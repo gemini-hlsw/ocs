@@ -1,7 +1,3 @@
-/**
- * $Id: Flamingos2CB.java 27606 2010-10-26 14:26:34Z swalker $
- */
-
 package edu.gemini.spModel.gemini.flamingos2;
 
 import edu.gemini.spModel.data.config.IConfig;
@@ -33,7 +29,8 @@ public class Flamingos2CB extends AbstractObsComponentCB {
         return result;
     }
 
-    protected void thisReset(Map options) {
+    @Override
+    protected void thisReset(Map<String, Object> options) {
         Flamingos2 dataObj = (Flamingos2) getDataObject();
         if (dataObj == null)
             throw new IllegalArgumentException("The data objectfor Flamingos2 can not be null");

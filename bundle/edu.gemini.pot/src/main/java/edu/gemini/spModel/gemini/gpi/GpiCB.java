@@ -35,7 +35,8 @@ public class GpiCB extends AbstractObsComponentCB {
         return result;
     }
 
-    protected void thisReset(Map options) {
+    @Override
+    protected void thisReset(Map<String, Object> options) {
         Gpi dataObj = (Gpi) getDataObject();
         if (dataObj == null)
             throw new IllegalArgumentException("The data objectfor Gpi can not be null");

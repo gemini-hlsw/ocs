@@ -31,8 +31,8 @@ public class InstPhoenixCB extends AbstractObsComponentCB {
         return result;
     }
 
-    @SuppressWarnings("rawtypes")
-    protected void thisReset(Map options) {
+    @Override
+    protected void thisReset(Map<String, Object> options) {
         InstPhoenix dataObj = (InstPhoenix) getDataObject();
         if (dataObj == null)
             throw new IllegalArgumentException("The data objectfor Phoenix can not be null");

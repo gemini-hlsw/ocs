@@ -23,8 +23,7 @@ public final class GsaoiSeqConfigCB extends HelperSeqCompCB {
     }
 
     public Object clone() {
-        GsaoiSeqConfigCB result = (GsaoiSeqConfigCB) super.clone();
-        return result;
+        return super.clone();
     }
 
     protected void thisApplyNext(IConfig config, IConfig prevFull) {
@@ -36,7 +35,8 @@ public final class GsaoiSeqConfigCB extends HelperSeqCompCB {
         Gsaoi.WAVELENGTH_INJECTOR.inject(config, prevFull);
     }
 
-    public void thisReset(Map options) {
+    @Override
+    public void thisReset(Map<String, Object> options) {
         super.thisReset(options);
     }
 }

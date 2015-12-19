@@ -1,10 +1,3 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: SeqConfigMichelleCB.java 27615 2010-10-26 20:14:30Z swalker $
-//
-
 package edu.gemini.spModel.gemini.michelle;
 
 import edu.gemini.pot.sp.ISPSeqComponent;
@@ -30,8 +23,7 @@ public final class SeqConfigMichelleCB extends HelperSeqCompCB {
     }
 
     public Object clone() {
-        SeqConfigMichelleCB result = (SeqConfigMichelleCB) super.clone();
-        return result;
+        return super.clone();
     }
 
     /**
@@ -50,7 +42,7 @@ public final class SeqConfigMichelleCB extends HelperSeqCompCB {
     }
 
 
-    public void thisReset(Map options) {
+    public void thisReset(Map<String, Object> options) {
         super.thisReset(options);
     }
 }

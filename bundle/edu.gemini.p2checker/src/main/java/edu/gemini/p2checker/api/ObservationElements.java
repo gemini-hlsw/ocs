@@ -1,7 +1,3 @@
-//
-//$Id: ObservationElements.java 47334 2012-08-07 16:53:27Z swalker $
-//
-
 package edu.gemini.p2checker.api;
 
 import edu.gemini.pot.sp.*;
@@ -27,7 +23,6 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Logger;
 
 /**
  * The ObservationElements class contains the nodes associated to one observation.
@@ -43,8 +38,6 @@ import java.util.logging.Logger;
  *
  */
 public class ObservationElements implements Serializable {
-
-    private static final Logger LOG = Logger.getLogger(ObservationElements.class.getName());
 
     private SPProgram _program; //the program that contains the observation
     private ISPProgram _programNode; //the program node
@@ -120,6 +113,7 @@ public class ObservationElements implements Serializable {
         return _siteQuality;
     }
 
+    @SuppressWarnings("unchecked")
     public <T> Option<T> getAOComponent() {
         return (Option<T>)_aoComponent;
     }
@@ -205,12 +199,11 @@ public class ObservationElements implements Serializable {
         _sequence = ConfigBridge.extractSequence(obs, getSequenceOptions(), ConfigValMapInstances.IDENTITY_MAP);
     }
 
-    private static Map getSequenceOptions() {
-        Map map = new HashMap();
+    private static Map<String, Object> getSequenceOptions() {
+        Map<String, Object> map = new HashMap<>();
         SeqRepeatCbOptions.setCollapseRepeat(map, true);
         SeqRepeatCbOptions.setAddObsCount(map, true);
         SeqRepeatCbOptions.setCalibrationProvider(map, CalibrationProviderHolder.getProvider());
-        //noinspection unchecked
         return Collections.unmodifiableMap(map);
     }
 

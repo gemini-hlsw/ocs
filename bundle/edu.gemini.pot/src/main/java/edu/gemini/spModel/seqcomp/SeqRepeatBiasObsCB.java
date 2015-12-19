@@ -1,11 +1,3 @@
-// Copyright 2000
-// Association for Universities for Research in Astronomy, Inc.
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: SeqRepeatBiasObsCB.java 38419 2011-11-07 14:37:51Z swalker $
-//
-
 package edu.gemini.spModel.seqcomp;
 
 import edu.gemini.spModel.data.config.DefaultParameter;
@@ -34,7 +26,7 @@ public class SeqRepeatBiasObsCB extends AbstractSeqComponentCB {
     private transient int _max;
     private transient int _limit;
     private transient boolean _firstTime;
-    private transient Map _options;
+    private transient Map<String, Object> _options;
 
     public SeqRepeatBiasObsCB(ISPSeqComponent seqComp) {
         super(seqComp);
@@ -50,7 +42,8 @@ public class SeqRepeatBiasObsCB extends AbstractSeqComponentCB {
         return result;
     }
 
-    protected void thisReset(Map options) {
+    @Override
+    protected void thisReset(Map<String, Object> options) {
         _curCount = 0;
         ICoaddExpSeqComponent c = (ICoaddExpSeqComponent) getDataObject();
         _max = c.getStepCount();

@@ -44,7 +44,7 @@ public abstract class AbstractSeqComponentCB implements IConfigBuilder {
     private transient int _nextChildBuilderIndex;
     private transient IConfigBuilder _curChildBuilder;
 
-    private transient Map _options;
+    private transient Map<String, Object> _options;
 
 
     /**
@@ -96,7 +96,7 @@ public abstract class AbstractSeqComponentCB implements IConfigBuilder {
      * Reset recursively calls reset on all its children and then
      * itself.  Therefore, seq components are reset from the bottom up.
      */
-    public void reset(Map options)  {
+    public void reset(Map<String, Object> options)  {
         _options = options;
         _nodeKey    = _seqComp.getNodeKey();
         _dataObject = _seqComp.getDataObject();
@@ -113,7 +113,7 @@ public abstract class AbstractSeqComponentCB implements IConfigBuilder {
             for (ISPSeqComponent seqComp: childList) {
                 IConfigBuilder cb = (IConfigBuilder) seqComp.getClientData(IConfigBuilder.USER_OBJ_KEY);
                 if (cb != null) {
-                    _childBuilders.add(cb);
+                    childBuilders.add(cb);
                 }
             }
 
@@ -133,8 +133,7 @@ public abstract class AbstractSeqComponentCB implements IConfigBuilder {
      * Provides the subclass an opportunity to reset its state, most likely
      * based upon the current state of the data object.
      */
-    protected abstract void thisReset(Map options) ;
-
+    protected abstract void thisReset(Map<String, Object> options) ;
 
     /**
      * Starts over at the first child configuration builder.

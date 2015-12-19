@@ -1,7 +1,3 @@
-/**
- * $Id: SeqConfigFlamingos2CB.java 27606 2010-10-26 14:26:34Z swalker $
- */
-
 package edu.gemini.spModel.gemini.flamingos2;
 
 import edu.gemini.spModel.config.HelperSeqCompCB;
@@ -26,8 +22,7 @@ public final class SeqConfigFlamingos2CB extends HelperSeqCompCB {
     }
 
     public Object clone() {
-        SeqConfigFlamingos2CB result = (SeqConfigFlamingos2CB) super.clone();
-        return result;
+        return super.clone();
     }
 
 
@@ -47,7 +42,7 @@ public final class SeqConfigFlamingos2CB extends HelperSeqCompCB {
     }
 
 
-    public void thisReset(Map options) {
+    public void thisReset(Map<String, Object> options) {
         super.thisReset(options);
     }
 }

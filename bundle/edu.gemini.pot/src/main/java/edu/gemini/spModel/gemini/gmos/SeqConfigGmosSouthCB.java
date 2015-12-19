@@ -1,9 +1,3 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: SeqConfigGmosSouthCB.java 27778 2010-11-02 17:54:39Z swalker $
-//
 package edu.gemini.spModel.gemini.gmos;
 
 import edu.gemini.pot.sp.ISPSeqComponent;
@@ -15,7 +9,6 @@ import edu.gemini.spModel.data.config.StringParameter;
 import edu.gemini.spModel.data.config.IConfig;
 
 import java.util.Map;
-
 
 /**
  * A configuration builder for the GMOS-S iterator.
@@ -31,8 +24,7 @@ public final class SeqConfigGmosSouthCB extends HelperSeqCompCB {
     }
 
     public Object clone() {
-        SeqConfigGmosSouthCB result = (SeqConfigGmosSouthCB) super.clone();
-        return result;
+        return super.clone();
     }
 
     /**
@@ -52,7 +44,7 @@ public final class SeqConfigGmosSouthCB extends HelperSeqCompCB {
         InstGmosSouth.GAIN_SETTING_INJECTOR.inject(config, prevFull);
     }
 
-    public void thisReset(Map options) {
+    public void thisReset(Map<String, Object> options) {
         super.thisReset(options);
     }
 }

@@ -25,7 +25,8 @@ public class InstNICICB extends AbstractObsComponentCB {
         return result;
     }
 
-    protected void thisReset(Map options) {
+    @Override
+    protected void thisReset(Map<String, Object> options) {
         InstNICI dataObj = (InstNICI) getDataObject();
         if (dataObj == null)
             throw new IllegalArgumentException("The data object for NICI can not be null");

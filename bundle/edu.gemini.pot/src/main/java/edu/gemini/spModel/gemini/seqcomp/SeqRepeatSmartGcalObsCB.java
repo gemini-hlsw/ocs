@@ -130,9 +130,9 @@ public abstract class SeqRepeatSmartGcalObsCB implements IConfigBuilder, Cloneab
     }
 
     @Override
-    public void reset(Map options)  {
+    public void reset(Map<String, Object> options)  {
         _firstTime     = true;
-        _plannedSteps  = new ArrayList<Config>();
+        _plannedSteps  = new ArrayList<>();
         _stepCount     = 0;
         _executedSteps = 0;
         _calibrationProvider = SeqRepeatCbOptions.getCalibrationProvider(options);

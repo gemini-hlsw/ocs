@@ -1,11 +1,3 @@
-// Copyright 2000
-// Association for Universities for Research in Astronomy, Inc.
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: SeqRepeatObsCB.java 27568 2010-10-25 18:03:42Z swalker $
-//
-
 package edu.gemini.spModel.seqcomp;
 
 import edu.gemini.pot.sp.ISPSeqComponent;
@@ -17,7 +9,6 @@ import edu.gemini.spModel.dataflow.GsaSequenceEditor;
 import edu.gemini.spModel.obscomp.InstConstants;
 
 import java.util.Map;
-
 
 /**
  * A configuration builder for the science object observe sequence
@@ -33,7 +24,7 @@ public class SeqRepeatObsCB extends AbstractSeqComponentCB {
     private transient int _curCount;
     private transient int _limit;
     private transient int _max;
-    private transient Map _options;
+    private transient Map<String, Object> _options;
 
     public SeqRepeatObsCB(ISPSeqComponent seqComp) {
         super(seqComp);
@@ -48,7 +39,8 @@ public class SeqRepeatObsCB extends AbstractSeqComponentCB {
         return result;
     }
 
-    protected void thisReset(Map options) {
+    @Override
+    protected void thisReset(Map<String, Object> options) {
         _curCount = 0;
         _max = ((IObserveSeqComponent) getDataObject()).getStepCount();
         _limit = SeqRepeatCbOptions.getCollapseRepeat(options) ? 1 : _max;

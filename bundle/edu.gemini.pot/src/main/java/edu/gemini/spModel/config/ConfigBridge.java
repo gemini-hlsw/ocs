@@ -39,11 +39,11 @@ public final class ConfigBridge {
         }
     }
 
-    public static ConfigSequence extractSequence(ISPObservation obs, Map options, ConfigValMap map) {
+    public static ConfigSequence extractSequence(ISPObservation obs, Map<String, Object> options, ConfigValMap map) {
         return extractSequence(obs, options, map, false);
     }
 
-    public static ConfigSequence extractSequence(ISPObservation obs, Map options, ConfigValMap map, boolean filterMeta) {
+    public static ConfigSequence extractSequence(ISPObservation obs, Map<String, Object> options, ConfigValMap map, boolean filterMeta) {
        return mapSequence(calculateSequence(obs, options, filterMeta), map);
     }
 
@@ -60,7 +60,7 @@ public final class ConfigBridge {
         }
     }
 
-    private static ConfigSequence calculateSequence(ISPObservation obs, Map options, boolean filterMeta) {
+    private static ConfigSequence calculateSequence(ISPObservation obs, Map<String, Object> options, boolean filterMeta) {
         ConfigSequence configSeq = new ConfigSequence();
 
         // make sure that important default options are added (e.g. smartgcal)

@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package edu.gemini.spModel.gemini.nici;
 
 import edu.gemini.spModel.gemini.seqcomp.SeqRepeatOffsetBaseCB;
@@ -22,11 +18,11 @@ public class SeqRepeatNiciOffsetCB extends SeqRepeatOffsetBaseCB<NiciOffsetPos> 
     }
 
     public Object clone() {
-        SeqRepeatNiciOffsetCB res = (SeqRepeatNiciOffsetCB) super.clone();
-        return res;
+        return super.clone();
     }
 
-    protected void thisReset(Map options) {
+    @Override
+    protected void thisReset(Map<String, Object> options) {
         super.thisReset(options);
     }
 

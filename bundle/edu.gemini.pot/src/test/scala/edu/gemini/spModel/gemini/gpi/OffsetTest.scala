@@ -58,7 +58,7 @@ object OffsetTest {
       observe
     }
 
-    private val options = new java.util.HashMap[Object, Object]()
+    private val options = new java.util.HashMap[String, Object]()
 
     def steps: Array[Config] =
       ConfigBridge.extractSequence(obs, options, ConfigValMapInstances.IDENTITY_MAP).getAllSteps
@@ -76,7 +76,7 @@ object OffsetTest {
       if (rows.nonEmpty) env.addOffsets(c, rows)
       else env.obs.getSeqComponent.addSeqComponent(env.makeObserve(c))
 
-      val seq = ConfigBridge.extractSequence(env.obs, new java.util.HashMap[Object, Object](), ConfigValMapInstances.IDENTITY_MAP)
+      val seq = ConfigBridge.extractSequence(env.obs, new java.util.HashMap[String, Object](), ConfigValMapInstances.IDENTITY_MAP)
       val steps = seq.getAllSteps
 
       // calibration should park

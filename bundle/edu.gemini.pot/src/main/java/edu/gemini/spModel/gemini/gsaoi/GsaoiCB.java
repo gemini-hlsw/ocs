@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package edu.gemini.spModel.gemini.gsaoi;
 
 import edu.gemini.pot.sp.ISPObsComponent;
@@ -30,7 +26,8 @@ public final class GsaoiCB extends AbstractObsComponentCB {
         return result;
     }
 
-    protected void thisReset(Map options)  {
+    @Override
+    protected void thisReset(Map<String, Object> options)  {
         Gsaoi dataObj = (Gsaoi) getDataObject();
         if (dataObj == null) {
             throw new RuntimeException("Gsaoi data object is null");
@@ -38,9 +35,8 @@ public final class GsaoiCB extends AbstractObsComponentCB {
         sysConfig = dataObj.getSysConfig();
     }
 
-    protected boolean thisHasConfiguration()  {
-        if (sysConfig == null) return false;
-        return (sysConfig.getParameterCount() > 0);
+    protected boolean thisHasConfiguration() {
+        return sysConfig != null && (sysConfig.getParameterCount() > 0);
     }
 
     protected void thisApplyNext(IConfig config, IConfig prevFull)  {

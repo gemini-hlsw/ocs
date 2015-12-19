@@ -24,7 +24,8 @@ public class InstAcqCamCB extends AbstractObsComponentCB {
         return result;
     }
 
-    protected void thisReset(Map options) {
+    @Override
+    protected void thisReset(Map<String, Object> options) {
         InstAcqCam dataObj = (InstAcqCam) getDataObject();
         if (dataObj == null) throw new IllegalArgumentException("The data objectfor AcqCam can not be null");
         _sysConfig = dataObj.getSysConfig();

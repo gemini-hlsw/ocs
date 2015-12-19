@@ -1,11 +1,3 @@
-// Copyright 2000
-// Association for Universities for Research in Astronomy, Inc.
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: TestDataObjectSeqCompCB.java 27568 2010-10-25 18:03:42Z swalker $
-//
-
 package edu.gemini.spModel.config.test;
 
 import edu.gemini.spModel.config.AbstractSeqComponentCB;
@@ -47,7 +39,8 @@ public class TestDataObjectSeqCompCB extends AbstractSeqComponentCB {
         return result;
     }
 
-    protected void thisReset(Map options) {
+    @Override
+    protected void thisReset(Map<String, Object> options) {
         TestDataObject dataObj = (TestDataObject) getDataObject();
         _sysConfig = dataObj.getSysConfig();
 
@@ -59,9 +52,7 @@ public class TestDataObjectSeqCompCB extends AbstractSeqComponentCB {
         _normalParamList = new LinkedList();
         _seqDataList = new LinkedList();
 
-        Iterator it = _sysConfig.getParameters().iterator();
-        while (it.hasNext()) {
-            IParameter param = (IParameter) it.next();
+        for (IParameter param : _sysConfig.getParameters()) {
             Object value = param.getValue();
             if (value instanceof Collection) {
                 Iterator valueIt = ((Collection) value).iterator();

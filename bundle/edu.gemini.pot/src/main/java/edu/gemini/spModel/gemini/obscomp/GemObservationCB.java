@@ -84,13 +84,11 @@ public class GemObservationCB extends ObservationCB {
     private static class ObsContext {
         private static Option<Integer> getScienceBand(ISPObservation obs) {
             final SPProgram p = (SPProgram) obs.getProgram().getDataObject();
-            return ImOption.apply(p.getQueueBand()).flatMap(new MapOp<String, Option<Integer>>() {
-                @Override public Option<Integer> apply(String s) {
-                    try {
-                        return new Some<>(Integer.parseInt(s));
-                    } catch (NumberFormatException ex) {
-                        return None.INTEGER;
-                    }
+            return ImOption.apply(p.getQueueBand()).flatMap(s -> {
+                try {
+                    return new Some<>(Integer.parseInt(s));
+                } catch (NumberFormatException ex) {
+                    return None.INTEGER;
                 }
             });
         }
@@ -159,7 +157,7 @@ public class GemObservationCB extends ObservationCB {
         private int _dataLabelCounter;
 
         // For OT-516: Used to Replace status READY with SKIPPED if followed by a COMPLETE
-        private List _statusParamList = new ArrayList();
+        private List<IParameter> _statusParamList = new ArrayList<>();
 
         // Constructor to initialize the data label counter
         ObsState() {
@@ -169,7 +167,7 @@ public class GemObservationCB extends ObservationCB {
         // Reset the dataLabel counter
         void reset() {
             _dataLabelCounter = 1;
-            _statusParamList = new ArrayList();
+            _statusParamList = new ArrayList<>();
         }
 
         void advanceDataLabelCounter() {
@@ -199,8 +197,7 @@ public class GemObservationCB extends ObservationCB {
         // Is the step complete, i.e., executed?
         boolean isComplete(ObsContext ctx) {
             final SPObservationID obsId = ctx.getObservationId();
-            if (obsId == null) return false;
-            return COMPLETE.equals(getStatus(ctx.getObsRecord(), getDataLabel(obsId)));
+            return obsId != null && COMPLETE.equals(getStatus(ctx.getObsRecord(), getDataLabel(obsId)));
         }
 
         void initConfig(IConfig current, IConfig prev, ObsContext ctx) {
@@ -332,12 +329,7 @@ public class GemObservationCB extends ObservationCB {
         // changed after they were added to the ISysConfig, but at least its well commented...
         private void _checkStatus(IParameter statusParam) {
             if (statusParam.getValue().equals(COMPLETE)) {
-                for (Object obj : _statusParamList) {
-                    IParameter p = (IParameter) obj;
-                    if (p.getValue().equals(READY)) {
-                        p.setValue(SKIPPED);
-                    }
-                }
+                _statusParamList.stream().filter(p -> p.getValue().equals(READY)).forEach(p -> p.setValue(SKIPPED));
             }
 
             //noinspection unchecked
@@ -382,7 +374,7 @@ public class GemObservationCB extends ObservationCB {
      * and then recursively to all sequence components that have
      * configuration builders.
      */
-    public void reset(Map options)  {
+    public void reset(Map<String, Object> options)  {
         super.reset(options);
 
         ISPObservation obs = _getObsNode();

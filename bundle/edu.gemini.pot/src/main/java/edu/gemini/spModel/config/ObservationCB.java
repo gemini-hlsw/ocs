@@ -46,7 +46,7 @@ public class ObservationCB implements IConfigBuilder {
     private transient int _seqBuilderIndex;
     private transient boolean _firstTime = true;
     private transient boolean _isReset;
-    private transient Map _options;
+    private transient Map<String, Object> _options;
 
     /**
      * Constructs with the observation that will be sequenced.
@@ -88,11 +88,10 @@ public class ObservationCB implements IConfigBuilder {
 
         List<ISPObsComponent> obsCompList = _obs.getObsComponents();
         if (obsCompList != null) {
-            _obsCompBuilders = new ArrayList<IConfigBuilder>(obsCompList.size());
+            _obsCompBuilders = new ArrayList<>(obsCompList.size());
 
             for (ISPObsComponent obsComp : obsCompList) {
-                IConfigBuilder cb;
-                cb = (IConfigBuilder) obsComp.getClientData(IConfigBuilder.USER_OBJ_KEY);
+                IConfigBuilder cb = (IConfigBuilder) obsComp.getClientData(IConfigBuilder.USER_OBJ_KEY);
                 if (cb != null) {
                     cb.reset(_options);
                     _obsCompBuilders.add(cb);
@@ -131,7 +130,7 @@ public class ObservationCB implements IConfigBuilder {
     }
 
     // Internal private routine that does the meat of the reset
-    private void _doReset(Map options)  {
+    private void _doReset(Map<String, Object> options)  {
         // First handle the observation components.  For each observation
         // component with a configuration builder user object, reset the
         // builder and place it in a list (_obsCompBuilders).
@@ -152,7 +151,7 @@ public class ObservationCB implements IConfigBuilder {
      * and then recursively to all sequence components that have
      * configuration builders.
      */
-    public void reset(Map options)  {
+    public void reset(Map<String, Object> options)  {
         _seqBuilderIndex = 0;
         _seqBuilder = _getTopLevelBuilder(_seqBuilderIndex);
         _doReset(options);
@@ -283,12 +282,12 @@ public class ObservationCB implements IConfigBuilder {
         _isReset = false;
     }
 
-    public static Map getDefaultSequenceOptions(Map options) {
+    public static Map<String, Object> getDefaultSequenceOptions(Map<String, Object> options) {
         // add a calibration provider that will be used for all calculations in the sequence; the same provider
         // has to be used throughout the calculations to make sure async updates have no effect on the sequence
         // (Note that updates will create a new provider so the values for a given provider will never change)
         if (options == null) {
-            options = new HashMap();
+            options = new HashMap<>();
         }
         if (SeqRepeatCbOptions.getCalibrationProvider(options) == null) {
             SeqRepeatCbOptions.setCalibrationProvider(options, CalibrationProviderHolder.getProvider());

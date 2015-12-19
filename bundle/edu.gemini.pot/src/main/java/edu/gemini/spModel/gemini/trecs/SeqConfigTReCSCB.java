@@ -1,10 +1,3 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: SeqConfigTReCSCB.java 27669 2010-10-28 17:44:55Z swalker $
-//
-
 package edu.gemini.spModel.gemini.trecs;
 
 import edu.gemini.pot.sp.ISPSeqComponent;
@@ -30,10 +23,8 @@ public final class SeqConfigTReCSCB extends HelperSeqCompCB {
     }
 
     public Object clone() {
-        SeqConfigTReCSCB result = (SeqConfigTReCSCB) super.clone();
-        return result;
+        return super.clone();
     }
-
 
     /**
      * This thisApplyNext overrides the HelperSeqCompCB
@@ -50,7 +41,8 @@ public final class SeqConfigTReCSCB extends HelperSeqCompCB {
         InstTReCS.WAVELENGTH_INJECTOR.inject(config, prevFull);
     }
 
-    public void thisReset(Map options) {
+    @Override
+    public void thisReset(Map<String, Object> options) {
         super.thisReset(options);
     }
 }

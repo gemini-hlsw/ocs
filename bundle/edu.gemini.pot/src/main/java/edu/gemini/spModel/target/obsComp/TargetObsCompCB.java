@@ -1,11 +1,3 @@
-// Copyright 2000
-// Association for Universities for Research in Astronomy, Inc.
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: TargetObsCompCB.java 45173 2012-05-10 19:45:13Z swalker $
-//
-
 package edu.gemini.spModel.target.obsComp;
 
 import edu.gemini.pot.sp.ISPObsComponent;
@@ -15,7 +7,6 @@ import edu.gemini.spModel.data.config.*;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 
 import java.util.Map;
-
 
 /**
  * TargetEnvCB is the configuration builder for the TargetEnv as used
@@ -36,7 +27,8 @@ public class TargetObsCompCB extends AbstractObsComponentCB {
         return result;
     }
 
-    protected void thisReset(Map options) {
+    @Override
+    protected void thisReset(Map<String, Object> options) {
         _dataObj = (TargetObsComp) getDataObject();
         if (_dataObj == null) throw new IllegalArgumentException("TargetEnv data object of null is not allowed");
     }

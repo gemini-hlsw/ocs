@@ -23,7 +23,8 @@ public class HelperObsCompCB extends AbstractObsComponentCB {
         return result;
     }
 
-    protected void thisReset(Map options) {
+    @Override
+    protected void thisReset(Map<String, Object> options) {
         IConfigProvider dataObj = (IConfigProvider) getDataObject();
         _sysConfig = dataObj.getSysConfig();
     }

@@ -16,8 +16,7 @@ public final class SeqConfigNICICB extends HelperSeqCompCB {
     }
 
     public Object clone() {
-        SeqConfigNICICB result = (SeqConfigNICICB) super.clone();
-        return result;
+        return super.clone();
     }
 
     protected void thisApplyNext(IConfig config, IConfig prevFull) {
@@ -30,7 +29,8 @@ public final class SeqConfigNICICB extends HelperSeqCompCB {
         InstNICICB.injectWavelength(config, prevFull);
     }
 
-    protected void thisReset(Map options) {
+    @Override
+    protected void thisReset(Map<String, Object> options) {
         super.thisReset(options);
     }
 
