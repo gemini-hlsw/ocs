@@ -6,9 +6,8 @@ object VisitorBlueprint {
   def apply(m: M.VisitorBlueprint): VisitorBlueprint = new VisitorBlueprint(Site.fromMutable(m.getSite), m.getCustomName)
 }
 
-case class VisitorBlueprint(site0: Site, customName: String) extends GeminiBlueprintBase {
+case class VisitorBlueprint(override val site: Site, customName: String) extends GeminiBlueprintBase {
   def name: String = s"Visitor - ${site.name} - $customName"
-  override def site = site0
   override val visitor = true
 
   def this(m: M.VisitorBlueprint) = this(Site.fromMutable(m.getSite), m.getCustomName)

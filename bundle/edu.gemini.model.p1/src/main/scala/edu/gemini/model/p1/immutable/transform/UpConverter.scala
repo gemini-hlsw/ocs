@@ -148,6 +148,7 @@ case object SemesterConverter2016ATo2016B extends SemesterConverter {
         }
         StepResult("The Flamingos2 filter K-long (2.00 um) has been converted to K-long (2.20 um).", <flamingos2>{KLongFilterTransformer.transform(ns)}</flamingos2>).successNel
     }
+
   val dssSite: TransformFunction = {
     case <dssi>{ns @ _*}</dssi> =>
       object DssiSiteTransformer extends BasicTransformer {
@@ -184,6 +185,7 @@ case object SemesterConverter2016ATo2016B extends SemesterConverter {
     case texesNameRegex(a, b) => s"$a ${Site.GN.name} $b"
     case _                      => name
   }
+
   val texesSite: TransformFunction = {
     case <texes>{ns @ _*}</texes> =>
       object TexesSiteTransformer extends BasicTransformer {

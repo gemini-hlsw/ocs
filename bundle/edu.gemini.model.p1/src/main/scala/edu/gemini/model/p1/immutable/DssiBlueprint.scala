@@ -6,9 +6,8 @@ object DssiBlueprint {
   def apply(m: M.DssiBlueprint): DssiBlueprint = new DssiBlueprint(Site.fromMutable(m.getSite))
 }
 
-case class DssiBlueprint(site0: Site) extends GeminiBlueprintBase {
+case class DssiBlueprint(override val site: Site) extends GeminiBlueprintBase {
   def name: String = s"DSSI ${site.name}"
-  override def site = site0
   override val visitor = true
 
   def this(m: M.DssiBlueprint) = this(Site.GN)
