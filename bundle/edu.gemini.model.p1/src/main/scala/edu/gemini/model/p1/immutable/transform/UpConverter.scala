@@ -160,8 +160,9 @@ case object SemesterConverter2016ATo2016B extends SemesterConverter {
       }
       StepResult("Dssi proposal has been assigned to Gemini North.", <dssi>{DssiSiteTransformer.transform(ns)}</dssi>).successNel
   }
+
   val phoenixNameRegex = "(Phoenix) (.*)".r
-  def transformPhoneixName(name: String) = name match {
+  def transformPhoenixName(name: String) = name match {
     case phoenixNameRegex(a, b) => s"$a ${Site.GS.name} $b"
     case _                      => name
   }
@@ -170,14 +171,32 @@ case object SemesterConverter2016ATo2016B extends SemesterConverter {
       object PhoenixSiteTransformer extends BasicTransformer {
         override def transform(n: xml.Node): xml.NodeSeq = n match {
             case p @ <Phoenix>{q @ _*}</Phoenix> => <Phoenix id={p.attribute("id")}>{q.map(transform) +: <site>{Site.GS.name}</site>}</Phoenix>
-            case <name>{name}</name>             => <name>{transformPhoneixName(name.text)}</name>
+            case <name>{name}</name>             => <name>{transformPhoenixName(name.text)}</name>
             case elem: xml.Elem                  => elem.copy(child = elem.child.flatMap(transform))
             case _                               => n
           }
       }
       StepResult("Phoenix proposal has been assigned to Gemini South.", <phoenix>{PhoenixSiteTransformer.transform(ns)}</phoenix>).successNel
   }
-  val transformers = List(replaceKLongFilter, dssSite, phoenixSite)
+
+  val texesNameRegex = "(Texes) (.*)".r
+  def transformTexesName(name: String) = name match {
+    case texesNameRegex(a, b) => s"$a ${Site.GN.name} $b"
+    case _                      => name
+  }
+  val texesSite: TransformFunction = {
+    case <texes>{ns @ _*}</texes> =>
+      object TexesSiteTransformer extends BasicTransformer {
+        override def transform(n: xml.Node): xml.NodeSeq = n match {
+            case p @ <Texes>{q @ _*}</Texes> => <Texes id={p.attribute("id")}>{q.map(transform) +: <site>{Site.GN.name}</site>}</Texes>
+            case <name>{name}</name>         => <name>{transformTexesName(name.text)}</name>
+            case elem: xml.Elem              => elem.copy(child = elem.child.flatMap(transform))
+            case _                           => n
+          }
+      }
+      StepResult("Texes proposal has been assigned to Gemini North.", <texes>{TexesSiteTransformer.transform(ns)}</texes>).successNel
+  }
+  val transformers = List(replaceKLongFilter, dssSite, phoenixSite, texesSite)
 }
 
 /**

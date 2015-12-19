@@ -432,7 +432,7 @@ class UpConverterSpec extends SpecificationWithJUnit with SemesterProperties {
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have length 4
+          changes must have length 5
           // The texes blueprint must remain
           result must \\("Texes")
       }
@@ -463,6 +463,20 @@ class UpConverterSpec extends SpecificationWithJUnit with SemesterProperties {
           result must \\("Phoenix", "id")
           result must \\("Phoenix") \\ "site" \> "Gemini South"
           result must \\("Phoenix") \\ "name" \> "Phoenix Gemini South 0.17 arcsec slit H6073"
+      }
+    }
+    "proposal with texes blueprints must have a site, REL-2463" in {
+      val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_with_texes_no_site.xml")))
+
+      val converted = UpConverter.convert(xml)
+      converted must beSuccessful.like {
+        case StepResult(changes, result) =>
+          changes must have length 4
+          changes must contain("Texes proposal has been assigned to Gemini North.")
+          // The texes blueprint must remain and include a site
+          result must \\("Texes", "id")
+          result must \\("Texes") \\ "site" \> "Gemini North"
+          result must \\("Texes") \\ "name" \> "Texes Gemini North LM_32_echelle"
       }
     }
     "proposal with GmosN blueprints that use a 0.25 slit must be converted to a 0.5 slit, REL-1256" in {
