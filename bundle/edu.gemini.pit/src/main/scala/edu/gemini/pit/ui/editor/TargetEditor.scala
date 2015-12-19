@@ -1,6 +1,7 @@
 package edu.gemini.pit.ui.editor
 
 import com.jgoodies.forms.factories.Borders.DLU4_BORDER
+import edu.gemini.model.p1.immutable.TooTarget
 
 import edu.gemini.model.p1.immutable._
 import edu.gemini.model.p1.immutable.EphemerisElement
@@ -15,7 +16,8 @@ import edu.gemini.pit.ui.util.ScrollPanes
 import edu.gemini.pit.ui.util.SharedIcons
 import edu.gemini.pit.ui.util.StdModalEditor
 import edu.gemini.shared.gui.textComponent.{NumberField, SelectOnFocus}
-import edu.gemini.spModel.core.{Coordinates, Magnitude, MagnitudeSystem, MagnitudeBand}
+import edu.gemini.spModel.core.{Magnitude, MagnitudeSystem, MagnitudeBand}
+import edu.gemini.spModel.core.{Declination, RightAscension, Coordinates}
 import edu.gemini.ui.gface.GComparator
 import edu.gemini.ui.gface.GSelection
 import edu.gemini.ui.gface.GSelectionBroker
@@ -121,7 +123,7 @@ class TargetEditor private (semester:Semester, target:Target, canEdit:Boolean) e
     }
   }
   (Tabs.CoordinatesPageContent.PMCheck :: Tabs.magControls.map(_.check)) foreach {
-      _.reactions += {
+    _.reactions += {
       case _ => validateEditor()
     }
   }
@@ -271,11 +273,11 @@ class TargetEditor private (semester:Semester, target:Target, canEdit:Boolean) e
       lazy val coords = target.coords(semester.midPoint)
 
       // Target RA and Dec in degrees
-      object RA extends RATextField(coords.map(_.ra.toAngle.toDegrees).getOrElse(0)) {
+      object RA extends RATextField(coords.map(_.ra).getOrElse(RightAscension.zero)) {
         enabled = canEdit
       }
 
-      object Dec extends DecTextField(coords.map(_.dec.toDegrees).getOrElse(0)) {
+      object Dec extends DecTextField(coords.map(_.dec).getOrElse(Declination.zero)) {
         enabled = canEdit
       }
 
@@ -414,8 +416,8 @@ class TargetEditor private (semester:Semester, target:Target, canEdit:Boolean) e
         }
 
         def getSubElement(e:EphemerisElement, c:Column) = c match {
-          case RA  => raFormat.toString(e.coords.ra.toAngle.toDegrees)
-          case Dec => decFormat.toString(e.coords.dec.toDegrees)
+          case RA  => raFormat.toString(e.coords.ra)
+          case Dec => decFormat.toString(e.coords.dec)
           case UTC => utc.format(new Date(e.validAt))
           case Mag => e.magnitude.map(magFormat.format).orNull
         }
@@ -552,7 +554,7 @@ class TargetEditor private (semester:Semester, target:Target, canEdit:Boolean) e
 
       sidereal.copy(
         name = Name.text,
-        coords = Coordinates(RA.toRightAscension, Dec.toDeclination),
+        coords = Coordinates(RA.toRightAscension, Dec.value),
         epoch = Epoch.selection.item,
         properMotion = PMCheck.selected match {
           case false => None

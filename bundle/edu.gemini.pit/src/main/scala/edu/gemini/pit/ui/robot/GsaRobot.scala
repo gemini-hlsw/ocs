@@ -1,7 +1,7 @@
 package edu.gemini.pit.ui.robot
 
 import scalaz.Lens
-import edu.gemini.gsa.client.api.GsaParams
+import edu.gemini.gsa.client.api.{GsaResult, GsaParams}
 import edu.gemini.gsa.client.impl.GsaClientImpl
 import edu.gemini.model.p1.immutable.{ObservationMeta, Observation}
 
