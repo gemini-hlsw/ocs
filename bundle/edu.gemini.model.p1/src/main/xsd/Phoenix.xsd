@@ -3,6 +3,7 @@
 -->
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
     <xsd:include schemaLocation="Instrument.xsd"/>
+    <xsd:include schemaLocation="Site.xsd"/>
 
     <!-- Options for Phoenix Blueprint. -->
     <xsd:complexType name="PhoenixBlueprintChoice">
@@ -24,6 +25,7 @@
         <xsd:complexContent>
             <xsd:extension base="BlueprintBase">
                 <xsd:sequence>
+                    <xsd:element name="site"   type="Site" minOccurs="1" maxOccurs="1"/>
                     <xsd:element name="fpu"    type="PhoenixFocalPlaneUnit" maxOccurs="1" minOccurs="0"/>
                     <xsd:element name="filter" type="PhoenixFilter"         maxOccurs="1" minOccurs="0"/>
                 </xsd:sequence>

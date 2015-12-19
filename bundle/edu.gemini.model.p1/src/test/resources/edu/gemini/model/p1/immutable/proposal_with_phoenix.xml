@@ -23,7 +23,8 @@
     <blueprints>
         <phoenix>
             <Phoenix id="blueprint-0">
-                <name>Phoenix 0.17 arcsec slit H6073</name>
+                <name>Phoenix Gemini South 0.17 arcsec slit H6073</name>
+                <site>Gemini South</site>
                 <visitor>false</visitor>
                 <fpu>0.17 arcsec slit</fpu>
                 <filter>H6073</filter>
