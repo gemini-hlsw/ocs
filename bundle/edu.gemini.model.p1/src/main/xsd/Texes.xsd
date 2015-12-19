@@ -3,6 +3,7 @@
 -->
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
     <xsd:include schemaLocation="Instrument.xsd"/>
+    <xsd:include schemaLocation="Site.xsd"/>
 
     <!-- Options for Texes Blueprint. -->
     <xsd:complexType name="TexesBlueprintChoice">
@@ -24,7 +25,8 @@
         <xsd:complexContent>
             <xsd:extension base="BlueprintBase">
                 <xsd:sequence>
-                    <xsd:element name="disperser"  type="TexesDisperser"/>
+                    <xsd:element name="site"      type="Site" minOccurs="1" maxOccurs="1"/>
+                    <xsd:element name="disperser" type="TexesDisperser"/>
                 </xsd:sequence>
             </xsd:extension>
         </xsd:complexContent>

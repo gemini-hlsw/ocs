@@ -18,7 +18,6 @@ object Phoenix {
     }
   }
 
-
   class FocalPlaneUnitNode(s: Site) extends SingleSelectNode[Site, PhoenixFocalPlaneUnit, PhoenixFocalPlaneUnit](s) {
     val title = "Focal Plane Unit"
     val description = "Select a focal plane unit for your configuration."

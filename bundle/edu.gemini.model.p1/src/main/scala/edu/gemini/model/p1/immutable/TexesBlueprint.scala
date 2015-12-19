@@ -6,11 +6,12 @@ object TexesBlueprint {
   def apply(m: M.TexesBlueprint): TexesBlueprint = new TexesBlueprint(m)
 }
 
-case class TexesBlueprint(disperser: TexesDisperser) extends GeminiBlueprintBase {
-  def name: String = s"Texes ${disperser.value}"
+case class TexesBlueprint(override val site: Site, disperser: TexesDisperser) extends GeminiBlueprintBase {
+  def name: String = s"Texes ${site.name} ${disperser.value}"
   override val visitor = true
 
   def this(m: M.TexesBlueprint) = this(
+    Site.fromMutable(m.getSite),
     m.getDisperser
   )
 
@@ -22,6 +23,7 @@ case class TexesBlueprint(disperser: TexesDisperser) extends GeminiBlueprintBase
     m.setName(name)
     m.setDisperser(disperser)
     m.setVisitor(visitor)
+    m.setSite(Site.toMutable(site))
     m
   }
 
