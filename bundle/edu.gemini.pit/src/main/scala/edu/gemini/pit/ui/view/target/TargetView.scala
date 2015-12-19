@@ -115,7 +115,7 @@ class TargetView(val shellAdvisor:ShellAdvisor) extends BorderPanel with BoundVi
     def text(e:Target) =
       if (!e.isEmpty) {
         case Name => e.name
-        case RA   => e.coords(semester.midPoint).map(_.ra.toAngle.toDegrees).map(raFormat.toString).orNull
+        case RA   => e.coords(semester.midPoint).map(_.ra).map(raFormat.toString).orNull
         case Dec  => e.coords(semester.midPoint).map(_.dec).map(decFormat.toString).orNull
         case PM   => e match {
           case SiderealTarget(_, _, _, _, Some(_), _) => "*"

@@ -42,7 +42,7 @@ class EphemerisElementEditor(e: EphemerisElement) extends StdModalEditor[Ephemer
     })
     setValue(new Date(e.validAt))
   }
-  object RA extends RATextField(e.coords.ra.toAngle.toDegrees)
+  object RA extends RATextField(e.coords.ra)
   object Dec extends DecTextField(e.coords.dec)
   object Mag extends NumberField(e.magnitude, allowEmpty = false)
 

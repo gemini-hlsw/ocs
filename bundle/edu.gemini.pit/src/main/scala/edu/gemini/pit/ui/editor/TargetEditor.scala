@@ -17,7 +17,7 @@ import edu.gemini.pit.ui.util.SharedIcons
 import edu.gemini.pit.ui.util.StdModalEditor
 import edu.gemini.shared.gui.textComponent.{NumberField, SelectOnFocus}
 import edu.gemini.spModel.core.{Magnitude, MagnitudeSystem, MagnitudeBand}
-import edu.gemini.spModel.core.{Declination, Coordinates}
+import edu.gemini.spModel.core.{Declination, RightAscension, Coordinates}
 import edu.gemini.ui.gface.GComparator
 import edu.gemini.ui.gface.GSelection
 import edu.gemini.ui.gface.GSelectionBroker
@@ -273,7 +273,7 @@ class TargetEditor private (semester:Semester, target:Target, canEdit:Boolean) e
       lazy val coords = target.coords(semester.midPoint)
 
       // Target RA and Dec in degrees
-      object RA extends RATextField(coords.map(_.ra.toAngle.toDegrees).getOrElse(0)) {
+      object RA extends RATextField(coords.map(_.ra).getOrElse(RightAscension.zero)) {
         enabled = canEdit
       }
 
@@ -416,7 +416,7 @@ class TargetEditor private (semester:Semester, target:Target, canEdit:Boolean) e
         }
 
         def getSubElement(e:EphemerisElement, c:Column) = c match {
-          case RA  => raFormat.toString(e.coords.ra.toAngle.toDegrees)
+          case RA  => raFormat.toString(e.coords.ra)
           case Dec => decFormat.toString(e.coords.dec)
           case UTC => utc.format(new Date(e.validAt))
           case Mag => e.magnitude.map(magFormat.format).orNull

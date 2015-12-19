@@ -9,11 +9,11 @@ import scala.util.Try
 import scalaz._
 import Scalaz._
 
-class DegreeFormatter(caption: String, inRange: Option[Double => Boolean] = None) extends Formatter[Double](caption) {
+class DegreeFormatter(caption: String, inRange: Option[Double => Boolean] = None) extends Formatter[RightAscension](caption) {
   val raDecFormat = new DecimalFormat("##0.000###")
-  def toString(d: Double) = raDecFormat.format(d)
+  def toString(d: RightAscension) = raDecFormat.format(d.toAngle.toDegrees)
 
-  def fromString(s: String) = Try { s.toDouble }.filter(d => inRange.forall(f => f(d))).toOption
+  def fromString(s: String) = Try { s.toDouble }.filter(d => inRange.forall(f => f(d))).toOption.map(a => RightAscension.fromAngle(Angle.fromDegrees(a)))
 }
 
 class DecDegreeFormatter(caption: String, inRange: Option[Double => Boolean] = None) extends Formatter[Declination](caption) {
@@ -28,25 +28,19 @@ object DegreeFormatter {
   def dec(c: String) = new DecDegreeFormatter(c, Some(_.abs <= 90))
 }
 
-class HMSFormatter(caption: String) extends Formatter[Double](caption) {
-  def toString(d: Double) = Angle.fromDegrees(d).formatHMS
-  def fromString(s: String) = Angle.parseHMS(s).toOption.map(_.toDegrees)
-}
-
-class DMSFormatter(caption: String) extends Formatter[Double](caption) {
-  def toString(d: Double) = Angle.fromDegrees(d).formatDMS
-  def fromString(s: String) = Angle.parseDMS(s).toOption.map(_.toDegrees)
+class HMSFormatter(caption: String) extends Formatter[RightAscension](caption) {
+  def toString(d: RightAscension) = ~Option(d).map(_.toAngle.formatHMS)
+  def fromString(s: String) = Angle.parseHMS(s).toOption.map(RightAscension.fromAngle)
 }
 
 class DecFormatter(caption: String) extends Formatter[Declination](caption) {
-  val dms = new DMSFormatter(caption)
   def toString(d: Declination) = ~Option(d).map(_.formatDMS)
   def fromString(s: String) = Angle.parseDMS(s).toOption.flatMap(Declination.fromAngle)
 }
 
-class RATextField(initialValue: Double) extends MultiFormatTextField(
+class RATextField(initialValue: RightAscension) extends MultiFormatTextField(
   initialValue, new HMSFormatter("HMS"), DegreeFormatter.ra("DEG")) {
-  def toRightAscension: RightAscension = RightAscension.fromAngle(Angle.fromDegrees(value))
+  def toRightAscension: RightAscension = value
   DegreePreference.BOX.get match {
     case DegreePreference.DEGREES => selectFormat("DEG")
     case DegreePreference.HMSDMS  => selectFormat("HMS")

@@ -5,7 +5,7 @@ import edu.gemini.pit.ui.util.MultiFormatTextField.Formatter
 import java.text.ParseException
 
 import edu.gemini.shared.gui.textComponent.SelectOnFocus
-import edu.gemini.spModel.core.Declination
+import edu.gemini.spModel.core.{RightAscension, Declination}
 
 import scala.swing._
 import scala.swing.BorderPanel.Position._
@@ -143,7 +143,7 @@ object MFTFTest extends SwingApplication {
 
     contents = new BorderPanel {
 
-      add(new RATextField(0) {
+      add(new RATextField(RightAscension.zero) {
         reactions += {
           case ValueChanged(_) =>
             println("Valid? " + valid)
