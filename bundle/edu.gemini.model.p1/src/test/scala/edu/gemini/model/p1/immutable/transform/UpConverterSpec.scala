@@ -446,12 +446,12 @@ class UpConverterSpec extends SpecificationWithJUnit with SemesterProperties {
           changes must have length 4
           changes must contain("Dssi proposal has been assigned to Gemini North.")
           // The dssi blueprint must remain and include a site
-          result must \\("Dssi")
+          result must \\("Dssi", "id")
           result must \\("Dssi") \\ "site" \> "Gemini North"
           result must \\("Dssi") \\ "name" \> "DSSI Gemini North"
       }
     }
-    "proposal with texes blueprints must have a site, REL-2463" in {
+    "proposal with phoenix blueprints must have a site, REL-2463" in {
       val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_with_phoenix_no_site.xml")))
 
       val converted = UpConverter.convert(xml)
@@ -460,7 +460,7 @@ class UpConverterSpec extends SpecificationWithJUnit with SemesterProperties {
           changes must have length 4
           changes must contain("Phoenix proposal has been assigned to Gemini South.")
           // The phoenix blueprint must remain and include a site
-          result must \\("Phoenix")
+          result must \\("Phoenix", "id")
           result must \\("Phoenix") \\ "site" \> "Gemini South"
           result must \\("Phoenix") \\ "name" \> "Phoenix Gemini South 0.17 arcsec slit H6073"
       }

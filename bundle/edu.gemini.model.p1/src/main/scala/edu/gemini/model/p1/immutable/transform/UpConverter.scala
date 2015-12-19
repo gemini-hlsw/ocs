@@ -152,10 +152,10 @@ case object SemesterConverter2016ATo2016B extends SemesterConverter {
     case <dssi>{ns @ _*}</dssi> =>
       object DssiSiteTransformer extends BasicTransformer {
         override def transform(n: xml.Node): xml.NodeSeq = n match {
-            case <Dssi>{q @ _*}</Dssi> => <Dssi>{q.map(transform) +: <site>{Site.GN.name}</site>}</Dssi>
-            case <name>{name}</name>   => <name>DSSI {Site.GN.name}</name>
-            case elem: xml.Elem        => elem.copy(child = elem.child.flatMap(transform))
-            case _                     => n
+            case p @ <Dssi>{q @ _*}</Dssi> => <Dssi id={p.attribute("id")}>{q.map(transform) +: <site>{Site.GN.name}</site>}</Dssi>
+            case <name>{name}</name>       => <name>DSSI {Site.GN.name}</name>
+            case elem: xml.Elem            => elem.copy(child = elem.child.flatMap(transform))
+            case _                         => n
           }
       }
       StepResult("Dssi proposal has been assigned to Gemini North.", <dssi>{DssiSiteTransformer.transform(ns)}</dssi>).successNel
@@ -167,15 +167,15 @@ case object SemesterConverter2016ATo2016B extends SemesterConverter {
   }
   val phoenixSite: TransformFunction = {
     case <phoenix>{ns @ _*}</phoenix> =>
-      object PhoneixSiteTransformer extends BasicTransformer {
+      object PhoenixSiteTransformer extends BasicTransformer {
         override def transform(n: xml.Node): xml.NodeSeq = n match {
-            case <Phoenix>{q @ _*}</Phoenix> => <Phoenix>{q.map(transform) +: <site>{Site.GS.name}</site>}</Phoenix>
-            case <name>{name}</name>         => <name>{transformPhoneixName(name.text)}</name>
-            case elem: xml.Elem              => elem.copy(child = elem.child.flatMap(transform))
-            case _                           => n
+            case p @ <Phoenix>{q @ _*}</Phoenix> => <Phoenix id={p.attribute("id")}>{q.map(transform) +: <site>{Site.GS.name}</site>}</Phoenix>
+            case <name>{name}</name>             => <name>{transformPhoneixName(name.text)}</name>
+            case elem: xml.Elem                  => elem.copy(child = elem.child.flatMap(transform))
+            case _                               => n
           }
       }
-      StepResult("Phoenix proposal has been assigned to Gemini South.", <phoenix>{PhoneixSiteTransformer.transform(ns)}</phoenix>).successNel
+      StepResult("Phoenix proposal has been assigned to Gemini South.", <phoenix>{PhoenixSiteTransformer.transform(ns)}</phoenix>).successNel
   }
   val transformers = List(replaceKLongFilter, dssSite, phoenixSite)
 }
