@@ -448,22 +448,9 @@ class UpConverterSpec extends SpecificationWithJUnit with SemesterProperties {
           // The dssi blueprint must remain and include a site
           result must \\("Dssi")
           result must \\("Dssi") \\ "site" \> "Gemini North"
+          result must \\("Dssi") \\ "name" \> "DSSI Gemini North"
       }
     }
-    /*
-    "proposal with dssi blueprints must be removed, REL-1350" in {
-      val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_with_dssi.xml")))
-
-      val converted = UpConverter.convert(xml)
-      converted must beSuccessful.like {
-        case StepResult(changes, result) => {
-          changes must have length 5
-          changes must contain("The original proposal contained DSSI observations. The instrument is not available and those resources have been removed.")
-          // The texes blueprint must remain
-          result must \\("gmosN")
-        }
-      }
-    } */
     "proposal with GmosN blueprints that use a 0.25 slit must be converted to a 0.5 slit, REL-1256" in {
       val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_with_gmosn_0.25_slit.xml")))
 

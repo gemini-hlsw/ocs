@@ -152,7 +152,8 @@ case object SemesterConverter2016ATo2016B extends SemesterConverter {
     case p @ <dssi>{ns @ _*}</dssi> =>
       object DssiSiteTransformer extends BasicTransformer {
         override def transform(n: xml.Node): xml.NodeSeq = n match {
-            case <Dssi>{q @ _*}</Dssi> => <Dssi>{q +: <site>{Site.GN.name}</site>}</Dssi>
+            case <Dssi>{q @ _*}</Dssi> => <Dssi>{q.map(transform) +: <site>{Site.GN.name}</site>}</Dssi>
+            case <name>{name}</name>   => <name>DSSI {Site.GN.name}</name>
             case elem: xml.Elem        => elem.copy(child = elem.child.flatMap(transform))
             case _                     => n
           }

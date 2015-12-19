@@ -25,7 +25,7 @@
         <xsd:complexContent>
             <xsd:extension base="BlueprintBase">
                 <xsd:sequence>
-                    <xsd:element name="site"        type="Site" minOccurs="1" maxOccurs="1"/>
+                    <xsd:element name="site" type="Site" minOccurs="1" maxOccurs="1"/>
                 </xsd:sequence>
             </xsd:extension>
         </xsd:complexContent>

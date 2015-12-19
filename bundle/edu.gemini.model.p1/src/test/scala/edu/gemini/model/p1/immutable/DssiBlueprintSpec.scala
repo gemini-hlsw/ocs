@@ -13,7 +13,7 @@ class DssiBlueprintSpec extends SpecificationWithJUnit with SemesterProperties {
     }
     "have an appropriate public name" in {
       val blueprint = DssiBlueprint(Site.GN)
-      blueprint.name must beEqualTo("DSSI")
+      blueprint.name must beEqualTo("DSSI Gemini North")
     }
     "is a visitor instrument" in {
       val blueprint = DssiBlueprint(Site.GN)
@@ -33,7 +33,7 @@ class DssiBlueprintSpec extends SpecificationWithJUnit with SemesterProperties {
       // verify the exported value
       xml must \\("dssi")
       xml must \\("dssi") \\ "Dssi"
-      xml must \\("Dssi") \\ "name" \> "DSSI"
+      xml must \\("Dssi") \\ "name" \> "DSSI Gemini North"
       xml must \\("Dssi") \\ "site" \> "Gemini North"
       xml must \\("Dssi") \ "visitor" \> "true"
     }

@@ -7,7 +7,7 @@ object DssiBlueprint {
 }
 
 case class DssiBlueprint(site0: Site) extends GeminiBlueprintBase {
-  def name: String = "DSSI"
+  def name: String = s"DSSI ${site.name}"
   override def site = site0
   override val visitor = true
 
