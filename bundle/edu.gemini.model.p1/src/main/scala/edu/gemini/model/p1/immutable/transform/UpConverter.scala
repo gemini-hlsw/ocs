@@ -149,7 +149,7 @@ case object SemesterConverter2016ATo2016B extends SemesterConverter {
         StepResult("The Flamingos2 filter K-long (2.00 um) has been converted to K-long (2.20 um).", <flamingos2>{KLongFilterTransformer.transform(ns)}</flamingos2>).successNel
     }
   val dssSite: TransformFunction = {
-    case p @ <dssi>{ns @ _*}</dssi> =>
+    case <dssi>{ns @ _*}</dssi> =>
       object DssiSiteTransformer extends BasicTransformer {
         override def transform(n: xml.Node): xml.NodeSeq = n match {
             case <Dssi>{q @ _*}</Dssi> => <Dssi>{q.map(transform) +: <site>{Site.GN.name}</site>}</Dssi>
@@ -160,7 +160,24 @@ case object SemesterConverter2016ATo2016B extends SemesterConverter {
       }
       StepResult("Dssi proposal has been assigned to Gemini North.", <dssi>{DssiSiteTransformer.transform(ns)}</dssi>).successNel
   }
-  val transformers = List(replaceKLongFilter, dssSite)
+  val phoenixNameRegex = "(Phoenix) (.*)".r
+  def transformPhoneixName(name: String) = name match {
+    case phoenixNameRegex(a, b) => s"$a ${Site.GS.name} $b"
+    case _                      => name
+  }
+  val phoenixSite: TransformFunction = {
+    case <phoenix>{ns @ _*}</phoenix> =>
+      object PhoneixSiteTransformer extends BasicTransformer {
+        override def transform(n: xml.Node): xml.NodeSeq = n match {
+            case <Phoenix>{q @ _*}</Phoenix> => <Phoenix>{q.map(transform) +: <site>{Site.GS.name}</site>}</Phoenix>
+            case <name>{name}</name>         => <name>{transformPhoneixName(name.text)}</name>
+            case elem: xml.Elem              => elem.copy(child = elem.child.flatMap(transform))
+            case _                           => n
+          }
+      }
+      StepResult("Phoenix proposal has been assigned to Gemini South.", <phoenix>{PhoneixSiteTransformer.transform(ns)}</phoenix>).successNel
+  }
+  val transformers = List(replaceKLongFilter, dssSite, phoenixSite)
 }
 
 /**
@@ -185,9 +202,9 @@ case object SemesterConverter2015BTo2016A extends SemesterConverter {
                f.replaceAllIn(t, "")
              }
              <name>{replacedText}</name>
-           case f @ <filter>{_}</filter> if removedFilters.contains(f)  => xml.NodeSeq.Empty
-           case elem: xml.Elem                                      => elem.copy(child = elem.child.flatMap(transform))
-           case _                                                   => n
+           case f @ <filter>{_}</filter> if removedFilters.contains(f) => xml.NodeSeq.Empty
+           case elem: xml.Elem                                         => elem.copy(child = elem.child.flatMap(transform))
+           case _                                                      => n
          }
        }
        // Remove unavailable filters
