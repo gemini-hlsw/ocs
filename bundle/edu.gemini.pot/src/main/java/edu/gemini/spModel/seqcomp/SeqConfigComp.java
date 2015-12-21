@@ -1,10 +1,3 @@
-// Copyright 1997-2000
-// Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: SeqConfigComp.java 18743 2009-03-12 22:15:39Z swalker $
-//
 package edu.gemini.spModel.seqcomp;
 
 import edu.gemini.pot.sp.ISPSeqObject;
@@ -64,7 +57,7 @@ public abstract class SeqConfigComp extends AbstractDataObject
             Collection<IParameter> c = _sysConfig.getParameters();
             if (c != null) {
                 for (IParameter aC : c) {
-                    List l = (List) aC.getValue();
+                    List<?> l = (List<?>) aC.getValue();
                     if (l != null) {
                         count = Math.max(count, l.size());
                     }
@@ -72,15 +65,6 @@ public abstract class SeqConfigComp extends AbstractDataObject
             }
         }
         return count;
-    }
-
-
-    /**
-     * Get the name of the item being iterated over.  Subclasses must
-     * define, else the Narrow Type is used.
-     */
-    public String getItemName() {
-        return getType().narrowType;
     }
 
     /**
@@ -104,26 +88,10 @@ public abstract class SeqConfigComp extends AbstractDataObject
         firePropertyChange((String)null, null, null);
     }
 
-
-    /**
-     * Diagnostic method to dump the current configuration.
-     */
-    public void dumpState() {
-        if (_sysConfig == null) {
-            System.err.println("System config is null!");
-            return;
-        }
-
-        if (_sysConfig instanceof DefaultSysConfig) {
-            DefaultSysConfig dsc = (DefaultSysConfig) _sysConfig;
-            dsc.dumpState();
-        }
-    }
-
     /**
      * Return a parameter set describing the current state of this object.
-     * @param factory
      */
+    @SuppressWarnings("unchecked")
     public ParamSet getParamSet(PioFactory factory) {
         ParamSet paramSet = super.getParamSet(factory);
 

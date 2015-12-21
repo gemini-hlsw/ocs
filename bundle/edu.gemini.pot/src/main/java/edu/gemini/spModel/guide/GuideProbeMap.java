@@ -1,7 +1,6 @@
 package edu.gemini.spModel.guide;
 
 import org.dom4j.Document;
-import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 
@@ -96,7 +95,7 @@ public final class GuideProbeMap {
         List<Element> probeElements  = root.elements(PROBE_TAG);
         if (probeElements == null) return Collections.emptyMap();
 
-        Map<String, GuideProbe> res = new HashMap<String, GuideProbe>();
+        Map<String, GuideProbe> res = new HashMap<>();
 
         for (Element probElement : probeElements) {
             for (GuideProbe probe : parseProbe(probElement)) {
@@ -108,7 +107,7 @@ public final class GuideProbeMap {
 
     private static GuideProbe[] parseProbe(Element probeElement) throws ClassNotFoundException {
         String className = probeElement.getTextTrim();
-        Class c = Class.forName(className, true, GuideProbeMap.class.getClassLoader());
+        Class<?> c = Class.forName(className, true, GuideProbeMap.class.getClassLoader());
         return (GuideProbe[]) c.getEnumConstants();
     }
 }

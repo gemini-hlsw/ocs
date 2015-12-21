@@ -113,7 +113,7 @@ public final class MemConflictFolder extends MemAbstractContainer implements ISP
     }
 
     private final MemProgram program;
-    private final List<ISPNode> children = new ArrayList<ISPNode>();
+    private final List<ISPNode> children = new ArrayList<>();
 
     public MemConflictFolder(MemProgram prog, SPNodeKey key) {
         super(prog.getDocumentData(), key);
@@ -149,7 +149,7 @@ public final class MemConflictFolder extends MemAbstractContainer implements ISP
     @Override public List<ISPNode> getChildren() {
         getProgramReadLock();
         try {
-            return new ArrayList<ISPNode>(children);
+            return new ArrayList<>(children);
         } finally {
             returnProgramReadLock();
         }
@@ -158,10 +158,10 @@ public final class MemConflictFolder extends MemAbstractContainer implements ISP
     @Override public void setChildren(List<ISPNode> newChildren) throws SPException {
         checkChildTypes(children, ISPNode.class);
 
-        final List<ISPNode> newCopy = new ArrayList<ISPNode>(newChildren);
+        final List<ISPNode> newCopy = new ArrayList<>(newChildren);
         getProgramWriteLock();
         try {
-            final List<ISPNode> oldCopy = new ArrayList<ISPNode>(children);
+            final List<ISPNode> oldCopy = new ArrayList<>(children);
             updateChildren(children, newCopy);
             firePropertyChange(CONFLICT_CHILDREN_PROP, oldCopy, newCopy);
             fireStructureChange(CONFLICT_CHILDREN_PROP, this, oldCopy, newCopy);
@@ -183,7 +183,7 @@ public final class MemConflictFolder extends MemAbstractContainer implements ISP
             List<ISPNode> oldCopy = getChildren();
             node.detachFrom(this);
             children.remove(index);
-            List<ISPNode> newCopy = new ArrayList<ISPNode>(children);
+            List<ISPNode> newCopy = new ArrayList<>(children);
             firePropertyChange(CONFLICT_CHILDREN_PROP, oldCopy, newCopy);
             fireStructureChange(CONFLICT_CHILDREN_PROP, this, oldCopy, newCopy);
         } finally {

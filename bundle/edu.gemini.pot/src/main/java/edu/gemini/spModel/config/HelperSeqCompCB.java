@@ -14,7 +14,7 @@ public class HelperSeqCompCB extends AbstractSeqComponentCB {
 
     private class SeqData {
         String name;
-        Iterator iter;
+        Iterator<?> iter;
     }
 
     private transient ISysConfig _sysConfig;
@@ -50,7 +50,7 @@ public class HelperSeqCompCB extends AbstractSeqComponentCB {
         for (IParameter param : _sysConfig.getParameters()) {
             Object value = param.getValue();
             if (value instanceof Collection) {
-                Iterator valueIt = ((Collection) value).iterator();
+                Iterator<?> valueIt = ((Collection<?>) value).iterator();
                 if (valueIt.hasNext()) {
                     SeqData sd = new SeqData();
                     sd.name = param.getName();

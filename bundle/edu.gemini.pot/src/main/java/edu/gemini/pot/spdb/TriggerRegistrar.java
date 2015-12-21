@@ -1,10 +1,3 @@
-// Copyright 1999 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: TriggerRegistrar.java 46832 2012-07-19 00:28:38Z rnorris $
-//
-
 package edu.gemini.pot.spdb;
 
 import edu.gemini.pot.sp.ISPProgram;
@@ -21,16 +14,15 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-
 /**
  * Handles trigger registration (and execution).
  */
 final class TriggerRegistrar implements PropertyChangeListener, ProgramEventListener<ISPProgram> {
     private static final Logger LOG = Logger.getLogger(TriggerRegistrar.class.getName());
 
-    private final ProgramManager _progMan;
+    private final ProgramManager<ISPProgram> _progMan;
     private final ExecutorService _pool;
-    private Map<IDBTriggerCondition, List<TriggerReg>> _triggerMap = new HashMap<IDBTriggerCondition, List<TriggerReg>>();
+    private Map<IDBTriggerCondition, List<TriggerReg>> _triggerMap = new HashMap<>();
 
     /**
      * Constructs with the program manager.
@@ -40,12 +32,9 @@ final class TriggerRegistrar implements PropertyChangeListener, ProgramEventList
         _pool = Executors.newCachedThreadPool();
 
         // Listen to all the programs.
-        List progs = programMan.getPrograms();
-        if (progs != null) {
-            for (Object obj : progs) {
-                ISPProgram prog = (ISPProgram) obj;
-                prog.addCompositeChangeListener(this);
-            }
+        List<ISPProgram> progs = programMan.getPrograms();
+        for (ISPProgram prog : progs) {
+            prog.addCompositeChangeListener(this);
         }
 
         // Listen to the program manager to make sure we see any new programs.
@@ -59,7 +48,7 @@ final class TriggerRegistrar implements PropertyChangeListener, ProgramEventList
         synchronized (this) {
             List<TriggerReg> actionList = _triggerMap.get(condition);
             if (actionList == null) {
-                actionList = new ArrayList<TriggerReg>();
+                actionList = new ArrayList<>();
                 _triggerMap.put(condition, actionList);
             }
             actionList.add(tr);
@@ -103,7 +92,7 @@ final class TriggerRegistrar implements PropertyChangeListener, ProgramEventList
             IDBTriggerCondition tc = me.getKey();
             Object handback = tc.matches(change);
             if (handback != null) {
-                if (res == null) res = new ArrayList<TriggerEvent>();
+                if (res == null) res = new ArrayList<>();
                 List<TriggerReg> triggerRegList = me.getValue();
                 for (TriggerReg reg : triggerRegList) {
                     res.add(new TriggerEvent(reg, handback));
@@ -196,8 +185,8 @@ final class TriggerRegistrar implements PropertyChangeListener, ProgramEventList
         _pool.shutdownNow();
         _progMan.removeListener(this);
 
-        for (Object o : _progMan.getPrograms())
-            ((ISPProgram) o).removeCompositeChangeListener(this);
+        for (ISPProgram o : _progMan.getPrograms())
+            o.removeCompositeChangeListener(this);
 
     }
 }

@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package edu.gemini.spModel.config.injector;
 
 import edu.gemini.spModel.data.config.IParameter;
@@ -104,9 +100,9 @@ public enum ConfigInjectorUtil {
         // lamda values.  They are unset when using not using a disperser, but
         // that shouldn't mean that the filter's wavelength cannot be determined.
         if (val == null) {
-            Class pt = pd.getPropertyType();
+            Class<?> pt = pd.getPropertyType();
             if (double.class.equals(pt) || Double.class.equals(pt)) {
-                val = new Double(0.0);
+                val = 0.0;
             }
         }
 

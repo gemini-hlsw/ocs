@@ -1,11 +1,3 @@
-// Copyright 2000
-// Association for Universities for Research in Astronomy, Inc.
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: SeqRepeatSmartGcalObsCB.java 46768 2012-07-16 18:58:53Z rnorris $
-//
-
 package edu.gemini.spModel.gemini.seqcomp;
 
 import edu.gemini.pot.sp.ISPSeqComponent;
@@ -35,7 +27,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-
 /**
  * A configuration builder for the Gemini CalUnit sequence
  * component that include coadds and exposure time.
@@ -57,7 +48,7 @@ public abstract class SeqRepeatSmartGcalObsCB implements IConfigBuilder, Cloneab
             super(seqComp);
         }
         protected List<Calibration> filter(List<Calibration> calibrations) {
-            List<Calibration> filteredCalibrations = new ArrayList<Calibration>();
+            List<Calibration> filteredCalibrations = new ArrayList<>();
             for (Calibration c : calibrations) {
                 if (c.isBasecalDay()) {
                     filteredCalibrations.add(c);
@@ -71,7 +62,7 @@ public abstract class SeqRepeatSmartGcalObsCB implements IConfigBuilder, Cloneab
             super(seqComp);
         }
         protected List<Calibration> filter(List<Calibration> calibrations) {
-            List<Calibration> filteredCalibrations = new ArrayList<Calibration>();
+            List<Calibration> filteredCalibrations = new ArrayList<>();
             for (Calibration c : calibrations) {
                 if (c.isBasecalNight()) {
                     filteredCalibrations.add(c);
@@ -85,7 +76,7 @@ public abstract class SeqRepeatSmartGcalObsCB implements IConfigBuilder, Cloneab
             super(seqComp);
         }
         protected List<Calibration> filter(List<Calibration> calibrations) {
-            List<Calibration> filteredCalibrations = new ArrayList<Calibration>();
+            List<Calibration> filteredCalibrations = new ArrayList<>();
             for (Calibration c : calibrations) {
                 if (c.isFlat()) {
                     filteredCalibrations.add(c);
@@ -99,7 +90,7 @@ public abstract class SeqRepeatSmartGcalObsCB implements IConfigBuilder, Cloneab
             super(seqComp);
         }
         protected List<Calibration> filter(List<Calibration> calibrations) {
-            List<Calibration> filteredCalibrations = new ArrayList<Calibration>();
+            List<Calibration> filteredCalibrations = new ArrayList<>();
             for (Calibration c : calibrations) {
                 if (c.isArc()) {
                     filteredCalibrations.add(c);

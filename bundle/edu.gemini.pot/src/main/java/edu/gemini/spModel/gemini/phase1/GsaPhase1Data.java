@@ -180,7 +180,7 @@ public final class GsaPhase1Data implements Serializable {
         if (keywords.size() == 0) {
             this.keywords = Collections.emptyList();
         } else {
-            List<String> ks = new ArrayList<String>(keywords.size());
+            List<String> ks = new ArrayList<>(keywords.size());
             for (Keyword k : keywords) ks.add(k.getValue());
             this.keywords = Collections.unmodifiableList(ks);
         }
@@ -188,7 +188,7 @@ public final class GsaPhase1Data implements Serializable {
         if (cois.size() == 0) {
             this.cois = Collections.emptyList();
         } else {
-            List<Investigator> is = new ArrayList<Investigator>(cois.size());
+            List<Investigator> is = new ArrayList<>(cois.size());
             is.addAll(cois);
             this.cois = Collections.unmodifiableList(is);
         }
@@ -202,7 +202,7 @@ public final class GsaPhase1Data implements Serializable {
         if (ks.size() == 0) {
             this.keywords = Collections.emptyList();
         } else {
-            List<String> keywords = new ArrayList(ks.size());
+            List<String> keywords = new ArrayList<>(ks.size());
             for (Param p : ks) {
                 String keyword = p.getValue();
                 if (keyword != null) keywords.add(keyword);
@@ -225,7 +225,7 @@ public final class GsaPhase1Data implements Serializable {
             if (coisPset.size() == 0) {
                 this.cois = Collections.emptyList();
             } else {
-                List<Investigator> cois = new ArrayList<Investigator>(coisPset.size());
+                List<Investigator> cois = new ArrayList<>(coisPset.size());
                 for (ParamSet coiPset : coisPset) {
                     cois.add(new Investigator(coiPset));
                 }
@@ -237,7 +237,7 @@ public final class GsaPhase1Data implements Serializable {
     public Abstract getAbstract() { return new Abstract(abstrakt); }
     public Category getCategory() { return new Category(category); }
     public List<Keyword> getKeywords() {
-        List<Keyword> keys = new ArrayList<Keyword>(keywords.size());
+        List<Keyword> keys = new ArrayList<>(keywords.size());
         for (String keyword : this.keywords) keys.add(new Keyword(keyword));
         return keys;
     }

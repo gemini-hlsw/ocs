@@ -1,16 +1,6 @@
-// Copyright 1999 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: ISPNodeInitializer.java 46768 2012-07-16 18:58:53Z rnorris $
-//
-
 package edu.gemini.pot.sp;
 
 import java.io.Serializable;
-
-
-
 
 /**
  * Initializers provide a means whereby newly created Science Program nodes

@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package edu.gemini.spModel.config.injector;
 
 import edu.gemini.spModel.data.config.DefaultParameter;

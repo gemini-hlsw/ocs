@@ -27,7 +27,7 @@ public class InstGMOSCB extends AbstractObsComponentCB {
     private static final int MAX_BEAM_LABELS = BEAM_LABELS.length();
 
     private transient ISysConfig _sysConfig;
-    private transient InstGmosCommon _dataObj;
+    private transient InstGmosCommon<?, ?, ?, ?> _dataObj;
 
     public InstGMOSCB(ISPObsComponent obsComp) {
         super(obsComp);
@@ -42,7 +42,7 @@ public class InstGMOSCB extends AbstractObsComponentCB {
 
     @Override
     protected void thisReset(Map<String, Object> options) {
-        _dataObj = (InstGmosCommon) getDataObject();
+        _dataObj = (InstGmosCommon<?, ?, ?, ?>) getDataObject();
         if (_dataObj == null) {
             System.out.println("It's null!");
         }
@@ -50,10 +50,7 @@ public class InstGMOSCB extends AbstractObsComponentCB {
     }
 
     protected boolean thisHasConfiguration() {
-        if (_sysConfig == null) {
-            return false;
-        }
-        return (_sysConfig.getParameterCount() > 0);
+        return _sysConfig != null && (_sysConfig.getParameterCount() > 0);
     }
 
     private String _getParamName(int i, String paramName) {

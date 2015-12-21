@@ -1,7 +1,3 @@
-//
-// $Id: SPObservationID.java 7324 2006-08-25 21:21:11Z shane $
-//
-
 package edu.gemini.pot.sp;
 
 import edu.gemini.spModel.core.SPBadIDException;
@@ -9,8 +5,7 @@ import edu.gemini.spModel.core.SPProgramID;
 
 import java.io.Serializable;
 
-
-public final class SPObservationID implements Comparable, Serializable {
+public final class SPObservationID implements Comparable<SPObservationID>, Serializable {
     static final long serialVersionUID = 3888785156260179952L;
 
     private static final String SEP = "-";
@@ -68,8 +63,8 @@ public final class SPObservationID implements Comparable, Serializable {
         return res * 37 + _obsNumber;
     }
 
-    public int compareTo(Object other) {
-        SPObservationID that = (SPObservationID) other;
+    @Override
+    public int compareTo(SPObservationID that) {
         int res = _programID.compareTo(that._programID);
         if (res != 0) return res;
         return _obsNumber - that._obsNumber;
@@ -83,10 +78,8 @@ public final class SPObservationID implements Comparable, Serializable {
     }
 
     public String toString() {
-        StringBuffer buf = new StringBuffer(_programID.stringValue());
-        buf.append(SEP);
-        buf.append(_obsNumber);
-        return buf.toString();
+        return _programID.stringValue() + SEP +
+                _obsNumber;
     }
 }
 

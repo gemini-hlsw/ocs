@@ -14,11 +14,10 @@ public class DBStatus implements Serializable {
     protected static DBStatus dbStatus = new DBStatus();
     protected int totalThreads;
 
-
     // This Map contains as key a thread Group Name. As value,
     // there is a list with all the threads name associated
     // to that group
-    protected Map threadMap = null;
+    protected Map<String, List<String>> threadMap = null;
 
     protected long freeMemory = 0;
 
@@ -53,29 +52,25 @@ public class DBStatus implements Serializable {
         totalThreads = tg.activeCount();
         Thread[] th = new Thread[totalThreads];
         int sz = tg.enumerate(th);
-        threadMap = new Hashtable();
+        threadMap = new HashMap<>();
         String groupName = null;
 
         for (int i = 0; i < sz; ++i) {
             Thread t = th[i];
             String thisGroupName = t.getThreadGroup().getName();
             if (!thisGroupName.equals(groupName)) {
-                List l = new Vector();
+                List<String> l = new ArrayList<>();
                 threadMap.put(thisGroupName, l);
                 groupName = thisGroupName;
             }
-            List l = (List) threadMap.get(thisGroupName);
+            List<String> l = threadMap.get(thisGroupName);
             l.add(t.getName());
         }
     }
 
     protected void updateDatabaseMetrics(IDBAdmin admin) {
         if (admin != null) {
-//            try {
-                storageInterval = admin.getStorageInterval();
-//            } catch (RemoteException e) {
-//                e.printStackTrace();
-//            }
+            storageInterval = admin.getStorageInterval();
         } else {
             storageInterval = 0;
         }
@@ -98,7 +93,7 @@ public class DBStatus implements Serializable {
         return storageInterval;
     }
 
-    public Map getThreadMap() {
+    public Map<String, List<String>> getThreadMap() {
         return threadMap;
     }
 
@@ -108,21 +103,17 @@ public class DBStatus implements Serializable {
         System.out.println("Total Memory: " + status.getTotalMemory());
         System.out.println("Total Threads: " + status.getTotalThreads());
         int sz = status.getTotalThreads();
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         buf.append("\n-----------------------------");
         buf.append("\nTotal Active Threads = ").append(sz);
         buf.append("\n");
 
-        Map map = status.getThreadMap();
-        Set set = map.keySet();
-        Iterator it = set.iterator();
-        while (it.hasNext()) {
-            String groupName = (String) it.next();
-            List l = (List) map.get(groupName);
+        Map<String, List<String>> map = status.getThreadMap();
+        Set<String> set = map.keySet();
+        for (String groupName : set) {
+            List<String> l = map.get(groupName);
             buf.append("\t").append(groupName).append("\n");
-            Iterator it2 = l.iterator();
-            while (it2.hasNext()) {
-                String threadName = (String) it2.next();
+            for (String threadName : l) {
                 buf.append("\t\t").append(threadName).append("\n");
             }
         }

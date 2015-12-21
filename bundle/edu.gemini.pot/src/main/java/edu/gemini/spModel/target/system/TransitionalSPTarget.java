@@ -66,7 +66,7 @@ public abstract class TransitionalSPTarget extends WatchablePos {
         _notifyOfUpdate();
     }
 
-    /** @deprecated */
+    @Deprecated
     public void notifyOfGenericUpdate() {
         super._notifyOfUpdate();
     }

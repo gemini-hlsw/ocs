@@ -17,7 +17,6 @@ import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.Iterator;
 
-
 /**
  * An iterator for telescope offset positions.  It maintains a position
  * list that details the sequence of offset positions and implements the
@@ -48,8 +47,8 @@ public abstract class SeqRepeatOffsetBase<P extends OffsetPosBase> extends Abstr
      */
     protected SeqRepeatOffsetBase(SPComponentType type, OffsetPosBase.Factory<P> factory) {
         super(type);
-        _posList = new OffsetPosList<P>(factory);
-        _posList.addWatcher(new OffsetPosListChangePropagator<P>(new PceNotifier()));
+        _posList = new OffsetPosList<>(factory);
+        _posList.addWatcher(new OffsetPosListChangePropagator<>(new PceNotifier()));
     }
 
 
@@ -86,14 +85,13 @@ public abstract class SeqRepeatOffsetBase<P extends OffsetPosBase> extends Abstr
     /**
      * Enumerate the steps of the offset iterator.
      */
-    public Iterator elements() {
+    public Iterator<P> elements() {
         return _posList.iterator();
     }
 
 
     /**
      * Return a parameter set describing the current state of this object.
-     * @param factory
      */
     public ParamSet getParamSet(PioFactory factory) {
         ParamSet paramSet = super.getParamSet(factory);
@@ -127,7 +125,7 @@ public abstract class SeqRepeatOffsetBase<P extends OffsetPosBase> extends Abstr
 
         //noinspection unchecked
         sro._posList = (OffsetPosList<P>)sro._posList.clone();
-        sro._posList.addWatcher(new OffsetPosListChangePropagator<P>(sro.new PceNotifier(), sro._posList));
+        sro._posList.addWatcher(new OffsetPosListChangePropagator<>(sro.new PceNotifier(), sro._posList));
 
         return sro;
     }
@@ -135,6 +133,6 @@ public abstract class SeqRepeatOffsetBase<P extends OffsetPosBase> extends Abstr
     // Setup change propagation when de-serializing.
     private void readObject(ObjectInputStream is) throws IOException, ClassNotFoundException {
         is.defaultReadObject();
-        _posList.addWatcher(new OffsetPosListChangePropagator<P>(new PceNotifier(), _posList));
+        _posList.addWatcher(new OffsetPosListChangePropagator<>(new PceNotifier(), _posList));
     }
 }

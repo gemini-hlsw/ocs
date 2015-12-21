@@ -12,9 +12,9 @@ public final class MemTemplateGroup extends MemAbstractContainer implements ISPT
     private static final Logger LOG = Logger.getLogger(MemTemplateGroup.class.getName());
 
     private final MemProgram program;
-    private final List<MemObservation> obsList = new ArrayList<MemObservation>();
-    private final List<MemTemplateParameters> paramsList = new ArrayList<MemTemplateParameters>();
-    private final List<MemObsComponent> obsCompList = new ArrayList<MemObsComponent>();
+    private final List<MemObservation> obsList = new ArrayList<>();
+    private final List<MemTemplateParameters> paramsList = new ArrayList<>();
+    private final List<MemObsComponent> obsCompList = new ArrayList<>();
 
     public MemTemplateGroup(MemProgram prog, SPNodeKey key)  {
         super(prog.getDocumentData(), key);
@@ -27,7 +27,7 @@ public final class MemTemplateGroup extends MemAbstractContainer implements ISPT
 
         // Make a copy of the obs list
         List<ISPObservation> thatObsList = that.getObservations();
-        List<ISPObservation> newObsList  = new ArrayList<ISPObservation>(thatObsList.size());
+        List<ISPObservation> newObsList  = new ArrayList<>(thatObsList.size());
         for (ISPObservation to : thatObsList) {
             try {
                 newObsList.add(fact.createObservationCopy(prog, to, preserveKeys));
@@ -39,7 +39,7 @@ public final class MemTemplateGroup extends MemAbstractContainer implements ISPT
 
         // Make a copy of the params list
         List<ISPTemplateParameters> thatParamsList = that.getTemplateParameters();
-        List<ISPTemplateParameters> newParamsList  = new ArrayList<ISPTemplateParameters>(thatParamsList.size());
+        List<ISPTemplateParameters> newParamsList  = new ArrayList<>(thatParamsList.size());
         for (ISPTemplateParameters tp : thatParamsList) {
             try {
                 newParamsList.add(fact.createTemplateParametersCopy(prog, tp, preserveKeys));
@@ -51,7 +51,7 @@ public final class MemTemplateGroup extends MemAbstractContainer implements ISPT
 
         // Make a copy of the obsComp list
         List<ISPObsComponent> thatObsCompList = that.getObsComponents();
-        List<ISPObsComponent> newObsCompList  = new ArrayList<ISPObsComponent>(thatObsCompList.size());
+        List<ISPObsComponent> newObsCompList  = new ArrayList<>(thatObsCompList.size());
         for (ISPObsComponent tp : thatObsCompList) {
             try {
                 newObsCompList.add(fact.createObsComponentCopy(prog, tp, preserveKeys));
@@ -78,7 +78,7 @@ public final class MemTemplateGroup extends MemAbstractContainer implements ISPT
 
     }
 
-    private static final Class[] VALID_CHILD_TYPES = {
+    private static final Class<?>[] VALID_CHILD_TYPES = {
         MemConflictFolder.class,
         MemObservation.class,
         MemObsComponent.class,
@@ -103,7 +103,7 @@ public final class MemTemplateGroup extends MemAbstractContainer implements ISPT
     public List<ISPNode> getChildren() {
         getProgramReadLock();
         try {
-            final List<ISPNode> ret = new ArrayList<ISPNode>();
+            final List<ISPNode> ret = new ArrayList<>();
             if (getConflictFolder() != null) ret.add(getConflictFolder());
             ret.addAll(getObsComponents());
             ret.addAll(getObservations());
@@ -117,7 +117,7 @@ public final class MemTemplateGroup extends MemAbstractContainer implements ISPT
     public List<ISPObservation> getObservations() {
         getProgramReadLock();
         try {
-            return new ArrayList<ISPObservation>(obsList);
+            return new ArrayList<>(obsList);
         } finally {
             returnProgramReadLock();
         }
@@ -128,10 +128,10 @@ public final class MemTemplateGroup extends MemAbstractContainer implements ISPT
     }
 
     public void setObservations(List<? extends ISPObservation> newObsList) throws SPNodeNotLocalException, SPTreeStateException {
-        List<ISPObservation> newCopy = new ArrayList<ISPObservation>(newObsList);
+        List<ISPObservation> newCopy = new ArrayList<>(newObsList);
         getProgramWriteLock();
         try {
-            List<ISPObservation> oldCopy = new ArrayList<ISPObservation>(obsList);
+            List<ISPObservation> oldCopy = new ArrayList<>(obsList);
             updateChildren(obsList, newCopy);
             firePropertyChange(TEMPLATE_OBSERVATIONS_PROP, oldCopy, newCopy);
             fireStructureChange(TEMPLATE_OBSERVATIONS_PROP, this, oldCopy, newCopy);
@@ -150,10 +150,10 @@ public final class MemTemplateGroup extends MemAbstractContainer implements ISPT
         MemObservation node = (MemObservation) obs;
         getProgramWriteLock();
         try {
-            List<ISPObservation> oldCopy = new ArrayList<ISPObservation>(obsList);
+            List<ISPObservation> oldCopy = new ArrayList<>(obsList);
             node.attachTo(this);
             if (index >= 0) obsList.add(index, node); else obsList.add(node);
-            List<ISPObservation> newCopy = new ArrayList<ISPObservation>(obsList);
+            List<ISPObservation> newCopy = new ArrayList<>(obsList);
             firePropertyChange(TEMPLATE_OBSERVATIONS_PROP, oldCopy, newCopy);
             fireStructureChange(TEMPLATE_OBSERVATIONS_PROP, this, oldCopy, newCopy);
         } finally {
@@ -170,10 +170,10 @@ public final class MemTemplateGroup extends MemAbstractContainer implements ISPT
                 LOG.warning("Component was not located and can't be removed.");
                 return;
             }
-            List<ISPObservation> oldCopy = new ArrayList<ISPObservation>(obsList);
+            List<ISPObservation> oldCopy = new ArrayList<>(obsList);
             node.detachFrom(this);
             obsList.remove(index);
-            List<ISPObservation> newCopy = new ArrayList<ISPObservation>(obsList);
+            List<ISPObservation> newCopy = new ArrayList<>(obsList);
             firePropertyChange(TEMPLATE_OBSERVATIONS_PROP, oldCopy, newCopy);
             fireStructureChange(TEMPLATE_OBSERVATIONS_PROP, this, oldCopy, newCopy);
         } finally {
@@ -184,17 +184,17 @@ public final class MemTemplateGroup extends MemAbstractContainer implements ISPT
     public List<ISPTemplateParameters> getTemplateParameters() {
         getProgramReadLock();
         try {
-            return new ArrayList<ISPTemplateParameters>(paramsList);
+            return new ArrayList<>(paramsList);
         } finally {
             returnProgramReadLock();
         }
     }
 
     public void setTemplateParameters(List<? extends ISPTemplateParameters> newParamsList) throws SPNodeNotLocalException, SPTreeStateException {
-        List<ISPTemplateParameters> newCopy = new ArrayList<ISPTemplateParameters>(newParamsList);
+        List<ISPTemplateParameters> newCopy = new ArrayList<>(newParamsList);
         getProgramWriteLock();
         try {
-            List<ISPTemplateParameters> oldCopy = new ArrayList<ISPTemplateParameters>(paramsList);
+            List<ISPTemplateParameters> oldCopy = new ArrayList<>(paramsList);
             updateChildren(paramsList, newCopy);
             firePropertyChange(TEMPLATE_PARAMETERS_PROP, oldCopy, newCopy);
             fireStructureChange(TEMPLATE_PARAMETERS_PROP, this, oldCopy, newCopy);
@@ -213,10 +213,10 @@ public final class MemTemplateGroup extends MemAbstractContainer implements ISPT
         MemTemplateParameters node = (MemTemplateParameters) params;
         getProgramWriteLock();
         try {
-            List<ISPTemplateParameters> oldCopy = new ArrayList<ISPTemplateParameters>(paramsList);
+            List<ISPTemplateParameters> oldCopy = new ArrayList<>(paramsList);
             node.attachTo(this);
             if (index >= 0) paramsList.add(index, node); else paramsList.add(node);
-            List<ISPTemplateParameters> newCopy = new ArrayList<ISPTemplateParameters>(paramsList);
+            List<ISPTemplateParameters> newCopy = new ArrayList<>(paramsList);
             firePropertyChange(TEMPLATE_PARAMETERS_PROP, oldCopy, newCopy);
             fireStructureChange(TEMPLATE_PARAMETERS_PROP, this, oldCopy, newCopy);
         } finally {
@@ -233,10 +233,10 @@ public final class MemTemplateGroup extends MemAbstractContainer implements ISPT
                 LOG.warning("Component was not located and can't be removed.");
                 return;
             }
-            List<ISPTemplateParameters> oldCopy = new ArrayList<ISPTemplateParameters>(paramsList);
+            List<ISPTemplateParameters> oldCopy = new ArrayList<>(paramsList);
             node.detachFrom(this);
             paramsList.remove(index);
-            List<ISPTemplateParameters> newCopy = new ArrayList<ISPTemplateParameters>(paramsList);
+            List<ISPTemplateParameters> newCopy = new ArrayList<>(paramsList);
             firePropertyChange(TEMPLATE_PARAMETERS_PROP, oldCopy, newCopy);
             fireStructureChange(TEMPLATE_PARAMETERS_PROP, this, oldCopy, newCopy);
         } finally {
@@ -247,17 +247,17 @@ public final class MemTemplateGroup extends MemAbstractContainer implements ISPT
     public List<ISPObsComponent> getObsComponents() {
         getProgramReadLock();
         try {
-            return new ArrayList<ISPObsComponent>(obsCompList);
+            return new ArrayList<>(obsCompList);
         } finally {
             returnProgramReadLock();
         }
     }
 
     public void setObsComponents(List<? extends ISPObsComponent> newObsCompList) throws SPNodeNotLocalException, SPTreeStateException {
-        List<ISPObsComponent> newCopy = new ArrayList<ISPObsComponent>(newObsCompList);
+        List<ISPObsComponent> newCopy = new ArrayList<>(newObsCompList);
         getProgramWriteLock();
         try {
-            List<ISPObsComponent> oldCopy = new ArrayList<ISPObsComponent>(obsCompList);
+            List<ISPObsComponent> oldCopy = new ArrayList<>(obsCompList);
             updateChildren(obsCompList, newCopy);
             firePropertyChange(OBS_COMPONENTS_PROP, oldCopy, newCopy);
             fireStructureChange(OBS_COMPONENTS_PROP, this, oldCopy, newCopy);
@@ -276,10 +276,10 @@ public final class MemTemplateGroup extends MemAbstractContainer implements ISPT
         MemObsComponent node = (MemObsComponent) obsComp;
         getProgramWriteLock();
         try {
-            List<ISPObsComponent> oldCopy = new ArrayList<ISPObsComponent>(obsCompList);
+            List<ISPObsComponent> oldCopy = new ArrayList<>(obsCompList);
             node.attachTo(this);
             if (index >= 0) obsCompList.add(index, node); else obsCompList.add(node);
-            List<ISPObsComponent> newCopy = new ArrayList<ISPObsComponent>(obsCompList);
+            List<ISPObsComponent> newCopy = new ArrayList<>(obsCompList);
             firePropertyChange(OBS_COMPONENTS_PROP, oldCopy, newCopy);
             fireStructureChange(OBS_COMPONENTS_PROP, this, oldCopy, newCopy);
         } finally {
@@ -296,10 +296,10 @@ public final class MemTemplateGroup extends MemAbstractContainer implements ISPT
                 LOG.warning("Component was not located and can't be removed.");
                 return;
             }
-            List<ISPObsComponent> oldCopy = new ArrayList<ISPObsComponent>(obsCompList);
+            List<ISPObsComponent> oldCopy = new ArrayList<>(obsCompList);
             node.detachFrom(this);
             obsCompList.remove(index);
-            List<ISPObsComponent> newCopy = new ArrayList<ISPObsComponent>(obsCompList);
+            List<ISPObsComponent> newCopy = new ArrayList<>(obsCompList);
             firePropertyChange(OBS_COMPONENTS_PROP, oldCopy, newCopy);
             fireStructureChange(OBS_COMPONENTS_PROP, this, oldCopy, newCopy);
         } finally {

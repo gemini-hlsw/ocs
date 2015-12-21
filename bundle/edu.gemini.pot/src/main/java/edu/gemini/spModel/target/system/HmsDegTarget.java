@@ -141,6 +141,20 @@ public final class HmsDegTarget extends ITarget {
         return true;
     }
 
+    @Override
+    public int hashCode() {
+        int result = _name != null ? _name.hashCode() : 0;
+        result = 31 * result + (_epoch != null ? _epoch.hashCode() : 0);
+        result = 31 * result + (_pm1 != null ? _pm1.hashCode() : 0);
+        result = 31 * result + (_pm2 != null ? _pm2.hashCode() : 0);
+        result = 31 * result + (_parallax != null ? _parallax.hashCode() : 0);
+        result = 31 * result + (_z != null ? _z.hashCode() : 0);
+        result = 31 * result + (_taiz != null ? _taiz.hashCode() : 0);
+        result = 31 * result + (_ra != null ? _ra.hashCode() : 0);
+        result = 31 * result + (_dec != null ? _dec.hashCode() : 0);
+        return result;
+    }
+
     /**
      * General method to return the first coordinate (right ascension).
      * This returns a reference to the actual object an {@link HMS HMS}
