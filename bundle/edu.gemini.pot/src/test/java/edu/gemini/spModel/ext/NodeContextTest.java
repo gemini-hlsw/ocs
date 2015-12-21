@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package edu.gemini.spModel.ext;
 
 import edu.gemini.pot.sp.*;
@@ -86,7 +82,7 @@ public class NodeContextTest {
             obsComp = factory.createObsComponent(prog, type, null);
             obs.addObsComponent(obsComp);
 
-            List<ISPObsComponent> obsComponents = new ArrayList<ISPObsComponent>();
+            List<ISPObsComponent> obsComponents = new ArrayList<>();
             obsComponents.add(obsComp);
             obs.setObsComponents(obsComponents);
 
@@ -94,7 +90,7 @@ public class NodeContextTest {
         }
     }
 
-    private void verifyNode(NodeContext node, ISPObsComponent obsComp) throws Exception {
+    private void verifyNode(NodeContext<?, ?> node, ISPObsComponent obsComp) throws Exception {
         assertNotNull(node);
         assertEquals(obsComp, node.getRemoteNode());
         assertEquals(progId, node.getProgramId());

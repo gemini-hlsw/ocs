@@ -1,11 +1,3 @@
-// Copyright 2000
-// Association for Universities for Research in Astronomy, Inc.
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: CBTestBase.java 46971 2012-07-25 16:59:17Z swalker $
-//
-
 package edu.gemini.spModel.config.test;
 
 import edu.gemini.pot.sp.*;
@@ -14,14 +6,10 @@ import edu.gemini.pot.spdb.IDBDatabaseService;
 import edu.gemini.spModel.config.IConfigBuilder;
 import edu.gemini.spModel.config.ObservationCB;
 import edu.gemini.spModel.data.config.*;
-import org.junit.After;
 import static org.junit.Assert.*;
-import org.junit.Before;
-
 
 import java.util.LinkedList;
 import java.util.List;
-
 
 public abstract class CBTestBase {
 
@@ -80,7 +68,7 @@ public abstract class CBTestBase {
     }
 
     protected void runApply(IConfigBuilder cb, IConfig expected)  {
-        List<IConfig> eList = new LinkedList<IConfig>();
+        List<IConfig> eList = new LinkedList<>();
         eList.add(expected);
 
         runApply(cb, eList);
@@ -95,7 +83,7 @@ public abstract class CBTestBase {
      * @param cb the parameter builder to execute
      * @param expectedList list of expected IConfig instances to match
      */
-    protected void runApply(IConfigBuilder cb, List expectedList)  {
+    protected void runApply(IConfigBuilder cb, List<IConfig> expectedList)  {
         // Test reset.  Make sure that "hasNext()" doesn't modify the state with
         // each call.
         cb.reset(null);
