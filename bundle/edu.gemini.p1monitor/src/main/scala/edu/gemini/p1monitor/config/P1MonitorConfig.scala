@@ -63,9 +63,9 @@ class P1MonitorConfig(ctx: BundleContext) {
       throw new IllegalArgumentException("Xml file doesn't contain an <" + tag + "> element")
     }
     if (tags.length > 1) {
-      LOG.warning("Xml file contains more than one <" + tag + "> tag, using: " + tags(0))
+      LOG.warning("Xml file contains more than one <" + tag + "> tag, using: " + tags.head)
     }
-    tags(0)
+    tags.head
   }
 
   private def elementContent(root: Node, tag: String): Seq[String] = {
