@@ -13,6 +13,8 @@ unmanagedJars in Compile ++= Seq(
   new File(baseDirectory.value, "../../lib/bundle/scalaz-core_2.11-7.0.6.jar"),
   new File(baseDirectory.value, "../../lib/bundle/scalaz-effect_2.11-7.0.6.jar"))
 
+libraryDependencies += "org.scala-lang" % "scala-actors" % "2.11.7"
+
 osgiSettings 
 
 ocsBundleSettings
@@ -24,6 +26,3 @@ OsgiKeys.bundleSymbolicName := name.value
 OsgiKeys.dynamicImportPackage := Seq("")
 
 OsgiKeys.exportPackage := Seq()
-
-
-        

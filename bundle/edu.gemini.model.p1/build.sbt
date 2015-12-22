@@ -7,8 +7,7 @@ name := "edu.gemini.model.p1"
 version := pitVersion.value.toOsgiVersion
 
 unmanagedJars in Compile ++= Seq(
-  new File(baseDirectory.value, "../../lib/bundle/scalaz-core_2.11-7.0.6.jar"),
-  new File(baseDirectory.value, "../../lib/bundle/scala-xml_2.11-1.0.5.jar")
+  new File(baseDirectory.value, "../../lib/bundle/scalaz-core_2.11-7.0.6.jar")
 )
 
 libraryDependencies ++= Seq(

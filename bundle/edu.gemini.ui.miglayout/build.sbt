@@ -8,9 +8,10 @@ name := "edu.gemini.ui.miglayout"
 
 unmanagedJars in Compile ++= Seq(
   new File(baseDirectory.value, "../../lib/bundle/miglayout-core-4.2.jar"),
-  new File(baseDirectory.value, "../../lib/bundle/miglayout-swing-4.2.jar"),
-  new File(baseDirectory.value, "../../lib/bundle/scala-swing_2.10-2.0.0-SNAPSHOT.jar")
+  new File(baseDirectory.value, "../../lib/bundle/miglayout-swing-4.2.jar")
 )
+
+libraryDependencies += "org.scala-lang.modules" %% "scala-swing" % "2.0.0-M2"
 
 osgiSettings
 
