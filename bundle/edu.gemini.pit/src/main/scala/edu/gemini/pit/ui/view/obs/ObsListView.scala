@@ -1,5 +1,6 @@
 package edu.gemini.pit.ui.view.obs
 
+import edu.gemini.gsa.client.impl.GsaUrl
 import edu.gemini.model.p1.immutable._
 import edu.gemini.pit.model._
 import edu.gemini.pit.ui.editor._
@@ -245,9 +246,6 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band, queueLookup: Target => U
     }
 
     object checkGsa extends ToolButton(ICON_GSA, ICON_GSA_DIS, "GSA Dataset Check") {
-// UX-1201
-//      text = "GSA"
-//      foreground = Color.DARK_GRAY
       enabled = false
 
       viewer.onSelectionChanged {s =>
@@ -258,10 +256,10 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band, queueLookup: Target => U
       }
 
       def apply() {
-        viewer.selection flatMap {
+        viewer.selection.flatMap {
           case ObsElem(o) => GsaParams.get(o).map(p => GsaUrl(p))
           case _          => None
-        } foreach {url =>
+        }.foreach {url =>
           try {
             Browser.open(url)
           } catch {

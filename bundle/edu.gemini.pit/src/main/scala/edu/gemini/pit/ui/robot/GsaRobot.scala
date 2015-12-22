@@ -13,11 +13,10 @@ object GsaRobot extends ObservationMetaRobot[GsaParams, Int] {
   protected def key(o: Observation): Option[GsaParams] = GsaParams.get(o)
 
   protected def query(o: Observation): Option[Int] =
-    key(o) flatMap {
-      k =>
-        GsaClientImpl.query(k) match {
-          case GsaResult.Success(_, datasets) => Some(datasets.size)
-          case _ => None
-        }
+    key(o).flatMap { k =>
+      GsaClientImpl.query(k) match {
+        case GsaResult.Success(_, datasets) => Some(datasets.size)
+        case _                              => None
+      }
     }
 }

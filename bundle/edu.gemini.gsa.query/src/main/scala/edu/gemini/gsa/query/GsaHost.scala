@@ -1,5 +1,7 @@
 package edu.gemini.gsa.query
 
+import java.net.URL
+
 import scalaz._
 
 /** Defines GsaHost options.  There is a GSA server at each summit and then
@@ -9,15 +11,17 @@ import scalaz._
 sealed trait GsaHost {
   def host: String
   def protocol: String
+
+  def baseUrl = s"$protocol://$host"
 }
 
 object GsaHost {
   final case class Summit(host: String) extends GsaHost {
-    override def protocol: String = "http"
+    override val protocol: String = "http"
   }
 
   final case class Archive(host: String) extends GsaHost {
-    override def protocol: String = "https"
+    override val protocol: String = "https"
   }
 
   implicit val EqualGsaHost: Equal[GsaHost] = Equal.equalA

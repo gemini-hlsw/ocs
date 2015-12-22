@@ -68,7 +68,7 @@ trait ObservationMetaRobot[K, V] extends Robot {
     } else {
       val t = new TimerTask() {
         def run() {
-          Swing.onEDT(rebind)
+          Swing.onEDT(rebind())
         }
       }
       rebindTask = Some(t)
@@ -128,7 +128,6 @@ trait ObservationMetaRobot[K, V] extends Robot {
   // Updates the model to match the current state, if there is anything new
   // in it.
   protected def updateModel(m: Model) {
-
     // We're mapping over the list essentially but keeping up with whether
     // any obs was actually updated.
     val init: (List[Observation], Boolean) = (Nil, false)
@@ -179,11 +178,11 @@ trait ObservationMetaRobot[K, V] extends Robot {
         // If a successful query result has already been cached, we will just use
         // it.  Otherwise, mark the result as pending.
         val cachedValue = lookup(k)
-        if (!cachedValue.isDefined) state = state + (k -> Result.Pending)
+        if (cachedValue.isEmpty) state = state + (k -> Result.Pending)
 
         // Do an asynchronous query to update the value
         actor {
-          callback(k, cachedValue.orElse(query(o)))
+          callback(k, query(o))
         }
     }
   }

@@ -19,9 +19,9 @@ case class ObservationMeta(guiding: Option[GuidingEstimation],
 
   def mutable = {
     val m = Factory.createObservationMetaData
-    guiding foreach { g => m.setGuiding(g.mutable) }
-    visibility foreach { v => m.setVisibility(v.mutable) }
-    gsa foreach { g => m.setGsa(java.math.BigInteger.valueOf(g.toLong))}
+    guiding.foreach { g => m.setGuiding(g.mutable) }
+    visibility.foreach { v => m.setVisibility(v.mutable) }
+    gsa.foreach { g => m.setGsa(java.math.BigInteger.valueOf(g.toLong))}
     m.setCk("")
     m
   }

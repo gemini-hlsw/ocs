@@ -122,6 +122,10 @@ object JsonCodecs {
 
   implicit val CodecJsonGsaRecord = CodecJson.derived[GsaRecord]
 
+  // *** GsaFile ***
+
+  implicit val CodecJsonGsaFile = casecodec1(GsaFile.apply, GsaFile.unapply)("name")
+
   // *** QaRequest **
 
   // The GSA API accepts multiple kinds of updates but we only care about
