@@ -14,22 +14,22 @@ import edu.gemini.ui.gface.GViewer;
 
 @SuppressWarnings("serial")
 public class SelectAllAction extends AbstractAction implements PropertyChangeListener {
-	
-	private final GViewer<Variant, ?> viewer;
-	
-	public SelectAllAction(final GViewer<Variant, ?> viewer) {
-		this.viewer = viewer;
-		setEnabled(false);
-		viewer.addPropertyChangeListener(GViewer.PROP_MODEL, this);
-	}
-	
-	public void actionPerformed(ActionEvent e) {
-		Collection<Alloc> all = viewer.getModel().getAllocs();
-		viewer.setSelection(new GSelection<Alloc>(all.toArray(new Alloc[all.size()])));
-	}
 
-	public void propertyChange(PropertyChangeEvent evt) {
-		setEnabled(viewer.getModel() != null);
-	}	
-	
+    private final GViewer<Variant, Alloc> viewer;
+
+    public SelectAllAction(final GViewer<Variant, Alloc> viewer) {
+        this.viewer = viewer;
+        setEnabled(false);
+        viewer.addPropertyChangeListener(GViewer.PROP_MODEL, this);
+    }
+
+    public void actionPerformed(ActionEvent e) {
+        Collection<Alloc> all = viewer.getModel().getAllocs();
+        viewer.setSelection(new GSelection<>(all.toArray(new Alloc[all.size()])));
+    }
+
+    public void propertyChange(PropertyChangeEvent evt) {
+        setEnabled(viewer.getModel() != null);
+    }
+
 }

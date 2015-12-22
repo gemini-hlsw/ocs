@@ -53,9 +53,9 @@ public class CommentViewAdvisor implements IViewAdvisor, PropertyChangeListener 
 		top.setEnabled(false);
 		top.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				GSelection<Schedule> sel = schedule != null ? 
-					new GSelection<Schedule>(schedule) : 
-					GSelection.<Schedule>emptySelection();
+				GSelection<Commentable> sel = schedule != null ?
+					new GSelection<>(schedule) :
+					GSelection.<Commentable>emptySelection();
 				viewer.setSelection(sel);
 			}
 		});

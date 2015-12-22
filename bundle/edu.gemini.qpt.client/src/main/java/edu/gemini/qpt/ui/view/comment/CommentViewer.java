@@ -8,54 +8,54 @@ import edu.gemini.ui.gface.GViewer;
 
 public class CommentViewer extends GViewer<Commentable, Commentable> {
 
-	public static final String PROP_TARGET = "target";
-	
-	public CommentViewer() {
-		super(null, new CommentEditor());
-	}
+    public static final String PROP_TARGET = "target";
 
-	@Override
-	public Commentable getElementAt(Point p) {
-		return null;
-	}
+    public CommentViewer() {
+        super(null, new CommentEditor());
+    }
 
-	@Override
-	protected Runnable getSelectionTask(GSelection<?> newSelection) {
-		Object sel = newSelection.size() == 1 ? newSelection.first() : null;
-		return new SelectionTask(sel instanceof Commentable ? (Commentable) sel : null);
-	}
-	
-	@Override
-	public void refresh() {
-	}
+    @Override
+    public Commentable getElementAt(Point p) {
+        return null;
+    }
 
-	private class SelectionTask implements Runnable {
+    @Override
+    protected Runnable getSelectionTask(GSelection<Commentable> newSelection) {
+        Commentable sel = newSelection.size() == 1 ? newSelection.first() : null;
+        return new SelectionTask(sel != null ? sel : null);
+    }
 
-		private final Commentable target;
+    @Override
+    public void refresh() {
+    }
 
-		public SelectionTask(final Commentable target) {
-			this.target = target;
-		}
+    private class SelectionTask implements Runnable {
 
-		public void run() {
-			Commentable prev = getControl().getTarget();
-			getControl().setTarget(target);
-			pcs.firePropertyChange(PROP_TARGET, prev, getControl().getTarget());
-			pullSelection();
-		}
+        private final Commentable target;
 
-	}
-	
-	@Override
-	public CommentEditor getControl() {
-		return (CommentEditor) super.getControl();
-	}
+        public SelectionTask(final Commentable target) {
+            this.target = target;
+        }
 
-	private void pullSelection() {
-		Commentable c = getControl().getTarget();
-		setPulledSelection(c == null ? GSelection.<Commentable>emptySelection() :
-			new GSelection<Commentable>(c));
-	}
-	
+        public void run() {
+            Commentable prev = getControl().getTarget();
+            getControl().setTarget(target);
+            pcs.firePropertyChange(PROP_TARGET, prev, getControl().getTarget());
+            pullSelection();
+        }
+
+    }
+
+    @Override
+    public CommentEditor getControl() {
+        return (CommentEditor) super.getControl();
+    }
+
+    private void pullSelection() {
+        Commentable c = getControl().getTarget();
+        setPulledSelection(c == null ? GSelection.<Commentable>emptySelection() :
+            new GSelection<>(c));
+    }
+
 
 }
