@@ -8,6 +8,6 @@ import javax.swing.Action;
  */
 public interface BooleanStateAction extends Action {
 
-	String BOOLEAN_STATE = "booleanState";
+    String BOOLEAN_STATE = "booleanState";
 
 }

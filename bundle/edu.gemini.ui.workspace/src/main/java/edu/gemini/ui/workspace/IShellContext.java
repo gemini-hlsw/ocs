@@ -3,15 +3,15 @@ package edu.gemini.ui.workspace;
 
 public interface IShellContext {
 
-	void setTitle(String name);
-	
-	void addView(IViewAdvisor advisor, String id, IViewAdvisor.Relation rel, String other);	
+    void setTitle(String name);
 
-	IActionManager getActionManager();
-	
-	IShell getShell();
-	
-	IWorkspace getWorkspace();
-	
+    void addView(IViewAdvisor advisor, String id, IViewAdvisor.Relation rel, String other);
+
+    IActionManager getActionManager();
+
+    IShell getShell();
+
+    IWorkspace getWorkspace();
+
 }
 

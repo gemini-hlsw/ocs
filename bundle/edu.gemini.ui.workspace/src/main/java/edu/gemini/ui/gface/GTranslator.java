@@ -13,12 +13,12 @@ import java.util.Set;
  */
 public interface GTranslator<M, E> extends GViewerPlugin<M, E> {
 
-	/**
-	 * Returns the translation of o into the viewer's domain, or the empty set if
-	 * no translation is possible.
-	 * @param o
-	 * @return a Set<E>, possibly empty
-	 */
-	Set<E> translate(Object o); // RCN: Set<E>?
-	
+    /**
+     * Returns the translation of o into the viewer's domain, or the empty set if
+     * no translation is possible.
+     * @param o
+     * @return a Set<E>, possibly empty
+     */
+    Set<E> translate(Object o); // RCN: Set<E>?
+
 }

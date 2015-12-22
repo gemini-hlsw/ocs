@@ -18,32 +18,16 @@ import javax.swing.plaf.basic.BasicSplitPaneUI;
 @SuppressWarnings("serial")
 public class CleanSplitPane extends JSplitPane {
     
-	{
+    {
         setBorder(BorderFactory.createEmptyBorder());
-	}
-	
-    public CleanSplitPane() {
-		super();
-	}
+    }
 
-	public CleanSplitPane(int alignment, boolean continuousLayout, Component one, Component two) {
-		super(alignment, continuousLayout, one, two);
-	}
+    public CleanSplitPane(int alignment, Component one, Component two) {
+        super(alignment, one, two);
+    }
 
-	public CleanSplitPane(int alignment, boolean continuousLayout) {
-		super(alignment, continuousLayout);
-	}
-
-	public CleanSplitPane(int alignment, Component one, Component two) {
-		super(alignment, one, two);
-	}
-
-	public CleanSplitPane(int alignment) {
-		super(alignment);
-	}
-
-	@Override
-	public void updateUI() {
+    @Override
+    public void updateUI() {
         super.updateUI();        
         SplitPaneUI ui = getUI();
         if (ui instanceof BasicSplitPaneUI) {

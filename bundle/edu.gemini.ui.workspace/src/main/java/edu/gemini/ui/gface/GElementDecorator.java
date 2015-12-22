@@ -5,6 +5,6 @@ import javax.swing.JLabel;
 
 public interface GElementDecorator<M, E> extends GDecorator<M, E> {
 
-	void decorate(JLabel label, E element);
-	
+    void decorate(JLabel label, E element);
+
 }

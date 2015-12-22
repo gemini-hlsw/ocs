@@ -1,7 +1,6 @@
 package edu.gemini.ui.workspace.scala
 
 import edu.gemini.ui.workspace.IShell
-import java.beans.{PropertyChangeListener, PropertyChangeEvent}
 import java.util.logging.{Level, Logger}
 import javax.swing.SwingUtilities
 import java.io.File
@@ -43,8 +42,8 @@ class RichShell[A](shell:IShell) {
   // Some one-liner predicates
   def isModified = model != pivot
   def isClean = !isModified
-  def canUndo = !undoStack.isEmpty
-  def canRedo = !redoStack.isEmpty
+  def canUndo = undoStack.nonEmpty
+  def canRedo = redoStack.nonEmpty
   def isRolled = wasRolled
 
   // Make a new state current, or clear out everything if the new state is None.
@@ -143,7 +142,7 @@ class RichShell[A](shell:IShell) {
   }
 
   private def roll[A](src:List[A], a:A, dst:List[A]):(List[A], A, List[A]) = {
-    assert(!src.isEmpty)
+    assert(src.nonEmpty)
     (src.tail, src.head, a :: dst)
   }
 

@@ -434,7 +434,7 @@ class TargetEditor private (semester:Semester, target:Target, canEdit:Boolean) e
 
         def selection = Option(getSelection).filter(!_.isEmpty).map(_.first)
         def selection_=(s:Option[EphemerisElement]) {
-          setSelection(s.map(new GSelection(_)).getOrElse(GSelection.emptySelection))
+          setSelection(s.map(new GSelection(_)).getOrElse(GSelection.emptySelection[EphemerisElement]))
         }
 
         def onDoubleClick(f:EphemerisElement => Unit) {
