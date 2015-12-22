@@ -15,18 +15,6 @@ import java.util.List;
  */
 public class DetectorsTransmissionVisitor implements SampledSpectrumVisitor {
 
-    // ======
-    // TODO: This is GMOS specific, in order to support future instruments with different CCD layouts
-    // TODO: we will have to make this more generic.
-    // Full size of GMOS array:
-    public static final double fullArrayPix = 6218.0;
-    // GMOS gap locations:
-    public static final double gap1a = 2048.0;
-    public static final double gap1b = 2086.0;
-    public static final double gap2a = 4133.0;
-    public static final double gap2b = 4171.0;
-    // ======
-
     private final int spectralBinning;
     private final double centralWavelength;
     private final double nmppx;
@@ -119,34 +107,52 @@ public class DetectorsTransmissionVisitor implements SampledSpectrumVisitor {
     // TODO: The code here is GMOS IFU-2 specific. Currently this class is only used for GMOS.
     // TODO: If we add other instruments to ITC with multiple CCDs we will have to revisit this.
 
+    // Full size of GMOS array:
+    public double fullArrayPix() {
+        return (3*2048.0 + 2*37.0)/spectralBinning; // 6218 for spectral binning = 1;
+    }
+    // GMOS gap locations:
+    public double gap1a() {
+        return 2048.0/spectralBinning;                                     // 2048.0 for spectral binning = 1;
+    }
+    public double gap1b() {
+        return gap1a() + 37.0/spectralBinning;                             // 2086.0 for spectral binning = 1;
+    }
+    public double gap2a() {
+        return (2*2048.0 + 37.0)/spectralBinning;                          // 4133.0 for spectral binning = 1;
+    }
+    public double gap2b() {
+        return gap2a() + 37.0/spectralBinning;                             // 4171.0 for spectral binning = 1;
+    }
+
     /** Calculates the shift for the given IFU-2 configuration in nm. */
     public double ifu2shift() {
-        return 0.5 * nmppx * CCDGapCalc.calcIfu2Shift(centralWavelength, rulingDensity);
+        return 0.5 * nmppx * CCDGapCalc.calcIfu2Shift(centralWavelength, rulingDensity) / spectralBinning;
     }
 
     /** The start of the "red" area in wavelength space. */
     public double ifu2RedStart() {
-        return centralWavelength - (nmppx * (fullArrayPix / 2)) - ifu2shift();    // in nm
+        return centralWavelength - (nmppx * (fullArrayPix() / 2)) - ifu2shift();    // in nm
     }
 
     /** The end of the "red" area in wavelength space. */
     public double ifu2RedEnd() {
-        return centralWavelength + (nmppx * (fullArrayPix / 2)) - ifu2shift();    // in nm
+        return centralWavelength + (nmppx * (fullArrayPix() / 2)) - ifu2shift();    // in nm
     }
 
     /** The start of the "blue" area in wavelength space. */
     public double ifu2BlueStart() {
-        return centralWavelength - (nmppx * (fullArrayPix / 2)) + ifu2shift();    // in nm
+        return centralWavelength - (nmppx * (fullArrayPix() / 2)) + ifu2shift();    // in nm
     }
 
     /** The end of the "blue" area in wavelength space. */
     public double ifu2BlueEnd() {
-        return centralWavelength + (nmppx * (fullArrayPix / 2)) + ifu2shift();    // in nm
+        return centralWavelength + (nmppx * (fullArrayPix() / 2)) + ifu2shift();    // in nm
     }
 
     /** Transforms the given nm value from wavelength space to pixel space. */
-    public double toPixelSpace(double data, double shift) {
-        return (fullArrayPix/2)-(data-centralWavelength+shift)/nmppx;
+    private double toPixelSpace(double data, double shift) {
+        return (fullArrayPix()/2)-(data-centralWavelength+shift)/nmppx;
     }
 
     /** Transforms data from wavelength into pixel space and add the CCD gaps.
@@ -166,8 +172,8 @@ public class DetectorsTransmissionVisitor implements SampledSpectrumVisitor {
         // add gaps (pull signal to zero in gaps)
         for (int i = 0; i < array[0].length; i++) {
             final double pixel = array[0][i];
-            if (pixel >= gap1a && pixel <= gap1b) array[1][i] = 0.0;
-            if (pixel >= gap2a && pixel <= gap2b) array[1][i] = 0.0;
+            if (pixel >= gap1a() && pixel <= gap1b()) array[1][i] = 0.0;
+            if (pixel >= gap2a() && pixel <= gap2b()) array[1][i] = 0.0;
         }
 
         return array;
