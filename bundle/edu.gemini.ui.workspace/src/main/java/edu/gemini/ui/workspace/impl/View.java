@@ -6,7 +6,7 @@ import java.beans.PropertyChangeSupport;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.swing.Action;
+import javax.swing.*;
 
 import edu.gemini.ui.gface.GSelectionBroker;
 import edu.gemini.ui.workspace.IShell;
@@ -31,6 +31,13 @@ public class View implements IViewContext {
 
     public View(Shell shell, IViewAdvisor advisor, String id) {
         peer = new SimpleInternalFrame("Untitled");
+        this.advisor = advisor;
+        this.shell = shell;
+        this.id = id;
+    }
+
+    public View(Shell shell, IViewAdvisor advisor, String id, Action helpAction, Icon helpIcon) {
+        peer = new SimpleInternalFrame("Untitled", helpAction, helpIcon);
         this.advisor = advisor;
         this.shell = shell;
         this.id = id;

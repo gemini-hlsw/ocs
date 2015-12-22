@@ -15,9 +15,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
-import javax.swing.WindowConstants;
+import javax.swing.*;
 
 import edu.gemini.ui.gface.GSelection;
 import edu.gemini.ui.gface.GSelectionBroker;
@@ -271,20 +269,16 @@ public class Shell implements IShell, PropertyChangeListener, WindowFocusListene
             view.addPropertyChangeListener(Shell.this);
             advisor.open(view);
 
-// This seems to be wrong.			
-//			try {
-//				SwingUtilities.invokeAndWait(new Runnable() {
-//					public void run() {
-//						advisor.open(view);
-//					}
-//				});
-//			} catch (InterruptedException e) {
-//				Thread.currentThread().interrupt();
-//			} catch (InvocationTargetException ite) {
-//				Throwable t = ite.getCause();
-//				if (t instanceof RuntimeException) throw (RuntimeException) t;
-//				throw new RuntimeException(t);
-//			}
+            viewManager.addView(view, rel, other);
+        }
+
+        public void addView(final IViewAdvisor advisor, String id, Relation rel, String otherId, Action helpAction, Icon helpIcon) {
+            View other = (otherId == null) ? null : viewManager.getView(otherId);
+            final View view = new View(Shell.this, advisor, id, helpAction, helpIcon);
+            views.add(view);
+            view.addPropertyChangeListener(Shell.this);
+            advisor.open(view);
+
             viewManager.addView(view, rel, other);
         }
 
