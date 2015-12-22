@@ -24,7 +24,8 @@
     <blueprints>
         <texes>
             <Texes id="blueprint-0">
-                <name>Texes LM_32_echelle</name>
+                <name>Texes Gemini North LM_32_echelle</name>
+                <site>Gemini North</site>
                 <disperser>32 l/mm echelle</disperser>
                 <visitor>false</visitor>
             </Texes>

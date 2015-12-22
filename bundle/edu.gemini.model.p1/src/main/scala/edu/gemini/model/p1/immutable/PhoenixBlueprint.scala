@@ -6,10 +6,11 @@ object PhoenixBlueprint {
   def apply(m: M.PhoenixBlueprint): PhoenixBlueprint = new PhoenixBlueprint(m)
 }
 
-case class PhoenixBlueprint(fpu: PhoenixFocalPlaneUnit, filter: PhoenixFilter) extends GeminiBlueprintBase {
-  def name: String = s"Phoenix ${fpu.value} ${filter.value}"
+case class PhoenixBlueprint(override val site: Site, fpu: PhoenixFocalPlaneUnit, filter: PhoenixFilter) extends GeminiBlueprintBase {
+  def name: String = s"Phoenix ${site.name} ${fpu.value} ${filter.value}"
 
   def this(m: M.PhoenixBlueprint) = this(
+    Site.fromMutable(m.getSite),
     m.getFpu,
     m.getFilter
   )
@@ -23,6 +24,7 @@ case class PhoenixBlueprint(fpu: PhoenixFocalPlaneUnit, filter: PhoenixFilter) e
     m.setName(name)
     m.setFpu(fpu)
     m.setFilter(filter)
+    m.setSite(Site.toMutable(site))
     m
   }
 

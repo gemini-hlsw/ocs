@@ -25,8 +25,7 @@
         <dssi>
             <Dssi id="blueprint-0">
                 <name>Dssi</name>
-                <site>Gemini North</site>
-                <visitor>false</visitor>
+                <visitor>true</visitor>
             </Dssi>
         </dssi>
     </blueprints>

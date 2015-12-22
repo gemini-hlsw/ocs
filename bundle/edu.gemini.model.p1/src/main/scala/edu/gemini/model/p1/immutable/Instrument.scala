@@ -13,7 +13,7 @@ object Instrument {
   case object Michelle   extends Instrument(GN, "Michelle", "Michelle", "michelle")
   case object Nifs       extends Instrument(GN, "NIFS")
   case object Niri       extends Instrument(GN, "NIRI")
-  case object Dssi       extends Instrument(GN, "DSSI", "DSSI North", "DSSI")
+  case object Dssi       extends Instrument(GN, "DSSI", "DSSI", "DSSI")
   case object Texes      extends Instrument(GN, "Texes", "Texes", "TEXES")
 
   case object Flamingos2 extends Instrument(GS, "Flamingos2", "Flamingos2", "FLAMINGOS")

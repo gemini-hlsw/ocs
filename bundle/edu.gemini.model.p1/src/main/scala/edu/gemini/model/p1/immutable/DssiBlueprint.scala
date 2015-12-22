@@ -3,14 +3,14 @@ package edu.gemini.model.p1.immutable
 import edu.gemini.model.p1.{mutable => M}
 
 object DssiBlueprint {
-  def apply(m: M.DssiBlueprint): DssiBlueprint = new DssiBlueprint()
+  def apply(m: M.DssiBlueprint): DssiBlueprint = new DssiBlueprint(Site.fromMutable(m.getSite))
 }
 
-case class DssiBlueprint() extends GeminiBlueprintBase {
-  def name: String = "DSSI"
+case class DssiBlueprint(override val site: Site) extends GeminiBlueprintBase {
+  def name: String = s"DSSI ${site.name}"
   override val visitor = true
 
-  def this(m: M.DssiBlueprint) = this()
+  def this(m: M.DssiBlueprint) = this(Site.GN)
 
   override def instrument: Instrument = Instrument.Dssi
 
@@ -19,6 +19,7 @@ case class DssiBlueprint() extends GeminiBlueprintBase {
     m.setId(n.nameOf(this))
     m.setName(name)
     m.setVisitor(visitor)
+    m.setSite(Site.toMutable(site))
     m
   }
 

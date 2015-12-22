@@ -12,20 +12,20 @@ class PhoenixBlueprintSpec extends SpecificationWithJUnit with SemesterPropertie
   "The Phoenix Blueprint" should {
     "has an FPU and a filter" in {
       // trivial sanity tests
-      val blueprint = PhoenixBlueprint(M.PhoenixFocalPlaneUnit.MASK_1, M.PhoenixFilter.H6073)
+      val blueprint = PhoenixBlueprint(Site.GS, M.PhoenixFocalPlaneUnit.MASK_1, M.PhoenixFilter.H6073)
       blueprint.fpu must beEqualTo(M.PhoenixFocalPlaneUnit.MASK_1)
       blueprint.filter must beEqualTo(M.PhoenixFilter.H6073)
     }
     "never uses Lgs" in {
-      val blueprint = PhoenixBlueprint(M.PhoenixFocalPlaneUnit.MASK_1, M.PhoenixFilter.H6073)
+      val blueprint = PhoenixBlueprint(Site.GS, M.PhoenixFocalPlaneUnit.MASK_1, M.PhoenixFilter.H6073)
       blueprint.ao must beEqualTo(AoNone)
     }
     "has an appropriate public name" in {
-      val blueprint = PhoenixBlueprint(M.PhoenixFocalPlaneUnit.MASK_1, M.PhoenixFilter.H6073)
-      blueprint.name must beEqualTo("Phoenix 0.17 arcsec slit H6073")
+      val blueprint = PhoenixBlueprint(Site.GS, M.PhoenixFocalPlaneUnit.MASK_1, M.PhoenixFilter.H6073)
+      blueprint.name must beEqualTo("Phoenix Gemini South 0.17 arcsec slit H6073")
     }
     "is not a visitor" in {
-      val blueprint = PhoenixBlueprint(M.PhoenixFocalPlaneUnit.MASK_1, M.PhoenixFilter.H6073)
+      val blueprint = PhoenixBlueprint(Site.GS, M.PhoenixFocalPlaneUnit.MASK_1, M.PhoenixFilter.H6073)
       blueprint.visitor must beFalse
       val observation = Observation(Some(blueprint), None, None, Band.BAND_1_2, None)
 
@@ -36,7 +36,7 @@ class PhoenixBlueprintSpec extends SpecificationWithJUnit with SemesterPropertie
       xml must \\("Phoenix") \ "visitor" \> "false"
     }
     "export fpu and filter to XML" in {
-      val blueprint = PhoenixBlueprint(M.PhoenixFocalPlaneUnit.MASK_1, M.PhoenixFilter.H6073)
+      val blueprint = PhoenixBlueprint(Site.GS, M.PhoenixFocalPlaneUnit.MASK_1, M.PhoenixFilter.H6073)
       val observation = Observation(Some(blueprint), None, None, Band.BAND_1_2, None)
 
       val proposal = Proposal.empty.copy(observations = observation :: Nil)
@@ -50,7 +50,7 @@ class PhoenixBlueprintSpec extends SpecificationWithJUnit with SemesterPropertie
       val proposal = ProposalIo.read(new InputStreamReader(getClass.getResourceAsStream("proposal_with_phoenix.xml")))
 
       proposal.blueprints.head.visitor must beFalse
-      proposal.blueprints must beEqualTo(PhoenixBlueprint(M.PhoenixFocalPlaneUnit.MASK_1, M.PhoenixFilter.H6073) :: Nil)
+      proposal.blueprints must beEqualTo(PhoenixBlueprint(Site.GS, M.PhoenixFocalPlaneUnit.MASK_1, M.PhoenixFilter.H6073) :: Nil)
     }
   }
 

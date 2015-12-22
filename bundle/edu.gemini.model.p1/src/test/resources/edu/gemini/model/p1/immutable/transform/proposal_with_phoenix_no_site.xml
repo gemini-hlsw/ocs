@@ -1,7 +1,6 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<proposal schemaVersion="2013.2.1">
+<proposal schemaVersion="2016.1.1">
     <meta band3optionChosen="false"/>
-    <semester year="2013" half="B"/>
+    <semester half="A" year="2016"/>
     <title/>
     <abstract/>
     <scheduling/>
@@ -22,16 +21,17 @@
     <targets/>
     <conditions/>
     <blueprints>
-        <dssi>
-            <Dssi id="blueprint-0">
-                <name>Dssi</name>
-                <site>Gemini North</site>
+        <phoenix>
+            <Phoenix id="blueprint-0">
+                <name>Phoenix 0.17 arcsec slit H6073</name>
                 <visitor>false</visitor>
-            </Dssi>
-        </dssi>
+                <fpu>0.17 arcsec slit</fpu>
+                <filter>H6073</filter>
+            </Phoenix>
+        </phoenix>
     </blueprints>
     <observations>
-        <observation band="Band 1/2" enabled="true" blueprint="blueprint-0"/>
+        <observation blueprint="blueprint-0" enabled="true" band="Band 1/2"/>
     </observations>
     <proposalClass>
         <queue tooOption="None"/>

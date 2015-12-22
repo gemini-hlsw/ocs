@@ -22,13 +22,12 @@
     <targets/>
     <conditions/>
     <blueprints>
-        <dssi>
-            <Dssi id="blueprint-0">
-                <name>Dssi</name>
-                <site>Gemini North</site>
-                <visitor>false</visitor>
-            </Dssi>
-        </dssi>
+        <texes>
+            <Texes id="blueprint-0">
+                <name>Texes LM_32_echelle</name>
+                <disperser>32 l/mm echelle</disperser>
+            </Texes>
+        </texes>
     </blueprints>
     <observations>
         <observation band="Band 1/2" enabled="true" blueprint="blueprint-0"/>

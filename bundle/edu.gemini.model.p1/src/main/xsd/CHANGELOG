@@ -3,6 +3,14 @@ Gemini Phase I Schema Changes
 # Version 2016.1.1 - 2016A
 ##########################
 
+* Rename Flamingos-2 K-long from 'K-long (2.20 um)' to 'K-long (2.00um)'
+* Add site to DSSI
+* Add site to Phoenix
+* Add site to Texes
+
+# Version 2016.1.1 - 2016A
+##########################
+
 * Offer Flamingos-2 K-long filter
 * Added keyword 'Star formation'
 * Offer Phoenix instrument
