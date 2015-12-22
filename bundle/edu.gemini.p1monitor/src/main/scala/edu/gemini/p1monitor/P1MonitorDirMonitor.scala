@@ -58,7 +58,7 @@ class P1MonitorDirMonitor(cfg: P1MonitorConfig) extends DirListener {
     def copyAndProcessFile(xml: File):Iterable[ProposalFileGroup] =
       cfg.translations.collect {
         case (s:String, d:String) if xml.getName.startsWith(s) => (s, d)
-      }.map {t =>
+      }.flatMap {t =>
         val pdfName = xml.getName.replaceAll(".xml", ".pdf")
         val pdfOpt = evt.newFiles.find(_.getName.equalsIgnoreCase(pdfName))
         val replacedName = new File(xml.getParentFile.getAbsolutePath, xml.getName.replaceAll(t._1, t._2))
@@ -90,9 +90,8 @@ class P1MonitorDirMonitor(cfg: P1MonitorConfig) extends DirListener {
         pdfOpt.foreach {
           f => f.renameTo(new File(originalsDir, f.getName))
         }
-
         fg
-      }.flatten
+      }
 
     //For every XML file, try to get the matching PDF and create the PDF summary, if something fails, just continue
     //with just the XML

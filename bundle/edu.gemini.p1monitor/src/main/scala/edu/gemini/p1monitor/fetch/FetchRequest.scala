@@ -2,7 +2,6 @@ package edu.gemini.p1monitor.fetch
 
 import javax.servlet.http.HttpServletRequest
 import edu.gemini.model.p1.immutable.SpecialProposalType
-import edu.gemini.p1monitor.P1Monitor._
 
 /**
  * A servlet request wrapper that makes it convenient to obtain the request

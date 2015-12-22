@@ -56,12 +56,9 @@ class DirScanner(dir: MonitoredDirectory) {
         LOG.warning("Cannot create directory %s".format(dir.dir))
       } else {
         LOG.info("Setting permissions and ownership of %s".format(dir.dir))
-        Some(dir.dir).
-          map(d => executeAction(Seq("chmod", "ag+rw", d.getAbsolutePath), "Cannot set proper permissions on %s".format(dir.dir)))
-        dir.username.
-          map(u => executeAction(Seq("chown", u, dir.dir.getAbsolutePath), "Failed to set user %s to dir %s".format(dir.username.get, dir.dir.getAbsolutePath)))
-        dir.group.
-          map(g => executeAction(Seq("chgrp", g, dir.dir.getAbsolutePath), "Failed to set user %s to dir %s".format(dir.group.get, dir.dir.getAbsolutePath)))
+        Some(dir.dir).foreach(d => executeAction(Seq("chmod", "ag+rw", d.getAbsolutePath), "Cannot set proper permissions on %s".format(dir.dir)))
+        dir.username.foreach(u => executeAction(Seq("chown", u, dir.dir.getAbsolutePath), "Failed to set user %s to dir %s".format(dir.username.get, dir.dir.getAbsolutePath)))
+        dir.group.foreach(g => executeAction(Seq("chgrp", g, dir.dir.getAbsolutePath), "Failed to set user %s to dir %s".format(dir.group.get, dir.dir.getAbsolutePath)))
       }
     }
   }
@@ -71,18 +68,17 @@ class DirScanner(dir: MonitoredDirectory) {
     var deletedFiles: List[File] = Nil
     var newFiles: List[File] = Nil
 
-    dir.dir.listFiles() foreach {
+    dir.dir.listFiles().foreach {
       file => {
         files.get(file.getName) foreach {
           //if file is updated more recently than info we had, add to updatedFiles
-          case f: FileRecord if f.lastUpdated < file.lastModified() => {
+          case f: FileRecord if f.lastUpdated < file.lastModified() =>
             files += ((file.getName, new FileRecord(file, file.lastModified()))) //update our copy
             updatedFiles = updatedFiles :+ file
-          }
           case _ =>
         }
         //if file wasn't stored, add it to newFiled
-        if (!files.get(file.getName).isDefined) {
+        if (files.get(file.getName).isEmpty) {
           files += ((file.getName, new FileRecord(file, file.lastModified()))) //update our copy
           newFiles = newFiles :+ file
         }
@@ -92,12 +88,12 @@ class DirScanner(dir: MonitoredDirectory) {
       f => f.getName
     })
     //if file is stored, but not on new list, add it to deletedFiles
-    if (!removed.isEmpty) {
+    if (removed.nonEmpty) {
       deletedFiles = removed.map {
         fileName => files.remove(fileName).get.file //remove file and add to deleted
       }.toList
     }
-    if (!newFiles.isEmpty || !updatedFiles.isEmpty || !deletedFiles.isEmpty) {
+    if (newFiles.nonEmpty || updatedFiles.nonEmpty || deletedFiles.nonEmpty) {
       listener.dirChanged(new DirEvent(dir, newFiles, deletedFiles, updatedFiles))
     }
     LOG.fine("Dir scan produced: newFiles: %s, updatedFiles: %s, deletedFiles: %s".format(newFiles.toString(), updatedFiles.toString(), deletedFiles.toString()))

@@ -2,7 +2,6 @@ package edu.gemini.p1monitor.fetch
 
 import edu.gemini.p1monitor.config.MonitoredDirectory
 import edu.gemini.p1monitor.config.P1MonitorConfig
-import edu.gemini.p1monitor.P1Monitor._
 import javax.servlet.ServletException
 import javax.servlet.http.HttpServlet
 import javax.servlet.http.HttpServletRequest
