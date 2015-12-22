@@ -6,7 +6,6 @@ import scala.swing.ScrollPane
 import javax.swing.{BorderFactory, SwingConstants, JLabel, Icon}
 import java.awt.Color
 import edu.gemini.ui.gface._
-import scala.collection.JavaConverters._
 import edu.gemini.pit.ui.binding._
 
 // TODO: factor out commonality with SimpleListViewer
@@ -27,7 +26,7 @@ abstract class MultiSelectSimpleListViewer[A, B, C <: Object](implicit ev: Null 
   // Viewer Delegates
   def selection = viewer.selection
   def selection_=(cs: List[C]) {
-    val gs = new GSelection(cs.asJava.toArray: _*)
+    val gs = new GSelection[C](cs: _*)
     viewer.setSelection(gs)
   }
 
@@ -65,7 +64,7 @@ abstract class MultiSelectSimpleListViewer[A, B, C <: Object](implicit ev: Null 
   def elementAt(b: B, i: Int): C
 
   override lazy val peer = {
-    val p = Factory.createStrippedScrollPane(viewer.getTable);
+    val p = Factory.createStrippedScrollPane(viewer.getTable)
     ScrollPanes.setViewportWidth(p)
     ScrollPanes.setViewportHeight(p, 5)
     p

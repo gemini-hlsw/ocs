@@ -9,34 +9,34 @@ import edu.gemini.ui.gface.GViewer;
 
 public class HistoViewer extends GViewer<Schedule, Variant> {
 
-	public HistoViewer() {
-		super(new HistoController(), new HistoPanel());
-	}
+    public HistoViewer() {
+        super(new HistoController(), new HistoPanel());
+    }
 
-	@Override
-	public Variant getElementAt(Point p) {
-		return null;
-	}
+    @Override
+    public Variant getElementAt(Point p) {
+        return null;
+    }
 
-	@Override
-	protected Runnable getSelectionTask(GSelection<?> newSelection) {
-		return null;
-	}
+    @Override
+    protected Runnable getSelectionTask(GSelection<Variant> newSelection) {
+        return null;
+    }
 
-	@Override
-	public void refresh() {
-		getControl().setVariant(getController().getVariant());
-		getControl().repaint();
-	}
+    @Override
+    public void refresh() {
+        getControl().setVariant(getController().getVariant());
+        getControl().repaint();
+    }
 
-	@Override
-	public HistoController getController() {
-		return (HistoController) super.getController();
-	}
-	
-	@Override
-	public HistoPanel getControl() {
-		return (HistoPanel) super.getControl();
-	}
-	
+    @Override
+    public HistoController getController() {
+        return (HistoController) super.getController();
+    }
+
+    @Override
+    public HistoPanel getControl() {
+        return (HistoPanel) super.getControl();
+    }
+
 }

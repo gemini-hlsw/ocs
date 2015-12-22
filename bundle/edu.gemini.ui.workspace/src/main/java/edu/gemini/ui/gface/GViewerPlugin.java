@@ -7,7 +7,5 @@ package edu.gemini.ui.gface;
  * @param <E> element type
  */
 public interface GViewerPlugin<M, E> {
-
-	void modelChanged(GViewer<M, E> viewer, M oldModel, M newModel);
-
+    void modelChanged(GViewer<M, E> viewer, M oldModel, M newModel);
 }

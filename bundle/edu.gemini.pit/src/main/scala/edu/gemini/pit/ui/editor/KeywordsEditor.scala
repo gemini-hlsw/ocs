@@ -17,7 +17,7 @@ import edu.gemini.ui.gface._
 import swing.JScrollPane
 
 object KeywordsEditor {
-  def selectKeywords(kws: List[Keyword], editable:Boolean, parent: UIElement) = (new KeywordsEditor(kws, editable)).open(parent)
+  def selectKeywords(kws: List[Keyword], editable:Boolean, parent: UIElement) = new KeywordsEditor(kws, editable).open(parent)
 }
 
 class KeywordsEditor(selection: List[Keyword], editable:Boolean) extends StdModalEditor[List[Keyword]]("Select Keywords") {dialog =>
@@ -47,7 +47,7 @@ class KeywordsEditor(selection: List[Keyword], editable:Boolean) extends StdModa
   def value = Viewer.getModel
 
   object Viewer extends GListViewer[List[Keyword], Keyword](new KeywordController, ElementFactory.createList()) {
-    getList.setBorder(swing.BorderFactory.createEmptyBorder(0, 3, 0, 0));
+    getList.setBorder(swing.BorderFactory.createEmptyBorder(0, 3, 0, 0))
     getList.addMouseListener(Listener)
     getList.setVisibleRowCount(20) // essential; scroll bar doesn't work otherwise
     getList.setFocusable(false)
@@ -101,8 +101,8 @@ class KeywordsEditor(selection: List[Keyword], editable:Boolean) extends StdModa
     def decorate(label: swing.JLabel, k: Keyword) {
       label.setText(k.value)
       model foreach {
-        case m if (m.contains(k)) => label.setIcon(SharedIcons.CHECK_SELECTED)
-        case m =>                    label.setIcon(SharedIcons.CHECK_UNSELECTED)
+        case m if m.contains(k) => label.setIcon(SharedIcons.CHECK_SELECTED)
+        case m                  => label.setIcon(SharedIcons.CHECK_UNSELECTED)
       }
       // REL-636
       // For some reason the label text color changes to white when selected on Windows

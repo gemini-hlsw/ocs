@@ -7,11 +7,9 @@ package edu.gemini.ui.gface;
  * @param <E> element type
  */
 public interface GListController<M, E> extends GViewerPlugin<M, E> {
+    int getElementCount();
 
-	int getElementCount();
-	
-	E getElementAt(int row);
-		
+    E getElementAt(int row);
 }
 
 

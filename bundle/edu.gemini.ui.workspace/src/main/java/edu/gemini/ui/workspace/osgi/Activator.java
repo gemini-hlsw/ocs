@@ -8,7 +8,6 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
-import edu.gemini.ui.workspace.IShell;
 import edu.gemini.ui.workspace.IShellAdvisor;
 import edu.gemini.ui.workspace.impl.Shell;
 import edu.gemini.ui.workspace.impl.Workspace;

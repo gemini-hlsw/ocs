@@ -10,10 +10,10 @@ package edu.gemini.ui.gface;
  */
 public interface GSelectionInterloper<M, E> extends GViewerPlugin<M, E> {
 
-	/**
-	 * Called post-translation, before the selection task executes.
-	 * @param newSelection
-	 */
-	void beforeSetSelection(GSelection<?> newSelection);
+    /**
+     * Called post-translation, before the selection task executes.
+     * @param newSelection
+     */
+    void beforeSetSelection(GSelection<?> newSelection);
 
 }

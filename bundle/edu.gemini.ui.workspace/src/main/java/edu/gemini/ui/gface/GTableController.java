@@ -9,6 +9,6 @@ package edu.gemini.ui.gface;
  */
 public interface GTableController<M, E, S> extends GListController<M, E> {
 
-	Object getSubElement(E element, S subElement);
-	
+    Object getSubElement(E element, S subElement);
+
 }

@@ -105,6 +105,7 @@ public interface SharedIcons {
     Icon ICON_INFO = new SharedIcon("info_tsk.gif");
     Icon ICON_WARN = new SharedIcon("warn_tsk.gif");
     Icon ICON_TEMPLATES = new SharedIcon("download_templates.gif");
+    Icon ICON_HELP = new SharedIcon("help.gif");
 
     Icon PROGRAM_CLOSED = new SharedIcon("cprj_obj.gif");
     Icon PROGRAM_OPEN = new SharedIcon("prj_obj.gif");
