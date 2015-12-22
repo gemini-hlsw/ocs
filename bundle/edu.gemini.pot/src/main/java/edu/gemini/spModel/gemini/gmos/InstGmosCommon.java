@@ -142,7 +142,7 @@ public abstract class InstGmosCommon<
     public static final PropertyDescriptor CUSTOM_SLIT_WIDTH;
     public static final PropertyDescriptor POS_ANGLE_CONSTRAINT_PROP;
 
-    private static final Map<String, PropertyDescriptor> PRIVATE_PROP_MAP = new TreeMap<String, PropertyDescriptor>();
+    private static final Map<String, PropertyDescriptor> PRIVATE_PROP_MAP = new TreeMap<>();
     protected static final Map<String, PropertyDescriptor> PROTECTED_PROP_MAP = Collections.unmodifiableMap(PRIVATE_PROP_MAP);
 
     private static PropertyDescriptor initProp(String propName, boolean query, boolean iter) {
@@ -343,7 +343,7 @@ public abstract class InstGmosCommon<
     }
 
     // Gain setting.
-    public static final ConfigInjector GAIN_SETTING_INJECTOR = ConfigInjector.create(
+    public static final ConfigInjector<String> GAIN_SETTING_INJECTOR = ConfigInjector.create(
             new ConfigInjectorCalc3<GmosCommonType.AmpGain, GmosCommonType.AmpReadMode, GmosCommonType.DetectorManufacturer, String>() {
 
                 public PropertyDescriptor descriptor1() {
@@ -390,12 +390,12 @@ public abstract class InstGmosCommon<
      * Implementation of the clone method.
      */
     public Object clone() {
-        InstGmosCommon result = (InstGmosCommon) super.clone();
+        InstGmosCommon<?, ?, ?, ?> result = (InstGmosCommon<?, ?, ?, ?>) super.clone();
 
         if (result._posList != null) {
             //noinspection unchecked
             result._posList = (OffsetPosList<OffsetPos>) result._posList.clone();
-            result._posList.addWatcher(new OffsetPosListChangePropagator<OffsetPos>(result.new PceNotifier(), result._posList));
+            result._posList.addWatcher(new OffsetPosListChangePropagator<>(result.new PceNotifier(), result._posList));
         }
         return result;
     }
@@ -412,13 +412,12 @@ public abstract class InstGmosCommon<
         in.defaultReadObject();
 
         if (_fpuMode == GmosCommonType.FPUnitMode.CUSTOM_MASK) {
-            GmosCommonType.FPUnitBridge bridge = getFPUnitBridge();
-            //noinspection unchecked
-            _fpu = (P) bridge.getCustomMask();
+            GmosCommonType.FPUnitBridge<P> bridge = getFPUnitBridge();
+            _fpu = bridge.getCustomMask();
         }
 
         if (_posList != null) {
-            _posList.addWatcher(new OffsetPosListChangePropagator<OffsetPos>(new PceNotifier(), _posList));
+            _posList.addWatcher(new OffsetPosListChangePropagator<>(new PceNotifier(), _posList));
         }
     }
 
@@ -640,13 +639,13 @@ public abstract class InstGmosCommon<
     }
 
     //    protected abstract D getDisperserFromString(String name, D defaultValue);
-    protected abstract GmosCommonType.DisperserBridge getDisperserBridge();
+    protected abstract GmosCommonType.DisperserBridge<D> getDisperserBridge();
 
     private void _setDisperser(String name) {
         D oldValue = getDisperser();
-        GmosCommonType.DisperserBridge bridge = getDisperserBridge();
+        GmosCommonType.DisperserBridge<D> bridge = getDisperserBridge();
         //noinspection unchecked
-        D newValue = (D) bridge.parse(name, oldValue);
+        D newValue = bridge.parse(name, oldValue);
         setDisperser(newValue);
     }
 
@@ -678,16 +677,16 @@ public abstract class InstGmosCommon<
         }
     }
 
-    protected abstract GmosCommonType.FPUnitBridge getFPUnitBridge();
+    protected abstract GmosCommonType.FPUnitBridge<P> getFPUnitBridge();
 
     /**
      * Get the FPUnit.
      */
     public P getFPUnit() {
         if (_fpu == null) {
-            GmosCommonType.FPUnitBridge bridge = getFPUnitBridge();
+            GmosCommonType.FPUnitBridge<P> bridge = getFPUnitBridge();
             //noinspection unchecked
-            _fpu = (P) bridge.getDefaultValue();
+            _fpu = bridge.getDefaultValue();
         }
         return _fpu;
     }
@@ -702,9 +701,9 @@ public abstract class InstGmosCommon<
             firePropertyChange(FPU_PROP_NAME, oldValue, newValue);
         }
 
-        GmosCommonType.FPUnitBridge bridge = getFPUnitBridge();
+        GmosCommonType.FPUnitBridge<P> bridge = getFPUnitBridge();
         //noinspection unchecked
-        P customMaskFPU = (P) bridge.getCustomMask();
+        P customMaskFPU = bridge.getCustomMask();
         GmosCommonType.FPUnitMode customMaskMode = GmosCommonType.FPUnitMode.CUSTOM_MASK;
         if (_fpu == customMaskFPU && _fpuMode != customMaskMode) {
             setFPUnitMode(customMaskMode);
@@ -716,9 +715,9 @@ public abstract class InstGmosCommon<
     protected void _setFPUnit(String name) {
         P oldValue = getFPUnit();
 
-        GmosCommonType.FPUnitBridge bridge = getFPUnitBridge();
+        GmosCommonType.FPUnitBridge<P> bridge = getFPUnitBridge();
         //noinspection unchecked
-        P newValue = (P) bridge.parse(name, oldValue);
+        P newValue = bridge.parse(name, oldValue);
 
         setFPUnit(newValue);
     }
@@ -741,15 +740,15 @@ public abstract class InstGmosCommon<
         }
 
 
-        GmosCommonType.FPUnitBridge bridge = getFPUnitBridge();
+        GmosCommonType.FPUnitBridge<P> bridge = getFPUnitBridge();
         //noinspection unchecked
-        P customMaskFPU = (P) bridge.getCustomMask();
+        P customMaskFPU = bridge.getCustomMask();
         GmosCommonType.FPUnitMode customMaskMode = GmosCommonType.FPUnitMode.CUSTOM_MASK;
         if (_fpuMode == customMaskMode && _fpu != customMaskFPU) {
             setFPUnit(customMaskFPU);
         } else if (_fpuMode == GmosCommonType.FPUnitMode.BUILTIN && _fpu == customMaskFPU) {
             //noinspection unchecked
-            setFPUnit((P) bridge.getNone());
+            setFPUnit(bridge.getNone());
         }
     }
 
@@ -793,14 +792,9 @@ public abstract class InstGmosCommon<
      */
     @Override
     public Option<Angle> calculateParallacticAngle(ISPObservation obs) {
-        return super.calculateParallacticAngle(obs).map(new Function1<Angle, Angle>() {
-            @Override
-            public Angle apply(Angle angle) {
-                return _fpu.isWideSlit() ?
-                        angle.add(Angle.ANGLE_PI_OVER_2).toPositive() :
-                        angle;
-            }
-        });
+        return super.calculateParallacticAngle(obs).map(angle -> _fpu.isWideSlit() ?
+                angle.add(Angle.ANGLE_PI_OVER_2).toPositive() :
+                angle);
     }
 
     /**
@@ -857,16 +851,16 @@ public abstract class InstGmosCommon<
         }
     }
 
-    protected abstract GmosCommonType.FilterBridge getFilterBridge();
+    protected abstract GmosCommonType.FilterBridge<F> getFilterBridge();
 
     /**
      * Set the filter.
      */
     protected void _setFilter(String name) {
         F oldValue = getFilter();
-        GmosCommonType.FilterBridge bridge = getFilterBridge();
+        GmosCommonType.FilterBridge<F> bridge = getFilterBridge();
         //noinspection unchecked
-        F newValue = (F) bridge.parse(name, oldValue);
+        F newValue = bridge.parse(name, oldValue);
         setFilter(newValue);
     }
 
@@ -946,7 +940,7 @@ public abstract class InstGmosCommon<
         setIssPort(IssPort.getPort(name, oldValue));
     }
 
-    protected abstract GmosCommonType.StageModeBridge getStageModeBridge();
+    protected abstract GmosCommonType.StageModeBridge<SM> getStageModeBridge();
 
     /**
      * Set the mode for the translation stage use.
@@ -980,9 +974,9 @@ public abstract class InstGmosCommon<
      */
     private void _setStageMode(String name) {
         SM oldValue = getStageMode();
-        GmosCommonType.StageModeBridge bridge = getStageModeBridge();
+        GmosCommonType.StageModeBridge<SM> bridge = getStageModeBridge();
         //noinspection unchecked
-        SM newValue = (SM) bridge.parse(name, oldValue);
+        SM newValue = bridge.parse(name, oldValue);
         setStageMode(newValue);
     }
 
@@ -1169,9 +1163,9 @@ public abstract class InstGmosCommon<
      */
     public OffsetPosList<OffsetPos> getPosList() {
         if (_posList == null) {
-            _posList = new OffsetPosList<OffsetPos>(OffsetPos.FACTORY);
+            _posList = new OffsetPosList<>(OffsetPos.FACTORY);
             _posList.setAdvancedGuiding(Collections.singleton(getGuideProbe()));
-            _posList.addWatcher(new OffsetPosListChangePropagator<OffsetPos>(new PceNotifier()));
+            _posList.addWatcher(new OffsetPosListChangePropagator<>(new PceNotifier()));
         }
         return _posList;
     }
@@ -1274,12 +1268,12 @@ public abstract class InstGmosCommon<
     }});
 
     public static boolean isNodAndShuffleableObsType(String obsType) {
-        return (obsType == null) ? false : NOD_AND_SHUFFLE_OBS_TYPES.contains(obsType);
+        return obsType != null && NOD_AND_SHUFFLE_OBS_TYPES.contains(obsType);
     }
 
     public static boolean isNodAndShuffleableObsType(Config c) {
         Object obj = c.getItemValue(CalDictionary.OBS_TYPE_ITEM.key);
-        return (obj == null) ? false : isNodAndShuffleableObsType(obj.toString());
+        return obj != null && isNodAndShuffleableObsType(obj.toString());
     }
 
     // REL-1678 (REL-1385)
@@ -1658,7 +1652,7 @@ public abstract class InstGmosCommon<
      * queryable configuration parameters.
      */
     protected static List<InstConfigInfo> getCommonInstConfigInfo() {
-        List<InstConfigInfo> configInfo = new LinkedList<InstConfigInfo>();
+        List<InstConfigInfo> configInfo = new LinkedList<>();
 
         configInfo.add(new InstConfigInfo(DISPERSER_LAMBDA_PROP, false));
         configInfo.add(new InstConfigInfo(CCD_X_BIN_PROP));
@@ -1784,7 +1778,7 @@ public abstract class InstGmosCommon<
      * The default should be for no electronic offsets.
      * @return a string explaining why electronic offsets are not allowed, or null if they are allowed
      */
-    public static UseElectronicOffsettingRuling checkUseElectronicOffsetting(InstGmosCommon inst, OffsetPosList<OffsetPos> p) {
+    public static UseElectronicOffsettingRuling checkUseElectronicOffsetting(InstGmosCommon<?, ?, ?, ?> inst, OffsetPosList<OffsetPos> p) {
         int size = p.size();
         if (size == 0) {
             return UseElectronicOffsettingRuling.deny("There are no offset positions defined.");
@@ -1891,7 +1885,7 @@ public abstract class InstGmosCommon<
     public void restoreScienceDetails(final SPInstObsComp oldData) {
         super.restoreScienceDetails(oldData);
         if (oldData instanceof InstGmosCommon) {
-            final InstGmosCommon oldGmos = (InstGmosCommon)oldData;
+            final InstGmosCommon<?, ?, ?, ?> oldGmos = (InstGmosCommon<?, ?, ?, ?>)oldData;
             setFPUnitCustomMask(oldGmos.getFPUnitCustomMask());
         }
     }

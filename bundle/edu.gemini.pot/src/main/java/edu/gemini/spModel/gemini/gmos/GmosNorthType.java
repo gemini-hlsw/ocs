@@ -2,9 +2,6 @@ package edu.gemini.spModel.gemini.gmos;
 
 import edu.gemini.spModel.type.*;
 
-/**
- *
- */
 public class GmosNorthType {
 
     private GmosNorthType() {
@@ -14,7 +11,7 @@ public class GmosNorthType {
     /**
      * Translation Stage options.
      */
-    public static enum StageModeNorth implements GmosCommonType.StageMode {
+    public enum StageModeNorth implements GmosCommonType.StageMode {
         NO_FOLLOW("Do Not Follow"),
         FOLLOW_XYZ("Follow in XYZ(focus)") { public boolean isObsolete() { return true;}},
         FOLLOW_XY("Follow in XY"),
@@ -25,7 +22,7 @@ public class GmosNorthType {
 
         private String _displayValue;
 
-        private StageModeNorth(String displayValue) {
+        StageModeNorth(String displayValue) {
             _displayValue = displayValue;
         }
 
@@ -153,7 +150,7 @@ public class GmosNorthType {
         }
     };
 
-    public static enum FilterNorth implements GmosCommonType.Filter, ObsoletableSpType {
+    public enum FilterNorth implements GmosCommonType.Filter, ObsoletableSpType {
         NONE("None", "none", "none"),
         g_G0301("g_G0301", "g", "0.475"),
         r_G0303("r_G0303", "r", "0.630"),
@@ -193,15 +190,13 @@ public class GmosNorthType {
 //        OIII_G0338 = new GMOSParams.UserFilter("OIII_G0338", "OIII", "0.499");
 //        OIIIC_G0339 = new GMOSParams.UserFilter("OIIIC_G0339", "OIIIC", "0.514");
 
-
-
         public static final FilterNorth DEFAULT = NONE;
 
         private String _displayValue;
         private String _logValue;
         private String _wavelength;
 
-        private FilterNorth(String displayValue, String logValue, String wavelength) {
+        FilterNorth(String displayValue, String logValue, String wavelength) {
             _displayValue = displayValue;
             _logValue     = logValue;
             _wavelength   = wavelength;
@@ -268,7 +263,7 @@ public class GmosNorthType {
     /**
      * Focal Plan Unit support.
      */
-    public static enum FPUnitNorth implements GmosCommonType.FPUnit {
+    public enum FPUnitNorth implements GmosCommonType.FPUnit {
         FPU_NONE("None", "none"),
         LONGSLIT_1("Longslit 0.25 arcsec", 0.25, "0.25arcsec"),
         LONGSLIT_2("Longslit 0.50 arcsec", 0.50, "0.5arcsec"),
@@ -304,12 +299,12 @@ public class GmosNorthType {
 
 
         // initialize with the name and slit width in arcsec
-        private FPUnitNorth(String displayValue, String logValue) {
+        FPUnitNorth(String displayValue, String logValue) {
             this(displayValue, -1, logValue);
         }
 
         // initialize with the name and slit width in arcsec
-        private FPUnitNorth(String displayValue, double width, String logValue) {
+        FPUnitNorth(String displayValue, double width, String logValue) {
             _displayValue = displayValue;
             _width = width;
             _logValue = logValue;
@@ -433,7 +428,7 @@ public class GmosNorthType {
 
     }
 
-    public static GmosCommonType.FPUnitBridge FPUNIT_BRIDGE = new GmosCommonType.FPUnitBridge<FPUnitNorth>() {
+    public static GmosCommonType.FPUnitBridge<FPUnitNorth> FPUNIT_BRIDGE = new GmosCommonType.FPUnitBridge<FPUnitNorth>() {
 
         public Class<FPUnitNorth> getPropertyType() {
             return FPUnitNorth.class;

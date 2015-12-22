@@ -1,11 +1,3 @@
-// Copyright 2000
-// Association for Universities for Research in Astronomy, Inc.
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: AbstractSeqComponentCB.java 46768 2012-07-16 18:58:53Z rnorris $
-//
-
 package edu.gemini.spModel.config;
 
 import edu.gemini.pot.sp.ISPSeqComponent;
@@ -14,10 +6,8 @@ import edu.gemini.spModel.data.config.IConfig;
 
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
 
 /**
  * An abstract base class useful for building
@@ -49,12 +39,12 @@ public abstract class AbstractSeqComponentCB implements IConfigBuilder {
     private transient boolean _applyThisIterator;
 
     // A List of this builder's children builders
-    private transient ArrayList _childBuilders;
+    private transient List<IConfigBuilder> _childBuilders;
     // An index indicating which of this builder's children is in use
     private transient int _nextChildBuilderIndex;
     private transient IConfigBuilder _curChildBuilder;
 
-    private transient Map _options;
+    private transient Map<String, Object> _options;
 
 
     /**
@@ -106,30 +96,30 @@ public abstract class AbstractSeqComponentCB implements IConfigBuilder {
      * Reset recursively calls reset on all its children and then
      * itself.  Therefore, seq components are reset from the bottom up.
      */
-    public void reset(Map options)  {
+    public void reset(Map<String, Object> options)  {
         _options = options;
         _nodeKey    = _seqComp.getNodeKey();
         _dataObject = _seqComp.getDataObject();
 
-        // Create the list of child sequence component parameter builders.
-        List childList = _seqComp.getSeqComponents();
-        if (childList == null || (childList.size() == 0)) {
-            _childBuilders = new ArrayList(0);
-        } else {
-            _childBuilders = new ArrayList(childList.size());
+        ArrayList<IConfigBuilder> childBuilders;
 
-            Iterator it = childList.iterator();
-            while (it.hasNext()) {
-                ISPSeqComponent seqComp = (ISPSeqComponent) it.next();
-                IConfigBuilder cb;
-                cb = (IConfigBuilder) seqComp.getClientData(IConfigBuilder.USER_OBJ_KEY);
+        // Create the list of child sequence component parameter builders.
+        List<ISPSeqComponent> childList = _seqComp.getSeqComponents();
+        if (childList == null || (childList.size() == 0)) {
+            childBuilders = new ArrayList<>(0);
+        } else {
+            childBuilders = new ArrayList<>(childList.size());
+
+            for (ISPSeqComponent seqComp: childList) {
+                IConfigBuilder cb = (IConfigBuilder) seqComp.getClientData(IConfigBuilder.USER_OBJ_KEY);
                 if (cb != null) {
-                    _childBuilders.add(cb);
+                    childBuilders.add(cb);
                 }
             }
 
-            _childBuilders.trimToSize();
+            childBuilders.trimToSize();
         }
+        _childBuilders = childBuilders;
 
         // This is recursive!
         _firstChildBuilder();
@@ -143,8 +133,7 @@ public abstract class AbstractSeqComponentCB implements IConfigBuilder {
      * Provides the subclass an opportunity to reset its state, most likely
      * based upon the current state of the data object.
      */
-    protected abstract void thisReset(Map options) ;
-
+    protected abstract void thisReset(Map<String, Object> options) ;
 
     /**
      * Starts over at the first child configuration builder.
@@ -176,7 +165,7 @@ public abstract class AbstractSeqComponentCB implements IConfigBuilder {
         // so the first time index is 0
 
         int index = _nextChildBuilderIndex++;
-        _curChildBuilder = (IConfigBuilder) _childBuilders.get(index);
+        _curChildBuilder = _childBuilders.get(index);
         // This recursive call descends down the tree of CBs
         _curChildBuilder.reset(_options);
 

@@ -25,7 +25,8 @@ public class InstNICICB extends AbstractObsComponentCB {
         return result;
     }
 
-    protected void thisReset(Map options) {
+    @Override
+    protected void thisReset(Map<String, Object> options) {
         InstNICI dataObj = (InstNICI) getDataObject();
         if (dataObj == null)
             throw new IllegalArgumentException("The data object for NICI can not be null");
@@ -33,16 +34,13 @@ public class InstNICICB extends AbstractObsComponentCB {
     }
 
     protected boolean thisHasConfiguration() {
-        if (sysConfig == null)
-            return false;
-        return (sysConfig.getParameterCount() > 0);
+        return sysConfig != null && (sysConfig.getParameterCount() > 0);
     }
 
     protected void thisApplyNext(IConfig config, IConfig prevFull) {
         String systemName = sysConfig.getSystemName();
-        Collection sysConfigParams = sysConfig.getParameters();
-        for (Object sysConfigParam : sysConfigParams) {
-            IParameter param = (IParameter) sysConfigParam;
+        Collection<IParameter> sysConfigParams = sysConfig.getParameters();
+        for (IParameter param : sysConfigParams) {
             config.putParameter(systemName, DefaultParameter.getInstance(
                     param.getName(),
                     param.getValue()));

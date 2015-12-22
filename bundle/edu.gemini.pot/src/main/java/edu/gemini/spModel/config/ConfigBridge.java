@@ -1,7 +1,3 @@
-//
-// $Id: ConfigBridge.java 46768 2012-07-16 18:58:53Z rnorris $
-//
-
 package edu.gemini.spModel.config;
 
 import edu.gemini.pot.sp.ISPObsComponent;
@@ -24,9 +20,8 @@ import java.util.Map;
  * an observation and extracts a {@link ConfigSequence} from it.
  */
 public final class ConfigBridge {
-    private static void _addItems(ItemKey rootKey, Config config, Collection params) {
-        for (Object param1 : params) {
-            final IParameter param = (IParameter) param1;
+    private static void _addItems(ItemKey rootKey, Config config, Collection<IParameter> params) {
+        for (IParameter param : params) {
             final String paramName = param.getName();
 
             final Object val = param.getValue();
@@ -44,11 +39,11 @@ public final class ConfigBridge {
         }
     }
 
-    public static ConfigSequence extractSequence(ISPObservation obs, Map options, ConfigValMap map) {
+    public static ConfigSequence extractSequence(ISPObservation obs, Map<String, Object> options, ConfigValMap map) {
         return extractSequence(obs, options, map, false);
     }
 
-    public static ConfigSequence extractSequence(ISPObservation obs, Map options, ConfigValMap map, boolean filterMeta) {
+    public static ConfigSequence extractSequence(ISPObservation obs, Map<String, Object> options, ConfigValMap map, boolean filterMeta) {
        return mapSequence(calculateSequence(obs, options, filterMeta), map);
     }
 
@@ -65,7 +60,7 @@ public final class ConfigBridge {
         }
     }
 
-    private static ConfigSequence calculateSequence(ISPObservation obs, Map options, boolean filterMeta) {
+    private static ConfigSequence calculateSequence(ISPObservation obs, Map<String, Object> options, boolean filterMeta) {
         ConfigSequence configSeq = new ConfigSequence();
 
         // make sure that important default options are added (e.g. smartgcal)

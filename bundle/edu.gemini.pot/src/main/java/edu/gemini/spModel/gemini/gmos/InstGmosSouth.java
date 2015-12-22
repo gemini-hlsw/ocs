@@ -100,7 +100,7 @@ public class InstGmosSouth extends
         super.setDisperser(disperser);
     }
 
-    protected GmosCommonType.DisperserBridge getDisperserBridge() {
+    protected GmosCommonType.DisperserBridge<DisperserSouth> getDisperserBridge() {
         return GmosSouthType.DISPERSER_BRIDGE;
     }
 
@@ -114,7 +114,7 @@ public class InstGmosSouth extends
         super.setFilter(filter);
     }
 
-    public GmosCommonType.FilterBridge getFilterBridge() {
+    public GmosCommonType.FilterBridge<FilterSouth> getFilterBridge() {
         return GmosSouthType.FILTER_BRIDGE;
     }
 
@@ -128,11 +128,11 @@ public class InstGmosSouth extends
         super.setFPUnit(fpunit);
     }
 
-    public GmosCommonType.FPUnitBridge getFPUnitBridge() {
+    public GmosCommonType.FPUnitBridge<GmosSouthType.FPUnitSouth> getFPUnitBridge() {
         return GmosSouthType.FPUNIT_BRIDGE;
     }
 
-    protected GmosCommonType.StageModeBridge getStageModeBridge() {
+    protected GmosCommonType.StageModeBridge<GmosSouthType.StageModeSouth> getStageModeBridge() {
         return GmosSouthType.STAGE_MODE_BRIDGE;
     }
 
@@ -147,7 +147,7 @@ public class InstGmosSouth extends
     }
 
     // Observing Wavelength Injection
-    public static final ConfigInjector WAVELENGTH_INJECTOR = ConfigInjector.create(
+    public static final ConfigInjector<String> WAVELENGTH_INJECTOR = ConfigInjector.create(
             new ObsWavelengthCalc3<DisperserSouth, FilterSouth, Double>() {
                 public PropertyDescriptor descriptor1() {
                     return DISPERSER_PROP;

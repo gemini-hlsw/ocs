@@ -1,7 +1,3 @@
-//
-// $Id: DefaultConfigProducer.java 6221 2005-05-29 23:51:37Z shane $
-//
-
 package edu.gemini.spModel.obsseq;
 
 import edu.gemini.spModel.config2.Config;
@@ -34,11 +30,11 @@ public class DefaultConfigProducer implements ConfigProducer {
         }
 
         public void mergeNextConfig(Config config) {
-            config.putAll((Config) _configs.get(_step++));
+            config.putAll(_configs.get(_step++));
         }
     }
 
-    private List _configs = new ArrayList();
+    private List<Config> _configs = new ArrayList<>();
 
     /**
      * Constructs with an empty list of {@link Config}.
@@ -53,9 +49,7 @@ public class DefaultConfigProducer implements ConfigProducer {
      * {@link Config} for this producer
      */
     public DefaultConfigProducer(Config[] configs) {
-        for (int i=0; i<configs.length; ++i) {
-            _configs.add(configs[i]);
-        }
+        Collections.addAll(_configs, configs);
     }
 
     public int getStepCount() {
@@ -65,39 +59,35 @@ public class DefaultConfigProducer implements ConfigProducer {
     public ItemKey[] getIteratedKeys() {
         if (_configs.size() <= 1) return ItemKey.EMPTY_ARRAY;
 
-        Config startConfig = (Config) _configs.get(0);
+        Config startConfig = _configs.get(0);
 
-        Set keys = new HashSet();
+        Set<ItemKey> keys = new HashSet<>();
         for (int i=1; i<_configs.size(); ++i) {
-            Config config = (Config) _configs.get(i);
+            Config config = _configs.get(i);
             ItemEntry[] itemEntryArray = config.itemEntries();
 
-            for (int j=0; j<itemEntryArray.length; ++j) {
-                ItemKey key = itemEntryArray[j].getKey();
-                Object  val = itemEntryArray[j].getItemValue();
+            for (ItemEntry anItemEntryArray : itemEntryArray) {
+                ItemKey key = anItemEntryArray.getKey();
+                Object val = anItemEntryArray.getItemValue();
 
                 if (!val.equals(startConfig.getItemValue(key))) {
                     keys.add(key);
                 }
             }
         }
-        return (ItemKey[]) keys.toArray(ItemKey.EMPTY_ARRAY);
+        return keys.toArray(ItemKey.EMPTY_ARRAY);
     }
 
     public ConfigMerger getConfigMerger() {
         return new DefaultConfigMerger();
     }
 
-//    public void mergeStep(int step, Config config) {
-//        config.putAll((Config) _configs.get(step));
-//    }
-
     /**
      * Gets all the {@link Config} objects, in the order that they would
      * be produced.
      */
     public Config[] getConfigs() {
-        return (Config[]) _configs.toArray(DefaultConfig.EMPTY_ARRAY);
+        return _configs.toArray(DefaultConfig.EMPTY_ARRAY);
     }
 
     /**
@@ -110,9 +100,7 @@ public class DefaultConfigProducer implements ConfigProducer {
      */
     public void setConfigs(Config[] configs) {
         _configs.clear();
-        for (int i=0; i<configs.length; ++i) {
-            _configs.add(configs[i]);
-        }
+        Collections.addAll(_configs, configs);
     }
 
     /**
@@ -181,7 +169,7 @@ public class DefaultConfigProducer implements ConfigProducer {
      * (0 <= index < getStepCount())
      */
     public Config removeConfig(int index) {
-        return (Config) _configs.remove(index);
+        return _configs.remove(index);
     }
 
     /**
@@ -198,6 +186,6 @@ public class DefaultConfigProducer implements ConfigProducer {
      * (0 <= index < getStepCount())
      */
     public Config setConfig(int index, Config config) {
-        return (Config) _configs.set(index, config);
+        return _configs.set(index, config);
     }
 }

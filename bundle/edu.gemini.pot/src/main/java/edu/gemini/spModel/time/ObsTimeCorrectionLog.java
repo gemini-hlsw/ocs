@@ -1,7 +1,3 @@
-//
-// $Id: ObsTimeCorrectionLog.java 7011 2006-05-04 16:12:21Z shane $
-//
-
 package edu.gemini.spModel.time;
 
 import edu.gemini.spModel.pio.ParamSet;
@@ -18,25 +14,24 @@ import java.util.List;
  * applied to correct the automatically calculated observing time.
  */
 public final class ObsTimeCorrectionLog implements Serializable {
-    private static final long serialVersionUID = 1l;
+    private static final long serialVersionUID = 1L;
 
     public static final String PARAM_SET_NAME = "timeCorrectionLog";
 
-    private List<ObsTimeCorrection> _log = new ArrayList<ObsTimeCorrection>();
+    private List<ObsTimeCorrection> _log = new ArrayList<>();
 
     public ObsTimeCorrectionLog() {
     }
 
     public ObsTimeCorrectionLog(ObsTimeCorrectionLog copy) {
-        _log = new ArrayList<ObsTimeCorrection>(copy._log);
+        _log = new ArrayList<>(copy._log);
     }
 
     public ObsTimeCorrectionLog(ParamSet pset) throws PioParseException {
-        List corrections = pset.getParamSets(ObsTimeCorrection.PARAM_SET_NAME);
+        List<ParamSet> corrections = pset.getParamSets(ObsTimeCorrection.PARAM_SET_NAME);
         if ((corrections == null) || (corrections.size() == 0)) return;
 
-        for (Object correction : corrections) {
-            ParamSet otc = (ParamSet) correction;
+        for (ParamSet otc : corrections) {
             _log.add(new ObsTimeCorrection(otc));
         }
     }

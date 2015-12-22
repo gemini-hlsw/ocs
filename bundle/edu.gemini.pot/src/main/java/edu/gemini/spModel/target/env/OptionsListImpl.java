@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package edu.gemini.spModel.target.env;
 
 import edu.gemini.shared.util.immutable.*;
@@ -39,7 +35,7 @@ public final class OptionsListImpl<T> implements Serializable, Iterable<T>, Tupl
      * @return new OptionsList with the given elements
      */
     public static <T> OptionsListImpl<T> create(ImList<T> list) {
-        Option<Integer> index = list.size() > 0 ? new Some<Integer>(0) : None.INTEGER;
+        Option<Integer> index = list.size() > 0 ? new Some<>(0) : None.INTEGER;
         return create(index, list);
     }
 
@@ -100,7 +96,7 @@ public final class OptionsListImpl<T> implements Serializable, Iterable<T>, Tupl
      * @return new OptionsList with the given elements and primary element
      */
     public static <T> OptionsListImpl<T> create(int primary, ImList<T> list) {
-        return create(new Some<Integer>(primary), list);
+        return create(new Some<>(primary), list);
     }
 
     /**
@@ -120,7 +116,7 @@ public final class OptionsListImpl<T> implements Serializable, Iterable<T>, Tupl
      * @return new OptionsList with the given elements and primary element
      */
     public static <T> OptionsListImpl<T> create(Option<Integer> primary, ImList<T> list) {
-        return new OptionsListImpl<T>(primary, list);
+        return new OptionsListImpl<>(primary, list);
     }
 
     private final Option<Integer> primaryIndex;
@@ -145,21 +141,17 @@ public final class OptionsListImpl<T> implements Serializable, Iterable<T>, Tupl
 
     @Override
     public Option<T> getPrimary() {
-        return primaryIndex.map(new Function1<Integer, T>() {
-            @Override public T apply(Integer integer) { return list.get(integer); }
-        });
+        return primaryIndex.map(list::get);
     }
 
     @Override
     public OptionsList<T> selectPrimary(Option<T> primary) {
-        return setPrimaryIndex(primary.map(new Function1<T, Integer>() {
-            @Override public Integer apply(T t) { return list.indexOf(t); }
-        }));
+        return setPrimaryIndex(primary.map(list::indexOf));
     }
 
     @Override
     public OptionsList<T> selectPrimary(T primary) {
-        return setPrimaryIndex(new Some<Integer>(list.indexOf(primary)));
+        return setPrimaryIndex(new Some<>(list.indexOf(primary)));
     }
 
     @Override
@@ -177,12 +169,12 @@ public final class OptionsListImpl<T> implements Serializable, Iterable<T>, Tupl
     @Override
     public OptionsList<T> setPrimaryIndex(Option<Integer> primary) {
         if (primary.equals(primaryIndex)) return this;
-        return new OptionsListImpl<T>(primary, list);
+        return new OptionsListImpl<>(primary, list);
     }
 
     @Override
     public OptionsList<T> setPrimaryIndex(int primary) {
-        return setPrimaryIndex(new Some<Integer>(primary));
+        return setPrimaryIndex(new Some<>(primary));
     }
 
     @Override
@@ -198,15 +190,13 @@ public final class OptionsListImpl<T> implements Serializable, Iterable<T>, Tupl
     @Override
     public OptionsList<T> setOptions(final ImList<T> newList) {
         return newList.isEmpty() ? create(newList) :
-            create(getPrimary().map(new Function1<T, Integer>() {
-                @Override public Integer apply(T t) {
-                    int res = newList.indexOf(t);
-                    if (res >= 0) return res;
+            create(getPrimary().map(t -> {
+                int res = newList.indexOf(t);
+                if (res >= 0) return res;
 
-                    int size = newList.size();
-                    int primary = primaryIndex.getOrElse(size);
-                    return primary < size ? primary : size-1;
-                }
+                int size = newList.size();
+                int primary = primaryIndex.getOrElse(size);
+                return primary < size ? primary : size-1;
             }), newList);
     }
 
@@ -230,7 +220,7 @@ public final class OptionsListImpl<T> implements Serializable, Iterable<T>, Tupl
 
     @Override
     public Tuple2<ImList<T>, Option<T>> swap() {
-        return new Pair<ImList<T>, Option<T>>(_2(), _1());
+        return new Pair<>(_2(), _1());
     }
 
     @Override
@@ -248,11 +238,12 @@ public final class OptionsListImpl<T> implements Serializable, Iterable<T>, Tupl
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        OptionsListImpl that = (OptionsListImpl) o;
+        OptionsListImpl<T> that = (OptionsListImpl<T>) o;
 
         if (!list.equals(that.list)) return false;
         return primaryIndex.equals(that.primaryIndex);

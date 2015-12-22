@@ -9,20 +9,11 @@ import edu.gemini.spModel.pio.xml.PioXmlFactory;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-import java.util.logging.Logger;
-import java.util.logging.Level;
 
 import java.util.Iterator;
 import java.util.List;
 
-//
-// Gemini Observatory/AURA
-// $Id: TestDefaultObservingLog.java 7487 2006-12-05 15:14:03Z gillies $
-//
-
 public final class TestDefaultObservingLog extends TestCase {
-    private static final Logger LOG = Logger.getLogger(NightlyRecord.class.getName());
-
     private static final String[] _testObservations = new String[]{"GN2004A-Q-1-1", "GN2004A-Q-2-1",
                                                                    "GN2004A-Q-3-1", "GN2004A-Q-4-1"};
 
@@ -40,13 +31,13 @@ public final class TestDefaultObservingLog extends TestCase {
 
         NightlyRecord obsLog = new NightlyRecord();
 
-        List l = obsLog.getObservationList();
+        List<SPObservationID> l = obsLog.getObservationList();
         assertNotNull(l);
         assertTrue(l.size() == 0);
 
-        l = obsLog.getWeatherLog();
-        assertNotNull(l);
-        assertTrue(l.size() == 0);
+        List<WeatherInfo> w = obsLog.getWeatherLog();
+        assertNotNull(w);
+        assertTrue(w.size() == 0);
     }
 
     // private method to convert a <code>String</code> to an <code>SPObservationID</code> object.
@@ -111,19 +102,6 @@ public final class TestDefaultObservingLog extends TestCase {
     }
 
     /**
-     * Dump the list of observations
-     *
-     * @param obsLog  dump this observing log
-     */
-    public void dumpList(NightlyRecord obsLog) {
-        Iterator it = obsLog.observationIterator();
-        while (it.hasNext()) {
-            SPObservationID obsID = (SPObservationID) it.next();
-            LOG.log(Level.INFO, obsID.toString());
-        }
-    }
-
-    /**
      * Test the remove observations method
      */
     public void testRemoveObservations() {
@@ -141,10 +119,10 @@ public final class TestDefaultObservingLog extends TestCase {
         assertTrue(success);
 
         assertEquals(_testObservations.length - 1, obsLog.getObservationListSize());
-        List l = obsLog.getObservationList();
-        assertEquals("0", _testObservations[0], ((SPObservationID) (l.get(0))).stringValue());
-        assertEquals("1", _testObservations[2], ((SPObservationID) (l.get(1))).stringValue());
-        assertEquals("2", _testObservations[3], ((SPObservationID) (l.get(2))).stringValue());
+        List<SPObservationID> l = obsLog.getObservationList();
+        assertEquals("0", _testObservations[0], l.get(0).stringValue());
+        assertEquals("1", _testObservations[2], l.get(1).stringValue());
+        assertEquals("2", _testObservations[3], l.get(2).stringValue());
 
         // Remove 2 - third in test list
         try {
@@ -158,8 +136,8 @@ public final class TestDefaultObservingLog extends TestCase {
         l = obsLog.getObservationList();
         assertEquals(_testObservations.length - 2, l.size());
 
-        assertEquals("3", _testObservations[0], ((SPObservationID) (l.get(0))).stringValue());
-        assertEquals("4", _testObservations[3], ((SPObservationID) (l.get(1))).stringValue());
+        assertEquals("3", _testObservations[0], l.get(0).stringValue());
+        assertEquals("4", _testObservations[3], l.get(1).stringValue());
 
     }
 
@@ -208,11 +186,11 @@ public final class TestDefaultObservingLog extends TestCase {
 
         // Verify that it's setup correctly
         assertEquals(_testObservations.length, obsLog2.getObservationListSize());
-        List l = obsLog2.getObservationList();
-        Iterator it = l.iterator();
+        List<SPObservationID> l = obsLog2.getObservationList();
+        Iterator<SPObservationID> it = l.iterator();
         int i = 0;
         while (it.hasNext()) {
-            SPObservationID obsID = (SPObservationID) it.next();
+            SPObservationID obsID = it.next();
             assertEquals(_testObservations[i++], obsID.toString());
         }
 

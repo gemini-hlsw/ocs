@@ -17,11 +17,11 @@ import java.util.Map;
 
 public class InstBHROSCB extends AbstractObsComponentCB {
 
-	private transient ISysConfig sysConfig;
+    private transient ISysConfig sysConfig;
 
-	public InstBHROSCB(ISPObsComponent obsComp) {
-		super(obsComp);
-	}
+    public InstBHROSCB(ISPObsComponent obsComp) {
+        super(obsComp);
+    }
 
     public Object clone() {
         InstBHROSCB result = (InstBHROSCB) super.clone();
@@ -29,36 +29,35 @@ public class InstBHROSCB extends AbstractObsComponentCB {
         return result;
     }
 
-    protected void thisReset(Map options) {
-		InstBHROS dataObj = (InstBHROS) getDataObject();
-		if (dataObj == null)
-			throw new IllegalArgumentException("The data object for BHROS can not be null");
-		sysConfig = dataObj.getSysConfig();
-	}
+    @Override
+    protected void thisReset(Map<String, Object> options) {
+        InstBHROS dataObj = (InstBHROS) getDataObject();
+        if (dataObj == null)
+            throw new IllegalArgumentException("The data object for BHROS can not be null");
+        sysConfig = dataObj.getSysConfig();
+    }
 
-	protected boolean thisHasConfiguration() {
-		if (sysConfig == null)
-			return false;
-		return (sysConfig.getParameterCount() > 0);
-	}
+    protected boolean thisHasConfiguration() {
+        return sysConfig != null && (sysConfig.getParameterCount() > 0);
+    }
 
-	protected void thisApplyNext(IConfig config, IConfig prevFull) {
-		String systemName = sysConfig.getSystemName();
-		Collection<IParameter> sysConfigParams = sysConfig.getParameters();
+    protected void thisApplyNext(IConfig config, IConfig prevFull) {
+        String systemName = sysConfig.getSystemName();
+        Collection<IParameter> sysConfigParams = sysConfig.getParameters();
         for (IParameter param : sysConfigParams) {
             config.putParameter(systemName, DefaultParameter.getInstance(
                     param.getName(),
                     param.getValue()));
         }
 
-		config.putParameter(systemName, StringParameter.getInstance(
-				InstConstants.INSTRUMENT_NAME_PROP,
-				InstBHROS.INSTRUMENT_NAME_PROP));
+        config.putParameter(systemName, StringParameter.getInstance(
+                InstConstants.INSTRUMENT_NAME_PROP,
+                InstBHROS.INSTRUMENT_NAME_PROP));
 
-		// Add the observing wavelength, which should be the same as the central wavelength.
-		Double centralWavelength = (Double) config.getParameterValue(SeqConfigNames.INSTRUMENT_CONFIG_NAME, InstBHROS.CENTRAL_WAVELENGTH_PROP.getName());
-		config.putParameter(SeqConfigNames.INSTRUMENT_CONFIG_NAME, DefaultParameter.getInstance(InstConstants.OBSERVING_WAVELENGTH_PROP, centralWavelength));
+        // Add the observing wavelength, which should be the same as the central wavelength.
+        Double centralWavelength = (Double) config.getParameterValue(SeqConfigNames.INSTRUMENT_CONFIG_NAME, InstBHROS.CENTRAL_WAVELENGTH_PROP.getName());
+        config.putParameter(SeqConfigNames.INSTRUMENT_CONFIG_NAME, DefaultParameter.getInstance(InstConstants.OBSERVING_WAVELENGTH_PROP, centralWavelength));
 
-	}
+    }
 
 }

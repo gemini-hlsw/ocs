@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package edu.gemini.spModel.data;
 
 import edu.gemini.shared.util.immutable.None;
@@ -21,9 +17,9 @@ public final class OptionTypeUtil {
      * {@link edu.gemini.shared.util.immutable.Some} instances are returned
      * otherwise.
      */
-    public static String toDisplayString(Option opt) {
+    public static <E> String toDisplayString(Option<E> opt) {
         if (None.instance().equals(opt)) return "*Unspecified";
-        Object obj = opt.getValue();
+        E obj = opt.getValue();
         
         return (obj instanceof DisplayableSpType) ?
                 ((DisplayableSpType) obj).displayValue() :

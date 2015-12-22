@@ -27,9 +27,9 @@ final class ProgramManager<N extends ISPRootNode> {
      * Constructs with the initial collection of programs.
      */
     ProgramManager(Collection<N> progCollection) {
-        _listeners  = new ArrayList<ProgramEventListener<N>>();
-        _progKeyMap = new TreeMap<SPNodeKey, N>();
-        _progIdMap  = new TreeMap<SPProgramID, N>();
+        _listeners  = new ArrayList<>();
+        _progKeyMap = new TreeMap<>();
+        _progIdMap  = new TreeMap<>();
 
         for (N prog : progCollection) {
             _progKeyMap.put(prog.getProgramKey(), prog);
@@ -69,10 +69,10 @@ final class ProgramManager<N extends ISPRootNode> {
         final List<ProgramEventListener<N>> listeners;
         synchronized (_listeners) {
             if (_listeners.size() == 0) return;  // nobody to notify anyway
-            listeners = new ArrayList<ProgramEventListener<N>>(_listeners);
+            listeners = new ArrayList<>(_listeners);
         }
 
-        final ProgramEvent<N> pme = new ProgramEvent<N>(this, oldProg, newProg);
+        final ProgramEvent<N> pme = new ProgramEvent<>(this, oldProg, newProg);
 
         final Method method;
         try {
@@ -181,7 +181,7 @@ final class ProgramManager<N extends ISPRootNode> {
      * be freely modified by the caller.
      */
     synchronized List<N> getPrograms() {
-        return new ArrayList<N>(_progKeyMap.values());
+        return new ArrayList<>(_progKeyMap.values());
     }
 
     /**

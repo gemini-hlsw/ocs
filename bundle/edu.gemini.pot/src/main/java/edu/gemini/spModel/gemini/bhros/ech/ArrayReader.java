@@ -12,28 +12,28 @@ import java.util.ArrayList;
  * pound sign (#). Each line is passed to build(), which should be overridden 
  * to either return an object or null if the line is to be skipped.
  */
-public abstract class ArrayReader {
+public abstract class ArrayReader<T> {
 
-	public Object[] readArray(InputStream is, Object[] castTo) {
-		try {
-			ArrayList accum = new ArrayList();
-			InputStreamReader isr = new InputStreamReader(is, Charset.forName("UTF-8"));
-			BufferedReader br = new BufferedReader(isr);
-			String line;
-			while ((line = br.readLine()) != null) {
-				line = line.trim();
-				if (line.startsWith("#") || line.length() == 0)
-					continue;
-				Object o = build(line);
-				if (o != null)
-					accum.add(o);
-			}
-			return accum.toArray(castTo);
-		} catch (IOException ioe) {
-			throw new RuntimeException("Trouble reading from " + is, ioe);
-		}
-	}
+    public T[] readArray(InputStream is, T[] castTo) {
+        try {
+            ArrayList<T> accum = new ArrayList<>();
+            InputStreamReader isr = new InputStreamReader(is, Charset.forName("UTF-8"));
+            BufferedReader br = new BufferedReader(isr);
+            String line;
+            while ((line = br.readLine()) != null) {
+                line = line.trim();
+                if (line.startsWith("#") || line.length() == 0)
+                    continue;
+                T o = build(line);
+                if (o != null)
+                    accum.add(o);
+            }
+            return accum.toArray(castTo);
+        } catch (IOException ioe) {
+            throw new RuntimeException("Trouble reading from " + is, ioe);
+        }
+    }
 
-	protected abstract Object build(String args);
-	
+    protected abstract T build(String args);
+
 }

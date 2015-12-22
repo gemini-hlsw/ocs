@@ -1,9 +1,3 @@
-// Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: DBProgramInfo.java 46768 2012-07-16 18:58:53Z rnorris $
-//
 package edu.gemini.spModel.util;
 
 import edu.gemini.pot.sp.SPNodeKey;
@@ -15,11 +9,10 @@ import java.util.Date;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
-
 /**
  * Struct containing basic identifying information about ISPRootNodes.
  */
-public class DBProgramInfo implements Serializable, Comparable {
+public class DBProgramInfo implements Serializable, Comparable<DBProgramInfo> {
     private static final long serialVersionUID = 2L;
 
     public final SPNodeKey nodeKey;
@@ -52,10 +45,9 @@ public class DBProgramInfo implements Serializable, Comparable {
         return programID != null ? programID.toString() : def;
     }
 
-    public int compareTo(Object o) {
-        if (o instanceof DBProgramInfo)
-            return programName.compareTo(((DBProgramInfo) o).programName);
-        return 0;
+    @Override
+    public int compareTo(DBProgramInfo that) {
+        return programName.compareTo(that.programName);
     }
 
     private static final Pattern PLAN_PATTERN =
@@ -69,12 +61,11 @@ public class DBProgramInfo implements Serializable, Comparable {
 
 
     public String toString() {
-        StringBuilder buf = new StringBuilder();
-        buf.append(programID);
-        buf.append(" (").append(nodeKey).append(") ");
-        buf.append(new Date(timestamp)).append(' ');
-        buf.append(programName);
-        return buf.toString();
+        String buf = String.valueOf(programID) +
+                " (" + nodeKey + ") " +
+                new Date(timestamp) + ' ' +
+                programName;
+        return buf;
     }
 
 }

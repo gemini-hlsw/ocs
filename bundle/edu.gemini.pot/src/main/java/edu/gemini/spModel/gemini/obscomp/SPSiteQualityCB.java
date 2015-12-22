@@ -1,7 +1,3 @@
-//
-// $Id$
-//
-
 package edu.gemini.spModel.gemini.obscomp;
 
 import edu.gemini.pot.sp.ISPObsComponent;
@@ -12,9 +8,6 @@ import edu.gemini.spModel.data.config.*;
 import java.util.List;
 import java.util.Map;
 
-/**
- *
- */
 public class SPSiteQualityCB extends AbstractObsComponentCB {
     private static final String SYSTEM_NAME = "ocs";
 
@@ -42,7 +35,8 @@ public class SPSiteQualityCB extends AbstractObsComponentCB {
         return result;
     }
 
-    protected void thisReset(Map options)  {
+    @Override
+    protected void thisReset(Map<String, Object> options) {
         _dataObj = (SPSiteQuality) getDataObject();
     }
 

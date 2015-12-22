@@ -13,7 +13,6 @@ import edu.gemini.spModel.pio.Pio;
 import edu.gemini.spModel.pio.PioFactory;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.SPTargetPio;
-import edu.gemini.spModel.target.system.ITarget;
 
 /**
  * Data object representing template parameters.
@@ -34,7 +33,7 @@ public final class TemplateParameters extends AbstractDataObject {
 
     public static TemplateParameters newInstance(SPTarget target, SPSiteQuality conditions, TimeValue timeValue) {
         return new TemplateParameters(
-                (SPTarget) target.clone(),
+                target.clone(),
                 conditions.clone(),
                 timeValue
         );
@@ -75,11 +74,11 @@ public final class TemplateParameters extends AbstractDataObject {
 
     public SPTarget getTarget() {
         checkRef(target);
-        return (SPTarget) target.clone();
+        return target.clone();
     }
 
     public TemplateParameters copy(SPTarget target) {
-        return new TemplateParameters((SPTarget) target.clone(), conditions, time);
+        return new TemplateParameters(target.clone(), conditions, time);
     }
 
     public SPSiteQuality getSiteQuality() {
@@ -126,7 +125,7 @@ public final class TemplateParameters extends AbstractDataObject {
         conditions = new SPSiteQuality();
         conditions.setParamSet(conditionsPs);
 
-        time = TimeValue.millisecondsToTimeValue(Pio.getLongValue(paramSet, PARAM_TIME, 0l), TimeValue.Units.hours);
+        time = TimeValue.millisecondsToTimeValue(Pio.getLongValue(paramSet, PARAM_TIME, 0L), TimeValue.Units.hours);
     }
 
     @Override

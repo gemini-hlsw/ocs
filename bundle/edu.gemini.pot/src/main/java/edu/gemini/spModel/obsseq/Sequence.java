@@ -1,6 +1,3 @@
-//
-// $Id: Sequence.java 8396 2008-01-18 14:25:49Z swalker $
-//
 package edu.gemini.spModel.obsseq;
 
 import edu.gemini.spModel.config2.Config;
@@ -24,7 +21,7 @@ public final class Sequence implements ConfigProducer, SequenceContainer, Serial
 
     private class SequenceConfigMerger implements ConfigMerger {
         private ConfigMerger _ourMerger;
-        private Iterator _childIterator;
+        private Iterator<Sequence> _childIterator;
         private ConfigMerger _childMerger;
         private boolean _childReset;
 
@@ -44,7 +41,7 @@ public final class Sequence implements ConfigProducer, SequenceContainer, Serial
         private void _advanceToNextChild() {
             _childMerger = null;
             while (_childIterator.hasNext()) {
-                Sequence seq = (Sequence) _childIterator.next();
+                Sequence seq = _childIterator.next();
                 _childMerger = seq.getConfigMerger();
                 if (_childMerger.hasNextConfig()) {
                     break;
@@ -103,7 +100,7 @@ public final class Sequence implements ConfigProducer, SequenceContainer, Serial
     }
 
     private ConfigProducer _configProducer;
-    private List<Sequence> _sequences = new ArrayList<Sequence>();
+    private List<Sequence> _sequences = new ArrayList<>();
 
     /**
      * Constructs an empty Sequence object without children or
@@ -166,7 +163,7 @@ public final class Sequence implements ConfigProducer, SequenceContainer, Serial
         _sequences.clear();
     }
 
-    public Iterator sequenceIterator() {
+    public Iterator<Sequence> sequenceIterator() {
         return _sequences.iterator();
     }
 
@@ -196,8 +193,8 @@ public final class Sequence implements ConfigProducer, SequenceContainer, Serial
 
     private int _getChildrenStepCount() {
         int childStepCount = 0;
-        for (Iterator it=sequenceIterator(); it.hasNext(); ) {
-            Sequence seq = (Sequence) it.next();
+        for (Iterator<Sequence> it=sequenceIterator(); it.hasNext(); ) {
+            Sequence seq = it.next();
             childStepCount += seq.getStepCount();
         }
         return childStepCount;

@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package edu.gemini.spModel.gemini;
 
 import edu.gemini.shared.util.immutable.ApplyOp;
@@ -93,16 +89,16 @@ public abstract class BeanPropertyTestBase<B extends ISPDataObject> extends Test
 
     // Wraps the Enum.getValue() method in a PropertyEditorSupport so that we
     // can extract the string value of enum types using property editors.
-    private class EnumEditor extends PropertyEditorSupport {
-        private final Class propertyType;
+    private class EnumEditor<T extends Enum<T>> extends PropertyEditorSupport {
+        private final Class<T> propertyType;
 
-        EnumEditor(Object source, Class propertyType) {
+        EnumEditor(Object source, Class<T> propertyType) {
             super(source);
             this.propertyType = propertyType;
         }
 
         public String getAsText() {
-            return ((Enum) getValue()).name();
+            return ((Enum<?>) getValue()).name();
         }
 
         public void setAsText(String text) {
@@ -111,10 +107,11 @@ public abstract class BeanPropertyTestBase<B extends ISPDataObject> extends Test
         }
     }
 
+    @SuppressWarnings("rawtypes")
     private PropertyEditor getPropertyEditor(PropertyDescriptor desc) throws Exception {
         PropertyEditor ped = PropertyEditorManager.findEditor(desc.getPropertyType());
         if (ped == null) {
-            Class propType = desc.getPropertyType();
+            Class<?> propType = desc.getPropertyType();
             if (propType.isEnum()) {
                 ped = new EnumEditor(bean, propType);
             } else {
@@ -190,13 +187,11 @@ public abstract class BeanPropertyTestBase<B extends ISPDataObject> extends Test
         assertEquals(testName, 1, tpcl.count);
     }
 
-    private final PropertyTestExecutor getSetTestExecutor = new PropertyTestExecutor(new ApplyTest() {
-        public void apply(PropertyDescriptor desc, Object oldValue, Object newValue) {
-            try {
-                testGetSet(desc, oldValue, newValue);
-            } catch (Exception ex) {
-                throw new RuntimeException(ex);
-            }
+    private final PropertyTestExecutor getSetTestExecutor = new PropertyTestExecutor((desc, oldValue, newValue) -> {
+        try {
+            testGetSet(desc, oldValue, newValue);
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
         }
     });
 

@@ -12,7 +12,7 @@ import java.text.ParseException;
  * This is simply a triple (DatasetLabel, DatasetQaState, String) to hold the QA
  * state and a comment.  Everything else is Java boilerplate and PIO boilerplate
  */
-public final class DatasetQaRecord implements Comparable, Serializable {
+public final class DatasetQaRecord implements Comparable<DatasetQaRecord>, Serializable {
     public static DatasetQaRecord empty(DatasetLabel label) {
         return new DatasetQaRecord(label, DatasetQaState.UNDEFINED, "");
     }
@@ -69,9 +69,7 @@ public final class DatasetQaRecord implements Comparable, Serializable {
      }
 
     @Override
-    public int compareTo(Object o) {
-        final DatasetQaRecord that = (DatasetQaRecord) o;
-
+    public int compareTo(DatasetQaRecord that) {
         int res;
 
         res = label.compareTo(that.label);

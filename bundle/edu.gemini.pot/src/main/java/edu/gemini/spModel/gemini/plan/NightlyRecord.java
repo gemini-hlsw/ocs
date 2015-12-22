@@ -77,10 +77,10 @@ public class NightlyRecord extends AbstractDataObject implements ISPDataObject, 
     public Object clone() {
         NightlyRecord obsLog = (NightlyRecord) super.clone();
         if (_observationsList != null) {
-            obsLog._observationsList = new ArrayList<SPObservationID>(_observationsList);
+            obsLog._observationsList = new ArrayList<>(_observationsList);
         }
         if (_weatherLog != null) {
-            obsLog._weatherLog = new ArrayList<WeatherInfo>(_weatherLog);
+            obsLog._weatherLog = new ArrayList<>(_weatherLog);
         }
         return obsLog;
     }
@@ -91,7 +91,7 @@ public class NightlyRecord extends AbstractDataObject implements ISPDataObject, 
     // private routine to create this list lazily
     private synchronized List<SPObservationID> _getObservationsList() {
         if (_observationsList == null) {
-            _observationsList = new ArrayList<SPObservationID>();
+            _observationsList = new ArrayList<>();
         }
         return _observationsList;
     }
@@ -104,9 +104,9 @@ public class NightlyRecord extends AbstractDataObject implements ISPDataObject, 
         List<SPObservationID> oldList;
         List<SPObservationID> newList;
         synchronized (l) {
-            oldList = Collections.unmodifiableList(new ArrayList<SPObservationID>(l));
+            oldList = Collections.unmodifiableList(new ArrayList<>(l));
             l.add(obsID);
-            newList = Collections.unmodifiableList(new ArrayList<SPObservationID>(l));
+            newList = Collections.unmodifiableList(new ArrayList<>(l));
         }
         firePropertyChange(OBSERVATION_LIST, oldList, newList);
         return true;
@@ -123,9 +123,9 @@ public class NightlyRecord extends AbstractDataObject implements ISPDataObject, 
         List<SPObservationID> newList;
         boolean worked;
         synchronized (l) {
-            oldList = Collections.unmodifiableList(new ArrayList<SPObservationID>(l));
+            oldList = Collections.unmodifiableList(new ArrayList<>(l));
             worked = l.remove(obsID);
-            newList = Collections.unmodifiableList(new ArrayList<SPObservationID>(l));
+            newList = Collections.unmodifiableList(new ArrayList<>(l));
         }
         firePropertyChange(OBSERVATION_LIST, oldList, newList);
         return worked;
@@ -149,7 +149,7 @@ public class NightlyRecord extends AbstractDataObject implements ISPDataObject, 
      */
     public List<SPObservationID> getObservationList() {
         List<SPObservationID> l = _getObservationsList();
-        return new ArrayList<SPObservationID>(l);
+        return new ArrayList<>(l);
     }
 
     /**
@@ -160,21 +160,12 @@ public class NightlyRecord extends AbstractDataObject implements ISPDataObject, 
         return _getObservationsList().size();
     }
 
-    /**
-     * Return an iterator over the list of observations.
-     * @return an iterator over the list
-     */
-    public Iterator observationIterator() {
-        return _getObservationsList().iterator();
-    }
-
-
     // --- weather log methods --
 
     // private routine to create this list lazily
     private synchronized List<WeatherInfo> _getWeatherLog() {
         if (_weatherLog == null) {
-            _weatherLog = new ArrayList<WeatherInfo>();
+            _weatherLog = new ArrayList<>();
         }
         return _weatherLog;
     }
@@ -188,9 +179,9 @@ public class NightlyRecord extends AbstractDataObject implements ISPDataObject, 
         List<WeatherInfo> oldList;
         List<WeatherInfo> newList;
         synchronized (l) {
-            oldList = Collections.unmodifiableList(new ArrayList<WeatherInfo>(l));
+            oldList = Collections.unmodifiableList(new ArrayList<>(l));
             l.add(weatherInfo);
-            newList = Collections.unmodifiableList(new ArrayList<WeatherInfo>(l));
+            newList = Collections.unmodifiableList(new ArrayList<>(l));
         }
         firePropertyChange(WEATHER_LOG, oldList, newList);
         return true;
@@ -218,9 +209,9 @@ public class NightlyRecord extends AbstractDataObject implements ISPDataObject, 
         List<WeatherInfo> newList;
         boolean worked;
         synchronized (l) {
-            oldList = Collections.unmodifiableList(new ArrayList<WeatherInfo>(l));
+            oldList = Collections.unmodifiableList(new ArrayList<>(l));
             worked = l.remove(weatherInfo);
-            newList = Collections.unmodifiableList(new ArrayList<WeatherInfo>(l));
+            newList = Collections.unmodifiableList(new ArrayList<>(l));
         }
         firePropertyChange(WEATHER_LOG, oldList, newList);
         return worked;
@@ -240,7 +231,7 @@ public class NightlyRecord extends AbstractDataObject implements ISPDataObject, 
      */
     public List<WeatherInfo> getWeatherLog() {
         List<WeatherInfo> l = _getWeatherLog();
-        return new ArrayList<WeatherInfo>(l);
+        return new ArrayList<>(l);
     }
 
     /**
@@ -346,7 +337,7 @@ public class NightlyRecord extends AbstractDataObject implements ISPDataObject, 
 
 
     private ParamSet _getWeatherLogParamSet(PioFactory factory) {
-        List l = _getWeatherLog();
+        List<WeatherInfo> l = _getWeatherLog();
         int size = l.size();
         if (size == 0) {
             return null;
@@ -354,7 +345,7 @@ public class NightlyRecord extends AbstractDataObject implements ISPDataObject, 
 
         ParamSet paramSet = factory.createParamSet(WEATHER_LOG);
         for (int i = 0; i < size; i++) {
-            WeatherInfo weatherInfo = (WeatherInfo)l.get(i);
+            WeatherInfo weatherInfo = l.get(i);
             ParamSet p = weatherInfo.getParamSet(factory, "weather");
             p.setSequence(i);
             paramSet.addParamSet(p);
@@ -368,9 +359,7 @@ public class NightlyRecord extends AbstractDataObject implements ISPDataObject, 
             return;
         }
         clearWeatherLog();
-        Iterator it = paramSet.getParamSets().iterator();
-        while(it.hasNext()) {
-            ParamSet p = (ParamSet)it.next();
+        for (ParamSet p : paramSet.getParamSets()) {
             WeatherInfo weatherInfo = new WeatherInfo();
             weatherInfo.setParamSet(p);
             _weatherLog.add(weatherInfo);
@@ -378,15 +367,14 @@ public class NightlyRecord extends AbstractDataObject implements ISPDataObject, 
     }
 
     private Param _getObservationListParam(PioFactory factory) {
-        List l = _getObservationsList();
+        List<SPObservationID> l = _getObservationsList();
         int size = l.size();
         if (size == 0) {
             return null;
         }
 
         Param p = factory.createParam(OBSERVATION_LIST);
-        for (int i = 0; i < size; i++) {
-            SPObservationID obsID = (SPObservationID)l.get(i);
+        for (SPObservationID obsID : l) {
             p.addValue(obsID.toString());
         }
 
@@ -398,9 +386,7 @@ public class NightlyRecord extends AbstractDataObject implements ISPDataObject, 
             return;
         }
         clearObservationList();
-        Iterator it = param.getValues().iterator();
-        while (it.hasNext()) {
-            String value = (String) it.next();
+        for (String value : param.getValues()) {
             try {
                 _observationsList.add(new SPObservationID(value));
             } catch (SPBadIDException ex) {
@@ -411,8 +397,6 @@ public class NightlyRecord extends AbstractDataObject implements ISPDataObject, 
 
     /**
      * Return a parameter set describing the current state of this object.
-     *
-     * @param factory
      */
     public ParamSet getParamSet(PioFactory factory) {
         ParamSet paramSet = super.getParamSet(factory);

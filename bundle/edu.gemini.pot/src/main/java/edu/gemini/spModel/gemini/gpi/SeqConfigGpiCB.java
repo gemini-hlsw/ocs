@@ -22,10 +22,8 @@ public final class SeqConfigGpiCB extends HelperSeqCompCB {
     }
 
     public Object clone() {
-        SeqConfigGpiCB result = (SeqConfigGpiCB) super.clone();
-        return result;
+        return super.clone();
     }
-
 
     /**
      * This thisApplyNext overrides the HelperSeqCompCB
@@ -40,8 +38,8 @@ public final class SeqConfigGpiCB extends HelperSeqCompCB {
                                     Gpi.INSTRUMENT_NAME_PROP));
     }
 
-
-    public void thisReset(Map options) {
+    @Override
+    public void thisReset(Map<String, Object> options) {
         super.thisReset(options);
     }
 }

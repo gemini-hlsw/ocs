@@ -1,7 +1,3 @@
-//
-// $Id: ConfigPio.java 6225 2005-05-30 04:01:30Z shane $
-//
-
 package edu.gemini.spModel.config2;
 
 import edu.gemini.spModel.pio.ParamSet;
@@ -10,7 +6,6 @@ import edu.gemini.spModel.pio.Pio;
 import edu.gemini.spModel.pio.PioParseException;
 
 import java.util.List;
-import java.util.Iterator;
 
 /**
  * A (maybe) temporary class for ParamSet I/O for configs.  Only works with
@@ -26,9 +21,8 @@ public final class ConfigPio {
         ParamSet paramSet = factory.createParamSet(CONFIG_PARAM_SET);
 
         ItemEntry[] entries = config.itemEntries();
-        for (int i=0; i<entries.length; ++i) {
-            ItemEntry entry = entries[i];
-            String key   = entry.getKey().toString();
+        for (ItemEntry entry : entries) {
+            String key = entry.getKey().toString();
             // Would break for items that are arbitrary objects.
             String value = entry.getItemValue().toString();
 
@@ -46,10 +40,8 @@ public final class ConfigPio {
     public static Config toConfig(ParamSet ps) throws PioParseException {
         Config c = new DefaultConfig();
 
-        List itemParamSets = ps.getParamSets(ITEM_PARAM_SET);
-        for (Iterator it=itemParamSets.iterator(); it.hasNext(); ) {
-            ParamSet itemParamSet = (ParamSet) it.next();
-
+        List<ParamSet> itemParamSets = ps.getParamSets(ITEM_PARAM_SET);
+        for (ParamSet itemParamSet : itemParamSets) {
             String keyStr = Pio.getValue(itemParamSet, KEY_PARAM);
             if (keyStr == null) {
                 throw new PioParseException("missing '" + KEY_PARAM + "'");

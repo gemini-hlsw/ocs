@@ -12,7 +12,7 @@ public final class MemTemplateFolder extends MemAbstractContainer implements ISP
     private static final Logger LOG = Logger.getLogger(MemTemplateFolder.class.getName());
 
     private final MemProgram program;
-    private final List<ISPTemplateGroup> templates = new ArrayList<ISPTemplateGroup>();
+    private final List<ISPTemplateGroup> templates = new ArrayList<>();
 
     public MemTemplateFolder(MemProgram prog, SPNodeKey key)  {
         super(prog.getDocumentData(), key);
@@ -24,7 +24,7 @@ public final class MemTemplateFolder extends MemAbstractContainer implements ISP
         this.program = prog;
 
         List<ISPTemplateGroup> thatList = that.getTemplateGroups();
-        List<ISPTemplateGroup> newList  = new ArrayList<ISPTemplateGroup>(thatList.size());
+        List<ISPTemplateGroup> newList  = new ArrayList<>(thatList.size());
         for (ISPTemplateGroup tg : thatList) {
             try {
                 newList.add(fact.createTemplateGroupCopy(prog, tg, preserveKeys));
@@ -48,7 +48,7 @@ public final class MemTemplateFolder extends MemAbstractContainer implements ISP
         }
     }
 
-    private static final Class[] VALID_CHILD_TYPES = {
+    private static final Class<?>[] VALID_CHILD_TYPES = {
         MemConflictFolder.class,
         MemTemplateGroup.class,
     };
@@ -62,7 +62,7 @@ public final class MemTemplateFolder extends MemAbstractContainer implements ISP
     @Override public List<ISPNode> getChildren()  {
         getProgramReadLock();
         try {
-            List<ISPNode> children = new ArrayList<ISPNode>();
+            List<ISPNode> children = new ArrayList<>();
             if (getConflictFolder() != null) children.add(getConflictFolder());
             children.addAll(templates);
             return children;
@@ -75,7 +75,7 @@ public final class MemTemplateFolder extends MemAbstractContainer implements ISP
     public List<ISPTemplateGroup> getTemplateGroups() {
         getProgramReadLock();
         try {
-            return new ArrayList<ISPTemplateGroup>(templates);
+            return new ArrayList<>(templates);
         } finally {
             returnProgramReadLock();
         }
@@ -83,10 +83,10 @@ public final class MemTemplateFolder extends MemAbstractContainer implements ISP
 
     @Override
     public void setTemplateGroups(List<? extends ISPTemplateGroup> newGroupList) throws SPNodeNotLocalException, SPTreeStateException {
-        List<ISPTemplateGroup> newCopy = new ArrayList<ISPTemplateGroup>(newGroupList);
+        List<ISPTemplateGroup> newCopy = new ArrayList<>(newGroupList);
         getProgramWriteLock();
         try {
-            List<ISPTemplateGroup> oldCopy = new ArrayList<ISPTemplateGroup>(templates);
+            List<ISPTemplateGroup> oldCopy = new ArrayList<>(templates);
             updateChildren(templates, newCopy);
             firePropertyChange(TEMPLATE_GROUP_PROP, oldCopy, newCopy);
             fireStructureChange(TEMPLATE_GROUP_PROP, this, oldCopy, newCopy);
@@ -105,10 +105,10 @@ public final class MemTemplateFolder extends MemAbstractContainer implements ISP
         MemTemplateGroup node = (MemTemplateGroup) group;
         getProgramWriteLock();
         try {
-            List<ISPTemplateGroup> oldCopy = new ArrayList<ISPTemplateGroup>(templates);
+            List<ISPTemplateGroup> oldCopy = new ArrayList<>(templates);
             node.attachTo(this);
             if (index >= 0) templates.add(index, node); else templates.add(node);
-            List<ISPTemplateGroup> newCopy = new ArrayList<ISPTemplateGroup>(templates);
+            List<ISPTemplateGroup> newCopy = new ArrayList<>(templates);
             firePropertyChange(TEMPLATE_GROUP_PROP, oldCopy, newCopy);
             fireStructureChange(TEMPLATE_GROUP_PROP, this, oldCopy, newCopy);
         } finally {
@@ -127,10 +127,10 @@ public final class MemTemplateFolder extends MemAbstractContainer implements ISP
                 LOG.warning("template group was not located and cannot be removed");
                 return;
             }
-            List<ISPTemplateGroup> oldCopy = new ArrayList<ISPTemplateGroup>(templates);
+            List<ISPTemplateGroup> oldCopy = new ArrayList<>(templates);
             node.detachFrom(this);
             templates.remove(index);
-            List<ISPTemplateGroup> newCopy = new ArrayList<ISPTemplateGroup>(templates);
+            List<ISPTemplateGroup> newCopy = new ArrayList<>(templates);
             firePropertyChange(TEMPLATE_GROUP_PROP, oldCopy, newCopy);
             fireStructureChange(TEMPLATE_GROUP_PROP, this, oldCopy, newCopy);
         } finally {

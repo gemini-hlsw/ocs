@@ -8,7 +8,6 @@ import java.io.Serializable;
 
 import java.util.*;
 
-
 /**
  * This functor gathers the information needed to display the science program tree and returns
  * it to the client as an object.
@@ -60,7 +59,7 @@ public class DBTreeListService {
     }
 
     // Returned for an empty sub node list
-    private static final List<Node> _EMPTY_LIST = new ArrayList<Node>(0);
+    private static final List<Node> _EMPTY_LIST = new ArrayList<>(0);
 
     // Compare nodes based on Class (ObsComps, Observations, Groups, in that order).
     private static class ClassComparator implements Comparator<Node>, Serializable {
@@ -79,13 +78,12 @@ public class DBTreeListService {
     }
     private static final Comparator<Node> _classComparator = new ClassComparator();
 
-
     // Compare nodes based on title
     private static class TitleComparator implements Comparator<Node>, Serializable {
         public int compare(Node n1, Node n2) {
             return n1.getDataObject().getTitle().compareTo(n2.getDataObject().getTitle());
         }
-    };
+    }
     private static final Comparator<Node> _titleComparator = new TitleComparator();
 
     // Compare nodes based on obs id
@@ -100,7 +98,7 @@ public class DBTreeListService {
             }
             return _classComparator.compare(o1, o2);
         }
-    };
+    }
     private static final Comparator<Node> _idComparator = new IdComparator();
 
     // Compare nodes based on observation status
@@ -120,7 +118,7 @@ public class DBTreeListService {
             }
             return _classComparator.compare(n1, n2);
         }
-    };
+    }
     private static final Comparator<Node> _statusComparator = new StatusComparator();
 
     // The result of this functor: a tree starting at the given node
@@ -177,13 +175,11 @@ public class DBTreeListService {
     // there are none
     private List<Node> _getSubNodes(ISPNode node)  {
         if (node instanceof ISPContainerNode) {
-            List subNodes = ((ISPContainerNode) node).getChildren();
+            List<ISPNode> subNodes = ((ISPContainerNode) node).getChildren();
             int n = subNodes.size();
             if (n != 0) {
-                List<Node> nodeList = new ArrayList<Node>(n);
-                Iterator it = subNodes.iterator();
-                while (it.hasNext()) {
-                    ISPNode subNode = (ISPNode) it.next();
+                List<Node> nodeList = new ArrayList<>(n);
+                for (ISPNode subNode : subNodes) {
                     nodeList.add(new Node(subNode, _getSubNodes(subNode)));
                 }
                 return nodeList;
@@ -203,9 +199,7 @@ public class DBTreeListService {
         Collections.sort(list, _comparator);
         if (_includeGroupNodes) {
             // If we are including group nodes, sort them too
-            Iterator<Node> iter = list.iterator();
-            while (iter.hasNext()) {
-                Node node = iter.next();
+            for (Node node : list) {
                 if (node.getRemoteNode() instanceof ISPGroup) {
                     Collections.sort(node.getSubNodes(), _comparator);
                 }
@@ -230,10 +224,8 @@ public class DBTreeListService {
     // Flatten the given list by removing any groups and replacing them with the contained
     // nodes.
     private List<Node> _flattenGroupNodes(List<Node> list) {
-        List<Node> result = new ArrayList<Node>();
-        Iterator<Node> iter = list.iterator();
-        while (iter.hasNext()) {
-            Node node = iter.next();
+        List<Node> result = new ArrayList<>();
+        for (Node node : list) {
             if (node.getRemoteNode() instanceof ISPGroup) {
                 result.addAll(node.getSubNodes());
             } else {

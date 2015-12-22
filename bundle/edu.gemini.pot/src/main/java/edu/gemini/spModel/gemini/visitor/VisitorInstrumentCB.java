@@ -6,8 +6,6 @@ import edu.gemini.spModel.data.config.*;
 import edu.gemini.spModel.obscomp.InstConstants;
 import edu.gemini.spModel.seqcomp.SeqConfigNames;
 
-import java.rmi.RemoteException;
-import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -28,7 +26,7 @@ public class VisitorInstrumentCB extends AbstractObsComponentCB {
     }
 
     @Override
-    protected void thisReset(Map options) {
+    protected void thisReset(Map<String, Object> options) {
         // No configuration
         VisitorInstrument dataObj = (VisitorInstrument) getDataObject();
         if (dataObj == null)
@@ -38,19 +36,15 @@ public class VisitorInstrumentCB extends AbstractObsComponentCB {
 
     @Override
     protected boolean thisHasConfiguration() {
-        if (_sysConfig == null)
-            return false;
-        return (_sysConfig.getParameterCount() > 0);
+        return _sysConfig != null && (_sysConfig.getParameterCount() > 0);
     }
 
     @Override
     protected void thisApplyNext(IConfig config, IConfig prevFull) {
         // No configuration
         String systemName = _sysConfig.getSystemName();
-        Collection sysConfig = _sysConfig.getParameters();
 
-        for (Object sc : sysConfig) {
-            IParameter param = (IParameter) sc;
+        for (IParameter param : _sysConfig.getParameters()) {
             config.putParameter(systemName,
                     DefaultParameter.getInstance(param.getName(), param.getValue()));
         }

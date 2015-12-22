@@ -14,7 +14,7 @@ import java.text.ParseException;
  * The Dataset class represents a raw dataset produced by an instrument.  This
  * class is immutable.
  */
-public final class Dataset implements Comparable, Serializable {
+public final class Dataset implements Comparable<Dataset>, Serializable {
     public static final Dataset[] EMPTY_ARRAY = new Dataset[0];
 
     public static final String PARAM_SET           = "dataset";
@@ -92,9 +92,8 @@ public final class Dataset implements Comparable, Serializable {
     /**
      * Provides a natural ordering.
      */
-    public int compareTo(Object obj) {
-        final Dataset that = (Dataset) obj;
-
+    @Override
+    public int compareTo(Dataset that) {
         int res = _label.compareTo(that._label);
         if (res != 0) return res;
 

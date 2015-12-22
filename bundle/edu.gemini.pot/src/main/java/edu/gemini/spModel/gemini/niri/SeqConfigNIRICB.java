@@ -1,9 +1,3 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: SeqConfigNIRICB.java 27570 2010-10-25 19:17:01Z swalker $
-//
 package edu.gemini.spModel.gemini.niri;
 
 import edu.gemini.pot.sp.ISPSeqComponent;
@@ -29,8 +23,7 @@ public final class SeqConfigNIRICB extends HelperSeqCompCB {
     }
 
     public Object clone() {
-        SeqConfigNIRICB result = (SeqConfigNIRICB) super.clone();
-        return result;
+        return super.clone();
     }
 
 
@@ -49,7 +42,8 @@ public final class SeqConfigNIRICB extends HelperSeqCompCB {
         InstNIRI.WAVELENGTH_INJECTOR.inject(config, prevFull);
     }
 
-    public void thisReset(Map options) {
+    @Override
+    public void thisReset(Map<String, Object> options) {
         super.thisReset(options);
     }
 }

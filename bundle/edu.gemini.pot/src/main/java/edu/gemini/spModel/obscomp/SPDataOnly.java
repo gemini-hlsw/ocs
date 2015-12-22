@@ -1,10 +1,3 @@
-// Copyright 1997-2000
-// Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: SPDataOnly.java 6000 2005-04-29 19:30:48Z brighton $
-//
 package edu.gemini.spModel.obscomp;
 
 import edu.gemini.pot.sp.SPComponentType;
@@ -29,7 +22,7 @@ public class SPDataOnly extends AbstractDataObject {
     private static final long serialVersionUID = 1L;
 
     // Temp HashMap for data storage
-    private Map _data;
+    private Map<String, List<String>> _data;
 
     /**
      * Default constructor.
@@ -46,17 +39,15 @@ public class SPDataOnly extends AbstractDataObject {
         result = (SPDataOnly) super.clone();
 
         if (_data == null) return result;
-        result._data = new HashMap();
+        result._data = new HashMap<>();
 
         // Make a copy of the values.
-        Iterator keys = _data.keySet().iterator();
-        while (keys.hasNext()) {
-            String key = (String) keys.next();
-            List src = (List) _data.get(key);
+        for (String key : _data.keySet()) {
+            List<String> src = _data.get(key);
             // src can be null
             if (src != null) {
                 // Okay since values are Strings
-                List dest = new ArrayList(src);
+                List<String> dest = new ArrayList<>(src);
                 result._data.put(key, dest);
             }
         }
@@ -67,26 +58,26 @@ public class SPDataOnly extends AbstractDataObject {
     /**
      * Provide access to the internal table.
      */
-    public Map getTable() {
+    public Map<String, List<String>> getTable() {
         // Just return it for now -- this is only for testing.
-        if (_data == null) _data = new HashMap();
+        if (_data == null) _data = new HashMap<>();
         return _data;
     }
 
     /**
      * A generic method for adding a property.
      */
-    public void setProperty(String prop, List values) {
+    public void setProperty(String prop, List<String> values) {
         getTable().put(prop, values);
     }
 
     /**
      * Return the value for a property.
      */
-    public List getProperty(String key) {
+    public List<String> getProperty(String key) {
         if ((key == null) || (size() == 0)) return null;
 
-        return (List) getTable().get(key);
+        return  getTable().get(key);
     }
 
     /**
@@ -99,14 +90,9 @@ public class SPDataOnly extends AbstractDataObject {
 
     /**
      * Return a parameter set describing the current state of this object.
-     * @param factory
      */
     public ParamSet getParamSet(PioFactory factory) {
-        ParamSet paramSet = super.getParamSet(factory);
-
-        // TODO
-
-        return paramSet;
+        return super.getParamSet(factory);
     }
 
     /**
@@ -114,7 +100,5 @@ public class SPDataOnly extends AbstractDataObject {
      */
     public void setParamSet(ParamSet paramSet) {
         super.setParamSet(paramSet);
-
-        // TODO
     }
 }

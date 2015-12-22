@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package edu.gemini.spModel.gemini.gems;
 
 import edu.gemini.pot.sp.ISPObsComponent;
@@ -32,7 +28,8 @@ public final class GemsCB extends AbstractObsComponentCB {
         return res;
     }
 
-    protected void thisReset(Map options) {
+    @Override
+    protected void thisReset(Map<String, Object> options) {
         Gems dataObj = (Gems) getDataObject();
         if (dataObj == null) throw new RuntimeException("Missing GemsCB data object");
         sysConfig = dataObj.getSysConfig();

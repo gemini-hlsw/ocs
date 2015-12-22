@@ -1,16 +1,6 @@
-// Copyright 1999 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: QueryRunner.java 46971 2012-07-25 16:59:17Z swalker $
-//
-
 package edu.gemini.pot.spdb;
 
-import edu.gemini.pot.sp.ISPNode;
-import edu.gemini.pot.sp.ISPObservation;
-import edu.gemini.pot.sp.ISPProgram;
-import edu.gemini.pot.sp.SPNodeNotLocalException;
+import edu.gemini.pot.sp.*;
 
 import java.security.Principal;
 import java.util.Iterator;
@@ -45,7 +35,7 @@ final class QueryRunner implements IDBQueryRunner {
      * Runs a query on the available observations.
      */
     public <T extends IDBQueryFunctor> T queryObservations(T queryFunctor) {
-        List<ISPObservation> lst = new LinkedList<ISPObservation>();
+        List<ISPObservation> lst = new LinkedList<>();
         for (ISPProgram prog : _dataMan.getProgramManager().getPrograms()) {
             lst.addAll(prog.getAllObservations());
         }
@@ -56,7 +46,7 @@ final class QueryRunner implements IDBQueryRunner {
      * Runs a query on the available programs.
      */
     public <T extends IDBQueryFunctor> T queryPrograms(T queryFunctor) {
-        List lst = _dataMan.getProgramManager().getPrograms();
+        List<ISPProgram> lst = _dataMan.getProgramManager().getPrograms();
         return _doQuery(lst, queryFunctor);
     }
 
@@ -64,7 +54,7 @@ final class QueryRunner implements IDBQueryRunner {
      * Runs a query on the available nightly plans.
      */
     public <T extends IDBQueryFunctor> T queryNightlyPlans(T queryFunctor) {
-        List lst = _dataMan.getNightlyPlanManager().getPrograms();
+        List<ISPNightlyRecord> lst = _dataMan.getNightlyPlanManager().getPrograms();
         return _doQuery(lst, queryFunctor);
     }
 
@@ -75,24 +65,22 @@ final class QueryRunner implements IDBQueryRunner {
     /**
      * Runs the query on the given node list using the given functor.
      */
-    <T extends IDBQueryFunctor> T _doQuery(final List nodeList, final T queryFunctor) {
-        WithPriority.exec(queryFunctor.getPriority(), new Runnable() {
-            public void run() {
-                Iterator it = nodeList.iterator();
-                FunctorLogger.Handback hb = _dataMan.functorLogger.logQueryStart(queryFunctor);
-                try {
-                    queryFunctor.init();
-                    while (!queryFunctor.isDone() && it.hasNext()) {
-                        ISPNode node = (ISPNode) it.next();
-                        queryFunctor.execute(_database, node, _principals);
-                    }
-                    queryFunctor.finished();
-                } catch (Exception ex) {
-                    LOG.log(Level.WARNING, "Problem running functor: " + queryFunctor, ex);
-                    queryFunctor.setException(ex);
+    <T extends IDBQueryFunctor> T _doQuery(final List<? extends ISPNode> nodeList, final T queryFunctor) {
+        WithPriority.exec(queryFunctor.getPriority(), () -> {
+            Iterator<? extends ISPNode> it = nodeList.iterator();
+            FunctorLogger.Handback hb = _dataMan.functorLogger.logQueryStart(queryFunctor);
+            try {
+                queryFunctor.init();
+                while (!queryFunctor.isDone() && it.hasNext()) {
+                    ISPNode node = it.next();
+                    queryFunctor.execute(_database, node, _principals);
                 }
-                _dataMan.functorLogger.logQueryEnd(queryFunctor, hb);
+                queryFunctor.finished();
+            } catch (Exception ex) {
+                LOG.log(Level.WARNING, "Problem running functor: " + queryFunctor, ex);
+                queryFunctor.setException(ex);
             }
+            _dataMan.functorLogger.logQueryEnd(queryFunctor, hb);
         });
         return queryFunctor;
     }

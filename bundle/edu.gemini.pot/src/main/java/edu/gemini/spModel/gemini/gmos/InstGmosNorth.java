@@ -1,7 +1,3 @@
-//
-// $Id: InstGmosNorth.java 45751 2012-06-04 15:28:44Z swalker $
-//
-
 package edu.gemini.spModel.gemini.gmos;
 
 import edu.gemini.pot.sp.SPComponentType;
@@ -110,7 +106,7 @@ public class InstGmosNorth extends
         super.setDisperser(disperser);
     }
 
-    protected GmosCommonType.DisperserBridge getDisperserBridge() {
+    protected GmosCommonType.DisperserBridge<DisperserNorth> getDisperserBridge() {
         return GmosNorthType.DISPERSER_BRIDGE;
     }
 
@@ -124,7 +120,7 @@ public class InstGmosNorth extends
         super.setFilter(filter);
     }
 
-    public GmosCommonType.FilterBridge getFilterBridge() {
+    public GmosCommonType.FilterBridge<FilterNorth> getFilterBridge() {
         return GmosNorthType.FILTER_BRIDGE;
     }
 
@@ -138,11 +134,11 @@ public class InstGmosNorth extends
         super.setFPUnit(fpunit);
     }
 
-    public GmosCommonType.FPUnitBridge getFPUnitBridge() {
+    public GmosCommonType.FPUnitBridge<GmosNorthType.FPUnitNorth> getFPUnitBridge() {
         return GmosNorthType.FPUNIT_BRIDGE;
     }
 
-    protected GmosCommonType.StageModeBridge getStageModeBridge() {
+    protected GmosCommonType.StageModeBridge<GmosNorthType.StageModeNorth> getStageModeBridge() {
         return GmosNorthType.STAGE_MODE_BRIDGE;
     }
 
@@ -157,7 +153,7 @@ public class InstGmosNorth extends
     }
 
     // Observing Wavelength Injection
-    public static final ConfigInjector WAVELENGTH_INJECTOR = ConfigInjector.create(
+    public static final ConfigInjector<String> WAVELENGTH_INJECTOR = ConfigInjector.create(
             new ObsWavelengthCalc3<DisperserNorth, FilterNorth, Double>() {
                 public PropertyDescriptor descriptor1() {
                     return DISPERSER_PROP;

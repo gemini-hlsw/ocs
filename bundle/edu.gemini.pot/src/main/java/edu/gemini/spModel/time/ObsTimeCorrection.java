@@ -1,7 +1,3 @@
-//
-// $Id: ObsTimeCorrection.java 6986 2006-05-01 17:05:49Z shane $
-//
-
 package edu.gemini.spModel.time;
 
 import edu.gemini.shared.util.TimeValue;
@@ -9,14 +5,13 @@ import edu.gemini.spModel.pio.*;
 
 import java.io.Serializable;
 
-
 /**
  * An (immutable) entry that indicates a single correction to be applied to the
  * automatically calculated observation time.  Each correction has an
  * reason comment and a timestamp.  This is a single entry in the
  * {@link ObsTimeCorrectionLog}.
  */
-public final class ObsTimeCorrection implements Serializable, Comparable {
+public final class ObsTimeCorrection implements Serializable, Comparable<ObsTimeCorrection> {
 
     private static final long serialVersionUID = 2;
 
@@ -181,9 +176,8 @@ public final class ObsTimeCorrection implements Serializable, Comparable {
         return res;
     }
 
-    public int compareTo(Object o) {
-        ObsTimeCorrection that = (ObsTimeCorrection) o;
-
+    @Override
+    public int compareTo(ObsTimeCorrection that) {
         if (_timestamp != that._timestamp) {
             return _timestamp < that._timestamp ? -1 : 1;
         }

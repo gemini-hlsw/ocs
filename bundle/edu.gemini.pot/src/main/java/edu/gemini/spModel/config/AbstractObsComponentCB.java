@@ -60,7 +60,7 @@ public abstract class AbstractObsComponentCB implements IConfigBuilder {
         return result;
     }
 
-    public void reset(Map options)  {
+    public void reset(Map<String, Object> options)  {
         _firstTime = true;
         // Go to the data object cache for acces
         _dataObject = _obsComp.getDataObject();
@@ -72,7 +72,7 @@ public abstract class AbstractObsComponentCB implements IConfigBuilder {
      * A subclass might choose to read the state of its node's data object
      * for example.
      */
-    protected abstract void thisReset(Map options) ;
+    protected abstract void thisReset(Map<String, Object> options) ;
 
     /**
      * Gets the observation component whose configuration is being iterated.

@@ -6,7 +6,6 @@ import edu.gemini.spModel.obscomp.InstConstants;
 import edu.gemini.spModel.seqcomp.SeqConfigNames;
 import edu.gemini.pot.sp.ISPObsComponent;
 
-import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -27,7 +26,8 @@ public class InstTexesCB extends AbstractObsComponentCB {
         return result;
     }
 
-    protected void thisReset(Map options) {
+    @Override
+    protected void thisReset(Map<String, Object> options) {
         InstTexes dataObj = (InstTexes) getDataObject();
         if (dataObj == null)
             throw new IllegalArgumentException("The data objectfor Texes can not be null");
@@ -35,17 +35,13 @@ public class InstTexesCB extends AbstractObsComponentCB {
     }
 
     protected boolean thisHasConfiguration() {
-        if (_sysConfig == null)
-            return false;
-        return (_sysConfig.getParameterCount() > 0);
+        return _sysConfig != null && (_sysConfig.getParameterCount() > 0);
     }
 
     protected void thisApplyNext(IConfig config, IConfig prevFull) {
         String systemName = _sysConfig.getSystemName();
-        Collection sysConfig = _sysConfig.getParameters();
 
-        for (Object sc : sysConfig) {
-            IParameter param = (IParameter) sc;
+        for (IParameter param : _sysConfig.getParameters()) {
             config.putParameter(systemName,
                     DefaultParameter.getInstance(param.getName(), param.getValue()));
         }

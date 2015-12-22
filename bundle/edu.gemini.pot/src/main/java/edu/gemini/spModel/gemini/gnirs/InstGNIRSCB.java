@@ -1,11 +1,3 @@
-// Copyright 2000
-// Association for Universities for Research in Astronomy, Inc.
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: InstGNIRSCB.java 27568 2010-10-25 18:03:42Z swalker $
-//
-
 package edu.gemini.spModel.gemini.gnirs;
 
 import edu.gemini.spModel.config.AbstractObsComponentCB;
@@ -15,10 +7,7 @@ import edu.gemini.spModel.seqcomp.SeqConfigNames;
 
 import edu.gemini.pot.sp.ISPObsComponent;
 
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.Map;
-
 
 /**
  * InstGNIRSCB is the configuration builder for the InstGNIRS data
@@ -40,7 +29,8 @@ public class InstGNIRSCB extends AbstractObsComponentCB {
         return result;
     }
 
-    protected void thisReset(Map options) {
+    @Override
+    protected void thisReset(Map<String, Object> options) {
         _dataObj = (InstGNIRS) getDataObject();
         _sysConfig = _dataObj.getSysConfig();
     }
@@ -53,11 +43,7 @@ public class InstGNIRSCB extends AbstractObsComponentCB {
 
     protected void thisApplyNext(IConfig config, IConfig prevFull) {
         String systemName = _sysConfig.getSystemName();
-        Collection sysConfig = _sysConfig.getParameters();
-
-        Iterator it = sysConfig.iterator();
-        while (it.hasNext()) {
-            IParameter param = (IParameter) it.next();
+        for (IParameter param : _sysConfig.getParameters()) {
             config.putParameter(systemName, param);
 
             // insert the observing wavelength

@@ -1,6 +1,3 @@
-//
-// $Id: ConfigTestUtils.java 47163 2012-08-01 23:09:47Z rnorris $
-//
 package edu.gemini.spModel.config2.test;
 
 import edu.gemini.spModel.config2.Config;
@@ -32,9 +29,9 @@ public final class ConfigTestUtils {
      */
     public static void assertConfigContains(Object[][] itemVals, Config config) {
         Assert.assertEquals(itemVals.length, config.size());
-        for (int i=0; i<itemVals.length; ++i) {
-            ItemKey key = new ItemKey((String) itemVals[i][0]);
-            Assert.assertEquals(itemVals[i][1], config.getItemValue(key));
+        for (Object[] itemVal : itemVals) {
+            ItemKey key = new ItemKey((String) itemVal[0]);
+            Assert.assertEquals(itemVal[1], config.getItemValue(key));
         }
     }
 
@@ -44,10 +41,9 @@ public final class ConfigTestUtils {
             configs[i] = new DefaultConfig();
 
             Object[][] step = steps[i];
-            for (int j=0; j<step.length; ++j) {
-                Object[] itemDesc = step[j];
+            for (Object[] itemDesc : step) {
                 ItemKey key = new ItemKey((String) itemDesc[0]);
-                Object  val = itemDesc[1];
+                Object val = itemDesc[1];
                 configs[i].putItem(key, val);
             }
         }
@@ -64,8 +60,8 @@ public final class ConfigTestUtils {
     public static void assertUnorderedValues(Object[] expected, Object[] actual) {
         Assert.assertEquals(expected.length, actual.length);
 
-        Set expectedset = new HashSet();
-        Set actualset = new HashSet();
+        Set<Object> expectedset = new HashSet<>();
+        Set<Object> actualset = new HashSet<>();
         for (int i=0; i<expectedset.size(); ++i) {
             expectedset.add(expected[i]);
             actualset.add(actual[i]);
@@ -75,7 +71,7 @@ public final class ConfigTestUtils {
 
     public static void printConfig(Config config) {
         ItemEntry[] entryArray = config.itemEntries();
-        Arrays.sort(entryArray, new Comparator() {
+        Arrays.sort(entryArray, new Comparator<Object>() {
             public int compare(Object o1, Object o2) {
                 ItemEntry ie1 = (ItemEntry) o1;
                 ItemEntry ie2 = (ItemEntry) o2;
@@ -84,8 +80,7 @@ public final class ConfigTestUtils {
             }
         });
 
-        for (int i=0; i<entryArray.length; ++i) {
-            ItemEntry ie = entryArray[i];
+        for (ItemEntry ie : entryArray) {
             System.out.println(ie.getKey() + " -> " + ie.getItemValue());
         }
     }

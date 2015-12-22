@@ -1,11 +1,3 @@
-// Copyright 2000
-// Association for Universities for Research in Astronomy, Inc.
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: TestDataObjectSeqCompCB.java 27568 2010-10-25 18:03:42Z swalker $
-//
-
 package edu.gemini.spModel.config.test;
 
 import edu.gemini.spModel.config.AbstractSeqComponentCB;
@@ -19,20 +11,19 @@ import edu.gemini.pot.sp.ISPSeqComponent;
 
 import java.util.*;
 
-
 public class TestDataObjectSeqCompCB extends AbstractSeqComponentCB {
 
     private class SeqData {
 
         String name;
-        Iterator iter;
+        Iterator<?> iter;
     }
 
     private transient ISysConfig _sysConfig;
 
     private transient String _systemName;
-    private transient List _normalParamList;  // List of IParameter
-    private transient List _seqDataList;      // List of SeqData
+    private transient List<IParameter> _normalParamList;  // List of IParameter
+    private transient List<SeqData> _seqDataList;      // List of SeqData
 
     public TestDataObjectSeqCompCB(ISPSeqComponent seqComp) {
         super(seqComp);
@@ -47,7 +38,8 @@ public class TestDataObjectSeqCompCB extends AbstractSeqComponentCB {
         return result;
     }
 
-    protected void thisReset(Map options) {
+    @Override
+    protected void thisReset(Map<String, Object> options) {
         TestDataObject dataObj = (TestDataObject) getDataObject();
         _sysConfig = dataObj.getSysConfig();
 
@@ -56,15 +48,13 @@ public class TestDataObjectSeqCompCB extends AbstractSeqComponentCB {
         }
 
         _systemName = _sysConfig.getSystemName();
-        _normalParamList = new LinkedList();
-        _seqDataList = new LinkedList();
+        _normalParamList = new LinkedList<>();
+        _seqDataList = new LinkedList<>();
 
-        Iterator it = _sysConfig.getParameters().iterator();
-        while (it.hasNext()) {
-            IParameter param = (IParameter) it.next();
+        for (IParameter param : _sysConfig.getParameters()) {
             Object value = param.getValue();
             if (value instanceof Collection) {
-                Iterator valueIt = ((Collection) value).iterator();
+                Iterator<?> valueIt = ((Collection<?>) value).iterator();
                 if (valueIt.hasNext()) {
                     SeqData sd = new SeqData();
                     sd.name = param.getName();
@@ -94,9 +84,7 @@ public class TestDataObjectSeqCompCB extends AbstractSeqComponentCB {
 
     protected void thisApplyNext(IConfig config, IConfig prevFull) {
         if (_normalParamList.size() > 0) {
-            Iterator it = _normalParamList.iterator();
-            while (it.hasNext()) {
-                IParameter param = (IParameter) it.next();
+            for (IParameter param : _normalParamList) {
                 IParameter param2 = DefaultParameter.getInstance(param.getName(), param.getValue());
                 config.putParameter(_systemName, param2);
             }
@@ -104,10 +92,10 @@ public class TestDataObjectSeqCompCB extends AbstractSeqComponentCB {
         }
 
         if (_seqDataList.size() > 0) {
-            ListIterator lit = _seqDataList.listIterator();
+            ListIterator<SeqData> lit = _seqDataList.listIterator();
 
             while (lit.hasNext()) {
-                SeqData sd = (SeqData) lit.next();
+                SeqData sd = lit.next();
                 IParameter param2 = DefaultParameter.getInstance(sd.name, sd.iter.next());
                 config.putParameter(_systemName, param2);
                 if (!sd.iter.hasNext()) {

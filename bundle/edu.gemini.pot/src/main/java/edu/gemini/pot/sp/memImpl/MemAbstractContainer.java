@@ -1,10 +1,3 @@
-// Copyright 1999 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: MemAbstractContainer.java 46999 2012-07-26 16:44:58Z swalker $
-//
-
 package edu.gemini.pot.sp.memImpl;
 
 import edu.gemini.pot.sp.*;
@@ -52,16 +45,16 @@ public abstract class MemAbstractContainer extends MemProgramNodeBase implements
      * upon the child type.
      */
     protected static class TypedChildren {
-        private Map<Class<?>, List<ISPNode>> _typedChildren = new HashMap<Class<?>, List<ISPNode>>();
+        private Map<Class<?>, List<ISPNode>> _typedChildren = new HashMap<>();
 
         private TypedChildren() {
         }
 
         private void addChild(ISPNode child) {
-            Class type = child.getClass();
+            Class<?> type = child.getClass();
             List<ISPNode> childList = _typedChildren.get(type);
             if (childList == null) {
-                childList = new ArrayList<ISPNode>();
+                childList = new ArrayList<>();
                 _typedChildren.put(type, childList);
             }
             childList.add(child);
@@ -104,10 +97,9 @@ public abstract class MemAbstractContainer extends MemProgramNodeBase implements
          *
          * @param validTypes valid types for this node
          */
-        public void verify(Class[] validTypes) {
-            Set<Class> childTypes = new HashSet<Class>(_typedChildren.keySet());
-            for (int i = 0; i < validTypes.length; ++i) {
-                Class type = validTypes[i];
+        public void verify(Class<?>[] validTypes) {
+            Set<Class<?>> childTypes = new HashSet<>(_typedChildren.keySet());
+            for (Class<?> type : validTypes) {
                 // Remove this valid type from the set of actual child types,
                 // if it exists.
                 childTypes.remove(type);
@@ -118,12 +110,12 @@ public abstract class MemAbstractContainer extends MemProgramNodeBase implements
             if (childTypes.size() > 0) {
                 // Format the invalid types in a string so that the exception
                 // will be more meaningful.
-                StringBuffer buf = new StringBuffer("Illegal child type(s) for ");
+                StringBuilder buf = new StringBuilder("Illegal child type(s) for ");
                 buf.append(getClass().getName()).append(": ");
-                Iterator it = childTypes.iterator();
-                buf.append(((Class) it.next()).getName());
+                Iterator<Class<?>> it = childTypes.iterator();
+                buf.append(it.next().getName());
                 while (it.hasNext()) {
-                    buf.append(", ").append(((Class) it.next()).getName());
+                    buf.append(", ").append(it.next().getName());
                 }
                 throw new ClassCastException(buf.toString());
             }
@@ -268,20 +260,18 @@ public abstract class MemAbstractContainer extends MemProgramNodeBase implements
      * <p/>
      * <p>Assumes write permission.
      */
+    @SuppressWarnings("rawtypes")
     protected void attachChildren(Collection newChildren) throws SPNodeNotLocalException, SPTreeStateException {
         // Make sure write permission is held.
         if (!haveProgramWriteLock()) throw new IllegalStateException("Do not have program write lock.");
 
         // Remember the children that are attached, in case we have to roll back.
         try {
-            Iterator it = newChildren.iterator();
-            while (it.hasNext()) {
-                MemAbstractBase mab = (MemAbstractBase) it.next();
+            for (Object aNewChildren : newChildren) {
+                MemAbstractBase mab = (MemAbstractBase) aNewChildren;
                 if (mab.getParent() != this) mab.attachTo(this);
             }
-        } catch (SPNodeNotLocalException ex) {
-            throw ex;
-        } catch (SPTreeStateException ex) {
+        } catch (SPNodeNotLocalException | SPTreeStateException ex) {
             throw ex;
         }
     }
@@ -292,12 +282,12 @@ public abstract class MemAbstractContainer extends MemProgramNodeBase implements
      * <p/>
      * <p>Assumes write permission.
      */
+    @SuppressWarnings("rawtypes")
     protected void extractChildren(Collection children) {
         // Make sure write permission is held.
         if (!haveProgramWriteLock()) throw new IllegalStateException("Do not have program write lock.");
-        Iterator it = children.iterator();
-        while (it.hasNext()) {
-            MemAbstractBase mab = (MemAbstractBase) it.next();
+        for (Object aChildren : children) {
+            MemAbstractBase mab = (MemAbstractBase) aChildren;
             mab.detachFrom(this);
         }
     }
@@ -314,6 +304,8 @@ public abstract class MemAbstractContainer extends MemProgramNodeBase implements
      * @throws SPNodeNotLocalException if any object in the <code>newList</code>
      *                                 is not local
      */
+    // CQ This method cannot be properly made generic, it shouldn't be writing to oldChildren but instead return a new copy
+    @SuppressWarnings({"unchecked", "rawtypes"})
     protected void updateChildren(Collection oldChildren, Collection newChildren) throws SPNodeNotLocalException, SPTreeStateException {
         // Make sure write permission is held.
         if (!haveProgramWriteLock()) throw new IllegalStateException("Do not have program write lock.");
@@ -323,9 +315,8 @@ public abstract class MemAbstractContainer extends MemProgramNodeBase implements
         // and "addList" will contain only the nodes to be added.
         Set rmSet = new HashSet(oldChildren);
         List addList = new LinkedList();
-        Iterator it = newChildren.iterator();
-        while (it.hasNext()) {
-            MemAbstractBase mab = (MemAbstractBase) it.next();
+        for (Object aNewChildren : newChildren) {
+            MemAbstractBase mab = (MemAbstractBase) aNewChildren;
 
             // There are 2 possibilities for mab:
             //
@@ -355,7 +346,7 @@ public abstract class MemAbstractContainer extends MemProgramNodeBase implements
         // If we are just rearranging items within this node, no modification
         // is recorded as a result of attaching or extracting children so be
         // sure to mark the node modified here.
-        if ((v0 == v1) && !oldChildren.equals(newChildren)) markModified();
+        if ((v0.equals(v1)) && !oldChildren.equals(newChildren)) markModified();
         oldChildren.clear();
         oldChildren.addAll(newChildren);
     }
@@ -382,11 +373,9 @@ public abstract class MemAbstractContainer extends MemProgramNodeBase implements
      * @throws ClassCastException if any member of the <code>collection</code>
      *                            is not an instance of the given <code>type</code>
      */
-    public static void checkChildTypes(Collection collection, Class type)
+    public static void checkChildTypes(Collection<?> collection, Class<?> type)
             throws SPTreeStateException {
-        Iterator it = collection.iterator();
-        while (it.hasNext()) {
-            Object obj = it.next();
+        for (Object obj : collection) {
             if (!type.isInstance(obj)) {
                 throw new SPTreeStateException("Object " + obj + " is not instance of " +
                         type.getName() + ".");

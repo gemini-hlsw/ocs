@@ -1,6 +1,3 @@
-//
-// $Id: ConfigSequenceTest.java 47163 2012-08-01 23:09:47Z rnorris $
-//
 package edu.gemini.spModel.config2.test;
 
 import junit.framework.TestCase;
@@ -24,7 +21,6 @@ public class ConfigSequenceTest extends TestCase {
     private Config _config0;
     private Config _config1;
     private Config _config2;
-
 
     public void setUp() {
         _config0 = new DefaultConfig();
@@ -415,13 +411,13 @@ public class ConfigSequenceTest extends TestCase {
 
     public void testIterator() {
         // Test the iterator of an empty sequence
-        Iterator it = _emptySeq.iterator();
+        Iterator<Config> it = _emptySeq.iterator();
         assertFalse(it.hasNext());
 
         // Get the first Config from the _seq.
         it = _seq.iterator();
         assertTrue(it.hasNext());
-        Config config = (Config) it.next();
+        Config config = it.next();
 
         // Make sure it contains what we expect
         ConfigTestUtils.assertConfigContains(new String[][] {
@@ -446,7 +442,7 @@ public class ConfigSequenceTest extends TestCase {
 
         // Finally, just iterate the last two steps.
         assertTrue(it.hasNext());
-        config = (Config) it.next();
+        config = it.next();
         ConfigTestUtils.assertConfigContains(new String[][] {
             {_nochangeKey.getPath(),   "nochange" },
             {_changeKey.getPath(),     "change1"  },
@@ -454,7 +450,7 @@ public class ConfigSequenceTest extends TestCase {
         }, config);
 
         assertTrue(it.hasNext());
-        config = (Config) it.next();
+        config = it.next();
         ConfigTestUtils.assertConfigContains(new String[][] {
             {_nochangeKey.getPath(),   "nochange" },
             {_changeKey.getPath(),     "change2"  },
@@ -468,13 +464,13 @@ public class ConfigSequenceTest extends TestCase {
 
     public void testCompactIterator() {
         // Test the compact iterator of an empty sequence
-        Iterator it = _emptySeq.iterator();
+        Iterator<Config> it = _emptySeq.iterator();
         assertFalse(it.hasNext());
 
         // Get the first Config of the _seq
         it = _seq.compactIterator();
         assertTrue(it.hasNext());
-        Config config = (Config) it.next();
+        Config config = it.next();
 
         // Make sure it contains what we expect
         ConfigTestUtils.assertConfigContains(new String[][] {
@@ -499,14 +495,14 @@ public class ConfigSequenceTest extends TestCase {
 
         // Finally, just iterate the last two steps.
         assertTrue(it.hasNext());
-        config = (Config) it.next();
+        config = it.next();
         ConfigTestUtils.assertConfigContains(new String[][] {
             {_changeKey.getPath(),     "change1"  },
             {_newKey1.getPath(),       "new1"     },
         }, config);
 
         assertTrue(it.hasNext());
-        config = (Config) it.next();
+        config = it.next();
         ConfigTestUtils.assertConfigContains(new String[][] {
             {_changeKey.getPath(),     "change2"  },
             {_newKey2.getPath(),       "new2"     },

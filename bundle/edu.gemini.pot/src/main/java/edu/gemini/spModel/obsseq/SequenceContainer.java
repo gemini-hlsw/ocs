@@ -1,6 +1,3 @@
-//
-// $Id: SequenceContainer.java 5860 2005-03-08 17:10:38Z shane $
-//
 package edu.gemini.spModel.obsseq;
 
 import java.util.Iterator;
@@ -64,7 +61,7 @@ public interface SequenceContainer {
      *
      * @return Iterator of {@link Sequence} children
      */
-    Iterator sequenceIterator();
+    Iterator<Sequence> sequenceIterator();
 
     /**
      * Returns the {@link Sequence} child at the specified <code>index</code>.

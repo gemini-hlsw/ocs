@@ -1,7 +1,3 @@
-// Copyright 1999 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-
 package edu.gemini.pot.sp.memImpl;
 
 import edu.gemini.pot.sp.*;
@@ -30,7 +26,7 @@ public final class MemObservation extends MemAbstractContainer implements ISPObs
     private int _obsNumber;
 
     // The list of observation components
-    private final List<ISPObsComponent> _compList = new ArrayList<ISPObsComponent>();
+    private final List<ISPObsComponent> _compList = new ArrayList<>();
 
     private MemObsQaLog _obsQaLog;
     private MemObsExecLog _obsExecLog;
@@ -199,7 +195,7 @@ public final class MemObservation extends MemAbstractContainer implements ISPObs
         // Make a list copy so the client gets a stable version
         getProgramReadLock();
         try {
-            return new ArrayList<ISPObsComponent>(_compList);
+            return new ArrayList<>(_compList);
         } finally {
             returnProgramReadLock();
         }
@@ -208,10 +204,10 @@ public final class MemObservation extends MemAbstractContainer implements ISPObs
     public void setObsComponents(List<? extends ISPObsComponent> newCompList) throws SPNodeNotLocalException, SPTreeStateException {
         checkChildTypes(newCompList, ISPObsComponent.class);
 
-        List<ISPObsComponent> newCopy = new ArrayList<ISPObsComponent>(newCompList);
+        List<ISPObsComponent> newCopy = new ArrayList<>(newCompList);
         getProgramWriteLock();
         try {
-            List<ISPObsComponent> oldCopy = new ArrayList<ISPObsComponent>(_compList);
+            List<ISPObsComponent> oldCopy = new ArrayList<>(_compList);
             updateChildren(_compList, newCopy);
             firePropertyChange(OBS_COMPONENTS_PROP, oldCopy, newCopy);
             fireStructureChange(OBS_COMPONENTS_PROP, this, oldCopy, newCopy);
@@ -226,10 +222,10 @@ public final class MemObservation extends MemAbstractContainer implements ISPObs
         MemObsComponent node = (MemObsComponent) obsComp;
         getProgramWriteLock();
         try {
-            List<ISPObsComponent> oldCopy = new ArrayList<ISPObsComponent>(_compList);
+            List<ISPObsComponent> oldCopy = new ArrayList<>(_compList);
             node.attachTo(this);
             _compList.add(node);
-            List<ISPObsComponent> newCopy = new ArrayList<ISPObsComponent>(_compList);
+            List<ISPObsComponent> newCopy = new ArrayList<>(_compList);
             firePropertyChange(OBS_COMPONENTS_PROP, oldCopy, newCopy);
             fireStructureChange(OBS_COMPONENTS_PROP, this, oldCopy, newCopy);
         } finally {
@@ -243,10 +239,10 @@ public final class MemObservation extends MemAbstractContainer implements ISPObs
         MemObsComponent node = (MemObsComponent) obsComp;
         getProgramWriteLock();
         try {
-            List<ISPObsComponent> oldCopy = new ArrayList<ISPObsComponent>(_compList);
+            List<ISPObsComponent> oldCopy = new ArrayList<>(_compList);
             node.attachTo(this);
             _compList.add(index, node);
-            List<ISPObsComponent> newCopy = new ArrayList<ISPObsComponent>(_compList);
+            List<ISPObsComponent> newCopy = new ArrayList<>(_compList);
             firePropertyChange(OBS_COMPONENTS_PROP, oldCopy, newCopy);
             fireStructureChange(OBS_COMPONENTS_PROP, this, oldCopy, newCopy);
         } finally {
@@ -263,10 +259,10 @@ public final class MemObservation extends MemAbstractContainer implements ISPObs
                 System.out.println("Component was not located and can't be removed.");
                 return;
             }
-            List<ISPObsComponent> oldCopy = new ArrayList<ISPObsComponent>(_compList);
+            List<ISPObsComponent> oldCopy = new ArrayList<>(_compList);
             node.detachFrom(this);
             _compList.remove(index);
-            List<ISPObsComponent> newCopy = new ArrayList<ISPObsComponent>(_compList);
+            List<ISPObsComponent> newCopy = new ArrayList<>(_compList);
             firePropertyChange(OBS_COMPONENTS_PROP, oldCopy, newCopy);
             fireStructureChange(OBS_COMPONENTS_PROP, this, oldCopy, newCopy);
         } finally {
@@ -320,13 +316,12 @@ public final class MemObservation extends MemAbstractContainer implements ISPObs
     public List<ISPNode> getChildren() {
         getProgramReadLock();
         try {
-            List<ISPNode> res = new ArrayList<ISPNode>();
+            List<ISPNode> res = new ArrayList<>();
             if (getConflictFolder() != null) res.add(getConflictFolder());
             res.addAll(getObsComponents());
             if (_obsQaLog != null) res.add(_obsQaLog);
             if (_obsExecLog != null) res.add(_obsExecLog);
             ISPSeqComponent seqComp = getSeqComponent();
-            ;
             if (seqComp != null) res.add(seqComp);
             return res;
         } finally {
@@ -334,7 +329,7 @@ public final class MemObservation extends MemAbstractContainer implements ISPObs
         }
     }
 
-    private static final Class[] VALID_CHILD_TYPES = {
+    private static final Class<?>[] VALID_CHILD_TYPES = {
             MemConflictFolder.class,
             MemObsComponent.class,
             MemObsQaLog.class,
@@ -370,10 +365,5 @@ public final class MemObservation extends MemAbstractContainer implements ISPObs
         return _program;
     }
 
-//    @Override
-//    public int getStepCount() {
-//        final ISPSeqComponent sc = getSeqComponent();
-//        return (sc == null) ? 0 : sc.getStepCount();
-//    }
 }
 

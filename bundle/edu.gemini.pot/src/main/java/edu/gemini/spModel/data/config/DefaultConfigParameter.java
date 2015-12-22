@@ -1,15 +1,4 @@
-// Copyright 2000
-// Association for Universities for Research in Astronomy, Inc.
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: DefaultConfigParameter.java 38078 2011-10-18 15:15:29Z swalker $
-//
-
 package edu.gemini.spModel.data.config;
-
-import java.util.Iterator;
-
 
 /**
  * A simple implementation of the <code>IParameter</code>
@@ -103,16 +92,6 @@ public class DefaultConfigParameter implements IConfigParameter {
 
         ISysConfig src = (ISysConfig) obj;
         _config = (ISysConfig) src.clone();
-    }
-
-    /**
-     * Diagnostic method to dump the contents of a <code>DefaultConfigParameter</code>
-     */
-    public void dump() {
-        Iterator i = _config.getParameters().iterator();
-        while (i.hasNext()) {
-            ((IParameter) i.next()).getAsString();
-        }
     }
 
     /**

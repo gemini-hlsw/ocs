@@ -19,7 +19,7 @@ public final class MemSerializer {
             this.loader = loader;
         }
 
-        @Override protected Class resolveClass(ObjectStreamClass osc) throws IOException, ClassNotFoundException {
+        @Override protected Class<?> resolveClass(ObjectStreamClass osc) throws IOException, ClassNotFoundException {
             try {
                 return Class.forName(osc.getName(), false, loader);
             } catch (ClassNotFoundException ex) {

@@ -61,7 +61,7 @@ public interface IConfigBuilder extends ISPCloneable, Serializable {
      * and may be called subsequently to iterate over the available
      * configurations from the beginning.
      */
-    void reset(Map options);
+    void reset(Map<String, Object> options);
 
     /**
      * Returns <code>true</code> if more configuration information is

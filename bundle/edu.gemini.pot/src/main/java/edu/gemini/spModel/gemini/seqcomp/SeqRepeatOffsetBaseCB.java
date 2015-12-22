@@ -1,11 +1,3 @@
-// Copyright 2000
-// Association for Universities for Research in Astronomy, Inc.
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: SeqRepeatOffsetBaseCB.java 45173 2012-05-10 19:45:13Z swalker $
-//
-
 package edu.gemini.spModel.gemini.seqcomp;
 
 import edu.gemini.pot.sp.ISPSeqComponent;
@@ -25,7 +17,6 @@ import edu.gemini.spModel.target.offset.OffsetPosBase;
 import edu.gemini.spModel.target.offset.OffsetPosList;
 
 import java.util.*;
-
 
 public abstract class SeqRepeatOffsetBaseCB<P extends OffsetPosBase> extends AbstractSeqComponentCB {
     private static final String GUIDING_PROP = "guiding";
@@ -55,7 +46,8 @@ public abstract class SeqRepeatOffsetBaseCB<P extends OffsetPosBase> extends Abs
         return result;
     }
 
-    protected void thisReset(Map options) {
+    @Override
+    protected void thisReset(Map<String, Object> options) {
         _curCount = 0;
         //noinspection unchecked
         SeqRepeatOffsetBase<P> sro = (SeqRepeatOffsetBase<P>) getDataObject();
@@ -88,7 +80,7 @@ public abstract class SeqRepeatOffsetBaseCB<P extends OffsetPosBase> extends Abs
             guideState = GuideState.forDefaultOption(defaultOption);
         } else {
             final Set<Map.Entry<GuideProbe, GuideOption>> links = op.getLinks().entrySet();
-            final List<ExplicitGuideSetting> res = new ArrayList<ExplicitGuideSetting>(links.size());
+            final List<ExplicitGuideSetting> res = new ArrayList<>(links.size());
             for (Map.Entry<GuideProbe, GuideOption> me : op.getLinks().entrySet()) {
                 res.add(new ExplicitGuideSetting(me.getKey(), me.getValue()));
             }

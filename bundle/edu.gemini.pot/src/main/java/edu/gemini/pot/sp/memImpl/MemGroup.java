@@ -7,8 +7,6 @@ import java.util.ArrayList;
 import java.util.ListIterator;
 import java.util.Set;
 import java.util.HashSet;
-import java.util.Iterator;
-
 
 /**
  * This class provides an in-memory, non-persistent implementation of the
@@ -18,10 +16,10 @@ public final class MemGroup extends MemAbstractContainer implements ISPGroup {
     private final MemProgram _program;
 
     // The list of observation components
-    private final List<ISPObsComponent> _compList = new ArrayList<ISPObsComponent>();
+    private final List<ISPObsComponent> _compList = new ArrayList<>();
 
     // The list of observations
-    private final List<ISPObservation> _obsList = new ArrayList<ISPObservation>();
+    private final List<ISPObservation> _obsList = new ArrayList<>();
 
     public MemGroup(MemProgram prog, SPNodeKey key)  {
         super(prog.getDocumentData(), key);
@@ -81,7 +79,7 @@ public final class MemGroup extends MemAbstractContainer implements ISPGroup {
         // Make a list copy so the client gets a stable version
         getProgramReadLock();
         try {
-            return new ArrayList<ISPObsComponent>(_compList);
+            return new ArrayList<>(_compList);
         } finally {
             returnProgramReadLock();
         }
@@ -92,10 +90,10 @@ public final class MemGroup extends MemAbstractContainer implements ISPGroup {
 
         // Convert the stubs in the newCompList into local object references.
         // This will throw SPNodeNotLocalException if any are not in fact local.
-        List<ISPObsComponent> newCopy = new ArrayList<ISPObsComponent>(newCompList);
+        List<ISPObsComponent> newCopy = new ArrayList<>(newCompList);
         getProgramWriteLock();
         try {
-            List<ISPObsComponent> oldCopy = new ArrayList<ISPObsComponent>(_compList);
+            List<ISPObsComponent> oldCopy = new ArrayList<>(_compList);
             updateChildren(_compList, newCopy);
             firePropertyChange(OBS_COMPONENTS_PROP, oldCopy, newCopy);
             fireStructureChange(OBS_COMPONENTS_PROP, this, oldCopy, newCopy);
@@ -110,10 +108,10 @@ public final class MemGroup extends MemAbstractContainer implements ISPGroup {
         MemObsComponent node = (MemObsComponent) obsComp;
         getProgramWriteLock();
         try {
-            List<ISPObsComponent> oldCopy = new ArrayList<ISPObsComponent>(_compList);
+            List<ISPObsComponent> oldCopy = new ArrayList<>(_compList);
             node.attachTo(this);
             _compList.add(node);
-            List<ISPObsComponent> newCopy = new ArrayList<ISPObsComponent>(_compList);
+            List<ISPObsComponent> newCopy = new ArrayList<>(_compList);
             firePropertyChange(OBS_COMPONENTS_PROP, oldCopy, newCopy);
             fireStructureChange(OBS_COMPONENTS_PROP, this, oldCopy, newCopy);
         } finally {
@@ -127,10 +125,10 @@ public final class MemGroup extends MemAbstractContainer implements ISPGroup {
         MemObsComponent node = (MemObsComponent) obsComp;
         getProgramWriteLock();
         try {
-            List<ISPObsComponent> oldCopy = new ArrayList<ISPObsComponent>(_compList);
+            List<ISPObsComponent> oldCopy = new ArrayList<>(_compList);
             node.attachTo(this);
             _compList.add(index, node);
-            List<ISPObsComponent> newCopy = new ArrayList<ISPObsComponent>(_compList);
+            List<ISPObsComponent> newCopy = new ArrayList<>(_compList);
             firePropertyChange(OBS_COMPONENTS_PROP, oldCopy, newCopy);
             fireStructureChange(OBS_COMPONENTS_PROP, this, oldCopy, newCopy);
         } finally {
@@ -150,10 +148,10 @@ public final class MemGroup extends MemAbstractContainer implements ISPGroup {
                 System.out.println("Component was not located and can't be removed.");
                 return;
             }
-            List<ISPObsComponent> oldCopy = new ArrayList<ISPObsComponent>(_compList);
+            List<ISPObsComponent> oldCopy = new ArrayList<>(_compList);
             node.detachFrom(this);
             _compList.remove(index);
-            List<ISPObsComponent> newCopy = new ArrayList<ISPObsComponent>(_compList);
+            List<ISPObsComponent> newCopy = new ArrayList<>(_compList);
             firePropertyChange(OBS_COMPONENTS_PROP, oldCopy, newCopy);
             fireStructureChange(OBS_COMPONENTS_PROP, this, oldCopy, newCopy);
         } finally {
@@ -164,7 +162,7 @@ public final class MemGroup extends MemAbstractContainer implements ISPGroup {
     public List<ISPObservation> getObservations() {
         getProgramReadLock();
         try {
-            return new ArrayList<ISPObservation>(_obsList);
+            return new ArrayList<>(_obsList);
         } finally {
             returnProgramReadLock();
         }
@@ -177,13 +175,13 @@ public final class MemGroup extends MemAbstractContainer implements ISPGroup {
     public void setObservations(List<? extends ISPObservation> newObsList) throws SPNodeNotLocalException, SPTreeStateException {
         checkChildTypes(newObsList, ISPObservation.class);
 
-        List<ISPObservation> newCopy = new ArrayList<ISPObservation>(newObsList);
+        List<ISPObservation> newCopy = new ArrayList<>(newObsList);
 
         // Check for duplicate sequence ids in the new obs list.
-        Set<Integer> taken = new HashSet<Integer>(newCopy.size());
-        for (Iterator it = newCopy.iterator(); it.hasNext();) {
-            MemObservation obs = (MemObservation) it.next();
-            Integer obsNum = new Integer(obs.getObservationNumber());
+        Set<Integer> taken = new HashSet<>(newCopy.size());
+        for (ISPObservation aNewCopy : newCopy) {
+            MemObservation obs = (MemObservation) aNewCopy;
+            Integer obsNum = obs.getObservationNumber();
             if (taken.contains(obsNum)) {
                 throw new SPTreeStateException("There are at least two observations with number: " + obsNum);
             }
@@ -191,7 +189,7 @@ public final class MemGroup extends MemAbstractContainer implements ISPGroup {
         }
         getProgramWriteLock();
         try {
-            List<ISPObservation> oldCopy = new ArrayList<ISPObservation>(_obsList);
+            List<ISPObservation> oldCopy = new ArrayList<>(_obsList);
             updateChildren(_obsList, newCopy);
             firePropertyChange(OBSERVATIONS_PROP, oldCopy, newCopy);
             fireStructureChange(OBSERVATIONS_PROP, this, oldCopy, newCopy);
@@ -203,8 +201,8 @@ public final class MemGroup extends MemAbstractContainer implements ISPGroup {
     private void checkForDuplicate(MemObservation localObs) throws SPTreeStateException {
         // Check for duplicate observation id.
         int newObsNum = localObs.getObservationNumber();
-        for (Iterator it = getObservations().iterator(); it.hasNext();) {
-            MemObservation obs = (MemObservation) it.next();
+        for (ISPObservation ispObservation : getObservations()) {
+            MemObservation obs = (MemObservation) ispObservation;
             int obsNum = obs.getObservationNumber();
             if (newObsNum == obsNum) {
                 throw new SPTreeStateException("There is an existing observation with number: " + obsNum);
@@ -219,10 +217,10 @@ public final class MemGroup extends MemAbstractContainer implements ISPGroup {
         checkForDuplicate(node);
         getProgramWriteLock();
         try {
-            List<ISPObservation> oldCopy = new ArrayList<ISPObservation>(_obsList);
+            List<ISPObservation> oldCopy = new ArrayList<>(_obsList);
             node.attachTo(this);
             _obsList.add(node);
-            List<ISPObservation> newCopy = new ArrayList<ISPObservation>(_obsList);
+            List<ISPObservation> newCopy = new ArrayList<>(_obsList);
             firePropertyChange(OBSERVATIONS_PROP, oldCopy, newCopy);
             fireStructureChange(OBSERVATIONS_PROP, this, oldCopy, newCopy);
         } finally {
@@ -237,10 +235,10 @@ public final class MemGroup extends MemAbstractContainer implements ISPGroup {
         checkForDuplicate(node);
         getProgramWriteLock();
         try {
-            List<ISPObservation> oldCopy = new ArrayList<ISPObservation>(_obsList);
+            List<ISPObservation> oldCopy = new ArrayList<>(_obsList);
             node.attachTo(this);
             _obsList.add(pos, node);
-            List<ISPObservation> newCopy = new ArrayList<ISPObservation>(_obsList);
+            List<ISPObservation> newCopy = new ArrayList<>(_obsList);
             firePropertyChange(OBSERVATIONS_PROP, oldCopy, newCopy);
             fireStructureChange(OBSERVATIONS_PROP, this, oldCopy, newCopy);
         } finally {
@@ -257,10 +255,10 @@ public final class MemGroup extends MemAbstractContainer implements ISPGroup {
                 //System.out.println("Observation not located and can't be removed.");
                 return;
             }
-            List<ISPObservation> oldCopy = new ArrayList<ISPObservation>(_obsList);
+            List<ISPObservation> oldCopy = new ArrayList<>(_obsList);
             node.detachFrom(this);
             _obsList.remove(index);
-            List<ISPObservation> newCopy = new ArrayList<ISPObservation>(_obsList);
+            List<ISPObservation> newCopy = new ArrayList<>(_obsList);
             firePropertyChange(OBSERVATIONS_PROP, oldCopy, newCopy);
             fireStructureChange(OBSERVATIONS_PROP, this, oldCopy, newCopy);
         } finally {
@@ -275,7 +273,7 @@ public final class MemGroup extends MemAbstractContainer implements ISPGroup {
     public List<ISPNode> getChildren() {
         getProgramReadLock();
         try {
-            List<ISPNode> res = new ArrayList<ISPNode>();
+            List<ISPNode> res = new ArrayList<>();
             if (getConflictFolder() != null) res.add(getConflictFolder());
             res.addAll(getObsComponents());
             res.addAll(getObservations());
@@ -285,7 +283,7 @@ public final class MemGroup extends MemAbstractContainer implements ISPGroup {
         }
     }
 
-    private static final Class[] VALID_CHILD_TYPES = {
+    private static final Class<?>[] VALID_CHILD_TYPES = {
         MemConflictFolder.class,
         MemObsComponent.class,
         MemObservation.class,

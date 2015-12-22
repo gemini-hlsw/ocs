@@ -1,11 +1,3 @@
-// Copyright 2000
-// Association for Universities for Research in Astronomy, Inc.
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: SeqRepeatFlatObsCB.java 38799 2011-11-18 15:28:38Z swalker $
-//
-
 package edu.gemini.spModel.gemini.seqcomp;
 
 import edu.gemini.pot.sp.ISPSeqComponent;
@@ -21,7 +13,6 @@ import edu.gemini.spModel.seqcomp.SeqRepeatCbOptions;
 
 import java.util.Map;
 
-
 /**
  * A configuration builder for the Gemini CalUnit sequence
  * component that include coadds and exposure time.
@@ -30,7 +21,7 @@ public class SeqRepeatFlatObsCB extends AbstractSeqComponentCB {
     private transient int _curCount;
     private transient int _max;
     private transient int _limit;
-    private transient Map _options;
+    private transient Map<String, Object> _options;
 
     private transient String _obsClass;
 
@@ -51,8 +42,8 @@ public class SeqRepeatFlatObsCB extends AbstractSeqComponentCB {
         return result;
     }
 
-
-    protected void thisReset(Map options) {
+    @Override
+    protected void thisReset(Map<String, Object> options) {
         _curCount = 0;
         SeqRepeatFlatObs c = (SeqRepeatFlatObs) getDataObject();
         _max = c.getStepCount();

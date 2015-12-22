@@ -1,11 +1,3 @@
-// Copyright 2000
-// Association for Universities for Research in Astronomy, Inc.
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: SeqRepeatCB.java 27568 2010-10-25 18:03:42Z swalker $
-//
-
 package edu.gemini.spModel.seqcomp;
 
 import edu.gemini.spModel.data.config.IConfig;
@@ -34,7 +26,8 @@ public class SeqRepeatCB extends AbstractSeqComponentCB {
         return result;
     }
 
-    protected void thisReset(Map options) {
+    @Override
+    protected void thisReset(Map<String, Object> options) {
         _curCount = 0;
         _max = SeqRepeatCbOptions.getCollapseRepeat(options) ? 1 :
                                 ((SeqRepeat) getDataObject()).getStepCount();

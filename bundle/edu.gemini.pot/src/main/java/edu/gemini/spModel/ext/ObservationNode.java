@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package edu.gemini.spModel.ext;
 
 import edu.gemini.pot.sp.*;
@@ -16,11 +12,11 @@ import java.util.Collection;
 import java.util.Collections;
 
 /**
- * An observation node and all of the objects it contains in one convient
+ * An observation node and all of the objects it contains in one convinient
  * local object.
  */
 public final class ObservationNode extends AbstractNodeContext<ISPObservation, SPObservation> {
-    private static final long serialVersionUID = 5969850561084118010l;
+    private static final long serialVersionUID = 5969850561084118010L;
 
     private final SPObservationID obsId;
 
@@ -30,7 +26,7 @@ public final class ObservationNode extends AbstractNodeContext<ISPObservation, S
     private final ConstraintsNode constraints;
     private final SequenceNode sequence;
 
-    private final Collection<NodeContext> children;
+    private final Collection<NodeContext<?, ?>> children;
 
     private final boolean isTemplate;
 
@@ -70,7 +66,7 @@ public final class ObservationNode extends AbstractNodeContext<ISPObservation, S
             sequence = new SequenceNode(seqComp);
         }
 
-        final Collection<NodeContext> c = new ArrayList<NodeContext>();
+        final Collection<NodeContext<?, ?>> c = new ArrayList<>();
         if (target != null) c.add(target);
         if (instrument != null) c.add(instrument);
         if (ao != null) c.add(ao);
@@ -118,7 +114,7 @@ public final class ObservationNode extends AbstractNodeContext<ISPObservation, S
      * Gets all of the child nodes in a single collection, which is useful
      * for methods that process all the nodes in a generic way.
      */
-    public Collection<NodeContext> getChildren() {
+    public Collection<NodeContext<?, ?>> getChildren() {
         return children;
     }
 

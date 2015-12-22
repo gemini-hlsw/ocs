@@ -22,12 +22,11 @@ public class SeqRepeatGpiOffsetCB extends SeqRepeatOffsetBaseCB<GpiOffsetPos> {
 
     @Override
     public Object clone() {
-        SeqRepeatGpiOffsetCB res = (SeqRepeatGpiOffsetCB) super.clone();
-        return res;
+        return super.clone();
     }
 
     @Override
-    protected void thisReset(Map options) {
+    protected void thisReset(Map<String, Object> options) {
         super.thisReset(options);
     }
 

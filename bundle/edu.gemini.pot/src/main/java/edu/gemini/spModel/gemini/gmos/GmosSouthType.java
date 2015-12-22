@@ -13,7 +13,7 @@ public class GmosSouthType {
             /**
      * Translation Stage options.
      */
-    public static enum StageModeSouth implements GmosCommonType.StageMode {
+    public enum StageModeSouth implements GmosCommonType.StageMode {
         NO_FOLLOW("Do Not Follow"),
         FOLLOW_XYZ("Follow in XYZ(focus)"),
         FOLLOW_XY("Follow in XY") { public boolean isObsolete() { return true;}},
@@ -24,7 +24,7 @@ public class GmosSouthType {
 
         private String _displayValue;
 
-        private StageModeSouth(String displayValue) {
+        StageModeSouth(String displayValue) {
             _displayValue = displayValue;
         }
 
@@ -149,7 +149,7 @@ public class GmosSouthType {
     };
 
 
-    public static enum FilterSouth implements GmosCommonType.Filter {
+    public enum FilterSouth implements GmosCommonType.Filter {
         NONE("None", "none", "none"),
         u_G0332("u_G0332", "u", "0.350"),
         g_G0325("g_G0325", "g", "0.475"),
@@ -187,7 +187,7 @@ public class GmosSouthType {
         private String _logValue;
         private String _wavelength;
 
-        private FilterSouth(String displayValue, String logValue, String wavelength) {
+        FilterSouth(String displayValue, String logValue, String wavelength) {
             _displayValue = displayValue;
             _logValue     = logValue;
             _wavelength   = wavelength;
@@ -248,7 +248,7 @@ public class GmosSouthType {
         }
     };
 
-    public static enum FPUnitSouth implements GmosCommonType.FPUnit {
+    public enum FPUnitSouth implements GmosCommonType.FPUnit {
         FPU_NONE("None", "none"),
         LONGSLIT_1("Longslit 0.25 arcsec", 0.25, "0.25arcsec"),
         LONGSLIT_2("Longslit 0.50 arcsec", 0.50, "0.5arcsec"),
@@ -289,12 +289,12 @@ public class GmosSouthType {
 
 
         // initialize with the name and slit width in arcsec
-        private FPUnitSouth(String displayValue, String logValue) {
+        FPUnitSouth(String displayValue, String logValue) {
             this(displayValue, -1, logValue);
         }
 
         // initialize with the name and slit width in arcsec
-        private FPUnitSouth(String displayValue, double width, String logValue) {
+        FPUnitSouth(String displayValue, double width, String logValue) {
             _displayValue = displayValue;
             _width = width;
             _logValue = logValue;
@@ -436,7 +436,7 @@ public class GmosSouthType {
         }
     }
 
-    public static GmosCommonType.FPUnitBridge FPUNIT_BRIDGE = new GmosCommonType.FPUnitBridge<FPUnitSouth>() {
+    public static GmosCommonType.FPUnitBridge<FPUnitSouth> FPUNIT_BRIDGE = new GmosCommonType.FPUnitBridge<FPUnitSouth>() {
 
         public Class<FPUnitSouth> getPropertyType() {
             return FPUnitSouth.class;

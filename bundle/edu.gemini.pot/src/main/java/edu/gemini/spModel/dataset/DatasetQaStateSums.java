@@ -1,7 +1,3 @@
-//
-// $Id: DatasetQaStateSums.java 7005 2006-05-03 21:31:59Z shane $
-//
-
 package edu.gemini.spModel.dataset;
 
 import java.io.Serializable;
@@ -11,8 +7,8 @@ import java.io.Serializable;
  * holds the count of each number of the various types of DatasetQaState.
  * This is an immutable value object.
  */
-public final class DatasetQaStateSums implements Comparable, Serializable {
-    private static final long serialVersionUID = 1l;
+public final class DatasetQaStateSums implements Comparable<DatasetQaStateSums>, Serializable {
+    private static final long serialVersionUID = 1L;
 
     private int[] _counts = new int[DatasetQaState.values().length];
 
@@ -124,8 +120,8 @@ public final class DatasetQaStateSums implements Comparable, Serializable {
         return res;
     }
 
-    public int compareTo(Object o) {
-        DatasetQaStateSums that = (DatasetQaStateSums) o;
+    @Override
+    public int compareTo(DatasetQaStateSums that) {
         for (int i=0; i<_counts.length; ++i) {
             int res = _counts[i] - that._counts[i];
             if (res != 0) return res;

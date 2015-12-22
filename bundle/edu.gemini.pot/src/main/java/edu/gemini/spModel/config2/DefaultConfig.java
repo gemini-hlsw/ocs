@@ -1,6 +1,3 @@
-//
-// $Id: DefaultConfig.java 38078 2011-10-18 15:15:29Z swalker $
-//
 package edu.gemini.spModel.config2;
 
 import edu.gemini.shared.util.immutable.MapOp;
@@ -18,7 +15,7 @@ public final class DefaultConfig implements Config, Serializable {
 
     public static final DefaultConfig[] EMPTY_ARRAY = new DefaultConfig[0];
 
-    private TreeMap<ItemKey, Object> _configMap = new TreeMap<ItemKey, Object>();
+    private TreeMap<ItemKey, Object> _configMap = new TreeMap<>();
 
     /**
      * Constructs an empty Config object.
@@ -126,7 +123,7 @@ public final class DefaultConfig implements Config, Serializable {
     }
 
     public <K> Map<K, ItemEntry[]> groupBy(MapOp<ItemEntry, K> f) {
-        Map<K, Config> tmp = new HashMap<K, Config>();
+        Map<K, Config> tmp = new HashMap<>();
 
         for (ItemEntry ie : itemEntries()) {
             K key = f.apply(ie);
@@ -139,7 +136,7 @@ public final class DefaultConfig implements Config, Serializable {
         }
 
         // Map the Configs to ItemEntry[].
-        Map<K, ItemEntry[]> res = new HashMap<K, ItemEntry[]>();
+        Map<K, ItemEntry[]> res = new HashMap<>();
         for (Map.Entry<K, Config> me : tmp.entrySet()) {
             res.put(me.getKey(), me.getValue().itemEntries());
         }
@@ -184,9 +181,8 @@ public final class DefaultConfig implements Config, Serializable {
             _configMap.entrySet().removeAll(((DefaultConfig) config)._configMap.entrySet());
         } else {
             ItemEntry[] entries = config.itemEntries();
-            for (int i=0; i<entries.length; ++i) {
-                ItemEntry ie = entries[i];
-                ItemKey   key = ie.getKey();
+            for (ItemEntry ie : entries) {
+                ItemKey key = ie.getKey();
                 if (ie.getItemValue().equals(_configMap.get(key))) {
                     _configMap.remove(key);
                 }
@@ -195,12 +191,12 @@ public final class DefaultConfig implements Config, Serializable {
     }
 
     public void retainAll(ItemKey parent) {
-        _configMap = new TreeMap<ItemKey, Object>(_subMap(parent));
+        _configMap = new TreeMap<>(_subMap(parent));
     }
 
 
     public void retainAll(ItemKey[] parents) {
-        TreeMap<ItemKey, Object> newmap = new TreeMap<ItemKey, Object>();
+        TreeMap<ItemKey, Object> newmap = new TreeMap<>();
         for (ItemKey parent : parents) {
             newmap.putAll(_subMap(parent));
         }
@@ -211,9 +207,9 @@ public final class DefaultConfig implements Config, Serializable {
         if (config instanceof DefaultConfig) {
             _configMap.entrySet().retainAll(((DefaultConfig) config)._configMap.entrySet());
         } else {
-            for (Iterator it=_configMap.entrySet().iterator(); it.hasNext(); ) {
-                Map.Entry me = (Map.Entry) it.next();
-                ItemKey key = (ItemKey) me.getKey();
+            for (Iterator<Map.Entry<ItemKey, Object>> it=_configMap.entrySet().iterator(); it.hasNext(); ) {
+                Map.Entry<ItemKey, Object> me = it.next();
+                ItemKey key = me.getKey();
                 Object val  = me.getValue();
                 if (!val.equals(config.getItemValue(key))) {
                     it.remove();
@@ -228,21 +224,18 @@ public final class DefaultConfig implements Config, Serializable {
         // by the itemEntries() method if possible
 
         if (config instanceof DefaultConfig) {
-            Iterator it = ((DefaultConfig) config)._configMap.entrySet().iterator();
-            while (it.hasNext()) {
-                Map.Entry me = (Map.Entry) it.next();
-                Object item = _configMap.get(me.getKey());
+            for (Map.Entry<ItemKey, Object> o : ((DefaultConfig) config)._configMap.entrySet()) {
+                Object item = _configMap.get(o.getKey());
                 if (item == null) return false;
-                if (!item.equals(me.getValue())) return false;
+                if (!item.equals(o.getValue())) return false;
             }
             return true;
         }
 
         ItemEntry[] entries = config.itemEntries();
-        for (int i=0; i<entries.length; ++i) {
-            ItemEntry ie = entries[i];
+        for (ItemEntry ie : entries) {
             ItemKey key = ie.getKey();
-            Object  val = _configMap.get(key);
+            Object val = _configMap.get(key);
             if (val == null) return false;
             if (!val.equals(ie.getItemValue())) return false;
         }
@@ -263,10 +256,9 @@ public final class DefaultConfig implements Config, Serializable {
         Config that = (Config) other;
         if (size() != that.size()) return false;
 
-        for (Iterator it=_configMap.entrySet().iterator(); it.hasNext(); ) {
-            Map.Entry me = (Map.Entry) it.next();
-            ItemKey  key = (ItemKey) me.getKey();
-            Object   val = me.getValue();
+        for (Map.Entry<ItemKey, Object> itemKeyObjectEntry : _configMap.entrySet()) {
+            ItemKey key = itemKeyObjectEntry.getKey();
+            Object val = itemKeyObjectEntry.getValue();
             if (!val.equals(that.getItemValue(key))) return false;
         }
 
@@ -275,9 +267,8 @@ public final class DefaultConfig implements Config, Serializable {
 
     public int hashCode() {
         int res = 0;
-        for (Iterator it=_configMap.entrySet().iterator(); it.hasNext(); ) {
-            Map.Entry me = (Map.Entry) it.next();
-            res += ItemEntry.hashCode((ItemKey) me.getKey(), me.getValue());
+        for (Map.Entry<ItemKey, Object> itemKeyObjectEntry : _configMap.entrySet()) {
+            res += ItemEntry.hashCode(itemKeyObjectEntry.getKey(), itemKeyObjectEntry.getValue());
         }
         return res;
     }

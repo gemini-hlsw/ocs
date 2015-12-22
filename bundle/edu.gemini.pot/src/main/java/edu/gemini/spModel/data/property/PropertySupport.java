@@ -1,7 +1,3 @@
-//
-// $Id: PropertySupport.java 38242 2011-10-26 12:55:06Z abrighton $
-//
-
 package edu.gemini.spModel.data.property;
 
 import edu.gemini.shared.util.StringUtil;
@@ -18,6 +14,7 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -95,20 +92,20 @@ public final class PropertySupport {
      * <p>The "wrapped type" attribute of property descriptors will be used to
      * keep this information so that it is available at runtime.
      */
-    public static Class getWrappedType(PropertyDescriptor pd) {
-        return (Class) pd.getValue(WRAPPED_TYPE_ATTR);
+    public static Class<?> getWrappedType(PropertyDescriptor pd) {
+        return (Class<?>) pd.getValue(WRAPPED_TYPE_ATTR);
     }
 
     /**
      * See {@link #getWrappedType(java.beans.PropertyDescriptor)}.
      */
-    public static void setWrappedType(PropertyDescriptor pd, Class type) {
+    public static void setWrappedType(PropertyDescriptor pd, Class<?> type) {
         pd.setValue(WRAPPED_TYPE_ATTR, type);
     }
 
     public static Map<String, PropertyDescriptor> map(Collection<PropertyDescriptor> props) {
         Map<String, PropertyDescriptor> res;
-        res = new TreeMap<String, PropertyDescriptor>();
+        res = new TreeMap<>();
 
         for (PropertyDescriptor pd : props) {
             res.put(pd.getName(), pd);
@@ -117,22 +114,9 @@ public final class PropertySupport {
         return res;
     }
 
-    public static List<PropertyDescriptor> sortByDisplayName(Collection<PropertyDescriptor> props) {
-        List<PropertyDescriptor> res;
-        res = new ArrayList<PropertyDescriptor>(props);
-
-        Collections.sort(res, new Comparator<PropertyDescriptor>() {
-            public int compare(PropertyDescriptor pd1, PropertyDescriptor pd2) {
-                return pd1.getDisplayName().compareTo(pd2.getDisplayName());
-            }
-        });
-
-        return res;
-    }
-
     public static Collection<PropertyDescriptor> filter(PropertyFilter filter, Collection<PropertyDescriptor> props) {
         ArrayList<PropertyDescriptor> res;
-        res = new ArrayList<PropertyDescriptor>(props.size());
+        res = new ArrayList<>(props.size());
 
         for (PropertyDescriptor pd : props) {
             if (filter.accept(pd)) res.add(pd);
@@ -150,11 +134,6 @@ public final class PropertySupport {
         LOG.log(Level.WARNING, "Could not convert '" + text + "' for type: " +
                               propertyType.getName());
     }
-
-//    private static void _logEnumConvertSuccess(String text, Class<Enum> propertyType, Enum e) {
-//        LOG.log(Level.WARNING, "* Converted '" + text + "' for type: " +
-//                              propertyType.getName() + ", to '" + e + "'");
-//    }
 
     private static Object getEnumValue(String text, Class<Enum> propertyType) {
         // Handle empty strings.
@@ -195,10 +174,6 @@ public final class PropertySupport {
             if (m != null) {
                 Object res = m.invoke(null, text, null);
                 if (res != null) return res;
-//                if (res != null) {
-//                    _logEnumConvertSuccess(text, propertyType, res);
-//                }
-//                return res;
             }
         } catch(Exception ex) {
             // give up
@@ -219,7 +194,7 @@ public final class PropertySupport {
         }
     }
 
-    private static Object _stringToValue(String text, Class propertyType) {
+    private static Object _stringToValue(String text, Class<?> propertyType) {
         if (propertyType.isEnum()) {
             //noinspection unchecked
             return getEnumValue(text, (Class<Enum>) propertyType);
@@ -230,7 +205,7 @@ public final class PropertySupport {
     public static Object stringToValue(String text, PropertyDescriptor pd) {
         if (text == null) return null;
 
-        Class propertyType = pd.getPropertyType();
+        Class<?> propertyType = pd.getPropertyType();
 
         if (Option.class.isAssignableFrom(propertyType)) {
             if (NONE_STR.equals(text)) return None.instance();
@@ -238,7 +213,7 @@ public final class PropertySupport {
 
             Object res = _stringToValue(text, propertyType);
             if (res == null) return None.instance();
-            return new Some<Object>(res);
+            return new Some<>(res);
         }
 
         return _stringToValue(text, propertyType);
@@ -246,10 +221,8 @@ public final class PropertySupport {
 
 
     public static List<Object> stringToValue(Collection<String> strings, PropertyDescriptor desc) {
-        List<Object> res = new ArrayList<Object>(strings.size());
-        for (String str : strings) {
-            res.add(stringToValue(str, desc));
-        }
+        List<Object> res = new ArrayList<>(strings.size());
+        res.addAll(strings.stream().map(str -> stringToValue(str, desc)).collect(Collectors.toList()));
         return res;
     }
 
@@ -268,14 +241,14 @@ public final class PropertySupport {
         if (value == null) return "";
         if (desc == null) return value.toString();
 
-        Class propertyType = desc.getPropertyType();
+        Class<?> propertyType = desc.getPropertyType();
 
         if (Option.class.isAssignableFrom(propertyType)) {
             if (None.instance().equals(value)) return NONE_STR;
             propertyType = getWrappedType(desc);
 
             // Unwrap the value
-            value = ((Some) value).getValue();
+            value = ((Some<?>) value).getValue();
         }
 
         if (propertyType.isEnum()) {
@@ -287,14 +260,12 @@ public final class PropertySupport {
     }
 
     public static List<String> valueToString(Collection<Object> values, PropertyDescriptor desc) {
-        List<String> res = new ArrayList<String>(values.size());
-        for (Object val : values) {
-            res.add(valueToString(val, desc));
-        }
+        List<String> res = new ArrayList<>(values.size());
+        res.addAll(values.stream().map(val -> valueToString(val, desc)).collect(Collectors.toList()));
         return res;
     }
 
-    public static PropertyDescriptor init(String propertyName, Class beanClass,
+    public static PropertyDescriptor init(String propertyName, Class<?> beanClass,
                                           boolean isQueryable, boolean isIterable) {
         try {
             PropertyDescriptor pd = new PropertyDescriptor(propertyName, beanClass);
@@ -307,7 +278,7 @@ public final class PropertySupport {
         }
     }
 
-    public static PropertyDescriptor init(String propertyName, String displayName, Class beanClass,
+    public static PropertyDescriptor init(String propertyName, String displayName, Class<?> beanClass,
                                           boolean isQueryable, boolean isIterable) {
         try {
             PropertyDescriptor pd = new PropertyDescriptor(propertyName, beanClass);

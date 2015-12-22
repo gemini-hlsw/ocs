@@ -1,7 +1,3 @@
-/**
- * $Id: InstEngNifsCB.java 27568 2010-10-25 18:03:42Z swalker $
- */
-
 package edu.gemini.spModel.gemini.nifs;
 
 import edu.gemini.spModel.config.AbstractObsComponentCB;
@@ -30,14 +26,14 @@ public class InstEngNifsCB extends AbstractObsComponentCB {
         return result;
     }
 
-    protected void thisReset(Map options) {
+    @Override
+    protected void thisReset(Map<String, Object> options) {
         InstEngNifs dataObj = (InstEngNifs) getDataObject();
         _sysConfig = dataObj.getSysConfig();
     }
 
     protected boolean thisHasConfiguration() {
-        if (_sysConfig == null) return false;
-        return (_sysConfig.getParameterCount() > 0);
+        return _sysConfig != null && (_sysConfig.getParameterCount() > 0);
     }
 
     protected void thisApplyNext(IConfig config, IConfig prevFull) {

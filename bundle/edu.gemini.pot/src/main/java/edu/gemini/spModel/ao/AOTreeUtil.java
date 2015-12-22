@@ -1,18 +1,6 @@
-// Copyright 1999-2002
-// Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: AOTreeUtil.java 46768 2012-07-16 18:58:53Z rnorris $
-//
-
 package edu.gemini.spModel.ao;
 
 import edu.gemini.pot.sp.*;
-
-import java.util.Iterator;
-
-
 
 /**
  * Utility class with operations on the science program tree model that are tailored
@@ -34,9 +22,7 @@ public class AOTreeUtil {
      */
     public static ISPObsComponent findAOSystem(ISPObservation obs) {
         if (obs != null) {
-            Iterator iter = obs.getObsComponents().iterator();
-            while (iter.hasNext()) {
-                ISPObsComponent obsComp = (ISPObsComponent) iter.next();
+            for (ISPObsComponent obsComp : obs.getObsComponents()) {
                 if (isAOInstrument(obsComp)) {
                     return obsComp;
                 }

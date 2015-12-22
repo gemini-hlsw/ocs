@@ -1,11 +1,3 @@
-// Copyright 1999-2000
-// Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: SPNodeInitializerConfigReader.java 46768 2012-07-16 18:58:53Z rnorris $
-//
-
 package edu.gemini.pot.spdb;
 
 import edu.gemini.pot.sp.*;
@@ -14,7 +6,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import java.util.*;
-
 
 /**
  * Parses an initializer configuration (property) file and provides a
@@ -166,7 +157,7 @@ public final class SPNodeInitializerConfigReader {
      */
     public static List<SPComponentType> getCreatableSeqComponents(Set<String> typeKeys) {
         // List for the result
-        List<SPComponentType> l = new ArrayList<SPComponentType>();
+        List<SPComponentType> l = new ArrayList<>();
 
         for (String key : typeKeys) {
             if (_isSeqComponentKey(key)) {
@@ -187,7 +178,7 @@ public final class SPNodeInitializerConfigReader {
      */
     public static List<SPComponentType> getCreatableObsComponents(Set<String> typeKeys) {
         // List for the result
-        List<SPComponentType> l = new ArrayList<SPComponentType>();
+        List<SPComponentType> l = new ArrayList<>();
 
         for (String key : typeKeys) {
             if (_isObsComponentKey(key)) {
@@ -232,7 +223,7 @@ public final class SPNodeInitializerConfigReader {
         final Set<Map.Entry<String, String>> entrySet = props.entrySet();
         final Iterator<Map.Entry<String, String>> it = entrySet.iterator();
 
-        final Map<String, ISPNodeInitializer> initMap = new HashMap<String, ISPNodeInitializer>();
+        final Map<String, ISPNodeInitializer> initMap = new HashMap<>();
         while (it.hasNext()) {
             final Map.Entry<String, String> me = it.next();
             final String key = me.getKey();
@@ -242,7 +233,7 @@ public final class SPNodeInitializerConfigReader {
             final ISPNodeInitializer ni;
             final String className = me.getValue();
             try {
-                final Class c = Class.forName(className);
+                final Class<?> c = Class.forName(className);
                 ni = (ISPNodeInitializer) c.newInstance();
             } catch (Exception ex) {
                 LOG.log(Level.SEVERE, "Problem loading initializer: " + className, ex);

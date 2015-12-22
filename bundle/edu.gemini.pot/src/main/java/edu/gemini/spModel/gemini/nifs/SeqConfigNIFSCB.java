@@ -1,9 +1,3 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: SeqConfigNIFSCB.java 27584 2010-10-25 21:18:41Z swalker $
-//
 package edu.gemini.spModel.gemini.nifs;
 
 import edu.gemini.pot.sp.ISPSeqComponent;
@@ -29,8 +23,7 @@ public final class SeqConfigNIFSCB extends HelperSeqCompCB {
     }
 
     public Object clone() {
-        SeqConfigNIFSCB result = (SeqConfigNIFSCB) super.clone();
-        return result;
+        return super.clone();
     }
 
     /**
@@ -48,8 +41,8 @@ public final class SeqConfigNIFSCB extends HelperSeqCompCB {
         InstNIFS.WAVELENGTH_INJECTOR.inject(config, prevFull);
     }
 
-
-    public void thisReset(Map options) {
+    @Override
+    public void thisReset(Map<String, Object> options) {
         super.thisReset(options);
     }
 }

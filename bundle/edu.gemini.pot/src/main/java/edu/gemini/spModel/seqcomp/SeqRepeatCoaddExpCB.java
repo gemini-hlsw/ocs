@@ -1,11 +1,3 @@
-// Copyright 2000
-// Association for Universities for Research in Astronomy, Inc.
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: SeqRepeatCoaddExpCB.java 38365 2011-11-03 20:37:20Z swalker $
-//
-
 package edu.gemini.spModel.seqcomp;
 
 import edu.gemini.pot.sp.ISPSeqComponent;
@@ -19,7 +11,6 @@ import edu.gemini.spModel.dataflow.GsaSequenceEditor;
 import edu.gemini.spModel.obscomp.InstConstants;
 
 import java.util.Map;
-
 
 /**
  * A configuration builder for the science object observe sequence
@@ -36,7 +27,7 @@ public class SeqRepeatCoaddExpCB extends AbstractSeqComponentCB {
     private transient int _max;
     private transient int _limit;
     private transient String _objectName;
-    private transient Map _options;
+    private transient Map<String, Object> _options;
 
     public SeqRepeatCoaddExpCB(ISPSeqComponent seqComp) {
         super(seqComp);
@@ -52,7 +43,8 @@ public class SeqRepeatCoaddExpCB extends AbstractSeqComponentCB {
         return result;
     }
 
-    protected void thisReset(Map options) {
+    @Override
+    protected void thisReset(Map<String, Object> options) {
         _curCount = 0;
         ICoaddExpSeqComponent c = (ICoaddExpSeqComponent) getDataObject();
         _max = c.getStepCount();

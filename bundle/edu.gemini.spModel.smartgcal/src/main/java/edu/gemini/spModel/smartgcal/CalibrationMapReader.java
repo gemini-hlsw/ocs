@@ -27,7 +27,7 @@ public class CalibrationMapReader {
 
     public CalibrationMapReader(CalibrationMap map) {
         this.map = map;
-        this.errors = new ArrayList<String>();
+        this.errors = new ArrayList<>();
         this.line = 0;
     }
 
@@ -128,9 +128,9 @@ public class CalibrationMapReader {
     }
 
     private List<String> parseHeader(String[] values) throws ParseException {
-        List<String> header = new LinkedList<String>();
-        for (int i = 0; i < values.length; i++) {
-            String v = values[i].trim();
+        List<String> header = new LinkedList<>();
+        for (String value : values) {
+            String v = value.trim();
             // check for duplicate column names (ignore "empty" columns)
             if (!v.isEmpty() && header.contains(v)) {
                 addError("duplicate column name '" + v + "'");

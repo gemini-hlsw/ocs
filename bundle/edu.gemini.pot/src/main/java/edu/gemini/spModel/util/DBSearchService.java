@@ -1,7 +1,3 @@
-/**
- * $Id: DBSearchService.java 46768 2012-07-16 18:58:53Z rnorris $
- */
-
 package edu.gemini.spModel.util;
 
 import edu.gemini.pot.sp.*;
@@ -123,14 +119,14 @@ public class DBSearchService {
 
 
     // Return the first observation that matches the searchString
-    private ISPObservation _search(List obsList)  {
+    private ISPObservation _search(List<ISPObservation> obsList)  {
 
-        Iterator it = obsList.iterator();
+        Iterator<ISPObservation> it = obsList.iterator();
         if (_startHere != null) {
             SPNodeKey startKey = _startHere.getNodeKey();
 
             while(it.hasNext()) {
-                ISPObservation obs = (ISPObservation)it.next();
+                ISPObservation obs = it.next();
                 SPNodeKey obsKey = obs.getNodeKey();
                 if (startKey.equals(obsKey)) break;
             }
@@ -141,14 +137,14 @@ public class DBSearchService {
 
         // Try to match on the title itself.
         while(it.hasNext()) {
-            ISPObservation obs = (ISPObservation)it.next();
+            ISPObservation obs = it.next();
 
             ISPDataObject dataObj = obs.getDataObject();
             if (dataObj == null) continue;
             String title = dataObj.getTitle();
             if (title == null) continue;
             title = title.toLowerCase();
-            if (title.indexOf(_searchString) != -1) {
+            if (title.contains(_searchString)) {
                 return obs;
             }
         }

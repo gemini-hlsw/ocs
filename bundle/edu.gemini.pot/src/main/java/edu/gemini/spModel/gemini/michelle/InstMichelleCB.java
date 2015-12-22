@@ -1,11 +1,3 @@
-// Copyright 2000
-// Association for Universities for Research in Astronomy, Inc.
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: InstMichelleCB.java 27615 2010-10-26 20:14:30Z swalker $
-//
-
 package edu.gemini.spModel.gemini.michelle;
 
 import edu.gemini.pot.sp.ISPObsComponent;
@@ -15,7 +7,6 @@ import edu.gemini.spModel.obscomp.InstConstants;
 
 import java.util.Collection;
 import java.util.Map;
-
 
 /**
  * InstMichelleCB is the configuration builder for the InstMichelle data
@@ -35,14 +26,14 @@ public class InstMichelleCB extends AbstractObsComponentCB {
         return result;
     }
 
-    protected void thisReset(Map options) {
+    @Override
+    protected void thisReset(Map<String, Object> options) {
         InstMichelle dataObj = (InstMichelle) getDataObject();
         _sysConfig = dataObj.getSysConfig();
     }
 
     protected boolean thisHasConfiguration() {
-        if (_sysConfig == null) return false;
-        return (_sysConfig.getParameterCount() > 0);
+        return _sysConfig != null && (_sysConfig.getParameterCount() > 0);
     }
 
     protected void thisApplyNext(IConfig config, IConfig prevFull) {

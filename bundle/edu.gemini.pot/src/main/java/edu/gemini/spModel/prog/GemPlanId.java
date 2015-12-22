@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package edu.gemini.spModel.prog;
 
 import edu.gemini.spModel.core.SPBadIDException;
@@ -24,7 +20,7 @@ import java.util.regex.Pattern;
 /**
  * A Gemini specific plan id.  Parses out the site and date.
  */
-public final class GemPlanId implements Serializable, Comparable {
+public final class GemPlanId implements Serializable, Comparable<GemPlanId> {
     private static final Logger LOG = Logger.getLogger(GemPlanId.class.getName());
 
     private static final Pattern PAT = Pattern.compile("G([NS])-PLAN(\\d\\d\\d\\d\\d\\d\\d\\d)");
@@ -42,8 +38,6 @@ public final class GemPlanId implements Serializable, Comparable {
      *
      * @param progId program id to be parsed into a GemPlanId
      *
-     * @throws SPBadIDException if the program id cannot be parsed into a
-     * GemPlanId
      */
     public static Option<GemPlanId> parse(SPProgramID progId) {
         if (progId == null) throw new NullPointerException();
@@ -69,7 +63,7 @@ public final class GemPlanId implements Serializable, Comparable {
             return None.instance();
         }
 
-        return new Some<GemPlanId>(new GemPlanId(progId, site, date));
+        return new Some<>(new GemPlanId(progId, site, date));
     }
 
     /**
@@ -77,8 +71,6 @@ public final class GemPlanId implements Serializable, Comparable {
      *
      * @param progIdStr program id to be parsed into a GemPlanId
      *
-     * @throws SPBadIDException if the program id cannot be parsed into a
-     * GemPlanId
      */
     public static Option<GemPlanId> parse(String progIdStr) {
         SPProgramID progId;
@@ -173,8 +165,8 @@ public final class GemPlanId implements Serializable, Comparable {
         return result;
     }
 
-    public int compareTo(Object o) {
-        GemPlanId that = (GemPlanId) o;
+    @Override
+    public int compareTo(GemPlanId that) {
         int res = site.compareTo(that.site);
         if (res != 0) return res;
         return date.compareTo(that.date);

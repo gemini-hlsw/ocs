@@ -1,7 +1,3 @@
-// Copyright 1999 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-
 package edu.gemini.pot.sp.memImpl;
 
 import edu.gemini.pot.sp.*;
@@ -21,7 +17,7 @@ public final class MemSeqComponent extends MemAbstractContainer implements ISPSe
     private final SPComponentType _type;
 
     // The list of sequence components
-    private final List<ISPSeqComponent> _compList = new ArrayList<ISPSeqComponent>();
+    private final List<ISPSeqComponent> _compList = new ArrayList<>();
 
     MemSeqComponent(MemProgram prog, SPComponentType type, SPNodeKey key) {
         super(prog.getDocumentData(), key);
@@ -71,7 +67,7 @@ public final class MemSeqComponent extends MemAbstractContainer implements ISPSe
         // Make a list copy so the client gets a stable version.
         getProgramReadLock();
         try {
-            return new ArrayList<ISPSeqComponent>(_compList);
+            return new ArrayList<>(_compList);
         } finally {
             returnProgramReadLock();
         }
@@ -80,10 +76,10 @@ public final class MemSeqComponent extends MemAbstractContainer implements ISPSe
     public void setSeqComponents(List<? extends ISPSeqComponent> newCompList) throws SPNodeNotLocalException, SPTreeStateException {
         checkChildTypes(newCompList, ISPSeqComponent.class);
 
-        List<ISPSeqComponent> newCopy = new ArrayList<ISPSeqComponent>(newCompList);
+        List<ISPSeqComponent> newCopy = new ArrayList<>(newCompList);
         getProgramWriteLock();
         try {
-            List<ISPSeqComponent> oldCopy = new ArrayList<ISPSeqComponent>(_compList);
+            List<ISPSeqComponent> oldCopy = new ArrayList<>(_compList);
             updateChildren(_compList, newCopy);
             firePropertyChange(SEQ_COMPONENTS_PROP, oldCopy, newCopy);
             fireStructureChange(SEQ_COMPONENTS_PROP, this, oldCopy, newCopy);
@@ -98,10 +94,10 @@ public final class MemSeqComponent extends MemAbstractContainer implements ISPSe
         MemSeqComponent node = (MemSeqComponent) seqComp;
         getProgramWriteLock();
         try {
-            List<ISPSeqComponent> oldCopy = new ArrayList<ISPSeqComponent>(_compList);
+            List<ISPSeqComponent> oldCopy = new ArrayList<>(_compList);
             node.attachTo(this);
             _compList.add(node);
-            List<ISPSeqComponent> newCopy = new ArrayList<ISPSeqComponent>(_compList);
+            List<ISPSeqComponent> newCopy = new ArrayList<>(_compList);
             firePropertyChange(SEQ_COMPONENTS_PROP, oldCopy, newCopy);
             fireStructureChange(SEQ_COMPONENTS_PROP, this, oldCopy, newCopy);
         } finally {
@@ -115,10 +111,10 @@ public final class MemSeqComponent extends MemAbstractContainer implements ISPSe
         MemSeqComponent node = (MemSeqComponent) seqComp;
         getProgramWriteLock();
         try {
-            List<ISPSeqComponent> oldCopy = new ArrayList<ISPSeqComponent>(_compList);
+            List<ISPSeqComponent> oldCopy = new ArrayList<>(_compList);
             node.attachTo(this);
             _compList.add(index, node);
-            List<ISPSeqComponent> newCopy = new ArrayList<ISPSeqComponent>(_compList);
+            List<ISPSeqComponent> newCopy = new ArrayList<>(_compList);
             firePropertyChange(SEQ_COMPONENTS_PROP, oldCopy, newCopy);
             fireStructureChange(SEQ_COMPONENTS_PROP, this, oldCopy, newCopy);
         } finally {
@@ -135,10 +131,10 @@ public final class MemSeqComponent extends MemAbstractContainer implements ISPSe
                 //System.out.println("Component was not located and can't be removed.");
                 return;
             }
-            List<ISPSeqComponent> oldCopy = new ArrayList<ISPSeqComponent>(_compList);
+            List<ISPSeqComponent> oldCopy = new ArrayList<>(_compList);
             node.detachFrom(this);
             _compList.remove(index);
-            List<ISPSeqComponent> newCopy = new ArrayList<ISPSeqComponent>(_compList);
+            List<ISPSeqComponent> newCopy = new ArrayList<>(_compList);
             firePropertyChange(SEQ_COMPONENTS_PROP, oldCopy, newCopy);
             fireStructureChange(SEQ_COMPONENTS_PROP, this, oldCopy, newCopy);
         } finally {
@@ -172,7 +168,7 @@ public final class MemSeqComponent extends MemAbstractContainer implements ISPSe
     public List<ISPNode> getChildren() {
         getProgramReadLock();
         try {
-            final List<ISPNode> children = new ArrayList<ISPNode>();
+            final List<ISPNode> children = new ArrayList<>();
             if (getConflictFolder() != null) children.add(getConflictFolder());
             children.addAll(getSeqComponents());
             return children;
@@ -181,7 +177,7 @@ public final class MemSeqComponent extends MemAbstractContainer implements ISPSe
         }
     }
 
-    private static final Class[] VALID_CHILD_TYPES = {
+    private static final Class<?>[] VALID_CHILD_TYPES = {
         MemConflictFolder.class,
         MemSeqComponent.class,
     };

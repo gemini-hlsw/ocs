@@ -1,11 +1,3 @@
-// Copyright 2000
-// Association for Universities for Research in Astronomy, Inc.
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: InstGMOSCB.java 47181 2012-08-02 16:40:03Z swalker $
-//
-
 package edu.gemini.spModel.gemini.gmos;
 
 import edu.gemini.pot.sp.ISPObsComponent;
@@ -22,9 +14,7 @@ import edu.gemini.spModel.target.obsComp.TargetObsCompConstants;
 import edu.gemini.spModel.target.offset.OffsetPos;
 import edu.gemini.spModel.target.offset.OffsetPosList;
 
-import java.util.Collection;
 import java.util.Map;
-
 
 /**
  * InstGMOSCB is the configuration builder for the InstGMOS data
@@ -37,7 +27,7 @@ public class InstGMOSCB extends AbstractObsComponentCB {
     private static final int MAX_BEAM_LABELS = BEAM_LABELS.length();
 
     private transient ISysConfig _sysConfig;
-    private transient InstGmosCommon _dataObj;
+    private transient InstGmosCommon<?, ?, ?, ?> _dataObj;
 
     public InstGMOSCB(ISPObsComponent obsComp) {
         super(obsComp);
@@ -50,8 +40,9 @@ public class InstGMOSCB extends AbstractObsComponentCB {
         return result;
     }
 
-    protected void thisReset(Map options) {
-        _dataObj = (InstGmosCommon) getDataObject();
+    @Override
+    protected void thisReset(Map<String, Object> options) {
+        _dataObj = (InstGmosCommon<?, ?, ?, ?>) getDataObject();
         if (_dataObj == null) {
             System.out.println("It's null!");
         }
@@ -59,10 +50,7 @@ public class InstGMOSCB extends AbstractObsComponentCB {
     }
 
     protected boolean thisHasConfiguration() {
-        if (_sysConfig == null) {
-            return false;
-        }
-        return (_sysConfig.getParameterCount() > 0);
+        return _sysConfig != null && (_sysConfig.getParameterCount() > 0);
     }
 
     private String _getParamName(int i, String paramName) {
@@ -76,10 +64,8 @@ public class InstGMOSCB extends AbstractObsComponentCB {
 
     protected void thisApplyNext(IConfig config, IConfig prevFull) {
         String systemName    = _sysConfig.getSystemName();
-        Collection sysConfig = _sysConfig.getParameters();
 
-        for (Object aSysConfig : sysConfig) {
-            IParameter param = (IParameter) aSysConfig;
+        for (IParameter param : _sysConfig.getParameters()) {
             config.putParameter(systemName, param);
         }
 
@@ -97,11 +83,11 @@ public class InstGMOSCB extends AbstractObsComponentCB {
         }
 
         if (_dataObj.useNS()) {
-            OffsetPosList posList = _dataObj.getPosList();
+            OffsetPosList<OffsetPos> posList = _dataObj.getPosList();
 
             // Do the offsets for N/S
             for (int i = 0, size = posList.size(); i < size; i++) {
-                OffsetPos op = (OffsetPos) posList.getPositionAt(i);
+                OffsetPos op = posList.getPositionAt(i);
 
                 config.putParameter(systemName, StringParameter.getInstance(
                         _getParamName(i, "p"), op.getXAxisAsString()));

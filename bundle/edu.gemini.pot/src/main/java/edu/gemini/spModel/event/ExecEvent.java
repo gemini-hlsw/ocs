@@ -1,7 +1,3 @@
-//
-// $Id: ExecEvent.java 6772 2005-11-29 15:40:38Z shane $
-//
-
 package edu.gemini.spModel.event;
 
 import edu.gemini.spModel.pio.ParamSet;
@@ -62,9 +58,9 @@ public abstract class ExecEvent implements Serializable {
 
         className = packageName + "." + kind + "Event";
         try {
-            final Class c = Class.forName(className);
-            final Constructor cons = c.getConstructor(new Class[]{ParamSet.class});
-            return (ExecEvent) cons.newInstance(new Object[]{paramSet});
+            final Class<?> c = Class.forName(className);
+            final Constructor<?> cons = c.getConstructor(ParamSet.class);
+            return (ExecEvent) cons.newInstance(paramSet);
         } catch (InvocationTargetException ex) {
             Throwable t = ex.getTargetException();
             if (t instanceof PioParseException) {
