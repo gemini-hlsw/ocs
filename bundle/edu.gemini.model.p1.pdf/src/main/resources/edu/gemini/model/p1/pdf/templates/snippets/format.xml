@@ -215,6 +215,7 @@
     <!-- Creates a nice name for the instrument names used in the xml blueprints -->
     <xsl:template name="get-inst-name">
         <xsl:param name="inst"/>
+        <xsl:param name="site"/>
         <xsl:choose>
             <xsl:when test="$inst = 'flamingos2'">Flamingos2</xsl:when>
             <xsl:when test="$inst = 'gmosN'">GMOS North</xsl:when>
@@ -227,9 +228,9 @@
             <xsl:when test="$inst = 'nici'">NICI</xsl:when>
             <xsl:when test="$inst = 'nifs'">NIFS</xsl:when>
             <xsl:when test="$inst = 'niri'">NIRI</xsl:when>
-            <xsl:when test="$inst = 'phoenix'">Phoenix</xsl:when>
-            <xsl:when test="$inst = 'dssi'">DSSI</xsl:when>
-            <xsl:when test="$inst = 'texes'">Texes</xsl:when>
+            <xsl:when test="$inst = 'phoenix'">Phoenix - <xsl:value-of select="$site"/></xsl:when>
+            <xsl:when test="$inst = 'dssi'">DSSI - <xsl:value-of select="$site"/></xsl:when>
+            <xsl:when test="$inst = 'texes'">Texes - <xsl:value-of select="$site"/></xsl:when>
             <xsl:when test="$inst = 'trecs'">TReCS</xsl:when>
             <xsl:otherwise>?<xsl:value-of select="$inst"/>?</xsl:otherwise>
         </xsl:choose>

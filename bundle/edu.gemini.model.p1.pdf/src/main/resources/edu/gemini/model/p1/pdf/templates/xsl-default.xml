@@ -104,6 +104,9 @@
                                         <xsl:with-param name="inst">
                                             <xsl:value-of select="name(.)"/>
                                         </xsl:with-param>
+                                        <xsl:with-param name="site">
+                                            <xsl:value-of select=".//site"/>
+                                        </xsl:with-param>
                                     </xsl:call-template>
                                 </xsl:otherwise>
                             </xsl:choose>
