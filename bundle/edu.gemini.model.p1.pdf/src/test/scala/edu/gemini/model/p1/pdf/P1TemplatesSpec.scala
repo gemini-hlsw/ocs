@@ -74,7 +74,7 @@ class P1TemplatesSpec extends SpecificationWithJUnit {
       // Check there is a table
       XML.loadString(result) must \\("block") \ "inline" \>~ """\s*TAC information\s*"""
       // Check there is one accepted
-      accepted must be size (1)
+      accepted must be size 1
       // And none rejected
       rejected must beEmpty
     }
@@ -105,7 +105,7 @@ class P1TemplatesSpec extends SpecificationWithJUnit {
       // Check there is a scheduling element
       XML.loadString(result) must (\\("block") \ "inline" \>~ """\s*Scheduling Constraints\s*""")
       // Check there is a scheduling text
-      foundMatches must be size (1)
+      foundMatches must be size 1
     }
     "use new text for observations with guiding between 50% and less than 100%, REL-640" in {
       val result = transformProposal("proposal_guiding_caution.xml")
@@ -130,12 +130,12 @@ class P1TemplatesSpec extends SpecificationWithJUnit {
     "present the correct name when using Texes, REL-1062" in {
       val result = transformProposal("proposal_with_texes.xml")
       // Check that we use the proper public name of Texes
-      XML.loadString(result) must (\\("table-cell") \ "block" \> "Texes")
+      XML.loadString(result) must (\\("table-cell") \ "block" \> "Texes - Gemini North")
     }
     "present the correct name when using Dssi, REL-1061" in {
       val result = transformProposal("proposal_with_dssi.xml")
       // Check that we use the proper public name of DSSI
-      XML.loadString(result) must (\\("table-cell") \ "block" \> "DSSI")
+      XML.loadString(result) must (\\("table-cell") \ "block" \> "DSSI - Gemini North")
     }
     "present the correct name when using Visitor GN, REL-1090" in {
       val result = transformProposal("proposal_with_visitor_gn.xml")
@@ -146,6 +146,21 @@ class P1TemplatesSpec extends SpecificationWithJUnit {
       val result = transformProposal("proposal_with_visitor_gs.xml")
       // Check that we use the proper public name of a south visitor
       XML.loadString(result) must (\\("table-cell") \ "block" \> "Visitor - Gemini South - Super Camera")
+    }
+    "present Phoenix's Site, REL-2463" in {
+      val result = transformProposal("proposal_with_phoenix.xml")
+      // Check that we use the proper public name of a south visitor
+      XML.loadString(result) must (\\("table-cell") \ "block" \> "Phoenix - Gemini South")
+    }
+    "present Texes' Site, REL-2463" in {
+      val result = transformProposal("proposal_with_texes.xml")
+      // Check that we use the proper public name of a south visitor
+      XML.loadString(result) must (\\("table-cell") \ "block" \> "Texes - Gemini North")
+    }
+    "present DSSI' Site, REL-2463" in {
+      val result = transformProposal("proposal_with_dssi.xml")
+      // Check that we use the proper public name of a south visitor
+      XML.loadString(result) must (\\("table-cell") \ "block" \> "DSSI - Gemini North")
     }
     "show an ITAC information section if the proposal contains a comment, REL-1165" in {
       val result = transformProposal("proposal_with_itac_comment.xml")
@@ -183,7 +198,7 @@ class P1TemplatesSpec extends SpecificationWithJUnit {
     "present the correct instrument name when using Phoenix, REL-2356" in {
       val result = transformProposal("proposal_with_phoenix.xml")
       // Check that we use the proper public name of Phoenix
-      XML.loadString(result) must (\\("table-cell") \ "block" \> "Phoenix")
+      XML.loadString(result) must (\\("table-cell") \ "block" \> "Phoenix - Gemini South")
     }
     "Supports Large Programs, REL-1614" in {
       val result = transformProposal("large_program.xml")
@@ -250,7 +265,7 @@ class P1TemplatesSpec extends SpecificationWithJUnit {
       // Check there is a scheduling element
       XML.loadString(result) must (\\("block") \ "inline" \>~ """\s*Scheduling Constraints:\s*""")
       // Check there is a scheduling text
-      foundMatches must be size (1)
+      foundMatches must be size 1
     }
     "include TAC partner ranking, REL-677" in {
       val result = transformProposal("proposal_submitted_to_tac_all_approved.xml", P1PDF.NOAO)
@@ -287,6 +302,11 @@ class P1TemplatesSpec extends SpecificationWithJUnit {
     "show that a GS visitor is in Gemini North, REL-1090" in {
       val result = transformProposal("proposal_with_visitor_gs.xml", P1PDF.NOAO)
       // Check that Speckle is shown in Gemini North
+      XML.loadString(result) must (\\("table-cell") \ "block" \> "Gemini South")
+    }
+    "show that a Phoenix site is displayed, REL-1090" in {
+      val result = transformProposal("proposal_with_phoenix.xml", P1PDF.NOAO)
+      // Check that Phoenix is shown in Gemini South
       XML.loadString(result) must (\\("table-cell") \ "block" \> "Gemini South")
     }
     "show an ITAC information section if the proposal contains a comment, REL-1165" in {

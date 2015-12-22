@@ -50,6 +50,7 @@
         <texes>
             <Texes id="blueprint-0">
                 <name>Texes 32 l/mm echelle</name>
+                <site>Gemini North</site>
                 <disperser>32 l/mm echelle</disperser>
             </Texes>
         </texes>
