@@ -2,8 +2,10 @@ package edu.gemini.model.p1.submit
 
 import edu.gemini.model.p1.immutable._
 
-import scala.actors.Actor._
 import java.util.logging.Logger
+
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
 object SubmitClient {
 
@@ -38,7 +40,7 @@ class SubmitClient(name:String,  url: Map[SubmitDestination, String]) {
   private def asyncSubmit(proposal: Proposal, sc: SubContainer, callback: ProposalSubmitResult => Unit) {
     val scWithKey       = sc.withKey
     val proposalWithKey = scWithKey.update(proposal)
-    actor { callback(syncSubmit(proposalWithKey, scWithKey)) }
+    syncSubmit(proposalWithKey, scWithKey).map(callback)
   }
 
   private def logValidation(proposal: Proposal) {
@@ -48,11 +50,11 @@ class SubmitClient(name:String,  url: Map[SubmitDestination, String]) {
     }
   }
 
-  private def syncSubmit(proposal: Proposal, sc: SubContainer): ProposalSubmitResult = {
+  private def syncSubmit(proposal: Proposal, sc: SubContainer): Future[ProposalSubmitResult] = {
     logValidation(proposal)
     val futs    = sc.pendingDestinations map { d => FutureSubmission(d, url(d), proposal) }
     val results = futs.map(_.result)
-    ProposalSubmitResult((sc/:results)(_+_).update(proposal), results)
+    Future.sequence(results).map(r => ProposalSubmitResult((sc/:r)(_+_).update(proposal), r))
   }
 
   override def toString = s"${getClass.getSimpleName}($name, $url)\n"

@@ -12,7 +12,8 @@ import java.net.{HttpURLConnection, URL}
 import java.net.HttpURLConnection.HTTP_CREATED
 import java.util.logging.{Logger, Level}
 
-import scala.actors.Futures._
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.io.Source
 import scalaz._
 import Scalaz._
@@ -21,9 +22,9 @@ case class FutureSubmission(dest: SubmitDestination, url: String, proposal: Prop
 
   private val LOG = Logger.getLogger(classOf[FutureSubmission].getName)
 
-  private val fut = future { sendSynchronously }
+  private val fut = Future.apply { sendSynchronously }
 
-  lazy val result = DestinationSubmitResult(dest, fut())
+  lazy val result = fut.map(DestinationSubmitResult(dest, _))
 
   val timeout = 1 * 60000  // 1 min ?
 
