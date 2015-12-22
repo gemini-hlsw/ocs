@@ -338,6 +338,7 @@ package object immutable {
   type ImageQuality = M.ImageQuality
   object ImageQuality extends EnumObject[M.ImageQuality] {
     val BEST = M.ImageQuality.iq20
+    val IQ70 = M.ImageQuality.iq70
   }
 
   type InvestigatorStatus = M.InvestigatorStatus

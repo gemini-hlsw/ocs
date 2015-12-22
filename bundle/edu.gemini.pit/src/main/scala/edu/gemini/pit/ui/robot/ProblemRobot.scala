@@ -86,7 +86,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
           TimeProblems.partnerZeroTimeRequest(p, s) ++
           TacProblems(p, s).all ++
           List(incompleteInvestigator, missingObsElementCheck, cfCheck, emptyTargetCheck, emptyEphemerisCheck, initialEphemerisCheck, finalEphemerisCheck,
-            badGuiding, badVisibility, iffyVisibility, singlePointEphemerisCheck, minTimeCheck, wrongSite, band3Orphan2, gpiCheck).flatten
+            badGuiding, badVisibility, iffyVisibility, singlePointEphemerisCheck, minTimeCheck, wrongSite, band3Orphan2, gpiCheck, altairLGSCC50Check, altairLGSIQCheck).flatten
       ps.sorted
     }
 
@@ -202,12 +202,48 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       msg = s"""Ephemeris for target "${t.name}" is undefined."""
     } yield new Problem(Severity.Warning, msg, "Targets", s.inTargetsView(_.edit(t)))
 
+    def bpAltair(b: BlueprintBase): Option[Altair] = b match {
+      case a: GmosNBlueprintBase         => a.altair.some
+      case a: GnirsBlueprintImaging      => a.altair.some
+      case a: GnirsBlueprintSpectroscopy => a.altair.some
+      case a: NifsBlueprintAo            => a.altair.some
+      case a: NiriBlueprint              => a.altair.some
+      case _                             => None
+    }
+
+    private val altairLGSCC50Check = for {
+      o  <- p.observations
+      t  <- o.target
+      c  <- o.condition
+      b  <- o.blueprint
+      a  <- bpAltair(b)
+      lgs = a.ao match {
+              case AoLgs => true
+              case _     => false
+            }
+      if lgs && (c.iq != ImageQuality.IQ70 && c.iq != ImageQuality.BEST)
+    } yield new Problem(Severity.Error, s"LGS requires IQ70 or better", "Targets", s.inTargetsView(_.edit(t)))
+
+    private val altairLGSIQCheck = for {
+      o  <- p.observations
+      t  <- o.target
+      c  <- o.condition
+      b  <- o.blueprint
+      a  <- bpAltair(b)
+      lgs = a.ao match {
+              case AoLgs => true
+              case _     => false
+            }
+      if lgs && (c.cc != CloudCover.BEST)
+    } yield new Problem(Severity.Error, s"LGS requires CC50 conditions", "Targets", s.inTargetsView(_.edit(t)))
+
     private val gpiCheck = {
       def gpiMagnitudesPresent(target: SiderealTarget):List[(Severity, String)] = {
         val requiredBands = Set(MagnitudeBand.I, MagnitudeBand.Y, MagnitudeBand.J, MagnitudeBand.H, MagnitudeBand.K)
         val observationBands = target.magnitudes.map(_.band).toSet
         ~(((requiredBands & observationBands) =/= requiredBands) option {List((Severity.Error, "The magnitude information in the GPI target component should include the bandpasses I, Y, J, H, and K"))})
       }
+
       def gpiIChecks(target: SiderealTarget):List[(Severity.Value, String)] = for {
           m <- target.magnitudes
           if m.band == MagnitudeBand.I
@@ -222,6 +258,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
               s"""GPI Target "${target.name}" is too faint for proper AO (OIWFS) operation, the AO performance will be poor"""
             }
         } yield (severity, message)
+
       def gpiIfsChecks(obsMode: GpiObservingMode, disperser: GpiDisperser, target: SiderealTarget):List[(Severity.Value, String)] = for {
           m <- target.magnitudes
           scienceBand <- GpiObservingMode.scienceBand(obsMode)
@@ -253,6 +290,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
           disperser = b.asInstanceOf[GpiBlueprint].disperser
           t @ SiderealTarget(_, _, _, _, _, mag) <- o.target
         } yield (t, (gpiMagnitudesPresent(t) :: gpiIChecks(t) :: gpiLowfsChecks(obsMode, t) :: gpiIfsChecks(obsMode, disperser, t) :: Nil).flatten)
+
       for {
         gpiProblems <- gpiTargetsWithProblems
         target      =  gpiProblems._1
