@@ -12,9 +12,9 @@ import edu.gemini.util.security.permission.ProgramPermission
 import edu.gemini.util.security.policy.ImplicitPolicy
 
 import scala.collection.JavaConverters._
-import scala.concurrent.ops.spawn
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 import java.security.Principal
-
 
 object TooService {
   val DefaultEventRetentionTime = 30 * 60 * 1000
@@ -52,8 +52,6 @@ class TooService(db: IDBDatabaseService, val site: Site, val eventRetentionTime:
 
     }
 
-
-
   private def trigger(obsList: List[ISPObservation]) {
     val time   = TooTimestamp.now
     val events = obsList map { obs =>
@@ -68,7 +66,7 @@ class TooService(db: IDBDatabaseService, val site: Site, val eventRetentionTime:
       timestamp    = time
     }
 
-    if (obsList.size > 0) spawn {
+    if (obsList.nonEmpty) Future {
       events foreach { evt => publish(evt) }
     }
   }
@@ -96,7 +94,7 @@ class TooService(db: IDBDatabaseService, val site: Site, val eventRetentionTime:
     }
 
     def obsList(n: ISPProgram, ks: Set[SPNodeKey]): List[ISPObservation] =
-      if (ks.size == 0) Nil  // just a shortcut ...
+      if (ks.isEmpty) Nil  // just a shortcut ...
       else n.getAllObservations.asScala.filter(o => ks.contains(o.getNodeKey)).toList
 
     val oldProg = pme.getOldProgram
