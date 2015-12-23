@@ -2,27 +2,22 @@ package edu.gemini.phase2.skeleton.factory
 
 import edu.gemini.model.p1.immutable.GracesBlueprint
 import edu.gemini.model.p1.mutable.{GracesFiberMode, GracesReadMode}
-import edu.gemini.pot.sp.{ISPProgram, ISPTemplateGroup}
-import edu.gemini.shared.skyobject.Magnitude.Band
-import edu.gemini.shared.util.immutable.ScalaConverters._
-import edu.gemini.spModel.core.MagnitudeBand
 import edu.gemini.spModel.gemini.graces.blueprint.SpGracesBlueprint
 import edu.gemini.spModel.gemini.graces.blueprint.SpGracesBlueprint._
 import edu.gemini.spModel.pio.xml.PioXmlFactory
-import edu.gemini.spModel.target.SPTarget
 
-import org.scalacheck.Prop.forAll
+import org.scalacheck.Prop._
 import org.scalacheck.{ Arbitrary, Gen }
 
 import org.specs2.ScalaCheck
-import org.specs2.mutable.Specification
+import org.specs2.mutable.SpecificationLike
 
-class REL_1842_Test extends TemplateSpec("GRACES_BP.xml") with Specification with ScalaCheck {
+class REL_1842_Test extends TemplateSpec("GRACES_BP.xml") with SpecificationLike with ScalaCheck {
 
   // Tests for P1 to P2 instantiation
   "P1 to P2 instantiation" should {
 
-    implicit val arbp1 = Arbitrary {
+    implicit val arbp1:Arbitrary[GracesBlueprint] = Arbitrary {
       for {
         r <- Gen.oneOf(GracesReadMode.values)
         f <- Gen.oneOf(GracesFiberMode.values)
@@ -34,7 +29,7 @@ class REL_1842_Test extends TemplateSpec("GRACES_BP.xml") with Specification wit
         forAll { (p1: GracesBlueprint) =>
           SpBlueprintFactory.create(p1) match {
             case Right(b: SpGracesBlueprint) => f(p1) must_== g(b)
-            case x => failure(x.toString)
+            case x => sys.error(x.toString)
           }
         }
 

@@ -9,6 +9,7 @@ import java.security.Principal
 import edu.gemini.util.security.principal.StaffPrincipal
 
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
 object Activator {
   val Log = Logger.getLogger(classOf[Activator].getName)

@@ -9,9 +9,9 @@ import edu.gemini.spModel.core.MagnitudeBand
 import edu.gemini.spModel.target.SPTarget
 
 import org.specs2.ScalaCheck
-import org.specs2.mutable.Specification
+import org.specs2.mutable.SpecificationLike
 
-class REL_2429_Test extends TemplateSpec("GRACES_BP.xml") with Specification with ScalaCheck {
+class REL_2429_Test extends TemplateSpec("GRACES_BP.xml") with SpecificationLike with ScalaCheck {
 
   // Magnitude buckets
   sealed trait Bucket
