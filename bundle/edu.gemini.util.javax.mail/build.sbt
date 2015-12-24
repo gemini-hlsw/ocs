@@ -30,6 +30,3 @@ OsgiKeys.exportPackage := Seq(
   "javax.mail.search",
   "javax.mail.internet",
   "javax.mail.util")
-
-
-

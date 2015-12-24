@@ -6,7 +6,6 @@ name := "jsky.util.gui"
 
 // version set in ThisBuild
 
-
 osgiSettings
 
 ocsBundleSettings
@@ -22,4 +21,3 @@ OsgiKeys.exportPackage := Seq(
 
 OsgiKeys.additionalHeaders += 
   ("Import-Package" -> "!com.sun.java.swing.plaf.windows,*")        
-

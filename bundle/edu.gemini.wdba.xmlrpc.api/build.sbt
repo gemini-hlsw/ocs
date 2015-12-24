@@ -23,5 +23,4 @@ OsgiKeys.dynamicImportPackage := Seq("")
 OsgiKeys.exportPackage := Seq(
   "edu.gemini.wdba.xmlrpc")
 
-        
 OsgiKeys.privatePackage := Seq("edu.gemini.wdba.xmlrpc.*")

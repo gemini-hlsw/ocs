@@ -22,5 +22,3 @@ OsgiKeys.dynamicImportPackage := Seq("")
 
 OsgiKeys.exportPackage := Seq(
   "edu.gemini.util.ssl.apache")
-
-        

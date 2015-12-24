@@ -9,10 +9,9 @@ name := "jsky.app.ot.testlauncher"
 unmanagedJars in Compile ++= Seq(
   new File(baseDirectory.value, "../../lib/bundle/osgi.cmpn-4.3.1.jar"),
   new File(baseDirectory.value, "../../lib/bundle/javax-servlet_2.10-2.5.0.jar"),
-  new File(baseDirectory.value, "../../lib/bundle/scala-actors-2.10.5.jar"),
-  new File(baseDirectory.value, "../../lib/bundle/scalaz-core_2.10-7.1.6.jar"),
-  new File(baseDirectory.value, "../../lib/bundle/scalaz-effect_2.10-7.1.6.jar"),
-  new File(baseDirectory.value, "../../lib/bundle/breeze_2.10-0.2.2.jar"),
+  new File(baseDirectory.value, "../../lib/bundle/scalaz-core_2.11-7.0.6.jar"),
+  new File(baseDirectory.value, "../../lib/bundle/scalaz-effect_2.11-7.0.6.jar"),
+  //new File(baseDirectory.value, "../../lib/bundle/breeze_2.10-0.2.2.jar"),
   new File(baseDirectory.value, "../../lib/bundle/com-jgoodies-looks_2.10-2.4.1.jar"),
   new File(baseDirectory.value, "../../lib/bundle/nom-tam-fits_2.10-0.99.3.jar"),
   new File(baseDirectory.value, "../../lib/bundle/org-apache-commons-httpclient_2.10-2.0.0.jar"),

@@ -21,5 +21,3 @@ OsgiKeys.dynamicImportPackage := Seq("")
 
 OsgiKeys.exportPackage := Seq(
   )
-
-        

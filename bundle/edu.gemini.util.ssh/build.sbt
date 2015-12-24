@@ -6,10 +6,6 @@ name := "edu.gemini.util.ssh"
 
 // version set in ThisBuild
 
-// unmanagedJars in Compile ++= Seq(
-//   new File(baseDirectory.value, "../../lib/bundle/org.apache.felix-4.2.1.jar"),
-//   new File(baseDirectory.value, "../../lib/bundle/scala-library-2.10.5.jar"))
-
 osgiSettings
 
 ocsBundleSettings
@@ -25,4 +21,3 @@ OsgiKeys.exportPackage := Seq(
 
 OsgiKeys.additionalHeaders += 
   ("Import-Package" -> "!com.jcraft.jzlib,!keypairgen,!signature,!userauth,*")
-        

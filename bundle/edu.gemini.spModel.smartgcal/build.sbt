@@ -24,5 +24,3 @@ OsgiKeys.exportPackage := Seq(
   "edu.gemini.spModel.smartgcal.functors",
   "edu.gemini.spModel.smartgcal.provider",
   "edu.gemini.spModel.smartgcal.repository")
-
-        

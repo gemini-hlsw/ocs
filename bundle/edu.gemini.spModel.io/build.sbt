@@ -7,8 +7,7 @@ name := "edu.gemini.spModel.io"
 // version set in ThisBuild
 
 unmanagedJars in Compile ++= Seq(
-  new File(baseDirectory.value, "../../lib/bundle/scala-library-2.10.5.jar"),
-  new File(baseDirectory.value, "../../lib/bundle/scalaz-core_2.10-7.1.6.jar"),
+  new File(baseDirectory.value, "../../lib/bundle/scalaz-core_2.11-7.0.6.jar"),
   new File(baseDirectory.value, "../../lib/bundle/org-dom4j_2.10-1.5.1.jar")
 )
 
@@ -26,5 +25,3 @@ OsgiKeys.exportPackage := Seq(
   "edu.gemini.spModel.io",
   "edu.gemini.spModel.io.updater",
   "edu.gemini.spModel.io.app")
-
-        

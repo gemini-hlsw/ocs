@@ -19,5 +19,3 @@ OsgiKeys.dynamicImportPackage := Seq("")
 
 OsgiKeys.exportPackage := Seq(
   "edu.gemini.wdba.shared")
-
-        

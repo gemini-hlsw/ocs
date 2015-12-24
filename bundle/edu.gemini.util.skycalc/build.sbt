@@ -7,7 +7,6 @@ name := "edu.gemini.util.skycalc"
 // version set in ThisBuild
 
 unmanagedJars in Compile ++= Seq(
-  new File(baseDirectory.value, "../../lib/bundle/org.scala-lang.scala-library_2.10.1.v20130302-092018-VFINAL-33e32179fd.jar"),
   new File(baseDirectory.value, "../../lib/bundle/scalaz-core_2.11-7.0.6.jar"),
   new File(baseDirectory.value, "../../lib/bundle/scalaz-effect_2.11-7.0.6.jar"))
 

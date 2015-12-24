@@ -30,5 +30,3 @@ OsgiKeys.exportPackage := Seq(
   "edu.gemini.filefilter.osgi",
   "edu.gemini.file.util",
   "edu.gemini.file.util.osgi")
-
-        
