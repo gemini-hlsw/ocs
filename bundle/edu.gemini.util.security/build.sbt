@@ -20,6 +20,10 @@ unmanagedJars in Compile ++= Seq(
   new File(baseDirectory.value, "../../lib/bundle/h2-1.3.170.jar")
 )
 
+libraryDependencies ++= Seq(
+  "org.scala-lang.modules" %% "scala-swing" % "2.0.0-M2",
+  "org.scala-lang" % "scala-reflect" % "2.11.7"
+  )
 osgiSettings
 
 ocsBundleSettings
