@@ -3,9 +3,9 @@ package edu.gemini.catalog.votable
 import edu.gemini.catalog.api._
 import edu.gemini.spModel.core._
 import org.specs2.matcher.{Expectable, Matcher}
-import org.specs2.mutable.SpecificationWithJUnit
+import org.specs2.mutable.Specification
 
-class CatalogQuerySpec extends SpecificationWithJUnit {
+class CatalogQuerySpec extends Specification {
   val a0    = Angle.fromArcsecs( 0.0)
   val a2    = Angle.fromArcsecs( 2.0)
   val a4_9  = Angle.fromArcsecs( 4.9)
@@ -64,9 +64,7 @@ class CatalogQuerySpec extends SpecificationWithJUnit {
           Coordinates(RightAscension.fromAngle(a0),    Declination.fromAngle(a4_9).getOrElse(Declination.zero)),
           Coordinates(RightAscension.fromAngle(a0),    Declination.fromAngle(ma2).getOrElse(Declination.zero)),
           Coordinates(RightAscension.fromAngle(a0),    Declination.fromAngle(ma4_9).getOrElse(Declination.zero)))
-      coordinates.map(c =>
-        par10_10 should beSuperSetOf(CatalogQuery(c, rad5, mag10, UCAC4))
-      )
+      forall(coordinates)(c => par10_10 should beSuperSetOf(CatalogQuery(c, rad5, mag10, UCAC4)))
     }
     "be a superset at the pole" in {
       val pole = Coordinates(RightAscension.zero, Declination.fromAngle(Angle.fromDegrees(90.0)).getOrElse(Declination.zero))
@@ -105,9 +103,7 @@ class CatalogQuerySpec extends SpecificationWithJUnit {
         Coordinates(RightAscension.fromAngle(a0),    Declination.fromAngle(ma11).getOrElse(Declination.zero)),
         Coordinates(RightAscension.fromAngle(a0),    Declination.fromAngle(a20).getOrElse(Declination.zero)),
         Coordinates(RightAscension.fromAngle(a0),    Declination.fromAngle(ma20).getOrElse(Declination.zero)))
-      coordinates.map(c =>
-        par10_10 should beNoSuperSetOf(CatalogQuery(c, rad5, mag10, UCAC4))
-      )
+      forall(coordinates)(c => par10_10 should beNoSuperSetOf(CatalogQuery(c, rad5, mag10, UCAC4)))
     }
     "not be a supersef far out of range" in {
       val far = CatalogQuery(Coordinates(RightAscension.fromDegrees(180), Declination.zero), rad5, mag10, UCAC4)

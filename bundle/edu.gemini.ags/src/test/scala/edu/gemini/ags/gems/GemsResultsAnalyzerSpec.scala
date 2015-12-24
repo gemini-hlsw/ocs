@@ -31,7 +31,7 @@ import org.specs2.time.NoTimeConversions
 
 import scala.concurrent.duration._
 
-import org.specs2.mutable.Specification
+import org.specs2.mutable.SpecificationLike
 import AlmostEqual.AlmostEqualOps
 import scala.concurrent.Await
 
@@ -41,7 +41,7 @@ import Scalaz._
 /**
  * See OT-27
  */
-class GemsResultsAnalyzerSpec extends MascotProgress with Specification with NoTimeConversions with TargetsHelper {
+class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with NoTimeConversions with TargetsHelper {
   class TestGemsVoTableCatalog(file: String) extends GemsVoTableCatalog {
     override val backend = TestVoTableBackend(file)
   }
@@ -278,10 +278,6 @@ class GemsResultsAnalyzerSpec extends MascotProgress with Specification with NoT
       (Angle.fromDegrees(cwfs3x.getDecDeg) ~= Angle.fromDegrees(cwfs3.getDecDeg)) should beTrue
       (Angle.fromDegrees(odgw4x.getRaDeg) ~= Angle.fromDegrees(odgw4.getRaDeg)) should beTrue
       (Angle.fromDegrees(odgw4x.getDecDeg) ~= Angle.fromDegrees(odgw4.getDecDeg)) should beTrue
-
-      //val cwfs1Mag = group.get(Canopus.Wfs.cwfs1).getValue.getPrimary.getValue.getTarget.getMagnitude(JMagnitude.Band.r).getValue.getBrightness
-      val cwfs2Mag = group.get(Canopus.Wfs.cwfs2).getValue.getPrimary.getValue.getTarget.getMagnitude(JMagnitude.Band.r).getValue.getBrightness
-      val cwfs3Mag = group.get(Canopus.Wfs.cwfs3).getValue.getPrimary.getValue.getTarget.getMagnitude(JMagnitude.Band.r).getValue.getBrightness
     }
     "sort targets by R magnitude" in {
       val st1 = target("n", edu.gemini.spModel.core.Coordinates.zero, List(new Magnitude(10.0, MagnitudeBand.J)))

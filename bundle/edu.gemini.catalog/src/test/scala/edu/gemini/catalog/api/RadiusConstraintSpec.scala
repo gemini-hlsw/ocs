@@ -3,12 +3,12 @@ package edu.gemini.catalog.api
 import edu.gemini.spModel.core._
 import org.specs2.ScalaCheck
 import org.scalacheck.Prop._
-import org.specs2.mutable.SpecificationWithJUnit
+import org.specs2.mutable.Specification
 
 import scalaz._
 import Scalaz._
 
-class RadiusConstraintSpec extends SpecificationWithJUnit with ScalaCheck with Arbitraries {
+class RadiusConstraintSpec extends Specification with ScalaCheck with Arbitraries {
   val min: Angle = Angle.fromDegrees(10 / 60.0)
   val max: Angle = Angle.fromDegrees(20 / 60.0)
 
