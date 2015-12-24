@@ -1,5 +1,6 @@
 package edu.gemini.model.p1.dtree.inst
 
+import edu.gemini.model.p1.immutable.Site
 import org.specs2.mutable.Specification
 
 class TexesSpec extends Specification {

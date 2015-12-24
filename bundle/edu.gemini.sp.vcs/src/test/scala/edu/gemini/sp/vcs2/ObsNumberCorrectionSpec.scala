@@ -152,7 +152,7 @@ class ObsNumberCorrectionSpec extends MergeCorrectionSpec {
       val expected  = p.node(renumberedLocal.leaf, oRemote.leaf)
 
       onc(plan) match {
-        case -\/(f)   => failure(VcsFailure.explain(f, SPProgramID.toProgramID("GS-2016A-Q-1"), "", None))
+        case -\/(f)   => sys.error(VcsFailure.explain(f, SPProgramID.toProgramID("GS-2016A-Q-1"), "", None))
         case \/-(mp)  => mp.update must correspondTo(expected)
       }
     }

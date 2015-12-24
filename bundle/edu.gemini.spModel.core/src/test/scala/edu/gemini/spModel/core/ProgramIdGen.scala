@@ -49,7 +49,7 @@ object ProgramIdGen {
   val unstructuredId: Gen[SPProgramID] =
     for {
       i <- choose(1,10)
-      s <- listOfN(i, oneOf(alphaNumChar, '-')).map(_.mkString)
+      s <- listOfN(i, oneOf[Char](alphaNumChar, '-')).map(t => t.map(_.toString).mkString)
     } yield SPProgramID.toProgramID(s)
 
   val genSomeId: Gen[SPProgramID] = frequency(

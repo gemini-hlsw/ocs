@@ -13,11 +13,19 @@ import edu.gemini.util.security.principal.{ProgramPrincipal, StaffPrincipal}
 
 import java.security.Principal
 
+import org.specs2.control.LanguageFeatures
+
 import scala.language.postfixOps
 import scalaz._
 import Scalaz._
 
-class VcsServerSpec extends VcsSpecification {
+// Specs2 bugfix https://github.com/etorreborre/specs2/issues/343
+trait NoLanguageFeatures extends LanguageFeatures {
+  override lazy val implicitsAreAllowed = language.implicitConversions
+  override lazy val postfixOpsAreAllowed = language.postfixOps
+}
+
+class VcsServerSpec extends VcsSpecification with NoLanguageFeatures {
 
   import TestEnv._
 
@@ -174,10 +182,11 @@ class VcsServerSpec extends VcsSpecification {
       val update = (Unmodified(Key): MergeNode).node()
       val mp     = MergePlan(update, Set.empty)
       val svs    = new env.local.server.SecureVcsService(StaffUser, MockVcsLog)
+
       svs.storeDiffs(Q1, mp.encode) match {
         case \/-(false) => ok("ok, nothing done")
-        case \/-(true)  => ko("updated anyway")
-        case x          => ko("didn't expect: " + x)
+        case \/-(true)  => sys.error("updated anyway")
+        case x          => sys.error("didn't expect: " + x)
       }
     }
 
@@ -193,8 +202,8 @@ class VcsServerSpec extends VcsSpecification {
       val svs = new env.local.server.SecureVcsService(StaffUser, MockVcsLog)
       svs.storeDiffs(Q1, mp.encode) match {
         case \/-(true)  => env.local.progTitle must_== "The Myth of Sisyphus"
-        case \/-(false) => ko("update ignored")
-        case x          => ko("didn't expect: " + x)
+        case \/-(false) => sys.error("update ignored")
+        case x          => sys.error("didn't expect: " + x)
       }
     }
 
@@ -211,10 +220,10 @@ class VcsServerSpec extends VcsSpecification {
 
       val svs = new env.local.server.SecureVcsService(StaffUser, MockVcsLog)
       svs.storeDiffs(Q1, mp.encode) match {
-        case \/-(true)        => ko("conflict ignored")
-        case \/-(false)       => ko("update and conflict ignored")
+        case \/-(true)        => sys.error("conflict ignored")
+        case \/-(false)       => sys.error("update and conflict ignored")
         case -\/(HasConflict) => ok("can't update with conflicts")
-        case x                => ko("didn't expect: " + x)
+        case x                => sys.error("didn't expect: " + x)
       }
     }
   }
