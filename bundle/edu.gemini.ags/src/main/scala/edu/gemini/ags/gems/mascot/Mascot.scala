@@ -208,7 +208,7 @@ object Mascot {
         valid(i + 1 until valid.size) :*= ok(i + 1 until ok.size)
       }
       crowd_rad += 2
-    } while (valid.sum > nstar_limit)
+    } while (sum(valid) > nstar_limit)
     crowd_rad -= 2
 
     Log.info(s"Select stars: found optimum crowding radius=$crowd_rad")
