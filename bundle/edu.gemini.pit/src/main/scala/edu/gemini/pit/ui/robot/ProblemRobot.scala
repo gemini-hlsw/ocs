@@ -86,7 +86,8 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
           TimeProblems.partnerZeroTimeRequest(p, s) ++
           TacProblems(p, s).all ++
           List(incompleteInvestigator, missingObsElementCheck, cfCheck, emptyTargetCheck, emptyEphemerisCheck, initialEphemerisCheck, finalEphemerisCheck,
-            badGuiding, badVisibility, iffyVisibility, singlePointEphemerisCheck, minTimeCheck, wrongSite, band3Orphan2, gpiCheck, altairLGSCC50Check, altairLGSIQCheck).flatten
+            badGuiding, badVisibility, iffyVisibility, singlePointEphemerisCheck, minTimeCheck, wrongSite, band3Orphan2, gpiCheck, altairLGSCC50Check, altairLGSIQCheck,
+            texesCCCheck).flatten
       ps.sorted
     }
 
@@ -236,6 +237,15 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
             }
       if lgs && (c.cc != CloudCover.BEST)
     } yield new Problem(Severity.Error, s"LGS requires CC50 conditions", "Targets", s.inTargetsView(_.edit(t)))
+
+    private val texesCCCheck = for {
+      o  <- p.observations
+      t  <- o.target
+      c  <- o.condition
+      b  <- o.blueprint
+      if b.isInstanceOf[TexesBlueprint]
+      if c.cc == CloudCover.ANY || c.cc == CloudCover.CC80
+    } yield new Problem(Severity.Warning, s"TEXES is not recommended for worse than CC70", "Targets", s.inTargetsView(_.edit(t)))
 
     private val gpiCheck = {
       def gpiMagnitudesPresent(target: SiderealTarget):List[(Severity, String)] = {

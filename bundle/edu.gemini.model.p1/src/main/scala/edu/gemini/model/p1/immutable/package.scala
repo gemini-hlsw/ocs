@@ -38,6 +38,8 @@ package object immutable {
   type CloudCover = M.CloudCover
   object CloudCover extends EnumObject[M.CloudCover] {
     val BEST = M.CloudCover.cc50
+    val CC80 = M.CloudCover.cc80
+    val ANY  = M.CloudCover.cc100
   }
 
   type CoordinatesEpoch = M.CoordinatesEpoch
