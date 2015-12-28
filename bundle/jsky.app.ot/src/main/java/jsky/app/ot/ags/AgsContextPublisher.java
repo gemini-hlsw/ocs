@@ -21,35 +21,25 @@ public final class AgsContextPublisher {
     public void subscribe(AgsContextSubscriber sub) {
         subs.add(sub);
     }
-
     public void removeSubscription(AgsContextSubscriber sub) {
         subs.remove(sub);
     }
 
-    private final PropertyChangeListener obsListener = new PropertyChangeListener() {
-        @Override public void propertyChange(PropertyChangeEvent evt) {
-            SwingUtilities.invokeLater(new Runnable() {
-                @Override public void run() {
-                    updateAgsContext(obs);
-                }
-            });
-        }
-    };
+    private final PropertyChangeListener obsListener = evt -> SwingUtilities.invokeLater(() -> updateAgsContext(obs));
 
-    private void updateAgsContext(ISPObservation obs) {
+
+    private void updateAgsContext(final ISPObservation obs) {
         final AgsContext newOptions = AgsContext.create(obs);
         final AgsContext oldOptions = agsContext;
         if (!oldOptions.equals(newOptions)) {
             agsContext = newOptions;
-            for (AgsContextSubscriber s : new ArrayList<>(subs)) {
-                s.notify(obs, oldOptions, newOptions);
-            }
+            new ArrayList<>(subs).forEach(s -> s.notify(obs, oldOptions, newOptions));
         }
     }
 
     public void watch(final Option<ISPObservation> obsShell) {
-        if (obsShell.isDefined()) watch(obsShell.getValue());
-        else unwatch();
+        unwatch();
+        obsShell.foreach(this::watch);
     }
 
     public void unwatch() {
@@ -61,12 +51,9 @@ public final class AgsContextPublisher {
     }
 
     private void watch(final ISPObservation newObs) {
-        unwatch();
         obs        = newObs;
         agsContext = AgsContext.create(newObs);
-        if (obs != null) {
-            obs.addCompositeChangeListener(obsListener);
-        }
+        obs.addCompositeChangeListener(obsListener);
     }
 
     public AgsContext getAgsContext() {

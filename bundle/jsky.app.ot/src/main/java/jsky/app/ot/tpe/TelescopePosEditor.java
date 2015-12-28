@@ -25,19 +25,16 @@ import jsky.app.ot.OT;
 import jsky.app.ot.ags.*;
 import jsky.app.ot.util.BasicPropertyList;
 import jsky.catalog.CatalogException;
-import jsky.coords.CoordinateConverter;
-import jsky.coords.WorldCoords;
 import jsky.image.gui.ImageDisplayControlFrame;
-import org.apache.ecs.html.P;
 
 import java.awt.*;
 import java.awt.event.MouseEvent;
-import java.awt.geom.Point2D;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
 
 import java.net.URL;
 import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -54,12 +51,12 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
     /**
      * All feature class names
      */
-    private static final java.util.List<Class<?>> _featureClasses = new ArrayList<>();
+    private static final List<Class<?>> _featureClasses = new ArrayList<>();
 
     /**
      * List of all features
      */
-    private final java.util.List<TpeImageFeature> _allFeatures;
+    private final List<TpeImageFeature> _allFeatures;
 
     private TpeContext _ctx = TpeContext.empty();
 
@@ -141,12 +138,15 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
      * target env, offset and instrument nodes.
      */
     private static boolean isTpeObject(final ISPNode node) {
-        SPComponentType type = null;
+        final SPComponentType type;
         if (node instanceof ISPObsComponent) {
             type = ((ISPObsComponent) node).getType();
         } else if (node instanceof ISPSeqComponent) {
             type = ((ISPSeqComponent) node).getType();
+        } else {
+            type = null;
         }
+
         if (type != null) {
             final SPComponentBroadType broadType = type.broadType;
             return (broadType.equals(TargetObsComp.SP_TYPE.broadType) ||
@@ -166,7 +166,7 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
     @Override
     protected ImageDisplayControlFrame makeNavigatorImageDisplayFrame(final String imageFileOrUrl) {
         final TpeImageDisplayFrame frame = new  TpeImageDisplayFrame(imageFileOrUrl);
-        // Very ugly this sets _iw indirectly on the constructor
+        // Very ugly: this sets _iw indirectly on the constructor.
         _iw = (TpeImageWidget) frame.getImageDisplayControl().getImageDisplay();
         return frame;
     }
@@ -182,7 +182,7 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
      * Register an independent feature.  These features will be
      * created when a TelescopePositionEditor is created.
      */
-    public static void registerFeature(Class<?> clazz) {
+    public static void registerFeature(final Class<?> clazz) {
         _featureClasses.add(clazz);
     }
 
@@ -190,7 +190,7 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
      * Return a reference to the first registered TPE image feature
      * corresponding to the given class, or null if not found.
      */
-    public TpeImageFeature getFeature(Class<?> c) {
+    public TpeImageFeature getFeature(final Class<?> c) {
         return _allFeatures.stream().filter(f -> f.getClass().equals(c)).findFirst().orElseGet(null);
     }
 
@@ -201,7 +201,7 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
     /**
      * Instantiate all the TpeImageFeatures indicated in the given Vector.
      */
-    private static java.util.List<TpeImageFeature> _createFeatures() {
+    private static List<TpeImageFeature> _createFeatures() {
         return TelescopePosEditor._featureClasses.stream().map(TpeImageFeature::createFeature).collect(Collectors.toList());
     }
 
@@ -209,8 +209,8 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
      * Do the work of adding a feature without worrying about whether
      * it should be visible or not.
      */
-    private void _addFeature(TpeImageFeature tif) {
-        if (_featureMan.isFeaturePresent(tif)) return;// already being displayed
+    private void _addFeature(final TpeImageFeature tif) {
+        if (_featureMan.isFeaturePresent(tif)) return; // already being displayed
 
         _featureMan.addFeature(tif);
         _editorTools.addFeature(tif);
@@ -222,7 +222,7 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
         }
     }
 
-    public void selectFeature(TpeImageFeature tif) {
+    public void selectFeature(final TpeImageFeature tif) {
         _featureMan.setSelected(tif, true);
     }
 
@@ -231,8 +231,8 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
      * world coordinate support and the base position at the center.
      */
     private void loadImage() {
-        double ra = 0.0;
-        double dec = 0.0;
+        final double ra;
+        final double dec;
         SPTarget tp = _ctx.targets().baseOrNull();
         if (tp != null) {
             // Get the RA and Dec from the pos list.
@@ -240,6 +240,9 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
             final Option<Long> when = _ctx.schedulingBlockJava().map(SchedulingBlock::start);
             ra = target.getRaDegrees(when).getOrElse(0.0);
             dec = target.getDecDegrees(when).getOrElse(0.0);
+        } else {
+            ra  = 0.0;
+            dec = 0.0;
         }
 
         _iw.loadCachedImage(ra, dec);
@@ -281,21 +284,14 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
      * Reset the position editor based on the currently selected science program
      * tree node.
      */
-    public void reset(ISPNode node) {
-        if (_ctx.obsShell().isDefined()) {
-            final ISPObservation obs = _ctx.obsShell().get();
+    public void reset(final ISPNode node) {
+        ImOption.fromScalaOpt(_ctx.obsShell()).foreach(obs -> {
             obs.removeCompositeChangeListener(obsListener);
             obs.removeStructureChangeListener(obsListener);
-        }
+        });
 
-        if (_ctx.targets().shell().isDefined()) {
-            final ISPObsComponent targetComp = _ctx.targets().shell().get();
-            TargetSelection.deafTo(targetComp, selListener);
-        }
-        for (SingleOffsetListContext off : _ctx.offsets().allJava()) {
-            final ISPNode n = off.shell().get();
-            OffsetPosSelection.deafTo(n, selListener);
-        }
+        ImOption.fromScalaOpt(_ctx.targets().shell()).foreach(targetComp -> TargetSelection.deafTo(targetComp, selListener));
+        _ctx.offsets().allJava().forEach(off -> OffsetPosSelection.deafTo(off.shell().get(), selListener));
 
         final TpeContext oldCtx = _ctx;
         _ctx = TpeContext.apply(node);
@@ -339,19 +335,19 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
      * @throws IOException      If a problem happens reading from the catalog
      * @throws CatalogException if a Catalog Problem is found
      */
-    public void getSkyImage(TpeContext ctx) throws IOException, CatalogException {
+    public void getSkyImage(final TpeContext ctx) throws IOException, CatalogException {
         final SPTarget _baseTarget = ctx.targets().baseOrNull();
         if (_baseTarget == null) return;
 
-        ImageCatalog imageCatalog = ImageCatalog.instance().user();
+        final ImageCatalog imageCatalog = ImageCatalog.instance().user();
 
         final Option<Long> when = ctx.schedulingBlockJava().map(SchedulingBlock::start);
 
         _baseTarget.getTarget().getRaDegrees(when).flatMap(ra ->
             _baseTarget.getTarget().getDecDegrees(when).flatMap( dec -> {
-                HmsDegCoordinates hmsDegCoordinates = new HmsDegCoordinates.Builder(new Angle(ra, Angle.Unit.DEGREES), new Angle(dec, Angle.Unit.DEGREES)).build();
-                Coordinates coordinates = ModelConverters.toCoordinates(hmsDegCoordinates);
-                URL queryUrl = imageCatalog.queryUrl(coordinates);
+                final HmsDegCoordinates hmsDegCoordinates = new HmsDegCoordinates.Builder(new Angle(ra, Angle.Unit.DEGREES), new Angle(dec, Angle.Unit.DEGREES)).build();
+                final Coordinates coordinates = ModelConverters.toCoordinates(hmsDegCoordinates);
+                final URL queryUrl = imageCatalog.queryUrl(coordinates);
                 ImageCatalogLoader.instance().display4Java(getImageWidget(), queryUrl);
                 return null;
             }));
@@ -362,7 +358,7 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
      * Receive a mouse event in the image widget.
      */
     @Override
-    public void tpeMouseEvent(TpeImageWidget iw, TpeMouseEvent mouseEvent) {
+    public void tpeMouseEvent(final TpeImageWidget iw, final TpeMouseEvent mouseEvent) {
         // only interested in button 1 here
         if (mouseEvent.mouseEvent.getButton() > 1)
             return;
