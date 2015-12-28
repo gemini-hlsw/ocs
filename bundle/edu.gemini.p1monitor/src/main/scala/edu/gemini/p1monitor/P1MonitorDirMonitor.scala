@@ -112,7 +112,7 @@ class P1MonitorDirMonitor(cfg: P1MonitorConfig) extends DirListener {
     src match {
       case s if src.exists() && src != dest =>
         LOG.info(s"Copy file $src to $dest")
-        new FileOutputStream(dest).getChannel().transferFrom(new FileInputStream(src).getChannel, 0, Long.MaxValue)
+        new FileOutputStream(dest).getChannel.transferFrom(new FileInputStream(src).getChannel, 0, Long.MaxValue)
         Some(dest)
       case s if src.exists() && src == dest =>
         LOG.info(s"Destination for $src, $dest already in place")

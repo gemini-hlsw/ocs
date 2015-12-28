@@ -449,11 +449,17 @@ package object immutable {
   }
 
   type SubaruInstrument = M.SubaruInstrument
-  object SubaruInstrument extends EnumObject[M.SubaruInstrument]
+  object SubaruInstrument extends EnumObject[M.SubaruInstrument] {
+    val COMICS = M.SubaruInstrument.COMICS
+    val FMOS   = M.SubaruInstrument.FMOS
+    val IRCS   = M.SubaruInstrument.IRCS
+    val MOIRCS = M.SubaruInstrument.MOIRCS
+  }
 
   type SkyBackground = M.SkyBackground
   object SkyBackground extends EnumObject[M.SkyBackground] {
     val BEST = M.SkyBackground.sb20
+    val ANY  = M.SkyBackground.sb100
   }
 
   type TacCategory = M.TacCategory

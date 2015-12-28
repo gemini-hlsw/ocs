@@ -87,7 +87,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
           TacProblems(p, s).all ++
           List(incompleteInvestigator, missingObsElementCheck, cfCheck, emptyTargetCheck, emptyEphemerisCheck, initialEphemerisCheck, finalEphemerisCheck,
             badGuiding, badVisibility, iffyVisibility, singlePointEphemerisCheck, minTimeCheck, wrongSite, band3Orphan2, gpiCheck, altairLGSCC50Check, altairLGSIQCheck,
-            texesCCCheck, texesWVCheck, gmosWVCheck, band3IQ, band3LGS, band3TOO).flatten
+            texesCCCheck, texesWVCheck, gmosWVCheck, band3IQ, band3LGS, band3TOO, bgAny).flatten
       ps.sorted
     }
 
@@ -301,7 +301,33 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       o  <- p.observations
       to <- isToO(p.proposalClass)
       t  <- o.target
+      if isBand3(o) && to != ToOChoice.None
     } yield new Problem(Severity.Error, s"ToO observations cannot be scheduled in Band 3", "Targets", s.inTargetsView(_.edit(t)))
+
+    def isIR(b: BlueprintBase): Boolean = b match {
+      case _: GsaoiBlueprint                           => true
+      case _: Flamingos2BlueprintBase                  => true
+      case _: PhoenixBlueprint                         => true
+      case _: NiciBlueprintBase                        => true
+      case _: TrecsBlueprintBase                       => true
+      case _: NiriBlueprint                            => true
+      case _: GnirsBlueprintBase                       => true
+      case _: NifsBlueprintBase                        => true
+      case _: TexesBlueprint                           => true
+      case SubaruBlueprint(SubaruInstrument.COMICS, _) => true
+      case SubaruBlueprint(SubaruInstrument.FMOS, _)   => true
+      case SubaruBlueprint(SubaruInstrument.IRCS, _)   => true
+      case SubaruBlueprint(SubaruInstrument.MOIRCS, _) => true
+      case _                                           => false
+    }
+
+    private val bgAny = for {
+      o  <- p.observations
+      t  <- o.target
+      b  <- o.blueprint
+      c  <- o.condition
+      if isIR(b) && c.sb != SkyBackground.ANY
+    } yield new Problem(Severity.Warning, s"Infrared observations usually do not require background constraints", "Targets", s.inTargetsView(_.edit(t)))
 
     private val gpiCheck = {
       def gpiMagnitudesPresent(target: SiderealTarget):List[(Severity, String)] = {
