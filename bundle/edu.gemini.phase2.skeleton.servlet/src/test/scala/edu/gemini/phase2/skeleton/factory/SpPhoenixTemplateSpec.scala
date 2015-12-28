@@ -1,6 +1,6 @@
 package edu.gemini.phase2.skeleton.factory
 
-import edu.gemini.model.p1.immutable.PhoenixBlueprint
+import edu.gemini.model.p1.immutable.{Site, PhoenixBlueprint}
 import edu.gemini.model.p1.mutable.{PhoenixFilter, PhoenixFocalPlaneUnit}
 import edu.gemini.spModel.core.MagnitudeBand
 import edu.gemini.spModel.gemini.phoenix.InstPhoenix
@@ -14,7 +14,7 @@ import scala.collection.JavaConverters._
 object SpPhoenixTemplateSpec extends TemplateSpec("PHOENIX_BP.xml") with Specification {
 
   def test(fpu: PhoenixFocalPlaneUnit, filter: PhoenixFilter) =
-    expand(proposal(PhoenixBlueprint(fpu, filter), List(1), MagnitudeBand.R)) { (p, sp) =>
+    expand(proposal(PhoenixBlueprint(Site.GS, fpu, filter), List(1), MagnitudeBand.R)) { (p, sp) =>
       s"Phoenic Blueprint Expansion $fpu $filter " >> {
 
         def group = groups(sp).head
