@@ -87,7 +87,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
           TacProblems(p, s).all ++
           List(incompleteInvestigator, missingObsElementCheck, cfCheck, emptyTargetCheck, emptyEphemerisCheck, initialEphemerisCheck, finalEphemerisCheck,
             badGuiding, badVisibility, iffyVisibility, singlePointEphemerisCheck, minTimeCheck, wrongSite, band3Orphan2, gpiCheck, altairLGSCC50Check, altairLGSIQCheck,
-            texesCCCheck, texesWVCheck, gmosWVCheck, band3IQ).flatten
+            texesCCCheck, texesWVCheck, gmosWVCheck, band3IQ, band3LGS, band3TOO).flatten
       ps.sorted
     }
 
@@ -265,16 +265,43 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       if c.wv != WaterVapor.ANY
     } yield new Problem(Severity.Warning, s"GMOS is usually unaffected by atmospheric water vapor", "Targets", s.inTargetsView(_.edit(t)))
 
+    def isBand3(o: Observation) = o.band == Band.BAND_3 && (p.proposalClass match {
+                  case q: QueueProposalClass if q.band3request.isDefined => true
+                  case _                                                 => false
+                })
+
     private val band3IQ = for {
       o  <- p.observations
-      if o.band == Band.BAND_3 && (p.proposalClass match {
-              case q: QueueProposalClass if q.band3request.isDefined => true
-              case _                                                 => false
-            })
+      if isBand3(o)
       t  <- o.target
       c  <- o.condition
       if c.iq == ImageQuality.BEST
     } yield new Problem(Severity.Warning, s"IQ20 observations are unlikely to be executed in Band-3", "Targets", s.inTargetsView(_.edit(t)))
+
+    private val band3LGS = for {
+      o  <- p.observations
+      t  <- o.target
+      b  <- o.blueprint
+      a  <- bpAltair(b)
+      lgs = a.ao match {
+              case AoLgs => true
+              case _     => false
+            }
+      if isBand3(o) && lgs
+    } yield new Problem(Severity.Error, s"LGS cannot be scheduled in Band 3", "Targets", s.inTargetsView(_.edit(t)))
+
+    def isToO(p: ProposalClass): Option[ToOChoice] = p match {
+      case q: QueueProposalClass         => q.tooOption.some
+      case l: LargeProgramClass          => l.tooOption.some
+      case f: FastTurnaroundProgramClass => f.tooOption.some
+      case _                             => None
+    }
+    
+    private val band3TOO = for {
+      o  <- p.observations
+      to <- isToO(p.proposalClass)
+      t  <- o.target
+    } yield new Problem(Severity.Error, s"ToO observations cannot be scheduled in Band 3", "Targets", s.inTargetsView(_.edit(t)))
 
     private val gpiCheck = {
       def gpiMagnitudesPresent(target: SiderealTarget):List[(Severity, String)] = {
