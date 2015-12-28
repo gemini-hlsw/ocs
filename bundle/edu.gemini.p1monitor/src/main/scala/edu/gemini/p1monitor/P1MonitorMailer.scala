@@ -103,7 +103,7 @@ class P1MonitorMailer(cfg: P1MonitorConfig) {
       case pc: SpecialProposalClass       => pc.sub.response.map(_.receipt.id).mkString(" ")
       case ft: FastTurnaroundProgramClass => ft.sub.response.map(_.receipt.id).mkString(" ")
       case lp: LargeProgramClass          => lp.sub.response.map(_.receipt.id).mkString(" ")
-      case q:  GeminiNormalProposalClass  => ~q.subs.left.getOrElse(Nil).map(_.response.map(_.receipt.id).mkString(" ")).headOption
+      case q:  GeminiNormalProposalClass  => ~q.subs.left.getOrElse(Nil).flatMap(_.response.map(_.receipt.id)).headOption
       case _                              => ""
     }
     string.trim
