@@ -38,6 +38,8 @@ package object immutable {
   type CloudCover = M.CloudCover
   object CloudCover extends EnumObject[M.CloudCover] {
     val BEST = M.CloudCover.cc50
+    val CC80 = M.CloudCover.cc80
+    val ANY  = M.CloudCover.cc100
   }
 
   type CoordinatesEpoch = M.CoordinatesEpoch
@@ -338,6 +340,7 @@ package object immutable {
   type ImageQuality = M.ImageQuality
   object ImageQuality extends EnumObject[M.ImageQuality] {
     val BEST = M.ImageQuality.iq20
+    val IQ70 = M.ImageQuality.iq70
   }
 
   type InvestigatorStatus = M.InvestigatorStatus
@@ -446,11 +449,17 @@ package object immutable {
   }
 
   type SubaruInstrument = M.SubaruInstrument
-  object SubaruInstrument extends EnumObject[M.SubaruInstrument]
+  object SubaruInstrument extends EnumObject[M.SubaruInstrument] {
+    val COMICS = M.SubaruInstrument.COMICS
+    val FMOS   = M.SubaruInstrument.FMOS
+    val IRCS   = M.SubaruInstrument.IRCS
+    val MOIRCS = M.SubaruInstrument.MOIRCS
+  }
 
   type SkyBackground = M.SkyBackground
   object SkyBackground extends EnumObject[M.SkyBackground] {
     val BEST = M.SkyBackground.sb20
+    val ANY  = M.SkyBackground.sb100
   }
 
   type TacCategory = M.TacCategory
@@ -484,6 +493,7 @@ package object immutable {
   type WaterVapor = M.WaterVapor
   object WaterVapor extends EnumObject[M.WaterVapor] {
     val BEST = M.WaterVapor.wv20
+    val ANY  = M.WaterVapor.wv100
   }
 
   type WavelengthRegime = M.WavelengthRegime

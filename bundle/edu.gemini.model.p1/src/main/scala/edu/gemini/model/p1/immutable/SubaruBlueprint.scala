@@ -19,7 +19,7 @@ case class SubaruBlueprint(instrument: SubaruInstrument, customName: Option[Stri
     m.setId(n.nameOf(this))
     m.setName(name)
     m.setInstrument(instrument)
-    customName.map(m.setCustomName)
+    customName.foreach(m.setCustomName)
     m
   }
 }
