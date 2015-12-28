@@ -156,7 +156,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
                 final Option<Coordinates> coords = getCoordinates(target, when);
                 distance = baseCoords.flatMap(bc ->
                         coords.map(c ->
-                                Coordinates.difference(bc, c).distance().toArcmins()
+                                bc.angularDistance(c).toArcmins()
                         )
                 );
             }
