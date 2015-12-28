@@ -487,6 +487,7 @@ package object immutable {
   type WaterVapor = M.WaterVapor
   object WaterVapor extends EnumObject[M.WaterVapor] {
     val BEST = M.WaterVapor.wv20
+    val ANY  = M.WaterVapor.wv100
   }
 
   type WavelengthRegime = M.WavelengthRegime
