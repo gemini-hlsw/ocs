@@ -5,6 +5,7 @@ import edu.gemini.pot.ModelConverters;
 import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.util.immutable.*;
+import edu.gemini.spModel.core.Coordinates;
 import edu.gemini.spModel.guide.*;
 import edu.gemini.spModel.obs.SchedulingBlock;
 import edu.gemini.spModel.obs.context.ObsContext;
@@ -21,7 +22,6 @@ import edu.gemini.spModel.target.system.ITarget;
 import jsky.app.ot.OT;
 import jsky.app.ot.OTOptions;
 import jsky.app.ot.util.Resources;
-import jsky.coords.WorldCoords;
 import org.jdesktop.swingx.JXTreeTable;
 import org.jdesktop.swingx.decorator.HighlighterFactory;
 import org.jdesktop.swingx.treetable.AbstractTreeTableModel;
@@ -150,10 +150,15 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
             private final Option<Double> distance;
 
             NonBaseTargetRow(final boolean enabled, final String tag, final SPTarget target,
-                             final Option<WorldCoords> baseCoords, final Option<Long> when) {
+                             final Option<Coordinates> baseCoords, final Option<Long> when) {
                 super(enabled, tag, target.getTarget().getName(), new Some<>(target), when);
-                final Option<WorldCoords> coords = getWorldCoords(target, when);
-                distance = baseCoords.flatMap(bc -> coords.map(c -> Math.abs(bc.dist(c))));
+
+                final Option<Coordinates> coords = getCoordinates(target, when);
+                distance = baseCoords.flatMap(bc ->
+                        coords.map(c ->
+                                Coordinates.difference(bc, c).distance().toArcmins()
+                        )
+                );
             }
 
             @Override public Option<Double> distance() { return distance; }
@@ -165,7 +170,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
 
             GuideTargetRow(final boolean isActiveGuideProbe, final Option<AgsGuideQuality> quality,
                            final boolean enabled, final GuideProbe probe, final int index, final SPTarget target,
-                           final Option<WorldCoords> baseCoords, final Option<Long> when) {
+                           final Option<Coordinates> baseCoords, final Option<Long> when) {
                 super(enabled, String.format("%s (%d)", probe.getKey(), index), target, baseCoords, when);
                 this.isActiveGuideProbe = isActiveGuideProbe;
                 this.quality = quality;
@@ -179,7 +184,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
         }
 
         static final class UserTargetRow extends NonBaseTargetRow {
-            UserTargetRow(final int index, final SPTarget target, final Option<WorldCoords> baseCoords,
+            UserTargetRow(final int index, final SPTarget target, final Option<Coordinates> baseCoords,
                           final Option<Long> when) {
                 super(true, String.format("%s (%d)", TargetEnvironment.USER_NAME, index), target, baseCoords, when);
             }
@@ -250,7 +255,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
             // Add the base position first.
             final SPTarget base = env.getBase();
             final Option<Long> when = ctx.flatMap(c -> c.getSchedulingBlock().map(SchedulingBlock::start));
-            final Option<WorldCoords> baseCoords = getWorldCoords(base, when);
+            final Option<Coordinates> baseCoords = getCoordinates(base, when);
             tmpRows.add(new BaseTargetRow(base, when));
 
             // Add all the guide groups and targets.
@@ -432,12 +437,13 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
     }
 
     // Return the world coordinates for the given target
-    private static Option<WorldCoords> getWorldCoords(final SPTarget tp, final Option<Long> when) {
+    private static Option<Coordinates> getCoordinates(final SPTarget tp, final Option<Long> when) {
         final ITarget target = tp.getTarget();
-        return target.getRaDegrees(when).flatMap(x ->
-                target.getDecDegrees(when).map(y ->
-                        new WorldCoords(x, y, 2000)
-                ));
+        return target.getRaDegrees(when).flatMap(ra ->
+                target.getDecDegrees(when).flatMap(dec ->
+                    ImOption.apply(Coordinates.fromDegrees(ra, dec).getOrElse(null))
+                )
+        );
     }
 
     private static void styleRendererLabel(final JLabel lab, final TableData.Row row) {
@@ -847,10 +853,8 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
         if (item == parent) return false;
         final GuideGroup group = parent.group().getOrNull();
         final SPTarget target = item.target().getOrNull();
-        if (group == null || target == null || group.containsTarget(target)) {
-            return false;
-        }
-        return !(item instanceof TableData.BaseTargetRow) && !(item instanceof TableData.UserTargetRow);
+        return !(group == null || target == null || group.containsTarget(target))
+                && !(item instanceof TableData.BaseTargetRow) && !(item instanceof TableData.UserTargetRow);
     }
 
     /**
