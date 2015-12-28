@@ -5,6 +5,7 @@ import edu.gemini.catalog.ui.tpe.ImageCatalogLoader;
 import edu.gemini.pot.ModelConverters;
 import edu.gemini.pot.sp.*;
 import edu.gemini.shared.skyobject.coords.HmsDegCoordinates;
+import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.skycalc.Angle;
 import edu.gemini.spModel.core.Coordinates;
@@ -27,6 +28,7 @@ import jsky.catalog.CatalogException;
 import jsky.coords.CoordinateConverter;
 import jsky.coords.WorldCoords;
 import jsky.image.gui.ImageDisplayControlFrame;
+import org.apache.ecs.html.P;
 
 import java.awt.*;
 import java.awt.event.MouseEvent;
@@ -243,19 +245,6 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
         _iw.loadCachedImage(ra, dec);
     }
 
-    /**
-     * Get the location of the center of the image being displayed.
-     */
-    private WorldCoords getImageCenterLocation() {
-        final CoordinateConverter converter = _iw.getCoordinateConverter();
-        if (!converter.isWCS()) {
-            return null;
-        }
-
-        final Point2D.Double p = converter.getWCSCenter();
-        return new WorldCoords(p.x, p.y, converter.getEquinox());
-    }
-
     private boolean basePosUpdated(final TpeContext oldCtx, final TpeContext newCtx) {
         final SPTarget oldBasePos = oldCtx.targets().baseOrNull();
         final SPTarget newBasePos = newCtx.targets().baseOrNull();
@@ -332,23 +321,16 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
         _editorTools.updateEnabledStates();
 
         // update selected guiders in toolbar
-        _agsPub.watch(_ctx.obsShellOrNull());
+        final Option<ISPObservation> obsShell = ImOption.fromScalaOpt(_ctx.obsShell());
+        _agsPub.watch(obsShell);
         _tpeToolBar.getGuiderSelector().setAgsOptions(_agsPub.getAgsContext());
-
-        if (_ctx.obsShell().isDefined()) {
-            final ISPObservation obs = _ctx.obsShell().get();
+        obsShell.foreach(obs -> {
             obs.addCompositeChangeListener(obsListener);
             obs.addStructureChangeListener(obsListener);
-        }
+        });
 
-        if (_ctx.targets().shell().isDefined()) {
-            final ISPObsComponent targetComp = _ctx.targets().shell().get();
-            TargetSelection.listenTo(targetComp, selListener);
-        }
-        for (SingleOffsetListContext off : _ctx.offsets().allJava()) {
-            final ISPNode n = off.shell().get();
-            OffsetPosSelection.listenTo(n, selListener);
-        }
+        ImOption.fromScalaOpt(_ctx.targets().shell()).foreach(targetComp -> TargetSelection.listenTo(targetComp, selListener));
+        _ctx.offsets().allJava().forEach(off -> OffsetPosSelection.listenTo(off.shell().get(), selListener));
     }
 
     /**

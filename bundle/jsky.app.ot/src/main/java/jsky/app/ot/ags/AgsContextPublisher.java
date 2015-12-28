@@ -1,6 +1,7 @@
 package jsky.app.ot.ags;
 
 import edu.gemini.pot.sp.ISPObservation;
+import edu.gemini.shared.util.immutable.Option;
 
 import javax.swing.*;
 import java.beans.PropertyChangeEvent;
@@ -46,14 +47,25 @@ public final class AgsContextPublisher {
         }
     }
 
-    public void watch(ISPObservation obs) {
-        if (this.obs != null) {
-            this.obs.removeCompositeChangeListener(obsListener);
+    public void watch(final Option<ISPObservation> obsShell) {
+        if (obsShell.isDefined()) watch(obsShell.getValue());
+        else unwatch();
+    }
+
+    public void unwatch() {
+        if (obs != null) {
+            obs.removeCompositeChangeListener(obsListener);
         }
-        this.obs        = obs;
-        this.agsContext = AgsContext.create(obs);
-        if (this.obs != null) {
-            this.obs.addCompositeChangeListener(obsListener);
+        obs        = null;
+        agsContext = AgsContext.EMPTY;
+    }
+
+    private void watch(final ISPObservation newObs) {
+        unwatch();
+        obs        = newObs;
+        agsContext = AgsContext.create(newObs);
+        if (obs != null) {
+            obs.addCompositeChangeListener(obsListener);
         }
     }
 

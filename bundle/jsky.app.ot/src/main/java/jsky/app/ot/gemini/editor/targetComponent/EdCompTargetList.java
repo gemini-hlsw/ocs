@@ -1,6 +1,7 @@
 package jsky.app.ot.gemini.editor.targetComponent;
 
 import edu.gemini.pot.sp.ISPObsComponent;
+import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.guide.GuideProbe;
@@ -225,12 +226,12 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         _w.positionTable.reinit(obsComp);
         _w.guidingControls.manualGuideStarButton().peer().setVisible(GuideStarSupport.supportsManualGuideStarSelection(getNode()));
         updateGuiding();
-        _agsPub.watch(getContextObservation());
+        _agsPub.watch(ImOption.apply(getContextObservation()));
     }
 
     // OtItemEditor
     @Override protected void cleanup() {
-        _agsPub.watch(null);
+        _agsPub.unwatch();
         TargetSelection.deafTo(getContextTargetObsComp(), selectionListener);
         getDataObject().removePropertyChangeListener(TargetObsComp.TARGET_ENV_PROP, primaryButtonUpdater);
         getDataObject().removePropertyChangeListener(TargetObsComp.TARGET_ENV_PROP, guidingPanelUpdater);
