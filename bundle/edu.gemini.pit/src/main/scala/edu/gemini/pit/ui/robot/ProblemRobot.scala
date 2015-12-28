@@ -87,7 +87,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
           TacProblems(p, s).all ++
           List(incompleteInvestigator, missingObsElementCheck, cfCheck, emptyTargetCheck, emptyEphemerisCheck, initialEphemerisCheck, finalEphemerisCheck,
             badGuiding, badVisibility, iffyVisibility, singlePointEphemerisCheck, minTimeCheck, wrongSite, band3Orphan2, gpiCheck, altairLGSCC50Check, altairLGSIQCheck,
-            texesCCCheck, texesWVCheck, gmosWVCheck).flatten
+            texesCCCheck, texesWVCheck, gmosWVCheck, band3IQ).flatten
       ps.sorted
     }
 
@@ -264,6 +264,17 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       if b.isInstanceOf[GmosNBlueprintBase] || b.isInstanceOf[GmosSBlueprintBase]
       if c.wv != WaterVapor.ANY
     } yield new Problem(Severity.Warning, s"GMOS is usually unaffected by atmospheric water vapor", "Targets", s.inTargetsView(_.edit(t)))
+
+    private val band3IQ = for {
+      o  <- p.observations
+      if o.band == Band.BAND_3 && (p.proposalClass match {
+              case q: QueueProposalClass if q.band3request.isDefined => true
+              case _                                                 => false
+            })
+      t  <- o.target
+      c  <- o.condition
+      if c.iq == ImageQuality.BEST
+    } yield new Problem(Severity.Warning, s"IQ20 observations are unlikely to be executed in Band-3", "Targets", s.inTargetsView(_.edit(t)))
 
     private val gpiCheck = {
       def gpiMagnitudesPresent(target: SiderealTarget):List[(Severity, String)] = {
