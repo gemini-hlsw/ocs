@@ -6,8 +6,8 @@ name := "jsky.app.ot.plugin"
 
 // version set in ThisBuild
 
-unmanagedJars in Compile ++= Seq(
-  new File(baseDirectory.value, "../../lib/bundle/scalaz-core_2.11-7.0.6.jar"))
+libraryDependencies ++= Seq(
+  "org.scalaz" %% "scalaz-core" % "7.0.6")
 
 osgiSettings
 
@@ -21,5 +21,3 @@ OsgiKeys.dynamicImportPackage := Seq("")
 
 OsgiKeys.exportPackage := Seq(
   "jsky.app.ot.plugin")
-
-        

@@ -6,13 +6,10 @@ name := "edu.gemini.model.p1"
 
 version := pitVersion.value.toOsgiVersion
 
-unmanagedJars in Compile ++= Seq(
-  new File(baseDirectory.value, "../../lib/bundle/scalaz-core_2.11-7.0.6.jar")
-)
-
 libraryDependencies ++= Seq(
   "org.scala-lang.modules" %% "scala-xml" % "1.0.5",
-  "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4"
+  "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4",
+  "org.scalaz" %% "scalaz-core" % "7.0.6"
   )
 
 osgiSettings

@@ -16,6 +16,9 @@ unmanagedJars in Compile ++= Seq(
   new File(baseDirectory.value, "../../lib/bundle/scalaz-concurrent_2.11-7.0.6.jar")
 )
 
+libraryDependencies ++= Seq(
+  "org.scalaz" %% "scalaz-concurrent" % "7.0.6")
+
 osgiSettings
 
 ocsBundleSettings

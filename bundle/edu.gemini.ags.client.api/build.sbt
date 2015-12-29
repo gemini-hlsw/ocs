@@ -6,8 +6,8 @@ name := "edu.gemini.ags.client.api"
 
 version := pitVersion.value.toOsgiVersion
 
-unmanagedJars in Compile ++= Seq(
-  new File(baseDirectory.value, "../../lib/bundle/osgi.core-4.3.1.jar"))
+libraryDependencies ++= Seq(
+  "org.scalaz" %% "scalaz-core" % "7.0.6")
 
 osgiSettings
 

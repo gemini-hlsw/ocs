@@ -6,10 +6,11 @@ name := "edu.gemini.model.p1.submit"
 
 version := pitVersion.value.toOsgiVersion
 
-unmanagedJars in Compile ++= Seq(
-  new File(baseDirectory.value, "../../lib/bundle/scalaz-concurrent_2.11-7.0.6.jar"),
-  new File(baseDirectory.value, "../../lib/bundle/scalaz-core_2.11-7.0.6.jar"),
-  new File(baseDirectory.value, "../../lib/bundle/scalaz-effect_2.11-7.0.6.jar"))
+libraryDependencies ++= Seq(
+  "org.scalaz" %% "scalaz-core" % "7.0.6",
+  "org.scalaz" %% "scalaz-concurrent" % "7.0.6",
+  "org.scalaz" %% "scalaz-effect" % "7.0.6"
+  )
 
 osgiSettings
 

@@ -9,8 +9,6 @@ name := "jsky.app.ot.testlauncher"
 unmanagedJars in Compile ++= Seq(
   new File(baseDirectory.value, "../../lib/bundle/osgi.cmpn-4.3.1.jar"),
   new File(baseDirectory.value, "../../lib/bundle/javax-servlet_2.10-2.5.0.jar"),
-  new File(baseDirectory.value, "../../lib/bundle/scalaz-core_2.11-7.0.6.jar"),
-  new File(baseDirectory.value, "../../lib/bundle/scalaz-effect_2.11-7.0.6.jar"),
   //new File(baseDirectory.value, "../../lib/bundle/breeze_2.10-0.2.2.jar"),
   new File(baseDirectory.value, "../../lib/bundle/com-jgoodies-looks_2.10-2.4.1.jar"),
   new File(baseDirectory.value, "../../lib/bundle/nom-tam-fits_2.10-0.99.3.jar"),
@@ -18,6 +16,10 @@ unmanagedJars in Compile ++= Seq(
   new File(baseDirectory.value, "../../lib/bundle/org-jfree_2.10-1.0.14.jar"),
   new File(baseDirectory.value, "../../lib/bundle/org-dom4j_2.10-1.5.1.jar")
 )
+
+libraryDependencies ++= Seq(
+  "org.scalaz" %% "scalaz-core" % "7.0.6",
+  "org.scalaz" %% "scalaz-effect" % "7.0.6")
 
 osgiSettings
 
