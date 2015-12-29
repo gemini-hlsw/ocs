@@ -6,9 +6,7 @@ package edu.gemini.spModel.target;
  */
 @FunctionalInterface
 public interface TelescopePosWatcher {
-
     void telescopePosUpdate(WatchablePos tp);
-
 }
 
 

@@ -8,4 +8,8 @@ public class ImOption {
             return new Some<>(value);
         }
     }
+
+    public static <T> Option<T> fromScalaOpt(final scala.Option<T> scalaOpt) {
+        return scalaOpt.isDefined() ? new Some<>(scalaOpt.get()) : None.instance();
+    }
 }

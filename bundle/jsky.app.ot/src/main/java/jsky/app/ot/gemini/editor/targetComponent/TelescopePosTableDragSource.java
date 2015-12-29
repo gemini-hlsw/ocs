@@ -7,12 +7,9 @@ import java.awt.*;
 import java.awt.dnd.*;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
+import java.util.Objects;
 
-/**
- * Drag&Drop source for the position table widget.
- *
- * @author Allan Brighton
- */
+// Drag & drop source for the position table widget.
 class TelescopePosTableDragSource implements DragGestureListener, DragSourceListener {
 
     /** The pos table widget */
@@ -26,67 +23,60 @@ class TelescopePosTableDragSource implements DragGestureListener, DragSourceList
     /**
      * Constructor
      */
-    public TelescopePosTableDragSource(TelescopePosTableWidget tree) {
-        _tree = tree;
+    public TelescopePosTableDragSource(final TelescopePosTableWidget tree) {
+        _tree = Objects.requireNonNull(tree);
 
-        // Create a DragGestureRecognizer and register as the listener
-        final DragSource _dragSource = DragSource.getDefaultDragSource();
-        _dragSource.createDefaultDragGestureRecognizer(_tree, DnDConstants.ACTION_COPY_OR_MOVE, this);
+        // Create a DragGestureRecognizer and register as the listener.
+        DragSource.getDefaultDragSource().createDefaultDragGestureRecognizer(_tree, DnDConstants.ACTION_COPY_OR_MOVE, this);
     }
 
-    void setEditable(boolean editable) { this.editable = editable; }
+    void setEditable(boolean editable) {
+        this.editable = editable;
+    }
 
-    /** Implementation of DragGestureListener interface. */
-    public void dragGestureRecognized(DragGestureEvent dge) {
+    public void dragGestureRecognized(final DragGestureEvent dge) {
         if (!editable) return;
 
-        // don't conflict with popup menus
+        // don't conflict with popup menus.
         final InputEvent e = dge.getTriggerEvent();
         if (e instanceof MouseEvent && ((MouseEvent) e).isPopupTrigger())
             return;
 
-
-        // Get the mouse location and convert it to
-        // a location within the tree.
+        // Get the mouse location and convert it to a location within the tree.
         final Point location = dge.getDragOrigin();
         final TreePath dragPath = _tree.getPathForLocation(location.x, location.y);
         if (dragPath != null && _tree.isPathSelected(dragPath)) {
-            // Get the list of selected nodes and create a Transferable
-            final TelescopePosTableWidget.TableData.Row[] nodes = _tree.getSelectedNodes();
-            if (nodes != null && nodes.length > 0) {
-                _dragObject = new TelescopePosTableDragDropObject(nodes, _tree);
+            // Get the selected node and create a Transferable.
+            _tree.getSelectedNode().ifPresent(node -> {
+                _dragObject = new TelescopePosTableDragDropObject(node, _tree);
                 try {
                     dge.startDrag(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR), _dragObject, this);
-                } catch (Exception ex) {
+                } catch (final Exception ex) {
                     DnDUtils.debugPrintln("SPTreeDragSource.dragGestureRecognized: " + ex);
                 }
-            }
+            });
         }
     }
 
     // Implementation of DragSourceListener interface
-    public void dragEnter(DragSourceDragEvent dsde) {
-        DnDUtils.debugPrintln("Drag Source: dragEnter, drop action = "
-                              + DnDUtils.showActions(dsde.getDropAction()));
+    public void dragEnter(final DragSourceDragEvent dsde) {
+        DnDUtils.debugPrintln("Drag Source: dragEnter, drop action = " + DnDUtils.showActions(dsde.getDropAction()));
     }
 
-    public void dragOver(DragSourceDragEvent dsde) {
-        DnDUtils.debugPrintln("Drag Source: dragOver, drop action = "
-                              + DnDUtils.showActions(dsde.getDropAction()));
+    public void dragOver(final DragSourceDragEvent dsde) {
+        DnDUtils.debugPrintln("Drag Source: dragOver, drop action = " + DnDUtils.showActions(dsde.getDropAction()));
     }
 
-    public void dragExit(DragSourceEvent dse) {
+    public void dragExit(final DragSourceEvent dse) {
         DnDUtils.debugPrintln("Drag Source: dragExit");
     }
 
-    public void dropActionChanged(DragSourceDragEvent dsde) {
-        DnDUtils.debugPrintln("Drag Source: dropActionChanged, drop action = "
-                              + DnDUtils.showActions(dsde.getDropAction()));
+    public void dropActionChanged(final DragSourceDragEvent dsde) {
+        DnDUtils.debugPrintln("Drag Source: dropActionChanged, drop action = " + DnDUtils.showActions(dsde.getDropAction()));
     }
 
-    public void dragDropEnd(DragSourceDropEvent dsde) {
+    public void dragDropEnd(final DragSourceDropEvent dsde) {
         DnDUtils.debugPrintln("Drag Source: drop completed, drop action = "
-                              + DnDUtils.showActions(dsde.getDropAction())
-                              + ", success: " + dsde.getDropSuccess());
+                              + DnDUtils.showActions(dsde.getDropAction()) + ", success: " + dsde.getDropSuccess());
     }
 }
