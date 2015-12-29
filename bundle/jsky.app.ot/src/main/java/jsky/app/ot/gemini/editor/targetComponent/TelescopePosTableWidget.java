@@ -22,13 +22,11 @@ import edu.gemini.spModel.target.system.ITarget;
 import jsky.app.ot.OT;
 import jsky.app.ot.OTOptions;
 import jsky.app.ot.util.Resources;
-import org.jdesktop.swingx.JXTreeTable;
-import org.jdesktop.swingx.decorator.HighlighterFactory;
-import org.jdesktop.swingx.treetable.AbstractTreeTableModel;
 
 import javax.swing.*;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeWillExpandListener;
+import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.tree.DefaultTreeCellRenderer;
@@ -47,7 +45,7 @@ import java.util.stream.Collectors;
 /**
  * An extension of the TableWidget to support telescope target lists.
  */
-public final class TelescopePosTableWidget extends JXTreeTable implements TelescopePosWatcher {
+public final class TelescopePosTableWidget extends JTable implements TelescopePosWatcher {
 
     private static final Icon errorIcon = Resources.getIcon("eclipse/error.gif");
     private static final Icon blankIcon = Resources.getIcon("eclipse/blank.gif");
@@ -58,7 +56,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
     static { nf.setMaximumFractionDigits(2); }
 
 
-    static class TableData extends AbstractTreeTableModel {
+    static class TableData extends AbstractTableModel {
         enum Col {
             TAG("Type Tag") {
                 public String getValue(final Row row) { return row.tag(); }
@@ -236,16 +234,12 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
         }
 
         TableData(final Option<ObsContext> ctx, final TargetEnvironment env) {
-            super(new ArrayList<Row>());
-            @SuppressWarnings("unchecked") final List<Row> tmp = (List<Row>)getRoot();
-
             this.env       = env;
             bands          = getSortedBands(env);
             columnHeaders  = computeColumnHeaders(bands);
 
             final List<Row> rowList = createRows(ctx);
             rows                    = DefaultImList.create(rowList);
-            tmp.addAll(rowList);
         }
 
         // Create rows for all the guide groups and targets.
@@ -303,9 +297,6 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
 
             return tmpRows;
         }
-
-
-
 
         // Gets all the magnitude bands used by targets in the target
         // environment.
@@ -385,54 +376,54 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
             return DefaultImList.create(hdr);
         }
 
-        @SuppressWarnings("unchecked")
-        private ImList<Row> parentToList(final Object parent) {
-            final List<Row> rowList;
-            if (parent instanceof List)     rowList = (List<Row>) parent;
-            else if (parent instanceof Row) rowList = ((Row) parent).children();
-            else                            rowList = Collections.emptyList();
-            return DefaultImList.create(rowList);
-        }
+//        @SuppressWarnings("unchecked")
+//        private ImList<Row> parentToList(final Object parent) {
+//            final List<Row> rowList;
+//            if (parent instanceof List)     rowList = (List<Row>) parent;
+//            else if (parent instanceof Row) rowList = ((Row) parent).children();
+//            else                            rowList = Collections.emptyList();
+//            return DefaultImList.create(rowList);
+//        }
+//
+//        public Object getChild(final Object parent, final int index) {
+//            final ImList<Row> rowList = parentToList(parent);
+//            return (index < rowList.size()) ? rowList.get(index) : null;
+//        }
+//
+//        public int getChildCount(final Object parent) {
+//            return parentToList(parent).size();
+//        }
+//
+//        public int getIndexOfChild(final Object parent, final Object child) {
+//            return parentToList(parent).zipWithIndex().find(t -> t._1() == child).map(Tuple2::_2).getOrElse(-1);
+//        }
+//
+//        public boolean isLeaf(Object node) {
+//            return (node instanceof Row) && !(node instanceof GroupRow);
+//        }
 
-        @Override
-        public Object getChild(final Object parent, final int index) {
-            final ImList<Row> rowList = parentToList(parent);
-            return (index < rowList.size()) ? rowList.get(index) : null;
-        }
-
-        @Override
-        public int getChildCount(final Object parent) {
-            return parentToList(parent).size();
-        }
-
-        @Override
-        public int getIndexOfChild(final Object parent, final Object child) {
-            return parentToList(parent).zipWithIndex().find(t -> t._1() == child).map(Tuple2::_2).getOrElse(-1);
-        }
-
-        @Override
-        public boolean isLeaf(Object node) {
-            return (node instanceof Row) && !(node instanceof GroupRow);
-        }
-
-        @Override
-        public int getColumnCount() {
+        @Override public int getColumnCount() {
             return Col.values().length + bands.size();
         }
 
-        @Override
-        public String getColumnName(final int index) {
+        @Override public String getColumnName(final int index) {
             return columnHeaders.get(index);
         }
 
-        @Override
-        public Object getValueAt(final Object node, final int columnIndex) {
-            if (!(node instanceof Row)) return null;
-            final Row row    = (Row) node;
+        @Override public Object getValueAt(final int rowIndex, final int columnIndex) {
+            if (rowIndex < 0 || rowIndex >= rows.size())
+                return null;
+
             final Col[] cols = Col.values();
-            return (columnIndex < cols.length) ?
-                      cols[columnIndex].getValue(row) :
-                      row.formatMagnitude(bands.get(columnIndex - cols.length));
+            return rowAt(rowIndex).map(row ->
+                    (columnIndex < cols.length) ?
+                    cols[columnIndex].getValue(row) :
+                    row.formatMagnitude(bands.get(columnIndex - cols.length))
+            ).getOrNull();
+        }
+
+        @Override public int getRowCount() {
+            return rows.size();
         }
     }
 
