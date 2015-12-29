@@ -39,8 +39,8 @@ class FetchServlet(val config: P1MonitorConfig) extends HttpServlet {
     if (ptc == null) {
       throw new FetchException("Directory inexistant: " + req.dir)
     }
-    val dir: File = ptc.dir
-    val proposalPrefix:String = req.proposalType
+    val dir = ptc.dir
+    val proposalPrefix = req.proposalType
     val fileName = "%s_%s".format(proposalPrefix, req.proposal)
     val res = req.format match {
       case FetchFormat.xml => new File(dir, fileName + ".xml")
@@ -90,9 +90,10 @@ class FetchServlet(val config: P1MonitorConfig) extends HttpServlet {
       bos = new BufferedOutputStream(res.getOutputStream)
       val buf: Array[Byte] = new Array[Byte](8 * 1024)
       var len: Int = 0
-      while ((({
-        len = bin.read(buf); len
-      })) > 0) {
+      while ( {
+        len = bin.read(buf)
+        len
+      } > 0) {
         bos.write(buf, 0, len)
       }
       bos.flush
