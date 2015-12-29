@@ -68,6 +68,7 @@ class MatrixUtilTest {
   // The signs of the elements in a column of U may be reversed if the signs in the corresponding column
   // in V are reversed. If a number of the singular values are identical one can apply an orthogonal
   // transformation to the corresponding columns of U and the corresponding columns of V.
+  @Ignore
   @Test def testSVD2() {
     val a = DenseMatrix(
       (1.0, -0.0, -0.023180133333333335, -0.1359605544139689, -0.016390829468808328),
