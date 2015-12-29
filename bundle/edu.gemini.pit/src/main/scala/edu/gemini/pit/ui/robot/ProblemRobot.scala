@@ -235,30 +235,27 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
 
     private val texesCCCheck = for {
       o  <- p.observations
-      t  <- o.target
       c  <- o.condition
       b  <- o.blueprint
       if b.isInstanceOf[TexesBlueprint]
       if c.cc == CloudCover.ANY || c.cc == CloudCover.CC80
-    } yield new Problem(Severity.Warning, s"TEXES is not recommended for worse than CC70", "Targets", s.inTargetsView(_.edit(t)))
+    } yield new Problem(Severity.Warning, s"TEXES is not recommended for worse than CC70", "Observations", s.inObsListView(o.band, _.Fixes.fixGroup(ObsListGrouping.Condition)))
 
     private val texesWVCheck = for {
       o  <- p.observations
-      t  <- o.target
       c  <- o.condition
       b  <- o.blueprint
       if b.isInstanceOf[TexesBlueprint]
       if c.wv == WaterVapor.ANY
-    } yield new Problem(Severity.Warning, s"TEXES is not recommended for worse than WV80", "Targets", s.inTargetsView(_.edit(t)))
+    } yield new Problem(Severity.Warning, s"TEXES is not recommended for worse than WV80", "Observations", s.inObsListView(o.band, _.Fixes.fixGroup(ObsListGrouping.Condition)))
 
     private val gmosWVCheck = for {
       o  <- p.observations
-      t  <- o.target
       c  <- o.condition
       b  <- o.blueprint
       if b.isInstanceOf[GmosNBlueprintBase] || b.isInstanceOf[GmosSBlueprintBase]
       if c.wv != WaterVapor.ANY
-    } yield new Problem(Severity.Warning, s"GMOS is usually unaffected by atmospheric water vapor", "Targets", s.inTargetsView(_.edit(t)))
+    } yield new Problem(Severity.Warning, s"GMOS is usually unaffected by atmospheric water vapor", "Observations", s.inObsListView(o.band, _.Fixes.fixGroup(ObsListGrouping.Condition)))
 
     def isBand3(o: Observation) = o.band == Band.BAND_3 && (p.proposalClass match {
                   case q: QueueProposalClass if q.band3request.isDefined => true
@@ -268,17 +265,15 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
     private val band3IQ = for {
       o  <- p.observations
       if isBand3(o)
-      t  <- o.target
       c  <- o.condition
       if c.iq == ImageQuality.BEST
-    } yield new Problem(Severity.Warning, s"IQ20 observations are unlikely to be executed in Band-3", "Targets", s.inTargetsView(_.edit(t)))
+    } yield new Problem(Severity.Warning, s"IQ20 observations are unlikely to be executed in Band-3", "Band 3", s.inObsListView(o.band, _.Fixes.fixGroup(ObsListGrouping.Condition)))
 
     private val band3LGS = for {
       o  <- p.observations
-      t  <- o.target
       b  <- o.blueprint
       if bpIsLgs(b) && isBand3(o)
-    } yield new Problem(Severity.Error, s"LGS cannot be scheduled in Band 3", "Targets", s.inTargetsView(_.edit(t)))
+    } yield new Problem(Severity.Error, s"LGS cannot be scheduled in Band 3", "Band 3", s.showObsListView(Band.BAND_3))
 
     def isToO(p: ProposalClass): Option[ToOChoice] = p match {
       case q: QueueProposalClass         => q.tooOption.some
@@ -290,9 +285,8 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
     private val band3TOO = for {
       o  <- p.observations
       to <- isToO(p.proposalClass)
-      t  <- o.target
       if isBand3(o) && to != ToOChoice.None
-    } yield new Problem(Severity.Error, s"ToO observations cannot be scheduled in Band 3", "Targets", s.inTargetsView(_.edit(t)))
+    } yield new Problem(Severity.Error, s"ToO observations cannot be scheduled in Band 3", "Time Requests", s.showPartnersView())
 
     def isIR(b: BlueprintBase): Boolean = b match {
       case _: GsaoiBlueprint                           => true
@@ -313,11 +307,10 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
 
     private val bgAny = for {
       o  <- p.observations
-      t  <- o.target
       b  <- o.blueprint
       c  <- o.condition
       if isIR(b) && c.sb != SkyBackground.ANY
-    } yield new Problem(Severity.Warning, s"Infrared observations usually do not require background constraints", "Targets", s.inTargetsView(_.edit(t)))
+    } yield new Problem(Severity.Warning, s"Infrared observations usually do not require background constraints", "Observations", s.inObsListView(o.band, _.Fixes.fixGroup(ObsListGrouping.Condition)))
 
     private val gpiCheck = {
       def gpiMagnitudesPresent(target: SiderealTarget):List[(Severity, String)] = {
