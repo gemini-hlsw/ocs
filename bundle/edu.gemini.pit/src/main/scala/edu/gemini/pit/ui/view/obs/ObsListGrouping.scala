@@ -4,7 +4,6 @@ import edu.gemini.model.p1.{immutable => I}
 import I.{BlueprintBase, Observation}
 import scalaz.Lens
 
-
 /**
  * ObsElems can be grouped various ways. An ObsListGrouping is simply a named function of type
  * ObsElem &rarr; ObsGroup that can be passed to List[ObsElem].groupBy.

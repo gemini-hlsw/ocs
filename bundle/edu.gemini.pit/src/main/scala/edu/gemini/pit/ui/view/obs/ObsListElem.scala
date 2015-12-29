@@ -56,7 +56,6 @@ case class BlueprintGroup(c: Option[Condition], b: Option[BlueprintBase], t: Opt
 
 import SharedIcons._
 
-
 object TargetGroup {
   private val errSidereal = new CompositeIcon(ICON_SIDEREAL, OVL_ERROR)
   private val errNonSidereal = new CompositeIcon(ICON_NONSIDEREAL, OVL_ERROR)
