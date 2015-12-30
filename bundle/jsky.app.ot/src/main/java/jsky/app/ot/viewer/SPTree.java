@@ -1006,7 +1006,6 @@ public final class SPTree extends JPanel {
             final NodeData viewable = (NodeData) obj;
             try {
                 setText(viewable.getTitle());
-//                nodeState(viewable.getNode()).style(this);
 
                 if (viewable.hasConflict()) {
                     setForeground(Color.red.darker());

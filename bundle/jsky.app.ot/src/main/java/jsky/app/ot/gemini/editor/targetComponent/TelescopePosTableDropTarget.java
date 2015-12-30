@@ -151,7 +151,7 @@ class TelescopePosTableDropTarget implements DropTargetListener {
         if (dtde != null) {
             if (acceptedDrag && isAcceptableDropLocation(dtde)) {
                 final Point location = dtde.getLocation();
-                treeIgnoreSelectionAction(() -> _tree.setSelectedNode(location));
+                treeIgnoreSelectionAction(() -> _tree.setSelectedRow(location));
                 _tree.setCursor(DragSource.DefaultCopyDrop);
 
             } else {
@@ -186,7 +186,7 @@ class TelescopePosTableDropTarget implements DropTargetListener {
                               " item " + ddo.getNode() + " to targetNode " + parent);
 
         // Highlight the drop location while we perform the drop
-        treeIgnoreSelectionAction(() -> _tree.setSelectedNode(location));
+        treeIgnoreSelectionAction(() -> _tree.setSelectedRow(location));
 
         try {
             if (ownerTW == _tree && _tree.isOkayToMove(item, parent)) {

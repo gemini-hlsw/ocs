@@ -98,7 +98,7 @@ public abstract class AbstractViewerAction extends AbstractAction {
      */
     protected <T extends ISPNode> T getContextNode(Class<T> clazz) {
 //        final NodeData viewable = viewer.getViewable();
-        ISPNode n = viewer == null ? null : viewer.getNode(); // (getProgram() != null && viewable != null) ? viewable.getNode() : null;
+        ISPNode n = viewer == null ? null : viewer.getNode();
         while (n != null && !clazz.isInstance(n))
             n = n.getParent();
         return (T) n;

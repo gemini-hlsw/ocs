@@ -24,13 +24,9 @@ import jsky.app.ot.OTOptions;
 import jsky.app.ot.util.Resources;
 
 import javax.swing.*;
-import javax.swing.event.TreeExpansionEvent;
-import javax.swing.event.TreeWillExpandListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
-import javax.swing.tree.DefaultTreeCellRenderer;
-import javax.swing.tree.ExpandVetoException;
 import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -203,13 +199,19 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
             @Override public Icon getIcon()             { return groupIcon; }
         }
 
+        // Collection of rows, which may include "subrows".
         private final ImList<Row> rows;
+
+        // Total number of rows, including subrows. Precalculated as swing uses this value frequently.
+        private final int numRows;
+
         private final ImList<Magnitude.Band> bands;
         private final ImList<String> columnHeaders;
         private final TargetEnvironment env;
 
         TableData() {
             rows          = DefaultImList.create();
+            numRows       = 0;
             bands         = DefaultImList.create();
             columnHeaders = computeColumnHeaders(bands);
             env           = null;
@@ -240,9 +242,10 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
 
             final List<Row> rowList = createRows(ctx);
             rows                    = DefaultImList.create(rowList);
+            numRows                 = countRows();
         }
 
-        // Create rows for all the guide groups and targets.
+        // Create rows for all the guide groups and targets, and keep track of the number of rows created.
         private List<Row> createRows(final Option<ObsContext> ctx) {
             final List<Row> tmpRows = new ArrayList<>();
 
@@ -296,6 +299,11 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
             });
 
             return tmpRows;
+        }
+
+        // Pre-compute the number of rows as this will be frequently used.
+        private int countRows() {
+            return rows.foldLeft(0, (numRows, row) -> numRows + row.children().size() + 1);
         }
 
         // Gets all the magnitude bands used by targets in the target
@@ -423,7 +431,7 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
         }
 
         @Override public int getRowCount() {
-            return rows.size();
+            return numRows;
         }
     }
 
@@ -437,7 +445,8 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
         );
     }
 
-    private static void styleRendererLabel(final JLabel lab, final TableData.Row row) {
+    private static final Color ODD_ROW_COLOR = new Color(248, 247, 255);
+    private static void styleRendererLabel(final JLabel lab, final int rowIdx, final TableData.Row row) {
         final int style = row.enabled() ? Font.PLAIN : Font.ITALIC;
         final Font f = lab.getFont().deriveFont(style);
         lab.setFont(f);
@@ -446,18 +455,21 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
         lab.setForeground(c);
 
         lab.setEnabled(row.enabled());
+
+        // Alternate row colors.
+        lab.setBackground(rowIdx % 2 == 0 ? Color.white : ODD_ROW_COLOR);
     }
 
-    private static final class TelescopePosTreeCellRenderer extends DefaultTreeCellRenderer {
+    private static final TableCellRenderer TELESCOPE_POS_TABLE_CELL_RENDERER = new DefaultTableCellRenderer() {
         @Override
-        public Component getTreeCellRendererComponent(final JTree tree,
-                                       final Object value,
-                                       final boolean selected,
-                                       final boolean expanded,
-                                       final boolean leaf,
-                                       final int row,
-                                       final boolean hasFocus) {
-            final JLabel lab = (JLabel) super.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
+        public Component getTableCellRendererComponent(final JTable table,
+                                                       final Object value,
+                                                       final boolean isSelected,
+                                                       final boolean hasFocus,
+                                                       final int row,
+                                                       final int column) {
+
+            final JLabel lab = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
             if (value instanceof TableData.Row) {
                 final TableData.Row tableDataRow = (TableData.Row) value;
@@ -474,12 +486,27 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
                 final Icon i = tableDataRow.getIcon();
                 lab.setIcon(i);
                 lab.setDisabledIcon(i);
-                styleRendererLabel(lab, tableDataRow);
+                styleRendererLabel(lab, row, tableDataRow);
             }
 
             return lab;
         }
-    }
+    };
+
+    private final TableCellRenderer DEFAULT_CELL_RENDERER = new DefaultTableCellRenderer() {
+        @Override
+        public Component getTableCellRendererComponent(final JTable table,
+                                                       final Object value,
+                                                       final boolean isSelected,
+                                                       final boolean hasFocus,
+                                                       final int row,
+                                                       final int col) {
+            final JLabel lab = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
+            final TableData.Row tdRow = _tableData.rowAt(row).getOrNull();
+            if (tdRow != null) styleRendererLabel(lab, row, tdRow);
+            return lab;
+        }
+    };
 
 
     // Telescope position list
@@ -496,20 +523,6 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
     private final TelescopePosTableDropTarget dropTarget;
     private final TelescopePosTableDragSource dragSource;
 
-    private final TableCellRenderer defaultCellRenderer = new DefaultTableCellRenderer() {
-        @Override
-        public Component getTableCellRendererComponent(final JTable table,
-                                                       final Object value,
-                                                       final boolean isSelected,
-                                                       final boolean hasFocus,
-                                                       final int row,
-                                                       final int col) {
-            final JLabel lab = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
-            final TableData.Row tdRow = _tableData.rowAt(row).getOrNull();
-            if (tdRow != null) styleRendererLabel(lab, tdRow);
-            return lab;
-        }
-    };
 
     /**
      * Default constructor.
@@ -518,26 +531,22 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
         this.owner = owner;
         setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
         // disable editing by default
-        setTreeTableModel(new TableData());
+        setModel(new TableData());
         setCellSelectionEnabled(false);
         setRowSelectionAllowed(true);
         setColumnSelectionAllowed(false);
         getTableHeader().setReorderingAllowed(false);
-
-        addTreeSelectionListener(e -> {
+        getSelectionModel().addListSelectionListener(e -> {
             if (_ignoreSelection) return;
-            final Object o = e.getPath().getLastPathComponent();
-            if (o instanceof TableData.Row) {
-                _notifySelect((TableData.Row) o);
-            }
+            final int idx = e.getFirstIndex();
+            final TableData tableData = (TableData) getModel();
+            tableData.rowAt(idx).foreach(this::notifySelect);
         });
 
         setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         setShowHorizontalLines(false);
         setShowVerticalLines(true);
-        setColumnMargin(1);
-        addHighlighter(HighlighterFactory.createAlternateStriping(Color.WHITE, new Color(248, 247, 255)));
-
+        getColumnModel().setColumnMargin(1);
         setRowSelectionAllowed(true);
         setColumnSelectionAllowed(false);
 
@@ -548,23 +557,7 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
             }
         });
 
-        setTreeCellRenderer(new TelescopePosTreeCellRenderer());
-
-        addTreeWillExpandListener(new TreeWillExpandListener() {
-            @Override
-            public void treeWillExpand(TreeExpansionEvent event) throws ExpandVetoException {
-            }
-
-            @Override
-            public void treeWillCollapse(TreeExpansionEvent event) throws ExpandVetoException {
-                throw new ExpandVetoException(event);
-            }
-        });
-        setExpandedIcon(null);
-        setCollapsedIcon(null);
-        setOpenIcon(null);
-        setClosedIcon(null);
-        setLeafIcon(null);
+        setDefaultRenderer(Object.class, TELESCOPE_POS_TABLE_CELL_RENDERER);
 
         // Add drag and drop features
         dropTarget = new TelescopePosTableDropTarget(this);
@@ -574,7 +567,7 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
     @Override
     public TableCellRenderer getCellRenderer(int row, int col) {
         if (col == 0) return super.getCellRenderer(row, col);
-        return defaultCellRenderer;
+        return DEFAULT_CELL_RENDERER;
     }
 
     public void telescopePosUpdate(WatchablePos tp) {
@@ -652,7 +645,7 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
         _dataObject.addPropertyChangeListener(TargetObsComp.TARGET_ENV_PROP, envChangeListener);
     }
 
-    void _notifySelect(TableData.Row row) {
+    private void notifySelect(TableData.Row row) {
         final SPTarget target = row.target().getOrNull();
         if (target != null) {
             stopWatchingSelection();
@@ -667,17 +660,27 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
         }
     }
 
-    private final PropertyChangeListener selectionListener = new PropertyChangeListener() {
-        @Override public void propertyChange(PropertyChangeEvent evt) {
-            if (_tableData == null) return;
-
-            final SPTarget target = TargetSelection.get(_env, _obsComp);
-            if (target != null) {
-                final int index = _tableData.indexOf(target);
-                _setSelectedRow(index);
-            }
+    private final PropertyChangeListener selectionListener = evt -> {
+        if (_tableData == null) return;
+        final SPTarget target = TargetSelection.get(_env, _obsComp);
+        if (target != null) {
+            final int index = _tableData.indexOf(target);
+            _setSelectedRow(index);
         }
+
     };
+
+//    private final PropertyChangeListener selectionListener = new PropertyChangeListener() {
+//        @Override public void propertyChange(PropertyChangeEvent evt) {
+//            if (_tableData == null) return;
+//
+//            final SPTarget target = TargetSelection.get(_env, _obsComp);
+//            if (target != null) {
+//                final int index = _tableData.indexOf(target);
+//                _setSelectedRow(index);
+//            }
+//        }
+//    };
 
     private final PropertyChangeListener envChangeListener = new PropertyChangeListener() {
         public void propertyChange(PropertyChangeEvent evt) {
@@ -690,16 +693,12 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
 
             // First update the target listeners according to what was added
             // and removed.
-            rmTargets.forEach(t -> t.deleteWatcher(TelescopePosTableWidget.this));
+            rmTargets.forEach (t -> t.deleteWatcher(TelescopePosTableWidget.this));
             addTargets.forEach(t -> t.addWatcher(TelescopePosTableWidget.this));
 
             // Remember what was selected before the reset below.
-            int oldSelIndex = getSelectedRow();
-            final TreePath tp = getTreeSelectionModel().getSelectionPath();
-            final Object o = tp != null ? tp.getLastPathComponent() : null;
-            final SPTarget oldSelTarget = o instanceof TableData.Row ?
-                    ((TableData.Row)o).target().getOrNull() :
-                    null;
+            final int oldSelIndex       = getSelectedRow();
+            final SPTarget oldSelTarget = _tableData.rowAt(oldSelIndex).flatMap(TableData.Row::target).getOrNull();
 
             // Update the table -- setting _tableData ....
             _resetTable(newEnv);
@@ -738,9 +737,9 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
 
             // Okay, the old selected target or group was removed.  Try to select the
             // target or group at the same position as the old selection.
-            if (oldSelIndex >= getRowCount()) oldSelIndex = getRowCount() -1;
-            if (oldSelIndex >= 0) {
-                selectRowAt(oldSelIndex);
+            final int newSelIndex = (oldSelIndex >= getRowCount()) ? getRowCount() - 1 : oldSelIndex;
+            if (newSelIndex >= 0) {
+                selectRowAt(newSelIndex);
             } else {
                 selectBasePos();
             }
@@ -754,13 +753,10 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
 
         _ignoreSelection = true;
         try {
-            setTreeTableModel(_tableData);
+            setModel(_tableData);
         } finally {
             _ignoreSelection = false;
         }
-
-        expandAll();
-        packAll();
     }
 
     /**
@@ -789,14 +785,14 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
     /**
      * Get the position that is currently selected.
      */
-    SPTarget getSelectedPos() {
+    private SPTarget getSelectedPos() {
         return TargetSelection.get(_env, _obsComp);
     }
 
     /**
      * Get the group that is currently selected.
      */
-    GuideGroup getSelectedGroup() {
+    private GuideGroup getSelectedGroup() {
         return TargetSelection.getGuideGroup(_env, _obsComp);
     }
 
@@ -815,24 +811,10 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
     }
 
     /**
-     * Returns true if the given path is selected
+     * Returns the selected node (currently only single select is allowed).
      */
-    public boolean isPathSelected(TreePath path) {
-        return getRowForPath(path) == getSelectedRow();
-    }
-
-    /**
-     * Returns the selected tree nodes (currently only single select is allowed).
-     */
-    public Optional<TableData.Row> getSelectedNode() {
-        final int i = getSelectedRow();
-        if (i != -1) {
-            final Object o = getPathForRow(i).getLastPathComponent();
-            if (o instanceof TableData.Row) {
-                return Optional.of((TableData.Row)o);
-            }
-        }
-        return Optional.empty();
+    public Option<TableData.Row> getSelectedNode() {
+        return _tableData.rowAt(getSelectedRow());
     }
 
 
@@ -938,30 +920,17 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
     }
 
     /**
-     * Selects the tree node at the given location.
+     * Selects the table row at the given location.
      */
-    public void setSelectedNode(Point location) {
-        final TreePath path = getPathForLocation(location.x, location.y);
-        if (path != null) {
-            final int i = getRowForPath(path);
-            if (i != -1) selectRowAt(i);
-        }
+    public void setSelectedRow(Point location) {
+        selectRowAt(rowAtPoint(location));
     }
 
     /**
      * Returns the node at the given location or null if not found.
      */
     public TableData.Row getNode(Point location) {
-        if (location != null) {
-            final TreePath path = getPathForLocation(location.x, location.y);
-            if (path != null) {
-                final Object o = path.getLastPathComponent();
-                if (o instanceof TableData.Row) {
-                    return (TableData.Row) o;
-                }
-            }
-        }
-        return null;
+        return _tableData.rowAt(rowAtPoint(location)).getOrNull();
     }
 
     /**

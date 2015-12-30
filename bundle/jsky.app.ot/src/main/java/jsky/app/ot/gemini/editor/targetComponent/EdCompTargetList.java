@@ -1,7 +1,6 @@
 package jsky.app.ot.gemini.editor.targetComponent;
 
 import edu.gemini.pot.sp.ISPObsComponent;
-import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.guide.GuideProbe;
@@ -581,51 +580,48 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     };
 
     @SuppressWarnings("FieldCanBeLocal")
-    private final ActionListener duplicateListener = new ActionListener() {
-        @Override public void actionPerformed(final ActionEvent evt) {
-            final ISPObsComponent obsComponent = getNode();
-            final TargetObsComp dataObject = getDataObject();
-            if ((obsComponent == null) || (dataObject == null)) return;
-            final SPTarget target = TargetSelection.get(dataObject.getTargetEnvironment(), obsComponent);
-            if (target != null) {
-                // Clone the target.
-                final ParamSet ps = target.getParamSet(new PioXmlFactory());
-                final SPTarget newTarget = new SPTarget();
-                newTarget.setParamSet(ps);
+    private final ActionListener duplicateListener = evt -> {
+        final ISPObsComponent obsComponent = getNode();
+        final TargetObsComp dataObject = getDataObject();
+        if ((obsComponent == null) || (dataObject == null)) return;
+        final SPTarget target = TargetSelection.get(dataObject.getTargetEnvironment(), obsComponent);
+        if (target != null) {
+            // Clone the target.
+            final ParamSet ps = target.getParamSet(new PioXmlFactory());
+            final SPTarget newTarget = new SPTarget();
+            newTarget.setParamSet(ps);
 
-                // Add it to the environment.  First we have to figure out what it is.
-                final TargetEnvironment env = dataObject.getTargetEnvironment();
+            // Add it to the environment.  First we have to figure out what it is.
+            final TargetEnvironment env = dataObject.getTargetEnvironment();
 
-                // See if it is a guide star and duplicate it in the correct GuideTargets list.
-                boolean duplicated = false;
-                env.getOrCreatePrimaryGuideGroup();
-                final List<GuideGroup> groups = new ArrayList<>();
-                for (GuideGroup group : env.getGroups()) {
-                    for (GuideProbeTargets gt : group) {
-                        if (gt.getTargets().contains(target)) {
-                            group = group.put(gt.addManualTarget(newTarget));
-                            duplicated = true;
-                            break;
-                        }
+            // See if it is a guide star and duplicate it in the correct GuideTargets list.
+            boolean duplicated = false;
+            env.getOrCreatePrimaryGuideGroup();
+            final List<GuideGroup> groups = new ArrayList<>();
+            for (GuideGroup group : env.getGroups()) {
+                for (GuideProbeTargets gt : group) {
+                    if (gt.getTargets().contains(target)) {
+                        group = group.put(gt.addManualTarget(newTarget));
+                        duplicated = true;
+                        break;
                     }
-                    groups.add(group);
                 }
+                groups.add(group);
+            }
 
-                final TargetEnvironment newEnv = duplicated ?
-                        env.setGuideEnvironment(env.getGuideEnvironment().setOptions(DefaultImList.create(groups))) :
-                        env.setUserTargets(env.getUserTargets().append(newTarget));
+            final TargetEnvironment newEnv = duplicated ?
+                    env.setGuideEnvironment(env.getGuideEnvironment().setOptions(DefaultImList.create(groups))) :
+                    env.setUserTargets(env.getUserTargets().append(newTarget));
+            dataObject.setTargetEnvironment(newEnv);
+        } else {
+            final GuideGroup group = TargetSelection.getGuideGroup(dataObject.getTargetEnvironment(), obsComponent);
+            if (group != null) {
+                final TargetEnvironment env = dataObject.getTargetEnvironment();
+                final List<GuideGroup> groups = new ArrayList<>();
+                groups.addAll(env.getGroups().toList());
+                groups.add(group.cloneTargets());
+                final TargetEnvironment newEnv = env.setGuideEnvironment(env.getGuideEnvironment().setOptions(DefaultImList.create(groups)));
                 dataObject.setTargetEnvironment(newEnv);
-            } else {
-                final GuideGroup group = TargetSelection.getGuideGroup(dataObject.getTargetEnvironment(), obsComponent);
-                if (group != null) {
-                    final TargetEnvironment env = dataObject.getTargetEnvironment();
-                    final List<GuideGroup> groups = new ArrayList<>();
-                    groups.addAll(env.getGroups().toList());
-                    groups.add(group.cloneTargets());
-                    final TargetEnvironment newEnv = env.setGuideEnvironment(env.getGuideEnvironment().setOptions(DefaultImList.create(groups)));
-                    dataObject.setTargetEnvironment(newEnv);
-                    _w.positionTable.expandAll();
-                }
             }
         }
     };
