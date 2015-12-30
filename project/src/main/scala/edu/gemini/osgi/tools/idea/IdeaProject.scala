@@ -164,6 +164,7 @@ class IdeaProject(idea: Idea, scalaInstance: ScalaInstance, imls: List[File]) {
       </component>
       <component name="VcsDirectoryMappings"/>
       {libraryTable}
+      <component name="ScalaCompilerConfiguration" />
     </project>
 
   private def initialProject(javaVersion: String): xml.Elem =
@@ -318,19 +319,20 @@ def project: xml.Elem =
 
   private def libraryTable: xml.Elem =
     <component name="libraryTable">
-      <library name="scala-compiler">
-        <CLASSES>
-          {scalaInstance.allJars.map(jarUrl)}
-        </CLASSES>
-      </library>
-      <library name="scala-library">
-        <CLASSES>
-          {scalaInstance.allJars.map(jarUrl)}
-        </CLASSES>
+      <library name="scala-sdk" type="Scala">
+        <properties>
+          <option name="languageLevel" value="Scala_2_11" />
+          <compiler-classpath>
+            {scalaInstance.allJars.map(jarUrl)}
+          </compiler-classpath>
+        </properties>
+        <CLASSES />
+        <JAVADOC />
+        <SOURCES />
       </library>
     </component>
 
   private def jarUrl(jarFile: File): xml.Elem =
-    <root url={"jar://%s!/".format(projRelativePath(jarFile)) } />
+    <root url={s"jar://${projRelativePath(jarFile)}"} />
 }
 

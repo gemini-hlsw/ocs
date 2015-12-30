@@ -22,15 +22,7 @@ class IdeaModule(
     </module>
 
   def scalaComponent: xml.Elem =
-    <component name="FacetManager">
-      <facet type="scala" name="Scala">
-        <configuration>
-          <option name="compilerLibraryLevel" value="Project" />
-          <option name="compilerLibraryName" value={"scala-compiler"} />
-          <option name="languageLevel" value="Scala 2.10" />
-        </configuration>
-      </facet>
-    </component>
+    <component name="FacetManager" />
 
   def rootComponent: xml.Elem =
     <component name="NewModuleRootManager" inherit-compiler-output="true">
@@ -45,7 +37,7 @@ class IdeaModule(
       {depMods.map(bv => bundleDependency(bv))}
       {depJars.map(j => libraryDependency(j))}
       {testJars.map(j => libraryDependency(j, isTest = true))}
-      {/*testScopeDependencies(imlFile)*/}
+      <orderEntry type="library" name="scala-sdk" level="project" />
     </component>
 
   def srcDirs(isTest: Boolean): List[File]= {
@@ -87,14 +79,6 @@ class IdeaModule(
         </CLASSES>
       </library>
     </orderEntry>
-
-  /**
-   * Keep any already defined test-scoped deps.  If none, add given deps.
-  def testLibraryDependencies(iml: File): xml.NodeSeq = {
-    val existing = testScopeDependencies(iml)
-    if (existing.isEmpty) testJars.map(j => libraryDependency(j, true)) else existing
-  }
-   */
 }
 
 object IdeaModule {
