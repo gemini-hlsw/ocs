@@ -7,7 +7,7 @@ import scalaz._, Scalaz._
  * values passed to the constructors are extracted correctly from search results. See `horizons.md`
  * in the bundle source for more information.
  */
-sealed abstract class HorizonsDesignation(val queryString: String) 
+sealed abstract class HorizonsDesignation(val queryString: String)
   extends Product with Serializable
 
 object HorizonsDesignation {
@@ -21,20 +21,22 @@ object HorizonsDesignation {
     val des: Comet @> String = Lens.lensu((a, b) => a.copy(des = b), _.des)
   }
 
+  sealed abstract class Asteroid(s: String) extends HorizonsDesignation(s)
+
   /**
    * Designation for an asteroid under modern naming conventions. Example: `1971 UC1` for
    * 1896 Beer, yielding a query string `DES=1971 UC1`.
    */
-  final case class Asteroid(des: String) extends HorizonsDesignation(s"DES=$des")
-  object Asteroid {
-    val des: Asteroid @> String = Lens.lensu((a, b) => a.copy(des = b), _.des)
+  final case class AsteroidNewStyle(des: String) extends Asteroid(s"DES=$des")
+  object AsteroidNewStyle {
+    val des: AsteroidNewStyle @> String = Lens.lensu((a, b) => a.copy(des = b), _.des)
   }
 
   /**
    * Designation for an asteroid under "old" naming conventions. These are small numbers. Example:
    * `4` for Vesta, yielding a query string `4;`
    */
-  final case class AsteroidOldStyle(num: Int) extends HorizonsDesignation(s"$num;")
+  final case class AsteroidOldStyle(num: Int) extends Asteroid(s"$num;")
   object AsteroidOldStyle {
     val num: AsteroidOldStyle @> Int = Lens.lensu((a, b) => a.copy(num = b), _.num)
   }

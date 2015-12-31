@@ -132,6 +132,9 @@ public class CgiReplyBuilder {
         HorizonsReply reply = new HorizonsReply();
         try {
             StringBuffer responseBuffer = _readFully(new InputStreamReader(stream, charset));
+
+            System.out.println(responseBuffer);
+
             //parse the buffer to get the real data...
             _processHeader(responseBuffer, reply);
             switch (reply.getReplyType()) {

@@ -71,9 +71,9 @@ object TargetParamSetCodecs {
     ParamSetCodec.initial(HorizonsDesignation.Comet(""))
       .withParam("des", HorizonsDesignation.Comet.des)
       
-  implicit val AsteroidParamSetCodec: ParamSetCodec[HorizonsDesignation.Asteroid] =
-    ParamSetCodec.initial(HorizonsDesignation.Asteroid(""))
-      .withParam("des", HorizonsDesignation.Asteroid.des)
+  implicit val AsteroidParamSetCodec: ParamSetCodec[HorizonsDesignation.AsteroidNewStyle] =
+    ParamSetCodec.initial(HorizonsDesignation.AsteroidNewStyle(""))
+      .withParam("des", HorizonsDesignation.AsteroidNewStyle.des)
       
   implicit val AsteroidOldStyleParamSetCodec: ParamSetCodec[HorizonsDesignation.AsteroidOldStyle] =
     ParamSetCodec.initial(HorizonsDesignation.AsteroidOldStyle(0))
@@ -89,7 +89,7 @@ object TargetParamSetCodecs {
       def encode(key: String, a: HorizonsDesignation): ParamSet = {
         val (tag, ps) = a match {
           case d: HorizonsDesignation.Comet            => ("comet", CometParamSetCodec.encode(key, d))
-          case d: HorizonsDesignation.Asteroid         => ("asteroid", AsteroidParamSetCodec.encode(key, d))
+          case d: HorizonsDesignation.AsteroidNewStyle         => ("asteroid", AsteroidParamSetCodec.encode(key, d))
           case d: HorizonsDesignation.AsteroidOldStyle => ("asteroid-old-style", AsteroidOldStyleParamSetCodec.encode(key, d))
           case d: HorizonsDesignation.MajorBody        => ("major-body", MajorBodyParamSetCodec.encode(key, d))
         }
