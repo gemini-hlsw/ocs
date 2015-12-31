@@ -317,11 +317,14 @@ def project: xml.Elem =
 
   private def artifactName(bl: BundleLoc): String = "%s_%s".format(bl.name, bl.version)
 
+  private def languageLevel: String =
+    scala.util.Properties.versionNumberString.split('.').take(2).mkString("Scala_", "_", "")
+
   private def libraryTable: xml.Elem =
     <component name="libraryTable">
       <library name="scala-sdk" type="Scala">
         <properties>
-          <option name="languageLevel" value="Scala_2_11" />
+          <option name="languageLevel" value={languageLevel} />
           <compiler-classpath>
             {scalaInstance.allJars.map(jarUrl)}
           </compiler-classpath>
