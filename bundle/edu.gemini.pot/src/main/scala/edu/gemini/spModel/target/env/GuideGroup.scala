@@ -15,12 +15,26 @@ import Scalaz._
 
 case class GuideGroup(grp: GuideGrp) extends java.lang.Iterable[GuideProbeTargets] with TargetContainer {
 
-  def getName: GemOption[String] =
-    ImOption.apply(GuideGroup.Name.getOr(this, "Automatic Guiding"))
+  // getName / setName are a bit wacky but the API is being kept compatible
+  // with the old Java-based GuideGroup
 
+  /**
+   * Gets the name if this is a manual guide group, otherwise None.
+   */
+  def getName: GemOption[String] =
+    GuideGroup.Name.get(this).asGeminiOpt
+
+  /**
+   * Sets the name (if defined) and returns the updated group if this is a
+   * manual guide group, otherwise returns this group.
+   */
   def setName(name: GemOption[String]): GuideGroup =
     name.asScalaOpt.fold(this)(GuideGroup.Name.setOr(this, _, this))
 
+  /**
+   * Sets the name and returns the updated group if this is a manual guide
+   * group, otherwise returns this group.
+   */
   def setName(n: String): GuideGroup =
     setName(ImOption.apply(n))
 
@@ -142,7 +156,7 @@ case class GuideGroup(grp: GuideGrp) extends java.lang.Iterable[GuideProbeTarget
   def getParamSet(f: PioFactory): ParamSet = ???
 }
 
-object GuideGroup {
+object GuideGroup extends Function1[GuideGrp, GuideGroup] {
   val EMPTY = GuideGroup(ManualGroup("Group", Map.empty))
 
   val Grp: GuideGroup @> GuideGrp =
