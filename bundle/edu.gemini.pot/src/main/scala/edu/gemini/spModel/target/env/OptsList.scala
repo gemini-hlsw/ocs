@@ -27,6 +27,7 @@ case class OptsList[A](toDisjunction: List[A] \/ Zipper[A]) {
 }
 
 object OptsList {
+  def empty[A]: OptsList[A] = OptsList(List.empty[A].left)
 
   implicit val TraverseOptsList: Traverse[OptsList] =
     new Traverse[OptsList] {

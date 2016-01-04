@@ -2,18 +2,16 @@ package edu.gemini.spModel.target.env
 
 import edu.gemini.spModel.guide.GuideProbe
 
-import java.io.IOException
-
 import scalaz._
 import Scalaz._
 
-final case class GuideEnv(auto: AutomaticGroup, manual: List[ManualGroup] \/ Zipper[ManualGroup]) {
+final case class GuideEnv(auto: AutomaticGroup, manual: OptsList[ManualGroup]) {
 
   def groups: List[GuideGrp] =
-    auto :: manual.fold(identity, _.toList)
+    auto :: manual.toDisjunction.fold(identity, _.toList)
 
   def primaryGroup: GuideGrp =
-    manual.fold(_ => auto, _.focus)
+    manual.toDisjunction.fold(_ => auto, _.focus)
 
   def referencedGuiders: Set[GuideProbe] =
     groups.foldMap(_.referencedGuiders)
@@ -28,5 +26,5 @@ final case class GuideEnv(auto: AutomaticGroup, manual: List[ManualGroup] \/ Zip
   * Otherwise the selection is indicated by the zipper.
   */
 object GuideEnv {
-  val initial: GuideEnv = GuideEnv(AutomaticGroup.Initial, Nil.left)
+  val initial: GuideEnv = GuideEnv(AutomaticGroup.Initial, OptsList.empty)
 }
