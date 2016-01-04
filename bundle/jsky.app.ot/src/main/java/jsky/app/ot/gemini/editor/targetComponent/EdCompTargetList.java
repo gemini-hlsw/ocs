@@ -107,7 +107,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         });
 
         _agsPub.subscribe((obs, oldOptions, newOptions) -> updateGuiding());
-
     }
 
     @Override protected void updateEnabledState(final boolean enabled) {
@@ -467,7 +466,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     private final PropertyChangeListener selectionListener = new PropertyChangeListener() {
         @Override
         public void propertyChange(PropertyChangeEvent evt) {
-
             final ISPObsComponent node = getContextTargetObsComp();
             final TargetEnvironment env = getDataObject().getTargetEnvironment();
             final SPTarget target = TargetSelection.get(env, node);
@@ -476,26 +474,22 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 manageCurPosIfEnvContainsTarget(target, () -> _curPos = target);
             } else {
                 final GuideGroup grp = TargetSelection.getGuideGroup(env, node);
-                if (grp != null) {
-                    final TargetEnvironment env1 = getDataObject().getTargetEnvironment();
-                    if (env1.getGroups().contains(grp)) {
+                if (grp != null && env.getGroups().contains(grp)) {
+                    if (_curPos != null) _curPos.deleteWatcher(posWatcher);
 
-                        if (_curPos != null) _curPos.deleteWatcher(posWatcher);
+                    _curPos = null;
+                    _curGroup = grp;
 
-                        _curPos = null;
-                        _curGroup = grp;
+                    _w.guideGroupPanel.setVisible(true);
+                    _w.detailEditor.setVisible(false);
 
-                        _w.guideGroupPanel.setVisible(true);
-                        _w.detailEditor.setVisible(false);
+                    // N.B. don't trim, otherwise user can't include space in group name
+                    final String name = _curGroup.getName().getOrElse("");
+                    _w.guideGroupName.setValue(name);
 
-                        // N.B. don't trim, otherwise user can't include space in group name
-                        final String name = _curGroup.getName().getOrElse("");
-                        _w.guideGroupName.setValue(name);
-
-                        final boolean editable = OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation());
-                        _w.removeButton.setEnabled(editable);
-                        _w.primaryButton.setEnabled(editable);
-                    }
+                    final boolean editable = OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation());
+                    _w.removeButton.setEnabled(editable);
+                    _w.primaryButton.setEnabled(editable);
                 }
             }
         }
@@ -635,12 +629,12 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
     @SuppressWarnings("FieldCanBeLocal")
     private final ActionListener pasteListener = new ActionListener() {
-        private void pasteSelectedPosition(ISPObsComponent obsComponent, TargetObsComp dataObject) {
+        private void pasteSelectedPosition(final ISPObsComponent obsComponent, final TargetObsComp dataObject) {
             if (clipboard != null) {
                 clipboard.paste(obsComponent, dataObject);
             }
         }
-        @Override public void actionPerformed(ActionEvent e) {
+        @Override public void actionPerformed(final ActionEvent e) {
             if (_curPos != null) {
                 pasteSelectedPosition(getNode(), getDataObject());
             } else if (_curGroup != null) {
@@ -651,7 +645,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
     @SuppressWarnings("FieldCanBeLocal")
     private final ActionListener primaryListener = new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
+        public void actionPerformed(final ActionEvent e) {
             _w.positionTable.updatePrimaryStar();
         }
     };

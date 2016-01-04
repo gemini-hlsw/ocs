@@ -184,7 +184,7 @@ public class FITSKeywords extends JPanel {
 
         table.setModel(new DefaultTableModel(values, columnNames));
         //table.sizeColumnsToFit(-1);  // XXX workaround for Java bugID# 4226181
-        sumColWidths = TableUtil.initColumnSizes(table, null);
+        sumColWidths = TableUtil.initColumnSizes(table);
         resize();
         updateTitle(header.getStringValue("EXTNAME"));
     }

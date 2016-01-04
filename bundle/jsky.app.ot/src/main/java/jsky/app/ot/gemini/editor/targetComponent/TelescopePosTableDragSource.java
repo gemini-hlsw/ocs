@@ -2,7 +2,6 @@ package jsky.app.ot.gemini.editor.targetComponent;
 
 import jsky.app.ot.util.DnDUtils;
 
-import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.awt.dnd.*;
 import java.awt.event.InputEvent;
@@ -13,7 +12,7 @@ import java.util.Objects;
 class TelescopePosTableDragSource implements DragGestureListener, DragSourceListener {
 
     /** The pos table widget */
-    private final TelescopePosTableWidget _tree;
+    private final TelescopePosTableWidget table;
 
     private boolean editable = false;
 
@@ -24,10 +23,10 @@ class TelescopePosTableDragSource implements DragGestureListener, DragSourceList
      * Constructor
      */
     public TelescopePosTableDragSource(final TelescopePosTableWidget tree) {
-        _tree = Objects.requireNonNull(tree);
+        table = Objects.requireNonNull(tree);
 
         // Create a DragGestureRecognizer and register as the listener.
-        DragSource.getDefaultDragSource().createDefaultDragGestureRecognizer(_tree, DnDConstants.ACTION_COPY_OR_MOVE, this);
+        DragSource.getDefaultDragSource().createDefaultDragGestureRecognizer(table, DnDConstants.ACTION_COPY_OR_MOVE, this);
     }
 
     void setEditable(boolean editable) {
@@ -42,13 +41,13 @@ class TelescopePosTableDragSource implements DragGestureListener, DragSourceList
         if (e instanceof MouseEvent && ((MouseEvent) e).isPopupTrigger())
             return;
 
-        // Get the mouse location and convert it to a location within the tree.
+        // Get the mouse location and convert it to a row.
         final Point location = dge.getDragOrigin();
-        final TreePath dragPath = _tree.getPathForLocation(location.x, location.y);
-        if (dragPath != null && _tree.isPathSelected(dragPath)) {
-            // Get the selected node and create a Transferable.
-            _tree.getSelectedNode().ifPresent(node -> {
-                _dragObject = new TelescopePosTableDragDropObject(node, _tree);
+        final int rowIdx = table.rowAtPoint(location);
+
+        if (table.isRowSelected(rowIdx)) {
+            table.getSelectedNode().foreach(selRow -> {
+                _dragObject = new TelescopePosTableDragDropObject(selRow, table);
                 try {
                     dge.startDrag(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR), _dragObject, this);
                 } catch (final Exception ex) {
