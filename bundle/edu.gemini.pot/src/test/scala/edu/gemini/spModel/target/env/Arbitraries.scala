@@ -32,7 +32,7 @@ trait Arbitraries extends edu.gemini.spModel.core.Arbitraries {
       } yield Zipper(l.toStream, f, r.toStream)
     }
 
-  implicit def arbDisjunction[A : Arbitrary, B : Arbitrary]: Arbitrary[A \/ B] =
+  implicit def arbDisjunction[A: Arbitrary, B: Arbitrary]: Arbitrary[A \/ B] =
     Arbitrary {
       for {
         b <- arbitrary[Boolean]
@@ -40,10 +40,17 @@ trait Arbitraries extends edu.gemini.spModel.core.Arbitraries {
       } yield d
     }
 
+  implicit def arbNonEmptyList[A: Arbitrary]: Arbitrary[NonEmptyList[A]] =
+    Arbitrary {
+      for {
+        a  <- arbitrary[A]
+        as <- arbitrary[List[A]]
+      } yield NonEmptyList.nel(a, as)
+    }
 
   implicit val arbOptsListTarget: Arbitrary[OptsList[SPTarget]] =
     Arbitrary {
-      arbitrary[List[SPTarget] \/ Zipper[SPTarget]].map { d => OptsList(d) }
+      arbitrary[NonEmptyList[SPTarget] \/ Zipper[SPTarget]].map { d => OptsList(d) }
     }
 
   implicit val arbGuideProbe: Arbitrary[GuideProbe] =

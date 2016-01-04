@@ -45,7 +45,7 @@ case class GuideGroup(grp: GuideGrp) extends java.lang.Iterable[GuideProbeTarget
     * guide probe; `false` otherwise.
     */
   def contains(gp: GuideProbe): Boolean = grp match {
-    case ManualGroup(_, ts)        => ts.get(gp).exists(_.toDisjunction.fold(_.nonEmpty, _ => true))
+    case ManualGroup(_, ts)        => ts.contains(gp)
     case AutomaticGroup.Active(ts) => ts.contains(gp)
     case AutomaticGroup.Initial    => false
   }
@@ -76,17 +76,22 @@ case class GuideGroup(grp: GuideGrp) extends java.lang.Iterable[GuideProbeTarget
   def put(gpt: GuideProbeTargets): GuideGroup = {
     val probe   = gpt.getGuider
     val primary = gpt.getPrimary.asScalaOpt
-    val targets = gpt.getManualTargets.asScalaList
 
     update {
       case mg@ManualGroup(_, m) =>
-        val opts = primary.fold(OptsList(targets.left[Zipper[SPTarget]])) { t =>
-          val (lefts, focusRight) = targets.span(_ != t)
-          focusRight.headOption.fold(OptsList(targets.left[Zipper[SPTarget]])) { _ =>
-            OptsList(Zipper(lefts.toStream, t, focusRight.drop(1).toStream).right)
+        val targets = gpt.getManualTargets.asScalaList.toNel
+
+        targets.fold(mg.copy(targetMap = m - probe)) { nel =>
+          def noPrimary = OptsList(nel.left[Zipper[SPTarget]])
+
+          val opts = primary.fold(noPrimary) { t =>
+            val (lefts, focusRight) = nel.toList.span(_ != t)
+            focusRight.headOption.fold(noPrimary) { _ =>
+              OptsList(Zipper(lefts.toStream, t, focusRight.drop(1).toStream).right)
+            }
           }
+          mg.copy(targetMap = m + (probe -> opts))
         }
-        mg.copy(targetMap = m + (probe -> opts))
 
       case a@Active(ts)         =>
         a.copy(targetMap = primary.fold(ts - probe) { t => ts + (probe -> t)})

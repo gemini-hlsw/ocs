@@ -2,7 +2,7 @@ package edu.gemini.spModel.target.env
 
 import scalaz._, Scalaz._
 
-case class OptsList[A](toDisjunction: List[A] \/ Zipper[A]) {
+case class OptsList[A](toDisjunction: NonEmptyList[A] \/ Zipper[A]) {
 
   def focus: Option[A] =
     toDisjunction.toOption.map(_.focus)
@@ -13,9 +13,15 @@ case class OptsList[A](toDisjunction: List[A] \/ Zipper[A]) {
   def map[B](f: A => B): OptsList[B] =
     OptsList(toDisjunction.bimap(_.map(f), _.map(f)))
 
-  def toList: List[A] =
+  def toNel: NonEmptyList[A] =
     toDisjunction match {
       case -\/(l) => l
+      case \/-(z) => z.toList.toNel.get
+    }
+
+  def toList: List[A] =
+    toDisjunction match {
+      case -\/(l) => l.toList
       case \/-(z) => z.toList
     }
 
@@ -27,8 +33,6 @@ case class OptsList[A](toDisjunction: List[A] \/ Zipper[A]) {
 }
 
 object OptsList {
-  def empty[A]: OptsList[A] = OptsList(List.empty[A].left)
-
   implicit val TraverseOptsList: Traverse[OptsList] =
     new Traverse[OptsList] {
       def traverseImpl[G[_]: Applicative, A, B](fa: OptsList[A])(f: A => G[B]): G[OptsList[B]] =

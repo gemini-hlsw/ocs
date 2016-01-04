@@ -46,4 +46,8 @@ class GuideGroupSpec extends Specification with ScalaCheck with Arbitraries {
         g.contains(gp) == g.get(gp).asScalaOpt.exists(_.getTargets.nonEmpty())
       }
   }
+
+//  "GuideGroup get" should {
+//
+//  }
 }

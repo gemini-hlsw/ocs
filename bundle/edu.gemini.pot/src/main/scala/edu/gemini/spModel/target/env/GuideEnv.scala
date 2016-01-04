@@ -5,13 +5,13 @@ import edu.gemini.spModel.guide.GuideProbe
 import scalaz._
 import Scalaz._
 
-final case class GuideEnv(auto: AutomaticGroup, manual: OptsList[ManualGroup]) {
+final case class GuideEnv(auto: AutomaticGroup, manual: Option[OptsList[ManualGroup]]) {
 
   def groups: List[GuideGrp] =
-    auto :: manual.toDisjunction.fold(identity, _.toList)
+    auto :: (manual.map(_.toList) | Nil)
 
   def primaryGroup: GuideGrp =
-    manual.toDisjunction.fold(_ => auto, _.focus)
+    (manual.flatMap(_.focus) : Option[GuideGrp]) | auto
 
   def referencedGuiders: Set[GuideProbe] =
     groups.foldMap(_.referencedGuiders)
@@ -26,5 +26,5 @@ final case class GuideEnv(auto: AutomaticGroup, manual: OptsList[ManualGroup]) {
   * Otherwise the selection is indicated by the zipper.
   */
 object GuideEnv {
-  val initial: GuideEnv = GuideEnv(AutomaticGroup.Initial, OptsList.empty)
+  val initial: GuideEnv = GuideEnv(AutomaticGroup.Initial, none)
 }
