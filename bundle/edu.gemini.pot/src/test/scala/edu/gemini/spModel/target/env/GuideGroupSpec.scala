@@ -47,7 +47,31 @@ class GuideGroupSpec extends Specification with ScalaCheck with Arbitraries {
       }
   }
 
-//  "GuideGroup get" should {
-//
-//  }
+  "GuideGroup get" should {
+    "return none or else a non empty list" in
+      forAll { (gp: GuideProbe, g: GuideGroup) =>
+        g.get(gp).asScalaOpt.forall(_.getTargets.nonEmpty)
+      }
+
+    "return none or else GuideProbeTargets with a matching probe" in
+      forAll { (gp: GuideProbe, g: GuideGroup) =>
+        g.get(gp).asScalaOpt.forall(_.getGuider == gp)
+      }
+
+    "return a non empty GuideProbeTargets iff the group contains the probe" in
+      forAll { (gp: GuideProbe, g: GuideGroup) =>
+          g.get(gp).asScalaOpt.isDefined == g.contains(gp)
+      }
+
+    "return a GuideProbeTargets with primary star that matches the options list focus" in
+      forAll { (gp: GuideProbe, g: GuideGroup) =>
+         g.get(gp).asScalaOpt.forall { gpt =>
+           gpt.getPrimary.asScalaOpt == (g.grp match {
+             case ManualGroup(_, m)        => m.get(gp).flatMap { _.focus }
+             case AutomaticGroup.Active(m) => m.get(gp)
+             case AutomaticGroup.Initial   => None
+           })
+         }
+      }
+  }
 }
