@@ -57,21 +57,17 @@ trait OcsBundleSettings { this: OcsKey =>
 
     ocsBundleIdeaModule := {
       val iml = ocsBundleIdeaModuleAbstractPath.value
-      if (iml.exists && iml.lastModified >= ocsBootTime.value) {
-        streams.value.log.debug("IDEA module up to date: " + iml)
-      } else {
-        val modules: Seq[String] = {
-          val s = state.value
-          val extracted = Project.extract(s)      
-          ocsDependencies.value.map(p => extracted.get(ocsBundleIdeaModuleName in p))
-        }      
-        val classpath = ((managedClasspath in Compile).value ++ (unmanagedJars in Compile).value).map(_.data)
-        val testClasspath= ((managedClasspath in Test).value ++ (unmanagedJars in Test).value).map(_.data) filterNot (classpath.contains)
-        IO.createDirectory(iml.getParentFile)
-        val mod = new IdeaModule(iml.getParentFile, modules, classpath, testClasspath)
-        IO.writeLines(iml, List(new PrettyPrinter(132, 2).format(mod.module)), IO.utf8)
-        streams.value.log.info("IDEA module: " + iml)
-      }
+      val modules: Seq[String] = {
+        val s = state.value
+        val extracted = Project.extract(s)      
+        ocsDependencies.value.map(p => extracted.get(ocsBundleIdeaModuleName in p))
+      }      
+      val classpath = ((managedClasspath in Compile).value ++ (unmanagedJars in Compile).value).map(_.data)
+      val testClasspath= ((managedClasspath in Test).value ++ (unmanagedJars in Test).value).map(_.data) filterNot (classpath.contains)
+      IO.createDirectory(iml.getParentFile)
+      val mod = new IdeaModule(iml.getParentFile, modules, classpath, testClasspath)
+      IO.writeLines(iml, List(new PrettyPrinter(132, 2).format(mod.module)), IO.utf8)
+      streams.value.log.info("IDEA module: " + iml)
       iml
     },
 
