@@ -6,6 +6,7 @@ import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.PioFactory;
 import edu.gemini.spModel.target.SPTarget;
 
+import java.io.Serializable;
 import java.lang.ref.SoftReference;
 import java.util.*;
 
@@ -24,7 +25,7 @@ import java.util.*;
  * <p>A TargetEnvironment is immutable, but the {@link SPTarget}s it contains
  * are unfortunately mutable.
  */
-public final class TargetEnvironment implements Iterable<SPTarget>, TargetContainer {
+public final class TargetEnvironment implements Serializable, Iterable<SPTarget>, TargetContainer {
 
     public static final String BASE_NAME = "Base";
     public static final String USER_NAME = "User";

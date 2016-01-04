@@ -61,7 +61,7 @@ public final class TargetObsComp extends AbstractDataObject implements GuideProb
 
     }
 
-    private transient TargetEnvironment targetEnv;
+    private TargetEnvironment targetEnv;
     private transient PcePropagator prop = new PcePropagator();
 
     public TargetObsComp() {
@@ -177,29 +177,9 @@ public final class TargetObsComp extends AbstractDataObject implements GuideProb
         return GUIDE_PROBES;
     }
 
-    private void readObject(final ObjectInputStream in) throws IOException, ClassNotFoundException {
-        in.defaultReadObject();
-
-        final TargetEnvironment env;
-        try {
-            final SPTarget base         = (SPTarget) in.readObject();
-            final GuideEnvironment gEnv = new GuideEnvironment(GuideEnv.readObject(in));
-            @SuppressWarnings("unchecked")
-            final ImList<SPTarget> user = (ImList<SPTarget>) in.readObject();
-            env = TargetEnvironment.create(base, gEnv, user);
-        } catch (ClassCastException ex) {
-            throw new IOException(ex);
-        }
-
-        targetEnv = env;
+    private void readObject(final ObjectInputStream is) throws IOException, ClassNotFoundException {
+        is.defaultReadObject();
         prop = new PcePropagator();
         watchTargets();
-    }
-
-    private void writeObject(ObjectOutputStream out) throws IOException {
-        out.defaultWriteObject();
-        out.writeObject(targetEnv.getBase());
-        targetEnv.getGuideEnvironment().guideEnv().writeObject(out);
-        out.writeObject(targetEnv.getUserTargets());
     }
 }

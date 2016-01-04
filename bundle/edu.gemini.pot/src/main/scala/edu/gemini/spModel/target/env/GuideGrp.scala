@@ -25,21 +25,6 @@ sealed trait GuideGrp extends Serializable {
     case AutomaticGroup.Initial    => Nil
     case AutomaticGroup.Active(ts) => ts.values.toList
   }
-
-  def writeObject(out: java.io.ObjectOutputStream): Unit = this match {
-    case ManualGroup(name, ts)  =>
-      out.writeObject(GuideGrp.ManualTag)
-      out.writeObject(name)
-      ScalazSer.writeList(out, ts.toList) { case (guideProbe, opts) =>
-          out.writeObject(guideProbe)
-          opts.writeObject(out)(out.writeObject(_))
-      }
-    case AutomaticGroup.Initial =>
-      out.writeObject(GuideGrp.InitialTag)
-    case AutomaticGroup.Active(ts)  =>
-      out.writeObject(GuideGrp.ActiveTag)
-      out.writeObject(ts)
-  }
 }
 
 /** A manual group has a name and a mapping from guide probe to a non-empty list
@@ -83,32 +68,4 @@ object GuideGrp {
     }, {
       case mg: ManualGroup => mg.name
     })
-
-  private sealed trait SerializationTag
-  private case object ManualTag  extends SerializationTag
-  private case object InitialTag extends SerializationTag
-  private case object ActiveTag  extends SerializationTag
-
-  def readObject(in: java.io.ObjectInputStream): GuideGrp = {
-    val tag = safeRead(in) { case s: SerializationTag => s }
-
-    tag match {
-      case ManualTag  =>
-        val name = safeRead(in) { case s: String => s }
-        val tups = ScalazSer.readList(in) {
-          val probe = safeRead(in) { case gp: GuideProbe => gp }
-          val opts  = OptsList.readObject(in) {
-            safeRead(in) { case sp: SPTarget => sp }
-          }
-          (probe, opts)
-        }
-        ManualGroup(name, tups.toMap)
-      case InitialTag =>
-        AutomaticGroup.Initial
-
-      case ActiveTag  =>
-        val map = safeRead(in) { case m: Map[GuideProbe, SPTarget] => m }
-        AutomaticGroup.Active(map)
-    }
-  }
 }

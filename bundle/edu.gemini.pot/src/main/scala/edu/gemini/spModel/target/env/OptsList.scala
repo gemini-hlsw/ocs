@@ -1,7 +1,5 @@
 package edu.gemini.spModel.target.env
 
-import edu.gemini.spModel.target.env.ScalazSer._
-
 import scalaz._, Scalaz._
 
 case class OptsList[A](toDisjunction: List[A] \/ Zipper[A]) {
@@ -26,9 +24,6 @@ case class OptsList[A](toDisjunction: List[A] \/ Zipper[A]) {
       case -\/(l) => l.traverse(f).map(l => OptsList(l.left))
       case \/-(r) => r.traverse(f).map(r => OptsList(r.right))
     }
-
-  def writeObject(out: java.io.ObjectOutputStream)(writeA: A => Unit): Unit =
-    writeDisjunction(out, toDisjunction)(writeList(out, _)(writeA), writeZipper(out, _)(writeA))
 }
 
 object OptsList {
@@ -41,7 +36,4 @@ object OptsList {
           case \/-(r) => r.traverse(f).map(r => OptsList(r.right))
         }
     }
-
-  def readObject[A](in: java.io.ObjectInputStream)(readA:  => A): OptsList[A] =
-    OptsList(readDisjunction(in)(readList(in)(readA), readZipper(in)(readA)))
 }
