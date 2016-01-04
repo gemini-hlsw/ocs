@@ -13,6 +13,9 @@ import scala.collection.JavaConverters._
 import scalaz._
 import Scalaz._
 
+/** The old Java codebase compatible wrapper around the model concept of a
+  * guide group.
+  */
 case class GuideGroup(grp: GuideGrp) extends java.lang.Iterable[GuideProbeTargets] with TargetContainer {
 
   // getName / setName are a bit wacky but the API is being kept compatible
@@ -38,8 +41,11 @@ case class GuideGroup(grp: GuideGrp) extends java.lang.Iterable[GuideProbeTarget
   def setName(n: String): GuideGroup =
     setName(ImOption.apply(n))
 
+  /** Returns `true` if the group contains a target associated with the given
+    * guide probe; `false` otherwise.
+    */
   def contains(gp: GuideProbe): Boolean = grp match {
-    case ManualGroup(_, ts)        => ts.contains(gp)
+    case ManualGroup(_, ts)        => ts.get(gp).exists(_.toDisjunction.fold(_.nonEmpty, _ => true))
     case AutomaticGroup.Active(ts) => ts.contains(gp)
     case AutomaticGroup.Initial    => false
   }
