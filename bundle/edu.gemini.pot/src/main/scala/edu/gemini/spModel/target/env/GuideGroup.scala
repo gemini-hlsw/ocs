@@ -68,7 +68,7 @@ case class GuideGroup(grp: GuideGrp) extends java.lang.Iterable[GuideProbeTarget
   }
 
   /** Constructs a `GuideProbeTargets` structure to describe the guide stars
-    * associated with the given guider.
+    * associated with the given guider, if any.
     */
   def get(gp: GuideProbe): GemOption[GuideProbeTargets] =
     gpt(gp).asGeminiOpt
@@ -175,19 +175,30 @@ case class GuideGroup(grp: GuideGrp) extends java.lang.Iterable[GuideProbeTarget
   def getAllMatching(t: GuideProbe.Type): ImList[GuideProbeTargets] =
     all.filter(_.getGuider.getType == t).asImList
 
-  def guiders: Set[GuideProbe] = grp match {
-    case ManualGroup(_, ts) => ts.keySet
-    case Active(ts)         => ts.keySet
-    case Initial            => Set.empty
+  private def guiderSet(autoFilter: ((GuideProbe, SPTarget)) => Boolean, manualFilter: ((GuideProbe, OptsList[SPTarget])) => Boolean): java.util.SortedSet[GuideProbe] = {
+    val probes = grp match {
+      case Initial            => Set.empty
+      case Active(ts)         => ts.filter(autoFilter).keySet
+      case ManualGroup(_, ts) => ts.filter(manualFilter).keySet
+    }
+
+    new java.util.TreeSet(GuideProbe.KeyComparator.instance) <| (_.addAll(probes.asJava))
   }
 
+  private val matchAll = scala.Function.const(true)_
+
   def getReferencedGuiders: java.util.SortedSet[GuideProbe] =
-    new java.util.TreeSet(guiders.asJava)
+    guiderSet(matchAll, matchAll)
 
   def getPrimaryReferencedGuiders: java.util.SortedSet[GuideProbe] =
-    ???
+    guiderSet(matchAll, _._2.hasFocus)
 
-  def getReferencedGuiders(t: GuideProbe.Type): java.util.SortedSet[GuideProbe] = ???
+  def getReferencedGuiders(t: GuideProbe.Type): java.util.SortedSet[GuideProbe] = {
+    def matchType[A]: ((GuideProbe, A)) => Boolean = {
+      case (gp, _) => gp.getType == t
+    }
+    guiderSet(matchType, matchType)
+  }
 
   override def getTargets: ImList[SPTarget] = ???
 

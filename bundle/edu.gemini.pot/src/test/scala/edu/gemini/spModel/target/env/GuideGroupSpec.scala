@@ -137,9 +137,130 @@ class GuideGroupSpec extends Specification with ScalaCheck with Arbitraries {
         }
       }
   }
+
+  "GuideGroup remove" should {
+    "remove all targets associated with the given guider" in
+      forAll { (g: GuideGroup) =>
+        AllProbes.forall { gp =>
+          val g2 = g.remove(gp)
+          g2.get(gp).isEmpty && !g2.contains(gp)
+        }
+      }
+  }
+
+  "GuideGroup clear" should {
+    "remove all targets" in
+      forAll { (g: GuideGroup) =>
+        val g2 = g.clear()
+        g2.getAll.isEmpty && AllProbes.forall { gp =>
+          g2.get(gp).isEmpty && !g2.contains(gp)
+        }
+      }
+  }
+
+  "GuideGroup getAll" should {
+    "return its results in sorted order" in
+      forAll { (g: GuideGroup) =>
+        val probeOrder = AllProbes.zipWithIndex.toMap
+        val order      = g.getAll.asScalaList.map(gpt => probeOrder(gpt.getGuider))
+        order == order.sorted
+      }
+
+    "return a result for each guider with associated guide stars" in
+      forAll { (g: GuideGroup) =>
+        val guiders = g.getAll.asScalaList.map(_.getGuider).toSet
+        g.grp match {
+          case AutomaticGroup.Active(m) => guiders == m.keySet
+          case AutomaticGroup.Initial   => guiders.isEmpty
+          case ManualGroup(_, m)        => guiders == m.keySet
+        }
+      }
+
+    "return matching guide probe targets for all guide probes with associated targets" in
+      forAll { (g: GuideGroup) =>
+        val gpts1 = g.getAll.asScalaList
+        val gpts2 = AllProbes.flatMap { gp => g.get(gp).asScalaOpt }
+        gpts1 == gpts2
+      }
+  }
+/*
+  "GuideGroup getAll" should {
+    "" in
+      forAll { (g: GuideGroup) =>
+        true
+      }
+
+    "" in
+      forAll { (g: GuideGroup) =>
+        true
+      }
+
+    "" in
+      forAll { (g: GuideGroup) =>
+        true
+      }
+
+    "" in
+      forAll { (g: GuideGroup) =>
+        true
+      }
+
+    "" in
+      forAll { (g: GuideGroup) =>
+        true
+      }
+
+    "" in
+      forAll { (g: GuideGroup) =>
+        true
+      }
+
+    "" in
+      forAll { (g: GuideGroup) =>
+        true
+      }
+  }
+
+  "GuideGroup getAll" should {
+    "" in
+      forAll { (g: GuideGroup) =>
+        true
+      }
+
+    "" in
+      forAll { (g: GuideGroup) =>
+        true
+      }
+
+    "" in
+      forAll { (g: GuideGroup) =>
+        true
+      }
+
+    "" in
+      forAll { (g: GuideGroup) =>
+        true
+      }
+
+    "" in
+      forAll { (g: GuideGroup) =>
+        true
+      }
+
+    "" in
+      forAll { (g: GuideGroup) =>
+        true
+      }
+
+    "" in
+      forAll { (g: GuideGroup) =>
+        true
+      }
+  }
+  */
 }
 
 object GuideGroupSpec {
-  val AllProbes: List[GuideProbe] = GuideProbeMap.instance.values.asScala.toList
+  val AllProbes: List[GuideProbe] = GuideProbeMap.instance.values.asScala.toList.sorted
 
 }
