@@ -27,7 +27,7 @@
     </type>
 
     <type name="FastTurnaround">
-        <dir>/home/software/proposals/fast_turnaround/proposals/2016B</dir>
+        <dir>/home/software/test_proposals/fast_turnaround/proposals/2016B</dir>
         <to>pitft@gemini.edu</to>
     </type>
 
