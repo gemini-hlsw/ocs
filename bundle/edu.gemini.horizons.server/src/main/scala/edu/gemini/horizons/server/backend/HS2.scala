@@ -115,7 +115,7 @@ object HS2 {
 
             // Single result with form: JPL/HORIZONS      4 Vesta     2015-Dec-31 11:40:21
             lazy val case2 =
-              """  +(\d+) ([^(]+)  """.r.findFirstMatchIn(header).map { m =>
+              """  +(\d+) ([^(]+?)  """.r.findFirstMatchIn(header).map { m =>
                 List(HS2.Row(HorizonsDesignation.AsteroidOldStyle(m.group(1).toInt) : HorizonsDesignation.Asteroid, m.group(2)))
               } \/> InternalError(lines, "Could not match '4 Vesta' header pattern.")
 
@@ -164,12 +164,12 @@ object HS2 {
 
             // Single result with form:  Revised: Aug 11, 2015       Charon / (Pluto)     901
             lazy val case1 =
-              """  +(.*?)  +(\d+)""".r.findFirstMatchIn(header).map { m =>
+              """  +(.*?)  +(\d+) $""".r.findFirstMatchIn(header).map { m =>
                 List(HS2.Row(HorizonsDesignation.MajorBody(m.group(2).toInt), m.group(1)))
               } \/> InternalError(lines, "Could not match 'Charon / (Pluto)     901' header pattern.")
 
-            // First one that works!
-            case0 orElse case1 orElse InternalError(lines, "Could not parse the header line.").left
+            // First one that works, otherwise Nil because it falls through to small-body search
+            case0 orElse case1 orElse Nil.right
 
           case _ => InternalError(lines, "Fewer than 2 lines!").left
 
@@ -203,27 +203,30 @@ object Searcher {
       )
 
     val lines = fetch(queryParams).unsafePerformIO()
-    lines.foreach(println)
+    // lines.foreach(println)
     search.parseResponse(lines)
   }
 
 
   def fetch(params: Map[String, String]): IO[List[String]] =
     IO {
-      val method = new GetMethod(CgiHorizonsConstants.HORIZONS_URL)
-      try {
-        method.setQueryString(params.map { case (k, v) => new NameValuePair(k, v) } .toArray)
-        (new HttpClient).executeMethod(method)
-        val s = scala.io.Source.fromInputStream(method.getResponseBodyAsStream, method.getRequestCharSet)
+      // HORIZONS allows only one request at a time for a given host
+      Searcher.synchronized {
+        val method = new GetMethod(CgiHorizonsConstants.HORIZONS_URL)
         try {
-          s.getLines.toList
-        } finally s.close()
-      } catch {
-        case ex: HorizonsException => throw ex
-        case ex: HttpException     => throw HorizonsException.create(ex)
-        case ex: IOException       => throw HorizonsException.create(ex)
-      } finally {
-        method.releaseConnection
+          method.setQueryString(params.map { case (k, v) => new NameValuePair(k, v) } .toArray)
+          (new HttpClient).executeMethod(method)
+          val s = scala.io.Source.fromInputStream(method.getResponseBodyAsStream, method.getRequestCharSet)
+          try {
+            s.getLines.toList
+          } finally s.close()
+        } catch {
+          case ex: HorizonsException => throw ex
+          case ex: HttpException     => throw HorizonsException.create(ex)
+          case ex: IOException       => throw HorizonsException.create(ex)
+        } finally {
+          method.releaseConnection
+        }
       }
     }
 
