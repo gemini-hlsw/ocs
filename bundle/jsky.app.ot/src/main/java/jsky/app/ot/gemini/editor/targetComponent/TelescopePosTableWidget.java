@@ -419,72 +419,6 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
         );
     }
 
-    private static final Color ODD_ROW_COLOR  = new Color(248, 247, 255);
-    private static void styleRendererLabel(final JLabel lab, final int rowIdx, final TableData.Row row) {
-        final int style = row.enabled() ? Font.PLAIN : Font.ITALIC;
-        final Font f = lab.getFont().deriveFont(style);
-        lab.setFont(f);
-
-        final Color c = row.enabled() ? Color.BLACK : Color.GRAY;
-        lab.setForeground(c);
-
-        lab.setEnabled(row.enabled());
-
-        // TODO
-        // Alternate row colors.
-        //lab.setBackground(rowIdx % 2 == 0 ? Color.white : ODD_ROW_COLOR);
-    }
-
-    private static final TableCellRenderer LEAD_CELL_RENDERER = new DefaultTableCellRenderer() {
-        @Override
-        public Component getTableCellRendererComponent(final JTable table,
-                                                       final Object value,
-                                                       final boolean isSelected,
-                                                       final boolean hasFocus,
-                                                       final int row,
-                                                       final int column) {
-            if (isSelected || hasFocus)
-                System.out.println("* row=" + row + " col=" + column + " isSelected=" + isSelected + " hasFocus=" + hasFocus);
-            final JLabel lab = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-
-            if (value instanceof TableData.Row) {
-                final TableData.Row tableDataRow = (TableData.Row) value;
-
-                // OT-17: display group name in tag field if defined
-                if (!tableDataRow.group().isEmpty()) {
-                    final String tag = tableDataRow.tag();
-                    final String name = tableDataRow.name();
-                    lab.setText(name != null && !name.equals("") ? name : tag);
-                } else {
-                    lab.setText(tableDataRow.tag());
-                }
-
-                final Icon i = tableDataRow.getIcon();
-                lab.setIcon(i);
-                lab.setDisabledIcon(i);
-                styleRendererLabel(lab, row, tableDataRow);
-            }
-
-            return lab;
-        }
-    };
-
-    private final TableCellRenderer defaultCellRenderer = new DefaultTableCellRenderer() {
-        @Override
-        public Component getTableCellRendererComponent(final JTable table,
-                                                       final Object value,
-                                                       final boolean isSelected,
-                                                       final boolean hasFocus,
-                                                       final int row,
-                                                       final int col) {
-            System.out.println("----- row=" + row + " col=" + col + " isSelected=" + isSelected + " hasFocus=" + hasFocus);
-            final JLabel lab = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
-            _tableData.rowAt(row).foreach(tdRow -> styleRendererLabel(lab, row, tdRow));
-            return lab;
-        }
-    };
-
-
     // Telescope position list
     private ISPObsComponent _obsComp;
     private TargetObsComp _dataObject;
@@ -522,8 +456,52 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
         setShowVerticalLines(true);
         getColumnModel().setColumnMargin(1);
         setRowSelectionAllowed(true);
-        setColumnSelectionAllowed(false);
-        setCellSelectionEnabled(false);
+        setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+            private final Color ODD_ROW_COLOR = new Color(248, 247, 255);
+            @Override public Component getTableCellRendererComponent(final JTable table,
+                                                                     final Object value,
+                                                                     final boolean isSelected,
+                                                                     final boolean hasFocus,
+                                                                     final int row,
+                                                                     final int column) {
+                final JLabel label = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+
+                _tableData.rowAt(row).foreach(tableDataRow -> {
+                    // If we are in column 0, we treat this differently.
+                    if (column == 0) {
+                        if (!tableDataRow.group().isEmpty()) {
+                            final String tag = tableDataRow.tag();
+                            final String name = tableDataRow.name();
+                            label.setText(name != null && !name.equals("") ? name : tag);
+                        } else {
+                            label.setText(tableDataRow.tag());
+                        }
+
+                        label.setIcon(tableDataRow.getIcon());
+                        label.setDisabledIcon(tableDataRow.getIcon());
+                    } else {
+                        label.setIcon(null);
+                        label.setDisabledIcon(null);
+                    }
+
+                    final int style = tableDataRow.enabled() ? Font.PLAIN : Font.ITALIC;
+                    final Font font = label.getFont().deriveFont(style);
+                    label.setFont(font);
+
+                    final Color c = tableDataRow.enabled() ? Color.BLACK : Color.GRAY;
+                    label.setForeground(c);
+
+                    label.setEnabled(tableDataRow.enabled());
+
+                    // If the row is not selected, set the background to alternating stripes.
+                    if (!isSelected) {
+                        label.setBackground(row % 2 == 0 ? Color.WHITE : ODD_ROW_COLOR);
+                    }
+                });
+
+                return label;
+            }
+        });
 
         addMouseListener(new MouseAdapter() {
             public void mouseClicked(final MouseEvent e) {
@@ -532,18 +510,9 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
             }
         });
 
-        // TODO
-        //setDefaultRenderer(Object.class, TELESCOPE_POS_TABLE_CELL_RENDERER);
-
         // Add drag and drop features
         dropTarget = new TelescopePosTableDropTarget(this);
         dragSource = new TelescopePosTableDragSource(this);
-    }
-
-    @Override
-    public TableCellRenderer getCellRenderer(int row, int col) {
-        //return col == 0 ? LEAD_CELL_RENDERER : defaultCellRenderer;
-        return col == 0 ? super.getCellRenderer(row, col) : defaultCellRenderer;
     }
 
     public void telescopePosUpdate(WatchablePos tp) {

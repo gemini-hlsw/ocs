@@ -4,7 +4,6 @@ import edu.gemini.itc.shared.*;
 import edu.gemini.itc.web.ITCMultiPartParser;
 import edu.gemini.itc.web.ITCRequest;
 import edu.gemini.itc.web.html.*;
-import edu.gemini.spModel.core.Version;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;

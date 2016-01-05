@@ -14,6 +14,7 @@ import java.awt.Toolkit;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.net.URL;
+
 import edu.gemini.spModel.core.Version;
 import jsky.app.ot.viewer.ViewerService;
 

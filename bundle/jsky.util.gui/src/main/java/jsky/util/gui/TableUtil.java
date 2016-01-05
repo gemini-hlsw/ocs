@@ -10,6 +10,7 @@ package jsky.util.gui;
 import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 import java.awt.*;
 import java.util.Optional;
@@ -17,16 +18,27 @@ import java.util.Optional;
 public class TableUtil {
 
     /**
-     * Return the default cell renderer for the given JTable column.
+     * Return the cell renderer for the given JTable's header.
      */
-    public static TableCellRenderer getDefaultRenderer(final JTable table) {
+    public static TableCellRenderer getHeaderRenderer(final JTable table) {
         try {
             return table.getTableHeader().getDefaultRenderer();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new RuntimeException(e);
         }
     }
 
+    /**
+     * Return the cell renderer for the given JTable column.
+     */
+    public static TableCellRenderer getColumnRenderer(final JTable table, int col) {
+        try {
+            final TableColumn tc = table.getColumnModel().getColumn(col);
+            return Optional.ofNullable(tc.getCellRenderer()).orElse(table.getDefaultRenderer(table.getColumnClass(col)));
+        } catch (final Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     /**
      * Pick good column sizes for the given JTable.
@@ -79,9 +91,8 @@ public class TableUtil {
             final TableColumn column = table.getColumnModel().getColumn(col);
 
             if (!show.isPresent() || show.get()[col]) {
-                final TableCellRenderer defaultRenderer = getDefaultRenderer(table);
-                final TableCellRenderer cellRenderer    = Optional.ofNullable(column.getCellRenderer()).orElse(defaultRenderer);
-                final TableCellRenderer headerRenderer  = Optional.ofNullable(column.getHeaderRenderer()).orElse(defaultRenderer);
+                final TableCellRenderer cellRenderer   = getColumnRenderer(table, col);
+                final TableCellRenderer headerRenderer = Optional.ofNullable(column.getHeaderRenderer()).orElse(cellRenderer);
 
                 // check the header width
                 final Component headerComponent = headerRenderer.getTableCellRendererComponent(table, column.getHeaderValue(), false, false, -1, col);
@@ -111,6 +122,7 @@ public class TableUtil {
                 column.setPreferredWidth(0);
             }
         }
+        System.out.println();
         return sumColWidths;
     }
 
