@@ -25,9 +25,9 @@ import jsky.app.ot.util.Resources;
 import jsky.util.gui.TableUtil;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -42,10 +42,7 @@ import java.util.stream.Collectors;
  * An extension of the TableWidget to support telescope target lists.
  */
 public final class TelescopePosTableWidget extends JTable implements TelescopePosWatcher {
-
     private static final Icon errorIcon = Resources.getIcon("eclipse/error.gif");
-    private static final Icon blankIcon = Resources.getIcon("eclipse/blank.gif");
-    private static final Icon groupIcon = Resources.getIcon("Open24.gif");
 
     // Used to format values as strings.
     private static final NumberFormat nf = NumberFormat.getInstance(Locale.US);
@@ -97,7 +94,11 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
 
             default Option<Double> distance()  { return None.instance(); }
             default List<Row> children()       { return Collections.emptyList(); }
-            default Icon getIcon()             { return blankIcon; }
+            default Icon getIcon()             { return null; }
+
+            default Border border(int col)     {
+                return col == 0 ? BorderFactory.createEmptyBorder(0, 5, 0, 0) : null;
+            }
 
             String formatMagnitude(Magnitude.Band band);
             Option<Long> when();
@@ -170,6 +171,10 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
                 this.quality = quality;
             }
 
+            @Override public Border border(int col)     {
+                return col == 0 ? BorderFactory.createEmptyBorder(0, 16, 0, 0) : null;
+            }
+
             @Override public Icon getIcon() {
                 return isActiveGuideProbe ?
                         GuidingIcon.apply(quality.getOrElse(AgsGuideQuality.Unusable$.MODULE$), enabled()) :
@@ -196,7 +201,6 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
 
             @Override public Option<GuideGroup> group() { return group; }
             @Override public List<Row> children()       { return children; }
-            @Override public Icon getIcon()             { return groupIcon; }
         }
 
         // Collection of rows, which may include "subrows".
@@ -476,13 +480,14 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
                         } else {
                             label.setText(tableDataRow.tag());
                         }
-
                         label.setIcon(tableDataRow.getIcon());
                         label.setDisabledIcon(tableDataRow.getIcon());
                     } else {
                         label.setIcon(null);
                         label.setDisabledIcon(null);
                     }
+
+                    label.setBorder(tableDataRow.border(column));
 
                     final int style = tableDataRow.enabled() ? Font.PLAIN : Font.ITALIC;
                     final Font font = label.getFont().deriveFont(style);
@@ -515,7 +520,7 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
         dragSource = new TelescopePosTableDragSource(this);
     }
 
-    public void telescopePosUpdate(WatchablePos tp) {
+    public void telescopePosUpdate(final WatchablePos tp) {
         final int index = getSelectedRow();
         _resetTable(_env);
 
@@ -773,7 +778,7 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
      * Moves the given row item to the given parent row.
      * In this case, a guide star to a group.
      */
-    public void moveTo(TableData.Row item, TableData.Row parent) {
+    public void moveTo(final TableData.Row item, final TableData.Row parent) {
         if (item == null) return;
         final GuideGroup snkGrp = parent.group().getOrNull();
         final SPTarget target = item.target().getOrNull();
@@ -807,14 +812,14 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
     /**
      * Get the group to which this target belongs, or null.
      */
-    private GuideGroup getTargetGroup(SPTarget target) {
+    private GuideGroup getTargetGroup(final SPTarget target) {
         return _env.getGuideEnvironment().getOptions().find(gg -> gg.containsTarget(target)).getOrNull();
     }
 
     /**
      * Updates the TargetSelection's target or group, and selects the relevant row in the table.
      */
-    public void selectRowAt(int index) {
+    public void selectRowAt(final int index) {
         if (_tableData == null) return;
         final SPTarget target = _tableData.targetAt(index).getOrNull();
         if (target != null) {
@@ -868,7 +873,7 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
     /**
      * Selects the relevant row in the table.
      */
-    private void _setSelectedRow(int index) {
+    private void _setSelectedRow(final int index) {
         if ((index < 0) || (index >= getRowCount())) return;
         getSelectionModel().setSelectionInterval(index, index);
     }
