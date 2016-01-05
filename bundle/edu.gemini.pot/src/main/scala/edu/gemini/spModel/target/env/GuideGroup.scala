@@ -67,12 +67,47 @@ case class GuideGroup(grp: GuideGrp) extends java.lang.Iterable[GuideProbeTarget
     }
   }
 
+  /** Constructs a `GuideProbeTargets` structure to describe the guide stars
+    * associated with the given guider.
+    */
   def get(gp: GuideProbe): GemOption[GuideProbeTargets] =
     gpt(gp).asGeminiOpt
 
   private def update(f: GuideGrp => GuideGrp): GuideGroup =
     GuideGroup(f(grp))
 
+  /** Sets the guide stars associated with a guider according to the given
+    * `GuideProbeTargets` and returns the updated `GuideGroup`.  The updates
+    * performed depend on the type of group. (WARNING: wacky behavior such here
+    * such as a put followed by a get not returning the same
+    * `GuideProbeTargets` in all cases.)
+    *
+    *
+    * <ul>
+    *   <li>
+    *     manual - if the given `GuideProbeTargets` is empty, then all guide
+    *     stars associated with its guider are removed in the new manual group
+    *     that is returned.  Otherwise, a new manual group is created to match
+    *     the `GuideProbeTargets` stars.  If there is no primary guide star in
+    *     the `GuideProbeTargets`, then there will be no primary for the guider
+    *     in the new manual group.
+    *   </li>
+    *   <li>
+    *     auto / initial - if there is no primary in the given
+    *     `GuideProbeTargets`, then this group is just returned (i.e., noop).
+    *     Otherwise, a new auto / active group is created and given the primary
+    *     guide star as its only guide star.  Any non-primary guide stars in
+    *     `GuideProbeTargets` are ignored.
+    *   </li>
+    *   <li>
+    *     auto / active - if there is no primary then a new auto / active group
+    *     is returned without any guide stars for the associated guider.  If
+    *     there is a primary, a new auto / active group is returned with a
+    *     mapping from the guider to the primary star.  Any non-primary guide
+    *     stars in `GuideProbeTargets` are ignored.
+    *   </li>
+    * </ul>
+    */
   def put(gpt: GuideProbeTargets): GuideGroup = {
     val probe   = gpt.getGuider
     val primary = gpt.getPrimary.asScalaOpt
