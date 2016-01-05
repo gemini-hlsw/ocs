@@ -13,6 +13,7 @@ import edu.gemini.ags.conf.ProbeLimitsTable;
 import edu.gemini.qpt.core.util.LttsServicesClient;
 
 import edu.gemini.qpt.ui.action.PublishAction;
+import edu.gemini.spModel.core.Version;
 import edu.gemini.util.security.auth.keychain.KeyChain;
 import edu.gemini.util.security.auth.ui.PasswordDialog;
 import org.osgi.framework.BundleActivator;

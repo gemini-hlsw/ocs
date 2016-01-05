@@ -122,7 +122,6 @@ public class TableUtil {
                 column.setPreferredWidth(0);
             }
         }
-        System.out.println();
         return sumColWidths;
     }
 

@@ -2,6 +2,7 @@ package edu.gemini.smartgcal.servlet.osgi;
 
 import edu.gemini.smartgcal.servlet.SmartGcalConfigServlet;
 import edu.gemini.spModel.core.OcsVersionUtil;
+import edu.gemini.spModel.core.Version;
 import edu.gemini.util.osgi.ExternalStorage$;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
