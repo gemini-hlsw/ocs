@@ -30,6 +30,17 @@ case class OptsList[A](toDisjunction: NonEmptyList[A] \/ Zipper[A]) {
       case -\/(l) => l.traverse(f).map(l => OptsList(l.left))
       case \/-(r) => r.traverse(f).map(r => OptsList(r.right))
     }
+
+  /** Deletes all occurrences of `a` in the options list. */
+  def delete(a: A): Option[OptsList[A]] =
+    toDisjunction match {
+      case -\/(l) => l.toList.filter(_ != a).toNel.map(nel => OptsList(nel.left))
+      case \/-(z) =>
+        val l  = z.lefts.filter(_ != a)
+        val r  = z.rights.filter(_ != a)
+        val z0 = Zipper(l, z.focus, r)
+        (if (z0.focus == a) z0.delete else Some(z0)).map(zip => OptsList(zip.right))
+    }
 }
 
 object OptsList {

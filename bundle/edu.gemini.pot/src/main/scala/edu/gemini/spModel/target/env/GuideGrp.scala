@@ -38,8 +38,22 @@ sealed trait GuideGrp extends Serializable {
   def targets: Map[GuideProbe, List[SPTarget]] =
     this match {
       case AutomaticGroup.Initial    => Map.empty
-      case ManualGroup(_, ts)        => ts.mapValues(_.toList)
       case AutomaticGroup.Active(ts) => ts.mapValues(_ :: Nil)
+      case ManualGroup(_, ts)        => ts.mapValues(_.toList)
+    }
+
+  def removeTarget(t: SPTarget): GuideGrp =
+    this match {
+      case AutomaticGroup.Initial    =>
+        this
+
+      case AutomaticGroup.Active(ts) =>
+        AutomaticGroup.Active(ts.filterNot(_._2 == t))
+
+      case ManualGroup(n, ts)        =>
+        ManualGroup(n, ts.mapValues(_.delete(t)).collect {
+          case (probe, Some(opts)) => (probe, opts)
+        })
     }
 }
 

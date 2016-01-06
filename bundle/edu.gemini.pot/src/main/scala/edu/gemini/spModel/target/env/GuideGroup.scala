@@ -161,15 +161,26 @@ case class GuideGroup(grp: GuideGrp) extends java.lang.Iterable[GuideProbeTarget
   private def all: List[GuideProbeTargets] =
     sortedKeys.flatMap(gpt)
 
+  /** Gets a list of `GuideProbeTargets` sorted by `GuideProbe` key. */
   def getAll: ImList[GuideProbeTargets] =
     all.asImList
 
+  /** Puts all the given `GuideProbeTargets` replacing any associated with the
+    * same `GuideProbe` but leaving unrelated `GuideProbes` alone.  This is the
+    * same as calling `put` for each `GuideProbeTargets` in turn.
+    */
   def putAll(ts: ImList[GuideProbeTargets]): GuideGroup =
     (this/:ts.asScalaList) { (gg, cur) => gg.put(cur) }
 
+  /** Creates a new group consisting of only the given `GuideProbeTargets`.
+    * Any existing `GuideProbeTargets` for unrelated `GuideProbe`s are removed.
+    */
   def setAll(ts: ImList[GuideProbeTargets]): GuideGroup =
     clear().putAll(ts)
 
+  /** Obtains an iterator that steps through the contained `GuideProbeTargets`
+    * in order of their `GuideProbe` key.
+    */
   override def iterator: java.util.Iterator[GuideProbeTargets] =
     getAll.toList.iterator()
 
@@ -195,7 +206,8 @@ case class GuideGroup(grp: GuideGrp) extends java.lang.Iterable[GuideProbeTarget
   override def getTargets: ImList[SPTarget] =
     grp.targets.toList.sortBy(_._1).flatMap(_._2).asImList
 
-  override def removeTarget(t: SPTarget): GuideGroup = ???
+  override def removeTarget(t: SPTarget): GuideGroup =
+    update { _.removeTarget(t) }
 
   override def cloneTargets: GuideGroup = ???
 
