@@ -8,23 +8,39 @@ import Scalaz._
 
 
 sealed trait GuideGrp extends Serializable {
-  def containsTarget(t: SPTarget): Boolean = this match {
-    case ManualGroup(_, ts)        => ts.values.exists(opts => opts.any(_ == t))
-    case AutomaticGroup.Initial    => false
-    case AutomaticGroup.Active(ts) => ts.exists { case (_, t0) => t == t0 }
-  }
+  /** Returns the set of guide probes with at least one associated guide star
+    * in this environment.
+    */
+  def referencedGuiders: Set[GuideProbe] =
+    this match {
+      case AutomaticGroup.Initial    => Set.empty[GuideProbe]
+      case AutomaticGroup.Active(ts) => ts.keySet
+      case ManualGroup(_, ts)        => ts.keySet
+    }
 
-  def referencedGuiders: Set[GuideProbe] = this match {
-    case ManualGroup(_, ts)        => ts.keySet
-    case AutomaticGroup.Initial    => Set.empty[GuideProbe]
-    case AutomaticGroup.Active(ts) => ts.keySet
-  }
+  /** Returns the set of guide probes with at least one associated primary
+    * guide star in this environment.
+    */
+  def primaryReferencedGuiders: Set[GuideProbe] =
+    this match {
+      case AutomaticGroup.Initial    => Set.empty[GuideProbe]
+      case AutomaticGroup.Active(ts) => ts.keySet
+      case ManualGroup(_, ts)        => ts.filter(_._2.hasFocus).keySet
+    }
 
-  def targets: List[SPTarget] = this match {
-    case ManualGroup(_, ts)        => ts.values.toList.flatMap(_.toList)
-    case AutomaticGroup.Initial    => Nil
-    case AutomaticGroup.Active(ts) => ts.values.toList
-  }
+  def containsTarget(t: SPTarget): Boolean =
+    this match {
+      case AutomaticGroup.Initial    => false
+      case AutomaticGroup.Active(ts) => ts.exists { case (_, t0) => t == t0 }
+      case ManualGroup(_, ts)        => ts.values.exists(opts => opts.any(_ == t))
+    }
+
+  def targets: Map[GuideProbe, List[SPTarget]] =
+    this match {
+      case AutomaticGroup.Initial    => Map.empty
+      case ManualGroup(_, ts)        => ts.mapValues(_.toList)
+      case AutomaticGroup.Active(ts) => ts.mapValues(_ :: Nil)
+    }
 }
 
 /** A manual group has a name and a mapping from guide probe to a non-empty list

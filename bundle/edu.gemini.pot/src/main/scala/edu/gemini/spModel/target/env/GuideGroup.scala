@@ -44,11 +44,12 @@ case class GuideGroup(grp: GuideGrp) extends java.lang.Iterable[GuideProbeTarget
   /** Returns `true` if the group contains a target associated with the given
     * guide probe; `false` otherwise.
     */
-  def contains(gp: GuideProbe): Boolean = grp match {
-    case ManualGroup(_, ts)        => ts.contains(gp)
-    case AutomaticGroup.Active(ts) => ts.contains(gp)
-    case AutomaticGroup.Initial    => false
-  }
+  def contains(gp: GuideProbe): Boolean =
+    grp match {
+      case AutomaticGroup.Initial    => false
+      case AutomaticGroup.Active(ts) => ts.contains(gp)
+      case ManualGroup(_, ts)        => ts.contains(gp)
+    }
 
   private def gpt(gp: GuideProbe): Option[GuideProbeTargets] = {
     val gpt = grp match {
@@ -136,26 +137,29 @@ case class GuideGroup(grp: GuideGrp) extends java.lang.Iterable[GuideProbeTarget
     }
   }
 
-  def remove(probe: GuideProbe): GuideGroup = update {
-    case mg: ManualGroup => mg.copy(targetMap = mg.targetMap - probe)
-    case a: Active       => a.copy(targetMap = a.targetMap - probe)
-    case Initial         => Initial
-  }
+  def remove(probe: GuideProbe): GuideGroup =
+    update {
+      case Initial         => Initial
+      case a: Active       => a.copy(targetMap = a.targetMap - probe)
+      case mg: ManualGroup => mg.copy(targetMap = mg.targetMap - probe)
+    }
 
-  def clear(): GuideGroup = update {
-    case mg: ManualGroup => mg.copy(targetMap = Map.empty)
-    case a: Active       => a.copy(targetMap = Map.empty)
-    case Initial         => Initial
-  }
+  def clear(): GuideGroup =
+    update {
+      case Initial         => Initial
+      case a: Active       => a.copy(targetMap = Map.empty)
+      case mg: ManualGroup => mg.copy(targetMap = Map.empty)
+    }
 
-  private def sortedKeys(m: Map[GuideProbe, _]): List[GuideProbe] =
-    m.keys.toList.sorted
+  private def sortedKeys: List[GuideProbe] =
+    (grp match {
+      case Initial            => Set.empty[GuideProbe]
+      case Active(ts)         => ts.keySet
+      case ManualGroup(_, ts) => ts.keySet
+    }).toList.sorted
 
-  private def all: List[GuideProbeTargets] = grp match {
-    case ManualGroup(_, ts) => sortedKeys(ts).flatMap(gpt)
-    case Active(ts)         => sortedKeys(ts).flatMap(gpt)
-    case Initial            => Nil
-  }
+  private def all: List[GuideProbeTargets] =
+    sortedKeys.flatMap(gpt)
 
   def getAll: ImList[GuideProbeTargets] =
     all.asImList
@@ -175,34 +179,21 @@ case class GuideGroup(grp: GuideGrp) extends java.lang.Iterable[GuideProbeTarget
   def getAllMatching(t: GuideProbe.Type): ImList[GuideProbeTargets] =
     all.filter(_.getGuider.getType == t).asImList
 
-  private def guiderSet(autoFilter: ((GuideProbe, SPTarget)) => Boolean, manualFilter: ((GuideProbe, OptsList[SPTarget])) => Boolean): java.util.SortedSet[GuideProbe] = {
-    val probes = grp match {
-      case Initial            => Set.empty
-      case Active(ts)         => ts.filter(autoFilter).keySet
-      case ManualGroup(_, ts) => ts.filter(manualFilter).keySet
-    }
-
+  private def guiderSet(probes: Set[GuideProbe]): java.util.SortedSet[GuideProbe] =
     new java.util.TreeSet(GuideProbe.KeyComparator.instance) <| (_.addAll(probes.asJava))
-  }
-
-  private val matchAll = scala.Function.const(true)_
 
   def getReferencedGuiders: java.util.SortedSet[GuideProbe] =
-    guiderSet(matchAll, matchAll)
+    guiderSet(grp.referencedGuiders)
 
   def getPrimaryReferencedGuiders: java.util.SortedSet[GuideProbe] =
-    guiderSet(matchAll, _._2.hasFocus)
+    guiderSet(grp.primaryReferencedGuiders)
 
-  def getReferencedGuiders(t: GuideProbe.Type): java.util.SortedSet[GuideProbe] = {
-    def matchType[A]: ((GuideProbe, A)) => Boolean = {
-      case (gp, _) => gp.getType == t
-    }
-    guiderSet(matchType, matchType)
-  }
+  override def containsTarget(t: SPTarget): Boolean =
+    grp.containsTarget(t)
 
-  override def getTargets: ImList[SPTarget] = ???
-
-  override def containsTarget(t: SPTarget): Boolean = ???
+  /** Gets a list of SPTarget sorted by their associated GuideProbe. */
+  override def getTargets: ImList[SPTarget] =
+    grp.targets.toList.sortBy(_._1).flatMap(_._2).asImList
 
   override def removeTarget(t: SPTarget): GuideGroup = ???
 

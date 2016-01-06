@@ -205,26 +205,6 @@ public final class GuideGroupTest extends TestCase {
         assertEquals(new HashSet<GuideProbe>(), GuideGroup.EMPTY().getReferencedGuiders());
     }
 
-    public void testGetReferencedGuidersByType() {
-        // Make a GMOS GuideProbeTargets instance with a guide star so that
-        // it is not eliminated from the results because it is empty.
-        GuideProbeTargets gpt = GuideProbeTargets.create(GmosOiwfsGuideProbe.instance, new SPTarget());
-        final GuideGroup all = fix.grp_all.put(gpt);
-
-        final Set<GuideProbe> pwfs = new HashSet<>();
-        pwfs.add(pwfs1); pwfs.add(pwfs2);
-
-        final Set<GuideProbe> oiwfs = new HashSet<>();
-        oiwfs.add(GmosOiwfsGuideProbe.instance);
-
-        final Set<GuideProbe> empty = Collections.emptySet();
-
-        assertEquals(pwfs,  all.getReferencedGuiders(GuideProbe.Type.PWFS));
-        assertEquals(oiwfs, all.getReferencedGuiders(GuideProbe.Type.OIWFS));
-        assertEquals(empty, all.getReferencedGuiders(GuideProbe.Type.AOWFS));
-        assertEquals(empty, GuideGroup.EMPTY().getReferencedGuiders(GuideProbe.Type.PWFS));
-    }
-
     public void testGetTargets() {
         final ImList<SPTarget> expected = DefaultImList.create(
             fix.t_pwfs1_1, fix.t_pwfs1_2, fix.t_pwfs2
