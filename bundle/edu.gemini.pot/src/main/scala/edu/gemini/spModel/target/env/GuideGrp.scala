@@ -55,6 +55,20 @@ sealed trait GuideGrp extends Serializable {
           case (probe, Some(opts)) => (probe, opts)
         })
     }
+
+  def cloneTargets: GuideGrp =
+    this match {
+      case AutomaticGroup.Initial    =>
+        this
+
+      case AutomaticGroup.Active(ts) =>
+        AutomaticGroup.Active(ts.mapValues(_.clone()))
+
+      case ManualGroup(n, ts)        =>
+        ManualGroup(n, ts.mapValues { opts =>
+          OptsList(opts.toDisjunction.bimap(_.map(_.clone()), _.map(_.clone())))
+        })
+    }
 }
 
 /** A manual group has a name and a mapping from guide probe to a non-empty list

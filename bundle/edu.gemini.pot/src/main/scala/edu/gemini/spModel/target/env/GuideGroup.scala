@@ -209,7 +209,8 @@ case class GuideGroup(grp: GuideGrp) extends java.lang.Iterable[GuideProbeTarget
   override def removeTarget(t: SPTarget): GuideGroup =
     update { _.removeTarget(t) }
 
-  override def cloneTargets: GuideGroup = ???
+  override def cloneTargets: GuideGroup =
+    update { _.cloneTargets }
 
   def iterateAllTargets: java.util.Iterator[SPTarget] = ???
 
