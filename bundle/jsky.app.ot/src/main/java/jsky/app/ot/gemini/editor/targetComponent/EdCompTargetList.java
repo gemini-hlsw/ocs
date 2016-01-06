@@ -694,7 +694,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 spTarget.setMagnitudes(mag);
             } else if (group != null && this.group != null) {
                 final GuideGroup newGroup = group.setAll(this.group.cloneTargets().getAll());
-                // XXX TODO: add a helper method in the model to replace a guide group
                 final TargetEnvironment env = dataObject.getTargetEnvironment();
                 final GuideEnvironment ge = dataObject.getTargetEnvironment().getGuideEnvironment();
                 final ImList<GuideGroup> options = ge.getOptions();

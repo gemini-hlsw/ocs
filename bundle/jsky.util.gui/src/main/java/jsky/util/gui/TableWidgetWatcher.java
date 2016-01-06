@@ -17,11 +17,11 @@ public interface TableWidgetWatcher {
     /**
      * Called when a row is selected.
      */
-    public void tableRowSelected(TableWidget twe, int rowIndex);
+    default void tableRowSelected(TableWidget twe, int rowIndex) {}
 
     /**
      * Called when a row is double clicked (or return key is pressed).
      */
-    public void tableAction(TableWidget twe, int colIndex, int rowIndex);
+    default void tableAction(TableWidget twe, int colIndex, int rowIndex) {}
 }
 
