@@ -69,7 +69,7 @@
         </void> 
         <void method="add"> 
          <object class="com.jformdesigner.model.FormComponent"> 
-          <string>jsky.util.gui.OptionWidget</string>
+          <string>javax.swing.JRadioButton</string>
           <void method="setProperty"> 
            <string>text</string> 
            <string>20%</string> 
@@ -90,7 +90,7 @@
         </void> 
         <void method="add"> 
          <object class="com.jformdesigner.model.FormComponent"> 
-          <string>jsky.util.gui.OptionWidget</string>
+          <string>javax.swing.JRadioButton</string>
           <void method="setProperty"> 
            <string>text</string> 
            <string>70%</string> 
@@ -132,7 +132,7 @@
         </void> 
         <void method="add"> 
          <object class="com.jformdesigner.model.FormComponent"> 
-          <string>jsky.util.gui.OptionWidget</string>
+          <string>javax.swing.JRadioButton</string>
           <void method="setProperty"> 
            <string>text</string> 
            <string>85%</string> 
@@ -174,7 +174,7 @@
         </void> 
         <void method="add"> 
          <object class="com.jformdesigner.model.FormComponent"> 
-          <string>jsky.util.gui.OptionWidget</string>
+          <string>javax.swing.JRadioButton</string>
           <void method="setProperty"> 
            <string>selected</string> 
            <boolean>true</boolean> 
@@ -287,7 +287,7 @@
         </void> 
         <void method="add"> 
          <object class="com.jformdesigner.model.FormComponent"> 
-          <string>jsky.util.gui.OptionWidget</string>
+          <string>javax.swing.JRadioButton</string>
           <void method="setProperty"> 
            <string>text</string> 
            <string>70%</string> 
@@ -329,7 +329,7 @@
         </void> 
         <void method="add"> 
          <object class="com.jformdesigner.model.FormComponent"> 
-          <string>jsky.util.gui.OptionWidget</string>
+          <string>javax.swing.JRadioButton</string>
           <void method="setProperty"> 
            <string>text</string> 
            <string>50%</string> 
@@ -371,7 +371,7 @@
         </void> 
         <void method="add"> 
          <object class="com.jformdesigner.model.FormComponent"> 
-          <string>jsky.util.gui.OptionWidget</string>
+          <string>javax.swing.JRadioButton</string>
           <void method="setProperty"> 
            <string>text</string> 
            <string>20%</string> 
@@ -400,7 +400,7 @@
         </void> 
         <void method="add"> 
          <object class="com.jformdesigner.model.FormComponent"> 
-          <string>jsky.util.gui.OptionWidget</string>
+          <string>javax.swing.JRadioButton</string>
           <void method="setProperty"> 
            <string>text</string> 
            <string>90%</string> 
@@ -442,7 +442,7 @@
         </void> 
         <void method="add"> 
          <object class="com.jformdesigner.model.FormComponent"> 
-          <string>jsky.util.gui.OptionWidget</string>
+          <string>javax.swing.JRadioButton</string>
           <void method="setProperty"> 
            <string>selected</string> 
            <boolean>true</boolean> 
@@ -555,7 +555,7 @@
         </void> 
         <void method="add"> 
          <object class="com.jformdesigner.model.FormComponent"> 
-          <string>jsky.util.gui.OptionWidget</string>
+          <string>javax.swing.JRadioButton</string>
           <void method="setProperty"> 
            <string>text</string> 
            <string>80%/Grey</string> 
@@ -597,7 +597,7 @@
         </void> 
         <void method="add"> 
          <object class="com.jformdesigner.model.FormComponent"> 
-          <string>jsky.util.gui.OptionWidget</string>
+          <string>javax.swing.JRadioButton</string>
           <void method="setProperty"> 
            <string>text</string> 
            <string>50%/Dark</string> 
@@ -639,7 +639,7 @@
         </void> 
         <void method="add"> 
          <object class="com.jformdesigner.model.FormComponent"> 
-          <string>jsky.util.gui.OptionWidget</string>
+          <string>javax.swing.JRadioButton</string>
           <void method="setProperty"> 
            <string>text</string> 
            <string>20%/Darkest</string> 
@@ -668,7 +668,7 @@
         </void> 
         <void method="add"> 
          <object class="com.jformdesigner.model.FormComponent"> 
-          <string>jsky.util.gui.OptionWidget</string>
+          <string>javax.swing.JRadioButton</string>
           <void method="setProperty"> 
            <string>selected</string> 
            <boolean>true</boolean> 
@@ -773,7 +773,7 @@
         </void> 
         <void method="add"> 
          <object class="com.jformdesigner.model.FormComponent"> 
-          <string>jsky.util.gui.OptionWidget</string>
+          <string>javax.swing.JRadioButton</string>
           <void method="setProperty"> 
            <string>text</string> 
            <string>80%</string> 
@@ -815,7 +815,7 @@
         </void> 
         <void method="add"> 
          <object class="com.jformdesigner.model.FormComponent"> 
-          <string>jsky.util.gui.OptionWidget</string>
+          <string>javax.swing.JRadioButton</string>
           <void method="setProperty"> 
            <string>text</string> 
            <string>50%</string> 
@@ -857,7 +857,7 @@
         </void> 
         <void method="add"> 
          <object class="com.jformdesigner.model.FormComponent"> 
-          <string>jsky.util.gui.OptionWidget</string>
+          <string>javax.swing.JRadioButton</string>
           <void method="setProperty"> 
            <string>selected</string> 
            <boolean>true</boolean> 
@@ -907,7 +907,7 @@
         </void> 
         <void method="add"> 
          <object class="com.jformdesigner.model.FormComponent"> 
-          <string>jsky.util.gui.OptionWidget</string>
+          <string>javax.swing.JRadioButton</string>
           <void method="setProperty"> 
            <string>text</string> 
            <string>20%</string> 

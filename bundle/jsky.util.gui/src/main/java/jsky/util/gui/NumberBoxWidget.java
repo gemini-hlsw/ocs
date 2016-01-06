@@ -9,14 +9,12 @@ import java.util.regex.Pattern;
 
 /**
  * A text box for entering numerical values.
- *
- * @author	Allan Brighton
  */
 public class NumberBoxWidget extends TextBoxWidget {
 
     // Allow unfinished exponential notation strings like e.g. "1e", "10E-" etc.
     // which could be the starting sequence of numbers like "1e4", "10E-15".
-    private static Pattern IncompleteExponentialNumber = Pattern.compile("-?[0-9]*?.?([0-9]+[e|E]-?)?");
+    private static final Pattern IncompleteExponentialNumber = Pattern.compile("-?[0-9]*?.?([0-9]+[e|E]-?)?");
 
     /** If true, allow negative numbers */
     private boolean allowNegative = true;
@@ -25,7 +23,7 @@ public class NumberBoxWidget extends TextBoxWidget {
     public NumberBoxWidget() { }
 
     /** Set to true to allow negative numbers (default), false to disallow them. */
-    public void setAllowNegative(boolean b) {
+    public void setAllowNegative(final boolean b) {
         allowNegative = b;
     }
 
@@ -34,8 +32,8 @@ public class NumberBoxWidget extends TextBoxWidget {
     }
 
     class NumericDocument extends PlainDocument {
-
-        public void insertString(int offs, String str, AttributeSet a) throws BadLocationException {
+        @SuppressWarnings("ResultOfMethodCallIgnored")
+        public void insertString(final int offs, final String str, final AttributeSet a) throws BadLocationException {
 
             if (str == null) {
                 return;

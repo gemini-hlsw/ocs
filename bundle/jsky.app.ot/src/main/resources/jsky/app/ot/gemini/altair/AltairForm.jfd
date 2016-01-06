@@ -169,7 +169,7 @@
       </void> 
       <void method="add"> 
        <object class="com.jformdesigner.model.FormComponent"> 
-        <string>jsky.util.gui.OptionWidget</string> 
+        <string>javax.swing.JRadioButton</string>
         <void method="setProperty"> 
          <string>text</string> 
          <string>850 nm</string> 
@@ -221,7 +221,7 @@
       </void> 
       <void method="add"> 
        <object class="com.jformdesigner.model.FormComponent"> 
-        <string>jsky.util.gui.OptionWidget</string> 
+        <string>javax.swing.JRadioButton</string>
         <void method="setProperty"> 
          <string>text</string> 
          <string>1 um</string> 

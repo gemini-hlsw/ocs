@@ -1,7 +1,3 @@
-/*
- * Created by JFormDesigner on Mon Oct 01 09:20:32 CLT 2007
- */
-
 package jsky.app.ot.editor.seq;
 
 import java.awt.*;
@@ -14,9 +10,6 @@ import jsky.util.gui.*;
 
 import static jsky.app.ot.util.OtColor.VERY_LIGHT_GREY;
 
-/**
- * @author User #6
- */
 public class IterFolderForm extends JPanel {
 	public IterFolderForm() {
 		initComponents();

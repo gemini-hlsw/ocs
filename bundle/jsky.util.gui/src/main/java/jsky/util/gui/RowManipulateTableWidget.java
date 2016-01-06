@@ -32,16 +32,16 @@ public class RowManipulateTableWidget extends PrintableJTable {
     }
 
     /* Set the column headers */
-    public void setColumnHeaders(String[] names) {
+    public void setColumnHeaders(final String[] names) {
         ((DefaultTableModel) getModel()).setColumnIdentifiers(names);
     }
 
     /** Set the value in the cell at the given row and column. */
-    public void setCell(Object value, int col, int row) {
+    public void setCell(final Object value, final int col, final int row) {
         getModel().setValueAt(value, row, col);
     }
     /** Set the focus at the given row (actually just select the row and deselect all other rows). */
-    public void focusAtRow(int index) {
+    public void focusAtRow(final int index) {
         getSelectionModel().setSelectionInterval(index, index);
     }
 
@@ -52,13 +52,13 @@ public class RowManipulateTableWidget extends PrintableJTable {
     }
 
     /** Set the contents of the table */
-    public void setRows(Vector<Object>[] v) {
-        int rowCount = v.length;
-        Vector<Vector<Object>> data = new Vector<>(rowCount);
+    public void setRows(final Vector<Object>[] v) {
+        final int rowCount = v.length;
+        final Vector<Vector<Object>> data = new Vector<>(rowCount);
         data.addAll(Arrays.asList(v).subList(0, rowCount));
-        DefaultTableModel model = (DefaultTableModel) getModel();
-        int colCount = model.getColumnCount();
-        Vector<String> header = new Vector<>(colCount);
+        final DefaultTableModel model = (DefaultTableModel) getModel();
+        final int colCount = model.getColumnCount();
+        final Vector<String> header = new Vector<>(colCount);
         for (int i = 0; i < colCount; ++i) {
             header.add(model.getColumnName(i));
         }

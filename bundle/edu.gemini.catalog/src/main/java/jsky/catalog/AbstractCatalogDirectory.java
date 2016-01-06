@@ -33,9 +33,6 @@ public abstract class AbstractCatalogDirectory implements CatalogDirectory {
     // A vector of Catalog objects, one for each catalog in the catalog directory
     private List<Catalog> _catalogs = new Vector<>();
 
-    // Optional handler, used to report HTML format errors from servers
-    private HTMLQueryResultHandler _htmlQueryResultHandler;
-
     // Optional link to the parent catalog directory, or null for the root
     private CatalogDirectory _parent;
 
@@ -75,18 +72,6 @@ public abstract class AbstractCatalogDirectory implements CatalogDirectory {
         if (dir != this)
             _parent = dir;
     }
-
-
-    /** Return the handler used to report HTML format errors from servers */
-    public HTMLQueryResultHandler getHTMLQueryResultHandler() {
-        return _htmlQueryResultHandler;
-    }
-
-    /** Optional handler, used to report HTML format errors from servers */
-    public void setHTMLQueryResultHandler(HTMLQueryResultHandler handler) {
-        _htmlQueryResultHandler = handler;
-    }
-
 
     /** Return a string representing this object (in this case the name) */
     public String toString() {

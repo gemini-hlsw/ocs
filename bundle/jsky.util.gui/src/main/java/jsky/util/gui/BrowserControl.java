@@ -1,9 +1,3 @@
-/*
- * Copyright 2003 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: BrowserControl.java 7887 2007-06-02 21:18:19Z swalker $
- */
 package jsky.util.gui;
 
 import java.io.IOException;

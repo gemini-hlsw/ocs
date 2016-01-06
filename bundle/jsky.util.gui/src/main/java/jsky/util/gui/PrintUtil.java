@@ -1,9 +1,3 @@
-// Copyright 2003
-// Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-//
-// $Id: PrintUtil.java 4726 2004-05-14 16:50:12Z brighton $
-
 package jsky.util.gui;
 
 import java.awt.Color;
@@ -32,7 +26,7 @@ public class PrintUtil {
     private static final I18N _I18N = I18N.getInstance(PrintUtil.class);
 
     // The target window being printed
-    private Printable _printable;
+    private final Printable _printable;
 
     // Base name of file used to store printer settings (under ~/.jsky)
     private static final String _ATTR_FILE = "jsky.printerAttr";
@@ -56,14 +50,14 @@ public class PrintUtil {
     /**
      * Initialize with the Printable and the title
      */
-    public PrintUtil(Printable p) {
+    public PrintUtil(final Printable p) {
         _printable = p;
     }
 
     /**
      * Initialize with the Printable and the title
      */
-    public PrintUtil(Printable p, String title) {
+    public PrintUtil(final Printable p, final String title) {
         _printable = p;
         _title = title;
     }
@@ -79,10 +73,10 @@ public class PrintUtil {
     /**
      * Display a dialog to print the given Printable with the given title
      */
-    public static void print(Printable p, String title) {
+    public static void print(final Printable p, final String title) {
         try {
             new PrintUtil(p, title).print();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             DialogUtil.error(e);
         }
     }
@@ -90,10 +84,10 @@ public class PrintUtil {
     /**
      * Display a dialog to print the given Printable
      */
-    public static void print(Printable p) {
+    public static void print(final Printable p) {
         try {
             new PrintUtil(p).print();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             DialogUtil.error(e);
         }
     }
@@ -103,7 +97,7 @@ public class PrintUtil {
      *
      * @param    title    title to print before the table
      */
-    public void setTitle(String title) {
+    public void setTitle(final String title) {
         _title = title;
     }
 
@@ -112,7 +106,7 @@ public class PrintUtil {
      * Set the default value for the given attribute.
      * For example, to set the default to landscape, pass {@link OrientationRequested}.LANDSCAPE
      */
-    public void setAttribute(Attribute attr) {
+    public void setAttribute(final Attribute attr) {
         _restorePrinterAttr();
         if (!_printerAttr.containsKey(attr.getClass())) {
             _printerAttr.add(attr);
@@ -122,7 +116,7 @@ public class PrintUtil {
 
     // By default printing is done in a background thread.
     // This can be used to avoid that.
-    public void setUseBgThread(boolean b) {
+    public void setUseBgThread(final boolean b) {
         _useBgThread = b;
     }
 
@@ -132,7 +126,7 @@ public class PrintUtil {
      * @param title the title for printing
      * @throws PrinterException thrown if any print-related errors occur
      */
-    public void print(String title) throws PrinterException {
+    public void print(final String title) throws PrinterException {
         setTitle(title);
         print();
     }
@@ -151,11 +145,11 @@ public class PrintUtil {
         _printerJob.setPrintable(_printable);
 
         // restore the user's previous printer selection
-        String prefKey = getClass().getName() + ".printer";
-        String printer = Preferences.get(prefKey);
+        final String prefKey = getClass().getName() + ".printer";
+        final String printer = Preferences.get(prefKey);
         if (printer != null) {
-            PrintService[] ar = PrintServiceLookup.lookupPrintServices(null, null);
-            for (PrintService anAr : ar) {
+            final PrintService[] ar = PrintServiceLookup.lookupPrintServices(null, null);
+            for (final PrintService anAr : ar) {
                 if (printer.equals(anAr.getName())) {
                     _printerJob.setPrintService(anAr);
                     break;
@@ -169,7 +163,7 @@ public class PrintUtil {
 
             if (_printerJob.printDialog(_printerAttr)) {
                 // remember the printer name
-                PrintService ps = _printerJob.getPrintService();
+                final PrintService ps = _printerJob.getPrintService();
                 if (ps == null)
                     return;
                 Preferences.set(prefKey, ps.getName());
@@ -184,7 +178,7 @@ public class PrintUtil {
                     _printerJob.print(_printerAttr);
                 }
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             DialogUtil.error(e);
         }
     }
@@ -208,7 +202,7 @@ public class PrintUtil {
 
             // print with a white background
             if (_printable instanceof JComponent) {
-                JComponent c = (JComponent) _printable;
+                final JComponent c = (JComponent) _printable;
                 _bg = c.getBackground();
                 if (!_bg.equals(Color.white))
                     c.setBackground(Color.white);
@@ -219,7 +213,7 @@ public class PrintUtil {
             try {
                 _progressPanel.setProgress(5);
                 _printerJob.print(_printerAttr);
-            } catch (Exception ex) {
+            } catch (final Exception ex) {
                 return ex;
             }
             return null;
@@ -228,14 +222,14 @@ public class PrintUtil {
         public void finished() {
             if (_printable instanceof JComponent) {
                 if (!_bg.equals(Color.white)) {
-                    JComponent c = (JComponent) _printable;
+                    final JComponent c = (JComponent) _printable;
                     c.setBackground(_bg);
                 }
             }
 
             _progressPanel.stop();
 
-            Object o = getValue();
+            final Object o = getValue();
             if (o instanceof Exception) {
                 DialogUtil.error((Exception) o);
             }
@@ -248,7 +242,7 @@ public class PrintUtil {
         if (_printerAttr != null) {
             try {
                 Preferences.getPreferences().serialize(_ATTR_FILE, _printerAttr);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 e.printStackTrace();
             }
         }
@@ -259,7 +253,7 @@ public class PrintUtil {
         if (_printerAttr == null) {
             try {
                 _printerAttr = (HashPrintRequestAttributeSet) Preferences.getPreferences().deserialize(_ATTR_FILE);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 _printerAttr = new HashPrintRequestAttributeSet();
             }
         }

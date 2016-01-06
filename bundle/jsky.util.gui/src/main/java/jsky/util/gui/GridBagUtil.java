@@ -1,13 +1,3 @@
-/*
- * ESO Archive
- *
- * $Id: GridBagUtil.java 4414 2004-02-03 16:21:36Z brighton $
- *
- * who             when        what
- * --------------  ----------  ----------------------------------------
- * Allan Brighton  1999/05/03  Created
- */
-
 package jsky.util.gui;
 
 import java.awt.*;
@@ -17,16 +7,16 @@ import java.awt.*;
  */
 public class GridBagUtil {
 
-    private GridBagLayout layout;
-    private Container container;
+    private final GridBagLayout layout;
+    private final Container container;
 
-    public GridBagUtil(Container container) {
+    public GridBagUtil(final Container container) {
         this.container = container;
         layout = new GridBagLayout();
         container.setLayout(layout);
     }
 
-    public GridBagUtil(Container container, GridBagLayout layout) {
+    public GridBagUtil(final Container container, final GridBagLayout layout) {
         this.layout = layout;
         this.container = container;
     }
@@ -34,13 +24,13 @@ public class GridBagUtil {
     /**
      * Add the given component to the given container with the given options.
      */
-    public void add(Component component,
-                    int gridx, int gridy,
-                    int gridwidth, int gridheight,
-                    double weightx, double weighty,
-                    int fill, int anchor, Insets insets,
-                    int ipadx, int ipady) {
-        GridBagConstraints gbc = new GridBagConstraints();
+    public void add(final Component component,
+                    final int gridx, final int gridy,
+                    final int gridwidth, final int gridheight,
+                    final double weightx, final double weighty,
+                    final int fill, final int anchor, final Insets insets,
+                    final int ipadx, final int ipady) {
+        final GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = gridx;
         gbc.gridy = gridy;
         gbc.gridwidth = gridwidth;
@@ -59,11 +49,11 @@ public class GridBagUtil {
     /**
      * Add the given component to the given container with the given options.
      */
-    public void add(Component component,
-                    int gridx, int gridy,
-                    int gridwidth, int gridheight,
-                    double weightx, double weighty,
-                    int fill, int anchor, Insets insets) {
+    public void add(final Component component,
+                    final int gridx, final int gridy,
+                    final int gridwidth, final int gridheight,
+                    final double weightx, final double weighty,
+                    final int fill, final int anchor, final Insets insets) {
 
         add(component, gridx, gridy, gridwidth, gridheight,
             weightx, weighty, fill, anchor, insets, 0, 0);
@@ -73,11 +63,11 @@ public class GridBagUtil {
      * Add the given component to the given container with the given options and
      * default insets.
      */
-    public void add(Component component,
-                    int gridx, int gridy,
-                    int gridwidth, int gridheight,
-                    double weightx, double weighty,
-                    int fill, int anchor) {
+    public void add(final Component component,
+                    final int gridx, final int gridy,
+                    final int gridwidth, final int gridheight,
+                    final double weightx, final double weighty,
+                    final int fill, final int anchor) {
 
         add(component, gridx, gridy, gridwidth, gridheight,
             weightx, weighty, fill, anchor,

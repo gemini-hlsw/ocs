@@ -20,16 +20,12 @@ import javax.swing.filechooser.*;
  *                   new String{"gif", "jpg"}, "JPEG & GIF Images")
  *     chooser.addChoosableFileFilter(filter);
  *     chooser.showOpenDialog(this);
- *
- * @version 1.8 08/26/98
- * @author Jeff Dinkins
  */
 public class ExampleFileFilter extends FileFilter {
 
     private Hashtable<String, FileFilter> filters = null;
     private String description = null;
     private String fullDescription = null;
-    private boolean useExtensionsInDescription = true;
 
     /**
      * Creates a file filter. If no filters are added, then all
@@ -46,9 +42,8 @@ public class ExampleFileFilter extends FileFilter {
      *
      * Note that the "." before the extension is not needed. If
      * provided, it will be ignored.
-     *
      */
-    public ExampleFileFilter(String extension, String description) {
+    public ExampleFileFilter(final String extension, final String description) {
         this();
         if (extension != null) addExtension(extension);
         if (description != null) setDescription(description);
@@ -59,12 +54,10 @@ public class ExampleFileFilter extends FileFilter {
      * Example: new ExampleFileFilter(String {"gif", "jpg"}, "Gif and JPG Images");
      *
      * Note that the "." before the extension is not needed and will be ignored.
-     *
      */
     public ExampleFileFilter(String[] filters, String description) {
         this();
-        for (String filter : filters) {
-            // add filters one by one
+        for (final String filter : filters) {
             addExtension(filter);
         }
         if (description != null) setDescription(description);
@@ -77,12 +70,12 @@ public class ExampleFileFilter extends FileFilter {
      * Files that begin with "." are ignored.
      *
      */
-    public boolean accept(File f) {
+    public boolean accept(final File f) {
         if (f != null) {
             if (f.isDirectory()) {
                 return true;
             }
-            String extension = getExtension(f);
+            final String extension = getExtension(f);
             if (extension != null && filters.get(getExtension(f)) != null) {
                 return true;
             }
@@ -92,12 +85,11 @@ public class ExampleFileFilter extends FileFilter {
 
     /**
      * Return the extension portion of the file's name .
-     *
      */
-    public String getExtension(File f) {
+    public String getExtension(final File f) {
         if (f != null) {
-            String filename = f.getName();
-            int i = filename.lastIndexOf('.');
+            final String filename = f.getName();
+            final int i = filename.lastIndexOf('.');
             if (i > 0 && i < filename.length() - 1) {
                 return filename.substring(i + 1).toLowerCase();
             }
@@ -117,7 +109,7 @@ public class ExampleFileFilter extends FileFilter {
      *
      * Note that the "." before the extension is not needed and will be ignored.
      */
-    public void addExtension(String extension) {
+    public void addExtension(final String extension) {
         if (filters == null) {
             filters = new Hashtable<>(5);
         }
@@ -133,8 +125,8 @@ public class ExampleFileFilter extends FileFilter {
      */
     public String getDescription() {
         if (fullDescription == null) {
-            if (description == null || isExtensionListInDescription()) {
-                fullDescription = description == null ? "(" : description + " (";
+            if (description == null) {
+                fullDescription = "(";
                 // build the description from the extension list
                 Enumeration<String> extensions = filters.keys();
                 if (extensions != null) {
@@ -154,22 +146,9 @@ public class ExampleFileFilter extends FileFilter {
     /**
      * Sets the human readable description of this filter. For
      * example: filter.setDescription("Gif and JPG Images");
-     *
      */
-    public void setDescription(String description) {
+    public void setDescription(final String description) {
         this.description = description;
         fullDescription = null;
-    }
-
-    /**
-     * Returns whether the extension list (.jpg, .gif, etc) should
-     * show up in the human readable description.
-     *
-     * Only relevent if a description was provided in the constructor
-     * or using setDescription();
-     *
-     */
-    public boolean isExtensionListInDescription() {
-        return useExtensionsInDescription;
     }
 }

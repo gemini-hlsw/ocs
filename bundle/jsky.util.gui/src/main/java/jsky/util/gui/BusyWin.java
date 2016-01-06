@@ -13,8 +13,6 @@ import javax.swing.SwingUtilities;
 
 /**
  * Utility class used to disable GUI input while work is in progress.
- *
- * @author Allan Brighton
  */
 public class BusyWin {
 

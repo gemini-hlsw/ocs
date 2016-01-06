@@ -28,10 +28,6 @@ public class BasicQueryArgs implements QueryArgs {
     /** Optional query type, which may be used by the catalog to determine the type of query */
     private String _queryType;
 
-    /** Optional object to display progress during background query */
-    private StatusLogger _statusLogger;
-
-
     /**
      * Create a BasicQueryArgs object for the given catalog, with no parameter
      * values (or only default values) set.
@@ -348,10 +344,4 @@ public class BasicQueryArgs implements QueryArgs {
         }
         return sb.toString();
     }
-
-    @Override
-    public StatusLogger getStatusLogger() {
-        return _statusLogger;
-    }
-
 }

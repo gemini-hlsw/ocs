@@ -1,6 +1,5 @@
 package jsky.util.gui;
 
-import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -9,14 +8,11 @@ import java.util.Arrays;
 import java.util.Vector;
 
 import javax.swing.Icon;
-import javax.swing.JFrame;
-import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
-import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
@@ -552,33 +548,5 @@ public class SortedJTable extends PrintableJTable
 
             return this;
         }
-    }
-
-
-    /**
-     * test main
-     */
-    public static void main(String[] args) {
-        JFrame frame = new JFrame("SortedJTable");
-        TableModel dataModel = new AbstractTableModel() {
-
-            public int getColumnCount() {
-                return 10;
-            }
-
-            public int getRowCount() {
-                return 10;
-            }
-
-            public Object getValueAt(int row, int col) {
-                return row * col;
-            }
-        };
-        SortedJTable table = new SortedJTable(dataModel);
-
-        frame.getContentPane().add(new JScrollPane(table), BorderLayout.CENTER);
-        frame.pack();
-        frame.setVisible(true);
-        frame.addWindowListener(new BasicWindowMonitor());
     }
 }

@@ -127,5 +127,5 @@ public interface QueryArgs {
     /**
      * Optional: If not null, use this object for displaying the progress of the background query
      */
-    StatusLogger getStatusLogger();
+    default StatusLogger getStatusLogger() { return null; }
 }

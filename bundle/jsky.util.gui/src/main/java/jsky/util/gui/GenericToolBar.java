@@ -29,7 +29,7 @@ public class GenericToolBar extends JToolBar {
     private static final I18N _I18N = I18N.getInstance(GenericToolBar.class);
 
     /** Target panel */
-    protected GenericToolBarTarget target;
+    protected final GenericToolBarTarget target;
 
     /** Handle for the "Open" button */
     protected JButton openButton;
@@ -54,15 +54,15 @@ public class GenericToolBar extends JToolBar {
      *                 be added by calling addToolBarItems() in a derived class.
      * @param orientation the orientation desired
      */
-    public GenericToolBar(GenericToolBarTarget target, boolean addItems, int orientation) {
+    public GenericToolBar(final GenericToolBarTarget target, final boolean addItems, final int orientation) {
         super(orientation);
         putClientProperty("JToolBar.isRollover", Boolean.TRUE);
         setFloatable(false);
 
+        this.target = target;
         if (target != null) {
             target.getBackAction().setEnabled(false);
             target.getForwAction().setEnabled(false);
-            this.target = target;
         }
 
         if (addItems) {
@@ -78,24 +78,16 @@ public class GenericToolBar extends JToolBar {
      * @param addItems if true, add the toolbar items, otherwise they should
      *                 be added by calling addToolBarItems() in a derived class.
      */
-    public GenericToolBar(GenericToolBarTarget target, boolean addItems) {
+    public GenericToolBar(final GenericToolBarTarget target, final boolean addItems) {
         this(target, addItems, HORIZONTAL);
     }
 
     /**
      * Create the toolbar for the given Generic target
      */
-    public GenericToolBar(GenericToolBarTarget target) {
+    public GenericToolBar(final GenericToolBarTarget target) {
         this(target, true);
     }
-
-    /**
-     * Create the toolbar with no target (derived class must add all items)
-     */
-    public GenericToolBar() {
-        this(null, true);
-    }
-
 
     /**
      * Add the items to the tool bar
@@ -109,7 +101,7 @@ public class GenericToolBar extends JToolBar {
 
 
     /** Set the common attributes for toolbar buttons */
-    protected AbstractButton setupButton(AbstractButton button) {
+    protected AbstractButton setupButton(final AbstractButton button) {
         button.setHorizontalTextPosition(SwingConstants.CENTER);
         button.setVerticalTextPosition(SwingConstants.BOTTOM);
         return button;
@@ -172,8 +164,8 @@ public class GenericToolBar extends JToolBar {
      * @param toolTip the tool tip text
      * @param action the action for the button
      */
-    protected JButton makeButton(String toolTip, Action action) {
-        JButton button = new JButton();
+    protected JButton makeButton(final String toolTip, final Action action) {
+        final JButton button = new JButton();
         button.setToolTipText(toolTip);
         if (action != null) {
             action.addPropertyChangeListener(new ButtonPropertyChangeListener(button));
@@ -191,12 +183,11 @@ public class GenericToolBar extends JToolBar {
      * @param toolTip the tool tip text for the button
      * @param menu the menu for the button
      */
-    protected JButton makeMenuButton(String toolTip, final JPopupMenu menu) {
-        JButton button = makeButton(toolTip, null);
+    protected JButton makeMenuButton(final String toolTip, final JPopupMenu menu) {
+        final JButton button = makeButton(toolTip, null);
         button.addMouseListener(new MouseAdapter() {
-
-            public void mousePressed(MouseEvent e) {
-                Component c = e.getComponent();
+            public void mousePressed(final MouseEvent e) {
+                final Component c = e.getComponent();
                 menu.show(c, 0, c.getHeight());
             }
         });
@@ -211,7 +202,7 @@ public class GenericToolBar extends JToolBar {
      * @param text the button text
      * @param icon the URL string for the button's icon
      */
-    protected void updateButton(AbstractButton button, String text, Icon icon) {
+    protected void updateButton(final AbstractButton button, final String text, final Icon icon) {
         if (showText) {
             button.setText(text);
         } else {
@@ -228,13 +219,13 @@ public class GenericToolBar extends JToolBar {
     }
 
     /** Set to true to show toolbar buttons with icons */
-    public void setShowPictures(boolean b) {
+    public void setShowPictures(final boolean b) {
         showPictures = b;
         update();
     }
 
     /** Set to true to show toolbar buttons with labels */
-    public void setShowText(boolean b) {
+    public void setShowText(final boolean b) {
         showText = b;
         update();
     }
@@ -254,15 +245,15 @@ public class GenericToolBar extends JToolBar {
      */
     protected class ButtonPropertyChangeListener implements PropertyChangeListener {
 
-        AbstractButton button;
+        final AbstractButton button;
 
-        public ButtonPropertyChangeListener(AbstractButton button) {
+        public ButtonPropertyChangeListener(final AbstractButton button) {
             this.button = button;
         }
 
-        public void propertyChange(PropertyChangeEvent e) {
+        public void propertyChange(final PropertyChangeEvent e) {
             if (e.getPropertyName().equals("enabled"))
-                button.setEnabled(((Boolean) e.getNewValue()).booleanValue());
+                button.setEnabled((boolean) e.getNewValue());
         }
     }
 }

@@ -1,10 +1,3 @@
-/*
- * Copyright 2001 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: ClipboardHelper.java 4414 2004-02-03 16:21:36Z brighton $
- */
-
 package jsky.util.gui;
 
 import java.awt.Toolkit;
@@ -18,9 +11,6 @@ import javax.swing.event.EventListenerList;
 /**
  * Utility shortcuts for accessing the system clipboard.
  * This uses the standard Java APIs.
- *
- * @author Klaas Waslander
- * @author Allan Brighton (added change listeners)
  */
 public final class ClipboardHelper {
 

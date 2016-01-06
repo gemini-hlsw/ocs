@@ -1,7 +1,3 @@
-/**
- * $Id: JTextAreaCellRenderer.java 5903 2005-03-17 12:39:48Z brighton $
- */
-
 package jsky.util.gui;
 
 import javax.swing.*;
@@ -9,7 +5,6 @@ import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.CompoundBorder;
 import javax.swing.table.TableCellRenderer;
-import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
 
 
@@ -20,8 +15,8 @@ public class JTextAreaCellRenderer extends JTextArea implements TableCellRendere
 
     private static final int ROW_PAD = 3;
 
-    protected static Border noFocusBorder = new EmptyBorder(3, 3, 3, 3);
-    protected static Border focusBorder = new CompoundBorder(
+    protected static final Border NO_FOCUS_BORDER = new EmptyBorder(3, 3, 3, 3);
+    protected static final Border FOCUS_BORDER = new CompoundBorder(
             UIManager.getBorder("Table.focusCellHighlightBorder"),
             new EmptyBorder(2, 2, 2, 2));
 
@@ -32,12 +27,12 @@ public class JTextAreaCellRenderer extends JTextArea implements TableCellRendere
         setWrapStyleWord(true);
         setLineWrap(true);
         setOpaque(true);
-        setBorder(noFocusBorder);
+        setBorder(NO_FOCUS_BORDER);
     }
 
-    public Component getTableCellRendererComponent(JTable table, Object value,
-                                                   boolean isSelected, boolean hasFocus,
-                                                   int row, int column) {
+    public Component getTableCellRendererComponent(final JTable table, final Object value,
+                                                   final boolean isSelected, final boolean hasFocus,
+                                                   final int row, final int column) {
         if (isSelected) {
             super.setForeground(table.getSelectionForeground());
             super.setBackground(table.getSelectionBackground());
@@ -51,14 +46,13 @@ public class JTextAreaCellRenderer extends JTextArea implements TableCellRendere
         setFont(table.getFont());
 
         if (hasFocus) {
-//            setBorder(UIManager.getBorder("Table.focusCellHighlightBorder"));
-            setBorder(focusBorder);
+            setBorder(FOCUS_BORDER);
             if (table.isCellEditable(row, column)) {
                 super.setForeground(UIManager.getColor("Table.focusCellForeground"));
                 super.setBackground(UIManager.getColor("Table.focusCellBackground"));
             }
         } else {
-            setBorder(noFocusBorder);
+            setBorder(NO_FOCUS_BORDER);
         }
 
         setText((value == null) ? "" : value.toString());
@@ -67,20 +61,20 @@ public class JTextAreaCellRenderer extends JTextArea implements TableCellRendere
         return this;
     }
 
-    private void _updateRowHeight(int row, int column, JTable table) {
+    private void _updateRowHeight(final int row, final int column, final JTable table) {
         if (row < 0 || column < 0) {
             return;
         }
 
-        int tableColWidth = table.getColumnModel().getColumn(column).getWidth();
+        final int tableColWidth = table.getColumnModel().getColumn(column).getWidth();
         Dimension d = getPreferredSize();
         if (d.width != tableColWidth) {
             setSize(new Dimension(tableColWidth, 1000));
             d = getPreferredSize();
         }
 
-        int tableRowHeight = table.getRowHeight(row);
-        int defaultTableRowHeight = table.getRowHeight();
+        final int tableRowHeight = table.getRowHeight(row);
+        final int defaultTableRowHeight = table.getRowHeight();
         if (d.height < defaultTableRowHeight) {
             d.height = defaultTableRowHeight;
         }
@@ -110,7 +104,7 @@ public class JTextAreaCellRenderer extends JTextArea implements TableCellRendere
      *
      * @param c set the foreground color to this value
      */
-    public void setForeground(Color c) {
+    public void setForeground(final Color c) {
         super.setForeground(c);
         unselectedForeground = c;
     }
@@ -121,7 +115,7 @@ public class JTextAreaCellRenderer extends JTextArea implements TableCellRendere
      *
      * @param c set the background color to this value
      */
-    public void setBackground(Color c) {
+    public void setBackground(final Color c) {
         super.setBackground(c);
         unselectedBackground = c;
     }
@@ -131,15 +125,15 @@ public class JTextAreaCellRenderer extends JTextArea implements TableCellRendere
      * See the <a href="#override">Implementation Note</a>
      * for more information.
      */
-    public boolean isOpaque() {
-        Color back = getBackground();
-        Component p = getParent();
-        if (p != null) {
-            p = p.getParent();
-        }
-        // p should now be the JTable.
-        boolean colorMatch = (back != null) && (p != null) &&
-                back.equals(p.getBackground()) && p.isOpaque();
+    @Override public boolean isOpaque() {
+        final Color back = getBackground();
+
+        final Component p = getParent();
+        final Component table = p != null ? p.getParent() : null;
+
+        // table should now be the JTable.
+        boolean colorMatch = (back != null) && (table != null) &&
+                back.equals(table.getBackground()) && table.isOpaque();
         return !colorMatch && super.isOpaque();
     }
 
@@ -148,7 +142,7 @@ public class JTextAreaCellRenderer extends JTextArea implements TableCellRendere
      * See the <a href="#override">Implementation Note</a>
      * for more information.
      */
-    public void validate() {
+    @Override public void validate() {
     }
 
     /**
@@ -156,7 +150,7 @@ public class JTextAreaCellRenderer extends JTextArea implements TableCellRendere
      * See the <a href="#override">Implementation Note</a>
      * for more information.
      */
-    public void revalidate() {
+    @Override public void revalidate() {
     }
 
     /**
@@ -164,7 +158,7 @@ public class JTextAreaCellRenderer extends JTextArea implements TableCellRendere
      * See the <a href="#override">Implementation Note</a>
      * for more information.
      */
-    public void repaint(long tm, int x, int y, int width, int height) {
+    @Override public void repaint(long tm, int x, int y, int width, int height) {
     }
 
     /**
@@ -172,7 +166,7 @@ public class JTextAreaCellRenderer extends JTextArea implements TableCellRendere
      * See the <a href="#override">Implementation Note</a>
      * for more information.
      */
-    public void repaint(Rectangle r) {
+    @Override public void repaint(Rectangle r) {
     }
 
     /**
@@ -180,41 +174,10 @@ public class JTextAreaCellRenderer extends JTextArea implements TableCellRendere
      * See the <a href="#override">Implementation Note</a>
      * for more information.
      */
-    protected void firePropertyChange(String propertyName, Object oldValue,
+    @Override protected void firePropertyChange(String propertyName, Object oldValue,
                                       Object newValue) {
-        // Strings get interned...
-        if (propertyName == "text") {
+        if (propertyName.equals("text")) {
             super.firePropertyChange(propertyName, oldValue, newValue);
         }
-    }
-
-    /**
-     * Overridden for performance reasons.
-     * See the <a href="#override">Implementation Note</a>
-     * for more information.
-     */
-//    public void firePropertyChange(String propertyName, boolean oldValue, boolean newValue) { }
-
-    /**
-     * A subclass of <code>DefaultTableCellRenderer</code> that
-     * implements <code>UIResource</code>.
-     * <code>DefaultTableCellRenderer</code> doesn't implement
-     * <code>UIResource</code>
-     * directly so that applications can safely override the
-     * <code>cellRenderer</code> property with
-     * <code>DefaultTableCellRenderer</code> subclasses.
-     * <p/>
-     * <strong>Warning:</strong>
-     * Serialized objects of this class will not be compatible with
-     * future Swing releases. The current serialization support is
-     * appropriate for short term storage or RMI between applications running
-     * the same version of Swing.  As of 1.4, support for long term storage
-     * of all JavaBeans<sup><font size="-2">TM</font></sup>
-     * has been added to the <code>java.beans</code> package.
-     * Please see {@link java.beans.XMLEncoder}.
-     */
-    public static class UIResource extends DefaultTableCellRenderer
-            implements javax.swing.plaf.UIResource {
-
     }
 }

@@ -8,11 +8,11 @@ public interface ListBoxWidgetWatcher<T> {
     /**
      * Called when an item is selected.
      */
-    void listBoxSelect(ListBoxWidget<T> lbwe, int index, Object val);
+    default void listBoxSelect(ListBoxWidget<T> lbwe, int index, Object val) {}
 
     /**
      * Called when an item is double clicked.
      */
-    void listBoxAction(ListBoxWidget<T> lbwe, int index, Object val);
+    default void listBoxAction(ListBoxWidget<T> lbwe, int index, Object val) {}
 }
 

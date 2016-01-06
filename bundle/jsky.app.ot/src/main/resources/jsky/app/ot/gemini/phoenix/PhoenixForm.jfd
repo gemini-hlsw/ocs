@@ -860,7 +860,7 @@
         </void> 
         <void method="add"> 
          <object class="com.jformdesigner.model.FormComponent"> 
-          <string>jsky.util.gui.OptionWidget</string> 
+          <string>javax.swing.JRadioButton</string>
           <void method="setProperty"> 
            <string>actionCommand</string> 
            <string>wavelength</string> 
@@ -950,7 +950,7 @@
         </void> 
         <void method="add"> 
          <object class="com.jformdesigner.model.FormComponent"> 
-          <string>jsky.util.gui.OptionWidget</string> 
+          <string>javax.swing.JRadioButton</string>
           <void method="setProperty"> 
            <string>actionCommand</string> 
            <string>wavenumber</string> 

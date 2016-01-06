@@ -1,10 +1,3 @@
-/*
- * Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: StatusLogger.java 38711 2011-11-15 13:35:55Z swalker $
- */
-
 package jsky.util.gui;
 
 import java.io.IOException;
@@ -17,9 +10,6 @@ import java.net.URLConnection;
  * this can be implemented as a progress bar and test message.
  *
  * @see jsky.util.gui.StatusPanel
- *
- * @version $Revision: 38711 $
- * @author Allan Brighton
  */
 public interface StatusLogger {
 

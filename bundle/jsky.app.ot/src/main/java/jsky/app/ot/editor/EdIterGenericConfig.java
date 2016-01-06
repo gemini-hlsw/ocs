@@ -784,15 +784,6 @@ public class EdIterGenericConfig<T extends SeqConfigComp> extends OtItemEditor<I
     }
 
     /**
-     * Ignore list box actions.
-     *
-     * @see jsky.util.gui.ListBoxWidgetWatcher
-     */
-    public void listBoxAction(ListBoxWidget<PropertyDescriptor> w, int index, Object val) {
-        // Don't care ...
-    }
-
-    /**
      * This method is called when the value of the selected step and attribute
      * is changed.
      */
