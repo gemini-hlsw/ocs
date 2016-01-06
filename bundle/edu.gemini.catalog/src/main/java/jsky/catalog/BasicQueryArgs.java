@@ -83,38 +83,6 @@ public class BasicQueryArgs implements QueryArgs {
         }
     }
 
-    /** Set the min and max values for the parameter with the given label */
-    @Override
-    public void setParamValueRange(String label, Object minValue, Object maxValue) {
-        int n = _catalog.getNumParams();
-        for (int i = 0; i < n; i++) {
-            FieldDesc param = _catalog.getParamDesc(i);
-            if (param != null) {
-                String name = param.getName();
-                String id = param.getId();
-                if ((id != null && id.equalsIgnoreCase(label)) || (name != null && name.equalsIgnoreCase(label))) {
-                    if (param.isMin()) {
-                        setParamValue(i, minValue);
-                    } else if (param.isMax()) {
-                        setParamValue(i, maxValue);
-                    }
-                }
-            }
-        }
-    }
-
-    /** Set the int value for the parameter with the given label */
-    @Override
-    public void setParamValue(String label, int value) {
-        setParamValue(label, new Integer(value));
-    }
-
-    /** Set the double value for the parameter with the given label */
-    @Override
-    public void setParamValueRange(String label, double minValue, double maxValue) {
-        setParamValueRange(label, new Double(minValue), new Double(maxValue));
-    }
-
     /** Set the double value for the parameter with the given label */
     @Override
     public void setParamValue(String label, double value) {
@@ -151,44 +119,6 @@ public class BasicQueryArgs implements QueryArgs {
             }
         }
         return null;
-    }
-
-    /**
-     * Get the value of the named parameter as an integer.
-     *
-     * @param label the parameter label
-     * @param defaultValue the default value, if the parameter was not specified
-     * @return the value of the parameter
-     */
-    @Override
-    public int getParamValueAsInt(String label, int defaultValue) {
-        Object o = getParamValue(label);
-        if (o == null)
-            return defaultValue;
-        if (o instanceof Number)
-            return ((Number) o).intValue();
-        if (o instanceof String)
-            return Integer.parseInt((String) o);
-        return defaultValue;
-    }
-
-    /**
-     * Get the value of the named parameter as a double.
-     *
-     * @param label the parameter label
-     * @param defaultValue the default value, if the parameter was not specified
-     * @return the value of the parameter
-     */
-    @Override
-    public double getParamValueAsDouble(String label, double defaultValue) {
-        Object o = getParamValue(label);
-        if (o == null)
-            return defaultValue;
-        if (o instanceof Number)
-            return ((Number) o).doubleValue();
-        if (o instanceof String)
-            return Double.parseDouble((String) o);
-        return defaultValue;
     }
 
     /**
@@ -317,18 +247,6 @@ public class BasicQueryArgs implements QueryArgs {
     @Override
     public void setMaxRows(int maxRows) {
         _maxRows = maxRows;
-    }
-
-    /** Returns the query type (an optional string, which may be interpreted by some catalogs) */
-    @Override
-    public String getQueryType() {
-        return _queryType;
-    }
-
-    /** Set the query type (an optional string, which may be interpreted by some catalogs) */
-    @Override
-    public void setQueryType(String queryType) {
-        _queryType = queryType;
     }
 
     /** Return a string of the form: arg=value&arg=value, ...*/

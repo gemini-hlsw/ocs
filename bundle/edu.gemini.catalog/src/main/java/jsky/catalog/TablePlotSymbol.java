@@ -14,9 +14,6 @@ import java.util.Vector;
  * each symbol may be displayed in an image window at a position given by the row's
  * coordinate columns. Each symbol's size, rotation angle, x/y ratio, and label
  * may be calculated from table column values.
- *
- * @version $Revision: 8038 $
- * @author Allan Brighton
  */
 public class TablePlotSymbol extends DVMap {
 
@@ -210,39 +207,6 @@ public class TablePlotSymbol extends DVMap {
         if (exprList.length > 1)
             setUnits(exprList[1]);
     }
-
-
-    /**
-     * Initialize a TablePlotSymbol from the given values.
-     *
-     * @param table contains the table data and information
-     * @param colNames an array of column headings used as variables
-     * @param shapeName the name of the plot symbol shape
-     * @param fg the name of the foreground color of the plot symbol
-     * @param bg the name of the background color of the plot symbol
-     * @param ratio the x/y ratio expression (stretch)
-     * @param angle the angle expression
-     * @param label the label expression
-     * @param cond the condition expression
-     * @param size the symbol size expression
-     * @param units the units of the symbol size
-     */
-    public TablePlotSymbol(TableQueryResult table, String[] colNames, String shapeName,
-                           String fg, String bg, String ratio, String angle, String label,
-                           String cond, String size, String units) {
-        setTable(table);
-        setColNames(colNames);
-        setShapeName(shapeName);
-        setFg(fg);
-        setBg(bg);
-        setRatio(ratio);
-        setAngle(angle);
-        setLabel(label);
-        setCond(cond);
-        setSize(size);
-        setUnits(units);
-    }
-
 
     /**
      * Return a String in Tcl list format describing the given array of plot symbol
@@ -555,7 +519,7 @@ public class TablePlotSymbol extends DVMap {
     /** Return the symbol's background color */
     public Color getBg() {
         return _bg;
-    };
+    }
 
 
     /** Return the X/Y size ratio (stretching) (may be expression using column names) */
@@ -569,6 +533,7 @@ public class TablePlotSymbol extends DVMap {
     }
 
     /** Return the symbol's ratio, evaluating the expression for the given row. */
+    @SuppressWarnings("EmptyCatchBlock")
     public double getRatio(Vector<Object> rowVec) {
         if (_ratioExpr != null) {
             _rowVec = rowVec;
@@ -592,6 +557,7 @@ public class TablePlotSymbol extends DVMap {
     }
 
     /** Return the symbol's rotation angle, evaluating the expression for the given row. */
+    @SuppressWarnings("EmptyCatchBlock")
     public double getAngle(Vector<Object> rowVec) {
         if (_angleExpr != null) {
             _rowVec = rowVec;
@@ -615,6 +581,7 @@ public class TablePlotSymbol extends DVMap {
     }
 
     /** Return the symbol's label,  evaluating the expression for the given row. */
+    @SuppressWarnings("EmptyCatchBlock")
     public String getLabel(Vector<Object> rowVec) {
         if (_labelExpr != null) {
             _rowVec = rowVec;
@@ -661,6 +628,7 @@ public class TablePlotSymbol extends DVMap {
     }
 
     /** Return the symbol's size, evaluating the size expression for the given row. */
+    @SuppressWarnings("EmptyCatchBlock")
     public double getSize(Vector<Object> rowVec) {
         if (_sizeExpr != null) {
             _rowVec = rowVec;
@@ -763,6 +731,7 @@ public class TablePlotSymbol extends DVMap {
      * Compile any expressions that are based on column values. If the expression is constant,
      * it is not compiled.
      */
+    @SuppressWarnings("EmptyCatchBlock")
     private void _compileExpressions() {
         try {
             _sizeVal = Double.parseDouble(_size);

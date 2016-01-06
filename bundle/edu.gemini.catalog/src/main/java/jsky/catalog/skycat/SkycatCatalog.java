@@ -192,13 +192,6 @@ public class SkycatCatalog implements PlotableCatalog {
     }
 
     /**
-     * Return true if the user edited the plot symbol definitions otherwise false
-     */
-    public boolean isSymbolsEdited() {
-        return _entry.isSymbolsEdited();
-    }
-
-    /**
      * Return true if the catalog has RA and DEC coordinate columns
      */
     public boolean isWCS() {

@@ -834,19 +834,9 @@ public class MemoryCatalog extends DefaultTableModel
         return !_readOnly;
     }
 
-    /** Return true if the table is read-only and should not be editable */
-    public boolean isReadOnly() {
-        return _readOnly;
-    }
-
     /** Set to true if the table is read-only and should not be editable */
     public void setReadOnly(boolean b) {
         _readOnly = b;
-    }
-
-    /** Return true if the table has coordinate columns, such as (ra, dec) */
-    public boolean hasCoordinates() {
-        return (_rowCoordinates != null);
     }
 
 

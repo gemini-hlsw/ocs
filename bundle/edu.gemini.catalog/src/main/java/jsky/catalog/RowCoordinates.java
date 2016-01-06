@@ -20,32 +20,29 @@ public class RowCoordinates {
     protected int idCol = -1;
 
     /** The column index for the X or RA coordinate */
-    protected int xCol = -1;
+    protected final int xCol;
 
     /** The column index for the Y or DEC coordinate */
-    protected int yCol = -1;
+    protected final int yCol;
 
     /** True if the table has RA and DEC coordinate columns */
-    protected boolean isWcs = false;
+    protected final boolean isWcs;
 
     /** Value of the equinox for world coordinates, if it is known */
-    protected double equinox = 2000.;
+    protected final double equinox;
 
     /** Index of a column containing the equnox for each row, or -1 if it is constant. */
-    protected int equinoxCol = -1;
+    protected final int equinoxCol;
 
     /** True if using image coordinates */
-    protected boolean isPix = false;
+    protected final boolean isPix;
 
     /**
      * Create an object that will extract a WorldCoords object from a
      * row using the given ra,dec indexes and the given equinox.
      */
     public RowCoordinates(int raCol, int decCol, double equinox) {
-        this.xCol = raCol;
-        this.yCol = decCol;
-        this.equinox = equinox;
-        isWcs = true;
+        this(raCol, decCol, equinox, -1, true, false);
     }
 
     /**
@@ -53,10 +50,7 @@ public class RowCoordinates {
      * row using the given ra,dec and equinox indexes.
      */
     public RowCoordinates(int raCol, int decCol, int equinoxCol) {
-        this.xCol = raCol;
-        this.yCol = decCol;
-        this.equinoxCol = equinoxCol;
-        isWcs = true;
+        this(raCol, decCol, 2000, equinoxCol, true, false);
     }
 
 
@@ -65,15 +59,25 @@ public class RowCoordinates {
      * row using the given x,y indexes.
      */
     public RowCoordinates(int xCol, int yCol) {
-        this.xCol = xCol;
-        this.yCol = yCol;
-        isPix = true;
+        this(xCol, yCol, 2000, -1, false, true);
     }
 
     /**
      * This constructor should be used when there are no coordinate columns.
      */
     public RowCoordinates() {
+        this (-1, -1, 2000, -1, false, false);
+    }
+
+    private RowCoordinates(final int xCol, final int yCol,
+                           final double equinox, final int equinoxCol,
+                           final boolean isWcs, final boolean isPix) {
+        this.xCol = xCol;
+        this.yCol = yCol;
+        this.equinox = equinox;
+        this.equinoxCol = equinoxCol;
+        this.isWcs = isWcs;
+        this.isPix = isPix;
     }
 
     /** Return true if the catalog has RA and DEC coordinate columns */
@@ -92,10 +96,10 @@ public class RowCoordinates {
     }
 
     /** Return a Coordinates object for the given row vector, or null if not found */
-    public Coordinates getCoordinates(Vector<Object> row) {
+    public Coordinates getCoordinates(final Vector<Object> row) {
         try {
             if (isWcs) {
-                Object ra = row.get(xCol), dec = row.get(yCol);
+                final Object ra = row.get(xCol), dec = row.get(yCol);
                 if (ra != null && dec != null) {
                     if (ra instanceof String && dec instanceof String
                             && ((String) ra).length() != 0
@@ -108,7 +112,7 @@ public class RowCoordinates {
                     }
                 }
             } else if (isPix) {
-                Object x = row.get(xCol), y = row.get(yCol);
+                final Object x = row.get(xCol), y = row.get(yCol);
                 if (x != null && y != null) {
                     if (x instanceof Double && y instanceof Double)
                         return new ImageCoords((Double) x, (Double) y);
@@ -116,7 +120,7 @@ public class RowCoordinates {
                         return new ImageCoords((Float) x, (Float) y);
                 }
             }
-        } catch (NumberFormatException e) {
+        } catch (final NumberFormatException e) {
             // return null if there was a bad value
         }
         return null;
@@ -143,7 +147,7 @@ public class RowCoordinates {
     }
 
     /** Set the column containing the object id (-1 if there isn't one). */
-    public void setIdCol(int idCol) {
+    public void setIdCol(final int idCol) {
         this.idCol = idCol;
     }
 }

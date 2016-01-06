@@ -23,10 +23,6 @@ public interface PlotableCatalog extends Catalog {
 
     /** Set to true if the user edited the plot symbol definitions (default: false) */
     void setSymbolsEdited(boolean edited);
-
-    /** Return true if the user edited the plot symbol definitions otherwise false */
-    boolean isSymbolsEdited();
-
 }
 
 

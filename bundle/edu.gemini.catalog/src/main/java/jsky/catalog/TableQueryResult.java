@@ -34,9 +34,6 @@ public interface TableQueryResult extends Catalog, TableModel {
     /** Return a vector of column headings for this table. */
     List<String> getColumnIdentifiers();
 
-    /** Return true if the table has coordinate columns, such as (ra, dec) */
-    boolean hasCoordinates();
-
     /**
      * Return a Coordinates object based on the appropriate columns in the given row,
      * or null if there are no coordinates available for the row.

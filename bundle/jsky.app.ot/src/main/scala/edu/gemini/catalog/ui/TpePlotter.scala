@@ -33,14 +33,6 @@ object adapters {
 
     override def getStatusLogger: StatusLogger = ???
 
-    override def getParamValueAsInt(label: String, defaultValue: Int): Int = ???
-
-    override def setParamValueRange(label: String, minValue: scala.Any, maxValue: scala.Any): Unit = ???
-
-    override def setParamValueRange(label: String, minValue: Double, maxValue: Double): Unit = ???
-
-    override def getQueryType: String = ???
-
     override def getId: String = ???
 
     override def getMaxRows: Int = ???
@@ -61,19 +53,13 @@ object adapters {
 
     override def getParamValueAsString(label: String, defaultValue: String): String = ???
 
-    override def setQueryType(queryType: String): Unit = ???
-
-    override def getParamValueAsDouble(label: String, defaultValue: Double): Double = ???
-
     override def setParamValues(values: Array[AnyRef]): Unit = ???
 
     override def setParamValue(i: Int, value: scala.Any): Unit = ???
 
-    override def setParamValue(label: String, value: scala.Any): Unit = ???
-
-    override def setParamValue(label: String, value: Int): Unit = ???
-
     override def setParamValue(label: String, value: Double): Unit = ???
+
+    override def setParamValue(label: String, value: scala.Any): Unit = ???
 
     override def getRegion: CoordinateRadius = {
       val raHMS = model.base.ra.toAngle.toHMS
@@ -133,8 +119,6 @@ object adapters {
     override def setSymbols(symbols: Array[TablePlotSymbol]): Unit = ???
 
     override def setSymbolsEdited(edited: Boolean): Unit = ???
-
-    override def isSymbolsEdited: Boolean = ???
 
     override def getSymbolDesc(i: Int): TablePlotSymbol = ???
 
@@ -201,8 +185,6 @@ object adapters {
       val mags = MagnitudeBand.all.map(_.name + "mag")
       (List("Id", "RAJ2000", "DECJ2000", "GQ") ::: mags).asJava
     }
-
-    override def hasCoordinates: Boolean = ???
 
     override def getCoordinates(rowIndex: Int): Coordinates = ???
 
