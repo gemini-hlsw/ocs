@@ -5,7 +5,7 @@ import edu.gemini.shared.util.immutable.{Option => GemOption, ImOption, ImList}
 import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.spModel.guide.GuideProbe
 //import edu.gemini.spModel.guide.OrderGuideGroup
-import edu.gemini.spModel.pio.{PioFactory, ParamSet}
+import edu.gemini.spModel.pio.{Pio, PioFactory, ParamSet}
 import edu.gemini.spModel.target.SPTarget
 
 import scala.annotation.varargs
@@ -212,13 +212,24 @@ case class GuideGroup(grp: GuideGrp) extends java.lang.Iterable[GuideProbeTarget
   override def cloneTargets: GuideGroup =
     update { _.cloneTargets }
 
-  def iterateAllTargets: java.util.Iterator[SPTarget] = ???
+  def iterateAllTargets: java.util.Iterator[SPTarget] =
+    getTargets.toList.iterator
 
-  def getParamSet(f: PioFactory): ParamSet = ???
+  def getParamSet(f: PioFactory): ParamSet = {
+    val ps = f.createParamSet(GuideGroup.PARAM_SET_NAME)
+
+    getName.asScalaOpt.foreach { Pio.addParam(f, ps, "name", _) }
+    all.foreach { gpt => ps.addParamSet(gpt.getParamSet(f)) }
+
+    ps
+  }
+
 }
 
 object GuideGroup extends Function1[GuideGrp, GuideGroup] {
   val EMPTY = GuideGroup(ManualGroup("Group", Map.empty))
+
+  val PARAM_SET_NAME = "guideGroup"
 
   val Grp: GuideGroup @> GuideGrp =
     Lens.lensu((jGrp, sGrp) => jGrp.copy(grp = sGrp), _.grp)
@@ -233,5 +244,10 @@ object GuideGroup extends Function1[GuideGrp, GuideGroup] {
 
   def create(name: GemOption[String], targets: ImList[GuideProbeTargets]): GuideGroup = ???
 
-  def fromParamSet(parent: ParamSet): GuideGroup = ???
+  def fromParamSet(ps: ParamSet): GuideGroup = {
+    val name    = ImOption.apply(Pio.getValue(ps, "name"))
+    val targets = ps.getParamSets.asScala.toList.map { GuideProbeTargets.fromParamSet }.asImList
+    create(name, targets)
+  }
+
 }
