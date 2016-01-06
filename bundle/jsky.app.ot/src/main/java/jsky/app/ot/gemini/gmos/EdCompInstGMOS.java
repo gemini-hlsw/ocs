@@ -871,16 +871,6 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
     }
 
     /**
-     * As part of the TableWidgetWatcher interface, this method must
-     * be supported, though we don't care about TableWidget actions.
-     *
-     * @see TableWidgetWatcher
-     */
-    public void tableAction(TableWidget twe, int colIndex, int rowIndex) {
-    }
-
-
-    /**
      * Return the exposure time text box
      */
     public TextBoxWidget getExposureTimeTextBox() {

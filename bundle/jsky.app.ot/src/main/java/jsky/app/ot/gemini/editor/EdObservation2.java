@@ -42,10 +42,7 @@ import java.awt.event.ActionListener;
 import java.beans.PropertyChangeListener;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Collection;
-import java.util.Date;
-import java.util.TimeZone;
-import java.util.Vector;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -502,7 +499,7 @@ public final class EdObservation2 extends OtItemEditor<ISPObservation, SPObserva
         };
         _editorPanel.timeSummaryTable.setModel(model);
 
-        TableUtil.initColumnSizes(_editorPanel.timeSummaryTable, null);
+        TableUtil.initColumnSizes(_editorPanel.timeSummaryTable);
 
         // scroll to end of table
         final int numRows = tableRows.size();
@@ -714,7 +711,7 @@ public final class EdObservation2 extends OtItemEditor<ISPObservation, SPObserva
             }
         };
         _editorPanel.correctionTable.setModel(model);
-        TableUtil.initColumnSizes(_editorPanel.correctionTable, null);
+        TableUtil.initColumnSizes(_editorPanel.correctionTable);
 
         final TableColumn c = _editorPanel.correctionTable.getColumnModel().getColumn(COMMENT_COLUMN);
         c.setCellRenderer(_commentRenderer);

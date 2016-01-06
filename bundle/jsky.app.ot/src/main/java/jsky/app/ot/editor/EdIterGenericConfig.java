@@ -177,6 +177,7 @@ public class EdIterGenericConfig<T extends SeqConfigComp> extends OtItemEditor<I
         _itemsLBW.addWatcher(this);
 
         // Initialize the ListBox value editor
+        //noinspection unchecked
         _listBoxVE =
                 new ICListBoxValueEditor(this, _w.listBoxGroup, _w.listBoxTitle,
                         _w.availableChoices);
@@ -190,6 +191,7 @@ public class EdIterGenericConfig<T extends SeqConfigComp> extends OtItemEditor<I
                         _w.numberBox);
 
         // Initialize the ComboBox value editor
+        //noinspection unchecked
         _comboBoxVE =
                 new ICComboBoxValueEditor(this, _w.comboBoxGroup, _w.comboBoxTitle,
                         _w.comboBox);
@@ -197,7 +199,7 @@ public class EdIterGenericConfig<T extends SeqConfigComp> extends OtItemEditor<I
         _valueEditor = _listBoxVE;
     }
 
-    private boolean isEditableProperty(PropertyDescriptor pd) {
+    private boolean isEditableProperty(final PropertyDescriptor pd) {
         if (pd == null) return true;
         if (OTOptions.isStaff(getProgram().getProgramID())) return true;
         return !pd.isExpert() && !PropertySupport.isEngineering(pd);
@@ -210,13 +212,13 @@ public class EdIterGenericConfig<T extends SeqConfigComp> extends OtItemEditor<I
      * Here we need to handle the components that are not currently in the
      * component hierarchy.
      */
-    protected void updateEnabledState(boolean enabled) {
+    protected void updateEnabledState(final boolean enabled) {
         if (enabled != isEnabled()) {
             setEnabled(enabled);
             updateEnabledState(getWindow().getComponents(), enabled);
 
             // 3 out of 4 of these will not be in the component hierarchy
-            List<Component> l = new ArrayList<Component>(3);
+            final List<Component> l = new ArrayList<>(3);
             if (_valueEditor != _listBoxVE) {
                 l.add(_w.availableChoices);
             }
@@ -229,7 +231,7 @@ public class EdIterGenericConfig<T extends SeqConfigComp> extends OtItemEditor<I
             if (_valueEditor != _comboBoxVE) {
                 l.add(_w.comboBox);
             }
-            Component[] ar = new Component[l.size()];
+            final Component[] ar = new Component[l.size()];
             l.toArray(ar);
             updateEnabledState(ar, enabled);
         }
@@ -1034,7 +1036,7 @@ public class EdIterGenericConfig<T extends SeqConfigComp> extends OtItemEditor<I
         @SuppressWarnings("rawtypes")
         private List<Object> getActiveElements(Class c) {
             //noinspection unchecked
-            return engineeringFilter(SpTypeUtil.getSelectableItems(c));
+            return new ArrayList<>(engineeringFilter(SpTypeUtil.getSelectableItems(c)));
         }
 
         void setEnabled(boolean enabled) {
@@ -1126,25 +1128,24 @@ public class EdIterGenericConfig<T extends SeqConfigComp> extends OtItemEditor<I
         }
 
         // Called when the user types a value in the combobox editor
-        private void _update(Document doc) {
+        private void _update(final Document doc) {
             if (_ignoreUpdate) {
                 return;
             }
-            boolean b = _ignoreUpdate;
+
             _ignoreUpdate = true;
             try {
-                String val = doc.getText(0, doc.getLength());
-                PropertyEditor ed;
-                ed = PropertyEditorManager.findEditor(_lastProp.getPropertyType());
+                final String val = doc.getText(0, doc.getLength());
+                final PropertyEditor ed = PropertyEditorManager.findEditor(_lastProp.getPropertyType());
                 if (ed != null) {
                     ed.setAsText(val);
                     _ci.cellValueChanged(ed.getValue(), false);
                     _lastValidValue = val;  // record the update
                 }
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 // Value wasn't valid for this property.
             }
-            _ignoreUpdate = b;
+            _ignoreUpdate = false;
         }
 
         // Show the list of choices defined in the IterConfigItem, and select the

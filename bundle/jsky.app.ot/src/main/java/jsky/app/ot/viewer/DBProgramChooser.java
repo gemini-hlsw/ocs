@@ -9,11 +9,7 @@ package jsky.app.ot.viewer;
 
 import edu.gemini.pot.client.SPDB;
 import edu.gemini.pot.spdb.IDBDatabaseService;
-import edu.gemini.shared.util.immutable.ApplyOp;
-import edu.gemini.spModel.core.Peer;
 import edu.gemini.spModel.util.DBProgramInfo;
-import edu.gemini.util.security.auth.Signed;
-import edu.gemini.util.security.principal.GeminiPrincipal;
 import jsky.app.ot.OT;
 import jsky.app.ot.shared.spModel.util.DBProgramListFunctor;
 import jsky.app.ot.util.Resources;
@@ -22,8 +18,6 @@ import jsky.util.Preferences;
 import jsky.util.gui.GridBagUtil;
 import jsky.util.gui.SortedJTable;
 import jsky.util.gui.TableUtil;
-import scala.Option;
-import scala.Tuple2;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
@@ -51,11 +45,11 @@ public final class DBProgramChooser extends JDialog implements ListSelectionList
         ;
 
         final String display;
-        private Col(String display) { this.display = display; }
+        Col(String display) { this.display = display; }
 
         public static Vector<String> toHeadings() {
-            final Vector<String> res = new Vector<String>();
-            for (Col c : values()) res.add(c.display);
+            final Vector<String> res = new Vector<>();
+            for (final Col c : values()) res.add(c.display);
             return res;
         }
     }
@@ -73,7 +67,7 @@ public final class DBProgramChooser extends JDialog implements ListSelectionList
     private JTextField _programName;
 
     /** The object representing the selected programs (List of DBProgramInfo) */
-    private List<DBProgramInfo> _selectedPrograms = new ArrayList<DBProgramInfo>();
+    private List<DBProgramInfo> _selectedPrograms = new ArrayList<>();
 
     // defines a panel to filter out programs based on site and program type (may be null)
     private final IDBProgramChooserFilter _filter;
@@ -111,19 +105,11 @@ public final class DBProgramChooser extends JDialog implements ListSelectionList
                             IDBProgramChooserFilter filter) {
         super((JFrame) null, "Program Chooser", true);
 
-        final KeySelectionCombo combo = new KeySelectionCombo(OT.getKeyChain(), new ApplyOp<Option<Tuple2<Peer, Signed<Tuple2<GeminiPrincipal, Object>>>>>() {
-            @Override public void apply(Option<Tuple2<Peer, Signed<Tuple2<GeminiPrincipal, Object>>>> tuple2Option) {
-                refresh();
-            }
-        });
+        final KeySelectionCombo combo = new KeySelectionCombo(OT.getKeyChain(), tuple2Option -> refresh());
         combo.refresh();
 
         _filter = filter;
-        _filter.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                refresh();
-            }
-        });
+        _filter.addActionListener(e -> refresh());
 
         _table = new SortedJTable() {
             public boolean isCellEditable(int row, int col) {
@@ -211,9 +197,9 @@ public final class DBProgramChooser extends JDialog implements ListSelectionList
 
         final List<DBProgramInfo> filteredProgs = _filter.filter(db, progs);
 
-        final Vector<Vector<Object>> data = new Vector<Vector<Object>>(filteredProgs.size());
+        final Vector<Vector<Object>> data = new Vector<>(filteredProgs.size());
         for (DBProgramInfo progInfo : filteredProgs) {
-            final Vector<Object> row = new Vector<Object>(3);
+            final Vector<Object> row = new Vector<>(3);
             row.add(progInfo);
             row.add(progInfo.programID);
             row.add(progInfo.timestamp);
@@ -225,7 +211,7 @@ public final class DBProgramChooser extends JDialog implements ListSelectionList
         installCellRenderers();
         if (data.size() > 0) _table.getSelectionModel().setSelectionInterval(0, 0);
         else _table.getSelectionModel().clearSelection();
-        TableUtil.initColumnSizes(_table, null);
+        TableUtil.initColumnSizes(_table);
 
         final TableColumnModel tcm = _table.getColumnModel();
         final TableColumn tcId = tcm.getColumn(Col.id.ordinal());
@@ -308,7 +294,7 @@ public final class DBProgramChooser extends JDialog implements ListSelectionList
 
     // Update the list of selected programs (_selectedPrograms)
     private void _updateSelectedPrograms() {
-        _selectedPrograms = new ArrayList<DBProgramInfo>();
+        _selectedPrograms = new ArrayList<>();
         ListSelectionModel lsm = _table.getSelectionModel();
         int firstIndex = lsm.getMinSelectionIndex();
         if (firstIndex == -1)
@@ -332,7 +318,7 @@ public final class DBProgramChooser extends JDialog implements ListSelectionList
     // The listener for selecting the cancel button
     class CancelListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
-            _selectedPrograms = new ArrayList<DBProgramInfo>();
+            _selectedPrograms = new ArrayList<>();
             dispose();
         }
     }

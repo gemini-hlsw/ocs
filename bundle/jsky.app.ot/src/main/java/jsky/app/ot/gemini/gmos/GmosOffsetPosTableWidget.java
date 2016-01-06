@@ -18,8 +18,6 @@ import edu.gemini.spModel.target.offset.OffsetPosSelection;
 import jsky.util.gui.TableUtil;
 
 import javax.swing.*;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
@@ -54,16 +52,14 @@ public class GmosOffsetPosTableWidget<P extends OffsetPosBase> extends jsky.util
         setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 
         // keep the offset position list selections in sync with the table selections
-        getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-            public void valueChanged(ListSelectionEvent e) {
-                if (_opl == null || _ignoreSelection || e.getValueIsAdjusting())
-                    return;
-                _updatePosListSelection();
-            }
+        getSelectionModel().addListSelectionListener(e -> {
+            if (_opl == null || _ignoreSelection || e.getValueIsAdjusting())
+                return;
+            _updatePosListSelection();
         });
     }
 
-    public void telescopePosUpdate(WatchablePos tp) {
+    public void telescopePosUpdate(final WatchablePos tp) {
         if (!(tp instanceof OffsetPosBase)) {
             // This shouldn't happen ...
             System.out.println(getClass().getName() + ": received a position " +
@@ -76,7 +72,7 @@ public class GmosOffsetPosTableWidget<P extends OffsetPosBase> extends jsky.util
     /**
      * Reinitialize the table.
      */
-    public void reinit(ISPNode node, OffsetPosList<P> opl) {
+    public void reinit(final ISPNode node, final OffsetPosList<P> opl) {
 
         OffsetPosSelection.deafTo(this.node, this);
 
@@ -84,8 +80,8 @@ public class GmosOffsetPosTableWidget<P extends OffsetPosBase> extends jsky.util
             // Quit watching previous positions
             _opl.deleteWatcher(this);
 
-            List<P> allList = _opl.getAllPositions();
-            for (P op : allList) {
+            final List<P> allList = _opl.getAllPositions();
+            for (final P op : allList) {
                 op.deleteWatcher(this);
             }
         }
@@ -135,7 +131,7 @@ public class GmosOffsetPosTableWidget<P extends OffsetPosBase> extends jsky.util
             if (!lsm.isSelectionEmpty()) {
                 int n1 = lsm.getMinSelectionIndex();
                 int n2 = lsm.getMaxSelectionIndex();
-                List<P> selList = new ArrayList<P>();
+                List<P> selList = new ArrayList<>();
                 for (int i = n1; i <= n2; i++) {
                     if (lsm.isSelectedIndex(i)) {
                         P tp = _opl.getPositionAt(i);
@@ -173,7 +169,7 @@ public class GmosOffsetPosTableWidget<P extends OffsetPosBase> extends jsky.util
      * Return a vector for a row in the table corresponding to the given offset position.
      */
     private Vector<String> _createPosRow(P op, int index) {
-        Vector<String> v = new Vector<String>(7);
+        Vector<String> v = new Vector<>(7);
         v.addElement(String.valueOf(index));
         v.addElement(op.getXAxisAsString());
         v.addElement(op.getYAxisAsString());
@@ -209,7 +205,7 @@ public class GmosOffsetPosTableWidget<P extends OffsetPosBase> extends jsky.util
         // restore the selection
         _updateTableSelection();
 
-        TableUtil.initColumnSizes(this, null);
+        TableUtil.initColumnSizes(this);
     }
 
 
@@ -241,35 +237,6 @@ public class GmosOffsetPosTableWidget<P extends OffsetPosBase> extends jsky.util
         }
 
         return _opl.getPositionAt(rows[0]);
-    }
-
-    public List<P> getSelectedPositions() {
-        int[] rows = getSelectedRowIndexes();
-        List<P> res = new ArrayList<P>();
-        for (int index : rows) {
-            res.add(_opl.getPositionAt(index));
-        }
-        return res;
-    }
-
-
-    /**
-     * Get the position at the given index.
-     */
-    public P getPos(int index) {
-        return _opl.getPositionAt(index);
-    }
-
-    /**
-     * Select the position at the given index.
-     */
-    public boolean selectPos(int index) {
-        P tp = _opl.getPositionAt(index);
-        if (tp != null) {
-            selectPos(tp);
-            return true;
-        }
-        return false;
     }
 
 

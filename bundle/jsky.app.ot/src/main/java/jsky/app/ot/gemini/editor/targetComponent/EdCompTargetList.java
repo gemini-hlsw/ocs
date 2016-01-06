@@ -1,7 +1,6 @@
 package jsky.app.ot.gemini.editor.targetComponent;
 
 import edu.gemini.pot.sp.ISPObsComponent;
-import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.guide.GuideProbe;
@@ -108,7 +107,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         });
 
         _agsPub.subscribe((obs, oldOptions, newOptions) -> updateGuiding());
-
     }
 
     @Override protected void updateEnabledState(final boolean enabled) {
@@ -468,7 +466,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     private final PropertyChangeListener selectionListener = new PropertyChangeListener() {
         @Override
         public void propertyChange(PropertyChangeEvent evt) {
-
             final ISPObsComponent node = getContextTargetObsComp();
             final TargetEnvironment env = getDataObject().getTargetEnvironment();
             final SPTarget target = TargetSelection.get(env, node);
@@ -477,26 +474,22 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 manageCurPosIfEnvContainsTarget(target, () -> _curPos = target);
             } else {
                 final GuideGroup grp = TargetSelection.getGuideGroup(env, node);
-                if (grp != null) {
-                    final TargetEnvironment env1 = getDataObject().getTargetEnvironment();
-                    if (env1.getGroups().contains(grp)) {
+                if (grp != null && env.getGroups().contains(grp)) {
+                    if (_curPos != null) _curPos.deleteWatcher(posWatcher);
 
-                        if (_curPos != null) _curPos.deleteWatcher(posWatcher);
+                    _curPos = null;
+                    _curGroup = grp;
 
-                        _curPos = null;
-                        _curGroup = grp;
+                    _w.guideGroupPanel.setVisible(true);
+                    _w.detailEditor.setVisible(false);
 
-                        _w.guideGroupPanel.setVisible(true);
-                        _w.detailEditor.setVisible(false);
+                    // N.B. don't trim, otherwise user can't include space in group name
+                    final String name = _curGroup.getName().getOrElse("");
+                    _w.guideGroupName.setValue(name);
 
-                        // N.B. don't trim, otherwise user can't include space in group name
-                        final String name = _curGroup.getName().getOrElse("");
-                        _w.guideGroupName.setValue(name);
-
-                        final boolean editable = OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation());
-                        _w.removeButton.setEnabled(editable);
-                        _w.primaryButton.setEnabled(editable);
-                    }
+                    final boolean editable = OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation());
+                    _w.removeButton.setEnabled(editable);
+                    _w.primaryButton.setEnabled(editable);
                 }
             }
         }
@@ -581,51 +574,48 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     };
 
     @SuppressWarnings("FieldCanBeLocal")
-    private final ActionListener duplicateListener = new ActionListener() {
-        @Override public void actionPerformed(final ActionEvent evt) {
-            final ISPObsComponent obsComponent = getNode();
-            final TargetObsComp dataObject = getDataObject();
-            if ((obsComponent == null) || (dataObject == null)) return;
-            final SPTarget target = TargetSelection.get(dataObject.getTargetEnvironment(), obsComponent);
-            if (target != null) {
-                // Clone the target.
-                final ParamSet ps = target.getParamSet(new PioXmlFactory());
-                final SPTarget newTarget = new SPTarget();
-                newTarget.setParamSet(ps);
+    private final ActionListener duplicateListener = evt -> {
+        final ISPObsComponent obsComponent = getNode();
+        final TargetObsComp dataObject = getDataObject();
+        if ((obsComponent == null) || (dataObject == null)) return;
+        final SPTarget target = TargetSelection.get(dataObject.getTargetEnvironment(), obsComponent);
+        if (target != null) {
+            // Clone the target.
+            final ParamSet ps = target.getParamSet(new PioXmlFactory());
+            final SPTarget newTarget = new SPTarget();
+            newTarget.setParamSet(ps);
 
-                // Add it to the environment.  First we have to figure out what it is.
-                final TargetEnvironment env = dataObject.getTargetEnvironment();
+            // Add it to the environment.  First we have to figure out what it is.
+            final TargetEnvironment env = dataObject.getTargetEnvironment();
 
-                // See if it is a guide star and duplicate it in the correct GuideTargets list.
-                boolean duplicated = false;
-                env.getOrCreatePrimaryGuideGroup();
-                final List<GuideGroup> groups = new ArrayList<>();
-                for (GuideGroup group : env.getGroups()) {
-                    for (GuideProbeTargets gt : group) {
-                        if (gt.getTargets().contains(target)) {
-                            group = group.put(gt.addManualTarget(newTarget));
-                            duplicated = true;
-                            break;
-                        }
+            // See if it is a guide star and duplicate it in the correct GuideTargets list.
+            boolean duplicated = false;
+            env.getOrCreatePrimaryGuideGroup();
+            final List<GuideGroup> groups = new ArrayList<>();
+            for (GuideGroup group : env.getGroups()) {
+                for (GuideProbeTargets gt : group) {
+                    if (gt.getTargets().contains(target)) {
+                        group = group.put(gt.addManualTarget(newTarget));
+                        duplicated = true;
+                        break;
                     }
-                    groups.add(group);
                 }
+                groups.add(group);
+            }
 
-                final TargetEnvironment newEnv = duplicated ?
-                        env.setGuideEnvironment(env.getGuideEnvironment().setOptions(DefaultImList.create(groups))) :
-                        env.setUserTargets(env.getUserTargets().append(newTarget));
+            final TargetEnvironment newEnv = duplicated ?
+                    env.setGuideEnvironment(env.getGuideEnvironment().setOptions(DefaultImList.create(groups))) :
+                    env.setUserTargets(env.getUserTargets().append(newTarget));
+            dataObject.setTargetEnvironment(newEnv);
+        } else {
+            final GuideGroup group = TargetSelection.getGuideGroup(dataObject.getTargetEnvironment(), obsComponent);
+            if (group != null) {
+                final TargetEnvironment env = dataObject.getTargetEnvironment();
+                final List<GuideGroup> groups = new ArrayList<>();
+                groups.addAll(env.getGroups().toList());
+                groups.add(group.cloneTargets());
+                final TargetEnvironment newEnv = env.setGuideEnvironment(env.getGuideEnvironment().setOptions(DefaultImList.create(groups)));
                 dataObject.setTargetEnvironment(newEnv);
-            } else {
-                final GuideGroup group = TargetSelection.getGuideGroup(dataObject.getTargetEnvironment(), obsComponent);
-                if (group != null) {
-                    final TargetEnvironment env = dataObject.getTargetEnvironment();
-                    final List<GuideGroup> groups = new ArrayList<>();
-                    groups.addAll(env.getGroups().toList());
-                    groups.add(group.cloneTargets());
-                    final TargetEnvironment newEnv = env.setGuideEnvironment(env.getGuideEnvironment().setOptions(DefaultImList.create(groups)));
-                    dataObject.setTargetEnvironment(newEnv);
-                    _w.positionTable.expandAll();
-                }
             }
         }
     };
@@ -639,12 +629,12 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
     @SuppressWarnings("FieldCanBeLocal")
     private final ActionListener pasteListener = new ActionListener() {
-        private void pasteSelectedPosition(ISPObsComponent obsComponent, TargetObsComp dataObject) {
+        private void pasteSelectedPosition(final ISPObsComponent obsComponent, final TargetObsComp dataObject) {
             if (clipboard != null) {
                 clipboard.paste(obsComponent, dataObject);
             }
         }
-        @Override public void actionPerformed(ActionEvent e) {
+        @Override public void actionPerformed(final ActionEvent e) {
             if (_curPos != null) {
                 pasteSelectedPosition(getNode(), getDataObject());
             } else if (_curGroup != null) {
@@ -655,7 +645,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
     @SuppressWarnings("FieldCanBeLocal")
     private final ActionListener primaryListener = new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
+        public void actionPerformed(final ActionEvent e) {
             _w.positionTable.updatePrimaryStar();
         }
     };
@@ -704,7 +694,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 spTarget.setMagnitudes(mag);
             } else if (group != null && this.group != null) {
                 final GuideGroup newGroup = group.setAll(this.group.cloneTargets().getAll());
-                // XXX TODO: add a helper method in the model to replace a guide group
                 final TargetEnvironment env = dataObject.getTargetEnvironment();
                 final GuideEnvironment ge = dataObject.getTargetEnvironment().getGuideEnvironment();
                 final ImList<GuideGroup> options = ge.getOptions();

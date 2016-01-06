@@ -447,8 +447,8 @@ public class SortedJTable extends PrintableJTable
      * @param	i	set header for this column
      **/
     protected void setCustomHeaderRenderer(int i) {
-        TableColumn column = getColumn(getColumnName(i));
-        TableCellRenderer rend = TableUtil.getDefaultRenderer(this, column);
+        final TableColumn column = getColumn(getColumnName(i));
+        final TableCellRenderer rend = TableUtil.getHeaderRenderer(this);
         if (!(rend instanceof CustomHeaderRenderer)) {
             CustomHeaderRenderer newHeader = new CustomHeaderRenderer();
 

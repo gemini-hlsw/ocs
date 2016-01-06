@@ -12,130 +12,114 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 import java.awt.*;
+import java.util.Optional;
+import java.util.stream.IntStream;
 
-/**
- * Implements static utility methods for use with JTables.
- *
- * @version $Revision: 18053 $
- * @author Allan Brighton
- */
 public class TableUtil {
 
     /**
-     * Return the default cell renderer for the given JTable column.
+     * Return the cell renderer for the given JTable's header.
      */
-    public static TableCellRenderer getDefaultRenderer(JTable table, TableColumn column) {
+    public static TableCellRenderer getHeaderRenderer(final JTable table) {
         try {
             return table.getTableHeader().getDefaultRenderer();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    /*
-     * This method picks good column sizes for the given JTable.
-     * If all column heads are wider than the column's cells'
-     * contents, then you can just use column.sizeWidthToFit().
-     *
-     * @param table the target JTable
-     * @param show if not null, should be an array with a boolean entry for each column
-     *             indicating whether the column should be shown or ignored.
-     *
-     * @return the sum of all the column widths
+    /**
+     * Return the cell renderer for the given JTable column.
      */
-    public static int initColumnSizes(JTable table, boolean[] show) {
-        return initColumnSizes(table, show, 10, true);
+    public static TableCellRenderer getColumnRenderer(final JTable table, final int col) {
+        try {
+            final TableColumn tc = table.getColumnModel().getColumn(col);
+            return Optional.ofNullable(tc.getCellRenderer()).orElse(table.getDefaultRenderer(table.getColumnClass(col)));
+        } catch (final Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    /*
+    /**
+     * Pick good column sizes for the given JTable.
+     * Assume that all the columns are to be shown.
+     * If all column heads are wider than the column's cells'
+     * contents, then you can just use column.sizeWidthToFit().
+     *
+     * @param table the target JTable
+     * @return the sum of all the column widths
+     */
+    public static int initColumnSizes(final JTable table) {
+        return initColumnSizes(table, null);
+    }
+
+    /**
      * This method picks good column sizes for the given JTable.
      * If all column heads are wider than the column's cells'
      * contents, then you can just use column.sizeWidthToFit().
      *
      * @param table the target JTable
      * @param show if not null, should be an array with a boolean entry for each column
-     *             indicating whether the column should be shown or ignored.
+     *             indicating whether the column should be shown or ignored
+     * @return the sum of all the column widths
+     */
+    public static int initColumnSizes(final JTable table, final boolean[] show) {
+        return initColumnSizes(table, Optional.ofNullable(show), 10, true);
+    }
+
+    /**
+     * This method picks good column sizes for the given JTable.
+     * If all column heads are wider than the column's cells'
+     * contents, then you can just use column.sizeWidthToFit().
+     *
+     * @param table the target JTable
+     * @param show  if not empty, should be an array with a boolean entry for each column
+     *              indicating whether the column should be shown or ignored (otherwise assume all shown)
      * @param padding number of pixels padding to add to calculated cell width
      * @param allowColumnResize true if columns can be resized
      *
      * @return the sum of all the column widths
      */
-    public static int initColumnSizes(JTable table, boolean[] show, int padding,
-                                      boolean allowColumnResize) {
-        TableColumn column;
-        Component comp;
-        int cellWidth;
-        TableModel model = table.getModel();
-        int numCols = model.getColumnCount();
-        int numRows = model.getRowCount();
+    public static int initColumnSizes(final JTable table, final Optional<boolean[]> show, final int padding,
+                                      final boolean allowColumnResize) {
+        final TableModel model = table.getModel();
+        final int numCols = model.getColumnCount();
+        final int numRows = model.getRowCount();
 
-        if (show != null && show.length != numCols) show = null;
+        return IntStream.range(0, numCols).map(colIdx -> {
+            final TableColumn column = table.getColumnModel().getColumn(colIdx);
+            final int columnWidth;
 
-        int sumColWidths = 0;
-        for (int col = 0; col < numCols; col++) {
-            column = table.getColumnModel().getColumn(col);
-
-            if (show == null || show[col]) {
-                TableCellRenderer defaultRenderer = getDefaultRenderer(table, column);
-                TableCellRenderer cellRenderer = column.getCellRenderer();
-                if (cellRenderer == null)
-                    cellRenderer = defaultRenderer;
-                TableCellRenderer headerRenderer = column.getHeaderRenderer();
-                if (headerRenderer == null)
-                    headerRenderer = defaultRenderer;
+            if (!show.isPresent() || show.get()[colIdx]) {
+                final TableCellRenderer cellRenderer = getColumnRenderer(table, colIdx);
+                final TableCellRenderer headerRenderer = Optional.ofNullable(column.getHeaderRenderer()).orElse(cellRenderer);
 
                 // check the header width
-                comp = headerRenderer.getTableCellRendererComponent(table, column.getHeaderValue(), false, false, -1, col);
-                cellWidth = comp.getPreferredSize().width;
+                final Component headerComponent = headerRenderer.getTableCellRendererComponent(table, column.getHeaderValue(), false, false, -1, colIdx);
+                final int headerWidth           = headerComponent.getPreferredSize().width;
 
-                // check the rendered width of the widest row
-                for (int row = 0; row < numRows; row++) {
-                    Object o = model.getValueAt(row, col);
-                    comp = cellRenderer.getTableCellRendererComponent(table, o, false, false, row, col);
-                    cellWidth = Math.max(cellWidth, comp.getPreferredSize().width);
-                }
+                columnWidth = IntStream.range(0, numRows).map(rowIdx -> {
+                    final Object o = model.getValueAt(rowIdx, colIdx);
+                    final Component cellComponent = cellRenderer.getTableCellRendererComponent(table, o, false, false, rowIdx, colIdx);
+                    return cellComponent.getPreferredSize().width;
+                }).reduce(headerWidth, Math::max) + padding;
 
-                cellWidth += padding; // add padding
-                sumColWidths += cellWidth;
-                column.setPreferredWidth(cellWidth);
+                column.setPreferredWidth(columnWidth);
                 if (allowColumnResize) {
                     column.setMinWidth(5);
                     column.setMaxWidth(1000);
                 } else {
-                    column.setMinWidth(cellWidth);
-                    column.setMaxWidth(cellWidth);
+                    column.setMinWidth(columnWidth);
+                    column.setMaxWidth(columnWidth);
                 }
             } else {
                 // hide column
+                columnWidth = 0;
                 column.setMinWidth(0);
                 column.setMaxWidth(0);
                 column.setPreferredWidth(0);
             }
-        }
-        return sumColWidths;
-    }
-
-    /*
-     * Return the index of the row containing the longest value in the given column.
-     */
-    public static int getWidestRow(TableModel model, int col) {
-        int widestRow = 0;
-        int maxLength = 0;
-        int numRows = model.getRowCount();
-        for (int row = 0; row < numRows; row++) {
-            Object o = model.getValueAt(row, col);
-            if (o != null) {
-                String s = o.toString();
-                int length = s.length();
-                if (length > maxLength) {
-                    maxLength = length;
-                    widestRow = row;
-                }
-            }
-        }
-        return widestRow;
+            return columnWidth;
+        }).sum();
     }
 }
-
-
-
