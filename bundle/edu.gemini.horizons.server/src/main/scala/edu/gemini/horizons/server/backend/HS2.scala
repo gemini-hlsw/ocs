@@ -8,8 +8,13 @@ import org.apache.commons.httpclient.methods.GetMethod
 import edu.gemini.horizons.api.HorizonsException
 import java.io.IOException
 import CgiHorizonsConstants._
+import edu.gemini.horizons.api.HorizonsReply
+import java.util.Date
+import java.text.SimpleDateFormat
 
+import scala.collection.JavaConverters._
 import scala.util.matching.Regex
+import scala.io.Source
 import scalaz._, Scalaz._, scalaz.effect.IO
 
 object HS2 {
@@ -174,7 +179,14 @@ object HS2 {
     ???
 
 
-  private def fetch(params: Map[String, String]): IO[List[String]] =
+  def fetch(params: Map[String, String]): IO[List[String]] =
+    genFetch(params) { method =>
+      val s = Source.fromInputStream(method.getResponseBodyAsStream, method.getRequestCharSet)
+      try     s.getLines.toList
+      finally s.close()
+    }
+
+  def genFetch[A](params: Map[String, String])(f: GetMethod => A): IO[A] =
     IO {
       // HORIZONS allows only one request at a time for a given host :-/
       HS2.synchronized {
@@ -182,10 +194,7 @@ object HS2 {
         try {
           method.setQueryString(params.map { case (k, v) => new NameValuePair(k, v) } .toArray)
           (new HttpClient).executeMethod(method)
-          val s = scala.io.Source.fromInputStream(method.getResponseBodyAsStream, method.getRequestCharSet)
-          try {
-            s.getLines.toList
-          } finally s.close()
+          f(method)
         } catch {
           case ex: HorizonsException => throw ex
           case ex: HttpException     => throw HorizonsException.create(ex)
@@ -200,91 +209,59 @@ object HS2 {
 
 
 
-//
-//
-//object Executor {
-//
-//  val initialParams: Map[String, String] =
-//    Map(
-//      BATCH            -> "1",
-//      TABLE_TYPE       -> OBSERVER_TABLE,
-//      CSV_FORMAT       -> NO,
-//      EPHEMERIS        -> YES,
-//      TABLE_FIELDS_ARG -> TABLE_FIELDS,
-//      CENTER           -> CENTER_COORD,
-//      COORD_TYPE       -> COORD_TYPE_GEO
-//    )
-//
-//  def siteParams(site: Site): Map[String, String] =
-//    site match {
-//      case Site.GN => Map(SITE_COORD -> SITE_COORD_GN)
-//      case Site.GS => Map(SITE_COORD -> SITE_COORD_GS)
-//    }
-//
-//  def dateParams(startDate: Date, endDate: Date): Map[String, String] = {
-//    def formatDate(date: Date): String = {
-//      val formatter: DateFormat = new SimpleDateFormat("yyyy-MMM-dd HH:mm:ss")
-//      val sb: StringBuilder = new StringBuilder("'")
-//      sb.append(formatter.format(date))
-//      sb.append("'")
-//      return sb.toString
-//    }
-//    Map(
-//      START_TIME -> formatDate(startDate),
-//      STOP_TIME  -> formatDate(endDate)
-//    )
-//  }
-//
-//  def commandParam(id: String): Map[String, String] =
-//    Map(COMMAND -> id)
-//
-//  def stepParams(stepSize: Int, stepUnits: StepUnits): Map[String, String] =
-//    if (stepSize > 0) Map(STEP_SIZE -> (stepSize + stepUnits.suffix))
-//    else Map.empty
-//
-//  def execute(query: HorizonsQuery): HorizonsReply = {
-//
-//    var objectId: String = query.getObjectId.trim
-//    if (query.getObjectType eq HorizonsQuery.ObjectType.MINOR_BODY) {
-//      objectId += ";"
-//    }
-//    if (objectId.contains(" ")) {
-//      val sb: StringBuffer = new StringBuffer
-//      sb.append("'")
-//      sb.append(objectId)
-//      sb.append("'")
-//      objectId = sb.toString
-//    }
-//
-//    val queryParams: Map[String, String] =
-//      initialParams ++
-//      siteParams(query.getSite) ++
-//      dateParams(query.getStartDate, query.getEndDate) ++
-//      commandParam(objectId) ++
-//      stepParams(query.getStepSize, query.getStepUnits)
-//
-//    val method: GetMethod = new GetMethod(CgiHorizonsConstants.HORIZONS_URL)
-//    method.setQueryString(queryParams.map { case (k, v) => new NameValuePair(k, v) } .toArray)
-//    var reply: HorizonsReply = null
-//    val client: HttpClient = new HttpClient
-//    try {
-//      client.executeMethod(method)
-//      reply = CgiReplyBuilder.buildResponse(method.getResponseBodyAsStream, method.getRequestCharSet)
-//      method.releaseConnection
-//    } catch {
-//      case ex: HorizonsException => {
-//        throw ex
-//      }
-//      case ex: HttpException => {
-//        throw HorizonsException.create(ex)
-//      }
-//      case ex: IOException => {
-//        throw HorizonsException.create(ex)
-//      }
-//    }
-//    return reply
-//  }
-//
-//}
+object Executor {
+
+  def execute(query: HorizonsDesignation, site: Site, elements: Int): IO[Ephemeris] =
+    execute(query, site, elements, new Semester(site))
+
+  def execute(query: HorizonsDesignation, site: Site, elements: Int, sem: Semester): IO[Ephemeris] =
+    execute(query, site, sem.getStartDate(site), sem.getEndDate(site), elements)
+
+  def execute(query: HorizonsDesignation, site: Site, start: Date, stop: Date, elements: Int): IO[Ephemeris] = {
+
+    def formatDate(date: Date): String = {
+      val df = new SimpleDateFormat("yyyy-MMM-dd HH:mm:ss")
+      s"'${df.format(date)}'"
+    }
+
+    def siteCoord(site: Site): String =
+      site match {
+        case Site.GN => SITE_COORD_GN
+        case Site.GS => SITE_COORD_GS
+      }
+
+    def toEphemeris(r: HorizonsReply): Ephemeris = 
+      ==>>.fromList {
+        r.getEphemeris.asScala.toList.map { e =>
+          val cs = e.getCoordinates
+          Coordinates.fromDegrees(cs.getRaDeg, cs.getDecDeg).strengthL(e.getDate.getTime)
+        } .collect { case Some(p) => p }
+      }
+
+    // The step size in minutes, such that the total number of elements will be roughly what was
+    // requested, or fewer for very short timespans (no more than 1/min)
+    val stepSize = 1L max (stop.getTime - start.getTime) / (1000L * 60 * elements)
+
+    val queryParams: Map[String, String] =
+      Map(
+        BATCH            -> "1",
+        TABLE_TYPE       -> OBSERVER_TABLE,
+        CSV_FORMAT       -> NO,
+        EPHEMERIS        -> YES,
+        TABLE_FIELDS_ARG -> TABLE_FIELDS,
+        CENTER           -> CENTER_COORD,
+        COORD_TYPE       -> COORD_TYPE_GEO,
+        COMMAND          -> s"'${query.queryString}'",
+        SITE_COORD       -> siteCoord(site),
+        START_TIME       -> formatDate(start),
+        STOP_TIME        -> formatDate(stop),
+        STEP_SIZE        -> s"${stepSize}m"
+      )
+
+    HS2.genFetch(queryParams)(m => CgiReplyBuilder.buildResponse(m.getResponseBodyAsStream, m.getRequestCharSet)).map(toEphemeris)
+
+  }
+
+}
 
 
