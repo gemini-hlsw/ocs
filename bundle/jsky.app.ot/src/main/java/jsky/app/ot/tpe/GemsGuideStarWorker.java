@@ -20,7 +20,6 @@ import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.*;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
-import jsky.app.ot.ags.BagsManager;
 import jsky.coords.WorldCoords;
 import jsky.util.gui.SwingWorker;
 import jsky.util.gui.DialogUtil;
@@ -178,60 +177,6 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
         }
     }
 
-    public static void applyResults(final TpeContext ctx, final Option<GemsGuideStars> gemsGuideStarsOpt, boolean isBags) {
-        gemsGuideStarsOpt.foreach(gemsGuideStars -> {
-            final SPInstObsComp inst = ctx.instrument().orNull();
-            if (inst != null) {
-                inst.setPosAngleDegrees(gemsGuideStars.pa().toDegrees());
-                ctx.instrument().commit();
-            }
-        });
-
-        final TargetObsComp targetObsComp = ctx.targets().orNull();
-        if (targetObsComp != null) {
-            final TargetEnvironment oldEnv = targetObsComp.getTargetEnvironment();
-
-            // If this is called from BAGS, we need to find out if there was a previous BAGS guide group and whether
-            // or not it was the primary group.
-            final boolean makeBagsGroupPrimary;
-            final TargetEnvironment clearedEnv;
-            if (isBags) {
-                final GuideEnvironment guideEnv = oldEnv.getGuideEnvironment();
-                final Option<GuideGroup> bagsGroup = guideEnv.getOptions().find(gg -> gg.getAll().exists(GuideProbeTargets::primaryIsBagsTarget));
-                makeBagsGroupPrimary = guideEnv.getOptions().isEmpty() || bagsGroup.exists(bg -> oldEnv.getGuideEnvironment().getPrimary().exists(bg::equals));
-                clearedEnv = BagsManager.clearBagsTargets(oldEnv);
-            } else {
-                makeBagsGroupPrimary = false;
-                clearedEnv = oldEnv;
-            }
-
-            // If this is BAGS running, denote the primary selected targets as the BAGS targets.
-            // This is a horrible way to do things, but we don't want to mess with the actual GeMS lookup code so we
-            // transform the guide group as necessary for BAGS.
-            final TargetEnvironment finalEnv = gemsGuideStarsOpt.map(gemsGuideStars -> {
-                // Determine / adapt the new guide group representing the GeMS selection.
-                final GuideGroup group;
-                if (isBags) {
-                    final ImList<GuideProbeTargets> gptList = gemsGuideStars.guideGroup().getAll().map(gpt ->
-                                    gpt.getPrimary().map(primary -> gpt.removeTarget(primary).withBagsResult(BagsResult.WithTarget$.MODULE$.apply(primary))).getOrElse(gpt)
-                    );
-                    group = gemsGuideStars.guideGroup().putAll(gptList);
-                    return makeBagsGroupPrimary ? clearedEnv.setPrimaryGuideGroup(group) :
-                            clearedEnv.setGuideEnvironment(clearedEnv.getGuideEnvironment().setOptions(clearedEnv.getGroups().cons(group)));
-                } else {
-                    group = gemsGuideStars.guideGroup();
-                    return clearedEnv.setPrimaryGuideGroup(group);
-                }
-            }).getOrElse(clearedEnv);
-
-            // If BAGS is running, only change if the target environments differ.
-            if (!isBags || !BagsManager.bagsTargetsMatch(oldEnv, finalEnv)) {
-                targetObsComp.setTargetEnvironment(finalEnv);
-                ctx.targets().commit();
-            }
-        }
-    }
-
     /**
      * Returns a set of position angles to use for the search, including the current one
      * used in the given obsContext.
@@ -332,18 +277,6 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
         } finally {
             stopProgress();
             interrupted = false;
-        }
-    }
-
-    public static Option<GemsGuideStars> findGuideStars(final ObsContext obsContext) throws Exception {
-        try {
-            final Set<edu.gemini.spModel.core.Angle> posAngles = getPosAngles(obsContext);
-            final List<GemsCatalogSearchResults> results = unloggedSearch(GemsGuideStarSearchOptions.DEFAULT, GemsTipTiltMode.canopus, obsContext, posAngles,
-                    scala.Option.empty());
-            final List<GemsGuideStars> gemsResults = GemsResultsAnalyzer.instance().analyze(obsContext, posAngles, results, scala.Option.empty());
-            return gemsResults.size() > 0 ? new Some<>(gemsResults.get(0)) : None.instance();
-        } catch (NoStarsException e) {
-            return None.instance();
         }
     }
 

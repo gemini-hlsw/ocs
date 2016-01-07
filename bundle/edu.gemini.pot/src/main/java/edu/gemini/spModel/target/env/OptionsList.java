@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package edu.gemini.spModel.target.env;
 
 import edu.gemini.shared.util.immutable.*;
@@ -17,7 +13,7 @@ public interface OptionsList<T> extends Iterable<T> {
      * An function representing an arbitrary update operation on the options
      * list.  Used with the {@link OptionsList#update} methods.
      */
-    public interface Op<T> extends Function1<OptionsList<T>, Tuple2<Option<Integer>, ImList<T>>> {
+    interface Op<T> extends Function1<OptionsList<T>, Tuple2<Option<Integer>, ImList<T>>> {
 
         /**
          * Given an {@link OptionsList} object, the function must compute a new
@@ -44,8 +40,8 @@ public interface OptionsList<T> extends Iterable<T> {
         // don't construct any instances
         private UpdateOps() { /* empty */ }
 
-        private static <T> Tuple2<Option<Integer>, ImList<T>> create(Option<Integer> primary, ImList<T> list) {
-            return new Pair<Option<Integer>, ImList<T>>(primary, list);
+        private static <T> Tuple2<Option<Integer>, ImList<T>> create(final Option<Integer> primary, final ImList<T> list) {
+            return new Pair<>(primary, list);
         }
 
         /**
@@ -58,11 +54,7 @@ public interface OptionsList<T> extends Iterable<T> {
          * the given item to the options list
          */
         public static <T> Op<T> append(final T t) {
-            return new Op<T>() {
-                @Override public Tuple2<Option<Integer>, ImList<T>> apply(OptionsList<T> olist) {
-                    return create(olist.getPrimaryIndex(), olist.getOptions().append(t));
-                }
-            };
+            return olist -> create(olist.getPrimaryIndex(), olist.getOptions().append(t));
         }
 
         /**
@@ -75,12 +67,10 @@ public interface OptionsList<T> extends Iterable<T> {
          * the given item to the options list and making it the primary element
          */
         public static <T> Op<T> appendAsPrimary(final T t) {
-            return new Op<T>() {
-                @Override public Tuple2<Option<Integer>, ImList<T>> apply(OptionsList<T> olist) {
-                    Option<Integer> newPrimary = new Some<Integer>(olist.getOptions().size());
-                    ImList<T> newList = olist.getOptions().append(t);
-                    return create(newPrimary, newList);
-                }
+            return olist -> {
+                final Option<Integer> newPrimary = new Some<>(olist.getOptions().size());
+                final ImList<T> newList = olist.getOptions().append(t);
+                return create(newPrimary, newList);
             };
         }
 
@@ -98,30 +88,26 @@ public interface OptionsList<T> extends Iterable<T> {
          * given item to the options list and making it the primary element
          */
         public static <T> Op<T> remove(final T t) {
-            return new Op<T>() {
-                @Override public Tuple2<Option<Integer>, ImList<T>> apply(OptionsList<T> olist) {
-                    Option<Integer> primary = olist.getPrimaryIndex();
-                    ImList<T> list = olist.getOptions();
+            return olist -> {
+                final Option<Integer> primary = olist.getPrimaryIndex();
+                final ImList<T> list = olist.getOptions();
 
-                    final int index = olist.getOptions().indexOf(t);
-                    if (index == -1) return create(primary, list);
+                final int index = olist.getOptions().indexOf(t);
+                if (index == -1) return create(primary, list);
 
-                    final ImList<T> newList = olist.getOptions().remove(t);
-                    ImList<T> empty = ImCollections.emptyList();
-                    if (newList.isEmpty()) return create(None.INTEGER, empty);
+                final ImList<T> newList = olist.getOptions().remove(t);
+                final ImList<T> empty = ImCollections.emptyList();
+                if (newList.isEmpty()) return create(None.INTEGER, empty);
 
-                    Option<Integer> newPrimary = primary.map(new Function1<Integer, Integer>() {
-                        @Override public Integer apply(Integer pindex) {
-                            if (pindex < index) return pindex;
-                            if (pindex > index) return pindex-1;
+                final Option<Integer> newPrimary = primary.map(pindex -> {
+                    if (pindex < index) return pindex;
+                    if (pindex > index) return pindex - 1;
 
-                            int size = newList.size();
-                            return pindex == size ? size-1 : pindex;
-                        }
-                    });
+                    final int size = newList.size();
+                    return pindex == size ? size - 1 : pindex;
+                });
 
-                    return create(newPrimary, newList);
-                }
+                return create(newPrimary, newList);
             };
         }
 
@@ -146,16 +132,14 @@ public interface OptionsList<T> extends Iterable<T> {
          * <code>!{@link OptionsList#getOptions()}.contains(primary)</code>)
          */
         public static <T> Op<T> togglePrimary(final T primary) {
-            return new Op<T>() {
-                @Override public Tuple2<Option<Integer>, ImList<T>> apply(OptionsList<T> olist) {
-                    int index = olist.getOptions().indexOf(primary);
-                    if (index < 0) {
-                        throw new IllegalArgumentException("not a member of the list");
-                    }
-
-                    Option<Integer> opt = (olist.getPrimaryIndex().getOrElse(-1) == index) ? None.INTEGER : new Some<Integer>(index);
-                    return create(opt, olist.getOptions());
+            return olist -> {
+                final int index = olist.getOptions().indexOf(primary);
+                if (index < 0) {
+                    throw new IllegalArgumentException("not a member of the list");
                 }
+
+                final Option<Integer> opt = (olist.getPrimaryIndex().getOrElse(-1) == index) ? None.INTEGER : new Some<>(index);
+                return create(opt, olist.getOptions());
             };
         }
     }

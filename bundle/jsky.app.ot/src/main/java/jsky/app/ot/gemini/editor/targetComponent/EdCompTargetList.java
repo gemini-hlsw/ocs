@@ -83,9 +83,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                     final GuideEnvironment ge = env.getGuideEnvironment();
                     final ImList<GuideGroup> options = ge.getOptions();
                     final List<GuideGroup> list = new ArrayList<>(options.size());
-                    for (GuideGroup g : options) {
-                        list.add(g == _curGroup ? newGroup : g);
-                    }
+                    options.foreach(g -> list.add(g == _curGroup ? newGroup : g));
                     _curGroup = newGroup;
 
                     getDataObject().setTargetEnvironment(env.setGuideEnvironment(ge.setOptions(DefaultImList.create(list))));
@@ -296,10 +294,8 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         Collections.sort(guidersList, GuideProbe.KeyComparator.instance);
 
         // Make a list of PositionTypes that are legal in the current observation context.
-        final PositionType[] ptA;
-        ptA = new PositionType[2 + guiders.size()];
-
         int index = 0;
+        final PositionType[] ptA = new PositionType[2 + guiders.size()];
         ptA[index++] = BasePositionType.instance;
         for (GuideProbe guider : guidersList) {
             ptA[index++] = new GuidePositionType(guider, guider != illegal);
@@ -367,9 +363,8 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
             final SPTarget target = new SPTarget();
             final GuideProbeTargets targets = opt
-                    .map(gpt -> gpt.addManualTarget(target))
-                    .getOrElse(GuideProbeTargets.create(probe, target))
-                    .withExistingPrimary(target);
+                    .map(gpt -> gpt.update(OptionsList.UpdateOps.appendAsPrimary(target)))
+                    .getOrElse(GuideProbeTargets.create(probe, target));
 
             obsComp.setTargetEnvironment(env.setGuideEnvironment(
                     env.getGuideEnvironment().putGuideProbeTargets(guideGroup, targets)));
@@ -464,8 +459,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     };
 
     private final PropertyChangeListener selectionListener = new PropertyChangeListener() {
-        @Override
-        public void propertyChange(PropertyChangeEvent evt) {
+        @Override public void propertyChange(PropertyChangeEvent evt) {
             final ISPObsComponent node = getContextTargetObsComp();
             final TargetEnvironment env = getDataObject().getTargetEnvironment();
             final SPTarget target = TargetSelection.get(env, node);
@@ -497,7 +491,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
     // Updates the enabled state of the primary guide target button when the target environment changes.
     private final PropertyChangeListener primaryButtonUpdater = new PropertyChangeListener() {
-        public void propertyChange(final PropertyChangeEvent evt) {
+        @Override public void propertyChange(final PropertyChangeEvent evt) {
             final boolean enabled;
             if (_curPos != null) {
                 final TargetEnvironment env = getDataObject().getTargetEnvironment();
@@ -549,14 +543,14 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             final TelescopePosEditor tpe = TpeManager.open();
             tpe.reset(getNode());
             tpe.getImageWidget().manualGuideStarSearch();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             DialogUtil.error(e);
         }
     };
 
     @SuppressWarnings("FieldCanBeLocal")
     private final ActionListener autoGuideStarListener = new ActionListener() {
-        @Override public void actionPerformed (final ActionEvent evt){
+        @Override public void actionPerformed (final ActionEvent evt) {
             try {
                 if (GuideStarSupport.hasGemsComponent(getNode())) {
                     final TelescopePosEditor tpe = TpeManager.open();
@@ -567,7 +561,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                     // pick a guide star.
                     AgsClient.launch(getNode(), _w);
                 }
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 DialogUtil.error(e);
             }
         }
@@ -595,7 +589,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             for (GuideGroup group : env.getGroups()) {
                 for (GuideProbeTargets gt : group) {
                     if (gt.getTargets().contains(target)) {
-                        group = group.put(gt.addManualTarget(newTarget));
+                        group = group.put(gt.update(OptionsList.UpdateOps.append(newTarget)));
                         duplicated = true;
                         break;
                     }
@@ -760,8 +754,8 @@ class GuidePositionType implements PositionType {
         env = env.removeTarget(target);
 
         final Option<GuideProbeTargets> gtOpt = env.getPrimaryGuideProbeTargets(guider);
-        final GuideProbeTargets gt = gtOpt.map(gpt -> gpt.addManualTarget(target)).
-                getOrElse(GuideProbeTargets.create(guider, target)).withExistingPrimary(target);
+        final GuideProbeTargets gt = gtOpt.map(gpt -> gpt.update(OptionsList.UpdateOps.appendAsPrimary(target)))
+                .getOrElse(GuideProbeTargets.create(guider, target));
 
         final TargetEnvironment newEnv = env.putPrimaryGuideProbeTargets(gt);
         obsComp.setTargetEnvironment(newEnv);

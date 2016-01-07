@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package edu.gemini.wdba.tcc;
 
 import edu.gemini.pot.sp.ISPObsComponent;
@@ -45,22 +41,22 @@ public class GuideConfigTest extends TestBase {
         base.setName("Base Pos");
     }
 
-    private static GuideProbeTargets createGuideTargets(GuideProbe probe) {
+    private static GuideProbeTargets createGuideTargets(final GuideProbe probe) {
         final SPTarget target = new SPTarget();
-        return GuideProbeTargets.create(probe, target).withExistingPrimary(target);
+        return GuideProbeTargets.create(probe, target);
     }
 
-    private static ImList<GuideProbeTargets> createGuideTargetsList(GuideProbe... probes) {
-        List<GuideProbeTargets> res = new ArrayList<GuideProbeTargets>();
-        for (GuideProbe probe : probes) {
+    private static ImList<GuideProbeTargets> createGuideTargetsList(final GuideProbe... probes) {
+        final List<GuideProbeTargets> res = new ArrayList<>();
+        for (final GuideProbe probe : probes) {
             res.add(createGuideTargets(probe));
         }
         return DefaultImList.create(res);
     }
 
     private TargetEnvironment create(GuideProbe... probes) {
-        ImList<GuideProbeTargets> gtCollection = createGuideTargetsList(probes);
-        ImList<SPTarget> userTargets = ImCollections.emptyList();
+        final ImList<GuideProbeTargets> gtCollection = createGuideTargetsList(probes);
+        final ImList<SPTarget> userTargets = ImCollections.emptyList();
         return TargetEnvironment.create(base).setAllPrimaryGuideProbeTargets(gtCollection).setUserTargets(userTargets);
     }
 
@@ -122,9 +118,9 @@ public class GuideConfigTest extends TestBase {
         testTargetEnvironment(TccNames.AOP1, create(AltairAowfsGuider.instance, PwfsGuideProbe.pwfs1));
     }
 
-    private void addAltair(AltairParams.Mode mode) throws Exception {
-        ISPObsComponent altairComp =  odb.getFactory().createObsComponent(prog, InstAltair.SP_TYPE, null);
-        InstAltair altair = (InstAltair) altairComp.getDataObject();
+    private void addAltair(final AltairParams.Mode mode) throws Exception {
+        final ISPObsComponent altairComp =  odb.getFactory().createObsComponent(prog, InstAltair.SP_TYPE, null);
+        final InstAltair altair = (InstAltair) altairComp.getDataObject();
         altair.setMode(mode);
         altairComp.setDataObject(altair);
         obs.addObsComponent(altairComp);
@@ -149,33 +145,30 @@ public class GuideConfigTest extends TestBase {
         testTargetEnvironment(TccNames.AOP2, create(AltairAowfsGuider.instance, PwfsGuideProbe.pwfs2));
     }
 
-    private String getGuideConfig(Document doc) throws Exception {
-        Element tccFieldConfig = getTccFieldConfig(doc);
+    private String getGuideConfig(final Document doc) throws Exception {
+        final Element tccFieldConfig = getTccFieldConfig(doc);
         if (tccFieldConfig == null) fail("no tcc_tcs_config_file element");
 
-        Element pset = (Element) tccFieldConfig.selectSingleNode("//paramset[@name='guideConfig']");
+        final Element pset = (Element) tccFieldConfig.selectSingleNode("//paramset[@name='guideConfig']");
         if (pset == null) fail("missing 'guideConfig' paramset");
 
-        Element param = (Element) pset.selectSingleNode("param[@name='guideWith']");
+        final Element param = (Element) pset.selectSingleNode("param[@name='guideWith']");
         if (param == null) fail("missing 'guide' param");
         return param.attributeValue("value");
     }
 
-    private void testTargetEnvironment(String guideConfig, TargetEnvironment env) throws Exception {
+    private void testTargetEnvironment(final String guideConfig, final TargetEnvironment env) throws Exception {
         // Store the target environment.
-        ObservationNode obsNode = getObsNode();
-        TargetNode targetNode = obsNode.getTarget();
+        final ObservationNode obsNode = getObsNode();
+        final TargetNode targetNode = obsNode.getTarget();
 
-        TargetObsComp obsComp = targetNode.getDataObject();
+        final TargetObsComp obsComp = targetNode.getDataObject();
         obsComp.setTargetEnvironment(env);
         targetNode.getRemoteNode().setDataObject(obsComp);
 
         // Get the results.
-        Document doc = getSouthResults();
+        final Document doc = getSouthResults();
 
         assertEquals(guideConfig, getGuideConfig(doc));
-
-//        doc.write(new OutputStreamWriter(System.out));
-//        System.out.println(doc);
     }
 }

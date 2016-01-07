@@ -8,6 +8,7 @@ import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.GuideGroup;
 import edu.gemini.spModel.target.env.GuideProbeTargets;
+import edu.gemini.spModel.target.env.OptionsList;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 
@@ -37,7 +38,7 @@ public enum PrimaryTargetToggle {
         if (lst.isEmpty()) return; // target not associated with any guider
 
         final TargetEnvironment finalEnv = lst.foldLeft(env,
-                (e, gt) -> e.putPrimaryGuideProbeTargets(gt.togglePrimary(target)));
+                (e, gt) -> e.putPrimaryGuideProbeTargets(gt.update(OptionsList.UpdateOps.togglePrimary(target))));
         obsComp.setTargetEnvironment(finalEnv);
     }
 }
