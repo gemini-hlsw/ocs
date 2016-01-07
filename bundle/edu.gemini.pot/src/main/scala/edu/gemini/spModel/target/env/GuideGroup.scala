@@ -216,9 +216,19 @@ case class GuideGroup(grp: GuideGrp) extends java.lang.Iterable[GuideProbeTarget
     getTargets.toList.iterator
 
   def getParamSet(f: PioFactory): ParamSet = {
-    val ps = f.createParamSet(GuideGroup.PARAM_SET_NAME)
+    import GuideGroup.{ParamSetName, AutoInitialTag, AutoActiveTag, ManualTag }
+
+    val ps = f.createParamSet(ParamSetName)
 
     getName.asScalaOpt.foreach { Pio.addParam(f, ps, "name", _) }
+
+    val tag = grp match {
+      case Initial           => AutoInitialTag
+      case Active(_)         => AutoActiveTag
+      case ManualGroup(_, _) => ManualTag
+    }
+    Pio.addParam(f, ps, "tag", tag.toString)
+
     all.foreach { gpt => ps.addParamSet(gpt.getParamSet(f)) }
 
     ps
@@ -227,9 +237,8 @@ case class GuideGroup(grp: GuideGrp) extends java.lang.Iterable[GuideProbeTarget
 }
 
 object GuideGroup extends Function1[GuideGrp, GuideGroup] {
-  val EMPTY = GuideGroup(ManualGroup("Group", Map.empty))
-
-  val PARAM_SET_NAME = "guideGroup"
+  val AutomaticGroupInitial = GuideGroup(Initial)
+  val ManualEmpty = GuideGroup(ManualGroup("Manual Group", Map.empty))
 
   val Grp: GuideGroup @> GuideGrp =
     Lens.lensu((jGrp, sGrp) => jGrp.copy(grp = sGrp), _.grp)
@@ -237,17 +246,58 @@ object GuideGroup extends Function1[GuideGrp, GuideGroup] {
   val Name: GuideGroup @?> String =
     Grp.partial >=> GuideGrp.Name
 
-  @varargs
-  def create(name: String, targets: GuideProbeTargets*): GuideGroup = ???
+  val ParamSetName = "guideGroup"
 
-  def create(name: String, targets: ImList[GuideProbeTargets]): GuideGroup = ???
+  private sealed trait TypeTag
+  private case object AutoInitialTag extends TypeTag
+  private case object AutoActiveTag extends TypeTag
+  private case object ManualTag extends TypeTag
 
-  def create(name: GemOption[String], targets: ImList[GuideProbeTargets]): GuideGroup = ???
+  private val AllTags = List(AutoInitialTag, AutoActiveTag, ManualTag)
 
   def fromParamSet(ps: ParamSet): GuideGroup = {
-    val name    = ImOption.apply(Pio.getValue(ps, "name"))
+    val name    = Pio.getValue(ps, "name", "Manual Group")
     val targets = ps.getParamSets.asScala.toList.map { GuideProbeTargets.fromParamSet }.asImList
-    create(name, targets)
+
+    val typeTag = for {
+      s <- Option(Pio.getValue(ps, "tag"))
+      t <- AllTags.find(_.toString == s)
+    } yield t
+
+    typeTag.fold(createManual(name, targets)) {
+      case AutoInitialTag => AutomaticGroupInitial
+      case AutoActiveTag  => createActive(targets)
+      case ManualTag      => createManual(name, targets)
+    }
   }
 
+  @varargs
+  def create(name: String, targets: GuideProbeTargets*): GuideGroup =
+    createManual(name, targets.toList.asImList)
+
+  def create(name: String, targets: ImList[GuideProbeTargets]): GuideGroup =
+    createManual(name, targets)
+
+  def create(name: GemOption[String], targets: ImList[GuideProbeTargets]): GuideGroup =
+    createManual(name.getOrElse("Manual Group"), targets)
+
+  def createManual(name: String, targets: ImList[GuideProbeTargets]): GuideGroup = {
+    val m = targets.asScalaList.flatMap { gpt =>
+      val lst    = gpt.getTargets.asScalaList
+      val zipOpt = gpt.getPrimaryIndex.asScalaOpt.map(i => lst.splitAt(i)).collect {
+        case (lefts, focus :: rights) => OptsList(Zipper(lefts.reverse.toStream, focus, rights.toStream).right)
+      }
+      zipOpt.orElse(lst.toNel.map(nel => OptsList(nel.left))).strengthL(gpt.getGuider)
+    }.toMap
+
+    GuideGroup(ManualGroup(name, m))
+  }
+
+  def createActive(targets: ImList[GuideProbeTargets]): GuideGroup = {
+    val m = targets.asScalaList.flatMap { gpt =>
+      gpt.getPrimary.asScalaOpt.strengthL(gpt.getGuider)
+    }.toMap
+
+    GuideGroup(Active(m))
+  }
 }
