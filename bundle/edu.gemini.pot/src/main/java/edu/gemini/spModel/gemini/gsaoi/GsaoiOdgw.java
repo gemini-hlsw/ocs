@@ -8,10 +8,7 @@ import edu.gemini.spModel.guide.*;
 import edu.gemini.spModel.obs.SchedulingBlock;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.target.SPTarget;
-import edu.gemini.spModel.target.env.BagsResult;
-import edu.gemini.spModel.target.env.GuideGroup;
-import edu.gemini.spModel.target.env.GuideProbeTargets;
-import edu.gemini.spModel.target.env.TargetEnvironment;
+import edu.gemini.spModel.target.env.*;
 
 import java.awt.geom.Area;
 import java.util.*;
@@ -33,20 +30,19 @@ public enum GsaoiOdgw implements ValidatableGuideProbe {
     public enum Group implements SelectableGuideProbeGroup, OptimizableGuideProbeGroup, GemsGuideProbeGroup {
         instance;
 
-        public String getKey() {
+        @Override public String getKey() {
             return "ODGW";
         }
 
-        public String getDisplayName() {
+        @Override public String getDisplayName() {
             return "On-detector Guide Window";
         }
 
-        public Collection<ValidatableGuideProbe> getMembers() {
-            ValidatableGuideProbe[] vals = GsaoiOdgw.values();
-            return Arrays.asList(vals);
+        @Override public Collection<ValidatableGuideProbe> getMembers() {
+            return Arrays.asList(GsaoiOdgw.values());
         }
 
-        public Option<GuideProbe> select(Coordinates guideStar, ObsContext ctx) {
+        @Override public Option<GuideProbe> select(Coordinates guideStar, ObsContext ctx) {
             // Get the id of the detector in which the guide star lands, if any
             final Option<GsaoiDetectorArray.Id> idOpt = GsaoiDetectorArray.instance.getId(guideStar, ctx);
             if (idOpt.isEmpty()) return None.instance();
@@ -55,7 +51,7 @@ public enum GsaoiOdgw implements ValidatableGuideProbe {
             return new Some<>(lookup(idOpt.getValue()));
         }
 
-        public TargetEnvironment add(final SPTarget guideStar, final boolean isBags, final ObsContext ctx) {
+        @Override public TargetEnvironment add(final SPTarget guideStar, final ObsContext ctx) {
             // Select the appropriate guider, if any.
             final TargetEnvironment env = ctx.getTargets();
             final Option<GuideProbe> probeOpt = select(guideStar.getTarget().getSkycalcCoordinates(), ctx);
@@ -71,14 +67,14 @@ public enum GsaoiOdgw implements ValidatableGuideProbe {
             if (gptOpt.exists(gpt -> gpt.containsTarget(guideStar)))
                 return env;
 
-            final GuideProbeTargets gptNew = gptOpt.map(gpt -> gpt.addManualTarget(guideStar))
-                    .getOrElse(GuideProbeTargets.create(probe, guideStar))
-                    .withExistingPrimary(guideStar);
+            final GuideProbeTargets gptNew = gptOpt.map(gpt ->
+                    gpt.update(OptionsList.UpdateOps.appendAsPrimary(guideStar)))
+                    .getOrElse(GuideProbeTargets.create(probe, guideStar));
             final GuideGroup grpNew = grp.put(gptNew);
             return env.setPrimaryGuideGroup(grpNew);
         }
 
-        public Angle getRadiusLimits() {
+        @Override public Angle getRadiusLimits() {
             return new Angle(1, Angle.Unit.ARCMINS);
         }
 
@@ -86,7 +82,7 @@ public enum GsaoiOdgw implements ValidatableGuideProbe {
 
     private final GsaoiDetectorArray.Id id;
 
-    private GsaoiOdgw(GsaoiDetectorArray.Id id) {
+    GsaoiOdgw(GsaoiDetectorArray.Id id) {
         this.id = id;
     }
 

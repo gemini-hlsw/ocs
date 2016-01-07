@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package edu.gemini.spModel.target.env;
 
 import edu.gemini.shared.util.immutable.*;
@@ -56,11 +52,11 @@ public class GuideEnvironmentTest {
 
     @Test
     public void testGetTargets() {
-        ImList<SPTarget> empty = ImCollections.emptyList();
+        final ImList<SPTarget> empty = ImCollections.emptyList();
         assertEquals(empty, GuideEnvironment.EMPTY.getTargets());
 
         // sorted in the order they are encountered in the groups
-        ImList<SPTarget> expected = DefaultImList.create(t_pwfs1_1, t_pwfs1_2, t_pwfs1_1, t_pwfs1_2, t_pwfs2, t_gmos);
+        final ImList<SPTarget> expected = DefaultImList.create(t_pwfs1_1, t_pwfs1_2, t_pwfs1_1, t_pwfs1_2, t_pwfs2, t_gmos);
         assertEquals(expected, env.getTargets());
     }
 
@@ -75,30 +71,28 @@ public class GuideEnvironmentTest {
 
     @Test
     public void testCloneTargets() {
-        GuideEnvironment env2 = env.cloneTargets();
+        final GuideEnvironment env2 = env.cloneTargets();
         Fixture.verifyGuideEnvironmentEquals(env, env2, when);
         assertFalse(env2.containsTarget(t_pwfs1_1)); // SPTarget.equals() not defined
     }
 
     @Test
     public void testRemoveTarget() {
-        GuideEnvironment env2 = env.removeTarget(t_pwfs1_1);
+        final GuideEnvironment env2 = env.removeTarget(t_pwfs1_1);
+        final ImList<SPTarget> expected2 = DefaultImList.create(t_pwfs1_2, t_pwfs1_2, t_pwfs2, t_gmos);
+        assertEquals(expected2, env2.getTargets());
 
-        // sorted in the order they are encountered in the groups
-        ImList<SPTarget> expected = DefaultImList.create(t_pwfs1_2, t_pwfs1_2, t_pwfs2, t_gmos);
-        assertEquals(expected, env2.getTargets());
+        final GuideEnvironment env3 = env2.removeTarget(t_gmos);
+        final ImList<SPTarget> expected3 = DefaultImList.create(t_pwfs1_2, t_pwfs1_2, t_pwfs2);
+        assertEquals(expected3, env3.getTargets());
 
-        env2 = env2.removeTarget(t_gmos);
-        expected = DefaultImList.create(t_pwfs1_2, t_pwfs1_2, t_pwfs2);
-        assertEquals(expected, env2.getTargets());
+        final GuideEnvironment env4 = env3.removeTarget(t_pwfs2);
+        final ImList<SPTarget> expected4 = DefaultImList.create(t_pwfs1_2, t_pwfs1_2);
+        assertEquals(expected4, env4.getTargets());
 
-        env2 = env2.removeTarget(t_pwfs2);
-        expected = DefaultImList.create(t_pwfs1_2, t_pwfs1_2);
-        assertEquals(expected, env2.getTargets());
-
-        env2 = env2.removeTarget(t_pwfs1_2);
-        expected = ImCollections.emptyList();
-        assertEquals(expected, env2.getTargets());
+        final GuideEnvironment env5 = env4.removeTarget(t_pwfs1_2);
+        final ImList<SPTarget> expected5 = ImCollections.emptyList();
+        assertEquals(expected5, env5.getTargets());
     }
 
     @Test
@@ -114,10 +108,11 @@ public class GuideEnvironmentTest {
 
         final ImList<GuideEnvironment> lst = DefaultImList.create(env, env3, env4, env5);
         final PioFactory fact = new PioXmlFactory();
-        for (GuideEnvironment expected : lst) {
+
+        lst.foreach(expected -> {
             final GuideEnvironment actual = GuideEnvironment.fromParamSet(expected.getParamSet(fact));
             Fixture.verifyGuideEnvironmentEquals(expected, actual, when);
-        }
+        });
     }
 
     @Test
@@ -134,11 +129,11 @@ public class GuideEnvironmentTest {
         assertNotNull(gpt);
 
         // Update them with a new target (the 3rd in the list of options)
-        final GuideProbeTargets gpt2 = gpt.withManualTargets(gpt.getManualTargets().append(new SPTarget()));
+        final GuideProbeTargets gpt2 = gpt.setOptions(gpt.getOptions().append(new SPTarget()));
         final GuideEnvironment  env3 = env2.putGuideProbeTargets(newGrp4, gpt2);
 
         // Check that they now contain the new target.
         final GuideProbeTargets gpt3 = env3.getOptions().get(3).get(pwfs1).getValue();
-        assertEquals(3, gpt3.getManualTargets().size());
+        assertEquals(3, gpt3.getOptions().size());
     }
 }

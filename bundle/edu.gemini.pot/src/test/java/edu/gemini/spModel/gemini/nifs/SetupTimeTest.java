@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package edu.gemini.spModel.gemini.nifs;
 
 import edu.gemini.pot.sp.*;
@@ -45,50 +41,50 @@ public final class SetupTimeTest {
 
     enum BaseOption implements Option {
         noAltair() {
-            public void init(Context ctx) throws Exception {
+            public void init(final Context ctx) throws Exception {
                 ensureNifs(ctx);
                 removeComponent(ctx.obs, InstAltair.SP_TYPE);
             }
-            public double compute(double baseTime) {
+            public double compute(final double baseTime) {
                 return NifsSetupTimeService.BASE_SETUP_TIME_SEC;
             }
         },
         altairNgs() {
-            public void init(Context ctx) throws Exception {
+            public void init(final Context ctx) throws Exception {
                 ensureNifs(ctx);
                 ensureAltair(ctx);
                 setMode(ctx, AltairParams.Mode.NGS);
             }
-            public double compute(double baseTime) {
+            public double compute(final double baseTime) {
                 return NifsSetupTimeService.BASE_SETUP_TIME_SEC;
             }
         },
         altairLgs() {
-            public void init(Context ctx) throws Exception {
+            public void init(final Context ctx) throws Exception {
                 ensureNifs(ctx);
                 ensureAltair(ctx);
                 setMode(ctx, AltairParams.Mode.LGS);
             }
-            public double compute(double baseTime) {
+            public double compute(final double baseTime) {
                 return NifsSetupTimeService.BASE_LGS_SETUP_TIME_SEC;
             }
         },
         ;
 
-        private static void ensureNifs(Context ctx) throws Exception {
+        private static void ensureNifs(final Context ctx) throws Exception {
             if (lookup(ctx.obs, InstNIFS.SP_TYPE) == null) {
                 ctx.obs.addObsComponent(ctx.nifsComponent);
             }
         }
 
-        private static void ensureAltair(Context ctx) throws Exception {
+        private static void ensureAltair(final Context ctx) throws Exception {
             if (lookup(ctx.obs, InstAltair.SP_TYPE) == null) {
                 ctx.obs.addObsComponent(ctx.altairComponent);
             }
         }
 
-        private static void setMode(Context ctx, AltairParams.Mode mode) throws Exception {
-            InstAltair dataObj = (InstAltair) ctx.altairComponent.getDataObject();
+        private static void setMode(final Context ctx, final AltairParams.Mode mode) throws Exception {
+            final InstAltair dataObj = (InstAltair) ctx.altairComponent.getDataObject();
             dataObj.setMode(mode);
             ctx.altairComponent.setDataObject(dataObj);
         }
@@ -96,18 +92,18 @@ public final class SetupTimeTest {
 
     enum CoronographyOption implements Option {
         notCoronography() {
-            public void init(Context ctx) throws Exception {
-                InstNIFS nifs = (InstNIFS) ctx.nifsComponent.getDataObject();
+            public void init(final Context ctx) throws Exception {
+                final InstNIFS nifs = (InstNIFS) ctx.nifsComponent.getDataObject();
                 nifs.setMask(NIFSParams.Mask.CLEAR);
                 ctx.nifsComponent.setDataObject(nifs);
             }
-            public double compute(double baseTime) {
+            public double compute(final double baseTime) {
                 return baseTime;
             }
         },
         coronography() {
-            public void init(Context ctx) throws Exception {
-                InstNIFS nifs = (InstNIFS) ctx.nifsComponent.getDataObject();
+            public void init(final Context ctx) throws Exception {
+                final InstNIFS nifs = (InstNIFS) ctx.nifsComponent.getDataObject();
                 nifs.setMask(NIFSParams.Mask.OD_1);
                 ctx.nifsComponent.setDataObject(nifs);
             }
@@ -119,7 +115,7 @@ public final class SetupTimeTest {
 
     enum OiwfsOption implements Option {
         noTargetComp() {
-            public void init(Context ctx) throws Exception {
+            public void init(final Context ctx) throws Exception {
                 removeComponent(ctx.obs, TargetObsComp.SP_TYPE);
             }
             public double compute(double baseTime) {
@@ -127,55 +123,55 @@ public final class SetupTimeTest {
             }
         },
         noOiwfs() {
-            public void init(Context ctx) throws Exception {
+            public void init(final Context ctx) throws Exception {
                 // Add the target component if it doesn't exist.
                 if (lookup(ctx.obs, TargetObsComp.SP_TYPE) == null) {
                     ctx.obs.addObsComponent(ctx.targetComponent);
                 }
 
                 // Get the target environment.
-                TargetObsComp dataObj = (TargetObsComp) ctx.targetComponent.getDataObject();
-                TargetEnvironment env = dataObj.getTargetEnvironment();
+                final TargetObsComp dataObj = (TargetObsComp) ctx.targetComponent.getDataObject();
+                final TargetEnvironment env = dataObj.getTargetEnvironment();
 
                 // Remove the OIWFS if it exists.
-                GuideGroup grp = env.getOrCreatePrimaryGuideGroup();
+                final GuideGroup grp = env.getOrCreatePrimaryGuideGroup();
                 final ImList<GuideProbeTargets> gtList = grp.getAll().remove(gpt -> gpt.getGuider() == NifsOiwfsGuideProbe.instance);
-                env = env.setPrimaryGuideGroup(grp.setAll(gtList));
+                final TargetEnvironment env2 = env.setPrimaryGuideGroup(grp.setAll(gtList));
 
-                dataObj.setTargetEnvironment(env);
+                dataObj.setTargetEnvironment(env2);
                 ctx.targetComponent.setDataObject(dataObj);
             }
-            public double compute(double baseTime) {
+            public double compute(final double baseTime) {
                 return baseTime;
             }
         },
         oiwfs() {
-            public void init(Context ctx) throws Exception {
+            public void init(final Context ctx) throws Exception {
                 // Add the target compnent if it doesn't exist.
                 if (lookup(ctx.obs, TargetObsComp.SP_TYPE) == null) {
                     ctx.obs.addObsComponent(ctx.targetComponent);
                 }
 
                 // Get the target environment
-                TargetObsComp dataObj = (TargetObsComp) ctx.targetComponent.getDataObject();
-                TargetEnvironment env = dataObj.getTargetEnvironment();
+                final TargetObsComp dataObj = (TargetObsComp) ctx.targetComponent.getDataObject();
+                final TargetEnvironment env = dataObj.getTargetEnvironment();
 
                 // Add the OIWFS if it doesn't exist.
                 final SPTarget target = new SPTarget();
-                GuideProbeTargets gt = GuideProbeTargets.create(NifsOiwfsGuideProbe.instance, target).withExistingPrimary(target);
-                env = env.putPrimaryGuideProbeTargets(gt);
-                dataObj.setTargetEnvironment(env);
+                final GuideProbeTargets gt = GuideProbeTargets.create(NifsOiwfsGuideProbe.instance, target);
+                final TargetEnvironment env2 = env.putPrimaryGuideProbeTargets(gt);
+                dataObj.setTargetEnvironment(env2);
                 ctx.targetComponent.setDataObject(dataObj);
             }
-            public double compute(double baseTime) {
+            public double compute(final double baseTime) {
                 return baseTime + NifsSetupTimeService.OIWFS_SETUP_SEC;
             }
         }
     }
 
-    private static void removeComponent(ISPObservation obs, SPComponentType type) throws Exception {
-        List<ISPObsComponent> obsComps = obs.getObsComponents();
-        Iterator<ISPObsComponent> it = obsComps.iterator();
+    private static void removeComponent(final ISPObservation obs, final SPComponentType type) throws Exception {
+        final List<ISPObsComponent> obsComps = obs.getObsComponents();
+        final Iterator<ISPObsComponent> it = obsComps.iterator();
         while (it.hasNext()) {
             ISPObsComponent comp = it.next();
             if (type.equals(comp.getType())) {
@@ -186,12 +182,10 @@ public final class SetupTimeTest {
         obs.setObsComponents(obsComps);
     }
 
-    private static ISPObsComponent lookup(ISPObservation obs, SPComponentType type) throws Exception {
-        List<ISPObsComponent> obsComps = obs.getObsComponents();
-        for (ISPObsComponent obsComp : obsComps) {
-            if (type.equals(obsComp.getType())) return obsComp;
-        }
-        return null;
+    private static ISPObsComponent lookup(final ISPObservation obs, final SPComponentType type) throws Exception {
+        return obs.getObsComponents().stream()
+                .filter(obsComp -> type.equals(obsComp.getType()))
+                .findFirst().orElse(null);
     }
 
     private Context ctx;
@@ -202,14 +196,14 @@ public final class SetupTimeTest {
     public void setUp() throws Exception {
         odb = DBLocalDatabase.createTransient();
 
-        SPProgramID progId = SPProgramID.toProgramID("GS-2009B-Q-1");
-        ISPProgram prog = odb.getFactory().createProgram(new SPNodeKey(), progId);
+        final SPProgramID progId = SPProgramID.toProgramID("GS-2009B-Q-1");
+        final ISPProgram prog = odb.getFactory().createProgram(new SPNodeKey(), progId);
         odb.put(prog);
 
         ctx = new Context();
         ctx.obs = odb.getFactory().createObservation(prog, null);
 
-        List<ISPObsComponent> emptyObsComponents = Collections.emptyList();
+        final List<ISPObsComponent> emptyObsComponents = Collections.emptyList();
         ctx.obs.setObsComponents(emptyObsComponents);
         prog.addObservation(ctx.obs);
 
@@ -223,8 +217,8 @@ public final class SetupTimeTest {
         odb.getDBAdmin().shutdown();
     }
 
-    private void verify(String name, double expectedTime) throws Exception {
-        double actualTime = NifsSetupTimeService.getSetupTimeSec(ctx.obs);
+    private void verify(final String name, final double expectedTime) throws Exception {
+        final double actualTime = NifsSetupTimeService.getSetupTimeSec(ctx.obs);
         assertEquals(name, expectedTime, actualTime, 0.00001);
     }
 
@@ -235,14 +229,14 @@ public final class SetupTimeTest {
 
     @Test
     public void testSetupTimes() throws Exception {
-        for (BaseOption baseOpt : BaseOption.values()) {
+        for (final BaseOption baseOpt : BaseOption.values()) {
             baseOpt.init(ctx);
-            for (OiwfsOption oiwfsOpt : OiwfsOption.values()) {
+            for (final OiwfsOption oiwfsOpt : OiwfsOption.values()) {
                 oiwfsOpt.init(ctx);
-                for (CoronographyOption corOpt : CoronographyOption.values()) {
+                for (final CoronographyOption corOpt : CoronographyOption.values()) {
                     corOpt.init(ctx);
-                    String name = String.format("(%s, %s, %s)", baseOpt.name(), oiwfsOpt.name(), corOpt.name());
-                    double time = corOpt.compute(oiwfsOpt.compute(baseOpt.compute(0)));
+                    final String name = String.format("(%s, %s, %s)", baseOpt.name(), oiwfsOpt.name(), corOpt.name());
+                    final double time = corOpt.compute(oiwfsOpt.compute(baseOpt.compute(0)));
                     verify(name, time);
                 }
             }

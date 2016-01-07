@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package edu.gemini.spModel.target.env;
 
 import edu.gemini.shared.util.immutable.*;
@@ -11,7 +7,6 @@ import edu.gemini.spModel.pio.Pio;
 import edu.gemini.spModel.pio.PioFactory;
 import edu.gemini.spModel.target.SPTarget;
 import static edu.gemini.spModel.target.env.GuideProbeTargets.sortByGuider;
-import edu.gemini.spModel.target.env.OptionsList.UpdateOps;
 
 import java.io.Serializable;
 import java.util.*;
@@ -369,7 +364,7 @@ public final class GuideGroup implements Serializable, Iterable<GuideProbeTarget
 
     @Override
     public GuideGroup removeTarget(final SPTarget target) {
-        final ImList<GuideProbeTargets> updated = guideTargets.map(gpt -> gpt.removeTargetSelectPrimary(target));
+        final ImList<GuideProbeTargets> updated = guideTargets.map(gpt -> gpt.removeTarget(target));
         return new GuideGroup(name, updated);
     }
 

@@ -3,6 +3,7 @@ package edu.gemini.spdb.rapidtoo.impl;
 import edu.gemini.pot.sp.*;
 import static edu.gemini.pot.sp.SPComponentBroadType.INSTRUMENT;
 import edu.gemini.pot.spdb.IDBDatabaseService;
+import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.core.SPBadIDException;
 import edu.gemini.spModel.core.SPProgramID;
@@ -47,16 +48,16 @@ public final class TooUpdateServiceImpl implements TooUpdateService {
         this.keyservice = keyservice;
     }
 
-    private ISPProgram _authenticate(IDBDatabaseService db, TooUpdate update) throws TooUpdateException {
-        TooIdentity id = update.getIdentity();
+    private ISPProgram _authenticate(final IDBDatabaseService db, final TooUpdate update) throws TooUpdateException {
+        final TooIdentity id = update.getIdentity();
 
-        SPProgramID progId = id.getProgramId();
+        final SPProgramID progId = id.getProgramId();
         if (progId == null) {
             LOG.info("Attempt to log in without a program id");
             throw new AuthenticationException("Incorrect program ID or password");
         }
 
-        ISPProgram prog = db.lookupProgramByID(progId);
+        final ISPProgram prog = db.lookupProgramByID(progId);
         if (prog == null) {
             // using a fine level here, since in the clustered database
             // approach, all but one database will not have the indicated
@@ -76,7 +77,7 @@ public final class TooUpdateServiceImpl implements TooUpdateService {
         final UserPrincipal up = UserPrincipal.apply(id.getEmail());
         try {
             ImplicitPolicyForJava.checkPermission(db, up, new PiPermission(id.getProgramId()));
-        } catch (AccessControlException ace) {
+        } catch (final AccessControlException ace) {
             LOG.info("PiPermission(" + id.getProgramId() + ") denied for user " + id.getEmail());
             throw new AuthenticationException("Insufficient privileges.");
         }
@@ -89,15 +90,15 @@ public final class TooUpdateServiceImpl implements TooUpdateService {
         return prog;
     }
 
-    private ISPObservation _lookupTemplate(IDBDatabaseService db, TooUpdate update, ISPProgram prog)
+    private ISPObservation _lookupTemplate(final IDBDatabaseService db, final TooUpdate update, final ISPProgram prog)
             throws MissingTemplateException {
-        TooIdentity id = update.getIdentity();
-        int obsNum = id.getTemplateObsNumber();
+        final TooIdentity id = update.getIdentity();
+        final int obsNum = id.getTemplateObsNumber();
         if (obsNum > 0) {
             SPObservationID obsId;
             try {
                 obsId = new SPObservationID(prog.getProgramID(), obsNum);
-            } catch (SPBadIDException ex) {
+            } catch (final SPBadIDException ex) {
                 LOG.log(Level.SEVERE, ex.getMessage(), ex);
                 throw new RuntimeException("invalid obs id with positive number?: " + obsNum);
             }
@@ -106,43 +107,30 @@ public final class TooUpdateServiceImpl implements TooUpdateService {
             return res;
         }
 
-        String obsName = id.getTemplateObsName();
+        final String obsName = id.getTemplateObsName();
         if (obsName == null) {
             throw new MissingTemplateException("Template observation not specified");
         }
 
-        //noinspection unchecked
-        List<ISPObservation> obsList = prog.getAllObservations();
+        final List<ISPObservation> obsList = prog.getAllObservations();
         if (obsList == null) {
             throw new MissingTemplateException("Program has no observations");
         }
 
-        for (ISPObservation obs : obsList) {
-            SPObservation dataObj = (SPObservation) obs.getDataObject();
-            if (obsName.equalsIgnoreCase(dataObj.getTitle())) {
-                return obs;
-            }
-        }
-
-        throw new MissingTemplateException("Template observation \"" +
-                                                     obsName + "\" not found");
+        return obsList.stream().filter(obs -> obsName.equalsIgnoreCase(obs.getDataObject().getTitle()))
+                .findFirst()
+                .orElseThrow(() -> new MissingTemplateException("Template observation \"" + obsName + "\" not found"));
     }
 
-    private ISPGroup _getOrCreateGroup(ISPProgram prog, ISPFactory factory, TooUpdate update)
-             {
-
-        String groupName = update.getGroup();
+    private ISPGroup _getOrCreateGroup(final ISPProgram prog, final ISPFactory factory, final TooUpdate update) {
+        final String groupName = update.getGroup();
         if (groupName == null) return null;
 
-        //noinspection unchecked
-        List<ISPGroup> groupList = prog.getGroups();
-        if (groupList == null) {
-            groupList = new ArrayList<ISPGroup>(1);
-        }
+        final List<ISPGroup> groupList = ImOption.apply(prog.getGroups()).getOrElse(new ArrayList<>(1));
 
-        for (ISPGroup group : groupList) {
-            SPGroup dataObj = (SPGroup) group.getDataObject();
-            String curGroupName = dataObj.getGroup();
+        for (final ISPGroup group : groupList) {
+            final SPGroup dataObj = (SPGroup) group.getDataObject();
+            final String curGroupName = dataObj.getGroup();
             if (groupName.equals(curGroupName)) return group;
         }
 
@@ -150,20 +138,20 @@ public final class TooUpdateServiceImpl implements TooUpdateService {
         ISPGroup group;
         try {
             group = factory.createGroup(prog, null);
-        } catch (SPUnknownIDException ex) {
+        } catch (final SPUnknownIDException ex) {
             LOG.log(Level.SEVERE, ex.getMessage(), ex);
             return null;
         }
 
-        SPGroup dataObj = new SPGroup(groupName);
+        final SPGroup dataObj = new SPGroup(groupName);
         group.setDataObject(dataObj);
         groupList.add(group);
         try {
             prog.setGroups(groupList);
-        } catch (SPNodeNotLocalException ex) {
+        } catch (final SPNodeNotLocalException ex) {
             LOG.log(Level.SEVERE, ex.getMessage(), ex);
             return null;
-        } catch (SPTreeStateException ex) {
+        } catch (final SPTreeStateException ex) {
             LOG.log(Level.SEVERE, ex.getMessage(), ex);
             return null;
         }
@@ -171,51 +159,48 @@ public final class TooUpdateServiceImpl implements TooUpdateService {
         return group;
     }
 
-    private void _addNote(ISPObservation obs, ISPFactory factory, TooUpdate update)
+    private void _addNote(final ISPObservation obs, final ISPFactory factory, final TooUpdate update)
             throws SPException {
 
-        String noteText = update.getNote();
+        final String noteText = update.getNote();
         if (noteText == null) return;
 
-        ISPObsComponent obsComp;
+        final ISPObsComponent obsComp;
         obsComp = factory.createObsComponent(obs.getProgram(), SPNote.SP_TYPE, null);
-        SPNote note = (SPNote) obsComp.getDataObject();
+
+        final SPNote note = (SPNote) obsComp.getDataObject();
         note.setTitle("Finding Chart");
         note.setNote(noteText);
+
         obsComp.setDataObject(note);
         obs.addObsComponent(0, obsComp);
     }
 
-    private void _addTimingWindow(ISPObservation obs, ISPFactory factory, TooUpdate update)
+    private void _addTimingWindow(final ISPObservation obs, final ISPFactory factory, final TooUpdate update)
             throws SPException {
 
-        SPSiteQuality.TimingWindow win = null;
-        TooTimingWindow toowin = update.getTimingWindow();
+        final SPSiteQuality.TimingWindow win;
+        final TooTimingWindow toowin = update.getTimingWindow();
         if (toowin != null) {
             long start    = toowin.getDate().getTime();
             long duration = toowin.getDuration();
             win = new SPSiteQuality.TimingWindow(start, duration, 0, 0);
+        } else {
+            win = null;
         }
 
         TooConstraintService.addTimingWindow(obs, factory, win);
     }
 
-    private void _addElevationConstraint(ISPObservation obs, ISPFactory factory, TooUpdate update)
+    private void _addElevationConstraint(final ISPObservation obs, final ISPFactory factory, final TooUpdate update)
             throws SPException {
-        TooElevationConstraint cons = update.getElevationConstraint();
+        final TooElevationConstraint cons = update.getElevationConstraint();
         if (cons == null) return;
         TooConstraintService.setElevationConstraint(obs, factory, cons.getType(), cons.getMin(), cons.getMax());
     }
 
-    private ISPObsComponent _findComponent(ISPObservation obs, SPComponentType type)
-             {
-        //noinspection unchecked
-        List<ISPObsComponent> compList = obs.getObsComponents();
-        for (ISPObsComponent comp : compList) {
-            SPComponentType curType = comp.getType();
-            if (curType.equals(type)) return comp;
-        }
-        return null;
+    private ISPObsComponent _findComponent(final ISPObservation obs, final SPComponentType type) {
+        return obs.getObsComponents().stream().filter(comp -> comp.getType().equals(type)).findFirst().orElse(null);
     }
 
     private void _setTarget(final ISPObservation obs, final TooUpdate update)  {
@@ -270,22 +255,16 @@ public final class TooUpdateServiceImpl implements TooUpdateService {
                 }
 
                 if (probe != null) {
-                    final Option<GuideProbeTargets> gtOpt = targetEnv.getPrimaryGuideProbeTargets(probe);
-                    final GuideProbeTargets gt = gtOpt.isEmpty() ? GuideProbeTargets.create(probe) : gtOpt.getValue();
+                    final GuideProbeTargets gt = targetEnv.getPrimaryGuideProbeTargets(probe).getOrElse(GuideProbeTargets.create(probe));
 
                     final Option<SPTarget> targetOpt = gt.getPrimary();
-                    final SPTarget target = targetOpt.isEmpty() ? new SPTarget() : targetOpt.getValue();
-
+                    final SPTarget target = targetOpt.getOrElse(new SPTarget());
                     target.setRaDecDegrees(gs.getRa(), gs.getDec());
-                    final String name = gs.getName();
-                    if (name != null) {
-                        target.setName(name);
-                    }
-
-                        target.setMagnitudes(gs.getMagnitudes());
+                    ImOption.apply(gs.getName()).foreach(target::setName);
+                    target.setMagnitudes(gs.getMagnitudes());
 
                     if (targetOpt.isEmpty()) {
-                        final GuideProbeTargets gtNew = gt.withManualTargets(gt.getManualTargets().cons(target)).withExistingPrimary(target);
+                        final GuideProbeTargets gtNew = GuideProbeTargets.create(probe, gt.getOptions().cons(target));
                         final TargetEnvironment targetEnvNew = targetEnv.putPrimaryGuideProbeTargets(gtNew);
                         targetObsComp.setTargetEnvironment(targetEnvNew);
                     }
@@ -297,67 +276,60 @@ public final class TooUpdateServiceImpl implements TooUpdateService {
         targetComp.setDataObject(targetObsComp);
     }
 
-    private void _setPosAngle(ISPObservation obs, TooUpdate update)  {
+    private void _setPosAngle(final ISPObservation obs, final TooUpdate update)  {
 
-        Double posAngle = update.getPositionAngle();
+        final Double posAngle = update.getPositionAngle();
         if (posAngle == null) return;
 
-        ISPObsComponent inst = getInstrument(obs);
+        final ISPObsComponent inst = getInstrument(obs);
         if (inst == null) {
             LOG.warning("Cannot set position angle for observation since it has no instrument: " +
                          obs.getObservationID());
             return;
         }
 
-        SPInstObsComp dobj = (SPInstObsComp) inst.getDataObject();
+        final SPInstObsComp dobj = (SPInstObsComp) inst.getDataObject();
         dobj.setPosAngleDegrees(update.getPositionAngle());
         inst.setDataObject(dobj);
     }
 
-    private ISPObsComponent getInstrument(ISPObservation obs)  {
-        //noinspection unchecked
-        List<ISPObsComponent> obsComps = obs.getObsComponents();
-        for (ISPObsComponent obsComp : obsComps) {
-            SPComponentType type = obsComp.getType();
-            if (INSTRUMENT == type.broadType) {
-                return obsComp;
-            }
-        }
-        return null;
+    private ISPObsComponent getInstrument(final ISPObservation obs)  {
+        return obs.getObsComponents().stream().filter(obsComp -> INSTRUMENT == obsComp.getType().broadType)
+            .findFirst().orElse(null);
     }
 
-    private GuideProbe getOiwfs(ISPObservation obs)  {
-        ISPObsComponent inst = getInstrument(obs);
+    private GuideProbe getOiwfs(final ISPObservation obs)  {
+        final ISPObsComponent inst = getInstrument(obs);
         if (inst == null) return null;
 
-        Object dataObj = inst.getDataObject();
+        final Object dataObj = inst.getDataObject();
         if (!(dataObj instanceof GuideProbeProvider)) return null;
 
-        Collection<GuideProbe> guiders = ((GuideProbeProvider) dataObj).getGuideProbes();
+        final Collection<GuideProbe> guiders = ((GuideProbeProvider) dataObj).getGuideProbes();
         if ((guiders != null) && (guiders.size() > 0)) return guiders.iterator().next();
         return null;
     }
 
-    private void _updateObsDataObj(ISPObservation obs, TooUpdate update)  {
-        SPObservation dobj = (SPObservation) obs.getDataObject();
+    private void _updateObsDataObj(final ISPObservation obs, final TooUpdate update)  {
+        final SPObservation dobj = (SPObservation) obs.getDataObject();
 
-        TooTarget tooTarget = update.getBasePosition();
+        final TooTarget tooTarget = update.getBasePosition();
         if (tooTarget != null) {
             dobj.setTitle(tooTarget.getName());
         }
 
-//        dobj.setPriority(SPObservation.Priority.TOO);
         dobj.setPhase2Status(ObsPhase2Status.ON_HOLD);
         obs.setDataObject(dobj);
     }
 
-    private void _markReady(ISPObservation obs)  {
-        SPObservation dobj = (SPObservation) obs.getDataObject();
+    private void _markReady(final ISPObservation obs)  {
+        final SPObservation dobj = (SPObservation) obs.getDataObject();
         dobj.setPhase2Status(ObsPhase2Status.PHASE_2_COMPLETE);
         obs.setDataObject(dobj);
     }
 
-    private void _updateObservation(ISPObservation obs, ISPFactory factory, TooUpdate update) throws SPException {
+    private void _updateObservation(final ISPObservation obs, final ISPFactory factory, final TooUpdate update)
+            throws SPException {
         _addNote(obs, factory, update);
         _addElevationConstraint(obs, factory, update);
         _addTimingWindow(obs, factory, update);
@@ -366,28 +338,28 @@ public final class TooUpdateServiceImpl implements TooUpdateService {
         _updateObsDataObj(obs, update);
     }
 
-    public ISPObservation handleUpdate(IDBDatabaseService db, TooUpdate update) throws TooUpdateException {
+    public ISPObservation handleUpdate(final IDBDatabaseService db, final TooUpdate update) throws TooUpdateException {
         // Get the associated program.
-        ISPProgram prog = _authenticate(db, update);
+        final ISPProgram prog = _authenticate(db, update);
 
         // Find the template observation.
-        ISPObservation template = _lookupTemplate(db, update, prog);
+        final ISPObservation template = _lookupTemplate(db, update, prog);
 
         // Make sure it is on hold.
-        SPObservation dataObj =  (SPObservation) template.getDataObject();
-        ObsPhase2Status status = dataObj.getPhase2Status();
+        final SPObservation dataObj =  (SPObservation) template.getDataObject();
+        final ObsPhase2Status status = dataObj.getPhase2Status();
         if (!(ObsPhase2Status.ON_HOLD == status)) {
             System.out.println("Was not on hold");
             throw new TooUpdateException("Template observation is not 'on hold'.");
         }
 
         // Clone the template observation.
-        ISPFactory factory = db.getFactory();
+        final ISPFactory factory = db.getFactory();
         ISPObservation res;
         try {
             res = factory.createObservationCopy(prog, template, false);
             _updateObservation(res, factory, update);
-            ISPGroup group = _getOrCreateGroup(prog, factory, update);
+            final ISPGroup group = _getOrCreateGroup(prog, factory, update);
             if (group == null) {
                 prog.addObservation(res);
             } else {
@@ -397,7 +369,7 @@ public final class TooUpdateServiceImpl implements TooUpdateService {
             // Set the observation status to ready after adding it, so that the
             // TOO alert is generated.
             if (update.isReady()) _markReady(res);
-        } catch (SPException ex) {
+        } catch (final SPException ex) {
             LOG.log(Level.SEVERE, ex.getMessage(), ex);
             throw new RuntimeException("unexpected problem in the middle of an update", ex);
         }

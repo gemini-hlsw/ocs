@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package edu.gemini.spModel.io.impl.migration.to2009B;
 
 import edu.gemini.pot.sp.SPObservationID;
@@ -31,13 +27,13 @@ enum SPTargetPosListParser {
     // real TargetEnvironment.
     private final static class Targets {
         SPTarget base;
-        Map<GuideProbe, GuideProbeTargets> guideMap = new HashMap<GuideProbe, GuideProbeTargets>();
-        List<SPTarget> userTargets = new ArrayList<SPTarget>();
+        final Map<GuideProbe, GuideProbeTargets> guideMap = new HashMap<>();
+        final List<SPTarget> userTargets = new ArrayList<>();
 
         TargetEnvironment toTargetEnv() {
             if (base == null) base = new SPTarget();
-            ImList<GuideProbeTargets> glst = DefaultImList.create(guideMap.values());
-            ImList<SPTarget> ulst = DefaultImList.create(userTargets);
+            final ImList<GuideProbeTargets> glst = DefaultImList.create(guideMap.values());
+            final ImList<SPTarget> ulst = DefaultImList.create(userTargets);
             return TargetEnvironment.create(base).setAllPrimaryGuideProbeTargets(glst).setUserTargets(ulst);
         }
     }
@@ -50,11 +46,11 @@ enum SPTargetPosListParser {
     }
 
     private static final TargetHandler BASE_HANDLER = new TargetHandler() {
-        public boolean matches(String tag) {
+        @Override public boolean matches(final String tag) {
             return "Base".equals(tag);
         }
 
-        public void addTarget(SPTarget target, Targets targets) {
+        @Override public void addTarget(final SPTarget target, final Targets targets) {
             targets.base = target;
         }
     };
@@ -63,36 +59,32 @@ enum SPTargetPosListParser {
         private final GuideProbe guider;
         private final Pattern pat;
 
-        GuideHandler(GuideProbe guider, String prefix) {
+        GuideHandler(final GuideProbe guider, final String prefix) {
             this.guider = guider;
             this.pat    = Pattern.compile(prefix + "-\\d+");
         }
 
-        public boolean matches(String tag) {
-            Matcher mat = pat.matcher(tag);
-            return mat.matches();
+        @Override public boolean matches(final String tag) {
+            return pat.matcher(tag).matches();
         }
 
-        public void addTarget(SPTarget target, Targets targets) {
-            GuideProbeTargets gt = targets.guideMap.get(guider);
-            if (gt == null) {
-                gt = GuideProbeTargets.create(guider, GuideProbeTargets.NO_TARGET, ImCollections.singletonList(target));
-            } else {
-                gt = gt.addManualTarget(target);
-            }
-            targets.guideMap.put(guider, gt);
+        @Override public void addTarget(final SPTarget target, final Targets targets) {
+            final GuideProbeTargets gt = targets.guideMap.get(guider);
+            final GuideProbeTargets gtNew = gt == null ?
+                    GuideProbeTargets.create(guider, ImCollections.singletonList(target)) :
+                    gt.setOptions(gt.getOptions().append(target));
+            targets.guideMap.put(guider, gtNew);
         }
     }
 
     private static final TargetHandler USER_HANDLER = new TargetHandler() {
         private final Pattern pat = Pattern.compile("User\\d+");
 
-        public boolean matches(String tag) {
-            Matcher mat = pat.matcher(tag);
-            return mat.matches();
+        @Override public boolean matches(final String tag) {
+            return pat.matcher(tag).matches();
         }
 
-        public void addTarget(SPTarget target, Targets targets) {
+        @Override public void addTarget(final SPTarget target, final Targets targets) {
             targets.userTargets.add(target);
         }
     };
@@ -110,11 +102,11 @@ enum SPTargetPosListParser {
             private final String root;
             private final int index;
 
-            Tag(String tag) {
+            Tag(final String tag) {
                 String root = null;
                 int index   = -1;
-                for (Pattern pat : pats) {
-                    Matcher mat = pat.matcher(tag);
+                for (final Pattern pat : pats) {
+                    final Matcher mat = pat.matcher(tag);
                     if (mat.matches()) {
                         root  = mat.group(1);
                         index = Integer.parseInt(mat.group(2));
@@ -127,34 +119,32 @@ enum SPTargetPosListParser {
                 this.index = index;
             }
 
-            public int compareTo(Tag that) {
+            public int compareTo(final Tag that) {
                 int res = root.compareTo(that.root);
-                if (res != 0) return res;
-
-                res = index - that.index;
-                return res;
+                return res != 0 ? res : index - that.index;
             }
         }
 
-        public int compare(ParamSet ps1, ParamSet ps2) {
-            Tag tag1 = new Tag(ps1.getName());
-            Tag tag2 = new Tag(ps2.getName());
+        public int compare(final ParamSet ps1, final ParamSet ps2) {
+            final Tag tag1 = new Tag(ps1.getName());
+            final Tag tag2 = new Tag(ps2.getName());
             return tag1.compareTo(tag2);
         }
     };
 
-    public Tuple2<TargetEnvironment, Map<String, SPTarget>> parse(SPObservationID obsId, ParamSet pset, Set<GuideProbe> availableGuiders) {
-        Map<String, SPTarget> tagMap = new HashMap<String, SPTarget>();
+    public Tuple2<TargetEnvironment, Map<String, SPTarget>> parse(final SPObservationID obsId, final ParamSet pset,
+                                                                  final Set<GuideProbe> availableGuiders) {
+        final Map<String, SPTarget> tagMap = new HashMap<>();
 
-        Set<TargetHandler> handlers = setupHandlers(availableGuiders);
+        final Set<TargetHandler> handlers = setupHandlers(availableGuiders);
 
-        List<ParamSet> targetPsets = pset.getParamSets();
+        final List<ParamSet> targetPsets = pset.getParamSets();
         Collections.sort(targetPsets, TARGET_COMPARATOR);
 
-        Targets targets = new Targets();
-        nextTarget: for (ParamSet targetPset : targetPsets) {
-            SPTarget target = SPTarget.fromParamSet(targetPset);
-            String tag = targetPset.getName();
+        final Targets targets = new Targets();
+        nextTarget: for (final ParamSet targetPset : targetPsets) {
+            final SPTarget target = SPTarget.fromParamSet(targetPset);
+            final String tag = targetPset.getName();
             tagMap.put(tag, target);
 
             for (TargetHandler handler : handlers) {
@@ -164,25 +154,24 @@ enum SPTargetPosListParser {
                 }
             }
 
-            String obsIdStr = obsId == null ? "unknown" : obsId.toString();
-            String msg;
-            msg = String.format("Skipping target '%s' in obs '%s'", tag, obsIdStr);
+            final String obsIdStr = obsId == null ? "unknown" : obsId.toString();
+            final String msg = String.format("Skipping target '%s' in obs '%s'", tag, obsIdStr);
             LOG.info(msg);
         }
 
-        return new Pair<TargetEnvironment, Map<String, SPTarget>>(targets.toTargetEnv(), tagMap);
+        return new Pair<>(targets.toTargetEnv(), tagMap);
     }
 
-    private Set<TargetHandler> setupHandlers(Set<GuideProbe> availableGuiders) {
-        Set<TargetHandler> handlers = new HashSet<TargetHandler>();
+    private Set<TargetHandler> setupHandlers(final Set<GuideProbe> availableGuiders) {
+        final Set<TargetHandler> handlers = new HashSet<>();
 
         handlers.add(BASE_HANDLER);
         handlers.add(USER_HANDLER);
         handlers.add(new GuideHandler(PwfsGuideProbe.pwfs1, "PWFS1"));
         handlers.add(new GuideHandler(PwfsGuideProbe.pwfs2, "PWFS2"));
 
-        for (GuideProbe guider : availableGuiders) {
-            GuideProbe.Type type = guider.getType();
+        for (final GuideProbe guider : availableGuiders) {
+            final GuideProbe.Type type = guider.getType();
             switch (type) {
                 case OIWFS :
                     handlers.add(new GuideHandler(guider, "OIWFS"));

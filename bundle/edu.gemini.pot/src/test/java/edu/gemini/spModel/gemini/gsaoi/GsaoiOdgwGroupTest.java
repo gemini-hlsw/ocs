@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package edu.gemini.spModel.gemini.gsaoi;
 
 import edu.gemini.skycalc.Angle;
@@ -84,7 +80,7 @@ public class GsaoiOdgwGroupTest extends TestCase {
         );
 
         final SPTarget guideTarget = new SPTarget(coords.getRaDeg(), coords.getDecDeg());
-        final TargetEnvironment env = group.add(guideTarget, false, baseContext);
+        final TargetEnvironment env = group.add(guideTarget, baseContext);
 
         // Adds an ODGW1 target by default.
         final ImList<GuideProbeTargets> col = env.getOrCreatePrimaryGuideGroup().getAll();
@@ -111,7 +107,7 @@ public class GsaoiOdgwGroupTest extends TestCase {
             final SPTarget guideTarget = new SPTarget(coords.getRaDeg(), coords.getDecDeg());
             final GsaoiOdgw odgw = GsaoiOdgw.values()[i];
 
-            final TargetEnvironment env = group.add(guideTarget, false, baseContext);
+            final TargetEnvironment env = group.add(guideTarget, baseContext);
 
             // Should have just one set of GuideTargets for the new guide star.
             assertEquals(1, env.getOrCreatePrimaryGuideGroup().getAll().size());

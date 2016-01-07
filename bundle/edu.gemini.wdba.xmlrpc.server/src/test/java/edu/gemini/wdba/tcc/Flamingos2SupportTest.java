@@ -14,8 +14,6 @@ import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.PwfsGuideProbe;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.telescope.IssPort;
-import org.junit.Test;
-import scala.actors.threadpool.Arrays;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,8 +26,7 @@ import static edu.gemini.spModel.gemini.flamingos2.Flamingos2.Filter;
  */
 public final class Flamingos2SupportTest extends InstrumentSupportTestBase<Flamingos2> {
 
-    private SPTarget base;
-
+    private final SPTarget base;
 
     public Flamingos2SupportTest() {
         super(Flamingos2.SP_TYPE);
@@ -38,34 +35,34 @@ public final class Flamingos2SupportTest extends InstrumentSupportTestBase<Flami
         base.setName("Base Pos");
     }
 
-    private static GuideProbeTargets createGuideTargets(GuideProbe probe) {
+    private static GuideProbeTargets createGuideTargets(final GuideProbe probe) {
         final SPTarget target = new SPTarget();
-        return GuideProbeTargets.create(probe, target).withExistingPrimary(target);
+        return GuideProbeTargets.create(probe, target);
     }
 
 
-    private TargetEnvironment create(GuideProbe... probes) {
-        ImList<GuideProbeTargets> gtCollection = createGuideTargetsList(probes);
-        ImList<SPTarget> userTargets = ImCollections.emptyList();
+    private TargetEnvironment create(final GuideProbe... probes) {
+        final ImList<GuideProbeTargets> gtCollection = createGuideTargetsList(probes);
+        final ImList<SPTarget> userTargets = ImCollections.emptyList();
         return TargetEnvironment.create(base).setAllPrimaryGuideProbeTargets(gtCollection).setUserTargets(userTargets);
     }
 
-    private static ImList<GuideProbeTargets> createGuideTargetsList(GuideProbe... probes) {
-        List<GuideProbeTargets> res = new ArrayList<GuideProbeTargets>();
+    private static ImList<GuideProbeTargets> createGuideTargetsList(final GuideProbe... probes) {
+        final List<GuideProbeTargets> res = new ArrayList<>();
         for (GuideProbe probe : probes) {
             res.add(createGuideTargets(probe));
         }
         return DefaultImList.create(res);
     }
 
-    private void setTargetEnv(GuideProbe... probes) throws Exception {
-        TargetEnvironment env = create(probes);
+    private void setTargetEnv(final GuideProbe... probes) throws Exception {
+        final TargetEnvironment env = create(probes);
 
         // Store the target environment.
-        ObservationNode obsNode = getObsNode();
-        TargetNode targetNode = obsNode.getTarget();
+        final ObservationNode obsNode = getObsNode();
+        final TargetNode targetNode = obsNode.getTarget();
 
-        TargetObsComp obsComp = targetNode.getDataObject();
+        final TargetObsComp obsComp = targetNode.getDataObject();
         obsComp.setTargetEnvironment(env);
         targetNode.getRemoteNode().setDataObject(obsComp);
     }
@@ -114,7 +111,6 @@ public final class Flamingos2SupportTest extends InstrumentSupportTestBase<Flami
         flam2.setDisperser(Flamingos2.Disperser.R3000);
         setInstrument(flam2);
 
-//        verifyInstrumentConfig(getSouthResults(), "F25_SPEC");
         verifyInstrumentConfig(getSouthResults(), "F25");
     }
 
@@ -124,10 +120,10 @@ public final class Flamingos2SupportTest extends InstrumentSupportTestBase<Flami
         flam2.setDisperser(Flamingos2.Disperser.R3000);
         setInstrument(flam2);
 
-//        verifyInstrumentConfig(getSouthResults(), "F2_SPEC");
         verifyInstrumentConfig(getSouthResults(), "F2");
     }
 
+    @SuppressWarnings({"ResultOfMethodCallIgnored","unchecked"})
     public void testWavelength() throws Exception {
         final Flamingos2 flam2 = getInstrument();
         flam2.setFilter(Filter.OPEN);
@@ -140,14 +136,13 @@ public final class Flamingos2SupportTest extends InstrumentSupportTestBase<Flami
         // Use the disperser wavelength in spectroscopy mode with no filter
         flam2.setFilter(Filter.OPEN);
 
-        final Pair[] dtA = new Pair[] {
+        final Pair<Disperser,String>[] dtA = new Pair[] {
             new Pair<>(Disperser.R1200JH, "1.39"),
             new Pair<>(Disperser.R1200HK, "1.871"),
             new Pair<>(Disperser.R3000,   "1.65"),
         };
 
-        //noinspection unchecked
-        for (final Pair<Disperser, String> t : (Pair<Disperser, String>[]) dtA ) {
+        for (final Pair<Disperser, String> t : dtA) {
             flam2.setDisperser(t._1());
             setInstrument(flam2);
             assertEquals(t._2(), getWavelength(getSouthResults()));
@@ -157,7 +152,7 @@ public final class Flamingos2SupportTest extends InstrumentSupportTestBase<Flami
         // filter is specified.
         flam2.setDisperser(Disperser.R3000);
 
-        final Pair[] ftA = new Pair[] {
+        final Pair<Filter,String>[] ftA = new Pair[] {
             new Pair<>(Filter.Y,       "1.02"),
             new Pair<>(Filter.J_LOW,   "1.15"),
             new Pair<>(Filter.J,       "1.25"),
@@ -168,8 +163,7 @@ public final class Flamingos2SupportTest extends InstrumentSupportTestBase<Flami
             new Pair<>(Filter.HK,      "1.871"),
         };
 
-        //noinspection unchecked
-        for (final Pair<Filter, String> t : (Pair<Filter, String>[]) ftA ) {
+        for (final Pair<Filter, String> t : ftA) {
             flam2.setFilter(t._1());
             setInstrument(flam2);
             assertEquals(t._2(), getWavelength(getSouthResults()));
@@ -178,29 +172,27 @@ public final class Flamingos2SupportTest extends InstrumentSupportTestBase<Flami
         // Use the filter when in imaging mode.
         flam2.setDisperser(Disperser.NONE);
 
-        //noinspection unchecked
-        for (final Pair<Filter, String> t : (Pair<Filter, String>[]) ftA ) {
+        for (final Pair<Filter, String> t : ftA) {
             flam2.setFilter(t._1());
             setInstrument(flam2);
             assertEquals(t._2(), getWavelength(getSouthResults()));
         }
-
 
         // For Darks, anything goes but make sure it doesn't crash.
         flam2.setFilter(Filter.DARK);
         setInstrument(flam2);
         try {
             Double.parseDouble(getWavelength(getSouthResults()));
-        } catch (Exception ex) {
+        } catch (final Exception ex) {
             fail("dark wavelength not set");
         }
     }
 
-    @Test public void testNoAoPointOrig() throws Exception {
+    public void testNoAoPointOrig() throws Exception {
         verifyPointOrig(getSouthResults(), "f2");
     }
 
-    @Test public void testLgsPointOrig() throws Exception {
+    public void testLgsPointOrig() throws Exception {
         addGems();
         verifyPointOrig(getSouthResults(), "lgs2f2");
     }

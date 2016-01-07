@@ -47,20 +47,20 @@ public class TpeGuidePosFeature extends TpePositionFeature
     /**
      * Reinitialize.
      */
-    public void reinit(TpeImageWidget iw, TpeImageInfo tii) {
+    @Override public void reinit(final TpeImageWidget iw, final TpeImageInfo tii) {
         super.reinit(iw, tii);
 
         _props.addWatcher(this);
 
         // Tell the position map that the guide star choices are visible.
-        TpePositionMap pm = TpePositionMap.getMap(iw);
+        final TpePositionMap pm = TpePositionMap.getMap(iw);
         pm.setFindGuideStars(true);
     }
 
     /** Called when the feature is unloaded */
-    public void unloaded() {
+    @Override public void unloaded() {
         // Tell the position map that the guide star choices are no longer visible.
-        TpePositionMap pm = TpePositionMap.getExistingMap();
+        final TpePositionMap pm = TpePositionMap.getExistingMap();
         if (pm != null)
             pm.setFindGuideStars(false);
 
@@ -74,7 +74,7 @@ public class TpeGuidePosFeature extends TpePositionFeature
      *
      * @see PropertyWatcher
      */
-    public void propertyChange(String propName) {
+    @Override public void propertyChange(final String propName) {
         _iw.repaint();
     }
 
@@ -82,7 +82,7 @@ public class TpeGuidePosFeature extends TpePositionFeature
      * Override getProperties to return the properties supported by this
      * feature.
      */
-    public BasicPropertyList getProperties() {
+    @Override public BasicPropertyList getProperties() {
         return _props;
     }
 
@@ -114,10 +114,10 @@ public class TpeGuidePosFeature extends TpePositionFeature
         return _props.getBoolean(PROP_IDENTIFY_PRIMARY, true);
     }
 
-    private SPTarget createNewTarget(TpeMouseEvent tme) {
-        SPTarget pos;
+    private SPTarget createNewTarget(final TpeMouseEvent tme) {
+        final SPTarget pos;
 
-        Option<SkyObject> skyObjectOpt = tme.getSkyObject();
+        final Option<SkyObject> skyObjectOpt = tme.getSkyObject();
         if (!skyObjectOpt.isEmpty()) {
             pos = new SPTarget(HmsDegTarget.fromSkyObject(skyObjectOpt.getValue()));
         } else {
@@ -176,7 +176,7 @@ public class TpeGuidePosFeature extends TpePositionFeature
 
             final TargetEnvironment env = obsComp.getTargetEnvironment();
             final Option<GuideProbeTargets> gptOpt = env.getPrimaryGuideProbeTargets(guider);
-            final GuideProbeTargets gpt = gptOpt.getOrElse(GuideProbeTargets.create(guider)).withManualPrimary(pos);
+            final GuideProbeTargets gpt = gptOpt.getOrElse(GuideProbeTargets.create(guider));
 
             obsComp.setTargetEnvironment(env.putPrimaryGuideProbeTargets(gpt));
             _iw.getContext().targets().commit();
@@ -225,7 +225,7 @@ public class TpeGuidePosFeature extends TpePositionFeature
             Option<ObsContext> ctx = tme.source.getObsContext();
             if (ctx.isEmpty()) return;
 
-            obsComp.setTargetEnvironment(group.add(pos, false, ctx.getValue()));
+            obsComp.setTargetEnvironment(group.add(pos, ctx.getValue()));
             _iw.getContext().targets().commit();
         }
     }
@@ -333,7 +333,7 @@ public class TpeGuidePosFeature extends TpePositionFeature
         final Option<GuideProbeTargets> gtOpt = env.getPrimaryGuideProbeTargets(res.getValue()._1());
         if (gtOpt.isEmpty()) return false;
 
-        final GuideProbeTargets gt = gtOpt.getValue().removeTargetSelectPrimary(res.getValue()._2());
+        final GuideProbeTargets gt = gtOpt.getValue().removeTarget(res.getValue()._2());
         toc.setTargetEnvironment(env.putPrimaryGuideProbeTargets(gt));
         _iw.getContext().targets().commit();
         return true;
@@ -393,7 +393,6 @@ public class TpeGuidePosFeature extends TpePositionFeature
 
             // Draw disabled targets in red.  Draw enabled but out of range
             // targets in a slightly transparent color.
-            // TODO: GuideProbeTargets.isEnabled
             final Color color = obsContextOpt.exists(c -> GuideProbeUtil.instance.isAvailable(c, gt.getGuider())) ? Color.green : Color.red;
             Color invalidColor = OtColor.makeSlightlyTransparent(color);
             g2d.setColor(color);

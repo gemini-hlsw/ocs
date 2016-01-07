@@ -1,6 +1,5 @@
 package edu.gemini.spModel.guide;
 
-import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.TargetEnvironment;
@@ -20,15 +19,11 @@ public interface OptimizableGuideProbeGroup extends GuideProbeGroup {
      * @param guideStar the new guide star to incorporate in the target
      * environment
      *
-     * @param isBAGS determines if the guide star was chosen by background
-     * AGS (true) or manually selected (false)*
-     *
      * @param ctx the context of the observation, which contains information
      * needed to assign a guider to the new guide star
      *
      * @return a newly optimized TargetEnvironment which incorporates the given
      * <code>guideStar</code>
      */
-    TargetEnvironment add(SPTarget guideStar, boolean isBAGS, ObsContext ctx);
-
+    TargetEnvironment add(SPTarget guideStar, ObsContext ctx);
 }

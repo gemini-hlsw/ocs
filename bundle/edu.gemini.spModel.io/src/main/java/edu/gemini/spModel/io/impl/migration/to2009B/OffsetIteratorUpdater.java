@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package edu.gemini.spModel.io.impl.migration.to2009B;
 
 import edu.gemini.pot.sp.ISPObservation;
@@ -31,7 +27,7 @@ enum OffsetIteratorUpdater {
 
     // Gets a map from the old guide probe key to the new GuideProbe instance.
     private Map<String, GuideProbe> getProbeNameMap(Set<GuideProbe> referencedGuiders) {
-        Map<String, GuideProbe> tagMap = new HashMap<String, GuideProbe>();
+        Map<String, GuideProbe> tagMap = new HashMap<>();
 
         tagMap.put("PWFS1", PwfsGuideProbe.pwfs1);
         tagMap.put("PWFS2", PwfsGuideProbe.pwfs2);
@@ -70,7 +66,7 @@ enum OffsetIteratorUpdater {
 
         // Create a mapping of GuideProbe to primary target tag.  Used to later
         // set the primary target for each guide probe in the target environment
-        Map<GuideProbe, String> primaryTargetMap = new HashMap<GuideProbe, String>();
+        Map<GuideProbe, String> primaryTargetMap = new HashMap<>();
 
         // Update the offset iterator links to the correct values in 2009B.
         for (int i=0; i<offsetIters.size(); ++i) {
@@ -133,7 +129,7 @@ enum OffsetIteratorUpdater {
             // Set links for guide stars referenced in the target env, but not
             // mentioned in the XML.  This would basically be working around a
             // bug in the old pre-2009B code.
-            Set<GuideProbe> missingSet = new HashSet<GuideProbe>(referencedGuiders);
+            Set<GuideProbe> missingSet = new HashSet<>(referencedGuiders);
             missingSet.removeAll(op.getGuideProbes());
             for (GuideProbe missingGuider : missingSet) {
                 op.setLink(missingGuider, missingGuider.getGuideOptions().getDefaultActive());
@@ -150,7 +146,7 @@ enum OffsetIteratorUpdater {
     }
 
     private List<ISPSeqComponent> getOffsetNodes(ISPObservation obs)  {
-        List<ISPSeqComponent> res = new ArrayList<ISPSeqComponent>();
+        List<ISPSeqComponent> res = new ArrayList<>();
         ISPSeqComponent seq = obs.getSeqComponent();
         if (seq != null) addOffsetNodes(seq, res);
         return res;
@@ -167,7 +163,7 @@ enum OffsetIteratorUpdater {
     }
 
     private List<Container> getOffsetContainers(Container rootContainer) {
-        List<Container> res = new ArrayList<Container>();
+        List<Container> res = new ArrayList<>();
         //noinspection unchecked
         for (Container cont : (List<Container>) rootContainer.getContainers()) {
             if (!"seqComp".equals(cont.getKind())) continue;

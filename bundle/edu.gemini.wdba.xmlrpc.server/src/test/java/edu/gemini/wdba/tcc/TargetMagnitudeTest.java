@@ -35,7 +35,7 @@ public final class TargetMagnitudeTest extends TestBase {
         pwfs1_1 = new SPTarget();
         pwfs1_1.setName("PWFS1-1");
 
-        final GuideProbeTargets gpt = GuideProbeTargets.create(PwfsGuideProbe.pwfs1, pwfs1_1).withExistingPrimary(pwfs1_1);
+        final GuideProbeTargets gpt = GuideProbeTargets.create(PwfsGuideProbe.pwfs1, pwfs1_1);
         final GuideGroup grp = GuideGroup.create("Default Guide Group", gpt);
         env = TargetEnvironment.create(base).setPrimaryGuideGroup(grp);
     }
@@ -62,54 +62,50 @@ public final class TargetMagnitudeTest extends TestBase {
         testTargetEnvironment(env);
     }
 
-    private void testTargetEnvironment(TargetEnvironment env) throws Exception {
-
+    private void testTargetEnvironment(final TargetEnvironment env) throws Exception {
         // Store the target environment.
-        ObservationNode obsNode = getObsNode();
-        TargetNode targetNode = obsNode.getTarget();
+        final ObservationNode obsNode = getObsNode();
+        final TargetNode targetNode = obsNode.getTarget();
 
-        TargetObsComp obsComp = targetNode.getDataObject();
+        final TargetObsComp obsComp = targetNode.getDataObject();
         obsComp.setTargetEnvironment(env);
         targetNode.getRemoteNode().setDataObject(obsComp);
 
         // Get the results.
-        Document doc = getSouthResults();
+        final Document doc = getSouthResults();
 
         // Check that there is a target for each target in the TargetEnvironment
-        List<Element> targetElements = getTargets(doc);
-
-        for (Element targetElement : targetElements) {
+        getTargets(doc).forEach(targetElement -> {
             final String name = targetElement.attributeValue(ParamSet.NAME);
             assertNotNull(name);
 
-            Option<SPTarget> target = env.getTargets().find(spTarget -> name.equals(spTarget.getTarget().getName()));
-
+            final Option<SPTarget> target = env.getTargets().find(spTarget -> name.equals(spTarget.getTarget().getName()));
             assertFalse(target.isEmpty());
 
             // Check the magnitude information for each target
             validateMagnitudes(targetElement, target.getValue());
-        }
+        });
     }
 
-    private void validateMagnitudes(Element element, SPTarget target) {
-        String MAG_PATH = "paramset[@name='" + TccNames.MAGNITUDES + "']";
+    private void validateMagnitudes(final Element element, final SPTarget target) {
+        final String MAG_PATH = "paramset[@name='" + TccNames.MAGNITUDES + "']";
         final Element magGroupElement = (Element) element.selectSingleNode(MAG_PATH);
-        ImList<Magnitude> mags = target.getTarget().getMagnitudes();
+        final ImList<Magnitude> mags = target.getTarget().getMagnitudes();
         if (magGroupElement == null) {
             assertEquals(0, mags.size());
             return;
         }
 
-        List<?> magElementList = magGroupElement.elements();
+        final List<?> magElementList = magGroupElement.elements();
 
         // One magnitude element per magnitude in the target
         assertEquals(mags.size(), magElementList.size());
 
         mags.foreach(mag -> {
-            String path = String.format("param[@name='%s']", mag.getBand().name());
-            Element magElement = (Element) magGroupElement.selectSingleNode(path);
-            String strValue = magElement.attributeValue("value");
-            double doubleVal = Double.valueOf(strValue);
+            final String path = String.format("param[@name='%s']", mag.getBand().name());
+            final Element magElement = (Element) magGroupElement.selectSingleNode(path);
+            final String strValue = magElement.attributeValue("value");
+            final double doubleVal = Double.valueOf(strValue);
 
             assertEquals(mag.getBrightness(), doubleVal, 0.00001);
         });

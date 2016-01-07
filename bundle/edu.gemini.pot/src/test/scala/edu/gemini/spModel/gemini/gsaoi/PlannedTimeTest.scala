@@ -37,7 +37,7 @@ class PlannedTimeTest extends InstrumentSequenceTestBase[Gsaoi, GsaoiSeqConfig] 
     val env  = getTargetEnvironment
     val grp  = env.getOrCreatePrimaryGuideGroup
     val target = new SPTarget(0.0, 0.0)
-    val env2 = env.setPrimaryGuideGroup(grp.put(GuideProbeTargets.create(Canopus.Wfs.cwfs3, target).withExistingPrimary(target)))
+    val env2 = env.setPrimaryGuideGroup(grp.put(GuideProbeTargets.create(Canopus.Wfs.cwfs3, target)))
 
     val dobj = getTarget.getDataObject.asInstanceOf[TargetObsComp]
     dobj.setTargetEnvironment(env2)

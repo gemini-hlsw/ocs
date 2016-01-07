@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package edu.gemini.spModel.io.impl.migration.to2009B;
 
 import edu.gemini.pot.sp.ISPObsComponent;
@@ -37,29 +33,29 @@ public enum To2009B {
 
     private static final Version VERSION_2009B = Version.match("2009B-1");
 
-    public void update(ISPObservation obs, Container obsContainer)  {
+    public void update(final ISPObservation obs, final Container obsContainer)  {
         // Find the targets container in order to get the version and the
         // ParamSet containing the serialized position list.
-        Container targetsContainer = obsContainer.getContainer("Targets");
+        final Container targetsContainer = obsContainer.getContainer("Targets");
         if (targetsContainer == null) return; // no targets anyway
 
         // Check the version to see if an update is needed.
-        Version v = targetsContainer.getVersion();
+        final Version v = targetsContainer.getVersion();
         if (v.compareTo(VERSION_2009B) >= 0) return; // up-to-date
 
         // Get the position list param set.
-        ParamSet posListPset = getPosListPset(targetsContainer);
+        final ParamSet posListPset = getPosListPset(targetsContainer);
         if (posListPset == null) return; // no pos list
 
         // Get the available guiders in the observation.
-        Set<GuideProbe> guiders = GuideProbeUtil.instance.getAvailableGuiders(obs);
+        final Set<GuideProbe> guiders = GuideProbeUtil.instance.getAvailableGuiders(obs);
 
         // Parse the old position list into a TargetEnvironment.
-        Tuple2<TargetEnvironment, Map<String, SPTarget>> res;
+        final Tuple2<TargetEnvironment, Map<String, SPTarget>> res;
         res = SPTargetPosListParser.instance.parse(obs.getObservationID(), posListPset, guiders);
 
         TargetEnvironment env = res._1();
-        Map<String, SPTarget> tagMap = res._2();
+        final Map<String, SPTarget> tagMap = res._2();
 
         // Update the probe "links" in the offset iterators (if any).  They
         // used to point to specific targets via their tag.  Now they need to
@@ -69,16 +65,16 @@ public enum To2009B {
         // iterators, we get back a map of guide probes to SPTarget tags.  This
         // map indicates which targets should be used as the primary target for
         // each probe.
-        Map<GuideProbe, String> primaryTargetMap;
-        primaryTargetMap = OffsetIteratorUpdater.instance.updateOffsetIterators(obs, obsContainer, env.getOrCreatePrimaryGuideGroup().getReferencedGuiders());
+        final Map<GuideProbe, String> primaryTargetMap = OffsetIteratorUpdater.instance.updateOffsetIterators(obs,
+                obsContainer, env.getOrCreatePrimaryGuideGroup().getReferencedGuiders());
 
         // Use the primaryTargetMap to correct the primary guide star.
-        for (GuideProbe guider : primaryTargetMap.keySet()) {
-            String targetTag = primaryTargetMap.get(guider);
-            SPTarget target = tagMap.get(targetTag);
+        for (final GuideProbe guider : primaryTargetMap.keySet()) {
+            final String targetTag = primaryTargetMap.get(guider);
+            final SPTarget target = tagMap.get(targetTag);
             if (target != null) {
-                Option<GuideProbeTargets> gtOpt = env.getPrimaryGuideProbeTargets(guider);
-                GuideProbeTargets gt = gtOpt.getValue().withExistingPrimary(target);
+                final Option<GuideProbeTargets> gtOpt = env.getPrimaryGuideProbeTargets(guider);
+                final GuideProbeTargets gt = gtOpt.getValue().selectPrimary(target);
                 env = env.putPrimaryGuideProbeTargets(gt);
             }
         }
@@ -87,26 +83,25 @@ public enum To2009B {
         updateTargetComponent(obs, env);
     }
 
-    private void updateTargetComponent(ISPObservation obs, TargetEnvironment env)  {
-        ISPObsComponent targetNode = getTargetNode(obs);
+    private void updateTargetComponent(final ISPObservation obs, final TargetEnvironment env)  {
+        final ISPObsComponent targetNode = getTargetNode(obs);
         if (targetNode == null) return;
 
         // Update the target component
-        TargetObsComp targetDataObj = (TargetObsComp) targetNode.getDataObject();
+        final TargetObsComp targetDataObj = (TargetObsComp) targetNode.getDataObject();
         targetDataObj.setTargetEnvironment(env);
         targetNode.setDataObject(targetDataObj);
     }
 
-    private ParamSet getPosListPset(Container targetsContainer) {
-        ParamSet pset = targetsContainer.getParamSet("Targets");
+    private ParamSet getPosListPset(final Container targetsContainer) {
+        final ParamSet pset = targetsContainer.getParamSet("Targets");
         if (pset == null) return null;
         return pset.getParamSet("posList");
     }
 
-    private ISPObsComponent getTargetNode(ISPObservation obs)  {
-        for (ISPObsComponent obsComp : obs.getObsComponents()) {
-            if (TargetObsComp.SP_TYPE.equals(obsComp.getType())) return obsComp;
-        }
-        return null;
+    private ISPObsComponent getTargetNode(final ISPObservation obs)  {
+        return obs.getObsComponents().stream()
+                .filter(obsComp -> TargetObsComp.SP_TYPE.equals(obsComp.getType()))
+                .findFirst().orElse(null);
     }
 }

@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package edu.gemini.spModel.target.env;
 
 import edu.gemini.shared.util.immutable.*;
@@ -32,9 +28,9 @@ final class Fixture {
         tl_pwfs2 = DefaultImList.create(t_pwfs2);
         tl_gmos  = DefaultImList.create();
 
-        gpt_pwfs1 = GuideProbeTargets.create(pwfs1, new Some<>(t_pwfs1_2), tl_pwfs1);
-        gpt_pwfs2 = GuideProbeTargets.create(pwfs2, GuideProbeTargets.NO_TARGET, tl_pwfs2);
-        gpt_gmos  = GuideProbeTargets.create(GmosOiwfsGuideProbe.instance);
+        gpt_pwfs1 = GuideProbeTargets.create(pwfs1, tl_pwfs1).selectPrimary(t_pwfs1_2);
+        gpt_pwfs2 = GuideProbeTargets.create(pwfs2, tl_pwfs2).setPrimaryIndex(None.INTEGER);
+        gpt_gmos  = GuideProbeTargets.create(GmosOiwfsGuideProbe.instance, tl_gmos);
 
         grp_all  = GuideGroup.create("All", gpt_gmos, gpt_pwfs1, gpt_pwfs2);
         grp_pwfs2_gmos = GuideGroup.create("PWFS2/GMOS", gpt_gmos, gpt_pwfs2);
