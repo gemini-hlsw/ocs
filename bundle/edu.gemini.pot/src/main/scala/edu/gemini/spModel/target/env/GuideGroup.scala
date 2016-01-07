@@ -4,7 +4,6 @@ import edu.gemini.spModel.target.env.AutomaticGroup.{Active, Initial}
 import edu.gemini.shared.util.immutable.{Option => GemOption, ImOption, ImList}
 import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.spModel.guide.GuideProbe
-//import edu.gemini.spModel.guide.OrderGuideGroup
 import edu.gemini.spModel.pio.{Pio, PioFactory, ParamSet}
 import edu.gemini.spModel.target.SPTarget
 
@@ -202,7 +201,7 @@ case class GuideGroup(grp: GuideGrp) extends java.lang.Iterable[GuideProbeTarget
   override def containsTarget(t: SPTarget): Boolean =
     grp.containsTarget(t)
 
-  /** Gets a list of SPTarget sorted by their associated GuideProbe. */
+  /** Gets a list of SPTarget sorted by their associated `GuideProbe`. */
   override def getTargets: ImList[SPTarget] =
     grp.targets.toList.sortBy(_._1).flatMap(_._2).asImList
 
@@ -212,6 +211,9 @@ case class GuideGroup(grp: GuideGrp) extends java.lang.Iterable[GuideProbeTarget
   override def cloneTargets: GuideGroup =
     update { _.cloneTargets }
 
+  /** Gets a Java `Iterator` that can step through targets sorted by their
+    * associated `GuideProbe`.
+    */
   def iterateAllTargets: java.util.Iterator[SPTarget] =
     getTargets.toList.iterator
 
@@ -236,7 +238,7 @@ case class GuideGroup(grp: GuideGrp) extends java.lang.Iterable[GuideProbeTarget
 
 }
 
-object GuideGroup extends Function1[GuideGrp, GuideGroup] {
+object GuideGroup extends ((GuideGrp) => GuideGroup) {
   val AutomaticGroupInitial = GuideGroup(Initial)
   val ManualEmpty = GuideGroup(ManualGroup("Manual Group", Map.empty))
 
