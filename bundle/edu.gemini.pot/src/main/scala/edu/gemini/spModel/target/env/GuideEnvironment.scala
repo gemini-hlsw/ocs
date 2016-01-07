@@ -30,6 +30,7 @@ final case class GuideEnvironment(guideEnv: GuideEnv) extends TargetContainer {
   override def removeTarget(target: SPTarget): GuideEnvironment =
     ???
 
+  // TODO: REFERENCE
   def removeGroup(grp: GuideGroup): GuideEnvironment =
     ???
 
@@ -42,6 +43,7 @@ final case class GuideEnvironment(guideEnv: GuideEnv) extends TargetContainer {
   def getOptions: ImList[GuideGroup] =
     ???
 
+  // TODO: REFERENCE
   // TODO: only used by BagsManager so can be removed when BagsManager is updated
   def update(op: OptionsList.Op[GuideGroup]): GuideEnvironment =
     ???
@@ -49,28 +51,32 @@ final case class GuideEnvironment(guideEnv: GuideEnv) extends TargetContainer {
   def setOptions(newList: ImList[GuideGroup]): GuideEnvironment =
     ???
 
+  // TODO: primary is always defined, remove the option wrapper
   def getPrimary: GemOption[GuideGroup] =
     ???
 
+  // TODO: REFERENCE
   def setPrimary(primary: GuideGroup): GuideEnvironment =
     ???
 
   def mkString(prefix: String, sep: String, suffix: String): String =
     ???
 
-  def getPrimaryIndex: GemOption[java.lang.Integer] =
+  def getPrimaryIndex: java.lang.Integer =
     ???
 
   def setPrimaryIndex(primary: Int): GuideEnvironment =
     ???
 
+  // TODO: REFERENCE
   def selectPrimary(primary: GuideGroup): GuideEnvironment =
     ???
 
   def iterator(): java.util.Iterator[GuideGroup] =
     ???
 
-  def putGuideProbeTargets(grp: GuideGroup, gtp: GuideProbeTargets): GuideEnvironment =
+  // TODO: REFERENCE
+  def putGuideProbeTargets(grp: GuideGroup, gpt: GuideProbeTargets): GuideEnvironment =
     ???
 
   def getParamSet(f: PioFactory): ParamSet =
