@@ -25,7 +25,7 @@ final case class GuideEnvironment(guideEnv: GuideEnv) extends TargetContainer {
 
   override def containsTarget(target: SPTarget): Boolean =
     guideEnv.groups.exists { _.containsTarget(target) }
-  
+
   /** Removes the target from any manual groups in which it is found. */
   override def removeTarget(target: SPTarget): GuideEnvironment =
     ???
@@ -42,9 +42,7 @@ final case class GuideEnvironment(guideEnv: GuideEnv) extends TargetContainer {
   def getOptions: ImList[GuideGroup] =
     ???
 
-  def update(primaryIndex: GemOption[Integer], list: ImList[GuideGroup]): GuideEnvironment =
-    ???
-
+  // TODO: only used by BagsManager so can be removed when BagsManager is updated
   def update(op: OptionsList.Op[GuideGroup]): GuideEnvironment =
     ???
 
@@ -67,9 +65,6 @@ final case class GuideEnvironment(guideEnv: GuideEnv) extends TargetContainer {
     ???
 
   def setPrimaryIndex(primary: Int): GuideEnvironment =
-    ???
-
-  def selectPrimary(primary: GemOption[GuideGroup]): GuideEnvironment =
     ???
 
   def selectPrimary(primary: GuideGroup): GuideEnvironment =
