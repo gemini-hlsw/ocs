@@ -97,16 +97,13 @@ public class GuideEnvironmentTest {
 
     @Test
     public void testIo() {
-        // With no primary
-        final GuideEnvironment env3 = env.setPrimaryIndex(None.INTEGER);
-
         // With non-default primary
-        final GuideEnvironment env4 = env.setPrimaryIndex(new Some<>(1));
+        final GuideEnvironment env4 = env.setPrimaryIndex(1);
 
         // Empty
         final GuideEnvironment env5 = GuideEnvironment$.MODULE$.Initial();
 
-        final ImList<GuideEnvironment> lst = DefaultImList.create(env, env3, env4, env5);
+        final ImList<GuideEnvironment> lst = DefaultImList.create(env, env4, env5);
         final PioFactory fact = new PioXmlFactory();
 
         lst.foreach(expected -> {

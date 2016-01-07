@@ -61,9 +61,6 @@ final case class GuideEnvironment(guideEnv: GuideEnv) extends TargetContainer {
   def getPrimaryIndex: GemOption[java.lang.Integer] =
     ???
 
-  def setPrimaryIndex(primary: GemOption[Integer]): GuideEnvironment =
-    ???
-
   def setPrimaryIndex(primary: Int): GuideEnvironment =
     ???
 
