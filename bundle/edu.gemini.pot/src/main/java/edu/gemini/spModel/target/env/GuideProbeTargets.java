@@ -105,7 +105,7 @@ public final class GuideProbeTargets implements Serializable, TargetContainer, O
     private final GuideProbe guider;
     private final OptionsList<SPTarget> targetOptions;
 
-    private GuideProbeTargets(GuideProbe guider, OptionsList<SPTarget> targetOptions) {
+    private GuideProbeTargets(final GuideProbe guider, final OptionsList<SPTarget> targetOptions) {
         if (guider == null) {
             throw new IllegalArgumentException("missing guider");
         }
