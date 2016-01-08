@@ -1,6 +1,7 @@
 package edu.gemini.spModel.target.env
 
 import edu.gemini.spModel.guide.GuideProbe
+import edu.gemini.spModel.target.SPTarget
 
 import scalaz._
 import Scalaz._
@@ -27,4 +28,24 @@ final case class GuideEnv(auto: AutomaticGroup, manual: Option[OptsList[ManualGr
   */
 object GuideEnv {
   val initial: GuideEnv = GuideEnv(AutomaticGroup.Initial, none)
+
+  val Auto: GuideEnv @> AutomaticGroup =
+    Lens.lensu((ge,a) => ge.copy(auto = a), _.auto)
+
+  val Manual: GuideEnv @> Option[OptsList[ManualGroup]] =
+    Lens.lensu((ge,m) => ge.copy(manual = m), _.manual)
+
+  import TargetCollection._
+
+  implicit val TargetCollectionGuideEnv: TargetCollection[GuideEnv] = new TargetCollection[GuideEnv] {
+    def mod(fa: AutomaticGroup => AutomaticGroup, fm: ManualGroup => ManualGroup): IndexedState[GuideEnv, GuideEnv, GuideEnv] =
+      for {
+        _ <- Auto   %== fa
+        _ <- Manual %== (_.map(_.map(fm)))
+        e <- get
+      } yield e
+
+    override def removeTarget(ge: GuideEnv, t: SPTarget): GuideEnv =
+      mod(_.removeTarget(t), _.removeTarget(t)).eval(ge)
+  }
 }

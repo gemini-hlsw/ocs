@@ -4,6 +4,7 @@ import edu.gemini.shared.util.immutable.{ImList, Option => GemOption}
 import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.spModel.pio.{PioFactory, ParamSet}
 import edu.gemini.spModel.target.SPTarget
+import edu.gemini.spModel.target.env.TargetCollection._
 
 import scala.collection.JavaConverters._
 
@@ -28,7 +29,7 @@ final case class GuideEnvironment(guideEnv: GuideEnv) extends TargetContainer {
 
   /** Removes the target from any manual groups in which it is found. */
   override def removeTarget(target: SPTarget): GuideEnvironment =
-    ???
+    GuideEnvironment(guideEnv.removeTarget(target))
 
   // TODO: REFERENCE
   def removeGroup(grp: GuideGroup): GuideEnvironment =

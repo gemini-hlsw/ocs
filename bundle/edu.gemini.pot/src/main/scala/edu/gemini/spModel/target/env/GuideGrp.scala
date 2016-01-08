@@ -42,7 +42,7 @@ sealed trait GuideGrp extends Serializable {
       case ManualGroup(_, ts)        => ts.mapValues(_.toList)
     }
 
-  def removeTarget(t: SPTarget): GuideGrp =
+  def removeTarget2(t: SPTarget): GuideGrp =
     this match {
       case AutomaticGroup.Initial    =>
         this
@@ -83,6 +83,13 @@ object ManualGroup {
 
   val TargetMap: ManualGroup @> Map[GuideProbe, OptsList[SPTarget]] =
     Lens.lensu((mg,m) => mg.copy(targetMap = m), _.targetMap)
+
+  implicit val TargetCollectionManualGroup: TargetCollection[ManualGroup] = new TargetCollection[ManualGroup] {
+    override def removeTarget(m: ManualGroup, t: SPTarget): ManualGroup =
+      TargetMap.mod(_.mapValues(_.delete(t)).collect {
+        case (probe, Some(opts)) => (probe, opts)
+      }, m)
+  }
 }
 
 
@@ -102,6 +109,14 @@ object AutomaticGroup {
 
   val TargetMap: Active @> Map[GuideProbe, SPTarget] =
     Lens.lensu((a,m) => a.copy(targetMap = m), _.targetMap)
+
+  implicit val TargetCollectionAutomaticGroup: TargetCollection[AutomaticGroup] = new TargetCollection[AutomaticGroup] {
+    override def removeTarget(a: AutomaticGroup, t: SPTarget): AutomaticGroup =
+      a match {
+        case Initial   => Initial
+        case Active(m) => Active(m.filterNot(_._2 == t))
+      }
+  }
 }
 
 object GuideGrp {

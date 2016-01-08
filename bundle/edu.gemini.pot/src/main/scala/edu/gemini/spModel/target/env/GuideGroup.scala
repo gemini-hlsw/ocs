@@ -1,6 +1,7 @@
 package edu.gemini.spModel.target.env
 
 import edu.gemini.spModel.target.env.AutomaticGroup.{Active, Initial}
+import edu.gemini.spModel.target.env.TargetCollection._
 import edu.gemini.shared.util.immutable.{Option => GemOption, ImOption, ImList}
 import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.spModel.guide.GuideProbe
@@ -206,7 +207,10 @@ case class GuideGroup(grp: GuideGrp) extends java.lang.Iterable[GuideProbeTarget
     grp.targets.toList.sortBy(_._1).flatMap(_._2).asImList
 
   override def removeTarget(t: SPTarget): GuideGroup =
-    update { _.removeTarget(t) }
+    update {
+      case a: AutomaticGroup => a.removeTarget(t)
+      case m: ManualGroup    => m.removeTarget(t)
+    }
 
   override def cloneTargets: GuideGroup =
     update { _.cloneTargets }
