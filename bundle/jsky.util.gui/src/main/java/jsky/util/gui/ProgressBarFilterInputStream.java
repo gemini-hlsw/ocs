@@ -1,21 +1,13 @@
 package jsky.util.gui;
 
-import java.awt.BorderLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 
 import jsky.util.FileUtil;
 
 import java.io.FilterInputStream;
-import javax.swing.JTextField;
-import javax.swing.DefaultBoundedRangeModel;
 import java.io.InputStream;
 import java.net.URL;
 import java.io.IOException;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JButton;
 
 /**
  * Monitors reading from a given stream or URL and updates a given progress
@@ -26,7 +18,7 @@ public class ProgressBarFilterInputStream extends FilterInputStream {
     /**
      * The progress bar to use
      */
-    private final ProgressBarUtil progressBar;
+    private final JProgressBar progressBar;
 
     /**
      * Text field used to display status information
@@ -68,7 +60,7 @@ public class ProgressBarFilterInputStream extends FilterInputStream {
      * @param in          the input stream to be monitored
      * @param size        the size in bytes of the date to be read, or 0 if not known
      */
-    public ProgressBarFilterInputStream(ProgressBarUtil progressBar, JTextField statusField, InputStream in, int size) {
+    public ProgressBarFilterInputStream(JProgressBar progressBar, JTextField statusField, InputStream in, int size) {
         super(in);
         this.progressBar = progressBar;
         this.statusField = statusField;
@@ -83,38 +75,25 @@ public class ProgressBarFilterInputStream extends FilterInputStream {
      * @param statusField text field used to display status information
      * @param url         the URL to read
      */
-    public ProgressBarFilterInputStream(ProgressBarUtil progressBar, JTextField statusField, URL url) {
+    public ProgressBarFilterInputStream(JProgressBar progressBar, JTextField statusField, URL url) {
         super(FileUtil.makeURLStream(url));
         this.progressBar = progressBar;
         this.statusField = statusField;
 
-        progressBar.startAnimation();
+        progressBar.setIndeterminate(true);
         statusField.setText("Connect: Host " + url.getHost());
         try {
             int size = url.openConnection().getContentLength();
-            progressBar.stopAnimation();
+            progressBar.setIndeterminate(false);
             setSize(size);
         } catch (Exception e) {
             statusField.setText(e.getMessage());
-            progressBar.stopAnimation();
+            progressBar.setIndeterminate(false);
             e.printStackTrace();
             throw new RuntimeException(e);
         }
         statusField.setText("Connected to Host " + url.getHost());
     }
-
-
-    /**
-     * Constructs an object to monitor the progress of an input stream
-     * using a given StatusPanel object.
-     *
-     * @param statusPanel used to display status information
-     * @param url         the URL to read
-     */
-    public ProgressBarFilterInputStream(StatusPanel statusPanel, URL url) {
-        this(statusPanel.getProgressBar(), statusPanel.getTextField(), url);
-    }
-
 
     /**
      * Interrupt the reading (causes the next read() to throw an exception).
@@ -122,7 +101,7 @@ public class ProgressBarFilterInputStream extends FilterInputStream {
      */
     public void interrupt() {
         interrupted = true;
-        progressBar.stopAnimation();
+        progressBar.setIndeterminate(false);
         progressBar.setStringPainted(false);
         if (model != null)
             model.setValue(0);
@@ -157,10 +136,10 @@ public class ProgressBarFilterInputStream extends FilterInputStream {
         this.size = size;
         if (size <= 0) {
             model = null;
-            progressBar.startAnimation();
+            progressBar.setIndeterminate(true);
             progressBar.setStringPainted(false);
         } else {
-            progressBar.stopAnimation();
+            progressBar.setIndeterminate(false);
             model = new DefaultBoundedRangeModel(0, 0, 0, size);
             progressBar.setModel(model);
             progressBar.setStringPainted(true);
@@ -184,7 +163,7 @@ public class ProgressBarFilterInputStream extends FilterInputStream {
             }
 
             if (model != null) {
-                progressBar.stopAnimation();
+                progressBar.setIndeterminate(false);
                 model.setValue(nread);
             }
             statusField.setText("Reading File: " + nread + " bytes");
@@ -205,7 +184,7 @@ public class ProgressBarFilterInputStream extends FilterInputStream {
         nread = 0;
         updateTime = 0L;
 
-        progressBar.stopAnimation();
+        progressBar.setIndeterminate(false);
         progressBar.setStringPainted(false);
         statusField.setText("Document Done");
         if (model != null)
@@ -282,91 +261,5 @@ public class ProgressBarFilterInputStream extends FilterInputStream {
     public synchronized void reset() throws IOException {
         in.reset();
         clear();
-    }
-
-    /**
-     * Test main
-     */
-    public static void main(String[] args) {
-        JFrame frame = new JFrame();
-
-        JPanel top = new JPanel();
-        final StatusPanel statusPanel = new StatusPanel();
-        final ProgressBarUtil progressBarUtil = statusPanel.getProgressBar();
-        top.setLayout(new BorderLayout());
-        top.add(statusPanel, BorderLayout.NORTH);
-        frame.getContentPane().add(top, BorderLayout.NORTH);
-
-        JPanel bot = new JPanel();
-        final JButton busyButton = new JButton("Look Busy");
-        final JButton startButton = new JButton("Start Reading");
-        final JButton stopButton = new JButton("Stop");
-        bot.add(busyButton);
-        bot.add(startButton);
-        bot.add(stopButton);
-        frame.getContentPane().add(bot, BorderLayout.SOUTH);
-
-        // local test class
-        class TestListener implements ActionListener {
-
-            ProgressBarFilterInputStream stream;
-            URL url;
-
-            public TestListener() {
-                try {
-                    url = new URL("file:/etc/hosts");
-                } catch (Exception e) {
-                    DialogUtil.error(e);
-                    System.exit(1);
-                }
-            }
-
-            public void actionPerformed(ActionEvent e) {
-                Object w = e.getSource();
-                if (w == busyButton) {
-                    if (stream != null) {
-                        stream.interrupt();
-                        stream = null;
-                    }
-                    progressBarUtil.startAnimation();
-                } else if (w == startButton) {
-                    if (stream != null) {
-                        stream.interrupt();
-                        stream = null;
-                    }
-                    stream = new ProgressBarFilterInputStream(statusPanel, url);
-                    SwingWorker worker = new SwingWorker() {
-
-                        public Object construct() {
-                            while (true) {
-                                try {
-                                    //thread.sleep(1);
-                                    if (stream.read() == -1)
-                                        return null;
-                                } catch (Exception ex) {
-                                    return null;
-                                }
-                            }
-                        }
-                    };
-                    worker.start();
-                } else if (w == stopButton) {
-                    if (stream != null) {
-                        stream.interrupt();
-                        stream = null;
-                    } else {
-                        progressBarUtil.stopAnimation();
-                    }
-                }
-            }
-        }
-        TestListener tl = new TestListener();
-        busyButton.addActionListener(tl);
-        startButton.addActionListener(tl);
-        stopButton.addActionListener(tl);
-
-        frame.pack();
-        frame.setVisible(true);
-        frame.addWindowListener(new BasicWindowMonitor());
     }
 }

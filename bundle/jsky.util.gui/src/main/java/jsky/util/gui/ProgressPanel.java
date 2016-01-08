@@ -28,9 +28,6 @@ import jsky.util.Resources;
  * <p>
  * This class is designed to be usable from any thread and all GUI access is done
  * synchronously in the event dispatching thread.
- *
- * @version $Revision: 38711 $
- * @author Allan Brighton
  */
 public class ProgressPanel extends JPanel implements ActionListener, StatusLogger {
 
@@ -216,7 +213,7 @@ public class ProgressPanel extends JPanel implements ActionListener, StatusLogge
         if (_parent instanceof JFrame)
             ((JFrame) _parent).setState(Frame.NORMAL);
         _parent.setVisible(true);
-        _statusPanel.getProgressBar().startAnimation();
+        _statusPanel.getProgressBar().setIndeterminate(true);
         BusyWin.setBusy(true, _parent);
     }
 
@@ -240,7 +237,7 @@ public class ProgressPanel extends JPanel implements ActionListener, StatusLogge
         }
         _parent.setVisible(false);
         _statusPanel.interrupt();
-        _statusPanel.getProgressBar().stopAnimation();
+        _statusPanel.getProgressBar().setIndeterminate(false);
         _statusPanel.setText("");
         _statusPanel.getProgressBar().setStringPainted(false);
         _statusPanel.getProgressBar().setValue(0);

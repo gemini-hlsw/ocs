@@ -2,7 +2,6 @@ package jsky.util.gui;
 
 import javax.swing.ListSelectionModel;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -45,6 +44,7 @@ public class TableWidget extends RowManipulateTableWidget {
         _watchers.remove(tww);
     }
 
+    private List<TableWidgetWatcher> _getWatchers() { return new ArrayList<>(_watchers); }
     /**
      * Select the given row and notify observers
      */
@@ -58,12 +58,7 @@ public class TableWidget extends RowManipulateTableWidget {
      * @param rowIndex the index of the row that was selected
      */
     protected void _notifySelect(int rowIndex) {
-        List<TableWidgetWatcher> v = Collections.unmodifiableList(_watchers);
-
-        for (TableWidgetWatcher tww : v) {
-            tww.tableRowSelected(this, rowIndex);
-        }
+        _getWatchers().forEach(tww -> tww.tableRowSelected(this, rowIndex));
     }
-
 }
 

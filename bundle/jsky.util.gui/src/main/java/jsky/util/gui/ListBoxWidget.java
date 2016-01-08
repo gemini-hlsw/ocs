@@ -1,16 +1,14 @@
 package jsky.util.gui;
 
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.*;
-import java.util.List;
 
 public class ListBoxWidget<T> extends JList<T> {
 
     // Observers
-    private final java.util.List<ListBoxWidgetWatcher<T>> _watchers = new ArrayList<>();
+    private final List<ListBoxWidgetWatcher<T>> _watchers = new ArrayList<>();
 
     /** Default Constructor */
     public ListBoxWidget() {
@@ -32,7 +30,7 @@ public class ListBoxWidget<T> extends JList<T> {
     /**
      * Add a watcher.  Watchers are notified when an item is selected.
      */
-    public synchronized final void addWatcher(ListBoxWidgetWatcher<T> watcher) {
+    public synchronized final void addWatcher(final ListBoxWidgetWatcher<T> watcher) {
         if (_watchers.contains(watcher)) {
             return;
         }
@@ -42,88 +40,45 @@ public class ListBoxWidget<T> extends JList<T> {
     /**
      * Delete a watcher.
      */
-    public synchronized final void deleteWatcher(ListBoxWidgetWatcher<T> watcher) {
+    public synchronized final void deleteWatcher(final ListBoxWidgetWatcher<T> watcher) {
         _watchers.remove(watcher);
     }
 
-    //
-    // Get a copy of the _watchers Vector.
-    //
-    private synchronized java.util.List<ListBoxWidgetWatcher<T>> _getWatchers() {
-        return Collections.unmodifiableList(_watchers);
+    private synchronized List<ListBoxWidgetWatcher<T>> _getWatchers() {
+        return new ArrayList<>(_watchers);
     }
 
-    //
-    // Notify watchers that an item has been selected.
-    //
-    private void _notifySelect(int index) {
-        java.util.List<ListBoxWidgetWatcher<T>> v = _getWatchers();
-        for (ListBoxWidgetWatcher<T> watcher : v) {
-            watcher.listBoxSelect(this, index, getSelectedValue());
-        }
+    private void _notifySelect(final int index) {
+        _getWatchers().forEach(w -> w.listBoxSelect(this, index, getSelectedValue()));
     }
 
-    //
-    // Notify watchers that an item has been double-clicked.
-    //
-    private void _notifyAction(int index) {
-        List<ListBoxWidgetWatcher<T>> v = _getWatchers();
-        for (ListBoxWidgetWatcher<T> watcher : v) {
-            watcher.listBoxAction(this, index, getSelectedValue());
-        }
-    }
-
-    /**
-     * test main
-     */
-    public static void main(String[] args) {
-        JFrame frame = new JFrame("ListBoxWidget");
-
-        ListBoxWidget<String> list = new ListBoxWidget<>();
-        DefaultListModel<String> model = new DefaultListModel<>();
-        for (int i = 0; i < 50; i++) {
-            model.addElement("row " + i);
-        }
-        list.setModel(model);
-        list.addWatcher(new ListBoxWidgetWatcher<String>() {
-            public void listBoxSelect(ListBoxWidget<String> lbwe, int index, Object val) {
-                System.out.println("listBoxSelect: " + index);
-            }
-
-            public void listBoxAction(ListBoxWidget<String> lbwe, int index, Object val) {
-                System.out.println("listBoxAction: " + index);
-            }
-        });
-
-        frame.getContentPane().add(new JScrollPane(list), BorderLayout.CENTER);
-        frame.pack();
-        frame.setVisible(true);
-        frame.addWindowListener(new BasicWindowMonitor());
+    private void _notifyAction(final int index) {
+        _getWatchers().forEach(w -> w.listBoxAction(this, index, getSelectedValue()));
     }
 
     /** Select the given value */
-    public void setValue(int i) {
+    public void setValue(final int i) {
         getSelectionModel().clearSelection();
         if (i >= 0)
             getSelectionModel().addSelectionInterval(i, i);
     }
 
     /** Select the given value */
-    public void setValue(Object s) {
+    public void setValue(final Object s) {
         setValue(((DefaultListModel) getModel()).indexOf(s));
     }
 
     /** Set the contents of the list */
-    public void setChoices(java.util.List<T> lst) {
-        DefaultListModel<T> model = new DefaultListModel<>();
+    public void setChoices(final List<T> lst) {
+        final DefaultListModel<T> model = new DefaultListModel<>();
         lst.forEach(model::addElement);
         setModel(model);
     }
 
     /** Set the contents of the list */
-    public void setChoices(T[] ar) {
+    public void setChoices(final T[] ar) {
         DefaultListModel<T> model = new DefaultListModel<>();
-        for (T o : ar) model.addElement(o);
+        for (final T o : ar) model.addElement(o);
         setModel(model);
     }
 

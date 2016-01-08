@@ -1,11 +1,10 @@
 package jsky.util.gui;
 
 import javax.swing.JCheckBox;
-import javax.swing.JFrame;
-import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -14,7 +13,7 @@ import java.util.List;
 public class CheckBoxWidget extends JCheckBox implements ActionListener {
 
     // Observers
-    private List<CheckBoxWidgetWatcher> _watchers = new ArrayList<>();
+    private final List<CheckBoxWidgetWatcher> _watchers = new ArrayList<>();
 
     /** Default constructor */
     public CheckBoxWidget() {
@@ -22,7 +21,7 @@ public class CheckBoxWidget extends JCheckBox implements ActionListener {
     }
 
     /** Default constructor */
-    public CheckBoxWidget(String text) {
+    public CheckBoxWidget(final String text) {
         this();
         setText(text);
     }
@@ -31,7 +30,7 @@ public class CheckBoxWidget extends JCheckBox implements ActionListener {
      * Add a watcher.  Watchers are notified when a button is pressed in the
      * option widget.
      */
-    public synchronized final void addWatcher(CheckBoxWidgetWatcher cbw) {
+    public synchronized final void addWatcher(final CheckBoxWidgetWatcher cbw) {
         if (_watchers.contains(cbw)) {
             return;
         }
@@ -42,45 +41,35 @@ public class CheckBoxWidget extends JCheckBox implements ActionListener {
     /**
      * Delete a watcher.
      */
-    public synchronized final void deleteWatcher(CheckBoxWidgetWatcher cbw) {
+    public synchronized final void deleteWatcher(final CheckBoxWidgetWatcher cbw) {
         _watchers.remove(cbw);
     }
 
-    //
-    // Notify watchers that a button has been pressed in the option widget.
-    //
+    /**
+     * Get a copy of the _watchers Vector.
+     */
+    private synchronized List<CheckBoxWidgetWatcher> _getWatchers() {
+        return new ArrayList<>(_watchers);
+    }
+
+    /**
+     * Notify watchers that a button has been pressed in the option widget.
+     */
     private void _notifyAction() {
-        for (CheckBoxWidgetWatcher cbw : _watchers) {
-            cbw.checkBoxAction(this);
-        }
+        _getWatchers().forEach(cbw -> cbw.checkBoxAction(this));
     }
 
     /** Called when the button is pressed. */
-    public void actionPerformed(ActionEvent ae) {
+    public void actionPerformed(final ActionEvent ae) {
         _notifyAction();
     }
 
-    public void setValue(boolean value) {
+    public void setValue(final boolean value) {
         setSelected(value);
     }
 
     public boolean getBooleanValue() {
         return isSelected();
-    }
-
-    /**
-     * test main
-     */
-    public static void main(String[] args) {
-        JFrame frame = new JFrame("CheckBoxWidget");
-
-        CheckBoxWidget button = new CheckBoxWidget("Push Me");
-        button.addWatcher(cbw -> System.out.println("OK"));
-
-        frame.getContentPane().add(button, BorderLayout.CENTER);
-        frame.pack();
-        frame.setVisible(true);
-        frame.addWindowListener(new BasicWindowMonitor());
     }
 }
 

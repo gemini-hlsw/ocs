@@ -1,10 +1,3 @@
-/*
- * Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: ConnectionUtil.java 4414 2004-02-03 16:21:36Z brighton $
- */
-
 package jsky.util.gui;
 
 import java.io.IOException;
@@ -20,15 +13,12 @@ import javax.net.ssl.HttpsURLConnection;
  * without hanging.  Used to solve the problem of a background thread
  * hanging (even after calling Thread.interrupt()) while waiting for
  * URL.openConnection() to return.
- *
- * @author Allan Brighton
- * @version $Revision: 4414 $
  */
 public class ConnectionUtil {
     /**
      * URL to connect to
      */
-    private URL url;
+    private final URL url;
 
     /**
      * The URL connection object.
@@ -66,8 +56,7 @@ public class ConnectionUtil {
 
             public Object construct() {
                 try {
-
-                    URLConnection connection = url.openConnection();
+                    final URLConnection connection = url.openConnection();
                     // UCAC4 connects to the VoTable proxy on SPDB using https and a self-signed certificate
                     // In principle this will break connections to other hosts but UCAC4 is the only https on skycat
                     if ("https".equals(url.getProtocol())) {

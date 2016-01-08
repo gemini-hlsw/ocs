@@ -9,20 +9,20 @@ import java.io.Serializable;
 public class ValueRange implements Serializable {
 
     /** The minimum value */
-    Comparable minValue;
+    final Comparable minValue;
 
     /** The maximum value */
-    Comparable maxValue;
+    final Comparable maxValue;
 
     /** True if the range includes the min value */
-    boolean minInclusive = true;
+    final boolean minInclusive;
 
     /** True if the range includes the max value */
-    boolean maxInclusive = true;
+    final boolean maxInclusive;
 
     /** Initialize from the given value (tests for equality) */
     public ValueRange(Comparable value) {
-        this.minValue = this.maxValue = value;
+        this(value, true, value, true);
     }
 
     /**
@@ -32,8 +32,8 @@ public class ValueRange implements Serializable {
      * @param maxValue the maximum value.
      * @param maxInclusive true if the range includes the max value.
      */
-    public ValueRange(Comparable minValue, boolean minInclusive,
-                      Comparable maxValue, boolean maxInclusive) {
+    public ValueRange(final Comparable minValue, final boolean minInclusive,
+                      final Comparable maxValue, final boolean maxInclusive) {
         this.minValue = minValue;
         this.minInclusive = minInclusive;
         this.maxValue = maxValue;

@@ -1,49 +1,43 @@
 package jsky.util.gui;
 
 import java.awt.*;
-import java.awt.event.*;
 import javax.swing.*;
 
 import jsky.util.ProxyServerUtil;
 import jsky.util.Preferences;
 
 /**
- * Title:        Observing Tool
- * Description:  Dialog for proxy server settings
- * Company:      Gemini 8m Telescopes Project
- *
- * @author Allan Brighton
- * @version 1.0
+ * Dialog for proxy server settings.
  */
 
 public class ProxyServerDialog extends JDialog {
 
-    JPanel panel1 = new JPanel();
-    JTextArea jTextArea1 = new JTextArea();
-    GridBagLayout gridBagLayout1 = new GridBagLayout();
-    JLabel jLabel1 = new JLabel();
-    JTextField httpProxyServerField = new JTextField();
-    JLabel jLabel2 = new JLabel();
-    JTextField httpProxyPortField = new JTextField();
-    JTextArea jTextArea2 = new JTextArea();
-    JLabel jLabel3 = new JLabel();
-    JTextField nonProxyHostsField = new JTextField();
-    JPanel jPanel1 = new JPanel();
-    JButton cancelButton = new JButton();
-    JButton applyButton = new JButton();
-    JButton resetButton = new JButton();
-    JButton okButton = new JButton();
-    JLabel jLabel4 = new JLabel();
-    JTextField httpsProxyServerField = new JTextField();
-    JLabel jLabel5 = new JLabel();
-    JTextField httpsProxyPortField = new JTextField();
+    final JPanel panel1 = new JPanel();
+    final JTextArea jTextArea1 = new JTextArea();
+    final GridBagLayout gridBagLayout1 = new GridBagLayout();
+    final JLabel jLabel1 = new JLabel();
+    final JTextField httpProxyServerField = new JTextField();
+    final JLabel jLabel2 = new JLabel();
+    final JTextField httpProxyPortField = new JTextField();
+    final JTextArea jTextArea2 = new JTextArea();
+    final JLabel jLabel3 = new JLabel();
+    final JTextField nonProxyHostsField = new JTextField();
+    final JPanel jPanel1 = new JPanel();
+    final JButton cancelButton = new JButton();
+    final JButton applyButton = new JButton();
+    final JButton resetButton = new JButton();
+    final JButton okButton = new JButton();
+    final JLabel jLabel4 = new JLabel();
+    final JTextField httpsProxyServerField = new JTextField();
+    final JLabel jLabel5 = new JLabel();
+    final JTextField httpsProxyPortField = new JTextField();
 
-    public ProxyServerDialog(Frame frame, String title, boolean modal) {
+    public ProxyServerDialog(final Frame frame, final String title, final boolean modal) {
         super(frame, title, modal);
         try {
             jbInit();
             pack();
-        } catch (Exception ex) {
+        } catch (final Exception ex) {
             ex.printStackTrace();
         }
         reset();
@@ -77,33 +71,19 @@ public class ProxyServerDialog extends JDialog {
         jLabel3.setLabelFor(nonProxyHostsField);
         jLabel3.setText("No Proxy for:");
         cancelButton.setText("Cancel");
-        cancelButton.addActionListener(new java.awt.event.ActionListener() {
+        cancelButton.addActionListener(e -> setVisible(false));
 
-            public void actionPerformed(ActionEvent e) {
-                cancelButton_actionPerformed(e);
-            }
-        });
         applyButton.setText("Apply");
-        applyButton.addActionListener(new java.awt.event.ActionListener() {
+        applyButton.addActionListener(e -> apply());
 
-            public void actionPerformed(ActionEvent e) {
-                applyButton_actionPerformed(e);
-            }
-        });
         resetButton.setText("Reset");
-        resetButton.addActionListener(new java.awt.event.ActionListener() {
+        resetButton.addActionListener(e -> reset());
 
-            public void actionPerformed(ActionEvent e) {
-                resetButton_actionPerformed(e);
-            }
-        });
         okButton.setText("OK");
-        okButton.addActionListener(new java.awt.event.ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                okButton_actionPerformed(e);
-            }
+        okButton.addActionListener(e -> {
+            if (apply()) setVisible(false);
         });
+
         this.setTitle("Proxy Server");
         panel1.setMinimumSize(new Dimension(521, 220));
         panel1.setPreferredSize(new Dimension(521, 220));
@@ -144,39 +124,21 @@ public class ProxyServerDialog extends JDialog {
                 , GridBagConstraints.SOUTHEAST, GridBagConstraints.HORIZONTAL, new Insets(11, 11, 0, 0), 0, 0));
     }
 
-    void okButton_actionPerformed(ActionEvent e) {
-        if (apply()) {
-            close();
-        }
-    }
-
-    void resetButton_actionPerformed(ActionEvent e) {
-        reset();
-    }
-
-    void applyButton_actionPerformed(ActionEvent e) {
-        apply();
-    }
-
-    void cancelButton_actionPerformed(ActionEvent e) {
-        close();
-    }
-
     /**
      * Apply changes and return true if okay.
      */
     public boolean apply() {
-        String httpProxyHost = httpProxyServerField.getText();
+        final String httpProxyHost = httpProxyServerField.getText();
         int httpProxyPort = 80;
 
-        String httpsProxyHost = httpsProxyServerField.getText();
+        final String httpsProxyHost = httpsProxyServerField.getText();
         int httpsProxyPort = 443;
 
         String s = httpProxyPortField.getText();
         if (s != null && s.length() != 0) {
             try {
                 httpProxyPort = Integer.parseInt(httpProxyPortField.getText());
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 DialogUtil.error("Please enter a valid HTTP proxy port number.");
                 return false;
             }
@@ -186,13 +148,13 @@ public class ProxyServerDialog extends JDialog {
         if (s != null && s.length() != 0) {
             try {
                 httpsProxyPort = Integer.parseInt(httpsProxyPortField.getText());
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 DialogUtil.error("Please enter a valid HTTPS proxy port number.");
                 return false;
             }
         }
 
-        String nonProxyHosts = nonProxyHostsField.getText();
+        final String nonProxyHosts = nonProxyHostsField.getText();
         ProxyServerUtil.setProxy(
                 httpProxyHost, httpProxyPort,
                 httpsProxyHost, httpsProxyPort,
@@ -229,27 +191,5 @@ public class ProxyServerDialog extends JDialog {
         httpsProxyServerField.setText(httpsProxyHost);
         httpsProxyPortField.setText("" + httpsProxyPort);
         nonProxyHostsField.setText(nonProxyHosts);
-    }
-
-    /**
-     * Close the window
-     */
-    public void close() {
-        setVisible(false);
-    }
-
-
-    /**
-     * Test main.
-     */
-    public static void main(String[] args) {
-        ProxyServerUtil.init();
-
-        new ProxyServerDialog() {
-
-            public void close() {
-                System.exit(0);
-            }
-        }.setVisible(true);
     }
 }

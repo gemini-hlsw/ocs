@@ -1,10 +1,3 @@
-/*
- * Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: TabbedPanelFrame.java 4414 2004-02-03 16:21:36Z brighton $
- */
-
 package jsky.util.gui;
 
 import java.awt.BorderLayout;
@@ -21,9 +14,6 @@ import jsky.util.Preferences;
 
 /**
  * Provides a frame with a TabbedPanel and some dialog buttons.
- *
- * @version $Revision: 4414 $
- * @author Allan Brighton
  */
 public class TabbedPanelFrame extends JFrame {
 

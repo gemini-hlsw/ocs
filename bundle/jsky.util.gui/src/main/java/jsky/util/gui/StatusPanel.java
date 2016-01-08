@@ -6,11 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
-import javax.swing.BorderFactory;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 
 /**
  * Displays a progress bar and a text field together in a panel and is
@@ -21,7 +17,7 @@ public class StatusPanel extends JPanel implements StatusLogger, SwingConstants 
     /**
      * Displays progress of download
      */
-    ProgressBarUtil progressBar;
+    JProgressBar progressBar;
 
     /**
      * Text field used to display status information
@@ -42,7 +38,7 @@ public class StatusPanel extends JPanel implements StatusLogger, SwingConstants 
     public StatusPanel(String barPosition, String textPosition) {
         setLayout(new BorderLayout());
 
-        progressBar = new ProgressBarUtil();
+        progressBar = new JProgressBar();
         progressBar.setToolTipText("Download progress");
         progressBar.setBorder(BorderFactory.createLoweredBevelBorder());
         add(progressBar, barPosition);
@@ -81,7 +77,7 @@ public class StatusPanel extends JPanel implements StatusLogger, SwingConstants 
     /**
      * Return the progress bar
      */
-    public ProgressBarUtil getProgressBar() {
+    public JProgressBar getProgressBar() {
         return progressBar;
     }
 
@@ -120,7 +116,7 @@ public class StatusPanel extends JPanel implements StatusLogger, SwingConstants 
             return;
         }
 
-        progressBar.stopAnimation();
+        progressBar.setIndeterminate(false);
         progressBar.setValue(percent);
         if (percent <= 0) {
             progressBar.setStringPainted(false);
@@ -204,7 +200,7 @@ public class StatusPanel extends JPanel implements StatusLogger, SwingConstants 
             return;
         }
 
-        getProgressBar().startAnimation();
+        getProgressBar().setIndeterminate(true);
     }
 
 
@@ -218,7 +214,7 @@ public class StatusPanel extends JPanel implements StatusLogger, SwingConstants 
             return;
         }
 
-        getProgressBar().stopAnimation();
+        getProgressBar().setIndeterminate(false);
         setText("");
         getProgressBar().setStringPainted(false);
         getProgressBar().setValue(0);

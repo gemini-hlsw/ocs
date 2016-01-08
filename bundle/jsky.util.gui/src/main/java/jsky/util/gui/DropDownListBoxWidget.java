@@ -1,9 +1,8 @@
 package jsky.util.gui;
 
 import javax.swing.JComboBox;
-import javax.swing.JFrame;
-import java.awt.BorderLayout;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -15,7 +14,7 @@ import java.util.List;
 public class DropDownListBoxWidget<T> extends JComboBox<T>  {
 
     // Observers
-    private List<DropDownListBoxWidgetWatcher<T>> _watchers = new ArrayList<>();
+    private final List<DropDownListBoxWidgetWatcher<T>> _watchers = new ArrayList<>();
 
     /** If true, don't fire any action events */
     protected boolean actionsEnabled = true;
@@ -30,7 +29,7 @@ public class DropDownListBoxWidget<T> extends JComboBox<T>  {
     /**
      * Add a watcher.  Watchers are notified when an item is selected.
      */
-    public synchronized final void addWatcher(DropDownListBoxWidgetWatcher<T> watcher) {
+    public synchronized final void addWatcher(final DropDownListBoxWidgetWatcher<T> watcher) {
         if (_watchers.contains(watcher)) {
             return;
         }
@@ -44,31 +43,26 @@ public class DropDownListBoxWidget<T> extends JComboBox<T>  {
         _watchers.remove(watcher);
     }
 
-    //
-    // Get a copy of the _watchers Vector.
-    //
-    @SuppressWarnings("unchecked")
+    /**
+     * Get a copy of the _watchers Vector.
+     */
     private synchronized List<DropDownListBoxWidgetWatcher<T>> _getWatchers() {
         return new ArrayList<>(_watchers);
     }
 
-    //
-    // Notify watchers that an item has been double-clicked.
-    //
-    private void _notifyAction(int index) {
+    /**
+     * Notify watchers that an item has been double-clicked.
+     */
+    private void _notifyAction(final int index) {
         if (!actionsEnabled)
             return;
-
-        List<DropDownListBoxWidgetWatcher<T>> v = _getWatchers();
-        for (DropDownListBoxWidgetWatcher<T> watcher : v) {
-            watcher.dropDownListBoxAction(this, index, getStringValue());
-        }
+        _getWatchers().forEach(w -> w.dropDownListBoxAction(this, index, getStringValue()));
     }
 
     /**
      * Set the index of the selected value.
      */
-    public void setValue(int index) {
+    public void setValue(final int index) {
         actionsEnabled = false;
         setSelectedIndex(index);
         actionsEnabled = true;
@@ -77,7 +71,7 @@ public class DropDownListBoxWidget<T> extends JComboBox<T>  {
     /**
      * Set the selected value.
      */
-    public void setValue(Object o) {
+    public void setValue(final Object o) {
         actionsEnabled = false;
         setSelectedItem(o);
         actionsEnabled = true;
@@ -102,18 +96,18 @@ public class DropDownListBoxWidget<T> extends JComboBox<T>  {
     }
 
     /** Set the choices by specifying a Vector containing the strings that represent the choices. */
-    public void setChoices(List<T> choices) {
+    public void setChoices(final List<T> choices) {
         actionsEnabled = false;
         removeAllItems();
-        for (T choice : choices) addItem(choice);
+        choices.forEach(this::addItem);
         actionsEnabled = true;
     }
 
     /** Set the choices by specifying the objects that appear on screen. */
-    public void setChoices(T[] choices) {
+    public void setChoices(final T[] choices) {
         actionsEnabled = false;
         removeAllItems();
-        for (T choice : choices) addItem(choice);
+        for (final T choice : choices) addItem(choice);
         actionsEnabled = true;
     }
 
@@ -122,28 +116,6 @@ public class DropDownListBoxWidget<T> extends JComboBox<T>  {
         actionsEnabled = false;
         removeAllItems();
         actionsEnabled = true;
-    }
-
-    /**
-     * test main
-     */
-    public static void main(String[] args) {
-        JFrame frame = new JFrame("DropDownListBoxWidget");
-
-        DropDownListBoxWidget<String> ddlbwe = new DropDownListBoxWidget<>();
-        ddlbwe.setChoices(new String[]{
-            "One", "Two", "Three", "Four", "Five", "Six"
-        });
-        ddlbwe.setChoices(new String[]{
-            "XOne", "XTwo", "XThree", "XFour", "XFive", "XSix"
-        });
-
-        ddlbwe.addWatcher((ddlbwe1, index, val) -> System.out.println("dropDownListBoxAction: " + ddlbwe1.getValue()));
-
-        frame.getContentPane().add(ddlbwe, BorderLayout.CENTER);
-        frame.pack();
-        frame.setVisible(true);
-        frame.addWindowListener(new BasicWindowMonitor());
     }
 }
 

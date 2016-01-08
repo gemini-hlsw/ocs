@@ -23,17 +23,8 @@ public interface QueryArgs {
     /** Set the value for the parameter with the given label */
     void setParamValue(String label, Object value);
 
-    /** Set the min and max values for the parameter with the given label */
-    void setParamValueRange(String label, Object minValue, Object maxValue);
-
-    /** Set the int value for the parameter with the given label */
-    void setParamValue(String label, int value);
-
     /** Set the double value for the parameter with the given label */
     void setParamValue(String label, double value);
-
-    /** Set the double value for the parameter with the given label */
-    void setParamValueRange(String label, double minValue, double maxValue);
 
     /** Set the array of parameter values directly. */
     void setParamValues(Object[] values);
@@ -47,24 +38,6 @@ public interface QueryArgs {
      * @return the value of the parameter, or null if not specified
      */
     Object getParamValue(String label);
-
-    /**
-     * Get the value of the named parameter as an integer.
-     *
-     * @param label the parameter label
-     * @param defaultValue the default value, if the parameter was not specified
-     * @return the value of the parameter
-     */
-    int getParamValueAsInt(String label, int defaultValue);
-
-    /**
-     * Get the value of the named parameter as a double.
-     *
-     * @param label the parameter label
-     * @param defaultValue the default value, if the parameter was not specified
-     * @return the value of the parameter
-     */
-    double getParamValueAsDouble(String label, double defaultValue);
 
     /**
      * Get the value of the named parameter as a String.
@@ -112,13 +85,6 @@ public interface QueryArgs {
     /** Set the max number of rows to be returned from a table query */
     void setMaxRows(int maxRows);
 
-
-    /** Returns the query type (an optional string, which may be interpreted by some catalogs) */
-    String getQueryType();
-
-    /** Set the query type (an optional string, which may be interpreted by some catalogs) */
-    void setQueryType(String queryType);
-
     /**
      * Returns a copy of this object
      */
@@ -127,5 +93,5 @@ public interface QueryArgs {
     /**
      * Optional: If not null, use this object for displaying the progress of the background query
      */
-    StatusLogger getStatusLogger();
+    default StatusLogger getStatusLogger() { return null; }
 }

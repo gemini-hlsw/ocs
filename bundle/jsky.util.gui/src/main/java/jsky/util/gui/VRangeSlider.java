@@ -1,39 +1,6 @@
-//
-// RangeSlider.java
-//
-
-// Modified from the original Visad version by Allan Brighton
-// $Id: VRangeSlider.java 4414 2004-02-03 16:21:36Z brighton $
-
-/*
-VisAD system for interactive analysis and visualization of numerical
-data.  Copyright (C) 1996 - 2000 Bill Hibbard, Curtis Rueden, Tom
-Rink, Dave Glowacki, Steve Emmerson, Tom Whittaker, Don Murray, and
-Tommy Jasmin.
-
-This library is free software; you can redistribute it and/or
-modify it under the terms of the GNU Library General Public
-License as published by the Free Software Foundation; either
-version 2 of the License, or (at your option) any later version.
-
-This library is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-Library General Public License for more details.
-
-You should have received a copy of the GNU Library General Public
-License along with this library; if not, write to the Free
-Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-MA 02111-1307, USA
-*/
-
-
-//package visad.browser;
-
 package jsky.util.gui;
 
 import java.awt.BasicStroke;
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FontMetrics;
@@ -45,7 +12,6 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.Line2D;
 import javax.swing.JComponent;
-import javax.swing.JFrame;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.EventListenerList;
@@ -58,9 +24,6 @@ import jsky.util.Convert;
  */
 public class VRangeSlider extends JComponent
         implements MouseListener, MouseMotionListener {
-
-    /** Default variable name.*/
-    private static final String DEFAULT_NAME = "value";
 
     /** Preferred slider height. */
     private static final int SLIDER_PREF_HEIGHT = 42;
@@ -122,15 +85,6 @@ public class VRangeSlider extends JComponent
     /** Flag whether mouse is currently affecting max gripper. */
     private boolean maxSlide = false;
 
-    /** Flag whether left gripper has moved. */
-    private boolean lSlideMoved = false;
-
-    /** Flag whether right gripper has moved. */
-    private boolean rSlideMoved = false;
-
-    /** Flag whether current text string value needs updating. */
-    private boolean textChanged = false;
-
     /** Variable name for values. */
     private String name;
 
@@ -186,13 +140,6 @@ public class VRangeSlider extends JComponent
     }
 
     /**
-     * Gets minimum and maximum slider values.
-     */
-    public double[] getMinMaxValues() {
-        return new double[]{minValue, maxValue};
-    }
-
-    /**
      * Resets the minimum and maximum values.
      */
     protected void resetValues(double min, double max) {
@@ -202,9 +149,6 @@ public class VRangeSlider extends JComponent
         maxGrip = getSize().width - GRIP_WIDTH;
         minSlide = false;
         maxSlide = false;
-        lSlideMoved = true;
-        rSlideMoved = true;
-        textChanged = true;
 
         int w = getSize().width;
         minValue = gripToValue(minGrip, w);
@@ -216,7 +160,6 @@ public class VRangeSlider extends JComponent
      */
     public void setName(String name) {
         this.name = name;
-        textChanged = true;
         repaint();
     }
 
@@ -234,21 +177,13 @@ public class VRangeSlider extends JComponent
      */
     public void setValues(double lo, double hi) {
         int w = getSize().width;
-        int g;
 
         minValue = lo;
-        g = minGrip;
         minGrip = valueToGrip(minValue, w);
-        if (g != minGrip)
-            lSlideMoved = true;
 
         maxValue = hi;
-        g = maxGrip;
         maxGrip = valueToGrip(maxValue, w);
-        if (g != maxGrip)
-            rSlideMoved = true;
 
-        textChanged = true;
         repaint();
     }
 
@@ -303,7 +238,6 @@ public class VRangeSlider extends JComponent
                 minGrip = x;
             minValue = gripToValue(minGrip, w);
             minSlide = true;
-            lSlideMoved = true;
             valuesUpdated();
             repaint();
         } else if (containedIn(x, y, maxGrip + 1 - GRIP_WIDTH, GRIP_TOP_Y - 3,
@@ -315,7 +249,6 @@ public class VRangeSlider extends JComponent
                 maxGrip = x;
             maxValue = gripToValue(maxGrip, w);
             maxSlide = true;
-            rSlideMoved = true;
             valuesUpdated();
             repaint();
         }
@@ -356,7 +289,6 @@ public class VRangeSlider extends JComponent
     public void mouseReleased(MouseEvent e) {
         minSlide = false;
         maxSlide = false;
-        textChanged = true;
         repaint();
         fireChange();
     }
@@ -390,7 +322,6 @@ public class VRangeSlider extends JComponent
     public void mouseDragged(MouseEvent e) {
         int w = getSize().width;
         int x = e.getX();
-        int y = e.getY();
 
         // move entire range
         if (minSlide && maxSlide) {
@@ -405,8 +336,6 @@ public class VRangeSlider extends JComponent
                 minValue = gripToValue(minGrip, w);
                 maxGrip += change;
                 maxValue = gripToValue(maxGrip, w);
-                lSlideMoved = true;
-                rSlideMoved = true;
                 valuesUpdated();
                 repaint();
             }
@@ -421,7 +350,6 @@ public class VRangeSlider extends JComponent
             else
                 minGrip = x;
             minValue = gripToValue(minGrip, w);
-            lSlideMoved = true;
             valuesUpdated();
             repaint();
         }
@@ -435,7 +363,6 @@ public class VRangeSlider extends JComponent
             else
                 maxGrip = x;
             maxValue = gripToValue(maxGrip, w);
-            rSlideMoved = true;
             valuesUpdated();
             repaint();
         }
@@ -550,76 +477,66 @@ public class VRangeSlider extends JComponent
         lines[2] = new Line2D.Double(0, GRIP_TOP_Y - 4, SLIDER_LINE_WIDTH, GRIP_TOP_Y - 4);
 
         lines[3] = new Line2D.Double(0, GRIP_TOP_Y + SLIDER_LINE_HEIGHT,
-                                     SLIDER_LINE_WIDTH, GRIP_TOP_Y + SLIDER_LINE_HEIGHT);
+                SLIDER_LINE_WIDTH, GRIP_TOP_Y + SLIDER_LINE_HEIGHT);
 
         lines[4] = new Line2D.Double(right, GRIP_TOP_Y - 4, right, GRIP_TOP_Y + SLIDER_LINE_HEIGHT);
 
         lines[5] = new Line2D.Double(right, GRIP_TOP_Y - 4, right - SLIDER_LINE_WIDTH, GRIP_TOP_Y - 4);
         lines[6] = new Line2D.Double(right, GRIP_TOP_Y + SLIDER_LINE_HEIGHT,
-                                     right - SLIDER_LINE_WIDTH, GRIP_TOP_Y + SLIDER_LINE_HEIGHT);
+                right - SLIDER_LINE_WIDTH, GRIP_TOP_Y + SLIDER_LINE_HEIGHT);
 
         // draw the lines
         g2.setColor(fg);
-        for (int i = 0; i < lines.length; i++)
-            g2.draw(lines[i]);
+        for (final Line2D.Double line : lines)
+            g2.draw(line);
 
         // draw the shadows
         g2.setStroke(shadowStroke);
         g2.setColor(Color.white);
-        for (int i = 0; i < lines.length; i++) {
-            lines[i].y1++;
-            lines[i].y2++;
-            g2.draw(lines[i]);
+        for (final Line2D.Double line : lines) {
+            line.y1++;
+            line.y2++;
+            g2.draw(line);
         }
 
         // refresh everything
-        lSlideMoved = true;
-        rSlideMoved = true;
-        textChanged = true;
+        g2.setColor(bg);
+        g2.fillRect(SLIDER_LINE_WIDTH, GRIP_TOP_Y, maxGrip - 3, GRIP_HEIGHT);
 
-        if (lSlideMoved) {
-            g2.setColor(bg);
-            g2.fillRect(SLIDER_LINE_WIDTH, GRIP_TOP_Y, maxGrip - 3, GRIP_HEIGHT);
+        g2.setColor(fg);
+        g2.drawLine(SLIDER_LINE_WIDTH, GRIP_MIDDLE_Y, maxGrip - 3, GRIP_MIDDLE_Y);
 
-            g2.setColor(fg);
-            g2.drawLine(SLIDER_LINE_WIDTH, GRIP_MIDDLE_Y, maxGrip - 3, GRIP_MIDDLE_Y);
+        g2.setStroke(shadowStroke);
+        g2.setColor(Color.white);
+        g2.drawLine(SLIDER_LINE_WIDTH, GRIP_MIDDLE_Y + 1, maxGrip - 3, GRIP_MIDDLE_Y + 1);
+        g2.setStroke(defaultStroke);
 
-            g2.setStroke(shadowStroke);
-            g2.setColor(Color.white);
-            g2.drawLine(SLIDER_LINE_WIDTH, GRIP_MIDDLE_Y + 1, maxGrip - 3, GRIP_MIDDLE_Y + 1);
-            g2.setStroke(defaultStroke);
+        g2.setColor(arrowColor);
+        int[] xpts = {minGrip - GRIP_WIDTH, minGrip + 1, minGrip + 1};
+        int[] ypts = {GRIP_MIDDLE_Y, GRIP_TOP_Y, GRIP_BOTTOM_Y};
+        g2.fillPolygon(xpts, ypts, 3);
 
-            g2.setColor(arrowColor);
-            int[] xpts = {minGrip - GRIP_WIDTH, minGrip + 1, minGrip + 1};
-            int[] ypts = {GRIP_MIDDLE_Y, GRIP_TOP_Y, GRIP_BOTTOM_Y};
-            g2.fillPolygon(xpts, ypts, 3);
-        }
-        if (rSlideMoved) {
-            g2.setColor(bg);
-            g2.fillRect(minGrip + 1, GRIP_TOP_Y, w - minGrip - 3, GRIP_HEIGHT);
+        g2.setColor(bg);
+        g2.fillRect(minGrip + 1, GRIP_TOP_Y, w - minGrip - 3, GRIP_HEIGHT);
 
-            g2.setColor(fg);
-            g2.drawLine(minGrip + 1, GRIP_MIDDLE_Y, w - 3, GRIP_MIDDLE_Y);
+        g2.setColor(fg);
+        g2.drawLine(minGrip + 1, GRIP_MIDDLE_Y, w - 3, GRIP_MIDDLE_Y);
 
-            g2.setStroke(shadowStroke);
-            g2.setColor(Color.white);
-            g2.drawLine(minGrip + 1, GRIP_MIDDLE_Y + 1, w - 3, GRIP_MIDDLE_Y + 1);
-            g2.setStroke(defaultStroke);
+        g2.setStroke(shadowStroke);
+        g2.setColor(Color.white);
+        g2.drawLine(minGrip + 1, GRIP_MIDDLE_Y + 1, w - 3, GRIP_MIDDLE_Y + 1);
+        g2.setStroke(defaultStroke);
 
-            g2.setColor(arrowColor);
-            int[] xpts = new int[]{maxGrip + GRIP_WIDTH - 1, maxGrip, maxGrip};
-            int[] ypts = {GRIP_MIDDLE_Y, GRIP_TOP_Y, GRIP_BOTTOM_Y};
-            g2.fillPolygon(xpts, ypts, 3);
-        }
-        if (lSlideMoved || rSlideMoved) {
-            g2.setColor(Color.gray);
-            g2.draw3DRect(minGrip + 1, GRIP_MIDDLE_Y - 7, maxGrip - minGrip - 1, 15, true);
-            g2.fill3DRect(minGrip + 1, GRIP_MIDDLE_Y - 7, maxGrip - minGrip - 1, 15, true);
-        }
-        if (textChanged) drawLabels(g2, w);
-        lSlideMoved = false;
-        rSlideMoved = false;
-        textChanged = false;
+        g2.setColor(arrowColor);
+        int[] xpts2 = new int[]{maxGrip + GRIP_WIDTH - 1, maxGrip, maxGrip};
+        int[] ypts2 = {GRIP_MIDDLE_Y, GRIP_TOP_Y, GRIP_BOTTOM_Y};
+        g2.fillPolygon(xpts2, ypts2, 3);
+
+        g2.setColor(Color.gray);
+        g2.draw3DRect(minGrip + 1, GRIP_MIDDLE_Y - 7, maxGrip - minGrip - 1, 15, true);
+        g2.fill3DRect(minGrip + 1, GRIP_MIDDLE_Y - 7, maxGrip - minGrip - 1, 15, true);
+
+        drawLabels(g2, w);
     }
 
     /**
@@ -656,21 +573,5 @@ public class VRangeSlider extends JComponent
         String maxStr = Convert.shortString(maxLimit);
         g2.drawString(maxStr, w - 4 - fm.stringWidth(maxStr), FONT_BOTTOM_Y);
         g2.drawString(curStr, (w - fm.stringWidth(curStr)) / 2, FONT_BOTTOM_Y);
-    }
-
-    /**
-     * Main method for testing purposes.
-     */
-    public static void main(String[] argv) {
-        JFrame frame = new JFrame("Test");
-        VRangeSlider rs = new VRangeSlider("", 0.0, 100.0);
-        // dynamically set the values
-        rs.setBounds(-200.0, 4500.0);
-        rs.setValues(22.2222, 1000.5432);
-        frame.getContentPane().add(rs, BorderLayout.NORTH);
-        frame.pack();
-        frame.setVisible(true);
-        frame.addWindowListener(new BasicWindowMonitor());
-
     }
 }

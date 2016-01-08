@@ -89,22 +89,6 @@ public class SkycatConfigFile extends AbstractCatalogDirectory {
         this(configFileOrURL, FileUtil.makeURL(null, configFileOrURL));
     }
 
-
-    /**
-     * Parse the skycat style config file from the already opened input stream.
-     * The URL is passed as a reference.
-     *
-     * @param url the URL of the config file
-     * @param handler used to report HTML errors from the HTTP server
-     */
-    public SkycatConfigFile(URL url, HTMLQueryResultHandler handler) {
-        super(new File(url.toString()).getPath());
-        setURL(url);
-        setHTMLQueryResultHandler(handler);
-        _load();
-    }
-
-
     /**
      * Load the skycat style config file from the URL and store any catalogs
      * found there in the catalogs vector.
@@ -127,15 +111,6 @@ public class SkycatConfigFile extends AbstractCatalogDirectory {
                 _progressPanel.setText("Connect: " + url.getHost() + ", waiting for reply.");
 
                 URLConnection connection = _progressPanel.openConnection(url);
-                String contentType = connection.getContentType();
-                if (contentType.equals("text/html")) {
-                    // must be an HTML formatted error message from the server
-                    HTMLQueryResultHandler handler = getHTMLQueryResultHandler();
-                    if (handler != null) {
-                        handler.displayHTMLPage(url);
-                        throw new RuntimeException("Error reading catalog config file URL: " + url.toString());
-                    }
-                }
                 _load(connection.getInputStream());
             }
         } catch (IOException e) {
@@ -198,7 +173,7 @@ public class SkycatConfigFile extends AbstractCatalogDirectory {
                 if (properties != null) {
                     // add catalog for previous entry
                     SkycatConfigEntry entry = new SkycatConfigEntry(this, properties);
-                    SkycatCatalog cat = new SkycatCatalog(entry, getHTMLQueryResultHandler());
+                    SkycatCatalog cat = new SkycatCatalog(entry);
                     catalogs.add(cat);
                     CatalogRegistry.instance.register(cat, isLocal());
                 }
@@ -209,7 +184,7 @@ public class SkycatConfigFile extends AbstractCatalogDirectory {
         if (properties != null) {
             // register last catalog entry
             SkycatConfigEntry entry = new SkycatConfigEntry(this, properties);
-            SkycatCatalog cat = new SkycatCatalog(entry, getHTMLQueryResultHandler());
+            SkycatCatalog cat = new SkycatCatalog(entry);
             catalogs.add(cat);
             CatalogRegistry.instance.register(cat, isLocal());
         }
@@ -339,23 +314,6 @@ public class SkycatConfigFile extends AbstractCatalogDirectory {
         return _configFile;
     }
 
-
-    /**
-     * Attempt to read a catalog subdirectory from the given URL and return
-     * a CatalogDirectory object for it.
-     *
-     * @return the new CatalogDirectory
-     * @throws RuntimeException if the catalog directory could not be created
-     */
-    public CatalogDirectory loadSubDir(URL url) {
-        String filename = url.getFile();
-        if (filename.endsWith(".cfg")) {
-            return new SkycatConfigFile(url, getHTMLQueryResultHandler());
-        }
-        throw new RuntimeException("Expected a Skycat style .cfg file, or an AstroCat XML file");
-    }
-
-
     /**
      * Set the URL to use for the default catalog config file.
      *
@@ -379,7 +337,7 @@ public class SkycatConfigFile extends AbstractCatalogDirectory {
         properties.setProperty(LONG_NAME, urlStr);
         properties.setProperty(URL, urlStr);
         SkycatConfigEntry entry = new SkycatConfigEntry(this, properties);
-        SkycatCatalog cat = new SkycatCatalog(entry, getHTMLQueryResultHandler());
+        SkycatCatalog cat = new SkycatCatalog(entry);
         addCatalog(cat);
     }
 

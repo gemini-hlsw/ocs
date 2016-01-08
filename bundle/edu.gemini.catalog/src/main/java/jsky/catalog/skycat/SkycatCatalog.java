@@ -16,16 +16,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.List;
 import java.util.StringTokenizer;
 
 /**
  * Represents a catalog as described in a Skycat style catalog
  * config file. The (keyword: value) pairs in the config file are stored
  * here in a Properties object.
- *
- * @author Allan Brighton
- * @version $Revision: 47126 $
  */
 @Deprecated
 public class SkycatCatalog implements PlotableCatalog {
@@ -38,26 +34,16 @@ public class SkycatCatalog implements PlotableCatalog {
     private SkycatConfigEntry _entry;
 
     /**
-     * Optional handler, used to report HTML format errors from servers
-     */
-    private HTMLQueryResultHandler _htmlQueryResultHandler;
-
-    /**
      * If this is a local catalog, this may optionally point to the data
      */
     private SkycatTable _table;
-
-    /**
-     * Used to assign a unique name to query results
-     */
-    private int _queryCount = 0;
 
     /**
      * Initialize the catalog from the given catalog configuration entry.
      *
      * @param entry the catalog configuration file entry describing the catalog
      */
-    public SkycatCatalog(SkycatConfigEntry entry) {
+    public SkycatCatalog(final SkycatConfigEntry entry) {
         _entry = entry;
     }
 
@@ -67,34 +53,10 @@ public class SkycatCatalog implements PlotableCatalog {
      * @param entry the catalog configuration file entry describing the catalog
      * @param table the data for the catalog (optional, only for local catalgs)
      */
-    public SkycatCatalog(SkycatConfigEntry entry, SkycatTable table) {
+    public SkycatCatalog(final SkycatConfigEntry entry, final SkycatTable table) {
         this(entry);
         _table = table;
     }
-
-    /**
-     * Initialize the catalog from the given table.
-     *
-     * @param table the data for the catalog (optional, only for local catalgs)
-     */
-    public SkycatCatalog(SkycatTable table) {
-        this(table.getConfigEntry());
-        _table = table;
-        _table.setCatalog(this);
-    }
-
-
-    /**
-     * Initialize the catalog from the given catalog configuration entry.
-     *
-     * @param entry   the catalog configuration file entry describing the catalog
-     * @param handler used to report HTML errors from the HTTP server
-     */
-    public SkycatCatalog(SkycatConfigEntry entry, HTMLQueryResultHandler handler) {
-        this(entry);
-        setHTMLQueryResultHandler(handler);
-    }
-
 
     /**
      * Implementation of the clone method (makes a shallow copy).
@@ -103,7 +65,7 @@ public class SkycatCatalog implements PlotableCatalog {
     public Object clone() {
         try {
             return super.clone();
-        } catch (CloneNotSupportedException ex) {
+        } catch (final CloneNotSupportedException ex) {
             throw new InternalError(); // won't happen
         }
     }
@@ -112,7 +74,7 @@ public class SkycatCatalog implements PlotableCatalog {
     /**
      * Set the name of the catalog
      */
-    public void setName(String name) {
+    public void setName(final String name) {
         _entry.setName(name);
     }
 
@@ -182,14 +144,14 @@ public class SkycatCatalog implements PlotableCatalog {
     /**
      * Return a description of the ith query parameter
      */
-    public FieldDesc getParamDesc(int i) {
+    public FieldDesc getParamDesc(final int i) {
         return _entry.getParamDesc(i);
     }
 
     /**
      * Return a description of the named query parameter
      */
-    public FieldDesc getParamDesc(String name) {
+    public FieldDesc getParamDesc(final String name) {
         return _entry.getParamDesc(name);
     }
 
@@ -204,7 +166,7 @@ public class SkycatCatalog implements PlotableCatalog {
     /**
      * Return the ith plot symbol description
      */
-    public TablePlotSymbol getSymbolDesc(int i) {
+    public TablePlotSymbol getSymbolDesc(final int i) {
         return _entry.getSymbolDesc(i);
     }
 
@@ -218,29 +180,15 @@ public class SkycatCatalog implements PlotableCatalog {
     /**
      * Set the array of catalog table plot symbol definitions for use with this catalog
      */
-    public void setSymbols(TablePlotSymbol[] symbols) {
+    public void setSymbols(final TablePlotSymbol[] symbols) {
         _entry.setSymbols(symbols);
     }
 
     /**
      * Set to true if the user edited the plot symbol definitions (default: false)
      */
-    public void setSymbolsEdited(boolean edited) {
+    public void setSymbolsEdited(final boolean edited) {
         _entry.setSymbolsEdited(edited);
-    }
-
-    /**
-     * Return true if the user edited the plot symbol definitions otherwise false
-     */
-    public boolean isSymbolsEdited() {
-        return _entry.isSymbolsEdited();
-    }
-
-    /**
-     * Return a short name or alias for the catalog
-     */
-    public String getShortName() {
-        return _entry.getShortName();
     }
 
     /**
@@ -292,7 +240,7 @@ public class SkycatCatalog implements PlotableCatalog {
     /**
      * Set the parent catalog directory
      */
-    public void setParent(CatalogDirectory catDir) {
+    public void setParent(final CatalogDirectory catDir) {
         _entry.setConfigFile(catDir);
     }
 
@@ -309,7 +257,7 @@ public class SkycatCatalog implements PlotableCatalog {
      * path from the root catalog directory to this catalog.
      */
     public Catalog[] getPath() {
-        CatalogDirectory parent = getParent();
+        final CatalogDirectory parent = getParent();
         if (parent == null)
             return null;
 
@@ -327,7 +275,7 @@ public class SkycatCatalog implements PlotableCatalog {
      * @param queryArgs An object describing the query arguments.
      * @return An object describing the result of the query.
      */
-    public QueryResult query(QueryArgs queryArgs) throws IOException, CatalogException {
+    public QueryResult query(final QueryArgs queryArgs) throws IOException, CatalogException {
         return query(queryArgs, true);
     }
 
@@ -339,9 +287,8 @@ public class SkycatCatalog implements PlotableCatalog {
      * and a progress dialog is displayed where the user can cancel the operation.
      * @return An object describing the result of the query.
      */
-    public QueryResult query(QueryArgs queryArgs, boolean interruptable) throws IOException, CatalogException {
-        _queryCount++;
-        String servType = _entry.getServType();
+    public QueryResult query(final QueryArgs queryArgs, final boolean interruptable) throws IOException, CatalogException {
+        final String servType = _entry.getServType();
         if (servType.equals(LOCAL))
             return _queryLocalCatalog(queryArgs);
 
@@ -365,13 +312,13 @@ public class SkycatCatalog implements PlotableCatalog {
      * @param queryArgs An object describing the query arguments.
      * @return An object describing the result of the query.
      */
-    private QueryResult _queryLocalCatalog(QueryArgs queryArgs) throws CatalogException, IOException {
-        String urlStr = _entry.getURL(0);
+    private QueryResult _queryLocalCatalog(final QueryArgs queryArgs) throws CatalogException, IOException {
+        final String urlStr = _entry.getURL(0);
         if (urlStr != null && urlStr.startsWith("java://"))
             return _queryJavaCatalog(queryArgs);
 
         // determine the query region and max rows settings
-        SearchCondition[] sc = queryArgs.getConditions();
+        final SearchCondition[] sc = queryArgs.getConditions();
         _setQueryRegion(queryArgs, sc);
         _setMaxRows(queryArgs, sc);
 
@@ -385,12 +332,12 @@ public class SkycatCatalog implements PlotableCatalog {
             if (urlStr != null) {
                 try {
                     cat = new SkycatTable(this, urlStr);
-                } catch (Exception e) {
-                    InputStream is;
+                } catch (final Exception e) {
+                    final InputStream is;
                     try {
                         is = Thread.currentThread().getContextClassLoader()
                                 .getResourceAsStream(urlStr);
-                    } catch (Exception ee) {
+                    } catch (final Exception ee) {
                         ee.printStackTrace();
                         return null;
                     }
@@ -403,7 +350,7 @@ public class SkycatCatalog implements PlotableCatalog {
         }
 
         // do the query
-        QueryResult result = cat.query(queryArgs);
+        final QueryResult result = cat.query(queryArgs);
 
         // set a reference to this catalog in the resulting table
         if (result instanceof SkycatTable) {
@@ -417,23 +364,10 @@ public class SkycatCatalog implements PlotableCatalog {
     /**
      * Return an object for displaying the progress of a query.
      */
-    protected synchronized StatusLogger getStatusLogger(String title, QueryArgs queryArgs) {
-        StatusLogger logger = queryArgs.getStatusLogger();
-        if (logger == null) {
-            logger = ProgressPanel.makeProgressPanel(title);
-        }
-        return logger;
+    protected synchronized StatusLogger getStatusLogger(final String title, final QueryArgs queryArgs) {
+        final StatusLogger logger = queryArgs.getStatusLogger();
+        return logger == null ? ProgressPanel.makeProgressPanel(title) : logger;
     }
-
-//    /**
-//     * Query the catalog using the given argument and return the result.
-//     *
-//     * @param queryArgs An object describing the query arguments.
-//     * @return An object describing the result of the query.
-//     */
-//    private QueryResult _queryCatalog(QueryArgs queryArgs) throws CatalogException, IOException {
-//        return _queryCatalog(queryArgs, true);
-//    }
 
     /**
      * Query the catalog using the given argument and return the result.
@@ -443,8 +377,8 @@ public class SkycatCatalog implements PlotableCatalog {
      * and a progress dialog is displayed where the user can cancel the operation.
      * @return An object describing the result of the query.
      */
-    private QueryResult _queryCatalog(QueryArgs queryArgs, boolean interruptable) throws CatalogException, IOException {
-        int n = _entry.getNumURLs();
+    private QueryResult _queryCatalog(final QueryArgs queryArgs, final boolean interruptable) throws CatalogException, IOException {
+        final int n = _entry.getNumURLs();
         for (int i = 0; i < n; i++) {
             String urlStr = _entry.getURL(i);
             if (urlStr != null) {
@@ -466,35 +400,35 @@ public class SkycatCatalog implements PlotableCatalog {
     }
 
     // Query using a local command path name (for security, must be from a local config file)
-    private QueryResult _queryCmdCatalog(QueryArgs queryArgs, String urlStr) throws CatalogException, IOException {
-        CatalogDirectory catDir = _entry.getConfigFile();
+    private QueryResult _queryCmdCatalog(final QueryArgs queryArgs, final String urlStr) throws CatalogException, IOException {
+        final CatalogDirectory catDir = _entry.getConfigFile();
         if (catDir != null && !catDir.isLocal())
             throw new RuntimeException("Invalid catalog URL: " + urlStr
                     + ", in remote config file");
-        Process process = Runtime.getRuntime().exec(urlStr);
-        InputStream stdout = process.getInputStream();
-        SkycatTable cat = new SkycatTable(this, stdout, queryArgs);
+        final Process process = Runtime.getRuntime().exec(urlStr);
+        final InputStream stdout = process.getInputStream();
+        final SkycatTable cat = new SkycatTable(this, stdout, queryArgs);
         cat.setConfigEntry(_entry);
         return cat;
     }
 
     // Query a remote catalog using an interruptable  background thread with progress display.
-    private QueryResult _queryRemoteCatalogBg(QueryArgs queryArgs, String urlStr) throws CatalogException, IOException {
-        urlStr = urlStr.replace(" ", "%20");
-        URL queryUrl = new URL(urlStr);
-        System.out.println("URL = " + urlStr);
-        StatusLogger statusLogger = getStatusLogger("Downloading query results ...", queryArgs);
+    private QueryResult _queryRemoteCatalogBg(final QueryArgs queryArgs, final String urlStr) throws CatalogException, IOException {
+        final String rurlStr = urlStr.replace(" ", "%20");
+        final URL queryUrl = new URL(rurlStr);
+        System.out.println("URL = " + rurlStr);
+        final StatusLogger statusLogger = getStatusLogger("Downloading query results ...", queryArgs);
         ProgressBarFilterInputStream in = null;
         try {
-            URLConnection connection = statusLogger.openConnection(queryUrl);
-            String contentType = connection.getContentType();
+            final URLConnection connection = statusLogger.openConnection(queryUrl);
+            final String contentType = connection.getContentType();
             if (contentType != null && contentType.equals("text/html")) {
                 // might be an HTML error from the catalog server
                 return new URLQueryResult(queryUrl);
             }
-            InputStream ins = connection.getInputStream();
+            final InputStream ins = connection.getInputStream();
             in = statusLogger.getLoggedInputStream(ins, connection.getContentLength());
-            SkycatTable cat = new SkycatTable(this, in, queryArgs);
+            final SkycatTable cat = new SkycatTable(this, in, queryArgs);
             cat.setConfigEntry(_entry);
             return cat;
         } finally {
@@ -506,65 +440,25 @@ public class SkycatCatalog implements PlotableCatalog {
     }
 
     // Query a remote catalog (no progress display of background thread)
-    private QueryResult _queryRemoteCatalog(QueryArgs queryArgs, String urlStr) throws CatalogException, IOException {
-        urlStr = urlStr.replace(" ", "%20");
-        System.out.println("URL = " + urlStr);
-        URL queryUrl = new URL(urlStr);
+    private QueryResult _queryRemoteCatalog(final QueryArgs queryArgs, final String urlStr) throws CatalogException, IOException {
+        final String rurlStr = urlStr.replace(" ", "%20");
+        System.out.println("URL = " + rurlStr);
+        URL queryUrl = new URL(rurlStr);
         InputStream ins = null;
         try {
-            URLConnection con = queryUrl.openConnection();
-            String contentType = con.getContentType();
+            final URLConnection con = queryUrl.openConnection();
+            final String contentType = con.getContentType();
             if (contentType != null && contentType.equals("text/html")) {
                 // might be an HTML error from the catalog server
                 return new URLQueryResult(queryUrl);
             }
             ins = con.getInputStream();
-            SkycatTable cat = new SkycatTable(this, ins, queryArgs);
+            final SkycatTable cat = new SkycatTable(this, ins, queryArgs);
             cat.setConfigEntry(_entry);
             return cat;
         } finally {
             if (ins != null) ins.close();
         }
-    }
-
-
-    // Hacking a way to do a catalog query without the popup dialog... This
-    // is just the same code from above but without the popup.
-    // TODO: Refactor SkycatCatalog to accept a listener for events that are
-    // TODO: currently displayed in the popup.
-    // TODO: Make the popup implement the listener interface and add a call
-    // TODO: to query that takes an optional (possibly null) listener.
-    // TODO: Add the query with listener method to the interface.
-    // TODO: Make the current query create the popup dialog listener and call
-    // TODO: the more generic method with the listener arg.  I guess ...
-    //
-    // XXX allan: Use query(args, false) to turn off background thread/progress bar
-    public QueryResult noPopupCatalogQuery(QueryArgs queryArgs) throws CatalogException, IOException {
-        ++_queryCount;
-        int n = _entry.getNumURLs();
-        for (int i = 0; i < n; i++) {
-            String urlStr = _entry.getURL(i);
-            if (urlStr == null) continue;
-            urlStr = _getQueryUrl(urlStr, queryArgs).replace(" ", "%20");
-            System.out.println("URL = " + urlStr);
-            URL queryUrl = new URL(urlStr);
-            InputStream ins = null;
-            try {
-                URLConnection con = queryUrl.openConnection();
-                String contentType = con.getContentType();
-                if (contentType != null && contentType.equals("text/html")) {
-                    // might be an HTML error from the catalog server
-                    return new URLQueryResult(queryUrl);
-                }
-                ins = con.getInputStream();
-                SkycatTable cat = new SkycatTable(this, ins, queryArgs);
-                cat.setConfigEntry(_entry);
-                return cat;
-            } finally {
-                if (ins != null) ins.close();
-            }
-        }
-        throw new RuntimeException("No query URL was specified in the config file.");
     }
 
     /**
@@ -573,18 +467,18 @@ public class SkycatCatalog implements PlotableCatalog {
      * @param queryArgs An object describing the query arguments.
      * @return An object describing the result of the query.
      */
-    private QueryResult _queryImageServer(QueryArgs queryArgs) throws CatalogException, IOException {
-        int n = _entry.getNumURLs();
+    private QueryResult _queryImageServer(final QueryArgs queryArgs) throws CatalogException, IOException {
+        final int n = _entry.getNumURLs();
         for (int i = 0; i < n; i++) {
-            String urlStr = _entry.getURL(i);
+            final String urlStr = _entry.getURL(i);
             if (urlStr != null) {
-                urlStr = _getQueryUrl(urlStr, queryArgs);
-                if (urlStr.startsWith(File.separator)) {
+                final String qurlStr = _getQueryUrl(urlStr, queryArgs);
+                if (qurlStr.startsWith(File.separator)) {
                     // may be a local command path name
                     throw new RuntimeException("Local commands not supported for image server (yet)");
                 } else {
                     // normal URL
-                    return new URLQueryResult(new URL(urlStr));
+                    return new URLQueryResult(new URL(qurlStr));
                 }
             }
         }
@@ -597,11 +491,11 @@ public class SkycatCatalog implements PlotableCatalog {
      * @return An object describing the result of the query.
      */
     private QueryResult _queryCatalogDirectory() {
-        int numURLs = _entry.getNumURLs();
+        final int numURLs = _entry.getNumURLs();
         for (int i = 0; i < numURLs; i++) {
             try {
                 return new URLQueryResult(new URL(_entry.getURL(0)));
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 if (i == (numURLs - 1))
                     throw new RuntimeException(e);
             }
@@ -617,29 +511,30 @@ public class SkycatCatalog implements PlotableCatalog {
      * @param queryArgs An object describing the query arguments (not used here)
      * @return An object describing the result of the query.
      */
-    private QueryResult _queryJavaCatalog(QueryArgs queryArgs) throws CatalogException, IOException {
+    @SuppressWarnings("unchecked")
+    private QueryResult _queryJavaCatalog(final QueryArgs queryArgs) throws CatalogException, IOException {
         QueryResult result = null;
 
         // determine the query region and max rows settings
-        SearchCondition[] sc = queryArgs.getConditions();
+        final SearchCondition[] sc = queryArgs.getConditions();
         _setQueryRegion(queryArgs, sc);
         _setMaxRows(queryArgs, sc);
 
-        String urlStr = _entry.getURL(0);
+        final String urlStr = _entry.getURL(0);
         if (urlStr != null) {
-            StringTokenizer token = new StringTokenizer(urlStr.substring(7), "?\t");
+            final StringTokenizer token = new StringTokenizer(urlStr.substring(7), "?\t");
             //urlStr = _getQueryUrl(urlStr, queryArgs);
-            String className = token.nextToken();
+            final String className = token.nextToken();
             try {
-                Class<?> catalogClass = Class.forName(className);
-                Catalog catalog = (Catalog) catalogClass.newInstance();
+                final Class<?> catalogClass = Class.forName(className);
+                final Catalog catalog = (Catalog) catalogClass.newInstance();
 
                 result = catalog.query(queryArgs);
                 if (result instanceof MemoryCatalog && !(result instanceof SkycatTable)) {
-                    MemoryCatalog mcat = (MemoryCatalog) result;
+                    final MemoryCatalog mcat = (MemoryCatalog) result;
                     result = new SkycatTable(_entry, mcat.getDataVector(), mcat.getFields());
                 }
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 if (e instanceof IOException)
                     throw (IOException) e;
                 if (e instanceof CatalogException) {
@@ -684,15 +579,15 @@ public class SkycatCatalog implements PlotableCatalog {
      * @param queryArgs An object describing the query arguments.
      * @return The substituted, expanded URL to use to make the query.
      */
-    private String _getQueryUrl(String urlStr, QueryArgs queryArgs) throws CatalogException, IOException {
+    private String _getQueryUrl(final String urlStr, final QueryArgs queryArgs) throws CatalogException, IOException {
 
         if (_entry.getNumParams() == 0)
             return urlStr;
 
-        int n = urlStr.length();
-        StringBuffer buf = new StringBuffer(n * 2);
+        final int n = urlStr.length();
+        final StringBuilder buf = new StringBuilder(n * 2);
         boolean urlHasId = false, urlHasRaDec = false, urlHasXy = false;
-        SearchCondition[] sc = queryArgs.getConditions();
+        final SearchCondition[] sc = queryArgs.getConditions();
 
         // determine the query region and max rows settings
         _setQueryRegion(queryArgs, sc);
@@ -716,9 +611,9 @@ public class SkycatCatalog implements PlotableCatalog {
                     c += 2;
                     urlHasId = true;
                 } else if (urlStr.startsWith("ra", c)) {
-                    CoordinateRadius region = queryArgs.getRegion();
+                    final CoordinateRadius region = queryArgs.getRegion();
                     if (region != null) {
-                        WorldCoords pos = (WorldCoords) region.getCenterPosition();
+                        final WorldCoords pos = (WorldCoords) region.getCenterPosition();
                         String ra = pos.getRA().toString();
                         if (ra.startsWith("+")) {
                             ra = ra.substring(1);
@@ -728,10 +623,10 @@ public class SkycatCatalog implements PlotableCatalog {
                     c += 2;
                     urlHasRaDec = true;
                 } else if (urlStr.startsWith("dec", c) || urlStr.startsWith("plusdec", c)) {
-                    boolean plusdec = urlStr.startsWith("plusdec", c);
-                    CoordinateRadius region = queryArgs.getRegion();
+                    final boolean plusdec = urlStr.startsWith("plusdec", c);
+                    final CoordinateRadius region = queryArgs.getRegion();
                     if (region != null) {
-                        WorldCoords pos = (WorldCoords) region.getCenterPosition();
+                        final WorldCoords pos = (WorldCoords) region.getCenterPosition();
                         String dec = pos.getDec().toString();
                         // Some servers require that the dec start with a +
                         // sign.  Some won't work if it does.  Differentiate
@@ -748,36 +643,36 @@ public class SkycatCatalog implements PlotableCatalog {
                     c += plusdec ? 7 : 3;
                     urlHasRaDec = true;
                 } else if (urlStr.charAt(c) == 'x') {
-                    CoordinateRadius region = queryArgs.getRegion();
+                    final CoordinateRadius region = queryArgs.getRegion();
                     if (region != null) {
-                        ImageCoords pos = (ImageCoords) region.getCenterPosition();
+                        final ImageCoords pos = (ImageCoords) region.getCenterPosition();
                         buf.append(pos.getX());
                     }
                     c++;
                     urlHasXy = true;
                 } else if (urlStr.charAt(c) == 'y') {
-                    CoordinateRadius region = queryArgs.getRegion();
+                    final CoordinateRadius region = queryArgs.getRegion();
                     if (region != null) {
-                        ImageCoords pos = (ImageCoords) region.getCenterPosition();
+                        final ImageCoords pos = (ImageCoords) region.getCenterPosition();
                         buf.append(pos.getY());
                     }
                     c++;
                     urlHasXy = true;
                 } else if (urlStr.startsWith("r1", c)) {
-                    CoordinateRadius region = queryArgs.getRegion();
+                    final CoordinateRadius region = queryArgs.getRegion();
                     if (region != null)
                         if (region.getMinRadius() != 0.0 || region.getMaxRadius() != 0.0)
                             buf.append(region.getMinRadius());
                     c += 2;
                 } else if (urlStr.startsWith("r2", c)) {
-                    CoordinateRadius region = queryArgs.getRegion();
+                    final CoordinateRadius region = queryArgs.getRegion();
                     if (region != null)
                         if (region.getMinRadius() != 0.0 || region.getMaxRadius() != 0.0)
                             buf.append(region.getMaxRadius());
                     c += 2;
                 } else if (urlStr.charAt(c) == 'w') {
                     if (sc != null && sc.length > 0) {
-                        for (SearchCondition aSc : sc) {
+                        for (final SearchCondition aSc : sc) {
                             if (aSc.getName().equals(SkycatConfigEntry.WIDTH)) {
                                 buf.append(aSc.getValueAsString());
                                 break;
@@ -787,7 +682,7 @@ public class SkycatCatalog implements PlotableCatalog {
                     c++;
                 } else if (urlStr.charAt(c) == 'h') {
                     if (sc != null && sc.length > 0) {
-                        for (SearchCondition aSc : sc) {
+                        for (final SearchCondition aSc : sc) {
                             if (aSc.getName().equals(SkycatConfigEntry.HEIGHT)) {
                                 buf.append(aSc.getValueAsString());
                                 break;
@@ -797,7 +692,7 @@ public class SkycatCatalog implements PlotableCatalog {
                     c++;
                 } else if (urlStr.startsWith("m1", c)) { // brightest
                     if (sc != null && sc.length > 0) {
-                        for (SearchCondition aSc : sc) {
+                        for (final SearchCondition aSc : sc) {
                             if (aSc.getName().equals(SkycatConfigEntry.BRIGHTEST)) {
                                 buf.append(aSc.getValueAsString());
                                 break;
@@ -807,7 +702,7 @@ public class SkycatCatalog implements PlotableCatalog {
                     c += 2;
                 } else if (urlStr.startsWith("m2", c)) { // faintest
                     if (sc != null && sc.length > 0) {
-                        for (SearchCondition aSc : sc) {
+                        for (final SearchCondition aSc : sc) {
                             if (aSc.getName().equals(SkycatConfigEntry.FAINTEST)) {
                                 buf.append(aSc.getValueAsString());
                             }
@@ -816,11 +711,11 @@ public class SkycatCatalog implements PlotableCatalog {
                     c += 2;
                 } else if (urlStr.startsWith("BAND", c)) { // band to apply magnitude limits
                     if (sc != null && sc.length > 0) {
-                        for (SearchCondition aSc : sc) {
+                        for (final SearchCondition aSc : sc) {
                             if (aSc.getName().equals(SkycatConfigEntry.BAND)) {
                                 String band = aSc.getValueAsString();
                                 if (band.equals("R")){
-                                    band="f.";
+                                    band = "f.";
                                 }
                                 buf.append(band);
                                 break;
@@ -835,7 +730,7 @@ public class SkycatCatalog implements PlotableCatalog {
                 } else if (urlStr.startsWith("cond", c)) {
                     // insert a list of conditions (param names and min/max values)
                     if (sc != null && sc.length > 0) {
-                        String s = urlStr.substring(c);
+                        final String s = urlStr.substring(c);
                         String sep = ",";
                         // check for optional separator: for example: %cond(..)
                         if (s.startsWith("cond(") && s.contains(")")) {
@@ -882,7 +777,7 @@ public class SkycatCatalog implements PlotableCatalog {
 
     // Returns true if name is one of the standard query parameters.
     // See SkycatConfigEntry.determineSearchParameters()
-    private boolean _isStandardParam(String name) {
+    private boolean _isStandardParam(final String name) {
         return (isWCS() && (name.equalsIgnoreCase(SkycatConfigEntry.OBJECT)
                 || name.equalsIgnoreCase(SkycatConfigEntry.RA)
                 || name.equalsIgnoreCase(SkycatConfigEntry.DEC)
@@ -902,8 +797,8 @@ public class SkycatCatalog implements PlotableCatalog {
     /**
      * Return the equinox setting from the given query arguments object.
      */
-    private double _getEquinox(QueryArgs queryArgs) {
-        String equinoxStr = (String) queryArgs.getParamValue(SkycatConfigEntry.EQUINOX);
+    private double _getEquinox(final QueryArgs queryArgs) {
+        final String equinoxStr = (String) queryArgs.getParamValue(SkycatConfigEntry.EQUINOX);
         double equinox = 2000.;
         if (equinoxStr != null && equinoxStr.endsWith("1950"))
             equinox = 1950.;
@@ -913,7 +808,7 @@ public class SkycatCatalog implements PlotableCatalog {
     /**
      * Determine the query region based on the given query arguments
      */
-    protected void _setQueryRegion(QueryArgs queryArgs, SearchCondition[] sc) throws CatalogException, IOException {
+    protected void _setQueryRegion(final QueryArgs queryArgs, final SearchCondition[] sc) throws CatalogException, IOException {
         if (queryArgs.getRegion() != null || sc == null || sc.length == 0)
             return;
 
@@ -931,10 +826,10 @@ public class SkycatCatalog implements PlotableCatalog {
             }
         } else {
             // look for a radius search condition
-            for (SearchCondition aSc : sc) {
-                String name = aSc.getName();
+            for (final SearchCondition aSc : sc) {
+                final String name = aSc.getName();
                 if (name.equalsIgnoreCase("radius") && aSc instanceof RangeSearchCondition) {
-                    RangeSearchCondition rsc = (RangeSearchCondition) aSc;
+                    final RangeSearchCondition rsc = (RangeSearchCondition) aSc;
                     r1 = (Double) rsc.getMinVal();
                     r2 = (Double) rsc.getMaxVal();
                     break;
@@ -950,18 +845,18 @@ public class SkycatCatalog implements PlotableCatalog {
         // look for the center position parameters
         if (isWCS()) {
             WorldCoords wcs = null;
-            String objectName = (String) queryArgs.getParamValue(SkycatConfigEntry.OBJECT);
+            final String objectName = (String) queryArgs.getParamValue(SkycatConfigEntry.OBJECT);
             if (objectName == null || objectName.length() == 0) {
                 // no object name specified, check RA and Dec
-                String raStr = (String) queryArgs.getParamValue(SkycatConfigEntry.RA);
-                String decStr = (String) queryArgs.getParamValue(SkycatConfigEntry.DEC);
+                final String raStr = (String) queryArgs.getParamValue(SkycatConfigEntry.RA);
+                final String decStr = (String) queryArgs.getParamValue(SkycatConfigEntry.DEC);
                 if (raStr == null || decStr == null)
                     return;
-                double equinox = _getEquinox(queryArgs);
+                final double equinox = _getEquinox(queryArgs);
                 wcs = new WorldCoords(raStr, decStr, equinox, true);
             } else {
                 // an object name was specified, which needs to be resolved with a nameserver
-                Object o = queryArgs.getParamValue(SkycatConfigEntry.NAME_SERVER);
+                final Object o = queryArgs.getParamValue(SkycatConfigEntry.NAME_SERVER);
                 if (o instanceof Catalog) {
                     wcs = _resolveObjectName(objectName, (Catalog) o);
                 } else {
@@ -984,7 +879,7 @@ public class SkycatCatalog implements PlotableCatalog {
             Double y = (Double) queryArgs.getParamValue(SkycatConfigEntry.Y);
             if (x == null || y == null)
                 return;
-            ImageCoords ic = new ImageCoords(x.intValue(), y.intValue());
+            final ImageCoords ic = new ImageCoords(x.intValue(), y.intValue());
             queryArgs.setRegion(new CoordinateRadius(ic, r1, r2));
         }
     }
@@ -994,12 +889,12 @@ public class SkycatCatalog implements PlotableCatalog {
      * Resolve the given astronomical object name using the given name server
      * and return the world coordinates corresponding the name.
      */
-    private WorldCoords _resolveObjectName(String objectName, Catalog cat) throws CatalogException, IOException {
-        QueryArgs queryArgs = new BasicQueryArgs(cat);
+    private WorldCoords _resolveObjectName(final String objectName, final Catalog cat) throws CatalogException, IOException {
+        final QueryArgs queryArgs = new BasicQueryArgs(cat);
         queryArgs.setId(objectName);
-        QueryResult r = cat.query(queryArgs);
+        final QueryResult r = cat.query(queryArgs);
         if (r instanceof TableQueryResult) {
-            Coordinates coords = ((TableQueryResult) r).getCoordinates(0);
+            final Coordinates coords = ((TableQueryResult) r).getCoordinates(0);
             if (coords instanceof WorldCoords)
                 return (WorldCoords) coords;
             if (coords == null) {
@@ -1013,21 +908,14 @@ public class SkycatCatalog implements PlotableCatalog {
     /**
      * Check for a "Max Objects" argument and if found, set queryArgs.maxRows with the value.
      */
-    protected void _setMaxRows(QueryArgs queryArgs, SearchCondition[] sc) {
+    protected void _setMaxRows(final QueryArgs queryArgs, final SearchCondition[] sc) {
         if (queryArgs.getMaxRows() != 0 || sc == null || sc.length == 0)
             return;
 
         // look for a min and max radius parameters
-        Integer maxObjects = (Integer) queryArgs.getParamValue(SkycatConfigEntry.MAX_OBJECTS);
+        final Integer maxObjects = (Integer) queryArgs.getParamValue(SkycatConfigEntry.MAX_OBJECTS);
         if (maxObjects != null)
             queryArgs.setMaxRows(maxObjects);
-    }
-
-    /**
-     * Optional handler, used to report HTML format errors from HTTP servers
-     */
-    public void setHTMLQueryResultHandler(HTMLQueryResultHandler handler) {
-        _htmlQueryResultHandler = handler;
     }
 
     /**
@@ -1038,14 +926,14 @@ public class SkycatCatalog implements PlotableCatalog {
      * @param queryArgs (in/out) describes the query arguments
      * @param region    (in) describes the query region (center and radius range)
      */
-    public void setRegionArgs(QueryArgs queryArgs, CoordinateRadius region) {
-        Coordinates coords = region.getCenterPosition();
-        RowCoordinates rowCoordinates = _entry.getRowCoordinates();
-        String equinoxStr = (String) queryArgs.getParamValue(SkycatConfigEntry.EQUINOX);
-        double equinox = _getEquinox(queryArgs);
+    public void setRegionArgs(final QueryArgs queryArgs, final CoordinateRadius region) {
+        final Coordinates coords = region.getCenterPosition();
+        final RowCoordinates rowCoordinates = _entry.getRowCoordinates();
+        final String equinoxStr = (String) queryArgs.getParamValue(SkycatConfigEntry.EQUINOX);
+        final double equinox = _getEquinox(queryArgs);
         if (rowCoordinates.isWCS()) {
-            WorldCoords pos = (WorldCoords) coords;
-            String[] radec = pos.format(equinox);
+            final WorldCoords pos = (WorldCoords) coords;
+            final String[] radec = pos.format(equinox);
             queryArgs.setParamValue(SkycatConfigEntry.RA, radec[0]);
             queryArgs.setParamValue(SkycatConfigEntry.DEC, radec[1]);
             queryArgs.setParamValue(SkycatConfigEntry.EQUINOX, equinoxStr);
@@ -1054,7 +942,7 @@ public class SkycatCatalog implements PlotableCatalog {
             queryArgs.setParamValue(SkycatConfigEntry.WIDTH, region.getWidth());
             queryArgs.setParamValue(SkycatConfigEntry.HEIGHT, region.getHeight());
         } else if (rowCoordinates.isPix()) {
-            ImageCoords pos = (ImageCoords) coords;
+            final ImageCoords pos = (ImageCoords) coords;
             queryArgs.setParamValue(SkycatConfigEntry.X, pos.getX());
             queryArgs.setParamValue(SkycatConfigEntry.Y, pos.getY());
             queryArgs.setParamValue(SkycatConfigEntry.MIN_RADIUS, region.getMinRadius());
@@ -1062,72 +950,5 @@ public class SkycatCatalog implements PlotableCatalog {
             queryArgs.setParamValue(SkycatConfigEntry.WIDTH, region.getWidth());
             queryArgs.setParamValue(SkycatConfigEntry.HEIGHT, region.getHeight());
         }
-    }
-
-    /**
-     * Test cases
-     */
-    public static void main(String[] args) {
-        if (args.length != 1) {
-            System.out.println("usage: java -classpath ... SkycatCatalog catalogName");
-            System.exit(1);
-        }
-        String catalogName = args[0];
-        SkycatConfigFile configFile = SkycatConfigFile.getConfigFile();
-        final Catalog cat = configFile.getCatalog(catalogName);
-        if (cat == null) {
-            System.out.println("Can't find entry for catalog: " + catalogName);
-            System.exit(1);
-        }
-
-        try {
-            String originalUrls[] = null;
-            WorldCoords wc = null;
-            QueryArgs queryArgs = new BasicQueryArgs(cat);
-            queryArgs.setId("M31");
-            queryArgs.setMaxRows(1);
-
-            QueryResult r = cat.query(queryArgs);
-            if (cat instanceof SkycatCatalog) {
-                SkycatCatalog skycat = (SkycatCatalog) cat;
-                if (skycat.getShortName().contains("simbad")) {
-                    skycat.getConfigEntry().setURLs(originalUrls);
-                }
-            }
-
-            if (r instanceof TableQueryResult) {
-                TableQueryResult tqr = (TableQueryResult) r;
-                if (tqr.getRowCount() > 0) {
-                    wc = (WorldCoords) tqr.getCoordinates(0);
-                    List<String> v = tqr.getColumnIdentifiers();
-                    for (String s : v) {
-                        System.out.println("Column: " + s);
-                    }
-                    int pm = tqr.getColumnIndex("pm1");
-                    if (pm >= 0) {
-                        Double pm1 = (Double) tqr.getValueAt(0, pm);
-                        Double pm2 = (Double) tqr.getValueAt(0, pm + 1);
-                        System.out.println("PM1 : " + pm1);
-                        System.out.println("PM2 : " + pm2);
-                    }
-                } else {
-                    throw new CatalogException("No objects were found.");
-                }
-            }
-            if (wc != null) {
-                System.out.println("RA  : " + wc.getRA().toString());
-                System.out.println("Dec : " + wc.getDec().toString());
-            }
-
-            System.out.println("");
-            System.out.println("test query: at center position/radius: ");
-            QueryArgs q2 = new BasicQueryArgs(cat);
-            q2.setRegion(new CoordinateRadius(new WorldCoords("03:19:44.44", "+41:30:58.21"), 2.));
-            QueryResult r2 = cat.query(q2);
-            System.out.println("result: " + r2);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        System.exit(0);
     }
 }

@@ -4,6 +4,7 @@ import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.table.DefaultTableModel;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Vector;
 
@@ -117,15 +118,7 @@ public class CellSelectTableWidget extends RowManipulateTableWidget {
         if ((rowIndex < 0) || (rowIndex >= getModel().getRowCount())) {
             return;
         }
-
-        List<CellSelectTableWatcher> v ;
-        synchronized (this) {
-            v = new ArrayList<>(_watchers);
-        }
-
-        for (CellSelectTableWatcher aV : v) {
-            aV.cellSelected(this, colIndex, rowIndex);
-        }
+        _getWatchers().forEach(w -> w.cellSelected(this, colIndex, rowIndex));
     }
 
     /**
@@ -144,29 +137,8 @@ public class CellSelectTableWidget extends RowManipulateTableWidget {
         _watchers.remove(cstw);
     }
 
-    /**
-     * test main
-     */
-    @SuppressWarnings("rawtypes")
-    public static void main(String[] args) {
-        JFrame frame = new JFrame("CellSelectTableWidget");
-
-        CellSelectTableWidget table = new CellSelectTableWidget();
-        String[] headers = new String[]{"One", "Two", "Three", "Four"};
-        table.setColumnHeaders(headers);
-        Vector<Object>[] v = new Vector[5];
-        for (int i = 0; i < v.length; i++) {
-            v[i] = new Vector<>(4);
-            for (int j = 0; j < headers.length; j++)
-                v[i].add("cell " + i + ", " + j);
-        }
-        table.setRows(v);
-        table.addWatcher((w, colIndex, rowIndex) -> System.out.println("tableCellSelected: " + rowIndex + ", " + colIndex));
-
-        frame.getContentPane().add("Center", new JScrollPane(table));
-        frame.pack();
-        frame.setVisible(true);
-        frame.addWindowListener(new BasicWindowMonitor());
+    private synchronized List<CellSelectTableWatcher> _getWatchers() {
+        return new ArrayList<>(_watchers);
     }
 }
 
