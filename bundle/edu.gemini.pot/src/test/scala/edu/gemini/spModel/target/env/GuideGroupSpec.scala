@@ -103,7 +103,7 @@ class GuideGroupSpec extends Specification with ScalaCheck with Arbitraries {
     "remove the primary guide star if there is no primary in GuideProbeTargets" in
       forAll { (g: GuideGroup) =>
         AllProbes.forall { gp =>
-          val noPrimaryGpt = GuideProbeTargets.create(gp, new SPTarget())
+          val noPrimaryGpt = GuideProbeTargets.create(gp, new SPTarget()).clearPrimarySelection()
           val g2           = g.put(noPrimaryGpt)
           g2.get(gp).asScalaOpt.forall { _.getPrimary.isEmpty }
         }
@@ -112,7 +112,7 @@ class GuideGroupSpec extends Specification with ScalaCheck with Arbitraries {
     "remove the guider from automatic groups if there is no primary in GuideProbeTargets" in
       forAll { (g: GuideGroup) =>
         AllProbes.forall { gp =>
-          val noPrimaryGpt = GuideProbeTargets.create(gp, new SPTarget())
+          val noPrimaryGpt = GuideProbeTargets.create(gp, new SPTarget()).clearPrimarySelection()
           val g2           = g.put(noPrimaryGpt)
           val gpt2         = g2.get(gp).asScalaOpt
           g2.grp match {
@@ -127,7 +127,7 @@ class GuideGroupSpec extends Specification with ScalaCheck with Arbitraries {
         val primaryTarget    = new SPTarget() <| (_.setName("primary"))
         val notPrimaryTarget = new SPTarget() <| (_.setName("not primary"))
         AllProbes.forall { gp =>
-          val gpt  = GuideProbeTargets.create(gp, ImOption.apply(primaryTarget), primaryTarget, notPrimaryTarget)
+          val gpt  = GuideProbeTargets.create(gp, primaryTarget, notPrimaryTarget)
           val g2   = g.put(gpt)
           val lst2 = g2.get(gp).asScalaOpt.toList.flatMap(_.getTargets.asScalaList)
           g2.grp match {

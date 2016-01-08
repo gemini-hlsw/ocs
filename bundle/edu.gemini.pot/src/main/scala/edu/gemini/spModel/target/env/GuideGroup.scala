@@ -63,7 +63,7 @@ case class GuideGroup(grp: GuideGrp) extends java.lang.Iterable[GuideProbeTarget
     }
 
     gpt.map { case (primary, all) =>
-      GuideProbeTargets.create(gp, primary.asGeminiOpt, all.asImList)
+      GuideProbeTargets.create(gp, all.asImList).selectPrimary(primary.asGeminiOpt)
     }
   }
 
@@ -114,7 +114,7 @@ case class GuideGroup(grp: GuideGrp) extends java.lang.Iterable[GuideProbeTarget
 
     update {
       case mg@ManualGroup(_, m) =>
-        val targets = gpt.getManualTargets.asScalaList.toNel
+        val targets = gpt.getOptions.asScalaList.toNel
 
         targets.fold(mg.copy(targetMap = m - probe)) { nel =>
           def noPrimary = OptsList(nel.left[Zipper[SPTarget]])

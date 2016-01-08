@@ -157,6 +157,10 @@ public final class GuideProbeTargets implements Serializable, TargetContainer, O
         return targetOptions.getPrimary();
     }
 
+    public GuideProbeTargets clearPrimarySelection() {
+        return selectPrimary(ImOption.empty());
+    }
+
     @Override
     public GuideProbeTargets selectPrimary(final Option<SPTarget> primary) {
         return new GuideProbeTargets(guider, targetOptions.selectPrimary(primary));
