@@ -38,14 +38,10 @@ object GuideEnv {
   import TargetCollection._
 
   implicit val TargetCollectionGuideEnv: TargetCollection[GuideEnv] = new TargetCollection[GuideEnv] {
-    def mod(fa: AutomaticGroup => AutomaticGroup, fm: ManualGroup => ManualGroup): IndexedState[GuideEnv, GuideEnv, GuideEnv] =
-      for {
-        _ <- Auto   %== fa
-        _ <- Manual %== (_.map(_.map(fm)))
-        e <- get
-      } yield e
+    def mod(fa: AutomaticGroup => AutomaticGroup, fm: ManualGroup => ManualGroup): State[GuideEnv, Unit] =
+      (Auto %== fa) *> (Manual %== (_.map(_.map(fm))))
 
     override def removeTarget(ge: GuideEnv, t: SPTarget): GuideEnv =
-      mod(_.removeTarget(t), _.removeTarget(t)).eval(ge)
+      mod(_.removeTarget(t), _.removeTarget(t)).exec(ge)
   }
 }

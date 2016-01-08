@@ -42,20 +42,6 @@ sealed trait GuideGrp extends Serializable {
       case ManualGroup(_, ts)        => ts.mapValues(_.toList)
     }
 
-  def removeTarget2(t: SPTarget): GuideGrp =
-    this match {
-      case AutomaticGroup.Initial    =>
-        this
-
-      case AutomaticGroup.Active(ts) =>
-        AutomaticGroup.Active(ts.filterNot(_._2 == t))
-
-      case ManualGroup(n, ts)        =>
-        ManualGroup(n, ts.mapValues(_.delete(t)).collect {
-          case (probe, Some(opts)) => (probe, opts)
-        })
-    }
-
   def cloneTargets: GuideGrp =
     this match {
       case AutomaticGroup.Initial    =>
