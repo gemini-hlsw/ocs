@@ -11,10 +11,10 @@ import org.specs2.mutable.Specification
 
 object HS2Spec extends Specification with ScalaCheck {
 
-  import HS2.{ InternalError, Row, Search }
+  import HS2.{ HS2Error, Row, Search }
   import edu.gemini.spModel.core.{ HorizonsDesignation => HD }
 
-  def runSearch[A](s: Search[A]): InternalError \/ List[Row[A]] =
+  def runSearch[A](s: Search[A]): HS2Error \/ List[Row[A]] =
     HS2.search(s).run.unsafePerformIO
 
   "comet search" should {
