@@ -35,9 +35,13 @@ final case class GuideEnvironment(guideEnv: GuideEnv) extends TargetContainer {
   override def removeTarget(target: SPTarget): GuideEnvironment =
     Env.mod(_.removeTarget(target), this)
 
-  // TODO: REFERENCE
-  def removeGroup(grp: GuideGroup): GuideEnvironment =
-    ???
+  def removeGroup(group: GuideGroup): GuideEnvironment =
+    group.grp match {
+      case m: ManualGroup =>
+        (Env andThen GuideEnv.Manual).mod(_.flatMap { _.delete(m) }, this)
+      case _              =>
+        this
+    }
 
   override def getTargets: ImList[SPTarget] =
     guideEnv.targets.toList.sortBy(_._1).flatMap(_._2.toList).asImList
