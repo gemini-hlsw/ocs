@@ -42,8 +42,7 @@ public class TableDisplay extends JPanel
             setHorizontalAlignment(SwingConstants.RIGHT);
         }
 
-        @Override
-        public void setValue(final Object value) {
+        @Override public void setValue(final Object value) {
             if (value instanceof Double) {
                 setText(String.format("%.2f", (Double)value));
             } else {
@@ -112,7 +111,7 @@ public class TableDisplay extends JPanel
 
         // handle resize events
         addComponentListener(new ComponentAdapter() {
-            public void componentResized(final ComponentEvent e) {
+            @Override public void componentResized(final ComponentEvent e) {
                 resize();
             }
         });
@@ -135,7 +134,7 @@ public class TableDisplay extends JPanel
      * If the given query result is a table, display it,
      * otherwise do nothing.
      */
-    public void setQueryResult(final QueryResult queryResult) {
+    @Override public void setQueryResult(final QueryResult queryResult) {
         if (queryResult instanceof TableQueryResult)
             setModel((TableQueryResult) queryResult);
     }
@@ -243,7 +242,7 @@ public class TableDisplay extends JPanel
     /**
      * Display a print dialog to print the contents of this object.
      */
-    public void print() throws PrinterException {
+    @Override public void print() throws PrinterException {
         _table.showPrintDialog();
     }
 
@@ -326,7 +325,7 @@ public class TableDisplay extends JPanel
 
 
     /** Save the table to the given filename in HTML format */
-    public void saveAsHTML(final String filename) throws IOException {
+    @Override public void saveAsHTML(final String filename) throws IOException {
         final int numCols = _table.getColumnCount();
         if (numCols == 0) return;
         final int numRows = _table.getRowCount();
