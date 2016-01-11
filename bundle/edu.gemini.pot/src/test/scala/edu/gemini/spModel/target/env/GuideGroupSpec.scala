@@ -183,81 +183,120 @@ class GuideGroupSpec extends Specification with ScalaCheck with Arbitraries {
         gpts1 == gpts2
       }
   }
-/*
-  "GuideGroup getAll" should {
-    "" in
-      forAll { (g: GuideGroup) =>
-        true
+
+  "GuideGroup putAll" should {
+    "contain the original primary guide probes and all primary guide probes for which targets have been added" in
+      forAll { (g: GuideGroup, gps: Set[GuideProbe]) =>
+        val gpts = gps.map(GuideProbeTargets.create(_, new SPTarget())).toList.asImList
+        val allGps = g.getPrimaryReferencedGuiders.asScala.toSet ++: gps
+        g.putAll(gpts).getPrimaryReferencedGuiders.asScala.toSet == allGps
       }
 
-    "" in
-      forAll { (g: GuideGroup) =>
-        true
-      }
+  }
 
-    "" in
-      forAll { (g: GuideGroup) =>
-        true
-      }
-
-    "" in
-      forAll { (g: GuideGroup) =>
-        true
-      }
-
-    "" in
-      forAll { (g: GuideGroup) =>
-        true
-      }
-
-    "" in
-      forAll { (g: GuideGroup) =>
-        true
-      }
-
-    "" in
-      forAll { (g: GuideGroup) =>
-        true
+  "GuideGroup setAll" should {
+    "only contain the guide probes in the collection" in
+      forAll { (g: GuideGroup, gps: Set[GuideProbe]) =>
+        val gpts  = gps.map(GuideProbeTargets.create(_, new SPTarget())).toList.asImList
+        val g2    = g.setAll(gpts)
+        val gpOut = g.getReferencedGuiders.asScala.toSet -- g2.getReferencedGuiders.asScala.toSet
+        g2.getReferencedGuiders.asScala.toSet == gpts.asScalaList.map(_.getGuider).toSet &&
+          gpOut.forall(gp => !g2.contains(gp))
       }
   }
 
-  "GuideGroup getAll" should {
-    "" in
+  "GuideGroup getPrimaryReferencedGuiders" should {
+    "contain a guider iff it has a primary target" in
       forAll { (g: GuideGroup) =>
-        true
-      }
-
-    "" in
-      forAll { (g: GuideGroup) =>
-        true
-      }
-
-    "" in
-      forAll { (g: GuideGroup) =>
-        true
-      }
-
-    "" in
-      forAll { (g: GuideGroup) =>
-        true
-      }
-
-    "" in
-      forAll { (g: GuideGroup) =>
-        true
-      }
-
-    "" in
-      forAll { (g: GuideGroup) =>
-        true
-      }
-
-    "" in
-      forAll { (g: GuideGroup) =>
-        true
+        g.getAll.asScalaList.collect {
+          case gpt if gpt.getPrimary.isDefined => gpt.getGuider
+        }.toSet == g.getPrimaryReferencedGuiders.asScala.toSet
       }
   }
-  */
+
+  "GuideGroup getReferencedGuiders" should {
+    "contain a guider iff it has guide probe targets" in
+      forAll { (g: GuideGroup) =>
+        g.getAll.asScalaList.map(_.getGuider).toSet == g.getReferencedGuiders.asScala.toSet
+      }
+  }
+
+
+      /*
+        "GuideGroup getAll" should {
+          "" in
+            forAll { (g: GuideGroup) =>
+              true
+            }
+
+          "" in
+            forAll { (g: GuideGroup) =>
+              true
+            }
+
+          "" in
+            forAll { (g: GuideGroup) =>
+              true
+            }
+
+          "" in
+            forAll { (g: GuideGroup) =>
+              true
+            }
+
+          "" in
+            forAll { (g: GuideGroup) =>
+              true
+            }
+
+          "" in
+            forAll { (g: GuideGroup) =>
+              true
+            }
+
+          "" in
+            forAll { (g: GuideGroup) =>
+              true
+            }
+        }
+
+        "GuideGroup getAll" should {
+          "" in
+            forAll { (g: GuideGroup) =>
+              true
+            }
+
+          "" in
+            forAll { (g: GuideGroup) =>
+              true
+            }
+
+          "" in
+            forAll { (g: GuideGroup) =>
+              true
+            }
+
+          "" in
+            forAll { (g: GuideGroup) =>
+              true
+            }
+
+          "" in
+            forAll { (g: GuideGroup) =>
+              true
+            }
+
+          "" in
+            forAll { (g: GuideGroup) =>
+              true
+            }
+
+          "" in
+            forAll { (g: GuideGroup) =>
+              true
+            }
+        }
+        */
 }
 
 object GuideGroupSpec {
