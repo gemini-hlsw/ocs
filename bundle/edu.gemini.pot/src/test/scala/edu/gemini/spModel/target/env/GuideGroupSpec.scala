@@ -221,6 +221,20 @@ class GuideGroupSpec extends Specification with ScalaCheck with Arbitraries {
       }
   }
 
+  "GuideGroup removeTarget" should {
+    "remove an existing target from all guiders" in
+      forAll { (g: GuideGroup, tIn: SPTarget) =>
+        val oldGpts = g.getAll
+        val newGpts = g.getAll.asScalaList.map(gt => gt.setOptions(gt.getOptions.append(tIn))).asImList
+        val remGpts = g.setAll(newGpts).removeTarget(tIn).getAll
+        println(tIn)
+        println(oldGpts)
+        println(remGpts)
+        println("\n\n")
+        remGpts == oldGpts
+      }
+  }
+
 
       /*
         "GuideGroup getAll" should {
