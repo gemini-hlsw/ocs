@@ -15,9 +15,9 @@ public class PhoenixForm extends JPanel {
     final DropDownListBoxWidget mask;
     final NumberBoxWidget exposureTime;
     final JLabel scienceFOV;
-    final OptionWidget wavelengthRadioButton;
+    final JRadioButton wavelengthRadioButton;
     final JLabel wavelengthUnits;
-    final OptionWidget wavenumberRadioButton;
+    final JRadioButton wavenumberRadioButton;
     final JLabel wavenumberUnits;
     final NumberBoxWidget gratingWavelength;
     final NumberBoxWidget gratingWavenumber;
@@ -40,9 +40,9 @@ public class PhoenixForm extends JPanel {
         JLabel scienceFOVLabel = new JLabel();
         scienceFOV = new JLabel();
         JPanel jPanel1 = new JPanel();
-        wavelengthRadioButton = new OptionWidget();
+        wavelengthRadioButton = new JRadioButton();
         wavelengthUnits = new JLabel();
-        wavenumberRadioButton = new OptionWidget();
+        wavenumberRadioButton = new JRadioButton();
         wavenumberUnits = new JLabel();
         gratingWavelength = new NumberBoxWidget();
         gratingWavenumber = new NumberBoxWidget();
