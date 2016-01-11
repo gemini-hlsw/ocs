@@ -1,6 +1,7 @@
 package edu.gemini.spModel.target.env
 
 import edu.gemini.shared.util.immutable.{ImList, Option => GemOption}
+import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.spModel.pio.{PioFactory, ParamSet}
 import edu.gemini.spModel.target.SPTarget
@@ -38,9 +39,8 @@ final case class GuideEnvironment(guideEnv: GuideEnv) extends TargetContainer {
   def removeGroup(grp: GuideGroup): GuideEnvironment =
     ???
 
-
   override def getTargets: ImList[SPTarget] =
-    ???
+    guideEnv.targets.toList.sortBy(_._1).flatMap(_._2.toList).asImList
 
   def getOptions: ImList[GuideGroup] =
     ???

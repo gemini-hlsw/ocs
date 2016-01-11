@@ -38,9 +38,6 @@ object GuideEnv {
   import TargetCollection._
 
   implicit val TargetCollectionGuideEnv: TargetCollection[GuideEnv] = new TargetCollection[GuideEnv] {
-//    def mod(fa: AutomaticGroup => AutomaticGroup, fm: ManualGroup => ManualGroup): State[GuideEnv, Unit] =
-//      (Auto %== fa) *> (Manual %== (_.map(_.map(fm))))
-
     def mod(ge: GuideEnv)(fa: AutomaticGroup => AutomaticGroup, fm: ManualGroup => ManualGroup): GuideEnv = {
       val s: State[GuideEnv, Unit] = (Auto %== fa) *> (Manual %== (_.map(_.map(fm))))
       s.exec(ge)
@@ -54,5 +51,24 @@ object GuideEnv {
 
     override def removeTarget(ge: GuideEnv, t: SPTarget): GuideEnv =
       mod(ge)(_.removeTarget(t), _.removeTarget(t))
+
+    type TargetMap = Map[GuideProbe, NonEmptyList[SPTarget]]
+
+    override def targets(ge: GuideEnv): TargetMap = {
+      def merge(tm0: TargetMap, tm1: TargetMap): TargetMap = {
+        val k0 = tm0.keySet
+        val k1 = tm1.keySet
+
+        val a = (k0 &~ k1).toList.map { gp => gp -> tm0(gp) }.toMap
+        val b = (k0 &  k1).toList.map { gp => gp -> tm0(gp).append(tm1(gp)) }.toMap
+        val c = (k1 &~ k0).toList.map { gp => gp -> tm1(gp) }.toMap
+
+        a ++ b ++ c
+      }
+
+      (ge.auto.targets :: ge.manual.fold(List.empty[TargetMap]) {
+        _.toList.map(_.targets)
+      }).reduceLeft(merge)
+    }
   }
 }

@@ -206,8 +206,13 @@ case class GuideGroup(grp: GuideGrp) extends java.lang.Iterable[GuideProbeTarget
     }
 
   /** Gets a list of SPTarget sorted by their associated `GuideProbe`. */
-  override def getTargets: ImList[SPTarget] =
-    grp.targets.toList.sortBy(_._1).flatMap(_._2).asImList
+  override def getTargets: ImList[SPTarget] = {
+    val m = grp match {
+      case a: AutomaticGroup => a.targets
+      case m: ManualGroup    => m.targets
+    }
+    m.toList.sortBy(_._1).flatMap(_._2.toList).asImList
+  }
 
   override def removeTarget(t: SPTarget): GuideGroup =
     update {
