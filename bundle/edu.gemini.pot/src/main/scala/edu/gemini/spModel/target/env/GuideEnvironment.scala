@@ -47,7 +47,7 @@ final case class GuideEnvironment(guideEnv: GuideEnv) extends TargetContainer {
     guideEnv.targets.toList.sortBy(_._1).flatMap(_._2.toList).asImList
 
   def getOptions: ImList[GuideGroup] =
-    ???
+    guideEnv.groups.map(GuideGroup).asImList
 
   // TODO: REFERENCE
   // TODO: only used by BagsManager so can be removed when BagsManager is updated
