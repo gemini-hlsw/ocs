@@ -7,6 +7,9 @@ case class OptsList[A](toDisjunction: NonEmptyList[A] \/ Zipper[A]) {
   def focus: Option[A] =
     toDisjunction.toOption.map(_.focus)
 
+  def focusIndex: Option[Int] =
+    toDisjunction.toOption.map(_.rights.length)
+
   def hasFocus: Boolean =
     toDisjunction.isRight
 

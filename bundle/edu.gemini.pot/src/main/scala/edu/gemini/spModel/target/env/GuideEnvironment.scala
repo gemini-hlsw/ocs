@@ -54,8 +54,41 @@ final case class GuideEnvironment(guideEnv: GuideEnv) extends TargetContainer {
   def update(op: OptionsList.Op[GuideGroup]): GuideEnvironment =
     ???
 
-  def setOptions(newList: ImList[GuideGroup]): GuideEnvironment =
-    ???
+  def setOptions(newList: ImList[GuideGroup]): GuideEnvironment = {
+    // This is an awkward, wacky method that updates the available guide groups
+    // and tries to keep the selected group the "same".  It predates the new
+    // model and has no concept of a single, always-present automatic group.
+
+    // The newList should contain exactly one automatic guide group, which
+    // should be the first in the list.  The new model won't support anything
+    // else.  We therefore will have to massage the list accordingly if it
+    // does not conform.
+
+    val empty    = (List.empty[AutomaticGroup], List.empty[ManualGroup])
+    val (as, ms) = (newList.asScalaList:\empty) { case (gg, (as0, ms0)) =>
+      gg.grp match {
+        case a: AutomaticGroup => (a :: as0, ms0)
+        case m: ManualGroup    => (as0, m :: ms0)
+      }
+    }
+
+    val auto       = as.headOption.getOrElse(AutomaticGroup.Initial)
+    val all        = auto :: ms
+    val oldPrimary = guideEnv.primaryGroup
+    val newPrimary = all.contains(oldPrimary) ? oldPrimary | {
+      // Select the group at the same index, as in the old Java GuideEnvironment
+      val i = guideEnv.primaryIndex
+      all((i < all.length) ? i | all.length - 1)
+    }
+
+    val manual = ms.span(_ != newPrimary) match {
+      case (Nil, Nil)               => None
+      case (h :: t, Nil)            => Some(OptsList(NonEmptyList.nel(h, t).left))
+      case (lefts, focus :: rights) => Some(OptsList(Zipper(lefts.reverse.toStream, focus, rights.toStream).right))
+    }
+
+    GuideEnvironment(GuideEnv(auto, manual))
+  }
 
   // TODO: primary is always defined, remove the option wrapper
   def getPrimary: GemOption[GuideGroup] =

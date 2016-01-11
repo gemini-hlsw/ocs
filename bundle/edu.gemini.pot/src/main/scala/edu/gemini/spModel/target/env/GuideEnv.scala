@@ -14,6 +14,9 @@ final case class GuideEnv(auto: AutomaticGroup, manual: Option[OptsList[ManualGr
   def primaryGroup: GuideGrp =
     (manual.flatMap(_.focus) : Option[GuideGrp]) | auto
 
+  def primaryIndex: Int =
+    manual.flatMap(_.focusIndex).map(_ + 1).getOrElse(0)
+
   def referencedGuiders: Set[GuideProbe] =
     groups.foldMap(_.referencedGuiders)
 
