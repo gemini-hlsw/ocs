@@ -282,7 +282,7 @@ public class TableDisplay extends JPanel
         final int max = brm.getMaximum();
         final int value = brm.getValue();
         final int extent = brm.getExtent();
-        final int newvalue = row * (max - min) / _tableQueryResult.getRowCount();
+        final int newvalue = unsortedRow * (max - min) / _tableQueryResult.getRowCount();
 
         if (newvalue < value || newvalue > value + extent)
             brm.setValue(newvalue - extent / 2);
