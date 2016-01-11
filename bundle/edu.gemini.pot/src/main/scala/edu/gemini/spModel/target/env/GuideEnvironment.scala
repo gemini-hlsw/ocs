@@ -24,19 +24,20 @@ final case class GuideEnvironment(guideEnv: GuideEnv) extends TargetContainer {
   def getPrimaryReferencedGuiders: java.util.SortedSet[GuideProbe] =
     toSortedSet(guideEnv.primaryReferencedGuiders)
 
+  override def cloneTargets(): GuideEnvironment =
+    Env.mod(_.cloneTargets, this)
+
   override def containsTarget(target: SPTarget): Boolean =
-    guideEnv.groups.exists { _.containsTarget(target) }
+    guideEnv.containsTarget(target)
 
   /** Removes the target from any manual groups in which it is found. */
   override def removeTarget(target: SPTarget): GuideEnvironment =
-    GuideEnvironment(guideEnv.removeTarget(target))
+    Env.mod(_.removeTarget(target), this)
 
   // TODO: REFERENCE
   def removeGroup(grp: GuideGroup): GuideEnvironment =
     ???
 
-  override def cloneTargets(): GuideEnvironment =
-    ???
 
   override def getTargets: ImList[SPTarget] =
     ???
@@ -87,6 +88,9 @@ final case class GuideEnvironment(guideEnv: GuideEnv) extends TargetContainer {
 object GuideEnvironment {
   val ParamSetName = "guideEnv"
   val Initial: GuideEnvironment = GuideEnvironment(GuideEnv.initial)
+
+  val Env: GuideEnvironment @> GuideEnv =
+    Lens.lensu((a,b) => a.copy(b), _.guideEnv)
 
   def create(guideGroups: OptionsList[GuideGroup]): GuideEnvironment =
     ???

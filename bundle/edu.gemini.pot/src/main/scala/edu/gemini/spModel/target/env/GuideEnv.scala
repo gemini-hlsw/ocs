@@ -38,10 +38,21 @@ object GuideEnv {
   import TargetCollection._
 
   implicit val TargetCollectionGuideEnv: TargetCollection[GuideEnv] = new TargetCollection[GuideEnv] {
-    def mod(fa: AutomaticGroup => AutomaticGroup, fm: ManualGroup => ManualGroup): State[GuideEnv, Unit] =
-      (Auto %== fa) *> (Manual %== (_.map(_.map(fm))))
+//    def mod(fa: AutomaticGroup => AutomaticGroup, fm: ManualGroup => ManualGroup): State[GuideEnv, Unit] =
+//      (Auto %== fa) *> (Manual %== (_.map(_.map(fm))))
+
+    def mod(ge: GuideEnv)(fa: AutomaticGroup => AutomaticGroup, fm: ManualGroup => ManualGroup): GuideEnv = {
+      val s: State[GuideEnv, Unit] = (Auto %== fa) *> (Manual %== (_.map(_.map(fm))))
+      s.exec(ge)
+    }
+
+    override def cloneTargets(ge: GuideEnv): GuideEnv =
+      mod(ge)(_.cloneTargets, _.cloneTargets)
+
+    override def containsTarget(ge: GuideEnv, t: SPTarget): Boolean =
+      ge.auto.containsTarget(t) || ge.manual.exists(_.toList.exists(_.containsTarget(t)))
 
     override def removeTarget(ge: GuideEnv, t: SPTarget): GuideEnv =
-      mod(_.removeTarget(t), _.removeTarget(t)).exec(ge)
+      mod(ge)(_.removeTarget(t), _.removeTarget(t))
   }
 }

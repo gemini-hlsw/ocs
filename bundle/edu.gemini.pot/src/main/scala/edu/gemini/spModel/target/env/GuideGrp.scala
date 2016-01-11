@@ -28,32 +28,11 @@ sealed trait GuideGrp extends Serializable {
       case ManualGroup(_, ts)        => ts.filter(_._2.hasFocus).keySet
     }
 
-  def containsTarget(t: SPTarget): Boolean =
-    this match {
-      case AutomaticGroup.Initial    => false
-      case AutomaticGroup.Active(ts) => ts.exists { case (_, t0) => t == t0 }
-      case ManualGroup(_, ts)        => ts.values.exists(opts => opts.any(_ == t))
-    }
-
   def targets: Map[GuideProbe, List[SPTarget]] =
     this match {
       case AutomaticGroup.Initial    => Map.empty
       case AutomaticGroup.Active(ts) => ts.mapValues(_ :: Nil)
       case ManualGroup(_, ts)        => ts.mapValues(_.toList)
-    }
-
-  def cloneTargets: GuideGrp =
-    this match {
-      case AutomaticGroup.Initial    =>
-        this
-
-      case AutomaticGroup.Active(ts) =>
-        AutomaticGroup.Active(ts.mapValues(_.clone()))
-
-      case ManualGroup(n, ts)        =>
-        ManualGroup(n, ts.mapValues { opts =>
-          OptsList(opts.toDisjunction.bimap(_.map(_.clone()), _.map(_.clone())))
-        })
     }
 }
 
@@ -71,6 +50,14 @@ object ManualGroup {
     Lens.lensu((mg,m) => mg.copy(targetMap = m), _.targetMap)
 
   implicit val TargetCollectionManualGroup: TargetCollection[ManualGroup] = new TargetCollection[ManualGroup] {
+    override def cloneTargets(m: ManualGroup): ManualGroup =
+      TargetMap.mod(_.mapValues { opts =>
+        OptsList(opts.toDisjunction.bimap(_.map(_.clone()), _.map(_.clone())))
+      }, m)
+
+    override def containsTarget(m: ManualGroup, t: SPTarget): Boolean =
+      m.targetMap.values.exists(opts => opts.any(_ == t))
+
     override def removeTarget(m: ManualGroup, t: SPTarget): ManualGroup =
       TargetMap.mod(_.mapValues(_.delete(t)).collect {
         case (probe, Some(opts)) => (probe, opts)
@@ -97,6 +84,18 @@ object AutomaticGroup {
     Lens.lensu((a,m) => a.copy(targetMap = m), _.targetMap)
 
   implicit val TargetCollectionAutomaticGroup: TargetCollection[AutomaticGroup] = new TargetCollection[AutomaticGroup] {
+    override def cloneTargets(a: AutomaticGroup): AutomaticGroup =
+      a match {
+        case AutomaticGroup.Initial    => a
+        case AutomaticGroup.Active(ts) => AutomaticGroup.Active(ts.mapValues(_.clone()))
+      }
+
+    override def containsTarget(a: AutomaticGroup, t: SPTarget): Boolean =
+      a match {
+        case AutomaticGroup.Initial    => false
+        case AutomaticGroup.Active(ts) => ts.exists { case (_, t0) => t == t0 }
+      }
+
     override def removeTarget(a: AutomaticGroup, t: SPTarget): AutomaticGroup =
       a match {
         case Initial   => Initial

@@ -200,7 +200,10 @@ case class GuideGroup(grp: GuideGrp) extends java.lang.Iterable[GuideProbeTarget
     guiderSet(grp.primaryReferencedGuiders)
 
   override def containsTarget(t: SPTarget): Boolean =
-    grp.containsTarget(t)
+    grp match {
+      case a: AutomaticGroup => a.containsTarget(t)
+      case m: ManualGroup    => m.containsTarget(t)
+    }
 
   /** Gets a list of SPTarget sorted by their associated `GuideProbe`. */
   override def getTargets: ImList[SPTarget] =
@@ -213,7 +216,10 @@ case class GuideGroup(grp: GuideGrp) extends java.lang.Iterable[GuideProbeTarget
     }
 
   override def cloneTargets: GuideGroup =
-    update { _.cloneTargets }
+    update {
+      case a: AutomaticGroup => a.cloneTargets
+      case m: ManualGroup    => m.cloneTargets
+    }
 
   /** Gets a Java `Iterator` that can step through targets sorted by their
     * associated `GuideProbe`.
