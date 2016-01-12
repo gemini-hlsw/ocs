@@ -4,11 +4,20 @@ import scalaz._, Scalaz._
 
 case class OptsList[A](toDisjunction: NonEmptyList[A] \/ Zipper[A]) {
 
+  def clearFocus: OptsList[A] =
+    OptsList(toDisjunction.flatMap { z =>
+      val s = z.start
+      NonEmptyList.nel(s.focus, s.toList.tail).left
+    })
+
+  def contains(a: A): Boolean =
+    toList.contains(a)
+
   def focus: Option[A] =
     toDisjunction.toOption.map(_.focus)
 
   def focusIndex: Option[Int] =
-    toDisjunction.toOption.map(_.rights.length)
+    toDisjunction.toOption.map(_.lefts.length)
 
   def hasFocus: Boolean =
     toDisjunction.isRight
@@ -18,8 +27,11 @@ case class OptsList[A](toDisjunction: NonEmptyList[A] \/ Zipper[A]) {
 
   def toNel: NonEmptyList[A] =
     toDisjunction match {
-      case -\/(l) => l
-      case \/-(z) => z.toList.toNel.get
+      case -\/(l) =>
+        l
+      case \/-(z) =>
+        val s = z.start
+        NonEmptyList.nel(s.focus, s.rights.toList)
     }
 
   def toList: List[A] =
@@ -43,6 +55,13 @@ case class OptsList[A](toDisjunction: NonEmptyList[A] \/ Zipper[A]) {
         val r  = z.rights.filter(_ != a)
         val z0 = Zipper(l, z.focus, r)
         (if (z0.focus == a) z0.delete else Some(z0)).map(zip => OptsList(zip.right))
+    }
+
+  /** Pairs each element with a boolean indicating whether that element has focus. */
+  def withFocus: OptsList[(A, Boolean)] =
+    toDisjunction match {
+      case -\/(l) => OptsList(l.zip(NonEmptyList.nel(false, List.fill(l.length-1)(false))).left)
+      case \/-(z) => OptsList(z.withFocus.right)
     }
 }
 

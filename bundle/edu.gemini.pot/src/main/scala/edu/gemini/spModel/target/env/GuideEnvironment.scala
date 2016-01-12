@@ -1,6 +1,6 @@
 package edu.gemini.spModel.target.env
 
-import edu.gemini.shared.util.immutable.{ImList, Option => GemOption}
+import edu.gemini.shared.util.immutable.{Option => GemOption, ImOption, ImList}
 import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.spModel.pio.{PioFactory, ParamSet}
@@ -37,10 +37,8 @@ final case class GuideEnvironment(guideEnv: GuideEnv) extends TargetContainer {
 
   def removeGroup(group: GuideGroup): GuideEnvironment =
     group.grp match {
-      case m: ManualGroup =>
-        (Env andThen GuideEnv.Manual).mod(_.flatMap { _.delete(m) }, this)
-      case _              =>
-        this
+      case m: ManualGroup => Manual.mod(_.flatMap { _.delete(m) }, this)
+      case _              => this
     }
 
   override def getTargets: ImList[SPTarget] =
@@ -49,7 +47,6 @@ final case class GuideEnvironment(guideEnv: GuideEnv) extends TargetContainer {
   def getOptions: ImList[GuideGroup] =
     guideEnv.groups.map(GuideGroup).asImList
 
-  // TODO: REFERENCE
   // TODO: only used by BagsManager so can be removed when BagsManager is updated
   def update(op: OptionsList.Op[GuideGroup]): GuideEnvironment =
     ???
@@ -92,11 +89,50 @@ final case class GuideEnvironment(guideEnv: GuideEnv) extends TargetContainer {
 
   // TODO: primary is always defined, remove the option wrapper
   def getPrimary: GemOption[GuideGroup] =
-    ???
+    ImOption.apply(GuideGroup(guideEnv.primaryGroup))
 
-  // TODO: REFERENCE
-  def setPrimary(primary: GuideGroup): GuideEnvironment =
-    ???
+  /** Roughly, replaces the primary group with the given guide group, if there
+    * is a primary group.  Otherwise it appends the given guide group and makes
+    * it the primary.  If the given group already exists in the environment,
+    * it is simply selected as primary.
+    *
+    * On the other hand, if the primary is a manual group and an automatic is
+    * given, the automatic group is replaced and made primary.  If the primary
+    * is automatic and a manual group provided, the manual group is selected/
+    * addded and made primary.
+    *
+    * @deprecated This is such a hopelessly confusing method that it is best
+    *             avoided altogether.  See the more straightforward
+    *             `selectPrimary` instead.
+    */
+  def setPrimary(primary: GuideGroup): GuideEnvironment = {
+    val (auto, manual) = primary.grp match {
+      case a: AutomaticGroup =>
+        (a, guideEnv.manual.map(_.clearFocus))
+
+      case m: ManualGroup =>
+        val zip = guideEnv.manual.fold(Zipper(Stream.empty, m, Stream.empty)) { opts =>
+          // If m exists in opts, select it as primary.  Otherwise, append it
+          // to the options list and select it as primary.
+          opts.toList.span(_ != m) match {
+            case (_, Nil)    =>
+              // m doesn't exist in opts.  If there is no primary, append m
+              // and select it as primary.  If there is a primary, replace it
+              // with m.
+              opts.toDisjunction match {
+                case -\/(l) => Zipper(l.reverse.toStream, m, Stream.empty)
+                case \/-(z) => Zipper(z.lefts.reverse, m, z.rights)
+              }
+            case (l, _ :: r) =>
+              // m exists in opts, so just select it
+              Zipper(l.reverse.toStream, m, r.toStream)
+          }
+
+        }
+        (guideEnv.auto, some(OptsList(zip.right)))
+    }
+    GuideEnvironment(GuideEnv(auto, manual))
+  }
 
   def mkString(prefix: String, sep: String, suffix: String): String =
     ???
@@ -128,6 +164,12 @@ object GuideEnvironment {
 
   val Env: GuideEnvironment @> GuideEnv =
     Lens.lensu((a,b) => a.copy(b), _.guideEnv)
+
+  val Auto: GuideEnvironment @> AutomaticGroup =
+    Env >=> GuideEnv.Auto
+
+  val Manual: GuideEnvironment @> Option[OptsList[ManualGroup]] =
+    Env >=> GuideEnv.Manual
 
   def create(guideGroups: OptionsList[GuideGroup]): GuideEnvironment =
     ???
