@@ -118,7 +118,7 @@ trait Arbitraries {
       for {
         obj <- arbitrary[Int]
         des <- oneOf(
-          HorizonsDesignation.Asteroid(obj.toString),
+          HorizonsDesignation.AsteroidNewStyle(obj.toString),
           HorizonsDesignation.AsteroidOldStyle(obj),
           HorizonsDesignation.Comet(obj.toString),
           HorizonsDesignation.MajorBody(obj)

@@ -1,0 +1,306 @@
+package edu.gemini.horizons.server.backend
+
+import edu.gemini.spModel.core._
+import org.apache.commons.httpclient.HttpClient
+import org.apache.commons.httpclient.HttpException
+import org.apache.commons.httpclient.NameValuePair
+import org.apache.commons.httpclient.methods.GetMethod
+import edu.gemini.horizons.api.HorizonsException
+import java.io.IOException
+import CgiHorizonsConstants._
+import edu.gemini.horizons.api.HorizonsReply
+import java.util.Date
+import java.text.SimpleDateFormat
+
+import scala.collection.JavaConverters._
+import scala.util.matching.Regex
+import scala.io.Source
+import scalaz._, Scalaz._, scalaz.effect.{ IO, Resource }
+
+// work-in-progress; this will get a better name and will probably move elsewhere
+object HorizonsService2 {
+
+  /** The type of programs that talk to HORIZONS */
+  type HS2[A] = EitherT[IO, HS2Error, A]
+  object HS2 {
+    def fromDisjunction[A](a: HS2Error \/ A): HS2[A] = EitherT(IO(a))
+    def delay[A](a: => A): HS2[A] = EitherT(IO(a.right))
+  }
+
+  /** The type of failures that might arise when talking to HORIZONS. */
+  sealed trait HS2Error
+  case class  HorizonsError(e: HorizonsException) extends HS2Error
+  case class  ParseError(input: List[String], message: String) extends HS2Error
+  case object EphemerisEmpty extends HS2Error
+
+  /** A value annotated with a name. Used when multiple results are returned. */
+  case class Row[A](a: A, name: String)
+
+  /** A partial-name search specification for HORIZONS. */
+  sealed abstract class Search[A](val queryString: String) extends Product with Serializable
+  object Search {
+    final case class Comet(partial: String)     extends Search[HorizonsDesignation.Comet](s"COMNAM=$partial*;CAP")
+    final case class Asteroid(partial: String)  extends Search[HorizonsDesignation.Asteroid](s"ASTNAM=$partial*")
+    final case class MajorBody(partial: String) extends Search[HorizonsDesignation.MajorBody](s"$partial")
+  }
+
+  /** Construct a program that performs a partial-name search. */
+  def search[A](search: Search[A]): HS2[List[Row[A]]] = {
+
+    val queryParams: Map[String, String] =
+      Map(
+        BATCH      -> "1",
+        TABLE_TYPE -> OBSERVER_TABLE,
+        CSV_FORMAT -> NO,
+        EPHEMERIS  -> NO,
+        COMMAND    -> s"'${search.queryString}'"
+      )
+
+    // Lift our pure String \/ List[Row[A]] into HS2
+    def parseLines(lines: List[String]): HS2[List[Row[A]]] =
+      HS2.fromDisjunction(parseResponse(search, lines).leftMap(ParseError(lines, _)))
+
+    // And finally
+    horizonsRequestLines(queryParams) >>= parseLines
+
+  }
+
+  /** Convenience method; looks up ephemeris for the current semester. */
+  def lookupEphemeris(target: HorizonsDesignation, site: Site, elems: Int): HS2[Ephemeris] =
+    HS2.delay(new Semester(site)).flatMap(lookupEphemeris(target, site, elems, _))
+
+  /** Convenience method; looks up ephemeris for the given semester. */
+  def lookupEphemeris(target: HorizonsDesignation, site: Site, elems: Int, sem: Semester): HS2[Ephemeris] =
+    lookupEphemeris(target, site, sem.getStartDate(site), sem.getEndDate(site), elems)
+
+  /** 
+   * Look up the ephemeris for the given target when viewed from the given site, requesting `elems`
+   * total elements spread uniformly over the over the given time period. The computed ephemeris may
+   * contain slightly more or fewer entries than requested due to rounding, or many fewer for very
+   * short timespans (no more than one entry will be returned per minute).
+   */
+  def lookupEphemeris(target: HorizonsDesignation, site: Site, start: Date, stop: Date, elems: Int): HS2[Ephemeris] = {
+
+    def formatDate(date: Date): String = {
+      val df = new SimpleDateFormat("yyyy-MMM-dd HH:mm:ss")
+      s"'${df.format(date)}'"
+    }
+
+    def siteCoord(site: Site): String =
+      site match {
+        case Site.GN => SITE_COORD_GN
+        case Site.GS => SITE_COORD_GS
+      }
+
+    def toEphemeris(r: HorizonsReply): Ephemeris = 
+      ==>>.fromList {
+        r.getEphemeris.asScala.toList.map { e =>
+          val cs = e.getCoordinates
+          Coordinates.fromDegrees(cs.getRaDeg, cs.getDecDeg).strengthL(e.getDate.getTime)
+        } .collect { case Some(p) => p }
+      }
+
+    // The step size in minutes, such that the total number of elements will be roughly what was
+    // requested, or fewer for very short timespans (no more than 1/min)
+    val stepSize = 1L max (stop.getTime - start.getTime) / (1000L * 60 * elems)
+
+    val queryParams: Map[String, String] =
+      Map(
+        BATCH            -> "1",
+        TABLE_TYPE       -> OBSERVER_TABLE,
+        CSV_FORMAT       -> NO,
+        EPHEMERIS        -> YES,
+        TABLE_FIELDS_ARG -> TABLE_FIELDS,
+        CENTER           -> CENTER_COORD,
+        COORD_TYPE       -> COORD_TYPE_GEO,
+        COMMAND          -> s"'${target.queryString}'",
+        SITE_COORD       -> siteCoord(site),
+        START_TIME       -> formatDate(start),
+        STOP_TIME        -> formatDate(stop),
+        STEP_SIZE        -> s"${stepSize}m"
+      )
+
+    def buildEphemeris(m: GetMethod): IO[Ephemeris]  =
+      IO(CgiReplyBuilder.buildResponse(m.getResponseBodyAsStream, m.getRequestCharSet)).map(toEphemeris)
+
+    // And finally      
+    horizonsRequest(queryParams)(buildEphemeris).ensure(EphemerisEmpty)(_.size > 0)
+
+  }
+
+  ///
+  /// INTERNALS
+  ///
+
+  // Representation of column offsets as (start, end) pairs, as deduced from --- -------- --- -----
+  private type Offsets = List[(Int, Int)]
+
+  // Parse many results based on an expected header pattern. This will read through the tail until
+  // headers are found, then parse the remaining lines (until a blank line is encountered) using
+  // the function constructed by `f`, if any (otherwise it is assumed that there were not enough
+  // columns found). Returns a list of values or an error message.
+  private def parseMany[A](header: String, tail: List[String], headerPattern: Regex)(f: Offsets => Option[String => A] ): String \/ List[A] =
+    (headerPattern.findFirstMatchIn(header) \/> ("Header pattern not found: " + headerPattern)) *>
+    (tail.dropWhile(s => !s.trim.startsWith("---")) match {
+      case Nil                => Nil.right // no column headers means no results!
+      case colHeaders :: rows =>           // we have a header row with data rows following
+        val offsets = "-+".r.findAllMatchIn(colHeaders).map(m => (m.start, m.end)).toList
+        try {
+          f(offsets).map(g => rows.takeWhile(_.trim.nonEmpty).map(g)) \/> "Not enough columns."
+        } catch {
+          case    nfe: NumberFormatException           =>  ("Number format exception: " + nfe.getMessage).left
+          case sioobe: StringIndexOutOfBoundsException =>   "Column value(s) not found.".left
+        }
+    })
+
+  // Split into header/tail, parse
+  private def parseHeader[A](lines: List[String])(f: (String, List[String]) => String \/ List[A]): String \/ List[A] =
+    lines match {
+      case _ :: h :: t => f(h, t)
+      case _           => "Fewer than 2 lines!".left
+    }
+
+  // Parse the result of the given search
+  private def parseResponse[A](s: Search[A], lines: List[String]): \/[String, List[Row[A]]] =
+    parseHeader[Row[A]](lines) { case (header, tail) => 
+      s match {
+
+        case Search.Comet(_) => 
+
+          // Common case is that we have many results, or none.
+          lazy val case0 =
+            parseMany[Row[HorizonsDesignation.Comet]](header, tail, """  +Small-body Search Results  """.r) { os =>
+              (os.lift(2) |@| os.lift(3)).tupled.map {
+                case ((ods, ode), (ons, one)) => { row =>
+                  val desig = row.substring(ods, ode).trim
+                  val name  = row.substring(ons, one).trim
+                  Row(HorizonsDesignation.Comet(desig), name)
+                }
+              }
+            }
+
+          // Single result with form: JPL/HORIZONS      Hubble (C/1937 P1)     2015-Dec-31 11:40:21
+          lazy val case1 =
+            """  +([^(]+)\s+\((.+?)\)  """.r.findFirstMatchIn(header).map { m =>
+              List(Row(HorizonsDesignation.Comet(m.group(2)), m.group(1)))
+            } \/> "Could not match 'Hubble (C/1937 P1)' header pattern."
+
+          // Single result with form: JPL/HORIZONS         1P/Halley           2015-Dec-31 11:40:21
+          lazy val case2 =
+            """  +([^/]+)/(.+?)  """.r.findFirstMatchIn(header).map { m =>
+              List(Row(HorizonsDesignation.Comet(m.group(1)), m.group(2)))
+            } \/> "Could not match '1P/Halley' header pattern."
+
+          // First one that works!
+          case0 orElse
+          case1 orElse
+          case2 orElse "Could not parse the header line as a comet".left
+
+       case Search.Asteroid(_) =>
+
+          // Common case is that we have many results, or none.
+          lazy val case0 =
+            parseMany[Row[HorizonsDesignation.Asteroid]](header, tail, """  +Small-body Index Search Results  """.r) { os =>
+              (os.lift(0) |@| os.lift(1) |@| os.lift(2)).tupled.map {
+                case ((ors, ore), (ods, ode), (ons, one)) => { row =>
+                  val rec   = row.substring(ors, ore).trim.toInt
+                  val desig = row.substring(ods, ode).trim
+                  val name  = row.substring(ons     ).trim // last column, so no end index because rows are ragged
+                  desig match {
+                    case "(undefined)" => Row(HorizonsDesignation.AsteroidOldStyle(rec): HorizonsDesignation.Asteroid, name)
+                    case des           => Row(HorizonsDesignation.AsteroidNewStyle(des): HorizonsDesignation.Asteroid, name)
+                  }
+                }
+              }
+            }
+
+          // Single result with form: JPL/HORIZONS      90377 Sedna (2003 VB12)     2015-Dec-31 11:40:21
+          lazy val case1 =
+            """  +\d+ ([^(]+)\s+\((.+?)\)  """.r.findFirstMatchIn(header).map { m =>
+              List(Row(HorizonsDesignation.AsteroidNewStyle(m.group(2)) : HorizonsDesignation.Asteroid, m.group(1)))
+            } \/> "Could not match '90377 Sedna (2003 VB12)' header pattern."
+
+          // Single result with form: JPL/HORIZONS      4 Vesta     2015-Dec-31 11:40:21
+          lazy val case2 =
+            """  +(\d+) ([^(]+?)  """.r.findFirstMatchIn(header).map { m =>
+              List(Row(HorizonsDesignation.AsteroidOldStyle(m.group(1).toInt) : HorizonsDesignation.Asteroid, m.group(2)))
+            } \/> "Could not match '4 Vesta' header pattern."
+
+          // First one that works!
+          case0 orElse
+          case1 orElse
+          case2 orElse "Could not parse the header line as an asteroid".left
+
+
+        case Search.MajorBody(_) =>
+
+          // Common case is that we have many results, or none.
+          lazy val case0 = 
+            parseMany[Row[HorizonsDesignation.MajorBody]](header, tail, """Multiple major-bodies match string""".r) { os =>
+              (os.lift(0) |@| os.lift(1)).tupled.map {
+                case ((ors, ore), (ons, one)) => { row =>
+                  val rec  = row.substring(ors, ore).trim.toInt
+                  val name = row.substring(ons, one).trim
+                  Row(HorizonsDesignation.MajorBody(rec.toInt), name)
+                }
+              }
+            } .map(_.filterNot(_.a.num < 0)) // filter out spacecraft
+
+          // Single result with form:  Revised: Aug 11, 2015       Charon / (Pluto)     901
+          lazy val case1 =
+            """  +(.*?)  +(\d+) $""".r.findFirstMatchIn(header).map { m =>
+              List(Row(HorizonsDesignation.MajorBody(m.group(2).toInt), m.group(1)))
+            } \/> "Could not match 'Charon / (Pluto)     901' header pattern."
+
+          // First one that works, otherwise Nil because it falls through to small-body search
+          case0 orElse 
+          case1 orElse Nil.right
+      
+      }
+  }
+
+  // Construct a program thet performs a HORIZONS request and yields the response as lines of text.
+  private def horizonsRequestLines(params: Map[String, String]): HS2[List[String]] =
+    horizonsRequest(params) { method =>
+      IO {
+        val s = Source.fromInputStream(method.getResponseBodyAsStream, method.getRequestCharSet)
+        try     s.getLines.toList
+        finally s.close()
+      }
+    }
+
+  implicit def GetMethodResource: Resource[GetMethod] =
+    new Resource[GetMethod] {
+      def close(m: GetMethod): IO[Unit] =
+        IO(m.releaseConnection)
+    }
+
+  // Construct a program thet performs a HORIZONS request and transforms the respons with the
+  // provided function.
+  private def horizonsRequest[A](params: Map[String, String])(f: GetMethod => IO[A]): HS2[A] =
+    EitherT {
+      IO(new GetMethod(CgiHorizonsConstants.HORIZONS_URL)).using { (method: GetMethod) =>
+        IO {
+
+          // This must be globally synchronized because HORIZONS only allows one request at a time
+          // from a given IP address (or so it seems). An open question is whether or not it's a
+          // problem that the lifetime of the GetMethod extends out of this block; it is possible
+          // that `f` will be streaming data back after the monitor has been released. So far this
+          // is not a problem in testing but it's worth keeping an eye on. Failure will be obvious.
+          HorizonsService2.synchronized {
+            method.setQueryString(params.map { case (k, v) => new NameValuePair(k, v) } .toArray)
+            (new HttpClient).executeMethod(method)
+            method
+          }
+
+        } .flatMap(f).catchSomeLeft {
+          case ex: HorizonsException => HorizonsError(ex).some
+          case ex: HttpException     => HorizonsError(HorizonsException.create(ex)).some
+          case ex: IOException       => HorizonsError(HorizonsException.create(ex)).some
+        }
+      }
+    }
+
+}
+
+
