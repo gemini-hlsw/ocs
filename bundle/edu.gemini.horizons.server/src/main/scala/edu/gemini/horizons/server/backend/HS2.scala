@@ -194,7 +194,7 @@ object HorizonsService2 {
           // First one that works!
           case0 orElse
           case1 orElse
-          case2 orElse "Could not parse the header line.".left
+          case2 orElse "Could not parse the header line as a comet".left
 
        case Search.Asteroid(_) =>
 
@@ -229,7 +229,7 @@ object HorizonsService2 {
           // First one that works!
           case0 orElse
           case1 orElse
-          case2 orElse "Could not parse the header line.".left
+          case2 orElse "Could not parse the header line as an asteroid".left
 
 
         case Search.MajorBody(_) =>
@@ -281,11 +281,18 @@ object HorizonsService2 {
     EitherT {
       IO(new GetMethod(CgiHorizonsConstants.HORIZONS_URL)).using { (method: GetMethod) =>
         IO {
+
+          // This must be globally synchronized because HORIZONS only allows one request at a time
+          // from a given IP address (or so it seems). An open question is whether or not it's a
+          // problem that the lifetime of the GetMethod extends out of this block; it is possible
+          // that `f` will be streaming data back after the monitor has been released. So far this
+          // is not a problem in testing but it's worth keeping an eye on. Failure will be obvious.
           HorizonsService2.synchronized {
             method.setQueryString(params.map { case (k, v) => new NameValuePair(k, v) } .toArray)
             (new HttpClient).executeMethod(method)
             method
           }
+
         } .flatMap(f).catchSomeLeft {
           case ex: HorizonsException => HorizonsError(ex).some
           case ex: HttpException     => HorizonsError(HorizonsException.create(ex)).some
