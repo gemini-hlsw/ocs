@@ -135,14 +135,13 @@ final case class GuideEnvironment(guideEnv: GuideEnv) extends TargetContainer {
   }
 
   def getPrimaryIndex: java.lang.Integer =
-    ???
+    guideEnv.primaryIndex
 
   def setPrimaryIndex(primary: Int): GuideEnvironment =
-    ???
+    guideEnv.selectPrimaryIndex(primary).map(GuideEnvironment(_)).getOrElse(this)
 
-  // TODO: REFERENCE
   def selectPrimary(primary: GuideGroup): GuideEnvironment =
-    ???
+    guideEnv.selectPrimary(primary.grp).map(GuideEnvironment(_)).getOrElse(this)
 
   def iterator(): java.util.Iterator[GuideGroup] =
     ???

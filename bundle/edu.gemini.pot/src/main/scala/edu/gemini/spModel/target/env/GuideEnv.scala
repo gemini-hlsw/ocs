@@ -6,6 +6,8 @@ import edu.gemini.spModel.target.SPTarget
 import scalaz._
 import Scalaz._
 
+import GuideEnv.{Auto, Manual}
+
 final case class GuideEnv(auto: AutomaticGroup, manual: Option[OptsList[ManualGroup]]) {
 
   def groups: List[GuideGrp] =
@@ -22,6 +24,32 @@ final case class GuideEnv(auto: AutomaticGroup, manual: Option[OptsList[ManualGr
 
   def primaryReferencedGuiders: Set[GuideProbe] =
     primaryGroup.referencedGuiders
+
+  def length: Int =
+    1 + manual.map(_.length).orZero
+
+  def selectPrimary(g: GuideGrp): Option[GuideEnv] =
+    g match {
+      case a: AutomaticGroup if a == g =>
+        some(Manual.mod(_.map(_.clearFocus), this))
+
+      case m: ManualGroup              =>
+        manual.flatMap { _.focusOn(m) }.map { opts =>
+          Manual.set(this, some(opts))
+        }
+    }
+
+  def selectPrimaryIndex(i: Int): Option[GuideEnv] =
+    if (i == 0) some(Manual.mod(_.map(_.clearFocus), this))
+    else manual.flatMap { _.focusOnIndex(i-1) }.map { opts =>
+      Manual.set(this, some(opts))
+    }
+
+  def toList: List[GuideGrp] =
+    auto :: manual.map(_.toList).orZero
+
+  def toNel: NonEmptyList[GuideGrp] =
+    NonEmptyList.nel(auto, manual.map(_.toList).orZero)
 }
 
 /** A guide environment is a bags group (possibly empty or "initial") followed

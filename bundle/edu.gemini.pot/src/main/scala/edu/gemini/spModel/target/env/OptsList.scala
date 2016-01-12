@@ -2,6 +2,8 @@ package edu.gemini.spModel.target.env
 
 import scalaz._, Scalaz._
 
+import OptsList._
+
 case class OptsList[A](toDisjunction: NonEmptyList[A] \/ Zipper[A]) {
 
   def clearFocus: OptsList[A] =
@@ -19,8 +21,30 @@ case class OptsList[A](toDisjunction: NonEmptyList[A] \/ Zipper[A]) {
   def focusIndex: Option[Int] =
     toDisjunction.toOption.map(_.lefts.length)
 
+  /** Moves or sets the focus to `a` if `a` is a member of the options list and
+    * returns the updated `OptsList` in a `Some`. Otherwise, returns `None`.
+    */
+  def focusOn(a: A): Option[OptsList[A]] =
+    toList.span(_ != a) match {
+      case (_, Nil)                 => none
+      case (lefts, focus :: rights) => some(focused(lefts, focus, rights))
+    }
+
+  /** Sets the focus element to the element at the given index if in range,
+    * returning a new `OptsList` wrapped in a `Some`.  Otherwise, returns `None`.
+    */
+  def focusOnIndex(i: Int): Option[OptsList[A]] =
+    if (i < 0) none
+    else toList.splitAt(i) match {
+      case (_, Nil)                 => none
+      case (lefts, focus :: rights) => some(focused(lefts, focus, rights))
+    }
+
   def hasFocus: Boolean =
     toDisjunction.isRight
+
+  def length: Int =
+    toDisjunction.fold(_.length, _.length)
 
   def map[B](f: A => B): OptsList[B] =
     OptsList(toDisjunction.bimap(_.map(f), _.map(f)))
@@ -74,4 +98,13 @@ object OptsList {
           case \/-(r) => r.traverse(f).map(r => OptsList(r.right))
         }
     }
+
+  def focused[A](lefts: List[A], focus: A, rights: List[A]): OptsList[A] =
+    OptsList(Zipper(lefts.reverse.toStream, focus, rights.toStream).right)
+
+  def unfocused[A](nel: NonEmptyList[A]): OptsList[A] =
+    OptsList(nel.left)
+
+  def unfocused[A](l: List[A]): Option[OptsList[A]] =
+    l.toNel.map(nel => unfocused(nel))
 }
