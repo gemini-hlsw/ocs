@@ -386,7 +386,9 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
         StringBuilder buf = new StringBuilder();
         buf.append("base=").append(base);
 
-        buf.append(sep).append("guide=").append(guide.mkString(prefix, sep, suffix));
+        buf.append(sep).append("guide:primary=").append(guide.getPrimaryIndex());
+        buf.append(sep).append("guide:auto=").append(guide.guideEnv().auto());
+        buf.append(sep).append("guide:manual=").append(guide.getOptions().tail().mkString(prefix, sep, suffix));
 
         if (user.size() > 0) {
             buf.append(sep).append("user=");

@@ -99,7 +99,7 @@ final case class GuideEnvironment(guideEnv: GuideEnv) extends TargetContainer {
     * On the other hand, if the primary is a manual group and an automatic is
     * given, the automatic group is replaced and made primary.  If the primary
     * is automatic and a manual group provided, the manual group is selected/
-    * addded and made primary.
+    * added and made primary.
     *
     * @deprecated This is such a hopelessly confusing method that it is best
     *             avoided altogether.  See the more straightforward
@@ -133,9 +133,6 @@ final case class GuideEnvironment(guideEnv: GuideEnv) extends TargetContainer {
     }
     GuideEnvironment(GuideEnv(auto, manual))
   }
-
-  def mkString(prefix: String, sep: String, suffix: String): String =
-    ???
 
   def getPrimaryIndex: java.lang.Integer =
     ???
