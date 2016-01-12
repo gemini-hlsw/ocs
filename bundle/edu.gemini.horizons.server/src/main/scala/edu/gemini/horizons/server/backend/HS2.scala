@@ -29,8 +29,9 @@ object HorizonsService2 {
 
   /** The type of failures that might arise when talking to HORIZONS. */
   sealed trait HS2Error
-  case class HorizonsError(e: HorizonsException) extends HS2Error
-  case class ParseError(input: List[String], message: String) extends HS2Error
+  case class  HorizonsError(e: HorizonsException) extends HS2Error
+  case class  ParseError(input: List[String], message: String) extends HS2Error
+  case object EphemerisEmpty extends HS2Error
 
   /** A value annotated with a name. Used when multiple results are returned. */
   case class Row[A](a: A, name: String)
@@ -60,7 +61,7 @@ object HorizonsService2 {
       HS2.fromDisjunction(parseResponse(search, lines).leftMap(ParseError(lines, _)))
 
     // And finally
-    horizonsRequestLines2(queryParams) >>= parseLines
+    horizonsRequestLines(queryParams) >>= parseLines
 
   }
 
@@ -123,7 +124,7 @@ object HorizonsService2 {
       IO(CgiReplyBuilder.buildResponse(m.getResponseBodyAsStream, m.getRequestCharSet)).map(toEphemeris)
 
     // And finally      
-    horizonsRequest2(queryParams)(buildEphemeris)
+    horizonsRequest(queryParams)(buildEphemeris).ensure(EphemerisEmpty)(_.size > 0)
 
   }
 
@@ -259,8 +260,8 @@ object HorizonsService2 {
   }
 
   // Construct a program thet performs a HORIZONS request and yields the response as lines of text.
-  private def horizonsRequestLines2(params: Map[String, String]): HS2[List[String]] =
-    horizonsRequest2(params) { method =>
+  private def horizonsRequestLines(params: Map[String, String]): HS2[List[String]] =
+    horizonsRequest(params) { method =>
       IO {
         val s = Source.fromInputStream(method.getResponseBodyAsStream, method.getRequestCharSet)
         try     s.getLines.toList
@@ -276,7 +277,7 @@ object HorizonsService2 {
 
   // Construct a program thet performs a HORIZONS request and transforms the respons with the
   // provided function.
-  private def horizonsRequest2[A](params: Map[String, String])(f: GetMethod => IO[A]): HS2[A] =
+  private def horizonsRequest[A](params: Map[String, String])(f: GetMethod => IO[A]): HS2[A] =
     EitherT {
       IO(new GetMethod(CgiHorizonsConstants.HORIZONS_URL)).using { (method: GetMethod) =>
         IO {

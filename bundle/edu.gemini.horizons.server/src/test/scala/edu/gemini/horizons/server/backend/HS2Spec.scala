@@ -11,7 +11,7 @@ import org.specs2.mutable.Specification
 
 object HS2Spec extends Specification with ScalaCheck {
 
-  import HorizonsService2.{ HS2Error, Row, Search, search, lookupEphemeris}
+  import HorizonsService2.{ HS2Error, Row, Search, search, lookupEphemeris, EphemerisEmpty }
   import edu.gemini.spModel.core.{ HorizonsDesignation => HD, Site, Ephemeris }
 
   def runSearch[A](s: Search[A]): HS2Error \/ List[Row[A]] =
@@ -20,7 +20,7 @@ object HS2Spec extends Specification with ScalaCheck {
   def runLookup(d: HD, n: Int): HS2Error \/ Ephemeris =
     lookupEphemeris(d, Site.GS, n).run.unsafePerformIO
 
-  "comet support" should {
+  "comet search" should {
 
     "handle empty results" in {
       runSearch(Search.Comet("kjhdwekuq")) must_== \/-(Nil)
@@ -48,15 +48,9 @@ object HS2Spec extends Specification with ScalaCheck {
       ))
     }   
 
-    "compute an ephemeris for Halley" in {
-      runLookup(HD.Comet("1P"), 100).map(_.size).toOption.exists { s =>
-        95 <= s && s <= 105
-      }
-    }
-
   }
 
-  "asteroid support" should {
+  "asteroid search" should {
 
     "handle empty results" in {
       runSearch(Search.Asteroid("kjhdwekuq")) must_== \/-(Nil)
@@ -84,21 +78,9 @@ object HS2Spec extends Specification with ScalaCheck {
       ))
     }   
 
-    "compute an ephemeris for Sedna (new style)" in {
-      runLookup(HD.AsteroidNewStyle("2003 VB12"), 100).map(_.size).toOption.exists { s =>
-        95 <= s && s <= 105
-      }
-    }
-
-    "compute an ephemeris for Amphitrite (new style)" in {
-      runLookup(HD.AsteroidOldStyle(29), 100).map(_.size).toOption.exists { s =>
-        95 <= s && s <= 105
-      }
-    }
-
   }
 
-  "major body support" should {
+  "major body search" should {
 
     "handle empty results" in {
       runSearch(Search.MajorBody("kjhdwekuq")) must_== \/-(Nil)
@@ -126,13 +108,38 @@ object HS2Spec extends Specification with ScalaCheck {
       ))
     }   
 
-    "compute an ephemeris for Charon" in {
+  }
+
+  "ephemeris lookup" should {
+
+    "return a populated ephemeris for Halley (comet)" in {
+      runLookup(HD.Comet("1P"), 100).map(_.size).toOption.exists { s =>
+        95 <= s && s <= 105
+      }
+    }
+
+    "return a populated ephemeris for Sedna (asteroid, new style)" in {
+      runLookup(HD.AsteroidNewStyle("2003 VB12"), 100).map(_.size).toOption.exists { s =>
+        95 <= s && s <= 105
+      }
+    }
+
+    "return a populated ephemeris for Amphitrite (asteroid, new style)" in {
+      runLookup(HD.AsteroidOldStyle(29), 100).map(_.size).toOption.exists { s =>
+        95 <= s && s <= 105
+      }
+    }
+
+    "return a populated ephemeris for Charon (major body)" in {
       runLookup(HD.MajorBody(901), 100).map(_.size).toOption.exists { s =>
         95 <= s && s <= 105
       }
     }
 
-  }
+    "return an empty ephemeris on bogus lookup" in {
+      runLookup(HD.Comet("29134698698376"), 100).map(_.size) must_== -\/(EphemerisEmpty)
+    }
 
+  }
 
 }
