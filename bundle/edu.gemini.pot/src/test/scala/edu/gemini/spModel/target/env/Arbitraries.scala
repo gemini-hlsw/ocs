@@ -23,12 +23,12 @@ trait Arbitraries extends edu.gemini.spModel.core.Arbitraries {
       } yield new SPTarget(r.toAngle.toDegrees, d.toDegrees) <| (_.setName(n.take(4)))
     }
 
-  implicit val arbZipperTarget: Arbitrary[Zipper[SPTarget]] =
+  implicit def arbZipper[A: Arbitrary]: Arbitrary[Zipper[A]] =
     Arbitrary {
       for {
-        l <- arbitrary[List[SPTarget]]
-        f <- arbitrary[SPTarget]
-        r <- arbitrary[List[SPTarget]]
+        l <- arbitrary[List[A]]
+        f <- arbitrary[A]
+        r <- arbitrary[List[A]]
       } yield Zipper(l.toStream, f, r.toStream)
     }
 
@@ -48,9 +48,9 @@ trait Arbitraries extends edu.gemini.spModel.core.Arbitraries {
       } yield NonEmptyList.nel(a, as)
     }
 
-  implicit val arbOptsListTarget: Arbitrary[OptsList[SPTarget]] =
+  implicit def arbOptsList[A: Arbitrary]: Arbitrary[OptsList[A]] =
     Arbitrary {
-      arbitrary[NonEmptyList[SPTarget] \/ Zipper[SPTarget]].map { d => OptsList(d) }
+      arbitrary[NonEmptyList[A] \/ Zipper[A]].map { d => OptsList(d) }
     }
 
   implicit val arbGuideProbe: Arbitrary[GuideProbe] =
