@@ -13,10 +13,8 @@ public class ArrayTableCellRenderer extends DefaultTableCellRenderer {
 
     /**
      * Constructor: set the alignment based on the array element type.
-     *
-     * @param arrayClass the type of the array
      */
-    public ArrayTableCellRenderer(Class<?> arrayClass) {
+    public ArrayTableCellRenderer() {
         setHorizontalAlignment(JLabel.CENTER);
     }
 
@@ -41,23 +39,22 @@ public class ArrayTableCellRenderer extends DefaultTableCellRenderer {
      *				drawing the header the rowIndex is -1.
      * @param	column	        the column index of the cell being drawn
      */
-    public Component getTableCellRendererComponent(JTable table, Object value,
-                                                   boolean isSelected, boolean hasFocus,
-                                                   int row, int column) {
-        Component component = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+    public Component getTableCellRendererComponent(final JTable table, final Object value,
+                                                   final boolean isSelected, final boolean hasFocus,
+                                                   final int row, final int column) {
+        final Component component = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
         if (value != null) {
-            Class<?> c = value.getClass();
+            final Class<?> c = value.getClass();
             if (c.isArray()) {
-                String s;
-                int n = Array.getLength(value);
+                final int n = Array.getLength(value);
+
+                final String text;
                 if (n >= 1) {
-                    s = Array.get(value, 0).toString();
-                    if (n > 1)
-                        s += ", ...";
+                    text = Array.get(value, 0).toString() + ((n > 1) ? ", ..." : "");
                 } else {
-                    s = "";
+                    text = "";
                 }
-                ((JLabel) component).setText(s);
+                ((JLabel) component).setText(text);
             }
         }
 

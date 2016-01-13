@@ -3,7 +3,6 @@ package jsky.catalog.gui;
 import jsky.catalog.FieldDesc;
 import jsky.catalog.QueryResult;
 import jsky.catalog.TableQueryResult;
-import jsky.catalog.TestTableQueryResult;
 import jsky.util.Preferences;
 import jsky.util.PrintableWithDialog;
 import jsky.util.SaveableAsHTML;
@@ -28,6 +27,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * This widget displays the contents of a TableQueryResult in a JTable and
@@ -35,14 +35,14 @@ import java.util.Map;
  */
 public class TableDisplay extends JPanel
         implements QueryResultDisplay, PrintableWithDialog, SaveableAsHTML, Storeable {
+    private final static Logger LOG = Logger.getLogger(TableDisplay.class.getName());
 
     private static final TableCellRenderer MagnitudeRenderer = new DefaultTableCellRenderer() {
         {
             setHorizontalAlignment(SwingConstants.RIGHT);
         }
 
-        @Override
-        public void setValue(Object value) {
+        @Override public void setValue(final Object value) {
             if (value instanceof Double) {
                 setText(String.format("%.2f", (Double)value));
             } else {
@@ -55,13 +55,13 @@ public class TableDisplay extends JPanel
     private TableQueryResult _tableQueryResult;
 
     /** Used to display any query results found by following links */
-    private QueryResultDisplay _queryResultDisplay;
+    private final QueryResultDisplay _queryResultDisplay;
 
     /** Used to scroll the table */
-    private JScrollPane _scrollPane;
+    private final JScrollPane _scrollPane;
 
     /** widget used to display the table */
-    private SortedJTable _table;
+    private final SortedJTable _table;
 
     /** Sum of column widths, used during resize */
     private int _sumColWidths = 0;
@@ -73,14 +73,14 @@ public class TableDisplay extends JPanel
     private static Map<String, boolean[]> _showTab = new HashMap<>();
 
     /** Name of file used to remember the _showTab settings between sessions */
-    private static String SHOW_TAB_FILE_NAME = "tableDisplayShowTab";
+    private static final String SHOW_TAB_FILE_NAME = "tableDisplayShowTab";
 
     /** Restore _showTab from the previous session, if the file exists */
     static {
         try {
             _showTab = (Hashtable) Preferences.getPreferences().deserialize(SHOW_TAB_FILE_NAME);
-        } catch (Exception e) {
-            // Ignore
+        } catch (final Exception e) {
+            LOG.warning("Could not deserialize TableDisplay preferences from file " + SHOW_TAB_FILE_NAME + ": " + e.getMessage());
         }
     }
 
@@ -91,7 +91,7 @@ public class TableDisplay extends JPanel
      * @param tableQueryResult the table to use.
      * @param queryResultDisplay used to display any query results (resulting from following links)
      */
-    public TableDisplay(TableQueryResult tableQueryResult, QueryResultDisplay queryResultDisplay) {
+    public TableDisplay(final TableQueryResult tableQueryResult, final QueryResultDisplay queryResultDisplay) {
         _queryResultDisplay = queryResultDisplay;
         _table = new SortedJTable();
         setBackground(Color.white);
@@ -102,7 +102,7 @@ public class TableDisplay extends JPanel
         _table.setRowSelectionAllowed(true);
         _table.setColumnSelectionAllowed(false);
 
-        JTableHeader header = _table.getTableHeader();
+        final JTableHeader header = _table.getTableHeader();
         header.setUpdateTableInRealTime(false);
         header.setFont(header.getFont().deriveFont(Font.BOLD));
         setLayout(new BorderLayout());
@@ -111,19 +111,10 @@ public class TableDisplay extends JPanel
 
         // handle resize events
         addComponentListener(new ComponentAdapter() {
-            public void componentResized(ComponentEvent e) {
+            @Override public void componentResized(final ComponentEvent e) {
                 resize();
             }
         });
-    }
-
-    /**
-     * Create an empty TableDisplay (Call setModel to set the data to display).
-     *
-     * @param tableQueryResult the table to use.
-     */
-    public TableDisplay(TableQueryResult tableQueryResult) {
-        this(tableQueryResult, null);
     }
 
     /**
@@ -143,7 +134,7 @@ public class TableDisplay extends JPanel
      * If the given query result is a table, display it,
      * otherwise do nothing.
      */
-    public void setQueryResult(QueryResult queryResult) {
+    @Override public void setQueryResult(final QueryResult queryResult) {
         if (queryResult instanceof TableQueryResult)
             setModel((TableQueryResult) queryResult);
     }
@@ -159,10 +150,10 @@ public class TableDisplay extends JPanel
     /**
      * Set the data to display in the table.
      */
-    public void setModel(TableQueryResult tableQueryResult) {
+    public void setModel(final TableQueryResult tableQueryResult) {
         _tableQueryResult = tableQueryResult;
 
-        Object o = _showTab.get(_tableQueryResult.getName());
+        final Object o = _showTab.get(_tableQueryResult.getName());
         if (o != null) {
             _show = (boolean[]) o;
             if (_show.length != _tableQueryResult.getColumnCount())
@@ -184,7 +175,7 @@ public class TableDisplay extends JPanel
     }
 
 
-    /*
+    /**
      * This method picks good column sizes for the given JTable.
      * If all column heads are wider than the column's cells'
      * contents, then you can just use column.sizeWidthToFit().
@@ -195,7 +186,7 @@ public class TableDisplay extends JPanel
      *
      * @return the sum of all the column widths
      */
-    protected int initColumnSizes(JTable table, boolean[] show) {
+    protected int initColumnSizes(final JTable table, final boolean[] show) {
         return TableUtil.initColumnSizes(table, show);
     }
 
@@ -207,10 +198,10 @@ public class TableDisplay extends JPanel
      * special formatting.
      */
     protected void setColumnRenderers() {
-        int numCols = _tableQueryResult.getColumnCount();
+        final int numCols = _tableQueryResult.getColumnCount();
         for (int col = 0; col < numCols; col++) {
-            FieldDesc field = _tableQueryResult.getColumnDesc(col);
-            TableColumn column = _table.getColumn(_tableQueryResult.getColumnName(col));
+            final FieldDesc field = _tableQueryResult.getColumnDesc(col);
+            final TableColumn column = _table.getColumn(_tableQueryResult.getColumnName(col));
 
             // linked fields are displayed as buttons
             if (field.hasLink()) {
@@ -224,12 +215,12 @@ public class TableDisplay extends JPanel
                 column.setCellRenderer(new SexagesimalTableCellRenderer(false));
                 column.setCellEditor(new SexagesimalTableCellEditor(false));
             } else {
-                Class<?> c = _tableQueryResult.getColumnClass(col);
+                final Class<?> c = _tableQueryResult.getColumnClass(col);
                 if (c != null && c.isArray()) {
-                    column.setCellRenderer(new ArrayTableCellRenderer(c));
+                    column.setCellRenderer(new ArrayTableCellRenderer());
                 } else if (String.class.equals(c) || Object.class.equals(c)) {
                     // center non-numeric columns, to leave more space
-                    DefaultTableCellRenderer renderer = new DefaultTableCellRenderer();
+                    final DefaultTableCellRenderer renderer = new DefaultTableCellRenderer();
                     renderer.setHorizontalAlignment(JLabel.CENTER);
                     column.setCellRenderer(renderer);
                 } else if (Double.class.equals(c)) {
@@ -243,7 +234,7 @@ public class TableDisplay extends JPanel
      * Display a print dialog to print the contents of this object
      * with the specified table title.
      */
-    public void print(String title) throws PrinterException {
+    public void print(final String title) throws PrinterException {
         _table.setTitle(title);
         _table.showPrintDialog();
     }
@@ -251,7 +242,7 @@ public class TableDisplay extends JPanel
     /**
      * Display a print dialog to print the contents of this object.
      */
-    public void print() throws PrinterException {
+    @Override public void print() throws PrinterException {
         _table.showPrintDialog();
     }
 
@@ -259,7 +250,7 @@ public class TableDisplay extends JPanel
     public void resize() {
         if (_tableQueryResult == null)
             return;
-        int numCols = _tableQueryResult.getColumnCount();
+        final int numCols = _tableQueryResult.getColumnCount();
         if (numCols == 1) {
             _table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
             _table.sizeColumnsToFit(0);
@@ -277,21 +268,21 @@ public class TableDisplay extends JPanel
      *
      * @param row the index of the row (0 is the first row)
      */
-    public void selectRow(int row) {
+    public void selectRow(final int row) {
         // table may be sorted ...
-        row = _table.getUnsortedRowIndex(row);
+        final int unsortedRow = _table.getUnsortedRowIndex(row);
 
         // select the row
-        ListSelectionModel model = _table.getSelectionModel();
-        model.addSelectionInterval(row, row);
+        final ListSelectionModel model = _table.getSelectionModel();
+        model.addSelectionInterval(unsortedRow, unsortedRow);
 
         // scroll to make the row visible
-        BoundedRangeModel brm = _scrollPane.getVerticalScrollBar().getModel();
-        int min = brm.getMinimum();
-        int max = brm.getMaximum();
-        int value = brm.getValue();
-        int extent = brm.getExtent();
-        int newvalue = row * (max - min) / _tableQueryResult.getRowCount();
+        final BoundedRangeModel brm = _scrollPane.getVerticalScrollBar().getModel();
+        final int min = brm.getMinimum();
+        final int max = brm.getMaximum();
+        final int value = brm.getValue();
+        final int extent = brm.getExtent();
+        final int newvalue = unsortedRow * (max - min) / _tableQueryResult.getRowCount();
 
         if (newvalue < value || newvalue > value + extent)
             brm.setValue(newvalue - extent / 2);
@@ -302,9 +293,9 @@ public class TableDisplay extends JPanel
      *
      * @param row the index of the row (0 is the first row)
      */
-    public void deselectRow(int row) {
-        row = _table.getUnsortedRowIndex(row);
-        _table.getSelectionModel().removeSelectionInterval(row, row);
+    public void deselectRow(final int row) {
+        final int unsortedRow = _table.getUnsortedRowIndex(row);
+        _table.getSelectionModel().removeSelectionInterval(unsortedRow, unsortedRow);
     }
 
     /** Return an array specifying which columns to show, if defined, otherwise null. */
@@ -313,7 +304,7 @@ public class TableDisplay extends JPanel
     }
 
     /** Set an array specifying which columns to show (or null, for default) */
-    public void setShow(boolean[] show) {
+    public void setShow(final boolean[] show) {
         _show = show;
         //_sumColWidths = initColumnSizes(_table, _show);
 
@@ -327,22 +318,20 @@ public class TableDisplay extends JPanel
         // make the change permanent
         try {
             Preferences.getPreferences().serialize(SHOW_TAB_FILE_NAME, _showTab);
-        } catch (Exception e) {
-            // ignore
+        } catch (final Exception e) {
+            LOG.warning("Could not deserialize TableDisplay preferences to file " + SHOW_TAB_FILE_NAME + ": " + e.getMessage());
         }
     }
 
 
     /** Save the table to the given filename in HTML format */
-    public void saveAsHTML(String filename) throws IOException {
-        FileOutputStream os = new FileOutputStream(filename);
+    @Override public void saveAsHTML(final String filename) throws IOException {
+        final int numCols = _table.getColumnCount();
+        if (numCols == 0) return;
+        final int numRows = _table.getRowCount();
 
-        int numCols = _table.getColumnCount(),
-                numRows = _table.getRowCount();
-        if (numCols == 0)
-            return;
-
-        PrintStream out = new PrintStream(os);
+        final FileOutputStream os = new FileOutputStream(filename);
+        final PrintStream out = new PrintStream(os);
 
         // table title
         out.println("<html>");
@@ -364,17 +353,17 @@ public class TableDisplay extends JPanel
             for (int col = 0; col < numCols; col++) {
                 if (_show == null || _show[col]) {
                     // The renderer might display a different string, so use it to get the string
-                    TableCellRenderer r = _table.getCellRenderer(row, col);
-                    Component c = r.getTableCellRendererComponent(_table,
-                                                                  _table.getValueAt(row, col),
-                                                                  false, false, row, col);
-                    String s;
+                    final TableCellRenderer r = _table.getCellRenderer(row, col);
+                    final Component c = r.getTableCellRendererComponent(_table,
+                                                                        _table.getValueAt(row, col),
+                                                                        false, false, row, col);
+                    final String s;
                     if (c instanceof JLabel) {
                         s = ((JLabel) r).getText();
                     } else if (c instanceof AbstractButton) {
                         s = ((AbstractButton) r).getText();
                     } else {
-                        Object o = _table.getValueAt(row, col);
+                        final Object o = _table.getValueAt(row, col);
                         if (o != null)
                             s = o.toString();
                         else
@@ -392,8 +381,8 @@ public class TableDisplay extends JPanel
 
 
     /** Store the current settings in a serializable object and return the object. */
-    public Object storeSettings() {
-        TableSettings settings = new TableSettings();
+    @Override public Object storeSettings() {
+        final TableSettings settings = new TableSettings();
         settings.show = _show;
         settings.columnToSort = _table.getSortColumn();
         settings.sortType = _table.getSortType();
@@ -401,9 +390,9 @@ public class TableDisplay extends JPanel
     }
 
     /** Restore the settings previously stored. */
-    public boolean restoreSettings(Object obj) {
+    @Override public boolean restoreSettings(Object obj) {
         if (obj instanceof TableSettings) {
-            TableSettings settings = (TableSettings) obj;
+            final TableSettings settings = (TableSettings) obj;
             _table.setSortType(settings.sortType);
             _table.setSortColumn(settings.columnToSort);
             if (settings.show != null && _show != null && settings.show.length == _show.length)
@@ -419,23 +408,6 @@ public class TableDisplay extends JPanel
         boolean[] show;
         int columnToSort;
         int sortType;
-
-        public TableSettings() {
-        }
-    }
-
-
-    /**
-     * test main
-     */
-    public static void main(String[] args) {
-        JFrame frame = new JFrame("TableDisplay");
-        TableDisplay tableDisplay = new TableDisplay(new TestTableQueryResult());
-
-        frame.getContentPane().add(tableDisplay, BorderLayout.CENTER);
-        frame.pack();
-        frame.setVisible(true);
-        frame.addWindowListener(new BasicWindowMonitor());
     }
 }
 

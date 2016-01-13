@@ -1,7 +1,6 @@
 package jsky.app.ot.gemini.altair;
 
 import edu.gemini.spModel.gemini.altair.AltairParams;
-import jsky.util.gui.CheckBoxWidget;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,7 +9,7 @@ public class AltairForm extends JPanel {
     public AltairForm() {
         JLabel adcLabel = new JLabel();
         JLabel beamSplitterLabel = new JLabel();
-        adcCheck = new CheckBoxWidget();
+        adcCheck = new JCheckBox();
         eight50Button = new JRadioButton();
         oneButton = new JRadioButton();
         JLabel cassRotatorLabel = new JLabel();
@@ -181,7 +180,7 @@ public class AltairForm extends JPanel {
 
     }
 
-    final CheckBoxWidget adcCheck;
+    final JCheckBox    adcCheck;
     final JRadioButton eight50Button;
     final JRadioButton oneButton;
     final JRadioButton cassRotatorFollowingButton;
