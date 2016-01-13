@@ -84,8 +84,4 @@ trait Arbitraries extends edu.gemini.spModel.core.Arbitraries {
       arbitrary[GuideGrp].map(GuideGroup)
     }
 
-  implicit val arbGuideProbes: Arbitrary[Set[GuideProbe]] =
-    Arbitrary {
-      oneOf(GuideProbeMap.instance.values.asScala.toSet.subsets.toSeq)
-    }
 }

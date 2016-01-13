@@ -123,7 +123,8 @@ case class GuideGroup(grp: GuideGrp) extends java.lang.Iterable[GuideProbeTarget
           val opts = primary.fold(noPrimary) { t =>
             val (lefts, focusRight) = nel.toList.span(_ != t)
             focusRight.headOption.fold(noPrimary) { _ =>
-              OptsList(Zipper(lefts.toStream, t, focusRight.drop(1).toStream).right)
+              // We have to reverse the lefts as Zipper expects the stream to generate from the focus.
+              OptsList(Zipper(lefts.reverse.toStream, t, focusRight.drop(1).toStream).right)
             }
           }
           mg.copy(targetMap = m + (probe -> opts))
