@@ -5,10 +5,7 @@ import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.spModel.guide.{GuideProbeMap, GuideProbe}
 import edu.gemini.spModel.target.SPTarget
 
-import org.scalacheck.Properties
-import org.scalacheck.Prop.forAll
 import org.scalacheck.Prop._
-import org.scalacheck.Gen
 
 import org.specs2.ScalaCheck
 
@@ -18,6 +15,7 @@ import scala.collection.JavaConverters._
 import scalaz._, Scalaz._
 
 class GuideGroupSpec extends Specification with ScalaCheck with Arbitraries {
+
   import GuideGroupSpec.AllProbes
 
   "GuideGroup name" should {
@@ -25,7 +23,7 @@ class GuideGroupSpec extends Specification with ScalaCheck with Arbitraries {
       forAll { (g: GuideGroup) =>
         g.grp match {
           case a: AutomaticGroup => g.getName == ImOption.empty
-          case _                 => g.getName != ImOption.empty
+          case _ => g.getName != ImOption.empty
         }
       }
 
@@ -34,8 +32,8 @@ class GuideGroupSpec extends Specification with ScalaCheck with Arbitraries {
         val nopt = ImOption.apply(n)
         g.grp match {
           case a: AutomaticGroup => g.setName(nopt) == g
-          case _                 => g.setName(nopt).getName == nopt &&
-                                    g.setName(n).getName == nopt
+          case _ => g.setName(nopt).getName == nopt &&
+            g.setName(n).getName == nopt
         }
       }
   }
@@ -81,9 +79,11 @@ class GuideGroupSpec extends Specification with ScalaCheck with Arbitraries {
         AllProbes.forall { gp =>
           g.get(gp).asScalaOpt.forall { gpt =>
             gpt.getPrimary.asScalaOpt == (g.grp match {
-              case ManualGroup(_, m)        => m.get(gp).flatMap { _.focus }
+              case ManualGroup(_, m) => m.get(gp).flatMap {
+                _.focus
+              }
               case AutomaticGroup.Active(m) => m.get(gp)
-              case AutomaticGroup.Initial   => None
+              case AutomaticGroup.Initial => None
             })
           }
         }
@@ -95,7 +95,7 @@ class GuideGroupSpec extends Specification with ScalaCheck with Arbitraries {
       forAll { (g: GuideGroup) =>
         AllProbes.forall { gp =>
           val emptyGpt = GuideProbeTargets.create(gp)
-          val g2       = g.put(emptyGpt)
+          val g2 = g.put(emptyGpt)
           !g2.contains(gp) && g2.get(gp).isEmpty
         }
       }
@@ -104,8 +104,10 @@ class GuideGroupSpec extends Specification with ScalaCheck with Arbitraries {
       forAll { (g: GuideGroup) =>
         AllProbes.forall { gp =>
           val noPrimaryGpt = GuideProbeTargets.create(gp, new SPTarget()).clearPrimarySelection()
-          val g2           = g.put(noPrimaryGpt)
-          g2.get(gp).asScalaOpt.forall { _.getPrimary.isEmpty }
+          val g2 = g.put(noPrimaryGpt)
+          g2.get(gp).asScalaOpt.forall {
+            _.getPrimary.isEmpty
+          }
         }
       }
 
@@ -113,26 +115,26 @@ class GuideGroupSpec extends Specification with ScalaCheck with Arbitraries {
       forAll { (g: GuideGroup) =>
         AllProbes.forall { gp =>
           val noPrimaryGpt = GuideProbeTargets.create(gp, new SPTarget()).clearPrimarySelection()
-          val g2           = g.put(noPrimaryGpt)
-          val gpt2         = g2.get(gp).asScalaOpt
+          val g2 = g.put(noPrimaryGpt)
+          val gpt2 = g2.get(gp).asScalaOpt
           g2.grp match {
             case _: AutomaticGroup => gpt2.isEmpty
-            case _: ManualGroup    => gpt2.exists(_.getPrimary.isEmpty)
+            case _: ManualGroup => gpt2.exists(_.getPrimary.isEmpty)
           }
         }
       }
 
     "set guide stars associated with a probe but ignore non-primary guide stars for automatic groups" in
       forAll { (g: GuideGroup) =>
-        val primaryTarget    = new SPTarget() <| (_.setName("primary"))
+        val primaryTarget = new SPTarget() <| (_.setName("primary"))
         val notPrimaryTarget = new SPTarget() <| (_.setName("not primary"))
         AllProbes.forall { gp =>
-          val gpt  = GuideProbeTargets.create(gp, primaryTarget, notPrimaryTarget)
-          val g2   = g.put(gpt)
+          val gpt = GuideProbeTargets.create(gp, primaryTarget, notPrimaryTarget)
+          val g2 = g.put(gpt)
           val lst2 = g2.get(gp).asScalaOpt.toList.flatMap(_.getTargets.asScalaList)
           g2.grp match {
             case _: AutomaticGroup => lst2 == List(primaryTarget)
-            case _: ManualGroup    => lst2 == List(primaryTarget, notPrimaryTarget)
+            case _: ManualGroup => lst2 == List(primaryTarget, notPrimaryTarget)
           }
         }
       }
@@ -162,7 +164,7 @@ class GuideGroupSpec extends Specification with ScalaCheck with Arbitraries {
     "return its results in sorted order" in
       forAll { (g: GuideGroup) =>
         val probeOrder = AllProbes.zipWithIndex.toMap
-        val order      = g.getAll.asScalaList.map(gpt => probeOrder(gpt.getGuider))
+        val order = g.getAll.asScalaList.map(gpt => probeOrder(gpt.getGuider))
         order == order.sorted
       }
 
@@ -171,8 +173,8 @@ class GuideGroupSpec extends Specification with ScalaCheck with Arbitraries {
         val guiders = g.getAll.asScalaList.map(_.getGuider).toSet
         g.grp match {
           case AutomaticGroup.Active(m) => guiders == m.keySet
-          case AutomaticGroup.Initial   => guiders.isEmpty
-          case ManualGroup(_, m)        => guiders == m.keySet
+          case AutomaticGroup.Initial => guiders.isEmpty
+          case ManualGroup(_, m) => guiders == m.keySet
         }
       }
 
@@ -188,7 +190,7 @@ class GuideGroupSpec extends Specification with ScalaCheck with Arbitraries {
     "contain the original primary guide probes and all primary guide probes for which targets have been added" in
       forAll { (g: GuideGroup, gps: Set[GuideProbe]) =>
         val gpts = gps.map(GuideProbeTargets.create(_, new SPTarget())).toList.asImList
-        val allGps = g.getPrimaryReferencedGuiders.asScala.toSet ++: gps
+        val allGps = g.getPrimaryReferencedGuiders.asScala.toSet ++ gps
         g.putAll(gpts).getPrimaryReferencedGuiders.asScala.toSet == allGps
       }
 
@@ -197,8 +199,8 @@ class GuideGroupSpec extends Specification with ScalaCheck with Arbitraries {
   "GuideGroup setAll" should {
     "only contain the guide probes in the collection" in
       forAll { (g: GuideGroup, gps: Set[GuideProbe]) =>
-        val gpts  = gps.map(GuideProbeTargets.create(_, new SPTarget())).toList.asImList
-        val g2    = g.setAll(gpts)
+        val gpts = gps.map(GuideProbeTargets.create(_, new SPTarget())).toList.asImList
+        val g2 = g.setAll(gpts)
         val gpOut = g.getReferencedGuiders.asScala.toSet -- g2.getReferencedGuiders.asScala.toSet
         g2.getReferencedGuiders.asScala.toSet == gpts.asScalaList.map(_.getGuider).toSet &&
           gpOut.forall(gp => !g2.contains(gp))
@@ -215,7 +217,7 @@ class GuideGroupSpec extends Specification with ScalaCheck with Arbitraries {
   }
 
   "GuideGroup getReferencedGuiders" should {
-    "contain a guider iff it has guide probe targets" in
+    "contain a guider iff it has associated targets" in
       forAll { (g: GuideGroup) =>
         g.getAll.asScalaList.map(_.getGuider).toSet == g.getReferencedGuiders.asScala.toSet
       }
@@ -223,90 +225,44 @@ class GuideGroupSpec extends Specification with ScalaCheck with Arbitraries {
 
   "GuideGroup removeTarget" should {
     "remove an existing target added to all guiders and preserve the order of the original targets" in
-      forAll { (g: GuideGroup, tIn: SPTarget) =>
+      forAll { (g: GuideGroup, target: SPTarget) =>
         val oldGpts = g.getAll
-        val newGpts = g.getAll.asScalaList.map(gt => gt.setOptions(gt.getOptions.append(tIn))).asImList
-        val remGpts = g.setAll(newGpts).removeTarget(tIn).getAll
+        val newGpts = g.getAll.asScalaList.map(gt => gt.update(OptionsList.UpdateOps.append(target))).asImList
+        val remGpts = g.setAll(newGpts).removeTarget(target).getAll
         remGpts == oldGpts
       }
   }
 
+  "GuideGroup getAllMatching" should {
+    "partition the collections of guide probe targets by guide probe type" in
+      forAll { g: GuideGroup =>
+        val ptns = g.getReferencedGuiders.asScala.map(gp => g.getAllMatching(gp.getType).asScalaList.toSet).toSet
+        (ptns.toList.map(_.length).sum == g.getAll.size) && ptns.forall(p => ptns.forall(q => p == q || p.intersect(q).isEmpty))
+      }
+  }
 
-      /*
-        "GuideGroup getAll" should {
-          "" in
-            forAll { (g: GuideGroup) =>
-              true
-            }
-
-          "" in
-            forAll { (g: GuideGroup) =>
-              true
-            }
-
-          "" in
-            forAll { (g: GuideGroup) =>
-              true
-            }
-
-          "" in
-            forAll { (g: GuideGroup) =>
-              true
-            }
-
-          "" in
-            forAll { (g: GuideGroup) =>
-              true
-            }
-
-          "" in
-            forAll { (g: GuideGroup) =>
-              true
-            }
-
-          "" in
-            forAll { (g: GuideGroup) =>
-              true
-            }
+  "GuideGroup cloneTargets" should {
+    "create a new GuideGroup where the underlying ITargets are equal for each guide probe and in the same order" in
+      forAll { g: GuideGroup =>
+        val cg = g.cloneTargets
+        val gt = g.getAll.asScalaList
+        val cgt = cg.getAll.asScalaList
+        (gt.length == cgt.length) && gt.zip(cgt).forall {
+          case (t1, t2) => t1.getGuider == t2.getGuider && t1.getTargets.asScala.map(_.getTarget) == t2.getTargets.asScala.map(_.getTarget)
         }
+      }
+  }
 
-        "GuideGroup getAll" should {
-          "" in
-            forAll { (g: GuideGroup) =>
-              true
-            }
-
-          "" in
-            forAll { (g: GuideGroup) =>
-              true
-            }
-
-          "" in
-            forAll { (g: GuideGroup) =>
-              true
-            }
-
-          "" in
-            forAll { (g: GuideGroup) =>
-              true
-            }
-
-          "" in
-            forAll { (g: GuideGroup) =>
-              true
-            }
-
-          "" in
-            forAll { (g: GuideGroup) =>
-              true
-            }
-
-          "" in
-            forAll { (g: GuideGroup) =>
-              true
-            }
-        }
-        */
+  "GuideGroup getAllContaining" should {
+    "return a subset of guide probe targets containing a specific target for manual groups" in
+    forAll { (g: GuideGroup, t: SPTarget) =>
+      val newGpt = g.getAll.asScalaList.zipWithIndex.map { case (gpt, idx) => if (idx % 2 == 0) gpt else gpt.update(OptionsList.UpdateOps.append(t)) }
+      g.setAll(newGpt.asImList).getAllContaining(t).asScalaList == (g.grp match {
+        case _: ManualGroup    => newGpt.zipWithIndex.collect { case (gpt, idx) if idx % 2 == 1 => gpt }
+        case _: AutomaticGroup => Nil
+      })
+    }
+  }
 }
 
 object GuideGroupSpec {
