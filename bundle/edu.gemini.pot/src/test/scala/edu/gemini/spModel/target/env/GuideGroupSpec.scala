@@ -1,8 +1,9 @@
 package edu.gemini.spModel.target.env
 
-import edu.gemini.shared.util.immutable.ImOption
+import edu.gemini.shared.util.immutable.{ImList, ImOption}
 import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.spModel.guide.{GuideProbeMap, GuideProbe}
+import edu.gemini.spModel.target.EqualSPTarget
 import edu.gemini.spModel.target.SPTarget
 
 import org.scalacheck.Prop._
@@ -182,22 +183,29 @@ class GuideGroupSpec extends Specification with ScalaCheck with Arbitraries {
   }
 
   "GuideGroup putAll" should {
-    "contain the original primary guide probes and all primary guide probes for which targets have been added" in
-      forAll { (g: GuideGroup, gps: Set[GuideProbe]) =>
-        val gpts = gps.map(GuideProbeTargets.create(_, new SPTarget())).toList.asImList
-        val allGps = g.getPrimaryReferencedGuiders.asScala.toSet ++ gps
-        g.putAll(gpts).getPrimaryReferencedGuiders.asScala.toSet == allGps
+    "behave the same as if a sequence of individual calls to put were made" in
+      forAll { (g: GuideGroup, ts: ImList[GuideProbeTargets]) =>
+        g.putAll(ts) === (g /: ts.asScalaList){(gg,gpt) => gg.put(gpt)}
       }
 
+    "contain the original primary guide probes and all primary guide probes for which targets have been added" in
+      forAll { (g: GuideGroup, ts: ImList[GuideProbeTargets]) =>
+        val allGps = g.getPrimaryReferencedGuiders.asScala.toSet ++ ts.asScalaList.map(_.getGuider)
+        g.putAll(ts).getPrimaryReferencedGuiders.asScala.toSet == allGps
+      }
   }
 
   "GuideGroup setAll" should {
+    "produce the same guide group if the group is cleared and the elements are added via putAll" in
+      forAll { (g: GuideGroup, ts: ImList[GuideProbeTargets]) =>
+        g.setAll(ts) === g.clear().putAll(ts)
+      }
+
     "only contain the guide probes in the collection" in
-      forAll { (g: GuideGroup, gps: Set[GuideProbe]) =>
-        val gpts = gps.map(GuideProbeTargets.create(_, new SPTarget())).toList.asImList
-        val g2 = g.setAll(gpts)
-        val gpOut = g.getReferencedGuiders.asScala.toSet -- g2.getReferencedGuiders.asScala.toSet
-        g2.getReferencedGuiders.asScala.toSet == gpts.asScalaList.map(_.getGuider).toSet &&
+      forAll { (g: GuideGroup, ts: ImList[GuideProbeTargets]) =>
+        val g2 = g.setAll(ts)
+        val gpOut = g.getReferencedGuiders.asScala.toSet -- g2.getReferencedGuiders.asScala
+        g2.getReferencedGuiders.asScala.toSet == ts.asScalaList.map(_.getGuider).toSet &&
           gpOut.forall(gp => !g2.contains(gp))
       }
   }
@@ -214,7 +222,7 @@ class GuideGroupSpec extends Specification with ScalaCheck with Arbitraries {
   "GuideGroup getReferencedGuiders" should {
     "contain a guider iff it has associated targets" in
       forAll { g: GuideGroup =>
-        g.getAll.asScalaList.map(_.getGuider).toSet == g.getReferencedGuiders.asScala.toSet
+        g.getAll.asScala.map(_.getGuider).toSet == g.getReferencedGuiders.asScala.toSet
       }
   }
 
@@ -225,6 +233,14 @@ class GuideGroupSpec extends Specification with ScalaCheck with Arbitraries {
         val newGpts = g.getAll.asScalaList.map(gt => gt.update(OptionsList.UpdateOps.append(target))).asImList
         val remGpts = g.setAll(newGpts).removeTarget(target).getAll
         remGpts == oldGpts
+      }
+
+    "remove an empty mapping from guide probe to targets" in
+      forAll { g: GuideGroup =>
+        g.getAll.asScalaList.forall { ts =>
+          val gNew = (g/:ts.getTargets.asScalaList){ (gg,t) => gg.removeTarget(t) }
+          !gNew.contains(ts.getGuider)
+        }
       }
   }
 
@@ -239,10 +255,10 @@ class GuideGroupSpec extends Specification with ScalaCheck with Arbitraries {
   "GuideGroup cloneTargets" should {
     "create a new GuideGroup where the underlying ITargets are equal for each guide probe and in the same order" in
       forAll { g: GuideGroup =>
-        val cg = g.cloneTargets
-        val gt = g.getAll.asScalaList
-        val cgt = cg.getAll.asScalaList
-        (gt.length == cgt.length) && gt.zip(cgt).forall {
+        val cg  = g.cloneTargets
+        val ts  = g.getAll.asScalaList
+        val cts = cg.getAll.asScalaList
+        (ts.length == cts.length) && ts.zip(cts).forall {
           case (t1, t2) => t1.getGuider == t2.getGuider && t1.getTargets.asScala.map(_.getTarget) == t2.getTargets.asScala.map(_.getTarget)
         }
       }

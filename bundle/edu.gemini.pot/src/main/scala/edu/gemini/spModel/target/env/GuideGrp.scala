@@ -1,6 +1,8 @@
 package edu.gemini.spModel.target.env
 
+import edu.gemini.spModel.guide.OrderGuideGroup
 import edu.gemini.spModel.guide.GuideProbe
+import edu.gemini.spModel.target.EqualSPTarget
 import edu.gemini.spModel.target.SPTarget
 
 import scalaz._
@@ -114,4 +116,10 @@ object GuideGrp {
     }, {
       case mg: ManualGroup => mg.name
     })
+
+  implicit val EqualGuideGrp: Equal[GuideGrp] = Equal.equal {
+    case (gg1: AutomaticGroup, gg2: AutomaticGroup) => gg1 == gg2
+    case (ManualGroup(n1,tm1), ManualGroup(n2,tm2)) => n1 == n2 && tm1 === tm2
+    case (_, _)                                     => false
+  }
 }

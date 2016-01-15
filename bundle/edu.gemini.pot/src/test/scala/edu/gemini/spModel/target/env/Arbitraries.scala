@@ -1,5 +1,7 @@
 package edu.gemini.spModel.target.env
 
+import edu.gemini.shared.util.immutable.ImList
+import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.spModel.core.{Declination, RightAscension}
 import edu.gemini.spModel.guide.{GuideProbeMap, GuideProbe}
 import edu.gemini.spModel.target.SPTarget
@@ -43,9 +45,14 @@ trait Arbitraries extends edu.gemini.spModel.core.Arbitraries {
   implicit def arbNonEmptyList[A: Arbitrary]: Arbitrary[NonEmptyList[A]] =
     Arbitrary {
       for {
-        a  <- arbitrary[A]
+        a <- arbitrary[A]
         as <- arbitrary[List[A]]
       } yield NonEmptyList.nel(a, as)
+    }
+
+  implicit def arbImList[A: Arbitrary]: Arbitrary[ImList[A]] =
+    Arbitrary {
+      arbitrary[List[A]].map(_.asImList)
     }
 
   implicit def arbOptsList[A: Arbitrary]: Arbitrary[OptsList[A]] =
@@ -54,19 +61,23 @@ trait Arbitraries extends edu.gemini.spModel.core.Arbitraries {
     }
 
   implicit val arbGuideProbe: Arbitrary[GuideProbe] =
-    Arbitrary { oneOf(GuideProbeMap.instance.values().asScala.toList) }
+    Arbitrary {
+      oneOf(GuideProbeMap.instance.values().asScala.toList)
+    }
 
   implicit val arbManualGroup: Arbitrary[ManualGroup] =
     Arbitrary {
       for {
         n <- alphaStr
-        m <- listOf(arbitrary[(GuideProbe, OptsList[SPTarget])]).map { _.toMap }
+        m <- listOf(arbitrary[(GuideProbe, OptsList[SPTarget])]).map {
+          _.toMap
+        }
       } yield ManualGroup(n.take(4), m)
     }
 
   implicit val arbAutomaticActiveGroup: Arbitrary[AutomaticGroup.Active] =
     Arbitrary {
-      listOf(arbitrary[(GuideProbe, SPTarget)]).map( _.toMap).map(AutomaticGroup.Active)
+      listOf(arbitrary[(GuideProbe, SPTarget)]).map(_.toMap).map(AutomaticGroup.Active)
     }
 
   implicit val arbAutomaticGroup: Arbitrary[AutomaticGroup] =
@@ -84,4 +95,11 @@ trait Arbitraries extends edu.gemini.spModel.core.Arbitraries {
       arbitrary[GuideGrp].map(GuideGroup)
     }
 
+  implicit val arbGuideProbeTargets: Arbitrary[GuideProbeTargets] =
+    Arbitrary {
+      for {
+        g  <- arbitrary[GuideProbe]
+        ts <- arbitrary[NonEmptyList[SPTarget]]
+      } yield GuideProbeTargets.create(g, ts.toList.asImList)
+    }
 }

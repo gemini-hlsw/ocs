@@ -107,4 +107,10 @@ object OptsList {
 
   def unfocused[A](l: List[A]): Option[OptsList[A]] =
     l.toNel.map(nel => unfocused(nel))
+
+  implicit def EqualOptsList[A : Equal]: Equal[OptsList[A]] = Equal.equal {
+    case (OptsList(-\/(nel1)),OptsList(-\/(nel2))) => nel1 === nel2
+    case (OptsList(\/-(zip1)),OptsList(\/-(zip2))) => zip1 === zip2
+    case _                                         => false
+  }
 }
