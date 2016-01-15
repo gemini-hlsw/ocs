@@ -10,7 +10,7 @@ class OptsListSpec extends Specification with ScalaCheck with Arbitraries {
 
   "OptsList" should {
     "have no focus after clearFocus" in
-      forAll { (opts: OptsList[Int]) =>
+      forAll { opts: OptsList[Int] =>
         val clearOpts = opts.clearFocus
         !clearOpts.hasFocus && clearOpts.focus.isEmpty && clearOpts.focusIndex.isEmpty
       }
@@ -26,17 +26,17 @@ class OptsListSpec extends Specification with ScalaCheck with Arbitraries {
       }
 
     "have a focus equal to the zipper focus (if any)" in
-      forAll { (opts: OptsList[Int]) =>
+      forAll { opts: OptsList[Int] =>
         opts.focus == opts.toDisjunction.toOption.map(_.focus)
       }
 
     "have a focus element which is the same as the element at the focus index" in
-      forAll { (opts: OptsList[Int]) =>
+      forAll { opts: OptsList[Int] =>
         opts.focus == opts.focusIndex.map { opts.toList }
       }
 
     "for an element in the list, have a focus element set by focusOn" in
-      forAll { (opts: OptsList[Int]) =>
+      forAll { opts: OptsList[Int] =>
         opts.toList.forall(i => opts.focusOn(i).exists(_.focus.exists(_ == i)))
       }
 
@@ -46,7 +46,7 @@ class OptsListSpec extends Specification with ScalaCheck with Arbitraries {
       }
 
     "for an index in the list, have the element at that index focused on by focusOnIndex" in
-      forAll { (opts: OptsList[Int]) =>
+      forAll { opts: OptsList[Int] =>
         Range(0, opts.length).forall(i => opts.focusOnIndex(i).exists(_.focus.exists(_ == opts.toList(i))))
       }
 
