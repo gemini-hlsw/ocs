@@ -32,8 +32,7 @@ class GuideGroupSpec extends Specification with ScalaCheck with Arbitraries {
         val nopt = ImOption.apply(n)
         g.grp match {
           case a: AutomaticGroup => g.setName(nopt) == g
-          case _                 => g.setName(nopt).getName == nopt &&
-            g.setName(n).getName == nopt
+          case _                 => g.setName(nopt).getName == nopt && g.setName(n).getName == nopt
         }
       }
   }
@@ -111,8 +110,8 @@ class GuideGroupSpec extends Specification with ScalaCheck with Arbitraries {
       forAll { g: GuideGroup =>
         AllProbes.forall { gp =>
           val noPrimaryGpt = GuideProbeTargets.create(gp, new SPTarget()).clearPrimarySelection()
-          val g2 = g.put(noPrimaryGpt)
-          val gpt2 = g2.get(gp).asScalaOpt
+          val g2           = g.put(noPrimaryGpt)
+          val gpt2         = g2.get(gp).asScalaOpt
           g2.grp match {
             case _: AutomaticGroup => gpt2.isEmpty
             case _: ManualGroup    => gpt2.exists(_.getPrimary.isEmpty)

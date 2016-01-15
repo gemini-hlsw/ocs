@@ -118,7 +118,7 @@ case class GuideGroup(grp: GuideGrp) extends java.lang.Iterable[GuideProbeTarget
         val targets = gpt.getOptions.asScalaList.toNel
 
         targets.fold(mg.copy(targetMap = m - probe)) { nel =>
-          def noPrimary = OptsList(nel.left[Zipper[SPTarget]])
+          def noPrimary = OptsList.unfocused(nel)
 
           val opts = primary.fold(noPrimary) { t =>
             val (lefts, focusRight) = nel.toList.span(_ != t)
