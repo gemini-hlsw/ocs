@@ -1,10 +1,7 @@
 package edu.gemini.itc.gnirs;
 
 import edu.gemini.itc.base.*;
-import edu.gemini.itc.shared.CalculationMethod;
-import edu.gemini.itc.shared.GnirsParameters;
-import edu.gemini.itc.shared.Imaging;
-import edu.gemini.itc.shared.ObservationDetails;
+import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams;
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams.Disperser;
@@ -71,7 +68,8 @@ public final class Gnirs extends Instrument implements SpectroscopyInstrument {
         _mode = odp.calculationMethod();
         _XDisp = isXDispUsed();
 
-        if (_centralWavelength < 1030 || _centralWavelength > 6000) {
+        // added additional condition (_mode instanceof Spectroscopy) -OS
+        if ((_centralWavelength < 1030 || _centralWavelength > 6000) && _mode instanceof Spectroscopy) {
             throw new RuntimeException("Central wavelength must be between 1.03um and 6.0um.");
         }
 
@@ -85,7 +83,10 @@ public final class Gnirs extends Instrument implements SpectroscopyInstrument {
         }
 
         //Select filter depending on if Cross dispersion is used.
-        if (_XDisp) {
+        if (_mode instanceof Imaging) {  // added -OS
+            _Filter = Filter.fromFile(getPrefix(), gp.filter().name(), getDirectory() + "/");
+
+        } else if (_XDisp) {
             _filterUsed = "XD";
             _Filter = Filter.fromFile(getPrefix(), _filterUsed, getDirectory() + "/");
         } else {
@@ -97,7 +98,9 @@ public final class Gnirs extends Instrument implements SpectroscopyInstrument {
 
         //Select Transmission Element depending on if Cross dispersion is used.
         final TransmissionElement selectableTrans;
-        if (_XDisp) {
+        if (_mode instanceof Imaging) {  // added -OS
+            selectableTrans = new GnirsAcquisitionMirror(getDirectory(), "acq_mirror");
+        } else if (_XDisp) {
             selectableTrans = new XDispersingPrism(getDirectory(), isLongCamera() ? "LXD" : "SXD");
         } else {
             selectableTrans = new GnirsPickoffMirror(getDirectory(), "mirror");
@@ -110,10 +113,10 @@ public final class Gnirs extends Instrument implements SpectroscopyInstrument {
         _camera = CameraFactory.camera(params.pixelScale(), _centralWavelength, getDirectory());
         addComponent(_camera);
 
-        // GNIRS is spectroscopy only
-        if (_mode instanceof Imaging) {
+        // GNIRS is spectroscopy only (commented this out for tests -OS)
+        /* if (_mode instanceof Imaging) {
             throw new RuntimeException("GNIRS does not support imaging.");
-        }
+        }*/
 
 
         _detector = new Detector(getDirectory() + "/", getPrefix(), "aladdin", "1K x 1K ALADDIN III InSb CCD");
@@ -132,6 +135,7 @@ public final class Gnirs extends Instrument implements SpectroscopyInstrument {
                     "0.15\" arcsec/pix (Short) camera.\n" +
                     "  Please either change the camera or the grating.");
 
+        if (!(_mode instanceof Imaging)) { // added "not Imaging" cond. -OS
         if (!(_filterUsed.equals("none")))
             if ((_Filter.getStart() >= _gratingOptics.getEnd()) ||
                     (_Filter.getEnd() <= _gratingOptics.getStart())) {
@@ -139,7 +143,7 @@ public final class Gnirs extends Instrument implements SpectroscopyInstrument {
                         " and the " + _grating +
                         " do not overlap with the requested wavelength.\n" +
                         " Please select a different filter, grating or wavelength.");
-            }
+            } }
 
 
         addComponent(_detector);
@@ -254,7 +258,9 @@ public final class Gnirs extends Instrument implements SpectroscopyInstrument {
     }
 
     private double correctedCentralWavelength() {
-        if (!isXDispUsed()) {
+        if (_mode instanceof Imaging) {  // added -OS
+            return params.filter().wavelength();
+        } else if (!isXDispUsed()) {
             return params.centralWavelength().toNanometers();
         } else {
             return XDISP_CENTRAL_WAVELENGTH;

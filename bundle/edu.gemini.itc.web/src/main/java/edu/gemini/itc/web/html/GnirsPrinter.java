@@ -1,9 +1,16 @@
 package edu.gemini.itc.web.html;
 
 import edu.gemini.itc.base.SpectroscopyResult;
+import edu.gemini.itc.altair.Altair; //added
+import edu.gemini.itc.base.AOSystem;  //added
+import edu.gemini.itc.base.ImagingResult;  //added
+import edu.gemini.itc.base.TransmissionElement;  //added
 import edu.gemini.itc.gnirs.Gnirs;
 import edu.gemini.itc.gnirs.GnirsRecipe;
+import edu.gemini.itc.niri.Niri;
 import edu.gemini.itc.shared.*;
+import scala.Option;
+import scalaz.Alpha;
 
 import java.io.PrintWriter;
 import java.util.UUID;
@@ -15,18 +22,28 @@ public final class GnirsPrinter extends PrinterBase {
 
     private final PlottingDetails pdp;
     private final GnirsRecipe recipe;
+    private final GnirsParameters instr;  //added
+    private final boolean isImaging; //added
 
     public GnirsPrinter(final ItcParameters p, final GnirsParameters instr, final PlottingDetails pdp, final PrintWriter out) {
         super(out);
+        this.instr     = instr; //added
+        this.isImaging = p.observation().calculationMethod() instanceof Imaging; //added
         this.pdp        = pdp;
         this.recipe     = new GnirsRecipe(p, instr);
     }
 
     public void writeOutput() {
-        final SpectroscopyResult r = recipe.calculateSpectroscopy();
-        final ItcSpectroscopyResult s = recipe.serviceResult(r);
-        final UUID id = cache(s);
-        writeSpectroscopyOutput(id, r, s);
+        if (isImaging) { // added "if" for imaging case
+            final ImagingResult result = recipe.calculateImaging();
+            final ItcImagingResult s = recipe.serviceResult(result);
+            writeImagingOutput(result, s);
+        } else {
+            final SpectroscopyResult r = recipe.calculateSpectroscopy();
+            final ItcSpectroscopyResult s = recipe.serviceResult(r);
+            final UUID id = cache(s);
+            writeSpectroscopyOutput(id, r, s);
+        }
     }
 
     private void writeSpectroscopyOutput(final UUID id, final SpectroscopyResult result, final ItcSpectroscopyResult s) {
@@ -86,8 +103,8 @@ public final class GnirsPrinter extends PrinterBase {
             _printFileLink(id, SingleS2NData.instance());
             _printFileLink(id, FinalS2NData.instance());
         }
-
-        _println("");
+// in separate method now
+        /*_println("");
 
         _print("<HR align=left SIZE=3>");
 
@@ -98,8 +115,52 @@ public final class GnirsPrinter extends PrinterBase {
         _println(HtmlPrinter.printParameterSummary(result.telescope()));
         _println(HtmlPrinter.printParameterSummary(result.conditions()));
         _println(HtmlPrinter.printParameterSummary(result.observation()));
-        _println(HtmlPrinter.printParameterSummary(pdp));
+        _println(HtmlPrinter.printParameterSummary(pdp)); */
 
+    }
+
+
+    private void writeImagingOutput(final ImagingResult result, final ItcImagingResult s) {  // copied from NIRI
+
+        final Gnirs instrument = (Gnirs) result.instrument();
+
+        _println("");
+
+        // Altair specific section
+        if (result.aoSystem().isDefined()) {
+            _println(HtmlPrinter.printSummary((Altair) result.aoSystem().get()));
+            _print(CalculatablePrinter.getTextResult(result.sfCalc(), false));
+            _println(String.format("derived image halo size (FWHM) for a point source = %.2f arcsec.\n", result.iqCalc().getImageQuality()));
+        } else {
+            _print(CalculatablePrinter.getTextResult(result.sfCalc()));
+            _println(CalculatablePrinter.getTextResult(result.iqCalc()));
+        }
+
+        _println(CalculatablePrinter.getTextResult(result.is2nCalc(), result.observation()));
+        _println(CalculatablePrinter.getBackgroundLimitResult(result.is2nCalc()));
+
+        _printPeakPixelInfo(s.ccd(0));
+        _printWarnings(s.warnings());
+
+        printConfiguration(result.parameters(), instrument, result.aoSystem());
+
+    }
+
+    private void printConfiguration(final ItcParameters p, final Gnirs instrument, final Option<AOSystem> ao) {
+        _print("<HR align=left SIZE=3>");
+        _println("<b>Input Parameters:</b>");
+        _println("Instrument: " + instrument.getName() + "\n");
+        _println(HtmlPrinter.printParameterSummary(p.source()));
+        _println(gnirsToString(instrument, p));
+        if (ao.isDefined()) {
+            _println(HtmlPrinter.printParameterSummary(p.telescope(), "altair"));
+            _println(HtmlPrinter.printParameterSummary((Altair) ao.get()));
+        } else {
+            _println(HtmlPrinter.printParameterSummary(p.telescope()));
+        }
+
+        _println(HtmlPrinter.printParameterSummary(p.conditions()));
+        _println(HtmlPrinter.printParameterSummary(p.observation()));
     }
 
     private String gnirsToString(final Gnirs instrument, final ItcParameters p) {

@@ -48,7 +48,7 @@ public final class GnirsOrderSelector {
             }
         }
 
-        if (selectedOrder == -1) {
+        if (selectedOrder == -1 ) {
             throw new IllegalArgumentException("Order could not be found for centralWavelength" + centralWavelength);
         }
 

@@ -1,0 +1,19 @@
+# These are temporarty (test) values for the GNIRS acquisition mirror transmission
+# (just a copy of gnirs_mirror.dat)
+
+# Average throughput for the GNIRS mirror in the prism turret
+# Columns are (1) wavelength in nm, (2) throughput
+# Values from J. Elias sensitivity table with zeroes added at 700 and 6000 nm.
+#
+# Author: Bernadette Rodgers
+# Created: 30 July 2003
+#
+# lambda transmission
+    700   0.0
+   1100   0.987
+   1270   0.988
+   1640   0.990
+   2230   0.991
+   3710   0.993
+   5150   0.994
+   6000   0.0

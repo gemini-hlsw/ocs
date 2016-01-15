@@ -158,12 +158,14 @@ object ITCRequest {
 
   def gnirsParameters(r: ITCRequest): GnirsParameters = {
     val grating     = r.enumParameter(classOf[GNIRSParams.Disperser])
+    val filter      = r.enumParameter(classOf[GNIRSParams.Filter]) // added -OS
     val camera      = r.enumParameter(classOf[GNIRSParams.PixelScale])
     val xDisp       = r.enumParameter(classOf[GNIRSParams.CrossDispersed])
     val readMode    = r.enumParameter(classOf[GNIRSParams.ReadMode])
     val centralWl   = r.centralWavelengthInMicrons()
     val fpMask      = r.enumParameter(classOf[GNIRSParams.SlitWidth])
-    GnirsParameters(camera, grating, readMode, xDisp, centralWl, fpMask)
+    val altair      = altairParameters(r)
+    GnirsParameters(camera, filter, grating, readMode, xDisp, centralWl, fpMask, altair)
   }
 
   def gsaoiParameters(r: ITCRequest): GsaoiParameters = {
