@@ -69,10 +69,12 @@ object GsaParams {
     }
 
   private def getGeminiParams(target: Target, blueprint: GeminiBlueprintBase): Option[GsaParams] =
-    target match {
-      case s: SiderealTarget    => GSAInstrument(blueprint.instrument).flatMap(k => GsaSiderealParams(s.coords, k).some).orElse(GsaUnsupportedParams.some)
-      case n: NonSiderealTarget => GSAInstrument(blueprint.instrument).flatMap(k => GsaNonSiderealParams(n.name, k).some).orElse(GsaUnsupportedParams.some)
-      case _                    => none
+    GSAInstrument(blueprint.instrument).fold(GsaUnsupportedParams.some : Option[GsaParams]) { i =>
+      target match {
+        case s: SiderealTarget    => GsaSiderealParams(s.coords, i).some
+        case n: NonSiderealTarget => GsaNonSiderealParams(n.name, i).some
+        case _                    => none
+      }
     }
 }
 
