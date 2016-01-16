@@ -37,13 +37,13 @@ class P1MonitorMailer(cfg: P1MonitorConfig) {
           |    ${prop.proposalClass.requestedTime.format()} requested
           |
           |Review the PDF summary at
-          |https://${cfg.getHost}/fetch/${getTypeName(prop.proposalClass)}/${Semester.current.display}/fetch?dir=$dirName&type=${getTypeName(prop.proposalClass)}&proposal=$proposalVariable&format=pdf
+          |https://${cfg.getHost}/fetch/${getTypeName(dirName, prop.proposalClass)}/${Semester.current.display}/fetch?dir=$dirName&type=${getTypeName(dirName, prop.proposalClass)}&proposal=$proposalVariable&format=pdf
           |
           |Download the proposal from:
-          |https://${cfg.getHost}/fetch/${getTypeName(prop.proposalClass)}/${Semester.current.display}/fetch?dir=$dirName&type=${getTypeName(prop.proposalClass)}&proposal=$proposalVariable&format=xml
+          |https://${cfg.getHost}/fetch/${getTypeName(dirName, prop.proposalClass)}/${Semester.current.display}/fetch?dir=$dirName&type=${getTypeName(dirName, prop.proposalClass)}&proposal=$proposalVariable&format=xml
           |
           |Download the proposal's attachment from:
-          |https://${cfg.getHost}/fetch/${getTypeName(prop.proposalClass)}/${Semester.current.display}/fetch?dir=$dirName&type=${getTypeName(prop.proposalClass)}&proposal=$proposalVariable&format=attachment
+          |https://${cfg.getHost}/fetch/${getTypeName(dirName, prop.proposalClass)}/${Semester.current.display}/fetch?dir=$dirName&type=${getTypeName(dirName, prop.proposalClass)}&proposal=$proposalVariable&format=attachment
           |
         """.stripMargin
     }
@@ -118,14 +118,12 @@ class P1MonitorMailer(cfg: P1MonitorConfig) {
       case _                              => ""
     }
 
-  private def getTypeName(propClass: ProposalClass): String = propClass match {
+  private def getTypeName(dir: String, propClass: ProposalClass): String = propClass match {
       case pc: SpecialProposalClass       => pc.sub.specialType
       case ft: FastTurnaroundProgramClass => "FT"
       case lp: LargeProgramClass          => "LP"
-      case q:  GeminiNormalProposalClass  => ~q.subs.left.getOrElse(Nil).collect {
-          case s if cfg.map.keys.toList.contains(s.partner.value()) => s.partner.value().toUpperCase
-        }.headOption
-      case _                                        => ""
+      case q:  GeminiNormalProposalClass  => dir.toUpperCase
+      case _                              => ""
     }
 
   private def getInstrumentsString(prop: Proposal): String = prop.observations.map {

@@ -1,6 +1,5 @@
 package edu.gemini.gsa.client.impl
 
-import edu.gemini.gsa.client.api.GsaResult._
 import edu.gemini.model.p1.immutable._
 import edu.gemini.model.p1.immutable.Band.BAND_1_2
 import edu.gemini.model.p1.immutable.CoordinatesEpoch.J_2000
@@ -27,11 +26,11 @@ object GsaQueryExample extends App {
     // A more straightforward sidereal query.  There are no results that match
     // this query.
     println("\nNo results")
-    query(GsaSiderealParams(Coordinates(RightAscension.fromAngle(Angle.fromDegrees(178.66)), Declination.fromAngle(Angle.fromDegrees(-13.97)).getOrElse(Declination.zero)), GSAInstrument(Instrument.GmosSouth)))
+    query(GsaSiderealParams(Coordinates(RightAscension.fromAngle(Angle.fromDegrees(178.66)), Declination.fromAngle(Angle.fromDegrees(-13.97)).getOrElse(Declination.zero)), GSAInstrument(Instrument.GmosSouth).get))
     //query(GsaSiderealParams(Coordinates(RightAscension.fromAngle(Angle.parseHMS("4:23:57.8").getOrElse(Angle.zero)), Declination.fromAngle(Angle.parseDMS("-20:23:45.7").getOrElse(Angle.zero)).getOrElse(Declination.zero)), Instrument.GmosSouth))
 
     // A non-sidereal target search.  Searches by name.
     println("\nA non-sidereal target")
-    query(GsaNonSiderealParams("Jupiter", GSAInstrument(Instrument.Niri)))
+    query(GsaNonSiderealParams("Jupiter", GSAInstrument(Instrument.Niri).get))
   }
 }

@@ -1,6 +1,6 @@
 package edu.gemini.gsa.client.impl
 
-import edu.gemini.gsa.client.api.{GsaNonSiderealParams, GsaSiderealParams, GsaParams}
+import edu.gemini.gsa.client.api.{GsaUnsupportedParams, GsaNonSiderealParams, GsaSiderealParams, GsaParams}
 import java.net.URL
 
 import edu.gemini.gsa.query.GsaHost
@@ -18,8 +18,9 @@ object GsaUrl {
     def nonSiderealUrl(filter: String, instrumentName: String): URL = new URL(s"$nonSiderealPrefix/$filter/$instrumentName/NotFail")
 
     params match {
-      case s: GsaSiderealParams    => siderealUrl(s"ra=${s.coords.ra.toAngle.toDegrees}/dec=${s.coords.dec.toDegrees}/sr=60", s.instrument.name)
-      case s: GsaNonSiderealParams => nonSiderealUrl(s"object=${s.targetName}/notengineering/", s.instrument.name)
+      case GsaSiderealParams(coords, instrument)        => siderealUrl(s"ra=${coords.ra.toAngle.toDegrees}/dec=${coords.dec.toDegrees}/sr=60", instrument.name)
+      case GsaNonSiderealParams(targetName, instrument) => nonSiderealUrl(s"object=$targetName/notengineering/", instrument.name)
+      case GsaUnsupportedParams                         => new URL(ROOT.baseUrl)
     }
   }
 }

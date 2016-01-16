@@ -1,6 +1,5 @@
 package edu.gemini.pit.ui.view.obs
 
-import edu.gemini.gsa.client.impl.GsaUrl
 import edu.gemini.model.p1.immutable._
 import edu.gemini.pit.model._
 import edu.gemini.pit.ui.editor._
@@ -671,6 +670,18 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band, queueLookup: Target => U
             viewer.selection = Some(g)
             true
           case _                                                                      => false
+        }
+      }
+    }
+
+    // Public existing group
+    def fixGroup[A](grouping:ObsListGrouping[A]) {
+      model.foreach {m =>
+        m.elems.find {
+          case g:ObsGroup[_] if g.grouping == grouping =>
+            viewer.selection = Some(g)
+            true
+          case _                                         => false
         }
       }
     }
