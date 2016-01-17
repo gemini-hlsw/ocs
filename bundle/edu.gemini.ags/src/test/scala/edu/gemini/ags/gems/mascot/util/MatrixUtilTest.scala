@@ -7,7 +7,7 @@ import YUtils.yMultiply
 import YUtils.assertVectorsEqual
 import YUtils.assertMatricesEqual
 import YUtils.abs
-import org.junit.Test
+import org.junit.{Ignore, Test}
 
 /**
  * Tests methods in the MascotUtil class.
@@ -48,8 +48,8 @@ class MatrixUtilTest {
     val (u, s, v) = MatrixUtil.svd(a)
 //    assert(s.sorted.toList.reverse == s.toList)
     val achk = u * yMultiply(s, v)
-    val sabs = abs(s).max
-    val err = abs(a - achk).max / sabs
+    val sabs = max(abs(s))
+    val err = max(abs(a - achk)) / sabs
     assert(err <= 1.0e-9)
   }
 
@@ -83,8 +83,8 @@ class MatrixUtilTest {
 
 //    assert(s.sorted.toList.reverse == s.toList)
     val achk = u * yMultiply(s, v)
-    val sabs = abs(s).max
-    val err = abs(a - achk).max / sabs
+    val sabs = max(abs(s))
+    val err = max(abs(a - achk)) / sabs
     assert(err <= 1.0e-9)
 
     assertVectorsEqual(DenseVector(1.73205, 1.73205, 0.706012, 0.434871, 0.26246), s, 0.0001)
@@ -99,14 +99,14 @@ class MatrixUtilTest {
         (0.0, -0.57735, 0.626984, -0.402473, -0.0919834))),
       abs(u), 0.00001)
 
-    /*assertMatricesEqual(
+    assertMatricesEqual(
       abs(DenseMatrix(
         (0.0, -1.0, 2.38674E-16, -2.46195E-16, 7.84579E-16),
         (-1.0, -0.0, -0.0, -0.0, -0.0),
         (0.0, 5.11629E-16, 0.848599, -0.376948, 0.371201),
         (-0.0, -3.66514E-16, -4.1672E-16, -0.701654, -0.712518),
         (-0.0, 4.49701E-16, -0.529037, -0.604642, 0.595423))),
-      abs(v), 0.0001)*/
+      abs(v), 0.0001)
   }
 
   /**
@@ -153,9 +153,9 @@ class MatrixUtilTest {
     check(0) = d(0) * x(0) + e(0) * x(1)
     check(1 until b.size - 1) := (c(0 until c.size - 1) :* x(0 until x.size - 2)) + (d(1 until d.size - 1) :* x(1 until x.size - 1)) + (e(1 until e.size) :* x(2 until x.size))
     check(b.size - 1) = c(c.size - 1) * x(x.size - 2) + d(d.size - 1) * x(x.size - 1)
-    if (abs(check - b).max > 1.0e-9 * abs(b).max) {
+    if (max(abs(check - b)) > 1.0e-9 * max(abs(b))) {
       println("***WARNING*** tridiagonal solution doesn't check")
-      println("max relative error is " + abs(check - b).max / abs(b).max)
+      println("max relative error is " + max(abs(check - b)) / max(abs(b)))
       assertTrue(false)
     }
   }

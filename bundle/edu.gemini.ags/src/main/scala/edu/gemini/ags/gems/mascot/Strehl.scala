@@ -6,7 +6,8 @@ import MascotUtils._
 import MascotConf._
 import Amoeba._
 import util.Spline._
-import util.YUtils._
+import util.YUtils.{avg, rms, where, sqrt, divide}
+import util.YUtils.{yMultiply, yMultiply4d}
 import scala.collection.JavaConverters._
 
 // mascot Strehl compute/optimize using distortion modes
@@ -38,7 +39,6 @@ import scala.collection.JavaConverters._
 // Authors, Francois Rigaut,  2010, for this file.
 //          Damien Gratadour, 2008-2010.
 //          Allan Brighton,   2011 Scala port
-
 
 /**
  * Holds the results of the computations done by the Strehl object below.
@@ -257,8 +257,8 @@ object Strehl {
 
     val avgstrehl = avg(smap) * factor
     val rmsstrehl = rms(smap)
-    val minstrehl = smap.min * factor
-    val maxstrehl = smap.max * factor
+    val minstrehl = min(smap) * factor
+    val maxstrehl = max(smap) * factor
     val strehl_map_halffield = smap
 
     //  write,format="Strehl over %.1f\": avg=%.1f  rms=%.1f  min=%.1f  max=%.1f\n",
@@ -339,7 +339,7 @@ object Strehl {
     //  rmsvib(2) = sum((*tiltvibrms)^2.);
 
 
-    if (spv(::, 0).max > sampfreq) {
+    if (max(spv(::, 0)) > sampfreq) {
       val tmp = where(spv(::, 0), _ < sampfreq)
       val w = tmp(tmp.length - 1)
       spv = spv(0 to w, ::)
@@ -347,8 +347,8 @@ object Strehl {
     val freqv = spv(::, 0)
 
     val rmsvib = DenseVector.zeros[Double](2)
-    rmsvib(0) = (tipvibrms :^ 2.0).sum
-    rmsvib(1) = (tiltvibrms :^ 2.0).sum
+    rmsvib(0) = sum(tipvibrms :^ 2.0)
+    rmsvib(1) = sum(tiltvibrms :^ 2.0)
 
 
     // compute transfer functions for said gains.
@@ -390,14 +390,14 @@ object Strehl {
       val hs = DenseMatrix.zeros[Double](npt + 1, 4)
       hs(1 until hs.rows, ::) := ftcb(1.0 / sampfreq, 0.3e-3, 2e-3, g(i), npt)
       // add missing values for freq=0
-      hs(0, ::) := (if (g(i) == 0.0) DenseVector(0.0, 0.0, 1.0, 0.0) else DenseVector(0.0, 0.0, 0.0, 1.0))
+      hs(0, ::) := (if (g(i) == 0.0) DenseVector(0.0, 0.0, 1.0, 0.0) else DenseVector(0.0, 0.0, 0.0, 1.0)).t
       // above these are to be applied on PSD.
       // computed in ftcb as h*conj(h), so OK.
       // servolag for turb + vibrations
 
       //      val xxx2 = new Date().getTime()
       val herror = splineMax(hs(::, 2), hs(::, 0), freq, 0.0)
-      turb(i) = ((sp(::, i + 1) * math.pow(rmsmodes(i), 2.0)) :* herror).sum
+      turb(i) = sum((sp(::, i + 1) * math.pow(rmsmodes(i), 2.0)) :* herror)
       if (i <= 1) {
         // vibrations + windshake:
         // NO ! we can't be sure 2 first modes are Tip and Tilt.
@@ -406,14 +406,14 @@ object Strehl {
         // TT isolation as modes 1 and 2. DONE.
         val herror2 = splineMax(hs(::, 2), hs(::, 0), freqv, 0.0)
         if (!novibs) {
-          turb(i) += ((spv(::, i + 1) * math.pow(rmsvib(i), 2.0)) :* herror2).sum
+          turb(i) += sum((spv(::, i + 1) * math.pow(rmsvib(i), 2.0)) :* herror2)
         }
       }
       //println("XXX spline: " + ((new Date().getTime() - xxx2)/1000.) + " sec")
 
       // noise
       val hnoise = hs(::, 3) / (npt * 1.0)
-      nois0(i) = hnoise.sum
+      nois0(i) = sum(hnoise)
     }
     val nois = nois0 :* g.mapValues(a => if (a > 0.0) 1.0 else 0.0)
 
@@ -590,8 +590,8 @@ object Strehl {
     xy(0) -= tmp
     xy(1) -= tmp
 
-    xy(0) = xy(0) / xy(0).max * halffield - offset(0)
-    xy(1) = xy(1) / xy(1).max * halffield - offset(1)
+    xy(0) = xy(0) / max(xy(0)) * halffield - offset(0)
+    xy(1) = xy(1) / max(xy(1)) * halffield - offset(1)
     val x = xy(0)
     val y = xy(1)
 

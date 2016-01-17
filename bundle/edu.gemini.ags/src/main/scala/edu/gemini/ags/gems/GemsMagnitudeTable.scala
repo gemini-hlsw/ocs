@@ -35,13 +35,14 @@ object GemsMagnitudeTable extends MagnitudeTable {
 
     def lookup(site: Site): Option[MagnitudeCalc] =
       ((site, probe) match {
-        case (Site.GS, odgw: GsaoiOdgw) =>
+        case (Site.GS, odgw: GsaoiOdgw)  =>
           Some(GsaoiOdgwMagnitudeLimitsCalculator.gemsMagnitudeConstraint(GemsGuideStarType.flexure, MagnitudeBand.H.some))
 
         case (Site.GS, can: Canopus.Wfs) =>
           Some(CanopusWfsMagnitudeLimitsCalculator.gemsMagnitudeConstraint(GemsGuideStarType.tiptilt, MagnitudeBand.R.some))
 
-        case _                                               => None
+        case _                           =>
+          None
       }).map(mc)
 
     ctx.getSite.asScalaOpt.flatMap(lookup)
@@ -78,7 +79,7 @@ object GemsMagnitudeTable extends MagnitudeTable {
     /**
      * The map formerly in Gsaoi.Filter.
      */
-    private val MagnitudeLimitsMap = Map[Pair[GemsGuideStarType, BandsList], MagnitudeConstraints](
+    private val MagnitudeLimitsMap = Map[Tuple2[GemsGuideStarType, BandsList], MagnitudeConstraints](
       (GemsGuideStarType.flexure, SingleBand(MagnitudeBand.J)) -> magLimits(SingleBand(MagnitudeBand.J), 17.2, 8.0),
       (GemsGuideStarType.flexure, SingleBand(MagnitudeBand.H)) -> magLimits(SingleBand(MagnitudeBand.H), 17.0, 8.0),
       (GemsGuideStarType.flexure, SingleBand(MagnitudeBand.K)) -> magLimits(SingleBand(MagnitudeBand.K), 18.2, 8.0),

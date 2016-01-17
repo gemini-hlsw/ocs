@@ -2,7 +2,7 @@ package edu.gemini.ags.gems.mascot
 
 import org.junit.Test
 import breeze.linalg._
-import edu.gemini.ags.gems.mascot.util.YUtils._
+import edu.gemini.ags.gems.mascot.util.YUtils.{abs, assertVectorsEqual}
 import Amoeba.amoeba
 
 class AmoebaTest {
@@ -15,7 +15,7 @@ class AmoebaTest {
   def myFunc(p: DenseVector[Double]): Double = {
     val x = DenseVector.tabulate(17)(_ * 5.0)
     val y = DenseVector(12.0, 24.3, 39.6, 51.0, 66.5, 78.4, 92.7, 107.8, 120.0, 135.5, 147.5, 161.0, 175.4, 187.4, 202.5, 215.4, 229.9)
-    abs(y - (x * p(1) + p(0))).max
+    max(abs(y - (x * p(1) + p(0))))
   }
 
 

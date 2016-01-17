@@ -203,7 +203,7 @@ object Mascot {
     do {
       for (i <- 0 until ns - 1) {
         // for each star, look at the distance to next (fainter) stars:
-        val dd = abs(starMat(0, ::).toDenseVector - starMat(0, i), starMat(1, ::).toDenseVector - starMat(1, i))
+        val dd = abs(starMat(0, ::).t.toDenseVector - starMat(0, i), starMat(1, ::).t.toDenseVector - starMat(1, i))
         val ok = dd.mapValues(d => if (d >= crowd_rad) 1.0 else 0.0)
         valid(i + 1 until valid.size) :*= ok(i + 1 until ok.size)
       }

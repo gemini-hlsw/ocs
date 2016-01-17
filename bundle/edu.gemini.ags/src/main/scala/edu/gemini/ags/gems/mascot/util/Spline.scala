@@ -1,12 +1,11 @@
 package edu.gemini.ags.gems.mascot.util
 
 import breeze.linalg._
-import breeze.util._
 
 import edu.gemini.ags.gems.mascot.util.MatrixUtil._
-import edu.gemini.ags.gems.mascot.util.YUtils._
-import scala.math
-import java.util.Date
+import YUtils.{dif, abs, divide, digitize}
+import YUtils.{cosh, sinh, add, grow}
+import YUtils.pcen
 
 /*
  * Cubic spline interpolator.
@@ -309,7 +308,7 @@ object Spline {
     val dx = dif(x)
     val dy = dif(y)
     // porting note: here tension is always a single value and x.size > 2
-    val k0 = tension * dx.size / (x.max - x.min)
+    val k0 = tension * dx.size / (max(x) - min(x))
     val k = YUtils.max(YUtils.min(k0, divide(100.0, abs(dx))), divide(0.01, abs(dx)))
     val kdx = k :* dx
     val skdx = sinh(kdx)
@@ -415,8 +414,8 @@ object Spline {
     // be careful not to make new intervals larger than necessary
     val n = px.size - 1 // number of original intervals
     val dxavg = (px(px.size - 1) - px(0)) / n
-    val dx0 = if (dxavg > 0.0) math.max(xp.max - px(px.size - 1), dxavg) else math.min(xp.min - px(px.size - 1), dxavg)
-    val dx1 = if (dxavg > 0.0) math.max(px(0) - xp.min, dxavg) else math.min(px(0) - xp.max, dxavg)
+    val dx0 = if (dxavg > 0.0) math.max(max(xp) - px(px.size - 1), dxavg) else math.min(min(xp) - px(px.size - 1), dxavg)
+    val dx1 = if (dxavg > 0.0) math.max(px(0) - min(xp), dxavg) else math.min(px(0) - max(xp), dxavg)
     val x = grow(px(0) - dx1, px, px(px.size - 1) + dx0)
 
     // compute k so that sinh(k*dx) is safe to compute

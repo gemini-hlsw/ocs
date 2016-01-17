@@ -3,8 +3,8 @@ package edu.gemini.ags.gems.mascot
 import MascotConf._
 import util.Spline._
 import util.YUtils
-import util.YUtils._
-import scala.math
+import util.YUtils.{sqrt, divide, span, exp}
+import util.YUtils.{grow, rowAvg}
 import nom.tam.fits.{ImageData, Fits}
 import java.io.IOException
 import breeze.linalg._
@@ -61,13 +61,13 @@ object MascotUtils {
       val d1 = dist(size, r + n1.y, r + n1.x)
       val d2 = dist(size, r + n2.y, r + n2.x)
       val d3 = dist(size, r + v3.y, r + v3.x)
-      val dmin = util.YUtils.max(util.YUtils.max(d1, d2), d3).min
+      val dmin = min(util.YUtils.max(util.YUtils.max(d1, d2), d3))
 
       dmin < 60 - edge_margin
     }.getOrElse {
       //      d = slist(1:2,1)-slist(1:2,2);
       //      d = sqrt(sum(d^2.));
-      val d = math.sqrt((DenseVector(n1.y - n2.y, n1.x - n2.x) :^ 2.0).sum)
+      val d = math.sqrt(sum(DenseVector(n1.y - n2.y, n1.x - n2.x) :^ 2.0))
       //      if (d<=(120-2*edge_margin)) return 1;
       //      else return 0;
       d <= (120 - 2 * edge_margin)
@@ -200,12 +200,12 @@ object MascotUtils {
     for (i <- 0 until tipvibfreq.size) {
       spv(::, 1) :+= (exp((((freq - tipvibfreq(i)) / (tipvibwidth(i) / 1.66)) :^ 2.0) * -1.0) :^ 2.0) * tipvibrms(i)
     }
-    spv(::, 1) := spv(::, 1) :/ spv(::, 1).sum
+    spv(::, 1) := spv(::, 1) :/ sum(spv(::, 1))
 
     for (i <- 0 until tiltvibfreq.size) {
       spv(::, 2) :+= (exp((((freq - tiltvibfreq(i)) / (tiltvibwidth(i) / 1.66)) :^ 2.0) * -1.0) :^ 2.0) * tiltvibrms(i)
     }
-    spv(::, 2) := spv(::, 2) :/ spv(::, 2).sum
+    spv(::, 2) := spv(::, 2) :/ sum(spv(::, 2))
 
     spv
   }
@@ -270,7 +270,7 @@ object MascotUtils {
 
     val rtel = tel_diam / 2.0
     val dr0 = tel_diam / (r0vis * math.pow(lambdawfs / 0.5,  1.2))
-    val cn2_2 = cn2 / cn2.sum
+    val cn2_2 = cn2 / sum(cn2)
     val dr0i = (cn2_2 :* math.pow(dr0, 5.0 / 3.0)) :^ (3.0 / 5.0)
     val nlayers = cn2_2.size
 
@@ -293,10 +293,10 @@ object MascotUtils {
     val x2 = a(::, 0)
     val dfreqinit = x2(2) - x2(1)
     val a1 = a(::, 1)
-    val y2 = a1 / (a1.sum * dfreqinit)
+    val y2 = a1 / (sum(a1) * dfreqinit)
     for (i <- 0 until nlayers) {
       val tmp = spline(x2 :* y2, x2, freq / (wind(i) / rtel)) :/ freq
-      val tmp2 = tmp / (tmp.sum * dfreq)
+      val tmp2 = tmp / (sum(tmp) * dfreq)
       sp2 += tmp2 * 0.45 * math.pow(dr0i(i), 5.0 / 3.0)
     }
     b(::, 1) := sp2
@@ -313,10 +313,10 @@ object MascotUtils {
 
     val sp3 = DenseVector.zeros[Double](sp.rows)
     val a2 = a(::, 2)
-    val y3 = a2 / (a2.sum * dfreqinit)
+    val y3 = a2 / (sum(a2) * dfreqinit)
     for (i <- 0 until nlayers) {
       val tmp = spline(x2 :* y3, x2, freq / (wind(i) / rtel)) :/ freq
-      val tmp2 = tmp / (tmp.sum * dfreq)
+      val tmp2 = tmp / (sum(tmp) * dfreq)
       sp3 += tmp2 * 0.45 * math.pow(dr0i(i), 5.0 / 3.0)
     }
     b(::, 2) := sp3
@@ -333,10 +333,10 @@ object MascotUtils {
 
     val sp4 = DenseVector.zeros[Double](sp.rows)
     val a3 = a(::, 3)
-    val y4 = a3 / (a3.sum * dfreqinit)
+    val y4 = a3 / (sum(a3) * dfreqinit)
     for (i <- 1 until nlayers) {
       val tmp = spline(x2 :* y4, x2, freq / (wind(i) / rtel)) :/ freq
-      val tmp2 = tmp / (tmp.sum * dfreq)
+      val tmp2 = tmp / (sum(tmp) * dfreq)
       sp4 += tmp2 * math.pow(alt(i), 2.0) * 0.02332 * math.pow(dr0i(i), 5.0 / 3.0)
     }
     b(::, 3) := sp4
@@ -353,10 +353,10 @@ object MascotUtils {
 
     val sp5 = DenseVector.zeros[Double](sp.rows)
     val a4 = a(::, 4)
-    val y5 = a4 / (a4.sum * dfreqinit)
+    val y5 = a4 / (sum(a4) * dfreqinit)
     for (i <- 1 until nlayers) {
       val tmp = spline(x2 :* y5, x2, freq / (wind(i) / rtel)) :/ freq
-      val tmp2 = tmp / (tmp.sum * dfreq)
+      val tmp2 = tmp / (sum(tmp) * dfreq)
       sp5 += tmp2 * math.pow(alt(i), 2.0) * 0.02332 * math.pow(dr0i(i), 5.0 / 3.0)
     }
     b(::, 4) := sp5
@@ -373,10 +373,10 @@ object MascotUtils {
 
     val sp6 = DenseVector.zeros[Double](sp.rows)
     val a5 = a(::, 5)
-    val y6 = a5 / (a5.sum * dfreqinit)
+    val y6 = a5 / (sum(a5) * dfreqinit)
     for (i <- 1 until nlayers) {
       val tmp = spline(x2 :* y6, x2, freq / (wind(i) / rtel)) :/ freq
-      val tmp2 = tmp / (tmp.sum * dfreq)
+      val tmp2 = tmp / (sum(tmp) * dfreq)
       sp6 += tmp2 * math.pow(alt(i), 2.0) * 0.02332 * math.pow(dr0i(i), 5.0 / 3.0)
     }
     b(::, 5) := sp6
@@ -393,9 +393,9 @@ object MascotUtils {
 
     // Porting note: using b instead of sp to avoid reassign to val sp
     val ttsp = rowAvg(b(::, 1 to 2))
-    ttsp :/= ttsp.sum
+    ttsp :/= sum(ttsp)
     val tasp = rowAvg(b(::, 3 to 5))
-    tasp :/= tasp.sum
+    tasp :/= sum(tasp)
     b(::, 1) := ttsp
     b(::, 2) := ttsp
     b(::, 3) := tasp
@@ -482,7 +482,7 @@ object MascotUtils {
       val tab1 = grow(f, f(f.size - 1))
       val tab2 = grow(cw, 1100e-9)
       val sp = tspline(8, tab1, tab2, lvec)
-      res(i) = (sp :* qeapd).sum
+      res(i) = sum(sp :* qeapd)
     }
 
     (res * (math.Pi * math.pow(ttwfs_aper_radius, 2.0))) * zero_point_fudge // for the TT wfs field stop
@@ -532,7 +532,7 @@ object MascotUtils {
     val sp = tspline(10, tab1, tab2, lvec)
 
     //  return zero_point_fudge*sum(sp*qeapd);
-    zero_point_fudge * (sp :* qeapd).sum
+    zero_point_fudge * sum(sp :* qeapd)
   }
 
 
