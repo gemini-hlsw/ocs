@@ -5,6 +5,7 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.swing.*;
 
@@ -12,6 +13,7 @@ import edu.gemini.ui.gface.GSelectionBroker;
 import edu.gemini.ui.workspace.IShell;
 import edu.gemini.ui.workspace.IViewAdvisor;
 import edu.gemini.ui.workspace.IViewContext;
+import edu.gemini.ui.workspace.util.InternalFrameHelp;
 import edu.gemini.ui.workspace.util.SimpleInternalFrame;
 
 @SuppressWarnings("unchecked")
@@ -36,8 +38,8 @@ public class View implements IViewContext {
         this.id = id;
     }
 
-    public View(Shell shell, IViewAdvisor advisor, String id, Action helpAction, Icon helpIcon) {
-        peer = new SimpleInternalFrame("Untitled", helpAction, helpIcon);
+    public View(Shell shell, IViewAdvisor advisor, String id, Optional<InternalFrameHelp> helpButton) {
+        peer = new SimpleInternalFrame("Untitled", helpButton);
         this.advisor = advisor;
         this.shell = shell;
         this.id = id;
@@ -47,7 +49,7 @@ public class View implements IViewContext {
         return id;
     }
 
-    public void setFocused(boolean focused) {
+    void setFocused(boolean focused) {
         peer.setSelected(focused);
     }
 
@@ -89,7 +91,7 @@ public class View implements IViewContext {
         return getClass().getSimpleName() + "[" + peer.getTitle() + "]";
     }
 
-    public GSelectionBroker getSelectionBroker() {
+    GSelectionBroker getSelectionBroker() {
         return selectionBroker;
     }
 
@@ -108,7 +110,3 @@ public class View implements IViewContext {
     }
 
 }
-
-
-
-

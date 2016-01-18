@@ -11,6 +11,7 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -27,6 +28,7 @@ import edu.gemini.ui.workspace.IShellContext;
 import edu.gemini.ui.workspace.IViewAdvisor;
 import edu.gemini.ui.workspace.IViewAdvisor.Relation;
 import edu.gemini.ui.workspace.IWorkspace;
+import edu.gemini.ui.workspace.util.InternalFrameHelp;
 import edu.gemini.ui.workspace.util.RetargetAction;
 import edu.gemini.ui.workspace.util.SimpleInternalFrame;
 
@@ -51,7 +53,7 @@ public class Shell implements IShell, PropertyChangeListener, WindowFocusListene
     private boolean closed = false;
     private Component focusWait;
 
-    public Shell(Workspace workspace, IShellAdvisor advisor) {
+    Shell(Workspace workspace, IShellAdvisor advisor) {
         FOCUS_MANAGER.addPropertyChangeListener("permanentFocusOwner", this);
         this.workspace = workspace;
         this.advisor = advisor;
@@ -262,6 +264,7 @@ public class Shell implements IShell, PropertyChangeListener, WindowFocusListene
             peer.setTitle(name);
         }
 
+        @Override
         public void addView(final IViewAdvisor advisor, String id, Relation rel, String otherId) {
             View other = (otherId == null) ? null : viewManager.getView(otherId);
             final View view = new View(Shell.this, advisor, id);
@@ -272,9 +275,10 @@ public class Shell implements IShell, PropertyChangeListener, WindowFocusListene
             viewManager.addView(view, rel, other);
         }
 
-        public void addView(final IViewAdvisor advisor, String id, Relation rel, String otherId, Action helpAction, Icon helpIcon) {
+        @Override
+        public void addView(final IViewAdvisor advisor, String id, Relation rel, String otherId, Optional<InternalFrameHelp> helpButton) {
             View other = (otherId == null) ? null : viewManager.getView(otherId);
-            final View view = new View(Shell.this, advisor, id, helpAction, helpIcon);
+            final View view = new View(Shell.this, advisor, id, helpButton);
             views.add(view);
             view.addPropertyChangeListener(Shell.this);
             advisor.open(view);
@@ -304,14 +308,9 @@ public class Shell implements IShell, PropertyChangeListener, WindowFocusListene
         return hub;
     }
 
-
-
-
     public GSelection<?> getSelection() {
         return hub.getSelection();
     }
-
-
 
     public void setSelection(GSelection newSelection) {
         GSelection<?> prev = getSelection();
@@ -319,37 +318,25 @@ public class Shell implements IShell, PropertyChangeListener, WindowFocusListene
         pcs.firePropertyChange(PROP_SELECTION, prev, newSelection); // RCN: hmm
     }
 
-
-
     public void addPropertyChangeListener(PropertyChangeListener listener) {
         pcs.addPropertyChangeListener(listener);
     }
-
-
 
     public void addPropertyChangeListener(String propertyName, PropertyChangeListener listener) {
         pcs.addPropertyChangeListener(propertyName, listener);
     }
 
-
-
     public PropertyChangeListener[] getPropertyChangeListeners() {
         return pcs.getPropertyChangeListeners();
     }
-
-
 
     public PropertyChangeListener[] getPropertyChangeListeners(String propertyName) {
         return pcs.getPropertyChangeListeners(propertyName);
     }
 
-
-
     public void removePropertyChangeListener(PropertyChangeListener listener) {
         pcs.removePropertyChangeListener(listener);
     }
-
-
 
     public void removePropertyChangeListener(String propertyName, PropertyChangeListener listener) {
         pcs.removePropertyChangeListener(propertyName, listener);
@@ -362,6 +349,5 @@ public class Shell implements IShell, PropertyChangeListener, WindowFocusListene
     public Clipboard getWorkspaceClipboard() {
         return workspace.getClipboard();
     }
-
 
 }

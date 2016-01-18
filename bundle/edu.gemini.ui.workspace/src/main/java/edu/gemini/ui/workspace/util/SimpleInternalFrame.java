@@ -42,6 +42,7 @@ import java.awt.LayoutManager;
 import java.awt.Paint;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Optional;
 
 import javax.swing.*;
 import javax.swing.border.AbstractBorder;
@@ -91,33 +92,9 @@ public class SimpleInternalFrame extends JPanel {
      * @param title       the initial title
      */
     public SimpleInternalFrame(String title) {
-        this(null, title, null, null, null, null);
-    }
-    
-    
-    /**
-     * Constructs a SimpleInternalFrame with the specified 
-     * icon, and title.
-     * 
-     * @param icon        the initial icon
-     * @param title       the initial title
-     */
-    public SimpleInternalFrame(Icon icon, String title) {
-        this(icon, title, null, null, null, null);
+        this(null, title, null, null, Optional.empty());
     }
 
-    
-    /**
-     * Constructs a SimpleInternalFrame with the specified 
-     * title, tool bar, and content panel.
-     * 
-     * @param title       the initial title
-     * @param bar         the initial tool bar
-     * @param content     the initial content pane
-     */
-    public SimpleInternalFrame(String title, JToolBar bar, JComponent content) {
-        this(null, title, bar, content, null, null);
-    }
 
     /**
      * Constructs a SimpleInternalFrame with the specified
@@ -125,8 +102,8 @@ public class SimpleInternalFrame extends JPanel {
      *
      * @param title       the initial title
      */
-    public SimpleInternalFrame(String title, Action helpAction, Icon helpIcon) {
-        this(null, title, null, null, helpAction, helpIcon);
+    public SimpleInternalFrame(String title, Optional<InternalFrameHelp> helpButton) {
+        this(null, title, null, null, helpButton);
     }
 
     /**
@@ -138,13 +115,12 @@ public class SimpleInternalFrame extends JPanel {
      * @param bar         the initial tool bar
      * @param content     the initial content pane
      */
-    public SimpleInternalFrame(
-        Icon icon,
-        String title,
-        JToolBar bar,
-        JComponent content,
-        Action helpAction,
-        Icon helpIcon) {
+    private SimpleInternalFrame(
+            Icon icon,
+            String title,
+            JToolBar bar,
+            JComponent content,
+            Optional<InternalFrameHelp> helpButton) {
         super(new BorderLayout());
         this.selected = false;
         this.titleLabel = new JLabel(title, icon, SwingConstants.LEADING);
@@ -161,7 +137,7 @@ public class SimpleInternalFrame extends JPanel {
         Font font = titleLabel.getFont();
         titleLabel.setFont(font.deriveFont(font.getSize() + 1.0f));
 
-        JPanel top = buildHeader(titleLabel, bar, helpAction, helpIcon);
+        JPanel top = buildHeader(titleLabel, bar, helpButton);
 
         add(top, BorderLayout.NORTH);
         if (content != null) {
@@ -171,31 +147,8 @@ public class SimpleInternalFrame extends JPanel {
 //        setSelected(true);
         updateHeader();
     }
-
     
     // Public API ***********************************************************
-
-    /**
-     * Returns the frame's icon.
-     * 
-     * @return the frame's icon
-     */
-    public Icon getFrameIcon() {
-        return titleLabel.getIcon();
-    }
-    
-
-    /**
-     * Sets a new frame icon.
-     * 
-     * @param newIcon   the icon to be set
-     */
-    public void setFrameIcon(Icon newIcon) {
-        Icon oldIcon = getFrameIcon();
-        titleLabel.setIcon(newIcon);
-        firePropertyChange("frameIcon", oldIcon, newIcon);
-    }
-    
 
     /**
      * Returns the frame's title text.
@@ -224,7 +177,7 @@ public class SimpleInternalFrame extends JPanel {
      * 
      * @return the current toolbar - if any
      */
-    public JToolBar getToolBar() {
+    private JToolBar getToolBar() {
         return headerPanel.getComponentCount() > 1
             ? (JToolBar) headerPanel.getComponent(1)
             : null;
@@ -236,7 +189,7 @@ public class SimpleInternalFrame extends JPanel {
      * 
      * @param newToolBar the tool bar to be set in the header
      */
-    public void setToolBar(JToolBar newToolBar) {
+    private void setToolBar(JToolBar newToolBar) {
         JToolBar oldToolBar = getToolBar();
         if (oldToolBar == newToolBar) {
             return;
@@ -320,22 +273,24 @@ public class SimpleInternalFrame extends JPanel {
      * @param bar     the panel's tool bar
      * @return the panel's built header area
      */
-    private JPanel buildHeader(JLabel label, JToolBar bar, Action helpAction, Icon helpIcon) {
+    private JPanel buildHeader(JLabel label, JToolBar bar, Optional<InternalFrameHelp> helpButton) {
         gradientPanel =
             new GradientPanel(new BorderLayout(), getHeaderBackground());
         label.setOpaque(false);
 
         gradientPanel.add(label, BorderLayout.WEST);
 
-        if (helpAction != null) {
-            JButton help = new JButton(helpAction);
-            help.setIcon(helpIcon);
-            help.setOpaque(false);
-            help.setContentAreaFilled(false);
-            help.setBorderPainted(false);
-            help.setFocusable(false);
-            gradientPanel.add(help, BorderLayout.EAST);
-        }
+        helpButton.ifPresent( b -> {
+                JButton help = new JButton(b.helpAction());
+                help.setIcon(b.helpIcon());
+                help.setOpaque(false);
+                help.setContentAreaFilled(false);
+                help.setBorderPainted(false);
+                help.setFocusable(false);
+                help.setToolTipText(b.hint());
+                gradientPanel.add(help, BorderLayout.EAST);
+            }
+        );
         gradientPanel.setBorder(BorderFactory.createEmptyBorder(3, 4, 3, 1));
 
         headerPanel = new JPanel(new BorderLayout());
@@ -389,7 +344,7 @@ public class SimpleInternalFrame extends JPanel {
      * @param isSelected   true to lookup the active color, false for the inactive
      * @return the color of the foreground text
      */
-    protected Color getTextForeground(boolean isSelected) {
+    private Color getTextForeground(boolean isSelected) {
         Color c =
             UIManager.getColor(
                 isSelected
@@ -412,10 +367,9 @@ public class SimpleInternalFrame extends JPanel {
      * 
      * @return the color of the header's background
      */
-    protected Color getHeaderBackground() {
+    private Color getHeaderBackground() {
         return new Color(0x33, 0x66, 0x99);
     }
-
 
     // Helper Classes *******************************************************
 

@@ -12,7 +12,7 @@ import edu.gemini.pit.ui.action._
 import edu.gemini.ui.workspace.IViewAdvisor.Relation._
 import edu.gemini.ui.workspace.IActionManager.Relation._
 import edu.gemini.ui.workspace.scala.{RichShell, RichShellAdvisor, RichShellContext}
-import edu.gemini.ui.workspace.util.RetargetAction
+import edu.gemini.ui.workspace.util.{InternalFrameHelp, RetargetAction}
 import java.awt.event.KeyEvent._
 import java.lang.reflect.{Method, Proxy, InvocationHandler}
 import java.util.logging.{Logger, Level}
@@ -27,10 +27,10 @@ import view.submit.SubmitView
 import edu.gemini.model.p1.immutable._
 import java.io.File
 import java.awt.event.ActionEvent
-import javax.swing.{AbstractAction, Action, JFrame}
+import javax.swing.{AbstractAction, JFrame}
 import view.tac.TacView
 import view.target.TargetView
-import java.util.Locale
+import java.util.{Optional, Locale}
 import edu.gemini.model.p1.submit.SubmitClient
 import edu.gemini.pit.ui.binding._
 import edu.gemini.pit.ui.robot.{ProblemRobot, AgsRobot, GsaRobot, VisibilityRobot, CatalogRobot}
@@ -160,20 +160,22 @@ class ShellAdvisor(
         shell.peer.getRootPane.putClientProperty("Window.documentModified", shell.isModified)
     }
 
-    def helpAction(s: String): Action = new AbstractAction() {
-      override def actionPerformed(e: ActionEvent): Unit = Browser.open(new URL(s))
-    }
+    def helpAction(s: String): Optional[InternalFrameHelp] =
+      Optional.of(InternalFrameHelp(new AbstractAction() {
+            override def actionPerformed(e: ActionEvent): Unit = Browser.open(new URL(s))
+          }, SharedIcons.ICON_HELP, "Open the help page for this tab in web browser."))
+
 
     // Add our views. Note that the ordering is significant; the underlying GFace code isn't very good so it can take
     // some fiddling around to make things look the way you want.
     context.context.addView(new BoundView.Advisor("Problems", problemView), "problems", null, null)
-    context.context.addView(new BoundView.Advisor("Overview", proposalView), "proposal", NorthOf, "problems", helpAction("http://www.gemini.edu/node/11761"), SharedIcons.ICON_HELP)
-    context.context.addView(new BoundView.Advisor("Band 3", obsListViewB3), "band3", EastOf, "proposal", helpAction("http://www.gemini.edu/node/11774"), SharedIcons.ICON_HELP)
-    context.context.addView(new BoundView.Advisor("Time Requests", partnerView), "partners", Beneath, "proposal", helpAction("http://www.gemini.edu/node/11762"), SharedIcons.ICON_HELP)
-    context.context.addView(new BoundView.Advisor("Scheduling", schedulingView), "scheduling", Beneath, "proposal", helpAction("http://www.gemini.edu/node/11884"), SharedIcons.ICON_HELP)
-    context.context.addView(new BoundView.Advisor("Submit", submitView), "submit", Beneath, "partners", helpAction("http://www.gemini.edu/node/11765"), SharedIcons.ICON_HELP)
-    context.context.addView(new BoundView.Advisor("Observations", obsListView), "obs", Above, "band3", helpAction("http://www.gemini.edu/node/11763"), SharedIcons.ICON_HELP)
-    context.context.addView(new BoundView.Advisor("Targets", targetView), "targets", Above, "obs", helpAction("http://www.gemini.edu/node/11764"), SharedIcons.ICON_HELP)
+    context.context.addView(new BoundView.Advisor("Overview", proposalView), "proposal", NorthOf, "problems", helpAction("http://www.gemini.edu/node/11761"))
+    context.context.addView(new BoundView.Advisor("Band 3", obsListViewB3), "band3", EastOf, "proposal", helpAction("http://www.gemini.edu/node/11774"))
+    context.context.addView(new BoundView.Advisor("Time Requests", partnerView), "partners", Beneath, "proposal", helpAction("http://www.gemini.edu/node/11762"))
+    context.context.addView(new BoundView.Advisor("Scheduling", schedulingView), "scheduling", Beneath, "proposal", helpAction("http://www.gemini.edu/node/11884"))
+    context.context.addView(new BoundView.Advisor("Submit", submitView), "submit", Beneath, "partners", helpAction("http://www.gemini.edu/node/11765"))
+    context.context.addView(new BoundView.Advisor("Observations", obsListView), "obs", Above, "band3", helpAction("http://www.gemini.edu/node/11763"))
+    context.context.addView(new BoundView.Advisor("Targets", targetView), "targets", Above, "obs", helpAction("http://www.gemini.edu/node/11764"))
     context.context.addView(new BoundView.Advisor("TAC", tacView), "tac", Beneath, "partners")
 
     // Add our status bar, which requires some secret knowledge
