@@ -93,31 +93,7 @@ public class SimpleInternalFrame extends JPanel {
     public SimpleInternalFrame(String title) {
         this(null, title, null, null, null, null, null);
     }
-    
-    
-    /**
-     * Constructs a SimpleInternalFrame with the specified 
-     * icon, and title.
-     * 
-     * @param icon        the initial icon
-     * @param title       the initial title
-     */
-    public SimpleInternalFrame(Icon icon, String title) {
-        this(icon, title, null, null, null, null, null);
-    }
 
-    
-    /**
-     * Constructs a SimpleInternalFrame with the specified 
-     * title, tool bar, and content panel.
-     * 
-     * @param title       the initial title
-     * @param bar         the initial tool bar
-     * @param content     the initial content pane
-     */
-    public SimpleInternalFrame(String title, JToolBar bar, JComponent content) {
-        this(null, title, bar, content, null, null, null);
-    }
 
     /**
      * Constructs a SimpleInternalFrame with the specified
@@ -138,14 +114,14 @@ public class SimpleInternalFrame extends JPanel {
      * @param bar         the initial tool bar
      * @param content     the initial content pane
      */
-    SimpleInternalFrame(
-        Icon icon,
-        String title,
-        JToolBar bar,
-        JComponent content,
-        Action helpAction,
-        Icon helpIcon,
-        String hint) {
+    private SimpleInternalFrame(
+            Icon icon,
+            String title,
+            JToolBar bar,
+            JComponent content,
+            Action helpAction,
+            Icon helpIcon,
+            String hint) {
         super(new BorderLayout());
         this.selected = false;
         this.titleLabel = new JLabel(title, icon, SwingConstants.LEADING);
@@ -172,31 +148,8 @@ public class SimpleInternalFrame extends JPanel {
 //        setSelected(true);
         updateHeader();
     }
-
     
     // Public API ***********************************************************
-
-    /**
-     * Returns the frame's icon.
-     * 
-     * @return the frame's icon
-     */
-    public Icon getFrameIcon() {
-        return titleLabel.getIcon();
-    }
-    
-
-    /**
-     * Sets a new frame icon.
-     * 
-     * @param newIcon   the icon to be set
-     */
-    public void setFrameIcon(Icon newIcon) {
-        Icon oldIcon = getFrameIcon();
-        titleLabel.setIcon(newIcon);
-        firePropertyChange("frameIcon", oldIcon, newIcon);
-    }
-    
 
     /**
      * Returns the frame's title text.
@@ -225,7 +178,7 @@ public class SimpleInternalFrame extends JPanel {
      * 
      * @return the current toolbar - if any
      */
-    public JToolBar getToolBar() {
+    private JToolBar getToolBar() {
         return headerPanel.getComponentCount() > 1
             ? (JToolBar) headerPanel.getComponent(1)
             : null;
@@ -237,7 +190,7 @@ public class SimpleInternalFrame extends JPanel {
      * 
      * @param newToolBar the tool bar to be set in the header
      */
-    public void setToolBar(JToolBar newToolBar) {
+    private void setToolBar(JToolBar newToolBar) {
         JToolBar oldToolBar = getToolBar();
         if (oldToolBar == newToolBar) {
             return;
@@ -393,7 +346,7 @@ public class SimpleInternalFrame extends JPanel {
      * @param isSelected   true to lookup the active color, false for the inactive
      * @return the color of the foreground text
      */
-    protected Color getTextForeground(boolean isSelected) {
+    private Color getTextForeground(boolean isSelected) {
         Color c =
             UIManager.getColor(
                 isSelected
@@ -416,10 +369,9 @@ public class SimpleInternalFrame extends JPanel {
      * 
      * @return the color of the header's background
      */
-    protected Color getHeaderBackground() {
+    private Color getHeaderBackground() {
         return new Color(0x33, 0x66, 0x99);
     }
-
 
     // Helper Classes *******************************************************
 

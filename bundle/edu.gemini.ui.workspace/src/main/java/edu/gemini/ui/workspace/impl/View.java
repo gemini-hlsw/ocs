@@ -47,7 +47,7 @@ public class View implements IViewContext {
         return id;
     }
 
-    public void setFocused(boolean focused) {
+    void setFocused(boolean focused) {
         peer.setSelected(focused);
     }
 
@@ -89,7 +89,7 @@ public class View implements IViewContext {
         return getClass().getSimpleName() + "[" + peer.getTitle() + "]";
     }
 
-    public GSelectionBroker getSelectionBroker() {
+    GSelectionBroker getSelectionBroker() {
         return selectionBroker;
     }
 
@@ -108,7 +108,3 @@ public class View implements IViewContext {
     }
 
 }
-
-
-
-

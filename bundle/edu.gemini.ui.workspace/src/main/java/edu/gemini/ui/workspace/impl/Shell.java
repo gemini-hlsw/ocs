@@ -306,14 +306,9 @@ public class Shell implements IShell, PropertyChangeListener, WindowFocusListene
         return hub;
     }
 
-
-
-
     public GSelection<?> getSelection() {
         return hub.getSelection();
     }
-
-
 
     public void setSelection(GSelection newSelection) {
         GSelection<?> prev = getSelection();
@@ -321,37 +316,25 @@ public class Shell implements IShell, PropertyChangeListener, WindowFocusListene
         pcs.firePropertyChange(PROP_SELECTION, prev, newSelection); // RCN: hmm
     }
 
-
-
     public void addPropertyChangeListener(PropertyChangeListener listener) {
         pcs.addPropertyChangeListener(listener);
     }
-
-
 
     public void addPropertyChangeListener(String propertyName, PropertyChangeListener listener) {
         pcs.addPropertyChangeListener(propertyName, listener);
     }
 
-
-
     public PropertyChangeListener[] getPropertyChangeListeners() {
         return pcs.getPropertyChangeListeners();
     }
-
-
 
     public PropertyChangeListener[] getPropertyChangeListeners(String propertyName) {
         return pcs.getPropertyChangeListeners(propertyName);
     }
 
-
-
     public void removePropertyChangeListener(PropertyChangeListener listener) {
         pcs.removePropertyChangeListener(listener);
     }
-
-
 
     public void removePropertyChangeListener(String propertyName, PropertyChangeListener listener) {
         pcs.removePropertyChangeListener(propertyName, listener);
@@ -364,6 +347,5 @@ public class Shell implements IShell, PropertyChangeListener, WindowFocusListene
     public Clipboard getWorkspaceClipboard() {
         return workspace.getClipboard();
     }
-
 
 }
