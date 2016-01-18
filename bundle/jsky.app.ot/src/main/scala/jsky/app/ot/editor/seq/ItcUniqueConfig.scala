@@ -26,10 +26,10 @@ case class ItcUniqueConfig(count: Int, labels: String, configs: NonEmptyList[Con
   def config = configs.head
 
   /** Single exposure time is either the given exposure time or the time on source divided by the number of images and coadds. */
-  def singleExposureTime: Double = singleTime.getOrElse(totalTime.orZero / (count * coadds.getOrElse(1)))
+  def singleExposureTime: Double = singleTime.getOrElse((totalTime | 0.0) / (count * coadds.getOrElse(1)))
 
   /** Total exposure time is either total time on source (TReCS/Michelle) or the single exposure time times the number of images and coadds. */
-  def totalExposureTime: Double = totalTime.getOrElse(singleTime.orZero * (count * coadds.getOrElse(1)))
+  def totalExposureTime: Double = totalTime.getOrElse((singleTime | 0.0) * (count * coadds.getOrElse(1)))
 
   /** The coadds for this step. */
   def coadds: Option[Int] = ConfigExtractor.extractOptionalInteger(config, INST_COADDS_KEY)

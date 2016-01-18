@@ -28,12 +28,12 @@ package object core {
       o.toRightDisjunction(DmanFailure.Unexpected(msg))
   }
 
-  type DmanAction[+A] = EitherT[Task, DmanFailure, A]
+  type DmanAction[A] = EitherT[Task, DmanFailure, A]
 
   object DmanAction {
     def apply[A](a: => A): DmanAction[A] = EitherT(Task.delay(a.right))
     def unit: DmanAction[Unit] = apply(())
-    def fail(f: => DmanFailure): DmanAction[Nothing] = EitherT(Task.delay(f.left))
+    def fail[A](f: => DmanFailure): DmanAction[A] = EitherT(Task.delay(f.left[A]))
 
     def mergeFailure[A](result: Throwable \/ TryDman[A]): TryDman[A] =
       result.fold({

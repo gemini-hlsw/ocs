@@ -134,8 +134,8 @@ class OpenDialog private(db: IDBDatabaseService, auth: KeyChain, vcs: VcsRegistr
   val titleUpdater: IO[Boolean] =
     (for {
       t <- auth.selection.map(_.fold("No Active Key")(p => p._2.get._1.getName + " (" + p._1.displayName + ")"))
-      _ <- IO(title = "Open Program - " + t).liftIO[KAction]
-      v <- IO(dialog.visible).liftIO[KAction]
+      _ <- IO(title = "Open Program - " + t).liftIO[KAction](edu.gemini.util.security.auth.keychain.ActionMonadIO)
+      v <- IO(dialog.visible).liftIO[KAction](edu.gemini.util.security.auth.keychain.ActionMonadIO)
     } yield v).run.map(_.fold(_ => false, identity))
 
   // Configuration

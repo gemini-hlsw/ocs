@@ -48,7 +48,7 @@ object KeySchema extends KeyMappers {
 
   ////// MONAD FOR SLICK OPERATIONS
 
-  type Slick[+A] = Kleisli[IO, Session, A]
+  type Slick[A] = Kleisli[IO, Session, A]
 
   object Slick {
     def apply[A](f: Session => A): Slick[A] = Kleisli(s => IO(f(s)))
@@ -59,7 +59,7 @@ object KeySchema extends KeyMappers {
   implicit class SlickOps[A](a: Slick[A]) {
     def except[B >: A](b: Throwable => Slick[B]): Slick[B] =
       Slick.session >>= { s => 
-        a(s).except { 
+        a(s).map(x => x: B).except { 
           case t: Throwable => b(t)(s) 
         } .liftIO[Slick] 
       }

@@ -3,6 +3,7 @@ package edu.gemini.spModel.core
 import squants.motion.{KilometersPerSecond, Velocity}
 
 import scalaz.{Monoid, Order}
+import scalaz.std.anyVal._
 
 /**
  * Specification of Radial velocity

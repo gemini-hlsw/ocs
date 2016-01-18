@@ -53,7 +53,7 @@ package object vcs2 {
       VcsException(t): VcsFailure
     }.flatMap { Option(_).toTryVcs(failureMessage) }
 
-  type VcsAction[+A] = EitherT[Task, VcsFailure, A]
+  type VcsAction[A] = EitherT[Task, VcsFailure, A]
 
   implicit object VcsActionMonad extends Monad[VcsAction] {
     def point[A](a: => A): VcsAction[A] = VcsAction(a)
@@ -63,7 +63,7 @@ package object vcs2 {
   object VcsAction {
     def apply[A](a: => A): VcsAction[A] = EitherT(Task.delay(a.right))
     def unit: VcsAction[Unit] = apply(())
-    def fail(vf: => VcsFailure): VcsAction[Nothing] = EitherT(Task.delay(vf.left))
+    def fail[A](vf: => VcsFailure): VcsAction[A] = EitherT(Task.delay(vf.left))
 
     implicit class VcsActionOps[A](a: VcsAction[A]) {
       private def merge(result: Throwable \/ TryVcs[A]): TryVcs[A] =

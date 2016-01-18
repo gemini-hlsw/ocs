@@ -191,7 +191,7 @@ class TacView(loc: Locale) extends BorderPanel with BoundView[ProposalClass] { v
       override def refresh(m:Option[Option[SubmissionDecision]]) {
         try {
           updating = true
-          selection.item = m.flatten.map(_.decision.merge).map {
+          selection.item = m.flatten.map(_.decision.fold(identity, identity)).map {
             case _:SubmissionReject => Rejected
             case _:SubmissionAccept => Accepted
           }.getOrElse(Undecided)

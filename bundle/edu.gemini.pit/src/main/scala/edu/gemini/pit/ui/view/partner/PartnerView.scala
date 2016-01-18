@@ -94,7 +94,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
       BorderFactory.createEmptyBorder(2, 4, 2, 4))
     override def refresh(m:Option[Proposal]) {
 
-      val (reqTime, minTime) = ~m.map(_.proposalClass).map(r => (r.requestedTime.hours, r.minRequestedTime.hours))
+      val (reqTime, minTime) = m.map(_.proposalClass).map(r => (r.requestedTime.hours, r.minRequestedTime.hours)) | ((0.0, 0.0))
 
       val b3 = m.flatMap(_.proposalClass match {
         case q:QueueProposalClass => q.band3request.map(r => (r.time.hours, r.minTime.hours))

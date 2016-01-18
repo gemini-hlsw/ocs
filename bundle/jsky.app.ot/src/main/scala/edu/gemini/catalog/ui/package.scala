@@ -230,7 +230,7 @@ case class GuidingQuality(info: Option[ObservationInfo], title: String) extends 
 
   override val lens: Target @?> AgsGuideQuality = PLens(_.fold(
     PLens.nil.run,
-    gf.run,
+    (gf.run _) andThen (_.map(_.map(x => x: Target))),
     PLens.nil.run
   ))
 
