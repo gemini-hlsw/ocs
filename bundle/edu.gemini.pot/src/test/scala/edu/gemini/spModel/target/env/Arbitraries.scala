@@ -45,7 +45,7 @@ trait Arbitraries extends edu.gemini.spModel.core.Arbitraries {
   implicit def arbNonEmptyList[A: Arbitrary]: Arbitrary[NonEmptyList[A]] =
     Arbitrary {
       for {
-        a <- arbitrary[A]
+        a  <- arbitrary[A]
         as <- arbitrary[List[A]]
       } yield NonEmptyList.nel(a, as)
     }
@@ -69,9 +69,7 @@ trait Arbitraries extends edu.gemini.spModel.core.Arbitraries {
     Arbitrary {
       for {
         n <- alphaStr
-        m <- listOf(arbitrary[(GuideProbe, OptsList[SPTarget])]).map {
-          _.toMap
-        }
+        m <- listOf(arbitrary[(GuideProbe, OptsList[SPTarget])]).map { _.toMap }
       } yield ManualGroup(n.take(4), m)
     }
 
