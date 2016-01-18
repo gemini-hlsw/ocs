@@ -57,7 +57,7 @@ case class BlueprintGroup(c: Option[Condition], b: Option[BlueprintBase], t: Opt
 import SharedIcons._
 
 object TargetGroup {
-  private val errSidereal = new CompositeIcon(ICON_SIDEREAL, OVL_ERROR)
+  private val errSidereal    = new CompositeIcon(ICON_SIDEREAL, OVL_ERROR)
   private val errNonSidereal = new CompositeIcon(ICON_NONSIDEREAL, OVL_ERROR)
 }
 
@@ -71,10 +71,10 @@ case class TargetGroup(c: Option[Condition], b: Option[BlueprintBase], t: Option
   val icon = t match {
     case Some(t: SiderealTarget)    if t.isEmpty => errSidereal
     case Some(t: NonSiderealTarget) if t.isEmpty => errNonSidereal
-    case Some(t: SiderealTarget)    => ICON_SIDEREAL
-    case Some(t: NonSiderealTarget) => ICON_NONSIDEREAL
-    case Some(t: TooTarget)         => ICON_TOO
-      case _                        => disIcon
+    case Some(t: SiderealTarget)                 => ICON_SIDEREAL
+    case Some(t: NonSiderealTarget)              => ICON_NONSIDEREAL
+    case Some(t: TooTarget)                      => ICON_TOO
+      case _                                     => disIcon
     }
 
   val text = t.map(_.name)

@@ -664,7 +664,7 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band, queueLookup: Target => U
 
     // Public method for fix-its
     def fixEmpty[A](grouping:ObsListGrouping[A]) {
-      model.foreach {m =>
+      model.foreach { m =>
         m.elems.find {
           case g:ObsGroup[_] if (g.grouping == grouping) && g.grouping.get(g).isEmpty =>
             viewer.selection = Some(g)
@@ -674,11 +674,12 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band, queueLookup: Target => U
       }
     }
 
-    // Public existing group
-    def fixGroup[A](grouping:ObsListGrouping[A]) {
-      model.foreach {m =>
+    // Edit the conditions
+    def fixConditions(c: Condition) {
+      model.foreach { m =>
         m.elems.find {
-          case g:ObsGroup[_] if g.grouping == grouping =>
+          case g @ ConditionGroup(_, _, _) =>
+            viewer.edit(g, p => ConditionEditor.open(Some(c), canEdit, panel), Observation.condition)
             viewer.selection = Some(g)
             true
           case _                                         => false
@@ -687,15 +688,12 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band, queueLookup: Target => U
     }
 
     def indicateObservation(o:Observation) {
-      model.foreach {m =>
+      model.foreach { m =>
         m.elems.find {
-
           case e:ObsElem if e.o == o =>
             viewer.selection = Some(e)
             true
-
           case _                     => false
-
         }
       }
     }
