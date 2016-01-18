@@ -242,6 +242,21 @@ class GuideGroupSpec extends Specification with ScalaCheck with Arbitraries {
           !gNew.contains(ts.getGuider)
         }
       }
+
+    "maintain the primary target correctly when removing the primary target for a probe" in
+      forAll { (name: String, gp: GuideProbe, lefts: List[SPTarget], focus: SPTarget, rights: List[SPTarget]) =>
+        def unrollGroupOptsList[A](gg2: GuideGroup): List[SPTarget] = gg2.grp match {
+          case ManualGroup(_, tm) => tm.get(gp).fold(List.empty[SPTarget]) { ol =>
+            ol.focus.fold(List.empty[SPTarget])(t => t :: unrollGroupOptsList(gg2.removeTarget(t)))
+          }
+          case _ => Nil
+        }
+
+        val gg = new GuideGroup(ManualGroup(name, List(gp -> OptsList.focused(lefts, focus, rights)).toMap))
+        val expectedOrder = focus :: (rights ++ lefts.reverse)
+        val actualOrder   = unrollGroupOptsList(gg)
+        expectedOrder === actualOrder
+      }
   }
 
   "GuideGroup getAllMatching" should {
