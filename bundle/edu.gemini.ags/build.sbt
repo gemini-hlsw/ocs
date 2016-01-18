@@ -13,7 +13,7 @@ unmanagedJars in Compile ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "org.scalanlp" % "breeze_2.10" % "0.7",
+  "org.scalanlp" %% "breeze" % "0.12",
   "net.sourceforge.f2j" % "arpack_combined_all" % "0.1")
 
 

@@ -151,7 +151,7 @@ object MascotUtils {
    */
   def matrixFromArray(data: Array[Array[Float]]): DenseMatrix[Double] = {
     // Need to convert float array to double
-    new DenseMatrix(data(0).length, data.flatten.map(_ * 1.0))
+    new DenseMatrix(data(0).length, data.flatten.map(_ * 1.0), 0)
   }
 
   /**

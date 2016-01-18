@@ -648,7 +648,7 @@ object YUtils {
    */
   def assertVectorsEqual(expect: DenseVector[Double], v: DenseVector[Double], err: Double) {
     val a = abs(expect - v)
-    val eq = a.forallValues(_ < err)
+    val eq = a.forall(_ < err)
     if (!eq) {
       println("Assertion failed. Expected:\n" + expect + "\nbut got:\n" + v)
     }
@@ -660,7 +660,7 @@ object YUtils {
    */
   def assertMatricesEqual(expect: DenseMatrix[Double], m: DenseMatrix[Double], err: Double) {
     val a = abs(expect - m)
-    val eq = a.forallValues(_ < err)
+    val eq = a.forall(_ < err)
     if (!eq) {
       println("Assertion failed. Expected:\n" + expect + "\nbut got:\n" + m)
     }
