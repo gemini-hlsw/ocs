@@ -7,7 +7,7 @@ name := "edu.gemini.model.p1.visibility"
 version := pitVersion.value.toOsgiVersion
 
 unmanagedJars in Compile ++= Seq(
-  new File(baseDirectory.value, "../../lib/bundle/scalaz-core_2.10-7.0.5.jar"))
+  new File(baseDirectory.value, "../../lib/bundle/scalaz-core_2.10-7.1.6.jar"))
 
 osgiSettings
 

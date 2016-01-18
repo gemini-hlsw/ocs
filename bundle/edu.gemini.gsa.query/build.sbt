@@ -8,8 +8,8 @@ name := "edu.gemini.gsa.query"
 
 unmanagedJars in Compile ++= Seq(
   new File(baseDirectory.value, "../../lib/bundle/argonaut_2.10-6.0.4.jar"),
-  new File(baseDirectory.value, "../../lib/bundle/scalaz-concurrent_2.10-7.0.5.jar"),
-  new File(baseDirectory.value, "../../lib/bundle/scalaz-core_2.10-7.0.5.jar")
+  new File(baseDirectory.value, "../../lib/bundle/scalaz-concurrent_2.10-7.1.6.jar"),
+  new File(baseDirectory.value, "../../lib/bundle/scalaz-core_2.10-7.1.6.jar")
 )
 
 osgiSettings

@@ -9,7 +9,7 @@ name := "edu.gemini.dataman.app"
 unmanagedJars in Compile ++= Seq(
   new File(baseDirectory.value, "../../lib/bundle/argonaut_2.10-6.0.4.jar"),
   new File(baseDirectory.value, "../../lib/bundle/osgi.cmpn-4.3.1.jar"),
-  new File(baseDirectory.value, "../../lib/bundle/scalaz-concurrent_2.10-7.0.5.jar")
+  new File(baseDirectory.value, "../../lib/bundle/scalaz-concurrent_2.10-7.1.6.jar")
 )
 
 osgiSettings
