@@ -3,6 +3,7 @@ package edu.gemini.spModel.target.env
 import edu.gemini.shared.util.immutable.{ImList, ImOption}
 import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.spModel.guide.{GuideProbeMap, GuideProbe}
+import edu.gemini.spModel.pio.xml.PioXmlFactory
 import edu.gemini.spModel.target.SPTarget
 
 import org.scalacheck.Prop._
@@ -16,7 +17,7 @@ import scalaz._, Scalaz._
 
 class GuideGroupSpec extends Specification with ScalaCheck with Arbitraries {
 
-  import GuideGroupSpec.AllProbes
+  import GuideGroupSpec.{AllProbes, equalGuideGroups}
 
   "GuideGroup name" should {
     "always be defined for manual groups, undefined for automatic" in
@@ -273,8 +274,42 @@ class GuideGroupSpec extends Specification with ScalaCheck with Arbitraries {
       })
     }
   }
+
+  "GuideGroup getParamSet" should {
+    "produce a ParamSet that can be read via fromParamSet to result in an equivalent guide group" in
+    forAll { (g: GuideGroup) =>
+      equalGuideGroups(g, GuideGroup.fromParamSet(g.getParamSet(new PioXmlFactory())))
+    }
+  }
+
+  // TODO: Restore this test case once serialization is achieved.
+//  "GuideGroup" should {
+//    "properly serialize and deserialize" in
+//    forAll { (g: GuideGroup) =>
+//      val bao = new ByteArrayOutputStream()
+//      val oos = new ObjectOutputStream(bao)
+//      oos.writeObject(g)
+//      oos.close()
+//
+//      val ois = new ObjectInputStream(new ByteArrayInputStream(bao.toByteArray))
+//      ois.readObject() match {
+//        case g2: GuideGroup => equalGuideGroups(g, g2)
+//        case _              => false
+//      }
+//    }
+//  }
 }
 
 object GuideGroupSpec {
   val AllProbes: List[GuideProbe] = GuideProbeMap.instance.values.asScala.toList.sorted
+
+  def equalGuideGroups(gg1: GuideGroup, gg2: GuideGroup): Boolean = {
+    implicit val EqualSPTarget: Equal[SPTarget] = Equal.equal((t1,t2) => t1.getTarget.getName === t2.getTarget.getName)
+    (gg1.grp, gg2.grp) match {
+      case (AutomaticGroup.Initial, AutomaticGroup.Initial)         => true
+      case (AutomaticGroup.Active(tm1), AutomaticGroup.Active(tm2)) => tm1 === tm2
+      case (ManualGroup(n1, tm1), ManualGroup(n2, tm2))             => n1 === n2 && tm1 === tm2
+      case _ => false
+    }
+  }
 }
