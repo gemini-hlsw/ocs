@@ -224,14 +224,14 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       c  <- o.condition
       b  <- o.blueprint
       if bpIsLgs(b) && (c.iq != ImageQuality.IQ70 && c.iq != ImageQuality.BEST)
-    } yield new Problem(Severity.Error, s"LGS requires IQ70 or better", "Observations", s.inObsListView(o.band, _.Fixes.fixGroup(ObsListGrouping.Condition)))
+    } yield new Problem(Severity.Error, s"LGS requires IQ70 or better", "Observations", s.inObsListView(o.band, _.Fixes.fixConditions(c)))
 
     private val lgsIQCheck = for {
       o  <- p.observations
       c  <- o.condition
       b  <- o.blueprint
       if bpIsLgs(b) && (c.cc != CloudCover.BEST)
-    } yield new Problem(Severity.Error, s"LGS requires CC50 conditions", "Observations", s.inObsListView(o.band, _.Fixes.fixGroup(ObsListGrouping.Condition)))
+    } yield new Problem(Severity.Error, s"LGS requires CC50 conditions", "Observations", s.inObsListView(o.band, _.Fixes.fixConditions(c)))
 
     private val texesCCCheck = for {
       o  <- p.observations
@@ -239,7 +239,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       b  <- o.blueprint
       if b.isInstanceOf[TexesBlueprint]
       if c.cc == CloudCover.ANY || c.cc == CloudCover.CC80
-    } yield new Problem(Severity.Warning, s"TEXES is not recommended for worse than CC70", "Observations", s.inObsListView(o.band, _.Fixes.fixGroup(ObsListGrouping.Condition)))
+    } yield new Problem(Severity.Warning, s"TEXES is not recommended for worse than CC70", "Observations", s.inObsListView(o.band, _.Fixes.fixConditions(c)))
 
     private val texesWVCheck = for {
       o  <- p.observations
@@ -247,7 +247,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       b  <- o.blueprint
       if b.isInstanceOf[TexesBlueprint]
       if c.wv == WaterVapor.ANY
-    } yield new Problem(Severity.Warning, s"TEXES is not recommended for worse than WV80", "Observations", s.inObsListView(o.band, _.Fixes.fixGroup(ObsListGrouping.Condition)))
+    } yield new Problem(Severity.Warning, s"TEXES is not recommended for worse than WV80", "Observations", s.inObsListView(o.band, _.Fixes.fixConditions(c)))
 
     private val gmosWVCheck = for {
       o  <- p.observations
@@ -255,7 +255,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       b  <- o.blueprint
       if b.isInstanceOf[GmosNBlueprintBase] || b.isInstanceOf[GmosSBlueprintBase]
       if c.wv != WaterVapor.ANY
-    } yield new Problem(Severity.Warning, s"GMOS is usually unaffected by atmospheric water vapor", "Observations", s.inObsListView(o.band, _.Fixes.fixGroup(ObsListGrouping.Condition)))
+    } yield new Problem(Severity.Warning, s"GMOS is usually unaffected by atmospheric water vapor", "Observations", s.inObsListView(o.band, _.Fixes.fixConditions(c)))
 
     def isBand3(o: Observation) = o.band == Band.BAND_3 && (p.proposalClass match {
                   case q: QueueProposalClass if q.band3request.isDefined => true
@@ -267,7 +267,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       if isBand3(o)
       c  <- o.condition
       if c.iq == ImageQuality.BEST
-    } yield new Problem(Severity.Warning, s"IQ20 observations are unlikely to be executed in Band-3", "Band 3", s.inObsListView(o.band, _.Fixes.fixGroup(ObsListGrouping.Condition)))
+    } yield new Problem(Severity.Warning, s"IQ20 observations are unlikely to be executed in Band-3", "Band 3", s.inObsListView(o.band, _.Fixes.fixConditions(c)))
 
     private val band3LGS = for {
       o  <- p.observations
@@ -310,7 +310,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       b  <- o.blueprint
       c  <- o.condition
       if isIR(b) && c.sb != SkyBackground.ANY
-    } yield new Problem(Severity.Warning, s"Infrared observations usually do not require background constraints", "Observations", s.inObsListView(o.band, _.Fixes.fixGroup(ObsListGrouping.Condition)))
+    } yield new Problem(Severity.Warning, s"Infrared observations usually do not require background constraints", "Observations", s.inObsListView(o.band, _.Fixes.fixConditions(c)))
 
     private val gpiCheck = {
       def gpiMagnitudesPresent(target: SiderealTarget):List[(Severity, String)] = {
