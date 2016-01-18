@@ -194,6 +194,7 @@
                         <xsl:otherwise>
                             <xsl:call-template name="get-inst-telescope-name">
                                 <xsl:with-param name="inst" select="$inst"/>
+                                <xsl:with-param name="site" select="/proposal/blueprints/*/*[@id=$bp]/../*/site"/>
                             </xsl:call-template>
                         </xsl:otherwise>
                     </xsl:choose>
@@ -246,6 +247,7 @@
     <!-- Gets the telescope name for an instrument -->
     <xsl:template name="get-inst-telescope-name">
         <xsl:param name="inst"/>
+        <xsl:param name="site"/>
         <xsl:choose>
             <xsl:when test="$inst = 'flamingos2'">Gemini South</xsl:when>
             <xsl:when test="$inst = 'gmosN'">Gemini North</xsl:when>
@@ -258,9 +260,9 @@
             <xsl:when test="$inst = 'nici'">Gemini South</xsl:when>
             <xsl:when test="$inst = 'nifs'">Gemini North</xsl:when>
             <xsl:when test="$inst = 'niri'">Gemini North</xsl:when>
-            <xsl:when test="$inst = 'phoenix'">Gemini South</xsl:when>
-            <xsl:when test="$inst = 'dssi'">Gemini North</xsl:when>
-            <xsl:when test="$inst = 'texes'">Gemini North</xsl:when>
+            <xsl:when test="$inst = 'phoenix'"><xsl:value-of select="$site"/></xsl:when>
+            <xsl:when test="$inst = 'dssi'"><xsl:value-of select="$site"/></xsl:when>
+            <xsl:when test="$inst = 'texes'"><xsl:value-of select="$site"/></xsl:when>
             <xsl:when test="$inst = 'trecs'">Gemini South</xsl:when>
             <xsl:when test="$inst = 'subaru'">Subaru</xsl:when>
             <xsl:when test="$inst = 'keck'">Keck</xsl:when>
