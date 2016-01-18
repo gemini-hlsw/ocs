@@ -1,6 +1,8 @@
 package edu.gemini.ui.workspace;
 
-import javax.swing.*;
+import edu.gemini.ui.workspace.util.InternalFrameHelp;
+
+import java.util.Optional;
 
 public interface IShellContext {
 
@@ -8,7 +10,7 @@ public interface IShellContext {
 
     void addView(IViewAdvisor advisor, String id, IViewAdvisor.Relation rel, String other);
 
-    void addView(IViewAdvisor advisor, String id, IViewAdvisor.Relation rel, String other, Action helpAction, Icon helpIcon, String hint);
+    void addView(IViewAdvisor advisor, String id, IViewAdvisor.Relation rel, String other, Optional<InternalFrameHelp> helpButton);
 
     IActionManager getActionManager();
 

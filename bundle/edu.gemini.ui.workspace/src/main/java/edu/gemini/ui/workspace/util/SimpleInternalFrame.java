@@ -42,6 +42,7 @@ import java.awt.LayoutManager;
 import java.awt.Paint;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Optional;
 
 import javax.swing.*;
 import javax.swing.border.AbstractBorder;
@@ -91,7 +92,7 @@ public class SimpleInternalFrame extends JPanel {
      * @param title       the initial title
      */
     public SimpleInternalFrame(String title) {
-        this(null, title, null, null, null, null, null);
+        this(null, title, null, null, Optional.empty());
     }
 
 
@@ -101,8 +102,8 @@ public class SimpleInternalFrame extends JPanel {
      *
      * @param title       the initial title
      */
-    public SimpleInternalFrame(String title, Action helpAction, Icon helpIcon, String hint) {
-        this(null, title, null, null, helpAction, helpIcon, hint);
+    public SimpleInternalFrame(String title, Optional<InternalFrameHelp> helpButton) {
+        this(null, title, null, null, helpButton);
     }
 
     /**
@@ -119,9 +120,7 @@ public class SimpleInternalFrame extends JPanel {
             String title,
             JToolBar bar,
             JComponent content,
-            Action helpAction,
-            Icon helpIcon,
-            String hint) {
+            Optional<InternalFrameHelp> helpButton) {
         super(new BorderLayout());
         this.selected = false;
         this.titleLabel = new JLabel(title, icon, SwingConstants.LEADING);
@@ -138,7 +137,7 @@ public class SimpleInternalFrame extends JPanel {
         Font font = titleLabel.getFont();
         titleLabel.setFont(font.deriveFont(font.getSize() + 1.0f));
 
-        JPanel top = buildHeader(titleLabel, bar, helpAction, helpIcon, hint);
+        JPanel top = buildHeader(titleLabel, bar, helpButton);
 
         add(top, BorderLayout.NORTH);
         if (content != null) {
@@ -274,25 +273,24 @@ public class SimpleInternalFrame extends JPanel {
      * @param bar     the panel's tool bar
      * @return the panel's built header area
      */
-    private JPanel buildHeader(JLabel label, JToolBar bar, Action helpAction, Icon helpIcon, String hint) {
+    private JPanel buildHeader(JLabel label, JToolBar bar, Optional<InternalFrameHelp> helpButton) {
         gradientPanel =
             new GradientPanel(new BorderLayout(), getHeaderBackground());
         label.setOpaque(false);
 
         gradientPanel.add(label, BorderLayout.WEST);
 
-        if (helpAction != null) {
-            JButton help = new JButton(helpAction);
-            help.setIcon(helpIcon);
-            help.setOpaque(false);
-            help.setContentAreaFilled(false);
-            help.setBorderPainted(false);
-            help.setFocusable(false);
-            if (hint != null) {
-                help.setToolTipText(hint);
+        helpButton.ifPresent( b -> {
+                JButton help = new JButton(b.helpAction());
+                help.setIcon(b.helpIcon());
+                help.setOpaque(false);
+                help.setContentAreaFilled(false);
+                help.setBorderPainted(false);
+                help.setFocusable(false);
+                help.setToolTipText(b.hint());
+                gradientPanel.add(help, BorderLayout.EAST);
             }
-            gradientPanel.add(help, BorderLayout.EAST);
-        }
+        );
         gradientPanel.setBorder(BorderFactory.createEmptyBorder(3, 4, 3, 1));
 
         headerPanel = new JPanel(new BorderLayout());

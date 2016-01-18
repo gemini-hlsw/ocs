@@ -11,6 +11,7 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -27,6 +28,7 @@ import edu.gemini.ui.workspace.IShellContext;
 import edu.gemini.ui.workspace.IViewAdvisor;
 import edu.gemini.ui.workspace.IViewAdvisor.Relation;
 import edu.gemini.ui.workspace.IWorkspace;
+import edu.gemini.ui.workspace.util.InternalFrameHelp;
 import edu.gemini.ui.workspace.util.RetargetAction;
 import edu.gemini.ui.workspace.util.SimpleInternalFrame;
 
@@ -274,9 +276,9 @@ public class Shell implements IShell, PropertyChangeListener, WindowFocusListene
         }
 
         @Override
-        public void addView(final IViewAdvisor advisor, String id, Relation rel, String otherId, Action helpAction, Icon helpIcon, String hint) {
+        public void addView(final IViewAdvisor advisor, String id, Relation rel, String otherId, Optional<InternalFrameHelp> helpButton) {
             View other = (otherId == null) ? null : viewManager.getView(otherId);
-            final View view = new View(Shell.this, advisor, id, helpAction, helpIcon, hint);
+            final View view = new View(Shell.this, advisor, id, helpButton);
             views.add(view);
             view.addPropertyChangeListener(Shell.this);
             advisor.open(view);
