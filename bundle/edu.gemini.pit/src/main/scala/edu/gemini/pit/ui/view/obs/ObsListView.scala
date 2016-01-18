@@ -244,7 +244,7 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band, queueLookup: Target => U
       }
     }
 
-    object checkGsa extends ToolButton(ICON_GSA, ICON_GSA_DIS, "GSA Dataset Check") {
+    object checkGsa extends ToolButton(ICON_GSA, ICON_GSA_DIS, "GOA Dataset Check") {
       enabled = false
 
       viewer.onSelectionChanged {s =>
@@ -383,7 +383,7 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band, queueLookup: Target => U
 
     // N.B. compiler crashes here if viewer is a top-level object
     object columns extends Enumeration {
-      val Item, Time, Guiding, Vis, GSA = Value
+      val Item, Time, Guiding, Vis, GOA = Value
     }
 
     import columns._
@@ -410,7 +410,7 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band, queueLookup: Target => U
       case Time    => (70, 70)
       case Guiding => (60, 60)
       case Vis     => (34, 34)
-      case GSA     => (34, 34)
+      case GOA     => (34, 34)
     }
 
     def ready(o:Observation):Boolean = model.exists {m => ready(m.sem, o)}
@@ -425,7 +425,7 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band, queueLookup: Target => U
       } yield true)
 
     override def alignment(e:ObsListElem) = {
-      case GSA => SwingConstants.CENTER
+      case GOA => SwingConstants.CENTER
       case Vis => SwingConstants.CENTER
       case _   => SwingConstants.LEFT
     }
@@ -443,7 +443,7 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band, queueLookup: Target => U
     override def tooltip(e:ObsListElem) = {
       case Guiding => presentation(e, guiding, _.tooltip)
       case Vis     => semPresentation(e, visibility, _.tooltip)
-      case GSA     => presentation(e, gsa, _.tooltip)
+      case GOA     => presentation(e, gsa, _.tooltip)
     }
 
     val obsDisIcon = new CompositeIcon(SharedIcons.ICON_CLOCK_DIS, SharedIcons.OVL_ERROR)
@@ -455,7 +455,7 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band, queueLookup: Target => U
       }
       case Guiding => presentation(e, guiding, _.icon)
       case Vis     => semPresentation(e, visibility, _.icon)
-      case GSA     => presentation(e, gsa, _.icon)
+      case GOA     => presentation(e, gsa, _.icon)
     }
 
     def text(e:ObsListElem) = {
