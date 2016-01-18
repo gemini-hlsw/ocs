@@ -36,8 +36,8 @@ public class View implements IViewContext {
         this.id = id;
     }
 
-    public View(Shell shell, IViewAdvisor advisor, String id, Action helpAction, Icon helpIcon) {
-        peer = new SimpleInternalFrame("Untitled", helpAction, helpIcon);
+    public View(Shell shell, IViewAdvisor advisor, String id, Action helpAction, Icon helpIcon, String hint) {
+        peer = new SimpleInternalFrame("Untitled", helpAction, helpIcon, hint);
         this.advisor = advisor;
         this.shell = shell;
         this.id = id;

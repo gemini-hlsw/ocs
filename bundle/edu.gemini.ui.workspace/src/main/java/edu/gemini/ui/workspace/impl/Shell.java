@@ -51,7 +51,7 @@ public class Shell implements IShell, PropertyChangeListener, WindowFocusListene
     private boolean closed = false;
     private Component focusWait;
 
-    public Shell(Workspace workspace, IShellAdvisor advisor) {
+    Shell(Workspace workspace, IShellAdvisor advisor) {
         FOCUS_MANAGER.addPropertyChangeListener("permanentFocusOwner", this);
         this.workspace = workspace;
         this.advisor = advisor;
@@ -262,6 +262,7 @@ public class Shell implements IShell, PropertyChangeListener, WindowFocusListene
             peer.setTitle(name);
         }
 
+        @Override
         public void addView(final IViewAdvisor advisor, String id, Relation rel, String otherId) {
             View other = (otherId == null) ? null : viewManager.getView(otherId);
             final View view = new View(Shell.this, advisor, id);
@@ -272,9 +273,10 @@ public class Shell implements IShell, PropertyChangeListener, WindowFocusListene
             viewManager.addView(view, rel, other);
         }
 
-        public void addView(final IViewAdvisor advisor, String id, Relation rel, String otherId, Action helpAction, Icon helpIcon) {
+        @Override
+        public void addView(final IViewAdvisor advisor, String id, Relation rel, String otherId, Action helpAction, Icon helpIcon, String hint) {
             View other = (otherId == null) ? null : viewManager.getView(otherId);
-            final View view = new View(Shell.this, advisor, id, helpAction, helpIcon);
+            final View view = new View(Shell.this, advisor, id, helpAction, helpIcon, hint);
             views.add(view);
             view.addPropertyChangeListener(Shell.this);
             advisor.open(view);

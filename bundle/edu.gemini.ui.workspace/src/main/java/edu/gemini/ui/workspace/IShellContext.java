@@ -8,7 +8,7 @@ public interface IShellContext {
 
     void addView(IViewAdvisor advisor, String id, IViewAdvisor.Relation rel, String other);
 
-    void addView(IViewAdvisor advisor, String id, IViewAdvisor.Relation rel, String other, Action helpAction, Icon helpIcon );
+    void addView(IViewAdvisor advisor, String id, IViewAdvisor.Relation rel, String other, Action helpAction, Icon helpIcon, String hint);
 
     IActionManager getActionManager();
 

@@ -91,7 +91,7 @@ public class SimpleInternalFrame extends JPanel {
      * @param title       the initial title
      */
     public SimpleInternalFrame(String title) {
-        this(null, title, null, null, null, null);
+        this(null, title, null, null, null, null, null);
     }
     
     
@@ -103,7 +103,7 @@ public class SimpleInternalFrame extends JPanel {
      * @param title       the initial title
      */
     public SimpleInternalFrame(Icon icon, String title) {
-        this(icon, title, null, null, null, null);
+        this(icon, title, null, null, null, null, null);
     }
 
     
@@ -116,7 +116,7 @@ public class SimpleInternalFrame extends JPanel {
      * @param content     the initial content pane
      */
     public SimpleInternalFrame(String title, JToolBar bar, JComponent content) {
-        this(null, title, bar, content, null, null);
+        this(null, title, bar, content, null, null, null);
     }
 
     /**
@@ -125,8 +125,8 @@ public class SimpleInternalFrame extends JPanel {
      *
      * @param title       the initial title
      */
-    public SimpleInternalFrame(String title, Action helpAction, Icon helpIcon) {
-        this(null, title, null, null, helpAction, helpIcon);
+    public SimpleInternalFrame(String title, Action helpAction, Icon helpIcon, String hint) {
+        this(null, title, null, null, helpAction, helpIcon, hint);
     }
 
     /**
@@ -138,13 +138,14 @@ public class SimpleInternalFrame extends JPanel {
      * @param bar         the initial tool bar
      * @param content     the initial content pane
      */
-    public SimpleInternalFrame(
+    SimpleInternalFrame(
         Icon icon,
         String title,
         JToolBar bar,
         JComponent content,
         Action helpAction,
-        Icon helpIcon) {
+        Icon helpIcon,
+        String hint) {
         super(new BorderLayout());
         this.selected = false;
         this.titleLabel = new JLabel(title, icon, SwingConstants.LEADING);
@@ -161,7 +162,7 @@ public class SimpleInternalFrame extends JPanel {
         Font font = titleLabel.getFont();
         titleLabel.setFont(font.deriveFont(font.getSize() + 1.0f));
 
-        JPanel top = buildHeader(titleLabel, bar, helpAction, helpIcon);
+        JPanel top = buildHeader(titleLabel, bar, helpAction, helpIcon, hint);
 
         add(top, BorderLayout.NORTH);
         if (content != null) {
@@ -320,7 +321,7 @@ public class SimpleInternalFrame extends JPanel {
      * @param bar     the panel's tool bar
      * @return the panel's built header area
      */
-    private JPanel buildHeader(JLabel label, JToolBar bar, Action helpAction, Icon helpIcon) {
+    private JPanel buildHeader(JLabel label, JToolBar bar, Action helpAction, Icon helpIcon, String hint) {
         gradientPanel =
             new GradientPanel(new BorderLayout(), getHeaderBackground());
         label.setOpaque(false);
@@ -334,6 +335,9 @@ public class SimpleInternalFrame extends JPanel {
             help.setContentAreaFilled(false);
             help.setBorderPainted(false);
             help.setFocusable(false);
+            if (hint != null) {
+                help.setToolTipText(hint);
+            }
             gradientPanel.add(help, BorderLayout.EAST);
         }
         gradientPanel.setBorder(BorderFactory.createEmptyBorder(3, 4, 3, 1));
