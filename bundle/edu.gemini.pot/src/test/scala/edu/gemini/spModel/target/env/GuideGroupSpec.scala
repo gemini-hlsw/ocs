@@ -5,12 +5,15 @@ import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.spModel.guide.{GuideProbeMap, GuideProbe}
 import edu.gemini.spModel.pio.xml.PioXmlFactory
 import edu.gemini.spModel.target.SPTarget
+import org.apache.commons.io.output.ByteArrayOutputStream
 
 import org.scalacheck.Prop._
 
 import org.specs2.ScalaCheck
 
 import org.specs2.mutable.Specification
+
+import java.io.{ByteArrayInputStream, ObjectInputStream, ObjectOutputStream}
 
 import scala.collection.JavaConverters._
 import scalaz._, Scalaz._
@@ -263,7 +266,7 @@ class GuideGroupSpec extends Specification with ScalaCheck with Arbitraries {
     "partition the collections of guide probe targets by guide probe type" in
       forAll { (g: GuideGroup) =>
         val ptns = g.getReferencedGuiders.asScala.map(gp => g.getAllMatching(gp.getType).asScalaList.toSet).toSet
-        (ptns.toList.map(_.length).sum == g.getAll.size) && ptns.forall(p => ptns.forall(q => p == q || p.intersect(q).isEmpty))
+        (ptns.toList.map(_.size).sum == g.getAll.size) && ptns.forall(p => ptns.forall(q => p == q || p.intersect(q).isEmpty))
       }
   }
 
@@ -316,21 +319,21 @@ class GuideGroupSpec extends Specification with ScalaCheck with Arbitraries {
   }
 
   // TODO: Restore this test case once we upgrade scalaz and Zipper and NonEmptyList are serializable.
-//  "GuideGroup" should {
-//    "properly serialize and deserialize" in
-//    forAll { (g: GuideGroup) =>
-//      val bao = new ByteArrayOutputStream()
-//      val oos = new ObjectOutputStream(bao)
-//      oos.writeObject(g)
-//      oos.close()
-//
-//      val ois = new ObjectInputStream(new ByteArrayInputStream(bao.toByteArray))
-//      ois.readObject() match {
-//        case g2: GuideGroup => equalGuideGroups(g, g2)
-//        case _              => false
-//      }
-//    }
-//  }
+  "GuideGroup" should {
+    "properly serialize and deserialize" in
+    forAll { (g: GuideGroup) =>
+      val bao = new ByteArrayOutputStream()
+      val oos = new ObjectOutputStream(bao)
+      oos.writeObject(g)
+      oos.close()
+
+      val ois = new ObjectInputStream(new ByteArrayInputStream(bao.toByteArray))
+      ois.readObject() match {
+        case g2: GuideGroup => equalGuideGroups(g, g2)
+        case _              => false
+      }
+    }
+  }
 }
 
 object GuideGroupSpec {

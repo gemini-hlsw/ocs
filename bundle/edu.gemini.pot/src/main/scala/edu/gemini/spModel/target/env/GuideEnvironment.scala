@@ -144,9 +144,8 @@ final case class GuideEnvironment(guideEnv: GuideEnv) extends TargetContainer {
     guideEnv.selectPrimary(primary.grp).map(GuideEnvironment(_)).getOrElse(this)
 
   def iterator(): java.util.Iterator[GuideGroup] =
-    ???
+    guideEnv.groups.map(GuideGroup).asJava.iterator
 
-  // TODO: REFERENCE
   def putGuideProbeTargets(grp: GuideGroup, gpt: GuideProbeTargets): GuideEnvironment =
     ???
 
