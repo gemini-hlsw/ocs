@@ -9,7 +9,6 @@ import java.util.logging.{Level, Logger}
 import scala.collection.mutable
 import scalaz._
 import Scalaz._
-import scalaz.std.anyVal.booleanInstance.disjunction
 
 
 /** PollService allows clients to request poll updates associated with given
@@ -101,7 +100,15 @@ object PollService {
       }
 
       override def addAll(ids: List[DmanId]): Boolean = synchronized {
-        ids.foldMap(add)(disjunction)
+        // Note, because of the side-effect of calling add(id), this isn't the
+        // same as either:
+        //
+        //    ids.foldMap(add)(disjunction)
+        // or
+        //    ids.any(add)
+        //
+        // We need to run add on all ids regardless.
+        ids.map(add).exists(identity)
       }
 
       def next: Option[mutable.LinkedHashSet[DmanId]] = synchronized {
