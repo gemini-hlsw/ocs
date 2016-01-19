@@ -81,7 +81,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
     lazy val all = {
       val ps =
         List(noObs, nonUpdatedInvestigatorName, titleCheck, band3option, abstractCheck, tacCategoryCheck, keywordCheck, attachmentCheck, attachmentValidityCheck,
-          attachmentSizeCheck, missingObsDetailsCheck, duplicateInvestigatorCheck, ftReviewerOrMentor, ftAffiliationMismatch).flatten ++
+          attachmentSizeCheck, missingObsDetailsCheck, duplicateInvestigatorCheck, ftReviewerOrMentor, ftAffiliationMismatch, band3Obs).flatten ++
           TimeProblems(p, s).all ++
           TimeProblems.partnerZeroTimeRequest(p, s) ++
           TacProblems(p, s).all ++
@@ -262,6 +262,11 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
                   case _                                                 => false
                 })
 
+    def isBand3(p: Proposal) = p.meta.band3OptionChosen && (p.proposalClass match {
+                  case q: QueueProposalClass if q.band3request.isDefined => true
+                  case _                                                 => false
+                })
+
     private val band3IQ = for {
       o  <- p.observations
       if isBand3(o)
@@ -287,6 +292,8 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       to <- isToO(p.proposalClass)
       if isBand3(o) && to != ToOChoice.None
     } yield new Problem(Severity.Error, s"ToO observations cannot be scheduled in Band 3", "Time Requests", s.showPartnersView())
+
+    private val band3Obs = (!p.observations.exists(_.band == Band.BAND_3) && isBand3(p)) option new Problem(Severity.Todo, s"Please create Band 3 observations with conditions, targets, and resources.", "Band 3", s.showObsListView(Band.BAND_3))
 
     def isIR(b: BlueprintBase): Boolean = b match {
       case _: GsaoiBlueprint                           => true
