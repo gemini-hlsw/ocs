@@ -85,12 +85,13 @@ object XMLConverter {
         t.orElse(fallbackTransform).apply(node)
       }
     }
-    transformers.foldLeft(StepResult(Nil, n).successNel[String])((r: ValidationNel[String, StepResult], transform:TransformFunction) => r.flatMap { p =>
+
+    transformers.foldLeft(StepResult(Nil, n).successNel[String])((r: ValidationNel[String, StepResult], transform:TransformFunction) => r.disjunction.flatMap { p =>
         val results = for {
           n <- p.node
         } yield (r |@| transformSingleNode(transform)(n))(_ |+| _)
-        StepResult.flatten(results.toList)
-      }
+        StepResult.flatten(results.toList).disjunction
+      }.validation
     )
   }
 

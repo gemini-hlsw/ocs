@@ -1,6 +1,7 @@
 package edu.gemini.spModel
 
 import scalaz.Order
+import scalaz.std.anyVal._
 
 package object obs {
 

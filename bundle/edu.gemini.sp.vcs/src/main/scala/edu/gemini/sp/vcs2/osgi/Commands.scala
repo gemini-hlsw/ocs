@@ -81,7 +81,7 @@ object Commands {
       } yield {
         remember(ca)
         res
-      }).toEither.merge
+      }).merge
 
     def timed[A](body: => A): (A, Long) = {
       val start = System.currentTimeMillis()
@@ -139,7 +139,7 @@ object Commands {
       if ("host".equals(cmd))
         args.length match {
           case 0 => Some(host())
-          case 1 => Some(parseLoc(args(0)).map(host).toEither.merge)
+          case 1 => Some(parseLoc(args(0)).map(host).merge)
           case _ => None
         }
       else None

@@ -10,6 +10,7 @@ import squants.radio.IrradianceConversions._
 import squants.radio.SpectralIrradianceConversions._
 
 import scalaz.==>>
+import scalaz.std.anyVal._
 
 trait Arbitraries {
 

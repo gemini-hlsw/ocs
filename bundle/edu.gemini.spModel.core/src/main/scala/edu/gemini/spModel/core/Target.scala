@@ -24,32 +24,38 @@ object Target extends TargetLenses
 
 trait TargetLenses {
 
+  private def runTarget[A <: Target, B](l: A @> B):  A => IndexedStore[B, B, Target] =
+   (l.run _) andThen (_.map(x => x: Target))
+
+  private def pRunTarget[A <: Target, B](l: A @?> B): A => Option[Store[B, Target]] =
+   (l.run _) andThen (_.map(_.map(x => x: Target)))
+
   val name: Target @> String =
     Lens(_.fold(
-      TooTarget.name.run,
-      SiderealTarget.name.run,
-      NonSiderealTarget.name.run
+      runTarget(TooTarget.name),
+      runTarget(SiderealTarget.name),
+      runTarget(NonSiderealTarget.name)
     ))
 
   val coords: Target @?> Coordinates =
     PLens(_.fold(
       PLens.nil.run,
-      SiderealTarget.coordinates.partial.run,
+      pRunTarget(SiderealTarget.coordinates.partial),
       PLens.nil.run
     ))
 
   val pm: Target @?> ProperMotion =
     PLens(_.fold(
       PLens.nil.run,
-      (SiderealTarget.properMotion.partial >=> PLens.somePLens[ProperMotion]).run,
+      pRunTarget(SiderealTarget.properMotion.partial >=> PLens.somePLens[ProperMotion]),
       PLens.nil.run
     ))
 
   val magnitudes: Target @?> List[Magnitude] =
     PLens(_.fold(
       PLens.nil.run,
-      SiderealTarget.magnitudes.partial.run,
-      NonSiderealTarget.magnitudes.partial.run
+      pRunTarget(SiderealTarget.magnitudes.partial),
+      pRunTarget(NonSiderealTarget.magnitudes.partial)
     ))
 
 }

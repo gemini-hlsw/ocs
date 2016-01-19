@@ -65,7 +65,7 @@ def common(version: Version) = AppConfig(
     BundleSpec("slf4j.jdk14",                  Version(1, 6, 4)),
     BundleSpec("org.h2",                       Version(1, 3, 170)),
     BundleSpec("org.apache.commons.io",        Version(2, 0, 1)),
-    BundleSpec("org.scalaz.concurrent",        Version(7, 0, 5)),
+    BundleSpec("org.scalaz.concurrent",        Version(7, 1, 6)),
     BundleSpec("jsky.app.ot",                  version),
     BundleSpec("jsky.app.ot.visitlog",         version),
     BundleSpec("org.apache.commons.logging",   Version(1, 1, 0)),

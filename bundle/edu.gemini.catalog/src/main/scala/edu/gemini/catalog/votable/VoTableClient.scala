@@ -221,7 +221,7 @@ trait VoTableClient {
   // First success or last failure
   protected def selectOne[A](fs: NonEmptyList[Future[A]]): Future[A] = {
     val p = Promise[A]()
-    val n = new AtomicInteger(fs.length)
+    val n = new AtomicInteger(fs.size)
     fs.foreach { f =>
       f.onComplete {
         case Success(a) => p.trySuccess(a)

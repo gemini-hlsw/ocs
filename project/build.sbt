@@ -4,8 +4,8 @@
 libraryDependencies ++= Seq(
   "org.ow2.asm" % "asm" % "4.0",
   "org.eclipse.osgi" % "org.eclipse.osgi" % "3.6.0.v20100517",
-  "org.scalaz" %% "scalaz-core" % "7.0.4",
-  "org.scalaz" %% "scalaz-effect" % "7.0.4"
+  "org.scalaz" %% "scalaz-core" % "7.1.6",
+  "org.scalaz" %% "scalaz-effect" % "7.1.6"
 )
 
 // TODO: remove this, it's for the inlined sbt-osgi plugin

@@ -132,10 +132,10 @@ class ProgramKeySetter(ks: KeyServer, ctx: BundleContext, user: java.util.Set[Pr
   import Scalaz._
   import scalaz.effect.IO
 
-  type PKS[+A] = EitherT[IO, String, A]
+  type PKS[A] = EitherT[IO, String, A]
   object PKS {
     def apply[A](a: => A): PKS[A] = EitherT(IO(a.right))
-    def fail(s: String): PKS[Nothing] = EitherT(IO(s.left))
+    def fail[A](s: String): PKS[A] = EitherT.left[IO, String, A](IO(s))
   }
 
   implicit class KeychainActionOps[A](a: edu.gemini.util.security.auth.keychain.Action[A]) {

@@ -87,7 +87,7 @@ class TargetView(val shellAdvisor:ShellAdvisor) extends BorderPanel with BoundVi
       // Abstract a few things out (used below)
       // TODO: continue abstraction; duplicated logic in places below
       lazy val date = semesterLens.get(m).midPoint
-      def coord(t:Target, f:Coordinates => BigDecimal) = ~t.coords(date).map(c => f(c).toDouble)
+      def coord(t:Target, f:Coordinates => BigDecimal): Double = t.coords(date).map(c => f(c).toDouble) | 0.0
       def ra(t:Target) = coord(t, c => BigDecimal(c.ra.toAngle.toDegrees))
       def dec(t:Target) = coord(t, c => BigDecimal(c.dec.toDegrees))
       def txt(t:Target) = ~text(t).lift(c)

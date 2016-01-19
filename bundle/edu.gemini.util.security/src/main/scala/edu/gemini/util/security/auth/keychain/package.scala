@@ -21,7 +21,7 @@ package object keychain {
 
   type UserPrincipal = edu.gemini.util.security.principal.UserPrincipal
   type KeyVersion = Int
-  type Action[+A] = EitherT[IO, KeyFailure, A]
+  type Action[A] = EitherT[IO, KeyFailure, A]
 
   implicit object ActionMonadIO extends MonadIO[Action] {
     def point[A](a: => A): Action[A] = Action(a)
@@ -32,7 +32,7 @@ package object keychain {
   object Action {
 
     def apply[A](a: => A): Action[A] = EitherT(IO(a.right))
-    def fail(kf: => KeyFailure): Action[Nothing] = EitherT(IO(kf.left))
+    def fail[A](kf: => KeyFailure): Action[A] = EitherT.left[IO, KeyFailure, A](IO(kf))
 
     implicit class ActionOps[A](a: Action[A]) {
 

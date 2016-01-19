@@ -175,7 +175,7 @@ abstract class ValidAtEditor[A <: ITarget](empty: A) extends TelescopePosEditor 
 
   def plotEphemeris(ephemeris: Ephemeris): HorizonsIO[Unit] =
     HorizonsIO.either {
-      ephemeris.isEmpty either NoOrbitalElements or HorizonsPlotter.plot(node, ephemeris)
+      ephemeris.isEmpty either HorizonsPlotter.plot(node, ephemeris) or NoOrbitalElements
     }
 
 }

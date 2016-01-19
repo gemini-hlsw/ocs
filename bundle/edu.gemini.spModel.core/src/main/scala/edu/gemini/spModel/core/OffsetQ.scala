@@ -1,6 +1,7 @@
 package edu.gemini.spModel.core
 
 import scalaz.{Order, Monoid, Show}
+import scalaz.std.anyVal._
 
 /**
  * Offset in Q.

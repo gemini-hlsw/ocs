@@ -8,7 +8,7 @@ name := "edu.gemini.oodb.too.window"
 
 unmanagedJars in Compile ++= Seq(
   new File(baseDirectory.value, "../../lib/bundle/org-dom4j_2.10-1.5.1.jar"),
-  new File(baseDirectory.value, "../../lib/bundle/scalaz-core_2.10-7.0.5.jar"))
+  new File(baseDirectory.value, "../../lib/bundle/scalaz-core_2.10-7.1.6.jar"))
 
 osgiSettings
 

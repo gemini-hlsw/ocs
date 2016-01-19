@@ -98,13 +98,13 @@ object Activator {
       Option(ctx.getProperty(name)).toSuccess(s"Missing '$name' property in app configuration".wrapNel)
 
     def lookupPollPeriod[A](name: String)(f: Duration => A): ValidationNel[String, A] =
-      lookup(name).flatMap { timeString =>
+      lookup(name).disjunction.flatMap { timeString =>
         catchingNonFatal(Duration.parse(timeString)).leftMap { _ =>
           s"Couldn't parse $name property value '$timeString' as an ISO-8601 time duration."
         }.ensure(s"$name time value must be greater than zero.") { d =>
           !(d.isNegative || d.isZero)
-        }.leftMap(_.wrapNel).map(f).validation
-      }
+        }.leftMap(_.wrapNel).map(f)
+      }.validation
 
     val archive    = lookup(ArchiveHost).map(GsaHost.Archive)
     val summit     = lookup(SummitHost).map(GsaHost.Summit)

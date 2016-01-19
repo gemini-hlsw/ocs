@@ -100,7 +100,15 @@ object PollService {
       }
 
       override def addAll(ids: List[DmanId]): Boolean = synchronized {
-        ids.map(add).foldMap(Tags.Disjunction)
+        // Note, because of the side-effect of calling add(id), this isn't the
+        // same as either:
+        //
+        //    ids.foldMap(add)(disjunction)
+        // or
+        //    ids.any(add)
+        //
+        // We need to run add on all ids regardless.
+        ids.map(add).exists(identity)
       }
 
       def next: Option[mutable.LinkedHashSet[DmanId]] = synchronized {

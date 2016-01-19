@@ -4,6 +4,7 @@ import squants.space.{Length, Microns, Nanometers}
 
 import scala.util.Try
 import scalaz.{Monoid, Order}
+import scalaz.std.anyVal._
 
 /** Representation of wavelengths.
   * Wavelength is internally represented by `squants` values of type `Length`. */
