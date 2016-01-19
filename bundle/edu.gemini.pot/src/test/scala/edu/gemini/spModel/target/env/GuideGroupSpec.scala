@@ -283,10 +283,28 @@ class GuideGroupSpec extends Specification with ScalaCheck with Arbitraries {
     "return a subset of guide probe targets containing a specific target for manual groups" in
     forAll { (g: GuideGroup, t: SPTarget) =>
       val newGpt = g.getAll.asScalaList.zipWithIndex.map { case (gpt, idx) => if (idx % 2 == 0) gpt else gpt.update(OptionsList.UpdateOps.append(t)) }
-      g.setAll(newGpt.asImList).getAllContaining(t).asScalaList == (g.grp match {
+
+      val expected = g.setAll(newGpt.asImList).getAllContaining(t).asScalaList.map(_.getGuider).toSet
+      val actual   = (g.grp match {
         case _: ManualGroup    => newGpt.zipWithIndex.collect { case (gpt, idx) if idx % 2 == 1 => gpt }
         case _: AutomaticGroup => Nil
-      })
+      }).map(_.getGuider).toSet
+      expected === actual
+    }
+
+    "return nothing for automatic initial groups" in
+    forAll { (t: SPTarget) =>
+      val gg = GuideGroup(AutomaticGroup.Initial)
+      gg.getAllContaining(t).isEmpty
+    }
+
+    "return a subset of guide probe targets containing a specific target for automatic, active groups" in
+      forAll { (t1Gps: Set[GuideProbe], t1: SPTarget, t2: SPTarget) =>
+        val t2Gps = AllProbes.toSet.diff(t1Gps)
+        val tm = (t1Gps.map(_ -> t1) ++ t2Gps.map(_ -> t2)).toMap
+        val gg = GuideGroup(AutomaticGroup.Active(tm))
+        gg.getAllContaining(t1).asScalaList.map(_.getGuider).toSet === t1Gps &&
+          gg.getAllContaining(t2).asScalaList.map(_.getGuider).toSet === t2Gps
     }
   }
 
@@ -297,7 +315,7 @@ class GuideGroupSpec extends Specification with ScalaCheck with Arbitraries {
     }
   }
 
-  // TODO: Restore this test case once serialization is achieved.
+  // TODO: Restore this test case once we upgrade scalaz and Zipper and NonEmptyList are serializable.
 //  "GuideGroup" should {
 //    "properly serialize and deserialize" in
 //    forAll { (g: GuideGroup) =>
@@ -318,6 +336,8 @@ class GuideGroupSpec extends Specification with ScalaCheck with Arbitraries {
 object GuideGroupSpec {
   val AllProbes: List[GuideProbe] = GuideProbeMap.instance.values.asScala.toList.sorted
 
+  // We currently only compare ITargets by name here, since currently, an ITarget that is written to XML and then
+  // parsed from it is not equal to the original ITarget, probably due to floating point differences in RA / Dec.
   def equalGuideGroups(gg1: GuideGroup, gg2: GuideGroup): Boolean = {
     implicit val EqualSPTarget: Equal[SPTarget] = Equal.equal((t1,t2) => t1.getTarget.getName === t2.getTarget.getName)
     (gg1.grp, gg2.grp) match {
