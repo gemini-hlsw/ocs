@@ -20,7 +20,7 @@ class P1MonitorMailer(cfg: P1MonitorConfig) {
 
     //construct email subject
     val subject = proposal.map { prop =>
-        s"New ${getSiteString(prop.observations)} ${getTypeString(prop.proposalClass)} Proposal: ${getReferenceString(prop.proposalClass)}"
+      s"New ${getSiteString(prop.observations)} ${getTypeString(prop.proposalClass)} Proposal: ${getReferenceString(prop.proposalClass)}"
       }.getOrElse("")
 
     //construct email body
@@ -100,30 +100,36 @@ class P1MonitorMailer(cfg: P1MonitorConfig) {
 
   private def getReferenceString(propClass: ProposalClass): String = {
     val string = propClass match {
-      case pc: SpecialProposalClass       => pc.sub.response.map(_.receipt.id).mkString(" ")
-      case ft: FastTurnaroundProgramClass => ft.sub.response.map(_.receipt.id).mkString(" ")
-      case lp: LargeProgramClass          => lp.sub.response.map(_.receipt.id).mkString(" ")
-      case q:  GeminiNormalProposalClass  => ~q.subs.left.getOrElse(Nil).flatMap(_.response.map(_.receipt.id)).headOption
-      case _                              => ""
+      case pc: SpecialProposalClass                         => pc.sub.response.map(_.receipt.id).mkString(" ")
+      case ft: FastTurnaroundProgramClass                   => ft.sub.response.map(_.receipt.id).mkString(" ")
+      case lp: LargeProgramClass                            => lp.sub.response.map(_.receipt.id).mkString(" ")
+      case t @ QueueProposalClass(_, _, _, Right(p), _, _)  => t.subs.right.get.response.map(_.receipt.id).mkString(" ")
+      case t @ ClassicalProposalClass(_, _, _, Right(p), _) => t.subs.right.get.response.map(_.receipt.id).mkString(" ")
+      case q:  GeminiNormalProposalClass                    => ~q.subs.left.getOrElse(Nil).flatMap(_.response.map(_.receipt.id)).headOption
+      case _                                                => ""
     }
     string.trim
   }
 
   private def getTypeString(propClass: ProposalClass): String = propClass match {
-      case pc: SpecialProposalClass       => pc.sub.specialType.value()
-      case _:  FastTurnaroundProgramClass => "Fast Turnaround"
-      case _:  LargeProgramClass          => "Large Program"
-      case _:  QueueProposalClass         => "Queue"
-      case _:  ClassicalProposalClass     => "Classical"
-      case _                              => ""
+      case pc: SpecialProposalClass                                  => pc.sub.specialType.value()
+      case _:  FastTurnaroundProgramClass                            => "Fast Turnaround"
+      case _:  LargeProgramClass                                     => "Large Program"
+      case QueueProposalClass(_, _, _, Right(_), _, _)               => "Exchange"
+      case _:  QueueProposalClass                                    => "Queue"
+      case ClassicalProposalClass(_, _, _, Right(_), _)              => "Exchange"
+      case _:  ClassicalProposalClass                                => "Classical"
+      case ExchangeProposalClass(_, _, _, ExchangePartner.SUBARU, _) => "Subaru"
+      case _                                                         => ""
     }
 
   private def getTypeName(dir: String, propClass: ProposalClass): String = propClass match {
-      case pc: SpecialProposalClass       => pc.sub.specialType
-      case ft: FastTurnaroundProgramClass => "FT"
-      case lp: LargeProgramClass          => "LP"
-      case q:  GeminiNormalProposalClass  => dir.toUpperCase
-      case _                              => ""
+      case ft: FastTurnaroundProgramClass                            => "FT"
+      case pc: SpecialProposalClass                                  => pc.sub.specialType
+      case lp: LargeProgramClass                                     => "LP"
+      case q:  GeminiNormalProposalClass                             => dir.toUpperCase
+      case ExchangeProposalClass(_, _, _, ExchangePartner.SUBARU, _) => "SUBARU"
+      case _                                                         => ""
     }
 
   private def getInstrumentsString(prop: Proposal): String = prop.observations.map {

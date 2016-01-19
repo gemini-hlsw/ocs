@@ -33,49 +33,53 @@
 
     <type name="LargeProgram">
         <dir>/home/software/test_proposals/large_program/proposals/2016B</dir>
-        <to>cquiroz@gemini.edu</to>
+        <to>pitlp@gemini.edu</to>
     </type>
 
     <type name="ar">
         <dir>/home/software/test_proposals/ar/proposals/2016B</dir>
-        <to>cquiroz@gemini.edu</to>
+        <to>pit.ar@gemini.edu</to>
     </type>
 
     <type name="au">
         <dir>/home/software/test_proposals/au/proposals/2016B</dir>
-        <to>cquiroz@gemini.edu</to>
+        <to>pit.au@gemini.edu</to>
     </type>
 
     <type name="br">
         <dir>/home/software/test_proposals/br/proposals/2016B</dir>
-        <to>cquiroz@gemini.edu</to>
+        <to>pit.br@gemini.edu</to>
     </type>
 
     <type name="ca">
         <dir>/home/software/test_proposals/ca/proposals/2016B</dir>
-        <to>cquiroz@gemini.edu</to>
+        <to>pit.ca@gemini.edu</to>
     </type>
 
     <type name="cl">
         <dir>/home/software/test_proposals/cl/proposals/2016B</dir>
-        <to>cquiroz@gemini.edu</to>
+        <to>pit.cl@gemini.edu</to>
     </type>
 
     <type name="kr">
         <dir>/home/software/test_proposals/kr/proposals/2016B</dir>
-        <to>cquiroz@gemini.edu</to>
-    </type>
-
-    <type name="us">
-        <dir>/home/software/test_proposals/us/proposals/2016B</dir>
-        <to>cquiroz@gemini.edu</to>
+        <to>pit.kr@gemini.edu</to>
     </type>
 
     <type name="uh">
         <dir>/home/software/test_proposals/uh/proposals/2016B</dir>
-        <to>cquiroz@gemini.edu</to>
+        <to>pit.uh@gemini.edu</to>
     </type>
 
+    <type name="us">
+        <dir>/home/software/test_proposals/us/proposals/2016B</dir>
+        <to>pit.us@gemini.edu</to>
+    </type>
+
+    <type name="subaru">
+        <dir>/home/software/test_proposals/subaru/proposals/2016B</dir>
+        <to>cquiroz@gemini.edu</to>
+    </type>
 
     <filetranslation>
         <translation>
@@ -133,6 +137,10 @@
         <translation>
             <from>uh</from>
             <to>UH</to>
+        </translation>
+        <translation>
+            <from>subaru</from>
+            <to>SUBARU</to>
         </translation>
     </filetranslation>
 
