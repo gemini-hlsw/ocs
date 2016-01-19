@@ -44,7 +44,7 @@ case class OptsList[A](toDisjunction: NonEmptyList[A] \/ Zipper[A]) {
     toDisjunction.isRight
 
   def length: Int =
-    toDisjunction.fold(_.length, _.length)
+    toDisjunction.fold(_.size, _.length)
 
   def map[B](f: A => B): OptsList[B] =
     OptsList(toDisjunction.bimap(_.map(f), _.map(f)))
@@ -84,7 +84,7 @@ case class OptsList[A](toDisjunction: NonEmptyList[A] \/ Zipper[A]) {
   /** Pairs each element with a boolean indicating whether that element has focus. */
   def withFocus: OptsList[(A, Boolean)] =
     toDisjunction match {
-      case -\/(l) => OptsList(l.zip(NonEmptyList.nel(false, List.fill(l.length-1)(false))).left)
+      case -\/(l) => OptsList(l.zip(NonEmptyList.nel(false, List.fill(l.size-1)(false))).left)
       case \/-(z) => OptsList(z.withFocus.right)
     }
 }
