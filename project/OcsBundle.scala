@@ -1,6 +1,8 @@
 
 import sbt.{ State => _, Configuration => _, Show => _, _ }
 import Keys._
+import org.scalajs.sbtplugin.ScalaJSPlugin
+import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 
 trait OcsBundle { 
 
@@ -263,6 +265,12 @@ trait OcsBundle {
       bundle_edu_gemini_util_trpc,
       bundle_jsky_coords,
       bundle_jsky_util
+    )
+
+  lazy val bundle_edu_gemini_seqexec_web_server = 
+    project.in(file("bundle/edu.gemini.seqexec.web.server"))
+      .enablePlugins(ScalaJSPlugin)
+      .dependsOn(
     )
 
   lazy val bundle_edu_gemini_services_client = 

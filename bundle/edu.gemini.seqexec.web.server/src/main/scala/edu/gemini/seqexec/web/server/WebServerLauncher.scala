@@ -1,0 +1,20 @@
+package edu.gemini.seqexec.web.server
+
+import org.http4s.server.Server
+import org.http4s.server.blaze.BlazeBuilder
+
+object WebServerLauncher extends App {
+  def launch(port: Int):Option[Server] = {
+    try {
+      Some(BlazeBuilder.bindHttp(port)
+        //.mountService(StaticRoutes.service, "/")
+        //.mountService(UploadService.service, "/backend")
+        .run)
+    } catch {
+      case e: Throwable =>
+        e.printStackTrace()
+        None
+    }
+  }
+  launch(9090).foreach(_.awaitShutdown())
+}
