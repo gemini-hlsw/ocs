@@ -563,6 +563,7 @@
                                                     <xsl:otherwise>
                                                         <xsl:call-template name="get-inst-telescope-name">
                                                             <xsl:with-param name="inst" select="name(.)"/>
+                                                            <xsl:with-param name="site" select=".//site"/>
                                                         </xsl:call-template>
                                                     </xsl:otherwise>
                                                 </xsl:choose>
@@ -1274,6 +1275,7 @@
                                     <xsl:otherwise>
                                         <xsl:call-template name="get-inst-telescope-name">
                                             <xsl:with-param name="inst" select="name($blueprint/..)"/>
+                                            <xsl:with-param name="site" select="$blueprint/site"/>
                                         </xsl:call-template>
                                     </xsl:otherwise>
                                 </xsl:choose>
