@@ -99,8 +99,14 @@ object OptsList {
         }
     }
 
+  def focused[A](a: A): OptsList[A] =
+    focused(Nil, a, Nil)
+
   def focused[A](lefts: List[A], focus: A, rights: List[A]): OptsList[A] =
     OptsList(Zipper(lefts.reverse.toStream, focus, rights.toStream).right)
+
+  def unfocused[A](a: A): OptsList[A] =
+    unfocused(a, Nil)
 
   def unfocused[A](a: A, as: List[A]): OptsList[A] =
     OptsList(OneAnd(a, as).left)

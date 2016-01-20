@@ -111,7 +111,7 @@ final case class GuideEnvironment(guideEnv: GuideEnv) extends TargetContainer {
         (a, guideEnv.manual.map(_.clearFocus))
 
       case m: ManualGroup =>
-        val zip = guideEnv.manual.fold(Zipper(Stream.empty, m, Stream.empty)) { opts =>
+        val opts0 = guideEnv.manual.fold(OptsList.focused(m)) { opts =>
           // If m exists in opts, select it as primary.  Otherwise, append it
           // to the options list and select it as primary.
           opts.toList.span(_ != m) match {
@@ -120,16 +120,16 @@ final case class GuideEnvironment(guideEnv: GuideEnv) extends TargetContainer {
               // and select it as primary.  If there is a primary, replace it
               // with m.
               opts.toDisjunction match {
-                case -\/(l) => Zipper(l.reverse.toStream, m, Stream.empty)
-                case \/-(z) => Zipper(z.lefts.reverse, m, z.rights)
+                case -\/(l) => OptsList.focused(l.toList, m, Nil)
+                case \/-(z) => OptsList(Zipper(z.lefts, m, z.rights).right)
               }
             case (l, _ :: r) =>
               // m exists in opts, so just select it
-              Zipper(l.reverse.toStream, m, r.toStream)
+              OptsList.focused(l, m, r)
           }
 
         }
-        (guideEnv.auto, some(OptsList(zip.right)))
+        (guideEnv.auto, some(opts0))
     }
     GuideEnvironment(GuideEnv(auto, manual))
   }
