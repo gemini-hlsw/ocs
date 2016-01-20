@@ -3,7 +3,7 @@ package edu.gemini.spModel.target.env
 import edu.gemini.shared.util.immutable.{Option => GemOption, ImOption, ImList}
 import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.spModel.guide.GuideProbe
-import edu.gemini.spModel.pio.{PioFactory, ParamSet}
+import edu.gemini.spModel.pio.{Pio, PioFactory, ParamSet}
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.env.TargetCollection._
 
@@ -185,8 +185,14 @@ final case class GuideEnvironment(guideEnv: GuideEnv) extends TargetContainer {
     }
   }
 
-  def getParamSet(f: PioFactory): ParamSet =
-    ???
+  def getParamSet(f: PioFactory): ParamSet = {
+    val ps = f.createParamSet(ParamSetName)
+    Pio.addIntParam(f, ps, "primary", guideEnv.primaryIndex)
+    guideEnv.groups.map(GuideGroup).foreach { g =>
+      ps.addParamSet(g.getParamSet(f))
+    }
+    ps
+  }
 }
 
 object GuideEnvironment {
@@ -205,8 +211,13 @@ object GuideEnvironment {
   def create(guideGroups: OptionsList[GuideGroup]): GuideEnvironment =
     ???
 
-  def fromParamSet(parent: ParamSet): GuideEnvironment =
-    ???
+  def fromParamSet(parent: ParamSet): GuideEnvironment = {
+    val primary = Pio.getIntValue(parent, "primary", 0)
+    val groups  = parent.getParamSets.asScala.toList.map { ps =>
+      GuideGroup.fromParamSet(ps)
+    }
+    Initial.setOptions(groups.asImList).setPrimaryIndex(primary)
+  }
 
   private def toSortedSet(s: Set[GuideProbe]): java.util.SortedSet[GuideProbe] =
     new java.util.TreeSet(GuideProbe.KeyComparator.instance) <|
