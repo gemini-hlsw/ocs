@@ -13,9 +13,9 @@ unmanagedJars in Compile ++= Seq(
 
 libraryDependencies ++= Seq(
   "org.scala-lang" % "scala-actors" % "2.11.7",
-  "org.scalaz" %% "scalaz-core" % "7.0.6",
-  "org.scalaz" %% "scalaz-concurrent" % "7.0.6",
-  "org.scalaz" %% "scalaz-effect" % "7.0.6")
+  "org.scalaz" %% "scalaz-core" % "7.1.6",
+  "org.scalaz" %% "scalaz-concurrent" % "7.1.6",
+  "org.scalaz" %% "scalaz-effect" % "7.1.6")
 
 
 ocsBundleSettings // defined in top-level project/ folder

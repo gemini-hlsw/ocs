@@ -12,7 +12,7 @@ unmanagedJars in Compile ++= Seq(
   new File(baseDirectory.value, "../../lib/bundle/org-dom4j_2.10-1.5.1.jar"))
 
 libraryDependencies ++= Seq(
-  "org.scalaz" %% "scalaz-core" % "7.0.6")
+  "org.scalaz" %% "scalaz-core" % "7.1.6")
 
 osgiSettings
 

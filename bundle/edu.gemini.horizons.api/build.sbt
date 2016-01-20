@@ -7,8 +7,8 @@ name := "edu.gemini.horizons.api"
 // version set in ThisBuild
 
 libraryDependencies ++= Seq(
-  "org.scalaz" %% "scalaz-core" % "7.0.6",
-  "org.scalaz" %% "scalaz-effect" % "7.0.6")
+  "org.scalaz" %% "scalaz-core" % "7.1.6",
+  "org.scalaz" %% "scalaz-effect" % "7.1.6")
 
 osgiSettings
 

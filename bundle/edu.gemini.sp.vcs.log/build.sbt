@@ -19,6 +19,9 @@ unmanagedJars in Compile ++= Seq(
   new File(baseDirectory.value, "../../lib/bundle/h2-1.3.170.jar")
 )
 
+libraryDependencies ++= Seq(
+  "org.scalaz" %% "scalaz-core" % "7.1.6",
+  "org.scalaz" %% "scalaz-effect" % "7.1.6")
 osgiSettings
 
 ocsBundleSettings

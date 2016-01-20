@@ -55,7 +55,7 @@ javacOptions in ThisBuild ++= Seq(
   "-Xlint:all,-serial,-path,-deprecation,-unchecked,-fallthrough" // TOOD: turn all on except maybe -serial and -path
 )
 
-val specs2Version = "2.3.12"
+val specs2Version = "2.5-scalaz-7.1.6"
 
 // Use managed dependencies for tests; everyone gets JUnit, ScalaCheck, and Specs2
 libraryDependencies in ThisBuild ++= Seq(
@@ -63,8 +63,8 @@ libraryDependencies in ThisBuild ++= Seq(
   "com.novocode"    % "junit-interface"      % "0.9"         % "test",
   "org.scalacheck" %% "scalacheck"           % "1.11.0"      % "test",
   "org.specs2"     %% "specs2-core"          % specs2Version % "test",
-  "org.specs2"     %% "specs2-matcher-extra" % specs2Version % "test",
   "org.specs2"     %% "specs2-scalacheck"    % specs2Version % "test",
+  "org.specs2"     %% "specs2-matcher-extra" % specs2Version % "test" intransitive, // This is required to avoid pulling a version of scalaz-stream not available in maven central
   "org.scalatest"  %% "scalatest"            % "2.2.4"       % "test"
 )
 

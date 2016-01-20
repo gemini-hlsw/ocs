@@ -116,8 +116,9 @@ object GsaQaUpdateQuerySpec extends Specification with ScalaCheck with Arbitrari
       } yield result
 
     val normalResponses: Gen[List[EitherQaResponse]] = {
+      import scala.collection.JavaConverters._
       val gens = reqs.map(r => genOptionalValidResponse(r))
-      Gen.sequence[List, Option[EitherQaResponse]](gens).map(_.flatten)
+      Gen.sequence(gens).map(_.asScala.toList.flatten)
     }
 
     val errorResponses: Gen[List[EitherQaResponse]] =
