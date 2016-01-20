@@ -80,8 +80,8 @@ final case class GuideEnvironment(guideEnv: GuideEnv) extends TargetContainer {
 
     val manual = ms.span(_ != newPrimary) match {
       case (Nil, Nil)               => None
-      case (h :: t, Nil)            => Some(OptsList(NonEmptyList.nel(h, t).left))
-      case (lefts, focus :: rights) => Some(OptsList(Zipper(lefts.reverse.toStream, focus, rights.toStream).right))
+      case (h :: t, Nil)            => Some(OptsList.unfocused(h, t))
+      case (lefts, focus :: rights) => Some(OptsList.focused(lefts, focus, rights))
     }
 
     GuideEnvironment(GuideEnv(auto, manual))

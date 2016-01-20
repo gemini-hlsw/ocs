@@ -4,12 +4,12 @@ import scalaz._, Scalaz._
 
 import OptsList._
 
-case class OptsList[A](toDisjunction: NonEmptyList[A] \/ Zipper[A]) {
+case class OptsList[A](toDisjunction: OneAnd[List, A] \/ Zipper[A]) {
 
   def clearFocus: OptsList[A] =
     OptsList(toDisjunction.flatMap { z =>
       val s = z.start
-      NonEmptyList.nel(s.focus, s.toList.tail).left
+      OneAnd(s.focus, s.toList.tail).left[Zipper[A]]
     })
 
   def contains(a: A): Boolean =
@@ -44,15 +44,15 @@ case class OptsList[A](toDisjunction: NonEmptyList[A] \/ Zipper[A]) {
     toDisjunction.isRight
 
   def length: Int =
-    toDisjunction.fold(_.size, _.length)
+    toDisjunction.fold(_.tail.length + 1, _.length)
 
   def map[B](f: A => B): OptsList[B] =
     OptsList(toDisjunction.bimap(_.map(f), _.map(f)))
 
   def toNel: NonEmptyList[A] =
     toDisjunction match {
-      case -\/(l) =>
-        l
+      case -\/(OneAnd(a, as)) =>
+        NonEmptyList.nel(a, as)
       case \/-(z) =>
         val s = z.start
         NonEmptyList.nel(s.focus, s.rights.toList)
@@ -73,7 +73,7 @@ case class OptsList[A](toDisjunction: NonEmptyList[A] \/ Zipper[A]) {
   /** Deletes all occurrences of `a` in the options list. */
   def delete(a: A): Option[OptsList[A]] =
     toDisjunction match {
-      case -\/(l) => l.toList.filter(_ != a).toNel.map(nel => OptsList(nel.left))
+      case -\/(l) => l.toList.filter(_ != a).toNel.map(nel => OptsList.unfocused(nel))
       case \/-(z) =>
         val l  = z.lefts.filter(_ != a)
         val r  = z.rights.filter(_ != a)
@@ -84,7 +84,7 @@ case class OptsList[A](toDisjunction: NonEmptyList[A] \/ Zipper[A]) {
   /** Pairs each element with a boolean indicating whether that element has focus. */
   def withFocus: OptsList[(A, Boolean)] =
     toDisjunction match {
-      case -\/(l) => OptsList(l.zip(NonEmptyList.nel(false, List.fill(l.size-1)(false))).left)
+      case -\/(o) => OptsList(o.strengthR(false).left)
       case \/-(z) => OptsList(z.withFocus.right)
     }
 }
@@ -102,8 +102,11 @@ object OptsList {
   def focused[A](lefts: List[A], focus: A, rights: List[A]): OptsList[A] =
     OptsList(Zipper(lefts.reverse.toStream, focus, rights.toStream).right)
 
+  def unfocused[A](a: A, as: List[A]): OptsList[A] =
+    OptsList(OneAnd(a, as).left)
+
   def unfocused[A](nel: NonEmptyList[A]): OptsList[A] =
-    OptsList(nel.left)
+    unfocused(nel.head, nel.tail)
 
   def unfocused[A](l: List[A]): Option[OptsList[A]] =
     l.toNel.map(nel => unfocused(nel))

@@ -50,6 +50,14 @@ trait Arbitraries extends edu.gemini.spModel.core.Arbitraries {
       } yield NonEmptyList.nel(a, as)
     }
 
+  implicit def arbOneAndList[A: Arbitrary]: Arbitrary[OneAnd[List, A]] =
+    Arbitrary {
+      for {
+        a  <- arbitrary[A]
+        as <- arbitrary[List[A]]
+      } yield OneAnd(a, as)
+    }
+
   implicit def arbImList[A: Arbitrary]: Arbitrary[ImList[A]] =
     Arbitrary {
       arbitrary[List[A]].map(_.asImList)
@@ -57,7 +65,7 @@ trait Arbitraries extends edu.gemini.spModel.core.Arbitraries {
 
   implicit def arbOptsList[A: Arbitrary]: Arbitrary[OptsList[A]] =
     Arbitrary {
-      arbitrary[NonEmptyList[A] \/ Zipper[A]].map { d => OptsList(d) }
+      arbitrary[OneAnd[List, A] \/ Zipper[A]].map { d => OptsList(d) }
     }
 
   implicit val arbGuideProbe: Arbitrary[GuideProbe] =

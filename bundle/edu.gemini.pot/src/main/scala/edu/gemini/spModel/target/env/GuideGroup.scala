@@ -302,9 +302,9 @@ object GuideGroup extends ((GuideGrp) => GuideGroup) {
     val m = targets.asScalaList.flatMap { gpt =>
       val lst    = gpt.getTargets.asScalaList
       val zipOpt = gpt.getPrimaryIndex.asScalaOpt.map(i => lst.splitAt(i)).collect {
-        case (lefts, focus :: rights) => OptsList(Zipper(lefts.reverse.toStream, focus, rights.toStream).right)
+        case (lefts, focus :: rights) => OptsList.focused(lefts, focus, rights)
       }
-      zipOpt.orElse(lst.toNel.map(nel => OptsList(nel.left))).strengthL(gpt.getGuider)
+      zipOpt.orElse(lst.toNel.map(nel => OptsList.unfocused(nel))).strengthL(gpt.getGuider)
     }.toMap
 
     GuideGroup(ManualGroup(name, m))
