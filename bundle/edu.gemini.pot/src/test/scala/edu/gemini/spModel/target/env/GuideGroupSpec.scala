@@ -284,22 +284,22 @@ class GuideGroupSpec extends Specification with ScalaCheck with Arbitraries {
 
   "GuideGroup getAllContaining" should {
     "return a subset of guide probe targets containing a specific target for manual groups" in
-    forAll { (g: GuideGroup, t: SPTarget) =>
-      val newGpt = g.getAll.asScalaList.zipWithIndex.map { case (gpt, idx) => if (idx % 2 == 0) gpt else gpt.update(OptionsList.UpdateOps.append(t)) }
+      forAll { (g: GuideGroup, t: SPTarget) =>
+        val newGpt = g.getAll.asScalaList.zipWithIndex.map { case (gpt, idx) => if (idx % 2 == 0) gpt else gpt.update(OptionsList.UpdateOps.append(t)) }
 
-      val expected = g.setAll(newGpt.asImList).getAllContaining(t).asScalaList.map(_.getGuider).toSet
-      val actual   = (g.grp match {
-        case _: ManualGroup    => newGpt.zipWithIndex.collect { case (gpt, idx) if idx % 2 == 1 => gpt }
-        case _: AutomaticGroup => Nil
-      }).map(_.getGuider).toSet
-      expected === actual
-    }
+        val expected = g.setAll(newGpt.asImList).getAllContaining(t).asScalaList.map(_.getGuider).toSet
+        val actual   = (g.grp match {
+          case _: ManualGroup    => newGpt.zipWithIndex.collect { case (gpt, idx) if idx % 2 == 1 => gpt }
+          case _: AutomaticGroup => Nil
+        }).map(_.getGuider).toSet
+        expected === actual
+      }
 
     "return nothing for automatic initial groups" in
-    forAll { (t: SPTarget) =>
-      val gg = GuideGroup(AutomaticGroup.Initial)
-      gg.getAllContaining(t).isEmpty
-    }
+      forAll { (t: SPTarget) =>
+        val gg = GuideGroup(AutomaticGroup.Initial)
+        gg.getAllContaining(t).isEmpty
+      }
 
     "return a subset of guide probe targets containing a specific target for automatic, active groups" in
       forAll { (t1Gps: Set[GuideProbe], t1: SPTarget, t2: SPTarget) =>
@@ -313,26 +313,25 @@ class GuideGroupSpec extends Specification with ScalaCheck with Arbitraries {
 
   "GuideGroup getParamSet" should {
     "produce a ParamSet that can be read via fromParamSet to result in an equivalent guide group" in
-    forAll { (g: GuideGroup) =>
-      equalGuideGroups(g, GuideGroup.fromParamSet(g.getParamSet(new PioXmlFactory())))
-    }
+      forAll { (g: GuideGroup) =>
+        equalGuideGroups(g, GuideGroup.fromParamSet(g.getParamSet(new PioXmlFactory())))
+      }
   }
 
-  // TODO: Restore this test case once we upgrade scalaz and Zipper and NonEmptyList are serializable.
   "GuideGroup" should {
     "properly serialize and deserialize" in
-    forAll { (g: GuideGroup) =>
-      val bao = new ByteArrayOutputStream()
-      val oos = new ObjectOutputStream(bao)
-      oos.writeObject(g)
-      oos.close()
+      forAll { (g: GuideGroup) =>
+        val bao = new ByteArrayOutputStream()
+        val oos = new ObjectOutputStream(bao)
+        oos.writeObject(g)
+        oos.close()
 
-      val ois = new ObjectInputStream(new ByteArrayInputStream(bao.toByteArray))
-      ois.readObject() match {
-        case g2: GuideGroup => equalGuideGroups(g, g2)
-        case _              => false
+        val ois = new ObjectInputStream(new ByteArrayInputStream(bao.toByteArray))
+        ois.readObject() match {
+          case g2: GuideGroup => equalGuideGroups(g, g2)
+          case _              => false
+        }
       }
-    }
   }
 }
 
