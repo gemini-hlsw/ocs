@@ -121,7 +121,7 @@ final case class GuideEnvironment(guideEnv: GuideEnv) extends TargetContainer {
               // with m.
               opts.toDisjunction match {
                 case -\/(l) => OptsList.focused(l.toList, m, Nil)
-                case \/-(z) => OptsList(Zipper(z.lefts, m, z.rights).right)
+                case \/-(z) => OptsList(z.update(m).right)
               }
             case (l, _ :: r) =>
               // m exists in opts, so just select it
@@ -146,8 +146,44 @@ final case class GuideEnvironment(guideEnv: GuideEnv) extends TargetContainer {
   def iterator(): java.util.Iterator[GuideGroup] =
     guideEnv.groups.map(GuideGroup).asJava.iterator
 
-  def putGuideProbeTargets(grp: GuideGroup, gpt: GuideProbeTargets): GuideEnvironment =
-    ???
+  /** Roughly, calls `put` on the given guide group (see `GuideGroup.put`) to
+    * obtain an updated `GuideGroup`.  Replaces the `current` guide group in
+    * the environment if it exists without changing the selected group.  If the
+    * `current` group is not already in this guide environment, the updated
+    * group is added and made the primary group.  The way that the updated
+    * group is added depends on its type.  If automatic, it replaces the
+    * current automatic group.  If manual, it is appended to the end of the
+    * manual options.
+    *
+    * @deprecated Confusing, surprising behavior.  Avoid.
+    */
+  def putGuideProbeTargets(current: GuideGroup, gpt: GuideProbeTargets): GuideEnvironment = {
+    val updated = current.put(gpt)
+
+    updated.grp match {
+      case a: AutomaticGroup =>
+        Auto.set(this, a)
+
+      case m: ManualGroup    =>
+        val opts2 = guideEnv.manual.fold(OptsList.focused(m)) { opts =>
+          // Remember the focus and try to find and replace the current group in
+          // the list of options.  If not found, append the updated group and
+          // mark it as having focus.
+          val lst = opts.withFocus.toList.span(_._1 =/= current.grp) match {
+            case (lefts, (_, f) :: rights) => lefts ::: ((m, f) :: rights)
+            case (lefts, Nil)              => lefts.unzip._1.zip(Stream.continually(false)) :+ (m, true)
+          }
+
+          // Look for the focused element, if any. Create the appropriate type
+          // OptsList depending on whether there is a focus.
+          lst.span(_._2 === false) match {
+            case (lefts, Nil)              => OptsList.unfocused(lefts.unzip._1).get
+            case (lefts, (g, _) :: rights) => OptsList.focused(lefts.unzip._1, g, rights.unzip._1)
+          }
+        }
+        Manual.set(this, Some(opts2))
+    }
+  }
 
   def getParamSet(f: PioFactory): ParamSet =
     ???
