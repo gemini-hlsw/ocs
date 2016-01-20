@@ -1,0 +1,56 @@
+<conf>
+    <smtp>localhost</smtp>
+
+    <bcc>swalker@gemini.edu</bcc>
+    <bcc>cquiroz@gemini.edu</bcc>
+
+    <type name="DirectorTime">
+        <dir>/home/software/proposals/directors_time/proposals/2016A</dir>
+        <to>pitdd@gemini.edu</to>
+    </type>
+
+    <type name="PoorWeather">
+        <dir>/home/software/proposals/poor_weather/proposals/2016A</dir>
+        <to>pitpw@gemini.edu</to>
+    </type>
+
+    <type name="DemoScience">
+        <dir>/home/software/proposals/demo_science/proposals/2016A</dir>
+        <to>pitds@gemini.edu</to>
+    </type>
+
+    <type name="SystemVerification">
+        <dir>/home/software/proposals/system_verification/proposals/2016A</dir>
+        <to>pitsv@gemini.edu</to>
+    </type>
+
+    <type name="FastTurnaround">
+        <dir>/home/software/proposals/fast_turnaround/proposals/2016A</dir>
+        <to>pitft@gemini.edu</to>
+    </type>
+
+    <filetranslation>
+        <translation>
+            <from>System Verification</from>
+            <to>SV</to>
+        </translation>
+        <translation>
+            <from>Poor Weather</from>
+            <to>PW</to>
+        </translation>
+        <translation>
+            <from>Directors Time</from>
+            <to>DT</to>
+        </translation>
+        <translation>
+            <from>Demo Science</from>
+            <to>DS</to>
+        </translation>
+        <translation>
+            <from>ft</from>
+            <to>FT</to>
+        </translation>
+
+    </filetranslation>
+
+</conf>
