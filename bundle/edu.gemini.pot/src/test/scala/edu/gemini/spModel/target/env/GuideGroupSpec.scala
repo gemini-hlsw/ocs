@@ -314,14 +314,12 @@ class GuideGroupSpec extends Specification with ScalaCheck with Arbitraries with
     }
   }
 
-  "GuideGroup getParamSet" should {
-    "produce a ParamSet that can be read via fromParamSet to result in an equivalent guide group" in
+  "GuideGroup" should {
+    "be PIO Externalizable" in
       forAll { (g: GuideGroup) =>
         g ~= GuideGroup.fromParamSet(g.getParamSet(new PioXmlFactory()))
       }
-  }
 
-  "GuideGroup" should {
     "be Serializable" in
       forAll { (g: GuideGroup) =>
         val bao = new ByteArrayOutputStream()

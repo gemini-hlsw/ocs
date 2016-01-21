@@ -24,6 +24,12 @@ import scalaz._, Scalaz._
 class GuideEnvironmentSpec extends Specification with ScalaCheck with Arbitraries with Almosts {
 
   "GuideEnvironment" should {
+    "be PIO Externalizable" in
+      forAll { (g: GuideEnvironment) =>
+        g ~= GuideEnvironment.fromParamSet(g.getParamSet(new PioXmlFactory()))
+      }
+
+
     "be Serializable" in
       forAll { (g: GuideEnvironment) =>
         val bao = new ByteArrayOutputStream()
