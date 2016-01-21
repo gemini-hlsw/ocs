@@ -77,7 +77,7 @@ object TargetVisibilityCalc {
     Key(B, GN, Ngs) -> hr(11.0 -> Limited,  13.5 -> Bad,                       (17.0 + EQUALITY_LIMIT) -> Limited, (19.0 + EQUALITY_LIMIT) -> Good),
     Key(B, GN, Lgs) -> hr(10.0 -> Limited,  12.5 -> Bad,                       (18.0 + EQUALITY_LIMIT) -> Limited, (20.0 + EQUALITY_LIMIT) -> Good),
     Key(B, GS, Ngs) -> hr( 9.0 -> Limited,  12.0 -> Bad,                       (16.0 + EQUALITY_LIMIT) -> Limited, (19.0 + EQUALITY_LIMIT) -> Good),
-    Key(B, GS, Lgs) -> hr( 8.0 -> Limited,  11.0 -> Bad,                       (19.0 + EQUALITY_LIMIT) -> Limited, (21.0 + EQUALITY_LIMIT) -> Good)
+    Key(B, GS, Lgs) -> hr( 8.0 -> Limited,  11.0 -> Bad,                       (19.0 + EQUALITY_LIMIT) -> Limited, (20.0 + EQUALITY_LIMIT) -> Good)
   )
 
   private val decGnNgs = deg( -90.0 -> Bad,                       -(37.0 - EQUALITY_LIMIT) -> Limited, -(30.0 - EQUALITY_LIMIT) -> Good, 73.0 -> Limited)
