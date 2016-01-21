@@ -83,13 +83,13 @@ trait Arbitraries extends edu.gemini.spModel.core.Arbitraries {
     Arbitrary {
       for {
         n <- alphaStr
-        m <- listOf(arbitrary[(GuideProbe, OptsList[SPTarget])]).map { _.toMap }
+        m <- boundedList[(GuideProbe, OptsList[SPTarget])](3).map { _.toMap }
       } yield ManualGroup(n.take(4), m)
     }
 
   implicit val arbAutomaticActiveGroup: Arbitrary[AutomaticGroup.Active] =
     Arbitrary {
-      listOf(arbitrary[(GuideProbe, SPTarget)]).map(_.toMap).map(AutomaticGroup.Active)
+      boundedList[(GuideProbe, SPTarget)](3).map(_.toMap).map(AutomaticGroup.Active)
     }
 
   implicit val arbAutomaticGroup: Arbitrary[AutomaticGroup] =
