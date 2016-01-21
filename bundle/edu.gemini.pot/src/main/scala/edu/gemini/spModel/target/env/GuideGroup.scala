@@ -318,5 +318,5 @@ object GuideGroup extends ((GuideGrp) => GuideGroup) {
     GuideGroup(Active(m))
   }
 
-  implicit val EqualGuideGroup: Equal[GuideGroup] = Equal.equal(_.grp === _.grp)
+  implicit val EqualGuideGroup: Equal[GuideGroup] = Equal.equalBy(_.grp)
 }

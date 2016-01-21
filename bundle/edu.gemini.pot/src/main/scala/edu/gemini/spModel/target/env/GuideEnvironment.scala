@@ -169,7 +169,7 @@ final case class GuideEnvironment(guideEnv: GuideEnv) extends TargetContainer {
           // Remember the focus and try to find and replace the current group in
           // the list of options.  If not found, append the updated group and
           // mark it as having focus.
-          val lst = opts.withFocus.toList.span(_._1 =/= current.grp) match {
+          val lst = opts.withFocus.toList.span { case (mg, _) => (mg: GuideGrp) =/= current.grp } match {
             case (lefts, (_, f) :: rights) => lefts ::: ((m, f) :: rights)
             case (lefts, Nil)              => lefts.unzip._1.zip(Stream.continually(false)) :+ (m, true)
           }
@@ -224,4 +224,6 @@ object GuideEnvironment {
   private def toSortedSet(s: Set[GuideProbe]): java.util.SortedSet[GuideProbe] =
     new java.util.TreeSet(GuideProbe.KeyComparator.instance) <|
       (_.addAll(s.asJavaCollection))
+
+  implicit val EqualGuideEnvironment: Equal[GuideEnvironment] = Equal.equalBy(_.guideEnv)
 }

@@ -61,6 +61,10 @@ object ManualGroup {
     override def targets(m: ManualGroup): Map[GuideProbe, NonEmptyList[SPTarget]] =
       m.targetMap.mapValues(_.toNel)
   }
+
+  implicit val EqualManualGroup: Equal[ManualGroup] = Equal.equal { (m0, m1) =>
+    (m0.name === m1.name) && (m0.targetMap === m1.targetMap)
+  }
 }
 
 
@@ -106,6 +110,8 @@ object AutomaticGroup {
         case Active(m) => m.mapValues(_.wrapNel)
       }
   }
+
+  implicit val EqualAutomaticGroup: Equal[AutomaticGroup] = Equal.equalA
 }
 
 object GuideGrp {
@@ -118,8 +124,8 @@ object GuideGrp {
     })
 
   implicit val EqualGuideGrp: Equal[GuideGrp] = Equal.equal {
-    case (gg1: AutomaticGroup, gg2: AutomaticGroup) => gg1 == gg2
-    case (ManualGroup(n1,tm1), ManualGroup(n2,tm2)) => n1 === n2 && tm1 === tm2
-    case (_, _)                                     => false
+    case (a0: AutomaticGroup, a1: AutomaticGroup) => a0 === a1
+    case (m0: ManualGroup,    m1: ManualGroup)    => m0 === m1
+    case (_, _)                                   => false
   }
 }

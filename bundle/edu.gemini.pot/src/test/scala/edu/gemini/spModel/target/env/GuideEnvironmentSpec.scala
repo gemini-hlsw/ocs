@@ -23,6 +23,19 @@ import scalaz._, Scalaz._
 
 class GuideEnvironmentSpec extends Specification with ScalaCheck with Arbitraries with Almosts {
 
+  "GuideEnvironment removeGroup" should {
+    "do nothing if the group is automatic" in {
+      forAll { (g: GuideEnvironment) =>
+        val auto = g.getOptions.head
+        auto.grp match {
+          case _: AutomaticGroup => g.removeGroup(auto) === g
+          case _                 => false
+        }
+      }
+    }
+  }
+
+
   "GuideEnvironment" should {
     "be PIO Externalizable" in
       forAll { (g: GuideEnvironment) =>

@@ -102,4 +102,8 @@ object GuideEnv {
       }).reduceLeft(merge)
     }
   }
+
+  implicit val EqualGuideEnv: Equal[GuideEnv] = Equal.equal { (ge0, ge1) =>
+    ge0.auto === ge1.auto && ge0.manual === ge1.manual
+  }
 }
