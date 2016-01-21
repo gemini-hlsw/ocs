@@ -208,8 +208,10 @@ object GuideEnvironment {
   val Manual: GuideEnvironment @> Option[OptsList[ManualGroup]] =
     Env >=> GuideEnv.Manual
 
-  def create(guideGroups: OptionsList[GuideGroup]): GuideEnvironment =
-    ???
+  def create(guideGroups: OptionsList[GuideGroup]): GuideEnvironment = {
+    val primary = guideGroups.getPrimaryIndex.getOrElse(0)
+    Initial.setOptions(guideGroups.getOptions).setPrimaryIndex(primary)
+  }
 
   def fromParamSet(parent: ParamSet): GuideEnvironment = {
     val primary = Pio.getIntValue(parent, "primary", 0)
