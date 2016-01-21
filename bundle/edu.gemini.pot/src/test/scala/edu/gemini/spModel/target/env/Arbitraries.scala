@@ -108,4 +108,17 @@ trait Arbitraries extends edu.gemini.spModel.core.Arbitraries {
         ts <- arbitrary[NonEmptyList[SPTarget]]
       } yield GuideProbeTargets.create(g, ts.toList.asImList)
     }
+
+  implicit val arbGuideEnv: Arbitrary[GuideEnv] =
+    Arbitrary {
+      for {
+        a <- arbitrary[AutomaticGroup]
+        m <- arbitrary[Option[OptsList[ManualGroup]]]
+      } yield GuideEnv(a, m)
+    }
+
+  implicit val arbGuideEnvironment: Arbitrary[GuideEnvironment] =
+    Arbitrary {
+      arbitrary[GuideEnv].map(ge => GuideEnvironment(ge))
+    }
 }
