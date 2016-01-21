@@ -143,12 +143,12 @@ class TestTargetVisibilityTest {
     // More or equal to 11 and less and equal to 19 is bad
     gsLgsB(Bad, ("11:00:00", "0:00:00"))
     gsLgsB(Bad, ("19:00:00", "0:00:00"))
-    // More than 19 and less or equal to 21 is warning
+    // More than 19 and less or equal to 20 is warning
     gsLgsB(Limited, ("19:00:00.001", "0:00:00"))
-    gsLgsB(Limited, ("21:00:00", "0:00:00"))
+    gsLgsB(Limited, ("20:00:00", "0:00:00"))
     // Other points are good
     gsLgsB(Good, ("0:00:00", "0:00:00"))
-    gsLgsB(Good, ("22:00:00", "0:00:00"))
+    gsLgsB(Good, ("21:00:00", "0:00:00"))
   }
 
   @Test def testRaGSNgsSemester() {
