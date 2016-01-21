@@ -135,7 +135,7 @@ def common(version: Version) = AppConfig(
     BundleSpec("org.scalaz.concurrent",                  Version(7, 1, 6)),
     BundleSpec("slf4j.api",                              Version(1, 6, 4)),
     BundleSpec("slf4j.jdk14",                            Version(1, 6, 4)),
-    BundleSpec("squants",                                Version(0, 5, 3)),
+    BundleSpec("com.squants",                            Version(0, 6, 1)),
     BundleSpec("org.apache.commons.logging",             Version(1, 1, 0)),
     BundleSpec("com.cosylab.epics.caj",                  Version(1, 0, 2)),
     BundleSpec("monocle.core",                           Version(1, 1, 0)),
