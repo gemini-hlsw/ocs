@@ -24,8 +24,8 @@ case class OptsList[A](toDisjunction: OneAnd[List, A] \/ Zipper[A]) {
   /** Moves or sets the focus to `a` if `a` is a member of the options list and
     * returns the updated `OptsList` in a `Some`. Otherwise, returns `None`.
     */
-  def focusOn(a: A): Option[OptsList[A]] =
-    toList.span(_ != a) match {
+  def focusOn(a: A)(implicit ev: Equal[A]): Option[OptsList[A]] =
+    toList.span(_ =/= a) match {
       case (_, Nil)                 => none
       case (lefts, focus :: rights) => some(focused(lefts, focus, rights))
     }
