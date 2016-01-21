@@ -71,14 +71,14 @@ case class OptsList[A](toDisjunction: OneAnd[List, A] \/ Zipper[A]) {
     }
 
   /** Deletes all occurrences of `a` in the options list. */
-  def delete(a: A): Option[OptsList[A]] =
+  def delete(a: A)(implicit ev: Equal[A]): Option[OptsList[A]] =
     toDisjunction match {
-      case -\/(l) => l.toList.filter(_ != a).toNel.map(nel => OptsList.unfocused(nel))
+      case -\/(l) => l.toList.filter(_ =/= a).toNel.map(nel => OptsList.unfocused(nel))
       case \/-(z) =>
-        val l  = z.lefts.filter(_ != a)
-        val r  = z.rights.filter(_ != a)
+        val l  = z.lefts.filter(_ =/= a)
+        val r  = z.rights.filter(_ =/= a)
         val z0 = Zipper(l, z.focus, r)
-        (if (z0.focus == a) z0.delete else Some(z0)).map(zip => OptsList(zip.right))
+        (if (z0.focus === a) z0.delete else Some(z0)).map(zip => OptsList(zip.right))
     }
 
   /** Pairs each element with a boolean indicating whether that element has focus. */
