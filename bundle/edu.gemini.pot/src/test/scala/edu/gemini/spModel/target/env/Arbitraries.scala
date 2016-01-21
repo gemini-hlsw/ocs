@@ -16,6 +16,12 @@ import Scalaz._
 
 trait Arbitraries extends edu.gemini.spModel.core.Arbitraries {
 
+  def boundedList[A: Arbitrary](max: Int): Gen[List[A]] =
+    for {
+      sz <- choose(0, max)
+      as <- listOfN(sz, arbitrary[A])
+    } yield as
+
   implicit val arbSpTarget: Arbitrary[SPTarget] = // arbitrary[Target].map(t => new SPTarget(???))
     Arbitrary {
       for {
@@ -28,9 +34,9 @@ trait Arbitraries extends edu.gemini.spModel.core.Arbitraries {
   implicit def arbZipper[A: Arbitrary]: Arbitrary[Zipper[A]] =
     Arbitrary {
       for {
-        l <- arbitrary[List[A]]
+        l <- boundedList[A](3)
         f <- arbitrary[A]
-        r <- arbitrary[List[A]]
+        r <- boundedList[A](3)
       } yield Zipper(l.toStream, f, r.toStream)
     }
 
@@ -46,7 +52,7 @@ trait Arbitraries extends edu.gemini.spModel.core.Arbitraries {
     Arbitrary {
       for {
         a  <- arbitrary[A]
-        as <- arbitrary[List[A]]
+        as <- boundedList[A](3)
       } yield NonEmptyList.nel(a, as)
     }
 
@@ -54,13 +60,13 @@ trait Arbitraries extends edu.gemini.spModel.core.Arbitraries {
     Arbitrary {
       for {
         a  <- arbitrary[A]
-        as <- arbitrary[List[A]]
+        as <- boundedList[A](3)
       } yield OneAnd(a, as)
     }
 
   implicit def arbImList[A: Arbitrary]: Arbitrary[ImList[A]] =
     Arbitrary {
-      arbitrary[List[A]].map(_.asImList)
+      boundedList[A](3).map(_.asImList)
     }
 
   implicit def arbOptsList[A: Arbitrary]: Arbitrary[OptsList[A]] =
