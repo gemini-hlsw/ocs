@@ -133,11 +133,13 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
      * Update the remove and primary buttons as well as the detail editor.
      */
     private void updateRemovePrimaryButtonsAndDetailEditor(final TargetEnvironment env) {
-        final boolean editable   = OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation());
-        final boolean curNotBase = _curPos != env.getBase();
-        _w.removeButton.setEnabled(curNotBase && editable);
-        _w.primaryButton.setEnabled(enablePrimary(_curPos, env) && editable);
-        updateDetailEditorEnabledState(editable);
+        final boolean editable      = OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation());
+        final boolean curNotBase    = _curPos != env.getBase();
+        final boolean notAutoTarget = !env.getGuideEnvironment().getOptions()
+                .find(gg -> gg.containsTarget(_curPos)).map(GuideGroup::isAutomatic).getOrElse(false);
+        _w.removeButton.setEnabled(curNotBase && editable && notAutoTarget);
+        _w.primaryButton.setEnabled(enablePrimary(_curPos, env) && editable && notAutoTarget);
+        updateDetailEditorEnabledState(editable && notAutoTarget);
     }
 
     // OtItemEditor

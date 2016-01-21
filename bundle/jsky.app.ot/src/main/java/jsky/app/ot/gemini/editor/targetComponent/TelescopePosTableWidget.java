@@ -95,6 +95,8 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
             default Option<Double> distance()  { return None.instance(); }
             default List<Row> children()       { return Collections.emptyList(); }
             default Icon getIcon()             { return null; }
+            default boolean editable()         { return true; }
+            default boolean movable()          { return true; }
 
             default Border border(int col)     {
                 return col == 0 ? BorderFactory.createEmptyBorder(0, 5, 0, 0) : null;
@@ -139,6 +141,8 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
             BaseTargetRow(final SPTarget target, final Option<Long> when) {
                 super(true, TargetEnvironment.BASE_NAME, target.getName(), new Some<>(target), when);
             }
+
+            @Override public boolean movable() { return false; }
         }
 
         static abstract class NonBaseTargetRow extends AbstractRow {
@@ -162,13 +166,18 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
         static final class GuideTargetRow extends NonBaseTargetRow {
             private final boolean isActiveGuideProbe;
             private final Option<AgsGuideQuality> quality;
+            private final boolean editable;
+            private final boolean movable;
 
             GuideTargetRow(final boolean isActiveGuideProbe, final Option<AgsGuideQuality> quality,
-                           final boolean enabled, final GuideProbe probe, final int index, final SPTarget target,
+                           final boolean enabled, final boolean editable, final boolean movable,
+                           final GuideProbe probe, final int index, final SPTarget target,
                            final Option<Coordinates> baseCoords, final Option<Long> when) {
                 super(enabled, String.format("%s (%d)", probe.getKey(), index), target, baseCoords, when);
                 this.isActiveGuideProbe = isActiveGuideProbe;
                 this.quality = quality;
+                this.editable = editable;
+                this.movable = movable;
             }
 
             @Override public Border border(int col)     {
@@ -180,6 +189,9 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
                         GuidingIcon.apply(quality.getOrElse(AgsGuideQuality.Unusable$.MODULE$), enabled()) :
                         errorIcon;
             }
+
+            @Override public boolean editable() { return editable; }
+            @Override public boolean movable()  { return movable;  }
         }
 
         static final class UserTargetRow extends NonBaseTargetRow {
@@ -187,20 +199,27 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
                           final Option<Long> when) {
                 super(true, String.format("%s (%d)", TargetEnvironment.USER_NAME, index), target, baseCoords, when);
             }
+
+            @Override public boolean movable() { return false; }
         }
 
         static final class GroupRow extends AbstractRow {
             private final Option<Tuple2<Integer, GuideGroup>> group;
             private final List<Row> children;
+            private final boolean editable;
 
-            GroupRow(final boolean enabled, final int index, final GuideGroup group, final List<Row> children) {
+            GroupRow(final boolean enabled, final boolean editable,
+                     final int index, final GuideGroup group, final List<Row> children) {
                 super(enabled, group.getName().getOrElse("Guide Group " + (index + 1)), "", None.instance(), None.instance());
                 this.group    = new Some<>(new Pair<>(index, group));
                 this.children = Collections.unmodifiableList(children);
+                this.editable = editable;
             }
 
             @Override public Option<Tuple2<Integer, GuideGroup>> group() { return group; }
             @Override public List<Row> children()                        { return children; }
+            @Override public boolean editable()                          { return editable; }
+            @Override public boolean movable()                           { return false; }
         }
 
         // Collection of rows, which may include "subrows".
@@ -270,7 +289,9 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
                 final int groupIndex   = gtup._2();
 
                 final boolean isPrimaryGroup = ge.getPrimaryIndex() == groupIndex;
-                final List<Row> rowList      = new ArrayList<>();
+                final boolean editable         = !group.isAutomatic();
+                final boolean movable          = !group.isAutomatic();
+                final List<Row> rowList        = new ArrayList<>();
 
                 // Process the guide probe targets for this group.
                 group.getAll().foreach(gpt -> {
@@ -284,14 +305,14 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
                         final int index = tup._2() + 1;
 
                         final Option<AgsGuideQuality> quality = guideQuality(ags, guideProbe, target);
-                        final boolean enabled = isPrimaryGroup && primary.exists(target::equals);
+                        final boolean enabled  = isPrimaryGroup && primary.exists(target::equals);
 
-                        final Row row = new GuideTargetRow(isActive, quality, enabled, guideProbe, index, target,
-                                baseCoords, when);
+                        final Row row = new GuideTargetRow(isActive, quality, enabled, editable, movable,
+                                guideProbe, index, target, baseCoords, when);
                         rowList.add(row);
                     });
                 });
-                tmpRows.add(new GroupRow(isPrimaryGroup, groupIndex, group, rowList));
+                tmpRows.add(new GroupRow(isPrimaryGroup, editable, groupIndex, group, rowList));
             });
 
             // Add the user positions.
@@ -754,15 +775,15 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
     }
 
     /**
-     * Returns true if it is ok to add the given item row to the given parent row
-     * (parent must be a guide group row and item a suitable guide star object).
+     * Returns true if it is ok to add the given item row to the given parent row.
+     * For this to be the case, the item must be movable, the parent must be an editable guide group row.
      */
     public boolean isOkayToAdd(final TableData.Row item, final TableData.Row parent) {
         if (item == parent) return false;
-        final GuideGroup group = parent.group().map(Tuple2::_2).getOrNull();
-        final SPTarget target = item.target().getOrNull();
-        return !(group == null || target == null || group.containsTarget(target))
-                && !(item instanceof TableData.BaseTargetRow) && !(item instanceof TableData.UserTargetRow);
+        final Option<GuideGroup> groupOpt   = parent.group().map(Tuple2::_2);
+        final Option<SPTarget>   targetOpt  = item.target();
+        return item.movable() && (parent instanceof TableData.GroupRow) && parent.editable()
+                && !groupOpt.exists(g -> targetOpt.exists(g::containsTarget));
     }
 
     /**
