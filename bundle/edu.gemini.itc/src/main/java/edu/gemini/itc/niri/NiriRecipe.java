@@ -124,19 +124,9 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
 
         final double pixel_size = instrument.getPixelSize();
 
-        final SlitThroughput st = new SlitThroughput(_obsDetailParameters.analysisMethod(), im_qual, pixel_size, instrument.getFPMask());
-        double ap_diam = st.getSpatialPix();
-        double spec_source_frac = st.getSlitThroughput();
-
-        if (_sdParameters.isUniform()) {
-
-            if (_obsDetailParameters.isAutoAperture()) {
-                ap_diam = new Double(1 / (instrument.getFPMask() * pixel_size) + 0.5).intValue();
-                spec_source_frac = 1;
-            } else {
-                spec_source_frac = instrument.getFPMask() * ap_diam * pixel_size;
-            }
-        }
+        final SlitThroughput st = new SlitThroughput(_obsDetailParameters, _sdParameters, im_qual, pixel_size, instrument.getFPMask());
+        final double ap_diam = st.getAppDiam();
+        final double spec_source_frac = st.getSlitThroughput();
 
         final SpecS2NVisitor specS2N = new SpecS2NVisitor(
                 pixel_size,

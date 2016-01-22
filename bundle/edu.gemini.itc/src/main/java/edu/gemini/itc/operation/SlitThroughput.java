@@ -2,9 +2,7 @@ package edu.gemini.itc.operation;
 
 import edu.gemini.itc.base.DatFile;
 import edu.gemini.itc.base.ITCConstants;
-import edu.gemini.itc.shared.AnalysisMethod;
-import edu.gemini.itc.shared.AutoAperture;
-import edu.gemini.itc.shared.UserAperture;
+import edu.gemini.itc.shared.*;
 
 import java.util.Scanner;
 
@@ -40,50 +38,80 @@ public final class SlitThroughput {
         }
     }
 
+    private final ObservationDetails obs;
+    private final SourceDefinition src;
     private final double im_qual;
     private final double pixel_size;
     private final double slit_width;
     private final double slit_ap;
 
-    public SlitThroughput(final AnalysisMethod method, final double im_qual, final double pixel_size, final double slit_width) {
-        this.im_qual = im_qual;
-        this.slit_ap = (method instanceof UserAperture) ? ((UserAperture) method).diameter() : 1.4 * im_qual;
+    public SlitThroughput(final ObservationDetails obs, final SourceDefinition src, final double im_qual, final double pixel_size, final double slit_width) {
+        this.obs        = obs;
+        this.src        = src;
+        this.im_qual    = im_qual;
+        this.slit_ap    = (obs.analysisMethod() instanceof UserAperture) ? ((UserAperture) obs.analysisMethod()).diameter() : 1.4 * im_qual;
         this.pixel_size = pixel_size;
         this.slit_width = slit_width;
     }
 
     public double getSlitThroughput() {
 
-        // find the x value
-        final double spatial_pix = slit_ap / pixel_size;
-        final int int_spatial_pix = new Double(spatial_pix + .5).intValue();
-        double slit_spatial_ratio = int_spatial_pix * pixel_size / slit_width;
+        // For the usb case we want the resolution to be determined by the
+        // slit width and not the image quality for a point source.
+        if (src.isUniform()) {
+            if (obs.isAutoAperture()) {
+                return 1;
+            } else {
+                return slit_width * getSpatialPix() * pixel_size;
+            }
 
-        // find the y value
-        final double sigma = im_qual / 2.355;
-        final double slit_spec_ratio = slit_width / sigma;
-
-        //trap large values
-        if (slit_spatial_ratio > 5.5) {
-            slit_spatial_ratio = 5.499; //Slide in under the max
-        }
-
-        if (slit_spec_ratio > 8) {
-            return 1;
-        }
-
-        // Do a 2D interpolation to find the return value using x= slit_spatial_ratio and y= slit_spec_ratio
-        double slitThroughput = getSTvalue(slit_spatial_ratio, slit_spec_ratio);
-
-        // Do a 2D interpolation to findethe return value using x= slit_spatial_ratio and y= slit_spec_ratio
-        if (slitThroughput > 1.0) {
-            return 1;
+        // Non-USB case (point source)
         } else {
-            return slitThroughput;
+
+            // find the x value
+            final double spatial_pix = slit_ap / pixel_size;
+            final int int_spatial_pix = new Double(spatial_pix + .5).intValue();
+            double slit_spatial_ratio = int_spatial_pix * pixel_size / slit_width;
+
+            // find the y value
+            final double sigma = im_qual / 2.355;
+            final double slit_spec_ratio = slit_width / sigma;
+
+            //trap large values
+            if (slit_spatial_ratio > 5.5) {
+                slit_spatial_ratio = 5.499; //Slide in under the max
+            }
+
+            if (slit_spec_ratio > 8) {
+                return 1;
+            }
+
+            // Do a 2D interpolation to find the return value using x= slit_spatial_ratio and y= slit_spec_ratio
+            final double slitThroughput = getSTvalue(slit_spatial_ratio, slit_spec_ratio);
+
+            if (slitThroughput > 1.0) {
+                return 1;
+            } else {
+                return slitThroughput;
+            }
+
+        }
+
+    }
+
+    /**
+     * Calculates the aperture diameter in pixels.
+     * @return aperture diameter
+     */
+    public double getAppDiam() {
+        if (src.isUniform() && obs.isAutoAperture()) {
+            return new Double(1 / (slit_width * pixel_size) + 0.5).intValue();
+        } else {
+            return getSpatialPix();
         }
     }
 
-    public double getSpatialPix() {
+    private double getSpatialPix() {
         return new Integer(new Double(slit_ap / pixel_size + 0.5).intValue()).doubleValue();
     }
 
@@ -91,7 +119,7 @@ public final class SlitThroughput {
      * @return y value at specified x using linear interpolation.
      * Silently returns zero if x is out of spectrum range.
      */
-    public double getSTvalue(final double x, final double y) {
+    private double getSTvalue(final double x, final double y) {
         if (x < getStartX() || y < getStartY()) {
             return 0;
         }
@@ -125,51 +153,51 @@ public final class SlitThroughput {
     /**
      * @return starting x value
      */
-    public double getStartX() {
+    private double getStartX() {
         return x_axis[0];
     }
 
-    public double getXAxisValue(final int index) {
+    private double getXAxisValue(final int index) {
         return x_axis[index];
     }
 
-    public double getYAxisValue(final int index) {
+    private double getYAxisValue(final int index) {
         return y_axis[index];
     }
 
-    public int getXAxisSize() {
+    private int getXAxisSize() {
         return x_axis.length;
     }
 
-    public int getYAxisSize() {
+    private int getYAxisSize() {
         return y_axis.length;
     }
 
     /**
      * @return starting y value
      */
-    public double getStartY() {
+    private double getStartY() {
         return y_axis[0];
     }
 
     /**
      * @return ending y value
      */
-    public double getEndY() {
+    private double getEndY() {
         return y_axis[y_axis.length - 1];
     }
 
     /**
      * Returns x value of specified data point.
      */
-    public double getValue(final int index_x, final int index_y) {
+    private double getValue(final int index_x, final int index_y) {
         return _data[index_y][index_x];
     }
 
     /**
      * Returns the index of the data point with largest x value less than x
      */
-    public int getLowerXIndex(final double x) {
+    private int getLowerXIndex(final double x) {
         // x value is in.  The only solution is to search for it.
         // Small amt of data so just walk through.
         int low_index = 0;
@@ -180,7 +208,7 @@ public final class SlitThroughput {
         return low_index;
     }
 
-    public int getLowerYIndex(double x) {
+    private int getLowerYIndex(double x) {
         // x value is in.  The only solution is to search for it.
         // Small amt of data so just walk through.
         int low_index = 0;

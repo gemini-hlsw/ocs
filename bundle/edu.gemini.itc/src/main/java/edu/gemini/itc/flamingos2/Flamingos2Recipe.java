@@ -92,25 +92,19 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
         // Might implement these modules at a later time.
 
         final double pixel_size = instrument.getPixelSize();
-        final SpecS2NLargeSlitVisitor specS2N;
-        final SlitThroughput st = new SlitThroughput(_obsDetailParameters.analysisMethod(), im_qual, pixel_size, instrument.getSlitSize() * pixel_size);
-
-        double ap_diam = st.getSpatialPix();
-        double spec_source_frac = st.getSlitThroughput();
-
-        if (_sdParameters.isUniform()) {
-            if (_obsDetailParameters.isAutoAperture()) {
-                ap_diam = new Double(1 / (instrument.getSlitSize() * pixel_size) + 0.5).intValue();
-                spec_source_frac = 1;
-            } else {
-                spec_source_frac = instrument.getSlitSize() * pixel_size * ap_diam * pixel_size;
-            }
+        final SlitThroughput st = new SlitThroughput(_obsDetailParameters, _sdParameters, im_qual, pixel_size, instrument.getSlitSize() * pixel_size);
+        final double spec_source_frac = st.getSlitThroughput();
+        double ap_diam = st.getAppDiam();
+        // TODO: This is correcting for a bug (mixup slit size in pixels vs arcsecs)
+        // TODO: Verify that results are ok when removing this if statement entirely, then update baseline
+        if (_sdParameters.isUniform() &&_obsDetailParameters.isAutoAperture()) {
+            ap_diam = new Double(1 / (instrument.getSlitSize() * pixel_size) + 0.5).intValue();
         }
 
         final double gratDispersion_nmppix = instrument.getSpectralPixelWidth();
         final double gratDispersion_nm = 0.5 / pixel_size * gratDispersion_nmppix;
 
-        specS2N = new SpecS2NLargeSlitVisitor(
+        final SpecS2NLargeSlitVisitor specS2N = new SpecS2NLargeSlitVisitor(
                 instrument.getSlitSize() * pixel_size,
                 pixel_size,
                 instrument.getSpectralPixelWidth(),

@@ -113,22 +113,20 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         // inputs: source morphology specification
 
         final double pixel_size = instrument.getPixelSize();
-        double ap_diam;
-        double source_fraction;
+        final double source_fraction;
         List<Double> sf_list = new ArrayList<>();
 
         // Calculate image quality
         final ImageQualityCalculatable IQcalc = ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _telescope, instrument);
         IQcalc.calculate();
-        double im_qual = IQcalc.getImageQuality();
 
-        final SourceFraction SFcalc = SourceFractionFactory.calculate(_sdParameters, _obsDetailParameters, instrument, im_qual);
+        final SourceFraction SFcalc = SourceFractionFactory.calculate(_sdParameters, _obsDetailParameters, instrument, IQcalc.getImageQuality());
         if (!instrument.isIfuUsed()) {
             source_fraction = SFcalc.getSourceFraction();
         } else {
             final VisitableMorphology morph;
             if (!_sdParameters.isUniform()) {
-                morph = new GaussianMorphology(im_qual);
+                morph = new GaussianMorphology(IQcalc.getImageQuality());
             } else {
                 morph = new USBMorphology();
             }
@@ -142,14 +140,15 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         // In this version we are bypassing morphology modules 3a-5a.
         // i.e. the output morphology is same as the input morphology.
         // Might implement these modules at a later time.
-        double spec_source_frac;
         final double dark_current = instrument.getDarkCurrent();
         final double read_noise = instrument.getReadNoise();
 
         // ObservationMode Imaging or spectroscopy
+        final double spec_source_frac;
+        final double ap_diam;
         if (!instrument.isIfuUsed()) {
-            st = new SlitThroughput(_obsDetailParameters.analysisMethod(), im_qual, pixel_size, instrument.getSlitWidth());
-            ap_diam = st.getSpatialPix();
+            st = new SlitThroughput(_obsDetailParameters, _sdParameters, IQcalc.getImageQuality(), pixel_size, instrument.getSlitWidth());
+            ap_diam = st.getAppDiam();
             spec_source_frac = st.getSlitThroughput();
         } else {
             st = null; // TODO: how to deal with no ST in case of IFU?
@@ -157,21 +156,8 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
             ap_diam = 5 / instrument.getSpatialBinning();
         }
 
-        // For the usb case we want the resolution to be determined by the
-        // slit width and not the image quality for a point source.
-        if (_sdParameters.isUniform()) {
-            im_qual = 10000;
-
-            if (!instrument.isIfuUsed()) {
-
-                if (!_obsDetailParameters.isAutoAperture()) {
-                    spec_source_frac = instrument.getSlitWidth() * ap_diam * pixel_size;
-                } else {
-                    ap_diam = new Double(1 / (instrument.getSlitWidth() * pixel_size) + 0.5).intValue();
-                    spec_source_frac = 1;
-                }
-            }
-        }
+        // TODO: why, oh why?
+        final double im_qual = _sdParameters.isUniform() ? 10000 : IQcalc.getImageQuality();
 
         if (instrument.isIfuUsed() && !_sdParameters.isUniform()) {
             specS2N = new SpecS2NLargeSlitVisitor[sf_list.size()];

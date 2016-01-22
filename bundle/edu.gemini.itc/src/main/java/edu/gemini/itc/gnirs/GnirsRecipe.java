@@ -74,7 +74,6 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
         // output: redshifteed SED
 
         final double pixel_size = instrument.getPixelSize();
-        double ap_diam = 0;
 
         // Calculate image quality
         final ImageQualityCalculatable IQcalc = ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _telescope, instrument);
@@ -93,25 +92,12 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
         // i.e. the output morphology is same as the input morphology.
         // Might implement these modules at a later time.
 
-        final SlitThroughput st = new SlitThroughput(_obsDetailParameters.analysisMethod(), IQcalc.getImageQuality(), pixel_size, instrument.getFPMask());
-        ap_diam = st.getSpatialPix(); // ap_diam really Spec_Npix on
+        final SlitThroughput st = new SlitThroughput(_obsDetailParameters, _sdParameters, IQcalc.getImageQuality(), pixel_size, instrument.getFPMask());
+        final double ap_diam = st.getAppDiam();
+        final double spec_source_frac = st.getSlitThroughput();
 
-        double spec_source_frac = st.getSlitThroughput();
-
-        // For the usb case we want the resolution to be determined by the
-        // slit width and not the image quality for a point source.
-        final double im_qual;
-        if (_sdParameters.isUniform()) {
-            im_qual = 10000;
-            if (_obsDetailParameters.isAutoAperture()) {
-                ap_diam = new Double(1 / (instrument.getFPMask() * pixel_size) + 0.5).intValue();
-                spec_source_frac = 1;
-            } else {
-                spec_source_frac = instrument.getFPMask() * ap_diam * pixel_size;
-            }
-        } else {
-            im_qual = IQcalc.getImageQuality();
-        }
+        // TODO: why, oh why?
+        final double im_qual = _sdParameters.isUniform() ? 10000 : IQcalc.getImageQuality();
 
         final SpecS2NLargeSlitVisitor specS2N = new SpecS2NLargeSlitVisitor(
                 instrument.getFPMask(), pixel_size,
