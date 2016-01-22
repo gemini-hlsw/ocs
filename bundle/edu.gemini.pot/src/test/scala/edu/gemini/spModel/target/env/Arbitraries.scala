@@ -74,6 +74,11 @@ trait Arbitraries extends edu.gemini.spModel.core.Arbitraries {
       arbitrary[OneAnd[List, A] \/ Zipper[A]].map { d => OptsList(d) }
     }
 
+  implicit def arbScalazMap[A: Arbitrary : Order, B: Arbitrary]: Arbitrary[A ==>> B] =
+    Arbitrary {
+      boundedList[(A, B)](3).map(lst => ==>>.fromList(lst))
+    }
+
   implicit val arbGuideProbe: Arbitrary[GuideProbe] =
     Arbitrary {
       oneOf(GuideProbeMap.instance.values().asScala.toList)
@@ -83,13 +88,13 @@ trait Arbitraries extends edu.gemini.spModel.core.Arbitraries {
     Arbitrary {
       for {
         n <- alphaStr
-        m <- boundedList[(GuideProbe, OptsList[SPTarget])](3).map { _.toMap }
+        m <- boundedList[(GuideProbe, OptsList[SPTarget])](3).map { lst => ==>>.fromList(lst) }
       } yield ManualGroup(n.take(4), m)
     }
 
   implicit val arbAutomaticActiveGroup: Arbitrary[AutomaticGroup.Active] =
     Arbitrary {
-      boundedList[(GuideProbe, SPTarget)](3).map(_.toMap).map(AutomaticGroup.Active)
+      boundedList[(GuideProbe, SPTarget)](3).map(lst => ==>>.fromList(lst)).map(AutomaticGroup.Active)
     }
 
   implicit val arbAutomaticGroup: Arbitrary[AutomaticGroup] =

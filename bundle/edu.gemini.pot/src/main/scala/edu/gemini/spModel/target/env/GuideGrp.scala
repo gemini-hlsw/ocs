@@ -27,7 +27,7 @@ sealed trait GuideGrp extends Serializable {
     this match {
       case AutomaticGroup.Initial    => Set.empty[GuideProbe]
       case AutomaticGroup.Active(ts) => ts.keySet
-      case ManualGroup(_, ts)        => ts.filter(_._2.hasFocus).keySet
+      case ManualGroup(_, ts)        => ts.filter(_.hasFocus).keySet
     }
 }
 
@@ -35,18 +35,18 @@ sealed trait GuideGrp extends Serializable {
   * of targets, of which exactly one is selected. Should it also have a UUID so
   * we can distinguish [temporarily] identical ones?
  */
-final case class ManualGroup(name: String, targetMap: Map[GuideProbe, OptsList[SPTarget]]) extends GuideGrp
+final case class ManualGroup(name: String, targetMap: GuideProbe ==>> OptsList[SPTarget]) extends GuideGrp
 
 object ManualGroup {
   val Name: ManualGroup @> String                                 =
     Lens.lensu((mg, n) => mg.copy(name = n), _.name)
 
-  val TargetMap: ManualGroup @> Map[GuideProbe, OptsList[SPTarget]] =
+  val TargetMap: ManualGroup @> ==>>[GuideProbe, OptsList[SPTarget]] =
     Lens.lensu((mg,m) => mg.copy(targetMap = m), _.targetMap)
 
   implicit val TargetCollectionManualGroup: TargetCollection[ManualGroup] = new TargetCollection[ManualGroup] {
     override def cloneTargets(m: ManualGroup): ManualGroup =
-      TargetMap.mod(_.mapValues { opts =>
+      TargetMap.mod(_.map { opts =>
         OptsList(opts.toDisjunction.bimap(_.map(_.clone()), _.map(_.clone())))
       }, m)
 
@@ -54,12 +54,10 @@ object ManualGroup {
       m.targetMap.values.exists(opts => opts.any(_ == t))
 
     override def removeTarget(m: ManualGroup, t: SPTarget): ManualGroup =
-      TargetMap.mod(_.mapValues(_.delete(t)).collect {
-        case (probe, Some(opts)) => (probe, opts)
-      }, m)
+      TargetMap.mod(_.mapOption(_.delete(t)), m)
 
-    override def targets(m: ManualGroup): Map[GuideProbe, NonEmptyList[SPTarget]] =
-      m.targetMap.mapValues(_.toNel)
+    override def targets(m: ManualGroup): GuideProbe ==>> NonEmptyList[SPTarget] =
+      m.targetMap.map(_.toNel)
   }
 
   implicit val EqualManualGroup: Equal[ManualGroup] = Equal.equal { (m0, m1) =>
@@ -80,34 +78,34 @@ object AutomaticGroup {
   /** An active bags group provides a 1:1 mapping from probe to target. If the
     * map is empty this is ok; it just means bags did not find any targets.
     */
-  case class Active(targetMap: Map[GuideProbe, SPTarget]) extends AutomaticGroup
+  case class Active(targetMap: GuideProbe ==>> SPTarget) extends AutomaticGroup
 
-  val TargetMap: Active @> Map[GuideProbe, SPTarget] =
+  val TargetMap: Active @> ==>>[GuideProbe, SPTarget] =
     Lens.lensu((a,m) => a.copy(targetMap = m), _.targetMap)
 
   implicit val TargetCollectionAutomaticGroup: TargetCollection[AutomaticGroup] = new TargetCollection[AutomaticGroup] {
     override def cloneTargets(a: AutomaticGroup): AutomaticGroup =
       a match {
         case Initial    => a
-        case Active(ts) => AutomaticGroup.Active(ts.mapValues(_.clone()))
+        case Active(ts) => AutomaticGroup.Active(ts.map(_.clone()))
       }
 
     override def containsTarget(a: AutomaticGroup, t: SPTarget): Boolean =
       a match {
         case Initial    => false
-        case Active(ts) => ts.exists { case (_, t0) => t == t0 }
+        case Active(ts) => ts.any { _ == t }
       }
 
     override def removeTarget(a: AutomaticGroup, t: SPTarget): AutomaticGroup =
       a match {
         case Initial   => Initial
-        case Active(m) => Active(m.filterNot(_._2 == t))
+        case Active(m) => Active(m.filter(_ != t))
       }
 
-    override def targets(a: AutomaticGroup): Map[GuideProbe, NonEmptyList[SPTarget]] =
+    override def targets(a: AutomaticGroup): GuideProbe ==>> NonEmptyList[SPTarget] =
       a match {
-        case Initial   => Map.empty
-        case Active(m) => m.mapValues(_.wrapNel)
+        case Initial   => ==>>.empty
+        case Active(m) => m.map(_.wrapNel)
       }
   }
 

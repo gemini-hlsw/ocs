@@ -3,7 +3,7 @@ package edu.gemini.spModel.target.env
 import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.spModel.target.SPTarget
 
-import scalaz.NonEmptyList
+import scalaz.{NonEmptyList, ==>>}
 
 /** A trait for common target collection operations across `GuideEnv` and the
   * various `GuideGrp`s.
@@ -12,7 +12,7 @@ trait TargetCollection[Repr] {
   def cloneTargets(r: Repr): Repr
   def containsTarget(r: Repr, t: SPTarget): Boolean
   def removeTarget(r: Repr, t: SPTarget): Repr
-  def targets(r: Repr): Map[GuideProbe, NonEmptyList[SPTarget]]
+  def targets(r: Repr): GuideProbe ==>> NonEmptyList[SPTarget]
 }
 
 object TargetCollection {
@@ -26,7 +26,7 @@ object TargetCollection {
     def removeTarget(t: SPTarget)(implicit tc: TargetCollection[Repr]): Repr =
       tc.removeTarget(value, t)
 
-    def targets(implicit tc: TargetCollection[Repr]): Map[GuideProbe, NonEmptyList[SPTarget]] =
+    def targets(implicit tc: TargetCollection[Repr]): GuideProbe ==>> NonEmptyList[SPTarget] =
       tc.targets(value)
   }
 }

@@ -85,8 +85,8 @@ class GuideGroupSpec extends Specification with ScalaCheck with Arbitraries with
         AllProbes.forall { gp =>
           g.get(gp).asScalaOpt.forall { gpt =>
             gpt.getPrimary.asScalaOpt == (g.grp match {
-              case ManualGroup(_, m)        => m.get(gp).flatMap(_.focus)
-              case AutomaticGroup.Active(m) => m.get(gp)
+              case ManualGroup(_, m)        => m.lookup(gp).flatMap(_.focus)
+              case AutomaticGroup.Active(m) => m.lookup(gp)
               case AutomaticGroup.Initial   => None
             })
           }
@@ -252,13 +252,13 @@ class GuideGroupSpec extends Specification with ScalaCheck with Arbitraries with
     "maintain the primary target correctly when removing the primary target for a probe" in
       forAll { (name: String, gp: GuideProbe, lefts: List[SPTarget], focus: SPTarget, rights: List[SPTarget]) =>
         def unrollGroupOptsList[A](gg2: GuideGroup): List[SPTarget] = gg2.grp match {
-          case ManualGroup(_, tm) => tm.get(gp).fold(List.empty[SPTarget]) { ol =>
+          case ManualGroup(_, tm) => tm.lookup(gp).fold(List.empty[SPTarget]) { ol =>
             ol.focus.fold(List.empty[SPTarget])(t => t :: unrollGroupOptsList(gg2.removeTarget(t)))
           }
           case _ => Nil
         }
 
-        val gg = new GuideGroup(ManualGroup(name, List(gp -> OptsList.focused(lefts, focus, rights)).toMap))
+        val gg = new GuideGroup(ManualGroup(name, ==>>(gp -> OptsList.focused(lefts, focus, rights))))
         val expectedOrder = focus :: (rights ++ lefts.reverse)
         val actualOrder   = unrollGroupOptsList(gg)
         expectedOrder === actualOrder
@@ -307,7 +307,7 @@ class GuideGroupSpec extends Specification with ScalaCheck with Arbitraries with
     "return a subset of guide probe targets containing a specific target for automatic, active groups" in
       forAll { (t1Gps: Set[GuideProbe], t1: SPTarget, t2: SPTarget) =>
         val t2Gps = AllProbes.toSet.diff(t1Gps)
-        val tm = (t1Gps.map(_ -> t1) ++ t2Gps.map(_ -> t2)).toMap
+        val tm = ==>>.fromFoldable(t1Gps.map(_ -> t1) ++ t2Gps.map(_ -> t2))
         val gg = GuideGroup(AutomaticGroup.Active(tm))
         gg.getAllContaining(t1).asScalaList.map(_.getGuider).toSet === t1Gps &&
           gg.getAllContaining(t2).asScalaList.map(_.getGuider).toSet === t2Gps

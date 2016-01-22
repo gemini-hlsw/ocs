@@ -73,6 +73,13 @@ trait Almosts {
       }
     }
 
+  implicit def AlmostEqualScalazMap[A: Order, B: AlmostEqual]: AlmostEqual[A ==>> B] =
+    new AlmostEqual[A ==>> B] {
+      def almostEqual(m0: A ==>> B, m1: A ==>> B): Boolean = {
+        (m0.keySet == m1.keySet) && m0.intersectionWith(m1)(_ ~= _).all(identity)
+      }
+    }
+
   implicit val AlmostEqualGuideGrp: AlmostEqual[GuideGrp] =
     new AlmostEqual[GuideGrp] {
       import AutomaticGroup.{Active, Initial}

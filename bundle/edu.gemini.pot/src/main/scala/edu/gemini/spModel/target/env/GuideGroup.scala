@@ -47,17 +47,17 @@ case class GuideGroup(grp: GuideGrp) extends java.lang.Iterable[GuideProbeTarget
   def contains(gp: GuideProbe): Boolean =
     grp match {
       case AutomaticGroup.Initial    => false
-      case AutomaticGroup.Active(ts) => ts.contains(gp)
-      case ManualGroup(_, ts)        => ts.contains(gp)
+      case AutomaticGroup.Active(ts) => ts.member(gp)
+      case ManualGroup(_, ts)        => ts.member(gp)
     }
 
   private def gpt(gp: GuideProbe): Option[GuideProbeTargets] = {
     val gpt = grp match {
       case ManualGroup(_, opts) =>
-        opts.get(gp).map { o => (o.focus, o.toList) }
+        opts.lookup(gp).map { o => (o.focus, o.toList) }
 
       case Active(ts)         =>
-        ts.get(gp).map { t => (some(t), List(t)) }
+        ts.lookup(gp).map { t => (some(t), List(t)) }
 
       case Initial            =>
         None
@@ -133,7 +133,7 @@ case class GuideGroup(grp: GuideGrp) extends java.lang.Iterable[GuideProbeTarget
         a.copy(targetMap = primary.fold(ts - probe) { t => ts + (probe -> t)})
 
       case Initial              =>
-        primary.fold(grp) { t => Active(Map(probe -> t)) }
+        primary.fold(grp) { t => Active(==>>.singleton(probe, t)) }
     }
   }
 
@@ -147,8 +147,8 @@ case class GuideGroup(grp: GuideGrp) extends java.lang.Iterable[GuideProbeTarget
   def clear(): GuideGroup =
     update {
       case Initial         => Initial
-      case a: Active       => a.copy(targetMap = Map.empty)
-      case mg: ManualGroup => mg.copy(targetMap = Map.empty)
+      case a: Active       => a.copy(targetMap  = ==>>.empty)
+      case mg: ManualGroup => mg.copy(targetMap = ==>>.empty)
     }
 
   private def sortedKeys: List[GuideProbe] =
@@ -255,7 +255,7 @@ case class GuideGroup(grp: GuideGrp) extends java.lang.Iterable[GuideProbeTarget
 
 object GuideGroup extends ((GuideGrp) => GuideGroup) {
   val AutomaticGroupInitial = GuideGroup(Initial)
-  val ManualEmpty = GuideGroup(ManualGroup("Manual Group", Map.empty))
+  val ManualEmpty = GuideGroup(ManualGroup("Manual Group", ==>>.empty))
 
   val Grp: GuideGroup @> GuideGrp =
     Lens.lensu((jGrp, sGrp) => jGrp.copy(grp = sGrp), _.grp)
@@ -299,21 +299,21 @@ object GuideGroup extends ((GuideGrp) => GuideGroup) {
     createManual(name.getOrElse("Manual Group"), targets)
 
   def createManual(name: String, targets: ImList[GuideProbeTargets]): GuideGroup = {
-    val m = targets.asScalaList.flatMap { gpt =>
+    val m = ==>>.fromList(targets.asScalaList.flatMap { gpt =>
       val lst    = gpt.getTargets.asScalaList
       val zipOpt = gpt.getPrimaryIndex.asScalaOpt.map(i => lst.splitAt(i)).collect {
         case (lefts, focus :: rights) => OptsList.focused(lefts, focus, rights)
       }
       zipOpt.orElse(lst.toNel.map(nel => OptsList.unfocused(nel))).strengthL(gpt.getGuider)
-    }.toMap
+    })
 
     GuideGroup(ManualGroup(name, m))
   }
 
   def createActive(targets: ImList[GuideProbeTargets]): GuideGroup = {
-    val m = targets.asScalaList.flatMap { gpt =>
+    val m = ==>>.fromList(targets.asScalaList.flatMap { gpt =>
       gpt.getPrimary.asScalaOpt.strengthL(gpt.getGuider)
-    }.toMap
+    })
 
     GuideGroup(Active(m))
   }

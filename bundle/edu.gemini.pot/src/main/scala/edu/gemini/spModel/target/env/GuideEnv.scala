@@ -89,19 +89,11 @@ object GuideEnv {
     override def removeTarget(ge: GuideEnv, t: SPTarget): GuideEnv =
       mod(ge)(_.removeTarget(t), _.removeTarget(t))
 
-    type TargetMap = Map[GuideProbe, NonEmptyList[SPTarget]]
+    type TargetMap = GuideProbe ==>> NonEmptyList[SPTarget]
 
     override def targets(ge: GuideEnv): TargetMap = {
-      def merge(tm0: TargetMap, tm1: TargetMap): TargetMap = {
-        val k0 = tm0.keySet
-        val k1 = tm1.keySet
-
-        val a = (k0 &~ k1).toList.map { gp => gp -> tm0(gp) }.toMap
-        val b = (k0 &  k1).toList.map { gp => gp -> tm0(gp).append(tm1(gp)) }.toMap
-        val c = (k1 &~ k0).toList.map { gp => gp -> tm1(gp) }.toMap
-
-        a ++ b ++ c
-      }
+      def merge(tm0: TargetMap, tm1: TargetMap): TargetMap =
+        tm0.intersectionWith(tm1)(_.append(_)) union tm0 union tm1
 
       (ge.auto.targets :: ge.manual.fold(List.empty[TargetMap]) {
         _.toList.map(_.targets)
