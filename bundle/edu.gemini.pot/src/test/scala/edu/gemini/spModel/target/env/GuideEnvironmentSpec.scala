@@ -23,6 +23,26 @@ import scalaz._, Scalaz._
 
 class GuideEnvironmentSpec extends Specification with ScalaCheck with Arbitraries with Almosts {
 
+  "GuideEnvironment guider references" should {
+    def toScala(s: java.util.Set[GuideProbe]): Set[GuideProbe] =
+      s.asScala.toSet
+
+    "include all guide probes associated with a guide star in getReferencedGuiders" in
+      forAll { (g: GuideEnvironment) =>
+        val gs = (Set.empty[GuideProbe]/:g.getOptions.asScalaList) { (s, grp) =>
+          s ++ toScala(grp.getReferencedGuiders)
+        }
+        gs === toScala(g.getReferencedGuiders)
+      }
+
+    "include only guide probes associated with the primary group that have a selected guide star in getPrimaryReferencedGuiders" in
+      forAll { (g: GuideEnvironment) =>
+        val s0 = toScala(g.getPrimary.getValue.getPrimaryReferencedGuiders)
+        val s1 = toScala(g.getPrimaryReferencedGuiders)
+        s0 === s1
+      }
+  }
+
   "GuideEnvironment removeGroup" should {
     "do nothing if the group is automatic" in {
       forAll { (g: GuideEnvironment) =>

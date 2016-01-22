@@ -19,11 +19,17 @@ final case class GuideEnv(auto: AutomaticGroup, manual: Option[OptsList[ManualGr
   def primaryIndex: Int =
     manual.flatMap(_.focusIndex).map(_ + 1).getOrElse(0)
 
+  /** Returns all guide probes associated with a guide star, whether or not
+    * they are configured to be used in this observation.
+    */
   def referencedGuiders: Set[GuideProbe] =
     groups.foldMap(_.referencedGuiders)
 
+  /** Returns the guide probes that will actually be in use to execute the
+    * observation.
+    */
   def primaryReferencedGuiders: Set[GuideProbe] =
-    primaryGroup.referencedGuiders
+    primaryGroup.primaryReferencedGuiders
 
   def length: Int =
     1 + manual.map(_.length).orZero
