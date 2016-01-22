@@ -17,6 +17,9 @@ import edu.gemini.spModel.target.system.HmsDegTarget
 
 import scala.concurrent.Future
 
+import scalaz._
+import Scalaz._
+
 trait AgsStrategy {
   def key: AgsStrategyKey
 
@@ -80,25 +83,19 @@ object AgsStrategy {
    * results are valid along with all assignments of guide probes to stars.
    */
   case class Selection(posAngle: Angle, assignments: List[Assignment]) {
-
     /**
      * Creates a new TargetEnvironment with guide stars for each assignment in
      * the Selection.
      */
     def applyTo(env: TargetEnvironment): TargetEnvironment = {
-      import GuideGrp._
-
       val targetMap = assignments.map { case Assignment(gp,gs) =>
         gp -> new SPTarget(HmsDegTarget.fromSkyObject(gs.toOldModel))}.toMap
-      val newAuto = AutomaticGroup.Active(targetMap)
+      val newAuto: AutomaticGroup = AutomaticGroup.Active(targetMap.mapValues(identity).map(identity))
 
       // If this is different from the old automatic GG, then replace.
       val oldGuideEnvironment = env.getGuideEnvironment
       val oldGuideEnv         = oldGuideEnvironment.guideEnv
-      val gg1 = oldGuideEnv.auto.asInstanceOf[GuideGrp]
-      val gg2 = newAuto.asInstanceOf[GuideGrp]
 
-      gg1 === gg2
       if (oldGuideEnv.auto =/= newAuto) {
         val newGuideEnv = oldGuideEnv.copy(auto = newAuto)
         val newGuideEnvironment = oldGuideEnvironment.copy(guideEnv = newGuideEnv)

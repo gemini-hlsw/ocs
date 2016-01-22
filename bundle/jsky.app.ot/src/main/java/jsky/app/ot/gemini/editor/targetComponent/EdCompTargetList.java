@@ -135,11 +135,17 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     private void updateRemovePrimaryButtonsAndDetailEditor(final TargetEnvironment env) {
         final boolean editable      = OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation());
         final boolean curNotBase    = _curPos != env.getBase();
-        final boolean notAutoTarget = !env.getGuideEnvironment().getOptions()
-                .find(gg -> gg.containsTarget(_curPos)).map(GuideGroup::isAutomatic).getOrElse(false);
-        _w.removeButton.setEnabled(curNotBase && editable && notAutoTarget);
-        _w.primaryButton.setEnabled(enablePrimary(_curPos, env) && editable && notAutoTarget);
-        updateDetailEditorEnabledState(editable && notAutoTarget);
+
+        // TODO: is it even possible to have isAutoGroup != isAutoTarget? I doubt it.
+        // We assume that if no group is set, then we are or want to handle the same as the auto group.
+        final boolean isAutoGroup  = ImOption.apply(_curGroup).exists(GuideGroup::isAutomatic);
+        final boolean isAutoTarget = ImOption.apply(_curPos).exists(p -> env.getGuideEnvironment().getOptions()
+                .exists(gg -> gg.isAutomatic() && gg.containsTarget(p)));
+        final boolean isAuto       = isAutoGroup || isAutoTarget;
+
+        _w.removeButton.setEnabled(curNotBase && editable && !isAuto);
+        _w.primaryButton.setEnabled(enablePrimary(_curPos, env) && editable);
+        updateDetailEditorEnabledState(editable && !isAuto);
     }
 
     // OtItemEditor
@@ -202,18 +208,9 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
             if (inst.hasGuideProbes()) {
                 _w.newMenu.addSeparator();
-                final JMenuItem guideGroupMenu = _w.newMenu.add(new JMenuItem("Guide Group") {{
+                _w.newMenu.add(new JMenuItem("Guide Group") {{
                     addActionListener(new AddGroupAction(obsComp, _w.positionTable));
                 }});
-
-                // OT-34: disable create group menu if no guide stars defined
-                _w.newMenu.addMenuListener(new MenuListener() {
-                    @Override public void menuSelected(final MenuEvent e) {
-                        guideGroupMenu.setEnabled(obsComp.getTargetEnvironment().getGuideEnvironment().getTargets().nonEmpty());
-                    }
-                    @Override public void menuDeselected(final MenuEvent e) {}
-                    @Override public void menuCanceled(final MenuEvent e) {}
-                });
             }
         }
         _w.positionTable.reinit(obsComp);
