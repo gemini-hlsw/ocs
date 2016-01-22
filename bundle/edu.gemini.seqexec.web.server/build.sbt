@@ -40,7 +40,17 @@ artifactPath in (Compile, fastOptJS) := (resourceManaged in Compile).value /
 
 //libraryDependencies += "be.doeraene" %%% "scalajs-jquery" % "0.8.1"
 
-libraryDependencies += "com.lihaoyi" %%% "scalatags" % "0.5.3"
+libraryDependencies ++= Seq(
+  "org.scala-js" %%% "scalajs-dom" % "0.8.0",
+  "com.lihaoyi" %%% "scalatags" % "0.5.4",
+  "com.github.japgolly.scalajs-react" %%% "core" % "0.10.4",
+  "com.github.japgolly.scalajs-react" %%% "extra" % "0.10.4"
+)
+
+// TODO get dependencies via webjars
+jsDependencies += "org.webjars" % "react" % "0.14.3" / "react-with-addons.js" commonJSName "React"
+
+skip in packageJSDependencies := false
 
 ocsBundleSettings 
 
@@ -49,7 +59,5 @@ OsgiKeys.bundleActivator := None
 OsgiKeys.bundleSymbolicName := name.value
 
 OsgiKeys.dynamicImportPackage := Seq("")
-
-OsgiKeys.exportPackage := None
 
 OsgiKeys.importPackage := Seq("!org.scalajs.jquery", "!org.scalajs.dom", "!scalatags.*", "*")
