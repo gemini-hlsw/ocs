@@ -7,8 +7,7 @@ object WebServerLauncher extends App {
   def launch(port: Int):Option[Server] = {
     try {
       Some(BlazeBuilder.bindHttp(port)
-        //.mountService(StaticRoutes.service, "/")
-        //.mountService(UploadService.service, "/backend")
+        .mountService(StaticRoutes.service, "/")
         .run)
     } catch {
       case e: Throwable =>
