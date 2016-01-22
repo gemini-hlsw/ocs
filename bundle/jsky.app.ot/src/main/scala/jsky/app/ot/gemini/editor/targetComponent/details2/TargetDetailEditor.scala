@@ -8,11 +8,9 @@ import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.system.ITarget.Tag
 import jsky.app.ot.gemini.editor.targetComponent.TelescopePosEditor
 
-abstract class TargetDetailEditor(val getTag: Tag) extends JPanel with TelescopePosEditor {
+abstract class TargetDetailEditor extends JPanel with TelescopePosEditor {
   def edit(ctx: GOption[ObsContext], spTarget: SPTarget, node: ISPNode): Unit = {
     require(ctx      != null, "obsContext should never be null")
     require(spTarget != null, "spTarget should never be null")
-    val tag = spTarget.getTarget.getTag
-    require(tag == getTag, "target tag should always be " + getTag + ", received " + tag)
   }
 }

@@ -14,13 +14,13 @@ import edu.gemini.pot.sp.ISPNode
 import edu.gemini.shared.util.immutable.{Option => GOption}
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
-import edu.gemini.spModel.target.system.{HmsDegTarget, ITarget}
+import edu.gemini.spModel.target.system.HmsDegTarget
 import jsky.app.ot.gemini.editor.targetComponent.MagnitudeEditor
 import squants.motion.KilometersPerSecond
 
 import scalaz.syntax.id._
 
-final class SiderealDetailEditor extends TargetDetailEditor(ITarget.Tag.SIDEREAL) {
+final class SiderealDetailEditor extends TargetDetailEditor {
   import NumericPropertySheet.Prop
 
   // Editor Components
@@ -49,28 +49,20 @@ final class SiderealDetailEditor extends TargetDetailEditor(ITarget.Tag.SIDEREAL
   object RedshiftRepresentations {
     val all: List[RedshiftRepresentations] = List(RadialVelocity, RedshiftZ, ApparentRadialVelocity)
     val repr: Map[RedshiftRepresentations, String] = Map(RadialVelocity -> "km/sec", RedshiftZ -> "", ApparentRadialVelocity -> "km/s")
-
     val renderLabel: RedshiftRepresentations => String = {
-      case RadialVelocity         => "RV"
-      case RedshiftZ              => "z"
+      case RadialVelocity => "RV"
+      case RedshiftZ => "z"
       case ApparentRadialVelocity => "cz"
     }
-
     val renderValue: (HmsDegTarget, RedshiftRepresentations) => Double = (t, v) => v match {
-      case RadialVelocity         =>
-        t.getRedshift.toRadialVelocity.toKilometersPerSecond
-      case RedshiftZ              =>
-        t.getRedshift.z
-      case ApparentRadialVelocity =>
-        t.getRedshift.toApparentRadialVelocity.toKilometersPerSecond
+      case RadialVelocity => t.getRedshift.toRadialVelocity.toKilometersPerSecond
+      case RedshiftZ => t.getRedshift.z
+      case ApparentRadialVelocity => t.getRedshift.toApparentRadialVelocity.toKilometersPerSecond
     }
     val editValue: (HmsDegTarget, RedshiftRepresentations, Double) => Unit = (t, v, d) => v match {
-      case RadialVelocity         =>
-        t.setRedshift(Redshift.fromRadialVelocity(KilometersPerSecond(d)))
-      case RedshiftZ              =>
-        t.setRedshift(Redshift(d))
-      case ApparentRadialVelocity =>
-        t.setRedshift(Redshift.fromApparentRadialVelocity(KilometersPerSecond(d)))
+      case RadialVelocity => t.setRedshift(Redshift.fromRadialVelocity(KilometersPerSecond(d)))
+      case RedshiftZ => t.setRedshift(Redshift(d))
+      case ApparentRadialVelocity => t.setRedshift(Redshift.fromApparentRadialVelocity(KilometersPerSecond(d)))
     }
     val formatter: RedshiftRepresentations => NumberFormat = (v) => v.formatter
   }

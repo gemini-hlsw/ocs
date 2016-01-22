@@ -1,5 +1,7 @@
 package edu.gemini.spModel.target;
 
+import edu.gemini.spModel.core.SiderealTarget;
+import edu.gemini.spModel.core.Target;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.PioFactory;
 import edu.gemini.spModel.target.system.*;
@@ -8,6 +10,17 @@ import edu.gemini.spModel.target.system.*;
 public final class SPTarget extends TransitionalSPTarget {
 
     private ITarget _target;
+    private Target _newTarget = SiderealTarget.empty();
+
+    public Target getNewTarget() {
+        return _newTarget;
+    }
+
+    public void setNewTarget(Target target) {
+        _newTarget = target;
+        System.out.println("*** SPTarget.setNewTarget: " + target);
+        _notifyOfUpdate();
+    }
 
     /** SPTarget with default empty target. */
     public SPTarget() {

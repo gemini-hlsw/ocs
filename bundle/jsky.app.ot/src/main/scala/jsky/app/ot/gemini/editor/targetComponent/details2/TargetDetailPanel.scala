@@ -1,7 +1,5 @@
 package jsky.app.ot.gemini.editor.targetComponent.details2
 
-import edu.gemini.spModel.target.system.ITarget.Tag
-
 import java.awt.{Insets, GridBagConstraints, GridBagLayout}
 import javax.swing.JPanel
 
@@ -18,22 +16,11 @@ import scalaz.syntax.id._
 
 final class TargetDetailPanel extends JPanel with TelescopePosEditor with ReentrancyHack {
 
-  val jplMinorBody   = new JplMinorBodyDetailEditor
-  val mpcMinorPlanet = new MpcMinorPlanetDetailEditor
-  val named          = new NamedDetailEditor
-  val sidereal       = new SiderealDetailEditor
+  private val nonsidereal = new NonSiderealDetailEditor
+  private val sidereal    = new SiderealDetailEditor
 
-  val allEditors = List(jplMinorBody, mpcMinorPlanet, named, sidereal)
-
+  val allEditors      = List(nonsidereal, sidereal)
   val allEditorsJava = allEditors.asJava
-
-  def editorForTag(t: Tag): TargetDetailEditor =
-    t match {
-      case Tag.JPL_MINOR_BODY   => jplMinorBody
-      case Tag.MPC_MINOR_PLANET => mpcMinorPlanet
-      case Tag.NAMED            => named
-      case Tag.SIDEREAL         => sidereal
-    }
 
   // This doodad will ensure that any change event coming from the SPTarget will get turned into
   // a call to `edit`, so we don't have to worry about that case everywhere. Everything from here
@@ -72,10 +59,11 @@ final class TargetDetailPanel extends JPanel with TelescopePosEditor with Reentr
   def edit(obsContext: GOption[ObsContext], spTarget: SPTarget, node: ISPNode): Unit = {
 
     // Create or replace the existing detail editor, if needed
-    val tag = spTarget.getTarget.getTag
-    if (tde == null || tde.getTag != tag) {
+    val newTde = spTarget.getNewTarget.fold(_ => ???, _ => sidereal, _ => nonsidereal)
+
+    if (tde != newTde) {
       if (tde != null) remove(tde)
-      tde = editorForTag(tag)
+      tde = newTde
       add(tde, new GridBagConstraints() <| { c =>
         c.gridx = 0
         c.gridy = 0
