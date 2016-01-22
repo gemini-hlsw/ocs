@@ -7,27 +7,19 @@ import edu.gemini.obslog.obslog.IObservingLogSegment;
 import java.util.*;
 import java.util.logging.Logger;
 import java.util.logging.Level;
-import java.util.regex.Pattern;
-
-//
-// Gemini Observatory/AURA
-// $Id: AbstractTextSegmentExporter.java,v 1.3 2006/12/05 15:14:02 gillies Exp $
-//
 
 /**
  * This class takes a segment and produces a table in the traditional obslog ascii text format.
  */
-public abstract class AbstractTextSegmentExporter extends TextExportBase {
+abstract class AbstractTextSegmentExporter extends TextExportBase {
     private static final Logger LOG = Logger.getLogger(AbstractTextSegmentExporter.class.getName());
-
-    protected static final Pattern ENDLINE_PATTERN = Pattern.compile("$", Pattern.MULTILINE);
 
     private IObservingLogSegment _segment;
     private List<ConfigMap> _rows;
     private Map<String, ColumnInfo> _columnInfo;
     private int _totalWidth;
 
-    protected class ColumnInfo {
+    class ColumnInfo {
         OlLogItem _logItem;
         int _headingWidth;
         int _maxColumnWidth;
@@ -52,10 +44,6 @@ public abstract class AbstractTextSegmentExporter extends TextExportBase {
             return _headingWidth;
         }
 
-        void setHeadingWidth(int headingWidth) {
-            _headingWidth = headingWidth;
-        }
-
         int getMaxColumnWidth() {
             return _maxColumnWidth;
         }
@@ -65,32 +53,32 @@ public abstract class AbstractTextSegmentExporter extends TextExportBase {
         }
     }
 
-    public AbstractTextSegmentExporter(IObservingLogSegment segment) {
+    AbstractTextSegmentExporter(IObservingLogSegment segment) {
         if (segment == null) throw new NullPointerException("Segment argument is null for export");
         _segment = segment;
         _build();
     }
 
-    protected Map<String,ColumnInfo> _getColumnInfoMap() {
+    Map<String,ColumnInfo> _getColumnInfoMap() {
         if (_columnInfo == null) {
-            _columnInfo = new LinkedHashMap<String,ColumnInfo>();
+            _columnInfo = new LinkedHashMap<>();
         }
         return _columnInfo;
     }
 
-    protected int _getTotalWidth() {
+    int _getTotalWidth() {
         return _totalWidth;
     }
 
-    protected List<ConfigMap> _getRows() {
+    List<ConfigMap> _getRows() {
         return _rows;
     }
 
-    protected IObservingLogSegment _getSegment() {
+    IObservingLogSegment _getSegment() {
         return _segment;
     }
 
-    // Private method to build all the strucutures needed for the text segment export
+    // Private method to build all the structures needed for the text segment export
     private void _build() {
         // Get the rows -- done once since this requires some work
         _rows = _segment.getRows();
@@ -102,9 +90,7 @@ public abstract class AbstractTextSegmentExporter extends TextExportBase {
         int width = cinfo.getHeadingWidth();
         String property = cinfo.getProperty();
 
-        for (int i = 0, size = rowMaps.size(); i < size; i++) {
-            Map rowMap = rowMaps.get(i);
-
+        for (Map<String, Object> rowMap : rowMaps) {
             String value = (String) rowMap.get(property);
             if (value == null) {
                 if (LOG.isLoggable(Level.FINE)) LOG.fine("Property: " + property + " missing in map for obslog");
@@ -131,7 +117,7 @@ public abstract class AbstractTextSegmentExporter extends TextExportBase {
         if (LOG.isLoggable(Level.FINE)) LOG.fine("Total width: " + totalWidth);
     }
 
-    protected OlLogItem _lookupColumnInfo(String propertyName) {
+    OlLogItem _lookupColumnInfo(String propertyName) {
         for (OlLogItem logItem : _segment.getTableInfo()) {
             if (logItem.getProperty().equals(propertyName)) {
                 return logItem;
@@ -162,7 +148,7 @@ public abstract class AbstractTextSegmentExporter extends TextExportBase {
         _setTotalWidth();
     }
 
-    protected void _printJustifiedMultilineComment(StringBuilder sb, int maxColWidth, String prefix, String comment) {
+    void _printJustifiedMultilineComment(StringBuilder sb, int maxColWidth, String prefix, String comment) {
         //String[] lines = _splitComment(comment);
         //LOG.info("Length is: " + lines.length);
         StringTokenizer st = new StringTokenizer(comment, "\n\r");
@@ -174,7 +160,7 @@ public abstract class AbstractTextSegmentExporter extends TextExportBase {
         }
     }
 
-    protected void _printOneRow(StringBuilder sb, ConfigMap row) {
+    void _printOneRow(StringBuilder sb, ConfigMap row) {
         Map<String,ColumnInfo> columns = _getColumnInfoMap();
 
         for (ColumnInfo cinfo : columns.values()) {
@@ -187,16 +173,16 @@ public abstract class AbstractTextSegmentExporter extends TextExportBase {
         }
     }
 
-   protected void _printHeading(StringBuilder sb,  List<ColumnInfo> columns) {
+   void _printHeading(StringBuilder sb, List<ColumnInfo> columns) {
         for (ColumnInfo cinfo : columns) {
             _printJustifiedText(sb, cinfo.getMaxColumnWidth(), cinfo.getColumnHeading());
         }
         sb.append(AbstractTextSegmentExporter.NEWLINE);
     }
 
-    protected void _printHeading(StringBuilder sb) {
+    void _printHeading(StringBuilder sb) {
         Map<String,ColumnInfo> columns = _getColumnInfoMap();
-        _printHeading(sb, new ArrayList<ColumnInfo>(columns.values()));
+        _printHeading(sb, new ArrayList<>(columns.values()));
     }
 
     /**
