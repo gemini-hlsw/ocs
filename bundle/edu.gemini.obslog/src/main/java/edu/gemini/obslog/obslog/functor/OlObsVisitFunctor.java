@@ -14,11 +14,6 @@ import edu.gemini.shared.util.GeminiRuntimeException;
 import java.security.Principal;
 import java.util.*;
 
-//
-// Gemini Observatory/AURA
-// $Id: OlObsVisitFunctor.java,v 1.3 2006/12/05 14:56:16 gillies Exp $
-//
-
 public final class OlObsVisitFunctor extends OlTransferDataFunctor {
 
     public OlObsVisitFunctor(OlLogOptions obsLogOptions, List<SPObservationID> observationIDs) {
@@ -31,13 +26,13 @@ public final class OlObsVisitFunctor extends OlTransferDataFunctor {
      *
      * @param observations the list of observations that should be fetched from the database
      * @return a new <tt>List</tt> of <tt>ObservationData</tt> objects.
-     * @throws java.rmi.RemoteException
      */
+    @Override
     protected List<EObslogVisit> fetchObservationData(List<ISPObservation> observations)  {
-        List<EObslogVisit> obsData = new ArrayList<EObslogVisit>();
+        List<EObslogVisit> obsData = new ArrayList<>();
 
-        for (int i = 0, size = observations.size(); i < size; i++) {
-            List<EObslogVisit> od = ObservationObsVisitsFactory.build(observations.get(i), _getObsLogOptions());
+        for (ISPObservation observation : observations) {
+            List<EObslogVisit> od = ObservationObsVisitsFactory.build(observation, _getObsLogOptions());
             obsData.addAll(od);
         }
 
@@ -46,7 +41,7 @@ public final class OlObsVisitFunctor extends OlTransferDataFunctor {
         return obsData;
     }
 
-    public static List create(IDBDatabaseService db, OlLogOptions obsLogOptions, List<SPObservationID> observationIDs, Set<Principal> user)  {
+    public static List<EObslogVisit> create(IDBDatabaseService db, OlLogOptions obsLogOptions, List<SPObservationID> observationIDs, Set<Principal> user)  {
 
         OlObsVisitFunctor lf = new OlObsVisitFunctor(obsLogOptions, observationIDs);
         try {
@@ -58,8 +53,9 @@ public final class OlObsVisitFunctor extends OlTransferDataFunctor {
         return lf.getResult();
     }
 
+    @Override
     public void mergeResults(Collection<IDBFunctor> functorCollection) {
-        List<EObslogVisit> res = new ArrayList<EObslogVisit>();
+        List<EObslogVisit> res = new ArrayList<>();
         for (IDBFunctor f : functorCollection) {
             res.addAll(((OlObsVisitFunctor) f).getResult());
         }
