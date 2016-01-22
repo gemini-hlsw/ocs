@@ -13,6 +13,8 @@ version in ThisBuild := ocsVersion.value.toOsgiVersion
 
 scalaVersion in ThisBuild := "2.10.4"
 
+updateOptions := updateOptions.value.withCachedResolution(true)
+
 // Note that this is not a standard setting; it's used for building IDEA modules.
 javaVersion in ThisBuild := {
   val expected = "1.8" 
