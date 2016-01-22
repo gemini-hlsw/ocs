@@ -274,14 +274,11 @@ class GuideGroupSpec extends Specification with ScalaCheck with Arbitraries with
   }
 
   "GuideGroup cloneTargets" should {
-    "create a new GuideGroup where the underlying ITargets are equal for each guide probe and in the same order" in
-      forAll { (g: GuideGroup) =>
-        val cg  = g.cloneTargets
-        val ts  = g.getAll.asScalaList
-        val cts = cg.getAll.asScalaList
-        (ts.length == cts.length) && ts.zip(cts).forall {
-          case (t1, t2) => t1.getGuider == t2.getGuider && t1.getTargets.asScala.map(_.getTarget) == t2.getTargets.asScala.map(_.getTarget)
-        }
+    "create a new GuideGroup with cloned SPTargets but otherwise equivalent in structure" in
+      forAll { (g0: GuideGroup) =>
+        def targetList(g: GuideGroup): List[SPTarget] = g.getTargets.asScalaList
+        val g1 = g0.cloneTargets
+        (g0 ~= g1) && targetList(g0).zip(targetList(g1)).forall { case (t0, t1) => t0 =/= t1 }
       }
   }
 

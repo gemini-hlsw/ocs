@@ -43,6 +43,8 @@ class GuideEnvironmentSpec extends Specification with ScalaCheck with Arbitrarie
       }
   }
 
+  "GuideEnvironment cloneTargets"
+
   "GuideEnvironment removeGroup" should {
     "do nothing if the group is automatic" in {
       forAll { (g: GuideEnvironment) =>

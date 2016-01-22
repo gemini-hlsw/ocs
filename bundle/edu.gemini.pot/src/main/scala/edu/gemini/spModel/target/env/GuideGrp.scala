@@ -126,4 +126,32 @@ object GuideGrp {
     case (m0: ManualGroup,    m1: ManualGroup)    => m0 === m1
     case (_, _)                                   => false
   }
+
+  implicit val TargetCollectionGuideGroup = new TargetCollection[GuideGrp] {
+    import TargetCollection.TargetCollectionSyntax
+
+    override def cloneTargets(g: GuideGrp): GuideGrp =
+      g match {
+        case a: AutomaticGroup => a.cloneTargets
+        case m: ManualGroup    => m.cloneTargets
+      }
+
+    override def containsTarget(g: GuideGrp, t: SPTarget): Boolean =
+      g match {
+        case a: AutomaticGroup => a.containsTarget(t)
+        case m: ManualGroup    => m.containsTarget(t)
+      }
+
+    override def removeTarget(g: GuideGrp, t: SPTarget): GuideGrp =
+      g match {
+        case a: AutomaticGroup => a.removeTarget(t)
+        case m: ManualGroup    => m.removeTarget(t)
+      }
+
+    override def targets(g: GuideGrp): GuideProbe ==>> NonEmptyList[SPTarget] =
+      g match {
+        case a: AutomaticGroup => a.targets
+        case m: ManualGroup    => m.targets
+      }
+  }
 }

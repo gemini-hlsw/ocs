@@ -319,4 +319,7 @@ object GuideGroup extends ((GuideGrp) => GuideGroup) {
   }
 
   implicit val EqualGuideGroup: Equal[GuideGroup] = Equal.equalBy(_.grp)
+
+  implicit val TargetCollectionGuideGroup: TargetCollection[GuideGroup] =
+    TargetCollection.wrapping(Grp)
 }

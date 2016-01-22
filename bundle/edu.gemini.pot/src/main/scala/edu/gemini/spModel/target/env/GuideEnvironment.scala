@@ -226,4 +226,7 @@ object GuideEnvironment {
       (_.addAll(s.asJavaCollection))
 
   implicit val EqualGuideEnvironment: Equal[GuideEnvironment] = Equal.equalBy(_.guideEnv)
+
+  implicit val TargetCollectionGuideEnvironment: TargetCollection[GuideEnvironment] =
+    TargetCollection.wrapping(Env)
 }
