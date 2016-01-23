@@ -1,14 +1,10 @@
 package edu.gemini.wdba.tcc;
 
-import edu.gemini.spModel.gemini.gmos.GmosCommonType;
 import edu.gemini.spModel.gemini.gmos.InstGmosCommon;
 import edu.gemini.spModel.gemini.gmos.GmosOiwfsGuideProbe;
 import edu.gemini.spModel.target.obsComp.PwfsGuideProbe;
 import edu.gemini.spModel.telescope.IssPort;
 
-/**
- *
- */
 public class GMOSSupport implements ITccInstrumentSupport {
 
     private String _wavelength;
@@ -39,9 +35,9 @@ public class GMOSSupport implements ITccInstrumentSupport {
     public String getWavelength() {
         if (_wavelength != null) return _wavelength;
 
-        InstGmosCommon inst = (InstGmosCommon) _oe.getInstrument();
-        if (((GmosCommonType.Disperser) inst.getDisperser()).isMirror()) {
-            _wavelength = ((GmosCommonType.Filter) inst.getFilter()).getWavelength();
+        InstGmosCommon<?, ?, ?, ?> inst = (InstGmosCommon) _oe.getInstrument();
+        if (inst.getDisperser().isMirror()) {
+            _wavelength = inst.getFilter().getWavelength();
             // Indicate there is no wavelength choice
             if (_wavelength.equals(TccNames.NONE)) return null;
             return _wavelength;
@@ -54,7 +50,7 @@ public class GMOSSupport implements ITccInstrumentSupport {
     }
 
     public String getPositionAngle() {
-        InstGmosCommon inst = (InstGmosCommon) _oe.getInstrument();
+        InstGmosCommon<?, ?, ?, ?> inst = (InstGmosCommon) _oe.getInstrument();
         return inst.getPosAngleDegreesStr();
     }
 
@@ -81,13 +77,12 @@ public class GMOSSupport implements ITccInstrumentSupport {
      * @return String that is the name of a TCC config file.  See WDBA-5.
      */
     public String getTccConfigInstrumentOrigin() {
-
-        InstGmosCommon inst = (InstGmosCommon) _oe.getInstrument();
+        InstGmosCommon<?, ?, ?, ?> inst = (InstGmosCommon) _oe.getInstrument();
         switch (_oe.getAoAspect()) {
             case ngs : return "ngs2gmos";
             case lgs : return _oe.adjustInstrumentOriginForLGS_P1("lgs2gmos");
             default:
-                return ((GmosCommonType.FPUnit) inst.getFPUnit()).isIFU() ? "gmos_ifu" : "gmos";
+                return inst.getFPUnit().isIFU() ? "gmos_ifu" : "gmos";
         }
     }
 

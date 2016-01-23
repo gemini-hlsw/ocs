@@ -12,49 +12,49 @@ public interface ITccInstrumentSupport {
      * The wavelength should be in microns!
      * @return String wavelength acceptable to TCC or null if not relevant.
      */
-    public String getWavelength();
+    String getWavelength();
 
     /**
      * Return the position angle from the OT
      * @return the position angle as a String
      */
-    public String getPositionAngle();
+    String getPositionAngle();
 
     /**
      * Return the guide configuration name
      * @return the guide configuration name or null if not relevant
      */
-    public String getTccConfigInstrument();
+    String getTccConfigInstrument();
 
     /**
      * Return the name of the instrument origins configuration
      * @return a String that refers to a config file in the TCC
      */
-    public String getTccConfigInstrumentOrigin();
+    String getTccConfigInstrumentOrigin();
 
     /**
      * Return true if the instrument is using a fixed rotator position.  In this case the pos angle is used
      * in a special rotator config
      * @return String value that is the name of the fixed rotator config or null if no special name is needed
      */
-    public String getFixedRotatorConfigName();
+    String getFixedRotatorConfigName();
 
     /**
      * Returns the TCC chop parameter value.
      * @return Chop value or null if there is no chop parameter for this instrument.
      */
-    public String getChopState();
+    String getChopState();
 
     /**
      * Return the name of the guide wavelenght configuration
      * @param p the <cc>ParamSet</cc> that the instrument should use to add guide details
      */
-    public void addGuideDetails(ParamSet p);
+    void addGuideDetails(ParamSet p);
 
     /**
      * A default class that implements all the methods ready for extending.
      */
-    public class DefaultInstrumentSupport implements ITccInstrumentSupport {
+    class DefaultInstrumentSupport implements ITccInstrumentSupport {
 
         protected ObservationEnvironment _oe;
 
