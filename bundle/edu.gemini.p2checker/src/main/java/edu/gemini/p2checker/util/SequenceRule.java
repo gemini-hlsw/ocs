@@ -1,7 +1,3 @@
-//
-// $Id$
-//
-
 package edu.gemini.p2checker.util;
 
 import edu.gemini.p2checker.api.*;
@@ -50,30 +46,26 @@ public class SequenceRule implements IRule {
     // types are primitives, "double.class", but the class of the object in the
     // sequence is the wrapper, "Double.class".  double.class.isInstance(obj)
     // returns false for objs of type Double.class.
-    private static final Map<Class, Class> PRIMITIVE_MAP = new HashMap<>();
+    private static final Map<Class<?>, Class<?>> PRIMITIVE_MAP = new HashMap<>();
 
     // Matcher for science observations only.
-    public static final IConfigMatcher SCIENCE_MATCHER = new IConfigMatcher() {
-        public boolean matches(Config config, int step, ObservationElements elems) {
-            ObsClass obsClass = getObsClass(config);
-            return obsClass == ObsClass.SCIENCE;
-        }
+    public static final IConfigMatcher SCIENCE_MATCHER = (config, step, elems) -> {
+        ObsClass obsClass = getObsClass(config);
+        return obsClass == ObsClass.SCIENCE;
     };
 
     // Matcher for science observations and nighttime calibrations.
-    public static final IConfigMatcher SCIENCE_NIGHTTIME_CAL_MATCHER = new IConfigMatcher() {
-        public boolean matches(Config config, int step, ObservationElements elems) {
-            ObsClass obsClass = getObsClass(config);
-            if (obsClass == null)
+    public static final IConfigMatcher SCIENCE_NIGHTTIME_CAL_MATCHER = (config, step, elems) -> {
+        ObsClass obsClass = getObsClass(config);
+        if (obsClass == null)
+            return false;
+        switch(obsClass) {
+            case SCIENCE:
+            case PARTNER_CAL:
+            case PROG_CAL:
+                return true;
+            default:
                 return false;
-            switch(obsClass) {
-                case SCIENCE:
-                case PARTNER_CAL:
-                case PROG_CAL:
-                    return true;
-                default:
-                    return false;
-            }
         }
     };
 
@@ -88,23 +80,21 @@ public class SequenceRule implements IRule {
         PRIMITIVE_MAP.put(float.class, Float.class);
         PRIMITIVE_MAP.put(double.class, Double.class);
     }
-    private static Class getWrapperClass(Class primitiveClass) {
+    private static Class<?> getWrapperClass(Class<?> primitiveClass) {
         return PRIMITIVE_MAP.get(primitiveClass);
     }
 
-    public static Object getItem(Config config, Class c, String strKey) {
+    private static Object getItem(Config config, Class<?> c, String strKey) {
         ItemKey key = new ItemKey(strKey);
         return getItem(config, c, key);
     }
 
-    public static Object getItem(Config config, Class c, ItemKey key) {
+    public static Object getItem(Config config, Class<?> c, ItemKey key) {
         Object obj = config.getItemValue(key);
-//        System.out.println("key = " + key + ", obj = " + obj + ", class=" + obj.getClass());
         if (c.isPrimitive()) c = getWrapperClass(c);
         if ((c != null) && c.isInstance(obj)) return obj;
         return null;
     }
-
 
     public static Object getInstrumentItem(Config config, PropertyDescriptor desc) {
         return getItem(config, desc.getPropertyType(), INSTRUMENT_PREFIX + desc.getName());
@@ -136,6 +126,7 @@ public class SequenceRule implements IRule {
 
     private static final ItemKey EXPOSURE_TIME_KEY = new ItemKey("observe:exposureTime");
     private static final ItemKey OBSERVE_TYPE_KEY = new ItemKey("observe:observeType");
+
     /**
      * Return the exposure time for the given config step. Will try to
      * get it both as a Double and String. The result is always a double
@@ -235,8 +226,8 @@ public class SequenceRule implements IRule {
         // a rule matches, remove it from the set so it won't be reported twice.
         int step = 0;
         ConfigSequence seq = elements.getSequence();
-        for (Iterator it=seq.iterator(); it.hasNext(); ++step) {
-            Config config = (Config) it.next();
+        for (Iterator<Config> it=seq.iterator(); it.hasNext(); ++step) {
+            Config config = it.next();
 
             Map<IConfigMatcher, Boolean> valMap = new HashMap<>();
 
