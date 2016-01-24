@@ -31,7 +31,7 @@ public final class Pair<T, U> implements Tuple2<T, U>, Serializable {
         if (o == this) return true;
         if (!(o instanceof Tuple2)) return false;
 
-        final Tuple2 that = (Tuple2) o;
+        final Tuple2<T, U> that = (Tuple2<T, U>) o;
         if (_1 == null) {
             if (that._1() != null) return false;
         } else {

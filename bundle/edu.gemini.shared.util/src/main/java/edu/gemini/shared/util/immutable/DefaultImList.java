@@ -347,10 +347,10 @@ public final class DefaultImList<T> implements ImList<T>, Serializable {
         if (o == this) return true;
         if (!(o instanceof ImList)) return false;
 
-        final ImList that = (ImList) o;
+        final ImList<T> that = (ImList<T>) o;
         if (this.size() != that.size()) return false;
 
-        final Iterator thatIt = that.iterator();
+        final Iterator<T> thatIt = that.iterator();
         for (final T t : this) {
             if (t == null) {
                 if (thatIt.next() != null) return false;

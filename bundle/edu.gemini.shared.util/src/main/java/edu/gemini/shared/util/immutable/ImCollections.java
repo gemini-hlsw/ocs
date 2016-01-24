@@ -8,6 +8,7 @@ import java.util.*;
  */
 public class ImCollections {
 
+    @SuppressWarnings("rawtypes")
     public static final ImList EMPTY_LIST = new EmptyList();
 
     @SuppressWarnings({"unchecked"})
@@ -136,7 +137,7 @@ public class ImCollections {
 
         @Override
         public Tuple2<ImList<Object>, ImList<Object>> partition(final Function1<? super Object, Boolean> op) {
-            return new Pair(this, this);
+            return new Pair<>(this, this);
         }
 
         @Override
@@ -216,7 +217,7 @@ public class ImCollections {
             if (o == this) return true;
             if (!(o instanceof ImList)) return false;
 
-            final ImList that = (ImList) o;
+            final ImList<?> that = (ImList) o;
             return (that.size() == 0);
         }
 

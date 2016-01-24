@@ -1,16 +1,7 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: RWLock.java 4392 2004-01-30 06:40:18Z gillies $
-//
-
 package edu.gemini.shared.util;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
@@ -43,7 +34,7 @@ import java.util.Map;
  *
  * A write operation would be performed similarly.
  */
-public final class RWLock {
+final class RWLock {
 
     private class RWRecord {
 
@@ -55,7 +46,7 @@ public final class RWLock {
 
         // For debugging.
         public String toString() {
-            StringBuffer sb = new StringBuffer(getClass().getName());
+            StringBuilder sb = new StringBuilder(getClass().getName());
             sb.append(" [thread=");
             sb.append(thread.toString());
             sb.append(", readCount=");
@@ -71,7 +62,7 @@ public final class RWLock {
     // created all the time.
     private class RWRecordPool {
 
-        private LinkedList _recordPool = new LinkedList();
+        private LinkedList<RWRecord> _recordPool = new LinkedList<>();
 
         synchronized RWRecord getRecord(Thread t, int readCount, int writeCount) {
             RWRecord record;
@@ -79,7 +70,7 @@ public final class RWLock {
                 record = new RWRecord();
             }
             else {
-                record = (RWRecord) _recordPool.removeFirst();
+                record = _recordPool.removeFirst();
             }
             record.thread = t;
             record.readCount = readCount;
@@ -96,18 +87,18 @@ public final class RWLock {
 
     private RWRecordPool _recordPool = new RWRecordPool();
 
-    private LinkedList _waitingReaders = new LinkedList();
+    private LinkedList<RWRecord> _waitingReaders = new LinkedList<>();
 
-    private LinkedList _waitingWriters = new LinkedList();
+    private LinkedList<RWRecord> _waitingWriters = new LinkedList<>();
 
-    private Map _activeReaders = new HashMap();
+    private Map<Thread, RWRecord> _activeReaders = new HashMap<>();
 
     private RWRecord _activeWriter;
 
     /**
      * Constructs a new reader/writer lock ready to be used by clients.
      */
-    public RWLock() {
+    RWLock() {
     }
 
     /**
@@ -143,9 +134,8 @@ public final class RWLock {
             System.out.println("\tActive Writer: " + _activeWriter);
             active = true;
         }
-        Iterator it = _activeReaders.values().iterator();
-        while (it.hasNext()) {
-            System.out.println("\tActive Reader: " + it.next());
+        for (Object o : _activeReaders.values()) {
+            System.out.println("\tActive Reader: " + o);
             active = true;
         }
         if (!active) {
@@ -158,37 +148,15 @@ public final class RWLock {
      */
     private void _notifyReaders() {
         if (_waitingReaders.size() > 0) {
-            ListIterator lit = _waitingReaders.listIterator();
+            ListIterator<RWRecord> lit = _waitingReaders.listIterator();
             while (lit.hasNext()) {
-                RWRecord record = (RWRecord) lit.next();
+                RWRecord record = lit.next();
                 record.readCount = 1;
                 _activeReaders.put(record.thread, record);
                 lit.remove();
             }
             notifyAll();  // unblock the waiting readers
         }
-    }
-
-    /**
-     * Determines whether the current thread currently has read permission
-     * (by virtue of a previous succussful <code>{@link #getReadPermission}</code>
-     * <em>or</em> <code>{@link #getWritePermission}</code> call for which
-     * permission has not not yet been returned.
-     *
-     * @return <code>true</code> if a subsequent call to
-     * <code>{@link #getReadPermission}</code> <em>definitely</em> will not block
-     */
-    public synchronized boolean haveReadPermission() {
-        Thread t = Thread.currentThread();
-        if (_activeWriter != null) {
-            return (_activeWriter.thread == t);
-        }
-        RWRecord record = (RWRecord) _activeReaders.get(t);
-        if (record != null) {
-            _assertTrue(record.readCount > 0);  // must be reading if in _activeReaders
-            return true;
-        }
-        return false;
     }
 
     /**
@@ -209,7 +177,7 @@ public final class RWLock {
 
         // No active writer.  If this is a new reader, only let him in if there
         // are no waiting writers.
-        RWRecord record = (RWRecord) _activeReaders.get(t);
+        RWRecord record = _activeReaders.get(t);
         if (record == null) {
             // This is a new reader, are there any waiting writers?
             if (_waitingWriters.size() > 0) {
@@ -232,7 +200,7 @@ public final class RWLock {
      * calling thread will have read access to the section of code guarded
      * by the lock.  Other simultaneous readers may be present.
      */
-    public synchronized void getReadPermission() {
+    synchronized void getReadPermission() {
         //System.out.println("*** ASKING FOR READ PERMISSION");
         Thread t = Thread.currentThread();
         if (!_getReadPermission(t)) {
@@ -255,7 +223,7 @@ public final class RWLock {
      * Relinquishes read permission, possibly allowing blocked writers to
      * proceed.
      */
-    public synchronized void returnReadPermission() {
+    synchronized void returnReadPermission() {
         //System.out.println("*** RETURN READ PERMISSION");
         Thread t = Thread.currentThread();
         if (_activeWriter != null) {
@@ -272,7 +240,7 @@ public final class RWLock {
         }
 
         // A true reader is returning its read permission.
-        RWRecord record = (RWRecord) _activeReaders.get(t);
+        RWRecord record = _activeReaders.get(t);
         _assertState(record != null);
         _assertTrue(record.writeCount == 0);
         --(record.readCount);
@@ -298,31 +266,12 @@ public final class RWLock {
      */
     private void _notifyWriter() {
         if (_waitingWriters.size() > 0) {
-            _activeWriter = (RWRecord) _waitingWriters.removeFirst();
+            _activeWriter = _waitingWriters.removeFirst();
             _activeWriter.writeCount = 1;
             synchronized (_activeWriter) {
                 _activeWriter.notify();
             }
         }
-    }
-
-    /**
-     * Determines whether the current thread currently has read permission
-     * (by virtue of a previous succussful
-     * <code>{@link #getWritePermission}</code> call for which
-     * permission has not not yet been returned.
-     *
-     * @return <code>true</code> if a subsequent call to
-     * <code>{@link #getReadPermission}</code> or
-     * <code>{@link #getWritePermission}</code> <em>definitely</em> will not block
-     */
-    public synchronized boolean haveWritePermission() {
-        Thread t = Thread.currentThread();
-        if ((_activeWriter != null) && (_activeWriter.thread == t)) {
-            _assertTrue(_activeWriter.writeCount > 0);
-            return true;
-        }
-        return false;
     }
 
     /**
@@ -371,7 +320,7 @@ public final class RWLock {
      * guarded by the lock.  No other thread, reader or writer, will be able
      * to execute the code.
      */
-    public void getWritePermission() {
+    void getWritePermission() {
         //System.out.println("*** ASKING FOR WRITE PERMISSION: " + this);
         Thread t = Thread.currentThread();
 
@@ -405,7 +354,7 @@ public final class RWLock {
     /**
      * Notifies any waiting readers or writers that the write is over.
      */
-    public synchronized void returnWritePermission() {
+    synchronized void returnWritePermission() {
         //System.out.println("*** RETURN WRITE PERMISSION: " + this);
         Thread t = Thread.currentThread();
 

@@ -1,10 +1,3 @@
-// Copyright 1999 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: TimeValue.java 15389 2008-11-03 20:02:08Z swalker $
-//
-
 package edu.gemini.shared.util;
 
 import java.io.Serializable;
@@ -17,7 +10,7 @@ import java.util.regex.Pattern;
  * amount is represented as a float and associated with a (time) Units
  * object.  This object is immutable.
  */
-public final class TimeValue implements Cloneable, Comparable, Serializable {
+public final class TimeValue implements Cloneable, Comparable<TimeValue>, Serializable {
     /**
      * The number of hours are in a "night".
      */
@@ -26,7 +19,7 @@ public final class TimeValue implements Cloneable, Comparable, Serializable {
     /**
      * Time units.
      */
-    public static enum Units {
+    public enum Units {
         nights(HOURS_PER_NIGHT * 60 * 60 * 1000),
         hours(60 * 60 * 1000),
         minutes(60 * 1000),
@@ -39,7 +32,7 @@ public final class TimeValue implements Cloneable, Comparable, Serializable {
 
         private long _milliseconds;
 
-        private Units(long milliseconds) {
+        Units(long milliseconds) {
             _milliseconds = milliseconds;
         }
 
@@ -67,7 +60,7 @@ public final class TimeValue implements Cloneable, Comparable, Serializable {
 
     public static TimeValue parse(String time) {
         if ((time == null) || "".equals(time.trim())) {
-            return new TimeValue(0l, Units.DEFAULT);
+            return new TimeValue(0L, Units.DEFAULT);
         }
 
         time = time.trim();
@@ -102,8 +95,8 @@ public final class TimeValue implements Cloneable, Comparable, Serializable {
         return new TimeValue(val, units);
     }
 
-    public static final TimeValue ZERO_NIGHTS = new TimeValue(0l, Units.nights);
-    public static final TimeValue ZERO_HOURS  = new TimeValue(0l, Units.hours);
+    public static final TimeValue ZERO_NIGHTS = new TimeValue(0L, Units.nights);
+    public static final TimeValue ZERO_HOURS  = new TimeValue(0L, Units.hours);
 
     private final long _milliseconds;
     private final Units _units;
@@ -195,10 +188,10 @@ public final class TimeValue implements Cloneable, Comparable, Serializable {
      * of time, then larger {@link Units} are sorted before smaller Units.
      * For example, 1 minute sorts before 60 seconds.
      *
-     * @param o the other TimeValue to compare against
+     * @param that the other TimeValue to compare against
      */
-    public int compareTo(Object o) {
-        TimeValue that = (TimeValue) o;
+    @Override
+    public int compareTo(TimeValue that) {
         if (_milliseconds != that._milliseconds) {
             return _milliseconds < that._milliseconds ? -1 : 1;
         }
