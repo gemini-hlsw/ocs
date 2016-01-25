@@ -26,9 +26,6 @@ import language.implicitConversions
 // Ported from Java, so slightly nasty.
 class MagnitudeEditor2 extends TelescopePosEditor {
 
-  implicit def F2ActionlListener(f: ActionEvent => Unit): ActionListener = ???
-  implicit def F2PropertyChangeListener(f: PropertyChangeEvent => Unit): PropertyChangeListener = ???
-
   val bandOrdering = Order[Wavelength].contramap((b: MagnitudeBand) => b.center).toScalaOrdering
 
   val MAG_FORMAT = new DecimalFormat("0.0##")
@@ -310,7 +307,7 @@ class MagnitudeEditor2 extends TelescopePosEditor {
 
   private def reinit(target: SPTarget): Unit =
     reinit(target,
-      if (target != null && target.getTarget.getMagnitudes.isEmpty) Mode.Add
+      if (target != null && Target.magnitudes.get(target.getNewTarget).forall(_.isEmpty)) Mode.Add
       else Mode.Edit
     )
 
@@ -325,7 +322,7 @@ class MagnitudeEditor2 extends TelescopePosEditor {
         def run(): Unit = {
           val sb = scroll.getVerticalScrollBar
           sb.setValue(sb.getMaximum)
-          if (!target.getTarget.getMagnitudes.isEmpty)
+          if (Target.magnitudes.get(target.getNewTarget).exists(_.nonEmpty))
             newRow.bandCombo.foreach(_.requestFocusInWindow)
         }
       })

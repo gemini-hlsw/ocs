@@ -20,7 +20,7 @@ import scala.util.{ Success, Failure }
 
 import scalaz.Scalaz._
 
-final class SiderealNameEditor(mags: MagnitudeEditor) extends TelescopePosEditor with ReentrancyHack {
+final class SiderealNameEditor(mags: MagnitudeEditor2) extends TelescopePosEditor with ReentrancyHack {
   private[this] var spt = new SPTarget // never null
 
   private def forkSearch(): Unit = {

@@ -28,7 +28,7 @@ final class SiderealDetailEditor extends TargetDetailEditor {
   val kind   = new TargetTypeEditor
   val coords = new CoordinateEditor
 
-  val mags   = new MagnitudeEditor <| { e =>
+  val mags   = new MagnitudeEditor2 <| { e =>
     e.getComponent.asInstanceOf[JComponent].setBorder(titleBorder("Magnitudes"))
   }
   val name   = new SiderealNameEditor(mags)

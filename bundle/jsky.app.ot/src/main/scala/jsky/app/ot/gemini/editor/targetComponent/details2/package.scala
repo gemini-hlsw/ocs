@@ -1,5 +1,7 @@
 package jsky.app.ot.gemini.editor.targetComponent
 
+import java.beans.{PropertyChangeListener, PropertyChangeEvent}
+
 import edu.gemini.horizons.api.HorizonsQuery.ObjectType
 import edu.gemini.spModel.target.system.{CoordinateParam, NamedTarget, NonSiderealTarget}
 import edu.gemini.spModel.target.system.ITarget.Tag
@@ -66,5 +68,11 @@ package object details2 {
       def construct = \/.fromTryCatch(constructImpl)
       override def finished = finishedImpl(getValue.asInstanceOf[Throwable \/ A])
     }.start()
+
+  implicit def F2ActionlListener(f: ActionEvent => Unit): ActionListener =
+    new ActionListener { def actionPerformed(e: ActionEvent): Unit = f(e) }
+
+  implicit def F2PropertyChangeListener(f: PropertyChangeEvent => Unit): PropertyChangeListener =
+    new PropertyChangeListener { def propertyChange(evt: PropertyChangeEvent): Unit = f(evt) }
 
 }
