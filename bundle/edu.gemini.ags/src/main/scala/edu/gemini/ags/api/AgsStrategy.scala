@@ -88,9 +88,9 @@ object AgsStrategy {
      * the Selection.
      */
     def applyTo(env: TargetEnvironment): TargetEnvironment = {
-      val targetMap = assignments.map { case Assignment(gp,gs) =>
-        gp -> new SPTarget(HmsDegTarget.fromSkyObject(gs.toOldModel))}.toMap
-      val newAuto: AutomaticGroup = AutomaticGroup.Active(targetMap.mapValues(identity).map(identity))
+      val targetMap = ==>>.fromList(assignments.map { case Assignment(gp,gs) =>
+        gp -> new SPTarget(HmsDegTarget.fromSkyObject(gs.toOldModel))})
+      val newAuto: AutomaticGroup = AutomaticGroup.Active(targetMap)
 
       // If this is different from the old automatic GG, then replace.
       val oldGuideEnvironment = env.getGuideEnvironment
