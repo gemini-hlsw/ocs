@@ -197,7 +197,7 @@ final case class GuideEnvironment(guideEnv: GuideEnv) extends TargetContainer {
           // mark it as having focus.
           val lst = opts.withFocus.toList.span { case (mg, _) => (mg: GuideGrp) =/= current.grp } match {
             case (lefts, (_, f) :: rights) => lefts ::: ((m, f) :: rights)
-            case (lefts, Nil)              => lefts.unzip._1.zip(Stream.continually(false)) :+ (m, true)
+            case (lefts, Nil)              => lefts.unzip._1.zip(Stream.continually(false)) :+ ((m, true))
           }
 
           // Look for the focused element, if any. Create the appropriate type
