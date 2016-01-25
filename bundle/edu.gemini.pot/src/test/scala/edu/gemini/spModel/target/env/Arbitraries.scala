@@ -16,11 +16,14 @@ import Scalaz._
 
 trait Arbitraries extends edu.gemini.spModel.core.Arbitraries {
 
-  def boundedList[A: Arbitrary](max: Int): Gen[List[A]] =
+  def boundedList[A](max: Int, g: => Gen[A]): Gen[List[A]] =
     for {
       sz <- choose(0, max)
-      as <- listOfN(sz, arbitrary[A])
+      as <- listOfN(sz, g)
     } yield as
+
+  def boundedListOf[A: Arbitrary](max: Int): Gen[List[A]] =
+    boundedList(max, arbitrary[A])
 
   implicit val arbSpTarget: Arbitrary[SPTarget] = // arbitrary[Target].map(t => new SPTarget(???))
     Arbitrary {
@@ -34,9 +37,9 @@ trait Arbitraries extends edu.gemini.spModel.core.Arbitraries {
   implicit def arbZipper[A: Arbitrary]: Arbitrary[Zipper[A]] =
     Arbitrary {
       for {
-        l <- boundedList[A](3)
+        l <- boundedListOf[A](3)
         f <- arbitrary[A]
-        r <- boundedList[A](3)
+        r <- boundedListOf[A](3)
       } yield Zipper(l.toStream, f, r.toStream)
     }
 
@@ -52,7 +55,7 @@ trait Arbitraries extends edu.gemini.spModel.core.Arbitraries {
     Arbitrary {
       for {
         a  <- arbitrary[A]
-        as <- boundedList[A](3)
+        as <- boundedListOf[A](3)
       } yield NonEmptyList.nel(a, as)
     }
 
@@ -60,13 +63,13 @@ trait Arbitraries extends edu.gemini.spModel.core.Arbitraries {
     Arbitrary {
       for {
         a  <- arbitrary[A]
-        as <- boundedList[A](3)
+        as <- boundedListOf[A](3)
       } yield OneAnd(a, as)
     }
 
   implicit def arbImList[A: Arbitrary]: Arbitrary[ImList[A]] =
     Arbitrary {
-      boundedList[A](3).map(_.asImList)
+      boundedListOf[A](3).map(_.asImList)
     }
 
   implicit def arbOptsList[A: Arbitrary]: Arbitrary[OptsList[A]] =
@@ -76,7 +79,7 @@ trait Arbitraries extends edu.gemini.spModel.core.Arbitraries {
 
   implicit def arbScalazMap[A: Arbitrary : Order, B: Arbitrary]: Arbitrary[A ==>> B] =
     Arbitrary {
-      boundedList[(A, B)](3).map(lst => ==>>.fromList(lst))
+      boundedListOf[(A, B)](3).map(lst => ==>>.fromList(lst))
     }
 
   implicit val arbGuideProbe: Arbitrary[GuideProbe] =
@@ -88,13 +91,13 @@ trait Arbitraries extends edu.gemini.spModel.core.Arbitraries {
     Arbitrary {
       for {
         n <- alphaStr
-        m <- boundedList[(GuideProbe, OptsList[SPTarget])](3).map { lst => ==>>.fromList(lst) }
+        m <- boundedListOf[(GuideProbe, OptsList[SPTarget])](3).map { lst => ==>>.fromList(lst) }
       } yield ManualGroup(n.take(4), m)
     }
 
   implicit val arbAutomaticActiveGroup: Arbitrary[AutomaticGroup.Active] =
     Arbitrary {
-      boundedList[(GuideProbe, SPTarget)](3).map(lst => ==>>.fromList(lst)).map(AutomaticGroup.Active)
+      boundedListOf[(GuideProbe, SPTarget)](3).map(lst => ==>>.fromList(lst)).map(AutomaticGroup.Active)
     }
 
   implicit val arbAutomaticGroup: Arbitrary[AutomaticGroup] =

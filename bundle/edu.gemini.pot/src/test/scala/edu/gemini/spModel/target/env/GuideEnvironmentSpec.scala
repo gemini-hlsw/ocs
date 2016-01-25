@@ -1,6 +1,7 @@
 package edu.gemini.spModel.target.env
 
 import edu.gemini.spModel.core.AlmostEqual.AlmostEqualOps
+import edu.gemini.spModel.target.env.TargetCollection.TargetCollectionSyntax
 
 import edu.gemini.shared.util.immutable.{ImList, ImOption}
 import edu.gemini.shared.util.immutable.ScalaConverters._
@@ -9,6 +10,9 @@ import edu.gemini.spModel.pio.xml.PioXmlFactory
 import edu.gemini.spModel.target.SPTarget
 import org.apache.commons.io.output.ByteArrayOutputStream
 
+import org.scalacheck.Arbitrary._
+import org.scalacheck.Gen
+import org.scalacheck.Gen._
 import org.scalacheck.Prop._
 
 import org.specs2.ScalaCheck
@@ -43,7 +47,24 @@ class GuideEnvironmentSpec extends Specification with ScalaCheck with Arbitrarie
       }
   }
 
-  "GuideEnvironment cloneTargets"
+  /*
+  val GenTargets: Gen[(GuideProbe, List[SPTarget])] =
+    for {
+      gp <- arbitrary[GuideProbe]
+      ts <- boundedListOf[SPTarget](3)
+    } yield (gp, ts)
+    */
+
+  "GuideEnvironment getTargets" should {
+    "return all targets in order according to their associated probe" in
+      forAll { (g: GuideEnvironment) =>
+        val maps = g.guideEnv.groups.map(_.targets)
+        val ts   = (maps :\ ==>>.empty[GuideProbe, NonEmptyList[SPTarget]]) { (cur, acc) =>
+          cur.unionWith(acc)(_ append _)
+        }
+        g.getTargets.asScalaList == ts.values.map(_.toList).flatten
+      }
+  }
 
   "GuideEnvironment removeGroup" should {
     "do nothing if the group is automatic" in {
@@ -56,7 +77,7 @@ class GuideEnvironmentSpec extends Specification with ScalaCheck with Arbitrarie
       }
     }
 
-    "remove the manual options altogether if the last one is removed" in {
+    "remove the manual options altogether if the last one is removed" in
       forAll { (g0: GuideEnvironment) =>
         g0.getOptions.asScalaList match {
           case (_ :: m :: Nil) =>
@@ -66,9 +87,8 @@ class GuideEnvironmentSpec extends Specification with ScalaCheck with Arbitrarie
             true
         }
       }
-    }
 
-    "remove the manual group if it exists in the environment" in {
+    "remove the manual group if it exists in the environment" in
       forAll { (g0: GuideEnvironment, i: Int) =>
         g0.getOptions.asScalaList match {
           case (_ :: h :: t) =>  // auto :: first_manual :: other_manuals
@@ -80,9 +100,8 @@ class GuideEnvironmentSpec extends Specification with ScalaCheck with Arbitrarie
             true
         }
       }
-    }
 
-    "keep the same focus unless removing the focused group" in {
+    "keep the same focus unless removing the focused group" in
       forAll { (g0: GuideEnvironment, i: Int) =>
         g0.getOptions.asScalaList match {
           case (_ :: h :: t) =>  // auto :: first_manual :: other_manuals
@@ -99,9 +118,8 @@ class GuideEnvironmentSpec extends Specification with ScalaCheck with Arbitrarie
             true
         }
       }
-    }
 
-    "when removing the primary, move the primary to the right unless at the end in which case to the left" in {
+    "when removing the primary, move the primary to the right unless at the end in which case to the left" in
       forAll { (g0: GuideEnvironment, i: Int) =>
         g0.getOptions.asScalaList match {
           case (_ :: h :: t) =>  // auto :: first_manual :: other_manuals
@@ -124,7 +142,6 @@ class GuideEnvironmentSpec extends Specification with ScalaCheck with Arbitrarie
             true
         }
       }
-    }
   }
 
 

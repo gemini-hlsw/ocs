@@ -42,7 +42,7 @@ final case class GuideEnvironment(guideEnv: GuideEnv) extends TargetContainer {
     }
 
   override def getTargets: ImList[SPTarget] =
-    guideEnv.targets.toList.sortBy(_._1).flatMap(_._2.toList).asImList
+    guideEnv.targetList.asImList
 
   def getOptions: ImList[GuideGroup] =
     guideEnv.groups.map(GuideGroup).asImList
