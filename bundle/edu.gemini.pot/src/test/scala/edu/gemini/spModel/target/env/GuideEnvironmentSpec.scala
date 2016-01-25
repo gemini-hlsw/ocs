@@ -140,6 +140,37 @@ class GuideEnvironmentSpec extends Specification with ScalaCheck with Arbitrarie
           (oldIndex < newSize)                       ||
           ((newSize - 1) === newEnv.getPrimaryIndex)
       }
+
+    "if there are multiple groups new groups that match the existing primary, select the one closest to the old primary index" in
+      forAll { (env: GuideEnvironment, newOptions: List[GuideGroup], count: Int) =>
+        val oldIndex = env.getPrimaryIndex.intValue
+
+        (oldIndex === 0) || {
+          val oldAuto     = env.getOptions.head
+          val oldPrimary  = env.getPrimary.getValue
+          val dups        = List.fill((count % 3).abs + 1)(oldPrimary)
+          val newWithDups = oldAuto :: scala.util.Random.shuffle(dups ::: newOptions)
+
+          val newEnv      = env.setOptions(newWithDups.asImList)
+          val newPrimary  = newEnv.getPrimary.getValue
+          val newIndex    = newEnv.getPrimaryIndex.intValue
+
+          // List of (index, distance from old primary index) for groups that
+          // match the primary index.
+          val allMatching = newEnv.getOptions.asScalaList.zipWithIndex.collect { case (g, i) if g === oldPrimary =>
+            (i, (oldIndex - i).abs)
+          }
+
+          // The distance of the closest matching group (or groups)
+          val closest   = allMatching.unzip._2.min
+
+          // Set of indices at the closest distance from the old primary index
+          val isClosest = allMatching.collect { case (i, distance) if distance === closest => i }.toSet
+
+          // New primary should be one of the closest options
+          (oldPrimary === newPrimary) && isClosest(newIndex)
+        }
+      }
   }
 
   "GuideEnvironment removeGroup" should {
