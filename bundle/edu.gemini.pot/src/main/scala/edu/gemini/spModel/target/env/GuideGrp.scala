@@ -10,6 +10,11 @@ import Scalaz._
 
 
 sealed trait GuideGrp extends Serializable {
+
+  def isAutomatic: Boolean
+
+  def isManual: Boolean = !isAutomatic
+
   /** Returns the set of guide probes with at least one associated guide star
     * in this environment.
     */
@@ -35,9 +40,13 @@ sealed trait GuideGrp extends Serializable {
   * of targets, of which exactly one is selected. Should it also have a UUID so
   * we can distinguish [temporarily] identical ones?
  */
-final case class ManualGroup(name: String, targetMap: GuideProbe ==>> OptsList[SPTarget]) extends GuideGrp
+final case class ManualGroup(name: String, targetMap: GuideProbe ==>> OptsList[SPTarget]) extends GuideGrp {
+  def isAutomatic: Boolean = false
+}
 
 object ManualGroup {
+  val Empty: ManualGroup = ManualGroup("", ==>>.empty)
+
   val Name: ManualGroup @> String                                 =
     Lens.lensu((mg, n) => mg.copy(name = n), _.name)
 
@@ -66,19 +75,33 @@ object ManualGroup {
 }
 
 
-sealed trait AutomaticGroup extends GuideGrp
+sealed trait AutomaticGroup extends GuideGrp {
+  def isAutomatic: Boolean = true
+  def toManualGroup: ManualGroup
+
+  def targetMap: GuideProbe ==>> SPTarget
+}
 
 object AutomaticGroup {
 
   /** The initial automatic group is a marker indicating that the target
     * environment is "new".
     */
-  case object Initial extends AutomaticGroup
+  case object Initial extends AutomaticGroup {
+    def toManualGroup: ManualGroup =
+      ManualGroup.Empty
+
+    def targetMap: GuideProbe ==>> SPTarget =
+      ==>>.empty
+  }
 
   /** An active bags group provides a 1:1 mapping from probe to target. If the
     * map is empty this is ok; it just means bags did not find any targets.
     */
-  case class Active(targetMap: GuideProbe ==>> SPTarget) extends AutomaticGroup
+  case class Active(targetMap: GuideProbe ==>> SPTarget) extends AutomaticGroup {
+    def toManualGroup: ManualGroup =
+      ManualGroup("", targetMap.map(t => OptsList.focused(t)))
+  }
 
   val TargetMap: Active @> ==>>[GuideProbe, SPTarget] =
     Lens.lensu((a,m) => a.copy(targetMap = m), _.targetMap)

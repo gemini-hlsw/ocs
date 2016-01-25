@@ -3,7 +3,7 @@ package edu.gemini.spModel.target.env
 import edu.gemini.spModel.core.AlmostEqual.AlmostEqualOps
 import edu.gemini.spModel.target.env.TargetCollection.TargetCollectionSyntax
 
-import edu.gemini.shared.util.immutable.{ImList, ImOption}
+import edu.gemini.shared.util.immutable.{DefaultImList, ImList, ImOption}
 import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.spModel.guide.{GuideProbeMap, GuideProbe}
 import edu.gemini.spModel.pio.xml.PioXmlFactory
@@ -63,6 +63,82 @@ class GuideEnvironmentSpec extends Specification with ScalaCheck with Arbitrarie
           cur.unionWith(acc)(_ append _)
         }
         g.getTargets.asScalaList == ts.values.map(_.toList).flatten
+      }
+  }
+
+  "GuideEnvironment setOptions" should {
+    "keep the initial automatic group, if any; otherwise use a new AutomaticGroup.Initial" in
+      forAll { (gs: ImList[GuideGroup]) =>
+        val env  = GuideEnvironment.Initial.setOptions(gs)
+        val grps = env.getOptions
+
+        val expected = gs.headOption.asScalaOpt.filter(_.grp.isAutomatic).getOrElse(GuideGroup(AutomaticGroup.Initial))
+        val actual   = env.getOptions.head
+
+        expected === actual
+      }
+
+    "convert all groups except the first one to equivalent manual groups" in
+      forAll { (gs: ImList[GuideGroup]) =>
+        val env = GuideEnvironment.Initial.setOptions(gs)
+
+        val expected = (gs.asScalaList.map(_.grp) match {
+          case Nil                      => Nil
+          case (a: AutomaticGroup) :: t => t
+          case ms                       => ms
+        }).map {
+          case a: AutomaticGroup => ManualGroup("", a.targetMap.map(t => OptsList.focused(t)))
+          case g                 => g
+        }
+
+        val actual = env.getOptions.asScalaList.tail.map(_.grp)
+
+        expected === actual
+      }
+
+    "maintain the same primary group if it exists in the new options list" in
+      forAll { (env: GuideEnvironment, newOptions: ImList[GuideGroup], i: Int) =>
+        // Get the existing primary group
+        val p = env.getPrimary.getValue
+
+        // if it is the automatic group, prepend it on the new options,
+        // otherwise replace some random newOptions element with it
+        val opts =
+          if (p.grp.isAutomatic) newOptions.cons(p)
+          else if (newOptions.isEmpty) DefaultImList.create(p)
+          else newOptions.updated((i % newOptions.size).abs, p)
+
+        // Get the new primary
+        val np = env.setOptions(opts).getPrimary.getValue
+
+        // finally proof that p equals np
+        p === np
+      }
+
+    "select the element at the same index as the existing primary if it isn't in the new options list" in
+      forAll { (env: GuideEnvironment, newOptions: ImList[GuideGroup]) =>
+        val oldPrimary = env.getPrimary.getValue
+        val oldIndex   = env.getPrimaryIndex.intValue
+        val newSize    = newOptions.size + (newOptions.headOption.asScalaOpt.filter(_.grp.isAutomatic).isDefined ? 0 | 1)
+        val newEnv     = env.setOptions(newOptions)
+        val newPrimary = newEnv.getPrimary.getValue
+
+        (newPrimary === oldPrimary)             ||
+          (oldIndex >= newSize)                 ||
+          (oldIndex === newEnv.getPrimaryIndex)
+      }
+
+    "select the last element if the existing primary isn't in the new options list" in
+      forAll { (env: GuideEnvironment, newOptions: ImList[GuideGroup]) =>
+        val oldPrimary = env.getPrimary.getValue
+        val oldIndex   = env.getPrimaryIndex.intValue
+        val newSize    = newOptions.size + (newOptions.headOption.asScalaOpt.filter(_.grp.isAutomatic).isDefined ? 0 | 1)
+        val newEnv     = env.setOptions(newOptions)
+        val newPrimary = newEnv.getPrimary.getValue
+
+        (newPrimary === oldPrimary)                  ||
+          (oldIndex < newSize)                       ||
+          ((newSize - 1) === newEnv.getPrimaryIndex)
       }
   }
 

@@ -51,6 +51,14 @@ final case class GuideEnvironment(guideEnv: GuideEnv) extends TargetContainer {
   def update(op: OptionsList.Op[GuideGroup]): GuideEnvironment =
     ???
 
+  /** Roughly replaces all the groups with the given groups and keeps the index
+    * of the selected group the same, if possible.  If the `newList` contains
+    * multiple `AutomaticGroup` instances, only the first is kept.
+    *
+    * @deprecated This method will have surprising behavior if there are
+    *             multiple automatic guide groups or if the `newList` is not a
+    *             slightly modified version of the existing list.
+    */
   def setOptions(newList: ImList[GuideGroup]): GuideEnvironment = {
     // This is an awkward, wacky method that updates the available guide groups
     // and tries to keep the selected group the "same".  It predates the new
@@ -61,28 +69,46 @@ final case class GuideEnvironment(guideEnv: GuideEnv) extends TargetContainer {
     // else.  We therefore will have to massage the list accordingly if it
     // does not conform.
 
-    val empty    = (List.empty[AutomaticGroup], List.empty[ManualGroup])
-    val (as, ms) = (newList.asScalaList:\empty) { case (gg, (as0, ms0)) =>
-      gg.grp match {
-        case a: AutomaticGroup => (a :: as0, ms0)
-        case m: ManualGroup    => (as0, m :: ms0)
-      }
+    // We need the initial automatic group, which should be the first element in
+    // the list.  If there is no first element or if it is manual, we'll use a
+    // new AutomaticGroup.Initial.
+    val autoOpt = newList.headOption.asScalaOpt.map(_.grp).collect {
+      case a: AutomaticGroup => a
     }
+    val auto    = autoOpt | AutomaticGroup.Initial
 
-    val auto       = as.headOption.getOrElse(AutomaticGroup.Initial)
-    val all        = auto :: ms
+    // Everything in `newList` except for the first element (if it is automatic)
+    // should be manual, so convert to manual if necessary
+    val manualList = autoOpt.fold(newList)(_ => newList.tail).asScalaList.map { g => g.grp match {
+      case a: AutomaticGroup => a.toManualGroup
+      case m: ManualGroup    => m
+    }}
+
+    // Select the primary group as in the old Java GuideEnvironment impl...  It
+    // should be the same as the existing primary group if it has not been
+    // modified in `newList`.  Otherwise, pick the group at the same index if
+    // there is one.  Otherwise, pick the last one.
+
+    val all        = auto :: (manualList: List[GuideGrp])
+    val allSize    = all.size
     val oldPrimary = guideEnv.primaryGroup
-    val newPrimary = all.contains(oldPrimary) ? oldPrimary | {
-      // Select the group at the same index, as in the old Java GuideEnvironment
-      val i = guideEnv.primaryIndex
-      all((i < all.length) ? i | all.length - 1)
+
+    // If there are multiple groups matching the oldPrimary we'll want the
+    // closest one to oldIndex
+    val oldIndex0  = guideEnv.primaryIndex
+    val oldIndex   = (oldIndex0 < allSize) ? oldIndex0 | (allSize - 1)
+    val newIndex   = all.zipWithIndex.filter(_._1 === oldPrimary).unzip._2 match {
+      case Nil => oldIndex
+      case ps  => ps.minBy { i => (oldIndex - i).abs }
     }
 
-    val manual = ms.span(_ != newPrimary) match {
-      case (Nil, Nil)               => None
-      case (h :: t, Nil)            => Some(OptsList.unfocused(h, t))
-      case (lefts, focus :: rights) => Some(OptsList.focused(lefts, focus, rights))
-    }
+    val manual =
+      if (newIndex === 0) manualList.headOption.map { h => OptsList.unfocused(h, manualList.tail) }
+      else manualList.splitAt(newIndex - 1) match {
+        case (Nil, Nil)               => None
+        case (h :: t, Nil)            => Some(OptsList.unfocused(h, t))
+        case (lefts, focus :: rights) => Some(OptsList.focused(lefts, focus, rights))
+      }
 
     GuideEnvironment(GuideEnv(auto, manual))
   }
