@@ -71,6 +71,7 @@ class ItcServiceImpl extends ItcService {
       case i: GmosParameters              => imagingResult        (new GmosRecipe(p, i))
       case i: GsaoiParameters             => imagingResult        (new GsaoiRecipe(p, i))
       case i: NiriParameters              => imagingResult        (new NiriRecipe(p, i))
+      case i: GnirsParameters             => imagingResult        (new GnirsRecipe(p, i))
       case _                              => ItcResult.forMessage ("Imaging with this instrument is not supported by ITC.")
     }
 

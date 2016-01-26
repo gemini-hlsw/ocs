@@ -39,11 +39,11 @@ public final class Gnirs extends Instrument implements SpectroscopyInstrument {
 
     // Keep a reference to the color filter to ask for effective wavelength
     private final GnirsParameters params;
-    protected Filter _Filter;
+    protected Filter _Filter;  // color filter
     protected GnirsGratingOptics _gratingOptics;
     protected Detector _detector;
     protected double _sampling;
-    protected String _filterUsed;
+    protected String _filterUsed;  // XD or order filter
     protected Disperser _grating;
     protected CalculationMethod _mode;
     protected double _centralWavelength;
@@ -64,8 +64,8 @@ public final class Gnirs extends Instrument implements SpectroscopyInstrument {
 
         params = gp;
         _grating = gp.grating();
-        _centralWavelength = correctedCentralWavelength(); // correct central wavelength if cross dispersion is used
         _mode = odp.calculationMethod();
+        _centralWavelength = correctedCentralWavelength(); // correct central wavelength if cross dispersion is used
         _XDisp = isXDispUsed();
 
         // added additional condition (_mode instanceof Spectroscopy) -OS
@@ -174,8 +174,11 @@ public final class Gnirs extends Instrument implements SpectroscopyInstrument {
      * @return Effective wavelength in nm
      */
     public int getEffectiveWavelength() {
-        return (int) _gratingOptics.getEffectiveWavelength();
-
+        if (_mode instanceof Imaging) {  // added effective wvl. for imaging -OS
+            return (int) _Filter.getEffectiveWavelength();
+        } else {
+            return (int) _gratingOptics.getEffectiveWavelength();
+        }
     }
 
     /**
@@ -259,7 +262,8 @@ public final class Gnirs extends Instrument implements SpectroscopyInstrument {
 
     private double correctedCentralWavelength() {
         if (_mode instanceof Imaging) {  // added -OS
-            return params.filter().wavelength();
+            _Filter = Filter.fromFile(getPrefix(), params.filter().name(), getDirectory() + "/");
+            return (int) _Filter.getEffectiveWavelength(); // instead of return params.filter().wavelength(); -OS
         } else if (!isXDispUsed()) {
             return params.centralWavelength().toNanometers();
         } else {
