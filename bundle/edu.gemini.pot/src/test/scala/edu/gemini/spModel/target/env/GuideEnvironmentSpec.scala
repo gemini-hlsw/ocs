@@ -96,6 +96,18 @@ class GuideEnvironmentSpec extends Specification with ScalaCheck with Arbitrarie
         expected === actual
       }
 
+    "select the element at the same index as the existing primary if there are enough options in the new list" in
+      forAll { (env: GuideEnvironment, newOptions: ImList[GuideGroup], i: Int) =>
+        val oldIndex = env.getPrimaryIndex.intValue
+        val newSize  = newOptions.size.toInt + (newOptions.headOption.asScalaOpt.filter(_.grp.isAutomatic).isDefined ? 0 | 1)
+        val newEnv   = env.setOptions(newOptions)
+        val newIndex = newEnv.getPrimaryIndex.intValue
+
+        if (oldIndex < newSize) newIndex === oldIndex else newIndex === (newSize - 1)
+      }
+
+/*
+
     "maintain the same primary group if it exists in the new options list" in
       forAll { (env: GuideEnvironment, newOptions: ImList[GuideGroup], i: Int) =>
         // Get the existing primary group
@@ -171,6 +183,7 @@ class GuideEnvironmentSpec extends Specification with ScalaCheck with Arbitrarie
           (oldPrimary === newPrimary) && isClosest(newIndex)
         }
       }
+      */
   }
 
   "GuideEnvironment removeGroup" should {

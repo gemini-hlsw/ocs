@@ -84,31 +84,24 @@ final case class GuideEnvironment(guideEnv: GuideEnv) extends TargetContainer {
       case m: ManualGroup    => m
     }}
 
-    // Select the primary group as in the old Java GuideEnvironment impl...  It
-    // should be the same as the existing primary group if it has not been
-    // modified in `newList`.  Otherwise, pick the group at the same index if
-    // there is one.  Otherwise, pick the last one.
+    // Compute the manual guide group Option[OptsList[ManualGroup]] to reflect
+    // the correct selection.  We will try to keep the primary index the same
+    // but if removing GuideGroups may have to resort to the last element.
 
-    val all        = auto :: (manualList: List[GuideGrp])
-    val allSize    = all.size
-    val oldPrimary = guideEnv.primaryGroup
-
-    // If there are multiple groups matching the oldPrimary we'll want the
-    // closest one to oldIndex
-    val oldIndex0  = guideEnv.primaryIndex
-    val oldIndex   = (oldIndex0 < allSize) ? oldIndex0 | (allSize - 1)
-    val newIndex   = all.zipWithIndex.filter(_._1 === oldPrimary).unzip._2 match {
-      case Nil => oldIndex
-      case ps  => ps.minBy { i => (oldIndex - i).abs }
-    }
+    val all      = auto :: (manualList: List[GuideGrp])
+    val allSize  = all.size
+    val oldIndex = guideEnv.primaryIndex
+    val newIndex = (oldIndex < allSize) ? oldIndex | (allSize - 1)
 
     val manual =
-      if (newIndex === 0) manualList.headOption.map { h => OptsList.unfocused(h, manualList.tail) }
-      else manualList.splitAt(newIndex - 1) match {
-        case (Nil, Nil)               => None
-        case (h :: t, Nil)            => Some(OptsList.unfocused(h, t))
-        case (lefts, focus :: rights) => Some(OptsList.focused(lefts, focus, rights))
-      }
+      if (newIndex === 0)
+        manualList.headOption.map { h => OptsList.unfocused(h, manualList.tail) }
+      else
+        manualList.splitAt(newIndex - 1) match { // - 1 to account for the auto group
+          case (Nil, Nil)               => None
+          case (h :: t, Nil)            => Some(OptsList.unfocused(h, t))
+          case (lefts, focus :: rights) => Some(OptsList.focused(lefts, focus, rights))
+        }
 
     GuideEnvironment(GuideEnv(auto, manual))
   }
