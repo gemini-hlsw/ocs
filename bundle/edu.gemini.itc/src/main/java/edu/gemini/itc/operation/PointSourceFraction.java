@@ -2,6 +2,11 @@ package edu.gemini.itc.operation;
 
 import edu.gemini.itc.base.Gaussian;
 
+/**
+ * Calculate the fraction of the source flux of a point source that is contained in this aperture.
+ * For point sources this is equal to the area and a gaussian distribution of the incoming flux depending
+ * on the image quality.
+ */
 public final class PointSourceFraction implements SourceFraction {
 
     private double Npix;
@@ -30,14 +35,17 @@ public final class PointSourceFraction implements SourceFraction {
         source_fraction = (ap_ratio > 5.0) ? 1.0 : ap_frac;
     }
 
+    /** {@inheritDoc} */
     public double getSourceFraction() {
         return source_fraction;
     }
 
+    /** {@inheritDoc} */
     public double getNPix() {
         return Npix;
     }
 
+    /** {@inheritDoc} */
     public double getSoftwareAperture() {
         return sw_ap;
     }

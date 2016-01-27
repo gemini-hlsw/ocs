@@ -41,9 +41,9 @@ public final class SlitThroughput {
     private final ObservationDetails obs;
     private final SourceDefinition src;
     private final double im_qual;
-    private final double pixel_size;
-    private final double slit_width;
-    private final double slit_ap;
+    private final double pixel_size;    // [arcsec/pixel]
+    private final double slit_width;    // [arcsec]
+    private final double slit_ap;       // the slit length in the aperture in arcsecs
 
     public SlitThroughput(final ObservationDetails obs, final SourceDefinition src, final double im_qual, final double pixel_size, final double slit_width) {
         this.obs        = obs;
@@ -54,26 +54,28 @@ public final class SlitThroughput {
         this.slit_width = slit_width;
     }
 
+    // For point sources and gaussian sources: returns the fraction of the source flux that goes through the slit.
+    // For uniform surface brightness: either return 1arcsec2 for auto aperture or the slit area.
     public double getSlitThroughput() {
 
         // For the usb case we want the resolution to be determined by the
-        // slit width and not the image quality for a point source.
+        // slit width and not the image quality.
         if (src.isUniform()) {
             if (obs.isAutoAperture()) {
-                return 1;
+                return 1;                                           // return 1 arcsec2
             } else {
-                return slit_width * getSpatialPix() * pixel_size;
+                return slit_width * getSpatialPix() * pixel_size;   // return the area (length * slit width)
             }
 
-        // Non-USB case (point source)
+        // Non-USB case (point source/gaussian)
         } else {
 
-            // find the x value
+            // find the slit length in the aperture
             final double spatial_pix = slit_ap / pixel_size;
             final int int_spatial_pix = new Double(spatial_pix + .5).intValue();
             double slit_spatial_ratio = int_spatial_pix * pixel_size / slit_width;
 
-            // find the y value
+            // find the slit width
             final double sigma = im_qual / 2.355;
             final double slit_spec_ratio = slit_width / sigma;
 

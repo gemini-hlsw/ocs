@@ -1,11 +1,20 @@
 package edu.gemini.itc.operation;
 
+/**
+ * Helper to calculate the fraction of the incoming source flux that goes through the are of an aperture.
+ * For uniform sources this is equal to the area; i.e. the area covered by the aperture in arcsec² multiplied
+ * with the flux/arcsec² will give us the total flux that arrives on the CCD.
+ */
 public final class USBSourceFraction implements SourceFraction {
 
     private final double sw_ap;
     private final double Npix;
     private final double source_fraction;
 
+    /**
+     * Creates source fraction for an "optimal" (automatic) aperture.
+     * Auto aperture is defined as 1 arcsec².
+     */
     public USBSourceFraction(final double pixel_size) {
 
         final double pix_per_sq_arcsec = 1 / (pixel_size * pixel_size);
@@ -18,6 +27,9 @@ public final class USBSourceFraction implements SourceFraction {
 
     }
 
+    /**
+     * Creates source fraction for a user defined aperture.
+     */
     public USBSourceFraction(final double ap_diam, final double pixel_size) {
 
         final double pix_per_sq_arcsec = 1 / (pixel_size * pixel_size);
@@ -31,14 +43,17 @@ public final class USBSourceFraction implements SourceFraction {
 
     }
 
+    /** {@inheritDoc} */
     public double getSourceFraction() {
         return source_fraction;
     }
 
+    /** {@inheritDoc} */
     public double getNPix() {
         return Npix;
     }
 
+    /** {@inheritDoc} */
     public double getSoftwareAperture() {
         return sw_ap;
     }
