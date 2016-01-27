@@ -1,65 +1,75 @@
 package jsky.app.ot.gemini.editor.targetComponent.details2
 
+import java.awt.Color
+
 import edu.gemini.pot.sp.ISPNode
 import edu.gemini.shared.util.immutable.{ Option => GOption }
-import edu.gemini.shared.util.immutable.ScalaConverters._
+import edu.gemini.spModel.core.{Declination, Angle, RightAscension, SiderealTarget, Coordinates, Target}
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
-import edu.gemini.spModel.target.system._
 import jsky.app.ot.gemini.editor.targetComponent.TelescopePosEditor
 import jsky.util.gui.TextBoxWidget
 
-import scala.util.Try
-import scalaz.syntax.id._
+import scalaz._, Scalaz._
 
 // RA and Dec
 class CoordinateEditor extends TelescopePosEditor with ReentrancyHack {
 
   private[this] var spt = new SPTarget
 
+  val raLens:  Target @?> RightAscension = Target.coords >=> Coordinates.ra .partial
+  val decLens: Target @?> Declination    = Target.coords >=> Coordinates.dec.partial
+
   val ra, dec = new TextBoxWidget <| {w =>
     w.setColumns(10)
     w.setMinimumSize(w.getPreferredSize)
   }
 
-    ra.addWatcher(watcher { s =>
-      nonreentrant {
-        try {
-          spt.setRaString(clean(s))
-        } catch {
-          case _: IllegalArgumentException => spt.setRaDegrees(0)
-        }
+  ra.addWatcher(watcher { s =>
+    nonreentrant {
+      Angle.parseHMS(clean(s)).map(RightAscension.fromAngle) match {
+        case -\/(e) => ra.setForeground(Color.RED)
+        case \/-(a) =>
+          ra.setForeground(Color.BLACK)
+          raLens.set(newTarget, a).foreach(spt.setNewTarget)
       }
-    })
+    }
+  })
 
   dec.addWatcher(watcher { s =>
     nonreentrant {
-      clean(s) match {
-        case "-" | "+" => // nop
-        case s =>
-          try {
-            spt.setDecString(s)
-          } catch {
-            case _: IllegalArgumentException =>
-              spt.setDecDegrees(0)
-          }
+      Angle.parseDMS(clean(s)).map(Declination.fromAngle) match {
+        case -\/(_) | \/-(None) => ra.setForeground(Color.RED)
+        case \/-(Some(a)) =>
+          dec.setForeground(Color.BLACK)
+          decLens.set(newTarget, a).foreach(spt.setNewTarget)
       }
     }
   })
 
   def edit(ctx: GOption[ObsContext], target0: SPTarget, node: ISPNode): Unit = {
-    val targetChanged = !target0.getTarget.equals(spt.getTarget)
     spt = target0
-
     nonreentrant {
-      val when = ctx.asScalaOpt.flatMap(_.getSchedulingBlock.asScalaOpt).map(_.start).map(java.lang.Long.valueOf).asGeminiOpt
-      target.getRaString(when).asScalaOpt.foreach(ra.setText)
-      target.getDecString(when).asScalaOpt.foreach(dec.setText)
+
+      def enable(t: SiderealTarget): Unit = {
+        ra.setEnabled(true)
+        ra.setText(t.coordinates.ra.toAngle.formatHMS)
+        dec.setEnabled(true)
+        dec.setText(t.coordinates.dec.formatDMS)
+      }
+
+      def disable(t: Target): Unit = {
+        ra.setEnabled(false)
+        dec.setEnabled(false)
+      }
+
+      newTarget.fold(disable, enable, disable)
+
     }
   }
 
-  def target: ITarget =
-    spt.getTarget
+  def newTarget: Target =
+    spt.getNewTarget
 
   def clean(angle: String): String =
     angle.trim.replace(",", ".")

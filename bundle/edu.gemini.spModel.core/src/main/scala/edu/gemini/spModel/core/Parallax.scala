@@ -11,6 +11,8 @@ case class Parallax(mas: Double) extends Serializable
 
 object Parallax {
 
+  val mas: Parallax @> Double = Lens.lensu((a, b) => a.copy(mas = b), _.mas)
+
   /**
    * The `No parallax`
    * @group Constructors

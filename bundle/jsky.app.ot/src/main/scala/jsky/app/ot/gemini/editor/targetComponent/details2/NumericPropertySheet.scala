@@ -121,19 +121,26 @@ case class NumericPropertySheet[A](title: Option[String], f: SPTarget => A, prop
 
 object NumericPropertySheet {
 
-  private val MaxFractionDigits   = 12
-  private val ExpLimit            = 6
-  private val SmallLimit          = Math.pow(10, -ExpLimit)
-  private val BigLimit            = Math.pow(10, ExpLimit)
-  private val ExpNumbersFormatter = new DecimalFormat("0.#E0") <|
-                                        { _.setMaximumFractionDigits(MaxFractionDigits) }
-  private val NumbersFormatter    = NumberFormat.getInstance(Locale.US) <|
-                                        { _.setGroupingUsed(false) }    <|
-                                        { _.setMaximumFractionDigits(MaxFractionDigits) }
-  private val ParseFormatter      = NumbersFormatter
+  private val MaxFractionDigits = 12
+  private val ExpLimit          = 6
+  private val SmallLimit        = Math.pow(10, -ExpLimit)
+  private val BigLimit          = Math.pow(10, ExpLimit)
+
+  private val ExpNumbersFormatter: NumberFormat =
+    new DecimalFormat("0.#E0") <| { f =>
+      f.setMaximumFractionDigits(MaxFractionDigits)
+    }
+
+  private val NumbersFormatter: NumberFormat =
+    NumberFormat.getInstance(Locale.US) <| { f =>
+      f.setMaximumFractionDigits(MaxFractionDigits)
+      f.setGroupingUsed(false)
+    }
+
+  private val ParseFormatter = NumbersFormatter
 
   sealed trait Prop[A, B] {
-    def leftComponent: Component
+    def leftComponent:  Component
     def rightComponent: Component
     def edit: (A, Double)                       => Unit
     def transform: (NumberBoxWidget, A, Double) => Unit = (_, _, _) => {}
@@ -146,67 +153,127 @@ object NumericPropertySheet {
     }
   }
 
-  case class DoubleProp[A](leftCaption: String, rightCaption: String, get: A => Double, edit: (A, Double) => Unit) extends Prop[A, Double] {
-    val leftComponent  = new Label(leftCaption) {
-      horizontalAlignment = Alignment.Left
-    }
-    val rightComponent = new Label(rightCaption) {
-      horizontalAlignment = Alignment.Left
-    }
-    def init: (NumberBoxWidget, A) => Unit  =  (w,a) => {
+  case class DoubleProp[A](
+    leftCaption: String,
+    rightCaption: String,
+    get: A => Double,
+    edit: (A, Double) => Unit
+  ) extends Prop[A, Double] {
+
+    val leftComponent =
+      new Label(leftCaption) {
+        horizontalAlignment = Alignment.Left
+      }
+
+    val rightComponent =
+      new Label(rightCaption) {
+        horizontalAlignment = Alignment.Left
+      }
+
+    def init: (NumberBoxWidget, A) => Unit = { (w,a) =>
       w.setValue(format(get(a)))
     }
+
   }
 
-  case class TransformableProp[A, B](leftOptions: List[B], rightCaptions: Map[B, String], initial: B, render: B => String, get: (A, B) => Double, set: (A, B, Double) => Unit, format: B => NumberFormat) extends Prop[A, Double] {
-    val rightComponent = new Label(rightCaptions.getOrElse(initial, "")) {
-      horizontalAlignment = Alignment.Left
-    }
-    val leftComponent  = new ComboBox[B](leftOptions) {
-      selection.item = initial
-      renderer = Renderer(render)
-      listenTo(selection)
-      reactions += {
-        case SelectionChanged(_) =>
-          rightComponent.text = rightCaptions.getOrElse(selection.item, "")
+  case class TransformableProp[A, B](
+    leftOptions: List[B],
+    rightCaptions: Map[B, String],
+    initial: B,
+    render: B => String,
+    get: (A, B) => Double,
+    set: (A, B, Double) => Unit,
+    format: B => NumberFormat
+  ) extends Prop[A, Double] {
+
+    val rightComponent =
+      new Label(rightCaptions.getOrElse(initial, "")) {
+        horizontalAlignment = Alignment.Left
       }
-    }
-    override def formatter(v: Double) = format(leftComponent.selection.item)
-    def edit: (A, Double)          => Unit  =  (a, d) => {
+
+    val leftComponent  =
+      new ComboBox[B](leftOptions) {
+        selection.item = initial
+        renderer = Renderer(render)
+        listenTo(selection)
+        reactions += {
+          case SelectionChanged(_) =>
+            rightComponent.text = rightCaptions.getOrElse(selection.item, "")
+        }
+      }
+
+    override def formatter(v: Double) =
+      format(leftComponent.selection.item)
+
+    def edit: (A, Double) => Unit = { (a, d) =>
       set(a, leftComponent.selection.item, d)
     }
-    override def transform: (NumberBoxWidget,  A, Double)          => Unit  =  (w, a, d) => {
+
+    override def transform: (NumberBoxWidget, A, Double) => Unit =  { (w, a, d) =>
       w.setValue(format(get(a, leftComponent.selection.item)))
     }
-    def init: (NumberBoxWidget, A) => Unit  =  (w, a) => {
+
+    def init: (NumberBoxWidget, A) => Unit  = { (w, a) =>
       w.setValue(format(get(a, leftComponent.selection.item)))
     }
+
   }
 
-  case class SingleUnitQuantity[A, B <: Quantity[B]](leftCaption: String, unit: UnitOfMeasure[B], get: A => B, set: (A, B) => Unit) extends Prop[A, B] {
-    val leftComponent  = new Label(leftCaption) {
-      horizontalAlignment = Alignment.Left
+  case class SingleUnitQuantity[A, B <: Quantity[B]](
+    leftCaption: String,
+    unit: UnitOfMeasure[B],
+    get: A => B,
+    set: (A, B) => Unit
+  ) extends Prop[A, B] {
+
+    val leftComponent =
+      new Label(leftCaption) {
+        horizontalAlignment = Alignment.Left
+      }
+
+    val rightComponent =
+      new Label(unit.symbol)  {
+        horizontalAlignment = Alignment.Left
+      }
+
+    def edit: (A, Double) => Unit = { (a, d) =>
+      set(a, unit(d))
     }
-    val rightComponent = new Label(unit.symbol)  {
-      horizontalAlignment = Alignment.Left
-    }
-    def edit: (A, Double)          => Unit  =  (a, d) => set(a, unit(d))
-    def init: (NumberBoxWidget, A) => Unit  =  (w, a) => {
+
+    def init: (NumberBoxWidget, A) => Unit = { (w, a) =>
       w.setValue(format(get(a).value))
     }
+
   }
 
-  case class MultiUnitQuantity[A, B <: Quantity[B]](leftCaption: String, units: Seq[UnitOfMeasure[B]], get: A => B, set: (A, B) => Unit) extends Prop[A, B] {
-    val leftComponent  = new Label(leftCaption) {
-      horizontalAlignment = Alignment.Left
+  case class MultiUnitQuantity[A, B <: Quantity[B]](
+    leftCaption: String,
+    units: Seq[UnitOfMeasure[B]],
+    get: A => B,
+    set: (A, B) => Unit
+  ) extends Prop[A, B] {
+
+    val leftComponent =
+      new Label(leftCaption) {
+        horizontalAlignment = Alignment.Left
+      }
+
+    val rightComponent =
+      new ComboBox[UnitOfMeasure[B]](units) {
+        renderer = Renderer(_.symbol)
+      }
+
+    def unit= rightComponent.selection.item
+
+    def edit: (A, Double) => Unit = {
+      (a, d) => set(a, unit(d))
     }
-    val rightComponent = new ComboBox[UnitOfMeasure[B]](units) {renderer = Renderer(_.symbol)}
-    def unit           = rightComponent.selection.item
-    def edit: (A, Double)          => Unit  =  (a, d) => set(a, unit(d))
-    def init: (NumberBoxWidget, A) => Unit  =  (w, a) => {
+
+    def init: (NumberBoxWidget, A) => Unit = { (w, a) =>
       w.setValue(format(get(a).value))
       rightComponent.selection.item = get(a).unit
     }
+
   }
 
   object Prop {
