@@ -26,8 +26,6 @@ import jsky.app.ot.util.Resources;
 import jsky.util.gui.*;
 
 import javax.swing.*;
-import javax.swing.event.MenuEvent;
-import javax.swing.event.MenuListener;
 import java.awt.*;
 import java.awt.event.*;
 import java.beans.PropertyChangeEvent;
@@ -136,9 +134,8 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         final boolean editable      = OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation());
         final boolean curNotBase    = _curPos != env.getBase();
 
-        // TODO: is it even possible to have isAutoGroup != isAutoTarget? I doubt it.
         // We assume that if no group is set, then we are or want to handle the same as the auto group.
-        final boolean isAutoGroup  = ImOption.apply(_curGroup).exists(GuideGroup::isAutomatic);
+        final boolean isAutoGroup  = ImOption.apply(_curGroup).exists(cgi -> cgi._2().isAutomatic());
         final boolean isAutoTarget = ImOption.apply(_curPos).exists(p -> env.getGuideEnvironment().getOptions()
                 .exists(gg -> gg.isAutomatic() && gg.containsTarget(p)));
         final boolean isAuto       = isAutoGroup || isAutoTarget;
@@ -366,7 +363,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     private static class AddUserTargetAction implements ActionListener {
         private final TargetObsComp obsComp;
 
-        AddUserTargetAction(TargetObsComp obsComp) {
+        AddUserTargetAction(final TargetObsComp obsComp) {
             this.obsComp = obsComp;
         }
 
@@ -387,19 +384,23 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         }
 
         @Override public void actionPerformed(final ActionEvent actionEvent) {
-            final TargetEnvironment env      = obsComp.getTargetEnvironment();
-            final GuideEnvironment ge        = env.getGuideEnvironment();
-            final ImList<GuideGroup> options = ge.getOptions();
-            final GuideGroup group           = GuideGroup.create("Manual Group");
-            final ImList<GuideGroup> groups  = options.append(group);
+            final TargetEnvironment env    = obsComp.getTargetEnvironment();
+
+            // Ensure we are working with a guide env with a primary group.
+            final GuideEnvironment ge     = env.getGuideEnvironment();
+            final GuideGroup primaryGroup = ge.getPrimary();
+
+            final ImList<GuideGroup> oldGroups = ge.getOptions();
+            final GuideGroup newGroup          = GuideGroup.create("Manual Group");
+            final ImList<GuideGroup> newGroups = oldGroups.append(newGroup);
 
             // OT-34: make new group primary and select it
-            final GuideGroup primaryGroup    = ge.getPrimary();
-            if (!positionTable.confirmGroupChange(primaryGroup, group)) return;
-            obsComp.setTargetEnvironment(env.setGuideEnvironment(ge.setOptions(groups).setPrimaryIndex(options.size())));
+            if (!positionTable.confirmGroupChange(primaryGroup, newGroup)) return;
+            obsComp.setTargetEnvironment(env.setGuideEnvironment(ge.setOptions(newGroups)
+                    .setPrimaryIndex(oldGroups.size())));
 
             // expand new group tree node
-            positionTable.selectGroup(group);
+            positionTable.selectGroup(newGroup);
         }
     }
 
@@ -444,7 +445,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     };
 
     private final PropertyChangeListener selectionListener = new PropertyChangeListener() {
-        @Override public void propertyChange(PropertyChangeEvent evt) {
+        @Override public void propertyChange(final PropertyChangeEvent evt) {
             final ISPObsComponent node = getContextTargetObsComp();
             final TargetEnvironment env = getDataObject().getTargetEnvironment();
             final SPTarget target = TargetSelection.get(env, node);
@@ -605,8 +606,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     @SuppressWarnings("FieldCanBeLocal")
     private final ActionListener copyListener = evt -> {
         final Option<TargetClipboard> opt = TargetClipboard.copy(getDataObject().getTargetEnvironment(), getNode());
-        if (opt.isEmpty()) return;
-        clipboard = opt.getValue();
+        opt.foreach(c -> clipboard = c);
     };
 
     @SuppressWarnings("FieldCanBeLocal")
@@ -640,17 +640,10 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
         static Option<TargetClipboard> copy(final TargetEnvironment env, final ISPObsComponent obsComponent) {
             if (obsComponent == null) return None.instance();
-
-            final SPTarget target = TargetSelection.get(env, obsComponent);
-            if (target == null) {
-                final GuideGroup group = TargetSelection.getGuideGroup(env, obsComponent);
-                if (group == null) {
-                    return None.instance();
-                }
-                return new Some<>(new TargetClipboard(group));
-            }
-            return new Some<>(new TargetClipboard(target));
+            return ImOption.apply(TargetSelection.get(env, obsComponent)).map(TargetClipboard::new).orElse(
+                    ImOption.apply(TargetSelection.getGuideGroup(env, obsComponent)).map(TargetClipboard::new));
         }
+
 
         TargetClipboard(final SPTarget spTarget) {
             this.target = spTarget.getTarget().clone();
