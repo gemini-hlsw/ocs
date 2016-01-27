@@ -12,6 +12,8 @@ import edu.gemini.ui.workspace.IShellAdvisor;
 import edu.gemini.ui.workspace.impl.Shell;
 import edu.gemini.ui.workspace.impl.Workspace;
 
+import javax.swing.SwingUtilities;
+
 public class Activator implements BundleActivator, ServiceTrackerCustomizer<IShellAdvisor, Shell> {
 
     private static final Logger LOGGER = Logger.getLogger(Activator.class.getName());
@@ -38,10 +40,12 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer<IShe
 
         // Close everything, in opposite order.
         tracker.close();
-        workspace.close();
+        SwingUtilities.invokeLater(() -> {
+            workspace.close();
+            workspace = null;
+        });
 
         // And let everything be GC'd
-        workspace = null;
         tracker = null;
         this.context = null;
 

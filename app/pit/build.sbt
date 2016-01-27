@@ -49,7 +49,9 @@ def common(pv: Version) = AppConfig(
     BundleSpec("org.scala-lang.scala-actors",  Version(2, 10, 1)),
     BundleSpec("org.scala-lang.scala-reflect", Version(2, 10, 1)),
     BundleSpec("org.scala-lang.scala-swing",   Version(2, 0, 0)),
-    BundleSpec("org.apache.commons.logging",   Version(1, 1, 0))
+    BundleSpec("org.apache.commons.logging",   Version(1, 1, 0)),
+    BundleSpec("monocle.core",                 Version(1, 1, 0)),
+    BundleSpec("monocle.macro",                Version(1, 1, 0))
   )
 ) extending List()
 
