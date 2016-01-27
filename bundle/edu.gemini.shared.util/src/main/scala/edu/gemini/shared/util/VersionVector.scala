@@ -1,5 +1,6 @@
 package edu.gemini.shared.util
 
+import IntegerIsIntegral._
 import scala.collection.immutable.ListMap
 import scala.collection.JavaConverters._
 
@@ -45,7 +46,7 @@ case class VersionVector[K, V : Integral](clocks: Map[K, V]) extends PartiallyOr
    * Returns true if there are no entries in the version vector (that is, if
    * all values are implicitly 0).
    */
-  def isEmpty = clocks.size == 0
+  def isEmpty = clocks.isEmpty
 
   /**
    * Combines this vector version with <code>that</code> one.  The vector

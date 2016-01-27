@@ -1,4 +1,4 @@
-package edu.gemini.shared
+package edu.gemini.shared.util
 
 import java.lang.{Integer => JInt}
 
@@ -28,7 +28,7 @@ trait IntegerIsIntegral extends Integral[JInt] with Ordering[JInt] {
   def rem(x: JInt, y: JInt)    = x.intValue() % y.intValue()
 }
 
-package object util {
+object IntegerIsIntegral {
 
-  implicit object IntegerIsIntegral extends IntegerIsIntegral
+  implicit val integerIsIntegral = new IntegerIsIntegral {}
 }
