@@ -1,10 +1,3 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: DateRange.java 27821 2010-11-05 22:01:32Z ddawson $
-//
-
 package edu.gemini.shared.util;
 
 import java.io.Serializable;
@@ -14,7 +7,7 @@ import java.util.Date;
  * An (immutable) class for representing a range of dates specified by a
  * start date and an end date.
  */
-public class DateRange implements Serializable, Comparable {
+public class DateRange implements Serializable, Comparable<DateRange> {
 
     private Date _startDate;
 
@@ -55,10 +48,8 @@ public class DateRange implements Serializable, Comparable {
     /**
      * This method supports sorting in collections, implements Comparable.
      */
-    public int compareTo(Object o) {
-        if (!(o instanceof DateRange))
-            return 1;
-        DateRange dr = (DateRange) o;
+    @Override
+    public int compareTo(DateRange dr) {
         if (getStartDate().getTime() < dr.getStartDate().getTime())
             return -1;
         if (getStartDate().getTime() > dr.getStartDate().getTime())

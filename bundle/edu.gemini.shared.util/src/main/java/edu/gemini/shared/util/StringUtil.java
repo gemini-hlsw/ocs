@@ -1,7 +1,3 @@
-//
-// $Id$
-//
-
 package edu.gemini.shared.util;
 
 import java.text.CharacterIterator;
@@ -9,9 +5,6 @@ import java.text.StringCharacterIterator;
 import java.util.Collection;
 import java.util.Iterator;
 
-/**
- *
- */
 public final class StringUtil {
     private StringUtil() {
     }
@@ -43,13 +36,10 @@ public final class StringUtil {
         return res.toString();
     }
 
-    public static interface MapToString<T> {
+    @FunctionalInterface
+    public interface MapToString<T> {
         String apply(T t);
     }
-
-    public static MapToString DEFAULT_MAP_TO_STRING = new MapToString() {
-        @Override public String apply(Object o) { return o.toString(); }
-    };
 
     public static <T> String mkString(Collection<T> c) {
         return mkString(c, ",");
@@ -60,7 +50,7 @@ public final class StringUtil {
     }
 
     public static <T> String mkString(Collection<T> c, String prefix, String sep, String suffix) {
-        return mkString(c, prefix, sep, suffix, DEFAULT_MAP_TO_STRING);
+        return mkString(c, prefix, sep, suffix, Object::toString);
     }
 
     public static <T> String mkString(Collection<T> c, String prefix, String sep, String suffix, MapToString<T> m) {

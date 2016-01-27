@@ -8,6 +8,7 @@ import java.util.NoSuchElementException;
  * The Option implementation that represents the lack of a value.
  */
 public final class None<T> implements Option<T>, Serializable {
+    @SuppressWarnings("rawtypes")
     public static None INSTANCE = new None<>();
 
     public static <T> None<T> instance() {

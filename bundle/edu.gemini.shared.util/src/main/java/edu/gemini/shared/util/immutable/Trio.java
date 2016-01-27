@@ -34,7 +34,7 @@ public final class Trio<T, U, V> implements Tuple3<T, U, V>, Serializable {
         if (o == this) return true;
         if (!(o instanceof Tuple3)) return false;
 
-        final Tuple3 that = (Tuple3) o;
+        final Tuple3<T, U, V> that = (Tuple3<T, U, V>) o;
         if (_1 == null) {
             if (that._1() != null) return false;
         } else {
