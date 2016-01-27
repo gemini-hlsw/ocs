@@ -13,8 +13,8 @@ import javax.swing.BorderFactory._
 import javax.swing.JButton
 import javax.swing.border.Border
 
-import scalaz.syntax.id._
-import scalaz.\/
+import scala.language.implicitConversions
+import scalaz._, Scalaz._
 
 package object details2 {
 
@@ -66,7 +66,7 @@ package object details2 {
   def forkSwingWorker[A <: AnyRef](constructImpl: => A)(finishedImpl: Throwable \/ A => Unit): Unit =
     new SwingWorker {
       def construct = \/.fromTryCatch(constructImpl)
-      override def finished = finishedImpl(getValue.asInstanceOf[Throwable \/ A])
+      override def finished() = finishedImpl(getValue.asInstanceOf[Throwable \/ A])
     }.start()
 
   implicit def F2ActionlListener(f: ActionEvent => Unit): ActionListener =
@@ -74,5 +74,11 @@ package object details2 {
 
   implicit def F2PropertyChangeListener(f: PropertyChangeEvent => Unit): PropertyChangeListener =
     new PropertyChangeListener { def propertyChange(evt: PropertyChangeEvent): Unit = f(evt) }
+
+  // Turn an A @ Option[B] into an A @> B given a default value for B
+  implicit class OptionsLensOps[A, B](lens: A @> Option[B]) {
+    def orZero(zero: B): A @> B =
+      lens.xmapB(_.getOrElse(zero))(b => (b != zero).option(b))
+  }
 
 }
