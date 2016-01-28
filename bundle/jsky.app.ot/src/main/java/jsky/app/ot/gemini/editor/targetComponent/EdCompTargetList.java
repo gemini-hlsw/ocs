@@ -49,7 +49,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
     // Stuff that varies with time
     private SPTarget        _curPos;
-    private GuideGroup      _curGroup;
+    private Tuple2<Integer, GuideGroup> _curGroup;
 
     public EdCompTargetList() {
 
@@ -77,16 +77,11 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         _w.guideGroupName.addWatcher(new TextBoxWidgetWatcher() {
             @Override public void textBoxKeyPress(final TextBoxWidget tbwe) {
                 SwingUtilities.invokeLater(() -> {
-                    final String name = _w.guideGroupName.getText();
-                    final GuideGroup newGroup = _curGroup.setName(name);
+                    final String name           = _w.guideGroupName.getText();
+                    final GuideGroup newGroup   = _curGroup._2().setName(name);
                     final TargetEnvironment env = getDataObject().getTargetEnvironment();
-                    final GuideEnvironment ge = env.getGuideEnvironment();
-                    final ImList<GuideGroup> options = ge.getOptions();
-                    final List<GuideGroup> list = new ArrayList<>(options.size());
-                    options.foreach(g -> list.add(g == _curGroup ? newGroup : g));
-                    _curGroup = newGroup;
-
-                    getDataObject().setTargetEnvironment(env.setGuideEnvironment(ge.setOptions(DefaultImList.create(list))));
+                    _curGroup                   = new Pair<>(_curGroup._1(), newGroup);
+                    getDataObject().setTargetEnvironment(env.setGroup(_curGroup._1(), newGroup));
                     _w.guideGroupName.requestFocus(); // otherwise focus is lost during event handling
                 });
             }
@@ -353,13 +348,11 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             }
 
             // OT-16: add new guide star to selected group, if any, otherwise the primary group
-            GuideGroup guideGroup = positionTable.getSelectedGroupOrParentGroup(env);
-            final Option<GuideProbeTargets> opt = guideGroup == null ?
-                    env.getPrimaryGuideProbeTargets(probe) :
-                    guideGroup.get(probe);
-            if (guideGroup == null) {
-                guideGroup = ge.getPrimary().getValue();
-            }
+            final Option<Tuple2<Integer, GuideGroup>> guideGroup = positionTable.getSelectedGroupOrParentGroup(env);
+            Option<GuideProbeTargets> opt = guideGroup.flatMap(tup -> tup._2().get(probe));
+            if (opt == null) opt = env.getPrimaryGuideProbeTargets(probe);
+
+            final Integer groupIndex = guideGroup.map(Tuple2::_1).getOrElse(ge.getPrimaryIndex());
 
             final SPTarget target = new SPTarget();
             final GuideProbeTargets targets = opt
@@ -367,7 +360,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                     .getOrElse(GuideProbeTargets.create(probe, target));
 
             obsComp.setTargetEnvironment(env.setGuideEnvironment(
-                    env.getGuideEnvironment().putGuideProbeTargets(guideGroup, targets)));
+                    env.getGuideEnvironment().putGuideProbeTargets(groupIndex, targets)));
 
             // XXX OT-35 hack to work around recursive call to TargetObsComp.setTargetEnvironment() in
             // SPProgData.ObsContextManager.update()
@@ -399,19 +392,16 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         }
 
         @Override public void actionPerformed(final ActionEvent actionEvent) {
-            final TargetEnvironment env = obsComp.getTargetEnvironment();
-            GuideEnvironment ge = env.getGuideEnvironment();
-            if (ge.getPrimary().isEmpty()) {
-                ge = ge.setPrimary(env.getOrCreatePrimaryGuideGroup());
-            }
-            final GuideGroup primaryGroup = ge.getPrimary().getValue();
+            final TargetEnvironment env      = obsComp.getTargetEnvironment();
+            final GuideEnvironment ge        = env.getGuideEnvironment();
             final ImList<GuideGroup> options = ge.getOptions();
-            final GuideGroup group = GuideGroup.create(null);
-            final ImList<GuideGroup> groups = options.append(group);
+            final GuideGroup group           = GuideGroup.create("Manual Group");
+            final ImList<GuideGroup> groups  = options.append(group);
 
             // OT-34: make new group primary and select it
+            final GuideGroup primaryGroup    = ge.getPrimary().getValue();
             if (!positionTable.confirmGroupChange(primaryGroup, group)) return;
-            obsComp.setTargetEnvironment(env.setGuideEnvironment(ge.setOptions(groups).selectPrimary(group)));
+            obsComp.setTargetEnvironment(env.setGuideEnvironment(ge.setOptions(groups).setPrimaryIndex(options.size())));
 
             // expand new group tree node
             positionTable.selectGroup(group);
@@ -467,25 +457,25 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             if (target != null) {
                 manageCurPosIfEnvContainsTarget(target, () -> _curPos = target);
             } else {
-                final GuideGroup grp = TargetSelection.getGuideGroup(env, node);
-                if (grp != null && env.getGroups().contains(grp)) {
+                final Option<Tuple2<Integer, GuideGroup>> grp = TargetSelection.getIndexedGuideGroup(env, node);
+                grp.filter(tup -> env.getGroups().contains(tup._2())).foreach(tup -> {
                     if (_curPos != null) _curPos.deleteWatcher(posWatcher);
 
                     _curPos = null;
-                    _curGroup = grp;
+                    _curGroup = tup;
 
                     _w.guideGroupPanel.setVisible(true);
                     _w.detailEditor.setVisible(false);
 
                     // N.B. don't trim, otherwise user can't include space in group name
-                    final String name = _curGroup.getName().getOrElse("");
+                    final String name = _curGroup._2().getName().getOrElse("");
                     if (!_w.guideGroupName.getValue().equals(name))
                         _w.guideGroupName.setValue(name);
 
                     final boolean editable = OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation());
                     _w.removeButton.setEnabled(editable);
                     _w.primaryButton.setEnabled(editable);
-                }
+                });
             }
         }
     };
@@ -522,8 +512,10 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 DialogUtil.error("You can't remove the primary guide group.");
                 return;
             }
-            env = env.removeGroup(_curGroup);
-            _curGroup = primary;
+            env = env.removeGroup(_curGroup._1());
+            final int groupIndex = env.getGuideEnvironment().getPrimaryIndex();
+            final GuideGroup group = env.getGuideEnvironment().getPrimary().getValue(); // TODO: primary is always defined, remove option wrapper
+            _curGroup = new Pair<>(groupIndex, group);
         }
         getDataObject().setTargetEnvironment(env);
         final SPTarget selTarget = TargetSelection.get(env, getNode());

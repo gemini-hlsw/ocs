@@ -105,87 +105,9 @@ class GuideEnvironmentSpec extends Specification with ScalaCheck with Arbitrarie
 
         if (oldIndex < newSize) newIndex === oldIndex else newIndex === (newSize - 1)
       }
-
-/*
-
-    "maintain the same primary group if it exists in the new options list" in
-      forAll { (env: GuideEnvironment, newOptions: ImList[GuideGroup], i: Int) =>
-        // Get the existing primary group
-        val p = env.getPrimary.getValue
-
-        // if it is the automatic group, prepend it on the new options,
-        // otherwise replace some random newOptions element with it
-        val opts =
-          if (p.grp.isAutomatic) newOptions.cons(p)
-          else if (newOptions.isEmpty) DefaultImList.create(p)
-          else newOptions.updated((i % newOptions.size).abs, p)
-
-        // Get the new primary
-        val np = env.setOptions(opts).getPrimary.getValue
-
-        // finally proof that p equals np
-        p === np
-      }
-
-    "select the element at the same index as the existing primary if it isn't in the new options list" in
-      forAll { (env: GuideEnvironment, newOptions: ImList[GuideGroup]) =>
-        val oldPrimary = env.getPrimary.getValue
-        val oldIndex   = env.getPrimaryIndex.intValue
-        val newSize    = newOptions.size + (newOptions.headOption.asScalaOpt.filter(_.grp.isAutomatic).isDefined ? 0 | 1)
-        val newEnv     = env.setOptions(newOptions)
-        val newPrimary = newEnv.getPrimary.getValue
-
-        (newPrimary === oldPrimary)             ||
-          (oldIndex >= newSize)                 ||
-          (oldIndex === newEnv.getPrimaryIndex)
-      }
-
-    "select the last element if the existing primary isn't in the new options list" in
-      forAll { (env: GuideEnvironment, newOptions: ImList[GuideGroup]) =>
-        val oldPrimary = env.getPrimary.getValue
-        val oldIndex   = env.getPrimaryIndex.intValue
-        val newSize    = newOptions.size + (newOptions.headOption.asScalaOpt.filter(_.grp.isAutomatic).isDefined ? 0 | 1)
-        val newEnv     = env.setOptions(newOptions)
-        val newPrimary = newEnv.getPrimary.getValue
-
-        (newPrimary === oldPrimary)                  ||
-          (oldIndex < newSize)                       ||
-          ((newSize - 1) === newEnv.getPrimaryIndex)
-      }
-
-    "if there are multiple groups new groups that match the existing primary, select the one closest to the old primary index" in
-      forAll { (env: GuideEnvironment, newOptions: List[GuideGroup], count: Int) =>
-        val oldIndex = env.getPrimaryIndex.intValue
-
-        (oldIndex === 0) || {
-          val oldAuto     = env.getOptions.head
-          val oldPrimary  = env.getPrimary.getValue
-          val dups        = List.fill((count % 3).abs + 1)(oldPrimary)
-          val newWithDups = oldAuto :: scala.util.Random.shuffle(dups ::: newOptions)
-
-          val newEnv      = env.setOptions(newWithDups.asImList)
-          val newPrimary  = newEnv.getPrimary.getValue
-          val newIndex    = newEnv.getPrimaryIndex.intValue
-
-          // List of (index, distance from old primary index) for groups that
-          // match the primary index.
-          val allMatching = newEnv.getOptions.asScalaList.zipWithIndex.collect { case (g, i) if g === oldPrimary =>
-            (i, (oldIndex - i).abs)
-          }
-
-          // The distance of the closest matching group (or groups)
-          val closest   = allMatching.unzip._2.min
-
-          // Set of indices at the closest distance from the old primary index
-          val isClosest = allMatching.collect { case (i, distance) if distance === closest => i }.toSet
-
-          // New primary should be one of the closest options
-          (oldPrimary === newPrimary) && isClosest(newIndex)
-        }
-      }
-      */
   }
 
+  /*
   "GuideEnvironment removeGroup" should {
     "do nothing if the group is automatic" in {
       forAll { (g: GuideEnvironment) =>
@@ -263,6 +185,7 @@ class GuideEnvironmentSpec extends Specification with ScalaCheck with Arbitrarie
         }
       }
   }
+  */
 
 
   "GuideEnvironment" should {

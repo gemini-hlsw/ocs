@@ -118,7 +118,7 @@ public class GuideEnvironmentTest {
         assertEquals(0, env.getOptions().get(3).getAll().size());
 
         // Add guide probe targets to the 4th group.
-        final GuideEnvironment env2 = env.putGuideProbeTargets(grp4, gpt_pwfs1);
+        final GuideEnvironment env2 = env.putGuideProbeTargets(3, gpt_pwfs1);
 
         // Make sure that they are there now.
         final GuideGroup newGrp4 = env2.getOptions().get(3);
@@ -127,7 +127,7 @@ public class GuideEnvironmentTest {
 
         // Update them with a new target (the 3rd in the list of options)
         final GuideProbeTargets gpt2 = gpt.setOptions(gpt.getOptions().append(new SPTarget()));
-        final GuideEnvironment  env3 = env2.putGuideProbeTargets(newGrp4, gpt2);
+        final GuideEnvironment  env3 = env2.putGuideProbeTargets(3, gpt2);
 
         // Check that they now contain the new target.
         final GuideProbeTargets gpt3 = env3.getOptions().get(3).get(pwfs1).getValue();

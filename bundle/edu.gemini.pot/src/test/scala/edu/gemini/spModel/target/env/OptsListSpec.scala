@@ -1,5 +1,7 @@
 package edu.gemini.spModel.target.env
 
+import edu.gemini.spModel.target.env.Indexable._
+
 import org.scalacheck.Prop.forAll
 import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
@@ -75,5 +77,50 @@ class OptsListSpec extends Specification with ScalaCheck with Arbitraries {
       opts.toList.distinct.forall(elem =>
         opts.delete(elem).fold(0)(_.length) == opts.length - opts.toList.count(_ == elem))
     }
+  }
+
+  "OptsList deleteAt" should {
+    "return None if the index is out of range" in
+      forAll { (opts: OptsList[Int]) =>
+        List(Int.MinValue, -2, -1, opts.length, opts.length + 1, Int.MaxValue).forall { i =>
+          opts.deleteAt(i).isEmpty
+        }
+      }
+
+    "return None if the last element is deleted" in
+      forAll { (opts: OptsList[Int]) =>
+        opts.deleteAt(0).fold(opts.length == 1) { _ => opts.length > 1 }
+      }
+
+    "delete the indicated element if in range" in
+      forAll { (opts: OptsList[Int], i: Int) =>
+        val index = (i % opts.length).abs
+        opts.deleteAt(index).fold(opts.length === 1) { opts2 =>
+          val expected = opts.toList.zipWithIndex.filterNot(_._2 === index).unzip._1
+          val actual   = opts2.toList
+          expected === actual
+        }
+      }
+
+    "maintain the same focus, unless deleting the focus" in
+      forAll { (opts: OptsList[Int], i: Int) =>
+        val index = (i % opts.length).abs
+        opts.deleteAt(index).fold(opts.length === 1) { opts2 =>
+          opts.focusIndex.forall { fi =>
+            (index === fi) || opts.focus === opts2.focus
+          }
+        }
+      }
+
+    "move the focus to right when deleting the focus, unless at the end" in
+      forAll { (opts: OptsList[Int]) =>
+        opts.focusIndex.forall { fi =>
+          opts.deleteAt(fi).forall { opts2 =>
+            val last = opts.length - 1
+            val expected = if (fi === last) last - 1 else fi
+            opts2.focusIndex.exists((_ === expected))
+          }
+        }
+      }
   }
 }

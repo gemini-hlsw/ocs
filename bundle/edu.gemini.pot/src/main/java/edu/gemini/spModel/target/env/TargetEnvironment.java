@@ -281,8 +281,16 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
      * Returns a TargetEnvironment equivalent to this one, but without the
      * given guide group.
      */
-    public TargetEnvironment removeGroup(GuideGroup group) {
-        return setGuideEnvironment(guide.removeGroup(group));
+//    public TargetEnvironment removeGroup(GuideGroup group) {
+//        return setGuideEnvironment(guide.removeGroup(group));
+//    }
+
+    public TargetEnvironment removeGroup(int groupIndex) {
+        return setGuideEnvironment(guide.removeGroup(groupIndex));
+    }
+
+    public TargetEnvironment setGroup(int groupIndex, GuideGroup grp) {
+        return setGuideEnvironment(guide.setGroup(groupIndex, grp));
     }
 
     /**

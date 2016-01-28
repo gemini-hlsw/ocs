@@ -1,5 +1,7 @@
 package edu.gemini.spModel.target.env
 
+import edu.gemini.spModel.target.env.Indexable._
+
 import edu.gemini.shared.util.immutable.{Option => GemOption, ImOption, ImList}
 import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.spModel.guide.GuideProbe
@@ -35,11 +37,26 @@ final case class GuideEnvironment(guideEnv: GuideEnv) extends TargetContainer {
   override def removeTarget(target: SPTarget): GuideEnvironment =
     Env.mod(_.removeTarget(target), this)
 
-  def removeGroup(group: GuideGroup): GuideEnvironment =
-    group.grp match {
-      case m: ManualGroup => Manual.mod(_.flatMap { _.delete(m) }, this)
-      case _              => this
+  def removeGroup(index: Int): GuideEnvironment =
+    index match {
+      case 0 => this // can't remove the automatic group
+      case i => Manual.mod(_.flatMap { _.deleteAt(i-1) }, this)
     }
+
+  def getGroup(index: Int): GemOption[GuideGroup] =
+    index match {
+      case 0 => ImOption.apply(GuideGroup(guideEnv.auto))
+      case i => guideEnv.manual.flatMap(_.elementAt(i-1)).map(GuideGroup).asGeminiOpt
+    }
+
+  def setGroup(index: Int, grp: GuideGroup): GuideEnvironment =
+    (index, grp.grp) match {
+      case (0, a: AutomaticGroup) => Auto.set(this, a)
+      case (i, m: ManualGroup)    => Manual.mod(_.map(o => o.setAt(i-1, m).getOrElse(o)), this)
+    }
+
+  def modifyGroup(index: Int, f: GuideGroup => GuideGroup): GuideEnvironment =
+    getGroup(index).asScalaOpt.fold(this) { g => setGroup(index, f(g)) }
 
   override def getTargets: ImList[SPTarget] =
     guideEnv.targetList.asImList
@@ -55,9 +72,9 @@ final case class GuideEnvironment(guideEnv: GuideEnv) extends TargetContainer {
     * of the selected group the same, if possible.  If the `newList` contains
     * multiple `AutomaticGroup` instances, only the first is kept.
     *
-    * @deprecated This method will have surprising behavior if there are
-    *             multiple automatic guide groups or if the `newList` is not a
-    *             slightly modified version of the existing list.
+    * This method may have surprising behavior if there are multiple automatic
+    * guide groups or if the `newList` is not a slightly modified version of the
+    * existing list.
     */
   def setOptions(newList: ImList[GuideGroup]): GuideEnvironment = {
     // This is an awkward, wacky method that updates the available guide groups
@@ -112,8 +129,7 @@ final case class GuideEnvironment(guideEnv: GuideEnv) extends TargetContainer {
 
   /** Roughly, replaces the primary group with the given guide group, if there
     * is a primary group.  Otherwise it appends the given guide group and makes
-    * it the primary.  If the given group already exists in the environment,
-    * it is simply selected as primary.
+    * it the primary.
     *
     * On the other hand, if the primary is a manual group and an automatic is
     * given, the automatic group is replaced and made primary.  If the primary
@@ -131,22 +147,9 @@ final case class GuideEnvironment(guideEnv: GuideEnv) extends TargetContainer {
 
       case m: ManualGroup =>
         val opts0 = guideEnv.manual.fold(OptsList.focused(m)) { opts =>
-          // If m exists in opts, select it as primary.  Otherwise, append it
-          // to the options list and select it as primary.
-          opts.toList.span(_ != m) match {
-            case (_, Nil)    =>
-              // m doesn't exist in opts.  If there is no primary, append m
-              // and select it as primary.  If there is a primary, replace it
-              // with m.
-              opts.toDisjunction match {
-                case -\/(l) => OptsList.focused(l.toList, m, Nil)
-                case \/-(z) => OptsList(z.update(m).right)
-              }
-            case (l, _ :: r) =>
-              // m exists in opts, so just select it
-              OptsList.focused(l, m, r)
+          opts.focusIndex.fold(OptsList.focused(opts.toList, m, Nil)) { i =>
+            opts.setAt(i, m).getOrElse(opts)
           }
-
         }
         (guideEnv.auto, some(opts0))
     }
@@ -159,50 +162,15 @@ final case class GuideEnvironment(guideEnv: GuideEnv) extends TargetContainer {
   def setPrimaryIndex(primary: Int): GuideEnvironment =
     guideEnv.selectPrimaryIndex(primary).map(GuideEnvironment(_)).getOrElse(this)
 
-  def selectPrimary(primary: GuideGroup): GuideEnvironment =
-    guideEnv.selectPrimary(primary.grp).map(GuideEnvironment(_)).getOrElse(this)
-
   def iterator(): java.util.Iterator[GuideGroup] =
     guideEnv.groups.map(GuideGroup).asJava.iterator
 
   /** Roughly, calls `put` on the given guide group (see `GuideGroup.put`) to
-    * obtain an updated `GuideGroup`.  Replaces the `current` guide group in
-    * the environment if it exists without changing the selected group.  If the
-    * `current` group is not already in this guide environment, the updated
-    * group is added and made the primary group.  The way that the updated
-    * group is added depends on its type.  If automatic, it replaces the
-    * current automatic group.  If manual, it is appended to the end of the
-    * manual options.
-    *
-    * @deprecated Confusing, surprising behavior.  Avoid.
+    * obtain an updated `GuideGroup`.  Replaces the indicated guide group with
+    * the updated version.
     */
-  def putGuideProbeTargets(current: GuideGroup, gpt: GuideProbeTargets): GuideEnvironment = {
-    val updated = current.put(gpt)
-
-    updated.grp match {
-      case a: AutomaticGroup =>
-        Auto.set(this, a)
-
-      case m: ManualGroup    =>
-        val opts2 = guideEnv.manual.fold(OptsList.focused(m)) { opts =>
-          // Remember the focus and try to find and replace the current group in
-          // the list of options.  If not found, append the updated group and
-          // mark it as having focus.
-          val lst = opts.withFocus.toList.span { case (mg, _) => (mg: GuideGrp) =/= current.grp } match {
-            case (lefts, (_, f) :: rights) => lefts ::: ((m, f) :: rights)
-            case (lefts, Nil)              => lefts.unzip._1.zip(Stream.continually(false)) :+ ((m, true))
-          }
-
-          // Look for the focused element, if any. Create the appropriate type
-          // OptsList depending on whether there is a focus.
-          lst.span(_._2 === false) match {
-            case (lefts, Nil)              => OptsList.unfocused(lefts.unzip._1).get
-            case (lefts, (g, _) :: rights) => OptsList.focused(lefts.unzip._1, g, rights.unzip._1)
-          }
-        }
-        Manual.set(this, Some(opts2))
-    }
-  }
+  def putGuideProbeTargets(index: Int, gpt: GuideProbeTargets): GuideEnvironment =
+    modifyGroup(index, _.put(gpt))
 
   def getParamSet(f: PioFactory): ParamSet = {
     val ps = f.createParamSet(ParamSetName)

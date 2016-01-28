@@ -90,7 +90,7 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
 
             // really we want: GuideGroup \/ SPTarget
             default Option<SPTarget> target()  { return None.instance(); }
-            default Option<GuideGroup> group() { return None.instance(); }
+            default Option<Tuple2<Integer, GuideGroup>> group() { return None.instance(); }
 
             default Option<Double> distance()  { return None.instance(); }
             default List<Row> children()       { return Collections.emptyList(); }
@@ -190,17 +190,17 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
         }
 
         static final class GroupRow extends AbstractRow {
-            private final Option<GuideGroup> group;
+            private final Option<Tuple2<Integer, GuideGroup>> group;
             private final List<Row> children;
 
             GroupRow(final boolean enabled, final int index, final GuideGroup group, final List<Row> children) {
-                super(enabled, group.getName().getOrElse("Guide Group " + index), "", None.instance(), None.instance());
-                this.group    = new Some<>(group);
+                super(enabled, group.getName().getOrElse("Guide Group " + (index + 1)), "", None.instance(), None.instance());
+                this.group    = new Some<>(new Pair<>(index, group));
                 this.children = Collections.unmodifiableList(children);
             }
 
-            @Override public Option<GuideGroup> group() { return group; }
-            @Override public List<Row> children()       { return children; }
+            @Override public Option<Tuple2<Integer, GuideGroup>> group() { return group; }
+            @Override public List<Row> children()                        { return children; }
         }
 
         // Collection of rows, which may include "subrows".
@@ -263,15 +263,14 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
             final Option<Tuple2<ObsContext, AgsMagnitude.MagnitudeTable>> ags = ctx.map(oc -> new Pair<>(oc, OT.getMagnitudeTable()));
             final GuideEnvironment ge = env.getGuideEnvironment();
             final ImList<GuideGroup> groups = ge.getOptions();
-            final GuideGroup primaryGroup = env.getOrCreatePrimaryGuideGroup();
 
             // Process each group.
             groups.zipWithIndex().foreach(gtup -> {
                 final GuideGroup group = gtup._1();
-                final int groupIndex = gtup._2() + 1;
+                final int groupIndex   = gtup._2();
 
-                final boolean isPrimaryGroup = groups.size() < 2 || group == primaryGroup;
-                final List<Row> rowList = new ArrayList<>();
+                final boolean isPrimaryGroup = ge.getPrimaryIndex() == groupIndex;
+                final List<Row> rowList      = new ArrayList<>();
 
                 // Process the guide probe targets for this group.
                 group.getAll().foreach(gpt -> {
@@ -355,7 +354,7 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
         }
 
         public Option<GuideGroup> groupAt(final int index) {
-            return rowAt(index).flatMap(Row::group);
+            return rowAt(index).flatMap(Row::group).map(Tuple2::_2);
         }
 
         public Option<Row> rowAt(final int index) {
@@ -604,7 +603,7 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
                 startWatchingSelection();
             }
         } else {
-            final GuideGroup group = row.group().getOrNull();
+            final GuideGroup group = row.group().map(Tuple2::_2).getOrNull();
             if (group != null) TargetSelection.setGuideGroup(_env, _obsComp, group);
         }
     }
@@ -705,17 +704,17 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
         if (target != null) {
             PrimaryTargetToggle.instance.toggle(_dataObject, target);
         } else {
-            final GuideGroup group = getSelectedGroup();
-            if (group != null) {
+            final Option<Tuple2<Integer, GuideGroup>> groupOpt = getSelectedGroup();
+            groupOpt.foreach(group -> {
                 final TargetEnvironment env = _dataObject.getTargetEnvironment();
-                final GuideGroup primary = env.getOrCreatePrimaryGuideGroup();
-                if (primary != group && confirmGroupChange(primary, group)) {
+                final GuideGroup primary    = env.getOrCreatePrimaryGuideGroup();
+                if (primary != group._2() && confirmGroupChange(primary, group._2())) {
                     final GuideEnvironment ge = env.getGuideEnvironment();
                     if (ge != null) {
-                        _dataObject.setTargetEnvironment(env.setGuideEnvironment(ge.selectPrimary(group)));
+                        _dataObject.setTargetEnvironment(env.setGuideEnvironment(ge.setPrimaryIndex(group._1())));
                     }
                 }
-            }
+            });
         }
     }
 
@@ -729,22 +728,22 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
     /**
      * Get the group that is currently selected.
      */
-    private GuideGroup getSelectedGroup() {
-        return TargetSelection.getGuideGroup(_env, _obsComp);
+    private Option<Tuple2<Integer, GuideGroup>> getSelectedGroup() {
+        return TargetSelection.getIndexedGuideGroup(_env, _obsComp);
     }
 
     /**
      * Get the group that is currently selected or the parent group of the selected node.
      * @param env the target environment to use
      */
-    public GuideGroup getSelectedGroupOrParentGroup(final TargetEnvironment env) {
-        final GuideGroup group = getSelectedGroup();
-        if (group != null) return group;
+    public Option<Tuple2<Integer, GuideGroup>> getSelectedGroupOrParentGroup(final TargetEnvironment env) {
+        final Option<Tuple2<Integer, GuideGroup>> groupOpt = getSelectedGroup();
+        if (groupOpt.isDefined()) return groupOpt;
 
         final SPTarget target = getSelectedPos();
-        if (target == null) return null;
+        if (target == null) return ImOption.<Tuple2<Integer, GuideGroup>>empty();
 
-        return env.getGroups().find(gg -> gg.containsTarget(target)).getOrNull();
+        return env.getGroups().zipWithIndex().find(gg -> gg._1().containsTarget(target)).map(Tuple2::swap);
     }
 
     /**
@@ -760,7 +759,7 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
      */
     public boolean isOkayToAdd(final TableData.Row item, final TableData.Row parent) {
         if (item == parent) return false;
-        final GuideGroup group = parent.group().getOrNull();
+        final GuideGroup group = parent.group().map(Tuple2::_2).getOrNull();
         final SPTarget target = item.target().getOrNull();
         return !(group == null || target == null || group.containsTarget(target))
                 && !(item instanceof TableData.BaseTargetRow) && !(item instanceof TableData.UserTargetRow);
@@ -779,43 +778,46 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
      */
     public void moveTo(final TableData.Row item, final TableData.Row parent) {
         if (item == null) return;
-        final GuideGroup snkGrp = parent.group().getOrNull();
+
+        final Option<Tuple2<Integer, GuideGroup>> snkGrpOpt = parent.group();
         final SPTarget target = item.target().getOrNull();
-        if (snkGrp.containsTarget(target)) return;
-        final GuideGroup srcGrp = getTargetGroup(target);
-        if (srcGrp == null) return;
+        if (snkGrpOpt.exists(tup -> tup._2().containsTarget(target))) return;
 
-        final ImList<GuideProbeTargets> targetList = srcGrp.getAllContaining(target);
-        if (targetList.isEmpty()) return;
-        final GuideProbeTargets src = targetList.get(0);
+        snkGrpOpt.foreach(snkGrp ->
+            getTargetGroup(target).foreach(srcGrp -> {
+                final ImList<GuideProbeTargets> targetList = srcGrp._2().getAllContaining(target);
+                if (targetList.isEmpty()) return;
+                final GuideProbeTargets src = targetList.get(0);
 
-        final GuideProbe guideprobe = src.getGuider();
-        GuideProbeTargets snk = snkGrp.get(guideprobe).getOrElse(null);
-        if (snk == null) {
-            snk = GuideProbeTargets.create(guideprobe);
-        }
+                final GuideProbe guideprobe = src.getGuider();
+                GuideProbeTargets snk = snkGrp._2().get(guideprobe).getOrElse(null);
+                if (snk == null) {
+                    snk = GuideProbeTargets.create(guideprobe);
+                }
 
-        final boolean isPrimary = src.getPrimary().getOrElse(null) == target;
-        final GuideProbeTargets newSrc = src.removeTarget(target);
-        final SPTarget newTarget = target.clone();
+                final boolean isPrimary = src.getPrimary().getOrElse(null) == target;
+                final GuideProbeTargets newSrc = src.removeTarget(target);
+                final SPTarget newTarget = target.clone();
 
-        GuideProbeTargets newSnk = snk.setOptions(snk.getOptions().append(newTarget));
-        if (isPrimary) {
-            newSnk = newSnk.selectPrimary(newTarget);
-        }
+                GuideProbeTargets newSnk = snk.setOptions(snk.getOptions().append(newTarget));
+                if (isPrimary) {
+                    newSnk = newSnk.selectPrimary(newTarget);
+                }
 
-        final GuideEnvironment guideEnv = _env.getGuideEnvironment();
-        final GuideEnvironment newGuideEnv = guideEnv.putGuideProbeTargets(srcGrp, newSrc).putGuideProbeTargets(snkGrp, newSnk);
-        final TargetEnvironment newTargetEnv = _env.setGuideEnvironment(newGuideEnv);
+                final GuideEnvironment guideEnv = _env.getGuideEnvironment();
+                final GuideEnvironment newGuideEnv = guideEnv.putGuideProbeTargets(srcGrp._1(), newSrc).putGuideProbeTargets(snkGrp._1(), newSnk);
+                final TargetEnvironment newTargetEnv = _env.setGuideEnvironment(newGuideEnv);
 
-        _dataObject.setTargetEnvironment(newTargetEnv);
+                _dataObject.setTargetEnvironment(newTargetEnv);
+            })
+        );
     }
 
     /**
      * Get the group to which this target belongs, or null.
      */
-    private GuideGroup getTargetGroup(final SPTarget target) {
-        return _env.getGuideEnvironment().getOptions().find(gg -> gg.containsTarget(target)).getOrNull();
+    private Option<Tuple2<Integer, GuideGroup>> getTargetGroup(final SPTarget target) {
+        return _env.getGuideEnvironment().getOptions().zipWithIndex().find(gg -> gg._1().containsTarget(target)).map(Tuple2::swap);
     }
 
     /**

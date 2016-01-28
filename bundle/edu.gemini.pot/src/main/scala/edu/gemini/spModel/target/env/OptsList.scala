@@ -1,10 +1,11 @@
 package edu.gemini.spModel.target.env
 
+import scala.language.higherKinds
 import scalaz._, Scalaz._
 
 import OptsList._
 
-case class OptsList[A](toDisjunction: OneAnd[List, A] \/ Zipper[A]) {
+case class OptsList[A](toDisjunction: OneAndList[A] \/ Zipper[A]) {
 
   def clearFocus: OptsList[A] =
     OptsList(toDisjunction.flatMap { z =>
@@ -121,5 +122,18 @@ object OptsList {
     case (OptsList(-\/(nel1)),OptsList(-\/(nel2))) => nel1 === nel2
     case (OptsList(\/-(zip1)),OptsList(\/-(zip2))) => zip1 === zip2
     case _                                         => false
+  }
+
+  import Indexable._
+
+  implicit val IndexableOptsList: Indexable[OptsList] = new Indexable[OptsList] {
+    override def deleteAt[A](o: OptsList[A], i: Int): Option[OptsList[A]] =
+      o.toDisjunction.bitraverse(_.deleteAt(i), _.deleteAt(i)).map(OptsList(_))
+
+    override def elementAt[A](o: OptsList[A], i: Int): Option[A] =
+      o.toDisjunction.fold(_.elementAt(i), _.elementAt(i))
+
+    override def modifyAt[A](o: OptsList[A], i: Int)(g: (A) => A): Option[OptsList[A]] =
+      o.toDisjunction.bitraverse(_.modifyAt(i)(g), _.modifyAt(i)(g)).map(OptsList(_))
   }
 }

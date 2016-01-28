@@ -119,6 +119,27 @@ public final class TargetSelection {
         return getGuideGroup(env, getIndex(node));
     }
 
+    public static Option<Tuple2<Integer, GuideGroup>> getIndexedGuideGroup(final TargetEnvironment env, final ISPNode node) {
+        final ImList<Tuple2<Selection,Integer>> lst = toSelections(env).zipWithIndex();
+        final Integer idx = getIndex(node);
+        if ((idx < 0) || (idx >= lst.size())) {
+            return ImOption.<Tuple2<Integer, GuideGroup>>empty();
+        } else {
+            final Tuple2<Selection, Integer> sel = lst.get(idx);
+            if (sel._1().guideGroup == null) {
+                return ImOption.<Tuple2<Integer, GuideGroup>>empty();
+            } else {
+                // Figure out the group index by counting groups until sel. Ugh.
+                int groupIndex = 0;
+                for (int i=0; i<sel._2(); ++i) {
+                    final Tuple2<Selection, Integer> cur = lst.get(i);
+                    groupIndex += (cur._1().guideGroup == null) ? 0 : 1;
+                }
+                return new Some<>(new Pair<>(groupIndex, sel._1().guideGroup));
+            }
+        }
+    }
+
     public static void listenTo(final ISPNode node, final PropertyChangeListener listener) {
         if (isValid(node)) node.addTransientPropertyChangeListener(PROP, listener);
     }
