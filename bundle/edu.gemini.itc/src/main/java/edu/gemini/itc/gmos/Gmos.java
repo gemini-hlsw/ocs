@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * Gmos specification class
  */
-public abstract class Gmos extends Instrument implements BinningProvider {
+public abstract class Gmos extends Instrument implements BinningProvider, SpectroscopyInstrument {
 
     //Plate scales for original and Hamamatsu CCD's (temporary)
     public static final double ORIG_PLATE_SCALE = 0.0727;
@@ -143,10 +143,7 @@ public abstract class Gmos extends Instrument implements BinningProvider {
 
     }
 
-    /**
-     * Gets the slit width for the currently selected fpu.
-     * @return
-     */
+    /** {@inheritDoc} */
     public double getSlitWidth() {
         if      (gp.fpMask().isIFU())               return 0.3;
         else if (gp.customSlitWidth().isDefined())  return gp.customSlitWidth().get().getWidth();

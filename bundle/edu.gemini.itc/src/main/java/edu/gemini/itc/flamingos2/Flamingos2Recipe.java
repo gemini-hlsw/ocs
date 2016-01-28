@@ -91,22 +91,22 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
         // i.e. the output morphology is same as the input morphology.
         // Might implement these modules at a later time.
 
-        final double pixel_size = instrument.getPixelSize();
-        final SlitThroughput st = new SlitThroughput(_obsDetailParameters, _sdParameters, im_qual, pixel_size, instrument.getSlitSize() * pixel_size);
+        final SlitThroughput st = new SlitThroughput(_obsDetailParameters, _sdParameters, im_qual, instrument.getPixelSize(), instrument.getSlitWidth());
+
         final double spec_source_frac = st.getSlitThroughput();
         double ap_diam = st.getAppDiam();
         // TODO: This is correcting for a bug (mixup slit size in pixels vs arcsecs)
         // TODO: Verify that results are ok when removing this if statement entirely, then update baseline
         if (_sdParameters.isUniform() &&_obsDetailParameters.isAutoAperture()) {
-            ap_diam = new Double(1 / (instrument.getSlitSize() * pixel_size) + 0.5).intValue();
+            ap_diam = new Double(1 / (instrument.getSlitWidth()) + 0.5).intValue();
         }
 
         final double gratDispersion_nmppix = instrument.getSpectralPixelWidth();
-        final double gratDispersion_nm = 0.5 / pixel_size * gratDispersion_nmppix;
+        final double gratDispersion_nm = 0.5 / instrument.getPixelSize() * gratDispersion_nmppix;
 
         final SpecS2NLargeSlitVisitor specS2N = new SpecS2NLargeSlitVisitor(
-                instrument.getSlitSize() * pixel_size,
-                pixel_size,
+                instrument.getSlitWidth(),
+                instrument.getPixelSize(),
                 instrument.getSpectralPixelWidth(),
                 instrument.getObservingStart(),
                 instrument.getObservingEnd(),

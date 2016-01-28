@@ -105,8 +105,6 @@ public final class MichelleRecipe implements ImagingRecipe, SpectroscopyRecipe {
         //
         // inputs: source morphology specification
 
-        final double pixel_size = instrument.getPixelSize();
-
         // Calculate image quality
         final ImageQualityCalculatable IQcalc = ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _telescope, instrument);
         IQcalc.calculate();
@@ -117,7 +115,7 @@ public final class MichelleRecipe implements ImagingRecipe, SpectroscopyRecipe {
         // In this version we are bypassing morphology modules 3a-5a.
         // i.e. the output morphology is same as the input morphology.
         // Might implement these modules at a later time.
-        final SlitThroughput st = new SlitThroughput(_obsDetailParameters, _sdParameters, IQcalc.getImageQuality(), pixel_size, instrument.getFPMask());
+        final SlitThroughput st = new SlitThroughput(_obsDetailParameters, _sdParameters, IQcalc.getImageQuality(), instrument.getPixelSize(), instrument.getSlitWidth());
         final double ap_diam = st.getAppDiam();
         final double spec_source_frac = st.getSlitThroughput();
 
@@ -125,8 +123,8 @@ public final class MichelleRecipe implements ImagingRecipe, SpectroscopyRecipe {
         final double im_qual = _sdParameters.isUniform() ? 10000 : IQcalc.getImageQuality();
 
         final SpecS2NLargeSlitVisitor specS2N = new SpecS2NLargeSlitVisitor(
-                        instrument.getFPMask(),
-                        pixel_size,
+                        instrument.getSlitWidth(),
+                        instrument.getPixelSize(),
                         instrument.getSpectralPixelWidth(),
                         instrument.getObservingStart(),
                         instrument.getObservingEnd(),

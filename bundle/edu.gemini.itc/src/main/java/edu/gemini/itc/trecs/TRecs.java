@@ -16,7 +16,7 @@ import java.util.Scanner;
 /**
  * TRecs specification class
  */
-public final class TRecs extends Instrument {
+public final class TRecs extends Instrument implements SpectroscopyInstrument {
     private static final String INSTR_DIR = "trecs";
     private static final String INSTR_PREFIX = "trecs_";
     private static final String FILENAME = "trecs" + getSuffix();
@@ -200,7 +200,8 @@ public final class TRecs extends Instrument {
             return elfn_param;
     }
 
-    public double getFPMask() {
+    /** {@inheritDoc} */
+    public double getSlitWidth() {
         switch (_focalPlaneMask) {
             case MASK_1: return 0.21;
             case MASK_2: return 0.26;

@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * Niri specification class
  */
-public class Niri extends Instrument {
+public class Niri extends Instrument implements SpectroscopyInstrument {
     /**
      * Related files will be in this subdir of lib
      */
@@ -187,7 +187,8 @@ public class Niri extends Instrument {
         return _grismOptics.getPixelWidth();
     }
 
-    public double getFPMask() {
+    /** {@inheritDoc} */
+    public double getSlitWidth() {
         // TODO: use size values provided by masks, this will make an update of baseline necessary
         switch (params.mask()) {
             case MASK_1:        // f6 2pix center

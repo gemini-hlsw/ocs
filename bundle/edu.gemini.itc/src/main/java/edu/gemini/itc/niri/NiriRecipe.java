@@ -122,15 +122,13 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
         // i.e. the output morphology is same as the input morphology.
         // Might implement these modules at a later time.
 
-        final double pixel_size = instrument.getPixelSize();
-
-        final SlitThroughput st = new SlitThroughput(_obsDetailParameters, _sdParameters, im_qual, pixel_size, instrument.getFPMask());
+        final SlitThroughput st = new SlitThroughput(_obsDetailParameters, _sdParameters, im_qual, instrument.getPixelSize(), instrument.getSlitWidth());
         final double ap_diam = st.getAppDiam();
         final double spec_source_frac = st.getSlitThroughput();
 
         final SpecS2NVisitor specS2N = new SpecS2NVisitor(
-                pixel_size,
-                instrument.getFPMask(),
+                instrument.getPixelSize(),
+                instrument.getSlitWidth(),
                 instrument.getSpectralPixelWidth(),
                 instrument.getObservingStart(),
                 instrument.getObservingEnd(),

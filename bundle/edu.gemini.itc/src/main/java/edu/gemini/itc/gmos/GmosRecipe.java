@@ -112,7 +112,6 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         //
         // inputs: source morphology specification
 
-        final double pixel_size = instrument.getPixelSize();
         final double source_fraction;
         List<Double> sf_list = new ArrayList<>();
 
@@ -147,7 +146,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         final double spec_source_frac;
         final double ap_diam;
         if (!instrument.isIfuUsed()) {
-            st = new SlitThroughput(_obsDetailParameters, _sdParameters, IQcalc.getImageQuality(), pixel_size, instrument.getSlitWidth());
+            st = new SlitThroughput(_obsDetailParameters, _sdParameters, IQcalc.getImageQuality(), instrument.getPixelSize(), instrument.getSlitWidth());
             ap_diam = st.getAppDiam();
             spec_source_frac = st.getSlitThroughput();
         } else {
@@ -165,7 +164,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
                 final double spsf = sf_list.get(i);
                 specS2N[i] = new SpecS2NLargeSlitVisitor(
                         instrument.getSlitWidth(),
-                        pixel_size,
+                        instrument.getPixelSize(),
                         instrument.getSpectralPixelWidth(),
                         instrument.getObservingStart(),
                         instrument.getObservingEnd(),
@@ -189,7 +188,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
             specS2N = new SpecS2NLargeSlitVisitor[1];
             specS2N[0] = new SpecS2NLargeSlitVisitor(
                     instrument.getSlitWidth(),
-                    pixel_size,
+                    instrument.getPixelSize(),
                     instrument.getSpectralPixelWidth(),
                     instrument.getObservingStart(),
                     instrument.getObservingEnd(),

@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * Michelle specification class
  */
-public final class Michelle extends Instrument {
+public final class Michelle extends Instrument implements SpectroscopyInstrument {
 
     public static final String WIRE_GRID = "wire_grid";
     public static final String KBR = "KBr";
@@ -188,7 +188,8 @@ public final class Michelle extends Instrument {
         }
     }
 
-    public double getFPMask() {
+    /** {@inheritDoc} */
+    public double getSlitWidth() {
         // Can we use the slit width from the Mask objects here?
         switch (params.mask()) {
             case MASK_1:    return 0.19;

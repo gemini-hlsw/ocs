@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * Nifs specification class
  */
-public final class Nifs extends Instrument {
+public final class Nifs extends Instrument implements SpectroscopyInstrument {
 
     // values are taken from instrument's web documentation
     private static final double WellDepth      = 134400;
@@ -159,6 +159,12 @@ public final class Nifs extends Instrument {
 
     public IFUComponent getIFU() {
         return _IFU;
+    }
+
+    /** {@inheritDoc} */
+    public double getSlitWidth() {
+        // fp mask is fixed as 0.15
+        return 0.15;
     }
 
     /**

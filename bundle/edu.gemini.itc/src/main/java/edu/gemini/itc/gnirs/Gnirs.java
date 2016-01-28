@@ -17,7 +17,7 @@ import java.util.List;
 /**
  * Gnirs specification class
  */
-public final class Gnirs extends Instrument {
+public final class Gnirs extends Instrument implements SpectroscopyInstrument {
 
     private static final double LONG_CAMERA_SCALE_FACTOR = 3.0;
 
@@ -144,7 +144,8 @@ public final class Gnirs extends Instrument {
 
     }
 
-    public double getFPMask() {
+    /** {@inheritDoc} */
+    public double getSlitWidth() {
         return params.slitWidth().getValue();
     }
 

@@ -90,8 +90,6 @@ public final class NifsRecipe implements SpectroscopyRecipe {
         //
         // inputs: source morphology specification
 
-        final double pixel_size = instrument.getPixelSize();
-
         //IFU morphology section
         final double im_qual = altair.isDefined() ? altair.get().getAOCorrectedFWHM() : IQcalc.getImageQuality();
         final VisitableMorphology morph, haloMorphology;
@@ -147,13 +145,9 @@ public final class NifsRecipe implements SpectroscopyRecipe {
                 ap_diam = 1;
             }
 
-
-            // fp mask is fixed as 0.15
-            final double fpMask = 0.15;
-
             final SpecS2NLargeSlitVisitor specS2N = new SpecS2NLargeSlitVisitor(
-                    fpMask,
-                    pixel_size,
+                    instrument.getSlitWidth(),
+                    instrument.getPixelSize(),
                     instrument.getSpectralPixelWidth(),
                     instrument.getObservingStart(),
                     instrument.getObservingEnd(),

@@ -59,7 +59,7 @@ public final class NiriPrinter extends PrinterBase {
             _println(HtmlPrinter.printSummary((Altair) result.aoSystem().get()));
         }
 
-        _printSoftwareAperture(result, 1 / instrument.getFPMask());
+        _printSoftwareAperture(result, 1 / instrument.getSlitWidth());
 
         _println(String.format("derived image size(FWHM) for a point source = %.2f arcsec", result.specS2N()[0].getImageQuality()));
 

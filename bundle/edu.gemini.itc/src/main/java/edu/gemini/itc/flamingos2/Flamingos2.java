@@ -13,7 +13,7 @@ import java.util.List;
 /**
  * Flamingos 2 specification class
  */
-public final class Flamingos2 extends Instrument {
+public final class Flamingos2 extends Instrument implements SpectroscopyInstrument {
 
     // values are taken from instrument's web documentation
     private static final double AmpGain        = 4.44;
@@ -30,7 +30,6 @@ public final class Flamingos2 extends Instrument {
     private final Option<Filter> _colorFilter;
     private final Option<GrismOptics> _grismOptics;
     private final Flamingos2Parameters params;
-    private final double _slitSize;
 
     /**
      * construct a Flamingos2 object with specified color filter and ND filter.
@@ -39,7 +38,6 @@ public final class Flamingos2 extends Instrument {
         super(Site.GS, Bands.NEAR_IR, INSTR_DIR, FILENAME);
 
         params = fp;
-        _slitSize = getSlitSize() * getPixelSize();
         _colorFilter = addColorFilter(fp);
 
         addComponent(new FixedOptics(getDirectory() + File.separator, getPrefix()));
@@ -66,7 +64,8 @@ public final class Flamingos2 extends Instrument {
             default:
                 final GrismOptics grismOptics;
                 try {
-                    grismOptics = new GrismOptics(getDirectory() + File.separator, fp.grism().name(), _slitSize * getPixelSize(), fp.filter().name());
+                    // TODO: it shouldn't be necessary to multiply with pixel size again?? Bug?
+                    grismOptics = new GrismOptics(getDirectory() + File.separator, fp.grism().name(), getSlitWidth() * getPixelSize(), fp.filter().name());
                 } catch (Exception e) {
                     throw new IllegalArgumentException("Grism/filter " + fp.grism() + "+" + fp.filter().name() + " combination is not supported.");
                 }
@@ -75,10 +74,11 @@ public final class Flamingos2 extends Instrument {
         }
     }
 
-    public double getSlitSize() {
+    /** {@inheritDoc} */
+    public double getSlitWidth() {
         switch (params.mask()) {
             case FPU_NONE:
-                return 1;
+                return 1 * getPixelSize();
             case CUSTOM_MASK:
                 // There are two possible errors here: a programming error in case "Custom Mask" is set but
                 // no custom slit width is sent to ITC or the case where the custom mask slit width is set
@@ -89,9 +89,9 @@ public final class Flamingos2 extends Instrument {
                 if (params.customSlitWidth().get().width().isEmpty()) {
                     throw new IllegalArgumentException("Custom masks with unknown slit widths are not supported.");
                 }
-                return params.customSlitWidth().get().width().getValue();
+                return params.customSlitWidth().get().width().getValue() * getPixelSize();
             default:
-                return params.mask().getSlitWidth();
+                return params.mask().getSlitWidth() * getPixelSize();
         }
     }
 

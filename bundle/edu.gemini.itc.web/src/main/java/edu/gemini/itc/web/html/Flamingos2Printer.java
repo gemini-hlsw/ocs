@@ -54,7 +54,8 @@ public final class Flamingos2Printer extends PrinterBase {
         _print(CalculatablePrinter.getTextResult(result.sfCalc()));
         _println(CalculatablePrinter.getTextResult(result.iqCalc()));
 
-        _printSoftwareAperture(result, 1 / instrument.getSlitSize() * result.instrument().getPixelSize());
+        // TODO: this should be 1/slitWidth; the additional multiplications with pixel size are to keep basline unchanged
+        _printSoftwareAperture(result, 1 / (instrument.getSlitWidth()/result.instrument().getPixelSize()) * result.instrument().getPixelSize());
 
         _println(String.format("derived image size(FWHM) for a point source = %.2f arcsec", result.iqCalc().getImageQuality()));
 
