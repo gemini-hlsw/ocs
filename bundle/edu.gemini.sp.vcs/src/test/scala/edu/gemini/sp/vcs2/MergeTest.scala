@@ -9,7 +9,7 @@ import edu.gemini.pot.sp.Conflict.Moved
 import edu.gemini.pot.sp.validator.Validator
 import edu.gemini.pot.sp.version.VersionMap
 import edu.gemini.pot.sp.{DataObjectBlob => DOB, _}
-import edu.gemini.shared.util.IntegerIsIntegral
+import edu.gemini.shared.util.IntegerIsIntegral._
 import edu.gemini.shared.util.VersionComparison
 import edu.gemini.shared.util.VersionComparison.{Conflicting, Same, Newer}
 import edu.gemini.shared.util.immutable.ScalaConverters._
@@ -27,7 +27,6 @@ import scala.collection.JavaConverters._
 
 import scalaz._
 import scalaz.syntax.functor._  // idea marks as unused but required for "as"
-
 
 class MergeTest extends JUnitSuite {
   import edu.gemini.sp.vcs2.MergePropertyTest.NamedProperty
