@@ -678,11 +678,11 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band, queueLookup: Target => U
     def fixConditions(c: Condition) {
       model.foreach { m =>
         m.elems.find {
-          case g @ ConditionGroup(_, _, _) =>
+          case g @ ConditionGroup(Some(gc), _, _) if c == gc =>
             viewer.edit(g, p => ConditionEditor.open(Some(c), canEdit, panel), Observation.condition)
             viewer.selection = Some(g)
             true
-          case _                                         => false
+          case _                                             => false
         }
       }
     }
