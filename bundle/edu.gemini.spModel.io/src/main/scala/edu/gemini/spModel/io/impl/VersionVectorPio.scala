@@ -3,6 +3,7 @@ package edu.gemini.spModel.io.impl
 import edu.gemini.pot.sp.SPNodeKey
 import edu.gemini.pot.sp.version._
 import edu.gemini.shared.util._
+import edu.gemini.shared.util.IntegerIsIntegral._
 import edu.gemini.spModel.pio._
 
 import scala.collection.JavaConverters._
@@ -49,7 +50,7 @@ object VersionVectorPio {
 
     // Fold and empty version map over the Node, converting each Node into a
     // SPNodeKey -> DbVersions tuple to add it to the version map.
-    (EmptyVersionMap/:nodes) { (vm, node) => vm + node.toTuple(ids) }.toMap
+    (EmptyVersionMap/:nodes) { (vm, node) => vm + node.toTuple(ids) }
   }
 
   private object Node {

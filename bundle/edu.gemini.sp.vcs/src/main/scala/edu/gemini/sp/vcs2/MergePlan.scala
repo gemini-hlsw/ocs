@@ -3,6 +3,7 @@ package edu.gemini.sp.vcs2
 import edu.gemini.pot.sp._
 import edu.gemini.pot.sp.version._
 import edu.gemini.shared.util._
+import edu.gemini.shared.util.IntegerIsIntegral._
 import edu.gemini.sp.vcs2.NodeDetail.Obs
 import edu.gemini.sp.vcs2.VcsFailure._
 import edu.gemini.spModel.rich.pot.sp._
