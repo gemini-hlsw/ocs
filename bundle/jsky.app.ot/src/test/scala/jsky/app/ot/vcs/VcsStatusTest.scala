@@ -2,13 +2,13 @@ package jsky.app.ot.vcs
 
 import edu.gemini.shared.util.VersionComparison.Conflicting
 import edu.gemini.shared.util._
+import edu.gemini.shared.util.IntegerIsIntegral._
 
 import org.junit.Test
 import org.junit.Assert._
 
 import edu.gemini.pot.sp.SPNodeKey
 import edu.gemini.pot.sp.version.{VersionMap, LifespanId}
-
 
 class VcsStatusTest {
   val id_cc8 = LifespanId.fromString("cc88b1dc-a913-4cbb-8c23-93cc0d2bd4e4")

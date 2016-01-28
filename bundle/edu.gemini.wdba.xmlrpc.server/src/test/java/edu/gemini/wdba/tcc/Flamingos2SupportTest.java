@@ -123,7 +123,7 @@ public final class Flamingos2SupportTest extends InstrumentSupportTestBase<Flami
         verifyInstrumentConfig(getSouthResults(), "F2");
     }
 
-    @SuppressWarnings({"ResultOfMethodCallIgnored","unchecked"})
+    @SuppressWarnings({"ResultOfMethodCallIgnored","unchecked","rawtypes"})
     public void testWavelength() throws Exception {
         final Flamingos2 flam2 = getInstrument();
         flam2.setFilter(Filter.OPEN);

@@ -24,8 +24,8 @@ public class TccBoilerPlate {
 
     ParamSet[] getBoilerPlate() {
 
-        ParamSet p = null;
-        List _params = new ArrayList();
+        ParamSet p;
+        List<ParamSet> _params = new ArrayList<>();
 
         LOG.info("North is:" + _oe.isNorth());
         LOG.info("South is:" + _oe.isSouth());
@@ -128,7 +128,7 @@ public class TccBoilerPlate {
 
         ParamSet[] _ps = new ParamSet[_params.size()];
 
-        return (ParamSet[]) _params.toArray(_ps);
+        return _params.toArray(_ps);
 
     }
 

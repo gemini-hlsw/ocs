@@ -43,7 +43,7 @@ public class WDBAServerActivator implements BundleActivator {
     private static final String COMMAND_FUNCTION = "osgi.command.function";
 
 
-    public static final String APP_CONTEXT = WdbaConstants.APP_CONTEXT;
+    private static final String APP_CONTEXT = WdbaConstants.APP_CONTEXT;
     private static final String SITE_KEY = "edu.gemini.site";
 
     private ServiceTracker<HttpService, HttpService> _httpTracker;
@@ -57,12 +57,12 @@ public class WDBAServerActivator implements BundleActivator {
         LOG.info("Start WDBA OSGi Service");
 
         // We will run as superuser
-        final Set<Principal> user = Collections.<Principal>singleton(StaffPrincipal.Gemini());
+        final Set<Principal> user = Collections.singleton(StaffPrincipal.Gemini());
 
         _bundleContext = bundleContext;
 
         // Track WDBA DatabaseAccess
-        _glueTracker = new ServiceTracker<IDBDatabaseService, WdbaContext>(_bundleContext, IDBDatabaseService.class.getName(),
+        _glueTracker = new ServiceTracker<>(_bundleContext, IDBDatabaseService.class.getName(),
                 new ServiceTrackerCustomizer<IDBDatabaseService, WdbaContext>() {
                     public WdbaContext addingService(ServiceReference<IDBDatabaseService> ref) {
                         LOG.info("Adding Wdba Access Service");
@@ -98,14 +98,14 @@ public class WDBAServerActivator implements BundleActivator {
                 });
         _glueTracker.open();
 
-        _httpTracker = new ServiceTracker<HttpService, HttpService>(_bundleContext, HttpService.class.getName(),
+        _httpTracker = new ServiceTracker<>(_bundleContext, HttpService.class.getName(),
                 new ServiceTrackerCustomizer<HttpService, HttpService>() {
                     public HttpService addingService(ServiceReference<HttpService> ref) {
                         LOG.info("Adding HttpService");
 
                         _http = _bundleContext.getService(ref);
                         try {
-                            _http.registerServlet(APP_CONTEXT, _servlet, new Hashtable(), null);
+                            _http.registerServlet(APP_CONTEXT, _servlet, new Hashtable<>(), null);
                         } catch (ServletException ex) {
                             LOG.log(Level.SEVERE, "Trouble setting up wdba web application.", ex);
                         } catch (NamespaceException ex) {
@@ -132,10 +132,10 @@ public class WDBAServerActivator implements BundleActivator {
                 });
         _httpTracker.open();
 
-        _dbTracker = new ServiceTracker<IDBDatabaseService, IDBDatabaseService>(bundleContext, IDBDatabaseService.class, null);
+        _dbTracker = new ServiceTracker<>(bundleContext, IDBDatabaseService.class, null);
         _dbTracker.open();
 
-        final Dictionary<String, Object> dict = new Hashtable<String, Object>();
+        final Dictionary<String, Object> dict = new Hashtable<>();
         dict.put(COMMAND_SCOPE,    "wdba");
         dict.put(COMMAND_FUNCTION, new String[] { "simVisit", "simWackyVisit" });
         bundleContext.registerService(Commands.class.getName(), new Commands(_dbTracker), dict);

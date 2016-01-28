@@ -5,9 +5,9 @@ import edu.gemini.pot.sp.SPObservationID;
 import java.io.Serializable;
 
 /**
- * Creaqted by Gemini Observatory HLDG
+ * Created by Gemini Observatory HLDG
  */
-public final class QueuedObservation implements Comparable, Serializable {
+public final class QueuedObservation implements Comparable<QueuedObservation>, Serializable {
     private SPObservationID _obsId;
     private String _title;
 
@@ -41,9 +41,8 @@ public final class QueuedObservation implements Comparable, Serializable {
         return result;
     }
 
-    public int compareTo(Object o) {
-        QueuedObservation that = (QueuedObservation) o;
-
+    @Override
+    public int compareTo(QueuedObservation that) {
         int res = _obsId.compareTo(that._obsId);
         if (res != 0) return res;
 
