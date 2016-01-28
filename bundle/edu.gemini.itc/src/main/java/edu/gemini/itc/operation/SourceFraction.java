@@ -17,7 +17,12 @@ public interface SourceFraction {
     /** Gets the number of enclosed pixels in this aperture. */
     double getNPix();
 
-    /** Gets the diameter of this aperture in arcsec. */
+    /**
+     * Gets the diameter of this aperture in arcsec.
+     * This value is calculated for a circular aperture and makes only sense for imaging.
+     * (It would make sense to split the imaging and spectroscopy cases more clearly in the implementation
+     * because some things need to be handled differently and/or make only sense in one or the other case.)
+     */
     double getSoftwareAperture();
 
 }
