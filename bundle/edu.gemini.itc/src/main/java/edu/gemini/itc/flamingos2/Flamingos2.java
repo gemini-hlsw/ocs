@@ -64,8 +64,7 @@ public final class Flamingos2 extends Instrument implements SpectroscopyInstrume
             default:
                 final GrismOptics grismOptics;
                 try {
-                    // TODO: it shouldn't be necessary to multiply with pixel size again?? Bug?
-                    grismOptics = new GrismOptics(getDirectory() + File.separator, fp.grism().name(), getSlitWidth() * getPixelSize(), fp.filter().name());
+                    grismOptics = new GrismOptics(getDirectory() + File.separator, fp.grism().name(), fp.filter().name());
                 } catch (Exception e) {
                     throw new IllegalArgumentException("Grism/filter " + fp.grism() + "+" + fp.filter().name() + " combination is not supported.");
                 }
@@ -76,6 +75,7 @@ public final class Flamingos2 extends Instrument implements SpectroscopyInstrume
 
     /** {@inheritDoc} */
     public double getSlitWidth() {
+        // Note: Slit size for F2 is in pixels, not in arcsecs!
         switch (params.mask()) {
             case FPU_NONE:
                 return 1 * getPixelSize();
