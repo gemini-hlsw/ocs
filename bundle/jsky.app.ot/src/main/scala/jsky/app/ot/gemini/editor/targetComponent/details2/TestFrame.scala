@@ -1,29 +1,40 @@
 package jsky.app.ot.gemini.editor.targetComponent.details2
 
-import edu.gemini.pot.sp.ISPFactory
+import java.awt.{Color, BorderLayout}
+import javax.swing.{BorderFactory, WindowConstants, JFrame}
+
 import edu.gemini.pot.spdb.DBLocalDatabase
 import edu.gemini.spModel.core.SPProgramID
+import edu.gemini.spModel.gemini.gmos.InstGmosSouth
 import edu.gemini.spModel.obs.context.ObsContext
-import edu.gemini.spModel.target.SPTarget
-import edu.gemini.shared.util.immutable.{ None => GNone }
+import edu.gemini.spModel.target.obsComp.TargetObsComp
 
+import scala.collection.JavaConverters._
 import scala.swing.{Component, MainFrame, Frame, SimpleSwingApplication}
 
-/**
-  * Created by rnorris on 1/15/16.
-  */
-object TestFrame extends SimpleSwingApplication {
+import scalaz._, Scalaz._
 
-  val tdp = new TargetDetailPanel
-  val odb = DBLocalDatabase.createTransient()
+object TestFrame extends App {
 
-  def top: Frame = new MainFrame {
-    title = "Target Editor Test UI"
-    contents = Component.wrap(tdp)
+  val odb  = DBLocalDatabase.createTransient()
+  val fact = odb.getFactory
+  val prog = fact.createProgram(null, SPProgramID.toProgramID("GS-2016-B-Q1"))
+  val obs  = fact.createObservation(prog, null) <| prog.addObservation
+  val gmos = fact.createObsComponent(prog, InstGmosSouth.SP_TYPE, null) <| obs.addObsComponent
+  val toc  = obs.getObsComponents.asScala.find(_.getType == TargetObsComp.SP_TYPE).get
+  val tenv = toc.getDataObject.asInstanceOf[TargetObsComp].getTargetEnvironment
+  val ctx  = ObsContext.create(obs)
+  val tdp  = new TargetDetailPanel
+
+  val top = new JFrame {
+    setTitle("Target Editor Test UI")
+    getContentPane.setLayout(new BorderLayout)
+    getContentPane.add(tdp, BorderLayout.CENTER)
+    setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE)
   }
 
-  val prog = odb.getFactory.createProgram(null, SPProgramID.toProgramID("GS-2016-B-Q1"))
-
-  tdp.edit(GNone.instance(), new SPTarget(), prog)
+  tdp.edit(ctx, ctx.getValue.getTargets.getBase, toc)
+  top.pack()
+  top.setVisible(true)
 
 }
