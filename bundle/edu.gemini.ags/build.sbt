@@ -20,7 +20,9 @@ libraryDependencies ++= Seq(
   //"com.github.fommil.netlib" % "netlib-native_system-osx-x86_64" % "1.1",
 //  "com.github.fommil.netlib" % "all" % "1.1.2" pomOnly(),
 //  "com.github.fommil" % "jniloader" % "1.1",
-  "com.chuusai" %% "shapeless" % "2.0.0")
+  "com.chuusai" %% "shapeless" % "2.0.0",
+  "org.apache.commons" % "commons-math3" % "3.2" % "test")
+
 
 osgiSettings
 
