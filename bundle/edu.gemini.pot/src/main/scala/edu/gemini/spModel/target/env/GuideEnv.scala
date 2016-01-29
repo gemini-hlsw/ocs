@@ -34,17 +34,6 @@ final case class GuideEnv(auto: AutomaticGroup, manual: Option[OptsList[ManualGr
   def length: Int =
     1 + manual.map(_.length).orZero
 
-  def selectPrimary(g: GuideGrp): Option[GuideEnv] =
-    g match {
-      case a: AutomaticGroup if a == g =>
-        some(Manual.mod(_.map(_.clearFocus), this))
-
-      case m: ManualGroup              =>
-        manual.flatMap { _.focusOn(m) }.map { opts =>
-          Manual.set(this, some(opts))
-        }
-    }
-
   def selectPrimaryIndex(i: Int): Option[GuideEnv] =
     if (i == 0) some(Manual.mod(_.map(_.clearFocus), this))
     else manual.flatMap { _.focusOnIndex(i-1) }.map { opts =>

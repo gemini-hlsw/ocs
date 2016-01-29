@@ -15,6 +15,8 @@ sealed trait GuideGrp extends Serializable {
 
   def isManual: Boolean = !isAutomatic
 
+  def toManualGroup: ManualGroup
+
   /** Returns the set of guide probes with at least one associated guide star
     * in this environment.
     */
@@ -41,7 +43,8 @@ sealed trait GuideGrp extends Serializable {
   * we can distinguish [temporarily] identical ones?
  */
 final case class ManualGroup(name: String, targetMap: GuideProbe ==>> OptsList[SPTarget]) extends GuideGrp {
-  def isAutomatic: Boolean = false
+  def isAutomatic: Boolean       = false
+  def toManualGroup: ManualGroup = this
 }
 
 object ManualGroup {

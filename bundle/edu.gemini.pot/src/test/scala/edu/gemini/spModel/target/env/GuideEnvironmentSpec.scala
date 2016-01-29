@@ -3,16 +3,13 @@ package edu.gemini.spModel.target.env
 import edu.gemini.spModel.core.AlmostEqual.AlmostEqualOps
 import edu.gemini.spModel.target.env.TargetCollection.TargetCollectionSyntax
 
-import edu.gemini.shared.util.immutable.{DefaultImList, ImList, ImOption}
+import edu.gemini.shared.util.immutable.ImList
 import edu.gemini.shared.util.immutable.ScalaConverters._
-import edu.gemini.spModel.guide.{GuideProbeMap, GuideProbe}
+import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.spModel.pio.xml.PioXmlFactory
 import edu.gemini.spModel.target.SPTarget
 import org.apache.commons.io.output.ByteArrayOutputStream
 
-import org.scalacheck.Arbitrary._
-import org.scalacheck.Gen
-import org.scalacheck.Gen._
 import org.scalacheck.Prop._
 
 import org.specs2.ScalaCheck
@@ -46,14 +43,6 @@ class GuideEnvironmentSpec extends Specification with ScalaCheck with Arbitrarie
         s0 === s1
       }
   }
-
-  /*
-  val GenTargets: Gen[(GuideProbe, List[SPTarget])] =
-    for {
-      gp <- arbitrary[GuideProbe]
-      ts <- boundedListOf[SPTarget](3)
-    } yield (gp, ts)
-    */
 
   "GuideEnvironment getTargets" should {
     "return all targets in order according to their associated probe" in
@@ -201,7 +190,7 @@ class GuideEnvironmentSpec extends Specification with ScalaCheck with Arbitrarie
         val grp = GuideGroup.create("")
         val sz  = g.getOptions.size
         val ixs = List(Int.MinValue, -1, sz, sz + 1, Int.MaxValue)
-        ixs.forall { i => (g.setGroup(i, grp) === g) }
+        ixs.forall { i => g.setGroup(i, grp) === g }
       }
 
     "do nothing if trying to replace the automatic group with an manual group" in
@@ -239,6 +228,73 @@ class GuideEnvironmentSpec extends Specification with ScalaCheck with Arbitrarie
       }
   }
 
+  "GuideEnvironment setOptions" should {
+    "add an automatic group if the first element isn't automatic" in
+      forAll { (g: GuideEnvironment, ms: List[ManualGroup]) =>
+        val manualGroups = ms.map(GuideGroup)
+        val g2 = g.setOptions(manualGroups.asImList)
+        g2.getOptions.asScalaList === (GuideGroup(AutomaticGroup.Initial) :: manualGroups)
+      }
+
+    "convert any additional automatic groups to manual" in
+      forAll { (g: GuideEnvironment, grps: List[GuideGroup]) =>
+        val init = GuideGroup(AutomaticGroup.Initial)
+        val g2   = g.setOptions((init :: grps).asImList)
+        g2.getOptions.asScalaList === (init :: grps.map(g => GuideGroup.Grp.set(g, g.grp.toManualGroup)))
+      }
+
+    "keep the primary index the same, if the new options have enough elements to include it" in
+      forAll { (g: GuideEnvironment, grps: List[GuideGroup]) =>
+        val init = GuideGroup(AutomaticGroup.Initial)
+        val g2   = g.setOptions((init :: grps).asImList)
+
+        val oldPrimary = g.getPrimaryIndex.intValue()
+        val newPrimary = g2.getPrimaryIndex.intValue()
+        val lastIndex  = grps.size // since the initial auto group is not counted
+        (oldPrimary === newPrimary) ||
+          ((oldPrimary > lastIndex) && (newPrimary === lastIndex))
+      }
+  }
+
+  "GuideEnvironment setPrimary" should {
+    "update the automatic group if given an automatic group" in
+      forAll { (g: GuideEnvironment, a: AutomaticGroup) =>
+        val g2 = g.setPrimary(GuideGroup(a))
+        (g2.getPrimaryIndex.intValue === 0) && (g2.getPrimary.grp === a)
+      }
+
+    "add a manual group if given a manual group when there is no primary manual group" in
+      forAll { (g: GuideEnvironment, m: ManualGroup) =>
+        val mg = GuideGroup(m)
+        val p1 = g.getPrimaryIndex.intValue    // initial guide environment primary
+        val m1 = g.getOptions.tail             // manuals for the initial guide env
+
+        val g2 = g.setPrimary(mg)
+        val p2 = g2.getPrimaryIndex.intValue   // primary in the updated guide env
+        val m2 = g2.getOptions.tail            // manuals for the updated guide env
+
+        if (p1 === 0) {
+          // Adds a new manual group
+          (m1.append(mg).asScalaList === m2.asScalaList) && (p2 === m2.size())
+        } else {
+          // Replaces the existing primary manual group
+          (m1.updated(p1 - 1, mg).asScalaList === m2.asScalaList) && (p2 === p1)
+        }
+      }
+  }
+
+  "GuideEnvironment setPrimaryIndex" should {
+    "select the corresponding group if in range, do nothing otherwise" in
+      forAll { (g: GuideEnvironment, i: Int) =>
+        val sz = g.getOptions.size
+        val ix = (i % sz).abs
+        val inRange = (i >= 0) && (i < sz)
+
+        (g.setPrimaryIndex(ix).getPrimaryIndex.intValue === ix) &&
+          (inRange || g.setPrimaryIndex(i).getPrimaryIndex.intValue === g.getPrimaryIndex.intValue)
+      }
+  }
+
   "GuideEnvironment" should {
     "be PIO Externalizable" in
       forAll { (g: GuideEnvironment) =>
@@ -260,6 +316,4 @@ class GuideEnvironmentSpec extends Specification with ScalaCheck with Arbitrarie
         }
       }
   }
-
-
 }
