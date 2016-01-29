@@ -53,6 +53,7 @@ final case class GuideEnvironment(guideEnv: GuideEnv) extends TargetContainer {
     (index, grp.grp) match {
       case (0, a: AutomaticGroup) => Auto.set(this, a)
       case (i, m: ManualGroup)    => Manual.mod(_.map(o => o.setAt(i-1, m).getOrElse(o)), this)
+      case _                      => this
     }
 
   def modifyGroup(index: Int, f: GuideGroup => GuideGroup): GuideEnvironment =

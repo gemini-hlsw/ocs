@@ -1,5 +1,6 @@
 package edu.gemini.spModel.target.env
 
+import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.env.Indexable._
 
 import org.scalacheck.Prop.forAll
@@ -68,15 +69,15 @@ class OptsListSpec extends Specification with ScalaCheck with Arbitraries {
       }
 
     "still have a focus if nonempty after the original focus was deleted" in
-     forAll { (opts: OptsList[Int]) =>
-       opts.focus.flatMap(opts.delete).forall(_.hasFocus)
-     }
+      forAll { (opts: OptsList[Int]) =>
+        opts.focus.flatMap(opts.delete).forall(_.hasFocus)
+      }
 
     "have length reduced by the number of times an element appears when that element is deleted" in
-    forAll { (opts: OptsList[Int]) =>
-      opts.toList.distinct.forall(elem =>
-        opts.delete(elem).fold(0)(_.length) == opts.length - opts.toList.count(_ == elem))
-    }
+      forAll { (opts: OptsList[Int]) =>
+        opts.toList.distinct.forall(elem =>
+          opts.delete(elem).fold(0)(_.length) == opts.length - opts.toList.count(_ == elem))
+      }
   }
 
   "OptsList deleteAt" should {

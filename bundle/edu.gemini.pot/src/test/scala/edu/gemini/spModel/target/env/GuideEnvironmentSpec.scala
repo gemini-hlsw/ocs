@@ -107,13 +107,12 @@ class GuideEnvironmentSpec extends Specification with ScalaCheck with Arbitrarie
       }
   }
 
-  /*
   "GuideEnvironment removeGroup" should {
     "do nothing if the group is automatic" in {
       forAll { (g: GuideEnvironment) =>
         val auto = g.getOptions.head
         auto.grp match {
-          case _: AutomaticGroup => g.removeGroup(auto) === g
+          case _: AutomaticGroup => g.removeGroup(0) === g
           case _                 => false
         }
       }
@@ -123,7 +122,7 @@ class GuideEnvironmentSpec extends Specification with ScalaCheck with Arbitrarie
       forAll { (g0: GuideEnvironment) =>
         g0.getOptions.asScalaList match {
           case (_ :: m :: Nil) =>
-            val g1 = g0.removeGroup(m)
+            val g1 = g0.removeGroup(1)
             g1.guideEnv.manual.isEmpty && g1.getPrimaryIndex == 0
           case _                       =>
             true
@@ -135,9 +134,9 @@ class GuideEnvironmentSpec extends Specification with ScalaCheck with Arbitrarie
         g0.getOptions.asScalaList match {
           case (_ :: h :: t) =>  // auto :: first_manual :: other_manuals
             val ms = h :: t
-            val m  = ms((i % ms.size).abs)  // pick a manual group
-            val g1 = g0.removeGroup(m)
-            g1.getOptions.asScalaList.tail === ms.filter(_ =/= m)
+            val ix = (i % ms.size).abs + 1 // pick a manual group
+            val g1 = g0.removeGroup(ix)
+            g1.getOptions.asScalaList.tail === ms.patch(ix - 1, Nil, 1)
           case _              =>
             true
         }
@@ -148,14 +147,12 @@ class GuideEnvironmentSpec extends Specification with ScalaCheck with Arbitrarie
         g0.getOptions.asScalaList match {
           case (_ :: h :: t) =>  // auto :: first_manual :: other_manuals
             val ms = h :: t
-            val m  = ms((i % ms.size).abs)  // pick a manual group
-            val f0 = g0.getPrimary.getValue // TODO: remove the option wrapper
-            val g1 = g0.removeGroup(m)
-            val f1 = g1.getPrimary.getValue
+            val ix = (i % ms.size).abs + 1 // pick a manual group
+            val g1 = g0.removeGroup(ix)
 
             // removing the focused group or else the focus is the same after
             // the removal
-            (f0 === m) || (f0 === f1)
+            (g0.getPrimaryIndex.intValue() === ix) || (g0.getPrimary === g1.getPrimary)
           case _              =>
             true
         }
@@ -166,16 +163,14 @@ class GuideEnvironmentSpec extends Specification with ScalaCheck with Arbitrarie
         g0.getOptions.asScalaList match {
           case (_ :: h :: t) =>  // auto :: first_manual :: other_manuals
             val ms = h :: t
-            val m  = ms((i % ms.size).abs)  // pick a manual group
-            val f0 = g0.getPrimary.getValue // TODO: remove the option wrapper
-            val g1 = g0.removeGroup(m)
-            val f1 = g1.getPrimary.getValue
+            val ix = (i % ms.size).abs  + 1 // pick a manual group
+            val g1 = g0.removeGroup(ix)
+            val i0 = g0.getPrimaryIndex.intValue
+            val i1 = g1.getPrimaryIndex.intValue
 
-            (f0 =/= m) || {
+            (i0 =/= ix) || {
                // focus should have changed
-              (f0 =/= f1) && {
-                val i0 = g0.getPrimaryIndex.intValue
-                val i1 = g1.getPrimaryIndex.intValue
+              (System.identityHashCode(g0.getPrimary) =/= System.identityHashCode(g1.getPrimary)) && {
                 (i0 === i1) || // but moved to the right if possible (i.e., same index)
                   ((i0 === ms.size) && (i1 === (i0 - 1))) // or one to the left if at the end
               }
@@ -185,8 +180,64 @@ class GuideEnvironmentSpec extends Specification with ScalaCheck with Arbitrarie
         }
       }
   }
-  */
 
+  "GuideEnvironment getGroup" should {
+    "return a group iff the index is in range" in
+      forAll { (g: GuideEnvironment, i: Int) =>
+        g.getGroup(i).isDefined === ((i >= 0) && (i < g.getOptions.size()))
+      }
+
+    "return the group corresponding to the index" in
+      forAll { (g: GuideEnvironment, i: Int) =>
+        val gs = g.getOptions
+        val ix = (i % gs.size()).abs
+        g.getOptions.get(ix) === g.getGroup(ix).getValue
+      }
+  }
+
+  "GuideEnvironment setGroup" should {
+    "do nothing if the group index is out of range" in
+      forAll { (g: GuideEnvironment) =>
+        val grp = GuideGroup.create("")
+        val sz  = g.getOptions.size
+        val ixs = List(Int.MinValue, -1, sz, sz + 1, Int.MaxValue)
+        ixs.forall { i => (g.setGroup(i, grp) === g) }
+      }
+
+    "do nothing if trying to replace the automatic group with an manual group" in
+      forAll { (g: GuideEnvironment, m: ManualGroup) =>
+        g.setGroup(0, GuideGroup(m)) === g
+      }
+
+    "do nothing if trying to replace a manual group with an automatic group" in
+      forAll { (g: GuideEnvironment, a: AutomaticGroup) =>
+        g.setGroup(1, GuideGroup(a)) === g  // either out of range or a manual group at 1
+      }
+
+    "replace the automatic group at index 0 if given an automatic group" in
+      forAll { (g: GuideEnvironment, a: AutomaticGroup) =>
+        g.setGroup(0, GuideGroup(a)).getGroup(0).getValue.grp === a
+      }
+
+    "replace a manual group at the corresponding index if given a manual group" in
+      forAll { (g: GuideEnvironment, m: ManualGroup, i: Int) =>
+        val ix = (i % g.getOptions.size).abs
+        (ix === 0) || {
+          g.setGroup(ix, GuideGroup(m)).getGroup(ix).getValue.grp === m
+        }
+      }
+
+    "not change any group at any other indices" in
+      forAll { (g: GuideEnvironment, a: AutomaticGroup, m: ManualGroup, i: Int) =>
+        val ix  = (i % g.getOptions.size).abs
+        val grp = (ix === 0) ? GuideGroup(a) | GuideGroup(m)
+        val g2  = g.setGroup(ix, grp)
+
+        import Indexable._
+
+        g.getOptions.asScalaList.deleteAt(ix) === g2.getOptions.asScalaList.deleteAt(ix)
+      }
+  }
 
   "GuideEnvironment" should {
     "be PIO Externalizable" in
