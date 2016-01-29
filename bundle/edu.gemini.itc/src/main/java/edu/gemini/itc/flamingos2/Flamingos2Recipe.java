@@ -94,13 +94,7 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
         final SlitThroughput st = new SlitThroughput(_obsDetailParameters, _sdParameters, im_qual, instrument.getPixelSize(), instrument.getSlitWidth());
 
         final double spec_source_frac = st.getSlitThroughput();
-        double ap_diam = st.getAppDiam();
-        // TODO: This is correcting for a bug (mixup slit size in pixels vs arcsecs)
-        // TODO: Verify that results are ok when removing this if statement entirely, then update baseline
-        if (_sdParameters.isUniform() &&_obsDetailParameters.isAutoAperture()) {
-            ap_diam = new Double(1 / (instrument.getSlitWidth()) + 0.5).intValue();
-        }
-
+        final double ap_diam = st.getAppDiam();
         final double gratDispersion_nmppix = instrument.getSpectralPixelWidth();
         final double gratDispersion_nm = 0.5 / instrument.getPixelSize() * gratDispersion_nmppix;
 
@@ -112,7 +106,8 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
                 instrument.getObservingEnd(),
                 gratDispersion_nm,
                 gratDispersion_nmppix,
-                spec_source_frac, im_qual,
+                spec_source_frac,
+                im_qual,
                 ap_diam,
                 instrument.getReadNoise(),
                 instrument.getDarkCurrent(),
