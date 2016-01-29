@@ -57,7 +57,7 @@ public class Pre2010BTargetEnvironmentIoTest {
                 assertEquals(1, genv.getOptions().size());
 
                 // It is the primary group option
-                GuideGroup grp = genv.getPrimary().getValue();
+                GuideGroup grp = genv.getPrimary();
                 assertSame(genv.getOptions().head(), grp);
 
                 // It contains a single GuideProbeTargets instance
@@ -78,7 +78,7 @@ public class Pre2010BTargetEnvironmentIoTest {
             public void verify(TargetEnvironment env) throws Exception {
                 GuideEnvironment genv = env.getGuideEnvironment();
 
-                GuideGroup grp = genv.getPrimary().getValue();
+                GuideGroup grp = genv.getPrimary();
                 Option<GuideProbeTargets> gpt1Opt = grp.get(PwfsGuideProbe.pwfs1);
                 Option<GuideProbeTargets> gpt2Opt = grp.get(PwfsGuideProbe.pwfs2);
 
@@ -94,7 +94,7 @@ public class Pre2010BTargetEnvironmentIoTest {
             public void verify(TargetEnvironment env) throws Exception {
                 GuideEnvironment genv = env.getGuideEnvironment();
 
-                GuideGroup grp = genv.getPrimary().getValue();
+                GuideGroup grp = genv.getPrimary();
                 Option<GuideProbeTargets> gptOpt = grp.get(PwfsGuideProbe.pwfs2);
 
                 SPTarget primary = gptOpt.getValue().getPrimary().getValue();

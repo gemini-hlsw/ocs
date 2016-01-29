@@ -99,7 +99,7 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
      * <code>getGuideEnvironment().getPrimary().getOrElse(GuideGroup.EMPTY)</code>.
      */
     public GuideGroup getOrCreatePrimaryGuideGroup() {
-        return guide.getPrimary().getOrElse(GuideGroup.AutomaticGroupInitial());
+        return guide.getPrimary();
     }
 
     /**

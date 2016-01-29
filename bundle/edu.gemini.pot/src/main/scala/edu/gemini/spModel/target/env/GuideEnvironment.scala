@@ -123,9 +123,8 @@ final case class GuideEnvironment(guideEnv: GuideEnv) extends TargetContainer {
     GuideEnvironment(GuideEnv(auto, manual))
   }
 
-  // TODO: primary is always defined, remove the option wrapper
-  def getPrimary: GemOption[GuideGroup] =
-    ImOption.apply(GuideGroup(guideEnv.primaryGroup))
+  def getPrimary: GuideGroup =
+    GuideGroup(guideEnv.primaryGroup)
 
   /** Roughly, replaces the primary group with the given guide group, if there
     * is a primary group.  Otherwise it appends the given guide group and makes

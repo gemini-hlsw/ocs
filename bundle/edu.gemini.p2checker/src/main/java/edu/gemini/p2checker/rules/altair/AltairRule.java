@@ -257,7 +257,7 @@ public final class AltairRule implements IRule {
     private static Tuple3<Double, Double, Boolean> getMinMaxMagnitudeInVorR(TargetObsComp targetObsComp, double lower, double upper) {
         GuideGroup guideGroup;
         try {
-            guideGroup = targetObsComp.getTargetEnvironment().getGuideEnvironment().getPrimary().getOrNull();
+            guideGroup = targetObsComp.getTargetEnvironment().getGuideEnvironment().getPrimary();
         } catch(NullPointerException e) {
             guideGroup = null;
         }

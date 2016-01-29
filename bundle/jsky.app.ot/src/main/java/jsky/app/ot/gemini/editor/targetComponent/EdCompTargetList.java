@@ -342,10 +342,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         @Override public void actionPerformed(final ActionEvent actionEvent) {
             TargetEnvironment env = obsComp.getTargetEnvironment();
             GuideEnvironment ge = env.getGuideEnvironment();
-            if (ge.getPrimary().isEmpty()) {
-                ge = ge.setPrimary(env.getOrCreatePrimaryGuideGroup());
-                env = env.setGuideEnvironment(ge);
-            }
 
             // OT-16: add new guide star to selected group, if any, otherwise the primary group
             final Option<Tuple2<Integer, GuideGroup>> guideGroup = positionTable.getSelectedGroupOrParentGroup(env);
@@ -399,7 +395,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             final ImList<GuideGroup> groups  = options.append(group);
 
             // OT-34: make new group primary and select it
-            final GuideGroup primaryGroup    = ge.getPrimary().getValue();
+            final GuideGroup primaryGroup    = ge.getPrimary();
             if (!positionTable.confirmGroupChange(primaryGroup, group)) return;
             obsComp.setTargetEnvironment(env.setGuideEnvironment(ge.setOptions(groups).setPrimaryIndex(options.size())));
 
@@ -514,7 +510,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             }
             env = env.removeGroup(_curGroup._1());
             final int groupIndex = env.getGuideEnvironment().getPrimaryIndex();
-            final GuideGroup group = env.getGuideEnvironment().getPrimary().getValue(); // TODO: primary is always defined, remove option wrapper
+            final GuideGroup group = env.getGuideEnvironment().getPrimary();
             _curGroup = new Pair<>(groupIndex, group);
         }
         getDataObject().setTargetEnvironment(env);

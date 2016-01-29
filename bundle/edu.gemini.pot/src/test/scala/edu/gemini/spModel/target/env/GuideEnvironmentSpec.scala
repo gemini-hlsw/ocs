@@ -41,7 +41,7 @@ class GuideEnvironmentSpec extends Specification with ScalaCheck with Arbitrarie
 
     "include only guide probes associated with the primary group that have a selected guide star in getPrimaryReferencedGuiders" in
       forAll { (g: GuideEnvironment) =>
-        val s0 = toScala(g.getPrimary.getValue.getPrimaryReferencedGuiders)
+        val s0 = toScala(g.getPrimary.getPrimaryReferencedGuiders)
         val s1 = toScala(g.getPrimaryReferencedGuiders)
         s0 === s1
       }
