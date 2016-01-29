@@ -91,11 +91,8 @@ public final class SlitThroughput {
             // Do a 2D interpolation to find the return value using x= slit_spatial_ratio and y= slit_spec_ratio
             final double slitThroughput = getSTvalue(slit_spatial_ratio, slit_spec_ratio);
 
-            if (slitThroughput > 1.0) {
-                return 1;
-            } else {
-                return slitThroughput;
-            }
+            // return a value in the range 0..1
+            return Math.min(1, slitThroughput);
 
         }
 
@@ -107,14 +104,14 @@ public final class SlitThroughput {
      */
     public double getAppDiam() {
         if (src.isUniform() && obs.isAutoAperture()) {
-            return new Double(1 / (slit_width * pixel_size) + 0.5).intValue();
+            return Math.round(1 / (slit_width * pixel_size));
         } else {
             return getSpatialPix();
         }
     }
 
     private double getSpatialPix() {
-        return new Integer(new Double(slit_ap / pixel_size + 0.5).intValue()).doubleValue();
+        return Math.round(slit_ap / pixel_size);
     }
 
     /**
