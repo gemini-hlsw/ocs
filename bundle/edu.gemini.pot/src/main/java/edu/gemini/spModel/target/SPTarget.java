@@ -1,7 +1,6 @@
 package edu.gemini.spModel.target;
 
-import edu.gemini.spModel.core.SiderealTarget;
-import edu.gemini.spModel.core.Target;
+import edu.gemini.spModel.core.*;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.PioFactory;
 import edu.gemini.spModel.target.system.*;
@@ -54,8 +53,13 @@ public final class SPTarget extends TransitionalSPTarget {
      * if the contained target is of the specified type.
      */
     public void setTargetType(final ITarget.Tag tag) {
-        if (tag != _target.getTag())
+        if (tag != _target.getTag()) {
             setTarget(ITarget.forTag(tag));
+            switch (tag) {
+                case SIDEREAL: setNewTarget(SiderealTarget.empty());
+                default: setNewTarget(edu.gemini.spModel.core.NonSiderealTarget.empty());
+            }
+        }
     }
 
     /** Return a paramset describing this SPTarget. */

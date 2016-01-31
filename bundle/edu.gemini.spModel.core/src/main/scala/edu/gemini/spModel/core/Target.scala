@@ -58,6 +58,23 @@ trait TargetLenses {
       pRunTarget(NonSiderealTarget.magnitudes.partial)
     ))
 
+  def const[A, B](b: B): A @> B =
+    Lens.lensu((a, _) => a, _ => b)
+
+  val spatialProfile: Target @?> Option[SpatialProfile] =
+    PLens(_.fold(
+      PLens.nil.run,
+      pRunTarget(SiderealTarget.spatialProfile.partial),
+      pRunTarget(NonSiderealTarget.spatialProfile.partial)
+    ))
+
+  val spectralDistribution: Target @?> Option[SpectralDistribution] =
+    PLens(_.fold(
+      PLens.nil.run,
+      pRunTarget(SiderealTarget.spectralDistribution.partial),
+      pRunTarget(NonSiderealTarget.spectralDistribution.partial)
+    ))
+
 }
 
 
