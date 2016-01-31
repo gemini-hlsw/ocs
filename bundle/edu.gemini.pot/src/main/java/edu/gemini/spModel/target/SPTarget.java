@@ -54,11 +54,15 @@ public final class SPTarget extends TransitionalSPTarget {
      */
     public void setTargetType(final ITarget.Tag tag) {
         if (tag != _target.getTag()) {
-            setTarget(ITarget.forTag(tag));
+            _target = ITarget.forTag(tag);
             switch (tag) {
-                case SIDEREAL: setNewTarget(SiderealTarget.empty());
-                default: setNewTarget(edu.gemini.spModel.core.NonSiderealTarget.empty());
+                case SIDEREAL:
+                    setNewTarget(SiderealTarget.empty());
+                    break;
+                default:
+                    setNewTarget(edu.gemini.spModel.core.NonSiderealTarget.empty());
             }
+            _notifyOfUpdate();
         }
     }
 
