@@ -6,16 +6,34 @@ import edu.gemini.spModel.target.SPTarget
 import scalaz._
 import Scalaz._
 
-import GuideEnv.{Auto, Manual}
+import GuideEnv.Manual
 
+/** A pair of an `AutomaticGroup` guide group and, optionally, a non-empty list
+  * of manual groups.  The `GuideEnv` maintains the concept of a "primary"
+  * group.  It is the group that will be used for guiding at night. The
+  * "primary" group is either the `AutomaticGroup` or else one of the various
+  * `ManualGroup`s (if any).  If the `manual` group option is defined and if the
+  * contained `OptsList` has a focused element, it is the "primary" group.
+  * Otherwise, the automatic group is considered to be the primary.
+  */
 final case class GuideEnv(auto: AutomaticGroup, manual: Option[OptsList[ManualGroup]]) {
 
+  /** All cotained `GuideGrp` starting with the `AutomaticGroup` and followed
+    * by any `ManualGroup`s that might be present.
+    */
   def groups: List[GuideGrp] =
     auto :: (manual.map(_.toList) | Nil)
 
+  /** Gets the "primary" group which will be used to configure guiding at night.
+    * Other `GuideGrp`s in this environment are alternative options.
+    */
   def primaryGroup: GuideGrp =
     (manual.flatMap(_.focus) : Option[GuideGrp]) | auto
 
+  /** Returns the index of the primary group in the list of all guide group
+    * options contained in the environment.  The `AutomaticGroup` is always at
+    * index 0 followed by the manual groups (if any) in order.
+    */
   def primaryIndex: Int =
     manual.flatMap(_.focusIndex).map(_ + 1).getOrElse(0)
 
@@ -31,9 +49,13 @@ final case class GuideEnv(auto: AutomaticGroup, manual: Option[OptsList[ManualGr
   def primaryReferencedGuiders: Set[GuideProbe] =
     primaryGroup.primaryReferencedGuiders
 
+  /** Gets the total number of `GuideGrp`s contained in this environment. */
   def length: Int =
     1 + manual.map(_.length).orZero
 
+  /** Selects the `GuideGrp` associated with the given index, if it exists.
+    * If not `None` is returned.
+    */
   def selectPrimaryIndex(i: Int): Option[GuideEnv] =
     if (i == 0) some(Manual.mod(_.map(_.clearFocus), this))
     else manual.flatMap { _.focusOnIndex(i-1) }.map { opts =>
@@ -47,12 +69,11 @@ final case class GuideEnv(auto: AutomaticGroup, manual: Option[OptsList[ManualGr
     NonEmptyList.nel(auto, manual.map(_.toList).orZero)
 }
 
-/** A guide environment is a bags group (possibly empty or "initial") followed
-  * by zero or more manual groups. One is always selected. If the second
-  * element in the pair is a list, it means the bags group is selected.
-  * Otherwise the selection is indicated by the zipper.
-  */
 object GuideEnv {
+
+  /** Initial/default `GuideEnv`. Contains an `AutomaticGroup.Initial` and no
+    * manual groups.
+    */
   val initial: GuideEnv = GuideEnv(AutomaticGroup.Initial, none)
 
   val Auto: GuideEnv @> AutomaticGroup =

@@ -16,9 +16,9 @@ import Scalaz._
 
 import GuideEnvironment._
 
-/**
- *
- */
+/** The old Java codebase compatible wrapper around the concept of a guide
+  * environment.  See `GuideEnv`.
+  */
 final case class GuideEnvironment(guideEnv: GuideEnv) extends TargetContainer {
 
   def getReferencedGuiders: java.util.SortedSet[GuideProbe] =
@@ -37,18 +37,36 @@ final case class GuideEnvironment(guideEnv: GuideEnv) extends TargetContainer {
   override def removeTarget(target: SPTarget): GuideEnvironment =
     Env.mod(_.removeTarget(target), this)
 
+  /** Removes the manual `GuideGroup` at the associated index, if possible,
+    * returning a new updated environment. The automatic guide group (index 0)
+    * cannot be removed and otherwise the index must be in range or else nothing
+    * is different in the returned `GuideEnvironment`.
+    */
   def removeGroup(index: Int): GuideEnvironment =
     index match {
       case 0 => this // can't remove the automatic group
       case i => Manual.mod(_.flatMap { _.deleteAt(i-1) }, this)
     }
 
+  /** Gets the `GuideGroup` at the given index, if any.  If the index is out
+    * of range, `None` is returned.  If the index is 0, the result will be the
+    * automatic group, otherwise one of the manual groups.
+    */
   def getGroup(index: Int): GemOption[GuideGroup] =
     index match {
       case 0 => ImOption.apply(GuideGroup(guideEnv.auto))
       case i => guideEnv.manual.flatMap(_.getAt(i-1)).map(GuideGroup).asGeminiOpt
     }
 
+  /** Sets the `GuideGroup` at the given index to the provided value.  If the
+    * index is 0, the `GuideGroup` must be an automatic group, otherwise it must
+    * be a manual group.  If not, or if the index is out of range, nothing is
+    * changed.
+    *
+    * This method is intended by be given a `GuideGroup` obtained from
+    * `getGroup` at the same index, or a guide group produced by manipulating
+    * the `GuideGroup.AutomaticInitial` or `GuideGroup.ManualEmpty`.
+    */
   def setGroup(index: Int, grp: GuideGroup): GuideEnvironment =
     (index, grp.grp) match {
       case (0, a: AutomaticGroup) => Auto.set(this, a)
@@ -62,6 +80,9 @@ final case class GuideEnvironment(guideEnv: GuideEnv) extends TargetContainer {
   override def getTargets: ImList[SPTarget] =
     guideEnv.targetList.asImList
 
+  /** Gets all the `GuideGroup` options in the environment, starting with the
+    * automatic group and followed by any manual group options.
+    */
   def getOptions: ImList[GuideGroup] =
     guideEnv.groups.map(GuideGroup).asImList
 

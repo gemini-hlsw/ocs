@@ -14,7 +14,7 @@ import scalaz._
 import Scalaz._
 
 /** The old Java codebase compatible wrapper around the model concept of a
-  * guide group.
+  * guide group.  See `GuideGrp`.
   */
 case class GuideGroup(grp: GuideGrp) extends java.lang.Iterable[GuideProbeTargets] with TargetContainer {
 
@@ -254,8 +254,11 @@ case class GuideGroup(grp: GuideGrp) extends java.lang.Iterable[GuideProbeTarget
 }
 
 object GuideGroup extends ((GuideGrp) => GuideGroup) {
-  val AutomaticGroupInitial = GuideGroup(Initial)
-  val ManualEmpty = GuideGroup(ManualGroup("Manual Group", ==>>.empty))
+  /** An initial automatic `GuideGroup`. */
+  val AutomaticInitial = GuideGroup(Initial)
+
+  /** An empty manual group. */
+  val ManualEmpty           = GuideGroup(ManualGroup("Manual Group", ==>>.empty))
 
   val Grp: GuideGroup @> GuideGrp =
     Lens.lensu((jGrp, sGrp) => jGrp.copy(grp = sGrp), _.grp)
@@ -282,7 +285,7 @@ object GuideGroup extends ((GuideGrp) => GuideGroup) {
     } yield t
 
     typeTag.fold(createManual(name, targets)) {
-      case AutoInitialTag => AutomaticGroupInitial
+      case AutoInitialTag => AutomaticInitial
       case AutoActiveTag  => createActive(targets)
       case ManualTag      => createManual(name, targets)
     }
