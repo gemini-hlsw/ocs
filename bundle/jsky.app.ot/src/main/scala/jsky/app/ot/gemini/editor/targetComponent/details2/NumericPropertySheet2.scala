@@ -282,11 +282,11 @@ object NumericPropertySheet2 {
     def apply[A, B](leftOptions: List[B], rightCaptions: Map[B, String], initial: B, render: B => String, f: (A, B) => Double, g: (A, B, Double) => A, h: B => NumberFormat): Prop[A] =
       TransformableProp(leftOptions, rightCaptions, initial, render, f, g, h)
 
-    def apply[A, B <: Quantity[B]](leftCaption: String, get: A => B, set: (A, B) => A, u: UnitOfMeasure[B], us: UnitOfMeasure[B]*): Prop[A] =
-      us match {
-        case Nil => SingleUnitQuantity(leftCaption, u,       get, set)
-        case _   => MultiUnitQuantity (leftCaption, u +: us, get, set)
-      }
+//    def apply[A, B <: Quantity[B]](leftCaption: String, get: A => B, set: (A, B) => A, u: UnitOfMeasure[B], us: UnitOfMeasure[B]*): Prop[A] =
+//      us match {
+//        case Nil => SingleUnitQuantity(leftCaption, u,       get, set)
+//        case _   => MultiUnitQuantity (leftCaption, u +: us, get, set)
+//      }
 
   }
 

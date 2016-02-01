@@ -75,6 +75,13 @@ trait TargetLenses {
       pRunTarget(NonSiderealTarget.spectralDistribution.partial)
     ))
 
+  val horizonsDesignation: Target @?> Option[HorizonsDesignation] =
+    PLens(_.fold(
+      PLens.nil.run,
+      PLens.nil.run,
+      pRunTarget(NonSiderealTarget.horizonsDesignation.partial)
+    ))
+
 }
 
 
