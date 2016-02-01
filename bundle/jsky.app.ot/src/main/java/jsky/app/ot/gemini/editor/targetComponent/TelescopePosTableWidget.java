@@ -204,13 +204,17 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
         }
 
         static final class GroupRow extends AbstractRow {
+            private static String extractName(final GuideGroup group) {
+                return group.getName().getOrElse("Auto");
+            }
+
             private final Option<Tuple2<Integer, GuideGroup>> group;
             private final List<Row> children;
             private final boolean editable;
 
             GroupRow(final boolean enabled, final boolean editable,
                      final int index, final GuideGroup group, final List<Row> children) {
-                super(enabled, group.getName().getOrElse("Guide Group " + (index + 1)), "", None.instance(), None.instance());
+                super(enabled, extractName(group), "", None.instance(), None.instance());
                 this.group    = new Some<>(new Pair<>(index, group));
                 this.children = Collections.unmodifiableList(children);
                 this.editable = editable;
@@ -762,7 +766,7 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
         if (groupOpt.isDefined()) return groupOpt;
 
         final SPTarget target = getSelectedPos();
-        if (target == null) return ImOption.<Tuple2<Integer, GuideGroup>>empty();
+        if (target == null) return ImOption.empty();
 
         return env.getGroups().zipWithIndex().find(gg -> gg._1().containsTarget(target)).map(Tuple2::swap);
     }

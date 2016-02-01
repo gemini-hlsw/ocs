@@ -116,7 +116,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         }
 
         final TargetEnvironment env = getDataObject().getTargetEnvironment();
-        _w.tag.setEnabled(enabled && env.getBase() != _curPos);
+        _w.tag.setEnabled(enabled && env.isBasePosition(_curPos));
 
         final SPInstObsComp inst = getContextInstrumentDataObject();
         _w.newMenu.setEnabled(enabled && inst != null);
@@ -130,15 +130,16 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     /**
      * Update the remove and primary buttons as well as the detail editor.
      */
-    private void updateRemovePrimaryButtonsAndDetailEditor(final TargetEnvironment env) {
-        final boolean editable      = OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation());
-        final boolean curNotBase    = _curPos != env.getBase();
+    private void updateRemovePrimaryButtonsAndDetailEditor() {
+        final TargetEnvironment env = getDataObject().getTargetEnvironment();
+        final boolean editable = OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation());
+        final boolean curNotBase = !env.isBasePosition(_curPos);
 
         // We assume that if no group is set, then we are or want to handle the same as the auto group.
-        final boolean isAutoGroup  = ImOption.apply(_curGroup).exists(cgi -> cgi._2().isAutomatic());
+        final boolean isAutoGroup = ImOption.apply(_curGroup).exists(cgtup -> cgtup._2().isAutomatic());
         final boolean isAutoTarget = ImOption.apply(_curPos).exists(p -> env.getGuideEnvironment().getOptions()
                 .exists(gg -> gg.isAutomatic() && gg.containsTarget(p)));
-        final boolean isAuto       = isAutoGroup || isAutoTarget;
+        final boolean isAuto = isAutoGroup || isAutoTarget;
 
         _w.removeButton.setEnabled(curNotBase && editable && !isAuto);
         _w.primaryButton.setEnabled(enablePrimary(_curPos, env) && editable);
@@ -167,7 +168,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         if (_curPos != null) {
             _curPos.addWatcher(posWatcher);
             refreshAll();
-            updateRemovePrimaryButtonsAndDetailEditor(env);
+            updateRemovePrimaryButtonsAndDetailEditor();
         }
     }
 
@@ -323,7 +324,10 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
      * Listeners and watchers.
      */
 
-    // Action that handles adding a new guide star when a probe is picked from the add menu.
+    /**
+     * Action that handles adding a new guide star when a probe is picked from the add menu.
+     * This should ONLY be permitted if a current non-auto group is selected.
+     */
     private class AddGuideStarAction implements ActionListener {
         private final TargetObsComp obsComp;
         private final GuideProbe probe;
@@ -339,11 +343,15 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             TargetEnvironment env = obsComp.getTargetEnvironment();
             GuideEnvironment ge = env.getGuideEnvironment();
 
-            // OT-16: add new guide star to selected group, if any, otherwise the primary group
+            // Make sure that a group is selected and that it is not the auto grou.
             final Option<Tuple2<Integer, GuideGroup>> guideGroup = positionTable.getSelectedGroupOrParentGroup(env);
-            Option<GuideProbeTargets> opt = guideGroup.flatMap(tup -> tup._2().get(probe));
-            if (opt == null) opt = env.getPrimaryGuideProbeTargets(probe);
+            if (!guideGroup.exists(tup -> !tup._2().isAutomatic()))
+                return;
 
+            Option<GuideProbeTargets> opt = guideGroup.flatMap(tup -> tup._2().get(probe));
+            //if (opt == null) opt = env.getPrimaryGuideProbeTargets(probe);
+
+            // TODO: This is not returning the group index, but the table row index?
             final Integer groupIndex = guideGroup.map(Tuple2::_1).getOrElse(ge.getPrimaryIndex());
 
             final SPTarget target = new SPTarget();
@@ -521,7 +529,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             if (_curPos != null) {
                 _curPos.addWatcher(posWatcher);
                 refreshAll();
-                updateRemovePrimaryButtonsAndDetailEditor(env);
+                updateRemovePrimaryButtonsAndDetailEditor();
             }
         }
     };

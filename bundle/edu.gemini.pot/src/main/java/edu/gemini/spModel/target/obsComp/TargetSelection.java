@@ -119,25 +119,31 @@ public final class TargetSelection {
         return getGuideGroup(env, getIndex(node));
     }
 
+    /**
+     * For a given node in the list, find its guide group if any, and the index of said guide group amongst all guide
+     * groups.
+     */
     public static Option<Tuple2<Integer, GuideGroup>> getIndexedGuideGroup(final TargetEnvironment env, final ISPNode node) {
-        final ImList<Tuple2<Selection,Integer>> lst = toSelections(env).zipWithIndex();
-        final Integer idx = getIndex(node);
-        if ((idx < 0) || (idx >= lst.size())) {
-            return ImOption.<Tuple2<Integer, GuideGroup>>empty();
-        } else {
-            final Tuple2<Selection, Integer> sel = lst.get(idx);
-            if (sel._1().guideGroup == null) {
-                return ImOption.<Tuple2<Integer, GuideGroup>>empty();
-            } else {
-                // Figure out the group index by counting groups until sel. Ugh.
-                int groupIndex = 0;
-                for (int i=0; i<sel._2(); ++i) {
-                    final Tuple2<Selection, Integer> cur = lst.get(i);
-                    groupIndex += (cur._1().guideGroup == null) ? 0 : 1;
-                }
-                return new Some<>(new Pair<>(groupIndex, sel._1().guideGroup));
-            }
+        // The list of all nodes in the truee, and the index of the currently selected node.
+        final ImList<Selection> lst = toSelections(env);
+        final int idx = getIndex(node);
+
+        // If node is not in the valid range, no guide group.
+        // Similarly, if the current node has no guide group set, then no guide group.
+        if ((idx < 0) || (idx >= lst.size()))
+            return None.instance();
+        final Selection sel = lst.get(idx);
+        if (sel.guideGroup == null)
+            return None.instance();
+
+        // Iterate over all the selections until we arrive at idx, counting the groups that we see along the way.
+        int numGroups = 0;
+        for (int i=0; i <= idx; ++i) {
+            final Selection cur = lst.get(i);
+            if (cur.guideGroup != null && cur.target == null)
+                numGroups += 1;
         }
+        return new Some<>(new Pair<>(numGroups-1, sel.guideGroup));
     }
 
     public static void listenTo(final ISPNode node, final PropertyChangeListener listener) {
