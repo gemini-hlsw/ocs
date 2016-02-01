@@ -24,3 +24,10 @@ Go to the bundle project
 
 Now every time a file is changed the files will be compiled and the server restarted
 
+## TODO
+
+* 
+* Support websockets
+* Authentication
+* Review the decision to use http4s
+* Support OSGi
