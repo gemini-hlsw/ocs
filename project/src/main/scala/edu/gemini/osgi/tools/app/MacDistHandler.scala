@@ -1,6 +1,8 @@
 package edu.gemini.osgi.tools.app
 
-import java.io.{ File, PrintWriter }
+import java.io.{File, PrintWriter, IOException}
+import java.nio.file.{Files, SimpleFileVisitor, FileVisitResult, Path, FileSystems}
+import java.nio.file.attribute.BasicFileAttributes
 import edu.gemini.osgi.tools.app.{copy => recursivecopy} 
 
 import java.util.jar.Manifest
@@ -10,6 +12,15 @@ import scala.xml.XML
 
 object MacDistHandler {
   val launcher = "JavaAppLauncher"
+  val jdkInfo = "Info.plist"
+
+  // These will change when the certifcate expires but that's likely ok
+  // Note that these ids are not very useful without the actual certificate installed
+  val certificateHash = "60464455CE099B3293643BC0021D1F25D2F52A59"
+  val signatureID = "T87F4ZD75E"
+
+  val jarMatcher = FileSystems.getDefault().getPathMatcher("glob:.jar")
+  val dylibMatcher = FileSystems.getDefault().getPathMatcher("glob:.dylib")
 }
 
 case class MacDistHandler(jre: Option[String], jreName: String) extends DistHandler {
@@ -43,6 +54,11 @@ case class MacDistHandler(jre: Option[String], jreName: String) extends DistHand
           val jrePath = new File(jreDir, path)
           if (!jrePath.isDirectory) sys.error("No JRE was found at " + jrePath)
           jrePath.listFiles.foreach{f: File => recursivecopy(f, mkdir(jrePluginDir, jreName))}
+
+          // JDK's Info.plist must be in the jre path even though it is not in the standard distribution
+          // It must be updated when we change JDK version
+          val jdkInfo = new File(new File(jrePluginDir, jreName), MacDistHandler.jdkInfo)
+          Files.copy(getClass.getResourceAsStream(MacDistHandler.jdkInfo), jdkInfo.toPath)
       }
     }
 
@@ -51,10 +67,44 @@ case class MacDistHandler(jre: Option[String], jreName: String) extends DistHand
     if (ret != 0) sys.error("chmod returned " + ret)
 
     // Copy the icon file, if it exists
-    config.icon foreach { f => recursivecopy(f, resourcesDir) }
+    config.icon.foreach { f => recursivecopy(f, resourcesDir) }
 
     // OSGi app layout
     buildCommon(resourcesDir, meta, version, config, d, solution, appProjectBaseDir)
+
+    // Check if we can sign
+    val cmd = Seq("security", "find-identity", "-v", "-p", "codesigning")
+    val canSign = cmd.lines.exists(_.contains(MacDistHandler.signatureID))
+    if (canSign) {
+      println("Signing code with developer ID")
+      // Sign each jar and dylib file
+      Files.walkFileTree(new File(appDir.getPath).toPath, new SimpleFileVisitor[Path]() {
+        override def visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult = {
+          if (MacDistHandler.jarMatcher.matches(file) || MacDistHandler.dylibMatcher.matches(file)) {
+            Seq("codesign", "-f", "-v", "-s", MacDistHandler.certificateHash, file.toFile.getAbsolutePath).!
+          }
+          FileVisitResult.CONTINUE
+        }
+      })
+
+      // Now sign the jre
+      if (Seq("codesign", "-f", "-v", "-s", MacDistHandler.certificateHash, new File(jrePluginDir, jreName).getAbsolutePath).! != 0) {
+        log.error("*** Codesign error ")
+      }
+
+      // The .Trash dir must be deleted
+      Files.walkFileTree(new File(appDir.getPath, ".Trash").toPath, new SimpleFileVisitor[Path]() {
+        override def postVisitDirectory(dir: Path, ex: IOException): FileVisitResult = {
+          Files.delete(dir);
+          FileVisitResult.CONTINUE
+        }
+      })
+
+      // Finally sign the app
+      if (Seq("codesign", "-f", "-v", "-s", MacDistHandler.certificateHash, appDir.getPath).! != 0) {
+        log.error("*** Codesign error")
+      }
+    }
 
     // Now create the DMG
     val volname = "%s_%s".format(meta.executableName(version), d.toString.toLowerCase)
