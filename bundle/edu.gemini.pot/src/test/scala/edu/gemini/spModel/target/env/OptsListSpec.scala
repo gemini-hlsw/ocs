@@ -1,6 +1,5 @@
 package edu.gemini.spModel.target.env
 
-import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.env.Indexable._
 
 import org.scalacheck.Prop.forAll

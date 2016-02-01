@@ -9,6 +9,9 @@ import scalaz._
 import Scalaz._
 
 
+/** A map of guide probes and their associated guide star options.  There are
+  * two main categories of guide groups, automatically vs. manually maintained.
+  */
 sealed trait GuideGrp extends Serializable {
 
   def isAutomatic: Boolean
@@ -39,8 +42,7 @@ sealed trait GuideGrp extends Serializable {
 }
 
 /** A manual group has a name and a mapping from guide probe to a non-empty list
-  * of targets, of which exactly one is selected. Should it also have a UUID so
-  * we can distinguish [temporarily] identical ones?
+  * of targets, of which exactly one may be selected.
  */
 final case class ManualGroup(name: String, targetMap: GuideProbe ==>> OptsList[SPTarget]) extends GuideGrp {
   def isAutomatic: Boolean       = false
@@ -77,7 +79,7 @@ object ManualGroup {
   }
 }
 
-
+/** Automatic groups map guide probes to a single guide star. */
 sealed trait AutomaticGroup extends GuideGrp {
   def isAutomatic: Boolean = true
   def toManualGroup: ManualGroup

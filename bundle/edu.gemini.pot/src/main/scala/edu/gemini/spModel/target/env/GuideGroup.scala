@@ -74,12 +74,12 @@ case class GuideGroup(grp: GuideGrp) extends java.lang.Iterable[GuideProbeTarget
   def get(gp: GuideProbe): GemOption[GuideProbeTargets] =
     gpt(gp).asGeminiOpt
 
-  private def update(f: GuideGrp => GuideGrp): GuideGroup =
-    GuideGroup(f(grp))
+  private def mod(f: GuideGrp => GuideGrp): GuideGroup =
+    GuideGroup.Grp.mod(f, this)
 
   /** Sets the guide stars associated with a guider according to the given
     * `GuideProbeTargets` and returns the updated `GuideGroup`.  The updates
-    * performed depend on the type of group. (WARNING: wacky behavior such here
+    * performed depend on the type of group. (WARNING: wacky behavior here
     * such as a put followed by a get not returning the same
     * `GuideProbeTargets` in all cases.)
     *
@@ -113,7 +113,7 @@ case class GuideGroup(grp: GuideGrp) extends java.lang.Iterable[GuideProbeTarget
     val probe   = gpt.getGuider
     val primary = gpt.getPrimary.asScalaOpt
 
-    update {
+    mod {
       case mg@ManualGroup(_, m) =>
         val targets = gpt.getOptions.asScalaList.toNel
 
@@ -121,7 +121,7 @@ case class GuideGroup(grp: GuideGrp) extends java.lang.Iterable[GuideProbeTarget
           def noPrimary = OptsList.unfocused(nel)
 
           val opts = primary.fold(noPrimary) { t =>
-            val (lefts, focusRight) = nel.toList.span(_ != t)
+            val (lefts, focusRight) = nel.toList.span(_ =/= t)
             focusRight.headOption.fold(noPrimary) { _ =>
               OptsList.focused(lefts, t, focusRight.drop(1))
             }
@@ -138,14 +138,14 @@ case class GuideGroup(grp: GuideGrp) extends java.lang.Iterable[GuideProbeTarget
   }
 
   def remove(probe: GuideProbe): GuideGroup =
-    update {
+    mod {
       case Initial         => Initial
       case a: Active       => a.copy(targetMap = a.targetMap - probe)
       case mg: ManualGroup => mg.copy(targetMap = mg.targetMap - probe)
     }
 
   def clear(): GuideGroup =
-    update {
+    mod {
       case Initial         => Initial
       case a: Active       => a.copy(targetMap  = ==>>.empty)
       case mg: ManualGroup => mg.copy(targetMap = ==>>.empty)
@@ -154,9 +154,9 @@ case class GuideGroup(grp: GuideGrp) extends java.lang.Iterable[GuideProbeTarget
   private def sortedKeys: List[GuideProbe] =
     (grp match {
       case Initial            => Set.empty[GuideProbe]
-      case Active(ts)         => ts.keySet
-      case ManualGroup(_, ts) => ts.keySet
-    }).toList.sorted
+      case Active(ts)         => ts.keySet // already sorted
+      case ManualGroup(_, ts) => ts.keySet // already sorted
+    }).toList
 
   private def all: List[GuideProbeTargets] =
     sortedKeys.flatMap(gpt)
@@ -170,7 +170,7 @@ case class GuideGroup(grp: GuideGrp) extends java.lang.Iterable[GuideProbeTarget
     * same as calling `put` for each `GuideProbeTargets` in turn.
     */
   def putAll(ts: ImList[GuideProbeTargets]): GuideGroup =
-    (this/:ts.asScalaList) { (gg, cur) => gg.put(cur) }
+    (this/:ts.asScalaList) { _ put _ }
 
   /** Creates a new group consisting of only the given `GuideProbeTargets`.
     * Any existing `GuideProbeTargets` for unrelated `GuideProbe`s are removed.
@@ -211,17 +211,17 @@ case class GuideGroup(grp: GuideGrp) extends java.lang.Iterable[GuideProbeTarget
       case a: AutomaticGroup => a.targets
       case m: ManualGroup    => m.targets
     }
-    m.toList.sortBy(_._1).flatMap(_._2.toList).asImList
+    m.values.flatMap(_.toList).asImList
   }
 
   override def removeTarget(t: SPTarget): GuideGroup =
-    update {
+    mod {
       case a: AutomaticGroup => a.removeTarget(t)
       case m: ManualGroup    => m.removeTarget(t)
     }
 
   override def cloneTargets: GuideGroup =
-    update {
+    mod {
       case a: AutomaticGroup => a.cloneTargets
       case m: ManualGroup    => m.cloneTargets
     }

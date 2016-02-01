@@ -38,7 +38,7 @@ class GuideGroupSpec extends Specification with ScalaCheck with Arbitraries with
       forAll { (g: GuideGroup, n: String) =>
         val nopt = ImOption.apply(n)
         g.grp match {
-          case a: AutomaticGroup => g.setName(nopt) == g
+          case a: AutomaticGroup => g.setName(nopt) === g
           case _                 => g.setName(nopt).getName == nopt && g.setName(n).getName == nopt
         }
       }
@@ -69,14 +69,14 @@ class GuideGroupSpec extends Specification with ScalaCheck with Arbitraries with
     "return none or else GuideProbeTargets with a matching probe" in
       forAll { (g: GuideGroup) =>
         AllProbes.forall { gp =>
-          g.get(gp).asScalaOpt.forall(_.getGuider == gp)
+          g.get(gp).asScalaOpt.forall(_.getGuider === gp)
         }
       }
 
     "return a non empty GuideProbeTargets iff the group contains the probe" in
       forAll { (g: GuideGroup) =>
         AllProbes.forall { gp =>
-          g.get(gp).asScalaOpt.isDefined == g.contains(gp)
+          g.get(gp).asScalaOpt.isDefined === g.contains(gp)
         }
       }
 
@@ -84,7 +84,7 @@ class GuideGroupSpec extends Specification with ScalaCheck with Arbitraries with
       forAll { (g: GuideGroup) =>
         AllProbes.forall { gp =>
           g.get(gp).asScalaOpt.forall { gpt =>
-            gpt.getPrimary.asScalaOpt == (g.grp match {
+            gpt.getPrimary.asScalaOpt === (g.grp match {
               case ManualGroup(_, m)        => m.lookup(gp).flatMap(_.focus)
               case AutomaticGroup.Active(m) => m.lookup(gp)
               case AutomaticGroup.Initial   => None
