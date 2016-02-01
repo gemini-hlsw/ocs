@@ -46,7 +46,7 @@ final case class GuideEnvironment(guideEnv: GuideEnv) extends TargetContainer {
   def getGroup(index: Int): GemOption[GuideGroup] =
     index match {
       case 0 => ImOption.apply(GuideGroup(guideEnv.auto))
-      case i => guideEnv.manual.flatMap(_.elementAt(i-1)).map(GuideGroup).asGeminiOpt
+      case i => guideEnv.manual.flatMap(_.getAt(i-1)).map(GuideGroup).asGeminiOpt
     }
 
   def setGroup(index: Int, grp: GuideGroup): GuideEnvironment =

@@ -80,10 +80,52 @@ class OptsListSpec extends Specification with ScalaCheck with Arbitraries {
       }
   }
 
+  def outOfRangeIndices[A](o: OptsList[A]): List[Int] =
+    List(Int.MinValue, -2, -1, o.length, o.length + 1, Int.MaxValue)
+
+  "OptsList getAt" should {
+    "return None if the index is out of range" in
+      forAll { (opts: OptsList[Int]) =>
+        outOfRangeIndices(opts).forall { i =>
+          opts.getAt(i).isEmpty
+        }
+      }
+
+    "return the corresponding element if in range" in
+      forAll { (opts: OptsList[Int], i: Int) =>
+        val index  = (i % opts.length).abs
+        opts.getAt(index) === Some(opts.toList(index))
+      }
+  }
+
+  "OptsList setAt" should {
+    "return None if the index is out of range" in
+      forAll { (opts: OptsList[Int]) =>
+        outOfRangeIndices(opts).forall { i =>
+          opts.setAt(i, 42).isEmpty
+        }
+      }
+
+    "change the value of the indicated element if in range" in
+      forAll { (opts: OptsList[Int], i: Int) =>
+        val index  = (i % opts.length).abs
+        val expected = {
+          val lst = opts.toList.patch(index, List(42), 1)
+          opts.focusIndex.fold(OptsList.unfocused(lst.head, lst.tail)) { f =>
+            lst.splitAt(f) match {
+              case (lefts, focus :: rights) => OptsList.focused(lefts, focus, rights)
+            }
+          }
+        }
+        val actual   = opts.setAt(index, 42).get
+        expected === actual
+      }
+  }
+
   "OptsList deleteAt" should {
     "return None if the index is out of range" in
       forAll { (opts: OptsList[Int]) =>
-        List(Int.MinValue, -2, -1, opts.length, opts.length + 1, Int.MaxValue).forall { i =>
+        outOfRangeIndices(opts).forall { i =>
           opts.deleteAt(i).isEmpty
         }
       }
@@ -123,5 +165,29 @@ class OptsListSpec extends Specification with ScalaCheck with Arbitraries {
           }
         }
       }
+  }
+
+  "OptsList filterAt" should {
+    import Function.const
+
+    "return None if the index is out of range" in
+      forAll { (opts: OptsList[Int]) =>
+        outOfRangeIndices(opts).forall { i =>
+          opts.filterAt(i)(const(true)).isEmpty
+        }
+      }
+
+    "work the same as deleteAt if the predicate is false" in
+      forAll { (opts: OptsList[Int], i: Int) =>
+        val index = (i % opts.length).abs
+        opts.deleteAt(index) === opts.filterAt(index)(const(false))
+      }
+
+    "do nothing if the predicate is true" in
+      forAll { (opts: OptsList[Int], i: Int) =>
+        val index = (i % opts.length).abs
+        opts === opts.filterAt(index)(const(true)).get
+      }
+
   }
 }

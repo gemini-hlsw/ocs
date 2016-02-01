@@ -5,6 +5,13 @@ import scalaz._, Scalaz._
 
 import OptsList._
 
+/**
+ * A non-empty list of elements of type `A`, where optionally one element is
+ * said to have the focus.  In other words, it supports an optional selection.
+ *
+ * Maintains a `\/` where the left value (a non-empty list) represents no-focus
+ * and the right value (a zipper) contains a focus.
+ */
 case class OptsList[A](toDisjunction: OneAndList[A] \/ Zipper[A]) {
 
   def clearFocus: OptsList[A] =
@@ -100,12 +107,18 @@ object OptsList {
         }
     }
 
+  /** Creates a singleton `OptsList` focused on the single element. */
   def focused[A](a: A): OptsList[A] =
     focused(Nil, a, Nil)
 
+  /** Creates a focused `OptsList` from two lists and a focus element.  Note
+    * that unlike the corresponding `Zipper` constructor, the left values are
+    * specified in order.
+    */
   def focused[A](lefts: List[A], focus: A, rights: List[A]): OptsList[A] =
     OptsList(Zipper(lefts.reverse.toStream, focus, rights.toStream).right)
 
+  /** Creates a singleton `OptsList` without a foucs. */
   def unfocused[A](a: A): OptsList[A] =
     unfocused(a, Nil)
 
@@ -115,6 +128,9 @@ object OptsList {
   def unfocused[A](nel: NonEmptyList[A]): OptsList[A] =
     unfocused(nel.head, nel.tail)
 
+  /** Creates an `OptsList` provided that the given `List` has at least one
+    * element.
+    */
   def unfocused[A](l: List[A]): Option[OptsList[A]] =
     l.toNel.map(nel => unfocused(nel))
 
@@ -127,13 +143,10 @@ object OptsList {
   import Indexable._
 
   implicit val IndexableOptsList: Indexable[OptsList] = new Indexable[OptsList] {
-    override def deleteAt[A](o: OptsList[A], i: Int): Option[OptsList[A]] =
-      o.toDisjunction.bitraverse(_.deleteAt(i), _.deleteAt(i)).map(OptsList(_))
-
-    override def elementAt[A](o: OptsList[A], i: Int): Option[A] =
-      o.toDisjunction.fold(_.elementAt(i), _.elementAt(i))
-
-    override def modifyAt[A](o: OptsList[A], i: Int)(g: (A) => A): Option[OptsList[A]] =
-      o.toDisjunction.bitraverse(_.modifyAt(i)(g), _.modifyAt(i)(g)).map(OptsList(_))
+    override def modifyAtIf[A](o: OptsList[A], i: Int)(g: A => Option[A]): Option[(A, OptsList[A])] =
+      o.toDisjunction.bitraverse(_.modifyAtIf(i)(g), _.modifyAtIf(i)(g)).map {
+        case -\/((a, l)) => (a, OptsList(-\/(l)))
+        case \/-((a, z)) => (a, OptsList(\/-(z)))
+      }
   }
 }
