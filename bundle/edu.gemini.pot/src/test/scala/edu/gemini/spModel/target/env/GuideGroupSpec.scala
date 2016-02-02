@@ -4,6 +4,7 @@ import edu.gemini.spModel.core.AlmostEqual.AlmostEqualOps
 
 import edu.gemini.shared.util.immutable.{ImList, ImOption}
 import edu.gemini.shared.util.immutable.ScalaConverters._
+import edu.gemini.spModel.core.Helpers
 import edu.gemini.spModel.guide.{GuideProbeMap, GuideProbe}
 import edu.gemini.spModel.pio.xml.PioXmlFactory
 import edu.gemini.spModel.target.SPTarget
@@ -21,7 +22,7 @@ import java.io.{ByteArrayInputStream, ObjectInputStream, ObjectOutputStream}
 import scala.collection.JavaConverters._
 import scalaz._, Scalaz._
 
-class GuideGroupSpec extends Specification with ScalaCheck with Arbitraries with Almosts {
+class GuideGroupSpec extends Specification with ScalaCheck with Arbitraries with Almosts with Helpers {
 
   import GuideGroupSpec.AllProbes
 
@@ -319,16 +320,7 @@ class GuideGroupSpec extends Specification with ScalaCheck with Arbitraries with
 
     "be Serializable" in
       forAll { (g: GuideGroup) =>
-        val bao = new ByteArrayOutputStream()
-        val oos = new ObjectOutputStream(bao)
-        oos.writeObject(g)
-        oos.close()
-
-        val ois = new ObjectInputStream(new ByteArrayInputStream(bao.toByteArray))
-        ois.readObject() match {
-          case g2: GuideGroup => g ~= g2
-          case _              => false
-        }
+        canSerializeP(g)(_ ~= _)
       }
   }
 }

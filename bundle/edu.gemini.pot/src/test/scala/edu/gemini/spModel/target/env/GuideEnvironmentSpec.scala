@@ -1,6 +1,7 @@
 package edu.gemini.spModel.target.env
 
 import edu.gemini.spModel.core.AlmostEqual.AlmostEqualOps
+import edu.gemini.spModel.core.Helpers
 import edu.gemini.spModel.target.env.TargetCollection.TargetCollectionSyntax
 
 import edu.gemini.shared.util.immutable.ImList
@@ -22,7 +23,7 @@ import scala.collection.JavaConverters._
 import scalaz._, Scalaz._
 
 
-class GuideEnvironmentSpec extends Specification with ScalaCheck with Arbitraries with Almosts {
+class GuideEnvironmentSpec extends Specification with ScalaCheck with Arbitraries with Almosts with Helpers {
 
   "GuideEnvironment guider references" should {
     def toScala(s: java.util.Set[GuideProbe]): Set[GuideProbe] =
@@ -304,16 +305,7 @@ class GuideEnvironmentSpec extends Specification with ScalaCheck with Arbitrarie
 
     "be Serializable" in
       forAll { (g: GuideEnvironment) =>
-        val bao = new ByteArrayOutputStream()
-        val oos = new ObjectOutputStream(bao)
-        oos.writeObject(g)
-        oos.close()
-
-        val ois = new ObjectInputStream(new ByteArrayInputStream(bao.toByteArray))
-        ois.readObject() match {
-          case g2: GuideEnvironment => g ~= g2
-          case _                    => false
-        }
+        canSerializeP(g)(_ ~= _)
       }
   }
 }

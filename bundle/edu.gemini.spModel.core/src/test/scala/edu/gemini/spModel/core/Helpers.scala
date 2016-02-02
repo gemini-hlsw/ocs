@@ -6,11 +6,14 @@ trait Helpers {
 
   // N.B. we need to subclass the inputstream, otherwise we can't deserialize List[A] for any A
   // that we define. No idea. Just trust me here.
-  def canSerialize[A](t: A): Boolean = {
+  def canSerialize[A](t: A): Boolean =
+    canSerializeP(t)(_ == _)
+
+  def canSerializeP[A](t: A)(p: (A, A) => Boolean): Boolean = {
     val baos = new ByteArrayOutputStream
     val oos  = new ObjectOutputStream(baos)
     oos.writeObject(t)
-    oos.close
+    oos.close()
     val bais = new ByteArrayInputStream(baos.toByteArray)
     val ois = new ObjectInputStream(bais) {
       override def resolveClass(desc: java.io.ObjectStreamClass): Class[_] = {
@@ -18,7 +21,6 @@ trait Helpers {
         catch { case ex: ClassNotFoundException => super.resolveClass(desc) }
       }
     }
-    ois.readObject == t
+    p(t, ois.readObject().asInstanceOf[A])
   }
-
 }
