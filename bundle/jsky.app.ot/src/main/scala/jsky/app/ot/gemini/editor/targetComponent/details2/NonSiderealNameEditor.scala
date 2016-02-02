@@ -32,14 +32,13 @@ final class NonSiderealNameEditor extends TelescopePosEditor with ReentrancyHack
   def lookup(site: Option[Site]): Unit = {
     import HorizonsService2.{ Search, Row }, Search._
 
-    case class Wrapper(unwrap: Search[_ <: HorizonsDesignation]) {
-      override def toString = unwrap.productPrefix
-    }
-
     /// Some IO actions for looking up targets and epherimides
 
     val askSearch: HS2[Option[Search[_ <: HorizonsDesignation]]] =
       HS2.delay {
+        case class Wrapper(unwrap: Search[_ <: HorizonsDesignation]) {
+          override def toString = unwrap.productPrefix
+        }
         Option {
           JOptionPane.showInputDialog(
             name,
@@ -59,7 +58,7 @@ final class NonSiderealNameEditor extends TelescopePosEditor with ReentrancyHack
       HS2.delay(Swing.onEDT(GlassLabel.hide(SwingUtilities.getRootPane(name))))
 
     def lookup(d: HorizonsDesignation, site: Site): HS2[Ephemeris] =
-      show("Fetching Ephemeris...") *> HorizonsService2.lookupEphemeris(d, site, 1000) // arbitrary, ok?
+      show("Fetching Ephemeris...") *> HorizonsService2.lookupEphemeris(d, site, 1000) // arbitrary
 
     def updateDesignation(hd: HorizonsDesignation, name: String): HS2[Unit] =
       HS2.delay {
@@ -72,6 +71,9 @@ final class NonSiderealNameEditor extends TelescopePosEditor with ReentrancyHack
 
     def manyResults(rs: List[Row[_ <: HorizonsDesignation]]): HS2[Unit] =
       HS2.delay {
+        case class Wrapper(unwrap: Row[_ <: HorizonsDesignation]) {
+          override def toString = unwrap.name + " - " + unwrap.a.des
+        }
         Option {
           JOptionPane.showInputDialog(
             name,
@@ -79,9 +81,9 @@ final class NonSiderealNameEditor extends TelescopePosEditor with ReentrancyHack
             "Horizons Search",
             JOptionPane.QUESTION_MESSAGE,
             null, // TODO: icon
-            rs.toArray[Object],
+            rs.map(Wrapper).sortBy(_.toString).toArray[Object],
             null)
-        } .map(_.asInstanceOf[Row[_ <: HorizonsDesignation]])
+        } .map(_.asInstanceOf[Wrapper].unwrap)
       } >>= {
         case Some(r) => oneResult(r)
         case None    => ().point[HS2]
@@ -135,7 +137,7 @@ final class NonSiderealNameEditor extends TelescopePosEditor with ReentrancyHack
   }
 
   def hidText(hd: Option[HorizonsDesignation]): String =
-    "Horizons: " + hd.fold("«unknown»")(_.queryString)
+    hd.fold("--")(_.queryString)
 
   def edit(ctx: GOption[ObsContext], target: SPTarget, node: ISPNode): Unit = {
     this.spt = target

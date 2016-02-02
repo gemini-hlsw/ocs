@@ -14,8 +14,9 @@ final class NonSiderealDetailEditor extends TargetDetailEditor {
 
   // Editors
 
-  val kind   = new TargetTypeEditor
-  val name   = new NonSiderealNameEditor
+  val kind  = new TargetTypeEditor
+  val name  = new NonSiderealNameEditor
+  val ephem = new EphemerisEditor
 
   val mags = new MagnitudeEditor2 {
     getComponent.asInstanceOf[JComponent].setBorder(titleBorder("Magnitudes"))
@@ -26,6 +27,7 @@ final class NonSiderealDetailEditor extends TargetDetailEditor {
   setLayout(new GridBagLayout)
 
   val general = new JPanel <| { p =>
+
     p.setLayout(new GridBagLayout)
     p.setBorder(BorderFactory.createCompoundBorder(titleBorder("General"),
                 BorderFactory.createEmptyBorder(1, 2, 1, 2)))
@@ -65,83 +67,46 @@ final class NonSiderealDetailEditor extends TargetDetailEditor {
       c.insets = new Insets(2, 0, 0, 0)
     })
 
+    p.add(new JLabel("Query"), new GridBagConstraints <| { c =>
+      c.anchor = GridBagConstraints.WEST
+      c.gridx  = 0
+      c.gridy  = 3
+      c.insets = new Insets(1, 0, 0, 5)
+    })
+
     p.add(name.hid, new GridBagConstraints <| { c =>
       c.anchor = GridBagConstraints.WEST
       c.gridx  = 1
-      c.gridy  = 2
-      c.insets = new Insets(1, 0, 0, 0)
+      c.gridy  = 3
+      c.insets = new Insets(1, 1, 0, 0)
     })
 
-//    p.add(new JLabel("RA"), new GridBagConstraints <| { c =>
-//      c.anchor = GridBagConstraints.WEST
-//      c.gridx  = 0
-//      c.gridy  = 3
-//      c.insets = new Insets(2, 0, 0, 5)
-//    })
-//
-//    p.add(coords.ra, new GridBagConstraints <| { c =>
-//      c.gridx  = 1
-//      c.gridy  = 3
-//      c.fill   = GridBagConstraints.HORIZONTAL
-//      c.insets = new Insets(2, 0, 0, 0)
-//    })
-//
-//    p.add(new JLabel("Dec"), new GridBagConstraints <| { c =>
-//      c.anchor = GridBagConstraints.WEST
-//      c.gridx  = 0
-//      c.gridy  = 4
-//      c.insets = new Insets(2, 0, 0, 5)
-//    })
-//
-//    p.add(coords.dec, new GridBagConstraints <| { c =>
-//      c.gridx  = 1
-//      c.gridy  = 4
-//      c.fill   = GridBagConstraints.HORIZONTAL
-//      c.insets = new Insets(2, 0, 0, 0)
-//    })
-//
-//    p.add(new JLabel("J2000"), new GridBagConstraints <| { c =>
-//      c.anchor     = GridBagConstraints.WEST
-//      c.gridx      = 2
-//      c.gridy      = 3
-//      c.gridheight = 2
-//      c.insets     = new Insets(2, 5, 0, 0)
-//    })
-//
-//    p.add(new JLabel("Valid"), new GridBagConstraints <| { c =>
-//      c.anchor = GridBagConstraints.WEST
-//      c.gridx  = 0
-//      c.gridy  = 5
-//      c.insets = new Insets(2, 0, 0, 5)
-//    })
-//
-//    p.add(valid.dateTimePanel, new GridBagConstraints <| { c =>
-//      c.anchor = GridBagConstraints.WEST
-//      c.gridx  = 1
-//      c.gridy  = 5
-//      c.insets = new Insets(2, 0, 0, 0)
-//    })
-//
-//    p.add(new JLabel("UTC"), new GridBagConstraints <| { c =>
-//      c.anchor = GridBagConstraints.WEST
-//      c.gridx  = 2
-//      c.gridy  = 5
-//      c.insets = new Insets(2, 5, 0, 0)
-//    })
-//
-//    p.add(valid.controlsPanel, new GridBagConstraints <| { c =>
-//      c.anchor = GridBagConstraints.WEST
-//      c.gridx  = 1
-//      c.gridy  = 6
-//      c.insets = new Insets(2, 0, 0, 0)
-//    })
+    p.add(new JLabel("Ephemeris"), new GridBagConstraints <| { c =>
+      c.anchor = GridBagConstraints.WEST
+      c.gridx  = 0
+      c.gridy  = 4
+      c.insets = new Insets(6, 0, 0, 5)
+    })
 
+    p.add(ephem.start, new GridBagConstraints <| { c =>
+      c.gridx  = 1
+      c.gridy  = 4
+      c.fill   = GridBagConstraints.HORIZONTAL
+      c.insets = new Insets(6, 1, 0, 0)
+    })
 
-    p.add(Box.createHorizontalGlue(), new GridBagConstraints <| { c =>
-      c.gridx   = 4
-      c.gridy   = 0
-      c.weightx = 1
-      c.fill    = GridBagConstraints.HORIZONTAL
+    p.add(ephem.end, new GridBagConstraints <| { c =>
+      c.gridx  = 1
+      c.gridy  = 5
+      c.fill   = GridBagConstraints.HORIZONTAL
+      c.insets = new Insets(2, 1, 0, 0)
+    })
+
+    p.add(ephem.size, new GridBagConstraints <| { c =>
+      c.anchor = GridBagConstraints.WEST
+      c.gridx  = 1
+      c.gridy  = 6
+      c.insets = new Insets(2, 1, 0, 0)
     })
 
   }
@@ -164,12 +129,11 @@ final class NonSiderealDetailEditor extends TargetDetailEditor {
   // Implementation
 
   override def edit(obsContext: GOption[ObsContext], spTarget: SPTarget, node: ISPNode): Unit = {
-    super .edit(obsContext, spTarget, node)
-    kind  .edit(obsContext, spTarget, node)
-    name  .edit(obsContext, spTarget, node)
-//    coords.edit(obsContext, spTarget, node)
-    mags  .edit(obsContext, spTarget, node)
-//    valid .edit(obsContext, spTarget, node)
+    super.edit(obsContext, spTarget, node)
+    kind .edit(obsContext, spTarget, node)
+    name .edit(obsContext, spTarget, node)
+    ephem.edit(obsContext, spTarget, node)
+    mags .edit(obsContext, spTarget, node)
   }
 
 

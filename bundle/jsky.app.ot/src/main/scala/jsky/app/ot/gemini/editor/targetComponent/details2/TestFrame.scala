@@ -16,6 +16,9 @@ import scalaz._, Scalaz._
 
 object TestFrame extends App {
 
+  // Set up the colors etc., to match the OT
+  jsky.util.gui.Theme.install()
+
   val odb  = DBLocalDatabase.createTransient()
   val fact = odb.getFactory
   val prog = fact.createProgram(null, SPProgramID.toProgramID("GS-2016-B-Q1"))
