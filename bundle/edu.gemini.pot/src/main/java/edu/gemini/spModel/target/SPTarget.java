@@ -9,17 +9,6 @@ import edu.gemini.spModel.target.system.*;
 public final class SPTarget extends TransitionalSPTarget {
 
     private ITarget _target;
-    private Target _newTarget = SiderealTarget.empty();
-
-    public Target getNewTarget() {
-        return _newTarget;
-    }
-
-    public void setNewTarget(Target target) {
-        _newTarget = target;
-        System.out.println("*** SPTarget.setNewTarget: " + target);
-        _notifyOfUpdate();
-    }
 
     /** SPTarget with default empty target. */
     public SPTarget() {
@@ -85,5 +74,22 @@ public final class SPTarget extends TransitionalSPTarget {
     public SPTarget clone() {
         return new SPTarget(_target.clone());
     }
+
+    // for testing only; this will go away
+
+    private transient Target _newTarget;
+
+    public Target getNewTarget() {
+        if (_newTarget == null)
+            _newTarget = SiderealTarget.empty();
+        return _newTarget;
+    }
+
+    public void setNewTarget(Target target) {
+        _newTarget = target;
+        System.out.println("*** SPTarget.setNewTarget: " + target);
+        _notifyOfUpdate();
+    }
+
 
 }
