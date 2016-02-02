@@ -142,4 +142,4 @@ OsgiKeys.exportPackage := Seq(
   "jsky.science.util",
   "jsky.science.util.gui")
 
-
+fork := true

@@ -82,6 +82,13 @@ trait TargetLenses {
       pRunTarget(NonSiderealTarget.horizonsDesignation.partial)
     ))
 
+  val ephemeris: Target @?> Ephemeris =
+    PLens(_.fold(
+      PLens.nil.run,
+      PLens.nil.run,
+      pRunTarget(NonSiderealTarget.ephemeris.partial)
+    ))
+
 }
 
 
@@ -221,6 +228,9 @@ case class NonSiderealTarget(
 
   def fold[A](too: TooTarget => A, sid: SiderealTarget => A,non: NonSiderealTarget => A): A =
     non(this)
+
+  override def toString =
+    s"NonSiderealTarget($name,«${ephemeris.size}»,$horizonsDesignation,$magnitudes,$spectralDistribution,$spatialProfile)"
 
 }
 

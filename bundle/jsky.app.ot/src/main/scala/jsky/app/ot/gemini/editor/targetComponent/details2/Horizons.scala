@@ -206,7 +206,7 @@ object Horizons {
 
   /** Construct a program that ensures the given name is valid (non-empty). */
   def validateName(name: String): HorizonsIO[Unit] =
-    HorizonsIO.either(name.isEmpty either () or EmptyName)
+    HorizonsIO.either(name.isEmpty.either(()).or(EmptyName))
 
   /** A program that retrieves the Horizons service, if available. */
   val getService: HorizonsIO[HorizonsService] =
