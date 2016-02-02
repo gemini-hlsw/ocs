@@ -217,8 +217,13 @@ object GuideEnvironment {
     Env >=> GuideEnv.Manual
 
   def create(guideGroups: OptionsList[GuideGroup]): GuideEnvironment = {
-    val primary = guideGroups.getPrimaryIndex.getOrElse(0)
-    Initial.setOptions(guideGroups.getOptions).setPrimaryIndex(primary)
+    val options = guideGroups.getOptions
+
+    // Unless options starts with an automatic group, one will be prepended.
+    val addOne  = options.headOption().asScalaOpt.exists(_.grp.isManual)
+    val primary = guideGroups.getPrimaryIndex.getOrElse(0) + (addOne ? 1 | 0)
+
+    Initial.setOptions(options).setPrimaryIndex(primary)
   }
 
   def fromParamSet(parent: ParamSet): GuideEnvironment = {

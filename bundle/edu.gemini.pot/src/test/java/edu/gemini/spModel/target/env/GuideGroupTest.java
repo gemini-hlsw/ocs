@@ -21,18 +21,8 @@ public final class GuideGroupTest extends TestCase {
     private final Fixture fix = new Fixture();
 
     public void testEmpty() {
-        assertEquals(None.STRING, GuideGroup.ManualEmpty().getName());
+        assertEquals(ImOption.apply("Manual Group"), GuideGroup.ManualEmpty().getName());
         assertEquals(GuideProbeTargets.EMPTY_LIST, GuideGroup.ManualEmpty().getAll());
-    }
-
-    public void testCreateNullName() {
-        final GuideGroup grp = GuideGroup.create(null);
-        assertEquals(None.STRING, grp.getName());
-        assertEquals(GuideProbeTargets.EMPTY_LIST, grp.getAll());
-
-        final GuideGroup grp2 = GuideGroup.create((String)null, GuideProbeTargets.EMPTY_LIST);
-        assertEquals(None.STRING, grp2.getName());
-        assertEquals(GuideProbeTargets.EMPTY_LIST, grp2.getAll());
     }
 
     public void testNormalize() {
@@ -51,7 +41,7 @@ public final class GuideGroupTest extends TestCase {
 
     public void testSetName() {
         final GuideGroup grp = fix.grp_all.setName((String)null);
-        assertEquals(None.STRING, grp.getName());
+        assertEquals(ImOption.apply(""), grp.getName());
 
         final GuideGroup grp2 = fix.grp_all.setName("x");
         assertEquals(new Some<>("x"), grp2.getName());
@@ -59,12 +49,12 @@ public final class GuideGroupTest extends TestCase {
         try {
             grp.setName((Option<String>)null);
             fail("can't assign a null option");
-        } catch (IllegalArgumentException ex) {
+        } catch (NullPointerException ex) {
             // okay
         }
 
         final GuideGroup grp3 = fix.grp_all.setName(None.STRING);
-        assertEquals(None.STRING, grp3.getName());
+        assertEquals(ImOption.apply(""), grp3.getName());
 
         final GuideGroup grp4 = fix.grp_all.setName(new Some<>("x"));
         assertEquals(new Some<>("x"), grp4.getName());
@@ -73,15 +63,15 @@ public final class GuideGroupTest extends TestCase {
     public void testContains() {
         assertTrue(fix.grp_all.contains(pwfs1));
         assertTrue(fix.grp_all.contains(pwfs2));
-        assertTrue(fix.grp_all.contains(GmosOiwfsGuideProbe.instance));
+        assertFalse(fix.grp_all.contains(GmosOiwfsGuideProbe.instance));
 
         assertFalse(GuideGroup.ManualEmpty().contains(pwfs1));
         assertFalse(fix.grp_gmos.contains(pwfs1));
     }
 
     public void testGet() {
-        Fixture.verifyGptEquals(fix.gpt_pwfs1, fix.grp_all.get(pwfs1).getValue(), fix.when);
-        Fixture.verifyGptEquals(fix.gpt_gmos, fix.grp_gmos.get(GmosOiwfsGuideProbe.instance).getValue(), fix.when);
+        Fixture.verifyGptEquals(fix.gpt_pwfs1, fix.grp_all.get(pwfs1).getValue(),                         fix.when);
+        assertTrue(fix.grp_gmos.getAll().isEmpty());
         assertTrue(fix.grp_gmos.get(pwfs1).isEmpty());
         assertTrue(GuideGroup.ManualEmpty().get(pwfs1).isEmpty());
     }
@@ -96,7 +86,7 @@ public final class GuideGroupTest extends TestCase {
         // Add to an empty group
         final GuideGroup grp2 = GuideGroup.ManualEmpty().put(fix.gpt_gmos);
         assertEquals(grp2.getName(), GuideGroup.ManualEmpty().getName());
-        Fixture.verifyGptListEquals(fix.grp_gmos.getAll(), grp.getAll(), fix.when);
+        Fixture.verifyGptListEquals(fix.grp_gmos.getAll(), grp2.getAll(), fix.when);
 
         // Replace an existing GuideProbeTargets.
         final GuideProbeTargets gpt = GuideProbeTargets.create(pwfs1, fix.t_pwfs1_2);
@@ -108,7 +98,7 @@ public final class GuideGroupTest extends TestCase {
     public void testRemove() {
         final GuideGroup grp = fix.grp_all.remove(pwfs1);
         assertEquals(grp.getName(), fix.grp_all.getName());
-        Fixture.verifyGptListEquals(DefaultImList.create(fix.gpt_gmos, fix.gpt_pwfs2), grp.getAll(), fix.when);
+        Fixture.verifyGptListEquals(DefaultImList.create(fix.gpt_pwfs2), grp.getAll(), fix.when);
 
         final GuideGroup grp2 = grp.remove(GmosOiwfsGuideProbe.instance);
         assertEquals(grp2.getName(), fix.grp_all.getName());
@@ -116,11 +106,11 @@ public final class GuideGroupTest extends TestCase {
 
         final GuideGroup grp3 = grp2.remove(pwfs2);
         assertEquals(grp3.getName(), fix.grp_all.getName());
-        Fixture.verifyGptListEquals(GuideGroup.ManualEmpty().getAll(), grp.getAll(), fix.when);
+        Fixture.verifyGptListEquals(GuideGroup.ManualEmpty().getAll(), grp3.getAll(), fix.when);
 
         // Remove from an empty list
         final GuideGroup grp4 = grp3.remove(pwfs2);
-        assertSame(grp4, grp3);
+        assertEquals(grp4, grp3);
     }
 
     public void testClear() {
@@ -129,7 +119,7 @@ public final class GuideGroupTest extends TestCase {
         Fixture.verifyGptListEquals(GuideGroup.ManualEmpty().getAll(), grp.getAll(), fix.when);
 
         final GuideGroup grp2 = GuideGroup.ManualEmpty().clear();
-        assertSame(GuideGroup.ManualEmpty(), grp2);
+        assertEquals(GuideGroup.ManualEmpty(), grp2);
     }
 
     public void testPutAll() {

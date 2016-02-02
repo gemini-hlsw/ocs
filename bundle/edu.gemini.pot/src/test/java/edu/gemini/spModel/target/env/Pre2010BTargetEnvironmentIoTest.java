@@ -41,8 +41,8 @@ public class Pre2010BTargetEnvironmentIoTest {
                 verifyTarget("BaseName", env.getBase());
                 assertEquals(0, env.getUserTargets().size());
 
-                // No guide groups
-                assertEquals(0, env.getGuideEnvironment().getOptions().size());
+                // Just the one automatic group
+                assertEquals(1, env.getGuideEnvironment().getOptions().size());
             }
         },
 
@@ -53,12 +53,12 @@ public class Pre2010BTargetEnvironmentIoTest {
 
                 GuideEnvironment genv = env.getGuideEnvironment();
 
-                // There is one guide group
-                assertEquals(1, genv.getOptions().size());
+                // There are two guide groups
+                assertEquals(2, genv.getOptions().size());
 
-                // It is the primary group option
+                // The primary defaults to the manual group.
                 GuideGroup grp = genv.getPrimary();
-                assertSame(genv.getOptions().head(), grp);
+                assertEquals(genv.getOptions().tail().head(), grp);
 
                 // It contains a single GuideProbeTargets instance
                 assertEquals(1, grp.getAll().size());

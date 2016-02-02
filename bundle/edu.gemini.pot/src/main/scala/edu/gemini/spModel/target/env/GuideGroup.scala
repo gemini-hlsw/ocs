@@ -32,7 +32,7 @@ case class GuideGroup(grp: GuideGrp) extends java.lang.Iterable[GuideProbeTarget
    * manual guide group, otherwise returns this group.
    */
   def setName(name: GemOption[String]): GuideGroup =
-    name.asScalaOpt.fold(this)(GuideGroup.Name.setOr(this, _, this))
+    GuideGroup.Name.setOr(this, name.getOrElse(""), this)
 
   /**
    * Sets the name and returns the updated group if this is a manual guide

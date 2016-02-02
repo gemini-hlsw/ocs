@@ -32,9 +32,9 @@ final class Fixture {
         gpt_pwfs2 = GuideProbeTargets.create(pwfs2, tl_pwfs2).setPrimaryIndex(None.INTEGER);
         gpt_gmos  = GuideProbeTargets.create(GmosOiwfsGuideProbe.instance, tl_gmos);
 
-        grp_all  = GuideGroup.create("All", gpt_gmos, gpt_pwfs1, gpt_pwfs2);
+        grp_all        = GuideGroup.create("All",        gpt_gmos, gpt_pwfs1, gpt_pwfs2);
         grp_pwfs2_gmos = GuideGroup.create("PWFS2/GMOS", gpt_gmos, gpt_pwfs2);
-        grp_gmos = GuideGroup.create("GMOS Only", gpt_gmos);
+        grp_gmos       = GuideGroup.create("GMOS Only",  gpt_gmos);
 
         when = None.instance();
     }

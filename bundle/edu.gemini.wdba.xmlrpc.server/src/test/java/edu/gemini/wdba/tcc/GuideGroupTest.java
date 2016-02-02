@@ -63,32 +63,17 @@ public final class GuideGroupTest extends TestBase {
         final ISPObsComponent gemsComp = odb.getFactory().createObsComponent(prog, Gems.SP_TYPE, null);
         obs.addObsComponent(gemsComp);
 
-        testTargetEnvironment("", env2);
-    }
-
-    public void testUnnamedGroup() throws Exception {
-        // Create a target environment that uses Gems canopus wfs.
-        final TargetEnvironment env = create(Canopus.Wfs.cwfs1, Canopus.Wfs.cwfs2, Canopus.Wfs.cwfs3);
-        final ImList<GuideProbeTargets> gtCollection = createGuideTargetsList(Canopus.Wfs.cwfs1, Canopus.Wfs.cwfs2, Canopus.Wfs.cwfs3);
-        final GuideGroup gg = GuideGroup.create("", gtCollection);
-        final TargetEnvironment env2 = env.setGuideEnvironment(GuideEnvironment.create(OptionsListImpl.create(env.getOrCreatePrimaryGuideGroup(), gg)));
-
-        // Now, we need to add Gems or the guide targets are
-        // not enabled and not sent to the TCC.
-        final ISPObsComponent gemsComp = odb.getFactory().createObsComponent(prog, Gems.SP_TYPE, null);
-        obs.addObsComponent(gemsComp);
-
-        testTargetEnvironment("Guide Group 1", env2);
+        testTargetEnvironment("LoneGroup", env2);
     }
 
     public void testNamedGroup() throws Exception {
         // Create a target environment that uses Gems canopus wfs.
         final TargetEnvironment env = TargetEnvironment.create(base);
         final ImList<GuideProbeTargets> gtCollection = createGuideTargetsList(Canopus.Wfs.cwfs1, Canopus.Wfs.cwfs2, Canopus.Wfs.cwfs3);
-        final GuideGroup gg1 = GuideGroup.create("NamedGroup", gtCollection);
+        final GuideGroup gg1 = GuideGroup.create("Group1", gtCollection);
 
         final ImList<GuideProbeTargets> gtCollection2 = createGuideTargetsList(Canopus.Wfs.cwfs1, Canopus.Wfs.cwfs2, Canopus.Wfs.cwfs3);
-        final GuideGroup gg2 = GuideGroup.create("", gtCollection2);
+        final GuideGroup gg2 = GuideGroup.create("Group2", gtCollection2);
         final TargetEnvironment env2 = env.setGuideEnvironment(GuideEnvironment.create(OptionsListImpl.create(gg1, gg2)));
 
         // Now, we need to add Gems or the guide targets are
@@ -96,7 +81,7 @@ public final class GuideGroupTest extends TestBase {
         final ISPObsComponent gemsComp = odb.getFactory().createObsComponent(prog, Gems.SP_TYPE, null);
         obs.addObsComponent(gemsComp);
 
-        testTargetEnvironment("NamedGroup", env2);
+        testTargetEnvironment("Group1", env2);
     }
 
     private String getGuideGroup(final Document doc) throws Exception {
