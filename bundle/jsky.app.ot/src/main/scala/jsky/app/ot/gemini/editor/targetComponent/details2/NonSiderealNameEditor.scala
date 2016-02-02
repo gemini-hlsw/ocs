@@ -36,75 +36,82 @@ final class NonSiderealNameEditor extends TelescopePosEditor with ReentrancyHack
       override def toString = unwrap.productPrefix
     }
 
-    Option(
-      JOptionPane.showInputDialog(
-        name,
-        "Select the HORIZONS target type:",
-        "Horizons Search",
-        JOptionPane.QUESTION_MESSAGE,
-        null, // TODO: icon
-        List(Comet, Asteroid, MajorBody).map(f => Wrapper(f(name.getText))).toArray[Object],
-        null)
-    ).map(_.asInstanceOf[Wrapper].unwrap).foreach { s =>
+    /// Some IO actions for looking up targets and epherimides
 
-        def show(msg: String): HS2[Unit] =
-          HS2.delay(Swing.onEDT(GlassLabel.show(SwingUtilities.getRootPane(name), msg)))
-
-        def hide: HS2[Unit] =
-          HS2.delay(Swing.onEDT(GlassLabel.hide(SwingUtilities.getRootPane(name))))
-
-        def lookup(d: HorizonsDesignation, site: Site): HS2[Ephemeris] =
-          show("Fetching Ephemeris...") *> HorizonsService2.lookupEphemeris(d, site, 1000) // arbitrary, ok?
-
-        def updateDesignation(hd: HorizonsDesignation, name: String): HS2[Unit] =
-          HS2.delay {
-            val t0 = Target.name.set(spt.getNewTarget, name)
-            Target.horizonsDesignation.set(t0, Some(hd)).foreach(spt.setNewTarget)
-          }
-
-        def updateEphem(e: Ephemeris): HS2[Unit] =
-          HS2.delay(Target.ephemeris.set(spt.getNewTarget, e).foreach(spt.setNewTarget))
-
-        def manyResults(rs: List[Row[_ <: HorizonsDesignation]]): HS2[Unit] =
-          HS2.delay {
-            Option(JOptionPane.showInputDialog(
-              name,
-              "Multiple results were found. Please disambiguate:",
-              "Horizons Search",
-              JOptionPane.QUESTION_MESSAGE,
-              null, // TODO: icon
-              rs.toArray[Object],
-              null)).map(_.asInstanceOf[Row[_ <: HorizonsDesignation]])
-          } >>= {
-            case Some(r) => oneResult(r)
-            case None    => ().point[HS2]
-          }
-
-        def oneResult(r: Row[_ <: HorizonsDesignation]): HS2[Unit] =
-          updateDesignation(r.a, r.name).as(site) >>= {
-            case Some(site) => lookup(r.a, site) <* hide >>= updateEphem
-            case None       => HS2.delay(DialogUtil.error(name, "Cannot determine site for this observation; this is needed for ephemeris lookup."))
-          }
-
-        val noResults: HS2[Unit] =
-          HS2.delay(DialogUtil.message(name, "No results found."))
-
-        val search =
-          (HorizonsService2.search(s) <* hide) >>= {
-            case Nil     => noResults
-            case List(r) => oneResult(r)
-            case rs      => manyResults(rs)
-          }
-
-        forkSwingWorker((show("Searching...") *> search).run.ensuring(hide.run).unsafePerformIO) {
-          case -\/(t) => DialogUtil.error(name, t)
-          case \/-(_) => () // done!
-        }
-
+    val askSearch: HS2[Option[Search[_ <: HorizonsDesignation]]] =
+      HS2.delay {
+        Option {
+          JOptionPane.showInputDialog(
+            name,
+            "Select the HORIZONS target type:",
+            "Horizons Search",
+            JOptionPane.QUESTION_MESSAGE,
+            null, // TODO: icon
+            List(Comet, Asteroid, MajorBody).map(f => Wrapper(f(name.getText))).toArray[Object],
+            null)
+        } .map(_.asInstanceOf[Wrapper].unwrap)
       }
 
+    def show(msg: String): HS2[Unit] =
+      HS2.delay(Swing.onEDT(GlassLabel.show(SwingUtilities.getRootPane(name), msg)))
+
+    def hide: HS2[Unit] =
+      HS2.delay(Swing.onEDT(GlassLabel.hide(SwingUtilities.getRootPane(name))))
+
+    def lookup(d: HorizonsDesignation, site: Site): HS2[Ephemeris] =
+      show("Fetching Ephemeris...") *> HorizonsService2.lookupEphemeris(d, site, 1000) // arbitrary, ok?
+
+    def updateDesignation(hd: HorizonsDesignation, name: String): HS2[Unit] =
+      HS2.delay {
+        val t0 = Target.name.set(spt.getNewTarget, name)
+        Target.horizonsDesignation.set(t0, Some(hd)).foreach(spt.setNewTarget)
+      }
+
+    def updateEphem(e: Ephemeris): HS2[Unit] =
+      HS2.delay(Target.ephemeris.set(spt.getNewTarget, e).foreach(spt.setNewTarget))
+
+    def manyResults(rs: List[Row[_ <: HorizonsDesignation]]): HS2[Unit] =
+      HS2.delay {
+        Option {
+          JOptionPane.showInputDialog(
+            name,
+            "Multiple results were found. Please disambiguate:",
+            "Horizons Search",
+            JOptionPane.QUESTION_MESSAGE,
+            null, // TODO: icon
+            rs.toArray[Object],
+            null)
+        } .map(_.asInstanceOf[Row[_ <: HorizonsDesignation]])
+      } >>= {
+        case Some(r) => oneResult(r)
+        case None    => ().point[HS2]
+      }
+
+    def oneResult(r: Row[_ <: HorizonsDesignation]): HS2[Unit] =
+      updateDesignation(r.a, r.name).as(site) >>= {
+        case Some(site) => lookup(r.a, site) <* hide >>= updateEphem
+        case None       => HS2.delay(DialogUtil.error(name, "Cannot determine site for this observation; this is needed for ephemeris lookup."))
+      }
+
+    val noResults: HS2[Unit] =
+      HS2.delay(DialogUtil.message(name, "No results found."))
+
+    val search = show("Searching...") *> askSearch >>= {
+      case None => ().point[HS2] // user hit cancel
+      case Some(s) => 
+        (HorizonsService2.search(s) <* hide) >>= {
+          case Nil     => noResults
+          case List(r) => oneResult(r)
+          case rs      => manyResults(rs)
+        }
+    }
+        
+    forkSwingWorker(search.run.ensuring(hide.run).unsafePerformIO) {
+      case -\/(t) => DialogUtil.error(name, t)
+      case \/-(_) => () // done!
     }
 
+  }
 
   val name = new TextBoxWidget <| { w =>
     w.setMinimumSize(w.getPreferredSize)
