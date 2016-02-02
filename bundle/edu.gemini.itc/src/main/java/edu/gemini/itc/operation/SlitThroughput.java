@@ -71,19 +71,17 @@ public final class SlitThroughput {
         } else {
 
             // find the slit length in the aperture
-            final double spatial_pix = slit_ap / pixel_size;
-            final int int_spatial_pix = new Double(spatial_pix + .5).intValue();
-            double slit_spatial_ratio = int_spatial_pix * pixel_size / slit_width;
+            double slit_spatial_ratio = getSpatialPix() * pixel_size / slit_width;
 
             // find the slit width
             final double sigma = im_qual / 2.355;
             final double slit_spec_ratio = slit_width / sigma;
 
-            //trap large values
+            // deal with values that are outside the range of the x- and y-axes
+            // defined in slit_throughput.dat
             if (slit_spatial_ratio > 5.5) {
                 slit_spatial_ratio = 5.499; //Slide in under the max
             }
-
             if (slit_spec_ratio > 8) {
                 return 1;
             }
