@@ -343,15 +343,12 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             TargetEnvironment env = obsComp.getTargetEnvironment();
             GuideEnvironment ge = env.getGuideEnvironment();
 
-            // Make sure that a group is selected and that it is not the auto grou.
+            // Make sure that a group is selected and that it is not the auto group.
             final Option<Tuple2<Integer, GuideGroup>> guideGroup = positionTable.getSelectedGroupOrParentGroup(env);
             if (!guideGroup.exists(tup -> !tup._2().isAutomatic()))
                 return;
 
             Option<GuideProbeTargets> opt = guideGroup.flatMap(tup -> tup._2().get(probe));
-            //if (opt == null) opt = env.getPrimaryGuideProbeTargets(probe);
-
-            // TODO: This is not returning the group index, but the table row index?
             final Integer groupIndex = guideGroup.map(Tuple2::_1).getOrElse(ge.getPrimaryIndex());
 
             final SPTarget target = new SPTarget();
