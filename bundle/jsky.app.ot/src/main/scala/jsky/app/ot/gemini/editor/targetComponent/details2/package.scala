@@ -6,7 +6,7 @@ import edu.gemini.horizons.api.HorizonsQuery.ObjectType
 import edu.gemini.spModel.target.system.{CoordinateParam, NamedTarget, NonSiderealTarget}
 import edu.gemini.spModel.target.system.ITarget.Tag
 import jsky.app.ot.ui.util.FlatButtonUtil
-import jsky.util.gui.{SwingWorker, TextBoxWidget, TextBoxWidgetWatcher}
+import jsky.util.gui.{ TextBoxWidget, TextBoxWidgetWatcher }
 
 import java.awt.event.{ActionEvent, ActionListener}
 import javax.swing.BorderFactory._
@@ -14,7 +14,7 @@ import javax.swing.JButton
 import javax.swing.border.Border
 
 import scala.language.implicitConversions
-import scalaz._, Scalaz._
+import scalaz._, Scalaz._, scalaz.concurrent.Task
 
 package object details2 {
 
@@ -64,10 +64,7 @@ package object details2 {
   }
 
   def forkSwingWorker[A <: AnyRef](constructImpl: => A)(finishedImpl: Throwable \/ A => Unit): Unit =
-    new SwingWorker {
-      def construct = \/.fromTryCatch(constructImpl)
-      override def finished() = finishedImpl(getValue.asInstanceOf[Throwable \/ A])
-    }.start()
+    Task(constructImpl).runAsync(finishedImpl)
 
   implicit def F2ActionlListener(f: ActionEvent => Unit): ActionListener =
     new ActionListener { def actionPerformed(e: ActionEvent): Unit = f(e) }

@@ -19,7 +19,7 @@ import jsky.app.ot.gemini.editor.targetComponent.TelescopePosEditor
 import jsky.util.gui.{DialogUtil, TextBoxWidget, TextBoxWidgetWatcher}
 
 import scala.swing.Swing
-import scalaz._, Scalaz._, effect.IO
+import scalaz._, Scalaz._, effect.IO, concurrent.Task
 
 final class NonSiderealNameEditor extends TelescopePosEditor with ReentrancyHack {
 
@@ -105,7 +105,7 @@ final class NonSiderealNameEditor extends TelescopePosEditor with ReentrancyHack
         }
     }
         
-    forkSwingWorker(search.run.ensuring(hide.run).unsafePerformIO) {
+    Task(search.run.ensuring(hide.run).unsafePerformIO).runAsync {
       case -\/(t) => DialogUtil.error(name, t)
       case \/-(_) => () // done!
     }
