@@ -18,9 +18,6 @@ import edu.gemini.spModel.target.system.ConicTarget
 import jsky.app.ot.gemini.editor.targetComponent.TelescopePosEditor
 import jsky.util.gui.{DialogUtil, TextBoxWidget, TextBoxWidgetWatcher}
 
-
-import Horizons.HorizonsIO
-
 import scala.swing.Swing
 import scalaz._, Scalaz._, effect.IO
 
