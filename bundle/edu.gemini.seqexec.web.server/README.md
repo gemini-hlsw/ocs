@@ -4,7 +4,11 @@ This bundle contains a web-based seqexec client and server. It is intended to ru
 
 ## Project Structure
 
-The project is done using [Scala.js]()
+The project is done using [Scala.js](http://www.scala-js.org/) to generate JavaScript out of Scala code. This requires a very specific structure to support cross compilation of the project. There are 3 directories on this bundle:
+
+* jvm: Contains code target only to the JVM, i.e. class files. It includes the server side of the application
+* js: Contains code that is compiled to JS, essentially the UI
+* shared: Some classes need to be used by both **jvm** and **js**. Those are located here. In particular this includes model classes
 
 ### How to compile and reload the server
 

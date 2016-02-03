@@ -23,10 +23,12 @@ Revolver.reStart <<= Revolver.reStart dependsOn (fastOptJS in (bundle_edu_gemini
 // Class to launch re-start with
 mainClass in Revolver.reStart := Some("edu.gemini.seqexec.web.server.WebServerLauncher")
 
+//logLevel := Level.Debug
+
 // This will make the generated js available to this bundle/server
-(resources in(bundle_edu_gemini_seqexec_web_server_JVM, Compile, Revolver.reStart)) ++= Seq(
-  (artifactPath in(bundle_edu_gemini_seqexec_web_server_JS, Compile, fastOptJS)).value
-)
+(managedResources in Compile) += (artifactPath in(bundle_edu_gemini_seqexec_web_server_JS, Compile, fastOptJS)).value
+
+//(unmanagedResourceDirectories in (Compile, Revolver.reStart)) += (artifactPath in(bundle_edu_gemini_seqexec_web_server_JS, Compile, fastOptJS)).value
 
 //unmanagedResources in (Compile, packageBin) += (classDirectory in Compile).value / "*.js"
 
@@ -41,8 +43,8 @@ mainClass in Revolver.reStart := Some("edu.gemini.seqexec.web.server.WebServerLa
 //crossTarget in packageExportedProductsJS := (crossTarget.value) / "main/public/javascripts"
 //crossTarget in (Compile, packageJSDependencies) := file("js")
 
-artifactPath in (Compile, fastOptJS) := (resourceManaged in Compile).value /
-  ((moduleName in fastOptJS).value + "-opt.js")
+//artifactPath in (Compile, fastOptJS) := (resourceManaged in Compile).value /
+//  ((moduleName in fastOptJS).value + "-opt.js")
 
 skip in packageJSDependencies := false
 
