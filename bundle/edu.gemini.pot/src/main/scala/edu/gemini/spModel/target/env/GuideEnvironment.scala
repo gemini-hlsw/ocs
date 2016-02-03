@@ -216,22 +216,20 @@ object GuideEnvironment {
   val Manual: GuideEnvironment @> Option[OptsList[ManualGroup]] =
     Env >=> GuideEnv.Manual
 
-  def create(guideGroups: OptionsList[GuideGroup]): GuideEnvironment = {
-    val options = guideGroups.getOptions
+  private def initializeOptions(opts0: List[GuideGroup], primary0: Int): GuideEnvironment = {
+    val (opts, primary) =
+      if (opts0.headOption.exists(_.grp.isAutomatic)) (opts0, primary0)
+      else (GuideGroup.AutomaticInitial :: opts0, primary0 + 1)
 
-    // Unless options starts with an automatic group, one will be prepended.
-    val addOne  = options.headOption().asScalaOpt.exists(_.grp.isManual)
-    val primary = guideGroups.getPrimaryIndex.getOrElse(0) + (addOne ? 1 | 0)
-
-    Initial.setOptions(options).setPrimaryIndex(primary)
+    Initial.setOptions(opts.asImList).setPrimaryIndex(primary)
   }
 
+  def create(guideGroups: OptionsList[GuideGroup]): GuideEnvironment =
+    initializeOptions(guideGroups.getOptions.asScalaList, guideGroups.getPrimaryIndex.getOrElse(0))
+
   def fromParamSet(parent: ParamSet): GuideEnvironment = {
-    val primary = Pio.getIntValue(parent, "primary", 0)
-    val groups  = parent.getParamSets.asScala.toList.map { ps =>
-      GuideGroup.fromParamSet(ps)
-    }
-    Initial.setOptions(groups.asImList).setPrimaryIndex(primary)
+    val groups = parent.getParamSets.asScala.toList.map(GuideGroup.fromParamSet)
+    initializeOptions(groups, Pio.getIntValue(parent, "primary", 0))
   }
 
   private def toSortedSet(s: Set[GuideProbe]): java.util.SortedSet[GuideProbe] =
