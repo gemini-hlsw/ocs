@@ -59,10 +59,6 @@ public class SpecS2NVisitor implements SampledSpectrumVisitor, SpecS2N {
         return im_qual;
     }
 
-    public double getSpecNpix() {
-        return spec_Npix;
-    }
-
     /**
      * Implements the SampledSpectrumVisitor interface
      */

@@ -39,7 +39,7 @@ object Recipe {
 
   // create signal/background chart
   def createSignalChart(result: SpectroscopyResult, index: Int): SpcChartData = {
-    createSignalChart(result, "Signal & SQRT(Background)\nSummed in an aperture of " + result.specS2N(index).getSpecNpix + " pix diameter", index)
+    createSignalChart(result, "Signal & SQRT(Background) in one pixel", index)
   }
 
   def createSignalChart(result: SpectroscopyResult, title: String, index: Int): SpcChartData = {

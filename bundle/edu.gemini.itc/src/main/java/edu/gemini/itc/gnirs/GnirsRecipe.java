@@ -177,7 +177,7 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
 
             final SpecS2N[] specS2Narr = new SpecS2N[ORDERS];
             for (int i = 0; i < ORDERS; i++) {
-                final SpecS2N s2n = new GnirsSpecS2N(im_qual, slit.lengthPixels(), signalOrder[i], backGroundOrder[i], null, finalS2NOrder[i]);
+                final SpecS2N s2n = new GnirsSpecS2N(im_qual, signalOrder[i], backGroundOrder[i], null, finalS2NOrder[i]);
                 specS2Narr[i] = s2n;
             }
 
@@ -204,7 +204,7 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
     // == GNIRS CHARTS
 
     private static SpcChartData createGnirsSignalChart(final SpectroscopyResult result) {
-        final String title = "Signal and SQRT(Background)\nSummed in an aperture of " + result.specS2N()[0].getSpecNpix() + " pix diameter";
+        final String title = "Signal and SQRT(Background) in one pixel";
         final String xAxis = "Wavelength (nm)";
         final String yAxis = "e- per exposure per spectral pixel";
         final List<SpcSeriesData> data = new ArrayList<>();
@@ -230,7 +230,6 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
     class GnirsSpecS2N implements SpecS2N {
 
         private final double imgQuality;
-        private final double nPix;
         private final VisitableSampledSpectrum signal;
         private final VisitableSampledSpectrum background;
         private final VisitableSampledSpectrum exps2n;
@@ -238,13 +237,11 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
 
         public GnirsSpecS2N(
                 final double imgQuality,
-                final double nPix,
                 final VisitableSampledSpectrum signal,
                 final VisitableSampledSpectrum background,
                 final VisitableSampledSpectrum exps2n,
                 final VisitableSampledSpectrum fins2n) {
             this.imgQuality   = imgQuality;
-            this.nPix         = nPix;
             this.signal       = signal;
             this.background   = background;
             this.exps2n       = exps2n;
@@ -271,9 +268,6 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
             return imgQuality;
         }
 
-        @Override public double getSpecNpix() {
-            return nPix;
-        }
     }
 
 }

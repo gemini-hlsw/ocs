@@ -262,13 +262,11 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
 
         final boolean ifuUsed   = mainInstrument.isIfuUsed();
         final double  ifuOffset = ifuUsed ? mainInstrument.getIFU().getApertureOffsetList().get(i) : 0.0;
-        final double  aperture  = results[0].specS2N()[0].getSpecNpix(); // same value for all CCDs (results) and specS2Ns, use first one
 
         final List<ChartAxis> axes = new ArrayList<>();
         final String title    =
-                "Signal and SQRT(Background)" +
-                        (ifuUsed ? "\nIFU element offset: " + String.format("%.2f", ifuOffset) + " arcsec" :
-                                   "\nSummed in an aperture of " + aperture + " pix diameter");
+                "Signal and SQRT(Background) in one pixel" +
+                        (ifuUsed ? "\nIFU element offset: " + String.format("%.2f", ifuOffset) + " arcsec" : "");
         final ChartAxis xAxis = ChartAxis.apply("Wavelength (nm)");
         final ChartAxis yAxis = ChartAxis.apply("e- per exposure per spectral pixel");
 

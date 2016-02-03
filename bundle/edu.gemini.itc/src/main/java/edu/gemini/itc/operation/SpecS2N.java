@@ -10,7 +10,6 @@ import java.util.stream.IntStream;
 public interface SpecS2N {
 
     double getImageQuality();
-    double getSpecNpix();
     VisitableSampledSpectrum getSignalSpectrum();
     VisitableSampledSpectrum getBackgroundSpectrum();
     VisitableSampledSpectrum getExpS2NSpectrum();

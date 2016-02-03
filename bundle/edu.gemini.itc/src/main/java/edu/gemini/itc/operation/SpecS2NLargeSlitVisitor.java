@@ -97,10 +97,6 @@ public class SpecS2NLargeSlitVisitor implements SampledSpectrumVisitor, SpecS2N 
         return im_qual;
     }
 
-    public double getSpecNpix() {
-        return slit.lengthPixels();
-    }
-
     /**
      * Implements the SampledSpectrumVisitor interface
      */
