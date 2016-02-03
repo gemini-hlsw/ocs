@@ -92,7 +92,7 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
         // Might implement these modules at a later time.
 
         final Slit slit = Slit$.MODULE$.apply(_sdParameters, _obsDetailParameters, instrument, instrument.getSlitWidth(), im_qual);
-        final SlitThroughput st = new SlitThroughput(_sdParameters, slit, im_qual, instrument.getPixelSize());
+        final SlitThroughput st = new SlitThroughput(_sdParameters, slit, im_qual);
 
         final double gratDispersion_nmppix = instrument.getSpectralPixelWidth();
         final double gratDispersion_nm = 0.5 / instrument.getPixelSize() * gratDispersion_nmppix;
@@ -100,7 +100,6 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
         final SpecS2NLargeSlitVisitor specS2N = new SpecS2NLargeSlitVisitor(
                 slit,
                 st.throughput(),
-                instrument.getPixelSize(),
                 instrument.getSpectralPixelWidth(),
                 instrument.getObservingStart(),
                 instrument.getObservingEnd(),

@@ -1,13 +1,16 @@
 package edu.gemini.itc.operation
 
-import edu.gemini.itc.base.{Instrument, SpectroscopyInstrument}
-import edu.gemini.itc.shared.{AutoAperture, UserAperture, ObservationDetails, SourceDefinition}
+import edu.gemini.itc.base.Instrument
+import edu.gemini.itc.shared.{AutoAperture, ObservationDetails, SourceDefinition, UserAperture}
 
 /**
- * Base trait for spectroscopy slits. A slit in this context defines the rectangular aperture
- * used for the ITC calculations.
+ * Base trait for spectroscopy slits.
+ * A slit in this context defines the rectangular aperture used for the ITC calculations and is relevant
+ * for the slit throughput, i.e. the flux (or the number of electrons) that arrive on the CCD.
  */
 trait Slit {
+
+  def pixelSize: Double
 
   def width: Double
   def length: Double
@@ -30,7 +33,7 @@ final case class UserApertureSlit(width: Double, length: Double, pixelSize: Doub
 
 }
 
-/** Auto aperture slit is defined by mask width and its area of 1 arcsec2. */
+/** Auto aperture slit is defined by mask width and its area of 1 arcsec². */
 final case class AutoApertureSlit(width: Double, pixelSize: Double) extends Slit {
 
   val area = 1.0

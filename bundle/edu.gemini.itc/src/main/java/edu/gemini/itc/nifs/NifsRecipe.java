@@ -146,7 +146,6 @@ public final class NifsRecipe implements SpectroscopyRecipe {
             final SpecS2NLargeSlitVisitor specS2N = new SpecS2NLargeSlitVisitor(
                     slit,
                     throughput,
-                    instrument.getPixelSize(),
                     instrument.getSpectralPixelWidth(),
                     instrument.getObservingStart(),
                     instrument.getObservingEnd(),

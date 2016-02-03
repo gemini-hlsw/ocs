@@ -148,7 +148,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         final double slitLength;
         if (!instrument.isIfuUsed()) {
             slit = Slit$.MODULE$.apply(_sdParameters, _obsDetailParameters, instrument, instrument.getSlitWidth(), IQcalc.getImageQuality());
-            final SlitThroughput st = new SlitThroughput(_sdParameters, slit, IQcalc.getImageQuality(), instrument.getPixelSize());
+            final SlitThroughput st = new SlitThroughput(_sdParameters, slit, IQcalc.getImageQuality());
             slitLength = slit.lengthPixels();
             throughput = st.throughput();
         } else {
@@ -168,7 +168,6 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
                 specS2N[i] = new SpecS2NLargeSlitVisitor(
                         ifuSlit,
                         spsf,
-                        instrument.getPixelSize(),
                         instrument.getSpectralPixelWidth(),
                         instrument.getObservingStart(),
                         instrument.getObservingEnd(),
@@ -191,7 +190,6 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
             specS2N[0] = new SpecS2NLargeSlitVisitor(
                     slit,
                     throughput,
-                    instrument.getPixelSize(),
                     instrument.getSpectralPixelWidth(),
                     instrument.getObservingStart(),
                     instrument.getObservingEnd(),

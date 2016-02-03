@@ -123,7 +123,7 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
         // Might implement these modules at a later time.
 
         final Slit slit = Slit$.MODULE$.apply(_sdParameters, _obsDetailParameters, instrument, instrument.getSlitWidth(), IQcalc.getImageQuality());
-        final SlitThroughput st = new SlitThroughput(_sdParameters, slit, im_qual, instrument.getPixelSize());
+        final SlitThroughput st = new SlitThroughput(_sdParameters, slit, im_qual);
         final double spec_source_frac = st.throughput();
 
         final SpecS2NVisitor specS2N = new SpecS2NVisitor(

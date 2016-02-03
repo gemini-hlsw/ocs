@@ -22,7 +22,6 @@ public class SpecS2NLargeSlitVisitor implements SampledSpectrumVisitor, SpecS2N 
     private final Slit slit;
     private final double throughput;
     private final double spec_frac_with_source;
-    private final double pixel_size;
     private final double spec_exp_time;
     private final double im_qual;
     private final double dark_current;
@@ -50,7 +49,6 @@ public class SpecS2NLargeSlitVisitor implements SampledSpectrumVisitor, SpecS2N 
      */
     public SpecS2NLargeSlitVisitor(final Slit slit,
                                    final double throughput,
-                                   final double pixel_size,
                                    final double pix_width,
                                    final double obs_wave_low,
                                    final double obs_wave_high,
@@ -62,7 +60,6 @@ public class SpecS2NLargeSlitVisitor implements SampledSpectrumVisitor, SpecS2N 
                                    final ObservationDetails odp) {
         this.slit                   = slit;
         this.throughput             = throughput;
-        this.pixel_size             = pixel_size;
         this.pix_width              = pix_width;
         this.obs_wave_low           = obs_wave_low;
         this.obs_wave_high          = obs_wave_high;
@@ -199,19 +196,17 @@ public class SpecS2NLargeSlitVisitor implements SampledSpectrumVisitor, SpecS2N 
         int source_flux_last = lastCcdPixel(source_flux.getLength());
         if (haloIsUsed) {
             for (int i = _firstCcdPixel; i <= source_flux_last; ++i)
-                spec_var_source.setY(i, source_flux.getY(i) * throughput *
-                        spec_exp_time * gratingDispersion_nmppix + halo_flux.getY(i) * spec_halo_source_fraction *
-                        spec_exp_time * gratingDispersion_nmppix);
+                spec_var_source.setY(i, totalFlux(source_flux.getY(i)) + totalHaloFlux(halo_flux.getY(i)));
         } else {
             for (int i = _firstCcdPixel; i <= source_flux_last; ++i)
-                spec_var_source.setY(i, source_flux.getY(i) * throughput *
-                        spec_exp_time * gratingDispersion_nmppix);
+                spec_var_source.setY(i, totalFlux(source_flux.getY(i)));
         }
         //Shot noise on background flux in aperture
         int spec_var_background_last = lastCcdPixel(spec_var_background.getLength());
         for (int i = _firstCcdPixel; i <= spec_var_background_last; ++i)
-            spec_var_background.setY(i, background_flux.getY(i) *
-                    slit.width() * pixel_size * slit.lengthPixels() * // TODO: use slit.area()
+            spec_var_background.setY(i,
+                    background_flux.getY(i) *
+                    slit.width() * slit.pixelSize() * slit.lengthPixels() * // TODO: use slit.area()
                     spec_exp_time * gratingDispersion_nmppix);
 
         //Shot noise on dark current flux in aperture
@@ -244,13 +239,10 @@ public class SpecS2NLargeSlitVisitor implements SampledSpectrumVisitor, SpecS2N 
         int spec_signal_last = lastCcdPixel(spec_signal.getLength());
         if (haloIsUsed) {
             for (int i = _firstCcdPixel; i <= spec_signal_last; ++i)
-                spec_signal.setY(i, source_flux.getY(i) *
-                        throughput * spec_exp_time * gratingDispersion_nmppix + halo_flux.getY(i) *
-                        spec_halo_source_fraction * spec_exp_time * gratingDispersion_nmppix);
+                spec_signal.setY(i, totalFlux(source_flux.getY(i)) + totalHaloFlux(halo_flux.getY(i)));
         } else {
             for (int i = _firstCcdPixel; i <= spec_signal_last; ++i)
-                spec_signal.setY(i, source_flux.getY(i) *
-                        throughput * spec_exp_time * gratingDispersion_nmppix);
+                spec_signal.setY(i, totalFlux(source_flux.getY(i)));
         }
         //S2N for one exposure
         int spec_exp_s2n_last = lastCcdPixel(spec_exp_s2n.getLength());
@@ -270,6 +262,14 @@ public class SpecS2NLargeSlitVisitor implements SampledSpectrumVisitor, SpecS2N 
         //Finally create the Sqrt(Background) sed for plotting
         for (int i = _firstCcdPixel; i <= spec_var_background_last; ++i)
             sqrt_spec_var_background.setY(i, Math.sqrt(spec_var_background.getY(i)));
+    }
+
+    private double totalFlux(final Double flux) {
+        return flux * throughput * spec_exp_time * gratingDispersion_nmppix;
+    }
+
+    private double totalHaloFlux(final Double flux) {
+        return flux * spec_halo_source_fraction * spec_exp_time * gratingDispersion_nmppix;
     }
 
     public void setSourceSpectrum(final VisitableSampledSpectrum sed) {

@@ -91,7 +91,7 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
         // Might implement these modules at a later time.
 
         final Slit slit = Slit$.MODULE$.apply(_sdParameters, _obsDetailParameters, instrument, instrument.getSlitWidth(), IQcalc.getImageQuality());
-        final SlitThroughput st = new SlitThroughput(_sdParameters, slit, IQcalc.getImageQuality(), instrument.getPixelSize());
+        final SlitThroughput st = new SlitThroughput(_sdParameters, slit, IQcalc.getImageQuality());
 
         // TODO: why, oh why?
         final double im_qual = _sdParameters.isUniform() ? 10000 : IQcalc.getImageQuality();
@@ -99,7 +99,6 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
         final SpecS2NLargeSlitVisitor specS2N = new SpecS2NLargeSlitVisitor(
                 slit,
                 st.throughput(),
-                instrument.getPixelSize(),
                 instrument.getSpectralPixelWidth() / instrument.getOrder(),
                 instrument.getObservingStart(),
                 instrument.getObservingEnd(),

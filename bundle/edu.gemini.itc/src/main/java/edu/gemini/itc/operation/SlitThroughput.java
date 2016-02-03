@@ -41,29 +41,28 @@ public final class SlitThroughput {
     private final SourceDefinition src;
     private final Slit slit;
     private final double im_qual;
-    private final double pixel_size;    // [arcsec/pixel]
 
-    public SlitThroughput(final SourceDefinition src, final Slit slit, final double im_qual, final double pixel_size) {
+    public SlitThroughput(final SourceDefinition src, final Slit slit, final double im_qual) {
         this.src        = src;
         this.slit       = slit;
         this.im_qual    = im_qual;
-        this.pixel_size = pixel_size;
     }
 
     // For point sources and gaussian sources: returns the fraction of the source flux that goes through the slit.
-    // For uniform surface brightness: either return 1arcsec2 for auto aperture or the slit area.
+    // For uniform surface brightness: either return 1 arcsec² for auto aperture or the slit area.
     public double throughput() {
 
-        // For the usb case we want the resolution to be determined by the
-        // slit width and not the image quality.
+        // For the usb case we want the resolution to be determined by the slit area and not the image quality.
         if (src.isUniform()) {
+
+            // return the aperture area in arcsec²
             return slit.area();
 
         // Non-USB case (point source/gaussian)
         } else {
 
             // find the slit length in the aperture
-            double slit_spatial_ratio = slit.lengthPixels() * pixel_size / slit.width();
+            double slit_spatial_ratio = slit.lengthPixels() * slit.pixelSize() / slit.width();
 
             // find the slit width
             final double sigma = im_qual / 2.355;
