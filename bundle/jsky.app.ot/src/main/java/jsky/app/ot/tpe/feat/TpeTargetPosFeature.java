@@ -160,7 +160,7 @@ public class TpeTargetPosFeature extends TpePositionFeature
         TargetEnvironment env = obsComp.getTargetEnvironment();
         if (!env.getUserTargets().contains(tp)) return null;
 
-        TargetSelection.set(env, getContext().targets().shell().get(), tp);
+        TargetSelection.setTargetForNode(env, getContext().targets().shell().get(), tp);
         return tp;
     }
 

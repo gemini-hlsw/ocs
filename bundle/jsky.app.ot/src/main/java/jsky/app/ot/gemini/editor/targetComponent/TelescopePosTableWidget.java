@@ -347,42 +347,53 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
             return DefaultImList.create(bands);
         }
 
-        public int indexOf(final SPTarget target) {
-            if (target == null) return -1;
+        /**
+         * Conversions between SPTarget and row index.
+         */
+        public Option<Integer> rowIndexForTarget(final SPTarget target) {
+            if (target == null) return None.instance();
 
             int index = 0;
             for (final Row row : rows) {
-                if (row.target().getOrNull() == target) return index;
+                if (row.target().getOrNull() == target) return new Some<>(index);
                 ++index;
 
                 for (final Row row2 : row.children()) {
-                    if (row2.target().getOrNull() == target) return index;
+                    if (row2.target().getOrNull() == target) return new Some<>(index);
                     ++index;
                 }
             }
-            return -1;
+            return None.instance();
         }
 
-        public int indexOf(final GuideGroup group) {
-            if (group == null) return -1;
+        public Option<SPTarget> targetAtRowIndex(final int index) {
+            return rowAtRowIndex(index).flatMap(Row::target);
+        }
+
+        /**
+         * Conversions between group index (index of group in list of groups) and row index.
+         */
+        public Option<Integer> rowIndexForGroupIndex(final int gpIdx) {
+            final ImList<GuideGroup> groups = env.getGroups();
+            if (gpIdx < 0 || gpIdx >= groups.size()) return None.instance();
 
             int index = 0;
             for (final Row row : rows) {
-                if (row.group().getOrNull() == group) return index;
+                if (row.group().exists(tup -> tup._1() == gpIdx))
+                    return new Some<>(index);
                 index += row.children().size() + 1;
             }
-            return -1;
+            return None.instance();
         }
 
-        public Option<SPTarget> targetAt(final int index) {
-            return rowAt(index).flatMap(Row::target);
+        public Option<Tuple2<Integer,GuideGroup>> groupAtRowIndex(final int index) {
+            return rowAtRowIndex(index).flatMap(Row::group);
         }
 
-        public Option<GuideGroup> groupAt(final int index) {
-            return rowAt(index).flatMap(Row::group).map(Tuple2::_2);
-        }
-
-        public Option<Row> rowAt(final int index) {
+        /**
+         * Get the Row object for a given index.
+         */
+        public Option<Row> rowAtRowIndex(final int index) {
             if (index >= 0) {
                 int i = 0;
                 for (final Row row : rows) {
@@ -425,7 +436,7 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
                 return null;
 
             final Col[] cols = Col.values();
-            return rowAt(rowIndex).map(row ->
+            return rowAtRowIndex(rowIndex).map(row ->
                     (columnIndex < cols.length) ?
                     cols[columnIndex].getValue(row) :
                     row.formatMagnitude(bands.get(columnIndex - cols.length))
@@ -467,14 +478,13 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
     public TelescopePosTableWidget(final EdCompTargetList owner) {
         this.owner = owner;
         setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-        // disable editing by default
         setModel(new TableData());
 
         getSelectionModel().addListSelectionListener(e -> {
             if (_ignoreSelection) return;
             final TableData tableData = (TableData) getModel();
             final int idx = getSelectionModel().getMinSelectionIndex();
-            tableData.rowAt(idx).foreach(this::notifySelect);
+            tableData.rowAtRowIndex(idx).foreach(this::notifySelect);
         });
 
         getTableHeader().setReorderingAllowed(false);
@@ -493,12 +503,12 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
                                                                      final int column) {
                 final JLabel label = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
-                _tableData.rowAt(row).foreach(tableDataRow -> {
+                _tableData.rowAtRowIndex(row).foreach(tableDataRow -> {
                     // If we are in column 0, we treat this differently.
                     if (column == 0) {
-                        if (!tableDataRow.group().isEmpty()) {
-                            final String tag = tableDataRow.tag();
+                        if (tableDataRow.group().isDefined()) {
                             final String name = tableDataRow.name();
+                            final String tag  = tableDataRow.tag();
                             label.setText(name != null && !name.equals("") ? name : tag);
                         } else {
                             label.setText(tableDataRow.tag());
@@ -532,7 +542,7 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
         });
 
         addMouseListener(new MouseAdapter() {
-            public void mouseClicked(final MouseEvent e) {
+            @Override public void mouseClicked(final MouseEvent e) {
                 if (e.getClickCount() != 2) return;
                 updatePrimaryStar();
             }
@@ -543,20 +553,15 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
         dragSource = new TelescopePosTableDragSource(this);
     }
 
-    public void telescopePosUpdate(final WatchablePos tp) {
+    @Override public void telescopePosUpdate(final WatchablePos tp) {
         final int index = getSelectedRow();
         _resetTable(_env);
 
         // Restore the selection without firing new selection events.
-        if ((index >= 0) && (index < getRowCount())) {
-            final boolean ignore = _ignoreSelection;
-            try {
-                _ignoreSelection = true;
-                _setSelectedRow(index);
-            } finally {
-                _ignoreSelection = ignore;
-            }
-        }
+        final boolean tmp = _ignoreSelection;
+        _ignoreSelection = true;
+        _setSelectedRow(index);
+        _ignoreSelection = tmp;
     }
 
     /**
@@ -585,12 +590,12 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
         final TargetEnvironment env = _dataObject.getTargetEnvironment();
         env.getTargets().foreach(t -> t.addWatcher(TelescopePosTableWidget.this));
 
-        final SPTarget tp = TargetSelection.get(_dataObject.getTargetEnvironment(), _obsComp);
+        final Option<SPTarget> tpOpt = TargetSelection.getTargetForNode(_dataObject.getTargetEnvironment(), _obsComp);
         _resetTable(_dataObject.getTargetEnvironment());
 
-        final int index = _tableData.indexOf(tp);
-        if (index >= 0) {
-            _setSelectedRow(index);
+        final Option<Integer> index = tpOpt.flatMap(_tableData::rowIndexForTarget);
+        if (index.isDefined()) {
+            _setSelectedRow(index.getValue());
         } else {
             selectBasePos();
         }
@@ -618,32 +623,28 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
         _dataObject.addPropertyChangeListener(TargetObsComp.TARGET_ENV_PROP, envChangeListener);
     }
 
+    /**
+     * Notify the TargetSelection object when a row in the table has been selected.
+     * This can either be a target row, or a group row.
+     */
     private void notifySelect(final TableData.Row row) {
-        final SPTarget target = row.target().getOrNull();
-        if (target != null) {
+        // Only one of these cases will hold.
+        row.target().foreach(target -> {
             stopWatchingSelection();
-            try {
-                TargetSelection.set(_env, _obsComp, target);
-            } finally {
-                startWatchingSelection();
-            }
-        } else {
-            final GuideGroup group = row.group().map(Tuple2::_2).getOrNull();
-            if (group != null) TargetSelection.setGuideGroup(_env, _obsComp, group);
-        }
+            TargetSelection.setTargetForNode(_env, _obsComp, target);
+            startWatchingSelection();
+        });
+        row.group().foreach(tup -> TargetSelection.setIndexedGuideGroup(_env, _obsComp, tup));
     }
 
     private final PropertyChangeListener selectionListener = evt -> {
         if (_tableData == null) return;
-        final SPTarget target = TargetSelection.get(_env, _obsComp);
-        if (target != null) {
-            final int index = _tableData.indexOf(target);
-            _setSelectedRow(index);
-        }
+        TargetSelection.getTargetForNode(_env, _obsComp)
+            .flatMap(_tableData::rowIndexForTarget).foreach(this::_setSelectedRow);
     };
 
     private final PropertyChangeListener envChangeListener = new PropertyChangeListener() {
-        public void propertyChange(PropertyChangeEvent evt) {
+        public void propertyChange(final PropertyChangeEvent evt) {
             final TargetEnvironment oldEnv = (TargetEnvironment) evt.getOldValue();
             final TargetEnvironment newEnv = (TargetEnvironment) evt.getNewValue();
 
@@ -651,14 +652,13 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
             final Collection<SPTarget> rmTargets  = diff.getRemovedTargets();
             final Collection<SPTarget> addTargets = diff.getAddedTargets();
 
-            // First update the target listeners according to what was added
-            // and removed.
+            // First update the target listeners according to what was added and removed.
             rmTargets.forEach (t -> t.deleteWatcher(TelescopePosTableWidget.this));
             addTargets.forEach(t -> t.addWatcher(TelescopePosTableWidget.this));
 
             // Remember what was selected before the reset below.
-            final int oldSelIndex       = getSelectedRow();
-            final SPTarget oldSelTarget = _tableData.rowAt(oldSelIndex).flatMap(TableData.Row::target).getOrNull();
+            final int oldSelIndex               = getSelectedRow();
+            final Option<SPTarget> oldSelTarget = _tableData.rowAtRowIndex(oldSelIndex).flatMap(TableData.Row::target);
 
             // Update the table -- setting _tableData ....
             _resetTable(newEnv);
@@ -666,32 +666,31 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
             // Update the selection.
             if (rmTargets.isEmpty() && (addTargets.size() == 1)) {
                 // A single position was added, so just select it.
-                selectPos(addTargets.iterator().next());
+                selectTarget(addTargets.iterator().next());
                 return;
             }
 
             // If obs comp has a selected target, then honor it.
-            final SPTarget newSelectedTarget = TargetSelection.get(_env, _obsComp);
-            if (newSelectedTarget != null) {
-                final int index = _tableData.indexOf(newSelectedTarget);
-                _setSelectedRow(index);
+            final Option<SPTarget> newSelectedTarget = TargetSelection.getTargetForNode(_env, _obsComp);
+            if (newSelectedTarget.isDefined()) {
+                 _tableData.rowIndexForTarget(newSelectedTarget.getValue())
+                         .foreach(TelescopePosTableWidget.this::_setSelectedRow);
                 return;
             }
 
-            // If a new group was added, select it
-            final GuideGroup newSelectedGroup = TargetSelection.getGuideGroup(_env, _obsComp);
-            if (newSelectedGroup != null) {
-                final int index = _tableData.indexOf(newSelectedGroup);
-                if (index != -1) {
-                    _setSelectedRow(index);
+            // If a new group was added, select it.
+            final Option<Tuple2<Integer,GuideGroup>> newGpIdx = TargetSelection.getIndexedGuideGroupForNode(_env, _obsComp);
+            if (newGpIdx.isDefined()) {
+                final Option<Integer> rowIdx = _tableData.rowIndexForGroupIndex(newGpIdx.getValue()._1());
+                if (rowIdx.isDefined()) {
+                    _setSelectedRow(rowIdx.getValue());
                     return;
                 }
             }
 
-            // Try to select the same target that was selected before, if it
-            // is there in the new table.
-            if ((oldSelTarget != null) && (_tableData.indexOf(oldSelTarget) >= 0)) {
-                selectPos(oldSelTarget);
+            // Try to select the same target that was selected before, if it is there in the new table.
+            if (oldSelTarget.exists(t -> _tableData.rowIndexForTarget(t).isDefined())) {
+                oldSelTarget.foreach(TelescopePosTableWidget.this::selectTarget);
                 return;
             }
 
@@ -725,9 +724,9 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
      */
     void updatePrimaryStar() {
         if (_env == null || !OTOptions.isEditable(_obsComp.getProgram(), _obsComp.getContextObservation())) return;
-        final SPTarget target = getSelectedPos();
-        if (target != null) {
-            PrimaryTargetToggle.instance.toggle(_dataObject, target);
+        final Option<SPTarget> targetOpt = getSelectedPos();
+        if (targetOpt.isDefined()) {
+            PrimaryTargetToggle.instance.toggle(_dataObject, targetOpt.getValue());
         } else {
             final Option<Tuple2<Integer, GuideGroup>> groupOpt = getSelectedGroup();
             groupOpt.foreach(group -> {
@@ -746,15 +745,15 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
     /**
      * Get the position that is currently selected.
      */
-    private SPTarget getSelectedPos() {
-        return TargetSelection.get(_env, _obsComp);
+    private Option<SPTarget> getSelectedPos() {
+        return TargetSelection.getTargetForNode(_env, _obsComp);
     }
 
     /**
      * Get the group that is currently selected.
      */
     private Option<Tuple2<Integer, GuideGroup>> getSelectedGroup() {
-        return TargetSelection.getIndexedGuideGroup(_env, _obsComp);
+        return TargetSelection.getIndexedGuideGroupForNode(_env, _obsComp);
     }
 
     /**
@@ -765,17 +764,16 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
         final Option<Tuple2<Integer, GuideGroup>> groupOpt = getSelectedGroup();
         if (groupOpt.isDefined()) return groupOpt;
 
-        final SPTarget target = getSelectedPos();
-        if (target == null) return ImOption.empty();
-
-        return env.getGroups().zipWithIndex().find(gg -> gg._1().containsTarget(target)).map(Tuple2::swap);
+        return getSelectedPos()
+                .map(target -> env.getGroups().zipWithIndex().find(gg -> gg._1().containsTarget(target)).map(Tuple2::swap))
+                .getOrElse(None.instance());
     }
 
     /**
      * Returns the selected node (currently only single select is allowed).
      */
     public Option<TableData.Row> getSelectedNode() {
-        return _tableData.rowAt(getSelectedRow());
+        return _tableData.rowAtRowIndex(getSelectedRow());
     }
 
     /**
@@ -850,14 +848,11 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
      */
     public void selectRowAt(final int index) {
         if (_tableData == null) return;
-        final SPTarget target = _tableData.targetAt(index).getOrNull();
+        final SPTarget target = _tableData.targetAtRowIndex(index).getOrNull();
         if (target != null) {
-            selectPos(target);
+            selectTarget(target);
         } else {
-            final GuideGroup group = _tableData.groupAt(index).getOrNull();
-            if (group != null) {
-                selectGroup(group);
-            }
+            _tableData.groupAtRowIndex(index).foreach(this::selectGroup);
         }
     }
 
@@ -865,24 +860,24 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
      * Select the base position, updating the TargetSelection's target, and set the relevant row in the table.
      */
     void selectBasePos() {
-        selectPos(_env.getBase());
+        selectTarget(_env.getBase());
     }
 
 
     /**
      * Updates the TargetSelection's target, and sets the relevant row in the table.
      */
-    void selectPos(final SPTarget tp) {
-        TargetSelection.set(_env, _obsComp, tp);
-        _setSelectedRow(_tableData.indexOf(tp));
+    void selectTarget(final SPTarget tp) {
+        TargetSelection.setTargetForNode(_env, _obsComp, tp);
+        _tableData.rowIndexForTarget(tp).foreach(this::_setSelectedRow);
     }
 
     /**
      * Update the TargetSelection's group, and sets the relevant row in the table.
      */
-    void selectGroup(final GuideGroup group) {
-        TargetSelection.setGuideGroup(_env, _obsComp, group);
-        _setSelectedRow(_tableData.indexOf(group));
+    void selectGroup(final Tuple2<Integer,GuideGroup> indexedGroup) {
+        TargetSelection.setIndexedGuideGroup(_env, _obsComp, indexedGroup);
+        _tableData.rowIndexForGroupIndex(indexedGroup._1()).foreach(this::_setSelectedRow);
     }
 
     /**
@@ -896,7 +891,7 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
      * Returns the node at the given location or null if not found.
      */
     public TableData.Row getNode(final Point location) {
-        return _tableData.rowAt(rowAtPoint(location)).getOrNull();
+        return _tableData.rowAtRowIndex(rowAtPoint(location)).getOrNull();
     }
 
     /**

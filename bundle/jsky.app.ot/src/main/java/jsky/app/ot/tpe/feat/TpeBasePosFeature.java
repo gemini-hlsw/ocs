@@ -7,7 +7,6 @@ import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.target.obsComp.TargetSelection;
-import edu.gemini.spModel.target.system.CoordinateParam;
 import jsky.app.ot.tpe.*;
 
 import java.awt.*;
@@ -58,7 +57,7 @@ public class TpeBasePosFeature extends TpePositionFeature {
         if (obsComp != null) {
             PosMapEntry<SPTarget> pme = pm.getPositionMapEntry(obsComp.getBase());
             if ((pme != null) && (positionIsClose(pme, x, y)) && getContext().targets().shell().isDefined()) {
-                TargetSelection.set(getContext().targets().envOrNull(), getContext().targets().shell().get(), pme.taggedPos);
+                TargetSelection.setTargetForNode(getContext().targets().envOrNull(), getContext().targets().shell().get(), pme.taggedPos);
                 return pme.taggedPos;
             }
         }

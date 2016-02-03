@@ -34,116 +34,144 @@ public final class TargetSelection {
         Index(int value) { this.value = value; }
     }
 
+    // Used internally as a placeholder for None.
     private static final Index NO_SELECTION = new Index(-1);
 
     private static boolean isValid(final ISPNode node) {
-        return (node instanceof ISPObsComponent) && ((ISPObsComponent) node).getType() == SPComponentType.TELESCOPE_TARGETENV;
+        return (node instanceof ISPObsComponent) &&
+                ((ISPObsComponent) node).getType() == SPComponentType.TELESCOPE_TARGETENV;
     }
 
-    public static int getIndex(final ISPNode node) {
-        if (!isValid(node)) return NO_SELECTION.value;
-        final Object cd = node.getTransientClientData(KEY);
-        return ((cd == null) ? NO_SELECTION : (Index) cd).value;
+    public static Option<Integer> getIndex(final ISPNode node) {
+        if (!isValid(node)) return None.instance();
+        return ImOption.apply((Index) node.getTransientClientData(KEY))
+                .map(i -> i.value).filter(i -> i != NO_SELECTION.value);
     }
 
-    public static void setIndex(final ISPNode node, final int index) {
-        if (isValid(node)) node.putTransientClientData(KEY, new Index(index));
+    private static void setIndex(final ISPNode node, final int index) {
+        setIndex(node, index == -1 ? None.instance() : new Some<>(index));
     }
 
+    public static void setIndex(final ISPNode node, final Option<Integer> index) {
+        if (isValid(node)) node.putTransientClientData(KEY, index.map(Index::new).getOrElse(NO_SELECTION));
+    }
+
+    /**
+     * Marks a selection object, which
+     */
     private static final class Selection {
-        final GuideGroup guideGroup;
-        final SPTarget target;
+        final int index;
+        final Option<GuideGroup> guideGroup;
+        final Option<SPTarget> target;
 
-        private Selection(final GuideGroup grp, final SPTarget target) {
+        private Selection(final int index, final Option<GuideGroup> grp, final Option<SPTarget> target) {
+            this.index      = index;
             this.guideGroup = grp;
             this.target     = target;
         }
+
+        boolean isGuideGroup() {
+            return guideGroup.isDefined() && target.isEmpty();
+        }
+
+        boolean isGuideProbeTarget() {
+            return guideGroup.isDefined() && target.isDefined();
+        }
+
+        /**
+         * Create a list of Selection from the target environment, consisting of:
+         * 1. The base;
+         * 2. A list of GuideGroups and their targets; and
+         * 3. A list of the user targets.
+         */
+        static ImList<Selection> toSelections(final TargetEnvironment env) {
+            if (env == null) return ImCollections.emptyList();
+
+            int idx = 0;
+            final List<Selection> res = new ArrayList<>();
+
+            res.add(new Selection(idx++, None.instance(), new Some<>(env.getBase())));
+            for (final GuideGroup g : env.getGroups()) {
+                final Option<GuideGroup> gOpt = new Some<>(g);
+                res.add(new Selection(idx++, gOpt, None.instance()));
+                for (final Option<SPTarget> tOpt : g.getTargets().map(Some::new)) {
+                    res.add(new Selection(idx++, gOpt, tOpt));
+                }
+            }
+            for (final Option<SPTarget> tOpt : env.getUserTargets().map(Some::new)) {
+                res.add(new Selection(idx++, None.instance(), tOpt));
+            }
+            return DefaultImList.create(res);
+        }
     }
 
-    private static ImList<Selection> toSelections(final TargetEnvironment env) {
-        if (env == null) return ImCollections.emptyList();
-
-        final List<Selection> res = new ArrayList<>();
-        res.add(new Selection(null, env.getBase()));
-        env.getGroups().foreach(g -> {
-            res.add(new Selection(g, null));
-            g.getTargets().foreach(t -> res.add(new Selection(g, t)));
-        });
-        env.getUserTargets().foreach(t -> res.add(new Selection(null, t)));
-        return DefaultImList.create(res);
+    public static Option<Integer> indexOfTarget(final TargetEnvironment env, final SPTarget target) {
+        return Selection.toSelections(env).find(sel -> sel.target.exists(target::equals)).map(sel -> sel.index);
     }
 
-    private static final MapOp<Tuple2<Selection, Integer>, Integer> INDEX_OF = Tuple2::_2;
+    public static Option<Integer> indexOfIndexedGuideGroup(final TargetEnvironment env,
+                                                           final Tuple2<Integer,GuideGroup> indexedGroup) {
+        // Extract the selections (and their indices) corresponding to guide groups.
+        final ImList<Selection> filtered = Selection.toSelections(env).filter(Selection::isGuideGroup);
 
-    public static int indexOf(final TargetEnvironment env, final SPTarget target) {
-        return toSelections(env).zipWithIndex().
-                find(tup -> target.equals(tup._1().target)).
-                map(INDEX_OF).getOrElse(NO_SELECTION.value);
+        // Now make sure the guide group at position gpIdx is gp, and if so, return its index in the selections.
+        final int gpIdx     = indexedGroup._1();
+        final GuideGroup gp = indexedGroup._2();
+        if (gpIdx >= 0 && gpIdx < filtered.size()) {
+            final Selection sel = filtered.get(gpIdx);
+            return sel.guideGroup.filter(gp::equals).map(ign -> sel.index);
+        } else {
+            return None.instance();
+        }
     }
 
-    public static int indexOf(final TargetEnvironment env, final GuideGroup grp) {
-        return toSelections(env).zipWithIndex().
-                find(tup -> grp.equals(tup._1().guideGroup)).
-                map(INDEX_OF).getOrElse(NO_SELECTION.value);
+    private static Option<Selection> selectionAtIndex(final TargetEnvironment env, final int index) {
+        if (index < 0) return None.instance();
+        final ImList<Selection> lst = Selection.toSelections(env);
+        return ImOption.apply(index < lst.size() ? lst.get(index) : null);
     }
 
-    private static Selection selectionAt(final TargetEnvironment env, final int index) {
-        if (index < 0) return null;
-        final ImList<Selection> lst = toSelections(env);
-        return (index < lst.size()) ? lst.get(index) : null;
+    public static Option<SPTarget> getTargetAtIndex(final TargetEnvironment env, final int index) {
+        return selectionAtIndex(env, index).flatMap(s -> s.target);
     }
 
-    public static SPTarget get(final TargetEnvironment env, final int index) {
-        final Selection s = selectionAt(env, index);
-        return (s == null) ? null : s.target;
+    public static Option<SPTarget> getTargetForNode(final TargetEnvironment env, final ISPNode node) {
+        return getIndex(node).flatMap(i -> getTargetAtIndex(env, i));
     }
 
-    public static SPTarget get(final TargetEnvironment env, final ISPNode node) {
-        return get(env, getIndex(node));
-    }
-
-    public static void set(final TargetEnvironment env, final ISPNode node, final SPTarget target) {
-        setIndex(node, indexOf(env, target));
-    }
-
-    public static GuideGroup getGuideGroup(final TargetEnvironment env, final int index) {
-        final Selection s = selectionAt(env, index);
-        return (s == null) ? null : s.guideGroup;
-    }
-
-    public static void setGuideGroup(final TargetEnvironment env, final ISPNode node, final GuideGroup grp) {
-        setIndex(node, indexOf(env, grp));
-    }
-
-    public static GuideGroup getGuideGroup(final TargetEnvironment env, final ISPNode node) {
-        return getGuideGroup(env, getIndex(node));
+    public static void setTargetForNode(final TargetEnvironment env, final ISPNode node, final SPTarget target) {
+        indexOfTarget(env, target).foreach(i -> setIndex(node, i));
     }
 
     /**
      * For a given node in the list, find its guide group if any, and the index of said guide group amongst all guide
      * groups.
      */
-    public static Option<Tuple2<Integer, GuideGroup>> getIndexedGuideGroup(final TargetEnvironment env, final ISPNode node) {
-        // The list of all nodes in the truee, and the index of the currently selected node.
-        final ImList<Selection> lst = toSelections(env);
-        final int idx = getIndex(node);
+    public static Option<Tuple2<Integer, GuideGroup>> getIndexedGuideGroupForNode(final TargetEnvironment env,
+                                                                                  final ISPNode node) {
+        // The list of all nodes in the tree, and the index of the currently selected node.
+        final ImList<Selection> lst = Selection.toSelections(env);
+        final int idx = getIndex(node).getOrElse(NO_SELECTION.value);
 
         // If node is not in the valid range, no guide group.
         // Similarly, if the current node has no guide group set, then no guide group.
         if ((idx < 0) || (idx >= lst.size()))
             return None.instance();
         final Selection sel = lst.get(idx);
-        if (sel.guideGroup == null)
+        if (sel.guideGroup.isEmpty())
             return None.instance();
 
-        // Iterate over all the selections until we arrive at idx, counting the groups that we see along the way.
-        int numGroups = 0;
-        for (int i=0; i <= idx; ++i) {
-            final Selection cur = lst.get(i);
-            if (cur.guideGroup != null && cur.target == null)
-                numGroups += 1;
-        }
-        return new Some<>(new Pair<>(numGroups-1, sel.guideGroup));
+        // Filter out the guide groups in positions 0...idx inclusive to get number of guide groups.
+        final int gpIdx = lst.zipWithIndex().filter(tup -> tup._1().isGuideGroup() && tup._2() <= idx).size() - 1;
+        return sel.guideGroup.map(g -> new Pair<>(gpIdx,g));
+    }
+
+    /**
+     * For a given guide group, find the corresponding node in the list if it exists, and set it as the index.
+     */
+    public static void setIndexedGuideGroup(final TargetEnvironment env, final ISPNode node,
+                                            final Tuple2<Integer,GuideGroup> indexedGroup) {
+        setIndex(node, indexOfIndexedGuideGroup(env, indexedGroup));
     }
 
     public static void listenTo(final ISPNode node, final PropertyChangeListener listener) {

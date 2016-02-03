@@ -353,7 +353,7 @@ public class TpeGuidePosFeature extends TpePositionFeature
         final TargetEnvironment env = obsComp.getTargetEnvironment();
         for (final GuideProbeTargets gt : env.getOrCreatePrimaryGuideGroup()) {
             if (gt.getTargets().contains(tp)) {
-                TargetSelection.set(env, getContext().targets().shell().get(), tp);
+                TargetSelection.setTargetForNode(env, getContext().targets().shell().get(), tp);
                 return tp;
             }
         }

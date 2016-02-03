@@ -182,7 +182,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         obsComp.addPropertyChangeListener(TargetObsComp.TARGET_ENV_PROP, guidingPanelUpdater);
 
         final TargetEnvironment env = obsComp.getTargetEnvironment();
-        final SPTarget selTarget = TargetSelection.get(env, node);
+        final SPTarget selTarget = TargetSelection.getTargetForNode(env, node).getOrNull();
         manageCurPosIfEnvContainsTarget(selTarget, () -> _curPos = selTarget);
 
         final SPInstObsComp inst = getContextInstrumentDataObject();
@@ -246,7 +246,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
         // Update the guiding feedback.
         final ISPObsComponent node = getContextTargetObsComp();
-        final SPTarget      target = TargetSelection.get(env, node);
+        final SPTarget      target = TargetSelection.getTargetForNode(env, node).getOrNull();
         _w.detailEditor.gfe().edit(ctx, target, node);
     }
 
@@ -396,16 +396,17 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             final GuideGroup primaryGroup = ge.getPrimary();
 
             final ImList<GuideGroup> oldGroups = ge.getOptions();
+            final int newGroupIdx              = oldGroups.size();
             final GuideGroup newGroup          = GuideGroup.create("Manual Group");
             final ImList<GuideGroup> newGroups = oldGroups.append(newGroup);
 
             // OT-34: make new group primary and select it
             if (!positionTable.confirmGroupChange(primaryGroup, newGroup)) return;
             obsComp.setTargetEnvironment(env.setGuideEnvironment(ge.setOptions(newGroups)
-                    .setPrimaryIndex(oldGroups.size())));
+                    .setPrimaryIndex(newGroupIdx)));
 
             // expand new group tree node
-            positionTable.selectGroup(newGroup);
+            positionTable.selectGroup(new Pair<>(newGroupIdx,newGroup));
         }
     }
 
@@ -453,12 +454,12 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         @Override public void propertyChange(final PropertyChangeEvent evt) {
             final ISPObsComponent node = getContextTargetObsComp();
             final TargetEnvironment env = getDataObject().getTargetEnvironment();
-            final SPTarget target = TargetSelection.get(env, node);
+            final Option<SPTarget> targetOpt = TargetSelection.getTargetForNode(env, node);
 
-            if (target != null) {
-                manageCurPosIfEnvContainsTarget(target, () -> _curPos = target);
+            if (targetOpt.isDefined()) {
+                targetOpt.foreach(target -> manageCurPosIfEnvContainsTarget(target, () -> _curPos = target));
             } else {
-                final Option<Tuple2<Integer, GuideGroup>> grp = TargetSelection.getIndexedGuideGroup(env, node);
+                final Option<Tuple2<Integer, GuideGroup>> grp = TargetSelection.getIndexedGuideGroupForNode(env, node);
                 grp.filter(tup -> env.getGroups().contains(tup._2())).foreach(tup -> {
                     if (_curPos != null) _curPos.deleteWatcher(posWatcher);
 
@@ -519,7 +520,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             _curGroup = new Pair<>(groupIndex, group);
         }
         getDataObject().setTargetEnvironment(env);
-        final SPTarget selTarget = TargetSelection.get(env, getNode());
+        final SPTarget selTarget = TargetSelection.getTargetForNode(env, getNode()).getOrNull();
         if (env.getTargets().contains(selTarget)) {
             if (_curPos != null) _curPos.deleteWatcher(posWatcher);
             _curPos = selTarget;
@@ -566,8 +567,10 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         final ISPObsComponent obsComponent = getNode();
         final TargetObsComp dataObject = getDataObject();
         if ((obsComponent == null) || (dataObject == null)) return;
-        final SPTarget target = TargetSelection.get(dataObject.getTargetEnvironment(), obsComponent);
-        if (target != null) {
+        final Option<SPTarget> targetOpt = TargetSelection.getTargetForNode(dataObject.getTargetEnvironment(), obsComponent);
+        if (targetOpt.isDefined()) {
+            final SPTarget target = targetOpt.getValue();
+
             // Clone the target.
             final ParamSet ps = target.getParamSet(new PioXmlFactory());
             final SPTarget newTarget = new SPTarget();
@@ -596,15 +599,17 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                     env.setUserTargets(env.getUserTargets().append(newTarget));
             dataObject.setTargetEnvironment(newEnv);
         } else {
-            final GuideGroup group = TargetSelection.getGuideGroup(dataObject.getTargetEnvironment(), obsComponent);
-            if (group != null) {
+            final Option<Tuple2<Integer,GuideGroup>> indexedGroupOpt =
+                    TargetSelection.getIndexedGuideGroupForNode(dataObject.getTargetEnvironment(), obsComponent);
+            indexedGroupOpt.foreach(indexedGroup -> {
+                final GuideGroup group = indexedGroup._2();
                 final TargetEnvironment env = dataObject.getTargetEnvironment();
                 final List<GuideGroup> groups = new ArrayList<>();
                 groups.addAll(env.getGroups().toList());
                 groups.add(group.cloneTargets());
                 final TargetEnvironment newEnv = env.setGuideEnvironment(env.getGuideEnvironment().setOptions(DefaultImList.create(groups)));
                 dataObject.setTargetEnvironment(newEnv);
-            }
+            });
         }
     };
 
@@ -645,8 +650,8 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
         static Option<TargetClipboard> copy(final TargetEnvironment env, final ISPObsComponent obsComponent) {
             if (obsComponent == null) return None.instance();
-            return ImOption.apply(TargetSelection.get(env, obsComponent)).map(TargetClipboard::new).orElse(
-                    ImOption.apply(TargetSelection.getGuideGroup(env, obsComponent)).map(TargetClipboard::new));
+            return TargetSelection.getTargetForNode(env, obsComponent).map(TargetClipboard::new).orElse(
+                    TargetSelection.getIndexedGuideGroupForNode(env, obsComponent).map(Tuple2::_2).map(TargetClipboard::new));
         }
 
 
@@ -666,8 +671,9 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         void paste(final ISPObsComponent obsComponent, final TargetObsComp dataObject) {
             if ((obsComponent == null) || (dataObject == null)) return;
 
-            final SPTarget spTarget = TargetSelection.get(dataObject.getTargetEnvironment(), obsComponent);
-            final GuideGroup group = TargetSelection.getGuideGroup(dataObject.getTargetEnvironment(), obsComponent);
+            final SPTarget spTarget = TargetSelection.getTargetForNode(dataObject.getTargetEnvironment(), obsComponent).getOrNull();
+            final GuideGroup group = TargetSelection.getIndexedGuideGroupForNode(dataObject.getTargetEnvironment(), obsComponent)
+                    .map(Tuple2::_2).getOrNull();
 
             if (spTarget != null && target != null) {
                 spTarget.setTarget(target.clone());
