@@ -93,7 +93,6 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
     private SpectroscopyResult calculateSpectroscopy(final Gmos mainInstrument, final Gmos instrument, final int detectorCount) {
 
         final SpecS2NLargeSlitVisitor[] specS2N;
-        final SlitThroughput st;
 
         final SEDFactory.SourceResult src = SEDFactory.calculate(instrument, _sdParameters, _obsConditionParameters, _telescope);
         final int ccdIndex = instrument.getDetectorCcdIndex();
@@ -143,16 +142,19 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         final double read_noise = instrument.getReadNoise();
 
         // ObservationMode Imaging or spectroscopy
-        final double spec_source_frac;
-        final double ap_diam;
+        final double throughput;
+        final Slit slit;
+
+        final double slitLength;
         if (!instrument.isIfuUsed()) {
-            st = new SlitThroughput(_obsDetailParameters, _sdParameters, IQcalc.getImageQuality(), instrument.getPixelSize(), instrument.getSlitWidth());
-            ap_diam = st.getAppDiam();
-            spec_source_frac = st.getSlitThroughput();
+            slit = Slit$.MODULE$.apply(_sdParameters, _obsDetailParameters, instrument, instrument.getSlitWidth(), IQcalc.getImageQuality());
+            final SlitThroughput st = new SlitThroughput(_sdParameters, slit, IQcalc.getImageQuality(), instrument.getPixelSize());
+            slitLength = slit.lengthPixels();
+            throughput = st.throughput();
         } else {
-            st = null; // TODO: how to deal with no ST in case of IFU?
-            spec_source_frac = source_fraction;
-            ap_diam = 5 / instrument.getSpatialBinning();
+            throughput = source_fraction;
+            slitLength = 5 / instrument.getSpatialBinning();
+            slit = Slit$.MODULE$.apply(instrument.getSlitWidth(), slitLength, instrument.getPixelSize());
         }
 
         // TODO: why, oh why?
@@ -162,17 +164,17 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
             specS2N = new SpecS2NLargeSlitVisitor[sf_list.size()];
             for (int i = 0; i < sf_list.size(); i++) {
                 final double spsf = sf_list.get(i);
+                final Slit ifuSlit = Slit$.MODULE$.apply(instrument.getSlitWidth(), slitLength, instrument.getPixelSize());
                 specS2N[i] = new SpecS2NLargeSlitVisitor(
-                        instrument.getSlitWidth(),
+                        ifuSlit,
+                        spsf,
                         instrument.getPixelSize(),
                         instrument.getSpectralPixelWidth(),
                         instrument.getObservingStart(),
                         instrument.getObservingEnd(),
                         instrument.getGratingDispersion_nm(),
                         instrument.getGratingDispersion_nmppix(),
-                        spsf,
                         im_qual,
-                        ap_diam,
                         read_noise,
                         dark_current * instrument.getSpatialBinning() * instrument.getSpectralBinning(),
                         _obsDetailParameters);
@@ -187,16 +189,15 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         } else {
             specS2N = new SpecS2NLargeSlitVisitor[1];
             specS2N[0] = new SpecS2NLargeSlitVisitor(
-                    instrument.getSlitWidth(),
+                    slit,
+                    throughput,
                     instrument.getPixelSize(),
                     instrument.getSpectralPixelWidth(),
                     instrument.getObservingStart(),
                     instrument.getObservingEnd(),
                     instrument.getGratingDispersion_nm(),
                     instrument.getGratingDispersion_nmppix(),
-                    spec_source_frac,
                     im_qual,
-                    ap_diam,
                     read_noise,
                     dark_current * instrument.getSpatialBinning() * instrument.getSpectralBinning(),
                     _obsDetailParameters);
@@ -210,7 +211,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
 
         }
 
-        return new SpectroscopyResult(p, instrument, SFcalc, IQcalc, specS2N, st, Option.empty());
+        return new SpectroscopyResult(p, instrument, SFcalc, IQcalc, specS2N, slit, throughput, Option.empty());
 
     }
 

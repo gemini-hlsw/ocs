@@ -38,44 +38,36 @@ public final class SlitThroughput {
         }
     }
 
-    private final ObservationDetails obs;
     private final SourceDefinition src;
+    private final Slit slit;
     private final double im_qual;
     private final double pixel_size;    // [arcsec/pixel]
-    private final double slit_width;    // [arcsec]
-    private final double slit_ap;       // the slit length in the aperture in arcsecs
 
-    public SlitThroughput(final ObservationDetails obs, final SourceDefinition src, final double im_qual, final double pixel_size, final double slit_width) {
-        this.obs        = obs;
+    public SlitThroughput(final SourceDefinition src, final Slit slit, final double im_qual, final double pixel_size) {
         this.src        = src;
+        this.slit       = slit;
         this.im_qual    = im_qual;
-        this.slit_ap    = (obs.analysisMethod() instanceof UserAperture) ? ((UserAperture) obs.analysisMethod()).diameter() : 1.4 * im_qual;
         this.pixel_size = pixel_size;
-        this.slit_width = slit_width;
     }
 
     // For point sources and gaussian sources: returns the fraction of the source flux that goes through the slit.
     // For uniform surface brightness: either return 1arcsec2 for auto aperture or the slit area.
-    public double getSlitThroughput() {
+    public double throughput() {
 
         // For the usb case we want the resolution to be determined by the
         // slit width and not the image quality.
         if (src.isUniform()) {
-            if (obs.isAutoAperture()) {
-                return 1;                                           // return 1 arcsec2
-            } else {
-                return slit_width * getSpatialPix() * pixel_size;   // return the area (length * slit width)
-            }
+            return slit.area();
 
         // Non-USB case (point source/gaussian)
         } else {
 
             // find the slit length in the aperture
-            double slit_spatial_ratio = getSpatialPix() * pixel_size / slit_width;
+            double slit_spatial_ratio = slit.lengthPixels() * pixel_size / slit.width();
 
             // find the slit width
             final double sigma = im_qual / 2.355;
-            final double slit_spec_ratio = slit_width / sigma;
+            final double slit_spec_ratio = slit.width() / sigma;
 
             // deal with values that are outside the range of the x- and y-axes
             // defined in slit_throughput.dat
@@ -94,22 +86,6 @@ public final class SlitThroughput {
 
         }
 
-    }
-
-    /**
-     * Calculates the aperture diameter in pixels.
-     * @return aperture diameter
-     */
-    public double getAppDiam() {
-        if (src.isUniform() && obs.isAutoAperture()) {
-            return Math.round(1 / (slit_width * pixel_size));
-        } else {
-            return getSpatialPix();
-        }
-    }
-
-    private double getSpatialPix() {
-        return Math.round(slit_ap / pixel_size);
     }
 
     /**

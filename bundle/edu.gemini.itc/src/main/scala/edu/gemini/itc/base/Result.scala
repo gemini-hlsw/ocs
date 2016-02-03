@@ -51,7 +51,8 @@ final case class SpectroscopyResult(
                       sfCalc:           SourceFraction,
                       iqCalc:           ImageQualityCalculatable,
                       specS2N:          Array[SpecS2N],   // Array is used for IFU cases (GMOS and NIFS)
-                      st:               SlitThroughput,
+                      slit:             Slit,
+                      slitThrougput:    Double,
                       aoSystem:         Option[AOSystem]) extends Result {
   lazy val peakPixelCount: Double = specS2N.map(_.getPeakPixelCount).max
 }

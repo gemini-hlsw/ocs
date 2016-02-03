@@ -19,11 +19,10 @@ public class SpecS2NLargeSlitVisitor implements SampledSpectrumVisitor, SpecS2N 
     private VisitableSampledSpectrum spec_exp_s2n;
     private VisitableSampledSpectrum spec_final_s2n;
 
-    private final double spec_Npix;
+    private final Slit slit;
+    private final double throughput;
     private final double spec_frac_with_source;
-    private final double slit_width;
     private final double pixel_size;
-    private final double spec_source_fraction;
     private final double spec_exp_time;
     private final double im_qual;
     private final double dark_current;
@@ -49,24 +48,22 @@ public class SpecS2NLargeSlitVisitor implements SampledSpectrumVisitor, SpecS2N 
      * pixel_size, Smoothing Element, SlitThroughput, spec_Npix(sw aperture
      * size), ExpNum, frac_with_source, ExpTime .
      */
-    public SpecS2NLargeSlitVisitor(final double slit_width,
+    public SpecS2NLargeSlitVisitor(final Slit slit,
+                                   final double throughput,
                                    final double pixel_size,
                                    final double pix_width,
                                    final double obs_wave_low,
                                    final double obs_wave_high,
                                    final double gratingDispersion_nm,
                                    final double gratingDispersion_nmppix,
-                                   final double spec_source_fraction,
                                    final double im_qual,
-                                   final double spec_Npix,
                                    final double read_noise,
                                    final double dark_current,
                                    final ObservationDetails odp) {
-        this.slit_width             = slit_width;
+        this.slit                   = slit;
+        this.throughput             = throughput;
         this.pixel_size             = pixel_size;
         this.pix_width              = pix_width;
-        this.spec_source_fraction   = spec_source_fraction;
-        this.spec_Npix              = spec_Npix;
         this.obs_wave_low           = obs_wave_low;
         this.obs_wave_high          = obs_wave_high;
         this.gratingDispersion_nm   = gratingDispersion_nm;
@@ -104,24 +101,22 @@ public class SpecS2NLargeSlitVisitor implements SampledSpectrumVisitor, SpecS2N 
     }
 
     public double getSpecNpix() {
-        return spec_Npix;
+        return slit.lengthPixels();
     }
 
     /**
      * Implements the SampledSpectrumVisitor interface
      */
     public void visit(final SampledSpectrum sed) {
-        //this.obs_wave = (obs_wave_low+obs_wave_high)/2;
-
 
         double width, background_width;
         //if image size is less than the slit width it will determine resolution
         // For source:
-        if (im_qual < slit_width)
+        if (im_qual < slit.width())
             width = im_qual;
-        else width = slit_width;
+        else width = slit.width();
         // For background:
-        background_width = slit_width;
+        background_width = slit.width();
 
         //calc the width of a spectral resolution element in nm
         //double res_element = obs_wave/grism_res;
@@ -152,9 +147,9 @@ public class SpecS2NLargeSlitVisitor implements SampledSpectrumVisitor, SpecS2N 
         background_flux.smoothY(background_smoothing_element);       // Uncommented and decoupled from IQ on 04/08/2014 (SLP)
 
         if (haloIsUsed) {
-            if (uncorrected_im_qual < slit_width)
+            if (uncorrected_im_qual < slit.width())
                 width = im_qual;
-            else width = slit_width;
+            else width = slit.width();
             //calc the width of a spectral resolution element in nm
             //double res_element = obs_wave/grism_res;
             res_element = gratingDispersion_nm * width / 0.5;  // gratingDispersion_nm is the spectral resolution in nm for a 0.5-arcsec slit
@@ -204,25 +199,26 @@ public class SpecS2NLargeSlitVisitor implements SampledSpectrumVisitor, SpecS2N 
         int source_flux_last = lastCcdPixel(source_flux.getLength());
         if (haloIsUsed) {
             for (int i = _firstCcdPixel; i <= source_flux_last; ++i)
-                spec_var_source.setY(i, source_flux.getY(i) * spec_source_fraction *
+                spec_var_source.setY(i, source_flux.getY(i) * throughput *
                         spec_exp_time * gratingDispersion_nmppix + halo_flux.getY(i) * spec_halo_source_fraction *
                         spec_exp_time * gratingDispersion_nmppix);
         } else {
             for (int i = _firstCcdPixel; i <= source_flux_last; ++i)
-                spec_var_source.setY(i, source_flux.getY(i) * spec_source_fraction *
+                spec_var_source.setY(i, source_flux.getY(i) * throughput *
                         spec_exp_time * gratingDispersion_nmppix);
         }
         //Shot noise on background flux in aperture
         int spec_var_background_last = lastCcdPixel(spec_var_background.getLength());
         for (int i = _firstCcdPixel; i <= spec_var_background_last; ++i)
-            spec_var_background.setY(i, background_flux.getY(i) * slit_width *
-                    pixel_size * spec_Npix * spec_exp_time * gratingDispersion_nmppix);
+            spec_var_background.setY(i, background_flux.getY(i) *
+                    slit.width() * pixel_size * slit.lengthPixels() * // TODO: use slit.area()
+                    spec_exp_time * gratingDispersion_nmppix);
 
         //Shot noise on dark current flux in aperture
-        double spec_var_dark = dark_current * spec_Npix * spec_exp_time;
+        double spec_var_dark = dark_current * slit.lengthPixels() * spec_exp_time;
 
         //Readout noise in aperture
-        double spec_var_readout = read_noise * read_noise * spec_Npix;
+        double spec_var_readout = read_noise * read_noise * slit.lengthPixels();
 
         //Create a container for the total and sourceless noise in the aperture
         final VisitableSampledSpectrum spec_noise = (VisitableSampledSpectrum) source_flux.clone();
@@ -249,12 +245,12 @@ public class SpecS2NLargeSlitVisitor implements SampledSpectrumVisitor, SpecS2N 
         if (haloIsUsed) {
             for (int i = _firstCcdPixel; i <= spec_signal_last; ++i)
                 spec_signal.setY(i, source_flux.getY(i) *
-                        spec_source_fraction * spec_exp_time * gratingDispersion_nmppix + halo_flux.getY(i) *
+                        throughput * spec_exp_time * gratingDispersion_nmppix + halo_flux.getY(i) *
                         spec_halo_source_fraction * spec_exp_time * gratingDispersion_nmppix);
         } else {
             for (int i = _firstCcdPixel; i <= spec_signal_last; ++i)
                 spec_signal.setY(i, source_flux.getY(i) *
-                        spec_source_fraction * spec_exp_time * gratingDispersion_nmppix);
+                        throughput * spec_exp_time * gratingDispersion_nmppix);
         }
         //S2N for one exposure
         int spec_exp_s2n_last = lastCcdPixel(spec_exp_s2n.getLength());

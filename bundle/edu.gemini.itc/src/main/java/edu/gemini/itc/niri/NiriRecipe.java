@@ -122,9 +122,9 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
         // i.e. the output morphology is same as the input morphology.
         // Might implement these modules at a later time.
 
-        final SlitThroughput st = new SlitThroughput(_obsDetailParameters, _sdParameters, im_qual, instrument.getPixelSize(), instrument.getSlitWidth());
-        final double ap_diam = st.getAppDiam();
-        final double spec_source_frac = st.getSlitThroughput();
+        final Slit slit = Slit$.MODULE$.apply(_sdParameters, _obsDetailParameters, instrument, instrument.getSlitWidth(), IQcalc.getImageQuality());
+        final SlitThroughput st = new SlitThroughput(_sdParameters, slit, im_qual, instrument.getPixelSize());
+        final double spec_source_frac = st.throughput();
 
         final SpecS2NVisitor specS2N = new SpecS2NVisitor(
                 instrument.getPixelSize(),
@@ -134,7 +134,7 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
                 instrument.getObservingEnd(),
                 instrument.getGrismResolution(),
                 spec_source_frac, im_qual,
-                ap_diam,
+                slit.lengthPixels(),
                 _obsDetailParameters.calculationMethod(),
                 instrument.getDarkCurrent(),
                 niriParameters.readMode().getReadNoise());
@@ -145,7 +145,7 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
 
         final SpecS2N[] specS2Narr = new SpecS2N[1];
         specS2Narr[0] = specS2N;
-        return new SpectroscopyResult(p, instrument, SFcalc, IQcalc, specS2Narr, st, altair);
+        return new SpectroscopyResult(p, instrument, SFcalc, IQcalc, specS2Narr, slit, st.throughput(), altair);
     }
 
     public ImagingResult calculateImaging() {

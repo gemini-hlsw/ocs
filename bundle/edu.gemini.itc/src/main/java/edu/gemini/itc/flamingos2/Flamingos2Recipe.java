@@ -91,24 +91,22 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
         // i.e. the output morphology is same as the input morphology.
         // Might implement these modules at a later time.
 
-        final SlitThroughput st = new SlitThroughput(_obsDetailParameters, _sdParameters, im_qual, instrument.getPixelSize(), instrument.getSlitWidth());
+        final Slit slit = Slit$.MODULE$.apply(_sdParameters, _obsDetailParameters, instrument, instrument.getSlitWidth(), im_qual);
+        final SlitThroughput st = new SlitThroughput(_sdParameters, slit, im_qual, instrument.getPixelSize());
 
-        final double spec_source_frac = st.getSlitThroughput();
-        final double ap_diam = st.getAppDiam();
         final double gratDispersion_nmppix = instrument.getSpectralPixelWidth();
         final double gratDispersion_nm = 0.5 / instrument.getPixelSize() * gratDispersion_nmppix;
 
         final SpecS2NLargeSlitVisitor specS2N = new SpecS2NLargeSlitVisitor(
-                instrument.getSlitWidth(),
+                slit,
+                st.throughput(),
                 instrument.getPixelSize(),
                 instrument.getSpectralPixelWidth(),
                 instrument.getObservingStart(),
                 instrument.getObservingEnd(),
                 gratDispersion_nm,
                 gratDispersion_nmppix,
-                spec_source_frac,
                 im_qual,
-                ap_diam,
                 instrument.getReadNoise(),
                 instrument.getDarkCurrent(),
                 _obsDetailParameters);
@@ -121,7 +119,7 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
         final SpecS2NLargeSlitVisitor[] specS2Narr = new SpecS2NLargeSlitVisitor[1];
         specS2Narr[0] = specS2N;
 
-        return new SpectroscopyResult(p, instrument, SFcalc, IQcalc, specS2Narr, st, Option.empty());
+        return new SpectroscopyResult(p, instrument, SFcalc, IQcalc, specS2Narr, slit, st.throughput(), Option.empty());
     }
 
     public ImagingResult calculateImaging() {
