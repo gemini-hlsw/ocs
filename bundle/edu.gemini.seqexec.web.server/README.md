@@ -1,6 +1,10 @@
-## Seqexec Web Server
+# Seqexec Web Server
 
-This bundle contains a web-based seqexec client. It is intended to run in the same process as the seqexec-server
+This bundle contains a web-based seqexec client and server. It is intended to run in the same process as the seqexec-server
+
+## Project Structure
+
+The project is done using [Scala.js]()
 
 ### How to compile and reload the server
 

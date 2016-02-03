@@ -2,17 +2,9 @@ import OcsKeys._
 
 // note: inter-project dependencies are declared at the top, in projects.sbt
 
-name := "edu.gemini.seqexec.web.server"
+name := "edu.gemini.seqexec.web.server.js"
 
 version := ocsVersion.value.toOsgiVersion
-
-libraryDependencies ++= Seq(
-  // NOTE this doesn't work on OSGI, http4s is not OSGi friendly
-  "org.http4s" %% "http4s-dsl"          % "0.12.0",
-  "org.http4s" %% "http4s-blaze-server" % "0.12.0",
-  "org.scalaz"             %% "scalaz-core" % "7.1.6",
-  "org.scalaz"             %% "scalaz-concurrent" % "7.1.6"
-  )
 
 Revolver.settings
 
@@ -42,7 +34,7 @@ libraryDependencies ++= Seq(
   "org.scala-js" %%% "scalajs-dom" % "0.8.0",
   "com.github.japgolly.scalajs-react" %%% "core" % "0.10.4",
   "com.github.japgolly.scalajs-react" %%% "extra" % "0.10.4",
-  "com.lihaoyi" %% "upickle" % "0.3.8"
+  "com.lihaoyi" %%% "upickle" % "0.3.8"
 )
 
 // TODO get dependencies via webjars

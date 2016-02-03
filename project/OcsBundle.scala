@@ -268,10 +268,14 @@ trait OcsBundle {
     )
 
   lazy val bundle_edu_gemini_seqexec_web_server = 
-    project.in(file("bundle/edu.gemini.seqexec.web.server"))
+    crossProject.in(file("bundle/edu.gemini.seqexec.web.server"))
       .enablePlugins(ScalaJSPlugin)
       .dependsOn(
     )
+
+  // Needed, so sbt finds the projects
+  lazy val bundle_edu_gemini_seqexec_web_server_JVM = bundle_edu_gemini_seqexec_web_server.jvm
+  lazy val bundle_edu_gemini_seqexec_web_server_JS = bundle_edu_gemini_seqexec_web_server.js
 
   lazy val bundle_edu_gemini_services_client = 
     project.in(file("bundle/edu.gemini.services.client")).dependsOn(

@@ -47,7 +47,7 @@ object SeqexecApp extends JSApp {
         .componentDidMount(s => Callback {
           Ajax.get(
             url = "/api/comments"
-          ).map(k => println(k.responseText))
+          ).map(k => println(k.responseText) + " ")
 
           s.modState(_ => List(Comment("Carlos", "My comment"), Comment("Jose", "His comment"))).runNow()
         })
