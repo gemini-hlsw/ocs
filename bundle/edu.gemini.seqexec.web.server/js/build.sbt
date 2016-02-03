@@ -4,6 +4,10 @@ import OcsKeys._
 
 name := "edu.gemini.seqexec.web.server.js"
 
+val jsName = SettingKey[String]("jsfilename")
+
+jsName := "seqexec"
+
 version := ocsVersion.value.toOsgiVersion
 
 Revolver.settings
@@ -28,7 +32,7 @@ crossTarget in (Compile, fullOptJS) := file("js")
 crossTarget in (Compile, packageJSDependencies) := file("js")
 
 artifactPath in (Compile, fastOptJS) := (resourceManaged in Compile).value /
-  ((moduleName in fastOptJS).value + "-opt.js")
+  (jsName.value + "-opt.js")
 
 libraryDependencies ++= Seq(
   "org.scala-js" %%% "scalajs-dom" % "0.8.0",
