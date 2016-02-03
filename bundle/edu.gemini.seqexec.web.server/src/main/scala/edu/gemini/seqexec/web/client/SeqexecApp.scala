@@ -1,15 +1,19 @@
 package edu.gemini.seqexec.web.client
 
+import edu.gemini.seqexec.web.common.Comment
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.prefix_<^._
 
 import scala.scalajs.js.JSApp
 
 import org.scalajs.dom.document
+import org.scalajs.dom.ext.Ajax
+
+import upickle.default._
+
+import scalajs.concurrent.JSExecutionContext.Implicits.runNow
 
 object SeqexecApp extends JSApp {
-
-  case class Comment(author: String, comment: String)
 
   def main(): Unit = {
     val ReactComment = ReactComponentB[Comment]("ReactComment")
@@ -39,7 +43,15 @@ object SeqexecApp extends JSApp {
             <.h1("Comments"),
             CommentList(k),
             CommentForm())
-        ).buildU
+        )
+        .componentDidMount(s => Callback {
+          Ajax.get(
+            url = "/api/comments"
+          ).map(k => println(k.responseText))
+
+          s.modState(_ => List(Comment("Carlos", "My comment"), Comment("Jose", "His comment"))).runNow()
+        })
+        .buildU
 
     ReactDOM.render(CommentBox(), document.getElementById("content"))
   }

@@ -38,13 +38,11 @@ crossTarget in (Compile, packageJSDependencies) := file("js")
 artifactPath in (Compile, fastOptJS) := (resourceManaged in Compile).value /
   ((moduleName in fastOptJS).value + "-opt.js")
 
-//libraryDependencies += "be.doeraene" %%% "scalajs-jquery" % "0.8.1"
-
 libraryDependencies ++= Seq(
   "org.scala-js" %%% "scalajs-dom" % "0.8.0",
-  "com.lihaoyi" %%% "scalatags" % "0.5.4",
   "com.github.japgolly.scalajs-react" %%% "core" % "0.10.4",
-  "com.github.japgolly.scalajs-react" %%% "extra" % "0.10.4"
+  "com.github.japgolly.scalajs-react" %%% "extra" % "0.10.4",
+  "com.lihaoyi" %% "upickle" % "0.3.8"
 )
 
 // TODO get dependencies via webjars
