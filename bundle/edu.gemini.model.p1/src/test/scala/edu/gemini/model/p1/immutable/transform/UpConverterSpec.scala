@@ -697,6 +697,17 @@ class UpConverterSpec extends SpecificationWithJUnit with SemesterProperties {
           result \\ "niri" must \\("name") \> "NIRI Altair Laser Guidestar f/32 (0.02\"/pix, 22\" FoV) HeI (1.083 um)"
       }
     }
+    "proposal with GPI and HStar and HLiwa modes should become H direct, REL-2671" in {
+      val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_with_gpi_hstar.xml")))
+
+      val converted = UpConverter.convert(xml)
+      converted must beSuccessful.like {
+        case StepResult(changes, result) =>
+          changes must have length 4
+          result \\ "gpi" must \\("observingMode") \>~ "H.direct"
+          result \\ "gpi" must \\("name") \> "GPI H direct Prism"
+      }
+    }
   }
 
   def testF2R3KYConversion(xml: Elem) = {

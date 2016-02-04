@@ -10,7 +10,7 @@ object Gpi {
     val title = "Observing Mode"
     val description = "Select an observing mode for your configuration."
 
-    def choices: List[GpiObservingMode] = GpiObservingMode.values.toList
+    def choices: List[GpiObservingMode] = GpiObservingMode.values.toList.filterNot(m => m == GpiObservingMode.HStar || m == GpiObservingMode.HLiwa)
 
     def apply(om: GpiObservingMode) = Left(new DisperserNode(om))
 

@@ -237,6 +237,10 @@ package object immutable {
 
   type GpiObservingMode = M.GpiObservingMode
   object GpiObservingMode extends EnumObject[M.GpiObservingMode] {
+    val HStar   = M.GpiObservingMode.H_STAR
+    val HLiwa   = M.GpiObservingMode.H_LIWA
+    val HDirect = M.GpiObservingMode.DIRECT_H_BAND
+    
     def isCoronographMode(mode: GpiObservingMode):Boolean = mode.value.startsWith("Coronograph")
     def isDirectMode(mode: GpiObservingMode):Boolean = mode.value.endsWith("direct")
     def scienceBand(mode: GpiObservingMode):Option[String] = {

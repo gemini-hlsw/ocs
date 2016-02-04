@@ -5,7 +5,7 @@ import xml.{Node => XMLNode, Text}
 import scalaz._
 import Scalaz._
 
-import edu.gemini.model.p1.immutable.{Site, SemesterOption, Proposal, Semester}
+import edu.gemini.model.p1.immutable._
 import edu.gemini.model.p1.immutable.transform.XMLConverter._
 import scala.xml.transform.BasicTransformer
 
@@ -201,7 +201,22 @@ case object SemesterConverter2016ATo2016B extends SemesterConverter {
       }
       StepResult("Texes proposal has been assigned to Gemini North.", <texes>{TexesSiteTransformer.transform(ns)}</texes>).successNel
   }
-  val transformers = List(replaceKLongFilter, dssSite, phoenixSite, texesSite)
+
+  val removedModes = List(GpiObservingMode.HLiwa, GpiObservingMode.HStar).map(_.value())
+
+  val gpiModes: TransformFunction = {
+    case p @ <gpi>{ns @ _*}</gpi> if removedModes.contains((p \\ "observingMode").text) =>
+      object GpiObsModeTransformer extends BasicTransformer {
+        override def transform(n: xml.Node): xml.NodeSeq = n match {
+            case <name>{name}</name>                   => <name>{name.text.replace((p \\ "observingMode").text, GpiObservingMode.HDirect.value)}</name>
+            case <observingMode>{name}</observingMode> => <observingMode>{GpiObservingMode.HDirect.value}</observingMode>
+            case elem: xml.Elem                        => elem.copy(child = elem.child.flatMap(transform))
+            case _                                     => n
+          }
+      }
+      StepResult(s"GPI proposal with observing mode ${(p \\ "observingMode").text} has been assigned to the ${GpiObservingMode.HDirect.value} mode.", <gpi>{GpiObsModeTransformer.transform(ns)}</gpi>).successNel
+  }
+  val transformers = List(replaceKLongFilter, dssSite, phoenixSite, texesSite, gpiModes)
 }
 
 /**
