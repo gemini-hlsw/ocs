@@ -43,6 +43,11 @@ object IdeaProject {
     <component name="EntryPointsManager">
       <entry_points version="2.0" />
     </component>
+    <component name="JavaProjectCodeInsightSettings">
+      <excluded-names>
+        <name>edu.gemini.model.p1.mutable</name>
+      </excluded-names>
+    </component>
     <component name="InspectionProjectProfileManager">
       <profiles>
         <profile version="1.0" is_locked="false">
