@@ -7,7 +7,7 @@ import edu.gemini.gsa.query.GsaHost
 
 object GsaUrl {
   val ROOT = GsaHost.Archive("archive.gemini.edu")
-  val siderealPrefix = s"${ROOT.baseUrl}/searchform/notengineering/science/NotFail/OBJECT"
+  val siderealPrefix = s"${ROOT.baseUrl}/searchform/notengineering/NotFail/OBJECT"
   val nonSiderealPrefix = s"${ROOT.baseUrl}/searchform"
 
   /**
