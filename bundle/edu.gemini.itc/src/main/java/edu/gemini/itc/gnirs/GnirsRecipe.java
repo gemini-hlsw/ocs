@@ -102,8 +102,8 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
                 instrument.getSpectralPixelWidth() / instrument.getOrder(),
                 instrument.getObservingStart(),
                 instrument.getObservingEnd(),
-                instrument.getGratingDispersion_nm(),
-                instrument.getGratingDispersion_nmppix(),
+                instrument.getGratingResolution(),
+                instrument.getGratingDispersion(),
                 im_qual,
                 instrument.getReadNoise(),
                 instrument.getDarkCurrent(),
@@ -129,7 +129,7 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
 
             for (int i = 0; i < ORDERS; i++) {
                 final int order = i + 3;
-                final double d         = instrument.getGratingDispersion_nmppix() / order * Gnirs.DETECTOR_PIXELS / 2;
+                final double d         = instrument.getGratingDispersion() / order * Gnirs.DETECTOR_PIXELS / 2;
                 final double trimStart = trimCenter * 3 / order - d;
                 final double trimEnd   = trimCenter * 3 / order + d;
 
@@ -145,8 +145,8 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
                 specS2N.setSourceSpectrum(sedOrder[i]);
                 specS2N.setBackgroundSpectrum(skyOrder[i]);
 
-                specS2N.setGratingDispersion_nmppix(instrument.getGratingDispersion_nmppix() / order);
-                specS2N.setGratingDispersion_nm(instrument.getGratingDispersion_nm() / order);
+                specS2N.setGratingDispersion(instrument.getGratingDispersion() / order);
+                specS2N.setGratingResolution(instrument.getGratingResolution() / order);
                 specS2N.setSpectralPixelWidth(instrument.getSpectralPixelWidth() / order);
 
                 specS2N.setStartWavelength(sedOrder[i].getStart());
@@ -163,8 +163,8 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
                 specS2N.setSourceSpectrum(sedOrder[i]);
                 specS2N.setBackgroundSpectrum(skyOrder[i]);
 
-                specS2N.setGratingDispersion_nmppix(instrument.getGratingDispersion_nmppix() / order);
-                specS2N.setGratingDispersion_nm(instrument.getGratingDispersion_nm() / order);
+                specS2N.setGratingDispersion(instrument.getGratingDispersion() / order);
+                specS2N.setGratingResolution(instrument.getGratingResolution() / order);
                 specS2N.setSpectralPixelWidth(instrument.getSpectralPixelWidth() / order);
 
                 specS2N.setStartWavelength(sedOrder[i].getStart());

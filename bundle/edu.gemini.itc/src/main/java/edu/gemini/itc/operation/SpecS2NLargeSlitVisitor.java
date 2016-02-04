@@ -32,8 +32,8 @@ public class SpecS2NLargeSlitVisitor implements SampledSpectrumVisitor, SpecS2N 
     private double pix_width;
     private double obs_wave_low;
     private double obs_wave_high;
-    private double gratingDispersion_nm;
-    private double gratingDispersion_nmppix;
+    private double gratingResolution;
+    private double gratingDispersion;
     private double spec_halo_source_fraction;
     private double uncorrected_im_qual;
 
@@ -52,8 +52,8 @@ public class SpecS2NLargeSlitVisitor implements SampledSpectrumVisitor, SpecS2N 
                                    final double pix_width,
                                    final double obs_wave_low,
                                    final double obs_wave_high,
-                                   final double gratingDispersion_nm,
-                                   final double gratingDispersion_nmppix,
+                                   final double gratingResolution,
+                                   final double gratingDispersion,
                                    final double im_qual,
                                    final double read_noise,
                                    final double dark_current,
@@ -63,8 +63,8 @@ public class SpecS2NLargeSlitVisitor implements SampledSpectrumVisitor, SpecS2N 
         this.pix_width              = pix_width;
         this.obs_wave_low           = obs_wave_low;
         this.obs_wave_high          = obs_wave_high;
-        this.gratingDispersion_nm   = gratingDispersion_nm;
-        this.gratingDispersion_nmppix = gratingDispersion_nmppix;
+        this.gratingResolution      = gratingResolution;
+        this.gratingDispersion      = gratingDispersion;
         this.im_qual                = im_qual;
         this.dark_current           = dark_current;
         this.read_noise             = read_noise;
@@ -123,11 +123,11 @@ public class SpecS2NLargeSlitVisitor implements SampledSpectrumVisitor, SpecS2N 
 
         //calc the width of a spectral resolution element in nm
         //double res_element = obs_wave/grism_res;
-        double res_element = gratingDispersion_nm * width / 0.5; // gratingDispersion_nm is the spectral resolution in nm for a 0.5-arcsec slit
-        double background_res_element = gratingDispersion_nm * background_width / 0.5;
+        double res_element = gratingResolution * width / 0.5; // gratingResolution is the spectral resolution in nm for a 0.5-arcsec slit
+        double background_res_element = gratingResolution * background_width / 0.5;
         //and the data size in the spectral domain
-        double res_element_data = res_element / source_flux.getSampling(); // /gratingDispersion_nmppix;
-        double background_res_element_data = background_res_element / background_flux.getSampling(); // /gratingDispersion_nmppix;
+        double res_element_data = res_element / source_flux.getSampling(); // /gratingDispersion;
+        double background_res_element_data = background_res_element / background_flux.getSampling(); // /gratingDispersion;
         //use the int value of spectral_pix as a smoothing element
         int smoothing_element = new Double(res_element_data + 0.5).intValue();
         int background_smoothing_element = new Double(background_res_element_data + 0.5).intValue();
@@ -152,9 +152,9 @@ public class SpecS2NLargeSlitVisitor implements SampledSpectrumVisitor, SpecS2N 
             }
             //calc the width of a spectral resolution element in nm
             //double res_element = obs_wave/grism_res;
-            res_element = gratingDispersion_nm * width / 0.5;  // gratingDispersion_nm is the spectral resolution in nm for a 0.5-arcsec slit
+            res_element = gratingResolution * width / 0.5;  // gratingResolution is the spectral resolution in nm for a 0.5-arcsec slit
             //and the data size in the spectral domain
-            res_element_data = res_element / source_flux.getSampling(); // /gratingDispersion_nmppix;
+            res_element_data = res_element / source_flux.getSampling(); // /gratingDispersion;
             //use the int value of spectral_pix as a smoothing element
             smoothing_element = new Double(res_element_data + 0.5).intValue();
             if (smoothing_element < 1) smoothing_element = 1;
@@ -257,7 +257,7 @@ public class SpecS2NLargeSlitVisitor implements SampledSpectrumVisitor, SpecS2N 
             background.setY(i,
                     background_flux.getY(i) *
                             slit.width() * slit.pixelSize() * slit.lengthPixels() * // TODO: use slit.area()
-                            spec_exp_time * gratingDispersion_nmppix);
+                            spec_exp_time * gratingDispersion);
         }
 
         return background;
@@ -309,7 +309,7 @@ public class SpecS2NLargeSlitVisitor implements SampledSpectrumVisitor, SpecS2N 
     }
 
     private double totalFlux(final double flux, final double throughput) {
-        return flux * throughput * spec_exp_time * gratingDispersion_nmppix;
+        return flux * throughput * spec_exp_time * gratingDispersion;
     }
 
 
@@ -340,12 +340,12 @@ public class SpecS2NLargeSlitVisitor implements SampledSpectrumVisitor, SpecS2N 
         _lastCcdPixel = last;
     }
 
-    public void setGratingDispersion_nmppix(final double gratingDispersion_nmppix) {
-        this.gratingDispersion_nmppix = gratingDispersion_nmppix;
+    public void setGratingDispersion(final double gratingDispersion) {
+        this.gratingDispersion = gratingDispersion;
     }
 
-    public void setGratingDispersion_nm(final double gratingDispersion_nm) {
-        this.gratingDispersion_nm = gratingDispersion_nm;
+    public void setGratingResolution(final double gratingResolution) {
+        this.gratingResolution = gratingResolution;
     }
 
     public void setSpectralPixelWidth(final double pix_width) {

@@ -178,7 +178,7 @@ public final class MichellePrinter extends PrinterBase {
             s += "Spectral Binning: 1\n";
         s += "Pixel Size in Spatial Direction: " + instrument.getPixelSize() + "arcsec\n";
         if (p.observation().calculationMethod() instanceof Spectroscopy)
-            s += "Pixel Size in Spectral Direction: " + instrument.getGratingDispersion_nmppix() + "nm\n";
+            s += "Pixel Size in Spectral Direction: " + instrument.getGratingDispersion() + "nm\n";
         return s;
     }
 

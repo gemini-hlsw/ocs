@@ -116,7 +116,7 @@ public final class Nifs extends Instrument implements SpectroscopyInstrument {
                 _centralWavelength,
                 _detector.getDetectorPixels(),
                 1);
-        _sampling = _gratingOptics.getGratingDispersion_nmppix();
+        _sampling = _gratingOptics.getGratingDispersion();
         addGrating(_gratingOptics);
 
 
@@ -174,20 +174,20 @@ public final class Nifs extends Instrument implements SpectroscopyInstrument {
         return INSTR_PREFIX;
     }
 
-    public double getGratingDispersion_nm() {
-        return _gratingOptics.getGratingDispersion_nm();
+    public double getGratingResolution() {
+        return _gratingOptics.getGratingResolution();
     }
 
-    public double getGratingDispersion_nmppix() {
-        return _gratingOptics.getGratingDispersion_nmppix();
+    public double getGratingDispersion() {
+        return _gratingOptics.getGratingDispersion();
     }
 
     public double getObservingStart() {
-        return _centralWavelength - (getGratingDispersion_nmppix() * _detector.getDetectorPixels() / 2);
+        return _centralWavelength - (getGratingDispersion() * _detector.getDetectorPixels() / 2);
     }
 
     public double getObservingEnd() {
-        return _centralWavelength + (getGratingDispersion_nmppix() * _detector.getDetectorPixels() / 2);
+        return _centralWavelength + (getGratingDispersion() * _detector.getDetectorPixels() / 2);
     }
 
     public double getIFUOffset() {

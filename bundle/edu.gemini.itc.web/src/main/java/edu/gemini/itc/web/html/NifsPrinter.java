@@ -6,7 +6,6 @@ import edu.gemini.itc.nifs.IFUComponent;
 import edu.gemini.itc.nifs.Nifs;
 import edu.gemini.itc.nifs.NifsRecipe;
 import edu.gemini.itc.shared.*;
-import scala.Tuple2;
 
 import java.io.PrintWriter;
 import java.util.UUID;
@@ -94,7 +93,7 @@ public final class NifsPrinter extends PrinterBase {
         s += String.format("<L1> Central Wavelength: %.1f nm\n", instrument.getCentralWavelength());
         s += "Pixel Size in Spatial Direction: " + instrument.getPixelSize() + " arcsec\n";
 
-        s += String.format("Pixel Size in Spectral Direction: %.3f nm\n", instrument.getGratingDispersion_nmppix());
+        s += String.format("Pixel Size in Spectral Direction: %.3f nm\n", instrument.getGratingDispersion());
 
         s += "IFU is selected,";
         if (instrument.getIFUMethod() instanceof IfuSingle)

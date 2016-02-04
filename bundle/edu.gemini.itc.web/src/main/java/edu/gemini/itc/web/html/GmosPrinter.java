@@ -169,7 +169,7 @@ public final class GmosPrinter extends PrinterBase {
             s += "Spectral Binning: " + instrument.getSpectralBinning() + "\n";
         s += "Pixel Size in Spatial Direction: " + instrument.getPixelSize() + "arcsec\n";
         if (p.observation().calculationMethod() instanceof Spectroscopy)
-            s += "Pixel Size in Spectral Direction: " + instrument.getGratingDispersion_nmppix() + "nm\n";
+            s += "Pixel Size in Spectral Direction: " + instrument.getGratingDispersion() + "nm\n";
         if (instrument.isIfuUsed()) {
             s += "IFU is selected,";
             if (instrument.getIfuMethod().get() instanceof IfuSingle) {

@@ -47,7 +47,7 @@ public abstract class GratingOptics extends TransmissionElement {
 
     }
 
-    public double getGratingResolution() {
+    public double getGratingResolvingPower() {
         return data.apply(gratingName).resolvingPower();
     }
 
@@ -55,11 +55,13 @@ public abstract class GratingOptics extends TransmissionElement {
         return data.apply(gratingName).blaze();
     }
 
-    public double getGratingDispersion_nm() {
+    /** Gets the resolution in [nm] */
+    public double getGratingResolution() {
         return data.apply(gratingName).resolution();
     }
 
-    public double getGratingDispersion_nmppix() {
+    /** Gets the dispersion in [nm/pixel] */
+    public double getGratingDispersion() {
         return data.apply(gratingName).dispersion() * _spectralBinning;
     }
 

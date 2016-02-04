@@ -199,44 +199,44 @@ public final class Gnirs extends Instrument implements SpectroscopyInstrument {
         return _grating;
     }
 
-    public double getGratingDispersion_nm() {
+    public double getGratingResolution() {
         try {
             if (!XDisp_IsUsed()) {
                 if (isLongCamera()) {
-                    return _gratingOptics.getGratingDispersion_nm() / LONG_CAMERA_SCALE_FACTOR / GnirsOrderSelector.getOrder(_centralWavelength);
+                    return _gratingOptics.getGratingResolution() / LONG_CAMERA_SCALE_FACTOR / GnirsOrderSelector.getOrder(_centralWavelength);
                 } else {
-                    return _gratingOptics.getGratingDispersion_nm() / GnirsOrderSelector.getOrder(_centralWavelength);
+                    return _gratingOptics.getGratingResolution() / GnirsOrderSelector.getOrder(_centralWavelength);
                 }
             } else {
                 if (isLongCamera()) {
-                    return _gratingOptics.getGratingDispersion_nm() / LONG_CAMERA_SCALE_FACTOR;
+                    return _gratingOptics.getGratingResolution() / LONG_CAMERA_SCALE_FACTOR;
                 } else {
-                    return _gratingOptics.getGratingDispersion_nm();
+                    return _gratingOptics.getGratingResolution();
                 }
             }
         } catch (Exception e) {
-            return _gratingOptics.getGratingDispersion_nm();
+            return _gratingOptics.getGratingResolution();
         }
     }
 
-    public double getGratingDispersion_nmppix() {
+    public double getGratingDispersion() {
         try {
             if (!XDisp_IsUsed()) {
                 if (isLongCamera()) {
-                    return _gratingOptics.getGratingDispersion_nmppix() / LONG_CAMERA_SCALE_FACTOR / GnirsOrderSelector.getOrder(_centralWavelength);
+                    return _gratingOptics.getGratingDispersion() / LONG_CAMERA_SCALE_FACTOR / GnirsOrderSelector.getOrder(_centralWavelength);
                 } else {
-                    return _gratingOptics.getGratingDispersion_nmppix() / GnirsOrderSelector.getOrder(_centralWavelength);
+                    return _gratingOptics.getGratingDispersion() / GnirsOrderSelector.getOrder(_centralWavelength);
                 }
             } else {
                 if (isLongCamera()) {
-                    return _gratingOptics.getGratingDispersion_nmppix() / LONG_CAMERA_SCALE_FACTOR;
+                    return _gratingOptics.getGratingDispersion() / LONG_CAMERA_SCALE_FACTOR;
                 } else {
-                    return _gratingOptics.getGratingDispersion_nmppix();
+                    return _gratingOptics.getGratingDispersion();
                 }
             }
 
         } catch (Exception e) {
-            return _gratingOptics.getGratingDispersion_nmppix();
+            return _gratingOptics.getGratingDispersion();
         }
     }
 
@@ -245,11 +245,11 @@ public final class Gnirs extends Instrument implements SpectroscopyInstrument {
     }
 
     public double getObservingStart() {
-        return _centralWavelength - (getGratingDispersion_nmppix() * _detector.getDetectorPixels() / 2);
+        return _centralWavelength - (getGratingDispersion() * _detector.getDetectorPixels() / 2);
     }
 
     public double getObservingEnd() {
-        return _centralWavelength + (getGratingDispersion_nmppix() * _detector.getDetectorPixels() / 2);
+        return _centralWavelength + (getGratingDispersion() * _detector.getDetectorPixels() / 2);
     }
 
     public boolean XDisp_IsUsed() {
