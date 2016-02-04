@@ -139,7 +139,14 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         final boolean isAutoGroup = ImOption.apply(_curGroup).exists(cgtup -> cgtup._2().isAutomatic());
         final boolean isAutoTarget = ImOption.apply(_curPos).exists(p -> env.getGuideEnvironment().getOptions()
                 .exists(gg -> gg.isAutomatic() && gg.containsTarget(p)));
-        final boolean isAuto = isAutoGroup || isAutoTarget;
+
+        // Note that it is possible to have _curGroup not be the group to which _curPos belongs, as it is
+        // simply the last group to have been selected.
+        // TODO: What about the case where the previous selection was a target was not in auto group, but now we have
+        // TODO: selected the auto group? In this case, isAuto should be true.
+        // TODO: Can we even differentiate this case from one in which the previous selection was the auto group, but
+        // TODO: now we have selected a target not in the auto group? In this case, isAuto should be false.
+        final boolean isAuto = isAutoGroup && (isAutoTarget || _curPos == null);
 
         _w.removeButton.setEnabled(curNotBase && editable && !isAuto);
         _w.primaryButton.setEnabled(enablePrimary(_curPos, env) && editable);
