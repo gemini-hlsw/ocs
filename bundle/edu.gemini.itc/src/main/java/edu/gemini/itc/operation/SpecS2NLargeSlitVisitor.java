@@ -6,10 +6,23 @@ import edu.gemini.itc.base.VisitableSampledSpectrum;
 import edu.gemini.itc.shared.*;
 
 /**
- * The SpecS2NLargeSlitVisitor is used to calculate the s2n of an observation using
- * a larger slit set.
+ * The SpecS2NLargeSlitVisitor is used to calculate the s2n of an observation using a larger slit set.
+ * Note that instances of this object are "recycled" in some recipes, in particular to handle different orders
+ * (GNIRS) or IFUs; this is why this class has a bunch of setters and not all variables are final. Not all
+ * relevant values are set in the constructor, e.g. halo information if used with an AO system. Ideally this
+ * could be changed so that instances of this class become immutable.
  */
 public class SpecS2NLargeSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
+
+    private final ObservationDetails odp;
+    private final Slit slit;
+    private final double throughput;
+    private final double spec_frac_with_source;
+    private final double spec_exp_time;
+    private final double im_qual;
+    private final double dark_current;
+    private final double read_noise;
+    private final int spec_number_exposures;
 
     private VisitableSampledSpectrum source_flux;
     private VisitableSampledSpectrum halo_flux;
@@ -18,16 +31,6 @@ public class SpecS2NLargeSlitVisitor implements SampledSpectrumVisitor, SpecS2N 
     private VisitableSampledSpectrum sqrt_spec_var_background;
     private VisitableSampledSpectrum spec_exp_s2n;
     private VisitableSampledSpectrum spec_final_s2n;
-
-    private final Slit slit;
-    private final double throughput;
-    private final double spec_frac_with_source;
-    private final double spec_exp_time;
-    private final double im_qual;
-    private final double dark_current;
-    private final double read_noise;
-    private final double skyAper;
-    private final int spec_number_exposures;
 
     private double pix_width;
     private double obs_wave_low;
@@ -58,6 +61,7 @@ public class SpecS2NLargeSlitVisitor implements SampledSpectrumVisitor, SpecS2N 
                                    final double read_noise,
                                    final double dark_current,
                                    final ObservationDetails odp) {
+        this.odp                    = odp;
         this.slit                   = slit;
         this.throughput             = throughput;
         this.pix_width              = pix_width;
@@ -68,15 +72,6 @@ public class SpecS2NLargeSlitVisitor implements SampledSpectrumVisitor, SpecS2N 
         this.im_qual                = im_qual;
         this.dark_current           = dark_current;
         this.read_noise             = read_noise;
-
-        final AnalysisMethod analysisMethod = odp.analysisMethod();
-        if (analysisMethod instanceof ApertureMethod) {
-            this.skyAper = ((ApertureMethod) analysisMethod).skyAperture();
-        } else if (analysisMethod instanceof IfuMethod) {
-            this.skyAper = ((IfuMethod) analysisMethod).skyFibres();
-        } else {
-            throw new Error();
-        }
 
         // Currently SpectroscopySN is the only supported calculation method for spectroscopy.
         final CalculationMethod calcMethod = odp.calculationMethod();
@@ -109,25 +104,35 @@ public class SpecS2NLargeSlitVisitor implements SampledSpectrumVisitor, SpecS2N 
         calculateSignal(slit);
     }
 
-    /** Calculates single and final S2N. */
+    // ======= Take apart calculation of resolution element dlambda
+
+    /** Calculates the size of a spectral resolution element in [nm] for the source */
+    private double resolutionElementSource(final Slit slit, final double imgQuality) {
+        //if image size is less than the slit width it will determine resolution
+        final double width = imgQuality < slit.width() ? imgQuality : slit.width();
+        // gratingResolution is the spectral resolution in nm for a 0.5-arcsec slit
+        return gratingResolution * width / 0.5;
+    }
+
+    /** Calculates the size of a spectral resolution element in [nm] for the background */
+    private double resolutionElementBackground(final Slit slit) {
+        // gratingResolution is the spectral resolution in nm for a 0.5-arcsec slit
+        return gratingResolution * slit.width() / 0.5;
+    }
+
+    // =======
+
+    /** Resample source and background flux. (It is unknown to me why we do that, please comment if you do.) */
     private void resample(final Slit slit) {
 
-        double width, background_width;
-        //if image size is less than the slit width it will determine resolution
-        // For source:
-        if (im_qual < slit.width())
-            width = im_qual;
-        else width = slit.width();
-        // For background:
-        background_width = slit.width();
-
         //calc the width of a spectral resolution element in nm
-        //double res_element = obs_wave/grism_res;
-        double res_element = gratingResolution * width / 0.5; // gratingResolution is the spectral resolution in nm for a 0.5-arcsec slit
-        double background_res_element = gratingResolution * background_width / 0.5;
+        final double res_element            = resolutionElementSource(slit, im_qual);
+        final double background_res_element = resolutionElementBackground(slit);
+
         //and the data size in the spectral domain
-        double res_element_data = res_element / source_flux.getSampling(); // /gratingDispersion;
-        double background_res_element_data = background_res_element / background_flux.getSampling(); // /gratingDispersion;
+        final double res_element_data            = res_element / source_flux.getSampling();                 // /gratingDispersion;
+        final double background_res_element_data = background_res_element / background_flux.getSampling();  // /gratingDispersion;
+
         //use the int value of spectral_pix as a smoothing element
         int smoothing_element = new Double(res_element_data + 0.5).intValue();
         int background_smoothing_element = new Double(background_res_element_data + 0.5).intValue();
@@ -145,18 +150,12 @@ public class SpecS2NLargeSlitVisitor implements SampledSpectrumVisitor, SpecS2N 
         background_flux.smoothY(background_smoothing_element);       // Uncommented and decoupled from IQ on 04/08/2014 (SLP)
 
         if (haloIsUsed) {
-            if (uncorrected_im_qual < slit.width()) {
-                width = im_qual;
-            } else {
-                width = slit.width();
-            }
             //calc the width of a spectral resolution element in nm
-            //double res_element = obs_wave/grism_res;
-            res_element = gratingResolution * width / 0.5;  // gratingResolution is the spectral resolution in nm for a 0.5-arcsec slit
+            final double halo_res_element      = resolutionElementSource(slit, uncorrected_im_qual);
             //and the data size in the spectral domain
-            res_element_data = res_element / source_flux.getSampling(); // /gratingDispersion;
+            final double halo_res_element_data = halo_res_element / source_flux.getSampling(); // /gratingDispersion;
             //use the int value of spectral_pix as a smoothing element
-            smoothing_element = new Double(res_element_data + 0.5).intValue();
+            smoothing_element = new Double(halo_res_element_data + 0.5).intValue();
             if (smoothing_element < 1) smoothing_element = 1;
             ///////////////////////////////////////////////////////////////////////////////////////
             //  We Don't know why but using just the smoothing element is not enough to create the resolution
@@ -176,11 +175,11 @@ public class SpecS2NLargeSlitVisitor implements SampledSpectrumVisitor, SpecS2N 
 
 
         // resample both sky and SED
-        SampledSpectrumVisitor source_resample = new ResampleWithPaddingVisitor(
+        final SampledSpectrumVisitor source_resample = new ResampleWithPaddingVisitor(
                 obs_wave_low, obs_wave_high - 1,
                 //source_flux.getStart(), source_flux.getEnd(),
                 pix_width, 0);
-        SampledSpectrumVisitor background_resample = new ResampleWithPaddingVisitor(
+        final SampledSpectrumVisitor background_resample = new ResampleWithPaddingVisitor(
                 obs_wave_low, obs_wave_high - 1,
                 //source_flux.getStart(), source_flux.getEnd(),
                 pix_width, 0);
@@ -282,9 +281,21 @@ public class SpecS2NLargeSlitVisitor implements SampledSpectrumVisitor, SpecS2N 
 
     }
 
-    private VisitableSampledSpectrum finalS2N(final VisitableSampledSpectrum signal, final VisitableSampledSpectrum background, final double spec_var_dark, final double spec_var_readout) {
+    /** Calculates the final signal to noise ratio for all exposures. */
+    private VisitableSampledSpectrum finalS2N(final VisitableSampledSpectrum signal, final VisitableSampledSpectrum background, final double darkNoise, final double readNoise) {
 
         // sky aper is either the aperture or the number of fibres in the IFU case
+        final double skyAper;
+        final AnalysisMethod analysisMethod = odp.analysisMethod();
+        if (analysisMethod instanceof ApertureMethod) {
+            skyAper = ((ApertureMethod) analysisMethod).skyAperture();
+        } else if (analysisMethod instanceof IfuMethod) {
+            skyAper = ((IfuMethod) analysisMethod).skyFibres();
+        } else {
+            throw new Error();
+        }
+
+        // calculate the noise factor for the given skyAper
         final double noiseFactor = 1 + (1 / skyAper);
 
         // the number of exposures measuring the source flux is
@@ -294,7 +305,7 @@ public class SpecS2NLargeSlitVisitor implements SampledSpectrumVisitor, SpecS2N 
         final VisitableSampledSpectrum spec_sourceless_noise = (VisitableSampledSpectrum) source_flux.clone();
         int spec_sourceless_noise_last = lastCcdPixel(spec_sourceless_noise.getLength());
         for (int i = _firstCcdPixel; i <= spec_sourceless_noise_last; ++i) {
-            spec_sourceless_noise.setY(i, Math.sqrt(background.getY(i) + spec_var_dark + spec_var_readout));
+            spec_sourceless_noise.setY(i, Math.sqrt(background.getY(i) + darkNoise + readNoise));
         }
 
         final VisitableSampledSpectrum finalS2N = (VisitableSampledSpectrum) source_flux.clone();
