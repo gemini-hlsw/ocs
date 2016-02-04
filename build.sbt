@@ -11,7 +11,7 @@ pitVersion in ThisBuild := OcsVersion("2016B", true, 2, 1, 0)
 // Bundles by default use the ocsVersion; this is overridden in bundles used only by the PIT
 version in ThisBuild := ocsVersion.value.toOsgiVersion
 
-scalaVersion in ThisBuild := "2.10.4"
+scalaVersion in ThisBuild := "2.10.5"
 
 // Note that this is not a standard setting; it's used for building IDEA modules.
 javaVersion in ThisBuild := {

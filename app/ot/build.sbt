@@ -51,7 +51,9 @@ def common(version: Version) = AppConfig(
   ),
   log = Some("%a/log/ot.%u.%g.log"),
   bundles = List(
-    BundleSpec("org.scala-lang.scala-reflect", Version(2, 10, 1)),
+    BundleSpec("org.scala-lang.scala-reflect", Version(2, 10, 5)),
+    BundleSpec("org.scala-lang.scala-compiler",Version(2, 10, 5)),
+    BundleSpec("quasiquotes",                  Version(2, 0, 1)),
     BundleSpec("edu.gemini.osgi.main",         Version(4, 2, 1)),
     BundleSpec("edu.gemini.util.log.extras",   version),
     BundleSpec("edu.gemini.sp.vcs",            version),

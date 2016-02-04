@@ -7,7 +7,7 @@ name := "edu.gemini.p2checker"
 // version set in ThisBuild
 
 unmanagedJars in Compile ++= Seq(
-  new File(baseDirectory.value, "../../lib/bundle/org.scala-lang.scala-library_2.10.1.v20130302-092018-VFINAL-33e32179fd.jar"))
+  new File(baseDirectory.value, "../../lib/bundle/scala-library-2.10.5.jar"))
 
 osgiSettings
 

@@ -15,7 +15,7 @@ unmanagedJars in Compile ++= Seq(
   // new File(baseDirectory.value, "../../lib/bundle/org.osgi.compendium-4.2.0.jar"),
   // new File(baseDirectory.value, "../../lib/bundle/osgi.cmpn-4.3.1.jar"),
   // new File(baseDirectory.value, "../../lib/bundle/org.osgi.enterprise-5.0.0.jar"),
-  // new File(baseDirectory.value, "../../lib/bundle/org.scala-lang.scala-library_2.10.1.v20130302-092018-VFINAL-33e32179fd.jar"),
+  // new File(baseDirectory.value, "../../lib/bundle/scala-library-2.10.5.jar"),
   // new File(baseDirectory.value, "../../lib/bundle/pax-web-jetty-bundle-1.1.13.jar"),
   new File(baseDirectory.value, "../../lib/bundle/scalaz-core_2.10-7.1.6.jar"),
   new File(baseDirectory.value, "../../lib/bundle/scalaz-effect_2.10-7.1.6.jar"))
