@@ -101,6 +101,16 @@ public class SpecS2NLargeSlitVisitor implements SampledSpectrumVisitor, SpecS2N 
      * Implements the SampledSpectrumVisitor interface
      */
     public void visit(final SampledSpectrum sed) {
+        // step one: do some resampling and preprocessing
+        resample(slit);
+        // step two: calculate S2N for single and final exposure for given slit
+        calculateS2N(slit);
+        // step three: calculate signal and background for single pixel
+        calculateSignal(slit);
+    }
+
+    /** Calculates single and final S2N. */
+    private void resample(final Slit slit) {
 
         double width, background_width;
         //if image size is less than the slit width it will determine resolution
@@ -130,19 +140,16 @@ public class SpecS2NLargeSlitVisitor implements SampledSpectrumVisitor, SpecS2N 
         ///////////////////////////////////////////////////////////////////////////////////////
         smoothing_element = smoothing_element + 1;                       // Left in on 04/23/2014 (SLP)
         background_smoothing_element = background_smoothing_element + 1; // Added in on 04/23/2014 (SLP)
-        //System.out.println("SpecS2NLargeSlit function:");
-        //System.out.println("Source Smoothing Element: " + smoothing_element + " " + res_element_data + " res el: " + res_element + " Sample : " + source_flux.getSampling());
-        //System.out.println("Background Smoothing Element: " + background_smoothing_element + " " + background_res_element_data + " res el: " + background_res_element + " Sample : " + background_flux.getSampling());
-        //System.out.println("gratingDispersion_nmppix: " + gratingDispersion_nmppix + "gratingDispersion_nm" + gratingDispersion_nm);
-        // on the source and background
 
         source_flux.smoothY(smoothing_element);
         background_flux.smoothY(background_smoothing_element);       // Uncommented and decoupled from IQ on 04/08/2014 (SLP)
 
         if (haloIsUsed) {
-            if (uncorrected_im_qual < slit.width())
+            if (uncorrected_im_qual < slit.width()) {
                 width = im_qual;
-            else width = slit.width();
+            } else {
+                width = slit.width();
+            }
             //calc the width of a spectral resolution element in nm
             //double res_element = obs_wave/grism_res;
             res_element = gratingDispersion_nm * width / 0.5;  // gratingDispersion_nm is the spectral resolution in nm for a 0.5-arcsec slit
@@ -182,91 +189,130 @@ public class SpecS2NLargeSlitVisitor implements SampledSpectrumVisitor, SpecS2N 
         source_flux.accept(source_resample);
         background_flux.accept(background_resample);
 
-        // the number of exposures measuring the source flux is
-        double spec_number_source_exposures = spec_number_exposures * spec_frac_with_source;
+    }
 
-        final VisitableSampledSpectrum spec_var_source = (VisitableSampledSpectrum) source_flux.clone();
-        final VisitableSampledSpectrum spec_var_background = (VisitableSampledSpectrum) background_flux.clone();
+    /** Calculates single and final S2N. */
+    private void calculateS2N(final Slit slit) {
 
-        //Shot noise on the source flux in aperture
-        int source_flux_last = lastCcdPixel(source_flux.getLength());
-        if (haloIsUsed) {
-            for (int i = _firstCcdPixel; i <= source_flux_last; ++i)
-                spec_var_source.setY(i, totalFlux(source_flux.getY(i)) + totalHaloFlux(halo_flux.getY(i)));
-        } else {
-            for (int i = _firstCcdPixel; i <= source_flux_last; ++i)
-                spec_var_source.setY(i, totalFlux(source_flux.getY(i)));
+        // shot noise on dark current flux in aperture
+        final double darkNoise = dark_current * slit.lengthPixels() * spec_exp_time;
+
+        // readout noise in aperture
+        final double readNoise = read_noise * read_noise * slit.lengthPixels();
+
+        // signal and background for given slit and throughput
+        final VisitableSampledSpectrum signal     = signal(throughput, spec_halo_source_fraction);
+        final VisitableSampledSpectrum background = background(slit);
+
+        // -- calculate and assign s2n results
+
+        // S2N for one exposure
+        spec_exp_s2n = singleS2N(signal, background, darkNoise, readNoise);
+
+        // final S2N for all exposures
+        spec_final_s2n = finalS2N(signal, background, darkNoise, readNoise);
+
+    }
+
+    /** Calculates signal and background. */
+    private void calculateSignal(final Slit slit) {
+
+        // total source flux in the aperture
+        final VisitableSampledSpectrum signal         = signal(throughput, spec_halo_source_fraction);
+        final VisitableSampledSpectrum sqrtBackground = background(slit);
+
+        // create the Sqrt(Background) sed for plotting
+        for (int i = _firstCcdPixel; i <= lastCcdPixel(sqrtBackground.getLength()); ++i)
+            sqrtBackground.setY(i, Math.sqrt(sqrtBackground.getY(i)));
+
+        // -- assign results
+        spec_signal              = signal;
+        sqrt_spec_var_background = sqrtBackground;
+
+    }
+
+    /** Calculates total source flux (signal) in the aperture. */
+    private VisitableSampledSpectrum signal(final double throughput, final double haloThroughput) {
+
+        final VisitableSampledSpectrum signal = (VisitableSampledSpectrum) source_flux.clone();
+        final int lastPixel = lastCcdPixel(signal.getLength());
+        for (int i = _firstCcdPixel; i <= lastPixel; ++i) {
+            if (haloIsUsed) {
+                signal.setY(i, totalFlux(source_flux.getY(i), throughput) + totalFlux(halo_flux.getY(i), haloThroughput));
+            } else {
+                signal.setY(i, totalFlux(source_flux.getY(i), throughput));
+            }
         }
+
+        return signal;
+    }
+
+    /** Calculates the background in the aperture. */
+    private VisitableSampledSpectrum background(final Slit slit) {
+
+        final VisitableSampledSpectrum background = (VisitableSampledSpectrum) background_flux.clone();
+
         //Shot noise on background flux in aperture
-        int spec_var_background_last = lastCcdPixel(spec_var_background.getLength());
-        for (int i = _firstCcdPixel; i <= spec_var_background_last; ++i)
-            spec_var_background.setY(i,
+        for (int i = _firstCcdPixel; i <= lastCcdPixel(background.getLength()); ++i) {
+            background.setY(i,
                     background_flux.getY(i) *
-                    slit.width() * slit.pixelSize() * slit.lengthPixels() * // TODO: use slit.area()
-                    spec_exp_time * gratingDispersion_nmppix);
-
-        //Shot noise on dark current flux in aperture
-        double spec_var_dark = dark_current * slit.lengthPixels() * spec_exp_time;
-
-        //Readout noise in aperture
-        double spec_var_readout = read_noise * read_noise * slit.lengthPixels();
-
-        //Create a container for the total and sourceless noise in the aperture
-        final VisitableSampledSpectrum spec_noise = (VisitableSampledSpectrum) source_flux.clone();
-        final VisitableSampledSpectrum spec_sourceless_noise = (VisitableSampledSpectrum) source_flux.clone();
-
-        spec_signal = (VisitableSampledSpectrum) source_flux.clone();
-        spec_exp_s2n = (VisitableSampledSpectrum) source_flux.clone();
-        spec_final_s2n = (VisitableSampledSpectrum) source_flux.clone();
-        sqrt_spec_var_background = (VisitableSampledSpectrum) spec_var_background.clone();
-
-        // Total noise in the aperture is ...
-        int spec_noise_last = lastCcdPixel(spec_noise.getLength());
-        for (int i = _firstCcdPixel; i <= spec_noise_last; ++i)
-            spec_noise.setY(i, Math.sqrt(spec_var_source.getY(i) + spec_var_background.getY(i) + spec_var_dark + spec_var_readout));
-
-        // and ...
-        int spec_sourceless_noise_last = lastCcdPixel(spec_sourceless_noise.getLength());
-        for (int i = _firstCcdPixel; i <= spec_sourceless_noise_last; ++i)
-            spec_sourceless_noise.setY(i, Math.sqrt(spec_var_background.getY(i) +
-                    spec_var_dark + spec_var_readout));
-
-        //total source flux in the aperture
-        int spec_signal_last = lastCcdPixel(spec_signal.getLength());
-        if (haloIsUsed) {
-            for (int i = _firstCcdPixel; i <= spec_signal_last; ++i)
-                spec_signal.setY(i, totalFlux(source_flux.getY(i)) + totalHaloFlux(halo_flux.getY(i)));
-        } else {
-            for (int i = _firstCcdPixel; i <= spec_signal_last; ++i)
-                spec_signal.setY(i, totalFlux(source_flux.getY(i)));
+                            slit.width() * slit.pixelSize() * slit.lengthPixels() * // TODO: use slit.area()
+                            spec_exp_time * gratingDispersion_nmppix);
         }
-        //S2N for one exposure
-        int spec_exp_s2n_last = lastCcdPixel(spec_exp_s2n.getLength());
-        for (int i = _firstCcdPixel; i <= spec_exp_s2n_last; ++i)
-            spec_exp_s2n.setY(i, spec_signal.getY(i) / spec_noise.getY(i));
 
-        double noiseFactor = 1 + (1 / skyAper);
-        //S2N for the observation
-        int spec_final_s2n_last = lastCcdPixel(spec_final_s2n.getLength());
-        for (int i = _firstCcdPixel; i <= spec_final_s2n_last; ++i)
-            spec_final_s2n.setY(i, Math.sqrt(spec_number_source_exposures) *
-                    spec_signal.getY(i) /
-                    Math.sqrt(spec_signal.getY(i) + noiseFactor *
+        return background;
+    }
+
+    /** Calculates the signal to noise ratio for a single exposure. */
+    private VisitableSampledSpectrum singleS2N(final VisitableSampledSpectrum signal, final VisitableSampledSpectrum background, final double darkNoise, final double readNoise) {
+
+        // total noise in the aperture
+        final VisitableSampledSpectrum noise = (VisitableSampledSpectrum) source_flux.clone();
+        for (int i = _firstCcdPixel; i <= lastCcdPixel(noise.getLength()); ++i) {
+            noise.setY(i, Math.sqrt(signal.getY(i) + background.getY(i) + darkNoise + readNoise));
+        }
+
+        // calculate signal to noise
+        final VisitableSampledSpectrum singleS2N = (VisitableSampledSpectrum) source_flux.clone();
+        for (int i = _firstCcdPixel; i <= lastCcdPixel(singleS2N.getLength()); ++i) {
+            singleS2N.setY(i, signal.getY(i) / noise.getY(i));
+        }
+
+        return singleS2N;
+
+    }
+
+    private VisitableSampledSpectrum finalS2N(final VisitableSampledSpectrum signal, final VisitableSampledSpectrum background, final double spec_var_dark, final double spec_var_readout) {
+
+        // sky aper is either the aperture or the number of fibres in the IFU case
+        final double noiseFactor = 1 + (1 / skyAper);
+
+        // the number of exposures measuring the source flux is
+        final double spec_number_source_exposures = spec_number_exposures * spec_frac_with_source;
+
+        // noise in aperture
+        final VisitableSampledSpectrum spec_sourceless_noise = (VisitableSampledSpectrum) source_flux.clone();
+        int spec_sourceless_noise_last = lastCcdPixel(spec_sourceless_noise.getLength());
+        for (int i = _firstCcdPixel; i <= spec_sourceless_noise_last; ++i) {
+            spec_sourceless_noise.setY(i, Math.sqrt(background.getY(i) + spec_var_dark + spec_var_readout));
+        }
+
+        final VisitableSampledSpectrum finalS2N = (VisitableSampledSpectrum) source_flux.clone();
+        for (int i = _firstCcdPixel; i <= lastCcdPixel(finalS2N.getLength()); ++i)
+            finalS2N.setY(i, Math.sqrt(spec_number_source_exposures) *
+                    signal.getY(i) /
+                    Math.sqrt(signal.getY(i) + noiseFactor *
                             spec_sourceless_noise.getY(i) *
                             spec_sourceless_noise.getY(i)));
 
-        //Finally create the Sqrt(Background) sed for plotting
-        for (int i = _firstCcdPixel; i <= spec_var_background_last; ++i)
-            sqrt_spec_var_background.setY(i, Math.sqrt(spec_var_background.getY(i)));
+        return finalS2N;
     }
 
-    private double totalFlux(final Double flux) {
+    private double totalFlux(final double flux, final double throughput) {
         return flux * throughput * spec_exp_time * gratingDispersion_nmppix;
     }
 
-    private double totalHaloFlux(final Double flux) {
-        return flux * spec_halo_source_fraction * spec_exp_time * gratingDispersion_nmppix;
-    }
+
 
     public void setSourceSpectrum(final VisitableSampledSpectrum sed) {
         source_flux = sed;

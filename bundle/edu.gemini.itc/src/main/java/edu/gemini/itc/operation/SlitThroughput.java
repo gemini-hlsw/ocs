@@ -38,19 +38,26 @@ public final class SlitThroughput {
         }
     }
 
-    private final SourceDefinition src;
-    private final Slit slit;
-    private final double im_qual;
+    private final double throughput;
+    private final double onePixelThroughput;
+
 
     public SlitThroughput(final SourceDefinition src, final Slit slit, final double im_qual) {
-        this.src        = src;
-        this.slit       = slit;
-        this.im_qual    = im_qual;
+        this.throughput             = calculateThroughput(src, slit, im_qual);
+        this.onePixelThroughput     = calculateThroughput(src, new OnePixelSlit(slit.pixelSize()), im_qual);
+    }
+
+    public double throughput() {
+        return throughput;
+    }
+
+    public double onePixelThroughput() {
+        return onePixelThroughput;
     }
 
     // For point sources and gaussian sources: returns the fraction of the source flux that goes through the slit.
     // For uniform surface brightness: either return 1 arcsec² for auto aperture or the slit area.
-    public double throughput() {
+    private double calculateThroughput(final SourceDefinition src, final Slit slit, final double im_qual) {
 
         // For the usb case we want the resolution to be determined by the slit area and not the image quality.
         if (src.isUniform()) {
