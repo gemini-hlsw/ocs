@@ -45,8 +45,9 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     private final AgsContextPublisher _agsPub = new AgsContextPublisher();
     private final TelescopeForm _w;
 
-    // Stuff that varies with time
-    private SPTarget        _curPos;
+    // Stuff that varies with time.
+    // This should be SPTarget \/ Tuple2<Integer,GuideGroup>. They can both be null if nothing is selected.
+    private SPTarget                    _curPos;
     private Tuple2<Integer, GuideGroup> _curGroup;
 
     public EdCompTargetList() {
@@ -128,27 +129,37 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     }
 
     /**
+     * Auxiliary method to determine if the group is an auto group.
+     */
+    private boolean groupIsAuto(final GuideGroup group) {
+        return ImOption.apply(group).exists(GuideGroup::isAutomatic);
+    }
+
+    /**
+     * Auxiliary method to determine if an indexed group is an auto group.
+     */
+    private boolean indexedGroupIsAuto(final Tuple2<Integer,GuideGroup> indexedGroup) {
+        return ImOption.apply(indexedGroup).exists(ig -> groupIsAuto(ig._2()));
+    }
+
+    /**
+     * Auxiliary method to determine if the target belongs to an auto group.
+     */
+    private boolean targetIsAuto(final SPTarget target) {
+        final TargetEnvironment env = getDataObject().getTargetEnvironment();
+        return ImOption.apply(target).exists(t -> env.getGuideEnvironment().getOptions().exists(gg -> gg.isAutomatic() && gg.containsTarget(t)));
+    }
+
+    /**
      * Update the remove and primary buttons as well as the detail editor.
      */
     private void updateRemovePrimaryButtonsAndDetailEditor() {
         final TargetEnvironment env = getDataObject().getTargetEnvironment();
         final boolean editable = OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation());
-        final boolean curNotBase = !env.isBasePosition(_curPos);
+        final boolean notBase  = !env.isBasePosition(_curPos);
+        final boolean isAuto = indexedGroupIsAuto(_curGroup) || targetIsAuto(_curPos);
 
-        // We assume that if no group is set, then we are or want to handle the same as the auto group.
-        final boolean isAutoGroup = ImOption.apply(_curGroup).exists(cgtup -> cgtup._2().isAutomatic());
-        final boolean isAutoTarget = ImOption.apply(_curPos).exists(p -> env.getGuideEnvironment().getOptions()
-                .exists(gg -> gg.isAutomatic() && gg.containsTarget(p)));
-
-        // Note that it is possible to have _curGroup not be the group to which _curPos belongs, as it is
-        // simply the last group to have been selected.
-        // TODO: What about the case where the previous selection was a target was not in auto group, but now we have
-        // TODO: selected the auto group? In this case, isAuto should be true.
-        // TODO: Can we even differentiate this case from one in which the previous selection was the auto group, but
-        // TODO: now we have selected a target not in the auto group? In this case, isAuto should be false.
-        final boolean isAuto = isAutoGroup && (isAutoTarget || _curPos == null);
-
-        _w.removeButton.setEnabled(curNotBase && editable && !isAuto);
+        _w.removeButton.setEnabled(notBase && editable && !isAuto);
         _w.primaryButton.setEnabled(enablePrimary(_curPos, env) && editable);
         updateDetailEditorEnabledState(editable && !isAuto);
     }
@@ -173,6 +184,8 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         action.run();
 
         if (_curPos != null) {
+            // We must maintain the property of desired type _curPos \/ _curGroup.
+            _curGroup = null;
             _curPos.addWatcher(posWatcher);
             refreshAll();
             updateRemovePrimaryButtonsAndDetailEditor();
@@ -303,7 +316,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
         _w.tag.removeActionListener(_tagListener);
         _w.tag.setModel(new DefaultComboBoxModel<>(ptA));
-        _w.tag.setEnabled(isEnabled() && (env.getBase() != _curPos));
+        _w.tag.setEnabled(isEnabled() && (!env.isBasePosition(_curPos)));
         _w.tag.addActionListener(_tagListener);
 
         _w.tag.setRenderer(tagRenderer);
@@ -443,6 +456,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             return;
         }
         refreshAll();
+        updateRemovePrimaryButtonsAndDetailEditor();
         updateGuiding();
     };
 
@@ -457,13 +471,17 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         }
     };
 
+    // TODO: BUGS HERE. Need to make sure that editors are updated properly with enable!
     private final PropertyChangeListener selectionListener = new PropertyChangeListener() {
         @Override public void propertyChange(final PropertyChangeEvent evt) {
             final ISPObsComponent node = getContextTargetObsComp();
             final TargetEnvironment env = getDataObject().getTargetEnvironment();
             final Option<SPTarget> targetOpt = TargetSelection.getTargetForNode(env, node);
 
+            // We must be careful here to make sure the _curPos \/ _curGroup property is maintained, i.e. exactly
+            // one of the two must be defined and the other null.
             if (targetOpt.isDefined()) {
+                // _curGroup = null is handled in function.
                 targetOpt.foreach(target -> manageCurPosIfEnvContainsTarget(target, () -> _curPos = target));
             } else {
                 final Option<Tuple2<Integer, GuideGroup>> grp = TargetSelection.getIndexedGuideGroupForNode(env, node);
@@ -477,12 +495,23 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                     _w.detailEditor.setVisible(false);
 
                     // N.B. don't trim, otherwise user can't include space in group name
-                    final String name = _curGroup._2().getName().getOrElse("");
+                    final String name;
+                    final boolean enabled;
+                    if (indexedGroupIsAuto(_curGroup)) {
+                        // TODO: Possibly change this for different AutomaticGroup types?
+                        name = "Automatic Group";
+                        enabled = false;
+                    } else {
+                        name = _curGroup._2().getName().getOrElse("");
+                        enabled = true;
+                    }
                     if (!_w.guideGroupName.getValue().equals(name))
                         _w.guideGroupName.setValue(name);
+                    _w.guideGroupName.setEnabled(enabled);
 
                     final boolean editable = OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation());
-                    _w.removeButton.setEnabled(editable);
+                    final boolean isAuto   = indexedGroupIsAuto(_curGroup);
+                    _w.removeButton.setEnabled(editable && !isAuto);
                     _w.primaryButton.setEnabled(editable);
                 });
             }
@@ -496,7 +525,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             if (_curPos != null) {
                 final TargetEnvironment env = getDataObject().getTargetEnvironment();
                 final ImList<GuideProbeTargets> gtList = env.getOrCreatePrimaryGuideGroup().getAllContaining(_curPos);
-                enabled = gtList.nonEmpty();
+                enabled = gtList.nonEmpty() && !targetIsAuto(_curPos);
             } else {
                 enabled = _curGroup != null;
             }
@@ -510,33 +539,66 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
     @SuppressWarnings("FieldCanBeLocal")
     private final ActionListener removeListener = evt -> {
-        TargetEnvironment env = getDataObject().getTargetEnvironment();
-        if (env.isBasePosition(_curPos)) {
-            DialogUtil.error("You can't remove the Base Position.");
-        } else if (_curPos != null) {
-            env = env.removeTarget(_curPos);
-        } else if (_curGroup != null) {
-            final GuideGroup primary = env.getOrCreatePrimaryGuideGroup();
+        final TargetEnvironment envOld = getDataObject().getTargetEnvironment();
+        final TargetEnvironment envNew;
+
+        // Target processing.
+        if (_curPos != null) {
+            if (envOld.isBasePosition(_curPos)) {
+                DialogUtil.error("You can't remove the Base Position.");
+                envNew = null;
+            } else if (targetIsAuto(_curPos)) {
+                DialogUtil.error("You can't remove automatic guide stars.");
+                envNew = null;
+            } else {
+                envNew = envOld.removeTarget(_curPos);
+            }
+        }
+
+        // Group processing: _curPos is null.
+        else if (_curGroup != null) {
+            final GuideGroup primary = envOld.getOrCreatePrimaryGuideGroup();
             if (_curGroup == primary) {
                 DialogUtil.error("You can't remove the primary guide group.");
-                return;
+                envNew = null;
+            } else if (indexedGroupIsAuto(_curGroup)) {
+                DialogUtil.error("You can't remove the automatic guide group.");
+                envNew = null;
+            } else {
+                envNew = envOld.removeGroup(_curGroup._1());
+                final int groupIndex = envNew.getGuideEnvironment().getPrimaryIndex();
+                final GuideGroup group = envNew.getGuideEnvironment().getPrimary();
+                _curGroup = new Pair<>(groupIndex, group);
             }
-            env = env.removeGroup(_curGroup._1());
-            final int groupIndex = env.getGuideEnvironment().getPrimaryIndex();
-            final GuideGroup group = env.getGuideEnvironment().getPrimary();
-            _curGroup = new Pair<>(groupIndex, group);
         }
-        getDataObject().setTargetEnvironment(env);
-        final SPTarget selTarget = TargetSelection.getTargetForNode(env, getNode()).getOrNull();
-        if (env.getTargets().contains(selTarget)) {
-            if (_curPos != null) _curPos.deleteWatcher(posWatcher);
-            _curPos = selTarget;
+        else envNew = null;
+
+
+        // No permitted changes were made if envNew is still null.
+        if (envNew == null)
+            return;
+
+        getDataObject().setTargetEnvironment(envNew);
+
+        // If we have a selected target, then process it accordingly.
+        final Option<SPTarget> selTargetOpt = TargetSelection.getTargetForNode(envNew, getNode());
+        if (selTargetOpt.exists(t -> envNew.getTargets().contains(t))) {
+            final SPTarget selTarget = selTargetOpt.getValue();
+
             if (_curPos != null) {
+                _curPos.deleteWatcher(posWatcher);
+            }
+
+            _curPos = selTarget;
+
+            if (_curPos != null) {
+                _curGroup = null;
                 _curPos.addWatcher(posWatcher);
-                refreshAll();
-                updateRemovePrimaryButtonsAndDetailEditor();
             }
         }
+
+        refreshAll();
+        updateRemovePrimaryButtonsAndDetailEditor();
     };
 
     @SuppressWarnings("FieldCanBeLocal")
@@ -554,6 +616,9 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     private final ActionListener autoGuideStarListener = new ActionListener() {
         @Override public void actionPerformed (final ActionEvent evt) {
             try {
+                //
+                // TODO: For BAGS, we do not want to pop open the TPE.
+                //
                 if (GuideStarSupport.hasGemsComponent(getNode())) {
                     final TelescopePosEditor tpe = TpeManager.open();
                     tpe.reset(getNode());
@@ -634,11 +699,8 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             }
         }
         @Override public void actionPerformed(final ActionEvent e) {
-            if (_curPos != null) {
+            if (_curPos != null || _curGroup != null)
                 pasteSelectedPosition(getNode(), getDataObject());
-            } else if (_curGroup != null) {
-                pasteSelectedPosition(getNode(), getDataObject());
-            }
         }
     };
 
