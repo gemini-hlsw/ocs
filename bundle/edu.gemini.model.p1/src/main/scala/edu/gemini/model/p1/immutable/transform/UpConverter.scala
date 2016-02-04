@@ -132,18 +132,21 @@ case class LastStepConverter(semester: Semester) extends SemesterConverter {
  */
 case object SemesterConverter2016ATo2016B extends SemesterConverter {
   val oldKLongFilter    = "K-long (2.00 um)"
+  val removedFilter     = <filter>{oldKLongFilter}</filter>
   val replacementFilter = "K-long (2.20 um)"
 
   val replaceKLongFilter: TransformFunction = {
-      case p @ <flamingos2>{ns @ _*}</flamingos2> if (p \\ "filter").text == oldKLongFilter =>
+      case p @ <flamingos2>{ns @ _*}</flamingos2> if (p \\ "filter").theSeq.contains(removedFilter) =>
         val defaultFilter     = <filter>{replacementFilter}</filter>
 
         object KLongFilterTransformer extends BasicTransformer {
-          override def transform(n: xml.Node): xml.NodeSeq = n match {
-            case <name>{name}</name>                                        => <name>{name.text.replace(oldKLongFilter, replacementFilter)}</name>
-            case <filter>{filter}</filter> if filter.text == oldKLongFilter => defaultFilter
-            case elem: xml.Elem                                             => elem.copy(child=elem.child.flatMap(transform))
-            case _                                                          => n
+          override def transform(n: xml.Node): xml.NodeSeq = {
+            n match {
+              case <name>{name}</name>                                        => <name>{name.text.replace(oldKLongFilter, replacementFilter)}</name>
+              case <filter>{filter}</filter> if filter.text == oldKLongFilter => defaultFilter
+              case elem: xml.Elem                                             => elem.copy(child=elem.child.flatMap(transform))
+              case _                                                          => n
+            }
           }
         }
         StepResult("The Flamingos2 filter K-long (2.00 um) has been converted to K-long (2.20 um).", <flamingos2>{KLongFilterTransformer.transform(ns)}</flamingos2>).successNel

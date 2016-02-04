@@ -24,9 +24,10 @@
     <blueprints>
         <flamingos2>
             <longslit id="blueprint-0">
-                <name>Flamingos2 Longslit R831 K-long (2.00 um) 2-pix longslit</name>
+                <name>Flamingos2 Longslit R831 K-long (2.00 um)+J (1.255 um) 2-pix longslit</name>
                 <visitor>false</visitor>
                 <filter>K-long (2.00 um)</filter>
+                <filter>J (1.255 um)</filter>
                 <disperser>R831</disperser>
                 <fpu>2-pix longslit</fpu>
             </longslit>
