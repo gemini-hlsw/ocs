@@ -138,10 +138,7 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
 
                 skyOrder[i].accept(instrument.getGratingOrderNTransmission(order));
                 skyOrder[i].trim(trimStart, trimEnd);
-            }
 
-            for (int i = 0; i < ORDERS; i++) {
-                final int order = i + 3;
                 specS2N.setSourceSpectrum(sedOrder[i]);
                 specS2N.setBackgroundSpectrum(skyOrder[i]);
 
