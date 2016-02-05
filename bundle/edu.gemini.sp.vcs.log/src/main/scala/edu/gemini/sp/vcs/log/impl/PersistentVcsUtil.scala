@@ -5,6 +5,10 @@ import java.security.MessageDigest
 
 object PersistentVcsUtil {
 
+  import doobie.imports._
+
+  val z = FC.delay("woo")
+
   implicit class StreamOps[A](stream: Stream[A]) {
 
     /**

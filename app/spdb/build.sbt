@@ -129,7 +129,9 @@ def common(version: Version) = AppConfig(
     BundleSpec("org.ops4j.pax.web.pax-web-jetty-bundle", Version(1, 1, 13)),
     BundleSpec("org.ops4j.pax.web.pax-web-jsp",          Version(1, 1, 13)),
     BundleSpec("org.ops4j.pax.web.pax-web-spi",          Version(1, 1, 13)),
-    BundleSpec("org.scala-lang.scala-reflect",           Version(2, 10, 1)),
+    BundleSpec("org.scala-lang.scala-reflect",           Version(2, 10, 5)),
+    BundleSpec("org.scala-lang.scala-actors",            Version(2, 10, 5)),
+    BundleSpec("org.scala-lang.scala-compiler",          Version(2, 10, 5)),
     BundleSpec("org.scalaz.concurrent",                  Version(7, 1, 6)),
     BundleSpec("slf4j.api",                              Version(1, 6, 4)),
     BundleSpec("slf4j.jdk14",                            Version(1, 6, 4)),
@@ -139,7 +141,8 @@ def common(version: Version) = AppConfig(
     BundleSpec("monocle.core",                           Version(1, 1, 0)),
     BundleSpec("monocle.macro",                          Version(1, 1, 0)),
     BundleSpec("edu.gemini.shared.ca",                   version),
-    BundleSpec("edu.gemini.spdb.reports.collection",     version)
+    BundleSpec("edu.gemini.spdb.reports.collection",     version),
+    BundleSpec("com.chuusai.shapeless.core",             Version(2, 2, 5))
   )
 ) extending List(common_credentials(version))
 
