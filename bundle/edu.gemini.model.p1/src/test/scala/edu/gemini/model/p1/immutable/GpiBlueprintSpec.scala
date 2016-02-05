@@ -31,7 +31,7 @@ class GpiBlueprintSpec extends SpecificationWithJUnit with SemesterProperties {
       val xml = XML.loadString(ProposalIo.writeToString(proposal))
 
       // verify the blueprint has a false attribute
-      xml must \\("Gpi") \("visitor") \> "false"
+      xml must \\("Gpi") \ "visitor" \> "false"
     }
     "export observing mode and disperser to XML" in {
       val blueprint = GpiBlueprint(M.GpiObservingMode.CORON_Y_BAND, M.GpiDisperser.PRISM)
@@ -41,8 +41,8 @@ class GpiBlueprintSpec extends SpecificationWithJUnit with SemesterProperties {
       val xml = XML.loadString(ProposalIo.writeToString(proposal))
 
       // verify the exported value
-      xml must \\("observingMode") \> ("Coronograph Y-band")
-      xml must \\("disperser") \> ("Prism")
+      xml must \\("observingMode") \> "Coronograph Y-band"
+      xml must \\("disperser") \> "Prism"
     }
     "be possible to deserialize" in {
       val proposal = ProposalIo.read(new InputStreamReader(getClass.getResourceAsStream("proposal_with_gpi.xml")))

@@ -1,15 +1,9 @@
 package edu.gemini.model.p1.immutable
 
 import org.specs2.mutable._
-import org.specs2.scalaz.ValidationMatchers._
 import edu.gemini.model.p1.{mutable => M}
 import scala.xml.XML
 import java.io.InputStreamReader
-
-//import edu.gemini.spModel.gemini.gsaoi.Gsaoi
-//import edu.gemini.spModel.`type`.SpTypeUtil
-
-
 
 class GsaoiBlueprintSpec extends SpecificationWithJUnit with SemesterProperties {
 
@@ -36,7 +30,7 @@ class GsaoiBlueprintSpec extends SpecificationWithJUnit with SemesterProperties 
       val xml = XML.loadString(ProposalIo.writeToString(proposal))
 
       // verify the blueprint has a false attribute
-      xml must \\("Gsaoi") \("visitor") \> "false"
+      xml must \\("Gsaoi") \ "visitor" \> "false"
     }
     "export J (1.250 um) Filter to XML" in {
       val blueprint = GsaoiBlueprint(M.GsaoiFilter.J :: Nil)
@@ -46,40 +40,24 @@ class GsaoiBlueprintSpec extends SpecificationWithJUnit with SemesterProperties 
       val xml = XML.loadString(ProposalIo.writeToString(proposal))
 
       // verify the exported value
-      xml must \\("filter") \> ("J (1.250 um)")
+      xml must \\("filter") \> "J (1.250 um)"
     }
     "be possible to deserialize" in {
       val proposal = ProposalIo.read(new InputStreamReader(getClass.getResourceAsStream("proposal_with_gsaoi.xml")))
 
-      proposal.blueprints(0).visitor must beFalse
-      proposal.blueprints(0) must beEqualTo(GsaoiBlueprint(GsaoiFilter.forName("K_SHORT") :: Nil))
+      proposal.blueprints.head.visitor must beFalse
+      proposal.blueprints.head must beEqualTo(GsaoiBlueprint(GsaoiFilter.forName("K_SHORT") :: Nil))
     }
     "overwrite visitor as true" in {
       val proposal = ProposalIo.read(new InputStreamReader(getClass.getResourceAsStream("proposal_with_gsaoi_as_visitor.xml")))
 
       // Even though it is true in the xml it becomes false in the logic
-      proposal.blueprints(0).visitor must beFalse
+      proposal.blueprints.head.visitor must beFalse
       val xml = XML.loadString(ProposalIo.writeToString(proposal))
 
       // verify the blueprint has a false attribute
-      xml must \\("Gsaoi") \("visitor") \> "false"
+      xml must \\("Gsaoi") \ "visitor" \> "false"
     }
   }
-
-
-  /*
-  // Commented out to avoid polluting the pit with old ocs jars
-  // TODO move to ./osgi/bundle/phase2/
-  "The Gsoai Blueprint Filters" should {
-    "match the GSOAI.Filters enumeration" in {
-      val enumNotInOT = M.GsaoiFilter.values() map {`oae
-        f => Option(SpTypeUtil.noExceptionValueOf(classOf[Gsaoi.Filter], f.toString))
-      } filter {
-        _.isEmpty
-      }
-
-      enumNotInOT must be empty
-    }
-  }*/
 
 }

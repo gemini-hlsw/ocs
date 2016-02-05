@@ -15,7 +15,7 @@ object SpPhoenixTemplateSpec extends TemplateSpec("PHOENIX_BP.xml") with Specifi
 
   def test(fpu: PhoenixFocalPlaneUnit, filter: PhoenixFilter) =
     expand(proposal(PhoenixBlueprint(Site.GS, fpu, filter), List(1), MagnitudeBand.R)) { (p, sp) =>
-      s"Phoenic Blueprint Expansion $fpu $filter " >> {
+      s"Phoenix Blueprint Expansion $fpu $filter " >> {
 
         def group = groups(sp).head
         def obs   = group.getAllObservations.asScala

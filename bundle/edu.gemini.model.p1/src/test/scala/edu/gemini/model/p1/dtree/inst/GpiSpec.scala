@@ -8,13 +8,13 @@ class GpiSpec extends SpecificationWithJUnit {
     "includes Gpi observing modes" in {
       val gpi = Gpi()
       gpi.title must beEqualTo("Observing Mode")
-      gpi.choices must have size (15)
+      gpi.choices must have size 20
     }
     "includes Gpi disperser modes" in {
       val gpi = Gpi()
       val disperser = gpi.apply(GpiObservingMode.CORON_H_BAND).a
       disperser.title must beEqualTo("Disperser")
-      disperser.choices must have size (2)
+      disperser.choices must have size 2
     }
   }
 
