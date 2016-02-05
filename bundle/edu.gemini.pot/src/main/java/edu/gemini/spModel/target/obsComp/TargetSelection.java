@@ -57,7 +57,7 @@ public final class TargetSelection {
     }
 
     /**
-     * Marks a selection object, which
+     * Marks a selection object.
      */
     private static final class Selection {
         final int index;

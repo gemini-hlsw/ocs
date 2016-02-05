@@ -89,7 +89,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 AgsStrategyUtil.setSelection(getContextObservation(), strategy)
         );
 
-        // TODO: setting _curSelection like this: is this allowed in a lambda?
         _w.guideGroupName.addWatcher(new TextBoxWidgetWatcher() {
             @Override public void textBoxKeyPress(final TextBoxWidget tbwe) {
                 SwingUtilities.invokeLater(() ->
@@ -516,7 +515,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         }
     };
 
-    // TODO: BUGS HERE. Need to make sure that editors are updated properly with enable!
     private final PropertyChangeListener selectionListener = new PropertyChangeListener() {
         @Override public void propertyChange(final PropertyChangeEvent evt) {
             final ISPObsComponent node = getContextTargetObsComp();
@@ -656,16 +654,12 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     private final ActionListener autoGuideStarListener = new ActionListener() {
         @Override public void actionPerformed (final ActionEvent evt) {
             try {
-                //
                 // TODO: For BAGS, we do not want to pop open the TPE.
-                //
                 if (GuideStarSupport.hasGemsComponent(getNode())) {
                     final TelescopePosEditor tpe = TpeManager.open();
                     tpe.reset(getNode());
                     tpe.getImageWidget().autoGuideStarSearch();
                 } else {
-                    // In general, we don't want to pop open the TPE just to
-                    // pick a guide star.
                     AgsClient.launch(getNode(), _w);
                 }
             } catch (final Exception e) {
