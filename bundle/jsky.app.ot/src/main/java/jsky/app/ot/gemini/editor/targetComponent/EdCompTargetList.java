@@ -37,23 +37,6 @@ import java.util.List;
  * This is the editor for the target list component. It is terrible.
  */
 public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, TargetObsComp> {
-    public final class IndexedGuideGroup {
-        private final int idx;
-        private final GuideGroup group;
-
-        public IndexedGuideGroup(final int idx, final GuideGroup group) {
-            this.idx = idx;
-            this.group = group;
-        }
-
-        public int getIndex() {
-            return idx;
-        }
-
-        public GuideGroup getGroup() {
-            return group;
-        }
-    }
 
     // Global variables \o/
     private static TargetClipboard clipboard;
@@ -95,8 +78,8 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                         _curSelection = _curSelection.map(e -> e.mapRight(igg -> {
                             final String newName = _w.guideGroupName.getText();
                             final TargetObsComp toc = getDataObject();
-                            final int idx = igg.getIndex();
-                            final GuideGroup newGroup = igg.getGroup().setName(newName);
+                            final int idx = igg.index();
+                            final GuideGroup newGroup = igg.group().setName(newName);
                             final TargetEnvironment oldEnv = toc.getTargetEnvironment();
                             toc.setTargetEnvironment(oldEnv.setGroup(idx, newGroup));
                             _w.guideGroupName.requestFocus();
@@ -160,7 +143,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
      * Auxiliary method to determine if the current selection is the auto group.
      */
     private boolean selectionIsAutoGroup() {
-        return _curSelection.flatMap(either -> either.foldRight(igg -> igg.getGroup().isAutomatic())).getOrElse(false);
+        return _curSelection.flatMap(either -> either.foldRight(igg -> igg.group().isAutomatic())).getOrElse(false);
     }
 
     /**
@@ -407,12 +390,12 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             GuideEnvironment ge = env.getGuideEnvironment();
 
             // Make sure that a group is selected and that it is not the auto group.
-            final Option<Tuple2<Integer, GuideGroup>> guideGroup = positionTable.getSelectedGroupOrParentGroup(env);
-            if (!guideGroup.exists(tup -> !tup._2().isAutomatic()))
+            final Option<IndexedGuideGroup> iggOpt = positionTable.getSelectedGroupOrParentGroup(env);
+            if (!iggOpt.exists(igg -> !igg.group().isAutomatic()))
                 return;
 
-            Option<GuideProbeTargets> opt = guideGroup.flatMap(tup -> tup._2().get(probe));
-            final Integer groupIndex = guideGroup.map(Tuple2::_1).getOrElse(ge.getPrimaryIndex());
+            Option<GuideProbeTargets> opt = iggOpt.flatMap(igg -> igg.group().get(probe));
+            final Integer groupIndex = iggOpt.map(IndexedGuideGroup::index).getOrElse(ge.getPrimaryIndex());
 
             final SPTarget target = new SPTarget();
             final GuideProbeTargets targets = opt
@@ -469,7 +452,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                     .setPrimaryIndex(newGroupIdx)));
 
             // expand new group tree node
-            positionTable.selectGroup(new Pair<>(newGroupIdx,newGroup));
+            positionTable.selectGroup(IndexedGuideGroup.apply(newGroupIdx,newGroup));
         }
     }
 
@@ -527,10 +510,8 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 // _curGroup = null is handled in function.
                 targetOpt.foreach(target -> manageCurPosIfEnvContainsTarget(target, () -> setSelectionToTarget(target)));
             } else {
-                // TODO change this to make TargetSelection work with IndexedGuideGroups.
-                final Option<Tuple2<Integer, GuideGroup>> grp_ = TargetSelection.getIndexedGuideGroupForNode(env, node);
-                final Option<IndexedGuideGroup> iggOpt = grp_.map(tup -> new IndexedGuideGroup(tup._1(), tup._2()));
-                iggOpt.filter(igg -> env.getGroups().contains(igg.getGroup())).foreach(igg -> {
+                final Option<IndexedGuideGroup> iggOpt = TargetSelection.getIndexedGuideGroupForNode(env, node);
+                iggOpt.filter(igg -> env.getGroups().contains(igg.group())).foreach(igg -> {
                     _curSelection.foreach(either -> either.forEachLeft(t -> t.deleteWatcher(posWatcher)));
 
                     _curSelection = new Some<>(Either.right(igg));
@@ -546,7 +527,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                         name = "Automatic Group";
                         enabled = false;
                     } else {
-                        name = igg.getGroup().getName().getOrElse("");
+                        name = igg.group().getName().getOrElse("");
                         enabled = true;
                     }
                     if (!_w.guideGroupName.getValue().equals(name))
@@ -602,12 +583,12 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 // Handle indexed guide groups.
                 igg -> {
                     final GuideGroup primary = envOld.getOrCreatePrimaryGuideGroup();
-                    if (igg.getGroup() == primary) {
+                    if (igg.group() == primary) {
                         DialogUtil.error("You can't remove the primary guide group.");
                     } else if (selectionIsAutoGroup()) {
                         DialogUtil.error("You can't remove the automatic guide group.");
                     } else {
-                        final TargetEnvironment envNew = envOld.removeGroup(igg.getIndex());
+                        final TargetEnvironment envNew = envOld.removeGroup(igg.index());
                         final int groupIndex = envNew.getGuideEnvironment().getPrimaryIndex();
                         final GuideGroup group = envNew.getGuideEnvironment().getPrimary();
                         _curSelection = new Some<>(Either.right(new IndexedGuideGroup(groupIndex, group)));
@@ -705,11 +686,11 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                     env.setUserTargets(env.getUserTargets().append(newTarget));
             dataObject.setTargetEnvironment(newEnv);
         } else {
-            final Option<Tuple2<Integer,GuideGroup>> indexedGroupOpt =
+            final Option<IndexedGuideGroup> iggOpt =
                     TargetSelection.getIndexedGuideGroupForNode(dataObject.getTargetEnvironment(), obsComponent);
-            indexedGroupOpt.foreach(indexedGroup -> {
-                final GuideGroup group = indexedGroup._2();
-                final TargetEnvironment env = dataObject.getTargetEnvironment();
+            iggOpt.foreach(igg -> {
+                final GuideGroup group        = igg.group();
+                final TargetEnvironment env   = dataObject.getTargetEnvironment();
                 final List<GuideGroup> groups = new ArrayList<>();
                 groups.addAll(env.getGroups().toList());
                 groups.add(group.cloneTargets());
@@ -753,8 +734,8 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
         static Option<TargetClipboard> copy(final TargetEnvironment env, final ISPObsComponent obsComponent) {
             if (obsComponent == null) return None.instance();
-            return TargetSelection.getTargetForNode(env, obsComponent).map(TargetClipboard::new).orElse(
-                    TargetSelection.getIndexedGuideGroupForNode(env, obsComponent).map(Tuple2::_2).map(TargetClipboard::new));
+            return TargetSelection.getTargetForNode(env, obsComponent).map(TargetClipboard::new)
+                    .orElse(TargetSelection.getIndexedGuideGroupForNode(env, obsComponent).map(IndexedGuideGroup::group).map(TargetClipboard::new));
         }
 
 
@@ -774,21 +755,24 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         void paste(final ISPObsComponent obsComponent, final TargetObsComp dataObject) {
             if ((obsComponent == null) || (dataObject == null)) return;
 
-            final SPTarget spTarget = TargetSelection.getTargetForNode(dataObject.getTargetEnvironment(), obsComponent).getOrNull();
-            final GuideGroup group = TargetSelection.getIndexedGuideGroupForNode(dataObject.getTargetEnvironment(), obsComponent)
-                    .map(Tuple2::_2).getOrNull();
+            final Option<SPTarget> tOpt    = TargetSelection.getTargetForNode(dataObject.getTargetEnvironment(), obsComponent);
+            final Option<GuideGroup> gpOpt = TargetSelection.getIndexedGuideGroupForNode(dataObject.getTargetEnvironment(), obsComponent).map(IndexedGuideGroup::group);
 
-            if (spTarget != null && target != null) {
-                spTarget.setTarget(target.clone());
-                spTarget.setMagnitudes(mag);
-            } else if (group != null && this.group != null) {
-                final GuideGroup newGroup = group.setAll(this.group.cloneTargets().getAll());
-                final TargetEnvironment env = dataObject.getTargetEnvironment();
-                final GuideEnvironment ge = dataObject.getTargetEnvironment().getGuideEnvironment();
-                final ImList<GuideGroup> options = ge.getOptions();
-                final ArrayList<GuideGroup> list = new ArrayList<>(options.size());
-                options.foreach(gg -> list.add(gg == group ? newGroup : gg));
-                dataObject.setTargetEnvironment(env.setGuideEnvironment(ge.setOptions(DefaultImList.create(list))));
+            if (tOpt.isDefined() && target != null) {
+                tOpt.foreach(t -> {
+                    t.setTarget(target.clone());
+                    t.setMagnitudes(mag);
+                });
+            } else if (gpOpt.isDefined() && group != null) {
+                gpOpt.foreach(gp -> {
+                    final GuideGroup newGroup = gp.setAll(group.cloneTargets().getAll());
+                    final TargetEnvironment env = dataObject.getTargetEnvironment();
+                    final GuideEnvironment ge = dataObject.getTargetEnvironment().getGuideEnvironment();
+                    final ImList<GuideGroup> options = ge.getOptions();
+                    final ArrayList<GuideGroup> list = new ArrayList<>(options.size());
+                    options.foreach(gg -> list.add(gg == gp ? newGroup : gg));
+                    dataObject.setTargetEnvironment(env.setGuideEnvironment(ge.setOptions(DefaultImList.create(list))));
+                });
             }
         }
     }

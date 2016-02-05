@@ -7,6 +7,7 @@ import edu.gemini.pot.sp.SPUtil;
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.GuideGroup;
+import edu.gemini.spModel.target.env.IndexedGuideGroup;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 
 import java.beans.PropertyChangeListener;
@@ -110,13 +111,13 @@ public final class TargetSelection {
     }
 
     public static Option<Integer> indexOfIndexedGuideGroup(final TargetEnvironment env,
-                                                           final Tuple2<Integer,GuideGroup> indexedGroup) {
+                                                           final IndexedGuideGroup igg) {
         // Extract the selections (and their indices) corresponding to guide groups.
         final ImList<Selection> filtered = Selection.toSelections(env).filter(Selection::isGuideGroup);
 
         // Now make sure the guide group at position gpIdx is gp, and if so, return its index in the selections.
-        final int gpIdx     = indexedGroup._1();
-        final GuideGroup gp = indexedGroup._2();
+        final int gpIdx     = igg.index();
+        final GuideGroup gp = igg.group();
         if (gpIdx >= 0 && gpIdx < filtered.size()) {
             final Selection sel = filtered.get(gpIdx);
             return sel.guideGroup.filter(gp::equals).map(ign -> sel.index);
@@ -147,7 +148,7 @@ public final class TargetSelection {
      * For a given node in the list, find its guide group if any, and the index of said guide group amongst all guide
      * groups.
      */
-    public static Option<Tuple2<Integer, GuideGroup>> getIndexedGuideGroupForNode(final TargetEnvironment env,
+    public static Option<IndexedGuideGroup> getIndexedGuideGroupForNode(final TargetEnvironment env,
                                                                                   final ISPNode node) {
         // The list of all nodes in the tree, and the index of the currently selected node.
         final ImList<Selection> lst = Selection.toSelections(env);
@@ -163,15 +164,15 @@ public final class TargetSelection {
 
         // Filter out the guide groups in positions 0...idx inclusive to get number of guide groups.
         final int gpIdx = lst.zipWithIndex().filter(tup -> tup._1().isGuideGroup() && tup._2() <= idx).size() - 1;
-        return sel.guideGroup.map(g -> new Pair<>(gpIdx,g));
+        return sel.guideGroup.map(g -> IndexedGuideGroup.apply(gpIdx,g));
     }
 
     /**
      * For a given guide group, find the corresponding node in the list if it exists, and set it as the index.
      */
     public static void setIndexedGuideGroup(final TargetEnvironment env, final ISPNode node,
-                                            final Tuple2<Integer,GuideGroup> indexedGroup) {
-        setIndex(node, indexOfIndexedGuideGroup(env, indexedGroup));
+                                            final IndexedGuideGroup igg) {
+        setIndex(node, indexOfIndexedGuideGroup(env, igg));
     }
 
     public static void listenTo(final ISPNode node, final PropertyChangeListener listener) {
