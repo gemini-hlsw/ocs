@@ -100,22 +100,6 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
         //
         // inputs: source morphology specification
 
-        // if altair is used we need to calculate both a core and halo
-        // source_fraction
-        // halo first
-        final SourceFraction SFcalc;
-        if (altair.isDefined()) {
-            final double aoCorrImgQual = altair.get().getAOCorrectedFWHM();
-            if (_obsDetailParameters.isAutoAperture()) {
-                SFcalc = SourceFractionFactory.calculate(_sdParameters.isUniform(), _obsDetailParameters.isAutoAperture(), 1.18 * aoCorrImgQual, instrument.getPixelSize(), aoCorrImgQual);
-            } else {
-                SFcalc = SourceFractionFactory.calculate(_sdParameters, _obsDetailParameters, instrument, aoCorrImgQual);
-            }
-        } else {
-            // this will be the core for an altair source; unchanged for non altair.
-            SFcalc = SourceFractionFactory.calculate(_sdParameters, _obsDetailParameters, instrument, IQcalc.getImageQuality());
-        }
-
         final double im_qual = altair.isDefined() ? altair.get().getAOCorrectedFWHM() : IQcalc.getImageQuality();
 
         // In this version we are bypassing morphology modules 3a-5a.
@@ -145,7 +129,7 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
 
         final SpecS2N[] specS2Narr = new SpecS2N[1];
         specS2Narr[0] = specS2N;
-        return new SpectroscopyResult(p, instrument, SFcalc, IQcalc, specS2Narr, slit, st.throughput(), altair);
+        return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, st.throughput(), altair);
     }
 
     public ImagingResult calculateImaging() {

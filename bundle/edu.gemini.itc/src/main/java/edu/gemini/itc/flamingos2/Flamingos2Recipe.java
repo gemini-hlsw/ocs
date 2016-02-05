@@ -84,9 +84,6 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
         IQcalc.calculate();
         final double im_qual = IQcalc.getImageQuality();
 
-        // Calculate Source fraction
-        final SourceFraction SFcalc = SourceFractionFactory.calculate(_sdParameters, _obsDetailParameters, instrument, im_qual);
-
         // In this version we are bypassing morphology modules 3a-5a.
         // i.e. the output morphology is same as the input morphology.
         // Might implement these modules at a later time.
@@ -114,7 +111,7 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
         final SpecS2NSlitVisitor[] specS2Narr = new SpecS2NSlitVisitor[1];
         specS2Narr[0] = specS2N;
 
-        return new SpectroscopyResult(p, instrument, SFcalc, IQcalc, specS2Narr, slit, st.throughput(), Option.empty());
+        return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, st.throughput(), Option.empty());
     }
 
     public ImagingResult calculateImaging() {

@@ -109,9 +109,6 @@ public final class MichelleRecipe implements ImagingRecipe, SpectroscopyRecipe {
         final ImageQualityCalculatable IQcalc = ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _telescope, instrument);
         IQcalc.calculate();
 
-        // Calculate the Fraction of source in the aperture
-        final SourceFraction SFcalc = SourceFractionFactory.calculate(_sdParameters, _obsDetailParameters, instrument, IQcalc.getImageQuality());
-
         // In this version we are bypassing morphology modules 3a-5a.
         // i.e. the output morphology is same as the input morphology.
         // Might implement these modules at a later time.
@@ -139,7 +136,7 @@ public final class MichelleRecipe implements ImagingRecipe, SpectroscopyRecipe {
 
         final SpecS2N[] specS2Narr = new SpecS2N[1];
         specS2Narr[0] = specS2N;
-        return new SpectroscopyResult(p, instrument, SFcalc, IQcalc, specS2Narr, slit, st.throughput(), Option.empty());
+        return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, st.throughput(), Option.empty());
 
 
     }

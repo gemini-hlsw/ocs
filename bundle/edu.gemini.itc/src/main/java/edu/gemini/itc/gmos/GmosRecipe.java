@@ -111,29 +111,9 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         //
         // inputs: source morphology specification
 
-        final double source_fraction;
-        List<Double> sf_list = new ArrayList<>();
-
         // Calculate image quality
         final ImageQualityCalculatable IQcalc = ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _telescope, instrument);
         IQcalc.calculate();
-
-        final SourceFraction SFcalc = SourceFractionFactory.calculate(_sdParameters, _obsDetailParameters, instrument, IQcalc.getImageQuality());
-        if (!instrument.isIfuUsed()) {
-            source_fraction = SFcalc.getSourceFraction();
-        } else {
-            final VisitableMorphology morph;
-            if (!_sdParameters.isUniform()) {
-                morph = new GaussianMorphology(IQcalc.getImageQuality());
-            } else {
-                morph = new USBMorphology();
-            }
-            morph.accept(instrument.getIFU().getAperture());
-            // for now just a single item from the list
-            sf_list = instrument.getIFU().getFractionOfSourceInAperture();
-            source_fraction = sf_list.get(0);
-        }
-
 
         // In this version we are bypassing morphology modules 3a-5a.
         // i.e. the output morphology is same as the input morphology.
@@ -146,13 +126,24 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         final Slit slit;
 
         final double slitLength;
+        final List<Double> sf_list;
         if (!instrument.isIfuUsed()) {
             slit = Slit$.MODULE$.apply(_sdParameters, _obsDetailParameters, instrument, instrument.getSlitWidth(), IQcalc.getImageQuality());
             final SlitThroughput st = new SlitThroughput(_sdParameters, slit, IQcalc.getImageQuality());
             slitLength = slit.lengthPixels();
             throughput = st.throughput();
+            sf_list = new ArrayList<>(); // TODO: this is actually only used for IFU, clean this up
         } else {
-            throughput = source_fraction;
+            final VisitableMorphology morph;
+            if (!_sdParameters.isUniform()) {
+                morph = new GaussianMorphology(IQcalc.getImageQuality());
+            } else {
+                morph = new USBMorphology();
+            }
+            morph.accept(instrument.getIFU().getAperture());
+            // for now just a single item from the list
+            sf_list = instrument.getIFU().getFractionOfSourceInAperture();
+            throughput = sf_list.get(0);
             slitLength = 5 / instrument.getSpatialBinning();
             slit = Slit$.MODULE$.apply(instrument.getSlitWidth(), slitLength, instrument.getPixelSize());
         }
@@ -207,7 +198,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
 
         }
 
-        return new SpectroscopyResult(p, instrument, SFcalc, IQcalc, specS2N, slit, throughput, Option.empty());
+        return new SpectroscopyResult(p, instrument, IQcalc, specS2N, slit, throughput, Option.empty());
 
     }
 

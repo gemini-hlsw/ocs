@@ -48,7 +48,6 @@ object ImagingResult {
 final case class SpectroscopyResult(
                       parameters:       ItcParameters,
                       instrument:       Instrument,
-                      sfCalc:           SourceFraction,
                       iqCalc:           ImageQualityCalculatable,
                       specS2N:          Array[SpecS2N],   // Array is used for IFU cases (GMOS and NIFS)
                       slit:             Slit,

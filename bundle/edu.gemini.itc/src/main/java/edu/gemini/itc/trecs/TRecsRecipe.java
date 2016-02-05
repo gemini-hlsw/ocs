@@ -138,7 +138,7 @@ public final class TRecsRecipe implements ImagingRecipe, SpectroscopyRecipe {
 
         final SpecS2NSlitVisitor[] specS2Narr = new SpecS2NSlitVisitor[1];
         specS2Narr[0] = specS2N;
-        return new SpectroscopyResult(p, instrument, null, IQcalc, specS2Narr, slit, st.throughput(), Option.empty()); // TODO SFCalc not needed!
+        return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, st.throughput(), Option.empty());
     }
 
     public ImagingResult calculateImaging() {

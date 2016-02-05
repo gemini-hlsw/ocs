@@ -83,9 +83,6 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
         final VisitableSampledSpectrum sed = calcSource.sed;
         final VisitableSampledSpectrum sky = calcSource.sky;
 
-        // Calculate the Fraction of source in the aperture
-        final SourceFraction SFcalc = SourceFractionFactory.calculate(_sdParameters, _obsDetailParameters, instrument, IQcalc.getImageQuality());
-
         // In this version we are bypassing morphology modules 3a-5a.
         // i.e. the output morphology is same as the input morphology.
         // Might implement these modules at a later time.
@@ -170,7 +167,7 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
                 specS2Narr[i] = s2n;
             }
 
-            return new SpectroscopyResult(p, instrument, SFcalc, IQcalc, specS2Narr, slit, st.throughput(), Option.<AOSystem>empty());
+            return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, st.throughput(), Option.<AOSystem>empty());
 
         } else {
 
@@ -184,7 +181,7 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
             sed.accept(specS2N);
 
             final SpecS2N[] specS2Narr = new SpecS2N[] {specS2N};
-            return new SpectroscopyResult(p, instrument, SFcalc, IQcalc, specS2Narr, slit, st.throughput(), Option.<AOSystem>empty());
+            return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, st.throughput(), Option.<AOSystem>empty());
         }
 
 

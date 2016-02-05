@@ -169,8 +169,7 @@ public final class NifsRecipe implements SpectroscopyRecipe {
             specS2Narr[i++] = specS2N;
         }
 
-        // TODO: no SFCalc and ST for Nifs, introduce specific result type? or optional values? work with null for now
-        return new SpectroscopyResult(p, instrument, null, IQcalc, specS2Narr, null, 0, altair);
+        return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, null, 0, altair);
     }
 
     // NIFS CHARTS
