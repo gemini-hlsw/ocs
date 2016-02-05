@@ -1,6 +1,5 @@
 package edu.gemini.spModel.gemini.gpi;
 
-import edu.gemini.model.p1.mutable.GpiObservingMode;
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Some;
 import edu.gemini.spModel.config2.Config;

@@ -57,6 +57,21 @@
             <jxb:bindings node="./xsd:enumeration[@value='K2 direct']">
                 <jxb:typesafeEnumMember name="DIRECT_K2_BAND"/>
             </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='Y Unblocked']">
+                <jxb:typesafeEnumMember name="UNBLOCKED_Y"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='J Unblocked']">
+                <jxb:typesafeEnumMember name="UNBLOCKED_J"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='H Unblocked']">
+                <jxb:typesafeEnumMember name="UNBLOCKED_H"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='K1 Unblocked']">
+                <jxb:typesafeEnumMember name="UNBLOCKED_K1"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='K2 Unblocked']">
+                <jxb:typesafeEnumMember name="UNBLOCKED_K2"/>
+            </jxb:bindings>
         </jxb:bindings>
 
         <!-- GpiDisperser => Gpi.Disperser -->

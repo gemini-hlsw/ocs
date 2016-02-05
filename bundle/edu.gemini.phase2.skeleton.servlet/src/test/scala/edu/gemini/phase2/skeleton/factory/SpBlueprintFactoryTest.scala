@@ -24,7 +24,17 @@ class SpBlueprintFactoryTest {
     }
 
     assertTrue(enumNotInOT.isEmpty)
+  }
 
+  @Test
+  def allGpiObservingModesPresentInP2() {
+    val enumNotInOT = M.GpiObservingMode.values() map {
+      f => Option(SpTypeUtil.noExceptionValueOf(classOf[M.GpiObservingMode], f.toString))
+    } filter {
+      _.isEmpty
+    }
+
+    assertTrue(enumNotInOT.isEmpty)
   }
 
   @Test

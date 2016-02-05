@@ -53,6 +53,11 @@
             <xsd:enumeration value="Non Redundant Mask H"/>
             <xsd:enumeration value="Non Redundant Mask K1"/>
             <xsd:enumeration value="Non Redundant Mask K2"/>
+            <xsd:enumeration value="Y Unblocked"/>
+            <xsd:enumeration value="J Unblocked"/>
+            <xsd:enumeration value="H Unblocked"/>
+            <xsd:enumeration value="K1 Unblocked"/>
+            <xsd:enumeration value="K2 Unblocked"/>
         </xsd:restriction>
     </xsd:simpleType>
 
