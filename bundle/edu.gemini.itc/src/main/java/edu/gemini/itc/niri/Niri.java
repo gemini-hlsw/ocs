@@ -97,7 +97,7 @@ public class Niri extends Instrument implements SpectroscopyInstrument {
                     getStringSlitWidth());
 
             resetBackGround(INSTR_DIR, "spec_");  //Niri has spectroscopic scattering from grisms
-            addGrism(_grismOptics);
+            addDisperser(_grismOptics);
         }
 
         if (_mode instanceof Imaging) {

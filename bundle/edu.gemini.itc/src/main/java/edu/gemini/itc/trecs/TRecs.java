@@ -119,7 +119,7 @@ public final class TRecs extends Instrument implements SpectroscopyInstrument {
                         "used with the " + WindowWheel.KRS_5.displayValue() + " window. \n" +
                         "Please change the grating or the window cover.");
             }
-            addGrating(gratingOptics);
+            addDisperser(gratingOptics);
             _gratingOptics = Option.apply(gratingOptics);
         } else {
             _gratingOptics = Option.empty();

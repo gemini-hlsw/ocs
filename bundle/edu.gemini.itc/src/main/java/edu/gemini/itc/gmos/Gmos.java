@@ -125,7 +125,7 @@ public abstract class Gmos extends Instrument implements BinningProvider, Spectr
                     _detector.getDetectorPixels(),
                     gp.spectralBinning());
             _sampling = _gratingOptics.dispersion();
-            addGrating(_gratingOptics);
+            addDisperser(_gratingOptics);
 
             // we only need the detector transmission visitor for the spectroscopy case (i.e. if there is a grating)
             if (detectorCcdIndex == 0) {
@@ -183,7 +183,7 @@ public abstract class Gmos extends Instrument implements BinningProvider, Spectr
      * @return Effective wavelength in nm
      */
     public int getEffectiveWavelength() {
-        if (grating.isEmpty()) return (int) _Filter.getEffectiveWavelength();
+        if (disperser.isEmpty()) return (int) _Filter.getEffectiveWavelength();
         else return (int) _gratingOptics.getEffectiveWavelength();
 
     }
@@ -266,7 +266,7 @@ public abstract class Gmos extends Instrument implements BinningProvider, Spectr
         //Test to see that all conditions for Spectroscopy are met
         if (odp.calculationMethod() instanceof Spectroscopy) {
 
-            if (grating.isEmpty())
+            if (disperser.isEmpty())
                 throw new RuntimeException("Spectroscopy calculation method is selected but a grating" +
                         " is not.\nPlease select a grating and a " +
                         "focal plane mask in the Instrument " +
@@ -298,7 +298,7 @@ public abstract class Gmos extends Instrument implements BinningProvider, Spectr
             if (filter.isEmpty())
                 throw new RuntimeException("Imaging calculation method is selected but a filter is not.");
 
-            if (grating.isDefined())
+            if (disperser.isDefined())
                 throw new RuntimeException("Imaging calculation method is selected but a grating" +
                         " is also selected.\nPlease deselect the " +
                         "grating or change the method to spectroscopy.");

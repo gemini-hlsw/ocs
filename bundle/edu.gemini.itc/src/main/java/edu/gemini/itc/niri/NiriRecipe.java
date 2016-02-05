@@ -128,7 +128,7 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
 
         final SpecS2NSlitVisitor specS2N = new SpecS2NSlitVisitor(
                 slit,
-                instrument.grism.get(),
+                instrument.disperser.get(),
                 spec_source_frac,
                 instrument.getSpectralPixelWidth(),
                 instrument.getObservingStart(),

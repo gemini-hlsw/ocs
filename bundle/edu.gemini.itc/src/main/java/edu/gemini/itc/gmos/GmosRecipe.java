@@ -167,7 +167,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
                 final Slit ifuSlit = Slit$.MODULE$.apply(instrument.getSlitWidth(), slitLength, instrument.getPixelSize());
                 specS2N[i] = new SpecS2NSlitVisitor(
                         ifuSlit,
-                        instrument._gratingOptics,
+                        instrument.disperser.get(),
                         spsf,
                         instrument.getSpectralPixelWidth(),
                         instrument.getObservingStart(),
@@ -188,7 +188,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
             specS2N = new SpecS2NSlitVisitor[1];
             specS2N[0] = new SpecS2NSlitVisitor(
                     slit,
-                    instrument._gratingOptics,
+                    instrument.disperser.get(),
                     throughput,
                     instrument.getSpectralPixelWidth(),
                     instrument.getObservingStart(),

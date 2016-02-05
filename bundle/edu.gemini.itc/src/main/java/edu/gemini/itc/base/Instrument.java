@@ -49,12 +49,10 @@ public abstract class Instrument {
     // Each Instrument adds its own background.
     private ArraySpectrum background;
 
-    // The filter
+    // The filter (if any)
     public Option<Filter> filter;
-    // The grating
-    public Option<GratingOptics> grating;
-    // The grism
-    public Option<GrismOptics> grism;
+    // The disperser (if any)
+    public Option<Disperser> disperser;
 
     /**
      * All instruments have data files of the same format.
@@ -73,8 +71,7 @@ public abstract class Instrument {
         this.components  = new LinkedList<>();
         this.background  = new DefaultArraySpectrum(dir + params.backgroundFile());
         this.filter      = Option.empty();
-        this.grating     = Option.empty();
-        this.grism       = Option.empty();  // TODO: difference grism vs grating??
+        this.disperser   = Option.empty();
     }
 
     /**
@@ -102,33 +99,23 @@ public abstract class Instrument {
      * @param f
      */
     protected void addFilter(Filter f) {
-        if (filter.isDefined()) throw new IllegalStateException(); // TODO: make sure filter is passed into constructor?
+        if (filter.isDefined()) throw new IllegalStateException();
         filter = new Some<>(f);
         components.add(f);
         validate();
     }
 
     /**
-     * Add a grating to the light path.
-     * Gratings limit the start and/or end value of the observable wavelengths.
-     * @param g
+     * Add a disperser to the light path.
+     * Dispersers limit the start and/or end value of the observable wavelengths.
+     * @param d
      */
-    protected void addGrating(GratingOptics g) {
-        if (grating.isDefined()) throw new IllegalStateException(); // TODO: make sure grating is passed into constructor?
-        grating = new Some<>(g);
-        components.add(g);
-        validate();
-    }
-
-    /**
-     * Add a grism to the light path.
-     * Grisms limit the start and/or end value of the observable wavelengths.
-     * @param g
-     */
-    protected void addGrism(GrismOptics g) {
-        if (grism.isDefined()) throw new IllegalStateException(); // TODO: make sure grating is passed into constructor?
-        grism = new Some<>(g);
-        components.add(g);
+    protected void addDisperser(final Disperser d) {
+        if (disperser.isDefined()) throw new IllegalStateException();
+        disperser = new Some<>(d);
+        // we know that all dispersers are transmission elements, it would be nice to reflect this in the object
+        // hierarchy but that's a refactoring for a later time
+        components.add((TransmissionElement) d);
         validate();
     }
 
@@ -143,27 +130,15 @@ public abstract class Instrument {
      * TODO: call this in constructor at some point?
      */
     private void validate() {
-        if (grating.isDefined() && filter.isDefined()) {
+        if (disperser.isDefined() && filter.isDefined()) {
             final Filter f = filter.get();
-            final GratingOptics g = grating.get();
-            if ((f.getStart() >= g.getEnd()) || (f.getEnd() <= g.getStart())) {
+            final Disperser d = disperser.get();
+            if ((f.getStart() >= d.getEnd()) || (f.getEnd() <= d.getStart())) {
                 throw new RuntimeException("The " + f + " filter" +
-                        " and the " + g +
+                        " and the " + d +
                         " do not overlap with the requested wavelength.\n" +
                         " Please select a different filter, grating or wavelength." + f.getStart() +
-                        " " + f.getEnd() + " " + g.getStart() + " " + g.getEnd());
-            }
-        }
-        if (grism.isDefined() && filter.isDefined()) { // TODO grism vs grating ??
-            final Filter f = filter.get();
-            final GrismOptics g = grism.get();
-            if ((f.getStart() >= g.getEnd()) || (f.getEnd() <= g.getStart())) {
-                throw new RuntimeException("The " + f + " filter" +
-                        " and the " + g +
-                        " do not overlap.\nTo continue with " +
-                        "Spectroscopy mode " +
-                        "either deselect the filter or choose " +
-                        "one that overlaps with the grism.");
+                        " " + f.getEnd() + " " + d.getStart() + " " + d.getEnd());
             }
         }
     }
@@ -194,11 +169,9 @@ public abstract class Instrument {
     public double getObservingStart() {
         // From original code (Michelle, TReCS, Nifs and GMOS): grating trumps everything else, is this correct?
         // Note that F2, Gnirs, Niri and Nifs behave differently again and override this method.
-        if (grating.isDefined()) return grating.get().getStart();
+        if (disperser.isDefined()) return disperser.get().getStart();
         double s = getStart();
-        //s = grating.isDefined() ? Math.max(grating.get().getStart(), s) : s;
-        s = grism.isDefined()   ? Math.max(grism.get().getStart(),   s) : s;
-        s = filter.isDefined()  ? Math.max(filter.get().getStart(),  s) : s;
+        s = filter.isDefined() ? Math.max(filter.get().getStart(),  s) : s;
         return s;
     }
 
@@ -207,11 +180,9 @@ public abstract class Instrument {
     public double getObservingEnd() {
         // From original code (Michelle, TReCS, Nifs and GMOS): grating trumps everything else, is this correct?
         // Note that F2, Gnirs, Niri and Nifs behave differently again and override this method.
-        if (grating.isDefined()) return grating.get().getEnd();
+        if (disperser.isDefined()) return disperser.get().getEnd();
         double e = getEnd();
-        //e = grating.isDefined() ? Math.min(grating.get().getEnd(), e) : e;
-        e = grism.isDefined()   ? Math.min(grism.get().getEnd(),   e) : e;
-        e = filter.isDefined()  ? Math.min(filter.get().getEnd(),  e) : e;
+        e = filter.isDefined() ? Math.min(filter.get().getEnd(),  e) : e;
         return e;
     }
 

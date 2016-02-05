@@ -145,7 +145,7 @@ public final class NifsRecipe implements SpectroscopyRecipe {
             final Slit slit = Slit$.MODULE$.apply(instrument.getSlitWidth(), slitLength, instrument.getPixelSize());
             final SpecS2NSlitVisitor specS2N = new SpecS2NSlitVisitor(
                     slit,
-                    instrument._gratingOptics,
+                    instrument.disperser.get(),
                     throughput,
                     instrument.getSpectralPixelWidth(),
                     instrument.getObservingStart(),

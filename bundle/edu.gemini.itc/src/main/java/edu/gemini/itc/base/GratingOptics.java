@@ -55,12 +55,10 @@ public abstract class GratingOptics extends TransmissionElement implements Dispe
         return data.apply(gratingName).blaze();
     }
 
-    /** Gets the resolution in [nm] */
-    public double resolution() {
+    public double resolutionHalfArcsecSlit() {
         return data.apply(gratingName).resolution();
     }
 
-    /** Gets the dispersion in [nm/pixel] */
     public double dispersion() {
         return data.apply(gratingName).dispersion() * _spectralBinning;
     }

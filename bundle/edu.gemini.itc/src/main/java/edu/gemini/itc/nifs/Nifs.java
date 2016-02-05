@@ -117,7 +117,7 @@ public final class Nifs extends Instrument implements SpectroscopyInstrument {
                 _detector.getDetectorPixels(),
                 1);
         _sampling = _gratingOptics.dispersion();
-        addGrating(_gratingOptics);
+        addDisperser(_gratingOptics);
 
 
         addComponent(_detector);

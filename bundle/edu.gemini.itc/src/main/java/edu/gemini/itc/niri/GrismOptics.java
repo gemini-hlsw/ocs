@@ -118,16 +118,21 @@ public final class GrismOptics extends TransmissionElement implements Disperser 
         }
     }
 
-    public double resolution() {
+    // For NIRI we can not use the extrapolation from the half arcsec slit as we do for other instruments.
+    // Therefore this method is undefined and must not be used for NIRI!
+    public double resolutionHalfArcsecSlit() {
+        throw new Error("not implemented for NIRI");
+    }
+
+    // Calculates the resolution for the current grism and wavelength.
+    public double resolution(final Slit slit) {
         return getEffectiveWavelength() / resolution.get(getGrismNumber());
     }
 
-    public double resolution(final Slit slit) {
-        return resolution();
-    }
-
+    // Calculates the resolution for the current grism and wavelength. The image quality is not taken into account;
+    // for NIRI the resolution in the files assumes that the target fills the slit (IQ>slit width).
     public double resolution(final Slit slit, final double imgQuality) {
-        return resolution();
+        return resolution(slit);
     }
 
     public double dispersion() {

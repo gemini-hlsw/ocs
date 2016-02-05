@@ -24,12 +24,14 @@ public final class GnirsGratingOptics extends GratingOptics {
         this.scale = scale;
     }
 
-    public double resolution() {
-        return super.resolution() / scale / order;  // value must be scaled for long camera
+    // Take camera scale factor and order into account.
+    public double resolutionHalfArcsecSlit() {
+        return super.resolutionHalfArcsecSlit() / scale / order;
     }
 
+    // Take camera scale factor and order into account.
     public double dispersion() {
-        return super.dispersion() / scale / order;  // value must be scaled for long camera
+        return super.dispersion() / scale / order;
     }
 
 }

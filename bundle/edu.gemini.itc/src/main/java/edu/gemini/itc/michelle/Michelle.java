@@ -122,7 +122,7 @@ public final class Michelle extends Instrument implements SpectroscopyInstrument
             _gratingOptics = new MichelleGratingOptics(getDirectory() + "/" + getPrefix(), params.grating(),
                     _centralWavelength,
                     detector.getDetectorPixels());
-            addGrating(_gratingOptics);
+            addDisperser(_gratingOptics);
         }
 
 

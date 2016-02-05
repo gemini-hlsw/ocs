@@ -122,7 +122,7 @@ public final class TRecsRecipe implements ImagingRecipe, SpectroscopyRecipe {
 
         final SpecS2NSlitVisitor specS2N = new SpecS2NSlitVisitor(
                 slit,
-                instrument.grating.get(),
+                instrument.disperser.get(),
                 st.throughput(),
                 instrument.getSpectralPixelWidth(),
                 instrument.getObservingStart(),
