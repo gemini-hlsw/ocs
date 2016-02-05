@@ -1,7 +1,10 @@
 package edu.gemini.shared.util.immutable;
 
+import com.sun.istack.internal.NotNull;
+
 import java.util.NoSuchElementException;
 import java.io.Serializable;
+import java.util.function.Supplier;
 
 /**
  * A class that represents an optional value of a particular type.  This has
@@ -30,7 +33,13 @@ public interface Option<T> extends Iterable<T>, Serializable {
      * Gets the value assuming there is one, but returns the
      * <code>defaultValue</code> if there is none.
      */
-    T getOrElse(T defaultValue);
+    T getOrElse(@NotNull T defaultValue);
+
+    /**
+     * Gets the value assuming there is one, but returns the value provided by a supplied if there is none.
+     * @return
+     */
+    T getOrElse(@NotNull Supplier<? extends T> supplier);
 
     /**
      * Returns <code>this</code> value if {@link Some} or else <code>that</code>.
@@ -97,7 +106,7 @@ public interface Option<T> extends Iterable<T>, Serializable {
      *
      * @param <U> result type of the operation
      */
-    <U> Option<U> map(Function1<? super T, U> op);
+    <U> Option<U> map(Function1<? super T, ? extends U> op);
 
     /**
      * If the option is nonempty, returns a function applied to its value

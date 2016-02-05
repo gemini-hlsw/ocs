@@ -497,9 +497,9 @@ public enum Canopus {
      */
     public Option<Area> probeArm(ObsContext ctx, Wfs cwfs, boolean validate) {
         return ctx.getBaseCoordinates().map(coords -> {
-            GuideProbeTargets targets = ctx.getTargets().getOrCreatePrimaryGuideGroup().get(cwfs).getOrElse(null);
+            GuideProbeTargets targets = ctx.getTargets().getOrCreatePrimaryGuideGroup().get(cwfs).getOrNull();
             if (targets != null) {
-                SPTarget target = targets.getPrimary().getOrElse(null);
+                SPTarget target = targets.getPrimary().getOrNull();
                 if (target != null && (!validate || cwfs.validate(target, ctx) == GuideStarValidation.VALID)) {
                     // Get offset from base position to cwfs in arcsecs
                     CoordinateDiff diff = new CoordinateDiff(coords, target.getTarget().getSkycalcCoordinates());

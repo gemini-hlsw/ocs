@@ -1,7 +1,10 @@
 package edu.gemini.shared.util.immutable;
 
+import com.sun.istack.internal.NotNull;
+
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.function.Supplier;
 
 /**
  * The Option implementation that represents the presence of a value.
@@ -19,7 +22,12 @@ public final class Some<T> implements Option<T> {
     }
 
     @Override
-    public T getOrElse(final T defaultValue) {
+    public T getOrElse(@NotNull final T defaultValue) {
+        return val;
+    }
+
+    @Override
+    public T getOrElse(@NotNull final Supplier<? extends T> supplier) {
         return val;
     }
 
@@ -70,7 +78,7 @@ public final class Some<T> implements Option<T> {
     }
 
     @Override
-    public <U> Option<U> map(final Function1<? super T, U> op) {
+    public <U> Option<U> map(final Function1<? super T, ? extends U> op) {
         final U res = op.apply(val);
         return new Some<>(res);
     }

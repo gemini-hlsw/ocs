@@ -1,8 +1,11 @@
 package edu.gemini.shared.util.immutable;
 
+import com.sun.istack.internal.NotNull;
+
 import java.io.Serializable;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.function.Supplier;
 
 /**
  * The Option implementation that represents the lack of a value.
@@ -64,8 +67,13 @@ public final class None<T> implements Option<T>, Serializable {
     }
 
     @Override
-    public T getOrElse(final T defaultValue) {
+    public T getOrElse(@NotNull final T defaultValue) {
         return defaultValue;
+    }
+
+    @Override
+    public T getOrElse(@NotNull final Supplier<? extends T> supplier) {
+        return supplier.get();
     }
 
     @Override
@@ -110,7 +118,7 @@ public final class None<T> implements Option<T>, Serializable {
     public boolean forall(final Function1<? super T, Boolean> op) { return true; }
 
     @Override
-    public <U> Option<U> map(final Function1<? super T, U> tuMapOp) {
+    public <U> Option<U> map(final Function1<? super T, ? extends U> tuMapOp) {
         return instance();
     }
 

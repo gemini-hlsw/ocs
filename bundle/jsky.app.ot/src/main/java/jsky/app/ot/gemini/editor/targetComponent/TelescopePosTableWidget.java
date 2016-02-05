@@ -813,12 +813,12 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
                 final GuideProbeTargets src = targetList.get(0);
 
                 final GuideProbe guideprobe = src.getGuider();
-                GuideProbeTargets snk = snkGrp._2().get(guideprobe).getOrElse(null);
+                GuideProbeTargets snk = snkGrp._2().get(guideprobe).getOrNull();
                 if (snk == null) {
                     snk = GuideProbeTargets.create(guideprobe);
                 }
 
-                final boolean isPrimary = src.getPrimary().getOrElse(null) == target;
+                final boolean isPrimary = src.getPrimary().getOrNull() == target;
                 final GuideProbeTargets newSrc = src.removeTarget(target);
                 final SPTarget newTarget = target.clone();
 
