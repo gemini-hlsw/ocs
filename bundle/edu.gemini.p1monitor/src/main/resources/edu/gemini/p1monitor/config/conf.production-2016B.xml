@@ -78,7 +78,7 @@
 
     <type name="subaru">
         <dir>/home/software/test_proposals/subaru/proposals/2016B</dir>
-        <to>cquiroz@gemini.edu</to>
+        <to>pit.subaru@gemini.edu</to>
     </type>
 
     <filetranslation>

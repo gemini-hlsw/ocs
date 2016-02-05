@@ -87,7 +87,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
           TacProblems(p, s).all ++
           List(incompleteInvestigator, missingObsElementCheck, cfCheck, emptyTargetCheck, emptyEphemerisCheck, initialEphemerisCheck, finalEphemerisCheck,
             badGuiding, badVisibility, iffyVisibility, singlePointEphemerisCheck, minTimeCheck, wrongSite, band3Orphan2, gpiCheck, lgsCC50Check, lgsIQCheck,
-            texesCCCheck, texesWVCheck, gmosWVCheck, band3IQ, band3LGS, band3TOO, bgAny).flatten
+            texesCCCheck, texesWVCheck, gmosWVCheck, band3IQ, band3LGS, band3RapidToO, sbIrObservation).flatten
       ps.sorted
     }
 
@@ -280,18 +280,18 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       if bpIsLgs(b) && isBand3(o)
     } yield new Problem(Severity.Error, s"LGS cannot be scheduled in Band 3", "Band 3", s.showObsListView(Band.BAND_3))
 
-    def isToO(p: ProposalClass): Option[ToOChoice] = p match {
+    def proposalToO(p: ProposalClass): Option[ToOChoice] = p match {
       case q: QueueProposalClass         => q.tooOption.some
       case l: LargeProgramClass          => l.tooOption.some
       case f: FastTurnaroundProgramClass => f.tooOption.some
       case _                             => None
     }
     
-    private val band3TOO = for {
+    private val band3RapidToO = for {
       o  <- p.observations
-      to <- isToO(p.proposalClass)
-      if isBand3(o) && to != ToOChoice.None
-    } yield new Problem(Severity.Error, s"ToO observations cannot be scheduled in Band 3", "Time Requests", s.showPartnersView())
+      to <- proposalToO(p.proposalClass)
+      if isBand3(o) && to == ToOChoice.Rapid
+    } yield new Problem(Severity.Error, s"Rapid ToO observations cannot be scheduled in Band 3", "Time Requests", s.showPartnersView())
 
     private val band3Obs = (!p.observations.exists(_.band == Band.BAND_3) && isBand3(p)) option new Problem(Severity.Todo, s"Please create Band 3 observations with conditions, targets, and resources.", "Band 3", s.showObsListView(Band.BAND_3))
 
@@ -312,11 +312,11 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       case _                                           => false
     }
 
-    private val bgAny = for {
+    private val sbIrObservation = for {
       o  <- p.observations
       b  <- o.blueprint
       c  <- o.condition
-      if isIR(b) && c.sb != SkyBackground.ANY
+      if isIR(b) && !bpIsLgs(b) && c.sb != SkyBackground.ANY
     } yield new Problem(Severity.Warning, s"Infrared observations usually do not require background constraints", "Observations", s.inObsListView(o.band, _.Fixes.fixConditions(c)))
 
     private val gpiCheck = {

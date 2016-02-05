@@ -89,6 +89,19 @@
                         <xsl:when test="name(.) = 'visitor' ">
                             <!-- Visitor instruments are handled separated -->
                         </xsl:when>
+                        <xsl:when test="./*/site != '' ">
+                            <!-- Instruments with a site are handled separated -->
+                            <xsl:element name="inst">
+                                <xsl:call-template name="get-inst-name">
+                                    <xsl:with-param name="inst">
+                                        <xsl:value-of select="name(.)"/>
+                                    </xsl:with-param>
+                                    <xsl:with-param name="site">
+                                        <xsl:value-of select=".//site"/>
+                                    </xsl:with-param>
+                                </xsl:call-template>
+                            </xsl:element>
+                        </xsl:when>
                         <xsl:when test="generate-id(.)=
                                           generate-id($uniqueBlueprints[name(.)=name(current())])">
                             <xsl:element name="inst">

@@ -475,7 +475,8 @@ package object immutable {
 
   type ToOChoice = mutable.TooOption
   object ToOChoice extends EnumObject[M.TooOption] {
-    val None = mutable.TooOption.NONE
+    val None  = mutable.TooOption.NONE
+    val Rapid = mutable.TooOption.RAPID
   }
 
   type TexesDisperser = M.TexesDisperser

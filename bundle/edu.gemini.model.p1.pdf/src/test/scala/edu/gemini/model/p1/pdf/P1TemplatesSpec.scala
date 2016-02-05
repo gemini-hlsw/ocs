@@ -216,6 +216,11 @@ class P1TemplatesSpec extends SpecificationWithJUnit {
       val proposalXml = XML.loadString(result)
       proposalXml must (\\("table-cell") \ "block" \>~ """GPI, GRACES, GMOS North, GNIRS, GMOS South, Flamingos2, NIRI, GSAOI, NIFS, Visitor - Gemini South - GS Cam, Visitor - Gemini North - DSSI""")
     }
+    "Shows Texes on each site on the summary" in {
+      val result = transformProposal("proposal_with_texes_gn_and_gs.xml")
+      val proposalXml = XML.loadString(result)
+      proposalXml must (\\("table-cell") \ "block" \>~ """GPI, GRACES, GMOS North, GNIRS, GMOS South, Flamingos2, Texes - Gemini North, NIRI, GSAOI, Texes - Gemini South, NIFS""")
+    }
     "show correct Observing Mode for FT, REL-1894" in {
       val result = transformProposal("proposal_fast_turnaround.xml")
       val proposalXml = XML.loadString(result)

@@ -244,7 +244,7 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band, queueLookup: Target => U
       }
     }
 
-    object checkGsa extends ToolButton(ICON_GSA, ICON_GSA_DIS, "GOA Dataset Check") {
+    object checkGsa extends ToolButton(ICON_GSA, ICON_GSA_DIS, "Display the results of the archive search in browser") {
       enabled = false
 
       viewer.onSelectionChanged {s =>
