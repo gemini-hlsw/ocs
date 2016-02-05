@@ -94,17 +94,13 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
         final Slit slit = Slit$.MODULE$.apply(_sdParameters, _obsDetailParameters, instrument, instrument.getSlitWidth(), im_qual);
         final SlitThroughput st = new SlitThroughput(_sdParameters, slit, im_qual);
 
-        final double gratDispersion_nmppix = instrument.getSpectralPixelWidth();
-        final double gratDispersion_nm = 0.5 / instrument.getPixelSize() * gratDispersion_nmppix;
-
-        final SpecS2NLargeSlitVisitor specS2N = new SpecS2NLargeSlitVisitor(
+        final SpecS2NSlitVisitor specS2N = new SpecS2NSlitVisitor(
                 slit,
+                instrument.disperser(),
                 st.throughput(),
                 instrument.getSpectralPixelWidth(),
                 instrument.getObservingStart(),
                 instrument.getObservingEnd(),
-                gratDispersion_nm,
-                gratDispersion_nmppix,
                 im_qual,
                 instrument.getReadNoise(),
                 instrument.getDarkCurrent(),
@@ -115,7 +111,7 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
         specS2N.setSpecHaloSourceFraction(0.0);
         src.sed.accept(specS2N);
 
-        final SpecS2NLargeSlitVisitor[] specS2Narr = new SpecS2NLargeSlitVisitor[1];
+        final SpecS2NSlitVisitor[] specS2Narr = new SpecS2NSlitVisitor[1];
         specS2Narr[0] = specS2N;
 
         return new SpectroscopyResult(p, instrument, SFcalc, IQcalc, specS2Narr, slit, st.throughput(), Option.empty());

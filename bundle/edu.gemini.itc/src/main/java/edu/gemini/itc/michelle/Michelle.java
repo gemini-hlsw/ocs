@@ -145,14 +145,9 @@ public final class Michelle extends Instrument implements SpectroscopyInstrument
             return (int) _gratingOptics.getEffectiveWavelength();
     }
 
-    public double getGratingResolution() {
-        return _gratingOptics.getGratingResolution();
-    }
-
     public double getGratingDispersion() {
-        return _gratingOptics.getGratingDispersion();
+        return _gratingOptics.dispersion();
     }
-
 
     /**
      * Returns the subdirectory where this instrument's data files are.

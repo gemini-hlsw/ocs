@@ -116,7 +116,7 @@ public final class Nifs extends Instrument implements SpectroscopyInstrument {
                 _centralWavelength,
                 _detector.getDetectorPixels(),
                 1);
-        _sampling = _gratingOptics.getGratingDispersion();
+        _sampling = _gratingOptics.dispersion();
         addGrating(_gratingOptics);
 
 
@@ -174,12 +174,8 @@ public final class Nifs extends Instrument implements SpectroscopyInstrument {
         return INSTR_PREFIX;
     }
 
-    public double getGratingResolution() {
-        return _gratingOptics.getGratingResolution();
-    }
-
     public double getGratingDispersion() {
-        return _gratingOptics.getGratingDispersion();
+        return _gratingOptics.dispersion();
     }
 
     public double getObservingStart() {

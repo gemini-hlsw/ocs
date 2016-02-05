@@ -121,14 +121,13 @@ public final class MichelleRecipe implements ImagingRecipe, SpectroscopyRecipe {
         // TODO: why, oh why?
         final double im_qual = _sdParameters.isUniform() ? 10000 : IQcalc.getImageQuality();
 
-        final SpecS2NLargeSlitVisitor specS2N = new SpecS2NLargeSlitVisitor(
+        final SpecS2NSlitVisitor specS2N = new SpecS2NSlitVisitor(
                         slit,
+                        instrument.grating.get(),
                         st.throughput(),
                         instrument.getSpectralPixelWidth(),
                         instrument.getObservingStart(),
                         instrument.getObservingEnd(),
-                        instrument.getGratingResolution(),
-                        instrument.getGratingDispersion(),
                         im_qual,
                         instrument.getReadNoise(),
                         instrument.getDarkCurrent(),

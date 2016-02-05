@@ -126,18 +126,18 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
         final SlitThroughput st = new SlitThroughput(_sdParameters, slit, im_qual);
         final double spec_source_frac = st.throughput();
 
-        final SpecS2NVisitor specS2N = new SpecS2NVisitor(
-                instrument.getPixelSize(),
-                instrument.getSlitWidth(),
+        final SpecS2NSlitVisitor specS2N = new SpecS2NSlitVisitor(
+                slit,
+                instrument.grism.get(),
+                spec_source_frac,
                 instrument.getSpectralPixelWidth(),
                 instrument.getObservingStart(),
                 instrument.getObservingEnd(),
-                instrument.getGrismResolution(),
-                spec_source_frac, im_qual,
-                slit.lengthPixels(),
-                _obsDetailParameters.calculationMethod(),
+                im_qual,
+                instrument.getReadNoise(),
                 instrument.getDarkCurrent(),
-                niriParameters.readMode().getReadNoise());
+                _obsDetailParameters);
+
         specS2N.setSourceSpectrum(calcSource.sed);
         specS2N.setBackgroundSpectrum(calcSource.sky);
 

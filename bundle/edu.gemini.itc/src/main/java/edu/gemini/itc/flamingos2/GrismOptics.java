@@ -1,5 +1,6 @@
 package edu.gemini.itc.flamingos2;
 
+import edu.gemini.itc.base.Disperser;
 import edu.gemini.itc.base.Instrument;
 import edu.gemini.itc.base.DatFile;
 import edu.gemini.itc.base.TransmissionElement;
@@ -11,7 +12,7 @@ import java.util.Scanner;
  * This represents the transmission of the Grism optics.
  * See REL-557
  */
-public class GrismOptics extends TransmissionElement {
+public class GrismOptics extends TransmissionElement implements Disperser {
 
     private static class CoverageEntry {
         public final double start;
@@ -44,11 +45,13 @@ public class GrismOptics extends TransmissionElement {
 
 
     private final String grismName;
+    private final double plateScale;
     private final CoverageEntry coverage;
 
-    public GrismOptics(final String directory, final String grismName, final String filterBand) {
+    public GrismOptics(final String directory, final String grismName, final String filterBand, final double plateScale) {
         super(directory + getGrismDataFileName(grismName, filterBand));
 
+        this.plateScale = plateScale;
         this.grismName = grismName;
         final String coverageDataName = buildCoverageDataName(grismName, filterBand);
         coverage = _coverage.get(coverageDataName);
@@ -71,8 +74,12 @@ public class GrismOptics extends TransmissionElement {
         return coverage.width;
     }
 
-    public double getGrismResolution() {
-        return coverage.resolution;
+    public double resolution() {
+        return 0.5 / plateScale * dispersion();
+    }
+
+    public double dispersion() {
+        return getPixelWidth();
     }
 
     public String toString() {

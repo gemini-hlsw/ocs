@@ -92,7 +92,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
     // TODO: bring mainInstrument and instrument together
     private SpectroscopyResult calculateSpectroscopy(final Gmos mainInstrument, final Gmos instrument, final int detectorCount) {
 
-        final SpecS2NLargeSlitVisitor[] specS2N;
+        final SpecS2NSlitVisitor[] specS2N;
 
         final SEDFactory.SourceResult src = SEDFactory.calculate(instrument, _sdParameters, _obsConditionParameters, _telescope);
         final int ccdIndex = instrument.getDetectorCcdIndex();
@@ -161,18 +161,17 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         final double im_qual = _sdParameters.isUniform() ? 10000 : IQcalc.getImageQuality();
 
         if (instrument.isIfuUsed() && !_sdParameters.isUniform()) {
-            specS2N = new SpecS2NLargeSlitVisitor[sf_list.size()];
+            specS2N = new SpecS2NSlitVisitor[sf_list.size()];
             for (int i = 0; i < sf_list.size(); i++) {
                 final double spsf = sf_list.get(i);
                 final Slit ifuSlit = Slit$.MODULE$.apply(instrument.getSlitWidth(), slitLength, instrument.getPixelSize());
-                specS2N[i] = new SpecS2NLargeSlitVisitor(
+                specS2N[i] = new SpecS2NSlitVisitor(
                         ifuSlit,
+                        instrument._gratingOptics,
                         spsf,
                         instrument.getSpectralPixelWidth(),
                         instrument.getObservingStart(),
                         instrument.getObservingEnd(),
-                        instrument.getGratingResolution(),
-                        instrument.getGratingDispersion(),
                         im_qual,
                         read_noise,
                         dark_current * instrument.getSpatialBinning() * instrument.getSpectralBinning(),
@@ -186,15 +185,14 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
 
             }
         } else {
-            specS2N = new SpecS2NLargeSlitVisitor[1];
-            specS2N[0] = new SpecS2NLargeSlitVisitor(
+            specS2N = new SpecS2NSlitVisitor[1];
+            specS2N[0] = new SpecS2NSlitVisitor(
                     slit,
+                    instrument._gratingOptics,
                     throughput,
                     instrument.getSpectralPixelWidth(),
                     instrument.getObservingStart(),
                     instrument.getObservingEnd(),
-                    instrument.getGratingResolution(),
-                    instrument.getGratingDispersion(),
                     im_qual,
                     read_noise,
                     dark_current * instrument.getSpatialBinning() * instrument.getSpectralBinning(),

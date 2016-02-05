@@ -1,15 +1,17 @@
 package edu.gemini.itc.niri;
 
 import edu.gemini.itc.base.DatFile;
+import edu.gemini.itc.base.Disperser;
 import edu.gemini.itc.base.Instrument;
 import edu.gemini.itc.base.TransmissionElement;
+import edu.gemini.itc.operation.Slit;
 
 import java.util.*;
 
 /**
  * This represents the transmission of the Grism optics.
  */
-public final class GrismOptics extends TransmissionElement {
+public final class GrismOptics extends TransmissionElement implements Disperser {
 
     private static final String JGRISM = "J-grism";
     private static final String HGRISM = "H-grism";
@@ -116,10 +118,21 @@ public final class GrismOptics extends TransmissionElement {
         }
     }
 
-    public double getGrismResolution() {
-        return resolution.get(getGrismNumber());
+    public double resolution() {
+        return getEffectiveWavelength() / resolution.get(getGrismNumber());
     }
 
+    public double resolution(final Slit slit) {
+        return resolution();
+    }
+
+    public double resolution(final Slit slit, final double imgQuality) {
+        return resolution();
+    }
+
+    public double dispersion() {
+        return coverage.get(getGrismNumber()).pixelWidth;
+    }
 
     public String toString() {
         return "Grism Optics: " + grismName;

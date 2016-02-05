@@ -64,7 +64,7 @@ public final class Flamingos2 extends Instrument implements SpectroscopyInstrume
             default:
                 final GrismOptics grismOptics;
                 try {
-                    grismOptics = new GrismOptics(getDirectory() + File.separator, fp.grism().name(), fp.filter().name());
+                    grismOptics = new GrismOptics(getDirectory() + File.separator, fp.grism().name(), fp.filter().name(), getPixelSize());
                 } catch (Exception e) {
                     throw new IllegalArgumentException("Grism/filter " + fp.grism() + "+" + fp.filter().name() + " combination is not supported.");
                 }
@@ -117,14 +117,6 @@ public final class Flamingos2 extends Instrument implements SpectroscopyInstrume
         }
     }
 
-    public double getGrismResolution() {
-        if (_grismOptics.isDefined()) {
-            return _grismOptics.get().getGrismResolution();
-        } else {
-            return 0;
-        }
-    }
-
     public double getObservingEnd() {
         if (_colorFilter.isDefined()) {
             return _colorFilter.get().getEnd();
@@ -163,6 +155,10 @@ public final class Flamingos2 extends Instrument implements SpectroscopyInstrume
             default:                 throw new Error();
         }
 
+    }
+
+    public Disperser disperser() {
+        return _grismOptics.get();
     }
 
     @Override public double wellDepth() {

@@ -139,10 +139,6 @@ public class Niri extends Instrument implements SpectroscopyInstrument {
         }
     }
 
-    public double getGrismResolution() {
-        return _grismOptics.getGrismResolution();
-    }
-
     public double getReadNoise() {
         return params.readMode().getReadNoise();
     }

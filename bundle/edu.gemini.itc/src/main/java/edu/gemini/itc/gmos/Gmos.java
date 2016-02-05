@@ -124,12 +124,12 @@ public abstract class Gmos extends Instrument implements BinningProvider, Spectr
                     gp.centralWavelength().toNanometers(),
                     _detector.getDetectorPixels(),
                     gp.spectralBinning());
-            _sampling = _gratingOptics.getGratingDispersion();
+            _sampling = _gratingOptics.dispersion();
             addGrating(_gratingOptics);
 
             // we only need the detector transmission visitor for the spectroscopy case (i.e. if there is a grating)
             if (detectorCcdIndex == 0) {
-                final double nmppx = _gratingOptics.getGratingDispersion();
+                final double nmppx = _gratingOptics.dispersion();
                 _dtv = new DetectorsTransmissionVisitor(gp, nmppx, getDirectory() + "/" + getPrefix() + "ccdpix" + Instrument.getSuffix());
             }
         }
@@ -192,14 +192,9 @@ public abstract class Gmos extends Instrument implements BinningProvider, Spectr
         return gp.grating();
     }
 
-    public double getGratingResolution() {
-        return _gratingOptics.getGratingResolution();
-    }
-
     public double getGratingDispersion() {
-        return _gratingOptics.getGratingDispersion();
+        return _gratingOptics.dispersion();
     }
-
 
     /**
      * Returns the subdirectory where this instrument's data files are.

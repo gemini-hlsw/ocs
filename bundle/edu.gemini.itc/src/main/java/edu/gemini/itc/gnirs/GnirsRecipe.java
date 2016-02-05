@@ -96,29 +96,19 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
         // TODO: why, oh why?
         final double im_qual = _sdParameters.isUniform() ? 10000 : IQcalc.getImageQuality();
 
-        final SpecS2NLargeSlitVisitor specS2N = new SpecS2NLargeSlitVisitor(
+        final SpecS2NSlitVisitor specS2N = new SpecS2NSlitVisitor(
                 slit,
+                instrument.disperser(instrument.getOrder()),
                 st.throughput(),
                 instrument.getSpectralPixelWidth() / instrument.getOrder(),
                 instrument.getObservingStart(),
                 instrument.getObservingEnd(),
-                instrument.getGratingResolution(),
-                instrument.getGratingDispersion(),
                 im_qual,
                 instrument.getReadNoise(),
                 instrument.getDarkCurrent(),
                 _obsDetailParameters);
 
         if (instrument.XDisp_IsUsed()) {
-            final VisitableSampledSpectrum[] sedOrder = new VisitableSampledSpectrum[ORDERS];
-            for (int i = 0; i < ORDERS; i++) {
-                sedOrder[i] = (VisitableSampledSpectrum) sed.clone();
-            }
-
-            final VisitableSampledSpectrum[] skyOrder = new VisitableSampledSpectrum[ORDERS];
-            for (int i = 0; i < ORDERS; i++) {
-                skyOrder[i] = (VisitableSampledSpectrum) sky.clone();
-            }
 
             final double trimCenter;
             if (instrument.getGrating().equals(GNIRSParams.Disperser.D_111)) {
@@ -127,23 +117,26 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
                 trimCenter = 2200.0;
             }
 
+            final VisitableSampledSpectrum[] sedOrder = new VisitableSampledSpectrum[ORDERS];
+            final VisitableSampledSpectrum[] skyOrder = new VisitableSampledSpectrum[ORDERS];
             for (int i = 0; i < ORDERS; i++) {
                 final int order = i + 3;
                 final double d         = instrument.getGratingDispersion() / order * Gnirs.DETECTOR_PIXELS / 2;
                 final double trimStart = trimCenter * 3 / order - d;
                 final double trimEnd   = trimCenter * 3 / order + d;
 
+                sedOrder[i] = (VisitableSampledSpectrum) sed.clone();
                 sedOrder[i].accept(instrument.getGratingOrderNTransmission(order));
                 sedOrder[i].trim(trimStart, trimEnd);
 
+                skyOrder[i] = (VisitableSampledSpectrum) sky.clone();
                 skyOrder[i].accept(instrument.getGratingOrderNTransmission(order));
                 skyOrder[i].trim(trimStart, trimEnd);
 
                 specS2N.setSourceSpectrum(sedOrder[i]);
                 specS2N.setBackgroundSpectrum(skyOrder[i]);
 
-                specS2N.setGratingDispersion(instrument.getGratingDispersion() / order);
-                specS2N.setGratingResolution(instrument.getGratingResolution() / order);
+                specS2N.setDisperser(instrument.disperser(order));
                 specS2N.setSpectralPixelWidth(instrument.getSpectralPixelWidth() / order);
 
                 specS2N.setStartWavelength(sedOrder[i].getStart());
@@ -160,8 +153,7 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
                 specS2N.setSourceSpectrum(sedOrder[i]);
                 specS2N.setBackgroundSpectrum(skyOrder[i]);
 
-                specS2N.setGratingDispersion(instrument.getGratingDispersion() / order);
-                specS2N.setGratingResolution(instrument.getGratingResolution() / order);
+                specS2N.setDisperser(instrument.disperser(order));
                 specS2N.setSpectralPixelWidth(instrument.getSpectralPixelWidth() / order);
 
                 specS2N.setStartWavelength(sedOrder[i].getStart());

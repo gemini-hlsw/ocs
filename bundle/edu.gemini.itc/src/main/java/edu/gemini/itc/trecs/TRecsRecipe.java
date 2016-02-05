@@ -120,14 +120,13 @@ public final class TRecsRecipe implements ImagingRecipe, SpectroscopyRecipe {
         // TODO: why, oh why?
         final double im_qual = _sdParameters.isUniform() ? 10000 : IQcalc.getImageQuality();
 
-        final SpecS2NLargeSlitVisitor specS2N = new SpecS2NLargeSlitVisitor(
-                slit, //st,
+        final SpecS2NSlitVisitor specS2N = new SpecS2NSlitVisitor(
+                slit,
+                instrument.grating.get(),
                 st.throughput(),
                 instrument.getSpectralPixelWidth(),
                 instrument.getObservingStart(),
                 instrument.getObservingEnd(),
-                instrument.getGratingResolution(),
-                instrument.getGratingDispersion(),
                 im_qual,
                 instrument.getReadNoise(),
                 instrument.getDarkCurrent(),
@@ -137,7 +136,7 @@ public final class TRecsRecipe implements ImagingRecipe, SpectroscopyRecipe {
         specS2N.setBackgroundSpectrum(sky);
         sed.accept(specS2N);
 
-        final SpecS2NLargeSlitVisitor[] specS2Narr = new SpecS2NLargeSlitVisitor[1];
+        final SpecS2NSlitVisitor[] specS2Narr = new SpecS2NSlitVisitor[1];
         specS2Narr[0] = specS2N;
         return new SpectroscopyResult(p, instrument, null, IQcalc, specS2Narr, slit, st.throughput(), Option.empty()); // TODO SFCalc not needed!
     }

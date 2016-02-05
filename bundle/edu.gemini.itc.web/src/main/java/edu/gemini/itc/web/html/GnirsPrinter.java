@@ -126,7 +126,7 @@ public final class GnirsPrinter extends PrinterBase {
                 s += String.format("Pixel Size in Spectral Direction(Order 7): %.3f nm\n", instrument.getGratingDispersion() / 7);
                 s += String.format("Pixel Size in Spectral Direction(Order 8): %.3f nm\n", instrument.getGratingDispersion() / 8);
             } else {
-                s += String.format("Pixel Size in Spectral Direction: %.3f nm\n", instrument.getGratingDispersion());
+                s += String.format("Pixel Size in Spectral Direction: %.3f nm\n", instrument.getGratingDispersion() / instrument.getOrder());
             }
         }
         return s;
