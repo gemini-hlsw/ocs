@@ -37,10 +37,10 @@ public interface Disperser {
     }
 
     /** Calculates the size of a spectral resolution element in [nm] for the source taking the image quality
-     *  into account. By default if the image quality is smaller than the slit width the image quality is used as the
-     *  resolution. */
+     *  into account. By default if the image quality is smaller than the slit width the image quality is used
+     *  as the slit width. */
     default double resolution(final Slit slit, final double imgQuality) {
-        //if image size is less than the slit width it will determine resolution
+        //if image size is less than the slit width it will determine the resolution
         final double width = imgQuality < slit.width() ? imgQuality : slit.width();
         return resolutionHalfArcsecSlit() * width / 0.5;
     }
