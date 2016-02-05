@@ -5,6 +5,8 @@
 
 [![Join the chat at https://gitter.im/gemini-hlsw/ocs](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/gemini-hlsw/ocs?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
+[![Build Status](https://travis-ci.org/gemini-hlsw/ocs.svg?branch=develop)](https://travis-ci.org/gemini-hlsw/ocs)
+
 This is a single rather large project that comprises a collection of **OSGi Bundles** that are assembled in various combinations to produce the following end-user applications:
 
 - **Science Program Database** (SPDB or ODB)
