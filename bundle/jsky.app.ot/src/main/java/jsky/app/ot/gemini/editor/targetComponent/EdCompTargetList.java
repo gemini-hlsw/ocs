@@ -1,6 +1,5 @@
 package jsky.app.ot.gemini.editor.targetComponent;
 
-import com.sun.istack.internal.NotNull;
 import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.util.immutable.*;
@@ -175,18 +174,31 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     }
 
     /**
-     * Update the remove and primary buttons as well as the detail editor.
+     * Update the UI components when a target becomes selected.
      */
-    private void updateRemovePrimaryButtonsAndDetailEditor() {
+    private void updateUIForTarget() {
         final boolean editable     = OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation());
         final boolean notBase      = !selectionIsBasePosition();
         final boolean notAuto      = !(selectionIsAutoGroup() || selectionIsAutoTarget());
-        final boolean isGuideGroup = _curSelection.exists(Either::isRight);
         final boolean isGuideStar  = _curSelection.exists(Either::isLeft) && !(selectionIsBasePosition() || selectionIsUserTarget());
 
         _w.removeButton.setEnabled (editable && notBase && notAuto);
-        _w.primaryButton.setEnabled(editable && ((isGuideStar && notAuto) || isGuideGroup));
+        _w.primaryButton.setEnabled(editable && isGuideStar && notAuto);
+        _w.pasteButton.setEnabled(editable && notAuto);
+        _w.duplicateButton.setEnabled(editable && isGuideStar && notAuto);
         updateDetailEditorEnabledState(editable && notAuto);
+    }
+
+    /**
+     * Update the UI components when a group becomes selected.
+     */
+    private void updateUIForGroup() {
+        final boolean editable = OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation());
+        final boolean notAuto   = !selectionIsAutoGroup();
+        _w.removeButton.setEnabled(editable && notAuto);
+        _w.primaryButton.setEnabled(editable);
+        _w.pasteButton.setEnabled(editable && notAuto);
+        _w.duplicateButton.setEnabled(editable);
     }
 
     @Override public JPanel getWindow() {
@@ -348,7 +360,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         _curSelection.foreach(either -> either.forEachLeft(t -> _w.detailEditor.edit(getObsContext(env), t, getNode())));
 
         // Set the status of the buttons and detail editors.
-        updateRemovePrimaryButtonsAndDetailEditor();
+        updateUIForTarget();
     }
 
     private void showTargetTag() {
@@ -535,10 +547,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                         _w.guideGroupName.setValue(name);
                     _w.guideGroupName.setEnabled(enabled);
 
-                    final boolean editable = OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation());
-                    final boolean notAuto   = !selectionIsAutoGroup();
-                    _w.removeButton.setEnabled(editable && notAuto);
-                    _w.primaryButton.setEnabled(editable);
+                    updateUIForGroup();
                 });
             }
         }
@@ -655,6 +664,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         final ISPObsComponent obsComponent = getNode();
         final TargetObsComp dataObject = getDataObject();
         if ((obsComponent == null) || (dataObject == null)) return;
+
         final Option<SPTarget> targetOpt = TargetSelection.getTargetForNode(dataObject.getTargetEnvironment(), obsComponent);
         if (targetOpt.isDefined()) {
             final SPTarget target = targetOpt.getValue();
@@ -690,11 +700,19 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             final Option<IndexedGuideGroup> iggOpt =
                     TargetSelection.getIndexedGuideGroupForNode(dataObject.getTargetEnvironment(), obsComponent);
             iggOpt.foreach(igg -> {
-                final GuideGroup group        = igg.group();
+                final GuideGroup origGroup    = igg.group();
+
+                // This used to be done with origGroup.cloneTargets(), but if origGroup is an auto group, this creates
+                // another auto group, which is problematic, so we specifically force a manual group to be created
+                // and receive an appropriate name.
+                final String newGroupName     = origGroup.getName().filter(s -> !s.isEmpty()).getOrElse("Manual Group");
+                final GuideGroup newGroup     = GuideGroup.create(newGroupName, origGroup.getAll()).cloneTargets();
+
                 final TargetEnvironment env   = dataObject.getTargetEnvironment();
                 final List<GuideGroup> groups = new ArrayList<>();
                 groups.addAll(env.getGroups().toList());
-                groups.add(group.cloneTargets());
+                groups.add(newGroup);
+
                 final TargetEnvironment newEnv = env.setGuideEnvironment(env.getGuideEnvironment().setOptions(DefaultImList.create(groups)));
                 dataObject.setTargetEnvironment(newEnv);
             });
@@ -782,14 +800,15 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
                     // Handle guide groups.
                     group -> {
-                        final Option<GuideGroup> gpOpt = TargetSelection.getIndexedGuideGroupForNode(dataObject.getTargetEnvironment(), obsComponent).map(IndexedGuideGroup::group);
-                        gpOpt.foreach(gp -> {
-                            final GuideGroup newGroup = gp.setAll(group.cloneTargets().getAll());
-                            final TargetEnvironment env = dataObject.getTargetEnvironment();
-                            final GuideEnvironment ge = dataObject.getTargetEnvironment().getGuideEnvironment();
+                        final Option<IndexedGuideGroup> gpOpt = TargetSelection.getIndexedGuideGroupForNode(dataObject.getTargetEnvironment(), obsComponent);
+                        gpOpt.foreach(igg -> {
+                            final int idx                    = igg.index();
+                            final GuideGroup newGroup        = group.setAll(group.cloneTargets().getAll());
+                            final TargetEnvironment env      = dataObject.getTargetEnvironment();
+                            final GuideEnvironment ge        = env.getGuideEnvironment();
                             final ImList<GuideGroup> options = ge.getOptions();
                             final ArrayList<GuideGroup> list = new ArrayList<>(options.size());
-                            options.foreach(gg -> list.add(gg == gp ? newGroup : gg));
+                            options.zipWithIndex().foreach(tup -> list.add(tup._2() == idx ? newGroup : tup._1()));
                             dataObject.setTargetEnvironment(env.setGuideEnvironment(ge.setOptions(DefaultImList.create(list))));
                         });
                     }
