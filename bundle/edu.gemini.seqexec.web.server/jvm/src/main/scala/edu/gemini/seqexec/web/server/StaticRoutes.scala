@@ -22,8 +22,7 @@ object StaticRoutes {
 
     def serve(path: String = req.pathInfo) = {
       // To find scala.js generated files we need to go into the dir below, hopefully this can be improved
-      println(path + "-> " + localResource(path, req))
-      localResource(path, req).orElse(localResource("target/scala-2.11/resource_managed/main/", path, req)).orElse(embeddedResource(path, req))
+      localResource(path, req).orElse(embeddedResource(path, req))
         .map(Task.now)
         .getOrElse(NotFound())
     }

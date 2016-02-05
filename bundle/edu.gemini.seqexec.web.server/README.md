@@ -14,7 +14,7 @@ The project is done using [Scala.js](http://www.scala-js.org/) to generate JavaS
 
 This project requires 2 new plugins
 
-* [scala-js](http://www.scala-js.org/doc/sbt-plugin.html): This plugins brings the support for scala.js compilation into sbt. Using the compiler we can take the scala code and 
+* [scala-js](http://www.scala-js.org/doc/sbt-plugin.html): This plugins brings the support for scala.js compilation into sbt. Using the compiler we can take the Scala code and 
 * [sbt-revolver](https://github.com/spray/sbt-revolver): This plugin allows to restart the web server and trigger a recompilation when the source code changes. I consider it essential for web development as it lets you rebuild as soon as files are changed
 
 ## How to compile and start the server
@@ -40,7 +40,7 @@ The project requires quite a bit of new libraries. Here is a summary of them and
 
 ## TODO
 
-* Package the application compressing with fullOptJS
+* Package the application optimizing the output with fullOptJS and packaging all the dependencies
 * Load javascript files from webjars
 * Support websockets
 * Authentication

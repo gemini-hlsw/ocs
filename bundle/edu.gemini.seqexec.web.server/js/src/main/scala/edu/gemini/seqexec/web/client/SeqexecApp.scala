@@ -31,23 +31,57 @@ object SeqexecApp extends JSApp {
           )
         ).build
 
-    val CommentForm = ReactComponentB[Unit]("CommentForm")
-        .render( _ =>
-          <.form(^.className := "commentForm",
-            <.input(^.`type` := "input", ^.placeholder := "Your name"),
-            <.input(^.`type` := "input", ^.placeholder := "Say something"),
-            <.input(^.`type` := "submit", ^.value := "Post"),
-            ^.onSubmit )
-        ).buildU
+    case class CommentFormProps(onCommentSubmit: Callback)
 
-    val CommentBox = ReactComponentB[Unit]("CommentBox")
-        .initialState(List(Comment("Carlos", "My comment"), Comment("Jose", "His comment")))
-        .render_S( k =>
-          <.div("Hello, world! I am a CommentBox.", ^.className := "commentBox",
-            <.h1("Comments"),
-            CommentList(k),
-            CommentForm())
+    class FormBackend(s: BackendScope[CommentFormProps, Comment]) {
+      def render(p: CommentFormProps, c: Comment) = {
+        <.div(
+          <.div(c.author),
+          <.div(c.comment),
+          <.form(^.className := "commentForm",
+            <.input(^.`type` := "input", ^.placeholder := "Your name", ^.onChange ==> onChangeName, ^.value := c.author),
+            <.input(^.`type` := "input", ^.placeholder := "Say something", ^.onChange ==> onChangeComment, ^.value := c.comment),
+            <.input(^.`type` := "submit", ^.value := "Post"),
+            ^.onSubmit ==> submit(p))
         )
+      }
+
+      def onChangeComment(e: ReactEventI) =
+        e.preventDefaultCB >> s.modState(_.copy(comment = e.target.value))
+
+      def onChangeName(e: ReactEventI) =
+        e.preventDefaultCB >> s.modState(_.copy(author = e.target.value))
+
+      def submit(p: CommentFormProps): (_root_.japgolly.scalajs.react.ReactEventI) => Callback = {
+        val submit: ReactEventI => Callback = (e: ReactEventI) =>
+          e.preventDefaultCB >> s.setState(Comment("", ""))
+        submit
+      }
+    }
+
+    val CommentForm = ReactComponentB[CommentFormProps]("CommentForm")
+        .initialState(new Comment("", ""))
+        .renderBackend[FormBackend]
+        .build
+
+    case class CommentBoxProps(comments: List[Comment]) {
+
+    }
+
+    class CommentBoxBackend(s: BackendScope[CommentBoxProps, List[Comment]]) {
+      def onCommentSubmit = Callback.alert("Sebmit")
+
+      def render(p: CommentBoxProps, s:List[Comment]) = {
+        <.div("Hello, world! I am a CommentBox.", ^.className := "commentBox",
+          <.h1("Comments"),
+          CommentList(s),
+          CommentForm(CommentFormProps(onCommentSubmit)))
+      }
+    }
+
+    val CommentBox = ReactComponentB[CommentBoxProps]("CommentBox")
+        .initialState_P(_ => List.empty[Comment])
+        .renderBackend[CommentBoxBackend]
         .componentDidMount(s => Callback {
           Ajax.get(
             url = "/api/comments"
@@ -56,8 +90,8 @@ object SeqexecApp extends JSApp {
             s.setState(c).runNow()
           }
         })
-        .buildU
+        .build
 
-    ReactDOM.render(CommentBox(), document.getElementById("content"))
+    ReactDOM.render(CommentBox(CommentBoxProps(Nil)), document.getElementById("content"))
   }
 }
