@@ -1,7 +1,5 @@
 package edu.gemini.shared.util.immutable;
 
-import com.sun.istack.internal.NotNull;
-
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.function.Supplier;
@@ -22,12 +20,12 @@ public final class Some<T> implements Option<T> {
     }
 
     @Override
-    public T getOrElse(@NotNull final T defaultValue) {
+    public T getOrElse(final T defaultValue) {
         return val;
     }
 
     @Override
-    public T getOrElse(@NotNull final Supplier<? extends T> supplier) {
+    public T getOrElse(final Supplier<? extends T> supplier) {
         return val;
     }
 

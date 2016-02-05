@@ -1,7 +1,5 @@
 package edu.gemini.shared.util.immutable;
 
-import com.sun.istack.internal.NotNull;
-
 import java.util.NoSuchElementException;
 import java.io.Serializable;
 import java.util.function.Supplier;
@@ -33,13 +31,12 @@ public interface Option<T> extends Iterable<T>, Serializable {
      * Gets the value assuming there is one, but returns the
      * <code>defaultValue</code> if there is none.
      */
-    T getOrElse(@NotNull T defaultValue);
+    T getOrElse(T defaultValue);
 
     /**
      * Gets the value assuming there is one, but returns the value provided by a supplied if there is none.
-     * @return
      */
-    T getOrElse(@NotNull Supplier<? extends T> supplier);
+    T getOrElse(Supplier<? extends T> supplier);
 
     /**
      * Returns <code>this</code> value if {@link Some} or else <code>that</code>.

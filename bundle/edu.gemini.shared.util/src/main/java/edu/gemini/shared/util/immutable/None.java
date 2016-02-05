@@ -1,7 +1,5 @@
 package edu.gemini.shared.util.immutable;
 
-import com.sun.istack.internal.NotNull;
-
 import java.io.Serializable;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -67,12 +65,12 @@ public final class None<T> implements Option<T>, Serializable {
     }
 
     @Override
-    public T getOrElse(@NotNull final T defaultValue) {
+    public T getOrElse(final T defaultValue) {
         return defaultValue;
     }
 
     @Override
-    public T getOrElse(@NotNull final Supplier<? extends T> supplier) {
+    public T getOrElse(final Supplier<? extends T> supplier) {
         return supplier.get();
     }
 

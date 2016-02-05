@@ -1,5 +1,6 @@
 package jsky.app.ot.gemini.editor.targetComponent;
 
+import com.sun.istack.internal.NotNull;
 import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.util.immutable.*;
@@ -452,7 +453,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                     .setPrimaryIndex(newGroupIdx)));
 
             // expand new group tree node
-            positionTable.selectGroup(IndexedGuideGroup.apply(newGroupIdx,newGroup));
+            positionTable.selectGroup(IndexedGuideGroup$.MODULE$.apply(newGroupIdx,newGroup));
         }
     }
 
@@ -728,9 +729,24 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
 
     private static final class TargetClipboard {
-        private ITarget target;
-        private GuideGroup group;
-        private ImList<Magnitude> mag;
+        private static final class TargetDetails {
+            private final ITarget           target;
+            private final ImList<Magnitude> mag;
+
+            public TargetDetails(final SPTarget target) {
+                this.target = target.getTarget().clone();
+                this.mag    = target.getTarget().getMagnitudes();
+            }
+
+            public ITarget getTarget() {
+                return target;
+            }
+            public ImList<Magnitude> getMag() {
+                return mag;
+            }
+        }
+
+        private Either<TargetDetails,GuideGroup> contents;
 
         static Option<TargetClipboard> copy(final TargetEnvironment env, final ISPObsComponent obsComponent) {
             if (obsComponent == null) return None.instance();
@@ -739,13 +755,12 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         }
 
 
-        TargetClipboard(final SPTarget spTarget) {
-            this.target = spTarget.getTarget().clone();
-            this.mag = spTarget.getTarget().getMagnitudes();
+        TargetClipboard(final SPTarget target) {
+            contents = Either.left(new TargetDetails(target));
         }
 
         TargetClipboard(final GuideGroup group) {
-            this.group = group;
+            contents = Either.right(group);
         }
 
         // Groups in their entirety should be copied, pasted, and duplicated by the existing
@@ -755,25 +770,30 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         void paste(final ISPObsComponent obsComponent, final TargetObsComp dataObject) {
             if ((obsComponent == null) || (dataObject == null)) return;
 
-            final Option<SPTarget> tOpt    = TargetSelection.getTargetForNode(dataObject.getTargetEnvironment(), obsComponent);
-            final Option<GuideGroup> gpOpt = TargetSelection.getIndexedGuideGroupForNode(dataObject.getTargetEnvironment(), obsComponent).map(IndexedGuideGroup::group);
+            contents.forEach(
+                    // Handle targets
+                    targetDetails -> {
+                        final Option<SPTarget> tOpt = TargetSelection.getTargetForNode(dataObject.getTargetEnvironment(), obsComponent);
+                        tOpt.foreach(t -> {
+                            t.setTarget(targetDetails.getTarget().clone());
+                            t.setMagnitudes(targetDetails.getMag());
+                        });
+                    },
 
-            if (tOpt.isDefined() && target != null) {
-                tOpt.foreach(t -> {
-                    t.setTarget(target.clone());
-                    t.setMagnitudes(mag);
-                });
-            } else if (gpOpt.isDefined() && group != null) {
-                gpOpt.foreach(gp -> {
-                    final GuideGroup newGroup = gp.setAll(group.cloneTargets().getAll());
-                    final TargetEnvironment env = dataObject.getTargetEnvironment();
-                    final GuideEnvironment ge = dataObject.getTargetEnvironment().getGuideEnvironment();
-                    final ImList<GuideGroup> options = ge.getOptions();
-                    final ArrayList<GuideGroup> list = new ArrayList<>(options.size());
-                    options.foreach(gg -> list.add(gg == gp ? newGroup : gg));
-                    dataObject.setTargetEnvironment(env.setGuideEnvironment(ge.setOptions(DefaultImList.create(list))));
-                });
-            }
+                    // Handle guide groups.
+                    group -> {
+                        final Option<GuideGroup> gpOpt = TargetSelection.getIndexedGuideGroupForNode(dataObject.getTargetEnvironment(), obsComponent).map(IndexedGuideGroup::group);
+                        gpOpt.foreach(gp -> {
+                            final GuideGroup newGroup = gp.setAll(group.cloneTargets().getAll());
+                            final TargetEnvironment env = dataObject.getTargetEnvironment();
+                            final GuideEnvironment ge = dataObject.getTargetEnvironment().getGuideEnvironment();
+                            final ImList<GuideGroup> options = ge.getOptions();
+                            final ArrayList<GuideGroup> list = new ArrayList<>(options.size());
+                            options.foreach(gg -> list.add(gg == gp ? newGroup : gg));
+                            dataObject.setTargetEnvironment(env.setGuideEnvironment(ge.setOptions(DefaultImList.create(list))));
+                        });
+                    }
+            );
         }
     }
 }

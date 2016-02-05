@@ -8,6 +8,7 @@ import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.GuideGroup;
 import edu.gemini.spModel.target.env.IndexedGuideGroup;
+import edu.gemini.spModel.target.env.IndexedGuideGroup$;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 
 import java.beans.PropertyChangeListener;
@@ -164,7 +165,7 @@ public final class TargetSelection {
 
         // Filter out the guide groups in positions 0...idx inclusive to get number of guide groups.
         final int gpIdx = lst.zipWithIndex().filter(tup -> tup._1().isGuideGroup() && tup._2() <= idx).size() - 1;
-        return sel.guideGroup.map(g -> IndexedGuideGroup.apply(gpIdx,g));
+        return sel.guideGroup.map(g -> IndexedGuideGroup$.MODULE$.apply(gpIdx,g));
     }
 
     /**

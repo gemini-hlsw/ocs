@@ -214,7 +214,7 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
             GroupRow(final boolean enabled, final boolean editable,
                      final int index, final GuideGroup group, final List<Row> children) {
                 super(enabled, extractName(group), "", None.instance(), None.instance());
-                this.group    = new Some<>(IndexedGuideGroup.apply(index, group));
+                this.group    = new Some<>(IndexedGuideGroup$.MODULE$.apply(index, group));
                 this.children = Collections.unmodifiableList(children);
                 this.editable = editable;
             }
@@ -764,7 +764,7 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
         if (groupOpt.isDefined()) return groupOpt;
 
         return getSelectedPos()
-                .map(target -> env.getGroups().zipWithIndex().find(gg -> gg._1().containsTarget(target)).map(IndexedGuideGroup::applyReverse))
+                .map(target -> env.getGroups().zipWithIndex().find(gg -> gg._1().containsTarget(target)).map(IndexedGuideGroup$.MODULE$::fromReverseTuple))
                 .getOrElse(None.instance());
     }
 
@@ -840,7 +840,7 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
      */
     private Option<IndexedGuideGroup> getTargetGroup(final SPTarget target) {
         return _env.getGuideEnvironment().getOptions().zipWithIndex().find(gg -> gg._1().containsTarget(target))
-                .map(IndexedGuideGroup::applyReverse);
+                .map(IndexedGuideGroup$.MODULE$::fromReverseTuple);
     }
 
     /**
