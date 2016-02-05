@@ -1,8 +1,6 @@
 package edu.gemini.shared.util.immutable;
 
 import java.io.Serializable;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 /**
  * Simulates a Scala Either[S,T].
