@@ -33,7 +33,11 @@ object SeqexecApp extends JSApp {
 
     val CommentForm = ReactComponentB[Unit]("CommentForm")
         .render( _ =>
-          <.div("Hello, world! I am a CommentForm.", ^.className := "commentForm")
+          <.form(^.className := "commentForm",
+            <.input(^.`type` := "input", ^.placeholder := "Your name"),
+            <.input(^.`type` := "input", ^.placeholder := "Say something"),
+            <.input(^.`type` := "submit", ^.value := "Post"),
+            ^.onSubmit )
         ).buildU
 
     val CommentBox = ReactComponentB[Unit]("CommentBox")
@@ -47,9 +51,10 @@ object SeqexecApp extends JSApp {
         .componentDidMount(s => Callback {
           Ajax.get(
             url = "/api/comments"
-          ).map(k => println(k.responseText) + " ")
-
-          s.modState(_ => List(Comment("Carlos", "My comment"), Comment("Jose", "His comment"))).runNow()
+          ).foreach { k =>
+            val c = read[List[Comment]](k.responseText)
+            s.setState(c).runNow()
+          }
         })
         .buildU
 

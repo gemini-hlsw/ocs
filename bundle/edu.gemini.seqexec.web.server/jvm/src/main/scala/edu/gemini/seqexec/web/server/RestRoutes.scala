@@ -9,10 +9,7 @@ import upickle.default._
 object RestRoutes {
 
   val service = HttpService {
-    case req @ GET -> Root / "comments" => println("heret");try {
-      Ok(write("Carlos"))
-    } catch {
-      case e => e.printStackTrace();Ok()
-    }
+    case req @ GET -> Root / "comments" =>
+      Ok(write(List(Comment("Carlos", "comment"), Comment("Andres", "another one"))))
   }
 }
