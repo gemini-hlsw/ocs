@@ -105,7 +105,6 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
 
         specS2N.setSourceSpectrum(src.sed);
         specS2N.setBackgroundSpectrum(src.sky);
-        specS2N.setSpecHaloSourceFraction(0.0);
         src.sed.accept(specS2N);
 
         final SpecS2NSlitVisitor[] specS2Narr = new SpecS2NSlitVisitor[1];

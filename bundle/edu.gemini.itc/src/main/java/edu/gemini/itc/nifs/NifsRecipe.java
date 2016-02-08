@@ -157,13 +157,9 @@ public final class NifsRecipe implements SpectroscopyRecipe {
 
             specS2N.setSourceSpectrum(calcSource.sed);
             specS2N.setBackgroundSpectrum(calcSource.sky);
-            specS2N.setHaloSpectrum(altair.isDefined() ? calcSource.halo.get() : (VisitableSampledSpectrum) calcSource.sed.clone());
-            specS2N.setHaloImageQuality(IQcalc.getImageQuality());
-            if (_nifsParameters.altair().isDefined())
-                specS2N.setSpecHaloSourceFraction(haloThroughput);
-            else
-                specS2N.setSpecHaloSourceFraction(0.0);
-
+            if (altair.isDefined()) {
+                specS2N.setHaloSpectrum(calcSource.halo.get(), haloThroughput, IQcalc.getImageQuality());
+            }
             calcSource.sed.accept(specS2N);
 
             specS2Narr[i++] = specS2N;

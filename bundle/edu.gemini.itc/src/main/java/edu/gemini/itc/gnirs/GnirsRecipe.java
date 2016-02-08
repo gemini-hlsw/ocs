@@ -175,9 +175,6 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
 
             specS2N.setSourceSpectrum(sed);
             specS2N.setBackgroundSpectrum(sky);
-            specS2N.setHaloImageQuality(0.0);
-            specS2N.setSpecHaloSourceFraction(0.0);
-
             sed.accept(specS2N);
 
             final SpecS2N[] specS2Narr = new SpecS2N[] {specS2N};
