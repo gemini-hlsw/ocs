@@ -90,12 +90,16 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
         tpe.setGemsGuideStarWorkerFinished();
         Object o = getValue();
         if (o instanceof CancellationException) {
+            clearResults();
             DialogUtil.message("The guide star search was canceled.");
         } else if (o instanceof NoStarsException) {
+            clearResults();
             DialogUtil.error(((NoStarsException) o).getMessage());
         } else if (o instanceof CatalogException) {
+            clearResults();
             DialogUtil.error(((CatalogException) o).firstMessage());
         } else if (o instanceof Exception) {
+            clearResults();
             DialogUtil.error((Exception) o);
         } else {
             GemsGuideStars gemsGuideStars = (GemsGuideStars) o;
@@ -116,24 +120,35 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
     }
 
     /**
+     * AGS failed to run, so clear the AGS results.
+     */
+    public void clearResults() {
+        apply(tpe.getContext(), 0.0, GuideGroup.AutomaticInitial());
+    }
+
+    /**
      * Apply the results of the guide star search to the current observation,
      * setting the selected position angle and guide probe.
      */
     public void applyResults(GemsGuideStars gemsGuideStars) {
-        applyResults(tpe.getContext(), gemsGuideStars);
+        apply(tpe.getContext(), gemsGuideStars.pa().toDegrees(), GuideGroup.createActive(gemsGuideStars.guideGroup().getAll()));
     }
 
-    public static void applyResults(final TpeContext ctx, final GemsGuideStars gemsGuideStars) {
-        SPInstObsComp inst = ctx.instrument().orNull();
+    private static void apply(final TpeContext ctx, final double paInDegrees, final GuideGroup autoGroup) {
+        final SPInstObsComp inst = ctx.instrument().orNull();
         if (inst != null) {
-            inst.setPosAngleDegrees(gemsGuideStars.pa().toDegrees());
+            inst.setPosAngleDegrees(paInDegrees);
             ctx.instrument().commit();
         }
 
-        TargetObsComp targetObsComp = ctx.targets().orNull();
+        final TargetObsComp targetObsComp = ctx.targets().orNull();
         if (targetObsComp != null) {
-            TargetEnvironment env = targetObsComp.getTargetEnvironment();
-            targetObsComp.setTargetEnvironment(env.setPrimaryGuideGroup(gemsGuideStars.guideGroup()));
+            final TargetEnvironment envOld = targetObsComp.getTargetEnvironment();
+            final GuideEnvironment gEnvOld = envOld.getGuideEnvironment();
+
+            final GuideEnvironment gEnvNew = gEnvOld.setGroup(0, autoGroup).setPrimaryIndex(0);
+            final TargetEnvironment envNew = envOld.setGuideEnvironment(gEnvNew);
+            targetObsComp.setTargetEnvironment(envNew);
             ctx.targets().commit();
         }
     }
