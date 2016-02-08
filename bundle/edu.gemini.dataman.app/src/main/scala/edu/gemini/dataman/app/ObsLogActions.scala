@@ -26,7 +26,6 @@ import ObsLogActions._
   * @param odb observing database in which to find the observations
   */
 final class ObsLogActions(odb: IDBDatabaseService) {
-
   /** Returns an action that will record the user's desire to edit the QA state
     * of the given datasets.
     */
@@ -51,7 +50,13 @@ final class ObsLogActions(odb: IDBDatabaseService) {
     // (i.e., via seq exec events in the WDBA).
     val cons: DatasetLabel => Option[Dataset] = (lab) => {
       val dsetOpt = fMap.get(lab).map { f =>
-        new Dataset(lab, f.filename, System.currentTimeMillis)
+        // Strip the trailing ".fits" suffix, if any, to be comptabile with how
+        // the WDBA adds new dataset filenames..
+        val filename = f.filename match {
+          case FitsFile(n) => n
+          case n           => n
+        }
+        new Dataset(lab, filename, System.currentTimeMillis)
       }
 
       dsetOpt.foreach { ds =>
@@ -255,6 +260,8 @@ final class ObsLogActions(odb: IDBDatabaseService) {
 
 object ObsLogActions {
   val Log = Logger.getLogger(ObsLogActions.getClass.getName)
+
+  val FitsFile = """(.*?)(?:\.fits)?$""".r
 
   val EmptyUpdates = (List.empty[DatasetQaRecord], List.empty[DatasetExecRecord])
 
