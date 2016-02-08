@@ -2,6 +2,7 @@ package edu.gemini.seqexec.web.client
 
 import edu.gemini.seqexec.web.common.Comment
 import japgolly.scalajs.react._
+import japgolly.scalajs.react.extra.{Reusability, Px}
 import japgolly.scalajs.react.vdom.prefix_<^._
 
 import scala.scalajs.js.JSApp
@@ -31,67 +32,100 @@ object SeqexecApp extends JSApp {
           )
         ).build
 
-    case class CommentFormProps(onCommentSubmit: Callback)
+    object CommentForm {
 
-    class FormBackend(s: BackendScope[CommentFormProps, Comment]) {
-      def render(p: CommentFormProps, c: Comment) = {
-        <.div(
-          <.div(c.author),
-          <.div(c.comment),
-          <.form(^.className := "commentForm",
-            <.input(^.`type` := "input", ^.placeholder := "Your name", ^.onChange ==> onChangeName, ^.value := c.author),
-            <.input(^.`type` := "input", ^.placeholder := "Say something", ^.onChange ==> onChangeComment, ^.value := c.comment),
-            <.input(^.`type` := "submit", ^.value := "Post"),
-            ^.onSubmit ==> submit(p))
-        )
+      case class Props(onCommentSubmit: Comment => Callback)
+
+      class Backend(s: BackendScope[Props, Comment]) {
+        def render(p: Props, c: Comment) = {
+          <.div(
+            <.div(c.author),
+            <.div(c.comment),
+            <.form(^.className := "commentForm",
+              <.input(^.`type` := "input", ^.placeholder := "Your name", ^.onChange ==> onChangeName, ^.value := c.author),
+              <.input(^.`type` := "input", ^.placeholder := "Say something", ^.onChange ==> onChangeComment, ^.value := c.comment),
+              <.input(^.`type` := "submit", ^.value := "Post"),
+              ^.onSubmit ==> submit(p))
+          )
+        }
+
+        def onChangeComment(e: ReactEventI) =
+          e.preventDefaultCB >> s.modState(_.copy(comment = e.target.value))
+
+        def onChangeName(e: ReactEventI) =
+          e.preventDefaultCB >> s.modState(_.copy(author = e.target.value))
+
+        def submit(p: Props): (ReactEventI) => Callback = {
+          val submit: ReactEventI => Callback = (e: ReactEventI) => {
+            // FIXME This is not idiomatic
+            (s.state >>= p.onCommentSubmit).runNow()
+            e.preventDefaultCB >> s.setState(Comment("", ""))
+          }
+          submit
+        }
       }
 
-      def onChangeComment(e: ReactEventI) =
-        e.preventDefaultCB >> s.modState(_.copy(comment = e.target.value))
-
-      def onChangeName(e: ReactEventI) =
-        e.preventDefaultCB >> s.modState(_.copy(author = e.target.value))
-
-      def submit(p: CommentFormProps): (_root_.japgolly.scalajs.react.ReactEventI) => Callback = {
-        val submit: ReactEventI => Callback = (e: ReactEventI) =>
-          e.preventDefaultCB >> s.setState(Comment("", ""))
-        submit
-      }
-    }
-
-    val CommentForm = ReactComponentB[CommentFormProps]("CommentForm")
+      val CommentForm = ReactComponentB[Props]("CommentForm")
         .initialState(new Comment("", ""))
-        .renderBackend[FormBackend]
+        .renderBackend[Backend]
         .build
 
-    case class CommentBoxProps(comments: List[Comment]) {
-
+      def apply(p: Props) = CommentForm(p)
     }
 
-    class CommentBoxBackend(s: BackendScope[CommentBoxProps, List[Comment]]) {
-      def onCommentSubmit = Callback.alert("Sebmit")
+    object CommentBox {
 
-      def render(p: CommentBoxProps, s:List[Comment]) = {
-        <.div("Hello, world! I am a CommentBox.", ^.className := "commentBox",
-          <.h1("Comments"),
-          CommentList(s),
-          CommentForm(CommentFormProps(onCommentSubmit)))
-      }
-    }
+      case class Props(comments: List[Comment])
 
-    val CommentBox = ReactComponentB[CommentBoxProps]("CommentBox")
-        .initialState_P(_ => List.empty[Comment])
-        .renderBackend[CommentBoxBackend]
-        .componentDidMount(s => Callback {
+      case class State(c: List[Comment])
+
+      implicit val reusableProps = Reusability.fn[Props]((p1, p2) =>
+          p1.comments eq p2.comments
+        )
+
+      class Backend(s: BackendScope[Props, State]) {
+        case class Callbacks(P: Props) {
+          def onCommentSubmit(a: Comment) = Callback {
+            Ajax.post(
+              url = "/api/comments",
+              data = write(a)
+            ).map { k =>
+              val c = read[List[Comment]](k.responseText)
+              s.setState(State(c)).runNow()
+            }
+          }
+            //s.modState(s => s.copy(c = s.c :+ a))
+        }
+        val cbs = Px.cbA(s.props).map(Callbacks)
+
+        def render(p: Props, s: State) = {
+          val cb = cbs.value()
+          <.div("Hello, world! I am a CommentBox.", ^.className := "commentBox",
+            <.h1("Comments"),
+            CommentList(s.c),
+            CommentForm(CommentForm.Props(cb.onCommentSubmit)))
+        }
+
+        def load() = Callback {
+          // Load initial data from the server
           Ajax.get(
             url = "/api/comments"
           ).foreach { k =>
             val c = read[List[Comment]](k.responseText)
-            s.setState(c).runNow()
+            s.setState(State(c)).runNow()
           }
-        })
+        }
+      }
+
+      val component = ReactComponentB[Props]("CommentBox")
+        .initialState_P(p => State(List.empty[Comment]))
+        .renderBackend[Backend]
+        .componentDidMount(_.backend.load())
         .build
 
-    ReactDOM.render(CommentBox(CommentBoxProps(Nil)), document.getElementById("content"))
+      def apply(p: Props) = component(p)
+    }
+
+    ReactDOM.render(CommentBox(CommentBox.Props(Nil)), document.getElementById("content"))
   }
 }

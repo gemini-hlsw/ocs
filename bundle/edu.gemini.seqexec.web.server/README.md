@@ -40,7 +40,9 @@ The project requires quite a bit of new libraries. Here is a summary of them and
 
 ## TODO
 
-* Package the application optimizing the output with fullOptJS and packaging all the dependencies
+* Integrate router capability
+* Package the application optimizing the output with fullOptJS 
+* Package all the js dependencies in a single js file
 * Load javascript files from webjars
 * Support websockets
 * Authentication
