@@ -89,7 +89,7 @@ final class NonSiderealNameEditor extends TelescopePosEditor with ReentrancyHack
     def oneResult(r: Row[_ <: HorizonsDesignation]): HS2[Unit] =
       updateDesignation(r.a, r.name).as(site) >>= {
         case Some(site) => lookup(r.a, site) <* hide >>= updateEphem
-        case None       => HS2.delay(DialogUtil.error(name, "Cannot determine site for this observation; this is needed for ephemeris lookup."))
+        case None       => HS2.delay(Swing.onEDT(DialogUtil.error(name, "Cannot determine site for this observation; this is needed for ephemeris lookup.")))
       }
 
     val noResults: HS2[Unit] =
@@ -106,7 +106,7 @@ final class NonSiderealNameEditor extends TelescopePosEditor with ReentrancyHack
     }
         
     Task(search.run.ensuring(hide.run).unsafePerformIO).runAsync {
-      case -\/(t) => DialogUtil.error(name, t)
+      case -\/(t) => Swing.onEDT(DialogUtil.error(name, t))
       case \/-(_) => () // done!
     }
 
