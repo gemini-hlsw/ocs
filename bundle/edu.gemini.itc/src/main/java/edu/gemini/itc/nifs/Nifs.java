@@ -92,19 +92,19 @@ public final class Nifs extends Instrument implements SpectroscopyInstrument {
         _IFUMethod = (IfuMethod) odp.analysisMethod();
         if (odp.analysisMethod() instanceof IfuSingle) {
             _IFUOffset      = ((IfuSingle) odp.analysisMethod()).offset();
-            _IFU            = new IFUComponent(_IFUOffset, getPixelSize());
+            _IFU            = new IFUComponent(_IFUOffset);
         }
         else if (odp.analysisMethod() instanceof IfuRadial) {
             _IFUMinOffset   = ((IfuRadial) odp.analysisMethod()).minOffset();
             _IFUMaxOffset   = ((IfuRadial) odp.analysisMethod()).maxOffset();
-            _IFU            = new IFUComponent(_IFUMinOffset, _IFUMaxOffset, getPixelSize());
+            _IFU            = new IFUComponent(_IFUMinOffset, _IFUMaxOffset);
         }
         else if (odp.analysisMethod() instanceof IfuSummed) {
             _IFUNumX        = ((IfuSummed) odp.analysisMethod()).numX();
             _IFUNumY        = ((IfuSummed) odp.analysisMethod()).numY();
             _IFUCenterX     = ((IfuSummed) odp.analysisMethod()).centerX();
             _IFUCenterY     = ((IfuSummed) odp.analysisMethod()).centerY();
-            _IFU            = new IFUComponent(_IFUNumX, _IFUNumY, _IFUCenterX, _IFUCenterY, getPixelSize());
+            _IFU            = new IFUComponent(_IFUNumX, _IFUNumY, _IFUCenterX, _IFUCenterY);
         }
         else {
             throw new IllegalArgumentException("Unknown IFU method");
