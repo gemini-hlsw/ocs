@@ -123,7 +123,7 @@ final class TpeEditorTools {
     }
 
     private boolean isAuto() {
-        return !ImOption.fromScalaOpt(_tpe.getImageWidget().getContext().targets().env())
+        return ImOption.fromScalaOpt(_tpe.getImageWidget().getContext().targets().env())
                 .exists(te -> te.getGuideEnvironment().getPrimary().isAutomatic());
     }
 

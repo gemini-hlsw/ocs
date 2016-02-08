@@ -48,6 +48,9 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     // The current selection. Can be None if nothing is selected.
     private Option<Either<SPTarget, IndexedGuideGroup>> _curSelection = None.instance();
 
+    // A collection of the JMenuItems that allow the addition of guide stars.
+    final Map<GuideProbe,Component> _guideStarAdders = new HashMap<>();
+
 
     public EdCompTargetList() {
 
@@ -201,6 +204,17 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         _w.duplicateButton.setEnabled(editable);
     }
 
+    /**
+     * Update the menu items that allow the addition of guide stars. These must be disabled for the automatic group
+     * or if we are currently on the base or a user target.
+     */
+    private void updateGuideStarAdders() {
+        final boolean notBase = !selectionIsBasePosition();
+        final boolean notUser = !selectionIsUserTarget();
+        final boolean notAuto = !(selectionIsAutoGroup() || selectionIsAutoTarget());
+        _guideStarAdders.forEach((gp, comp) -> comp.setEnabled(notBase && notUser && notAuto));
+    }
+
     @Override public JPanel getWindow() {
         return _w;
     }
@@ -240,6 +254,8 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
         final SPInstObsComp inst = getContextInstrumentDataObject();
         _w.newMenu.removeAll();
+        _guideStarAdders.clear();
+
         if (inst == null) {
             _w.newMenu.setEnabled(false);
         } else {
@@ -247,10 +263,13 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             if (inst.hasGuideProbes()) {
                 final List<GuideProbe> guiders = new ArrayList<>(GuideProbeUtil.instance.getAvailableGuiders(getContextObservation()));
                 Collections.sort(guiders, GuideProbe.KeyComparator.instance);
-                guiders.forEach(probe ->
-                    _w.newMenu.add(new JMenuItem(probe.getKey()) {{
+                guiders.forEach(probe -> {
+                    final JMenuItem guideStarAdder = new JMenuItem(probe.getKey()) {{
                         addActionListener(new AddGuideStarAction(obsComp, probe, _w.positionTable));
-                    }}));
+                    }};
+                    _w.newMenu.add(guideStarAdder);
+                    _guideStarAdders.put(probe, guideStarAdder);
+                });
             }
 
             _w.newMenu.add(new JMenuItem("User") {{
@@ -361,6 +380,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
         // Set the status of the buttons and detail editors.
         updateUIForTarget();
+        updateGuideStarAdders();
     }
 
     private void showTargetTag() {
@@ -548,6 +568,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                     _w.guideGroupName.setEnabled(enabled);
 
                     updateUIForGroup();
+                    updateGuideStarAdders();
                 });
             }
         }
