@@ -26,6 +26,28 @@ object KeySchema2Spec extends Specification {
     f.transact(xa).ensuring(sql"SHUTDOWN IMMEDIATELY".update.run.transact(xa).attempt).unsafePerformIO
   }
 
+  "compatibility" should {
+
+    "read old database without error" in go {
+
+      val testData: List[(GeminiPrincipal, String, Int)] = 
+        List(
+          (UserPrincipal("bob@dobbs.com"), "foodle", 1),
+          (ProgramPrincipal(SPProgramID.toProgramID("GS-2010A-Q-3")), "blippy", 1),
+          (StaffPrincipal.Gemini, "hoox", 2),
+          (AffiliatePrincipal(Affiliate.CHILE), "huevon", 123),
+          (VisitorPrincipal(SPProgramID.toProgramID("GN-2010-C-3")), "doop", 1)
+        )
+
+      for {
+        _  <- sql"runscript from 'classpath:/testdb.sql' charset 'utf-8'".update.run
+        vs <- testData.traverse { case (p, pass, v) => checkPass(p, pass) } 
+      } yield vs must_== testData.map(t => Some(t._3))
+
+    }
+
+  }
+
   "checkSchema" should {
 
     "initialize with new database" in go {
