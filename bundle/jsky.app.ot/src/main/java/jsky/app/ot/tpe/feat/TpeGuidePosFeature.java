@@ -5,8 +5,7 @@ import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.guide.*;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.target.SPTarget;
-import edu.gemini.spModel.target.env.GuideProbeTargets;
-import edu.gemini.spModel.target.env.TargetEnvironment;
+import edu.gemini.spModel.target.env.*;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.target.obsComp.TargetSelection;
 import edu.gemini.spModel.target.system.HmsDegTarget;
@@ -172,13 +171,19 @@ public class TpeGuidePosFeature extends TpePositionFeature
             final TargetObsComp obsComp = getTargetObsComp();
             if (obsComp == null) return;
 
-            final SPTarget pos = createNewTarget(tme);
-
             final TargetEnvironment env = obsComp.getTargetEnvironment();
-            final Option<GuideProbeTargets> gptOpt = env.getPrimaryGuideProbeTargets(guider);
-            final GuideProbeTargets gpt = gptOpt.getOrElse(GuideProbeTargets.create(guider));
+            final GuideEnvironment genv = env.getGuideEnvironment();
+            final GuideGroup gp         = genv.getPrimary();
+            final int idx               = genv.getPrimaryIndex();
+            if (gp.isAutomatic()) return;
 
-            obsComp.setTargetEnvironment(env.putPrimaryGuideProbeTargets(gpt));
+            final GuideProbeTargets oldTargets = gp.get(guider).getOrElse(GuideProbeTargets.create(guider));
+            final SPTarget pos                 = createNewTarget(tme);
+            final GuideProbeTargets newTargets = oldTargets.update(OptionsList.UpdateOps.append(pos));
+            final GuideGroup gpNew             = gp.put(newTargets);
+            final GuideEnvironment genvNew     = genv.setGroup(idx, gpNew);
+            obsComp.setTargetEnvironment(env.setGuideEnvironment(genvNew));
+
             _iw.getContext().targets().commit();
         }
     }

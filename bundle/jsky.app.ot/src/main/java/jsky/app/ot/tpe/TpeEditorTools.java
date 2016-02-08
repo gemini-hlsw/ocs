@@ -123,12 +123,10 @@ final class TpeEditorTools {
         });
     }
 
-    private void modeChange(TpeMode mode, Option<Object> arg) {
-        for (TpeImageFeature feat : _tpe.getFeatures()) {
-            if (feat instanceof TpeModeSensitive) {
-                ((TpeModeSensitive) feat).handleModeChange(mode, arg);
-            }
-        }
+    private void modeChange(final TpeMode mode, final Option<Object> arg) {
+        _tpe.getFeatures().stream()
+                .filter(feat -> feat instanceof TpeModeSensitive)
+                .forEach(feat -> ((TpeModeSensitive)feat).handleModeChange(mode, arg));
     }
 
     private boolean isEnabled() {
@@ -149,12 +147,12 @@ final class TpeEditorTools {
     //
     // Add a create tool.
     //
-    private void _addCreateTool(TpeCreateableItem item, TpeImageFeature tif) {
+    private void _addCreateTool(final TpeCreateableItem item, final TpeImageFeature tif) {
         // See if this tool is already present.
         final String label = item.getLabel();
         if (_createButtonMap.get(label) != null) return;
 
-        Icon icon = Resources.getIcon("eclipse/add.gif");
+        final Icon icon = Resources.getIcon("eclipse/add.gif");
         final JToggleButton btn = new JToggleButton(label, icon) {{
             setToolTipText("Create a new " + label + " position");
             setVisible(false);
@@ -163,7 +161,7 @@ final class TpeEditorTools {
         btn.addActionListener(evt -> {
             _current = btn;
 
-            ButtonState bs = ButtonState.get(btn);
+            final ButtonState bs = ButtonState.get(btn);
             _tpe.selectFeature(bs.feature);
             _tpe.getImageWidget().setCursor(TpeCursor.add.get());
 
