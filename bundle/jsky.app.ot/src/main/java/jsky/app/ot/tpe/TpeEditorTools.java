@@ -1,6 +1,7 @@
 package jsky.app.ot.tpe;
 
 import edu.gemini.pot.sp.ISPNode;
+import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.shared.util.immutable.Some;
@@ -121,13 +122,20 @@ final class TpeEditorTools {
         return ctx.progShell().isDefined() && ctx.obsShell().isDefined() && OTOptions.isProgramEditable(ctx.progShell().get()) && OTOptions.isObservationEditable(ctx.obsShell().get());
     }
 
+    private boolean isAuto() {
+        return !ImOption.fromScalaOpt(_tpe.getImageWidget().getContext().targets().env())
+                .exists(te -> te.getGuideEnvironment().getPrimary().isAutomatic());
+    }
+
     /**
-     * Update the enable states of the buttons based on the OT editable state.
+     * Update the enable states of the buttons based on the OT editable state and whether or not the group is
+     * the automatic guide group.
      */
     public void updateEnabledStates() {
         final boolean enabled = isEnabled();
+        final boolean notAuto = !isAuto();
         _dragButton.setEnabled(enabled);
-        _eraseButton.setEnabled(enabled);
+        _eraseButton.setEnabled(enabled && notAuto);
     }
 
 
@@ -195,6 +203,9 @@ final class TpeEditorTools {
         // If not enabled, then we're done.
         if (!enabled) return;
 
+        // Determine if we are in the auto group.
+        final boolean notAuto = !isAuto();
+
         // Add create buttons according to the enabled state of each item.
         for (final TpeImageFeature feature : feats) {
             if (!(feature instanceof TpeCreatableFeature)) continue;
@@ -204,6 +215,7 @@ final class TpeEditorTools {
                 if (item.isEnabled(_tpe.getImageWidget().getContext())) {
                     final JToggleButton btn = _createButtonMap.get(item.getLabel());
                     btn.setVisible(true);
+                    btn.setEnabled(notAuto);
                 }
             }
         }

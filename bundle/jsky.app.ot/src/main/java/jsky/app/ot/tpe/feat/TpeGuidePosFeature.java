@@ -180,7 +180,7 @@ public class TpeGuidePosFeature extends TpePositionFeature
 
             final GuideProbeTargets oldTargets = gp.get(guider).getOrElse(GuideProbeTargets.create(guider));
             final SPTarget pos                 = createNewTarget(tme);
-            final GuideProbeTargets newTargets = oldTargets.update(OptionsList.UpdateOps.append(pos));
+            final GuideProbeTargets newTargets = oldTargets.update(OptionsList.UpdateOps.appendAsPrimary(pos));
             final GuideGroup gpNew             = gp.put(newTargets);
             final GuideEnvironment genvNew     = genv.setGroup(idx, gpNew);
             obsComp.setTargetEnvironment(env.setGuideEnvironment(genvNew));
@@ -244,13 +244,13 @@ public class TpeGuidePosFeature extends TpePositionFeature
         // group in a Set.  Otherwise, add a GuiderCreateableItem to the
         // result list.
         final Set<OptimizableGuideProbeGroup> groups = new HashSet<>();
-        guiders.forEach(guider -> guider.getGroup().foreach(group -> {
-            if (group instanceof OptimizableGuideProbeGroup) {
+        guiders.forEach(guider -> {
+            final GuideProbeGroup group = guider.getGroup().getOrNull();
+            if (group instanceof OptimizableGuideProbeGroup)
                 groups.add((OptimizableGuideProbeGroup) group);
-            } else {
+            else
                 res.add(new GuiderCreatableItem(guider));
-            }
-        }));
+        });
 
         // Go through the groups and add a GuiderGroupCreatableItem for each one.
         groups.forEach(group -> res.add(new GuiderGroupCreatableItem(group)));
