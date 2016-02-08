@@ -39,7 +39,7 @@ public class TpeBasePosFeature extends TpePositionFeature {
 
     /**
      */
-    public boolean erase(TpeMouseEvent tme) {
+    public boolean erase(final TpeMouseEvent tme) {
         // You can't erase the base position
         return false;
     }
@@ -47,15 +47,15 @@ public class TpeBasePosFeature extends TpePositionFeature {
     /**
      * @see jsky.app.ot.tpe.TpeSelectableFeature
      */
-    public Object select(TpeMouseEvent tme) {
-        TpePositionMap pm = TpePositionMap.getMap(_iw);
+    public Object select(final TpeMouseEvent tme) {
+        final TpePositionMap pm = TpePositionMap.getMap(_iw);
 
-        int x = tme.xWidget;
-        int y = tme.yWidget;
+        final int x = tme.xWidget;
+        final int y = tme.yWidget;
 
-        TargetObsComp obsComp = getTargetObsComp();
+        final TargetObsComp obsComp = getTargetObsComp();
         if (obsComp != null) {
-            PosMapEntry<SPTarget> pme = pm.getPositionMapEntry(obsComp.getBase());
+            final PosMapEntry<SPTarget> pme = pm.getPositionMapEntry(obsComp.getBase());
             if ((pme != null) && (positionIsClose(pme, x, y)) && getContext().targets().shell().isDefined()) {
                 TargetSelection.setTargetForNode(getContext().targets().envOrNull(), getContext().targets().shell().get(), pme.taggedPos);
                 return pme.taggedPos;
@@ -66,17 +66,17 @@ public class TpeBasePosFeature extends TpePositionFeature {
 
     /**
      */
-    public void draw(Graphics g, TpeImageInfo tii) {
-        TpePositionMap pm = TpePositionMap.getMap(_iw);
+    public void draw(final Graphics g, final TpeImageInfo tii) {
+        final TpePositionMap pm = TpePositionMap.getMap(_iw);
 
-        TargetEnvironment env = getTargetEnvironment();
+        final TargetEnvironment env = getTargetEnvironment();
         if (env == null) return;
 
-        Point2D.Double base = pm.getLocationFromTag(env.getBase());
+        final Point2D.Double base = pm.getLocationFromTag(env.getBase());
         if (base == null) return;
 
-        int r = MARKER_SIZE;
-        int d = 2 * r;
+        final int r = MARKER_SIZE;
+        final int d = 2 * r;
 
         // Draw crosshairs
         g.setColor(Color.yellow);
@@ -87,12 +87,12 @@ public class TpeBasePosFeature extends TpePositionFeature {
 
     /**
      */
-    public Option<Object> dragStart(TpeMouseEvent tme, TpeImageInfo tii) {
-        TargetEnvironment env = getTargetEnvironment();
+    public Option<Object> dragStart(final TpeMouseEvent tme, final TpeImageInfo tii) {
+        final TargetEnvironment env = getTargetEnvironment();
         if (env == null) return None.instance();
 
-        TpePositionMap pm = TpePositionMap.getMap(_iw);
-        PosMapEntry<SPTarget> pme = pm.getPositionMapEntry(env.getBase());
+        final TpePositionMap pm = TpePositionMap.getMap(_iw);
+        final PosMapEntry<SPTarget> pme = pm.getPositionMapEntry(env.getBase());
         if (pme != null && positionIsClose(pme, tme.xWidget, tme.yWidget)) {
             _dragObject = pme;
             return new Some<>(pme.taggedPos);

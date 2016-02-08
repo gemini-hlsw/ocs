@@ -19,7 +19,7 @@ import edu.gemini.spModel.target.env.GuideProbeTargets;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.env.TargetEnvironmentDiff;
 import jsky.app.ot.tpe.*;
-import jsky.app.ot.tpe.feat.TpeGuidePosCreateableItem;
+import jsky.app.ot.tpe.feat.TpeGuidePosCreatableItem;
 import jsky.app.ot.util.BasicPropertyList;
 import jsky.app.ot.util.OtColor;
 import jsky.app.ot.util.PropertyWatcher;
@@ -325,12 +325,12 @@ public final class CanopusFeature extends TpeImageFeature implements PropertyWat
         }
 
         Object value = arg.getValue();
-        if (!(value instanceof TpeGuidePosCreateableItem)) {
+        if (!(value instanceof TpeGuidePosCreatableItem)) {
             setRangeDisplayMode(RangeDisplayMode.both);
             return;
         }
 
-        TpeGuidePosCreateableItem item = (TpeGuidePosCreateableItem) value;
+        TpeGuidePosCreatableItem item = (TpeGuidePosCreatableItem) value;
         GuideProbe guider = item.getGuideProbe();
         if (guider == Canopus.Wfs.cwfs1) {
             setRangeDisplayMode(RangeDisplayMode.probe1);

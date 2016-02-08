@@ -20,9 +20,10 @@ import java.awt.font.TextAttribute;
 import java.awt.geom.Point2D;
 import java.text.AttributedString;
 import java.util.*;
+import java.util.List;
 
 public class TpeGuidePosFeature extends TpePositionFeature
-        implements TpeCreateableFeature, TpeActionableFeature, PropertyWatcher {
+        implements TpeCreatableFeature, TpeActionableFeature, PropertyWatcher {
 
     private static final BasicPropertyList _props = new BasicPropertyList(TpeGuidePosFeature.class.getName());
     private static final String PROP_SHOW_TAGS = "Show Tags";
@@ -88,7 +89,7 @@ public class TpeGuidePosFeature extends TpePositionFeature
     /**
      * Turn on/off the drawing of position tags.
      */
-    public void setDrawTags(boolean drawTags) {
+    public void setDrawTags(final boolean drawTags) {
         _props.setBoolean(PROP_SHOW_TAGS, drawTags);
     }
 
@@ -102,7 +103,7 @@ public class TpeGuidePosFeature extends TpePositionFeature
     /**
      * Turn on/off the drawing of the primary guide star indicator.
      */
-    public void setIdentifyPrimary(boolean identifyPrimary) {
+    public void setIdentifyPrimary(final boolean identifyPrimary) {
         _props.setBoolean(PROP_IDENTIFY_PRIMARY, identifyPrimary);
     }
 
@@ -122,8 +123,8 @@ public class TpeGuidePosFeature extends TpePositionFeature
         } else {
             // No SkyObject info is present so we use the old way of creating
             // a target from a mouse event.
-            double ra  = tme.pos.getRaDeg();
-            double dec = tme.pos.getDecDeg();
+            final double ra  = tme.pos.getRaDeg();
+            final double dec = tme.pos.getDecDeg();
 
             pos = new SPTarget(ra, dec);
             if (tme.name != null) {
@@ -134,12 +135,12 @@ public class TpeGuidePosFeature extends TpePositionFeature
         return pos;
     }
 
-    // Create-able item for a particular guider.  There will be one for each
+    // Creatable item for a particular guider.  There will be one for each
     // guider in the GuideProbeMap (that isn't part of an optimize-able group)
-    private final class GuiderCreateableItem implements TpeGuidePosCreateableItem {
+    private final class GuiderCreatableItem implements TpeGuidePosCreatableItem {
         private final GuideProbe guider;
 
-        GuiderCreateableItem(GuideProbe guider) {
+        GuiderCreatableItem(final GuideProbe guider) {
             this.guider = guider;
         }
 
@@ -159,15 +160,15 @@ public class TpeGuidePosFeature extends TpePositionFeature
          * Returns <code>true</code> if the corresponding guider is available
          * in the current observation's context.
          */
-        public boolean isEnabled(TpeContext ctx) {
+        public boolean isEnabled(final TpeContext ctx) {
             if (ctx.isEmpty()) return false;
             if (ctx.targets().isEmpty()) return false;
-            Set<GuideProbe> guiders = GuideProbeUtil.instance.getAvailableGuiders(ctx.obsShell().get());
+            final Set<GuideProbe> guiders = GuideProbeUtil.instance.getAvailableGuiders(ctx.obsShell().get());
             return guiders.contains(guider);
         }
 
         /** This is called, e.g., to create a new guide star in reaction to a mouse down **/
-        public void create(TpeMouseEvent tme, TpeImageInfo tii) {
+        public void create(final TpeMouseEvent tme, final TpeImageInfo tii) {
             final TargetObsComp obsComp = getTargetObsComp();
             if (obsComp == null) return;
 
@@ -188,11 +189,11 @@ public class TpeGuidePosFeature extends TpePositionFeature
         }
     }
 
-    // Create-able item for a guide groups.
-    private final class GuiderGroupCreateableItem implements TpeCreateableItem {
+    // Creatable item for a guide groups.
+    private final class GuiderGroupCreatableItem implements TpeCreatableItem {
         private final OptimizableGuideProbeGroup group;
 
-        GuiderGroupCreateableItem(OptimizableGuideProbeGroup group) {
+        GuiderGroupCreatableItem(final OptimizableGuideProbeGroup group) {
             this.group = group;
         }
 
@@ -208,61 +209,51 @@ public class TpeGuidePosFeature extends TpePositionFeature
          * Returns <code>true</code> if the corresponding group is available
          * in the current observation's context.
          */
-        public boolean isEnabled(TpeContext ctx) {
+        public boolean isEnabled(final TpeContext ctx) {
             if (ctx.isEmpty()) return false;
 
             if (ctx.targets().isEmpty()) return false;
-            Set<GuideProbe> guiders = GuideProbeUtil.instance.getAvailableGuiders(ctx.obsShell().get());
+            final Set<GuideProbe> guiders = GuideProbeUtil.instance.getAvailableGuiders(ctx.obsShell().get());
 
-            // Assume it should be enabled if any member of the group is
-            // present.
-            for (GuideProbe guider : group.getMembers()) {
-                if (guiders.contains(guider)) return true;
-            }
-            return false;
+            // Assume it should be enabled if any member of the group is present.
+            return group.getMembers().stream().anyMatch(guiders::contains);
         }
 
-        public void create(TpeMouseEvent tme, TpeImageInfo tii) {
-            TargetObsComp obsComp = getTargetObsComp();
+        public void create(final TpeMouseEvent tme, final TpeImageInfo tii) {
+            final TargetObsComp obsComp = getTargetObsComp();
             if (obsComp == null) return;
 
-            SPTarget   pos = createNewTarget(tme);
-            Option<ObsContext> ctx = tme.source.getObsContext();
-            if (ctx.isEmpty()) return;
-
-            obsComp.setTargetEnvironment(group.add(pos, ctx.getValue()));
-            _iw.getContext().targets().commit();
+            final SPTarget   pos = createNewTarget(tme);
+            tme.source.getObsContext().foreach(ctx -> {
+                obsComp.setTargetEnvironment(group.add(pos, ctx));
+                _iw.getContext().targets().commit();
+            });
         }
     }
 
-    private TpeCreateableItem[] createableItems;
+    private TpeCreatableItem[] creatableItems;
 
-    private java.util.List<TpeCreateableItem> createCreateableItems() {
+    private java.util.List<TpeCreatableItem> createCreatableItems() {
         // Get a collection of all the guiders.
-        Collection<GuideProbe> guiders = GuideProbeMap.instance.values();
+        final Collection<GuideProbe> guiders = GuideProbeMap.instance.values();
 
         // Create the result list.
-        java.util.List<TpeCreateableItem> res = new ArrayList<>();
+        final List<TpeCreatableItem> res = new ArrayList<>();
 
         // Review each guider.  If part of an optimizable group, remember the
         // group in a Set.  Otherwise, add a GuiderCreateableItem to the
         // result list.
-        Set<OptimizableGuideProbeGroup> groups = new HashSet<>();
-        for (GuideProbe guider : guiders) {
-            Option<GuideProbeGroup> groupOption = guider.getGroup();
-
-            GuideProbeGroup group = (groupOption.isEmpty() ? null : groupOption.getValue());
+        final Set<OptimizableGuideProbeGroup> groups = new HashSet<>();
+        guiders.forEach(guider -> guider.getGroup().foreach(group -> {
             if (group instanceof OptimizableGuideProbeGroup) {
                 groups.add((OptimizableGuideProbeGroup) group);
             } else {
-                res.add(new GuiderCreateableItem(guider));
+                res.add(new GuiderCreatableItem(guider));
             }
-        }
+        }));
 
         // Go through the groups and add a GuiderGroupCreatableItem for each one.
-        for (OptimizableGuideProbeGroup group : groups) {
-            res.add(new GuiderGroupCreateableItem(group));
-        }
+        groups.forEach(group -> res.add(new GuiderGroupCreatableItem(group)));
 
         // Sort the list by label.
         Collections.sort(res, (item1, item2) -> item1.getLabel().compareTo(item2.getLabel()));
@@ -270,12 +261,12 @@ public class TpeGuidePosFeature extends TpePositionFeature
         return res;
     }
 
-    public synchronized TpeCreateableItem[] getCreateableItems() {
-        if (createableItems == null) {
-            java.util.List<TpeCreateableItem> lst = createCreateableItems();
-            createableItems = lst.toArray(new TpeCreateableItem[lst.size()]);
+    public synchronized TpeCreatableItem[] getCreatableItems() {
+        if (creatableItems == null) {
+            final List<TpeCreatableItem> lst = createCreatableItems();
+            creatableItems = lst.toArray(new TpeCreatableItem[lst.size()]);
         }
-        return createableItems;
+        return creatableItems;
     }
 
 
@@ -286,23 +277,23 @@ public class TpeGuidePosFeature extends TpePositionFeature
      *
      * @return optional tuple of the guide probe and target that was selected
      */
-    private Option<Tuple2<GuideProbe, SPTarget>> locatePosition(TpeMouseEvent tme) {
-        TargetObsComp obsComp = getTargetObsComp();
+    private Option<Tuple2<GuideProbe, SPTarget>> locatePosition(final TpeMouseEvent tme) {
+        final TargetObsComp obsComp = getTargetObsComp();
         if (obsComp == null) return None.instance();
 
-        TpePositionMap pm = TpePositionMap.getMap(_iw);
+        final TpePositionMap pm = TpePositionMap.getMap(_iw);
 
-        Iterator<PosMapEntry<SPTarget>> it = pm.getAllPositionMapEntries();
+        final Iterator<PosMapEntry<SPTarget>> it = pm.getAllPositionMapEntries();
         while (it.hasNext()) {
-            PosMapEntry<SPTarget> pme = it.next();
-            SPTarget tp = pme.taggedPos;
+            final PosMapEntry<SPTarget> pme = it.next();
+            final SPTarget tp = pme.taggedPos;
 
-            TargetEnvironment env = obsComp.getTargetEnvironment();
-            for (GuideProbeTargets gt : env.getOrCreatePrimaryGuideGroup()) {
+            final TargetEnvironment env = obsComp.getTargetEnvironment();
+            for (final GuideProbeTargets gt : env.getOrCreatePrimaryGuideGroup()) {
                 if (!gt.getTargets().contains(tp)) continue;
 
                 if (positionIsClose(pme, tme.xWidget, tme.yWidget)) {
-                    Tuple2<GuideProbe, SPTarget> tup = new Pair<>(gt.getGuider(), tp);
+                    final Tuple2<GuideProbe, SPTarget> tup = new Pair<>(gt.getGuider(), tp);
                     return new Some<>(tup);
                 }
 
@@ -314,34 +305,43 @@ public class TpeGuidePosFeature extends TpePositionFeature
     /**
      * Perform the action of selecting the primary guide star in the group.
      */
-    public void action(TpeMouseEvent tme) {
+    public void action(final TpeMouseEvent tme) {
         if (!getIdentifyPrimary()) return;
 
-        Option<Tuple2<GuideProbe, SPTarget>> res = locatePosition(tme);
-        if (res.isEmpty()) return;
-
-        TargetObsComp   toc = getTargetObsComp();
-        SPTarget     target = res.getValue()._2();
-        PrimaryTargetToggle.instance.toggle(toc, target);
-        _iw.getContext().targets().commit();
+        locatePosition(tme).foreach(tup -> {
+            final SPTarget target   = tup._2();
+            final TargetObsComp toc = getTargetObsComp();
+            PrimaryTargetToggle.instance.toggle(toc, target);
+            _iw.getContext().targets().commit();
+        });
     }
 
 
     /**
      */
-    public boolean erase(TpeMouseEvent tme) {
+    public boolean erase(final TpeMouseEvent tme) {
         final Option<Tuple2<GuideProbe, SPTarget>> res = locatePosition(tme);
-        if (res.isEmpty()) return false;
+        return res.map(tup -> {
+            final GuideProbe probe = tup._1();
+            final SPTarget target  = tup._2();
 
-        final TargetObsComp     toc = getTargetObsComp();
-        final TargetEnvironment env = getTargetEnvironment();
-        final Option<GuideProbeTargets> gtOpt = env.getPrimaryGuideProbeTargets(res.getValue()._1());
-        if (gtOpt.isEmpty()) return false;
+            final TargetObsComp     toc = getTargetObsComp();
+            final TargetEnvironment env = getTargetEnvironment();
+            if (env == null) return false;
 
-        final GuideProbeTargets gt = gtOpt.getValue().removeTarget(res.getValue()._2());
-        toc.setTargetEnvironment(env.putPrimaryGuideProbeTargets(gt));
-        _iw.getContext().targets().commit();
-        return true;
+            // We do not allow deletion of auto guide stars.
+            final GuideGroup        gp  = env.getOrCreatePrimaryGuideGroup();
+            if (gp.isAutomatic()) return false;
+
+            final Option<GuideProbeTargets> gtOpt = gp.get(probe);
+            gtOpt.map(gt -> {
+                final GuideProbeTargets gtNew = gt.removeTarget(target);
+                toc.setTargetEnvironment(env.putPrimaryGuideProbeTargets(gtNew));
+                _iw.getContext().targets().commit();
+                return true;
+            }).getOrElse(false);
+            return true;
+        }).getOrElse(false);
     }
 
     /**
@@ -368,46 +368,44 @@ public class TpeGuidePosFeature extends TpePositionFeature
 
     /**
      */
-    public void draw(Graphics g, TpeImageInfo tii) {
-        Graphics2D g2d = (Graphics2D) g;
+    public void draw(final Graphics g, final TpeImageInfo tii) {
+        final Graphics2D g2d = (Graphics2D) g;
 
         // Get the TargetEnvironment, if any.  If none, give up immediately.
-        TargetObsComp obsComp = getTargetObsComp();
+        final TargetObsComp obsComp = getTargetObsComp();
         if (obsComp == null) return;
-        TargetEnvironment env = obsComp.getTargetEnvironment();
+        final TargetEnvironment env = obsComp.getTargetEnvironment();
 
         // Get the base position.  If not found, give up.
-        TpePositionMap pm = TpePositionMap.getMap(_iw);
-        Point2D.Double base = pm.getLocationFromTag(env.getBase());
+        final TpePositionMap pm = TpePositionMap.getMap(_iw);
+        final Point2D.Double base = pm.getLocationFromTag(env.getBase());
         if (base == null) return;
 
         // Set up for drawing.
-        int size = MARKER_SIZE * 2;
-        Map<TextAttribute, Object> attrMap = new HashMap<>();
+        final int size = MARKER_SIZE * 2;
+        final Map<TextAttribute, Object> attrMap = new HashMap<>();
         attrMap.put(TextAttribute.FONT, FONT);
-        Option<ObsContext> obsContextOpt = _iw.getObsContext();
-        boolean drawTags = getDrawTags();
-        boolean drawPrimary = getIdentifyPrimary();
+        final Option<ObsContext> obsContextOpt = _iw.getObsContext();
+        final boolean drawTags = getDrawTags();
+        final boolean drawPrimary = getIdentifyPrimary();
 
         // Check for overlapping tags
-        Map<Point2D.Double, Integer> overlapMap = new HashMap<>();
+        final Map<Point2D.Double, Integer> overlapMap = new HashMap<>();
 
         // Draw all the guide targets.
-        for (GuideProbeTargets gt : env.getOrCreatePrimaryGuideGroup()) {
-            String tagBase = gt.getGuider().getKey();
+        for (final GuideProbeTargets gt : env.getOrCreatePrimaryGuideGroup()) {
+            final String tagBase = gt.getGuider().getKey();
 
             // Draw disabled targets in red.  Draw enabled but out of range
             // targets in a slightly transparent color.
             final Color color = obsContextOpt.exists(c -> GuideProbeUtil.instance.isAvailable(c, gt.getGuider())) ? Color.green : Color.red;
-            Color invalidColor = OtColor.makeSlightlyTransparent(color);
+            final Color invalidColor = OtColor.makeSlightlyTransparent(color);
             g2d.setColor(color);
             attrMap.put(TextAttribute.FOREGROUND, color);
 
             // See if we can validate guide stars of this type.
-            ValidatableGuideProbe validator = null;
-            if (gt.getGuider() instanceof ValidatableGuideProbe) {
-                validator = (ValidatableGuideProbe) gt.getGuider();
-            }
+            final ValidatableGuideProbe validator = (gt.getGuider() instanceof ValidatableGuideProbe)
+                    ? ((ValidatableGuideProbe) gt.getGuider()) : null;
 
             // Draw each star of this type.
             int index = 1;
@@ -415,19 +413,19 @@ public class TpeGuidePosFeature extends TpePositionFeature
             for (SPTarget target : targetList) {
                 // If there is exactly one of this type, then no need to show
                 // the index.
-                String tag = (targetList.size() == 1) ? tagBase :
+                final String tag = (targetList.size() == 1) ? tagBase :
                                 String.format("%s (%d)", tagBase, index++);
 
                 // Find the position map entry for this star, if present.
-                PosMapEntry<SPTarget> pme = pm.getPositionMapEntry(target);
+                final PosMapEntry<SPTarget> pme = pm.getPositionMapEntry(target);
                 if (pme == null) continue;
-                Point2D.Double p = pme.screenPos;
+                final Point2D.Double p = pme.screenPos;
                 if (p == null) continue;
 
                 // Check whether the position is valid or not.  If not, switch
                 // to the invalid color and make the text strikethrough.
                 boolean valid = true;
-                AttributedString txt = new AttributedString(tag, attrMap);
+                final AttributedString txt = new AttributedString(tag, attrMap);
                 if (!obsContextOpt.isEmpty() && (validator != null) &&
                         validator.validate(target, obsContextOpt.getValue()) != GuideStarValidation.VALID) {
                     txt.addAttribute(TextAttribute.STRIKETHROUGH, true);
@@ -451,7 +449,7 @@ public class TpeGuidePosFeature extends TpePositionFeature
                 // Draw a marker to identify the primary guide star.
                 int x = (int) (p.x + size);
                 if (drawPrimary && !gt.getPrimary().isEmpty() && (gt.getPrimary().getValue() == target)) {
-                    Color orig = g2d.getColor();
+                    final Color orig = g2d.getColor();
                     g2d.setColor(valid ? PRIMARY_STAR_COLOR : INVALID_PRIMARY_STAR_COLOR);
                     g2d.fillOval(x, (int) p.y - overlap*11, size, size);
                     g2d.setColor(orig);
@@ -471,17 +469,17 @@ public class TpeGuidePosFeature extends TpePositionFeature
 
     /**
      */
-    public Option<Object> dragStart(TpeMouseEvent tme, TpeImageInfo tii) {
-        TargetObsComp obsComp = getTargetObsComp();
+    public Option<Object> dragStart(final TpeMouseEvent tme, final TpeImageInfo tii) {
+        final TargetObsComp obsComp = getTargetObsComp();
         if (obsComp == null) return None.instance();
 
-        TargetEnvironment env = obsComp.getTargetEnvironment();
+        final TargetEnvironment env = obsComp.getTargetEnvironment();
 
-        TpePositionMap pm = TpePositionMap.getMap(_iw);
+        final TpePositionMap pm = TpePositionMap.getMap(_iw);
 
-        Iterator<PosMapEntry<SPTarget>> it = pm.getAllPositionMapEntries();
+        final Iterator<PosMapEntry<SPTarget>> it = pm.getAllPositionMapEntries();
         while (it.hasNext()) {
-            PosMapEntry<SPTarget> pme = it.next();
+            final PosMapEntry<SPTarget> pme = it.next();
 
             if (positionIsClose(pme, tme.xWidget, tme.yWidget) && env.isGuidePosition(pme.taggedPos)) {
                 _dragObject = pme;

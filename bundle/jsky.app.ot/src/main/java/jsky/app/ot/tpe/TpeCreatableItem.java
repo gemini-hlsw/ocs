@@ -7,10 +7,10 @@ package jsky.app.ot.tpe;
 
 /**
  * An interface for the items that can be created by features that support
- * the {@link TpeCreateableFeature} interface.  A single feature may support
+ * the {@link TpeCreatableFeature} interface.  A single feature may support
  * creating multiple items.
  */
-public interface TpeCreateableItem {
+public interface TpeCreatableItem {
 
     /**
      * The types of items that can be created.

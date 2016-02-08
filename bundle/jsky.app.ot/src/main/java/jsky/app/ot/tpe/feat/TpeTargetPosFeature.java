@@ -17,7 +17,7 @@ import java.awt.geom.Point2D;
 import java.util.Iterator;
 
 public class TpeTargetPosFeature extends TpePositionFeature
-        implements TpeCreateableFeature, PropertyWatcher {
+        implements TpeCreatableFeature, PropertyWatcher {
 
     private static final BasicPropertyList _props = new BasicPropertyList(TpeTargetPosFeature.class.getName());
     private static final String PROP_SHOW_TAGS = "Show Tags";
@@ -84,8 +84,8 @@ public class TpeTargetPosFeature extends TpePositionFeature
         return _props.getBoolean(PROP_SHOW_TAGS, true);
     }
 
-    private final TpeCreateableItem[] createableItems = new TpeCreateableItem[] {
-        new TpeCreateableItem() {
+    private final TpeCreatableItem[] createableItems = new TpeCreatableItem[] {
+        new TpeCreatableItem() {
             public String getLabel() {
                 return "Target";
             }
@@ -116,24 +116,24 @@ public class TpeTargetPosFeature extends TpePositionFeature
 
     /**
      */
-    public TpeCreateableItem[] getCreateableItems() {
+    public TpeCreatableItem[] getCreatableItems() {
         return createableItems;
     }
 
     /**
      */
-    public boolean erase(TpeMouseEvent tme) {
-        TargetObsComp obsComp = getTargetObsComp();
+    public boolean erase(final TpeMouseEvent tme) {
+        final TargetObsComp obsComp = getTargetObsComp();
         if (obsComp == null) return false;
 
-        TpePositionMap pm = TpePositionMap.getMap(_iw);
+        final TpePositionMap pm = TpePositionMap.getMap(_iw);
 
-        Iterator<PosMapEntry<SPTarget>> it = pm.getAllPositionMapEntries();
+        final Iterator<PosMapEntry<SPTarget>> it = pm.getAllPositionMapEntries();
         while (it.hasNext()) {
-            PosMapEntry<SPTarget> pme = it.next();
-            SPTarget tp = pme.taggedPos;
+            final PosMapEntry<SPTarget> pme = it.next();
+            final SPTarget tp = pme.taggedPos;
 
-            TargetEnvironment env = obsComp.getTargetEnvironment();
+            final TargetEnvironment env = obsComp.getTargetEnvironment();
             if (!env.getUserTargets().contains(tp)) continue;
 
             if (positionIsClose(pme, tme.xWidget, tme.yWidget)) {

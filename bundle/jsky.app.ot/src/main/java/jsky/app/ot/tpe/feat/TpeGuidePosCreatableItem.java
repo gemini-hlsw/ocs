@@ -5,13 +5,13 @@
 package jsky.app.ot.tpe.feat;
 
 import edu.gemini.spModel.guide.GuideProbe;
-import jsky.app.ot.tpe.TpeCreateableItem;
+import jsky.app.ot.tpe.TpeCreatableItem;
 
 /**
- * Identifies {@link jsky.app.ot.tpe.TpeCreateableItem createable items} that
+ * Identifies {@link TpeCreatableItem createable items} that
  * make guide stars.
  */
-public interface TpeGuidePosCreateableItem extends TpeCreateableItem {
+public interface TpeGuidePosCreatableItem extends TpeCreatableItem {
 
     /**
      * Gets the type of guide star that will be created.
