@@ -71,5 +71,4 @@ public abstract class TransitionalSPTarget extends WatchablePos {
         super._notifyOfUpdate();
     }
 
-
 }

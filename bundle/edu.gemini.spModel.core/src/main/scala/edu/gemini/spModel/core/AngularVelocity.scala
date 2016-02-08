@@ -13,6 +13,7 @@ case class AngularVelocity(masPerYear: Double) extends AnyVal with java.io.Seria
 
 }
 
+
 /** An Angular Velocity in Right Ascension */
 case class RightAscensionAngularVelocity(velocity: AngularVelocity)
 
@@ -20,6 +21,10 @@ case class RightAscensionAngularVelocity(velocity: AngularVelocity)
 case class DeclinationAngularVelocity(velocity: AngularVelocity)
 
 object AngularVelocity {
+
+  val masPerYear: AngularVelocity @> Double =
+    Lens.lensu((a, b) => a.copy(masPerYear = b), _.masPerYear)
+
   val MilliArcSecsInADegree:Double = 1296000000
 
   val Zero = AngularVelocity(0.0)
@@ -39,6 +44,9 @@ object AngularVelocity {
 }
 
 object RightAscensionAngularVelocity {
+
+  val velocity: RightAscensionAngularVelocity @> AngularVelocity =
+    Lens.lensu((a, b) => a.copy(velocity = b), _.velocity)
 
   /** 
    * The `RightAscensionAngularVelocity` of zero miliarcsecs/year.
@@ -61,6 +69,9 @@ object RightAscensionAngularVelocity {
 }
 
 object DeclinationAngularVelocity {
+
+  val velocity: DeclinationAngularVelocity @> AngularVelocity =
+    Lens.lensu((a, b) => a.copy(velocity = b), _.velocity)
 
   /** 
    * The `DeclinationAngularVelocity` of zero miliarcsecs/year.

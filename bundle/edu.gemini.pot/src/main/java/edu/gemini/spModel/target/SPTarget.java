@@ -1,5 +1,6 @@
 package edu.gemini.spModel.target;
 
+import edu.gemini.spModel.core.*;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.PioFactory;
 import edu.gemini.spModel.target.system.*;
@@ -41,8 +42,17 @@ public final class SPTarget extends TransitionalSPTarget {
      * if the contained target is of the specified type.
      */
     public void setTargetType(final ITarget.Tag tag) {
-        if (tag != _target.getTag())
-            setTarget(ITarget.forTag(tag));
+        if (tag != _target.getTag()) {
+            _target = ITarget.forTag(tag);
+            switch (tag) {
+                case SIDEREAL:
+                    setNewTarget(SiderealTarget.empty());
+                    break;
+                default:
+                    setNewTarget(edu.gemini.spModel.core.NonSiderealTarget.empty());
+            }
+            _notifyOfUpdate();
+        }
     }
 
     /** Return a paramset describing this SPTarget. */
@@ -64,5 +74,22 @@ public final class SPTarget extends TransitionalSPTarget {
     public SPTarget clone() {
         return new SPTarget(_target.clone());
     }
+
+    // for testing only; this will go away
+
+    private transient Target _newTarget;
+
+    public Target getNewTarget() {
+        if (_newTarget == null)
+            _newTarget = SiderealTarget.empty();
+        return _newTarget;
+    }
+
+    public void setNewTarget(Target target) {
+        _newTarget = target;
+        System.out.println("*** SPTarget.setNewTarget: " + target);
+        _notifyOfUpdate();
+    }
+
 
 }

@@ -58,6 +58,37 @@ trait TargetLenses {
       pRunTarget(NonSiderealTarget.magnitudes.partial)
     ))
 
+  def const[A, B](b: B): A @> B =
+    Lens.lensu((a, _) => a, _ => b)
+
+  val spatialProfile: Target @?> Option[SpatialProfile] =
+    PLens(_.fold(
+      PLens.nil.run,
+      pRunTarget(SiderealTarget.spatialProfile.partial),
+      pRunTarget(NonSiderealTarget.spatialProfile.partial)
+    ))
+
+  val spectralDistribution: Target @?> Option[SpectralDistribution] =
+    PLens(_.fold(
+      PLens.nil.run,
+      pRunTarget(SiderealTarget.spectralDistribution.partial),
+      pRunTarget(NonSiderealTarget.spectralDistribution.partial)
+    ))
+
+  val horizonsDesignation: Target @?> Option[HorizonsDesignation] =
+    PLens(_.fold(
+      PLens.nil.run,
+      PLens.nil.run,
+      pRunTarget(NonSiderealTarget.horizonsDesignation.partial)
+    ))
+
+  val ephemeris: Target @?> Ephemeris =
+    PLens(_.fold(
+      PLens.nil.run,
+      PLens.nil.run,
+      pRunTarget(NonSiderealTarget.ephemeris.partial)
+    ))
+
 }
 
 
@@ -197,6 +228,9 @@ case class NonSiderealTarget(
 
   def fold[A](too: TooTarget => A, sid: SiderealTarget => A,non: NonSiderealTarget => A): A =
     non(this)
+
+  override def toString =
+    s"NonSiderealTarget($name,«${ephemeris.size}»,$horizonsDesignation,$magnitudes,$spectralDistribution,$spatialProfile)"
 
 }
 

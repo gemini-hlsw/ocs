@@ -8,7 +8,9 @@ import scalaz._, Scalaz._
  * in the bundle source for more information.
  */
 sealed abstract class HorizonsDesignation(val queryString: String)
-  extends Product with Serializable
+  extends Product with Serializable {
+    def des: String // designation, human readable
+  }
 
 object HorizonsDesignation {
 
@@ -36,7 +38,9 @@ object HorizonsDesignation {
    * Designation for an asteroid under "old" naming conventions. These are small numbers. Example:
    * `4` for Vesta, yielding a query string `4;`
    */
-  final case class AsteroidOldStyle(num: Int) extends Asteroid(s"$num;")
+  final case class AsteroidOldStyle(num: Int) extends Asteroid(s"$num;") {
+    def des = num.toString
+  }
   object AsteroidOldStyle {
     val num: AsteroidOldStyle @> Int = Lens.lensu((a, b) => a.copy(num = b), _.num)
   }
@@ -45,7 +49,9 @@ object HorizonsDesignation {
    * Designation for a major body (planet or satellite thereof). These have small numbers. Example:
    * `606` for Titan, yielding a query string `606`.
    */
-  final case class MajorBody(num: Int) extends HorizonsDesignation(s"$num")
+  final case class MajorBody(num: Int) extends HorizonsDesignation(s"$num") {
+    def des = num.toString
+  }
   object MajorBody {
     val num: MajorBody @> Int = Lens.lensu((a, b) => a.copy(num = b), _.num)
   }
