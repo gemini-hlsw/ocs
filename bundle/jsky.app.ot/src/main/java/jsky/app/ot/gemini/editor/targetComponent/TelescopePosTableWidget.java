@@ -723,9 +723,12 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
      */
     void updatePrimaryStar() {
         if (_env == null || !OTOptions.isEditable(_obsComp.getProgram(), _obsComp.getContextObservation())) return;
+
         final Option<SPTarget> targetOpt = getSelectedPos();
         if (targetOpt.isDefined()) {
-            PrimaryTargetToggle.instance.toggle(_dataObject, targetOpt.getValue());
+            final boolean autoGroup = targetOpt.flatMap(this::getTargetGroup).exists(igg -> igg.group().isAutomatic());
+            if (!autoGroup)
+                PrimaryTargetToggle.instance.toggle(_dataObject, targetOpt.getValue());
         } else {
             final Option<IndexedGuideGroup> iggOpt = getSelectedGroup();
             iggOpt.foreach(igg -> {
