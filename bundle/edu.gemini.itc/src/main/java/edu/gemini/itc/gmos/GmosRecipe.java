@@ -124,7 +124,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         // TODO: why, oh why?
         final double im_qual = _sdParameters.isUniform() ? 10000 : IQcalc.getImageQuality();
 
-        // ==== IFU case
+        // ==== IFU
         if (instrument.isIfuUsed()) {
 
             final VisitableMorphology morph = _sdParameters.isUniform() ? new USBMorphology() : new GaussianMorphology(IQcalc.getImageQuality());
@@ -165,7 +165,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
 
             return new SpectroscopyResult(p, instrument, IQcalc, specS2N, slit, sf_list.get(0), Option.empty());
 
-        // ==== NON-IFU case
+        // ==== SLIT
         } else {
 
             final Slit slit = Slit$.MODULE$.apply(_sdParameters, _obsDetailParameters, instrument, instrument.getSlitWidth(), IQcalc.getImageQuality());
