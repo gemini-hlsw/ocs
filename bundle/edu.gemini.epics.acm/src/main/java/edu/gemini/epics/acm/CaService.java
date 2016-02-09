@@ -2,6 +2,8 @@ package edu.gemini.epics.acm;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -37,6 +39,7 @@ public final class CaService {
     private final Map<String, CaCommandSenderImpl> commandSenders;
     static private String addrList;
     static private CaService theInstance;
+    static private Lock instanceLock = new ReentrantLock();
 
     private CaService(String addrList) {
         statusAcceptors = new HashMap<>();
@@ -69,12 +72,17 @@ public final class CaService {
      * @return the single instance of CaService.
      */
     public static CaService getInstance() {
+        // Double check avoids using the lock after the instance was created.
         if (theInstance == null) {
-            if (addrList == null) {
-                theInstance = new CaService();
-            } else {
-                theInstance = new CaService(addrList);
+            instanceLock.lock();
+            if (theInstance == null) {
+                if (addrList == null) {
+                    theInstance = new CaService();
+                } else {
+                    theInstance = new CaService(addrList);
+                }
             }
+            instanceLock.unlock();
         }
         return theInstance;
     }
