@@ -178,7 +178,7 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
 
         // total source flux in the aperture
         final VisitableSampledSpectrum signal         = haloIsUsed ? signalWithHalo(throughput.onePixelThroughput(), haloThroughput.onePixelThroughput()) : signal(throughput.onePixelThroughput());
-        final VisitableSampledSpectrum sqrtBackground = background(slit);
+        final VisitableSampledSpectrum sqrtBackground = background(slit); //background(new OnePixelSlit(slit.pixelSize()));
 
         // create the Sqrt(Background) sed for plotting
         for (int i = firstCcdPixel; i <= lastCcdPixel(sqrtBackground.getLength()); ++i)
@@ -224,7 +224,7 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
         for (int i = firstCcdPixel; i <= lastCcdPixel(background.getLength()); ++i) {
             background.setY(i,
                     backgroundFlux.getY(i) *
-                            slit.width() * slit.pixelSize() * slit.lengthPixels() * // TODO: use slit.area()
+                            slit.width() * slit.pixelSize() * slit.lengthPixels() *
                             exposureTime * disperser.dispersion());
         }
 

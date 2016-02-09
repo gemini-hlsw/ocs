@@ -16,45 +16,44 @@ sealed trait Slit {
   def length: Double
   def area: Double
 
-  def widthPixels: Double       // TODO: use int?
-  def lengthPixels: Double      // TODO: use int?
-  def areaPixels: Double        // TODO: use int?
+  // According to Andy Stephens we do want to take partial pixels into account for throughput calculations.
+  // The values here are rounded to the next full pixel, so depending on future usage of these values this
+  // may or may not be what is needed. Please use with care. This current implementation follows the original
+  // implementation.
+  def widthPixels: Int        = Math.max(1, (width / pixelSize).round).toInt
+  def lengthPixels: Int       = Math.max(1, (length / pixelSize).round).toInt
+  def areaPixels: Int         = widthPixels * lengthPixels
 
 }
 
 /** Slit that covers exactly one pixel². This is used to calculate the peak pixel flux for a single pixel. */
 final case class OnePixelSlit(pixelSize: Double) extends Slit {
 
-  val width         = pixelSize
-  val length        = pixelSize
-  val area          = width * length
+  val width                   = pixelSize
+  val length                  = pixelSize
+  val area                    = width * length
 
-  val widthPixels   = 1.0
-  val lengthPixels  = 1.0
-  val areaPixels    = 1.0
+  override val widthPixels    = 1
+  override val lengthPixels   = 1
+  override val areaPixels     = 1
 
 }
 
 /** Slit that covers exactly one arcsec². This is used for auto apertures on uniform sources. */
 final case class OneArcsecSlit(width: Double, pixelSize: Double) extends Slit {
 
-  val area        = 1.0
-  val length      = area / width
-
-  val widthPixels: Double = (width / pixelSize).round   // TODO: turn into int, make sure > 0; combine with code from generic slit
-  val lengthPixels: Double = (length / pixelSize).round  // TODO: turn into int
-  val areaPixels = widthPixels * lengthPixels
+  val area                    = 1.0
+  val length                  = area / width
 
 }
 
 /** Arbitrary aperture slits are defined by their mask width and the user defined slit length. */
 final case class RectangleSlit(width: Double, length: Double, pixelSize: Double) extends Slit {
 
-  val widthPixels: Double   = (width / pixelSize).round   // TODO: make sure this is at least 1 ?
-  val lengthPixels: Double  = (length / pixelSize).round // TODO: make sure this is at least 1 ?
-
-  val area          = width * lengthPixels * pixelSize   // TODO: this should be width * length
-  val areaPixels    = widthPixels * lengthPixels   // TODO: ok? rounded..
+  // The area should/could be width*length, the way it is calculated here mimics some rounding differences
+  // (full vs partial pixels) from the original code that I am keeping in place for now; maybe this can
+  // can be simplified in the future.
+  val area                    = width * lengthPixels * pixelSize
 
 }
 
