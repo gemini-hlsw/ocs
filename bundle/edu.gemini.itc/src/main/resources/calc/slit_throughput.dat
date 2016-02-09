@@ -1,5 +1,6 @@
-#This is a first attempt at the slit_throughput 2d array may have to modify 
-#later on.
+# Slit throughput lookup table of a Gaussian PSF through a rectangular slit
+# x = slit length / slit width
+# y = slit width / image quality in sigma
 
 # Array x dimension
 12
