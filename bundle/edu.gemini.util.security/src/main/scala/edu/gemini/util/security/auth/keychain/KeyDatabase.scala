@@ -62,12 +62,13 @@ object KeyDatabase {
       val cpds = new com.mchange.v2.c3p0.ComboPooledDataSource();
       cpds.setDriverClass("org.h2.Driver")
       cpds.setJdbcUrl(url)
-//      cpds.setUser("sa")
-//      cpds.setPassword("")
       Database.forDataSource(cpds)
     }
 
-  def apply(dir: File): IO[KeyDatabase] = {
+  def apply(dir: File): IO[KeyDatabase] =
+    withDoobie(dir)
+
+  def withSlick(dir: File): IO[KeyDatabase] = {
     for {
       p <- IO(dir.getAbsolutePath) // can throw
       _ <- IO(require(dir.mkdirs() || dir.isDirectory, s"Not a valid directory: $p"))
@@ -89,6 +90,33 @@ object KeyDatabase {
 
       def backup(backup: File): IO[Unit] =
         liftS(d, KeySchema.backup(backup))
+
+    }
+  }
+
+  def withDoobie(dir: File): IO[KeyDatabase] = {
+    import doobie.imports._
+    for {
+      p <- IO(dir.getAbsolutePath) // can throw
+      _ <- IO(require(dir.mkdirs() || dir.isDirectory, s"Not a valid directory: $p"))
+      d = DriverManagerTransactor[IO]("org.h2.Driver", s"jdbc:h2:$p/keydb;DB_CLOSE_ON_EXIT=FALSE;TRACE_LEVEL_FILE=4", "", "")
+      x <- KeySchema2.checkSchema(p).transact(d)
+    } yield new KeyDatabase {
+
+      def checkPass(p: GeminiPrincipal, pass: String): IO[Option[KeyVersion]] =
+        KeySchema2.checkPass(p, pass).transact(d)
+
+      def setPass(p: GeminiPrincipal, pass: String): IO[KeyVersion] =
+        KeySchema2.setPass(p, pass).transact(d)
+
+      def getVersion(p: GeminiPrincipal): IO[Option[KeyVersion]] =
+        KeySchema2.getVersion(p).transact(d)
+
+      def revokeKey(p: GeminiPrincipal): IO[Unit] =
+        KeySchema2.revokeKey(p).transact(d)
+
+      def backup(backup: File): IO[Unit] =
+        KeySchema2.backup(backup).transact(d)
 
     }
   }
