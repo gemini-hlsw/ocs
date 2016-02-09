@@ -107,13 +107,12 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
         // Might implement these modules at a later time.
 
         final Slit slit = Slit$.MODULE$.apply(_sdParameters, _obsDetailParameters, instrument, instrument.getSlitWidth(), IQcalc.getImageQuality());
-        final SlitThroughput st = new SlitThroughput(_sdParameters, slit, im_qual);
-        final double spec_source_frac = st.throughput();
+        final SlitThroughput throughput = new SlitThroughput(_sdParameters, slit, im_qual);
 
         final SpecS2NSlitVisitor specS2N = new SpecS2NSlitVisitor(
                 slit,
                 instrument.disperser.get(),
-                spec_source_frac,
+                throughput,
                 instrument.getSpectralPixelWidth(),
                 instrument.getObservingStart(),
                 instrument.getObservingEnd(),
@@ -129,7 +128,7 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
 
         final SpecS2N[] specS2Narr = new SpecS2N[1];
         specS2Narr[0] = specS2N;
-        return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, st.throughput(), altair);
+        return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), altair);
     }
 
     public ImagingResult calculateImaging() {

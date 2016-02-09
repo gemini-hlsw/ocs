@@ -115,7 +115,7 @@ public final class TRecsRecipe implements ImagingRecipe, SpectroscopyRecipe {
         // i.e. the output morphology is same as the input morphology.
         // Might implement these modules at a later time.
         final Slit slit = Slit$.MODULE$.apply(_sdParameters, _obsDetailParameters, instrument, instrument.getSlitWidth(), IQcalc.getImageQuality());
-        final SlitThroughput st = new SlitThroughput(_sdParameters, slit, IQcalc.getImageQuality());
+        final SlitThroughput throughput = new SlitThroughput(_sdParameters, slit, IQcalc.getImageQuality());
 
         // TODO: why, oh why?
         final double im_qual = _sdParameters.isUniform() ? 10000 : IQcalc.getImageQuality();
@@ -123,7 +123,7 @@ public final class TRecsRecipe implements ImagingRecipe, SpectroscopyRecipe {
         final SpecS2NSlitVisitor specS2N = new SpecS2NSlitVisitor(
                 slit,
                 instrument.disperser.get(),
-                st.throughput(),
+                throughput,
                 instrument.getSpectralPixelWidth(),
                 instrument.getObservingStart(),
                 instrument.getObservingEnd(),
@@ -138,7 +138,7 @@ public final class TRecsRecipe implements ImagingRecipe, SpectroscopyRecipe {
 
         final SpecS2NSlitVisitor[] specS2Narr = new SpecS2NSlitVisitor[1];
         specS2Narr[0] = specS2N;
-        return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, st.throughput(), Option.empty());
+        return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), Option.empty());
     }
 
     public ImagingResult calculateImaging() {

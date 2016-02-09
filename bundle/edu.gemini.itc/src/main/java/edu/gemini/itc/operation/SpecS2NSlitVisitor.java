@@ -30,13 +30,13 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
     // signal and background
     private VisitableSampledSpectrum sourceFlux;
     private VisitableSampledSpectrum backgroundFlux;
-    private final double throughput;
+    private final SlitThroughput throughput;
     private final double imgQuality;
 
     // halo for AO system (optional)
     private boolean haloIsUsed = false;
     private VisitableSampledSpectrum haloFlux;
-    private double haloThroughput;
+    private SlitThroughput haloThroughput;
     private double haloImgQuality;
 
     // used for GMOS multi-CCD case
@@ -54,7 +54,7 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
      */
     public SpecS2NSlitVisitor(final Slit slit,
                               final Disperser disperser,
-                              final double throughput,
+                              final SlitThroughput throughput,
                               final double pixelWidth,
                               final double obsWaveLow,
                               final double obsEnd,
@@ -88,24 +88,20 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
         return lastCcdPixel;
     }
 
-    public double getImageQuality() {
-        return imgQuality;
-    }
-
     /**
      * Implements the SampledSpectrumVisitor interface
      */
     public void visit(final SampledSpectrum sed) {
         // step one: do some resampling and preprocessing
-        resample(slit);
+        resample();
         // step two: calculate S2N for single and final exposure for given slit
-        calculateS2N(slit);
+        calculateS2N();
         // step three: calculate signal and background for single pixel
-        calculateSignal(slit);
+        calculateSignal();
     }
 
     /** Resample source, background and - if applicable - halo flux as needed. */
-    private void resample(final Slit slit) {
+    private void resample() {
 
         // calc the width of a spectral resolution element in nm
         final double resElement                 = disperser.resolution(slit, imgQuality);
@@ -155,7 +151,7 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
     }
 
     /** Calculates single and final S2N. */
-    private void calculateS2N(final Slit slit) {
+    private void calculateS2N() {
 
         // shot noise on dark current flux in aperture
         final double darkNoise = darkCurrent * slit.lengthPixels() * exposureTime;
@@ -164,7 +160,7 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
         final double readNoise = this.readNoise * this.readNoise * slit.lengthPixels();
 
         // signal and background for given slit and throughput
-        final VisitableSampledSpectrum signal     = signal(throughput, haloThroughput);
+        final VisitableSampledSpectrum signal     = haloIsUsed ? signalWithHalo(throughput.throughput(), haloThroughput.throughput()) : signal(throughput.throughput());
         final VisitableSampledSpectrum background = background(slit);
 
         // -- calculate and assign s2n results
@@ -178,10 +174,10 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
     }
 
     /** Calculates signal and background. */
-    private void calculateSignal(final Slit slit) {
+    private void calculateSignal() {
 
         // total source flux in the aperture
-        final VisitableSampledSpectrum signal         = signal(throughput, haloThroughput);
+        final VisitableSampledSpectrum signal         = haloIsUsed ? signalWithHalo(throughput.onePixelThroughput(), haloThroughput.onePixelThroughput()) : signal(throughput.onePixelThroughput());
         final VisitableSampledSpectrum sqrtBackground = background(slit);
 
         // create the Sqrt(Background) sed for plotting
@@ -195,20 +191,29 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
     }
 
     /** Calculates total source flux (signal) in the aperture. */
-    private VisitableSampledSpectrum signal(final double throughput, final double haloThroughput) {
+    private VisitableSampledSpectrum signal(final double throughput) {
 
         final VisitableSampledSpectrum signal = (VisitableSampledSpectrum) sourceFlux.clone();
         final int lastPixel = lastCcdPixel(signal.getLength());
         for (int i = firstCcdPixel; i <= lastPixel; ++i) {
-            if (haloIsUsed) {
-                signal.setY(i, totalFlux(sourceFlux.getY(i), throughput) + totalFlux(haloFlux.getY(i), haloThroughput));
-            } else {
-                signal.setY(i, totalFlux(sourceFlux.getY(i), throughput));
-            }
+            signal.setY(i, totalFlux(sourceFlux.getY(i), throughput));
         }
 
         return signal;
     }
+
+    /** Calculates total source flux (signal) in the aperture. */
+    private VisitableSampledSpectrum signalWithHalo(final double throughput, final double haloThroughput) {
+
+        final VisitableSampledSpectrum signal = (VisitableSampledSpectrum) sourceFlux.clone();
+        final int lastPixel = lastCcdPixel(signal.getLength());
+        for (int i = firstCcdPixel; i <= lastPixel; ++i) {
+            signal.setY(i, totalFlux(sourceFlux.getY(i), throughput) + totalFlux(haloFlux.getY(i), haloThroughput));
+        }
+
+        return signal;
+    }
+
 
     /** Calculates the background in the aperture. */
     private VisitableSampledSpectrum background(final Slit slit) {
@@ -293,7 +298,7 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
         sourceFlux = sed;
     }
 
-    public void setHaloSpectrum(final VisitableSampledSpectrum sed, final double throughput, final double imgQuality) {
+    public void setHaloSpectrum(final VisitableSampledSpectrum sed, final SlitThroughput throughput, final double imgQuality) {
         haloIsUsed      = true;
         haloFlux        = sed;
         haloThroughput  = throughput;

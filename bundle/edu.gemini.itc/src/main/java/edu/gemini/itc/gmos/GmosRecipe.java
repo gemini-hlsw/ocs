@@ -121,45 +121,32 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         final double dark_current = instrument.getDarkCurrent();
         final double read_noise = instrument.getReadNoise();
 
-        // ObservationMode Imaging or spectroscopy
-        final double throughput;
-        final Slit slit;
-
-        final double slitLength;
-        final List<Double> sf_list;
-        if (!instrument.isIfuUsed()) {
-            slit = Slit$.MODULE$.apply(_sdParameters, _obsDetailParameters, instrument, instrument.getSlitWidth(), IQcalc.getImageQuality());
-            final SlitThroughput st = new SlitThroughput(_sdParameters, slit, IQcalc.getImageQuality());
-            slitLength = slit.lengthPixels();
-            throughput = st.throughput();
-            sf_list = new ArrayList<>(); // TODO: this is actually only used for IFU, clean this up
-        } else {
-            final VisitableMorphology morph;
-            if (!_sdParameters.isUniform()) {
-                morph = new GaussianMorphology(IQcalc.getImageQuality());
-            } else {
-                morph = new USBMorphology();
-            }
-            morph.accept(instrument.getIFU().getAperture());
-            // for now just a single item from the list
-            sf_list = instrument.getIFU().getFractionOfSourceInAperture();
-            throughput = sf_list.get(0);
-            slitLength = 5 / instrument.getSpatialBinning();
-            slit = Slit$.MODULE$.apply(instrument.getSlitWidth(), slitLength, instrument.getPixelSize());
-        }
-
         // TODO: why, oh why?
         final double im_qual = _sdParameters.isUniform() ? 10000 : IQcalc.getImageQuality();
 
-        if (instrument.isIfuUsed() && !_sdParameters.isUniform()) {
-            specS2N = new SpecS2NSlitVisitor[sf_list.size()];
-            for (int i = 0; i < sf_list.size(); i++) {
+        // ==== IFU case
+        if (instrument.isIfuUsed()) {
+
+            final VisitableMorphology morph = _sdParameters.isUniform() ? new USBMorphology() : new GaussianMorphology(IQcalc.getImageQuality());
+            morph.accept(instrument.getIFU().getAperture());
+
+            final List<Double> sf_list = instrument.getIFU().getFractionOfSourceInAperture();
+            final double slitLength = 5 / instrument.getSpatialBinning();
+            final Slit slit = Slit$.MODULE$.apply(instrument.getSlitWidth(), slitLength, instrument.getPixelSize());
+
+            // for uniform sources the result is the same regardless of the IFU offsets/position
+            // in this case we only calcualte and display the result of the first IFU element
+            final int ifusToShow = _sdParameters.isUniform() ? 1 : sf_list.size();
+            specS2N = new SpecS2NSlitVisitor[ifusToShow];
+
+            // process all IFU elements
+            for (int i = 0; i < ifusToShow; i++) {
                 final double spsf = sf_list.get(i);
                 final Slit ifuSlit = Slit$.MODULE$.apply(instrument.getSlitWidth(), slitLength, instrument.getPixelSize());
                 specS2N[i] = new SpecS2NSlitVisitor(
                         ifuSlit,
                         instrument.disperser.get(),
-                        spsf,
+                        new SlitThroughput(spsf, spsf),
                         instrument.getSpectralPixelWidth(),
                         instrument.getObservingStart(),
                         instrument.getObservingEnd(),
@@ -175,7 +162,15 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
                 src.sed.accept(specS2N[i]);
 
             }
+
+            return new SpectroscopyResult(p, instrument, IQcalc, specS2N, slit, sf_list.get(0), Option.empty());
+
+        // ==== NON-IFU case
         } else {
+
+            final Slit slit = Slit$.MODULE$.apply(_sdParameters, _obsDetailParameters, instrument, instrument.getSlitWidth(), IQcalc.getImageQuality());
+            final SlitThroughput throughput = new SlitThroughput(_sdParameters, slit, IQcalc.getImageQuality());
+
             specS2N = new SpecS2NSlitVisitor[1];
             specS2N[0] = new SpecS2NSlitVisitor(
                     slit,
@@ -196,9 +191,8 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
 
             src.sed.accept(specS2N[0]);
 
+            return new SpectroscopyResult(p, instrument, IQcalc, specS2N, slit, throughput.throughput(), Option.empty());
         }
-
-        return new SpectroscopyResult(p, instrument, IQcalc, specS2N, slit, throughput, Option.empty());
 
     }
 

@@ -61,7 +61,7 @@ public final class NiriPrinter extends PrinterBase {
 
         _printSoftwareAperture(result, 1 / instrument.getSlitWidth());
 
-        _println(String.format("derived image size(FWHM) for a point source = %.2f arcsec", result.specS2N()[0].getImageQuality()));
+        _println(String.format("derived image size(FWHM) for a point source = %.2f arcsec", result.iqCalc().getImageQuality())); //result.specS2N()[0].getImageQuality()));
 
         _println("");
 

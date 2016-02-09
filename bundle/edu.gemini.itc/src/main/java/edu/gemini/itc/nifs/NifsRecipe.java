@@ -146,7 +146,7 @@ public final class NifsRecipe implements SpectroscopyRecipe {
             final SpecS2NSlitVisitor specS2N = new SpecS2NSlitVisitor(
                     slit,
                     instrument.disperser.get(),
-                    throughput,
+                    new SlitThroughput(throughput, throughput),
                     instrument.getSpectralPixelWidth(),
                     instrument.getObservingStart(),
                     instrument.getObservingEnd(),
@@ -158,7 +158,7 @@ public final class NifsRecipe implements SpectroscopyRecipe {
             specS2N.setSourceSpectrum(calcSource.sed);
             specS2N.setBackgroundSpectrum(calcSource.sky);
             if (altair.isDefined()) {
-                specS2N.setHaloSpectrum(calcSource.halo.get(), haloThroughput, IQcalc.getImageQuality());
+                specS2N.setHaloSpectrum(calcSource.halo.get(), new SlitThroughput(haloThroughput, haloThroughput), IQcalc.getImageQuality());
             }
             calcSource.sed.accept(specS2N);
 

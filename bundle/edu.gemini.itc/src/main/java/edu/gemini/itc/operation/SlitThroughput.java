@@ -41,10 +41,15 @@ public final class SlitThroughput {
     private final double throughput;
     private final double onePixelThroughput;
 
+    public SlitThroughput(final double throughput, final double onePixelThroughput) {
+        this.throughput = throughput;
+        this.onePixelThroughput = onePixelThroughput;
+    }
+
 
     public SlitThroughput(final SourceDefinition src, final Slit slit, final double im_qual) {
         this.throughput             = calculateThroughput(src, slit, im_qual);
-        this.onePixelThroughput     = calculateThroughput(src, new OnePixelSlit(slit.pixelSize()), im_qual);
+        this.onePixelThroughput     = throughput; //calculateThroughput(src, new OnePixelSlit(slit.pixelSize()), im_qual);
     }
 
     public double throughput() {

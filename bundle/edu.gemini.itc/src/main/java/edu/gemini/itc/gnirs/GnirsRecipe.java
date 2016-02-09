@@ -88,7 +88,7 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
         // Might implement these modules at a later time.
 
         final Slit slit = Slit$.MODULE$.apply(_sdParameters, _obsDetailParameters, instrument, instrument.getSlitWidth(), IQcalc.getImageQuality());
-        final SlitThroughput st = new SlitThroughput(_sdParameters, slit, IQcalc.getImageQuality());
+        final SlitThroughput throughput = new SlitThroughput(_sdParameters, slit, IQcalc.getImageQuality());
 
         // TODO: why, oh why?
         final double im_qual = _sdParameters.isUniform() ? 10000 : IQcalc.getImageQuality();
@@ -96,7 +96,7 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
         final SpecS2NSlitVisitor specS2N = new SpecS2NSlitVisitor(
                 slit,
                 instrument.disperser(instrument.getOrder()),
-                st.throughput(),
+                throughput,
                 instrument.getSpectralPixelWidth() / instrument.getOrder(),
                 instrument.getObservingStart(),
                 instrument.getObservingEnd(),
@@ -163,11 +163,11 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
 
             final SpecS2N[] specS2Narr = new SpecS2N[ORDERS];
             for (int i = 0; i < ORDERS; i++) {
-                final SpecS2N s2n = new GnirsSpecS2N(im_qual, signalOrder[i], backGroundOrder[i], null, finalS2NOrder[i]);
+                final SpecS2N s2n = new GnirsSpecS2N(signalOrder[i], backGroundOrder[i], null, finalS2NOrder[i]);
                 specS2Narr[i] = s2n;
             }
 
-            return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, st.throughput(), Option.<AOSystem>empty());
+            return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), Option.<AOSystem>empty());
 
         } else {
 
@@ -178,7 +178,7 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
             sed.accept(specS2N);
 
             final SpecS2N[] specS2Narr = new SpecS2N[] {specS2N};
-            return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, st.throughput(), Option.<AOSystem>empty());
+            return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), Option.<AOSystem>empty());
         }
 
 
@@ -212,19 +212,16 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
     // SpecS2N implementation to hold results for GNIRS cross dispersion mode calculations.
     class GnirsSpecS2N implements SpecS2N {
 
-        private final double imgQuality;
         private final VisitableSampledSpectrum signal;
         private final VisitableSampledSpectrum background;
         private final VisitableSampledSpectrum exps2n;
         private final VisitableSampledSpectrum fins2n;
 
         public GnirsSpecS2N(
-                final double imgQuality,
                 final VisitableSampledSpectrum signal,
                 final VisitableSampledSpectrum background,
                 final VisitableSampledSpectrum exps2n,
                 final VisitableSampledSpectrum fins2n) {
-            this.imgQuality   = imgQuality;
             this.signal       = signal;
             this.background   = background;
             this.exps2n       = exps2n;
@@ -245,10 +242,6 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
 
         @Override public VisitableSampledSpectrum getFinalS2NSpectrum() {
             return fins2n;
-        }
-
-        @Override public double getImageQuality() {
-            return imgQuality;
         }
 
     }
