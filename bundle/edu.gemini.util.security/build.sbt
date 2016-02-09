@@ -48,3 +48,5 @@ initialCommands := """
   import edu.gemini.util.security.principal._
 """
 
+// required for shapeless on 2.10.5
+addCompilerPlugin("org.scalamacros" % "paradise" % "2.0.1" cross CrossVersion.full)

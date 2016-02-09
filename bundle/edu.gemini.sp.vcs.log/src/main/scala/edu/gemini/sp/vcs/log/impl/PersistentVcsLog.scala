@@ -13,6 +13,7 @@ import scalaz.std.tuple._
 import scalaz.syntax.bifunctor._
 import java.util.logging.Logger
 import scala.slick.jdbc.{StaticQuery => Q}
+import scalaz.std.set._
 
 final class PersistentVcsLog(dir: File) extends VcsLogEx with PersistentVcsSchema {
 

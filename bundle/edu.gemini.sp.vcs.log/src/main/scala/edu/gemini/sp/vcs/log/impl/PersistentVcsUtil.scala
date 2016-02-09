@@ -2,6 +2,7 @@ package edu.gemini.sp.vcs.log.impl
 
 import scalaz.syntax.std.tuple._
 import java.security.MessageDigest
+import scalaz.Foldable, scalaz.syntax.foldable._
 
 object PersistentVcsUtil {
 
@@ -28,12 +29,11 @@ object PersistentVcsUtil {
   /**
    * Calculate a good hash based on a set of integers. We use this to digest a set of IDs down to a single value.
    */
-  def setHash(s:Set[Int]):String = {
+  def setHash[F[_]: Foldable](s: F[Int]): String = {
     val md = MessageDigest.getInstance("MD5")
     s.toList.sorted.map(n => BigInt(n).toByteArray).foreach(md.update)
     BigInt(1, md.digest).toString(16)
   }
-
 
 }
 
