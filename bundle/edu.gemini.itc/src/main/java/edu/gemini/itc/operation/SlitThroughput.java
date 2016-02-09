@@ -49,7 +49,7 @@ public final class SlitThroughput {
 
     public SlitThroughput(final SourceDefinition src, final Slit slit, final double im_qual) {
         this.throughput             = calculateThroughput(src, slit, im_qual);
-        this.onePixelThroughput     = throughput; //calculateThroughput(src, new OnePixelSlit(slit.pixelSize()), im_qual);
+        this.onePixelThroughput     = calculateThroughput(src, new OnePixelSlit(slit.pixelSize()), im_qual); // throughput; REL-508
     }
 
     public double throughput() {
