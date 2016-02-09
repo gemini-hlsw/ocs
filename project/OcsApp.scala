@@ -52,7 +52,7 @@ trait OcsApp { this: OcsBundle =>
   )
 
   lazy val app_seqexec_web = project.in(file("app/seqexec-web")).dependsOn(
-    bundle_edu_gemini_seqexec_web_server_JVM
+    bundle_edu_gemini_seqexec_web_server
   )
 
   lazy val app_spdb = project.in(file("app/spdb")).dependsOn(
@@ -116,6 +116,9 @@ trait OcsApp { this: OcsBundle =>
     bundle_edu_gemini_qpt_shared,
     bundle_edu_gemini_qv_plugin,
     bundle_edu_gemini_seqexec_server,
+    bundle_edu_gemini_seqexec_web_shared,
+    bundle_edu_gemini_seqexec_web_server,
+    bundle_edu_gemini_seqexec_web_client,
     bundle_edu_gemini_services_client,
     bundle_edu_gemini_services_server,
     bundle_edu_gemini_shared_ca,

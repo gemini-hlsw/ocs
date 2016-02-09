@@ -43,7 +43,7 @@ object SeqexecApp extends JSApp {
             <.div(c.comment),
             <.form(^.className := "commentForm",
               <.input(^.`type` := "input", ^.placeholder := "Your name", ^.onChange ==> onChangeName, ^.value := c.author),
-              <.input(^.`type` := "input", ^.placeholder := "Say something", ^.onChange ==> onChangeComment, ^.value := c.comment),
+              <.input(^.`type` := "input", ^.placeholder := "Say something to the world!", ^.onChange ==> onChangeComment, ^.value := c.comment),
               <.input(^.`type` := "submit", ^.value := "Post"),
               ^.onSubmit ==> submit(p))
           )

@@ -267,15 +267,32 @@ trait OcsBundle {
       bundle_jsky_util
     )
 
-  lazy val bundle_edu_gemini_seqexec_web_server = 
-    crossProject.in(file("bundle/edu.gemini.seqexec.web.server"))
-      .enablePlugins(ScalaJSPlugin)
+  lazy val bundle_edu_gemini_seqexec_web_shared = 
+    project.in(file("bundle/edu.gemini.seqexec.web.shared"))
       .dependsOn(
     )
 
-  // Needed, so sbt finds the projects
-  lazy val bundle_edu_gemini_seqexec_web_server_JVM = bundle_edu_gemini_seqexec_web_server.jvm
-  lazy val bundle_edu_gemini_seqexec_web_server_JS = bundle_edu_gemini_seqexec_web_server.js
+  lazy val seqexec_web_shared_settings = Seq(
+    unmanagedSourceDirectories in Compile +=
+      baseDirectory.value / ".." / "edu.gemini.seqexec.web.shared" / "src" / "main" / "scala",
+    unmanagedSourceDirectories in Test +=
+      baseDirectory.value / ".." / "edu.gemini.seqexec.web.shared" / "src" / "test" / "scala"
+  )
+
+  lazy val bundle_edu_gemini_seqexec_web_client = 
+    project.in(file("bundle/edu.gemini.seqexec.web.client"))
+      .settings(seqexec_web_shared_settings: _*)
+      .enablePlugins(ScalaJSPlugin)
+      .dependsOn(
+        bundle_edu_gemini_seqexec_web_shared
+    )
+
+  lazy val bundle_edu_gemini_seqexec_web_server = 
+    project.in(file("bundle/edu.gemini.seqexec.web.server"))
+      .settings(seqexec_web_shared_settings: _*)
+      .dependsOn(
+        bundle_edu_gemini_seqexec_web_shared
+    )
 
   lazy val bundle_edu_gemini_services_client = 
     project.in(file("bundle/edu.gemini.services.client")).dependsOn(

@@ -2,7 +2,7 @@ import OcsKeys._
 
 // note: inter-project dependencies are declared at the top, in projects.sbt
 
-name := "edu.gemini.seqexec.web.server.js"
+name := "edu.gemini.seqexec.web.client"
 
 val jsName = SettingKey[String]("jsfilename")
 
@@ -10,26 +10,7 @@ jsName := "seqexec"
 
 version := ocsVersion.value.toOsgiVersion
 
-Revolver.settings
-
 osgiSettings
-
-//Revolver.reStart <<= (Revolver.reStart dependsOn (crossTarget in (Compile)).value)
-
-mainClass in Revolver.reStart := Some("edu.gemini.seqexec.web.server.WebServerLauncher")
-
-unmanagedResources in (Compile, packageBin) += (classDirectory in Compile).value / "*.js"
-
-resourceDirectories in (Compile, packageBin) += (classDirectory in Compile).value / "*.js"
-
-//logLevel := Level.Debug
-
-//crossTarget in (Compile, fastOptJS) := baseDirectory.value / "src/main/resources/sjs"
-
-crossTarget in (Compile, fullOptJS) := file("js")
-
-//crossTarget in packageExportedProductsJS := (crossTarget.value) / "main/public/javascripts"
-crossTarget in (Compile, packageJSDependencies) := file("js")
 
 artifactPath in (Compile, fastOptJS) := (resourceManaged in Compile).value /
   (jsName.value + "-opt.js")
