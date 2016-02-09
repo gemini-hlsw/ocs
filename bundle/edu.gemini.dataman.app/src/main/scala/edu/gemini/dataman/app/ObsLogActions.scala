@@ -4,6 +4,8 @@ import edu.gemini.dataman.app.ModelActions._
 import edu.gemini.dataman.core._
 import edu.gemini.pot.sp.SPObservationID
 import edu.gemini.pot.spdb.IDBDatabaseService
+import edu.gemini.spModel.config.map.ConfigValMapInstances
+import edu.gemini.spModel.config.{DatasetConfigService, ConfigBridge}
 import edu.gemini.spModel.dataset.{DatasetQaState, Dataset, DatasetQaRecord, DatasetLabel, SummitState, DatasetExecRecord, DatasetGsaState}
 import edu.gemini.spModel.dataset.Implicits._
 import edu.gemini.spModel.dataset.SummitState.Idle
@@ -26,7 +28,6 @@ import ObsLogActions._
   * @param odb observing database in which to find the observations
   */
 final class ObsLogActions(odb: IDBDatabaseService) {
-
   /** Returns an action that will record the user's desire to edit the QA state
     * of the given datasets.
     */
@@ -51,7 +52,13 @@ final class ObsLogActions(odb: IDBDatabaseService) {
     // (i.e., via seq exec events in the WDBA).
     val cons: DatasetLabel => Option[Dataset] = (lab) => {
       val dsetOpt = fMap.get(lab).map { f =>
-        new Dataset(lab, f.filename, System.currentTimeMillis)
+        // Strip the trailing ".fits" suffix, if any, to be comptabile with how
+        // the WDBA adds new dataset filenames..
+        val filename = f.filename match {
+          case FitsFile(n) => n
+          case n           => n
+        }
+        new Dataset(lab, filename, System.currentTimeMillis)
       }
 
       dsetOpt.foreach { ds =>
@@ -138,28 +145,23 @@ final class ObsLogActions(odb: IDBDatabaseService) {
   private def summitStateAction(oid: SPObservationID, transitions: List[Transition], cons: DatasetLabel => Option[Dataset]): DmanAction[DatasetUpdates] = {
     val transMap = transitions.map(t => t.label -> t).toMap
 
-    // Obtains the existing DatasetExecRecords for the observation, creating
-    // any that we are expecting but which don't exist if possible.  This is
-    // how new datasets discovered during polling get created.  They are made
-    // in an initial "Missing" state which is then updated by the state machine
+    // Gets all already exisitng DatasetExecRecords for the observation.
+    def existingRecords(r: ObsExecRecord): List[DatasetExecRecord] =
+      r.getAllDatasetExecRecords.asScala.toList
+
+    // Creates any DatasetExecRecords for which we received poll information
+    // from the archive but which don't exist in the database. They are made in
+    // an initial "Missing" state which is then updated by the state machine
     // transition.
-    def oldExecRecords(r: ObsExecRecord): List[DatasetExecRecord] = {
-      val existing = r.getAllDatasetExecRecords.asScala.toList
-      val missing  = (transMap.keySet/:existing) { (ks, er) => ks - er.label }.toList.flatMap { lab =>
-        // NOTE: here i suppose we could try to invent a sequence Config to go
-        // with the new missing dataset record like we used to, but i think it
-        // is not a good idea anyway.
+    def missingRecords(existing: List[DatasetExecRecord]): List[DatasetExecRecord] =
+      (transMap.keySet/:existing) { (ks, er) => ks - er.label }.toList.flatMap { lab =>
         cons(lab).map(DatasetExecRecord.apply)
       }
 
-      missing ++ existing
-    }
-
-    // Function that takes an ObsExecRecord and returns any updated
-    // DatasetExecRecords according to the provided state machine transition
-    // functions in the provided `transitions`..
-    val runTransitions: ObsExecRecord => List[DatasetExecRecord] = r =>
-      oldExecRecords(r).flatMap { oldRec =>
+    // Returns any updated DatasetExecRecords according to the provided state
+    // machine transition functions in the provided `transitions`.
+    def runTransitions(recs: List[DatasetExecRecord]): List[DatasetExecRecord] =
+      recs.flatMap { oldRec =>
         transMap.get(oldRec.label).flatMap { trans =>
           val oldSs = oldRec.summit
           val newSs = trans.fun(oldSs)
@@ -178,10 +180,15 @@ final class ObsLogActions(odb: IDBDatabaseService) {
             // no side-effects.
             (exNode, exLog) = exTup
             (qaNode, qaLog) = qaTup
-            exRecord  = exLog.getRecord
-            qaRecord  = qaLog.getRecord
-            exUpdates = runTransitions(exRecord)
-            qaUpdates = exUpdates.collect {
+            exRecord        = exLog.getRecord
+            qaRecord        = qaLog.getRecord
+
+            existDers       = existingRecords(exRecord)
+            existExUpdates  = runTransitions(existDers)
+            missExUpdates   = runTransitions(missingRecords(existDers))
+            allExUpdates    = missExUpdates ++ existExUpdates
+
+            qaUpdates = allExUpdates.collect {
               case DatasetExecRecord(ds, Idle(DatasetGsaState(qa, _, _)), _)
                 if qaRecord.qaState(ds.getLabel) =/= qa =>
                 // QA State is set to a distinct value and not expected to
@@ -190,13 +197,26 @@ final class ObsLogActions(odb: IDBDatabaseService) {
             }
 
             _ <- DmanAction {
-              // Apply the updates, which requires mutations.
-              exUpdates.foreach(up => exRecord.putDatasetExecRecord(up, null))
+              // Apply updates, mutating as we go.
+
+              // First, existing dataset exec record updates.
+              existExUpdates.foreach(up => exRecord.putDatasetExecRecord(up, null))
+
+              // Second, missing dataset exec records, which require a that we
+              // compute a configuration that corresponds to the dataset.
+              lazy val seq = ConfigBridge.extractSequence(o, null, ConfigValMapInstances.TO_DISPLAY_VALUE) // urp
+              missExUpdates.foreach { up =>
+                val config = DatasetConfigService.configForStep(seq, up.label.getIndex - 1)
+                exRecord.putDatasetExecRecord(up, config.getOrNull)
+              }
+
+              // Finally QA record updates.
               qaUpdates.foreach(qaLog.set)
-              if (exUpdates.nonEmpty) exNode.setDataObject(exLog)
+
+              if (allExUpdates.nonEmpty) exNode.setDataObject(exLog)
               if (qaUpdates.nonEmpty) qaNode.setDataObject(qaLog)
             }
-          } yield (qaUpdates, exUpdates)
+          } yield (qaUpdates, allExUpdates)
         }
       }
     }
@@ -255,6 +275,8 @@ final class ObsLogActions(odb: IDBDatabaseService) {
 
 object ObsLogActions {
   val Log = Logger.getLogger(ObsLogActions.getClass.getName)
+
+  val FitsFile = """(\V*?)(?:\.fits)?$""".r
 
   val EmptyUpdates = (List.empty[DatasetQaRecord], List.empty[DatasetExecRecord])
 
