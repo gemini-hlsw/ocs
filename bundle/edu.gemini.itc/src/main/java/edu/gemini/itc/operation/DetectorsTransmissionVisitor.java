@@ -108,7 +108,7 @@ public class DetectorsTransmissionVisitor implements SampledSpectrumVisitor {
     // TODO: If we add other instruments to ITC with multiple CCDs we will have to revisit this.
 
     // Full size of GMOS array:
-    private double fullArrayPix() {
+    public double fullArrayPix() {
         return (3*2048.0 + 2*37.0)/spectralBinning; // 6218 for spectral binning = 1;
     }
     // GMOS gap locations:
