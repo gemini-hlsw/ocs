@@ -1,5 +1,6 @@
 package edu.gemini.itc.flamingos2;
 
+import edu.gemini.itc.base.Disperser;
 import edu.gemini.itc.base.Instrument;
 import edu.gemini.itc.base.DatFile;
 import edu.gemini.itc.base.TransmissionElement;
@@ -11,22 +12,23 @@ import java.util.Scanner;
  * This represents the transmission of the Grism optics.
  * See REL-557
  */
-public class GrismOptics extends TransmissionElement {
+public class GrismOptics extends TransmissionElement implements Disperser {
 
     private static class CoverageEntry {
-        public final double _start, _end, _width;
-        public final double _resolution;
-        public final String _name;
-        public final String _grismDataFileName;
+        public final double start;
+        public final double end;
+        public final double width;
+        public final double resolution;
+        public final String name;
+        public final String grismDataFileName;
 
-        CoverageEntry(String name, double start, double end, double width,
-                      double res, String grismDataFileName) {
-            _name = name;
-            _start = start;
-            _end = end;
-            _width = width;
-            _resolution = res;
-            _grismDataFileName = grismDataFileName;
+        CoverageEntry(final String name, final double start, final double end, final double width, final double res, final String grismDataFileName) {
+            this.name       = name;
+            this.start      = start;
+            this.end        = end;
+            this.width      = width;
+            this.resolution = res;
+            this.grismDataFileName = grismDataFileName;
         }
     }
 
@@ -42,30 +44,26 @@ public class GrismOptics extends TransmissionElement {
     }
 
 
-    private final String _grismName;
-    private final String _coverageDataName;
-    private final double _slitSize;
+    private final String grismName;
+    private final double plateScale;
+    private final CoverageEntry coverage;
 
-    public GrismOptics(String directory, String grismName, double slitSize, String filterBand) {
+    public GrismOptics(final String directory, final String grismName, final String filterBand, final double plateScale) {
         super(directory + getGrismDataFileName(grismName, filterBand));
 
-        _grismName = grismName;
-        _coverageDataName = buildCoverageDataName(grismName, filterBand);
-        _slitSize = slitSize;
+        this.plateScale = plateScale;
+        this.grismName = grismName;
+        final String coverageDataName = buildCoverageDataName(grismName, filterBand);
+        coverage = _coverage.get(coverageDataName);
+        if (coverage == null) throw new RuntimeException("No coverage entry for " + coverageDataName);
     }
 
     public double getStart() {
-        CoverageEntry ce = _coverage.get(_coverageDataName);
-        if (ce == null)
-            return this.get_trans().getStart();
-        return ce._start;
+        return coverage.start;
     }
 
     public double getEnd() {
-        CoverageEntry ce = _coverage.get(_coverageDataName);
-        if (ce == null)
-            return this.get_trans().getEnd();
-        return ce._end;
+        return coverage.end;
     }
 
     public double getEffectiveWavelength() {
@@ -73,21 +71,19 @@ public class GrismOptics extends TransmissionElement {
     }
 
     public double getPixelWidth() {
-        CoverageEntry ce = _coverage.get(_coverageDataName);
-        if (ce == null)
-            return _slitSize;
-        return ce._width;
+        return coverage.width;
     }
 
-    public double getGrismResolution() {
-        CoverageEntry ce = _coverage.get(_coverageDataName);
-        if (ce == null)
-            return 0;
-        return ce._resolution;
+    public double resolutionHalfArcsecSlit() {
+        return 0.5 / plateScale * dispersion();
+    }
+
+    public double dispersion() {
+        return getPixelWidth();
     }
 
     public String toString() {
-        return "Grism Optics: " + _grismName;
+        return "Grism Optics: " + grismName;
     }
 
     // =====
@@ -110,14 +106,14 @@ public class GrismOptics extends TransmissionElement {
     }
 
     // REL-557: Get grism data file name from coverage table
-    private static String getGrismDataFileName(String grismName, String filter) {
-        CoverageEntry ce = _coverage.get(buildCoverageDataName(grismName, filter));
-        if (ce == null)
-            return null;
-        return ce._grismDataFileName;
+    private static String getGrismDataFileName(final String grismName, final String filter) {
+        final String coverageDataName = buildCoverageDataName(grismName, filter);
+        final CoverageEntry ce = _coverage.get(coverageDataName);
+        if (ce == null) throw new RuntimeException("No coverage entry for " + coverageDataName);
+        return ce.grismDataFileName;
     }
 
-    private static String buildCoverageDataName(String grismName, String filter) {
+    private static String buildCoverageDataName(final String grismName, final String filter) {
         return grismName + "-" + filter;
     }
 

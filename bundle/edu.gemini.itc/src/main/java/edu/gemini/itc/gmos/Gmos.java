@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * Gmos specification class
  */
-public abstract class Gmos extends Instrument implements BinningProvider {
+public abstract class Gmos extends Instrument implements BinningProvider, SpectroscopyInstrument {
 
     //Plate scales for original and Hamamatsu CCD's (temporary)
     public static final double ORIG_PLATE_SCALE = 0.0727;
@@ -124,12 +124,12 @@ public abstract class Gmos extends Instrument implements BinningProvider {
                     gp.centralWavelength().toNanometers(),
                     _detector.getDetectorPixels(),
                     gp.spectralBinning());
-            _sampling = _gratingOptics.getGratingDispersion_nmppix();
-            addGrating(_gratingOptics);
+            _sampling = _gratingOptics.dispersion();
+            addDisperser(_gratingOptics);
 
             // we only need the detector transmission visitor for the spectroscopy case (i.e. if there is a grating)
             if (detectorCcdIndex == 0) {
-                final double nmppx = _gratingOptics.getGratingDispersion_nmppix();
+                final double nmppx = _gratingOptics.dispersion();
                 _dtv = new DetectorsTransmissionVisitor(gp, nmppx, getDirectory() + "/" + getPrefix() + "ccdpix" + Instrument.getSuffix());
             }
         }
@@ -143,10 +143,7 @@ public abstract class Gmos extends Instrument implements BinningProvider {
 
     }
 
-    /**
-     * Gets the slit width for the currently selected fpu.
-     * @return
-     */
+    /** {@inheritDoc} */
     public double getSlitWidth() {
         if      (gp.fpMask().isIFU())               return 0.3;
         else if (gp.customSlitWidth().isDefined())  return gp.customSlitWidth().get().getWidth();
@@ -186,7 +183,7 @@ public abstract class Gmos extends Instrument implements BinningProvider {
      * @return Effective wavelength in nm
      */
     public int getEffectiveWavelength() {
-        if (grating.isEmpty()) return (int) _Filter.getEffectiveWavelength();
+        if (disperser.isEmpty()) return (int) _Filter.getEffectiveWavelength();
         else return (int) _gratingOptics.getEffectiveWavelength();
 
     }
@@ -195,14 +192,9 @@ public abstract class Gmos extends Instrument implements BinningProvider {
         return gp.grating();
     }
 
-    public double getGratingDispersion_nm() {
-        return _gratingOptics.getGratingDispersion_nm();
+    public double getGratingDispersion() {
+        return _gratingOptics.dispersion();
     }
-
-    public double getGratingDispersion_nmppix() {
-        return _gratingOptics.getGratingDispersion_nmppix();
-    }
-
 
     /**
      * Returns the subdirectory where this instrument's data files are.
@@ -274,7 +266,7 @@ public abstract class Gmos extends Instrument implements BinningProvider {
         //Test to see that all conditions for Spectroscopy are met
         if (odp.calculationMethod() instanceof Spectroscopy) {
 
-            if (grating.isEmpty())
+            if (disperser.isEmpty())
                 throw new RuntimeException("Spectroscopy calculation method is selected but a grating" +
                         " is not.\nPlease select a grating and a " +
                         "focal plane mask in the Instrument " +
@@ -306,7 +298,7 @@ public abstract class Gmos extends Instrument implements BinningProvider {
             if (filter.isEmpty())
                 throw new RuntimeException("Imaging calculation method is selected but a filter is not.");
 
-            if (grating.isDefined())
+            if (disperser.isDefined())
                 throw new RuntimeException("Imaging calculation method is selected but a grating" +
                         " is also selected.\nPlease deselect the " +
                         "grating or change the method to spectroscopy.");

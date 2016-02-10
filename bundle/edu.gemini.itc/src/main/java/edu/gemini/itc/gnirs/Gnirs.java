@@ -17,7 +17,7 @@ import java.util.List;
 /**
  * Gnirs specification class
  */
-public final class Gnirs extends Instrument {
+public final class Gnirs extends Instrument implements SpectroscopyInstrument {
 
     private static final double LONG_CAMERA_SCALE_FACTOR = 3.0;
 
@@ -119,9 +119,12 @@ public final class Gnirs extends Instrument {
         _detector = new Detector(getDirectory() + "/", getPrefix(), "aladdin", "1K x 1K ALADDIN III InSb CCD");
         _detector.setDetectorPixels(DETECTOR_PIXELS);
 
-        _gratingOptics = new GnirsGratingOptics(getDirectory() + "/" + getPrefix(), _grating,
+        _gratingOptics = new GnirsGratingOptics(
+                getDirectory() + "/" + getPrefix(), _grating,
                 _centralWavelength,
                 _detector.getDetectorPixels(),
+                1,
+                isLongCamera() ? LONG_CAMERA_SCALE_FACTOR : 1,
                 1);
 
         if (_grating.equals(Disperser.D_10) && !isLongCamera())
@@ -144,7 +147,18 @@ public final class Gnirs extends Instrument {
 
     }
 
-    public double getFPMask() {
+    public edu.gemini.itc.base.Disperser disperser(final int order) {
+        return new GnirsGratingOptics(
+                getDirectory() + "/" + getPrefix(), _grating,
+                _centralWavelength,
+                _detector.getDetectorPixels(),
+                order,
+                isLongCamera() ? LONG_CAMERA_SCALE_FACTOR : 1,
+                1);
+    }
+
+    /** {@inheritDoc} */
+    public double getSlitWidth() {
         return params.slitWidth().getValue();
     }
 
@@ -198,45 +212,8 @@ public final class Gnirs extends Instrument {
         return _grating;
     }
 
-    public double getGratingDispersion_nm() {
-        try {
-            if (!XDisp_IsUsed()) {
-                if (isLongCamera()) {
-                    return _gratingOptics.getGratingDispersion_nm() / LONG_CAMERA_SCALE_FACTOR / GnirsOrderSelector.getOrder(_centralWavelength);
-                } else {
-                    return _gratingOptics.getGratingDispersion_nm() / GnirsOrderSelector.getOrder(_centralWavelength);
-                }
-            } else {
-                if (isLongCamera()) {
-                    return _gratingOptics.getGratingDispersion_nm() / LONG_CAMERA_SCALE_FACTOR;
-                } else {
-                    return _gratingOptics.getGratingDispersion_nm();
-                }
-            }
-        } catch (Exception e) {
-            return _gratingOptics.getGratingDispersion_nm();
-        }
-    }
-
-    public double getGratingDispersion_nmppix() {
-        try {
-            if (!XDisp_IsUsed()) {
-                if (isLongCamera()) {
-                    return _gratingOptics.getGratingDispersion_nmppix() / LONG_CAMERA_SCALE_FACTOR / GnirsOrderSelector.getOrder(_centralWavelength);
-                } else {
-                    return _gratingOptics.getGratingDispersion_nmppix() / GnirsOrderSelector.getOrder(_centralWavelength);
-                }
-            } else {
-                if (isLongCamera()) {
-                    return _gratingOptics.getGratingDispersion_nmppix() / LONG_CAMERA_SCALE_FACTOR;
-                } else {
-                    return _gratingOptics.getGratingDispersion_nmppix();
-                }
-            }
-
-        } catch (Exception e) {
-            return _gratingOptics.getGratingDispersion_nmppix();
-        }
+    public double getGratingDispersion() {
+        return _gratingOptics.dispersion();
     }
 
     public double getReadNoise() {
@@ -244,11 +221,11 @@ public final class Gnirs extends Instrument {
     }
 
     public double getObservingStart() {
-        return _centralWavelength - (getGratingDispersion_nmppix() * _detector.getDetectorPixels() / 2);
+        return _centralWavelength - (getGratingDispersion() / getOrder() * _detector.getDetectorPixels() / 2);
     }
 
     public double getObservingEnd() {
-        return _centralWavelength + (getGratingDispersion_nmppix() * _detector.getDetectorPixels() / 2);
+        return _centralWavelength + (getGratingDispersion() / getOrder() * _detector.getDetectorPixels() / 2);
     }
 
     public boolean XDisp_IsUsed() {

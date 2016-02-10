@@ -107,8 +107,6 @@ public final class TRecsRecipe implements ImagingRecipe, SpectroscopyRecipe {
         //
         // inputs: source morphology specification
 
-        double pixel_size = instrument.getPixelSize();
-
         // Calculate image quality
         final ImageQualityCalculatable IQcalc = ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _telescope, instrument);
         IQcalc.calculate();
@@ -116,36 +114,20 @@ public final class TRecsRecipe implements ImagingRecipe, SpectroscopyRecipe {
         // In this version we are bypassing morphology modules 3a-5a.
         // i.e. the output morphology is same as the input morphology.
         // Might implement these modules at a later time.
-        final SlitThroughput st = new SlitThroughput(_obsDetailParameters.analysisMethod(), IQcalc.getImageQuality(), pixel_size, instrument.getFPMask());
-        double ap_diam = st.getSpatialPix();
-        double spec_source_frac = st.getSlitThroughput();
+        final Slit slit = Slit$.MODULE$.apply(_sdParameters, _obsDetailParameters, instrument, instrument.getSlitWidth(), IQcalc.getImageQuality());
+        final SlitThroughput throughput = new SlitThroughput(_sdParameters, slit, IQcalc.getImageQuality());
 
-        // For the usb case we want the resolution to be determined by the
-        // slit width and not the image quality for a point source.
-        final double im_qual;
-        if (_sdParameters.isUniform()) {
-            im_qual = 10000;
-            if (_obsDetailParameters.isAutoAperture()) {
-                ap_diam = new Double(1 / (instrument.getFPMask() * pixel_size) + 0.5).intValue();
-                spec_source_frac = 1;
-            } else {
-                spec_source_frac = instrument.getFPMask() * ap_diam * pixel_size; // ap_diam = Spec_NPix
-            }
-        } else {
-            im_qual = IQcalc.getImageQuality();
-        }
+        // TODO: why, oh why?
+        final double im_qual = _sdParameters.isUniform() ? 10000 : IQcalc.getImageQuality();
 
-        final SpecS2NLargeSlitVisitor specS2N = new SpecS2NLargeSlitVisitor(
-                instrument.getFPMask(),
-                pixel_size,
+        final SpecS2NSlitVisitor specS2N = new SpecS2NSlitVisitor(
+                slit,
+                instrument.disperser.get(),
+                throughput,
                 instrument.getSpectralPixelWidth(),
                 instrument.getObservingStart(),
                 instrument.getObservingEnd(),
-                instrument.getGratingDispersion_nm(),
-                instrument.getGratingDispersion_nmppix(),
-                spec_source_frac,
                 im_qual,
-                ap_diam,
                 instrument.getReadNoise(),
                 instrument.getDarkCurrent(),
                 _obsDetailParameters);
@@ -154,9 +136,9 @@ public final class TRecsRecipe implements ImagingRecipe, SpectroscopyRecipe {
         specS2N.setBackgroundSpectrum(sky);
         sed.accept(specS2N);
 
-        final SpecS2NLargeSlitVisitor[] specS2Narr = new SpecS2NLargeSlitVisitor[1];
+        final SpecS2NSlitVisitor[] specS2Narr = new SpecS2NSlitVisitor[1];
         specS2Narr[0] = specS2N;
-        return new SpectroscopyResult(p, instrument, null, IQcalc, specS2Narr, st, Option.empty()); // TODO SFCalc not needed!
+        return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), Option.empty());
     }
 
     public ImagingResult calculateImaging() {

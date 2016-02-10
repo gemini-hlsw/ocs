@@ -73,9 +73,6 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
         // calculates: redshifted SED
         // output: redshifteed SED
 
-        final double pixel_size = instrument.getPixelSize();
-        double ap_diam = 0;
-
         // Calculate image quality
         final ImageQualityCalculatable IQcalc = ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _telescope, instrument);
         IQcalc.calculate();
@@ -86,56 +83,29 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
         final VisitableSampledSpectrum sed = calcSource.sed;
         final VisitableSampledSpectrum sky = calcSource.sky;
 
-        // Calculate the Fraction of source in the aperture
-        final SourceFraction SFcalc = SourceFractionFactory.calculate(_sdParameters, _obsDetailParameters, instrument, IQcalc.getImageQuality());
-
         // In this version we are bypassing morphology modules 3a-5a.
         // i.e. the output morphology is same as the input morphology.
         // Might implement these modules at a later time.
 
-        final SlitThroughput st = new SlitThroughput(_obsDetailParameters.analysisMethod(), IQcalc.getImageQuality(), pixel_size, instrument.getFPMask());
-        ap_diam = st.getSpatialPix(); // ap_diam really Spec_Npix on
+        final Slit slit = Slit$.MODULE$.apply(_sdParameters, _obsDetailParameters, instrument, instrument.getSlitWidth(), IQcalc.getImageQuality());
+        final SlitThroughput throughput = new SlitThroughput(_sdParameters, slit, IQcalc.getImageQuality());
 
-        double spec_source_frac = st.getSlitThroughput();
+        // TODO: why, oh why?
+        final double im_qual = _sdParameters.isUniform() ? 10000 : IQcalc.getImageQuality();
 
-        // For the usb case we want the resolution to be determined by the
-        // slit width and not the image quality for a point source.
-        final double im_qual;
-        if (_sdParameters.isUniform()) {
-            im_qual = 10000;
-            if (_obsDetailParameters.isAutoAperture()) {
-                ap_diam = new Double(1 / (instrument.getFPMask() * pixel_size) + 0.5).intValue();
-                spec_source_frac = 1;
-            } else {
-                spec_source_frac = instrument.getFPMask() * ap_diam * pixel_size;
-            }
-        } else {
-            im_qual = IQcalc.getImageQuality();
-        }
-
-        final SpecS2NLargeSlitVisitor specS2N = new SpecS2NLargeSlitVisitor(
-                instrument.getFPMask(), pixel_size,
+        final SpecS2NSlitVisitor specS2N = new SpecS2NSlitVisitor(
+                slit,
+                instrument.disperser(instrument.getOrder()),
+                throughput,
                 instrument.getSpectralPixelWidth() / instrument.getOrder(),
                 instrument.getObservingStart(),
                 instrument.getObservingEnd(),
-                instrument.getGratingDispersion_nm(),
-                instrument.getGratingDispersion_nmppix(),
-                spec_source_frac,
-                im_qual, ap_diam,
+                im_qual,
                 instrument.getReadNoise(),
                 instrument.getDarkCurrent(),
                 _obsDetailParameters);
 
         if (instrument.XDisp_IsUsed()) {
-            final VisitableSampledSpectrum[] sedOrder = new VisitableSampledSpectrum[ORDERS];
-            for (int i = 0; i < ORDERS; i++) {
-                sedOrder[i] = (VisitableSampledSpectrum) sed.clone();
-            }
-
-            final VisitableSampledSpectrum[] skyOrder = new VisitableSampledSpectrum[ORDERS];
-            for (int i = 0; i < ORDERS; i++) {
-                skyOrder[i] = (VisitableSampledSpectrum) sky.clone();
-            }
 
             final double trimCenter;
             if (instrument.getGrating().equals(GNIRSParams.Disperser.D_111)) {
@@ -144,26 +114,26 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
                 trimCenter = 2200.0;
             }
 
+            final VisitableSampledSpectrum[] sedOrder = new VisitableSampledSpectrum[ORDERS];
+            final VisitableSampledSpectrum[] skyOrder = new VisitableSampledSpectrum[ORDERS];
             for (int i = 0; i < ORDERS; i++) {
                 final int order = i + 3;
-                final double d         = instrument.getGratingDispersion_nmppix() / order * Gnirs.DETECTOR_PIXELS / 2;
+                final double d         = instrument.getGratingDispersion() / order * Gnirs.DETECTOR_PIXELS / 2;
                 final double trimStart = trimCenter * 3 / order - d;
                 final double trimEnd   = trimCenter * 3 / order + d;
 
+                sedOrder[i] = (VisitableSampledSpectrum) sed.clone();
                 sedOrder[i].accept(instrument.getGratingOrderNTransmission(order));
                 sedOrder[i].trim(trimStart, trimEnd);
 
+                skyOrder[i] = (VisitableSampledSpectrum) sky.clone();
                 skyOrder[i].accept(instrument.getGratingOrderNTransmission(order));
                 skyOrder[i].trim(trimStart, trimEnd);
-            }
 
-            for (int i = 0; i < ORDERS; i++) {
-                final int order = i + 3;
                 specS2N.setSourceSpectrum(sedOrder[i]);
                 specS2N.setBackgroundSpectrum(skyOrder[i]);
 
-                specS2N.setGratingDispersion_nmppix(instrument.getGratingDispersion_nmppix() / order);
-                specS2N.setGratingDispersion_nm(instrument.getGratingDispersion_nm() / order);
+                specS2N.setDisperser(instrument.disperser(order));
                 specS2N.setSpectralPixelWidth(instrument.getSpectralPixelWidth() / order);
 
                 specS2N.setStartWavelength(sedOrder[i].getStart());
@@ -180,8 +150,7 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
                 specS2N.setSourceSpectrum(sedOrder[i]);
                 specS2N.setBackgroundSpectrum(skyOrder[i]);
 
-                specS2N.setGratingDispersion_nmppix(instrument.getGratingDispersion_nmppix() / order);
-                specS2N.setGratingDispersion_nm(instrument.getGratingDispersion_nm() / order);
+                specS2N.setDisperser(instrument.disperser(order));
                 specS2N.setSpectralPixelWidth(instrument.getSpectralPixelWidth() / order);
 
                 specS2N.setStartWavelength(sedOrder[i].getStart());
@@ -194,11 +163,11 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
 
             final SpecS2N[] specS2Narr = new SpecS2N[ORDERS];
             for (int i = 0; i < ORDERS; i++) {
-                final SpecS2N s2n = new GnirsSpecS2N(im_qual, ap_diam, signalOrder[i], backGroundOrder[i], null, finalS2NOrder[i]);
+                final SpecS2N s2n = new GnirsSpecS2N(signalOrder[i], backGroundOrder[i], null, finalS2NOrder[i]);
                 specS2Narr[i] = s2n;
             }
 
-            return new SpectroscopyResult(p, instrument, SFcalc, IQcalc, specS2Narr, st, Option.<AOSystem>empty());
+            return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), Option.<AOSystem>empty());
 
         } else {
 
@@ -206,13 +175,10 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
 
             specS2N.setSourceSpectrum(sed);
             specS2N.setBackgroundSpectrum(sky);
-            specS2N.setHaloImageQuality(0.0);
-            specS2N.setSpecHaloSourceFraction(0.0);
-
             sed.accept(specS2N);
 
             final SpecS2N[] specS2Narr = new SpecS2N[] {specS2N};
-            return new SpectroscopyResult(p, instrument, SFcalc, IQcalc, specS2Narr, st, Option.<AOSystem>empty());
+            return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), Option.<AOSystem>empty());
         }
 
 
@@ -221,7 +187,7 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
     // == GNIRS CHARTS
 
     private static SpcChartData createGnirsSignalChart(final SpectroscopyResult result) {
-        final String title = "Signal and SQRT(Background)\nSummed in an aperture of " + result.specS2N()[0].getSpecNpix() + " pix diameter";
+        final String title = "Signal and SQRT(Background) in one pixel";
         final String xAxis = "Wavelength (nm)";
         final String yAxis = "e- per exposure per spectral pixel";
         final List<SpcSeriesData> data = new ArrayList<>();
@@ -246,22 +212,16 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
     // SpecS2N implementation to hold results for GNIRS cross dispersion mode calculations.
     class GnirsSpecS2N implements SpecS2N {
 
-        private final double imgQuality;
-        private final double nPix;
         private final VisitableSampledSpectrum signal;
         private final VisitableSampledSpectrum background;
         private final VisitableSampledSpectrum exps2n;
         private final VisitableSampledSpectrum fins2n;
 
         public GnirsSpecS2N(
-                final double imgQuality,
-                final double nPix,
                 final VisitableSampledSpectrum signal,
                 final VisitableSampledSpectrum background,
                 final VisitableSampledSpectrum exps2n,
                 final VisitableSampledSpectrum fins2n) {
-            this.imgQuality   = imgQuality;
-            this.nPix         = nPix;
             this.signal       = signal;
             this.background   = background;
             this.exps2n       = exps2n;
@@ -284,13 +244,6 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
             return fins2n;
         }
 
-        @Override public double getImageQuality() {
-            return imgQuality;
-        }
-
-        @Override public double getSpecNpix() {
-            return nPix;
-        }
     }
 
 }

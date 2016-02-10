@@ -28,14 +28,23 @@ import scala.Option;
  * the first is a wavelength in nanometers, the second is the energy in
  * arbitrary units.  Since a SED will be normalized before it is used,
  * the scale is arbitrary.
- * <p/>
- * Programmer's note: There is no need for a factory.  A factory is for
- * creating something when the client does not know which concrete type
- * to create.  Since we don't have different types of SEDs at this point,
- * we could directly create a SED.
- * Maybe this is for future support of data files in different units.
  */
 public final class SEDFactory {
+
+    /**
+     * The resulting source intensity, sky intensity and, if applicable, the halo produced by the AO system.
+     * The source is redshifted; all values are in photons/s/nm.
+     */
+    public static final class SourceResult {
+        public final VisitableSampledSpectrum sed;
+        public final VisitableSampledSpectrum sky;
+        public final Option<VisitableSampledSpectrum> halo;
+        public SourceResult(final VisitableSampledSpectrum sed, final VisitableSampledSpectrum sky, final Option<VisitableSampledSpectrum> halo) {
+            this.sed                = sed;
+            this.sky                = sky;
+            this.halo               = halo;
+        }
+    }
 
     /**
      * Location of SED data files
@@ -98,7 +107,7 @@ public final class SEDFactory {
         }
     }
 
-    public static VisitableSampledSpectrum getSED(final SourceDefinition sdp, final Instrument instrument) {
+    private static VisitableSampledSpectrum getSED(final SourceDefinition sdp, final Instrument instrument) {
 
         final VisitableSampledSpectrum temp;
         if (sdp.distribution() instanceof BlackBody) {
@@ -338,17 +347,6 @@ public final class SEDFactory {
                         + ITCConstants.DATA_SUFFIX;
             default:
                 throw new Error("invalid band");
-        }
-    }
-
-    public static final class SourceResult {
-        public final VisitableSampledSpectrum sed;
-        public final VisitableSampledSpectrum sky;
-        public final Option<VisitableSampledSpectrum> halo;
-        public SourceResult(final VisitableSampledSpectrum sed, final VisitableSampledSpectrum sky, final Option<VisitableSampledSpectrum> halo) {
-            this.sed                = sed;
-            this.sky                = sky;
-            this.halo               = halo;
         }
     }
 

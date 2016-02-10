@@ -26,13 +26,13 @@ object DatFile {
   case class Filter(wavelength: Double, data: Data)
 
   case class Instrument(name: String,
-                        start: Int,                  // The range and sampling allowed by this instrument.
-                        end: Int,
-                        sampling: Double,
+                        start: Int,                 // supported wavelength range start [nm]
+                        end: Int,                   // supported wavelength range end [nm]
+                        sampling: Double,           // sampling rate in dat files [nm]
                         backgroundFile: String,
-                        plateScale: Double,
-                        readNoise: Double,          // electrons/pixel
-                        darkCurrent: Double)        // electrons/s/pixel
+                        plateScale: Double,         // [arcsec/pixel]
+                        readNoise: Double,          // [electrons/pixel]
+                        darkCurrent: Double)        // [electrons/s/pixel]
 
   case class Grating(name: String, resolvingPower: Int, blaze: Int, dispersion: Double, resolution: Double)
 

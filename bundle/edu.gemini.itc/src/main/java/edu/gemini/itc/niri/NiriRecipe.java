@@ -100,56 +100,27 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
         //
         // inputs: source morphology specification
 
-        // if altair is used we need to calculate both a core and halo
-        // source_fraction
-        // halo first
-        final SourceFraction SFcalc;
-        if (altair.isDefined()) {
-            final double aoCorrImgQual = altair.get().getAOCorrectedFWHM();
-            if (_obsDetailParameters.isAutoAperture()) {
-                SFcalc = SourceFractionFactory.calculate(_sdParameters.isUniform(), _obsDetailParameters.isAutoAperture(), 1.18 * aoCorrImgQual, instrument.getPixelSize(), aoCorrImgQual);
-            } else {
-                SFcalc = SourceFractionFactory.calculate(_sdParameters, _obsDetailParameters, instrument, aoCorrImgQual);
-            }
-        } else {
-            // this will be the core for an altair source; unchanged for non altair.
-            SFcalc = SourceFractionFactory.calculate(_sdParameters, _obsDetailParameters, instrument, IQcalc.getImageQuality());
-        }
-
         final double im_qual = altair.isDefined() ? altair.get().getAOCorrectedFWHM() : IQcalc.getImageQuality();
 
         // In this version we are bypassing morphology modules 3a-5a.
         // i.e. the output morphology is same as the input morphology.
         // Might implement these modules at a later time.
 
-        final double pixel_size = instrument.getPixelSize();
+        final Slit slit = Slit$.MODULE$.apply(_sdParameters, _obsDetailParameters, instrument, instrument.getSlitWidth(), IQcalc.getImageQuality());
+        final SlitThroughput throughput = new SlitThroughput(_sdParameters, slit, im_qual);
 
-        final SlitThroughput st = new SlitThroughput(_obsDetailParameters.analysisMethod(), im_qual, pixel_size, instrument.getFPMask());
-        double ap_diam = st.getSpatialPix();
-        double spec_source_frac = st.getSlitThroughput();
-
-        if (_sdParameters.isUniform()) {
-
-            if (_obsDetailParameters.isAutoAperture()) {
-                ap_diam = new Double(1 / (instrument.getFPMask() * pixel_size) + 0.5).intValue();
-                spec_source_frac = 1;
-            } else {
-                spec_source_frac = instrument.getFPMask() * ap_diam * pixel_size;
-            }
-        }
-
-        final SpecS2NVisitor specS2N = new SpecS2NVisitor(
-                pixel_size,
-                instrument.getFPMask(),
+        final SpecS2NSlitVisitor specS2N = new SpecS2NSlitVisitor(
+                slit,
+                instrument.disperser.get(),
+                throughput,
                 instrument.getSpectralPixelWidth(),
                 instrument.getObservingStart(),
                 instrument.getObservingEnd(),
-                instrument.getGrismResolution(),
-                spec_source_frac, im_qual,
-                ap_diam,
-                _obsDetailParameters.calculationMethod(),
+                im_qual,
+                instrument.getReadNoise(),
                 instrument.getDarkCurrent(),
-                niriParameters.readMode().getReadNoise());
+                _obsDetailParameters);
+
         specS2N.setSourceSpectrum(calcSource.sed);
         specS2N.setBackgroundSpectrum(calcSource.sky);
 
@@ -157,7 +128,7 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
 
         final SpecS2N[] specS2Narr = new SpecS2N[1];
         specS2Narr[0] = specS2N;
-        return new SpectroscopyResult(p, instrument, SFcalc, IQcalc, specS2Narr, st, altair);
+        return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), altair);
     }
 
     public ImagingResult calculateImaging() {

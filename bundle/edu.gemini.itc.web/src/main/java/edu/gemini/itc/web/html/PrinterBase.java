@@ -147,7 +147,7 @@ public abstract class PrinterBase {
         }
 
         if (!result.parameters().source().isUniform()) {
-            _println(String.format("fraction of source flux in aperture = %.2f", result.st().getSlitThroughput()));
+            _println(String.format("fraction of source flux in aperture = %.2f", result.slitThrougput()));
         }
     }
 

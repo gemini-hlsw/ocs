@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * Niri specification class
  */
-public class Niri extends Instrument {
+public class Niri extends Instrument implements SpectroscopyInstrument {
     /**
      * Related files will be in this subdir of lib
      */
@@ -97,7 +97,7 @@ public class Niri extends Instrument {
                     getStringSlitWidth());
 
             resetBackGround(INSTR_DIR, "spec_");  //Niri has spectroscopic scattering from grisms
-            addGrism(_grismOptics);
+            addDisperser(_grismOptics);
         }
 
         if (_mode instanceof Imaging) {
@@ -137,10 +137,6 @@ public class Niri extends Instrument {
             case NONE:   return (int) _Filter.getEffectiveWavelength();
             default:     return (int) _grismOptics.getEffectiveWavelength();
         }
-    }
-
-    public double getGrismResolution() {
-        return _grismOptics.getGrismResolution();
     }
 
     public double getReadNoise() {
@@ -187,7 +183,8 @@ public class Niri extends Instrument {
         return _grismOptics.getPixelWidth();
     }
 
-    public double getFPMask() {
+    /** {@inheritDoc} */
+    public double getSlitWidth() {
         // TODO: use size values provided by masks, this will make an update of baseline necessary
         switch (params.mask()) {
             case MASK_1:        // f6 2pix center

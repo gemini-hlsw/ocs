@@ -5,7 +5,7 @@ import scala.collection.immutable.Map;
 /**
  * Base class for all grating optics elements.
  */
-public abstract class GratingOptics extends TransmissionElement {
+public abstract class GratingOptics extends TransmissionElement implements Disperser {
 
     protected final String gratingName;
     protected final double centralWavelength;
@@ -47,7 +47,7 @@ public abstract class GratingOptics extends TransmissionElement {
 
     }
 
-    public double getGratingResolution() {
+    public double getGratingResolvingPower() {
         return data.apply(gratingName).resolvingPower();
     }
 
@@ -55,11 +55,11 @@ public abstract class GratingOptics extends TransmissionElement {
         return data.apply(gratingName).blaze();
     }
 
-    public double getGratingDispersion_nm() {
+    public double resolutionHalfArcsecSlit() {
         return data.apply(gratingName).resolution();
     }
 
-    public double getGratingDispersion_nmppix() {
+    public double dispersion() {
         return data.apply(gratingName).dispersion() * _spectralBinning;
     }
 

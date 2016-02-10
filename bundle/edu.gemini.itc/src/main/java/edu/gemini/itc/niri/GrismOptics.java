@@ -1,15 +1,17 @@
 package edu.gemini.itc.niri;
 
 import edu.gemini.itc.base.DatFile;
+import edu.gemini.itc.base.Disperser;
 import edu.gemini.itc.base.Instrument;
 import edu.gemini.itc.base.TransmissionElement;
+import edu.gemini.itc.operation.Slit;
 
 import java.util.*;
 
 /**
  * This represents the transmission of the Grism optics.
  */
-public final class GrismOptics extends TransmissionElement {
+public final class GrismOptics extends TransmissionElement implements Disperser {
 
     private static final String JGRISM = "J-grism";
     private static final String HGRISM = "H-grism";
@@ -116,10 +118,26 @@ public final class GrismOptics extends TransmissionElement {
         }
     }
 
-    public double getGrismResolution() {
-        return resolution.get(getGrismNumber());
+    // For NIRI we can not use the extrapolation from the half arcsec slit as we do for other instruments.
+    // Therefore this method is undefined and must not be used for NIRI!
+    public double resolutionHalfArcsecSlit() {
+        throw new Error("not implemented for NIRI");
     }
 
+    // Calculates the resolution for the current grism and wavelength.
+    public double resolution(final Slit slit) {
+        return getEffectiveWavelength() / resolution.get(getGrismNumber());
+    }
+
+    // Calculates the resolution for the current grism and wavelength. The image quality is not taken into account;
+    // for NIRI the resolution in the files assumes that the target fills the slit (IQ>slit width).
+    public double resolution(final Slit slit, final double imgQuality) {
+        return resolution(slit);
+    }
+
+    public double dispersion() {
+        return coverage.get(getGrismNumber()).pixelWidth;
+    }
 
     public String toString() {
         return "Grism Optics: " + grismName;

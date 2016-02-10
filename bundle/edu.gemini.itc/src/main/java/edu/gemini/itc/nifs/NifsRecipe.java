@@ -2,10 +2,7 @@ package edu.gemini.itc.nifs;
 
 import edu.gemini.itc.altair.Altair;
 import edu.gemini.itc.base.*;
-import edu.gemini.itc.operation.ImageQualityCalculatable;
-import edu.gemini.itc.operation.ImageQualityCalculationFactory;
-import edu.gemini.itc.operation.SpecS2N;
-import edu.gemini.itc.operation.SpecS2NLargeSlitVisitor;
+import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.core.GaussianSource;
 import edu.gemini.spModel.core.PointSource$;
@@ -90,8 +87,6 @@ public final class NifsRecipe implements SpectroscopyRecipe {
         //
         // inputs: source morphology specification
 
-        final double pixel_size = instrument.getPixelSize();
-
         //IFU morphology section
         final double im_qual = altair.isDefined() ? altair.get().getAOCorrectedFWHM() : IQcalc.getImageQuality();
         final VisitableMorphology morph, haloMorphology;
@@ -123,8 +118,8 @@ public final class NifsRecipe implements SpectroscopyRecipe {
         // In this version we are bypassing morphology modules 3a-5a.
         // i.e. the output morphology is same as the input morphology.
         // Might implement these modules at a later time.
-        double spec_source_frac = 0;
-        double halo_spec_source_frac = 0;
+        double throughput = 0;
+        double haloThroughput = 0;
 
         final Iterator<Double> src_frac_it = sf_list.iterator();
         final Iterator<Double> halo_src_frac_it = halo_sf_list.iterator();
@@ -133,55 +128,44 @@ public final class NifsRecipe implements SpectroscopyRecipe {
         final SpecS2N[] specS2Narr = new SpecS2N[_obsDetailParameters.analysisMethod() instanceof IfuSummed ? 1 : sf_list.size()];
 
         while (src_frac_it.hasNext()) {
-            double ap_diam = 1;
+            double slitLength = 1;
 
             if (_obsDetailParameters.analysisMethod()  instanceof IfuSummed) {
                 while (src_frac_it.hasNext()) {
-                    spec_source_frac = spec_source_frac + src_frac_it.next();
-                    halo_spec_source_frac = halo_spec_source_frac + halo_src_frac_it.next();
-                    ap_diam = (ap_offset_list.size() / 2);
+                    throughput = throughput + src_frac_it.next();
+                    haloThroughput = haloThroughput + halo_src_frac_it.next();
+                    slitLength = (ap_offset_list.size() / 2);
                 }
             } else {
-                spec_source_frac = src_frac_it.next();
-                halo_spec_source_frac = halo_src_frac_it.next();
-                ap_diam = 1;
+                throughput = src_frac_it.next();
+                haloThroughput = halo_src_frac_it.next();
+                slitLength = 1;
             }
 
-
-            // fp mask is fixed as 0.15
-            final double fpMask = 0.15;
-
-            final SpecS2NLargeSlitVisitor specS2N = new SpecS2NLargeSlitVisitor(
-                    fpMask,
-                    pixel_size,
+            final Slit slit = Slit$.MODULE$.apply(instrument.getSlitWidth(), slitLength, instrument.getPixelSize());
+            final SpecS2NSlitVisitor specS2N = new SpecS2NSlitVisitor(
+                    slit,
+                    instrument.disperser.get(),
+                    new SlitThroughput(throughput, throughput),
                     instrument.getSpectralPixelWidth(),
                     instrument.getObservingStart(),
                     instrument.getObservingEnd(),
-                    instrument.getGratingDispersion_nm(),
-                    instrument.getGratingDispersion_nmppix(),
-                    spec_source_frac,
                     im_qual,
-                    ap_diam,
                     instrument.getReadNoise(),
                     instrument.getDarkCurrent(),
                     _obsDetailParameters);
 
             specS2N.setSourceSpectrum(calcSource.sed);
             specS2N.setBackgroundSpectrum(calcSource.sky);
-            specS2N.setHaloSpectrum(altair.isDefined() ? calcSource.halo.get() : (VisitableSampledSpectrum) calcSource.sed.clone());
-            specS2N.setHaloImageQuality(IQcalc.getImageQuality());
-            if (_nifsParameters.altair().isDefined())
-                specS2N.setSpecHaloSourceFraction(halo_spec_source_frac);
-            else
-                specS2N.setSpecHaloSourceFraction(0.0);
-
+            if (altair.isDefined()) {
+                specS2N.setHaloSpectrum(calcSource.halo.get(), new SlitThroughput(haloThroughput, haloThroughput), IQcalc.getImageQuality());
+            }
             calcSource.sed.accept(specS2N);
 
             specS2Narr[i++] = specS2N;
         }
 
-        // TODO: no SFCalc and ST for Nifs, introduce specific result type? or optional values? work with null for now
-        return new SpectroscopyResult(p, instrument, null, IQcalc, specS2Narr, null, altair);
+        return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, null, 0, altair);
     }
 
     // NIFS CHARTS

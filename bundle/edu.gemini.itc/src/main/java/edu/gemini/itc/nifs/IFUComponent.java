@@ -33,11 +33,10 @@ public class IFUComponent extends TransmissionElement {
      *
      * @param IFURadialMin First IFU element when the radial set is selected
      * @param IFURadialMax Last IFU element when the radial set is selected
-     * @param pixel_size   pixel size in arcsec/pixel
      * @throws java.lang.Exception Thown if IFUComponent cannot be created
      */
 
-    public IFUComponent(double IFURadialMin, double IFURadialMax, double pixel_size) {
+    public IFUComponent(double IFURadialMin, double IFURadialMax) {
 
         super(ITCConstants.LIB + "/" + Nifs.INSTR_DIR + "/" + Nifs.INSTR_PREFIX + "ifu_trans" + Instrument.DATA_SUFFIX);
         int Napps;
@@ -66,10 +65,9 @@ public class IFUComponent extends TransmissionElement {
      * @param numY       Number of IFU elements in the Y direction
      * @param centerX    X center for the IFU elements
      * @param centerY    Y Center for the IFU elements
-     * @param pixel_size Pixel size in arcsec/pixel
      * @throws java.lang.Exception Thrown if IFU cannot be created
      */
-    public IFUComponent(int numX, int numY, double centerX, double centerY, double pixel_size) {
+    public IFUComponent(int numX, int numY, double centerX, double centerY) {
 
         super(ITCConstants.LIB + "/" + Nifs.INSTR_DIR + "/" + Nifs.INSTR_PREFIX + "ifu_trans" + Instrument.DATA_SUFFIX);
 
@@ -104,10 +102,9 @@ public class IFUComponent extends TransmissionElement {
      * Constructor for a single IFU element
      *
      * @param IFUOffsetX the X position of the IFU element
-     * @param pixel_size Pixel size in arcsec/pixel
      * @throws java.lang.Exception Thrown if IFU cannot be created
      */
-    public IFUComponent(double IFUOffsetX, double pixel_size) {
+    public IFUComponent(double IFUOffsetX) {
         super(ITCConstants.LIB + "/" + Nifs.INSTR_DIR + "/" + Nifs.INSTR_PREFIX + "ifu_trans" + Instrument.DATA_SUFFIX);
         IFUApertures = new ApertureComposite();
         IFUOffsets = new ArrayList<>();

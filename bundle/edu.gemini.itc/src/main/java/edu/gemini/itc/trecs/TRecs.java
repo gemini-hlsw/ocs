@@ -16,7 +16,7 @@ import java.util.Scanner;
 /**
  * TRecs specification class
  */
-public final class TRecs extends Instrument {
+public final class TRecs extends Instrument implements SpectroscopyInstrument {
     private static final String INSTR_DIR = "trecs";
     private static final String INSTR_PREFIX = "trecs_";
     private static final String FILENAME = "trecs" + getSuffix();
@@ -112,14 +112,14 @@ public final class TRecs extends Instrument {
             final TrecsGratingOptics gratingOptics = new TrecsGratingOptics(getDirectory() + "/" + TRecs.getPrefix(), _grating.name(),
                     _centralWavelength,
                     detector.getDetectorPixels());
-            _sampling = gratingOptics.getGratingDispersion_nmppix();
+            _sampling = gratingOptics.dispersion();
 
             if (getGrating().equals(Disperser.LOW_RES_20) && !(instrumentWindow.equals(WindowWheel.KRS_5))) {
                 throw new RuntimeException("The " + getGrating().displayValue() + " grating must be " +
                         "used with the " + WindowWheel.KRS_5.displayValue() + " window. \n" +
                         "Please change the grating or the window cover.");
             }
-            addGrating(gratingOptics);
+            addDisperser(gratingOptics);
             _gratingOptics = Option.apply(gratingOptics);
         } else {
             _gratingOptics = Option.empty();
@@ -149,12 +149,8 @@ public final class TRecs extends Instrument {
         return _grating;
     }
 
-    public double getGratingDispersion_nm() {
-        return _gratingOptics.get().getGratingDispersion_nm();
-    }
-
-    public double getGratingDispersion_nmppix() {
-        return _gratingOptics.get().getGratingDispersion_nmppix();
+    public double getGratingDispersion() {
+        return _gratingOptics.get().dispersion();
     }
 
 
@@ -200,7 +196,8 @@ public final class TRecs extends Instrument {
             return elfn_param;
     }
 
-    public double getFPMask() {
+    /** {@inheritDoc} */
+    public double getSlitWidth() {
         switch (_focalPlaneMask) {
             case MASK_1: return 0.21;
             case MASK_2: return 0.26;

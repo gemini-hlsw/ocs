@@ -84,55 +84,33 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
         IQcalc.calculate();
         final double im_qual = IQcalc.getImageQuality();
 
-        // Calculate Source fraction
-        final SourceFraction SFcalc = SourceFractionFactory.calculate(_sdParameters, _obsDetailParameters, instrument, im_qual);
-
         // In this version we are bypassing morphology modules 3a-5a.
         // i.e. the output morphology is same as the input morphology.
         // Might implement these modules at a later time.
 
-        final double pixel_size = instrument.getPixelSize();
-        final SpecS2NLargeSlitVisitor specS2N;
-        final SlitThroughput st = new SlitThroughput(_obsDetailParameters.analysisMethod(), im_qual, pixel_size, instrument.getSlitSize() * pixel_size);
+        final Slit slit = Slit$.MODULE$.apply(_sdParameters, _obsDetailParameters, instrument, instrument.getSlitWidth(), im_qual);
+        final SlitThroughput throughput = new SlitThroughput(_sdParameters, slit, im_qual);
 
-        double ap_diam = st.getSpatialPix();
-        double spec_source_frac = st.getSlitThroughput();
-
-        if (_sdParameters.isUniform()) {
-            if (_obsDetailParameters.isAutoAperture()) {
-                ap_diam = new Double(1 / (instrument.getSlitSize() * pixel_size) + 0.5).intValue();
-                spec_source_frac = 1;
-            } else {
-                spec_source_frac = instrument.getSlitSize() * pixel_size * ap_diam * pixel_size;
-            }
-        }
-
-        final double gratDispersion_nmppix = instrument.getSpectralPixelWidth();
-        final double gratDispersion_nm = 0.5 / pixel_size * gratDispersion_nmppix;
-
-        specS2N = new SpecS2NLargeSlitVisitor(
-                instrument.getSlitSize() * pixel_size,
-                pixel_size,
+        final SpecS2NSlitVisitor specS2N = new SpecS2NSlitVisitor(
+                slit,
+                instrument.disperser(),
+                throughput,
                 instrument.getSpectralPixelWidth(),
                 instrument.getObservingStart(),
                 instrument.getObservingEnd(),
-                gratDispersion_nm,
-                gratDispersion_nmppix,
-                spec_source_frac, im_qual,
-                ap_diam,
+                im_qual,
                 instrument.getReadNoise(),
                 instrument.getDarkCurrent(),
                 _obsDetailParameters);
 
         specS2N.setSourceSpectrum(src.sed);
         specS2N.setBackgroundSpectrum(src.sky);
-        specS2N.setSpecHaloSourceFraction(0.0);
         src.sed.accept(specS2N);
 
-        final SpecS2NLargeSlitVisitor[] specS2Narr = new SpecS2NLargeSlitVisitor[1];
+        final SpecS2NSlitVisitor[] specS2Narr = new SpecS2NSlitVisitor[1];
         specS2Narr[0] = specS2N;
 
-        return new SpectroscopyResult(p, instrument, SFcalc, IQcalc, specS2Narr, st, Option.empty());
+        return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), Option.empty());
     }
 
     public ImagingResult calculateImaging() {
