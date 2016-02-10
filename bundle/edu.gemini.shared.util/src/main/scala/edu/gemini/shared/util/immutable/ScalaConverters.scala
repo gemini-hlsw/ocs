@@ -62,16 +62,16 @@ object ScalaConverters {
   }
 
   implicit class ScalaEitherOps[L,R](val e: scala.Either[L,R]) extends AnyVal {
-    def asGeminiEither: Either[L,R] =
-      e.fold(Either.left[L,R], Either.right[L,R])
+    def asImEither: ImEither[L,R] =
+      e.fold(ImEither.left[L,R], ImEither.right[L,R])
   }
 
   implicit class ScalazDisjunctionOps[L,R](val e: \/[L,R]) extends AnyVal {
-    def asGeminiEither: Either[L,R] =
-      e.fold(Either.left[L,R], Either.right[L,R])
+    def asImEither: ImEither[L,R] =
+      e.fold(ImEither.left[L,R], ImEither.right[L,R])
   }
 
-  implicit class EitherOps[L,R](val e: Either[L,R]) extends AnyVal {
+  implicit class ImEitherOps[L,R](val e: ImEither[L,R]) extends AnyVal {
     def asScalaEither: scala.Either[L, R] =
       e.fold(((l: L) => Left(l)).asGeminiFunction1, ((r: R) => Right(r)).asGeminiFunction1)
     def asScalazDisjunction: \/[L,R] =
