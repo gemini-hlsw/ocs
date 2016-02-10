@@ -39,11 +39,9 @@ object SeqexecApp extends JSApp {
       class Backend(s: BackendScope[Props, Comment]) {
         def render(p: Props, c: Comment) = {
           <.div(
-            <.div(c.author),
-            <.div(c.comment),
             <.form(^.className := "commentForm",
               <.input(^.`type` := "input", ^.placeholder := "Your name", ^.onChange ==> onChangeName, ^.value := c.author),
-              <.input(^.`type` := "input", ^.placeholder := "Say something to the world!", ^.onChange ==> onChangeComment, ^.value := c.comment),
+              <.input(^.`type` := "input", ^.placeholder := "Say something!", ^.onChange ==> onChangeComment, ^.value := c.comment),
               <.input(^.`type` := "submit", ^.value := "Post"),
               ^.onSubmit ==> submit(p))
           )
@@ -59,6 +57,7 @@ object SeqexecApp extends JSApp {
           val submit: ReactEventI => Callback = (e: ReactEventI) => {
             // FIXME This is not idiomatic
             (s.state >>= p.onCommentSubmit).runNow()
+            // Clear the form
             e.preventDefaultCB >> s.setState(Comment("", ""))
           }
           submit
@@ -86,15 +85,16 @@ object SeqexecApp extends JSApp {
       class Backend(s: BackendScope[Props, State]) {
         case class Callbacks(P: Props) {
           def onCommentSubmit(a: Comment) = Callback {
+            // Optimistically update the local copy
+            s.modState(s => s.copy(c = s.c :+ a))
             Ajax.post(
-              url = "/api/comments",
-              data = write(a)
+                url = "/api/comments",
+                data = write(a)
             ).map { k =>
               val c = read[List[Comment]](k.responseText)
               s.setState(State(c)).runNow()
             }
           }
-            //s.modState(s => s.copy(c = s.c :+ a))
         }
         val cbs = Px.cbA(s.props).map(Callbacks)
 
