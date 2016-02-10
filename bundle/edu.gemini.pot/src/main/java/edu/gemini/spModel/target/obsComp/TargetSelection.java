@@ -120,7 +120,8 @@ public final class TargetSelection {
 
         /**
          * Create a list of GuideGroupSelection from the target environment.
-         * This is the same as if the guide groups were filtered out of the Selection.toSelection method.
+         * This is the same as if the guide groups were filtered out of the Selection.toSelection method,
+         * but avoids creating the unnecessary objects.
          */
         static ImList<GuideGroupSelection> toGuideGroupSelections(final TargetEnvironment env) {
             if (env == null) return ImCollections.emptyList();
@@ -181,9 +182,7 @@ public final class TargetSelection {
     }
 
     private static Option<Selection> selectionAtIndex(final TargetEnvironment env, final int index) {
-        if (index < 0) return None.instance();
-        final ImList<Selection> lst = Selection.toSelections(env);
-        return ImOption.apply(index < lst.size() ? lst.get(index) : null);
+        return Selection.toSelections(env).getOption(index);
     }
 
     public static Option<SPTarget> getTargetAtIndex(final TargetEnvironment env, final int index) {
