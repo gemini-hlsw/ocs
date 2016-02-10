@@ -20,19 +20,24 @@ import scalaz.{\/-, -\/}
 
 object ObsLogActionsSpec extends TestSupport {
 
+  val VerticalWhitespace = Set('\u000A', '\u000B', '\u000C', '\u000D', '\u0085',  '\u2028', '\u2029')
+
+  def hasVerticalWhitespace(s: String): Boolean =
+    s.exists(VerticalWhitespace)
+
   "FitsFile regex" should {
     "match the prefix of all strings that don't contain vertical whitespace" in
       forAll { (s: String) =>
         s"$s.fits" match {
           case FitsFile(n) => s == n
-          case _           => s.exists(_.isWhitespace)
+          case _           => hasVerticalWhitespace(s)
         }
       }
     "match any strings not ending with .fits suffix and not containing vertical whitespace" in
       forAll { (s: String) =>
         s.endsWith(".fits") || (s match {
           case FitsFile(n) => s == n
-          case _           => s.exists(_.isWhitespace)
+          case _           => hasVerticalWhitespace(s)
         })
       }
 
@@ -41,11 +46,10 @@ object ObsLogActionsSpec extends TestSupport {
         val fn = s".fits$s.fits"
         s"$fn.fits" match {
           case FitsFile(n) => fn == n
-          case _           => s.exists(_.isWhitespace)
+          case _           => hasVerticalWhitespace(s)
         }
       }
   }
-
 
   val FilenamePrefix   = "GN20160207S"
   val DatasetLabelKey  = new ItemKey("observe:dataLabel")
