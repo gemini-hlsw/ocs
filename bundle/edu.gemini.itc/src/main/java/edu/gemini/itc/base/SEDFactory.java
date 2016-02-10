@@ -1,6 +1,7 @@
 package edu.gemini.itc.base;
 
 import edu.gemini.itc.flamingos2.Flamingos2;
+import edu.gemini.itc.gnirs.Gnirs;
 import edu.gemini.itc.gsaoi.Gsaoi;
 import edu.gemini.itc.nifs.Nifs;
 import edu.gemini.itc.niri.Niri;
@@ -255,7 +256,7 @@ public final class SEDFactory {
         sky.accept(tb);
 
         // FOR GSAOI and NIRI ADD AO STUFF HERE
-        if (instrument instanceof Gsaoi || instrument instanceof Niri) {
+        if (instrument instanceof Gsaoi || instrument instanceof Niri || instrument instanceof Gnirs) {
             // Moved section where sky/sed is convolved with instrument below Altair/Gems
             // section
             // Module 5b
@@ -284,7 +285,7 @@ public final class SEDFactory {
         // background spectra.
         // input: instrument, source and background SED
         // output: total flux of source and background.
-        if (!(instrument instanceof Gsaoi) && !(instrument instanceof Niri)) {
+        if (!(instrument instanceof Gsaoi) && !(instrument instanceof Niri) && !(instrument instanceof Gnirs)) {
             // TODO: for any instrument other than GSAOI and NIRI convolve here, why?
             instrument.convolveComponents(sed);
         }

@@ -283,6 +283,7 @@ object ConfigExtractor {
     }).map(_.microns)
   }
 
+
   // Extract an optional integer, values in the configuration are Java objects
   def extractOptionalInteger(c: Config, key: ItemKey): Option[Int] =
     extract[java.lang.Integer](c, key).map(_.toInt).toOption
