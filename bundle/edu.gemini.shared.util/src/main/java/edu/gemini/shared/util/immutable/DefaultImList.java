@@ -147,6 +147,11 @@ public final class DefaultImList<T> implements ImList<T>, Serializable {
     }
 
     @Override
+    public Option<T> getOption(final int index) {
+        return (index < 0 || index >= backingList.size()) ? None.instance() : new Some<>(backingList.get(index));
+    }
+
+    @Override
     public int indexOf(final T t) {
         return backingList.indexOf(t);
     }

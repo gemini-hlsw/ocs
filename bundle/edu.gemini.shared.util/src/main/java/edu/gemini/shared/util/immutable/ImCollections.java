@@ -87,6 +87,11 @@ public class ImCollections {
         }
 
         @Override
+        public Option<Object> getOption(final int index) {
+            return None.instance();
+        }
+
+        @Override
         public int indexOf(final Object o) {
             return -1;
         }

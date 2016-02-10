@@ -134,6 +134,7 @@ public interface ImList<T> extends Iterable<T> {
 
     /**
      * Gets the item at the given position in the list.
+     *
      * @param index position of the element to return
      *
      * @return the element at the specified position in this list
@@ -142,6 +143,17 @@ public interface ImList<T> extends Iterable<T> {
      * (<code>index < 0 || index >= size()</code>).
      */
     T get(int index);
+
+    /**
+     * If the index is a valid position in the list which contains item, returns Some(item).
+     * Otherwise, returns None.
+     *
+     * @param index position of the element to return.
+     *
+     * @return Some(item) if index is a valid position in the list containing item,
+     * and None otherwise.
+     */
+    Option<T> getOption(int index);
 
     /**
      * Returns the index in this list of the first occurrence of the specified
