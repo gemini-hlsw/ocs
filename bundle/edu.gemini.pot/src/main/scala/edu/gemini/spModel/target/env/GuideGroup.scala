@@ -251,11 +251,11 @@ case class GuideGroup(grp: GuideGrp) extends java.lang.Iterable[GuideProbeTarget
     ps
   }
 
-  lazy val isAutomatic: Boolean = grp match {
-    case Initial           => true
-    case Active(_)         => true
-    case ManualGroup(_, _) => false
-  }
+  def isAutomatic: Boolean =
+    grp.isAutomatic
+
+  def isManual: Boolean =
+    grp.isManual
 }
 
 object GuideGroup extends ((GuideGrp) => GuideGroup) {
