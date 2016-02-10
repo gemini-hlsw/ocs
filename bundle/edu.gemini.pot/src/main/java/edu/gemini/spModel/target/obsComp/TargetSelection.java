@@ -174,20 +174,10 @@ public final class TargetSelection {
         return Selection.toSelections(env).find(sel -> sel.getTarget().exists(target::equals)).map(sel -> sel.index);
     }
 
-    public static Option<Integer> indexOfIndexedGuideGroup(final TargetEnvironment env,
-                                                           final IndexedGuideGroup igg) {
-        // Extract the selections (and their indices) corresponding to guide groups.
+    public static Option<Integer> indexOfGuideGroup(final TargetEnvironment env,
+                                                    final GuideGroup guideGroup) {
         final ImList<GuideGroupSelection> selections = GuideGroupSelection.toGuideGroupSelections(env);
-
-        // Now make sure the guide group at position gpIdx is gp, and if so, return its index in the selections.
-        final int gpIdx     = igg.index();
-        final GuideGroup gp = igg.group();
-        if (gpIdx >= 0 && gpIdx < selections.size()) {
-            final GuideGroupSelection sel = selections.get(gpIdx);
-            return sel.getGuideGroup().filter(gp::equals).map(ign -> sel.getIndex());
-        } else {
-            return None.instance();
-        }
+        return selections.find(ggs -> ggs.getGuideGroup().exists(guideGroup::equals)).map(GuideGroupSelection::getIndex);
     }
 
     private static Option<Selection> selectionAtIndex(final TargetEnvironment env, final int index) {
@@ -213,7 +203,7 @@ public final class TargetSelection {
      * groups.
      */
     public static Option<IndexedGuideGroup> getIndexedGuideGroupForNode(final TargetEnvironment env,
-                                                                                  final ISPNode node) {
+                                                                        final ISPNode node) {
         // The list of all nodes in the tree, and the index of the currently selected node.
         final ImList<GuideGroupSelection> selections = GuideGroupSelection.toGuideGroupSelections(env);
         final int idx = getIndex(node).getOrElse(NO_SELECTION.value);
@@ -227,9 +217,8 @@ public final class TargetSelection {
     /**
      * For a given guide group, find the corresponding node in the list if it exists, and set it as the index.
      */
-    public static void setIndexedGuideGroup(final TargetEnvironment env, final ISPNode node,
-                                            final IndexedGuideGroup igg) {
-        setIndex(node, indexOfIndexedGuideGroup(env, igg));
+    public static void setGuideGroup(final TargetEnvironment env, final ISPNode node, final GuideGroup gg) {
+        setIndex(node, indexOfGuideGroup(env, gg));
     }
 
     public static void listenTo(final ISPNode node, final PropertyChangeListener listener) {

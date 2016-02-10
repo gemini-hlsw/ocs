@@ -633,7 +633,7 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
             TargetSelection.setTargetForNode(_env, _obsComp, target);
             startWatchingSelection();
         });
-        row.group().foreach(tup -> TargetSelection.setIndexedGuideGroup(_env, _obsComp, tup));
+        row.group().foreach(igg -> TargetSelection.setGuideGroup(_env, _obsComp, igg.group()));
     }
 
     private final PropertyChangeListener selectionListener = evt -> {
@@ -879,7 +879,7 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
      * Update the TargetSelection's group, and sets the relevant row in the table.
      */
     void selectGroup(final IndexedGuideGroup igg) {
-        TargetSelection.setIndexedGuideGroup(_env, _obsComp, igg);
+        TargetSelection.setGuideGroup(_env, _obsComp, igg.group());
         _tableData.rowIndexForGroupIndex(igg.index()).foreach(this::_setSelectedRow);
     }
 
