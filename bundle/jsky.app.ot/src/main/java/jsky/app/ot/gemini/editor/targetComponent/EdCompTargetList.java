@@ -124,7 +124,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
         final SPInstObsComp inst = getContextInstrumentDataObject();
         _w.newMenu.setEnabled(enabled && inst != null);
-        _w.tag.setEnabled(enabled && selectionIsBasePosition());
+        _w.tag.setEnabled(enabled && !selectionIsBasePosition());
     }
 
     private void updateDetailEditorEnabledState(final boolean enabled) {
@@ -150,13 +150,37 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     }
 
     /**
+     * Auxiliary method to determine if the current selection is a manual group.
+     */
+    private boolean selectionIsManualGroup() {
+        return _curSelection.exists(either -> either.exists(igg -> igg.group().isManual()));
+    }
+
+    /**
      * Auxiliary method to determine if the current selection is a target that belongs to the auto group.
      */
     private boolean selectionIsAutoTarget() {
         return _curSelection.exists(sel -> sel.swap().exists(t ->
-            getDataObject().getTargetEnvironment().getGuideEnvironment().getOptions()
-                    .exists(gg -> gg.isAutomatic() && gg.containsTarget(t))
+                getDataObject().getTargetEnvironment().getGuideEnvironment().getOptions()
+                        .exists(gg -> gg.isAutomatic() && gg.containsTarget(t))
         ));
+    }
+
+    /**
+     * Auxiliary method to determine if the current selection is a target that belongs to a manual group.
+     */
+    private boolean selectionIsManualTarget() {
+        return _curSelection.exists(sel -> sel.swap(). exists(t ->
+                getDataObject().getTargetEnvironment().getGuideEnvironment().getOptions()
+                        .exists(gg -> gg.isManual() && gg.containsTarget(t))
+        ));
+    }
+
+    /**
+     * Auxiliary method to determine if the current selection is a guide target.
+     */
+    private boolean selectionIsGuideTarget() {
+        return _curSelection.exists(ImEither::isLeft) && !(selectionIsBasePosition() || selectionIsUserTarget());
     }
 
     /**
@@ -177,22 +201,26 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
      * Update the UI components when a target becomes selected.
      */
     private void updateUIForTarget() {
-        final boolean editable     = OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation());
-        final boolean notBase      = !selectionIsBasePosition();
-        final boolean notAuto      = !(selectionIsAutoGroup() || selectionIsAutoTarget());
-        final boolean isGuideStar  = _curSelection.exists(ImEither::isLeft) && !(selectionIsBasePosition() || selectionIsUserTarget());
+        if (!_curSelection.exists(ImEither::isLeft)) return;
 
-        _w.removeButton.setEnabled (editable && notBase && notAuto);
-        _w.primaryButton.setEnabled(editable && isGuideStar && notAuto);
-        _w.pasteButton.setEnabled(editable && notAuto);
-        _w.duplicateButton.setEnabled(editable && isGuideStar && notAuto);
-        updateDetailEditorEnabledState(editable && notAuto);
+        final boolean editable      = OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation());
+        final boolean notBase       = !selectionIsBasePosition();
+        final boolean notAutoTarget = !selectionIsAutoTarget();
+        final boolean isGuideStar   = selectionIsGuideTarget();
+
+        _w.removeButton.setEnabled (editable && notBase && notAutoTarget);
+        _w.primaryButton.setEnabled(editable && isGuideStar && notAutoTarget);
+        _w.pasteButton.setEnabled(editable && notAutoTarget);
+        _w.duplicateButton.setEnabled(editable && isGuideStar && notAutoTarget);
+        updateDetailEditorEnabledState(editable && notAutoTarget);
     }
 
     /**
      * Update the UI components when a group becomes selected.
      */
     private void updateUIForGroup() {
+        if (!_curSelection.exists(ImEither::isRight)) return;
+
         final boolean editable = OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation());
         final boolean notAuto   = !selectionIsAutoGroup();
         _w.removeButton.setEnabled(editable && notAuto);
@@ -206,10 +234,8 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
      * or if we are currently on the base or a user target.
      */
     private void updateGuideStarAdders() {
-        final boolean notBase = !selectionIsBasePosition();
-        final boolean notUser = !selectionIsUserTarget();
-        final boolean notAuto = !(selectionIsAutoGroup() || selectionIsAutoTarget());
-        _guideStarAdders.forEach((gp, comp) -> comp.setEnabled(notBase && notUser && notAuto));
+        final boolean enabled = selectionIsManualGroup() || selectionIsManualTarget();
+        _guideStarAdders.forEach((gp, comp) -> comp.setEnabled(enabled));
     }
 
     @Override public JPanel getWindow() {
@@ -821,7 +847,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                         final Option<IndexedGuideGroup> gpOpt = TargetSelection.getIndexedGuideGroupForNode(dataObject.getTargetEnvironment(), obsComponent);
                         gpOpt.foreach(igg -> {
                             final int idx                    = igg.index();
-                            final GuideGroup newGroup        = group.setAll(group.cloneTargets().getAll());
+                            final GuideGroup newGroup        = igg.group().setAll(group.cloneTargets().getAll());
                             final TargetEnvironment env      = dataObject.getTargetEnvironment();
                             final GuideEnvironment ge        = env.getGuideEnvironment();
                             final ImList<GuideGroup> options = ge.getOptions();

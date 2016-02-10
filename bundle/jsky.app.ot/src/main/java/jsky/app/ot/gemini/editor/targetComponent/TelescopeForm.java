@@ -45,7 +45,7 @@ class TelescopeForm extends JPanel {
     }};
 
     final JButton removeButton = new JButton() {{
-        setToolTipText("Remove the selected target");
+        setToolTipText("Remove the selected group or target");
         setMargin(new Insets(2, 2, 2, 2));
         setFocusable(false);
         setIcon(Resources.getIcon("eclipse/remove.gif"));
@@ -54,27 +54,27 @@ class TelescopeForm extends JPanel {
 
     final JButton copyButton = new JButton() {{
         setFocusable(false);
-        setToolTipText("Copy selected target coordinates");
+        setToolTipText("Copy selected group contents or target coordinates");
         setIcon(Resources.getIcon("eclipse/copy.gif"));
         ButtonFlattener.flatten(this);
     }};
 
     final JButton pasteButton = new JButton() {{
         setFocusable(false);
-        setToolTipText("Paste coordinates on selected target");
+        setToolTipText("Paste targets in selected group or coordinates in selected target");
         setIcon(Resources.getIcon("eclipse/paste.gif"));
         ButtonFlattener.flatten(this);
     }};
 
     final JButton duplicateButton = new JButton() {{
         setFocusable(false);
-        setToolTipText("Duplicate selected target");
+        setToolTipText("Duplicate selected group or target");
         setIcon(Resources.getIcon("eclipse/duplicate.gif"));
         ButtonFlattener.flatten(this);
     }};
 
     final JButton primaryButton = new JButton() {{
-        setToolTipText("Set/unset as active guide star");
+        setToolTipText("Set/unset as active group or guide star");
         setIcon(Resources.getIcon("eclipse/radiobuttons.gif"));
         ButtonFlattener.flatten(this);
     }};
