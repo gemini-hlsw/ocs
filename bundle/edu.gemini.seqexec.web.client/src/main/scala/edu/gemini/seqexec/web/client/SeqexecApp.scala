@@ -85,6 +85,12 @@ object SeqexecApp extends JSApp {
       class Backend(s: BackendScope[Props, State]) {
         case class Callbacks(P: Props) {
           def onCommentSubmit(a: Comment) = Callback {
+            // Dummy test only to check that scalaz gets into the client side
+            import scalaz.std.anyVal._
+            import scalaz.syntax.equal._
+
+            println(a === a)
+
             // Optimistically update the local copy
             s.modState(s => s.copy(c = s.c :+ a))
             Ajax.post(

@@ -19,7 +19,8 @@ libraryDependencies ++= Seq(
   "org.scala-js" %%% "scalajs-dom" % "0.8.0",
   "com.github.japgolly.scalajs-react" %%% "core" % "0.10.4",
   "com.github.japgolly.scalajs-react" %%% "extra" % "0.10.4",
-  "com.lihaoyi" %%% "upickle" % "0.3.8"
+  "com.lihaoyi" %%% "upickle" % "0.3.8",
+  "com.github.japgolly.fork.scalaz" %%% "scalaz-core" % "7.1.3" // note that the scalaz version for scala.js is a bit old
 )
 
 // TODO get dependencies via webjars
