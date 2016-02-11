@@ -45,7 +45,6 @@ object SeqexecApp extends JSApp {
           .initialState_P(_ => "Waiting")
           .renderBackend[Backend]
           .configure(Listenable.install((p: Props) => p, $ => (m: String) => {
-            println("Listen " + m)
             $.modState(_ => m)
           }))
           .componentDidMount(_.backend.load())

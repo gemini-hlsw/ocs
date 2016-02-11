@@ -24,7 +24,10 @@ libraryDependencies ++= Seq(
 )
 
 // TODO get dependencies via webjars
-jsDependencies += "org.webjars" % "react" % "0.14.3" / "react-with-addons.js" commonJSName "React"
+jsDependencies ++= Seq(
+  "org.webjars" % "react" % "0.14.3" / "react-with-addons.js" commonJSName "React",
+  "org.webjars" % "bootstrap" % "3.3.6" / "bootstrap.js"
+  )
 
 skip in packageJSDependencies := false
 
