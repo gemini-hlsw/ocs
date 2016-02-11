@@ -127,6 +127,18 @@ object BaselineGmos {
       Site.GN),
     GmosParameters(
       FilterNorth.g_G0301,
+      DisperserNorth.R150_G5306,
+      500.nm,
+      FPUnitNorth.IFU_1,
+      AmpGain.HIGH,
+      AmpReadMode.SLOW,
+      None,
+      1,
+      2,
+      DetectorManufacturer.E2V,
+      Site.GN),
+    GmosParameters(
+      FilterNorth.g_G0301,
       DisperserNorth.R400_G5305,
       500.nm,
       FPUnitNorth.IFU_2,

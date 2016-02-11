@@ -7,7 +7,7 @@ package edu.gemini.itc.gmos;
  */
 public class CCDGapCalc {
 
-    /** Calculates the shift for the given wavelength for IFU-2. */
+    /** Calculates the shift in unbinned pixels for the given wavelength for IFU-2. */
     public static double calcIfu2Shift(double cwavlen, double lpmm) {
 
         // TODO: Some of the values here (e.g. plate scale) are different for Hamamatsu and E2V CCDs.
