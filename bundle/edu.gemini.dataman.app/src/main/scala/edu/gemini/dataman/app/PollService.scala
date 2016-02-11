@@ -40,6 +40,17 @@ sealed trait PollService {
 
   /** Stops the poll service and cleans up resources. */
   def shutdown(): Unit
+
+  /** Returns true if the PollService is not currently polling and has no
+    * pending ids to poll at the moment this method is called.
+    */
+  def isEmpty: Boolean
+
+  /** Returns true if the PollService is actively processing a poll for any
+    * `DmanId` or has a pending id that will be polled.
+    */
+  def nonEmpty: Boolean =
+    !isEmpty
 }
 
 object PollService {
@@ -57,6 +68,10 @@ object PollService {
     def clearPending(): Unit
     def pending: List[DmanId]
     def active: Set[DmanId]
+    def isEmpty: Boolean
+
+    def nonEmpty: Boolean =
+      !isEmpty
   }
 
   object RequestQueue {
@@ -75,6 +90,10 @@ object PollService {
 
       override def active: Set[DmanId] = synchronized {
         activeSet.toSet
+      }
+
+      override def isEmpty: Boolean = synchronized {
+        pendingQueues.forall(_.isEmpty) && activeSet.isEmpty
       }
 
       override def isActive(id: DmanId): Boolean = synchronized {
@@ -178,8 +197,14 @@ object PollService {
 
       workers.foreach(_.start())
 
-      override def add(id: DmanId): Boolean           = queue.add(id)
-      override def addAll(ids: List[DmanId]): Boolean = queue.addAll(ids)
+      override def add(id: DmanId): Boolean           =
+        queue.add(id)
+
+      override def addAll(ids: List[DmanId]): Boolean =
+        queue.addAll(ids)
+
+      override def isEmpty: Boolean =
+        queue.isEmpty
 
       override def shutdown(): Unit = {
         Log.log(DetailLevel, s"Dataman shutdown PollService.")
