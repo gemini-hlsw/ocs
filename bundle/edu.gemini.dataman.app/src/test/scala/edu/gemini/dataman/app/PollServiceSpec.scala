@@ -11,10 +11,13 @@ import org.scalacheck.Prop.forAll
 import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
 
+import java.time.Instant
+
 import scala.concurrent.{ExecutionContext, TimeoutException, Await, Future, blocking}
 import scala.concurrent.duration._
 
 object PollServiceSpec extends Specification with ScalaCheck with Arbitraries {
+
   val genPid: Gen[SPProgramID] =
     Gen.chooseNum(1, 5).map(n => SPProgramID.toProgramID(s"GS-2016A-Q-$n"))
 
@@ -47,8 +50,8 @@ object PollServiceSpec extends Specification with ScalaCheck with Arbitraries {
   }
 
   val Q1        = Prog(SPProgramID.toProgramID("GS-2016A-Q-1"))
-  val ShortWait = Duration(1000, MILLISECONDS)
-  val LongWait  = Duration(5000, MILLISECONDS)
+  val ShortWait = Duration(  1000, MILLISECONDS)
+  val LongWait  = Duration(120000, MILLISECONDS)
 
   "RequestQueue" should {
     "respect id priority" in {
@@ -132,11 +135,15 @@ object PollServiceSpec extends Specification with ScalaCheck with Arbitraries {
 
   "PollService" should {
     "execute tasks in parallel" in {
-      val oids = (1 to 10).map(i => Obs(new SPObservationID(Q1.pid, i))).toList
+      val threadCount = 2
+      val oids        = (1 to 20).map(i => Obs(new SPObservationID(Q1.pid, i))).toList
+      val log         = List.newBuilder[(DmanId, String)]
 
-      val log = List.newBuilder[(DmanId, String)]
-
-      val ps = PollService("Test", 2) { id =>
+      val ps = PollService("Test", threadCount) { id =>
+        // We want to simulate work and give the other poll service thread an
+        // opportunity to run.  This is probably a bit sketchy since there is
+        // no guarantee that the other thread will actually run.
+        Thread.sleep(100)
         Thread.`yield`()
         log.synchronized {
           log += ((id, Thread.currentThread().getName))
@@ -144,11 +151,21 @@ object PollServiceSpec extends Specification with ScalaCheck with Arbitraries {
       }
 
       ps.addAll(oids)
-      Thread.sleep(LongWait.toMillis)
+
+      // Poll, waiting for completion.
+      val end = Instant.now().plusMillis(LongWait.toMillis)
+      while (Instant.now().isBefore(end) && ps.nonEmpty) {
+        Thread.sleep(ShortWait.toMillis)
+      }
+
+      val finishedWorking = ps.isEmpty
+
       ps.shutdown()
 
-      val results = log.result()
-      (results.map(_._1).toSet == oids.toSet) && (results.map(_._2).toSet.size == 2)
+      val (loggedOids, loggedThreads) = log.result().unzip
+      finishedWorking &&                          // all the work eventually finished (i.e., didn't time out)
+        (loggedOids.toSet == oids.toSet) &&       // every obs id was processed
+        (loggedThreads.toSet.size == threadCount) // all threads participated in the work
     }
   }
 }
