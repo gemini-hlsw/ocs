@@ -2,12 +2,12 @@ package edu.gemini.seqexec.web.client
 
 import edu.gemini.seqexec.web.common.Comment
 import japgolly.scalajs.react._
-import japgolly.scalajs.react.extra.{Reusability, Px}
+import japgolly.scalajs.react.extra._
 import japgolly.scalajs.react.vdom.prefix_<^._
 
 import scala.scalajs.js.JSApp
 
-import org.scalajs.dom.document
+import org.scalajs.dom.{MessageEvent, Event, document, WebSocket}
 import org.scalajs.dom.ext.Ajax
 
 import upickle.default._
@@ -17,6 +17,43 @@ import scalajs.concurrent.JSExecutionContext.Implicits.runNow
 object SeqexecApp extends JSApp {
 
   def main(): Unit = {
+    object Ping {
+
+      case class Props(m: String) extends Broadcaster[String] {
+        def mod(s: String): Callback = {
+          broadcast(s)
+        }
+      }
+
+      class Backend(s: BackendScope[Props, String]) extends OnUnmount {
+        def render(c: String) = {
+          <.div(
+            <.h1("message"),
+            <.span(c)
+          )
+        }
+        def load() = Callback {
+          val ws = new WebSocket("ws://127.0.0.1:9090/api/ws")
+
+          ws.onmessage = (x:MessageEvent) => {
+            s.setState(x.data.toString).runNow()
+          }
+        }
+      }
+
+      val component = ReactComponentB[Props]("Ping")
+          .initialState_P(_ => "Waiting")
+          .renderBackend[Backend]
+          .configure(Listenable.install((p: Props) => p, $ => (m: String) => {
+            println("Listen " + m)
+            $.modState(_ => m)
+          }))
+          .componentDidMount(_.backend.load())
+          .build
+
+      def apply() = component(Props(""))
+    }
+
     val ReactComment = ReactComponentB[Comment]("ReactComment")
         .render_P( c =>
           <.div(^.className := "comment",
@@ -107,6 +144,8 @@ object SeqexecApp extends JSApp {
         def render(p: Props, s: State) = {
           val cb = cbs.value()
           <.div("Hello, world! I am a CommentBox.", ^.className := "commentBox",
+            <.div("I get pings over websockets"),
+            Ping(),
             <.h1("Comments"),
             CommentList(s.c),
             CommentForm(CommentForm.Props(cb.onCommentSubmit)))
