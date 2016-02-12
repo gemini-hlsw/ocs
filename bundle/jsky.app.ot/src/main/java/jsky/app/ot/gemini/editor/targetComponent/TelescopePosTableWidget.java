@@ -292,8 +292,8 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
                 final int groupIndex   = gtup._2();
 
                 final boolean isPrimaryGroup = ge.getPrimaryIndex() == groupIndex;
-                final boolean editable         = !group.isAutomatic();
-                final boolean movable          = !group.isAutomatic();
+                final boolean editable         = group.isManual();
+                final boolean movable          = group.isManual();
                 final List<Row> rowList        = new ArrayList<>();
 
                 // Process the guide probe targets for this group.
@@ -558,9 +558,12 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
 
         // Restore the selection without firing new selection events.
         final boolean tmp = _ignoreSelection;
-        _ignoreSelection = true;
-        _setSelectedRow(index);
-        _ignoreSelection = tmp;
+        try {
+            _ignoreSelection = true;
+            _setSelectedRow(index);
+        } finally {
+            _ignoreSelection = tmp;
+        }
     }
 
     /**
@@ -630,8 +633,11 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
         // Only one of these cases will hold.
         row.target().foreach(target -> {
             stopWatchingSelection();
-            TargetSelection.setTargetForNode(_env, _obsComp, target);
-            startWatchingSelection();
+            try {
+                TargetSelection.setTargetForNode(_env, _obsComp, target);
+            } finally {
+                startWatchingSelection();
+            }
         });
         row.group().foreach(igg -> TargetSelection.setGuideGroup(_env, _obsComp, igg.group()));
     }
@@ -724,6 +730,7 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
     void updatePrimaryStar() {
         if (_env == null || !OTOptions.isEditable(_obsComp.getProgram(), _obsComp.getContextObservation())) return;
 
+        // TODO: This method must be tested in greater detail, since custom guiding is required for offset positions.
         final Option<SPTarget> targetOpt = getSelectedPos();
         if (targetOpt.isDefined()) {
             final boolean autoGroup = targetOpt.flatMap(this::getTargetGroup).exists(igg -> igg.group().isAutomatic());

@@ -334,13 +334,12 @@ public class TpeGuidePosFeature extends TpePositionFeature
             if (gp.isAutomatic()) return false;
 
             final Option<GuideProbeTargets> gtOpt = gp.get(probe);
-            gtOpt.map(gt -> {
+            return gtOpt.map(gt -> {
                 final GuideProbeTargets gtNew = gt.removeTarget(target);
                 toc.setTargetEnvironment(env.putPrimaryGuideProbeTargets(gtNew));
                 _iw.getContext().targets().commit();
                 return true;
             }).getOrElse(false);
-            return true;
         }).getOrElse(false);
     }
 

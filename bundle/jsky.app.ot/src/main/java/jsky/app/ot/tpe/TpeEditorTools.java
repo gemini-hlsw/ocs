@@ -122,9 +122,9 @@ final class TpeEditorTools {
         return ctx.progShell().isDefined() && ctx.obsShell().isDefined() && OTOptions.isProgramEditable(ctx.progShell().get()) && OTOptions.isObservationEditable(ctx.obsShell().get());
     }
 
-    private boolean isAuto() {
+    private boolean isManual() {
         return ImOption.fromScalaOpt(_tpe.getImageWidget().getContext().targets().env())
-                .exists(te -> te.getGuideEnvironment().getPrimary().isAutomatic());
+                .exists(te -> te.getGuideEnvironment().getPrimary().isManual());
     }
 
     /**
@@ -133,9 +133,9 @@ final class TpeEditorTools {
      */
     public void updateEnabledStates() {
         final boolean enabled = isEnabled();
-        final boolean notAuto = !isAuto();
+        final boolean manual  = isManual();
         _dragButton.setEnabled(enabled);
-        _eraseButton.setEnabled(enabled && notAuto);
+        _eraseButton.setEnabled(enabled && manual);
     }
 
 
@@ -203,8 +203,8 @@ final class TpeEditorTools {
         // If not enabled, then we're done.
         if (!enabled) return;
 
-        // Determine if we are in the auto group.
-        final boolean notAuto = !isAuto();
+        // Determine if we are in a manual group.
+        final boolean manual = isManual();
 
         // Add create buttons according to the enabled state of each item.
         for (final TpeImageFeature feature : feats) {
@@ -215,7 +215,7 @@ final class TpeEditorTools {
                 if (item.isEnabled(_tpe.getImageWidget().getContext())) {
                     final JToggleButton btn = _createButtonMap.get(item.getLabel());
                     btn.setVisible(true);
-                    btn.setEnabled(notAuto);
+                    btn.setEnabled(manual);
                 }
             }
         }

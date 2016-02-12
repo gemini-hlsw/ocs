@@ -90,16 +90,14 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
         tpe.setGemsGuideStarWorkerFinished();
         Object o = getValue();
         if (o instanceof CancellationException) {
-            clearResults();
             DialogUtil.message("The guide star search was canceled.");
         } else if (o instanceof NoStarsException) {
+            // In this case, no valid asterisms were found, so clear the selection.
             clearResults();
             DialogUtil.error(((NoStarsException) o).getMessage());
         } else if (o instanceof CatalogException) {
-            clearResults();
             DialogUtil.error(((CatalogException) o).firstMessage());
         } else if (o instanceof Exception) {
-            clearResults();
             DialogUtil.error((Exception) o);
         } else {
             GemsGuideStars gemsGuideStars = (GemsGuideStars) o;
@@ -185,6 +183,8 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
                 targetObsComp.setTargetEnvironment(env.setGuideEnvironment(env.getGuideEnvironment().setOptions(
                         DefaultImList.create(guideGroupList))));
             } else {
+                // TODO: This does not work. The primary index passed here is the primary index of the asterism
+                // TODO: in the list of results, and not the primary guide group in the target env.
                 targetObsComp.setTargetEnvironment(env.setGuideEnvironment(env.getGuideEnvironment().setOptions(
                         DefaultImList.create(guideGroupList)).setPrimaryIndex(primaryIndex)));
             }
