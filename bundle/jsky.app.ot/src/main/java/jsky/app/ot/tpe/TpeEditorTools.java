@@ -133,9 +133,8 @@ final class TpeEditorTools {
      */
     public void updateEnabledStates() {
         final boolean enabled = isEnabled();
-        final boolean manual  = isManual();
         _dragButton.setEnabled(enabled);
-        _eraseButton.setEnabled(enabled && manual);
+        _eraseButton.setEnabled(enabled);
     }
 
 
@@ -213,14 +212,17 @@ final class TpeEditorTools {
             final TpeCreatableFeature cFeature = (TpeCreatableFeature) feature;
             for (final TpeCreatableItem item : cFeature.getCreatableItems()) {
                 if (item.isEnabled(_tpe.getImageWidget().getContext())) {
-                    final JToggleButton btn = _createButtonMap.get(item.getLabel());
+                    final boolean isWFSTarget = item.getType() == TpeCreatableItem.Type.wfsTarget;
+                    final JToggleButton btn   = _createButtonMap.get(item.getLabel());
                     btn.setVisible(true);
-                    btn.setEnabled(manual);
+
+                    // If we are on the auto group, only allow non WFS targets to be created.
+                    btn.setEnabled(manual || !isWFSTarget);
                 }
             }
         }
 
-        if ((selected != null) && !selected.isVisible()){
+        if ((selected != null) && !(selected.isVisible() && selected.isEnabled())) {
             _browseButton.doClick();
         }
     }
