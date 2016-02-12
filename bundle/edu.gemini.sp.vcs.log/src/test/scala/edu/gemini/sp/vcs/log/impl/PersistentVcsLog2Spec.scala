@@ -12,6 +12,7 @@ import java.sql.Timestamp
 
 object PersistentVcsLog2Spec extends Specification {
   import PersistentVcsLog2._
+  import PersistentVcsMappers._
 
   val serialId = new java.util.concurrent.atomic.AtomicLong(System.currentTimeMillis)
 
@@ -31,6 +32,9 @@ object PersistentVcsLog2Spec extends Specification {
     f.transact(xa).ensuring(sql"SHUTDOWN IMMEDIATELY".update.run.transact(xa).attempt).unsafePerformIO
   }
 
+  val initTestData: ConnectionIO[Unit] =
+    sql"runscript from 'classpath:/testdb.sql' charset 'utf-8'".update.run *> checkSchema("«in memory»")
+
   "compatibility" should {
 
     "query old database with indentical result" in go {
@@ -46,8 +50,7 @@ object PersistentVcsLog2Spec extends Specification {
       }
 
       for {
-        _ <- sql"runscript from 'classpath:/testdb.sql' charset 'utf-8'".update.run
-        _ <- checkSchema("«in memory»")
+        _ <- initTestData
         x <- doSelectByProgram(SPProgramID.toProgramID("GN-2015B-Q-10"), 1, 3)
       } yield x must_== expected
 
@@ -136,21 +139,54 @@ object PersistentVcsLog2Spec extends Specification {
   }
 
   "selectByProgram" should {
-
-  // /** Select `VcsEventSet`s for the specified program, from newest to oldest. Because there may be many such sets,
-  //   * `offset` and `size` must be specified. This mechanism can be used to provide a "paged" user interface.
-  //   * @param pid science program
-  //   * @param offset offset into the result set
-  //   * @param size number of events to return
-  //   * @return A page of event sets and a flag (`true` if there are more pages)
-  //   */
-
-    "select all event information" in pending
  
-    "time-chunk events with the same program/principals" in pending
+    val allPids: ConnectionIO[List[SPProgramID]] =
+      sql"select distinct program_id from event".query[SPProgramID].list
 
-    "handle paging correctly" in pending
+    // all List[EventSet] in the database
+    val all: ConnectionIO[List[List[VcsEventSet]]] =
+      for {
+        _    <- initTestData
+        pids <- allPids
+        ess  <- pids.traverse(doSelectByProgram(_, 0, 1000))
+      } yield ess.map(_._1)
 
+    "time-chunk events (1)" in go {
+      all.map(_.forall { (es: List[VcsEventSet]) =>
+        es.forall { e =>
+          // no EventSet should be longer than total events * TimeSlice
+          val events   = e.ops.values.sum
+          val duration = e.timestamps._2 - e.timestamps._1
+          duration < events * TimeSlice
+        }
+      })
+    }
+
+    "time-chunk events (2)" in go {
+      all.map(_.forall { (es: List[VcsEventSet]) =>
+        // adjacent eventsets should differ in principals or should be >= TimeSlice apart
+        es.zip(es.tail)
+          .filter { case (e0, e1) => (e0.principals == e1.principals) } 
+          .forall { case (e0, e1) => (e0.timestamps._2 - e1.timestamps._2) > TimeSlice }
+      })
+    }
+
+    "handle paging correctly" in go {
+
+      // drop(1).drop(1).take(1) == drop(2).take(1)
+      def checkPages(pid: SPProgramID): ConnectionIO[Boolean] =
+        for {
+          p2a <- doSelectByProgram(pid, 1, 2).map(_._1.drop(1))
+          p2b <- doSelectByProgram(pid, 2, 1).map(_._1)
+        } yield p2a == p2b
+
+      for {
+        _    <- initTestData
+        pids <- allPids
+        rs   <- pids.traverse(checkPages)
+      } yield rs.forall(_ == true)
+    
+    }
 
   }
 
