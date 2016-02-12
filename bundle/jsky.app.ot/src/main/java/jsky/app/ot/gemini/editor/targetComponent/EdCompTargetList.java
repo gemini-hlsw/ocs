@@ -755,7 +755,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 // another auto group, which is problematic, so we specifically force a manual group to be created
                 // and receive an appropriate name.
                 final String newGroupName     = origGroup.getName().filter(s -> !s.isEmpty()).getOrElse("Manual Group");
-                final GuideGroup newGroup     = GuideGroup.create(newGroupName, origGroup.getAll()).cloneTargets();
+                final GuideGroup newGroup     = origGroup.toManualGroup().setName(newGroupName);
 
                 final TargetEnvironment env   = dataObject.getTargetEnvironment();
                 final List<GuideGroup> groups = new ArrayList<>();

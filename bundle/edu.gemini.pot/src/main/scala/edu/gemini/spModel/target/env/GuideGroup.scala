@@ -256,6 +256,9 @@ case class GuideGroup(grp: GuideGrp) extends java.lang.Iterable[GuideProbeTarget
 
   def isManual: Boolean =
     grp.isManual
+
+  def toManualGroup: GuideGroup =
+    GuideGroup(grp.cloneTargets.toManualGroup)
 }
 
 object GuideGroup extends ((GuideGrp) => GuideGroup) {
