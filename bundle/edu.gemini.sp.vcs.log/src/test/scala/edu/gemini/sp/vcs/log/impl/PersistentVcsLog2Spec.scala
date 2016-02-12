@@ -104,40 +104,6 @@ object PersistentVcsLog2Spec extends Specification {
 
   }
 
-  "log" should {
-
-    def checkLog(op: VcsOp, principals: List[GeminiPrincipal]) =
-      for {
-        _  <- checkSchema("«in memory»")
-        ts <- FC.delay(new Timestamp(System.currentTimeMillis))
-        e  <- doLog(op, ts, pid, principals)
-      } yield {
-        (e.op         must_== op)         and
-        (e.timestamp  must_== ts.getTime) and
-        (e.pid        must_== pid)        and
-        (e.principals must_== principals.toSet)
-      }
-
-    "accurately log a fetch event" in go {
-      checkLog(OpFetch, principals)
-    }
-
-    "accurately log a store event" in go {
-      checkLog(OpStore, principals)
-    }
-
-    "use the anonymous principal if none are given" in go {
-      for {
-        _  <- checkSchema("«in memory»")
-        ts <- FC.delay(new Timestamp(System.currentTimeMillis))
-        e  <- doLog(OpFetch, ts, pid, Nil)
-      } yield {
-        (e.principals must_== Anonymous.toList.toSet)
-      }
-    }
-
-  }
-
   "selectByProgram" should {
  
     val allPids: ConnectionIO[List[SPProgramID]] =
