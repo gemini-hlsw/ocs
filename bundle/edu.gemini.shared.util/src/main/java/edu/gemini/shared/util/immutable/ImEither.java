@@ -98,4 +98,8 @@ public final class ImEither<L,R> implements Serializable {
     public ImEither<R,L> swap() {
         return new ImEither<>(right, left);
     }
+
+    public Option<R> toOption() {
+        return right;
+    }
 }

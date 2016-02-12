@@ -44,6 +44,11 @@ public interface Option<T> extends Iterable<T>, Serializable {
     Option<T> orElse(Option<T> that);
 
     /**
+     * Returns <code>this</code> value if {@link Some} or else an option from the supplier.
+     */
+    Option<T> orElse(final Supplier<Option<T>> supplier);
+
+    /**
      * Gets the value assuming there is one, but otherwise returns
      * <code>null</code>.
      */

@@ -35,6 +35,11 @@ public final class Some<T> implements Option<T> {
     }
 
     @Override
+    public Option<T> orElse(final Supplier<Option<T>> supplier) {
+        return this;
+    }
+
+    @Override
     public T getOrNull() {
         return val;
     }
