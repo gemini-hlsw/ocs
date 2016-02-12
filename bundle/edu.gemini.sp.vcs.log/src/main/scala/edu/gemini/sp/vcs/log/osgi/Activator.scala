@@ -22,7 +22,7 @@ class Activator extends BundleActivator {
     val file:File = new File(OcsVersionUtil.getVersionDir(root, Version.current), "vcs")
     file.mkdirs()
     LOG.info(s"VCS log storage is at ${file.getAbsolutePath}")
-    ctx.registerService(classOf[VcsLog], new PersistentVcsLog(file), null)
+    ctx.registerService(classOf[VcsLog], VcsLog.forDoobie(file).unsafePerformIO, null)
   }
 
   def stop(ctx: BundleContext) {
