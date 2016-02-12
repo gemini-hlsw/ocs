@@ -8,8 +8,14 @@ version := ocsVersion.value.toOsgiVersion
 
 libraryDependencies ++= Seq(
   // NOTE this doesn't work on OSGI, http4s is not OSGi friendly
+  // http4s
   "org.http4s"  %% "http4s-dsl"          % "0.12.0",
   "org.http4s"  %% "http4s-blaze-server" % "0.12.0",
+
+  // Play
+  "com.typesafe.play" %% "play" % "2.4.6",
+  "com.typesafe.play" %% "play-netty-server" % "2.4.6",
+
   "org.scalaz"  %% "scalaz-core" % "7.1.6",
   "org.scalaz"  %% "scalaz-concurrent" % "7.1.6",
   "com.lihaoyi" %% "upickle" % "0.3.8"
@@ -18,7 +24,7 @@ libraryDependencies ++= Seq(
 Revolver.settings
 
 // Class to launch re-start with
-mainClass in Revolver.reStart := Some("edu.gemini.seqexec.web.server.WebServerLauncher")
+mainClass in Revolver.reStart := Some("edu.gemini.seqexec.web.server.play.WebServerLauncher")
 
 // Run FastOptJS on the JS project for reStart
 Revolver.reStart <<= Revolver.reStart dependsOn (fastOptJS in (bundle_edu_gemini_seqexec_web_client, Compile))

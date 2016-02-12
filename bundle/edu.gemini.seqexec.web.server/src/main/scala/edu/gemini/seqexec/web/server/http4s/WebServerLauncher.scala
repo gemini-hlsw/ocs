@@ -1,4 +1,4 @@
-package edu.gemini.seqexec.web.server
+package edu.gemini.seqexec.web.server.http4s
 
 import org.http4s.server.Server
 import org.http4s.server.blaze.BlazeBuilder

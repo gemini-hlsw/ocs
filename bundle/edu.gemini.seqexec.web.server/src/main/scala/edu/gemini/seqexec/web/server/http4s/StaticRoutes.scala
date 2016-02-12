@@ -1,9 +1,9 @@
-package edu.gemini.seqexec.web.server
+package edu.gemini.seqexec.web.server.http4s
 
 import java.io.File
 
-import org.http4s.{StaticFile, Response, Request, HttpService}
 import org.http4s.dsl._
+import org.http4s.{HttpService, Request, Response, StaticFile}
 
 import scalaz.concurrent.Task
 
