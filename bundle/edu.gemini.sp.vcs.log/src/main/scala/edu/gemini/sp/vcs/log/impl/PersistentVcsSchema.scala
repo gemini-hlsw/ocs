@@ -10,7 +10,8 @@ import java.util.logging.Logger
 import edu.gemini.util.security.principal.GeminiPrincipal
 import scala.slick.jdbc.{GetResult, StaticQuery => Q}
 
-trait PersistentVcsSchema extends PersistentVcsMappers {
+trait PersistentVcsSchema {
+  import PersistentVcsMappers._
 
   // Implementor must provide a logger
   def Log: Logger

@@ -10,5 +10,11 @@ case class VcsEventSet(
   ops: Map[VcsOp, Int],
   timestamps: (Long, Long),
   pid: SPProgramID,
-  principals: Set[GeminiPrincipal])
+  principals: Set[GeminiPrincipal]) {
+
+  // the Range toString is useless
+  override def toString =
+    s"VcsEventSet(${ids.min} to ${ids.max}, $ops, $timestamps, $pid, $principals)"
+
+}
 

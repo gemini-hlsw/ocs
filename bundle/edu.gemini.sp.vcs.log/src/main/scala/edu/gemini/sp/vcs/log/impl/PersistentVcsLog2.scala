@@ -1,6 +1,6 @@
-package edu.gemini.sp.vcs.log
-package impl
+package edu.gemini.sp.vcs.log.impl
 
+import edu.gemini.sp.vcs.log._
 import edu.gemini.spModel.core.SPProgramID
 import edu.gemini.util.security.principal.{StaffPrincipal, UserPrincipal, GeminiPrincipal}
 import doobie.imports._
@@ -9,7 +9,8 @@ import java.sql.Timestamp
 import java.util.logging.Logger
 import scalaz._, Scalaz._, effect.IO
 
-object PersistentVcsLog2 extends PersistentVcsMappers {
+object PersistentVcsLog2 {
+  import PersistentVcsMappers._
 
   lazy val Log = Logger.getLogger(getClass.getName)
 
@@ -159,14 +160,14 @@ object PersistentVcsLog2 extends PersistentVcsMappers {
   def doSelectByProgram(pid: SPProgramID, offset: Int, size: Int): ConnectionIO[(List[VcsEventSet], Boolean)] =
     sql"""
       select   E.EVENT_ID, E.OP, E.TIMESTAMP, E.PROGRAM_ID, E.PRINCIPAL_HASH, P.CLASS, P.NAME
-      from     EVENT
+      from     EVENT E
       join     EVENT_PRINCIPAL J on J.EVENT_ID = E.EVENT_ID
       join     PRINCIPAL P on P.PRINCIPAL_ID = J.PRINCIPAL_ID
       where    E.PROGRAM_ID = $pid
-      order by E.TIMESTAMP desc
+      order by E.EVENT_ID desc
     """.query[U].process.chunkBy2 { 
       case (((_, _, ts0, pid0, ph0), _), ((_, _, ts1, pid1, ph1), _)) =>
-        (ts1.getTime - ts0.getTime < TimeSlice) && (pid0 == pid1) && (ph0 == ph1)
+        (ts0.getTime - ts1.getTime < TimeSlice) && (pid0 == pid1) && (ph0 == ph1)
     } .map(decode2)
       .drop(offset)
       .take(size + 1)
@@ -179,7 +180,7 @@ object PersistentVcsLog2 extends PersistentVcsMappers {
   def selectEvent(id: Id[VcsEvent]): ConnectionIO[VcsEvent] = 
     sql"""
       select E.EVENT_ID, E.OP, E.TIMESTAMP, E.PROGRAM_ID, E.PRINCIPAL_HASH, P.CLASS, P.NAME
-      from   EVENT
+      from   EVENT E
       join   EVENT_PRINCIPAL J on J.EVENT_ID = E.EVENT_ID
       join   PRINCIPAL P on P.PRINCIPAL_ID = J.PRINCIPAL_ID
       where  E.EVENT_ID = $id
