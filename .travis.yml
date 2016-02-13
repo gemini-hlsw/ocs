@@ -20,13 +20,11 @@ notifications:
     format: '%{repository}#%{build_number} (%{branch} - %{commit} : %{author}): %{message}'
 before_script:
   - sudo apt-get update && sudo apt-get install oracle-java8-installer
-  - echo $TRAVIS_SECURE_ENV_VARS
   - if [ $TRAVIS_SECURE_ENV_VARS == true ]; then
       svn --username $SVN_USERNAME --password $SVN_PASSWORD --non-interactive co http://source.gemini.edu/software/ocs-credentials $TRAVIS_BUILD_DIR/ocs-credentials;
-      ls $TRAVIS_BUILD_DIR;
       bash $TRAVIS_BUILD_DIR/ocs-credentials/trunk/link.sh -v $TRAVIS_BUILD_DIR;
     fi
   - if [ $TRAVIS_SECURE_ENV_VARS == false ]; then
       cp $TRAVIS_BUILD_DIR/project/OcsCredentials.scala.template $TRAVIS_BUILD_DIR/project/OcsCredentials.scala;
     fi
-script: sbt $TRAVIS_SCALA_VERSION test
+script: sbt $TRAVIS_SCALA_VERSION -Dsbt.log.noformat=true test
