@@ -45,8 +45,8 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     private final AgsContextPublisher _agsPub = new AgsContextPublisher();
     private final TelescopeForm _w;
 
-    // The current selection. Can be None if nothing is selected.
-    private Option<ImEither<SPTarget, IndexedGuideGroup>> _curSelection = None.instance();
+    // The current selection. This will not be defined until after init is run.
+    private ImEither<SPTarget, IndexedGuideGroup> _curSelection;
 
     // A collection of the JMenuItems that allow the addition of guide stars.
     final Map<GuideProbe,Component> _guideStarAdders = new HashMap<>();
@@ -136,11 +136,11 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
      * Simplifications for dealing with the Either representing selection.
      */
     private Option<SPTarget> selectedTarget() {
-        return _curSelection.flatMap(e -> e.swap().toOption());
+        return _curSelection.swap().toOption();
     }
 
     private Option<IndexedGuideGroup> selectedGroup() {
-        return _curSelection.flatMap(ImEither::toOption);
+        return _curSelection.toOption();
     }
 
     /**
@@ -202,14 +202,14 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
      * Auxiliary method to set the selection to the specified target.
      */
     private void setSelectionToTarget(final SPTarget t) {
-        _curSelection = new Some<>(ImEither.left(t));
+        _curSelection = ImEither.left(t);
     }
 
     /**
      * Auxiliary method to set the selection to the specified group.
      */
     private void setSelectionToGroup(final IndexedGuideGroup igg) {
-        _curSelection = new Some<>(ImEither.right(igg));
+        _curSelection = ImEither.right(igg);
     }
 
     /**
@@ -287,6 +287,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         obsComp.addPropertyChangeListener(TargetObsComp.TARGET_ENV_PROP, guidingPanelUpdater);
 
         final TargetEnvironment env = obsComp.getTargetEnvironment();
+        setSelectionToTarget(env.getBase());
         final SPTarget selTarget = TargetSelection.getTargetForNode(env, node).getOrNull();
         manageCurPosIfEnvContainsTarget(selTarget, () -> setSelectionToTarget(selTarget));
 
@@ -609,14 +610,14 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     // Updates the enabled state of the primary guide target button when the target environment changes.
     private final PropertyChangeListener primaryButtonUpdater = new PropertyChangeListener() {
         @Override public void propertyChange(final PropertyChangeEvent evt) {
-            final boolean enabled = _curSelection.map(either -> either.fold(
+            final boolean enabled = _curSelection.fold(
                     t -> {
                         final TargetEnvironment env = getDataObject().getTargetEnvironment();
                         final ImList<GuideProbeTargets> gtList = env.getOrCreatePrimaryGuideGroup().getAllContaining(t);
                         return gtList.nonEmpty() && !selectionIsAutoTarget();
                     },
                     igg -> true
-            )).getOrElse(false);
+            );
             _w.primaryButton.setEnabled(enabled && OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation()));
         }
     };
