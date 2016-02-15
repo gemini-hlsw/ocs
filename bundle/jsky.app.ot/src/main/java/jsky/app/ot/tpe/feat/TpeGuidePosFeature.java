@@ -474,6 +474,10 @@ public class TpeGuidePosFeature extends TpePositionFeature
 
         final TargetEnvironment env = obsComp.getTargetEnvironment();
 
+        // We do not allow deletion of auto guide stars.
+        final GuideGroup        gp  = env.getOrCreatePrimaryGuideGroup();
+        if (gp.isAutomatic()) return None.instance();
+
         final TpePositionMap pm = TpePositionMap.getMap(_iw);
 
         final Iterator<PosMapEntry<SPTarget>> it = pm.getAllPositionMapEntries();
