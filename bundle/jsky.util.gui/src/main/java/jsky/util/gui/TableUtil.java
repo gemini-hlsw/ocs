@@ -1,10 +1,3 @@
-/*
- * Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: TableUtil.java 18053 2009-02-20 20:16:23Z swalker $
- */
-
 package jsky.util.gui;
 
 import javax.swing.*;
@@ -92,7 +85,7 @@ public class TableUtil {
 
             if (!show.isPresent() || show.get()[colIdx]) {
                 final TableCellRenderer cellRenderer = getColumnRenderer(table, colIdx);
-                final TableCellRenderer headerRenderer = Optional.ofNullable(column.getHeaderRenderer()).orElse(cellRenderer);
+                final TableCellRenderer headerRenderer = Optional.ofNullable(column.getHeaderRenderer()).orElse(getHeaderRenderer(table));
 
                 // check the header width
                 final Component headerComponent = headerRenderer.getTableCellRendererComponent(table, column.getHeaderValue(), false, false, -1, colIdx);
