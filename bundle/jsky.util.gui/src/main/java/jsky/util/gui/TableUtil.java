@@ -87,7 +87,7 @@ public class TableUtil {
                 final TableCellRenderer cellRenderer = getColumnRenderer(table, colIdx);
                 final TableCellRenderer headerRenderer = Optional.ofNullable(column.getHeaderRenderer()).orElse(getHeaderRenderer(table));
 
-                // Check the header width if we can.
+                // check the header width
                 final Component headerComponent = headerRenderer.getTableCellRendererComponent(table, column.getHeaderValue(), false, false, -1, colIdx);
                 final int headerWidth           = headerComponent.getPreferredSize().width;
 
