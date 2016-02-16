@@ -36,3 +36,6 @@ OsgiKeys.exportPackage := Seq(
 
 // required for shapeless on 2.10.5
 addCompilerPlugin("org.scalamacros" % "paradise" % "2.0.1" cross CrossVersion.full)
+
+// thread safety issue for object initialization in 2.10 ... this is a workaround
+parallelExecution in Test := false
