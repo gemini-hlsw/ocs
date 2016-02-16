@@ -479,7 +479,8 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
                     // N.B. don't trim, otherwise user can't include space in group name
                     final String name = _curGroup.getName().getOrElse("");
-                    _w.guideGroupName.setValue(name);
+                    if (!_w.guideGroupName.getValue().equals(name))
+                        _w.guideGroupName.setValue(name);
 
                     final boolean editable = OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation());
                     _w.removeButton.setEnabled(editable);
