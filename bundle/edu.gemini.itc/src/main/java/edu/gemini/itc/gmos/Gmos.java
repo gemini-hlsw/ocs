@@ -291,6 +291,12 @@ public abstract class Gmos extends Instrument implements BinningProvider, Spectr
             if (isIfu2() && gp.ccdType() == GmosCommonType.DetectorManufacturer.HAMAMATSU) {
                 throw new RuntimeException("Currently IFU-2 is not supported for Hamamatsu CCD.");
             }
+
+            if ((gp.fpMask().isIFU() || isIfu2()) && gp.spatialBinning() != 1) {
+                throw new RuntimeException("IFU is selected but spatial binning is not 1.\n" +
+                        "   Please select \"Detector binning (spatial direction)\" equal to 1 (no binning)\n" +
+                        "   or deselect the IFU method.");
+            }
         }
 
         if (odp.calculationMethod() instanceof Imaging) {

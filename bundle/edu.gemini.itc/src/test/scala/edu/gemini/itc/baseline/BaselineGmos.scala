@@ -145,7 +145,7 @@ object BaselineGmos {
       AmpGain.HIGH,
       AmpReadMode.SLOW,
       None,
-      2,
+      1, //2,
       2,
       DetectorManufacturer.HAMAMATSU,
       Site.GN),
@@ -158,7 +158,7 @@ object BaselineGmos {
       AmpGain.HIGH,
       AmpReadMode.SLOW,
       None,
-      2,
+      1, //2,
       2,
       DetectorManufacturer.HAMAMATSU,
       Site.GN)
