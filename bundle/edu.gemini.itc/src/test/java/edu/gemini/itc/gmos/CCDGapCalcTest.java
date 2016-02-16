@@ -5,7 +5,9 @@ import org.junit.Test;
 
 /**
  * Testing out calcIfu2Shift code in CCDGapCalc.
- * [Add more details!!!]
+ * CCDGapCalc.java is based on the IRAF script gfoneshift.cl, which takes the central wavelength
+ * and the lpmm and outputs the shift. This is used in the GMOS IFU-2 calculations.
+ * This test was created to compare the output of CCDGapCalc.java to gfoneshift.cl.
  * ...
  */
 public class CCDGapCalcTest {
