@@ -298,7 +298,7 @@ public final class Gnirs extends Instrument implements SpectroscopyInstrument {
     private double correctedCentralWavelength() {
         if (_mode instanceof Imaging) {
             _Filter = Filter.fromFile(getPrefix(), params.filter().name(), getDirectory() + "/");
-            return (int) _Filter.getEffectiveWavelength(); // instead of return params.filter().wavelength(); -OS
+            return (int) _Filter.getEffectiveWavelength();
         } else if (!isXDispUsed()) {
             return params.centralWavelength().toNanometers();
         } else {

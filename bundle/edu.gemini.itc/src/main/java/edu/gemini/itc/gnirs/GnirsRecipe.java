@@ -65,10 +65,6 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
 
     }
 
-
-
-
-// following line was copied from NIRI
     public ItcImagingResult serviceResult(final ImagingResult r) {
         return Recipe$.MODULE$.serviceResult(r);
     }
@@ -267,7 +263,6 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
 
     }
 
-    //imaging section COPIED from NIRI
 
     public ImagingResult calculateImaging() {
         // Module 1b

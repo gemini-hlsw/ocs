@@ -27,7 +27,7 @@ public final class GnirsPrinter extends PrinterBase {
         super(out);
         this.instr     = instr;
         this.recipe     = new GnirsRecipe(p, instr);
-        this.isImaging = p.observation().calculationMethod() instanceof Imaging; //added
+        this.isImaging = p.observation().calculationMethod() instanceof Imaging;
         this.pdp        = pdp;
     }
 
@@ -128,7 +128,7 @@ public final class GnirsPrinter extends PrinterBase {
     }
 
 
-    private void writeImagingOutput(final ImagingResult result, final ItcImagingResult s) {  // copied from NIRI
+    private void writeImagingOutput(final ImagingResult result, final ItcImagingResult s) {
 
         final Gnirs instrument = (Gnirs) result.instrument();
 

@@ -10,7 +10,7 @@ import edu.gemini.spModel.core.WavelengthConversions._
  */
 object BaselineGnirs {
 
-  lazy val Fixtures = KBandSpectroscopy
+  lazy val Fixtures = KBandSpectroscopy ++ KBandImaging
 
   private lazy val KBandSpectroscopy = Fixture.kBandSpcFixtures(List(
     new GnirsParameters(
@@ -52,6 +52,71 @@ object BaselineGnirs {
       2.6.microns,
       SlitWidth.SW_8,
       Fixture.NoAltair)
+
+  ))
+
+  private lazy val KBandImaging = Fixture.kBandImgFixtures(List(
+    new GnirsParameters(
+      PixelScale.PS_005,
+      Filter.K,
+      null,
+      ReadMode.FAINT,
+      CrossDispersed.NO,
+      2.4.microns,
+      SlitWidth.ACQUISITION,
+      Fixture.NoAltair),
+
+    new GnirsParameters(
+      PixelScale.PS_005,
+      Filter.J,
+      null,
+      ReadMode.BRIGHT,
+      CrossDispersed.NO,
+      2.4.microns,
+      SlitWidth.ACQUISITION,
+      Fixture.AltairNgs),
+
+    new GnirsParameters(
+      PixelScale.PS_005,
+      Filter.Y,
+      null,
+      ReadMode.VERY_FAINT,
+      CrossDispersed.NO,
+      2.4.microns,
+      SlitWidth.ACQUISITION,
+      Fixture.AltairLgs),
+
+
+
+    new GnirsParameters(
+      PixelScale.PS_015,
+      Filter.ORDER_4,
+      null,
+      ReadMode.FAINT,
+      CrossDispersed.NO,
+      2.4.microns,
+      SlitWidth.ACQUISITION,
+      Fixture.AltairNgsFL),
+
+    new GnirsParameters(
+      PixelScale.PS_015,
+      Filter.K,
+      null,
+      ReadMode.VERY_BRIGHT,
+      CrossDispersed.NO,
+      2.4.microns,
+      SlitWidth.ACQUISITION,
+      Fixture.AltairNgs),
+
+    new GnirsParameters(
+      PixelScale.PS_015,
+      Filter.K,
+      null,
+      ReadMode.FAINT,
+      CrossDispersed.NO,
+      2.4.microns,
+      SlitWidth.ACQUISITION,
+      Fixture.AltairLgs)
 
   ))
 
