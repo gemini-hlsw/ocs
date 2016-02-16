@@ -284,7 +284,7 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
         // Altair specific section
         final Option<AOSystem> altair;
         if (_gnirsParameters.altair().isDefined()) {
-            final Altair ao = new Altair(instrument.getEffectiveWavelength(), _telescope.getTelescopeDiameter(), IQcalc.getImageQuality(), _gnirsParameters.altair().get(), 0.0);
+            final Altair ao = new Altair(instrument.getEffectiveWavelength(), _telescope.getTelescopeDiameter(), IQcalc.getImageQuality(), _gnirsParameters.altair().get(), 0.1); // Since GNIRS does not have perfect optics, the PSF delivered by Altair is convolved with a ~0.10" Gaussian to reproduce the ~0.12" images which are measured under optimal conditions.
             altair = Option.apply((AOSystem) ao);
         } else {
             altair = Option.empty();

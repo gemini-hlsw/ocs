@@ -1,5 +1,5 @@
-# Temporary (test) transmission file for the GNIRS H-MK filter.
-# Taken from NIRI.
+# Temporary (test) transmission file for the GNIRS Y-MK filter.
+# Copy of NIRI BBF-Y data file.
 
 900.00   0
 900.25   5e-06

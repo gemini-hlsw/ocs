@@ -360,6 +360,7 @@
 				<option value="D_10"> 10 l/mm</option>
 				<option value="D_32" selected="selected"> 32 l/mm</option>
 				<option value="D_111"> 111 l/mm</option>
+				<option value="imaging"> none</option>
 				</select></td>
 
 				<td height="25">Spectrum central wavelength: </td>
@@ -378,7 +379,7 @@
 				<!-- added "Filter" section -OS -->
 				<td height="25">Filter: </td>
 				<td height="25"><select name="Filter" size="1">
-				<option value="X_DISPERSED">none</option>
+				<option value="spectroscopy">spectroscopy</option>
 				<option value="Y">Y-MK: 1.03 µm</option>
 				<option value="J">J-MK: 1.25 µm</option>
 				<option value="ORDER_4">H-MK 1.65 µm</option>
@@ -556,12 +557,18 @@
 		<tbody>
 			<tr>
 				<td colspan="2" height="40" valign="bottom"><b>Calculation method:</b><i><span>(<a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10256','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false">more info</a>)</span></i></td>
+				<i>Select the calculation method (note: second method is not available for spectroscopy)</i></td>
+			</tr>
+			<tr>
+
+			<td><input value="s2n" name="calcMethod" checked="checked" type="radio" /></td>
+			<td>Total S/N ratio resulting from <input name="numExpA" size="5" value="30" type="text" />
+				exposures each having an exposure time of <input name="expTimeA" size="5" value="120" type="text" /> secs and with a fraction <input name="fracOnSourceA" size="4" value="1.0" type="text" /> of exposures that observe the source </td>
 
 			</tr>
 			<tr>
-				<td colspan="2"><input value="s2n" name="calcMethod" type="hidden" />Total S/N ratio resulting 
-				from <input name="numExpA" size="5" value="30" type="text" />
-				exposures each having an exposure time of <input name="expTimeA" size="5" value="120" type="text" /> secs and with a fraction <input name="fracOnSourceA" size="4" value="1.0" type="text" /> of exposures that observe the source</td>
+				<td><input value="intTime" name="calcMethod" type="radio" /></td>
+				<td>Total integration time to achieve a S/N ratio of <input name="sigmaC" size="3" value="5" type="text" /> using an exposure time for each exposure of <input name="expTimeC" size="5" value="120" type="text" /> secs and with a fraction <input name="fracOnSourceC" size="4" value="1.0" type="text" /> of exposures that observe the source </td>
 
 			</tr>
 			<!-- calc method C--><!-- analysis methods-->
@@ -572,11 +579,12 @@
 
 			</tr>
 			<tr>
-				<td colspan="2"><input value="autoAper" name="analysisMethod" checked="checked" type="radio" />
-				Software aperture that gives 'optimum' S/N ratio </td>
+				<td><input value="autoAper" name="analysisMethod" checked="checked" type="radio" /></td>
+				<td>Software aperture that gives 'optimum' S/N ratio </td>
 			</tr>
 			<tr>
-				<td colspan="2"><input value="userAper" name="analysisMethod" type="radio" />  Software aperture of diameter (or slit length) <input name="userAperDiam" size="4" value="2" type="text" /> arcsec </td>
+				<td><input value="userAper" name="analysisMethod" type="radio" /></td>
+				<td>Software aperture of diameter (or slit length) <input name="userAperDiam" size="4" value="2" type="text" /> arcsec </td>
 
 			</tr>
 			<tr>

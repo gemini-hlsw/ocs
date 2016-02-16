@@ -13,6 +13,6 @@ public class GnirsAcquisitionMirror extends TransmissionElement {
     }
 
     public String toString() {
-        return "acquisition mirror";
+        return "Acquisition Mirror";
     }
 }

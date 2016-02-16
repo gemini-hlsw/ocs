@@ -1,16 +1,14 @@
 package edu.gemini.itc.web.html;
 
+import edu.gemini.itc.altair.Altair;
+import edu.gemini.itc.base.AOSystem;
+import edu.gemini.itc.base.ImagingResult;
 import edu.gemini.itc.base.SpectroscopyResult;
-import edu.gemini.itc.altair.Altair; //added
-import edu.gemini.itc.base.AOSystem;  //added
-import edu.gemini.itc.base.ImagingResult;  //added
-import edu.gemini.itc.base.TransmissionElement;  //added
 import edu.gemini.itc.gnirs.Gnirs;
 import edu.gemini.itc.gnirs.GnirsRecipe;
-import edu.gemini.itc.niri.Niri;
 import edu.gemini.itc.shared.*;
 import scala.Option;
-import scalaz.Alpha;
+// import scalaz.Alpha;
 
 import java.io.PrintWriter;
 import java.util.UUID;
@@ -20,21 +18,21 @@ import java.util.UUID;
  */
 public final class GnirsPrinter extends PrinterBase {
 
+    private final GnirsParameters instr;
     private final PlottingDetails pdp;
     private final GnirsRecipe recipe;
-    private final GnirsParameters instr;  //added
-    private final boolean isImaging; //added
+    private final boolean isImaging;
 
     public GnirsPrinter(final ItcParameters p, final GnirsParameters instr, final PlottingDetails pdp, final PrintWriter out) {
         super(out);
-        this.instr     = instr; //added
+        this.instr     = instr;
+        this.recipe     = new GnirsRecipe(p, instr);
         this.isImaging = p.observation().calculationMethod() instanceof Imaging; //added
         this.pdp        = pdp;
-        this.recipe     = new GnirsRecipe(p, instr);
     }
 
     public void writeOutput() {
-        if (isImaging) { // added "if" for imaging case
+        if (isImaging) {
             final ImagingResult result = recipe.calculateImaging();
             final ItcImagingResult s = recipe.serviceResult(result);
             writeImagingOutput(result, s);
@@ -47,9 +45,15 @@ public final class GnirsPrinter extends PrinterBase {
     }
 
     private void writeSpectroscopyOutput(final UUID id, final SpectroscopyResult result, final ItcSpectroscopyResult s) {
-        _println("");
 
         final Gnirs instrument = (Gnirs) result.instrument();
+
+        _println("");
+
+        // Altair specific section
+        // if (result.aoSystem().isDefined()) {
+        //    _println(HtmlPrinter.printSummary((Altair) result.aoSystem().get()));
+        //}
 
         _printSoftwareAperture(result, 1 / instrument.getSlitWidth());
 
@@ -102,6 +106,10 @@ public final class GnirsPrinter extends PrinterBase {
 
             _printFileLink(id, SingleS2NData.instance());
             _printFileLink(id, FinalS2NData.instance());
+
+            printConfiguration(result.parameters(), instrument, result.aoSystem());
+
+            _println(HtmlPrinter.printParameterSummary(pdp));
         }
 // in separate method now
         /*_println("");
@@ -168,17 +176,18 @@ public final class GnirsPrinter extends PrinterBase {
         String s = "Instrument configuration: \n";
         s += HtmlPrinter.opticalComponentsToString(instrument);
 
-        s += "<LI>Focal Plane Mask: " + instrument.getFocalPlaneMask().displayValue() + "\n";
-
-        s += "<LI>Grating: " + instrument.getGrating().displayValue() + "\n"; // REL-469
+        if (p.observation().calculationMethod() instanceof Spectroscopy) {
+            s += "<LI>Focal Plane Mask: " + instrument.getFocalPlaneMask().displayValue() + "\n";
+            s += "<LI>Grating: " + instrument.getGrating().displayValue() + "\n"; // REL-469
+        }
 
         s += "<LI>Read Noise: " + instrument.getReadNoise() + "\n";
         s += "<LI>Well Depth: " + instrument.getWellDepth() + "\n";
         s += "\n";
 
-        s += String.format("<L1> Central Wavelength: %.1f nm\n", instrument.getCentralWavelength());
-        s += "Pixel Size in Spatial Direction: " + instrument.getPixelSize() + " arcsec\n";
         if (p.observation().calculationMethod() instanceof Spectroscopy) {
+            s += String.format("<L1> Central Wavelength: %.1f nm\n", instrument.getCentralWavelength());
+            s += "Pixel Size in Spatial Direction: " + instrument.getPixelSize() + " arcsec\n";
             if (instrument.XDisp_IsUsed()) {
                 s += String.format("Pixel Size in Spectral Direction(Order 3): %.3f nm\n", instrument.getGratingDispersion() / 3);
                 s += String.format("Pixel Size in Spectral Direction(Order 4): %.3f nm\n", instrument.getGratingDispersion() / 4);
@@ -189,6 +198,8 @@ public final class GnirsPrinter extends PrinterBase {
             } else {
                 s += String.format("Pixel Size in Spectral Direction: %.3f nm\n", instrument.getGratingDispersion() / instrument.getOrder());
             }
+        } else {
+            s += "Pixel Size: " + instrument.getPixelSize() + " arcsec\n";
         }
         return s;
     }

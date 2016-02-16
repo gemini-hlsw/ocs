@@ -1,4 +1,5 @@
-# H-blocking filter copied from web
+# Temporary transmission curve, data taken from web for H-blocking filter.
+# Negative values set to zeros.
 1431   0.000000
 1432   0.000000
 1433   0.000080
