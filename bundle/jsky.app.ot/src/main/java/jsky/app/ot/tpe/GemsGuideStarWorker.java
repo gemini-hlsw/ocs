@@ -125,6 +125,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
     }
 
     /**
+     * Used in automatic search.
      * Apply the results of the guide star search to the current observation,
      * setting the selected position angle and guide probe.
      */
@@ -132,6 +133,9 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
         apply(tpe.getContext(), gemsGuideStars.pa().toDegrees(), GuideGroup.createActive(gemsGuideStars.guideGroup().getAll()));
     }
 
+    /**
+     * Used in automatic search.
+     */
     private static void apply(final TpeContext ctx, final double paInDegrees, final GuideGroup autoGroup) {
         final SPInstObsComp inst = ctx.instrument().orNull();
         if (inst != null) {
@@ -152,6 +156,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
     }
 
     /**
+     * Used in manual search.
      * Apply the results of the guide star search to the current observation,
      * setting the selected position angle and guide probes.
      *
@@ -169,6 +174,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
             final List<GuideGroup> guideGroupList = new ArrayList<>();
             int i = 0;
             for (final GemsGuideStars gemsGuideStars : selectedAsterisms) {
+                // TODO: Is this condition correct? i++ == primaryIndex instead?
                 if (i++ == 0) {
                     // Set position angle only for first (primary) group
                     final SPInstObsComp inst = ctx.instrument().orNull();
