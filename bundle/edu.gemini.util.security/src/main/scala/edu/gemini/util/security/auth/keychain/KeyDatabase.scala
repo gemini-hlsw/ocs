@@ -3,7 +3,6 @@ package edu.gemini.util.security.auth.keychain
 import scalaz._
 import Scalaz._
 import scalaz.effect.IO
-import scala.slick.driver.H2Driver.simple._
 import edu.gemini.util.security.principal._
 import java.io.File
 
@@ -52,49 +51,7 @@ object KeyDatabase {
 
     })
 
-  /** Lift an IO action to run inside a Slick callback. */
-  private def liftS[A](d: Database, f: Session => IO[A]): IO[A] =
-    IO(d.withSession((s: Session) => f(s).unsafePerformIO))
-
-  // as an experiment we will try a connection pool here
-  private def db(url: String): IO[Database] =
-    IO {
-      val cpds = new com.mchange.v2.c3p0.ComboPooledDataSource();
-      cpds.setDriverClass("org.h2.Driver")
-      cpds.setJdbcUrl(url)
-      Database.forDataSource(cpds)
-    }
-
-  def apply(dir: File): IO[KeyDatabase] =
-    withDoobie(dir)
-
-  def withSlick(dir: File): IO[KeyDatabase] = {
-    for {
-      p <- IO(dir.getAbsolutePath) // can throw
-      _ <- IO(require(dir.mkdirs() || dir.isDirectory, s"Not a valid directory: $p"))
-      d <- db(s"jdbc:h2:$p/keydb;DB_CLOSE_ON_EXIT=FALSE;TRACE_LEVEL_FILE=4")
-      x <- liftS(d, KeySchema.checkSchema(p))
-    } yield new KeyDatabase {
-
-      def checkPass(p: GeminiPrincipal, pass: String): IO[Option[KeyVersion]] =
-        liftS(d, KeySchema.checkPass(p, pass))
-
-      def setPass(p: GeminiPrincipal, pass: String): IO[KeyVersion] =
-        liftS(d, KeySchema.setPass(p, pass))
-
-      def getVersion(p: GeminiPrincipal): IO[Option[KeyVersion]] =
-        liftS(d, KeySchema.getVersion(p))
-
-      def revokeKey(p: GeminiPrincipal): IO[Unit] =
-        liftS(d, KeySchema.revokeKey(p))
-
-      def backup(backup: File): IO[Unit] =
-        liftS(d, KeySchema.backup(backup))
-
-    }
-  }
-
-  def withDoobie(dir: File): IO[KeyDatabase] = {
+  def apply(dir: File): IO[KeyDatabase] = {
     import doobie.imports._
     for {
       p <- IO(dir.getAbsolutePath) // can throw

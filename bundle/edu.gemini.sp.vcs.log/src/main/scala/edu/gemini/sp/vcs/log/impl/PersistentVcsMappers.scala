@@ -3,7 +3,6 @@ package edu.gemini.sp.vcs.log.impl
 import edu.gemini.util.security.principal._
 import edu.gemini.spModel.core.SPProgramID
 import edu.gemini.sp.vcs.log._
-import scala.slick.lifted.MappedTypeMapper
 import edu.gemini.util.security.principal.AffiliatePrincipal
 import edu.gemini.util.security.principal.ProgramPrincipal
 import edu.gemini.util.security.principal.UserPrincipal
@@ -20,7 +19,6 @@ case class Id[A](n: Int)
 
 // And a companion with a type mapper
 object Id {
-  implicit def mapper[A] = MappedTypeMapper.base[Id[A], Int](_.n, Id(_))
 
   // N.B. the type tag constraint will go away in doobie 0.3
   implicit def idMeta[A](implicit ev: TypeTag[Id[A]]): Meta[Id[A]] = 
@@ -71,16 +69,6 @@ object PersistentVcsMappers {
   }
 
   // Operations are mapped to strings. Indirection here decouples the names.
-  implicit val VcsOpMapper =
-    MappedTypeMapper.base[VcsOp, String]({
-      case OpFetch => "Fetch"
-      case OpStore => "Store"
-    }, {
-      case "Fetch" => OpFetch
-      case "Store" => OpStore
-    })
-
-  // Operations are mapped to strings. Indirection here decouples the names.
   implicit val VcsOpMeta: Meta[VcsOp] =
     Meta[String].nxmap({
       case "Fetch" => OpFetch
@@ -89,10 +77,6 @@ object PersistentVcsMappers {
       case OpFetch => "Fetch"
       case OpStore => "Store"
     })
-
-  // Program ids are mapped to strings
-  implicit val SPProgramIdMapper =
-    MappedTypeMapper.base[SPProgramID, String](_.toString, SPProgramID.toProgramID(_))
 
   // Program ids are mapped to strings
   implicit val SPProgramIDMeta: Meta[SPProgramID] =

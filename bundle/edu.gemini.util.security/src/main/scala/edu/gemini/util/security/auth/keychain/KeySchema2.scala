@@ -13,7 +13,7 @@ import java.util.logging.Logger
 import scalaz._, Scalaz._, effect.IO
 
 object KeySchema2 extends KeyMappers2 {
-  lazy val Log: Logger = java.util.logging.Logger.getLogger(KeySchema.getClass.getName)
+  lazy val Log: Logger = java.util.logging.Logger.getLogger(KeySchema2.getClass.getName)
 
   // H2-specific SqlState
   val TABLE_OR_VIEW_NOT_FOUND = SqlState("42S02")

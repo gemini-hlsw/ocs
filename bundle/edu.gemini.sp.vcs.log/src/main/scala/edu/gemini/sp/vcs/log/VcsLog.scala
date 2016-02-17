@@ -47,7 +47,7 @@ trait VcsLog {
 object VcsLog {
   import scalaz.effect.IO
 
-  def forDoobie(dir: File): IO[VcsLogEx] = {
+  def apply(dir: File): IO[VcsLog] = {
     import impl.PersistentVcsLog2._ 
     import doobie.imports._
     import java.sql.Timestamp
@@ -57,7 +57,7 @@ object VcsLog {
       _ <- IO(require(dir.mkdirs() || dir.isDirectory, s"Not a valid directory: $p"))
       xa = DriverManagerTransactor[IO]("org.h2.Driver", s"jdbc:h2:$p;DB_CLOSE_ON_EXIT=FALSE;TRACE_LEVEL_FILE=4", "", "")
       x <- checkSchema(p).transact(xa)
-    } yield new VcsLogEx {     
+    } yield new VcsLog {     
 
       def archive(f: File): Unit = ???
 
@@ -66,21 +66,8 @@ object VcsLog {
 
       def selectByProgram(pid: SPProgramID, offset: Int, size: Int): (List[VcsEventSet], Boolean) =
         doSelectByProgram(pid, offset, size).transact(xa).unsafePerformIO
-
-      def log(op: VcsOp, time: Long, pid: SPProgramID, principals: Set[GeminiPrincipal]): VcsEvent =
-        doLog(op, new Timestamp(time), pid, principals.toList).transact(xa).unsafePerformIO
     
     }
   }
-
-}
-
-/**
- * This interface is provided for the log migrator for 2014A, which does not rely on the system clock. It can be
- * removed in a future release.
- */
-trait VcsLogEx extends VcsLog {
-
-  def log(op: VcsOp, time:Long, pid: SPProgramID, principals: Set[GeminiPrincipal]): VcsEvent
 
 }
