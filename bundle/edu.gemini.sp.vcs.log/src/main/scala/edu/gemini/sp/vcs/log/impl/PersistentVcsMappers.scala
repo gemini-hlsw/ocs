@@ -11,18 +11,27 @@ import edu.gemini.util.security.principal.AffiliatePrincipal
 import edu.gemini.util.security.principal.ProgramPrincipal
 import edu.gemini.util.security.principal.UserPrincipal
 
+import scala.reflect.runtime.universe.TypeTag
+import doobie.imports._
+
+
+// A typesafe Id
+case class Id[A](n: Int)
+
+// And a companion with a type mapper
+object Id {
+  implicit def mapper[A] = MappedTypeMapper.base[Id[A], Int](_.n, Id(_))
+
+  // N.B. the type tag constraint will go away in doobie 0.3
+  implicit def idMeta[A](implicit ev: TypeTag[Id[A]]): Meta[Id[A]] = 
+    Meta[Int].xmap(Id(_), _.n)
+
+}
+
 /**
  * Some helpers for mapping VCS model objects to database columns.
  */
-trait PersistentVcsMappers {
-
-  // A typesafe Id
-  case class Id[A](n: Int)
-
-  // And a companion with a type mapper
-  object Id {
-    implicit def mapper[A] = MappedTypeMapper.base[Id[A], Int](_.n, Id(_))
-  }
+object PersistentVcsMappers {
 
   // Indirection for principal type names
   val Affiliate = "Affiliate"
@@ -71,9 +80,22 @@ trait PersistentVcsMappers {
       case "Store" => OpStore
     })
 
+  // Operations are mapped to strings. Indirection here decouples the names.
+  implicit val VcsOpMeta: Meta[VcsOp] =
+    Meta[String].nxmap({
+      case "Fetch" => OpFetch
+      case "Store" => OpStore
+    }, {
+      case OpFetch => "Fetch"
+      case OpStore => "Store"
+    })
+
   // Program ids are mapped to strings
   implicit val SPProgramIdMapper =
     MappedTypeMapper.base[SPProgramID, String](_.toString, SPProgramID.toProgramID(_))
 
+  // Program ids are mapped to strings
+  implicit val SPProgramIDMeta: Meta[SPProgramID] =
+    Meta[String].nxmap(SPProgramID.toProgramID, _.toString)
 
 }
