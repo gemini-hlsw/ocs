@@ -9,6 +9,7 @@ import edu.gemini.spModel.core._
 import edu.gemini.spModel.core.Affiliate.CHILE
 import java.io.File
 import java.sql.Timestamp
+import java.util.TimeZone
 
 object PersistentVcsLog2Spec extends Specification {
   import PersistentVcsLog2._
@@ -32,8 +33,18 @@ object PersistentVcsLog2Spec extends Specification {
     f.transact(xa).ensuring(sql"SHUTDOWN IMMEDIATELY".update.run.transact(xa).attempt).unsafePerformIO
   }
 
+  // Read in the test database and offset the event timestamps to what they would be if they had
+  // been read with a local timezone of PST, which is the timezone where the example data was
+  // written. This ensures that the hardcoded values below match what's in the db.
   val initTestData: ConnectionIO[Unit] =
-    sql"runscript from 'classpath:/testdb.sql' charset 'utf-8'".update.run *> checkSchema("«in memory»")
+    for {
+      now <- FC.delay(System.currentTimeMillis)
+      _   <- sql"runscript from 'classpath:/testdb.sql' charset 'utf-8'".update.run
+      pst <- FC.delay(TimeZone.getTimeZone("PST").getOffset(now))
+      loc <- FC.delay(TimeZone.getDefault.getOffset(now))
+      _   <- sql"update event e set e.timestamp = timestampadd('MS', ${ loc - pst }, e.timestamp)".update.run
+      _   <- checkSchema("«in memory»")
+    } yield ()
 
   "compatibility" should {
 
