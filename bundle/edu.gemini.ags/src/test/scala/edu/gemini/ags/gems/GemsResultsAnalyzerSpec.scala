@@ -58,13 +58,13 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
       val expectedResults = if (tipTiltMode == GemsTipTiltMode.both) 4 else 2
       results should have size expectedResults
 
-      results.zipWithIndex.foreach { case (r, i) =>
-        System.out.println("Result #" + i)
-        System.out.println(" Criteria:" + r.criterion)
-        System.out.println(" Results size:" + r.results.size)
-      }
+      // results.zipWithIndex.foreach { case (r, i) =>
+      //   System.out.println("Result #" + i)
+      //   System.out.println(" Criteria:" + r.criterion)
+      //   System.out.println(" Results size:" + r.results.size)
+      // }
 
-      System.out.println("gems results: size = " + gemsGuideStars.size)
+      // System.out.println("gems results: size = " + gemsGuideStars.size)
       gemsGuideStars should have size 247
 
       val result = gemsGuideStars.head
@@ -119,13 +119,13 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
       val expectedResults = if (tipTiltMode == GemsTipTiltMode.both) 4 else 2
       results should have size expectedResults
 
-      results.zipWithIndex.foreach { case (r, i) =>
-        System.out.println("Result #" + i)
-        System.out.println(" Criteria:" + r.criterion)
-        System.out.println(" Results size:" + r.results.size)
-      }
+      // results.zipWithIndex.foreach { case (r, i) =>
+      //   System.out.println("Result #" + i)
+      //   System.out.println(" Criteria:" + r.criterion)
+      //   System.out.println(" Results size:" + r.results.size)
+      // }
 
-      System.out.println("gems results: size = " + gemsGuideStars.size)
+      // System.out.println("gems results: size = " + gemsGuideStars.size)
       gemsGuideStars should have size 135
 
       val result = gemsGuideStars.head
@@ -180,13 +180,13 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
       val expectedResults = if (tipTiltMode == GemsTipTiltMode.both) 4 else 2
       results should have size expectedResults
 
-      results.zipWithIndex.foreach { case (r, i) =>
-        System.out.println("Result #" + i)
-        System.out.println(" Criteria:" + r.criterion)
-        System.out.println(" Results size:" + r.results.size)
-      }
+      // results.zipWithIndex.foreach { case (r, i) =>
+      //   System.out.println("Result #" + i)
+      //   System.out.println(" Criteria:" + r.criterion)
+      //   System.out.println(" Results size:" + r.results.size)
+      // }
 
-      System.out.println("gems results: size = " + gemsGuideStars.size)
+      // System.out.println("gems results: size = " + gemsGuideStars.size)
       gemsGuideStars should have size 98
 
       val result = gemsGuideStars.head
@@ -241,13 +241,13 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
       val expectedResults = if (tipTiltMode == GemsTipTiltMode.both) 4 else 2
       results should have size expectedResults
 
-      results.zipWithIndex.foreach { case (r, i) =>
-        System.out.println("Result #" + i)
-        System.out.println(" Criteria:" + r.criterion)
-        System.out.println(" Results size:" + r.results.size)
-      }
+      // results.zipWithIndex.foreach { case (r, i) =>
+      //   System.out.println("Result #" + i)
+      //   System.out.println(" Criteria:" + r.criterion)
+      //   System.out.println(" Results size:" + r.results.size)
+      // }
 
-      System.out.println("gems results: size = " + gemsGuideStars.size)
+      // System.out.println("gems results: size = " + gemsGuideStars.size)
       gemsGuideStars should have size 54
 
       val result = gemsGuideStars.head

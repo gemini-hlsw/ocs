@@ -131,10 +131,10 @@ object GemsResultsAnalyzer {
   }
 
   private def printResults(result: List[GemsGuideStars]) {
-    Log.info("Results:")
-    result.zipWithIndex.foreach { case (s, i) =>
-      Log.info(s"result #$i : $s")
-    }
+    // Log.info("Results:")
+    // result.zipWithIndex.foreach { case (s, i) =>
+    //   Log.info(s"result #$i : $s")
+    // }
   }
 
   private def sortResultsByRanking(list: List[GemsGuideStars]): List[GemsGuideStars] = {

@@ -87,8 +87,8 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
   protected [ags] def select(ctx: ObsContext, mt: MagnitudeTable, candidates: List[SiderealTarget]): Option[AgsStrategy.Selection] = {
 
     // Temporary for Andy's tests.
-    def feedback(feedback: => String): Unit =
-      println(s"AGS $feedback")
+    def feedback(feedback: => String): Unit = ()
+      // println(s"AGS $feedback")
 
     def selectMinVigetting(vprobe: VProbe, allValid: List[(ObsContext, List[SiderealTarget])]): Option[AgsStrategy.Selection] = {
 

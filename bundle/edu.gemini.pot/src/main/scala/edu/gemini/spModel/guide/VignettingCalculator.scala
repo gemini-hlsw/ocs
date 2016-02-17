@@ -59,9 +59,9 @@ sealed trait VignettingCalculator {
         case a :: as =>
           val vignetting = calc(f(a))
           if (curMin.forall(_._2 > vignetting)) {
-            curMin.foreach { case (t,d) =>
-              println(f"AGS rejecting ${formatCoordinates(f(t))}. Vignettes ${d*100}%.2f%%.")
-            }
+            // curMin.foreach { case (t,d) =>
+            //   println(f"AGS rejecting ${formatCoordinates(f(t))}. Vignettes ${d*100}%.2f%%.")
+            // }
             val newMin = Some((a, vignetting))
             if (vignetting == 0.0) newMin else go(as, newMin)
           } else go(as, curMin)
