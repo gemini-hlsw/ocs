@@ -2,7 +2,6 @@ package edu.gemini.sp.vcs.log.osgi
 
 import org.osgi.framework.{BundleActivator, BundleContext}
 import edu.gemini.sp.vcs.log.VcsLog
-import edu.gemini.sp.vcs.log.impl.PersistentVcsLog
 import edu.gemini.util.osgi.ExternalStorage.getExternalDataFile
 import java.io.File
 import java.util.logging.Logger
