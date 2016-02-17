@@ -104,3 +104,4 @@ At least 2 bundles need to be shared via a maven repository for use on other pro
 You need to setup your credentials for the repository adding an sbt file, e.g. `artifactory.sbt` to your sbt settings at `~/.sbt/0.13/` with the following content
 
 `credentials += Credentials("Artifactory Realm", "<artifactory host>", "<username>", "<pwd>")`
+
