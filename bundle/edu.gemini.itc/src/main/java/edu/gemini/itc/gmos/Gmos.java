@@ -291,12 +291,6 @@ public abstract class Gmos extends Instrument implements BinningProvider, Spectr
             if (isIfu2() && gp.ccdType() == GmosCommonType.DetectorManufacturer.HAMAMATSU) {
                 throw new RuntimeException("Currently IFU-2 is not supported for Hamamatsu CCD.");
             }
-
-            if ((gp.fpMask().isIFU() || isIfu2()) && gp.spatialBinning() != 1) {
-                throw new RuntimeException("IFU is selected but spatial binning is not 1.\n" +
-                        "   Please select \"Detector binning (spatial direction)\" equal to 1 (no binning)\n" +
-                        "   or deselect the IFU method.");
-            }
         }
 
         if (odp.calculationMethod() instanceof Imaging) {
@@ -336,6 +330,10 @@ public abstract class Gmos extends Instrument implements BinningProvider, Spectr
             // How to display gaps in proper location for IFU-2 case? Currently we don't display them at all
             // in the wavelength charts. They are displayed in the pixel space chart for IFU-2 only.
             if (isIfu2()) add(new ItcWarning("Chip gaps are not shown in wavelength charts in IFU-2 mode."));
+
+            if ((gp.fpMask().isIFU() || isIfu2()) && gp.spatialBinning() != 1) {
+                add (new ItcWarning("Spatial binning is strongly discouraged with IFU observations."));
+            }
         }};
     }
 

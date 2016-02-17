@@ -72,6 +72,14 @@ public final class GmosPrinter extends PrinterBase {
 //            _printPeakPixelInfo(s.ccd(ccdIndex));
 //            _printWarnings(s.ccd(ccdIndex).warnings());
 //        }
+        for (final Gmos ccd : ccdArray) {
+            if (ccdArray.length > 1) {
+                printCcdTitle(ccd);
+            }
+            final int ccdIndex = ccd.getDetectorCcdIndex();
+            _printPeakPixelInfo(s.ccd(ccdIndex));
+            _printWarnings(s.ccd(ccdIndex).warnings());
+        }
 
         _print("<HR align=left SIZE=3>");
 
@@ -93,6 +101,7 @@ public final class GmosPrinter extends PrinterBase {
                 _printImageLink(id, SignalPixelChart.instance(), i, pdp);
                 _println("");
             }
+
         }
 
         printConfiguration(results[0].parameters(), mainInstrument);

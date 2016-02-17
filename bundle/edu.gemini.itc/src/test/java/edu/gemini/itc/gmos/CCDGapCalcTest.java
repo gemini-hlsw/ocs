@@ -19,7 +19,6 @@ public class CCDGapCalcTest {
         final double actualResult1  = CCDGapCalc.calcIfu2Shift(750.0, 150.0);
         final double expectedResult1 = 3645.34948931;           // Taken from gfoneshift in PYRAF
 
-        Assert.assertTrue("this is true", true);
         Assert.assertEquals("well this should work", expectedResult0, actualResult0, 0.1);   // 20150814: 0.0172 difference
         Assert.assertEquals("well this should work", expectedResult1, actualResult1, 0.1);     // 20150814: 0.0288 difference-
     }
