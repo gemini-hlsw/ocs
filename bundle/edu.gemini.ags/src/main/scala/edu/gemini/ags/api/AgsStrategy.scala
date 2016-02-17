@@ -96,7 +96,10 @@ object AgsStrategy {
       val oldGuideEnvironment = env.getGuideEnvironment
       val oldGuideEnv         = oldGuideEnvironment.guideEnv
 
-      if (oldGuideEnv.auto =/= newAuto) {
+      // SPTargets are compared by references, so we extract the names and compare.
+      def extractNames(auto: AutomaticGroup) = auto.targetMap.map(_.getTarget.getName)
+
+      if (extractNames(oldGuideEnv.auto) != extractNames(newAuto)) {
         val newGuideEnv = oldGuideEnv.copy(auto = newAuto)
         val newGuideEnvironment = oldGuideEnvironment.copy(guideEnv = newGuideEnv)
         env.setGuideEnvironment(newGuideEnvironment)
