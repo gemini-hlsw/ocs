@@ -2,7 +2,6 @@ package edu.gemini.sp.vcs.log.osgi
 
 import org.osgi.framework.{BundleActivator, BundleContext}
 import edu.gemini.sp.vcs.log.VcsLog
-import edu.gemini.sp.vcs.log.impl.PersistentVcsLog
 import edu.gemini.util.osgi.ExternalStorage.getExternalDataFile
 import java.io.File
 import java.util.logging.Logger
@@ -22,7 +21,7 @@ class Activator extends BundleActivator {
     val file:File = new File(OcsVersionUtil.getVersionDir(root, Version.current), "vcs")
     file.mkdirs()
     LOG.info(s"VCS log storage is at ${file.getAbsolutePath}")
-    ctx.registerService(classOf[VcsLog], VcsLog.forDoobie(file).unsafePerformIO, null)
+    ctx.registerService(classOf[VcsLog], VcsLog(file).unsafePerformIO, null)
   }
 
   def stop(ctx: BundleContext) {
