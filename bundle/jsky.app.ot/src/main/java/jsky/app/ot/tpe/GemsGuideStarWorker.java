@@ -179,14 +179,25 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
                 }
                 guideGroupList.add(gemsGuideStars.guideGroup());
             }
+
+            // Note that the index is off by 1 to account for the auto group.
+            final GuideEnvironment   geOrig     = env.getGuideEnvironment();
+            final ImList<GuideGroup> gemsGroups = DefaultImList.create(guideGroupList);
+            final Option<GuideGroup> autoGpOpt  = geOrig.getGroup(0);
+
+            final ImList<GuideGroup> newGroups  = autoGpOpt.map(autoGp ->
+                    DefaultImList.create(autoGp).append(gemsGroups)
+            ).getOrElse(gemsGroups);
+
+            // If there WAS an index, the primary is now off by 1.
+            final int idx = primaryIndex + (autoGpOpt.isDefined() ? 1 : 0);
+
             if (guideGroupList.size() == 0) {
                 targetObsComp.setTargetEnvironment(env.setGuideEnvironment(env.getGuideEnvironment().setOptions(
-                        DefaultImList.create(guideGroupList))));
+                        newGroups)));
             } else {
-                // TODO: This does not work. The primary index passed here is the primary index of the asterism
-                // TODO: in the list of results, and not the primary guide group in the target env.
                 targetObsComp.setTargetEnvironment(env.setGuideEnvironment(env.getGuideEnvironment().setOptions(
-                        DefaultImList.create(guideGroupList)).setPrimaryIndex(primaryIndex)));
+                        newGroups).setPrimaryIndex(idx)));
             }
             ctx.targets().commit();
         }
