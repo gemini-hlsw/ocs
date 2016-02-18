@@ -175,10 +175,13 @@ public final class TargetSelection {
         return Selection.toSelections(env).find(sel -> sel.getTarget().exists(target::equals)).map(sel -> sel.index);
     }
 
-    public static Option<Integer> indexOfGuideGroup(final TargetEnvironment env,
-                                                    final GuideGroup guideGroup) {
+    /**
+     * Given an index of a guide group in the list of all guide groups, find the corresponding node index.
+     */
+    public static Option<Integer> indexOfGuideGroupByIndex(final TargetEnvironment env,
+                                                           final int guideGroupIndex) {
         final ImList<GuideGroupSelection> selections = GuideGroupSelection.toGuideGroupSelections(env);
-        return selections.find(ggs -> ggs.getGuideGroup().exists(guideGroup::equals)).map(GuideGroupSelection::getIndex);
+        return selections.getOption(guideGroupIndex).map(GuideGroupSelection::getIndex);
     }
 
     private static Option<Selection> selectionAtIndex(final TargetEnvironment env, final int index) {
@@ -210,14 +213,14 @@ public final class TargetSelection {
         // Look for the entry numbered idx in the selections, and if it exists, return it as an IndexedGuideGroup
         // with its index amongst all guide groups.
         return selections.zipWithIndex().find(tup -> tup._1().getIndex() == idx)
-                .map(tup -> IndexedGuideGroup$.MODULE$.apply(tup._2(), tup._1().guideGroup));
+                .map(tup -> new IndexedGuideGroup(tup._2(), tup._1().guideGroup));
     }
 
     /**
      * For a given guide group, find the corresponding node in the list if it exists, and set it as the index.
      */
-    public static void setGuideGroup(final TargetEnvironment env, final ISPNode node, final GuideGroup gg) {
-        setIndex(node, indexOfGuideGroup(env, gg));
+    public static void setGuideGroupByIndex(final TargetEnvironment env, final ISPNode node, final int index) {
+        setIndex(node, indexOfGuideGroupByIndex(env, index));
     }
 
     public static void listenTo(final ISPNode node, final PropertyChangeListener listener) {

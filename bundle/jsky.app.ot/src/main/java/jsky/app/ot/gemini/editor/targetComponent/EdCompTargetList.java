@@ -510,6 +510,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             final ImList<GuideGroup> oldGroups = ge.getOptions();
             final int newGroupIdx              = oldGroups.size();
             final GuideGroup newGroup          = GuideGroup.create("Manual Group");
+            final IndexedGuideGroup igg        = new IndexedGuideGroup(newGroupIdx, newGroup);
             final ImList<GuideGroup> newGroups = oldGroups.append(newGroup);
 
             // OT-34: make new group primary and select it
@@ -517,8 +518,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             obsComp.setTargetEnvironment(env.setGuideEnvironment(ge.setOptions(newGroups)
                     .setPrimaryIndex(newGroupIdx)));
 
-            // expand new group tree node
-            positionTable.selectGroup(IndexedGuideGroup$.MODULE$.apply(newGroupIdx,newGroup));
+            positionTable.selectGroup(igg);
         }
     }
 
@@ -564,48 +564,45 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         }
     };
 
-    private final PropertyChangeListener selectionListener = new PropertyChangeListener() {
-        @Override public void propertyChange(final PropertyChangeEvent evt) {
-            final ISPObsComponent node = getContextTargetObsComp();
-            final TargetEnvironment env = getDataObject().getTargetEnvironment();
-            final Option<SPTarget> targetOpt = TargetSelection.getTargetForNode(env, node);
+    private void setSelectionFromNode() {
+        final ISPObsComponent node = getContextTargetObsComp();
+        final TargetEnvironment env = getDataObject().getTargetEnvironment();
+        final Option<SPTarget> targetOpt = TargetSelection.getTargetForNode(env, node);
+        final Option<IndexedGuideGroup> iggOpt = TargetSelection.getIndexedGuideGroupForNode(env, node);
 
-            // We must be careful here to make sure the _curPos \/ _curGroup property is maintained, i.e. exactly
-            // one of the two must be defined and the other null.
-            if (targetOpt.isDefined()) {
-                // _curGroup = null is handled in function.
-                targetOpt.foreach(target -> manageCurPosIfEnvContainsTarget(target, () -> setSelectionToTarget(target)));
+        // If a target, process it.
+        targetOpt.foreach(target -> manageCurPosIfEnvContainsTarget(target, () -> setSelectionToTarget(target)));
+
+        // If it is a guide group, process it.
+        iggOpt.filter(igg -> env.getGroups().contains(igg.group())).foreach(igg -> {
+            selectedTarget().foreach(t -> t.deleteWatcher(posWatcher));
+
+            setSelectionToGroup(igg);
+
+            _w.guideGroupPanel.setVisible(true);
+            _w.detailEditor.setVisible(false);
+
+            // N.B. don't trim, otherwise user can't include space in group name
+            final String name;
+            final boolean enabled;
+            if (selectionIsAutoGroup()) {
+                // TODO: Possibly change this for different AutomaticGroup types?
+                name = "Automatic Group";
+                enabled = false;
             } else {
-                final Option<IndexedGuideGroup> iggOpt = TargetSelection.getIndexedGuideGroupForNode(env, node);
-                iggOpt.filter(igg -> env.getGroups().contains(igg.group())).foreach(igg -> {
-                    selectedTarget().foreach(t -> t.deleteWatcher(posWatcher));
-
-                    setSelectionToGroup(igg);
-
-                    _w.guideGroupPanel.setVisible(true);
-                    _w.detailEditor.setVisible(false);
-
-                    // N.B. don't trim, otherwise user can't include space in group name
-                    final String name;
-                    final boolean enabled;
-                    if (selectionIsAutoGroup()) {
-                        // TODO: Possibly change this for different AutomaticGroup types?
-                        name = "Automatic Group";
-                        enabled = false;
-                    } else {
-                        name = igg.group().getName().getOrElse("");
-                        enabled = true;
-                    }
-                    if (!_w.guideGroupName.getValue().equals(name))
-                        _w.guideGroupName.setValue(name);
-                    _w.guideGroupName.setEnabled(enabled);
-
-                    updateUIForGroup();
-                    updateGuideStarAdders();
-                });
+                name = igg.group().getName().getOrElse("");
+                enabled = true;
             }
-        }
-    };
+            if (!_w.guideGroupName.getValue().equals(name))
+                _w.guideGroupName.setValue(name);
+            _w.guideGroupName.setEnabled(enabled);
+
+            updateUIForGroup();
+            updateGuideStarAdders();
+        });
+    }
+
+    private final PropertyChangeListener selectionListener = e -> setSelectionFromNode();
 
     // Updates the enabled state of the primary guide target button when the target environment changes.
     private final PropertyChangeListener primaryButtonUpdater = new PropertyChangeListener() {
@@ -661,21 +658,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         // Permitted changes were made only if envNewOpt is defined.
         envNewOpt.foreach(envNew -> {
             getDataObject().setTargetEnvironment(envNew);
-
-            // If we have a selected target, then process it accordingly.
-            final Option<SPTarget> selTargetOpt = TargetSelection.getTargetForNode(envNew, getNode());
-            selTargetOpt.filter(t -> envNew.getTargets().contains(t)).foreach(selTarget -> {
-                // Remove any watchers on the currently selected position.
-                selectedTarget().foreach(t -> t.deleteWatcher(posWatcher));
-
-                // Set the current selection to the new target.
-                setSelectionToTarget(selTarget);
-
-                // Add the watcher to the currently selected position.
-                selectedTarget().foreach(t -> t.addWatcher(posWatcher));
-            });
-
-            refreshAll();
+            setSelectionFromNode();
         });
     };
 
