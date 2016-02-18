@@ -908,7 +908,7 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
     // Returns true if the new primary guide group should be set, false to cancel
     // the operation.
     boolean confirmGroupChange(final GuideGroup oldPrimary, final GuideGroup newPrimary) {
-        final List<OffsetPosList<OffsetPosBase>> posLists = OffsetUtil.allOffsetPosLists(owner.getNode());
+        final List<OffsetPosList<OffsetPosBase>> posLists = OffsetUtil.allOffsetPosLists(owner.getContextObservation());
         if (!posLists.isEmpty()) {
             final SortedSet<GuideProbe> oldGuideProbes = oldPrimary.getReferencedGuiders();
             final SortedSet<GuideProbe> newGuideProbes = newPrimary.getReferencedGuiders();
