@@ -122,7 +122,7 @@ public final class Gnirs extends Instrument implements SpectroscopyInstrument {
 
         //Select filter depending on if Cross dispersion is used.
         if (_mode instanceof Imaging) {
-            _Filter = Filter.fromFile(getPrefix(), gp.filter().get().name(), getDirectory() + "/");
+            _Filter = Filter.fromFile(getPrefix(), getFilter().name(), getDirectory() + "/");
         } else if (_XDisp) {
             _filterUsed = "XD";
             _Filter = Filter.fromFile(getPrefix(), _filterUsed, getDirectory() + "/");
@@ -155,14 +155,14 @@ public final class Gnirs extends Instrument implements SpectroscopyInstrument {
 
         if (_mode instanceof Spectroscopy) {
             _gratingOptics = new GnirsGratingOptics(
-                    getDirectory() + "/" + getPrefix(), _grating.get(),
+                    getDirectory() + "/" + getPrefix(), getGrating(),
                     _centralWavelength,
                     _detector.getDetectorPixels(),
                     1,
                     isLongCamera() ? LONG_CAMERA_SCALE_FACTOR : 1,
                     1);
 
-            if (_grating.equals(Disperser.D_10) && !isLongCamera())
+            if (_grating.equals(Option.apply(Disperser.D_10)) && !isLongCamera())
                 throw new RuntimeException("The grating " + _grating.get() + " cannot be used with the " +
                         "0.15\" arcsec/pix (Short) camera.\n" +
                         "  Please either change the camera or the grating.");
@@ -171,7 +171,7 @@ public final class Gnirs extends Instrument implements SpectroscopyInstrument {
                 if ((_Filter.getStart() >= _gratingOptics.getEnd()) ||
                         (_Filter.getEnd() <= _gratingOptics.getStart())) {
                     throw new RuntimeException("The " + _filterUsed + " filter" +
-                            " and the " + _grating.get() +
+                            " and the " + getGrating() +
                             " do not overlap with the requested wavelength.\n" +
                             " Please select a different filter, grating or wavelength.");
                 }
@@ -179,9 +179,14 @@ public final class Gnirs extends Instrument implements SpectroscopyInstrument {
         addComponent(_detector);
     }
 
+    /**
+     * Gets the disperser for the given order.
+     * @param order
+     * @return
+     */
     public edu.gemini.itc.base.Disperser disperser(final int order) {
         return new GnirsGratingOptics(
-                getDirectory() + "/" + getPrefix(), _grating.get(),
+                getDirectory() + "/" + getPrefix(), getGrating(),
                 _centralWavelength,
                 _detector.getDetectorPixels(),
                 order,
@@ -243,8 +248,33 @@ public final class Gnirs extends Instrument implements SpectroscopyInstrument {
         return INSTR_PREFIX;
     }
 
+    /**
+     * Returns the selected imaging filter.
+     *
+     * Note that the filter is only defined for imaging calculations.
+     * Trying to get a filter for spectroscopy will throw an error.
+     */
+    public GNIRSParams.Filter getFilter() {
+        if (params.filter().isEmpty()) {
+            throw new RuntimeException("No imaging filter selected");
+        } else {
+            return params.filter().get();
+        }
+    }
+
+    /**
+     * Returns the selected grating.
+     *
+     * Note that the disperser (grating) is only defined for spectroscopy calculations.
+     * Trying to get a disperser for imaging will throw an error.
+     */
+
     public Disperser getGrating() {
-        return _grating.get();
+        if (_grating.isEmpty()) {
+            throw new RuntimeException("No disperser selected");
+        } else {
+            return _grating.get();
+        }
     }
 
     public double getGratingDispersion() {
@@ -293,13 +323,13 @@ public final class Gnirs extends Instrument implements SpectroscopyInstrument {
     }
 
     public TransmissionElement getGratingOrderNTransmission(int order) {
-        return GnirsGratingsTransmission.getOrderNTransmission(_grating.get(), order);
+        return GnirsGratingsTransmission.getOrderNTransmission(getGrating(), order);
     }
 
     private double correctedCentralWavelength() {
         if (_mode instanceof Imaging) {
-            _Filter = Filter.fromFile(getPrefix(), params.filter().get().name(), getDirectory() + "/");
-            return (int) _Filter.getEffectiveWavelength();
+            _Filter = Filter.fromFile(getPrefix(), getFilter().name(), getDirectory() + "/");
+            return _Filter.getEffectiveWavelength();
         } else if (!isXDispUsed()) {
             return params.centralWavelength().toNanometers();
         } else {
