@@ -288,9 +288,6 @@ public abstract class Gmos extends Instrument implements BinningProvider, Spectr
                     throw new RuntimeException("Slit width for the custom mask is not known.");
             }
 
-            if (isIfu2() && gp.ccdType() == GmosCommonType.DetectorManufacturer.HAMAMATSU) {
-                throw new RuntimeException("Currently IFU-2 is not supported for Hamamatsu CCD.");
-            }
         }
 
         if (odp.calculationMethod() instanceof Imaging) {

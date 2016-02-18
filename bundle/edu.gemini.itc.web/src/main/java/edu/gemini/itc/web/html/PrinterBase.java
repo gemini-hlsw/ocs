@@ -130,7 +130,7 @@ public abstract class PrinterBase {
 
     protected void _printWarnings(final scala.collection.immutable.Seq<ItcWarning> warnings) {
         for (final ItcWarning w : JavaConversions.asJavaList(warnings)) {
-            _print("\n<b >WARNING: </b>" + w.msg());
+            _print("Warning: " + w.msg());
         }
         _println("");
     }
