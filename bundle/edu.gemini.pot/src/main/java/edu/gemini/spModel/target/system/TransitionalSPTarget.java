@@ -2,6 +2,7 @@ package edu.gemini.spModel.target.system;
 
 import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.util.immutable.ImList;
+import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.core.SpatialProfile;
 import edu.gemini.spModel.core.SpectralDistribution;
 import edu.gemini.spModel.target.WatchablePos;
@@ -49,6 +50,10 @@ public abstract class TransitionalSPTarget extends WatchablePos {
     public void putMagnitude(final Magnitude mag) {
         getTarget().putMagnitude(mag);
         _notifyOfUpdate();
+    }
+
+    public Option<Magnitude> getMagnitude(final Magnitude.Band band) {
+        return getTarget().getMagnitude(band);
     }
 
     public void setMagnitudes(final ImList<Magnitude> magnitudes) {

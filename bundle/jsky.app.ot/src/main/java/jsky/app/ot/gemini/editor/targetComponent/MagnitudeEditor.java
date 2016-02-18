@@ -165,7 +165,7 @@ public class MagnitudeEditor implements TelescopePosEditor {
 
         public void setTarget(SPTarget target, Mode mode) {
             Option<Magnitude> magOpt = None.instance();
-            if (target != null) magOpt = target.getTarget().getMagnitude(band);
+            if (target != null) magOpt = target.getMagnitude(band);
 
             // Update visibility based upon whether the target has a
             // corresponding magnitude value for this band.
@@ -477,7 +477,7 @@ public class MagnitudeEditor implements TelescopePosEditor {
     }
 
     void addBand(Magnitude.Band b) {
-        final Option<Magnitude> magOpt = target.getTarget().getMagnitude(b);
+        final Option<Magnitude> magOpt = target.getMagnitude(b);
         if (!magOpt.isEmpty()) return; // shouldn't happen ...
 
         final Magnitude newMag = new Magnitude(b, Magnitude.UNDEFINED_MAG, 0, b.defaultSystem);
@@ -491,7 +491,7 @@ public class MagnitudeEditor implements TelescopePosEditor {
     }
 
     void changeBand(Magnitude.Band from, Magnitude.Band to) {
-        final Option<Magnitude> oldMagOpt = target.getTarget().getMagnitude(from);
+        final Option<Magnitude> oldMagOpt = target.getMagnitude(from);
         if (oldMagOpt.isEmpty()) return; // shouldn't happen ...
         final Magnitude oldMag = oldMagOpt.getValue();
         final Magnitude newMag = new Magnitude(to, oldMag.getBrightness(), oldMag.getError(), oldMag.getSystem());
@@ -503,7 +503,7 @@ public class MagnitudeEditor implements TelescopePosEditor {
     }
 
     void changeSystem(Magnitude.Band band, MagnitudeSystem system) {
-        final Option<Magnitude> oldMagOpt = target.getTarget().getMagnitude(band);
+        final Option<Magnitude> oldMagOpt = target.getMagnitude(band);
         if (oldMagOpt.isEmpty()) return; // shouldn't happen ...
         final Magnitude oldMag = oldMagOpt.getValue();
         if (system == oldMag.getSystem()) return;
@@ -516,7 +516,7 @@ public class MagnitudeEditor implements TelescopePosEditor {
     }
 
     void updateMagnitudeValue(Magnitude.Band b, double d) {
-        final Option<Magnitude> oldMagOpt = target.getTarget().getMagnitude(b);
+        final Option<Magnitude> oldMagOpt = target.getMagnitude(b);
         if (oldMagOpt.isEmpty()) return;
         final Magnitude oldMag = oldMagOpt.getValue();
 

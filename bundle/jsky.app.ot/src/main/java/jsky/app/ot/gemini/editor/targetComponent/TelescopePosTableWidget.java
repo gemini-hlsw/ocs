@@ -127,7 +127,7 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
             @Override public Option<Long> when()        { return when; }
 
             public Option<Magnitude> getMagnitude(final Magnitude.Band band) {
-                return target.flatMap(t -> t.getTarget().getMagnitude(band));
+                return target.flatMap(t -> t.getMagnitude(band));
             }
 
             @Override public String formatMagnitude(final Magnitude.Band band) {

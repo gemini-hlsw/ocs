@@ -435,12 +435,12 @@ public class StrehlFeature extends TpeImageFeature implements PropertyWatcher, M
                 double baseX = _tii.getBasePos().getRaDeg();
                 double baseY = _tii.getBasePos().getDecDeg();
                 Magnitude undef = new Magnitude(Magnitude.Band.J, MascotConf.invalidMag());
-                double bmag = target.getTarget().getMagnitude(Magnitude.Band.B).getOrElse(undef).getBrightness();
-                double vmag = target.getTarget().getMagnitude(Magnitude.Band.V).getOrElse(undef).getBrightness();
-                double rmag = target.getTarget().getMagnitude(Magnitude.Band.R).getOrElse(undef).getBrightness();
-                double jmag = target.getTarget().getMagnitude(Magnitude.Band.J).getOrElse(undef).getBrightness();
-                double hmag = target.getTarget().getMagnitude(Magnitude.Band.H).getOrElse(undef).getBrightness();
-                double kmag = target.getTarget().getMagnitude(Magnitude.Band.K).getOrElse(undef).getBrightness();
+                double bmag = target.getMagnitude(Magnitude.Band.B).getOrElse(undef).getBrightness();
+                double vmag = target.getMagnitude(Magnitude.Band.V).getOrElse(undef).getBrightness();
+                double rmag = target.getMagnitude(Magnitude.Band.R).getOrElse(undef).getBrightness();
+                double jmag = target.getMagnitude(Magnitude.Band.J).getOrElse(undef).getBrightness();
+                double hmag = target.getMagnitude(Magnitude.Band.H).getOrElse(undef).getBrightness();
+                double kmag = target.getMagnitude(Magnitude.Band.K).getOrElse(undef).getBrightness();
                 return Star.makeStar(name, baseX, baseY, bmag, vmag, rmag, jmag, hmag, kmag, ra, dec);
             }));
     }

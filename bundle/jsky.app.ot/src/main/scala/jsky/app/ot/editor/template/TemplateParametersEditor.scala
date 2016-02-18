@@ -314,14 +314,14 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
         lazy val zero = new Magnitude(band, 0.0, band.defaultSystem)
 
         def mag(tp: TemplateParameters): Option[Magnitude] =
-          tp.getTarget.getTarget.getMagnitude(band).asScalaOpt
+          tp.getTarget.getMagnitude(band).asScalaOpt
 
         def magOrZero(tp: TemplateParameters): Magnitude =
           mag(tp).getOrElse(zero)
 
         def setMag[A](f: (Magnitude, A) => Magnitude): (TemplateParameters, A) => TemplateParameters =
           setTarget[A]{ (t, a) =>
-            t.putMagnitude(f(t.getTarget.getMagnitude(band).getOrElse(zero), a))
+            t.putMagnitude(f(t.getMagnitude(band).getOrElse(zero), a))
           }
 
         val magCheck = new BoundCheckbox(

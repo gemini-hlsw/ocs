@@ -235,7 +235,7 @@ object ConfigExtractor {
     def extractGuideStar(targets: GuideProbeTargets) =
       targets.getPrimary.asScalaOpt.fold("No guide star selected".left[SPTarget])(_.right)
 
-    def extractMagnitude(guideStar: ITarget) = {
+    def extractMagnitude(guideStar: SPTarget) = {
       val r  = guideStar.getMagnitude(Band.r)
       val R  = guideStar.getMagnitude(Band.R)
       val UC = guideStar.getMagnitude(Band.UC)
@@ -249,7 +249,7 @@ object ConfigExtractor {
       for {
         group     <- extractGroup
         guideStar <- extractGuideStar(group)
-        magnitude <- extractMagnitude(guideStar.getTarget)
+        magnitude <- extractMagnitude(guideStar)
         fieldLens <- extract[FieldLens]     (c, AoFieldLensKey)
         wfsMode   <- extract[GuideStarType] (c, AoGuideStarTypeKey)
       } yield {

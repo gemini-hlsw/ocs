@@ -117,7 +117,7 @@ abstract class TemplateSpec(xmlName: String) { this: SpecificationLike =>
 
   /** Retrieve the phase-2 magnitude in the given band, if any, from the given target. */
   def p2mag(t: SPTarget, b: Band): Option[Double] =
-    Option(t.getTarget.getMagnitude(b).getOrNull).map(_.getBrightness)
+    Option(t.getMagnitude(b).getOrNull).map(_.getBrightness)
 
   /** True if a note with the given title exists at the root of the given template group. */
   def existsNote(tg: ISPTemplateGroup, title: String) =
