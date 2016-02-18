@@ -768,6 +768,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         @Override public void actionPerformed(final ActionEvent e) {
             // As long as something is selected, we can paste it.
             _curSelection.foreach(ignored -> pasteSelectedPosition(getNode(), getDataObject()));
+            _curSelection.swap().foreach(ignored -> pasteSelectedPosition(getNode(), getDataObject()));
         }
     };
 
