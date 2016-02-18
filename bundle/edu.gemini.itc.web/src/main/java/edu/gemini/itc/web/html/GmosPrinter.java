@@ -93,6 +93,7 @@ public final class GmosPrinter extends PrinterBase {
                 _printImageLink(id, SignalPixelChart.instance(), i, pdp);
                 _println("");
             }
+
         }
 
         printConfiguration(results[0].parameters(), mainInstrument);
