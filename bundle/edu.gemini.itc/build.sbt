@@ -12,6 +12,9 @@ unmanagedJars in Compile ++= Seq(
   new File(baseDirectory.value, "../../lib/bundle/org.osgi.enterprise-5.0.0.jar")
 )
 
+libraryDependencies += 
+  "org.scala-lang" %  "scala-compiler"    % "2.11.7"
+
 osgiSettings
 
 ocsBundleSettings

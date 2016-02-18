@@ -36,9 +36,6 @@ def common(version: Version) = AppConfig(
   log = None,
   script = None,
   bundles = List(
-    BundleSpec("org.scalaz.concurrent",              Version(7, 1, 6)),
-    BundleSpec("org.scala-lang.scala-compiler",      Version(2, 10, 5)),
-    BundleSpec("org.scala-lang.scala-reflect",       Version(2,10, 5)),
     BundleSpec("edu.gemini.osgi.main",               Version(4, 2, 1)),
     BundleSpec("edu.gemini.shared.ca",               version),
     BundleSpec("edu.gemini.spdb.reports.collection", version),
@@ -47,7 +44,6 @@ def common(version: Version) = AppConfig(
     BundleSpec("org.dom4j",                          Version(1, 5, 1)),
     BundleSpec("slf4j.api",                          Version(1, 6, 4)),
     BundleSpec("slf4j.jdk14",                        Version(1, 6, 4)),
-    BundleSpec("quasiquotes",                        Version(2, 0, 1)),
     BundleSpec(10, "org.apache.felix.gogo.command",  Version(0, 12, 0)),
     BundleSpec(10, "org.apache.felix.gogo.runtime",  Version(0, 10, 0)),
     BundleSpec(10, "org.apache.felix.gogo.shell",    Version(0, 10, 0))

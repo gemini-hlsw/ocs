@@ -157,11 +157,7 @@ class IdeaProject(idea: Idea, scalaInstance: ScalaInstance, imls: List[File]) {
       </component>
       {rootComponent(javaVersion)}
       <component name="ProjectRunConfigurationManager"/>
-      <component name="ScalaCompilerConfiguration">
-        <plugins>
-          <plugin path="$PROJECT_DIR$/../../../lib/compile/paradise_2.10.5-2.0.1.jar" />
-        </plugins>
-      </component>
+      <component name="ScalaCompilerConfiguration"/>
       <component name="ScalacSettings">
         <option name="SCALAC_BEFORE" value="false" />
       </component>

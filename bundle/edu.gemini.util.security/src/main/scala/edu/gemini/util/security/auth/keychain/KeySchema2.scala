@@ -75,7 +75,7 @@ object KeySchema2 extends KeyMappers2 {
       _ <- info(s"Upgrading from version ${from}...")
       _ <- from match {
         // case 1 => ...
-        case n => fail("Can't upgrade from ${from}")
+        case n => fail(s"Can't upgrade from ${from}")
       }
     } yield ()
 

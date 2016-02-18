@@ -46,7 +46,7 @@ def common(pv: Version) = AppConfig(
     BundleSpec("edu.gemini.pit",               pv),
     BundleSpec("slf4j.api",                    Version(1, 6, 4)),
     BundleSpec("slf4j.jdk14",                  Version(1, 6, 4)),
-    BundleSpec("org.apache.commons.logging",   Version(1, 1, 0))
+    BundleSpec("org.apache.commons.logging",   Version(1, 1, 0)),
     BundleSpec("monocle.core",                 Version(1, 1, 0)),
     BundleSpec("monocle.macro",                Version(1, 1, 0))
   )
