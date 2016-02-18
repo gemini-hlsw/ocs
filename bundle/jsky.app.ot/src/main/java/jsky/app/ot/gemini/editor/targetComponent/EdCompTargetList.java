@@ -222,11 +222,12 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         final boolean notBase       = !selectionIsBasePosition();
         final boolean notAutoTarget = !selectionIsAutoTarget();
         final boolean isGuideStar   = selectionIsGuideTarget();
+        final boolean isUserTarget  = selectionIsUserTarget();
 
         _w.removeButton.setEnabled (editable && notBase && notAutoTarget);
         _w.primaryButton.setEnabled(editable && isGuideStar && notAutoTarget);
         _w.pasteButton.setEnabled(editable && notAutoTarget);
-        _w.duplicateButton.setEnabled(editable && isGuideStar && notAutoTarget);
+        _w.duplicateButton.setEnabled(editable && ((isGuideStar && notAutoTarget) || isUserTarget));
         updateDetailEditorEnabledState(editable && notAutoTarget);
     }
 
