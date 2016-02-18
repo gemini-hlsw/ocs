@@ -43,9 +43,8 @@ scalacOptions in ThisBuild ++= Seq(
   "-target:jvm-1.7",
   "-unchecked",
   // "-Xfatal-warnings",
-  "-Xlint",
+  "-Xlint:-stars-align",
   "-Yno-adapted-args"
-  // "-Ywarn-all", C.Q. Not supported on scala 2.11
   // "-Ywarn-dead-code"        // N.B. doesn't work well with bottom
   // "-Ywarn-numeric-widen",   
   // "-Ywarn-value-discard"   
@@ -66,7 +65,7 @@ libraryDependencies in ThisBuild ++= Seq(
   "org.scalacheck" %% "scalacheck"           % "1.11.0"      % "test",
   "org.specs2"     %% "specs2-core"          % specs2Version % "test",
   "org.specs2"     %% "specs2-scalacheck"    % specs2Version % "test",
-  "org.specs2"     %% "specs2-matcher-extra" % specs2Version % "test" intransitive, // This is required to avoid pulling a version of scalaz-stream not available in maven central
+  "org.specs2"     %% "specs2-matcher-extra" % specs2Version % "test" intransitive(), // This is required to avoid pulling a version of scalaz-stream not available in maven central
   "org.scalatest"  %% "scalatest"            % "2.2.4"       % "test"
 )
 
