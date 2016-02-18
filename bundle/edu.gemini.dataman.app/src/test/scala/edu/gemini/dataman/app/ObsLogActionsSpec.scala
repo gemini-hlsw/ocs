@@ -78,6 +78,11 @@ object ObsLogActionsSpec extends TestSupport {
         GsaRecord(Some(lab), f"$FilenamePrefix%s${index+1}%03d.fits", DatasetGsaState(DatasetQaState.UNDEFINED, Instant.now(), DatasetMd5.empty))
       }
 
+      // This test case generates "missing" datasets, which results in a warning
+      // to the console.  Since there are quite a few instances of this we'll up
+      // the log level to SEVERE to avoid seeing them here.
+      ObsLogActions.Log.setLevel(java.util.logging.Level.SEVERE)
+ 
       new ObsLogActions(odb).updateSummit(recs).unsafeRun match {
         case -\/(f) =>
           failure(f.explain)
