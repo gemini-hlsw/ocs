@@ -15,8 +15,8 @@ object BaselineGnirs {
   private lazy val KBandSpectroscopy = Fixture.kBandSpcFixtures(List(
     new GnirsParameters(
       PixelScale.PS_005,
-      null,
-      Disperser.D_10,
+      None,
+      Some(Disperser.D_10),
       ReadMode.FAINT,
       CrossDispersed.LXD,
       2.4.microns,
@@ -25,8 +25,8 @@ object BaselineGnirs {
 
     new GnirsParameters(
       PixelScale.PS_015,
-      null,
-      Disperser.D_111,
+      None,
+      Some(Disperser.D_111),
       ReadMode.VERY_BRIGHT,
       CrossDispersed.NO,
       2.4.microns,
@@ -35,8 +35,8 @@ object BaselineGnirs {
 
     new GnirsParameters(
       PixelScale.PS_005,
-      null,
-      Disperser.D_32,
+      None,
+      Some(Disperser.D_32),
       ReadMode.FAINT,
       CrossDispersed.LXD,
       2.6.microns,
@@ -45,8 +45,8 @@ object BaselineGnirs {
 
     new GnirsParameters(
       PixelScale.PS_015,
-      null,
-      Disperser.D_32,
+      None,
+      Some(Disperser.D_32),
       ReadMode.VERY_BRIGHT,
       CrossDispersed.NO,
       2.6.microns,
@@ -58,8 +58,8 @@ object BaselineGnirs {
   private lazy val KBandImaging = Fixture.kBandImgFixtures(List(
     new GnirsParameters(
       PixelScale.PS_005,
-      Filter.K,
-      null,
+      Some(Filter.K),
+      None,
       ReadMode.FAINT,
       CrossDispersed.NO,
       2.4.microns,
@@ -68,8 +68,8 @@ object BaselineGnirs {
 
     new GnirsParameters(
       PixelScale.PS_005,
-      Filter.J,
-      null,
+      Some(Filter.J),
+      None,
       ReadMode.BRIGHT,
       CrossDispersed.NO,
       2.4.microns,
@@ -78,8 +78,8 @@ object BaselineGnirs {
 
     new GnirsParameters(
       PixelScale.PS_005,
-      Filter.Y,
-      null,
+      Some(Filter.Y),
+      None,
       ReadMode.VERY_FAINT,
       CrossDispersed.NO,
       2.4.microns,
@@ -90,8 +90,8 @@ object BaselineGnirs {
 
     new GnirsParameters(
       PixelScale.PS_015,
-      Filter.ORDER_4,
-      null,
+      Some(Filter.ORDER_4),
+      None,
       ReadMode.FAINT,
       CrossDispersed.NO,
       2.4.microns,
@@ -100,8 +100,8 @@ object BaselineGnirs {
 
     new GnirsParameters(
       PixelScale.PS_015,
-      Filter.K,
-      null,
+      Some(Filter.K),
+      None,
       ReadMode.VERY_BRIGHT,
       CrossDispersed.NO,
       2.4.microns,
@@ -110,14 +110,13 @@ object BaselineGnirs {
 
     new GnirsParameters(
       PixelScale.PS_015,
-      Filter.K,
-      null,
+      Some(Filter.K),
+      None,
       ReadMode.FAINT,
       CrossDispersed.NO,
       2.4.microns,
       SlitWidth.ACQUISITION,
       Fixture.AltairLgs)
-
   ))
 
 

@@ -163,11 +163,11 @@ object ITCRequest {
   */
   def gnirsParameters(r: ITCRequest): GnirsParameters = {
     val grating     = r.parameter("Disperser") match {
-      case "imaging" => null
-      case _ => r.enumParameter(classOf[GNIRSParams.Disperser]) }
+      case "imaging" => None
+      case _ => Some(r.enumParameter(classOf[GNIRSParams.Disperser])) }
     val filter      = r.parameter("Filter") match {
-      case "spectroscopy" => null
-      case _ => r.enumParameter(classOf[GNIRSParams.Filter]) }
+      case "spectroscopy" => None
+      case _ => Some(r.enumParameter(classOf[GNIRSParams.Filter])) }
     val camera      = r.enumParameter(classOf[GNIRSParams.PixelScale])
     val xDisp       = r.enumParameter(classOf[GNIRSParams.CrossDispersed])
     val readMode    = r.enumParameter(classOf[GNIRSParams.ReadMode])

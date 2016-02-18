@@ -104,13 +104,13 @@ object ConfigExtractor {
   private def extractGnirs(targetEnv: TargetEnvironment, probe: GuideProbe, c: Config): String \/ GnirsParameters = {
     import GNIRSParams._
     for {
-      pixelScale  <- extract[PixelScale]     (c, PixelScaleKey)
-      filter      <- extract[Filter]         (c, FilterKey)
-      grating     <- extract[Disperser]      (c, DisperserKey)
-      readMode    <- extract[ReadMode]       (c, ReadModeKey)
-      xDisp       <- extract[CrossDispersed] (c, CrossDispersedKey)
-      slitWidth   <- extract[SlitWidth]      (c, SlitWidthKey)
-      altair      <- extractAltair          (targetEnv, probe, c)
+      pixelScale  <- extract[PixelScale]        (c, PixelScaleKey)
+      filter      <- extract[Option[Filter]]    (c, FilterKey)
+      grating     <- extract[Option[Disperser]] (c, DisperserKey)
+      readMode    <- extract[ReadMode]          (c, ReadModeKey)
+      xDisp       <- extract[CrossDispersed]    (c, CrossDispersedKey)
+      slitWidth   <- extract[SlitWidth]         (c, SlitWidthKey)
+      altair      <- extractAltair             (targetEnv, probe, c)
       wavelen     <- extractObservingWavelength(c)
     } yield GnirsParameters(pixelScale, filter, grating, readMode, xDisp, wavelen, slitWidth, altair)
   }

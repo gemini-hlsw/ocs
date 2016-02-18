@@ -262,7 +262,7 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
         }
 
     }
-
+    
 
     public ImagingResult calculateImaging() {
         // Module 1b

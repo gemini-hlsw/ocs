@@ -92,7 +92,9 @@ public final class GnirsPrinter extends PrinterBase {
 
             for (int i = 0; i < GnirsRecipe.ORDERS; i++) {
                 _printFileLink(id, FinalS2NData.instance(), 0, i, "Order " + (i+3));
+
             }
+
 
         } else {
 
@@ -107,9 +109,9 @@ public final class GnirsPrinter extends PrinterBase {
             _printFileLink(id, SingleS2NData.instance());
             _printFileLink(id, FinalS2NData.instance());
 
-            printConfiguration(result.parameters(), instrument, result.aoSystem());
+           // printConfiguration(result.parameters(), instrument, result.aoSystem());
 
-            _println(HtmlPrinter.printParameterSummary(pdp));
+           // _println(HtmlPrinter.printParameterSummary(pdp));
         }
 // in separate method now
         /*_println("");
@@ -124,6 +126,9 @@ public final class GnirsPrinter extends PrinterBase {
         _println(HtmlPrinter.printParameterSummary(result.conditions()));
         _println(HtmlPrinter.printParameterSummary(result.observation()));
         _println(HtmlPrinter.printParameterSummary(pdp)); */
+        printConfiguration(result.parameters(), instrument, result.aoSystem());
+
+        _println(HtmlPrinter.printParameterSummary(pdp));
 
     }
 

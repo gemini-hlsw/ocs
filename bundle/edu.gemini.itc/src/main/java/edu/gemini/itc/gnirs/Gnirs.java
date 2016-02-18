@@ -6,6 +6,7 @@ import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams;
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams.Disperser;
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams.SlitWidth;
+import scala.Option;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +45,7 @@ public final class Gnirs extends Instrument implements SpectroscopyInstrument {
     protected Detector _detector;
     protected double _sampling;
     protected String _filterUsed;  // XD or order filter
-    protected Disperser _grating;
+    protected Option<Disperser> _grating;
     protected CalculationMethod _mode;
     protected double _centralWavelength;
 
@@ -68,7 +69,7 @@ public final class Gnirs extends Instrument implements SpectroscopyInstrument {
 
         //Test to see that all conditions for Spectroscopy are met
         if (_mode instanceof Spectroscopy) {
-            if (gp.slitWidth() == SlitWidth.ACQUISITION && gp.filter() != null)
+            if (gp.slitWidth() == SlitWidth.ACQUISITION && gp.filter().isDefined())
                 throw new RuntimeException("Spectroscopy calculation method is selected," +
                         " but an imaging <b>Filter</b> is also selected, and a <b>Focal" +
                         " plane mask</b> is set to \"imaging\".\nPlease set Filter to \"spectroscopy\"" +
@@ -80,14 +81,14 @@ public final class Gnirs extends Instrument implements SpectroscopyInstrument {
                         "Focal plane mask in the Instrument " +
                         "configuration section.");
 
-            if (gp.filter() != null)
+            if (gp.filter().isDefined())
                 throw new RuntimeException("Spectroscopy calculation method is selected, but an imaging " +
                         "<b>Filter</b> is also selected. \nPlease set Filter to \"spectroscopy\"" +
                         " in the Instrument configuration section.");
         }
 
         if (_mode instanceof Imaging) {
-            if (gp.slitWidth() != SlitWidth.ACQUISITION && gp.filter() == null)
+            if (gp.slitWidth() != SlitWidth.ACQUISITION && gp.filter().isEmpty())
                 throw new RuntimeException("Imaging calculation method is selected, but a <b>Focal" +
                          " plane mask</b> is also selected, and a <b>Filter</b> is set to \"spectroscopy\"." +
                          " \nPlease set Focal plane mask to \"imaging\" and  select an imaging filter, " +
@@ -98,7 +99,7 @@ public final class Gnirs extends Instrument implements SpectroscopyInstrument {
                         " plane mask</b> is also selected.\nPlease " +
                         "set Focal plane mask to \"imaging\" in the Instrument " +
                         "configuration section.");
-            if (gp.filter() == null)
+            if (gp.filter().isEmpty())
                 throw new RuntimeException("Imaging calculation method is selected, but a Filter " +
                         "is not. \nPlease select an imaging Filter in the Instrument configuration section.");
         }
@@ -121,7 +122,7 @@ public final class Gnirs extends Instrument implements SpectroscopyInstrument {
 
         //Select filter depending on if Cross dispersion is used.
         if (_mode instanceof Imaging) {
-            _Filter = Filter.fromFile(getPrefix(), gp.filter().name(), getDirectory() + "/");
+            _Filter = Filter.fromFile(getPrefix(), gp.filter().get().name(), getDirectory() + "/");
         } else if (_XDisp) {
             _filterUsed = "XD";
             _Filter = Filter.fromFile(getPrefix(), _filterUsed, getDirectory() + "/");
@@ -154,7 +155,7 @@ public final class Gnirs extends Instrument implements SpectroscopyInstrument {
 
         if (_mode instanceof Spectroscopy) {
             _gratingOptics = new GnirsGratingOptics(
-                    getDirectory() + "/" + getPrefix(), _grating,
+                    getDirectory() + "/" + getPrefix(), _grating.get(),
                     _centralWavelength,
                     _detector.getDetectorPixels(),
                     1,
@@ -243,7 +244,7 @@ public final class Gnirs extends Instrument implements SpectroscopyInstrument {
     }
 
     public Disperser getGrating() {
-        return _grating;
+        return _grating.get();
     }
 
     public double getGratingDispersion() {
@@ -292,12 +293,12 @@ public final class Gnirs extends Instrument implements SpectroscopyInstrument {
     }
 
     public TransmissionElement getGratingOrderNTransmission(int order) {
-        return GnirsGratingsTransmission.getOrderNTransmission(_grating, order);
+        return GnirsGratingsTransmission.getOrderNTransmission(_grating.get(), order);
     }
 
     private double correctedCentralWavelength() {
         if (_mode instanceof Imaging) {
-            _Filter = Filter.fromFile(getPrefix(), params.filter().name(), getDirectory() + "/");
+            _Filter = Filter.fromFile(getPrefix(), params.filter().get().name(), getDirectory() + "/");
             return (int) _Filter.getEffectiveWavelength();
         } else if (!isXDispUsed()) {
             return params.centralWavelength().toNanometers();
