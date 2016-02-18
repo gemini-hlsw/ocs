@@ -163,7 +163,7 @@ public final class Gnirs extends Instrument implements SpectroscopyInstrument {
                     1);
 
             if (_grating.equals(Disperser.D_10) && !isLongCamera())
-                throw new RuntimeException("The grating " + _grating + " cannot be used with the " +
+                throw new RuntimeException("The grating " + _grating.get() + " cannot be used with the " +
                         "0.15\" arcsec/pix (Short) camera.\n" +
                         "  Please either change the camera or the grating.");
 
@@ -171,7 +171,7 @@ public final class Gnirs extends Instrument implements SpectroscopyInstrument {
                 if ((_Filter.getStart() >= _gratingOptics.getEnd()) ||
                         (_Filter.getEnd() <= _gratingOptics.getStart())) {
                     throw new RuntimeException("The " + _filterUsed + " filter" +
-                            " and the " + _grating +
+                            " and the " + _grating.get() +
                             " do not overlap with the requested wavelength.\n" +
                             " Please select a different filter, grating or wavelength.");
                 }
@@ -181,7 +181,7 @@ public final class Gnirs extends Instrument implements SpectroscopyInstrument {
 
     public edu.gemini.itc.base.Disperser disperser(final int order) {
         return new GnirsGratingOptics(
-                getDirectory() + "/" + getPrefix(), _grating,
+                getDirectory() + "/" + getPrefix(), _grating.get(),
                 _centralWavelength,
                 _detector.getDetectorPixels(),
                 order,
