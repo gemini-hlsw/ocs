@@ -113,6 +113,7 @@ class OptsListSpec extends Specification with ScalaCheck with Arbitraries {
           opts.focusIndex.fold(OptsList.unfocused(lst.head, lst.tail)) { f =>
             lst.splitAt(f) match {
               case (lefts, focus :: rights) => OptsList.focused(lefts, focus, rights)
+              case (_, Nil)                 => sys.error(s"Could not split $lst at focus index $f")
             }
           }
         }
