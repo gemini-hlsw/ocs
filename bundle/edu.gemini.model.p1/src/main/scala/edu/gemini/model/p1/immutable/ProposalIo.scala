@@ -64,20 +64,20 @@ object ProposalIo {
 
   def readAndConvert(s: String):Validation[Either[Exception, NonEmptyList[String]], ProposalConversion] =
     try {
-      UpConverter.upConvert(XML.loadString(stripNonValidXMLCharacters(s))).fold(Right(_).fail, toProposal(_).success)
+      UpConverter.upConvert(XML.loadString(stripNonValidXMLCharacters(s))).fold(Right(_).failure, toProposal(_).success)
     } catch {
-      case ex: UnmarshalException => ex.printStackTrace();Left(ex).fail
-      case ex: Exception          => ex.printStackTrace();Left(ex).fail
+      case ex: UnmarshalException => ex.printStackTrace();Left(ex).failure
+      case ex: Exception          => ex.printStackTrace();Left(ex).failure
     }
 
   def readAndConvert(f:File):Validation[Either[Exception, NonEmptyList[String]], ProposalConversion] = try {
     if (f.exists()) {
-      UpConverter.upConvert(XML.loadFile(f)).fold(Right(_).fail, toProposal(_).success)
+      UpConverter.upConvert(XML.loadFile(f)).fold(Right(_).failure, toProposal(_).success)
     } else {
-      Left(new FileNotFoundException(s"File '${f.getName}' not found")).fail
+      Left(new FileNotFoundException(s"File '${f.getName}' not found")).failure
     }
   } catch {
-    case ex: UnmarshalException => Left(ex).fail
+    case ex: UnmarshalException => Left(ex).failure
     case ex: Exception          => tryLatin1AndConvert(f)
   }
 

@@ -1,7 +1,5 @@
 package edu.gemini.model.p1.dtree
 
-import edu.gemini.model.p1.{ immutable => I }
-import java.text.NumberFormat
 import scala.annotation.tailrec
 
 /**
@@ -25,10 +23,10 @@ object TextUI {
     // selection of the appropriate type.
     def interp(s: String): Option[S] = s match {
       case "" => state.default
-      case s => try {
+      case t => try {
         state match {
-          case state: SelectUIState[C, S] => state.select(s.split("\\D+").toList.map(_.toInt - 1))
-          case state: TextUIState[C]      => state.text(s)
+          case state: SelectUIState[C, S] => state.select(t.split("\\D+").toList.map(_.toInt - 1))
+          case state: TextUIState[C]      => state.text(t)
         }
       } catch {
         case _: NumberFormatException => None
@@ -45,11 +43,11 @@ object TextUI {
     sb.append(": ")
 
     // Read and return, or try again
-    readLine(sb.toString()).trim.toLowerCase match {
+    scala.io.StdIn.readLine(sb.toString()).trim.toLowerCase match {
       case "undo" if state.canUndo => Undo
       case "redo" if state.canRedo => Redo
       case s => interp(s) match { // n.b. map + getOrElse makes tail call optimization fail
-        case Some(s)  => Choice(s)
+        case Some(u)  => Choice(u)
         case None     => input(state)
       }
     }
@@ -61,12 +59,12 @@ object TextUI {
   def run[C, S](state: UIState[C, S]): (UIState[_,_], Any) = {
 
     // Print our prompt and choices
-    println("\n*** %s".format(state.node.title))
+    println(s"\n*** ${state.node.title}")
     state.node.description.trim.lines.map(_.trim).foreach(println)
     state.node match {
       case n:SelectNode[_, _, _, _] => n.choices.zipWithIndex.foreach {
-          case (c, n) =>
-            print(" %d. %s".format(n + 1, c))
+          case (c, p) =>
+            print(s" ${p+1}. $c")
             state.default.filter(_ == c).foreach(_ => print(" (*)"))
             println()
         }
