@@ -43,65 +43,65 @@ import static edu.gemini.qpt.shared.util.TimeUtils.MS_PER_DAY;
  * Top-level model object representing a queue plan.
  * @author rnorris
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unchecked", "rawtypes"})
 public final class Schedule extends BaseMutableBean implements PioSerializable, Commentable {
 
-	private static final Logger LOGGER = Logger.getLogger(Schedule.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(Schedule.class.getName());
 
-	// Property Constants
-	public static final String PROP_SITE = "site";
-	public static final String PROP_VARIANTS = "variants";
-	public static final String PROP_CURRENT_VARIANT = "currentVariant";
-	public static final String PROP_BLOCKS = "blocks";
-	public static final String PROP_DIRTY = "dirty";
-	public static final String PROP_FILE = "file";
-	public static final String PROP_FACILITIES = "facilities";
-	public static final String PROP_EXTRA_SEMESTERS = "extraSemesters";
-	public static final String PROP_MINI_MODEL = "miniModel";
+    // Property Constants
+    public static final String PROP_SITE = "site";
+    public static final String PROP_VARIANTS = "variants";
+    public static final String PROP_CURRENT_VARIANT = "currentVariant";
+    public static final String PROP_BLOCKS = "blocks";
+    public static final String PROP_DIRTY = "dirty";
+    public static final String PROP_FILE = "file";
+    public static final String PROP_FACILITIES = "facilities";
+    public static final String PROP_EXTRA_SEMESTERS = "extraSemesters";
+    public static final String PROP_MINI_MODEL = "miniModel";
 
-	// Constants for internal use (probably will move)
-	private static final TwilightBoundType TYPE = TwilightBoundType.NAUTICAL;
+    // Constants for internal use (probably will move)
+    private static final TwilightBoundType TYPE = TwilightBoundType.NAUTICAL;
 
-	// Persistent Members
-	private final BlockUnion blocks;
-	private final VariantList variants;
-	private String comment;
-	private StringSet extraSemesters;
+    // Persistent Members
+    private final BlockUnion blocks;
+    private final VariantList variants;
+    private String comment;
+    private StringSet extraSemesters;
 
-	// Transient Members
-	private Variant currentVariant;
-	private MixedEnumSet facilities = new MixedEnumSet();
-	private MarkerManager markerManager = new MarkerManager();
-	private File file;
-	private Map<WorldCoordinates, Union<Interval>> intervalCache = new HashMap<WorldCoordinates, Union<Interval>>();
-	private MiniModel miniModel;
+    // Transient Members
+    private Variant currentVariant;
+    private MixedEnumSet facilities = new MixedEnumSet();
+    private MarkerManager markerManager = new MarkerManager();
+    private File file;
+    private Map<WorldCoordinates, Union<Interval>> intervalCache = new HashMap<WorldCoordinates, Union<Interval>>();
+    private MiniModel miniModel;
 
-	/**
-	 * Constructs an empty Schedule.
-	 * @param model
-	 */
-	public Schedule(MiniModel model) {
-		assert model != null;
-		this.miniModel = model;
-		this.blocks = new BlockUnion();
-		this.variants = new VariantList();
-		this.extraSemesters = new StringSet();
-		init(true);
-	}
+    /**
+     * Constructs an empty Schedule.
+     * @param model
+     */
+    public Schedule(MiniModel model) {
+        assert model != null;
+        this.miniModel = model;
+        this.blocks = new BlockUnion();
+        this.variants = new VariantList();
+        this.extraSemesters = new StringSet();
+        init(true);
+    }
 
-	/**
-	 * Constructs a Schedule from the specified ParamSet.
-	 * @param model
-	 * @param params
-	 */
-	public Schedule(MiniModel model, ParamSet params, int upgradingFrom) {
-		this.miniModel = model;
+    /**
+     * Constructs a Schedule from the specified ParamSet.
+     * @param model
+     * @param params
+     */
+    public Schedule(MiniModel model, ParamSet params, int upgradingFrom) {
+        this.miniModel = model;
 
-		// Initialize the Facilities collection. After deserializing, we want to
-		// add any new facilities that didn't exist in the previous version if
-		// we're upgrading.
-		this.facilities = new MixedEnumSet(params.getParamSet(PROP_FACILITIES));
-		switch (upgradingFrom) {
+        // Initialize the Facilities collection. After deserializing, we want to
+        // add any new facilities that didn't exist in the previous version if
+        // we're upgrading.
+        this.facilities = new MixedEnumSet(params.getParamSet(PROP_FACILITIES));
+        switch (upgradingFrom) {
 
             // MIGRATE PRE-104 to 104
             case ScheduleIO.VERSION_PRE_104:
@@ -172,56 +172,56 @@ public final class Schedule extends BaseMutableBean implements PioSerializable, 
 
             // ADD MORE MIGRATION STEPS HERE AS NEEDED
             // .....
-		}
+        }
 
         // ok, now the data should be up to date and ready to be processed
-		this.blocks = getBlockUnion(params);
-		this.variants = new VariantList(this, params.getParamSet(PROP_VARIANTS));
-		this.extraSemesters = getExtraSemesters(params);
-		this.comment = Pio.getValue(params, PROP_COMMENT);
-		init(false);
-	}
+        this.blocks = getBlockUnion(params);
+        this.variants = new VariantList(this, params.getParamSet(PROP_VARIANTS));
+        this.extraSemesters = getExtraSemesters(params);
+        this.comment = Pio.getValue(params, PROP_COMMENT);
+        init(false);
+    }
 
-	private void init(boolean isNew) {
-		if (isNew) initFacilities();
-		if (!variants.isEmpty())
-			setCurrentVariant(variants.getFirst());
-		Listeners.attach(this);
-		for (Variant v: variants)
-			Listeners.attach(v);
+    private void init(boolean isNew) {
+        if (isNew) initFacilities();
+        if (!variants.isEmpty())
+            setCurrentVariant(variants.getFirst());
+        Listeners.attach(this);
+        for (Variant v: variants)
+            Listeners.attach(v);
         addHiddenFacilities();
-		setDirty(false);
-	}
+        setDirty(false);
+    }
 
-	@Override
-	public void setDirty(boolean dirty) {
-		super.setDirty(dirty);
-		LOGGER.fine("dirty => " + dirty);
-	}
+    @Override
+    public void setDirty(boolean dirty) {
+        super.setDirty(dirty);
+        LOGGER.fine("dirty => " + dirty);
+    }
 
-	///
-	/// MINI-MODEL
-	///
+    ///
+    /// MINI-MODEL
+    ///
 
-	public MiniModel getMiniModel() {
-		return miniModel;
-	}
+    public MiniModel getMiniModel() {
+        return miniModel;
+    }
 
-	public void setMiniModel(MiniModel miniModel) {
-		if (this.miniModel.getSite() != miniModel.getSite())
-			throw new IllegalArgumentException("Sites do not match, sorry.");
+    public void setMiniModel(MiniModel miniModel) {
+        if (this.miniModel.getSite() != miniModel.getSite())
+            throw new IllegalArgumentException("Sites do not match, sorry.");
 
-		MiniModel prev = this.miniModel;
+        MiniModel prev = this.miniModel;
 
-		invalidateAllCaches();
+        invalidateAllCaches();
 
-		this.miniModel = miniModel;
-		for (Variant v: variants)
-			v.miniModelChanged(miniModel);
+        this.miniModel = miniModel;
+        for (Variant v: variants)
+            v.miniModelChanged(miniModel);
 
-		firePropertyChange(PROP_MINI_MODEL, prev, miniModel);
+        firePropertyChange(PROP_MINI_MODEL, prev, miniModel);
 
-	}
+    }
 
     public void moveAllocs(long offset) {
         try {
@@ -243,32 +243,32 @@ public final class Schedule extends BaseMutableBean implements PioSerializable, 
         }
     }
 
-	///
-	/// PIO
-	///
+    ///
+    /// PIO
+    ///
 
-	public ParamSet getParamSet(PioFactory factory, String name) {
-		ParamSet params = factory.createParamSet(name);
-		params.addParamSet(facilities.getParamSet(factory, PROP_FACILITIES));
-		params.addParamSet(blocks.getParamSet(factory, PROP_BLOCKS));
-		params.addParamSet(variants.getParamSet(factory, PROP_VARIANTS));
-		params.addParamSet(extraSemesters.getParamSet(factory, PROP_EXTRA_SEMESTERS));
-		Pio.addParam(factory, params, PROP_COMMENT, comment);
-		return params;
-	}
+    public ParamSet getParamSet(PioFactory factory, String name) {
+        ParamSet params = factory.createParamSet(name);
+        params.addParamSet(facilities.getParamSet(factory, PROP_FACILITIES));
+        params.addParamSet(blocks.getParamSet(factory, PROP_BLOCKS));
+        params.addParamSet(variants.getParamSet(factory, PROP_VARIANTS));
+        params.addParamSet(extraSemesters.getParamSet(factory, PROP_EXTRA_SEMESTERS));
+        Pio.addParam(factory, params, PROP_COMMENT, comment);
+        return params;
+    }
 
-	// package-private, needed for ScheduleIO
-	static BlockUnion getBlockUnion(ParamSet params) {
-		return new BlockUnion(params.getParamSet(PROP_BLOCKS));
-	}
+    // package-private, needed for ScheduleIO
+    static BlockUnion getBlockUnion(ParamSet params) {
+        return new BlockUnion(params.getParamSet(PROP_BLOCKS));
+    }
 
-	static StringSet getExtraSemesters(ParamSet params) {
-		return new StringSet(params.getParamSet(PROP_EXTRA_SEMESTERS));
-	}
+    static StringSet getExtraSemesters(ParamSet params) {
+        return new StringSet(params.getParamSet(PROP_EXTRA_SEMESTERS));
+    }
 
-	///
-	/// FACILITIES
-	///
+    ///
+    /// FACILITIES
+    ///
 
     // Initialize our facilities collection with the default instruments
     // (or default options for instruments with changeable configurations).
@@ -292,206 +292,206 @@ public final class Schedule extends BaseMutableBean implements PioSerializable, 
         }
     }
     @SuppressWarnings("unchecked")
-	public void addFacility(Enum o) {
-		assert o instanceof Serializable;
-		Set<Enum> prev = getFacilities();
-		facilities.add(o);
-		firePropertyChange(PROP_FACILITIES, prev, getFacilities());
-		setDirty(true);
-		for (Variant v: variants)
-			v.facilitiesChanged();
-	}
+    public void addFacility(Enum o) {
+        assert o instanceof Serializable;
+        Set<Enum> prev = getFacilities();
+        facilities.add(o);
+        firePropertyChange(PROP_FACILITIES, prev, getFacilities());
+        setDirty(true);
+        for (Variant v: variants)
+            v.facilitiesChanged();
+    }
 
-	@SuppressWarnings("unchecked")
-	public void removeFacility(Enum o) {
-		Set<Enum> prev = getFacilities();
-		facilities.remove(o);
-		firePropertyChange(PROP_FACILITIES, prev, getFacilities());
-		setDirty(true);
-		for (Variant v: variants)
-			v.facilitiesChanged();
-	}
+    @SuppressWarnings("unchecked")
+    public void removeFacility(Enum o) {
+        Set<Enum> prev = getFacilities();
+        facilities.remove(o);
+        firePropertyChange(PROP_FACILITIES, prev, getFacilities());
+        setDirty(true);
+        for (Variant v: variants)
+            v.facilitiesChanged();
+    }
 
-	@SuppressWarnings("unchecked")
-	public void setFacilities(Collection<Enum> newFacilities) {
-		Set<Enum> prev = getFacilities();
-		facilities.clear();
-		facilities.addAll(newFacilities);
+    @SuppressWarnings("unchecked")
+    public void setFacilities(Collection<Enum> newFacilities) {
+        Set<Enum> prev = getFacilities();
+        facilities.clear();
+        facilities.addAll(newFacilities);
         addHiddenFacilities();
-		firePropertyChange(PROP_FACILITIES, prev, getFacilities());
-		setDirty(true);
-		for (Variant v: variants)
-			v.facilitiesChanged();
-	}
+        firePropertyChange(PROP_FACILITIES, prev, getFacilities());
+        setDirty(true);
+        for (Variant v: variants)
+            v.facilitiesChanged();
+    }
 
-	@SuppressWarnings("unchecked")
-	public boolean hasFacility(Enum o) {
-		return facilities.contains(o);
-	}
+    @SuppressWarnings("unchecked")
+    public boolean hasFacility(Enum o) {
+        return facilities.contains(o);
+    }
 
-	@SuppressWarnings("unchecked")
-	public Set<Enum> getFacilities() {
-		return new HashSet<Enum>(facilities);
-	}
+    @SuppressWarnings("unchecked")
+    public Set<Enum> getFacilities() {
+        return new HashSet<Enum>(facilities);
+    }
 
-	///
-	/// PLANNER COMMENTS
-	///
+    ///
+    /// PLANNER COMMENTS
+    ///
 
-	public String getComment() {
-		return comment;
-	}
+    public String getComment() {
+        return comment;
+    }
 
-	public void setComment(String comment) {
-		this.comment = comment;
-		setDirty(true);
-	}
+    public void setComment(String comment) {
+        this.comment = comment;
+        setDirty(true);
+    }
 
-	///
-	/// VARIANTS
-	///
+    ///
+    /// VARIANTS
+    ///
 
-	public Variant addVariant(String name, byte cc, byte iq, byte wv, ApproximateAngle windConstraint, Boolean lgsConstraint) {
-		return addVariant(name, new Conds((byte) 0 /* Any sky brightness. */, cc, iq, wv), windConstraint, lgsConstraint);
-	}
+    public Variant addVariant(String name, byte cc, byte iq, byte wv, ApproximateAngle windConstraint, Boolean lgsConstraint) {
+        return addVariant(name, new Conds((byte) 0 /* Any sky brightness. */, cc, iq, wv), windConstraint, lgsConstraint);
+    }
 
-	public Variant addVariant(String name, Conds conds, ApproximateAngle windConstraint, Boolean lgsConstraint) {
-		List<Variant> prev = Collections.unmodifiableList(new ArrayList<Variant>());
-		Variant v = new Variant(this, name, conds, windConstraint, lgsConstraint);
-		variants.add(v);
-		firePropertyChange(PROP_VARIANTS, prev, getVariants());
-		if (currentVariant == null) setCurrentVariant(v);
-		setDirty(true);
-		Listeners.attach(v);
-		return v;
-	}
+    public Variant addVariant(String name, Conds conds, ApproximateAngle windConstraint, Boolean lgsConstraint) {
+        List<Variant> prev = Collections.unmodifiableList(new ArrayList<Variant>());
+        Variant v = new Variant(this, name, conds, windConstraint, lgsConstraint);
+        variants.add(v);
+        firePropertyChange(PROP_VARIANTS, prev, getVariants());
+        if (currentVariant == null) setCurrentVariant(v);
+        setDirty(true);
+        Listeners.attach(v);
+        return v;
+    }
 
-	/**
-	 * Removes the specified Variant from this Schedule.
-	 */
-	public void removeVariant(Variant v) {
-		List<Variant> prev = Collections.unmodifiableList(new ArrayList<Variant>());
-		if (currentVariant == v) setCurrentVariant(null);
-		variants.remove(v);
-		firePropertyChange(PROP_VARIANTS, prev, getVariants());
-		setDirty(true);
-		Listeners.detach(v);
-	}
+    /**
+     * Removes the specified Variant from this Schedule.
+     */
+    public void removeVariant(Variant v) {
+        List<Variant> prev = Collections.unmodifiableList(new ArrayList<Variant>());
+        if (currentVariant == v) setCurrentVariant(null);
+        variants.remove(v);
+        firePropertyChange(PROP_VARIANTS, prev, getVariants());
+        setDirty(true);
+        Listeners.detach(v);
+    }
 
-	/**
-	 * Moves the specified Variant up or down.
-	 * @throws ArrayIndexOutOfBoundsException if delta would push the variant out of the list.
-	 */
-	public void moveVariant(Variant v, int delta) {
-		List<Variant> prev = Collections.unmodifiableList(new ArrayList<Variant>());
-		int newPos = variants.indexOf(v) + delta;
-		variants.remove(v);
-		variants.add(newPos, v);
-		firePropertyChange(PROP_VARIANTS, prev, getVariants());
-		setDirty(true);
-	}
+    /**
+     * Moves the specified Variant up or down.
+     * @throws ArrayIndexOutOfBoundsException if delta would push the variant out of the list.
+     */
+    public void moveVariant(Variant v, int delta) {
+        List<Variant> prev = Collections.unmodifiableList(new ArrayList<Variant>());
+        int newPos = variants.indexOf(v) + delta;
+        variants.remove(v);
+        variants.add(newPos, v);
+        firePropertyChange(PROP_VARIANTS, prev, getVariants());
+        setDirty(true);
+    }
 
-	/**
-	 * Duplicates the specified variant, adding it next in the list (or to the end
-	 * if the variant is from another plan) and making it current. This method handles
-	 * some of the subtle issues related to deep-cloning the variant, hooking up
-	 * listeners. etc.
-	 * <p>
-	 * Note that if the supplied variant is from another plan, the destination's
-	 * mini-model should be replaced (but first be sure to add any extra semesters
-	 * referred to by the imported variant). See MergeAction for an example.
-	 * @param old
-	 * @return
-	 */
-	public Variant duplicateVariant(Variant old) {
-		List<Variant> prev = Collections.unmodifiableList(new ArrayList<Variant>());
+    /**
+     * Duplicates the specified variant, adding it next in the list (or to the end
+     * if the variant is from another plan) and making it current. This method handles
+     * some of the subtle issues related to deep-cloning the variant, hooking up
+     * listeners. etc.
+     * <p>
+     * Note that if the supplied variant is from another plan, the destination's
+     * mini-model should be replaced (but first be sure to add any extra semesters
+     * referred to by the imported variant). See MergeAction for an example.
+     * @param old
+     * @return
+     */
+    public Variant duplicateVariant(Variant old) {
+        List<Variant> prev = Collections.unmodifiableList(new ArrayList<Variant>());
 
-		Variant v = new Variant(this, old.getName(), old.getConditions(), old.getWindConstraint(), old.getLgsConstraint());
-		for (Alloc a: old.getAllocs()) {
-			try {
-				v.addAlloc(a.getObs(), a.getStart(), a.getFirstStep(), a.getLastStep(), a.getSetupType(), a.getComment());
-			} catch (EditException pe) {
-				// This will never happen; we can always copy the allocs first to last without
-				// breaking any rules.
-				LOGGER.log(Level.SEVERE, "Problem duplicating variant " + old, pe);
-				throw new RuntimeException(pe); // ?
-			}
-		}
+        Variant v = new Variant(this, old.getName(), old.getConditions(), old.getWindConstraint(), old.getLgsConstraint());
+        for (Alloc a: old.getAllocs()) {
+            try {
+                v.addAlloc(a.getObs(), a.getStart(), a.getFirstStep(), a.getLastStep(), a.getSetupType(), a.getComment());
+            } catch (EditException pe) {
+                // This will never happen; we can always copy the allocs first to last without
+                // breaking any rules.
+                LOGGER.log(Level.SEVERE, "Problem duplicating variant " + old, pe);
+                throw new RuntimeException(pe); // ?
+            }
+        }
 
-		v.setComment(old.getComment());
-		int newPos = variants.indexOf(old) + 1;
-		if (newPos == 0)
-			variants.add(v);
-		else
-			variants.add(newPos, v);
+        v.setComment(old.getComment());
+        int newPos = variants.indexOf(old) + 1;
+        if (newPos == 0)
+            variants.add(v);
+        else
+            variants.add(newPos, v);
 
-		firePropertyChange(PROP_VARIANTS, prev, getVariants());
-		setCurrentVariant(v);
-		setDirty(true);
-		Listeners.attach(v);
-		return v;
-	}
+        firePropertyChange(PROP_VARIANTS, prev, getVariants());
+        setCurrentVariant(v);
+        setDirty(true);
+        Listeners.attach(v);
+        return v;
+    }
 
-	/**
-	 * Returns this Schedule's list of Variants (read-only).
-	 * @return the Variants collection
-	 */
-	public List<Variant> getVariants() {
-		return Collections.unmodifiableList(variants);
-	}
+    /**
+     * Returns this Schedule's list of Variants (read-only).
+     * @return the Variants collection
+     */
+    public List<Variant> getVariants() {
+        return Collections.unmodifiableList(variants);
+    }
 
-	public void setCurrentVariant(Variant v) {
-		assert v == null || variants.contains(v);
-		Variant prev = currentVariant;
-		currentVariant = v;
-		firePropertyChange(PROP_CURRENT_VARIANT, prev, currentVariant);
+    public void setCurrentVariant(Variant v) {
+        assert v == null || variants.contains(v);
+        Variant prev = currentVariant;
+        currentVariant = v;
+        firePropertyChange(PROP_CURRENT_VARIANT, prev, currentVariant);
 //		setDirty(true);
-	}
+    }
 
-	public Variant getCurrentVariant() {
-		return currentVariant;
-	}
+    public Variant getCurrentVariant() {
+        return currentVariant;
+    }
 
-	///
-	/// BLOCKS
-	///
+    ///
+    /// BLOCKS
+    ///
 
-	public void addBlock(long start, long end) {
-		SortedSet<Block> prev = Collections.unmodifiableSortedSet(new TreeSet<Block>(getBlocks()));
-		blocks.add(new Block(start, end));
-		synchronized (intervalCache) {
-			intervalCache.clear();
-		}
-		firePropertyChange(PROP_BLOCKS, prev, getBlocks());
-		setDirty(true);
-	}
+    public void addBlock(long start, long end) {
+        SortedSet<Block> prev = Collections.unmodifiableSortedSet(new TreeSet<Block>(getBlocks()));
+        blocks.add(new Block(start, end));
+        synchronized (intervalCache) {
+            intervalCache.clear();
+        }
+        firePropertyChange(PROP_BLOCKS, prev, getBlocks());
+        setDirty(true);
+    }
 
-	public void removeBlock(long start, long end) {
-		SortedSet<Block> prev = Collections.unmodifiableSortedSet(new TreeSet<Block>(getBlocks()));
-		blocks.remove(new Block(start, end));
-		synchronized (intervalCache) {
-			intervalCache.clear();
-		}
-		firePropertyChange(PROP_BLOCKS, prev, getBlocks());
-		setDirty(true);
-	}
+    public void removeBlock(long start, long end) {
+        SortedSet<Block> prev = Collections.unmodifiableSortedSet(new TreeSet<Block>(getBlocks()));
+        blocks.remove(new Block(start, end));
+        synchronized (intervalCache) {
+            intervalCache.clear();
+        }
+        firePropertyChange(PROP_BLOCKS, prev, getBlocks());
+        setDirty(true);
+    }
 
-	public void addObservingNights(long start, long end) {
-		for (long i = start; i <= end; i += MS_PER_DAY) {
-			TwilightBoundedNight night = new TwilightBoundedNight(TYPE, i, miniModel.getSite());
-			addBlock(night.getStartTime(), night.getEndTime());
-		}
-	}
+    public void addObservingNights(long start, long end) {
+        for (long i = start; i <= end; i += MS_PER_DAY) {
+            TwilightBoundedNight night = new TwilightBoundedNight(TYPE, i, miniModel.getSite());
+            addBlock(night.getStartTime(), night.getEndTime());
+        }
+    }
 
-	public void addObservingNights(int count) {
-		if (count < 1) throw new IllegalArgumentException("You must add at least one night.");
-		long now = System.currentTimeMillis();
-		addObservingNights(now, now + (count - 1) * TimeUtils.MS_PER_DAY);
-	}
+    public void addObservingNights(int count) {
+        if (count < 1) throw new IllegalArgumentException("You must add at least one night.");
+        long now = System.currentTimeMillis();
+        addObservingNights(now, now + (count - 1) * TimeUtils.MS_PER_DAY);
+    }
 
-	public SortedSet<Block> getBlocks() {
-		return blocks.getIntervals();
-	}
+    public SortedSet<Block> getBlocks() {
+        return blocks.getIntervals();
+    }
 
     public SortedSet<Interval> getBlockIntervals() {
         final SortedSet<Interval> ts = new TreeSet<>();
@@ -503,145 +503,145 @@ public final class Schedule extends BaseMutableBean implements PioSerializable, 
 
 
     ///
-	/// TRIVIAL GETTERS
-	///
+    /// TRIVIAL GETTERS
+    ///
 
-	@Override
-	public String toString() {
-		return getName(); // getClass().getSimpleName() + ":" + miniModel.getSite();
-	}
+    @Override
+    public String toString() {
+        return getName(); // getClass().getSimpleName() + ":" + miniModel.getSite();
+    }
 
-	public Site getSite() {
-		return miniModel.getSite();
-	}
+    public Site getSite() {
+        return miniModel.getSite();
+    }
 
-	public MarkerManager getMarkerManager() {
-		return markerManager;
-	}
+    public MarkerManager getMarkerManager() {
+        return markerManager;
+    }
 
-	///
-	/// Extra Semesters
-	///
+    ///
+    /// Extra Semesters
+    ///
 
-	public SortedSet<String> getExtraSemesters() {
-		return Collections.unmodifiableSortedSet(extraSemesters);
-	}
+    public SortedSet<String> getExtraSemesters() {
+        return Collections.unmodifiableSortedSet(extraSemesters);
+    }
 
-	public void addExtraSemester(String semester) {
-		if (!miniModel.getAllSemesters().contains(semester))
-			throw new NoSuchElementException(semester);
-		SortedSet<String> prev = new TreeSet<String>(extraSemesters);
-		if (extraSemesters.add(semester))
-			firePropertyChange(PROP_EXTRA_SEMESTERS, prev, getExtraSemesters());
-	}
+    public void addExtraSemester(String semester) {
+        if (!miniModel.getAllSemesters().contains(semester))
+            throw new NoSuchElementException(semester);
+        SortedSet<String> prev = new TreeSet<String>(extraSemesters);
+        if (extraSemesters.add(semester))
+            firePropertyChange(PROP_EXTRA_SEMESTERS, prev, getExtraSemesters());
+    }
 
-	public void removeExtraSemester(String semester) {
-		if (!extraSemesters.contains(semester))
-			throw new NoSuchElementException(semester);
-		for (Variant v: variants) {
-			for (Alloc a: v.getAllocs()) {
-				String inUse = a.getObs().getProg().getStructuredProgramId().getSemester();
-				if (semester.equals(inUse))
-					throw new IllegalStateException("Can't remove. Plan contains observations from " + semester + ".");
-			}
-		}
-		SortedSet<String> prev = new TreeSet<String>(extraSemesters);
-		extraSemesters.remove(semester);
-		firePropertyChange(PROP_EXTRA_SEMESTERS, prev, getExtraSemesters());
-	}
+    public void removeExtraSemester(String semester) {
+        if (!extraSemesters.contains(semester))
+            throw new NoSuchElementException(semester);
+        for (Variant v: variants) {
+            for (Alloc a: v.getAllocs()) {
+                String inUse = a.getObs().getProg().getStructuredProgramId().getSemester();
+                if (semester.equals(inUse))
+                    throw new IllegalStateException("Can't remove. Plan contains observations from " + semester + ".");
+            }
+        }
+        SortedSet<String> prev = new TreeSet<String>(extraSemesters);
+        extraSemesters.remove(semester);
+        firePropertyChange(PROP_EXTRA_SEMESTERS, prev, getExtraSemesters());
+    }
 
-	///
-	/// I/O
-	///
+    ///
+    /// I/O
+    ///
 
-	public File getFile() {
-		return file;
-	}
+    public File getFile() {
+        return file;
+    }
 
-	public void setFile(File file) {
-		File prev = this.file;
-		this.file = file;
-		firePropertyChange(PROP_FILE, prev, file);
-	}
+    public void setFile(File file) {
+        File prev = this.file;
+        this.file = file;
+        firePropertyChange(PROP_FILE, prev, file);
+    }
 
-	///
-	/// DERIVED PROPERTIES
-	///
+    ///
+    /// DERIVED PROPERTIES
+    ///
 
-	/**
-	 * The schedule if empty if there are no blocks AND all variants are empty.
-	 */
-	public boolean isEmpty() {
-		if (!blocks.isEmpty()) return false;
-		for (Variant v: variants) {
-			if (!v.isEmpty()) return false;
-		}
-		return true;
-	}
+    /**
+     * The schedule if empty if there are no blocks AND all variants are empty.
+     */
+    public boolean isEmpty() {
+        if (!blocks.isEmpty()) return false;
+        for (Variant v: variants) {
+            if (!v.isEmpty()) return false;
+        }
+        return true;
+    }
 
-	public long getStart() {
-		if (isEmpty()) throw new IllegalStateException("Schedule is empty.");
-		long start = Long.MAX_VALUE;
-		if (!blocks.isEmpty()) start = blocks.getIntervals().first().getStart();
-		if (variants != null) {
-			for (Variant v: variants) {
-				if (!v.isEmpty()) start = Math.min(start, v.getStart());
-			}
-		}
-		return start;
-	}
+    public long getStart() {
+        if (isEmpty()) throw new IllegalStateException("Schedule is empty.");
+        long start = Long.MAX_VALUE;
+        if (!blocks.isEmpty()) start = blocks.getIntervals().first().getStart();
+        if (variants != null) {
+            for (Variant v: variants) {
+                if (!v.isEmpty()) start = Math.min(start, v.getStart());
+            }
+        }
+        return start;
+    }
 
-	public long getEnd() {
-		if (isEmpty()) throw new IllegalStateException("Schedule is empty.");
-		long end = Long.MIN_VALUE;
-		if (!blocks.isEmpty()) end = blocks.getIntervals().last().getEnd();
-		if (variants != null) {
-			for (Variant v: variants) {
-				if (!v.isEmpty()) end = Math.max(end, v.getEnd());
-			}
-		}
-		return end;
-	}
+    public long getEnd() {
+        if (isEmpty()) throw new IllegalStateException("Schedule is empty.");
+        long end = Long.MIN_VALUE;
+        if (!blocks.isEmpty()) end = blocks.getIntervals().last().getEnd();
+        if (variants != null) {
+            for (Variant v: variants) {
+                if (!v.isEmpty()) end = Math.max(end, v.getEnd());
+            }
+        }
+        return end;
+    }
 
-	public long getSpan() {
-		return getEnd() - getStart();
-	}
+    public long getSpan() {
+        return getEnd() - getStart();
+    }
 
-	public String getName() {
-		StringBuilder sb = new StringBuilder();
-		if (getFile() != null) {
-			sb.append(getFile().getName());
-			sb.append(" - ");
-		}
-		sb.append(getSite().displayName);
-		if (!isEmpty()) {
-			sb.append(" - ");
-			sb.append(DateUtil.formatUTCyyyymmdd(getEnd()));
-		}
-		return sb.toString();
-	}
+    public String getName() {
+        StringBuilder sb = new StringBuilder();
+        if (getFile() != null) {
+            sb.append(getFile().getName());
+            sb.append(" - ");
+        }
+        sb.append(getSite().displayName);
+        if (!isEmpty()) {
+            sb.append(" - ");
+            sb.append(DateUtil.formatUTCyyyymmdd(getEnd()));
+        }
+        return sb.toString();
+    }
 
-	public static class BlockUnion extends Union<Block> implements PioSerializable {
+    public static class BlockUnion extends Union<Block> implements PioSerializable {
 
-		public static final String PROP_MEMBER = "block";
+        public static final String PROP_MEMBER = "block";
 
-		public BlockUnion() {
-		}
+        public BlockUnion() {
+        }
 
-		public BlockUnion(ParamSet params) {
-			for (ParamSet blockParams: params.getParamSets(PROP_MEMBER)) {
-				add(new Block(blockParams));
-			}
-		}
+        public BlockUnion(ParamSet params) {
+            for (ParamSet blockParams: params.getParamSets(PROP_MEMBER)) {
+                add(new Block(blockParams));
+            }
+        }
 
-		public ParamSet getParamSet(PioFactory factory, String name) {
-			ParamSet params = factory.createParamSet(name);
-			for (Block block: getIntervals())
-				params.addParamSet(block.getParamSet(factory, PROP_MEMBER));
-			return params;
-		}
+        public ParamSet getParamSet(PioFactory factory, String name) {
+            ParamSet params = factory.createParamSet(name);
+            for (Block block: getIntervals())
+                params.addParamSet(block.getParamSet(factory, PROP_MEMBER));
+            return params;
+        }
 
-	}
+    }
 
     //
     // MIGRATIONS
@@ -680,24 +680,24 @@ public final class Schedule extends BaseMutableBean implements PioSerializable, 
 @SuppressWarnings("serial")
 class VariantList extends LinkedList<Variant> implements PioSerializable {
 
-	public static final String PROP_MEMBER = "variant";
+    public static final String PROP_MEMBER = "variant";
 
-	public VariantList() {
-	}
+    public VariantList() {
+    }
 
-	public VariantList(Schedule schedule, ParamSet paramSet) {
-		if (paramSet != null) {
-			for (ParamSet variantParams: paramSet.getParamSets(PROP_MEMBER))
-				add(new Variant(schedule, variantParams));
-		}
-	}
+    public VariantList(Schedule schedule, ParamSet paramSet) {
+        if (paramSet != null) {
+            for (ParamSet variantParams: paramSet.getParamSets(PROP_MEMBER))
+                add(new Variant(schedule, variantParams));
+        }
+    }
 
-	public ParamSet getParamSet(PioFactory factory, String name) {
-		ParamSet params = factory.createParamSet(name);
-		for (Variant v: this)
-			params.addParamSet(v.getParamSet(factory, PROP_MEMBER));
-		return params;
-	}
+    public ParamSet getParamSet(PioFactory factory, String name) {
+        ParamSet params = factory.createParamSet(name);
+        for (Variant v: this)
+            params.addParamSet(v.getParamSet(factory, PROP_MEMBER));
+        return params;
+    }
 
 }
 
@@ -705,75 +705,75 @@ class VariantList extends LinkedList<Variant> implements PioSerializable {
 @SuppressWarnings("serial")
 class StringSet extends TreeSet<String> implements PioSerializable {
 
-	public static final String PROP_MEMBER = "item";
+    public static final String PROP_MEMBER = "item";
 
-	public StringSet() {
-	}
+    public StringSet() {
+    }
 
-	@SuppressWarnings("unchecked")
-	public StringSet(ParamSet paramSet) {
-		if (paramSet != null) {
-			for (Param p: (List<Param>) paramSet.getParams(PROP_MEMBER)) {
-				add(p.getValue());
-			}
-		}
-	}
+    @SuppressWarnings("unchecked")
+    public StringSet(ParamSet paramSet) {
+        if (paramSet != null) {
+            for (Param p: (List<Param>) paramSet.getParams(PROP_MEMBER)) {
+                add(p.getValue());
+            }
+        }
+    }
 
-	public ParamSet getParamSet(PioFactory factory, String name) {
-		ParamSet params = factory.createParamSet(name);
-		for (String s: this) {
-			Pio.addParam(factory, params, PROP_MEMBER, s);
-		}
-		return params;
-	}
+    public ParamSet getParamSet(PioFactory factory, String name) {
+        ParamSet params = factory.createParamSet(name);
+        for (String s: this) {
+            Pio.addParam(factory, params, PROP_MEMBER, s);
+        }
+        return params;
+    }
 
 }
 
-@SuppressWarnings({ "serial", "unchecked" })
+@SuppressWarnings({ "serial", "unchecked", "rawtypes" })
 class MixedEnumSet extends HashSet<Enum> implements PioSerializable {
 
-	private static final Logger LOGGER = Logger.getLogger(MixedEnumSet.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(MixedEnumSet.class.getName());
 
-	public static final String PROP_MEMBER = "member";
-	public static final String PROP_MEMBER_CLASS = "class";
-	public static final String PROP_MEMBER_NAME = "name";
+    public static final String PROP_MEMBER = "member";
+    public static final String PROP_MEMBER_CLASS = "class";
+    public static final String PROP_MEMBER_NAME = "name";
 
-	public MixedEnumSet() {
-	}
+    public MixedEnumSet() {
+    }
 
-	public MixedEnumSet(ParamSet params) {
-		if (params != null) {
-			for (ParamSet ps: params.getParamSets(PROP_MEMBER)) {
-				Enum e = getEnum(ps);
-				if (e != null)
-					add(e);
-			}
-		}
-	}
+    public MixedEnumSet(ParamSet params) {
+        if (params != null) {
+            for (ParamSet ps: params.getParamSets(PROP_MEMBER)) {
+                Enum e = getEnum(ps);
+                if (e != null)
+                    add(e);
+            }
+        }
+    }
 
-	public ParamSet getParamSet(PioFactory factory, String name) {
-		ParamSet params = factory.createParamSet(name);
-		for (Enum e: this)
-			params.addParamSet(getEnumParamSet(factory, PROP_MEMBER, e));
-		return params;
-	}
+    public ParamSet getParamSet(PioFactory factory, String name) {
+        ParamSet params = factory.createParamSet(name);
+        for (Enum e: this)
+            params.addParamSet(getEnumParamSet(factory, PROP_MEMBER, e));
+        return params;
+    }
 
-	private ParamSet getEnumParamSet(PioFactory factory, String name, Enum e) {
-		ParamSet params = factory.createParamSet(name);
-		Pio.addParam(factory, params, PROP_MEMBER_CLASS, e.getClass().getName());
-		Pio.addParam(factory, params, PROP_MEMBER_NAME, e.name());
-		return params;
-	}
+    private ParamSet getEnumParamSet(PioFactory factory, String name, Enum e) {
+        ParamSet params = factory.createParamSet(name);
+        Pio.addParam(factory, params, PROP_MEMBER_CLASS, e.getClass().getName());
+        Pio.addParam(factory, params, PROP_MEMBER_NAME, e.name());
+        return params;
+    }
 
-	@SuppressWarnings("unchecked")
-	private Enum getEnum(ParamSet params) {
-		try {
-			String cname = Pio.getValue(params, PROP_MEMBER_CLASS);
-			String ename = Pio.getValue(params, PROP_MEMBER_NAME);
+    @SuppressWarnings("unchecked")
+    private Enum getEnum(ParamSet params) {
+        try {
+            String cname = Pio.getValue(params, PROP_MEMBER_CLASS);
+            String ename = Pio.getValue(params, PROP_MEMBER_NAME);
 
-			// For backward-compatability from when the sp package was
-			// called sp101. This was an annoying mistake, sorry.
-			cname = cname.replace("sp101", "sp");
+            // For backward-compatability from when the sp package was
+            // called sp101. This was an annoying mistake, sorry.
+            cname = cname.replace("sp101", "sp");
 
             // Patch for Gmos change
             if (cname.equals("edu.gemini.spModel.gemini.gmos.GmosNorthType$DetectorManufacturerNorth")
@@ -784,26 +784,26 @@ class MixedEnumSet extends HashSet<Enum> implements PioSerializable {
             // Patch for package change
             if (cname.equals("edu.gemini.qpt.core.sp.Inst")) cname = Inst.class.getName();
 
-			// We need to do this for subclassed enum constants like
-			// GMOSNorthType.FilterNorth.u_G0308, which has a runtime type of
-			// GMOSNorthType$FilterNorth$1, which is not actually an enum type.
-			// This is a little puzzling.
-			Class c = Class.forName(cname);
-			while (c != null) {
-				try {
-					return Enum.valueOf(c, ename);
-				} catch (IllegalArgumentException iae) {
-					c = c.getSuperclass();
-				}
-			}
+            // We need to do this for subclassed enum constants like
+            // GMOSNorthType.FilterNorth.u_G0308, which has a runtime type of
+            // GMOSNorthType$FilterNorth$1, which is not actually an enum type.
+            // This is a little puzzling.
+            Class c = Class.forName(cname);
+            while (c != null) {
+                try {
+                    return Enum.valueOf(c, ename);
+                } catch (IllegalArgumentException iae) {
+                    c = c.getSuperclass();
+                }
+            }
 
-			throw new Exception(cname + " doesn't appear to be an enum class, or " + ename + " is a bogus token.");
+            throw new Exception(cname + " doesn't appear to be an enum class, or " + ename + " is a bogus token.");
 
-		} catch (Exception e) {
-			LOGGER.log(Level.WARNING, "Trouble deserializing enum type.", e);
-			return null;
-		}
-	}
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Trouble deserializing enum type.", e);
+            return null;
+        }
+    }
 
 }
 
