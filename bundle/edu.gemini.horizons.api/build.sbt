@@ -7,10 +7,12 @@ name := "edu.gemini.horizons.api"
 // version set in ThisBuild
 
 unmanagedJars in Compile ++= Seq(
-  new File(baseDirectory.value, "../../lib/bundle/scalaz-core_2.10-7.1.6.jar"),
-  new File(baseDirectory.value, "../../lib/bundle/scalaz-effect_2.10-7.1.6.jar"),
   new File(baseDirectory.value, "../../lib/bundle/org-apache-commons-httpclient_2.10-2.0.0.jar")
 )
+
+libraryDependencies ++= Seq(
+  "org.scalaz" %% "scalaz-core" % "7.1.6",
+  "org.scalaz" %% "scalaz-effect" % "7.1.6")
 
 osgiSettings
 

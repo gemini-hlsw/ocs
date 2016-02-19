@@ -7,12 +7,10 @@ name := "jsky.app.ot.shared"
 // version set in ThisBuild
 
 unmanagedJars in Compile ++= Seq(
-  new File(baseDirectory.value, "../../lib/bundle/osgi.cmpn-4.3.1.jar"),
-  // new File(baseDirectory.value, "../../lib/bundle/org.apache.felix-4.0.3.jar"),
-  // new File(baseDirectory.value, "../../lib/bundle/org.apache.felix-4.2.1.jar"),
-  // new File(baseDirectory.value, "../../lib/bundle/org.osgi.core-4.3.0.jar"),
-  // new File(baseDirectory.value, "../../lib/bundle/scala-library-2.10.5.jar"),
-  new File(baseDirectory.value, "../../lib/bundle/scalaz-core_2.10-7.1.6.jar"))
+  new File(baseDirectory.value, "../../lib/bundle/osgi.cmpn-4.3.1.jar"))
+
+libraryDependencies ++= Seq(
+  "org.scalaz" %% "scalaz-core" % "7.1.6")
 
 osgiSettings
 

@@ -7,11 +7,11 @@ import edu.gemini.spModel.gemini.phoenix.InstPhoenix
 import edu.gemini.spModel.obs.SPObservation
 import edu.gemini.spModel.util.SPTreeUtil
 
-import org.specs2.mutable.Specification
+import org.specs2.mutable.SpecificationLike
 
 import scala.collection.JavaConverters._
 
-object SpPhoenixTemplateSpec extends TemplateSpec("PHOENIX_BP.xml") with Specification {
+object SpPhoenixTemplateSpec extends TemplateSpec("PHOENIX_BP.xml") with SpecificationLike {
 
   def test(fpu: PhoenixFocalPlaneUnit, filter: PhoenixFilter) =
     expand(proposal(PhoenixBlueprint(Site.GS, fpu, filter), List(1), MagnitudeBand.R)) { (p, sp) =>

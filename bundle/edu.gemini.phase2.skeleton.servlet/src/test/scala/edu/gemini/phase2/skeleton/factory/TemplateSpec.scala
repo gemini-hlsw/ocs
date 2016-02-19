@@ -11,11 +11,11 @@ import edu.gemini.pot.sp.{ISPObservation, ISPTemplateGroup, ISPProgram}
 import edu.gemini.pot.spdb.DBLocalDatabase
 import edu.gemini.shared.skyobject.Magnitude.Band
 import edu.gemini.spModel.core.{MagnitudeBand, Magnitude, SPProgramID}
-import edu.gemini.spModel.obscomp.{SPInstObsComp, SPNote}
+import edu.gemini.spModel.obscomp.SPNote
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.obs.SPObservation
 import edu.gemini.spModel.template.TemplateParameters
-import org.specs2.mutable.Specification
+import org.specs2.mutable.SpecificationLike
 import scala.collection.JavaConverters._
 import scalaz._, Scalaz._
 import Observation.{blueprint, target, condition, time}
@@ -24,9 +24,10 @@ import Proposal.{ targets, observations }
 /** 
  * Mixin for a specs test for template expansion. This provides code to expand a Phase 1 Proposal
  * into a skeleton, then test that the expansion was correct.
+ *
  * @param xmlName name of the template to test: "NIFS_BP.xml" for example
  */
-abstract class TemplateSpec(xmlName: String) { this: Specification =>
+abstract class TemplateSpec(xmlName: String) { this: SpecificationLike =>
 
   // Required when constructing phase 1 proposals
   if (System.getProperty("edu.gemini.model.p1.schemaVersion") == null)
@@ -54,7 +55,7 @@ abstract class TemplateSpec(xmlName: String) { this: Specification =>
       val f   = Phase1FolderFactory.create(p).unsafeGet
       val ss  = new SkeletonShell(pid, SpProgramFactory.create(p), f)
       val tf  = TemplateFactoryImpl(templateDb)
-      val tfe = TemplateFolderExpansionFactory.expand(ss.folder, tf, true).unsafeGet
+      val tfe = TemplateFolderExpansionFactory.expand(ss.folder, tf, preserveLibraryIds = true).unsafeGet
       func(p, SkeletonStoreService.store(ss, tfe, db).program)
     } catch {
 
@@ -102,8 +103,8 @@ abstract class TemplateSpec(xmlName: String) { this: Specification =>
   def checkLibs(label: String, tg: ISPTemplateGroup, incl: Set[Int], excl: Set[Int]) = {
     val ls = libs(tg)
     s"$label should include ${incl.mkString("{", ",", "}")} and exclude ${excl.mkString("{", ",", "}")}." in {
-      if (ls.filter(incl) == incl && ls.filter(excl).isEmpty) ok
-      else failure("Failed: Actual library ids: " + ls)
+      if (ls.filter(incl) == incl && !ls.exists(excl)) ok
+      else sys.error("Failed: Actual library ids: " + ls)
     }
   }
 

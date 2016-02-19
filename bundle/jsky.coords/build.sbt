@@ -6,7 +6,6 @@ name := "jsky.coords"
 
 // version set in ThisBuild
 
-
 osgiSettings
 
 ocsBundleSettings
@@ -20,5 +19,3 @@ OsgiKeys.dynamicImportPackage := Seq("")
 OsgiKeys.exportPackage := Seq(
   "jsky.coords",
   "jsky.coords.gui")
-
-        

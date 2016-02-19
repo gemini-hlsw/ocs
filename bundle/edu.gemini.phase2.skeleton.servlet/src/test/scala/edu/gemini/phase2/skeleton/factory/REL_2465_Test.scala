@@ -3,12 +3,12 @@ package edu.gemini.phase2.skeleton.factory
 import edu.gemini.phase2.template.factory.impl.gpi._
 import edu.gemini.spModel.core.MagnitudeBand
 import edu.gemini.spModel.gemini.gpi.Gpi
-import org.specs2.mutable.Specification
+import org.specs2.mutable.SpecificationLike
 import edu.gemini.model.p1.immutable.GpiBlueprint
 import edu.gemini.model.p1.mutable.{GpiObservingMode, GpiDisperser}
 import edu.gemini.spModel.rich.pot.sp._
 
-object REL_2465_Test extends TemplateSpec("GPI_BP.xml") with Specification {
+object REL_2465_Test extends TemplateSpec("GPI_BP.xml") with SpecificationLike {
   import GpiDisperser._, GpiFilterGroup._
 
   def gpiTest(disp: GpiDisperser, mode: GpiObservingMode, incl: Set[Int]): Unit =

@@ -1,8 +1,8 @@
 package edu.gemini.model.p1.immutable
 
-import org.specs2.mutable.SpecificationWithJUnit
+import org.specs2.mutable.Specification
 
-class AltairSpec extends SpecificationWithJUnit {
+class AltairSpec extends Specification {
   "Altair" should {
     "can be LGS and none of pwfs1/aowfs/oiwfs simultaneously" in {
       AltairLGS(pwfs1 = false, aowfs = false, oiwfs = false).toString must beEqualTo("Altair Laser Guidestar")

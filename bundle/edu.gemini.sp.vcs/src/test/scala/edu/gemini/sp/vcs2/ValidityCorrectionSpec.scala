@@ -14,7 +14,7 @@ class ValidityCorrectionSpec extends MergeCorrectionSpec {
 
   private def test(start: Tree[MergeNode], expected: Tree[MergeNode], vc: ValidityCorrection = validityCorrection): MatchResult[Tree[MergeNode]] =
     vc.apply(plan(start)) match {
-      case -\/(f)   => failure(VcsFailure.explain(f, SPProgramID.toProgramID("GS-2016A-Q-1"), "", None))
+      case -\/(f)   => sys.error(VcsFailure.explain(f, SPProgramID.toProgramID("GS-2016A-Q-1"), "", None))
       case \/-(mp)  => mp.update must correspondTo(expected)
     }
 

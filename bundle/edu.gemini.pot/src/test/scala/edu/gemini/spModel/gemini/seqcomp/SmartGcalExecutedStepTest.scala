@@ -10,7 +10,7 @@ import edu.gemini.spModel.gemini.calunit.smartgcal.{Calibration, CalibrationKey,
 
 import collection.JavaConverters._
 import edu.gemini.spModel.gemini.calunit.CalUnitParams._
-import reflect.BeanProperty
+import scala.beans.BeanProperty
 import edu.gemini.spModel.config2.ItemKey
 import edu.gemini.spModel.obslog.ObsExecLog
 import edu.gemini.spModel.core.SPProgramID
@@ -41,7 +41,7 @@ class SmartGcalExecutedStepTest extends SpModelTestBase {
     addSeqComponent(getObs.getSeqComponent, SeqRepeatSmartGcalObs.Arc.SP_TYPE)
   }
 
-  val cal = CalImpl(Set(Lamp.arcLamps().get(0)), Shutter.OPEN, Filter.ND_10, Diffuser.IR, 1, 1.0, 1, true)
+  val cal = CalImpl(Set(Lamp.arcLamps().get(0)), Shutter.OPEN, Filter.ND_10, Diffuser.IR, 1, 1.0, 1, arc = true)
 
 
   @Test def testNoExecutedSteps() {

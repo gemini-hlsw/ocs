@@ -1,10 +1,10 @@
 package edu.gemini.model.p1.dtree
 
-import org.specs2.mutable.SpecificationWithJUnit
 import edu.gemini.model.p1.immutable.{Semester, Instrument}
 import edu.gemini.model.p1.immutable.SemesterOption._
+import org.specs2.mutable.Specification
 
-class RootSpec extends SpecificationWithJUnit {
+class RootSpec extends Specification {
 
   "The Root Spec" should {
     "include Gsaoi" in {

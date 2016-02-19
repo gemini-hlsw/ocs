@@ -1,8 +1,7 @@
 package edu.gemini.ags.gems.mascot.util
 
 import breeze.linalg._
-import breeze.util._
-import org.netlib.lapack.LAPACK
+import com.github.fommil.netlib.LAPACK
 import org.netlib.util.intW
 
 /**

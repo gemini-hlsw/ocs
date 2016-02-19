@@ -4,13 +4,13 @@ import java.net.URL
 
 import edu.gemini.catalog.api.{SIMBAD, PPMXL, UCAC4}
 import edu.gemini.spModel.core._
-import org.specs2.mutable.SpecificationWithJUnit
+import org.specs2.mutable.Specification
 import squants.motion.KilometersPerSecond
 
 import scalaz._
 import Scalaz._
 
-class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
+class VoTableParserSpec extends Specification with VoTableParser {
 
   "Ucd" should {
     "detect if is a superset" in {

@@ -4,8 +4,8 @@ import edu.gemini.model.p1.immutable.Target
 import java.io.{InputStream, File}
 
 trait TargetReader[+T <: Target] {
-  type TargetResult = Either[ParseError, T]
-  type Result       = Either[DataSourceError, List[TargetResult]]
+  protected [this] type TargetResult = Either[ParseError, T]
+  protected [this] type Result       = Either[DataSourceError, List[TargetResult]]
 
   def read(file: File): Result
   def read(is: InputStream): Result

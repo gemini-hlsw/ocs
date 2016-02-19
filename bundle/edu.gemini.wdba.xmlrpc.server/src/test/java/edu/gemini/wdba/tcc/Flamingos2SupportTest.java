@@ -14,6 +14,7 @@ import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.PwfsGuideProbe;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.telescope.IssPort;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;

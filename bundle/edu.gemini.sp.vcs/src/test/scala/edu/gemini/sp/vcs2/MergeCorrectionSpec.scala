@@ -50,13 +50,13 @@ class MergeCorrectionSpec extends Specification {
   def incr(mn: MergeNode): MergeNode =
     mn match {
       case m: Modified => m.copy(nv = m.nv.incr(lifespanId))
-      case _           => failure("trying to increment unmodified node")
+      case _           => sys.error("trying to increment unmodified node")
     }
 
   def addConflictNote(mn: MergeNode, cn: SPNodeKey => Conflict.Note): MergeNode =
     mn match {
       case m: Modified => m.copy(conflicts = m.conflicts.withConflictNote(cn(mn.key)))
-      case _           => failure("trying to add a conflict note to an unmodified node")
+      case _           => sys.error("trying to add a conflict note to an unmodified node")
     }
 
   def obsTree(num: Int): Tree[MergeNode] =

@@ -1,11 +1,12 @@
 package edu.gemini.model.p1.immutable
 
 import java.io.InputStreamReader
+import org.specs2.matcher.XmlMatchers
 import org.specs2.mutable._
 import scala.xml.XML
 import scala.Some
 
-class VisitorBlueprintSpec extends SpecificationWithJUnit with SemesterProperties {
+class VisitorBlueprintSpec extends Specification with SemesterProperties with XmlMatchers {
 
   "The Visitor Blueprint" should {
     "does not use Ao" in {

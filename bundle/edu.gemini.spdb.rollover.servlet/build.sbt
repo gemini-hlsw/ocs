@@ -9,10 +9,6 @@ name := "edu.gemini.spdb.rollover.servlet"
 unmanagedJars in Compile ++= Seq(
   new File(baseDirectory.value, "../../lib/bundle/javax-servlet_2.10-2.5.0.jar"),
   new File(baseDirectory.value, "../../lib/bundle/osgi.cmpn-4.3.1.jar")
-  // new File(baseDirectory.value, "../../lib/bundle/org.apache.felix-4.2.1.jar"),
-  // new File(baseDirectory.value, "../../lib/bundle/org.apache.felix.http.jetty-2.2.0.jar"),
-  // new File(baseDirectory.value, "../../lib/bundle/scala-library-2.10.5.jar"),
-  // new File(baseDirectory.value, "../../lib/bundle/pax-web-jetty-bundle-1.1.13.jar")
 )
 
 osgiSettings

@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package edu.gemini.wdba.tcc;
 
 import static edu.gemini.spModel.gemini.altair.AltairParams.GuideStarType.*;

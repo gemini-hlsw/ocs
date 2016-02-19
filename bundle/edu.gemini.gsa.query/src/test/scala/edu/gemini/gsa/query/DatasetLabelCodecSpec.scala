@@ -26,7 +26,7 @@ object DatasetLabelCodecSpec extends Specification {
     "fail for invalid labels" in {
       Parse.decodeEither[DatasetLabel](s""""foo"""") match {
         case -\/(m) => m.startsWith(invalidDatasetLabel("foo"))
-        case _      => failure("expected to fail on input `foo`")
+        case _      => sys.error("expected to fail on input `foo`")
       }
     }
   }

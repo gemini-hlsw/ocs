@@ -6,6 +6,7 @@ import edu.gemini.itc.shared._
 import edu.gemini.itc.web.baseline.Baseline._
 import org.scalacheck.{Arbitrary, Gen}
 import org.specs2.ScalaCheck
+import org.specs2.matcher.ScalaCheckParameters
 import org.specs2.mutable.Specification
 
 /**
@@ -15,7 +16,7 @@ import org.specs2.mutable.Specification
  * map is stored as a resource file and needs to be updated whenever there are changes to the code that change
  * the outputs. See [[BaselineTest]] for details.
  */
-object BaselineAllSpec extends Specification with ScalaCheck {
+object BaselineAllSpec extends Specification with ScalaCheck with ScalaCheckParameters {
 
   // default number of tests is 100, that takes a bit too long
   private val minTestsCnt = 10
@@ -28,7 +29,7 @@ object BaselineAllSpec extends Specification with ScalaCheck {
       "match latest baseline" !
         prop { f: Fixture[AcquisitionCamParameters] =>
           checkAgainstBaseline(Baseline.from(f, executeAcqCamRecipe(f)))
-        }.set((minTestsOk, minTestsCnt))
+        }.set(defaultParameters.minTestsOk, minTestsCnt)
     }
   }
 
@@ -40,7 +41,7 @@ object BaselineAllSpec extends Specification with ScalaCheck {
       "match latest baseline" !
         prop { f: Fixture[Flamingos2Parameters] =>
           checkAgainstBaseline(Baseline.from(f, executeF2Recipe(f)))
-        }.set((minTestsOk, minTestsCnt))
+        }.set(defaultParameters.minTestsOk, minTestsCnt)
     }
   }
 
@@ -52,7 +53,7 @@ object BaselineAllSpec extends Specification with ScalaCheck {
       "match latest baseline" !
         prop { f: Fixture[GmosParameters] =>
           checkAgainstBaseline(Baseline.from(f, executeGmosRecipe(f)))
-        }.set((minTestsOk, minTestsCnt))
+        }.set(defaultParameters.minTestsOk, minTestsCnt)
     }
   }
 
@@ -64,7 +65,7 @@ object BaselineAllSpec extends Specification with ScalaCheck {
       "match latest baseline" !
         prop { f: Fixture[GnirsParameters] =>
           checkAgainstBaseline(Baseline.from(f, executeGnirsRecipe(f)))
-        }.set((minTestsOk, minTestsCnt))
+        }.set(defaultParameters.minTestsOk, minTestsCnt)
     }
   }
 
@@ -76,7 +77,7 @@ object BaselineAllSpec extends Specification with ScalaCheck {
       "match latest baseline" !
         prop { f: Fixture[GsaoiParameters] =>
           checkAgainstBaseline(Baseline.from(f, executeGsaoiRecipe(f)))
-        }.set((minTestsOk, minTestsCnt))
+        }.set(defaultParameters.minTestsOk, minTestsCnt)
     }
   }
 
@@ -88,7 +89,7 @@ object BaselineAllSpec extends Specification with ScalaCheck {
       "match latest baseline" !
         prop { f: Fixture[MichelleParameters] =>
           checkAgainstBaseline(Baseline.from(f, executeMichelleRecipe(f)))
-        }.set((minTestsOk, minTestsCnt))
+        }.set(defaultParameters.minTestsOk, minTestsCnt)
     }
   }
 
@@ -100,7 +101,7 @@ object BaselineAllSpec extends Specification with ScalaCheck {
       "match latest baseline" !
         prop { f: Fixture[NifsParameters] =>
           checkAgainstBaseline(Baseline.from(f, executeNifsRecipe(f)))
-        }.set((minTestsOk, minTestsCnt))
+        }.set(defaultParameters.minTestsOk, minTestsCnt)
     }
   }
 
@@ -112,7 +113,7 @@ object BaselineAllSpec extends Specification with ScalaCheck {
       "match latest baseline" !
         prop { f: Fixture[NiriParameters] =>
           checkAgainstBaseline(Baseline.from(f, executeNiriRecipe(f)))
-        }.set((minTestsOk, minTestsCnt))
+        }.set(defaultParameters.minTestsOk, minTestsCnt)
     }
   }
 
@@ -124,7 +125,7 @@ object BaselineAllSpec extends Specification with ScalaCheck {
       "match latest baseline" !
         prop { f: Fixture[TRecsParameters] =>
           checkAgainstBaseline(Baseline.from(f, executeTrecsRecipe(f)))
-        }.set((minTestsOk, minTestsCnt))
+        }.set(defaultParameters.minTestsOk, minTestsCnt)
     }
   }
 }

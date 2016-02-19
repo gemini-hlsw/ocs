@@ -29,5 +29,3 @@ OsgiKeys.exportPackage := Seq(
   "edu.gemini.ui.workspace.osgi",
   "edu.gemini.ui.workspace.scala",
   "edu.gemini.ui.workspace.util")
-
-        

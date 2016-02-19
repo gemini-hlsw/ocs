@@ -51,9 +51,6 @@ def common(version: Version) = AppConfig(
   ),
   log = Some("%a/log/ot.%u.%g.log"),
   bundles = List(
-    BundleSpec("org.scala-lang.scala-reflect", Version(2, 10, 5)),
-    BundleSpec("org.scala-lang.scala-compiler",Version(2, 10, 5)),
-    BundleSpec("quasiquotes",                  Version(2, 0, 1)),
     BundleSpec("edu.gemini.osgi.main",         Version(4, 2, 1)),
     BundleSpec("edu.gemini.util.log.extras",   version),
     BundleSpec("edu.gemini.sp.vcs",            version),
@@ -67,11 +64,10 @@ def common(version: Version) = AppConfig(
     BundleSpec("slf4j.jdk14",                  Version(1, 6, 4)),
     BundleSpec("org.h2",                       Version(1, 3, 170)),
     BundleSpec("org.apache.commons.io",        Version(2, 0, 1)),
-    BundleSpec("org.scalaz.concurrent",        Version(7, 1, 6)),
     BundleSpec("jsky.app.ot",                  version),
     BundleSpec("jsky.app.ot.visitlog",         version),
     BundleSpec("org.apache.commons.logging",   Version(1, 1, 0)),
-    BundleSpec("squants",                      Version(0, 5, 3))
+    BundleSpec("com.squants",                  Version(0, 6, 1))
   ),
   spec = Some(file("app/ot/dist/RPM64/ot.spec.template"))
 ) extending List(common_credentials(version))

@@ -24,7 +24,7 @@ import Scalaz._
   * interface. */
 class VcsServer(odb: IDBDatabaseService) { vs =>
 
-  import SPNodeKeyLocks.instance.{readLock, readUnlock, writeLock, writeUnlock}
+  import SPNodeKeyLocks.instance
 
   def hasPermission(p: Permission, user: Set[Principal]): VcsAction[Boolean] =
     VcsAction(ImplicitPolicy.hasPermission(odb, user, p).unsafePerformIO())
@@ -36,7 +36,7 @@ class VcsServer(odb: IDBDatabaseService) { vs =>
   /** Creates an action that reads from a program with a read lock held
     * provided the caller has permission. */
   def read[A](id: SPProgramID, user: Set[Principal])(body: ISPProgram => A): VcsAction[A] =
-    managed(id, user, readLock, readUnlock)(p => body(p).point[VcsAction])
+    managed(id, user, instance.readLock, instance.readUnlock)(p => body(p).point[VcsAction])
 
   /** Creates an action that potentially writes to a program with a write lock
     * held provided the caller has permission.  Writing is done on a copy of the
@@ -67,7 +67,7 @@ class VcsServer(odb: IDBDatabaseService) { vs =>
                evaluate: ISPProgram => VcsAction[A],
                filter:   A => Boolean,
                update:   (ISPFactory, ISPProgram, A) => VcsAction[Unit]): VcsAction[A] =
-    managed(id, user, writeLock, writeUnlock) { prog =>
+    managed(id, user, instance.writeLock, instance.writeUnlock) { prog =>
       evaluate(prog) >>= { a =>
         if (filter(a)) {
           val cp = odb.getFactory.copyWithSameKeys(prog)
@@ -92,7 +92,7 @@ class VcsServer(odb: IDBDatabaseService) { vs =>
     }
 
     (Option(p.getProgramID) \/> MissingId).liftVcs >>= { id =>
-      locked(p.getProgramKey, writeLock, writeUnlock) {
+      locked(p.getProgramKey, instance.writeLock, instance.writeUnlock) {
         failIfExists(id, p.getProgramKey) >> putProg(odb.getFactory.copyWithNewLifespanId(p)).liftVcs
       }
     }

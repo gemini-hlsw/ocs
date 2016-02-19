@@ -35,7 +35,6 @@ def common(version: Version) = AppConfig(
   ),
   bundles = List(
     BundleSpec("edu.gemini.osgi.main",               Version(4, 2, 1)),
-    BundleSpec("org.scala-lang.scala-library",       Version(2, 10, 5)),
     BundleSpec("org.apache.felix.http.jetty",        Version(2, 2, 0)),
     BundleSpec("org.osgi.impl.bundle.repoindex.lib", Version(0, 0, 4)),
     BundleSpec("edu.gemini.util.osgi",               version),

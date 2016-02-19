@@ -1,10 +1,10 @@
 package edu.gemini.model.p1.dtree.inst
 
-import org.specs2.mutable.SpecificationWithJUnit
+import org.specs2.mutable.Specification
 import edu.gemini.model.p1.immutable.AltairLGS
 import edu.gemini.model.p1.immutable
 
-class GnirsSpec extends SpecificationWithJUnit {
+class GnirsSpec extends Specification {
   "The Gnirs decision tree" should {
     "includes X filter in order, REL-630" in {
       val gnirs = new Gnirs.ImagingNode((AltairLGS(true), immutable.GnirsPixelScale.PS_005))

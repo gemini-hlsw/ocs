@@ -1,9 +1,9 @@
 package edu.gemini.model.p1.dtree.inst
 
-import org.specs2.mutable.SpecificationWithJUnit
+import org.specs2.mutable.Specification
 import edu.gemini.model.p1.mutable.GpiObservingMode
 
-class GpiSpec extends SpecificationWithJUnit {
+class GpiSpec extends Specification {
   "The Gpi decision tree" should {
     "includes Gpi observing modes" in {
       val gpi = Gpi()

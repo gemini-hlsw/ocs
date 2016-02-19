@@ -13,8 +13,7 @@ object StrehlContourPlot {
   def create(s: Strehl, size: Int) : ContourPlot = {
     val m = s.strehl_map
     val numCols = m.cols
-    val data = (for (i <- 0 until numCols) yield m(i, ::).toDenseVector.toArray).toArray
-//    ContourPlot.createPlot(size, size, data)
+    val data = (for (i <- 0 until numCols) yield m(i, ::).t.toDenseVector.toArray).toArray
     val cmap = ColorMap.getColormap("YlGn", ContourPlot.N_CONTOURS - 1, true)
     ContourPlot.createPlot(size, size, data, cmap)
   }

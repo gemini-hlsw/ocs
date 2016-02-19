@@ -23,10 +23,10 @@ class ModelConversionsSpec extends Specification with ScalaCheck with Arbitrarie
       }
     }
     "convert old bands to new bands" in {
-      for {
+      (for {
         m <- skyobject.Magnitude.Band.values().toList
         b = m.toNewModel
-      } yield MagnitudeBand.all should contain(b)
+      } yield MagnitudeBand.all should contain(b)).reduce(_ and _)
     }
     "convert new magnitudes to old" in {
       forAll { (m: Magnitude) =>

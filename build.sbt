@@ -11,7 +11,9 @@ pitVersion in ThisBuild := OcsVersion("2016B", true, 2, 1, 0)
 // Bundles by default use the ocsVersion; this is overridden in bundles used only by the PIT
 version in ThisBuild := ocsVersion.value.toOsgiVersion
 
-scalaVersion in ThisBuild := "2.10.5"
+scalaVersion in ThisBuild := "2.11.7"
+
+updateOptions := updateOptions.value.withCachedResolution(true)
 
 // Note that this is not a standard setting; it's used for building IDEA modules.
 javaVersion in ThisBuild := {
@@ -30,7 +32,7 @@ javaVersion in ThisBuild := {
 }
 
 scalacOptions in ThisBuild ++= Seq(
-  // "-deprecation",
+  "-deprecation",
   "-encoding", "UTF-8",  // yes, this is 2 args
   "-feature",
   "-language:existentials",
@@ -41,9 +43,8 @@ scalacOptions in ThisBuild ++= Seq(
   "-target:jvm-1.7",
   "-unchecked",
   // "-Xfatal-warnings",
-  "-Xlint",
-  "-Yno-adapted-args", 
-  "-Ywarn-all"
+  "-Xlint:-stars-align",
+  "-Yno-adapted-args"
   // "-Ywarn-dead-code"        // N.B. doesn't work well with bottom
   // "-Ywarn-numeric-widen",   
   // "-Ywarn-value-discard"   
@@ -55,14 +56,21 @@ javacOptions in ThisBuild ++= Seq(
   "-Xlint:all,-serial,-path,-deprecation,-unchecked,-fallthrough" // TOOD: turn all on except maybe -serial and -path
 )
 
+val specs2Version = "2.5-scalaz-7.1.6"
+
 // Use managed dependencies for tests; everyone gets JUnit, ScalaCheck, and Specs2
 libraryDependencies in ThisBuild ++= Seq(
-  "junit"           % "junit"           % "4.11"   % "test",
-  "com.novocode"    % "junit-interface" % "0.9"    % "test",
-  "org.scalacheck" %% "scalacheck"      % "1.10.1" % "test",
-  "org.specs2"     %% "specs2"          % "1.12.3" % "test",
-  "org.scalatest"   % "scalatest_2.10"  % "2.0"    % "test"
+  "junit"           % "junit"                % "4.11"        % "test",
+  "com.novocode"    % "junit-interface"      % "0.9"         % "test",
+  "org.scalacheck" %% "scalacheck"           % "1.11.0"      % "test",
+  "org.specs2"     %% "specs2-core"          % specs2Version % "test",
+  "org.specs2"     %% "specs2-scalacheck"    % specs2Version % "test",
+  "org.specs2"     %% "specs2-matcher-extra" % specs2Version % "test" intransitive(), // This is required to avoid pulling a version of scalaz-stream not available in maven central
+  "org.scalatest"  %% "scalatest"            % "2.2.4"       % "test"
 )
+
+// Required for specs2
+scalacOptions in Test ++= Seq("-Yrangepos")
 
 // Don't build scaladoc (for now)
 publishArtifact in (ThisBuild, packageDoc) := false
@@ -88,7 +96,7 @@ commands += {
   import complete.DefaultParsers._
   val stuff = Seq(("-6", "java6",  "Java SE6"),
                   ("-7", "java7",  "Java SE7"),
-		  ("-8", "java8",  "Java SE8"),
+                  ("-8", "java8",  "Java SE8"),
                   ("-s", "scala",  "Scala"),
                   ("-z", "scalaz", "scalaz"))
   val option = stuff.map { case (o, d, _) => o ^^^ d } .reduceLeft(_ | _)

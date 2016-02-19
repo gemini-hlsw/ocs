@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicInteger
 import edu.gemini.catalog.api._
 import edu.gemini.spModel.core._
 import org.apache.commons.httpclient.NameValuePair
-import org.specs2.mutable.SpecificationWithJUnit
+import org.specs2.mutable.Specification
 import org.specs2.time.NoTimeConversions
 
 import scala.concurrent._
@@ -16,7 +16,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 import scalaz.NonEmptyList
 
-class VoTableClientSpec extends SpecificationWithJUnit with VoTableClient with NoTimeConversions {
+class VoTableClientSpec extends Specification with VoTableClient with NoTimeConversions {
   val noMagnitudeConstraint = MagnitudeConstraints(SingleBand(MagnitudeBand.J), FaintnessConstraint(100), None)
   "The VoTable client" should {
 

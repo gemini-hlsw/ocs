@@ -6,11 +6,11 @@ name := "edu.gemini.model.p1.submit"
 
 version := pitVersion.value.toOsgiVersion
 
-unmanagedJars in Compile ++= Seq(
-  new File(baseDirectory.value, "../../lib/bundle/scala-actors-2.10.5.jar"),
-  new File(baseDirectory.value, "../../lib/bundle/scalaz-concurrent_2.10-7.1.6.jar"),
-  new File(baseDirectory.value, "../../lib/bundle/scalaz-core_2.10-7.1.6.jar"),
-  new File(baseDirectory.value, "../../lib/bundle/scalaz-effect_2.10-7.1.6.jar"))
+libraryDependencies ++= Seq(
+  "org.scalaz" %% "scalaz-core" % "7.1.6",
+  "org.scalaz" %% "scalaz-concurrent" % "7.1.6",
+  "org.scalaz" %% "scalaz-effect" % "7.1.6"
+  )
 
 osgiSettings
 
@@ -25,4 +25,3 @@ OsgiKeys.dynamicImportPackage := Seq("")
 OsgiKeys.exportPackage := Seq(
   "edu.gemini.model.p1.submit")
 
-        

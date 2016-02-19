@@ -120,7 +120,8 @@ object GemsResultsAnalyzer {
           }
         }
         pairs match {
-          case x :: Nil => check(x)
+          case Nil       => Nil
+          case x :: Nil  => check(x)
           case x :: tail => go(check(x), tail)
         }
       }

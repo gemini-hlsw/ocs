@@ -8,9 +8,9 @@ import org.scalacheck._
 import org.scalacheck.Arbitrary._
 import org.scalacheck.Prop.forAll
 import org.specs2.ScalaCheck
-import org.specs2.mutable.Specification
+import org.specs2.mutable.SpecificationLike
 
-class GnirsBlueprintSpec extends TemplateSpec("GNIRS_BP.xml") with Specification with ScalaCheck {
+class GnirsBlueprintSpec extends TemplateSpec("GNIRS_BP.xml") with SpecificationLike with ScalaCheck {
 
   implicit val ArbitraryAltair: Arbitrary[Altair] =
     Arbitrary(Gen.oneOf(List(

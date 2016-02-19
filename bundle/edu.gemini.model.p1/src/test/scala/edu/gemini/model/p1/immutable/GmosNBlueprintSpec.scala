@@ -3,7 +3,7 @@ package edu.gemini.model.p1.immutable
 import edu.gemini.model.p1.{mutable => M}
 import org.specs2.mutable._
 
-class GmosNBlueprintSpec extends SpecificationWithJUnit with SemesterProperties {
+class GmosNBlueprintSpec extends Specification with SemesterProperties {
 
   "The GmosN Blueprint" should {
     "removes the 0.25 longslit, REL-1256" in {

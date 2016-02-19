@@ -3,7 +3,7 @@ package edu.gemini.ags.gems.mascot.util
 import breeze.linalg._
 import Spline._
 import YUtils._
-import org.junit.{Ignore, Test}
+import org.junit.Test
 
 /**
  * Tests methods in the Spline class.

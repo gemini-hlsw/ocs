@@ -1,5 +1,6 @@
 package edu.gemini.model.p1.immutable.transform
 
+import org.specs2.matcher.XmlMatchers
 import org.specs2.mutable._
 import org.specs2.scalaz.ValidationMatchers._
 import xml._
@@ -8,7 +9,7 @@ import edu.gemini.model.p1.immutable._
 import scalaz.NonEmptyList
 import XMLConverter._
 
-class UpConverterSpec extends SpecificationWithJUnit with SemesterProperties {
+class UpConverterSpec extends Specification with SemesterProperties with XmlMatchers {
   "The UpConverter" should {
     "change the version but not the semester from a 2014.1.1 proposal to the 2015.1.1 Release" in {
       val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_ver_2014.1.1.xml")))

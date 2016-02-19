@@ -23,5 +23,3 @@ OsgiKeys.exportPackage := Seq(
   "edu.gemini.spModel.pio",
   "edu.gemini.spModel.pio.codec",
   "edu.gemini.spModel.pio.xml")
-
-        

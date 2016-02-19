@@ -7,8 +7,10 @@ name := "jsky.app.ot.visitlog"
 // version set in ThisBuild
 
 unmanagedJars in Compile ++= Seq(
-  new File(baseDirectory.value, "../../lib/bundle/org-jdesktop-swingx_2.10-1.6.4.jar"),
-  new File(baseDirectory.value, "../../lib/bundle/scalaz-core_2.10-7.1.6.jar"))
+  new File(baseDirectory.value, "../../lib/bundle/org-jdesktop-swingx_2.10-1.6.4.jar"))
+
+libraryDependencies ++= Seq(
+  "org.scalaz" %% "scalaz-core" % "7.1.6")
 
 osgiSettings
 

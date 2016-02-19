@@ -863,7 +863,7 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor implements Iterable<
                 scala.Option<AgsStrategy> strategyOption = AgsRegistrar.currentStrategy(ctx);
                 if (strategyOption.isDefined()) {
                     AgsStrategy strategy = strategyOption.get();
-                    analysis.addAll(JavaConversions.asJavaList(strategy.analyze(ctx, magTable)));
+                    analysis.addAll(JavaConversions.seqAsJavaList(strategy.analyze(ctx, magTable)));
                 }
             }
         }

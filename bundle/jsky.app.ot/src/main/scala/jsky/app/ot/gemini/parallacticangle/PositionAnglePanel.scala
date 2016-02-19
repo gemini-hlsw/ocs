@@ -55,7 +55,7 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
       def angle: Option[Double] =
         Try { text.toDouble }.toOption
 
-      def validate(): Unit =
+      override def validate(): Unit =
         // TODO: Restore this line when background AGS is implemented.
         //background = angle.fold(badBackground)(x => defaultBackground)
         background = angle.fold(if (positionAngleConstraintComboBox.selection.item == PosAngleConstraint.UNBOUNDED) background else badBackground)(x => defaultBackground)

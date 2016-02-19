@@ -2,10 +2,11 @@ package edu.gemini.model.p1.immutable
 
 import edu.gemini.model.p1.{mutable => M}
 import java.io.InputStreamReader
+import org.specs2.matcher.XmlMatchers
 import org.specs2.mutable._
 import scala.xml.XML
 
-class TexesBlueprintSpec extends SpecificationWithJUnit with SemesterProperties {
+class TexesBlueprintSpec extends Specification with SemesterProperties with XmlMatchers {
 
   "The Texes Blueprint" should {
     "be able to have a disperser" in {

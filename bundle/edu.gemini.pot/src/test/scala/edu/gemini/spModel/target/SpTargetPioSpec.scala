@@ -5,6 +5,7 @@ import edu.gemini.spModel.pio.{Pio, ParamSet}
 import edu.gemini.spModel.pio.xml.PioXmlFactory
 import edu.gemini.spModel.target.system.{ConicTarget, HmsDegTarget, ITarget}
 import org.specs2.ScalaCheck
+import org.specs2.matcher.MatchResult
 import org.specs2.mutable.Specification
 import squants.motion.KilometersPerSecond
 
@@ -16,7 +17,6 @@ import edu.gemini.shared.util.immutable.ScalaConverters._
   * Feel free to expand on this; however, I guess this will all become obsolete once we switch to the new target model.
   */
 object SpTargetPioSpec extends Specification with ScalaCheck with Arbitraries {
-
   {
 
     "SPTargetPio" should {
@@ -35,8 +35,10 @@ object SpTargetPioSpec extends Specification with ScalaCheck with Arbitraries {
           assert(spt.getTarget.getSpatialProfile === spt2.getTarget.getSpatialProfile)
           assert(spt.getTarget.getSpectralDistribution === spt2.getTarget.getSpectralDistribution)
         }
-      "store redshift" !
-        prop { z: Redshift =>
+    }
+    "SPTargetPio" should {
+      "store redshift" ! {
+        prop { (z: Redshift) =>
 
           val factory = new PioXmlFactory()
           val t = new HmsDegTarget
@@ -49,9 +51,10 @@ object SpTargetPioSpec extends Specification with ScalaCheck with Arbitraries {
 
           (spt.getTarget, spt2.getTarget) match {
             case (t1: HmsDegTarget, t2: HmsDegTarget) => assert(t1.getRedshift === t2.getRedshift)
-            case _                                    => failure("Cannot happen")
+            case _                                    => assert(false)
           }
         }
+      }
     }
 
   }
@@ -66,16 +69,17 @@ object SpTargetPioSpec extends Specification with ScalaCheck with Arbitraries {
       SPTargetPio.getParamSet(spt, fact)
     }
 
-    def expect(ps: ParamSet, era: Double, edec: Double): Unit = {
+    def expect(ps: ParamSet, era: Double, edec: Double): MatchResult[Double] = {
       val spt = SPTargetPio.fromParamSet(ps)
       val ra  = spt.getTarget.getRaDegrees(JNone.instance[java.lang.Long]).asScalaOpt.map(_.doubleValue).get
       val dec = spt.getTarget.getDecDegrees(JNone.instance[java.lang.Long]).asScalaOpt.map(_.doubleValue).get
 
-      ra  must beCloseTo(era,  0.000001)
-      dec must beCloseTo(edec, 0.000001)
+      val raCheck = ra  must beCloseTo(era,  0.000001)
+      val decCheck = dec must beCloseTo(edec, 0.000001)
+      raCheck and decCheck
     }
 
-    def fromDegrees(t: ITarget): Unit = {
+    def fromDegrees(t: ITarget): MatchResult[Double] = {
       val ps   = newTargetParamSet(t)
       val pRa  = ps.getParam(ParamRa)
       val pDec = ps.getParam(ParamDec)
@@ -86,7 +90,7 @@ object SpTargetPioSpec extends Specification with ScalaCheck with Arbitraries {
       expect(ps, 180.0, 10.0)
     }
 
-    def fromHmsDms(t: ITarget): Unit = {
+    def fromHmsDms(t: ITarget): MatchResult[Double] = {
       val ps   = newTargetParamSet(t)
       val pRa  = ps.getParam(ParamRa)
       val pDec = ps.getParam(ParamDec)

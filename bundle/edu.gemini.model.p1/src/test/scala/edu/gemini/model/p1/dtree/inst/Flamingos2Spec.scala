@@ -1,9 +1,9 @@
 package edu.gemini.model.p1.dtree.inst
 
-import org.specs2.mutable.SpecificationWithJUnit
+import org.specs2.mutable.Specification
 import edu.gemini.model.p1.immutable.Flamingos2Filter
 
-class Flamingos2Spec extends SpecificationWithJUnit {
+class Flamingos2Spec extends Specification {
   "The Flamingos2 decision tree" should {
     "not include the narrow band filters, REL-1282" in {
       val f2 = new Flamingos2.ImagingFilterNode()

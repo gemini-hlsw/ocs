@@ -1,9 +1,9 @@
 package edu.gemini.ags.gems.mascot
 
-import org.junit.{Ignore, Test}
+import org.junit.Test
 import org.junit.Assert._
 import breeze.linalg._
-import edu.gemini.ags.gems.mascot.util.YUtils._
+import edu.gemini.ags.gems.mascot.util.YUtils.{assertVectorsEqual, assertMatricesEqual, where}
 import MascotConf._
 import MascotUtils._
 
@@ -78,7 +78,7 @@ class MascotUtilsTest {
     assertEquals(6, m.cols)
     val mf = fitsRead("vib_spectra.fits")
 
-    if (m(::, 0).max > sampfreq) {
+    if (max(m(::, 0)) > sampfreq) {
       val tmp = where(m(::, 0), _ < sampfreq)
       val w = tmp(tmp.size - 1)
       m = m(0 to w, ::)

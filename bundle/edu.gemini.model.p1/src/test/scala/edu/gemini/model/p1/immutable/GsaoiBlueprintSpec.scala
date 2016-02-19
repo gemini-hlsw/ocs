@@ -1,11 +1,12 @@
 package edu.gemini.model.p1.immutable
 
+import org.specs2.matcher.XmlMatchers
 import org.specs2.mutable._
 import edu.gemini.model.p1.{mutable => M}
 import scala.xml.XML
 import java.io.InputStreamReader
 
-class GsaoiBlueprintSpec extends SpecificationWithJUnit with SemesterProperties {
+class GsaoiBlueprintSpec extends Specification with SemesterProperties with XmlMatchers {
 
   "The Gsaoi Blueprint" should {
     "be able to have filters" in {

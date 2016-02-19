@@ -1,8 +1,6 @@
 package edu.gemini.ags.gems.mascot.util
 
 import breeze.linalg._
-import breeze.util._
-import breeze.math._
 
 /**
  * Support routines for the Yorick to Scala port
@@ -16,9 +14,9 @@ object YUtils {
   def yFormat(a: Array[Array[DenseMatrix[Double]]]): String = {
     val sb = new StringBuilder
     sb.append("[")
-    for (i <- 0 until a.size) {
+    for (i <- a.indices) {
       sb.append(yFormat(a(i)))
-      if (i != a.size - 1) {
+      if (i != a.length - 1) {
         sb.append(",")
       }
     }
@@ -32,9 +30,9 @@ object YUtils {
   def yFormat(a: Array[DenseMatrix[Double]]): String = {
     val sb = new StringBuilder
     sb.append("[")
-    for (i <- 0 until a.size) {
+    for (i <- a.indices) {
       sb.append(yFormat(a(i)))
-      if (i != a.size - 1) {
+      if (i != a.length - 1) {
         sb.append(",")
       }
     }
@@ -88,9 +86,9 @@ object YUtils {
   def yFormat(v: Array[Int]): String = {
     val sb = new StringBuilder
     sb.append("[")
-    for (i <- 0 until v.size) {
+    for (i <- v.indices) {
       sb.append(v(i))
-      if (i != v.size - 1) {
+      if (i != v.length - 1) {
         sb.append(",")
       }
     }
@@ -117,7 +115,7 @@ object YUtils {
 
   def yMultiply4d(v: DenseVector[Double], a: Array[Array[DenseMatrix[Double]]], n: Int): DenseMatrix[Double] = {
     var m = DenseMatrix.zeros[Double](a(0)(0).rows, a(0)(0).cols)
-    for (j <- 0 until a.size) {
+    for (j <- a.indices) {
       m += a(j)(n) * v(j)
     }
     m
@@ -178,11 +176,11 @@ object YUtils {
    * Returns a to the power of d for each value in a
    */
   def pow(a: Array[Array[DenseMatrix[Double]]], d: Double): Array[Array[DenseMatrix[Double]]] = {
-    val result = Array.ofDim[Array[DenseMatrix[Double]]](a.size)
-    for (i <- 0 until a.size) {
-      result(i) = Array.ofDim[DenseMatrix[Double]](a(i).size)
-      for (j <- 0 until a(i).size) {
-        result(i)(j) = (a(i)(j) :^ d)
+    val result = Array.ofDim[Array[DenseMatrix[Double]]](a.length)
+    for (i <- a.indices) {
+      result(i) = Array.ofDim[DenseMatrix[Double]](a(i).length)
+      for (j <- a(i).indices) {
+        result(i)(j) = a(i)(j) :^ d
       }
     }
     result
@@ -650,7 +648,7 @@ object YUtils {
    */
   def assertVectorsEqual(expect: DenseVector[Double], v: DenseVector[Double], err: Double) {
     val a = abs(expect - v)
-    val eq = a.forallValues(_ < err)
+    val eq = a.forall(_ < err)
     if (!eq) {
       println("Assertion failed. Expected:\n" + expect + "\nbut got:\n" + v)
     }
@@ -662,7 +660,7 @@ object YUtils {
    */
   def assertMatricesEqual(expect: DenseMatrix[Double], m: DenseMatrix[Double], err: Double) {
     val a = abs(expect - m)
-    val eq = a.forallValues(_ < err)
+    val eq = a.forall(_ < err)
     if (!eq) {
       println("Assertion failed. Expected:\n" + expect + "\nbut got:\n" + m)
     }
@@ -673,11 +671,11 @@ object YUtils {
    * asserts that 2 double matrices are about equal (difference < err)
    */
   def assertArrayMatricesEqual(expect: Array[DenseMatrix[Double]], a: Array[DenseMatrix[Double]], err: Double) {
-    if (expect.size != a.size) {
-      println("Assertion failed. Array sizes do not match: Expected" + expect.size + " but got: " + a.size)
+    if (expect.length != a.length) {
+      println("Assertion failed. Array sizes do not match: Expected" + expect.length + " but got: " + a.length)
       assert(false)
     }
-    for (i <- 0 until a.size) {
+    for (i <- a.indices) {
       assertMatricesEqual(expect(i), a(i), err)
     }
   }
@@ -710,7 +708,7 @@ object YUtils {
    * Returns the average of all the values (in Yorick: avg(m))
    */
   def avg(m: DenseMatrix[Double]): Double = {
-    m.sum / (m.rows * m.cols)
+    sum(m) / (m.rows * m.cols)
   }
 
   /**
@@ -719,7 +717,7 @@ object YUtils {
   def colSum(m: DenseMatrix[Double]): DenseVector[Double] = {
     val v = DenseVector.zeros[Double](m.cols)
     for (i <- 0 until m.cols) {
-      v(i) = m(::, i).sum
+      v(i) = sum(m(::, i))
     }
     v
   }
@@ -730,7 +728,7 @@ object YUtils {
   def rowSum(m: DenseMatrix[Double]): DenseVector[Double] = {
     val v = DenseVector.zeros[Double](m.rows)
     for (i <- 0 until m.rows) {
-      v(i) = m(i, ::).sum
+      v(i) = sum(m(i, ::).t.toDenseVector)
     }
     v
   }
@@ -746,8 +744,7 @@ object YUtils {
    * Returns the root mean square deviation from the arithmetic mean of the values
    */
   def rms(v: DenseVector[Double]): Double = {
-//    math.sqrt((v - (v.sum / v.size)).mapValues(_ :^ 2.0).sum / v.size)
-    math.sqrt((v - (v.sum / v.size)).mapValues(math.pow(_, 2.0)).sum / v.size)
+    math.sqrt(sum((v - (sum(v) / v.size)).mapValues(math.pow(_, 2.0))) / v.size)
   }
 
   /**
@@ -760,7 +757,7 @@ object YUtils {
     //      rms((for (j <- 0 until m.numCols; i <- 0 until m.numRows) yield m(i, j)).toArray.asVector)
     //    }
     val size = m.rows * m.cols
-    math.sqrt((m - (m.sum / size)).mapValues(math.pow(_, 2.0)).sum / size)
+    math.sqrt(sum((m - (sum(m) / size)).mapValues(math.pow(_, 2.0))) / size)
   }
 
   /**

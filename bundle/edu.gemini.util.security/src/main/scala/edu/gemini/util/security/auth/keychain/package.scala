@@ -1,12 +1,9 @@
 package edu.gemini.util.security.auth
 
-import edu.gemini.spModel.core.Peer
 import edu.gemini.spModel.core.Site
 import scalaz._
 import Scalaz._
 import scalaz.effect._
-import scalaz.effect.IO._
-import java.security.Principal
 import java.security.PrivateKey
 import edu.gemini.util.security.principal._
 
@@ -17,7 +14,6 @@ package object keychain {
 
   type Sealed[A] = edu.gemini.util.security.auth.Sealed[A]
   val Sealed = edu.gemini.util.security.auth.Sealed
-
 
   type UserPrincipal = edu.gemini.util.security.principal.UserPrincipal
   type KeyVersion = Int
@@ -63,8 +59,6 @@ package object keychain {
 
   implicit val siteEqual: Equal[Site] =
     Equal.equalA
-
-
 
   type MD5 = String
 

@@ -22,15 +22,15 @@ public enum Affiliate {
     public final String isoCode;
     public final boolean isActive;
 
-    private Affiliate(final String displayValue) {
+    Affiliate(final String displayValue) {
         this(displayValue, null);
     }
 
-    private Affiliate(final String displayValue, final String isoCode) {
+    Affiliate(final String displayValue, final String isoCode) {
         this(displayValue, isoCode, true);
     }
 
-    private Affiliate(final String displayValue, final String isoCode, final boolean isActive) {
+    Affiliate(final String displayValue, final String isoCode, final boolean isActive) {
         this.displayValue = displayValue;
         this.isoCode = isoCode;
         this.isActive = isActive;

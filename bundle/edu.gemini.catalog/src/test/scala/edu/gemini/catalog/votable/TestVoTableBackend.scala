@@ -3,7 +3,7 @@ package edu.gemini.catalog.votable
 import java.net.URL
 
 import edu.gemini.catalog.api.{UCAC4, CatalogQuery}
-import scala.concurrent.future
+import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 import scalaz.NonEmptyList
 
@@ -11,7 +11,7 @@ import scalaz.NonEmptyList
 case class TestVoTableBackend(file: String) extends VoTableBackend {
   override val catalogUrls = NonEmptyList(new URL(s"file://$file"))
 
-  override def doQuery(query: CatalogQuery, url: URL) = future {
+  override def doQuery(query: CatalogQuery, url: URL) = Future {
     VoTableParser.parse(UCAC4, this.getClass.getResourceAsStream(file)).fold(p => QueryResult(query, CatalogQueryResult(TargetsTable.Zero, List(p))), y => QueryResult(query, CatalogQueryResult(y).filter(query)))
   }
 }

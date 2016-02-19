@@ -1,9 +1,9 @@
 package edu.gemini.catalog.api
 
 import edu.gemini.spModel.core._
-import org.specs2.mutable.SpecificationWithJUnit
+import org.specs2.mutable.Specification
 
-class MagnitudeConstraintsSpec extends SpecificationWithJUnit {
+class MagnitudeConstraintsSpec extends Specification {
 
   "Magnitude Constraints" should {
     "filter targets on band and faintness" in {

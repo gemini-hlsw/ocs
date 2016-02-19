@@ -2,8 +2,27 @@ package edu.gemini.ags.gems.mascot.util
 
 import org.junit.Assert._
 import breeze.linalg._
-import YUtils._
-import org.junit.{Ignore, Test}
+import YUtils.poly
+import YUtils.digitize
+import YUtils.yMultiply
+import YUtils.span
+import YUtils.where
+import YUtils.assertArrayMatricesEqual
+import YUtils.pcen
+import YUtils.dif
+import YUtils.rms
+import YUtils.sort
+import YUtils.avg
+import YUtils.rowSum
+import YUtils.colSum
+import YUtils.colAvg
+import YUtils.rowAvg
+import YUtils.assertVectorsEqual
+import YUtils.grow
+import YUtils.divide
+import YUtils.clip
+
+import org.junit.Test
 
 /**
  * Tests methods in the YUtil class.

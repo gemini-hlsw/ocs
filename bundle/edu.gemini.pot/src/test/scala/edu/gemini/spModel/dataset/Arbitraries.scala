@@ -84,10 +84,10 @@ trait Arbitraries {
   implicit val arbQaRequestStatus: Arbitrary[QaRequestStatus] = {
     import QaRequestStatus._
     Arbitrary {
-      Gen.oneOf(PendingPost, ProcessingPost, arbitrary[Failed], Accepted)
+      Gen.oneOf[QaRequestStatus](PendingPost, ProcessingPost, arbitrary[Failed], Accepted)
     }
   }
 
   implicit val arbUuid: Arbitrary[UUID] =
-    Arbitrary { Gen(_ => Some(UUID.randomUUID())) }
+    Arbitrary { Gen.wrap(UUID.randomUUID()) }
 }

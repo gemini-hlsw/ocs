@@ -24,22 +24,23 @@ class ConditionsAdjustmentsSpec extends Specification {
       badConditions.adjust(defaultConstraints) should beEqualTo(MagnitudeConstraints(RBandsList, FaintnessConstraint(11.0), SaturationConstraint(3.5).some))
     }
     "adjust for iq" in {
-      IQAdjustments.foreach {
-        case (iq, factor) =>
-          iq.adjust(defaultConstraints) should beEqualTo(MagnitudeConstraints(RBandsList, FaintnessConstraint(15.5 + factor), SaturationConstraint(8.0 + factor).some))
+      val a = IQAdjustments.collect {
+        case (iq, factor) => (factor, iq.adjust(defaultConstraints))
       }
+      forall(a)(b => b._2 should beEqualTo(MagnitudeConstraints(RBandsList, FaintnessConstraint(15.5 + b._1), SaturationConstraint(8.0 + b._1).some)))
     }
     "adjust for cc" in {
-      CCAdjustments.foreach {
-        case (cc, factor) =>
-          cc.adjust(defaultConstraints) should beEqualTo(MagnitudeConstraints(RBandsList, FaintnessConstraint(15.5 + factor), SaturationConstraint(8.0 + factor).some))
+      val a = CCAdjustments.collect {
+        case (cc, factor) => (factor, cc.adjust(defaultConstraints))
       }
+      forall(a)(b => b._2 should beEqualTo(MagnitudeConstraints(RBandsList, FaintnessConstraint(15.5 + b._1), SaturationConstraint(8.0 + b._1).some)))
     }
+
     "adjust for iq" in {
-      SBAdjustments.foreach {
-        case (sb, factor) =>
-          sb.adjust(defaultConstraints) should beEqualTo(MagnitudeConstraints(RBandsList, FaintnessConstraint(15.5 + factor), SaturationConstraint(8.0 + factor).some))
+      val a = SBAdjustments.collect{
+        case (sb, factor) => (factor, sb.adjust(defaultConstraints))
       }
+      forall(a)(b => b._2 should beEqualTo(MagnitudeConstraints(RBandsList, FaintnessConstraint(15.5 + b._1), SaturationConstraint(8.0 + b._1).some)))
     }
   }
 

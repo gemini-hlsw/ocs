@@ -26,5 +26,3 @@ OsgiKeys.exportPackage := Seq(
   "jsky.plot",
   "jsky.plot.util",
   "jsky.plot.util.gui")
-
-        

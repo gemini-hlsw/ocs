@@ -49,7 +49,7 @@ object SingleProbeVignettingTest extends Specification with ScalaCheck with Vign
 
   // why do i have to write this myself?
   def sequence[A](lst: List[Gen[A]]): Gen[List[A]] =
-    (lst:\Gen.value[List[A]](Nil)) { (ga, glst) =>
+    (lst:\Gen.const[List[A]](Nil)) { (ga, glst) =>
       for {
         a   <- ga
         lst <- glst

@@ -3,9 +3,9 @@ package edu.gemini.catalog.votable
 import edu.gemini.catalog.api._
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
-import org.specs2.mutable.SpecificationWithJUnit
+import org.specs2.mutable.Specification
 
-class CatalogQueryResultSpec extends SpecificationWithJUnit {
+class CatalogQueryResultSpec extends Specification {
   // reference values for the query
   val ra = RightAscension.fromAngle(Angle.fromDegrees(10))
   val dec = Declination.fromAngle(Angle.fromDegrees(20)).getOrElse(Declination.zero)

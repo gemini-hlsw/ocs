@@ -172,7 +172,7 @@ abstract class KeyChain(kCell: KeyChain.KCell, pCell: KeyChain.PCell, lCell: Key
   // in the companion object, otherwise the Subject will be empty initially.
   val subject = new Subject
 
-  private def updateSubject: Action[Unit] =
+  protected def updateSubject: Action[Unit] =
     for {
       l <- kernel.map(_.selection.map(_._2.get._1)) ||| Action(None)
       s <- Action(subject.getPrincipals <| (_.clear))
@@ -212,7 +212,7 @@ abstract class KeyChain(kCell: KeyChain.KCell, pCell: KeyChain.PCell, lCell: Key
   protected def tryPass(p: Password): Action[Boolean] =
     kCell.get.map(_.get(p).isRight)
 
-  private def modify(f: Kernel => Kernel): Action[Unit] =
+  protected def modify(f: Kernel => Kernel): Action[Unit] =
     for {
       k <- kernel.map(f)
       _ <- commit(k)
@@ -274,7 +274,7 @@ abstract class PersistentKeyChain(
     for {
       _ <- super.commit(k)
       _ <- kCell.get >>= (s => o.put(s).liftIO[Action])
-      _ <- IO.putStrLn("Committted keychain.").liftIO[Action]
+      _ <- IO.putStrLn("Committed keychain.").liftIO[Action]
     } yield ()
 
 }

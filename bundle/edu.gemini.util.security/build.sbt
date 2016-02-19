@@ -7,18 +7,21 @@ name := "edu.gemini.util.security"
 // version set in ThisBuild
 
 unmanagedJars in Compile ++= Seq(
-  new File(baseDirectory.value, "../../lib/bundle/scala-reflect-2.10.5.jar"),
-  new File(baseDirectory.value, "../../lib/bundle/scala-swing_2.10-2.0.0-SNAPSHOT.jar"),
-  new File(baseDirectory.value, "../../lib/bundle/scalaz-core_2.10-7.1.6.jar"),
-  new File(baseDirectory.value, "../../lib/bundle/scalaz-concurrent_2.10-7.1.6.jar"),
-  new File(baseDirectory.value, "../../lib/bundle/scalaz-effect_2.10-7.1.6.jar"),
-  new File(baseDirectory.value, "../../lib/bundle/scalaz-stream_2.10-0.7.2a.jar"),
-  new File(baseDirectory.value, "../../lib/bundle/doobie-core_2.10-0.2.4-SNAPSHOT.jar"),
-  new File(baseDirectory.value, "../../lib/bundle/shapeless_2.10-2.2.5.jar"),
-  new File(baseDirectory.value, "../../lib/bundle/scodec-bits_2.10-1.0.9.jar"),
-  new File(baseDirectory.value, "../../lib/bundle/quasiquotes_2.10-2.0.1.jar"),
+  new File(baseDirectory.value, "../../lib/bundle/doobie-core_2.11-0.2.4-SNAPSHOT.jar"),
   new File(baseDirectory.value, "../../lib/bundle/h2-1.3.170.jar")
 )
+
+libraryDependencies ++= Seq(
+  "org.scala-lang.modules" %% "scala-swing" % "2.0.0-M2",
+  "org.scalaz.stream"      %% "scalaz-stream" % "0.7.2a" intransitive(),
+  "org.scalaz"             %% "scalaz-core" % "7.1.6",
+  "org.scalaz"             %% "scalaz-effect" % "7.1.6",
+  "org.scalaz"             %% "scalaz-concurrent" % "7.1.6",
+  "com.chuusai"            %% "shapeless" % "2.2.5",
+  "org.scodec"             %% "scodec-bits" % "1.0.9",
+  "org.scala-lang"         %  "scala-reflect" % "2.11.7",
+  "org.scala-lang"         %  "scala-compiler" % "2.11.7"
+  )
 
 osgiSettings
 
@@ -45,6 +48,3 @@ initialCommands := """
   import java.io.File
   import edu.gemini.util.security.principal._
 """
-
-// required for shapeless on 2.10.5
-addCompilerPlugin("org.scalamacros" % "paradise" % "2.0.1" cross CrossVersion.full)
