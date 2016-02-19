@@ -9,7 +9,7 @@ object Phoenix {
   class SiteNode extends SingleSelectNode[Unit, VisitorSite, Site](()) {
     val title       = "Site"
     val description = "Select the site."
-    def choices     = GNVisitorSite :: GSVisitorSite :: Nil
+    def choices     = GSVisitorSite :: Nil
 
     def apply(s: VisitorSite) = Left(new FocalPlaneUnitNode(s.site))
 
