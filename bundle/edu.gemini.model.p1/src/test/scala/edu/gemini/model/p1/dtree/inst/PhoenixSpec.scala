@@ -9,7 +9,7 @@ class PhoenixSpec extends Specification {
     "includes a Site" in {
       val phoenix = Phoenix()
       phoenix.title must beEqualTo("Site")
-      phoenix.choices must have size 2
+      phoenix.choices must have size 1
       // Check no default site
       phoenix.default must beNone
     }
