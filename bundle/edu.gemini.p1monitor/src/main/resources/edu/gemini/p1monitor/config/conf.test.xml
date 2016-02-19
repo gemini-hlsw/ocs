@@ -4,23 +4,25 @@
     <bcc>cquiroz@gemini.edu</bcc>
 
     <type name="DirectorTime">
-        <dir>/home/software/phase1/test/directors_time/proposals/2014B</dir>
+        <dir>/tmp</dir>
         <to>cquiroz@gemini.edu</to>
     </type>
 
     <type name="PoorWeather">
-        <dir>/home/software/phase1/test/poor_weather/proposals/2014B</dir>
+        <dir>/tmp/pw</dir>
         <to>cquiroz@gemini.edu</to>
+        <template>au</template>
     </type>
 
     <type name="DemoScience">
-        <dir>/home/software/phase1/test/demo_science/proposals/2014B</dir>
+        <dir>/tmp</dir>
         <to>cquiroz@gemini.edu</to>
     </type>
 
     <type name="SystemVerification">
-        <dir>/home/software/phase1/test/system_verification/proposals/2014B</dir>
+        <dir>/tmp</dir>
         <to>cquiroz@gemini.edu</to>
+        <template>au</template>
     </type>
 
     <filetranslation>
