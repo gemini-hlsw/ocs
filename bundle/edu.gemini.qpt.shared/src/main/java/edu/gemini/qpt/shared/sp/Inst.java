@@ -65,8 +65,8 @@ public enum Inst {
             false, true, true, Canopus.Wfs.values(), Canopus.Wfs.values()),
 
     FLAMINGOS2(Flamingos2.SP_TYPE, false, true, false,
-            join(Flamingos2.FPUnit.values(), Flamingos2.Filter.values(), new Enum[]{Flamingos2OiwfsGuideProbe.instance}),
-            join(arrayOf(Flamingos2.FPUnit.FPU_NONE, Flamingos2.FPUnit.CUSTOM_MASK), Flamingos2.Filter.values(), new Enum[]{Flamingos2OiwfsGuideProbe.instance}),
+            join(Flamingos2.FPUnit.values(), Flamingos2.Filter.values(), new Enum<?>[]{Flamingos2OiwfsGuideProbe.instance}),
+            join(arrayOf(Flamingos2.FPUnit.FPU_NONE, Flamingos2.FPUnit.CUSTOM_MASK), Flamingos2.Filter.values(), new Enum<?>[]{Flamingos2OiwfsGuideProbe.instance}),
             join(Flamingos2.Disperser.values(), PreImagingType.values())),
 
     GMOS_NORTH(InstGmosNorth.SP_TYPE, true, false, true,
@@ -74,11 +74,11 @@ public enum Inst {
                     DisperserNorth.values(),
                     FilterNorth.values(),
                     GmosCommonType.DetectorManufacturer.values(),
-                    new Enum[]{GmosOiwfsGuideProbe.instance}),
-            join(new Enum[]{FPUnitNorth.FPU_NONE, FPUnitNorth.CUSTOM_MASK, DisperserNorth.MIRROR},
+                    new Enum<?>[]{GmosOiwfsGuideProbe.instance}),
+            join(new Enum<?>[]{FPUnitNorth.FPU_NONE, FPUnitNorth.CUSTOM_MASK, DisperserNorth.MIRROR},
                     FilterNorth.values(),
-                    new Enum[]{GmosCommonType.DetectorManufacturer.E2V},
-                    new Enum[]{GmosOiwfsGuideProbe.instance}),
+                    new Enum<?>[]{GmosCommonType.DetectorManufacturer.E2V},
+                    new Enum<?>[]{GmosOiwfsGuideProbe.instance}),
             join(GmosCommonType.UseNS.values(), PreImagingType.values())),
 
     GMOS_SOUTH(InstGmosSouth.SP_TYPE, false, true, true,
@@ -86,22 +86,22 @@ public enum Inst {
                     DisperserSouth.values(),
                     FilterSouth.values(),
                     GmosCommonType.DetectorManufacturer.values(),
-                    new Enum[]{GmosOiwfsGuideProbe.instance}),
-            join(new Enum[] { FPUnitSouth.FPU_NONE, FPUnitSouth.CUSTOM_MASK, DisperserSouth.MIRROR },
+                    new Enum<?>[]{GmosOiwfsGuideProbe.instance}),
+            join(new Enum<?>[] { FPUnitSouth.FPU_NONE, FPUnitSouth.CUSTOM_MASK, DisperserSouth.MIRROR },
                     FilterSouth.values(),
-                    new Enum[]{GmosCommonType.DetectorManufacturer.HAMAMATSU},
-                    new Enum[]{GmosOiwfsGuideProbe.instance}),
+                    new Enum<?>[]{GmosCommonType.DetectorManufacturer.HAMAMATSU},
+                    new Enum<?>[]{GmosOiwfsGuideProbe.instance}),
              join(GmosCommonType.UseNS.values(), PreImagingType.values())),
 
 
     GNIRS(InstGNIRS.SP_TYPE, true, false, false,
-            join(GNIRSParams.Disperser.values(), GNIRSParams.SlitWidth.values(), new Enum[]{GnirsOiwfsGuideProbe.instance}),
-            join(GNIRSParams.Disperser.values(), GNIRSParams.SlitWidth.values(), new Enum[]{GnirsOiwfsGuideProbe.instance}),
+            join(GNIRSParams.Disperser.values(), GNIRSParams.SlitWidth.values(), new Enum<?>[]{GnirsOiwfsGuideProbe.instance}),
+            join(GNIRSParams.Disperser.values(), GNIRSParams.SlitWidth.values(), new Enum<?>[]{GnirsOiwfsGuideProbe.instance}),
             join(GNIRSParams.CrossDispersed.values(), GNIRSParams.Filter.values(), GNIRSParams.Camera.values())),
 
     GPI(Gpi.SP_TYPE, false, true, false,
-            new Enum[0],
-            new Enum[0],
+            new Enum<?>[0],
+            new Enum<?>[0],
             join(Gpi.Disperser.values(), Gpi.Filter.values())),
 
     GSAOI(Gsaoi.SP_TYPE, false, true, true,
@@ -110,18 +110,18 @@ public enum Inst {
     MICHELLE(InstMichelle.SP_TYPE, true, false, false),
 
     NICI(InstNICI.SP_TYPE, false, true, false,
-            new Enum[]{NiciOiwfsGuideProbe.instance},
-            new Enum[]{NiciOiwfsGuideProbe.instance},
+            new Enum<?>[]{NiciOiwfsGuideProbe.instance},
+            new Enum<?>[]{NiciOiwfsGuideProbe.instance},
             join(NICIParams.FocalPlaneMask.values(), NICIParams.DichroicWheel.values(), NICIParams.Channel1FW.values(), NICIParams.Channel2FW.values())),
 
     NIFS(InstNIFS.SP_TYPE, true, false, false,
-            new Enum[]{NifsOiwfsGuideProbe.instance},
-            new Enum[]{NifsOiwfsGuideProbe.instance},
+            new Enum<?>[]{NifsOiwfsGuideProbe.instance},
+            new Enum<?>[]{NifsOiwfsGuideProbe.instance},
             join(NIFSParams.Disperser.values(), NIFSParams.Filter.values(), NIFSParams.Mask.values())),
 
     NIRI(InstNIRI.SP_TYPE, true, false, false,
-            join(new Enum[]{NiriOiwfsGuideProbe.instance}, Niri.Filter.values()),
-            join(new Enum[]{NiriOiwfsGuideProbe.instance}),
+            join(new Enum<?>[]{NiriOiwfsGuideProbe.instance}, Niri.Filter.values()),
+            join(new Enum<?>[]{NiriOiwfsGuideProbe.instance}),
             join(Niri.Mask.values(), Niri.Disperser.values(), Niri.Camera.values())),
 
     // Not currently in use
@@ -132,7 +132,7 @@ public enum Inst {
 
     // Not currently in use
     TEXES(InstTexes.SP_TYPE, false, false, false,
-            new Enum[0], new Enum[0], TexesParams.Disperser.values()),
+            new Enum<?>[0], new Enum<?>[0], TexesParams.Disperser.values()),
 
     TRECS(InstTReCS.SP_TYPE, false, true, false,
         join(TReCSParams.Disperser.values(), TReCSParams.Mask.values()),
@@ -145,7 +145,7 @@ public enum Inst {
     // Some instruments have different categories of options. This map allows
     // us to assign a label to each type. If an option's class isn't in this map
     // the category will be null (which is ok).
-    private static final Map<Class<? extends Enum>, String> CATEGORY_MAP = new HashMap<Class<? extends Enum>, String>();
+    private static final Map<Class<? extends Enum<?>>, String> CATEGORY_MAP = new HashMap<>();
     static {
 
         CATEGORY_MAP.put(Flamingos2.FPUnit.class, "Focal Plane Units");
@@ -174,7 +174,7 @@ public enum Inst {
     }
 
     // Some enum types represent custom masks
-    private static final Set<Enum> CUSTOM_MASKS = new HashSet<Enum>();
+    private static final Set<Enum<?>> CUSTOM_MASKS = new HashSet<>();
     static {
 
         CUSTOM_MASKS.add(FPUnitNorth.CUSTOM_MASK);
@@ -185,20 +185,20 @@ public enum Inst {
     private final SPComponentType spType;
     private final boolean north, south;
     private final boolean normallyAvailable;
-    private final Enum[] options, normallyAvailableOptions, hiddenOptions;
+    private final Enum<?>[] options, normallyAvailableOptions, hiddenOptions;
     private final GuideProbe guideProbe;
 
     Inst(SPComponentType spType, boolean north, boolean south, boolean normallyAvailable) {
-        this(spType, north, south, normallyAvailable, new Enum[0], new Enum[0]);
+        this(spType, north, south, normallyAvailable, new Enum<?>[0], new Enum<?>[0]);
     }
 
     Inst(SPComponentType spType, boolean north, boolean south, boolean normallyAvailable,
-         Enum[] options, Enum[] normallyAvailableOptions) {
-        this(spType, north, south, normallyAvailable, options, normallyAvailableOptions, new Enum[0]);
+         Enum<?>[] options, Enum<?>[] normallyAvailableOptions) {
+        this(spType, north, south, normallyAvailable, options, normallyAvailableOptions, new Enum<?>[0]);
     };
 
     Inst(SPComponentType spType, boolean north, boolean south, boolean normallyAvailable,
-         Enum[] options, Enum[] normallyAvailableOptions, Enum[] hiddenOptions) {
+         Enum<?>[] options, Enum<?>[] normallyAvailableOptions, Enum<?>[] hiddenOptions) {
 
         assert spType != null;
 
@@ -216,8 +216,8 @@ public enum Inst {
         return normallyAvailable;
     }
 
-    public boolean isNormallyAvailable(Enum option) {
-        for (Enum o: normallyAvailableOptions)
+    public boolean isNormallyAvailable(Enum<?> option) {
+        for (Enum<?> o: normallyAvailableOptions)
             if (o.equals(option)) return true;
         return false;
     }
@@ -239,25 +239,24 @@ public enum Inst {
     /**
      * Returns this for instruments, or guideProbe for WFS
      */
-    public Enum getValue() {
-        if (getGuideProbe() instanceof Enum) return (Enum) getGuideProbe();
+    public Enum<?> getValue() {
+        if (getGuideProbe() instanceof Enum<?>) return (Enum<?>) getGuideProbe();
         return this;
     }
 
-    public Enum[] getOptions() {
+    public Enum<?>[] getOptions() {
         return options;
     }
 
     /**
      * Hidden options are options that should be treated as always selected, but are not shown for filtering.
-     * @return
      */
-    public Enum[] getHiddenOptions() {
+    public Enum<?>[] getHiddenOptions() {
         return hiddenOptions;
     }
 
-    public static String getCategory(Enum e) {
-        for (Class c = e.getClass(); c != null; c = c.getSuperclass()) {
+    public static String getCategory(Enum<?> e) {
+        for (Class<?> c = e.getClass(); c != null; c = c.getSuperclass()) {
             String cat = CATEGORY_MAP.get(c);
             if (cat != null)
                 return cat;
@@ -271,21 +270,21 @@ public enum Inst {
         throw new NoSuchElementException("Unknown " + Inst.class.getSimpleName() + ": " + type);
     }
 
-    public static boolean isCustomMask(Enum e) {
+    public static boolean isCustomMask(Enum<?> e) {
         return CUSTOM_MASKS.contains(e);
     }
 
-    public static Enum[] join(Enum[]... arrays) {
+    public static Enum<?>[] join(Enum<?>[]... arrays) {
         int length = 0;
-        for (Enum[] array: arrays) length += array.length;
-        Enum[] ret = new Enum[length];
+        for (Enum<?>[] array: arrays) length += array.length;
+        Enum<?>[] ret = new Enum<?>[length];
         int i = 0;
-        for (Enum[] array: arrays)
-            for (Enum e: array)
+        for (Enum<?>[] array: arrays)
+            for (Enum<?> e: array)
                 ret[i++] = e;
         return ret;
     }
-    public static Enum[] arrayOf(Enum... arrays) {
+    public static Enum<?>[] arrayOf(Enum<?>... arrays) {
         return arrays;
     }
     @Override

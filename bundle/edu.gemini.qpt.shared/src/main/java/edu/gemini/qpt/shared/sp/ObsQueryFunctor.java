@@ -420,9 +420,9 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor implements Iterable<
     }
 
     @SuppressWarnings("unchecked")
-    private Set<Enum> options(ISPObservation obsShell) throws RemoteException {
+    private Set<Enum<?>> options(ISPObservation obsShell) throws RemoteException {
 
-        Set<Enum> ret = new HashSet<>();
+        Set<Enum<?>> ret = new HashSet<>();
 
         // Need to look through all the components.
         for (ISPObsComponent comp: obsShell.getObsComponents()) {
@@ -434,7 +434,7 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor implements Iterable<
                 // GMOS
                 if (type.equals(InstGmosNorth.SP_TYPE) || type.equals(InstGmosSouth.SP_TYPE)) {
 
-                    InstGmosCommon gmos = (InstGmosCommon) comp.getDataObject();
+                    InstGmosCommon<?, ?, ?, ?> gmos = (InstGmosCommon<?, ?, ?, ?>) comp.getDataObject();
                     ret.add(gmos.getFPUnit());
                     ret.add(gmos.getDisperser());
                     ret.add(gmos.getFilter());
@@ -695,13 +695,13 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor implements Iterable<
     }
 
     @SuppressWarnings("unchecked")
-    private void addFromIterators(ISPObservation obsShell, final Set<Enum> ret, final String... params) {
+    private void addFromIterators(ISPObservation obsShell, final Set<Enum<?>> ret, final String... params) {
         applySysConfigs(obsShell, config -> {
             for (String name: params) {
                 IParameter param = config.getParameter(name);
                 if (param != null) {
                     // magically, this will be a List<Enum>. I think.
-                    for (Enum v: (List<Enum>) param.getValue())
+                    for (Enum<?> v: (List<Enum<?>>) param.getValue())
                         if (v != null) ret.add(v);
                 }
             }
@@ -709,14 +709,14 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor implements Iterable<
     }
 
     @SuppressWarnings("unchecked")
-    private void addFromIterators(ISPObservation obsShell, Set<Enum> ret, PropertyDescriptor... params) throws RemoteException {
+    private void addFromIterators(ISPObservation obsShell, Set<Enum<?>> ret, PropertyDescriptor... params) throws RemoteException {
         String[] names = new String[params.length];
         for (int i = 0; i < names.length; i++)
             names[i] = params[i].getName();
         addFromIterators(obsShell, ret, names);
     }
 
-    private void addGnirsCameras(ISPObservation obsShell, final Set<Enum> ret, final GNIRSParams.PixelScale pixelScale) {
+    private void addGnirsCameras(ISPObservation obsShell, final Set<Enum<?>> ret, final GNIRSParams.PixelScale pixelScale) {
         applySysConfigs(obsShell, config -> {
             // the parameter can be a single wavelength or a DefaultParameter with a collection of wavelengths
             final IParameter param = config.getParameter(InstGNIRS.CENTRAL_WAVELENGTH_PROP.getName());
@@ -724,7 +724,7 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor implements Iterable<
         });
     }
 
-    private void addGnirsCameras(Object param, final Set<Enum> ret, final GNIRSParams.PixelScale pixelScale) {
+    private void addGnirsCameras(Object param, final Set<Enum<?>> ret, final GNIRSParams.PixelScale pixelScale) {
         if (param instanceof GNIRSParams.Wavelength) {
             final GNIRSParams.Wavelength wl = (GNIRSParams.Wavelength) param;
             ret.add(GNIRSParams.Camera.getDefault(wl.doubleValue(), pixelScale));
@@ -751,7 +751,7 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor implements Iterable<
 
                 // GMOS
                 if (type.equals(InstGmosNorth.SP_TYPE) || type.equals(InstGmosSouth.SP_TYPE)) {
-                    InstGmosCommon gmos = (InstGmosCommon) comp.getDataObject();
+                    InstGmosCommon<?, ?, ?, ?> gmos = (InstGmosCommon<?, ?, ?, ?>) comp.getDataObject();
                     return gmos.getFPUnitCustomMask();
                 }
 
@@ -899,7 +899,7 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor implements Iterable<
 
     }
 
-    public static boolean isRollover(ISPProgram programShell) throws RemoteException {
+    private static boolean isRollover(ISPProgram programShell) throws RemoteException {
         try {
             return ((SPProgram) programShell.getDataObject()).getRolloverStatus();
 //            return P1DocumentUtil.getGeminiPart(P1DocumentUtil.lookupProposal(programShell)).getITacExtension().getRolloverFlag();
@@ -911,26 +911,26 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor implements Iterable<
         return false;
     }
 
-    public SortedSet<Prog> getProgramSet() {
+    SortedSet<Prog> getProgramSet() {
         return programSet;
     }
 
-    public SortedSet<String> getMisconfiguredObservations() {
+    SortedSet<String> getMisconfiguredObservations() {
         return misconfiguredObservations;
     }
 
     /**
      * Set of all semesters in the database.
      */
-    public SortedSet<String> getAllSemesters() {
+    SortedSet<String> getAllSemesters() {
         return allSemesters;
     }
 
-    public Map<SPProgramID, ProgramExclusion> getProgramExclusions() {
+    Map<SPProgramID, ProgramExclusion> getProgramExclusions() {
         return programExclusions;
     }
 
-    public Map<SPObservationID, ObsExclusion> getObsExclusions() {
+    Map<SPObservationID, ObsExclusion> getObsExclusions() {
         return obsExclusions;
     }
 

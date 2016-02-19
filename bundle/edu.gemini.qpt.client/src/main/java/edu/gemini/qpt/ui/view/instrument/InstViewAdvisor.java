@@ -96,7 +96,7 @@ public class InstViewAdvisor implements IViewAdvisor, PropertyChangeListener {
             root.add(inode);
 
             final Map<String, OutlineNode> categoryNodes = new TreeMap<>();
-            for (final Enum option: i.getOptions()) {
+            for (final Enum<?> option: i.getOptions()) {
                 final OutlineNode optionNode = new OutlineNode(option);
 
                 final String category = Inst.getCategory(option);
@@ -141,6 +141,7 @@ public class InstViewAdvisor implements IViewAdvisor, PropertyChangeListener {
         }
     }
 
+    @SuppressWarnings("rawtypes")
     private void updateSchedule() {
         if (model != null) {
             synchronized (this) {

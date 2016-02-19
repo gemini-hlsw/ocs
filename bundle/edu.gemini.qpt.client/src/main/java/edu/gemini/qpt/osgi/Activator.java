@@ -99,7 +99,7 @@ public final class Activator implements BundleActivator {
                 });
 
                 Activator.this.advisor = new ShellAdvisor("Gemini QPT", Version.current.toString(), root, ac, internal, pachon, ProbeLimitsTable.loadOrThrow());
-                shellRegistration = context.registerService(IShellAdvisor.class.getName(), advisor, new Hashtable());
+                shellRegistration = context.registerService(IShellAdvisor.class.getName(), advisor, new Hashtable<>());
                 return ac;
             }
 

@@ -11,9 +11,7 @@ import edu.gemini.ui.workspace.IShell;
 import edu.gemini.util.security.auth.keychain.KeyChain;
 
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -26,7 +24,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import scala.util.Success;
 import scala.util.Try;
 
 /**
@@ -256,13 +253,13 @@ public class PublishAction extends AbstractAsyncAction implements PropertyChange
                 pm.work();
                 pm.setMessage("Connecting to " + dest.config.getHost());
 
-                SftpSession session = null;
+                SftpSession session;
                 final Try<SftpSession> result = SftpSession$.MODULE$.connect(dest.config);
                 if (result.isFailure()) {
                     //final Failure<SftpSession> failure = (Failure<SftpSession>) result;
-                    LOG.severe("Could not sftp %s".format(dest.config.toString()));
+                    LOG.severe(String.format("Could not sftp %s", dest.config.toString()));
                 } else {
-                    session = ((Success<SftpSession>)result).get();
+                    session = result.get();
 
                     // Chdir if needed.
                     if (dest.root != null) session.remoteCd(dest.root);
