@@ -46,11 +46,13 @@ final case class GmosParameters(
 
 final case class GnirsParameters(
                      pixelScale:        GNIRSParams.PixelScale,
-                     grating:           GNIRSParams.Disperser,
+                     filter:            Option[GNIRSParams.Filter],
+                     grating:           Option[GNIRSParams.Disperser],
                      readMode:          GNIRSParams.ReadMode,
                      crossDispersed:    GNIRSParams.CrossDispersed,
                      centralWavelength: Wavelength,
-                     slitWidth:         GNIRSParams.SlitWidth) extends InstrumentDetails
+                     slitWidth:         GNIRSParams.SlitWidth,
+                     altair:            Option[AltairParameters]) extends InstrumentDetails
 
 final case class GsaoiParameters(
                      filter:            Gsaoi.Filter,
@@ -110,7 +112,7 @@ object InstrumentDetails {
   def isImaging(i: InstrumentDetails): Boolean = i match {
     case i: AcquisitionCamParameters  => true                                       // Acq cam is imaging only
     case i: Flamingos2Parameters      => i.grism.equals(Flamingos2.Disperser.NONE)
-    case i: GnirsParameters           => false                                      // GNIRS is spectroscopy only
+    case i: GnirsParameters           => i.grating.isEmpty
     case i: GsaoiParameters           => true                                       // Gsaoi is imaging only
     case i: MichelleParameters        => i.grating.equals(MichelleParams.Disperser.MIRROR)
     case i: NifsParameters            => false                                      // NIFS is spectroscopy only

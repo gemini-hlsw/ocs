@@ -348,6 +348,9 @@
 
 				<option value="SW_7">
 				1.0 arcsec slit</option>
+
+				<option value="ACQUISITION">
+				imaging</option>
 				</select></td>
 			</tr>
 			<tr>
@@ -357,6 +360,7 @@
 				<option value="D_10"> 10 l/mm</option>
 				<option value="D_32" selected="selected"> 32 l/mm</option>
 				<option value="D_111"> 111 l/mm</option>
+				<option value="imaging"> none</option>
 				</select></td>
 
 				<td height="25">Spectrum central wavelength: </td>
@@ -364,12 +368,22 @@
 			</tr>
 			<tr>
 				<td height="25">Cross dispersion:</td>
-				<td colspan= "2" height="25"><select name="CrossDispersed" size="1">
+				<td height="25"><select name="CrossDispersed" size="1">
 				<option value="NO" selected="selected">
 
 				no</option>
 				<option value="SXD">
 				yes</option>
+				</select></td>
+
+				<td height="25">Filter: </td>
+				<td height="25"><select name="Filter" size="1">
+				<option value="spectroscopy">spectroscopy</option>
+				<option value="Y">Y-MK: 1.03 µm</option>
+				<option value="J">J-MK: 1.25 µm</option>
+				<option value="ORDER_4">H-MK 1.65 µm</option>
+				<option value="K">K-MK: 2.20 µm</option>
+				<!-- <option value="H2">H2: 2.12 µm</option>  test value -->
 				</select></td>
 			</tr>
         </tbody>
@@ -429,7 +443,29 @@
 				<td colspan="2" height="21">Wavefront sensor for tip-tilt compensation:
                     <input value="PWFS" name="Type" checked="checked" type="radio" /> PWFS
                     <input value="OIWFS" name="Type" type="radio" /> OIWFS
+					<input value="AOWFS" name="Type" type="radio" />Altair
                 </td>
+			</tr>
+
+			<tr>
+				<td colspan="4" height="50" valign="bottom"><b>Altair properties:</b><i><span>(</span><a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10269','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false"><span>more info</span></a><span>)</span></i></td>
+			</tr>
+			<tr>
+				<td>AO guide star <br />
+					separation: </td>
+
+				<td><input name="guideSep" size="5" value="0.0" type="text" />  arcsec</td>
+				<td>AO guide star brightness <br />
+					(R-band):</td>
+				<td><input name="guideMag" size="5" value="12.0" type="text" /> mag</td>
+			</tr>
+			<tr>
+
+				<td>Field Lens: </td>
+				<td><input value="OUT" name="FieldLens" checked="checked" type="radio" /> OUT <input value="IN" name="FieldLens" size="1" type="radio" /> IN(Required for LGS)</td>
+				<td>Altair Mode: </td>
+				<td><input value="NGS" name="GuideStarType" checked="checked" type="radio" /> NGS <input value="LGS" name="GuideStarType" size="1" type="radio" />LGS</td>
+
 			</tr>
 
             <tr>
@@ -492,7 +528,7 @@
             </tr>
             <tr>
                 <td><b>Typical air mass during observation:</b></td>
-                <td><input name="Airmass" value="1.2" type="radio" /> &lt;1.2</td>
+				<td><input name="Airmass" value="1.2" type="radio" /> &lt;1.2</td>
                 <td><input name="Airmass" value="1.5" type="radio" checked /> 1.5</td>
                 <td><input name="Airmass" value="2.0" type="radio" /> 2.0</td>
             </tr>
@@ -519,12 +555,18 @@
 		<tbody>
 			<tr>
 				<td colspan="2" height="40" valign="bottom"><b>Calculation method:</b><i><span>(<a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10256','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false">more info</a>)</span></i></td>
+				<i>Select the calculation method (note: second method is not available for spectroscopy)</i></td>
+			</tr>
+			<tr>
+
+			<td><input value="s2n" name="calcMethod" checked="checked" type="radio" /></td>
+			<td>Total S/N ratio resulting from <input name="numExpA" size="5" value="30" type="text" />
+				exposures each having an exposure time of <input name="expTimeA" size="5" value="120" type="text" /> secs and with a fraction <input name="fracOnSourceA" size="4" value="1.0" type="text" /> of exposures that observe the source </td>
 
 			</tr>
 			<tr>
-				<td colspan="2"><input value="s2n" name="calcMethod" type="hidden" />Total S/N ratio resulting 
-				from <input name="numExpA" size="5" value="30" type="text" />
-				exposures each having an exposure time of <input name="expTimeA" size="5" value="120" type="text" /> secs and with a fraction <input name="fracOnSourceA" size="4" value="1.0" type="text" /> of exposures that observe the source</td>
+				<td><input value="intTime" name="calcMethod" type="radio" /></td>
+				<td>Total integration time to achieve a S/N ratio of <input name="sigmaC" size="3" value="5" type="text" /> using an exposure time for each exposure of <input name="expTimeC" size="5" value="120" type="text" /> secs and with a fraction <input name="fracOnSourceC" size="4" value="1.0" type="text" /> of exposures that observe the source </td>
 
 			</tr>
 			<!-- calc method C--><!-- analysis methods-->
@@ -535,11 +577,12 @@
 
 			</tr>
 			<tr>
-				<td colspan="2"><input value="autoAper" name="analysisMethod" checked="checked" type="radio" />
-				Software aperture that gives 'optimum' S/N ratio </td>
+				<td><input value="autoAper" name="analysisMethod" checked="checked" type="radio" /></td>
+				<td>Software aperture that gives 'optimum' S/N ratio </td>
 			</tr>
 			<tr>
-				<td colspan="2"><input value="userAper" name="analysisMethod" type="radio" />  Software aperture of diameter (or slit length) <input name="userAperDiam" size="4" value="2" type="text" /> arcsec </td>
+				<td><input value="userAper" name="analysisMethod" type="radio" /></td>
+				<td>Software aperture of diameter (or slit length) <input name="userAperDiam" size="4" value="2" type="text" /> arcsec </td>
 
 			</tr>
 			<tr>
@@ -569,10 +612,6 @@
 	</div>
 
 </form>
-<hr align="left" size="3" />
-<p>
-<i>Last update November 23, 2012; Allan Brighton</i>
-</p>
 </div>
 </body>
 </html>

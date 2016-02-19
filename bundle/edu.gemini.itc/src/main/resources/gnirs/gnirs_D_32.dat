@@ -2,7 +2,7 @@
 #
 # Columns are (1) wavelength in nm, (2) throughput, for each order (1-8)
 #
-# Data from x-dispersed spectrum (orders 3-8) and single-order spectra (orders 1 & 2); 
+# Data from x-dispersed spectrum (orders 3-8) and single-order spectra (orders 1 & 2);
 # normalised to peak transmission for 4th order in SDN 0003.27
 # 1st from approximate scaling of 2nd order with shift to blue (very very uncertain)
 # 2nd from star; corrected BB slope, extrapolated to red and blue (uncertain)

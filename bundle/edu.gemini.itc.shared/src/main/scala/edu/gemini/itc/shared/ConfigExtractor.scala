@@ -62,7 +62,7 @@ object ConfigExtractor {
     instrument.getType match {
       case INSTRUMENT_ACQCAM                      => extractAcqCam(c)
       case INSTRUMENT_FLAMINGOS2                  => extractF2(c)
-      case INSTRUMENT_GNIRS                       => extractGnirs(c)
+      case INSTRUMENT_GNIRS                       => extractGnirs(targetEnv, probe, c)
       case INSTRUMENT_GMOS | INSTRUMENT_GMOSSOUTH => extractGmos(c)
       case INSTRUMENT_GSAOI                       => extractGsaoi(c, cond)
       case INSTRUMENT_NIFS                        => extractNifs(targetEnv, probe, c)
@@ -101,16 +101,18 @@ object ConfigExtractor {
     } yield Flamingos2Parameters(filter, grism, mask, customSlit, readMode)
   }
 
-  private def extractGnirs(c: Config): String \/ GnirsParameters = {
+  private def extractGnirs(targetEnv: TargetEnvironment, probe: GuideProbe, c: Config): String \/ GnirsParameters = {
     import GNIRSParams._
     for {
-      pixelScale  <- extract[PixelScale]     (c, PixelScaleKey)
-      grating     <- extract[Disperser]      (c, DisperserKey)
-      readMode    <- extract[ReadMode]       (c, ReadModeKey)
-      xDisp       <- extract[CrossDispersed] (c, CrossDispersedKey)
-      slitWidth   <- extract[SlitWidth]      (c, SlitWidthKey)
+      pixelScale  <- extract[PixelScale]        (c, PixelScaleKey)
+      filter      <- extract[Option[Filter]]    (c, FilterKey)
+      grating     <- extract[Option[Disperser]] (c, DisperserKey)
+      readMode    <- extract[ReadMode]          (c, ReadModeKey)
+      xDisp       <- extract[CrossDispersed]    (c, CrossDispersedKey)
+      slitWidth   <- extract[SlitWidth]         (c, SlitWidthKey)
+      altair      <- extractAltair             (targetEnv, probe, c)
       wavelen     <- extractObservingWavelength(c)
-    } yield GnirsParameters(pixelScale, grating, readMode, xDisp, wavelen, slitWidth)
+    } yield GnirsParameters(pixelScale, filter, grating, readMode, xDisp, wavelen, slitWidth, altair)
   }
 
   private def extractGmos(c: Config): String \/ GmosParameters = {
@@ -280,6 +282,7 @@ object ConfigExtractor {
 
     }).map(_.microns)
   }
+
 
   // Extract an optional integer, values in the configuration are Java objects
   def extractOptionalInteger(c: Config, key: ItemKey): Option[Int] =

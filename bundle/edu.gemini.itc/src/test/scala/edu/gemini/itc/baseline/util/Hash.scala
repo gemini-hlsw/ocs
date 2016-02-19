@@ -34,12 +34,14 @@ object Hash {
 
   def calc(p: GnirsParameters): Int =
     hash(
-      p.grating.name,
+      p.grating.map(_.name),
+      p.filter.map(_.name),
       p.pixelScale.name,
       p.crossDispersed.name,
       p.readMode.name,
       f"${p.centralWavelength.toNanometers}%.0f",
-      p.slitWidth.name
+      p.slitWidth.name,
+      calc(p.altair)
     )
 
   def calc(p: GsaoiParameters): Int =
