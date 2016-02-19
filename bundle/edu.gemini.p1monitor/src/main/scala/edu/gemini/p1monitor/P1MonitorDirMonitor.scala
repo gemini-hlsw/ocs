@@ -34,22 +34,24 @@ class P1MonitorDirMonitor(cfg: P1MonitorConfig) extends DirListener {
       originalsDir.mkdirs()
     }
 
-    def writeUpdated(attachment: File, proposal: Proposal, f: File) {
+    def writeUpdated(attachment: File, proposal: Proposal, f: File):Proposal = {
       // Use just the name to avoid hardcoding the file
       val attachedFileName = attachment.getName
       LOG.info(s"Attachment file changed to $attachedFileName")
-      ProposalIo.write(proposal.copy(meta = proposal.meta.copy(attachment = Some(new File(attachedFileName)))), f)
+      val p = proposal.copy(meta = proposal.meta.copy(attachment = Some(new File(attachedFileName))))
+      ProposalIo.write(p, f)
+      p
     }
 
-    def updateAttachmentLink(newPDFile: Option[File], f: File) = {
+    def updateAttachmentLink(newPDFile: Option[File], f: File):Option[Proposal] = {
       // If we have a PDF we must replace the attachment name
-      newPDFile.foreach {
+      newPDFile.flatMap {
         case p =>
           // This sounds like a good idea, let Proposal to do the IO, but this will need some help to avoid writing
           // the absolute path of the file
-          for {
+          (for {
             conversion <- ProposalIo.readAndConvert(f)
-          } yield writeUpdated(p, conversion.proposal, f)
+          } yield writeUpdated(p, conversion.proposal, f)).toOption
       }
     }
 
@@ -68,12 +70,14 @@ class P1MonitorDirMonitor(cfg: P1MonitorConfig) extends DirListener {
 
         val fg:Option[ProposalFileGroup] = newXMLFile.flatMap {
           case f:File =>
-            updateAttachmentLink(newPDFile, f)
+            val proposal = updateAttachmentLink(newPDFile, f)
 
             val r:Option[ProposalFileGroup] = try {
               val summaryFile = new File(f.getAbsolutePath.substring(0, f.getAbsolutePath.length - 4) + "_summary.pdf")
-              LOG.info(s"Build summary report of $f at $summaryFile")
-              P1PDF.createFromFile(f, P1PDF.DEFAULT, summaryFile)
+              // Find the template to use
+              val template = cfg.map.find(_._2.dir == f.getParentFile.getAbsoluteFile).map(_._2.template).getOrElse(P1PDF.DEFAULT)
+              P1PDF.createFromFile(f, template, summaryFile)
+              LOG.info(s"Build summary report of $f at $summaryFile with template $template")
               Some(new ProposalFileGroup(Some(f), newPDFile, Some(summaryFile)))
             } catch {
               case ex: Exception =>

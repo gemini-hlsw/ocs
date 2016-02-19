@@ -9,8 +9,9 @@
     </type>
 
     <type name="PoorWeather">
-        <dir>/tmp</dir>
+        <dir>/tmp/pw</dir>
         <to>cquiroz@gemini.edu</to>
+        <template>au</template>
     </type>
 
     <type name="DemoScience">
@@ -21,6 +22,7 @@
     <type name="SystemVerification">
         <dir>/tmp</dir>
         <to>cquiroz@gemini.edu</to>
+        <template>au</template>
     </type>
 
     <filetranslation>

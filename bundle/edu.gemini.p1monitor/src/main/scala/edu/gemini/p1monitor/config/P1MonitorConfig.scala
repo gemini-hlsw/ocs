@@ -1,5 +1,6 @@
 package edu.gemini.p1monitor.config
 
+import edu.gemini.model.p1.pdf.P1PDF
 import org.osgi.framework.BundleContext
 import java.io.File
 import javax.mail.internet.InternetAddress
@@ -13,7 +14,8 @@ case class MonitoredDirectory(name: String,
                               group: Option[String],
                               to: Traversable[InternetAddress],
                               cc: Traversable[InternetAddress],
-                              bcc: Traversable[InternetAddress])
+                              bcc: Traversable[InternetAddress],
+                              template: P1PDF.Template)
 
 class P1MonitorConfig(ctx: BundleContext) {
   val LOG = Logger.getLogger(this.getClass.getName)
@@ -24,6 +26,7 @@ class P1MonitorConfig(ctx: BundleContext) {
   private val TO_TAG: String = "to"
   private val CC_TAG: String = "cc"
   private val BCC_TAG: String = "bcc"
+  private val TEMPLATE_TAG: String = "template"
   private val TYPE_TAG: String = "type"
   private val NAME_TAG: String = "name"
   private val DIR_TAG: String = "dir"
@@ -32,7 +35,7 @@ class P1MonitorConfig(ctx: BundleContext) {
 
   val xmlConf = {
     val filename = getProp(CONF_FILE)
-    LOG.info("P1 Monitor configuration: " + filename)
+    LOG.info(s"P1 Monitor configuration: $filename")
     XML.load(this.getClass.getResourceAsStream(filename))
   }
 
@@ -43,7 +46,7 @@ class P1MonitorConfig(ctx: BundleContext) {
   val getHost: String = getProp(HOST_TAG)
   val translations: Map[String, String] = getTranslations
 
-  LOG.info("P1Monitor starting, monitoring %s".format(map.toString()))
+  LOG.info(s"P1Monitor starting, monitoring $map")
 
   private def getTranslations:Map[String, String] = (xmlConf \\ "translation").map { x =>
       (x \ "from").text -> (x \ "to").text
@@ -52,7 +55,7 @@ class P1MonitorConfig(ctx: BundleContext) {
   private def getProp(propName: String) = {
     val prop = ctx.getProperty(propName)
     if (prop == null || prop.equals("")) {
-      throw new IllegalArgumentException("Property " + propName + " not defined in bundle config")
+      throw new IllegalArgumentException(s"Property $propName not defined in bundle config")
     }
     prop
   }
@@ -90,10 +93,18 @@ class P1MonitorConfig(ctx: BundleContext) {
         val to = (elementContent(_type, TO_TAG) ++ global_to).map(new InternetAddress(_))
         val cc = (elementContent(_type, CC_TAG) ++ global_cc).map(new InternetAddress(_))
         val bcc = (elementContent(_type, BCC_TAG) ++ global_bcc).map(new InternetAddress(_))
-        (name, MonitoredDirectory(name, rootDir.head, username, group, to, cc, bcc))
+        val template = (elementContent(_type, TEMPLATE_TAG) ++ global_bcc).headOption.map(toTemplate)
+        (name, MonitoredDirectory(name, rootDir.head, username, group, to, cc, bcc, template.getOrElse(P1PDF.DEFAULT)))
       }
     }
 
+  }
+
+  private def toTemplate(s: String): P1PDF.Template = s match {
+    case "au" => P1PDF.AU
+    case "cl" => P1PDF.CL
+    case "us" => P1PDF.NOAO
+    case _    => P1PDF.DEFAULT
   }
 
   def getDirectories: Traversable[MonitoredDirectory] = map.values
