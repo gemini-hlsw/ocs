@@ -1,42 +1,39 @@
 package edu.gemini.p1monitor
 
+import java.util.{TimerTask, Timer}
+
 import config.MonitoredDirectory
 import java.io.File
 import collection.mutable
-import actors.Actor._
-import actors.{TIMEOUT, Actor}
 import java.util.logging.Logger
 import scala.sys.process._
+import scala.util.Try
 
 class DirScanner(dir: MonitoredDirectory) {
   val LOG = Logger.getLogger(classOf[DirScanner].getName)
 
   val files: mutable.Map[String, FileRecord] = new mutable.HashMap[String, FileRecord]()
-  var updater: Actor = _
 
   case class Stop(listener: DirListener)
 
+  val timer = new Timer
+
   def startMonitoring(listener: DirListener) {
-    fullScan(listener)
-    updater = actor {
-      var keepGoing = true
-      while (keepGoing) {
+    Try(fullScan(listener))
+    timer.schedule(new TimerTask {
+      override def run(): Unit = {
         update(listener)
-        receiveWithin(10000) {
-          case Stop => keepGoing = false
-          case TIMEOUT =>
-        }
       }
-    }
+    }, 5000, 10000)
   }
 
   def stopMonitoring() {
-    updater ! Stop
+    timer.cancel()
   }
 
   private def fullScan(listener: DirListener) {
     createDirIfNeeded()
-    LOG.info("Run a full scan on directory %s".format(dir.dir))
+    LOG.info(s"Run a full scan on directory ${dir.dir}")
     files.clear()
     dir.dir.listFiles() foreach {
       file => {
@@ -51,14 +48,14 @@ class DirScanner(dir: MonitoredDirectory) {
 
   def createDirIfNeeded() {
     if (!dir.dir.exists()) {
-      LOG.info("Directory %s is not present, attempt to create and set permissions".format(dir.dir))
+      LOG.info(s"Directory ${dir.dir} is not present, attempt to create and set permissions")
       if (!dir.dir.mkdirs()) {
-        LOG.warning("Cannot create directory %s".format(dir.dir))
+        LOG.warning(s"Cannot create directory ${dir.dir}")
       } else {
-        LOG.info("Setting permissions and ownership of %s".format(dir.dir))
-        Some(dir.dir).foreach(d => executeAction(Seq("chmod", "ag+rw", d.getAbsolutePath), "Cannot set proper permissions on %s".format(dir.dir)))
-        dir.username.foreach(u => executeAction(Seq("chown", u, dir.dir.getAbsolutePath), "Failed to set user %s to dir %s".format(dir.username.get, dir.dir.getAbsolutePath)))
-        dir.group.foreach(g => executeAction(Seq("chgrp", g, dir.dir.getAbsolutePath), "Failed to set user %s to dir %s".format(dir.group.get, dir.dir.getAbsolutePath)))
+        LOG.info(s"Setting permissions and ownership of ${dir.dir}")
+        Some(dir.dir).foreach(d => executeAction(Seq("chmod", "ag+rw", d.getAbsolutePath), s"Cannot set proper permissions on ${dir.dir}"))
+        dir.username.foreach(u => executeAction(Seq("chown", u, dir.dir.getAbsolutePath), s"Failed to set user $u to dir ${dir.dir.getAbsolutePath}"))
+        dir.group.foreach(g => executeAction(Seq("chgrp", g, dir.dir.getAbsolutePath), s"Failed to set user $g to dir ${dir.dir.getAbsolutePath}"))
       }
     }
   }
@@ -96,7 +93,7 @@ class DirScanner(dir: MonitoredDirectory) {
     if (newFiles.nonEmpty || updatedFiles.nonEmpty || deletedFiles.nonEmpty) {
       listener.dirChanged(new DirEvent(dir, newFiles, deletedFiles, updatedFiles))
     }
-    LOG.fine("Dir scan produced: newFiles: %s, updatedFiles: %s, deletedFiles: %s".format(newFiles.toString(), updatedFiles.toString(), deletedFiles.toString()))
+    LOG.fine(s"Dir scan produced: newFiles: $newFiles, updatedFiles: $updatedFiles, deletedFiles: $deletedFiles")
   }
 }
 

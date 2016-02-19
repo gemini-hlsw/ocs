@@ -19,14 +19,12 @@ class P1MonitorDirMonitor(cfg: P1MonitorConfig) extends DirListener {
     dirScanner.foreach {
       _.startMonitoring(this)
     }
-
   }
 
   def stopMonitoring() {
     dirScanner.foreach {
       _.stopMonitoring()
     }
-
   }
 
   def dirChanged(evt: DirEvent) {
@@ -74,7 +72,7 @@ class P1MonitorDirMonitor(cfg: P1MonitorConfig) extends DirListener {
 
             val r:Option[ProposalFileGroup] = try {
               val summaryFile = new File(f.getAbsolutePath.substring(0, f.getAbsolutePath.length - 4) + "_summary.pdf")
-              LOG.info("Build summary report of %s at %s".format(f, summaryFile))
+              LOG.info(s"Build summary report of $f at $summaryFile")
               P1PDF.createFromFile(f, P1PDF.DEFAULT, summaryFile)
               Some(new ProposalFileGroup(Some(f), newPDFile, Some(summaryFile)))
             } catch {
