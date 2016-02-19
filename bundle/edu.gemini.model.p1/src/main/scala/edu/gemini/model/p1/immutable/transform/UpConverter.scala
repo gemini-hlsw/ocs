@@ -77,12 +77,12 @@ object UpConverter {
     case p @ <proposal>{ns @ _*}</proposal> if (p \ "@schemaVersion").text == "1.0.0"                       =>
       from2012B.concatenate.convert(node)
     case p @ <proposal>{ns @ _*}</proposal> if (p \ "@schemaVersion").isEmpty                               =>
-      "I don't know how to handle a proposal without version".failNel
+      "I don't know how to handle a proposal without version".failureNel
     case p @ <proposal>{ns @ _*}</proposal>                                                                 =>
       val version = (p \\ "@schemaVersion").text
-      s"I don't know how to handle a proposal with version $version".failNel
+      s"I don't know how to handle a proposal with version $version".failureNel
     case _                                                                                                  =>
-      "Unknown xml file format".failNel
+      "Unknown xml file format".failureNel
   }
 }
 

@@ -27,10 +27,10 @@ sealed abstract class UIState[C, S] protected (undoStack: PageStack, page: UIPag
   def redo = redoStack.headOption.map(_.mkState(page :: undoStack, redoStack.tail))
 
   /** Returns true if the undo stack is non-empty. */
-  def canUndo = !undoStack.isEmpty
+  def canUndo = undoStack.nonEmpty
 
   /** Returns true if the redo stack is non-empty. */
-  def canRedo = !redoStack.isEmpty
+  def canRedo = redoStack.nonEmpty
 
   def canFinish = ~default.map(apply(_).isRight)
   

@@ -46,7 +46,7 @@ class XMLConverterSpec extends Specification with SemesterProperties with XmlMat
       case <proposal>{ns @ _*}</proposal>  => StepResult("Updated schema version to 2.0 and eaten the semester child" :: Nil, <proposal version="2.0"></proposal>).successNel
     }
     val withFailure:TransformFunction = {
-      case <proposal>{ns @ _*}</proposal>  => "Error message".failNel
+      case <proposal>{ns @ _*}</proposal>  => "Error message".failureNel
     }
     "preserve non-convertive node" in {
       val node = new Atom("A")
