@@ -3,7 +3,7 @@ package edu.gemini.catalog.votable
 import java.net.URL
 
 import edu.gemini.catalog.api.{UCAC4, CatalogQuery}
-import scala.concurrent.future
+import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 import scalaz.NonEmptyList
 

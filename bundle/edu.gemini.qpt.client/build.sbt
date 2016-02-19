@@ -11,8 +11,10 @@ unmanagedJars in Compile ++= Seq(
   new File(baseDirectory.value, "../../lib/bundle/org-jdesktop-swingx_2.10-1.6.4.jar")
 )
 
-libraryDependencies += 
+libraryDependencies ++= Seq(
+  "org.scalaz"     %% "scalaz-concurrent" % "7.1.6",
   "org.scala-lang" %  "scala-compiler"    % "2.11.7"
+)
 
 osgiSettings
 

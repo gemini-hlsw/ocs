@@ -16,6 +16,7 @@ unmanagedJars in Compile ++= Seq(
 
 libraryDependencies ++= Seq(
   "org.scala-lang" %  "scala-compiler"    % "2.11.7",
+  "org.scodec"     %% "scodec-bits"       % "1.0.9",
   "org.scalaz"     %% "scalaz-core"       % "7.1.6",
   "org.scalaz"     %% "scalaz-concurrent" % "7.1.6")
 
