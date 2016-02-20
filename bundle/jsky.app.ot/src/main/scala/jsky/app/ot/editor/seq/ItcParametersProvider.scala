@@ -68,18 +68,11 @@ object ItcParametersProvider {
     def redshift: String \/ Redshift =
       for {
         tEnv <- targetEnvironment
-      } yield {
-        tEnv.getBase.getTarget match {
-          case t: HmsDegTarget  => t.getRedshift // get z-shift for this target
-          case _                => Redshift(0.0) // non-sidereal targets are assumed to have z-shift 0
-        }
-      }
+      } yield tEnv.getBase.getHmsDegTarget.fold(Redshift(0.0))(_.getRedshift)
 
     def sequence: ConfigSequence = Option(owner.getContextObservation).fold(new ConfigSequence) {
       ConfigBridge.extractSequence(_, null, ConfigValMapInstances.IDENTITY_MAP, true)
     }
-
-
 
   }
 }

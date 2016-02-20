@@ -771,7 +771,8 @@ public final class Obs implements Serializable, Comparable<Obs> {
      * Call this only if you know there is a target environment.
      */
     public boolean isSidereal() {
-        return !isNonSidereal();
+        assert targetEnvironment != null;
+        return targetEnvironment.getBase().isSidereal();
     }
 
     /**
@@ -780,7 +781,7 @@ public final class Obs implements Serializable, Comparable<Obs> {
      */
     public boolean isNonSidereal() {
         assert targetEnvironment != null;
-        return targetEnvironment.getBase().getTarget() instanceof NonSiderealTarget;
+        return targetEnvironment.getBase().isNonSidereal();
     }
 
     public Object getConstraintsString() {

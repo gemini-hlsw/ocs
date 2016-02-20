@@ -67,7 +67,7 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
 
             DEC("Dec") {
                 public String getValue(final Row row) {
-                    return row.target().flatMap(t -> t.getTarget().getDecString(row.when())).getOrElse("");
+                    return row.target().flatMap(t -> t.getDecString(row.when())).getOrElse("");
                 }
             },
 
@@ -415,9 +415,8 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
 
     // Return the world coordinates for the given target
     private static Option<Coordinates> getCoordinates(final SPTarget tp, final Option<Long> when) {
-        final ITarget target = tp.getTarget();
-        return target.getRaDegrees(when).flatMap(ra ->
-                target.getDecDegrees(when).flatMap(dec ->
+        return tp.getRaDegrees(when).flatMap(ra ->
+                tp.getDecDegrees(when).flatMap(dec ->
                     ImOption.apply(Coordinates.fromDegrees(ra, dec).getOrElse(null))
                 )
         );

@@ -49,9 +49,9 @@ object SpTargetPioSpec extends Specification with ScalaCheck with Arbitraries {
           val pset = SPTargetPio.getParamSet(spt, factory)
           val spt2 = SPTargetPio.fromParamSet(pset)
 
-          (spt.getTarget, spt2.getTarget) match {
-            case (t1: HmsDegTarget, t2: HmsDegTarget) => assert(t1.getRedshift === t2.getRedshift)
-            case _                                    => assert(false)
+          (spt.getHmsDegTarget, spt2.getHmsDegTarget) match {
+            case (Some(t1), Some(t2)) => assert(t1.getRedshift === t2.getRedshift)
+            case _                    => assert(false)
           }
         }
       }
@@ -124,7 +124,7 @@ object SpTargetPioSpec extends Specification with ScalaCheck with Arbitraries {
       Pio.addParam(fact, ps, "rv", "295000")
       ps.removeChild("z")
       val spt = SPTargetPio.fromParamSet(ps)
-      spt.getTarget.asInstanceOf[HmsDegTarget].getRedshift must beEqualTo(Redshift.fromRadialVelocity(KilometersPerSecond(295000)))
+      spt.getHmsDegTarget.map(_.getRedshift) must beEqualTo(Some(Redshift.fromRadialVelocity(KilometersPerSecond(295000))))
     }
   }
 

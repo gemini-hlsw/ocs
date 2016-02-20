@@ -212,7 +212,7 @@ class CandidateAsterismsTreeTableModel extends AbstractTreeTableModel {
 
         Object getDec() {
             if (_guideProbeTargets != null) {
-                return getTarget().getTarget().getDecString(_when).getOrNull();
+                return getTarget().getDecString(_when).getOrNull();
             }
             return null;
         }

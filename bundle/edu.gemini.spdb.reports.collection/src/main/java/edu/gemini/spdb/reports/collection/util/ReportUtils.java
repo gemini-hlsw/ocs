@@ -417,9 +417,6 @@ public class ReportUtils {
         if (target == null) {
             return None.instance();
         }
-        if (!(target.getTarget() instanceof HmsDegTarget)) {
-            return None.instance();
-        }
 
         return
             target.getRaDegrees(when).flatMap(r ->

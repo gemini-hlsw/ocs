@@ -236,10 +236,9 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
         SPTarget tp = _ctx.targets().baseOrNull();
         if (tp != null) {
             // Get the RA and Dec from the pos list.
-            final ITarget target = tp.getTarget();
             final Option<Long> when = _ctx.schedulingBlockJava().map(SchedulingBlock::start);
-            ra = target.getRaDegrees(when).getOrElse(0.0);
-            dec = target.getDecDegrees(when).getOrElse(0.0);
+            ra = tp.getRaDegrees(when).getOrElse(0.0);
+            dec = tp.getDecDegrees(when).getOrElse(0.0);
         } else {
             ra  = 0.0;
             dec = 0.0;
@@ -254,14 +253,11 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
         if (newBasePos == null) return oldBasePos != null;
         if (oldBasePos == null) return true;
 
-        final ITarget oldBase = oldBasePos.getTarget();
-        final ITarget newBase = newBasePos.getTarget();
-
         final Option<Long> oldWhen = oldCtx.schedulingBlockJava().map(SchedulingBlock::start);
         final Option<Long> newWhen = newCtx.schedulingBlockJava().map(SchedulingBlock::start);
 
-        return !(oldBase.getRaDegrees(oldWhen).equals(newBase.getRaDegrees(newWhen)) &&
-                 oldBase.getDecDegrees(oldWhen).equals(newBase.getDecDegrees(newWhen)));
+        return !(oldBasePos.getRaDegrees(oldWhen).equals(newBasePos.getRaDegrees(newWhen)) &&
+                oldBasePos.getDecDegrees(oldWhen).equals(newBasePos.getDecDegrees(newWhen)));
     }
 
     private final PropertyChangeListener obsListener = evt -> {

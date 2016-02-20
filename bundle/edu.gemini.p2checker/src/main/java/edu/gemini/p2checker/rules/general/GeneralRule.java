@@ -662,7 +662,7 @@ public class GeneralRule implements IRule {
                 ObsClass obsClass = ObsClassService.lookupObsClass(elements.getObservationNode());
                 if (obsClass == ObsClass.SCIENCE) {
                     SPTarget target = targetEnv.getBase();
-                    if (!(target.getTarget() instanceof NonSiderealTarget))
+                    if (target.isSidereal())
                         return target;
                 }
             }

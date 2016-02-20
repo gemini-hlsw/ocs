@@ -234,7 +234,7 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
     }
 
     def targetType(t: SPTarget): TargetType =
-      if (t.getTarget.isInstanceOf[NonSiderealTarget]) NonSidereal else Sidereal
+      t.getHmsDegTarget.map(_ => Sidereal).getOrElse(NonSidereal)
 
     object CoordinatesPanel extends ColumnPanel {
       val nameField = new BoundTextField[String](10)(
@@ -280,12 +280,12 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
         new BoundTextField[Double](10)(
           read = _.toDouble,
           show = d => f"$d%.3f",
-          get  = tp => Option(tp.getTarget.getTarget).collect { case t: HmsDegTarget => getPM(t) } .getOrElse(0.0),
+          get  = tp => tp.getTarget.getHmsDegTarget.fold(0.0)(getPM),
           set  = (tp, pm) => {
             val newTarget = tp.getTarget
-            newTarget.getTarget match {
-              case t: HmsDegTarget => setPM(t, pm); newTarget.notifyOfGenericUpdate()
-              case _               => () // do nothing
+            newTarget.getHmsDegTarget.foreach {t =>
+              setPM(t, pm)
+              newTarget.notifyOfGenericUpdate()
             }
             tp.copy(newTarget)
           }

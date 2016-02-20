@@ -56,10 +56,10 @@ class TargetConversionTest extends MigrationTest {
       // A sidereal and a non-sidereal target
       tpList.map(_.getTarget) match {
         case List(tSidereal, tNonSidereal) =>
-          assertTrue(tSidereal.getTarget.isInstanceOf[HmsDegTarget])
+          assertTrue(tSidereal.isSidereal)
           assertEquals("Some Sidereal", tSidereal.getName)
 
-          assertTrue(tNonSidereal.getTarget.isInstanceOf[NonSiderealTarget])
+          assertTrue(tNonSidereal.isNonSidereal)
           assertEquals("S123456", tNonSidereal.getName)
 
         case _ =>
@@ -86,7 +86,7 @@ class TargetConversionTest extends MigrationTest {
     // unsafe extravaganza!
     val targetComp = obs.getObsComponents.asScala.find(_.getType == SPComponentType.TELESCOPE_TARGETENV).get
     val toc        = targetComp.getDataObject.asInstanceOf[TargetObsComp]
-    val rigel      = toc.getBase.getTarget.asInstanceOf[HmsDegTarget]
+    val rigel      = toc.getBase.getHmsDegTarget.get
 
     val when  = JNone.instance[java.lang.Long]
 

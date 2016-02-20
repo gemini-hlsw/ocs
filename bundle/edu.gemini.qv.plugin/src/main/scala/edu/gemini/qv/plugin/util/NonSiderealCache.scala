@@ -46,10 +46,7 @@ object NonSiderealCache {
    */
   def isHorizonsTarget(obs: Obs): Boolean =
     // QV only deals with "valid" observations, i.e. target environment, base and target all have to be set
-    obs.getTargetEnvironment.getBase.getTarget match {
-      case t: NST => true
-      case _ => false
-    }
+    obs.getTargetEnvironment.getBase.isNonSidereal
 
   def get(nights: Seq[Night], obs: Obs): NonSiderealTarget = {
     require(isHorizonsTarget(obs))
@@ -81,13 +78,13 @@ object NonSiderealCache {
    * @return
    */
   def horizonsNameFor(obs: Obs): Option[String] =
-    obs.getTargetEnvironment.getBase.getTarget match {
+    obs.getTargetEnvironment.getBase.getNonSiderealTarget match {
 
-      case t: NST =>
+      case Some(t) =>
         if (t.getName == null || t.getName.isEmpty) None
         else Option(t.getName)
 
-      case _ =>
+      case None =>
         LOG.warning(s"Don't know how to get Horizons name for this target ${obs.getObsId}.")
         None
     }

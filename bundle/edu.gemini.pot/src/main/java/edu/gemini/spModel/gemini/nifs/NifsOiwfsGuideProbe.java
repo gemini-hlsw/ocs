@@ -59,14 +59,12 @@ public enum NifsOiwfsGuideProbe implements ValidatableGuideProbe, OffsetValidati
     @Override
     public Option<PatrolField> getCorrectedPatrolField(ObsContext ctx) {
         if (ctx.getInstrument() instanceof InstNIFS) {
-            return ctx.getAOComponent().flatMap(new MapOp<AbstractDataObject, Option<PatrolField>>() {
-                @Override public Option<PatrolField> apply(AbstractDataObject ado) {
-                    if (ado instanceof InstAltair) {
-                        final InstAltair altair = (InstAltair) ado;
-                        return new Some<>((altair.getFieldLens() == IN) ? fieldLensPatrolField : noFieldLensPatrolField);
-                    } else {
-                        return None.instance();
-                    }
+            return ctx.getAOComponent().flatMap(ado -> {
+                if (ado instanceof InstAltair) {
+                    final InstAltair altair = (InstAltair) ado;
+                    return new Some<>((altair.getFieldLens() == IN) ? fieldLensPatrolField : noFieldLensPatrolField);
+                } else {
+                    return None.instance();
                 }
             }).orElse(new Some<>(noFieldLensPatrolField));
         } else {

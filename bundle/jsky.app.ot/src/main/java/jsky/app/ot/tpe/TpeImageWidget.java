@@ -483,7 +483,7 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
         }
 
         // Get the equinox assumed by the coordinate conversion methods (depends on current image)
-        final ITarget target = ((SPTarget) tp).getTarget();
+        final SPTarget target = (SPTarget) tp;
         final Option<Long> when = _ctx.schedulingBlockJava().map(SchedulingBlock::start);
         final double x = target.getRaDegrees(when).getOrElse(0.0);
         final double y = target.getDecDegrees(when).getOrElse(0.0);
@@ -660,7 +660,7 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
         if (_ctx.targets().base().isDefined()) {
             final SPTarget base = _ctx.targets().base().get();
             base.addWatcher(this);
-            basePosUpdate(base.getTarget());
+            basePosUpdate(base);
         }
 
         _autoGuideStarAction.setEnabled(GuideStarSupport.supportsAutoGuideStarSelection(_ctx));
@@ -813,13 +813,13 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
 
     @Override
     public void telescopePosUpdate(final WatchablePos tp) {
-        basePosUpdate(((SPTarget) tp).getTarget());
+        basePosUpdate((SPTarget) tp);
     }
 
     /**
      * The Base position has been updated.
      */
-    public void basePosUpdate(final ITarget target) {
+    public void basePosUpdate(final SPTarget target) {
         final Option<Long> when = _ctx.schedulingBlockJava().map(SchedulingBlock::start);
         final double x = target.getRaDegrees(when).getOrElse(0.0);
         final double y = target.getDecDegrees(when).getOrElse(0.0);

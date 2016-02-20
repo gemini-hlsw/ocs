@@ -57,7 +57,7 @@ class TargetEnvironmentListener extends MarkerModelListener[Variant] {
       }
 
       // Check for non-sidereal targets.
-      if (targetEnvironment.getBase.getTarget.isInstanceOf[NonSiderealTarget]) {
+      if (targetEnvironment.getBase.isNonSidereal) {
         markerManager.addMarker(false, this, Marker.Severity.Warning, "Observation has a non-sidereal target.", variant, a)
       }
 

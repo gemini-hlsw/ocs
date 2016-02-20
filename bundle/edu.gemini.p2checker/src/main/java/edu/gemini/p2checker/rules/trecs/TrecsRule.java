@@ -363,9 +363,8 @@ public class TrecsRule implements IRule {
 
         // Return the world coordinates for the give target
         private Option<WorldCoords> _getWorldCoords(SPTarget tp, Option<Long> time) {
-            ITarget target = tp.getTarget();
-            return target.getRaDegrees(time).flatMap( ra ->
-                   target.getDecDegrees(time).map(dec ->
+            return tp.getRaDegrees(time).flatMap( ra ->
+                   tp.getDecDegrees(time).map(dec ->
                      new WorldCoords(ra, dec, 2000.)));
         }
     };

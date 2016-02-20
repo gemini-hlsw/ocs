@@ -95,8 +95,7 @@ class InstantiationDialogRenderer extends TemplateDialogRenderer {
             // Icon
             final TemplateParameters tps = (TemplateParameters) nd.getDataObject();
             final SPTarget spTarget = tps.getTarget();
-            final ITarget target = spTarget.getTarget();
-            final Icon targetIcon = (target instanceof NonSiderealTarget) ? ICON_NONSIDEREAL : ICON_SIDEREAL;
+            final Icon targetIcon = spTarget.isNonSidereal() ? ICON_NONSIDEREAL : ICON_SIDEREAL;
             setIcon(new DualIcon(targetIcon, ICON_CONDS));
 
             // Text

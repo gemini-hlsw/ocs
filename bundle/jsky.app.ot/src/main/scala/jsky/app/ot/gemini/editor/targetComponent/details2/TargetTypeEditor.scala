@@ -26,10 +26,7 @@ final class TargetTypeEditor extends DropDownListBoxWidget[AnyRef] with Telescop
   def edit(obsContext: GOption[ObsContext], spTarget: SPTarget, node: ISPNode): Unit = {
     spt = spTarget
     nonreentrant {
-      setSelectedItem(spt.getTarget match {
-        case s: HmsDegTarget => "Sidereal Target"
-        case _               => "Nonsidereal Target"
-      })
+      setSelectedItem(spt.getHmsDegTarget.map(_ => "Sidereal Target").getOrElse("Nonsidereal Target"))
     }
   }
 

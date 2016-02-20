@@ -22,7 +22,7 @@ final class ConicNameEditor(date: HorizonsIO[Date]) extends TelescopePosEditor w
 
   private[this] var spt = new SPTarget // never null
 
-  def ct: ConicTarget = spt.getTarget.asInstanceOf[ConicTarget]
+  def ct: ConicTarget = spt.getConicTarget.get
 
   /** A program to resolve the current target BY NAME and replace it. */
   val lookup: HorizonsIO[Unit] =

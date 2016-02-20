@@ -6,6 +6,7 @@ import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.core.SpatialProfile;
 import edu.gemini.spModel.core.SpectralDistribution;
 import edu.gemini.spModel.target.WatchablePos;
+import scala.None$;
 
 // transitional; will go away
 public abstract class TransitionalSPTarget extends WatchablePos {
@@ -58,6 +59,10 @@ public abstract class TransitionalSPTarget extends WatchablePos {
         return getTarget().getDecDegrees(time);
     }
 
+    public Option<String> getDecString(Option<Long> time) {
+        return getTarget().getDecString(time);
+    }
+
     public void setRaString(String value) {
         getTarget().setRaString(value);
         _notifyOfUpdate();
@@ -103,6 +108,34 @@ public abstract class TransitionalSPTarget extends WatchablePos {
     @Deprecated
     public void notifyOfGenericUpdate() {
         super._notifyOfUpdate();
+    }
+
+    public scala.Option<HmsDegTarget> getHmsDegTarget() {
+        ITarget t = getTarget();
+        return (t instanceof  HmsDegTarget) ? new scala.Some<>((HmsDegTarget) t) : scala.Option.empty();
+    }
+
+    public scala.Option<NonSiderealTarget> getNonSiderealTarget() {
+        ITarget t = getTarget();
+        return (t instanceof NonSiderealTarget) ? new scala.Some<>((NonSiderealTarget) t) : scala.Option.empty();
+    }
+
+    public scala.Option<ConicTarget> getConicTarget() {
+        ITarget t = getTarget();
+        return (t instanceof ConicTarget) ? new scala.Some<>((ConicTarget) t) : scala.Option.empty();
+    }
+
+    public scala.Option<NamedTarget> getNamedTarget() {
+        ITarget t = getTarget();
+        return (t instanceof NamedTarget) ? new scala.Some<>((NamedTarget) t) : scala.Option.empty();
+    }
+
+    public boolean isSidereal() {
+        return getTarget() instanceof HmsDegTarget;
+    }
+
+    public boolean isNonSidereal() {
+        return !isSidereal();
     }
 
 }

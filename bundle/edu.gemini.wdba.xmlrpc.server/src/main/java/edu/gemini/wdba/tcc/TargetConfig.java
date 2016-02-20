@@ -94,14 +94,14 @@ public final class TargetConfig extends ParamSet {
      */
     private void _buildHmsDegTarget(SPTarget target) {
 
-        HmsDegTarget hmsDeg = (HmsDegTarget) target.getTarget();
+        HmsDegTarget hmsDeg = target.getHmsDegTarget().get();
         putParameter(TccNames.C1, hmsDeg.getRa().toString());
         putParameter(TccNames.C2, hmsDeg.getDec().toString());
         add(_addProperMotion(hmsDeg));
     }
 
     private void _buildConicTarget(SPTarget spTarget) {
-        ConicTarget target = (ConicTarget) spTarget.getTarget();
+        ConicTarget target = spTarget.getConicTarget().get();
 
         ITarget.Tag option = target.getTag();
         putParameter(TccNames.FORMAT, option.tccName);

@@ -84,7 +84,7 @@ final class SiderealNameEditor(mags: MagnitudeEditor) extends TelescopePosEditor
   }
 
   def processResult(target: Option[SiderealTarget]): Unit = Swing.onEDT {
-    val t = spt.getTarget.asInstanceOf[HmsDegTarget]
+    val t = spt.getHmsDegTarget.get
 
     target.foreach { i =>
       i.properMotion.foreach { pm =>

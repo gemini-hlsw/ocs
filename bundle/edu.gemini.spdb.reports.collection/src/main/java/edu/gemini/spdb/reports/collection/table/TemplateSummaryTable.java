@@ -136,7 +136,7 @@ public class TemplateSummaryTable extends AbstractTable {
         row.put(Columns.TEMPLATE_ID, templateId);
         row.put(Columns.TARGET_NAME, target.getName());
         row.put(Columns.RA, target.getRaString(None.instance()).getOrElse(""));
-        row.put(Columns.DEC, target.getTarget().getDecString(None.instance()).getOrElse(""));
+        row.put(Columns.DEC, target.getDecString(None.instance()).getOrElse(""));
         row.put(Columns.COND_CONSTRAINTS, conditions.toString().replaceAll(",", ""));
         row.put(Columns.INST_CONFIG, instConfig);
         row.put(Columns.PHASE1_TIME, String.format("%.2f hrs", time.getTimeAmount()));
