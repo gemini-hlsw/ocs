@@ -196,13 +196,13 @@ public final class NifsRule implements IRule {
                 final Option<Long> when = elements.getSchedulingBlock().map(SchedulingBlock::start);
 
                 baseTarget.getRaHours(when).foreach(baseC1 ->
-                baseTarget.getTarget().getDecDegrees(when).foreach(baseC2 ->
+                baseTarget.getDecDegrees(when).foreach(baseC2 ->
 
                 oiTarget.getValue().getRaHours(when).foreach(oiC1 ->
-                oiTarget.getValue().getTarget().getDecDegrees(when).foreach(oiC2 ->
+                oiTarget.getValue().getDecDegrees(when).foreach(oiC2 ->
 
                 aoTarget.getValue().getRaHours(when).foreach(aoC1 ->
-                aoTarget.getValue().getTarget().getDecDegrees(when).foreach(aoC2 -> {
+                aoTarget.getValue().getDecDegrees(when).foreach(aoC2 -> {
                     if (Double.compare(baseC1, oiC1) == 0
                             &&
                             Double.compare(baseC2, oiC2) == 0

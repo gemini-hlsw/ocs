@@ -46,6 +46,10 @@ public abstract class TransitionalSPTarget extends WatchablePos {
         _notifyOfUpdate();
     }
 
+    public Option<Double> getDecDegrees(Option<Long> time) {
+        return getTarget().getDecDegrees(time);
+    }
+
     public void setRaString(String value) {
         getTarget().setRaString(value);
         _notifyOfUpdate();

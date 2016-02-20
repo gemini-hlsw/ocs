@@ -272,7 +272,7 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
       val decField = new BoundTextField[Double](10)(
         read = s => dms.parse(s),
         show = dms.format,
-        get  = _.getTarget.getTarget.getDecDegrees(JNoneLong).getOrElse(0.0),
+        get  = _.getTarget.getDecDegrees(JNoneLong).getOrElse(0.0),
         set  = setTarget((a, b) => a.setDecDegrees(b))
       )
 

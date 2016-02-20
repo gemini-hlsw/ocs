@@ -344,7 +344,7 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
         final Option<Long> when = ctx.schedulingBlockJava().map(SchedulingBlock::start);
 
         _baseTarget.getTarget().getRaDegrees(when).flatMap(ra ->
-            _baseTarget.getTarget().getDecDegrees(when).flatMap( dec -> {
+            _baseTarget.getDecDegrees(when).flatMap( dec -> {
                 final HmsDegCoordinates hmsDegCoordinates = new HmsDegCoordinates.Builder(new Angle(ra, Angle.Unit.DEGREES), new Angle(dec, Angle.Unit.DEGREES)).build();
                 final Coordinates coordinates = ModelConverters.toCoordinates(hmsDegCoordinates);
                 final URL queryUrl = imageCatalog.queryUrl(coordinates);

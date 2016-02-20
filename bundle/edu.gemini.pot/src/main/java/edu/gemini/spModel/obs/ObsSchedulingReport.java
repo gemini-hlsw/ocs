@@ -134,7 +134,7 @@ public final class ObsSchedulingReport implements Serializable {
 
         return
             target.getTarget().getRaDegrees(when).flatMap(ra ->
-            target.getTarget().getDecDegrees(when).map(dec ->
+            target.getDecDegrees(when).map(dec ->
                 new WorldCoords(ra, dec))).getOrNull();
         }
 

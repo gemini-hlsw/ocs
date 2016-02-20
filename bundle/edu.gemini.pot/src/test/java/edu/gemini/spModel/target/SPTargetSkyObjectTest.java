@@ -66,7 +66,7 @@ public final class SPTargetSkyObjectTest {
 
             assertEquals("xyz", target.getName());
             assertEquals(15.0, target.getTarget().getRaDegrees(None.instance()).getValue(), 0.000001);
-            assertEquals(20.0, target.getTarget().getDecDegrees(None.instance()).getValue(), 0.000001);
+            assertEquals(20.0, target.getDecDegrees(None.instance()).getValue(), 0.000001);
             assertEquals(1.0, hmsDeg.getPM1().getValue(), 0.000001);
             assertEquals(2.0, hmsDeg.getPM2().getValue(), 0.000001);
 

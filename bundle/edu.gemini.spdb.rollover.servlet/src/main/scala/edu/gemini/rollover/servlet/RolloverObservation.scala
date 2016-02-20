@@ -63,7 +63,7 @@ object RolloverObservation {
       // Coordinates may or may not be known
       val coords = for {
         ra  <- science.getTarget.getRaDegrees(when).asScalaOpt
-        dec <- science.getTarget.getDecDegrees(when).asScalaOpt
+        dec <- science.getDecDegrees(when).asScalaOpt
       } yield Coords(new Angle(ra, Angle.Unit.DEGREES), new Angle(dec, Angle.Unit.DEGREES))
 
       RolloverTarget(name, coords)

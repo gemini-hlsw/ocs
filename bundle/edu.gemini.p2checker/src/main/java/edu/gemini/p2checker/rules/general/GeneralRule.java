@@ -443,10 +443,10 @@ public class GeneralRule implements IRule {
         final Option<Long> when = elems.getSchedulingBlock().map(SchedulingBlock::start);
 
         Option<Double> spRA = target.getRaHours(when);
-        Option<Double> spDec = target.getTarget().getDecDegrees(when);
+        Option<Double> spDec = target.getDecDegrees(when);
 
         Option<Double> p1RA = p1Target.getRaHours(when);
-        Option<Double> p1Dec = p1Target.getTarget().getDecDegrees(when);
+        Option<Double> p1Dec = p1Target.getDecDegrees(when);
 
         double minDistance = _getMinDistance(elems);
 

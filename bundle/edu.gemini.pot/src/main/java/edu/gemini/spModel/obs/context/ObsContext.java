@@ -267,7 +267,7 @@ public final class ObsContext {
         SPTarget target = targets.getBase();
         return
             target.getTarget().getRaDegrees(when).flatMap(raDeg ->
-            target.getTarget().getDecDegrees(when).map(decDeg ->
+            target.getDecDegrees(when).map(decDeg ->
                 new Coordinates(raDeg, decDeg)
             ));
     }
