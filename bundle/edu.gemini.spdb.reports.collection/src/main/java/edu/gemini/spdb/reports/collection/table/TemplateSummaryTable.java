@@ -134,7 +134,7 @@ public class TemplateSummaryTable extends AbstractTable {
         row.put(Columns.BAND, band);
         row.put(Columns.PROG_TOO_STATUS, tooType.getDisplayValue());
         row.put(Columns.TEMPLATE_ID, templateId);
-        row.put(Columns.TARGET_NAME, target.getTarget().getName());
+        row.put(Columns.TARGET_NAME, target.getName());
         row.put(Columns.RA, target.getTarget().getRaString(None.instance()).getOrElse(""));
         row.put(Columns.DEC, target.getTarget().getDecString(None.instance()).getOrElse(""));
         row.put(Columns.COND_CONSTRAINTS, conditions.toString().replaceAll(",", ""));

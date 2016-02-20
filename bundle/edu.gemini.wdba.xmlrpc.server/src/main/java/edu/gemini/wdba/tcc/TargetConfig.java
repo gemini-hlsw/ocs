@@ -53,9 +53,9 @@ public final class TargetConfig extends ParamSet {
      * Note that only the hmsDegTarget is supported at this time.
      */
     public TargetConfig(SPTarget spTarget) throws WdbaGlueException {
-        super(spTarget.getTarget().getName());
+        super(spTarget.getName());
 
-        putParameter(TccNames.OBJNAME, spTarget.getTarget().getName());
+        putParameter(TccNames.OBJNAME, spTarget.getName());
 
         putParameter(TccNames.BRIGHTNESS, ""); // TODO: can we elide this altogether?
         putParameter(TccNames.TAG, ""); // ugh

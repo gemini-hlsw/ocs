@@ -131,7 +131,7 @@ public final class ObservationEnvironment {
     }
 
     public String getBasePositionName() {
-        return _targetEnv.getBase().getTarget().getName();
+        return _targetEnv.getBase().getName();
     }
 
     public boolean isNorth() {

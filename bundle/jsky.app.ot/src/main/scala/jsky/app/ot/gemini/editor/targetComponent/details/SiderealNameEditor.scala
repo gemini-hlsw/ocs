@@ -79,7 +79,7 @@ final class SiderealNameEditor(mags: MagnitudeEditor) extends TelescopePosEditor
   def edit(ctx: GOption[ObsContext], target: SPTarget, node: ISPNode): Unit = {
     this.spt = target
     nonreentrant {
-      name.setText(spt.getTarget.getName)
+      name.setText(spt.getName)
     }
   }
 

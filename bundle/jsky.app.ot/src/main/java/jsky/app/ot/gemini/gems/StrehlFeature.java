@@ -417,7 +417,7 @@ public class StrehlFeature extends TpeImageFeature implements PropertyWatcher, M
                 final SPTarget spt = targetList.get(i);
                 final Option<Star> op = targetToStar(spt);
                 if (op.isEmpty()) {
-                    throw new RuntimeException("No coordinates for " + spt.getTarget().getName());
+                    throw new RuntimeException("No coordinates for " + spt.getName());
                 }
                 starList[i] = op.getValue();
             }
@@ -431,7 +431,7 @@ public class StrehlFeature extends TpeImageFeature implements PropertyWatcher, M
         return
             target.getTarget().getRaDegrees(when).flatMap(ra ->
             target.getTarget().getDecDegrees(when).map(dec -> {
-                String name = target.getTarget().getName();
+                String name = target.getName();
                 double baseX = _tii.getBasePos().getRaDeg();
                 double baseY = _tii.getBasePos().getDecDeg();
                 Magnitude undef = new Magnitude(Magnitude.Band.J, MascotConf.invalidMag());

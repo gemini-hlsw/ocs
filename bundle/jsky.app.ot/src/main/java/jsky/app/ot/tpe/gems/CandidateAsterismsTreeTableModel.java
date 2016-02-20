@@ -165,7 +165,7 @@ class CandidateAsterismsTreeTableModel extends AbstractTreeTableModel {
         String getId() {
             if (_guideProbeTargets != null) {
                 if (_guideProbeTargets.getPrimary().isDefined()) {
-                    return _guideProbeTargets.getPrimary().getValue().getTarget().getName();
+                    return _guideProbeTargets.getPrimary().getValue().getName();
                 }
             } else if (_gemsGuideStars != null) { // top level displays Strehl values
                 GemsStrehl strehl = _gemsGuideStars.strehl();

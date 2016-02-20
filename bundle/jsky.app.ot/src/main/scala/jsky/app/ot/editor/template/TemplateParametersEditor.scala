@@ -240,7 +240,7 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
       val nameField = new BoundTextField[String](10)(
         read = identity,
         show = identity,
-        get  = _.getTarget.getTarget.getName,
+        get  = _.getTarget.getName,
         set  = setTarget(_.setName(_))
       )
 
@@ -253,7 +253,7 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
             case NonSidereal => new ConicTarget()
           }
           target.setTarget(coords)
-          target.setName(target.getTarget.getName)
+          target.setName(target.getName)
           target.setMagnitudes(DefaultImList.create[Magnitude]())
         })}
       )

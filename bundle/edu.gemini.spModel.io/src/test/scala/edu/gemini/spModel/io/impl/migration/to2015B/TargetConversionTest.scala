@@ -57,10 +57,10 @@ class TargetConversionTest extends MigrationTest {
       tpList.map(_.getTarget) match {
         case List(tSidereal, tNonSidereal) =>
           assertTrue(tSidereal.getTarget.isInstanceOf[HmsDegTarget])
-          assertEquals("Some Sidereal", tSidereal.getTarget.getName)
+          assertEquals("Some Sidereal", tSidereal.getName)
 
           assertTrue(tNonSidereal.getTarget.isInstanceOf[NonSiderealTarget])
-          assertEquals("S123456", tNonSidereal.getTarget.getName)
+          assertEquals("S123456", tNonSidereal.getName)
 
         case _ =>
           fail("expecting Sidereal, NonSidereal")

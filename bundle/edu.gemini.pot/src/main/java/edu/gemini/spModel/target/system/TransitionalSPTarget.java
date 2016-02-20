@@ -17,6 +17,10 @@ public abstract class TransitionalSPTarget extends WatchablePos {
         _notifyOfUpdate();
     }
 
+    public String getName() {
+        return getTarget().getName();
+    }
+
     public void setName(String name) {
         getTarget().setName(name);
         _notifyOfUpdate();

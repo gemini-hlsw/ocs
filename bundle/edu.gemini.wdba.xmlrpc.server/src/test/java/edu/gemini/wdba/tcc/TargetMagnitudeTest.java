@@ -79,7 +79,7 @@ public final class TargetMagnitudeTest extends TestBase {
             final String name = targetElement.attributeValue(ParamSet.NAME);
             assertNotNull(name);
 
-            final Option<SPTarget> target = env.getTargets().find(spTarget -> name.equals(spTarget.getTarget().getName()));
+            final Option<SPTarget> target = env.getTargets().find(spTarget -> name.equals(spTarget.getName()));
             assertFalse(target.isEmpty());
 
             // Check the magnitude information for each target

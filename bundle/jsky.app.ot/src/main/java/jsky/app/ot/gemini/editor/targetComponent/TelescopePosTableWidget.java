@@ -137,7 +137,7 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
 
         static final class BaseTargetRow extends AbstractRow {
             BaseTargetRow(final SPTarget target, final Option<Long> when) {
-                super(true, TargetEnvironment.BASE_NAME, target.getTarget().getName(), new Some<>(target), when);
+                super(true, TargetEnvironment.BASE_NAME, target.getName(), new Some<>(target), when);
             }
         }
 
@@ -146,7 +146,7 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
 
             NonBaseTargetRow(final boolean enabled, final String tag, final SPTarget target,
                              final Option<Coordinates> baseCoords, final Option<Long> when) {
-                super(enabled, tag, target.getTarget().getName(), new Some<>(target), when);
+                super(enabled, tag, target.getName(), new Some<>(target), when);
 
                 final Option<Coordinates> coords = getCoordinates(target, when);
                 distance = baseCoords.flatMap(bc ->

@@ -168,7 +168,7 @@ class InstantiationFunctorTest extends SpModelTestBase {
         case o :: Nil =>
           // Science site quality is copied, but not the science target
           assertTrue(siteQuality(o).exists(_.getCloudCover == ScienceTargetCC) &&
-                     target(o).exists(_.getBase.getTarget.getName == ScienceTargetName))
+                     target(o).exists(_.getBase.getName == ScienceTargetName))
         case _       =>
           fail("Expected a single observation")
       }
@@ -184,7 +184,7 @@ class InstantiationFunctorTest extends SpModelTestBase {
         case o :: Nil =>
           // CC, target, and PA changes are kept.
           assertTrue(siteQuality(o).exists(_.getCloudCover == EditTargetCC) &&
-                     target(o).exists(_.getBase.getTarget.getName == EditTargetName) &&
+                     target(o).exists(_.getBase.getName == EditTargetName) &&
                      getPositionAngle(o) == EditPA)
         case _       =>
           fail("Expected a single observation")

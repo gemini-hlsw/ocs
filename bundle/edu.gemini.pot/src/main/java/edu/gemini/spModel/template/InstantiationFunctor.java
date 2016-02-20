@@ -146,7 +146,7 @@ public class InstantiationFunctor extends DBAbstractFunctor {
     // Get a group name from the given config, conditions, target triple
     private static String createGroupTitle(TemplateGroup templateGroupData, SPTarget targetData) {
         return String.format("%s - [%s] %s",
-                targetData.getTarget().getName(),
+                targetData.getName(),
                 templateGroupData.getVersionToken(),
                 templateGroupData.getTitle());
     }

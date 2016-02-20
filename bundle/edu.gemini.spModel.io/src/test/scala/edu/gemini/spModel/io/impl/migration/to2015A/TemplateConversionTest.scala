@@ -54,7 +54,7 @@ class TemplateConversionTest extends MigrationTest {
       assertTrue(tpList.forall(_.getSiteQuality.conditions() == sq.conditions()))
 
       // Different targets
-      assertEquals(List("target_D", "target_C", "target_B", "target_A"), tpList.map(_.getTarget.getTarget.getName))
+      assertEquals(List("target_D", "target_C", "target_B", "target_A"), tpList.map(_.getTarget.getName))
     }
 
     def validateFolder(f: ISPTemplateFolder): Unit = {

@@ -443,7 +443,7 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor {
             final SPTarget target = targetEnv.getBase();
             if (target == null)
                 return null;
-            return target.getTarget().getName();
+            return target.getName();
         } catch (Exception e) {
             e.printStackTrace();
             return null;

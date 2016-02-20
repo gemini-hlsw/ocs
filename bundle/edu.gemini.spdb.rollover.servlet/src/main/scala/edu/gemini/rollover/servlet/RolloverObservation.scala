@@ -49,7 +49,7 @@ object RolloverObservation {
       dataObj    <- Option(targetComp.getDataObject.asInstanceOf[TargetObsComp])
       targetEnv  <- Option(dataObj.getTargetEnvironment)
       science    <- Option(targetEnv.getBase)
-      name       <- Option(science.getTarget.getName)
+      name       <- Option(science.getName)
     } yield {
 
       // Amazingly this is easier in Java

@@ -68,7 +68,7 @@ public class ObsTargetDesc extends TargetDesc {
                 new WorldCoords(x, y, 2000.)
             ));
 
-                 String targetName = basePos.getTarget().getName();
+                 String targetName = basePos.getName();
 
         String obsId = "";
         SPObservationID spObsId = obs.getObservationID();

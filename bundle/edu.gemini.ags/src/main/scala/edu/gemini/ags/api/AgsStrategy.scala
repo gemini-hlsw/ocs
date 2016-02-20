@@ -88,7 +88,7 @@ object AgsStrategy {
     def applyTo(env: TargetEnvironment): TargetEnvironment = {
       def findMatching(gpt: GuideProbeTargets, target: SPTarget): Option[SPTarget] = {
         def name(t: SPTarget): Option[String] =
-          Option(t.getTarget.getName).map(_.trim)
+          Option(t.getName).map(_.trim)
 
         name(target).flatMap(n => gpt.getTargets.asScalaList.find(name(_).exists(_ == n)))
       }

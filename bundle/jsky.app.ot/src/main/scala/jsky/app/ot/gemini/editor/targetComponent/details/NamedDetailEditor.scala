@@ -211,7 +211,7 @@ final class NamedDetailEditor extends TargetDetailEditor(Tag.NAMED) with Reentra
     this.spt = spTarget
     nonreentrant {
       solarObject.setValue(spt.getTarget.asInstanceOf[NamedTarget].getSolarObject)
-      name.setValue(spt.getTarget.getName)
+      name.setValue(spt.getName)
     }
 
   }

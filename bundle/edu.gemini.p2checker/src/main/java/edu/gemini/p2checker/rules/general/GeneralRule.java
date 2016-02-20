@@ -212,7 +212,7 @@ public class GeneralRule implements IRule {
                 final Set<String> errorSet = new TreeSet<>();
                 for (final SPTarget target : guideTargets) {
                     //Check for empty name
-                    if ("".equals(target.getTarget().getName().trim())) {
+                    if ("".equals(target.getName().trim())) {
                         errorSet.add(String.format(WFS_EMPTY_NAME_TEMPLATE, guider.getKey()));
                     }
 
@@ -385,7 +385,7 @@ public class GeneralRule implements IRule {
             if (scienceTarget == null) { //really unlikely
                 problems.addError(PREFIX+"NO_SCIENCE_TARGET_MSG", NO_SCIENCE_TARGET_MSG, elements.getTargetObsComponentNode().getValue());
             } else {
-                if ("".equals(scienceTarget.getTarget().getName().trim())) {
+                if ("".equals(scienceTarget.getName().trim())) {
                     problems.addError(PREFIX+"EMPTY_TARGET_NAME_MSG", EMPTY_TARGET_NAME_MSG, elements.getTargetObsComponentNode().getValue());
                 }
             }
