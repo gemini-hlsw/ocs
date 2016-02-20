@@ -32,8 +32,8 @@ object SpTargetPioSpec extends Specification with ScalaCheck with Arbitraries {
           val pset = SPTargetPio.getParamSet(spt, factory)
           val spt2 = SPTargetPio.fromParamSet(pset)
 
-          assert(spt.getTarget.getSpatialProfile === spt2.getTarget.getSpatialProfile)
-          assert(spt.getTarget.getSpectralDistribution === spt2.getTarget.getSpectralDistribution)
+          assert(spt.getSpatialProfile === spt2.getSpatialProfile)
+          assert(spt.getSpectralDistribution === spt2.getSpectralDistribution)
         }
     }
     "SPTargetPio" should {

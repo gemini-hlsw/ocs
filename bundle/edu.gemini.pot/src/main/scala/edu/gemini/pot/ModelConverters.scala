@@ -213,8 +213,8 @@ object ModelConverters {
         redshift             = z,
         parallax             = px,
         magnitudes           = mags,
-        spectralDistribution = sp.getTarget.getSpectralDistribution,
-        spatialProfile       = sp.getTarget.getSpatialProfile
+        spectralDistribution = sp.getSpectralDistribution,
+        spatialProfile       = sp.getSpatialProfile
       )
     }
   }

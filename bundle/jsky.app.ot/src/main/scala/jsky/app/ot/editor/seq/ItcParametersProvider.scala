@@ -50,13 +50,13 @@ object ItcParametersProvider {
     def spatialProfile: String \/ SpatialProfile =
       for {
         tEnv <- targetEnvironment
-        sp   <- tEnv.getBase.getTarget.getSpatialProfile.fold("Spatial profile not available".left[SpatialProfile])(_.right)
+        sp   <- tEnv.getBase.getSpatialProfile.fold("Spatial profile not available".left[SpatialProfile])(_.right)
       } yield sp
 
     def spectralDistribution: String \/ SpectralDistribution =
       for {
         tEnv <- targetEnvironment
-        sd   <- tEnv.getBase.getTarget.getSpectralDistribution.fold("Spectral distribution not available".left[SpectralDistribution])(_.right)
+        sd   <- tEnv.getBase.getSpectralDistribution.fold("Spectral distribution not available".left[SpectralDistribution])(_.right)
       } yield sd
 
     def instrumentPort: String \/ IssPort =

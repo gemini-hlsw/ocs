@@ -50,7 +50,7 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor wit
 
   private val defaultGaussianSource = GaussianSource(0.5)
 
-  private def gaussianOrDefault(t: SPTarget): GaussianSource = t.getTarget.getSpatialProfile.fold(defaultGaussianSource)(_.asInstanceOf[GaussianSource])
+  private def gaussianOrDefault(t: SPTarget): GaussianSource = t.getSpatialProfile.fold(defaultGaussianSource)(_.asInstanceOf[GaussianSource])
 
   private val pointSourceDetails    = new JPanel()
   private val uniformSourceDetails  = new JPanel()
@@ -76,9 +76,9 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor wit
   private val defaultEmissionLine = EmissionLine(2.2.microns, 500.kps, 5.0e-19.wattsPerSquareMeter, 1.0e-16.wattsPerSquareMeterPerMicron)
   private val defaultPowerLaw     = PowerLaw(1)
 
-  private def blackBodyOrDefault   (t: SPTarget): BlackBody     = t.getTarget.getSpectralDistribution.fold(defaultBlackBody)(_.asInstanceOf[BlackBody])
-  private def emissionLineOrDefault(t: SPTarget): EmissionLine  = t.getTarget.getSpectralDistribution.fold(defaultEmissionLine)(_.asInstanceOf[EmissionLine])
-  private def powerLawOrDefault    (t: SPTarget): PowerLaw      = t.getTarget.getSpectralDistribution.fold(defaultPowerLaw)(_.asInstanceOf[PowerLaw])
+  private def blackBodyOrDefault   (t: SPTarget): BlackBody     = t.getSpectralDistribution.fold(defaultBlackBody)(_.asInstanceOf[BlackBody])
+  private def emissionLineOrDefault(t: SPTarget): EmissionLine  = t.getSpectralDistribution.fold(defaultEmissionLine)(_.asInstanceOf[EmissionLine])
+  private def powerLawOrDefault    (t: SPTarget): PowerLaw      = t.getSpectralDistribution.fold(defaultPowerLaw)(_.asInstanceOf[PowerLaw])
 
   private val libraryStarDetails     = new ComboBox[LibraryStar](LibraryStar.Values) {
     renderer = Renderer(_.sedSpectrum)
@@ -228,7 +228,7 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor wit
       deafTo(editElements:_*)
 
       // update UI elements to reflect the spatial profile
-      spt.getTarget.getSpatialProfile match {
+      spt.getSpatialProfile match {
         case None                        => profiles.selection.item = profilePanels.head
         case Some(PointSource)           => profiles.selection.item = profilePanels(1)
         case Some(GaussianSource(_))     => profiles.selection.item = profilePanels(2); profilePanels(2).panel.asInstanceOf[NumericPropertySheet[GaussianSource]].edit(obsContext, spTarget, node)
@@ -236,7 +236,7 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor wit
       }
 
       // update UI elements to reflect the spectral distribution
-      spt.getTarget.getSpectralDistribution match {
+      spt.getSpectralDistribution match {
         case None                        => distributions.selection.item = distributionPanels.head
         case Some(s: LibraryStar)        => distributions.selection.item = distributionPanels(1); libraryStarDetails.selection.item = s
         case Some(s: LibraryNonStar)     => distributions.selection.item = distributionPanels(2); libraryNonStarDetails.selection.item = s
@@ -302,7 +302,7 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor wit
     private def updateAuxFileModel(programId: SPProgramID): Unit =  {
 
       // Determines the currently selected SED aux file (if any)
-      def selectedAuxFile = spt.getTarget.getSpectralDistribution match {
+      def selectedAuxFile = spt.getSpectralDistribution match {
         case Some(s: AuxFileSpectrum) => Some(s)
         case _                        => None
       }

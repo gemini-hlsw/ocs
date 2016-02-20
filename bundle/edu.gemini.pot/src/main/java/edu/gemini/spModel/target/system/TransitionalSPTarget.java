@@ -92,6 +92,14 @@ public abstract class TransitionalSPTarget extends WatchablePos {
         _notifyOfUpdate();
     }
 
+    public scala.Option<SpectralDistribution> getSpectralDistribution() {
+        return getTarget().getSpectralDistribution();
+    }
+
+    public scala.Option<SpatialProfile> getSpatialProfile() {
+        return getTarget().getSpatialProfile();
+    }
+
     @Deprecated
     public void notifyOfGenericUpdate() {
         super._notifyOfUpdate();
