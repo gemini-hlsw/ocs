@@ -61,7 +61,7 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
 
             RA("RA") {
                 public String getValue(final Row row) {
-                    return row.target().flatMap(t -> t.getTarget().getRaString(row.when())).getOrElse("");
+                    return row.target().flatMap(t -> t.getRaString(row.when())).getOrElse("");
                 }
             },
 
