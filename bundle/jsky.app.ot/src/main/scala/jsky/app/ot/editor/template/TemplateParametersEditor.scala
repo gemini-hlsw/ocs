@@ -264,7 +264,7 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
       val raField = new BoundTextField[Double](10)(
         read = s => hms.parse(s),
         show = hms.format,
-        get  = _.getTarget.getTarget.getRaHours(JNoneLong).getOrElse(0.0),
+        get  = _.getTarget.getRaHours(JNoneLong).getOrElse(0.0),
         set  = setTarget((a, b) => a.setRaHours(b))
       )
 
