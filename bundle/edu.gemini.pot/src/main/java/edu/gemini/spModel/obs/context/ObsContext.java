@@ -266,7 +266,7 @@ public final class ObsContext {
         final Option<Long> when = getSchedulingBlock().map(SchedulingBlock::start);
         SPTarget target = targets.getBase();
         return
-            target.getTarget().getRaDegrees(when).flatMap(raDeg ->
+            target.getRaDegrees(when).flatMap(raDeg ->
             target.getDecDegrees(when).map(decDeg ->
                 new Coordinates(raDeg, decDeg)
             ));

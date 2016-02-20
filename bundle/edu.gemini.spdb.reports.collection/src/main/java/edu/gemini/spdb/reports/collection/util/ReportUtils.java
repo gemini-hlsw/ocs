@@ -422,7 +422,7 @@ public class ReportUtils {
         }
 
         return
-            target.getTarget().getRaDegrees(when).flatMap(r ->
+            target.getRaDegrees(when).flatMap(r ->
             target.getDecDegrees(when).flatMap(d ->
                 (r == 0.0 && d == 0.0) ?  None.instance() : new Some<>(((int) Math.round(r / 15.0)) % 24)
             ));

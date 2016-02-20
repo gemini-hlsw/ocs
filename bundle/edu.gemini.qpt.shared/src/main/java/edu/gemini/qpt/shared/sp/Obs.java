@@ -575,9 +575,9 @@ public final class Obs implements Serializable, Comparable<Obs> {
         return obsNumber;
     }
 
-    public double getRa() {
-        return (targetEnvironment != null ? targetEnvironment.getBase().getTarget().getRaDegrees(schedulingBlock.map(SchedulingBlock::start)).getOrElse(0.0) : 0.0);
-    }
+	public double getRa() {
+        return (targetEnvironment != null ? targetEnvironment.getBase().getRaDegrees(schedulingBlock.map(SchedulingBlock::start)).getOrElse(0.0) : 0.0);
+	}
 
 	public double getDec() {
         return (targetEnvironment != null ? targetEnvironment.getBase().getDecDegrees(schedulingBlock.map(SchedulingBlock::start)).getOrElse(0.0) : 0.0);

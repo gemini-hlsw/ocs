@@ -106,7 +106,7 @@ final class Fixture {
             // the coordinates and get enough of an idea that they are the
             // same for the purposes of testing GuideProbeTargets.
 
-            assertOptEquals(t1.getTarget().getRaDegrees(when), t2.getTarget().getRaDegrees(when), 0.000001);
+            assertOptEquals(t1.getRaDegrees(when), t2.getRaDegrees(when), 0.000001);
             assertOptEquals(t1.getDecDegrees(when), t2.getDecDegrees(when), 0.000001);
         });
     }

@@ -429,7 +429,7 @@ public class StrehlFeature extends TpeImageFeature implements PropertyWatcher, M
     private Option<Star> targetToStar(SPTarget target) {
         final Option<Long> when = _iw.getContext().schedulingBlockJava().map(SchedulingBlock::start);
         return
-            target.getTarget().getRaDegrees(when).flatMap(ra ->
+            target.getRaDegrees(when).flatMap(ra ->
             target.getDecDegrees(when).map(dec -> {
                 String name = target.getName();
                 double baseX = _tii.getBasePos().getRaDeg();

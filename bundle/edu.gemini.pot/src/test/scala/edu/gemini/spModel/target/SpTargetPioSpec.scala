@@ -71,7 +71,7 @@ object SpTargetPioSpec extends Specification with ScalaCheck with Arbitraries {
 
     def expect(ps: ParamSet, era: Double, edec: Double): MatchResult[Double] = {
       val spt = SPTargetPio.fromParamSet(ps)
-      val ra  = spt.getTarget.getRaDegrees(JNone.instance[java.lang.Long]).asScalaOpt.map(_.doubleValue).get
+      val ra  = spt.getRaDegrees(JNone.instance[java.lang.Long]).asScalaOpt.map(_.doubleValue).get
       val dec = spt.getDecDegrees(JNone.instance[java.lang.Long]).asScalaOpt.map(_.doubleValue).get
 
       val raCheck = ra  must beCloseTo(era,  0.000001)
