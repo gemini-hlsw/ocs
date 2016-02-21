@@ -296,7 +296,7 @@ public enum PwfsGuideProbe implements ValidatableGuideProbe, OffsetValidatingGui
     }
 
     public Option<BoundaryPosition> checkBoundaries(SPTarget guideStar, ObsContext ctx){
-        guideStar
+        return guideStar
             .getSkycalcCoordinates(ctx.getSchedulingBlock().map(SchedulingBlock::start))
             .flatMap(cs -> checkBoundaries(cs, ctx));
     }

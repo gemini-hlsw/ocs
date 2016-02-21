@@ -144,4 +144,8 @@ public abstract class TransitionalSPTarget extends WatchablePos {
         return getTarget().getSkycalcCoordinates(when);
     }
 
+    public ImList<Magnitude> getMagnitudes() {
+        return getTarget().getMagnitudes();
+    }
+
 }
