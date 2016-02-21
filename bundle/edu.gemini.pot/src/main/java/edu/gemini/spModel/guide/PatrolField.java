@@ -4,6 +4,7 @@ import edu.gemini.skycalc.Angle;
 import edu.gemini.skycalc.CoordinateDiff;
 import edu.gemini.skycalc.Coordinates;
 import edu.gemini.skycalc.Offset;
+import edu.gemini.spModel.obs.SchedulingBlock;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.target.SPTarget;
 
@@ -267,19 +268,21 @@ public class PatrolField {
 
         @Override
         public GuideStarValidation validate(SPTarget guideStar, ObsContext ctx) {
-            return ctx.getBaseCoordinates().map(baseCoordinates -> {
-                final Coordinates guideCoordinates = guideStar.getTarget().getSkycalcCoordinates();
-                // Calculate the difference between the coordinate and the observation's
-                // base position.
-                CoordinateDiff diff;
-                diff = new CoordinateDiff(baseCoordinates, guideCoordinates);
-                // Get offset and switch it to be defined in the same coordinate
-                // system as the shape.
-                Offset dis = diff.getOffset();
-                double p = -dis.p().toArcsecs().getMagnitude();
-                double q = -dis.q().toArcsecs().getMagnitude();
-                return validArea.contains(p, q) ? GuideStarValidation.VALID : GuideStarValidation.INVALID;
-            }).getOrElse(GuideStarValidation.UNDEFINED);
+            return
+                guideStar.getSkycalcCoordinates(ctx.getSchedulingBlock().map(SchedulingBlock::start)).flatMap(guideCoordinates ->
+                ctx.getBaseCoordinates().map(baseCoordinates -> {
+                    // Calculate the difference between the coordinate and the observation's
+                    // base position.
+                    CoordinateDiff diff;
+                    diff = new CoordinateDiff(baseCoordinates, guideCoordinates);
+                    // Get offset and switch it to be defined in the same coordinate
+                    // system as the shape.
+                    Offset dis = diff.getOffset();
+                    double p = -dis.p().toArcsecs().getMagnitude();
+                    double q = -dis.q().toArcsecs().getMagnitude();
+                    return validArea.contains(p, q) ? GuideStarValidation.VALID : GuideStarValidation.INVALID;
+                }))
+                .getOrElse(GuideStarValidation.UNDEFINED);
         }
     }
 

@@ -404,7 +404,7 @@ public final class Obs implements Serializable, Comparable<Obs> {
     }
 
     public String getTargetName() {
-        return (targetEnvironment != null ? targetEnvironment.getBase().getTarget().getName() : "");
+        return (targetEnvironment != null ? targetEnvironment.getBase().getName() : "");
     }
 
     public String getWavefrontSensors() {

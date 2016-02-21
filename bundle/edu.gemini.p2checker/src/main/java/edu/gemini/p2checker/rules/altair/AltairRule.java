@@ -20,6 +20,7 @@ import edu.gemini.spModel.gemini.altair.AltairAowfsGuider;
 import edu.gemini.spModel.gemini.altair.AltairParams;
 import edu.gemini.spModel.gemini.altair.InstAltair;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
+import edu.gemini.spModel.obs.SchedulingBlock;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.target.SPTarget;
@@ -174,7 +175,7 @@ public final class AltairRule implements IRule {
                     boolean isPwfs  = (altair.getMode() == AltairParams.Mode.LGS_P1);
                     boolean isAowfs = (altair.getMode() == AltairParams.Mode.LGS);
                     if (altair.getGuideStarType() == AltairParams.GuideStarType.NGS) {
-                        final boolean offAxis = altairOffAxisGuiding(target.getTargetEnvironment());
+                        final boolean offAxis = altairOffAxisGuiding(target.getTargetEnvironment(), elements.getSchedulingBlock().map(SchedulingBlock::start));
                         if (offAxis && altair.getFieldLens() == AltairParams.FieldLens.OUT) {
                             //Altair NGS without Field Lens (Warning: The Altair field lens is recommended for off-axis targets.)
                             problems.addWarning(PREFIX + "NO_FIELD_LENS", NO_FIELD_LENS, aoNode);
@@ -284,13 +285,13 @@ public final class AltairRule implements IRule {
     }
 
     // Check if the primary guide target for Altair is off-axis (i.e. has different coordinates from base target).
-    private static boolean altairOffAxisGuiding(final TargetEnvironment targets) {
+    private static boolean altairOffAxisGuiding(final TargetEnvironment targets, final Option<Long> when) {
         final Option<GuideProbeTargets> altairTargets = targets.getPrimaryGuideProbeTargets(AltairAowfsGuider.instance);
         if (altairTargets.isDefined()) {
             final Option<SPTarget> primaryAltairTarget = altairTargets.getValue().getPrimary();
             if (primaryAltairTarget.isDefined()) {
-                final Coordinates science = targets.getBase().getTarget().getSkycalcCoordinates();
-                final Coordinates altair  = primaryAltairTarget.getValue().getTarget().getSkycalcCoordinates();
+                final Option<Coordinates> science = targets.getBase().getSkycalcCoordinates(when);
+                final Option<Coordinates> altair  = primaryAltairTarget.getValue().getSkycalcCoordinates(when);
                 return !science.equals(altair);
             }
         }

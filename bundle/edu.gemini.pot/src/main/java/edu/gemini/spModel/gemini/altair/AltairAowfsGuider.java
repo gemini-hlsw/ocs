@@ -7,6 +7,7 @@ import edu.gemini.skycalc.Offset;
 import edu.gemini.spModel.data.AbstractDataObject;
 import edu.gemini.spModel.gemini.nifs.InstNIFS;
 import edu.gemini.spModel.guide.*;
+import edu.gemini.spModel.obs.SchedulingBlock;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.target.SPTarget;
 
@@ -101,7 +102,9 @@ public enum AltairAowfsGuider implements OffsetValidatingGuideProbe, Validatable
     }
 
     public Option<BoundaryPosition> checkBoundaries(SPTarget guideStar, ObsContext ctx) {
-        return checkBoundaries(guideStar.getTarget().getSkycalcCoordinates(), ctx);
+        return guideStar
+            .getSkycalcCoordinates(ctx.getSchedulingBlock().map(SchedulingBlock::start))
+            .flatMap(coords -> checkBoundaries(coords, ctx));
     }
 
     public Option<BoundaryPosition> checkBoundaries(final Coordinates coords, final ObsContext ctx) {
