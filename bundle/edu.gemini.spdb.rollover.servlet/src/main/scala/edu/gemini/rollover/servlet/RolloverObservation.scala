@@ -49,7 +49,7 @@ object RolloverObservation {
       dataObj    <- Option(targetComp.getDataObject.asInstanceOf[TargetObsComp])
       targetEnv  <- Option(dataObj.getTargetEnvironment)
       science    <- Option(targetEnv.getBase)
-      name       <- Option(science.getTarget.getName)
+      name       <- Option(science.getName)
     } yield {
 
       // Amazingly this is easier in Java
@@ -62,8 +62,8 @@ object RolloverObservation {
 
       // Coordinates may or may not be known
       val coords = for {
-        ra  <- science.getTarget.getRaDegrees(when).asScalaOpt
-        dec <- science.getTarget.getDecDegrees(when).asScalaOpt
+        ra  <- science.getRaDegrees(when).asScalaOpt
+        dec <- science.getDecDegrees(when).asScalaOpt
       } yield Coords(new Angle(ra, Angle.Unit.DEGREES), new Angle(dec, Angle.Unit.DEGREES))
 
       RolloverTarget(name, coords)

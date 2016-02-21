@@ -39,11 +39,11 @@ public final class TargetGroupConfig extends ParamSet {
 
         addAttribute(TYPE, TYPE_VALUE);
 
-        primaryTarget.map(t -> t.getTarget().getName())
+        primaryTarget.map(t -> t.getName())
                 .filter(n -> !"".equals(n))
                 .foreach(n -> putParameter(TccNames.PRIMARY, n));
 
-        final List<String> targetNames = targets.toList().stream().map(t -> t.getTarget().getName()).collect(Collectors.toList());
+        final List<String> targetNames = targets.toList().stream().map(t -> t.getName()).collect(Collectors.toList());
         putParameter(TccNames.TARGETS, targetNames);
     }
 }

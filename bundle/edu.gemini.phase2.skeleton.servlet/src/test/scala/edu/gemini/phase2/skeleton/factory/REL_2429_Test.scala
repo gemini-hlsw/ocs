@@ -21,8 +21,8 @@ class REL_2429_Test extends TemplateSpec("GRACES_BP.xml") with SpecificationLike
   object Bucket {
     def all = List(A, B)
     def fromTarget(t: SPTarget): Option[Bucket] =
-      (t.getTarget.getMagnitude(Band.R).asScalaOpt orElse
-       t.getTarget.getMagnitude(Band.V).asScalaOpt).map(_.getBrightness).map {
+      (t.getMagnitude(Band.R).asScalaOpt orElse
+       t.getMagnitude(Band.V).asScalaOpt).map(_.getBrightness).map {
         m => if (m > 10) A else B
       }
   }

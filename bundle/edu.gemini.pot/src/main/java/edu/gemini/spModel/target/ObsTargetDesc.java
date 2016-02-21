@@ -60,15 +60,14 @@ public class ObsTargetDesc extends TargetDesc {
         if (targetEnv == null) return null;
 
         SPTarget basePos = targetEnv.getBase();
-        ITarget target = basePos.getTarget();
 
         Function<Option<Long>, Option<WorldCoords>> pos = op ->
-            target.getRaDegrees(op).flatMap(x ->
-            target.getDecDegrees(op).map(y ->
+            basePos.getRaDegrees(op).flatMap(x ->
+            basePos.getDecDegrees(op).map(y ->
                 new WorldCoords(x, y, 2000.)
             ));
 
-                 String targetName = basePos.getTarget().getName();
+                 String targetName = basePos.getName();
 
         String obsId = "";
         SPObservationID spObsId = obs.getObservationID();

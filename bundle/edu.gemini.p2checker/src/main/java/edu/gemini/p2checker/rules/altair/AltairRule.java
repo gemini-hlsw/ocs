@@ -268,7 +268,7 @@ public final class AltairRule implements IRule {
             Magnitude.Band[] bands = new Magnitude.Band[]{Magnitude.Band.R, Magnitude.Band.V};
             for (SPTarget spTarget : guideGroup.getTargets()) {
                 for (Magnitude.Band band : bands) {
-                    Magnitude m = spTarget.getTarget().getMagnitude(band).getOrNull();
+                    Magnitude m = spTarget.getMagnitude(band).getOrNull();
                     if (m != null) {
                         double b = m.getBrightness();
                         if (minMag == null || b < minMag) minMag = b;

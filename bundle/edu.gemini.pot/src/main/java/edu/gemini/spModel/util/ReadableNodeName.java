@@ -23,7 +23,7 @@ public final class ReadableNodeName {
 
         private String formatTarget(ISPObsComponent oc) {
             final TargetObsComp toc = (TargetObsComp) oc.getDataObject();
-            return String.format("Target Environment '%s'", toc.getBase().getTarget().getName());
+            return String.format("Target Environment '%s'", toc.getBase().getName());
         }
 
         private String formatInstrument(ISPObsComponent oc) {
@@ -116,7 +116,7 @@ public final class ReadableNodeName {
             final SPSiteQuality c = tp.getSiteQuality();
             final TimeValue     v = tp.getTime();
             if ((t != null) && (c != null) && (v != null)) {
-                final String ts = t.getTarget().getName();
+                final String ts = t.getName();
                 final String cs = c.conditions().toString();
                 final String vs = v.toString(2);
                 if (ts != null) {

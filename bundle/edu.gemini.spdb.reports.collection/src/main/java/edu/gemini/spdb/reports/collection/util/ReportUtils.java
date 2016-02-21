@@ -417,13 +417,10 @@ public class ReportUtils {
         if (target == null) {
             return None.instance();
         }
-        if (!(target.getTarget() instanceof HmsDegTarget)) {
-            return None.instance();
-        }
 
         return
-            target.getTarget().getRaDegrees(when).flatMap(r ->
-            target.getTarget().getDecDegrees(when).flatMap(d ->
+            target.getRaDegrees(when).flatMap(r ->
+            target.getDecDegrees(when).flatMap(d ->
                 (r == 0.0 && d == 0.0) ?  None.instance() : new Some<>(((int) Math.round(r / 15.0)) % 24)
             ));
     }

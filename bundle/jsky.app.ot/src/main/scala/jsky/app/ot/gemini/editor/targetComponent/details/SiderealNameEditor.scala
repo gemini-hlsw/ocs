@@ -79,12 +79,12 @@ final class SiderealNameEditor(mags: MagnitudeEditor) extends TelescopePosEditor
   def edit(ctx: GOption[ObsContext], target: SPTarget, node: ISPNode): Unit = {
     this.spt = target
     nonreentrant {
-      name.setText(spt.getTarget.getName)
+      name.setText(spt.getName)
     }
   }
 
   def processResult(target: Option[SiderealTarget]): Unit = Swing.onEDT {
-    val t = spt.getTarget.asInstanceOf[HmsDegTarget]
+    val t = spt.getHmsDegTarget.get
 
     target.foreach { i =>
       i.properMotion.foreach { pm =>

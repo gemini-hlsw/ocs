@@ -27,9 +27,9 @@ class PlutoDemotionTest extends MigrationTest {
 
       case sp: SPTarget =>
 
-        sp.getTarget match {
+        sp.getConicTarget match {
 
-          case ct: ConicTarget => // we know system is correct
+          case Some(ct) => // we know system is correct
 
             // These are preserved from the fixture
             Assert.assertEquals("Name", "Pluto", ct.getName)
@@ -48,7 +48,7 @@ class PlutoDemotionTest extends MigrationTest {
             Assert.assertEquals("Perihelion", 114.2248220688449, ct.getPerihelion.getValue, 0.00001)
             Assert.assertEquals("Epoch of Perihelion", 2447885.60548777, ct.getEpochOfPeri.getValue, 0.00001)
 
-          case t => Assert.fail("Expected ConicTarget, found " + t)
+          case None => Assert.fail("Expected ConicTarget, found " + sp.getTarget)
 
         }
     }

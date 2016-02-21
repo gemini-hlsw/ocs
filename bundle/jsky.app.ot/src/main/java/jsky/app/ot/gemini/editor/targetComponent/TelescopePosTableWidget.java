@@ -61,13 +61,13 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
 
             RA("RA") {
                 public String getValue(final Row row) {
-                    return row.target().flatMap(t -> t.getTarget().getRaString(row.when())).getOrElse("");
+                    return row.target().flatMap(t -> t.getRaString(row.when())).getOrElse("");
                 }
             },
 
             DEC("Dec") {
                 public String getValue(final Row row) {
-                    return row.target().flatMap(t -> t.getTarget().getDecString(row.when())).getOrElse("");
+                    return row.target().flatMap(t -> t.getDecString(row.when())).getOrElse("");
                 }
             },
 
@@ -127,7 +127,7 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
             @Override public Option<Long> when()        { return when; }
 
             public Option<Magnitude> getMagnitude(final Magnitude.Band band) {
-                return target.flatMap(t -> t.getTarget().getMagnitude(band));
+                return target.flatMap(t -> t.getMagnitude(band));
             }
 
             @Override public String formatMagnitude(final Magnitude.Band band) {
@@ -137,7 +137,7 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
 
         static final class BaseTargetRow extends AbstractRow {
             BaseTargetRow(final SPTarget target, final Option<Long> when) {
-                super(true, TargetEnvironment.BASE_NAME, target.getTarget().getName(), new Some<>(target), when);
+                super(true, TargetEnvironment.BASE_NAME, target.getName(), new Some<>(target), when);
             }
         }
 
@@ -146,7 +146,7 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
 
             NonBaseTargetRow(final boolean enabled, final String tag, final SPTarget target,
                              final Option<Coordinates> baseCoords, final Option<Long> when) {
-                super(enabled, tag, target.getTarget().getName(), new Some<>(target), when);
+                super(enabled, tag, target.getName(), new Some<>(target), when);
 
                 final Option<Coordinates> coords = getCoordinates(target, when);
                 distance = baseCoords.flatMap(bc ->
@@ -415,9 +415,8 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
 
     // Return the world coordinates for the given target
     private static Option<Coordinates> getCoordinates(final SPTarget tp, final Option<Long> when) {
-        final ITarget target = tp.getTarget();
-        return target.getRaDegrees(when).flatMap(ra ->
-                target.getDecDegrees(when).flatMap(dec ->
+        return tp.getRaDegrees(when).flatMap(ra ->
+                tp.getDecDegrees(when).flatMap(dec ->
                     ImOption.apply(Coordinates.fromDegrees(ra, dec).getOrElse(null))
                 )
         );

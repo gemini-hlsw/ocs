@@ -75,7 +75,7 @@ final class SiderealDetailEditor extends TargetDetailEditor(ITarget.Tag.SIDEREAL
     val formatter: RedshiftRepresentations => NumberFormat = (v) => v.formatter
   }
 
-  val props = NumericPropertySheet[HmsDegTarget](Some("Motion"), _.getTarget.asInstanceOf[HmsDegTarget],
+  val props = NumericPropertySheet[HmsDegTarget](Some("Motion"), _.getHmsDegTarget.get,
     Prop("µ RA",     "mas/year", _.getPM1),
     Prop("µ Dec",    "mas/year", _.getPM2),
     Prop("Epoch",    "years",    _.getEpoch.getValue,    (t, d) => t.setEpoch(new Epoch(d, Units.YEARS))),

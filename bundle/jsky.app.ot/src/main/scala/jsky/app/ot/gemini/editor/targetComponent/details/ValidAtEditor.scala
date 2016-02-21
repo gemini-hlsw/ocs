@@ -108,7 +108,7 @@ abstract class ValidAtEditor[A <: ITarget](empty: A) extends TelescopePosEditor 
     spt = target
     node = node0
     nonreentrant {
-      val nst = spt.getTarget.asInstanceOf[NonSiderealTarget]
+      val nst = spt.getNonSiderealTarget.get
       val d   = Option(nst.getDateForPosition) | new java.util.Date
       calendar.setDate(d)
       timeConfig.setTime(d)

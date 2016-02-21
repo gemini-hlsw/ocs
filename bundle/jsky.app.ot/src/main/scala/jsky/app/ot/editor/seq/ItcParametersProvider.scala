@@ -50,13 +50,13 @@ object ItcParametersProvider {
     def spatialProfile: String \/ SpatialProfile =
       for {
         tEnv <- targetEnvironment
-        sp   <- tEnv.getBase.getTarget.getSpatialProfile.fold("Spatial profile not available".left[SpatialProfile])(_.right)
+        sp   <- tEnv.getBase.getSpatialProfile.fold("Spatial profile not available".left[SpatialProfile])(_.right)
       } yield sp
 
     def spectralDistribution: String \/ SpectralDistribution =
       for {
         tEnv <- targetEnvironment
-        sd   <- tEnv.getBase.getTarget.getSpectralDistribution.fold("Spectral distribution not available".left[SpectralDistribution])(_.right)
+        sd   <- tEnv.getBase.getSpectralDistribution.fold("Spectral distribution not available".left[SpectralDistribution])(_.right)
       } yield sd
 
     def instrumentPort: String \/ IssPort =
@@ -68,18 +68,11 @@ object ItcParametersProvider {
     def redshift: String \/ Redshift =
       for {
         tEnv <- targetEnvironment
-      } yield {
-        tEnv.getBase.getTarget match {
-          case t: HmsDegTarget  => t.getRedshift // get z-shift for this target
-          case _                => Redshift(0.0) // non-sidereal targets are assumed to have z-shift 0
-        }
-      }
+      } yield tEnv.getBase.getHmsDegTarget.fold(Redshift(0.0))(_.getRedshift)
 
     def sequence: ConfigSequence = Option(owner.getContextObservation).fold(new ConfigSequence) {
       ConfigBridge.extractSequence(_, null, ConfigValMapInstances.IDENTITY_MAP, true)
     }
-
-
 
   }
 }

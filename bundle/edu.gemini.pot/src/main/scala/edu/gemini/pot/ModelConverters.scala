@@ -186,7 +186,7 @@ object ModelConverters {
 
   implicit class SPTarget2SiderealTarget(val sp:SPTarget) extends AnyVal {
     def toNewModel:SiderealTarget = {
-      val name        = sp.getTarget.getName
+      val name        = sp.getName
       val coords      = sp.getTarget.getSkycalcCoordinates
       val mags        = sp.getTarget.getMagnitudes.asScalaList.map(_.toNewModel)
       val ra          = Angle.fromDegrees(coords.getRaDeg)
@@ -194,17 +194,14 @@ object ModelConverters {
       val coordinates = Coordinates(RightAscension.fromAngle(ra), Declination.fromAngle(dec).getOrElse(Declination.zero))
 
       // Only HmsDegTargets have a proper motion, radial velocity, etc
-      val pm          = sp.getTarget match {
-        case t:HmsDegTarget => Some(ProperMotion(RightAscensionAngularVelocity(AngularVelocity(t.getPropMotionRA)), DeclinationAngularVelocity(AngularVelocity(t.getPropMotionDec))))
-        case _              => None
+      val pm = sp.getHmsDegTarget map { t =>
+        ProperMotion(RightAscensionAngularVelocity(AngularVelocity(t.getPropMotionRA)), DeclinationAngularVelocity(AngularVelocity(t.getPropMotionDec)))
       }
-      val px          = sp.getTarget match {
-        case t:HmsDegTarget => Some(Parallax(t.getParallax.mas()))
-        case _              => None
+      val px = sp.getHmsDegTarget map { t =>
+        Parallax(t.getParallax.mas())
       }
-      val z           = sp.getTarget match {
-        case t:HmsDegTarget => Some(t.getRedshift)
-        case _              => None
+      val z = sp.getHmsDegTarget map { t =>
+        t.getRedshift
       }
       SiderealTarget( // full ctor here, so we're forced to handle changes
         name                 = name,
@@ -213,8 +210,8 @@ object ModelConverters {
         redshift             = z,
         parallax             = px,
         magnitudes           = mags,
-        spectralDistribution = sp.getTarget.getSpectralDistribution,
-        spatialProfile       = sp.getTarget.getSpatialProfile
+        spectralDistribution = sp.getSpectralDistribution,
+        spatialProfile       = sp.getSpatialProfile
       )
     }
   }

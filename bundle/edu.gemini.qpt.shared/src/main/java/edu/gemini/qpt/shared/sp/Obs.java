@@ -575,13 +575,13 @@ public final class Obs implements Serializable, Comparable<Obs> {
         return obsNumber;
     }
 
-    public double getRa() {
-        return (targetEnvironment != null ? targetEnvironment.getBase().getTarget().getRaDegrees(schedulingBlock.map(SchedulingBlock::start)).getOrElse(0.0) : 0.0);
-    }
+	public double getRa() {
+        return (targetEnvironment != null ? targetEnvironment.getBase().getRaDegrees(schedulingBlock.map(SchedulingBlock::start)).getOrElse(0.0) : 0.0);
+	}
 
-    public double getDec() {
-        return (targetEnvironment != null ? targetEnvironment.getBase().getTarget().getDecDegrees(schedulingBlock.map(SchedulingBlock::start)).getOrElse(0.0) : 0.0);
-    }
+	public double getDec() {
+        return (targetEnvironment != null ? targetEnvironment.getBase().getDecDegrees(schedulingBlock.map(SchedulingBlock::start)).getOrElse(0.0) : 0.0);
+	}
 
     public Conds getConditions() {
         return conditions;
@@ -771,7 +771,8 @@ public final class Obs implements Serializable, Comparable<Obs> {
      * Call this only if you know there is a target environment.
      */
     public boolean isSidereal() {
-        return !isNonSidereal();
+        assert targetEnvironment != null;
+        return targetEnvironment.getBase().isSidereal();
     }
 
     /**
@@ -780,7 +781,7 @@ public final class Obs implements Serializable, Comparable<Obs> {
      */
     public boolean isNonSidereal() {
         assert targetEnvironment != null;
-        return targetEnvironment.getBase().getTarget() instanceof NonSiderealTarget;
+        return targetEnvironment.getBase().isNonSidereal();
     }
 
     public Object getConstraintsString() {

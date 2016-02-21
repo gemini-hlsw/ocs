@@ -165,7 +165,7 @@ class CandidateAsterismsTreeTableModel extends AbstractTreeTableModel {
         String getId() {
             if (_guideProbeTargets != null) {
                 if (_guideProbeTargets.getPrimary().isDefined()) {
-                    return _guideProbeTargets.getPrimary().getValue().getTarget().getName();
+                    return _guideProbeTargets.getPrimary().getValue().getName();
                 }
             } else if (_gemsGuideStars != null) { // top level displays Strehl values
                 GemsStrehl strehl = _gemsGuideStars.strehl();
@@ -200,7 +200,7 @@ class CandidateAsterismsTreeTableModel extends AbstractTreeTableModel {
 
         String getRA() {
             if (_guideProbeTargets != null) {
-                return getTarget().getTarget().getRaString(_when).getOrNull();
+                return getTarget().getRaString(_when).getOrNull();
             } else if (_gemsGuideStars != null) { // top level displays Strehl values
                 GemsStrehl strehl = _gemsGuideStars.strehl();
                 if (strehl != null) {
@@ -212,7 +212,7 @@ class CandidateAsterismsTreeTableModel extends AbstractTreeTableModel {
 
         Object getDec() {
             if (_guideProbeTargets != null) {
-                return getTarget().getTarget().getDecString(_when).getOrNull();
+                return getTarget().getDecString(_when).getOrNull();
             }
             return null;
         }

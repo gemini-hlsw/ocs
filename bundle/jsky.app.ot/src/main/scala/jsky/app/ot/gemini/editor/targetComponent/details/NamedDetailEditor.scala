@@ -17,7 +17,7 @@ import scalaz._, Scalaz._
 final class NamedDetailEditor extends TargetDetailEditor(Tag.NAMED) with ReentrancyHack {
   private[this] var spt = new SPTarget // never null
 
-  private def nt: NamedTarget = spt.getTarget.asInstanceOf[NamedTarget]
+  private def nt: NamedTarget = spt.getNamedTarget.get
 
   // Editors
 
@@ -210,8 +210,8 @@ final class NamedDetailEditor extends TargetDetailEditor(Tag.NAMED) with Reentra
 
     this.spt = spTarget
     nonreentrant {
-      solarObject.setValue(spt.getTarget.asInstanceOf[NamedTarget].getSolarObject)
-      name.setValue(spt.getTarget.getName)
+      solarObject.setValue(spt.getNamedTarget.map(_.getSolarObject).get)
+      name.setValue(spt.getName)
     }
 
   }

@@ -443,7 +443,7 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor {
             final SPTarget target = targetEnv.getBase();
             if (target == null)
                 return null;
-            return target.getTarget().getName();
+            return target.getName();
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -526,11 +526,10 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor {
             return false;
         final TargetObsComp targetEnv = (TargetObsComp) targetObsComp.getDataObject();
         final SPTarget tp = targetEnv.getBase();
-        final ITarget target = tp.getTarget();
 
         final Option<Long> when = ((SPObservation) o.getDataObject()).getSchedulingBlock().map(SchedulingBlock::start);
-        final Option<Double> raOp  = target.getRaDegrees(when).map(x -> x / 15.);
-        final Option<Double> decOp = target.getDecDegrees(when);
+        final Option<Double> raOp  = tp.getRaDegrees(when).map(x -> x / 15.);
+        final Option<Double> decOp = tp.getDecDegrees(when);
 
         final double ra0  = (minRA != null)  ? new HMS(minRA, true).getVal() :   0.;
         final double ra1  = (maxRA != null)  ? new HMS(maxRA, true).getVal() :  24.;
@@ -623,10 +622,9 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor {
         if (targetObsComp != null) {
             final TargetObsComp targetEnv = (TargetObsComp) targetObsComp.getDataObject();
             final SPTarget tp = targetEnv.getBase();
-            final ITarget target = tp.getTarget();
             final Option<Long> when = obs.getSchedulingBlock().map(SchedulingBlock::start);
-            ra = target.getRaDegrees(when).getOrNull();
-            dec = target.getDecDegrees(when).getOrNull();
+            ra = tp.getRaDegrees(when).getOrNull();
+            dec = tp.getDecDegrees(when).getOrNull();
         }
 
         // Figure out the planned time for all observations.

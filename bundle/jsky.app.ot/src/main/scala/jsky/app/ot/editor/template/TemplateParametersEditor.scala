@@ -234,13 +234,13 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
     }
 
     def targetType(t: SPTarget): TargetType =
-      if (t.getTarget.isInstanceOf[NonSiderealTarget]) NonSidereal else Sidereal
+      t.getHmsDegTarget.map(_ => Sidereal).getOrElse(NonSidereal)
 
     object CoordinatesPanel extends ColumnPanel {
       val nameField = new BoundTextField[String](10)(
         read = identity,
         show = identity,
-        get  = _.getTarget.getTarget.getName,
+        get  = _.getTarget.getName,
         set  = setTarget(_.setName(_))
       )
 
@@ -253,7 +253,7 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
             case NonSidereal => new ConicTarget()
           }
           target.setTarget(coords)
-          target.setName(target.getTarget.getName)
+          target.setName(target.getName)
           target.setMagnitudes(DefaultImList.create[Magnitude]())
         })}
       )
@@ -264,7 +264,7 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
       val raField = new BoundTextField[Double](10)(
         read = s => hms.parse(s),
         show = hms.format,
-        get  = _.getTarget.getTarget.getRaHours(JNoneLong).getOrElse(0.0),
+        get  = _.getTarget.getRaHours(JNoneLong).getOrElse(0.0),
         set  = setTarget((a, b) => a.setRaHours(b))
       )
 
@@ -272,7 +272,7 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
       val decField = new BoundTextField[Double](10)(
         read = s => dms.parse(s),
         show = dms.format,
-        get  = _.getTarget.getTarget.getDecDegrees(JNoneLong).getOrElse(0.0),
+        get  = _.getTarget.getDecDegrees(JNoneLong).getOrElse(0.0),
         set  = setTarget((a, b) => a.setDecDegrees(b))
       )
 
@@ -280,12 +280,12 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
         new BoundTextField[Double](10)(
           read = _.toDouble,
           show = d => f"$d%.3f",
-          get  = tp => Option(tp.getTarget.getTarget).collect { case t: HmsDegTarget => getPM(t) } .getOrElse(0.0),
+          get  = tp => tp.getTarget.getHmsDegTarget.fold(0.0)(getPM),
           set  = (tp, pm) => {
             val newTarget = tp.getTarget
-            newTarget.getTarget match {
-              case t: HmsDegTarget => setPM(t, pm); newTarget.notifyOfGenericUpdate()
-              case _               => () // do nothing
+            newTarget.getHmsDegTarget.foreach {t =>
+              setPM(t, pm)
+              newTarget.notifyOfGenericUpdate()
             }
             tp.copy(newTarget)
           }
@@ -314,14 +314,14 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
         lazy val zero = new Magnitude(band, 0.0, band.defaultSystem)
 
         def mag(tp: TemplateParameters): Option[Magnitude] =
-          tp.getTarget.getTarget.getMagnitude(band).asScalaOpt
+          tp.getTarget.getMagnitude(band).asScalaOpt
 
         def magOrZero(tp: TemplateParameters): Magnitude =
           mag(tp).getOrElse(zero)
 
         def setMag[A](f: (Magnitude, A) => Magnitude): (TemplateParameters, A) => TemplateParameters =
           setTarget[A]{ (t, a) =>
-            t.putMagnitude(f(t.getTarget.getMagnitude(band).getOrElse(zero), a))
+            t.putMagnitude(f(t.getMagnitude(band).getOrElse(zero), a))
           }
 
         val magCheck = new BoundCheckbox(

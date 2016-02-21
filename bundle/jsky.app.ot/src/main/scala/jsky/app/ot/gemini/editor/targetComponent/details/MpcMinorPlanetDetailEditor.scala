@@ -7,7 +7,7 @@ import edu.gemini.spModel.target.system.{ConicTarget, ITarget}
 final class MpcMinorPlanetDetailEditor extends ConicDetailEditor(ITarget.Tag.MPC_MINOR_PLANET) {
   import NumericPropertySheet.Prop
 
-  lazy val props = NumericPropertySheet[ConicTarget](Some("Orbital Elements"), _.getTarget.asInstanceOf[ConicTarget],
+  lazy val props = NumericPropertySheet[ConicTarget](Some("Orbital Elements"), _.getConicTarget.get,
     Prop("EPOCH", "Orbital Element Epoch (JD)",        _.getEpoch.getValue, (t,d) => t.setEpoch(new Epoch(d, Units.JD))),
     Prop("IN",    "Inclination (deg)",                 _.getInclination),
     Prop("OM",    "Longitude of Ascending Node (deg)", _.getANode),
