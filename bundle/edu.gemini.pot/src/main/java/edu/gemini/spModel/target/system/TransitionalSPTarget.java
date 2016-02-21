@@ -6,7 +6,6 @@ import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.core.SpatialProfile;
 import edu.gemini.spModel.core.SpectralDistribution;
 import edu.gemini.spModel.target.WatchablePos;
-import scala.None$;
 
 // transitional; will go away
 public abstract class TransitionalSPTarget extends WatchablePos {
