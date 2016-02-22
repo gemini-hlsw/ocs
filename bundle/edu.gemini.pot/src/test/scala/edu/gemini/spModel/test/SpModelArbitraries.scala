@@ -10,6 +10,7 @@ import edu.gemini.spModel.core.AngleSyntax._
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
 import edu.gemini.spModel.gemini.gmos.GmosCommonType.FPUnitMode._
 import edu.gemini.spModel.gemini.gmos.{GmosCommonType, GmosSouthType, InstGmosSouth, GmosNorthType, InstGmosNorth}
+import edu.gemini.spModel.gemini.gsaoi.Gsaoi
 import edu.gemini.spModel.gemini.niri.{InstNIRI, Niri}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.{CloudCover, Conditions, ImageQuality, SkyBackground, WaterVapor}
 import edu.gemini.spModel.obs.context.ObsContext
@@ -45,6 +46,7 @@ trait SpModelArbitraries extends Arbitraries with edu.gemini.spModel.target.env.
         fpu       <- arbitrary[Flamingos2.FPUnit]
         disperser <- Gen.oneOf(Flamingos2.Disperser.values)
         lyot      <- arbitrary[Flamingos2.LyotWheel]
+        port      <- arbitrary[IssPort]
         posAngle  <- arbitrary[Angle]
         pac       <- arbitrary[PosAngleConstraint]
       } yield
@@ -53,6 +55,7 @@ trait SpModelArbitraries extends Arbitraries with edu.gemini.spModel.target.env.
           (_.setFpu(fpu))                      <|
           (_.setDisperser(disperser))          <|
           (_.setLyotWheel(lyot))               <|
+          (_.setIssPort(port))                 <|
           (_.setPosAngleConstraint(pac))       <|
           (_.setPosAngle(posAngle.toDegrees))
 
@@ -70,7 +73,7 @@ trait SpModelArbitraries extends Arbitraries with edu.gemini.spModel.target.env.
         filter   <- Gen.oneOf(GmosNorthType.FilterNorth.values)
         fpu      <- arbitrary[GmosNorthType.FPUnitNorth]
         mode     <- Gen.frequency((1, CUSTOM_MASK), (9, BUILTIN))
-        port     <- Gen.oneOf(IssPort.values)
+        port     <- arbitrary[IssPort]
         posAngle <- arbitrary[Angle]
         pac      <- arbitrary[PosAngleConstraint]
       } yield
@@ -92,7 +95,7 @@ trait SpModelArbitraries extends Arbitraries with edu.gemini.spModel.target.env.
         filter   <- Gen.oneOf(GmosSouthType.FilterSouth.values)
         fpu      <- arbitrary[GmosSouthType.FPUnitSouth]
         mode     <- Gen.frequency((1, CUSTOM_MASK), (9, BUILTIN))
-        port     <- Gen.oneOf(IssPort.values)
+        port     <- arbitrary[IssPort]
         posAngle <- arbitrary[Angle]
         pac      <- arbitrary[PosAngleConstraint]
       } yield
@@ -105,13 +108,29 @@ trait SpModelArbitraries extends Arbitraries with edu.gemini.spModel.target.env.
           (_.setPosAngle(posAngle.toDegrees))
     }
 
+  implicit val arbGsaoi: Arbitrary[Gsaoi] =
+    Arbitrary {
+      for {
+        port     <- arbitrary[IssPort]
+        posAngle <- arbitrary[Angle]
+      } yield
+        new Gsaoi                             <|
+          (_.setIssPort(port))                <|
+          (_.setPosAngle(posAngle.toDegrees))
+    }
+
+  implicit val arbNiriCamera: Arbitrary[Niri.Camera] =
+    Arbitrary { Gen.oneOf(Niri.Camera.values) }
+
   implicit val arbNiri: Arbitrary[InstNIRI] =
     Arbitrary {
       for {
+        camera    <- arbitrary[Niri.Camera]
         disperser <- Gen.oneOf(Niri.Disperser.values)
         posAngle  <- arbitrary[Angle]
       } yield
         new InstNIRI                        <|
+          (_.setCamera(camera))             <|
           (_.setDisperser(disperser))       <|
           (_.setPosAngle(posAngle.toDegrees))
     }
@@ -122,6 +141,7 @@ trait SpModelArbitraries extends Arbitraries with edu.gemini.spModel.target.env.
         arbitrary[Flamingos2],
         arbitrary[InstGmosNorth],
         arbitrary[InstGmosSouth],
+        arbitrary[Gsaoi],
         arbitrary[InstNIRI]
       )
     }

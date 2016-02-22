@@ -90,20 +90,44 @@ object AgsHash {
       iss.## +=: buf
     }
 
-    // Instrument-specific features.  These have an impact on the science area
-    // and probe arm position and hence, vignetting.  Vignetting is a factor in
-    // AGS calculations.
+    import AgsStrategyKey._
+
+    // Vignetting calculation. Instrument-specific features that have an impact
+    // on the science area and probe arm position and hence, vignetting.
     Option(ctx.getInstrument).foreach {
-      case i: Flamingos2 if strategyKey.contains(AgsStrategyKey.Flamingos2OiwfsKey)   =>
+      case i: Flamingos2 if strategyKey.contains(Flamingos2OiwfsKey)   =>
         i.getFpu.## +=: i.getLyotWheel.getPlateScale.## +=: buf
 
-      case i: InstGmosNorth if strategyKey.contains(AgsStrategyKey.GmosNorthOiwfsKey) =>
+      case i: InstGmosNorth if strategyKey.contains(GmosNorthOiwfsKey) =>
         i.getFPUnit.## +=: i.getFPUnitMode.## +=: buf
 
-      case i: InstGmosSouth if strategyKey.contains(AgsStrategyKey.GmosSouthOiwfsKey) =>
+      case i: InstGmosSouth if strategyKey.contains(GmosSouthOiwfsKey) =>
         i.getFPUnit.## +=: i.getFPUnitMode.## +=: buf
 
-      case _                                                                          =>
+      case _                                                           =>
+    }
+
+    // Strategy-specific differences.  In some instruments PWFS vignetting
+    // clearance changes based on instrument-specific features such as which
+    // camera is in use.
+    strategyKey.foreach {
+      case Pwfs1NorthKey | Pwfs1SouthKey =>
+        Option(ctx.getInstrument).foreach {
+          _.pwfs1VignettingClearance.getMagnitude.## +=: buf
+        }
+
+      case Pwfs2NorthKey | Pwfs2SouthKey =>
+        Option(ctx.getInstrument).foreach {
+          _.pwfs2VignettingClearance.getMagnitude.## +=: buf
+        }
+
+      case GemsKey                       =>
+        // GeMS works differently depending upon whether GSAOI or F2 is in use.
+        Option(ctx.getInstrument).map(_.getPhaseIResourceName).foreach { n =>
+          M3.stringHash(n) +=: buf
+        }
+
+      case _                             =>
     }
 
     M3.orderedHash(buf)

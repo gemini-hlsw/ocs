@@ -1,14 +1,19 @@
 package edu.gemini.ags.api
 
 import edu.gemini.pot.ModelConverters._
+import edu.gemini.shared.util.immutable.{Option => JOption}
 import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.skycalc.{Offset => SkyCalcOffset}
 import edu.gemini.spModel.ags.AgsStrategyKey
-import edu.gemini.spModel.core.{Declination, Angle}
+import edu.gemini.spModel.core.{Site, Declination, Angle}
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
+import edu.gemini.spModel.gemini.gems.Gems
 import edu.gemini.spModel.gemini.gmos.{GmosCommonType, InstGmosSouth, GmosSouthType, GmosNorthType, InstGmosNorth}
+import edu.gemini.spModel.gemini.gsaoi.Gsaoi
+import edu.gemini.spModel.gemini.niri.{InstNIRI, Niri}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.{CloudCover, Conditions, ImageQuality, SkyBackground, WaterVapor}
 import edu.gemini.spModel.obs.context.ObsContext
+import edu.gemini.spModel.obscomp.SPInstObsComp
 import edu.gemini.spModel.telescope.{IssPort, PosAngleConstraint, PosAngleConstraintAware}
 
 import java.time.Instant
@@ -154,7 +159,10 @@ class AgsHashSpec extends Specification with ScalaCheck with edu.gemini.spModel.
         hashSame(ctx0, ctx0.withInstrument(i1))
       }
 
-    val F2Key = Option(AgsStrategyKey.Flamingos2OiwfsKey: AgsStrategyKey).asGeminiOpt
+    def agsKey(k: AgsStrategyKey): JOption[AgsStrategyKey] =
+      Option(k).asGeminiOpt
+
+    val F2Key = agsKey(AgsStrategyKey.Flamingos2OiwfsKey)
 
     "differ if Flamingos2 FPU changes" in
       forAll { (ctx0: ObsContext, f: Flamingos2, fpu2: Flamingos2.FPUnit) =>
@@ -174,7 +182,7 @@ class AgsHashSpec extends Specification with ScalaCheck with edu.gemini.spModel.
         (ly1.getPlateScale == ly2.getPlateScale) == hashSame(ctx1, ctx2)
       }
 
-    val GmosNKey = Option(AgsStrategyKey.GmosNorthOiwfsKey: AgsStrategyKey).asGeminiOpt
+    val GmosNKey = agsKey(AgsStrategyKey.GmosNorthOiwfsKey)
 
     "differ if GMOS North FPU changes" in
       forAll { (ctx0: ObsContext, g: InstGmosNorth, fpu2: GmosNorthType.FPUnitNorth) =>
@@ -194,7 +202,7 @@ class AgsHashSpec extends Specification with ScalaCheck with edu.gemini.spModel.
         (mode1 == mode2) == hashSame(ctx1, ctx2)
       }
 
-    val GmosSKey = Option(AgsStrategyKey.GmosSouthOiwfsKey: AgsStrategyKey).asGeminiOpt
+    val GmosSKey = agsKey(AgsStrategyKey.GmosSouthOiwfsKey)
 
     "differ if GMOS South FPU changes" in
       forAll { (ctx0: ObsContext, g: InstGmosSouth, fpu2: GmosSouthType.FPUnitSouth) =>
@@ -212,6 +220,42 @@ class AgsHashSpec extends Specification with ScalaCheck with edu.gemini.spModel.
         val ctx2  = ctx1.withInstrument(g <| (_.setFPUnitMode(mode2)))
 
         (mode1 == mode2) == hashSame(ctx1, ctx2)
+      }
+
+    def testPwfs(ctx0: ObsContext, n: InstNIRI, camera2: Niri.Camera, k: AgsStrategyKey, f: (SPInstObsComp) => edu.gemini.skycalc.Angle): Boolean = {
+      val ctx1 = ctx0.withInstrument(n).withSite(Option(Site.GN).asGeminiOpt).withAgsStrategyOverride(agsKey(k))
+      val ctx2 = ctx1.withInstrument(n <| (_.setCamera(camera2)))
+
+      def vc(ctx: ObsContext): Double = f(ctx.getInstrument).getMagnitude
+
+      (vc(ctx1) == vc(ctx2)) == hashSame(ctx1, ctx2)
+    }
+
+    "differ if PWFS1 vignetting clearance changes" in
+      forAll { (ctx0: ObsContext, n: InstNIRI, camera2: Niri.Camera) =>
+        testPwfs(ctx0, n, camera2, AgsStrategyKey.Pwfs1NorthKey, _.pwfs1VignettingClearance)
+      }
+
+    "differ if PWFS2 vignetting clearance changes" in
+      forAll { (ctx0: ObsContext, n: InstNIRI, camera2: Niri.Camera) =>
+        testPwfs(ctx0, n, camera2, AgsStrategyKey.Pwfs2NorthKey, _.pwfs2VignettingClearance)
+      }
+
+    val GemsKey = agsKey(AgsStrategyKey.GemsKey)
+
+    "differ between GeMS GSAOI vs Flamingos2" in
+      forAll { (ctx0: ObsContext) =>
+        val f    = new Flamingos2
+        val g    = new Gsaoi
+
+        val ctx1 = ctx0.withSite(Option(Site.GS).asGeminiOpt)
+                       .withAOComponent(new Gems)
+                       .withAgsStrategyOverride(GemsKey)
+                       .withInstrument(f)
+
+        val ctx2 = ctx1.withInstrument(g)
+
+        hashDiffers(ctx1, ctx2)
       }
   }
 }
