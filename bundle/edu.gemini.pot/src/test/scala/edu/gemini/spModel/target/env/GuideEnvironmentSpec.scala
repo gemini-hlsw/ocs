@@ -241,7 +241,7 @@ class GuideEnvironmentSpec extends Specification with ScalaCheck with Arbitrarie
       forAll { (g: GuideEnvironment, grps: List[GuideGroup]) =>
         val init = GuideGroup(AutomaticGroup.Initial)
         val g2   = g.setOptions((init :: grps).asImList)
-        g2.getOptions.asScalaList === (init :: grps.map(g => GuideGroup.Grp.set(g, g.grp.toManualGroup)))
+        g2.getOptions.asScalaList === (init :: grps.map(g => GuideGroup.grp.set(g, g.grp.toManualGroup)))
       }
 
     "keep the primary index the same, if the new options have enough elements to include it" in

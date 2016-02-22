@@ -6,7 +6,6 @@ import edu.gemini.spModel.target.SPTarget
 import scalaz._
 import Scalaz._
 
-import GuideEnv.Manual
 
 /** A pair of an `AutomaticGroup` guide group and, optionally, a non-empty list
   * of manual groups.  The `GuideEnv` maintains the concept of a "primary"
@@ -57,9 +56,9 @@ final case class GuideEnv(auto: AutomaticGroup, manual: Option[OptsList[ManualGr
     * If not `None` is returned.
     */
   def selectPrimaryIndex(i: Int): Option[GuideEnv] =
-    if (i == 0) some(Manual.mod(_.map(_.clearFocus), this))
+    if (i == 0) some(GuideEnv.manual.mod(_.map(_.clearFocus), this))
     else manual.flatMap { _.focusOnIndex(i-1) }.map { opts =>
-      Manual.set(this, some(opts))
+      GuideEnv.manual.set(this, some(opts))
     }
 
   def toList: List[GuideGrp] =
@@ -76,17 +75,17 @@ object GuideEnv {
     */
   val initial: GuideEnv = GuideEnv(AutomaticGroup.Initial, none)
 
-  val Auto: GuideEnv @> AutomaticGroup =
+  val auto: GuideEnv @> AutomaticGroup =
     Lens.lensu((ge,a) => ge.copy(auto = a), _.auto)
 
-  val Manual: GuideEnv @> Option[OptsList[ManualGroup]] =
+  val manual: GuideEnv @> Option[OptsList[ManualGroup]] =
     Lens.lensu((ge,m) => ge.copy(manual = m), _.manual)
 
   import TargetCollection._
 
   implicit val TargetCollectionGuideEnv: TargetCollection[GuideEnv] = new TargetCollection[GuideEnv] {
     def mod(ge: GuideEnv)(fa: AutomaticGroup => AutomaticGroup, fm: ManualGroup => ManualGroup): GuideEnv = {
-      val s: State[GuideEnv, Unit] = (Auto %== fa) *> (Manual %== (_.map(_.map(fm))))
+      val s: State[GuideEnv, Unit] = (auto %== fa) *> (manual %== (_.map(_.map(fm))))
       s.exec(ge)
     }
 

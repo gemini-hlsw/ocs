@@ -28,14 +28,14 @@ final case class GuideEnvironment(guideEnv: GuideEnv) extends TargetContainer {
     toSortedSet(guideEnv.primaryReferencedGuiders)
 
   override def cloneTargets(): GuideEnvironment =
-    Env.mod(_.cloneTargets, this)
+    env.mod(_.cloneTargets, this)
 
   override def containsTarget(target: SPTarget): Boolean =
     guideEnv.containsTarget(target)
 
   /** Removes the target from any manual groups in which it is found. */
   override def removeTarget(target: SPTarget): GuideEnvironment =
-    Env.mod(_.removeTarget(target), this)
+    env.mod(_.removeTarget(target), this)
 
   /** Removes the manual `GuideGroup` at the associated index, if possible,
     * returning a new updated environment. The automatic guide group (index 0)
@@ -45,7 +45,7 @@ final case class GuideEnvironment(guideEnv: GuideEnv) extends TargetContainer {
   def removeGroup(index: Int): GuideEnvironment =
     index match {
       case 0 => this // can't remove the automatic group
-      case i => Manual.mod(_.flatMap { _.deleteAt(i-1) }, this)
+      case i => manual.mod(_.flatMap { _.deleteAt(i-1) }, this)
     }
 
   /** Gets the `GuideGroup` at the given index, if any.  If the index is out
@@ -69,8 +69,8 @@ final case class GuideEnvironment(guideEnv: GuideEnv) extends TargetContainer {
     */
   def setGroup(index: Int, grp: GuideGroup): GuideEnvironment =
     (index, grp.grp) match {
-      case (0, a: AutomaticGroup) => Auto.set(this, a)
-      case (i, m: ManualGroup)    => Manual.mod(_.map(o => o.setAt(i-1, m).getOrElse(o)), this)
+      case (0, a: AutomaticGroup) => auto.set(this, a)
+      case (i, m: ManualGroup)    => manual.mod(_.map(o => o.setAt(i-1, m).getOrElse(o)), this)
       case _                      => this
     }
 
@@ -207,14 +207,14 @@ object GuideEnvironment {
   val ParamSetName = "guideEnv"
   val Initial: GuideEnvironment = GuideEnvironment(GuideEnv.initial)
 
-  val Env: GuideEnvironment @> GuideEnv =
+  val env: GuideEnvironment @> GuideEnv =
     Lens.lensu((a,b) => a.copy(b), _.guideEnv)
 
-  val Auto: GuideEnvironment @> AutomaticGroup =
-    Env >=> GuideEnv.Auto
+  val auto: GuideEnvironment @> AutomaticGroup =
+    env >=> GuideEnv.auto
 
-  val Manual: GuideEnvironment @> Option[OptsList[ManualGroup]] =
-    Env >=> GuideEnv.Manual
+  val manual: GuideEnvironment @> Option[OptsList[ManualGroup]] =
+    env >=> GuideEnv.manual
 
   private def initializeOptions(opts0: List[GuideGroup], primary0: Int): GuideEnvironment = {
     val (opts, primary) =
@@ -239,5 +239,5 @@ object GuideEnvironment {
   implicit val EqualGuideEnvironment: Equal[GuideEnvironment] = Equal.equalBy(_.guideEnv)
 
   implicit val TargetCollectionGuideEnvironment: TargetCollection[GuideEnvironment] =
-    TargetCollection.wrapping(Env)
+    TargetCollection.wrapping(env)
 }

@@ -108,7 +108,7 @@ object AutomaticGroup {
       ManualGroup("", targetMap.map(t => OptsList.focused(t)))
   }
 
-  val TargetMap: Active @> ==>>[GuideProbe, SPTarget] =
+  val targetMap: Active @> ==>>[GuideProbe, SPTarget] =
     Lens.lensu((a,m) => a.copy(targetMap = m), _.targetMap)
 
   implicit val TargetCollectionAutomaticGroup: TargetCollection[AutomaticGroup] = new TargetCollection[AutomaticGroup] {
@@ -142,7 +142,7 @@ object AutomaticGroup {
 
 object GuideGrp {
 
-  val Name: GuideGrp @?> String =
+  val name: GuideGrp @?> String =
     PLens.plensgf({
       case mg: ManualGroup => n => mg.copy(name = n)
     }, {

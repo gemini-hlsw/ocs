@@ -25,14 +25,14 @@ case class GuideGroup(grp: GuideGrp) extends java.lang.Iterable[GuideProbeTarget
    * Gets the name if this is a manual guide group, otherwise None.
    */
   def getName: GemOption[String] =
-    GuideGroup.Name.get(this).asGeminiOpt
+    GuideGroup.name.get(this).asGeminiOpt
 
   /**
    * Sets the name (if defined) and returns the updated group if this is a
    * manual guide group, otherwise returns this group.
    */
   def setName(name: GemOption[String]): GuideGroup =
-    GuideGroup.Name.setOr(this, name.getOrElse(""), this)
+    GuideGroup.name.setOr(this, name.getOrElse(""), this)
 
   /**
    * Sets the name and returns the updated group if this is a manual guide
@@ -75,7 +75,7 @@ case class GuideGroup(grp: GuideGrp) extends java.lang.Iterable[GuideProbeTarget
     gpt(gp).asGeminiOpt
 
   private def mod(f: GuideGrp => GuideGrp): GuideGroup =
-    GuideGroup.Grp.mod(f, this)
+    GuideGroup.grp.mod(f, this)
 
   /** Sets the guide stars associated with a guider according to the given
     * `GuideProbeTargets` and returns the updated `GuideGroup`.  The updates
@@ -266,13 +266,13 @@ object GuideGroup extends ((GuideGrp) => GuideGroup) {
   val AutomaticInitial = GuideGroup(Initial)
 
   /** An empty manual group. */
-  val ManualEmpty           = GuideGroup(ManualGroup("Manual Group", ==>>.empty))
+  val ManualEmpty      = GuideGroup(ManualGroup("Manual Group", ==>>.empty))
 
-  val Grp: GuideGroup @> GuideGrp =
+  val grp: GuideGroup @> GuideGrp =
     Lens.lensu((jGrp, sGrp) => jGrp.copy(grp = sGrp), _.grp)
 
-  val Name: GuideGroup @?> String =
-    Grp.partial >=> GuideGrp.Name
+  val name: GuideGroup @?> String =
+    grp.partial >=> GuideGrp.name
 
   val ParamSetName = "guideGroup"
 
@@ -332,5 +332,5 @@ object GuideGroup extends ((GuideGrp) => GuideGroup) {
   implicit val EqualGuideGroup: Equal[GuideGroup] = Equal.equalBy(_.grp)
 
   implicit val TargetCollectionGuideGroup: TargetCollection[GuideGroup] =
-    TargetCollection.wrapping(Grp)
+    TargetCollection.wrapping(grp)
 }
