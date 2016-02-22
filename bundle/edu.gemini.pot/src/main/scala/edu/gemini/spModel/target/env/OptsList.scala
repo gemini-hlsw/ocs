@@ -105,6 +105,9 @@ object OptsList {
           case -\/(l) => l.traverse(f).map(l => OptsList(l.left))
           case \/-(r) => r.traverse(f).map(r => OptsList(r.right))
         }
+
+      override def map[A, B](fa: OptsList[A])(f: A => B): OptsList[B] =
+        fa.map(f)
     }
 
   /** Creates a singleton `OptsList` focused on the single element. */
