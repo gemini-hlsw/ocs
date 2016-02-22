@@ -161,8 +161,8 @@ public class GeneralRule implements IRule {
 
             if (hasAltairComp && altairSupported) {
                 final ISPObsComponent targetComp = elements.getTargetObsComponentNode().getValue();
-                final GuideGroup guideGroup      = env.getGuideEnvironment().getPrimary().getOrNull();
-                final Set<GuideProbe> guiders    = (guideGroup == null) ? Collections.emptySet() : guideGroup.getReferencedGuiders();
+                final GuideGroup guideGroup      = env.getGuideEnvironment().getPrimary();
+                final Set<GuideProbe> guiders    = guideGroup.getReferencedGuiders();
                 final InstAltair altair          = (InstAltair) elements.getAOComponent().getValue();
                 final AltairParams.Mode mode     = altair.getMode();
                 isLgs = mode.guideStarType() == AltairParams.GuideStarType.LGS;

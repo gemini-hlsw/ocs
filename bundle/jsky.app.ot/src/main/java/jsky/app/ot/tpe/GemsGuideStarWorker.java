@@ -92,6 +92,8 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
         if (o instanceof CancellationException) {
             DialogUtil.message("The guide star search was canceled.");
         } else if (o instanceof NoStarsException) {
+            // In this case, no valid asterisms were found, so clear the selection.
+            clearResults();
             DialogUtil.error(((NoStarsException) o).getMessage());
         } else if (o instanceof CatalogException) {
             DialogUtil.error(((CatalogException) o).firstMessage());
@@ -116,29 +118,45 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
     }
 
     /**
+     * AGS failed to run, so clear the AGS results.
+     */
+    public void clearResults() {
+        apply(tpe.getContext(), 0.0, GuideGroup.AutomaticInitial());
+    }
+
+    /**
+     * Used in automatic search.
      * Apply the results of the guide star search to the current observation,
      * setting the selected position angle and guide probe.
      */
     public void applyResults(GemsGuideStars gemsGuideStars) {
-        applyResults(tpe.getContext(), gemsGuideStars);
+        apply(tpe.getContext(), gemsGuideStars.pa().toDegrees(), GuideGroup.createActive(gemsGuideStars.guideGroup().getAll()));
     }
 
-    public static void applyResults(final TpeContext ctx, final GemsGuideStars gemsGuideStars) {
-        SPInstObsComp inst = ctx.instrument().orNull();
+    /**
+     * Used in automatic search.
+     */
+    private static void apply(final TpeContext ctx, final double paInDegrees, final GuideGroup autoGroup) {
+        final SPInstObsComp inst = ctx.instrument().orNull();
         if (inst != null) {
-            inst.setPosAngleDegrees(gemsGuideStars.pa().toDegrees());
+            inst.setPosAngleDegrees(paInDegrees);
             ctx.instrument().commit();
         }
 
-        TargetObsComp targetObsComp = ctx.targets().orNull();
+        final TargetObsComp targetObsComp = ctx.targets().orNull();
         if (targetObsComp != null) {
-            TargetEnvironment env = targetObsComp.getTargetEnvironment();
-            targetObsComp.setTargetEnvironment(env.setPrimaryGuideGroup(gemsGuideStars.guideGroup()));
+            final TargetEnvironment envOld = targetObsComp.getTargetEnvironment();
+            final GuideEnvironment gEnvOld = envOld.getGuideEnvironment();
+
+            final GuideEnvironment gEnvNew = gEnvOld.setGroup(0, autoGroup).setPrimaryIndex(0);
+            final TargetEnvironment envNew = envOld.setGuideEnvironment(gEnvNew);
+            targetObsComp.setTargetEnvironment(envNew);
             ctx.targets().commit();
         }
     }
 
     /**
+     * Used in manual search.
      * Apply the results of the guide star search to the current observation,
      * setting the selected position angle and guide probes.
      *
@@ -156,6 +174,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
             final List<GuideGroup> guideGroupList = new ArrayList<>();
             int i = 0;
             for (final GemsGuideStars gemsGuideStars : selectedAsterisms) {
+                // TODO: Is this condition correct? i++ == primaryIndex instead?
                 if (i++ == 0) {
                     // Set position angle only for first (primary) group
                     final SPInstObsComp inst = ctx.instrument().orNull();
@@ -166,12 +185,25 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
                 }
                 guideGroupList.add(gemsGuideStars.guideGroup());
             }
+
+            // Note that the index is off by 1 to account for the auto group.
+            final GuideEnvironment   geOrig     = env.getGuideEnvironment();
+            final ImList<GuideGroup> gemsGroups = DefaultImList.create(guideGroupList);
+            final Option<GuideGroup> autoGpOpt  = geOrig.getGroup(0);
+
+            final ImList<GuideGroup> newGroups  = autoGpOpt.map(autoGp ->
+                    DefaultImList.create(autoGp).append(gemsGroups)
+            ).getOrElse(gemsGroups);
+
+            // If there WAS an index, the primary is now off by 1.
+            final int idx = primaryIndex + (autoGpOpt.isDefined() ? 1 : 0);
+
             if (guideGroupList.size() == 0) {
                 targetObsComp.setTargetEnvironment(env.setGuideEnvironment(env.getGuideEnvironment().setOptions(
-                        DefaultImList.create(guideGroupList))));
+                        newGroups)));
             } else {
                 targetObsComp.setTargetEnvironment(env.setGuideEnvironment(env.getGuideEnvironment().setOptions(
-                        DefaultImList.create(guideGroupList)).setPrimaryIndex(primaryIndex)));
+                        newGroups).setPrimaryIndex(idx)));
             }
             ctx.targets().commit();
         }

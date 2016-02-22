@@ -3,6 +3,7 @@ package edu.gemini.shared.util.immutable;
 import java.io.Serializable;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.function.Supplier;
 
 /**
  * The Option implementation that represents the lack of a value.
@@ -11,9 +12,9 @@ public final class None<T> implements Option<T>, Serializable {
     @SuppressWarnings("rawtypes")
     public static None INSTANCE = new None<>();
 
-    public static <T> None<T> instance() {
+    public static <T> Option<T> instance() {
         //noinspection unchecked
-        return (None<T>) INSTANCE;
+        return (Option<T>) INSTANCE;
     }
 
     // There is only one None instance which is defined above as INSTANCE.
@@ -69,8 +70,18 @@ public final class None<T> implements Option<T>, Serializable {
     }
 
     @Override
+    public T getOrElse(final Supplier<? extends T> supplier) {
+        return supplier.get();
+    }
+
+    @Override
     public Option<T> orElse(final Option<T> that) {
         return that;
+    }
+
+    @Override
+    public Option<T> orElse(final Supplier<Option<T>> supplier) {
+        return supplier.get();
     }
 
     @Override
@@ -110,7 +121,7 @@ public final class None<T> implements Option<T>, Serializable {
     public boolean forall(final Function1<? super T, Boolean> op) { return true; }
 
     @Override
-    public <U> Option<U> map(final Function1<? super T, U> tuMapOp) {
+    public <U> Option<U> map(final Function1<? super T, ? extends U> tuMapOp) {
         return instance();
     }
 

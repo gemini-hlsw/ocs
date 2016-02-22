@@ -38,7 +38,7 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
      */
     public static TargetEnvironment create(SPTarget base) {
         ImList<SPTarget> user = ImCollections.emptyList();
-        return create(base, GuideEnvironment.EMPTY, user);
+        return create(base, GuideEnvironment$.MODULE$.Initial(), user);
     }
 
     /**
@@ -99,7 +99,7 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
      * <code>getGuideEnvironment().getPrimary().getOrElse(GuideGroup.EMPTY)</code>.
      */
     public GuideGroup getOrCreatePrimaryGuideGroup() {
-        return guide.getPrimary().getOrElse(GuideGroup.EMPTY);
+        return guide.getPrimary();
     }
 
     /**
@@ -281,8 +281,16 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
      * Returns a TargetEnvironment equivalent to this one, but without the
      * given guide group.
      */
-    public TargetEnvironment removeGroup(GuideGroup group) {
-        return setGuideEnvironment(guide.removeGroup(group));
+//    public TargetEnvironment removeGroup(GuideGroup group) {
+//        return setGuideEnvironment(guide.removeGroup(group));
+//    }
+
+    public TargetEnvironment removeGroup(int groupIndex) {
+        return setGuideEnvironment(guide.removeGroup(groupIndex));
+    }
+
+    public TargetEnvironment setGroup(int groupIndex, GuideGroup grp) {
+        return setGuideEnvironment(guide.setGroup(groupIndex, grp));
     }
 
     /**
@@ -338,14 +346,14 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
 
     private static GuideEnvironment parseGuideEnvironment(ParamSet parent) {
         // Add guide information
-        ParamSet guidePset = parent.getParamSet(GuideEnvironment.PARAM_SET_NAME);
+        ParamSet guidePset = parent.getParamSet(GuideEnvironment.ParamSetName());
         if (guidePset != null) return GuideEnvironment.fromParamSet(guidePset);
 
         // Check for pre-2010B guide probe targets
         List<ParamSet> guideProbeTargets = parent.getParamSets("guider");
         if (guideProbeTargets.isEmpty()) {
             // nothing there, return a default empty guide environment
-            return GuideEnvironment.EMPTY;
+            return GuideEnvironment.Initial();
         }
 
         // Parse the old pre-2010B information into a GuideEnvironment
@@ -386,7 +394,9 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
         StringBuilder buf = new StringBuilder();
         buf.append("base=").append(base);
 
-        buf.append(sep).append("guide=").append(guide.mkString(prefix, sep, suffix));
+        buf.append(sep).append("guide:primary=").append(guide.getPrimaryIndex());
+        buf.append(sep).append("guide:auto=").append(guide.guideEnv().auto());
+        buf.append(sep).append("guide:manual=").append(guide.getOptions().tail().mkString(prefix, sep, suffix));
 
         if (user.size() > 0) {
             buf.append(sep).append("user=");

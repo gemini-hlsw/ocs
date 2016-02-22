@@ -12,10 +12,13 @@ import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable._
 import edu.gemini.shared.util.immutable.{Option => JOption, Some => JSome}
 import edu.gemini.spModel.target.SPTarget
-import edu.gemini.spModel.target.env.{OptionsList, GuideProbeTargets, TargetEnvironment}
+import edu.gemini.spModel.target.env._
 import edu.gemini.spModel.target.system.HmsDegTarget
 
 import scala.concurrent.Future
+
+import scalaz._
+import Scalaz._
 
 trait AgsStrategy {
   def key: AgsStrategyKey
@@ -80,34 +83,28 @@ object AgsStrategy {
    * results are valid along with all assignments of guide probes to stars.
    */
   case class Selection(posAngle: Angle, assignments: List[Assignment]) {
-
     /**
      * Creates a new TargetEnvironment with guide stars for each assignment in
      * the Selection.
      */
     def applyTo(env: TargetEnvironment): TargetEnvironment = {
-      def findMatching(gpt: GuideProbeTargets, target: SPTarget): Option[SPTarget] = {
-        def name(t: SPTarget): Option[String] =
-          Option(t.getName).map(_.trim)
+      val targetMap = ==>>.fromList(assignments.map { case Assignment(gp,gs) =>
+        gp -> new SPTarget(HmsDegTarget.fromSkyObject(gs.toOldModel))})
+      val newAuto: AutomaticGroup = AutomaticGroup.Active(targetMap)
 
-        name(target).flatMap(n => gpt.getTargets.asScalaList.find(name(_).exists(_ == n)))
-      }
+      // If this is different from the old automatic GG, then replace.
+      val oldGuideEnvironment = env.getGuideEnvironment
+      val oldGuideEnv         = oldGuideEnvironment.guideEnv
 
-      (env /: assignments) { (curEnv, ass) =>
-        val target = new SPTarget(HmsDegTarget.fromSkyObject(ass.guideStar.toOldModel))
-        val oldGpt = curEnv.getPrimaryGuideProbeTargets(ass.guideProbe).asScalaOpt
+      // SPTargets are compared by references, so we extract the names and compare.
+      def extractNames(auto: AutomaticGroup) = auto.targetMap.map(_.getName)
 
-        val newGpt = oldGpt.fold(GuideProbeTargets.create(ass.guideProbe, target)) { gpt =>
-          // We already have guide probe targets for guide probe.
-          // Does one with the same target name already exist? If so, mark it as
-          // primary and replace it with the target we just made.  If not, add the
-          // target and mark it as primary.
-          findMatching(gpt, target).fold(gpt.update(OptionsList.UpdateOps.appendAsPrimary(target))) { existing =>
-            gpt.selectPrimary(existing).setPrimary(target)
-          }
-        }
-
-        curEnv.putPrimaryGuideProbeTargets(newGpt)
+      if (extractNames(oldGuideEnv.auto) =/= extractNames(newAuto)) {
+        val newGuideEnv = oldGuideEnv.copy(auto = newAuto)
+        val newGuideEnvironment = oldGuideEnvironment.copy(guideEnv = newGuideEnv)
+        env.setGuideEnvironment(newGuideEnvironment)
+      } else {
+        env
       }
     }
   }

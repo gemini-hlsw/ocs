@@ -74,7 +74,7 @@ public class OptionTest extends TestCase {
                 return true;
             }
         }));
-        None<Integer> none = None.instance();
+        Option<Integer> none = None.instance();
         assertEquals(none, o.filter(new PredicateOp<Integer>() {
             public Boolean apply(Integer integer) {
                 return false;

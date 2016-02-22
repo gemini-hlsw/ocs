@@ -321,7 +321,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
         public static Option<ObservingMode> valueOf(String name, Option<ObservingMode> nvalue) {
             ObservingMode def = nvalue.isEmpty() ? null : nvalue.getValue();
             ObservingMode val = SpTypeUtil.oldValueOf(ObservingMode.class, name, def);
-            None<ObservingMode> none = None.instance();
+            Option<ObservingMode> none = None.instance();
             return val == null ? none : new Some<>(val);
         }
 

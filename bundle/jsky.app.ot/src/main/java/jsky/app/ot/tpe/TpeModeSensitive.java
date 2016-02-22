@@ -19,7 +19,7 @@ public interface TpeModeSensitive {
      *
      * @param arg optional argument that depends upon the mode; in particular
      * for {@link TpeMode#CREATE}, <code>arg</code> is the
-     * {@link TpeCreateableItem} in use
+     * {@link TpeCreatableItem} in use
      */
     void handleModeChange(TpeMode mode, Option<Object> arg);
 }

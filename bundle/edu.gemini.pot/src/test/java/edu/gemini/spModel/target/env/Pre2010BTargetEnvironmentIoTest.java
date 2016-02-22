@@ -41,8 +41,8 @@ public class Pre2010BTargetEnvironmentIoTest {
                 verifyTarget("BaseName", env.getBase());
                 assertEquals(0, env.getUserTargets().size());
 
-                // No guide groups
-                assertEquals(0, env.getGuideEnvironment().getOptions().size());
+                // Just the one automatic group
+                assertEquals(1, env.getGuideEnvironment().getOptions().size());
             }
         },
 
@@ -53,12 +53,12 @@ public class Pre2010BTargetEnvironmentIoTest {
 
                 GuideEnvironment genv = env.getGuideEnvironment();
 
-                // There is one guide group
-                assertEquals(1, genv.getOptions().size());
+                // There are two guide groups
+                assertEquals(2, genv.getOptions().size());
 
-                // It is the primary group option
-                GuideGroup grp = genv.getPrimary().getValue();
-                assertSame(genv.getOptions().head(), grp);
+                // The primary defaults to the manual group.
+                GuideGroup grp = genv.getPrimary();
+                assertEquals(genv.getOptions().tail().head(), grp);
 
                 // It contains a single GuideProbeTargets instance
                 assertEquals(1, grp.getAll().size());
@@ -78,7 +78,7 @@ public class Pre2010BTargetEnvironmentIoTest {
             public void verify(TargetEnvironment env) throws Exception {
                 GuideEnvironment genv = env.getGuideEnvironment();
 
-                GuideGroup grp = genv.getPrimary().getValue();
+                GuideGroup grp = genv.getPrimary();
                 Option<GuideProbeTargets> gpt1Opt = grp.get(PwfsGuideProbe.pwfs1);
                 Option<GuideProbeTargets> gpt2Opt = grp.get(PwfsGuideProbe.pwfs2);
 
@@ -94,7 +94,7 @@ public class Pre2010BTargetEnvironmentIoTest {
             public void verify(TargetEnvironment env) throws Exception {
                 GuideEnvironment genv = env.getGuideEnvironment();
 
-                GuideGroup grp = genv.getPrimary().getValue();
+                GuideGroup grp = genv.getPrimary();
                 Option<GuideProbeTargets> gptOpt = grp.get(PwfsGuideProbe.pwfs2);
 
                 SPTarget primary = gptOpt.getValue().getPrimary().getValue();

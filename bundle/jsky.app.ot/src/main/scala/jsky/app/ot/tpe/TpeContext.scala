@@ -76,7 +76,7 @@ final class TargetContext(obs: Option[ISPObservation]) extends TpeSubContext[ISP
   def selected: Option[SPTarget] = for {
     s <- shell
     e <- env
-    r <- Option(TargetSelection.get(e, s))
+    r <- TargetSelection.getTargetForNode(e, s).asScalaOpt
   } yield r
 
   def selectedOrNull: SPTarget = selected.orNull

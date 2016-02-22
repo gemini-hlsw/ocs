@@ -100,7 +100,7 @@ class TargetEnvironmentListener extends MarkerModelListener[Variant] {
         }
       }
 
-      targetEnvironment.getGuideEnvironment.getPrimary.asScala.foreach(addGuideGroupWarnings)
+      addGuideGroupWarnings(targetEnvironment.getGuideEnvironment.getPrimary)
     }
   }
 

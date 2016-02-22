@@ -274,7 +274,9 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
         }
     };
     
-    private final PropertyChangeListener selListener = evt -> reset((ISPNode) evt.getSource());
+    private final PropertyChangeListener selListener = evt -> {
+        reset((ISPNode) evt.getSource());
+    };
 
     /**
      * Reset the position editor based on the currently selected science program

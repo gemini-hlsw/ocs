@@ -1,6 +1,7 @@
 package jsky.app.ot.tpe;
 
 import edu.gemini.pot.sp.ISPNode;
+import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.shared.util.immutable.Some;
@@ -9,8 +10,6 @@ import jsky.app.ot.OTOptions;
 import jsky.app.ot.util.Resources;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -27,13 +26,13 @@ final class TpeEditorTools {
         private static final String KEY = ButtonState.class.getName();
         final TpeMode mode;
         final TpeImageFeature feature;
-        final TpeCreateableItem item;
+        final TpeCreatableItem item;
 
         ButtonState(TpeMode mode) {
             this(mode, null, null);
         }
 
-        ButtonState(TpeMode mode, TpeImageFeature feature, TpeCreateableItem item) {
+        ButtonState(TpeMode mode, TpeImageFeature feature, TpeCreatableItem item) {
             this.mode    = mode;
             this.feature = feature;
             this.item    = item;
@@ -59,55 +58,44 @@ final class TpeEditorTools {
     private Map<String, JToggleButton> _createButtonMap = new HashMap<>();
 
     /** Create with the Presentation that contains the tool buttons. */
-    TpeEditorTools(TelescopePosEditor tpe) {
+    TpeEditorTools(final TelescopePosEditor tpe) {
         _tpe = tpe;
         _tpeToolBar = _tpe.getTpeToolBar();
 
-        Icon icon;
-
         // Browse Tool
-        icon = Resources.getIcon("browseArrow.gif");
-        _browseButton = new JToggleButton("Browse", icon) {{
+        _browseButton = new JToggleButton("Browse", Resources.getIcon("browseArrow.gif")) {{
             setToolTipText("Switch to browse mode");
-            addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    _current = _browseButton;
+            addActionListener(e -> {
+                    _current = this;
                     modeChange(TpeMode.BROWSE, None.instance());
                     _tpe.getImageWidget().setCursor(TpeCursor.browse.get());
-                }
-            });
+                });
             setHorizontalAlignment(LEFT);
         }};
         new ButtonState(TpeMode.BROWSE).set(_browseButton);
         _tpeToolBar.addModeButton(_browseButton);
 
         // Drag Tool
-        icon = Resources.getIcon("whiteGlove.gif");
-        _dragButton = new JToggleButton("Drag", icon) {{
+        _dragButton = new JToggleButton("Drag", Resources.getIcon("whiteGlove.gif")) {{
             setToolTipText("Switch to drag mode");
-            addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    _current = _dragButton;
+            addActionListener(e -> {
+                    _current = this;
                     modeChange(TpeMode.DRAG, None.instance());
                     _tpe.getImageWidget().setCursor(TpeCursor.drag.get());
-                }
-            });
+                });
             setHorizontalAlignment(LEFT);
         }};
         new ButtonState(TpeMode.DRAG).set(_dragButton);
         _tpeToolBar.addModeButton(_dragButton);
 
         // Erase Tool
-        icon = Resources.getIcon("eclipse/remove.gif");
-        _eraseButton = new JToggleButton("Erase", icon) {{
+        _eraseButton = new JToggleButton("Erase", Resources.getIcon("eclipse/remove.gif")) {{
             setToolTipText("Switch to erase mode");
-            addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    _current = _eraseButton;
+            addActionListener(e -> {
+                    _current = this;
                     modeChange(TpeMode.ERASE, None.instance());
                     _tpe.getImageWidget().setCursor(TpeCursor.erase.get());
-                }
-            });
+                });
             setHorizontalAlignment(LEFT);
         }};
         new ButtonState(TpeMode.ERASE).set(_eraseButton);
@@ -123,12 +111,10 @@ final class TpeEditorTools {
         });
     }
 
-    private void modeChange(TpeMode mode, Option<Object> arg) {
-        for (TpeImageFeature feat : _tpe.getFeatures()) {
-            if (feat instanceof TpeModeSensitive) {
-                ((TpeModeSensitive) feat).handleModeChange(mode, arg);
-            }
-        }
+    private void modeChange(final TpeMode mode, final Option<Object> arg) {
+        _tpe.getFeatures().stream()
+                .filter(feat -> feat instanceof TpeModeSensitive)
+                .forEach(feat -> ((TpeModeSensitive)feat).handleModeChange(mode, arg));
     }
 
     private boolean isEnabled() {
@@ -136,8 +122,14 @@ final class TpeEditorTools {
         return ctx.progShell().isDefined() && ctx.obsShell().isDefined() && OTOptions.isProgramEditable(ctx.progShell().get()) && OTOptions.isObservationEditable(ctx.obsShell().get());
     }
 
+    private boolean isManual() {
+        return ImOption.fromScalaOpt(_tpe.getImageWidget().getContext().targets().env())
+                .exists(te -> te.getGuideEnvironment().getPrimary().isManual());
+    }
+
     /**
-     * Update the enable states of the buttons based on the OT editable state.
+     * Update the enable states of the buttons based on the OT editable state and whether or not the group is
+     * the automatic guide group.
      */
     public void updateEnabledStates() {
         final boolean enabled = isEnabled();
@@ -149,12 +141,12 @@ final class TpeEditorTools {
     //
     // Add a create tool.
     //
-    private void _addCreateTool(TpeCreateableItem item, TpeImageFeature tif) {
+    private void _addCreateTool(final TpeCreatableItem item, final TpeImageFeature tif) {
         // See if this tool is already present.
         final String label = item.getLabel();
         if (_createButtonMap.get(label) != null) return;
 
-        Icon icon = Resources.getIcon("eclipse/add.gif");
+        final Icon icon = Resources.getIcon("eclipse/add.gif");
         final JToggleButton btn = new JToggleButton(label, icon) {{
             setToolTipText("Create a new " + label + " position");
             setVisible(false);
@@ -163,7 +155,7 @@ final class TpeEditorTools {
         btn.addActionListener(evt -> {
             _current = btn;
 
-            ButtonState bs = ButtonState.get(btn);
+            final ButtonState bs = ButtonState.get(btn);
             _tpe.selectFeature(bs.feature);
             _tpe.getImageWidget().setCursor(TpeCursor.add.get());
 
@@ -181,17 +173,17 @@ final class TpeEditorTools {
     /**
      * Add the create tools for the given feature.
      */
-    public void addFeature(TpeImageFeature tif) {
-        if (!(tif instanceof TpeCreateableFeature)) return;  // nothing to add
-        TpeCreateableItem[] items = ((TpeCreateableFeature) tif).getCreateableItems();
-        for (TpeCreateableItem item : items) _addCreateTool(item, tif);
+    public void addFeature(final TpeImageFeature tif) {
+        if (!(tif instanceof TpeCreatableFeature)) return;  // nothing to add
+        final TpeCreatableItem[] items = ((TpeCreatableFeature) tif).getCreatableItems();
+        for (TpeCreatableItem item : items) _addCreateTool(item, tif);
     }
 
     /**
-     * Disable or enable the set of creational tools associated with the
+     * Disable or enable the set of creation tools associated with the
      * given image features.
      */
-    public void updateAvailableOptions(Collection<TpeImageFeature> feats) {
+    public void updateAvailableOptions(final Collection<TpeImageFeature> feats) {
         boolean enabled = true;
         if (!isEnabled()) {
             _browseButton.setSelected(true); // make sure we are only in browse mode
@@ -202,7 +194,7 @@ final class TpeEditorTools {
         JToggleButton selected = null;
 
         // Remove all the existing create buttons.
-        for (JToggleButton tbw : _createButtonMap.values()) {
+        for (final JToggleButton tbw : _createButtonMap.values()) {
             if (tbw.isSelected()) selected = tbw;
             tbw.setVisible(false);
         }
@@ -210,20 +202,27 @@ final class TpeEditorTools {
         // If not enabled, then we're done.
         if (!enabled) return;
 
-        // Add create buttons according to the enabled state of each item.
-        for (TpeImageFeature feature : feats) {
-            if (!(feature instanceof TpeCreateableFeature)) continue;
+        // Determine if we are in a manual group.
+        final boolean manual = isManual();
 
-            TpeCreateableFeature cFeature = (TpeCreateableFeature) feature;
-            for (TpeCreateableItem item : cFeature.getCreateableItems()) {
+        // Add create buttons according to the enabled state of each item.
+        for (final TpeImageFeature feature : feats) {
+            if (!(feature instanceof TpeCreatableFeature)) continue;
+
+            final TpeCreatableFeature cFeature = (TpeCreatableFeature) feature;
+            for (final TpeCreatableItem item : cFeature.getCreatableItems()) {
                 if (item.isEnabled(_tpe.getImageWidget().getContext())) {
-                    JToggleButton btn = _createButtonMap.get(item.getLabel());
+                    final boolean isWFSTarget = item.getType() == TpeCreatableItem.Type.wfsTarget;
+                    final JToggleButton btn   = _createButtonMap.get(item.getLabel());
                     btn.setVisible(true);
+
+                    // If we are on the auto group, only allow non WFS targets to be created.
+                    btn.setEnabled(manual || !isWFSTarget);
                 }
             }
         }
 
-        if ((selected != null) && !selected.isVisible()){
+        if ((selected != null) && !(selected.isVisible() && selected.isEnabled())) {
             _browseButton.doClick();
         }
     }
@@ -250,7 +249,7 @@ final class TpeEditorTools {
     /**
      * Get the creatable item currently selected.
      */
-    public TpeCreateableItem getCurrentCreatableItem() {
+    public TpeCreatableItem getCurrentCreatableItem() {
         if (_current == null) return null;
         return ButtonState.get(_current).item;
     }

@@ -43,7 +43,7 @@ import java.util.List;
  */
 public class EdIterOffsetFeature extends TpeImageFeature
         implements TpeDraggableFeature, TpeEraseableFeature,
-        TpeCreateableFeature, TpeSelectableFeature, TpeActionableFeature,
+        TpeCreatableFeature, TpeSelectableFeature, TpeActionableFeature,
         PropertyWatcher, ChangeListener {
 
     /** Color used to draw offset features */
@@ -347,7 +347,7 @@ public class EdIterOffsetFeature extends TpeImageFeature
     /**
      * If there is an offset position under the mouse, return it.
      *
-     * @see TpeCreateableFeature
+     * @see TpeCreatableFeature
      */
     public Object select(TpeMouseEvent tme) {
         final SelectedPos sel = find(tme);
@@ -376,8 +376,8 @@ public class EdIterOffsetFeature extends TpeImageFeature
      * Create an offset position at the given mouse position, if possible.
      * Return true if anything is actually created.
      */
-    private final TpeCreateableItem[] createableItems = new TpeCreateableItem[] {
-        new TpeCreateableItem() {
+    private final TpeCreatableItem[] createableItems = new TpeCreatableItem[] {
+        new TpeCreatableItem() {
             public String getLabel() {
                 return "Offset";
             }
@@ -419,7 +419,7 @@ public class EdIterOffsetFeature extends TpeImageFeature
     /**
      * Get the label that should be displayed on the create button.
      */
-    public TpeCreateableItem[] getCreateableItems() {
+    public TpeCreatableItem[] getCreatableItems() {
         return createableItems;
     }
 

@@ -1,6 +1,7 @@
 package edu.gemini.shared.util.immutable
 
 import scala.collection.JavaConverters._
+import scalaz.{\/-, -\/, \/}
 
 object ScalaConverters {
 
@@ -58,5 +59,22 @@ object ScalaConverters {
   implicit class ImPairOps[A,B](val p: Pair[A,B]) extends AnyVal {
     def asScalaPair: (A,B) =
       (p._1(), p._2())
+  }
+
+  implicit class ScalaEitherOps[L,R](val e: scala.Either[L,R]) extends AnyVal {
+    def asImEither: ImEither[L,R] =
+      e.fold(ImEither.left[L,R], ImEither.right[L,R])
+  }
+
+  implicit class ScalazDisjunctionOps[L,R](val e: \/[L,R]) extends AnyVal {
+    def asImEither: ImEither[L,R] =
+      e.fold(ImEither.left[L,R], ImEither.right[L,R])
+  }
+
+  implicit class ImEitherOps[L,R](val e: ImEither[L,R]) extends AnyVal {
+    def asScalaEither: scala.Either[L, R] =
+      e.fold(((l: L) => Left(l)).asGeminiFunction1, ((r: R) => Right(r)).asGeminiFunction1)
+    def asScalazDisjunction: \/[L,R] =
+      e.fold(((l: L) => -\/(l)).asGeminiFunction1, ((r: R) => \/-(r)).asGeminiFunction1)
   }
 }

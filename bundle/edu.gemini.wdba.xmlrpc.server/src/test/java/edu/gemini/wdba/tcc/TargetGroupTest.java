@@ -279,8 +279,8 @@ public final class TargetGroupTest extends TestBase {
         testName(env1, "Explicit Name");
 
         // Make the unamed group primary, and check that the name is defaulted.
-        final TargetEnvironment env2 = env1.setGuideEnvironment(genv.setPrimaryIndex(1));
-        testName(env2, "Guide Group 2");
+        final TargetEnvironment env2 = env1.setGuideEnvironment(genv.setPrimaryIndex(2));
+        testName(env2, "Manual Group");
     }
 
     private void testName(TargetEnvironment env, String name) throws Exception {

@@ -56,7 +56,7 @@ public final class MichelleParams {
         public static Option<ChopMode> valueOf(String name, Option<ChopMode> nvalue) {
             ChopMode def = nvalue.isEmpty() ? null : nvalue.getValue();
             ChopMode val = SpTypeUtil.oldValueOf(ChopMode.class, name, def);
-            None<ChopMode> none = None.instance();
+            Option<ChopMode> none = None.instance();
             return val == null ? none : new Some<ChopMode>(val);
         }
     }
@@ -93,7 +93,7 @@ public final class MichelleParams {
         public static Option<ChopWaveform> valueOf(String name, Option<ChopWaveform> nvalue) {
             ChopWaveform def = nvalue.isEmpty() ? null : nvalue.getValue();
             ChopWaveform val = SpTypeUtil.oldValueOf(ChopWaveform.class, name, def);
-            None<ChopWaveform> none = None.instance();
+            Option<ChopWaveform> none = None.instance();
             return val == null ? none : new Some<ChopWaveform>(val);
         }
     }
@@ -129,7 +129,7 @@ public final class MichelleParams {
         public static Option<DisperserOrder> valueOf(String name, Option<DisperserOrder> nvalue) {
             DisperserOrder def = nvalue.isEmpty() ? null : nvalue.getValue();
             DisperserOrder val = SpTypeUtil.oldValueOf(DisperserOrder.class, name, def);
-            None<DisperserOrder> none = None.instance();
+            Option<DisperserOrder> none = None.instance();
             return val == null ? none : new Some<DisperserOrder>(val);
         }
     }
@@ -294,7 +294,7 @@ public final class MichelleParams {
         public static Option<Position> valueOf(String name, Option<Position> nvalue) {
             Position def = nvalue.isEmpty() ? null : nvalue.getValue();
             Position val = SpTypeUtil.oldValueOf(Position.class, name, def);
-            None<Position> none = None.instance();
+            Option<Position> none = None.instance();
             return val == null ? none : new Some<Position>(val);
         }
     }
@@ -356,7 +356,7 @@ public final class MichelleParams {
         public static Option<EngMask> valueOf(String name, Option<EngMask> nvalue) {
             EngMask def = nvalue.isEmpty() ? null : nvalue.getValue();
             EngMask val = SpTypeUtil.oldValueOf(EngMask.class, name, def);
-            None<EngMask> none = None.instance();
+            Option<EngMask> none = None.instance();
             return val == null ? none : new Some<EngMask>(val);
         }
     }
@@ -522,7 +522,7 @@ public final class MichelleParams {
         public static Option<FilterWheelA> valueOf(String name, Option<FilterWheelA> nvalue) {
             FilterWheelA def = nvalue.isEmpty() ? null : nvalue.getValue();
             FilterWheelA val = SpTypeUtil.oldValueOf(FilterWheelA.class, name, def);
-            None<FilterWheelA> none = None.instance();
+            Option<FilterWheelA> none = None.instance();
             return val == null ? none : new Some<FilterWheelA>(val);
         }
     }
@@ -575,7 +575,7 @@ public final class MichelleParams {
         public static Option<FilterWheelB> valueOf(String name, Option<FilterWheelB> nvalue) {
             FilterWheelB def = nvalue.isEmpty() ? null : nvalue.getValue();
             FilterWheelB val = SpTypeUtil.oldValueOf(FilterWheelB.class, name, def);
-            None<FilterWheelB> none = None.instance();
+            Option<FilterWheelB> none = None.instance();
             return val == null ? none : new Some<FilterWheelB>(val);
         }
     }

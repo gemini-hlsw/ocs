@@ -780,7 +780,7 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
     /**
      * Create an image feature item, based on the given arguments, and return true if successful.
      */
-    public void create(final TpeMouseEvent tme, final TpeCreateableItem item) {
+    public void create(final TpeMouseEvent tme, final TpeCreatableItem item) {
         if (!_imgInfoValid) return;
         item.create(tme, _imgInfo);
     }

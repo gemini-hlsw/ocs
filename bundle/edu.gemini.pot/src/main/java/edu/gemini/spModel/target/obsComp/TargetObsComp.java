@@ -1,6 +1,7 @@
 package edu.gemini.spModel.target.obsComp;
 
 import edu.gemini.pot.sp.SPComponentType;
+import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.spModel.data.AbstractDataObject;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.guide.GuideProbeProvider;
@@ -10,11 +11,14 @@ import edu.gemini.spModel.pio.PioFactory;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.TelescopePosWatcher;
 import edu.gemini.spModel.target.WatchablePos;
+import edu.gemini.spModel.target.env.GuideEnv;
+import edu.gemini.spModel.target.env.GuideEnvironment;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.system.ITarget;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;

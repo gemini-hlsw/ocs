@@ -527,7 +527,7 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         public static Option<WindowCover> valueOf(String name, Option<WindowCover> nvalue) {
             WindowCover def = nvalue.isEmpty() ? null : nvalue.getValue();
             WindowCover val = SpTypeUtil.oldValueOf(WindowCover.class, name, def);
-            None<WindowCover> none = None.instance();
+            Option<WindowCover> none = None.instance();
             return val == null ? none : new Some<>(val);
         }
     }
@@ -554,7 +554,7 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         public static Option<Decker> valueOf(String name, Option<Decker> nvalue) {
             Decker def = nvalue.isEmpty() ? null : nvalue.getValue();
             Decker val = SpTypeUtil.oldValueOf(Decker.class, name, def);
-            None<Decker> none = None.instance();
+            Option<Decker> none = None.instance();
             return val == null ? none : new Some<>(val);
         }
     }
@@ -580,7 +580,7 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         public static Option<ReadoutMode> valueOf(String name, Option<ReadoutMode> nvalue) {
             ReadoutMode def = nvalue.isEmpty() ? null : nvalue.getValue();
             ReadoutMode val = SpTypeUtil.oldValueOf(ReadoutMode.class, name, def);
-            None<ReadoutMode> none = None.instance();
+            Option<ReadoutMode> none = None.instance();
             return val == null ? none : new Some<>(val);
         }
     }
@@ -620,7 +620,7 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         public static Option<Reads> valueOf(String name, Option<Reads> nvalue) {
             Reads def = nvalue.isEmpty() ? null : nvalue.getValue();
             Reads val = SpTypeUtil.oldValueOf(Reads.class, name, def);
-            None<Reads> none = None.instance();
+            Option<Reads> none = None.instance();
             return val == null ? none : new Some<>(val);
         }
     }
