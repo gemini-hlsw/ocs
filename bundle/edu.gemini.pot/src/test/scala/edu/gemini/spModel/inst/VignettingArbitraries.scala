@@ -3,78 +3,21 @@ package edu.gemini.spModel.inst
 import java.awt.geom.{Point2D, AffineTransform}
 
 import edu.gemini.pot.ModelConverters._
-import edu.gemini.shared.util.immutable.None
-import edu.gemini.skycalc.{Offset => SkyCalcOffset}
 import edu.gemini.spModel.core._
-import edu.gemini.spModel.core.AngleSyntax._
-import edu.gemini.spModel.gemini.gmos.GmosCommonType.FPUnitMode._
 import edu.gemini.spModel.gemini.gmos._
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.Conditions
 import edu.gemini.spModel.obs.context.ObsContext
-import edu.gemini.spModel.target.SPTarget
-import edu.gemini.spModel.target.env.TargetEnvironment
-import edu.gemini.spModel.telescope.{PosAngleConstraintAware, PosAngleConstraint, IssPort}
+import edu.gemini.spModel.telescope.PosAngleConstraintAware
 import edu.gemini.spModel.telescope.PosAngleConstraint.FIXED_180
 
 import org.scalacheck._
-import org.scalacheck.Gen._
-import org.scalacheck.Arbitrary._
 
 import scala.collection.JavaConverters._
 
 import scalaz._
 import Scalaz._
 
-trait VignettingArbitraries extends Arbitraries {
-  implicit val arbTargetEnv: Arbitrary[TargetEnvironment] =
-    Arbitrary {
-      arbitrary[Coordinates].map { c =>
-        val ra  = c.ra.toAngle.toDegrees
-        val dec = c.dec.toDegrees
-        TargetEnvironment.create(new SPTarget(ra, dec))
-      }
-    }
-
-  implicit val arbGmosN: Arbitrary[InstGmosNorth] =
-    Arbitrary {
-      for {
-        fpu      <- Gen.oneOf(GmosNorthType.FPUnitNorth.values)
-        mode     <- Gen.frequency((1, CUSTOM_MASK), (9, BUILTIN))
-        port     <- Gen.oneOf(IssPort.values)
-        posAngle <- arbitrary[Angle]
-        pac      <- Gen.oneOf(PosAngleConstraint.FIXED, PosAngleConstraint.FIXED_180)
-      } yield
-        new InstGmosNorth                    <|
-              (_.setFPUnit(fpu))             <|
-              (_.setFPUnitMode(mode))        <|
-              (_.setIssPort(port))           <|
-              (_.setPosAngleConstraint(pac)) <|
-              (_.setPosAngle(posAngle.toDegrees))
-    }
-
-  val genSmallOffset: Gen[SkyCalcOffset] =
-    for {
-      pi <- Gen.chooseNum(-50, 50)
-      qi <- Gen.chooseNum(-50, 50)
-    } yield Offset(pi.toDouble.arcsecs[OffsetP], qi.toDouble.arcsecs[OffsetQ]).toOldModel
-
-  implicit val arbSciencePosSet: Arbitrary[java.util.Set[SkyCalcOffset]] =
-    Arbitrary {
-      for {
-        count <- Gen.chooseNum(1, 4)
-        offs  <- Gen.listOfN(count, genSmallOffset)
-      } yield new java.util.HashSet(offs.asJava)
-    }
-
-  implicit val arbContext: Arbitrary[ObsContext] =
-    Arbitrary {
-      for {
-        env  <- arbitrary[TargetEnvironment]
-        gmos <- arbitrary[InstGmosNorth]
-        offs <- arbitrary[java.util.Set[SkyCalcOffset]]
-      } yield ObsContext.create(env, gmos, Conditions.NOMINAL, offs, null, None.instance())
-    }
-
+trait VignettingArbitraries extends edu.gemini.spModel.test.SpModelArbitraries {
   // Generate guide star candidates at all position angles supported by the
   // instrument configuration in the context.
   def genCandidates(ctx: ObsContext): Gen[List[Coordinates]] =
