@@ -1,6 +1,8 @@
 package edu.gemini.spModel.inst
 
 import edu.gemini.pot.ModelConverters._
+import edu.gemini.shared.util.immutable.ImOption
+import edu.gemini.spModel.ags.AgsStrategyKey.GmosNorthOiwfsKey
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.gemini.gmos._
 import edu.gemini.spModel.guide.VignettingCalculator
@@ -45,9 +47,11 @@ object VignettingCalcSpec extends Specification with ScalaCheck with VignettingA
   implicit val arbTest: Arbitrary[TestEnv] =
     Arbitrary {
       for {
-        ctx <- arbitrary[ObsContext]
-        can <- genCandidates(ctx)
-      } yield TestEnv(ctx, can)
+        ctx  <- arbitrary[ObsContext]
+        gmos <- arbitrary[InstGmosNorth]
+        gmosCtx = ctx.withInstrument(gmos).withAgsStrategyOverride(ImOption.apply(GmosNorthOiwfsKey))
+        can  <- genCandidates(gmosCtx)
+      } yield TestEnv(gmosCtx, can)
     }
 
   "VignettingCalculator" should {

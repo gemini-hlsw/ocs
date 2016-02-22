@@ -4,14 +4,18 @@ import edu.gemini.ags.api.{AgsGuideQuality, AgsStrategy}
 import edu.gemini.ags.conf.ProbeLimitsTable
 import edu.gemini.catalog.votable.CannedBackend
 import edu.gemini.pot.ModelConverters._
+import edu.gemini.skycalc.{Offset => SkyCalcOffset}
+import edu.gemini.shared.util.immutable.ImOption
 import edu.gemini.spModel.ags.AgsStrategyKey.GmosNorthOiwfsKey
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.core.MagnitudeBand.{_r, R, UC}
 import edu.gemini.spModel.gemini.gmos.{InstGmosNorth, GmosOiwfsGuideProbe}
+import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.Conditions
 import edu.gemini.spModel.inst.VignettingArbitraries
 import edu.gemini.spModel.obs.context.ObsContext
+import edu.gemini.spModel.target.env.TargetEnvironment
 import edu.gemini.spModel.telescope.PosAngleConstraintAware
-import edu.gemini.spModel.telescope.PosAngleConstraint.FIXED_180
+import edu.gemini.spModel.telescope.PosAngleConstraint.{FIXED, FIXED_180}
 
 import org.scalacheck._
 import org.scalacheck.Arbitrary._
@@ -56,7 +60,7 @@ object SingleProbeVignettingTest extends Specification with ScalaCheck with Vign
       } yield a :: lst
     }
 
-  def genGuidStars(ctx: ObsContext): Gen[List[SiderealTarget]] = {
+  def genGuideStars(ctx: ObsContext): Gen[List[SiderealTarget]] = {
     def farEnough(c: Coordinates): Boolean = {
       val minDistance = SingleProbeStrategyParams.GmosOiwfsParams.apply(Site.GN).minDistance.map(_.toDegrees) | 0
       val diff        = Coordinates.difference(ctx.getBaseCoordinates.getValue.toNewModel, c).distance.toDegrees
@@ -73,8 +77,12 @@ object SingleProbeVignettingTest extends Specification with ScalaCheck with Vign
   implicit val arbTest: Arbitrary[(ObsContext, List[SiderealTarget])] =
     Arbitrary {
       for {
-        ctx <- arbitrary[ObsContext]
-        gs  <- genGuidStars(ctx)
+        env  <- arbitrary[TargetEnvironment]
+        gmos <- arbitrary[InstGmosNorth]
+        offs <- arbitrary[java.util.Set[SkyCalcOffset]]
+        pac  <- Gen.oneOf(FIXED, FIXED_180)
+        ctx   = ObsContext.create(env, gmos <| (_.setPosAngleConstraint(pac)), Conditions.NOMINAL, offs, null, ImOption.empty())
+        gs   <- genGuideStars(ctx)
       } yield (ctx, gs)
     }
 
