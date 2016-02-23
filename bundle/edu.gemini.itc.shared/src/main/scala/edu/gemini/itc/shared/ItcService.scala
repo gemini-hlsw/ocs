@@ -77,6 +77,8 @@ case object SignalData        extends SpcDataType { val instance = this }  // si
 case object BackgroundData    extends SpcDataType { val instance = this }  // background over wavelength [nm]
 case object SingleS2NData     extends SpcDataType { val instance = this }  // single S2N over wavelength [nm]
 case object FinalS2NData      extends SpcDataType { val instance = this }  // final S2N over wavelength [nm]
+case object PixSigData        extends SpcDataType { val instance = this }  // signal over pixels
+case object PixBackData       extends SpcDataType { val instance = this }  // background over pixels
 
 /** Series of (x,y) data points used to create charts and text data files. */
 final case class SpcSeriesData(dataType: SpcDataType, title: String, data: Array[Array[Double]], color: Option[Color] = None) {

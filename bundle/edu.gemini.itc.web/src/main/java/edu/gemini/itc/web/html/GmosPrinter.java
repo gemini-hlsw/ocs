@@ -83,7 +83,12 @@ public final class GmosPrinter extends PrinterBase {
             _printFileLinkAllSeries(id, BackgroundData.instance(), i);
             _printFileLinkAllSeries(id, SingleS2NData.instance(),  i);
             _printFileLinkAllSeries(id, FinalS2NData.instance(),  i);
-
+            if (mainInstrument.isIfu2()) {
+                _printFileLink(id, PixSigData.instance(), i, 0, " (red)");
+                _printFileLink(id, PixSigData.instance(), i, 1, " (blue)");
+                _printFileLink(id, PixBackData.instance(), i, 0, " (red)");
+                _printFileLink(id, PixBackData.instance(), i, 1, " (blue)");
+            }
             _printImageLink(id, SignalChart.instance(), i, pdp);
             _println("");
             _printImageLink(id, S2NChart.instance(),    i, pdp);
