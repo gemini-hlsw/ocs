@@ -134,7 +134,7 @@ class P1MonitorMailer(cfg: P1MonitorConfig) {
 
   private def getInstrumentsString(prop: Proposal): String = prop.observations.map {
       obs => obs.blueprint match {
-        case Some(bp: GeminiBlueprintBase) => s"${bp.instrument.site.name} (${bp.instrument.id})"
+        case Some(bp: GeminiBlueprintBase) => s"${bp.site.name} (${bp.instrument.id})"
         case _                             => ""
       }
     }.distinct.mkString(", ")
