@@ -204,6 +204,8 @@ public abstract class PrinterBase {
         else if (type == BackgroundData.instance())     return "ASCII background spectrum";
         else if (type == SingleS2NData.instance())      return "Single Exposure S/N ASCII data";
         else if (type == FinalS2NData.instance())       return "Final S/N ASCII data";
+        else if (type == PixSigData.instance())         return "Pixel ASCII signal spectrum";
+        else if (type == PixBackData.instance())        return "Pixel ASCII SQRT(background) spectrum";
         else    throw new Error();
     }
 

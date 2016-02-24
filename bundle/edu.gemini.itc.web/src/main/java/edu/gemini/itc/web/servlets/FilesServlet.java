@@ -142,6 +142,8 @@ public final class FilesServlet extends HttpServlet {
             case "BackgroundData": file = toFile(result.chart(SignalChart.instance(), chartIndex).allSeriesAsJava(BackgroundData.instance()), seriesIndex); break;
             case "SingleS2NData":  file = toFile(result.chart(S2NChart.instance(),    chartIndex).allSeriesAsJava(SingleS2NData.instance()),  seriesIndex); break;
             case "FinalS2NData":   file = toFile(result.chart(S2NChart.instance(),    chartIndex).allSeriesAsJava(FinalS2NData.instance()),   seriesIndex); break;
+            case "PixSigData":     file = toFile(result.chart(SignalPixelChart.instance(),    chartIndex).allSeriesAsJava(SignalData.instance()),  seriesIndex); break;
+            case "PixBackData":    file = toFile(result.chart(SignalPixelChart.instance(),    chartIndex).allSeriesAsJava(BackgroundData.instance()),   seriesIndex); break;
             default:               throw new Error();
         }
         return "# ITC Data: " + Calendar.getInstance().getTime() + "\n \n" + file;
