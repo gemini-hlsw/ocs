@@ -77,6 +77,7 @@ object LibraryStar {
   case object G5I     extends LibraryStar("G5I")
   case object K0V     extends LibraryStar("K0V")
   case object K0V_r   extends LibraryStar("K0V-r")
+  case object K0III   extends LibraryStar("K0III")
   case object K0III_w extends LibraryStar("K0III-w")
   case object K0III_r extends LibraryStar("K0III-r")
   case object K0_1II  extends LibraryStar("K0-1II")
@@ -99,9 +100,9 @@ object LibraryStar {
     O5V,      O8III,      B0V,      B5_7V,      B5III,      B5I,      A0V,      A0III,      A0I,
     A5V,      A5III,      F0V,      F0III,      F0I,        F5V,      F5V_w,    F6V_r,      F5III,
     F5I,      G0V,        G0V_w,    G0V_r,      G0III,      G0I,      G2V,      G5V,        G5V_w,
-    G5V_r,    G5III,      G5III_w,  G5III_r,    G5I,        K0V,      K0V_r,    K0III_w,    K0III_r,
-    K0_1II,   K4V,        K4III,    K4III_w,    K4III_r,    K4I,      M0V,      M0III,      M3V,
-    M3III,    M6V,        M6III,    M9III
+    G5V_r,    G5III,      G5III_w,  G5III_r,    G5I,        K0V,      K0V_r,    K0III,      K0III_w,
+    K0III_r,  K0_1II,     K4V,      K4III,      K4III_w,    K4III_r,  K4I,      M0V,        M0III,
+    M3V,      M3III,      M6V,      M6III,      M9III
   )
 }
 
