@@ -33,7 +33,7 @@ object VoTableParser extends VoTableParser {
 
   val xsd = "/votable-1.2.xsd"
   
-  private def validate(xmlText: String): Throwable \/ String = \/.fromTryCatch {
+  private def validate(xmlText: String): Throwable \/ String = \/.fromTryCatchNonFatal {
     import javax.xml.transform.stream.StreamSource
     import javax.xml.validation.SchemaFactory
 
@@ -110,7 +110,7 @@ object CatalogAdapter {
   val magRegex = """(?i)em.(opt|IR)(\.\w)?""".r
 
   def parseDoubleValue(ucd: Ucd, s: String): CatalogProblem \/ Double =
-    \/.fromTryCatch(s.toDouble).leftMap(_ => FieldValueProblem(ucd, s))
+    \/.fromTryCatchNonFatal(s.toDouble).leftMap(_ => FieldValueProblem(ucd, s))
 
 }
 
