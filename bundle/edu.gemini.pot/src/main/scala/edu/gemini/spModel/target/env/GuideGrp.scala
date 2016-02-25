@@ -8,6 +8,7 @@ import edu.gemini.spModel.target.SPTarget
 import scalaz._
 import Scalaz._
 
+import AutomaticGroup.{Active, Initial, Disabled}
 
 /** A map of guide probes and their associated guide star options.  There are
   * two main categories of guide groups, automatically vs. manually maintained.
@@ -25,9 +26,9 @@ sealed trait GuideGrp extends Serializable {
     */
   def referencedGuiders: Set[GuideProbe] =
     this match {
-      case AutomaticGroup.Initial    => Set.empty[GuideProbe]
-      case AutomaticGroup.Active(ts) => ts.keySet
-      case ManualGroup(_, ts)        => ts.keySet
+      case Initial | Disabled  => Set.empty[GuideProbe]
+      case Active(ts)          => ts.keySet
+      case ManualGroup(_, ts)  => ts.keySet
     }
 
   /** Returns the set of guide probes with at least one associated primary
@@ -35,9 +36,9 @@ sealed trait GuideGrp extends Serializable {
     */
   def primaryReferencedGuiders: Set[GuideProbe] =
     this match {
-      case AutomaticGroup.Initial    => Set.empty[GuideProbe]
-      case AutomaticGroup.Active(ts) => ts.keySet
-      case ManualGroup(_, ts)        => ts.filter(_.hasFocus).keySet
+      case Initial | Disabled => Set.empty[GuideProbe]
+      case Active(ts)         => ts.keySet
+      case ManualGroup(_, ts) => ts.filter(_.hasFocus).keySet
     }
 }
 
@@ -82,9 +83,12 @@ object ManualGroup {
 /** Automatic groups map guide probes to a single guide star. */
 sealed trait AutomaticGroup extends GuideGrp {
   def isAutomatic: Boolean = true
-  def toManualGroup: ManualGroup
 
-  def targetMap: GuideProbe ==>> SPTarget
+  def toManualGroup: ManualGroup =
+    ManualGroup.Empty
+
+  def targetMap: GuideProbe ==>> SPTarget =
+    ==>>.empty
 }
 
 object AutomaticGroup {
@@ -92,19 +96,18 @@ object AutomaticGroup {
   /** The initial automatic group is a marker indicating that the target
     * environment is "new".
     */
-  case object Initial extends AutomaticGroup {
-    def toManualGroup: ManualGroup =
-      ManualGroup.Empty
+  case object Initial extends AutomaticGroup
 
-    def targetMap: GuideProbe ==>> SPTarget =
-      ==>>.empty
-  }
+  /** A BAGS group that indicates that automatic guide stars should not be
+    * sought. This is used in particular for pre-2016B observations.
+    */
+  case object Disabled extends AutomaticGroup
 
-  /** An active bags group provides a 1:1 mapping from probe to target. If the
+  /** An active BAGS group provides a 1:1 mapping from probe to target. If the
     * map is empty this is ok; it just means bags did not find any targets.
     */
-  case class Active(targetMap: GuideProbe ==>> SPTarget) extends AutomaticGroup {
-    def toManualGroup: ManualGroup =
+  case class Active(override val targetMap: GuideProbe ==>> SPTarget) extends AutomaticGroup {
+    override def toManualGroup: ManualGroup =
       ManualGroup("", targetMap.map(t => OptsList.focused(t)))
   }
 
@@ -114,26 +117,26 @@ object AutomaticGroup {
   implicit val TargetCollectionAutomaticGroup: TargetCollection[AutomaticGroup] = new TargetCollection[AutomaticGroup] {
     override def cloneTargets(a: AutomaticGroup): AutomaticGroup =
       a match {
-        case Initial    => a
-        case Active(ts) => AutomaticGroup.Active(ts.map(_.clone()))
+        case Initial | Disabled => a
+        case Active(ts)         => AutomaticGroup.Active(ts.map(_.clone()))
       }
 
     override def containsTarget(a: AutomaticGroup, t: SPTarget): Boolean =
       a match {
-        case Initial    => false
-        case Active(ts) => ts.any { _ == t }
+        case Initial | Disabled  => false
+        case Active(ts)          => ts.any { _ == t }
       }
 
     override def removeTarget(a: AutomaticGroup, t: SPTarget): AutomaticGroup =
       a match {
-        case Initial   => Initial
         case Active(m) => Active(m.filter(_ != t))
+        case _         => a
       }
 
     override def targets(a: AutomaticGroup): GuideProbe ==>> NonEmptyList[SPTarget] =
       a match {
-        case Initial   => ==>>.empty
-        case Active(m) => m.map(_.wrapNel)
+        case Initial | Disabled => ==>>.empty
+        case Active(m)          => m.map(_.wrapNel)
       }
   }
 

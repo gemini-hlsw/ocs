@@ -1,0 +1,433 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE document PUBLIC "-//Gemini Observatory//DTD for Storage of P1 and P2 Documents//EN" "http://ftp.gemini.edu/Support/xml/dtds/SpXML2.dtd">
+
+<document>
+  <container kind="program" type="Program" version="2016A-1" subtype="basic" key="aff871bb-d34f-4a88-b965-aba58a98f6bd" name="">
+    <paramset name="Science Program" kind="dataObj">
+      <param name="programMode" value="QUEUE"/>
+      <param name="tooType" value="none"/>
+      <param name="programStatus" value="PHASE2"/>
+      <param name="nextObsId" value="1"/>
+      <paramset name="timeAcct"/>
+      <param name="awardedTime" value="0.0" units="hours"/>
+      <param name="fetched" value="true"/>
+      <param name="completed" value="false"/>
+      <param name="notifyPi" value="YES"/>
+    </paramset>
+    <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="debfbe51-decc-4c4f-90fa-cc7a37b2f4b9" name="">
+      <paramset name="Observation" kind="dataObj">
+        <param name="title" value="No Groups"/>
+        <param name="libraryId" value=""/>
+        <param name="priority" value="LOW"/>
+        <param name="tooOverrideRapid" value="false"/>
+        <param name="phase2Status" value="PI_TO_COMPLETE"/>
+        <param name="qaState" value="UNDEFINED"/>
+        <param name="overrideQaState" value="false"/>
+      </paramset>
+      <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="1b8830c3-5359-43ef-929c-be2026c2d751" name="Observing Conditions">
+        <paramset name="Observing Conditions" kind="dataObj">
+          <param name="CloudCover" value="ANY"/>
+          <param name="ImageQuality" value="ANY"/>
+          <param name="SkyBackground" value="ANY"/>
+          <param name="WaterVapor" value="ANY"/>
+          <param name="ElevationConstraintType" value="NONE"/>
+          <param name="ElevationConstraintMin" value="0.0"/>
+          <param name="ElevationConstraintMax" value="0.0"/>
+          <paramset name="timing-window-list"/>
+        </paramset>
+      </container>
+      <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="4ed6b480-12a5-4274-9b61-e269f3725b37" name="Targets">
+        <paramset name="Targets" kind="dataObj">
+          <paramset name="targetEnv">
+            <paramset name="base">
+              <param name="name" value=""/>
+              <param name="system" value="J2000"/>
+              <param name="epoch" value="2000.0" units="years"/>
+              <param name="c1" value="00:00:00.000"/>
+              <param name="c2" value="00:00:00.00"/>
+              <param name="pm1" value="0.0" units="milli-arcsecs/year"/>
+              <param name="pm2" value="0.0" units="milli-arcsecs/year"/>
+              <param name="parallax" value="0.0" units="mas"/>
+              <param name="z" value="0.0"/>
+            </paramset>
+            <paramset name="guideEnv"/>
+          </paramset>
+        </paramset>
+      </container>
+      <container kind="obsComp" type="Instrument" version="2009A-1" subtype="GMOSSouth" key="843e9a60-3081-42b2-aa3a-b12e6f7cc8e0" name="GMOS-S">
+        <paramset name="GMOS-S" kind="dataObj">
+          <param name="exposureTime" value="300.0"/>
+          <param name="posAngle" value="0"/>
+          <param name="coadds" value="1"/>
+          <paramset name="parallacticAngleDuration">
+            <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+            <param name="explicitDuration" value="0"/>
+          </paramset>
+          <param name="adc" value="NONE"/>
+          <param name="ampCount" value="TWELVE"/>
+          <param name="gainChoice" value="LOW"/>
+          <param name="ampReadMode" value="SLOW"/>
+          <param name="detectorManufacturer" value="HAMAMATSU"/>
+          <param name="disperser" value="MIRROR"/>
+          <param name="fpuMode" value="BUILTIN"/>
+          <param name="fpu" value="FPU_NONE"/>
+          <param name="filter" value="NONE"/>
+          <param name="ccdXBinning" value="ONE"/>
+          <param name="ccdYBinning" value="ONE"/>
+          <param name="issPort" value="SIDE_LOOKING"/>
+          <param name="posAngleConstraint" value="FIXED"/>
+          <param name="stageMode" value="FOLLOW_XYZ"/>
+          <param name="dtaXOffset" value="ZERO"/>
+          <param name="builtinROI" value="FULL_FRAME"/>
+          <param name="useNS" value="FALSE"/>
+          <param name="mosPreimaging" value="NO"/>
+        </paramset>
+      </container>
+      <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="d8969949-1b12-4b2b-a996-d21d481f2c7d" name="Observing Log">
+        <paramset name="Observing Log" kind="dataObj">
+          <paramset name="obsQaRecord"/>
+        </paramset>
+      </container>
+      <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="9f1bf006-93c0-4ce2-95c2-b65e43b1f833" name="Observation Exec Log">
+        <paramset name="Observation Exec Log" kind="dataObj">
+          <paramset name="obsExecRecord">
+            <paramset name="datasets"/>
+            <paramset name="events"/>
+            <paramset name="configMap"/>
+          </paramset>
+        </paramset>
+      </container>
+      <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="832f370e-4eaa-47fa-9a95-316e64d5075d" name="Sequence">
+        <paramset name="Sequence" kind="dataObj"/>
+      </container>
+    </container>
+    <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="9820c503-ff91-4a06-84cd-f770bb9d8f7c" name="">
+      <paramset name="Observation" kind="dataObj">
+        <param name="title" value="One Manual Group"/>
+        <param name="libraryId" value=""/>
+        <param name="priority" value="LOW"/>
+        <param name="tooOverrideRapid" value="false"/>
+        <param name="phase2Status" value="PI_TO_COMPLETE"/>
+        <param name="qaState" value="UNDEFINED"/>
+        <param name="overrideQaState" value="false"/>
+      </paramset>
+      <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="3ee541fb-c0fc-4d58-93bd-9b1bf1b08ff7" name="Observing Conditions">
+        <paramset name="Observing Conditions" kind="dataObj">
+          <param name="CloudCover" value="ANY"/>
+          <param name="ImageQuality" value="ANY"/>
+          <param name="SkyBackground" value="ANY"/>
+          <param name="WaterVapor" value="ANY"/>
+          <param name="ElevationConstraintType" value="NONE"/>
+          <param name="ElevationConstraintMin" value="0.0"/>
+          <param name="ElevationConstraintMax" value="0.0"/>
+          <paramset name="timing-window-list"/>
+        </paramset>
+      </container>
+      <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="46ef879d-4cb8-4ed4-9d0f-c7e7896ac7f2" name="Targets">
+        <paramset name="Targets" kind="dataObj">
+          <paramset name="targetEnv">
+            <paramset name="base">
+              <param name="name" value=""/>
+              <param name="system" value="J2000"/>
+              <param name="epoch" value="2000.0" units="years"/>
+              <param name="c1" value="00:00:00.000"/>
+              <param name="c2" value="00:00:00.00"/>
+              <param name="pm1" value="0.0" units="milli-arcsecs/year"/>
+              <param name="pm2" value="0.0" units="milli-arcsecs/year"/>
+              <param name="parallax" value="0.0" units="mas"/>
+              <param name="z" value="0.0"/>
+            </paramset>
+            <paramset name="guideEnv">
+              <param name="primary" value="0"/>
+              <paramset name="guideGroup">
+                <paramset name="guider">
+                  <param name="key" value="GMOS OIWFS"/>
+                  <paramset name="bagsResult">
+                    <param name="bagsResultId" value="NoSearchPerformed"/>
+                  </paramset>
+                  <param name="primary" value="0"/>
+                  <paramset name="spTarget">
+                    <param name="name" value="Foo"/>
+                    <param name="system" value="J2000"/>
+                    <param name="epoch" value="2000.0" units="years"/>
+                    <param name="c1" value="00:00:00.000"/>
+                    <param name="c2" value="00:00:00.00"/>
+                    <param name="pm1" value="0.0" units="milli-arcsecs/year"/>
+                    <param name="pm2" value="0.0" units="milli-arcsecs/year"/>
+                    <param name="parallax" value="0.0" units="mas"/>
+                    <param name="z" value="0.0"/>
+                  </paramset>
+                </paramset>
+              </paramset>
+            </paramset>
+          </paramset>
+        </paramset>
+      </container>
+      <container kind="obsComp" type="Instrument" version="2009A-1" subtype="GMOSSouth" key="76bbd950-ce06-4960-a72d-afd5c3618898" name="GMOS-S">
+        <paramset name="GMOS-S" kind="dataObj">
+          <param name="exposureTime" value="300.0"/>
+          <param name="posAngle" value="0"/>
+          <param name="coadds" value="1"/>
+          <paramset name="parallacticAngleDuration">
+            <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+            <param name="explicitDuration" value="0"/>
+          </paramset>
+          <param name="adc" value="NONE"/>
+          <param name="ampCount" value="TWELVE"/>
+          <param name="gainChoice" value="LOW"/>
+          <param name="ampReadMode" value="SLOW"/>
+          <param name="detectorManufacturer" value="HAMAMATSU"/>
+          <param name="disperser" value="MIRROR"/>
+          <param name="fpuMode" value="BUILTIN"/>
+          <param name="fpu" value="FPU_NONE"/>
+          <param name="filter" value="NONE"/>
+          <param name="ccdXBinning" value="ONE"/>
+          <param name="ccdYBinning" value="ONE"/>
+          <param name="issPort" value="SIDE_LOOKING"/>
+          <param name="posAngleConstraint" value="FIXED"/>
+          <param name="stageMode" value="FOLLOW_XYZ"/>
+          <param name="dtaXOffset" value="ZERO"/>
+          <param name="builtinROI" value="FULL_FRAME"/>
+          <param name="useNS" value="FALSE"/>
+          <param name="mosPreimaging" value="NO"/>
+        </paramset>
+      </container>
+      <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="b6561a3b-e1d4-4abe-abdf-061d112924eb" name="Observing Log">
+        <paramset name="Observing Log" kind="dataObj">
+          <paramset name="obsQaRecord"/>
+        </paramset>
+      </container>
+      <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="7cbfde0c-2bed-4f1d-9320-050498ed5599" name="Observation Exec Log">
+        <paramset name="Observation Exec Log" kind="dataObj">
+          <paramset name="obsExecRecord">
+            <paramset name="datasets"/>
+            <paramset name="events"/>
+            <paramset name="configMap"/>
+          </paramset>
+        </paramset>
+      </container>
+      <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="db8b6028-1886-47bd-a367-f3cdac7296ab" name="Sequence">
+        <paramset name="Sequence" kind="dataObj"/>
+      </container>
+    </container>
+    <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="f13a8f6f-aefc-4f38-8de8-0b6d8f591518" name="">
+      <paramset name="Observation" kind="dataObj">
+        <param name="title" value="Two Manual Groups"/>
+        <param name="libraryId" value=""/>
+        <param name="priority" value="LOW"/>
+        <param name="tooOverrideRapid" value="false"/>
+        <param name="phase2Status" value="PI_TO_COMPLETE"/>
+        <param name="qaState" value="UNDEFINED"/>
+        <param name="overrideQaState" value="false"/>
+      </paramset>
+      <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="631c08f4-5424-4ca7-bcca-f30429310fe0" name="Observing Conditions">
+        <paramset name="Observing Conditions" kind="dataObj">
+          <param name="CloudCover" value="ANY"/>
+          <param name="ImageQuality" value="ANY"/>
+          <param name="SkyBackground" value="ANY"/>
+          <param name="WaterVapor" value="ANY"/>
+          <param name="ElevationConstraintType" value="NONE"/>
+          <param name="ElevationConstraintMin" value="0.0"/>
+          <param name="ElevationConstraintMax" value="0.0"/>
+          <paramset name="timing-window-list"/>
+        </paramset>
+      </container>
+      <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="3dfc0212-7671-44a0-b12e-7129f33caca5" name="Targets">
+        <paramset name="Targets" kind="dataObj">
+          <paramset name="targetEnv">
+            <paramset name="base">
+              <param name="name" value=""/>
+              <param name="system" value="J2000"/>
+              <param name="epoch" value="2000.0" units="years"/>
+              <param name="c1" value="00:00:00.000"/>
+              <param name="c2" value="00:00:00.00"/>
+              <param name="pm1" value="0.0" units="milli-arcsecs/year"/>
+              <param name="pm2" value="0.0" units="milli-arcsecs/year"/>
+              <param name="parallax" value="0.0" units="mas"/>
+              <param name="z" value="0.0"/>
+            </paramset>
+            <paramset name="guideEnv">
+              <param name="primary" value="1"/>
+              <paramset name="guideGroup">
+                <paramset name="guider">
+                  <param name="key" value="GMOS OIWFS"/>
+                  <paramset name="bagsResult">
+                    <param name="bagsResultId" value="NoSearchPerformed"/>
+                  </paramset>
+                  <param name="primary" value="0"/>
+                  <paramset name="spTarget">
+                    <param name="name" value=""/>
+                    <param name="system" value="J2000"/>
+                    <param name="epoch" value="2000.0" units="years"/>
+                    <param name="c1" value="00:00:00.000"/>
+                    <param name="c2" value="00:00:00.00"/>
+                    <param name="pm1" value="0.0" units="milli-arcsecs/year"/>
+                    <param name="pm2" value="0.0" units="milli-arcsecs/year"/>
+                    <param name="parallax" value="0.0" units="mas"/>
+                    <param name="z" value="0.0"/>
+                  </paramset>
+                </paramset>
+              </paramset>
+              <paramset name="guideGroup">
+                <paramset name="guider">
+                  <param name="key" value="GMOS OIWFS"/>
+                  <paramset name="bagsResult">
+                    <param name="bagsResultId" value="NoSearchPerformed"/>
+                  </paramset>
+                  <param name="primary" value="0"/>
+                  <paramset name="spTarget">
+                    <param name="name" value=""/>
+                    <param name="system" value="J2000"/>
+                    <param name="epoch" value="2000.0" units="years"/>
+                    <param name="c1" value="00:00:00.000"/>
+                    <param name="c2" value="00:00:00.00"/>
+                    <param name="pm1" value="0.0" units="milli-arcsecs/year"/>
+                    <param name="pm2" value="0.0" units="milli-arcsecs/year"/>
+                    <param name="parallax" value="0.0" units="mas"/>
+                    <param name="z" value="0.0"/>
+                  </paramset>
+                </paramset>
+              </paramset>
+            </paramset>
+          </paramset>
+        </paramset>
+      </container>
+      <container kind="obsComp" type="Instrument" version="2009A-1" subtype="GMOSSouth" key="bdb73a0d-b04c-43cf-95a4-c14d3f154868" name="GMOS-S">
+        <paramset name="GMOS-S" kind="dataObj">
+          <param name="exposureTime" value="300.0"/>
+          <param name="posAngle" value="0"/>
+          <param name="coadds" value="1"/>
+          <paramset name="parallacticAngleDuration">
+            <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+            <param name="explicitDuration" value="0"/>
+          </paramset>
+          <param name="adc" value="NONE"/>
+          <param name="ampCount" value="TWELVE"/>
+          <param name="gainChoice" value="LOW"/>
+          <param name="ampReadMode" value="SLOW"/>
+          <param name="detectorManufacturer" value="HAMAMATSU"/>
+          <param name="disperser" value="MIRROR"/>
+          <param name="fpuMode" value="BUILTIN"/>
+          <param name="fpu" value="FPU_NONE"/>
+          <param name="filter" value="NONE"/>
+          <param name="ccdXBinning" value="ONE"/>
+          <param name="ccdYBinning" value="ONE"/>
+          <param name="issPort" value="SIDE_LOOKING"/>
+          <param name="posAngleConstraint" value="FIXED"/>
+          <param name="stageMode" value="FOLLOW_XYZ"/>
+          <param name="dtaXOffset" value="ZERO"/>
+          <param name="builtinROI" value="FULL_FRAME"/>
+          <param name="useNS" value="FALSE"/>
+          <param name="mosPreimaging" value="NO"/>
+        </paramset>
+      </container>
+      <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="8e99d47e-2d61-47ec-88e1-7ba60369e1ba" name="Observing Log">
+        <paramset name="Observing Log" kind="dataObj">
+          <paramset name="obsQaRecord"/>
+        </paramset>
+      </container>
+      <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="554e479d-4e0f-45a1-b613-070e0f8553b7" name="Observation Exec Log">
+        <paramset name="Observation Exec Log" kind="dataObj">
+          <paramset name="obsExecRecord">
+            <paramset name="datasets"/>
+            <paramset name="events"/>
+            <paramset name="configMap"/>
+          </paramset>
+        </paramset>
+      </container>
+      <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="cb59237e-1692-49d1-8f11-1c111a5d7848" name="Sequence">
+        <paramset name="Sequence" kind="dataObj"/>
+      </container>
+    </container>
+  </container>
+  <container kind="versions" type="versions" version="1.0">
+    <paramset name="node">
+      <param name="key" value="debfbe51-decc-4c4f-90fa-cc7a37b2f4b9"/>
+      <param name="1feece17-a8bc-4cd8-bb72-da9d0eb52966" value="10"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="cb59237e-1692-49d1-8f11-1c111a5d7848"/>
+      <param name="1feece17-a8bc-4cd8-bb72-da9d0eb52966" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="f13a8f6f-aefc-4f38-8de8-0b6d8f591518"/>
+      <param name="1feece17-a8bc-4cd8-bb72-da9d0eb52966" value="17"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="3dfc0212-7671-44a0-b12e-7129f33caca5"/>
+      <param name="1feece17-a8bc-4cd8-bb72-da9d0eb52966" value="4"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="631c08f4-5424-4ca7-bcca-f30429310fe0"/>
+      <param name="1feece17-a8bc-4cd8-bb72-da9d0eb52966" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="7cbfde0c-2bed-4f1d-9320-050498ed5599"/>
+      <param name="1feece17-a8bc-4cd8-bb72-da9d0eb52966" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="46ef879d-4cb8-4ed4-9d0f-c7e7896ac7f2"/>
+      <param name="1feece17-a8bc-4cd8-bb72-da9d0eb52966" value="23"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="9f1bf006-93c0-4ce2-95c2-b65e43b1f833"/>
+      <param name="1feece17-a8bc-4cd8-bb72-da9d0eb52966" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="554e479d-4e0f-45a1-b613-070e0f8553b7"/>
+      <param name="1feece17-a8bc-4cd8-bb72-da9d0eb52966" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="b6561a3b-e1d4-4abe-abdf-061d112924eb"/>
+      <param name="1feece17-a8bc-4cd8-bb72-da9d0eb52966" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="d8969949-1b12-4b2b-a996-d21d481f2c7d"/>
+      <param name="1feece17-a8bc-4cd8-bb72-da9d0eb52966" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="1b8830c3-5359-43ef-929c-be2026c2d751"/>
+      <param name="1feece17-a8bc-4cd8-bb72-da9d0eb52966" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="832f370e-4eaa-47fa-9a95-316e64d5075d"/>
+      <param name="1feece17-a8bc-4cd8-bb72-da9d0eb52966" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="76bbd950-ce06-4960-a72d-afd5c3618898"/>
+      <param name="1feece17-a8bc-4cd8-bb72-da9d0eb52966" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="843e9a60-3081-42b2-aa3a-b12e6f7cc8e0"/>
+      <param name="1feece17-a8bc-4cd8-bb72-da9d0eb52966" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="bdb73a0d-b04c-43cf-95a4-c14d3f154868"/>
+      <param name="1feece17-a8bc-4cd8-bb72-da9d0eb52966" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="4ed6b480-12a5-4274-9b61-e269f3725b37"/>
+      <param name="1feece17-a8bc-4cd8-bb72-da9d0eb52966" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="aff871bb-d34f-4a88-b965-aba58a98f6bd"/>
+      <param name="1feece17-a8bc-4cd8-bb72-da9d0eb52966" value="3"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="3ee541fb-c0fc-4d58-93bd-9b1bf1b08ff7"/>
+      <param name="1feece17-a8bc-4cd8-bb72-da9d0eb52966" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="8e99d47e-2d61-47ec-88e1-7ba60369e1ba"/>
+      <param name="1feece17-a8bc-4cd8-bb72-da9d0eb52966" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="db8b6028-1886-47bd-a367-f3cdac7296ab"/>
+      <param name="1feece17-a8bc-4cd8-bb72-da9d0eb52966" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="9820c503-ff91-4a06-84cd-f770bb9d8f7c"/>
+      <param name="1feece17-a8bc-4cd8-bb72-da9d0eb52966" value="26"/>
+    </paramset>
+  </container>
+</document>

@@ -205,7 +205,8 @@ final case class GuideEnvironment(guideEnv: GuideEnv) extends TargetContainer {
 
 object GuideEnvironment {
   val ParamSetName = "guideEnv"
-  val Initial: GuideEnvironment = GuideEnvironment(GuideEnv.initial)
+  val Initial: GuideEnvironment  = GuideEnvironment(GuideEnv.Initial)
+  val Disabled: GuideEnvironment = GuideEnvironment(GuideEnv.Disabled)
 
   val env: GuideEnvironment @> GuideEnv =
     Lens.lensu((a,b) => a.copy(b), _.guideEnv)
@@ -216,7 +217,9 @@ object GuideEnvironment {
   val manual: GuideEnvironment @> Option[OptsList[ManualGroup]] =
     env >=> GuideEnv.manual
 
-  private def initializeOptions(opts0: List[GuideGroup], primary0: Int): GuideEnvironment = {
+  def create(guideGroups: OptionsList[GuideGroup]): GuideEnvironment = {
+    val opts0    = guideGroups.getOptions.asScalaList
+    val primary0 = guideGroups.getPrimaryIndex.getOrElse(0).intValue
     val (opts, primary) =
       if (opts0.headOption.exists(_.grp.isAutomatic)) (opts0, primary0)
       else (GuideGroup.AutomaticInitial :: opts0, primary0 + 1)
@@ -224,12 +227,9 @@ object GuideEnvironment {
     Initial.setOptions(opts.asImList).setPrimaryIndex(primary)
   }
 
-  def create(guideGroups: OptionsList[GuideGroup]): GuideEnvironment =
-    initializeOptions(guideGroups.getOptions.asScalaList, guideGroups.getPrimaryIndex.getOrElse(0))
-
   def fromParamSet(parent: ParamSet): GuideEnvironment = {
     val groups = parent.getParamSets.asScala.toList.map(GuideGroup.fromParamSet)
-    initializeOptions(groups, Pio.getIntValue(parent, "primary", 0))
+    Initial.setOptions(groups.asImList).setPrimaryIndex(Pio.getIntValue(parent, "primary", 0))
   }
 
   private def toSortedSet(s: Set[GuideProbe]): java.util.SortedSet[GuideProbe] =

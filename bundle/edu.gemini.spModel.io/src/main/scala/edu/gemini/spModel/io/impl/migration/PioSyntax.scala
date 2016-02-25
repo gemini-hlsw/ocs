@@ -19,7 +19,7 @@ object PioSyntax {
     }
 
     def findContainers(spc: SPComponentType): List[Container] =
-      allContainers.filter(_.componentType.exists(_ == spc))
+      allContainers.filter(_.componentType.contains(spc))
 
   }
 

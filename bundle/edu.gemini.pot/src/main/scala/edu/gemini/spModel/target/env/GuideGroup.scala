@@ -1,6 +1,7 @@
 package edu.gemini.spModel.target.env
 
-import edu.gemini.spModel.target.env.AutomaticGroup.{Active, Initial}
+import edu.gemini.spModel.target.env.AutomaticGroup.{Active, Disabled, Initial}
+import edu.gemini.spModel.target.env.GuideGroup.AutoDisabledTag
 import edu.gemini.spModel.target.env.TargetCollection._
 import edu.gemini.shared.util.immutable.{Option => GemOption, ImOption, ImList}
 import edu.gemini.shared.util.immutable.ScalaConverters._
@@ -46,9 +47,9 @@ case class GuideGroup(grp: GuideGrp) extends java.lang.Iterable[GuideProbeTarget
     */
   def contains(gp: GuideProbe): Boolean =
     grp match {
-      case AutomaticGroup.Initial    => false
-      case AutomaticGroup.Active(ts) => ts.member(gp)
-      case ManualGroup(_, ts)        => ts.member(gp)
+      case Initial | Disabled => false
+      case Active(ts)         => ts.member(gp)
+      case ManualGroup(_, ts) => ts.member(gp)
     }
 
   private def gpt(gp: GuideProbe): Option[GuideProbeTargets] = {
@@ -56,10 +57,10 @@ case class GuideGroup(grp: GuideGrp) extends java.lang.Iterable[GuideProbeTarget
       case ManualGroup(_, opts) =>
         opts.lookup(gp).map { o => (o.focus, o.toList) }
 
-      case Active(ts)         =>
+      case Active(ts)           =>
         ts.lookup(gp).map { t => (some(t), List(t)) }
 
-      case Initial            =>
+      case Initial | Disabled   =>
         None
     }
 
@@ -132,7 +133,7 @@ case class GuideGroup(grp: GuideGrp) extends java.lang.Iterable[GuideProbeTarget
       case a@Active(ts)         =>
         a.copy(targetMap = primary.fold(ts - probe) { t => ts + (probe -> t)})
 
-      case Initial              =>
+      case Initial | Disabled   =>
         primary.fold(grp) { t => Active(==>>.singleton(probe, t)) }
     }
   }
@@ -140,6 +141,7 @@ case class GuideGroup(grp: GuideGrp) extends java.lang.Iterable[GuideProbeTarget
   def remove(probe: GuideProbe): GuideGroup =
     mod {
       case Initial         => Initial
+      case Disabled        => Disabled
       case a: Active       => a.copy(targetMap = a.targetMap - probe)
       case mg: ManualGroup => mg.copy(targetMap = mg.targetMap - probe)
     }
@@ -147,13 +149,14 @@ case class GuideGroup(grp: GuideGrp) extends java.lang.Iterable[GuideProbeTarget
   def clear(): GuideGroup =
     mod {
       case Initial         => Initial
+      case Disabled        => Disabled
       case a: Active       => a.copy(targetMap  = ==>>.empty)
       case mg: ManualGroup => mg.copy(targetMap = ==>>.empty)
     }
 
   private def sortedKeys: List[GuideProbe] =
     (grp match {
-      case Initial            => Set.empty[GuideProbe]
+      case Initial | Disabled => Set.empty[GuideProbe]
       case Active(ts)         => ts.keySet // already sorted
       case ManualGroup(_, ts) => ts.keySet // already sorted
     }).toList
@@ -241,6 +244,7 @@ case class GuideGroup(grp: GuideGrp) extends java.lang.Iterable[GuideProbeTarget
 
     val tag = grp match {
       case Initial           => AutoInitialTag
+      case Disabled          => AutoDisabledTag
       case Active(_)         => AutoActiveTag
       case ManualGroup(_, _) => ManualTag
     }
@@ -263,7 +267,8 @@ case class GuideGroup(grp: GuideGrp) extends java.lang.Iterable[GuideProbeTarget
 
 object GuideGroup extends ((GuideGrp) => GuideGroup) {
   /** An initial automatic `GuideGroup`. */
-  val AutomaticInitial = GuideGroup(Initial)
+  val AutomaticInitial  = GuideGroup(Initial)
+  val AutomaticDisabled = GuideGroup(Disabled)
 
   /** An empty manual group. */
   val ManualEmpty      = GuideGroup(ManualGroup("Manual Group", ==>>.empty))
@@ -276,12 +281,13 @@ object GuideGroup extends ((GuideGrp) => GuideGroup) {
 
   val ParamSetName = "guideGroup"
 
-  private sealed trait TypeTag
-  private case object AutoInitialTag extends TypeTag
-  private case object AutoActiveTag extends TypeTag
-  private case object ManualTag extends TypeTag
+  sealed trait TypeTag
+  case object AutoInitialTag  extends TypeTag
+  case object AutoDisabledTag extends TypeTag
+  case object AutoActiveTag   extends TypeTag
+  case object ManualTag       extends TypeTag
 
-  private val AllTags = List(AutoInitialTag, AutoActiveTag, ManualTag)
+  private val AllTags = List(AutoInitialTag, AutoDisabledTag, AutoActiveTag, ManualTag)
 
   def fromParamSet(ps: ParamSet): GuideGroup = {
     val name    = Pio.getValue(ps, "name", "Manual Group")
@@ -293,9 +299,10 @@ object GuideGroup extends ((GuideGrp) => GuideGroup) {
     } yield t
 
     typeTag.fold(createManual(name, targets)) {
-      case AutoInitialTag => AutomaticInitial
-      case AutoActiveTag  => createActive(targets)
-      case ManualTag      => createManual(name, targets)
+      case AutoInitialTag  => AutomaticInitial
+      case AutoDisabledTag => AutomaticDisabled
+      case AutoActiveTag   => createActive(targets)
+      case ManualTag       => createManual(name, targets)
     }
   }
 

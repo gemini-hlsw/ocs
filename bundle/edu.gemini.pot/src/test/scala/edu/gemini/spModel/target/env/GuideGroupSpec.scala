@@ -51,6 +51,11 @@ class GuideGroupSpec extends Specification with ScalaCheck with Arbitraries with
         !GuideGroup(AutomaticGroup.Initial).contains(gp)
       }
 
+    "be false for any guide probe for the disabled automatic group" in
+      forAll { (gp: GuideProbe) =>
+        !GuideGroup(AutomaticGroup.Disabled).contains(gp)
+      }
+
     "be true iff there are targets associated with the guide probe" in
       forAll { (g: GuideGroup) =>
         AllProbes.forall { gp =>
@@ -89,6 +94,7 @@ class GuideGroupSpec extends Specification with ScalaCheck with Arbitraries with
               case ManualGroup(_, m)        => m.lookup(gp).flatMap(_.focus)
               case AutomaticGroup.Active(m) => m.lookup(gp)
               case AutomaticGroup.Initial   => None
+              case AutomaticGroup.Disabled  => None
             })
           }
         }
@@ -177,6 +183,7 @@ class GuideGroupSpec extends Specification with ScalaCheck with Arbitraries with
         g.grp match {
           case AutomaticGroup.Active(m) => guiders == m.keySet
           case AutomaticGroup.Initial   => guiders.isEmpty
+          case AutomaticGroup.Disabled  => guiders.isEmpty
           case ManualGroup(_, m)        => guiders == m.keySet
         }
       }
@@ -299,6 +306,12 @@ class GuideGroupSpec extends Specification with ScalaCheck with Arbitraries with
     "return nothing for automatic initial groups" in
       forAll { (t: SPTarget) =>
         val gg = GuideGroup(AutomaticGroup.Initial)
+        gg.getAllContaining(t).isEmpty
+      }
+
+    "return nothing for automatic disabled groups" in
+      forAll { (t: SPTarget) =>
+        val gg = GuideGroup(AutomaticGroup.Disabled)
         gg.getAllContaining(t).isEmpty
       }
 

@@ -73,7 +73,8 @@ object GuideEnv {
   /** Initial/default `GuideEnv`. Contains an `AutomaticGroup.Initial` and no
     * manual groups.
     */
-  val initial: GuideEnv = GuideEnv(AutomaticGroup.Initial, none)
+  val Initial: GuideEnv  = GuideEnv(AutomaticGroup.Initial, none)
+  val Disabled: GuideEnv = GuideEnv(AutomaticGroup.Disabled, none)
 
   val auto: GuideEnv @> AutomaticGroup =
     Lens.lensu((ge,a) => ge.copy(auto = a), _.auto)

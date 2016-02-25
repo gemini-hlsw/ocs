@@ -18,7 +18,6 @@ import edu.gemini.spModel.target.obsComp.TargetSelection;
 import edu.gemini.spModel.target.offset.OffsetPosBase;
 import edu.gemini.spModel.target.offset.OffsetPosList;
 import edu.gemini.spModel.target.offset.OffsetUtil;
-import edu.gemini.spModel.target.system.ITarget;
 import jsky.app.ot.OT;
 import jsky.app.ot.OTOptions;
 import jsky.app.ot.util.Resources;
@@ -204,7 +203,18 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
 
         static final class GroupRow extends AbstractRow {
             private static String extractName(final GuideGroup group) {
-                return group.getName().getOrElse("Auto");
+                final GuideGrp grp = group.grp();
+                final String name;
+                if (grp.isAutomatic()) {
+                    if (grp instanceof AutomaticGroup.Disabled$) {
+                        name = "Auto (Disabled)";
+                    } else {
+                        name = "Auto";
+                    }
+                } else {
+                    name = group.getName().getOrElse("Manual");
+                }
+                return name;
             }
 
             private final Option<IndexedGuideGroup> group;
