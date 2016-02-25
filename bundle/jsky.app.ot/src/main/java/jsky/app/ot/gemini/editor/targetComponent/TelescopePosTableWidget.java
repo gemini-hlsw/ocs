@@ -340,7 +340,7 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
             final Set<Magnitude.Band> bands = new TreeSet<>(Magnitude.Band.WAVELENGTH_COMPARATOR);
 
             // Extract all the magnitude bands from the environment.
-            env.getTargets().foreach(spTarget -> bands.addAll(spTarget.getTarget().getMagnitudeBands()));
+            env.getTargets().foreach(spTarget -> bands.addAll(spTarget.getMagnitudeBands()));
 
             // Create an immutable sorted list containing the results.
             return DefaultImList.create(bands);

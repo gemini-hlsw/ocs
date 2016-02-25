@@ -16,6 +16,7 @@ import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.obscomp.SPInstObsComp
 import edu.gemini.spModel.rich.shared.immutable.asScalaOpt
+import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.system.ITarget
 import jsky.app.ot.userprefs.observer.ObservingPeer
 import jsky.app.ot.util.OtColor
@@ -123,7 +124,7 @@ trait ItcTable extends Table {
       targetEnv <- parameters.targetEnvironment
       analysis  <- parameters.analysisMethod
       probe     <- extractGuideProbe()
-      src       <- extractSource(targetEnv.getBase.getTarget, uc)
+      src       <- extractSource(targetEnv.getBase, uc)
       tele      <- ConfigExtractor.extractTelescope(port, probe, targetEnv, uc.config)
       ins       <- ConfigExtractor.extractInstrumentDetails(instrument, probe, targetEnv, uc.config, cond)
       srcFrac   <- extractSourceFraction(uc, instrument)
@@ -183,7 +184,7 @@ trait ItcTable extends Table {
     o.flatten.fold("Could not identify ags strategy or guide probe type".left[GuideProbe])(_.right)
   }
 
-  private def extractSource(target: ITarget, c: ItcUniqueConfig): String \/ SourceDefinition = {
+  private def extractSource(target: SPTarget, c: ItcUniqueConfig): String \/ SourceDefinition = {
     for {
       (mag, band, system) <- extractSourceMagnitude(target, c.config)
       srcProfile          <- parameters.spatialProfile
@@ -194,7 +195,7 @@ trait ItcTable extends Table {
     }
   }
 
-  private def extractSourceMagnitude(target: ITarget, c: Config): String \/ (Double, MagnitudeBand, BrightnessUnit) = {
+  private def extractSourceMagnitude(target: SPTarget, c: Config): String \/ (Double, MagnitudeBand, BrightnessUnit) = {
 
     def closestBand(bands: List[Magnitude], wl: Wavelength) =
       // note, at this point we've filtered out all bands without a wavelength

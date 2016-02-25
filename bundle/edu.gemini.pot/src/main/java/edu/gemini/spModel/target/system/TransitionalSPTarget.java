@@ -9,6 +9,8 @@ import edu.gemini.spModel.core.SpectralDistribution;
 import edu.gemini.spModel.obs.SchedulingBlock;
 import edu.gemini.spModel.target.WatchablePos;
 
+import java.util.Set;
+
 // transitional; will go away
 public abstract class TransitionalSPTarget extends WatchablePos {
 
@@ -146,6 +148,20 @@ public abstract class TransitionalSPTarget extends WatchablePos {
 
     public ImList<Magnitude> getMagnitudes() {
         return getTarget().getMagnitudes();
+    }
+
+    public boolean isTooTarget() {
+        final ITarget t = getTarget();
+        if (t instanceof HmsDegTarget) {
+            final HmsDegTarget hmsDeg = (HmsDegTarget) t;
+            return hmsDeg.getRa().getValue() == 0.0 &&
+                    hmsDeg.getDec().getValue() == 0.0; ///
+        }
+        return false;
+    }
+
+    public Set<Magnitude.Band> getMagnitudeBands() {
+        return getTarget().getMagnitudeBands();
     }
 
 }

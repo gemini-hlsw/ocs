@@ -444,15 +444,7 @@ public class SPObservation extends AbstractDataObject implements ISPStaffOnlyFie
             return false;
         } else {
             final TargetObsComp toc = (TargetObsComp) targetComp.getDataObject();
-            final ITarget target = toc.getBase().getTarget();
-            final boolean too;
-            if (target instanceof HmsDegTarget) {
-                final HmsDegTarget hms = (HmsDegTarget) target;
-                too = hms.getRa().getValue() == 0 && hms.getDec().getValue() == 0;
-            } else {
-                too = false;
-            }
-            return !too;
+            return !toc.getBase().isTooTarget();
         }
     }
 

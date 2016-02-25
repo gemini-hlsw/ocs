@@ -462,15 +462,7 @@ public class GeneralRule implements IRule {
     private static boolean _isTooTarget(SPTarget p1Target, ObservationElements elems) {
         final ISPObservation obs = elems.getObservationNode();
         if (obs == null || !Too.isToo(obs)) return false;
-
-        final ITarget t = p1Target.getTarget();
-        if (t instanceof HmsDegTarget) {
-            final HmsDegTarget hmsDeg = (HmsDegTarget) t;
-            return hmsDeg.getRa().getValue()  == 0.0 &&
-                   hmsDeg.getDec().getValue() == 0.0; ///
-        }
-
-        return false;
+        return p1Target.isTooTarget();
     }
 
     // true if both defined and diff <= tolerance

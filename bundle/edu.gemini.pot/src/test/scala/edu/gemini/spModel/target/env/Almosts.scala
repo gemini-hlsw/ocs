@@ -26,9 +26,7 @@ trait Almosts {
     new AlmostEqual[SPTarget] {
       val Now = ImOption.apply[java.lang.Long](System.currentTimeMillis)
 
-      def almostEqual(a: SPTarget, b: SPTarget): Boolean = {
-        val at = a.getTarget
-        val bt = b.getTarget
+      def almostEqual(at: SPTarget, bt: SPTarget): Boolean = {
         (at.getName === bt.getName) &&
           (at.getRaDegrees(Now) ~= bt.getRaDegrees(Now)) &&
           (at.getDecDegrees(Now) ~= bt.getDecDegrees(Now))

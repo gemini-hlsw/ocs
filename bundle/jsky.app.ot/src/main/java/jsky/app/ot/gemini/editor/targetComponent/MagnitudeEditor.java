@@ -181,7 +181,7 @@ public class MagnitudeEditor implements TelescopePosEditor {
             final Set<Magnitude.Band> options = new TreeSet<>(Magnitude.Band.WAVELENGTH_COMPARATOR);
             options.addAll(Arrays.asList(Magnitude.Band.values()));
             //noinspection ConstantConditions
-            options.removeAll(target.getTarget().getMagnitudeBands());
+            options.removeAll(target.getMagnitudeBands());
             options.add(band);
             cb.removeActionListener(changeBandAction);
             cb.setModel(new DefaultComboBoxModel<>(options.toArray(new Magnitude.Band[options.size()])));
@@ -271,7 +271,7 @@ public class MagnitudeEditor implements TelescopePosEditor {
             // bands and show that nothing is selected.
             final Set<Magnitude.Band> options = new TreeSet<>(Magnitude.Band.WAVELENGTH_COMPARATOR);
             options.addAll(Arrays.asList(Magnitude.Band.values()));
-            options.removeAll(target.getTarget().getMagnitudeBands());
+            options.removeAll(target.getMagnitudeBands());
             cb.setMaximumRowCount(options.size());
             cb.removeActionListener(addAction);
             cb.setModel(new DefaultComboBoxModel<>(options.toArray(new Magnitude.Band[options.size()])));

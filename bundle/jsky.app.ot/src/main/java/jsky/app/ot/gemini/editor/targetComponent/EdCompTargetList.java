@@ -787,7 +787,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
             public TargetDetails(final SPTarget target) {
                 this.target = target.getTarget().clone();
-                this.mag    = target.getTarget().getMagnitudes();
+                this.mag    = target.getMagnitudes();
             }
 
             public ITarget getTarget() {
