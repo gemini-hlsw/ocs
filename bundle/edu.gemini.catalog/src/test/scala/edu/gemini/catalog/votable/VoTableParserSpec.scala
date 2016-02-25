@@ -1,11 +1,8 @@
 package edu.gemini.catalog.votable
 
-import java.net.URL
-
 import edu.gemini.catalog.api.{SIMBAD, PPMXL, UCAC4}
 import edu.gemini.spModel.core._
 import org.specs2.mutable.Specification
-import squants.motion.KilometersPerSecond
 
 import scalaz._
 import Scalaz._
@@ -596,6 +593,15 @@ class VoTableParserSpec extends Specification with VoTableParser {
       result.map(_.magnitudeIn(MagnitudeBand._r)) should beEqualTo(\/.right(Some(new Magnitude(19.929, MagnitudeBand._r, 0.021))))
       result.map(_.magnitudeIn(MagnitudeBand._i)) should beEqualTo(\/.right(Some(new Magnitude(19.472, MagnitudeBand._i, 0.023))))
       result.map(_.magnitudeIn(MagnitudeBand._z)) should beEqualTo(\/.right(Some(new Magnitude(19.191, MagnitudeBand._z, 0.068))))
+    }
+    "don't allow negative parallax values" in {
+      // From http://simbad.u-strasbg.fr/simbad/sim-id?output.format=VOTable&Ident=HIP43018
+      val xmlFile = "simbad_hip43018.xml"
+      // We are interested only on the first row
+      val result = VoTableParser.parse(SIMBAD, getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables.headOption.flatMap(_.rows.headOption).get
+
+      // parallax is reported as -0.57 by Simbad, the parser makes it a 0
+      result.map(_.parallax) should beEqualTo(\/.right(Parallax(0).some))
     }
     "parse simbad with a not-found name" in {
       val xmlFile = "simbad-not-found.xml"

@@ -33,7 +33,7 @@ object VoTableParser extends VoTableParser {
 
   val xsd = "/votable-1.2.xsd"
   
-  private def validate(xmlText: String): Throwable \/ String = \/.fromTryCatch {
+  private def validate(xmlText: String): Throwable \/ String = \/.fromTryCatchNonFatal {
     import javax.xml.transform.stream.StreamSource
     import javax.xml.validation.SchemaFactory
 
@@ -110,7 +110,7 @@ object CatalogAdapter {
   val magRegex = """(?i)em.(opt|IR)(\.\w)?""".r
 
   def parseDoubleValue(ucd: Ucd, s: String): CatalogProblem \/ Double =
-    \/.fromTryCatch(s.toDouble).leftMap(_ => FieldValueProblem(ucd, s))
+    \/.fromTryCatchNonFatal(s.toDouble).leftMap(_ => FieldValueProblem(ucd, s))
 
 }
 
@@ -316,7 +316,7 @@ trait VoTableParser {
     def parsePlx(plx: Option[String]): CatalogProblem \/ Option[Parallax] =
       (for {
         p <- plx.filter(_.nonEmpty)
-      } yield CatalogAdapter.parseDoubleValue(VoTableParser.UCD_RV, p).map(p => Parallax(p))).sequenceU
+      } yield CatalogAdapter.parseDoubleValue(VoTableParser.UCD_RV, p).map(p => Parallax(math.max(0.0, p)))).sequenceU
 
     def combineWithErrorsSystemAndFilter(m: List[(FieldId, MagnitudeBand, Double)], e: List[(FieldId, MagnitudeBand, Double)], s: List[(MagnitudeBand, MagnitudeSystem)], adapter: CatalogAdapter): List[Magnitude] = {
       val mags = m.map {

@@ -12,7 +12,7 @@ import org.apache.commons.httpclient.methods.GetMethod
 
 import scala.annotation.tailrec
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{Promise, Future, future}
+import scala.concurrent.{Promise, Future}
 import scala.util.{Failure, Success}
 import scala.math.min
 
@@ -130,7 +130,7 @@ trait CachedBackend extends VoTableBackend {
   protected def query(e: SearchKey): QueryResult
 
   // Cache the query not the future so that failed queries are executed again
-  protected [votable] def doQuery(query: CatalogQuery, url: URL): Future[QueryResult] = future {
+  protected [votable] def doQuery(query: CatalogQuery, url: URL): Future[QueryResult] = Future {
     val qr = cachedQuery(SearchKey(query, url))
     // Filter on the cached query results
     qr.copy(query = query, result = qr.result.filter(query))
