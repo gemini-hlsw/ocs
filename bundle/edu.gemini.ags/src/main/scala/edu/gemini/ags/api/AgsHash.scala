@@ -61,7 +61,7 @@ object AgsHash {
       val base = t.getBase.getTarget
 
       def toData(coord: GemOption[java.lang.Double]): Int =
-        coord.asScalaOpt.map(_.doubleValue.scaled(8)).##
+        coord.asScalaOpt.map(_.doubleValue).##
 
       val ra  = toData(base.getRaDegrees(time))
       val dec = toData(base.getDecDegrees(time))
@@ -72,12 +72,12 @@ object AgsHash {
     // Offset Positions, which are returned in a Set.  Order is not important
     // for the purpose of AGS calculations.
     M3.unorderedHash(ctx.getSciencePositions.asScala.map { o =>
-      (o.p.arcsec.scaled(3), o.q.arcsec.scaled(3))
+      (o.p.arcsec, o.q.arcsec)
     }) +=: buf
 
     // Position Angle
     Option(ctx.getPositionAngle).foreach { a =>
-      a.degrees.scaled(3).## +=: buf
+      a.degrees.## +=: buf
     }
 
     // Position Angle Constraint
@@ -139,10 +139,5 @@ object AgsHash {
 
     def arcsec: Double =
       a.toArcsecs.getMagnitude
-  }
-
-  private implicit class DoubleOps(d: Double) {
-    def scaled(scale: Int): Double =
-      BigDecimal(d).setScale(scale, BigDecimal.RoundingMode.HALF_UP).doubleValue()
   }
 }

@@ -98,9 +98,6 @@ class AgsHashSpec extends Specification with ScalaCheck with edu.gemini.spModel.
         (ctx0.getPosAngleConstraint == pac1) == hashSame(ctx0, ctx1)
       }
 
-    def scale(d: Double, s: Int): Double =
-      BigDecimal(d).setScale(s, BigDecimal.RoundingMode.HALF_UP).doubleValue()
-
     "differ if the position angle changes significantly" in
       forAll { (ctx0: ObsContext, pa: Angle) =>
         val ctx1 = ctx0.withPositionAngle(pa.toOldModel)
@@ -108,7 +105,7 @@ class AgsHashSpec extends Specification with ScalaCheck with edu.gemini.spModel.
         val pa0  = ctx0.getPositionAngle.toDegrees.getMagnitude
         val pa1  = ctx1.getPositionAngle.toDegrees.getMagnitude
 
-        (scale(pa0, 3) == scale(pa1, 3)) == hashSame(ctx0, ctx1)
+        (pa0 == pa1) == hashSame(ctx0, ctx1)
       }
 
     "differ if RA changes" in
@@ -123,7 +120,7 @@ class AgsHashSpec extends Specification with ScalaCheck with edu.gemini.spModel.
         val ra0   = base0.getTarget.getRaDegrees(time).getValue
         val ra1   = base1.getTarget.getRaDegrees(time).getValue
 
-        (scale(ra0,8) == scale(ra1,8)) == hashSame(ctx0, ctx1)
+        (ra0 == ra1) == hashSame(ctx0, ctx1)
       }
 
     "differ if Dec changes" in
@@ -138,7 +135,7 @@ class AgsHashSpec extends Specification with ScalaCheck with edu.gemini.spModel.
         val dec0  = base0.getTarget.getDecDegrees(time).getValue
         val dec1  = base1.getTarget.getDecDegrees(time).getValue
 
-        (scale(dec0,8) == scale(dec1,8)) == hashSame(ctx0, ctx1)
+        (dec0 == dec1) == hashSame(ctx0, ctx1)
       }
 
     "differ if offset positions change" in
