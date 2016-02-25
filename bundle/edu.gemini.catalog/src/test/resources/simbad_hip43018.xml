@@ -1,0 +1,1375 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VOTABLE xmlns="http://www.ivoa.net/xml/VOTable/v1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.ivoa.net/xml/VOTable/v1.2" version="1.2">
+<DEFINITIONS>
+<COOSYS ID="COOSYS" equinox="2000" epoch="J2000" system="ICRS"/>
+</DEFINITIONS>
+<RESOURCE name="Simbad query" type="results">
+<TABLE ID="simbad" name="simbad query"><DESCRIPTION>... query string ...</DESCRIPTION>
+<FIELD ID="TYPED_ID" name="TYPED_ID" datatype="char" width="25" ucd="meta.id" arraysize="*">
+<DESCRIPTION>Raw identifier as typed in the query</DESCRIPTION>
+</FIELD>
+<FIELD ID="ANG_DIST" name="ANG_DIST" datatype="float" precision="4" width="8" ucd="pos.posAng" unit="arcsec">
+<DESCRIPTION>Angular distance from the center</DESCRIPTION>
+</FIELD>
+<FIELD ID="MAIN_ID" name="MAIN_ID" datatype="char" width="22" ucd="meta.id;meta.main" arraysize="*">
+<DESCRIPTION>Main identifier for an object</DESCRIPTION>
+<LINK value="${MAIN_ID}" href="http://simbad.u-strasbg.fr/simbad/sim-id?Ident=${MAIN_ID}&amp;NbIdent=1"/>
+</FIELD>
+<FIELD ID="OTYPE_S" name="OTYPE_S" datatype="char" width="8" ucd="src.class" arraysize="*">
+<DESCRIPTION>Object type</DESCRIPTION>
+<LINK href="http://simbad.u-strasbg.fr/simbad/sim-display?data=otypes"/>
+</FIELD>
+<FIELD ID="RA_d" name="RA_d" datatype="double" precision="8" width="11" ucd="pos.eq.ra;meta.main" unit="deg">
+<DESCRIPTION>Right ascension</DESCRIPTION>
+</FIELD>
+<FIELD ID="DEC_d" name="DEC_d" datatype="double" precision="8" width="12" ucd="pos.eq.dec;meta.main" unit="deg">
+<DESCRIPTION>Declination</DESCRIPTION>
+</FIELD>
+<FIELD ID="COO_ERR_MAJA_d" name="COO_ERR_MAJA_d" datatype="float" precision="3" width="6" ucd="phys.angSize.smajAxis;pos.errorEllipse;pos.eq" unit="mas">
+<DESCRIPTION>Coordinate error major axis</DESCRIPTION>
+</FIELD>
+<FIELD ID="COO_ERR_MINA_d" name="COO_ERR_MINA_d" datatype="float" precision="3" width="6" ucd="phys.angSize.sminAxis;pos.errorEllipse;pos.eq" unit="mas">
+<DESCRIPTION>Coordinate error minor axis</DESCRIPTION>
+</FIELD>
+<FIELD ID="COO_ERR_ANGLE_d" name="COO_ERR_ANGLE_d" datatype="short" width="3" ucd="pos.posAng;pos.errorEllipse;pos.eq" unit="deg">
+<DESCRIPTION>Coordinate error angle</DESCRIPTION>
+</FIELD>
+<FIELD ID="PMRA" name="PMRA" datatype="double" precision="3" width="9" ucd="pos.pm;pos.eq.ra" unit="mas.yr-1">
+<DESCRIPTION>Proper motion in RA</DESCRIPTION>
+</FIELD>
+<FIELD ID="PMDEC" name="PMDEC" datatype="double" precision="3" width="9" ucd="pos.pm;pos.eq.dec" unit="mas.yr-1">
+<DESCRIPTION>Proper motion in DEC</DESCRIPTION>
+</FIELD>
+<FIELD ID="PM_ERR_MAJA" name="PM_ERR_MAJA" datatype="float" precision="3" width="5" ucd="phys.angSize.smajAxis;pos.errorEllipse;pos.pm" unit="mas.yr-1">
+<DESCRIPTION>Proper motion error major axis</DESCRIPTION>
+</FIELD>
+<FIELD ID="PM_ERR_MINA" name="PM_ERR_MINA" datatype="float" precision="3" width="5" ucd="phys.angSize.sminAxis;pos.errorEllipse;pos.pm" unit="mas.yr-1">
+<DESCRIPTION>Proper motion error minor axis</DESCRIPTION>
+</FIELD>
+<FIELD ID="PM_ERR_ANGLE" name="PM_ERR_ANGLE" datatype="short" width="3" ucd="pos.posAng;pos.errorEllipse;pos.pm" unit="deg">
+<DESCRIPTION>Proper motion error angle</DESCRIPTION>
+</FIELD>
+<FIELD ID="PLX_VALUE" name="PLX_VALUE" datatype="double" precision="3" width="9" ucd="pos.parallax.trig" unit="mas">
+<DESCRIPTION>Parallax</DESCRIPTION>
+</FIELD>
+<FIELD ID="RV_VALUE" name="RV_VALUE" datatype="double" precision="3" ucd="spect.dopplerVeloc.opt" unit="km.s-1">
+<DESCRIPTION>Radial velocity</DESCRIPTION>
+</FIELD>
+<FIELD ID="Z_VALUE" name="Z_VALUE" datatype="double" precision="7" ucd="src.redshift">
+<DESCRIPTION>Redshift</DESCRIPTION>
+</FIELD>
+<FIELD ID="GALDIM_MAJAXIS" name="GALDIM_MAJAXIS" datatype="float" width="4" ucd="phys.angSize.smajAxis" unit="arcmin">
+<DESCRIPTION>Angular size major axis</DESCRIPTION>
+</FIELD>
+<FIELD ID="GALDIM_MINAXIS" name="GALDIM_MINAXIS" datatype="float" width="4" ucd="phys.angSize.sminAxis" unit="arcmin">
+<DESCRIPTION>Angular size minor axis</DESCRIPTION>
+</FIELD>
+<FIELD ID="GALDIM_ANGLE" name="GALDIM_ANGLE" datatype="short" width="3" ucd="pos.posAng" unit="deg">
+<DESCRIPTION>Galaxy ellipse angle</DESCRIPTION>
+</FIELD>
+<FIELD ID="GALDIM_INCL" name="GALDIM_INCL" datatype="short" width="1" ucd="src.orbital.inclination">
+<DESCRIPTION>Galaxy inclinaison code (0-7)</DESCRIPTION>
+</FIELD>
+<FIELD ID="SP_TYPE" name="SP_TYPE" datatype="char" width="6" ucd="src.spType" arraysize="*">
+<DESCRIPTION>MK spectral type</DESCRIPTION>
+</FIELD>
+<FIELD ID="MORPH_TYPE" name="MORPH_TYPE" datatype="char" width="20" ucd="src.morph.type" arraysize="*">
+<DESCRIPTION>Morphological type</DESCRIPTION>
+</FIELD>
+<FIELD ID="NB_REF" name="NB_REF" datatype="int" width="4" ucd="meta.bib;meta.number">
+<DESCRIPTION>number of references</DESCRIPTION>
+</FIELD>
+<FIELD ID="FILTER_NAME_U" name="FILTER_NAME_U" datatype="char" width="8" ucd="instr.filter" arraysize="*">
+<DESCRIPTION>flux filter name</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_U" name="FLUX_U" datatype="float" ucd="phot.mag;em.opt.U" unit="mag">
+<DESCRIPTION>Magnitude U</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_ERROR_U" name="FLUX_ERROR_U" datatype="float" precision="3" ucd="stat.error;phot.mag">
+<DESCRIPTION>flux error</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_SYSTEM_U" name="FLUX_SYSTEM_U" datatype="char" ucd="instr.precision;phot.flux" arraysize="*">
+<DESCRIPTION>flux system A=AB V=Vega</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_BIBCODE_U" name="FLUX_BIBCODE_U" datatype="char" width="19" ucd="meta.bib.bibcode;phot.flux" arraysize="*">
+<DESCRIPTION>flux reference</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_VAR_U" name="FLUX_VAR_U" datatype="char" width="1" ucd="meta.code;src.var;phot.flux">
+<DESCRIPTION>flux variability flag</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_MULT_U" name="FLUX_MULT_U" datatype="char" width="1" ucd="meta.code.multip;phot.flux" arraysize="*">
+<DESCRIPTION>flux multiplicity flag</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_QUAL_U" name="FLUX_QUAL_U" datatype="char" width="1" ucd="meta.code.qual;phot.flux">
+<DESCRIPTION>flux quality flag</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_UNIT_U" name="FLUX_UNIT_U" datatype="char" width="3" ucd="meta.unit;phot.flux">
+<DESCRIPTION>flux unit</DESCRIPTION>
+</FIELD>
+<FIELD ID="FILTER_NAME_B" name="FILTER_NAME_B" datatype="char" width="8" ucd="instr.filter" arraysize="*">
+<DESCRIPTION>flux filter name</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_B" name="FLUX_B" datatype="float" ucd="phot.mag;em.opt.B" unit="mag">
+<DESCRIPTION>Magnitude B</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_ERROR_B" name="FLUX_ERROR_B" datatype="float" precision="3" ucd="stat.error;phot.mag">
+<DESCRIPTION>flux error</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_SYSTEM_B" name="FLUX_SYSTEM_B" datatype="char" ucd="instr.precision;phot.flux" arraysize="*">
+<DESCRIPTION>flux system A=AB V=Vega</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_BIBCODE_B" name="FLUX_BIBCODE_B" datatype="char" width="19" ucd="meta.bib.bibcode;phot.flux" arraysize="*">
+<DESCRIPTION>flux reference</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_VAR_B" name="FLUX_VAR_B" datatype="char" width="1" ucd="meta.code;src.var;phot.flux">
+<DESCRIPTION>flux variability flag</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_MULT_B" name="FLUX_MULT_B" datatype="char" width="1" ucd="meta.code.multip;phot.flux" arraysize="*">
+<DESCRIPTION>flux multiplicity flag</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_QUAL_B" name="FLUX_QUAL_B" datatype="char" width="1" ucd="meta.code.qual;phot.flux">
+<DESCRIPTION>flux quality flag</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_UNIT_B" name="FLUX_UNIT_B" datatype="char" width="3" ucd="meta.unit;phot.flux">
+<DESCRIPTION>flux unit</DESCRIPTION>
+</FIELD>
+<FIELD ID="FILTER_NAME_V" name="FILTER_NAME_V" datatype="char" width="8" ucd="instr.filter" arraysize="*">
+<DESCRIPTION>flux filter name</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_V" name="FLUX_V" datatype="float" ucd="phot.mag;em.opt.V" unit="mag">
+<DESCRIPTION>Magnitude V</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_ERROR_V" name="FLUX_ERROR_V" datatype="float" precision="3" ucd="stat.error;phot.mag">
+<DESCRIPTION>flux error</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_SYSTEM_V" name="FLUX_SYSTEM_V" datatype="char" ucd="instr.precision;phot.flux" arraysize="*">
+<DESCRIPTION>flux system A=AB V=Vega</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_BIBCODE_V" name="FLUX_BIBCODE_V" datatype="char" width="19" ucd="meta.bib.bibcode;phot.flux" arraysize="*">
+<DESCRIPTION>flux reference</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_VAR_V" name="FLUX_VAR_V" datatype="char" width="1" ucd="meta.code;src.var;phot.flux">
+<DESCRIPTION>flux variability flag</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_MULT_V" name="FLUX_MULT_V" datatype="char" width="1" ucd="meta.code.multip;phot.flux" arraysize="*">
+<DESCRIPTION>flux multiplicity flag</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_QUAL_V" name="FLUX_QUAL_V" datatype="char" width="1" ucd="meta.code.qual;phot.flux">
+<DESCRIPTION>flux quality flag</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_UNIT_V" name="FLUX_UNIT_V" datatype="char" width="3" ucd="meta.unit;phot.flux">
+<DESCRIPTION>flux unit</DESCRIPTION>
+</FIELD>
+<FIELD ID="FILTER_NAME_R" name="FILTER_NAME_R" datatype="char" width="8" ucd="instr.filter" arraysize="*">
+<DESCRIPTION>flux filter name</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_R" name="FLUX_R" datatype="float" ucd="phot.mag;em.opt.R" unit="mag">
+<DESCRIPTION>Magnitude R</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_ERROR_R" name="FLUX_ERROR_R" datatype="float" precision="3" ucd="stat.error;phot.mag">
+<DESCRIPTION>flux error</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_SYSTEM_R" name="FLUX_SYSTEM_R" datatype="char" ucd="instr.precision;phot.flux" arraysize="*">
+<DESCRIPTION>flux system A=AB V=Vega</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_BIBCODE_R" name="FLUX_BIBCODE_R" datatype="char" width="19" ucd="meta.bib.bibcode;phot.flux" arraysize="*">
+<DESCRIPTION>flux reference</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_VAR_R" name="FLUX_VAR_R" datatype="char" width="1" ucd="meta.code;src.var;phot.flux">
+<DESCRIPTION>flux variability flag</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_MULT_R" name="FLUX_MULT_R" datatype="char" width="1" ucd="meta.code.multip;phot.flux" arraysize="*">
+<DESCRIPTION>flux multiplicity flag</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_QUAL_R" name="FLUX_QUAL_R" datatype="char" width="1" ucd="meta.code.qual;phot.flux">
+<DESCRIPTION>flux quality flag</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_UNIT_R" name="FLUX_UNIT_R" datatype="char" width="3" ucd="meta.unit;phot.flux">
+<DESCRIPTION>flux unit</DESCRIPTION>
+</FIELD>
+<FIELD ID="FILTER_NAME_I" name="FILTER_NAME_I" datatype="char" width="8" ucd="instr.filter" arraysize="*">
+<DESCRIPTION>flux filter name</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_I" name="FLUX_I" datatype="float" ucd="phot.mag;em.opt.I" unit="mag">
+<DESCRIPTION>Magnitude I</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_ERROR_I" name="FLUX_ERROR_I" datatype="float" precision="3" ucd="stat.error;phot.mag">
+<DESCRIPTION>flux error</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_SYSTEM_I" name="FLUX_SYSTEM_I" datatype="char" ucd="instr.precision;phot.flux" arraysize="*">
+<DESCRIPTION>flux system A=AB V=Vega</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_BIBCODE_I" name="FLUX_BIBCODE_I" datatype="char" width="19" ucd="meta.bib.bibcode;phot.flux" arraysize="*">
+<DESCRIPTION>flux reference</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_VAR_I" name="FLUX_VAR_I" datatype="char" width="1" ucd="meta.code;src.var;phot.flux">
+<DESCRIPTION>flux variability flag</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_MULT_I" name="FLUX_MULT_I" datatype="char" width="1" ucd="meta.code.multip;phot.flux" arraysize="*">
+<DESCRIPTION>flux multiplicity flag</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_QUAL_I" name="FLUX_QUAL_I" datatype="char" width="1" ucd="meta.code.qual;phot.flux">
+<DESCRIPTION>flux quality flag</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_UNIT_I" name="FLUX_UNIT_I" datatype="char" width="3" ucd="meta.unit;phot.flux">
+<DESCRIPTION>flux unit</DESCRIPTION>
+</FIELD>
+<FIELD ID="FILTER_NAME_J" name="FILTER_NAME_J" datatype="char" width="8" ucd="instr.filter" arraysize="*">
+<DESCRIPTION>flux filter name</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_J" name="FLUX_J" datatype="float" ucd="phot.mag;em.IR.J" unit="mag">
+<DESCRIPTION>Magnitude J</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_ERROR_J" name="FLUX_ERROR_J" datatype="float" precision="3" ucd="stat.error;phot.mag">
+<DESCRIPTION>flux error</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_SYSTEM_J" name="FLUX_SYSTEM_J" datatype="char" ucd="instr.precision;phot.flux" arraysize="*">
+<DESCRIPTION>flux system A=AB V=Vega</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_BIBCODE_J" name="FLUX_BIBCODE_J" datatype="char" width="19" ucd="meta.bib.bibcode;phot.flux" arraysize="*">
+<DESCRIPTION>flux reference</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_VAR_J" name="FLUX_VAR_J" datatype="char" width="1" ucd="meta.code;src.var;phot.flux">
+<DESCRIPTION>flux variability flag</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_MULT_J" name="FLUX_MULT_J" datatype="char" width="1" ucd="meta.code.multip;phot.flux" arraysize="*">
+<DESCRIPTION>flux multiplicity flag</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_QUAL_J" name="FLUX_QUAL_J" datatype="char" width="1" ucd="meta.code.qual;phot.flux">
+<DESCRIPTION>flux quality flag</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_UNIT_J" name="FLUX_UNIT_J" datatype="char" width="3" ucd="meta.unit;phot.flux">
+<DESCRIPTION>flux unit</DESCRIPTION>
+</FIELD>
+<FIELD ID="FILTER_NAME_H" name="FILTER_NAME_H" datatype="char" width="8" ucd="instr.filter" arraysize="*">
+<DESCRIPTION>flux filter name</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_H" name="FLUX_H" datatype="float" ucd="phot.mag;em.IR.H" unit="mag">
+<DESCRIPTION>Magnitude H</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_ERROR_H" name="FLUX_ERROR_H" datatype="float" precision="3" ucd="stat.error;phot.mag">
+<DESCRIPTION>flux error</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_SYSTEM_H" name="FLUX_SYSTEM_H" datatype="char" ucd="instr.precision;phot.flux" arraysize="*">
+<DESCRIPTION>flux system A=AB V=Vega</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_BIBCODE_H" name="FLUX_BIBCODE_H" datatype="char" width="19" ucd="meta.bib.bibcode;phot.flux" arraysize="*">
+<DESCRIPTION>flux reference</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_VAR_H" name="FLUX_VAR_H" datatype="char" width="1" ucd="meta.code;src.var;phot.flux">
+<DESCRIPTION>flux variability flag</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_MULT_H" name="FLUX_MULT_H" datatype="char" width="1" ucd="meta.code.multip;phot.flux" arraysize="*">
+<DESCRIPTION>flux multiplicity flag</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_QUAL_H" name="FLUX_QUAL_H" datatype="char" width="1" ucd="meta.code.qual;phot.flux">
+<DESCRIPTION>flux quality flag</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_UNIT_H" name="FLUX_UNIT_H" datatype="char" width="3" ucd="meta.unit;phot.flux">
+<DESCRIPTION>flux unit</DESCRIPTION>
+</FIELD>
+<FIELD ID="FILTER_NAME_K" name="FILTER_NAME_K" datatype="char" width="8" ucd="instr.filter" arraysize="*">
+<DESCRIPTION>flux filter name</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_K" name="FLUX_K" datatype="float" ucd="phot.mag;em.IR.K" unit="mag">
+<DESCRIPTION>Magnitude K</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_ERROR_K" name="FLUX_ERROR_K" datatype="float" precision="3" ucd="stat.error;phot.mag">
+<DESCRIPTION>flux error</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_SYSTEM_K" name="FLUX_SYSTEM_K" datatype="char" ucd="instr.precision;phot.flux" arraysize="*">
+<DESCRIPTION>flux system A=AB V=Vega</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_BIBCODE_K" name="FLUX_BIBCODE_K" datatype="char" width="19" ucd="meta.bib.bibcode;phot.flux" arraysize="*">
+<DESCRIPTION>flux reference</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_VAR_K" name="FLUX_VAR_K" datatype="char" width="1" ucd="meta.code;src.var;phot.flux">
+<DESCRIPTION>flux variability flag</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_MULT_K" name="FLUX_MULT_K" datatype="char" width="1" ucd="meta.code.multip;phot.flux" arraysize="*">
+<DESCRIPTION>flux multiplicity flag</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_QUAL_K" name="FLUX_QUAL_K" datatype="char" width="1" ucd="meta.code.qual;phot.flux">
+<DESCRIPTION>flux quality flag</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_UNIT_K" name="FLUX_UNIT_K" datatype="char" width="3" ucd="meta.unit;phot.flux">
+<DESCRIPTION>flux unit</DESCRIPTION>
+</FIELD>
+<FIELD ID="FILTER_NAME_u" name="FILTER_NAME_u" datatype="char" width="8" ucd="instr.filter" arraysize="*">
+<DESCRIPTION>flux filter name</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_u" name="FLUX_u" datatype="float" ucd="phot.mag;em.opt.U" unit="mag">
+<DESCRIPTION>Magnitude SDSS u</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_ERROR_u" name="FLUX_ERROR_u" datatype="float" precision="3" ucd="stat.error;phot.mag">
+<DESCRIPTION>flux error</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_SYSTEM_u" name="FLUX_SYSTEM_u" datatype="char" ucd="instr.precision;phot.flux" arraysize="*">
+<DESCRIPTION>flux system A=AB V=Vega</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_BIBCODE_u" name="FLUX_BIBCODE_u" datatype="char" width="19" ucd="meta.bib.bibcode;phot.flux" arraysize="*">
+<DESCRIPTION>flux reference</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_VAR_u" name="FLUX_VAR_u" datatype="char" width="1" ucd="meta.code;src.var;phot.flux">
+<DESCRIPTION>flux variability flag</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_MULT_u" name="FLUX_MULT_u" datatype="char" width="1" ucd="meta.code.multip;phot.flux" arraysize="*">
+<DESCRIPTION>flux multiplicity flag</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_QUAL_u" name="FLUX_QUAL_u" datatype="char" width="1" ucd="meta.code.qual;phot.flux">
+<DESCRIPTION>flux quality flag</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_UNIT_u" name="FLUX_UNIT_u" datatype="char" width="3" ucd="meta.unit;phot.flux">
+<DESCRIPTION>flux unit</DESCRIPTION>
+</FIELD>
+<FIELD ID="FILTER_NAME_g" name="FILTER_NAME_g" datatype="char" width="8" ucd="instr.filter" arraysize="*">
+<DESCRIPTION>flux filter name</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_g" name="FLUX_g" datatype="float" ucd="phot.mag;em.opt.B" unit="mag">
+<DESCRIPTION>Magnitude SDSS g</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_ERROR_g" name="FLUX_ERROR_g" datatype="float" precision="3" ucd="stat.error;phot.mag">
+<DESCRIPTION>flux error</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_SYSTEM_g" name="FLUX_SYSTEM_g" datatype="char" ucd="instr.precision;phot.flux" arraysize="*">
+<DESCRIPTION>flux system A=AB V=Vega</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_BIBCODE_g" name="FLUX_BIBCODE_g" datatype="char" width="19" ucd="meta.bib.bibcode;phot.flux" arraysize="*">
+<DESCRIPTION>flux reference</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_VAR_g" name="FLUX_VAR_g" datatype="char" width="1" ucd="meta.code;src.var;phot.flux">
+<DESCRIPTION>flux variability flag</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_MULT_g" name="FLUX_MULT_g" datatype="char" width="1" ucd="meta.code.multip;phot.flux" arraysize="*">
+<DESCRIPTION>flux multiplicity flag</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_QUAL_g" name="FLUX_QUAL_g" datatype="char" width="1" ucd="meta.code.qual;phot.flux">
+<DESCRIPTION>flux quality flag</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_UNIT_g" name="FLUX_UNIT_g" datatype="char" width="3" ucd="meta.unit;phot.flux">
+<DESCRIPTION>flux unit</DESCRIPTION>
+</FIELD>
+<FIELD ID="FILTER_NAME_r" name="FILTER_NAME_r" datatype="char" width="8" ucd="instr.filter" arraysize="*">
+<DESCRIPTION>flux filter name</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_r" name="FLUX_r" datatype="float" ucd="phot.mag;em.opt.R" unit="mag">
+<DESCRIPTION>Magnitude SDSS r</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_ERROR_r" name="FLUX_ERROR_r" datatype="float" precision="3" ucd="stat.error;phot.mag">
+<DESCRIPTION>flux error</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_SYSTEM_r" name="FLUX_SYSTEM_r" datatype="char" ucd="instr.precision;phot.flux" arraysize="*">
+<DESCRIPTION>flux system A=AB V=Vega</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_BIBCODE_r" name="FLUX_BIBCODE_r" datatype="char" width="19" ucd="meta.bib.bibcode;phot.flux" arraysize="*">
+<DESCRIPTION>flux reference</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_VAR_r" name="FLUX_VAR_r" datatype="char" width="1" ucd="meta.code;src.var;phot.flux">
+<DESCRIPTION>flux variability flag</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_MULT_r" name="FLUX_MULT_r" datatype="char" width="1" ucd="meta.code.multip;phot.flux" arraysize="*">
+<DESCRIPTION>flux multiplicity flag</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_QUAL_r" name="FLUX_QUAL_r" datatype="char" width="1" ucd="meta.code.qual;phot.flux">
+<DESCRIPTION>flux quality flag</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_UNIT_r" name="FLUX_UNIT_r" datatype="char" width="3" ucd="meta.unit;phot.flux">
+<DESCRIPTION>flux unit</DESCRIPTION>
+</FIELD>
+<FIELD ID="FILTER_NAME_i" name="FILTER_NAME_i" datatype="char" width="8" ucd="instr.filter" arraysize="*">
+<DESCRIPTION>flux filter name</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_i" name="FLUX_i" datatype="float" ucd="phot.mag;em.opt.I" unit="mag">
+<DESCRIPTION>Magnitude SDSS i</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_ERROR_i" name="FLUX_ERROR_i" datatype="float" precision="3" ucd="stat.error;phot.mag">
+<DESCRIPTION>flux error</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_SYSTEM_i" name="FLUX_SYSTEM_i" datatype="char" ucd="instr.precision;phot.flux" arraysize="*">
+<DESCRIPTION>flux system A=AB V=Vega</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_BIBCODE_i" name="FLUX_BIBCODE_i" datatype="char" width="19" ucd="meta.bib.bibcode;phot.flux" arraysize="*">
+<DESCRIPTION>flux reference</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_VAR_i" name="FLUX_VAR_i" datatype="char" width="1" ucd="meta.code;src.var;phot.flux">
+<DESCRIPTION>flux variability flag</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_MULT_i" name="FLUX_MULT_i" datatype="char" width="1" ucd="meta.code.multip;phot.flux" arraysize="*">
+<DESCRIPTION>flux multiplicity flag</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_QUAL_i" name="FLUX_QUAL_i" datatype="char" width="1" ucd="meta.code.qual;phot.flux">
+<DESCRIPTION>flux quality flag</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_UNIT_i" name="FLUX_UNIT_i" datatype="char" width="3" ucd="meta.unit;phot.flux">
+<DESCRIPTION>flux unit</DESCRIPTION>
+</FIELD>
+<FIELD ID="FILTER_NAME_z" name="FILTER_NAME_z" datatype="char" width="8" ucd="instr.filter" arraysize="*">
+<DESCRIPTION>flux filter name</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_z" name="FLUX_z" datatype="float" ucd="phot.mag;em.opt.I" unit="mag">
+<DESCRIPTION>Magnitude SDSS z</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_ERROR_z" name="FLUX_ERROR_z" datatype="float" precision="3" ucd="stat.error;phot.mag">
+<DESCRIPTION>flux error</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_SYSTEM_z" name="FLUX_SYSTEM_z" datatype="char" ucd="instr.precision;phot.flux" arraysize="*">
+<DESCRIPTION>flux system A=AB V=Vega</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_BIBCODE_z" name="FLUX_BIBCODE_z" datatype="char" width="19" ucd="meta.bib.bibcode;phot.flux" arraysize="*">
+<DESCRIPTION>flux reference</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_VAR_z" name="FLUX_VAR_z" datatype="char" width="1" ucd="meta.code;src.var;phot.flux">
+<DESCRIPTION>flux variability flag</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_MULT_z" name="FLUX_MULT_z" datatype="char" width="1" ucd="meta.code.multip;phot.flux" arraysize="*">
+<DESCRIPTION>flux multiplicity flag</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_QUAL_z" name="FLUX_QUAL_z" datatype="char" width="1" ucd="meta.code.qual;phot.flux">
+<DESCRIPTION>flux quality flag</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_UNIT_z" name="FLUX_UNIT_z" datatype="char" width="3" ucd="meta.unit;phot.flux">
+<DESCRIPTION>flux unit</DESCRIPTION>
+</FIELD>
+<FIELD ID="CEL_U1" name="CEL:U1" datatype="float" precision="2" width="5" ucd="PHOT.MAG;EM.UV.200-300NM" unit="mag">
+<DESCRIPTION>Magn U1 (210-320nm)</DESCRIPTION>
+</FIELD>
+<FIELD ID="CEL_meU1" name="CEL:meU1" datatype="float" precision="2" width="4" ucd="STAT.ERROR">
+<DESCRIPTION>sigma(U1)</DESCRIPTION>
+</FIELD>
+<FIELD ID="CEL_U2" name="CEL:U2" datatype="float" precision="2" width="5" ucd="PHOT.MAG;EM.UV" unit="mag">
+<DESCRIPTION>Magn U2 (155-320nm)</DESCRIPTION>
+</FIELD>
+<FIELD ID="CEL_meU2" name="CEL:meU2" datatype="float" precision="2" width="4" ucd="STAT.ERROR">
+<DESCRIPTION>sigma(U2)</DESCRIPTION>
+</FIELD>
+<FIELD ID="CEL_U3" name="CEL:U3" datatype="float" precision="2" width="5" ucd="PHOT.MAG;EM.UV" unit="mag">
+<DESCRIPTION>Magn U3 (135-315nm)</DESCRIPTION>
+</FIELD>
+<FIELD ID="CEL_meU3" name="CEL:meU3" datatype="float" precision="2" width="4" ucd="STAT.ERROR">
+<DESCRIPTION>sigma(U3)</DESCRIPTION>
+</FIELD>
+<FIELD ID="CEL_U4" name="CEL:U4" datatype="float" precision="2" width="5" ucd="PHOT.MAG;EM.UV.100-200NM" unit="mag">
+<DESCRIPTION>Magn U4 (105-215nm)</DESCRIPTION>
+</FIELD>
+<FIELD ID="CEL_meU4" name="CEL:meU4" datatype="float" precision="2" width="4" ucd="STAT.ERROR">
+<DESCRIPTION>sigma(U4)</DESCRIPTION>
+</FIELD>
+<FIELD ID="CEL_pec" name="CEL:pec" datatype="char" width="13" ucd="META.NOTE" arraysize="*">
+<DESCRIPTION>peculiarities</DESCRIPTION>
+</FIELD>
+<FIELD ID="CEL_bibcode" name="CEL:bibcode" datatype="char" width="19" ucd="META.BIB.BIBCODE" arraysize="19">
+<DESCRIPTION>Bibcode</DESCRIPTION>
+</FIELD>
+<FIELD ID="Cl.G_D" name="Cl.G:D" datatype="int" width="1" ucd="SRC.CLASS.DISTANCE">
+<DESCRIPTION>Distance class</DESCRIPTION>
+</FIELD>
+<FIELD ID="Cl.G_R" name="Cl.G:R" datatype="int" width="1" ucd="SRC.CLASS.RICHNESS">
+<DESCRIPTION>Richness class</DESCRIPTION>
+</FIELD>
+<FIELD ID="Cl.G_Nga" name="Cl.G:Nga" datatype="int" width="3" ucd="META.NUMBER">
+<DESCRIPTION>number of cluster members between m3 and m3+2</DESCRIPTION>
+</FIELD>
+<FIELD ID="Cl.G_pNga" name="Cl.G:pNga" datatype="char" width="1" ucd="META.CODE.ERROR" arraysize="1">
+<DESCRIPTION>flag</DESCRIPTION>
+</FIELD>
+<FIELD ID="Cl.G_Acl" name="Cl.G:Acl" datatype="char" width="3" ucd="SRC.CLASS.STRUCT" arraysize="3">
+<DESCRIPTION>Cluster classification in Abell s system</DESCRIPTION>
+</FIELD>
+<FIELD ID="Cl.G_BMclass" name="Cl.G:BMclass" datatype="char" width="6" ucd="SRC.CLASS.STRUCT" arraysize="6">
+<DESCRIPTION>Cluster classification in the Bautz-Morgan system</DESCRIPTION>
+</FIELD>
+<FIELD ID="Cl.G_pBMclass" name="Cl.G:pBMclass" datatype="char" width="1" ucd="META.CODE.ERROR" arraysize="1">
+<DESCRIPTION>BMclass flag</DESCRIPTION>
+</FIELD>
+<FIELD ID="Cl.G_m1" name="Cl.G:m1" datatype="float" precision="1" width="4" ucd="PHOT.MAG" unit="mag">
+<DESCRIPTION>Weighted mean total V mag. estimate for the fist-ranked cluster member</DESCRIPTION>
+</FIELD>
+<FIELD ID="Cl.G_pm1" name="Cl.G:pm1" datatype="char" width="1" ucd="META.CODE.ERROR" arraysize="1">
+<DESCRIPTION>m1 flag</DESCRIPTION>
+</FIELD>
+<FIELD ID="Cl.G_m3" name="Cl.G:m3" datatype="float" precision="1" width="4" ucd="PHOT.MAG" unit="mag">
+<DESCRIPTION>Weighted mean total V mag. estimate for the third-ranked cluster member</DESCRIPTION>
+</FIELD>
+<FIELD ID="Cl.G_pm3" name="Cl.G:pm3" datatype="char" width="1" ucd="META.CODE.ERROR" arraysize="1">
+<DESCRIPTION>m3 flag</DESCRIPTION>
+</FIELD>
+<FIELD ID="Cl.G_m10" name="Cl.G:m10" datatype="float" precision="1" width="4" ucd="PHOT.MAG" unit="mag">
+<DESCRIPTION>Weighted mean total V mag. estimate for the tenth-ranked cluster member</DESCRIPTION>
+</FIELD>
+<FIELD ID="Cl.G_pm10" name="Cl.G:pm10" datatype="char" width="1" ucd="META.CODE.ERROR" arraysize="1">
+<DESCRIPTION>m10 flag</DESCRIPTION>
+</FIELD>
+<FIELD ID="Cl.G_m10a" name="Cl.G:m10a" datatype="float" precision="1" width="4" ucd="PHOT.MAG" unit="mag">
+<DESCRIPTION>Weighted mean total V mag. estimate for the tenth-ranked cluster member (xxx)</DESCRIPTION>
+</FIELD>
+<FIELD ID="Cl.G_pm10a" name="Cl.G:pm10a" datatype="char" width="1" ucd="META.CODE.ERROR" arraysize="1">
+<DESCRIPTION>m10a flag</DESCRIPTION>
+</FIELD>
+<FIELD ID="Cl.G_bibcode" name="Cl.G:bibcode" datatype="char" width="19" ucd="META.BIB.BIBCODE" arraysize="19">
+<DESCRIPTION>Bibcode</DESCRIPTION>
+</FIELD>
+<FIELD ID="diameter_diameter" name="diameter:diameter" datatype="double" precision="2" width="8" ucd="PHYS.ANGSIZE">
+<DESCRIPTION>Diameter value</DESCRIPTION>
+</FIELD>
+<FIELD ID="diameter_Q" name="diameter:Q" datatype="char" width="1" ucd="META.CODE.QUAL" arraysize="1">
+<DESCRIPTION>Quality</DESCRIPTION>
+</FIELD>
+<FIELD ID="diameter_unit" name="diameter:unit" datatype="char" width="4" ucd="META.UNIT" arraysize="4">
+<DESCRIPTION>Unit (mas/km)</DESCRIPTION>
+</FIELD>
+<FIELD ID="diameter_error" name="diameter:error" datatype="double" precision="2" width="8" ucd="STAT.ERROR">
+<DESCRIPTION>Error</DESCRIPTION>
+</FIELD>
+<FIELD ID="diameter_filter" name="diameter:filter" datatype="char" width="8" ucd="INSTR.FILTER" arraysize="8">
+<DESCRIPTION>filter or wavelength</DESCRIPTION>
+</FIELD>
+<FIELD ID="diameter_method" name="diameter:method" datatype="char" width="8" ucd="INSTR.SETUP" arraysize="8">
+<DESCRIPTION>calculation method</DESCRIPTION>
+</FIELD>
+<FIELD ID="diameter_bibcode" name="diameter:bibcode" datatype="char" width="19" ucd="META.BIB.BIBCODE" arraysize="19">
+<DESCRIPTION>Bibcode</DESCRIPTION>
+</FIELD>
+<FIELD ID="distance_distance" name="distance:distance" datatype="double" precision="3" width="9" ucd="POS.DISTANCE">
+<DESCRIPTION>Distance value</DESCRIPTION>
+</FIELD>
+<FIELD ID="distance_Q" name="distance:Q" datatype="char" width="1" ucd="META.CODE.QUAL" arraysize="1">
+<DESCRIPTION>Quality</DESCRIPTION>
+</FIELD>
+<FIELD ID="distance_unit" name="distance:unit" datatype="char" width="4" ucd="META.UNIT" arraysize="4">
+<DESCRIPTION>Unit (pc,kpc or Mpc)</DESCRIPTION>
+</FIELD>
+<FIELD ID="distance_merr" name="distance:merr" datatype="double" precision="3" width="7" ucd="STAT.ERROR">
+<DESCRIPTION>minus error</DESCRIPTION>
+</FIELD>
+<FIELD ID="distance_perr" name="distance:perr" datatype="double" precision="3" width="7" ucd="STAT.ERROR">
+<DESCRIPTION>plus error</DESCRIPTION>
+</FIELD>
+<FIELD ID="distance_method" name="distance:method" datatype="char" width="8" ucd="INSTR.SETUP" arraysize="8">
+<DESCRIPTION>distance calculation method</DESCRIPTION>
+</FIELD>
+<FIELD ID="distance_bibcode" name="distance:bibcode" datatype="char" width="19" ucd="META.BIB.BIBCODE" arraysize="19">
+<DESCRIPTION>Bibcode</DESCRIPTION>
+</FIELD>
+<FIELD ID="Einstein_RA" name="Einstein:RA" datatype="char" width="10" ucd="POS.EQ.RA;META.MAIN" arraysize="10" unit="h:m:s">
+<DESCRIPTION>Right Ascension B1950</DESCRIPTION>
+</FIELD>
+<FIELD ID="Einstein_DEC" name="Einstein:DEC" datatype="char" width="9" ucd="POS.EQ.DEC;META.MAIN" arraysize="9" unit="d:m:s">
+<DESCRIPTION>Declination B1950</DESCRIPTION>
+</FIELD>
+<FIELD ID="Einstein_Err_coo" name="Einstein:Err_coo" datatype="int" width="4" ucd="STAT.ERROR" unit="arcsec">
+<DESCRIPTION>Error on position</DESCRIPTION>
+</FIELD>
+<FIELD ID="Einstein_Count" name="Einstein:Count" datatype="double" precision="5" width="9" ucd="PHOT.COUNT;EM.X-RAY" unit="ct/s">
+<DESCRIPTION>Count rate in the total Einstein energy band (0.16 to 3.5 keV)</DESCRIPTION>
+</FIELD>
+<FIELD ID="Einstein_Err_count" name="Einstein:Err_count" datatype="double" precision="5" width="7" ucd="STAT.ERROR" unit="ct/s">
+<DESCRIPTION>error on count rate</DESCRIPTION>
+</FIELD>
+<FIELD ID="Einstein_Hard" name="Einstein:Hard" datatype="float" precision="3" width="6" ucd="PHOT.FLUX;ARITH.RATIO">
+<DESCRIPTION>Hardness ratio</DESCRIPTION>
+</FIELD>
+<FIELD ID="Einstein_HardErrPlus" name="Einstein:HardErrPlus" datatype="float" precision="3" width="5" ucd="STAT.ERROR">
+<DESCRIPTION>+Hardness ratio error</DESCRIPTION>
+</FIELD>
+<FIELD ID="Einstein_HardErrMinus" name="Einstein:HardErrMinus" datatype="float" precision="3" width="5" ucd="STAT.ERROR">
+<DESCRIPTION>-Hardness ratio error</DESCRIPTION>
+</FIELD>
+<FIELD ID="Einstein_bibcode" name="Einstein:bibcode" datatype="char" width="19" ucd="META.BIB.BIBCODE" arraysize="19">
+<DESCRIPTION>Bibcode</DESCRIPTION>
+</FIELD>
+<FIELD ID="Fe_H_Teff" name="Fe_H:Teff" datatype="int" width="5" ucd="PHYS.TEMPERATURE.EFFECTIVE" unit="unit-degK">
+<DESCRIPTION>Effective Temperature</DESCRIPTION>
+</FIELD>
+<FIELD ID="Fe_H_log_g" name="Fe_H:log_g" datatype="float" precision="1" width="5" ucd="PHYS.GRAVITY" unit="cm/s**2">
+<DESCRIPTION>Decimal logarithm of the surface gravity</DESCRIPTION>
+</FIELD>
+<FIELD ID="Fe_H_Fe_H" name="Fe_H:Fe_H" datatype="float" precision="2" width="5" ucd="PHYS.ABUND.FE">
+<DESCRIPTION>Metallicity index relative to the Sun</DESCRIPTION>
+</FIELD>
+<FIELD ID="Fe_H_flag" name="Fe_H:flag" datatype="char" width="1" ucd="META.CODE.ERROR" arraysize="1">
+<DESCRIPTION>Flag on the [Fe/H] value</DESCRIPTION>
+</FIELD>
+<FIELD ID="Fe_H_CompStar" name="Fe_H:CompStar" datatype="char" width="9" ucd="META.ID" arraysize="*">
+<DESCRIPTION>Designates the comparison star from which the [Fe/H] value was obtained</DESCRIPTION>
+</FIELD>
+<FIELD ID="Fe_H_CatNo" name="Fe_H:CatNo" datatype="char" width="5" ucd="META.ID;META.MAIN" arraysize="5">
+<DESCRIPTION>Star in the Cayrel et al. (1997A&amp;AS..124..299C) compilation</DESCRIPTION>
+</FIELD>
+<FIELD ID="Fe_H_bibcode" name="Fe_H:bibcode" datatype="char" width="19" ucd="META.BIB.BIBCODE" arraysize="19">
+<DESCRIPTION>Bibcode</DESCRIPTION>
+</FIELD>
+<FIELD ID="GCRV_radvel" name="GCRV:radvel" datatype="float" precision="2" width="8" ucd="PHYS.VELOC;POS.HELIOCENTRIC" unit="km.s-1">
+<DESCRIPTION>Radial velocity</DESCRIPTION>
+</FIELD>
+<FIELD ID="GCRV_Q" name="GCRV:Q" datatype="char" width="1" ucd="META.CODE.QUAL" arraysize="1">
+<DESCRIPTION>Quality</DESCRIPTION>
+</FIELD>
+<FIELD ID="GCRV_nmes" name="GCRV:nmes" datatype="int" width="3" ucd="META.NUMBER">
+<DESCRIPTION>Number of measurements</DESCRIPTION>
+</FIELD>
+<FIELD ID="GCRV_rem" name="GCRV:rem" datatype="char" width="5" ucd="META.NOTE" arraysize="*">
+<DESCRIPTION>Remarks</DESCRIPTION>
+</FIELD>
+<FIELD ID="GCRV_Rf" name="GCRV:Rf" datatype="char" width="2" ucd="META.ID;INSTR.OBSTY" arraysize="2">
+<DESCRIPTION>Observatory code</DESCRIPTION>
+</FIELD>
+<FIELD ID="GCRV_dis" name="GCRV:dis" datatype="int" width="3" ucd="INSTR.DISPERSION" unit="A.mm-1">
+<DESCRIPTION>Dispersion</DESCRIPTION>
+</FIELD>
+<FIELD ID="GCRV_bibcode" name="GCRV:bibcode" datatype="char" width="19" ucd="META.BIB.BIBCODE" arraysize="19">
+<DESCRIPTION>Bibcode</DESCRIPTION>
+</FIELD>
+<FIELD ID="GEN_U_B" name="GEN:U_B" datatype="float" precision="3" width="6" ucd="PHOT.COLOR;EM.OPT.U;EM.OPT.B" unit="mag">
+<DESCRIPTION>color index U-B</DESCRIPTION>
+</FIELD>
+<FIELD ID="GEN_V_B" name="GEN:V_B" datatype="float" precision="3" width="6" ucd="PHOT.COLOR;EM.OPT.V;EM.OPT.B" unit="mag">
+<DESCRIPTION>color index V-B</DESCRIPTION>
+</FIELD>
+<FIELD ID="GEN_B1_B" name="GEN:B1_B" datatype="float" precision="3" width="6" ucd="PHOT.COLOR;EM.OPT.B;EM.OPT.B" unit="mag">
+<DESCRIPTION>color index B1-B</DESCRIPTION>
+</FIELD>
+<FIELD ID="GEN_B2_B" name="GEN:B2_B" datatype="float" precision="3" width="6" ucd="PHOT.COLOR;EM.OPT.B;EM.OPT.B" unit="mag">
+<DESCRIPTION>color index B2-B</DESCRIPTION>
+</FIELD>
+<FIELD ID="GEN_V1_B" name="GEN:V1_B" datatype="float" precision="3" width="6" ucd="PHOT.COLOR;EM.OPT.V;EM.OPT.B" unit="mag">
+<DESCRIPTION>color index V1-B</DESCRIPTION>
+</FIELD>
+<FIELD ID="GEN_G_B" name="GEN:G_B" datatype="float" precision="3" width="6" ucd="PHOT.COLOR;EM.OPT.V;EM.OPT.B" unit="mag">
+<DESCRIPTION>color index G-B</DESCRIPTION>
+</FIELD>
+<FIELD ID="GEN_Wt_colind" name="GEN:Wt_colind" datatype="int" width="3" ucd="STAT.WEIGHT">
+<DESCRIPTION>weight on color indices</DESCRIPTION>
+</FIELD>
+<FIELD ID="GEN_me_colind" name="GEN:me_colind" datatype="float" precision="3" width="5" ucd="STAT.ERROR" unit="mag">
+<DESCRIPTION>m.e. sigma on color indices</DESCRIPTION>
+</FIELD>
+<FIELD ID="GEN_Vmag" name="GEN:Vmag" datatype="float" precision="3" width="6" ucd="PHOT.MAG;EM.OPT.V" unit="mag">
+<DESCRIPTION>V magnitude</DESCRIPTION>
+</FIELD>
+<FIELD ID="GEN_Wt_Vmag" name="GEN:Wt_Vmag" datatype="int" width="3" ucd="STAT.WEIGHT">
+<DESCRIPTION>weight on V magnitude</DESCRIPTION>
+</FIELD>
+<FIELD ID="GEN_me_Vmag" name="GEN:me_Vmag" datatype="float" precision="3" width="5" ucd="STAT.ERROR" unit="mag">
+<DESCRIPTION>m.e. sigma on V magnitude</DESCRIPTION>
+</FIELD>
+<FIELD ID="GEN_Rem" name="GEN:Rem" datatype="char" width="5" ucd="META.NOTE" arraysize="*">
+<DESCRIPTION>Remarks</DESCRIPTION>
+</FIELD>
+<FIELD ID="GEN_bibcode" name="GEN:bibcode" datatype="char" width="19" ucd="META.BIB.BIBCODE" arraysize="19">
+<DESCRIPTION>Bibcode</DESCRIPTION>
+</FIELD>
+<FIELD ID="GJ_plx" name="GJ:plx" datatype="float" precision="3" width="6" ucd="POS.PARALLAX.TRIG" unit="unit-plx">
+<DESCRIPTION>resulting parallax</DESCRIPTION>
+</FIELD>
+<FIELD ID="GJ_pe_plx" name="GJ:pe_plx" datatype="int" width="3" ucd="STAT.ERROR" unit="unit-plx">
+<DESCRIPTION>probable error on parallax</DESCRIPTION>
+</FIELD>
+<FIELD ID="GJ_Mabs" name="GJ:Mabs" datatype="float" precision="2" width="5" ucd="PHYS.MAGABS" unit="mag">
+<DESCRIPTION>Absolute magnitude</DESCRIPTION>
+</FIELD>
+<FIELD ID="GJ_P_Mabs" name="GJ:P_Mabs" datatype="char" width="1" ucd="META.NOTE" arraysize="1">
+<DESCRIPTION>Flag indication that Mabs=Mpg</DESCRIPTION>
+</FIELD>
+<FIELD ID="GJ_Q_Mabs" name="GJ:Q_Mabs" datatype="char" width="1" ucd="META.CODE.QUAL" arraysize="1">
+<DESCRIPTION>Quality on Abs. magn (A:very good-&gt;F:very poor)</DESCRIPTION>
+</FIELD>
+<FIELD ID="GJ_U" name="GJ:U" datatype="int" width="4" ucd="PHYS.VELOC;POS.CARTESIAN.X" unit="km/s">
+<DESCRIPTION>component of velocity directed to (b=0d l=0d)</DESCRIPTION>
+</FIELD>
+<FIELD ID="GJ_V" name="GJ:V" datatype="int" width="4" ucd="PHYS.VELOC;POS.CARTESIAN.Y" unit="km/s">
+<DESCRIPTION>component of velocity directed to (b=0d l=+90d)</DESCRIPTION>
+</FIELD>
+<FIELD ID="GJ_W" name="GJ:W" datatype="int" width="4" ucd="PHYS.VELOC;POS.CARTESIAN.Z" unit="km/s">
+<DESCRIPTION>component of velocity directed to (b=+90d)</DESCRIPTION>
+</FIELD>
+<FIELD ID="GJ_bibcode" name="GJ:bibcode" datatype="char" width="19" ucd="META.BIB.BIBCODE" arraysize="19">
+<DESCRIPTION>Bibcode</DESCRIPTION>
+</FIELD>
+<FIELD ID="Hbet_Hbet" name="Hbet:Hbet" datatype="float" precision="3" width="6" ucd="PHOT.COLOR;EM.OPT.B;EM.LINE.HBETA" unit="mag">
+<DESCRIPTION>Hbeta index</DESCRIPTION>
+</FIELD>
+<FIELD ID="Hbet_R" name="Hbet:R" datatype="char" width="1" ucd="META.NOTE" arraysize="1">
+<DESCRIPTION>Qualifier for measurement number</DESCRIPTION>
+</FIELD>
+<FIELD ID="Hbet_nmes" name="Hbet:nmes" datatype="int" width="4" ucd="META.NUMBER">
+<DESCRIPTION>Number of measurements</DESCRIPTION>
+</FIELD>
+<FIELD ID="Hbet_bibcode" name="Hbet:bibcode" datatype="char" width="19" ucd="META.BIB.BIBCODE" arraysize="19">
+<DESCRIPTION>Bibcode</DESCRIPTION>
+</FIELD>
+<FIELD ID="Hbet1_Hbet" name="Hbet1:Hbet" datatype="float" precision="3" width="6" ucd="PHOT.COLOR;EM.OPT.B;EM.LINE.HBETA" unit="mag">
+<DESCRIPTION>Hbeta index</DESCRIPTION>
+</FIELD>
+<FIELD ID="Hbet1_errHbet" name="Hbet1:errHbet" datatype="float" precision="2" width="5" ucd="STAT.ERROR" unit="mag">
+<DESCRIPTION>Erreur sur Hbet</DESCRIPTION>
+</FIELD>
+<FIELD ID="Hbet1_nmes" name="Hbet1:nmes" datatype="int" width="4" ucd="META.NUMBER">
+<DESCRIPTION>Number of measurements</DESCRIPTION>
+</FIELD>
+<FIELD ID="Hbet1_r1" name="Hbet1:r1" datatype="char" width="1" ucd="META.NOTE" arraysize="1">
+<DESCRIPTION>Remark</DESCRIPTION>
+</FIELD>
+<FIELD ID="Hbet1_r2" name="Hbet1:r2" datatype="char" width="1" ucd="META.NOTE" arraysize="1">
+<DESCRIPTION>Remark</DESCRIPTION>
+</FIELD>
+<FIELD ID="Hbet1_r3" name="Hbet1:r3" datatype="char" width="1" ucd="META.NOTE" arraysize="1">
+<DESCRIPTION>Remark</DESCRIPTION>
+</FIELD>
+<FIELD ID="Hbet1_r4" name="Hbet1:r4" datatype="char" width="1" ucd="META.NOTE" arraysize="1">
+<DESCRIPTION>Remark</DESCRIPTION>
+</FIELD>
+<FIELD ID="Hbet1_bibcode" name="Hbet1:bibcode" datatype="char" width="19" ucd="META.BIB.BIBCODE" arraysize="*">
+<DESCRIPTION>Bibcode</DESCRIPTION>
+</FIELD>
+<FIELD ID="Herschel_ObsId" name="Herschel:ObsId" datatype="char" width="10" ucd="META.ID;META.MAIN" arraysize="10">
+<DESCRIPTION>Observation identifier</DESCRIPTION>
+</FIELD>
+<FIELD ID="Herschel_alpha" name="Herschel:alpha" datatype="char" width="11" ucd="POS.EQ.RA;META.MAIN" arraysize="11" unit="h:m:s">
+<DESCRIPTION>Right ascension</DESCRIPTION>
+</FIELD>
+<FIELD ID="Herschel_delta" name="Herschel:delta" datatype="char" width="11" ucd="POS.EQ.DEC;META.MAIN" arraysize="11" unit="d:m:s">
+<DESCRIPTION>Declination</DESCRIPTION>
+</FIELD>
+<FIELD ID="HGAM_width" name="HGAM:width" datatype="float" precision="1" width="7" ucd="SPECT.LINE.EQWIDTH">
+<DESCRIPTION>equivalent width of H{gamma} line</DESCRIPTION>
+</FIELD>
+<FIELD ID="HGAM_mes" name="HGAM:mes" datatype="int" width="3" ucd="META.NUMBER">
+<DESCRIPTION>number of measurements</DESCRIPTION>
+</FIELD>
+<FIELD ID="HGAM_Flag" name="HGAM:Flag" datatype="char" width="1" ucd="META.NOTE" arraysize="1">
+<DESCRIPTION>Flag (E: emission  R: ???)</DESCRIPTION>
+</FIELD>
+<FIELD ID="HGAM_bibcode" name="HGAM:bibcode" datatype="char" width="19" ucd="META.BIB.BIBCODE" arraysize="19">
+<DESCRIPTION>Bibcode</DESCRIPTION>
+</FIELD>
+<FIELD ID="IRAS_RA" name="IRAS:RA" datatype="char" width="10" ucd="POS.EQ.RA;META.MAIN" arraysize="10" unit="h:m:s">
+<DESCRIPTION>Right Ascension B1950</DESCRIPTION>
+</FIELD>
+<FIELD ID="IRAS_DEC" name="IRAS:DEC" datatype="char" width="9" ucd="POS.EQ.DEC;META.MAIN" arraysize="9" unit="d:m:s">
+<DESCRIPTION>Declination B1950</DESCRIPTION>
+</FIELD>
+<FIELD ID="IRAS_errmaj" name="IRAS:errmaj" datatype="int" width="3" ucd="STAT.ERROR" unit="arcsec">
+<DESCRIPTION>major axis of error ellipse</DESCRIPTION>
+</FIELD>
+<FIELD ID="IRAS_errmin" name="IRAS:errmin" datatype="int" width="3" ucd="STAT.ERROR" unit="arcsec">
+<DESCRIPTION>minor axis of error ellipse</DESCRIPTION>
+</FIELD>
+<FIELD ID="IRAS_errangle" name="IRAS:errangle" datatype="int" width="3" ucd="POS.POSANG" unit="deg">
+<DESCRIPTION>position angle (east of north)</DESCRIPTION>
+</FIELD>
+<FIELD ID="IRAS_f12" name="IRAS:f12" datatype="float" precision="7" width="2" ucd="PHOT.FLUX.DENSITY;EM.IR.8-15UM" unit="Jy">
+<DESCRIPTION>flux density in 12mu-m filter</DESCRIPTION>
+</FIELD>
+<FIELD ID="IRAS_Q12" name="IRAS:Q12" datatype="char" width="1" ucd="META.CODE.QUAL" arraysize="1">
+<DESCRIPTION>quality of the 12mu-m flux density</DESCRIPTION>
+</FIELD>
+<FIELD ID="IRAS_f25" name="IRAS:f25" datatype="float" precision="7" width="2" ucd="PHOT.FLUX.DENSITY;EM.IR.15-30UM" unit="Jy">
+<DESCRIPTION>flux density in 25mu-m filter</DESCRIPTION>
+</FIELD>
+<FIELD ID="IRAS_Q25" name="IRAS:Q25" datatype="char" width="1" ucd="META.CODE.QUAL" arraysize="1">
+<DESCRIPTION>quality of the 25mu-m flux density</DESCRIPTION>
+</FIELD>
+<FIELD ID="IRAS_f60" name="IRAS:f60" datatype="float" precision="7" width="2" ucd="PHOT.FLUX.DENSITY;EM.IR.30-60UM" unit="Jy">
+<DESCRIPTION>flux density in 60mu-m filter</DESCRIPTION>
+</FIELD>
+<FIELD ID="IRAS_Q60" name="IRAS:Q60" datatype="char" width="1" ucd="META.CODE.QUAL" arraysize="1">
+<DESCRIPTION>quality of the 60mu-m flux density</DESCRIPTION>
+</FIELD>
+<FIELD ID="IRAS_f100" name="IRAS:f100" datatype="float" precision="8" width="2" ucd="PHOT.FLUX.DENSITY;EM.IR.60-100UM" unit="Jy">
+<DESCRIPTION>flux density in 100mu-m filter</DESCRIPTION>
+</FIELD>
+<FIELD ID="IRAS_Q100" name="IRAS:Q100" datatype="char" width="1" ucd="META.CODE.QUAL" arraysize="1">
+<DESCRIPTION>quality of the 100mu-m flux density</DESCRIPTION>
+</FIELD>
+<FIELD ID="IRAS_e12" name="IRAS:e12" datatype="int" width="3" ucd="STAT.ERROR">
+<DESCRIPTION>percent relative flux density uncertainties for f12</DESCRIPTION>
+</FIELD>
+<FIELD ID="IRAS_e25" name="IRAS:e25" datatype="int" width="3" ucd="STAT.ERROR">
+<DESCRIPTION>percent relative flux density uncertainties for f25</DESCRIPTION>
+</FIELD>
+<FIELD ID="IRAS_e60" name="IRAS:e60" datatype="int" width="3" ucd="STAT.ERROR">
+<DESCRIPTION>percent relative flux density uncertainties for f60</DESCRIPTION>
+</FIELD>
+<FIELD ID="IRAS_e100" name="IRAS:e100" datatype="int" width="3" ucd="STAT.ERROR">
+<DESCRIPTION>percent relative flux density uncertainties for f100</DESCRIPTION>
+</FIELD>
+<FIELD ID="IRAS_conf" name="IRAS:conf" datatype="char" width="4" ucd="META.CODE" arraysize="4">
+<DESCRIPTION>confusion flags (c) for the four bands</DESCRIPTION>
+</FIELD>
+<FIELD ID="IRAS_v" name="IRAS:v" datatype="int" width="2" ucd="STAT.FIT.GOODNESS;SRC.VAR">
+<DESCRIPTION>percent likelihood of variability of the source in the far infra-red</DESCRIPTION>
+</FIELD>
+<FIELD ID="IRAS_ns" name="IRAS:ns" datatype="int" width="2" ucd="META.NUMBER">
+<DESCRIPTION>Number of significant low-resolution spectra</DESCRIPTION>
+</FIELD>
+<FIELD ID="IRAS_na" name="IRAS:na" datatype="int" width="2" ucd="META.NUMBER">
+<DESCRIPTION>Number of associated (optical) sources in the original catalog</DESCRIPTION>
+</FIELD>
+<FIELD ID="IRAS_bibcode" name="IRAS:bibcode" datatype="char" width="19" ucd="META.BIB.BIBCODE" arraysize="19">
+<DESCRIPTION>Bibcode</DESCRIPTION>
+</FIELD>
+<FIELD ID="IRC_Krem" name="IRC:Krem" datatype="char" width="1" ucd="META.NOTE" arraysize="1">
+<DESCRIPTION>K magnitude remark</DESCRIPTION>
+</FIELD>
+<FIELD ID="IRC_Kmag" name="IRC:Kmag" datatype="float" precision="2" width="5" ucd="PHOT.MAG;EM.IR.K" unit="mag">
+<DESCRIPTION>K magnitude</DESCRIPTION>
+</FIELD>
+<FIELD ID="IRC_mes_K" name="IRC:mes_K" datatype="int" width="3" ucd="META.NUMBER">
+<DESCRIPTION>Number of observations</DESCRIPTION>
+</FIELD>
+<FIELD ID="IRC_me_K" name="IRC:me_K" datatype="float" precision="2" width="4" ucd="STAT.ERROR">
+<DESCRIPTION>{sigma} on K magnitude</DESCRIPTION>
+</FIELD>
+<FIELD ID="IRC_chi2_K" name="IRC:chi2_K" datatype="float" precision="2" width="5" ucd="STAT.FIT.CHI2">
+<DESCRIPTION>{chi}2 on K magnitude</DESCRIPTION>
+</FIELD>
+<FIELD ID="IRC_Irem" name="IRC:Irem" datatype="char" width="1" ucd="META.NOTE" arraysize="1">
+<DESCRIPTION>I magnitude remark</DESCRIPTION>
+</FIELD>
+<FIELD ID="IRC_Imag" name="IRC:Imag" datatype="float" precision="2" width="5" ucd="PHOT.MAG;EM.OPT.I" unit="mag">
+<DESCRIPTION>I magnitude</DESCRIPTION>
+</FIELD>
+<FIELD ID="IRC_mes_I" name="IRC:mes_I" datatype="int" width="3" ucd="META.NUMBER">
+<DESCRIPTION>Number of observations</DESCRIPTION>
+</FIELD>
+<FIELD ID="IRC_me_I" name="IRC:me_I" datatype="float" precision="2" width="4" ucd="STAT.ERROR">
+<DESCRIPTION>{sigma} on I magnitude</DESCRIPTION>
+</FIELD>
+<FIELD ID="IRC_chi2_I" name="IRC:chi2_I" datatype="float" precision="2" width="5" ucd="STAT.FIT.CHI2">
+<DESCRIPTION>{chi}2 on I magnitude</DESCRIPTION>
+</FIELD>
+<FIELD ID="IRC_bibcode" name="IRC:bibcode" datatype="char" width="19" ucd="META.BIB.BIBCODE" arraysize="19">
+<DESCRIPTION>Bibcode</DESCRIPTION>
+</FIELD>
+<FIELD ID="IRC_R" name="IRC:R" datatype="char" width="1" ucd="META.NOTE" arraysize="1">
+<DESCRIPTION>Remark</DESCRIPTION>
+</FIELD>
+<FIELD ID="ISO_TDT" name="ISO:TDT" datatype="char" width="8" ucd="META.ID;META.MAIN" arraysize="8">
+<DESCRIPTION>Observation identifier</DESCRIPTION>
+</FIELD>
+<FIELD ID="ISO_alpha" name="ISO:alpha" datatype="double" precision="4" width="8" ucd="POS.EQ.RA;META.MAIN" unit="deg">
+<DESCRIPTION>Right ascension</DESCRIPTION>
+</FIELD>
+<FIELD ID="ISO_delta" name="ISO:delta" datatype="double" precision="4" width="8" ucd="POS.EQ.DEC;META.MAIN" unit="deg">
+<DESCRIPTION>Declination</DESCRIPTION>
+</FIELD>
+<FIELD ID="IUE_Homogenized_Name" name="IUE:Homogenized_Name" datatype="char" width="16" ucd="META.ID;META.MAIN" arraysize="*">
+<DESCRIPTION>Homogenized Name</DESCRIPTION>
+</FIELD>
+<FIELD ID="IUE_ComplID" name="IUE:ComplID" datatype="char" width="12" ucd="META.ID" arraysize="*">
+<DESCRIPTION>Complementary Identifier</DESCRIPTION>
+</FIELD>
+<FIELD ID="IUE_PROG" name="IUE:PROG" datatype="char" width="5" ucd="META.ID;OBS" arraysize="5">
+<DESCRIPTION>Observing Program Identification</DESCRIPTION>
+</FIELD>
+<FIELD ID="IUE_CL" name="IUE:CL" datatype="int" width="2" ucd="SRC.CLASS">
+<DESCRIPTION>IUE class code</DESCRIPTION>
+</FIELD>
+<FIELD ID="IUE_D" name="IUE:D" datatype="char" width="1" ucd="META.CODE" arraysize="1">
+<DESCRIPTION>Dispersion code</DESCRIPTION>
+</FIELD>
+<FIELD ID="IUE_CAM" name="IUE:CAM" datatype="char" width="3" ucd="META.ID;INSTR" arraysize="3">
+<DESCRIPTION>Camera id</DESCRIPTION>
+</FIELD>
+<FIELD ID="IUE_IMAGE" name="IUE:IMAGE" datatype="int" width="5" ucd="OBS.IMAGE">
+<DESCRIPTION>Image number</DESCRIPTION>
+</FIELD>
+<FIELD ID="IUE_A" name="IUE:A" datatype="char" width="1" ucd="INSTR.FOV" arraysize="1">
+<DESCRIPTION>Aperture designation code</DESCRIPTION>
+</FIELD>
+<FIELD ID="IUE_FES" name="IUE:FES" datatype="int" width="5" ucd="PHOT.COUNT;EM.OPT">
+<DESCRIPTION>FES count</DESCRIPTION>
+</FIELD>
+<FIELD ID="IUE_MD" name="IUE:MD" datatype="char" width="2" ucd="META.CODE" arraysize="2">
+<DESCRIPTION>FES mode</DESCRIPTION>
+</FIELD>
+<FIELD ID="IUE_ObsDate" name="IUE:ObsDate" datatype="char" width="6" ucd="TIME.EPOCH" arraysize="6">
+<DESCRIPTION>Observation date</DESCRIPTION>
+</FIELD>
+<FIELD ID="IUE_Time" name="IUE:Time" datatype="char" width="6" ucd="TIME.EPOCH" arraysize="6">
+<DESCRIPTION>Observation time</DESCRIPTION>
+</FIELD>
+<FIELD ID="IUE_ExpTim" name="IUE:ExpTim" datatype="int" width="6" ucd="TIME.EXPO" unit="sec">
+<DESCRIPTION>Effective exposure time</DESCRIPTION>
+</FIELD>
+<FIELD ID="IUE_m" name="IUE:m" datatype="char" width="1" ucd="META.CODE.QUAL" arraysize="1">
+<DESCRIPTION>Abnormality code</DESCRIPTION>
+</FIELD>
+<FIELD ID="IUE_CEB" name="IUE:CEB" datatype="char" width="3" ucd="META.CODE.CLASS" arraysize="3">
+<DESCRIPTION>Exposure quality code</DESCRIPTION>
+</FIELD>
+<FIELD ID="IUE_S" name="IUE:S" datatype="char" width="1" ucd="META.FLAG;INSTR.TEL" arraysize="1">
+<DESCRIPTION>Station (V=Vilspa/G=Goddard)</DESCRIPTION>
+</FIELD>
+<FIELD ID="IUE_Comments" name="IUE:Comments" datatype="char" width="20" ucd="META.NOTE" arraysize="*">
+<DESCRIPTION>Comments</DESCRIPTION>
+</FIELD>
+<FIELD ID="IUE_F" name="IUE:F" datatype="char" width="1" ucd="META.CODE" arraysize="1">
+<DESCRIPTION>Flag</DESCRIPTION>
+</FIELD>
+<FIELD ID="IUE_bibcode" name="IUE:bibcode" datatype="char" width="19" ucd="META.BIB.BIBCODE" arraysize="19">
+<DESCRIPTION>Bibcode</DESCRIPTION>
+</FIELD>
+<FIELD ID="JP11_U_360" name="JP11:U_360" datatype="float" precision="2" width="6" ucd="PHOT.MAG;EM.OPT.U" unit="mag">
+<DESCRIPTION>magnitude at {lambda}eff = 360 nm</DESCRIPTION>
+</FIELD>
+<FIELD ID="JP11_sp_U" name="JP11:sp_U" datatype="char" width="1" ucd="META.CODE.QUAL" arraysize="1">
+<DESCRIPTION>special value U magnitude</DESCRIPTION>
+</FIELD>
+<FIELD ID="JP11_nmes_U" name="JP11:nmes_U" datatype="int" width="3" ucd="META.NUMBER">
+<DESCRIPTION>Number of measurements</DESCRIPTION>
+</FIELD>
+<FIELD ID="JP11_B_450" name="JP11:B_450" datatype="float" precision="2" width="6" ucd="PHOT.MAG;EM.OPT.B" unit="mag">
+<DESCRIPTION>magnitude at {lambda}eff = 450 nm</DESCRIPTION>
+</FIELD>
+<FIELD ID="JP11_sp_B" name="JP11:sp_B" datatype="char" width="1" ucd="META.CODE.QUAL" arraysize="1">
+<DESCRIPTION>special value B magnitude</DESCRIPTION>
+</FIELD>
+<FIELD ID="JP11_nmes_B" name="JP11:nmes_B" datatype="int" width="3" ucd="META.NUMBER">
+<DESCRIPTION>Number of measurements</DESCRIPTION>
+</FIELD>
+<FIELD ID="JP11_V_555" name="JP11:V_555" datatype="float" precision="2" width="6" ucd="PHOT.MAG;EM.OPT.V" unit="mag">
+<DESCRIPTION>magnitude at {lambda}eff = 555 nm</DESCRIPTION>
+</FIELD>
+<FIELD ID="JP11_sp_V" name="JP11:sp_V" datatype="char" width="1" ucd="META.CODE.QUAL" arraysize="1">
+<DESCRIPTION>special value V magnitude</DESCRIPTION>
+</FIELD>
+<FIELD ID="JP11_nmes_V" name="JP11:nmes_V" datatype="int" width="3" ucd="META.NUMBER">
+<DESCRIPTION>Number of measurements</DESCRIPTION>
+</FIELD>
+<FIELD ID="JP11_R_670" name="JP11:R_670" datatype="float" precision="2" width="6" ucd="PHOT.MAG;EM.OPT.R" unit="mag">
+<DESCRIPTION>magnitude at {lambda}eff = 670 nm</DESCRIPTION>
+</FIELD>
+<FIELD ID="JP11_sp_R" name="JP11:sp_R" datatype="char" width="1" ucd="META.CODE.QUAL" arraysize="1">
+<DESCRIPTION>special value R magnitude</DESCRIPTION>
+</FIELD>
+<FIELD ID="JP11_nmes_R" name="JP11:nmes_R" datatype="int" width="3" ucd="META.NUMBER">
+<DESCRIPTION>Number of measurements</DESCRIPTION>
+</FIELD>
+<FIELD ID="JP11_I_870" name="JP11:I_870" datatype="float" precision="2" width="6" ucd="PHOT.MAG;EM.OPT.I" unit="mag">
+<DESCRIPTION>magnitude at {lambda}eff = 870 nm</DESCRIPTION>
+</FIELD>
+<FIELD ID="JP11_sp_I" name="JP11:sp_I" datatype="char" width="1" ucd="META.CODE.QUAL" arraysize="1">
+<DESCRIPTION>special value I magnitude</DESCRIPTION>
+</FIELD>
+<FIELD ID="JP11_nmes_I" name="JP11:nmes_I" datatype="int" width="3" ucd="META.NUMBER">
+<DESCRIPTION>Number of measurements</DESCRIPTION>
+</FIELD>
+<FIELD ID="JP11_J_1200" name="JP11:J_1200" datatype="float" precision="2" width="6" ucd="PHOT.MAG;EM.IR.J" unit="mag">
+<DESCRIPTION>magnitude at {lambda}eff = 1200 nm</DESCRIPTION>
+</FIELD>
+<FIELD ID="JP11_sp_J" name="JP11:sp_J" datatype="char" width="1" ucd="META.CODE.QUAL" arraysize="1">
+<DESCRIPTION>special value J magnitude</DESCRIPTION>
+</FIELD>
+<FIELD ID="JP11_nmes_J" name="JP11:nmes_J" datatype="int" width="3" ucd="META.NUMBER">
+<DESCRIPTION>Number of measurements</DESCRIPTION>
+</FIELD>
+<FIELD ID="JP11_K_2200" name="JP11:K_2200" datatype="float" precision="2" width="6" ucd="PHOT.MAG;EM.IR.K" unit="mag">
+<DESCRIPTION>magnitude at {lambda}eff = 2200 nm</DESCRIPTION>
+</FIELD>
+<FIELD ID="JP11_sp_K" name="JP11:sp_K" datatype="char" width="1" ucd="META.CODE.QUAL" arraysize="1">
+<DESCRIPTION>special value K magnitude</DESCRIPTION>
+</FIELD>
+<FIELD ID="JP11_nmes_K" name="JP11:nmes_K" datatype="int" width="3" ucd="META.NUMBER">
+<DESCRIPTION>Number of measurements</DESCRIPTION>
+</FIELD>
+<FIELD ID="JP11_L_3500" name="JP11:L_3500" datatype="float" precision="2" width="6" ucd="PHOT.MAG;EM.IR.3-4UM" unit="mag">
+<DESCRIPTION>magnitude at {lambda}eff = 3500 nm</DESCRIPTION>
+</FIELD>
+<FIELD ID="JP11_sp_L" name="JP11:sp_L" datatype="char" width="1" ucd="META.CODE.QUAL" arraysize="1">
+<DESCRIPTION>special value L magnitude</DESCRIPTION>
+</FIELD>
+<FIELD ID="JP11_nmes_L" name="JP11:nmes_L" datatype="int" width="3" ucd="META.NUMBER">
+<DESCRIPTION>Number of measurements</DESCRIPTION>
+</FIELD>
+<FIELD ID="JP11_M_5000" name="JP11:M_5000" datatype="float" precision="2" width="6" ucd="PHOT.MAG;EM.IR.4-8UM" unit="mag">
+<DESCRIPTION>magnitude at {lambda}eff = 5000 nm</DESCRIPTION>
+</FIELD>
+<FIELD ID="JP11_sp_M" name="JP11:sp_M" datatype="char" width="1" ucd="META.CODE.QUAL" arraysize="1">
+<DESCRIPTION>special value M magnitude</DESCRIPTION>
+</FIELD>
+<FIELD ID="JP11_nmes_M" name="JP11:nmes_M" datatype="int" width="3" ucd="META.NUMBER">
+<DESCRIPTION>Number of measurements</DESCRIPTION>
+</FIELD>
+<FIELD ID="JP11_N_9000" name="JP11:N_9000" datatype="float" precision="2" width="6" ucd="PHOT.MAG;EM.IR.8-15UM" unit="mag">
+<DESCRIPTION>magnitude at {lambda}eff = 9000 nm</DESCRIPTION>
+</FIELD>
+<FIELD ID="JP11_sp_N" name="JP11:sp_N" datatype="char" width="1" ucd="META.CODE.QUAL" arraysize="1">
+<DESCRIPTION>special value N magnitude</DESCRIPTION>
+</FIELD>
+<FIELD ID="JP11_nmes_N" name="JP11:nmes_N" datatype="int" width="3" ucd="META.NUMBER">
+<DESCRIPTION>Number of measurements</DESCRIPTION>
+</FIELD>
+<FIELD ID="JP11_H_16200" name="JP11:H_16200" datatype="float" precision="2" width="6" ucd="PHOT.MAG;EM.IR.H" unit="mag">
+<DESCRIPTION>magnitude at {lambda}eff = 16200 nm</DESCRIPTION>
+</FIELD>
+<FIELD ID="JP11_sp_H" name="JP11:sp_H" datatype="char" width="1" ucd="META.CODE.QUAL" arraysize="1">
+<DESCRIPTION>special value H magnitude</DESCRIPTION>
+</FIELD>
+<FIELD ID="JP11_nmes_H" name="JP11:nmes_H" datatype="int" width="3" ucd="META.NUMBER">
+<DESCRIPTION>Number of measurements</DESCRIPTION>
+</FIELD>
+<FIELD ID="JP11_bibcode" name="JP11:bibcode" datatype="char" width="19" ucd="META.BIB.BIBCODE" arraysize="19">
+<DESCRIPTION>Bibcode</DESCRIPTION>
+</FIELD>
+<FIELD ID="MK_ds" name="MK:ds" datatype="char" width="2" ucd="META.ID;INSTR" arraysize="2">
+<DESCRIPTION>dispersive system</DESCRIPTION>
+</FIELD>
+<FIELD ID="MK_mss" name="MK:mss" datatype="char" width="3" ucd="META.NOTE" arraysize="3">
+<DESCRIPTION>mss notes</DESCRIPTION>
+</FIELD>
+<FIELD ID="MK_Spectral_type" name="MK:Spectral_type" datatype="char" width="36" ucd="SRC.SPTYPE" arraysize="*">
+<DESCRIPTION>MK/MSS spectral type</DESCRIPTION>
+</FIELD>
+<FIELD ID="MK_bibcode" name="MK:bibcode" datatype="char" width="19" ucd="META.BIB.BIBCODE" arraysize="19">
+<DESCRIPTION>Bibcode</DESCRIPTION>
+</FIELD>
+<FIELD ID="oRV_RVel" name="oRV:RVel" datatype="float" precision="7" width="1" ucd="PHYS.VELOC;POS.HELIOCENTRIC" unit="km/s">
+<DESCRIPTION>Radial velocity</DESCRIPTION>
+</FIELD>
+<FIELD ID="oRV_Q" name="oRV:Q" datatype="char" width="1" ucd="META.CODE.QUAL" arraysize="1">
+<DESCRIPTION>Quality</DESCRIPTION>
+</FIELD>
+<FIELD ID="oRV_Nmes" name="oRV:Nmes" datatype="int" width="4" ucd="META.NUMBER">
+<DESCRIPTION>Number of measurements</DESCRIPTION>
+</FIELD>
+<FIELD ID="oRV_Rem" name="oRV:Rem" datatype="char" width="7" ucd="META.NOTE" arraysize="*">
+<DESCRIPTION>Remarks</DESCRIPTION>
+</FIELD>
+<FIELD ID="oRV_Orig" name="oRV:Orig" datatype="char" width="2" ucd="META.NOTE" arraysize="2">
+<DESCRIPTION>Origin of the radial velocity</DESCRIPTION>
+</FIELD>
+<FIELD ID="oRV_Dis" name="oRV:Dis" datatype="int" width="3" ucd="INSTR.DISPERSION" unit="a.mm-1">
+<DESCRIPTION>dispersion</DESCRIPTION>
+</FIELD>
+<FIELD ID="oRV_bibcode" name="oRV:bibcode" datatype="char" width="19" ucd="META.BIB.BIBCODE" arraysize="19">
+<DESCRIPTION>Bibcode</DESCRIPTION>
+</FIELD>
+<FIELD ID="PLX_plx" name="PLX:plx" datatype="float" precision="3" width="6" ucd="POS.PARALLAX.TRIG" unit="arcsec">
+<DESCRIPTION>Parallaxe</DESCRIPTION>
+</FIELD>
+<FIELD ID="PLX_me" name="PLX:me" datatype="int" width="3" ucd="STAT.ERROR" unit="arcsec">
+<DESCRIPTION>sigma{plx}</DESCRIPTION>
+</FIELD>
+<FIELD ID="PLX_R" name="PLX:R" datatype="char" width="2" ucd="META.ID;INSTR.OBSTY" arraysize="2">
+<DESCRIPTION>Observatory code</DESCRIPTION>
+</FIELD>
+<FIELD ID="PLX_bibcode" name="PLX:bibcode" datatype="char" width="19" ucd="META.BIB.BIBCODE" arraysize="19">
+<DESCRIPTION>Bibcode</DESCRIPTION>
+</FIELD>
+<FIELD ID="PM_pmra" name="PM:pmra" datatype="float" precision="3" width="7" ucd="POS.PM;POS.EQ.RA" unit="mas.yr-1">
+<DESCRIPTION>Proper motion R.A.</DESCRIPTION>
+</FIELD>
+<FIELD ID="PM_me_pmra" name="PM:me_pmra" datatype="float" precision="3" width="5" ucd="STAT.ERROR" unit="mas.yr-1">
+<DESCRIPTION>sigma{pm-ra}</DESCRIPTION>
+</FIELD>
+<FIELD ID="PM_pmde" name="PM:pmde" datatype="float" precision="3" width="7" ucd="POS.PM;POS.EQ.DEC" unit="mas.yr-1">
+<DESCRIPTION>Proper motion DEC.</DESCRIPTION>
+</FIELD>
+<FIELD ID="PM_me_pmde" name="PM:me_pmde" datatype="float" precision="3" width="5" ucd="STAT.ERROR" unit="mas.yr-1">
+<DESCRIPTION>sigma{pm-de}</DESCRIPTION>
+</FIELD>
+<FIELD ID="PM_system" name="PM:system" datatype="char" width="4" ucd="POS.FRAME" arraysize="4">
+<DESCRIPTION>coordinates system designation</DESCRIPTION>
+</FIELD>
+<FIELD ID="PM_bibcode" name="PM:bibcode" datatype="char" width="19" ucd="META.BIB.BIBCODE" arraysize="19">
+<DESCRIPTION>Bibcode</DESCRIPTION>
+</FIELD>
+<FIELD ID="pos_RA" name="pos:RA" datatype="char" width="13" ucd="POS.EQ.RA;META.MAIN" arraysize="13" unit="h:m:s">
+<DESCRIPTION>Right ascension</DESCRIPTION>
+</FIELD>
+<FIELD ID="pos_DEC" name="pos:DEC" datatype="char" width="13" ucd="POS.EQ.DEC;META.MAIN" arraysize="13" unit="d:m:s">
+<DESCRIPTION>Declination</DESCRIPTION>
+</FIELD>
+<FIELD ID="pos_me_al" name="pos:me_al" datatype="float" precision="3" width="5" ucd="STAT.ERROR" unit="sec">
+<DESCRIPTION>sigma{RA}</DESCRIPTION>
+</FIELD>
+<FIELD ID="pos_me_de" name="pos:me_de" datatype="float" precision="3" width="5" ucd="STAT.ERROR" unit="sec">
+<DESCRIPTION>sigma{DEC}</DESCRIPTION>
+</FIELD>
+<FIELD ID="pos_equi" name="pos:equi" datatype="int" width="4" ucd="TIME.EQUINOX" unit="yr">
+<DESCRIPTION>Equinox</DESCRIPTION>
+</FIELD>
+<FIELD ID="pos_epoch" name="pos:epoch" datatype="float" precision="7" width="2" ucd="TIME.EPOCH" unit="yr">
+<DESCRIPTION>Epoch</DESCRIPTION>
+</FIELD>
+<FIELD ID="pos_bibcode" name="pos:bibcode" datatype="char" width="19" ucd="META.BIB.BIBCODE" arraysize="19">
+<DESCRIPTION>Bibcode</DESCRIPTION>
+</FIELD>
+<FIELD ID="posa_RA" name="posa:RA" datatype="char" width="13" ucd="POS.EQ.RA;META.MAIN" arraysize="13" unit="h:m:s">
+<DESCRIPTION>Right ascension</DESCRIPTION>
+</FIELD>
+<FIELD ID="posa_DEC" name="posa:DEC" datatype="char" width="13" ucd="POS.EQ.DEC;META.MAIN" arraysize="13" unit="d:m:s">
+<DESCRIPTION>Declination</DESCRIPTION>
+</FIELD>
+<FIELD ID="posa_upMajAxis" name="posa:upMajAxis" datatype="char" width="1" ucd="META.CODE" arraysize="1">
+<DESCRIPTION>Upper value of Major axis</DESCRIPTION>
+</FIELD>
+<FIELD ID="posa_MajAxis" name="posa:MajAxis" datatype="float" precision="3" width="8" ucd="STAT.ERROR" unit="arcsec">
+<DESCRIPTION>Major axis of the error ellipse</DESCRIPTION>
+</FIELD>
+<FIELD ID="posa_upMinAxis" name="posa:upMinAxis" datatype="char" width="1" ucd="META.CODE" arraysize="1">
+<DESCRIPTION>Upper value of Minor axis</DESCRIPTION>
+</FIELD>
+<FIELD ID="posa_MinAxis" name="posa:MinAxis" datatype="float" precision="3" width="8" ucd="STAT.ERROR" unit="arcsec">
+<DESCRIPTION>Minor axis of the error ellipse</DESCRIPTION>
+</FIELD>
+<FIELD ID="posa_PA" name="posa:PA" datatype="float" precision="1" width="5" ucd="POS.POSANG" unit="deg">
+<DESCRIPTION>Position angle of the error ellipse</DESCRIPTION>
+</FIELD>
+<FIELD ID="posa_equi" name="posa:equi" datatype="int" width="4" ucd="TIME.EQUINOX" unit="yr">
+<DESCRIPTION>Equinox</DESCRIPTION>
+</FIELD>
+<FIELD ID="posa_epoch" name="posa:epoch" datatype="float" precision="7" width="2" ucd="TIME.EPOCH" unit="yr">
+<DESCRIPTION>Epoch</DESCRIPTION>
+</FIELD>
+<FIELD ID="posa_bibcode" name="posa:bibcode" datatype="char" width="19" ucd="META.BIB.BIBCODE" arraysize="19">
+<DESCRIPTION>Bibcode</DESCRIPTION>
+</FIELD>
+<FIELD ID="ROT_upVsini" name="ROT:upVsini" datatype="char" width="1" ucd="META.CODE" arraysize="1">
+<DESCRIPTION>Upper value of Vsini</DESCRIPTION>
+</FIELD>
+<FIELD ID="ROT_Vsini" name="ROT:Vsini" datatype="float" precision="2" width="6" ucd="PHYS.VELOC.ROTAT" unit="km.s-1">
+<DESCRIPTION>V sini</DESCRIPTION>
+</FIELD>
+<FIELD ID="ROT_err" name="ROT:err" datatype="float" precision="2" width="5" ucd="STAT.ERROR">
+<DESCRIPTION>error</DESCRIPTION>
+</FIELD>
+<FIELD ID="ROT_mes" name="ROT:mes" datatype="int" width="3" ucd="META.NUMBER">
+<DESCRIPTION>Number of measurements</DESCRIPTION>
+</FIELD>
+<FIELD ID="ROT_qual" name="ROT:qual" datatype="char" width="1" ucd="CODE.QUAL" arraysize="1">
+<DESCRIPTION>Quality</DESCRIPTION>
+</FIELD>
+<FIELD ID="ROT_bibcode" name="ROT:bibcode" datatype="char" width="19" ucd="META.BIB.BIBCODE" arraysize="19">
+<DESCRIPTION>Bibcode</DESCRIPTION>
+</FIELD>
+<FIELD ID="RVel_Rvel" name="RVel:Rvel" datatype="int" width="7" ucd="PHYS.VELOC;POS.HELIOCENTRIC" unit="km.sec-1">
+<DESCRIPTION>Radial velocity</DESCRIPTION>
+</FIELD>
+<FIELD ID="RVel_nmes" name="RVel:nmes" datatype="int" width="4" ucd="META.NUMBER">
+<DESCRIPTION>Number of measurements</DESCRIPTION>
+</FIELD>
+<FIELD ID="RVel_rem" name="RVel:rem" datatype="char" width="5" ucd="META.NOTE" arraysize="5">
+<DESCRIPTION>Remarks</DESCRIPTION>
+</FIELD>
+<FIELD ID="RVel_dis" name="RVel:dis" datatype="int" width="3" ucd="INSTR.DISPERSION" unit="a.mm-1">
+<DESCRIPTION>Dispersion</DESCRIPTION>
+</FIELD>
+<FIELD ID="RVel_bibcode" name="RVel:bibcode" datatype="char" width="19" ucd="META.BIB.BIBCODE" arraysize="19">
+<DESCRIPTION>Bibcode</DESCRIPTION>
+</FIELD>
+<FIELD ID="SAO_alpha" name="SAO:alpha" datatype="char" width="13" ucd="POS.EQ.RA;META.MAIN" arraysize="13" unit="h:m:s">
+<DESCRIPTION>Right ascension</DESCRIPTION>
+</FIELD>
+<FIELD ID="SAO_delta" name="SAO:delta" datatype="char" width="14" ucd="POS.EQ.DEC;META.MAIN" arraysize="14" unit="d:m:s">
+<DESCRIPTION>Declination</DESCRIPTION>
+</FIELD>
+<FIELD ID="SAO_me_coo" name="SAO:me_coo" datatype="float" precision="2" width="4" ucd="STAT.ERROR" unit="arcsec">
+<DESCRIPTION>Mean error on position</DESCRIPTION>
+</FIELD>
+<FIELD ID="SAO_pm_ra" name="SAO:pm_ra" datatype="float" precision="3" width="7" ucd="POS.PM;POS.EQ.RA" unit="arcsec.yr-1">
+<DESCRIPTION>Proper motion {mu}alpha*cos(delta)</DESCRIPTION>
+</FIELD>
+<FIELD ID="SAO_me_pmra" name="SAO:me_pmra" datatype="int" width="3" ucd="STAT.ERROR" unit="mas.yr-1">
+<DESCRIPTION>sigma on pm-ra</DESCRIPTION>
+</FIELD>
+<FIELD ID="SAO_pm_de" name="SAO:pm_de" datatype="float" precision="3" width="7" ucd="POS.PM;POS.EQ.DEC" unit="arcsec.yr-1">
+<DESCRIPTION>Proper motion {mu}delta</DESCRIPTION>
+</FIELD>
+<FIELD ID="SAO_me_pmde" name="SAO:me_pmde" datatype="int" width="3" ucd="STAT.ERROR" unit="mas.yr-1">
+<DESCRIPTION>sigma on pm-de</DESCRIPTION>
+</FIELD>
+<FIELD ID="SAO_bibcode" name="SAO:bibcode" datatype="char" width="19" ucd="META.BIB.BIBCODE" arraysize="19">
+<DESCRIPTION>Bibcode</DESCRIPTION>
+</FIELD>
+<FIELD ID="TD1_m2740" name="TD1:m2740" datatype="float" precision="2" width="5" ucd="PHOT.MAG;EM.UV.200-300NM" unit="mag">
+<DESCRIPTION>magnitude at 274.0 nm</DESCRIPTION>
+</FIELD>
+<FIELD ID="TD1_se_m2740" name="TD1:se_m2740" datatype="float" precision="2" width="4" ucd="STAT.ERROR" unit="mag">
+<DESCRIPTION>{sigma}(m2740)</DESCRIPTION>
+</FIELD>
+<FIELD ID="TD1_m2365" name="TD1:m2365" datatype="float" precision="2" width="5" ucd="PHOT.MAG;EM.UV.200-300NM" unit="mag">
+<DESCRIPTION>magnitude at 236.5 nm</DESCRIPTION>
+</FIELD>
+<FIELD ID="TD1_se_m2365" name="TD1:se_m2365" datatype="float" precision="2" width="4" ucd="STAT.ERROR" unit="mag">
+<DESCRIPTION>{sigma}(m2365)</DESCRIPTION>
+</FIELD>
+<FIELD ID="TD1_m1965" name="TD1:m1965" datatype="float" precision="2" width="5" ucd="PHOT.MAG;EM.UV.100-200NM" unit="mag">
+<DESCRIPTION>magnitude at 196.5 nm</DESCRIPTION>
+</FIELD>
+<FIELD ID="TD1_se_m1965" name="TD1:se_m1965" datatype="float" precision="2" width="4" ucd="STAT.ERROR" unit="mag">
+<DESCRIPTION>{sigma}(m1965)</DESCRIPTION>
+</FIELD>
+<FIELD ID="TD1_m1565" name="TD1:m1565" datatype="float" precision="2" width="5" ucd="PHOT.MAG;EM.UV.100-200NM" unit="mag">
+<DESCRIPTION>magnitude at 156.5 nm</DESCRIPTION>
+</FIELD>
+<FIELD ID="TD1_se_m1565" name="TD1:se_m1565" datatype="float" precision="2" width="4" ucd="STAT.ERROR" unit="mag">
+<DESCRIPTION>{sigma}(m1565)</DESCRIPTION>
+</FIELD>
+<FIELD ID="TD1_bibcode" name="TD1:bibcode" datatype="char" width="19" ucd="META.BIB.BIBCODE" arraysize="19">
+<DESCRIPTION>Bibcode</DESCRIPTION>
+</FIELD>
+<FIELD ID="UBV_Ph_syst" name="UBV:Ph_syst" datatype="char" width="3" ucd="META.ID;PHOT" arraysize="3">
+<DESCRIPTION>Photometric system</DESCRIPTION>
+</FIELD>
+<FIELD ID="UBV_V" name="UBV:V" datatype="float" precision="3" width="6" ucd="PHOT.MAG;EM.OPT.V" unit="mag">
+<DESCRIPTION>V magnitude</DESCRIPTION>
+</FIELD>
+<FIELD ID="UBV_B_V" name="UBV:B_V" datatype="float" precision="3" width="6" ucd="PHOT.COLOR;EM.OPT.B;EM.OPT.V" unit="mag">
+<DESCRIPTION>B-V color index</DESCRIPTION>
+</FIELD>
+<FIELD ID="UBV_U_B" name="UBV:U_B" datatype="float" precision="3" width="6" ucd="PHOT.COLOR;EM.OPT.U;EM.OPT.B" unit="mag">
+<DESCRIPTION>U-B color index</DESCRIPTION>
+</FIELD>
+<FIELD ID="UBV_qual" name="UBV:qual" datatype="char" width="5" ucd="META.CODE.QUAL" arraysize="5">
+<DESCRIPTION>Quality</DESCRIPTION>
+</FIELD>
+<FIELD ID="UBV_remarks" name="UBV:remarks" datatype="char" width="11" ucd="META.NOTE" arraysize="*" unit="char">
+<DESCRIPTION>REMARKS</DESCRIPTION>
+</FIELD>
+<FIELD ID="UBV_bibcode" name="UBV:bibcode" datatype="char" width="19" ucd="META.BIB.BIBCODE" arraysize="19">
+<DESCRIPTION>Bibcode</DESCRIPTION>
+</FIELD>
+<FIELD ID="uvby_b_y" name="uvby:b_y" datatype="float" precision="3" width="6" ucd="PHOT.COLOR;EM.OPT.B;EM.OPT.V" unit="mag">
+<DESCRIPTION>b-y color index</DESCRIPTION>
+</FIELD>
+<FIELD ID="uvby_m1" name="uvby:m1" datatype="float" precision="3" width="6" ucd="PHOT.COLOR" unit="mag">
+<DESCRIPTION>m1 index (Balmer discontinuity)</DESCRIPTION>
+</FIELD>
+<FIELD ID="uvby_c1" name="uvby:c1" datatype="float" precision="3" width="6" ucd="PHOT.COLOR" unit="mag">
+<DESCRIPTION>c1 index (line blocking)</DESCRIPTION>
+</FIELD>
+<FIELD ID="uvby_flag" name="uvby:flag" datatype="char" width="1" ucd="META.CODE" arraysize="1">
+<DESCRIPTION>flag</DESCRIPTION>
+</FIELD>
+<FIELD ID="uvby_nbmes" name="uvby:nbmes" datatype="int" width="4" ucd="META.NUMBER">
+<DESCRIPTION>Number of measurements</DESCRIPTION>
+</FIELD>
+<FIELD ID="uvby_bibcode" name="uvby:bibcode" datatype="char" width="19" ucd="META.BIB.BIBCODE" arraysize="19">
+<DESCRIPTION>Bibcode</DESCRIPTION>
+</FIELD>
+<FIELD ID="uvby1_b_y" name="uvby1:b_y" datatype="float" precision="3" width="6" ucd="PHOT.COLOR;EM.OPT.B;EM.OPT.V" unit="mag">
+<DESCRIPTION>b-y color index</DESCRIPTION>
+</FIELD>
+<FIELD ID="uvby1_me_b_y" name="uvby1:me_b_y" datatype="float" precision="3" width="5" ucd="STAT.ERROR" unit="mag">
+<DESCRIPTION>{sigma}(b-y)</DESCRIPTION>
+</FIELD>
+<FIELD ID="uvby1_m1" name="uvby1:m1" datatype="float" precision="3" width="6" ucd="PHOT.COLOR" unit="mag">
+<DESCRIPTION>m1 index (Balmer discontinuity)</DESCRIPTION>
+</FIELD>
+<FIELD ID="uvby1_me_m1" name="uvby1:me_m1" datatype="float" precision="3" width="5" ucd="STAT.ERROR" unit="mag">
+<DESCRIPTION>{sigma}(m1)</DESCRIPTION>
+</FIELD>
+<FIELD ID="uvby1_c1" name="uvby1:c1" datatype="float" precision="3" width="6" ucd="PHOT.COLOR" unit="mag">
+<DESCRIPTION>c1 index (line blocking)</DESCRIPTION>
+</FIELD>
+<FIELD ID="uvby1_me_c1" name="uvby1:me_c1" datatype="float" precision="3" width="5" ucd="STAT.ERROR" unit="mag">
+<DESCRIPTION>{sigma}(c1)</DESCRIPTION>
+</FIELD>
+<FIELD ID="uvby1_flag" name="uvby1:flag" datatype="char" width="1" ucd="META.CODE" arraysize="1">
+<DESCRIPTION>flag</DESCRIPTION>
+</FIELD>
+<FIELD ID="uvby1_nbmes" name="uvby1:nbmes" datatype="int" width="4" ucd="META.NUMBER">
+<DESCRIPTION>Number of measurements</DESCRIPTION>
+</FIELD>
+<FIELD ID="uvby1_f1" name="uvby1:f1" datatype="char" width="1" ucd="META.NOTE" arraysize="1">
+<DESCRIPTION>flag 1</DESCRIPTION>
+</FIELD>
+<FIELD ID="uvby1_f2" name="uvby1:f2" datatype="char" width="1" ucd="META.NOTE" arraysize="1">
+<DESCRIPTION>flag 2</DESCRIPTION>
+</FIELD>
+<FIELD ID="uvby1_f3" name="uvby1:f3" datatype="char" width="1" ucd="META.NOTE" arraysize="1">
+<DESCRIPTION>flag 3</DESCRIPTION>
+</FIELD>
+<FIELD ID="uvby1_f4" name="uvby1:f4" datatype="char" width="1" ucd="META.NOTE" arraysize="1">
+<DESCRIPTION>flag 4</DESCRIPTION>
+</FIELD>
+<FIELD ID="uvby1_bibcode" name="uvby1:bibcode" datatype="char" width="19" ucd="META.BIB.BIBCODE" arraysize="19">
+<DESCRIPTION>Bibcode</DESCRIPTION>
+</FIELD>
+<FIELD ID="V__vartyp" name="V*:vartyp" datatype="char" width="6" ucd="META.CODE;SRC.VAR" arraysize="6">
+<DESCRIPTION>Type of variability</DESCRIPTION>
+</FIELD>
+<FIELD ID="V__LoVmax" name="V*:LoVmax" datatype="char" width="1" ucd="META.CODE.ERROR" arraysize="1">
+<DESCRIPTION>Upper limit flag for Vmax</DESCRIPTION>
+</FIELD>
+<FIELD ID="V__Vmax" name="V*:Vmax" datatype="float" precision="2" width="5" ucd="PHOT.MAG" unit="mag">
+<DESCRIPTION>Maximum of brightness</DESCRIPTION>
+</FIELD>
+<FIELD ID="V__R_Vmax" name="V*:R_Vmax" datatype="char" width="1" ucd="META.CODE.ERROR" arraysize="1">
+<DESCRIPTION>Uncertainty flag</DESCRIPTION>
+</FIELD>
+<FIELD ID="V__magtyp" name="V*:magtyp" datatype="char" width="1" ucd="META.ID;PHOT" arraysize="1">
+<DESCRIPTION>Magnitude type</DESCRIPTION>
+</FIELD>
+<FIELD ID="V__UpVmin" name="V*:UpVmin" datatype="char" width="1" ucd="META.CODE" arraysize="1">
+<DESCRIPTION>Lower limit flag for Vmin</DESCRIPTION>
+</FIELD>
+<FIELD ID="V__Vmin" name="V*:Vmin" datatype="float" precision="2" width="5" ucd="PHOT.MAG" unit="mag">
+<DESCRIPTION>Minimum of brightness</DESCRIPTION>
+</FIELD>
+<FIELD ID="V__R_Vmin" name="V*:R_Vmin" datatype="char" width="1" ucd="META.CODE.ERROR" arraysize="1">
+<DESCRIPTION>Uncertainty flag for Vmin</DESCRIPTION>
+</FIELD>
+<FIELD ID="V__UpPeriod" name="V*:UpPeriod" datatype="char" width="1" ucd="META.CODE" arraysize="1">
+<DESCRIPTION>Lower limit flag for the period</DESCRIPTION>
+</FIELD>
+<FIELD ID="V__period" name="V*:period" datatype="double" precision="4" width="10" ucd="TIME.PERIOD" unit="day">
+<DESCRIPTION>Period</DESCRIPTION>
+</FIELD>
+<FIELD ID="V__R_period" name="V*:R_period" datatype="char" width="2" ucd="META.CODE.ERROR" arraysize="2">
+<DESCRIPTION>Uncertainty flag on period (:)</DESCRIPTION>
+</FIELD>
+<FIELD ID="V__epoch" name="V*:epoch" datatype="double" precision="4" width="13" ucd="TIME.EPOCH" unit="day">
+<DESCRIPTION>Epoch of maximum or minimum</DESCRIPTION>
+</FIELD>
+<FIELD ID="V__R_epoch" name="V*:R_epoch" datatype="char" width="1" ucd="META.CODE.ERROR" arraysize="1">
+<DESCRIPTION>Uncertainty on epoch (:)</DESCRIPTION>
+</FIELD>
+<FIELD ID="V__D_rt" name="V*:D_rt" datatype="float" precision="1" width="4" ucd="TIME.INTERVAL">
+<DESCRIPTION>Raising time for all other variable types</DESCRIPTION>
+</FIELD>
+<FIELD ID="V__R_D_rt" name="V*:R_D_rt" datatype="char" width="1" ucd="META.CODE.ERROR" arraysize="1">
+<DESCRIPTION>Uncertainty flag on raising time</DESCRIPTION>
+</FIELD>
+<FIELD ID="V__bibcode" name="V*:bibcode" datatype="char" width="19" ucd="META.BIB.BIBCODE" arraysize="19">
+<DESCRIPTION>Bibcode</DESCRIPTION>
+</FIELD>
+<FIELD ID="XMM_Obsno" name="XMM:Obsno" datatype="char" width="10" ucd="META.ID;META.MAIN" arraysize="10">
+<DESCRIPTION>Observation identifier</DESCRIPTION>
+</FIELD>
+<FIELD ID="Z_redshift" name="Z:redshift" datatype="double" precision="5" width="8" ucd="SRC.REDSHIFT">
+<DESCRIPTION>Redshift</DESCRIPTION>
+</FIELD>
+<FIELD ID="Z_R" name="Z:R" datatype="char" width="1" ucd="META.NOTE" arraysize="1">
+<DESCRIPTION>colon is uncertain question mark is questionable</DESCRIPTION>
+</FIELD>
+<FIELD ID="Z_bibcode" name="Z:bibcode" datatype="char" width="19" ucd="META.BIB.BIBCODE" arraysize="19">
+<DESCRIPTION>Bibcode</DESCRIPTION>
+</FIELD>
+<FIELD ID="ze_redshift" name="ze:redshift" datatype="double" precision="6" width="9" ucd="SRC.REDSHIFT">
+<DESCRIPTION>Redshift</DESCRIPTION>
+</FIELD>
+<FIELD ID="ze_R" name="ze:R" datatype="char" width="1" ucd="META.NOTE" arraysize="1">
+<DESCRIPTION>colon is uncertain question mark is questionable</DESCRIPTION>
+</FIELD>
+<FIELD ID="ze_me" name="ze:me" datatype="double" precision="6" width="8" ucd="STAT.ERROR">
+<DESCRIPTION>{sigma} on redshift</DESCRIPTION>
+</FIELD>
+<FIELD ID="ze_bibcode" name="ze:bibcode" datatype="char" width="19" ucd="META.BIB.BIBCODE" arraysize="19">
+<DESCRIPTION>Bibcode</DESCRIPTION>
+</FIELD>
+<FIELD ID="OID4" name="OID4" datatype="char" width="10" ucd="meta.record;meta.id" arraysize="*">
+<DESCRIPTION>Object internal identifier</DESCRIPTION>
+</FIELD>
+<DATA>
+<TABLEDATA>
+<TR><TD>HIP43018</TD><TD></TD><TD>HD  74721</TD><TD>HB*</TD><TD>131.49692302</TD><TD>+13.26350211</TD><TD>7.82</TD><TD>5.88</TD><TD>90</TD><TD>-40.22</TD><TD>-113.98</TD><TD>0.89</TD><TD>0.67</TD><TD>0</TD><TD>-0.57</TD><TD>31.00</TD><TD>0.000103</TD><TD></TD><TD></TD><TD></TD><TD></TD><TD>A0V</TD><TD></TD><TD></TD><TD>U</TD><TD>8.88</TD><TD></TD><TD>Vega</TD><TD>2002yCat.2237....0D</TD><TD></TD><TD></TD><TD>C</TD><TD>U</TD><TD>B</TD><TD>8.75</TD><TD></TD><TD>Vega</TD><TD>2002yCat.2237....0D</TD><TD></TD><TD></TD><TD>C</TD><TD>B</TD><TD>V</TD><TD>8.72</TD><TD></TD><TD>Vega</TD><TD>2002yCat.2237....0D</TD><TD></TD><TD></TD><TD>C</TD><TD>V</TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD>J</TD><TD>8.521</TD><TD>0.035</TD><TD>Vega</TD><TD>2003yCat.2246....0C</TD><TD></TD><TD></TD><TD>C</TD><TD>J</TD><TD>H</TD><TD>8.525</TD><TD>0.029</TD><TD>Vega</TD><TD>2003yCat.2246....0C</TD><TD></TD><TD></TD><TD>C</TD><TD>H</TD><TD>K</TD><TD>8.522</TD><TD>0.021</TD><TD>Vega</TD><TD>2003yCat.2246....0C</TD><TD></TD><TD></TD><TD>C</TD><TD>K</TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD>8900</TD><TD>3.38</TD><TD>|-1.3</TD><TD></TD><TD>|SUN</TD><TD>|</TD><TD>|2011A&amp;A...531A.1</TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD>1.670</TD><TD>0.915</TD><TD>0.885</TD><TD>1.495</TD><TD>1.615</TD><TD>2.101</TD><TD>2</TD><TD>0.003</TD><TD>8.693</TD><TD>1</TD><TD>0.000</TD><TD></TD><TD>1976A&amp;AS...26..275R</TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD>2.860</TD><TD>0.00</TD><TD>26</TD><TD></TD><TD></TD><TD></TD><TD></TD><TD>1998A&amp;AS..129..431H</TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD>HD 74721</TD><TD></TD><TD>GCBAC</TD><TD>38</TD><TD>L</TD><TD>SWP</TD><TD>08061</TD><TD>S</TD><TD>1189</TD><TD>FO</TD><TD>800227</TD><TD>034600</TD><TD>000600</TD><TD></TD><TD>400</TD><TD>G</TD><TD>C=120,B=18</TD><TD>*</TD><TD>1996IUEML.C......0I</TD><TD>8.88</TD><TD></TD><TD></TD><TD>8.75</TD><TD></TD><TD></TD><TD>8.72</TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD>8.54</TD><TD></TD><TD></TD><TD>8.50</TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD>8.52</TD><TD></TD><TD></TD><TD>2002yCat.2237.....D</TD><TD>P</TD><TD></TD><TD>A0V</TD><TD>1959ApJ...129..362B</TD><TD>+9</TD><TD>E</TD><TD>4</TD><TD></TD><TD>##</TD><TD></TD><TD>1979IAUS...30...57E</TD><TD>-0.001</TD><TD>000</TD><TD></TD><TD>2007A&amp;A...474..653V</TD><TD>-40</TD><TD>1</TD><TD>-114</TD><TD>[1</TD><TD>|ICR</TD><TD>|2007A&amp;A...474..653</TD><TD>08 45 59.26 +</TD><TD>13 15 48.62</TD><TD>0.188</TD><TD>0.140</TD><TD>2000</TD><TD>1991.25</TD><TD>1997A&amp;A...323L..49P</TD><TD>08 45 59.286</TD><TD>+13 15 49.60</TD><TD></TD><TD>0.001</TD><TD></TD><TD>0.000</TD><TD>0</TD><TD>2000</TD><TD>1991.25</TD><TD>2007A&amp;A...474..653V</TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD>(E)</TD><TD>8.70</TD><TD>+0.04</TD><TD>+0.10</TD><TD>1</TD><TD></TD><TD>1986EgUBV........0M</TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD>0.028</TD><TD>0.002</TD><TD>0.135</TD><TD>0.007</TD><TD>1.262</TD><TD>0.011</TD><TD></TD><TD>38</TD><TD></TD><TD></TD><TD></TD><TD></TD><TD>1998A&amp;AS..129..431H</TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD>@1112016</TD></TR>
+
+</TABLEDATA>
+
+</DATA>
+</TABLE>
+</RESOURCE>
+</VOTABLE>
