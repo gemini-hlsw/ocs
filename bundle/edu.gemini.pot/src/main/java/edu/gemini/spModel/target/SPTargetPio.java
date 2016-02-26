@@ -1,6 +1,5 @@
 package edu.gemini.spModel.target;
 
-import edu.gemini.pot.ModelConverters$;
 import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.shared.util.immutable.Option;
@@ -17,7 +16,6 @@ import edu.gemini.spModel.target.system.*;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Date;
-import java.util.NoSuchElementException;
 import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;

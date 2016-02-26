@@ -22,41 +22,42 @@ import edu.gemini.spModel.target.TargetParamSetCodecs._
   * Currently this only tests that the source profile and distribution are stored and retrieved.
   * Feel free to expand on this; however, I guess this will all become obsolete once we switch to the new target model.
   */
-class SpTargetPioSpec extends Specification with ScalaCheck with Arbitraries {
+object SpTargetPioSpec extends Specification with ScalaCheck with Arbitraries {
+  {
+    "SPTargetPio" should {
+      "store source profile and distribution" !
+        prop { (sd: Option[SpectralDistribution], sp: Option[SpatialProfile]) =>
 
-  "SPTargetPio" should {
-    "store source profile and distribution" !
-      prop { (sd: Option[SpectralDistribution], sp: Option[SpatialProfile]) =>
+          val factory = new PioXmlFactory()
 
-        val factory = new PioXmlFactory()
+          val spt = new SPTarget(10, 10)
+          spt.setSpatialProfile(sp)
+          spt.setSpectralDistribution(sd)
 
-        val spt = new SPTarget(10, 10)
-        spt.setSpatialProfile(sp)
-        spt.setSpectralDistribution(sd)
+          val pset = SPTargetPio.getParamSet(spt, factory)
+          val spt2 = SPTargetPio.fromParamSet(pset)
 
-        val pset = SPTargetPio.getParamSet(spt, factory)
-        val spt2 = SPTargetPio.fromParamSet(pset)
+          assert(spt.getSpatialProfile === spt2.getSpatialProfile)
+          assert(spt.getSpectralDistribution === spt2.getSpectralDistribution)
+        }
+    }
+    "SPTargetPio" should {
+      "store redshift" ! {
+        prop { (z: Redshift) =>
 
-        assert(spt.getSpatialProfile === spt2.getSpatialProfile)
-        assert(spt.getSpectralDistribution === spt2.getSpectralDistribution)
-      }
-  }
-  "SPTargetPio" should {
-    "store redshift" ! {
-      prop { (z: Redshift) =>
+          val factory = new PioXmlFactory()
+          val t = new HmsDegTarget
 
-        val factory = new PioXmlFactory()
-        val t = new HmsDegTarget
+          t.setRedshift(z)
+          val spt = new SPTarget(t)
 
-        t.setRedshift(z)
-        val spt = new SPTarget(t)
+          val pset = SPTargetPio.getParamSet(spt, factory)
+          val spt2 = SPTargetPio.fromParamSet(pset)
 
-        val pset = SPTargetPio.getParamSet(spt, factory)
-        val spt2 = SPTargetPio.fromParamSet(pset)
-
-        (spt.getHmsDegTarget, spt2.getHmsDegTarget) match {
-          case (Some(t1), Some(t2)) => assert(t1.getRedshift === t2.getRedshift)
-          case _                    => assert(false)
+          (spt.getHmsDegTarget, spt2.getHmsDegTarget) match {
+            case (Some(t1), Some(t2)) => assert(t1.getRedshift === t2.getRedshift)
+            case _ => assert(false)
+          }
         }
       }
     }
