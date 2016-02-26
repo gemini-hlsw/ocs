@@ -102,7 +102,7 @@ trait Arbitraries extends edu.gemini.spModel.core.Arbitraries {
 
   implicit val arbAutomaticGroup: Arbitrary[AutomaticGroup] =
     Arbitrary {
-      oneOf[AutomaticGroup](AutomaticGroup.Initial, arbitrary[AutomaticGroup.Active])
+      oneOf[AutomaticGroup](AutomaticGroup.Initial, AutomaticGroup.Disabled, arbitrary[AutomaticGroup.Active])
     }
 
   implicit val arbGuideGrp: Arbitrary[GuideGrp] =

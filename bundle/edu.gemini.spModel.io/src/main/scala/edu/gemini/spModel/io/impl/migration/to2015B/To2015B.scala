@@ -24,16 +24,7 @@ object To2015B extends Migration {
   import PioSyntax._
   import BrightnessParser._
 
-  val Version_2015B = Version.`match`("2015B-1")
-
-  def isPre2015B(c: Container): Boolean =
-    c.getVersion.compareTo(Version_2015B) < 0
-
-  // Entry point here
-  def updateProgram(d: Document): Unit =
-    d.containers.find(_.getKind == SpIOTags.PROGRAM).filter(isPre2015B).foreach { _ =>
-      conversions.foreach(_.apply(d))
-    }
+  val version = Version.`match`("2015B-1")
 
   // These constants are take from mainline code, where they are private to implementations and
   // ultimately will go away (but we will need them here for a while longer).
@@ -105,7 +96,7 @@ object To2015B extends Migration {
   private val PioFactory = new PioXmlFactory()
 
   // These will be applied in the given order
-  private val conversions: List[Document => Unit] = List(
+  val conversions: List[Document => Unit] = List(
     brightnessToMagnitude,
     uselessSystemsToJ2000,
     b1950ToJ2000,

@@ -1,14 +1,15 @@
 package edu.gemini.spModel.target.env;
 
+import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.shared.util.immutable.Option;
+import edu.gemini.shared.util.immutable.Some;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.PioFactory;
 import edu.gemini.spModel.pio.xml.PioXmlFactory;
 import edu.gemini.spModel.pio.xml.PioXmlUtil;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.obsComp.PwfsGuideProbe;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
+import static org.junit.Assert.*;
 import org.junit.Test;
 
 import java.io.File;
@@ -41,8 +42,12 @@ public class Pre2010BTargetEnvironmentIoTest {
                 verifyTarget("BaseName", env.getBase());
                 assertEquals(0, env.getUserTargets().size());
 
-                // Just the one automatic group
-                assertEquals(1, env.getGuideEnvironment().getOptions().size());
+                // An initial disabled auto group and a manual primary group
+                final ImList<GuideGroup> groups = env.getGuideEnvironment().getOptions();
+                assertEquals(2, groups.size());
+                assertTrue(groups.get(0).grp() instanceof AutomaticGroup.Disabled$);
+                assertTrue(groups.get(1).grp() instanceof ManualGroup);
+                assertTrue(1 == env.getGuideEnvironment().getPrimaryIndex());
             }
         },
 

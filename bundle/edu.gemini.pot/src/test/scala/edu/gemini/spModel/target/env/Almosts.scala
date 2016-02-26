@@ -82,12 +82,13 @@ trait Almosts {
 
   implicit val AlmostEqualGuideGrp: AlmostEqual[GuideGrp] =
     new AlmostEqual[GuideGrp] {
-      import AutomaticGroup.{Active, Initial}
+      import AutomaticGroup.{Active, Initial, Disabled}
       def almostEqual(a: GuideGrp, b: GuideGrp): Boolean =
         (a, b) match {
           case (ManualGroup(an, am), ManualGroup(bn, bm)) => (an === bn) && (am ~= bm)
           case (Active(am), Active(bm))                   => am ~= bm
           case (Initial, Initial)                         => true
+          case (Disabled, Disabled)                       => true
           case _                                          => false
         }
     }

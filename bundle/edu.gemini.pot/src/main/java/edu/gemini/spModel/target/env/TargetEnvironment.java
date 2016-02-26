@@ -346,26 +346,19 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
 
     private static GuideEnvironment parseGuideEnvironment(ParamSet parent) {
         // Add guide information
-        ParamSet guidePset = parent.getParamSet(GuideEnvironment.ParamSetName());
+        final ParamSet guidePset = parent.getParamSet(GuideEnvironment.ParamSetName());
         if (guidePset != null) return GuideEnvironment.fromParamSet(guidePset);
 
-        // Check for pre-2010B guide probe targets
-        List<ParamSet> guideProbeTargets = parent.getParamSets("guider");
-        if (guideProbeTargets.isEmpty()) {
-            // nothing there, return a default empty guide environment
-            return GuideEnvironment.Initial();
-        }
-
         // Parse the old pre-2010B information into a GuideEnvironment
-        List<GuideProbeTargets> lst = new ArrayList<>();
+        final List<ParamSet> guideProbeTargets = parent.getParamSets("guider");
+        final List<GuideProbeTargets> lst = new ArrayList<>();
         for (ParamSet ps : guideProbeTargets) {
-            GuideProbeTargets gpt = GuideProbeTargets.fromParamSet(ps);
-            if (gpt == null) continue;
-            lst.add(gpt);
+            final GuideProbeTargets gpt = GuideProbeTargets.fromParamSet(ps);
+            if (gpt != null) lst.add(gpt);
         }
 
-        GuideGroup grp = GuideGroup.create(None.STRING, DefaultImList.create(lst));
-        return GuideEnvironment.create(OptionsListImpl.create(grp));
+        final GuideGroup grp = GuideGroup.create(None.STRING, DefaultImList.create(lst));
+        return GuideEnvironment.create(OptionsListImpl.create(new GuideGroup(AutomaticGroup.Disabled$.MODULE$), grp).setPrimaryIndex(1));
     }
 
 
