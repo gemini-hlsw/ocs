@@ -24,6 +24,7 @@ import edu.gemini.spModel.target.TargetParamSetCodecs._
   */
 object SpTargetPioSpec extends Specification with ScalaCheck with Arbitraries {
   {
+
     "SPTargetPio" should {
       "store source profile and distribution" !
         prop { (sd: Option[SpectralDistribution], sp: Option[SpatialProfile]) =>
@@ -41,6 +42,7 @@ object SpTargetPioSpec extends Specification with ScalaCheck with Arbitraries {
           assert(spt.getSpectralDistribution === spt2.getSpectralDistribution)
         }
     }
+
     "SPTargetPio" should {
       "store redshift" ! {
         prop { (z: Redshift) =>
@@ -56,22 +58,23 @@ object SpTargetPioSpec extends Specification with ScalaCheck with Arbitraries {
 
           (spt.getHmsDegTarget, spt2.getHmsDegTarget) match {
             case (Some(t1), Some(t2)) => assert(t1.getRedshift === t2.getRedshift)
-            case _ => assert(false)
+            case _                    => assert(false)
           }
         }
       }
     }
-  }
 
-  "SPTargetPIO" should {
-    "Preserve New Target" !
-      forAll { (t: Target) =>
-        val spt1 = new SPTarget; spt1.setNewTarget(t)
-        val spt2 = SPTargetPio.fromParamSet(SPTargetPio.getParamSet(spt1, new PioXmlFactory))
-        spt1.getNewTarget ~= spt2.getNewTarget // pio can lose floating point precision :-\
-      }
-  }
+    "SPTargetPIO" should {
+      "Preserve New Target" !
+        forAll { (t: Target) =>
+          val spt1 = new SPTarget;
+          spt1.setNewTarget(t)
+          val spt2 = SPTargetPio.fromParamSet(SPTargetPio.getParamSet(spt1, new PioXmlFactory))
+          spt1.getNewTarget ~= spt2.getNewTarget // pio can lose floating point precision :-\
+        }
+    }
 
+  }
 
   val ParamRa  = "c1"
   val ParamDec = "c2"
