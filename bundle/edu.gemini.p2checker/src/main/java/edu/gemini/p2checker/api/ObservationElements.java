@@ -167,7 +167,7 @@ public class ObservationElements implements Serializable {
     }
 
     public Option<Long> getSchedulingBlockStart() {
-        return getSchedulingBlockStart();
+        return getSchedulingBlock().map(SchedulingBlock::start);
     }
 
     private void _setInstrumentNode(ISPObsComponent inst) {
