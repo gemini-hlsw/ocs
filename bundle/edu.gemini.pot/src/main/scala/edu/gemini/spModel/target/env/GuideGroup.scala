@@ -281,11 +281,11 @@ object GuideGroup extends ((GuideGrp) => GuideGroup) {
 
   val ParamSetName = "guideGroup"
 
-  sealed trait TypeTag
-  case object AutoInitialTag  extends TypeTag
-  case object AutoDisabledTag extends TypeTag
-  case object AutoActiveTag   extends TypeTag
-  case object ManualTag       extends TypeTag
+  sealed trait GroupTypeTag
+  case object AutoInitialTag  extends GroupTypeTag
+  case object AutoDisabledTag extends GroupTypeTag
+  case object AutoActiveTag   extends GroupTypeTag
+  case object ManualTag       extends GroupTypeTag
 
   private val AllTags = List(AutoInitialTag, AutoDisabledTag, AutoActiveTag, ManualTag)
 
