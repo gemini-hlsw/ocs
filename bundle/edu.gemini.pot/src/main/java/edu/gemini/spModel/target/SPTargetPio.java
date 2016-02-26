@@ -1,11 +1,13 @@
 package edu.gemini.spModel.target;
 
+import edu.gemini.pot.ModelConverters$;
 import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.shared.util.immutable.Some;
 import edu.gemini.spModel.core.Redshift;
 import edu.gemini.spModel.core.Redshift$;
+import edu.gemini.spModel.core.Target;
 import edu.gemini.spModel.pio.Param;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.Pio;
@@ -15,6 +17,7 @@ import edu.gemini.spModel.target.system.*;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Date;
+import java.util.NoSuchElementException;
 import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -45,6 +48,8 @@ public class SPTargetPio {
     private static final String _N = "n";
     private static final String _PERIHELION = "perihelion";
     private static final String _EPOCH_OF_PERIHELION = "epochOfPeri";
+
+    private static final String _TARGET = "target";
 
     public static final DateFormat formatter = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.FULL);
     static {
@@ -145,6 +150,9 @@ public class SPTargetPio {
         if (target.getSpectralDistribution().isDefined()) {
             paramSet.addParamSet(SourcePio.toParamSet(target.getSpectralDistribution().get(), factory));
         }
+
+        // The new target
+        paramSet.addParamSet(TargetParamSetCodecs.TargetParamSetCodec().encode(_TARGET, spt.getNewTarget()));
 
         return paramSet;
     }
@@ -320,6 +328,13 @@ public class SPTargetPio {
         // Add spatial profile and spectral distribution
         spt.setSpatialProfile(SourcePio.profileFromParamSet(paramSet));
         spt.setSpectralDistribution(SourcePio.distributionFromParamSet(paramSet));
+
+        // New target ... N.B. This entire class will go away so forgive the .get() below.
+        final ParamSet ntps = paramSet.getParamSet(_TARGET);
+        if (ntps != null) {
+            final Target t = TargetParamSetCodecs.TargetParamSetCodec().decode(ntps).toOption().get();
+            spt.setNewTarget(t);
+        }
 
     }
 
