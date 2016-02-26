@@ -224,9 +224,9 @@ public enum Canopus {
         public abstract Option<Area> probeArm(ObsContext ctx, boolean validate);
 
         public GuideStarValidation validate(SPTarget guideStar, ObsContext ctx) {
-            final Option<Long> when = ctx.getSchedulingBlock().map(SchedulingBlock::start);
+            final Option<Long> when = ctx.getSchedulingBlockStart();
             final Wfs self = this;
-            return guideStar.getTarget().getSkycalcCoordinates(when).map(coords ->
+            return guideStar.getSkycalcCoordinates(when).map(coords ->
                 Canopus.instance.getProbesInRange(coords, ctx).contains(self) ?
                         GuideStarValidation.VALID : GuideStarValidation.INVALID
             ).getOrElse(GuideStarValidation.UNDEFINED);
@@ -242,16 +242,16 @@ public enum Canopus {
         // coordinates of the given guide star
         // (i.e.: The guide star is vignetted by the wfs probe arm)
         private static Option<Boolean> isVignetted(Wfs wfs, SPTarget guideStar, ObsContext ctx) {
-            return ctx.getBaseCoordinates().flatMap(coords ->
-                wfs.probeArm(ctx, false).map(a -> {
-                if (a == null) return false;
-
-                CoordinateDiff diff = new CoordinateDiff(coords, guideStar.getTarget().getSkycalcCoordinates());
-                Offset dis = diff.getOffset();
-                double p = -dis.p().toArcsecs().getMagnitude();
-                double q = -dis.q().toArcsecs().getMagnitude();
-                return a.contains(p, q);
-            }));
+            return guideStar.getSkycalcCoordinates(ctx.getSchedulingBlockStart()).flatMap(gscoords ->
+                    ctx.getBaseCoordinates().flatMap(coords ->
+                    wfs.probeArm(ctx, false).map(a -> {
+                        if (a == null) return false;
+                        CoordinateDiff diff = new CoordinateDiff(coords, gscoords);
+                        Offset dis = diff.getOffset();
+                        double p = -dis.p().toArcsecs().getMagnitude();
+                        double q = -dis.q().toArcsecs().getMagnitude();
+                        return a.contains(p, q);
+                    })));
         }
 
         /**
@@ -271,19 +271,23 @@ public enum Canopus {
             SPTarget guideStar = guideStarOpt.getValue();
 
             // Calculate the difference between the coordinate and the observation's base position.
-            return ctx.getBaseCoordinates().map(base -> {
-                CoordinateDiff diff = new CoordinateDiff(base, guideStar.getTarget().getSkycalcCoordinates());
-                // Get offset and switch it to be defined in the same coordinate
-                // system as the shape.
-                Offset dis = diff.getOffset();
-                double p = -dis.p().toArcsecs().getMagnitude();
-                double q = -dis.q().toArcsecs().getMagnitude();
-                Set<Offset> offsets = new TreeSet<Offset>();
-                offsets.add(offset);
+            return guideStar
+                .getSkycalcCoordinates(ctx.getSchedulingBlockStart())
+                .flatMap(gscoords -> ctx.getBaseCoordinates()
+                    .map(base -> {
+                        CoordinateDiff diff = new CoordinateDiff(base, gscoords);
+                        // Get offset and switch it to be defined in the same coordinate
+                        // system as the shape.
+                        Offset dis = diff.getOffset();
+                        double p = -dis.p().toArcsecs().getMagnitude();
+                        double q = -dis.q().toArcsecs().getMagnitude();
+                        Set<Offset> offsets = new TreeSet<Offset>();
+                        offsets.add(offset);
 
-                Area a = Canopus.instance.offsetIntersection(ctx, offsets);
-                return a != null && a.contains(p, q);
-            }).getOrElse(false);
+                        Area a = Canopus.instance.offsetIntersection(ctx, offsets);
+                        return a != null && a.contains(p, q);
+                    }))
+                .getOrElse(false);
         }
     }
 
@@ -354,13 +358,17 @@ public enum Canopus {
         SPTarget base   = ctx.getTargets().getBase();
         SPTarget target = spTargetOpt.getValue();
 
-        CoordinateDiff diff;
-        diff = new CoordinateDiff(base.getTarget().getSkycalcCoordinates(), target.getTarget().getSkycalcCoordinates());
-        Offset o = diff.getOffset();
-        double p = -o.p().toArcsecs().getMagnitude();
-        double q = -o.q().toArcsecs().getMagnitude();
-        Point2D pt = new Point2D.Double(p, q);
-        return new Some<Point2D>(pt);
+        final Option<Long> when = ctx.getSchedulingBlockStart();
+
+        return
+            base.getSkycalcCoordinates(when).flatMap(bc ->
+            target.getSkycalcCoordinates(when).map(tc -> {
+                CoordinateDiff diff = new CoordinateDiff(bc, tc);
+                Offset o = diff.getOffset();
+                double p = -o.p().toArcsecs().getMagnitude();
+                double q = -o.q().toArcsecs().getMagnitude();
+                return new Point2D.Double(p, q);
+            }));
     }
 
     private static final Angle[] rotation = new Angle[IssPort.values().length];

@@ -14,6 +14,7 @@ import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.guide.VignettingCalculator;
 import edu.gemini.spModel.guide.*;
+import edu.gemini.spModel.obs.SchedulingBlock;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.telescope.IssPort;
@@ -71,7 +72,9 @@ public enum GmosOiwfsGuideProbe implements ValidatableGuideProbe, OffsetValidati
     }
 
     public Option<BoundaryPosition> checkBoundaries(final SPTarget guideStar, final ObsContext ctx) {
-        return checkBoundaries(guideStar.getTarget().getSkycalcCoordinates(), ctx);
+        return guideStar
+            .getSkycalcCoordinates(ctx.getSchedulingBlockStart())
+            .flatMap(cs -> checkBoundaries(cs, ctx));
     }
 
     public Option<BoundaryPosition> checkBoundaries(final Coordinates coords, final ObsContext ctx) {
@@ -102,7 +105,7 @@ public enum GmosOiwfsGuideProbe implements ValidatableGuideProbe, OffsetValidati
 
     @Override
     public GuideStarValidation validate(final SPTarget guideStar, final ObsContext ctx) {
-        return GuideProbeUtil.instance.validate(guideStar.getTarget().getSkycalcCoordinates(), this, ctx);
+        return GuideProbeUtil.instance.validate(guideStar, this, ctx);
     }
 
     public GuideStarValidation validate(final SkyObject guideStar, final ObsContext ctx) {

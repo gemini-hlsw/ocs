@@ -90,7 +90,7 @@ public final class TargetMagnitudeTest extends TestBase {
     private void validateMagnitudes(final Element element, final SPTarget target) {
         final String MAG_PATH = "paramset[@name='" + TccNames.MAGNITUDES + "']";
         final Element magGroupElement = (Element) element.selectSingleNode(MAG_PATH);
-        final ImList<Magnitude> mags = target.getTarget().getMagnitudes();
+        final ImList<Magnitude> mags = target.getMagnitudes();
         if (magGroupElement == null) {
             assertEquals(0, mags.size());
             return;

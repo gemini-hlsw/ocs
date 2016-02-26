@@ -79,6 +79,6 @@ public enum NifsOiwfsGuideProbe implements ValidatableGuideProbe, OffsetValidati
 
     @Override
     public GuideStarValidation validate(SPTarget guideStar, ObsContext ctx) {
-        return GuideProbeUtil.instance.validate(guideStar.getTarget().getSkycalcCoordinates(), this, ctx);
+        return GuideProbeUtil.instance.validate(guideStar, this, ctx);
     }
 }

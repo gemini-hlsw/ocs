@@ -103,8 +103,8 @@ public enum GuideProbeUtil {
     }
 
     public GuideStarValidation validate(final SPTarget guideStar, final GuideProbe guideProbe, final ObsContext ctx) {
-        final Option<Long> when = ctx.getSchedulingBlock().map(SchedulingBlock::start);
-        return guideStar.getTarget().getSkycalcCoordinates(when).map(coords ->
+        final Option<Long> when = ctx.getSchedulingBlockStart();
+        return guideStar.getSkycalcCoordinates(when).map(coords ->
             validate(coords, guideProbe, ctx)).getOrElse(GuideStarValidation.UNDEFINED);
     }
 
@@ -147,14 +147,16 @@ public enum GuideProbeUtil {
             // and we must rotate the patrol field according to position angle
             final PatrolField rotatedPatrolField = offsetPatrolField.getTransformed(AffineTransform.getRotateInstance(-ctx.getPositionAngle().toRadians().getMagnitude()));
             // find distance of base position to the guide star
-            return ctx.getBaseCoordinates().map(baseCoordinates -> {
-                final CoordinateDiff diff = new CoordinateDiff(baseCoordinates, guideStar.getTarget().getSkycalcCoordinates());
-                final Offset dis = diff.getOffset();
-                final double p = -dis.p().toArcsecs().getMagnitude();
-                final double q = -dis.q().toArcsecs().getMagnitude();
-                // and now check if that guide star is inside the correctly transformed/rotated patrol field
-                return rotatedPatrolField.getArea().contains(p, q);
-            }).getOrElse(false);
+            return
+                guideStar.getSkycalcCoordinates(ctx.getSchedulingBlockStart()).flatMap(gcs ->
+                ctx.getBaseCoordinates().map(baseCoordinates -> {
+                    final CoordinateDiff diff = new CoordinateDiff(baseCoordinates, gcs);
+                    final Offset dis = diff.getOffset();
+                    final double p = -dis.p().toArcsecs().getMagnitude();
+                    final double q = -dis.q().toArcsecs().getMagnitude();
+                    // and now check if that guide star is inside the correctly transformed/rotated patrol field
+                    return rotatedPatrolField.getArea().contains(p, q);
+                })).getOrElse(false);
         });
     }
 }

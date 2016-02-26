@@ -193,7 +193,7 @@ public final class NifsRule implements IRule {
                 if (baseTarget == null || oiTarget.isEmpty() || aoTarget.isEmpty()) return null;
                 //now, let's compare coordinates. If they are the same, raise an error
 
-                final Option<Long> when = elements.getSchedulingBlock().map(SchedulingBlock::start);
+                final Option<Long> when = elements.getSchedulingBlockStart();
 
                 baseTarget.getRaHours(when).foreach(baseC1 ->
                 baseTarget.getDecDegrees(when).foreach(baseC2 ->

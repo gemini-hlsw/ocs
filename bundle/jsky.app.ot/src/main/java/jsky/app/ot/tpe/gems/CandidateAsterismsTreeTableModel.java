@@ -180,7 +180,7 @@ class CandidateAsterismsTreeTableModel extends AbstractTreeTableModel {
             if (_guideProbeTargets != null) {
                 if (!_guideProbeTargets.getPrimary().isEmpty()) {
                     GuideProbe guideProbe = _guideProbeTargets.getGuider();
-                    return GemsUtils4Java.probeMagnitudeInUse(guideProbe, _band, _guideProbeTargets.getPrimary().getValue().getTarget());
+                    return GemsUtils4Java.probeMagnitudeInUse(guideProbe, _band, _guideProbeTargets.getPrimary().getValue().getMagnitudes());
                 }
             } else if (_gemsGuideStars != null) { // top level displays Strehl values
                 GemsStrehl strehl = _gemsGuideStars.strehl();

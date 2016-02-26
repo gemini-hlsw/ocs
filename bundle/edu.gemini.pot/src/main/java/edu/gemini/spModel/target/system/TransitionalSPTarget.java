@@ -3,9 +3,13 @@ package edu.gemini.spModel.target.system;
 import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.shared.util.immutable.Option;
+import edu.gemini.skycalc.Coordinates;
 import edu.gemini.spModel.core.SpatialProfile;
 import edu.gemini.spModel.core.SpectralDistribution;
+import edu.gemini.spModel.obs.SchedulingBlock;
 import edu.gemini.spModel.target.WatchablePos;
+
+import java.util.Set;
 
 // transitional; will go away
 public abstract class TransitionalSPTarget extends WatchablePos {
@@ -111,7 +115,7 @@ public abstract class TransitionalSPTarget extends WatchablePos {
 
     public scala.Option<HmsDegTarget> getHmsDegTarget() {
         ITarget t = getTarget();
-        return (t instanceof  HmsDegTarget) ? new scala.Some<>((HmsDegTarget) t) : scala.Option.empty();
+        return (t instanceof HmsDegTarget) ? new scala.Some<>((HmsDegTarget) t) : scala.Option.empty();
     }
 
     public scala.Option<NonSiderealTarget> getNonSiderealTarget() {
@@ -135,6 +139,29 @@ public abstract class TransitionalSPTarget extends WatchablePos {
 
     public boolean isNonSidereal() {
         return !isSidereal();
+    }
+
+
+    public synchronized Option<Coordinates> getSkycalcCoordinates(Option<Long> when) {
+        return getTarget().getSkycalcCoordinates(when);
+    }
+
+    public ImList<Magnitude> getMagnitudes() {
+        return getTarget().getMagnitudes();
+    }
+
+    public boolean isTooTarget() {
+        final ITarget t = getTarget();
+        if (t instanceof HmsDegTarget) {
+            final HmsDegTarget hmsDeg = (HmsDegTarget) t;
+            return hmsDeg.getRa().getValue() == 0.0 &&
+                    hmsDeg.getDec().getValue() == 0.0; ///
+        }
+        return false;
+    }
+
+    public Set<Magnitude.Band> getMagnitudeBands() {
+        return getTarget().getMagnitudeBands();
     }
 
 }

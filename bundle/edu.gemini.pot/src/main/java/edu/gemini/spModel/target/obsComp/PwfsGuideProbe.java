@@ -281,8 +281,8 @@ public enum PwfsGuideProbe implements ValidatableGuideProbe, OffsetValidatingGui
     /* ValidatableGuideProbe */
 
     public GuideStarValidation validate(SPTarget guideStar, ObsContext ctx) {
-        final Option<Long> when = ctx.getSchedulingBlock().map(SchedulingBlock::start);
-        return guideStar.getTarget().getSkycalcCoordinates(when).map(coords ->
+        final Option<Long> when = ctx.getSchedulingBlockStart();
+        return guideStar.getSkycalcCoordinates(when).map(coords ->
             validate(coords, ctx)
         ).getOrElse(GuideStarValidation.UNDEFINED);
     }
@@ -296,7 +296,9 @@ public enum PwfsGuideProbe implements ValidatableGuideProbe, OffsetValidatingGui
     }
 
     public Option<BoundaryPosition> checkBoundaries(SPTarget guideStar, ObsContext ctx){
-        return checkBoundaries(guideStar.getTarget().getSkycalcCoordinates(), ctx);
+        return guideStar
+            .getSkycalcCoordinates(ctx.getSchedulingBlockStart())
+            .flatMap(cs -> checkBoundaries(cs, ctx));
     }
 
     /**

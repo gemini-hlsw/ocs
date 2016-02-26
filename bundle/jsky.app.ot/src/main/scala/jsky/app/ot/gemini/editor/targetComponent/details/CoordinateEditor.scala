@@ -52,7 +52,7 @@ class CoordinateEditor extends TelescopePosEditor with ReentrancyHack {
     spt = target0
 
     nonreentrant {
-      val when = ctx.asScalaOpt.flatMap(_.getSchedulingBlock.asScalaOpt).map(_.start).map(java.lang.Long.valueOf).asGeminiOpt
+      val when = ctx.asScalaOpt.flatMap(_.getSchedulingBlockStart.asScalaOpt).asGeminiOpt //  :-\
       target.getRaString(when).asScalaOpt.foreach(ra.setText)
       target.getDecString(when).asScalaOpt.foreach(dec.setText)
     }

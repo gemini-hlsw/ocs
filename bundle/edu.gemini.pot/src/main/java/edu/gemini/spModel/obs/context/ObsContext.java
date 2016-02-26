@@ -263,7 +263,7 @@ public final class ObsContext {
     }
 
     public Option<Coordinates> getBaseCoordinates() {
-        final Option<Long> when = getSchedulingBlock().map(SchedulingBlock::start);
+        final Option<Long> when = getSchedulingBlockStart();
         SPTarget target = targets.getBase();
         return
             target.getRaDegrees(when).flatMap(raDeg ->
@@ -359,6 +359,10 @@ public final class ObsContext {
 
     public Option<SchedulingBlock> getSchedulingBlock() {
         return schedulingBlock;
+    }
+
+    public Option<Long> getSchedulingBlockStart() {
+        return schedulingBlock.map(SchedulingBlock::start);
     }
 
     public String toString() {

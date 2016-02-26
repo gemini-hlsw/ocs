@@ -381,7 +381,7 @@ public class ReportUtils {
             // Figure out the RA of the base position
             final TargetObsComp targetEnv = (TargetObsComp) targetEnvComp.getDataObject();
             final SPTarget target = targetEnv.getBase();
-            final Option<Long> when = ((SPObservation) obsShell.getDataObject()).getSchedulingBlock().map(SchedulingBlock::start);
+            final Option<Long> when = ((SPObservation) obsShell.getDataObject()).getSchedulingBlockStart();
             final Option<Integer> raHours = getRaHours(target, when);
             raHours.forEach(h -> hourSet.add(h));
         }

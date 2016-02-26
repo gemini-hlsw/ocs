@@ -427,7 +427,7 @@ public class StrehlFeature extends TpeImageFeature implements PropertyWatcher, M
 
     // Returns a mascot Star object for the given target, if coordinates are known
     private Option<Star> targetToStar(SPTarget target) {
-        final Option<Long> when = _iw.getContext().schedulingBlockJava().map(SchedulingBlock::start);
+        final Option<Long> when = _iw.getContext().schedulingBlockStartJava();
         return
             target.getRaDegrees(when).flatMap(ra ->
             target.getDecDegrees(when).map(dec -> {

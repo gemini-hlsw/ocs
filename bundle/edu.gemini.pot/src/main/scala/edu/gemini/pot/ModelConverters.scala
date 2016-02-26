@@ -1,6 +1,7 @@
 package edu.gemini.pot
 
 import edu.gemini.shared.skyobject
+import edu.gemini.shared.util.immutable
 import edu.gemini.skycalc
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.core.AngleSyntax._
@@ -186,11 +187,11 @@ object ModelConverters {
 
   implicit class SPTarget2SiderealTarget(val sp:SPTarget) extends AnyVal {
     def toNewModel:SiderealTarget = {
+      val when        = immutable.None.instance[java.lang.Long]
       val name        = sp.getName
-      val coords      = sp.getTarget.getSkycalcCoordinates
-      val mags        = sp.getTarget.getMagnitudes.asScalaList.map(_.toNewModel)
-      val ra          = Angle.fromDegrees(coords.getRaDeg)
-      val dec         = Angle.fromDegrees(coords.getDecDeg)
+      val mags        = sp.getMagnitudes.asScalaList.map(_.toNewModel)
+      val ra          = Angle.fromDegrees(sp.getRaDegrees(when).getOrElse(0.0))
+      val dec         = Angle.fromDegrees(sp.getDecDegrees(when).getOrElse(0.0))
       val coordinates = Coordinates(RightAscension.fromAngle(ra), Declination.fromAngle(dec).getOrElse(Declination.zero))
 
       // Only HmsDegTargets have a proper motion, radial velocity, etc

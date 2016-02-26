@@ -8,6 +8,7 @@ import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.shared.util.immutable.Some;
 import edu.gemini.spModel.guide.*;
+import edu.gemini.spModel.obs.SchedulingBlock;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.target.SPTarget;
 
@@ -62,6 +63,6 @@ public enum NiciOiwfsGuideProbe implements ValidatableGuideProbe {
     }
     @Override
     public GuideStarValidation validate(SPTarget guideStar, ObsContext ctx) {
-        return GuideProbeUtil.instance.validate(guideStar.getTarget().getSkycalcCoordinates(), this, ctx);
+        return GuideProbeUtil.instance.validate(guideStar, this, ctx);
     }
 }
