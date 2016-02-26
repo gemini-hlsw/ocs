@@ -46,6 +46,8 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
     override val backend = TestVoTableBackend(file)
   }
 
+  val NoTime = JNone.instance[java.lang.Long]
+
   "GemsCatalogResultsSpec" should {
     "support Gsaoi Search on TYC 8345-1155-1" in {
       val base = new WorldCoords("17:25:27.529", "-48:27:24.02")
@@ -81,10 +83,10 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
       set.contains(GsaoiOdgw.odgw3) should beFalse
       set.contains(GsaoiOdgw.odgw4) should beTrue
 
-      val cwfs1 = group.get(Canopus.Wfs.cwfs1).getValue.getPrimary.getValue.getTarget
-      val cwfs2 = group.get(Canopus.Wfs.cwfs2).getValue.getPrimary.getValue.getTarget
-      val cwfs3 = group.get(Canopus.Wfs.cwfs3).getValue.getPrimary.getValue.getTarget
-      val odgw4 = group.get(GsaoiOdgw.odgw4).getValue.getPrimary.getValue.getTarget
+      val cwfs1 = group.get(Canopus.Wfs.cwfs1).getValue.getPrimary.getValue
+      val cwfs2 = group.get(Canopus.Wfs.cwfs2).getValue.getPrimary.getValue
+      val cwfs3 = group.get(Canopus.Wfs.cwfs3).getValue.getPrimary.getValue
+      val odgw4 = group.get(GsaoiOdgw.odgw4).getValue.getPrimary.getValue
       cwfs1.getName must beEqualTo("208-152095")
       cwfs2.getName must beEqualTo("208-152215")
       cwfs3.getName must beEqualTo("208-152039")
@@ -95,14 +97,14 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
       val cwfs3x = Coordinates.create("17:25:24.719", "-48:26:58.00")
       val odgw4x = Coordinates.create("17:25:27.552", "-48:27:23.86")
 
-      (Angle.fromDegrees(cwfs1x.getRaDeg) ~= Angle.fromDegrees(cwfs1.getSkycalcCoordinates.getRaDeg)) should beTrue
-      (Angle.fromDegrees(cwfs1x.getDecDeg) ~= Angle.fromDegrees(cwfs1.getSkycalcCoordinates.getDecDeg)) should beTrue
-      (Angle.fromDegrees(cwfs2x.getRaDeg) ~= Angle.fromDegrees(cwfs2.getSkycalcCoordinates.getRaDeg)) should beTrue
-      (Angle.fromDegrees(cwfs2x.getDecDeg) ~= Angle.fromDegrees(cwfs2.getSkycalcCoordinates.getDecDeg)) should beTrue
-      (Angle.fromDegrees(cwfs3x.getRaDeg) ~= Angle.fromDegrees(cwfs3.getSkycalcCoordinates.getRaDeg)) should beTrue
-      (Angle.fromDegrees(cwfs3x.getDecDeg) ~= Angle.fromDegrees(cwfs3.getSkycalcCoordinates.getDecDeg)) should beTrue
-      (Angle.fromDegrees(odgw4x.getRaDeg) ~= Angle.fromDegrees(odgw4.getSkycalcCoordinates.getRaDeg)) should beTrue
-      (Angle.fromDegrees(odgw4x.getDecDeg) ~= Angle.fromDegrees(odgw4.getSkycalcCoordinates.getDecDeg)) should beTrue
+      (Angle.fromDegrees(cwfs1x.getRaDeg)  ~= Angle.fromDegrees(cwfs1.getSkycalcCoordinates(NoTime).getValue.getRaDeg)) should beTrue
+      (Angle.fromDegrees(cwfs1x.getDecDeg) ~= Angle.fromDegrees(cwfs1.getSkycalcCoordinates(NoTime).getValue.getDecDeg)) should beTrue
+      (Angle.fromDegrees(cwfs2x.getRaDeg)  ~= Angle.fromDegrees(cwfs2.getSkycalcCoordinates(NoTime).getValue.getRaDeg)) should beTrue
+      (Angle.fromDegrees(cwfs2x.getDecDeg) ~= Angle.fromDegrees(cwfs2.getSkycalcCoordinates(NoTime).getValue.getDecDeg)) should beTrue
+      (Angle.fromDegrees(cwfs3x.getRaDeg)  ~= Angle.fromDegrees(cwfs3.getSkycalcCoordinates(NoTime).getValue.getRaDeg)) should beTrue
+      (Angle.fromDegrees(cwfs3x.getDecDeg) ~= Angle.fromDegrees(cwfs3.getSkycalcCoordinates(NoTime).getValue.getDecDeg)) should beTrue
+      (Angle.fromDegrees(odgw4x.getRaDeg)  ~= Angle.fromDegrees(odgw4.getSkycalcCoordinates(NoTime).getValue.getRaDeg)) should beTrue
+      (Angle.fromDegrees(odgw4x.getDecDeg) ~= Angle.fromDegrees(odgw4.getSkycalcCoordinates(NoTime).getValue.getDecDeg)) should beTrue
 
       val cwfs1Mag = cwfs1.getMagnitude(JMagnitude.Band.r).getValue.getBrightness
       val cwfs2Mag = cwfs2.getMagnitude(JMagnitude.Band.UC).getValue.getBrightness
@@ -142,10 +144,10 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
       set.contains(GsaoiOdgw.odgw3) should beFalse
       set.contains(GsaoiOdgw.odgw4) should beFalse
 
-      val cwfs1 = group.get(Canopus.Wfs.cwfs1).getValue.getPrimary.getValue.getTarget
-      val cwfs2 = group.get(Canopus.Wfs.cwfs2).getValue.getPrimary.getValue.getTarget
-      val cwfs3 = group.get(Canopus.Wfs.cwfs3).getValue.getPrimary.getValue.getTarget
-      val odgw2 = group.get(GsaoiOdgw.odgw2).getValue.getPrimary.getValue.getTarget
+      val cwfs1 = group.get(Canopus.Wfs.cwfs1).getValue.getPrimary.getValue
+      val cwfs2 = group.get(Canopus.Wfs.cwfs2).getValue.getPrimary.getValue
+      val cwfs3 = group.get(Canopus.Wfs.cwfs3).getValue.getPrimary.getValue
+      val odgw2 = group.get(GsaoiOdgw.odgw2)  .getValue.getPrimary.getValue
       cwfs1.getName must beEqualTo("104-014597")
       cwfs2.getName must beEqualTo("104-014608")
       cwfs3.getName must beEqualTo("104-014547")
@@ -156,14 +158,14 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
       val cwfs3x = Coordinates.create("05:35:18.423", "-69:16:30.67")
       val odgw2x = Coordinates.create("05:35:23.887", "-69:16:18.20")
 
-      (Angle.fromDegrees(cwfs1x.getRaDeg) ~= Angle.fromDegrees(cwfs1.getSkycalcCoordinates.getRaDeg)) should beTrue
-      (Angle.fromDegrees(cwfs1x.getDecDeg) ~= Angle.fromDegrees(cwfs1.getSkycalcCoordinates.getDecDeg)) should beTrue
-      (Angle.fromDegrees(cwfs2x.getRaDeg) ~= Angle.fromDegrees(cwfs2.getSkycalcCoordinates.getRaDeg)) should beTrue
-      (Angle.fromDegrees(cwfs2x.getDecDeg) ~= Angle.fromDegrees(cwfs2.getSkycalcCoordinates.getDecDeg)) should beTrue
-      (Angle.fromDegrees(cwfs3x.getRaDeg) ~= Angle.fromDegrees(cwfs3.getSkycalcCoordinates.getRaDeg)) should beTrue
-      (Angle.fromDegrees(cwfs3x.getDecDeg) ~= Angle.fromDegrees(cwfs3.getSkycalcCoordinates.getDecDeg)) should beTrue
-      (Angle.fromDegrees(odgw2x.getRaDeg) ~= Angle.fromDegrees(odgw2.getSkycalcCoordinates.getRaDeg)) should beTrue
-      (Angle.fromDegrees(odgw2x.getDecDeg) ~= Angle.fromDegrees(odgw2.getSkycalcCoordinates.getDecDeg)) should beTrue
+      (Angle.fromDegrees(cwfs1x.getRaDeg)  ~= Angle.fromDegrees(cwfs1.getSkycalcCoordinates(NoTime).getValue.getRaDeg)) should beTrue
+      (Angle.fromDegrees(cwfs1x.getDecDeg) ~= Angle.fromDegrees(cwfs1.getSkycalcCoordinates(NoTime).getValue.getDecDeg)) should beTrue
+      (Angle.fromDegrees(cwfs2x.getRaDeg)  ~= Angle.fromDegrees(cwfs2.getSkycalcCoordinates(NoTime).getValue.getRaDeg)) should beTrue
+      (Angle.fromDegrees(cwfs2x.getDecDeg) ~= Angle.fromDegrees(cwfs2.getSkycalcCoordinates(NoTime).getValue.getDecDeg)) should beTrue
+      (Angle.fromDegrees(cwfs3x.getRaDeg)  ~= Angle.fromDegrees(cwfs3.getSkycalcCoordinates(NoTime).getValue.getRaDeg)) should beTrue
+      (Angle.fromDegrees(cwfs3x.getDecDeg) ~= Angle.fromDegrees(cwfs3.getSkycalcCoordinates(NoTime).getValue.getDecDeg)) should beTrue
+      (Angle.fromDegrees(odgw2x.getRaDeg)  ~= Angle.fromDegrees(odgw2.getSkycalcCoordinates(NoTime).getValue.getRaDeg)) should beTrue
+      (Angle.fromDegrees(odgw2x.getDecDeg) ~= Angle.fromDegrees(odgw2.getSkycalcCoordinates(NoTime).getValue.getDecDeg)) should beTrue
 
       val cwfs1Mag = cwfs1.getMagnitude(JMagnitude.Band.UC).getValue.getBrightness
       val cwfs2Mag = cwfs2.getMagnitude(JMagnitude.Band.UC).getValue.getBrightness
@@ -203,10 +205,10 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
       set.contains(GsaoiOdgw.odgw3) should beFalse
       set.contains(GsaoiOdgw.odgw4) should beFalse
 
-      val cwfs1 = group.get(Canopus.Wfs.cwfs1).getValue.getPrimary.getValue.getTarget
-      val cwfs2 = group.get(Canopus.Wfs.cwfs2).getValue.getPrimary.getValue.getTarget
-      val cwfs3 = group.get(Canopus.Wfs.cwfs3).getValue.getPrimary.getValue.getTarget
-      val odgw2 = group.get(GsaoiOdgw.odgw2).getValue.getPrimary.getValue.getTarget
+      val cwfs1 = group.get(Canopus.Wfs.cwfs1).getValue.getPrimary.getValue
+      val cwfs2 = group.get(Canopus.Wfs.cwfs2).getValue.getPrimary.getValue
+      val cwfs3 = group.get(Canopus.Wfs.cwfs3).getValue.getPrimary.getValue
+      val odgw2 = group.get(GsaoiOdgw.odgw2)  .getValue.getPrimary.getValue
       cwfs1.getName must beEqualTo("289-128909")
       cwfs2.getName must beEqualTo("289-128878")
       cwfs3.getName must beEqualTo("289-128908")
@@ -217,14 +219,14 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
       val cwfs3x = Coordinates.create("17:40:21.594", "-32:15:50.38")
       val odgw2x = Coordinates.create("17:40:19.295", "-32:14:58.34")
 
-      (Angle.fromDegrees(cwfs1x.getRaDeg) ~= Angle.fromDegrees(cwfs1.getSkycalcCoordinates.getRaDeg)) should beTrue
-      (Angle.fromDegrees(cwfs1x.getDecDeg) ~= Angle.fromDegrees(cwfs1.getSkycalcCoordinates.getDecDeg)) should beTrue
-      (Angle.fromDegrees(cwfs2x.getRaDeg) ~= Angle.fromDegrees(cwfs2.getSkycalcCoordinates.getRaDeg)) should beTrue
-      (Angle.fromDegrees(cwfs2x.getDecDeg) ~= Angle.fromDegrees(cwfs2.getSkycalcCoordinates.getDecDeg)) should beTrue
-      (Angle.fromDegrees(cwfs3x.getRaDeg) ~= Angle.fromDegrees(cwfs3.getSkycalcCoordinates.getRaDeg)) should beTrue
-      (Angle.fromDegrees(cwfs3x.getDecDeg) ~= Angle.fromDegrees(cwfs3.getSkycalcCoordinates.getDecDeg)) should beTrue
-      (Angle.fromDegrees(odgw2x.getRaDeg) ~= Angle.fromDegrees(odgw2.getSkycalcCoordinates.getRaDeg)) should beTrue
-      (Angle.fromDegrees(odgw2x.getDecDeg) ~= Angle.fromDegrees(odgw2.getSkycalcCoordinates.getDecDeg)) should beTrue
+      (Angle.fromDegrees(cwfs1x.getRaDeg)  ~= Angle.fromDegrees(cwfs1.getSkycalcCoordinates(NoTime).getValue.getRaDeg)) should beTrue
+      (Angle.fromDegrees(cwfs1x.getDecDeg) ~= Angle.fromDegrees(cwfs1.getSkycalcCoordinates(NoTime).getValue.getDecDeg)) should beTrue
+      (Angle.fromDegrees(cwfs2x.getRaDeg)  ~= Angle.fromDegrees(cwfs2.getSkycalcCoordinates(NoTime).getValue.getRaDeg)) should beTrue
+      (Angle.fromDegrees(cwfs2x.getDecDeg) ~= Angle.fromDegrees(cwfs2.getSkycalcCoordinates(NoTime).getValue.getDecDeg)) should beTrue
+      (Angle.fromDegrees(cwfs3x.getRaDeg)  ~= Angle.fromDegrees(cwfs3.getSkycalcCoordinates(NoTime).getValue.getRaDeg)) should beTrue
+      (Angle.fromDegrees(cwfs3x.getDecDeg) ~= Angle.fromDegrees(cwfs3.getSkycalcCoordinates(NoTime).getValue.getDecDeg)) should beTrue
+      (Angle.fromDegrees(odgw2x.getRaDeg)  ~= Angle.fromDegrees(odgw2.getSkycalcCoordinates(NoTime).getValue.getRaDeg)) should beTrue
+      (Angle.fromDegrees(odgw2x.getDecDeg) ~= Angle.fromDegrees(odgw2.getSkycalcCoordinates(NoTime).getValue.getDecDeg)) should beTrue
 
       val cwfs1Mag = cwfs1.getMagnitude(JMagnitude.Band.UC).getValue.getBrightness
       val cwfs2Mag = cwfs2.getMagnitude(JMagnitude.Band.UC).getValue.getBrightness
@@ -264,9 +266,9 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
       set.contains(GsaoiOdgw.odgw3) should beFalse
       set.contains(GsaoiOdgw.odgw4) should beTrue
 
-      val cwfs2 = group.get(Canopus.Wfs.cwfs2).getValue.getPrimary.getValue.getTarget.getSkycalcCoordinates
-      val cwfs3 = group.get(Canopus.Wfs.cwfs3).getValue.getPrimary.getValue.getTarget.getSkycalcCoordinates
-      val odgw4 = group.get(GsaoiOdgw.odgw4).getValue.getPrimary.getValue.getTarget.getSkycalcCoordinates
+      val cwfs2 = group.get(Canopus.Wfs.cwfs2).getValue.getPrimary.getValue.getSkycalcCoordinates(NoTime).getValue
+      val cwfs3 = group.get(Canopus.Wfs.cwfs3).getValue.getPrimary.getValue.getSkycalcCoordinates(NoTime).getValue
+      val odgw4 = group.get(GsaoiOdgw.odgw4)  .getValue.getPrimary.getValue.getSkycalcCoordinates(NoTime).getValue
 
       val cwfs2x = Coordinates.create("12:38:44.500", "-49:47:58.38")
       val cwfs3x = Coordinates.create("12:38:50.005", "-49:48:00.89")

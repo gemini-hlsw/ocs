@@ -107,7 +107,7 @@ trait UCAC3Regression {
           val equalGroup = expectedGuideGroup.zip(actualGuideGroup).map {
             case (egg, acc) =>
               val sameGuider = egg.getGuider == acc.getGuider
-              sameGuider && sameCoordinates(egg.getPrimary.getValue.getTarget, acc.getPrimary.getValue.getTarget)
+              sameGuider && sameCoordinates(egg.getPrimary.getValue, acc.getPrimary.getValue)
           }
           val sameStrehl = math.abs(expected.strehl.avg - actual.strehl.avg) < 0.0001
           sameStrehl && equalGroup.forall(_ == true)
@@ -123,7 +123,7 @@ trait UCAC3Regression {
 
 
   // Compare if two targets have the same RA/Dec ... they are assumed to be sidereal
-  def sameCoordinates(a: ITarget, b: ITarget): Boolean = {
+  def sameCoordinates(a: SPTarget, b: SPTarget): Boolean = {
     val when = JNone.instance[java.lang.Long]
     same(a.getRaDegrees(when),  b.getRaDegrees(when)) &&
     same(a.getDecDegrees(when), b.getDecDegrees(when))

@@ -18,6 +18,9 @@ import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.pot.sp.ISPProgram;
 import edu.gemini.pot.sp.ISPNode;
 import edu.gemini.pot.sp.SPComponentType;
+import edu.gemini.shared.util.immutable.None;
+import edu.gemini.shared.util.immutable.Option;
+import edu.gemini.shared.util.immutable.Some;
 import edu.gemini.spModel.core.SPProgramID;
 import edu.gemini.pot.spdb.DBAbstractQueryFunctor;
 import edu.gemini.pot.spdb.IDBDatabaseService;
@@ -30,6 +33,7 @@ import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.spModel.ao.AOConstants;
 import edu.gemini.spModel.ao.AOTreeUtil;
 import edu.gemini.spModel.data.YesNoType;
+import edu.gemini.spModel.ext.TargetNode;
 import edu.gemini.spModel.gemini.altair.AltairParams;
 import edu.gemini.spModel.gemini.altair.InstAltair;
 import edu.gemini.spModel.gemini.obscomp.SPProgram;
@@ -37,6 +41,8 @@ import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 import edu.gemini.spModel.obs.ObsClassService;
 import edu.gemini.spModel.obs.ObservationStatus;
 import edu.gemini.spModel.obs.SPObservation;
+import edu.gemini.spModel.obs.SchedulingBlock;
+import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obsclass.ObsClass;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.target.SPTarget;
@@ -355,27 +361,40 @@ public class LchQueryFunctor extends DBAbstractQueryFunctor implements IDBParall
      * Returns one of the following for the given target:
      * {@link edu.gemini.odb.browser.NonSidereal }
      * {@link edu.gemini.odb.browser.Sidereal }
+     * ... or None if the coordinates are unknown
      */
-    private Serializable _makeTargetNode(SPTarget target, TargetEnvironment targetEnvironment) {
-        if (target.getTarget() instanceof NonSiderealTarget) {
+    private Option<Serializable> _makeTargetNode(SPTarget target, TargetEnvironment targetEnvironment) {
+        if (target.isNonSidereal()) {
             NonSidereal nonSidereal = new NonSidereal();
             nonSidereal.setName(target.getName());
             nonSidereal.setType(_getTargetType(target, targetEnvironment));
-            Long id = ((NonSiderealTarget) target.getTarget()).getHorizonsObjectId();
-            if (id != null) {
-                nonSidereal.setHorizonsObjectId(id.toString());
-            }
-            return nonSidereal;
-        } else {
+
+            // TODO: update for new model, which has better HORIZONS support. we can
+            // this BREAKS lch for nonsidereal targets
+
+//            Long id = ((NonSiderealTarget) target.getTarget()).getHorizonsObjectId();
+//            if (id != null) {
+//                nonSidereal.setHorizonsObjectId(id.toString());
+//            }
+
+            return new Some(nonSidereal);
+        } else if (target.isSidereal()) {
             Sidereal sidereal = new Sidereal();
             sidereal.setName(target.getName());
             sidereal.setType(_getTargetType(target, targetEnvironment));
-            Coordinates coords = target.getTarget().getSkycalcCoordinates();
-            HmsDms hmsDms = new HmsDms();
-            hmsDms.setRa(HHMMSS.valStr(coords.getRa().getMagnitude()));
-            hmsDms.setDec(DDMMSS.valStr(coords.getDec().getMagnitude()));
-            sidereal.setHmsDms(hmsDms);
-            return sidereal;
+
+            // TODO: pattern match with new model and get the coords directly
+            // for the time being we know that we don't need a time because this is a sidereal target
+            return target.getSkycalcCoordinates(None.instance()).map(coords -> {
+                HmsDms hmsDms = new HmsDms();
+                hmsDms.setRa(HHMMSS.valStr(coords.getRa().getMagnitude()));
+                hmsDms.setDec(DDMMSS.valStr(coords.getDec().getMagnitude()));
+                sidereal.setHmsDms(hmsDms);
+                return sidereal;
+            });
+
+        } else {
+            return None.instance(); // it's a TOO target
         }
     }
 
@@ -455,7 +474,9 @@ public class LchQueryFunctor extends DBAbstractQueryFunctor implements IDBParall
                         if (targets != null && targets.size() != 0) {
                             TargetsNode targetsNode = new TargetsNode();
                             for (SPTarget target : targets) {
-                                targetsNode.getTargets().add(_makeTargetNode(target, targetEnvironment));
+                                _makeTargetNode(target, targetEnvironment).foreach(tn ->
+                                    targetsNode.getTargets().add(tn)
+                                );
                             }
                             observation.setTargetsNode(targetsNode);
                         }

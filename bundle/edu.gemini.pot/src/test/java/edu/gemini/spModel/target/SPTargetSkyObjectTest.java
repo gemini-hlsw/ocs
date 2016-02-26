@@ -61,7 +61,7 @@ public final class SPTargetSkyObjectTest {
             SPTarget target = new SPTarget(hmsDeg);
 
             assertEquals(0, target.getMagnitudes().size());
-            assertEquals(0, target.getTarget().getMagnitudeBands().size());
+            assertEquals(0, target.getMagnitudeBands().size());
 
             assertEquals("xyz", target.getName());
             assertEquals(15.0, target.getRaDegrees(None.instance()).getValue(), 0.000001);
