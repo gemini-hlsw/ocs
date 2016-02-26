@@ -55,7 +55,7 @@ public enum GsaoiOdgw implements ValidatableGuideProbe {
             // Select the appropriate guider, if any.
             final TargetEnvironment env = ctx.getTargets();
             final Option<GuideProbe> probeOpt = guideStar
-                .getSkycalcCoordinates(ctx.getSchedulingBlock().map(SchedulingBlock::start))
+                .getSkycalcCoordinates(ctx.getSchedulingBlockStart())
                 .flatMap(cs -> select(cs, ctx));
 
             // If no probe is defined, just use ODGW1 since we're adding a target that is off the valid range.
@@ -136,7 +136,7 @@ public enum GsaoiOdgw implements ValidatableGuideProbe {
     }
 
     public GuideStarValidation validate(SPTarget guideStar, ObsContext ctx) {
-        final Option<Long> when = ctx.getSchedulingBlock().map(SchedulingBlock::start);
+        final Option<Long> when = ctx.getSchedulingBlockStart();
         return guideStar.getSkycalcCoordinates(when).map(coords -> {
             // Get the id of the detector in which the guide star lands, if any
 

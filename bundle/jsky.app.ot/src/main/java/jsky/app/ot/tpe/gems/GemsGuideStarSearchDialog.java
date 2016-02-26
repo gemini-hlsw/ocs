@@ -577,7 +577,7 @@ public class GemsGuideStarSearchDialog extends JFrame {
     }
 
     private void analyzeDone() {
-        final Option<Long> when = _tpe.getObsContext().flatMap(ObsContext::getSchedulingBlock).map(SchedulingBlock::start);
+        final Option<Long> when = _tpe.getObsContext().flatMap(ObsContext::getSchedulingBlockStart);
         CandidateAsterismsTreeTableModel treeTableModel = new CandidateAsterismsTreeTableModel(
                 _model.getGemsGuideStars(), ModelConverters.toOldBand(_model.getBand().getBand()), when);
         _candidateAsterismsTreeTable.setTreeTableModel(treeTableModel);

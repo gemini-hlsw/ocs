@@ -321,6 +321,13 @@ public class SPObservation extends AbstractDataObject implements ISPStaffOnlyFie
     }
 
     /**
+     * Get the scheduling block's starting time.
+     */
+    public Option<Long> getSchedulingBlockStart() {
+        return getSchedulingBlockStart();
+    }
+
+    /**
      * Set the scheduling block.
      */
     public void setSchedulingBlock(Option<SchedulingBlock> newValue) {

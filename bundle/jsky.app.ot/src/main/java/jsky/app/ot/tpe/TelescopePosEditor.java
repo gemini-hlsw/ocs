@@ -236,7 +236,7 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
         SPTarget tp = _ctx.targets().baseOrNull();
         if (tp != null) {
             // Get the RA and Dec from the pos list.
-            final Option<Long> when = _ctx.schedulingBlockJava().map(SchedulingBlock::start);
+            final Option<Long> when = _ctx.schedulingBlockStartJava();
             ra = tp.getRaDegrees(when).getOrElse(0.0);
             dec = tp.getDecDegrees(when).getOrElse(0.0);
         } else {
@@ -253,8 +253,8 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
         if (newBasePos == null) return oldBasePos != null;
         if (oldBasePos == null) return true;
 
-        final Option<Long> oldWhen = oldCtx.schedulingBlockJava().map(SchedulingBlock::start);
-        final Option<Long> newWhen = newCtx.schedulingBlockJava().map(SchedulingBlock::start);
+        final Option<Long> oldWhen = oldCtx.schedulingBlockStartJava();
+        final Option<Long> newWhen = newCtx.schedulingBlockStartJava();
 
         return !(oldBasePos.getRaDegrees(oldWhen).equals(newBasePos.getRaDegrees(newWhen)) &&
                 oldBasePos.getDecDegrees(oldWhen).equals(newBasePos.getDecDegrees(newWhen)));
@@ -339,7 +339,7 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
 
         final ImageCatalog imageCatalog = ImageCatalog.instance().user();
 
-        final Option<Long> when = ctx.schedulingBlockJava().map(SchedulingBlock::start);
+        final Option<Long> when = ctx.schedulingBlockStartJava();
 
         _baseTarget.getRaDegrees(when).flatMap(ra ->
             _baseTarget.getDecDegrees(when).flatMap( dec -> {

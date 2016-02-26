@@ -205,7 +205,13 @@ case class TpeContext(node: Option[ISPNode]) {
   def schedulingBlock: Option[SchedulingBlock] =
     obsShell.flatMap(_.getDataObject.asInstanceOf[SPObservation].getSchedulingBlock.asScalaOpt)
 
+  def schedulingBlockStart: Option[Long] =
+    schedulingBlock.map(_.start)
+
   def schedulingBlockJava: JOption[SchedulingBlock] =
     schedulingBlock.asGeminiOpt
+
+  def schedulingBlockStartJava: JOption[java.lang.Long] =
+    schedulingBlockStart.map(a => a : java.lang.Long).asGeminiOpt
 
 }

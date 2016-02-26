@@ -440,7 +440,7 @@ public class GeneralRule implements IRule {
     // targets are equal only if positions are defined and within _getMinDistance
     private static boolean _areTargetsEquals(SPTarget p1Target, SPTarget target, ObservationElements elems) {
 
-        final Option<Long> when = elems.getSchedulingBlock().map(SchedulingBlock::start);
+        final Option<Long> when = elems.getSchedulingBlockStart();
 
         Option<Double> spRA = target.getRaHours(when);
         Option<Double> spDec = target.getDecDegrees(when);

@@ -277,7 +277,7 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
 
             // Add the base position first.
             final SPTarget base = env.getBase();
-            final Option<Long> when = ctx.flatMap(c -> c.getSchedulingBlock().map(SchedulingBlock::start));
+            final Option<Long> when = ctx.flatMap(c -> c.getSchedulingBlockStart());
             final Option<Coordinates> baseCoords = getCoordinates(base, when);
             tmpRows.add(new BaseTargetRow(base, when));
 

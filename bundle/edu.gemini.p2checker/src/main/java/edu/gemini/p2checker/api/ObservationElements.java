@@ -166,6 +166,10 @@ public class ObservationElements implements Serializable {
         return _observation == null ? None.instance() : _observation.getSchedulingBlock();
     }
 
+    public Option<Long> getSchedulingBlockStart() {
+        return getSchedulingBlockStart();
+    }
+
     private void _setInstrumentNode(ISPObsComponent inst) {
         _instrumentNode = inst;
         if (inst != null) {

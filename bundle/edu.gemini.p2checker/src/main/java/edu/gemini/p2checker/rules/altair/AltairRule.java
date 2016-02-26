@@ -175,7 +175,7 @@ public final class AltairRule implements IRule {
                     boolean isPwfs  = (altair.getMode() == AltairParams.Mode.LGS_P1);
                     boolean isAowfs = (altair.getMode() == AltairParams.Mode.LGS);
                     if (altair.getGuideStarType() == AltairParams.GuideStarType.NGS) {
-                        final boolean offAxis = altairOffAxisGuiding(target.getTargetEnvironment(), elements.getSchedulingBlock().map(SchedulingBlock::start));
+                        final boolean offAxis = altairOffAxisGuiding(target.getTargetEnvironment(), elements.getSchedulingBlockStart());
                         if (offAxis && altair.getFieldLens() == AltairParams.FieldLens.OUT) {
                             //Altair NGS without Field Lens (Warning: The Altair field lens is recommended for off-axis targets.)
                             problems.addWarning(PREFIX + "NO_FIELD_LENS", NO_FIELD_LENS, aoNode);

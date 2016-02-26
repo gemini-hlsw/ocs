@@ -85,7 +85,7 @@ public final class ObsSchedulingReport implements Serializable {
             if (SPSiteQuality.SP_TYPE.equals(type)) {
                 sq = (SPSiteQuality) obsComp.getDataObject();
             } else if (TargetObsComp.SP_TYPE.equals(type)) {
-                coords = getCoordinates(obsComp, _dataObj.getSchedulingBlock().map(SchedulingBlock::start));
+                coords = getCoordinates(obsComp, _dataObj.getSchedulingBlockStart());
             }
         }
         _siteQuality = sq;

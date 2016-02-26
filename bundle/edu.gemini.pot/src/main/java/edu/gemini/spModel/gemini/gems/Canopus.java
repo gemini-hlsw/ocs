@@ -224,7 +224,7 @@ public enum Canopus {
         public abstract Option<Area> probeArm(ObsContext ctx, boolean validate);
 
         public GuideStarValidation validate(SPTarget guideStar, ObsContext ctx) {
-            final Option<Long> when = ctx.getSchedulingBlock().map(SchedulingBlock::start);
+            final Option<Long> when = ctx.getSchedulingBlockStart();
             final Wfs self = this;
             return guideStar.getSkycalcCoordinates(when).map(coords ->
                 Canopus.instance.getProbesInRange(coords, ctx).contains(self) ?
@@ -242,7 +242,7 @@ public enum Canopus {
         // coordinates of the given guide star
         // (i.e.: The guide star is vignetted by the wfs probe arm)
         private static Option<Boolean> isVignetted(Wfs wfs, SPTarget guideStar, ObsContext ctx) {
-            return guideStar.getSkycalcCoordinates(ctx.getSchedulingBlock().map(SchedulingBlock::start)).flatMap(gscoords ->
+            return guideStar.getSkycalcCoordinates(ctx.getSchedulingBlockStart()).flatMap(gscoords ->
                     ctx.getBaseCoordinates().flatMap(coords ->
                     wfs.probeArm(ctx, false).map(a -> {
                         if (a == null) return false;
@@ -272,7 +272,7 @@ public enum Canopus {
 
             // Calculate the difference between the coordinate and the observation's base position.
             return guideStar
-                .getSkycalcCoordinates(ctx.getSchedulingBlock().map(SchedulingBlock::start))
+                .getSkycalcCoordinates(ctx.getSchedulingBlockStart())
                 .flatMap(gscoords -> ctx.getBaseCoordinates()
                     .map(base -> {
                         CoordinateDiff diff = new CoordinateDiff(base, gscoords);
@@ -358,7 +358,7 @@ public enum Canopus {
         SPTarget base   = ctx.getTargets().getBase();
         SPTarget target = spTargetOpt.getValue();
 
-        final Option<Long> when = ctx.getSchedulingBlock().map(SchedulingBlock::start);
+        final Option<Long> when = ctx.getSchedulingBlockStart();
 
         return
             base.getSkycalcCoordinates(when).flatMap(bc ->

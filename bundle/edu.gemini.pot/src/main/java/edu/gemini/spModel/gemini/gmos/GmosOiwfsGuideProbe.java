@@ -73,7 +73,7 @@ public enum GmosOiwfsGuideProbe implements ValidatableGuideProbe, OffsetValidati
 
     public Option<BoundaryPosition> checkBoundaries(final SPTarget guideStar, final ObsContext ctx) {
         return guideStar
-            .getSkycalcCoordinates(ctx.getSchedulingBlock().map(SchedulingBlock::start))
+            .getSkycalcCoordinates(ctx.getSchedulingBlockStart())
             .flatMap(cs -> checkBoundaries(cs, ctx));
     }
 

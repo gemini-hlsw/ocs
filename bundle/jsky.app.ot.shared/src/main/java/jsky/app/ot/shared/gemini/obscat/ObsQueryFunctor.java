@@ -527,7 +527,7 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor {
         final TargetObsComp targetEnv = (TargetObsComp) targetObsComp.getDataObject();
         final SPTarget tp = targetEnv.getBase();
 
-        final Option<Long> when = ((SPObservation) o.getDataObject()).getSchedulingBlock().map(SchedulingBlock::start);
+        final Option<Long> when = ((SPObservation) o.getDataObject()).getSchedulingBlockStart();
         final Option<Double> raOp  = tp.getRaDegrees(when).map(x -> x / 15.);
         final Option<Double> decOp = tp.getDecDegrees(when);
 
@@ -622,7 +622,7 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor {
         if (targetObsComp != null) {
             final TargetObsComp targetEnv = (TargetObsComp) targetObsComp.getDataObject();
             final SPTarget tp = targetEnv.getBase();
-            final Option<Long> when = obs.getSchedulingBlock().map(SchedulingBlock::start);
+            final Option<Long> when = obs.getSchedulingBlockStart();
             ra = tp.getRaDegrees(when).getOrNull();
             dec = tp.getDecDegrees(when).getOrNull();
         }
