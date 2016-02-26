@@ -21,6 +21,7 @@ import edu.gemini.spModel.obslog.ObsQaLog;
 import edu.gemini.spModel.obsrecord.ObsExecStatus;
 import edu.gemini.spModel.seqcomp.InstrumentSequenceSync;
 import edu.gemini.spModel.seqcomp.SeqBase;
+import edu.gemini.spModel.target.env.*;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.telescope.IssPortSync;
 import edu.gemini.spModel.too.Too;
@@ -178,5 +179,21 @@ public class ObservationNI implements ISPNodeInitializer {
         if (qa != null) qa.setDataObject(new ObsQaLog());
         final ISPObsExecLog exec = obs.getObsExecLog();
         if (exec != null) exec.setDataObject(new ObsExecLog());
+
+        // Reset disabled automatic groups.
+        for (ISPObsComponent oc : obs.getObsComponents()) {
+            if (oc.getType() == SPComponentType.TELESCOPE_TARGETENV) {
+                final TargetObsComp     toc = (TargetObsComp) oc.getDataObject();
+                final TargetEnvironment env = toc.getTargetEnvironment();
+                final GuideEnvironment genv = env.getGuideEnvironment();
+
+                if (genv.guideEnv().auto() instanceof AutomaticGroup.Disabled$) {
+                    toc.setTargetEnvironment(
+                        TargetEnv.auto().set(env, AutomaticGroup.Initial$.MODULE$)
+                    );
+                    oc.setDataObject(toc);
+                }
+            }
+        }
     }
 }
