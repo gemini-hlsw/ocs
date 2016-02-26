@@ -21,6 +21,14 @@ object To2016B extends Migration {
 
   val fact = new PioXmlFactory
 
+  def updateTargets(d: Document): Unit = {
+    // TODO
+  }
+
+  def updateSchedulingBlocks(d: Document): Unit = {
+    // TODO
+  }
+
   private def updateGuideEnvironment(d: Document): Unit = {
 
     def disabledGroup: ParamSet =
