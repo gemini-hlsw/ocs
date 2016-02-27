@@ -77,17 +77,14 @@ public final class SPTarget extends TransitionalSPTarget {
 
     // for testing only; this will go away
 
-    private transient Target _newTarget;
+    private Target _newTarget = SiderealTarget.empty(); // never null
 
     public Target getNewTarget() {
-        if (_newTarget == null)
-            _newTarget = SiderealTarget.empty();
         return _newTarget;
     }
 
     public void setNewTarget(Target target) {
         _newTarget = target;
-        System.out.println("*** SPTarget.setNewTarget: " + target);
         _notifyOfUpdate();
     }
 

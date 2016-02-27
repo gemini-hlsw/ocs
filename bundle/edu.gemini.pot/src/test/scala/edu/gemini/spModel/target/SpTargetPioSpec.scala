@@ -1,9 +1,13 @@
 package edu.gemini.spModel.target
 
-import edu.gemini.spModel.core.{SpectralDistribution, SpatialProfile, Redshift, Arbitraries}
+import edu.gemini.spModel.core.{Target, SpectralDistribution, SpatialProfile, Redshift, Arbitraries}
+import edu.gemini.spModel.pio.codec.ParamSetCodec
 import edu.gemini.spModel.pio.{Pio, ParamSet}
-import edu.gemini.spModel.pio.xml.PioXmlFactory
+import edu.gemini.spModel.pio.xml.{PioXmlUtil, PioXmlFactory}
+import edu.gemini.spModel.target.SPTargetSerializationSpec.canSerializeP
+import edu.gemini.spModel.core.AlmostEqual._
 import edu.gemini.spModel.target.system.{ConicTarget, HmsDegTarget, ITarget}
+import org.scalacheck.Prop.forAll
 import org.specs2.ScalaCheck
 import org.specs2.matcher.MatchResult
 import org.specs2.mutable.Specification
@@ -11,6 +15,8 @@ import squants.motion.KilometersPerSecond
 
 import edu.gemini.shared.util.immutable.{ None => JNone }
 import edu.gemini.shared.util.immutable.ScalaConverters._
+import edu.gemini.spModel.pio.codec.CodecSyntax._
+import edu.gemini.spModel.target.TargetParamSetCodecs._
 
 /** Tests Pio input/output operations for SpTargets.
   * Currently this only tests that the source profile and distribution are stored and retrieved.
@@ -36,6 +42,7 @@ object SpTargetPioSpec extends Specification with ScalaCheck with Arbitraries {
           assert(spt.getSpectralDistribution === spt2.getSpectralDistribution)
         }
     }
+
     "SPTargetPio" should {
       "store redshift" ! {
         prop { (z: Redshift) =>
@@ -55,6 +62,16 @@ object SpTargetPioSpec extends Specification with ScalaCheck with Arbitraries {
           }
         }
       }
+    }
+
+    "SPTargetPIO" should {
+      "Preserve New Target" !
+        forAll { (t: Target) =>
+          val spt1 = new SPTarget;
+          spt1.setNewTarget(t)
+          val spt2 = SPTargetPio.fromParamSet(SPTargetPio.getParamSet(spt1, new PioXmlFactory))
+          spt1.getNewTarget ~= spt2.getNewTarget // pio can lose floating point precision :-\
+        }
     }
 
   }
