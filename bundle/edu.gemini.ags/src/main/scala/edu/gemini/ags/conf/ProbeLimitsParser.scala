@@ -40,7 +40,7 @@ object ProbeLimitsParser {
     def missingIds: ValidationNel[String, Unit] =
       AllLimitsIds.filterNot(cm.contains).map(_.name) match {
         case Nil => ().success
-        case ids => ids.mkString("Missing table for: ", ", ", "").failNel
+        case ids => ids.mkString("Missing table for: ", ", ", "").failureNel
       }
 
     def incompleteTables: ValidationNel[String, Unit] = {
@@ -52,7 +52,7 @@ object ProbeLimitsParser {
 
       errors match {
         case Nil    => ().success
-        case h :: t => NonEmptyList.nel(h, t.toList).fail
+        case h :: t => NonEmptyList.nel(h, t.toList).failure
       }
     }
 
