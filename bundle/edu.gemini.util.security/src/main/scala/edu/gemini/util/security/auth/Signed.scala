@@ -41,7 +41,7 @@ class Signed[+A] private (private val so: SignedObject)(implicit mf: Manifest[A]
 object Signed extends DSA {
 
   def fromSignedObject[A](so: SignedObject)(implicit mf: Manifest[A]): Exception \/ Signed[A] =
-    \/.fromTryCatch(new Signed[A](so)).leftMap {
+    \/.fromTryCatchNonFatal(new Signed[A](so)).leftMap {
       case e:Exception => e
       case t => throw t
     }

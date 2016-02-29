@@ -33,7 +33,7 @@ object GsaMigration {
       val qaMap     = qaRecords.flatMap { qa =>
         for {
           ls <- Option(Pio.getValue(qa, "label"))
-          l  <- \/.fromTryCatch(new DatasetLabel(ls)).toOption
+          l  <- \/.fromTryCatchNonFatal(new DatasetLabel(ls)).toOption
           qs <- Option(Pio.getValue(qa, "qaState"))
           q  <- Option(DatasetQaState.parseType(qs))
         } yield l -> q
@@ -43,7 +43,7 @@ object GsaMigration {
       execRecords.flatMap { ps =>
         for {
           ls <- Option(Pio.getValue(ps, "dataset/datasetLabel"))
-          l  <- \/.fromTryCatch(new DatasetLabel(ls)).toOption
+          l  <- \/.fromTryCatchNonFatal(new DatasetLabel(ls)).toOption
         } yield OldExecRecord(ps, qaMap.getOrElse(l, DatasetQaState.UNDEFINED))
       }
     }

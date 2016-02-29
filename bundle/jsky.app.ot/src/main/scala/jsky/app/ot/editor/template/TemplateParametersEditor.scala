@@ -153,7 +153,7 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
     private def listenToDoc(): Unit = doc.addDocumentListener(docListener)
     private def deafToDoc(): Unit   = doc.removeDocumentListener(docListener)
 
-    def displayedValue: Option[A] = \/.fromTryCatch(read(readDoc)).toOption
+    def displayedValue: Option[A] = \/.fromTryCatchNonFatal(read(readDoc)).toOption
 
     private def showCommonValue(ps: Iterable[TemplateParameters]): Unit = {
       deafToDoc()

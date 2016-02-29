@@ -20,7 +20,7 @@ trait Commands {
 
 object Commands {
   def parseId(s: String): String \/ SPProgramID =
-    \/.fromTryCatch {
+    \/.fromTryCatchNonFatal {
       SPProgramID.toProgramID(s)
     }.leftMap(_ => s"Sorry, '$s' isn't a valid program id")
 

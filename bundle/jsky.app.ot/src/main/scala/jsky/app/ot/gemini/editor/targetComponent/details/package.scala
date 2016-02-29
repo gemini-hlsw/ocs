@@ -63,8 +63,8 @@ package object details {
 
   def forkSwingWorker[A <: AnyRef](constructImpl: => A)(finishedImpl: Throwable \/ A => Unit): Unit =
     new SwingWorker {
-      def construct = \/.fromTryCatch(constructImpl)
-      override def finished = finishedImpl(getValue.asInstanceOf[Throwable \/ A])
+      def construct = \/.fromTryCatchNonFatal(constructImpl)
+      override def finished() = finishedImpl(getValue.asInstanceOf[Throwable \/ A])
     }.start()
 
 }

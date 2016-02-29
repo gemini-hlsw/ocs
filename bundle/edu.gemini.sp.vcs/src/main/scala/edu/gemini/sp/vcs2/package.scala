@@ -49,7 +49,7 @@ package object vcs2 {
    * elements as VcsFailures.
    */
   def safeGet[A](a: => A, failureMessage: => String): TryVcs[A] =
-    \/.fromTryCatch(a).leftMap { t =>
+    \/.fromTryCatchNonFatal(a).leftMap { t =>
       VcsException(t): VcsFailure
     }.flatMap { Option(_).toTryVcs(failureMessage) }
 

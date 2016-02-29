@@ -121,7 +121,7 @@ final class ProbeLimitsParser extends JavaTokenParsers {
 
   def read(is: InputStream): String \/ CalcMap =
     for {
-      cm <- \/.fromTryCatch(read(Source.fromInputStream(is, "UTF8"))).fold(message(_).left, identity)
+      cm <- \/.fromTryCatchNonFatal(read(Source.fromInputStream(is, "UTF8"))).fold(message(_).left, identity)
       _  <- validate(cm)
     } yield cm
 }

@@ -296,7 +296,7 @@ object ConfigExtractor {
   def extractDoubleFromString(c: Config, key: ItemKey): String \/ Double = {
     val v = for {
       s <- extractWithThrowable[String](c, key)
-      d <- \/.fromTryCatch(s.toDouble)
+      d <- \/.fromTryCatchNonFatal(s.toDouble)
     } yield d
     v.leftMap(_.getMessage)
    }
@@ -309,7 +309,7 @@ object ConfigExtractor {
       new Error(s"Missing config value for key ${key.getPath}").left[A]
 
     Option(c.getItemValue(key)).fold(missingKey[A](key)) { v =>
-      \/.fromTryCatch(clazz.runtimeClass.cast(v).asInstanceOf[A])
+      \/.fromTryCatchNonFatal(clazz.runtimeClass.cast(v).asInstanceOf[A])
     }
 
   }
