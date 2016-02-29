@@ -54,7 +54,7 @@ final class VcsSyncAction(viewer: SPViewer) extends AbstractViewerAction(viewer,
   }
 
   private def isShowIcons: Boolean =
-    \/.fromTryCatch(viewer.getParentFrame.getToolBar.isShowPictures) | true
+    \/.fromTryCatchNonFatal(viewer.getParentFrame.getToolBar.isShowPictures) | true
 
   listenTo(viewer.getVcsStateTracker)
 

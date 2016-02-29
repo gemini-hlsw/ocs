@@ -57,7 +57,7 @@ class VcsPeerSelectionDialog(c: Option[Component], pid: SPProgramID, allPeers: L
 
   private def loc(comp: Option[java.awt.Component]): Point = {
     def safeLocation(c0: java.awt.Component): Option[Point] =
-      \/.fromTryCatch(c0.getLocationOnScreen).toOption
+      \/.fromTryCatchNonFatal(c0.getLocationOnScreen).toOption
 
     def viewer: Option[SPViewer] =
       SPViewer.instances().asScala.find { v =>
@@ -75,7 +75,7 @@ class VcsPeerSelectionDialog(c: Option[Component], pid: SPProgramID, allPeers: L
   location = loc(c.map(_.peer))
 
   private def peerForDefaultSite = Option(pid.site).flatMap { site =>
-    allPeers.find(p => Option(p.site).exists(_ == site))
+    allPeers.find(p => Option(p.site).contains(site))
   }
 
   private var choice = peerForDefaultSite orElse ObservingPeer.get orElse allPeers.headOption
@@ -173,7 +173,7 @@ class VcsPeerSelectionDialog(c: Option[Component], pid: SPProgramID, allPeers: L
   def onePeer(p: Peer) = new Content {
     def message = "This program was not fetched from a remote database."
     def panel   = new GridBagPanel {
-      layout(new Label(s"Synchronize ${pid} with")) = new Constraints() {
+      layout(new Label(s"Synchronize $pid with")) = new Constraints() {
         gridx  = 0
         insets = new Insets(0, 0, 0, 5)
       }
@@ -187,7 +187,7 @@ class VcsPeerSelectionDialog(c: Option[Component], pid: SPProgramID, allPeers: L
     def message = "This program was not fetched from a remote database.  Select the database with which to synchronize."
 
     def panel   = new GridBagPanel {
-      layout(new Label(s"Synchronize ${pid} with")) = new Constraints() {
+      layout(new Label(s"Synchronize $pid with")) = new Constraints() {
         gridx  = 0
         insets = new Insets(0, 0, 0, 5)
       }

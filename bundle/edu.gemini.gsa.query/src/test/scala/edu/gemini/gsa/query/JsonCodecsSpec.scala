@@ -12,7 +12,7 @@ import org.specs2.mutable.Specification
 
 import java.time.Instant
 
-import scalaz.syntax.id._
+import scalaz.syntax.either._
 
 object JsonCodecsSpec extends Specification with ScalaCheck with Arbitraries {
 

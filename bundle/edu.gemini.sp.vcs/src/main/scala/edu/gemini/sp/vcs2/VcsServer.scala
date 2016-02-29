@@ -169,7 +169,7 @@ class VcsServer(odb: IDBDatabaseService) { vs =>
     VcsAction(lock(k)) >> { try { body} finally { unlock(k) } }
 
   private  def putProg(p: ISPProgram): TryVcs[Unit] =
-    \/.fromTryCatch(odb.put(p)).leftMap {
+    \/.fromTryCatchNonFatal(odb.put(p)).leftMap {
       case clash: DBIDClashException => VcsFailure.idClash(clash)
       case ex                        => VcsException(ex)
     }.as(())

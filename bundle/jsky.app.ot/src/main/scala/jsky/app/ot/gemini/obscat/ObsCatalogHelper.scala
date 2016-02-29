@@ -121,7 +121,7 @@ object ObsCatalogHelper {
 
         // Remote ones via TRPC. Result type ends up the same
         case db @ Remote(peer) => authFuture {
-          TrpcClient(peer, 10 * 1000, TIMEOUT_MS).withKeyChain(OT.getKeyChain).apply(r => run(db, r[IDBQueryRunner])).fold(QueryFailure(db, _).fail, _.success)
+          TrpcClient(peer, 10 * 1000, TIMEOUT_MS).withKeyChain(OT.getKeyChain).apply(r => run(db, r[IDBQueryRunner])).fold(QueryFailure(db, _).failure, _.success)
         }
 
       }

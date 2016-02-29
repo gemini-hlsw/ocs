@@ -127,7 +127,7 @@ case class MergePlan(update: Tree[MergeNode], delete: Set[Missing]) {
     }.liftVcs
 
     def doEdit(mt: Tree[(MergeNode, ISPNode)]): VcsAction[Unit] =
-      \/.fromTryCatch {
+      \/.fromTryCatchNonFatal {
         edit(mt)
         p.setVersions(vm(p))
       }.leftMap(VcsException).liftVcs
