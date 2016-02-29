@@ -2,7 +2,7 @@ package edu.gemini.spModel.target.env
 
 import edu.gemini.shared.util.immutable.ImList
 import edu.gemini.shared.util.immutable.ScalaConverters._
-import edu.gemini.spModel.core.{Declination, RightAscension}
+import edu.gemini.spModel.core.{Angle, Declination, RightAscension}
 import edu.gemini.spModel.guide.{GuideProbeMap, GuideProbe}
 import edu.gemini.spModel.target.SPTarget
 import org.scalacheck._
@@ -97,7 +97,10 @@ trait Arbitraries extends edu.gemini.spModel.core.Arbitraries {
 
   implicit val arbAutomaticActiveGroup: Arbitrary[AutomaticGroup.Active] =
     Arbitrary {
-      boundedListOf[(GuideProbe, SPTarget)](3).map(lst => ==>>.fromList(lst)).map(AutomaticGroup.Active)
+      for {
+        m <- boundedListOf[(GuideProbe, SPTarget)](3).map(lst => ==>>.fromList(lst))
+        a <- arbitrary[Angle]
+      } yield AutomaticGroup.Active(m, a)
     }
 
   implicit val arbAutomaticGroup: Arbitrary[AutomaticGroup] =

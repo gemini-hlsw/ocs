@@ -11,6 +11,7 @@ import edu.gemini.skycalc.Angle;
 import edu.gemini.shared.skyobject.coords.HmsDegCoordinates;
 import edu.gemini.shared.skyobject.coords.SkyCoordinates;
 import edu.gemini.skycalc.Coordinates;
+import edu.gemini.spModel.core.Angle$;
 import edu.gemini.spModel.core.MagnitudeBand;
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2;
 import edu.gemini.spModel.gemini.gems.GemsInstrument;
@@ -130,7 +131,9 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
      * setting the selected position angle and guide probe.
      */
     public void applyResults(GemsGuideStars gemsGuideStars) {
-        apply(tpe.getContext(), gemsGuideStars.pa().toDegrees(), GuideGroup.createActive(gemsGuideStars.guideGroup().getAll()));
+        final edu.gemini.spModel.core.Angle posAngle;
+        posAngle = Angle$.MODULE$.fromDegrees(gemsGuideStars.pa().toDegrees());
+        apply(tpe.getContext(), gemsGuideStars.pa().toDegrees(), GuideGroup.createActive(gemsGuideStars.guideGroup().getAll(), posAngle));
     }
 
     /**

@@ -1,5 +1,6 @@
 package edu.gemini.spModel.target.env
 
+import edu.gemini.spModel.core.Angle
 import edu.gemini.spModel.target.env.AutomaticGroup.{Active, Disabled, Initial}
 import edu.gemini.spModel.target.env.GuideGroup.AutoDisabledTag
 import edu.gemini.spModel.target.env.TargetCollection._
@@ -48,7 +49,7 @@ case class GuideGroup(grp: GuideGrp) extends java.lang.Iterable[GuideProbeTarget
   def contains(gp: GuideProbe): Boolean =
     grp match {
       case Initial | Disabled => false
-      case Active(ts)         => ts.member(gp)
+      case Active(ts, _)      => ts.member(gp)
       case ManualGroup(_, ts) => ts.member(gp)
     }
 
@@ -57,7 +58,7 @@ case class GuideGroup(grp: GuideGrp) extends java.lang.Iterable[GuideProbeTarget
       case ManualGroup(_, opts) =>
         opts.lookup(gp).map { o => (o.focus, o.toList) }
 
-      case Active(ts)           =>
+      case Active(ts, _)        =>
         ts.lookup(gp).map { t => (some(t), List(t)) }
 
       case Initial | Disabled   =>
@@ -130,11 +131,16 @@ case class GuideGroup(grp: GuideGrp) extends java.lang.Iterable[GuideProbeTarget
           mg.copy(targetMap = m + (probe -> opts))
         }
 
-      case a@Active(ts)         =>
+      case a@Active(ts, _)      =>
         a.copy(targetMap = primary.fold(ts - probe) { t => ts + (probe -> t)})
 
       case Initial | Disabled   =>
-        primary.fold(grp) { t => Active(==>>.singleton(probe, t)) }
+        // It isn't really cool to just stick in 0 degrees for the position
+        // angle here but the "put" method is required by the old
+        // GuideEnvironment API and should only be used for manual guide groups.
+        // BAGS will be updating the automatic group via the underlying Scala
+        // GuideGrp and will supply the correct position angle.
+        primary.fold(grp) { t => Active(==>>.singleton(probe, t), Angle.zero) }
     }
   }
 
@@ -157,7 +163,7 @@ case class GuideGroup(grp: GuideGrp) extends java.lang.Iterable[GuideProbeTarget
   private def sortedKeys: List[GuideProbe] =
     (grp match {
       case Initial | Disabled => Set.empty[GuideProbe]
-      case Active(ts)         => ts.keySet // already sorted
+      case Active(ts, _)      => ts.keySet // already sorted
       case ManualGroup(_, ts) => ts.keySet // already sorted
     }).toList
 
@@ -236,19 +242,23 @@ case class GuideGroup(grp: GuideGrp) extends java.lang.Iterable[GuideProbeTarget
     getTargets.toList.iterator
 
   def getParamSet(f: PioFactory): ParamSet = {
-    import GuideGroup.{ParamSetName, AutoInitialTag, AutoActiveTag, ManualTag }
+    import GuideGroup.{grp => _, _}
 
     val ps = f.createParamSet(ParamSetName)
 
-    getName.asScalaOpt.foreach { Pio.addParam(f, ps, "name", _) }
+    getName.asScalaOpt.foreach { Pio.addParam(f, ps, NameParam, _) }
 
-    val tag = grp match {
-      case Initial           => AutoInitialTag
-      case Disabled          => AutoDisabledTag
-      case Active(_)         => AutoActiveTag
-      case ManualGroup(_, _) => ManualTag
+    val (tag, posAngle) = grp match {
+      case Initial           => (AutoInitialTag, None)
+      case Disabled          => (AutoDisabledTag, None)
+      case Active(_, pa)     => (AutoActiveTag, Some(pa))
+      case ManualGroup(_, _) => (ManualTag, None)
     }
-    Pio.addParam(f, ps, "tag", tag.toString)
+    Pio.addParam(f, ps, TagParam, tag.toString)
+
+    posAngle.foreach { pa =>
+      Pio.addDoubleParam(f, ps, PosAngleParam, pa.toDegrees)
+    }
 
     all.foreach { gpt => ps.addParamSet(gpt.getParamSet(f)) }
 
@@ -279,7 +289,10 @@ object GuideGroup extends ((GuideGrp) => GuideGroup) {
   val name: GuideGroup @?> String =
     grp.partial >=> GuideGrp.name
 
-  val ParamSetName = "guideGroup"
+  val ParamSetName  = "guideGroup"
+  val NameParam     = "name"
+  val TagParam      = "tag"
+  val PosAngleParam = "posAngle"
 
   sealed trait GroupTypeTag
   case object AutoInitialTag  extends GroupTypeTag
@@ -290,19 +303,27 @@ object GuideGroup extends ((GuideGrp) => GuideGroup) {
   private val AllTags = List(AutoInitialTag, AutoDisabledTag, AutoActiveTag, ManualTag)
 
   def fromParamSet(ps: ParamSet): GuideGroup = {
-    val name    = Pio.getValue(ps, "name", "Manual Group")
+    val name    = Pio.getValue(ps, NameParam, "Manual Group")
     val targets = ps.getParamSets.asScala.toList.map { GuideProbeTargets.fromParamSet }.asImList
 
     val typeTag = for {
-      s <- Option(Pio.getValue(ps, "tag"))
+      s <- Option(Pio.getValue(ps, TagParam))
       t <- AllTags.find(_.toString == s)
     } yield t
 
     typeTag.fold(createManual(name, targets)) {
-      case AutoInitialTag  => AutomaticInitial
-      case AutoDisabledTag => AutomaticDisabled
-      case AutoActiveTag   => createActive(targets)
-      case ManualTag       => createManual(name, targets)
+      case AutoInitialTag  =>
+        AutomaticInitial
+
+      case AutoDisabledTag =>
+        AutomaticDisabled
+
+      case AutoActiveTag   =>
+        val posAngle = Angle.fromDegrees(Pio.getDoubleValue(ps, PosAngleParam, 0.0))
+        createActive(targets, posAngle)
+
+      case ManualTag       =>
+        createManual(name, targets)
     }
   }
 
@@ -328,12 +349,12 @@ object GuideGroup extends ((GuideGrp) => GuideGroup) {
     GuideGroup(ManualGroup(name, m))
   }
 
-  def createActive(targets: ImList[GuideProbeTargets]): GuideGroup = {
+  def createActive(targets: ImList[GuideProbeTargets], posAngle: Angle): GuideGroup = {
     val m = ==>>.fromList(targets.asScalaList.flatMap { gpt =>
       gpt.getPrimary.asScalaOpt.strengthL(gpt.getGuider)
     })
 
-    GuideGroup(Active(m))
+    GuideGroup(Active(m, posAngle))
   }
 
   implicit val EqualGuideGroup: Equal[GuideGroup] = Equal.equalBy(_.grp)

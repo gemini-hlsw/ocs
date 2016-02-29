@@ -84,7 +84,7 @@ trait Almosts {
       def almostEqual(a: GuideGrp, b: GuideGrp): Boolean =
         (a, b) match {
           case (ManualGroup(an, am), ManualGroup(bn, bm)) => (an === bn) && (am ~= bm)
-          case (Active(am), Active(bm))                   => am ~= bm
+          case (Active(am, apa), Active(bm, bpa))         => (am ~= bm) && (apa ~= bpa)
           case (Initial, Initial)                         => true
           case (Disabled, Disabled)                       => true
           case _                                          => false
