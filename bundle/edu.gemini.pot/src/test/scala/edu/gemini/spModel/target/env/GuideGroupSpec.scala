@@ -4,11 +4,10 @@ import edu.gemini.spModel.core.AlmostEqual.AlmostEqualOps
 
 import edu.gemini.shared.util.immutable.{ImList, ImOption}
 import edu.gemini.shared.util.immutable.ScalaConverters._
-import edu.gemini.spModel.core.Helpers
+import edu.gemini.spModel.core.{Angle, Helpers}
 import edu.gemini.spModel.guide.{GuideProbeMap, GuideProbe}
 import edu.gemini.spModel.pio.xml.PioXmlFactory
 import edu.gemini.spModel.target.SPTarget
-import org.apache.commons.io.output.ByteArrayOutputStream
 
 
 import org.scalacheck.Prop._
@@ -16,8 +15,6 @@ import org.scalacheck.Prop._
 import org.specs2.ScalaCheck
 
 import org.specs2.mutable.Specification
-
-import java.io.{ByteArrayInputStream, ObjectInputStream, ObjectOutputStream}
 
 import scala.collection.JavaConverters._
 import scalaz._, Scalaz._
@@ -91,10 +88,10 @@ class GuideGroupSpec extends Specification with ScalaCheck with Arbitraries with
         AllProbes.forall { gp =>
           g.get(gp).asScalaOpt.forall { gpt =>
             gpt.getPrimary.asScalaOpt === (g.grp match {
-              case ManualGroup(_, m)        => m.lookup(gp).flatMap(_.focus)
-              case AutomaticGroup.Active(m) => m.lookup(gp)
-              case AutomaticGroup.Initial   => None
-              case AutomaticGroup.Disabled  => None
+              case ManualGroup(_, m)           => m.lookup(gp).flatMap(_.focus)
+              case AutomaticGroup.Active(m, _) => m.lookup(gp)
+              case AutomaticGroup.Initial      => None
+              case AutomaticGroup.Disabled     => None
             })
           }
         }
@@ -181,10 +178,10 @@ class GuideGroupSpec extends Specification with ScalaCheck with Arbitraries with
       forAll { (g: GuideGroup) =>
         val guiders = g.getAll.asScalaList.map(_.getGuider).toSet
         g.grp match {
-          case AutomaticGroup.Active(m) => guiders == m.keySet
-          case AutomaticGroup.Initial   => guiders.isEmpty
-          case AutomaticGroup.Disabled  => guiders.isEmpty
-          case ManualGroup(_, m)        => guiders == m.keySet
+          case AutomaticGroup.Active(m, _) => guiders == m.keySet
+          case AutomaticGroup.Initial      => guiders.isEmpty
+          case AutomaticGroup.Disabled     => guiders.isEmpty
+          case ManualGroup(_, m)           => guiders == m.keySet
         }
       }
 
@@ -319,7 +316,7 @@ class GuideGroupSpec extends Specification with ScalaCheck with Arbitraries with
       forAll { (t1Gps: Set[GuideProbe], t1: SPTarget, t2: SPTarget) =>
         val t2Gps = AllProbes.toSet.diff(t1Gps)
         val tm = ==>>.fromFoldable(t1Gps.map(_ -> t1) ++ t2Gps.map(_ -> t2))
-        val gg = GuideGroup(AutomaticGroup.Active(tm))
+        val gg = GuideGroup(AutomaticGroup.Active(tm, Angle.zero))
         gg.getAllContaining(t1).asScalaList.map(_.getGuider).toSet === t1Gps &&
           gg.getAllContaining(t2).asScalaList.map(_.getGuider).toSet === t2Gps
     }

@@ -1,5 +1,6 @@
 package edu.gemini.spModel.target.env
 
+import edu.gemini.spModel.core.Angle
 import edu.gemini.spModel.guide.OrderGuideGroup
 import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.spModel.target.EqualSPTarget
@@ -27,7 +28,7 @@ sealed trait GuideGrp extends Serializable {
   def referencedGuiders: Set[GuideProbe] =
     this match {
       case Initial | Disabled  => Set.empty[GuideProbe]
-      case Active(ts)          => ts.keySet
+      case Active(ts, _)       => ts.keySet
       case ManualGroup(_, ts)  => ts.keySet
     }
 
@@ -37,7 +38,7 @@ sealed trait GuideGrp extends Serializable {
   def primaryReferencedGuiders: Set[GuideProbe] =
     this match {
       case Initial | Disabled => Set.empty[GuideProbe]
-      case Active(ts)         => ts.keySet
+      case Active(ts, _)      => ts.keySet
       case ManualGroup(_, ts) => ts.filter(_.hasFocus).keySet
     }
 }
@@ -106,7 +107,7 @@ object AutomaticGroup {
   /** An active BAGS group provides a 1:1 mapping from probe to target. If the
     * map is empty this is ok; it just means bags did not find any targets.
     */
-  case class Active(override val targetMap: GuideProbe ==>> SPTarget) extends AutomaticGroup {
+  case class Active(override val targetMap: GuideProbe ==>> SPTarget, posAngle: Angle) extends AutomaticGroup {
     override def toManualGroup: ManualGroup =
       ManualGroup("", targetMap.map(t => OptsList.focused(t)))
   }
@@ -118,25 +119,25 @@ object AutomaticGroup {
     override def cloneTargets(a: AutomaticGroup): AutomaticGroup =
       a match {
         case Initial | Disabled => a
-        case Active(ts)         => AutomaticGroup.Active(ts.map(_.clone()))
+        case Active(ts, pa)     => Active(ts.map(_.clone()), pa)
       }
 
     override def containsTarget(a: AutomaticGroup, t: SPTarget): Boolean =
       a match {
         case Initial | Disabled  => false
-        case Active(ts)          => ts.any { _ == t }
+        case Active(ts, _)       => ts.any { _ == t }
       }
 
     override def removeTarget(a: AutomaticGroup, t: SPTarget): AutomaticGroup =
       a match {
-        case Active(m) => Active(m.filter(_ != t))
-        case _         => a
+        case Active(m, pa) => Active(m.filter(_ != t), pa)
+        case _             => a
       }
 
     override def targets(a: AutomaticGroup): GuideProbe ==>> NonEmptyList[SPTarget] =
       a match {
         case Initial | Disabled => ==>>.empty
-        case Active(m)          => m.map(_.wrapNel)
+        case Active(m, _)       => m.map(_.wrapNel)
       }
   }
 

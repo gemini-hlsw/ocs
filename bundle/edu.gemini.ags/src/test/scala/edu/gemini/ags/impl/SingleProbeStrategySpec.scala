@@ -42,11 +42,6 @@ import Scalaz._
 class SingleProbeStrategySpec extends Specification with NoTimeConversions {
   private val magTable = ProbeLimitsTable.loadOrThrow()
 
-  private def applySelection(ctx: ObsContext, sel: AgsStrategy.Selection): ObsContext = {
-    // Make a new TargetEnvironment with the guide probe assignments.
-    sel.applyTo(ctx.getTargets) |> {ctx.withTargets} |> {_.withPositionAngle(sel.posAngle.toOldModel)}
-  }
-
   def offset(p: Int, q: Int): SkycalcOffset =
     new SkycalcOffset(SkycalcAngle.arcsecs(p), SkycalcAngle.arcsecs(q))
 
@@ -464,7 +459,7 @@ class SingleProbeStrategySpec extends Specification with NoTimeConversions {
     val guideStar = selection.flatMap(_.assignments.headOption.map(_.guideStar))
     guideStar.map(_.name) should beSome(expectedName)
     // Add GS to targets
-    val newCtx = selection.map(applySelection(ctx, _))
+    val newCtx = selection.map(_.applyTo(ctx))
     val analyzedSelection = ~newCtx.map(strategy.analyze(_, magTable))
     analyzedSelection should be size 1
     analyzedSelection.headOption.map(_.quality) should beSome(quality)

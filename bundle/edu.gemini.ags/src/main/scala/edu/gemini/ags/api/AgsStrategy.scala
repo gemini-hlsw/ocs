@@ -90,7 +90,7 @@ object AgsStrategy {
     def applyTo(env: TargetEnvironment): TargetEnvironment = {
       val targetMap = ==>>.fromList(assignments.map { case Assignment(gp,gs) =>
         gp -> new SPTarget(HmsDegTarget.fromSkyObject(gs.toOldModel))})
-      val newAuto: AutomaticGroup = AutomaticGroup.Active(targetMap)
+      val newAuto: AutomaticGroup = AutomaticGroup.Active(targetMap, posAngle)
 
       // If this is different from the old automatic GG, then replace.
       val oldGuideEnvironment = env.getGuideEnvironment
@@ -105,6 +105,15 @@ object AgsStrategy {
         env.setGuideEnvironment(newGuideEnvironment)
       } else {
         env
+      }
+    }
+
+    def applyTo(ctx: ObsContext): ObsContext = {
+      // Make a new TargetEnvironment with the guide probe assignments.  Update
+      // the position angle as well if the automatic group is primary.
+      applyTo(ctx.getTargets) |> ctx.withTargets |> { ctx0 =>
+        val auto = ctx0.getTargets.getGuideEnvironment.guideEnv.primaryGroup.isAutomatic
+        auto ? ctx0.withPositionAngle(posAngle.toOldModel) | ctx0
       }
     }
   }

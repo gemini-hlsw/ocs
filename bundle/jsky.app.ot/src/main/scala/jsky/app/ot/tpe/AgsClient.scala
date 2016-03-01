@@ -234,12 +234,14 @@ class AgsClient(ctx: TpeContext) extends Dialog {
       ctx.targets.commit()
 
       // Update the position angle, if necessary.
-      ctx.instrument.dataObject.foreach { inst =>
-        val deg = sel.posAngle.toDegrees
-        val old = inst.getPosAngleDegrees
-        if (deg != old) {
-          inst.setPosAngleDegrees(deg)
-          ctx.instrument.commit()
+      if (newEnv.getGuideEnvironment.guideEnv.primaryGroup.isAutomatic) {
+        ctx.instrument.dataObject.foreach { inst =>
+          val deg = sel.posAngle.toDegrees
+          val old = inst.getPosAngleDegrees
+          if (deg != old) {
+            inst.setPosAngleDegrees(deg)
+            ctx.instrument.commit()
+          }
         }
       }
     }

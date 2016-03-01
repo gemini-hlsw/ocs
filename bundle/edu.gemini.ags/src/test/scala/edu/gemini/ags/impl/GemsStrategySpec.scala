@@ -37,11 +37,6 @@ case class TestGemsStrategy(file: String) extends GemsStrategy {
 
 class GemsStrategySpec extends Specification with NoTimeConversions {
 
-  private def applySelection(ctx: ObsContext, sel: AgsStrategy.Selection): ObsContext = {
-    // Make a new TargetEnvironment with the guide probe assignments.
-    sel.applyTo(ctx.getTargets) |> {ctx.withTargets} |> {_.withPositionAngle(sel.posAngle.toOldModel)}
-  }
-
   "GemsStrategy" should {
     "support estimate" in {
       val ra = Angle.fromHMS(3, 19, 48.2341).getOrElse(Angle.zero)
@@ -123,7 +118,7 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
       (mag3 < mag2) should beTrue
 
       // Analyze as a whole
-      val newCtx = selection.map(applySelection(ctx, _)).getOrElse(ctx)
+      val newCtx = selection.map(_.applyTo(ctx)).getOrElse(ctx)
       val analysis = gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow())
       analysis.collect {
         case AgsAnalysis.Usable(Canopus.Wfs.cwfs2, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq, _) if st.some == cwfs2                         => Canopus.Wfs.cwfs2
@@ -197,7 +192,7 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
       (mag3 < mag1 && mag2 < mag1) should beTrue
 
       // Analyze as a whole
-      val newCtx = selection.map(applySelection(ctx, _)).getOrElse(ctx)
+      val newCtx = selection.map(_.applyTo(ctx)).getOrElse(ctx)
       val analysis = gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow())
       analysis.collect {
         case AgsAnalysis.Usable(Canopus.Wfs.cwfs1, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq, _) if st.some == cwfs1                         => Canopus.Wfs.cwfs1
@@ -262,7 +257,7 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
       val odgw2x = Coordinates(RightAscension.fromAngle(Angle.fromHMS(5, 35, 23.887).getOrElse(Angle.zero)), Declination.fromAngle(Angle.zero - Angle.fromDMS(69, 16, 18.20).getOrElse(Angle.zero)).getOrElse(Declination.zero))
       odgw2.map(_.coordinates ~= odgw2x) should beSome(true)
 
-      val newCtx = selection.map(applySelection(ctx, _)).getOrElse(ctx)
+      val newCtx = selection.map(_.applyTo(ctx)).getOrElse(ctx)
       // Analyze as a whole
       val analysis = gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow())
       analysis.collect {
@@ -338,7 +333,7 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
       (mag3 < mag1 && mag2 < mag1) should beTrue
 
       // Analyze as a whole
-      val newCtx = selection.map(applySelection(ctx, _)).getOrElse(ctx)
+      val newCtx = selection.map(_.applyTo(ctx)).getOrElse(ctx)
       val analysis = gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow())
       analysis.collect {
         case AgsAnalysis.Usable(Canopus.Wfs.cwfs1, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq, _) if st.some == cwfs1 => Canopus.Wfs.cwfs1
@@ -414,7 +409,7 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
       (mag3 < mag1 && mag2 < mag1) should beTrue
 
       // Analyze as a whole
-      val newCtx = selection.map(applySelection(ctx, _)).getOrElse(ctx)
+      val newCtx = selection.map(_.applyTo(ctx)).getOrElse(ctx)
       val analysis = gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow())
       analysis.collect {
         case AgsAnalysis.Usable(Canopus.Wfs.cwfs1, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq, _) if st.some == cwfs1 => Canopus.Wfs.cwfs1
@@ -479,7 +474,7 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
       val odgw4x = Coordinates(RightAscension.fromAngle(Angle.fromHMS(12, 38, 50.005).getOrElse(Angle.zero)), Declination.fromAngle(Angle.zero - Angle.fromDMS(49, 48, 00.89).getOrElse(Angle.zero)).getOrElse(Declination.zero))
       odgw4.map(_.coordinates ~= odgw4x) should beSome(true)
 
-      val newCtx = selection.map(applySelection(ctx, _)).getOrElse(ctx)
+      val newCtx = selection.map(_.applyTo(ctx)).getOrElse(ctx)
       // Analyze all the probes at once
       gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow()).collect {
         case AgsAnalysis.Usable(Canopus.Wfs.cwfs1, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq, _) if st.some == cwfs1                         => Canopus.Wfs.cwfs1
@@ -543,7 +538,7 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
       val odgw4x = Coordinates(RightAscension.fromAngle(Angle.fromHMS(12, 38, 50.005).getOrElse(Angle.zero)), Declination.fromAngle(Angle.zero - Angle.fromDMS(49, 48, 00.89).getOrElse(Angle.zero)).getOrElse(Declination.zero))
       odgw4.map(_.coordinates ~= odgw4x) should beSome(true)
 
-      val newCtx = selection.map(applySelection(ctx, _)).getOrElse(ctx)
+      val newCtx = selection.map(_.applyTo(ctx)).getOrElse(ctx)
       // Analyze all the probes at once
       gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow()).collect {
         case AgsAnalysis.Usable(Canopus.Wfs.cwfs1, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq, _) if st.some == cwfs1                         => Canopus.Wfs.cwfs1
