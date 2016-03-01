@@ -3,12 +3,14 @@ package jsky.app.ot.gemini.editor.targetComponent;
 import edu.gemini.ags.api.*;
 import edu.gemini.pot.ModelConverters;
 import edu.gemini.pot.sp.ISPObsComponent;
+import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.util.immutable.*;
+import edu.gemini.spModel.core.Angle;
 import edu.gemini.spModel.core.Coordinates;
 import edu.gemini.spModel.guide.*;
-import edu.gemini.spModel.obs.SchedulingBlock;
 import edu.gemini.spModel.obs.context.ObsContext;
+import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.TelescopePosWatcher;
 import edu.gemini.spModel.target.WatchablePos;
@@ -18,6 +20,7 @@ import edu.gemini.spModel.target.obsComp.TargetSelection;
 import edu.gemini.spModel.target.offset.OffsetPosBase;
 import edu.gemini.spModel.target.offset.OffsetPosList;
 import edu.gemini.spModel.target.offset.OffsetUtil;
+import edu.gemini.spModel.util.SPTreeUtil;
 import jsky.app.ot.OT;
 import jsky.app.ot.OTOptions;
 import jsky.app.ot.util.Resources;
@@ -287,7 +290,7 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
 
             // Add the base position first.
             final SPTarget base = env.getBase();
-            final Option<Long> when = ctx.flatMap(c -> c.getSchedulingBlockStart());
+            final Option<Long> when = ctx.flatMap(ObsContext::getSchedulingBlockStart);
             final Option<Coordinates> baseCoords = getCoordinates(base, when);
             tmpRows.add(new BaseTargetRow(base, when));
 
@@ -747,17 +750,43 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
             if (!autoGroup)
                 PrimaryTargetToggle.instance.toggle(_dataObject, targetOpt.getValue());
         } else {
-            final Option<IndexedGuideGroup> iggOpt = getSelectedGroup();
-            iggOpt.foreach(igg -> {
+            getSelectedGroup().foreach(igg -> {
                 final TargetEnvironment env = _dataObject.getTargetEnvironment();
-                final GuideGroup primary    = env.getOrCreatePrimaryGuideGroup();
+                final GuideGroup primary = env.getOrCreatePrimaryGuideGroup();
                 if (primary != igg.group() && confirmGroupChange(primary, igg.group())) {
                     final GuideEnvironment ge = env.getGuideEnvironment();
                     if (ge != null) {
                         _dataObject.setTargetEnvironment(env.setGuideEnvironment(ge.setPrimaryIndex(igg.index())));
+
+                        // If we are switching to an automatic group, we also
+                        // possibly need to update the position angle.
+                        final GuideGrp grp = igg.group().grp();
+                        if (grp instanceof AutomaticGroup.Active) {
+                            updatePosAngle(((AutomaticGroup.Active) grp).posAngle());
+                        }
                     }
                 }
             });
+        }
+    }
+
+    // Finds the instrument component in the observation that houses the
+    // target component being edited and then sets its position angle to the
+    // given value.  This is done in response to making the automatic guide
+    // group primary.
+    private void updatePosAngle(Angle posAngle) {
+        final ISPObservation obs = _obsComp.getContextObservation();
+        if (obs != null) {
+            final ISPObsComponent oc = SPTreeUtil.findInstrument(obs);
+            if (oc != null) {
+                final SPInstObsComp inst = (SPInstObsComp) oc.getDataObject();
+                final double oldPosAngle = inst.getPosAngleDegrees();
+                final double newPosAngle = posAngle.toDegrees();
+                if (oldPosAngle != newPosAngle) {
+                    inst.setPosAngleDegrees(newPosAngle);
+                    oc.setDataObject(inst);
+                }
+            }
         }
     }
 
