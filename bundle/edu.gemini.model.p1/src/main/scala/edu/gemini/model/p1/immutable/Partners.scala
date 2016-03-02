@@ -2,6 +2,8 @@ package edu.gemini.model.p1.immutable
 
 import java.util.Locale
 
+import scalaz.{-\/, \/, \/-}
+
 object Partners {
 
   val name = Map[Any, String](
@@ -22,12 +24,18 @@ object Partners {
   // REL-2248 Contains a list of partners that are not allowed on joint proposals
   val jointProposalNotAllowed = List[NgoPartner](NgoPartner.KR, NgoPartner.AU)
 
-  val ftPartners:Seq[(Option[NgoPartner], String)] = {
-    (None -> "None") :: NgoPartner.values.toList.map(p => Some(p) -> Partners.name.getOrElse(p, ""))
+  // REL-2670 A partner for FT can be either Ngo or Exchange
+  type FtPartner = Option[NgoPartner \/ ExchangePartner]
+
+  val NoPartnerAffiliation = "None"
+
+  val ftPartners:Seq[(FtPartner, String)] = {
+    (None -> NoPartnerAffiliation) :: (NgoPartner.values.toList.map(p => Option(-\/(p)) -> Partners.name.getOrElse(p, "")) ::: List(Option(\/-(ExchangePartner.SUBARU)) -> "Japan")).sortBy(_._2)
   }
 
-  def toPartner(name: String): Option[NgoPartner] = Partners.name.find(_._2 == name).collect {
-    case (p: NgoPartner, _) => p
+  def toPartner(name: String): FtPartner = ftPartners.find(_._2 == name).collect {
+    case (Some(-\/(p)), _)      => -\/(p)
+    case (Some(\/-(e)), _) => \/-(e)
   }
 
   def forLocale(loc:Locale):Option[Either[NgoPartner, ExchangePartner]] = loc match {

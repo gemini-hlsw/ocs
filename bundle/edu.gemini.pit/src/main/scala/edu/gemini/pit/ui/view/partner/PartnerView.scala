@@ -3,19 +3,23 @@ package edu.gemini.pit.ui.view.partner
 import edu.gemini.pit.model.Model
 import edu.gemini.pit.ui.util.gface.SimpleListViewer
 import edu.gemini.shared.gui.textComponent.TextRenderer
+
 import swing.BorderPanel.Position._
 import swing.event.SelectionChanged
 import swing._
 import Swing._
 import scalaz._
 import Scalaz._
-import edu.gemini.pit.ui.editor.{Institutions, LargeSubmissionRequestEditor, VisitorSelector, SubmissionRequestEditor}
+import edu.gemini.pit.ui.editor.{Institutions, LargeSubmissionRequestEditor, SubmissionRequestEditor, VisitorSelector}
 import edu.gemini.model.p1.immutable._
 import java.awt.Color
+
 import edu.gemini.pit.ui.util._
 import edu.gemini.pit.ui.binding._
-import javax.swing.{JLabel, BorderFactory, JComboBox}
-import javax.swing.{DefaultComboBoxModel, ComboBoxModel}
+import javax.swing.{BorderFactory, JComboBox, JLabel}
+import javax.swing.{ComboBoxModel, DefaultComboBoxModel}
+
+import edu.gemini.model.p1.immutable.Partners.FtPartner
 
 // This is the proposal class editor, and it's actually kind of involved.
 class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
@@ -714,9 +718,9 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
         val piPartner = Institutions.institution2Ngo(pi.address.institution, pi.address.country)
         pi.address match {
           case a if piPartner.isDefined && previousAffiliation.isEmpty =>
-            selection.item = Partners.ftPartners.toMap.getOrElse(piPartner, "None")
+            selection.item = Partners.ftPartners.toMap.getOrElse(piPartner, Partners.NoPartnerAffiliation)
           case a if currentAffiliation != piPartner =>
-            selection.item = Partners.ftPartners.toMap.getOrElse(currentAffiliation, "None")
+            selection.item = Partners.ftPartners.toMap.getOrElse(currentAffiliation, Partners.NoPartnerAffiliation)
           case _ =>
         }
       }
@@ -728,16 +732,16 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
               case _                            => None
             }
           val selected = Partners.toPartner(selection.item)
-          if (currentAffiliation != Partners.toPartner(selection.item)) {
-            selection.item = Partners.ftPartners.toMap.getOrElse(selected, "None")
+          if (currentAffiliation =/= Partners.toPartner(selection.item)) {
+            selection.item = Partners.ftPartners.toMap.getOrElse(selected, Partners.NoPartnerAffiliation)
             updateP1Model(selected)
           }
       }
 
-      def updateP1Model(partner: Option[NgoPartner]) {
+      def updateP1Model(partner: FtPartner) {
         model.foreach {p => p.proposalClass match {
           case f: FastTurnaroundProgramClass =>
-            val pc = FastTurnaroundProgramClass.partnerAffiliation.set(f, partner)
+            val pc = FastTurnaroundProgramClass.affiliation.set(f, partner)
             model = Some(pcLens.set(p, pc))
           case _ => // ignore
         }}
