@@ -713,8 +713,6 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
         val pi = currentPi(m)
         val piPartner = Institutions.institution2Ngo(pi.address.institution, pi.address.country)
         pi.address match {
-          case InstitutionAddress("", "", "") =>
-            selection.item = "None"
           case a if piPartner.isDefined && previousAffiliation.isEmpty =>
             selection.item = Partners.ftPartners.toMap.getOrElse(piPartner, "None")
           case a if currentAffiliation != piPartner =>
