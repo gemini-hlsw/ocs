@@ -292,7 +292,7 @@ class ShellAdvisor(
 
   // This is called when the user closes the window or selects Quit. If there's a model, we want to
   // invoke the Close method.
-  def close(context: RichShellContext[Model]): Boolean = try {
+  def close(context: RichShellContext[Model]): Boolean = {
 
     def confirmClose(frame: JFrame) = showConfirmDialog(frame,
       "There are unsaved changes.\nDo you wish to save first?",
