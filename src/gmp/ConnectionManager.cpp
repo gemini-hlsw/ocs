@@ -60,7 +60,7 @@ void ConnectionManager::startup() throw (GmpException) {
         "?wireFormat=openwire"
 //        "&transport.useInactivityMonitor=false"
 //        "&connection.alwaysSyncSend=true"
-//        "&connection.useAsyncSend=true"
+        "&connection.useAsyncSend=true"
 //        "&transport.commandTracingEnabled=true"
 //        "&transport.tcpTracingEnabled=true"
 //        "&wireFormat.tightEncodingEnabled=true"

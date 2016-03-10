@@ -20,6 +20,8 @@ JmsStatusSender::JmsStatusSender() throw (CommunicationException) {
 
 		//Instantiate the message producer
 		_producer = pMessageProducer(_session->createProducer(NULL));
+                _producer->setDeliveryMode(DeliveryMode::NON_PERSISTENT);
+                _producer->setTimeToLive(10 * 1000);
 	} catch (CMSException& e) {
 		//clean any resources that might have been allocated
 		cleanup();

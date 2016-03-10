@@ -1,5 +1,9 @@
 Release Notes - Gemini Instrument Application Programmer Interface 
 
+Version Release 15 : Performance improvements
+** Improvements
+    * [REL-2276] - Memory limit reached on the GMP
+
 Version Release 14 : New Epics Service Interface
 ** New Feature
     * [GIAPI-1035] - Add method getChannel to retrieve an EPICS channel
@@ -147,5 +151,4 @@ Version Release 1: GIAPI Logging C++. February 29, 2008
   * [GIAPI-35] - Add postObservationEvent to Logging C++ Language Glue
   * [GIAPI-36] - Add postAncillaryFileEvent to Logging C++ Language Glue
   * [GIAPI-37] - Add postIntermediateFileEvent to Logging C++ Language Glue
-  
-  
+
