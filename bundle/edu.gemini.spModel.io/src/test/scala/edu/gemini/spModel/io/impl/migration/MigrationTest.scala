@@ -12,7 +12,7 @@ import org.junit.Assert._
  */
 trait MigrationTest {
 
-  protected def withTestOdb(block: IDBDatabaseService => Unit): Unit = {
+  protected def withTestOdb[A](block: IDBDatabaseService => A): A = {
     val odb = DBLocalDatabase.createTransient()
     try {
       block(odb)
@@ -21,12 +21,15 @@ trait MigrationTest {
     }
   }
 
-  protected def withTestProgram(programName: String, block: (IDBDatabaseService, ISPProgram) => Unit): Unit = withTestOdb { odb =>
+  protected def withTestProgram[A](programName: String, block: (IDBDatabaseService, ISPProgram) => A): A = withTestOdb { odb =>
     val parser = new PioSpXmlParser(odb.getFactory)
     parser.parseDocument(new InputStreamReader(getClass.getResourceAsStream(programName))) match {
       case p: ISPProgram => block(odb, p)
-      case _             => fail("Expecting a science program")
+      case _             => sys.error("Expecting a science program")
     }
   }
+
+  protected def withTestProgram2[A](programName: String)(block: ISPProgram => A): A =
+    withTestProgram(programName, (_, p) => block(p))
 
 }

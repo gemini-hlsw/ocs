@@ -1,14 +1,20 @@
-package edu.gemini.spModel.io.impl.migration.to2016B
+package edu.gemini.spModel.io.impl.migration
+package to2016B
 
 import edu.gemini.pot.sp.SPComponentType
+import edu.gemini.spModel.core.Semester
+import edu.gemini.spModel.gemini.obscomp.SPProgram
 import edu.gemini.spModel.io.impl.migration.Migration
 import edu.gemini.spModel.io.impl.migration.PioSyntax._
+import edu.gemini.spModel.obs.SPObservation
 import edu.gemini.spModel.pio.xml.PioXmlFactory
 import edu.gemini.spModel.pio.{Pio, ParamSet, Document, Version}
+import edu.gemini.spModel.target.SPTargetPio
 import edu.gemini.spModel.target.env.GuideGroup
 
 import scala.collection.JavaConverters._
 
+import PioSyntax._
 import scalaz._
 import Scalaz._
 
@@ -16,18 +22,10 @@ object To2016B extends Migration {
   val version = Version.`match`("2016B-1")
 
   val conversions: List[Document => Unit] = List(
-    updateGuideEnvironment
+    updateGuideEnvironment, updateSchedulingBlocks, updateTargets // order matters!
   )
 
   val fact = new PioXmlFactory
-
-  def updateTargets(d: Document): Unit = {
-    // TODO
-  }
-
-  def updateSchedulingBlocks(d: Document): Unit = {
-    // TODO
-  }
 
   private def updateGuideEnvironment(d: Document): Unit = {
 
@@ -76,4 +74,25 @@ object To2016B extends Migration {
       Option(paramSet.getParamSet("guideEnv")).fold(addEmptyGuideEnv(paramSet))(addDisabledAutomaticGroup)
     }
   }
+
+  // Add a scheduling block to nonsidereal observations that don't have one. A duration of 0ms means
+  // that the planned time will be used by internal calculations, which is a reasonable default.
+  def updateSchedulingBlocks(d: Document): Unit =
+    for {
+      (o, b) <- obsAndBases(d) if o.value("schedulingBlockStart").isEmpty
+      date   <- b.value("validAt").map(SPTargetPio.parseDate)
+    } {
+      Pio.addLongParam(fact, o, "schedulingBlockStart", date.getTime)
+      Pio.addLongParam(fact, o, "schedulingBlockDuration", 0L)
+    }
+
+  // Update targets to the new model
+  def updateTargets(d: Document): Unit =
+    allTargets(d).foreach { t =>
+      // TODO
+    }
+
 }
+
+
+
