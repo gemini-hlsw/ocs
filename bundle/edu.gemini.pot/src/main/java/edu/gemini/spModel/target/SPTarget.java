@@ -72,7 +72,9 @@ public final class SPTarget extends TransitionalSPTarget {
 
     /** Clone this SPTarget. */
     public SPTarget clone() {
-        return new SPTarget(_target.clone());
+        final SPTarget t = new SPTarget(_target.clone());
+        t.setNewTarget(_newTarget);
+        return t;
     }
 
     // for testing only; this will go away
@@ -87,6 +89,5 @@ public final class SPTarget extends TransitionalSPTarget {
         _newTarget = target;
         _notifyOfUpdate();
     }
-
 
 }

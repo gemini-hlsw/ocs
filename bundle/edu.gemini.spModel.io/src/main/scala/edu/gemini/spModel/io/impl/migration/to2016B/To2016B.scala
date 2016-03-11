@@ -2,14 +2,11 @@ package edu.gemini.spModel.io.impl.migration
 package to2016B
 
 import edu.gemini.pot.sp.SPComponentType
-import edu.gemini.spModel.core.Semester
-import edu.gemini.spModel.gemini.obscomp.SPProgram
-import edu.gemini.spModel.io.impl.migration.Migration
-import edu.gemini.spModel.io.impl.migration.PioSyntax._
-import edu.gemini.spModel.obs.SPObservation
+import edu.gemini.spModel.core._
+
 import edu.gemini.spModel.pio.xml.PioXmlFactory
 import edu.gemini.spModel.pio.{Pio, ParamSet, Document, Version}
-import edu.gemini.spModel.target.SPTargetPio
+import edu.gemini.spModel.target.{TargetParamSetCodecs, SPTargetPio, SourcePio}
 import edu.gemini.spModel.target.env.GuideGroup
 
 import scala.collection.JavaConverters._
@@ -19,7 +16,15 @@ import scalaz._
 import Scalaz._
 
 object To2016B extends Migration {
+
   val version = Version.`match`("2016B-1")
+  val R0 = RightAscension.zero
+  val D0 = Declination.zero
+
+  implicit class MoreLensOps[A, B](lens: A @> B) {
+    def ?:=(op: Option[B]): State[A, B] =
+      op.fold(lens.mods(identity))(lens.assign(_))
+  }
 
   val conversions: List[Document => Unit] = List(
     updateGuideEnvironment, updateSchedulingBlocks, updateTargets // order matters!
@@ -89,8 +94,68 @@ object To2016B extends Migration {
   // Update targets to the new model
   def updateTargets(d: Document): Unit =
     allTargets(d).foreach { t =>
-      // TODO
+
+      // In order to determine the target type we need the system as well as the coordinates
+      // because a TOO target is encoded as a sidereal target at the origin.
+      val data: Option[(String, Coordinates)] =
+        for {
+          system <- t.value("system")
+          ra     <- t.value("c1").flatMap(Angle.parseHMS(_).toOption).map(RightAscension.fromAngle)
+          dec    <- t.value("c2").flatMap(Angle.parseDMS(_).toOption).flatMap(Declination.fromAngle)
+        } yield (system, Coordinates(ra, dec))
+
+      // Construct a new target
+      val newTarget: Target =
+        data.map {
+          case ("J2000", Coordinates.zero) => TooTarget.empty
+          case ("J2000",               cs) => sidereal(t, cs).exec(SiderealTarget.empty)
+          case ("JPL minor body",      cs) => NonSiderealTarget.empty
+          case ("MPC minor planet",    cs) => NonSiderealTarget.empty
+          case ("Solar system object", cs) => NonSiderealTarget.empty
+        }.map(common(t).exec) getOrElse sys.error("cannot determine target type!") // TODO: more info
+
+      // Drop it into the paramset.
+      // TODO: remove everything else!
+      t.addParamSet(TargetParamSetCodecs.TargetParamSetCodec.encode("target", newTarget))
+
     }
+
+  def common(ps: ParamSet): State[Target, Unit] =
+    for {
+      _ <- Target.name                ?:= ps.value("name")
+      _ <- Target.spatialProfile       := SourcePio.profileFromParamSet(ps)
+      _ <- Target.spectralDistribution := SourcePio.distributionFromParamSet(ps)
+    // todo: mags
+    } yield ()
+
+  // Read a sidereal target.
+  def sidereal(ps: ParamSet, cs: Coordinates): State[SiderealTarget, Unit] =
+    for {
+      _ <- SiderealTarget.coordinates   := cs
+      _ <- SiderealTarget.properMotion  := Some(pm(ps).exec(ProperMotion.zero)).filterNot(_ == ProperMotion.zero)
+      _ <- SiderealTarget.redshift     ?:= ps.double("rv").map(Redshift.fromRadialVelocityJava).map(Some(_))
+      _ <- SiderealTarget.redshift     ?:= ps.double("z").map(Redshift(_)).map(Some(_))
+      _ <- SiderealTarget.parallax      := ps.double("parallax").map(Parallax(_))
+    } yield ()
+
+  // Read proper motion
+  def pm(ps: ParamSet): State[ProperMotion, Unit] =
+    for {
+      _ <- ProperMotion.epoch    ?:= ps.double("epoch").map(Epoch(_))
+      _ <- ProperMotion.deltaRA  ?:= ps.double("pm1").map(AngularVelocity(_)).map(RightAscensionAngularVelocity(_))
+      _ <- ProperMotion.deltaDec ?:= ps.double("pm2").map(AngularVelocity(_)).map(DeclinationAngularVelocity(_))
+    } yield ()
+
+//  // Add magnitude information to the target.
+//  final ParamSet magCollectionPset = paramSet.getParamSet(MagnitudePio.MAG_LIST);
+//  if (magCollectionPset != null) {
+//    try {
+//      spt.setMagnitudes(MagnitudePio.instance.toList(magCollectionPset));
+//    } catch (final ParseException ex) {
+//      LOGGER.log(Level.WARNING, "Could not parse target magnitudes", ex);
+//    }
+//  }
+//
 
 }
 

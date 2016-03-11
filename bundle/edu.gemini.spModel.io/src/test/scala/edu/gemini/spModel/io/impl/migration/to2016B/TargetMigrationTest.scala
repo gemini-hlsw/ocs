@@ -1,7 +1,7 @@
 package edu.gemini.spModel.io.impl.migration.to2016B
 
 import edu.gemini.pot.sp.{SPComponentType, ISPProgram}
-import edu.gemini.spModel.core.Target
+import edu.gemini.spModel.core.{TooTarget, Target}
 import edu.gemini.spModel.io.impl.migration.MigrationTest
 import edu.gemini.spModel.obs.{SchedulingBlock, SPObservation}
 import edu.gemini.spModel.target.SPTarget
@@ -16,7 +16,7 @@ class TargetMigrationTest extends Specification with MigrationTest {
 
     def findBaseByObsTitle(title: String): Option[Target] =
       for {
-        isp <- p.allObservations.filter(_.title == title).headOption
+        isp <- p.allObservations.find(_.title == title)
         x   <- isp.findObsComponentByType(SPComponentType.TELESCOPE_TARGETENV)
         spt <- x.dataObject.map(_.asInstanceOf[TargetObsComp].getBase)
       } yield spt.getNewTarget
@@ -46,8 +46,7 @@ class TargetMigrationTest extends Specification with MigrationTest {
     }
 
     "Migrate TOO Targets" in withTestProgram2("targetMigration.xml") { p =>
-      p.findBaseByObsTitle("too") must beSome
-      failure("not implemented")
+      p.findBaseByObsTitle("too") must_== Some(TooTarget("bob"))
     }
 
   }
