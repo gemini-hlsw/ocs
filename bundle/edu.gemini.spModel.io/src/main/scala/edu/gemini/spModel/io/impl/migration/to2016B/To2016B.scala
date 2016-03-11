@@ -3,6 +3,7 @@ package to2016B
 
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.spModel.core._
+import edu.gemini.spModel.pio.codec.ParamSetCodec
 
 import edu.gemini.spModel.pio.xml.PioXmlFactory
 import edu.gemini.spModel.pio.{Pio, ParamSet, Document, Version}
@@ -120,12 +121,13 @@ object To2016B extends Migration {
 
     }
 
+  // Properties common to all target types
   def common(ps: ParamSet): State[Target, Unit] =
     for {
       _ <- Target.name                ?:= ps.value("name")
       _ <- Target.spatialProfile       := SourcePio.profileFromParamSet(ps)
       _ <- Target.spectralDistribution := SourcePio.distributionFromParamSet(ps)
-    // todo: mags
+      _ <- Target.magnitudes           := magnitudeList(ps)
     } yield ()
 
   // Read a sidereal target.
@@ -146,16 +148,22 @@ object To2016B extends Migration {
       _ <- ProperMotion.deltaDec ?:= ps.double("pm2").map(AngularVelocity(_)).map(DeclinationAngularVelocity(_))
     } yield ()
 
-//  // Add magnitude information to the target.
-//  final ParamSet magCollectionPset = paramSet.getParamSet(MagnitudePio.MAG_LIST);
-//  if (magCollectionPset != null) {
-//    try {
-//      spt.setMagnitudes(MagnitudePio.instance.toList(magCollectionPset));
-//    } catch (final ParseException ex) {
-//      LOGGER.log(Level.WARNING, "Could not parse target magnitudes", ex);
-//    }
-//  }
-//
+  // Read magnitude list, given a target paramset
+  def magnitudeList(ps: ParamSet): List[Magnitude] =
+    for {
+      ml <- Option(ps.getParamSet("magnitudeList")).toList
+      m  <- ml.getParamSets("magnitude").asScala.toList
+    } yield mag(m).exec(Magnitude(Double.NaN, MagnitudeBand.R, None, MagnitudeSystem.Vega))
+
+  // Read magnitude given a magnitude paramset
+  def mag(ps: ParamSet): State[Magnitude, Unit] =
+    for {
+      _ <- Magnitude.band   := ps.value("band").map(MagnitudeBand.unsafeFromString).get
+      _ <- Magnitude.system := ps.value("system").map(MagnitudeSystem.unsafeFromString).get
+      _ <- Magnitude.value  := ps.double("val").get
+      _ <- Magnitude.error  := ps.double("error")
+    } yield()
+
 
 }
 
