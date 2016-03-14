@@ -48,7 +48,7 @@ object PersistentVcsLog2Spec extends Specification {
 
   "compatibility" should {
 
-    "query old database with indentical result" in go {
+    "query old database with identical result" in go {
 
       // result as constructed by the old implementation
       val expected = {
@@ -65,7 +65,7 @@ object PersistentVcsLog2Spec extends Specification {
         x <- doSelectByProgram(SPProgramID.toProgramID("GN-2015B-Q-10"), 1, 3)
       } yield x must_== expected
 
-    }
+    }.pendingUntilFixed("See REL-2682")
 
   }
 
