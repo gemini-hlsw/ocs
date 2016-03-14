@@ -29,8 +29,16 @@ object Partners {
 
   val NoPartnerAffiliation = "None"
 
+  private val SubaruAffiliation = "Japan"
+
   val ftPartners:Seq[(FtPartner, String)] = {
-    (None -> NoPartnerAffiliation) :: (NgoPartner.values.toList.map(p => Option(-\/(p)) -> Partners.name.getOrElse(p, "")) ::: List(Option(\/-(ExchangePartner.SUBARU)) -> "Japan")).sortBy(_._2)
+    (None -> NoPartnerAffiliation) :: (NgoPartner.values.toList.map(p => Option(-\/(p)) -> Partners.name.getOrElse(p, "")) ::: List(Option(\/-(ExchangePartner.SUBARU)) -> SubaruAffiliation)).sortBy(_._2)
+  }
+
+  def nameOfFTPartner(fp: FtPartner): Option[String] = fp match {
+    case Some(-\/(p))                      => Partners.name.get(p)
+    case Some(\/-(ExchangePartner.SUBARU)) => Some(SubaruAffiliation)
+    case _                                 => None
   }
 
   def toPartner(name: String): FtPartner = ftPartners.find(_._2 == name).collect {

@@ -519,10 +519,10 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
         pi                                                                      <- Option(p.investigators.pi)
         piNgo                                                                   <- Option(Institutions.institution2Ngo(pi.address.institution, pi.address.country))
         f @ FastTurnaroundProgramClass(_, _, _, _, _, _, _, _, affiliateNgo, _) <- Option(p.proposalClass)
-        same <- (affiliateNgo |@| piNgo){_ == _}
-        if ~(affiliateNgo |@| piNgo){_ != _}
+        same                                                                    <- (affiliateNgo |@| piNgo){_ === _}
+        if ~(affiliateNgo |@| piNgo){_ =/= _}
       } yield new Problem(Severity.Info,
-            s"The Fast Turnaround affiliation country: '${~Partners.name.get(affiliateNgo.get)}' is different from the PI's country: '${~Partners.name.get(piNgo.get)}'.", TimeProblems.SCHEDULING_SECTION, {
+            s"The Fast Turnaround affiliation country: '${~Partners.nameOfFTPartner(affiliateNgo)}' is different from the PI's country: '${~Partners.nameOfFTPartner(piNgo)}'.", TimeProblems.SCHEDULING_SECTION, {
               s.showPartnersView()
             })
 
