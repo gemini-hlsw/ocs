@@ -1,7 +1,3 @@
-//
-// $Id: Grillo2Palote.java 46768 2012-07-16 18:58:53Z rnorris $
-//
-
 package edu.gemini.spModel.io.impl.migration.toPalote;
 
 import edu.gemini.pot.sp.*;
@@ -27,12 +23,9 @@ import edu.gemini.spModel.config.DatasetConfigService;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
-
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
-
 
 /**
  * Code to convert the Grillo model to the Palote model.
@@ -40,7 +33,7 @@ import java.util.HashMap;
 public final class Grillo2Palote {
     private static final Logger LOG = Logger.getLogger(Grillo2Palote.class.getName());
 
-    public static DatasetQaState getDatasetQaState(Container obsCont) {
+    private static DatasetQaState getDatasetQaState(Container obsCont) {
         String obsStatusStr = Pio.getValue(obsCont, "Observation/status");
         if ("QA(fail)".equals(obsStatusStr)) {
             return DatasetQaState.FAIL;
@@ -53,7 +46,7 @@ public final class Grillo2Palote {
         }
     }
 
-    public static ObsQaState getObsQaState(Container obsCont) {
+    private static ObsQaState getObsQaState(Container obsCont) {
         String obsStatusStr = Pio.getValue(obsCont, "Observation/status");
         if ("QA(fail)".equals(obsStatusStr)) {
             return ObsQaState.FAIL;
@@ -104,7 +97,7 @@ public final class Grillo2Palote {
         DatasetRecord[] records = DatasetConverter.getDatasetRecords(obsId, obsCont, qa);
 
         // Convert the old history list to new ObsExecEvents.
-        List evts = EventConverter.getEventList(obsId, records, obsCont);
+        List<ObsExecEvent> evts = EventConverter.getEventList(obsId, records, obsCont);
 
         // Now, if there are no datasets and there are no events, then do
         // nothing.
@@ -128,17 +121,16 @@ public final class Grillo2Palote {
         obsDo.setOverrideQaState(true);
 
         // Hash the records by label.
-        final Map<DatasetLabel, DatasetRecord> recMap = new HashMap<DatasetLabel, DatasetRecord>();
-        for (int i=0; i<records.length; ++i) {
-            recMap.put(records[i].label(), records[i]);
+        final Map<DatasetLabel, DatasetRecord> recMap = new HashMap<>();
+        for (DatasetRecord record : records) {
+            recMap.put(record.label(), record);
         }
 
         // Go through the old history list, adding corresponding new
         // ObsExecEvents.
         final ObsExecRecord obsRec = execLogDo.getRecord();
         long lastTime = 0;
-        for (Iterator it=evts.iterator(); it.hasNext(); ) {
-            ObsExecEvent evt = (ObsExecEvent) it.next();
+        for (ObsExecEvent evt : evts) {
             long time = evt.getTimestamp();
 
             // If we guess that a visit ended, inject a start visit event.

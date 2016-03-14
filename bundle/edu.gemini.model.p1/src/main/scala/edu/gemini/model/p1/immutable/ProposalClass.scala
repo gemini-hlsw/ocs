@@ -323,11 +323,13 @@ case class FastTurnaroundProgramClass(itac                       :Option[Itac],
     partnerAffiliation match {
       case Some(-\/(p)) =>
         m.setPartnerAffiliation(p)
+        m.setExchangeAffiliation(null)
       case Some(\/-(e)) =>
+        m.setPartnerAffiliation(null)
         m.setExchangeAffiliation(e)
       case _            =>
-        m.setExchangeAffiliation(null)
         m.setPartnerAffiliation(null)
+        m.setExchangeAffiliation(null)
     }
     m
   }

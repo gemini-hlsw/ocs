@@ -57,7 +57,7 @@ trait NiriBase extends GroupInitializer[SpNiriBlueprint] with TemplateDsl with A
   }
 
   // DSL Setters
-  def setFilter = Setter[Filter](error("None"))(_.setFilter(_))
+  def setFilter = Setter[Filter](sys.error("None"))(_.setFilter(_))
   def setFilters = Setter(blueprint.filters.asScala)(_.setFilters(_))
   def setAltair = AltairSetter(blueprint.altair)
 

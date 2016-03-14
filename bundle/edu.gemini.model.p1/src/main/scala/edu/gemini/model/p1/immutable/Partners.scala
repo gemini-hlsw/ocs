@@ -34,7 +34,7 @@ object Partners {
   }
 
   def toPartner(name: String): FtPartner = ftPartners.find(_._2 == name).collect {
-    case (Some(-\/(p)), _)      => -\/(p)
+    case (Some(-\/(p)), _) => -\/(p)
     case (Some(\/-(e)), _) => \/-(e)
   }
 
