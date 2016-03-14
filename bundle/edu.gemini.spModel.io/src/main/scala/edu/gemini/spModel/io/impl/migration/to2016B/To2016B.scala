@@ -2,6 +2,7 @@ package edu.gemini.spModel.io.impl.migration
 package to2016B
 
 import edu.gemini.pot.sp.SPComponentType
+import edu.gemini.spModel.core.HorizonsDesignation.MajorBody
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.pio.codec.ParamSetCodec
 
@@ -101,8 +102,8 @@ object To2016B extends Migration {
       val data: Option[(String, Coordinates)] =
         for {
           system <- t.value("system")
-          ra     <- t.value("c1").flatMap(Angle.parseHMS(_).toOption).map(RightAscension.fromAngle)
-          dec    <- t.value("c2").flatMap(Angle.parseDMS(_).toOption).flatMap(Declination.fromAngle)
+          ra     <- t.value("c1").flatMap(s => (Angle.parseHMS(s) orElse Angle.parseDegrees(s)).toOption).map(RightAscension.fromAngle)
+          dec    <- t.value("c2").flatMap(s => (Angle.parseDMS(s) orElse Angle.parseDegrees(s)).toOption).flatMap(Declination.fromAngle)
         } yield (system, Coordinates(ra, dec))
 
       // Construct a new target
@@ -110,10 +111,10 @@ object To2016B extends Migration {
         data.map {
           case ("J2000", Coordinates.zero) => TooTarget.empty
           case ("J2000",               cs) => sidereal(t, cs).exec(SiderealTarget.empty)
-          case ("JPL minor body",      cs) => NonSiderealTarget.empty
-          case ("MPC minor planet",    cs) => NonSiderealTarget.empty
-          case ("Solar system object", cs) => NonSiderealTarget.empty
-        }.map(common(t).exec) getOrElse sys.error("cannot determine target type!") // TODO: more info
+          case ("JPL minor body",      cs) => nonsidereal(t, cs).exec(NonSiderealTarget.empty)
+          case ("MPC minor planet",    cs) => nonsidereal(t, cs).exec(NonSiderealTarget.empty)
+          case ("Solar system object", cs) => (nonsidereal(t, cs) *> named(t)).exec(NonSiderealTarget.empty)
+        }.map(common(t).exec) getOrElse sys.error("Can't recognize target.")
 
       // Drop it into the paramset.
       // TODO: remove everything else!
@@ -164,6 +165,30 @@ object To2016B extends Migration {
       _ <- Magnitude.error  := ps.double("error")
     } yield()
 
+  // Named target
+  def named(ps: ParamSet): State[NonSiderealTarget, Option[HorizonsDesignation]] =
+    NonSiderealTarget.horizonsDesignation := ps.value("object").map(horizonsDesignation)
+
+  // Generic Nonsidereal
+  def nonsidereal(ps: ParamSet, cs: Coordinates): State[NonSiderealTarget, Ephemeris] =
+    NonSiderealTarget.ephemeris := ps.value("validAt")
+                                     .map(SPTargetPio.parseDate)
+                                     .map(d => IMap(d.getTime -> cs))
+                                     .getOrElse(IMap.empty)
+
+  // Horizons designation from named target
+  def horizonsDesignation(name: String): HorizonsDesignation =
+    MajorBody(name match {
+      case "MOON"    => 301
+      case "MERCURY" => 199
+      case "VENUS"   => 299
+      case "MARS"    => 499
+      case "JUPITER" => 599
+      case "SATURN"  => 699
+      case "URANUS"  => 799
+      case "NEPTUNE" => 899
+      case _         => sys.error("Unknown named target: " + name)
+    })
 
 }
 

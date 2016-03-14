@@ -58,33 +58,8 @@
               <param name="z" value="-3.69E-4"/>
               <paramset name="magnitudeList">
                 <paramset name="magnitude">
-                  <param name="band" value="U"/>
-                  <param name="val" value="12.497"/>
-                  <param name="system" value="Vega"/>
-                </paramset>
-                <paramset name="magnitude">
-                  <param name="band" value="B"/>
-                  <param name="val" value="11.24"/>
-                  <param name="system" value="Vega"/>
-                </paramset>
-                <paramset name="magnitude">
-                  <param name="band" value="V"/>
-                  <param name="val" value="9.511"/>
-                  <param name="system" value="Vega"/>
-                </paramset>
-                <paramset name="magnitude">
-                  <param name="band" value="R"/>
-                  <param name="val" value="8.298"/>
-                  <param name="system" value="Vega"/>
-                </paramset>
-                <paramset name="magnitude">
-                  <param name="band" value="I"/>
-                  <param name="val" value="6.741"/>
-                  <param name="system" value="Vega"/>
-                </paramset>
-                <paramset name="magnitude">
-                  <param name="band" value="J"/>
-                  <param name="val" value="5.244"/>
+                  <param name="band" value="K"/>
+                  <param name="val" value="4.524"/>
                   <param name="system" value="Vega"/>
                 </paramset>
                 <paramset name="magnitude">
@@ -93,8 +68,33 @@
                   <param name="system" value="Vega"/>
                 </paramset>
                 <paramset name="magnitude">
-                  <param name="band" value="K"/>
-                  <param name="val" value="4.524"/>
+                  <param name="band" value="J"/>
+                  <param name="val" value="5.244"/>
+                  <param name="system" value="Vega"/>
+                </paramset>
+                <paramset name="magnitude">
+                  <param name="band" value="I"/>
+                  <param name="val" value="6.741"/>
+                  <param name="system" value="Vega"/>
+                </paramset>
+                <paramset name="magnitude">
+                  <param name="band" value="R"/>
+                  <param name="val" value="8.298"/>
+                  <param name="system" value="Vega"/>
+                </paramset>
+                <paramset name="magnitude">
+                  <param name="band" value="V"/>
+                  <param name="val" value="9.511"/>
+                  <param name="system" value="Vega"/>
+                </paramset>
+                <paramset name="magnitude">
+                  <param name="band" value="B"/>
+                  <param name="val" value="11.24"/>
+                  <param name="system" value="Vega"/>
+                </paramset>
+                <paramset name="magnitude">
+                  <param name="band" value="U"/>
+                  <param name="val" value="12.497"/>
                   <param name="system" value="Vega"/>
                 </paramset>
               </paramset>
@@ -148,8 +148,9 @@
           <paramset name="targetEnv">
             <paramset name="base">
               <param name="name" value="Mars"/>
-              <param name="c1" value="00:00:00.000"/>
-              <param name="c2" value="00:00:00.00"/>
+              <param name="c1" value="16:03:57.960"/>
+              <param name="c2" value="-19:34:06.70"/>
+              <param name="validAt" value="3/14/16 10:27:09 PM UTC"/>
               <param name="system" value="Solar system object"/>
               <param name="object" value="MARS"/>
             </paramset>
@@ -201,19 +202,22 @@
         <paramset name="Targets" kind="dataObj">
           <paramset name="targetEnv">
             <paramset name="base">
-              <param name="name" value="jpl-minor-body"/>
-              <param name="c1" value="00:00:00.000"/>
-              <param name="c2" value="00:00:00.00"/>
+              <param name="name" value="halley"/>
+              <param name="horizons-object-id" value="900033"/>
+              <param name="horizons-object-type" value="0"/>
+              <param name="c1" value="08:21:58.410"/>
+              <param name="c2" value="01:53:33.90"/>
+              <param name="validAt" value="3/14/16 10:27:40 PM UTC"/>
               <param name="system" value="JPL minor body"/>
-              <param name="epoch" value="0.0" units="JD"/>
-              <param name="anode" value="0.0" units="degrees"/>
-              <param name="aq" value="0.0" units="au"/>
-              <param name="e" value="0.0"/>
-              <param name="inclination" value="0.0" units="degrees"/>
-              <param name="lm" value="0.0" units="degrees"/>
+              <param name="epoch" value="2449400.5" units="JD"/>
+              <param name="anode" value="58.42008097656843" units="degrees"/>
+              <param name="aq" value="0.5859781115169086" units="au"/>
+              <param name="e" value="0.9671429084623044"/>
+              <param name="inclination" value="162.2626905791606" units="degrees"/>
+              <param name="lm" value="38.384264476436" units="degrees"/>
               <param name="n" value="0.0" units="degrees/day"/>
-              <param name="perihelion" value="0.0" units="degrees"/>
-              <param name="epochOfPeri" value="0.0" units="JD"/>
+              <param name="perihelion" value="111.3324851045177" units="degrees"/>
+              <param name="epochOfPeri" value="2446467.395317051" units="JD"/>
             </paramset>
             <paramset name="guideEnv"/>
           </paramset>
@@ -263,19 +267,22 @@
         <paramset name="Targets" kind="dataObj">
           <paramset name="targetEnv">
             <paramset name="base">
-              <param name="name" value="mpc-minor-planet"/>
-              <param name="c1" value="00:00:00.000"/>
-              <param name="c2" value="00:00:00.00"/>
+              <param name="name" value="beer"/>
+              <param name="horizons-object-id" value="1896"/>
+              <param name="horizons-object-type" value="1"/>
+              <param name="c1" value="05:55:04.560"/>
+              <param name="c2" value="21:04:58.80"/>
+              <param name="validAt" value="3/14/16 10:28:05 PM UTC"/>
               <param name="system" value="MPC minor planet"/>
-              <param name="epoch" value="0.0" units="JD"/>
-              <param name="anode" value="0.0" units="degrees"/>
-              <param name="aq" value="0.0" units="au"/>
-              <param name="e" value="0.0"/>
-              <param name="inclination" value="0.0" units="degrees"/>
-              <param name="lm" value="0.0" units="degrees"/>
+              <param name="epoch" value="2455271.5" units="JD"/>
+              <param name="anode" value="182.1735572024307" units="degrees"/>
+              <param name="aq" value="2.368063037173691" units="au"/>
+              <param name="e" value="0.2215143419686845"/>
+              <param name="inclination" value="2.220418347744165" units="degrees"/>
+              <param name="lm" value="212.8061703595739" units="degrees"/>
               <param name="n" value="0.0" units="degrees/day"/>
-              <param name="perihelion" value="0.0" units="degrees"/>
-              <param name="epochOfPeri" value="0.0" units="JD"/>
+              <param name="perihelion" value="180.0542620681246" units="degrees"/>
+              <param name="epochOfPeri" value="2455815.7211546064" units="JD"/>
             </paramset>
             <paramset name="guideEnv"/>
           </paramset>
@@ -410,6 +417,7 @@
     <paramset name="node">
       <param name="key" value="87881445-2e3c-417e-9abf-a5815760e951"/>
       <param name="a2608ece-27f8-49b0-aeff-e6a0b766cb6e" value="18"/>
+      <param name="50960219-3682-4709-a9e1-004af855bfc4" value="6"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="55bc25f3-74da-43f0-b0c2-cedaed64f26c"/>
@@ -454,6 +462,7 @@
     <paramset name="node">
       <param name="key" value="e2def4c6-14c3-4e91-8ce2-634b3ab3f3f4"/>
       <param name="a2608ece-27f8-49b0-aeff-e6a0b766cb6e" value="15"/>
+      <param name="50960219-3682-4709-a9e1-004af855bfc4" value="23"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="9c348131-beb6-424c-9515-51dd3d2d633b"/>
@@ -482,6 +491,7 @@
     <paramset name="node">
       <param name="key" value="d7756c36-3811-4b93-b347-ab47dfa491d4"/>
       <param name="a2608ece-27f8-49b0-aeff-e6a0b766cb6e" value="8"/>
+      <param name="50960219-3682-4709-a9e1-004af855bfc4" value="1"/>
     </paramset>
   </container>
 </document>
