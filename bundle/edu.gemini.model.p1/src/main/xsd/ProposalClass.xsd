@@ -137,6 +137,7 @@
                 <xsd:sequence>
                     <xsd:element name="submission"   type="FastTurnaroundSubmission"/>
                     <xsd:element name="band3request" type="SubmissionRequest" minOccurs="0" maxOccurs="1"/>
+                    <!-- An FT proposal should include an affiliation, either an NGO Partner or an Exchange Partner -->
                     <xsd:choice minOccurs="1" maxOccurs="1">
                         <xsd:element name="partnerAffiliation" type="NgoPartner" minOccurs="0" maxOccurs="1"/>
                         <xsd:element name="exchangeAffiliation" type="ExchangePartner" minOccurs="0" maxOccurs="1"/>

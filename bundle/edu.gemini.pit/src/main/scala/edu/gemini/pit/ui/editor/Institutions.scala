@@ -1,9 +1,9 @@
 package edu.gemini.pit.ui.editor
 
-import edu.gemini.model.p1.immutable.NgoPartner
+import edu.gemini.model.p1.immutable.{ExchangePartner, NgoPartner}
 import edu.gemini.model.p1.immutable.Partners.FtPartner
 
-import scalaz.-\/
+import scalaz.{-\/, \/-}
 import xml.{Node, XML}
 
 object Institutions {
@@ -61,6 +61,7 @@ object Institutions {
     case "Canada"    => Some(-\/(NgoPartner.CA))
     case "Chile"     => Some(-\/(NgoPartner.CL))
     case "USA"       => Some(-\/(NgoPartner.US))
+    case "Japan"     => Some(\/-(ExchangePartner.SUBARU))
     case _           => None
   }
 }

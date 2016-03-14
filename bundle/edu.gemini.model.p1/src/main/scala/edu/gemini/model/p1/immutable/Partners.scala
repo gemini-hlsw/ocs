@@ -24,17 +24,21 @@ object Partners {
   // REL-2248 Contains a list of partners that are not allowed on joint proposals
   val jointProposalNotAllowed = List[NgoPartner](NgoPartner.KR, NgoPartner.AU)
 
-  // REL-2670 A partner for FT can be either Ngo or Exchange
+  // REL-2670 A partner affiliation for an FT proposal can be either Ngo or Exchange (Subaru)
   type FtPartner = Option[NgoPartner \/ ExchangePartner]
 
   val NoPartnerAffiliation = "None"
 
   private val SubaruAffiliation = "Japan"
 
+  // Possible FT Partners: None, Ngos, Subaru
   val ftPartners:Seq[(FtPartner, String)] = {
     (None -> NoPartnerAffiliation) :: (NgoPartner.values.toList.map(p => Option(-\/(p)) -> Partners.name.getOrElse(p, "")) ::: List(Option(\/-(ExchangePartner.SUBARU)) -> SubaruAffiliation)).sortBy(_._2)
   }
 
+  /**
+    * Returns the public name of the FT Affiliation Partner
+    */
   def nameOfFTPartner(fp: FtPartner): Option[String] = fp match {
     case Some(-\/(p))                      => Partners.name.get(p)
     case Some(\/-(ExchangePartner.SUBARU)) => Some(SubaruAffiliation)

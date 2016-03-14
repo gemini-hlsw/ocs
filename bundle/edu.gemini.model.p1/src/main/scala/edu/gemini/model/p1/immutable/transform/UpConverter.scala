@@ -34,7 +34,7 @@ object UpConverter {
   }
 
   // Sequence of conversions for proposals from a given semester
-  val from2016BToFT:List[SemesterConverter] = List(SemesterConverterToCurrent)
+  val from2016BToFT:List[SemesterConverter] = List(SchemaVersionConverter) // No changes besides the schema version
   val from2016A:List[SemesterConverter]     = List(SemesterConverterToCurrent, SemesterConverter2016ATo2016B, LastStepConverter(Semester(2016, SemesterOption.A)))
   val from2015B:List[SemesterConverter]     = List(SemesterConverterToCurrent, SemesterConverter2016ATo2016B, SemesterConverter2015BTo2016A, LastStepConverter(Semester(2015, SemesterOption.B)))
   val from2015A:List[SemesterConverter]     = List(SemesterConverterToCurrent, SemesterConverter2016ATo2016B, SemesterConverter2015ATo2015B, LastStepConverter(Semester(2015, SemesterOption.A)))
@@ -296,9 +296,9 @@ case object SemesterConverter2014BTo2015A extends SemesterConverter {
   override val transformers = List(gsSubmission)
 }
 /**
- * This converter is to current, as a minimum you need to convert a proposal to be the current version and semester
+ * This converter only changes the schema version but retains the semester
  */
-case object SemesterConverterToSV extends SemesterConverter {
+case object SchemaVersionConverter extends SemesterConverter {
   val current = Semester.current
   val schemaVersionTransformToCurrent:TransformFunction = {
     case p @ <proposal>{ns @ _*}</proposal> if (p \ "@tacCategory").nonEmpty =>
