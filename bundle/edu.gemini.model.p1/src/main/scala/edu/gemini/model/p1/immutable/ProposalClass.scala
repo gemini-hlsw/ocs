@@ -357,9 +357,9 @@ object FastTurnaroundProgramClass {
   val affiliation:Lens[FastTurnaroundProgramClass, FtPartner] = Lens.lensu((a, b) => a.copy(partnerAffiliation = b, previousPartnerAffiliation = a.partnerAffiliation), _.partnerAffiliation)
 
   def affiliation(m: M.FastTurnaroundProgramClass): FtPartner = (Option(m.getPartnerAffiliation), Option(m.getExchangeAffiliation)) match {
-    case (Some(p), _) => Some(-\/(p))
-    case (_, Some(e)) => Some(\/-(e))
-    case _            => None
+    case (Some(p), _)                      => Some(-\/(p))
+    case (_, Some(ExchangePartner.SUBARU)) => Some(\/-(ExchangePartner.SUBARU))
+    case _                                 => None
   }
 
   def apply(m:M.FastTurnaroundProgramClass):FastTurnaroundProgramClass = apply(

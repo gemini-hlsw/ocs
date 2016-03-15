@@ -3,6 +3,7 @@ package edu.gemini.pit.ui.robot
 import edu.gemini.pit.ui._
 import action.AppPreferencesAction
 import edu.gemini.model.p1.immutable._
+import edu.gemini.model.p1.immutable.Partners._
 import edu.gemini.pit.ui.editor.Institutions
 import edu.gemini.pit.util.PDF
 import edu.gemini.pit.catalog._
@@ -519,8 +520,8 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
         pi                                                                      <- Option(p.investigators.pi)
         piNgo                                                                   <- Option(Institutions.institution2Ngo(pi.address.institution, pi.address.country))
         f @ FastTurnaroundProgramClass(_, _, _, _, _, _, _, _, affiliateNgo, _) <- Option(p.proposalClass)
-        same                                                                    <- (affiliateNgo |@| piNgo){_ === _}
-        if ~(affiliateNgo |@| piNgo){_ =/= _}
+        samePartner                                                             <- (affiliateNgo |@| piNgo){_ === _}
+        if !samePartner // Show a warning if the PI's institution partner isn't the same as the partner affiliation
       } yield new Problem(Severity.Info,
             s"The Fast Turnaround affiliation country: '${~Partners.nameOfFTPartner(affiliateNgo)}' is different from the PI's country: '${~Partners.nameOfFTPartner(piNgo)}'.", TimeProblems.SCHEDULING_SECTION, {
               s.showPartnersView()
@@ -529,15 +530,15 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
     private lazy val wrongSite = for {
       o <- p.observations
       b <- o.blueprint if (p.proposalClass match {
-      case e: ExchangeProposalClass if e.partner == ExchangePartner.KECK => b.site != Site.Keck
+      case e: ExchangeProposalClass if e.partner == ExchangePartner.KECK   => b.site != Site.Keck
       case e: ExchangeProposalClass if e.partner == ExchangePartner.SUBARU => b.site != Site.Subaru
-      case _ => b.site != Site.GN && b.site != Site.GS
+      case _                                                               => b.site != Site.GN && b.site != Site.GS
     })
     } yield {
       val host = p.proposalClass match {
-        case e: ExchangeProposalClass if e.partner == ExchangePartner.KECK => Site.Keck.name
+        case e: ExchangeProposalClass if e.partner == ExchangePartner.KECK   => Site.Keck.name
         case e: ExchangeProposalClass if e.partner == ExchangePartner.SUBARU => Site.Subaru.name
-        case _ => "Gemini"
+        case _                                                               => "Gemini"
       }
       new Problem(Severity.Error, s"Scheduling request is for $host but resource resides at ${b.site.name}", "Observations", {
         s.showPartnersView()

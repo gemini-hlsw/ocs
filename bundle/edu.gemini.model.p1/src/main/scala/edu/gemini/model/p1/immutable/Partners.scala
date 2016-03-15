@@ -2,7 +2,7 @@ package edu.gemini.model.p1.immutable
 
 import java.util.Locale
 
-import scalaz.{-\/, \/, \/-}
+import scalaz.{-\/, Equal, \/, \/-}
 
 object Partners {
 
@@ -24,8 +24,10 @@ object Partners {
   // REL-2248 Contains a list of partners that are not allowed on joint proposals
   val jointProposalNotAllowed = List[NgoPartner](NgoPartner.KR, NgoPartner.AU)
 
-  // REL-2670 A partner affiliation for an FT proposal can be either Ngo or Exchange (Subaru)
-  type FtPartner = Option[NgoPartner \/ ExchangePartner]
+  // REL-2670 A partner affiliation for an FT proposal can be either Ngo or Subaru
+  type FtPartner = Option[NgoPartner \/ ExchangePartner.SUBARU.type]
+
+  implicit val ftPartnerEqual = Equal.equalA[FtPartner]
 
   val NoPartnerAffiliation = "None"
 
@@ -33,7 +35,7 @@ object Partners {
 
   // Possible FT Partners: None, Ngos, Subaru
   val ftPartners:Seq[(FtPartner, String)] = {
-    (None -> NoPartnerAffiliation) :: (NgoPartner.values.toList.map(p => Option(-\/(p)) -> Partners.name.getOrElse(p, "")) ::: List(Option(\/-(ExchangePartner.SUBARU)) -> SubaruAffiliation)).sortBy(_._2)
+    (None -> NoPartnerAffiliation) :: (NgoPartner.values.toList.map(p => Option(-\/(p)) -> Partners.name.getOrElse(p, "")) ::: List((Option(\/-(ExchangePartner.SUBARU)): FtPartner) -> SubaruAffiliation)).sortBy(_._2)
   }
 
   /**
@@ -46,8 +48,7 @@ object Partners {
   }
 
   def toPartner(name: String): FtPartner = ftPartners.find(_._2 == name).collect {
-    case (Some(-\/(p)), _) => -\/(p)
-    case (Some(\/-(e)), _) => \/-(e)
+    case (Some(a), _) => a
   }
 
   def forLocale(loc:Locale):Option[Either[NgoPartner, ExchangePartner]] = loc match {

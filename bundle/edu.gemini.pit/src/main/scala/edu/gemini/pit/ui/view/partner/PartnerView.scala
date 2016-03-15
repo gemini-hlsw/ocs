@@ -12,6 +12,7 @@ import scalaz._
 import Scalaz._
 import edu.gemini.pit.ui.editor.{Institutions, LargeSubmissionRequestEditor, SubmissionRequestEditor, VisitorSelector}
 import edu.gemini.model.p1.immutable._
+import edu.gemini.model.p1.immutable.Partners._
 import java.awt.Color
 
 import edu.gemini.pit.ui.util._
@@ -228,12 +229,12 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
           }
 
           selection.item match {
-            case Queue => model = Some(localQueue)
+            case Queue     => model = Some(localQueue)
             case Classical => model = Some(localClassical)
-            case Exchange => model = Some(localExchange)
-            case Special => model = Some(localSpecial)
-            case Large => model = Some(localLarge)
-            case Fast => model = Some(localFast)
+            case Exchange  => model = Some(localExchange)
+            case Special   => model = Some(localSpecial)
+            case Large     => model = Some(localLarge)
+            case Fast      => model = Some(localFast)
           }
 
       }
@@ -719,9 +720,9 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
         pi.address match {
           case a if piPartner.isDefined && previousAffiliation.isEmpty =>
             selection.item = Partners.ftPartners.toMap.getOrElse(piPartner, Partners.NoPartnerAffiliation)
-          case a if currentAffiliation != piPartner =>
+          case a if currentAffiliation =/= piPartner                   =>
             selection.item = Partners.ftPartners.toMap.getOrElse(currentAffiliation, Partners.NoPartnerAffiliation)
-          case _ =>
+          case _                                                       =>
         }
       }
 
