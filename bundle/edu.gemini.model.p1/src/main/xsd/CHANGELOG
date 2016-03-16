@@ -1,6 +1,11 @@
 Gemini Phase I Schema Changes
 
-# Version 2016.1.1 - 2016A
+# Version 2016.2.2 - 2016B
+##########################
+
+* FT proposals can have as PI Affiliation an NGO partner or an Exchange Partner
+
+# Version 2016.2.1 - 2016B
 ##########################
 
 * Rename Flamingos-2 K-long from 'K-long (2.20 um)' to 'K-long (2.00um)'

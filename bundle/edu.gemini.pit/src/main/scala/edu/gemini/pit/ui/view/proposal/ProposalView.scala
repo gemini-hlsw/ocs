@@ -145,7 +145,7 @@ class ProposalView(advisor:ShellAdvisor) extends BorderPanel with BoundView[Prop
       tooltip = "Remove attachment."
       border = null
       override def refresh(m:Option[Option[File]]) {
-        visible = ~(m.map(_.isDefined))
+        visible = ~m.map(_.isDefined)
         enabled = canEdit
       }
       reactions += {
@@ -190,7 +190,7 @@ class ProposalView(advisor:ShellAdvisor) extends BorderPanel with BoundView[Prop
     override def children = List(toolbar, listViewer)
 
     // Implicit to allow swapping and replacing of elements in a list.
-    implicit def pimpList[A](as:List[A]) = new RichList(as)
+    implicit def pimpList[A](as:List[A]):RichList[A] = new RichList(as)
 
     class RichList[A](as:List[A]) {
       def swap(i:Int, j:Int):Option[List[A]] = for {
@@ -200,7 +200,7 @@ class ProposalView(advisor:ShellAdvisor) extends BorderPanel with BoundView[Prop
           case (_, n) if n == i => aj
           case (_, n) if n == j => ai
           case (a0, _)          => a0
-        }.toList
+        }
 
       def replace(a:A, b:A):List[A] = as.indexOf(a) match {
         case -1 => as

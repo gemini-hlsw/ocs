@@ -35,7 +35,6 @@ class OpenAction(shell: RichShell[Model], handler: ((Model, Option[File]) => Uni
           case Some(Model.empty) => shell.close()
           case _                 => // nop
         }
-      //case Failure(e: UnmarshalException) => alert("This does not appear to be a valid proposal document.")
       case Failure(e) => println(e)
         e match {
         case Right(x) => alert(x.toString()) // TODO: make this better

@@ -2,8 +2,11 @@ package edu.gemini.model.p1.immutable
 
 import edu.gemini.model.p1.{mutable => M}
 import java.util.UUID
+
+import edu.gemini.model.p1.immutable.Partners.FtPartner
+
 import scala.collection.JavaConverters._
-import scalaz.Lens
+import scalaz.{-\/, Lens, \/-}
 
 object ProposalClass {
 
@@ -93,7 +96,7 @@ case class QueueProposalClass(itac:Option[Itac],
                               comment:Option[String],
                               key:Option[UUID],
                               subs:Either[List[NgoSubmission], ExchangeSubmission],
-                              band3request:Option[SubmissionRequest], // TODO: we probably need a req/res pair
+                              band3request:Option[SubmissionRequest],
                               tooOption:ToOChoice) extends GeminiNormalProposalClass {
 
   override val isSpecial = false
@@ -304,8 +307,8 @@ case class FastTurnaroundProgramClass(itac                       :Option[Itac],
                                       tooOption                  :ToOChoice,
                                       reviewer                   :Option[Investigator],
                                       mentor                     :Option[Investigator],
-                                      partnerAffiliation         :Option[NgoPartner],
-                                      previousPartnerAffiliation :Option[NgoPartner] = None) extends ProposalClass {
+                                      partnerAffiliation         :FtPartner,
+                                      previousPartnerAffiliation :FtPartner = None) extends ProposalClass {
 
   def mutable(n: Namer):M.FastTurnaroundProgramClass = {
     val m = Factory.createFastTurnaroundProgramClass
@@ -317,7 +320,17 @@ case class FastTurnaroundProgramClass(itac                       :Option[Itac],
     m.setSubmission(sub.mutable)
     m.setReviewer(reviewer.map(_.mutable(n)).orNull)
     m.setMentor(mentor.map(_.mutable(n)).orNull)
-    m.setPartnerAffiliation(partnerAffiliation.orNull)
+    partnerAffiliation match {
+      case Some(-\/(p)) =>
+        m.setPartnerAffiliation(p)
+        m.setExchangeAffiliation(null)
+      case Some(\/-(e)) =>
+        m.setPartnerAffiliation(null)
+        m.setExchangeAffiliation(e)
+      case _            =>
+        m.setPartnerAffiliation(null)
+        m.setExchangeAffiliation(null)
+    }
     m
   }
 
@@ -341,7 +354,13 @@ object FastTurnaroundProgramClass {
   val reviewer:Lens[FastTurnaroundProgramClass, Option[Investigator]] = Lens.lensu((a, b) => a.copy(reviewer = b), _.reviewer)
   val reviewerAndMentor:Lens[FastTurnaroundProgramClass, (Option[Investigator], Option[Investigator])] = Lens.lensu((a, b) => a.copy(reviewer = b._1, mentor = b._2), f => (f.reviewer, f.mentor))
   val mentor:Lens[FastTurnaroundProgramClass, Option[Investigator]] = Lens.lensu((a, b) => a.copy(mentor = b), _.mentor)
-  val partnerAffiliation:Lens[FastTurnaroundProgramClass, Option[NgoPartner]] = Lens.lensu((a, b) => a.copy(partnerAffiliation = b, previousPartnerAffiliation = a.partnerAffiliation), _.partnerAffiliation)
+  val affiliation:Lens[FastTurnaroundProgramClass, FtPartner] = Lens.lensu((a, b) => a.copy(partnerAffiliation = b, previousPartnerAffiliation = a.partnerAffiliation), _.partnerAffiliation)
+
+  def affiliation(m: M.FastTurnaroundProgramClass): FtPartner = (Option(m.getPartnerAffiliation), Option(m.getExchangeAffiliation)) match {
+    case (Some(p), _)                      => Some(-\/(p))
+    case (_, Some(ExchangePartner.SUBARU)) => Some(\/-(ExchangePartner.SUBARU))
+    case _                                 => None
+  }
 
   def apply(m:M.FastTurnaroundProgramClass):FastTurnaroundProgramClass = apply(
     Option(m.getItac).map(Itac(_)),
@@ -352,7 +371,7 @@ object FastTurnaroundProgramClass {
     m.getTooOption,
     Option(m.getReviewer).map(Investigator.apply),
     Option(m.getMentor).map(Investigator.apply),
-    Option(m.getPartnerAffiliation))
+    affiliation(m))
 
   def empty = apply(None, None, None, FastTurnaroundSubmission.empty, None, ToOChoice.None, None, None, None)
 

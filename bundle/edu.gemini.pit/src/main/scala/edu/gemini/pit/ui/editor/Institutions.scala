@@ -1,7 +1,9 @@
 package edu.gemini.pit.ui.editor
 
-import edu.gemini.model.p1.immutable.NgoPartner
+import edu.gemini.model.p1.immutable.{ExchangePartner, NgoPartner}
+import edu.gemini.model.p1.immutable.Partners.FtPartner
 
+import scalaz.{-\/, \/-}
 import xml.{Node, XML}
 
 object Institutions {
@@ -45,20 +47,21 @@ object Institutions {
     case _      => None
   }
 
-  def institution2Ngo(institution: String, country: String): Option[NgoPartner] = {
+  def institution2Ngo(institution: String, country: String): FtPartner = {
     val geminiRegex = "Gemini.Observatory.*".r
     institution match {
-      case geminiRegex() => Some(NgoPartner.US) // Gemini Staff always go as US
+      case geminiRegex() => Some(-\/(NgoPartner.US)) // Gemini Staff always go as US
       case _             => country2Ngo(country)
     }
   }
-  def country2Ngo(country: String): Option[NgoPartner] = country match {
-    case "Argentina" => Some(NgoPartner.AR)
-    case "Australia" => Some(NgoPartner.AU)
-    case "Brazil"    => Some(NgoPartner.BR)
-    case "Canada"    => Some(NgoPartner.CA)
-    case "Chile"     => Some(NgoPartner.CL)
-    case "USA"       => Some(NgoPartner.US)
+  def country2Ngo(country: String): FtPartner = country match {
+    case "Argentina" => Some(-\/(NgoPartner.AR))
+    case "Australia" => Some(-\/(NgoPartner.AU))
+    case "Brazil"    => Some(-\/(NgoPartner.BR))
+    case "Canada"    => Some(-\/(NgoPartner.CA))
+    case "Chile"     => Some(-\/(NgoPartner.CL))
+    case "USA"       => Some(-\/(NgoPartner.US))
+    case "Japan"     => Some(\/-(ExchangePartner.SUBARU))
     case _           => None
   }
 }

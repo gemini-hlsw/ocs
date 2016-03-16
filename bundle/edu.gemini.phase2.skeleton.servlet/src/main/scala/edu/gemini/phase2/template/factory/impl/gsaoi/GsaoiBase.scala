@@ -3,7 +3,6 @@ package edu.gemini.phase2.template.factory.impl.gsaoi
 import edu.gemini.phase2.template.factory.impl._
 import edu.gemini.pot.sp.{ISPGroup, ISPObservation}
 import scala.collection.JavaConverters._
-import edu.gemini.spModel.seqcomp.{SeqRepeatDarkObs, SeqConfigComp}
 import edu.gemini.spModel.gemini.gsaoi.blueprint.SpGsaoiBlueprint
 import edu.gemini.spModel.gemini.gsaoi.GsaoiSeqConfig
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi.Filter
@@ -50,7 +49,7 @@ trait GsaoiBase extends GroupInitializer[SpGsaoiBlueprint] with TemplateDsl {
   }
 
   // DSL Setters
-  def setFilter = Setter[Filter](error("None"))(_.setFilter(_))
+  def setFilter = Setter[Filter](sys.error("None"))(_.setFilter(_))
 
   def setFilters = Setter(blueprint.filters.asScala)(_.setFilters(_))
 }

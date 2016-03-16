@@ -25,17 +25,6 @@ import edu.gemini.spModel.core.Affiliate
  */
 object SpProgramFactory {
 
-  private val AFFILIATES = Map(
-    AR -> "Argentina",
-    AU -> "Australia",
-    BR -> "Brazil",
-    CA -> "Canada",
-    CL -> "Chile",
-    KR -> "Korea",
-    UH -> "University of Hawaii",
-    US -> "United States"
-  )
-
   private val NGO_TIME_ACCT = Map(
     AR -> TimeAcctCategory.AR,
     AU -> TimeAcctCategory.AU,
@@ -144,7 +133,7 @@ object SpProgramFactory {
     } yield h
 
   private def hostSubmission(l: List[NgoSubmission]): Option[NgoSubmission] =
-    if (l.size == 0) {
+    if (l.isEmpty) {
       None
     } else {
       Some(l.maxBy(s => timeAward(s).getOrElse(TimeAmount.empty).hours))
@@ -228,9 +217,13 @@ object SpProgramFactory {
         // But we'll leave it here for the future
       case f: FastTurnaroundProgramClass =>
         // In principle there are no proposals submitted without a PA but check just in case
-        ~f.partnerAffiliation.map { partnerAffiliation =>
-          val s = NgoSubmission(f.sub.request, f.sub.response, partnerAffiliation, InvestigatorRef(proposal.investigators.pi))
-          ngoRatios(List(s))
+        ~f.partnerAffiliation.collect {
+          case -\/(ngo) =>
+            val s = NgoSubmission(f.sub.request, f.sub.response, ngo, InvestigatorRef(proposal.investigators.pi))
+            ngoRatios(List(s))
+          case \/-(exc) =>
+            val s = ExchangeSubmission(f.sub.request, f.sub.response, exc, InvestigatorRef(proposal.investigators.pi))
+            excRatio(s).toList
         }
       case s: SpecialProposalClass       => spcRatio(s.sub).toList
     }

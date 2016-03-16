@@ -64,7 +64,13 @@ class ConversionResultDialog(m: Model) extends StdModalEditor[ModelConversion]("
   }
 
   object Log extends GridBagPanel with Rows {
-    addRow(new Label(s"The opened proposal from semester ${value.from.display} was converted to the ${Semester.current.display} format."))
+    val conversionText = if (value.from.display =/= Semester.current.display) {
+        s"The opened proposal from semester ${value.from.display} was converted to the ${Semester.current.display} format."
+      } else {
+        s"The opened proposal from semester ${value.from.display} was converted to the current format."
+      }
+
+    addRow(new Label(conversionText))
     addRow(new Label("Summary of changes:"))
     add(DetailsArea, new Constraints { gridx = 1; gridy = 3; fill = GridBagPanel.Fill.Horizontal; weightx = 2 })
 
