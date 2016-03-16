@@ -58,7 +58,7 @@ object AgsHash {
     // Base Position
     Option(ctx.getTargets).foreach { t =>
       val time = Some(new java.lang.Long(when)).asGeminiOpt
-      val base = t.getBase.getTarget
+      val base = t.getBase
 
       def toData(coord: GemOption[java.lang.Double]): Int =
         coord.asScalaOpt.map(_.doubleValue).##

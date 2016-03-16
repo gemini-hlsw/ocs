@@ -3,6 +3,7 @@ package jsky.app.ot.gemini.editor.targetComponent;
 import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.util.immutable.*;
+import edu.gemini.spModel.core.Target;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.guide.GuideProbeUtil;
 import edu.gemini.spModel.obs.context.ObsContext;
@@ -782,15 +783,15 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
     private static final class TargetClipboard {
         private static final class TargetDetails {
-            private final ITarget           target;
+            private final Target target;
             private final ImList<Magnitude> mag;
 
             public TargetDetails(final SPTarget target) {
-                this.target = target.getTarget().clone();
+                this.target = target.getNewTarget();
                 this.mag    = target.getMagnitudes();
             }
 
-            public ITarget getTarget() {
+            public Target getTarget() {
                 return target;
             }
             public ImList<Magnitude> getMag() {
@@ -825,7 +826,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             contents.swap().foreach(targetDetails -> {
                         final Option<SPTarget> tOpt = TargetSelection.getTargetForNode(dataObject.getTargetEnvironment(), obsComponent);
                         tOpt.foreach(t -> {
-                            t.setTarget(targetDetails.getTarget().clone());
+                            t.setNewTarget(targetDetails.getTarget());
                             t.setMagnitudes(targetDetails.getMag());
                         });
                     });

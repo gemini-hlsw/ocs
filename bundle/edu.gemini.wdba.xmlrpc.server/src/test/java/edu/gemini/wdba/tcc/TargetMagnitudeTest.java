@@ -11,6 +11,7 @@ import edu.gemini.spModel.target.env.GuideGroup;
 import edu.gemini.spModel.target.obsComp.PwfsGuideProbe;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.target.system.ConicTarget;
+import edu.gemini.spModel.target.system.ITarget;
 import org.dom4j.Document;
 import org.dom4j.Element;
 
@@ -51,7 +52,7 @@ public final class TargetMagnitudeTest extends TestBase {
 
     public void testNonSiderealMagnitude() throws Exception {
         pwfs1_1.putMagnitude(new Magnitude(Magnitude.Band.J, 10));
-        pwfs1_1.setTarget(new ConicTarget());
+        pwfs1_1.setNonSidereal();
         pwfs1_1.setName("PWFS1-1");
         testTargetEnvironment(env);
     }

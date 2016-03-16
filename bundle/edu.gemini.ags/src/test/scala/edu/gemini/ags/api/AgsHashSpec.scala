@@ -117,8 +117,8 @@ class AgsHashSpec extends Specification with ScalaCheck with edu.gemini.spModel.
         val ctx1  = ctx0.withTargets(env1)
 
         val time  = Option(new java.lang.Long(now.toEpochMilli)).asGeminiOpt
-        val ra0   = base0.getTarget.getRaDegrees(time).getValue
-        val ra1   = base1.getTarget.getRaDegrees(time).getValue
+        val ra0   = base0.getRaDegrees(time).getValue
+        val ra1   = base1.getRaDegrees(time).getValue
 
         (ra0 == ra1) == hashSame(ctx0, ctx1)
       }
@@ -132,8 +132,8 @@ class AgsHashSpec extends Specification with ScalaCheck with edu.gemini.spModel.
         val ctx1  = ctx0.withTargets(env1)
 
         val time  = Option(new java.lang.Long(now.toEpochMilli)).asGeminiOpt
-        val dec0  = base0.getTarget.getDecDegrees(time).getValue
-        val dec1  = base1.getTarget.getDecDegrees(time).getValue
+        val dec0  = base0.getDecDegrees(time).getValue
+        val dec1  = base1.getDecDegrees(time).getValue
 
         (dec0 == dec1) == hashSame(ctx0, ctx1)
       }

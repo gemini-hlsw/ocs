@@ -48,7 +48,7 @@ class PlutoDemotionTest extends MigrationTest {
             Assert.assertEquals("Perihelion", 114.2248220688449, ct.getPerihelion.getValue, 0.00001)
             Assert.assertEquals("Epoch of Perihelion", 2447885.60548777, ct.getEpochOfPeri.getValue, 0.00001)
 
-          case None => Assert.fail("Expected ConicTarget, found " + sp.getTarget)
+          case None => Assert.fail("Expected ConicTarget, found something else in " + obs.getObservationID)
 
         }
     }

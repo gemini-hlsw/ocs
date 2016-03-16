@@ -248,11 +248,10 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
         show = _.display,
         get  = { tp => targetType(tp.getTarget) },
         set  = { setTarget((target, targetType) => {
-          val coords = targetType match {
-            case Sidereal    => new HmsDegTarget()
-            case NonSidereal => new ConicTarget()
+          targetType match {
+            case Sidereal    => target.setSidereal()
+            case NonSidereal => target.setNonSidereal()
           }
-          target.setTarget(coords)
           target.setName(target.getName)
           target.setMagnitudes(DefaultImList.create[Magnitude]())
         })}

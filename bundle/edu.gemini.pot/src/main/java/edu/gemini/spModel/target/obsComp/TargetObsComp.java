@@ -95,10 +95,9 @@ public final class TargetObsComp extends AbstractDataObject implements GuideProb
             final TargetEnvironment env = getTargetEnvironment();
             final SPTarget tp = env.getBase();
             if (tp != null) {
-                final ITarget t = tp.getTarget();
-                final String initName  = t.getName();
+                final String initName  = tp.getName();
                 final String finalName = initName == null || initName.trim().isEmpty() ? "<Untitled>" : initName;
-                return targetPrefixes.getOrDefault(t.getTag(), "") + finalName;
+                return finalName; // TODO targetPrefixes.getOrDefault(t.getTag(), "") + finalName;
             }
         }
 

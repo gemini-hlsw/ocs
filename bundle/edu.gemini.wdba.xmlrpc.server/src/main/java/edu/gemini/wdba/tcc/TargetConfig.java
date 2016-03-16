@@ -60,23 +60,24 @@ public final class TargetConfig extends ParamSet {
         putParameter(TccNames.BRIGHTNESS, ""); // TODO: can we elide this altogether?
         putParameter(TccNames.TAG, ""); // ugh
 
-        ITarget target = spTarget.getTarget();
-        if (target instanceof HmsDegTarget) {
-            // System only appears in HmsDegTarget
-            addAttribute(TYPE, "hmsdegTarget");
-            putParameter(TccNames.SYSTEM, spTarget.getTarget().getTag().tccName);
-            _buildHmsDegTarget(spTarget);
-        } else if (target instanceof ConicTarget) {
-            addAttribute(TYPE, "conicTarget");
-            _buildConicTarget(spTarget);
-        } else if (target instanceof NamedTarget) {
-            addAttribute(TYPE, "namedTarget");
-            _buildNamedTarget((NamedTarget) target);
-        } else {
-            // In all other cases, report a problem and return
-            _logAbort("Unsupported target type: " + target.getClass().getName(), null);
-
-        }
+// TODO
+//        ITarget target = spTarget.getTarget();
+//        if (target instanceof HmsDegTarget) {
+//            // System only appears in HmsDegTarget
+//            addAttribute(TYPE, "hmsdegTarget");
+//            putParameter(TccNames.SYSTEM, spTarget.getTarget().getTag().tccName);
+//            _buildHmsDegTarget(spTarget);
+//        } else if (target instanceof ConicTarget) {
+//            addAttribute(TYPE, "conicTarget");
+//            _buildConicTarget(spTarget);
+//        } else if (target instanceof NamedTarget) {
+//            addAttribute(TYPE, "namedTarget");
+//            _buildNamedTarget((NamedTarget) target);
+//        } else {
+//            // In all other cases, report a problem and return
+//            _logAbort("Unsupported target type: " + target.getClass().getName(), null);
+//
+//        }
 
         Option<Element> mags = _createMagnitudes(spTarget);
         if (!mags.isEmpty()) add(mags.getValue());

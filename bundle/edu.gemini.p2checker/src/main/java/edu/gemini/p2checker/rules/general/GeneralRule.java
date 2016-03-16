@@ -219,8 +219,8 @@ public class GeneralRule implements IRule {
                     // If a WFS has the same name as the base position, make sure the have the same
                     // type (i.e., tag) and position; or, if they have the same tag and position,
                     // make sure they have the same name.
-                    final ITarget t1 = baseTarget.getTarget();
-                    final ITarget t2 = target.getTarget();
+                    final ITarget t1 = null; //baseTarget.getTarget();
+                    final ITarget t2 = null; //target.getTarget();
 
                     final boolean sameName = t1.getName().equals(t2.getName());
                     final boolean sameTag  = t1.getTag() == t2.getTag();
@@ -418,7 +418,7 @@ public class GeneralRule implements IRule {
             SPTarget baseTarget = elements.getTargetObsComp().getValue().getBase();
 
             if (baseTarget != null) {
-                final ITarget t = baseTarget.getTarget();
+                final ITarget t = null; // baseTarget.getTarget();
                 if (t instanceof HmsDegTarget) {
                     final HmsDegTarget hms = (HmsDegTarget) t;
 
