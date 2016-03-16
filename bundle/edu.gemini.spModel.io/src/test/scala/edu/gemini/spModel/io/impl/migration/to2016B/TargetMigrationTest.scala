@@ -27,8 +27,24 @@ class TargetMigrationTest extends Specification with MigrationTest {
 
   "2016B Target Migration" should {
 
-    "Migrate TOO Targets" in withTestProgram2("targetMigration.xml") { p =>
-      p.findBaseByObsTitle("too") must_== Some(TooTarget("bob"))
+    "Migrate TOO Target" in withTestProgram2("targetMigrationToo.xml") { p =>
+      p.findBaseByObsTitle("origin") must_== Some(
+        TooTarget("zero")
+      )
+    }
+    
+    "Migrate Sidereal Target at the Origin" in withTestProgram2("targetMigration.xml") { p =>
+      p.findBaseByObsTitle("origin") must_== Some(
+        SiderealTarget(
+          "zero",
+          Coordinates.zero,
+          None,
+          Some(Redshift(0.0)),
+          Some(Parallax(0.0)),
+          List(),
+          None,
+          None)
+      )
     }
 
     "Migrate Sidereal Targets" in withTestProgram2("targetMigration.xml") { p =>

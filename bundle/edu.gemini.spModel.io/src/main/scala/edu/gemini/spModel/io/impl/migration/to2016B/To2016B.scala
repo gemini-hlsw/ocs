@@ -4,6 +4,7 @@ package to2016B
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.spModel.core.HorizonsDesignation.MajorBody
 import edu.gemini.spModel.core._
+import edu.gemini.spModel.gemini.obscomp.SPProgram
 import edu.gemini.spModel.pio.codec.ParamSetCodec
 
 import edu.gemini.spModel.pio.xml.PioXmlFactory
@@ -93,6 +94,13 @@ object To2016B extends Migration {
       Pio.addLongParam(fact, o, "schedulingBlockDuration", 0L)
     }
 
+  def isTooProgram(d: Document): Boolean =
+    d.findContainers(SPProgram.SP_TYPE).exists { c =>
+      Option(c.getParamSet("Science Program"))
+        .flatMap(ps => ps.value("tooType"))
+        .filterNot(_ == "none").isDefined
+    }
+
   // Update targets to the new model
   def updateTargets(d: Document): Unit =
     allTargets(d).foreach { t =>
@@ -109,7 +117,7 @@ object To2016B extends Migration {
       // Construct a new target
       val newTarget: Target =
         data.map {
-          case ("J2000", Coordinates.zero) => TooTarget.empty
+          case ("J2000", Coordinates.zero) if isTooProgram(d) => TooTarget.empty
           case ("J2000",               cs) => sidereal(t, cs).exec(SiderealTarget.empty)
           case ("JPL minor body",      cs) => nonsidereal(t, cs).exec(NonSiderealTarget.empty)
           case ("MPC minor planet",    cs) => nonsidereal(t, cs).exec(NonSiderealTarget.empty)

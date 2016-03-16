@@ -308,7 +308,7 @@
     </container>
     <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="e864ea1f-53de-4f64-b8df-a2737dfd93b9" name="">
       <paramset name="Observation" kind="dataObj">
-        <param name="title" value="too"/>
+        <param name="title" value="origin"/>
         <param name="libraryId" value=""/>
         <param name="priority" value="LOW"/>
         <param name="tooOverrideRapid" value="false"/>
@@ -332,7 +332,7 @@
         <paramset name="Targets" kind="dataObj">
           <paramset name="targetEnv">
             <paramset name="base">
-              <param name="name" value="bob"/>
+              <param name="name" value="zero"/>
               <param name="system" value="J2000"/>
               <param name="epoch" value="2000.0" units="years"/>
               <param name="c1" value="00:00:00.000"/>
