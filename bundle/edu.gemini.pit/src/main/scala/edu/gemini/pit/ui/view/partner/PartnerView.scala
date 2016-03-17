@@ -697,6 +697,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
 
     // Partner affiliation combo box
     object partnerAffiliation extends ComboBox[String](Partners.ftPartners.map(_._2)) with Bound.Self[Proposal] {
+      maximumRowCount = Partners.ftPartners.size
 
       val pcLens = Proposal.proposalClass
 
