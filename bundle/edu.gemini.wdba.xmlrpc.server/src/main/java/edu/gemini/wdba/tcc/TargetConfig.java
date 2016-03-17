@@ -79,91 +79,91 @@ public final class TargetConfig extends ParamSet {
 //
 //        }
 
-        Option<Element> mags = _createMagnitudes(spTarget);
-        if (!mags.isEmpty()) add(mags.getValue());
+//        Option<Element> mags = _createMagnitudes(spTarget);
+//        if (!mags.isEmpty()) add(mags.getValue());
     }
 
-    /**
-     * Build a target for a named object
-     */
-    private void _buildNamedTarget(NamedTarget target) {
-        putParameter(TccNames.OBJECT, target.getSolarObject().getDisplayValue());
-    }
+//    /**
+//     * Build a target for a named object
+//     */
+//    private void _buildNamedTarget(NamedTarget target) {
+//        putParameter(TccNames.OBJECT, target.getSolarObject().getDisplayValue());
+//    }
+//
+//    /**
+//     * Build an HMS Deg target
+//     */
+//    private void _buildHmsDegTarget(SPTarget target) {
+//
+//        HmsDegTarget hmsDeg = target.getHmsDegTarget().get();
+//        putParameter(TccNames.C1, hmsDeg.getRa().toString());
+//        putParameter(TccNames.C2, hmsDeg.getDec().toString());
+//        add(_addProperMotion(hmsDeg));
+//    }
+//
+//    private void _buildConicTarget(SPTarget spTarget) {
+//        ConicTarget target = spTarget.getConicTarget().get();
+//
+//        ITarget.Tag option = target.getTag();
+//        putParameter(TccNames.FORMAT, option.tccName);
+//
+//        // All have epoch
+//        putParameter(TccNames.EPOCHOFEL, target.getEpoch().getStringValue());
+//        // All have orbital inclination
+//        putParameter(TccNames.ORBINC, target.getInclination().getStringValue());
+//        // All have longitude of ascending node
+//        putParameter(TccNames.LONGASCNODE, target.getANode().getStringValue());
+//        // All have eccentricity
+//        putParameter(TccNames.ECCENTRICITY, String.valueOf(target.getE()));
+//
+//        if (option == ITarget.Tag.JPL_MINOR_BODY) {
+//            putParameter(TccNames.ARGOFPERI, target.getPerihelion().getStringValue());
+//            putParameter(TccNames.PERIDIST, target.getAQ().getStringValue());
+//            putParameter(TccNames.EPOCHOFPERI, target.getEpochOfPeri().getStringValue());
+//        }
+//
+//        if (option == ITarget.Tag.MPC_MINOR_PLANET) {
+//            putParameter(TccNames.ARGOFPERI, target.getPerihelion().getStringValue());
+//            putParameter(TccNames.MEANDIST, target.getAQ().getStringValue());
+//            putParameter(TccNames.MEANANOM, target.getLM().getStringValue());
+//        }
+//
+//    }
+//
+//    /**
+//     * Add the proper motion.
+//     */
+//    private Element _addProperMotion(HmsDegTarget target) {
+//        ParamSet ps = new ParamSet(TccNames.PROPER_MOTION);
+//        ps.putParameter(TccNames.PM1, target.getPM1().getStringValue());
+//        ps.putParameter(TccNames.PM2, target.getPM2().getStringValue());
+//        ps.putParameter(TccNames.EPOCH, target.getEpoch().getStringValue());
+//        // Patch for TCC/OT inconsistency
+//        String pmunits = target.getPM2().getUnits().getName();
+//        if (pmunits.equals(TccNames.OT_PMUNITS)) pmunits = TccNames.TCC_PMUNITS;
+//        ps.putParameter(TccNames.PMUNITS, pmunits);
+//        ps.putParameter(TccNames.PARALLAX, Double.toString(target.getParallax().arcsecs()));
+//        ps.putParameter(TccNames.RV, Double.toString(target.getRedshift().toRadialVelocity().value()));
+//        return ps;
+//    }
+//
+//    private Option<Element> _createMagnitudes(SPTarget target) {
+//        ImList<Magnitude> magList = target.getMagnitudes();
+//        if (magList.size() == 0) return None.instance();
+//
+//        final ParamSet ps = new ParamSet(TccNames.MAGNITUDES);
+//        magList.foreach(mag -> {
+//            String band = mag.getBand().name();
+//            String brig = String.format("%1.3f", mag.getBrightness());
+//            ps.putParameter(band, brig);
+//        });
+//        return new Some<>(ps);
+//    }
 
-    /**
-     * Build an HMS Deg target
-     */
-    private void _buildHmsDegTarget(SPTarget target) {
-
-        HmsDegTarget hmsDeg = target.getHmsDegTarget().get();
-        putParameter(TccNames.C1, hmsDeg.getRa().toString());
-        putParameter(TccNames.C2, hmsDeg.getDec().toString());
-        add(_addProperMotion(hmsDeg));
-    }
-
-    private void _buildConicTarget(SPTarget spTarget) {
-        ConicTarget target = spTarget.getConicTarget().get();
-
-        ITarget.Tag option = target.getTag();
-        putParameter(TccNames.FORMAT, option.tccName);
-
-        // All have epoch
-        putParameter(TccNames.EPOCHOFEL, target.getEpoch().getStringValue());
-        // All have orbital inclination
-        putParameter(TccNames.ORBINC, target.getInclination().getStringValue());
-        // All have longitude of ascending node
-        putParameter(TccNames.LONGASCNODE, target.getANode().getStringValue());
-        // All have eccentricity
-        putParameter(TccNames.ECCENTRICITY, String.valueOf(target.getE()));
-
-        if (option == ITarget.Tag.JPL_MINOR_BODY) {
-            putParameter(TccNames.ARGOFPERI, target.getPerihelion().getStringValue());
-            putParameter(TccNames.PERIDIST, target.getAQ().getStringValue());
-            putParameter(TccNames.EPOCHOFPERI, target.getEpochOfPeri().getStringValue());
-        }
-
-        if (option == ITarget.Tag.MPC_MINOR_PLANET) {
-            putParameter(TccNames.ARGOFPERI, target.getPerihelion().getStringValue());
-            putParameter(TccNames.MEANDIST, target.getAQ().getStringValue());
-            putParameter(TccNames.MEANANOM, target.getLM().getStringValue());
-        }
-
-    }
-
-    /**
-     * Add the proper motion.
-     */
-    private Element _addProperMotion(HmsDegTarget target) {
-        ParamSet ps = new ParamSet(TccNames.PROPER_MOTION);
-        ps.putParameter(TccNames.PM1, target.getPM1().getStringValue());
-        ps.putParameter(TccNames.PM2, target.getPM2().getStringValue());
-        ps.putParameter(TccNames.EPOCH, target.getEpoch().getStringValue());
-        // Patch for TCC/OT inconsistency
-        String pmunits = target.getPM2().getUnits().getName();
-        if (pmunits.equals(TccNames.OT_PMUNITS)) pmunits = TccNames.TCC_PMUNITS;
-        ps.putParameter(TccNames.PMUNITS, pmunits);
-        ps.putParameter(TccNames.PARALLAX, Double.toString(target.getParallax().arcsecs()));
-        ps.putParameter(TccNames.RV, Double.toString(target.getRedshift().toRadialVelocity().value()));
-        return ps;
-    }
-
-    private Option<Element> _createMagnitudes(SPTarget target) {
-        ImList<Magnitude> magList = target.getMagnitudes();
-        if (magList.size() == 0) return None.instance();
-
-        final ParamSet ps = new ParamSet(TccNames.MAGNITUDES);
-        magList.foreach(mag -> {
-            String band = mag.getBand().name();
-            String brig = String.format("%1.3f", mag.getBrightness());
-            ps.putParameter(band, brig);
-        });
-        return new Some<>(ps);
-    }
-
-    // private method to log and throw and exception
-    private void _logAbort(String message, Exception ex) throws WdbaGlueException {
-        LOG.severe(message);
-        throw new WdbaGlueException(message, (ex != null) ? ex : null);
-    }
+//    // private method to log and throw and exception
+//    private void _logAbort(String message, Exception ex) throws WdbaGlueException {
+//        LOG.severe(message);
+//        throw new WdbaGlueException(message, (ex != null) ? ex : null);
+//    }
 }
 

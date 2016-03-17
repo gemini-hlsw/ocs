@@ -10,6 +10,7 @@ import edu.gemini.spModel.target.system.CoordinateParam.Units
 import edu.gemini.spModel.target.system.{HmsDegTarget, ITarget, TransitionalSPTarget}
 
 import edu.gemini.shared.util.immutable.{ Option => GOption }
+import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.skycalc.{ Coordinates => SCoordinates }
 
 import scalaz.@?>
@@ -98,7 +99,7 @@ final class SPTarget(private var _target: ITarget) extends TransitionalSPTarget 
   private val ra:  Target @?> RightAscension = Target.coords >=> Coordinates.ra.partial
   private val dec: Target @?> Declination    = Target.coords >=> Coordinates.dec.partial
 
-  def getName(): String =
+  def getName: String =
     _newTarget.name
 
   def setName(s: String): Unit =
@@ -110,11 +111,30 @@ final class SPTarget(private var _target: ITarget) extends TransitionalSPTarget 
   def setRaHours(value: Double): Unit =
     ra.set(_newTarget, RightAscension.fromHours(value)).foreach(setNewTarget)
 
+  def setRaString(hms: String): Unit =
+    for {
+      a <- Angle.parseHMS(hms).toOption
+      t <- ra.set(_newTarget, RightAscension.fromAngle(a))
+    } setNewTarget(t)
+
   def setDecDegrees(value: Double): Unit =
-    Declination.fromDegrees(value).flatMap(dec.set(_newTarget, _)).foreach(setNewTarget)
+    for {
+      d <- Declination.fromDegrees(value)
+      t <- dec.set(_newTarget, d)
+    } setNewTarget(t)
+
+  def setDecString(dms: String): Unit =
+    for {
+      a <- Angle.parseDMS(dms).toOption
+      d <- Declination.fromAngle(a)
+      t <- dec.set(_newTarget, d)
+    } setNewTarget(t)
 
   def setRaDecDegrees(ra: Double, dec: Double): Unit =
-    Coordinates.fromDegrees(ra, dec).flatMap(Target.coords.set(_newTarget, _)).foreach(setNewTarget)
+    for {
+      cs <- Coordinates.fromDegrees(ra, dec)
+      t  <- Target.coords.set(_newTarget, cs)
+    } setNewTarget(t)
 
   def setSpectralDistribution(sd: Option[SpectralDistribution]): Unit =
     Target.spectralDistribution.set(_newTarget, sd).foreach(setNewTarget)
@@ -128,10 +148,50 @@ final class SPTarget(private var _target: ITarget) extends TransitionalSPTarget 
   def getSpatialProfile: Option[SpatialProfile] =
     Target.spatialProfile.get(_newTarget).flatten
 
-  def isSidereal(): Boolean =
-    _newTarget.fold(_ => true, _ => true, _ => false)
+  def isSidereal: Boolean =
+    _newTarget.fold(_ => false, _ => true, _ => false)
 
-  def isNonSidereal(): Boolean =
-    !isSidereal()
+  def isNonSidereal: Boolean =
+    _newTarget.fold(_ => false, _ => false, _ => true)
+
+  def isTooTarget: Boolean =
+    _newTarget.fold(_ => true, _ => false, _ => false)
+
+  def getCoordinates(when: Option[Long]): Option[Coordinates] =
+    _newTarget.fold(
+      _ => None,
+      s => Some(s.coordinates),
+      n => when.flatMap(n.coords)
+    )
+
+  // Accessors for Java that use Gemini's Option type and boxed primitives
+
+  type GOLong   = GOption[java.lang.Long]
+  type GODouble = GOption[java.lang.Double]
+
+  private def gcoords[A](when: GOLong)(f: Coordinates => A): GOption[A] =
+    getCoordinates(when.asScalaOpt.map(_.longValue())).map(f).asGeminiOpt
+
+  def getRaHours(time: GOLong): GODouble =
+    gcoords(time)(_.ra.toHours)
+
+  def getRaDegrees(time: GOLong):GODouble =
+    gcoords(time)(_.ra.toDegrees)
+
+  def getRaString(time: GOLong): GOption[String] =
+    gcoords(time)(_.ra.toAngle.formatHMS)
+
+  def getDecDegrees(time: GOLong): GODouble =
+    gcoords(time)(_.dec.toDegrees)
+
+  def getDecString(time: GOLong): GOption[String] =
+    gcoords(time)(_.dec.toAngle.formatDMS)
+
+  def getSkycalcCoordinates(time: GOLong): GOption[SCoordinates] =
+    gcoords(time)(cs => new SCoordinates(cs.ra.toDegrees, cs.dec.toDegrees))
+
+  @deprecated("this should not be public")
+  def notifyOfGenericUpdate(): Unit =
+    _notifyOfUpdate()
 
 }
