@@ -58,7 +58,7 @@ public class SPTargetPio {
         return formatter.format(d);
     }
 
-    private static synchronized Date parseDate(final String dateStr) {
+    public static synchronized Date parseDate(final String dateStr) {
         if (dateStr == null) return null;
 
         DateFormat format = formatter;

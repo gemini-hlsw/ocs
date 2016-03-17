@@ -3,7 +3,7 @@ package edu.gemini.spModel.io.impl.migration
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.spModel.io.impl.SpIOTags
 import edu.gemini.spModel.pio.xml.PioXmlUtil
-import edu.gemini.spModel.pio.{ParamSet, Document, Version}
+import edu.gemini.spModel.pio.{Container, ParamSet, Document, Version}
 
 import java.io.StringWriter
 
@@ -29,6 +29,7 @@ trait Migration {
     }
 
   val ParamSetBase               = "base"
+  val ParamSetObservation        = "Observation"
   val ParamSetTarget             = "spTarget"
   val ParamSetTemplateParameters = "Template Parameters"
 
@@ -51,6 +52,15 @@ trait Migration {
 
     templateTargets ++ obsTargets
   }
+
+
+  /** (obs paramset, target paramset) paramset pairs **/
+  protected def obsAndBases(d: Document): List[(ParamSet, ParamSet)] =
+    for {
+      obs <- d.findContainers(SPComponentType.OBSERVATION_BASIC)
+      env <- obs.findContainers(SPComponentType.TELESCOPE_TARGETENV)
+      ps  <- env.allParamSets if ps.getName == ParamSetBase
+    } yield (obs.getParamSet(ParamSetObservation), ps)
 
   /** Writes the document to an XML String for debugging. */
   protected def formatDocument(d: Document): String = {
