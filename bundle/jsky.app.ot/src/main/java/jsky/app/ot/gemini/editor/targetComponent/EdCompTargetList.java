@@ -15,7 +15,6 @@ import edu.gemini.spModel.target.TelescopePosWatcher;
 import edu.gemini.spModel.target.env.*;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.target.obsComp.TargetSelection;
-import edu.gemini.spModel.target.system.ITarget;
 import jsky.app.ot.OTOptions;
 import jsky.app.ot.ags.*;
 import jsky.app.ot.editor.OtItemEditor;
@@ -787,7 +786,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             private final ImList<Magnitude> mag;
 
             public TargetDetails(final SPTarget target) {
-                this.target = target.getNewTarget();
+                this.target = target.getTarget();
                 this.mag    = target.getMagnitudes();
             }
 

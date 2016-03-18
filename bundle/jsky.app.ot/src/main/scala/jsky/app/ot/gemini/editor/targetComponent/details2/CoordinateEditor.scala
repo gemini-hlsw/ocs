@@ -69,7 +69,7 @@ class CoordinateEditor extends TelescopePosEditor with ReentrancyHack {
   }
 
   def newTarget: Target =
-    spt.getNewTarget
+    spt.getTarget
 
   def clean(angle: String): String =
     angle.trim.replace(",", ".")

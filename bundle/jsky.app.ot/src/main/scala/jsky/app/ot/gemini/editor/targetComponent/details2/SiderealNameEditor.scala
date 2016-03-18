@@ -45,7 +45,7 @@ final class SiderealNameEditor(mags: MagnitudeEditor2) extends TelescopePosEdito
     w.addWatcher(new TextBoxWidgetWatcher {
       override def textBoxAction(tbwe: TextBoxWidget): Unit = forkSearch()
       override def textBoxKeyPress(tbwe: TextBoxWidget): Unit =
-        nonreentrant(spt.setNewTarget(Target.name.set(spt.getNewTarget, tbwe.getValue)))
+        nonreentrant(spt.setNewTarget(Target.name.set(spt.getTarget, tbwe.getValue)))
     })
   }
 
@@ -54,7 +54,7 @@ final class SiderealNameEditor(mags: MagnitudeEditor2) extends TelescopePosEdito
   def edit(ctx: GOption[ObsContext], target: SPTarget, node: ISPNode): Unit = {
     this.spt = target
     nonreentrant {
-      name.setText(Target.name.get(spt.getNewTarget))
+      name.setText(Target.name.get(spt.getTarget))
     }
   }
 

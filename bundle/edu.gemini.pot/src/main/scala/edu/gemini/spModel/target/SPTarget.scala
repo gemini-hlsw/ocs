@@ -22,7 +22,7 @@ object SPTarget {
   }
 
 }
-final class SPTarget(private var _newTarget: Target) extends TransitionalSPTarget {
+final class SPTarget(private var target: Target) extends TransitionalSPTarget {
 
   def this() =
     this(SiderealTarget.empty)
@@ -30,30 +30,27 @@ final class SPTarget(private var _newTarget: Target) extends TransitionalSPTarge
   /** SPTarget with the given RA/Dec in degrees. */
   @deprecated("Use safe constructors; this one throws if declination is invalid.", "16B")
   def this(raDeg: Double, degDec: Double) =
-    this {
-      Coordinates.fromDegrees(raDeg, degDec)
-        .map(cs => SiderealTarget.empty.copy(coordinates = cs))
-        .getOrElse(sys.error("invalid coords"))
-    }
+    this(Coordinates.fromDegrees(raDeg, degDec)
+      .map(cs => SiderealTarget.empty.copy(coordinates = cs))
+      .getOrElse(sys.error("invalid coords")))
 
   /** Return a paramset describing this SPTarget. */
   def getParamSet(factory: PioFactory): ParamSet =
     SPTargetPio.getParamSet(this, factory)
 
   /** Re-initialize this SPTarget from the given paramset */
-  def setParamSet(paramSet: ParamSet): Unit = {
+  def setParamSet(paramSet: ParamSet): Unit =
     SPTargetPio.setParamSet(paramSet, this)
-  }
 
   /** Clone this SPTarget. */
   override def clone: SPTarget =
-    new SPTarget(_newTarget)
+    new SPTarget(target)
 
-  def getNewTarget: Target =
-    _newTarget
+  def getTarget: Target =
+    target
 
   def setNewTarget(target: Target): Unit = {
-    _newTarget = target
+    this.target = target
     _notifyOfUpdate()
   }
 
@@ -61,19 +58,19 @@ final class SPTarget(private var _newTarget: Target) extends TransitionalSPTarge
   // by inspecting and/or replacing the Target.
 
   def setSidereal(): Unit =
-    _newTarget match {
+    target match {
       case _: SiderealTarget => ()
       case _ => setNewTarget(SiderealTarget.empty)
     }
 
   def setNonSidereal(): Unit =
-    _newTarget match {
+    target match {
       case _: NonSiderealTarget => ()
       case _ => setNewTarget(NonSiderealTarget.empty)
     }
 
   def setTOO(): Unit =
-    _newTarget match {
+    target match {
       case _: TooTarget => ()
       case _ => setNewTarget(TooTarget.empty)
     }
@@ -83,65 +80,65 @@ final class SPTarget(private var _newTarget: Target) extends TransitionalSPTarge
   private val dec: Target @?> Declination    = Target.coords >=> Coordinates.dec.partial
 
   def getName: String =
-    _newTarget.name
+    target.name
 
   def setName(s: String): Unit =
-    setNewTarget(Target.name.set(_newTarget, s))
+    setNewTarget(Target.name.set(target, s))
 
   def setRaDegrees(value: Double): Unit =
-    ra.set(_newTarget, RightAscension.fromDegrees(value)).foreach(setNewTarget)
+    ra.set(target, RightAscension.fromDegrees(value)).foreach(setNewTarget)
 
   def setRaHours(value: Double): Unit =
-    ra.set(_newTarget, RightAscension.fromHours(value)).foreach(setNewTarget)
+    ra.set(target, RightAscension.fromHours(value)).foreach(setNewTarget)
 
   def setRaString(hms: String): Unit =
     for {
       a <- Angle.parseHMS(hms).toOption
-      t <- ra.set(_newTarget, RightAscension.fromAngle(a))
+      t <- ra.set(target, RightAscension.fromAngle(a))
     } setNewTarget(t)
 
   def setDecDegrees(value: Double): Unit =
     for {
       d <- Declination.fromDegrees(value)
-      t <- dec.set(_newTarget, d)
+      t <- dec.set(target, d)
     } setNewTarget(t)
 
   def setDecString(dms: String): Unit =
     for {
       a <- Angle.parseDMS(dms).toOption
       d <- Declination.fromAngle(a)
-      t <- dec.set(_newTarget, d)
+      t <- dec.set(target, d)
     } setNewTarget(t)
 
   def setRaDecDegrees(ra: Double, dec: Double): Unit =
     for {
       cs <- Coordinates.fromDegrees(ra, dec)
-      t  <- Target.coords.set(_newTarget, cs)
+      t  <- Target.coords.set(target, cs)
     } setNewTarget(t)
 
   def setSpectralDistribution(sd: Option[SpectralDistribution]): Unit =
-    Target.spectralDistribution.set(_newTarget, sd).foreach(setNewTarget)
+    Target.spectralDistribution.set(target, sd).foreach(setNewTarget)
 
   def setSpatialProfile(sp: Option[SpatialProfile]): Unit =
-    Target.spatialProfile.set(_newTarget, sp).foreach(setNewTarget)
+    Target.spatialProfile.set(target, sp).foreach(setNewTarget)
 
   def getSpectralDistribution: Option[SpectralDistribution] =
-    Target.spectralDistribution.get(_newTarget).flatten
+    Target.spectralDistribution.get(target).flatten
 
   def getSpatialProfile: Option[SpatialProfile] =
-    Target.spatialProfile.get(_newTarget).flatten
-
-  def isSidereal: Boolean =
-    _newTarget.fold(_ => false, _ => true, _ => false)
-
-  def isNonSidereal: Boolean =
-    _newTarget.fold(_ => false, _ => false, _ => true)
+    Target.spatialProfile.get(target).flatten
 
   def isTooTarget: Boolean =
-    _newTarget.fold(_ => true, _ => false, _ => false)
+    target.fold(_ => true,  _ => false, _ => false)
+
+  def isSidereal: Boolean =
+    target.fold(_ => false, _ => true,  _ => false)
+
+  def isNonSidereal: Boolean =
+    target.fold(_ => false, _ => false, _ => true)
 
   def getCoordinates(when: Option[Long]): Option[Coordinates] =
-    _newTarget.fold(
+    target.fold(
       _ => None,
       s => Some(s.coordinates),
       n => when.flatMap(n.coords)
@@ -174,6 +171,6 @@ final class SPTarget(private var _newTarget: Target) extends TransitionalSPTarge
     gcoords(time)(cs => new SCoordinates(cs.ra.toDegrees, cs.dec.toDegrees))
 
   def getSiderealTarget: Option[SiderealTarget] =
-    _newTarget.fold(_ => None, Some(_), _ => None)
+    target.fold(_ => None, Some(_), _ => None)
 
 }

@@ -49,7 +49,7 @@ public class SPTargetPio {
 
     public static ParamSet getParamSet(final SPTarget spt, final PioFactory factory) {
         final ParamSet paramSet = factory.createParamSet(PARAM_SET_NAME);
-        paramSet.addParamSet(TargetParamSetCodecs.TargetParamSetCodec().encode(_TARGET, spt.getNewTarget()));
+        paramSet.addParamSet(TargetParamSetCodecs.TargetParamSetCodec().encode(_TARGET, spt.getTarget()));
         return paramSet;
     }
 

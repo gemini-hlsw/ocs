@@ -31,7 +31,7 @@ final class SiderealDetailEditor extends TargetDetailEditor {
   val pm: SiderealTarget @> ProperMotion = SiderealTarget.properMotion.orZero(ProperMotion.zero)
   val px: SiderealTarget @> Parallax     = SiderealTarget.parallax.orZero(Parallax.zero)
 
-  val motion = NumericPropertySheet2[SiderealTarget](Some("Motion"), _.getNewTarget.asInstanceOf[SiderealTarget],
+  val motion = NumericPropertySheet2[SiderealTarget](Some("Motion"), _.getTarget.asInstanceOf[SiderealTarget],
     Prop("µ RA",     "mas/year", pm >=> ProperMotion.deltaRA  >=> RightAscensionAngularVelocity.velocity >=> AngularVelocity.masPerYear),
     Prop("µ Dec",    "mas/year", pm >=> ProperMotion.deltaDec >=> DeclinationAngularVelocity.velocity    >=> AngularVelocity.masPerYear),
     Prop("Epoch",    "years",    pm >=> ProperMotion.epoch    >=> Epoch.year),

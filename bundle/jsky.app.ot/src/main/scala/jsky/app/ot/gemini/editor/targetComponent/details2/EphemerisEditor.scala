@@ -32,7 +32,7 @@ class EphemerisEditor extends TelescopePosEditor with ReentrancyHack {
 
   def edit(ctx: GOption[ObsContext], spt: SPTarget, node: ISPNode): Unit = {
     nonreentrant {
-      Target.ephemeris.get(spt.getNewTarget) match {
+      Target.ephemeris.get(spt.getTarget) match {
         case None => clear()
         case Some(e) if e.isEmpty => clear()
         case Some(e) =>

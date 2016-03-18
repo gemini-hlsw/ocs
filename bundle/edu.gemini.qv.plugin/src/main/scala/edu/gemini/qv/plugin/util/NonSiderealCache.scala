@@ -82,7 +82,7 @@ object NonSiderealCache {
    * @return
    */
   def horizonsNameFor(obs: Obs): Option[HorizonsDesignation] =
-    obs.getTargetEnvironment.getBase.getNewTarget match {
+    obs.getTargetEnvironment.getBase.getTarget match {
       case n: core.NonSiderealTarget => n.horizonsDesignation
       case _ =>
         LOG.warning(s"Don't know how to get Horizons name for this target ${obs.getObsId}.")

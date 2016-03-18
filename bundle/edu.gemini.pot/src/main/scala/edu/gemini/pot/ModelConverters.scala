@@ -187,7 +187,7 @@ object ModelConverters {
 
     // RCN: this is suuper sketchy but it's what the old code was doing, so ... ?
     def toNewModel:SiderealTarget =
-      sp.getNewTarget.fold(
+      sp.getTarget.fold(
         too => SiderealTarget.empty.copy(name = too.name),
         sid => sid,
         ns  => SiderealTarget.empty.copy(name = ns.name, magnitudes = ns.magnitudes, spectralDistribution = ns.spectralDistribution, spatialProfile = ns.spatialProfile)

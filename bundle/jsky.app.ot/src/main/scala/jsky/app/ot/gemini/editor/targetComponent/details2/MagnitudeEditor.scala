@@ -124,7 +124,7 @@ class MagnitudeEditor2 extends TelescopePosEditor {
       val magOpt: Option[Magnitude] =
         for {
           t  <- Option(target)
-          ms <- Target.magnitudes.get(t.getNewTarget)
+          ms <- Target.magnitudes.get(t.getTarget)
           m  <- ms.find(_.band == band)
         } yield m
 
@@ -133,7 +133,7 @@ class MagnitudeEditor2 extends TelescopePosEditor {
 
         val options: Set[MagnitudeBand] = {
           val bandOrdering = Order[Wavelength].contramap((b: MagnitudeBand) => b.center).toScalaOrdering
-          val existingBands = Target.magnitudes.get(target.getNewTarget).map(_.map(_.band)).orZero
+          val existingBands = Target.magnitudes.get(target.getTarget).map(_.map(_.band)).orZero
           TreeSet.empty[MagnitudeBand](bandOrdering) ++ MagnitudeBand.all -- existingBands + band
         }
 
@@ -193,10 +193,10 @@ class MagnitudeEditor2 extends TelescopePosEditor {
       List(button, tf, cb).foreach(_.setVisible(visible))
       if (visible) {
 
-        button.setEnabled(Target.magnitudes.get(target.getNewTarget).exists(_.nonEmpty))
+        button.setEnabled(Target.magnitudes.get(target.getTarget).exists(_.nonEmpty))
 
         val options: Set[MagnitudeBand] = {
-          val existingBands = Target.magnitudes.get(target.getNewTarget).map(_.map(_.band)).orZero
+          val existingBands = Target.magnitudes.get(target.getTarget).map(_.map(_.band)).orZero
           TreeSet.empty[MagnitudeBand](bandOrdering) ++ MagnitudeBand.all -- existingBands
         }
 
@@ -307,7 +307,7 @@ class MagnitudeEditor2 extends TelescopePosEditor {
 
   private def reinit(target: SPTarget): Unit =
     reinit(target,
-      if (target != null && Target.magnitudes.get(target.getNewTarget).forall(_.isEmpty)) Mode.Add
+      if (target != null && Target.magnitudes.get(target.getTarget).forall(_.isEmpty)) Mode.Add
       else Mode.Edit
     )
 
@@ -322,7 +322,7 @@ class MagnitudeEditor2 extends TelescopePosEditor {
         def run(): Unit = {
           val sb = scroll.getVerticalScrollBar
           sb.setValue(sb.getMaximum)
-          if (Target.magnitudes.get(target.getNewTarget).exists(_.nonEmpty))
+          if (Target.magnitudes.get(target.getTarget).exists(_.nonEmpty))
             newRow.bandCombo.foreach(_.requestFocusInWindow)
         }
       })
@@ -345,17 +345,17 @@ class MagnitudeEditor2 extends TelescopePosEditor {
   private def addBand(b: MagnitudeBand): Unit = {
     target.setNewTarget(Target.magnitudes.mod({ ms =>
       new Magnitude(0.0, b) :: ms.filterNot(_.band == b)
-    }, target.getNewTarget))
+    }, target.getTarget))
     focusOn(b)
   }
 
   private def removeBand(b: MagnitudeBand): Unit =
-    target.setNewTarget(Target.magnitudes.mod(_.filterNot(_.band == b), target.getNewTarget))
+    target.setNewTarget(Target.magnitudes.mod(_.filterNot(_.band == b), target.getTarget))
 
   private def modifyMagnitudeWithBand(b: MagnitudeBand, f: Magnitude => Magnitude): Unit = {
     target.setNewTarget(Target.magnitudes.mod(_.map { m =>
       if (m.band == b) f(m) else m
-    }, target.getNewTarget))
+    }, target.getTarget))
     focusOn(b)
   }
 

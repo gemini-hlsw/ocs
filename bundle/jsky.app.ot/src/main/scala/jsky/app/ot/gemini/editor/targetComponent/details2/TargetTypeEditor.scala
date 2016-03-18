@@ -32,7 +32,7 @@ final class TargetTypeEditor extends DropDownListBoxWidget[AnyRef] with Telescop
     spt = spTarget
     nonreentrant {
       setSelectedItem(
-        spt.getNewTarget.fold(
+        spt.getTarget.fold(
           _ => `Target of Opportunity`,
           _ => `Sidereal Target`,
           _ => `Nonsidereal Target`
