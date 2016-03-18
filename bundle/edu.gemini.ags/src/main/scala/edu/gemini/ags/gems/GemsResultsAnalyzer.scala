@@ -17,7 +17,6 @@ import edu.gemini.pot.ModelConverters._
 import edu.gemini.spModel.obscomp.SPInstObsComp
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.env.{GuideGroup, GuideProbeTargets}
-import edu.gemini.spModel.target.system.HmsDegTarget
 
 import scala.annotation.tailrec
 import scala.collection.JavaConverters._
@@ -406,6 +405,8 @@ object GemsResultsAnalyzer {
     // The true default is suspicious but changing it to false breaks backwards compatibility
     magLimits.searchBands.extract(target).map(m => magLimits.contains(m)).getOrElse(true)
 
-  def toSPTarget(siderealTarget: SiderealTarget):SPTarget = new SPTarget(HmsDegTarget.fromSkyObject(siderealTarget.toOldModel))
+  def toSPTarget(siderealTarget: SiderealTarget):SPTarget = new SPTarget(siderealTarget)
 
 }
+
+

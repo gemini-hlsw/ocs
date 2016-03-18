@@ -6,8 +6,7 @@ import edu.gemini.spModel.core.TooTarget
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.pio.ParamSet
 import edu.gemini.spModel.pio.PioFactory
-import edu.gemini.spModel.target.system.CoordinateParam.Units
-import edu.gemini.spModel.target.system.{HmsDegTarget, ITarget, TransitionalSPTarget}
+import edu.gemini.spModel.target.system.{ TransitionalSPTarget}
 
 import edu.gemini.shared.util.immutable.{ Option => GOption }
 import edu.gemini.shared.util.immutable.ScalaConverters._
@@ -23,30 +22,19 @@ object SPTarget {
   }
 
 }
-
-final class SPTarget(private var _target: ITarget) extends TransitionalSPTarget {
+final class SPTarget(private var _newTarget: Target) extends TransitionalSPTarget {
 
   def this() =
-    this(new HmsDegTarget)
+    this(SiderealTarget.empty)
 
   /** SPTarget with the given RA/Dec in degrees. */
+  @deprecated("Use safe constructors; this one throws if declination is invalid.", "16B")
   def this(raDeg: Double, degDec: Double) =
     this {
-      val hms = new HmsDegTarget
-      hms.getRa.setAs(raDeg, Units.DEGREES)
-      hms.getDec.setAs(degDec, Units.DEGREES)
-      hms
+      Coordinates.fromDegrees(raDeg, degDec)
+        .map(cs => SiderealTarget.empty.copy(coordinates = cs))
+        .getOrElse(sys.error("invalid coords"))
     }
-
-  /** Return the contained target. */
-  protected def getTarget: ITarget =
-    _target
-
-  /** Replace the contained target and notify listeners. */
-  protected def setTarget(target: ITarget): Unit = {
-    _target = target
-    _notifyOfUpdate()
-  }
 
   /** Return a paramset describing this SPTarget. */
   def getParamSet(factory: PioFactory): ParamSet =
@@ -58,13 +46,8 @@ final class SPTarget(private var _target: ITarget) extends TransitionalSPTarget 
   }
 
   /** Clone this SPTarget. */
-  override def clone: SPTarget = {
-    val t: SPTarget = new SPTarget(_target.clone)
-    t.setNewTarget(_newTarget)
-    t
-  }
-
-  private var _newTarget: Target = SiderealTarget.empty
+  override def clone: SPTarget =
+    new SPTarget(_newTarget)
 
   def getNewTarget: Target =
     _newTarget
@@ -190,8 +173,11 @@ final class SPTarget(private var _target: ITarget) extends TransitionalSPTarget 
   def getSkycalcCoordinates(time: GOLong): GOption[SCoordinates] =
     gcoords(time)(cs => new SCoordinates(cs.ra.toDegrees, cs.dec.toDegrees))
 
-  @deprecated("this should not be public")
+  @deprecated("This should not be public.", "16B")
   def notifyOfGenericUpdate(): Unit =
     _notifyOfUpdate()
+
+  def getSiderealTarget: Option[SiderealTarget] =
+    _newTarget.fold(_ => None, Some(_), _ => None)
 
 }

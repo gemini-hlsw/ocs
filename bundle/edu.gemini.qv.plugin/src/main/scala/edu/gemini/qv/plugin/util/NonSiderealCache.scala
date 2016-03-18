@@ -1,16 +1,18 @@
 package edu.gemini.qv.plugin.util
 
-import edu.gemini.horizons.api.{HorizonsQuery, HorizonsService}
+import java.util.Date
+
+import edu.gemini.horizons.server.backend.HorizonsService2
 import edu.gemini.qpt.shared.sp.Obs
-import edu.gemini.qv.plugin.QvTool
 import edu.gemini.skycalc.TimeUtils
-import edu.gemini.spModel.core.{Site, Peer}
-import edu.gemini.spModel.target.system.{ NonSiderealTarget => NST }
+import edu.gemini.spModel.core
+import edu.gemini.spModel.core.{HorizonsDesignation, Site, Peer}
 import edu.gemini.util.skycalc.calc.Interval
 import edu.gemini.util.skycalc.{Night, Ephemeris, NonSiderealTarget}
 import java.util.logging.{Level, Logger}
 import jsky.coords.WorldCoords
 import scala.collection.concurrent
+import scalaz.{\/-, -\/}
 
 /**
  * Cache for non-sidereal targets and their positions according to JPL Horizons.
@@ -20,7 +22,7 @@ object NonSiderealCache {
 
   private val LOG = Logger.getLogger(NonSiderealCache.getClass.getName)
 
-  case class NonSiderealKey(horizonsId: String)
+  case class NonSiderealKey(horizonsId: HorizonsDesignation)
 
   private val targetMap: concurrent.Map[NonSiderealKey, NonSiderealTarget] = concurrent.TrieMap()
 
@@ -41,6 +43,7 @@ object NonSiderealCache {
    * Checks if the positions of the base target of this observation can be looked up using Horizon.
    * In order we can do a lookup for a non-sidereal target it needs to be defined (i.e. target environment,
    * base position and target are not null) and the target is a NonSiderealTarget.
+ *
    * @param obs
    * @return
    */
@@ -58,7 +61,7 @@ object NonSiderealCache {
       getOrElse(NonSiderealTarget(obs.getCoords))
   }
 
-  private def get(peer: Peer, nights: Seq[Night], horizonsId: String, default: WorldCoords): NonSiderealTarget = {
+  private def get(peer: Peer, nights: Seq[Night], horizonsId: HorizonsDesignation, default: WorldCoords): NonSiderealTarget = {
     val key = NonSiderealKey(horizonsId)
     val trg = targetMap.get(key)
     if (trg.isDefined) trg.get
@@ -74,34 +77,31 @@ object NonSiderealCache {
    * Gets the Horizons name from the observation which can be used as the object's ID for position look-ups.
    * Note that this name can be empty if no one has yet done a Horizons lookup for a new non-sidereal target
    * in the OT (magnifying glass).
+ *
    * @param obs
    * @return
    */
-  def horizonsNameFor(obs: Obs): Option[String] =
-    obs.getTargetEnvironment.getBase.getNonSiderealTarget match {
-
-      case Some(t) =>
-        if (t.getName == null || t.getName.isEmpty) None
-        else Option(t.getName)
-
-      case None =>
+  def horizonsNameFor(obs: Obs): Option[HorizonsDesignation] =
+    obs.getTargetEnvironment.getBase.getNewTarget match {
+      case n: core.NonSiderealTarget => n.horizonsDesignation
+      case _ =>
         LOG.warning(s"Don't know how to get Horizons name for this target ${obs.getObsId}.")
         None
     }
-
 
   /**
    * Executes a horizons query for the a semester and waits for the result.
    * Doing this as a blocking operation is ok here, because this is only executed as part of the constraints
    * calculations which are all done in the background and in parallel, so this will not block the main UI but
    * will wait for the positions to be available to do the constraints calculations that need them.
+ *
    * @param peer
    * @param nights
    * @param horizonsName
    * @param default
    * @return
    */
-  private def executeHorizonsQuery(peer: Peer, nights: Seq[Night], horizonsName: String, default: WorldCoords): Seq[Ephemeris] = {
+  private def executeHorizonsQuery(peer: Peer, nights: Seq[Night], horizonsName: HorizonsDesignation, default: WorldCoords): Seq[Ephemeris] = {
     // Horizons service only allows fixed intervals, which means we can not get the positions precisely at middle night times for each night
     // of a whole semester and getting a precise position for every single night is too slow. As a compromise we calculate an "average"
     // middle night time for the semester and use that (e.g. if for the first night middle night time is 00:40 and for the 90st night
@@ -118,26 +118,23 @@ object NonSiderealCache {
     LOG.fine(s"Mid night times are: head: time=${TimeUtils.print(nights.head.middleNightTime, peer.site.timezone)}}")
     LOG.fine(s"Mid night times are: last: time=${TimeUtils.print(nights.last.middleNightTime, peer.site.timezone)}}")
 
-    // execute and wait, this will block; we need the horizons result before we can continue..
-    val tryResult = HorizonsService.
-      executeAndWait(QvTool.authClient, peer, horizonsName,  interval, 24*60, HorizonsQuery.StepUnits.TIME_MINUTES)
-
-    // in case of an error log a warning
-    tryResult.leftMap(t => {
-      LOG.log(Level.WARNING, s"Horizons lookup failed for id $horizonsName, using default position", t)
-    })
-
-    // in case of an empty result also return dummy result, otherwise return positions returned by Horizons service
-    tryResult.map(result => {
-      if (result.getEphemeris.isEmpty) {
-        LOG.warning(s"Reply from Horizons service was empty for id $horizonsName: ${result.getReplyType}; using default position")
-        dummyResult
-      } else {
-        LOG.fine(s"Received ${result.getEphemeris.size} positions for id $horizonsName from Horizons service")
-        val eph = Seq(scala.collection.JavaConversions.asScalaBuffer(result.getEphemeris):_*)
-        eph.map(e => Ephemeris(e.getDate.getTime, e.getCoordinates))
+    def toSkycalcEphemeris(e: core.Ephemeris): Seq[Ephemeris] =
+      e.toList.map { case (t, c) =>
+        Ephemeris(t, new WorldCoords(c.ra.toDegrees, c.dec.toDegrees))
       }
-    }).getOrElse(dummyResult)
+
+    // One element per day
+    HorizonsService2.lookupEphemeris(horizonsName, peer.site, new Date(interval.start), new Date(interval.end), interval.asDays.toInt)
+      .map(toSkycalcEphemeris).run.unsafePerformIO match {
+
+      case -\/(e) =>
+          LOG.log(Level.WARNING, s"Horizons lookup failed for id $horizonsName, using default position; error was $e")
+          dummyResult
+
+      case \/-(e) =>
+          LOG.fine(s"Received ${e.size} positions for id $horizonsName from Horizons service")
+          e
+    }
 
   }
 

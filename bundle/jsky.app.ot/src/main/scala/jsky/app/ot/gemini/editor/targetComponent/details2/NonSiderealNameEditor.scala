@@ -13,7 +13,6 @@ import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.spModel.core.{Site, Ephemeris, HorizonsDesignation, Target}
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
-import edu.gemini.spModel.target.system.ConicTarget
 
 import jsky.app.ot.gemini.editor.targetComponent.TelescopePosEditor
 import jsky.util.gui.{DialogUtil, TextBoxWidget, TextBoxWidgetWatcher}

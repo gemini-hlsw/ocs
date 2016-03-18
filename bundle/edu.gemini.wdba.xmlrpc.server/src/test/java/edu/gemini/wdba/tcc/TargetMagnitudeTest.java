@@ -10,8 +10,6 @@ import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.env.GuideGroup;
 import edu.gemini.spModel.target.obsComp.PwfsGuideProbe;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
-import edu.gemini.spModel.target.system.ConicTarget;
-import edu.gemini.spModel.target.system.ITarget;
 import org.dom4j.Document;
 import org.dom4j.Element;
 

@@ -46,44 +46,46 @@ object SpTargetFactory {
 
 
   private def createNonSiderealTarget(nsid: NonSiderealTarget, time: Long): Either[String, SP.SPTarget] =
-    for {
-      coordsAt <- nonSiderealCoordinates(nsid, time).right
-    } yield {
-      val itarget = new SP.system.ConicTarget()
-      val (coords, when) = coordsAt
-      itarget.setDateForPosition(new java.util.Date(when))
-
-      val spTarget = new SP.SPTarget(itarget)
-      spTarget.setName(nsid.name)
-      setRaDec(spTarget, coords)
-
-      // Add apparent magnitude, if any.
-      nsid.magnitude(time)
-        .map(new SO.Magnitude(SO.Magnitude.Band.AP, _, MagnitudeSystem.AB))
-        .foreach(spTarget.putMagnitude)
-
-      spTarget
-    }
+    ??? // TODO: P1 to P2
+//    for {
+//      coordsAt <- nonSiderealCoordinates(nsid, time).right
+//    } yield {
+//      val itarget = new SP.system.ConicTarget()
+//      val (coords, when) = coordsAt
+//      itarget.setDateForPosition(new java.util.Date(when))
+//
+//      val spTarget = new SP.SPTarget(itarget)
+//      spTarget.setName(nsid.name)
+//      setRaDec(spTarget, coords)
+//
+//      // Add apparent magnitude, if any.
+//      nsid.magnitude(time)
+//        .map(new SO.Magnitude(SO.Magnitude.Band.AP, _, MagnitudeSystem.AB))
+//        .foreach(spTarget.putMagnitude)
+//
+//      spTarget
+//    }
 
   private def createSiderealTarget(sid: SiderealTarget, time: Long): Either[String, SP.SPTarget] =
-    for {
-      coords <- siderealCoordinates(sid, time).right
-      mags   <- siderealMags(sid).right
-    } yield {
-      val itarget  = new SP.system.HmsDegTarget()
-      sid.properMotion.foreach { pm =>
-        val ra  = pm.deltaRA
-        val dec = pm.deltaDec
-        itarget.setPM1(new SPProperMotionRA(ra,   SP.system.CoordinateParam.Units.MILLI_ARCSECS_PER_YEAR))
-        itarget.setPM2(new SPProperMotionDec(dec, SP.system.CoordinateParam.Units.MILLI_ARCSECS_PER_YEAR))
-      }
-
-      val spTarget = new SP.SPTarget(itarget)
-      setRaDec(spTarget, coords)
-      spTarget.setName(sid.name)
-      spTarget.setMagnitudes(DefaultImList.create(mags.asJava))
-      spTarget
-    }
+    ??? // TODO: P1 to P2
+//    for {
+//      coords <- siderealCoordinates(sid, time).right
+//      mags   <- siderealMags(sid).right
+//    } yield {
+//      val itarget  = new SP.system.HmsDegTarget()
+//      sid.properMotion.foreach { pm =>
+//        val ra  = pm.deltaRA
+//        val dec = pm.deltaDec
+//        itarget.setPM1(new SPProperMotionRA(ra,   SP.system.CoordinateParam.Units.MILLI_ARCSECS_PER_YEAR))
+//        itarget.setPM2(new SPProperMotionDec(dec, SP.system.CoordinateParam.Units.MILLI_ARCSECS_PER_YEAR))
+//      }
+//
+//      val spTarget = new SP.SPTarget(itarget)
+//      setRaDec(spTarget, coords)
+//      spTarget.setName(sid.name)
+//      spTarget.setMagnitudes(DefaultImList.create(mags.asJava))
+//      spTarget
+//    }
 
   private def setRaDec(spt: SP.SPTarget, c: Coordinates) {
     spt.setRaDecDegrees(c.ra.toAngle.toDegrees, c.dec.toDegrees)

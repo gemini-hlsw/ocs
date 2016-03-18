@@ -10,7 +10,6 @@ import edu.gemini.spModel.gemini.gsaoi.GsaoiOdgw
 import edu.gemini.spModel.gemini.nifs.NifsOiwfsGuideProbe
 import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.spModel.target.env.GuideGroup
-import edu.gemini.spModel.target.system.NonSiderealTarget
 import java.beans.PropertyChangeEvent
 import scala.collection.JavaConverters._
 

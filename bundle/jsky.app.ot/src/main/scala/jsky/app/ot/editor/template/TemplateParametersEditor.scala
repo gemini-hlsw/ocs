@@ -5,7 +5,7 @@ import edu.gemini.shared.skyobject.Magnitude
 import edu.gemini.shared.util.TimeValue
 import edu.gemini.shared.util.immutable.{ DefaultImList, None => JNone, Option => JOption }
 import edu.gemini.spModel.`type`.ObsoletableSpType
-import edu.gemini.spModel.core.MagnitudeSystem
+import edu.gemini.spModel.core.{DeclinationAngularVelocity, AngularVelocity, RightAscensionAngularVelocity, ProperMotion, SiderealTarget, MagnitudeSystem}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.{PercentageContainer, ImageQuality, CloudCover, SkyBackground, WaterVapor}
 import edu.gemini.spModel.rich.shared.immutable.asScalaOpt
@@ -234,7 +234,7 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
     }
 
     def targetType(t: SPTarget): TargetType =
-      t.getHmsDegTarget.map(_ => Sidereal).getOrElse(NonSidereal)
+      t.getSiderealTarget.map(_ => Sidereal).getOrElse(NonSidereal)
 
     object CoordinatesPanel extends ColumnPanel {
       val nameField = new BoundTextField[String](10)(
@@ -275,26 +275,34 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
         set  = setTarget((a, b) => a.setDecDegrees(b))
       )
 
-      def pmField(getPM: HmsDegTarget => Double, setPM: (HmsDegTarget, Double) => Unit): BoundTextField[Double] =
+      def pmField(lens: SiderealTarget @> Double): BoundTextField[Double] =
         new BoundTextField[Double](10)(
           read = _.toDouble,
           show = d => f"$d%.3f",
-          get  = tp => tp.getTarget.getHmsDegTarget.fold(0.0)(getPM),
+          get  = tp => tp.getTarget.getSiderealTarget.fold(0.0)(lens.get),
           set  = (tp, pm) => {
             val newTarget = tp.getTarget
-            newTarget.getHmsDegTarget.foreach {t =>
-              setPM(t, pm)
-              newTarget.notifyOfGenericUpdate()
+            newTarget.getSiderealTarget.foreach { t =>
+              tp.getTarget.setNewTarget(lens.set(t, pm))
             }
             tp.copy(newTarget)
           }
         )
 
+      // Lens that mediates ProperMotion.zero ~ None ... not clear why we distinguish this in the
+      // model when no user-facing code cares.
+      val totalPM: SiderealTarget @> ProperMotion =
+        SiderealTarget.properMotion.xmapB(_.getOrElse(ProperMotion.zero))(Some(_).filterNot(_ == ProperMotion.zero))
+
+      // Given the lens above we can lens dRA and dDec
+      val totalPMRA  = totalPM >=> ProperMotion.deltaRA  >=> RightAscensionAngularVelocity.velocity >=> AngularVelocity.masPerYear
+      val totalPMDec = totalPM >=> ProperMotion.deltaDec >=> DeclinationAngularVelocity.velocity    >=> AngularVelocity.masPerYear
+
       val siderealRows = List(
         Row("RA",     raField),
         Row("Dec",    decField),
-        Row("pm RA",  pmField(_.getPropMotionRA,  _.setPropMotionRA(_))),
-        Row("pm Dec", pmField(_.getPropMotionDec, _.setPropMotionDec(_)))
+        Row("pm RA",  pmField(totalPMRA)),
+        Row("pm Dec", pmField(totalPMDec))
       )
 
       val rows = List(

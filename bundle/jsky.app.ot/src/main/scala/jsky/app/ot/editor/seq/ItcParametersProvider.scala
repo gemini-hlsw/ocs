@@ -8,7 +8,6 @@ import edu.gemini.spModel.config2.ConfigSequence
 import edu.gemini.spModel.core.{SpectralDistribution, SpatialProfile, Redshift}
 import edu.gemini.spModel.obscomp.SPInstObsComp
 import edu.gemini.spModel.target.env.TargetEnvironment
-import edu.gemini.spModel.target.system.HmsDegTarget
 import edu.gemini.spModel.telescope.IssPort
 
 import scalaz._
@@ -68,7 +67,7 @@ object ItcParametersProvider {
     def redshift: String \/ Redshift =
       for {
         tEnv <- targetEnvironment
-      } yield tEnv.getBase.getHmsDegTarget.fold(Redshift(0.0))(_.getRedshift)
+      } yield tEnv.getBase.getSiderealTarget.flatMap(_.redshift).getOrElse(Redshift.zero)
 
     def sequence: ConfigSequence = Option(owner.getContextObservation).fold(new ConfigSequence) {
       ConfigBridge.extractSequence(_, null, ConfigValMapInstances.IDENTITY_MAP, true)

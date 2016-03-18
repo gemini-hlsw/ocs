@@ -10,7 +10,6 @@ import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 import edu.gemini.spModel.pio.xml.PioXmlFactory;
 import edu.gemini.spModel.target.SPTarget;
-import edu.gemini.spModel.target.system.NonSiderealTarget;
 import edu.gemini.spModel.template.SpBlueprint;
 import edu.gemini.spModel.template.TemplateFolder;
 import edu.gemini.spModel.template.TemplateGroup;

@@ -1,6 +1,7 @@
 package edu.gemini.pot
 
 import edu.gemini.shared.skyobject
+import edu.gemini.shared.skyobject.SkyObject
 import edu.gemini.shared.util.immutable
 import edu.gemini.skycalc
 import edu.gemini.spModel.core._
@@ -8,7 +9,6 @@ import edu.gemini.spModel.core.AngleSyntax._
 import edu.gemini.spModel.rich.shared.immutable._
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.offset.OffsetPosBase
-import edu.gemini.spModel.target.system.{CoordinateTypes, HmsDegTarget}
 
 import scalaz._
 import Scalaz._
@@ -25,6 +25,8 @@ object ModelConverters {
 
   def toSideralTarget(spTarget: SPTarget):SiderealTarget = spTarget.toNewModel
 
+  def toSideralTarget(so: SkyObject):SiderealTarget = so.toNewModel
+
   def toOffset(pos: OffsetPosBase): Offset = pos.toNewModel
 
   def toOldBand(band: MagnitudeBand): skyobject.Magnitude.Band = band.toOldModel
@@ -39,10 +41,6 @@ object ModelConverters {
 
   implicit class NewAngle2Old(val angle: Angle) extends AnyVal {
     def toOldModel: skycalc.Angle = skycalc.Angle.degrees(angle.toDegrees)
-  }
-
-  implicit class NewEpoch2Old(val epoch: Epoch) extends AnyVal{
-    def toOldModel: CoordinateTypes.Epoch = new CoordinateTypes.Epoch(epoch.year)
   }
 
   // We need a way to convert angles from [0,maxValOfUnit) to [-maxValOfUnit/2,maxValOfUnit/2) for a number of purposes.
@@ -186,34 +184,14 @@ object ModelConverters {
   }
 
   implicit class SPTarget2SiderealTarget(val sp:SPTarget) extends AnyVal {
-    def toNewModel:SiderealTarget = {
-      val when        = immutable.None.instance[java.lang.Long]
-      val name        = sp.getName
-      val mags        = sp.getMagnitudes.asScalaList.map(_.toNewModel)
-      val ra          = Angle.fromDegrees(sp.getRaDegrees(when).getOrElse(0.0))
-      val dec         = Angle.fromDegrees(sp.getDecDegrees(when).getOrElse(0.0))
-      val coordinates = Coordinates(RightAscension.fromAngle(ra), Declination.fromAngle(dec).getOrElse(Declination.zero))
 
-      // Only HmsDegTargets have a proper motion, radial velocity, etc
-      val pm = sp.getHmsDegTarget map { t =>
-        ProperMotion(RightAscensionAngularVelocity(AngularVelocity(t.getPropMotionRA)), DeclinationAngularVelocity(AngularVelocity(t.getPropMotionDec)))
-      }
-      val px = sp.getHmsDegTarget map { t =>
-        Parallax(t.getParallax.mas())
-      }
-      val z = sp.getHmsDegTarget map { t =>
-        t.getRedshift
-      }
-      SiderealTarget( // full ctor here, so we're forced to handle changes
-        name                 = name,
-        coordinates          = coordinates,
-        properMotion         = pm,
-        redshift             = z,
-        parallax             = px,
-        magnitudes           = mags,
-        spectralDistribution = sp.getSpectralDistribution,
-        spatialProfile       = sp.getSpatialProfile
+    // RCN: this is suuper sketchy but it's what the old code was doing, so ... ?
+    def toNewModel:SiderealTarget =
+      sp.getNewTarget.fold(
+        too => SiderealTarget.empty.copy(name = too.name),
+        sid => sid,
+        ns  => SiderealTarget.empty.copy(name = ns.name, magnitudes = ns.magnitudes, spectralDistribution = ns.spectralDistribution, spatialProfile = ns.spatialProfile)
       )
-    }
+
   }
 }

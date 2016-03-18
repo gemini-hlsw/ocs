@@ -7,7 +7,7 @@ import edu.gemini.shared.util.immutable.Option;
 
 import edu.gemini.shared.util.immutable.Some;
 import edu.gemini.shared.util.immutable.None;
-import edu.gemini.spModel.core.Site;
+import edu.gemini.spModel.core.*;
 import edu.gemini.spModel.gemini.altair.AltairParams;
 import edu.gemini.spModel.gemini.altair.InstAltair;
 import edu.gemini.spModel.gemini.gmos.InstGmosNorth;
@@ -151,9 +151,10 @@ public enum ToContext {
             // Here we just need an SPTarget with a contained NonSiderealTarget. In the end, this
             // is just used to determine whether it is a non-sidereal target or not in order to
             // pick the right guider.
+            // TODO: track down where this happens!
             case nonsidereal:
-                t = new SPTarget(new ConicTarget());
-                t.setRaDecDegrees(raDeg, decDeg);
+                t = new SPTarget(edu.gemini.spModel.core.NonSiderealTarget.empty());
+//                t.setRaDecDegrees(raDeg, decDeg);
                 break;
             default:
                 t = new SPTarget(raDeg, decDeg);

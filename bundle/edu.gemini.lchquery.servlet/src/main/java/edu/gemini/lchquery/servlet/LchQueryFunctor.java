@@ -50,7 +50,6 @@ import edu.gemini.spModel.target.env.GuideGroup;
 import edu.gemini.spModel.target.env.GuideProbeTargets;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
-import edu.gemini.spModel.target.system.NonSiderealTarget;
 import edu.gemini.spModel.too.Too;
 import edu.gemini.spModel.too.TooType;
 import edu.gemini.spModel.util.SPTreeUtil;
