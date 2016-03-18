@@ -1,0 +1,19 @@
+<conf>
+    <smtp>smtp.hi.gemini.edu</smtp>
+
+    <bcc>swalker@gemini.edu</bcc>
+    <bcc>cquiroz@gemini.edu</bcc>
+
+    <type name="FastTurnaround">
+        <dir>/home/software/test_proposals/fast_turnaround/proposals/2016B</dir>
+        <to>pitft@gemini.edu</to>
+    </type>
+
+    <filetranslation>
+        <translation>
+            <from>ft</from>
+            <to>FT</to>
+        </translation>
+    </filetranslation>
+
+</conf>

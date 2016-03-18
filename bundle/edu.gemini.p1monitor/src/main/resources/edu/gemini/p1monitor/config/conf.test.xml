@@ -25,6 +25,11 @@
         <template>au</template>
     </type>
 
+    <type name="FastTurnaround">
+        <dir>/tmp/ft</dir>
+        <to>cquiroz@gemini.edu</to>
+    </type>
+
     <filetranslation>
         <translation>
             <from>System Verification</from>
@@ -41,6 +46,10 @@
         <translation>
             <from>Demo Science</from>
             <to>DS</to>
+        </translation>
+        <translation>
+            <from>ft</from>
+            <to>FastTurnaround</to>
         </translation>
     </filetranslation>
 
