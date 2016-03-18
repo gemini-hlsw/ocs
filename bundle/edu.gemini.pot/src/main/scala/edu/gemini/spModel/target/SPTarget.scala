@@ -173,10 +173,6 @@ final class SPTarget(private var _newTarget: Target) extends TransitionalSPTarge
   def getSkycalcCoordinates(time: GOLong): GOption[SCoordinates] =
     gcoords(time)(cs => new SCoordinates(cs.ra.toDegrees, cs.dec.toDegrees))
 
-  @deprecated("This should not be public.", "16B")
-  def notifyOfGenericUpdate(): Unit =
-    _notifyOfUpdate()
-
   def getSiderealTarget: Option[SiderealTarget] =
     _newTarget.fold(_ => None, Some(_), _ => None)
 
