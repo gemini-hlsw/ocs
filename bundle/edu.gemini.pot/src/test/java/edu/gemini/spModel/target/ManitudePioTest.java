@@ -1,7 +1,8 @@
 package edu.gemini.spModel.target;
 
-import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.util.immutable.*;
+import edu.gemini.spModel.core.Magnitude;
+import edu.gemini.spModel.core.MagnitudeBand;
 import edu.gemini.spModel.core.MagnitudeSystem;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.PioFactory;
@@ -20,7 +21,7 @@ public final class ManitudePioTest {
     @Test
     public void testMagnitudeIO() throws Exception {
         // Without error.
-        Magnitude mag1 = new Magnitude(Magnitude.Band.J, 1);
+        Magnitude mag1 = new Magnitude(1, MagnitudeBand.J$.MODULE$);
 
         ParamSet  pset = MagnitudePio.instance.toParamSet(fact, mag1);
         Magnitude mag2 = MagnitudePio.instance.toMagnitude(pset);
@@ -31,7 +32,7 @@ public final class ManitudePioTest {
 
     @Test
     public void testError() throws Exception {
-        Magnitude mag1 = new Magnitude(Magnitude.Band.J, 1, 0.1);
+        Magnitude mag1 = new Magnitude(1, MagnitudeBand.J$.MODULE$, 0.1);
 
         ParamSet  pset = MagnitudePio.instance.toParamSet(fact, mag1);
         Magnitude mag2 = MagnitudePio.instance.toMagnitude(pset);
@@ -52,8 +53,8 @@ public final class ManitudePioTest {
 
     @Test
     public void testList() throws Exception {
-        Magnitude magJ1 = new Magnitude(Magnitude.Band.J, 1);
-        Magnitude magK2 = new Magnitude(Magnitude.Band.K, 2);
+        Magnitude magJ1 = new Magnitude(1, MagnitudeBand.J$.MODULE$);
+        Magnitude magK2 = new Magnitude(2, MagnitudeBand.K$.MODULE$);
 
         ImList<Magnitude> lst1 = DefaultImList.create(magJ1, magK2);
         ParamSet pset = MagnitudePio.instance.toParamSet(fact, lst1);
@@ -64,20 +65,20 @@ public final class ManitudePioTest {
         // Order isn't necessarily preserved.
         assertEquals(new Some<Magnitude>(magJ1), lst2.find(new PredicateOp<Magnitude>() {
             @Override public Boolean apply(Magnitude magnitude) {
-                return magnitude.getBand() == Magnitude.Band.J;
+                return magnitude.band() == MagnitudeBand.J$.MODULE$;
             }
         }));
         assertEquals(new Some<Magnitude>(magK2), lst2.find(new PredicateOp<Magnitude>() {
             @Override public Boolean apply(Magnitude magnitude) {
-                return magnitude.getBand() == Magnitude.Band.K;
+                return magnitude.band() == MagnitudeBand.K$.MODULE$;
             }
         }));
     }
 
     @Test
     public void testListWithSystem() throws Exception {
-        Magnitude magJ1 = new Magnitude(Magnitude.Band.J, 1, (Option<Double>) None.INSTANCE, MagnitudeSystem.AB$.MODULE$);
-        Magnitude magK2 = new Magnitude(Magnitude.Band.K, 2, (Option<Double>) None.INSTANCE, MagnitudeSystem.Jy$.MODULE$);
+        Magnitude magJ1 = new Magnitude(1, MagnitudeBand.J$.MODULE$, MagnitudeSystem.AB$.MODULE$);
+        Magnitude magK2 = new Magnitude(2, MagnitudeBand.K$.MODULE$, MagnitudeSystem.Jy$.MODULE$);
 
         ImList<Magnitude> lst1 = DefaultImList.create(magJ1, magK2);
         ParamSet pset = MagnitudePio.instance.toParamSet(fact, lst1);
@@ -87,10 +88,10 @@ public final class ManitudePioTest {
 
         // Order isn't necessarily preserved.
         assertEquals(new Some<>(magJ1), lst2.find(
-            magnitude -> magnitude.getBand() == Magnitude.Band.J && magnitude.getSystem() == MagnitudeSystem.AB$.MODULE$
+            magnitude -> magnitude.band() == MagnitudeBand.J$.MODULE$ && magnitude.system() == MagnitudeSystem.AB$.MODULE$
         ));
         assertEquals(new Some<>(magK2), lst2.find(
-            magnitude -> magnitude.getBand() == Magnitude.Band.K && magnitude.getSystem() == MagnitudeSystem.Jy$.MODULE$
+            magnitude -> magnitude.band() == MagnitudeBand.K$.MODULE$ && magnitude.system() == MagnitudeSystem.Jy$.MODULE$
         ));
     }
 }

@@ -19,7 +19,7 @@ object REL_2232_Test extends TemplateSpec("NIFS_BP.xml") with SpecificationLike 
   // list should always have size = 1 but we will check that in a test below.
   def groupBuckets(g: ISPTemplateGroup): List[Option[TargetBrightness]] =
     p2targets(g)
-      .map(p2mag(_, Band.K))
+      .map(p2mag(_, MagnitudeBand.K))
       .map(_.map(TargetBrightness(_)))
 
   // Return the TargetBrightness bucket for the first target in the given group. We establish by

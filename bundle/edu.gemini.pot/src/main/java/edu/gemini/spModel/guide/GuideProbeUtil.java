@@ -7,7 +7,6 @@ import edu.gemini.skycalc.Angle;
 import edu.gemini.skycalc.CoordinateDiff;
 import edu.gemini.skycalc.Coordinates;
 import edu.gemini.skycalc.Offset;
-import edu.gemini.shared.skyobject.SkyObject;
 import edu.gemini.shared.skyobject.coords.HmsDegCoordinates;
 import edu.gemini.spModel.data.AbstractDataObject;
 import edu.gemini.spModel.data.ISPDataObject;

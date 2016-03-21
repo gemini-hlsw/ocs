@@ -9,7 +9,6 @@ import edu.gemini.shared.util.immutable.Some;
 import edu.gemini.skycalc.Angle;
 import edu.gemini.skycalc.Coordinates;
 import edu.gemini.skycalc.Offset;
-import edu.gemini.shared.skyobject.SkyObject;
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.gemini.gmos.GmosCommonType;

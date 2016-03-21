@@ -9,6 +9,7 @@ import edu.gemini.spModel.config.ConfigPostProcessor;
 import edu.gemini.spModel.config2.Config;
 import edu.gemini.spModel.config2.ConfigSequence;
 import edu.gemini.spModel.config2.ItemKey;
+import edu.gemini.spModel.core.MagnitudeBand;
 import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.data.ISPDataObject;
 import edu.gemini.spModel.data.YesNoType;
@@ -419,11 +420,11 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
      * Filter: see OT-62
      */
     public enum Filter implements DisplayableSpType, SequenceableSpType, LoggableSpType {
-        Y(Magnitude.Band.Y),
-        J(Magnitude.Band.J),
-        H(Magnitude.Band.H),
-        K1(Magnitude.Band.K),
-        K2(Magnitude.Band.K)
+         Y(MagnitudeBand.Y$.MODULE$),
+         J(MagnitudeBand.J$.MODULE$),
+         H(MagnitudeBand.H$.MODULE$),
+        K1(MagnitudeBand.K$.MODULE$),
+        K2(MagnitudeBand.K$.MODULE$)
         ;
 
         /** The default filter value **/
@@ -431,9 +432,9 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
         public static final ItemKey KEY = new ItemKey(INSTRUMENT_KEY, "filter");
 
         // The related mag band
-        private Magnitude.Band _band;
+        private MagnitudeBand _band;
 
-        Filter(Magnitude.Band band) {
+        Filter(MagnitudeBand band) {
             _band = band;
 
         }
@@ -446,7 +447,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
             return name();
         }
 
-        public Magnitude.Band getBand() {
+        public MagnitudeBand getBand() {
             return _band;
         }
 

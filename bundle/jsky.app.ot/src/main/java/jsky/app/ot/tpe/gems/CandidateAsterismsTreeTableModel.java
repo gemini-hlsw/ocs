@@ -1,12 +1,12 @@
 package jsky.app.ot.tpe.gems;
 
 import edu.gemini.ags.gems.GemsUtils4Java;
-import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.util.immutable.DefaultImList;
 import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.ags.gems.GemsGuideStars;
 import edu.gemini.ags.gems.GemsStrehl;
 import edu.gemini.shared.util.immutable.Option;
+import edu.gemini.spModel.core.MagnitudeBand;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.GuideProbeTargets;
@@ -79,7 +79,7 @@ class CandidateAsterismsTreeTableModel extends AbstractTreeTableModel {
         private final GuideProbeTargets _guideProbeTargets;
 
         // The NIR mag band to display
-        private final Magnitude.Band _band;
+        private final MagnitudeBand _band;
 
         // Not displayed: true if this is a top level tree node row
         private final boolean _isTopLevel;
@@ -115,7 +115,7 @@ class CandidateAsterismsTreeTableModel extends AbstractTreeTableModel {
         }
 
         // A row corresponding to a GuideProbeTargets object (child node)
-        Row(GemsGuideStars gemsGuideStars, GuideProbeTargets guideProbeTargets, Magnitude.Band band, Option<Long> when) {
+        Row(GemsGuideStars gemsGuideStars, GuideProbeTargets guideProbeTargets, MagnitudeBand band, Option<Long> when) {
             _gemsGuideStars = gemsGuideStars;
             _guideProbeTargets = guideProbeTargets;
             _band = band;
@@ -180,7 +180,7 @@ class CandidateAsterismsTreeTableModel extends AbstractTreeTableModel {
             if (_guideProbeTargets != null) {
                 if (!_guideProbeTargets.getPrimary().isEmpty()) {
                     GuideProbe guideProbe = _guideProbeTargets.getGuider();
-                    return GemsUtils4Java.probeMagnitudeInUse(guideProbe, _band, _guideProbeTargets.getPrimary().getValue().getMagnitudes());
+                    return GemsUtils4Java.probeMagnitudeInUse(guideProbe, _band, _guideProbeTargets.getPrimary().getValue().getNewMagnitudesJava());
                 }
             } else if (_gemsGuideStars != null) { // top level displays Strehl values
                 GemsStrehl strehl = _gemsGuideStars.strehl();
@@ -217,7 +217,7 @@ class CandidateAsterismsTreeTableModel extends AbstractTreeTableModel {
             return null;
         }
 
-        public Magnitude.Band getBand() {
+        public MagnitudeBand getBand() {
             return _band;
         }
 
@@ -236,7 +236,7 @@ class CandidateAsterismsTreeTableModel extends AbstractTreeTableModel {
 
     private final ImList<String> _columnHeaders;
 
-    CandidateAsterismsTreeTableModel(List<GemsGuideStars> gemsGuideStarsList, Magnitude.Band band, Option<Long> when) {
+    CandidateAsterismsTreeTableModel(List<GemsGuideStars> gemsGuideStarsList, MagnitudeBand band, Option<Long> when) {
         super(new ArrayList<Row>());
         _columnHeaders = computeColumnHeaders();
 

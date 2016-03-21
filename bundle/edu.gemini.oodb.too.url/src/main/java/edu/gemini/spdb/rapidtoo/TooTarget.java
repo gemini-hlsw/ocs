@@ -4,8 +4,8 @@
 
 package edu.gemini.spdb.rapidtoo;
 
-import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.util.immutable.ImList;
+import edu.gemini.spModel.core.Magnitude;
 
 import java.io.Serializable;
 

@@ -2,6 +2,7 @@ package edu.gemini.phase2.template.factory.impl.graces
 
 import edu.gemini.phase2.template.factory.impl._
 import edu.gemini.shared.skyobject.Magnitude.Band
+import edu.gemini.spModel.core.MagnitudeBand
 import edu.gemini.spModel.gemini.graces.blueprint.SpGracesBlueprint
 import edu.gemini.pot.sp.{SPComponentType, ISPGroup}
 import edu.gemini.spModel.gemini.visitor.VisitorInstrument
@@ -34,9 +35,9 @@ case class Graces(blueprint: SpGracesBlueprint, exampleTarget: Option[SPTarget])
   val rMag: Option[Double] =
     for {
       t <- exampleTarget
-      m <- t.getMagnitude(Band.R).asScalaOpt orElse
-           t.getMagnitude(Band.V).asScalaOpt
-    } yield m.getBrightness
+      m <- t.getNewMagnitude(MagnitudeBand.R) orElse
+           t.getNewMagnitude(MagnitudeBand.V)
+    } yield m.value
 
   //  IF FIBER-MODE == 1 AND (READ-MODE == Normal OR READ-MODE == Fast):
   //    IF   R> 10 INCLUDE {1}

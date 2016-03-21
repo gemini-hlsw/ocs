@@ -5,7 +5,7 @@ import edu.gemini.spModel.target.SPTarget
 
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams._
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams.{SlitWidth => FPU, Decker}
-import edu.gemini.shared.skyobject.Magnitude.Band
+import edu.gemini.spModel.core.MagnitudeBand
 import edu.gemini.spModel.gemini.altair.AltairParams.Mode._
 import edu.gemini.spModel.gemini.altair.AltairParams.Mode
 import edu.gemini.pot.sp.ISPObservation
@@ -23,7 +23,7 @@ case class GnirsSpectroscopy(blueprint:SpGnirsBlueprintSpectroscopy, exampleTarg
   import CrossDispersed.{SXD, LXD}
   import SlitWidth.{PINHOLE_1, PINHOLE_3}
   import WellDepth.DEEP
-  import Band.H
+  import MagnitudeBand.H
   import edu.gemini.spModel.obscomp.InstConstants.EXPOSURE_TIME_PROP
 
   // Some aliases, just to match the P-Code
@@ -98,7 +98,7 @@ case class GnirsSpectroscopy(blueprint:SpGnirsBlueprintSpectroscopy, exampleTarg
   // IF TARGET H-MAGNITUDE >= 20 INCLUDE {10}        #Blind offset target
   // ELSE INCLUDE {7} - {11}, {22}   # No H-magnitude provided for target, so put all of them
 
-  val otherAcq = exampleTarget.flatMap(t => Option(t.getMagnitude(H).getOrNull)).map(_.getBrightness) match {
+  val otherAcq = exampleTarget.flatMap(t => t.getNewMagnitude(H)).map(_.value) match {
     case Some(h) =>
       if (h < 7) Seq(22)
       else if (h < 11.5) Seq(7)

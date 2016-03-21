@@ -1,8 +1,6 @@
 package edu.gemini.spModel.io.impl.migration.to2015B
 
-import edu.gemini.shared.skyobject.Magnitude
-import edu.gemini.shared.skyobject.Magnitude.Band
-import edu.gemini.spModel.core.MagnitudeSystem
+import edu.gemini.spModel.core.{Magnitude, MagnitudeBand, MagnitudeSystem}
 import edu.gemini.spModel.core.MagnitudeSystem.{Vega, AB, Jy}
 import org.specs2.mutable.Specification
 
@@ -10,12 +8,12 @@ import scalaz.NonEmptyList
 
 object BrightnessParserSpec extends Specification {
 
-  import Magnitude.Band._
+  import MagnitudeBand._
 
-  def mag(n: Double, b: Band, s: MagnitudeSystem): Magnitude =
-    new Magnitude(b, n, s)
+  def mag(n: Double, b: MagnitudeBand, s: MagnitudeSystem): Magnitude =
+    new Magnitude(n, b, s)
 
-  def one(n: Double, b: Band, s: MagnitudeSystem): NonEmptyList[Magnitude] =
+  def one(n: Double, b: MagnitudeBand, s: MagnitudeSystem): NonEmptyList[Magnitude] =
     NonEmptyList(mag(n, b, s))
 
   // All taken from historical data
@@ -31,10 +29,10 @@ object BrightnessParserSpec extends Specification {
     "14.8 Jmag, 14.2 Hmag"        -> NonEmptyList(mag(14.8, J, Vega), mag(14.2, H, Vega)),
     "14.9mag at K"                -> one(14.9, K, Vega),
     "15: H"                       -> one(15, H, Vega),
-    "17.9 (i mag)"                -> one(17.9, i, AB),
+    "17.9 (i mag)"                -> one(17.9, _i, AB),
     "18.74  K"                    -> one(18.74, K, Vega),
     "19.05 (I-band)"              -> one(19.05, I, Vega),
-    "19.7(iAB)"                   -> one(19.7, i, AB),
+    "19.7(iAB)"                   -> one(19.7, _i, AB),
     "2.7 mag at N"                -> one(2.7, N, Vega),
     "24.6 (H)"                    -> one(24.6, H, Vega),
     "3 mJy N-band"                -> one(0.003, N, Jy),
@@ -50,9 +48,9 @@ object BrightnessParserSpec extends Specification {
     "B_mag=9.4"                   -> one(9.4, B, Vega),
     "H,11.268"                    -> one(11.268, H, Vega),
     "Hband 13.07"                 -> one(13.07, H, Vega),
-    "i mag = 18.1"                -> one(18.1, i, AB),
+    "i mag = 18.1"                -> one(18.1, _i, AB),
     "I(AB)18.96"                  -> one(18.96, I, AB),
-    "i(AB)=16.6"                  -> one(16.6, i, AB),
+    "i(AB)=16.6"                  -> one(16.6, _i, AB),
     "I_AB=19.09"                  -> one(19.09, I, AB),
     "J mag ~ 18.8"                -> one(18.8, J, Vega),
     "J ~ 16.5"                    -> one(16.5, J, Vega),
@@ -84,7 +82,7 @@ object BrightnessParserSpec extends Specification {
     "7.39 in V"                   -> one(7.39, V, Vega),
     "13.774 in J-band "           -> one(13.774, J, Vega),
     "L'=7.055,M=7.04"             -> NonEmptyList(mag(7.055, L, Vega), mag(7.04, M, Vega)),
-    "22.7 z'"                     -> one(22.7, z, AB)
+    "22.7 z'"                     -> one(22.7, _z, AB)
   )
 
   "Brightness Parser" should {

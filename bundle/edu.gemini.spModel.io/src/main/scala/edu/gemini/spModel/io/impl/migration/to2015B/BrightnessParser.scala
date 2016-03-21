@@ -1,8 +1,6 @@
 package edu.gemini.spModel.io.impl.migration.to2015B
 
-import edu.gemini.shared.skyobject.Magnitude
-import edu.gemini.shared.skyobject.Magnitude.Band
-import edu.gemini.spModel.core.MagnitudeSystem
+import edu.gemini.spModel.core.{Magnitude, MagnitudeBand, MagnitudeSystem}
 
 import scala.util.parsing.combinator.RegexParsers
 import scalaz._, Scalaz._
@@ -24,17 +22,17 @@ object BrightnessParser extends RegexParsers {
   private val num: Parser[BigDecimal] =
     """-?\d+(\.\d*)?""".r <~ """\s*(mag)?""".r ^^ (s => BigDecimal(new java.math.BigDecimal(s))) // BigDecimal.exact(s)
 
-  private val band: Parser[Band] = {
-    def bandParser(b: Band): Parser[Band] = {
+  private val band: Parser[MagnitudeBand] = {
+    def bandParser(b: MagnitudeBand): Parser[MagnitudeBand] = {
       val p = (b.toString + """'?\s*(_mag|mag|-band|band)?""").r ^^^ b
       p | paren(p) | paren(p, '<', '>')
     }
 
-    Band.values.map(bandParser).foldRight[Parser[Band]](failure("expected band"))(_ ||| _)
+    MagnitudeBand.all.map(bandParser).foldRight[Parser[MagnitudeBand]](failure("expected band"))(_ ||| _)
   }
 
   private case class Sys(s: MagnitudeSystem, scale: BigDecimal = BigDecimal(1, 0)) {
-    def toMag(b: Band, m: BigDecimal): Magnitude = new Magnitude(b, (m * scale).doubleValue(), s)
+    def toMag(b: MagnitudeBand, m: BigDecimal): Magnitude = new Magnitude((m * scale).doubleValue(), b, s)
   }
 
   private val Jy     = Sys(MagnitudeSystem.Jy)
@@ -54,8 +52,8 @@ object BrightnessParser extends RegexParsers {
   private def paren[A](p: Parser[A], bra: Char = '(', ket: Char = ')'): Parser[A] =
     (bra ~> p) <~ ket
 
-  private def mkMag(s: Option[Sys], b: Band, m: BigDecimal): Magnitude = {
-    def defaultSys(b: Band): Sys = AllSys.find(_.s == b.defaultSystem) | Vega
+  private def mkMag(s: Option[Sys], b: MagnitudeBand, m: BigDecimal): Magnitude = {
+    def defaultSys(b: MagnitudeBand): Sys = AllSys.find(_.s == b.defaultSystem) | Vega
 
     (s | defaultSys(b)).toMag(b, m)
   }

@@ -8,7 +8,7 @@ import edu.gemini.spModel.pio.ParamSet
 import edu.gemini.spModel.pio.PioFactory
 import edu.gemini.spModel.target.system.{ TransitionalSPTarget}
 
-import edu.gemini.shared.util.immutable.{ Option => GOption }
+import edu.gemini.shared.util.immutable.{Option => GOption, ImList}
 import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.skycalc.{ Coordinates => SCoordinates }
 
@@ -179,11 +179,20 @@ final class SPTarget(private var target: Target) extends TransitionalSPTarget {
   def getNewMagnitude(band: MagnitudeBand): Option[Magnitude] =
     Target.magnitudes.get(target).flatMap(_.find(_.band == band))
 
+  def getNewMagnitudeJava(band: MagnitudeBand): GOption[Magnitude] =
+    Target.magnitudes.get(target).flatMap(_.find(_.band == band)).asGeminiOpt
+
   def setNewMagnitudes(mags: List[Magnitude]): Unit =
     Target.magnitudes.set(target, mags).foreach(setNewTarget)
 
+  def setNewMagnitudes(mags: ImList[Magnitude]): Unit =
+    Target.magnitudes.set(target, mags.asScalaList).foreach(setNewTarget)
+
   def getNewMagnitudes: List[Magnitude] =
     Target.magnitudes.get(target).orZero
+
+  def getNewMagnitudesJava: ImList[Magnitude] =
+    Target.magnitudes.get(target).orZero.asImList
 
   def getNewMagnitudeBands: Set[MagnitudeBand] =
     getNewMagnitudes.map(_.band)(collection.breakOut)

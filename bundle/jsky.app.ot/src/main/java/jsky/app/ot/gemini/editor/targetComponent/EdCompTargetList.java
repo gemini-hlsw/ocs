@@ -1,8 +1,8 @@
 package jsky.app.ot.gemini.editor.targetComponent;
 
 import edu.gemini.pot.sp.ISPObsComponent;
-import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.util.immutable.*;
+import edu.gemini.spModel.core.Magnitude;
 import edu.gemini.spModel.core.Target;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.guide.GuideProbeUtil;
@@ -787,7 +787,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
             public TargetDetails(final SPTarget target) {
                 this.target = target.getTarget();
-                this.mag    = target.getMagnitudes();
+                this.mag    = target.getNewMagnitudesJava();
             }
 
             public Target getTarget() {

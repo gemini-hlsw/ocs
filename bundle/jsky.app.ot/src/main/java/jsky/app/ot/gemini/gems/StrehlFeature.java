@@ -8,7 +8,6 @@ import edu.gemini.ags.gems.mascot.Strehl;
 import edu.gemini.mascot.gui.contour.ContourPlot;
 import edu.gemini.mascot.gui.contour.StrehlContourPlot;
 import edu.gemini.pot.ModelConverters;
-import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.core.*;
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi;
@@ -270,14 +269,14 @@ public class StrehlFeature extends TpeImageFeature implements PropertyWatcher, M
                 if (!band.isEmpty()) {
                     BandsList s = band.getValue();
                     SPSiteQuality.Conditions conditions = obsContext.getConditions();
-                    if (new SingleBand(ModelConverters.toNewBand(Magnitude.Band.J)).equals(s)) {
+                    if (new SingleBand(MagnitudeBand.J$.MODULE$).equals(s)) {
                         if (conditions != null) {
                             if (conditions.iq == SPSiteQuality.ImageQuality.PERCENT_20) return 0.08;
                             if (conditions.iq == SPSiteQuality.ImageQuality.PERCENT_70) return 0.13;
                             if (conditions.iq == SPSiteQuality.ImageQuality.PERCENT_85) return 0.15;
                         }
                     }
-                    if (new SingleBand(ModelConverters.toNewBand(Magnitude.Band.H)).equals(s)) {
+                    if (new SingleBand(MagnitudeBand.H$.MODULE$).equals(s)) {
                         if (conditions != null) {
                             if (conditions.iq == SPSiteQuality.ImageQuality.PERCENT_20) return 0.07;
                             if (conditions.iq == SPSiteQuality.ImageQuality.PERCENT_70) return 0.10;
@@ -285,7 +284,7 @@ public class StrehlFeature extends TpeImageFeature implements PropertyWatcher, M
 
                         }
                     }
-                    if (new SingleBand(ModelConverters.toNewBand(Magnitude.Band.K)).equals(s)) {
+                    if (new SingleBand(MagnitudeBand.K$.MODULE$).equals(s)) {
                         if (conditions != null) {
                             if (conditions.iq == SPSiteQuality.ImageQuality.PERCENT_20) return 0.06;
                             if (conditions.iq == SPSiteQuality.ImageQuality.PERCENT_70) return 0.09;
@@ -434,13 +433,13 @@ public class StrehlFeature extends TpeImageFeature implements PropertyWatcher, M
                 String name = target.getName();
                 double baseX = _tii.getBasePos().getRaDeg();
                 double baseY = _tii.getBasePos().getDecDeg();
-                Magnitude undef = new Magnitude(Magnitude.Band.J, MascotConf.invalidMag());
-                double bmag = target.getMagnitude(Magnitude.Band.B).getOrElse(undef).getBrightness();
-                double vmag = target.getMagnitude(Magnitude.Band.V).getOrElse(undef).getBrightness();
-                double rmag = target.getMagnitude(Magnitude.Band.R).getOrElse(undef).getBrightness();
-                double jmag = target.getMagnitude(Magnitude.Band.J).getOrElse(undef).getBrightness();
-                double hmag = target.getMagnitude(Magnitude.Band.H).getOrElse(undef).getBrightness();
-                double kmag = target.getMagnitude(Magnitude.Band.K).getOrElse(undef).getBrightness();
+                Magnitude undef =   new Magnitude(MascotConf.invalidMag(), MagnitudeBand.J$.MODULE$);
+                double bmag = target.getNewMagnitudeJava(MagnitudeBand.B$.MODULE$).getOrElse(undef).value();
+                double vmag = target.getNewMagnitudeJava(MagnitudeBand.V$.MODULE$).getOrElse(undef).value();
+                double rmag = target.getNewMagnitudeJava(MagnitudeBand.R$.MODULE$).getOrElse(undef).value();
+                double jmag = target.getNewMagnitudeJava(MagnitudeBand.J$.MODULE$).getOrElse(undef).value();
+                double hmag = target.getNewMagnitudeJava(MagnitudeBand.H$.MODULE$).getOrElse(undef).value();
+                double kmag = target.getNewMagnitudeJava(MagnitudeBand.K$.MODULE$).getOrElse(undef).value();
                 return Star.makeStar(name, baseX, baseY, bmag, vmag, rmag, jmag, hmag, kmag, ra, dec);
             }));
     }

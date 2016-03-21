@@ -1,5 +1,6 @@
 package edu.gemini.phase2.template.factory.impl.nifs
 
+import edu.gemini.spModel.core.MagnitudeBand
 import edu.gemini.spModel.gemini.nifs.blueprint.SpNifsBlueprint
 
 import edu.gemini.spModel.target.SPTarget
@@ -12,7 +13,7 @@ case class Nifs(blueprint:SpNifsBlueprint, exampleTarget: Option[SPTarget]) exte
 
   // N.B. This is the same as NifsAo but without altair or occulting disk
 
-  val tb = exampleTarget.flatMap(t => Option(t.getMagnitude(Band.K).getOrNull)).map(_.getBrightness).map(TargetBrightness(_))
+  val tb = exampleTarget.flatMap(t => t.getNewMagnitude(MagnitudeBand.K)).map(_.value).map(TargetBrightness(_))
 
   // These two notes should be included at the top of every NIFS program
   addNote("Phase II Requirements: General Information", "Phase II  \"BEFORE Submission\" Checklist") in TopLevel
