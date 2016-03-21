@@ -9,7 +9,6 @@ import edu.gemini.phase2.template.factory.api.TemplateFolderExpansionFactory
 import edu.gemini.phase2.template.factory.impl.{TemplateDb, TemplateFactoryImpl}
 import edu.gemini.pot.sp.{ISPObservation, ISPTemplateGroup, ISPProgram}
 import edu.gemini.pot.spdb.DBLocalDatabase
-import edu.gemini.shared.skyobject.Magnitude.Band
 import edu.gemini.spModel.core.{MagnitudeBand, Magnitude, SPProgramID}
 import edu.gemini.spModel.obscomp.SPNote
 import edu.gemini.spModel.target.SPTarget

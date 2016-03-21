@@ -4,7 +4,6 @@ import edu.gemini.spModel.core.MagnitudeBand
 import edu.gemini.spModel.gemini.nifs.blueprint.SpNifsBlueprintAo
 
 import edu.gemini.spModel.target.SPTarget
-import edu.gemini.shared.skyobject.Magnitude.Band
 import edu.gemini.spModel.gemini.nifs.NIFSParams
 import NIFSParams._
 import edu.gemini.spModel.gemini.altair.AltairParams

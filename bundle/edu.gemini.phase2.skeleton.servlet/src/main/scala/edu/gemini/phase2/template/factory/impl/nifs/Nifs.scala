@@ -6,7 +6,6 @@ import edu.gemini.spModel.gemini.nifs.blueprint.SpNifsBlueprint
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.gemini.nifs.NIFSParams
 import NIFSParams._
-import edu.gemini.shared.skyobject.Magnitude.Band
 
 case class Nifs(blueprint:SpNifsBlueprint, exampleTarget: Option[SPTarget]) extends NifsBase[SpNifsBlueprint] {
   import blueprint._

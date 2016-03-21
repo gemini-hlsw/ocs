@@ -2,7 +2,6 @@ package edu.gemini.itc.shared
 
 import edu.gemini.pot.ModelConverters._
 import edu.gemini.pot.sp.SPComponentType._
-import edu.gemini.shared.skyobject.Magnitude.Band
 import edu.gemini.spModel.config2.{Config, ItemKey}
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.gemini.acqcam.AcqCamParams
@@ -161,9 +160,9 @@ object ConfigExtractor {
 
     val error: String \/ GemsParameters = "GSAOI filter with unknown band".left
 
-    def closestBand(band: Band) =
+    def closestBand(band: MagnitudeBand) =
       // pick the closest band that's supported by ITC
-      List(Band.J, Band.H, Band.K).minBy(b => Math.abs(b.getWavelengthMidPoint.getValue.toNanometers - band.getWavelengthMidPoint.getValue.toNanometers))
+      List(MagnitudeBand.J, MagnitudeBand.H, MagnitudeBand.K).minBy(b => Math.abs(b.center.toNanometers - band.center.toNanometers))
 
 
     // a rudimentary approximation for the expected GeMS performance

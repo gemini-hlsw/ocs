@@ -1,13 +1,11 @@
 package edu.gemini.phase2.template.factory.impl.graces
 
 import edu.gemini.phase2.template.factory.impl._
-import edu.gemini.shared.skyobject.Magnitude.Band
 import edu.gemini.spModel.core.MagnitudeBand
 import edu.gemini.spModel.gemini.graces.blueprint.SpGracesBlueprint
 import edu.gemini.pot.sp.{SPComponentType, ISPGroup}
 import edu.gemini.spModel.gemini.visitor.VisitorInstrument
 import edu.gemini.spModel.target.SPTarget
-import edu.gemini.shared.util.immutable.ScalaConverters._
 
 import SpGracesBlueprint.ReadMode._
 import SpGracesBlueprint.FiberMode._

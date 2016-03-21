@@ -3,8 +3,6 @@ package edu.gemini.phase2.skeleton.factory
 import edu.gemini.model.p1.immutable.GracesBlueprint
 import edu.gemini.model.p1.mutable.{GracesFiberMode, GracesReadMode}
 import edu.gemini.pot.sp.{ISPProgram, ISPTemplateGroup}
-import edu.gemini.shared.skyobject.Magnitude.Band
-import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.spModel.core.MagnitudeBand
 import edu.gemini.spModel.target.SPTarget
 

@@ -6,7 +6,7 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
-import edu.gemini.shared.skyobject.Magnitude;
+import edu.gemini.spModel.core.MagnitudeBand;
 import jsky.catalog.Catalog;
 import jsky.catalog.CatalogDirectory;
 import jsky.catalog.FieldDesc;
@@ -401,7 +401,7 @@ public class SkycatConfigEntry {
                 p = new FieldDescAdapter(BAND);
                 p.setDescription("The band over which to apply magnitude limits");
                 p.setFieldClass(String.class);
-                p.setDefaultValue(Magnitude.Band.R);
+                p.setDefaultValue(MagnitudeBand.R$.MODULE$);
                 params.add(p);
             }
             _paramDesc = new FieldDescAdapter[params.size()];

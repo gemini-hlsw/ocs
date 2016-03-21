@@ -2,7 +2,6 @@ package edu.gemini.spModel.gemini.gpi;
 
 import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.pot.sp.SPComponentType;
-import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.skycalc.Angle;
 import edu.gemini.spModel.config.ConfigPostProcessor;

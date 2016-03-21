@@ -4,7 +4,6 @@ import edu.gemini.ags.TargetsHelper
 import edu.gemini.ags.gems.mascot.MascotProgress
 import edu.gemini.ags.gems.mascot.Strehl
 import edu.gemini.catalog.votable.TestVoTableBackend
-import edu.gemini.shared.skyobject.{Magnitude => JMagnitude}
 import edu.gemini.shared.skyobject.coords.HmsDegCoordinates
 import edu.gemini.shared.util.immutable.{None => JNone}
 import edu.gemini.skycalc.Coordinates

@@ -15,29 +15,6 @@ import Scalaz._
 
 class ModelConversionsSpec extends Specification with ScalaCheck with Arbitraries {
   "implicit conversions of model classes" should {
-    "convert new bands to old bands" in {
-      forAll { (b: MagnitudeBand) =>
-        val mag = b.toOldModel
-        skyobject.Magnitude.Band.values().toList should contain(mag)
-      }
-    }
-    "convert old bands to new bands" in {
-      (for {
-        m <- skyobject.Magnitude.Band.values().toList
-        b = m.toNewModel
-      } yield MagnitudeBand.all should contain(b)).reduce(_ and _)
-    }
-    "convert new magnitudes to old" in {
-      forAll { (m: Magnitude) =>
-        val mag = m.toOldModel
-        mag.getBrightness should beEqualTo(m.value)
-      }
-    }
-    "convert old magnitudes to new" in {
-      val mag = new skyobject.Magnitude(skyobject.Magnitude.Band.J, 10)
-      mag.toNewModel.value should beEqualTo(10)
-      mag.toNewModel.band should beEqualTo(MagnitudeBand.J)
-    }
     "convert old Angles to new" in {
       forAll { (a: Angle) =>
         val oldAngle = skycalc.Angle.degrees(a.toDegrees)
@@ -57,18 +34,5 @@ class ModelConversionsSpec extends Specification with ScalaCheck with Arbitrarie
         oldCoordinates.toNewModel ~= c
       }
     }
-//    "convert SPTarget to SiderealTarget" in {
-//      forAll { (c: Coordinates, mag: Magnitude, properMotion: Option[ProperMotion]) =>
-//        val coord = properMotion.map { pm => new skyobject.coords.HmsDegCoordinates.Builder(c.ra.toAngle.toOldModel, c.dec.toAngle.toOldModel).pmDec(skycalc.Angle.milliarcsecs(pm.deltaDec.velocity.masPerYear)).pmRa(skycalc.Angle.milliarcsecs(pm.deltaRA.velocity.masPerYear)).build() }
-//          .getOrElse(new skyobject.coords.HmsDegCoordinates.Builder(c.ra.toAngle.toOldModel, c.dec.toAngle.toOldModel).build())
-//        val so = new skyobject.SkyObject.Builder("name", coord).magnitudes(mag.toOldModel).build()
-//        val target = new SPTarget(HmsDegTarget.fromSkyObject(so))
-//        val t = target.toNewModel
-//        t.name shouldEqual "name"
-//        t.coordinates ~= c
-//        (t.properMotion |@| properMotion)(_ ~= _).getOrElse {properMotion should beNone}
-//        t.magnitudeIn(mag.band) should beSome(mag.copy(error = None))
-//      }
-//    }
   }
 }

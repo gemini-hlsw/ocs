@@ -2,7 +2,6 @@ package edu.gemini.phase2.skeleton.factory
 
 import edu.gemini.phase2.template.factory.impl.nifs.{ TargetBrightness, BAT, BT, FT, MT }
 import edu.gemini.pot.sp.{ISPProgram, ISPTemplateGroup}
-import edu.gemini.shared.skyobject.Magnitude.Band
 import edu.gemini.spModel.core.MagnitudeBand
 import org.specs2.mutable.SpecificationLike
 import edu.gemini.model.p1.immutable.{ProposalIo, AltairNGS, NifsBlueprintAo, NifsBlueprintBase, NifsBlueprint}

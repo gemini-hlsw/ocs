@@ -89,7 +89,7 @@ object GemsMagnitudeTable extends MagnitudeTable {
     )
 
     override def gemsMagnitudeConstraint(starType: GemsGuideStarType, nirBand: Option[MagnitudeBand]): MagnitudeConstraints= {
-      val filter = nirBand.fold(Gsaoi.Filter.H)(band => Gsaoi.Filter.getFilter(band.toOldModel, Gsaoi.Filter.H))
+      val filter = nirBand.fold(Gsaoi.Filter.H)(band => Gsaoi.Filter.getFilter(band, Gsaoi.Filter.H))
       MagnitudeLimitsMap((starType, filter.getCatalogBand.getValue))
     }
   }
