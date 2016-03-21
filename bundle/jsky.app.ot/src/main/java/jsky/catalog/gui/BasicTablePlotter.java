@@ -5,7 +5,6 @@ import diva.canvas.DamageRegion;
 import diva.canvas.TransformContext;
 import diva.canvas.event.LayerEvent;
 import diva.canvas.event.LayerListener;
-import edu.gemini.shared.skyobject.SkyObject;
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.core.SiderealTarget;
 import jsky.catalog.*;
@@ -960,7 +959,7 @@ public class BasicTablePlotter
                 for (FigureListItem fli: sli.figureList) {
                     // assume symbol has already been selected
                     if (fli.selected && sli.symbol.getBoundingShape(fli.shape).contains(p)) {
-                        Option<SiderealTarget> skyObject = tli.table.getSkyObject(fli.row);
+                        Option<SiderealTarget> skyObject = tli.table.getSiderealTarget(fli.row);
                         skyObject.forEach(s -> {
                             // This is a bit strange, we convert the incoming parameter to the position of the
                             // object and it also side-effects setting the equinox

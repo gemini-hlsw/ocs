@@ -3,7 +3,6 @@ package jsky.app.ot.tpe;
 import edu.gemini.ags.api.AgsRegistrar;
 import edu.gemini.catalog.ui.QueryResultsFrame;
 import edu.gemini.catalog.ui.tpe.CatalogImageDisplay;
-import edu.gemini.shared.skyobject.SkyObject;
 import edu.gemini.shared.skyobject.coords.HmsDegCoordinates;
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.ags.AgsStrategyKey;

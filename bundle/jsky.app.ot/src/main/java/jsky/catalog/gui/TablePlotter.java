@@ -7,7 +7,6 @@ import java.awt.geom.Rectangle2D;
 
 import javax.swing.JPanel;
 
-import edu.gemini.shared.skyobject.SkyObject;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.core.SiderealTarget;
 import jsky.catalog.TablePlotSymbol;

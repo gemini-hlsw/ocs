@@ -5,7 +5,6 @@ import java.util.Vector;
 
 import javax.swing.table.TableModel;
 
-import edu.gemini.shared.skyobject.SkyObject;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.core.SiderealTarget;
 import jsky.coords.Coordinates;
@@ -78,8 +77,8 @@ public interface TableQueryResult extends Catalog, TableModel {
     Catalog getCatalog();
 
     /**
-     * Return a possible SkyObject for the row i
+     * Return a possible SiderealTarget for the row i
      */
-    Option<SiderealTarget> getSkyObject(int i);
+    Option<SiderealTarget> getSiderealTarget(int i);
 
 }

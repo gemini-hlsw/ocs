@@ -238,7 +238,7 @@ public class MemoryCatalog extends DefaultTableModel
     }
 
     @Override
-    public Option<SiderealTarget> getSkyObject(int i) {
+    public Option<SiderealTarget> getSiderealTarget(int i) {
         return None.instance();
     }
 

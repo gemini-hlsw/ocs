@@ -1,7 +1,6 @@
 package jsky.app.ot.tpe.feat;
 
 import edu.gemini.pot.ModelConverters$;
-import edu.gemini.shared.skyobject.SkyObject;
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.core.SiderealTarget;
 import edu.gemini.spModel.guide.*;

@@ -1,6 +1,5 @@
 package jsky.app.ot.tpe;
 
-import edu.gemini.shared.skyobject.SkyObject;
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.core.SiderealTarget;
