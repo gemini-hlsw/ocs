@@ -55,6 +55,7 @@ class TargetConversionTest extends MigrationTest {
       // A sidereal and a non-sidereal target
       tpList.map(_.getTarget) match {
         case List(tSidereal, tNonSidereal) =>
+
           assertTrue(tSidereal.isSidereal)
           assertEquals("Some Sidereal", tSidereal.getName)
 

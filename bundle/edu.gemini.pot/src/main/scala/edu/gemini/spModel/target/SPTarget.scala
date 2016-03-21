@@ -22,8 +22,13 @@ object SPTarget {
     return SPTargetPio.fromParamSet(pset)
   }
 
+  // Some convenience lenses
+  private val ra:  Target @?> RightAscension = Target.coords >=> Coordinates.ra.partial
+  private val dec: Target @?> Declination    = Target.coords >=> Coordinates.dec.partial
+
 }
 final class SPTarget(private var target: Target) extends WatchablePos {
+  import SPTarget._
 
   def this() =
     this(SiderealTarget.empty)
@@ -75,10 +80,6 @@ final class SPTarget(private var target: Target) extends WatchablePos {
       case _: TooTarget => ()
       case _ => setNewTarget(TooTarget.empty)
     }
-
-  // Some convenience lenses
-  private val ra:  Target @?> RightAscension = Target.coords >=> Coordinates.ra.partial
-  private val dec: Target @?> Declination    = Target.coords >=> Coordinates.dec.partial
 
   def getName: String =
     target.name
