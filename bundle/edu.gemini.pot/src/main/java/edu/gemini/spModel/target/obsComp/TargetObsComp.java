@@ -1,7 +1,6 @@
 package edu.gemini.spModel.target.obsComp;
 
 import edu.gemini.pot.sp.SPComponentType;
-import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.spModel.data.AbstractDataObject;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.guide.GuideProbeProvider;
@@ -11,17 +10,11 @@ import edu.gemini.spModel.pio.PioFactory;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.TelescopePosWatcher;
 import edu.gemini.spModel.target.WatchablePos;
-import edu.gemini.spModel.target.env.GuideEnv;
-import edu.gemini.spModel.target.env.GuideEnvironment;
 import edu.gemini.spModel.target.env.TargetEnvironment;
-import edu.gemini.spModel.target.system.ITarget;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * A class for telescope observation component items.  Maintains a
@@ -39,14 +32,6 @@ public final class TargetObsComp extends AbstractDataObject implements GuideProb
     // Property name used when the contained TargetEnvironment is updated.
     public static final String TARGET_ENV_PROP = "TargetEnvironment";
     public static final String TARGET_POS_PROP = "TargetPos";
-
-    // A map from ITarget tags to strings used to create the title prefix for this node.
-    private static Map<ITarget.Tag,String> targetPrefixes = new HashMap<ITarget.Tag,String>() {{
-        put(ITarget.Tag.JPL_MINOR_BODY,   "Comet: ");
-        put(ITarget.Tag.MPC_MINOR_PLANET, "Minor Planet: ");
-        put(ITarget.Tag.NAMED,            "Solar System: ");
-        put(ITarget.Tag.SIDEREAL,         "Target: ");
-    }};
 
     private static TargetEnvironment createEmptyEnvironment() {
         final SPTarget base = new SPTarget();
@@ -91,7 +76,7 @@ public final class TargetObsComp extends AbstractDataObject implements GuideProb
         // By default, append the name of the base position.  If a title
         // has been directly set though, use that instead.
         final String title = super.getTitle();
-        if (!isTitleChanged() || targetPrefixes.values().stream().anyMatch(title::startsWith)) {
+        if (!isTitleChanged()) { // || targetPrefixes.values().stream().anyMatch(title::startsWith)) {
             final TargetEnvironment env = getTargetEnvironment();
             final SPTarget tp = env.getBase();
             if (tp != null) {

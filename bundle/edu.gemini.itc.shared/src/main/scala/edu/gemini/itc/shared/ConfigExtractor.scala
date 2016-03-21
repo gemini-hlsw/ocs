@@ -18,7 +18,6 @@ import edu.gemini.spModel.obscomp.SPInstObsComp
 import edu.gemini.spModel.rich.shared.immutable.asScalaOpt
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.env.{GuideProbeTargets, TargetEnvironment}
-import edu.gemini.spModel.target.system.ITarget
 import edu.gemini.spModel.telescope.IssPort
 import edu.gemini.spModel.core.WavelengthConversions._
 

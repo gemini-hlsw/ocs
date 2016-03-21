@@ -5,7 +5,6 @@ import edu.gemini.pot.sp.ISPNode
 import edu.gemini.shared.util.immutable.{ Option => GOption }
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
-import edu.gemini.spModel.target.system.ITarget.Tag
 import jsky.app.ot.gemini.editor.targetComponent.TelescopePosEditor
 
 abstract class TargetDetailEditor extends JPanel with TelescopePosEditor {

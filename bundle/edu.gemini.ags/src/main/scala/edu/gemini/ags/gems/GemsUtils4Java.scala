@@ -7,7 +7,6 @@ import edu.gemini.spModel.core.{Magnitude, MagnitudeBand, SingleBand, RBandsList
 import edu.gemini.spModel.gemini.gems.Canopus
 import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.shared.skyobject
-import edu.gemini.spModel.target.system.ITarget
 import scala.collection.JavaConverters._
 
 import scalaz._
