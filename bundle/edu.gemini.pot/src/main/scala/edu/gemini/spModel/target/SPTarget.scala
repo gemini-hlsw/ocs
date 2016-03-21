@@ -6,11 +6,12 @@ import edu.gemini.spModel.core.TooTarget
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.pio.ParamSet
 import edu.gemini.spModel.pio.PioFactory
-import edu.gemini.spModel.target.system.{ TransitionalSPTarget}
 
 import edu.gemini.shared.util.immutable.{Option => GOption, ImList}
 import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.skycalc.{ Coordinates => SCoordinates }
+
+import scala.collection.JavaConverters._
 
 import scalaz._, Scalaz._
 
@@ -22,7 +23,7 @@ object SPTarget {
   }
 
 }
-final class SPTarget(private var target: Target) extends TransitionalSPTarget {
+final class SPTarget(private var target: Target) extends WatchablePos {
 
   def this() =
     this(SiderealTarget.empty)
@@ -196,5 +197,8 @@ final class SPTarget(private var target: Target) extends TransitionalSPTarget {
 
   def getNewMagnitudeBands: Set[MagnitudeBand] =
     getNewMagnitudes.map(_.band)(collection.breakOut)
+
+  def getNewMagnitudeBandsJava: java.util.Set[MagnitudeBand] =
+    new java.util.HashSet(getNewMagnitudeBands.asJavaCollection)
 
 }

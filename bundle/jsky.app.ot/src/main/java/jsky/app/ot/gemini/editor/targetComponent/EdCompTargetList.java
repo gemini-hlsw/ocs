@@ -826,7 +826,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                         final Option<SPTarget> tOpt = TargetSelection.getTargetForNode(dataObject.getTargetEnvironment(), obsComponent);
                         tOpt.foreach(t -> {
                             t.setNewTarget(targetDetails.getTarget());
-                            t.setMagnitudes(targetDetails.getMag());
+                            t.setNewMagnitudes(targetDetails.getMag());
                         });
                     });
             contents.foreach(group -> {

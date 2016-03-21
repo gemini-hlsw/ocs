@@ -4,14 +4,10 @@
 package edu.gemini.wdba.tcc;
 
 import edu.gemini.spModel.target.SPTarget;
-import edu.gemini.spModel.target.system.*;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.gemini.gsaoi.GsaoiOdgw;
 import edu.gemini.spModel.gemini.gems.Canopus;
 import edu.gemini.wdba.glue.api.WdbaGlueException;
-import edu.gemini.shared.skyobject.Magnitude;
-import edu.gemini.shared.util.immutable.*;
-import org.dom4j.Element;
 
 import java.util.logging.Logger;
 
