@@ -2,9 +2,9 @@ package jsky.catalog;
 
 import edu.gemini.catalog.skycat.DefaultOutputAdapter;
 import edu.gemini.catalog.skycat.SkycatOutputAdapter;
-import edu.gemini.shared.skyobject.SkyObject;
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
+import edu.gemini.spModel.core.SiderealTarget;
 import jsky.catalog.skycat.SkycatCatalog;
 import jsky.catalog.skycat.SkycatConfigEntry;
 import jsky.coords.CoordinateRadius;
@@ -238,7 +238,7 @@ public class MemoryCatalog extends DefaultTableModel
     }
 
     @Override
-    public Option<SkyObject> getSkyObject(int i) {
+    public Option<SiderealTarget> getSkyObject(int i) {
         return None.instance();
     }
 

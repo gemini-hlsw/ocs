@@ -13,9 +13,6 @@ import java.util.Set;
 // transitional; will go away
 public abstract class TransitionalSPTarget extends WatchablePos {
 
-    public void putMagnitude(final Magnitude mag) {
-    }
-
     public Option<Magnitude> getMagnitude(final Magnitude.Band band) {
         return None.instance();
     }

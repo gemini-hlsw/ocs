@@ -35,6 +35,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.List;
@@ -50,6 +51,13 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
     private static final NumberFormat nf = NumberFormat.getInstance(Locale.US);
     static { nf.setMaximumFractionDigits(2); }
 
+    private static final DecimalFormat MAG_FORMAT = new DecimalFormat("0.0##");
+
+    // Note -- synchronized though I guess this should always be called from
+    // gui thread...
+    public static synchronized String formatBrightness(Magnitude mag) {
+        return MAG_FORMAT.format(mag.getBrightness());
+    }
 
     static class TableData extends AbstractTableModel {
         enum Col {
@@ -134,7 +142,7 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
             }
 
             @Override public String formatMagnitude(final Magnitude.Band band) {
-                return getMagnitude(band).map(MagnitudeEditor::formatBrightness).getOrElse("");
+                return getMagnitude(band).map(TelescopePosTableWidget::formatBrightness).getOrElse("");
             }
         }
 

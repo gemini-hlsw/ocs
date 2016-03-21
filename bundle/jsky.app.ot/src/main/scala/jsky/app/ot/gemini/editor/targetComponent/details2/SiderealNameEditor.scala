@@ -10,8 +10,8 @@ import edu.gemini.shared.util.immutable.{Option => GOption}
 import edu.gemini.spModel.core.Target
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
-import jsky.app.ot.gemini.editor.targetComponent.{MagnitudeEditor, TelescopePosEditor}
-import jsky.util.gui.{DialogUtil, TextBoxWidgetWatcher, TextBoxWidget}
+import jsky.app.ot.gemini.editor.targetComponent.TelescopePosEditor
+import jsky.util.gui.{ TextBoxWidgetWatcher, TextBoxWidget}
 import jsky.util.gui.DialogUtil.{ error => errmsg }
 
 import scala.concurrent.ExecutionContext.Implicits.global

@@ -57,31 +57,6 @@ class ModelConversionsSpec extends Specification with ScalaCheck with Arbitrarie
         oldCoordinates.toNewModel ~= c
       }
     }
-    "convert SiderealTarget to SkyObject" in {
-      forAll { (c: SiderealTarget) =>
-        val so = c.toOldModel
-        so.getName shouldEqual c.name
-        so.getCoordinates.toHmsDeg(0).getRa.toDegrees.getMagnitude should beCloseTo(c.coordinates.ra.toAngle.toDegrees, 0.001)
-        so.getCoordinates.toHmsDeg(0).getDec.toDegrees.getMagnitude should beCloseTo(c.coordinates.dec.toAngle.toDegrees, 0.001)
-        c.properMotion.map { pm =>
-          so.getHmsDegCoordinates.getPmDec.toMilliarcsecs.getMagnitude should beCloseTo(pm.deltaDec.velocity.masPerYear, 0.001)
-          so.getHmsDegCoordinates.getPmRa.toMilliarcsecs.getMagnitude should beCloseTo(pm.deltaRA.velocity.masPerYear, 0.001)
-        }
-        so.getMagnitudes.size() should beEqualTo(c.magnitudes.size)
-      }
-    }
-    "convert SkyObject to SiderealTarget" in {
-      forAll { (c: Coordinates, mag: Magnitude, properMotion: Option[ProperMotion]) =>
-        val coord = properMotion.map { pm => new skyobject.coords.HmsDegCoordinates.Builder(c.ra.toAngle.toOldModel, c.dec.toAngle.toOldModel).pmDec(skycalc.Angle.milliarcsecs(pm.deltaDec.velocity.masPerYear)).pmRa(skycalc.Angle.milliarcsecs(pm.deltaRA.velocity.masPerYear)).build() }
-          .getOrElse(new skyobject.coords.HmsDegCoordinates.Builder(c.ra.toAngle.toOldModel, c.dec.toAngle.toOldModel).build())
-        val so = new skyobject.SkyObject.Builder("name", coord).magnitudes(mag.toOldModel).build()
-        val t = so.toNewModel
-        t.name shouldEqual "name"
-        t.coordinates ~= c
-        (t.properMotion |@| properMotion)(_ ~= _).getOrElse {properMotion should beNone}
-        t.magnitudeIn(mag.band) should beSome(mag.copy(error = None))
-      }
-    }
 //    "convert SPTarget to SiderealTarget" in {
 //      forAll { (c: Coordinates, mag: Magnitude, properMotion: Option[ProperMotion]) =>
 //        val coord = properMotion.map { pm => new skyobject.coords.HmsDegCoordinates.Builder(c.ra.toAngle.toOldModel, c.dec.toAngle.toOldModel).pmDec(skycalc.Angle.milliarcsecs(pm.deltaDec.velocity.masPerYear)).pmRa(skycalc.Angle.milliarcsecs(pm.deltaRA.velocity.masPerYear)).build() }

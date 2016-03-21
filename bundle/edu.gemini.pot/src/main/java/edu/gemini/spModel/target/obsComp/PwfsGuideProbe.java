@@ -287,10 +287,6 @@ public enum PwfsGuideProbe implements ValidatableGuideProbe, OffsetValidatingGui
         ).getOrElse(GuideStarValidation.UNDEFINED);
     }
 
-    public GuideStarValidation validate(SkyObject guideStar, ObsContext ctx) {
-        return GuideProbeUtil.instance.validate(guideStar, this, ctx);
-    }
-
     public GuideStarValidation validate(Coordinates coords, ObsContext ctx) {
         return GuideProbeUtil.instance.validate(coords, this, ctx);
     }

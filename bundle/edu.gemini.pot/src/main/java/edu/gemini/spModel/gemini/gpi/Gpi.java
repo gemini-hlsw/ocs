@@ -264,8 +264,8 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
         private Apodizer _apodizer;
         private FPM _fpm;
         private Lyot _lyot;
-        private double _brightLimitPrism;
-        private double _brightLimitWollaston;
+        private Option<Double> _brightLimitPrism;
+        private Option<Double> _brightLimitWollaston;
 
         // Only for NONSTANDARD
         ObservingMode(String name) {
@@ -274,7 +274,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
         }
 
         ObservingMode(String name, Filter filter, boolean filterIterable, Apodizer apodizer,
-                              FPM fpm, Lyot lyot, double brightLimitPrism, double brightLimitWollaston) {
+                              FPM fpm, Lyot lyot, Option<Double> brightLimitPrism, Option<Double> brightLimitWollaston) {
             _logValue = name;
             _displayValue = name;
             _filter = filter;
@@ -286,15 +286,20 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
             _brightLimitWollaston = brightLimitWollaston;
         }
 
-        /**
-         * Gets the corresponding observing mode that uses the H filter.  This
-         * is used in template creation.  See REL-1817 and GP_BP.txt
-         */
+        ObservingMode(String name, Filter filter, boolean filterIterable, Apodizer apodizer,
+                      FPM fpm, Lyot lyot, double brightLimitPrism, double brightLimitWollaston) {
+            this(name, filter, filterIterable, apodizer, fpm, lyot, new Some<>(brightLimitPrism), new Some(brightLimitWollaston));
+        }
+
+            /**
+             * Gets the corresponding observing mode that uses the H filter.  This
+             * is used in template creation.  See REL-1817 and GP_BP.txt
+             */
         public abstract ObservingMode correspondingH();
 
         ObservingMode(String name, Filter filter, boolean filterIterable, Apodizer apodizer,
                               FPM fpm, Lyot lyot) {
-            this(name, filter, filterIterable, apodizer, fpm, lyot, Magnitude.UNDEFINED_MAG, Magnitude.UNDEFINED_MAG);
+            this(name, filter, filterIterable, apodizer, fpm, lyot, None.instance(), None.instance());
         }
 
         public String displayValue() {
@@ -330,12 +335,12 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
         }
 
         /**
-         * Returns the bright limit based on the given disperser.
+         * Returns the bright limit based on the given disperser, if defined.
          */
-        public double getBrightLimit(Disperser disperser) {
+        public Option<Double> getBrightLimit(Disperser disperser) {
             if (disperser == Disperser.PRISM) return _brightLimitPrism;
             if (disperser == Disperser.WOLLASTON) return _brightLimitWollaston;
-            return Magnitude.UNDEFINED_MAG;
+            return None.instance();
         }
 
         public boolean isFilterIterable() {

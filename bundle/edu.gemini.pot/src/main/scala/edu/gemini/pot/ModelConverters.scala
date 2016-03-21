@@ -1,7 +1,6 @@
 package edu.gemini.pot
 
 import edu.gemini.shared.skyobject
-import edu.gemini.shared.skyobject.SkyObject
 import edu.gemini.shared.util.immutable
 import edu.gemini.skycalc
 import edu.gemini.spModel.core._
@@ -24,8 +23,6 @@ object ModelConverters {
   def toCoordinates(coords: skycalc.Coordinates): Coordinates = coords.toNewModel
 
   def toSideralTarget(spTarget: SPTarget):SiderealTarget = spTarget.toNewModel
-
-  def toSideralTarget(so: SkyObject):SiderealTarget = so.toNewModel
 
   def toOffset(pos: OffsetPosBase): Offset = pos.toNewModel
 
@@ -145,42 +142,6 @@ object ModelConverters {
 
   implicit class HmsDegCoords2Coordinates(val c: skyobject.coords.HmsDegCoordinates) extends AnyVal {
     def toNewModel: Coordinates = Coordinates(RightAscension.fromAngle(c.getRa.toNewModel), Declination.fromAngle(c.getDec.toNewModel).getOrElse(Declination.zero))
-  }
-
-  implicit class SiderealTarget2SkyObject(val st:SiderealTarget) extends AnyVal {
-    def toOldModel: skyobject.SkyObject = {
-      val ra          = skycalc.Angle.degrees(st.coordinates.ra.toAngle.toDegrees)
-      val dec         = skycalc.Angle.degrees(st.coordinates.dec.toAngle.toDegrees)
-      val coordinates = st.properMotion.map { pm =>
-            new skyobject.coords.HmsDegCoordinates.Builder(ra, dec).pmRa(skycalc.Angle.milliarcsecs(pm.deltaRA.velocity.masPerYear)).pmDec(skycalc.Angle.milliarcsecs(pm.deltaDec.velocity.masPerYear)).build()
-        } |  new skyobject.coords.HmsDegCoordinates.Builder(ra, dec).build()
-      val mags        = st.magnitudes.map(_.toOldModel)
-      new skyobject.SkyObject.Builder(st.name, coordinates).magnitudes(mags: _*).build()
-    }
-  }
-
-  implicit class SkyObject2SiderealTarget(val so:skyobject.SkyObject) extends AnyVal {
-    def toNewModel:SiderealTarget = {
-      import scala.collection.JavaConverters._
-
-      val ra          = Angle.fromDegrees(so.getHmsDegCoordinates.getRa.toDegrees.getMagnitude)
-      val dec         = Angle.fromDegrees(so.getHmsDegCoordinates.getDec.toDegrees.getMagnitude)
-      val coordinates = Coordinates(RightAscension.fromAngle(ra), Declination.fromAngle(dec).getOrElse(Declination.zero))
-      val mags        = so.getMagnitudes.asScala.map(_.toNewModel)
-      val pmRa        = RightAscensionAngularVelocity(AngularVelocity(so.getHmsDegCoordinates.getPmRa.toMilliarcsecs.getMagnitude))
-      val pmDec       = DeclinationAngularVelocity(AngularVelocity(so.getHmsDegCoordinates.getPmDec.toMilliarcsecs.getMagnitude))
-      val pm          = ProperMotion(pmRa, pmDec)
-      SiderealTarget( // full ctor here, so we're forced to handle changes
-        name                 = so.getName,
-        coordinates          = coordinates,
-        properMotion         = Some(pm),
-        magnitudes           = mags.toList,
-        redshift             = None,
-        parallax             = None,
-        spectralDistribution = None,
-        spatialProfile       = None
-      )
-    }
   }
 
   implicit class SPTarget2SiderealTarget(val sp:SPTarget) extends AnyVal {

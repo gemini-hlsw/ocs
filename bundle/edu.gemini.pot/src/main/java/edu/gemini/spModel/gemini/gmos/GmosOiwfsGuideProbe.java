@@ -108,10 +108,6 @@ public enum GmosOiwfsGuideProbe implements ValidatableGuideProbe, OffsetValidati
         return GuideProbeUtil.instance.validate(guideStar, this, ctx);
     }
 
-    public GuideStarValidation validate(final SkyObject guideStar, final ObsContext ctx) {
-        return GuideProbeUtil.instance.validate(guideStar, this, ctx);
-    }
-
     public GuideStarValidation validate(final Coordinates guideStar, final ObsContext ctx) {
         return GuideProbeUtil.instance.validate(guideStar, this, ctx);
     }

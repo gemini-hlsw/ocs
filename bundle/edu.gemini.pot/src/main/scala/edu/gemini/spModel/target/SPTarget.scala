@@ -12,7 +12,7 @@ import edu.gemini.shared.util.immutable.{ Option => GOption }
 import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.skycalc.{ Coordinates => SCoordinates }
 
-import scalaz.@?>
+import scalaz._, Scalaz._
 
 object SPTarget {
 
@@ -172,5 +172,20 @@ final class SPTarget(private var target: Target) extends TransitionalSPTarget {
 
   def getSiderealTarget: Option[SiderealTarget] =
     target.fold(_ => None, Some(_), _ => None)
+
+  def putNewMagnitude(mag: Magnitude): Unit =
+    Target.magnitudes.modg(mag :: _.filterNot(_.band == mag.band), target).foreach(setNewTarget)
+
+  def getNewMagnitude(band: MagnitudeBand): Option[Magnitude] =
+    Target.magnitudes.get(target).flatMap(_.find(_.band == band))
+
+  def setNewMagnitudes(mags: List[Magnitude]): Unit =
+    Target.magnitudes.set(target, mags).foreach(setNewTarget)
+
+  def getNewMagnitudes: List[Magnitude] =
+    Target.magnitudes.get(target).orZero
+
+  def getNewMagnitudeBands: Set[MagnitudeBand] =
+    getNewMagnitudes.map(_.band)(collection.breakOut)
 
 }

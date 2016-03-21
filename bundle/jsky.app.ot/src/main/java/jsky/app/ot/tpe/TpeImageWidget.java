@@ -7,6 +7,8 @@ import edu.gemini.shared.skyobject.SkyObject;
 import edu.gemini.shared.skyobject.coords.HmsDegCoordinates;
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.ags.AgsStrategyKey;
+import edu.gemini.spModel.core.Coordinates;
+import edu.gemini.spModel.core.SiderealTarget;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 import edu.gemini.spModel.obs.SchedulingBlock;
 import edu.gemini.spModel.obs.context.ObsContext;
@@ -536,11 +538,11 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
         final Point2D.Double p = new Point2D.Double(mp.x, mp.y);
         getCoordinateConverter().screenToUserCoords(p, false);
         if (evt.getID() == MouseEvent.MOUSE_CLICKED) {
-            Option<SkyObject> skyObject = getCatalogPosition(mp);
+            Option<SiderealTarget> skyObject = getCatalogPosition(mp);
             skyObject.forEach(s -> {
-                final HmsDegCoordinates coords = s.getCoordinates().toHmsDeg(0);
-                tme.pos = new WorldCoords(coords.getRa().toDegrees().getMagnitude(), coords.getDec().toDegrees().getMagnitude());
-                tme.name = s.getName();
+                final Coordinates coords = s.coordinates();
+                tme.pos = new WorldCoords(coords.ra().toDegrees(), coords.dec().toDegrees());
+                tme.name = s.name();
             });
             tme.setSkyObject(skyObject);
             if (!skyObject.isDefined()) {
@@ -590,7 +592,7 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
      * point to the center of the symbol and return the world coordinates position
      * from the catalog table row. Otherwise, return null and do nothing.
      */
-    private Option<SkyObject> getCatalogPosition(final Point2D.Double p) {
+    private Option<SiderealTarget> getCatalogPosition(final Point2D.Double p) {
         return plotter().getCatalogObjectAt(p);
     }
 

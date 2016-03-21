@@ -5,8 +5,6 @@ import edu.gemini.shared.{skyobject => SO}
 import edu.gemini.shared.util.immutable.DefaultImList
 import edu.gemini.spModel.core.{Coordinates, MagnitudeSystem, MagnitudeBand, Magnitude}
 import edu.gemini.spModel.{target => SP}
-import edu.gemini.spModel.target.system.CoordinateTypes.{PM1 => SPProperMotionRA}
-import edu.gemini.spModel.target.system.CoordinateTypes.{PM2 => SPProperMotionDec}
 
 import java.text.DateFormat
 import scala.collection.JavaConverters._
@@ -91,29 +89,4 @@ object SpTargetFactory {
     spt.setRaDecDegrees(c.ra.toAngle.toDegrees, c.dec.toDegrees)
   }
 
-  private def siderealMags(sid: SiderealTarget): Either[String, List[SO.Magnitude]] = {
-    val empty: Either[String, List[SO.Magnitude]] = Right(Nil)
-    (empty/:sid.magnitudes) {
-      (e, m) => e.right flatMap { lst =>
-        mag(m).right map { _ :: lst }
-      }
-    }
-  }
-
-  private def mag(m: Magnitude): Either[String, SO.Magnitude] =
-    for {
-      band   <- band(m.band).right
-      system <- system(m.system).right
-    } yield new SO.Magnitude(band, m.value, system)
-
-  // Find the magnitude band with the same name.
-  private def band(b: MagnitudeBand): Either[String, SO.Magnitude.Band] = {
-    val opt = SO.Magnitude.Band.values().find { _.name() == b.name }
-    opt.toRight(s"Unexpected magnitude band: ${b.name}")
-  }
-
-  private def system(s: MagnitudeSystem): Either[String, MagnitudeSystem] = {
-    val opt = MagnitudeSystem.allForOT.find { _.name.equalsIgnoreCase(s.name) }
-    opt.toRight(s"Unexpected magnitude system: ${s.name}")
-  }
 }

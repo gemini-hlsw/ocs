@@ -108,12 +108,6 @@ public enum GuideProbeUtil {
             validate(coords, guideProbe, ctx)).getOrElse(GuideStarValidation.UNDEFINED);
     }
 
-    public GuideStarValidation validate(final SkyObject guideStar, final GuideProbe guideProbe, final ObsContext ctx) {
-        final HmsDegCoordinates coords = guideStar.getCoordinates().toHmsDeg(0);
-        final Coordinates c = new Coordinates(coords.getRa(), coords.getDec());
-        return validate(c, guideProbe, ctx);
-    }
-
     public GuideStarValidation validate(final Coordinates coords, final GuideProbe guideProbe, final ObsContext ctx) {
         final Angle positionAngle = ctx.getPositionAngle();
         final Set<Offset> sciencePositions = ctx.getSciencePositions();

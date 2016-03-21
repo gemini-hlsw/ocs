@@ -106,9 +106,9 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
       (Angle.fromDegrees(odgw4x.getRaDeg)  ~= Angle.fromDegrees(odgw4.getSkycalcCoordinates(NoTime).getValue.getRaDeg)) should beTrue
       (Angle.fromDegrees(odgw4x.getDecDeg) ~= Angle.fromDegrees(odgw4.getSkycalcCoordinates(NoTime).getValue.getDecDeg)) should beTrue
 
-      val cwfs1Mag = cwfs1.getMagnitude(JMagnitude.Band.r).getValue.getBrightness
-      val cwfs2Mag = cwfs2.getMagnitude(JMagnitude.Band.UC).getValue.getBrightness
-      val cwfs3Mag = cwfs3.getMagnitude(JMagnitude.Band.r).getValue.getBrightness
+      val cwfs1Mag = cwfs1.getNewMagnitude(MagnitudeBand._r).map(_.value).get
+      val cwfs2Mag = cwfs2.getNewMagnitude(MagnitudeBand.UC).map(_.value).get
+      val cwfs3Mag = cwfs3.getNewMagnitude(MagnitudeBand._r).map(_.value).get
       cwfs3Mag < cwfs1Mag && cwfs2Mag < cwfs1Mag should beTrue
     }
     "support Gsaoi Search on SN-1987A" in {
@@ -167,9 +167,9 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
       (Angle.fromDegrees(odgw2x.getRaDeg)  ~= Angle.fromDegrees(odgw2.getSkycalcCoordinates(NoTime).getValue.getRaDeg)) should beTrue
       (Angle.fromDegrees(odgw2x.getDecDeg) ~= Angle.fromDegrees(odgw2.getSkycalcCoordinates(NoTime).getValue.getDecDeg)) should beTrue
 
-      val cwfs1Mag = cwfs1.getMagnitude(JMagnitude.Band.UC).getValue.getBrightness
-      val cwfs2Mag = cwfs2.getMagnitude(JMagnitude.Band.UC).getValue.getBrightness
-      val cwfs3Mag = cwfs3.getMagnitude(JMagnitude.Band.UC).getValue.getBrightness
+      val cwfs1Mag = cwfs1.getNewMagnitude(MagnitudeBand.UC).map(_.value).get
+      val cwfs2Mag = cwfs2.getNewMagnitude(MagnitudeBand.UC).map(_.value).get
+      val cwfs3Mag = cwfs3.getNewMagnitude(MagnitudeBand.UC).map(_.value).get
       cwfs3Mag < cwfs1Mag && cwfs2Mag < cwfs1Mag should beTrue
     }
     "support Gsaoi Search on M6" in {
@@ -228,9 +228,9 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
       (Angle.fromDegrees(odgw2x.getRaDeg)  ~= Angle.fromDegrees(odgw2.getSkycalcCoordinates(NoTime).getValue.getRaDeg)) should beTrue
       (Angle.fromDegrees(odgw2x.getDecDeg) ~= Angle.fromDegrees(odgw2.getSkycalcCoordinates(NoTime).getValue.getDecDeg)) should beTrue
 
-      val cwfs1Mag = cwfs1.getMagnitude(JMagnitude.Band.UC).getValue.getBrightness
-      val cwfs2Mag = cwfs2.getMagnitude(JMagnitude.Band.UC).getValue.getBrightness
-      val cwfs3Mag = cwfs3.getMagnitude(JMagnitude.Band.UC).getValue.getBrightness
+      val cwfs1Mag = cwfs1.getNewMagnitude(MagnitudeBand.UC).map(_.value).get
+      val cwfs2Mag = cwfs2.getNewMagnitude(MagnitudeBand.UC).map(_.value).get
+      val cwfs3Mag = cwfs3.getNewMagnitude(MagnitudeBand.UC).map(_.value).get
       cwfs3Mag < cwfs1Mag && cwfs2Mag < cwfs1Mag should beTrue
     }
     "support Gsaoi Search on BPM 37093" in {

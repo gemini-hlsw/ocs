@@ -1,14 +1,12 @@
 package jsky.app.ot.editor.template
 
 import edu.gemini.pot.sp.ISPTemplateParameters
-import edu.gemini.shared.skyobject.Magnitude
 import edu.gemini.shared.util.TimeValue
 import edu.gemini.shared.util.immutable.{ DefaultImList, None => JNone, Option => JOption }
 import edu.gemini.spModel.`type`.ObsoletableSpType
-import edu.gemini.spModel.core.{DeclinationAngularVelocity, AngularVelocity, RightAscensionAngularVelocity, ProperMotion, SiderealTarget, MagnitudeSystem}
+import edu.gemini.spModel.core._
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.{PercentageContainer, ImageQuality, CloudCover, SkyBackground, WaterVapor}
-import edu.gemini.spModel.rich.shared.immutable.asScalaOpt
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.system._
 import edu.gemini.spModel.template.TemplateParameters
@@ -253,7 +251,7 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
             case NonSidereal => target.setNonSidereal()
           }
           target.setName(target.getName)
-          target.setMagnitudes(DefaultImList.create[Magnitude]())
+          target.setNewMagnitudes(Nil)
         })}
       )
 
@@ -317,28 +315,28 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
     }
 
     object MagnitudesPanel extends ColumnPanel {
-      def magRow(band: Magnitude.Band): Row = {
-        lazy val zero = new Magnitude(band, 0.0, band.defaultSystem)
+      def magRow(band: MagnitudeBand): Row = {
+        lazy val zero = new Magnitude(0.0, band, band.defaultSystem)
 
         def mag(tp: TemplateParameters): Option[Magnitude] =
-          tp.getTarget.getMagnitude(band).asScalaOpt
+          tp.getTarget.getNewMagnitude(band)
 
         def magOrZero(tp: TemplateParameters): Magnitude =
           mag(tp).getOrElse(zero)
 
         def setMag[A](f: (Magnitude, A) => Magnitude): (TemplateParameters, A) => TemplateParameters =
           setTarget[A]{ (t, a) =>
-            t.putMagnitude(f(t.getMagnitude(band).getOrElse(zero), a))
+            t.putNewMagnitude(f(t.getNewMagnitude(band).getOrElse(zero), a))
           }
 
         val magCheck = new BoundCheckbox(
           get = mag(_).isDefined,
           set = setTarget((target, inc) => {
             if (inc) {
-              target.putMagnitude(zero)
+              target.putNewMagnitude(zero)
             } else {
-              val mags = target.getMagnitudes.toList.asScala.filterNot(_.getBand == band)
-              target.setMagnitudes(DefaultImList.create(mags.asJava))
+              val mags = target.getNewMagnitudes.filterNot(_.band == band)
+              target.setNewMagnitudes(mags)
             }}
           )
         )
@@ -348,16 +346,16 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
         val magValue = new BoundTextField[Double](5)(
           read = _.toDouble,
           show = d => f"$d%.3f",
-          get  = magOrZero(_).getBrightness,
-          set  = setMag((m, b) => new Magnitude(band, b, m.getSystem))
+          get  = magOrZero(_).value,
+          set  = setMag((m, b) => new Magnitude(b, band, m.system))
         ) {
           override def updateEnabledState(): Unit = enabled = includeBand
         }
 
         val magSys = new BoundNullableCombo[MagnitudeSystem](MagnitudeSystem.allForOT)(
           show = _.name,
-          get  = magOrZero(_).getSystem,
-          set  = setMag((m, s) => new Magnitude(band, m.getBrightness, s))
+          get  = magOrZero(_).system,
+          set  = setMag((m, s) => new Magnitude(m.value, band, s))
         ) {
           override def updateEnabledState(): Unit = enabled = includeBand
         }
@@ -372,7 +370,7 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
         Row(band.name, magCheck, magValue, magSys)
       }
 
-      val rows = Magnitude.Band.values().toList.map(magRow)
+      val rows = MagnitudeBand.all.map(magRow)
       layoutRows()
     }
 

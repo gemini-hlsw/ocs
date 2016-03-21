@@ -96,11 +96,6 @@ public final class Magnitude implements Comparable<Magnitude>, Serializable {
 
     }
 
-    /**
-     * Magnitudes with this brightness are undefined.
-     */
-    public static final double UNDEFINED_MAG = -99.0;  // Yikes :-(
-
     private final Band band;
     private final double brightness;
     private final Option<Double> error;

@@ -9,7 +9,7 @@ import edu.gemini.ags.api.AgsGuideQuality
 import edu.gemini.catalog.ui.tpe.CatalogImageDisplay
 import edu.gemini.shared.skyobject.SkyObject
 import edu.gemini.pot.ModelConverters._
-import edu.gemini.spModel.core.MagnitudeBand
+import edu.gemini.spModel.core.{SiderealTarget, MagnitudeBand}
 import edu.gemini.shared.util.immutable.{Option => JOption}
 import edu.gemini.shared.util.immutable.ScalaConverters._
 import jsky.catalog._
@@ -272,7 +272,7 @@ object adapters {
 
     override def addTableModelListener(l: TableModelListener): Unit = model.addTableModelListener(l)
 
-    override def getSkyObject(i: Int): JOption[SkyObject] = model.targets.lift(i).map(_.toOldModel).asGeminiOpt
+    override def getSkyObject(i: Int): JOption[SiderealTarget] = model.targets.lift(i).asGeminiOpt
 
   }
 

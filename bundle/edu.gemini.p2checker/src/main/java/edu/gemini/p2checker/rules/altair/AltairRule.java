@@ -11,11 +11,12 @@ import edu.gemini.p2checker.api.P2Problems;
 import edu.gemini.p2checker.util.PositionOffsetChecker;
 import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.pot.sp.ISPProgramNode;
-import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.shared.util.immutable.Trio;
 import edu.gemini.shared.util.immutable.Tuple3;
 import edu.gemini.skycalc.Coordinates;
+import edu.gemini.spModel.core.Magnitude;
+import edu.gemini.spModel.core.MagnitudeBand;
 import edu.gemini.spModel.gemini.altair.AltairAowfsGuider;
 import edu.gemini.spModel.gemini.altair.AltairParams;
 import edu.gemini.spModel.gemini.altair.InstAltair;
@@ -28,6 +29,7 @@ import edu.gemini.spModel.target.env.GuideGroup;
 import edu.gemini.spModel.target.env.GuideProbeTargets;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
+import scala.Predef$;
 
 /**
  * Rules for observations containing an Altair node.
@@ -266,12 +268,13 @@ public final class AltairRule implements IRule {
             Double minMag = null;
             Double maxMag = null;
             boolean inRange = false;
-            Magnitude.Band[] bands = new Magnitude.Band[]{Magnitude.Band.R, Magnitude.Band.V};
+            MagnitudeBand[] bands = new MagnitudeBand[]{MagnitudeBand.R$.MODULE$, MagnitudeBand.V$.MODULE$};
             for (SPTarget spTarget : guideGroup.getTargets()) {
-                for (Magnitude.Band band : bands) {
-                    Magnitude m = spTarget.getMagnitude(band).getOrNull();
+                for (MagnitudeBand band : bands) {
+                    final scala.Option<Magnitude> om = spTarget.getNewMagnitude(band);
+                    final Magnitude m = om.isDefined() ? om.get() : null;
                     if (m != null) {
-                        double b = m.getBrightness();
+                        double b = m.value();
                         if (minMag == null || b < minMag) minMag = b;
                         if (maxMag == null || b > maxMag) maxMag = b;
                         if (b > lower && b < upper) inRange = true;

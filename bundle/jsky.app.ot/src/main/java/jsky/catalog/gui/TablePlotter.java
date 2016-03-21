@@ -9,6 +9,7 @@ import javax.swing.JPanel;
 
 import edu.gemini.shared.skyobject.SkyObject;
 import edu.gemini.shared.util.immutable.Option;
+import edu.gemini.spModel.core.SiderealTarget;
 import jsky.catalog.TablePlotSymbol;
 import jsky.catalog.TableQueryResult;
 import jsky.coords.CoordinateConverter;
@@ -67,7 +68,7 @@ public interface TablePlotter {
      * point to the center of the symbol and return the name and coordinates
      * from the catalog table row. Otherwise, return null and do nothing.
      */
-    Option<SkyObject> getCatalogObjectAt(Point2D.Double p);
+    Option<SiderealTarget> getCatalogObjectAt(Point2D.Double p);
 
     /** Return the object used to convert to screen coordinates for drawing */
     CoordinateConverter getCoordinateConverter();
