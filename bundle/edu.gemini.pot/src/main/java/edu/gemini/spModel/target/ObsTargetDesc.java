@@ -16,7 +16,6 @@ import edu.gemini.spModel.obs.SPObservation;
 import edu.gemini.spModel.obs.plannedtime.PlannedTimeSummaryService;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
-import edu.gemini.spModel.target.system.ITarget;
 import edu.gemini.spModel.time.TimeAmountFormatter;
 import edu.gemini.spModel.util.SPTreeUtil;
 import jsky.coords.TargetDesc;

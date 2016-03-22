@@ -16,7 +16,6 @@ import edu.gemini.spModel.target.*;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.target.offset.OffsetPosBase;
-import edu.gemini.spModel.target.system.ITarget;
 import edu.gemini.spModel.util.Angle;
 import jsky.app.ot.tpe.gems.GemsGuideStarSearchDialog;
 import jsky.app.ot.util.OtColor;
