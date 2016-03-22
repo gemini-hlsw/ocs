@@ -12,8 +12,9 @@ object MagParserSpec extends Specification with ScalaCheck with edu.gemini.spMod
 
   "MagParser" should {
 
-    "Parse Valid Mags" ! forAll { (ms: List[Magnitude]) =>
-      val s = ms.map(m => s"${m.value}/${m.band}/${m.system}").mkString(",")
+    "Parse Valid Mags" ! forAll { (ms0: List[Magnitude]) =>
+      val ms = ms0.map(_.copy(error = None))
+      val s = ms.map(m => s"${m.value}/${m.band.name}/${m.system}").mkString(",")
       new MagParser().unsafeParse(s) must_== ms.asImList
     }
 

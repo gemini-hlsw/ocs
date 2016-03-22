@@ -13,7 +13,7 @@ class MagParser extends RegexParsers {
     """-?\d+(\.\d*)?""".r ^^ (_.toDouble)
 
   val band: Parser[MagnitudeBand] =
-    MagnitudeBand.all.map(b => b.toString ^^^ b).reverse.reduceLeft(_ | _) // reverse to put UC ahead of U
+    MagnitudeBand.all.map(b => b.name ^^^ b).reverse.reduceLeft(_ | _) // reverse to put UC ahead of U
 
   val sys:  Parser[MagnitudeSystem] =
     MagnitudeSystem.allForOT.map(s => s.toString ^^^ s).reduceLeft(_ | _)

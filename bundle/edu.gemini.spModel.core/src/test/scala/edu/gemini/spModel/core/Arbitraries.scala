@@ -81,7 +81,7 @@ trait Arbitraries {
   implicit val arbMagnitude: Arbitrary[Magnitude] =
     Arbitrary {
       for {
-        value  <- arbitrary[Double]
+        value  <- arbitrary[Short].map(_ / 100.0)
         band   <- arbitrary[MagnitudeBand]
         error  <- arbitrary[Option[Double]]
         system <- arbitrary[MagnitudeSystem]

@@ -81,8 +81,9 @@ object HttpTargetSpec extends Specification with ScalaCheck with Arbitraries wit
     "Dec: Fail on Missing" in {
       mustFail(req without "dec")
     }
-    "Mags: Parse Magnitudes" ! forAll { (ms: List[Magnitude]) =>
-      val s = ms.map(m => s"${m.value}/${m.band}/${m.system}").mkString(",")
+    "Mags: Parse Magnitudes" ! forAll { (ms0: List[Magnitude]) =>
+      val ms = ms0.map(_.copy(error = None))
+      val s = ms.map(m => s"${m.value}/${m.band.name}/${m.system}").mkString(",")
       val t = new HttpTooTarget(req.modifiedWith("mags" -> s))
       t.getMagnitudes must_== ms.asImList
     }
@@ -158,8 +159,9 @@ object HttpTargetSpec extends Specification with ScalaCheck with Arbitraries wit
     "Probe: Fail on Missing" in {
       mustFail(req without "gsprobe")
     }
-    "Mags: Parse Magnitudes" ! forAll { (ms: List[Magnitude]) =>
-      val s = ms.map(m => s"${m.value}/${m.band}/${m.system}").mkString(",")
+    "Mags: Parse Magnitudes" ! forAll { (ms0: List[Magnitude]) =>
+      val ms = ms0.map(_.copy(error = None))
+      val s = ms.map(m => s"${m.value}/${m.band.name}/${m.system}").mkString(",")
       val t = new HttpTooGuideTarget(req.modifiedWith("gsmags" -> s))
       t.getMagnitudes must_== ms.asImList
     }
