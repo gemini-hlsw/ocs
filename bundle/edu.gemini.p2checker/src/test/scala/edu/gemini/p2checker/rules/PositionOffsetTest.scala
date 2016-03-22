@@ -93,14 +93,14 @@ class PositionOffsetTest extends AbstractRuleTest {
   // success is absence of problem message with given text
   private def expectSuccess(rule: IRule, msg: String): Unit = {
     val problems = applyRule(rule)
-    println("PROBLEMS: " + problems.mkString(", "))
+//    println("PROBLEMS: " + problems.mkString(", "))
     assertTrue(problems.filter(_ == msg).isEmpty)
   }
 
   // failure is presence of problem message with given text
   private def expectFailure(rule: IRule, msg: String): Unit = {
     val problems = applyRule(rule)
-    println("PROBLEMS: " + problems.mkString(", "))
+//    println("PROBLEMS: " + problems.mkString(", "))
     // Note that we want only ONE offset problem to be reported, regardless of the number of bad offsets.
     problems.filter(_ == msg) match {
       case msg :: Nil => // okay
