@@ -10,7 +10,10 @@ import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.config2.Config;
 import edu.gemini.spModel.config2.ConfigSequence;
 import edu.gemini.spModel.config2.ItemKey;
+import edu.gemini.spModel.core.ProperMotion;
+import edu.gemini.spModel.core.SiderealTarget;
 import edu.gemini.spModel.core.Site;
+import edu.gemini.spModel.core.Target;
 import edu.gemini.spModel.gemini.altair.AltairAowfsGuider;
 import edu.gemini.spModel.gemini.altair.AltairParams;
 import edu.gemini.spModel.gemini.altair.InstAltair;
@@ -52,6 +55,8 @@ public class GeneralRule implements IRule {
     public static final ItemKey OBSTYPE_KEY = new ItemKey("observe:observeType");
     public static final ItemKey OBSCLASS_KEY = new ItemKey("observe:class");
     public static final ItemKey OBSLABEL_KEY = new ItemKey("observe:dataLabel");
+
+    private static final GeneralRuleHelper helper = new GeneralRuleHelper();
 
     public IP2Problems check(ObservationElements elements)  {
         P2Problems problems = new P2Problems();
@@ -150,162 +155,103 @@ public class GeneralRule implements IRule {
             final P2Problems problems = new P2Problems();
             final SPTarget baseTarget = env.getBase();
 
-//            final boolean hasAltairComp = elements.hasAltair();
-//            boolean isLgs = false;
-//
-//            // Don't do Altair checks if Altair is not supported
-//            final boolean altairSupported = isAltairSupported(elements);
-//
-//            if (hasAltairComp && altairSupported) {
-//                final ISPObsComponent targetComp = elements.getTargetObsComponentNode().getValue();
-//                final GuideGroup guideGroup      = env.getGuideEnvironment().getPrimary();
-//                final Set<GuideProbe> guiders    = guideGroup.getReferencedGuiders();
-//                final InstAltair altair          = (InstAltair) elements.getAOComponent().getValue();
-//                final AltairParams.Mode mode     = altair.getMode();
-//                isLgs = mode.guideStarType() == AltairParams.GuideStarType.LGS;
-//                switch (mode) {
-//                    case NGS:
-//                    case NGS_FL:
-//                        if (!guiders.contains(AltairAowfsGuider.instance)) {
-//                            problems.addError(PREFIX+"NGS_AOWFS", NGS_AOWFS, targetComp);
-//                        }
-//                        break;
-//                    case LGS:
-//                    case LGS_P1:
-//                        reportAltairLgsGuideIssues(problems, guiders, mode, targetComp);
-//                        break;
-//                    case LGS_OI:
-//                        reportAltairLgsGuideIssues(problems, guiders, mode, targetComp);
-//                        final SPInstObsComp inst = elements.getInstrument();
-//                        if ((inst == null) || inst.getType() != SPComponentType.INSTRUMENT_GMOS) {
-//                            problems.addError(PREFIX+"LSG_OI_NO_GMOS", LGS_OI_NO_GMOS, elements.getAOComponentNode().getValue());
-//                        }
-//                        break;
-//                }
-//            }
-//
-//            for (final GuideProbeTargets guideTargets : env.getOrCreatePrimaryGuideGroup()) {
-//                final GuideProbe guider = guideTargets.getGuider();
-//                // TODO: GuideProbeTargets.isEnabled
-//
-//                final boolean dis = elements.getObsContext().exists(c -> !GuideProbeUtil.instance.isAvailable(c, guider) &&
-//                                                                         (guideTargets.getTargets().size() > 0));
-//                if (dis) {
-//                    problems.addError(PREFIX+"DISABLED_GUIDER", String.format(DISABLED_GUIDER, guider.getKey()),
-//                            elements.getTargetObsComponentNode().getValue());
-//                    continue;
-//                }
-//
-//                if (guider == PwfsGuideProbe.pwfs1) {
-//                    if (guideTargets.getTargets().size() > 0) {
-//                        final SPInstObsComp instrument = elements.getInstrument();
-//                        if(instrument!=null && instrument.getSite().contains(Site.GN) && !isLgs){
-//                            problems.addWarning(PREFIX+"P2_PREFERRED", P2_PREFERRED,elements.getTargetObsComponentNode().getValue());
-//                        }
-//                    }
-//                    continue;
-//                }
-//
-//                final Set<String> errorSet = new TreeSet<>();
-//                for (final SPTarget target : guideTargets) {
-//                    //Check for empty name
-//                    if ("".equals(target.getName().trim())) {
-//                        errorSet.add(String.format(WFS_EMPTY_NAME_TEMPLATE, guider.getKey()));
-//                    }
-//
-//                    // If a WFS has the same name as the base position, make sure the have the same
-//                    // type (i.e., tag) and position; or, if they have the same tag and position,
-//                    // make sure they have the same name.
-//                    final ITarget t1 = null; //baseTarget.getTarget();
-//                    final ITarget t2 = null; //target.getTarget();
-//
-//                    final boolean sameName = t1.getName().equals(t2.getName());
-//                    final boolean sameTag  = t1.getTag() == t2.getTag();
-//
-//                    if (sameName) {
-//                        if (sameTag) {
-//                            if (!samePosition(t1, t2)) {
-//                                // same name and tag, but positions don't match
-//                                errorSet.add(COORD_CLASH_MESSAGE);
-//                            }
-//                        } else {
-//                            // same name but different tags
-//                            errorSet.add(TAG_CLASH_MESSAGE);
-//                        }
-//                    } else if (sameTag && samePosition(t1, t2)) {
-//                        // same tag and position, but different name
-//                        errorSet.add(NAME_CLASH_MESSAGE);
-//                    }
-//
-//                }
-//                for (final String error : errorSet) {
-//                    final String id = error.equals(WFS_EMPTY_NAME_TEMPLATE) ? "WFS_EMPTY_NAME_TEMPLATE" :
-//                              (error.equals(NAME_CLASH_MESSAGE) ? "NAME_CLASH_MESSAGE" : "COORD_CLASH_MESSAGE");
-//                    problems.addError(PREFIX+id, error, elements.getTargetObsComponentNode().getValue());
-//                }
-//            }
+            final boolean hasAltairComp = elements.hasAltair();
+            boolean isLgs = false;
+
+            // Don't do Altair checks if Altair is not supported
+            final boolean altairSupported = isAltairSupported(elements);
+
+            if (hasAltairComp && altairSupported) {
+                final ISPObsComponent targetComp = elements.getTargetObsComponentNode().getValue();
+                final GuideGroup guideGroup      = env.getGuideEnvironment().getPrimary();
+                final Set<GuideProbe> guiders    = guideGroup.getReferencedGuiders();
+                final InstAltair altair          = (InstAltair) elements.getAOComponent().getValue();
+                final AltairParams.Mode mode     = altair.getMode();
+                isLgs = mode.guideStarType() == AltairParams.GuideStarType.LGS;
+                switch (mode) {
+                    case NGS:
+                    case NGS_FL:
+                        if (!guiders.contains(AltairAowfsGuider.instance)) {
+                            problems.addError(PREFIX+"NGS_AOWFS", NGS_AOWFS, targetComp);
+                        }
+                        break;
+                    case LGS:
+                    case LGS_P1:
+                        reportAltairLgsGuideIssues(problems, guiders, mode, targetComp);
+                        break;
+                    case LGS_OI:
+                        reportAltairLgsGuideIssues(problems, guiders, mode, targetComp);
+                        final SPInstObsComp inst = elements.getInstrument();
+                        if ((inst == null) || inst.getType() != SPComponentType.INSTRUMENT_GMOS) {
+                            problems.addError(PREFIX+"LSG_OI_NO_GMOS", LGS_OI_NO_GMOS, elements.getAOComponentNode().getValue());
+                        }
+                        break;
+                }
+            }
+
+            for (final GuideProbeTargets guideTargets : env.getOrCreatePrimaryGuideGroup()) {
+                final GuideProbe guider = guideTargets.getGuider();
+                // TODO: GuideProbeTargets.isEnabled
+
+                final boolean dis = elements.getObsContext().exists(c -> !GuideProbeUtil.instance.isAvailable(c, guider) &&
+                                                                         (guideTargets.getTargets().size() > 0));
+                if (dis) {
+                    problems.addError(PREFIX+"DISABLED_GUIDER", String.format(DISABLED_GUIDER, guider.getKey()),
+                            elements.getTargetObsComponentNode().getValue());
+                    continue;
+                }
+
+                if (guider == PwfsGuideProbe.pwfs1) {
+                    if (guideTargets.getTargets().size() > 0) {
+                        final SPInstObsComp instrument = elements.getInstrument();
+                        if(instrument!=null && instrument.getSite().contains(Site.GN) && !isLgs){
+                            problems.addWarning(PREFIX+"P2_PREFERRED", P2_PREFERRED,elements.getTargetObsComponentNode().getValue());
+                        }
+                    }
+                    continue;
+                }
+
+                final Set<String> errorSet = new TreeSet<>();
+                for (final SPTarget target : guideTargets) {
+                    //Check for empty name
+                    if ("".equals(target.getName().trim())) {
+                        errorSet.add(String.format(WFS_EMPTY_NAME_TEMPLATE, guider.getKey()));
+                    }
+
+                    // If a WFS has the same name as the base position, make sure the have the same
+                    // type (i.e., tag) and position; or, if they have the same tag and position,
+                    // make sure they have the same name.
+                    final Target t1 = baseTarget.getTarget();
+                    final Target t2 = target.getTarget();
+
+                    final boolean sameName = t1.name().equals(t2.name());
+                    final boolean sameTag  = t1.getClass().getName() == t2.getClass().getName();
+
+                    if (sameName) {
+                        if (sameTag) {
+                            if (!helper.samePosition(t1, t2)) {
+                                // same name and tag, but positions don't match
+                                errorSet.add(COORD_CLASH_MESSAGE);
+                            }
+                        } else {
+                            // same name but different tags
+                            errorSet.add(TAG_CLASH_MESSAGE);
+                        }
+                    } else if (sameTag && helper.samePosition(t1, t2)) {
+                        // same tag and position, but different name
+                        errorSet.add(NAME_CLASH_MESSAGE);
+                    }
+
+                }
+                for (final String error : errorSet) {
+                    final String id = error.equals(WFS_EMPTY_NAME_TEMPLATE) ? "WFS_EMPTY_NAME_TEMPLATE" :
+                              (error.equals(NAME_CLASH_MESSAGE) ? "NAME_CLASH_MESSAGE" : "COORD_CLASH_MESSAGE");
+                    problems.addError(PREFIX+id, error, elements.getTargetObsComponentNode().getValue());
+                }
+            }
 
             return problems;
         }
-
-//        // determines whether positions are the same, assuming identical tags
-//        private boolean samePosition(ITarget t1, ITarget t2) {
-//            assert t1.getTag() == t2.getTag() : "Programmer error; tags must match.";
-//            switch (t1.getTag()) {
-//                case JPL_MINOR_BODY:
-//                case MPC_MINOR_PLANET:
-//                case NAMED:
-//
-//                    // SUPER SUPER SKETCHY
-//                    // The .equals logic in NonSiderealTarget actually does what we want here, at
-//                    // least according to the old implementation here. So we'll leave it for now.
-//                    // This will be easier with the new model.
-//                    return t1.equals(t2);
-//
-//                case SIDEREAL:
-//                    final HmsDegTarget hms1 = (HmsDegTarget) t1;
-//                    final HmsDegTarget hms2 = (HmsDegTarget) t2;
-//                    return hasSameCoordinates(hms1, hms2) &&
-//                           hasSameProperMotion(hms1, hms2) &&
-//                           hasSameTrackingDetails(hms1, hms2);
-//
-//                default:
-//                    throw new Error("Unpossible target tag: " + t1.getTag());
-//            }
-//        }
-//
-//        private boolean hasSameCoordinates(HmsDegTarget base, HmsDegTarget guide) {
-//
-//            // Okay, this kind of sucks, but I want to compare the coordinates
-//            // in the same way they are externalized and displayed.  That is,
-//            // ignore any extra precision that we end up throwing away.
-//            String baseC1 = base.getRa().toString();
-//            String baseC2 = base.getDec().toString();
-//
-//            String guideC1 = guide.getRa().toString();
-//            String guideC2 = guide.getDec().toString();
-//
-//            return baseC1.equals(guideC1) && baseC2.equals(guideC2);
-//        }
-//
-//        private boolean hasSameProperMotion(HmsDegTarget base, HmsDegTarget guide) {
-//
-//            double pmDecBase = base.getPropMotionDec();
-//            double pmRaBase = base.getPropMotionRA();
-//
-//            double pmDecGuide = guide.getPropMotionDec();
-//            double pmRaGuide = guide.getPropMotionRA();
-//
-//            return pmRaBase == pmRaGuide && pmDecBase == pmDecGuide;
-//        }
-//
-//        private boolean hasSameTrackingDetails(HmsDegTarget base, HmsDegTarget guide) {
-//            if (base.getTrackingEpoch() != guide.getTrackingEpoch()) return false;
-//            if (base.getTrackingParallax() !=  guide.getTrackingParallax()) return false;
-//            if (base.getRedshift() != guide.getRedshift()) return false;
-//            //everything is the same
-//            return true;
-//        }
     };
 
     private static IRule EXTRA_ADVANCED_GUIDERS_RULE = new IRule() {
@@ -413,23 +359,26 @@ public class GeneralRule implements IRule {
             if (elements.getTargetObsComp().isEmpty()) return null; // can't perform this check without a target environment
 
             SPTarget baseTarget = elements.getTargetObsComp().getValue().getBase();
-//
-//            if (baseTarget != null) {
-//                final ITarget t = null; // baseTarget.getTarget();
-//                if (t instanceof HmsDegTarget) {
-//                    final HmsDegTarget hms = (HmsDegTarget) t;
-//
-//                    double pm_ra = hms.getPropMotionRA();
-//                    double pm_dec = hms.getPropMotionDec();
-//                    double total = pm_ra * pm_ra + pm_dec * pm_dec;
-//
-//                    if (total > MAX_PM * MAX_PM) { //to avoid sqrt call
-//                        P2Problems problems = new P2Problems();
-//                        problems.addWarning(PREFIX + "TARGET_PM_RULE", MESSAGE, elements.getTargetObsComponentNode().getValue());
-//                        return problems;
-//                    }
-//                }
-//            }
+            if (baseTarget != null) {
+                final Target t = baseTarget.getTarget();
+                if (t instanceof SiderealTarget) {
+                    final SiderealTarget hms = (SiderealTarget) t;
+                    final scala.Option<ProperMotion> opm = hms.properMotion();
+                    if (opm.isDefined()) {
+                        final ProperMotion pm = opm.get();
+
+                        double pm_ra = pm.deltaRA().velocity();
+                        double pm_dec = pm.deltaDec().velocity();
+                        double total = pm_ra * pm_ra + pm_dec * pm_dec;
+
+                        if (total > MAX_PM * MAX_PM) { //to avoid sqrt call
+                            P2Problems problems = new P2Problems();
+                            problems.addWarning(PREFIX + "TARGET_PM_RULE", MESSAGE, elements.getTargetObsComponentNode().getValue());
+                            return problems;
+                        }
+                    }
+                }
+            }
             return null;
         }
     };
