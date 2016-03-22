@@ -3,11 +3,17 @@
 //
 package edu.gemini.wdba.tcc;
 
+import edu.gemini.shared.util.immutable.ImList;
+import edu.gemini.shared.util.immutable.None;
+import edu.gemini.shared.util.immutable.Option;
+import edu.gemini.shared.util.immutable.Some;
+import edu.gemini.spModel.core.Magnitude;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.gemini.gsaoi.GsaoiOdgw;
 import edu.gemini.spModel.gemini.gems.Canopus;
 import edu.gemini.wdba.glue.api.WdbaGlueException;
+import org.dom4j.Element;
 
 import java.util.logging.Logger;
 
@@ -52,9 +58,19 @@ public final class TargetConfig extends ParamSet {
         super(spTarget.getName());
 
         putParameter(TccNames.OBJNAME, spTarget.getName());
-
         putParameter(TccNames.BRIGHTNESS, ""); // TODO: can we elide this altogether?
         putParameter(TccNames.TAG, ""); // ugh
+
+        // All targets are considered sidereal now
+        addAttribute(TYPE, "hmsdegTarget");
+        putParameter(TccNames.SYSTEM, "J2000");
+
+//        HmsDegTarget hmsDeg = target.getHmsDegTarget().get();
+//        putParameter(TccNames.C1, hmsDeg.getRa().toString());
+//        putParameter(TccNames.C2, hmsDeg.getDec().toString());
+//        add(_addProperMotion(hmsDeg));
+
+
 
 // TODO
 //        ITarget target = spTarget.getTarget();
@@ -75,8 +91,8 @@ public final class TargetConfig extends ParamSet {
 //
 //        }
 
-//        Option<Element> mags = _createMagnitudes(spTarget);
-//        if (!mags.isEmpty()) add(mags.getValue());
+        Option<Element> mags = _createMagnitudes(spTarget);
+        if (!mags.isEmpty()) add(mags.getValue());
     }
 
 //    /**
@@ -143,18 +159,17 @@ public final class TargetConfig extends ParamSet {
 //        return ps;
 //    }
 //
-//    private Option<Element> _createMagnitudes(SPTarget target) {
-//        ImList<Magnitude> magList = target.getMagnitudes();
-//        if (magList.size() == 0) return None.instance();
-//
-//        final ParamSet ps = new ParamSet(TccNames.MAGNITUDES);
-//        magList.foreach(mag -> {
-//            String band = mag.getBand().name();
-//            String brig = String.format("%1.3f", mag.getBrightness());
-//            ps.putParameter(band, brig);
-//        });
-//        return new Some<>(ps);
-//    }
+    private Option<Element> _createMagnitudes(SPTarget target) {
+        ImList<Magnitude> magList = target.getNewMagnitudesJava();
+        if (magList.size() == 0) return None.instance();
+        final ParamSet ps = new ParamSet(TccNames.MAGNITUDES);
+        magList.foreach(mag -> {
+            String band = mag.band().name();
+            String brig = String.format("%1.3f", mag.value());
+            ps.putParameter(band, brig);
+        });
+        return new Some<>(ps);
+    }
 
 //    // private method to log and throw and exception
 //    private void _logAbort(String message, Exception ex) throws WdbaGlueException {

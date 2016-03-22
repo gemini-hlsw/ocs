@@ -63,7 +63,7 @@ public enum Site {
         // N.B. this static block must appear after the patterns above are created
         final String prop = System.getProperty(SITE_PROP);
         currentSiteOrNull = tryParse(prop);
-        LOG.info("Current site is " + currentSiteOrNull);
+        LOG.fine("Current site is " + currentSiteOrNull);
     }
 
     /**

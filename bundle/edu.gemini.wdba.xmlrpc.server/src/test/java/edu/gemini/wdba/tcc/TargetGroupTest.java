@@ -13,6 +13,7 @@ import edu.gemini.spModel.gemini.gmos.InstGmosSouth;
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi;
 import edu.gemini.spModel.gemini.gsaoi.GsaoiOdgw;
 import edu.gemini.spModel.guide.GuideProbe;
+import edu.gemini.spModel.pio.xml.PioXmlUtil;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.*;
 import edu.gemini.spModel.target.obsComp.PwfsGuideProbe;
@@ -61,6 +62,7 @@ public final class TargetGroupTest extends TestBase {
      */
     public void testUnamedBase() throws Exception {
         final SPTarget base = new SPTarget();
+        base.setName("");
         nameMap.putTargetName(base, TccNames.BASE);
         testTargetEnvironment(TargetEnvironment.create(base));
     }
@@ -76,8 +78,8 @@ public final class TargetGroupTest extends TestBase {
      * An unamed base and user target.
      */
     public void testUnamedBaseAndUser() throws Exception {
-        final SPTarget base = new SPTarget();
-        final SPTarget user = new SPTarget();
+        final SPTarget base = new SPTarget(); base.setName("");
+        final SPTarget user = new SPTarget(); user.setName("");
         final ImList<SPTarget> userTargets = ImCollections.singletonList(user);
 
         nameMap.putTargetName(base, TccNames.BASE);
@@ -175,7 +177,7 @@ public final class TargetGroupTest extends TestBase {
 
     public void testOiwfsMapping() throws Exception {
         // Create a target environment that uses an instrument OIWFS.
-        final SPTarget oiwfsTarget = new SPTarget();
+        final SPTarget oiwfsTarget = new SPTarget(); oiwfsTarget.setName("");
 
         final ImList<SPTarget> targetList = ImCollections.singletonList(oiwfsTarget);
         final GuideProbeTargets gt = GuideProbeTargets.create(GmosOiwfsGuideProbe.instance, targetList);
@@ -196,7 +198,7 @@ public final class TargetGroupTest extends TestBase {
 
     public void testGsaoiOdgwMapping() throws Exception {
         // Create a target environment that uses an instrument OIWFS.
-        final SPTarget odgwTarget = new SPTarget();
+        final SPTarget odgwTarget = new SPTarget(); odgwTarget.setName("");
 
         final ImList<SPTarget> targetList = ImCollections.singletonList(odgwTarget);
         final GuideProbeTargets gt = GuideProbeTargets.create(GsaoiOdgw.odgw1, targetList);
@@ -217,7 +219,7 @@ public final class TargetGroupTest extends TestBase {
 
     public void testAowfsMapping() throws Exception {
         // Create a target environment that uses the altair AOWFS.
-        final SPTarget aowfsTarget = new SPTarget();
+        final SPTarget aowfsTarget = new SPTarget(); aowfsTarget.setName("");
 
         final ImList<SPTarget> targetList = ImCollections.singletonList(aowfsTarget);
         final GuideProbeTargets gt = GuideProbeTargets.create(AltairAowfsGuider.instance, targetList);
@@ -238,7 +240,7 @@ public final class TargetGroupTest extends TestBase {
 
     public void testGemsMapping() throws Exception {
         // Create a target environment that uses Gems canopus wfs.
-        final SPTarget cwfsTarget = new SPTarget();
+        final SPTarget cwfsTarget = new SPTarget(); cwfsTarget.setName("");
 
         final ImList<SPTarget> targetList = ImCollections.singletonList(cwfsTarget);
         final GuideProbeTargets gt = GuideProbeTargets.create(Canopus.Wfs.cwfs1, targetList);
