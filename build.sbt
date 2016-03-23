@@ -65,7 +65,7 @@ libraryDependencies in ThisBuild ++= Seq(
   "org.scalacheck" %% "scalacheck"           % "1.11.0"      % "test",
   "org.specs2"     %% "specs2-core"          % specs2Version % "test",
   "org.specs2"     %% "specs2-scalacheck"    % specs2Version % "test",
-  "org.specs2"     %% "specs2-matcher-extra" % specs2Version % "test" intransitive(), // This is required to avoid pulling a version of scalaz-stream not available in maven central
+  "org.specs2"     %% "specs2-matcher-extra" % specs2Version % "test" exclude("org.scalaz.stream", "scalaz-stream_2.11") intransitive(), // This is required to avoid pulling a version of scalaz-stream not available in maven central
   "org.scalatest"  %% "scalatest"            % "2.2.4"       % "test"
 )
 
@@ -76,7 +76,7 @@ scalacOptions in Test ++= Seq("-Yrangepos")
 publishArtifact in (ThisBuild, packageDoc) := false
 
 // Don't build package source (for now)
-publishArtifact in (ThisBuild, packageSrc) := false
+publishArtifact in (ThisBuild, packageSrc) := true
 
 publishTo in Global := {
     val repo = if (isSnapshot.value) {
@@ -88,7 +88,7 @@ publishTo in Global := {
   }
 
 // No poms
-publishMavenStyle in ThisBuild := false
+publishMavenStyle in ThisBuild := true
 
 // > dash -s List
 commands += {

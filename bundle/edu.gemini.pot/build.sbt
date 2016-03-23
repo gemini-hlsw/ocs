@@ -163,4 +163,3 @@ OsgiKeys.exportPackage := Seq(
 
 OsgiKeys.additionalHeaders += 
   ("Import-Package" -> "!org.apache.regexp,!org.apache.xerces.*,*")
-
