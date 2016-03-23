@@ -45,20 +45,20 @@ public final class TargetMagnitudeTest extends TestBase {
     }
 
     public void testOneMagnitude() throws Exception {
-        pwfs1_1.putNewMagnitude(new Magnitude(10, MagnitudeBand.J$.MODULE$));
+        pwfs1_1.putMagnitude(new Magnitude(10, MagnitudeBand.J$.MODULE$));
         testTargetEnvironment(env);
     }
 
     public void testNonSiderealMagnitude() throws Exception {
-        pwfs1_1.putNewMagnitude(new Magnitude(10, MagnitudeBand.J$.MODULE$));
+        pwfs1_1.putMagnitude(new Magnitude(10, MagnitudeBand.J$.MODULE$));
         pwfs1_1.setNonSidereal();
         pwfs1_1.setName("PWFS1-1");
         testTargetEnvironment(env);
     }
 
     public void testTwoMagnitudes() throws Exception {
-        pwfs1_1.putNewMagnitude(new Magnitude(10, MagnitudeBand.J$.MODULE$));
-        pwfs1_1.putNewMagnitude(new Magnitude(10, MagnitudeBand.K$.MODULE$));
+        pwfs1_1.putMagnitude(new Magnitude(10, MagnitudeBand.J$.MODULE$));
+        pwfs1_1.putMagnitude(new Magnitude(10, MagnitudeBand.K$.MODULE$));
         testTargetEnvironment(env);
     }
 
@@ -90,7 +90,7 @@ public final class TargetMagnitudeTest extends TestBase {
     private void validateMagnitudes(final Element element, final SPTarget target) {
         final String MAG_PATH = "paramset[@name='" + TccNames.MAGNITUDES + "']";
         final Element magGroupElement = (Element) element.selectSingleNode(MAG_PATH);
-        final scala.collection.immutable.List<Magnitude> mags = target.getNewMagnitudes();
+        final scala.collection.immutable.List<Magnitude> mags = target.getMagnitudes();
         if (magGroupElement == null) {
             assertEquals(0, mags.size());
             return;

@@ -343,17 +343,17 @@ class MagnitudeEditor2 extends TelescopePosEditor {
     reinit(target, Mode.Add)
 
   private def addBand(b: MagnitudeBand): Unit = {
-    target.setNewTarget(Target.magnitudes.mod({ ms =>
+    target.setTarget(Target.magnitudes.mod({ ms =>
       new Magnitude(0.0, b) :: ms.filterNot(_.band == b)
     }, target.getTarget))
     focusOn(b)
   }
 
   private def removeBand(b: MagnitudeBand): Unit =
-    target.setNewTarget(Target.magnitudes.mod(_.filterNot(_.band == b), target.getTarget))
+    target.setTarget(Target.magnitudes.mod(_.filterNot(_.band == b), target.getTarget))
 
   private def modifyMagnitudeWithBand(b: MagnitudeBand, f: Magnitude => Magnitude): Unit = {
-    target.setNewTarget(Target.magnitudes.mod(_.map { m =>
+    target.setTarget(Target.magnitudes.mod(_.map { m =>
       if (m.band == b) f(m) else m
     }, target.getTarget))
     focusOn(b)

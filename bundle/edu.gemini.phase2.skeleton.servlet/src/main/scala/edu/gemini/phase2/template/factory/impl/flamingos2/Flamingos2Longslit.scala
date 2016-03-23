@@ -33,7 +33,7 @@ case class Flamingos2Longslit(blueprint:SpFlamingos2BlueprintLongslit, exampleTa
 //              Put FILTERS from PI into F2 ITERATOR
 //
 
-  val acq = exampleTarget.flatMap(t => t.getNewMagnitude(H)).map(_.value) match {
+  val acq = exampleTarget.flatMap(t => t.getMagnitude(H)).map(_.value) match {
     case Some(h) if h <= 12 => Seq(13)
     case Some(h) if h >  12 => Seq(14)
     case _                  => Seq(13, 14)

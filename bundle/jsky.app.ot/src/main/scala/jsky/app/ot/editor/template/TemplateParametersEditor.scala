@@ -251,7 +251,7 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
             case NonSidereal => target.setNonSidereal()
           }
           target.setName(target.getName)
-          target.setNewMagnitudes(Nil)
+          target.setMagnitudes(Nil)
         })}
       )
 
@@ -281,7 +281,7 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
           set  = (tp, pm) => {
             val newTarget = tp.getTarget
             newTarget.getSiderealTarget.foreach { t =>
-              tp.getTarget.setNewTarget(lens.set(t, pm))
+              tp.getTarget.setTarget(lens.set(t, pm))
             }
             tp.copy(newTarget)
           }
@@ -319,24 +319,24 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
         lazy val zero = new Magnitude(0.0, band, band.defaultSystem)
 
         def mag(tp: TemplateParameters): Option[Magnitude] =
-          tp.getTarget.getNewMagnitude(band)
+          tp.getTarget.getMagnitude(band)
 
         def magOrZero(tp: TemplateParameters): Magnitude =
           mag(tp).getOrElse(zero)
 
         def setMag[A](f: (Magnitude, A) => Magnitude): (TemplateParameters, A) => TemplateParameters =
           setTarget[A]{ (t, a) =>
-            t.putNewMagnitude(f(t.getNewMagnitude(band).getOrElse(zero), a))
+            t.putMagnitude(f(t.getMagnitude(band).getOrElse(zero), a))
           }
 
         val magCheck = new BoundCheckbox(
           get = mag(_).isDefined,
           set = setTarget((target, inc) => {
             if (inc) {
-              target.putNewMagnitude(zero)
+              target.putMagnitude(zero)
             } else {
-              val mags = target.getNewMagnitudes.filterNot(_.band == band)
-              target.setNewMagnitudes(mags)
+              val mags = target.getMagnitudes.filterNot(_.band == band)
+              target.setMagnitudes(mags)
             }}
           )
         )

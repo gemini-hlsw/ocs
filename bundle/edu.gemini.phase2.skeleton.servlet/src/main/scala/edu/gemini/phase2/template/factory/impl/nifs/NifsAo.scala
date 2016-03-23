@@ -16,7 +16,7 @@ import edu.gemini.spModel.rich.pot.sp._
 case class NifsAo(blueprint: SpNifsBlueprintAo, exampleTarget: Option[SPTarget]) extends NifsBase[SpNifsBlueprintAo] {
   import blueprint._
 
-  val tb = exampleTarget.flatMap(t => t.getNewMagnitude(MagnitudeBand.K)).map(_.value).map(TargetBrightness(_))
+  val tb = exampleTarget.flatMap(t => t.getMagnitude(MagnitudeBand.K)).map(_.value).map(TargetBrightness(_))
 
   // These two notes should be included at the top of every NIFS program
   addNote("Phase II Requirements: General Information", "Phase II  \"BEFORE Submission\" Checklist") in TopLevel

@@ -122,7 +122,7 @@ trait Partitioner {
 
 object GnirsSpectroscopyPartitioner extends Partitioner {
   import edu.gemini.spModel.core.MagnitudeBand.H
-  def bucket(t:SPTarget):Int = t.getNewMagnitude(H).map(_.value).map {H =>
+  def bucket(t:SPTarget):Int = t.getMagnitude(H).map(_.value).map { H =>
     if (H < 11.5) 1
     else if (H < 16) 2
     else if (H < 20) 3
@@ -139,7 +139,7 @@ object GnirsSpectroscopyPartitioner extends Partitioner {
 
 object NifsPartitioner extends Partitioner {
   import edu.gemini.spModel.core.MagnitudeBand.K
-  def bucket(t:SPTarget):Int = t.getNewMagnitude(K).map(_.value).map { K =>
+  def bucket(t:SPTarget):Int = t.getMagnitude(K).map(_.value).map { K =>
          if (K <= 9) 1
     else if (K <= 13) 2
     else if (K <= 20) 3
@@ -153,7 +153,7 @@ object NifsPartitioner extends Partitioner {
 
 object F2LongslitPartitioner extends Partitioner {
   import edu.gemini.spModel.core.MagnitudeBand.H
-  def bucket(t: SPTarget): Int = t.getNewMagnitude(H).map(_.value).map { h =>
+  def bucket(t: SPTarget): Int = t.getMagnitude(H).map(_.value).map { h =>
     if (h <= 12.0) 1 else 2
   }.getOrElse(3)
 }
@@ -166,8 +166,8 @@ object F2LongslitPartitioner extends Partitioner {
 object GracesPartitioner extends Partitioner {
   import edu.gemini.spModel.core.MagnitudeBand.{ R, V }
   def bucket(t:SPTarget):Int =
-    (t.getNewMagnitude(R) orElse
-     t.getNewMagnitude(V)).map(_.value).map { mag =>
+    (t.getMagnitude(R) orElse
+     t.getMagnitude(V)).map(_.value).map { mag =>
          if (mag > 10) 1 else 2
      }.getOrElse(3) // no R/V-mag is treated differently
 }

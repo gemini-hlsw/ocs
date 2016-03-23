@@ -200,7 +200,7 @@ trait ItcTable extends Table {
       bands.minBy(m => Math.abs(m.band.center.toNanometers - wl.toNanometers))
 
     def mags(wl: Wavelength): String \/ Magnitude = {
-      val bands = target.getNewMagnitudes.
+      val bands = target.getMagnitudes.
         filterNot(_.band == MagnitudeBand.UC).        // ignore UC magnitudes
         filterNot(_.band == MagnitudeBand.AP)         // ignore AP magnitudes
       if (bands.isEmpty) "No standard magnitudes for target defined; ITC does not support UC and AP magnitudes.".left[Magnitude]

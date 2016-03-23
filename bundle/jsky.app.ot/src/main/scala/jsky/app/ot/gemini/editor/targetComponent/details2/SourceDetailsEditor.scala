@@ -45,9 +45,9 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor wit
   private def getProfile(t: SPTarget): Option[SpatialProfile] = Target.spatialProfile.get(t.getTarget).join
 
   private def setDistribution(sd: SpectralDistribution): Unit = setDistribution(Some(sd))
-  private def setDistribution(sd: Option[SpectralDistribution]): Unit = Target.spectralDistribution.set(spt.getTarget, sd).foreach(spt.setNewTarget)
+  private def setDistribution(sd: Option[SpectralDistribution]): Unit = Target.spectralDistribution.set(spt.getTarget, sd).foreach(spt.setTarget)
   private def setProfile     (sp: SpatialProfile): Unit = setProfile(Some(sp))
-  private def setProfile     (sp: Option[SpatialProfile]): Unit = Target.spatialProfile.set(spt.getTarget, sp).foreach(spt.setNewTarget)
+  private def setProfile     (sp: Option[SpatialProfile]): Unit = Target.spatialProfile.set(spt.getTarget, sp).foreach(spt.setTarget)
 
   // ==== Spatial Profile Details
 

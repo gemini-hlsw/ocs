@@ -105,7 +105,7 @@ public final class TargetConfig extends ParamSet {
     }
 
     private Option<Element> _createMagnitudes(SPTarget target) {
-        ImList<Magnitude> magList = target.getNewMagnitudesJava();
+        ImList<Magnitude> magList = target.getMagnitudesJava();
         if (magList.size() == 0) return None.instance();
         final ParamSet ps = new ParamSet(TccNames.MAGNITUDES);
         magList.foreach(mag -> {

@@ -58,7 +58,7 @@ public class SPTargetPio {
         final ParamSet ntps = paramSet.getParamSet(_TARGET);
         if (ntps != null) {
             final Target t = TargetParamSetCodecs.TargetParamSetCodec().decode(ntps).toOption().get();
-            spt.setNewTarget(t);
+            spt.setTarget(t);
         }
     }
 

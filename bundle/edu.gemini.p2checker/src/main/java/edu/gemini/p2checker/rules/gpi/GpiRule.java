@@ -3,7 +3,6 @@ package edu.gemini.p2checker.rules.gpi;
 
 import edu.gemini.p2checker.api.*;
 import edu.gemini.p2checker.util.SequenceRule;
-import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.config2.Config;
 import edu.gemini.spModel.config2.ConfigSequence;
 import edu.gemini.spModel.core.Magnitude;
@@ -166,8 +165,8 @@ public class GpiRule implements IRule {
                 P2Problems problems = new P2Problems();
                 TargetEnvironment env = obsComp.getTargetEnvironment();
                 SPTarget base = env.getBase();
-                scala.Option<Magnitude> imag = base.getNewMagnitude(MagnitudeBand.I$.MODULE$);
-                scala.Option<Magnitude> hmag = base.getNewMagnitude(MagnitudeBand.H$.MODULE$);
+                scala.Option<Magnitude> imag = base.getMagnitude(MagnitudeBand.I$.MODULE$);
+                scala.Option<Magnitude> hmag = base.getMagnitude(MagnitudeBand.H$.MODULE$);
                 // OT-74
                 if (imag.isEmpty()) {
                     problems.addError(PREFIX + "MAG_BAND_MESSAGE", MAG_BAND_MESSAGE + "I-band.", elements.getTargetObsComponentNode().getValue());
@@ -182,7 +181,7 @@ public class GpiRule implements IRule {
                     if (!inst.getObservingMode().isEmpty()) {
                         Gpi.ObservingMode obsMode = inst.getObservingMode().getValue();
                         MagnitudeBand band = inst.getFilter().getBand(); // OT-102: obsMode could be NONSTANDARD
-                        scala.Option<Magnitude> mag = base.getNewMagnitude(band);
+                        scala.Option<Magnitude> mag = base.getMagnitude(band);
                         if (mag.isEmpty()) {
                             // OT-99
                             problems.addError(PREFIX + "MAG_BAND_MESSAGE", MAG_BAND_MESSAGE + band + "-band",

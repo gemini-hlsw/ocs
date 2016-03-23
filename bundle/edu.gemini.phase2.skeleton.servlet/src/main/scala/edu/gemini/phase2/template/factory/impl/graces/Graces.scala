@@ -33,8 +33,8 @@ case class Graces(blueprint: SpGracesBlueprint, exampleTarget: Option[SPTarget])
   val rMag: Option[Double] =
     for {
       t <- exampleTarget
-      m <- t.getNewMagnitude(MagnitudeBand.R) orElse
-           t.getNewMagnitude(MagnitudeBand.V)
+      m <- t.getMagnitude(MagnitudeBand.R) orElse
+           t.getMagnitude(MagnitudeBand.V)
     } yield m.value
 
   //  IF FIBER-MODE == 1 AND (READ-MODE == Normal OR READ-MODE == Fast):

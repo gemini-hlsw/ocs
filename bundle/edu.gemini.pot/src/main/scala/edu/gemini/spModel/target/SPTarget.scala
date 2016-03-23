@@ -27,6 +27,7 @@ object SPTarget {
   private val dec: Target @?> Declination    = Target.coords >=> Coordinates.dec.partial
 
 }
+
 final class SPTarget(private var target: Target) extends WatchablePos {
   import SPTarget._
 
@@ -55,7 +56,7 @@ final class SPTarget(private var target: Target) extends WatchablePos {
   def getTarget: Target =
     target
 
-  def setNewTarget(target: Target): Unit = {
+  def setTarget(target: Target): Unit = {
     this.target = target
     _notifyOfUpdate()
   }
@@ -66,63 +67,63 @@ final class SPTarget(private var target: Target) extends WatchablePos {
   def setSidereal(): Unit =
     target match {
       case _: SiderealTarget => ()
-      case _ => setNewTarget(SiderealTarget.empty)
+      case _ => setTarget(SiderealTarget.empty)
     }
 
   def setNonSidereal(): Unit =
     target match {
       case _: NonSiderealTarget => ()
-      case _ => setNewTarget(NonSiderealTarget.empty)
+      case _ => setTarget(NonSiderealTarget.empty)
     }
 
   def setTOO(): Unit =
     target match {
       case _: TooTarget => ()
-      case _ => setNewTarget(TooTarget.empty)
+      case _ => setTarget(TooTarget.empty)
     }
 
   def getName: String =
     target.name
 
   def setName(s: String): Unit =
-    setNewTarget(Target.name.set(target, s))
+    setTarget(Target.name.set(target, s))
 
   def setRaDegrees(value: Double): Unit =
-    ra.set(target, RightAscension.fromDegrees(value)).foreach(setNewTarget)
+    ra.set(target, RightAscension.fromDegrees(value)).foreach(setTarget)
 
   def setRaHours(value: Double): Unit =
-    ra.set(target, RightAscension.fromHours(value)).foreach(setNewTarget)
+    ra.set(target, RightAscension.fromHours(value)).foreach(setTarget)
 
   def setRaString(hms: String): Unit =
     for {
       a <- Angle.parseHMS(hms).toOption
       t <- ra.set(target, RightAscension.fromAngle(a))
-    } setNewTarget(t)
+    } setTarget(t)
 
   def setDecDegrees(value: Double): Unit =
     for {
       d <- Declination.fromDegrees(value)
       t <- dec.set(target, d)
-    } setNewTarget(t)
+    } setTarget(t)
 
   def setDecString(dms: String): Unit =
     for {
       a <- Angle.parseDMS(dms).toOption
       d <- Declination.fromAngle(a)
       t <- dec.set(target, d)
-    } setNewTarget(t)
+    } setTarget(t)
 
   def setRaDecDegrees(ra: Double, dec: Double): Unit =
     for {
       cs <- Coordinates.fromDegrees(ra, dec)
       t  <- Target.coords.set(target, cs)
-    } setNewTarget(t)
+    } setTarget(t)
 
   def setSpectralDistribution(sd: Option[SpectralDistribution]): Unit =
-    Target.spectralDistribution.set(target, sd).foreach(setNewTarget)
+    Target.spectralDistribution.set(target, sd).foreach(setTarget)
 
   def setSpatialProfile(sp: Option[SpatialProfile]): Unit =
-    Target.spatialProfile.set(target, sp).foreach(setNewTarget)
+    Target.spatialProfile.set(target, sp).foreach(setTarget)
 
   def getSpectralDistribution: Option[SpectralDistribution] =
     Target.spectralDistribution.get(target).flatten
@@ -175,31 +176,31 @@ final class SPTarget(private var target: Target) extends WatchablePos {
   def getSiderealTarget: Option[SiderealTarget] =
     target.fold(_ => None, Some(_), _ => None)
 
-  def putNewMagnitude(mag: Magnitude): Unit =
-    Target.magnitudes.modg(mag :: _.filterNot(_.band == mag.band), target).foreach(setNewTarget)
+  def putMagnitude(mag: Magnitude): Unit =
+    Target.magnitudes.modg(mag :: _.filterNot(_.band == mag.band), target).foreach(setTarget)
 
-  def getNewMagnitude(band: MagnitudeBand): Option[Magnitude] =
+  def getMagnitude(band: MagnitudeBand): Option[Magnitude] =
     Target.magnitudes.get(target).flatMap(_.find(_.band == band))
 
-  def getNewMagnitudeJava(band: MagnitudeBand): GOption[Magnitude] =
+  def getMagnitudeJava(band: MagnitudeBand): GOption[Magnitude] =
     Target.magnitudes.get(target).flatMap(_.find(_.band == band)).asGeminiOpt
 
-  def setNewMagnitudes(mags: List[Magnitude]): Unit =
-    Target.magnitudes.set(target, mags).foreach(setNewTarget)
+  def setMagnitudes(mags: List[Magnitude]): Unit =
+    Target.magnitudes.set(target, mags).foreach(setTarget)
 
-  def setNewMagnitudes(mags: ImList[Magnitude]): Unit =
-    Target.magnitudes.set(target, mags.asScalaList).foreach(setNewTarget)
+  def setMagnitudes(mags: ImList[Magnitude]): Unit =
+    Target.magnitudes.set(target, mags.asScalaList).foreach(setTarget)
 
-  def getNewMagnitudes: List[Magnitude] =
+  def getMagnitudes: List[Magnitude] =
     Target.magnitudes.get(target).orZero
 
-  def getNewMagnitudesJava: ImList[Magnitude] =
+  def getMagnitudesJava: ImList[Magnitude] =
     Target.magnitudes.get(target).orZero.asImList
 
-  def getNewMagnitudeBands: Set[MagnitudeBand] =
-    getNewMagnitudes.map(_.band)(collection.breakOut)
+  def getMagnitudeBands: Set[MagnitudeBand] =
+    getMagnitudes.map(_.band)(collection.breakOut)
 
-  def getNewMagnitudeBandsJava: java.util.Set[MagnitudeBand] =
-    new java.util.HashSet(getNewMagnitudeBands.asJavaCollection)
+  def getMagnitudeBandsJava: java.util.Set[MagnitudeBand] =
+    new java.util.HashSet(getMagnitudeBands.asJavaCollection)
 
 }

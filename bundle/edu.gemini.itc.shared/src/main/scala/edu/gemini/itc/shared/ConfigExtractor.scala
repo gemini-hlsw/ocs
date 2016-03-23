@@ -234,9 +234,9 @@ object ConfigExtractor {
       targets.getPrimary.asScalaOpt.fold("No guide star selected".left[SPTarget])(_.right)
 
     def extractMagnitude(guideStar: SPTarget) = {
-      val r  = guideStar.getNewMagnitude(MagnitudeBand._r)
-      val R  = guideStar.getNewMagnitude(MagnitudeBand.R)
-      val UC = guideStar.getNewMagnitude(MagnitudeBand.UC)
+      val r  = guideStar.getMagnitude(MagnitudeBand._r)
+      val R  = guideStar.getMagnitude(MagnitudeBand.R)
+      val UC = guideStar.getMagnitude(MagnitudeBand.UC)
       if      (r.isDefined)   r.map(_.value).get.right
       else if (R.isDefined)   R.map(_.value).get.right
       else if (UC.isDefined) UC.map(_.value).get.right

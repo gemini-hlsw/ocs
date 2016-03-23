@@ -19,8 +19,8 @@ class REL_2429_Test extends TemplateSpec("GRACES_BP.xml") with SpecificationLike
   object Bucket {
     def all = List(A, B)
     def fromTarget(t: SPTarget): Option[Bucket] =
-      (t.getNewMagnitude(MagnitudeBand.R) orElse
-       t.getNewMagnitude(MagnitudeBand.V)).map(_.value).map {
+      (t.getMagnitude(MagnitudeBand.R) orElse
+       t.getMagnitude(MagnitudeBand.V)).map(_.value).map {
         m => if (m > 10) A else B
       }
   }

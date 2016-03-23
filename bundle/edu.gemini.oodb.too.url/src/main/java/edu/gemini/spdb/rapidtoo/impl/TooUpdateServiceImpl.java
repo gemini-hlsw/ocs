@@ -227,7 +227,7 @@ public final class TooUpdateServiceImpl implements TooUpdateService {
         final SPTarget base = targetEnv.getBase();
         base.setName(tooTarget.getName());
         base.setRaDecDegrees(tooTarget.getRa(), tooTarget.getDec());
-        base.setNewMagnitudes(tooTarget.getMagnitudes());
+        base.setMagnitudes(tooTarget.getMagnitudes());
 
         // Set the guide star, if present.
         final TooGuideTarget gs = update.getGuideStar();
@@ -261,7 +261,7 @@ public final class TooUpdateServiceImpl implements TooUpdateService {
                     final SPTarget target = targetOpt.getOrElse(new SPTarget());
                     target.setRaDecDegrees(gs.getRa(), gs.getDec());
                     ImOption.apply(gs.getName()).foreach(target::setName);
-                    target.setNewMagnitudes(gs.getMagnitudes());
+                    target.setMagnitudes(gs.getMagnitudes());
 
                     if (targetOpt.isEmpty()) {
                         final GuideProbeTargets gtNew = GuideProbeTargets.create(probe, gt.getOptions().cons(target));

@@ -93,7 +93,7 @@ public class GpiCB extends AbstractObsComponentCB {
             final TargetObsComp toc = (TargetObsComp) targetcomp.getDataObject();
             if (toc != null) {
                 if (toc.getTargetEnvironment().getBase() != null) {
-                    ImList<Magnitude> magnitudes = toc.getTargetEnvironment().getBase().getNewMagnitudesJava();
+                    ImList<Magnitude> magnitudes = toc.getTargetEnvironment().getBase().getMagnitudesJava();
                     magnitudes.filter(new MagnitudeFilter(MagnitudeBand.H$.MODULE$)).headOption().foreach(new MagnitudeSetter(Gpi.MAG_H_PROP));
                     magnitudes.filter(new MagnitudeFilter(MagnitudeBand.I$.MODULE$)).headOption().foreach(new MagnitudeSetter(Gpi.MAG_I_PROP));
                 }

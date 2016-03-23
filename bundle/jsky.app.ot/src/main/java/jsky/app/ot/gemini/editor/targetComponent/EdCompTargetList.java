@@ -787,7 +787,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
             public TargetDetails(final SPTarget target) {
                 this.target = target.getTarget();
-                this.mag    = target.getNewMagnitudesJava();
+                this.mag    = target.getMagnitudesJava();
             }
 
             public Target getTarget() {
@@ -825,8 +825,8 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             contents.swap().foreach(targetDetails -> {
                         final Option<SPTarget> tOpt = TargetSelection.getTargetForNode(dataObject.getTargetEnvironment(), obsComponent);
                         tOpt.foreach(t -> {
-                            t.setNewTarget(targetDetails.getTarget());
-                            t.setNewMagnitudes(targetDetails.getMag());
+                            t.setTarget(targetDetails.getTarget());
+                            t.setMagnitudes(targetDetails.getMag());
                         });
                     });
             contents.foreach(group -> {

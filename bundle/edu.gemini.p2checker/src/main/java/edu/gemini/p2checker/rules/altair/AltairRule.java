@@ -21,7 +21,6 @@ import edu.gemini.spModel.gemini.altair.AltairAowfsGuider;
 import edu.gemini.spModel.gemini.altair.AltairParams;
 import edu.gemini.spModel.gemini.altair.InstAltair;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
-import edu.gemini.spModel.obs.SchedulingBlock;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.target.SPTarget;
@@ -29,7 +28,6 @@ import edu.gemini.spModel.target.env.GuideGroup;
 import edu.gemini.spModel.target.env.GuideProbeTargets;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
-import scala.Predef$;
 
 /**
  * Rules for observations containing an Altair node.
@@ -271,7 +269,7 @@ public final class AltairRule implements IRule {
             MagnitudeBand[] bands = new MagnitudeBand[]{MagnitudeBand.R$.MODULE$, MagnitudeBand.V$.MODULE$};
             for (SPTarget spTarget : guideGroup.getTargets()) {
                 for (MagnitudeBand band : bands) {
-                    final scala.Option<Magnitude> om = spTarget.getNewMagnitude(band);
+                    final scala.Option<Magnitude> om = spTarget.getMagnitude(band);
                     final Magnitude m = om.isDefined() ? om.get() : null;
                     if (m != null) {
                         double b = m.value();

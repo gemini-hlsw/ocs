@@ -139,7 +139,7 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
             @Override public Option<Long> when()        { return when; }
 
             public Option<Magnitude> getMagnitude(final MagnitudeBand band) {
-                return target.flatMap(t -> t.getNewMagnitudeJava(band));
+                return target.flatMap(t -> t.getMagnitudeJava(band));
             }
 
             @Override public String formatMagnitude(final MagnitudeBand band) {
@@ -366,7 +366,7 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
             });
 
             // Extract all the magnitude bands from the environment.
-            env.getTargets().foreach(spTarget -> bands.addAll(spTarget.getNewMagnitudeBandsJava()));
+            env.getTargets().foreach(spTarget -> bands.addAll(spTarget.getMagnitudeBandsJava()));
 
             // Create an immutable sorted list containing the results.
             return DefaultImList.create(bands);
