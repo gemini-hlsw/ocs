@@ -65,7 +65,7 @@ object PersistentVcsLog2Spec extends Specification {
         x <- doSelectByProgram(SPProgramID.toProgramID("GN-2015B-Q-10"), 1, 3)
       } yield x must_== expected
 
-    }
+    }.pendingUntilFixed("See REL-2682")
 
   }
 
