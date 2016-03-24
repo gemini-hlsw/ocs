@@ -12,7 +12,8 @@ class GeneralRuleHelper {
       // Sidereal targets must have identical coordinates, proper motion, redshift, and parallax
       case (SiderealTarget(_, c1, pm1, rs1, px1, _, _, _),
             SiderealTarget(_, c2, pm2, rs2, px2, _, _, _)) =>
-        (c1, pm1, rs1, px1) == ((c2, pm2, rs2, px2))
+        (c1.ra.toAngle.formatHMS, c1.dec.formatDMS, pm1, rs1, px1) ==
+       ((c2.ra.toAngle.formatHMS, c2.dec.formatDMS, pm2, rs2, px2))
 
       // TOO targets are always identical
       case (TooTarget(_), TooTarget(_)) => true
