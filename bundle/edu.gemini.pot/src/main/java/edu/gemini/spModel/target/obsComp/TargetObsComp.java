@@ -25,6 +25,8 @@ public final class TargetObsComp extends AbstractDataObject implements GuideProb
     // for serialization
     private static final long serialVersionUID = 2L;
 
+    private static final TargetObsCompHelper helper = new TargetObsCompHelper();
+
     public static final SPComponentType SP_TYPE = SPComponentType.TELESCOPE_TARGETENV;
 
     private static final String _VERSION =  "2009B-1";
@@ -76,13 +78,13 @@ public final class TargetObsComp extends AbstractDataObject implements GuideProb
         // By default, append the name of the base position.  If a title
         // has been directly set though, use that instead.
         final String title = super.getTitle();
-        if (!isTitleChanged()) { // || targetPrefixes.values().stream().anyMatch(title::startsWith)) {
+        if (!isTitleChanged()) {
             final TargetEnvironment env = getTargetEnvironment();
             final SPTarget tp = env.getBase();
             if (tp != null) {
                 final String initName  = tp.getName();
                 final String finalName = initName == null || initName.trim().isEmpty() ? "<Untitled>" : initName;
-                return finalName; // TODO targetPrefixes.getOrDefault(t.getTag(), "") + finalName;
+                return helper.targetTag(tp.getTarget()) + ": " + finalName;
             }
         }
 
