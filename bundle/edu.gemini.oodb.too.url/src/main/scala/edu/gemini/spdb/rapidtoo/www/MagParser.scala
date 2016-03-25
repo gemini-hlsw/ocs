@@ -1,10 +1,8 @@
 package edu.gemini.spdb.rapidtoo.www
 
-import edu.gemini.shared.skyobject.Magnitude
-import edu.gemini.shared.skyobject.Magnitude.Band
 import edu.gemini.shared.util.immutable.ImList
 import edu.gemini.shared.util.immutable.ScalaConverters._
-import edu.gemini.spModel.core.MagnitudeSystem
+import edu.gemini.spModel.core.{Magnitude, MagnitudeBand, MagnitudeSystem}
 
 import scala.util.parsing.combinator.RegexParsers
 
@@ -14,14 +12,14 @@ class MagParser extends RegexParsers {
   val num: Parser[Double] =
     """-?\d+(\.\d*)?""".r ^^ (_.toDouble)
 
-  val band: Parser[Band] =
-    Band.values.map(b => b.toString ^^^ b).reverse.reduceLeft(_ | _) // reverse to put UC ahead of U
+  val band: Parser[MagnitudeBand] =
+    MagnitudeBand.all.map(b => b.name ^^^ b).reverse.reduceLeft(_ | _) // reverse to put UC ahead of U
 
   val sys:  Parser[MagnitudeSystem] =
     MagnitudeSystem.allForOT.map(s => s.toString ^^^ s).reduceLeft(_ | _)
 
   val mag: Parser[Magnitude] =
-    (num <~ '/') ~ (band <~ '/') ~ sys ^^ { case n ~ b ~ s => new Magnitude(b, n, s) }
+    (num <~ '/') ~ (band <~ '/') ~ sys ^^ { case n ~ b ~ s => new Magnitude(n, b, s) }
 
   val mags: Parser[ImList[Magnitude]] =
     repsep(mag, ',').map(_.asImList)

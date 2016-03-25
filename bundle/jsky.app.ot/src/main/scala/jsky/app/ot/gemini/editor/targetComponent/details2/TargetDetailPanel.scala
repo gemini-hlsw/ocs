@@ -59,7 +59,7 @@ final class TargetDetailPanel extends JPanel with TelescopePosEditor with Reentr
   def edit(obsContext: GOption[ObsContext], spTarget: SPTarget, node: ISPNode): Unit = {
 
     // Create or replace the existing detail editor, if needed
-    val newTde = spTarget.getNewTarget.fold(_ => ???, _ => sidereal, _ => nonsidereal)
+    val newTde = spTarget.getTarget.fold(_ => ???, _ => sidereal, _ => nonsidereal)
 
     if (tde != newTde) {
       if (tde != null) remove(tde)

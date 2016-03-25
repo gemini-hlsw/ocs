@@ -10,7 +10,13 @@ sealed trait RightAscension extends java.io.Serializable {
    * @group Conversions
    */
   def toAngle: Angle
-  
+
+  def toDegrees: Double =
+    toAngle.toDegrees
+
+  def toHours: Double =
+    toDegrees / 15.0
+
   /**
    * Offset this `RightAscension` by the given angle.
    * @group Operations

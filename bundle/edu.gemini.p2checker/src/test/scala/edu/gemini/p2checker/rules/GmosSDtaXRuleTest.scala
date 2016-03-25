@@ -57,7 +57,7 @@ class GmosSDtaXRuleTest extends AbstractRuleTest {
   }
 
   private def expectSuccess(): Unit = {
-    println(runCheck.mkString(",\n"))
+//    println(runCheck.mkString(",\n"))
     assertTrue(runCheck.isEmpty)
   }
 

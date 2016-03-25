@@ -1,8 +1,8 @@
 package jsky.app.ot.tpe;
 
-import edu.gemini.shared.skyobject.SkyObject;
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
+import edu.gemini.spModel.core.SiderealTarget;
 import jsky.coords.WorldCoords;
 
 import java.awt.event.MouseEvent;
@@ -45,7 +45,7 @@ public class TpeMouseEvent {
     public String name;
 
     // Optional details of the object.
-    private Option<SkyObject> skyObject = None.instance();
+    private Option<SiderealTarget> skyObject = None.instance();
 
     /** The X offset of the event from the base position in arcsec. */
     public double xOffset;
@@ -58,11 +58,11 @@ public class TpeMouseEvent {
         mouseEvent = e;
     }
 
-    public Option<SkyObject> getSkyObject() {
+    public Option<SiderealTarget> getSkyObject() {
         return skyObject;
     }
 
-    public void setSkyObject(Option<SkyObject> skyObject) {
+    public void setSkyObject(Option<SiderealTarget> skyObject) {
         if (skyObject == null) throw new IllegalArgumentException();
         this.skyObject = skyObject;
     }

@@ -4,7 +4,7 @@ import edu.gemini.phase2.template.factory.impl.TemplateDb
 import edu.gemini.pot.sp.{ISPObservation, ISPGroup}
 import edu.gemini.spModel.gemini.flamingos2.blueprint.SpFlamingos2BlueprintLongslit
 import edu.gemini.spModel.target.SPTarget
-import edu.gemini.shared.skyobject.Magnitude.Band.H
+import edu.gemini.spModel.core.MagnitudeBand.H
 
 import scala.collection.JavaConverters._
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
@@ -33,7 +33,7 @@ case class Flamingos2Longslit(blueprint:SpFlamingos2BlueprintLongslit, exampleTa
 //              Put FILTERS from PI into F2 ITERATOR
 //
 
-  val acq = exampleTarget.flatMap(t => Option(t.getMagnitude(H).getOrNull)).map(_.getBrightness) match {
+  val acq = exampleTarget.flatMap(t => t.getMagnitude(H)).map(_.value) match {
     case Some(h) if h <= 12 => Seq(13)
     case Some(h) if h >  12 => Seq(14)
     case _                  => Seq(13, 14)

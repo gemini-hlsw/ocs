@@ -7,7 +7,6 @@ import edu.gemini.ags.api.AgsRegistrar
 import edu.gemini.itc.shared._
 import edu.gemini.pot.ModelConverters
 import edu.gemini.pot.sp.SPComponentType._
-import edu.gemini.shared.skyobject.Magnitude
 import edu.gemini.spModel.`type`.DisplayableSpType
 import edu.gemini.spModel.config2.{Config, ConfigSequence, ItemKey}
 import edu.gemini.spModel.core._
@@ -17,7 +16,6 @@ import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.obscomp.SPInstObsComp
 import edu.gemini.spModel.rich.shared.immutable.asScalaOpt
 import edu.gemini.spModel.target.SPTarget
-import edu.gemini.spModel.target.system.ITarget
 import jsky.app.ot.userprefs.observer.ObservingPeer
 import jsky.app.ot.util.OtColor
 
@@ -199,13 +197,12 @@ trait ItcTable extends Table {
 
     def closestBand(bands: List[Magnitude], wl: Wavelength) =
       // note, at this point we've filtered out all bands without a wavelength
-      bands.minBy(m => Math.abs(m.getBand.getWavelengthMidPoint.getValue.toNanometers - wl.toNanometers))
+      bands.minBy(m => Math.abs(m.band.center.toNanometers - wl.toNanometers))
 
     def mags(wl: Wavelength): String \/ Magnitude = {
-      val bands = target.getMagnitudes.toList.asScala.toList.
-        filter(_.getBand.getWavelengthMidPoint.isDefined).// ignore bands with unknown wavelengths (currently AP only)
-        filterNot(_.getBand == Magnitude.Band.UC).        // ignore UC magnitudes
-        filterNot(_.getBand == Magnitude.Band.AP)         // ignore AP magnitudes
+      val bands = target.getMagnitudes.
+        filterNot(_.band == MagnitudeBand.UC).        // ignore UC magnitudes
+        filterNot(_.band == MagnitudeBand.AP)         // ignore AP magnitudes
       if (bands.isEmpty) "No standard magnitudes for target defined; ITC does not support UC and AP magnitudes.".left[Magnitude]
       else closestBand(bands, wl).right[String]
     }
@@ -214,8 +211,8 @@ trait ItcTable extends Table {
       wl  <- ConfigExtractor.extractObservingWavelength(c)
       mag <- mags(wl)
     } yield {
-      val value  = mag.getBrightness
-      (value, ModelConverters.toNewBand(mag.getBand), mag.getSystem)
+      val value  = mag.value
+      (value, mag.band, mag.system)
     }
   }
 

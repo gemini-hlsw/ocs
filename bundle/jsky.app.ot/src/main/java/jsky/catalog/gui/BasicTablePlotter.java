@@ -5,8 +5,8 @@ import diva.canvas.DamageRegion;
 import diva.canvas.TransformContext;
 import diva.canvas.event.LayerEvent;
 import diva.canvas.event.LayerListener;
-import edu.gemini.shared.skyobject.SkyObject;
 import edu.gemini.shared.util.immutable.*;
+import edu.gemini.spModel.core.SiderealTarget;
 import jsky.catalog.*;
 import jsky.coords.*;
 import jsky.graphics.CanvasGraphics;
@@ -950,7 +950,7 @@ public class BasicTablePlotter
      * if known) from the catalog table row. Otherwise, return null and do nothing.
      */
     @Override
-    public Option<SkyObject> getCatalogObjectAt(final Point2D.Double p) {
+    public Option<SiderealTarget> getCatalogObjectAt(final Point2D.Double p) {
         // Find the plot symbol under the mouse pointer
         for (TableListItem tli: _tableList) {
             if (!tli.inRange)
@@ -959,13 +959,13 @@ public class BasicTablePlotter
                 for (FigureListItem fli: sli.figureList) {
                     // assume symbol has already been selected
                     if (fli.selected && sli.symbol.getBoundingShape(fli.shape).contains(p)) {
-                        Option<SkyObject> skyObject = tli.table.getSkyObject(fli.row);
+                        Option<SiderealTarget> skyObject = tli.table.getSiderealTarget(fli.row);
                         skyObject.forEach(s -> {
                             // This is a bit strange, we convert the incoming parameter to the position of the
                             // object and it also side-effects setting the equinox
                             _imageEquinox = _coordinateConverter.getEquinox();
-                            p.x = s.getCoordinates().toHmsDeg(0).getRa().toDegrees().getMagnitude();
-                            p.y = s.getCoordinates().toHmsDeg(0).getDec().toDegrees().getMagnitude();
+                            p.x = s.coordinates().ra().toDegrees();
+                            p.y = s.coordinates().dec().toDegrees();
                             _coordinateConverter.convertCoords(p, CoordinateConverter.WORLD, CoordinateConverter.SCREEN, false);
 
                         });

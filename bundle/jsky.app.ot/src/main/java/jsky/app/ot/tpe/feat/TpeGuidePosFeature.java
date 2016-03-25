@@ -1,14 +1,14 @@
 package jsky.app.ot.tpe.feat;
 
-import edu.gemini.shared.skyobject.SkyObject;
+import edu.gemini.pot.ModelConverters$;
 import edu.gemini.shared.util.immutable.*;
+import edu.gemini.spModel.core.SiderealTarget;
 import edu.gemini.spModel.guide.*;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.*;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.target.obsComp.TargetSelection;
-import edu.gemini.spModel.target.system.HmsDegTarget;
 import jsky.app.ot.gemini.editor.targetComponent.PrimaryTargetToggle;
 import jsky.app.ot.tpe.*;
 import jsky.app.ot.util.BasicPropertyList;
@@ -117,9 +117,12 @@ public class TpeGuidePosFeature extends TpePositionFeature
     private SPTarget createNewTarget(final TpeMouseEvent tme) {
         final SPTarget pos;
 
-        final Option<SkyObject> skyObjectOpt = tme.getSkyObject();
+        final Option<SiderealTarget> skyObjectOpt = tme.getSkyObject();
         if (!skyObjectOpt.isEmpty()) {
-            pos = new SPTarget(HmsDegTarget.fromSkyObject(skyObjectOpt.getValue()));
+
+            final SiderealTarget st = skyObjectOpt.getValue();
+
+            pos = new SPTarget(st);
         } else {
             // No SkyObject info is present so we use the old way of creating
             // a target from a mouse event.

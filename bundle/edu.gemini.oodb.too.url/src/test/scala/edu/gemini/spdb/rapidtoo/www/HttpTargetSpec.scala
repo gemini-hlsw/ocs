@@ -7,8 +7,7 @@ import java.util.Locale
 import javax.servlet.{RequestDispatcher, ServletInputStream}
 import javax.servlet.http.{Cookie, HttpSession, HttpServletRequest}
 
-import edu.gemini.shared.skyobject.Magnitude
-import edu.gemini.spModel.core.{Angle, Declination, RightAscension}
+import edu.gemini.spModel.core.{Magnitude, Angle, Declination, RightAscension}
 import edu.gemini.spdb.rapidtoo.TooGuideTarget.GuideProbe
 import edu.gemini.shared.util.immutable.ScalaConverters._
 
@@ -18,7 +17,7 @@ import org.scalacheck.Arbitrary._
 import org.scalacheck.Prop.forAll
 import org.scalacheck.Prop._
 
-object HttpTargetSpec extends Specification with ScalaCheck with Arbitraries {
+object HttpTargetSpec extends Specification with ScalaCheck with Arbitraries with edu.gemini.spModel.core.Arbitraries {
 
   // a valid request
   val req = MockRequest(
@@ -82,8 +81,9 @@ object HttpTargetSpec extends Specification with ScalaCheck with Arbitraries {
     "Dec: Fail on Missing" in {
       mustFail(req without "dec")
     }
-    "Mags: Parse Magnitudes" ! forAll { (ms: List[Magnitude]) =>
-      val s = ms.map(m => s"${m.getBrightness}/${m.getBand}/${m.getSystem}").mkString(",")
+    "Mags: Parse Magnitudes" ! forAll { (ms0: List[Magnitude]) =>
+      val ms = ms0.map(_.copy(error = None))
+      val s = ms.map(m => s"${m.value}/${m.band.name}/${m.system}").mkString(",")
       val t = new HttpTooTarget(req.modifiedWith("mags" -> s))
       t.getMagnitudes must_== ms.asImList
     }
@@ -159,8 +159,9 @@ object HttpTargetSpec extends Specification with ScalaCheck with Arbitraries {
     "Probe: Fail on Missing" in {
       mustFail(req without "gsprobe")
     }
-    "Mags: Parse Magnitudes" ! forAll { (ms: List[Magnitude]) =>
-      val s = ms.map(m => s"${m.getBrightness}/${m.getBand}/${m.getSystem}").mkString(",")
+    "Mags: Parse Magnitudes" ! forAll { (ms0: List[Magnitude]) =>
+      val ms = ms0.map(_.copy(error = None))
+      val s = ms.map(m => s"${m.value}/${m.band.name}/${m.system}").mkString(",")
       val t = new HttpTooGuideTarget(req.modifiedWith("gsmags" -> s))
       t.getMagnitudes must_== ms.asImList
     }

@@ -13,7 +13,6 @@ import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.spModel.core.{Site, Ephemeris, HorizonsDesignation, Target}
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
-import edu.gemini.spModel.target.system.ConicTarget
 
 import jsky.app.ot.gemini.editor.targetComponent.TelescopePosEditor
 import jsky.util.gui.{DialogUtil, TextBoxWidget, TextBoxWidgetWatcher}
@@ -59,12 +58,12 @@ final class NonSiderealNameEditor extends TelescopePosEditor with ReentrancyHack
 
     def updateDesignation(hd: HorizonsDesignation, name: String): HS2[Unit] =
       HS2.delay {
-        val t0 = Target.name.set(spt.getNewTarget, name)
-        Target.horizonsDesignation.set(t0, Some(hd)).foreach(spt.setNewTarget)
+        val t0 = Target.name.set(spt.getTarget, name)
+        Target.horizonsDesignation.set(t0, Some(hd)).foreach(spt.setTarget)
       }
 
     def updateEphem(e: Ephemeris): HS2[Unit] =
-      HS2.delay(Target.ephemeris.set(spt.getNewTarget, e).foreach(spt.setNewTarget))
+      HS2.delay(Target.ephemeris.set(spt.getTarget, e).foreach(spt.setTarget))
 
     def manyResults(rs: List[Row[_ <: HorizonsDesignation]]): HS2[Unit] =
       HS2.delay {
@@ -118,7 +117,7 @@ final class NonSiderealNameEditor extends TelescopePosEditor with ReentrancyHack
 
       override def textBoxKeyPress(tbwe: TextBoxWidget): Unit =
         nonreentrant {
-          spt.setNewTarget(Target.name.set(spt.getNewTarget, tbwe.getValue))
+          spt.setTarget(Target.name.set(spt.getTarget, tbwe.getValue))
         }
 
       override def textBoxAction(tbwe: TextBoxWidget): Unit =
@@ -140,8 +139,8 @@ final class NonSiderealNameEditor extends TelescopePosEditor with ReentrancyHack
     this.spt = target
     this.site = ctx.asScalaOpt.flatMap(_.getSite.asScalaOpt)
     nonreentrant {
-      name.setText(Target.name.get(target.getNewTarget))
-      Target.horizonsDesignation.get(target.getNewTarget).map(hidText).foreach(hid.setText)
+      name.setText(Target.name.get(target.getTarget))
+      Target.horizonsDesignation.get(target.getTarget).map(hidText).foreach(hid.setText)
     }
   }
 

@@ -1,8 +1,9 @@
 package jsky.app.ot.gemini.editor.targetComponent;
 
 import edu.gemini.pot.sp.ISPObsComponent;
-import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.util.immutable.*;
+import edu.gemini.spModel.core.Magnitude;
+import edu.gemini.spModel.core.Target;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.guide.GuideProbeUtil;
 import edu.gemini.spModel.obs.context.ObsContext;
@@ -14,7 +15,6 @@ import edu.gemini.spModel.target.TelescopePosWatcher;
 import edu.gemini.spModel.target.env.*;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.target.obsComp.TargetSelection;
-import edu.gemini.spModel.target.system.ITarget;
 import jsky.app.ot.OTOptions;
 import jsky.app.ot.ags.*;
 import jsky.app.ot.editor.OtItemEditor;
@@ -782,15 +782,15 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
     private static final class TargetClipboard {
         private static final class TargetDetails {
-            private final ITarget           target;
+            private final Target target;
             private final ImList<Magnitude> mag;
 
             public TargetDetails(final SPTarget target) {
-                this.target = target.getTarget().clone();
-                this.mag    = target.getMagnitudes();
+                this.target = target.getTarget();
+                this.mag    = target.getMagnitudesJava();
             }
 
-            public ITarget getTarget() {
+            public Target getTarget() {
                 return target;
             }
             public ImList<Magnitude> getMag() {
@@ -825,7 +825,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             contents.swap().foreach(targetDetails -> {
                         final Option<SPTarget> tOpt = TargetSelection.getTargetForNode(dataObject.getTargetEnvironment(), obsComponent);
                         tOpt.foreach(t -> {
-                            t.setTarget(targetDetails.getTarget().clone());
+                            t.setTarget(targetDetails.getTarget());
                             t.setMagnitudes(targetDetails.getMag());
                         });
                     });

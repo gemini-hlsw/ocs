@@ -9,7 +9,6 @@ import edu.gemini.phase2.template.factory.api.TemplateFolderExpansionFactory
 import edu.gemini.phase2.template.factory.impl.{TemplateDb, TemplateFactoryImpl}
 import edu.gemini.pot.sp.{ISPObservation, ISPTemplateGroup, ISPProgram}
 import edu.gemini.pot.spdb.DBLocalDatabase
-import edu.gemini.shared.skyobject.Magnitude.Band
 import edu.gemini.spModel.core.{MagnitudeBand, Magnitude, SPProgramID}
 import edu.gemini.spModel.obscomp.SPNote
 import edu.gemini.spModel.target.SPTarget
@@ -116,8 +115,8 @@ abstract class TemplateSpec(xmlName: String) { this: SpecificationLike =>
       .map(_.getTarget)
 
   /** Retrieve the phase-2 magnitude in the given band, if any, from the given target. */
-  def p2mag(t: SPTarget, b: Band): Option[Double] =
-    Option(t.getMagnitude(b).getOrNull).map(_.getBrightness)
+  def p2mag(t: SPTarget, b: MagnitudeBand): Option[Double] =
+    t.getMagnitude(b).map(_.value)
 
   /** True if a note with the given title exists at the root of the given template group. */
   def existsNote(tg: ISPTemplateGroup, title: String) =

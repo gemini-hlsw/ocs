@@ -97,7 +97,7 @@ case class NumericPropertySheet2[A <: Target](title: Option[String], f: SPTarget
   private def updateField(p: Prop[A], tbwe: TextBoxWidget): Unit =
     nonreentrant {
       parse(tbwe.getValue).foreach { d =>
-        spt.setNewTarget(p.edit(f(spt), d))
+        spt.setTarget(p.edit(f(spt), d))
       }
     }
 

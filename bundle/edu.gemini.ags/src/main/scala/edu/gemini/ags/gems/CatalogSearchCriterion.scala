@@ -104,7 +104,6 @@ case class GemsCatalogSearchCriterion(key: GemsCatalogSearchKey, criterion: Cata
  */
 case class GemsCatalogSearchResults(criterion: GemsCatalogSearchCriterion, results: List[SiderealTarget]) {
   // Constructors for Java
-  def this(criterion: GemsCatalogSearchCriterion, results: java.util.List[skyobject.SkyObject]) = this(criterion, results.asScala.map(_.toNewModel).toList)
   def this(results: java.util.List[SiderealTarget], criterion: GemsCatalogSearchCriterion) = this(criterion, results.asScala.toList)
 
   def resultsAsJava: java.util.List[SiderealTarget] = new java.util.ArrayList[SiderealTarget](results.asJava)

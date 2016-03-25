@@ -19,7 +19,6 @@ import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.target.obsComp.TargetSelection;
 import edu.gemini.spModel.target.offset.OffsetPosSelection;
-import edu.gemini.spModel.target.system.ITarget;
 import jsky.app.jskycat.JSkyCat;
 import jsky.app.ot.OT;
 import jsky.app.ot.ags.*;

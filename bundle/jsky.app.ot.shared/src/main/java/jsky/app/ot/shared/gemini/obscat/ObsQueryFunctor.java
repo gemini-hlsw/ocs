@@ -28,7 +28,6 @@ import edu.gemini.spModel.pio.PioFactory;
 import edu.gemini.spModel.pio.xml.PioXmlFactory;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
-import edu.gemini.spModel.target.system.ITarget;
 import edu.gemini.spModel.time.ChargeClass;
 import edu.gemini.spModel.time.ObsTimeCharges;
 import edu.gemini.spModel.time.ObsTimes;

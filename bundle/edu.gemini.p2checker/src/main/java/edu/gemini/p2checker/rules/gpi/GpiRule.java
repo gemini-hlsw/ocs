@@ -3,10 +3,10 @@ package edu.gemini.p2checker.rules.gpi;
 
 import edu.gemini.p2checker.api.*;
 import edu.gemini.p2checker.util.SequenceRule;
-import edu.gemini.shared.skyobject.Magnitude;
-import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.config2.Config;
 import edu.gemini.spModel.config2.ConfigSequence;
+import edu.gemini.spModel.core.Magnitude;
+import edu.gemini.spModel.core.MagnitudeBand;
 import edu.gemini.spModel.gemini.gpi.Gpi;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.TargetEnvironment;
@@ -165,14 +165,14 @@ public class GpiRule implements IRule {
                 P2Problems problems = new P2Problems();
                 TargetEnvironment env = obsComp.getTargetEnvironment();
                 SPTarget base = env.getBase();
-                Option<Magnitude> imag = base.getMagnitude(Magnitude.Band.I);
-                Option<Magnitude> hmag = base.getMagnitude(Magnitude.Band.H);
+                scala.Option<Magnitude> imag = base.getMagnitude(MagnitudeBand.I$.MODULE$);
+                scala.Option<Magnitude> hmag = base.getMagnitude(MagnitudeBand.H$.MODULE$);
                 // OT-74
-                if (imag.isEmpty() || imag.getValue().getBrightness() == Magnitude.UNDEFINED_MAG) {
+                if (imag.isEmpty()) {
                     problems.addError(PREFIX + "MAG_BAND_MESSAGE", MAG_BAND_MESSAGE + "I-band.", elements.getTargetObsComponentNode().getValue());
                 }
                 // OT-75
-                if (hmag.isEmpty() || hmag.getValue().getBrightness() == Magnitude.UNDEFINED_MAG) {
+                if (hmag.isEmpty()) {
                     problems.addError(PREFIX + "MAG_BAND_MESSAGE", MAG_BAND_MESSAGE + "H-band.", elements.getTargetObsComponentNode().getValue());
                 }
 
@@ -180,23 +180,23 @@ public class GpiRule implements IRule {
                     Gpi inst = (Gpi) elements.getInstrument();
                     if (!inst.getObservingMode().isEmpty()) {
                         Gpi.ObservingMode obsMode = inst.getObservingMode().getValue();
-                        Magnitude.Band band = inst.getFilter().getBand(); // OT-102: obsMode could be NONSTANDARD
-                        Option<Magnitude> mag = base.getMagnitude(band);
-                        if (mag.isEmpty() || mag.getValue().getBrightness() == Magnitude.UNDEFINED_MAG) {
+                        MagnitudeBand band = inst.getFilter().getBand(); // OT-102: obsMode could be NONSTANDARD
+                        scala.Option<Magnitude> mag = base.getMagnitude(band);
+                        if (mag.isEmpty()) {
                             // OT-99
                             problems.addError(PREFIX + "MAG_BAND_MESSAGE", MAG_BAND_MESSAGE + band + "-band",
                                     elements.getTargetObsComponentNode().getValue());
-                        } else if (mag.getValue().getBrightness() < obsMode.getBrightLimit(inst.getDisperser())) {
+                        } else if (obsMode.getBrightLimit(inst.getDisperser()).exists(a -> mag.get().value() < a)) {
                             // OT-76
                             problems.addWarning(PREFIX + "MAG_BRIGHT_MESSAGE", MAG_BRIGHT_MESSAGE, elements.getTargetObsComponentNode().getValue());
                         }
                         if (!hmag.isEmpty() && obsMode.logValue().startsWith("Coronograph")) {
                             // OT-127
-                            if (hmag.getValue().getBrightness() < MAG_BRIGHT_LOFS_LIMIT) {
+                            if (hmag.get().value() < MAG_BRIGHT_LOFS_LIMIT) {
                                 problems.addError(PREFIX + "MAG_BRIGHT_LOFS_MESSAGE", MAG_BRIGHT_LOFS_MESSAGE, elements.getTargetObsComponentNode().getValue());
                             }
                             // OT-128
-                            if (hmag.getValue().getBrightness() > MAG_FAINT_LOFS_LIMIT) {
+                            if (hmag.get().value() > MAG_FAINT_LOFS_LIMIT) {
                                 problems.addError(PREFIX + "MAG_FAINT_LOFS_MESSAGE", MAG_FAINT_LOFS_MESSAGE, elements.getTargetObsComponentNode().getValue());
                             }
                         }
@@ -204,7 +204,7 @@ public class GpiRule implements IRule {
                 }
                 // OT-77
                 if (!imag.isEmpty()) {
-                    double brightness = imag.getValue().getBrightness();
+                    double brightness = imag.get().value();
                     if (brightness != -99 && brightness < 0.5   ) {
                         problems.addWarning(PREFIX + "TOO_BRIGHT_MESSAGE", TOO_BRIGHT_MESSAGE, elements.getTargetObsComponentNode().getValue());
                     }

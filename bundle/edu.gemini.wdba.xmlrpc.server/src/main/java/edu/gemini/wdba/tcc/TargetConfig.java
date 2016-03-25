@@ -3,14 +3,22 @@
 //
 package edu.gemini.wdba.tcc;
 
+import edu.gemini.shared.util.immutable.ImList;
+import edu.gemini.shared.util.immutable.None;
+import edu.gemini.shared.util.immutable.Option;
+import edu.gemini.shared.util.immutable.Some;
+import edu.gemini.spModel.core.Coordinates;
+import edu.gemini.spModel.core.Magnitude;
+import edu.gemini.spModel.core.Parallax;
+import edu.gemini.spModel.core.ProperMotion;
+import edu.gemini.spModel.core.Redshift;
+import edu.gemini.spModel.core.SiderealTarget;
+import edu.gemini.spModel.core.Target;
 import edu.gemini.spModel.target.SPTarget;
-import edu.gemini.spModel.target.system.*;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.gemini.gsaoi.GsaoiOdgw;
 import edu.gemini.spModel.gemini.gems.Canopus;
 import edu.gemini.wdba.glue.api.WdbaGlueException;
-import edu.gemini.shared.skyobject.Magnitude;
-import edu.gemini.shared.util.immutable.*;
 import org.dom4j.Element;
 
 import java.util.logging.Logger;
@@ -47,122 +55,66 @@ public final class TargetConfig extends ParamSet {
         return String.format("%s (%d)", tag, position);
     }
 
-    /**
-     * Build the portion of the XML document that goes with one Target.
-     * <p>
-     * Note that only the hmsDegTarget is supported at this time.
-     */
-    public TargetConfig(SPTarget spTarget) throws WdbaGlueException {
-        super(spTarget.getName());
+    public TargetConfig(SPTarget spt) throws WdbaGlueException {
+        super(spt.getName());
+        final Target t = spt.getTarget();
 
-        putParameter(TccNames.OBJNAME, spTarget.getName());
+        // Get coordinates right now
+        final scala.Option<Coordinates> ocs = t.coords(System.currentTimeMillis());
+        final Coordinates cs = ocs.isDefined() ? ocs.get() : Coordinates.zero();
 
-        putParameter(TccNames.BRIGHTNESS, ""); // TODO: can we elide this altogether?
-        putParameter(TccNames.TAG, ""); // ugh
+        // All targets are sidereal as far as the TCC is concerned
+        addAttribute(TYPE, "hmsdegTarget");
 
-        ITarget target = spTarget.getTarget();
-        if (target instanceof HmsDegTarget) {
-            // System only appears in HmsDegTarget
-            addAttribute(TYPE, "hmsdegTarget");
-            putParameter(TccNames.SYSTEM, spTarget.getTarget().getTag().tccName);
-            _buildHmsDegTarget(spTarget);
-        } else if (target instanceof ConicTarget) {
-            addAttribute(TYPE, "conicTarget");
-            _buildConicTarget(spTarget);
-        } else if (target instanceof NamedTarget) {
-            addAttribute(TYPE, "namedTarget");
-            _buildNamedTarget((NamedTarget) target);
-        } else {
-            // In all other cases, report a problem and return
-            _logAbort("Unsupported target type: " + target.getClass().getName(), null);
+        // Parameters
+        putParameter(TccNames.OBJNAME,    t.name());
+        putParameter(TccNames.BRIGHTNESS, "");
+        putParameter(TccNames.TAG,        "");
+        putParameter(TccNames.SYSTEM,     "J2000");
+        putParameter(TccNames.C1,         cs.ra().toAngle().formatHMS());
+        putParameter(TccNames.C2,         cs.dec().formatDMS());
 
+        if (t instanceof SiderealTarget) {
+            add(_addProperMotion((SiderealTarget) t));
         }
 
-        Option<Element> mags = _createMagnitudes(spTarget);
+        Option<Element> mags = _createMagnitudes(spt);
         if (!mags.isEmpty()) add(mags.getValue());
-    }
-
-    /**
-     * Build a target for a named object
-     */
-    private void _buildNamedTarget(NamedTarget target) {
-        putParameter(TccNames.OBJECT, target.getSolarObject().getDisplayValue());
-    }
-
-    /**
-     * Build an HMS Deg target
-     */
-    private void _buildHmsDegTarget(SPTarget target) {
-
-        HmsDegTarget hmsDeg = target.getHmsDegTarget().get();
-        putParameter(TccNames.C1, hmsDeg.getRa().toString());
-        putParameter(TccNames.C2, hmsDeg.getDec().toString());
-        add(_addProperMotion(hmsDeg));
-    }
-
-    private void _buildConicTarget(SPTarget spTarget) {
-        ConicTarget target = spTarget.getConicTarget().get();
-
-        ITarget.Tag option = target.getTag();
-        putParameter(TccNames.FORMAT, option.tccName);
-
-        // All have epoch
-        putParameter(TccNames.EPOCHOFEL, target.getEpoch().getStringValue());
-        // All have orbital inclination
-        putParameter(TccNames.ORBINC, target.getInclination().getStringValue());
-        // All have longitude of ascending node
-        putParameter(TccNames.LONGASCNODE, target.getANode().getStringValue());
-        // All have eccentricity
-        putParameter(TccNames.ECCENTRICITY, String.valueOf(target.getE()));
-
-        if (option == ITarget.Tag.JPL_MINOR_BODY) {
-            putParameter(TccNames.ARGOFPERI, target.getPerihelion().getStringValue());
-            putParameter(TccNames.PERIDIST, target.getAQ().getStringValue());
-            putParameter(TccNames.EPOCHOFPERI, target.getEpochOfPeri().getStringValue());
-        }
-
-        if (option == ITarget.Tag.MPC_MINOR_PLANET) {
-            putParameter(TccNames.ARGOFPERI, target.getPerihelion().getStringValue());
-            putParameter(TccNames.MEANDIST, target.getAQ().getStringValue());
-            putParameter(TccNames.MEANANOM, target.getLM().getStringValue());
-        }
 
     }
 
-    /**
-     * Add the proper motion.
-     */
-    private Element _addProperMotion(HmsDegTarget target) {
+    private Element _addProperMotion(SiderealTarget t) {
         ParamSet ps = new ParamSet(TccNames.PROPER_MOTION);
-        ps.putParameter(TccNames.PM1, target.getPM1().getStringValue());
-        ps.putParameter(TccNames.PM2, target.getPM2().getStringValue());
-        ps.putParameter(TccNames.EPOCH, target.getEpoch().getStringValue());
-        // Patch for TCC/OT inconsistency
-        String pmunits = target.getPM2().getUnits().getName();
-        if (pmunits.equals(TccNames.OT_PMUNITS)) pmunits = TccNames.TCC_PMUNITS;
-        ps.putParameter(TccNames.PMUNITS, pmunits);
-        ps.putParameter(TccNames.PARALLAX, Double.toString(target.getParallax().arcsecs()));
-        ps.putParameter(TccNames.RV, Double.toString(target.getRedshift().toRadialVelocity().value()));
+
+        final scala.Option<ProperMotion> opm = t.properMotion();
+        final ProperMotion pm = opm.isDefined() ? opm.get() : ProperMotion.zero();
+        ps.putParameter(TccNames.PM1,     Double.toString(pm.deltaRA().velocity()));
+        ps.putParameter(TccNames.PM2,     Double.toString(pm.deltaDec().velocity()));
+        ps.putParameter(TccNames.EPOCH,   Double.toString(pm.epoch().year()));
+        ps.putParameter(TccNames.PMUNITS, TccNames.TCC_PMUNITS);
+
+        final scala.Option<Redshift> or = t.redshift();
+        final Redshift r = or.isDefined() ? or.get() : Redshift.zero();
+        ps.putParameter(TccNames.RV, Double.toString(r.toRadialVelocity().toKilometersPerSecond()));
+
+        final scala.Option<Parallax> op = t.parallax();
+        final Parallax p = op.isDefined() ? op.get() : Parallax.zero();
+        ps.putParameter(TccNames.PARALLAX, Double.toString(p.mas()));
+
         return ps;
     }
 
     private Option<Element> _createMagnitudes(SPTarget target) {
-        ImList<Magnitude> magList = target.getMagnitudes();
+        ImList<Magnitude> magList = target.getMagnitudesJava();
         if (magList.size() == 0) return None.instance();
-
         final ParamSet ps = new ParamSet(TccNames.MAGNITUDES);
         magList.foreach(mag -> {
-            String band = mag.getBand().name();
-            String brig = String.format("%1.3f", mag.getBrightness());
+            String band = mag.band().name();
+            String brig = String.format("%1.3f", mag.value());
             ps.putParameter(band, brig);
         });
         return new Some<>(ps);
     }
 
-    // private method to log and throw and exception
-    private void _logAbort(String message, Exception ex) throws WdbaGlueException {
-        LOG.severe(message);
-        throw new WdbaGlueException(message, (ex != null) ? ex : null);
-    }
 }
 

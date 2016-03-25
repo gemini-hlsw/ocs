@@ -3,8 +3,6 @@ package edu.gemini.phase2.skeleton.factory
 import edu.gemini.model.p1.immutable.GracesBlueprint
 import edu.gemini.model.p1.mutable.{GracesFiberMode, GracesReadMode}
 import edu.gemini.pot.sp.{ISPProgram, ISPTemplateGroup}
-import edu.gemini.shared.skyobject.Magnitude.Band
-import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.spModel.core.MagnitudeBand
 import edu.gemini.spModel.target.SPTarget
 
@@ -21,8 +19,8 @@ class REL_2429_Test extends TemplateSpec("GRACES_BP.xml") with SpecificationLike
   object Bucket {
     def all = List(A, B)
     def fromTarget(t: SPTarget): Option[Bucket] =
-      (t.getMagnitude(Band.R).asScalaOpt orElse
-       t.getMagnitude(Band.V).asScalaOpt).map(_.getBrightness).map {
+      (t.getMagnitude(MagnitudeBand.R) orElse
+       t.getMagnitude(MagnitudeBand.V)).map(_.value).map {
         m => if (m > 10) A else B
       }
   }

@@ -7,7 +7,7 @@ import edu.gemini.shared.util.immutable.Option;
 
 import edu.gemini.shared.util.immutable.Some;
 import edu.gemini.shared.util.immutable.None;
-import edu.gemini.spModel.core.Site;
+import edu.gemini.spModel.core.*;
 import edu.gemini.spModel.gemini.altair.AltairParams;
 import edu.gemini.spModel.gemini.altair.InstAltair;
 import edu.gemini.spModel.gemini.gmos.InstGmosNorth;
@@ -25,6 +25,7 @@ import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.SkyBackground;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.WaterVapor;
 import edu.gemini.spModel.gemini.trecs.InstTReCS;
 import edu.gemini.spModel.gemini.trecs.TReCSParams;
+import edu.gemini.spModel.obs.SchedulingBlock;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.target.SPTarget;
@@ -54,6 +55,8 @@ import java.util.Collections;
  */
 public enum ToContext {
     instance;
+
+    private static ToContextHelper helper = new ToContextHelper();
 
     public static final class RequestException extends Exception {
         public RequestException(String message) {
@@ -138,7 +141,7 @@ public enum ToContext {
         return o.getValue();
     }
 
-    private TargetEnvironment targetEnv(HttpServletRequest req) throws RequestException {
+    private TargetEnvironment targetEnv(HttpServletRequest req, long when) throws RequestException {
         Angle ra  = parse(req, RA,  RA_OP);
         Angle dec = parse(req, DEC, DEC_OP);
         TargetType tt = parse(req, TARGET_TYPE, TARGET_TYPE_OP, TargetType.sidereal);
@@ -152,8 +155,7 @@ public enum ToContext {
             // is just used to determine whether it is a non-sidereal target or not in order to
             // pick the right guider.
             case nonsidereal:
-                t = new SPTarget(new ConicTarget());
-                t.setRaDecDegrees(raDeg, decDeg);
+                t = new SPTarget(helper.nonSiderealWithSingleEphemerisElement(raDeg, decDeg, when));
                 break;
             default:
                 t = new SPTarget(raDeg, decDeg);
@@ -169,7 +171,10 @@ public enum ToContext {
     }
 
     public ObsContext apply(HttpServletRequest req) throws RequestException {
-        TargetEnvironment env   = targetEnv(req);
+
+        // Construct a scheduling block at the current time with zero length.
+        SchedulingBlock sb      = new SchedulingBlock(System.currentTimeMillis(), 0L);
+        TargetEnvironment env   = targetEnv(req, sb.start());
         Conditions conds        = conds(req);
         SPInstObsComp inst      = parseOption(req, INST, INST_OP);
         final Option<Site> site = ObsContext.getSiteFromInstrument(inst);
@@ -207,7 +212,7 @@ public enum ToContext {
 
         final TargetObsComp toc = new TargetObsComp();
         toc.setTargetEnvironment(env);
-        return ObsContext.create(env, inst, site, conds, Collections.emptySet(), altair, None.instance());
+        return ObsContext.create(env, inst, site, conds, Collections.emptySet(), altair, new Some<>(sb));
     }
 
     private InstAltair getAltair(HttpServletRequest req) throws RequestException {

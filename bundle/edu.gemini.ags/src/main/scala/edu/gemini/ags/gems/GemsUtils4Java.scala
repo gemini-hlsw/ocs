@@ -1,14 +1,12 @@
 package edu.gemini.ags.gems
 
 import edu.gemini.pot.ModelConverters._
-import edu.gemini.shared.skyobject.Magnitude
 import edu.gemini.shared.util.immutable.ImList
 import edu.gemini.shared.util.immutable.ScalaConverters._
-import edu.gemini.spModel.core.{SingleBand, RBandsList, SiderealTarget}
+import edu.gemini.spModel.core.{Magnitude, MagnitudeBand, SingleBand, RBandsList, SiderealTarget}
 import edu.gemini.spModel.gemini.gems.Canopus
 import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.shared.skyobject
-import edu.gemini.spModel.target.system.ITarget
 import scala.collection.JavaConverters._
 
 import scalaz._
@@ -30,13 +28,13 @@ object GemsUtils4Java {
   /**
    * Outputs the target magnitudes used by the Asterism table on the Manual Search for GEMS
    */
-  def probeMagnitudeInUse(guideProbe: GuideProbe, referenceBand: skyobject.Magnitude.Band, mags: ImList[Magnitude]): String = {
-    val availableMagnitudes = mags.asScalaList.map(_.toNewModel)
+  def probeMagnitudeInUse(guideProbe: GuideProbe, referenceBand: MagnitudeBand, mags: ImList[Magnitude]): String = {
+    val availableMagnitudes = mags.asScalaList
     // TODO Use GemsMagnitudeTable
     val bandsList = if (Canopus.Wfs.Group.instance.getMembers.contains(guideProbe)) {
         RBandsList
       } else {
-        SingleBand(referenceBand.toNewModel)
+        SingleBand(referenceBand)
       }
     val r = availableMagnitudes.find(m => bandsList.bandSupported(m.band))
     ~r.map(m => s"${m.value} (${m.band.name})")

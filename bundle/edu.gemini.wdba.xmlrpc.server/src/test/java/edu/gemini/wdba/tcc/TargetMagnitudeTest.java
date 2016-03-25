@@ -1,7 +1,7 @@
 package edu.gemini.wdba.tcc;
 
 import edu.gemini.shared.util.immutable.*;
-import edu.gemini.shared.skyobject.Magnitude;
+import edu.gemini.spModel.core.*;
 import edu.gemini.spModel.ext.ObservationNode;
 import edu.gemini.spModel.ext.TargetNode;
 import edu.gemini.spModel.target.SPTarget;
@@ -10,9 +10,9 @@ import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.env.GuideGroup;
 import edu.gemini.spModel.target.obsComp.PwfsGuideProbe;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
-import edu.gemini.spModel.target.system.ConicTarget;
 import org.dom4j.Document;
 import org.dom4j.Element;
+import scala.collection.JavaConversions$;
 
 import java.util.*;
 
@@ -45,20 +45,20 @@ public final class TargetMagnitudeTest extends TestBase {
     }
 
     public void testOneMagnitude() throws Exception {
-        pwfs1_1.putMagnitude(new Magnitude(Magnitude.Band.J, 10));
+        pwfs1_1.putMagnitude(new Magnitude(10, MagnitudeBand.J$.MODULE$));
         testTargetEnvironment(env);
     }
 
     public void testNonSiderealMagnitude() throws Exception {
-        pwfs1_1.putMagnitude(new Magnitude(Magnitude.Band.J, 10));
-        pwfs1_1.setTarget(new ConicTarget());
+        pwfs1_1.putMagnitude(new Magnitude(10, MagnitudeBand.J$.MODULE$));
+        pwfs1_1.setNonSidereal();
         pwfs1_1.setName("PWFS1-1");
         testTargetEnvironment(env);
     }
 
     public void testTwoMagnitudes() throws Exception {
-        pwfs1_1.putMagnitude(new Magnitude(Magnitude.Band.J, 10));
-        pwfs1_1.putMagnitude(new Magnitude(Magnitude.Band.K, 20));
+        pwfs1_1.putMagnitude(new Magnitude(10, MagnitudeBand.J$.MODULE$));
+        pwfs1_1.putMagnitude(new Magnitude(10, MagnitudeBand.K$.MODULE$));
         testTargetEnvironment(env);
     }
 
@@ -90,7 +90,7 @@ public final class TargetMagnitudeTest extends TestBase {
     private void validateMagnitudes(final Element element, final SPTarget target) {
         final String MAG_PATH = "paramset[@name='" + TccNames.MAGNITUDES + "']";
         final Element magGroupElement = (Element) element.selectSingleNode(MAG_PATH);
-        final ImList<Magnitude> mags = target.getMagnitudes();
+        final scala.collection.immutable.List<Magnitude> mags = target.getMagnitudes();
         if (magGroupElement == null) {
             assertEquals(0, mags.size());
             return;
@@ -101,13 +101,13 @@ public final class TargetMagnitudeTest extends TestBase {
         // One magnitude element per magnitude in the target
         assertEquals(mags.size(), magElementList.size());
 
-        mags.foreach(mag -> {
-            final String path = String.format("param[@name='%s']", mag.getBand().name());
+        JavaConversions$.MODULE$.seqAsJavaList(mags).forEach(mag -> {
+            final String path = String.format("param[@name='%s']", mag.band().name());
             final Element magElement = (Element) magGroupElement.selectSingleNode(path);
             final String strValue = magElement.attributeValue("value");
             final double doubleVal = Double.valueOf(strValue);
 
-            assertEquals(mag.getBrightness(), doubleVal, 0.00001);
+            assertEquals(mag.value(), doubleVal, 0.00001);
         });
     }
 }

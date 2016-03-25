@@ -6,7 +6,7 @@
     <paramset name="Science Program" kind="dataObj">
       <param name="title" value="Template Target Import Test"/>
       <param name="programMode" value="QUEUE"/>
-      <param name="tooType" value="standard"/>
+      <param name="tooType" value="none"/>
       <param name="programStatus" value="PHASE2"/>
       <param name="nextObsId" value="1"/>
       <paramset name="piInfo">

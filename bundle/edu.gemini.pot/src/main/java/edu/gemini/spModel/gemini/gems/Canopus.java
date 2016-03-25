@@ -510,29 +510,32 @@ public enum Canopus {
                 SPTarget target = targets.getPrimary().getOrNull();
                 if (target != null && (!validate || cwfs.validate(target, ctx) == GuideStarValidation.VALID)) {
                     // Get offset from base position to cwfs in arcsecs
-                    CoordinateDiff diff = new CoordinateDiff(coords, target.getTarget().getSkycalcCoordinates());
-                    Offset dis = diff.getOffset();
-                    double p = -dis.p().toArcsecs().getMagnitude();
-                    double q = -dis.q().toArcsecs().getMagnitude();
+                    final Option<Coordinates> oc = target.getSkycalcCoordinates(ctx.getSchedulingBlockStart());
+                    if (oc.isDefined()) {
+                        CoordinateDiff diff = new CoordinateDiff(coords, oc.getValue());
+                        Offset dis = diff.getOffset();
+                        double p = -dis.p().toArcsecs().getMagnitude();
+                        double q = -dis.q().toArcsecs().getMagnitude();
 
-                    // Get current transformations
-                    double t = ctx.getPositionAngle().toRadians().getMagnitude();
-                    t = t + getRotationConfig(ctx.getIssPort()).toRadians().getMagnitude();
-                    AffineTransform xform = new AffineTransform();
-                    xform.translate(p, q);
-                    xform.rotate(cwfs.getArmAngle(ctx)); // probe arm starting angle
-                    if (t != 0.0) xform.rotate(-t);
+                        // Get current transformations
+                        double t = ctx.getPositionAngle().toRadians().getMagnitude();
+                        t = t + getRotationConfig(ctx.getIssPort()).toRadians().getMagnitude();
+                        AffineTransform xform = new AffineTransform();
+                        xform.translate(p, q);
+                        xform.rotate(cwfs.getArmAngle(ctx)); // probe arm starting angle
+                        if (t != 0.0) xform.rotate(-t);
 
-                    // Get basic probe arm shape and apply transformations
-                    Area res = new Area(new Rectangle2D.Double(
-                            -PROBE_ARM_END, -PROBE_ARM_WIDTH / 2,
-                            RADIUS_ARCSEC * 2, PROBE_ARM_WIDTH));
-                    res.transform(xform);
+                        // Get basic probe arm shape and apply transformations
+                        Area res = new Area(new Rectangle2D.Double(
+                                -PROBE_ARM_END, -PROBE_ARM_WIDTH / 2,
+                                RADIUS_ARCSEC * 2, PROBE_ARM_WIDTH));
+                        res.transform(xform);
 
-                    // Clip to Canopus range, taking offsets into account
-                    Area range = probeRange3(ctx);
-                    res.intersect(range);
-                    return res;
+                        // Clip to Canopus range, taking offsets into account
+                        Area range = probeRange3(ctx);
+                        res.intersect(range);
+                        return res;
+                    }
                 }
             }
             return null;

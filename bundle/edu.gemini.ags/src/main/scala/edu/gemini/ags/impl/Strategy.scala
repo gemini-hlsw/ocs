@@ -13,7 +13,6 @@ import edu.gemini.spModel.guide.{GuideProbe, GuideProbeUtil}
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable._
 import edu.gemini.spModel.target.obsComp.PwfsGuideProbe
-import edu.gemini.spModel.target.system.{ITarget, NonSiderealTarget}
 
 import scala.Function.const
 

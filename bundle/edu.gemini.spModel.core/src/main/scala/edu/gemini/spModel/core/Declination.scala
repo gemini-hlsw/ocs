@@ -89,6 +89,13 @@ object Declination {
         def toAngle = a
       }
 
+  /**
+   * Construct a `Declination` from an angle in decimal degrees normalizable in [270 - 360) + [0 - 90], if possible.
+   * @group Constructors
+   */
+  def fromDegrees(d: Double): Option[Declination] =
+    fromAngle(Angle.fromDegrees(d))
+
   /** 
    * The `Declination` at zero degrees. 
    * @group Constructors

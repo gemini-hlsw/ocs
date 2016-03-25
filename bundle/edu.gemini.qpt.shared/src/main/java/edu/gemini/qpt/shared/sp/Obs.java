@@ -43,7 +43,6 @@ import edu.gemini.spModel.obs.plannedtime.PlannedStepSummary;
 import edu.gemini.spModel.obsclass.ObsClass;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.PwfsGuideProbe;
-import edu.gemini.spModel.target.system.NonSiderealTarget;
 import edu.gemini.spModel.too.TooType;
 import edu.gemini.spModel.type.DisplayableSpType;
 import edu.gemini.spModel.type.LoggableSpType;

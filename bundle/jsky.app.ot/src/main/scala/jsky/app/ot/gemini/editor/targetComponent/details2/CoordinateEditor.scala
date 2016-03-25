@@ -31,7 +31,7 @@ class CoordinateEditor extends TelescopePosEditor with ReentrancyHack {
         case -\/(e) => ra.setForeground(Color.RED)
         case \/-(a) =>
           ra.setForeground(Color.BLACK)
-          raLens.set(newTarget, a).foreach(spt.setNewTarget)
+          raLens.set(newTarget, a).foreach(spt.setTarget)
       }
     }
   })
@@ -42,7 +42,7 @@ class CoordinateEditor extends TelescopePosEditor with ReentrancyHack {
         case -\/(_) | \/-(None) => ra.setForeground(Color.RED)
         case \/-(Some(a)) =>
           dec.setForeground(Color.BLACK)
-          decLens.set(newTarget, a).foreach(spt.setNewTarget)
+          decLens.set(newTarget, a).foreach(spt.setTarget)
       }
     }
   })
@@ -69,7 +69,7 @@ class CoordinateEditor extends TelescopePosEditor with ReentrancyHack {
   }
 
   def newTarget: Target =
-    spt.getNewTarget
+    spt.getTarget
 
   def clean(angle: String): String =
     angle.trim.replace(",", ".")

@@ -24,9 +24,9 @@ object SPTargetSerializationSpec extends Specification with ScalaCheck with Arbi
       forAll { (t: Target) =>
         canSerializeP({
           val spt = new SPTarget
-          spt.setNewTarget(t)
+          spt.setTarget(t)
           spt
-        })((a, b) => a.getNewTarget == b.getNewTarget)
+        })((a, b) => a.getTarget == b.getTarget)
       }
 
   }

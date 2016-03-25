@@ -16,7 +16,6 @@ import edu.gemini.spModel.target.env.GuideProbeTargets;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.PwfsGuideProbe;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
-import edu.gemini.spModel.target.system.ITarget;
 import jsky.coords.WorldCoords;
 
 

@@ -1,14 +1,12 @@
 package jsky.app.ot.editor.template
 
 import edu.gemini.pot.sp.ISPTemplateParameters
-import edu.gemini.shared.skyobject.Magnitude
 import edu.gemini.shared.util.TimeValue
 import edu.gemini.shared.util.immutable.{ DefaultImList, None => JNone, Option => JOption }
 import edu.gemini.spModel.`type`.ObsoletableSpType
-import edu.gemini.spModel.core.MagnitudeSystem
+import edu.gemini.spModel.core._
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.{PercentageContainer, ImageQuality, CloudCover, SkyBackground, WaterVapor}
-import edu.gemini.spModel.rich.shared.immutable.asScalaOpt
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.system._
 import edu.gemini.spModel.template.TemplateParameters
@@ -234,7 +232,7 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
     }
 
     def targetType(t: SPTarget): TargetType =
-      t.getHmsDegTarget.map(_ => Sidereal).getOrElse(NonSidereal)
+      t.getSiderealTarget.map(_ => Sidereal).getOrElse(NonSidereal)
 
     object CoordinatesPanel extends ColumnPanel {
       val nameField = new BoundTextField[String](10)(
@@ -248,13 +246,12 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
         show = _.display,
         get  = { tp => targetType(tp.getTarget) },
         set  = { setTarget((target, targetType) => {
-          val coords = targetType match {
-            case Sidereal    => new HmsDegTarget()
-            case NonSidereal => new ConicTarget()
+          targetType match {
+            case Sidereal    => target.setSidereal()
+            case NonSidereal => target.setNonSidereal()
           }
-          target.setTarget(coords)
           target.setName(target.getName)
-          target.setMagnitudes(DefaultImList.create[Magnitude]())
+          target.setMagnitudes(Nil)
         })}
       )
 
@@ -276,26 +273,34 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
         set  = setTarget((a, b) => a.setDecDegrees(b))
       )
 
-      def pmField(getPM: HmsDegTarget => Double, setPM: (HmsDegTarget, Double) => Unit): BoundTextField[Double] =
+      def pmField(lens: SiderealTarget @> Double): BoundTextField[Double] =
         new BoundTextField[Double](10)(
           read = _.toDouble,
           show = d => f"$d%.3f",
-          get  = tp => tp.getTarget.getHmsDegTarget.fold(0.0)(getPM),
+          get  = tp => tp.getTarget.getSiderealTarget.fold(0.0)(lens.get),
           set  = (tp, pm) => {
             val newTarget = tp.getTarget
-            newTarget.getHmsDegTarget.foreach {t =>
-              setPM(t, pm)
-              newTarget.notifyOfGenericUpdate()
+            newTarget.getSiderealTarget.foreach { t =>
+              tp.getTarget.setTarget(lens.set(t, pm))
             }
             tp.copy(newTarget)
           }
         )
 
+      // Lens that mediates ProperMotion.zero ~ None ... not clear why we distinguish this in the
+      // model when no user-facing code cares.
+      val totalPM: SiderealTarget @> ProperMotion =
+        SiderealTarget.properMotion.xmapB(_.getOrElse(ProperMotion.zero))(Some(_).filterNot(_ == ProperMotion.zero))
+
+      // Given the lens above we can lens dRA and dDec
+      val totalPMRA  = totalPM >=> ProperMotion.deltaRA  >=> RightAscensionAngularVelocity.velocity >=> AngularVelocity.masPerYear
+      val totalPMDec = totalPM >=> ProperMotion.deltaDec >=> DeclinationAngularVelocity.velocity    >=> AngularVelocity.masPerYear
+
       val siderealRows = List(
         Row("RA",     raField),
         Row("Dec",    decField),
-        Row("pm RA",  pmField(_.getPropMotionRA,  _.setPropMotionRA(_))),
-        Row("pm Dec", pmField(_.getPropMotionDec, _.setPropMotionDec(_)))
+        Row("pm RA",  pmField(totalPMRA)),
+        Row("pm Dec", pmField(totalPMDec))
       )
 
       val rows = List(
@@ -310,11 +315,11 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
     }
 
     object MagnitudesPanel extends ColumnPanel {
-      def magRow(band: Magnitude.Band): Row = {
-        lazy val zero = new Magnitude(band, 0.0, band.defaultSystem)
+      def magRow(band: MagnitudeBand): Row = {
+        lazy val zero = new Magnitude(0.0, band, band.defaultSystem)
 
         def mag(tp: TemplateParameters): Option[Magnitude] =
-          tp.getTarget.getMagnitude(band).asScalaOpt
+          tp.getTarget.getMagnitude(band)
 
         def magOrZero(tp: TemplateParameters): Magnitude =
           mag(tp).getOrElse(zero)
@@ -330,8 +335,8 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
             if (inc) {
               target.putMagnitude(zero)
             } else {
-              val mags = target.getMagnitudes.toList.asScala.filterNot(_.getBand == band)
-              target.setMagnitudes(DefaultImList.create(mags.asJava))
+              val mags = target.getMagnitudes.filterNot(_.band == band)
+              target.setMagnitudes(mags)
             }}
           )
         )
@@ -341,16 +346,16 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
         val magValue = new BoundTextField[Double](5)(
           read = _.toDouble,
           show = d => f"$d%.3f",
-          get  = magOrZero(_).getBrightness,
-          set  = setMag((m, b) => new Magnitude(band, b, m.getSystem))
+          get  = magOrZero(_).value,
+          set  = setMag((m, b) => new Magnitude(b, band, m.system))
         ) {
           override def updateEnabledState(): Unit = enabled = includeBand
         }
 
         val magSys = new BoundNullableCombo[MagnitudeSystem](MagnitudeSystem.allForOT)(
           show = _.name,
-          get  = magOrZero(_).getSystem,
-          set  = setMag((m, s) => new Magnitude(band, m.getBrightness, s))
+          get  = magOrZero(_).system,
+          set  = setMag((m, s) => new Magnitude(m.value, band, s))
         ) {
           override def updateEnabledState(): Unit = enabled = includeBand
         }
@@ -365,7 +370,7 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
         Row(band.name, magCheck, magValue, magSys)
       }
 
-      val rows = Magnitude.Band.values().toList.map(magRow)
+      val rows = MagnitudeBand.all.map(magRow)
       layoutRows()
     }
 

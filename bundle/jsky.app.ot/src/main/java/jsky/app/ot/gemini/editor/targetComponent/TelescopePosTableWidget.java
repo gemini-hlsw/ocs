@@ -4,10 +4,11 @@ import edu.gemini.ags.api.*;
 import edu.gemini.pot.ModelConverters;
 import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.pot.sp.ISPObservation;
-import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.core.Angle;
 import edu.gemini.spModel.core.Coordinates;
+import edu.gemini.spModel.core.Magnitude;
+import edu.gemini.spModel.core.MagnitudeBand;
 import edu.gemini.spModel.guide.*;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
@@ -35,6 +36,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.List;
@@ -50,6 +52,13 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
     private static final NumberFormat nf = NumberFormat.getInstance(Locale.US);
     static { nf.setMaximumFractionDigits(2); }
 
+    private static final DecimalFormat MAG_FORMAT = new DecimalFormat("0.0##");
+
+    // Note -- synchronized though I guess this should always be called from
+    // gui thread...
+    public static synchronized String formatBrightness(Magnitude mag) {
+        return MAG_FORMAT.format(mag.value());
+    }
 
     static class TableData extends AbstractTableModel {
         enum Col {
@@ -103,7 +112,7 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
                 return col == 0 ? BorderFactory.createEmptyBorder(0, 5, 0, 0) : null;
             }
 
-            String formatMagnitude(Magnitude.Band band);
+            String formatMagnitude(MagnitudeBand band);
             Option<Long> when();
         }
 
@@ -129,12 +138,12 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
             @Override public Option<SPTarget> target()  { return target;   }
             @Override public Option<Long> when()        { return when; }
 
-            public Option<Magnitude> getMagnitude(final Magnitude.Band band) {
-                return target.flatMap(t -> t.getMagnitude(band));
+            public Option<Magnitude> getMagnitude(final MagnitudeBand band) {
+                return target.flatMap(t -> t.getMagnitudeJava(band));
             }
 
-            @Override public String formatMagnitude(final Magnitude.Band band) {
-                return getMagnitude(band).map(MagnitudeEditor::formatBrightness).getOrElse("");
+            @Override public String formatMagnitude(final MagnitudeBand band) {
+                return getMagnitude(band).map(TelescopePosTableWidget::formatBrightness).getOrElse("");
             }
         }
 
@@ -244,7 +253,7 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
         // Total number of rows, including subrows. Precalculated as swing uses this value frequently.
         private final int numRows;
 
-        private final ImList<Magnitude.Band> bands;
+        private final ImList<MagnitudeBand> bands;
         private final ImList<String> columnHeaders;
         private final TargetEnvironment env;
 
@@ -348,12 +357,16 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
 
         // Gets all the magnitude bands used by targets in the target
         // environment.
-        private ImList<Magnitude.Band> getSortedBands(final TargetEnvironment env) {
+        private ImList<MagnitudeBand> getSortedBands(final TargetEnvironment env) {
             // Keep a sorted set of bands, sorted by the name.
-            final Set<Magnitude.Band> bands = new TreeSet<>(Magnitude.Band.WAVELENGTH_COMPARATOR);
+            final Set<MagnitudeBand> bands = new TreeSet<>((b1, b2) -> {
+                double w1 = b1.center().toNanometers();
+                double w2 = b2.center().toNanometers();
+                return (int) (w1 - w2);
+            });
 
             // Extract all the magnitude bands from the environment.
-            env.getTargets().foreach(spTarget -> bands.addAll(spTarget.getMagnitudeBands()));
+            env.getTargets().foreach(spTarget -> bands.addAll(spTarget.getMagnitudeBandsJava()));
 
             // Create an immutable sorted list containing the results.
             return DefaultImList.create(bands);
@@ -426,12 +439,12 @@ public final class TelescopePosTableWidget extends JTable implements TelescopePo
         }
 
 
-        private static ImList<String> computeColumnHeaders(final ImList<Magnitude.Band> bands) {
+        private static ImList<String> computeColumnHeaders(final ImList<MagnitudeBand> bands) {
             // First add the fixed column headers
             final List<String> hdr = Arrays.stream(Col.values()).map(Col::displayName).collect(Collectors.toList());
 
             // Add each magnitude band name
-            hdr.addAll(bands.map(Magnitude.Band::name).toList());
+            hdr.addAll(bands.map(MagnitudeBand::name).toList());
             return DefaultImList.create(hdr);
         }
 

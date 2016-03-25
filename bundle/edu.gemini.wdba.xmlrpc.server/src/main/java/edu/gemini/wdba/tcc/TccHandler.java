@@ -60,7 +60,7 @@ public final class TccHandler implements ITccXmlRpc {
             Class<?> cl = Class.forName(className);
             for (Class<?> itsInterface : cl.getInterfaces()) {
                 if (itsInterface == ITccInstrumentSupport.class) {
-                    LOG.info("Registering: " + cl.getName() + " for instrument: " + instrumentName);
+                    LOG.fine("Registering: " + cl.getName() + " for instrument: " + instrumentName);
                     // Now check that it implements a create factory method
                     cl.getMethod("create", ObservationEnvironment.class);
                     isSupport = true;
@@ -155,7 +155,7 @@ public final class TccHandler implements ITccXmlRpc {
         String result;
         ObservationNode obsNode;
         try {
-            LOG.info("Fetching tcc: " + observationId);
+            LOG.fine("Fetching tcc: " + observationId);
             ISPObservation spObs = dbAccess.getObservation(observationId);
             IDBDatabaseService db = dbAccess.getDatabase();
             obsNode = ObservationNodeFunctor.getObservationNode(db, spObs, ctx.user);

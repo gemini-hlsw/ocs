@@ -1,11 +1,12 @@
 package edu.gemini.spModel.gemini.gpi;
 
 import edu.gemini.pot.sp.ISPObsComponent;
-import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.util.immutable.ApplyOp;
 import edu.gemini.shared.util.immutable.Function1;
 import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.spModel.config.AbstractObsComponentCB;
+import edu.gemini.spModel.core.Magnitude;
+import edu.gemini.spModel.core.MagnitudeBand;
 import edu.gemini.spModel.data.config.DefaultParameter;
 import edu.gemini.spModel.data.config.IConfig;
 import edu.gemini.spModel.data.config.IParameter;
@@ -54,15 +55,15 @@ public class GpiCB extends AbstractObsComponentCB {
         Collection<IParameter> sysConfig = _sysConfig.getParameters();
 
         final class MagnitudeFilter implements Function1<Magnitude, Boolean> {
-            private final Magnitude.Band band;
+            private final MagnitudeBand band;
 
-            private MagnitudeFilter(Magnitude.Band band) {
+            private MagnitudeFilter(MagnitudeBand band) {
                 this.band = band;
             }
 
             @Override
             public Boolean apply(Magnitude magnitude) {
-                return magnitude.getBand().equals(band);
+                return magnitude.band().equals(band);
             }
         }
 
@@ -77,7 +78,7 @@ public class GpiCB extends AbstractObsComponentCB {
             public void apply(Magnitude magnitude) {
                 config.putParameter(systemName,
                             DefaultParameter.getInstance(magProp,
-                                magnitude.getBrightness()));
+                                magnitude.value()));
             }
         }
         for (IParameter param : sysConfig) {
@@ -92,9 +93,9 @@ public class GpiCB extends AbstractObsComponentCB {
             final TargetObsComp toc = (TargetObsComp) targetcomp.getDataObject();
             if (toc != null) {
                 if (toc.getTargetEnvironment().getBase() != null) {
-                    ImList<Magnitude> magnitudes = toc.getTargetEnvironment().getBase().getMagnitudes();
-                    magnitudes.filter(new MagnitudeFilter(Magnitude.Band.H)).headOption().foreach(new MagnitudeSetter(Gpi.MAG_H_PROP));
-                    magnitudes.filter(new MagnitudeFilter(Magnitude.Band.I)).headOption().foreach(new MagnitudeSetter(Gpi.MAG_I_PROP));
+                    ImList<Magnitude> magnitudes = toc.getTargetEnvironment().getBase().getMagnitudesJava();
+                    magnitudes.filter(new MagnitudeFilter(MagnitudeBand.H$.MODULE$)).headOption().foreach(new MagnitudeSetter(Gpi.MAG_H_PROP));
+                    magnitudes.filter(new MagnitudeFilter(MagnitudeBand.I$.MODULE$)).headOption().foreach(new MagnitudeSetter(Gpi.MAG_I_PROP));
                 }
             }
         }

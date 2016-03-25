@@ -4,8 +4,6 @@ import edu.gemini.pot.client.SPDB;
 import edu.gemini.pot.sp.*;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 import edu.gemini.spModel.target.SPTarget;
-import edu.gemini.spModel.target.system.ITarget;
-import edu.gemini.spModel.target.system.NonSiderealTarget;
 import edu.gemini.spModel.template.InstantiationFunctor;
 import edu.gemini.spModel.template.TemplateParameters;
 import jsky.app.ot.OT;

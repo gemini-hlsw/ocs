@@ -4,7 +4,6 @@ import edu.gemini.ags.TargetsHelper
 import edu.gemini.ags.gems.mascot.MascotProgress
 import edu.gemini.ags.gems.mascot.Strehl
 import edu.gemini.catalog.votable.TestVoTableBackend
-import edu.gemini.shared.skyobject.{Magnitude => JMagnitude}
 import edu.gemini.shared.skyobject.coords.HmsDegCoordinates
 import edu.gemini.shared.util.immutable.{None => JNone}
 import edu.gemini.skycalc.Coordinates
@@ -106,9 +105,9 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
       (Angle.fromDegrees(odgw4x.getRaDeg)  ~= Angle.fromDegrees(odgw4.getSkycalcCoordinates(NoTime).getValue.getRaDeg)) should beTrue
       (Angle.fromDegrees(odgw4x.getDecDeg) ~= Angle.fromDegrees(odgw4.getSkycalcCoordinates(NoTime).getValue.getDecDeg)) should beTrue
 
-      val cwfs1Mag = cwfs1.getMagnitude(JMagnitude.Band.r).getValue.getBrightness
-      val cwfs2Mag = cwfs2.getMagnitude(JMagnitude.Band.UC).getValue.getBrightness
-      val cwfs3Mag = cwfs3.getMagnitude(JMagnitude.Band.r).getValue.getBrightness
+      val cwfs1Mag = cwfs1.getMagnitude(MagnitudeBand._r).map(_.value).get
+      val cwfs2Mag = cwfs2.getMagnitude(MagnitudeBand.UC).map(_.value).get
+      val cwfs3Mag = cwfs3.getMagnitude(MagnitudeBand._r).map(_.value).get
       cwfs3Mag < cwfs1Mag && cwfs2Mag < cwfs1Mag should beTrue
     }
     "support Gsaoi Search on SN-1987A" in {
@@ -167,9 +166,9 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
       (Angle.fromDegrees(odgw2x.getRaDeg)  ~= Angle.fromDegrees(odgw2.getSkycalcCoordinates(NoTime).getValue.getRaDeg)) should beTrue
       (Angle.fromDegrees(odgw2x.getDecDeg) ~= Angle.fromDegrees(odgw2.getSkycalcCoordinates(NoTime).getValue.getDecDeg)) should beTrue
 
-      val cwfs1Mag = cwfs1.getMagnitude(JMagnitude.Band.UC).getValue.getBrightness
-      val cwfs2Mag = cwfs2.getMagnitude(JMagnitude.Band.UC).getValue.getBrightness
-      val cwfs3Mag = cwfs3.getMagnitude(JMagnitude.Band.UC).getValue.getBrightness
+      val cwfs1Mag = cwfs1.getMagnitude(MagnitudeBand.UC).map(_.value).get
+      val cwfs2Mag = cwfs2.getMagnitude(MagnitudeBand.UC).map(_.value).get
+      val cwfs3Mag = cwfs3.getMagnitude(MagnitudeBand.UC).map(_.value).get
       cwfs3Mag < cwfs1Mag && cwfs2Mag < cwfs1Mag should beTrue
     }
     "support Gsaoi Search on M6" in {
@@ -228,9 +227,9 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
       (Angle.fromDegrees(odgw2x.getRaDeg)  ~= Angle.fromDegrees(odgw2.getSkycalcCoordinates(NoTime).getValue.getRaDeg)) should beTrue
       (Angle.fromDegrees(odgw2x.getDecDeg) ~= Angle.fromDegrees(odgw2.getSkycalcCoordinates(NoTime).getValue.getDecDeg)) should beTrue
 
-      val cwfs1Mag = cwfs1.getMagnitude(JMagnitude.Band.UC).getValue.getBrightness
-      val cwfs2Mag = cwfs2.getMagnitude(JMagnitude.Band.UC).getValue.getBrightness
-      val cwfs3Mag = cwfs3.getMagnitude(JMagnitude.Band.UC).getValue.getBrightness
+      val cwfs1Mag = cwfs1.getMagnitude(MagnitudeBand.UC).map(_.value).get
+      val cwfs2Mag = cwfs2.getMagnitude(MagnitudeBand.UC).map(_.value).get
+      val cwfs3Mag = cwfs3.getMagnitude(MagnitudeBand.UC).map(_.value).get
       cwfs3Mag < cwfs1Mag && cwfs2Mag < cwfs1Mag should beTrue
     }
     "support Gsaoi Search on BPM 37093" in {

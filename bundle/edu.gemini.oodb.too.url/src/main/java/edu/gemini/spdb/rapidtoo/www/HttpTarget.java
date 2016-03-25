@@ -4,9 +4,9 @@
 
 package edu.gemini.spdb.rapidtoo.www;
 
-import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.util.immutable.DefaultImList;
 import edu.gemini.shared.util.immutable.ImList;
+import edu.gemini.spModel.core.Magnitude;
 import edu.gemini.spdb.rapidtoo.TooTarget;
 import edu.gemini.spModel.target.system.HMS;
 import edu.gemini.spModel.target.system.DMS;

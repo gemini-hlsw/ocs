@@ -101,7 +101,6 @@ case class NumericPropertySheet[A](title: Option[String], f: SPTarget => A, prop
     try
       nonreentrant {
         p.edit(f(spt), parse(tbwe.getValue))
-        spt.notifyOfGenericUpdate()
       }
     catch { case _: ParseException => }
 

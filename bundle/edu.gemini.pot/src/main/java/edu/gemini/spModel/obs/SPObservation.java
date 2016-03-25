@@ -17,8 +17,6 @@ import edu.gemini.spModel.pio.PioFactory;
 import edu.gemini.spModel.pio.PioParseException;
 import edu.gemini.spModel.seqcomp.IObserveSeqComponent;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
-import edu.gemini.spModel.target.system.HmsDegTarget;
-import edu.gemini.spModel.target.system.ITarget;
 import edu.gemini.spModel.time.ChargeClass;
 import edu.gemini.spModel.time.ObsTimeCharges;
 import edu.gemini.spModel.time.ObsTimeCorrection;
@@ -146,7 +144,8 @@ public class SPObservation extends AbstractDataObject implements ISPStaffOnlyFie
     private boolean _overrideQaState = false;
 
     // The next scheduling block for the observation. Begin with None.
-    private Option<SchedulingBlock> _schedulingBlock = None.instance();
+    private Option<SchedulingBlock> _schedulingBlock =
+            new Some(new SchedulingBlock(System.currentTimeMillis(), 0L));
 
     private Option<AgsStrategyKey> _agsStrategyOverride = None.instance();
 

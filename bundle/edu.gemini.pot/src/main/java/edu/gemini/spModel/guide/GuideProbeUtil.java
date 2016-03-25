@@ -7,7 +7,6 @@ import edu.gemini.skycalc.Angle;
 import edu.gemini.skycalc.CoordinateDiff;
 import edu.gemini.skycalc.Coordinates;
 import edu.gemini.skycalc.Offset;
-import edu.gemini.shared.skyobject.SkyObject;
 import edu.gemini.shared.skyobject.coords.HmsDegCoordinates;
 import edu.gemini.spModel.data.AbstractDataObject;
 import edu.gemini.spModel.data.ISPDataObject;
@@ -106,12 +105,6 @@ public enum GuideProbeUtil {
         final Option<Long> when = ctx.getSchedulingBlockStart();
         return guideStar.getSkycalcCoordinates(when).map(coords ->
             validate(coords, guideProbe, ctx)).getOrElse(GuideStarValidation.UNDEFINED);
-    }
-
-    public GuideStarValidation validate(final SkyObject guideStar, final GuideProbe guideProbe, final ObsContext ctx) {
-        final HmsDegCoordinates coords = guideStar.getCoordinates().toHmsDeg(0);
-        final Coordinates c = new Coordinates(coords.getRa(), coords.getDec());
-        return validate(c, guideProbe, ctx);
     }
 
     public GuideStarValidation validate(final Coordinates coords, final GuideProbe guideProbe, final ObsContext ctx) {

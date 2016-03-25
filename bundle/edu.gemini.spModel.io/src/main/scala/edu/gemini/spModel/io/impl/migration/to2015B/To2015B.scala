@@ -1,7 +1,6 @@
 package edu.gemini.spModel.io.impl.migration.to2015B
 
 import edu.gemini.spModel.io.impl.migration.{Migration, PioSyntax}
-import edu.gemini.spModel.target.system.CoordinateParam
 
 import java.util.UUID
 
@@ -57,7 +56,7 @@ object To2015B extends Migration {
   val VALUE_SYSTEM_BNNNN    = "BNNNN"
   val VALUE_SYSTEM_APPARENT = "Apparent"
 
-  val UNITS_JD                        = CoordinateParam.Units.JD.getName
+  val UNITS_JD                        = "JD"
   val UNITS_SECONDS_PER_YEAR          = "seconds/year"
   val UNITS_ARCSECONDS_PER_YEAR       = "arcsecs/year"
   val UNITS_MILLI_ARCSECONDS_PER_YEAR = "milli-arcsecs/year"

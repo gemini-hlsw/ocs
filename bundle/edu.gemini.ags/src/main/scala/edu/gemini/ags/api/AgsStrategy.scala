@@ -13,7 +13,6 @@ import edu.gemini.spModel.rich.shared.immutable._
 import edu.gemini.shared.util.immutable.{Option => JOption, Some => JSome}
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.env._
-import edu.gemini.spModel.target.system.HmsDegTarget
 
 import scala.concurrent.Future
 
@@ -89,7 +88,7 @@ object AgsStrategy {
      */
     def applyTo(env: TargetEnvironment): TargetEnvironment = {
       val targetMap = ==>>.fromList(assignments.map { case Assignment(gp,gs) =>
-        gp -> new SPTarget(HmsDegTarget.fromSkyObject(gs.toOldModel))})
+        gp -> new SPTarget(gs)})
       val newAuto: AutomaticGroup = AutomaticGroup.Active(targetMap, posAngle)
 
       // If this is different from the old automatic GG, then replace.

@@ -25,7 +25,6 @@ import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.target.system.DMS;
 import edu.gemini.spModel.target.system.HMS;
-import edu.gemini.spModel.target.system.HmsDegTarget;
 import edu.gemini.spModel.template.TemplateParameters;
 import edu.gemini.spModel.time.ChargeClass;
 import edu.gemini.spModel.too.Too;

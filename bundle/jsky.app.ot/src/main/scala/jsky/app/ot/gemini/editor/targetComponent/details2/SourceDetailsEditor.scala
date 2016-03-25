@@ -41,13 +41,13 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor wit
   // ==== The current target
   private[this] var spt: SPTarget = new SPTarget
 
-  private def getDistribution(t: SPTarget): Option[SpectralDistribution]= Target.spectralDistribution.get(t.getNewTarget).join
-  private def getProfile(t: SPTarget): Option[SpatialProfile] = Target.spatialProfile.get(t.getNewTarget).join
+  private def getDistribution(t: SPTarget): Option[SpectralDistribution]= Target.spectralDistribution.get(t.getTarget).join
+  private def getProfile(t: SPTarget): Option[SpatialProfile] = Target.spatialProfile.get(t.getTarget).join
 
   private def setDistribution(sd: SpectralDistribution): Unit = setDistribution(Some(sd))
-  private def setDistribution(sd: Option[SpectralDistribution]): Unit = Target.spectralDistribution.set(spt.getNewTarget, sd).foreach(spt.setNewTarget)
+  private def setDistribution(sd: Option[SpectralDistribution]): Unit = Target.spectralDistribution.set(spt.getTarget, sd).foreach(spt.setTarget)
   private def setProfile     (sp: SpatialProfile): Unit = setProfile(Some(sp))
-  private def setProfile     (sp: Option[SpatialProfile]): Unit = Target.spatialProfile.set(spt.getNewTarget, sp).foreach(spt.setNewTarget)
+  private def setProfile     (sp: Option[SpatialProfile]): Unit = Target.spatialProfile.set(spt.getTarget, sp).foreach(spt.setTarget)
 
   // ==== Spatial Profile Details
 
@@ -231,7 +231,7 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor wit
       deafTo(editElements:_*)
 
       // update UI elements to reflect the spatial profile
-      Target.spatialProfile.get(spt.getNewTarget).join match {
+      Target.spatialProfile.get(spt.getTarget).join match {
         case None                        => profiles.selection.item = profilePanels.head
         case Some(PointSource)           => profiles.selection.item = profilePanels(1)
         case Some(GaussianSource(_))     => profiles.selection.item = profilePanels(2); profilePanels(2).panel.asInstanceOf[NumericPropertySheet[GaussianSource]].edit(obsContext, spTarget, node)
@@ -239,7 +239,7 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor wit
       }
 
       // update UI elements to reflect the spectral distribution
-      Target.spectralDistribution.get(spt.getNewTarget).join match  {
+      Target.spectralDistribution.get(spt.getTarget).join match  {
         case None                        => distributions.selection.item = distributionPanels.head
         case Some(s: LibraryStar)        => distributions.selection.item = distributionPanels(1); libraryStarDetails.selection.item = s
         case Some(s: LibraryNonStar)     => distributions.selection.item = distributionPanels(2); libraryNonStarDetails.selection.item = s

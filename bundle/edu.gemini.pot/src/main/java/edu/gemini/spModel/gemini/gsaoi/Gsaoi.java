@@ -2,7 +2,6 @@ package edu.gemini.spModel.gemini.gsaoi;
 
 import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.pot.sp.SPComponentType;
-import edu.gemini.shared.skyobject.Magnitude.Band;
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.skycalc.Angle;
 import edu.gemini.spModel.config.injector.ConfigInjector;
@@ -10,6 +9,8 @@ import edu.gemini.spModel.config.injector.obswavelength.ObsWavelengthCalc1;
 import edu.gemini.spModel.config2.Config;
 import edu.gemini.spModel.config2.ItemKey;
 import edu.gemini.spModel.core.BandsList;
+import edu.gemini.spModel.core.Magnitude;
+import edu.gemini.spModel.core.MagnitudeBand;
 import edu.gemini.spModel.core.SingleBand;
 import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.data.ISPDataObject;
@@ -45,7 +46,6 @@ import edu.gemini.spModel.type.DisplayableSpType;
 import edu.gemini.spModel.type.LoggableSpType;
 import edu.gemini.spModel.type.SequenceableSpType;
 import edu.gemini.spModel.type.SpTypeUtil;
-import static edu.gemini.pot.ModelConverters.toNewBand;
 
 import java.beans.PropertyDescriptor;
 import java.util.*;
@@ -152,49 +152,49 @@ public final class Gsaoi extends SPInstObsComp implements PropertyProvider, Guid
     // REL-445: Updated using the new 50/50 times below
     public enum Filter implements DisplayableSpType, SequenceableSpType, LoggableSpType {
         Z("Z (1.015 um)", "Z",
-                1.015, ReadMode.FAINT, 26.0, 4619, new SingleBand(toNewBand(Band.J))),
+                1.015, ReadMode.FAINT, 26.0, 4619, new SingleBand((MagnitudeBand.J$.MODULE$))),
         HEI("HeI (1.083 um)", "HeI",
-                1.083, ReadMode.VERY_FAINT, 72.6, 21792, new SingleBand(toNewBand(Band.J))),
+                1.083, ReadMode.VERY_FAINT, 72.6, 21792, new SingleBand((MagnitudeBand.J$.MODULE$))),
         PA_GAMMA("Pa(gamma) (1.094 um)", "Pagma",
-                1.094, ReadMode.VERY_FAINT, 122.0, 36585, new SingleBand(toNewBand(Band.J))),
+                1.094, ReadMode.VERY_FAINT, 122.0, 36585, new SingleBand((MagnitudeBand.J$.MODULE$))),
         J_CONTINUUM("J-continuum (1.207 um)", "Jcont",
-                1.207, ReadMode.VERY_FAINT, 32.6, 9793, new SingleBand(toNewBand(Band.J))),
+                1.207, ReadMode.VERY_FAINT, 32.6, 9793, new SingleBand((MagnitudeBand.J$.MODULE$))),
         J("J (1.250 um)", "J",
-                1.250, ReadMode.FAINT, 5.7, 1004, new SingleBand(toNewBand(Band.J))),
+                1.250, ReadMode.FAINT, 5.7, 1004, new SingleBand((MagnitudeBand.J$.MODULE$))),
         H("H (1.635 um)", "H",
-                1.635, ReadMode.BRIGHT, 12.0, 460, new SingleBand(toNewBand(Band.H))),
+                1.635, ReadMode.BRIGHT, 12.0, 460, new SingleBand((MagnitudeBand.H$.MODULE$))),
         PA_BETA("Pa(beta) (1.282 um)", "Pabeta",
-                1.282, ReadMode.FAINT, 21.8, 3879, new SingleBand(toNewBand(Band.J))),
+                1.282, ReadMode.FAINT, 21.8, 3879, new SingleBand((MagnitudeBand.J$.MODULE$))),
         H_CONTINUUM("H-continuum (1.570 um)", "Hcont",
-                1.570, ReadMode.FAINT, 31.2, 5545, new SingleBand(toNewBand(Band.H))),
+                1.570, ReadMode.FAINT, 31.2, 5545, new SingleBand((MagnitudeBand.H$.MODULE$))),
         CH4_SHORT("CH4(short) (1.580 um)", "CH4short",
-                1.580, ReadMode.FAINT, 6.6, 1174, new SingleBand(toNewBand(Band.H))),
+                1.580, ReadMode.FAINT, 6.6, 1174, new SingleBand((MagnitudeBand.H$.MODULE$))),
         FE_II("[Fe II] (1.644 um)", "FeII1644",
-                1.644, ReadMode.FAINT, 24.9, 4416, new SingleBand(toNewBand(Band.H))),
+                1.644, ReadMode.FAINT, 24.9, 4416, new SingleBand((MagnitudeBand.H$.MODULE$))),
         CH4_LONG("CH4(long) (1.690 um)", "CH4long",
-                1.690, ReadMode.FAINT, 6.8, 1202, new SingleBand(toNewBand(Band.H))),
+                1.690, ReadMode.FAINT, 6.8, 1202, new SingleBand((MagnitudeBand.H$.MODULE$))),
         H20_ICE("H20 ice (2.000 um)", "H20ice",
-                2.000, ReadMode.FAINT, 19.1, 3395, new SingleBand(toNewBand(Band.K))),
+                2.000, ReadMode.FAINT, 19.1, 3395, new SingleBand((MagnitudeBand.K$.MODULE$))),
         HEI_2P2S("HeI (2p2s) (2.058 um)", "HeI2p2s",
-                2.058, ReadMode.FAINT, 28.3, 5032, new SingleBand(toNewBand(Band.K))),
+                2.058, ReadMode.FAINT, 28.3, 5032, new SingleBand((MagnitudeBand.K$.MODULE$))),
         K_CONTINUUM1("Ks-continuum (2.093 um)", "Kcontshrt",
-                2.093, ReadMode.FAINT, 7.8, 6069, new SingleBand(toNewBand(Band.K))),
+                2.093, ReadMode.FAINT, 7.8, 6069, new SingleBand((MagnitudeBand.K$.MODULE$))),
         BR_GAMMA("Br(gamma) (2.166 um)", "Brgma",
-                2.166, ReadMode.FAINT, 31.0, 5496, new SingleBand(toNewBand(Band.K))),
+                2.166, ReadMode.FAINT, 31.0, 5496, new SingleBand((MagnitudeBand.K$.MODULE$))),
         K_CONTINUUM2("Kl-continuum (2.270 um)", "Kcontlong",
-                2.270, ReadMode.FAINT, 33.3, 5911, new SingleBand(toNewBand(Band.K))),
+                2.270, ReadMode.FAINT, 33.3, 5911, new SingleBand((MagnitudeBand.K$.MODULE$))),
         K_PRIME("K(prime) (2.120 um)", "Kprime",
-                2.120, ReadMode.BRIGHT, 14.8, 566, new SingleBand(toNewBand(Band.K))),
+                2.120, ReadMode.BRIGHT, 14.8, 566, new SingleBand((MagnitudeBand.K$.MODULE$))),
         H2_1_0_S_1("H2 1-0 S(1) (2.122 um)", "H2(1-0)",
-                2.122, ReadMode.FAINT, 27.5, 5400, new SingleBand(toNewBand(Band.K))),
+                2.122, ReadMode.FAINT, 27.5, 5400, new SingleBand((MagnitudeBand.K$.MODULE$))),
         K_SHORT("K(short) (2.150 um)", "Kshort",
-                2.150, ReadMode.BRIGHT, 14.4, 551, new SingleBand(toNewBand(Band.K))),
+                2.150, ReadMode.BRIGHT, 14.4, 551, new SingleBand((MagnitudeBand.K$.MODULE$))),
         K("K (2.200 um)", "K",
-                2.200, ReadMode.BRIGHT, 12.3, 470, new SingleBand(toNewBand(Band.K))),
+                2.200, ReadMode.BRIGHT, 12.3, 470, new SingleBand((MagnitudeBand.K$.MODULE$))),
         H2_2_1_S_1("H2 2-1 S(1) (2.248 um)", "H2(2-1)",
-                2.248, ReadMode.FAINT, 32.6, 5784, new SingleBand(toNewBand(Band.K))),
+                2.248, ReadMode.FAINT, 32.6, 5784, new SingleBand((MagnitudeBand.K$.MODULE$))),
         CO("CO (2.360 um)", "CO2360",
-                2.360, ReadMode.FAINT, 7.7, 1370, new SingleBand(toNewBand(Band.K))),
+                2.360, ReadMode.FAINT, 7.7, 1370, new SingleBand((MagnitudeBand.K$.MODULE$))),
         DIFFUSER1("Diffuser1", "Diffuser1",
                 0.0, ReadMode.BRIGHT, 0.0, 0),
         DIFFUSER2("Diffuser2", "Diffuser2",
@@ -283,9 +283,9 @@ public final class Gsaoi extends SPInstObsComp implements PropertyProvider, Guid
          * Returns the filter matching the given magnitude band by searching through the
          * known types.  If not found, nvalue is returned.
          */
-        public static Filter getFilter(Band band, Filter nvalue) {
+        public static Filter getFilter(MagnitudeBand band, Filter nvalue) {
             for(Filter filter : values()) {
-                if (!filter.catalogBand.isEmpty() && filter.catalogBand.getValue().bandSupported(toNewBand(band))) {
+                if (!filter.catalogBand.isEmpty() && filter.catalogBand.getValue().bandSupported(band)) {
                     return filter;
                 }
             }

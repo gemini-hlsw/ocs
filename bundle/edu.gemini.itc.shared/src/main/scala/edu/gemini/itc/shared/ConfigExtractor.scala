@@ -2,7 +2,6 @@ package edu.gemini.itc.shared
 
 import edu.gemini.pot.ModelConverters._
 import edu.gemini.pot.sp.SPComponentType._
-import edu.gemini.shared.skyobject.Magnitude.Band
 import edu.gemini.spModel.config2.{Config, ItemKey}
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.gemini.acqcam.AcqCamParams
@@ -19,7 +18,6 @@ import edu.gemini.spModel.obscomp.SPInstObsComp
 import edu.gemini.spModel.rich.shared.immutable.asScalaOpt
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.env.{GuideProbeTargets, TargetEnvironment}
-import edu.gemini.spModel.target.system.ITarget
 import edu.gemini.spModel.telescope.IssPort
 import edu.gemini.spModel.core.WavelengthConversions._
 
@@ -161,9 +159,9 @@ object ConfigExtractor {
 
     val error: String \/ GemsParameters = "GSAOI filter with unknown band".left
 
-    def closestBand(band: Band) =
+    def closestBand(band: MagnitudeBand) =
       // pick the closest band that's supported by ITC
-      List(Band.J, Band.H, Band.K).minBy(b => Math.abs(b.getWavelengthMidPoint.getValue.toNanometers - band.getWavelengthMidPoint.getValue.toNanometers))
+      List(MagnitudeBand.J, MagnitudeBand.H, MagnitudeBand.K).minBy(b => Math.abs(b.center.toNanometers - band.center.toNanometers))
 
 
     // a rudimentary approximation for the expected GeMS performance
@@ -236,12 +234,12 @@ object ConfigExtractor {
       targets.getPrimary.asScalaOpt.fold("No guide star selected".left[SPTarget])(_.right)
 
     def extractMagnitude(guideStar: SPTarget) = {
-      val r  = guideStar.getMagnitude(Band.r)
-      val R  = guideStar.getMagnitude(Band.R)
-      val UC = guideStar.getMagnitude(Band.UC)
-      if      (r.isDefined)  r.getValue.getBrightness.right
-      else if (R.isDefined)  R.getValue.getBrightness.right
-      else if (UC.isDefined) UC.getValue.getBrightness.right
+      val r  = guideStar.getMagnitude(MagnitudeBand._r)
+      val R  = guideStar.getMagnitude(MagnitudeBand.R)
+      val UC = guideStar.getMagnitude(MagnitudeBand.UC)
+      if      (r.isDefined)   r.map(_.value).get.right
+      else if (R.isDefined)   R.map(_.value).get.right
+      else if (UC.isDefined) UC.map(_.value).get.right
       else "No r, R or UC magnitude defined for guide star".left
     }
 

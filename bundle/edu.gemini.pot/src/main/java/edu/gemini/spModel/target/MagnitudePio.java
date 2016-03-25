@@ -1,7 +1,8 @@
 package edu.gemini.spModel.target;
 
-import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.util.immutable.*;
+import edu.gemini.spModel.core.Magnitude;
+import edu.gemini.spModel.core.MagnitudeBand;
 import edu.gemini.spModel.core.MagnitudeSystem;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.Pio;
@@ -34,7 +35,7 @@ public enum MagnitudePio {
 
     /**
      * Name of the {@link edu.gemini.spModel.pio.Param} that identifies
-     * the {@link Magnitude.Band magnitude band}.
+     * the {@link MagnitudeBand magnitude band}.
      */
     public static final String MAG_BAND = "band";
 
@@ -92,15 +93,14 @@ public enum MagnitudePio {
      */
     public ParamSet toParamSet(PioFactory factory, Magnitude mag) {
         ParamSet magPset = factory.createParamSet(MAG);
-        Magnitude.Band band = mag.getBand();
-        double magVal = mag.getBrightness();
-        Option<Double> error = mag.getError();
-        MagnitudeSystem system = mag.getSystem();
+        MagnitudeBand band = mag.band();
+        double magVal = mag.value();
+        MagnitudeSystem system = mag.system();
 
         Pio.addParam(factory, magPset, MAG_BAND, band.name());
         Pio.addDoubleParam(factory, magPset, MAG_VAL, magVal);
-        if (!error.isEmpty()) {
-            Pio.addDoubleParam(factory, magPset, MAG_ERROR, error.getValue());
+        if (!mag.error().isEmpty()) {
+            Pio.addDoubleParam(factory, magPset, MAG_ERROR, (Double) mag.error().get());
         }
         Pio.addParam(factory, magPset, MAG_SYSTEM, system.name());
 
@@ -161,9 +161,9 @@ public enum MagnitudePio {
             return null;
         }
 
-        Magnitude.Band band;
+        MagnitudeBand band;
         try {
-            band = Magnitude.Band.valueOf(bandName);
+            band = MagnitudeBand.unsafeFromString(bandName);
         } catch (Exception ex) {
             String msg = String.format("Invalid magnitude band '%s'", bandName);
             throw new ParseException(msg, 0);
@@ -183,17 +183,6 @@ public enum MagnitudePio {
             throw new ParseException(msg, 0);
         }
 
-        Option<Double> error = None.instance();
-        String errorStr = Pio.getValue(pset, MAG_ERROR);
-        if (errorStr != null) {
-            try {
-                error = new Some<Double>(Double.parseDouble(errorStr));
-            } catch (NumberFormatException ex) {
-                String msg = String.format("Could not parse error information from '%s' for band '%s'.", errorStr, bandName);
-                throw new ParseException(msg, 0);
-            }
-        }
-
         // Get the system and assume Vega if not specified.
         final String defaultSys = MagnitudeSystem.Vega$.MODULE$.name();
         final String systemName = Optional.ofNullable(Pio.getValue(pset, MAG_SYSTEM)).orElse(defaultSys);
@@ -208,7 +197,18 @@ public enum MagnitudePio {
             throw new ParseException(msg, 0);
         }
 
-        return new Magnitude(band, val, error, system);
+        String errorStr = Pio.getValue(pset, MAG_ERROR);
+        if (errorStr != null) {
+            try {
+                return new Magnitude(val, band, Double.parseDouble(errorStr), system);
+            } catch (NumberFormatException ex) {
+                String msg = String.format("Could not parse error information from '%s' for band '%s'.", errorStr, bandName);
+                throw new ParseException(msg, 0);
+            }
+        } else {
+            return new Magnitude(val, band, system);
+        }
+
     }
 
 }

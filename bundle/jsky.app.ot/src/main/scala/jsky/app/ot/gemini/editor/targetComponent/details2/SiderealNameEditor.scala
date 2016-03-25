@@ -10,8 +10,8 @@ import edu.gemini.shared.util.immutable.{Option => GOption}
 import edu.gemini.spModel.core.Target
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
-import jsky.app.ot.gemini.editor.targetComponent.{MagnitudeEditor, TelescopePosEditor}
-import jsky.util.gui.{DialogUtil, TextBoxWidgetWatcher, TextBoxWidget}
+import jsky.app.ot.gemini.editor.targetComponent.TelescopePosEditor
+import jsky.util.gui.{ TextBoxWidgetWatcher, TextBoxWidget}
 import jsky.util.gui.DialogUtil.{ error => errmsg }
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -32,7 +32,7 @@ final class SiderealNameEditor(mags: MagnitudeEditor2) extends TelescopePosEdito
         t.map(r => (r.result.problems, r.result.targets.rows.headOption)) match {
           case Failure(f) => errmsg(f.getMessage)
           case Success((Nil, None)) => errmsg(s"Target '$searchItem' not found ")
-          case Success((Nil, Some(t))) => spt.setNewTarget(t)
+          case Success((Nil, Some(t))) => spt.setTarget(t)
           case Success((ps, _)) => errmsg(ps.map(_.displayValue).mkString(", "))
         }
       }
@@ -45,7 +45,7 @@ final class SiderealNameEditor(mags: MagnitudeEditor2) extends TelescopePosEdito
     w.addWatcher(new TextBoxWidgetWatcher {
       override def textBoxAction(tbwe: TextBoxWidget): Unit = forkSearch()
       override def textBoxKeyPress(tbwe: TextBoxWidget): Unit =
-        nonreentrant(spt.setNewTarget(Target.name.set(spt.getNewTarget, tbwe.getValue)))
+        nonreentrant(spt.setTarget(Target.name.set(spt.getTarget, tbwe.getValue)))
     })
   }
 
@@ -54,7 +54,7 @@ final class SiderealNameEditor(mags: MagnitudeEditor2) extends TelescopePosEdito
   def edit(ctx: GOption[ObsContext], target: SPTarget, node: ISPNode): Unit = {
     this.spt = target
     nonreentrant {
-      name.setText(Target.name.get(spt.getNewTarget))
+      name.setText(Target.name.get(spt.getTarget))
     }
   }
 

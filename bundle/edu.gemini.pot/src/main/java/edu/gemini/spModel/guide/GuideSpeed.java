@@ -1,7 +1,7 @@
 package edu.gemini.spModel.guide;
 
-import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.util.immutable.MapOp;
+import edu.gemini.spModel.core.Magnitude;
 
 public enum GuideSpeed {
     FAST(0.00),

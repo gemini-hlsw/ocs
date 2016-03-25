@@ -2,9 +2,6 @@ package jsky.app.ot.gemini.editor.targetComponent
 
 import java.beans.{PropertyChangeListener, PropertyChangeEvent}
 
-import edu.gemini.horizons.api.HorizonsQuery.ObjectType
-import edu.gemini.spModel.target.system.{CoordinateParam, NamedTarget, NonSiderealTarget}
-import edu.gemini.spModel.target.system.ITarget.Tag
 import jsky.app.ot.ui.util.FlatButtonUtil
 import jsky.util.gui.{ TextBoxWidget, TextBoxWidgetWatcher }
 
@@ -37,31 +34,6 @@ package object details2 {
         override def actionPerformed(e: ActionEvent) = doSearch
       })
     }
-
-  implicit class NonSiderealTargetOps(nst: NonSiderealTarget) {
-    def getHorizonsObjectType: ObjectType =
-      ObjectType.values()(nst.getHorizonsObjectTypeOrdinal)
-  }
-
-  implicit class ITargetTagOps(tag: Tag) {
-    def toHorizonsObjectType: Option[ObjectType] =
-      Some(tag) collect {
-        case Tag.JPL_MINOR_BODY   => ObjectType.COMET
-        case Tag.MPC_MINOR_PLANET => ObjectType.MINOR_BODY
-        case Tag.NAMED            => ObjectType.MAJOR_BODY
-      }
-    def unsafeToHorizonsObjectType: ObjectType =
-      toHorizonsObjectType.getOrElse(throw new NoSuchElementException("No Horizons object type for target tag " + tag))
-  }
-
-  implicit class SolarObjectOps(obj: NamedTarget.SolarObject) {
-    def objectType = ObjectType.MAJOR_BODY
-  }
-
-  implicit class CoordinateParamOps(p: CoordinateParam) {
-    def setOrZero(d: java.lang.Double): Unit =
-      p.setValue(if (d == null) 0.0 else d.doubleValue)
-  }
 
   def forkSwingWorker[A <: AnyRef](constructImpl: => A)(finishedImpl: Throwable \/ A => Unit): Unit =
     Task(constructImpl).runAsync(finishedImpl)

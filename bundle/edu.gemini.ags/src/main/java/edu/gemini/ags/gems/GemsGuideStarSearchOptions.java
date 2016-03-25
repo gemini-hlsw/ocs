@@ -63,9 +63,9 @@ public class GemsGuideStarSearchOptions {
 
 
     public enum NirBandChoice {
-        J(ModelConverters.toNewBand(edu.gemini.shared.skyobject.Magnitude.Band.J)),
-        H(ModelConverters.toNewBand(edu.gemini.shared.skyobject.Magnitude.Band.H)),
-        K(ModelConverters.toNewBand(edu.gemini.shared.skyobject.Magnitude.Band.K)),
+        J(MagnitudeBand.J$.MODULE$),
+        H(MagnitudeBand.H$.MODULE$),
+        K(MagnitudeBand.K$.MODULE$),
         ;
 
         public static NirBandChoice DEFAULT = H;

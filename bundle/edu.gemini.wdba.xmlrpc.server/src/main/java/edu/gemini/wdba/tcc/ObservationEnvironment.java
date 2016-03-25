@@ -69,7 +69,7 @@ public final class ObservationEnvironment {
         ITccInstrumentSupport sup = null;
         InstrumentNode instNode = _obs.getInstrument();
         if (instNode == null) {
-            LOG.info("No instrument in observation: " + _obs.getObservationId());
+            LOG.fine("No instrument in observation: " + _obs.getObservationId());
             _inst = null;
         } else {
             _inst = instNode.getDataObject();
@@ -77,10 +77,10 @@ public final class ObservationEnvironment {
             if (className != null) {
                 try {
                     Class<?> cl = Class.forName(className);
-                    LOG.info("Map class is:" + className);
+                    LOG.fine("Map class is:" + className);
                     sup = _create(cl);
                 } catch (ClassNotFoundException ex) {
-                    LOG.info("Could not locate the support class: " + className);
+                    LOG.warning("Could not locate the support class: " + className);
                 }
             }
         }

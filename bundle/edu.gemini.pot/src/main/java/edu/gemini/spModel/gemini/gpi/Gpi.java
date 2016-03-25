@@ -2,13 +2,13 @@ package edu.gemini.spModel.gemini.gpi;
 
 import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.pot.sp.SPComponentType;
-import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.skycalc.Angle;
 import edu.gemini.spModel.config.ConfigPostProcessor;
 import edu.gemini.spModel.config2.Config;
 import edu.gemini.spModel.config2.ConfigSequence;
 import edu.gemini.spModel.config2.ItemKey;
+import edu.gemini.spModel.core.MagnitudeBand;
 import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.data.ISPDataObject;
 import edu.gemini.spModel.data.YesNoType;
@@ -264,8 +264,8 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
         private Apodizer _apodizer;
         private FPM _fpm;
         private Lyot _lyot;
-        private double _brightLimitPrism;
-        private double _brightLimitWollaston;
+        private Option<Double> _brightLimitPrism;
+        private Option<Double> _brightLimitWollaston;
 
         // Only for NONSTANDARD
         ObservingMode(String name) {
@@ -274,7 +274,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
         }
 
         ObservingMode(String name, Filter filter, boolean filterIterable, Apodizer apodizer,
-                              FPM fpm, Lyot lyot, double brightLimitPrism, double brightLimitWollaston) {
+                              FPM fpm, Lyot lyot, Option<Double> brightLimitPrism, Option<Double> brightLimitWollaston) {
             _logValue = name;
             _displayValue = name;
             _filter = filter;
@@ -286,15 +286,20 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
             _brightLimitWollaston = brightLimitWollaston;
         }
 
-        /**
-         * Gets the corresponding observing mode that uses the H filter.  This
-         * is used in template creation.  See REL-1817 and GP_BP.txt
-         */
+        ObservingMode(String name, Filter filter, boolean filterIterable, Apodizer apodizer,
+                      FPM fpm, Lyot lyot, double brightLimitPrism, double brightLimitWollaston) {
+            this(name, filter, filterIterable, apodizer, fpm, lyot, new Some<>(brightLimitPrism), new Some(brightLimitWollaston));
+        }
+
+            /**
+             * Gets the corresponding observing mode that uses the H filter.  This
+             * is used in template creation.  See REL-1817 and GP_BP.txt
+             */
         public abstract ObservingMode correspondingH();
 
         ObservingMode(String name, Filter filter, boolean filterIterable, Apodizer apodizer,
                               FPM fpm, Lyot lyot) {
-            this(name, filter, filterIterable, apodizer, fpm, lyot, Magnitude.UNDEFINED_MAG, Magnitude.UNDEFINED_MAG);
+            this(name, filter, filterIterable, apodizer, fpm, lyot, None.instance(), None.instance());
         }
 
         public String displayValue() {
@@ -330,12 +335,12 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
         }
 
         /**
-         * Returns the bright limit based on the given disperser.
+         * Returns the bright limit based on the given disperser, if defined.
          */
-        public double getBrightLimit(Disperser disperser) {
+        public Option<Double> getBrightLimit(Disperser disperser) {
             if (disperser == Disperser.PRISM) return _brightLimitPrism;
             if (disperser == Disperser.WOLLASTON) return _brightLimitWollaston;
-            return Magnitude.UNDEFINED_MAG;
+            return None.instance();
         }
 
         public boolean isFilterIterable() {
@@ -414,11 +419,11 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
      * Filter: see OT-62
      */
     public enum Filter implements DisplayableSpType, SequenceableSpType, LoggableSpType {
-        Y(Magnitude.Band.Y),
-        J(Magnitude.Band.J),
-        H(Magnitude.Band.H),
-        K1(Magnitude.Band.K),
-        K2(Magnitude.Band.K)
+         Y(MagnitudeBand.Y$.MODULE$),
+         J(MagnitudeBand.J$.MODULE$),
+         H(MagnitudeBand.H$.MODULE$),
+        K1(MagnitudeBand.K$.MODULE$),
+        K2(MagnitudeBand.K$.MODULE$)
         ;
 
         /** The default filter value **/
@@ -426,9 +431,9 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
         public static final ItemKey KEY = new ItemKey(INSTRUMENT_KEY, "filter");
 
         // The related mag band
-        private Magnitude.Band _band;
+        private MagnitudeBand _band;
 
-        Filter(Magnitude.Band band) {
+        Filter(MagnitudeBand band) {
             _band = band;
 
         }
@@ -441,7 +446,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
             return name();
         }
 
-        public Magnitude.Band getBand() {
+        public MagnitudeBand getBand() {
             return _band;
         }
 

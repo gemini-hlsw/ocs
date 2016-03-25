@@ -1,14 +1,11 @@
 package edu.gemini.pot
 
 import edu.gemini.shared.skyobject
-import edu.gemini.shared.util.immutable
 import edu.gemini.skycalc
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.core.AngleSyntax._
-import edu.gemini.spModel.rich.shared.immutable._
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.offset.OffsetPosBase
-import edu.gemini.spModel.target.system.{CoordinateTypes, HmsDegTarget}
 
 import scalaz._
 import Scalaz._
@@ -27,10 +24,6 @@ object ModelConverters {
 
   def toOffset(pos: OffsetPosBase): Offset = pos.toNewModel
 
-  def toOldBand(band: MagnitudeBand): skyobject.Magnitude.Band = band.toOldModel
-
-  def toNewBand(band: skyobject.Magnitude.Band): MagnitudeBand = band.toNewModel
-
   def toNewAngle(angle: skycalc.Angle): Angle = angle.toNewModel
 
   implicit class OldAngle2New(val angle: skycalc.Angle) extends AnyVal{
@@ -39,10 +32,6 @@ object ModelConverters {
 
   implicit class NewAngle2Old(val angle: Angle) extends AnyVal {
     def toOldModel: skycalc.Angle = skycalc.Angle.degrees(angle.toDegrees)
-  }
-
-  implicit class NewEpoch2Old(val epoch: Epoch) extends AnyVal{
-    def toOldModel: CoordinateTypes.Epoch = new CoordinateTypes.Epoch(epoch.year)
   }
 
   // We need a way to convert angles from [0,maxValOfUnit) to [-maxValOfUnit/2,maxValOfUnit/2) for a number of purposes.
@@ -83,137 +72,19 @@ object ModelConverters {
     def toNewModel: Coordinates = Coordinates(RightAscension.fromAngle(c.getRa.toNewModel), Declination.fromAngle(c.getDec.toNewModel).getOrElse(Declination.zero))
   }
 
-  implicit class OldMagnitudeBand2New(val band: skyobject.Magnitude.Band) extends AnyVal {
-    def toNewModel: MagnitudeBand = band match {
-      case edu.gemini.shared.skyobject.Magnitude.Band.u  => MagnitudeBand._u
-      case edu.gemini.shared.skyobject.Magnitude.Band.g  => MagnitudeBand._g
-      case edu.gemini.shared.skyobject.Magnitude.Band.r  => MagnitudeBand._r
-      case edu.gemini.shared.skyobject.Magnitude.Band.i  => MagnitudeBand._i
-      case edu.gemini.shared.skyobject.Magnitude.Band.z  => MagnitudeBand._z
-
-      case edu.gemini.shared.skyobject.Magnitude.Band.U  => MagnitudeBand.U
-      case edu.gemini.shared.skyobject.Magnitude.Band.B  => MagnitudeBand.B
-      case edu.gemini.shared.skyobject.Magnitude.Band.V  => MagnitudeBand.V
-      case edu.gemini.shared.skyobject.Magnitude.Band.UC => MagnitudeBand.UC
-      case edu.gemini.shared.skyobject.Magnitude.Band.R  => MagnitudeBand.R
-      case edu.gemini.shared.skyobject.Magnitude.Band.I  => MagnitudeBand.I
-      case edu.gemini.shared.skyobject.Magnitude.Band.Y  => MagnitudeBand.Y
-      case edu.gemini.shared.skyobject.Magnitude.Band.J  => MagnitudeBand.J
-      case edu.gemini.shared.skyobject.Magnitude.Band.H  => MagnitudeBand.H
-      case edu.gemini.shared.skyobject.Magnitude.Band.K  => MagnitudeBand.K
-      case edu.gemini.shared.skyobject.Magnitude.Band.L  => MagnitudeBand.L
-      case edu.gemini.shared.skyobject.Magnitude.Band.M  => MagnitudeBand.M
-      case edu.gemini.shared.skyobject.Magnitude.Band.N  => MagnitudeBand.N
-      case edu.gemini.shared.skyobject.Magnitude.Band.Q  => MagnitudeBand.Q
-      case edu.gemini.shared.skyobject.Magnitude.Band.AP => MagnitudeBand.AP
-    }
-  }
-
-  implicit class NewMagnitudeBand2Old(val band: MagnitudeBand) {
-    def toOldModel: skyobject.Magnitude.Band = band match {
-      case MagnitudeBand._u => edu.gemini.shared.skyobject.Magnitude.Band.u
-      case MagnitudeBand._g => edu.gemini.shared.skyobject.Magnitude.Band.g
-      case MagnitudeBand._r => edu.gemini.shared.skyobject.Magnitude.Band.r
-      case MagnitudeBand._i => edu.gemini.shared.skyobject.Magnitude.Band.i
-      case MagnitudeBand._z => edu.gemini.shared.skyobject.Magnitude.Band.z
-
-      case MagnitudeBand.U  => edu.gemini.shared.skyobject.Magnitude.Band.U
-      case MagnitudeBand.B  => edu.gemini.shared.skyobject.Magnitude.Band.B
-      case MagnitudeBand.V  => edu.gemini.shared.skyobject.Magnitude.Band.V
-      case MagnitudeBand.UC => edu.gemini.shared.skyobject.Magnitude.Band.UC
-      case MagnitudeBand.R  => edu.gemini.shared.skyobject.Magnitude.Band.R
-      case MagnitudeBand.I  => edu.gemini.shared.skyobject.Magnitude.Band.I
-      case MagnitudeBand.Y  => edu.gemini.shared.skyobject.Magnitude.Band.Y
-      case MagnitudeBand.J  => edu.gemini.shared.skyobject.Magnitude.Band.J
-      case MagnitudeBand.H  => edu.gemini.shared.skyobject.Magnitude.Band.H
-      case MagnitudeBand.K  => edu.gemini.shared.skyobject.Magnitude.Band.K
-      case MagnitudeBand.L  => edu.gemini.shared.skyobject.Magnitude.Band.L
-      case MagnitudeBand.M  => edu.gemini.shared.skyobject.Magnitude.Band.M
-      case MagnitudeBand.N  => edu.gemini.shared.skyobject.Magnitude.Band.N
-      case MagnitudeBand.Q  => edu.gemini.shared.skyobject.Magnitude.Band.Q
-
-      case MagnitudeBand.AP => edu.gemini.shared.skyobject.Magnitude.Band.AP
-    }
-  }
-
-  implicit class OldMagnitude2New(val m: skyobject.Magnitude) extends AnyVal {
-    def toNewModel: Magnitude = new Magnitude(m.getBrightness, m.getBand.toNewModel, m.getSystem)
-  }
-
-  implicit class NewMagnitude2Old(val m: Magnitude) extends AnyVal {
-    def toOldModel: skyobject.Magnitude =
-      new skyobject.Magnitude(m.band.toOldModel, m.value, m.system)
-  }
-
   implicit class HmsDegCoords2Coordinates(val c: skyobject.coords.HmsDegCoordinates) extends AnyVal {
     def toNewModel: Coordinates = Coordinates(RightAscension.fromAngle(c.getRa.toNewModel), Declination.fromAngle(c.getDec.toNewModel).getOrElse(Declination.zero))
   }
 
-  implicit class SiderealTarget2SkyObject(val st:SiderealTarget) extends AnyVal {
-    def toOldModel: skyobject.SkyObject = {
-      val ra          = skycalc.Angle.degrees(st.coordinates.ra.toAngle.toDegrees)
-      val dec         = skycalc.Angle.degrees(st.coordinates.dec.toAngle.toDegrees)
-      val coordinates = st.properMotion.map { pm =>
-            new skyobject.coords.HmsDegCoordinates.Builder(ra, dec).pmRa(skycalc.Angle.milliarcsecs(pm.deltaRA.velocity.masPerYear)).pmDec(skycalc.Angle.milliarcsecs(pm.deltaDec.velocity.masPerYear)).build()
-        } |  new skyobject.coords.HmsDegCoordinates.Builder(ra, dec).build()
-      val mags        = st.magnitudes.map(_.toOldModel)
-      new skyobject.SkyObject.Builder(st.name, coordinates).magnitudes(mags: _*).build()
-    }
-  }
-
-  implicit class SkyObject2SiderealTarget(val so:skyobject.SkyObject) extends AnyVal {
-    def toNewModel:SiderealTarget = {
-      import scala.collection.JavaConverters._
-
-      val ra          = Angle.fromDegrees(so.getHmsDegCoordinates.getRa.toDegrees.getMagnitude)
-      val dec         = Angle.fromDegrees(so.getHmsDegCoordinates.getDec.toDegrees.getMagnitude)
-      val coordinates = Coordinates(RightAscension.fromAngle(ra), Declination.fromAngle(dec).getOrElse(Declination.zero))
-      val mags        = so.getMagnitudes.asScala.map(_.toNewModel)
-      val pmRa        = RightAscensionAngularVelocity(AngularVelocity(so.getHmsDegCoordinates.getPmRa.toMilliarcsecs.getMagnitude))
-      val pmDec       = DeclinationAngularVelocity(AngularVelocity(so.getHmsDegCoordinates.getPmDec.toMilliarcsecs.getMagnitude))
-      val pm          = ProperMotion(pmRa, pmDec)
-      SiderealTarget( // full ctor here, so we're forced to handle changes
-        name                 = so.getName,
-        coordinates          = coordinates,
-        properMotion         = Some(pm),
-        magnitudes           = mags.toList,
-        redshift             = None,
-        parallax             = None,
-        spectralDistribution = None,
-        spatialProfile       = None
-      )
-    }
-  }
-
   implicit class SPTarget2SiderealTarget(val sp:SPTarget) extends AnyVal {
-    def toNewModel:SiderealTarget = {
-      val when        = immutable.None.instance[java.lang.Long]
-      val name        = sp.getName
-      val mags        = sp.getMagnitudes.asScalaList.map(_.toNewModel)
-      val ra          = Angle.fromDegrees(sp.getRaDegrees(when).getOrElse(0.0))
-      val dec         = Angle.fromDegrees(sp.getDecDegrees(when).getOrElse(0.0))
-      val coordinates = Coordinates(RightAscension.fromAngle(ra), Declination.fromAngle(dec).getOrElse(Declination.zero))
 
-      // Only HmsDegTargets have a proper motion, radial velocity, etc
-      val pm = sp.getHmsDegTarget map { t =>
-        ProperMotion(RightAscensionAngularVelocity(AngularVelocity(t.getPropMotionRA)), DeclinationAngularVelocity(AngularVelocity(t.getPropMotionDec)))
-      }
-      val px = sp.getHmsDegTarget map { t =>
-        Parallax(t.getParallax.mas())
-      }
-      val z = sp.getHmsDegTarget map { t =>
-        t.getRedshift
-      }
-      SiderealTarget( // full ctor here, so we're forced to handle changes
-        name                 = name,
-        coordinates          = coordinates,
-        properMotion         = pm,
-        redshift             = z,
-        parallax             = px,
-        magnitudes           = mags,
-        spectralDistribution = sp.getSpectralDistribution,
-        spatialProfile       = sp.getSpatialProfile
+    // RCN: this is suuper sketchy but it's what the old code was doing, so ... ?
+    def toNewModel:SiderealTarget =
+      sp.getTarget.fold(
+        too => SiderealTarget.empty.copy(name = too.name),
+        sid => sid,
+        ns  => SiderealTarget.empty.copy(name = ns.name, magnitudes = ns.magnitudes, spectralDistribution = ns.spectralDistribution, spatialProfile = ns.spatialProfile)
       )
-    }
+
   }
 }
