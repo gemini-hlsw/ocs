@@ -75,7 +75,7 @@ scalacOptions in Test ++= Seq("-Yrangepos")
 // Don't build scaladoc (for now)
 publishArtifact in (ThisBuild, packageDoc) := false
 
-// Don't build package source (for now)
+// Publish sources for each artifact
 publishArtifact in (ThisBuild, packageSrc) := true
 
 publishTo in Global := {
@@ -87,7 +87,7 @@ publishTo in Global := {
     Some("Gemini Artifactory" at s"http://sbfosxdev-mp1.cl.gemini.edu:8081/artifactory/$repo")
   }
 
-// No poms
+// Publish artifacts with poms
 publishMavenStyle in ThisBuild := true
 
 // > dash -s List
