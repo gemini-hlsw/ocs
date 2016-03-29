@@ -23,7 +23,7 @@ import scala.swing.ListView.Renderer
 import scala.swing.GridBagPanel.Anchor.{East, North}
 import scala.swing.GridBagPanel.Fill.{Horizontal, Vertical}
 
-import scalaz._
+import scalaz._, Scalaz._
 
 // Editor for staff-use to modify TemplateParameters.  Allows multi-selection
 // and bulk editing to change many phase 1 observations at once.  For example,
@@ -257,20 +257,25 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
 
       val JNoneLong: JOption[java.lang.Long] = JNone.instance[java.lang.Long]
 
+      // These are defined in object SPTarget, but private.  Can we open them
+      // up and/or provide get/set for RightAscension/Declination on SPTarget?
+      val ra:  Target @?> RightAscension = Target.coords >=> Coordinates.ra.partial
+      val dec: Target @?> Declination    = Target.coords >=> Coordinates.dec.partial
+
       val hms = new HMSFormat()
-      val raField = new BoundTextField[Double](10)(
-        read = s => hms.parse(s),
-        show = hms.format,
-        get  = _.getTarget.getRaDegrees(JNoneLong).getOrElse(0.0),
-        set  = setTarget((a, b) => a.setRaDegrees(b))
+      val raField = new BoundTextField[RightAscension](10)(
+        read = s  => Angle.parseHMS(s).map(RightAscension.fromAngle).valueOr(nfe => throw nfe),
+        show = ra => Angle.formatHMS(ra.toAngle),
+        get  = _.getTarget.getCoordinates(None).map(_.ra).getOrElse(RightAscension.zero),
+        set  = setTarget((a, b) => ra.set(a.getTarget, b).foreach(a.setTarget))
       )
 
       val dms = new DMSFormat()
-      val decField = new BoundTextField[Double](10)(
-        read = s => dms.parse(s),
-        show = dms.format,
-        get  = _.getTarget.getDecDegrees(JNoneLong).getOrElse(0.0),
-        set  = setTarget((a, b) => a.setDecDegrees(b))
+      val decField = new BoundTextField[Declination](10)(
+        read = s   => Angle.parseDMS(s).flatMap(a => Declination.fromAngle(a) \/> new IllegalArgumentException(s"%s is not a valid declination")).valueOr(ex => throw ex),
+        show = dec => Declination.formatDMS(dec),
+        get  = _.getTarget.getCoordinates(None).map(_.dec).getOrElse(Declination.zero),
+        set  = setTarget((a, b) => dec.set(a.getTarget, b).foreach(a.setTarget))
       )
 
       def pmField(lens: SiderealTarget @> Double): BoundTextField[Double] =
