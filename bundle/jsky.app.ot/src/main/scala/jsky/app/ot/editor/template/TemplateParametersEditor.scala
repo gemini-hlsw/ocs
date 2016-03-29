@@ -2,7 +2,7 @@ package jsky.app.ot.editor.template
 
 import edu.gemini.pot.sp.ISPTemplateParameters
 import edu.gemini.shared.util.TimeValue
-import edu.gemini.shared.util.immutable.{ DefaultImList, None => JNone, Option => JOption }
+import edu.gemini.shared.util.immutable.{None => JNone, Option => JOption}
 import edu.gemini.spModel.`type`.ObsoletableSpType
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
@@ -72,8 +72,7 @@ object TemplateParametersEditor {
     def nextY(): Int = (-1 :: layout.values.toList.map(_.gridy)).max + 1
 
     def layoutRow(r: Row): Unit = {
-      val y    = nextY()
-      val size = r.components.length
+      val y = nextY()
 
       r.components.zipWithIndex.foreach { case (c, i) =>
         layout(c) = new Constraints {
@@ -409,7 +408,7 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
     }
 
     def showTypeSpecificWidgets(ps: Iterable[TemplateParameters]): Unit = {
-      val isSid = common(ps)(tp => targetType(tp.getTarget)).exists(_ == Sidereal)
+      val isSid = common(ps)(tp => targetType(tp.getTarget)).contains(Sidereal)
       CoordinatesPanel.showSiderealRows(isSid)
       magScroll.visible = isSid
 
