@@ -20,7 +20,7 @@ class EphemerisEditor extends TelescopePosEditor with ReentrancyHack {
   private[this] var target: Option[NonSiderealTarget] = None
 
   // TODO: stop the timer when the window closes, or something?
-  private val timer = new Timer
+  private val timer = new Timer(true)
   timer.scheduleAtFixedRate(new TimerTask {
     def run(): Unit =
       target.flatMap(_.coords(System.currentTimeMillis)) match {
