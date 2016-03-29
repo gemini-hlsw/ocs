@@ -81,40 +81,19 @@ final class NonSiderealDetailEditor extends TargetDetailEditor {
       c.insets = new Insets(1, 1, 0, 0)
     })
 
-    p.add(new JLabel("Ephemeris"), new GridBagConstraints <| { c =>
-      c.anchor = GridBagConstraints.WEST
-      c.gridx  = 0
-      c.gridy  = 4
-      c.insets = new Insets(6, 0, 0, 5)
-    })
-
-    p.add(ephem.start, new GridBagConstraints <| { c =>
-      c.gridx  = 1
-      c.gridy  = 4
-      c.fill   = GridBagConstraints.HORIZONTAL
-      c.insets = new Insets(6, 1, 0, 0)
-    })
-
-    p.add(ephem.end, new GridBagConstraints <| { c =>
-      c.gridx  = 1
-      c.gridy  = 5
-      c.fill   = GridBagConstraints.HORIZONTAL
-      c.insets = new Insets(2, 1, 0, 0)
-    })
-
-    p.add(ephem.size, new GridBagConstraints <| { c =>
-      c.anchor = GridBagConstraints.WEST
-      c.gridx  = 1
-      c.gridy  = 6
-      c.insets = new Insets(2, 1, 0, 0)
-    })
-
   }
 
   add(general, new GridBagConstraints <| { c =>
     c.gridx   = 0
     c.gridy   = 0
     c.fill    = GridBagConstraints.HORIZONTAL
+  })
+
+  add(ephem.panel, new GridBagConstraints <| { c =>
+    c.gridx   = 0
+    c.gridy   = 1
+    c.fill    = GridBagConstraints.HORIZONTAL
+    c.anchor  = GridBagConstraints.WEST
   })
 
   add(mags.getComponent, new GridBagConstraints <| { c =>
