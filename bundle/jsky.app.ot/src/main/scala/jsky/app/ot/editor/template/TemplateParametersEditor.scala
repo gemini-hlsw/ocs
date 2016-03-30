@@ -8,7 +8,6 @@ import edu.gemini.spModel.core._
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.{PercentageContainer, ImageQuality, CloudCover, SkyBackground, WaterVapor}
 import edu.gemini.spModel.target.SPTarget
-import edu.gemini.spModel.target.system._
 import edu.gemini.spModel.template.TemplateParameters
 
 import javax.swing.BorderFactory
@@ -261,20 +260,21 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
       val ra:  Target @?> RightAscension = Target.coords >=> Coordinates.ra.partial
       val dec: Target @?> Declination    = Target.coords >=> Coordinates.dec.partial
 
-      val hms = new HMSFormat()
+      def updateCoordinate[A](lens: Target @?> A): (TemplateParameters, A) => TemplateParameters =
+        setTarget((a, b) => lens.set(a.getTarget, b).foreach(a.setTarget))
+
       val raField = new BoundTextField[RightAscension](10)(
-        read = s  => Angle.parseHMS(s).map(RightAscension.fromAngle).valueOr(nfe => throw nfe),
-        show = ra => Angle.formatHMS(ra.toAngle),
-        get  = _.getTarget.getCoordinates(None).map(_.ra).getOrElse(RightAscension.zero),
-        set  = setTarget((a, b) => ra.set(a.getTarget, b).foreach(a.setTarget))
+        read = s => Angle.parseHMS(s).map(RightAscension.fromAngle).valueOr(ex => throw ex),
+        show = _.toAngle.formatHMS,
+        get  = _.getTarget.getCoordinates(None).map(_.ra) | RightAscension.zero,
+        set  = updateCoordinate(ra)
       )
 
-      val dms = new DMSFormat()
       val decField = new BoundTextField[Declination](10)(
-        read = s   => Angle.parseDMS(s).flatMap(a => Declination.fromAngle(a) \/> new IllegalArgumentException(s"%s is not a valid declination")).valueOr(ex => throw ex),
-        show = dec => Declination.formatDMS(dec),
-        get  = _.getTarget.getCoordinates(None).map(_.dec).getOrElse(Declination.zero),
-        set  = setTarget((a, b) => dec.set(a.getTarget, b).foreach(a.setTarget))
+        read = s => Angle.parseDMS(s).flatMap(a => Declination.fromAngle(a) \/> new IllegalArgumentException(s"$s is not a valid declination")).valueOr(ex => throw ex),
+        show = _.formatDMS,
+        get  = _.getTarget.getCoordinates(None).map(_.dec) | Declination.zero,
+        set  = updateCoordinate(dec)
       )
 
       def pmField(lens: SiderealTarget @> Double): BoundTextField[Double] =
