@@ -59,7 +59,7 @@ class ProprietaryTest extends InstrumentSequenceTestBase[Flamingos2, SeqConfigFl
     doTest(SPProgramID.toProgramID("GS-2015B-Q-1"), vis, months: _*)
 
   @Test def testDefaultSetup(): Unit =
-    doTest(PUBLIC, 18)
+    doTest(PUBLIC, 12)
 
   @Test def testExplicitSetup(): Unit = {
     getProgram.update { _.setGsaAspect(new GsaAspect(true, 999, PRIVATE)) }
@@ -74,7 +74,7 @@ class ProprietaryTest extends InstrumentSequenceTestBase[Flamingos2, SeqConfigFl
   @Test def testChanging(): Unit = {
     val o2 = addSeqComponent(getInstSeqComp, SeqRepeatObserve.SP_TYPE)
     o2.dataObject = new SeqRepeatObserve <| (_.setObsClass(ObsClass.DAY_CAL))
-    doTest(PUBLIC, 18, 0)
+    doTest(PUBLIC, 12, 0)
   }
 
   @Test def testDefaultPeriods(): Unit =

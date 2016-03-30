@@ -49,12 +49,12 @@ public final class GsaAspect implements Serializable {
 
     static {
         TYPE_MAP.put(ProgramType.Calibration$.MODULE$,        new GsaAspect(true,  0));
-        TYPE_MAP.put(ProgramType.Classical$.MODULE$,          new GsaAspect(true, 18));
+        TYPE_MAP.put(ProgramType.Classical$.MODULE$,          new GsaAspect(true, 12));
         TYPE_MAP.put(ProgramType.DemoScience$.MODULE$,        new GsaAspect(true,  3));
-        TYPE_MAP.put(ProgramType.DirectorsTime$.MODULE$,      new GsaAspect(true, 18));
+        TYPE_MAP.put(ProgramType.DirectorsTime$.MODULE$,      new GsaAspect(true, 12));
         TYPE_MAP.put(ProgramType.FastTurnaround$.MODULE$,     new GsaAspect(true,  6));
-        TYPE_MAP.put(ProgramType.LargeProgram$.MODULE$,       new GsaAspect(true, 18));
-        TYPE_MAP.put(ProgramType.Queue$.MODULE$,              new GsaAspect(true, 18));
+        TYPE_MAP.put(ProgramType.LargeProgram$.MODULE$,       new GsaAspect(true, 12));
+        TYPE_MAP.put(ProgramType.Queue$.MODULE$,              new GsaAspect(true, 12));
         TYPE_MAP.put(ProgramType.SystemVerification$.MODULE$, new GsaAspect(true,  3));
     }
 
