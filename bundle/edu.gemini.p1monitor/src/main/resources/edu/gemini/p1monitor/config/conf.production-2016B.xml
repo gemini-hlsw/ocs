@@ -24,11 +24,6 @@
         <to>pitsv@gemini.edu</to>
     </type>
 
-    <type name="FastTurnaround">
-        <dir>/home/software/proposals/fast_turnaround/proposals/2016B</dir>
-        <to>pitft@gemini.edu</to>
-    </type>
-
     <type name="LargeProgram">
         <dir>/home/software/proposals/large_program/proposals/2016B</dir>
         <to>pitlp@gemini.edu</to>
@@ -98,10 +93,6 @@
         <translation>
             <from>Demo Science</from>
             <to>DS</to>
-        </translation>
-        <translation>
-            <from>ft</from>
-            <to>FT</to>
         </translation>
         <translation>
             <from>lp</from>
