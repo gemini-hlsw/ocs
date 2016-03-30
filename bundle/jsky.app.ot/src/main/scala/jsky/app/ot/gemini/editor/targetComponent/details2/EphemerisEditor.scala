@@ -7,7 +7,7 @@ import javax.swing.{SwingConstants, BorderFactory, JPanel, JLabel}
 
 import edu.gemini.pot.sp.ISPNode
 import edu.gemini.shared.util.immutable.{ Option => GOption }
-import edu.gemini.spModel.core.{Ephemeris, NonSiderealTarget, Target}
+import edu.gemini.spModel.core.{Coordinates, NonSiderealTarget, Target}
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
 import jsky.app.ot.gemini.editor.targetComponent.TelescopePosEditor
@@ -23,12 +23,12 @@ class EphemerisEditor extends TelescopePosEditor with ReentrancyHack {
   // TODO: stop the timer when the window closes, or something?
   private val timer = new Timer(true)
   timer.scheduleAtFixedRate(new TimerTask {
-    def run(): Unit =
-      target.flatMap(_.coords(System.currentTimeMillis)) match {
-        case Some(cs) => Swing.onEDT(now.setText(cs.ra.toAngle.formatHMS + " " + cs.dec.formatDMS))
-        case None     => Swing.onEDT(now.setText("--"))
-      }
-    }, 1000L, 1000L)
+    def run(): Unit = {
+      val time = System.currentTimeMillis
+      val text = target.flatMap(_.coords(time)).fold("--")(formatCoords)
+      Swing.onEDT(now.setText(text))
+    }
+  }, 1000L, 1000L)
 
   val start, end, size, now, sched, schedCoords  = new JLabel <| { l =>
     l.setForeground(Color.DARK_GRAY)
@@ -46,29 +46,38 @@ class EphemerisEditor extends TelescopePosEditor with ReentrancyHack {
   def formatDate(ut: Long): String =
     df.format(new Date(ut))
 
+  def formatCoords(cs: Coordinates): String =
+    cs.ra.toAngle.formatHMS + " " + cs.dec.formatDMS
+
   def edit(ctx: GOption[ObsContext], spt: SPTarget, node: ISPNode): Unit = {
     nonreentrant {
       clear()
       target = spt.getNonSiderealTarget
-      Target.ephemeris.get(spt.getTarget).filterNot(_.isEmpty).foreach { e =>
-        for {
-          a <- e.findMin.map(_._1)
-          b <- e.findMax.map(_._1)
-        } {
-          start.setText(formatDate(a))
-          end  .setText(formatDate(b))
-          val res = (b - a) / e.size
-          e.findMin.map(_._1).map(formatDate).foreach(start.setText)
-          e.findMax.map(_._1).map(formatDate).foreach(end.setText)
-          size.setText(res / (1000 * 60 * 60) + " minutes")
-        }
+
+      // Ephemeris bounds and resolution
+      for {
+        e <- Target.ephemeris.get(spt.getTarget).filterNot(_.isEmpty)
+        a <- e.findMin.map(_._1)
+        b <- e.findMax.map(_._1)
+      } {
+        start.setText(formatDate(a))
+        end  .setText(formatDate(b))
+        val res = (b - a) / e.size
+        e.findMin.map(_._1).map(formatDate).foreach(start.setText)
+        e.findMax.map(_._1).map(formatDate).foreach(end.setText)
+        size.setText(res / (1000 * 60 * 60) + " minutes")
       }
-      ctx.asScalaOpt.flatMap(_.getSchedulingBlockStart.asScalaOpt).foreach { t =>
-        sched.setText(formatDate(t))
-        target.flatMap(_.coords(t)).foreach { cs =>
-          schedCoords.setText(cs.ra.toAngle.formatHMS + " " + cs.dec.formatDMS)
-        }
+
+      // Scheduled time and coordinates
+      for {
+        t <- target
+        c <- ctx.asScalaOpt
+        s <- c.getSchedulingBlockStart.asScalaOpt
+      } {
+        sched.setText(formatDate(s))
+        t.coords(s).map(formatCoords).foreach(schedCoords.setText)
       }
+
     }
   }
 
