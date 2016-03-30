@@ -255,11 +255,6 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
 
       val JNoneLong: JOption[java.lang.Long] = JNone.instance[java.lang.Long]
 
-      // These are defined in object SPTarget, but private.  Can we open them
-      // up and/or provide get/set for RightAscension/Declination on SPTarget?
-      val ra:  Target @?> RightAscension = Target.coords >=> Coordinates.ra.partial
-      val dec: Target @?> Declination    = Target.coords >=> Coordinates.dec.partial
-
       def updateCoordinate[A](lens: Target @?> A): (TemplateParameters, A) => TemplateParameters =
         setTarget((a, b) => lens.set(a.getTarget, b).foreach(a.setTarget))
 
@@ -267,14 +262,14 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
         read = s => Angle.parseHMS(s).map(RightAscension.fromAngle).valueOr(ex => throw ex),
         show = _.toAngle.formatHMS,
         get  = _.getTarget.getCoordinates(None).map(_.ra) | RightAscension.zero,
-        set  = updateCoordinate(ra)
+        set  = updateCoordinate(Target.ra)
       )
 
       val decField = new BoundTextField[Declination](10)(
         read = s => Angle.parseDMS(s).flatMap(a => Declination.fromAngle(a) \/> new IllegalArgumentException(s"$s is not a valid declination")).valueOr(ex => throw ex),
         show = _.formatDMS,
         get  = _.getTarget.getCoordinates(None).map(_.dec) | Declination.zero,
-        set  = updateCoordinate(dec)
+        set  = updateCoordinate(Target.dec)
       )
 
       def pmField(lens: SiderealTarget @> Double): BoundTextField[Double] =

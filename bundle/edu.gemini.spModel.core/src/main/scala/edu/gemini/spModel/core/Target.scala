@@ -2,8 +2,8 @@ package edu.gemini.spModel.core
 
 import scalaz._, Scalaz._
 
-/** 
- * Algebraic type for targets of observation. 
+/**
+ * Algebraic type for targets of observation.
  */
 sealed trait Target extends Product with Serializable {
 
@@ -43,6 +43,12 @@ trait TargetLenses {
       pRunTarget(SiderealTarget.coordinates.partial),
       PLens.nil.run
     ))
+
+  val ra:  Target @?> RightAscension =
+    coords >=> Coordinates.ra.partial
+
+  val dec: Target @?> Declination    =
+    coords >=> Coordinates.dec.partial
 
   val pm: Target @?> ProperMotion =
     PLens(_.fold(

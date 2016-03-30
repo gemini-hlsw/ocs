@@ -18,18 +18,11 @@ import scalaz._, Scalaz._
 object SPTarget {
 
   /** Construct a new SPTarget from the given paramset */
-  def fromParamSet(pset: ParamSet): SPTarget = {
-    return SPTargetPio.fromParamSet(pset)
-  }
-
-  // Some convenience lenses
-  private val ra:  Target @?> RightAscension = Target.coords >=> Coordinates.ra.partial
-  private val dec: Target @?> Declination    = Target.coords >=> Coordinates.dec.partial
-
+  def fromParamSet(pset: ParamSet): SPTarget =
+    SPTargetPio.fromParamSet(pset)
 }
 
 final class SPTarget(private var target: Target) extends WatchablePos {
-  import SPTarget._
 
   def this() =
     this(SiderealTarget.empty)
@@ -89,28 +82,28 @@ final class SPTarget(private var target: Target) extends WatchablePos {
     setTarget(Target.name.set(target, s))
 
   def setRaDegrees(value: Double): Unit =
-    ra.set(target, RightAscension.fromDegrees(value)).foreach(setTarget)
+    Target.ra.set(target, RightAscension.fromDegrees(value)).foreach(setTarget)
 
   def setRaHours(value: Double): Unit =
-    ra.set(target, RightAscension.fromHours(value)).foreach(setTarget)
+    Target.ra.set(target, RightAscension.fromHours(value)).foreach(setTarget)
 
   def setRaString(hms: String): Unit =
     for {
       a <- Angle.parseHMS(hms).toOption
-      t <- ra.set(target, RightAscension.fromAngle(a))
+      t <- Target.ra.set(target, RightAscension.fromAngle(a))
     } setTarget(t)
 
   def setDecDegrees(value: Double): Unit =
     for {
       d <- Declination.fromDegrees(value)
-      t <- dec.set(target, d)
+      t <- Target.dec.set(target, d)
     } setTarget(t)
 
   def setDecString(dms: String): Unit =
     for {
       a <- Angle.parseDMS(dms).toOption
       d <- Declination.fromAngle(a)
-      t <- dec.set(target, d)
+      t <- Target.dec.set(target, d)
     } setTarget(t)
 
   def setRaDecDegrees(ra: Double, dec: Double): Unit =
