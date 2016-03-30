@@ -13,21 +13,22 @@ import edu.gemini.spModel.target.SPTarget
 import jsky.app.ot.gemini.editor.targetComponent.TelescopePosEditor
 import edu.gemini.shared.util.immutable.ScalaConverters._
 
+import scala.swing.Swing
 import scalaz._, Scalaz._
 
 class EphemerisEditor extends TelescopePosEditor with ReentrancyHack {
 
-  private[this] var target: Option[NonSiderealTarget] = None
+  @volatile private[this] var target: Option[NonSiderealTarget] = None
 
   // TODO: stop the timer when the window closes, or something?
   private val timer = new Timer(true)
   timer.scheduleAtFixedRate(new TimerTask {
     def run(): Unit =
       target.flatMap(_.coords(System.currentTimeMillis)) match {
-        case Some(cs) => now.setText(cs.ra.toAngle.formatHMS + " " + cs.dec.formatDMS)
-        case None     => now.setText("--")
+        case Some(cs) => Swing.onEDT(now.setText(cs.ra.toAngle.formatHMS + " " + cs.dec.formatDMS))
+        case None     => Swing.onEDT(now.setText("--"))
       }
-    }, 1000L, 50L) // unjustifiably fast but it looks cool
+    }, 1000L, 1000L)
 
   val start, end, size, now, sched, schedCoords  = new JLabel <| { l =>
     l.setForeground(Color.DARK_GRAY)
