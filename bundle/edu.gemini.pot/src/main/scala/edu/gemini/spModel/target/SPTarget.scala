@@ -176,6 +176,9 @@ final class SPTarget(private var target: Target) extends WatchablePos {
   def getSiderealTarget: Option[SiderealTarget] =
     target.fold(_ => None, Some(_), _ => None)
 
+  def getNonSiderealTarget: Option[NonSiderealTarget] =
+    target.fold(_ => None, _ => None, Some(_))
+
   def putMagnitude(mag: Magnitude): Unit =
     Target.magnitudes.modg(mag :: _.filterNot(_.band == mag.band), target).foreach(setTarget)
 
