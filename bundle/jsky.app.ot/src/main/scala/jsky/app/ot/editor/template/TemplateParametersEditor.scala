@@ -2,13 +2,12 @@ package jsky.app.ot.editor.template
 
 import edu.gemini.pot.sp.ISPTemplateParameters
 import edu.gemini.shared.util.TimeValue
-import edu.gemini.shared.util.immutable.{ DefaultImList, None => JNone, Option => JOption }
+import edu.gemini.shared.util.immutable.{None => JNone, Option => JOption}
 import edu.gemini.spModel.`type`.ObsoletableSpType
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.{PercentageContainer, ImageQuality, CloudCover, SkyBackground, WaterVapor}
 import edu.gemini.spModel.target.SPTarget
-import edu.gemini.spModel.target.system._
 import edu.gemini.spModel.template.TemplateParameters
 
 import javax.swing.BorderFactory
@@ -23,7 +22,7 @@ import scala.swing.ListView.Renderer
 import scala.swing.GridBagPanel.Anchor.{East, North}
 import scala.swing.GridBagPanel.Fill.{Horizontal, Vertical}
 
-import scalaz._
+import scalaz._, Scalaz._
 
 // Editor for staff-use to modify TemplateParameters.  Allows multi-selection
 // and bulk editing to change many phase 1 observations at once.  For example,
@@ -72,8 +71,7 @@ object TemplateParametersEditor {
     def nextY(): Int = (-1 :: layout.values.toList.map(_.gridy)).max + 1
 
     def layoutRow(r: Row): Unit = {
-      val y    = nextY()
-      val size = r.components.length
+      val y = nextY()
 
       r.components.zipWithIndex.foreach { case (c, i) =>
         layout(c) = new Constraints {
@@ -257,20 +255,21 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
 
       val JNoneLong: JOption[java.lang.Long] = JNone.instance[java.lang.Long]
 
-      val hms = new HMSFormat()
-      val raField = new BoundTextField[Double](10)(
-        read = s => hms.parse(s),
-        show = hms.format,
-        get  = _.getTarget.getRaHours(JNoneLong).getOrElse(0.0),
-        set  = setTarget((a, b) => a.setRaHours(b))
+      def updateCoordinate[A](lens: Target @?> A): (TemplateParameters, A) => TemplateParameters =
+        setTarget((a, b) => lens.set(a.getTarget, b).foreach(a.setTarget))
+
+      val raField = new BoundTextField[RightAscension](10)(
+        read = s => Angle.parseHMS(s).map(RightAscension.fromAngle).valueOr(ex => throw ex),
+        show = _.toAngle.formatHMS,
+        get  = _.getTarget.getCoordinates(None).map(_.ra) | RightAscension.zero,
+        set  = updateCoordinate(Target.ra)
       )
 
-      val dms = new DMSFormat()
-      val decField = new BoundTextField[Double](10)(
-        read = s => dms.parse(s),
-        show = dms.format,
-        get  = _.getTarget.getDecDegrees(JNoneLong).getOrElse(0.0),
-        set  = setTarget((a, b) => a.setDecDegrees(b))
+      val decField = new BoundTextField[Declination](10)(
+        read = s => Angle.parseDMS(s).flatMap(a => Declination.fromAngle(a) \/> new IllegalArgumentException(s"$s is not a valid declination")).valueOr(ex => throw ex),
+        show = _.formatDMS,
+        get  = _.getTarget.getCoordinates(None).map(_.dec) | Declination.zero,
+        set  = updateCoordinate(Target.dec)
       )
 
       def pmField(lens: SiderealTarget @> Double): BoundTextField[Double] =
@@ -404,7 +403,7 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
     }
 
     def showTypeSpecificWidgets(ps: Iterable[TemplateParameters]): Unit = {
-      val isSid = common(ps)(tp => targetType(tp.getTarget)).exists(_ == Sidereal)
+      val isSid = common(ps)(tp => targetType(tp.getTarget)).contains(Sidereal)
       CoordinatesPanel.showSiderealRows(isSid)
       magScroll.visible = isSid
 
