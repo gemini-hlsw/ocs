@@ -5,10 +5,9 @@ import org.apache.commons.httpclient.HttpClient
 import org.apache.commons.httpclient.HttpException
 import org.apache.commons.httpclient.NameValuePair
 import org.apache.commons.httpclient.methods.GetMethod
-import edu.gemini.horizons.api.HorizonsException
+import edu.gemini.horizons.api._
 import java.io.IOException
 import CgiHorizonsConstants._
-import edu.gemini.horizons.api.HorizonsReply
 import java.util.Date
 import java.text.SimpleDateFormat
 
@@ -79,7 +78,16 @@ object HorizonsService2 {
    * contain slightly more or fewer entries than requested due to rounding, or many fewer for very
    * short timespans (no more than one entry will be returned per minute).
    */
-  def lookupEphemeris(target: HorizonsDesignation, site: Site, start: Date, stop: Date, elems: Int): HS2[Ephemeris] = {
+  def lookupEphemeris(target: HorizonsDesignation, site: Site, start: Date, stop: Date, elems: Int): HS2[Ephemeris] =
+    lookupEphemerisE(target, site, start, stop, elems) { _.coords }
+
+  /**
+   * Look up the ephemeris for the given target when viewed from the given site, requesting `elems`
+   * total elements spread uniformly over the over the given time period. The computed ephemeris may
+   * contain slightly more or fewer entries than requested due to rounding, or many fewer for very
+   * short timespans (no more than one entry will be returned per minute).
+   */
+  def lookupEphemerisE[E](target: HorizonsDesignation, site: Site, start: Date, stop: Date, elems: Int)(ef: EphemerisEntry => Option[E]): HS2[Long ==>> E] = {
 
     def formatDate(date: Date): String = {
       val df = new SimpleDateFormat("yyyy-MMM-dd HH:mm:ss")
@@ -92,12 +100,11 @@ object HorizonsService2 {
         case Site.GS => SITE_COORD_GS
       }
 
-    def toEphemeris(r: HorizonsReply): Ephemeris =
+    def toEphemeris(r: HorizonsReply): Long ==>> E =
       ==>>.fromList {
         r.getEphemeris.asScala.toList.map { e =>
-          val cs = e.getCoordinates
-          Coordinates.fromDegrees(cs.getRaDeg, cs.getDecDeg).strengthL(e.getDate.getTime)
-        } .collect { case Some(p) => p }
+          ef(e).strengthL(e.timestamp)
+        }.collect { case Some(p) => p }
       }
 
     // The step size in minutes, such that the total number of elements will be roughly what was
@@ -117,15 +124,16 @@ object HorizonsService2 {
         SITE_COORD       -> siteCoord(site),
         START_TIME       -> formatDate(start),
         STOP_TIME        -> formatDate(stop),
-        STEP_SIZE        -> s"${stepSize}m"
+        STEP_SIZE        -> s"${stepSize}m",
+        EXTRA_PRECISION  -> YES,
+        TIME_DIGITS      -> FRACTIONAL_SEC
       )
 
-    def buildEphemeris(m: GetMethod): IO[Ephemeris]  =
+    def buildEphemeris(m: GetMethod): IO[Long ==>> E]  =
       IO(CgiReplyBuilder.buildResponse(m.getResponseBodyAsStream, m.getRequestCharSet)).map(toEphemeris)
 
     // And finally
     horizonsRequest(queryParams)(buildEphemeris).ensure(EphemerisEmpty)(_.size > 0)
-
   }
 
   ///
