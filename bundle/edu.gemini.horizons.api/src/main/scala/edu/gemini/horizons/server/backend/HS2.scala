@@ -73,7 +73,7 @@ object HorizonsService2 {
   def lookupEphemeris(target: HorizonsDesignation, site: Site, elems: Int, sem: Semester): HS2[Ephemeris] =
     lookupEphemeris(target, site, sem.getStartDate(site), sem.getEndDate(site), elems)
 
-  /** 
+  /**
    * Look up the ephemeris for the given target when viewed from the given site, requesting `elems`
    * total elements spread uniformly over the over the given time period. The computed ephemeris may
    * contain slightly more or fewer entries than requested due to rounding, or many fewer for very
@@ -92,7 +92,7 @@ object HorizonsService2 {
         case Site.GS => SITE_COORD_GS
       }
 
-    def toEphemeris(r: HorizonsReply): Ephemeris = 
+    def toEphemeris(r: HorizonsReply): Ephemeris =
       ==>>.fromList {
         r.getEphemeris.asScala.toList.map { e =>
           val cs = e.getCoordinates
@@ -123,7 +123,7 @@ object HorizonsService2 {
     def buildEphemeris(m: GetMethod): IO[Ephemeris]  =
       IO(CgiReplyBuilder.buildResponse(m.getResponseBodyAsStream, m.getRequestCharSet)).map(toEphemeris)
 
-    // And finally      
+    // And finally
     horizonsRequest(queryParams)(buildEphemeris).ensure(EphemerisEmpty)(_.size > 0)
 
   }
@@ -162,10 +162,10 @@ object HorizonsService2 {
 
   // Parse the result of the given search
   private def parseResponse[A](s: Search[A], lines: List[String]): \/[String, List[Row[A]]] =
-    parseHeader[Row[A]](lines) { case (header, tail) => 
+    parseHeader[Row[A]](lines) { case (header, tail) =>
       s match {
 
-        case Search.Comet(_) => 
+        case Search.Comet(_) =>
 
           // Common case is that we have many results, or none.
           lazy val case0 =
@@ -235,7 +235,7 @@ object HorizonsService2 {
         case Search.MajorBody(_) =>
 
           // Common case is that we have many results, or none.
-          lazy val case0 = 
+          lazy val case0 =
             parseMany[Row[HorizonsDesignation.MajorBody]](header, tail, """Multiple major-bodies match string""".r) { os =>
               (os.lift(0) |@| os.lift(1)).tupled.map {
                 case ((ors, ore), (ons, one)) => { row =>
@@ -253,9 +253,9 @@ object HorizonsService2 {
             } \/> "Could not match 'Charon / (Pluto)     901' header pattern."
 
           // First one that works, otherwise Nil because it falls through to small-body search
-          case0 orElse 
+          case0 orElse
           case1 orElse Nil.right
-      
+
       }
   }
 
