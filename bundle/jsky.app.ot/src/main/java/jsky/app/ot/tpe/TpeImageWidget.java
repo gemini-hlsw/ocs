@@ -115,22 +115,6 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
             }
         }
     };
-
-    private final AbstractAction _autoGuideStarAction = new AbstractAction(
-            "Auto GS",
-            Resources.getIcon("gsauto.png")) {
-        {
-            putValue(Action.SHORT_DESCRIPTION, "Have the OT automatically select the best guide star for your observation");
-        }
-
-        @Override public void actionPerformed(ActionEvent actionEvent) {
-            try {
-                autoGuideStarSearch();
-            } catch (Exception e) {
-                DialogUtil.error(e);
-            }
-        }
-    };
     private boolean _viewingOffsets;
 
     /**
@@ -663,8 +647,6 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
             basePosUpdate(base);
         }
 
-        _autoGuideStarAction.setEnabled(GuideStarSupport.supportsAutoGuideStarSelection(_ctx));
-
         repaint();
     }
 
@@ -1027,35 +1009,6 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
         return super.getBasePos();
     }
 
-    // Perform an AGS lookup.
-    public void autoGuideStarSearch() {
-        Option<ObsContext> maybeObsContext = _ctx.obsContextJava();
-        if (maybeObsContext.isEmpty()) {
-            // UX-1012: there's no obsContext which means some vital information is missing
-            // in this case do not allow an automated guide star search to be launched
-            final String missingComponent;
-            if (_ctx.targets().isEmpty()) {
-                missingComponent = "Target";
-            } else if (_ctx.instrument().isEmpty()) {
-                missingComponent = "Instrument";
-            } else if (_ctx.siteQuality().isEmpty()) {
-                missingComponent = "Site Quality";
-            } else {
-                missingComponent = "Some";
-            }
-            DialogUtil.error(String.format("%s component is missing. It is not possible to select a guide star.", missingComponent));
-        } else {
-            if (GuideStarSupport.supportsAutoGuideStarSelection(_ctx)) {
-                maybeObsContext.flatMap(AgsRegistrar::currentStrategyForJava).foreach(strategy -> {
-                    if (strategy.key() == AgsStrategyKey.GemsKey$.MODULE$ && GuideStarSupport.hasGemsComponent(_ctx))
-                        gemsGuideStarSearch();
-                    else
-                        AgsClient.launch(_ctx, this);
-                });
-            }
-        }
-    }
-
     // manual guide star selection dialog
     public void manualGuideStarSearch() {
         if (GuideStarSupport.hasGemsComponent(_ctx)) {
@@ -1067,19 +1020,6 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
 
     public void openCatalogNavigator() {
         QueryResultsFrame.instance().showOn(this, _ctx);
-    }
-
-    // OT-36: Gems guide star auto selection
-    private void gemsGuideStarSearch() {
-        if (_gemsGuideStarWorker == null) {
-            _gemsGuideStarWorker = new GemsGuideStarWorker();
-            // Change button/menu label while searching
-            _autoGuideStarAction.putValue(Action.NAME, "Cancel Search");
-            _gemsGuideStarWorker.start();
-        } else {
-            // button changes to Cancel during processing. If pressed, interrupt the background thread.
-            _gemsGuideStarWorker.interrupt();
-        }
     }
 
     private void showGemsGuideStarSearchDialog() {
@@ -1103,13 +1043,8 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
         return _manualGuideStarAction;
     }
 
-    public AbstractAction getAutoGuideStarAction() {
-        return _autoGuideStarAction;
-    }
-
     // Called from GemsGuideStarWorker when finished
     void setGemsGuideStarWorkerFinished() {
-        _autoGuideStarAction.putValue(Action.NAME, "Auto GS");
         _gemsGuideStarWorker = null;
     }
 

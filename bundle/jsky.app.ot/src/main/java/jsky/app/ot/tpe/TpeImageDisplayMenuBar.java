@@ -34,7 +34,6 @@ public class TpeImageDisplayMenuBar extends CatalogImageDisplayMenuBar {
         JMenu catalogMenu = getCatalogMenu();
         catalogMenu.addSeparator();
         catalogMenu.add(imageDisplay.getManualGuideStarAction());
-        catalogMenu.add(imageDisplay.getAutoGuideStarAction());
 
         _popupMenu = new JPopupMenu();
 
