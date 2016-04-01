@@ -328,16 +328,12 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             final TargetEnvironment oldEnv = oldTOC.getTargetEnvironment();
             final GuideEnvironment oldGuideEnv = oldEnv.getGuideEnvironment();
 
-            final int oldPrimaryIdx          = oldGuideEnv.getPrimaryIndex();
-            final boolean oldHasNonEmptyAuto = oldGuideEnv.getOptions().find(GuideGroup::isAutomatic)
-                    .map(gg -> !gg.getTargets().isEmpty()).getOrElse(false);
-
+            final int primaryIdx               = oldGuideEnv.getPrimaryIndex();
             final Option<GuideGroup> autoGroup = newTOC.getTargetEnvironment().getGroups().find(GuideGroup::isAutomatic);
 
             final TargetEnvironment newEnv = autoGroup.map(a -> {
                 final ImList<GuideGroup> newGroups = oldGuideEnv.getOptions().filter(GuideGroup::isManual).cons(a);
-                final int newPrimaryIdx = oldPrimaryIdx + (oldHasNonEmptyAuto ? 0 : 1);
-                final GuideEnvironment newGuideEnv = oldGuideEnv.setOptions(newGroups).setPrimaryIndex(newPrimaryIdx);
+                final GuideEnvironment newGuideEnv = oldGuideEnv.setOptions(newGroups).setPrimaryIndex(primaryIdx);
                 return oldEnv.setGuideEnvironment(newGuideEnv);
             }).getOrElse(oldEnv);
             newTOC.setTargetEnvironment(newEnv);

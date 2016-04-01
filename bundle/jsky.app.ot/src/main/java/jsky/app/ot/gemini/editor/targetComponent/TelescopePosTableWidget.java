@@ -41,6 +41,8 @@ import java.text.NumberFormat;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 /**
  * An extension of the TableWidget to support telescope target lists.
@@ -247,19 +249,21 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
             @Override public boolean movable()                 { return false; }
         }
 
+        private static final int FIRST_AUTO_TARGET_IDX = 2;
+
         // Collection of rows, which may include "subrows".
-        private final ImList<Row> rows;
+        private List<Row> rows;
 
         // Total number of rows, including subrows. Precalculated as swing uses this value frequently.
-        private final int numRows;
+        private int numRows;
 
-        private final ImList<MagnitudeBand> bands;
-        private final ImList<String> columnHeaders;
-        private final TargetEnvironment env;
+        private ImList<MagnitudeBand> bands;
+        private ImList<String> columnHeaders;
+        private TargetEnvironment env;
 
         // A completely empty set of TableData.
         TelescopePosTableModel() {
-            rows          = DefaultImList.create();
+            rows          = new ArrayList<>();
             numRows       = 0;
             bands         = DefaultImList.create();
             columnHeaders = computeColumnHeaders(bands);
@@ -271,19 +275,7 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
             this.env       = env;
             bands          = getSortedBands(env);
             columnHeaders  = computeColumnHeaders(bands);
-            rows           = DefaultImList.create(createRows(ctxOpt));
-            numRows        = countRows();
-        }
-
-        // Create a TableData for a given set of rows.
-        // This allows us, for a given target environment, to manually modify an existing list of rows in a
-        // TableData object instead of rebuilding everything from scratch. This is necessary for auto group
-        // operations to prevent resetting GUI components when the auto group changes.
-        TelescopePosTableModel(final TargetEnvironment env, final List<Row> rowList) {
-            this.env       = env;
-            bands          = getSortedBands(env);
-            columnHeaders  = computeColumnHeaders(bands);
-            rows           = DefaultImList.create(rowList);
+            rows           = createRows(ctxOpt);
             numRows        = countRows();
         }
 
@@ -322,14 +314,52 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
         // Replace the auto group and return a new TableData.
         // Note that we work under the assumption that there is ALWAYS an auto group, which should be the case,
         // and that it is in row position 1 of the table (directly after the base).
-        TelescopePosTableModel replaceAutoGroup(final Option<ObsContext> ctxOpt, final GuideGroup autoGroup) {
-            // The auto group is always in group position 0.
-            final Row autoGroupRow = createGroupRow(ctxOpt, 0, autoGroup);
+        void replaceAutoGroup(final Option<ObsContext> ctxOpt, final TargetEnvironment newEnv) {
+            final List<Row>         oldRows = rows;
 
-            // Now replace the auto group row, i.e. row 1.
-            final ArrayList<Row> newRows = new ArrayList<>(rows.toList());
-            newRows.set(1, autoGroupRow);
-            return new TelescopePosTableModel(env, newRows);
+            // Recalculate the rows to see if quality has changed based on the new context.
+            env = newEnv;
+            final Set<Integer> changedRowIndices      = recalculateManualGSQuality(ctxOpt);
+
+            // The auto group is always in group position 0 and row position 1.
+            // Recreate it and set it in the new rows.
+            final GuideGroup autoGroup  = newEnv.getGuideEnvironment().getOptions().head();
+            final GroupRow autoGroupRow = createGroupRow(ctxOpt, 0, autoGroup);
+            rows.set(1, autoGroupRow);
+            numRows = countRows();
+
+            // Determine the size difference between the old auto group and the new.
+            final int oldAutoGroupSize  = oldRows.get(1).children().size();
+            final int newAutoGroupSize  = autoGroupRow.children().size();
+            final int autoGroupSizeDiff = newAutoGroupSize - oldAutoGroupSize;
+            final int autoGroupSizeInt  = Math.min(oldAutoGroupSize, newAutoGroupSize);
+
+            // Fire events indicating the changes in the model.
+            if (autoGroupSizeInt > 0) {
+                fireTableRowsUpdated(FIRST_AUTO_TARGET_IDX, FIRST_AUTO_TARGET_IDX + autoGroupSizeInt - 1);
+            }
+            if (oldAutoGroupSize < newAutoGroupSize) {
+                fireTableRowsInserted(FIRST_AUTO_TARGET_IDX + oldAutoGroupSize, FIRST_AUTO_TARGET_IDX + newAutoGroupSize - 1);
+            } else if (newAutoGroupSize < oldAutoGroupSize) {
+                fireTableRowsDeleted(FIRST_AUTO_TARGET_IDX + newAutoGroupSize, FIRST_AUTO_TARGET_IDX + oldAutoGroupSize - 1);
+            }
+
+            // Now for each group that was changed, fire update events.
+            int tableRowIdx = 0;
+            final Stream<Tuple2<Integer,Row>> indexedRows = IntStream.range(0, rows.size()).mapToObj(i -> new Pair<>(i, rows.get(i)));
+            for (final Tuple2<Integer, Row> tup2 : indexedRows.collect(Collectors.toList())) {
+                final int rowIdx = tup2._1();
+                final Row row    = tup2._2();
+
+                if (changedRowIndices.contains(rowIdx)) {
+                    // We only care about the child rows (hence + 1), and all rows have been offset by autoGroupSizeDiff.
+                    final int lowerIdx = tableRowIdx + 1 + autoGroupSizeDiff;
+                    final int upperIdx = lowerIdx + row.children().size() - 1;
+                    fireTableRowsUpdated(lowerIdx, upperIdx);
+                }
+
+                tableRowIdx += 1 + row.children().size();
+            }
         }
 
         // Given a guide group and its index amongst the set of all groups, create a GroupRow (and all children
@@ -354,7 +384,7 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
                 // The index here is used to generate target names, so begin at 1.
                 gpt.getTargets().zipWithIndex().foreach(tup -> {
                     final SPTarget target = tup._1();
-                    final int index       = tup._2();
+                    final int index       = tup._2() + 1;
 
                     final Option<AgsGuideQuality> quality = guideQuality(ags, guideProbe, target);
                     final boolean enabled = isPrimaryGroup && primary.exists(target::equals);
@@ -366,6 +396,48 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
             });
 
             return new GroupRow(isPrimaryGroup, false, groupIdx, group, rowList);
+        }
+
+        // Recalculate the quality of all guide stars. If one of them has changed, return a new set of rows.
+        // We return a list of row indices of GroupRows indicating which groups have changed.
+        private Set<Integer> recalculateManualGSQuality(final Option<ObsContext> ctxOpt) {
+            final List<Row>    newRows          = new ArrayList<>();
+            final Set<Integer> groupRowsChanged = new HashSet<>();
+
+            IntStream.range(0, rows.size()).mapToObj(i -> new Pair<>(i, rows.get(i))).forEach(tup -> {
+                final int rowIdx = tup._1();
+                final Row row    = tup._2();
+
+                if (row instanceof GroupRow) {
+                    final IndexedGuideGroup igg = row.group().getValue();
+                    final int gIdx              = igg.index();
+                    final GuideGroup gg         = igg.group();
+
+                    // Recreate the entire group row, and then scan the children to see if any of the qualities are different.
+                    final GroupRow gRowNew = createGroupRow(ctxOpt, gIdx, gg);
+
+                    // Zipping Java lists is too obnoxious.
+                    final ImList<Row> childRowsOld       = DefaultImList.create(row.children());
+                    final ImList<Row> childRowsNew       = DefaultImList.create(gRowNew.children());
+                    final boolean groupChanged           = childRowsOld.zip(childRowsNew).exists(tup2 -> {
+                        final GuideTargetRow gtrOld = (GuideTargetRow) tup2._1();
+                        final GuideTargetRow gtrNew = (GuideTargetRow) tup2._2();
+                        return !gtrOld.quality.exists(q -> gtrNew.quality.exists(q::equals));
+                    });
+
+                    if (groupChanged) {
+                        newRows.add(gRowNew);
+                        groupRowsChanged.add(rowIdx);
+                    } else {
+                        newRows.add(row);
+                    }
+                } else {
+                    newRows.add(row);
+                }
+            });
+
+            rows = newRows;
+            return groupRowsChanged;
         }
 
         // Return an object used for guide star quality calculations, adjusted by pos angle for the group if one exists.
@@ -402,7 +474,9 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
 
         // Pre-compute the number of rows as this will be frequently used.
         private int countRows() {
-            return rows.foldLeft(0, (numRows, row) -> numRows + row.children().size() + 1);
+            return rows.stream().reduce(0,
+                    (final Integer sz, final Row r) -> sz + r.children().size() + 1,
+                    (i1, i2) -> i1 + i2);
         }
 
         // Gets all the magnitude bands used by targets in the target
@@ -536,7 +610,7 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
     private ISPObsComponent _obsComp;
     private TargetObsComp _dataObject;
     private TargetEnvironment _env;
-    private TelescopePosTableModel _TelescopePos_tableModel;
+    private TelescopePosTableModel _model;
 
     // if true, ignore selections
     private boolean _ignoreSelection;
@@ -578,7 +652,7 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
                                                                      final int column) {
                 final JLabel label = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
-                _TelescopePos_tableModel.rowAtRowIndex(row).foreach(tableDataRow -> {
+                _model.rowAtRowIndex(row).foreach(tableDataRow -> {
                     // If we are in column 0, we treat this differently.
                     if (column == 0) {
                         if (tableDataRow.group().isDefined()) {
@@ -669,11 +743,11 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
             // Determine what, if anything, is selected.
             final Option<Integer> selIndex = ImOption.apply(oldTOC).flatMap(toc -> {
                 final TargetEnvironment oldEnv = oldTOC.getTargetEnvironment();
-                return ImOption.apply(_TelescopePos_tableModel).flatMap(td -> {
+                return ImOption.apply(_model).flatMap(td -> {
                     final Option<SPTarget> tpOpt = TargetSelection.getTargetForNode(oldEnv, _obsComp);
-                    final Option<Integer> tpIndex = tpOpt.flatMap(_TelescopePos_tableModel::rowIndexForTarget);
+                    final Option<Integer> tpIndex = tpOpt.flatMap(_model::rowIndexForTarget);
                     final Option<IndexedGuideGroup> iggOpt = TargetSelection.getIndexedGuideGroupForNode(oldEnv, _obsComp);
-                    final Option<Integer> iggIndex = iggOpt.map(IndexedGuideGroup::index).flatMap(_TelescopePos_tableModel::rowIndexForGroupIndex);
+                    final Option<Integer> iggIndex = iggOpt.map(IndexedGuideGroup::index).flatMap(_model::rowIndexForGroupIndex);
                     return tpIndex.orElse(iggIndex);
                 });
             });
@@ -739,9 +813,9 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
     }
 
     private final PropertyChangeListener selectionListener = evt -> {
-        if (_TelescopePos_tableModel == null) return;
+        if (_model == null) return;
         TargetSelection.getTargetForNode(_env, _obsComp)
-                .flatMap(_TelescopePos_tableModel::rowIndexForTarget).foreach(this::_setSelectedRow);
+                .flatMap(_model::rowIndexForTarget).foreach(this::_setSelectedRow);
     };
 
     private final PropertyChangeListener envChangeListener = new PropertyChangeListener() {
@@ -759,7 +833,7 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
 
             // Remember what was selected before the reset below.
             final int oldSelIndex               = getSelectedRow();
-            final Option<SPTarget> oldSelTarget = _TelescopePos_tableModel.rowAtRowIndex(oldSelIndex).flatMap(TelescopePosTableModel.Row::target);
+            final Option<SPTarget> oldSelTarget = _model.rowAtRowIndex(oldSelIndex).flatMap(TelescopePosTableModel.Row::target);
 
             // Update the table -- setting _tableData ....
             _resetTable(newEnv);
@@ -774,7 +848,7 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
             // If obs comp has a selected target, then honor it.
             final Option<SPTarget> newSelectedTarget = TargetSelection.getTargetForNode(_env, _obsComp);
             if (newSelectedTarget.isDefined()) {
-                _TelescopePos_tableModel.rowIndexForTarget(newSelectedTarget.getValue())
+                _model.rowIndexForTarget(newSelectedTarget.getValue())
                         .foreach(TelescopePosTableWidget.this::_setSelectedRow);
                 return;
             }
@@ -782,7 +856,7 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
             // If a new group was added, select it.
             final Option<IndexedGuideGroup> newGpIdx = TargetSelection.getIndexedGuideGroupForNode(_env, _obsComp);
             if (newGpIdx.isDefined()) {
-                final Option<Integer> rowIdx = _TelescopePos_tableModel.rowIndexForGroupIndex(newGpIdx.getValue().index());
+                final Option<Integer> rowIdx = _model.rowIndexForGroupIndex(newGpIdx.getValue().index());
                 if (rowIdx.isDefined()) {
                     _setSelectedRow(rowIdx.getValue());
                     return;
@@ -790,7 +864,7 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
             }
 
             // Try to select the same target that was selected before, if it is there in the new table.
-            if (oldSelTarget.exists(t -> _TelescopePos_tableModel.rowIndexForTarget(t).isDefined())) {
+            if (oldSelTarget.exists(t -> _model.rowIndexForTarget(t).isDefined())) {
                 oldSelTarget.foreach(TelescopePosTableWidget.this::selectTarget);
                 return;
             }
@@ -806,42 +880,22 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
         }
     };
 
-    // Just update the BAGS group instead of resetting the entire table.
-    private void _setAutoGroup(final TargetEnvironment env) {
-        _env = env;
-        final Option<ObsContext> ctxOpt = ObsContext.create(owner.getContextObservation()).map(c -> c.withTargets(env));
-
-        // We need to track what changed to fire events.
-        final TelescopePosTableModel oldData       = _TelescopePos_tableModel;
-        final GuideGroup newAutoGroup = env.getGuideEnvironment().getOptions().head();
-
-        _TelescopePos_tableModel = _TelescopePos_tableModel.replaceAutoGroup(ctxOpt, newAutoGroup);
-        _ignoreSelection = true;
-        try {
-            setModel(_TelescopePos_tableModel);
-        } finally {
-            _ignoreSelection = false;
-        }
+    // Just update the auto group and adjust the model accordingly instead of resetting the entire table.
+    private void _setAutoGroup(final TargetEnvironment newEnv) {
+        _env = newEnv;
+        final Option<ObsContext> ctxOpt = ObsContext.create(owner.getContextObservation()).map(c -> c.withTargets(newEnv));
+        _model.replaceAutoGroup(ctxOpt, newEnv);
         TableUtil.initColumnSizes(this);
-
-        // Fire events indicating what changed. The auto group will always be at row position 1.
-        final int oldLastIdx = oldData.rows.get(1).children().size() + 2;
-        final int newLastIdx = _TelescopePos_tableModel.rows.get(1).children().size() + 2;
-        _TelescopePos_tableModel.fireTableRowsUpdated(1, Math.min(oldLastIdx, newLastIdx));
-        if (oldLastIdx < newLastIdx)
-            _TelescopePos_tableModel.fireTableRowsInserted(oldLastIdx + 1, newLastIdx);
-        else if (newLastIdx < oldLastIdx)
-            _TelescopePos_tableModel.fireTableRowsDeleted(newLastIdx + 1, oldLastIdx);
     }
 
-    private void _resetTable(final TargetEnvironment env) {
-        _env = env;
-        final Option<ObsContext> ctxOpt = ObsContext.create(owner.getContextObservation()).map(c -> c.withTargets(env));
-        _TelescopePos_tableModel = new TelescopePosTableModel(ctxOpt, env);
+    private void _resetTable(final TargetEnvironment newEnv) {
+        _env = newEnv;
+        final Option<ObsContext> ctxOpt = ObsContext.create(owner.getContextObservation()).map(c -> c.withTargets(newEnv));
+        _model = new TelescopePosTableModel(ctxOpt, newEnv);
 
         _ignoreSelection = true;
         try {
-            setModel(_TelescopePos_tableModel);
+            setModel(_model);
         } finally {
             _ignoreSelection = false;
         }
@@ -934,7 +988,7 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
      * Returns the selected node (currently only single select is allowed).
      */
     Option<TelescopePosTableModel.Row> getSelectedNode() {
-        return _TelescopePos_tableModel.rowAtRowIndex(getSelectedRow());
+        return _model.rowAtRowIndex(getSelectedRow());
     }
 
     /**
@@ -1009,12 +1063,12 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
      * Updates the TargetSelection's target or group, and selects the relevant row in the table.
      */
     void selectRowAt(final int index) {
-        if (_TelescopePos_tableModel == null) return;
-        final SPTarget target = _TelescopePos_tableModel.targetAtRowIndex(index).getOrNull();
+        if (_model == null) return;
+        final SPTarget target = _model.targetAtRowIndex(index).getOrNull();
         if (target != null) {
             selectTarget(target);
         } else {
-            _TelescopePos_tableModel.groupAtRowIndex(index).foreach(this::selectGroup);
+            _model.groupAtRowIndex(index).foreach(this::selectGroup);
         }
     }
 
@@ -1031,7 +1085,7 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
      */
     void selectTarget(final SPTarget tp) {
         TargetSelection.setTargetForNode(_env, _obsComp, tp);
-        _TelescopePos_tableModel.rowIndexForTarget(tp).foreach(this::_setSelectedRow);
+        _model.rowIndexForTarget(tp).foreach(this::_setSelectedRow);
     }
 
     /**
@@ -1039,7 +1093,7 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
      */
     void selectGroup(final IndexedGuideGroup igg) {
         TargetSelection.setGuideGroupByIndex(_env, _obsComp, igg.index());
-        _TelescopePos_tableModel.rowIndexForGroupIndex(igg.index()).foreach(this::_setSelectedRow);
+        _model.rowIndexForGroupIndex(igg.index()).foreach(this::_setSelectedRow);
     }
 
     /**
@@ -1053,7 +1107,7 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
      * Returns the node at the given location or null if not found.
      */
     public TelescopePosTableModel.Row getNode(final Point location) {
-        return _TelescopePos_tableModel.rowAtRowIndex(rowAtPoint(location)).getOrNull();
+        return _model.rowAtRowIndex(rowAtPoint(location)).getOrNull();
     }
 
     /**
@@ -1077,7 +1131,7 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
         final int numCols = getColumnCount();
         for (int row = 0; row < numRows; ++row) {
             for (int col = 0; col < numCols; ++col) {
-                body += "\t" + _TelescopePos_tableModel.getValueAt(col, row);
+                body += "\t" + _model.getValueAt(col, row);
             }
             body += "\n";
         }
