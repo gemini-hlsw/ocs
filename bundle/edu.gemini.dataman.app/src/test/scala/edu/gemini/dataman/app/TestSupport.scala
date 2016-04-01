@@ -1,14 +1,11 @@
 package edu.gemini.dataman.app
 
 import edu.gemini.gsa.query.Arbitraries
-import edu.gemini.pot.sp.{ISPFactory, ISPProgram, ProgramGen}
-import edu.gemini.pot.spdb.{DBLocalDatabase, IDBDatabaseService}
+import edu.gemini.pot.sp.{ProgramTestSupport, ISPFactory, ISPProgram, ProgramGen}
 import edu.gemini.spModel.dataset.{DatasetRecord, DatasetGsaState, SummitState, DatasetQaState, Dataset, DatasetExecRecord, DatasetQaRecord, DatasetLabel}
 import edu.gemini.spModel.obslog.ObsLog
 import edu.gemini.util.security.principal.StaffPrincipal
-import org.scalacheck.{Prop, Arbitrary, Gen}
-import org.specs2.ScalaCheck
-import org.specs2.mutable.Specification
+import org.scalacheck.{Arbitrary, Gen}
 
 import Arbitrary.arbitrary
 import java.security.Principal
@@ -16,7 +13,7 @@ import java.time.Instant
 
 import scala.collection.JavaConverters._
 
-trait TestSupport extends Specification with ScalaCheck with Arbitraries {
+trait TestSupport extends ProgramTestSupport with Arbitraries {
   val User = java.util.Collections.singleton[Principal](StaffPrincipal.Gemini)
 
   import ProgramGen._
@@ -62,23 +59,6 @@ trait TestSupport extends Specification with ScalaCheck with Arbitraries {
       p
     }
 
-
-  // Generates programs and populates a database with them.
-  val genTestEnvironment: Gen[IDBDatabaseService => List[ISPProgram]] =
-    for {
-      num <- Gen.chooseNum(0, 5)
-      fn  <- Gen.listOfN(num, genTestProg)
-    } yield { (odb: IDBDatabaseService) =>
-      val fact   = odb.getFactory
-      val progs  = fn.map { f => f(fact) }
-      // Nothing stops multiple programs in the list from having the same ID.
-      // The database can't have two or more programs with the same ID.  Just
-      // filter out any duplicates.
-      val unique = progs.groupBy(_.getProgramID).mapValues(_.head).values.toList
-      unique.foreach { odb.put }
-      unique
-    }
-
   // Extracts all the dataset records in the program into a single list.
   def allDatasets(progs: List[ISPProgram]): List[DatasetRecord] =
     for {
@@ -86,23 +66,4 @@ trait TestSupport extends Specification with ScalaCheck with Arbitraries {
       o  <- p.getAllObservations.asScala
       dr <- Option(ObsLog.getIfExists(o)).toList.flatMap(_.getAllDatasetRecords.asScala)
     } yield dr
-
-
-  def withTestOdb(block: IDBDatabaseService => Boolean): Boolean = {
-    val odb = DBLocalDatabase.createTransient()
-    try {
-      block(odb)
-    } finally {
-      odb.getDBAdmin.shutdown()
-    }
-  }
-
-  def forAllPrograms(test: (IDBDatabaseService, List[ISPProgram]) => Boolean): Prop = {
-    implicit val arbTestEnvironment: Arbitrary[IDBDatabaseService => List[ISPProgram]] =
-      Arbitrary { genTestEnvironment }
-
-    Prop.forAll { (setup: (IDBDatabaseService => List[ISPProgram])) =>
-      withTestOdb { odb => test(odb, setup(odb)) }
-    }
-  }
 }
