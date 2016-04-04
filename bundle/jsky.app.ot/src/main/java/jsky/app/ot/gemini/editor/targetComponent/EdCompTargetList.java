@@ -298,21 +298,26 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             return false;
         }
 
-        // Extract the target environments and check if the auto groups have changed.
-        final TargetEnvironment oldEnv    = oldTOC.getTargetEnvironment();
-        final TargetEnvironment newEnv    = newTOC.getTargetEnvironment();
-        final Option<GuideGroup> oldGpOpt = oldEnv.getGroups().headOption().filter(GuideGroup::isAutomatic);
-        final Option<GuideGroup> newGpOpt = newEnv.getGroups().headOption().filter(GuideGroup::isAutomatic);
+        // Check to see if the old and new auto groups contain the same targets, in which case, they are
+        // considered equal.
+        final GuideGroup oldAutoGroup = oldTOC.getTargetEnvironment().getGuideEnvironment().automaticGroup();
+        final GuideGroup newAutoGroup = newTOC.getTargetEnvironment().getGuideEnvironment().automaticGroup();
+        final Map<GuideProbe,Set<Target>> oldAutoTargets = extractGroupTargets(oldAutoGroup);
+        final Map<GuideProbe,Set<Target>> newAutoTargets = extractGroupTargets(newAutoGroup);
+        return !oldAutoTargets.equals(newAutoTargets);
+    }
 
-        // We only want to return false if the two groups exist and contain the same targets.
-        return oldGpOpt.forall(oldGp ->
-                newGpOpt.forall(newGp -> {
-                    // Extract the target names.
-                    final List<String> oldNames = oldGp.getTargets().map(SPTarget::getName).toList();
-                    final List<String> newNames = newGp.getTargets().map(SPTarget::getName).toList();
-                    return !(oldNames.size() == newNames.size() && oldNames.containsAll(newNames));
-                })
-        );
+    /**
+     * Extract the targets by guide probe for a given guide group.
+     */
+    private static Map<GuideProbe,Set<Target>> extractGroupTargets(final GuideGroup group) {
+        final Map<GuideProbe,Set<Target>> targets = new HashMap<>();
+        group.getAll().foreach(gpt -> {
+            final GuideProbe probe = gpt.getGuider();
+            final Set<Target> targetSet = new HashSet<>(gpt.getOptions().map(SPTarget::getTarget).toList());
+            targets.put(probe, targetSet);
+        });
+        return targets;
     }
 
     @Override public void init(final ISPObsComponent oldNode, final TargetObsComp oldTOC) {

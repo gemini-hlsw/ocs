@@ -48,6 +48,10 @@ final case class GuideEnvironment(guideEnv: GuideEnv) extends TargetContainer {
       case i => manual.mod(_.flatMap { _.deleteAt(i-1) }, this)
     }
 
+  /** Gets the automatic group. */
+  def automaticGroup: GuideGroup =
+    GuideGroup(guideEnv.auto)
+
   /** Gets the `GuideGroup` at the given index, if any.  If the index is out
     * of range, `None` is returned.  If the index is 0, the result will be the
     * automatic group, otherwise one of the manual groups.
