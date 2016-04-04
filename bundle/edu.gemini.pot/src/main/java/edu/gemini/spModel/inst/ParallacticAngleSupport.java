@@ -12,8 +12,6 @@ import edu.gemini.skycalc.Angle;
  * in ParallacticAngleSupportInst.
  */
 public interface ParallacticAngleSupport {
-    public void setParallacticAngleDuration(ParallacticAngleDuration parallacticAngleDuration);
-    public ParallacticAngleDuration getParallacticAngleDuration();
 
     /**
      * Perform the parallactic angle computation for the observation.

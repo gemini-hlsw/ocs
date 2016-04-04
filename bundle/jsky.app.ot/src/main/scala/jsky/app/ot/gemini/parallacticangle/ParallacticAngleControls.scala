@@ -35,7 +35,7 @@ class ParallacticAngleControls extends GridBagPanel with Publisher {
 
       private case class RelativeTime(desc: String, timeInMs: Long) extends MenuItem(desc) {
         action = Action(desc) {
-          updateSchedulingBlock(new Date().getTime + timeInMs)
+          updateSchedulingBlock(SchedulingBlock(System.currentTimeMillis, timeInMs))
         }
       }
 
@@ -130,24 +130,15 @@ class ParallacticAngleControls extends GridBagPanel with Publisher {
   /**
    * Call this whenever the state of the parallactic controls change
    */
-  private def updateSchedulingBlock(start: Long): Unit =
+  private def updateSchedulingBlock(sb: SchedulingBlock): Unit =
     for {
       e      <- editor
       ispObs <- Option(e.getContextObservation)
     } {
       val spObs = ispObs.getDataObject.asInstanceOf[SPObservation]
 
-      // Calculate the duration.
-      // Create a new scheduling block with now as the start time, and the remaining exec time as the duration.
-      val parallacticAngleDuration = e.getDataObject.getParallacticAngleDuration
-      val duration =
-        if (parallacticAngleDuration.getParallacticAngleDurationMode.equals(ParallacticAngleDurationMode.EXPLICITLY_SET))
-          parallacticAngleDuration.getExplicitDuration
-        else
-          ParallacticAngleDuration.calculateRemainingTime(ispObs)
-
       // Set the scheduling block.
-      spObs.setSchedulingBlock(Some(new SchedulingBlock(start, duration)).asGeminiOpt)
+      spObs.setSchedulingBlock(Some(sb).asGeminiOpt)
       ispObs.setDataObject(spObs)
 
       // Update the components to reflect the change.
@@ -168,17 +159,11 @@ class ParallacticAngleControls extends GridBagPanel with Publisher {
       val dialog = new ParallacticAngleDialog(
         e.getViewer.getParentFrame,
         o,
-        e.getDataObject.getParallacticAngleDuration,
+        o.getDataObject.asInstanceOf[SPObservation].getSchedulingBlock.asScalaOpt,
         s)
       dialog.pack()
       dialog.visible = true
-
-      // As the dialog is modal, this code only executes after it is dismissed. If the dialog was successfully
-      // configured, update the scheduling block.
-      dialog.startTime.foreach(st => {
-        e.getDataObject.setParallacticAngleDuration(dialog.duration)
-        updateSchedulingBlock(st)
-      })
+      updateSchedulingBlock(dialog.schedulingBlock)
     }
 
 
