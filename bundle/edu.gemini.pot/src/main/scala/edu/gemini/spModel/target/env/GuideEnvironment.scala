@@ -78,7 +78,10 @@ final case class GuideEnvironment(guideEnv: GuideEnv) extends TargetContainer {
       case _                      => this
     }
 
-  /** Convenience method to set the automatic group, which is always in position 0. */
+  /**
+    * Convenience method to set the automatic group, which is always in position 0.
+    * Note that as per `setGroup` above, this must be an automatic group.
+    */
   def setAutomaticGroup(grp: GuideGroup): GuideEnvironment =
     setGroup(0, grp)
 
