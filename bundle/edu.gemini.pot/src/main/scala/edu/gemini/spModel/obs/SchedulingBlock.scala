@@ -19,6 +19,10 @@ object SchedulingBlock {
   // Private impl allows us to have default equality and so on with smart constructors
   private case class Impl(val start: Long, val duration: Option[Long]) extends SchedulingBlock
 
+  // N.B. yes, return type should be Some[...]
+  def unapply(s: SchedulingBlock): Some[(Long, Option[Long])] =
+    Some((s.start, s.duration))
+
   def apply(start: Long): SchedulingBlock =
     apply(start, None)
 
