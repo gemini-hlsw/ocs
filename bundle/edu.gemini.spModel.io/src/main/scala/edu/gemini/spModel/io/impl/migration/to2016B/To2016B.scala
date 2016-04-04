@@ -88,7 +88,7 @@ object To2016B extends Migration {
   def updateSchedulingBlocks(d: Document): Unit =
     for {
       (o, b) <- obsAndBases(d) if o.value("schedulingBlockStart").isEmpty
-      date   <- b.value("validAt").map(SPTargetPio.parseDate)
+      date   <- b.value("validAt").flatMap(s => Option(SPTargetPio.parseDate(s)))
     } {
       Pio.addLongParam(fact, o, "schedulingBlockStart", date.getTime)
       Pio.addLongParam(fact, o, "schedulingBlockDuration", 0L)
@@ -180,7 +180,7 @@ object To2016B extends Migration {
   // Generic Nonsidereal
   def nonsidereal(ps: ParamSet, cs: Coordinates): State[NonSiderealTarget, Ephemeris] =
     NonSiderealTarget.ephemeris := ps.value("validAt")
-                                     .map(SPTargetPio.parseDate)
+                                     .flatMap(s => Option(SPTargetPio.parseDate(s)))
                                      .map(d => IMap(d.getTime -> cs))
                                      .getOrElse(IMap.empty)
 
