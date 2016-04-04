@@ -165,9 +165,9 @@ class ParallacticAngleDialog(owner: java.awt.Window, observation: ISPObservation
     }
 
     // Set the number of minutes of duration, converting from ms.
-    val durationField = new NumberField(Some(schedulingBlock.duration / 60000.0), allowEmpty = false) {
+    val durationField = new NumberField(Some(schedulingBlock.durationOrZero / 60000.0), allowEmpty = false) {
       peer.setColumns(5)
-      enabled = !schedulingBlock.useRemainingTime
+      enabled = schedulingBlock.duration.isDefined
     }
 
     // Reset duration to 0.0 if nonsense is typed in and the focus is lost.
@@ -197,7 +197,7 @@ class ParallacticAngleDialog(owner: java.awt.Window, observation: ISPObservation
     }
 
     new ButtonGroup(remainingTimeButton, setToButton) {
-      if (schedulingBlock.useRemainingTime) select(remainingTimeButton)
+      if (schedulingBlock.duration.isEmpty) select(remainingTimeButton)
       else select(setToButton)
     }
 

@@ -6,7 +6,6 @@ import edu.gemini.skycalc.HHMMSS;
 import edu.gemini.shared.util.immutable.Option;
 
 import edu.gemini.shared.util.immutable.Some;
-import edu.gemini.shared.util.immutable.None;
 import edu.gemini.spModel.core.*;
 import edu.gemini.spModel.gemini.altair.AltairParams;
 import edu.gemini.spModel.gemini.altair.InstAltair;
@@ -31,7 +30,6 @@ import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
-import edu.gemini.spModel.target.system.*;
 import edu.gemini.spModel.telescope.PosAngleConstraint;
 import edu.gemini.spModel.telescope.PosAngleConstraintAware;
 
@@ -173,7 +171,7 @@ public enum ToContext {
     public ObsContext apply(HttpServletRequest req) throws RequestException {
 
         // Construct a scheduling block at the current time with zero length.
-        SchedulingBlock sb      = new SchedulingBlock(System.currentTimeMillis(), 0L);
+        SchedulingBlock sb      = SchedulingBlock.apply(System.currentTimeMillis());
         TargetEnvironment env   = targetEnv(req, sb.start());
         Conditions conds        = conds(req);
         SPInstObsComp inst      = parseOption(req, INST, INST_OP);

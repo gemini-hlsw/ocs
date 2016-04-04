@@ -145,7 +145,7 @@ public class SPObservation extends AbstractDataObject implements ISPStaffOnlyFie
 
     // The next scheduling block for the observation. Begin with None.
     private Option<SchedulingBlock> _schedulingBlock =
-            new Some(new SchedulingBlock(System.currentTimeMillis(), 0L));
+            new Some(SchedulingBlock.apply(System.currentTimeMillis()));
 
     private Option<AgsStrategyKey> _agsStrategyOverride = None.instance();
 
@@ -592,7 +592,7 @@ public class SPObservation extends AbstractDataObject implements ISPStaffOnlyFie
         }
         if (!_schedulingBlock.isEmpty()) {
             Pio.addLongParam(factory, paramSet, SCHEDULING_BLOCK_START_PROP, getSchedulingBlock().getValue().start());
-            Pio.addLongParam(factory, paramSet, SCHEDULING_BLOCK_DURATION_PROP, getSchedulingBlock().getValue().duration());
+            Pio.addLongParam(factory, paramSet, SCHEDULING_BLOCK_DURATION_PROP, getSchedulingBlock().getValue().durationOrZero());
         }
 
         Pio.addParam(factory, paramSet, QA_STATE_PROP, getOverriddenObsQaState().name());
@@ -660,7 +660,7 @@ public class SPObservation extends AbstractDataObject implements ISPStaffOnlyFie
         if (v == null || v2 == null) {
             setSchedulingBlock(None.instance());
         } else {
-            setSchedulingBlock(new Some<>(SchedulingBlock$.MODULE$.valueOf(v, v2)));
+            setSchedulingBlock(new Some<>(SchedulingBlock.unsafeFromStrings(v, v2)));
         }
 
         v = Pio.getValue(paramSet, QA_STATE_PROP);
