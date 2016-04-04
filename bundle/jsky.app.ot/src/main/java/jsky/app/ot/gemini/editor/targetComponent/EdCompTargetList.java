@@ -330,17 +330,13 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         // to them will be lost as they are repopulated and the caret moved to the end.
         if (autoGroupChanged) {
             // Determine if there was an auto group in the old env and what the primary index was.
-            final TargetEnvironment oldEnv = oldTOC.getTargetEnvironment();
+            final TargetEnvironment oldEnv     = oldTOC.getTargetEnvironment();
             final GuideEnvironment oldGuideEnv = oldEnv.getGuideEnvironment();
-
             final int primaryIdx               = oldGuideEnv.getPrimaryIndex();
-            final Option<GuideGroup> autoGroup = newTOC.getTargetEnvironment().getGroups().find(GuideGroup::isAutomatic);
+            final GuideGroup autoGroup         = newTOC.getTargetEnvironment().getGuideEnvironment().automaticGroup();
 
-            final TargetEnvironment newEnv = autoGroup.map(a -> {
-                final ImList<GuideGroup> newGroups = oldGuideEnv.getOptions().filter(GuideGroup::isManual).cons(a);
-                final GuideEnvironment newGuideEnv = oldGuideEnv.setOptions(newGroups).setPrimaryIndex(primaryIdx);
-                return oldEnv.setGuideEnvironment(newGuideEnv);
-            }).getOrElse(oldEnv);
+            final GuideEnvironment newGuideEnv = oldGuideEnv.setAutomaticGroup(autoGroup).setPrimaryIndex(primaryIdx);
+            final TargetEnvironment newEnv     = oldEnv.setGuideEnvironment(newGuideEnv);
             newTOC.setTargetEnvironment(newEnv);
         }
 

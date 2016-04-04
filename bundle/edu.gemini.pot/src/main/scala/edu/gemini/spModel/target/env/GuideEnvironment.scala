@@ -78,6 +78,10 @@ final case class GuideEnvironment(guideEnv: GuideEnv) extends TargetContainer {
       case _                      => this
     }
 
+  /** Convenience method to set the automatic group, which is always in position 0. */
+  def setAutomaticGroup(grp: GuideGroup): GuideEnvironment =
+    setGroup(0, grp)
+
   def modifyGroup(index: Int, f: GuideGroup => GuideGroup): GuideEnvironment =
     getGroup(index).asScalaOpt.fold(this) { g => setGroup(index, f(g)) }
 
