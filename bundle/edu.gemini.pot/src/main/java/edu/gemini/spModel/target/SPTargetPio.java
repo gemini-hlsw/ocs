@@ -42,8 +42,16 @@ public class SPTargetPio {
         try {
             return format.parse(dateStr);
         } catch (final ParseException e) {
-            LOGGER.log(Level.WARNING, " Invalid date found " + dateStr);
-            return null;
+            try {
+
+                // At some point during 16A the server started writing out times with o'clock in
+                // them ... unclear why this happened. Workaround...
+                return format.parse(dateStr.replace("o'clock ", ""));
+
+            } catch (final ParseException ee) {
+                LOGGER.log(Level.WARNING, " Invalid date found " + dateStr);
+                return null;
+            }
         }
     }
 
