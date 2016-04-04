@@ -62,10 +62,10 @@ class EphemerisEditor extends TelescopePosEditor with ReentrancyHack {
       } {
         start.setText(formatDate(a))
         end  .setText(formatDate(b))
-        val res = (b - a) / e.size
+        val hrs: Double = (b - a) / (e.size.toDouble * 1000 * 60 * 60)
         e.findMin.map(_._1).map(formatDate).foreach(start.setText)
         e.findMax.map(_._1).map(formatDate).foreach(end.setText)
-        size.setText(res / (1000 * 60 * 60) + " minutes")
+        size.setText(f"${e.size} elems @ ~$hrs%3.1f hrs")
       }
 
       // Scheduled time and coordinates
