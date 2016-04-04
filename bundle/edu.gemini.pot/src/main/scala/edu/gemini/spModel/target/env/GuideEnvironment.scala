@@ -48,6 +48,10 @@ final case class GuideEnvironment(guideEnv: GuideEnv) extends TargetContainer {
       case i => manual.mod(_.flatMap { _.deleteAt(i-1) }, this)
     }
 
+  /** Gets the automatic group. */
+  def automaticGroup: GuideGroup =
+    GuideGroup(guideEnv.auto)
+
   /** Gets the `GuideGroup` at the given index, if any.  If the index is out
     * of range, `None` is returned.  If the index is 0, the result will be the
     * automatic group, otherwise one of the manual groups.
@@ -73,6 +77,13 @@ final case class GuideEnvironment(guideEnv: GuideEnv) extends TargetContainer {
       case (i, m: ManualGroup)    => manual.mod(_.map(o => o.setAt(i-1, m).getOrElse(o)), this)
       case _                      => this
     }
+
+  /**
+    * Convenience method to set the automatic group, which is always in position 0.
+    * Note that as per `setGroup` above, this must be an automatic group.
+    */
+  def setAutomaticGroup(grp: GuideGroup): GuideEnvironment =
+    setGroup(0, grp)
 
   def modifyGroup(index: Int, f: GuideGroup => GuideGroup): GuideEnvironment =
     getGroup(index).asScalaOpt.fold(this) { g => setGroup(index, f(g)) }

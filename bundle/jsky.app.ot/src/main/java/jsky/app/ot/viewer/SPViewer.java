@@ -16,6 +16,7 @@ import edu.gemini.spModel.obslog.ObsQaLog;
 import edu.gemini.spModel.util.SPTreeUtil;
 import jsky.app.ot.OT;
 import jsky.app.ot.OTOptions;
+import jsky.app.ot.ags.BagsManager;
 import jsky.app.ot.editor.EdObsGroup;
 import jsky.app.ot.editor.OtItemEditor;
 import jsky.app.ot.editor.eng.EngEditor;
@@ -666,6 +667,7 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
 
             // If there was an old root, clean up
             if (getRoot() != null) {
+                BagsManager.instance().unwatch(getRoot());
                 getDatabase().checkpoint();
                 getRoot().removePropertyChangeListener(ISPProgram.DATA_OBJECT_KEY, authListener);
                 updateEngToolWindow(null);
@@ -709,6 +711,7 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
                 if (getRoot() != null && OTOptions.isCheckingEngineEnabled()) {
                     _checker.check(getRoot(), getTree(), OT.getMagnitudeTable());
                 }
+                BagsManager.instance().watch(getRoot());
             }
 
             // Finally, update title and actions
@@ -873,6 +876,7 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
             return;
         }
         if (p != null) {
+            BagsManager.instance().unwatch(p);
             treeSnapshots.remove(p.getNodeKey());
         }
         tryNavigate(_history.delete());
@@ -880,6 +884,7 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
 
     public void closeProgram(ISPProgram node) {
         if (node != null) {
+            BagsManager.instance().unwatch(node);
             treeSnapshots.remove(node.getNodeKey());
         }
         tryNavigate(_history.delete(node));
@@ -887,6 +892,10 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
 
     /** Close the current viewer window, but don't exit the application, even if it is the last window. */
     private void closeViewer() {
+        if (getRoot() != null) {
+            BagsManager.instance().unwatch(getRoot());
+        }
+
         tryNavigate(_history.empty());
         treeSnapshots.clear();
         try {
@@ -1077,4 +1086,3 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
         getParentFrame().rebuildPluginMenu();
     }
 }
-

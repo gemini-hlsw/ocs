@@ -1,6 +1,5 @@
 package jsky.app.ot.gemini.editor.targetComponent
 
-import edu.gemini.ags.api.AgsAnalysis
 import edu.gemini.spModel.obs.context.ObsContext
 
 import jsky.app.ot.ags.AgsContext
@@ -28,21 +27,11 @@ class GuidingControls extends GridBagPanel {
     insets = new Insets(0, 5, 0, 10)
   }
 
-  val autoGuideStarButton = new Button("Auto GS") {
-    def update(analysis: List[AgsAnalysis]): Unit = {
-      enabled = analysis.nonEmpty // if empty, no strategy so no search
-    }
-  }
-
-  layout(autoGuideStarButton) = new Constraints {
-    gridx = 2
-    insets = new Insets(0, 0, 0, 5)
-  }
-
   val manualGuideStarButton = new Button("Manual GS")
 
   layout(manualGuideStarButton) = new Constraints {
-    gridx  = 3
+    gridx  = 2
+    insets = new Insets(0, 0, 0, 5)
   }
 
   def update(ctxOpt: edu.gemini.shared.util.immutable.Option[ObsContext]): Unit = {
@@ -53,5 +42,4 @@ class GuidingControls extends GridBagPanel {
     guiderLabel.visible = supports
     autoGuideStarGuiderSelector.getUi.setVisible(supports)
   }
-
 }
