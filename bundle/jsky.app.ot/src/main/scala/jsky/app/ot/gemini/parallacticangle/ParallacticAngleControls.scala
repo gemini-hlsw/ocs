@@ -9,7 +9,7 @@ import javax.swing.border.EtchedBorder
 import edu.gemini.pot.sp.ISPObsComponent
 import edu.gemini.skycalc.Angle
 import edu.gemini.spModel.core.Site
-import edu.gemini.spModel.inst.{ParallacticAngleDuration, ParallacticAngleDurationMode, ParallacticAngleSupport}
+import edu.gemini.spModel.inst.ParallacticAngleSupport
 import edu.gemini.spModel.obs.{ObsTargetCalculatorService, SPObservation, SchedulingBlock}
 import edu.gemini.spModel.obscomp.SPInstObsComp
 import edu.gemini.spModel.rich.shared.immutable._

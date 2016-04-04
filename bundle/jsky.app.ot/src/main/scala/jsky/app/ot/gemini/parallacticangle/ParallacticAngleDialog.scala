@@ -9,7 +9,6 @@ import edu.gemini.shared.gui.monthview.MonthView.Ymd
 import edu.gemini.shared.gui.monthview.{DateSelectionMode, MonthView}
 import edu.gemini.shared.gui.textComponent.{NumberField, SelectOnFocus, TimeOfDayText}
 import edu.gemini.spModel.core.Site
-import edu.gemini.spModel.inst.ParallacticAngleDuration
 import edu.gemini.spModel.obs.SchedulingBlock
 import edu.gemini.spModel.obs.plannedtime.{PlannedTimeCalculator, PlannedTime}
 import jsky.app.ot.util.TimeZonePreference
