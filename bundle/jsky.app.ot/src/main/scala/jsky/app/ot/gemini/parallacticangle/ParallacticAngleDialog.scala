@@ -9,10 +9,11 @@ import edu.gemini.shared.gui.monthview.MonthView.Ymd
 import edu.gemini.shared.gui.monthview.{DateSelectionMode, MonthView}
 import edu.gemini.shared.gui.textComponent.{NumberField, SelectOnFocus, TimeOfDayText}
 import edu.gemini.spModel.core.Site
-import edu.gemini.spModel.inst.{ParallacticAngleDuration, ParallacticAngleDurationMode}
-import edu.gemini.spModel.obs.{SPObservation, SchedulingBlock}
+import edu.gemini.spModel.obs.SchedulingBlock
+import edu.gemini.spModel.obs.plannedtime.{PlannedTimeCalculator, PlannedTime}
 import jsky.app.ot.util.TimeZonePreference
 
+import scala.collection.JavaConverters._
 import scala.swing.Swing._
 import scala.swing._
 import scala.swing.event.{FocusGained, ValueChanged, ButtonClicked, FocusLost}
@@ -21,13 +22,9 @@ import scala.swing.event.{FocusGained, ValueChanged, ButtonClicked, FocusLost}
 
 // This is horrific, but it seems that Scala Windows and Java Windows are not compatible.
 class ParallacticAngleDialog(owner: java.awt.Window, observation: ISPObservation,
-                             var duration: ParallacticAngleDuration, site: Site) extends Dialog {
+                             osb: Option[SchedulingBlock], site: Site) extends Dialog {
 
-  // Scheduling block.
-  val schedulingBlock = observation.getDataObject.asInstanceOf[SPObservation].getSchedulingBlock.getOrElse(new SchedulingBlock(new Date().getTime, 0))
-
-  // The start date and time managed by this widget.
-  var startTime: Option[Long] = None
+  var schedulingBlock = osb.getOrElse(SchedulingBlock.apply(System.currentTimeMillis, 0L))
   private var _timeZone = TimeZonePreference.get
 
   title     = "Parallactic Angle Calculation"
@@ -138,7 +135,7 @@ class ParallacticAngleDialog(owner: java.awt.Window, observation: ISPObservation
     }
 
     object remainingTimeButton extends RadioButton {
-      val remainingTime = ParallacticAngleDuration.calculateRemainingTime(observation).toDouble / 1000 / 60
+      val remainingTime = calculateRemainingTime(observation).toDouble / 1000 / 60
       text = f"Use Remaining Execution Time Estimate ($remainingTime%.1f min)"
     }
     layout(remainingTimeButton) = new Constraints() {
@@ -168,9 +165,9 @@ class ParallacticAngleDialog(owner: java.awt.Window, observation: ISPObservation
     }
 
     // Set the number of minutes of duration, converting from ms.
-    val durationField = new NumberField(Some(duration.getExplicitDuration / 60000.0), allowEmpty = false) {
+    val durationField = new NumberField(Some(schedulingBlock.duration / 60000.0), allowEmpty = false) {
       peer.setColumns(5)
-      enabled = duration.getParallacticAngleDurationMode == ParallacticAngleDurationMode.EXPLICITLY_SET
+      enabled = !schedulingBlock.useRemainingTime
     }
 
     // Reset duration to 0.0 if nonsense is typed in and the focus is lost.
@@ -200,7 +197,7 @@ class ParallacticAngleDialog(owner: java.awt.Window, observation: ISPObservation
     }
 
     new ButtonGroup(remainingTimeButton, setToButton) {
-      if (duration.getParallacticAngleDurationMode == ParallacticAngleDurationMode.REMAINING_TIME) select(remainingTimeButton)
+      if (schedulingBlock.useRemainingTime) select(remainingTimeButton)
       else select(setToButton)
     }
 
@@ -251,20 +248,13 @@ class ParallacticAngleDialog(owner: java.awt.Window, observation: ISPObservation
     }
 
     // The duration managed by this widget.
-    def fetchDuration: ParallacticAngleDuration = {
-      val mode = {
-        if (remainingTimeButton.selected) ParallacticAngleDurationMode.REMAINING_TIME
-        else ParallacticAngleDurationMode.EXPLICITLY_SET
-      }
-      ParallacticAngleDuration.getInstance(mode, (durationField.text.toDouble * 60 * 1000).toLong)
-    }
+    def fetchDuration: Long =
+      (durationField.text.toDouble * 60 * 1000).toLong
 
     listenTo(okButton, cancelButton)
     reactions += {
       case ButtonClicked(`okButton`)     =>
-        startTime = Some(selection(_timeZone))
-        duration = fetchDuration
-
+        schedulingBlock = SchedulingBlock(selection(_timeZone), fetchDuration)
         TimeZonePreference.set(_timeZone)
         close()
         dispose()
@@ -290,4 +280,13 @@ class ParallacticAngleDialog(owner: java.awt.Window, observation: ISPObservation
   // Now center on the Java window.
   pack()
   location = owner.getLocationOnScreen
-}
+
+  def calculateRemainingTime(ispObservation: ISPObservation): Long =
+    PlannedTimeCalculator.instance
+      .calc(ispObservation)
+      .steps.asScala
+      .filterNot(_.executed)
+      .map(_.totalTime)
+      .sum
+
+  }
