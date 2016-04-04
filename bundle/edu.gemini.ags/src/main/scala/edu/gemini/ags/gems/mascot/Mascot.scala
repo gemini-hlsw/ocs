@@ -26,11 +26,11 @@ object Mascot {
 
   // Default progress callback, called for each asterism as it is calculated
   val defaultProgress:ProgressFunction = (s: Strehl, count: Int, total: Int) => {
-    Log.info(s"Asterism #$count")
-    for (i <- s.stars.indices) {
-      Log.finer(s"[${s.stars(i).x}%.1f,${s.stars(i).y}%.1f]")
-    }
-    Log.info(f"Strehl over ${s.halffield * 2}%.1f: avg=${s.avgstrehl * 100}%.1f  rms=${s.rmsstrehl * 100}%.1f  min=${s.minstrehl * 100}%.1f  max=${s.maxstrehl * 100}%.1f")
+    // Log.info(s"Asterism #$count")
+    // for (i <- s.stars.indices) {
+    //   Log.finer(s"[${s.stars(i).x}%.1f,${s.stars(i).y}%.1f]")
+    // }
+    // Log.info(f"Strehl over ${s.halffield * 2}%.1f: avg=${s.avgstrehl * 100}%.1f  rms=${s.rmsstrehl * 100}%.1f  min=${s.minstrehl * 100}%.1f  max=${s.maxstrehl * 100}%.1f")
     true
   }
 
@@ -58,7 +58,7 @@ object Mascot {
   def computeStrehl(factor: Double, st: StarTriple): Option[Strehl] = {
     st match {
       case StarTriple(n1, Some(n2), n3) if !doesItFit(n1, n2, n3) =>
-        Log.warning("Skipped. Does not fit.")
+        // Log.warning("Skipped. Does not fit.")
         None
       case s                                  =>
         //          sdata = mascot_compute_strehl();
@@ -93,7 +93,7 @@ object Mascot {
     val pairs = AllPairsAndTriples.allPairs(filteredStarList)
     val total = trips.length + pairs.length + ns
 
-    Log.info(s"Mascot.findBestAsterism: input stars: $ns, total asterisms: $total")
+    // Log.info(s"Mascot.findBestAsterism: input stars: $ns, total asterisms: $total")
 
     // Compute strehl for a sets of stars
     @tailrec
@@ -211,7 +211,7 @@ object Mascot {
     } while (sum(valid) > nstar_limit)
     crowd_rad -= 2
 
-    Log.info(s"Select stars: found optimum crowding radius=$crowd_rad")
+    // Log.info(s"Select stars: found optimum crowding radius=$crowd_rad")
 
     starList.zipWithIndex collect {
       case (s, i) if valid(i) != 0.0 => s
