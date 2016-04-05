@@ -206,7 +206,7 @@ class ParallacticAngleControls extends GridBagPanel with Publisher {
       val dateTimeStr = dateFormat.format(new Date(sb.start))
 
       // Include tenths of a minute if not even.
-      val duration = sb.duration / 60000.0
+      val duration = sb.durationOrZero / 60000.0
       val durationFmt = if (Math.round(duration * 10) == (Math.floor(duration) * 10).toLong) "%.0f" else "%.1f"
       //val durationStr = durationFmt.format(duration)
       //val pluralOrNot = if ("1".equals(durationStr)) "" else "s"

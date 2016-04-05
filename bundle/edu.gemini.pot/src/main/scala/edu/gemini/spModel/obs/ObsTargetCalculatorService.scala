@@ -50,8 +50,8 @@ object ObsTargetCalculatorService {
       // science time is plannedTime.totalTime - plannedTime.setup.time
       // Ideally, if you hover over duration box in GUI, should say acquisition + science time OR not.
 
-      // Since we need start < end explicitly, if the duration is 0, we cannot use it.
-      val duration = if (b.duration > 0) b.duration else plannedTime.totalTime
+      // Since we need start < end explicitly, if the duration is None, we cannot use it.
+      val duration = b.duration getOrElse plannedTime.totalTime
       val end      = b.start + duration
 
       // If the duration is going to be smaller than the default step size of 30 seconds used by the
