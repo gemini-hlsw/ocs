@@ -77,6 +77,10 @@ class InstantiationFunctorTest extends SpModelTestBase {
     os.foreach(func.add)
     func.execute(getOdb, null, null)
 
+    // If the functor ended with an exception, rethrow it so it stops the test
+    // as well.
+    Option(func.getException).foreach { ex => throw ex }
+
     val obsKeys = os.map(_.getNodeKey).toSet
     getProgram.getAllObservations.asScala.toList.filter(o => obsKeys(o.getNodeKey))
   }
