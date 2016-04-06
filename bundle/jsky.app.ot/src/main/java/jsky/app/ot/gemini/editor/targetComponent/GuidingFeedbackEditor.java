@@ -20,7 +20,7 @@ public final class GuidingFeedbackEditor implements TelescopePosEditor {
     @Override
     public void edit(final Option<ObsContext> ctxOpt, final SPTarget target, ISPNode node) {
         final AgsMagnitude.MagnitudeTable mt = OT.getMagnitudeTable();
-        if (ctxOpt.isEmpty()) {
+        if (ctxOpt.isEmpty() || target.isTooTarget()) {
             tab.clear();
         } else {
             tab.showRows(GuidingFeedback.targetAnalysis(ctxOpt.getValue(), mt, target));

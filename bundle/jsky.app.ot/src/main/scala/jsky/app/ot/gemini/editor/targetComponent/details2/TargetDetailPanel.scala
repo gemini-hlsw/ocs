@@ -18,6 +18,7 @@ final class TargetDetailPanel extends JPanel with TelescopePosEditor with Reentr
 
   private val nonsidereal = new NonSiderealDetailEditor
   private val sidereal    = new SiderealDetailEditor
+  private val too         = new TooDetailEditor
 
   val allEditors      = List(nonsidereal, sidereal)
   val allEditorsJava = allEditors.asJava
@@ -59,14 +60,15 @@ final class TargetDetailPanel extends JPanel with TelescopePosEditor with Reentr
   def edit(obsContext: GOption[ObsContext], spTarget: SPTarget, node: ISPNode): Unit = {
 
     // Create or replace the existing detail editor, if needed
-    val newTde = spTarget.getTarget.fold(_ => ???, _ => sidereal, _ => nonsidereal)
+    val newTde = spTarget.getTarget.fold(_ => too, _ => sidereal, _ => nonsidereal)
 
     if (tde != newTde) {
       if (tde != null) remove(tde)
       tde = newTde
       add(tde, new GridBagConstraints() <| { c =>
-        c.gridx = 0
-        c.gridy = 0
+        c.anchor = GridBagConstraints.NORTH
+        c.gridx  = 0
+        c.gridy  = 0
       })
       revalidate()
       repaint()

@@ -225,7 +225,7 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor wit
     programId = node.getProgramID
 
     // we only show the source editor for the base/science target, and we also only need to update it if visible
-    visible = if (obsContext.isDefined) obsContext.getValue.getTargets.getBase == spTarget else false
+    visible = obsContext.isDefined && obsContext.getValue.getTargets.getBase == spTarget && !spt.isTooTarget
     if (visible) {
 
       deafTo(editElements:_*)
