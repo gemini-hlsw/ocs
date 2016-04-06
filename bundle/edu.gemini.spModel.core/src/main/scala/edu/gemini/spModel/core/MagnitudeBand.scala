@@ -17,6 +17,8 @@ sealed abstract class MagnitudeBand private (val name: String, val center: Wavel
 
   val end:   Wavelength = center + width / 2
 
+  final override def toString = name
+
 }
 
 object MagnitudeBand {
