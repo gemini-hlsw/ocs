@@ -161,7 +161,7 @@ final class SPTarget(private var target: Target) extends WatchablePos {
     gcoords(time)(_.dec.toDegrees)
 
   def getDecString(time: GOLong): GOption[String] =
-    gcoords(time)(_.dec.toAngle.formatDMS)
+    gcoords(time)(_.dec.formatDMS)
 
   def getSkycalcCoordinates(time: GOLong): GOption[SCoordinates] =
     gcoords(time)(cs => new SCoordinates(cs.ra.toDegrees, cs.dec.toDegrees))
