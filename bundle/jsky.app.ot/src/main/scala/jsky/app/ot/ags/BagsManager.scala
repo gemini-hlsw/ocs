@@ -12,8 +12,9 @@ import edu.gemini.catalog.votable.{CatalogException, GenericError}
 import edu.gemini.pot.sp._
 import edu.gemini.spModel.core.SPProgramID
 import edu.gemini.spModel.guide.GuideProbe
-import edu.gemini.spModel.obs.{ObservationStatus, SPObservation}
+import edu.gemini.spModel.obs.{ObsClassService, ObservationStatus, SPObservation}
 import edu.gemini.spModel.obs.context.ObsContext
+import edu.gemini.spModel.obsclass.ObsClass
 import edu.gemini.spModel.rich.shared.immutable._
 import edu.gemini.spModel.target.env.{AutomaticGroup, GuideEnv, GuideEnvironment}
 import jsky.app.ot.OT
@@ -118,9 +119,11 @@ final class BagsManager(executorService: ExecutorService) {
       !curHash.contains(newHash)
     }
 
-    def notObserved(o: ISPObservation): Boolean = {
+    def notObserved(o: ISPObservation): Boolean =
       ObservationStatus.computeFor(o) != ObservationStatus.OBSERVED
-    }
+
+    def notDaytimeCalibration(o: ISPObservation): Boolean =
+      ObsClassService.lookupObsClass(o) != ObsClass.DAY_CAL
 
     Option(observation).foreach { obs =>
       synchronized {
@@ -132,7 +135,12 @@ final class BagsManager(executorService: ExecutorService) {
           // or (b) we don't care about that program anymore, so we're done.
           if (dequeue(key, obs.getProgramID)) {
             // Otherwise construct an obs context, verify that it's bagworthy, and go
-            ObsContext.create(obs).asScalaOpt.filter(ctx => isEligibleForBags(ctx) && hasBeenUpdated(obs, ctx) && notObserved(obs)).foreach { ctx =>
+            ObsContext.create(obs).asScalaOpt.filter(ctx =>
+              isEligibleForBags(ctx)
+              && hasBeenUpdated(obs, ctx)
+              && notObserved(obs)
+              && notDaytimeCalibration(obs)
+            ).foreach { ctx =>
               //   do the lookup
               //   on success {
               //      if we're in the queue again, it means something changed while this task was
