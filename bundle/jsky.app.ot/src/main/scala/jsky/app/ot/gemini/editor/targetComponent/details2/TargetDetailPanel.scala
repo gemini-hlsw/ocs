@@ -35,8 +35,8 @@ final class TargetDetailPanel extends JPanel with TelescopePosEditor with Reentr
 
   def curDetailEditorJava: GOption[TargetDetailEditor] = curDetailEditor.asGeminiOpt
 
-  val source = new SourceDetailsEditor
-  val gfe    = new GuidingFeedbackEditor
+  val source                = new SourceDetailsEditor
+  val guidingFeedbackEditor = new GuidingFeedbackEditor
 
   // Put it all together
   setLayout(new GridBagLayout)
@@ -48,7 +48,7 @@ final class TargetDetailPanel extends JPanel with TelescopePosEditor with Reentr
     c.weighty   = 1.0
     c.fill      = GridBagConstraints.BOTH
   })
-  add(gfe.getComponent, new GridBagConstraints() <| { c =>
+  add(guidingFeedbackEditor.getComponent, new GridBagConstraints() <| { c =>
     c.gridx     = 0
     c.gridy     = 1
     c.weightx   = 1
@@ -75,10 +75,10 @@ final class TargetDetailPanel extends JPanel with TelescopePosEditor with Reentr
     }
 
     // Forward the `edit` call.
-    tpw.   edit(obsContext, spTarget, node)
-    tde.   edit(obsContext, spTarget, node)
-    gfe.   edit(obsContext, spTarget, node)
-    source.edit(obsContext, spTarget, node)
+    tpw.                  edit(obsContext, spTarget, node)
+    tde.                  edit(obsContext, spTarget, node)
+    guidingFeedbackEditor.edit(obsContext, spTarget, node)
+    source.               edit(obsContext, spTarget, node)
 
   }
 
