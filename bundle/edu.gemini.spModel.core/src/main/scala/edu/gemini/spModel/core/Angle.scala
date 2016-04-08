@@ -1,5 +1,7 @@
 package edu.gemini.spModel.core
 
+import java.text.DecimalFormat
+
 import scalaz._, Scalaz._
 
 /** An angle, convertible to various representations. */
@@ -343,7 +345,7 @@ object Angle {
     def hours: Int
     def minutes: Int
     def seconds: Double
-    override def toString = s"DMS(${format3(hours, minutes, seconds)})"
+    override def toString = s"HMS(${format3(hours, minutes, seconds, 24, ":", 3)})"
   }
 
   /**
@@ -354,7 +356,7 @@ object Angle {
     def degrees: Int
     def minutes: Int
     def seconds: Double
-    override def toString = s"DMS(${format3(degrees, minutes, seconds)})"
+    override def toString = s"DMS(${format3(degrees, minutes, seconds, 360, ":", 2)})"
   }
 
   /** @group Type Members */
@@ -376,41 +378,52 @@ object Angle {
    * seconds.
    * @group Formatters
    */
-  def formatSexigesimal(a: Angle): String = {
+  def formatSexigesimal(a: Angle, sep: String = ":", fractionalDigits: Int = 2): String = {
     val dms = a.toSexigesimal
-    format3(dms.degrees, dms.minutes, dms.seconds)
+    format3(dms.degrees, dms.minutes, dms.seconds, 360, sep, fractionalDigits)
   }
 
   /**
    * Alias for [[Angle.formatSexigesimal]].
    * @group Formatters
    */
-  def formatDMS(a: Angle): String =
-    formatSexigesimal(a)
+  def formatDMS(a: Angle, sep: String = ":", fractionalDigits: Int = 2): String =
+    formatSexigesimal(a, sep, fractionalDigits)
 
   /**
    * Format the given `Angle` in hour angle format `h:mm:ss` with three fractional digits for
    * seconds.
    * @group Formatters
    */
-  def formatHourAngle(a: Angle): String = {
+  def formatHourAngle(a: Angle, sep: String = ":", fractionalDigits: Int = 3): String = {
     val hms = a.toHourAngle
-    format3(hms.hours, hms.minutes, hms.seconds)
+    format3(hms.hours, hms.minutes, hms.seconds, 24, sep, fractionalDigits)
   }
 
   /**
    * Alias for [[Angle.formatHourAngle]].
    * @group Formatters
    */
-  def formatHMS(a: Angle): String =
-    formatHourAngle(a)
+  def formatHMS(a: Angle, sep: String = ":", fractionalDigits: Int = 3): String =
+    formatHourAngle(a, sep, fractionalDigits)
 
   // Abstract over HMS/DMS
-  private[core] def format3(a: Int, b: Int, c: Double): String =
-    if (f"$c%06.03f".startsWith("60")) // grr
-      format3(a, b + 1, 0)
-    else
-      f"$a%d:$b%02d:$c%06.03f"
+  private[core] def format3(a: Int, b: Int, c: Double, max: Int, sep: String, fractionalDigits: Int): String = {
+    val df =
+      if (fractionalDigits > 0) new DecimalFormat(s"00.${"0" * fractionalDigits}")
+      else new DecimalFormat("00")
+
+    val s0 = df.format(c)
+    val (s, carryC) = s0.startsWith("60") ? ((df.format(0), 1)) | ((s0, 0))
+
+    val m0 = b + carryC
+    val (m, carryB) = (m0 == 60) ? (("00", 1)) | ((f"$m0%02d", 0))
+
+    val x = a + carryB
+
+    if (x == max) s"0${sep}00$sep${df.format(0)}"
+    else f"$x%d$sep$m$sep$s"
+  }
 
   def signedDegrees(d: Double): Double =
     ((d % 360) + 360) % 360 match {
