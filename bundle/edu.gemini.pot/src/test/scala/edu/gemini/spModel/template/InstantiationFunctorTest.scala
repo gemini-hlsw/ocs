@@ -33,6 +33,10 @@ class InstantiationFunctorTest extends SpModelTestBase {
     val fact = getFactory
     val prog = getProgram
 
+    // Remove any existing observations.
+    prog.setObservations(java.util.Collections.emptyList())
+    prog.setGroups(java.util.Collections.emptyList())
+
     // Setup the test program with a single template group with a single target
     // at (RA, Dec) (1, 2) and CC50 observing conditions.
     val tfNode = fact.createTemplateFolder(prog, WithSomeNewKey)
@@ -72,6 +76,10 @@ class InstantiationFunctorTest extends SpModelTestBase {
     val func = new ReapplicationFunctor(UserRolePrivileges.STAFF)
     os.foreach(func.add)
     func.execute(getOdb, null, null)
+
+    // If the functor ended with an exception, rethrow it so it stops the test
+    // as well.
+    Option(func.getException).foreach { ex => throw ex }
 
     val obsKeys = os.map(_.getNodeKey).toSet
     getProgram.getAllObservations.asScala.toList.filter(o => obsKeys(o.getNodeKey))
