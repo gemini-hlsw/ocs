@@ -432,8 +432,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
         // Update the guiding feedback.
         final ISPObsComponent node = getContextTargetObsComp();
-        final SPTarget      target = TargetSelection.getTargetForNode(env, node).getOrNull();
-        _w.detailEditor.gfe().edit(ctx, target, node);
+        TargetSelection.getTargetForNode(env, node).foreach(target -> _w.detailEditor.guidingFeedbackEditor().edit(ctx, target, node));
     }
 
 

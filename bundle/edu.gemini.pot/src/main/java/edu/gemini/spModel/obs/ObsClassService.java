@@ -56,7 +56,7 @@ public final class ObsClassService {
             }
         }
 
-        // default value is sicence
+        // default value is science
         if (obsClass == null) obsClass = ObsClass.SCIENCE;
 
         // Cache the results.
