@@ -109,7 +109,7 @@ final class BagsManager(executorService: ExecutorService) {
         case _                                                   => false
       }
       enabledGroup &&
-        (AgsRegistrar.validStrategies(ctx).nonEmpty) &&
+        AgsRegistrar.validStrategies(ctx).nonEmpty &&
         ObsClassService.lookupObsClass(observation) != ObsClass.DAY_CAL
 
     }
