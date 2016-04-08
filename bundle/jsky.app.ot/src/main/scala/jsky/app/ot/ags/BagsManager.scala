@@ -107,7 +107,10 @@ final class BagsManager(executorService: ExecutorService) {
         case AutomaticGroup.Initial | AutomaticGroup.Active(_,_) => true
         case _                                                   => false
       }
-      enabledGroup && (ctx.getInstrument.getType != SPComponentType.INSTRUMENT_GPI)
+      enabledGroup &&
+        (ctx.getInstrument.getType != SPComponentType.INSTRUMENT_GPI) &&
+        ObsClassService.lookupObsClass(observation) != ObsClass.DAY_CAL
+
     }
 
     def hasBeenUpdated(o: ISPObservation, ctx: ObsContext): Boolean = {
@@ -121,9 +124,6 @@ final class BagsManager(executorService: ExecutorService) {
 
     def notObserved(o: ISPObservation): Boolean =
       ObservationStatus.computeFor(o) != ObservationStatus.OBSERVED
-
-    def notDaytimeCalibration(o: ISPObservation): Boolean =
-      ObsClassService.lookupObsClass(o) != ObsClass.DAY_CAL
 
     Option(observation).foreach { obs =>
       synchronized {
@@ -139,7 +139,6 @@ final class BagsManager(executorService: ExecutorService) {
               isEligibleForBags(ctx)
               && hasBeenUpdated(obs, ctx)
               && notObserved(obs)
-              && notDaytimeCalibration(obs)
             ).foreach { ctx =>
               //   do the lookup
               //   on success {
