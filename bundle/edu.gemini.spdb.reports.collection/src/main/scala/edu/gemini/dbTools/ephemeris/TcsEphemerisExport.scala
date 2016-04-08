@@ -14,7 +14,7 @@ import java.io.File
 import java.nio.charset.StandardCharsets
 import java.nio.file.{Files, Paths}
 import java.security.Principal
-import java.text.{DecimalFormat, SimpleDateFormat}
+import java.text.SimpleDateFormat
 import java.time.Instant
 import java.util.logging.{Level, Logger}
 import java.util.{TimeZone, Date}
@@ -119,33 +119,10 @@ object TcsEphemerisExport {
 
 
   private def formatCoords(coords: Coordinates): String = {
-    // TODO: fix coordinate formating in core.spModel and make it flexible
-    // TODO: enough to specify precision, then use that instead of doing it here
-    def normalize(a: Int, b: Int, c: Double, fractionalDigits: Int): String = {
-      val df = new DecimalFormat("00." + ("0" * fractionalDigits))
+    val ra  = Angle.formatHMS(coords.ra.toAngle, " ", 4)
+    val dec = Declination.formatDMS(coords.dec, " ", 3)
 
-      val s0 = df.format(c)
-      val (s, carryC) = s0.startsWith("60.") ? (("00", 1)) | ((s0, 0))
-
-      val m0 = b + carryC
-      val (m, carryB) = (m0 == 60) ? (("00", 1)) | ((f"$m0%02d", 0))
-
-      val x0 = a + carryB
-      val x  = f"$x0%02d"
-
-      s"$x $m $s"
-    }
-
-    val ra0  = coords.ra.toAngle.toHourAngle
-    val ra1  = normalize(ra0.hours, ra0.minutes, ra0.seconds, 4)
-    val raS  = ra1.startsWith("24") ? "00 00 00.0000" | ra1
-
-    val dec0 = coords.dec.toDegrees
-    val sgn  = (dec0 < 0) ? "-" | ""
-    val dec1 = Angle.fromDegrees(dec0.abs).toSexigesimal
-    val decS = sgn + normalize(dec1.degrees, dec1.minutes, dec1.seconds, 3)
-
-    s"$raS $decS"
+    s"$ra $dec"
   }
 
   /** Writes the given ephemeris map to a String in the format expected by the
