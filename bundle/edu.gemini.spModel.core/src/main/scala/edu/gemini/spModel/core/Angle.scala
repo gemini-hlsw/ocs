@@ -409,18 +409,19 @@ object Angle {
 
   // Abstract over HMS/DMS
   private[core] def format3(a: Int, b: Int, c: Double, max: Int, sep: String, fractionalDigits: Int): String = {
-    val zs = "0" * fractionalDigits
-    val df = new DecimalFormat(s"00.$zs")
+    val df =
+      if (fractionalDigits > 0) new DecimalFormat(s"00.${"0" * fractionalDigits}")
+      else new DecimalFormat("00")
 
     val s0 = df.format(c)
-    val (s, carryC) = s0.startsWith("60.") ? ((s"00.$zs", 1)) | ((s0, 0))
+    val (s, carryC) = s0.startsWith("60") ? ((df.format(0), 1)) | ((s0, 0))
 
     val m0 = b + carryC
     val (m, carryB) = (m0 == 60) ? (("00", 1)) | ((f"$m0%02d", 0))
 
     val x = a + carryB
 
-    if (x == max) s"0${sep}00${sep}00.$zs"
+    if (x == max) s"0${sep}00$sep${df.format(0)}"
     else f"$x%d$sep$m$sep$s"
   }
 
