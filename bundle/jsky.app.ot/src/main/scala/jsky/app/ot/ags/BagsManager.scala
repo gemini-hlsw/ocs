@@ -101,14 +101,15 @@ final class BagsManager(executorService: ExecutorService) {
     * a delay of at least `delay` milliseconds.
     */
   def enqueue(observation: ISPObservation, delay: Long): Unit = {
-    // Performs checks to rule out disabled guide groups, instruments like GPI, etc.
+    // Performs checks to rule out disabled guide groups, instruments without guiding strategies (e.g. GPI),
+    // observation classes that do not have guiding (e.g. daytime calibration).
     def isEligibleForBags(ctx: ObsContext): Boolean = {
       val enabledGroup = ctx.getTargets.getGuideEnvironment.guideEnv.auto match {
         case AutomaticGroup.Initial | AutomaticGroup.Active(_,_) => true
         case _                                                   => false
       }
       enabledGroup &&
-        (ctx.getInstrument.getType != SPComponentType.INSTRUMENT_GPI) &&
+        (AgsRegistrar.validStrategies(ctx).nonEmpty) &&
         ObsClassService.lookupObsClass(observation) != ObsClass.DAY_CAL
 
     }
