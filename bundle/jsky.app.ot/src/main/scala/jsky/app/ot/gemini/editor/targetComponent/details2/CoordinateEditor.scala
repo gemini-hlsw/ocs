@@ -54,8 +54,10 @@ class CoordinateEditor extends TelescopePosEditor with ReentrancyHack {
       def enable(t: SiderealTarget): Unit = {
         ra.setEnabled(true)
         ra.setText(t.coordinates.ra.toAngle.formatHMS)
+        ra.setForeground(Color.BLACK)
         dec.setEnabled(true)
         dec.setText(t.coordinates.dec.formatDMS)
+        ra.setForeground(Color.BLACK)
       }
 
       def disable(t: Target): Unit = {
