@@ -17,7 +17,7 @@ import java.security.Principal
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.util.logging.{Level, Logger}
-import java.util.{TimeZone, Date}
+import java.util.{Locale, TimeZone, Date}
 
 import scalaz._
 import Scalaz._
@@ -142,7 +142,7 @@ object TcsEphemerisExport {
     * TCS.
     */
   def formatEphemeris(em: EphemerisMap): String = {
-    val dfm = new SimpleDateFormat(DateFormatString)
+    val dfm = new SimpleDateFormat(DateFormatString, Locale.US)
     dfm.setTimeZone(TimeZone.getTimeZone("UTC"))
 
     em.toList.map { case (time, (coords, raTrack, decTrack)) =>

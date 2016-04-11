@@ -9,7 +9,7 @@ import java.nio.file.{Path, Files}
 import java.security.Principal
 import java.text.SimpleDateFormat
 import java.time.Instant
-import java.util.TimeZone
+import java.util.{Locale, TimeZone}
 import java.util.function.Consumer
 import java.util.logging.Logger
 
@@ -44,7 +44,7 @@ object TcsEphemerisExportTest extends TestSupport {
     val EOE: Parser[String] = "$$EOE"
 
     object Date {
-      val Format = new SimpleDateFormat(TcsEphemerisExport.DateFormatString) {
+      val Format = new SimpleDateFormat(TcsEphemerisExport.DateFormatString, Locale.US) {
         setTimeZone(TimeZone.getTimeZone("UTC"))
       }
       def parse(utc: String): Long = synchronized {
