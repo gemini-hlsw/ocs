@@ -47,7 +47,10 @@ object ProgramGen {
   val genSomeNote:       Gen[ProgFun[ISPObsComponent]] = oneOf(genNote, genProgNote, genSchedulingNote)
 
   def genNotes: Gen[List[ProgFun[ISPObsComponent]]] =
-    sized { size => listOfN(size min 3, genSomeNote) }
+    for {
+      nc <- Gen.chooseNum(0, 3)
+      ls <- listOfN(nc, genSomeNote)
+    } yield ls
 
   private val validInstruments = SPComponentType.values().filter(_.broadType == SPComponentBroadType.INSTRUMENT).filterNot { ct =>
     ct == SPComponentType.QPT_CANOPUS ||
@@ -74,27 +77,28 @@ object ProgramGen {
       o
     }
 
-  val genGroup: Gen[ProgFun[ISPGroup]] = sized { size =>
+  val genGroup: Gen[ProgFun[ISPGroup]] =
     for {
       fg  <- genNode(_.createGroup(_, null))
       fns <- genNotes
-      fos <- listOfN(size min 3, genObs)
+      oc  <- chooseNum(0, 3)
+      fos <- listOfN(oc, genObs)
     } yield { (f: ISPFactory, p: ISPProgram) =>
       val g = fg(f, p)
       g.children = fns.sequenceU.apply(f, p) ++ fos.sequenceU.apply(f, p)
       g
     }
-  }
 
   val genTemplateGroup: Gen[ProgFun[ISPTemplateGroup]] =
     genNode(_.createTemplateGroup(_, null)).map { ftg => {
       (f: ISPFactory, p: ISPProgram) => ftg.apply(f, p) }
     }
 
-  val genTemplateFolder: Gen[ProgFun[ISPTemplateFolder]] = sized { size =>
+  val genTemplateFolder: Gen[ProgFun[ISPTemplateFolder]] =
     for {
       ftf <- genNode(_.createTemplateFolder(_, null))
-      ftg <- listOfN(size min 3, genTemplateGroup)
+      tgc <- chooseNum(0, 3)
+      ftg <- listOfN(tgc, genTemplateGroup)
     } yield { (f: ISPFactory, p: ISPProgram) =>
       val tf  = ftf(f, p)
       val tgs = ftg.sequenceU.apply(f, p).zipWithIndex.map { case (tg, i) =>
@@ -106,22 +110,23 @@ object ProgramGen {
       tf.children = tgs
       tf
     }
-  }
 
-  val genProg: Gen[ISPFactory => ISPProgram] = sized { size =>
+  val genProg: Gen[ISPFactory => ISPProgram] =
     for {
-      id <- ProgramIdGen.genSomeId
-      ns <- genNotes
-      tf <- listOfN(size % 2,   genTemplateFolder)
-      os <- listOfN(size min 3, genObs)
-      gs <- listOfN(size min 5, genGroup)
+      id  <- ProgramIdGen.genSomeId
+      ns  <- genNotes
+      tfc <- chooseNum(0, 1)
+      tf  <- listOfN(tfc, genTemplateFolder)
+      oc  <- chooseNum(0, 3)
+      os  <- listOfN(oc, genObs)
+      gc  <- chooseNum(0, 5)
+      gs  <- listOfN(gc, genGroup)
     } yield { (fact: ISPFactory) =>
       val p = fact.createProgram(null, id)
       p.children = ns.sequenceU.apply(fact, p) ++ tf.sequenceU.apply(fact, p) ++
                    os.sequenceU.apply(fact, p) ++ gs.sequenceU.apply(fact, p)
       p
     }
-  }
 
   def pickOne[T](f: ISPNode => NonEmptyList[T]): Gen[ISPNode => T] =
     choose(0, Int.MaxValue).map { i => n => {
@@ -282,7 +287,11 @@ object ProgramGen {
       genEditDeleteChild,
       genEditMoveChild)
 
-  val genEdits: Gen[List[ProgEdit]] = sized { size => listOfN(size, genEdit) }
+  val genEdits: Gen[List[ProgEdit]] =
+    for {
+      ec  <- chooseNum(0, 10)
+      eds <- listOfN(ec, genEdit)
+    } yield eds
 
   val genEditedProg: Gen[ProgFun[ISPProgram]] = {
     // This copy is a bit different from ISPFactory.copyWithSameKeys in that it

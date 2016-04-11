@@ -404,9 +404,10 @@ trait OcsBundle {
 
   lazy val bundle_edu_gemini_spdb_reports_collection = 
     project.in(file("bundle/edu.gemini.spdb.reports.collection")).dependsOn(
+      bundle_edu_gemini_horizons_api,
       bundle_edu_gemini_shared_skyobject,
       bundle_edu_gemini_p2checker,
-      bundle_edu_gemini_pot,
+      bundle_edu_gemini_pot % "test->test;compile->compile",
       bundle_edu_gemini_shared_mail,
       bundle_edu_gemini_shared_util,
       bundle_edu_gemini_sp_vcs,

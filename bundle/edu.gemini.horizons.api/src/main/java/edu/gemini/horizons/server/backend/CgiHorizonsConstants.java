@@ -3,7 +3,7 @@ package edu.gemini.horizons.server.backend;
 //$Id: CgiHorizonsConstants.java 895 2007-07-24 20:18:09Z anunez $
 /**
  * Define a set of constants to be used to talk to the CGI
- * offered by the JPL Horizons service 
+ * offered by the JPL Horizons service
  */
 public final class CgiHorizonsConstants {
     public static final String HORIZONS_PROTOCOL = "http://";
@@ -29,6 +29,10 @@ public final class CgiHorizonsConstants {
     public static final String SITE_COORD = "SITE_COORD";
     public static final String SITE_COORD_GS = "'289.23944,-30.237778,2.743'";
     public static final String SITE_COORD_GN = "'204.53094,19.823806,4.2134'";
+
+    public static final String EXTRA_PRECISION = "extra_prec";
+    public static final String TIME_DIGITS     = "time_digits";
+    public static final String FRACTIONAL_SEC  = "FRACSEC";
 
     public static final String YES = "YES";
     public static final String NO = "NO";
