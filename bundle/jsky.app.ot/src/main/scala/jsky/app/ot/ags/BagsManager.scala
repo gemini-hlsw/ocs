@@ -7,6 +7,7 @@ import java.util.concurrent.TimeoutException
 import java.util.concurrent._
 import java.util.logging.{Level, Logger}
 
+import edu.gemini.ags.api.AgsStrategy.Assignment
 import edu.gemini.ags.api.{AgsHash, AgsRegistrar, AgsStrategy}
 import edu.gemini.catalog.votable.{CatalogException, GenericError}
 import edu.gemini.pot.sp._
@@ -128,6 +129,16 @@ final class BagsManager(executorService: ExecutorService) {
 
     Option(observation).foreach { obs =>
       synchronized {
+        def applySwingResults(opt: Option[AgsStrategy.Selection]): Unit = {
+          Swing.onEDT {
+            obs.getProgram.removeCompositeChangeListener(CompositePropertyChangeListener)
+            obs.getProgram.removeStructureChangeListener(StructurePropertyChangeListener)
+            BagsManager.applyResults(TpeContext(obs), opt)
+            obs.getProgram.addStructureChangeListener(StructurePropertyChangeListener)
+            obs.getProgram.addCompositeChangeListener(CompositePropertyChangeListener)
+          }
+        }
+
         val key = obs.getNodeKey
         state += key
         Future {
@@ -136,54 +147,51 @@ final class BagsManager(executorService: ExecutorService) {
           // or (b) we don't care about that program anymore, so we're done.
           if (dequeue(key, obs.getProgramID)) {
             // Otherwise construct an obs context, verify that it's bagworthy, and go
-            ObsContext.create(obs).asScalaOpt.filter(ctx =>
-              isEligibleForBags(ctx)
-              && hasBeenUpdated(obs, ctx)
-              && notObserved(obs)
-            ).foreach { ctx =>
-              //   do the lookup
-              //   on success {
-              //      if we're in the queue again, it means something changed while this task was
-              //      running, so discard this result and do nothing,
-              //      otherwise update the model
-              //   }
-              //   on failure enqueue again, maybe with a delay depending on the failure
-              val bagsIdMsg = s"BAGS lookup on thread=${Thread.currentThread.getId} for observation=${obs.getObservationID}"
-              LOG.info(s"Performing $bagsIdMsg.")
+            ObsContext.create(obs).asScalaOpt.foreach { ctx =>
+              if (isEligibleForBags(ctx)
+                && hasBeenUpdated(obs, ctx)
+                && notObserved(obs)) {
+                //   do the lookup
+                //   on success {
+                //      if we're in the queue again, it means something changed while this task was
+                //      running, so discard this result and do nothing,
+                //      otherwise update the model
+                //   }
+                //   on failure enqueue again, maybe with a delay depending on the failure
+                val bagsIdMsg = s"BAGS lookup on thread=${Thread.currentThread.getId} for observation=${obs.getObservationID}"
+                LOG.info(s"Performing $bagsIdMsg.")
 
-              AgsRegistrar.currentStrategy(ctx).foreach { strategy =>
-                val fut = strategy.select(ctx, OT.getMagnitudeTable)
-                fut onComplete {
-                  case Success(opt) =>
-                    // If this observation is once again in the queue, then something changed while this task
-                    // was running, so discard the result.
-                    if (!state.keys(key)) {
-                      LOG.info(s"$bagsIdMsg successful. Results=${opt ? "Yes" | "No"}.")
-                      Swing.onEDT {
-                        obs.getProgram.removeCompositeChangeListener(CompositePropertyChangeListener)
-                        obs.getProgram.removeStructureChangeListener(StructurePropertyChangeListener)
-                        BagsManager.applyResults(TpeContext(obs), opt)
-                        obs.getProgram.addStructureChangeListener(StructurePropertyChangeListener)
-                        obs.getProgram.addCompositeChangeListener(CompositePropertyChangeListener)
+                AgsRegistrar.currentStrategy(ctx).foreach { strategy =>
+                  val fut = strategy.select(ctx, OT.getMagnitudeTable)
+                  fut onComplete {
+                    case Success(opt) =>
+                      // If this observation is once again in the queue, then something changed while this task
+                      // was running, so discard the result.
+                      if (!state.keys(key)) {
+                        LOG.info(s"$bagsIdMsg successful. Results=${opt ? "Yes" | "No"}.")
+                        applySwingResults(opt)
                       }
-                    }
 
-                  // We don't want to print the stack trace if the host is simply unreachable.
-                  // This is reported only as a GenericError in a CatalogException, unfortunately.
-                  case Failure(CatalogException((e: GenericError) :: _)) =>
-                    LOG.warning(s"$bagsIdMsg failed: ${e.msg}")
-                    enqueue(obs, 5000L)
+                    // We don't want to print the stack trace if the host is simply unreachable.
+                    // This is reported only as a GenericError in a CatalogException, unfortunately.
+                    case Failure(CatalogException((e: GenericError) :: _)) =>
+                      LOG.warning(s"$bagsIdMsg failed: ${e.msg}")
+                      enqueue(obs, 5000L)
 
-                  // If we timed out, we don't want to delay.
-                  case Failure(ex: TimeoutException) =>
-                    LOG.warning(s"$bagsIdMsg failed: ${ex.getMessage}")
-                    enqueue(obs, 0L)
+                    // If we timed out, we don't want to delay.
+                    case Failure(ex: TimeoutException) =>
+                      LOG.warning(s"$bagsIdMsg failed: ${ex.getMessage}")
+                      enqueue(obs, 0L)
 
-                  // For all other exceptions, print the full stack trace.
-                  case Failure(ex) =>
-                    LOG.log(Level.WARNING, s"$bagsIdMsg} failed.", ex)
-                    enqueue(obs, 5000L)
+                    // For all other exceptions, print the full stack trace.
+                    case Failure(ex) =>
+                      LOG.log(Level.WARNING, s"$bagsIdMsg} failed.", ex)
+                      enqueue(obs, 5000L)
+                  }
                 }
+              } else {
+                LOG.info(s"${obs.getObservationID} not eligible for BAGS. Clearing auto group.")
+                applySwingResults(None)
               }
             }
           }
