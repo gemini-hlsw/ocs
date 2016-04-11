@@ -5,7 +5,7 @@ import java.util.UUID
 import edu.gemini.p2checker.target.NonSiderealTargetRules
 import edu.gemini.pot.sp.{ISPObservation, SPComponentType}
 import edu.gemini.pot.util.POTUtil
-import edu.gemini.spModel.core.{SiderealTarget, HorizonsDesignation, NonSiderealTarget, Target, SPProgramID}
+import edu.gemini.spModel.core.{Site, Semester, SiderealTarget, HorizonsDesignation, NonSiderealTarget, Target, SPProgramID}
 import edu.gemini.spModel.obs.{SPObservation, SchedulingBlock}
 import edu.gemini.spModel.rich.pot.sp._
 import edu.gemini.spModel.target.SPTarget
@@ -38,11 +38,16 @@ class NonSiderealTargetRulesSpec extends RuleSpec {
 
   }
 
-  ERR_NO_SCHEDULING_BLOCK_SEM should {
+  ERR_SCHEDULING_BLOCK_SEM should {
 
-    "error if no scheduling block defined for program semester" in
-      expectAllOf(ERR_NO_SCHEDULING_BLOCK_SEM) {
-        obs(NonSiderealTarget.empty, None)
+    "error if scheduling block is outside semester" in
+      expectAllOf(ERR_SCHEDULING_BLOCK_SEM) {
+        obs(NonSiderealTarget.empty, Some(SchedulingBlock(0L)))
+      }
+
+    "no error if scheduling block is within semester" in
+      expectNoneOf(ERR_SCHEDULING_BLOCK_SEM) {
+        obs(NonSiderealTarget.empty, Some(SchedulingBlock(Semester.parse("2015A").getStartDate(Site.GS).getTime)))
       }
 
   }
