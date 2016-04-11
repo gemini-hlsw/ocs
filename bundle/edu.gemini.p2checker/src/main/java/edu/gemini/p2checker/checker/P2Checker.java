@@ -26,6 +26,7 @@ import edu.gemini.p2checker.rules.pwfs.PwfsRule;
 import edu.gemini.p2checker.rules.trecs.TrecsRule;
 import edu.gemini.p2checker.rules.flamingos2.Flamingos2Rule;
 import edu.gemini.p2checker.rules.visitor.VisitorRule;
+import edu.gemini.p2checker.target.NonSiderealTargetRules;
 import edu.gemini.pot.sp.*;
 import edu.gemini.spModel.gemini.gmos.InstGmosNorth;
 import edu.gemini.spModel.gemini.gmos.InstGmosSouth;
@@ -67,6 +68,7 @@ public final class P2Checker {
             _compositeRules.add(new SmartgcalMappingRule());
             _compositeRules.add(new PwfsRule());
             _compositeRules.add(new AgsAnalysisRule(mt));
+            _compositeRules.add(new NonSiderealTargetRules());
             if (rule != null)
                 _compositeRules.add(rule);
         }
