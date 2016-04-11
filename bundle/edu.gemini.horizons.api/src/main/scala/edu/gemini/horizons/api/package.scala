@@ -6,6 +6,7 @@ import java.time.Instant
 
 package object api {
 
+  /** Adds a few convenience methods to `EphemerisEntry`. */
   implicit class EphemerisEntryOps(ee: EphemerisEntry) {
     def timestamp: Long =
       ee.getDate.getTime

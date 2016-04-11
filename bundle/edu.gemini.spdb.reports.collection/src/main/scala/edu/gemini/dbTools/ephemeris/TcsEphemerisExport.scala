@@ -31,18 +31,28 @@ object TcsEphemerisExport {
   val DirectoryProp = "edu.gemini.dbTools.tcs.ephemeris.directory"
 
   // We will request this many elements from horizons, though the actual number
-  // provided may differ.
-  val ElementCount  = 1440
+  // provided may differ.  The TCS maximum is 1440, but horizons may return a
+  // few more than requested.
+  val ElementCount  = 1430
 
   type EphemerisElement = (Coordinates, Double, Double)
   type EphemerisMap     = Long ==>> EphemerisElement
 
-  sealed trait EEError
-  case class OdbError(ex: Throwable) extends EEError
-  case class HorizonsError(hid: HorizonsDesignation, e: HorizonsService2.HS2Error) extends EEError
-  case class WriteError(hid: HorizonsDesignation, ex: Throwable) extends EEError
+  /** Errors that may occur while exporting ephemeris data. */
+  sealed trait ExportError
 
-  object EEError {
+  /** An error that happens when working with the ODB to extract the non-
+    * sidereal observation references with their horizons ids.
+    */
+  case class OdbError(ex: Throwable) extends ExportError
+
+  /** An error that happens while working with the horizons service itself. */
+  case class HorizonsError(hid: HorizonsDesignation, e: HorizonsService2.HS2Error) extends ExportError
+
+  /** An error that happens when writing out ephemeris data for the TCS. */
+  case class WriteError(hid: HorizonsDesignation, ex: Throwable) extends ExportError
+
+  object ExportError {
     private def reportH2Error(hid: HorizonsDesignation, h2: HS2Error): (String, Option[Throwable]) = h2 match {
       case HorizonsService2.HorizonsError(e)   =>
         (s"$hid: Error communicating with horizons service", Some(e))
@@ -54,7 +64,7 @@ object TcsEphemerisExport {
         (s"$hid: No response from horizons", None)
     }
 
-    def report(e: EEError): (String, Option[Throwable]) = e match {
+    def report(e: ExportError): (String, Option[Throwable]) = e match {
       case OdbError(ex)           =>
         ("Error looking up nonsidereal observations in the database", Some(ex))
 
@@ -65,19 +75,19 @@ object TcsEphemerisExport {
         (s"$hid: Error writing ephemeris file", Some(ex))
     }
 
-    def logError(e: EEError, log: Logger, prefix: String): Unit = {
+    def logError(e: ExportError, log: Logger, prefix: String): Unit = {
       val (msg, ex) = report(e)
       log.log(Level.WARNING, s"$prefix$msg", ex.orNull)
     }
   }
 
-  type EE[A] = EitherT[IO, EEError, A]
+  type TryExport[A] = EitherT[IO, ExportError, A]
 
-  object EE {
-    def fromDisjunction[A](a:EEError \/ A): EE[A] =
+  object TryExport {
+    def fromDisjunction[A](a:ExportError \/ A): TryExport[A] =
       EitherT(IO(a))
 
-    def fromTryCatch[A](e: Throwable => EEError)(a: => A): EE[A] =
+    def fromTryCatch[A](e: Throwable => ExportError)(a: => A): TryExport[A] =
       fromDisjunction {
         \/.fromTryCatchNonFatal(a).leftMap(e)
       }
@@ -86,7 +96,7 @@ object TcsEphemerisExport {
   /** Cron job entry point.  See edu.gemini.spdb.cron.osgi.Activator.
     */
   def run(ctx: BundleContext)(tmpDir: File, log: Logger, env: java.util.Map[String, String], user: java.util.Set[Principal]): Unit = {
-    val site = SiteProperty.get(ctx)
+    val site = Option(SiteProperty.get(ctx)) | sys.error(s"Property `${SiteProperty.NAME}` not specified.")
 
     val exportDir = Option(ctx.getProperty(DirectoryProp)).fold(tmpDir) { path =>
       new File(path)
@@ -95,18 +105,18 @@ object TcsEphemerisExport {
     val odbRef = ctx.getServiceReference(classOf[IDBDatabaseService])
     val odb    = ctx.getService(odbRef)
     val night  = TwilightBoundedNight.forTime(NAUTICAL, Instant.now.toEpochMilli, site)
-    val tee    = new TcsEphemerisExport(exportDir, night, site, odb, user)
+    val exp    = new TcsEphemerisExport(exportDir, night, site, odb, user)
 
     log.info(s"Starting ephemeris lookup for $site, writing into $exportDir")
     try {
-      tee.export.run.unsafePerformIO() match {
+      exp.export.run.unsafePerformIO() match {
         case -\/(err)     =>
-          EEError.logError(err, log, "Could not refresh emphemeris data: ")
+          ExportError.logError(err, log, "Could not refresh ephemeris data: ")
 
         case \/-(updates) =>
           updates.toList.foreach { case (hid, res) =>
             res match {
-              case -\/(err)  => EEError.logError(err, log, "")
+              case -\/(err)  => ExportError.logError(err, log, "")
               case \/-(file) => log.log(Level.INFO, s"$hid: updated at ${Instant.ofEpochMilli(file.lastModified())}")
             }
           }
@@ -150,44 +160,46 @@ object TcsEphemerisExport {
 class TcsEphemerisExport(dir: File, night: Night, site: Site, odb: IDBDatabaseService, user: java.util.Set[Principal]) {
   import TcsEphemerisExport._
 
-  val lookupNonSiderealObservations: EE[HorizonsDesignation ==>> Set[String]] =
-    EE.fromTryCatch(OdbError) {
+  val start = new Date(night.getStartTime)
+  val end   = new Date(night.getEndTime)
+
+  val lookupNonSiderealObservations: TryExport[HorizonsDesignation ==>> Set[String]] =
+    TryExport.fromTryCatch(OdbError) {
       val ns = NonSiderealObservationFunctor.query(odb, user)
       (==>>.empty[HorizonsDesignation, Set[String]]/:ns) { (m, n) =>
         m.updateAppend(n.hid, Set(n.targetName))
       }
     }
 
-  val export: EE[HorizonsDesignation ==>> (EEError \/ File)] =
+  val export: TryExport[HorizonsDesignation ==>> (ExportError \/ File)] =
     lookupNonSiderealObservations >>= exportAll
 
-  private def exportAll(nos: HorizonsDesignation ==>> Set[String]): EE[HorizonsDesignation ==>> (EEError \/ File)] =
+  private def exportAll(nos: HorizonsDesignation ==>> Set[String]): TryExport[HorizonsDesignation ==>> (ExportError \/ File)] =
     EitherT(nos.mapOptionWithKey { (hid, names) =>
       // There can be multiple names for the same horizons id.  We'll just pick
       // one at random for now ...
       names.headOption.map { exportOne(dir, hid, _) }
-    }.traverse(_.run).map(_.right[EEError]))
+    }.traverse(_.run).map(_.right[ExportError]))
 
-  def exportOne(dir: File, hid: HorizonsDesignation, name: String): EE[File] =
+  def exportOne(dir: File, hid: HorizonsDesignation, name: String): TryExport[File] =
     for {
       em <- lookupEphemeris(hid)
       f  <- writeEphemeris(hid, name, em)
     } yield f
 
-  def lookupEphemeris(hid: HorizonsDesignation): EE[EphemerisMap] = {
-    val start = new Date(night.getStartTime)
-    val end   = new Date(night.getEndTime)
-    val map   = HorizonsService2.lookupEphemerisE[EphemerisElement](hid, site, start, end, ElementCount) { (ee: EphemerisEntry) =>
+  def lookupEphemeris(hid: HorizonsDesignation): TryExport[EphemerisMap] =
+    HorizonsService2.lookupEphemerisE[EphemerisElement](hid, site, start, end, ElementCount) { (ee: EphemerisEntry) =>
       ee.coords.map((_, ee.getRATrack, ee.getDecTrack))
-    }
+    }.leftMap(e => HorizonsError(hid, e): ExportError)
 
-    map.leftMap(e => HorizonsError(hid, e): EEError)
-  }
-
-  def writeEphemeris(hid: HorizonsDesignation, name: String, em: EphemerisMap): EE[File] = {
+  def writeEphemeris(hid: HorizonsDesignation, name: String, em: EphemerisMap): TryExport[File] = {
+    // TODO: taking a random string and assuming it is suitable for a filename
+    // TODO: seems like asking for trouble.  any suggestions?  URL encode?
+    // TODO: still not sure what to do about file names anyway.
     val fileName = s"${name}_${hid.toString}.eph".replaceAll("/", "-")
+
     val file     = new File(dir, fileName)
-    EE.fromTryCatch(t => WriteError(hid, t)) {
+    TryExport.fromTryCatch(t => WriteError(hid, t)) {
       Files.write(Paths.get(file.toURI), formatEphemeris(em).getBytes(StandardCharsets.UTF_8))
       file
     }
