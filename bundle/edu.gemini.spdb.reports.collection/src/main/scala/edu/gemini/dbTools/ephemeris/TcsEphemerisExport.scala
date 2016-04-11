@@ -35,6 +35,9 @@ object TcsEphemerisExport {
   // few more than requested.
   val ElementCount  = 1430
 
+  // Text date format
+  val DateFormatString = "yyyy-MMM-dd HH:mm"
+
   type EphemerisElement = (Coordinates, Double, Double)
   type EphemerisMap     = Long ==>> EphemerisElement
 
@@ -139,7 +142,7 @@ object TcsEphemerisExport {
     * TCS.
     */
   def formatEphemeris(em: EphemerisMap): String = {
-    val dfm = new SimpleDateFormat("yyyy-MMM-dd HH:mm")
+    val dfm = new SimpleDateFormat(DateFormatString)
     dfm.setTimeZone(TimeZone.getTimeZone("UTC"))
 
     em.toList.map { case (time, (coords, raTrack, decTrack)) =>
