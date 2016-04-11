@@ -258,17 +258,17 @@ object BagsManager {
       if (oldEnv != newEnv) {
         targetComp.setTargetEnvironment(newEnv)
         ctx.targets.commit()
+      }
 
-        // Change the pos angle as appropriate if this is the auto group.
-        selOpt.foreach { sel =>
-          if (newEnv.getOrCreatePrimaryGuideGroup().isAutomatic && selOpt.isDefined) {
-            ctx.instrument.dataObject.foreach { inst =>
-              val deg = sel.posAngle.toDegrees
-              val old = inst.getPosAngleDegrees
-              if (deg != old) {
-                inst.setPosAngleDegrees(deg)
-                ctx.instrument.commit()
-              }
+      // Change the pos angle as appropriate if this is the auto group.
+      selOpt.foreach { sel =>
+        if (newEnv.getOrCreatePrimaryGuideGroup().isAutomatic && selOpt.isDefined) {
+          ctx.instrument.dataObject.foreach { inst =>
+            val deg = sel.posAngle.toDegrees
+            val old = inst.getPosAngleDegrees
+            if (deg != old) {
+              inst.setPosAngleDegrees(deg)
+              ctx.instrument.commit()
             }
           }
         }
