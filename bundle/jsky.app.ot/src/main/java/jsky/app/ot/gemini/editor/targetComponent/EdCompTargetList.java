@@ -221,8 +221,9 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         final boolean notAutoTarget = !selectionIsAutoTarget();
         final boolean isGuideStar   = selectionIsGuideTarget();
 
+        // We allow the primary button to be set for auto targets as it will flag the auto group as primary.
         _w.removeButton.setEnabled (editable && notBase && notAutoTarget);
-        _w.primaryButton.setEnabled(editable && isGuideStar && notAutoTarget);
+        _w.primaryButton.setEnabled(editable && isGuideStar);
         _w.pasteButton.setEnabled(editable && notAutoTarget);
         _w.duplicateButton.setEnabled(editable && notAutoTarget);
         updateDetailEditorEnabledState(editable && notAutoTarget);

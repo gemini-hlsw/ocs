@@ -918,14 +918,20 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
         if (_env == null || !OTOptions.isEditable(_obsComp.getProgram(), _obsComp.getContextObservation())) return;
 
         // TODO: This method must be tested in greater detail, since custom guiding is required for offset positions.
+        final TargetEnvironment env = _dataObject.getTargetEnvironment();
         final Option<SPTarget> targetOpt = getSelectedPos();
-        if (targetOpt.isDefined()) {
+        final Option<IndexedGuideGroup> iggOpt = targetOpt.flatMap(this::getTargetGroup).orElse(getSelectedGroup());
+        final boolean primaryGroupIsSelected = iggOpt.exists(igg -> igg.group().equals(env.getOrCreatePrimaryGuideGroup()));
+
+        // All we need to do now is additionally check if the iggOpt group is selected. If it is, trigger if
+        // and if not, fall through to else.
+        if (targetOpt.isDefined() && primaryGroupIsSelected) {
             final boolean autoGroup = targetOpt.flatMap(this::getTargetGroup).exists(igg -> igg.group().isAutomatic());
             if (!autoGroup)
                 PrimaryTargetToggle.instance.toggle(_dataObject, targetOpt.getValue());
         } else {
-            getSelectedGroup().foreach(igg -> {
-                final TargetEnvironment env = _dataObject.getTargetEnvironment();
+            // The current target or guide group is not promary, so mark ths owner guide group as primary.
+            iggOpt.foreach(igg -> {
                 final GuideGroup primary = env.getOrCreatePrimaryGuideGroup();
 
                 // If the auto group is disabled and set to primary, then make it an initial auto group.
