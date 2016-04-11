@@ -25,6 +25,9 @@ package object core {
 
   type Ephemeris = Long ==>> Coordinates
 
+  implicit def SPProgramIdToRichProgramId(id: SPProgramID): RichSpProgramId =
+    new RichSpProgramId(id)
+
   /** Operations for maps of types that we can interpolate.  We use these for Ephemerides. */
   implicit class MoreMapOps[K, V](m: K ==>> V)(implicit O: Order[K], I: Interpolate[K,V]) {
 
