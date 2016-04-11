@@ -44,4 +44,5 @@ project/OcsCredentials.scala
 !/bundle/edu.gemini.pot/src/main/resources/edu/gemini/spModel/target
 !/bundle/edu.gemini.pot/src/test/java/edu/gemini/spModel/target
 !/bundle/edu.gemini.pot/src/test/scala/edu/gemini/spModel/target
+!/bundle/edu.gemini.p2checker/src/main/scala/edu/gemini/p2checker/target
 !/bundle/edu.gemini.sp.vcs.log
