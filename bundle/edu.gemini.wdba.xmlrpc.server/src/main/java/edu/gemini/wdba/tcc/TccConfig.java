@@ -36,7 +36,7 @@ public final class TccConfig {
      * Default constructor - constructs an empty paramset.
      */
     public TccConfig(Site site) {
-        _paramSets = new ArrayList<ParamSet>();
+        _paramSets = new ArrayList<>();
         _site = site;
     }
 
@@ -82,9 +82,7 @@ public final class TccConfig {
             doc.setRootElement(e);
 
             // First add the field
-            for (int i = 0, size = _paramSets.size(); i < size; i++) {
-                e.add(_paramSets.get(i));
-            }
+            _paramSets.forEach(ps -> e.add(ps));
 
             OutputFormat format = new OutputFormat("  ", true);
 
