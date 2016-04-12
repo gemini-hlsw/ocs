@@ -66,7 +66,7 @@ final class NonSiderealTargetRules extends IRule {
         ocn <- es.getTargetObsComponentNode.asScalaOpt.toList
         toc <- es.getTargetObsComp.asScalaOpt.toList
         tar <- toc.getTargetEnvironment.getTargets.asScalaList
-        nst <- tar.getNonSiderealTarget.toList if nst.horizonsDesignation.isEmpty
+        nst <- tar.getNonSiderealTarget.toList
         sb  <- es.getObservation.getSchedulingBlock.asScalaOpt
                if nst.coords(sb.start).isEmpty
       } p2p.addWarning(ERR_NO_EPHEMERIS_FOR_BLOCK,
