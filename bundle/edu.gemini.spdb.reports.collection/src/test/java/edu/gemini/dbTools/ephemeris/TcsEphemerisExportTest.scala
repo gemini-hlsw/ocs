@@ -116,7 +116,7 @@ object TcsEphemerisExportTest extends TestSupport {
     "export parseable ephemeris files" in {
       withTempDir { dir =>
         val exp = new TcsEphemerisExport(dir.toFile, night, site, null, java.util.Collections.emptySet[Principal])
-        exp.exportOne(dir.toFile, MajorBody(606), "Titan").run.unsafePerformIO() match {
+        exp.exportOne(dir.toFile, MajorBody(606)).run.unsafePerformIO() match {
           case -\/(err)  =>
             TcsEphemerisExport.ExportError.logError(err, log, "")
             false

@@ -11,13 +11,15 @@ import edu.gemini.spModel.core.osgi.SiteProperty
 import org.osgi.framework.BundleContext
 
 import java.io.File
-import java.nio.charset.StandardCharsets
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets.UTF_8
 import java.nio.file.{Files, Paths}
 import java.security.Principal
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.util.logging.{Level, Logger}
-import java.util.{Locale, TimeZone, Date}
+import java.util.{TimeZone, Date}
+import java.util.Locale.US
 
 import scalaz._
 import Scalaz._
@@ -142,7 +144,7 @@ object TcsEphemerisExport {
     * TCS.
     */
   def formatEphemeris(em: EphemerisMap): String = {
-    val dfm = new SimpleDateFormat(DateFormatString, Locale.US)
+    val dfm = new SimpleDateFormat(DateFormatString, US)
     dfm.setTimeZone(TimeZone.getTimeZone("UTC"))
 
     em.toList.map { case (time, (coords, raTrack, decTrack)) =>
@@ -166,28 +168,29 @@ class TcsEphemerisExport(dir: File, night: Night, site: Site, odb: IDBDatabaseSe
   val start = new Date(night.getStartTime)
   val end   = new Date(night.getEndTime)
 
-  val lookupNonSiderealObservations: TryExport[HorizonsDesignation ==>> Set[String]] =
+  val lookupNonSiderealObservations: TryExport[Set[HorizonsDesignation]] =
     TryExport.fromTryCatch(OdbError) {
-      val ns = NonSiderealObservationFunctor.query(odb, user)
-      (==>>.empty[HorizonsDesignation, Set[String]]/:ns) { (m, n) =>
-        m.updateAppend(n.hid, Set(n.targetName))
-      }
+      NonSiderealObservationFunctor.query(odb, user).map(_.hid).toSet
     }
 
   val export: TryExport[HorizonsDesignation ==>> (ExportError \/ File)] =
     lookupNonSiderealObservations >>= exportAll
 
-  private def exportAll(nos: HorizonsDesignation ==>> Set[String]): TryExport[HorizonsDesignation ==>> (ExportError \/ File)] =
-    EitherT(nos.mapOptionWithKey { (hid, names) =>
-      // There can be multiple names for the same horizons id.  We'll just pick
-      // one at random for now ...
-      names.headOption.map { exportOne(dir, hid, _) }
-    }.traverse(_.run).map(_.right[ExportError]))
+  private def exportAll(nos: Set[HorizonsDesignation]): TryExport[HorizonsDesignation ==>> (ExportError \/ File)] = {
+    // HorizonsDesignation ==>> TryExport[File]
+    val exportMap = ==>>.fromList(nos.toList.map(hid => (hid, exportOne(dir, hid))))
 
-  def exportOne(dir: File, hid: HorizonsDesignation, name: String): TryExport[File] =
+    // IO[HorizonsDesignation ==>> (ExportError \/ File)]
+    val exportOp  = exportMap.traverse(_.run)
+
+    // TryExport[HorizonsDesignation ==> (ExportError \/ File)]
+    EitherT(exportOp.map(_.right[ExportError]))
+  }
+
+  def exportOne(dir: File, hid: HorizonsDesignation): TryExport[File] =
     for {
       em <- lookupEphemeris(hid)
-      f  <- writeEphemeris(hid, name, em)
+      f  <- writeEphemeris(hid, em)
     } yield f
 
   def lookupEphemeris(hid: HorizonsDesignation): TryExport[EphemerisMap] =
@@ -195,15 +198,11 @@ class TcsEphemerisExport(dir: File, night: Night, site: Site, odb: IDBDatabaseSe
       ee.coords.map((_, ee.getRATrack, ee.getDecTrack))
     }.leftMap(e => HorizonsError(hid, e): ExportError)
 
-  def writeEphemeris(hid: HorizonsDesignation, name: String, em: EphemerisMap): TryExport[File] = {
-    // TODO: taking a random string and assuming it is suitable for a filename
-    // TODO: seems like asking for trouble.  any suggestions?  URL encode?
-    // TODO: still not sure what to do about file names anyway.
-    val fileName = s"${name}_${hid.toString}.eph".replaceAll("/", "-")
-
+  def writeEphemeris(hid: HorizonsDesignation, em: EphemerisMap): TryExport[File] = {
+    val fileName = URLEncoder.encode(s"${hid.toString}.eph", UTF_8.name)
     val file     = new File(dir, fileName)
     TryExport.fromTryCatch(t => WriteError(hid, t)) {
-      Files.write(Paths.get(file.toURI), formatEphemeris(em).getBytes(StandardCharsets.UTF_8))
+      Files.write(Paths.get(file.toURI), formatEphemeris(em).getBytes(UTF_8))
       file
     }
   }
