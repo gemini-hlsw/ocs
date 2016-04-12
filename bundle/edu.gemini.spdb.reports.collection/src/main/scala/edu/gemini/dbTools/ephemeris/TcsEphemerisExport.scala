@@ -200,7 +200,7 @@ class TcsEphemerisExport(dir: File, night: Night, site: Site, odb: IDBDatabaseSe
 
   def writeEphemeris(hid: HorizonsDesignation, em: EphemerisMap): TryExport[File] = {
     // See TcsConfig.ephemerisFile
-    val fileName = URLEncoder.encode(s"${hid.toString}.eph", UTF_8.name)
+    val fileName = URLEncoder.encode(s"${hid.show}.eph", UTF_8.name)
     val file     = new File(dir, fileName)
     TryExport.fromTryCatch(t => WriteError(hid, t)) {
       Files.write(Paths.get(file.toURI), formatEphemeris(em).getBytes(UTF_8))

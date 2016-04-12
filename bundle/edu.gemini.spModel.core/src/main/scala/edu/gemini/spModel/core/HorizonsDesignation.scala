@@ -1,8 +1,9 @@
 package edu.gemini.spModel.core
 
+
 import scalaz._, Scalaz._
 
-/** 
+/**
  * Unique Horizons designation, which should allow for reproduceable ephemeris queries <b>if</b> the
  * values passed to the constructors are extracted correctly from search results. See `horizons.md`
  * in the bundle source for more information.
@@ -10,11 +11,24 @@ import scalaz._, Scalaz._
 sealed abstract class HorizonsDesignation(val queryString: String)
   extends Product with Serializable {
     def des: String // designation, human readable
+
+    import edu.gemini.spModel.core.HorizonsDesignation._
+
+    /** Exports an HorizonsDesignation to a String in a format that can be read
+      * by the `HorizonsDesignation.read` method.
+      */
+    def show: String =
+      this match {
+        case Comet(des)            => s"Comet_$des"
+        case AsteroidNewStyle(des) => s"AsteroidNew_$des"
+        case AsteroidOldStyle(num) => s"AsteroidOld_$num"
+        case MajorBody(num)        => s"MajorBody_$num"
+      }
   }
 
 object HorizonsDesignation {
 
-  /** 
+  /**
    * Designation for a comet, in the current apparition. Example: `C/1973 E1` for Kohoutek, yielding
    * the query string `DES=C/1973 E1;CAP`.
    */
@@ -56,4 +70,19 @@ object HorizonsDesignation {
     val num: MajorBody @> Int = Lens.lensu((a, b) => a.copy(num = b), _.num)
   }
 
+  private val CometRegex       = """Comet_(.+)""".r
+  private val AsteroidRegex    = """AsteroidNew_(.+)""".r
+  private val AsteroidNumRegex = """AsteroidOld_(-?\d+)""".r
+  private val MajorRegex       = """MajorBody_(-?\d+)""".r
+
+  /** Extracts an HorizonsDesignation from a String written by the `show`
+    * method, if possible.
+    */
+  def read(s: String): Option[HorizonsDesignation] = s match {
+    case CometRegex(des)     => some(Comet(des))
+    case AsteroidRegex(des)  => some(AsteroidNewStyle(des))
+    case AsteroidNumRegex(i) => some(AsteroidOldStyle(i.toInt))
+    case MajorRegex(i)       => some(MajorBody(i.toInt))
+    case _                   => none
+  }
 }

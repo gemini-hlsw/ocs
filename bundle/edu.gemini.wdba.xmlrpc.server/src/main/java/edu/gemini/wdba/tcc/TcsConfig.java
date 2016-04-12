@@ -31,7 +31,7 @@ public final class TcsConfig extends ParamSet {
     public static String ephemerisFile(final HorizonsDesignation hd) {
         try {
             // See TcsEphemerisExport.
-            return URLEncoder.encode(hd.toString() + ".eph", StandardCharsets.UTF_8.name());
+            return URLEncoder.encode(hd.show() + ".eph", StandardCharsets.UTF_8.name());
         } catch (UnsupportedEncodingException ex) {
             LOG.log(Level.SEVERE, "UTF-8 is not supported!", ex);
             throw new RuntimeException(ex);
