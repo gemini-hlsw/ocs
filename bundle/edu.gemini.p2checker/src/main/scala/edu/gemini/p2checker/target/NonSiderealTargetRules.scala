@@ -52,7 +52,7 @@ final class NonSiderealTargetRules extends IRule {
         toc  <- es.getTargetObsComp.asScalaOpt
                 if toc.getTargetEnvironment.getTargets.asScalaList.exists(_.isNonSidereal)
         sb   <- es.getObservation.getSchedulingBlock.asScalaOpt
-        site <- Option(es.getObservationNode.getProgramID.site)
+        site <- Option(es.getObservationNode.getProgramID).flatMap(pid => Option(pid.site))
         sem  <- es.getObservationNode.getProgramID.semester
                 if !sem.contains(sb.start, site)
       } p2p.addWarning(ERR_SCHEDULING_BLOCK_SEM,
