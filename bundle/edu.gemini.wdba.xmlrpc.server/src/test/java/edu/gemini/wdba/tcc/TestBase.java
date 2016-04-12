@@ -24,9 +24,7 @@ import org.dom4j.io.SAXReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.security.Principal;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * A base class for creating unit test code for the TCC configuration file
@@ -152,5 +150,19 @@ public abstract class TestBase extends TestCase {
 
     protected Element getTcsConfiguration(Document doc) {
         return getSubconfig(doc, TccNames.TCS_CONFIGURATION);
+    }
+
+    protected Map<String, String> getTcsConfigurationMap(Document doc) throws Exception {
+        final Map<String, String> res = new HashMap<>();
+
+        final Element psetElement = getTcsConfiguration(doc);
+        @SuppressWarnings({"unchecked"}) List<Element> params = (List<Element>) psetElement.elements();
+        for (Element paramElement : params) {
+            final String name  = paramElement.attributeValue("name");
+            final String value = paramElement.attributeValue("value");
+            res.put(name, value);
+        }
+
+        return Collections.unmodifiableMap(res);
     }
 }

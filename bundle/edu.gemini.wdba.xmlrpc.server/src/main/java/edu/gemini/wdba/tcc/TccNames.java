@@ -34,6 +34,7 @@ public final class TccNames {
     public static final String DAILYMOT = "dailymot";
     public static final String DEPLOYABLE_BAFFLE = "deployableBaffle";
     public static final String ECCENTRICITY = "eccentricity";
+    public static final String EPHEMERIS = "ephemeris";
     public static final String EPOCH = "epoch";
     public static final String EPOCHOFEL = "epochofel";
     public static final String EPOCHOFPERI = "epochofperi";

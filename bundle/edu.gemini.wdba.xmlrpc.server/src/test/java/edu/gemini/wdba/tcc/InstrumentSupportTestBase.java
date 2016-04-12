@@ -86,20 +86,6 @@ public abstract class InstrumentSupportTestBase<T extends ISPDataObject> extends
         obsComp.setDataObject(dataObj);
     }
 
-    protected Map<String, String> getTcsConfigurationMap(Document doc) throws Exception {
-        Map<String, String> res = new HashMap<String, String>();
-
-        Element psetElement = getTcsConfiguration(doc);
-        @SuppressWarnings({"unchecked"}) List<Element> params = (List<Element>) psetElement.elements();
-        for (Element paramElement : params) {
-            String name  = paramElement.attributeValue("name");
-            String value = paramElement.attributeValue("value");
-            res.put(name, value);
-        }
-
-        return Collections.unmodifiableMap(res);
-    }
-
     protected String getInstrumentConfig(Document doc) throws Exception {
         return getTcsConfigurationMap(doc).get(TccNames.INSTRUMENT);
     }
