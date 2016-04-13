@@ -146,9 +146,10 @@ final class BagsManager(executorService: ExecutorService) {
           // running before me, so their result is as good as mine would have been and we're done;
           // or (b) we don't care about that program anymore, so we're done.
           if (dequeue(key, obs.getProgramID)) {
-            // Otherwise construct an obs context, verify that it's bagworthy, and go
+            // Otherwise construct an obs context, verify that it's bags-worthy, and go.
             ObsContext.create(obs).asScalaOpt.foreach { ctx =>
-              if (isEligibleForBags(ctx)
+              val eligibleForBags = isEligibleForBags(ctx)
+              if (eligibleForBags
                 && hasBeenUpdated(obs, ctx)
                 && notObserved(obs)) {
                 //   do the lookup
@@ -189,7 +190,7 @@ final class BagsManager(executorService: ExecutorService) {
                       enqueue(obs, 5000L)
                   }
                 }
-              } else {
+              } else if (!eligibleForBags) {
                 LOG.info(s"${obs.getObservationID} not eligible for BAGS. Clearing auto group.")
                 applySwingResults(None)
               }
