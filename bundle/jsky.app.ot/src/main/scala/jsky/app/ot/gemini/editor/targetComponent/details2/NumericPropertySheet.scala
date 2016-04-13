@@ -9,7 +9,6 @@ import edu.gemini.pot.sp.ISPNode
 import edu.gemini.shared.util.immutable.{Option => JOption}
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
-import edu.gemini.spModel.target.system.CoordinateParam
 import jsky.app.ot.gemini.editor.targetComponent.TelescopePosEditor
 import jsky.app.ot.gemini.editor.targetComponent.details2.NumericPropertySheet.Prop
 import jsky.util.gui.{NumberBoxWidget, TextBoxWidget, TextBoxWidgetWatcher}

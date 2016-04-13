@@ -6,7 +6,6 @@ import edu.gemini.spModel.obs.SPObservation
 import edu.gemini.spModel.obs.plannedtime.PlannedTimeCalculator
 import edu.gemini.spModel.target.obsComp.TargetObsComp
 import edu.gemini.pot.sp._
-import edu.gemini.spModel.target.system.CoordinateParam.Units
 import edu.gemini.shared.util.immutable.ScalaConverters._
 
 import scala.annotation.tailrec
