@@ -311,6 +311,15 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
             return tmpRows;
         }
 
+        // Update the auto row of a table.
+        // This is called when the auto row should be changed from disabled to initial.
+        void enableAutoRow(final TargetEnvironment env) {
+            final GroupRow autoGroupRow = new GroupRow(true, true, 0, env.getGuideEnvironment().automaticGroup(),
+                    Collections.emptyList());
+            rows.set(1, autoGroupRow);
+            fireTableRowsUpdated(1, 1);
+        }
+
         // Replace the auto group and return a new TableData.
         // Note that we work under the assumption that there is ALWAYS an auto group, which should be the case,
         // and that it is in row position 1 of the table (directly after the base).
@@ -918,17 +927,22 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
             getSelectedGroup().foreach(igg -> {
                 final TargetEnvironment env = _dataObject.getTargetEnvironment();
                 final GuideGroup primary = env.getOrCreatePrimaryGuideGroup();
-                if (primary != igg.group() && confirmGroupChange(primary, igg.group())) {
-                    final GuideEnvironment ge = env.getGuideEnvironment();
-                    if (ge != null) {
-                        _dataObject.setTargetEnvironment(env.setGuideEnvironment(ge.setPrimaryIndex(igg.index())));
 
-                        // If we are switching to an automatic group, we also
-                        // possibly need to update the position angle.
-                        final GuideGrp grp = igg.group().grp();
-                        if (grp instanceof AutomaticGroup.Active) {
-                            updatePosAngle(((AutomaticGroup.Active) grp).posAngle());
-                        }
+                // If the auto group is disabled and set to primary, then make it an initial auto group.
+                final GuideGrp grp = igg.group().grp();
+                final GuideEnvironment ge = env.getGuideEnvironment();
+                if (ge != null && grp instanceof AutomaticGroup.Disabled$) {
+                    final TargetEnvironment envNew = env.setGuideEnvironment(ge.setAutomaticGroup(GuideGroup.AutomaticInitial()).setPrimaryIndex(0));
+                    _dataObject.setTargetEnvironment(envNew);
+                    _model.enableAutoRow(envNew);
+                }
+                else if (ge != null && primary != igg.group() && confirmGroupChange(primary, igg.group())) {
+                    _dataObject.setTargetEnvironment(env.setGuideEnvironment(ge.setPrimaryIndex(igg.index())));
+
+                    // If we are switching to an automatic group, we also
+                    // possibly need to update the position angle.
+                    if (grp instanceof AutomaticGroup.Active) {
+                        updatePosAngle(((AutomaticGroup.Active) grp).posAngle());
                     }
                 }
             });
