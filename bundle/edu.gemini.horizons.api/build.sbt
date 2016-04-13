@@ -18,6 +18,8 @@ osgiSettings
 
 ocsBundleSettings
 
+OsgiKeys.bundleActivator := None
+
 OsgiKeys.bundleSymbolicName := name.value
 
 OsgiKeys.dynamicImportPackage := Seq("")
