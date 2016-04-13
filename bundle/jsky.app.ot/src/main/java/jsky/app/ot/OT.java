@@ -200,6 +200,7 @@ public final class OT {
         // will correspond to the order in which the features are registered.
         final Class<?>[] features = new Class<?>[]{
                 jsky.app.ot.tpe.feat.TpeBasePosFeature.class,
+                jsky.app.ot.tpe.feat.TpeEphemerisFeature.class,
                 jsky.app.ot.tpe.feat.TpeGuidePosFeature.class,
                 jsky.app.ot.tpe.feat.TpeTargetPosFeature.class,
                 jsky.app.ot.tpe.feat.TpeCatalogFeature.class,

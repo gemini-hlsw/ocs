@@ -49,7 +49,7 @@ public class BasicTablePlotter
     private CanvasLayer _layer;
 
     /** The object used to convert to screen coordinates for drawing */
-    private ImageCoordinateConverter _coordinateConverter;
+    private final ImageCoordinateConverter _coordinateConverter;
 
     /** The equinox of the image (assumed by the ImageCoordinateConverter methods) */
     private double _imageEquinox = 2000.;
