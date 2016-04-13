@@ -257,7 +257,7 @@ object BagsManager {
     // If AGS results were found, apply them to the target env; otherwise, clear out any existing auto group.
     val newEnv = selOpt.map(_.applyTo(oldEnv)).getOrElse {
       val oldGuideEnv = oldEnv.getGuideEnvironment.guideEnv
-      if (oldGuideEnv.auto === AutomaticGroup.Initial) oldEnv
+      if (oldGuideEnv.auto === AutomaticGroup.Initial || oldGuideEnv.auto === AutomaticGroup.Disabled) oldEnv
       else oldEnv.setGuideEnvironment(GuideEnvironment(GuideEnv(AutomaticGroup.Initial, oldGuideEnv.manual)))
     }
 
