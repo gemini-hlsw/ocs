@@ -4,12 +4,10 @@
 
 package edu.gemini.spdb.rapidtoo.www;
 
-import edu.gemini.shared.util.immutable.DefaultImList;
 import edu.gemini.shared.util.immutable.ImList;
+import edu.gemini.spModel.core.Angle$;
 import edu.gemini.spModel.core.Magnitude;
 import edu.gemini.spdb.rapidtoo.TooTarget;
-import edu.gemini.spModel.target.system.HMS;
-import edu.gemini.spModel.target.system.DMS;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -36,8 +34,7 @@ public abstract class HttpTarget implements TooTarget {
             return Double.parseDouble(val);
         } catch (NumberFormatException ex) {
             try {
-                HMS hms = new HMS(val);
-                return hms.getAs(HMS.Units.DEGREES);
+                return Angle$.MODULE$.parseHMS(val).toOption().get().toDegrees();
             } catch (Exception ex2) {
                 throw new BadRequestException("cannot parse the ra \"" + val + "\"");
             }
@@ -49,8 +46,7 @@ public abstract class HttpTarget implements TooTarget {
             return Double.parseDouble(val);
         } catch (NumberFormatException ex) {
             try {
-                DMS dms = new DMS(val);
-                return dms.getAs(DMS.Units.DEGREES);
+                return Angle$.MODULE$.parseDMS(val).toOption().get().toSignedDegrees();
             } catch (Exception ex2) {
                 throw new BadRequestException("cannot parse the dec \"" +
                         val + "\"");

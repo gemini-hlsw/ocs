@@ -280,9 +280,6 @@ object NumericPropertySheet {
     def apply[A](leftCaption: String, rightCaption: String, f: A => Double, g: (A, Double) => Unit): Prop[A, Double] =
       DoubleProp(leftCaption, rightCaption, f, g)
 
-    def apply[A](leftCaption: String, rightCaption: String, f: A => CoordinateParam): Prop[A, Double] =
-      DoubleProp(leftCaption, rightCaption, a => f(a).getValue, (a, b) => f(a).setValue(b))
-
     def apply[A, B](leftOptions: List[B], rightCaptions: Map[B, String], initial: B, render: B => String, f: (A, B) => Double, g: (A, B, Double) => Unit, h: B => NumberFormat): Prop[A, Double] =
       TransformableProp(leftOptions, rightCaptions, initial, render, f, g, h)
 
