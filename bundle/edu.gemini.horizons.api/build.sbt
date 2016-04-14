@@ -18,13 +18,12 @@ osgiSettings
 
 ocsBundleSettings
 
-OsgiKeys.bundleActivator := Some("edu.gemini.horizons.api.osgi.Activator")
+OsgiKeys.bundleActivator := None
 
 OsgiKeys.bundleSymbolicName := name.value
 
 OsgiKeys.dynamicImportPackage := Seq("")
 
 OsgiKeys.exportPackage := Seq(
-  "edu.gemini.horizons.api",
-  "edu.gemini.horizons.server.backend"
+  "edu.gemini.horizons.api"
 )
