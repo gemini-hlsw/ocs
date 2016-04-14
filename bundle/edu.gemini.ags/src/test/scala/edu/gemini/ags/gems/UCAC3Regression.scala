@@ -14,7 +14,6 @@ import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.env.{GuideProbeTargets, TargetEnvironment}
-import edu.gemini.spModel.target.system.CoordinateParam
 import edu.gemini.shared.util.immutable.{ None => JNone, Option => JOption }
 import edu.gemini.shared.util.immutable.ScalaConverters._
 

@@ -14,14 +14,12 @@ import edu.gemini.spModel.gemini.nifs.NIFSParams;
 import edu.gemini.spModel.gemini.nifs.NifsOiwfsGuideProbe;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.guide.GuideProbeUtil;
-import edu.gemini.spModel.obs.SchedulingBlock;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obsclass.ObsClass;
 import edu.gemini.spModel.obscomp.InstConstants;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.GuideProbeTargets;
 import edu.gemini.spModel.target.env.TargetEnvironment;
-import edu.gemini.spModel.target.system.CoordinateParam;
 
 
 import java.util.ArrayList;
