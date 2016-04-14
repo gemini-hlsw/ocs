@@ -314,7 +314,7 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
         // Update the auto row of a table.
         // This is called when the auto row should be changed from disabled to initial.
         void enableAutoRow(final TargetEnvironment env) {
-            final GroupRow autoGroupRow = new GroupRow(true, true, 0, env.getGuideEnvironment().automaticGroup(),
+            final GroupRow autoGroupRow = new GroupRow(true, false, 0, env.getGuideEnvironment().automaticGroup(),
                     Collections.emptyList());
             rows.set(1, autoGroupRow);
             fireTableRowsUpdated(1, 1);
