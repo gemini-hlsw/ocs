@@ -2,210 +2,173 @@ package edu.gemini.dbTools.ephemeris
 
 import edu.gemini.horizons.api._
 import edu.gemini.horizons.server.backend.HorizonsService2
-import edu.gemini.horizons.server.backend.HorizonsService2.HS2Error
-import edu.gemini.pot.spdb.IDBDatabaseService
-import edu.gemini.skycalc.{JulianDate, TwilightBoundedNight, Night}
-import edu.gemini.skycalc.TwilightBoundType.NAUTICAL
+import edu.gemini.skycalc.Night
 import edu.gemini.spModel.core._
-import edu.gemini.spModel.core.osgi.SiteProperty
-import org.osgi.framework.BundleContext
 
-import java.io.File
-import java.net.URLEncoder
-import java.nio.charset.StandardCharsets.UTF_8
-import java.nio.file.{Files, Paths}
-import java.security.Principal
-import java.text.SimpleDateFormat
-import java.time.Instant
-import java.util.logging.{Level, Logger}
-import java.util.{TimeZone, Date}
-import java.util.Locale.US
+import java.nio.file.Path
+import java.time.{Duration, Instant}
+import java.util.Date
 
 import scalaz._
 import Scalaz._
-import scalaz.effect._
+
+
+import TcsEphemerisExport.FilePartition
+
+/** TCS ephemeris directory maintenance. */
+sealed trait TcsEphemerisExport {
+
+  /** Gets an action which will partition the given horizons ids into
+    * categories: expired, extra, missing, and up-to-date.  Any existing
+    * ephemeris file that is still of interest must have minimum coverage of
+    * the night to be considered valid.  Namely, if there is a gap between
+    * consecutive ephemeris elements of longer than two minutes for the night,
+    * the file is considered "expired".
+    *
+    * @param hids horizons ids for all non-sidereal observations of interest
+    *
+    * @return categorization of horizons ids according to the state of the
+    *         corresponding ephemeris file on disk
+    */
+  def partition(hids: ISet[HorizonsDesignation]): TryExport[FilePartition]
+
+  /** Gets an action that will update the directory of ephemeris files as
+    * necessary so that it contains an entry for each observation of interest
+    * and removes all that are no longer of interest.
+    *
+    * @param hids horizons ids for all non-sidereal observations of interest
+    *
+    * @return map of horizons ids to either an error or the (possibly) updated
+    *         file
+    */
+  def update(hids: ISet[HorizonsDesignation]): TryExport[HorizonsDesignation ==>> (ExportError \/ Path)]
+
+  /** Gets an action that will write ephemeris files for each of the given
+    * horizons ids. Note this action doesn't delete out-of-date files or skip
+    * up-to-date files.  See `update` for that.
+    *
+    * @param hids horizons ids for all non-sidereal observations of interest
+    *
+    * @return map of horizons ids to either an error or the updated file
+    */
+  def write(hids: ISet[HorizonsDesignation]): TryExport[HorizonsDesignation ==>> (ExportError \/ Path)]
+}
+
 
 /** TCS ephemeris export cron job.
   */
 object TcsEphemerisExport {
 
-  // If specified, ephemeris files will be written here.
-  val DirectoryProp = "edu.gemini.dbTools.tcs.ephemeris.directory"
+  // Maximum time between two consecutive elements in the ephemeris file.  If a
+  // larger time gap is found, the file is fetched from horizons and updated.
+  val MaxGap = Duration.ofMinutes(2)
 
   // We will request this many elements from horizons, though the actual number
   // provided may differ.  The TCS maximum is 1440, but horizons may return a
   // few more than requested.
   val ElementCount  = 1430
 
-  // Text date format
-  val DateFormatString = "yyyy-MMM-dd HH:mm"
-
-  type EphemerisElement = (Coordinates, Double, Double)
-  type EphemerisMap     = Long ==>> EphemerisElement
-
-  /** Errors that may occur while exporting ephemeris data. */
-  sealed trait ExportError
-
-  /** An error that happens when working with the ODB to extract the non-
-    * sidereal observation references with their horizons ids.
-    */
-  case class OdbError(ex: Throwable) extends ExportError
-
-  /** An error that happens while working with the horizons service itself. */
-  case class HorizonsError(hid: HorizonsDesignation, e: HorizonsService2.HS2Error) extends ExportError
-
-  /** An error that happens when writing out ephemeris data for the TCS. */
-  case class WriteError(hid: HorizonsDesignation, ex: Throwable) extends ExportError
-
-  object ExportError {
-    private def reportH2Error(hid: HorizonsDesignation, h2: HS2Error): (String, Option[Throwable]) = h2 match {
-      case HorizonsService2.HorizonsError(e)   =>
-        (s"$hid: Error communicating with horizons service", Some(e))
-
-      case HorizonsService2.ParseError(_, msg) =>
-        (s"$hid: Could not parse response from horizons service: $msg", None)
-
-      case HorizonsService2.EphemerisEmpty     =>
-        (s"$hid: No response from horizons", None)
-    }
-
-    def report(e: ExportError): (String, Option[Throwable]) = e match {
-      case OdbError(ex)           =>
-        ("Error looking up nonsidereal observations in the database", Some(ex))
-
-      case HorizonsError(hid, h2) =>
-        reportH2Error(hid, h2)
-
-      case WriteError(hid, ex)    =>
-        (s"$hid: Error writing ephemeris file", Some(ex))
-    }
-
-    def logError(e: ExportError, log: Logger, prefix: String): Unit = {
-      val (msg, ex) = report(e)
-      log.log(Level.WARNING, s"$prefix$msg", ex.orNull)
-    }
+  sealed trait FileCategory {
+    def hids: ISet[HorizonsDesignation]
   }
 
-  type TryExport[A] = EitherT[IO, ExportError, A]
-
-  object TryExport {
-    def fromDisjunction[A](a:ExportError \/ A): TryExport[A] =
-      EitherT(IO(a))
-
-    def fromTryCatch[A](e: Throwable => ExportError)(a: => A): TryExport[A] =
-      fromDisjunction {
-        \/.fromTryCatchNonFatal(a).leftMap(e)
-      }
-  }
-
-  /** Cron job entry point.  See edu.gemini.spdb.cron.osgi.Activator.
+  /** Horizons ids for which the corresponding ephemeris file is out of date or
+    * contains insufficient coverage for the night in general.
     */
-  def run(ctx: BundleContext)(tmpDir: File, log: Logger, env: java.util.Map[String, String], user: java.util.Set[Principal]): Unit = {
-    val site = Option(SiteProperty.get(ctx)) | sys.error(s"Property `${SiteProperty.NAME}` not specified.")
+  final case class Expired(hids: ISet[HorizonsDesignation]) extends FileCategory
 
-    val exportDir = Option(ctx.getProperty(DirectoryProp)).fold(tmpDir) { path =>
-      new File(path)
-    }
+  /** Horizons ids for ephemeris files corresponding to observations that are
+    * no longer of interest (for example because they have been observed).
+    */
+  final case class Extra(hids: ISet[HorizonsDesignation]) extends FileCategory
 
-    val odbRef = ctx.getServiceReference(classOf[IDBDatabaseService])
-    val odb    = ctx.getService(odbRef)
-    val night  = TwilightBoundedNight.forTime(NAUTICAL, Instant.now.toEpochMilli, site)
-    val exp    = new TcsEphemerisExport(exportDir, night, site, odb, user)
+  /** Horizons ids for missing ephemeris files.
+    */
+  final case class Missing(hids: ISet[HorizonsDesignation]) extends FileCategory
 
-    log.info(s"Starting ephemeris lookup for $site, writing into $exportDir")
-    try {
-      exp.export.run.unsafePerformIO() match {
-        case -\/(err)     =>
-          ExportError.logError(err, log, "Could not refresh ephemeris data: ")
+  /** Horizons ids that correspond to ephemeris files that do not need to be
+    * updated because they have sufficient converage for the night already.
+    */
+  final case class UpToDate(hids: ISet[HorizonsDesignation]) extends FileCategory
 
-        case \/-(updates) =>
-          updates.toList.foreach { case (hid, res) =>
-            res match {
-              case -\/(err)  => ExportError.logError(err, log, "")
-              case \/-(file) => log.log(Level.INFO, s"$hid: updated at ${Instant.ofEpochMilli(file.lastModified())}")
-            }
+  /** Categorization of horizons ids according to the disposition of the
+    * corresponding ephemeris file in the directory.
+    */
+  final case class FilePartition(expired: Expired, extra: Extra, missing: Missing, upToDate: UpToDate)
+
+  def apply(dir: Path, night: Night, site: Site): TcsEphemerisExport =
+    new TcsEphemerisExport {
+
+      import ExportError._
+
+      val files  = EphemerisFiles(dir)
+      val start  = Instant.ofEpochMilli(night.getStartTime)
+      val end    = Instant.ofEpochMilli(night.getEndTime)
+
+      def partition(hids: ISet[HorizonsDesignation]): TryExport[FilePartition] = {
+        def upToDate(relevant: ISet[HorizonsDesignation]): TryExport[ISet[HorizonsDesignation]] = {
+          // TryExport[ List[(HorizonsDesignation, List[Instant])]  ]
+          val allPairs = relevant.toList.traverseU { hid =>
+            files.parseTimes(hid).strengthL(hid)
           }
+
+          allPairs.map { lst =>
+            val upToDatePairs = lst.filter { case (hid, times) =>
+              times.filterGt(Some(start)).filterLt(Some(end)).insert(start).insert(end).toList.sliding(2).forall {
+                case List(s, e) =>
+                  val gap = Duration.ofMillis(e.toEpochMilli - s.toEpochMilli)
+                  gap.compareTo(MaxGap) <= 0
+                case _          =>
+                  false
+              }
+            }
+
+            ISet.fromList(upToDatePairs.unzip._1)
+          }
+        }
+
+        for {
+          all     <- files.list
+          relevant = all.intersection(hids)
+          up      <- upToDate(relevant)
+          expired  = relevant.difference(up)
+        } yield FilePartition(
+          Expired(expired),
+          Extra(all.difference(relevant)),
+          Missing(hids.difference(all)),
+          UpToDate(up))
       }
-    } finally {
-      ctx.ungetService(odbRef)
+
+      def update(hids: ISet[HorizonsDesignation]): TryExport[HorizonsDesignation ==>> (ExportError \/ Path)] =
+        for {
+          part      <- partition(hids)
+          _         <- files.deleteAll(part.extra.hids.union(part.expired.hids))
+          upToDate   = ==>>.fromList(part.upToDate.hids.toList.map(hid => (hid, files.path(hid).right[ExportError])))
+          refreshed <- write(part.expired.hids.union(part.missing.hids))
+        } yield upToDate.union(refreshed)
+
+      def write(hids: ISet[HorizonsDesignation]): TryExport[HorizonsDesignation ==>> (ExportError \/ Path)] = {
+        // HorizonsDesignation ==>> TryExport[File]
+        val exportMap = ==>>.fromList(hids.toList.map(hid => (hid, writeOne(hid))))
+
+        // IO[HorizonsDesignation ==>> (ExportError \/ Path)]
+        val exportOp = exportMap.traverse(_.run)
+
+        // TryExport[HorizonsDesignation ==> (ExportError \/ Path)]
+        EitherT(exportOp.map(_.right[ExportError]))
+      }
+
+      def writeOne(hid: HorizonsDesignation): TryExport[Path] =
+        for {
+          em <- lookupEphemeris(hid)
+          p  <- files.write(hid, em)
+        } yield p
+
+      def lookupEphemeris(hid: HorizonsDesignation): TryExport[EphemerisMap] =
+        HorizonsService2.lookupEphemerisE[EphemerisElement](hid, site, new Date(start.toEpochMilli), new Date(end.toEpochMilli), ElementCount) {
+          (ee: EphemerisEntry) => ee.coords.map((_, ee.getRATrack, ee.getDecTrack))
+        }.leftMap(e => HorizonsError(hid, e): ExportError).map {
+          _.mapKeys(Instant.ofEpochMilli)
+        }
     }
-    log.info("Finish ephemeris lookup.")
-  }
-
-
-  private def formatCoords(coords: Coordinates): String = {
-    val ra  = Angle.formatHMS(coords.ra.toAngle, " ", 4)
-    val dec = Declination.formatDMS(coords.dec, " ", 3)
-
-    s"$ra $dec"
-  }
-
-  /** Writes the given ephemeris map to a String in the format expected by the
-    * TCS.
-    */
-  def formatEphemeris(em: EphemerisMap): String = {
-    val dfm = new SimpleDateFormat(DateFormatString, US)
-    dfm.setTimeZone(TimeZone.getTimeZone("UTC"))
-
-    em.toList.map { case (time, (coords, raTrack, decTrack)) =>
-      val timeS     = dfm.format(new Date(time))
-      val jdS       = f"${new JulianDate(time).toDouble}%.9f"
-      val coordsS   = formatCoords(coords)
-      val raTrackS  = f"$raTrack%9.5f"
-      val decTrackS = f"$decTrack%9.5f"
-      s" $timeS $jdS     $coordsS $raTrackS $decTrackS"
-    }.mkString("$$SOE\n", "\n", "\n$$EOE\n")
-  }
-
-  // Need Order to use HorizonsDesignation as a ==>> key
-  implicit val OrderHorizonsDesignation: Order[HorizonsDesignation] =
-    Order.orderBy(_.toString)
-}
-
-class TcsEphemerisExport(dir: File, night: Night, site: Site, odb: IDBDatabaseService, user: java.util.Set[Principal]) {
-  import TcsEphemerisExport._
-
-  val start = new Date(night.getStartTime)
-  val end   = new Date(night.getEndTime)
-
-  val lookupNonSiderealObservations: TryExport[Set[HorizonsDesignation]] =
-    TryExport.fromTryCatch(OdbError) {
-      NonSiderealObservationFunctor.query(odb, user).map(_.hid).toSet
-    }
-
-  val export: TryExport[HorizonsDesignation ==>> (ExportError \/ File)] =
-    lookupNonSiderealObservations >>= exportAll
-
-  private def exportAll(nos: Set[HorizonsDesignation]): TryExport[HorizonsDesignation ==>> (ExportError \/ File)] = {
-    // HorizonsDesignation ==>> TryExport[File]
-    val exportMap = ==>>.fromList(nos.toList.map(hid => (hid, exportOne(dir, hid))))
-
-    // IO[HorizonsDesignation ==>> (ExportError \/ File)]
-    val exportOp  = exportMap.traverse(_.run)
-
-    // TryExport[HorizonsDesignation ==> (ExportError \/ File)]
-    EitherT(exportOp.map(_.right[ExportError]))
-  }
-
-  def exportOne(dir: File, hid: HorizonsDesignation): TryExport[File] =
-    for {
-      em <- lookupEphemeris(hid)
-      f  <- writeEphemeris(hid, em)
-    } yield f
-
-  def lookupEphemeris(hid: HorizonsDesignation): TryExport[EphemerisMap] =
-    HorizonsService2.lookupEphemerisE[EphemerisElement](hid, site, start, end, ElementCount) { (ee: EphemerisEntry) =>
-      ee.coords.map((_, ee.getRATrack, ee.getDecTrack))
-    }.leftMap(e => HorizonsError(hid, e): ExportError)
-
-  def writeEphemeris(hid: HorizonsDesignation, em: EphemerisMap): TryExport[File] = {
-    // See TcsConfig.ephemerisFile
-    val fileName = URLEncoder.encode(s"${hid.show}.eph", UTF_8.name)
-    val file     = new File(dir, fileName)
-    TryExport.fromTryCatch(t => WriteError(hid, t)) {
-      Files.write(Paths.get(file.toURI), formatEphemeris(em).getBytes(UTF_8))
-      file
-    }
-  }
-
 }

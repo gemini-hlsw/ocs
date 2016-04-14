@@ -226,6 +226,18 @@ public final class TwilightBoundedNight implements Night {
         return (_start <= time) && (time < _end);
     }
 
+    public ObservingNight getObservingNight() {
+        return new ObservingNight(_site, _start);
+    }
+
+    public TwilightBoundedNight previous() {
+        return TwilightBoundedNight.forObservingNight(_type, getObservingNight().previous());
+    }
+
+    public TwilightBoundedNight next() {
+        return TwilightBoundedNight.forObservingNight(_type, getObservingNight().next());
+    }
+
     public static void main(String[] args) {
 
         Calendar cal = Calendar.getInstance();
