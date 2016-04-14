@@ -45,7 +45,7 @@ import java.util.stream.Collectors;
  * @author Allan Brighton (based on code from original OT version)
  * @version $Revision: 46768 $ $Date: 2012-07-16 14:58:53 -0400 (Mon, 16 Jul 2012) $
  */
-public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
+public final class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
 
     /**
      * All feature class names
