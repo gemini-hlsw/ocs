@@ -15,7 +15,6 @@ import edu.gemini.spModel.obs.plannedtime.PlannedTimeSummaryService;
 import edu.gemini.spModel.obs.plannedtime.PlannedTimeSummary;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.target.SPTarget;
-import edu.gemini.spModel.target.system.CoordinateParam;
 import edu.gemini.spModel.too.Too;
 import jsky.coords.WorldCoords;
 

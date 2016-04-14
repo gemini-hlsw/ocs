@@ -5,8 +5,6 @@ import edu.gemini.qv.plugin.filter.core.Filter
 import edu.gemini.qv.plugin.{ReferenceDateChanged, QvContext}
 import edu.gemini.qv.plugin.util.ConstraintsCache.ConstraintCalculationEnd
 import edu.gemini.qv.plugin.util.{SolutionProvider, NonSiderealCache}
-import edu.gemini.spModel.target.SPTarget
-import edu.gemini.spModel.target.system.CoordinateParam.Units
 import scala.collection.JavaConversions._
 import scala.swing.event.Event
 import scala.swing.{Swing, Publisher}

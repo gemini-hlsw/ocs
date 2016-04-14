@@ -9,7 +9,6 @@ import edu.gemini.pot.sp.ISPNode
 import edu.gemini.shared.util.immutable.{Option => JOption}
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
-import edu.gemini.spModel.target.system.CoordinateParam
 import jsky.app.ot.gemini.editor.targetComponent.TelescopePosEditor
 import jsky.app.ot.gemini.editor.targetComponent.details2.NumericPropertySheet.Prop
 import jsky.util.gui.{NumberBoxWidget, TextBoxWidget, TextBoxWidgetWatcher}
@@ -279,9 +278,6 @@ object NumericPropertySheet {
 
     def apply[A](leftCaption: String, rightCaption: String, f: A => Double, g: (A, Double) => Unit): Prop[A, Double] =
       DoubleProp(leftCaption, rightCaption, f, g)
-
-    def apply[A](leftCaption: String, rightCaption: String, f: A => CoordinateParam): Prop[A, Double] =
-      DoubleProp(leftCaption, rightCaption, a => f(a).getValue, (a, b) => f(a).setValue(b))
 
     def apply[A, B](leftOptions: List[B], rightCaptions: Map[B, String], initial: B, render: B => String, f: (A, B) => Double, g: (A, B, Double) => Unit, h: B => NumberFormat): Prop[A, Double] =
       TransformableProp(leftOptions, rightCaptions, initial, render, f, g, h)
