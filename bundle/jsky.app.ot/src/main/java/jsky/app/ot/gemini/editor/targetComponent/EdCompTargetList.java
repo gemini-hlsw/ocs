@@ -608,14 +608,14 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         final ImList<GuideGroup> newGroups = oldGroups.append(newGroup);
 
         // OT-34: make new group primary and select it
-        if (!positionTable.confirmGroupChange(primaryGroup, newGroup)) {
+        if (positionTable.confirmGroupChange(primaryGroup, newGroup)) {
+            obsComp.setTargetEnvironment(env.setGuideEnvironment(ge.setOptions(newGroups)
+                    .setPrimaryIndex(newGroupIdx)));
+            positionTable.selectGroup(igg);
+            return new Some<>(igg);
+        } else {
             return None.instance();
         }
-        obsComp.setTargetEnvironment(env.setGuideEnvironment(ge.setOptions(newGroups)
-                .setPrimaryIndex(newGroupIdx)));
-
-        positionTable.selectGroup(igg);
-        return new Some<>(igg);
     }
 
     /**
