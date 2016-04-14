@@ -544,7 +544,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             // group is present. This requires some ugly hacking.
             final Option<IndexedGuideGroup> iggOpt = positionTable.getSelectedGroupOrParentGroup(env)
                     .filter(igg -> !igg.group().isAutomatic())
-                    .orElse(() -> { return appendNewGroup(obsComp, positionTable); });
+                    .orElse(() -> appendNewGroup(obsComp, positionTable));
 
             // Env may have changed at this point if we appended a new group, so we must re-retrieve env.
             final TargetEnvironment newEnv = obsComp.getTargetEnvironment();
