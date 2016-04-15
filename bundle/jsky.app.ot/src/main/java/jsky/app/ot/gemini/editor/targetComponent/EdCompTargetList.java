@@ -619,7 +619,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
         // Make and return a new primary group and target environment, if possible.
         final TargetEnvironment         newEnv;
-        final Option<IndexedGuideGroup> newIggOpt;
         if (positionTable.confirmGroupChange(primaryGroup, newGroup)) {
             newEnv = env.setGuideEnvironment(ge.setOptions(newGroups).setPrimaryIndex(newGroupIdx));
             return new Some<>(new Pair<>(newEnv, igg));

@@ -1,6 +1,5 @@
 package jsky.app.ot.tpe.feat;
 
-import edu.gemini.pot.ModelConverters$;
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.core.SiderealTarget;
 import edu.gemini.spModel.guide.*;
@@ -175,17 +174,34 @@ public class TpeGuidePosFeature extends TpePositionFeature
             final TargetObsComp obsComp = getTargetObsComp();
             if (obsComp == null) return;
 
-            final TargetEnvironment env = obsComp.getTargetEnvironment();
-            final GuideEnvironment genv = env.getGuideEnvironment();
-            final GuideGroup gp         = genv.getPrimary();
-            final int idx               = genv.getPrimaryIndex();
-            if (gp.isAutomatic()) return;
+            final TargetEnvironment envInit = obsComp.getTargetEnvironment();
+            final GuideEnvironment genvInit = envInit.getGuideEnvironment();
+            final GuideGroup gpInit         = genvInit.getPrimary();
+            final boolean onlyAuto          = envInit.getGuideEnvironment().manualGroups().isEmpty();
+
+            final GuideGroup        gp;
+            final TargetEnvironment env;
+            final int idx;
+
+            if (gpInit.isAutomatic()) {
+                if (!onlyAuto) return;
+
+                // Only the auto group exists, so create a new manual group and add it as the primary group.
+                final ImList<GuideGroup> oldGroups = genvInit.getOptions();
+                gp  = GuideGroup.create("Manual Group");
+                idx = oldGroups.size();
+                env = envInit.setGuideEnvironment(genvInit.setOptions(oldGroups.append(gp)).setPrimaryIndex(idx));
+            } else {
+                gp  = gpInit;
+                env = envInit;
+                idx = genvInit.getPrimaryIndex();
+            }
 
             final GuideProbeTargets oldTargets = gp.get(guider).getOrElse(GuideProbeTargets.create(guider));
             final SPTarget pos                 = createNewTarget(tme);
             final GuideProbeTargets newTargets = oldTargets.update(OptionsList.UpdateOps.appendAsPrimary(pos));
             final GuideGroup gpNew             = gp.put(newTargets);
-            final GuideEnvironment genvNew     = genv.setGroup(idx, gpNew);
+            final GuideEnvironment genvNew     = env.getGuideEnvironment().setGroup(idx, gpNew);
             obsComp.setTargetEnvironment(env.setGuideEnvironment(genvNew));
 
             _iw.getContext().targets().commit();
