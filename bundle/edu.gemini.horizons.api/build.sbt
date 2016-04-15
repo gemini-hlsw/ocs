@@ -25,5 +25,6 @@ OsgiKeys.bundleSymbolicName := name.value
 OsgiKeys.dynamicImportPackage := Seq("")
 
 OsgiKeys.exportPackage := Seq(
-  "edu.gemini.horizons.api"
+  "edu.gemini.horizons.api",
+  "edu.gemini.horizons.server.backend"
 )

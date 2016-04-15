@@ -97,7 +97,6 @@ def common(version: Version) = AppConfig(
     BundleSpec("edu.gemini.ags",                         version),
     BundleSpec("edu.gemini.ags.servlet",                 version),
     BundleSpec("edu.gemini.dataman.app",                 version),
-    BundleSpec("edu.gemini.horizons.server",             version),
     BundleSpec("edu.gemini.itc",                         version),
     BundleSpec("edu.gemini.itc.shared",                  version),
     BundleSpec("edu.gemini.itc.web",                     version),
