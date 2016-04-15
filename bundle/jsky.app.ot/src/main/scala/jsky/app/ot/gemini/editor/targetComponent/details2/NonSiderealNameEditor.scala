@@ -58,12 +58,18 @@ final class NonSiderealNameEditor extends TelescopePosEditor with ReentrancyHack
 
     def updateDesignation(hd: HorizonsDesignation, name: String): HS2[Unit] =
       HS2.delay {
-        val t0 = Target.name.set(spt.getTarget, name)
-        Target.horizonsDesignation.set(t0, Some(hd)).foreach(spt.setTarget)
+        Swing.onEDT {
+          val t0 = Target.name.set(spt.getTarget, name)
+          Target.horizonsDesignation.set(t0, Some(hd)).foreach(spt.setTarget)
+        }
       }
 
     def updateEphem(e: Ephemeris): HS2[Unit] =
-      HS2.delay(Target.ephemeris.set(spt.getTarget, e).foreach(spt.setTarget))
+      HS2.delay {
+        Swing.onEDT {
+          Target.ephemeris.set(spt.getTarget, e).foreach(spt.setTarget)
+        }
+      }
 
     def manyResults(rs: List[Row[_ <: HorizonsDesignation]]): HS2[Unit] =
       HS2.delay {
