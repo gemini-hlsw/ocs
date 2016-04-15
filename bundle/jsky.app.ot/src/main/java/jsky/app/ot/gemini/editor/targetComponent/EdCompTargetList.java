@@ -251,7 +251,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
      */
     private void updateGuideStarAdders() {
         // If there is only one group, then it must be the auto group.
-        final boolean onlyAutoGroup = getContextTargetEnv().getGroups().size() == 1;
+        final boolean onlyAutoGroup = getContextTargetEnv().getGuideEnvironment().manualGroups().isEmpty();
         final boolean enabled       = onlyAutoGroup || selectionIsManualGroup() || selectionIsManualTarget();
         _guideStarAdders.forEach((gp, comp) -> comp.setEnabled(enabled));
     }
@@ -542,28 +542,30 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
             // REL-2715 demands that we allow manual guide groups to be automatically created if only the auto
             // group is present. This requires some ugly hacking.
-            final Option<IndexedGuideGroup> iggOpt = positionTable.getSelectedGroupOrParentGroup(env)
+            final Option<Tuple2<TargetEnvironment,IndexedGuideGroup>> resultOpt = positionTable.getSelectedGroupOrParentGroup(env)
                     .filter(igg -> !igg.group().isAutomatic())
+                    .map(igg -> (Tuple2<TargetEnvironment,IndexedGuideGroup>) new Pair<>(env, igg))
                     .orElse(() -> appendNewGroup(obsComp, positionTable));
 
-            // Env may have changed at this point if we appended a new group, so we must re-retrieve env.
-            final TargetEnvironment newEnv = obsComp.getTargetEnvironment();
+            resultOpt.foreach(result -> {
+                final TargetEnvironment newEnv         = result._1();
+                final IndexedGuideGroup igg            = result._2();
+                final Option<GuideProbeTargets> gptOpt = igg.group().get(probe);
+                final Integer groupIndex               = igg.index();
 
-            Option<GuideProbeTargets> opt = iggOpt.flatMap(igg -> igg.group().get(probe));
-            final Integer groupIndex = iggOpt.map(IndexedGuideGroup::index).getOrElse(ge.getPrimaryIndex());
+                final SPTarget target = new SPTarget();
+                final GuideProbeTargets targets = gptOpt
+                        .map(gpt -> gpt.update(OptionsList.UpdateOps.appendAsPrimary(target)))
+                        .getOrElse(GuideProbeTargets.create(probe, target));
+                final TargetEnvironment newEnvWithTarget = newEnv.setGuideEnvironment(newEnv.getGuideEnvironment()
+                        .putGuideProbeTargets(groupIndex, targets));
+                obsComp.setTargetEnvironment(newEnvWithTarget);
+                positionTable.selectTarget(target);
 
-            final SPTarget target = new SPTarget();
-            final GuideProbeTargets targets = opt
-                    .map(gpt -> gpt.update(OptionsList.UpdateOps.appendAsPrimary(target)))
-                    .getOrElse(GuideProbeTargets.create(probe, target));
-
-            obsComp.setTargetEnvironment(newEnv.setGuideEnvironment(
-                    newEnv.getGuideEnvironment().putGuideProbeTargets(groupIndex, targets)));
-            positionTable.selectTarget(target);
-
-            // XXX OT-35 hack to work around recursive call to TargetObsComp.setTargetEnvironment() in
-            // SPProgData.ObsContextManager.update()
-            SwingUtilities.invokeLater(EdCompTargetList.this::showTargetTag);
+                // XXX OT-35 hack to work around recursive call to TargetObsComp.setTargetEnvironment() in
+                // SPProgData.ObsContextManager.update()
+                SwingUtilities.invokeLater(EdCompTargetList.this::showTargetTag);
+            });
         }
     }
 
@@ -587,14 +589,22 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         }
 
         @Override public void actionPerformed(final ActionEvent actionEvent) {
-            appendNewGroup(obsComp, positionTable);
+            final Option<Tuple2<TargetEnvironment,IndexedGuideGroup>> resultOpt = appendNewGroup(obsComp, positionTable);
+            resultOpt.foreach(result -> {
+                final TargetEnvironment newEnv = result._1();
+                final IndexedGuideGroup igg    = result._2();
+                obsComp.setTargetEnvironment(newEnv);
+                positionTable.selectGroup(igg);
+            });
         }
     }
 
     /**
      * Append a guide group to the collection of guide groups and select it as the primary.
+     * If the guide group is not able to be appended, returns None.
      */
-    private static Option<IndexedGuideGroup> appendNewGroup(final TargetObsComp obsComp, final TelescopePosTableWidget positionTable) {
+    private static Option<Tuple2<TargetEnvironment,IndexedGuideGroup>> appendNewGroup(final TargetObsComp obsComp,
+                                                                                      final TelescopePosTableWidget positionTable) {
         final TargetEnvironment env    = obsComp.getTargetEnvironment();
 
         // Ensure we are working with a guide env with a primary group.
@@ -607,12 +617,12 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         final IndexedGuideGroup igg        = new IndexedGuideGroup(newGroupIdx, newGroup);
         final ImList<GuideGroup> newGroups = oldGroups.append(newGroup);
 
-        // OT-34: make new group primary and select it
+        // Make and return a new primary group and target environment, if possible.
+        final TargetEnvironment         newEnv;
+        final Option<IndexedGuideGroup> newIggOpt;
         if (positionTable.confirmGroupChange(primaryGroup, newGroup)) {
-            obsComp.setTargetEnvironment(env.setGuideEnvironment(ge.setOptions(newGroups)
-                    .setPrimaryIndex(newGroupIdx)));
-            positionTable.selectGroup(igg);
-            return new Some<>(igg);
+            newEnv = env.setGuideEnvironment(ge.setOptions(newGroups).setPrimaryIndex(newGroupIdx));
+            return new Some<>(new Pair<>(newEnv, igg));
         } else {
             return None.instance();
         }
