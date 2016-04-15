@@ -917,7 +917,6 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
     void updatePrimaryStar() {
         if (_env == null || !OTOptions.isEditable(_obsComp.getProgram(), _obsComp.getContextObservation())) return;
 
-        // TODO: This method must be tested in greater detail, since custom guiding is required for offset positions.
         final TargetEnvironment env = _dataObject.getTargetEnvironment();
         final Option<SPTarget> targetOpt = getSelectedPos();
         final Option<IndexedGuideGroup> iggOpt = targetOpt.flatMap(this::getTargetGroup).orElse(getSelectedGroup());
