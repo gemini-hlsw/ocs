@@ -245,9 +245,14 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     /**
      * Update the menu items that allow the addition of guide stars. These must be disabled for the automatic group
      * or if we are currently on the base or a user target.
+     *
+     * REL-2715 similarly demands that if there is only the auto guide group that they be enabled, with a new guide
+     * group created automatically.
      */
     private void updateGuideStarAdders() {
-        final boolean enabled = selectionIsManualGroup() || selectionIsManualTarget();
+        // If there is only one group, then it must be the auto group.
+        final boolean onlyAutoGroup = getContextTargetEnv().getGuideEnvironment().manualGroups().isEmpty();
+        final boolean enabled       = onlyAutoGroup || selectionIsManualGroup() || selectionIsManualTarget();
         _guideStarAdders.forEach((gp, comp) -> comp.setEnabled(enabled));
     }
 
@@ -532,29 +537,35 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         }
 
         @Override public void actionPerformed(final ActionEvent actionEvent) {
-            TargetEnvironment env = obsComp.getTargetEnvironment();
-            GuideEnvironment ge = env.getGuideEnvironment();
+            final TargetEnvironment env = obsComp.getTargetEnvironment();
+            final GuideEnvironment ge = env.getGuideEnvironment();
 
-            // Make sure that a group is selected and that it is not the auto group.
-            final Option<IndexedGuideGroup> iggOpt = positionTable.getSelectedGroupOrParentGroup(env);
-            if (!iggOpt.exists(igg -> !igg.group().isAutomatic()))
-                return;
+            // REL-2715 demands that we allow manual guide groups to be automatically created if only the auto
+            // group is present. This requires some ugly hacking.
+            final Option<Tuple2<TargetEnvironment,IndexedGuideGroup>> resultOpt = positionTable.getSelectedGroupOrParentGroup(env)
+                    .filter(igg -> !igg.group().isAutomatic())
+                    .map(igg -> (Tuple2<TargetEnvironment,IndexedGuideGroup>) new Pair<>(env, igg))
+                    .orElse(() -> appendNewGroup(obsComp, positionTable));
 
-            Option<GuideProbeTargets> opt = iggOpt.flatMap(igg -> igg.group().get(probe));
-            final Integer groupIndex = iggOpt.map(IndexedGuideGroup::index).getOrElse(ge.getPrimaryIndex());
+            resultOpt.foreach(result -> {
+                final TargetEnvironment newEnv         = result._1();
+                final IndexedGuideGroup igg            = result._2();
+                final Option<GuideProbeTargets> gptOpt = igg.group().get(probe);
+                final Integer groupIndex               = igg.index();
 
-            final SPTarget target = new SPTarget();
-            final GuideProbeTargets targets = opt
-                    .map(gpt -> gpt.update(OptionsList.UpdateOps.appendAsPrimary(target)))
-                    .getOrElse(GuideProbeTargets.create(probe, target));
+                final SPTarget target = new SPTarget();
+                final GuideProbeTargets targets = gptOpt
+                        .map(gpt -> gpt.update(OptionsList.UpdateOps.appendAsPrimary(target)))
+                        .getOrElse(GuideProbeTargets.create(probe, target));
+                final TargetEnvironment newEnvWithTarget = newEnv.setGuideEnvironment(newEnv.getGuideEnvironment()
+                        .putGuideProbeTargets(groupIndex, targets));
+                obsComp.setTargetEnvironment(newEnvWithTarget);
+                positionTable.selectTarget(target);
 
-            obsComp.setTargetEnvironment(env.setGuideEnvironment(
-                    env.getGuideEnvironment().putGuideProbeTargets(groupIndex, targets)));
-            positionTable.selectTarget(target);
-
-            // XXX OT-35 hack to work around recursive call to TargetObsComp.setTargetEnvironment() in
-            // SPProgData.ObsContextManager.update()
-            SwingUtilities.invokeLater(EdCompTargetList.this::showTargetTag);
+                // XXX OT-35 hack to work around recursive call to TargetObsComp.setTargetEnvironment() in
+                // SPProgData.ObsContextManager.update()
+                SwingUtilities.invokeLater(EdCompTargetList.this::showTargetTag);
+            });
         }
     }
 
@@ -578,24 +589,41 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         }
 
         @Override public void actionPerformed(final ActionEvent actionEvent) {
-            final TargetEnvironment env    = obsComp.getTargetEnvironment();
+            final Option<Tuple2<TargetEnvironment,IndexedGuideGroup>> resultOpt = appendNewGroup(obsComp, positionTable);
+            resultOpt.foreach(result -> {
+                final TargetEnvironment newEnv = result._1();
+                final IndexedGuideGroup igg    = result._2();
+                obsComp.setTargetEnvironment(newEnv);
+                positionTable.selectGroup(igg);
+            });
+        }
+    }
 
-            // Ensure we are working with a guide env with a primary group.
-            final GuideEnvironment ge     = env.getGuideEnvironment();
-            final GuideGroup primaryGroup = ge.getPrimary();
+    /**
+     * Append a guide group to the collection of guide groups and select it as the primary.
+     * If the guide group is not able to be appended, returns None.
+     */
+    private static Option<Tuple2<TargetEnvironment,IndexedGuideGroup>> appendNewGroup(final TargetObsComp obsComp,
+                                                                                      final TelescopePosTableWidget positionTable) {
+        final TargetEnvironment env    = obsComp.getTargetEnvironment();
 
-            final ImList<GuideGroup> oldGroups = ge.getOptions();
-            final int newGroupIdx              = oldGroups.size();
-            final GuideGroup newGroup          = GuideGroup.create("Manual Group");
-            final IndexedGuideGroup igg        = new IndexedGuideGroup(newGroupIdx, newGroup);
-            final ImList<GuideGroup> newGroups = oldGroups.append(newGroup);
+        // Ensure we are working with a guide env with a primary group.
+        final GuideEnvironment ge     = env.getGuideEnvironment();
+        final GuideGroup primaryGroup = ge.getPrimary();
 
-            // OT-34: make new group primary and select it
-            if (!positionTable.confirmGroupChange(primaryGroup, newGroup)) return;
-            obsComp.setTargetEnvironment(env.setGuideEnvironment(ge.setOptions(newGroups)
-                    .setPrimaryIndex(newGroupIdx)));
+        final ImList<GuideGroup> oldGroups = ge.getOptions();
+        final int newGroupIdx              = oldGroups.size();
+        final GuideGroup newGroup          = GuideGroup.create("Manual Group");
+        final IndexedGuideGroup igg        = new IndexedGuideGroup(newGroupIdx, newGroup);
+        final ImList<GuideGroup> newGroups = oldGroups.append(newGroup);
 
-            positionTable.selectGroup(igg);
+        // Make and return a new primary group and target environment, if possible.
+        final TargetEnvironment         newEnv;
+        if (positionTable.confirmGroupChange(primaryGroup, newGroup)) {
+            newEnv = env.setGuideEnvironment(ge.setOptions(newGroups).setPrimaryIndex(newGroupIdx));
+            return new Some<>(new Pair<>(newEnv, igg));
+        } else {
+            return None.instance();
         }
     }
 

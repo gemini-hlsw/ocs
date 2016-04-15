@@ -52,6 +52,10 @@ final case class GuideEnvironment(guideEnv: GuideEnv) extends TargetContainer {
   def automaticGroup: GuideGroup =
     GuideGroup(guideEnv.auto)
 
+  /** Gets the manual groups. */
+  def manualGroups: List[GuideGroup] =
+    guideEnv.manual.map(_.toList.map(GuideGroup)) | Nil
+
   /** Gets the `GuideGroup` at the given index, if any.  If the index is out
     * of range, `None` is returned.  If the index is 0, the result will be the
     * automatic group, otherwise one of the manual groups.
