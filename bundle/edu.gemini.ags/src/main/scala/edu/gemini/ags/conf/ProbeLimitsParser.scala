@@ -52,7 +52,7 @@ object ProbeLimitsParser {
 
       errors match {
         case Nil    => ().success
-        case h :: t => NonEmptyList.nel(h, t.toList).failure
+        case h :: t => NonEmptyList(h, t: _*).failure
       }
     }
 

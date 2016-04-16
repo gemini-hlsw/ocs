@@ -58,7 +58,7 @@ sealed trait CatalogQuery {
 case class ConeSearchCatalogQuery(id: Option[Int], base: Coordinates, radiusConstraint: RadiusConstraint, magnitudeConstraints: List[MagnitudeConstraints], catalog: CatalogName) extends CatalogQuery {
 
   val filters: NonEmptyList[QueryResultsFilter] = NonEmptyList(RadiusFilter(base, radiusConstraint), magnitudeConstraints.map(MagnitudeQueryFilter.apply): _*)
-  override def filter(t: SiderealTarget):Boolean = filters.list.forall(_.filter(t))
+  override def filter(t: SiderealTarget):Boolean = filters.toList.forall(_.filter(t))
 
   override def isSuperSetOf(q: CatalogQuery) = q match {
     case c: ConeSearchCatalogQuery =>

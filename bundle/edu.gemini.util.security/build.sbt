@@ -7,17 +7,17 @@ name := "edu.gemini.util.security"
 // version set in ThisBuild
 
 unmanagedJars in Compile ++= Seq(
-  new File(baseDirectory.value, "../../lib/bundle/doobie-core_2.11-0.2.4-SNAPSHOT.jar"),
   new File(baseDirectory.value, "../../lib/bundle/h2-1.3.170.jar")
 )
 
 libraryDependencies ++= Seq(
   "org.scala-lang.modules" %% "scala-swing" % "2.0.0-M2",
-  "org.scalaz.stream"      %% "scalaz-stream" % "0.7.2a" intransitive(),
+  "org.scalaz.stream"      %% "scalaz-stream" % "0.8a" intransitive(),
   "org.scalaz"             %% "scalaz-core" % ScalaZVersion,
   "org.scalaz"             %% "scalaz-effect" % ScalaZVersion,
   "org.scalaz"             %% "scalaz-concurrent" % ScalaZVersion,
-  "com.chuusai"            %% "shapeless" % "2.2.5",
+  "org.tpolecat"           %% "doobie-core" % "0.3.0-M1",
+  "com.chuusai"            %% "shapeless" % "2.3.0",
   "org.scodec"             %% "scodec-bits" % "1.0.9",
   "org.scala-lang"         %  "scala-reflect" % "2.11.7",
   "org.scala-lang"         %  "scala-compiler" % "2.11.7"

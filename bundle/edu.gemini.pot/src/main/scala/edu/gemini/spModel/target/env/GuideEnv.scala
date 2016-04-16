@@ -63,8 +63,9 @@ final case class GuideEnv(auto: AutomaticGroup, manual: Option[OptsList[ManualGr
   def toList: List[GuideGrp] =
     auto :: manual.map(_.toList).orZero
 
-  def toNel: NonEmptyList[GuideGrp] =
-    NonEmptyList.nel(auto, manual.map(_.toList).orZero)
+  def toNel: NonEmptyList[GuideGrp] = {
+    NonEmptyList(auto, manual.map(_.toList).orZero: _*)
+  }
 }
 
 object GuideEnv {

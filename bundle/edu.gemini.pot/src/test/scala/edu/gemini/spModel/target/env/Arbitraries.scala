@@ -56,7 +56,7 @@ trait Arbitraries extends edu.gemini.spModel.core.Arbitraries {
       for {
         a  <- arbitrary[A]
         as <- boundedListOf[A](3)
-      } yield NonEmptyList.nel(a, as)
+      } yield NonEmptyList(a, as: _*)
     }
 
   implicit def arbOneAndList[A: Arbitrary]: Arbitrary[OneAnd[List, A]] =

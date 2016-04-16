@@ -170,7 +170,7 @@ object To2015B extends Migration {
       case (None, _)           => appendMagNote(ps, "failed: " + b)
       case (Some(ms), Some(_)) => appendMagNote(ps, "ignored: " + b)
       case (Some(ms), None)    => appendMagNote(ps, "parsed: " + b)
-        ps.addParamSet(MagnitudePio.instance.toParamSet(PioFactory, ms.list.asImList))
+        ps.addParamSet(MagnitudePio.instance.toParamSet(PioFactory, ms.toList.asImList))
     }
   }
 

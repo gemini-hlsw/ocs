@@ -12,7 +12,6 @@ import scala.annotation.tailrec
 import scalaz._
 import Scalaz._
 
-
 /** MergeNodes form a tree with potential links into an existing science
   * program.  There are two types of MergeNode, [[edu.gemini.sp.vcs2.Modified]]
   * and [[edu.gemini.sp.vcs2.Unmodified]]s.  `Modified` describes a
@@ -249,6 +248,6 @@ object MergeNode {
   }
 
   def draw(t: Tree[MergeNode]): String =
-    t.draw.zipWithIndex.collect { case (s0, n) if n % 2 == 0 => s0 }.mkString("\n")
+    t.drawTree.zipWithIndex.collect { case (s0, n) if n % 2 == 0 => s0 }.mkString("\n")
 }
 

@@ -59,7 +59,7 @@ final class Activator extends BundleActivator {
         tracker.foreach(_.open())
 
       case Failure(problems) =>
-        val msg = s"Data Manager configuration issues.  Not starting.\n${problems.list.mkString("\n\t", "\n\t", "\n")}"
+        val msg = s"Data Manager configuration issues.  Not starting.\n${problems.toList.mkString("\n\t", "\n\t", "\n")}"
         Log.severe(msg)
         sys.error(msg)
     }

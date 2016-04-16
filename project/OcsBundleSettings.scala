@@ -244,7 +244,7 @@ trait OcsBundleSettings { this: OcsKey =>
 
   // Print a tree in a slighly prettier form than default, using toString for elements
   def printTree[A](t: Tree[A]): Unit = 
-    t.draw(Show.showA).zipWithIndex.filter(_._2 % 2 == 0).map(_._1).foreach(println)
+    t.drawTree(Show.showA).zipWithIndex.filter(_._2 % 2 == 0).map(_._1).foreach(println)
 
 }
 
