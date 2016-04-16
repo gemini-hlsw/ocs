@@ -1,11 +1,13 @@
 
 // Dependencies for the build itself.
 
+val ScalaZVersion = "7.2.2"
+
 libraryDependencies ++= Seq(
   "org.ow2.asm" % "asm" % "4.0",
   "org.eclipse.osgi" % "org.eclipse.osgi" % "3.6.0.v20100517",
-  "org.scalaz" %% "scalaz-core" % "7.1.6",
-  "org.scalaz" %% "scalaz-effect" % "7.1.6"
+  "org.scalaz" %% "scalaz-core" % ScalaZVersion,
+  "org.scalaz" %% "scalaz-effect" % ScalaZVersion
 )
 
 // TODO: remove this, it's for the inlined sbt-osgi plugin

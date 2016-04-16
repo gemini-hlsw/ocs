@@ -13,7 +13,7 @@ unmanagedJars in Compile ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "org.scalaz" %% "scalaz-concurrent" % "7.1.6")
+  "org.scalaz" %% "scalaz-concurrent" % ScalaZVersion)
 
 osgiSettings
 

@@ -14,9 +14,9 @@ unmanagedJars in Compile ++= Seq(
 libraryDependencies ++= Seq(
   "org.scala-lang.modules" %% "scala-swing" % "2.0.0-M2",
   "org.scalaz.stream"      %% "scalaz-stream" % "0.7.2a" intransitive(),
-  "org.scalaz"             %% "scalaz-core" % "7.1.6",
-  "org.scalaz"             %% "scalaz-effect" % "7.1.6",
-  "org.scalaz"             %% "scalaz-concurrent" % "7.1.6",
+  "org.scalaz"             %% "scalaz-core" % ScalaZVersion,
+  "org.scalaz"             %% "scalaz-effect" % ScalaZVersion,
+  "org.scalaz"             %% "scalaz-concurrent" % ScalaZVersion,
   "com.chuusai"            %% "shapeless" % "2.2.5",
   "org.scodec"             %% "scodec-bits" % "1.0.9",
   "org.scala-lang"         %  "scala-reflect" % "2.11.7",

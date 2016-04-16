@@ -12,9 +12,9 @@ unmanagedJars in Compile ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "org.scalaz"     %% "scalaz-core"       % "7.1.6",
-  "org.scalaz"     %% "scalaz-effect"     % "7.1.6",
-  "org.scalaz"     %% "scalaz-concurrent" % "7.1.6",
+  "org.scalaz"     %% "scalaz-core"       % ScalaZVersion,
+  "org.scalaz"     %% "scalaz-effect"     % ScalaZVersion,
+  "org.scalaz"     %% "scalaz-concurrent" % ScalaZVersion,
   "com.chuusai"    %% "shapeless"         % "2.2.5",
   "org.scala-lang" %  "scala-compiler"    % "2.11.7")
 

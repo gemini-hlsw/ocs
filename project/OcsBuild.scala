@@ -9,6 +9,7 @@ object OcsBuild extends Build
   with OcsAppSettings // settings for app projects
   with OcsKey         // ocs-provided keys
 {
+  val ScalaZVersion = "7.2.2"
 
   override lazy val settings = super.settings ++
     Seq(

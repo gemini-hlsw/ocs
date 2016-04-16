@@ -6,7 +6,6 @@ import edu.gemini.spModel.target.SPTarget
 import scalaz._
 import Scalaz._
 
-
 /** A pair of an `AutomaticGroup` guide group and, optionally, a non-empty list
   * of manual groups.  The `GuideEnv` maintains the concept of a "primary"
   * group.  It is the group that will be used for guiding at night. The

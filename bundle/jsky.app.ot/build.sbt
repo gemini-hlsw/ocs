@@ -18,8 +18,8 @@ unmanagedJars in Compile ++= Seq(
 
 libraryDependencies ++= Seq(
   "org.scala-lang" % "scala-actors" % "2.11.7",
-  "org.scalaz" %% "scalaz-core" % "7.1.6",
-  "org.scalaz" %% "scalaz-effect" % "7.1.6")
+  "org.scalaz" %% "scalaz-core" % ScalaZVersion,
+  "org.scalaz" %% "scalaz-effect" % ScalaZVersion)
 
 osgiSettings
 
