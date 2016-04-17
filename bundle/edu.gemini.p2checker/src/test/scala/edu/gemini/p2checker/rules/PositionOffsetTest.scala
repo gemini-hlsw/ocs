@@ -24,7 +24,7 @@ class PositionOffsetTest extends AbstractRuleTest {
     prog = super.createBasicProgram("GN-2014B-LP-2")
   }
 
-  private def initAltair(offsets: Pair[Double, Double]*): Unit = {
+  private def initAltair(offsets: Tuple2[Double, Double]*): Unit = {
     val niri = addNiri()
     val niriDataObj = niri.getDataObject.asInstanceOf[InstNIRI]
     // Any other config necessary here?
@@ -43,7 +43,7 @@ class PositionOffsetTest extends AbstractRuleTest {
     addOffsets(offsets:_*)
   }
 
-  private def initGmosNorth(offsets: Pair[Double, Double]*): ISPObsComponent = {
+  private def initGmosNorth(offsets: Tuple2[Double, Double]*): ISPObsComponent = {
     val gmos        = addGmosNorth()
     val gmosDataObj = gmos.getDataObject.asInstanceOf[InstGmosNorth]
     gmosDataObj.setFilter(GmosNorthType.FilterNorth.Ha_G0310) // avoid a different unrelated warning ...
@@ -59,7 +59,7 @@ class PositionOffsetTest extends AbstractRuleTest {
     gmos.setDataObject(gmosDataObj)
   }
 
-  private def initGmosSouth(offsets: Pair[Double, Double]*): ISPObsComponent = {
+  private def initGmosSouth(offsets: Tuple2[Double, Double]*): ISPObsComponent = {
     val gmos        = addGmosSouth()
     val gmosDataObj = gmos.getDataObject.asInstanceOf[InstGmosSouth]
     gmosDataObj.setFilter(GmosSouthType.FilterSouth.Ha_G0336) // avoid a different unrelated warning ...
@@ -75,7 +75,7 @@ class PositionOffsetTest extends AbstractRuleTest {
     gmos.setDataObject(gmosDataObj)
   }
 
-  private def addOffsets(offsets: Pair[Double, Double]*): Unit = {
+  private def addOffsets(offsets: Tuple2[Double, Double]*): Unit = {
     // Create and add an offset iterator.
     val iter = addOffsetIterator()
     val seqDataObj = iter.getDataObject.asInstanceOf[SeqRepeatOffset]
@@ -94,7 +94,7 @@ class PositionOffsetTest extends AbstractRuleTest {
   private def expectSuccess(rule: IRule, msg: String): Unit = {
     val problems = applyRule(rule)
 //    println("PROBLEMS: " + problems.mkString(", "))
-    assertTrue(problems.filter(_ == msg).isEmpty)
+    assertTrue(!problems.exists(_ == msg))
   }
 
   // failure is presence of problem message with given text

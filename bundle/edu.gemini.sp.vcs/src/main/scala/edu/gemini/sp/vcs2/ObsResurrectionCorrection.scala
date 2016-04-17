@@ -7,6 +7,7 @@ import edu.gemini.spModel.rich.pot.sp.SpNodeKeyEqual
 
 import scalaz._
 import Scalaz._
+import scalaz.Tree.Leaf
 
 /** The ObsResurrectionCorrection ensures that resurrected observations are
   * brought back in their entirety, with all descendants. */
@@ -49,7 +50,7 @@ case class ObsResurrectionCorrection(mc: MergeContext) extends CorrectionFunctio
     val resurrectedChildren = loc.tree.subForest.map { child => child.key -> child }.toMap
 
     // Strip the node of all children.
-    val loc2 = loc.modifyTree { t => Tree(t.rootLabel) }
+    val loc2 = loc.modifyTree { t => Leaf(t.rootLabel) }
 
     // Add children back, one at a time.  If it is a resurrected child, we can
     // add it straight away.  If it was deleted but not present anywhere else,
@@ -59,8 +60,8 @@ case class ObsResurrectionCorrection(mc: MergeContext) extends CorrectionFunctio
       tl.flatMap { l =>
         val origChildKey = c.key
         val c2 = resurrectedChildren.getOrElse(origChildKey, {
-          if (!usedKeys(origChildKey)) Tree(c.rootLabel)
-          else Tree(c.rootLabel match { // Duplicate child with a new node key.
+          if (!usedKeys(origChildKey)) Leaf(c.rootLabel)
+          else Leaf(c.rootLabel match { // Duplicate child with a new node key.
             case m: Modified => m.copy(key = new SPNodeKey(), nv = EmptyNodeVersions.incr(lifespanId))
             case u           => u
           })

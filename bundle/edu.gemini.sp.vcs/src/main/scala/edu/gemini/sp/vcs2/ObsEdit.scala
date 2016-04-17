@@ -3,15 +3,15 @@ package edu.gemini.sp.vcs2
 import edu.gemini.pot.sp._
 import edu.gemini.pot.sp.version._
 import edu.gemini.shared.util.VersionComparison
-import edu.gemini.shared.util.VersionComparison.{Newer, Conflicting}
+import edu.gemini.shared.util.VersionComparison.{Conflicting, Newer}
 import edu.gemini.spModel.obs.ObservationStatus
 import edu.gemini.spModel.rich.pot.sp._
 
 import scala.collection.breakOut
 import scala.collection.JavaConverters._
-
 import scalaz._
 import Scalaz._
+import scalaz.Tree.Node
 
 /**
  * ObsEdit describes a change to a local observation vs. the remote version
@@ -73,7 +73,7 @@ object ObsEdit {
     val remoteVm     = diff.plan.vm(local)
     val remoteStatus = diff.obsStatus.toMap.lift
     val remoteObsMap = diff.plan.update.foldObservations(Map.empty[SPNodeKey, Tree[MergeNode]]) {
-      (mod, _, children, m) => m + (mod.key -> Tree.node(mod, children))
+      (mod, _, children, m) => m + (mod.key -> Node(mod, children))
     }
 
     def remoteObs(k: SPNodeKey, s: ObservationStatus): Obs =

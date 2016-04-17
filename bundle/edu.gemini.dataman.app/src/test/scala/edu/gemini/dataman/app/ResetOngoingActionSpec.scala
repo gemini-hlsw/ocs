@@ -23,7 +23,7 @@ object ResetOngoingActionSpec extends TestSupport {
         case DatasetRecord(_, DatasetExecRecord(ds, ActiveRequest(_, _, uid, stat, _, _), _)) if stat != Accepted => ds.getLabel
       }.toSet
 
-      DmanAction.mergeFailure(ResetOngoingAction(odb, User).run.attemptRun) match {
+      DmanAction.mergeFailure(ResetOngoingAction(odb, User).run.unsafePerformSyncAttempt) match {
         case -\/(f) =>
           println(f.explain)
           false

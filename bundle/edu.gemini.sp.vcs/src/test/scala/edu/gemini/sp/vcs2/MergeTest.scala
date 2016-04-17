@@ -284,7 +284,7 @@ class MergeTest extends JUnitSuite {
           resurrectedNodes.forall { k =>
             lookup(k) match {
               case o: ISPObservation =>
-                val cmp = pc.correctedMergePlan.run.run.getOrElse(sys.error("Couldn't run merge plan"))
+                val cmp = pc.correctedMergePlan.run.unsafePerformSync.getOrElse(sys.error("Couldn't run merge plan"))
                 cmp.update.focus(k).exists(loc => matches(loc.tree, o))
               case _                 => true
             }
@@ -512,7 +512,7 @@ class MergeTest extends JUnitSuite {
           val updateVm = ulp.getVersions
           val remoteVm = pc.rp.getVersions
           isSameOrNewer(updateVm, remoteVm)
-        }.run
+        }.unsafePerformSync
       }
     ),
 
@@ -568,7 +568,7 @@ class MergeTest extends JUnitSuite {
             }
           }
 
-        val deletedLocalKeys = remoteKeys.filter(pc.local.deletedKeys.contains)
+        val deletedLocalKeys = remoteKeys.intersect(pc.local.deletedKeys)
 
         val obsDeleteKeys   = pc.obsEdits.collect {
           case ObsDelete(k, _) => k
@@ -582,7 +582,7 @@ class MergeTest extends JUnitSuite {
       (start, local, remote, pc) => {
         val localKeys = pc.local.editedObservationKeys
 
-        val localEditRemoteDeleteKeys = localKeys.filter(pc.remote.deletedKeys.contains)
+        val localEditRemoteDeleteKeys = localKeys.intersect(pc.remote.deletedKeys)
 
         val obsUpdateKeys = pc.obsEdits.collect {
           case ObsUpdate(k, _, None, _) => k
@@ -658,7 +658,7 @@ class MergeTest extends JUnitSuite {
           }
           val vts = tgs.map(_.getDataObject.asInstanceOf[TemplateGroup].getVersionToken)
           vts.size == vts.toSet.size
-        }.run
+        }.unsafePerformSync
       }
     ),
 
@@ -675,7 +675,7 @@ class MergeTest extends JUnitSuite {
           conflicts.forall { c =>
             VersionComparison.compare(ulp.getVersions(c.key), local.getVersions(c.key)) == Newer
           }
-        }.run
+        }.unsafePerformSync
     ),
 
     ("Every merged node with a conflict note has a newer version number",
@@ -702,7 +702,7 @@ class MergeTest extends JUnitSuite {
 
             (VersionComparison.compare(ulp.getVersions(k), local.getVersions(k)) == Newer) || possibleStatusCorrection
           }
-        }.run
+        }.unsafePerformSync
       }
     ),
 

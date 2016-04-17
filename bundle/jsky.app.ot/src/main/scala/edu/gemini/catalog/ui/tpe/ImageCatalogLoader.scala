@@ -19,7 +19,7 @@ object ImageCatalogLoader {
     */
   def display4Java(display: CatalogImageDisplay, url: URL):Unit = {
     val (p, f) = new ImageCatalogLoader().queryImage(url)
-    f.runAsync {
+    f.unsafePerformAsync {
       case -\/(t) =>
         p.stop()
         DialogUtil.error(t)

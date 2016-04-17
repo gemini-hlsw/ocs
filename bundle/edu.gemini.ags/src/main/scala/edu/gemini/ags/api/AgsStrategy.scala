@@ -5,9 +5,8 @@ import edu.gemini.ags.api.AgsMagnitude.{MagnitudeCalc, MagnitudeTable}
 import edu.gemini.catalog.api.CatalogQuery
 import edu.gemini.pot.ModelConverters._
 import edu.gemini.spModel.ags.AgsStrategyKey
-import edu.gemini.spModel.core.{BandsList, Angle}
-import edu.gemini.spModel.core.SiderealTarget
-import edu.gemini.spModel.guide.{GuideStarValidation, ValidatableGuideProbe, GuideProbe}
+import edu.gemini.spModel.core.{Angle, BandsList, Coordinates, SiderealTarget}
+import edu.gemini.spModel.guide.{GuideProbe, GuideStarValidation, ValidatableGuideProbe}
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable._
 import edu.gemini.shared.util.immutable.{Option => JOption, Some => JSome}
@@ -15,7 +14,6 @@ import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.env._
 
 import scala.concurrent.Future
-
 import scalaz._
 import Scalaz._
 
@@ -29,7 +27,7 @@ trait AgsStrategy {
   def analyze(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SiderealTarget): Option[AgsAnalysis]
 
   def analyzeForJava(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SiderealTarget): JOption[AgsAnalysis] = {
-    val spTarget = new SPTarget(guideStar.coordinates.ra.toAngle.toDegrees, guideStar.coordinates.dec.toDegrees)
+    val spTarget = new SPTarget(SiderealTarget.empty.copy(coordinates = Coordinates(guideStar.coordinates.ra, guideStar.coordinates.dec)))
     if (guideProbe.validate(spTarget, ctx) != GuideStarValidation.VALID) new JSome(NotReachable(guideProbe, guideStar, probeBands))
     else analyze(ctx, mt, guideProbe, guideStar).asGeminiOpt
   }

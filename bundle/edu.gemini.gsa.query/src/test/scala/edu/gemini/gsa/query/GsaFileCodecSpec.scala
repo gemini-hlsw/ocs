@@ -118,9 +118,9 @@ object GsaFileCodecSpec extends Specification {
     }
 
     "cannot decode without name" in {
-      \/.fromEither(Parse.decodeEither[GsaRecord](missingName)) match {
-        case -\/(_) => success
-        case _      => failure("Expecting missing filename warning")
+      Parse.decodeEither[GsaRecord](missingName) match {
+        case Left(_) => success
+        case _       => failure("Expecting missing filename warning")
       }
     }
   }

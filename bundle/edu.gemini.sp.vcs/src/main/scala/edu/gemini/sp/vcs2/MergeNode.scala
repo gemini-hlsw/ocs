@@ -1,7 +1,7 @@
 package edu.gemini.sp.vcs2
 
 import edu.gemini.pot.sp._
-import edu.gemini.pot.sp.version.{LifespanId, EmptyNodeVersions, EmptyVersionMap, VersionMap, NodeVersions}
+import edu.gemini.pot.sp.version.{EmptyNodeVersions, EmptyVersionMap, LifespanId, NodeVersions, VersionMap}
 import edu.gemini.shared.util.VersionComparison
 import edu.gemini.sp.vcs2.NodeDetail.Obs
 import edu.gemini.spModel.conflict.ConflictFolder
@@ -11,6 +11,7 @@ import edu.gemini.spModel.rich.pot.sp._
 import scala.annotation.tailrec
 import scalaz._
 import Scalaz._
+import scalaz.Tree.Node
 
 /** MergeNodes form a tree with potential links into an existing science
   * program.  There are two types of MergeNode, [[edu.gemini.sp.vcs2.Modified]]
@@ -75,7 +76,7 @@ object MergeNode {
   def modified(n: ISPNode): MergeNode = new Modified(n)
 
   def modifiedTree(root: ISPNode): Tree[MergeNode] =
-    Tree.node(modified(root), root.children.map(modifiedTree).toStream)
+    Node(modified(root), root.children.map(modifiedTree).toStream)
 
   implicit class TreeOps[A](t: Tree[A]) {
     /** A `foldRight` with strict evaluation of the `B` value of `f`. */
@@ -109,7 +110,7 @@ object MergeNode {
         ls.foldLeft(rs)((a, b) => b #:: a)
 
       tl.parents match {
-        case (pls, v, prs) #:: ps => Some(TreeLoc.loc(Tree.node(v, combine(tl.lefts, tl.rights)), pls, prs, ps))
+        case (pls, v, prs) #:: ps => Some(TreeLoc.loc(Node(v, combine(tl.lefts, tl.rights)), pls, prs, ps))
         case Stream.Empty         => None
       }
     }
@@ -157,7 +158,7 @@ object MergeNode {
 
     def mModifyLabel(f: Modified => Modified): TryVcs[Tree[MergeNode]] =
       t.rootLabel match {
-        case m: Modified => Tree.node(f(m): MergeNode, t.subForest).right
+        case m: Modified => Node(f(m): MergeNode, t.subForest).right
         case _           => TryVcs.fail(s"Expected Modified label for $key")
       }
 
@@ -196,7 +197,7 @@ object MergeNode {
           nodeMap.get(k).toTryVcs(s"Unmodified node $k not found in node map.").map { n =>
             z.modifyTree { _ =>
               val mod = f(Modified(n.key, n.getVersion, n.getDataObject, NodeDetail(n), n.getConflicts))
-              Tree.node(mod, n.children.map(c => unmodified(c).leaf).toStream)
+              Node(mod, n.children.map(c => unmodified(c).leaf).toStream)
             }
           }
       }

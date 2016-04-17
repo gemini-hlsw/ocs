@@ -75,7 +75,7 @@ object ObsCatalogHelper {
         cancel.set(true)
       }
     })
-    f.onFinish(_ => Task.now(p.stop())).runAsyncInterruptibly(callback, cancel)
+    f.onFinish(_ => Task.now(p.stop())).unsafePerformAsyncInterruptibly(callback, cancel)
   }
 
   // Construct a functor for a given set of query args. It turns out we can do some simplifications
@@ -102,8 +102,8 @@ object ObsCatalogHelper {
     def run(db: DB, qr: IDBQueryRunner): Result = {
       LOG.info("Querying " + db)
       val f0 = qr.queryPrograms(functorFor(queryArgs))
-      val ds = f0.getResult.asScala.map(_.asInstanceOf[DataRow])
-      val is = f0.getIds.asScala.map(_.asInstanceOf[IdRow])
+      val ds = f0.getResult.asScala
+      val is = f0.getIds.asScala
       assert(ds.length == is.length)
       (ds, is).zipped.map((d, i) => ResultRow(d, i, db))
     }

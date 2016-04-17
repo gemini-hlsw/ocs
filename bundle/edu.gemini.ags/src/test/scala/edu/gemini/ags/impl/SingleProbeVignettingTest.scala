@@ -22,7 +22,6 @@ import org.scalacheck.Arbitrary._
 import org.scalacheck.Prop.forAll
 import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
-import org.specs2.time.NoTimeConversions
 
 import scala.collection.JavaConverters._
 import scala.concurrent.Await
@@ -31,8 +30,7 @@ import scala.concurrent.duration._
 import scalaz._
 import Scalaz._
 
-
-object SingleProbeVignettingTest extends Specification with ScalaCheck with VignettingArbitraries with Helpers with NoTimeConversions {
+object SingleProbeVignettingTest extends Specification with ScalaCheck with VignettingArbitraries with Helpers {
   private val magTable = ProbeLimitsTable.loadOrThrow()
 
   val genRMag: Gen[Magnitude] =

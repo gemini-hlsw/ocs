@@ -70,12 +70,12 @@ package object vcs2 {
         result.fold(ex => VcsFailure.VcsException(ex).left, identity)
 
       /** Execute this action, performing any side-effects. */
-      def unsafeRun: TryVcs[A] = merge(a.run.attemptRun)
+      def unsafeRun: TryVcs[A] = merge(a.run.unsafePerformSyncAttempt)
 
       /** Executes the action in a separate thread and calls the supplied
         * handler when finished. */
       def forkAsync(f: TryVcs[A] => Unit): Unit =
-        Task.fork(a.run).runAsync(result => f(merge(result)))
+        Task.fork(a.run).unsafePerformAsync(result => f(merge(result)))
     }
   }
 

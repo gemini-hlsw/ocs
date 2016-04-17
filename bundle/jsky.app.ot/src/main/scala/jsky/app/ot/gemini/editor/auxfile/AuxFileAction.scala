@@ -32,7 +32,7 @@ object AuxFileAction {
   def silentUpdate(m: AuxFileModel) {
     for (client <- m.client; pid <- m.currentPid) {
       m.busy(pid)
-      future {
+      Future {
         client.listAll(pid).asScala.toList
       } onComplete {
         case Failure(ex) =>
@@ -71,7 +71,7 @@ abstract class AuxFileAction(t: String, c: Component, model: AuxFileModel) exten
   protected def exec[I](input: => Option[I])(op: (AuxFileClient, SPProgramID, I) => Unit) {
     for (client <- model.client; pid <- model.currentPid; in <- input) {
       model.busy(pid)
-      future {
+      Future {
         op(client, pid, in)
         update(client, pid)
       } onComplete {

@@ -43,10 +43,10 @@ package object core {
   }
 
   implicit class DmanActionOps[A](a: DmanAction[A]) {
-    def unsafeRun: TryDman[A] = DmanAction.mergeFailure(a.run.attemptRun)
+    def unsafeRun: TryDman[A] = DmanAction.mergeFailure(a.run.unsafePerformSyncAttempt)
 
     def forkAsync(f: TryDman[A] => Unit): Unit =
-      Task.fork(a.run).runAsync(result => f(DmanAction.mergeFailure(result)))
+      Task.fork(a.run).unsafePerformAsync(result => f(DmanAction.mergeFailure(result)))
   }
 
   implicit object DmanActionMonad extends Monad[DmanAction] {

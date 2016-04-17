@@ -15,7 +15,7 @@ private[ssh] object JschSftpSession {
    * @return        A pair containing the connected Session and ChannelSftp objects, for use with the SftpSession
    *                constructor.
    */
-    def connectChannel(config: SshConfig, session: Session): Try[Pair[Session,ChannelSftp]] = {
+    def connectChannel(config: SshConfig, session: Session): Try[Tuple2[Session,ChannelSftp]] = {
       val tryChannel = Try {
         val channel = session.openChannel("sftp").asInstanceOf[ChannelSftp]
         channel.connect()

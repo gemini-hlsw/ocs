@@ -2,10 +2,9 @@ package edu.gemini.ags.impl
 
 import edu.gemini.ags.api.AgsGuideQuality.{DeliversRequestedIq, PossibleIqDegradation}
 import edu.gemini.ags.api.AgsStrategy.{Estimate, Selection}
-import edu.gemini.ags.api.{AgsGuideQuality, AgsStrategy}
+import edu.gemini.ags.api.AgsGuideQuality
 import edu.gemini.ags.conf.ProbeLimitsTable
 import edu.gemini.catalog.votable.{CannedBackend, TestVoTableBackend}
-import edu.gemini.pot.ModelConverters.NewAngle2Old
 import edu.gemini.skycalc.{Angle => SkycalcAngle, Offset => SkycalcOffset}
 import edu.gemini.spModel.ags.AgsStrategyKey._
 import edu.gemini.spModel.core.MagnitudeBand.{_r, R, UC}
@@ -29,7 +28,6 @@ import edu.gemini.spModel.telescope.IssPort
 import edu.gemini.spModel.telescope.PosAngleConstraint.FIXED_180
 
 import org.specs2.matcher.MatchResult
-import org.specs2.time.NoTimeConversions
 import org.specs2.mutable.Specification
 
 import scala.concurrent.Await
@@ -39,7 +37,7 @@ import scala.collection.JavaConverters._
 import scalaz._
 import Scalaz._
 
-class SingleProbeStrategySpec extends Specification with NoTimeConversions {
+class SingleProbeStrategySpec extends Specification {
   private val magTable = ProbeLimitsTable.loadOrThrow()
 
   def offset(p: Int, q: Int): SkycalcOffset =

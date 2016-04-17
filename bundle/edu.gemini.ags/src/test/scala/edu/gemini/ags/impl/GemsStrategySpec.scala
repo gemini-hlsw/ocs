@@ -22,7 +22,6 @@ import edu.gemini.spModel.target.env.TargetEnvironment
 import edu.gemini.spModel.target.obsComp.PwfsGuideProbe
 import edu.gemini.spModel.telescope.IssPort
 import org.specs2.mutable.Specification
-import org.specs2.time.NoTimeConversions
 import AlmostEqual.AlmostEqualOps
 
 import scala.concurrent.Await
@@ -35,7 +34,7 @@ case class TestGemsStrategy(file: String) extends GemsStrategy {
   override val backend = TestVoTableBackend(file)
 }
 
-class GemsStrategySpec extends Specification with NoTimeConversions {
+class GemsStrategySpec extends Specification {
 
   "GemsStrategy" should {
     "support estimate" in {
