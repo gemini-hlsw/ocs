@@ -25,6 +25,15 @@ trait Arbitraries extends edu.gemini.spModel.core.Arbitraries {
   def boundedListOf[A: Arbitrary](max: Int): Gen[List[A]] =
     boundedList(max, arbitrary[A])
 
+  implicit val arbSpTarget: Arbitrary[SPTarget] =
+    Arbitrary {
+      for {
+        n <- alphaStr
+        r <- arbitrary[RightAscension]
+        d <- arbitrary[Declination]
+      } yield new SPTarget(r.toAngle.toDegrees, d.toDegrees) <| (_.setName(n.take(4)))
+    }
+
   implicit def arbZipper[A: Arbitrary]: Arbitrary[Zipper[A]] =
     Arbitrary {
       for {
