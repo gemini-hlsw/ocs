@@ -178,10 +178,10 @@ class GuideGroupSpec extends Specification with ScalaCheck with Arbitraries with
       forAll { (g: GuideGroup) =>
         val guiders = g.getAll.asScalaList.map(_.getGuider).toSet
         g.grp match {
-          case AutomaticGroup.Active(m, _) => guiders == m.keySet
+          case AutomaticGroup.Active(m, _) => guiders === m.keySet.toSet
           case AutomaticGroup.Initial      => guiders.isEmpty
           case AutomaticGroup.Disabled     => guiders.isEmpty
-          case ManualGroup(_, m)           => guiders == m.keySet
+          case ManualGroup(_, m)           => guiders === m.keySet.toSet
         }
       }
 

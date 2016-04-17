@@ -19,17 +19,17 @@ object DatasetQaStateCodecSpec extends Specification {
 
   "DatasetQaState decode" should {
     "work for valid DatasetQaState display values" in {
-      Parse.decodeEither[DatasetQaState](s""""${PASS.displayValue}"""") must_== \/-(PASS)
+      Parse.decodeEither[DatasetQaState](s""""${PASS.displayValue}"""") must_== Right(PASS)
     }
 
     "ignore case when parsing" in {
-      Parse.decodeEither[DatasetQaState](s""""pAsS"""") must_== \/-(PASS)
+      Parse.decodeEither[DatasetQaState](s""""pAsS"""") must_== Right(PASS)
     }
 
     "fail for invalid qa states" in {
       Parse.decodeEither[DatasetQaState](s""""FOO"""") match {
-        case -\/(m) => m.startsWith(invalidDatasetQaState("FOO"))
-        case _      => sys.error("expected to fail on input `FOO`")
+        case Left(m) => m.startsWith(invalidDatasetQaState("FOO"))
+        case _       => sys.error("expected to fail on input `FOO`")
       }
     }
   }

@@ -106,8 +106,8 @@ object GsaRecordCodecSpec extends Specification {
         """.stripMargin
 
       Parse.decodeEither[GsaRecord](json) match {
-        case -\/(_) => success
-        case _      => failure("Expecting missing filename warning")
+        case Left(_) => success
+        case _       => failure("Expecting missing filename warning")
       }
     }
 
@@ -123,8 +123,8 @@ object GsaRecordCodecSpec extends Specification {
         """.stripMargin
 
       Parse.decodeEither[GsaRecord](json) match {
-        case -\/(_) => success
-        case _      => failure("Expecting unparseable QA state warning")
+        case Left(_) => success
+        case _       => failure("Expecting unparseable QA state warning")
       }
     }
 

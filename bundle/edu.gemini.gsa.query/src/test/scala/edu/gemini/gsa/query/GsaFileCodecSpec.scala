@@ -5,7 +5,7 @@ import argonaut._
 import edu.gemini.gsa.query.JsonCodecs._
 import org.specs2.mutable.Specification
 
-import scalaz.-\/
+import scalaz.{-\/, \/}
 
 object GsaFileCodecSpec extends Specification {
   val json0 =
@@ -118,7 +118,7 @@ object GsaFileCodecSpec extends Specification {
     }
 
     "cannot decode without name" in {
-      Parse.decodeEither[GsaRecord](missingName) match {
+      \/.fromEither(Parse.decodeEither[GsaRecord](missingName)) match {
         case -\/(_) => success
         case _      => failure("Expecting missing filename warning")
       }

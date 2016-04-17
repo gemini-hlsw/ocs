@@ -1,8 +1,9 @@
 package edu.gemini.spModel.io.impl.migration.to2015B
 
 import edu.gemini.spModel.core.{Magnitude, MagnitudeBand, MagnitudeSystem}
-import edu.gemini.spModel.core.MagnitudeSystem.{Vega, AB, Jy}
+import edu.gemini.spModel.core.MagnitudeSystem.{AB, Jy, Vega}
 import org.specs2.mutable.Specification
+import org.specs2.specification.core.Fragments
 
 import scalaz.NonEmptyList
 
@@ -86,11 +87,11 @@ object BrightnessParserSpec extends Specification {
   )
 
   "Brightness Parser" should {
-      cases.foreach { case (s, ms) =>
-        "parse " + s in {
-          BrightnessParser.parseBrightness(s) must beSome(ms)
-        }
+    Fragments.foreach(cases.toList) { case (s, ms) =>
+      s"parse $s" in {
+        BrightnessParser.parseBrightness(s) must beSome(ms)
       }
+    }
   }
 
 }

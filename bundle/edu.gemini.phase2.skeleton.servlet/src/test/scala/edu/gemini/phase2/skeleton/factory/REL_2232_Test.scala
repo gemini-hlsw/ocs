@@ -1,12 +1,12 @@
 package edu.gemini.phase2.skeleton.factory
 
-import edu.gemini.phase2.template.factory.impl.nifs.{ TargetBrightness, BAT, BT, FT, MT }
+import edu.gemini.phase2.template.factory.impl.nifs.{BAT, BT, FT, MT, TargetBrightness}
 import edu.gemini.pot.sp.{ISPProgram, ISPTemplateGroup}
 import edu.gemini.spModel.core.MagnitudeBand
 import org.specs2.mutable.SpecificationLike
-import edu.gemini.model.p1.immutable.{ProposalIo, AltairNGS, NifsBlueprintAo, NifsBlueprintBase, NifsBlueprint}
-import edu.gemini.model.p1.mutable.{NifsOccultingDisk, NifsDisperser}
-import org.specs2.specification.Example
+import edu.gemini.model.p1.immutable.{AltairNGS, NifsBlueprint, NifsBlueprintAo, NifsBlueprintBase, ProposalIo}
+import edu.gemini.model.p1.mutable.{NifsDisperser, NifsOccultingDisk}
+import org.specs2.specification.core.Fragment
 
 object REL_2232_Test extends TemplateSpec("NIFS_BP.xml") with SpecificationLike {
 
@@ -34,7 +34,7 @@ object REL_2232_Test extends TemplateSpec("NIFS_BP.xml") with SpecificationLike 
       .toMap
 
   // Our common tests for NIFS blueprint expansion
-  def nifsTest(title: String, bp: NifsBlueprintBase)(more: ISPProgram => Example): Unit =
+  def nifsTest(title: String, bp: NifsBlueprintBase)(more: ISPProgram => Fragment): Unit =
     expand(proposal(bp, (0.0 to 25.0 by 0.5).toList, MagnitudeBand.K)) { (p, sp) =>
       title >> {
         "All targets in a given group should be in the same target brightness bucket." in {

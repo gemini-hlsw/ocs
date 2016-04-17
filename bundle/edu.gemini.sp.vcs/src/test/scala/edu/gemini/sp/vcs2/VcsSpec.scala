@@ -1,16 +1,15 @@
 package edu.gemini.sp.vcs2
 
-
 import edu.gemini.pot.sp.version.VersionMap
-import edu.gemini.sp.vcs2.ProgramLocationSet.{RemoteOnly, LocalOnly, Neither, Both}
+import edu.gemini.sp.vcs2.ProgramLocationSet.{Both, LocalOnly, Neither, RemoteOnly}
 import edu.gemini.sp.vcs2.VcsAction._
 import edu.gemini.sp.vcs2.VcsFailure.NeedsUpdate
 import edu.gemini.spModel.core.SPProgramID
 import edu.gemini.spModel.obscomp.SPNote
 import edu.gemini.util.security.principal.ProgramPrincipal
-import org.specs2.specification.Fragments
-
 import java.util.concurrent.atomic.AtomicBoolean
+
+import org.specs2.specification.core.Fragments
 
 import scalaz._
 
