@@ -6,10 +6,15 @@ name := "edu.gemini.gsa.query"
 
 // version set in ThisBuild
 
+unmanagedJars in Compile ++= Seq(
+  new File(baseDirectory.value, "../../lib/bundle/argonaut_2.11-6.2.jar"),
+  new File(baseDirectory.value, "../../lib/bundle/monocle-core_2.11-1.2.1.jar"),
+  new File(baseDirectory.value, "../../lib/bundle/monocle-macro_2.11-1.2.1.jar")
+)
+
 libraryDependencies ++= Seq(
   "org.scalaz"  %% "scalaz-core"       % ScalaZVersion,
-  "org.scalaz"  %% "scalaz-concurrent" % ScalaZVersion,
-  "io.argonaut" %% "argonaut"          % "6.2-M1")
+  "org.scalaz"  %% "scalaz-concurrent" % ScalaZVersion)
 
 osgiSettings
 
