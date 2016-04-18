@@ -46,8 +46,6 @@ object ConstraintsCache {
 
 }
 
-/**
- */
 class ConstraintsCache(allNights: Seq[Night]) extends Publisher {
 
   sealed trait SolutionKey
@@ -81,7 +79,7 @@ class ConstraintsCache(allNights: Seq[Night]) extends Publisher {
   }
 
   def solution(nights: Seq[Night], constraints: Set[ConstraintType], obs: Obs): Solution = {
-    require(nights.size > 0, "can only produce solutions for at least one night")
+    require(nights.nonEmpty, "can only produce solutions for at least one night")
     solution(constraints, obs).restrictTo(Interval(nights.head.start, nights.last.end))
   }
 
@@ -114,14 +112,14 @@ class ConstraintsCache(allNights: Seq[Night]) extends Publisher {
   }
 
 
-  def update(peer: Peer, nights: Seq[Night], observations: Set[Obs]): Future[Unit] = future {
-    require(nights.size > 0)
+  def update(peer: Peer, nights: Seq[Night], observations: Set[Obs]): Future[Unit] = Future {
+    require(nights.nonEmpty)
 
     val constraints = Set(AboveHorizon, SkyBrightness, TimingWindows, Elevation)
     val foldedMap = FoldedTargetsProvider.observationsMap(observations)
     val foldedObs = foldedMap.keys
 
-    onEDT(constraints.map(c => {
+    onEDT(constraints.foreach(c => {
       publish(ConstraintCalculationStart(c, observations.size * nights.size))
     }))
 
@@ -145,7 +143,7 @@ class ConstraintsCache(allNights: Seq[Night]) extends Publisher {
 
     })
 
-    onEDT(constraints.map(c => {
+    onEDT(constraints.foreach(c => {
       publish(ConstraintCalculationEnd(c, 0))
     }))
 

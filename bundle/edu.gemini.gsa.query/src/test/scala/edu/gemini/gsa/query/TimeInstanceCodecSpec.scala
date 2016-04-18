@@ -21,17 +21,17 @@ object TimeInstanceCodecSpec extends Specification {
 
   "Time instance decode" should {
     "work for valid time strings" in {
-      Parse.decodeEither[Instant](""""2011-12-03 10:15:30.000000+00:00"""") must_== \/-(ExampleInstant)
+      Parse.decodeEither[Instant](""""2011-12-03 10:15:30.000000+00:00"""") must_== Right(ExampleInstant)
     }
 
     "handle zone offsets" in {
-      Parse.decodeEither[Instant](""""2011-12-03 08:15:30.000000-02:00"""") must_== \/-(ExampleInstant)
+      Parse.decodeEither[Instant](""""2011-12-03 08:15:30.000000-02:00"""") must_== Right(ExampleInstant)
     }
 
     "fail for invalid time strings" in {
       Parse.decodeEither[Instant](""""2011-12-03 10:15:30"""") match {
-        case -\/(m) => m.startsWith(invalidTimeInstance("2011-12-03 10:15:30"))
-        case _      => sys.error("expected to fail on input `2011-12-03 10:15:30`")
+        case Left(m) => m.startsWith(invalidTimeInstance("2011-12-03 10:15:30"))
+        case _       => sys.error("expected to fail on input `2011-12-03 10:15:30`")
       }
     }
   }

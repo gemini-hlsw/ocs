@@ -110,7 +110,7 @@ final class NonSiderealNameEditor extends TelescopePosEditor with ReentrancyHack
         }
     }
         
-    Task(search.run.ensuring(hide.run).unsafePerformIO).runAsync {
+    Task(search.run.ensuring(hide.run).unsafePerformIO).unsafePerformAsync {
       case -\/(t) => Swing.onEDT(DialogUtil.error(name, t))
       case \/-(_) => () // done!
     }

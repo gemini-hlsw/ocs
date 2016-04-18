@@ -182,8 +182,8 @@ class XMLConverterSpec extends Specification with SemesterProperties with XmlMat
       val transformed = XMLConverter.transform(node, proposalTransformVersion, semesterTransformToCurrent, withFailure)
       transformed must beFailing.like {
         case e:NonEmptyList[String] => {
-          e.list must have size 1
-          e.list must contain("Error message")
+          e.list.toList must have size 1
+          e.list.toList must contain("Error message")
         }
       }
     }

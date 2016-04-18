@@ -133,8 +133,9 @@ def common(version: Version) = AppConfig(
     BundleSpec("com.squants",                            Version(0, 6, 1)),
     BundleSpec("org.apache.commons.logging",             Version(1, 1, 0)),
     BundleSpec("com.cosylab.epics.caj",                  Version(1, 0, 2)),
-    BundleSpec("monocle.core",                           Version(1, 1, 0)),
-    BundleSpec("monocle.macro",                          Version(1, 1, 0)),
+    BundleSpec("io.argonaut",                            Version(6, 2, 0)),
+    BundleSpec("monocle.core",                           Version(1, 2, 1)),
+    BundleSpec("monocle.macro",                          Version(1, 2, 1)),
     BundleSpec("edu.gemini.shared.ca",                   version),
     BundleSpec("edu.gemini.spdb.reports.collection",     version)
   )

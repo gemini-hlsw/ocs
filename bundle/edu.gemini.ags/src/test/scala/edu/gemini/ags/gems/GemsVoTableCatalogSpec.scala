@@ -3,7 +3,6 @@ package edu.gemini.ags.gems
 import edu.gemini.catalog.api._
 import edu.gemini.catalog.votable.TestVoTableBackend
 import edu.gemini.spModel.gemini.gems.Canopus.Wfs
-import org.specs2.time.NoTimeConversions
 import scala.concurrent.duration._
 import edu.gemini.shared.util.immutable.{None => JNone}
 import edu.gemini.spModel.core._
@@ -26,7 +25,7 @@ import Scalaz._
 import scala.concurrent.Await
 import scala.collection.JavaConverters._
 
-class GemsVoTableCatalogSpec extends Specification with NoTimeConversions {
+class GemsVoTableCatalogSpec extends Specification {
   val magnitudeRange = MagnitudeConstraints(SingleBand(MagnitudeBand.J), FaintnessConstraint(10.0), SaturationConstraint(2.0).some)
 
   "GemsVoTableCatalog" should {

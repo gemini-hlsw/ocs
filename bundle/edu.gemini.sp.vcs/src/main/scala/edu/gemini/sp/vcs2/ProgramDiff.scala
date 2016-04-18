@@ -7,11 +7,11 @@ import edu.gemini.spModel.obs.ObservationStatus
 import edu.gemini.spModel.rich.pot.sp._
 
 import scala.collection.JavaConverters._
-
 import scalaz._
 import Scalaz._
-
 import ProgramDiff._
+
+import scalaz.Tree.Node
 
 /** Pairs a `MergePlan` describing the differences between two versions of a
   * program with a `List` of pairs of observation node key and
@@ -134,7 +134,7 @@ object ProgramDiff {
           // If there is even one descendant that differs, include this node
           // in the results.  Otherwise, only include it if it differs.
           if (nodeDiffers(r) || children.exists(_.rootLabel.isModified))
-            (Tree.node(modified(r), children.toStream), pairs)
+            (Node(modified(r), children.toStream), pairs)
           else
             (unmodified(r).leaf, in)
       }

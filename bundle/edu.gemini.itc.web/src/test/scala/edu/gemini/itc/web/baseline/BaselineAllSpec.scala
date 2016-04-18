@@ -6,8 +6,8 @@ import edu.gemini.itc.shared._
 import edu.gemini.itc.web.baseline.Baseline._
 import org.scalacheck.{Arbitrary, Gen}
 import org.specs2.ScalaCheck
-import org.specs2.matcher.ScalaCheckParameters
 import org.specs2.mutable.Specification
+import org.specs2.scalacheck.ScalaCheckParameters
 
 /**
  * Spec which compares a limited amount of random ITC "recipe" executions with the expected outcome.

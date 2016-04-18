@@ -7,7 +7,7 @@ name := "edu.gemini.ags.client.api"
 version := pitVersion.value.toOsgiVersion
 
 libraryDependencies ++= Seq(
-  "org.scalaz" %% "scalaz-core" % "7.1.6")
+  "org.scalaz" %% "scalaz-core" % ScalaZVersion)
 
 osgiSettings
 

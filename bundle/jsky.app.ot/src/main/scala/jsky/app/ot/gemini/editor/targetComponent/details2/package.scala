@@ -36,7 +36,7 @@ package object details2 {
     }
 
   def forkSwingWorker[A <: AnyRef](constructImpl: => A)(finishedImpl: Throwable \/ A => Unit): Unit =
-    Task(constructImpl).runAsync(finishedImpl)
+    Task(constructImpl).unsafePerformAsync(finishedImpl)
 
   implicit def F2ActionlListener(f: ActionEvent => Unit): ActionListener =
     new ActionListener { def actionPerformed(e: ActionEvent): Unit = f(e) }

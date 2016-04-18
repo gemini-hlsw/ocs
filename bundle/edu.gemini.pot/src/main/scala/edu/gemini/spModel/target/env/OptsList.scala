@@ -60,10 +60,10 @@ case class OptsList[A](toDisjunction: OneAndList[A] \/ Zipper[A]) {
   def toNel: NonEmptyList[A] =
     toDisjunction match {
       case -\/(OneAnd(a, as)) =>
-        NonEmptyList.nel(a, as)
+        NonEmptyList(a, as: _*)
       case \/-(z) =>
         val s = z.start
-        NonEmptyList.nel(s.focus, s.rights.toList)
+        NonEmptyList(s.focus, s.rights: _*)
     }
 
   def toList: List[A] =
@@ -129,7 +129,7 @@ object OptsList {
     OptsList(OneAnd(a, as).left)
 
   def unfocused[A](nel: NonEmptyList[A]): OptsList[A] =
-    unfocused(nel.head, nel.tail)
+    unfocused(nel.head, nel.tail.toList)
 
   /** Creates an `OptsList` provided that the given `List` has at least one
     * element.

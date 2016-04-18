@@ -38,7 +38,7 @@ package object sp {
 
   def drawNodeTree(n: ISPNode)(implicit ev: Show[ISPNode]): String = {
     val t = Tree.unfoldTree(n)(n0 => (n0, () => n0.children.toStream))
-    t.draw(ev).zipWithIndex.collect { case (s, n0) if n0 % 2 == 0 => s}.mkString("\n")
+    t.drawTree(ev).zipWithIndex.collect { case (s, n0) if n0 % 2 == 0 => s}.mkString("\n")
   }
 
   implicit def SpNodeKeyEqual: Equal[SPNodeKey] = Equal.equalA

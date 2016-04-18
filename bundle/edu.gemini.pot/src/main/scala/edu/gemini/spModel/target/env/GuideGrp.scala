@@ -28,8 +28,8 @@ sealed trait GuideGrp extends Serializable {
   def referencedGuiders: Set[GuideProbe] =
     this match {
       case Initial | Disabled  => Set.empty[GuideProbe]
-      case Active(ts, _)       => ts.keySet
-      case ManualGroup(_, ts)  => ts.keySet
+      case Active(ts, _)       => ts.keySet.toSet
+      case ManualGroup(_, ts)  => ts.keySet.toSet
     }
 
   /** Returns the set of guide probes with at least one associated primary
@@ -38,8 +38,8 @@ sealed trait GuideGrp extends Serializable {
   def primaryReferencedGuiders: Set[GuideProbe] =
     this match {
       case Initial | Disabled => Set.empty[GuideProbe]
-      case Active(ts, _)      => ts.keySet
-      case ManualGroup(_, ts) => ts.filter(_.hasFocus).keySet
+      case Active(ts, _)      => ts.keySet.toSet
+      case ManualGroup(_, ts) => ts.filter(_.hasFocus).keySet.toSet
     }
 }
 

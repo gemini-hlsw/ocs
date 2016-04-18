@@ -11,8 +11,8 @@ unmanagedJars in Compile ++= Seq(
   new File(baseDirectory.value, "../../lib/bundle/org-jfree_2.10-1.0.14.jar"))
 
 libraryDependencies ++= Seq(
-  "org.scalaz" %% "scalaz-core" % "7.1.6",
-  "org.scalaz" %% "scalaz-effect" % "7.1.6")
+  "org.scalaz" %% "scalaz-core" % ScalaZVersion,
+  "org.scalaz" %% "scalaz-effect" % ScalaZVersion)
 
 osgiSettings
 

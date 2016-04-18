@@ -1,8 +1,8 @@
 package edu.gemini.spModel.io.impl.migration.to2015B
 
 import org.specs2.mutable.Specification
-
 import edu.gemini.spModel.core._
+import org.specs2.specification.core.{Fragment, Fragments}
 
 object B1950Spec extends Specification {
 
@@ -55,7 +55,7 @@ object B1950Spec extends Specification {
 
   val MasToDeg = 3600000
 
-  def k45(q: Example, a: Expected, degTolerance: Double, pmTolerance: Double) =
+  def k45(q: Example, a: Expected, degTolerance: Double, pmTolerance: Double):Fragment =
     s"handle ${q.name}" in {
 
       val qra   = Angle.parseHMS(q.ra).toOption.get.toDegrees
@@ -80,11 +80,11 @@ object B1950Spec extends Specification {
 
 
   "FK4 -> FK5 compared w/jprecess (almost exact)" should {
-    cases foreach { case (q, _, a) => k45(q, a, 0.00001, 0.000001)}
+    Fragments.foreach(cases) { case (q, _, a) => k45(q, a, 0.00001, 0.000001)}
   }
 
   "FK4 -> FK5 compared w/simbad (approximate)" should {
-    cases foreach { case (q, a, _) => k45(q, a, 0.1, 0.00001)}
+    Fragments.foreach(cases) { case (q, a, _) => k45(q, a, 0.1, 0.00001)}
   }
 
 }

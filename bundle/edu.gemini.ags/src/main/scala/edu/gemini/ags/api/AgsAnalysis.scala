@@ -3,7 +3,7 @@ package edu.gemini.ags.api
 import edu.gemini.ags.api.AgsGuideQuality.Unusable
 import edu.gemini.ags.api.AgsMagnitude._
 import edu.gemini.pot.ModelConverters._
-import edu.gemini.spModel.core.{BandsList, Magnitude, SiderealTarget}
+import edu.gemini.spModel.core.{BandsList, Coordinates, Magnitude, SiderealTarget}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.ImageQuality
 import edu.gemini.spModel.guide.{GuideProbe, GuideProbeGroup, GuideSpeed, GuideStarValidation, ValidatableGuideProbe}
 import edu.gemini.spModel.obs.context.ObsContext
@@ -150,7 +150,7 @@ object AgsAnalysis {
    * guide star is actually selected in the target environment.
    */
   protected [ags] def analysis(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SiderealTarget, bands: BandsList): Option[AgsAnalysis] = {
-    val spTarget = new SPTarget(guideStar.coordinates.ra.toAngle.toDegrees, guideStar.coordinates.dec.toDegrees)
+    val spTarget = new SPTarget(SiderealTarget.empty.copy(coordinates = Coordinates(guideStar.coordinates.ra, guideStar.coordinates.dec)))
     if (guideProbe.validate(spTarget, ctx) != GuideStarValidation.VALID) Some(NotReachable(guideProbe, guideStar, bands))
     else magnitudeAnalysis(ctx, mt, guideProbe, guideStar, bands)
   }

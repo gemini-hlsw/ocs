@@ -1,9 +1,9 @@
 package edu.gemini.sp.vcs2
 
-import edu.gemini.pot.sp.{SPObservationID, SPNodeKey}
+import edu.gemini.pot.sp.{SPNodeKey, SPObservationID}
 import edu.gemini.sp.vcs2.NodeDetail.Obs
 import edu.gemini.sp.vcs2.ProgramLocation.{Local, Remote}
-import edu.gemini.sp.vcs2.ProgramLocationSet.{RemoteOnly, LocalOnly, Both}
+import edu.gemini.sp.vcs2.ProgramLocationSet.{Both, LocalOnly, RemoteOnly}
 import edu.gemini.spModel.core.SPProgramID
 import edu.gemini.spModel.event.SlewEvent
 import edu.gemini.spModel.gemini.obscomp.SPProgram
@@ -11,13 +11,14 @@ import edu.gemini.spModel.obslog.ObsExecLog
 
 import scalaz._
 import Scalaz._
+import scalaz.Tree.Node
 
 class ObsNumberCorrectionSpec extends MergeCorrectionSpec {
 
   def test(expected: List[Int], merged: (Int, ProgramLocationSet)*): Boolean = {
     val obsList = merged.map { case (i,_) => obs(i).leaf }
 
-    val mergeTree = Tree.node(prog, obsList.toStream)
+    val mergeTree = Node(prog, obsList.toStream)
 
     val known = merged.unzip._2.zip(obsList.map(_.key)).map { case (locs, key) =>
       locs.toSet.map(loc => (loc, key))

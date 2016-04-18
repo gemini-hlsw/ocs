@@ -3,12 +3,13 @@ package edu.gemini.sp.vcs2
 
 import edu.gemini.pot.sp.version.NodeVersions
 import edu.gemini.sp.vcs2.ProgramLocation.Remote
-import edu.gemini.sp.vcs2.ProgramLocationSet.{RemoteOnly, LocalOnly, Both}
-import edu.gemini.spModel.template.{TemplateGroup, TemplateFolder}
+import edu.gemini.sp.vcs2.ProgramLocationSet.{Both, LocalOnly, RemoteOnly}
+import edu.gemini.spModel.template.{TemplateFolder, TemplateGroup}
 import edu.gemini.spModel.util.VersionToken
 
 import scalaz._
 import Scalaz._
+import scalaz.Tree.Node
 
 class TemplateNumberCorrectionSpec extends MergeCorrectionSpec {
   def vt1(segs: Int*): VersionToken = vt(segs: _*)(1)
@@ -19,7 +20,7 @@ class TemplateNumberCorrectionSpec extends MergeCorrectionSpec {
   def test(expectedToks: List[VersionToken], merged: (VersionToken, ProgramLocationSet)*): Boolean = {
     val tgList = merged.map { case (tok,_) => templateGroup(tok).leaf }
 
-    val mergeTree = prog.node(Tree.node(templateFolder, tgList.toStream))
+    val mergeTree = prog.node(Node(templateFolder, tgList.toStream))
 
     val known = merged.unzip._2.zip(tgList.map(_.key)).collect {
       case (locs, key) if locs.toSet.contains(Remote) => key

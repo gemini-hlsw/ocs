@@ -140,7 +140,7 @@ object MergePlan {
 
   /** A serializable Tree[MergeNode].  Sadly scalaz.Tree is not serializable. */
   case class TreeTransport(mn: MergeNode, children: List[TreeTransport]) {
-    def decode: Tree[MergeNode] = Tree.node(mn, children.map(_.decode).toStream)
+    def decode: Tree[MergeNode] = Tree.Node(mn, children.map(_.decode).toStream)
   }
 
   /** A serializable MergePlan.  Sadly the Tree[MergeNode] contained in the

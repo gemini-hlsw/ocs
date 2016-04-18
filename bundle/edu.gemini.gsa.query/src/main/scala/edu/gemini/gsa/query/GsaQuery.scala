@@ -92,9 +92,9 @@ private [query] object GsaQuery {
         case HTTP_OK   =>
           val s = read(con.getInputStream)
           logIf(JsonLevel) { s"GSA response ($url):\n$s" }
-          Parse.decodeEither[A](s).leftMap { _ =>
+          \/.fromEither(Parse.decodeEither[A](s).leftMap { _ =>
             InvalidResponse(s"Could not parse GSA server response:\n$s")
-          }
+          })
         case errorCode =>
           RequestError(errorCode, read(con.getErrorStream)).left
       }

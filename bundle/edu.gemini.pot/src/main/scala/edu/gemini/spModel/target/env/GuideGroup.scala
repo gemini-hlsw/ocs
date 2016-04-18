@@ -163,8 +163,8 @@ case class GuideGroup(grp: GuideGrp) extends java.lang.Iterable[GuideProbeTarget
   private def sortedKeys: List[GuideProbe] =
     (grp match {
       case Initial | Disabled => Set.empty[GuideProbe]
-      case Active(ts, _)      => ts.keySet // already sorted
-      case ManualGroup(_, ts) => ts.keySet // already sorted
+      case Active(ts, _)      => ts.keySet.toSet // already sorted
+      case ManualGroup(_, ts) => ts.keySet.toSet // already sorted
     }).toList
 
   private def all: List[GuideProbeTargets] =

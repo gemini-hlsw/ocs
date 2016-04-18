@@ -114,7 +114,7 @@ class VcsRegistrarImpl(val storage: File) extends VcsRegistrar {
 
   def register(pid: SPProgramID, loc: Peer): Unit =
     synchronized {
-      if (m.get(pid).forall(_ != loc)) {
+      if (!m.get(pid).contains(loc)) {
         m = m.updated(pid, loc)
         store(storage, bak, m)
         publish(pid, Some(loc))
@@ -131,5 +131,5 @@ class VcsRegistrarImpl(val storage: File) extends VcsRegistrar {
     }
 
   private def publish(pid: SPProgramID, loc: Option[Peer]): Unit =
-    future { publish(VcsRegistrationEvent(pid, loc)) }
+    Future { publish(VcsRegistrationEvent(pid, loc)) }
 }

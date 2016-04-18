@@ -25,7 +25,7 @@ trait Arbitraries extends edu.gemini.spModel.core.Arbitraries {
   def boundedListOf[A: Arbitrary](max: Int): Gen[List[A]] =
     boundedList(max, arbitrary[A])
 
-  implicit val arbSpTarget: Arbitrary[SPTarget] = // arbitrary[Target].map(t => new SPTarget(???))
+  implicit val arbSpTarget: Arbitrary[SPTarget] =
     Arbitrary {
       for {
         n <- alphaStr
@@ -56,7 +56,7 @@ trait Arbitraries extends edu.gemini.spModel.core.Arbitraries {
       for {
         a  <- arbitrary[A]
         as <- boundedListOf[A](3)
-      } yield NonEmptyList.nel(a, as)
+      } yield NonEmptyList(a, as: _*)
     }
 
   implicit def arbOneAndList[A: Arbitrary]: Arbitrary[OneAnd[List, A]] =

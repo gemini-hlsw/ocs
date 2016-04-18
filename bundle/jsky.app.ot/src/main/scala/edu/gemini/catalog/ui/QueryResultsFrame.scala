@@ -667,7 +667,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
 
       errorLabel.reset()
 
-      buildLayout(query.filters.list.collect { case q: MagnitudeQueryFilter => q.mc })
+      buildLayout(query.filters.toList.collect { case q: MagnitudeQueryFilter => q.mc })
     }
 
     def updateGuidersModel(selected: SupportedStrategy, strategies: List[SupportedStrategy]): Unit = {

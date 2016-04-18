@@ -6,9 +6,10 @@ import edu.gemini.shared.util.VersionComparison._
 import edu.gemini.sp.vcs2.MergeNode._
 import edu.gemini.spModel.rich.pot.sp._
 
-import scalaz.\&/.{Both, This, That}
+import scalaz.\&/.{Both, That, This}
 import scalaz._
 import Scalaz._
+import scalaz.Tree.Node
 
 /** Produces a preliminary [[MergePlan]]. Before using it to complete a merge
   * however, various special case corrections (e.g., observation renumbering)
@@ -194,7 +195,7 @@ object PreliminaryMerge {
         case _: Unmodified => mod
       }
 
-      Tree.node(mod2, newChildren.toStream)
+      Node(mod2, newChildren.toStream)
     }
 
 
@@ -204,7 +205,7 @@ object PreliminaryMerge {
       def incr1(n: Tree[MergeNode]): Tree[MergeNode] =
         n.rootLabel match {
           case m: Modified   =>
-            Tree.node(m.copy(nv = m.nv.incr(mc.local.prog.getLifespanId)), n.subForest)
+            Node(m.copy(nv = m.nv.incr(mc.local.prog.getLifespanId)), n.subForest)
           case _             =>
             n
         }

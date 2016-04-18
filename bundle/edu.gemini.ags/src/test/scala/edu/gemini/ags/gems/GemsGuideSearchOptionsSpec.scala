@@ -21,11 +21,11 @@ class GemsGuideSearchOptionsSpec extends Specification {
   val ra = Angle.fromHMS(3, 19, 48.2341).getOrElse(Angle.zero)
   val dec = Angle.fromDMS(41, 30, 42.078).getOrElse(Angle.zero)
   val target = new SPTarget(ra.toDegrees, dec.toDegrees)
-  val env = TargetEnvironment.create(target)
+  val targetEnvironment = TargetEnvironment.create(target)
   val inst = new Gsaoi
   inst.setPosAngle(0.0)
   inst.setIssPort(IssPort.SIDE_LOOKING)
-  val ctx = ObsContext.create(env, inst, JNone.instance[Site], SPSiteQuality.Conditions.BEST, null, null, JNone.instance())
+  val ctx = ObsContext.create(targetEnvironment, inst, JNone.instance[Site], SPSiteQuality.Conditions.BEST, null, null, JNone.instance())
   val posAngles = new java.util.HashSet[Angle]()
 
   "GemsGuideSearchOptions" should {
@@ -56,7 +56,7 @@ class GemsGuideSearchOptionsSpec extends Specification {
       criteria(1).criterion.magConstraint should beEqualTo(MagnitudeConstraints(SingleBand(MagnitudeBand.H), FaintnessConstraint(17.0), Some(SaturationConstraint(8))))
     }
     "provide search options for gsaoi in both tip tilt modes" in {
-      val ctx = ObsContext.create(env, inst, JNone.instance[Site], SPSiteQuality.Conditions.BEST, null, null, JNone.instance())
+      val ctx = ObsContext.create(targetEnvironment, inst, JNone.instance[Site], SPSiteQuality.Conditions.BEST, null, null, JNone.instance())
       val instrument = GemsInstrument.gsaoi
       val tipTiltMode = GemsTipTiltMode.both
 

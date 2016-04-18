@@ -26,7 +26,6 @@ import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.env.TargetEnvironment
 import edu.gemini.spModel.telescope.IssPort
 import jsky.coords.WorldCoords
-import org.specs2.time.NoTimeConversions
 
 import scala.concurrent.duration._
 
@@ -40,7 +39,7 @@ import Scalaz._
 /**
  * See OT-27
  */
-class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with NoTimeConversions with TargetsHelper {
+class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with TargetsHelper {
   class TestGemsVoTableCatalog(file: String) extends GemsVoTableCatalog {
     override val backend = TestVoTableBackend(file)
   }
