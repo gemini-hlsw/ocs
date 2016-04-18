@@ -32,7 +32,7 @@ final class SiderealNameEditor(mags: MagnitudeEditor2) extends TelescopePosEdito
         t.map(r => (r.result.problems, r.result.targets.rows.headOption)) match {
           case Failure(f) => errmsg(f.getMessage)
           case Success((Nil, None)) => errmsg(s"Target '$searchItem' not found ")
-          case Success((Nil, Some(t))) => spt.setTarget(t)
+          case Success((Nil, Some(t))) => spt.setTarget(Target.name.set(t, name.getValue)) // REL-2717
           case Success((ps, _)) => errmsg(ps.map(_.displayValue).mkString(", "))
         }
       }
