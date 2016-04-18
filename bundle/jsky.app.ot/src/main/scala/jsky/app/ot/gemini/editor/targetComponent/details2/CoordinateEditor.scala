@@ -50,23 +50,12 @@ class CoordinateEditor extends TelescopePosEditor with ReentrancyHack {
   def edit(ctx: GOption[ObsContext], target0: SPTarget, node: ISPNode): Unit = {
     spt = target0
     nonreentrant {
-
-      def enable(t: SiderealTarget): Unit = {
-        ra.setEnabled(true)
-        ra.setText(t.coordinates.ra.toAngle.formatHMS)
+      Target.coords.get(newTarget).foreach { cs =>
+        ra.setText(cs.ra.toAngle.formatHMS)
         ra.setForeground(Color.BLACK)
-        dec.setEnabled(true)
-        dec.setText(t.coordinates.dec.formatDMS)
+        dec.setText(cs.dec.formatDMS)
         dec.setForeground(Color.BLACK)
       }
-
-      def disable(t: Target): Unit = {
-        ra.setEnabled(false)
-        dec.setEnabled(false)
-      }
-
-      newTarget.fold(disable, enable, disable)
-
     }
   }
 
