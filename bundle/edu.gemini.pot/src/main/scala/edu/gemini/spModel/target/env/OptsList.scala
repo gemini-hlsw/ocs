@@ -72,12 +72,6 @@ case class OptsList[A](toDisjunction: OneAndList[A] \/ Zipper[A]) {
       case \/-(z) => z.toList
     }
 
-  def toIList: IList[A] =
-    toDisjunction match {
-      case -\/(l) => l.toIList
-      case \/-(z) => z.toIList
-    }
-
   def traverse[G[_]: Applicative, B](f: A => G[B]): G[OptsList[B]] =
     toDisjunction match {
       case -\/(l) => l.traverse(f).map(l => OptsList(l.left))
