@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package edu.gemini.spModel.core;
 
 import java.io.Serializable;

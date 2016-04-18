@@ -163,7 +163,7 @@ public final class ObservationEnvironment {
     }
 
     public boolean containsTargets(GuideProbe.Type type) {
-        final GuideGroup grp = _targetEnv.getOrCreatePrimaryGuideGroup();
+        final GuideGroup grp = _targetEnv.getPrimaryGuideGroup();
         final ImList<GuideProbeTargets> gtList = grp.getAllMatching(type);
         return gtList.exists(GuideProbeTargets::containsTargets);
     }

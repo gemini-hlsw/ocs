@@ -223,7 +223,7 @@ public abstract class AbstractOffsetPosListEditor<P extends OffsetPosBase> exten
         final TargetObsComp toc = getContextTargetObsCompDataObject();
         if (toc != null) {
             envOpt = new Some<TargetEnvironment>(toc.getTargetEnvironment());
-            referenced = envOpt.getValue().getOrCreatePrimaryGuideGroup().getReferencedGuiders();
+            referenced = envOpt.getValue().getPrimaryGuideGroup().getReferencedGuiders();
         }
 
         // Make sure that the position links are in sync with the referenced
@@ -242,7 +242,7 @@ public abstract class AbstractOffsetPosListEditor<P extends OffsetPosBase> exten
                     GuideProbeUtil.instance.getAvailableGuiders(getContextObservation());
         final Set<GuideProbe> noPrimary = new HashSet<GuideProbe>();
         if (!envOpt.isEmpty()) {
-            for (GuideProbeTargets gt : envOpt.getValue().getOrCreatePrimaryGuideGroup()) {
+            for (GuideProbeTargets gt : envOpt.getValue().getPrimaryGuideGroup()) {
                 if (gt.getPrimary().isEmpty()) {
                     noPrimary.add(gt.getGuider());
                 }

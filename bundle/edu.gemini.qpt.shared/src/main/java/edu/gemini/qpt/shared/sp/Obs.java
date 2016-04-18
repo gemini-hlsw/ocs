@@ -476,7 +476,7 @@ public final class Obs implements Serializable, Comparable<Obs> {
 
         this.targetEnvironment = targetEnvironment;
         if (this.targetEnvironment != null) {
-            for (GuideProbe probe : targetEnvironment.getOrCreatePrimaryGuideGroup().getReferencedGuiders()) {
+            for (GuideProbe probe : targetEnvironment.getPrimaryGuideGroup().getReferencedGuiders()) {
                 String key = probe.getKey();
                 if (key.contains("OIWFS")) key = "OIWFS"; // trim off instrument
                 wfs.add(key);

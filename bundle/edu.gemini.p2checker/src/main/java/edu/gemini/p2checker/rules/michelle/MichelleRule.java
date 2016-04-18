@@ -68,7 +68,7 @@ public class MichelleRule implements IRule {
         }
 
         private boolean hasOI(final TargetEnvironment env) {
-            final GuideGroup grp = env.getOrCreatePrimaryGuideGroup();
+            final GuideGroup grp = env.getPrimaryGuideGroup();
 
             final ImList<GuideProbeTargets> col = grp.getAllMatching(GuideProbe.Type.OIWFS);
             if ((col == null) || (col.size() == 0)) return false;

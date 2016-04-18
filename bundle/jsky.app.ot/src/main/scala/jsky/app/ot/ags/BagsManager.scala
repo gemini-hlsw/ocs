@@ -271,7 +271,7 @@ object BagsManager {
 
       // Change the pos angle as appropriate if this is the auto group.
       selOpt.foreach { sel =>
-        if (newEnv.getOrCreatePrimaryGuideGroup().isAutomatic && selOpt.isDefined) {
+        if (newEnv.getPrimaryGuideGroup().isAutomatic && selOpt.isDefined) {
           ctx.instrument.dataObject.foreach { inst =>
             val deg = sel.posAngle.toDegrees
             val old = inst.getPosAngleDegrees

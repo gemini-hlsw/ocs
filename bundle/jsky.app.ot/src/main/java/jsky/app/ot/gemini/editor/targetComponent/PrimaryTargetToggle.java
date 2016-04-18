@@ -33,7 +33,7 @@ public enum PrimaryTargetToggle {
         if ((obsComp == null) || (target == null)) return;
 
         final TargetEnvironment env = obsComp.getTargetEnvironment();
-        final GuideGroup grp = env.getOrCreatePrimaryGuideGroup();
+        final GuideGroup grp = env.getPrimaryGuideGroup();
         final ImList<GuideProbeTargets> lst = grp.getAllContaining(target);
         if (lst.isEmpty()) return; // target not associated with any guider
 

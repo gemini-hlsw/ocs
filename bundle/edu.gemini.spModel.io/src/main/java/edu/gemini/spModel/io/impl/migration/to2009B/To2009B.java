@@ -66,7 +66,7 @@ public enum To2009B {
         // map indicates which targets should be used as the primary target for
         // each probe.
         final Map<GuideProbe, String> primaryTargetMap = OffsetIteratorUpdater.instance.updateOffsetIterators(obs,
-                obsContainer, env.getOrCreatePrimaryGuideGroup().getReferencedGuiders());
+                obsContainer, env.getPrimaryGuideGroup().getReferencedGuiders());
 
         // Use the primaryTargetMap to correct the primary guide star.
         for (final GuideProbe guider : primaryTargetMap.keySet()) {

@@ -331,7 +331,7 @@ public class TrecsRule implements IRule {
                 if (baseTarget == null) return null;
 
 
-                for (GuideProbeTargets guideTargets : env.getOrCreatePrimaryGuideGroup()) {
+                for (GuideProbeTargets guideTargets : env.getPrimaryGuideGroup()) {
                     for (SPTarget target : guideTargets) {
 
                         // Calculate the distance to the base position in arcmin

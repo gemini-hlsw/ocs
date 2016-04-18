@@ -917,16 +917,15 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
     void updatePrimaryStar() {
         if (_env == null || !OTOptions.isEditable(_obsComp.getProgram(), _obsComp.getContextObservation())) return;
 
-        // TODO: This method must be tested in greater detail, since custom guiding is required for offset positions.
+        final TargetEnvironment env = _dataObject.getTargetEnvironment();
         final Option<SPTarget> targetOpt = getSelectedPos();
-        if (targetOpt.isDefined()) {
-            final boolean autoGroup = targetOpt.flatMap(this::getTargetGroup).exists(igg -> igg.group().isAutomatic());
-            if (!autoGroup)
-                PrimaryTargetToggle.instance.toggle(_dataObject, targetOpt.getValue());
-        } else {
-            getSelectedGroup().foreach(igg -> {
-                final TargetEnvironment env = _dataObject.getTargetEnvironment();
-                final GuideGroup primary = env.getOrCreatePrimaryGuideGroup();
+        final Option<IndexedGuideGroup> iggOpt = targetOpt.flatMap(this::getTargetGroup).orElse(getSelectedGroup());
+        final boolean primaryGroupIsSelected = iggOpt.exists(igg -> igg.group().equals(env.getPrimaryGuideGroup()));
+
+        if (!primaryGroupIsSelected) {
+            // The current target or guide group is not primary, so mark ths owner guide group as primary.
+            iggOpt.foreach(igg -> {
+                final GuideGroup primary = env.getPrimaryGuideGroup();
 
                 // If the auto group is disabled and set to primary, then make it an initial auto group.
                 ImOption.apply(env.getGuideEnvironment()).foreach(ge -> {
@@ -946,6 +945,19 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
                         }
                     }
                 });
+            });
+        }
+
+        // If we are not the auto group and the update was triggered on a guide star:
+        // 1. If the group was originally primary, then toggle the star as primary.
+        // 2. If the group wasn't originally primary, then mark the star as primary.
+        final boolean autoGroup = targetOpt.flatMap(this::getTargetGroup).exists(igg -> igg.group().isAutomatic());
+        if (!autoGroup) {
+            targetOpt.foreach(target -> {
+                if (primaryGroupIsSelected
+                        || iggOpt.exists(igg -> igg.group().getAllContaining(target).forall(gpt -> gpt.getPrimary().forall(pt -> pt != target)))) {
+                    PrimaryTargetToggle.instance.toggle(_dataObject, target);
+                }
             });
         }
     }

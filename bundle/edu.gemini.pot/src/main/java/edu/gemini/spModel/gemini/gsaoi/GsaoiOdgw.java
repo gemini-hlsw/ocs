@@ -5,7 +5,6 @@ import edu.gemini.skycalc.Coordinates;
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.gems.GemsGuideProbeGroup;
 import edu.gemini.spModel.guide.*;
-import edu.gemini.spModel.obs.SchedulingBlock;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.*;
@@ -63,7 +62,7 @@ public enum GsaoiOdgw implements ValidatableGuideProbe {
 
             // Return an updated target environment that incorporates this
             // guide star.
-            final GuideGroup grp = env.getOrCreatePrimaryGuideGroup();
+            final GuideGroup grp = env.getPrimaryGuideGroup();
             final Option<GuideProbeTargets> gptOpt = grp.get(probe);
 
             if (gptOpt.exists(gpt -> gpt.containsTarget(guideStar)))

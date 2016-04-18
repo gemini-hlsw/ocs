@@ -98,7 +98,7 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
      * method and is equivalent to
      * <code>getGuideEnvironment().getPrimary().getOrElse(GuideGroup.EMPTY)</code>.
      */
-    public GuideGroup getOrCreatePrimaryGuideGroup() {
+    public GuideGroup getPrimaryGuideGroup() {
         return guide.getPrimary();
     }
 
@@ -126,11 +126,11 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
      * equivalent to
      * <pre>
      *     TargetEnvironment env = ...
-     *     env.getOrCreatePrimaryGuideGroup().get(guider)
+     *     env.getPrimaryGuideGroup().get(guider)
      * </pre>
      */
     public Option<GuideProbeTargets> getPrimaryGuideProbeTargets(final GuideProbe guider) {
-        return getOrCreatePrimaryGuideGroup().get(guider);
+        return getPrimaryGuideGroup().get(guider);
     }
 
     /**
@@ -140,7 +140,7 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
      * <code>gpt</code>.  This is a convenience method equivalent to
      * <pre>
      *     TargetEnvironment env = ...
-     *     env.setPrimaryGuideGroup(env.getOrCreatePrimaryGuideGroup().put(gpt))
+     *     env.setPrimaryGuideGroup(env.getPrimaryGuideGroup().put(gpt))
      * </pre>
      *
      * @param gpt guide probe targets to add or update in the primary guide
@@ -150,7 +150,7 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
      * its primary group, but otherwise identical to <code>this</code>
      */
     public TargetEnvironment putPrimaryGuideProbeTargets(GuideProbeTargets gpt) {
-        return setPrimaryGuideGroup(getOrCreatePrimaryGuideGroup().put(gpt));
+        return setPrimaryGuideGroup(getPrimaryGuideGroup().put(gpt));
     }
 
     /**
@@ -160,7 +160,7 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
      * that tis equivalent to
      * <pre>
      *     TargetEnvironment env = ...
-     *     env.setPrimaryGuideGroup(env.getOrCreatePrimaryGuideGroup().setAll(lst))
+     *     env.setPrimaryGuideGroup(env.getPrimaryGuideGroup().setAll(lst))
      * </pre>
      *
      * @param lst new list of GuideProbeTargets to apply to the primary guide
@@ -170,7 +170,7 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
      * its primary group, but otherwise identical to <code>this</code>
      */
     public TargetEnvironment setAllPrimaryGuideProbeTargets(ImList<GuideProbeTargets> lst) {
-        return setPrimaryGuideGroup(getOrCreatePrimaryGuideGroup().setAll(lst));
+        return setPrimaryGuideGroup(getPrimaryGuideGroup().setAll(lst));
     }
 
     /**
@@ -276,14 +276,6 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
     public TargetEnvironment removeTarget(SPTarget target) {
         return setGuideEnvironment(guide.removeTarget(target)).setUserTargets(user.remove(target));
     }
-
-    /**
-     * Returns a TargetEnvironment equivalent to this one, but without the
-     * given guide group.
-     */
-//    public TargetEnvironment removeGroup(GuideGroup group) {
-//        return setGuideEnvironment(guide.removeGroup(group));
-//    }
 
     public TargetEnvironment removeGroup(int groupIndex) {
         return setGuideEnvironment(guide.removeGroup(groupIndex));
