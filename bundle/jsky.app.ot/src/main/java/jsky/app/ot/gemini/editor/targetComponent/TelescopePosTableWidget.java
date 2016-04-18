@@ -922,14 +922,8 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
         final Option<IndexedGuideGroup> iggOpt = targetOpt.flatMap(this::getTargetGroup).orElse(getSelectedGroup());
         final boolean primaryGroupIsSelected = iggOpt.exists(igg -> igg.group().equals(env.getPrimaryGuideGroup()));
 
-        // All we need to do now is additionally check if the iggOpt group is selected. If it is, trigger if
-        // and if not, fall through to else.
-        if (targetOpt.isDefined() && primaryGroupIsSelected) {
-            final boolean autoGroup = targetOpt.flatMap(this::getTargetGroup).exists(igg -> igg.group().isAutomatic());
-            if (!autoGroup)
-                PrimaryTargetToggle.instance.toggle(_dataObject, targetOpt.getValue());
-        } else {
-            // The current target or guide group is not promary, so mark ths owner guide group as primary.
+        if (!primaryGroupIsSelected) {
+            // The current target or guide group is not primary, so mark ths owner guide group as primary.
             iggOpt.foreach(igg -> {
                 final GuideGroup primary = env.getPrimaryGuideGroup();
 
@@ -951,6 +945,19 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
                         }
                     }
                 });
+            });
+        }
+
+        // If we are not the auto group and the update was triggered on a guide star:
+        // 1. If the group was originally primary, then toggle the star as primary.
+        // 2. If the group wasn't originally primary, then mark the star as primary.
+        final boolean autoGroup = targetOpt.flatMap(this::getTargetGroup).exists(igg -> igg.group().isAutomatic());
+        if (!autoGroup) {
+            targetOpt.foreach(target -> {
+                if (primaryGroupIsSelected
+                        || iggOpt.exists(igg -> igg.group().getAllContaining(target).forall(gpt -> gpt.getPrimary().forall(pt -> pt != target)))) {
+                    PrimaryTargetToggle.instance.toggle(_dataObject, target);
+                }
             });
         }
     }
