@@ -13,7 +13,6 @@ import edu.gemini.spModel.gemini.gmos.InstGmosSouth;
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi;
 import edu.gemini.spModel.gemini.gsaoi.GsaoiOdgw;
 import edu.gemini.spModel.guide.GuideProbe;
-import edu.gemini.spModel.pio.xml.PioXmlUtil;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.*;
 import edu.gemini.spModel.target.obsComp.PwfsGuideProbe;
@@ -393,7 +392,7 @@ public final class TargetGroupTest extends TestBase {
         // Count the number of targets (discounting the disabled guide targets)
         int targetCount = 1 + env.getUserTargets().size(); // base position + user
         int groupCount = 1; // base group
-        for (GuideProbeTargets gt : env.getOrCreatePrimaryGuideGroup()) {
+        for (GuideProbeTargets gt : env.getPrimaryGuideGroup()) {
             ++groupCount;
             targetCount += gt.getTargets().size();
         }
@@ -426,7 +425,7 @@ public final class TargetGroupTest extends TestBase {
         validateGroup(baseGroupElement, TccNames.BASE, baseName, targets);
 
         // Check each guide group.
-        for (GuideProbeTargets gt : env.getOrCreatePrimaryGuideGroup()) {
+        for (GuideProbeTargets gt : env.getPrimaryGuideGroup()) {
             GuideProbe guider = gt.getGuider();
             String name = nameMap.getGuiderName(guider);
 

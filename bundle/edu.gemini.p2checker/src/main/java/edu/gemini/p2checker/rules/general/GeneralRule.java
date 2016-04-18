@@ -26,7 +26,6 @@ import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.guide.GuideProbeUtil;
 import edu.gemini.spModel.obs.ObsClassService;
 import edu.gemini.spModel.obs.ObservationStatus;
-import edu.gemini.spModel.obs.SchedulingBlock;
 import edu.gemini.spModel.obsclass.ObsClass;
 import edu.gemini.spModel.obscomp.InstConstants;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
@@ -189,7 +188,7 @@ public class GeneralRule implements IRule {
                 }
             }
 
-            for (final GuideProbeTargets guideTargets : env.getOrCreatePrimaryGuideGroup()) {
+            for (final GuideProbeTargets guideTargets : env.getPrimaryGuideGroup()) {
                 final GuideProbe guider = guideTargets.getGuider();
                 // TODO: GuideProbeTargets.isEnabled
 

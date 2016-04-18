@@ -1,6 +1,5 @@
 package jsky.app.ot.tpe.feat;
 
-import edu.gemini.pot.ModelConverters$;
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.core.SiderealTarget;
 import edu.gemini.spModel.guide.*;
@@ -292,7 +291,7 @@ public class TpeGuidePosFeature extends TpePositionFeature
             final SPTarget tp = pme.taggedPos;
 
             final TargetEnvironment env = obsComp.getTargetEnvironment();
-            for (final GuideProbeTargets gt : env.getOrCreatePrimaryGuideGroup()) {
+            for (final GuideProbeTargets gt : env.getPrimaryGuideGroup()) {
                 if (!gt.getTargets().contains(tp)) continue;
 
                 if (positionIsClose(pme, tme.xWidget, tme.yWidget)) {
@@ -333,7 +332,7 @@ public class TpeGuidePosFeature extends TpePositionFeature
             if (env == null) return false;
 
             // We do not allow deletion of auto guide stars.
-            final GuideGroup        gp  = env.getOrCreatePrimaryGuideGroup();
+            final GuideGroup        gp  = env.getPrimaryGuideGroup();
             if (gp.isAutomatic()) return false;
 
             final Option<GuideProbeTargets> gtOpt = gp.get(probe);
@@ -358,7 +357,7 @@ public class TpeGuidePosFeature extends TpePositionFeature
         if (tp == null) return null;
 
         final TargetEnvironment env = obsComp.getTargetEnvironment();
-        for (final GuideProbeTargets gt : env.getOrCreatePrimaryGuideGroup()) {
+        for (final GuideProbeTargets gt : env.getPrimaryGuideGroup()) {
             if (gt.getTargets().contains(tp)) {
                 TargetSelection.setTargetForNode(env, getContext().targets().shell().get(), tp);
                 return tp;
@@ -395,7 +394,7 @@ public class TpeGuidePosFeature extends TpePositionFeature
         final Map<Point2D.Double, Integer> overlapMap = new HashMap<>();
 
         // Draw all the guide targets.
-        for (final GuideProbeTargets gt : env.getOrCreatePrimaryGuideGroup()) {
+        for (final GuideProbeTargets gt : env.getPrimaryGuideGroup()) {
             final String tagBase = gt.getGuider().getKey();
 
             // Draw disabled targets in red.  Draw enabled but out of range
@@ -478,7 +477,7 @@ public class TpeGuidePosFeature extends TpePositionFeature
         final TargetEnvironment env = obsComp.getTargetEnvironment();
 
         // We do not allow deletion of auto guide stars.
-        final GuideGroup        gp  = env.getOrCreatePrimaryGuideGroup();
+        final GuideGroup        gp  = env.getPrimaryGuideGroup();
         if (gp.isAutomatic()) return None.instance();
 
         final TpePositionMap pm = TpePositionMap.getMap(_iw);

@@ -38,7 +38,7 @@ class WfsRuleSpec extends Specification {
       val g   = te.getBase.clone() <| (g => g.setTarget(mod(g.getTarget.asInstanceOf[SiderealTarget])))
       val p   = GmosOiwfsGuideProbe.instance
       val gpt = GuideProbeTargets.create(p, g)
-      val gg  = te.getOrCreatePrimaryGuideGroup.setAll(List(gpt).asImList)
+      val gg  = te.getPrimaryGuideGroup.setAll(List(gpt).asImList)
       te.setPrimaryGuideGroup(gg)
     }
 

@@ -81,7 +81,7 @@ public class TccFieldConfig extends ParamSet {
 
     private String getPrimaryGuideGroupName() {
         TargetEnvironment env = _oe.getTargetEnvironment();
-        final GuideGroup gg = env.getOrCreatePrimaryGuideGroup();
+        final GuideGroup gg = env.getPrimaryGuideGroup();
         //Only return a name if there are more than one group.
         if ( env.getGroups().size() <= 1 ) return "";
         if (!gg.getName().isEmpty()) return gg.getName().getValue();
@@ -94,7 +94,7 @@ public class TccFieldConfig extends ParamSet {
 
     private void addTargets(TargetEnvironment env) throws WdbaGlueException {
         addBaseGroup(env);
-        for (GuideProbeTargets gt : env.getOrCreatePrimaryGuideGroup()) addGuideGroup(gt);
+        for (GuideProbeTargets gt : env.getPrimaryGuideGroup()) addGuideGroup(gt);
     }
 
     private static boolean isEmpty(String name) {

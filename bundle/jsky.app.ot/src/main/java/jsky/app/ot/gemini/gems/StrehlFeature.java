@@ -318,7 +318,7 @@ public class StrehlFeature extends TpeImageFeature implements PropertyWatcher, M
         if (ctxOpt.isEmpty()) return targetList;
         ObsContext ctx = ctxOpt.getValue();
         TargetEnvironment env = ctx.getTargets();
-        GuideGroup group = env.getOrCreatePrimaryGuideGroup();
+        GuideGroup group = env.getPrimaryGuideGroup();
         guideProbeType = null;
         // The counts are used to guess which is tiptilt and which is flexure. See OT-33
         int oiwfsCount = 0;

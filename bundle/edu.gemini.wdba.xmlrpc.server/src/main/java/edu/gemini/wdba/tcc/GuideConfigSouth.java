@@ -1,6 +1,5 @@
 package edu.gemini.wdba.tcc;
 
-import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.shared.util.immutable.ApplyOp;
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
@@ -57,7 +56,7 @@ public class GuideConfigSouth extends ParamSet {
         // ODGW to be "on instrument".  Explicitly check for these probes.
         if (!oe.containsTargets(GuideProbe.Type.OIWFS)) return false;
         Set<GuideProbe> odgwSet = new HashSet<GuideProbe>(Arrays.asList(GsaoiOdgw.values()));
-        GuideGroup grp = oe.getTargetEnvironment().getOrCreatePrimaryGuideGroup();
+        GuideGroup grp = oe.getTargetEnvironment().getPrimaryGuideGroup();
         for (GuideProbeTargets gt : grp.getAllMatching(GuideProbe.Type.OIWFS)) {
             if (!odgwSet.contains(gt.getGuider())) return true;
         }

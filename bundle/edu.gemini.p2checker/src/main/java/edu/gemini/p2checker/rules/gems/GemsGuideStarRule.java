@@ -99,7 +99,7 @@ public final class GemsGuideStarRule implements IRule {
                 }
             }
 
-            GuideGroup primaryGuideGroup = env.getOrCreatePrimaryGuideGroup();
+            GuideGroup primaryGuideGroup = env.getPrimaryGuideGroup();
             // get # cwfs
             int cwfs = 0;
             for (Canopus.Wfs canwfs : Canopus.Wfs.values()) {

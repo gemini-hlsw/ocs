@@ -72,7 +72,7 @@ public class UnusedGuideConfig extends ParamSet {
         // Now, handle the case where there are one or more offset iterators
         // in the sequence.
         Set<GuideProbe> refGuiders;
-        refGuiders = _oe.getTargetEnvironment().getOrCreatePrimaryGuideGroup().getReferencedGuiders();
+        refGuiders = _oe.getTargetEnvironment().getPrimaryGuideGroup().getReferencedGuiders();
 
         if (refGuiders.contains(PwfsGuideProbe.pwfs1) && probeUsed(PwfsGuideProbe.pwfs1, offsetNodes)) {
             putParameter(TccNames.PWFS1ACTIVE, TccNames.A);

@@ -868,7 +868,7 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         final TargetObsComp dataObj   = (TargetObsComp) obsComp.getDataObject();
         final TargetEnvironment tenv  = dataObj.getTargetEnvironment();
 
-        final GuideGroup gg = tenv.getOrCreatePrimaryGuideGroup();
+        final GuideGroup gg = tenv.getPrimaryGuideGroup();
 
         final Option<GuideProbeTargets> gptOpt = gg.get(Flamingos2OiwfsGuideProbe.instance);
         return gptOpt.exists(gpt -> gpt.getPrimary().isDefined());

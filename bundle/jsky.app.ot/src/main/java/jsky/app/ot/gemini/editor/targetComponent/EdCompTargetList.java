@@ -448,7 +448,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
         // Get the set of guiders that are referenced but not legal in this context, if any.  Any
         // "available" guider is legal, anything left over is referenced but not really available.
-        final Set<GuideProbe> illegalSet = env.getOrCreatePrimaryGuideGroup().getReferencedGuiders();
+        final Set<GuideProbe> illegalSet = env.getPrimaryGuideGroup().getReferencedGuiders();
         illegalSet.removeAll(avail);
 
         GuideProbe illegal = null;
@@ -688,7 +688,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             final boolean enabled = _curSelection.fold(
                     t -> {
                         final TargetEnvironment env = getDataObject().getTargetEnvironment();
-                        final ImList<GuideProbeTargets> gtList = env.getOrCreatePrimaryGuideGroup().getAllContaining(t);
+                        final ImList<GuideProbeTargets> gtList = env.getPrimaryGuideGroup().getAllContaining(t);
                         return gtList.nonEmpty() && !selectionIsAutoTarget();
                     },
                     igg -> true
@@ -718,7 +718,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             return None.instance();
         }).orElse(() -> selectedGroup().flatMap(igg -> {
             // Handle guide groups.
-            final GuideGroup primary = envOld.getOrCreatePrimaryGuideGroup();
+            final GuideGroup primary = envOld.getPrimaryGuideGroup();
             if (igg.group() == primary) {
                 DialogUtil.error("You can't remove the primary guide group.");
             } else if (selectionIsAutoGroup()) {
@@ -771,7 +771,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
                 // See if it is a guide star and duplicate it in the correct GuideTargets list.
                 boolean duplicated = false;
-                env.getOrCreatePrimaryGuideGroup();
+                env.getPrimaryGuideGroup();
                 final List<GuideGroup> groups = new ArrayList<>();
                 for (GuideGroup group : env.getGroups()) {
                     for (GuideProbeTargets gt : group) {

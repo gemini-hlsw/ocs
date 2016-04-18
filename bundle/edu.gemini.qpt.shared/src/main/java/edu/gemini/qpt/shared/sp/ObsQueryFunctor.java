@@ -593,7 +593,7 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor implements Iterable<
             // REL-293: check for WFS
             if (TargetObsComp.SP_TYPE.equals(type)) {
                 TargetObsComp targetObsComp = (TargetObsComp)comp.getDataObject();
-                for(GuideProbe guideProbe : targetObsComp.getTargetEnvironment().getOrCreatePrimaryGuideGroup().getReferencedGuiders()) {
+                for(GuideProbe guideProbe : targetObsComp.getTargetEnvironment().getPrimaryGuideGroup().getReferencedGuiders()) {
                     if (guideProbe instanceof Enum) {
                         ret.add((Enum)guideProbe);
                     }

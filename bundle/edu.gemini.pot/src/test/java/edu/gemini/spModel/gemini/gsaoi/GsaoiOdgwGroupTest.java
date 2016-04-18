@@ -83,7 +83,7 @@ public class GsaoiOdgwGroupTest extends TestCase {
         final TargetEnvironment env = group.add(guideTarget, baseContext);
 
         // Adds an ODGW1 target by default.
-        final ImList<GuideProbeTargets> col = env.getOrCreatePrimaryGuideGroup().getAll();
+        final ImList<GuideProbeTargets> col = env.getPrimaryGuideGroup().getAll();
         assertEquals(1, col.size());
 
         final Option<GuideProbeTargets> gtOpt = env.getPrimaryGuideProbeTargets(GsaoiOdgw.odgw1);
@@ -110,7 +110,7 @@ public class GsaoiOdgwGroupTest extends TestCase {
             final TargetEnvironment env = group.add(guideTarget, baseContext);
 
             // Should have just one set of GuideTargets for the new guide star.
-            assertEquals(1, env.getOrCreatePrimaryGuideGroup().getAll().size());
+            assertEquals(1, env.getPrimaryGuideGroup().getAll().size());
 
             // Should be guide targets for the expected guide window.
             final Option<GuideProbeTargets> gtOpt = env.getPrimaryGuideProbeTargets(odgw);
