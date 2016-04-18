@@ -15,11 +15,6 @@ import edu.gemini.spModel.telescope.IssPortProvider;
 import org.dom4j.Document;
 import org.dom4j.Element;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 /**
  * Test cases for {@link edu.gemini.wdba.tcc.Flamingos2Support}.
  */
@@ -42,15 +37,15 @@ public abstract class InstrumentSupportTestBase<T extends ISPDataObject> extends
         obs.addObsComponent(obsComp);
     }
 
-    protected class ObsComponentPair<T extends ISPDataObject> {
+    protected class ObsComponentPair<D extends ISPDataObject> {
         public ISPObsComponent obsComp;
-        public T dataObject;
+        public D dataObject;
 
         public ObsComponentPair(SPComponentType type) throws Exception {
             obsComp = odb.getFactory().createObsComponent(prog, type, null);
             obs.addObsComponent(obsComp);
             //noinspection unchecked
-            dataObject = (T) obsComp.getDataObject();
+            dataObject = (D) obsComp.getDataObject();
         }
 
         public void store() throws Exception {
@@ -59,7 +54,7 @@ public abstract class InstrumentSupportTestBase<T extends ISPDataObject> extends
     }
 
     protected ObsComponentPair<InstAltair> addAltair() throws Exception {
-        return new ObsComponentPair<InstAltair>(InstAltair.SP_TYPE);
+        return new ObsComponentPair<>(InstAltair.SP_TYPE);
     }
 
     protected ObsComponentPair<InstAltair> addAltair(AltairParams.GuideStarType type) throws Exception {
@@ -74,7 +69,7 @@ public abstract class InstrumentSupportTestBase<T extends ISPDataObject> extends
     }
 
     protected ObsComponentPair<Gems> addGems() throws Exception {
-        return new ObsComponentPair<Gems>(Gems.SP_TYPE);
+        return new ObsComponentPair<>(Gems.SP_TYPE);
     }
 
     protected T getInstrument() throws Exception {
@@ -84,20 +79,6 @@ public abstract class InstrumentSupportTestBase<T extends ISPDataObject> extends
 
     protected void setInstrument(T dataObj) throws Exception {
         obsComp.setDataObject(dataObj);
-    }
-
-    protected Map<String, String> getTcsConfigurationMap(Document doc) throws Exception {
-        Map<String, String> res = new HashMap<String, String>();
-
-        Element psetElement = getTcsConfiguration(doc);
-        @SuppressWarnings({"unchecked"}) List<Element> params = (List<Element>) psetElement.elements();
-        for (Element paramElement : params) {
-            String name  = paramElement.attributeValue("name");
-            String value = paramElement.attributeValue("value");
-            res.put(name, value);
-        }
-
-        return Collections.unmodifiableMap(res);
     }
 
     protected String getInstrumentConfig(Document doc) throws Exception {

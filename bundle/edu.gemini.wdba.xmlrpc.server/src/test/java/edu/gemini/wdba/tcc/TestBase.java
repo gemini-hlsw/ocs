@@ -24,9 +24,7 @@ import org.dom4j.io.SAXReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.security.Principal;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * A base class for creating unit test code for the TCC configuration file
@@ -82,14 +80,11 @@ public abstract class TestBase extends TestCase {
     }
 
     protected Document parse(String tccConfigXml) throws Exception {
-        SAXReader sax = new SAXReader();
+        final SAXReader sax = new SAXReader();
 
-        Reader rdr = new StringReader(tccConfigXml);
-        Document doc;
-        try {
+        final Document doc;
+        try (Reader rdr = new StringReader(tccConfigXml)) {
             doc = sax.read(rdr);
-        } finally {
-            rdr.close();
         }
         return doc;
     }
@@ -128,29 +123,27 @@ public abstract class TestBase extends TestCase {
         return getTccFieldContainedParamSet(doc, TargetGroupConfig.TYPE_VALUE);
     }
 
-    protected Element getTargetGroup(Document doc, String name) {
-        for (Element e : getTargetGroups(doc)) {
-            String thisName = e.attributeValue(ParamSet.NAME);
-            if (name.equals(thisName)) return e;
-        }
-        return null;
-    }
-
     protected List<Element> getTargets(Document doc) {
         List<Element> res = getTccFieldContainedParamSet(doc, "hmsdegTarget");
         res.addAll(getTccFieldContainedParamSet(doc, "conicTarget"));
         return res;
     }
 
-    protected Element getTarget(Document doc, String name) {
-        for (Element e : getTccFieldContainedParamSet(doc, "hmsdegTarget")) {
-            String thisName = e.attributeValue(ParamSet.NAME);
-            if (name.equals(thisName)) return e;
-        }
-        return null;
-    }
-
     protected Element getTcsConfiguration(Document doc) {
         return getSubconfig(doc, TccNames.TCS_CONFIGURATION);
+    }
+
+    protected Map<String, String> getTcsConfigurationMap(Document doc) throws Exception {
+        final Map<String, String> res = new HashMap<>();
+
+        final Element psetElement = getTcsConfiguration(doc);
+        @SuppressWarnings({"unchecked"}) List<Element> params = (List<Element>) psetElement.elements();
+        for (Element paramElement : params) {
+            final String name  = paramElement.attributeValue("name");
+            final String value = paramElement.attributeValue("value");
+            res.put(name, value);
+        }
+
+        return Collections.unmodifiableMap(res);
     }
 }
