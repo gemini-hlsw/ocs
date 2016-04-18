@@ -65,7 +65,7 @@ libraryDependencies in ThisBuild ++= Seq(
   "org.scalacheck" %% "scalacheck"           % "1.12.5"      % "test",
   "org.specs2"     %% "specs2-core"          % specs2Version % "test",
   "org.specs2"     %% "specs2-scalacheck"    % specs2Version % "test",
-  "org.specs2"     %% "specs2-matcher-extra" % specs2Version % "test" exclude("org.scalaz.stream", "scalaz-stream_2.11") intransitive(), // This is required to avoid pulling a version of scalaz-stream not available in maven central
+  "org.specs2"     %% "specs2-matcher-extra" % specs2Version % "test",
   "org.scalatest"  %% "scalatest"            % "3.0.0-M15"   % "test"
 )
 
