@@ -928,11 +928,11 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
             // If the auto group is disabled and set to primary, then make it an initial auto group.
             ImOption.apply(env.getGuideEnvironment()).foreach(ge -> {
                 final GuideGrp grp = igg.group().grp();
-                if (ge != null && grp instanceof AutomaticGroup.Disabled$) {
+                if (grp instanceof AutomaticGroup.Disabled$) {
                     final TargetEnvironment envNew = env.setGuideEnvironment(ge.setAutomaticGroup(GuideGroup.AutomaticInitial()).setPrimaryIndex(0));
                     _dataObject.setTargetEnvironment(envNew);
                     _model.enableAutoRow(envNew);
-                } else if (ge != null && primary != igg.group() && confirmGroupChange(primary, igg.group())) {
+                } else if (primary != igg.group() && confirmGroupChange(primary, igg.group())) {
                     _dataObject.setTargetEnvironment(env.setGuideEnvironment(ge.setPrimaryIndex(igg.index())));
 
                     // If we are switching to an automatic group, we also
@@ -963,21 +963,17 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
     // given value.  This is done in response to making the automatic guide
     // group primary.
     private void updatePosAngle(Angle posAngle) {
-        final ISPObservation obs = _obsComp.getContextObservation();
-        if (obs != null) {
-            final ISPObsComponent oc = SPTreeUtil.findInstrument(obs);
-            if (oc != null) {
+        ImOption.apply(_obsComp.getContextObservation()).foreach(obs -> {
+            ImOption.apply(SPTreeUtil.findInstrument(obs)).foreach(oc -> {
                 final SPInstObsComp inst = (SPInstObsComp) oc.getDataObject();
                 final double oldPosAngle = inst.getPosAngleDegrees();
                 final double newPosAngle = posAngle.toDegrees();
                 if (oldPosAngle != newPosAngle) {
                     inst.setPosAngleDegrees(newPosAngle);
                     oc.setDataObject(inst);
-
-                    // We need to re-evaluate the guiding
                 }
-            }
-        }
+            });
+        });
     }
 
     /**
