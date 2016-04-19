@@ -102,9 +102,15 @@ object HS2Spec extends Specification with ScalaCheck {
       ))
     }
 
-    "handle single result" in {
+    "handle single result with trailing space (!)" in {
       runSearch(Search.MajorBody("charon")) must_== \/-(List(
-        Row(HD.MajorBody(901), "Charon / (Pluto)")
+        Row(HD.MajorBody(901), "Charon")
+      ))
+    }
+
+    "handle single result without trailing space" in {
+      runSearch(Search.MajorBody("europa")) must_== \/-(List(
+        Row(HD.MajorBody(502), "Europa")
       ))
     }   
 

@@ -256,8 +256,8 @@ object HorizonsService2 {
 
           // Single result with form:  Revised: Aug 11, 2015       Charon / (Pluto)     901
           lazy val case1 =
-            """  +(.*?)  +(\d+) $""".r.findFirstMatchIn(header).map { m =>
-              List(Row(HorizonsDesignation.MajorBody(m.group(2).toInt), m.group(1)))
+            """  +(.*?) / \((.+?)\)  +(\d+) *$""".r.findFirstMatchIn(header).map { m =>
+              List(Row(HorizonsDesignation.MajorBody(m.group(3).toInt), m.group(1)))
             } \/> "Could not match 'Charon / (Pluto)     901' header pattern."
 
           // First one that works, otherwise Nil because it falls through to small-body search
