@@ -3,7 +3,6 @@ package jsky.app.ot.gemini.editor.targetComponent;
 import edu.gemini.ags.api.*;
 import edu.gemini.pot.ModelConverters;
 import edu.gemini.pot.sp.ISPObsComponent;
-import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.core.Angle;
 import edu.gemini.spModel.core.Coordinates;
@@ -963,17 +962,17 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
     // given value.  This is done in response to making the automatic guide
     // group primary.
     private void updatePosAngle(Angle posAngle) {
-        ImOption.apply(_obsComp.getContextObservation()).foreach(obs -> {
-            ImOption.apply(SPTreeUtil.findInstrument(obs)).foreach(oc -> {
-                final SPInstObsComp inst = (SPInstObsComp) oc.getDataObject();
-                final double oldPosAngle = inst.getPosAngleDegrees();
-                final double newPosAngle = posAngle.toDegrees();
-                if (oldPosAngle != newPosAngle) {
-                    inst.setPosAngleDegrees(newPosAngle);
-                    oc.setDataObject(inst);
-                }
-            });
-        });
+        ImOption.apply(_obsComp.getContextObservation()).foreach(obs ->
+                ImOption.apply(SPTreeUtil.findInstrument(obs)).foreach(oc -> {
+                    final SPInstObsComp inst = (SPInstObsComp) oc.getDataObject();
+                    final double oldPosAngle = inst.getPosAngleDegrees();
+                    final double newPosAngle = posAngle.toDegrees();
+                    if (oldPosAngle != newPosAngle) {
+                        inst.setPosAngleDegrees(newPosAngle);
+                        oc.setDataObject(inst);
+                    }
+                })
+        );
     }
 
     /**
