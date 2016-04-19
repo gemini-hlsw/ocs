@@ -335,6 +335,11 @@ public abstract class Gmos extends Instrument implements BinningProvider, Spectr
             if ((gp.fpMask().isIFU() || isIfu2()) && gp.spatialBinning() != 1) {
                 add (new ItcWarning("Spatial binning is strongly discouraged with IFU observations."));
             }
+            if ((gp.fpMask().isIFU() || isIfu2()) && gp.spectralBinning() == 4) {
+                add (new ItcWarning("THE SPECTRAL RESOLUTION IS UNDERSAMPLED. " +
+                        "The effective slit width of the IFU fibers is 0.31 arcsec, " +
+                        "and binning by four yields fewer than 1 pixel per resolution element for all gratings. "));
+            }
         }};
     }
 
