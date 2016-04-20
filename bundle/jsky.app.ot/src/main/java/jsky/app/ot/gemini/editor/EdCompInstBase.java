@@ -5,6 +5,8 @@ import edu.gemini.spModel.obscomp.SPInstObsComp;
 import jsky.app.ot.editor.OtItemEditor;
 import jsky.util.gui.TextBoxWidget;
 
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
@@ -40,6 +42,17 @@ public abstract class EdCompInstBase<T extends SPInstObsComp> extends OtItemEdit
             if (getPosAngleTextBox() != null) {
                 getPosAngleTextBox().setText(getDataObject().getPosAngleDegreesStr());
                 getPosAngleTextBox().addWatcher(this);
+
+                // We now ignore changes to the pos angle if the text field is being edited.
+                // As a result, make sure everything is synched when editing starts / stops.
+                getPosAngleTextBox().addFocusListener(new FocusAdapter() {
+                    @Override public void focusLost(final FocusEvent e) {
+                        updatePosAngle();
+                    }
+                    @Override public void focusGained(final FocusEvent e) {
+                        updatePosAngle();
+                    }
+                });
             }
 
             if (getExposureTimeTextBox() != null) {
@@ -78,7 +91,8 @@ public abstract class EdCompInstBase<T extends SPInstObsComp> extends OtItemEdit
         }
     }
 
-    public void propertyChange(final PropertyChangeEvent evt) {
+    // Copy the data model pos angle value to the pos angle text field.
+    private void updatePosAngle() {
         if (_ignoreChanges) return;
 
         // Ignore model changes to the pos angle if the pos angle text box has the focus.
@@ -90,6 +104,11 @@ public abstract class EdCompInstBase<T extends SPInstObsComp> extends OtItemEdit
                 posAngleTextBox.setText(newAngle);
             }
         }
+    }
+
+    // Copy the data model exposure time value to the exposure time text field.
+    private void updateExpTime() {
+        if (_ignoreChanges) return;
 
         final TextBoxWidget expTimeTextBox = getExposureTimeTextBox();
         if (expTimeTextBox != null && getDataObject() != null) {
@@ -98,6 +117,11 @@ public abstract class EdCompInstBase<T extends SPInstObsComp> extends OtItemEdit
                 expTimeTextBox.setText(newExpTime);
             }
         }
+    }
+
+    public void propertyChange(final PropertyChangeEvent evt) {
+        updatePosAngle();
+        updateExpTime();
     }
 
     /**

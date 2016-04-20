@@ -4,7 +4,7 @@ import java.awt.CardLayout
 import java.text.NumberFormat
 import java.util.Locale
 
-import edu.gemini.pot.sp.{SPComponentType, ISPObsComponent}
+import edu.gemini.pot.sp.{ISPObsComponent, SPComponentType}
 import edu.gemini.shared.gui.EnableDisableComboBox
 import edu.gemini.skycalc.Angle
 import edu.gemini.spModel.core.Site
@@ -19,10 +19,10 @@ import jsky.app.ot.util.OtColor
 
 import scala.swing.GridBagPanel.{Anchor, Fill}
 import scala.swing._
-import scala.swing.event.{SelectionChanged, ValueChanged}
+import scala.swing.event.{FocusGained, FocusLost, SelectionChanged, ValueChanged}
 import scala.util.Try
-
-import scalaz._, Scalaz._
+import scalaz._
+import Scalaz._
 
 
 class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
@@ -75,6 +75,9 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
         ui.parallacticAngleControlsOpt.foreach(_.positionAngleChanged(positionAngleTextField.text))
         ui.positionAngleTextField.validate()
         copyPosAngleToInstrument()
+
+      case FocusGained(`positionAngleTextField`, _, _) | FocusLost(`positionAngleTextField`, _, _) =>
+        editor.foreach(e => ui.positionAngleTextField.text = numberFormatter.format(e.getDataObject.getPosAngle))
     }
 
 
