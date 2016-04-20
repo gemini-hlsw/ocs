@@ -22,14 +22,16 @@ import scala.swing._
 import scala.swing.event.{SelectionChanged, ValueChanged}
 import scala.util.Try
 
+import scalaz._, Scalaz._
+
 
 class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
                          E <: OtItemEditor[ISPObsComponent, I]](instType: SPComponentType) extends GridBagPanel with Reactor {
   private var editor: Option[E] = None
 
-  private val numberFormatter = NumberFormat.getInstance(Locale.US)
-  numberFormatter.setMaximumFractionDigits(2)
-  numberFormatter.setMaximumIntegerDigits(3)
+  private val numberFormatter = NumberFormat.getInstance(Locale.US) <|
+    (_.setMaximumFractionDigits(2)) <|
+    (_.setMaximumIntegerDigits(3))
 
   private object ui {
     // We initialize the combo box will all possible items, and will modify this list as required.
@@ -56,8 +58,6 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
         Try { text.toDouble }.toOption
 
       override def validate(): Unit =
-        // TODO: Restore this line when background AGS is implemented.
-        //background = angle.fold(badBackground)(x => defaultBackground)
         background = angle.fold(if (positionAngleConstraintComboBox.selection.item == PosAngleConstraint.UNBOUNDED) background else badBackground)(x => defaultBackground)
     }
 
@@ -187,8 +187,13 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
 
     ui.positionAngleConstraintComboBox.resetEnabledItems()
     ui.positionAngleConstraintComboBox.selection.item = instrument.getPosAngleConstraint
-    ui.positionAngleTextField.text                    = numberFormatter.format(instrument.getPosAngle)
-    ui.positionAngleTextField.enabled                 = instrument.getPosAngleConstraint != PosAngleConstraint.UNBOUNDED
+
+    // Ignore changes to the position angle text field if it is being edited, i.e. has the focus.
+    // This is to avoid BAGS changing the contents to +180 while editing is occurring.
+    if (!ui.positionAngleTextField.hasFocus) {
+      ui.positionAngleTextField.text = numberFormatter.format(instrument.getPosAngle)
+    }
+    ui.positionAngleTextField.enabled = instrument.getPosAngleConstraint != PosAngleConstraint.UNBOUNDED
     ui.controlsPanel.updatePanel()
     listenTo(ui.positionAngleConstraintComboBox.selection)
 

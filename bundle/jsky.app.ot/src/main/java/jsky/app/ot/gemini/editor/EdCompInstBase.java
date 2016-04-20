@@ -1,9 +1,3 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: EdCompInstBase.java 47001 2012-07-26 19:40:02Z swalker $
-//
 package jsky.app.ot.gemini.editor;
 
 import edu.gemini.pot.sp.ISPObsComponent;
@@ -60,26 +54,21 @@ public abstract class EdCompInstBase<T extends SPInstObsComp> extends OtItemEdit
         }
     }
 
-    // -- Implement the TextBoxWidgetWatcher interface --
-
-
     /**
      * A key was pressed in the given TextBoxWidget.
      */
-    public void textBoxKeyPress(TextBoxWidget tbwe) {
+    public void textBoxKeyPress(final TextBoxWidget tbwe) {
         if (getDataObject() != null) {
             _ignoreChanges = true;
             try {
                 if (tbwe == getPosAngleTextBox()) {
-                    /* The default position angle */
                     final double defaultPositionAngle = 0.0;
                     getDataObject().setPosAngleDegrees(tbwe.getDoubleValue(defaultPositionAngle));
                 } else if (tbwe == getExposureTimeTextBox()) {
-                    double expTime = tbwe.getDoubleValue(getDefaultExposureTime());
-                    if (isForceIntegerExposureTime()) expTime = Math.floor(expTime);
-                    getDataObject().setExposureTime(expTime);
+                    final double expTime    = tbwe.getDoubleValue(getDefaultExposureTime());
+                    final double expTimeAdj = isForceIntegerExposureTime() ? Math.floor(expTime) : expTime;
+                    getDataObject().setExposureTime(expTimeAdj);
                 } else if (tbwe == getCoaddsTextBox()) {
-                    /* The default number of coadds */
                     final int defaultCoadds = 1;
                     getDataObject().setCoadds(tbwe.getIntegerValue(defaultCoadds));
                 }
@@ -89,27 +78,24 @@ public abstract class EdCompInstBase<T extends SPInstObsComp> extends OtItemEdit
         }
     }
 
-    // ignore
-    public void textBoxAction(TextBoxWidget tbwe) {
-    }
-
-
-    /** Implements the PropertyChangeListener interface */
-    public void propertyChange(PropertyChangeEvent evt) {
+    public void propertyChange(final PropertyChangeEvent evt) {
         if (_ignoreChanges) return;
-        TextBoxWidget tbwe = getPosAngleTextBox();
-        if (tbwe != null && getDataObject() != null) {
+
+        // Ignore model changes to the pos angle if the pos angle text box has the focus.
+        // This is to avoid changing the text box value when BAGS selects an auto group at +180.
+        final TextBoxWidget posAngleTextBox = getPosAngleTextBox();
+        if (posAngleTextBox != null && getDataObject() != null && !posAngleTextBox.hasFocus()) {
             final String newAngle = getDataObject().getPosAngleDegreesStr();
-            if (!newAngle.equals(tbwe.getText())) {
-                tbwe.setText(newAngle);
+            if (!newAngle.equals(posAngleTextBox.getText())) {
+                posAngleTextBox.setText(newAngle);
             }
         }
-        tbwe = getExposureTimeTextBox();
-        // Added this check because TReCS doesn't have an exposure time box!
-        if (tbwe != null && getDataObject() != null) {
+
+        final TextBoxWidget expTimeTextBox = getExposureTimeTextBox();
+        if (expTimeTextBox != null && getDataObject() != null) {
             final String newExpTime = getDataObject().getExposureTimeAsString();
-            if (!newExpTime.equals(tbwe.getText())) {
-                tbwe.setText(newExpTime);
+            if (!newExpTime.equals(expTimeTextBox.getText())) {
+                expTimeTextBox.setText(newExpTime);
             }
         }
     }
