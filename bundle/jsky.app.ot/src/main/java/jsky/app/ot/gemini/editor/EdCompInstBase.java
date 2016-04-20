@@ -79,8 +79,7 @@ public abstract class EdCompInstBase<T extends SPInstObsComp> extends OtItemEdit
                     getDataObject().setPosAngleDegrees(tbwe.getDoubleValue(defaultPositionAngle));
                 } else if (tbwe == getExposureTimeTextBox()) {
                     final double expTime    = tbwe.getDoubleValue(getDefaultExposureTime());
-                    final double expTimeAdj = isForceIntegerExposureTime() ? Math.floor(expTime) : expTime;
-                    getDataObject().setExposureTime(expTimeAdj);
+                    getDataObject().setExposureTime(expTime);
                 } else if (tbwe == getCoaddsTextBox()) {
                     final int defaultCoadds = 1;
                     getDataObject().setCoadds(tbwe.getIntegerValue(defaultCoadds));
@@ -93,28 +92,28 @@ public abstract class EdCompInstBase<T extends SPInstObsComp> extends OtItemEdit
 
     // Copy the data model pos angle value to the pos angle text field.
     private void updatePosAngle() {
-        if (_ignoreChanges) return;
-
-        // Ignore model changes to the pos angle if the pos angle text box has the focus.
-        // This is to avoid changing the text box value when BAGS selects an auto group at +180.
-        final TextBoxWidget posAngleTextBox = getPosAngleTextBox();
-        if (posAngleTextBox != null && getDataObject() != null && !posAngleTextBox.hasFocus()) {
-            final String newAngle = getDataObject().getPosAngleDegreesStr();
-            if (!newAngle.equals(posAngleTextBox.getText())) {
-                posAngleTextBox.setText(newAngle);
+        if (!_ignoreChanges) {
+            // Ignore model changes to the pos angle if the pos angle text box has the focus.
+            // This is to avoid changing the text box value when BAGS selects an auto group at +180.
+            final TextBoxWidget posAngleTextBox = getPosAngleTextBox();
+            if (posAngleTextBox != null && getDataObject() != null && !posAngleTextBox.hasFocus()) {
+                final String newAngle = getDataObject().getPosAngleDegreesStr();
+                if (!newAngle.equals(posAngleTextBox.getText())) {
+                    posAngleTextBox.setText(newAngle);
+                }
             }
         }
     }
 
     // Copy the data model exposure time value to the exposure time text field.
     private void updateExpTime() {
-        if (_ignoreChanges) return;
-
-        final TextBoxWidget expTimeTextBox = getExposureTimeTextBox();
-        if (expTimeTextBox != null && getDataObject() != null) {
-            final String newExpTime = getDataObject().getExposureTimeAsString();
-            if (!newExpTime.equals(expTimeTextBox.getText())) {
-                expTimeTextBox.setText(newExpTime);
+        if (!_ignoreChanges) {
+            final TextBoxWidget expTimeTextBox = getExposureTimeTextBox();
+            if (expTimeTextBox != null && getDataObject() != null) {
+                final String newExpTime = getDataObject().getExposureTimeAsString();
+                if (!newExpTime.equals(expTimeTextBox.getText())) {
+                    expTimeTextBox.setText(newExpTime);
+                }
             }
         }
     }
@@ -141,11 +140,6 @@ public abstract class EdCompInstBase<T extends SPInstObsComp> extends OtItemEdit
     /** The default exposure time. Subclasses can override. **/
     protected double getDefaultExposureTime() {
         return 60.0;
-    }
-
-    /** If true, force an integer exposure time. Subclasses can override. **/
-    protected boolean isForceIntegerExposureTime() {
-        return false;
     }
 }
 
