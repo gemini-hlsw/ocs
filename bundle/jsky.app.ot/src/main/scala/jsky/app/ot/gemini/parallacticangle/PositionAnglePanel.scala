@@ -77,7 +77,7 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
         copyPosAngleToInstrument()
 
       case FocusGained(`positionAngleTextField`, _, _) | FocusLost(`positionAngleTextField`, _, _) =>
-        editor.foreach(e => ui.positionAngleTextField.text = numberFormatter.format(e.getDataObject.getPosAngle))
+        copyPosAngleToTextField()
     }
 
 
@@ -194,7 +194,7 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
     // Ignore changes to the position angle text field if it is being edited, i.e. has the focus.
     // This is to avoid BAGS changing the contents to +180 while editing is occurring.
     if (!ui.positionAngleTextField.hasFocus) {
-      ui.positionAngleTextField.text = numberFormatter.format(instrument.getPosAngle)
+      copyPosAngleToTextField()
     }
     ui.positionAngleTextField.enabled = instrument.getPosAngleConstraint != PosAngleConstraint.UNBOUNDED
     ui.controlsPanel.updatePanel()
@@ -220,6 +220,18 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
       e.getDataObject.setPosAngle(a)
     }
 
+  /**
+    * Copies the position angle in the data object to the position angle text field.
+    */
+  private def copyPosAngleToTextField(): Unit = {
+    editor.foreach(e => {
+      val newAngleStr = numberFormatter.format(e.getDataObject.getPosAngleDegrees)
+      val oldAngleStr = ui.positionAngleTextField.text
+      if (!newAngleStr.equals(oldAngleStr)) {
+        ui.positionAngleTextField.text = newAngleStr
+      }
+    })
+  }
 
   /**
    * Called whenever a selection is made in the position angle constraint combo box.
