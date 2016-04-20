@@ -234,10 +234,18 @@ object HorizonsService2 {
               List(Row(HorizonsDesignation.AsteroidOldStyle(m.group(1).toInt) : HorizonsDesignation.Asteroid, m.group(2)))
             } \/> "Could not match '4 Vesta' header pattern."
 
+          // Single result with form: JPL/HORIZONS    (2016 GB222)    2016-Apr-20 15:22:36
+          lazy val case3 =
+            """  +\((.+?)\)  """.r.findFirstMatchIn(header).map { m =>
+              List(Row(HorizonsDesignation.AsteroidNewStyle(m.group(1)) : HorizonsDesignation.Asteroid, m.group(1)))
+            } \/> "Could not match '(2016 GB222)' header pattern."
+
+
           // First one that works!
           case0 orElse
           case1 orElse
-          case2 orElse "Could not parse the header line as an asteroid".left
+          case2 orElse
+          case3 orElse "Could not parse the header line as an asteroid".left
 
 
         case Search.MajorBody(_) =>
