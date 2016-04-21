@@ -48,7 +48,6 @@ object EphemerisFilesTest extends Specification with ScalaCheck with Arbitraries
       case -\/(err) =>
         val (msg, ex) = err.report
         log.log(Level.WARNING, msg, ex.orNull)
-        err.log(log)
         throw ex.getOrElse(new RuntimeException())
 
       case \/-(t) =>

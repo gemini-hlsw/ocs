@@ -107,15 +107,16 @@ object TcsEphemerisExport {
 
       def partition(hids: ISet[HorizonsDesignation]): TryExport[FilePartition] = {
         def upToDate(relevant: ISet[HorizonsDesignation]): TryExport[ISet[HorizonsDesignation]] = {
-          // TryExport[ List[(HorizonsDesignation, List[Instant])]  ]
+          // ISet[HorizonsDesignation] => TryExport[ List[(hid, ISet[Instant])] ]
           val allPairs = relevant.toList.traverseU { hid =>
             files.parseTimes(hid).strengthL(hid)
           }
 
           allPairs.map { lst =>
             val upToDatePairs = lst.filter { case (hid, times) =>
-              times.filterGt(Some(start)).filterLt(Some(end)).insert(start).insert(end).toList.sliding(2).forall {
-                case List(s, e) =>
+              val validTimes = times.filterGt(Some(start)).filterLt(Some(end)).insert(start).insert(end).toList
+              validTimes.zip(validTimes.tail).forall {
+                case (s, e) =>
                   val gap = Duration.ofMillis(e.toEpochMilli - s.toEpochMilli)
                   gap.compareTo(MaxGap) <= 0
                 case _          =>
@@ -133,23 +134,23 @@ object TcsEphemerisExport {
           up      <- upToDate(relevant)
           expired  = relevant.difference(up)
         } yield FilePartition(
-          Expired(expired),
-          Extra(all.difference(relevant)),
-          Missing(hids.difference(all)),
-          UpToDate(up))
+                  Expired(expired),
+                  Extra(all.difference(relevant)),
+                  Missing(hids.difference(all)),
+                  UpToDate(up))
       }
 
       def update(hids: ISet[HorizonsDesignation]): TryExport[HorizonsDesignation ==>> (ExportError \/ Path)] =
         for {
           part      <- partition(hids)
           _         <- files.deleteAll(part.extra.hids.union(part.expired.hids))
-          upToDate   = ==>>.fromList(part.upToDate.hids.toList.map(hid => (hid, files.path(hid).right[ExportError])))
+          upToDate   = ==>>.fromList(part.upToDate.hids.toList.fproduct(files.path(_).right[ExportError]))
           refreshed <- write(part.expired.hids.union(part.missing.hids))
         } yield upToDate.union(refreshed)
 
       def write(hids: ISet[HorizonsDesignation]): TryExport[HorizonsDesignation ==>> (ExportError \/ Path)] = {
         // HorizonsDesignation ==>> TryExport[File]
-        val exportMap = ==>>.fromList(hids.toList.map(hid => (hid, writeOne(hid))))
+        val exportMap = ==>>.fromList(hids.toList.fproduct(writeOne))
 
         // IO[HorizonsDesignation ==>> (ExportError \/ Path)]
         val exportOp = exportMap.traverse(_.run)
