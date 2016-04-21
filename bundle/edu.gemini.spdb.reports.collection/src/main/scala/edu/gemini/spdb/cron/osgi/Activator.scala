@@ -1,6 +1,6 @@
 package edu.gemini.spdb.cron.osgi
 
-import edu.gemini.dbTools.ephemeris.TcsEphemerisExport
+import edu.gemini.dbTools.ephemeris.TcsEphemerisCron
 import org.osgi.framework.{BundleContext, BundleActivator}
 import org.osgi.util.tracker.ServiceTracker
 import edu.gemini.util.osgi.Tracker._
@@ -39,7 +39,7 @@ class Activator extends BundleActivator {
          "odbMail"        -> OdbMailAgent.run,
          "weather"        -> new WeatherUpdater(c).run,
          "archive"        -> Archiver.run(c),
-         "ephemeris"      -> TcsEphemerisExport.run(c))
+         "ephemeris"      -> TcsEphemerisCron.run(c))
 
   var tracker: ServiceTracker[HttpService, HttpService] = null
 

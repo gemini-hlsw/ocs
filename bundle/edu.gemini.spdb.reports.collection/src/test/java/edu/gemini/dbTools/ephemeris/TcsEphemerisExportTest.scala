@@ -1,136 +1,108 @@
 package edu.gemini.dbTools.ephemeris
 
-import edu.gemini.skycalc.{JulianDate, TwilightBoundedNight}
+import edu.gemini.skycalc.{Night, TwilightBoundedNight}
 import edu.gemini.skycalc.TwilightBoundType.NAUTICAL
 import edu.gemini.spModel.core.HorizonsDesignation.MajorBody
-import edu.gemini.spModel.core.{Angle, RightAscension, Declination, Coordinates, Site}
+import edu.gemini.spModel.core.{Coordinates, HorizonsDesignation, Site}
+import org.scalacheck.Prop
+
+import org.specs2.ScalaCheck
+import org.specs2.mutable.Specification
 
 import java.nio.file.{Path, Files}
-import java.security.Principal
-import java.text.SimpleDateFormat
 import java.time.Instant
-import java.util.{Locale, TimeZone}
-import java.util.function.Consumer
-import java.util.logging.Logger
+import java.util.logging.{Level, Logger}
 
 import scala.collection.JavaConverters._
-import scala.util.Random
-import scala.util.parsing.combinator._
+import scala.collection.immutable.NumericRange
 import scalaz._, Scalaz._
 
-object TcsEphemerisExportTest extends TestSupport {
+object TcsEphemerisExportTest extends Specification with ScalaCheck with Arbitraries {
   val log   = Logger.getLogger(TcsEphemerisExport.getClass.getName)
   val site  = Site.GS
   val night = TwilightBoundedNight.forTime(NAUTICAL, Instant.now.toEpochMilli, site)
 
-  def withTempDir(f: Path => Boolean): Boolean = {
-    val dir = Files.createTempDirectory(s"tcsEphemerisExportTest-${Random.nextLong()}")
+  import TcsEphemerisExport.{Expired, Extra, Missing, UpToDate, FilePartition}
+
+  def hid(i: Int): HorizonsDesignation =
+    MajorBody(i)
+
+  def hidSet(ids: HorizonsDesignation*): ISet[HorizonsDesignation] =
+    ISet.fromList(ids.toList)
+
+  val hid0 = hid(0)
+  val hid1 = hid(1)
+
+  def delete(f: Path): Unit = {
+    if (Files.isDirectory(f)) {
+      Files.list(f).iterator.asScala.foreach(delete)
+    }
+    Files.delete(f)
+  }
+
+  def runTest(hids: ISet[HorizonsDesignation], ems: HorizonsDesignation ==>> EphemerisMap, expected: FilePartition): Boolean = {
+    val dir = Files.createTempDirectory("TcsEphemeris")
+
+    val ex  = TcsEphemerisExport(dir, night, site)
+    val ef  = EphemerisFiles(dir)
+
     try {
-      f(dir)
+      val action = for {
+        _ <- ems.toList.traverseU { case (hid, em) => ef.write(hid, em) }
+        p <- ex.partition(hids)
+      } yield p
+
+      action.run.unsafePerformIO() match {
+        case -\/(err) =>
+          val (msg, ex) = err.report
+          log.log(Level.WARNING, msg, ex.orNull)
+          err.log(log)
+          throw ex.getOrElse(new RuntimeException())
+
+        case \/-(actual) =>
+          actual == expected
+      }
     } finally {
-      Files.list(dir).forEach(new Consumer[Path] {
-        override def accept(t: Path): Unit = Files.delete(t)
-      })
-      Files.delete(dir)
+      delete(dir)
     }
   }
 
-  case class EpElem(time: Long, julian: JulianDate, coords: Coordinates, raTrack: Double, decTrack: Double)
-
-  object Parser extends JavaTokenParsers {
-    override val whiteSpace = """[ \t]+""".r
-
-    val SOE: Parser[String] = "$$SOE"
-    val EOE: Parser[String] = "$$EOE"
-
-    object Date {
-      val Format = new SimpleDateFormat(TcsEphemerisExport.DateFormatString, Locale.US) {
-        setTimeZone(TimeZone.getTimeZone("UTC"))
-      }
-      def parse(utc: String): Long = synchronized {
-        Format.parse(utc).getTime
-      }
-    }
-
-    val eol: Parser[Any]     = """(\r?\n)""".r
-    val soeLine: Parser[Any] = SOE~eol
-    val eoeLine: Parser[Any] = EOE
-
-    val UtcEx = """\d{4}-[a-zA-Z]{3}-\d{1,2}\s+\d{1,2}:\d{1,2}""".r
-    val utc: Parser[Long]             = UtcEx ^^ { x => Date.parse(x) }
-    val julian: Parser[JulianDate]    = decimalNumber ^^ { dn => new JulianDate(dn.toDouble) }
-
-    val sign: Parser[String]          = """[-+]?""".r
-    val signedDecimal: Parser[Double] = sign~decimalNumber ^^ {
-      case "-"~d => -d.toDouble
-      case s~d   => d.toDouble
-    }
-
-    val raTrack: Parser[Double]     = signedDecimal
-    val decTrack: Parser[Double]    = signedDecimal
-
-    def coord[T](f: (String, Int, Int, Double) => Option[T]): Parser[Option[T]] =
-      sign~wholeNumber~wholeNumber~decimalNumber ^^ { case sn~h~m~s => f(sn, h.toInt, m.toInt, s.toDouble) }
-
-    def toRa(sign: String, h: Int, m: Int, s: Double): Option[RightAscension] =
-      Angle.parseHMS(s"$sign$h:$m:$s").toOption.map(RightAscension.fromAngle)
-
-    def toDec(sign: String, d: Int, m: Int, s: Double): Option[Declination] =
-      Angle.parseDMS(s"$sign$d:$m:$s").toOption.flatMap(Declination.fromAngle)
-
-    def ra: Parser[Option[RightAscension]] = coord(toRa)
-    def dec: Parser[Option[Declination]]   = coord(toDec)
-
-    val coords: Parser[Coordinates] = ra~dec ^? {
-      case Some(r)~Some(d) => Coordinates(r, d)
-    }
-
-    val ephemerisLine: Parser[EpElem]       = utc~julian~coords~raTrack~decTrack<~eol ^^ {
-      case u~j~c~r~d => EpElem(u, j, c, r, d)
-    }
-    val ephemerisList: Parser[List[EpElem]] = rep1(ephemerisLine)
-
-    val ephemeris: Parser[List[EpElem]] = soeLine~>ephemerisList<~eoeLine
-
-    private def dump(input: String): Unit =
-      println(input.split("\n").zipWithIndex.map(_.swap).map{
-        case (num, s) => f"${num+1}%3d $s"
-      }.mkString("\n"))
-
-    def read(file: Path): String \/ List[EpElem] = {
-      val lines = Files.readAllLines(file)
-      val input = lines.asScala.mkString("\n")
-
-      parse(ephemeris, input) match {
-        case Success(l, _)     =>
-          val expected = lines.size - 2  // removing 2 for SOE and EOE
-          if (l.size == expected) l.right
-          else s"Expected $expected results, but found ${l.size}".left
-        case NoSuccess(msg, n) =>
-          s"$msg: line=${n.pos.line}, col=${n.pos.column}".left
-      }
-    }
-  }
 
   "TcsEphemerisExport" should {
-    "export parseable ephemeris files" in {
-      withTempDir { dir =>
-        val exp = new TcsEphemerisExport(dir.toFile, night, site, null, java.util.Collections.emptySet[Principal])
-        exp.exportOne(dir.toFile, MajorBody(606)).run.unsafePerformIO() match {
-          case -\/(err)  =>
-            TcsEphemerisExport.ExportError.logError(err, log, "")
-            false
-          case \/-(file) =>
-            Parser.read(file.toPath) match {
-              case -\/(msg) =>
-                sys.error(msg)
-                false
-              case \/-(_)   =>
-                true
-            }
+    "partition ephemeris files" in {
+      def ephemerisMap(n: Night, mins: Int): EphemerisMap =
+        (==>>.empty[Instant, EphemerisElement]/:NumericRange.inclusive(n.getStartTime, n.getEndTime, mins * 60000l)) { (m, t) =>
+          m.insert(Instant.ofEpochMilli(t), (Coordinates.zero, 0.0, 0.0))
         }
+
+      val tonightMap   = ephemerisMap(night, 1)
+      val yesterdayMap = ephemerisMap(night.previous(), 1)
+      val sparseMap    = ephemerisMap(night, 30)
+
+      def count(i: Int): Int = Math.abs(i % 5)
+
+      Prop.forAll { (i0: Int, i1: Int, i2: Int, i3: Int) =>
+        val ranges = List(i0, i1, i2, i3).scanLeft(0)((a,b) => a + count(b)).sliding(2)
+        val hids   = ranges.map { case List(start, end) =>
+                       (start until end).map(i => MajorBody(i): HorizonsDesignation).toList
+                     }.toList
+
+        val List(expired, extra, missing, upToDate) = hids
+
+        // Create ephemeris maps corresponding to the various categories.
+        val expiredMaps  = ==>>.fromList(expired.zipWithIndex.map { case (hid, i) => (hid, (i%2 == 0) ? yesterdayMap | sparseMap) })
+        val extraMaps    = ==>>.fromList(extra.map    { hid => (hid, tonightMap) })
+        val upToDateMaps = ==>>.fromList(upToDate.map { hid => (hid, tonightMap )})
+
+        val expiredHids  = ISet.fromList(expired)
+        val extraHids    = ISet.fromList(extra)
+        val missingHids  = ISet.fromList(missing)
+        val upToDateHids = ISet.fromList(upToDate)
+
+        runTest(expiredHids.union(missingHids).union(upToDateHids),  // none of the "extra" ids
+                expiredMaps.union(extraMaps).union(upToDateMaps),    // none of the "missing" ids
+                FilePartition(Expired(expiredHids), Extra(extraHids), Missing(missingHids), UpToDate(upToDateHids)))
       }
     }
   }
-
 }
