@@ -289,10 +289,12 @@ def cquiroz(version: Version) = AppConfig(
     "edu.gemini.spdb.dir"                  -> "/Users/cquiroz/.spdb/",
     "edu.gemini.auxfile.root"              -> "/Users/cquiroz/.auxfile",
     "edu.gemini.dataman.gsa.summit.host"   -> "cpofits-lv1new.cl.gemini.edu",
+    "edu.gemini.services.server.start"     -> "false",
     "edu.gemini.util.trpc.name"            -> "Carlos's ODB (Test)",
     "edu.gemini.auxfile.fits.dest"         -> "/gemsoft/var/data/ictd/test/GS@SEMESTER@/@PROG_ID@",
     "edu.gemini.auxfile.other.dest"        -> "/gemsoft/var/data/finder/GSqueue/Finders-Test/@SEMESTER@/@PROG_ID@",
-    "edu.gemini.auxfile.fits.host"         -> "gsconfig.gemini.edu"
+    "edu.gemini.auxfile.fits.host"         -> "gsconfig.gemini.edu",
+    "edu.gemini.smartgcal.host"            -> "localhost"
   )
 ) extending List(with_gogo(version), cquiroz_credentials(version))
 
