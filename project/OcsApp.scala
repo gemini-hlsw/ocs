@@ -47,6 +47,10 @@ trait OcsApp { this: OcsBundle =>
     bundle_edu_gemini_qpt_client
   )
 
+  lazy val app_seqexec_server = project.in(file("app/seqexec-server")).dependsOn(
+    bundle_edu_gemini_seqexec_server
+  )
+
   lazy val app_spdb = project.in(file("app/spdb")).dependsOn(
     bundle_edu_gemini_catalog,
     bundle_edu_gemini_p2checker,
@@ -75,6 +79,10 @@ trait OcsApp { this: OcsBundle =>
     bundle_edu_gemini_itc
   )
 
+//  lazy val app_seqexec = project.in(file("app/seqexec")).dependsOn(
+//    bundle_edu_gemini_seqexec_client
+//  )
+
   lazy val app_weather = project.in(file("app/weather")).dependsOn(
     bundle_edu_gemini_shared_ca,
     bundle_edu_gemini_spdb_reports_collection
@@ -101,6 +109,7 @@ trait OcsApp { this: OcsBundle =>
     bundle_edu_gemini_qpt_server,
     bundle_edu_gemini_qpt_shared,
     bundle_edu_gemini_qv_plugin,
+    bundle_edu_gemini_seqexec_server,
     bundle_edu_gemini_services_client,
     bundle_edu_gemini_services_server,
     bundle_edu_gemini_shared_ca,
