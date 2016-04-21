@@ -50,7 +50,7 @@ package object core {
     /** Construct an exact or interpolated slice. */
     def iSlice(lo: K, hi: K): Option[K ==>> V] =
       ^(iLookup(lo), iLookup(hi)) { (lov, hiv) =>
-        m.trim(O(_, lo), O(_, hi)) + (lo -> lov) + (hi -> hiv)
+        m.filterWithKey((k, _) => O.greaterThanOrEqual(k, lo) && O.lessThanOrEqual(k, hi)) + (lo -> lov) + (hi -> hiv)
       }
 
     /** Construct a table of (K, V) values on the given interval. */

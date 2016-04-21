@@ -3,14 +3,18 @@ package jsky.app.ot.tpe.feat
 import java.awt.font.TextLayout
 import java.awt.geom.{Line2D, GeneralPath}
 import java.awt.geom.Point2D.{ Double => Point }
-import java.awt.{ Graphics2D, Color, Graphics }
+import java.awt.{ Graphics2D, Color, Graphics}
+import java.awt.RenderingHints._
 import java.text.SimpleDateFormat
 import java.util.{ Date, TimeZone }
 
+import edu.gemini.pot.sp.ISPObservation
 import edu.gemini.spModel.core._
+import edu.gemini.spModel.obs.plannedtime.PlannedTimeCalculator
 import jsky.app.ot.tpe.{TpeContext, TpeImageFeature, TpeImageFeatureCategory, TpeImageInfo}
 import jsky.coords.CoordinateConverter.{ WORLD, SCREEN }
 
+import scala.collection.JavaConverters._
 import scalaz._, Scalaz._
 
 class TpeEphemerisFeature extends TpeImageFeature("Ephemeris", "Show interpolated ephemeris.") {
@@ -27,22 +31,65 @@ class TpeEphemerisFeature extends TpeImageFeature("Ephemeris", "Show interpolate
       p
     }.toOption
 
-  def getScreenEphemeris: ScreenEphemeris =
+  def toScreenEphemeris(e: Ephemeris): ScreenEphemeris =
+    e.toList.flatMap { case (t, c) => toScreenCoordinates(c).strengthL(t) }
+
+  def getEphemeris: Ephemeris =
     getContext.targets.base
       .flatMap(_.getNonSiderealTarget)
-      .fold(Ephemeris.empty)(_.ephemeris).toList
-      .flatMap { case (t, c) => toScreenCoordinates(c).strengthL(t) }
+      .fold(Ephemeris.empty)(_.ephemeris)
 
-  def draw(g: Graphics, tii: TpeImageInfo): Unit = {
+  def getScreenEphemeris: ScreenEphemeris =
+    toScreenEphemeris(getEphemeris)
+
+  def obsTime: Option[Long] =
+    getContext.schedulingBlock.flatMap(_.duration) orElse
+    getContext.obsShell.map(remainingTime)
+
+  def obsScreenEphemeris: Option[ScreenEphemeris] =
+    for {
+      lo <- getContext.schedulingBlockStart
+      hi <- obsTime.map(_ + lo)
+      e  <- getEphemeris.iSlice(lo, hi)
+    } yield toScreenEphemeris(e)
+
+  def draw(g: Graphics, tii: TpeImageInfo): Unit =
+    draw2D(g.asInstanceOf[Graphics2D])
+
+  def draw2D(g: Graphics2D): Unit = {
+
+    // This seems to help
+    g.setRenderingHint(KEY_ANTIALIASING,      VALUE_ANTIALIAS_ON)
+    g.setRenderingHint(KEY_RENDERING,         VALUE_RENDER_QUALITY)
+    g.setRenderingHint(KEY_TEXT_ANTIALIASING, VALUE_TEXT_ANTIALIAS_ON)
+
+    // Save these
     val origColor = g.getColor
     val origFont  = g.getFont
+
     g.setColor(Color.RED)
     g.setFont(TpeImageFeature.FONT)
+
+    // The main ephemeris track
     val se = getScreenEphemeris
-    drawTrack (g.asInstanceOf[Graphics2D], se)
-    drawLabels(g.asInstanceOf[Graphics2D], se)
+    drawTrack (g, se)
+    drawLabels(g, se)
+
+    // Highlighted track for remainder of observation, and label at the last point
+    // on the highlighted track.
+    obsScreenEphemeris.foreach { se =>
+      g.setColor(Color.GREEN)
+      drawTrack(g, se)
+      se.takeRight(2) match {
+        case List((_, p1), (t, p2)) => drawLabel(g, t, p2, ang(p1, p2))
+        case _ => // degenerate ephemeris; no track was drawn, ignore
+      }
+    }
+
+    // Restore old values
     g.setColor(origColor)
     g.setFont(origFont)
+    
   }
 
   def drawTrack(g: Graphics2D, e: ScreenEphemeris): Unit =
@@ -64,17 +111,21 @@ class TpeEphemerisFeature extends TpeImageFeature("Ephemeris", "Show interpolate
 
     // Draw a tick mark and label at each remaining point.
     sparse.foreach { case (t, point, angle) =>
-      val layout = new TextLayout(formatDate(t), g.getFont, g.getFontRenderContext)
-      g.translate(point.x,  point.y)
-      g.rotate(angle)
-      g.draw(new Line2D.Double(-TickSize, 0.0, TickSize, 0.0))
-      g.translate(TickSize * 2, TickSize)
-      layout.draw(g, 0, 0)
-      g.translate(-TickSize * 2, -TickSize)
-      g.rotate(- angle)
-      g.translate(-point.x, -point.y)
+      drawLabel(g, t, point, angle)
     }
 
+  }
+
+  def drawLabel(g: Graphics2D, t: Long, point: Point, angle: Double): Unit = {
+    val layout = new TextLayout(formatDate(t), g.getFont, g.getFontRenderContext)
+    g.translate(point.x,  point.y)
+    g.rotate(angle)
+    g.draw(new Line2D.Double(-TickSize, 0.0, TickSize, 0.0))
+    g.translate(TickSize * 2, TickSize)
+    layout.draw(g, 0, 0)
+    g.translate(-TickSize * 2, -TickSize)
+    g.rotate(- angle)
+    g.translate(-point.x, -point.y)
   }
 
 }
@@ -128,5 +179,13 @@ object TpeEphemerisFeature {
       path
     }
   }
+
+  def remainingTime(ispObservation: ISPObservation): Long =
+    PlannedTimeCalculator.instance
+      .calc(ispObservation)
+      .steps.asScala
+      .filterNot(_.executed)
+      .map(_.totalTime)
+      .sum
 
 }
