@@ -1,9 +1,9 @@
-package edu.gemini.seqexec.shared.osgi
+package edu.gemini.seqexec.odb.osgi
 
 import java.util
 
 import edu.gemini.pot.spdb.IDBDatabaseService
-import edu.gemini.seqexec.shared.{SeqExecService, SeqExecServer}
+import edu.gemini.seqexec.odb.{SeqExecService, SeqExecServer}
 import org.osgi.framework.{ServiceRegistration, BundleContext, BundleActivator}
 
 import edu.gemini.util.osgi.Tracker._

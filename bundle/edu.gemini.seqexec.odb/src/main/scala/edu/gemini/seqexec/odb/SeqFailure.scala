@@ -1,4 +1,4 @@
-package edu.gemini.seqexec.shared
+package edu.gemini.seqexec.odb
 
 import edu.gemini.pot.sp.SPObservationID
 

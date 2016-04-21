@@ -1,8 +1,8 @@
-package edu.gemini.seqexec.shared
+package edu.gemini.seqexec.odb
 
 import edu.gemini.pot.sp.{ISPObservation, SPObservationID}
 import edu.gemini.pot.spdb.IDBDatabaseService
-import edu.gemini.seqexec.shared.SeqFailure.MissingObservation
+import edu.gemini.seqexec.odb.SeqFailure.MissingObservation
 import edu.gemini.spModel.config.ConfigBridge
 import edu.gemini.spModel.config.map.ConfigValMapInstances.IDENTITY_MAP
 import edu.gemini.spModel.config2.ConfigSequence
