@@ -234,21 +234,8 @@ trait OcsBundle {
       bundle_jsky_elevation_plot
     )
 
-  lazy val bundle_edu_gemini_seqexec_server = 
-    project.in(file("bundle/edu.gemini.seqexec.server")).dependsOn(
-      bundle_edu_gemini_pot,
-      bundle_edu_gemini_seqexec_shared,
-      bundle_edu_gemini_shared_util,
-      bundle_edu_gemini_spModel_core,
-      bundle_edu_gemini_spModel_pio,
-      bundle_edu_gemini_util_trpc,
-      bundle_edu_gemini_epics_acm,
-      bundle_jsky_coords,
-      bundle_jsky_util
-    )
-
-  lazy val bundle_edu_gemini_seqexec_shared = 
-    project.in(file("bundle/edu.gemini.seqexec.shared")).dependsOn(
+  lazy val bundle_edu_gemini_seqexec_odb = 
+    project.in(file("bundle/edu.gemini.seqexec.odb")).dependsOn(
       bundle_edu_gemini_pot,
       bundle_edu_gemini_shared_util,
       bundle_edu_gemini_spModel_core,
