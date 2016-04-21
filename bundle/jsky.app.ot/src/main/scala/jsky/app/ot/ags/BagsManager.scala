@@ -7,7 +7,6 @@ import java.util.concurrent.TimeoutException
 import java.util.concurrent._
 import java.util.logging.{Level, Logger}
 
-import edu.gemini.ags.api.AgsStrategy.Assignment
 import edu.gemini.ags.api.{AgsHash, AgsRegistrar, AgsStrategy}
 import edu.gemini.catalog.votable.{CatalogException, GenericError}
 import edu.gemini.pot.sp._
@@ -46,13 +45,15 @@ final class BagsManager(executorService: ExecutorService) {
   }
 
   /** Our state is just a set of programs to watch, and a set of pending keys. */
-  private case class BagsState(programs: Set[SPProgramID], keys: Set[SPNodeKey]) {
+  private case class BagsState(programs: Set[SPProgramID], keys: Set[SPNodeKey], statuses: Map[SPNodeKey,BagsStatus]) {
     def +(key: SPNodeKey): BagsState = copy(keys = keys + key)
     def -(key: SPNodeKey): BagsState = copy(keys = keys - key)
     def +(pid: SPProgramID): BagsState = copy(programs = programs + pid)
     def -(pid: SPProgramID): BagsState = copy(programs = programs - pid)
+    def setStatus(key: SPNodeKey, status: BagsStatus): BagsState = copy(statuses = statuses + ((key, status)))
+    def clearStatus(key: SPNodeKey): BagsState = copy(statuses = statuses - key)
   }
-  @volatile private var state: BagsState = BagsState(Set.empty, Set.empty)
+  @volatile private var state: BagsState = BagsState(Set.empty, Set.empty, Map.empty)
 
   // Setup an LRU cache with max entries BagsManager.CacheSize
   private val hashes = new util.LinkedHashMap[SPNodeKey, Int](math.ceil((BagsManager.CacheSize + 1) * 1.334).toInt, 0.75f, true) {
@@ -141,6 +142,21 @@ final class BagsManager(executorService: ExecutorService) {
 
         val key = obs.getNodeKey
         state += key
+
+        def status(newStatus: BagsStatus): Unit = {
+          val oldStatusOpt = state.statuses.get(key)
+          if (!oldStatusOpt.exists(_.equals(newStatus))) {
+            state = state.setStatus(key, newStatus)
+            notifyBagsStatusListeners(observation, oldStatusOpt, Some(newStatus))
+          }
+        }
+        def clearStatus(): Unit = {
+          state.statuses.get(key).foreach(oldStatus => {
+            state = state.clearStatus(key)
+            notifyBagsStatusListeners(observation, Some(oldStatus), None)
+          })
+        }
+
         Future {
           // If dequeue is false this means that (a) another task scheduled *after* me ended up
           // running before me, so their result is as good as mine would have been and we're done;
@@ -216,6 +232,26 @@ final class BagsManager(executorService: ExecutorService) {
         case _                             => // Ignore
       }
   }
+
+  /** BAGS status changes. **/
+  def bagsStatus(key: SPNodeKey): Option[BagsStatus] =
+    synchronized(state.statuses.get(key))
+
+  /** Listeners for BAGS status changes. **/
+  private var listeners: List[BagsStatusListener] = Nil
+
+  def addBagsStatusListener(l: BagsStatusListener): Unit =
+    if (!listeners.contains(l))
+      listeners = l :: listeners
+
+  def removeBagsStatusListener(l: BagsStatusListener): Unit =
+    listeners = listeners.filterNot(_ == l)
+
+  def clearBagsStatusListeners(): Unit =
+    listeners = Nil
+
+  private def notifyBagsStatusListeners(obs: ISPObservation, oldStatus: Option[BagsStatus], newStatus: Option[BagsStatus]): Unit =
+    listeners.foreach(l => Try { l.bagsStatusChanged(obs, oldStatus.asGeminiOpt, newStatus.asGeminiOpt) } )
 }
 
 object BagsManager {
@@ -271,7 +307,7 @@ object BagsManager {
 
       // Change the pos angle as appropriate if this is the auto group.
       selOpt.foreach { sel =>
-        if (newEnv.getPrimaryGuideGroup().isAutomatic && selOpt.isDefined) {
+        if (newEnv.getPrimaryGuideGroup.isAutomatic && selOpt.isDefined) {
           ctx.instrument.dataObject.foreach { inst =>
             val deg = sel.posAngle.toDegrees
             val old = inst.getPosAngleDegrees
