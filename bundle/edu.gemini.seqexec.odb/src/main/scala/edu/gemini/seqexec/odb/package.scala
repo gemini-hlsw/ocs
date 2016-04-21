@@ -2,6 +2,6 @@ package edu.gemini.seqexec
 
 import scalaz._
 
-package object shared {
+package object odb {
   type TrySeq[A] = SeqFailure \/ A
 }

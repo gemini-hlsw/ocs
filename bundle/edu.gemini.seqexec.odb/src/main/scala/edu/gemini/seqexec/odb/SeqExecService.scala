@@ -1,7 +1,7 @@
-package edu.gemini.seqexec.shared
+package edu.gemini.seqexec.odb
 
 import edu.gemini.pot.sp.SPObservationID
-import edu.gemini.seqexec.shared.SeqFailure.SeqException
+import edu.gemini.seqexec.odb.SeqFailure.SeqException
 
 
 import edu.gemini.spModel.config2.ConfigSequence
