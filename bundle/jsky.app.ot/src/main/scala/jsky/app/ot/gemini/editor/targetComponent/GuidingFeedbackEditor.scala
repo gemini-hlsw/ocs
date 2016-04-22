@@ -9,7 +9,7 @@ import edu.gemini.spModel.rich.shared.immutable._
 import edu.gemini.spModel.target.SPTarget
 import jsky.app.ot.OT
 import jsky.app.ot.ags.BagsManager
-import jsky.app.ot.gemini.editor.targetComponent.GuidingFeedback2.BagsStatusRow
+import jsky.app.ot.gemini.editor.targetComponent.GuidingFeedback.BagsStatusRow
 
 
 class GuidingFeedbackEditor extends TelescopePosEditor {
@@ -30,7 +30,8 @@ class GuidingFeedbackEditor extends TelescopePosEditor {
       // If the BAGS row is defined, then use it. If not, create the rows corresponding to the analysis.
       // NOTE that is target.isTooTarget, we don't want an analysis.
       bagsRow.fold(
-        ctxOpt.asScalaOpt.map(GuidingFeedback.targetAnalysis(_, mt, target)).getOrElse(Nil)
+        if (target.isTooTarget) Nil
+        else ctxOpt.asScalaOpt.map(GuidingFeedback.targetAnalysis(_, mt, target)).getOrElse(Nil)
       )(List(_))
     }
 

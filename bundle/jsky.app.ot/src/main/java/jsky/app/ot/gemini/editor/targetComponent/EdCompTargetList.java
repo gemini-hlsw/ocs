@@ -103,6 +103,11 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         });
 
         _agsPub.subscribe((obs, oldOptions, newOptions) -> updateGuiding());
+
+        BagsManager.instance().addBagsStatusListener((obs, oldStatus, newStatus) -> {
+            if (obs == getContextObservation())
+                updateGuiding();
+        });
     }
 
     @Override protected void updateEnabledState(final boolean enabled) {
