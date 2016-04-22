@@ -258,17 +258,29 @@ final class BagsManager(executorService: ExecutorService) {
   private var listeners: List[BagsStatusListener] = Nil
 
   def addBagsStatusListener(l: BagsStatusListener): Unit =
-    if (!listeners.contains(l))
-      listeners = l :: listeners
+    listeners.synchronized {
+      if (!listeners.contains(l))
+        listeners = l :: listeners
+    }
 
   def removeBagsStatusListener(l: BagsStatusListener): Unit =
-    listeners = listeners.filterNot(_ == l)
+    listeners.synchronized {
+      listeners = listeners.diff(List(l))
+    }
 
   def clearBagsStatusListeners(): Unit =
-    listeners = Nil
+    listeners.synchronized {
+      listeners = Nil
+    }
 
-  private def notifyBagsStatusListeners(obs: ISPObservation, oldStatus: Option[BagsStatus], newStatus: Option[BagsStatus]): Unit =
-    listeners.foreach(l => Try { l.bagsStatusChanged(obs, oldStatus.asGeminiOpt, newStatus.asGeminiOpt) } )
+  private def notifyBagsStatusListeners(obs: ISPObservation, oldStatus: Option[BagsStatus], newStatus: Option[BagsStatus]): Unit = {
+    val immutableListenerList = listeners
+    Swing.onEDT {
+      immutableListenerList.foreach(l => Try {
+        l.bagsStatusChanged(obs, oldStatus.asGeminiOpt, newStatus.asGeminiOpt)
+      })
+    }
+  }
 }
 
 object BagsManager {
