@@ -11,9 +11,10 @@ import edu.gemini.spModel.guide.GuideSpeed._
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.env.TargetEnvironment
-import jsky.app.ot.util.OtColor
+import jsky.app.ot.ags.BagsStatus
+import jsky.app.ot.util.{Resources, OtColor}
 
-import java.awt.Color.DARK_GRAY
+import java.awt.Color._
 import javax.swing.BorderFactory
 
 import scala.collection.JavaConverters._
@@ -49,7 +50,38 @@ object GuidingFeedback {
       s"${lim(sat)} $le FAST $le ${lim(fast)} < MEDIUM $le ${lim(medium)} < SLOW $le ${lim(slow)}"
   }
 
-  case class Row(analysis: AgsAnalysis, probeLimits: Option[ProbeLimits], includeProbeName: Boolean) extends GridBagPanel {
+  sealed trait Row extends GridBagPanel {
+    protected val labelBorder = BorderFactory.createEmptyBorder(2, 2, 2, 2)
+  }
+
+  case class BagsStatusRow(bagsStatus: BagsStatus) extends Row {
+    private val bgColor = bagsStatus match {
+      case BagsStatus.Pending | BagsStatus.Running => BANANA
+      case BagsStatus.Failed(_)                    => LIGHT_SALMON
+    }
+
+    private val statusIcon = bagsStatus match {
+      case BagsStatus.Pending | BagsStatus.Running => Resources.getIcon("ajax-loader.gif")
+      case BagsStatus.Failed(_)                    => null
+    }
+
+    object feedbackLabel extends Label {
+      border              = labelBorder
+      foreground          = DARK_GRAY
+      background          = bgColor
+      text                = bagsStatus.message
+      icon                = statusIcon
+      opaque              = true
+      horizontalAlignment = Alignment.Left
+    }
+
+    layout(feedbackLabel) = new Constraints {
+      weightx = 1.0
+      fill    = Fill.Both
+    }
+  }
+
+  case class AnalysisRow(analysis: AgsAnalysis, probeLimits: Option[ProbeLimits], includeProbeName: Boolean) extends Row {
     val bg = analysis.quality match {
       case DeliversRequestedIq   => HONEY_DEW
       case PossibleIqDegradation => BANANA
@@ -57,8 +89,6 @@ object GuidingFeedback {
       case PossiblyUnusable      => TANGERINE
       case Unusable              => LIGHT_SALMON
     }
-
-    val labelBorder = BorderFactory.createEmptyBorder(2, 2, 2, 2)
 
     object feedbackLabel extends Label {
       border     = labelBorder
@@ -126,7 +156,7 @@ object GuidingFeedback {
   }
 
   // GuidingFeedback.Rows corresponding to the observation as a whole.
-  def obsAnalysis(ctx: ObsContext, mt: MagnitudeTable): List[Row] = {
+  def obsAnalysis(ctx: ObsContext, mt: MagnitudeTable): List[AnalysisRow] = {
     AgsRegistrar.currentStrategy(ctx).map { strategy =>
       val (calcTable, analysis, probeBands) = (strategy.magnitudes(ctx, mt).toMap, strategy.analyze(ctx, mt), strategy.probeBands)
       val probeLimitsMap = calcTable.mapValues(ProbeLimits(probeBands, ctx, _))
@@ -136,7 +166,7 @@ object GuidingFeedback {
           gp <- AgsAnalysis.guideProbe(a)
           pl <- probeLimitsMap.get(gp).flatten
         } yield pl
-        Row(a, plo, includeProbeName = true)
+        AnalysisRow(a, plo, includeProbeName = true)
       }
     }.getOrElse(Nil)
   }
@@ -155,26 +185,26 @@ object GuidingFeedback {
   def targetAnalysis(ctx: ObsContext, mt: MagnitudeTable, target: SPTarget): List[Row] = {
     val env = ctx.getTargets
     if (target == env.getBase) baseAnalysis(ctx, mt)
-    else guideProbe(env, target).fold(List.empty[Row]) { vgp =>
+    else guideProbe(env, target).fold(List.empty[AnalysisRow]) { vgp =>
       guideStarAnalysis(ctx, mt, vgp, target).toList
     }
   }
 
   // GuidingFeedback.Rows corresponding to global errors like missing guide
   // stars.
-  def baseAnalysis(ctx: ObsContext, mt: MagnitudeTable): List[Row] =
-    AgsRegistrar.currentStrategy(ctx).fold(List.empty[Row]) { s =>
+  def baseAnalysis(ctx: ObsContext, mt: MagnitudeTable): List[AnalysisRow] =
+    AgsRegistrar.currentStrategy(ctx).fold(List.empty[AnalysisRow]) { s =>
       s.analyze(ctx, mt).filter {
         case NoGuideStarForGroup(_, _) => true
         case NoGuideStarForProbe(_, _) => true
         case _                         => false
-      }.map { a => Row(a, None, includeProbeName = true) }
+      }.map { a => AnalysisRow(a, None, includeProbeName = true) }
     }
 
   // GuidingFeedback.Row related to the given guide star itself.
-  def guideStarAnalysis(ctx: ObsContext, mt: MagnitudeTable, gp: ValidatableGuideProbe, target: SPTarget): Option[Row] =
+  def guideStarAnalysis(ctx: ObsContext, mt: MagnitudeTable, gp: ValidatableGuideProbe, target: SPTarget): Option[AnalysisRow] =
     AgsRegistrar.currentStrategy(ctx).flatMap(_.analyze(ctx, mt, gp, target.toNewModel).map { a =>
       val plo = mt(ctx, gp).flatMap(ProbeLimits(a.probeBands, ctx, _))
-      Row(a, plo, includeProbeName = false)
+      AnalysisRow(a, plo, includeProbeName = false)
     })
 }

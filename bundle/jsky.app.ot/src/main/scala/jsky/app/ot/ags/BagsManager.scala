@@ -26,7 +26,7 @@ import jsky.app.ot.tpe.{TpeContext, TpeManager}
 import scala.collection.JavaConverters._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.swing.Swing
-import scala.util.{Failure, Success}
+import scala.util.{Failure, Success, Try}
 import scalaz._
 import Scalaz._
 
@@ -157,17 +157,22 @@ final class BagsManager(executorService: ExecutorService) {
           })
         }
 
-        Future {
-          // If dequeue is false this means that (a) another task scheduled *after* me ended up
-          // running before me, so their result is as good as mine would have been and we're done;
-          // or (b) we don't care about that program anymore, so we're done.
-          if (dequeue(key, obs.getProgramID)) {
-            // Otherwise construct an obs context, verify that it's bags-worthy, and go.
-            ObsContext.create(obs).asScalaOpt.foreach { ctx =>
-              val eligibleForBags = isEligibleForBags(ctx)
-              if (eligibleForBags
-                && hasBeenUpdated(obs, ctx)
-                && notObserved(obs)) {
+
+        // If dequeue is false this means that (a) another task scheduled *after* me ended up
+        // running before me, so their result is as good as mine would have been and we're done;
+        // or (b) we don't care about that program anymore, so we're done.
+        clearStatus()
+
+        if (dequeue(key, obs.getProgramID)) {
+          // Otherwise construct an obs context, verify that it's bags-worthy, and go.
+          ObsContext.create(obs).asScalaOpt.foreach { ctx =>
+            val eligibleForBags = isEligibleForBags(ctx)
+            if (eligibleForBags
+              && hasBeenUpdated(obs, ctx)
+              && notObserved(obs)) {
+
+              status(BagsStatus.Pending)
+              Future {
                 //   do the lookup
                 //   on success {
                 //      if we're in the queue again, it means something changed while this task was
@@ -177,6 +182,7 @@ final class BagsManager(executorService: ExecutorService) {
                 //   on failure enqueue again, maybe with a delay depending on the failure
                 val bagsIdMsg = s"BAGS lookup on thread=${Thread.currentThread.getId} for observation=${obs.getObservationID}"
                 LOG.info(s"Performing $bagsIdMsg.")
+                status(BagsStatus.Running)
 
                 AgsRegistrar.currentStrategy(ctx).foreach { strategy =>
                   val fut = strategy.select(ctx, OT.getMagnitudeTable)
@@ -187,29 +193,39 @@ final class BagsManager(executorService: ExecutorService) {
                       if (!state.keys(key)) {
                         LOG.info(s"$bagsIdMsg successful. Results=${opt ? "Yes" | "No"}.")
                         applySwingResults(opt)
+                        clearStatus()
                       }
+
+                    // Note that we have to sleep after reporting a bags failure, as otherwise, there is no time for
+                    // the failure status message to be read before we change back to pending.
 
                     // We don't want to print the stack trace if the host is simply unreachable.
                     // This is reported only as a GenericError in a CatalogException, unfortunately.
                     case Failure(CatalogException((e: GenericError) :: _)) =>
                       LOG.warning(s"$bagsIdMsg failed: ${e.msg}")
+                      status(BagsStatus.Failed("Catalog lookup failed."))
+                      Thread.sleep(3000)
                       enqueue(obs, 5000L)
 
                     // If we timed out, we don't want to delay.
                     case Failure(ex: TimeoutException) =>
                       LOG.warning(s"$bagsIdMsg failed: ${ex.getMessage}")
+                      status(BagsStatus.Failed("Catalog timed out."))
+                      Thread.sleep(3000)
                       enqueue(obs, 0L)
 
                     // For all other exceptions, print the full stack trace.
                     case Failure(ex) =>
                       LOG.log(Level.WARNING, s"$bagsIdMsg} failed.", ex)
+                      status(BagsStatus.Failed(s"${ex.getMessage}."))
+                      Thread.sleep(3000)
                       enqueue(obs, 5000L)
                   }
                 }
-              } else if (!eligibleForBags) {
-                LOG.info(s"${obs.getObservationID} not eligible for BAGS. Clearing auto group.")
-                applySwingResults(None)
               }
+            } else if (!eligibleForBags) {
+              LOG.info(s"${obs.getObservationID} not eligible for BAGS. Clearing auto group.")
+              applySwingResults(None)
             }
           }
         }
