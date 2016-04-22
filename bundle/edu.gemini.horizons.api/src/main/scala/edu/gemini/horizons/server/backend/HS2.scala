@@ -8,8 +8,10 @@ import org.apache.commons.httpclient.methods.GetMethod
 import edu.gemini.horizons.api._
 import java.io.IOException
 import CgiHorizonsConstants._
+import java.time.ZoneOffset.UTC
+import java.time.format.DateTimeFormatter
 import java.util.Date
-import java.text.SimpleDateFormat
+import java.util.Locale.US
 
 import scala.collection.JavaConverters._
 import scala.util.matching.Regex
@@ -81,6 +83,9 @@ object HorizonsService2 {
   def lookupEphemeris(target: HorizonsDesignation, site: Site, start: Date, stop: Date, elems: Int): HS2[Ephemeris] =
     lookupEphemerisE(target, site, start, stop, elems) { _.coords }
 
+  /** Date formatter used for formatting the Horizons start/stop time parameters. */
+  val DateFormat = DateTimeFormatter.ofPattern("yyyy-MMM-dd HH:mm:ss", US).withZone(UTC)
+
   /**
    * Look up the ephemeris for the given target when viewed from the given site, requesting `elems`
    * total elements spread uniformly over the over the given time period. The computed ephemeris may
@@ -89,10 +94,8 @@ object HorizonsService2 {
    */
   def lookupEphemerisE[E](target: HorizonsDesignation, site: Site, start: Date, stop: Date, elems: Int)(ef: EphemerisEntry => Option[E]): HS2[Long ==>> E] = {
 
-    def formatDate(date: Date): String = {
-      val df = new SimpleDateFormat("yyyy-MMM-dd HH:mm:ss")
-      s"'${df.format(date)}'"
-    }
+    def formatDate(date: Date): String =
+      s"'${DateFormat.format(date.toInstant)}'"
 
     def siteCoord(site: Site): String =
       site match {
