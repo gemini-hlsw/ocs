@@ -61,7 +61,7 @@ object GuidingFeedback {
     }
 
     private val statusIcon = bagsStatus match {
-      case BagsStatus.Pending | BagsStatus.Running => Resources.getIcon("ajax-loader.gif")
+      case BagsStatus.Pending | BagsStatus.Running => Resources.getIcon("spinner16.gif")
       case BagsStatus.Failed(_)                    => null
     }
 

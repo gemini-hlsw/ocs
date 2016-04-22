@@ -144,8 +144,9 @@ final class BagsManager(executorService: ExecutorService) {
         state += key
 
         def status(newStatus: BagsStatus): Unit = {
+          Thread.sleep(3000)
           val oldStatusOpt = state.statuses.get(key)
-          if (!oldStatusOpt.exists(_.equals(newStatus))) {
+          if (!oldStatusOpt.contains(newStatus)) {
             state = state.setStatus(key, newStatus)
             notifyBagsStatusListeners(observation, oldStatusOpt, Some(newStatus))
           }
