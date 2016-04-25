@@ -46,9 +46,8 @@ object EphemerisFilesTest extends Specification with ScalaCheck with Arbitraries
   def testRight[T](makeAction: EphemerisFiles => TryExport[T]): T =
     execTest(makeAction) {
       case -\/(err) =>
-        val (msg, ex) = err.report
-        log.log(Level.WARNING, msg, ex.orNull)
-        throw ex.getOrElse(new RuntimeException())
+        log.log(Level.WARNING, err.message, err.exception.orNull)
+        throw err.exception | new RuntimeException()
 
       case \/-(t) =>
         t

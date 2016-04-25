@@ -22,8 +22,6 @@ object TcsEphemerisExportTest extends Specification with ScalaCheck with Arbitra
   val site  = Site.GS
   val night = TwilightBoundedNight.forTime(NAUTICAL, Instant.now.toEpochMilli, site)
 
-  import TcsEphemerisExport.{Expired, Extra, Missing, UpToDate, FilePartition}
-
   def hid(i: Int): HorizonsDesignation =
     MajorBody(i)
 
@@ -40,7 +38,7 @@ object TcsEphemerisExportTest extends Specification with ScalaCheck with Arbitra
     Files.delete(f)
   }
 
-  def runTest(hids: ISet[HorizonsDesignation], ems: HorizonsDesignation ==>> EphemerisMap, expected: FilePartition): Boolean = {
+  def runTest(hids: ISet[HorizonsDesignation], ems: HorizonsDesignation ==>> EphemerisMap, expected: HorizonsDesignation ==>> FileStatus): Boolean = {
     val dir = Files.createTempDirectory("TcsEphemeris")
 
     val ex  = TcsEphemerisExport(dir, night, site)
@@ -54,10 +52,8 @@ object TcsEphemerisExportTest extends Specification with ScalaCheck with Arbitra
 
       action.run.unsafePerformIO() match {
         case -\/(err) =>
-          val (msg, ex) = err.report
-          log.log(Level.WARNING, msg, ex.orNull)
-          err.log(log)
-          throw ex.getOrElse(new RuntimeException())
+          log.log(Level.WARNING, err.message, err.exception.orNull)
+          throw err.exception | new RuntimeException()
 
         case \/-(actual) =>
           actual == expected
@@ -94,14 +90,21 @@ object TcsEphemerisExportTest extends Specification with ScalaCheck with Arbitra
         val extraMaps    = ==>>.fromList(extra.map    { hid => (hid, tonightMap) })
         val upToDateMaps = ==>>.fromList(upToDate.map { hid => (hid, tonightMap )})
 
-        val expiredHids  = ISet.fromList(expired)
-        val extraHids    = ISet.fromList(extra)
-        val missingHids  = ISet.fromList(missing)
-        val upToDateHids = ISet.fromList(upToDate)
+        def statusMap(fs: FileStatus, hids: List[HorizonsDesignation]): HorizonsDesignation ==>> FileStatus =
+          ==>>.fromList(hids.fproduct(Function.const(fs)))
 
-        runTest(expiredHids.union(missingHids).union(upToDateHids),  // none of the "extra" ids
-                expiredMaps.union(extraMaps).union(upToDateMaps),    // none of the "missing" ids
-                FilePartition(Expired(expiredHids), Extra(extraHids), Missing(missingHids), UpToDate(upToDateHids)))
+        import FileStatus._
+
+        val expiredS  = statusMap(Expired, expired)
+        val extraS    = statusMap(Extra, extra)
+        val missingS  = statusMap(Missing, missing)
+        val upToDateS = statusMap(UpToDate, upToDate)
+
+        val relevantS = expiredS.union(missingS).union(upToDateS)
+
+        runTest(relevantS.keySet,                                 // none of the "extra" ids
+                expiredMaps.union(extraMaps).union(upToDateMaps), // none of the "missing" ids
+                relevantS.union(extraS))
       }
     }
   }

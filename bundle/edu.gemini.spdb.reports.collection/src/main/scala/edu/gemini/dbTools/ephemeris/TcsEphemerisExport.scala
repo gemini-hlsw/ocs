@@ -11,9 +11,8 @@ import java.util.Date
 
 import scalaz._
 import Scalaz._
+import scalaz.effect.IO
 
-
-import TcsEphemerisExport.FilePartition
 
 /** TCS ephemeris directory maintenance. */
 sealed trait TcsEphemerisExport {
@@ -30,7 +29,7 @@ sealed trait TcsEphemerisExport {
     * @return categorization of horizons ids according to the state of the
     *         corresponding ephemeris file on disk
     */
-  def partition(hids: ISet[HorizonsDesignation]): TryExport[FilePartition]
+  def partition(hids: ISet[HorizonsDesignation]): TryExport[HorizonsDesignation ==>> FileStatus]
 
   /** Gets an action that will update the directory of ephemeris files as
     * necessary so that it contains an entry for each observation of interest
@@ -41,7 +40,7 @@ sealed trait TcsEphemerisExport {
     * @return map of horizons ids to either an error or the (possibly) updated
     *         file
     */
-  def update(hids: ISet[HorizonsDesignation]): TryExport[HorizonsDesignation ==>> (ExportError \/ Path)]
+  def update(hids: ISet[HorizonsDesignation]): TryExport[HorizonsDesignation ==>> (FileStatus, ExportError \/ Path)]
 
   /** Gets an action that will write ephemeris files for each of the given
     * horizons ids. Note this action doesn't delete out-of-date files or skip
@@ -68,33 +67,8 @@ object TcsEphemerisExport {
   // few more than requested.
   val ElementCount  = 1430
 
-  sealed trait FileCategory {
-    def hids: ISet[HorizonsDesignation]
-  }
-
-  /** Horizons ids for which the corresponding ephemeris file is out of date or
-    * contains insufficient coverage for the night in general.
-    */
-  final case class Expired(hids: ISet[HorizonsDesignation]) extends FileCategory
-
-  /** Horizons ids for ephemeris files corresponding to observations that are
-    * no longer of interest (for example because they have been observed).
-    */
-  final case class Extra(hids: ISet[HorizonsDesignation]) extends FileCategory
-
-  /** Horizons ids for missing ephemeris files.
-    */
-  final case class Missing(hids: ISet[HorizonsDesignation]) extends FileCategory
-
-  /** Horizons ids that correspond to ephemeris files that do not need to be
-    * updated because they have sufficient converage for the night already.
-    */
-  final case class UpToDate(hids: ISet[HorizonsDesignation]) extends FileCategory
-
-  /** Categorization of horizons ids according to the disposition of the
-    * corresponding ephemeris file in the directory.
-    */
-  final case class FilePartition(expired: Expired, extra: Extra, missing: Missing, upToDate: UpToDate)
+  // Single file result.  Status before, error from operation or file path
+  type FileUpdate = (FileStatus, ExportError \/ Path)
 
   def apply(dir: Path, night: Night, site: Site): TcsEphemerisExport =
     new TcsEphemerisExport {
@@ -105,22 +79,20 @@ object TcsEphemerisExport {
       val start  = Instant.ofEpochMilli(night.getStartTime)
       val end    = Instant.ofEpochMilli(night.getEndTime)
 
-      def partition(hids: ISet[HorizonsDesignation]): TryExport[FilePartition] = {
+      def partition(hids: ISet[HorizonsDesignation]): TryExport[HorizonsDesignation ==>> FileStatus] = {
+
         def upToDate(relevant: ISet[HorizonsDesignation]): TryExport[ISet[HorizonsDesignation]] = {
-          // ISet[HorizonsDesignation] => TryExport[ List[(hid, ISet[Instant])] ]
-          val allPairs = relevant.toList.traverseU { hid =>
-            files.parseTimes(hid).strengthL(hid)
-          }
+          val allPairs: TryExport[List[(HorizonsDesignation, ISet[Instant])]] =
+            relevant.toList.traverseU { hid =>
+              files.parseTimes(hid).strengthL(hid)
+            }
 
           allPairs.map { lst =>
             val upToDatePairs = lst.filter { case (hid, times) =>
               val validTimes = times.filterGt(Some(start)).filterLt(Some(end)).insert(start).insert(end).toList
               validTimes.zip(validTimes.tail).forall {
-                case (s, e) =>
-                  val gap = Duration.ofMillis(e.toEpochMilli - s.toEpochMilli)
-                  gap.compareTo(MaxGap) <= 0
-                case _          =>
-                  false
+                case (s, e) => Duration.ofMillis(e.toEpochMilli - s.toEpochMilli).compareTo(MaxGap) <= 0
+                case _      => false
               }
             }
 
@@ -128,36 +100,68 @@ object TcsEphemerisExport {
           }
         }
 
+        def statusMap(status: FileStatus, hids: ISet[HorizonsDesignation]): HorizonsDesignation ==>> FileStatus =
+          ==>>.fromList(hids.toList.zip(Stream.continually(status)))
+
         for {
           all     <- files.list
           relevant = all.intersection(hids)
           up      <- upToDate(relevant)
-          expired  = relevant.difference(up)
-        } yield FilePartition(
-                  Expired(expired),
-                  Extra(all.difference(relevant)),
-                  Missing(hids.difference(all)),
-                  UpToDate(up))
+        } yield statusMap(FileStatus.Expired,          relevant.difference(up)).
+                  union(statusMap(FileStatus.Extra,    all.difference(relevant))).
+                  union(statusMap(FileStatus.Missing,  hids.difference(all))).
+                  union(statusMap(FileStatus.UpToDate, up))
       }
 
-      def update(hids: ISet[HorizonsDesignation]): TryExport[HorizonsDesignation ==>> (ExportError \/ Path)] =
+
+      def update(hids: ISet[HorizonsDesignation]): TryExport[HorizonsDesignation ==>> FileUpdate] = {
+
+        // Map each file status to an action to take.
+        def actions(m: HorizonsDesignation ==>> FileStatus): HorizonsDesignation ==>> (FileStatus, TryExport[Path]) =
+          m.mapWithKey { case (hid, status) =>
+            val act: TryExport[Path] = status match {
+              case FileStatus.Expired  => writeOne(hid)
+              case FileStatus.Extra    => files.delete(hid).as(files.path(hid))
+              case FileStatus.Missing  => writeOne(hid)
+              case FileStatus.UpToDate => TryExport(files.path(hid))
+            }
+            (status, act)
+          }
+
+        // Explicit sequencing because of the (FileStatus, TryExport[Path]) tuple.
+        def seq(m: HorizonsDesignation ==>> (FileStatus, TryExport[Path])): TryExport[HorizonsDesignation ==>> FileUpdate] = {
+          val mr: HorizonsDesignation ==>> (FileStatus, IO[ExportError \/ Path]) =
+            m.map { _.map(_.run) }
+
+          val empty = IO(==>>.empty[HorizonsDesignation, FileUpdate])
+          val ms: IO[HorizonsDesignation ==>> FileUpdate] =
+            mr.fold(empty) { case (hid, (fs, io), res) =>
+              for {
+                m0   <- res
+                disj <- io
+              } yield m0.insert(hid, (fs, disj))
+            }
+
+          EitherT.eitherT(ms.map(_.right[ExportError]))
+        }
+
         for {
-          part      <- partition(hids)
-          _         <- files.deleteAll(part.extra.hids.union(part.expired.hids))
-          upToDate   = ==>>.fromList(part.upToDate.hids.toList.fproduct(files.path(_).right[ExportError]))
-          refreshed <- write(part.expired.hids.union(part.missing.hids))
-        } yield upToDate.union(refreshed)
+          part <- partition(hids)     // TryExport[HorizonsDesignation ==>> FileStatus]]
+          acts <- seq(actions(part))  // TryExport[HorizonsDesignations ==>> (FileStatus, ExportError \/ Path)]
+        } yield acts
+      }
+
 
       def write(hids: ISet[HorizonsDesignation]): TryExport[HorizonsDesignation ==>> (ExportError \/ Path)] = {
-        // HorizonsDesignation ==>> TryExport[File]
-        val exportMap = ==>>.fromList(hids.toList.fproduct(writeOne))
+        val exportMap: HorizonsDesignation ==>> TryExport[Path] =
+          ==>>.fromList(hids.toList.fproduct(writeOne))
 
-        // IO[HorizonsDesignation ==>> (ExportError \/ Path)]
-        val exportOp = exportMap.traverse(_.run)
+        val exportOp: IO[HorizonsDesignation ==>> (ExportError \/ Path)] =
+          exportMap.traverse(_.run)
 
-        // TryExport[HorizonsDesignation ==> (ExportError \/ Path)]
         EitherT(exportOp.map(_.right[ExportError]))
       }
+
 
       def writeOne(hid: HorizonsDesignation): TryExport[Path] =
         for {

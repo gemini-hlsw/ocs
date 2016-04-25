@@ -84,7 +84,7 @@ object EphemerisFiles {
       dir.resolve(filename(hid))
 
     def error(action: String, hid: HorizonsDesignation, ex: Throwable): FileError =
-      FileError(s"Error $action ephemeris file '${filename(hid)}'", Some(hid), Some(ex))
+      FileError(s"Error $action ephemeris file", Some(hid), Some(ex))
 
     def fileOp[T](action: String, hid: HorizonsDesignation)(op: Path => T): TryExport[T] =
       TryExport.fromTryCatch(error(action, hid, _)) { op(path(hid)) }
@@ -102,7 +102,7 @@ object EphemerisFiles {
       def parseString(content: String): TryExport[T] =
         TryExport.fromDisjunction {
           parser(content).leftMap { s =>
-            FileError(s"Could not parse ephemeris data in '${filename(hid)}': $s", Some(hid), None)
+            FileError(s"Could not parse ephemeris data: $s", Some(hid), None)
           }
         }
 

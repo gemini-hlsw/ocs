@@ -3,40 +3,37 @@ package edu.gemini.dbTools.ephemeris
 import edu.gemini.horizons.server.backend.HorizonsService2
 import edu.gemini.spModel.core.HorizonsDesignation
 
-import java.util.logging.{Level, Logger}
-
 /** Errors that may occur while exporting ephemeris data. */
 trait ExportError {
   import ExportError._
 
-  /** Extracts a human readable explanation of the error and the associated
-    * `Throwable`, if any.
-    */
-  def report: (String, Option[Throwable]) = this match {
-    case OdbError(ex)           =>
-      ("Error looking up nonsidereal observations in the database", Some(ex))
-
-    case HorizonsError(hid, h2) =>
-      h2 match {
-        case HorizonsService2.HorizonsError(e)   =>
-          (s"$hid: Error communicating with horizons service", Some(e))
-
-        case HorizonsService2.ParseError(_, msg) =>
-          (s"$hid: Could not parse response from horizons service: $msg", None)
-
-        case HorizonsService2.EphemerisEmpty     =>
-          (s"$hid: No response from horizons", None)
-      }
-
-    case FileError(msg, hid, ex)   =>
-      val prefix = hid.fold("") { h => s"$h: " }
-      (s"$prefix $msg", ex)
+  /** A user-oriented message describing the error. */
+  def message: String = {
+    val m = exception.flatMap(e => Option(e.getMessage)).getOrElse("")
+    this match {
+      case OdbError(e)                                           =>
+        s"Error looking up nonsidereal observations in the database: $m"
+      case HorizonsError(_, HorizonsService2.HorizonsError(e))   =>
+        s"Error communicating with horizons service: $m"
+      case HorizonsError(_, HorizonsService2.ParseError(_, msg)) =>
+        s"Could not parse response from horizons service: $msg"
+      case HorizonsError(_, HorizonsService2.EphemerisEmpty)     =>
+        "No response from horizons"
+      case FileError(msg, _, Some(e))                            =>
+        s"$msg: $m"
+      case FileError(msg, _, None)                               =>
+        msg
+    }
   }
 
-  def log(logger: Logger, prefix: String = ""): Unit = {
-    val (msg, ex) = report
-    logger.log(Level.WARNING, s"$prefix$msg", ex.orNull)
-  }
+  /** The exception corresponding to this error, if any. */
+  def exception: Option[Throwable] =
+    this match {
+      case OdbError(e)                                         => Some(e)
+      case HorizonsError(_, HorizonsService2.HorizonsError(e)) => Some(e)
+      case FileError(_, _, e)                                  => e
+      case _                                                   => None
+    }
 }
 
 object ExportError {
