@@ -45,17 +45,45 @@ final class BagsManager(executorService: ExecutorService) {
   }
 
   /** Our state is just a set of programs to watch, and a set of pending keys. */
-  private case class BagsState(programs: Set[SPProgramID], keys: Set[SPNodeKey], statuses: Map[SPNodeKey,BagsStatus]) {
+  private case class BagsState(programs: Set[SPProgramID], keys: Set[SPNodeKey]) {
     def +(key: SPNodeKey): BagsState = copy(keys = keys + key)
     def -(key: SPNodeKey): BagsState = copy(keys = keys - key)
     def +(pid: SPProgramID): BagsState = copy(programs = programs + pid)
     def -(pid: SPProgramID): BagsState = copy(programs = programs - pid)
-    def setStatus(key: SPNodeKey, status: BagsStatus): BagsState = copy(statuses = statuses + ((key, status)))
-    def clearStatus(key: SPNodeKey): BagsState = copy(statuses = statuses - key)
   }
-  @volatile private var state: BagsState = BagsState(Set.empty, Set.empty, Map.empty)
+  @volatile private var state: BagsState = BagsState(Set.empty, Set.empty)
 
-  // Setup an LRU cache with max entries BagsManager.CacheSize
+  /** The status of programs and observations being managed by BAGS. */
+  @volatile private var bagsStatuses: Map[SPNodeKey, BagsStatus] = Map.empty
+
+  private def setStatus(key: SPNodeKey, statusOpt: Option[BagsStatus]): Unit =
+    bagsStatuses.synchronized {
+      val oldStatusOpt = bagsStatuses.get(key)
+      if (oldStatusOpt != statusOpt) {
+        bagsStatuses = statusOpt match {
+          case Some(status) => bagsStatuses + ((key, status))
+          case None         => bagsStatuses - key
+        }
+        notifyBagsStatusListeners(key, oldStatusOpt, statusOpt)
+      }
+    }
+
+  private def clearStatusForProgram(prog: ISPProgram): Unit = {
+    bagsStatuses.synchronized {
+      prog.getObservations.asScala.foreach { obs =>
+        val key = obs.getNodeKey
+        bagsStatuses.get(key).foreach { oldStatus =>
+          bagsStatuses = bagsStatuses - key
+          notifyBagsStatusListeners(key, Some(oldStatus), None)
+        }
+      }
+    }
+  }
+
+  def bagsStatus(key: SPNodeKey): Option[BagsStatus] =
+    bagsStatuses.synchronized(bagsStatuses.get(key))
+
+  /** Setup an LRU cache with max entries BagsManager.CacheSize. */
   private val hashes = new util.LinkedHashMap[SPNodeKey, Int](math.ceil((BagsManager.CacheSize + 1) * 1.334).toInt, 0.75f, true) {
     override def removeEldestEntry(e: java.util.Map.Entry[SPNodeKey, Int]): Boolean =
       size > BagsManager.CacheSize
@@ -81,6 +109,7 @@ final class BagsManager(executorService: ExecutorService) {
   def unwatch(prog: ISPProgram): Unit = {
     synchronized {
       state -= prog.getProgramID
+      clearStatusForProgram(prog)
       prog.removeStructureChangeListener(StructurePropertyChangeListener)
       prog.removeCompositeChangeListener(CompositePropertyChangeListener)
     }
@@ -107,18 +136,17 @@ final class BagsManager(executorService: ExecutorService) {
     // observation classes that do not have guiding (e.g. daytime calibration).
     def isEligibleForBags(ctx: ObsContext): Boolean = {
       val enabledGroup = ctx.getTargets.getGuideEnvironment.guideEnv.auto match {
-        case AutomaticGroup.Initial | AutomaticGroup.Active(_,_) => true
-        case _                                                   => false
+        case AutomaticGroup.Initial | AutomaticGroup.Active(_, _) => true
+        case _ => false
       }
       enabledGroup &&
         AgsRegistrar.validStrategies(ctx).nonEmpty &&
         ObsClassService.lookupObsClass(observation) != ObsClass.DAY_CAL
-
     }
 
     def hasBeenUpdated(o: ISPObservation, ctx: ObsContext): Boolean = {
-      val key     = o.getNodeKey
-      val when    = o.getDataObject.asInstanceOf[SPObservation].getSchedulingBlock.asScalaOpt.map(_.start) | Instant.now.toEpochMilli
+      val key = o.getNodeKey
+      val when = o.getDataObject.asInstanceOf[SPObservation].getSchedulingBlock.asScalaOpt.map(_.start) | Instant.now.toEpochMilli
       val newHash = AgsHash.hash(ctx, when)
       val curHash = Option(hashes.get(key))
       hashes.put(key, newHash)
@@ -142,38 +170,20 @@ final class BagsManager(executorService: ExecutorService) {
 
         val key = obs.getNodeKey
         state += key
+        setStatus(key, Some(BagsStatus.NewPending))
 
-        def status(newStatus: BagsStatus): Unit = {
-          Thread.sleep(3000)
-          val oldStatusOpt = state.statuses.get(key)
-          if (!oldStatusOpt.contains(newStatus)) {
-            state = state.setStatus(key, newStatus)
-            notifyBagsStatusListeners(observation, oldStatusOpt, Some(newStatus))
-          }
-        }
-        def clearStatus(): Unit = {
-          state.statuses.get(key).foreach(oldStatus => {
-            state = state.clearStatus(key)
-            notifyBagsStatusListeners(observation, Some(oldStatus), None)
-          })
-        }
+        Future {
+          // If dequeue is false this means that (a) another task scheduled *after* me ended up
+          // running before me, so their result is as good as mine would have been and we're done;
+          // or (b) we don't care about that program anymore, so we're done.
+          if (dequeue(key, obs.getProgramID)) {
+            // Otherwise construct an obs context, verify that it's bags-worthy, and go.
+            ObsContext.create(obs).asScalaOpt.foreach { ctx =>
+              val eligibleForBags = isEligibleForBags(ctx)
+              if (eligibleForBags
+                && hasBeenUpdated(obs, ctx)
+                && notObserved(obs)) {
 
-
-        // If dequeue is false this means that (a) another task scheduled *after* me ended up
-        // running before me, so their result is as good as mine would have been and we're done;
-        // or (b) we don't care about that program anymore, so we're done.
-        clearStatus()
-
-        if (dequeue(key, obs.getProgramID)) {
-          // Otherwise construct an obs context, verify that it's bags-worthy, and go.
-          ObsContext.create(obs).asScalaOpt.foreach { ctx =>
-            val eligibleForBags = isEligibleForBags(ctx)
-            if (eligibleForBags
-              && hasBeenUpdated(obs, ctx)
-              && notObserved(obs)) {
-
-              status(BagsStatus.Pending)
-              Future {
                 //   do the lookup
                 //   on success {
                 //      if we're in the queue again, it means something changed while this task was
@@ -183,7 +193,10 @@ final class BagsManager(executorService: ExecutorService) {
                 //   on failure enqueue again, maybe with a delay depending on the failure
                 val bagsIdMsg = s"BAGS lookup on thread=${Thread.currentThread.getId} for observation=${obs.getObservationID}"
                 LOG.info(s"Performing $bagsIdMsg.")
-                status(BagsStatus.Running)
+
+                val oldStatusOpt = bagsStatus(key)
+                val newStatusOpt = oldStatusOpt.fold(BagsStatus.NewRunning)(_.toRunning).some
+                setStatus(key, newStatusOpt)
 
                 AgsRegistrar.currentStrategy(ctx).foreach { strategy =>
                   val fut = strategy.select(ctx, OT.getMagnitudeTable)
@@ -194,7 +207,7 @@ final class BagsManager(executorService: ExecutorService) {
                       if (!state.keys(key)) {
                         LOG.info(s"$bagsIdMsg successful. Results=${opt ? "Yes" | "No"}.")
                         applySwingResults(opt)
-                        clearStatus()
+                        //setStatus(key, None)
                       }
 
                     // Note that we have to sleep after reporting a bags failure, as otherwise, there is no time for
@@ -204,29 +217,27 @@ final class BagsManager(executorService: ExecutorService) {
                     // This is reported only as a GenericError in a CatalogException, unfortunately.
                     case Failure(CatalogException((e: GenericError) :: _)) =>
                       LOG.warning(s"$bagsIdMsg failed: ${e.msg}")
-                      status(BagsStatus.Failed("Catalog lookup failed."))
-                      Thread.sleep(3000)
+                      setStatus(key, BagsStatus.Pending("Catalog lookup failed.".some).some)
                       enqueue(obs, 5000L)
 
                     // If we timed out, we don't want to delay.
                     case Failure(ex: TimeoutException) =>
                       LOG.warning(s"$bagsIdMsg failed: ${ex.getMessage}")
-                      status(BagsStatus.Failed("Catalog timed out."))
-                      Thread.sleep(3000)
+                      setStatus(key, BagsStatus.Pending("Catalog timed out.".some).some)
                       enqueue(obs, 0L)
 
                     // For all other exceptions, print the full stack trace.
                     case Failure(ex) =>
                       LOG.log(Level.WARNING, s"$bagsIdMsg} failed.", ex)
-                      status(BagsStatus.Failed(s"${ex.getMessage}."))
-                      Thread.sleep(3000)
+                      setStatus(key, BagsStatus.Pending(s"${ex.getMessage}.".some).some)
                       enqueue(obs, 5000L)
                   }
                 }
+              } else if (!eligibleForBags) {
+                LOG.info(s"${obs.getObservationID} not eligible for BAGS. Clearing auto group.")
+                //setStatus(key, None)
+                applySwingResults(None)
               }
-            } else if (!eligibleForBags) {
-              LOG.info(s"${obs.getObservationID} not eligible for BAGS. Clearing auto group.")
-              applySwingResults(None)
             }
           }
         }
@@ -250,10 +261,6 @@ final class BagsManager(executorService: ExecutorService) {
       }
   }
 
-  /** BAGS status changes. **/
-  def bagsStatus(key: SPNodeKey): Option[BagsStatus] =
-    synchronized(state.statuses.get(key))
-
   /** Listeners for BAGS status changes. **/
   private var listeners: List[BagsStatusListener] = Nil
 
@@ -273,11 +280,11 @@ final class BagsManager(executorService: ExecutorService) {
       listeners = Nil
     }
 
-  private def notifyBagsStatusListeners(obs: ISPObservation, oldStatus: Option[BagsStatus], newStatus: Option[BagsStatus]): Unit = {
+  private def notifyBagsStatusListeners(key: SPNodeKey, oldStatus: Option[BagsStatus], newStatus: Option[BagsStatus]): Unit = {
     val immutableListenerList = listeners
     Swing.onEDT {
       immutableListenerList.foreach(l => Try {
-        l.bagsStatusChanged(obs, oldStatus.asGeminiOpt, newStatus.asGeminiOpt)
+        l.bagsStatusChanged(key, oldStatus.asGeminiOpt, newStatus.asGeminiOpt)
       })
     }
   }
