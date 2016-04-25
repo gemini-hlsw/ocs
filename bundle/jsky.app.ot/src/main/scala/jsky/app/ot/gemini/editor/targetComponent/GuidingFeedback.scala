@@ -56,14 +56,11 @@ object GuidingFeedback {
 
   case class BagsStatusRow(bagsStatus: BagsStatus) extends Row {
     private val bgColor = bagsStatus match {
-      case BagsStatus.Pending | BagsStatus.Running => BANANA
-      case BagsStatus.Failed(_)                    => LIGHT_SALMON
+      case BagsStatus.Pending(None) | BagsStatus.Running(None) => BANANA
+      case _                                                   => LIGHT_SALMON
     }
 
-    private val statusIcon = bagsStatus match {
-      case BagsStatus.Pending | BagsStatus.Running => Resources.getIcon("spinner16.gif")
-      case BagsStatus.Failed(_)                    => null
-    }
+    private val statusIcon = Resources.getIcon("spinner16.gif")
 
     object feedbackLabel extends Label {
       border              = labelBorder
