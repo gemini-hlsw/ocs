@@ -131,6 +131,8 @@ public class ObsForm extends JPanel {
                 FormFactory.DEFAULT_ROWSPEC,
                 FormFactory.LINE_GAP_ROWSPEC,
                 FormFactory.DEFAULT_ROWSPEC,
+                FormFactory.LINE_GAP_ROWSPEC,
+                FormFactory.DEFAULT_ROWSPEC,
                 FormFactory.PARAGRAPH_GAP_ROWSPEC,
                 FormFactory.DEFAULT_ROWSPEC,
                 FormFactory.LINE_GAP_ROWSPEC,
