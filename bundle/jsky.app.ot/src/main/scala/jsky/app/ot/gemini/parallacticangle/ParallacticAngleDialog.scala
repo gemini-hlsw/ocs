@@ -22,10 +22,11 @@ import scala.swing.event.{FocusGained, ValueChanged, ButtonClicked, FocusLost}
 
 // This is horrific, but it seems that Scala Windows and Java Windows are not compatible.
 class ParallacticAngleDialog(owner: java.awt.Window, observation: ISPObservation,
-                             osb: Option[SchedulingBlock], site: Site) extends Dialog {
+                             osb: Option[SchedulingBlock], local: Option[TimeZone]) extends Dialog {
 
   var schedulingBlock = osb.getOrElse(SchedulingBlock.apply(System.currentTimeMillis, 0L))
-  private var _timeZone = TimeZonePreference.get
+  val utc = TimeZone.getTimeZone("UTC")
+  private var _timeZone = local.filter(_ == TimeZonePreference.get).getOrElse(utc)
 
   title     = "Parallactic Angle Calculation"
   modal     = true
@@ -75,23 +76,24 @@ class ParallacticAngleDialog(owner: java.awt.Window, observation: ISPObservation
 
     val timeEditor = new TextField(8) with SelectOnFocus with TimeOfDayText
 
-    object localButton extends RadioButton(s"Local (${site.abbreviation})") {
+    object localButton extends RadioButton(s"Local (${local.fold("«none»")(_.getDisplayName(false, TimeZone.SHORT))})") {
       focusable = false
+      enabled   = local.isDefined
     }
     listenTo(localButton)
 
-    object utcButton extends RadioButton("UTC") {
+    object utcButton extends RadioButton(utc.getDisplayName(false, TimeZone.SHORT)) {
       focusable = false
     }
     listenTo(utcButton)
 
     new ButtonGroup(localButton, utcButton) {
-      select(if (_timeZone == TimeZone.getTimeZone("UTC")) utcButton else localButton)
+      select(if (_timeZone == utc) utcButton else localButton)
     }
 
     reactions += {
-      case ButtonClicked(`localButton`) => timeZone = site.timezone
-      case ButtonClicked(`utcButton`)   => timeZone = TimeZone.getTimeZone("UTC")
+      case ButtonClicked(`localButton`) => local.foreach(timeZone = _)
+      case ButtonClicked(`utcButton`)   => timeZone = utc
     }
 
     val timePanel = new GridBagPanel {
@@ -135,7 +137,7 @@ class ParallacticAngleDialog(owner: java.awt.Window, observation: ISPObservation
     }
 
     object remainingTimeButton extends RadioButton {
-      val remainingTime = calculateRemainingTime(observation).toDouble / 1000 / 60
+      val remainingTime = ParallacticAngleDialog.calculateRemainingTime(observation).toDouble / 1000 / 60
       text = f"Use Remaining Execution Time Estimate ($remainingTime%.1f min)"
     }
     layout(remainingTimeButton) = new Constraints() {
@@ -281,6 +283,9 @@ class ParallacticAngleDialog(owner: java.awt.Window, observation: ISPObservation
   pack()
   location = owner.getLocationOnScreen
 
+}
+
+object ParallacticAngleDialog {
   def calculateRemainingTime(ispObservation: ISPObservation): Long =
     PlannedTimeCalculator.instance
       .calc(ispObservation)
