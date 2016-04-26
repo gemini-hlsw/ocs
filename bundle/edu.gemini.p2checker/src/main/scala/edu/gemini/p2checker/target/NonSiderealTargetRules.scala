@@ -38,7 +38,7 @@ final class NonSiderealTargetRules extends IRule {
 
   def checkNoSchedulingBlock(es: ObservationElements): IP2Problems =
     new P2Problems <| { p2p =>
-      es.getTargetObsComp.asScalaOpt.map { toc =>
+      es.getTargetObsComp.asScalaOpt.foreach { toc =>
         if (toc.getTargetEnvironment.getTargets.asScalaList.exists(_.isNonSidereal) &&
             es.getSchedulingBlock.isEmpty) {
         p2p.addWarning(ERR_NO_SCHEDULING_BLOCK,
