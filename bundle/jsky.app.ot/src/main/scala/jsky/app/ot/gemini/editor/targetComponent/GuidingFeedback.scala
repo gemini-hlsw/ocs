@@ -60,7 +60,7 @@ object GuidingFeedback {
       case _                                                   => LIGHT_SALMON
     }
 
-    private val statusIcon = Resources.getIcon("spinner16.gif")
+    private val statusIcon = Resources.getIcon("spinner16-transparent.png")
 
     object feedbackLabel extends Label {
       border              = labelBorder
