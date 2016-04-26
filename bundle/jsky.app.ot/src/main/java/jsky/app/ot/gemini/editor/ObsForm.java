@@ -5,6 +5,7 @@ import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.*;
 import edu.gemini.spModel.obs.ObsPhase2Status;
 import edu.gemini.spModel.obs.ObsQaState;
+import jsky.app.ot.gemini.parallacticangle.ParallacticAngleControls;
 import jsky.util.gui.DropDownListBoxWidget;
 import jsky.util.gui.NumberBoxWidget;
 import jsky.util.gui.SingleSelectComboBox;
@@ -50,6 +51,9 @@ public class ObsForm extends JPanel {
         JLabel phase2StatusLabel = new JLabel();
         phase2StatusBox = new SingleSelectComboBox<>();
         execStatusPanel = new JPanel();
+
+        final JLabel schedulingBlockLabel = new JLabel();
+        schedulingBlock = new ParallacticAngleControls(false);
 
         JLabel label3 = new JLabel();
         qaStateBox = new DropDownListBoxWidget<>();
@@ -231,6 +235,12 @@ public class ObsForm extends JPanel {
             panel1.add(tooCardPanel, cc.xywh(7, 1, 5, 1, CellConstraints.FILL, CellConstraints.FILL));
         }
         add(panel1, cc.xywh(3, row, 9, 1));
+
+        row += 2;
+
+        schedulingBlockLabel.setText("Scheduling ");
+        add(schedulingBlockLabel, cc.xy(1, row));
+        add(schedulingBlock.peer(), cc.xywh(3, row, 9, 1));
 
         row += 2;
 
@@ -528,4 +538,7 @@ public class ObsForm extends JPanel {
     JPanel tooLabelOnlyPanel;
     JLabel tooSinglePriorityLabel;
     // JFormDesigner - End of variables declaration  //GEN-END:variables
+
+    ParallacticAngleControls schedulingBlock;
+
 }

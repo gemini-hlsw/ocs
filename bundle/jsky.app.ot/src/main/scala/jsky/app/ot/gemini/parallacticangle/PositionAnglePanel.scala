@@ -103,7 +103,7 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
                                          SPComponentType.INSTRUMENT_GNIRS).contains(instType)
 
       if (supportsParallacticAngle) {
-        val parallacticAngleControls = new ParallacticAngleControls
+        val parallacticAngleControls = new ParallacticAngleControls(true)
 
         listenTo(parallacticAngleControls)
         reactions += {
@@ -176,7 +176,7 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
     // Turn off the parallactic angle changing event handling as it triggers an AGS lookup.
     ui.parallacticAngleControlsOpt.foreach(p => {
       deafTo(p)
-      p.init(e.asInstanceOf[ParallacticAngleControls.Editor], s, numberFormatter)
+      p.init(e, s, numberFormatter)
     })
 
     // Reset the combo box so that all of the options are enabled by default.

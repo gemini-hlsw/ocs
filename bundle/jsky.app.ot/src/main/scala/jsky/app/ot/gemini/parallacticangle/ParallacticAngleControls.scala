@@ -6,13 +6,12 @@ import java.util.Date
 import javax.swing.BorderFactory
 import javax.swing.border.EtchedBorder
 
-import edu.gemini.pot.sp.ISPObsComponent
 import edu.gemini.skycalc.Angle
 import edu.gemini.spModel.core.Site
 import edu.gemini.spModel.inst.ParallacticAngleSupport
 import edu.gemini.spModel.obs.{ObsTargetCalculatorService, SPObservation, SchedulingBlock}
-import edu.gemini.spModel.obscomp.SPInstObsComp
 import edu.gemini.spModel.rich.shared.immutable._
+import edu.gemini.shared.util.immutable.{ Option => JOption }
 import jsky.app.ot.editor.OtItemEditor
 import jsky.app.ot.util.TimeZonePreference
 
@@ -24,8 +23,8 @@ import scala.swing.event.{ButtonClicked, Event}
  * This class encompasses all of the logic required to manage the average parallactic angle information associated
  * with an instrument configuration.
  */
-class ParallacticAngleControls extends GridBagPanel with Publisher {
-  private var editor:    Option[ParallacticAngleControls.Editor] = None
+class ParallacticAngleControls(showParallacticAngleFeedback: Boolean) extends GridBagPanel with Publisher {
+  private var editor:    Option[OtItemEditor[_, _]] = None
   private var site:      Option[Site]   = None
   private var formatter: Option[Format] = None
 
@@ -118,14 +117,19 @@ class ParallacticAngleControls extends GridBagPanel with Publisher {
   /**
    * Initialize the UI and set the instrument editor to allow for the parallactic angle updates.
    */
-  def init(e: ParallacticAngleControls.Editor, s: Site, f: Format): Unit = {
+  def init(e: OtItemEditor[_, _], s: Option[Site], f: Format): Unit = {
     editor    = Some(e)
-    site      = Some(s)
+    site      = s
     formatter = Some(f)
     ui.relativeTimeMenu.rebuild()
     resetComponents()
   }
 
+  def init(e: OtItemEditor[_, _], s: Site, f: Format): Unit =
+    init(e, Some(s), f)
+
+  def init(e: OtItemEditor[_, _], s: JOption[Site], f: Format): Unit =
+    init(e, s.asScalaOpt, f)
 
   /**
    * Call this whenever the state of the parallactic controls change
@@ -153,14 +157,13 @@ class ParallacticAngleControls extends GridBagPanel with Publisher {
   private def displayParallacticAngleDialog(): Unit =
     for {
       e <- editor
-      s <- site
       o <- Option(e.getContextObservation)
     } {
       val dialog = new ParallacticAngleDialog(
         e.getViewer.getParentFrame,
         o,
         o.getDataObject.asInstanceOf[SPObservation].getSchedulingBlock.asScalaOpt,
-        s)
+        site.map(_.timezone))
       dialog.pack()
       dialog.visible = true
       updateSchedulingBlock(dialog.schedulingBlock)
@@ -194,7 +197,6 @@ class ParallacticAngleControls extends GridBagPanel with Publisher {
     for {
       e              <- editor
       ispObservation <- Option(e.getContextObservation)
-      if ObsTargetCalculatorService.targetCalculation(ispObservation).isDefined
       spObservation  = ispObservation.getDataObject.asInstanceOf[SPObservation]
       sb             <- spObservation.getSchedulingBlock.asScalaOpt
       fmt            <- formatter
@@ -206,15 +208,19 @@ class ParallacticAngleControls extends GridBagPanel with Publisher {
       val dateTimeStr = dateFormat.format(new Date(sb.start))
 
       // Include tenths of a minute if not even.
-      val duration = sb.durationOrZero / 60000.0
+      val duration = sb.duration.getOrElse(ParallacticAngleDialog.calculateRemainingTime(ispObservation)) / 60000.0
       val durationFmt = if (Math.round(duration * 10) == (Math.floor(duration) * 10).toLong) "%.0f" else "%.1f"
-      //val durationStr = durationFmt.format(duration)
-      //val pluralOrNot = if ("1".equals(durationStr)) "" else "s"
-      //val when = s"($dateTimeStr, for $durationStr min$pluralOrNot)"
-      val when = s"($dateTimeStr, ${durationFmt.format(duration)}m)"
+      val when = s"$dateTimeStr, ${durationFmt.format(duration)}m"
 
-      ui.parallacticAngleFeedback.text = parallacticAngle.fold(s"Target not visible $when")(angle =>
-        s"${fmt.format(ParallacticAngleControls.angleToDegrees(angle))}\u00b0 $when")
+      ui.parallacticAngleFeedback.text =
+        e.getDataObject match {
+          case p: ParallacticAngleSupport if showParallacticAngleFeedback =>
+            parallacticAngle.fold(
+              s"Target not visible ($when)")(angle =>
+              s"${fmt.format(ParallacticAngleControls.angleToDegrees(angle))}\u00b0 ($when)")
+          case _ =>
+            s"$when"
+        }
 
       publish(ParallacticAngleControls.ParallacticAngleChangedEvent)
     }
@@ -228,13 +234,14 @@ class ParallacticAngleControls extends GridBagPanel with Publisher {
     for {
       e <- editor
       o <- Option(e.getContextObservation)
-      a <- e.getDataObject.calculateParallacticAngle(o).asScalaOpt
+      a <- e.getDataObject match {
+        case p: ParallacticAngleSupport => p.calculateParallacticAngle(o).asScalaOpt
+        case _                          => None
+      }
     } yield a
 }
 
 object ParallacticAngleControls {
-  type Editor = OtItemEditor[ISPObsComponent, SPInstObsComp with ParallacticAngleSupport]
-
   case object ParallacticAngleChangedEvent extends Event
 
   def angleToDegrees(a: Angle): Double = a.toPositive.toDegrees.getMagnitude
