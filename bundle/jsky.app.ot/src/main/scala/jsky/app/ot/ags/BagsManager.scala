@@ -284,23 +284,23 @@ final class BagsManager(executorService: ExecutorService) {
   private var listeners: List[BagsStatusListener] = Nil
 
   def addBagsStatusListener(l: BagsStatusListener): Unit =
-    listeners.synchronized {
+    synchronized {
       if (!listeners.contains(l))
         listeners = l :: listeners
     }
 
   def removeBagsStatusListener(l: BagsStatusListener): Unit =
-    listeners.synchronized {
+    synchronized {
       listeners = listeners.diff(List(l))
     }
 
   def clearBagsStatusListeners(): Unit =
-    listeners.synchronized {
+    synchronized {
       listeners = Nil
     }
 
   private def notifyBagsStatusListeners(key: SPNodeKey, oldStatus: Option[BagsStatus], newStatus: Option[BagsStatus]): Unit = {
-    val immutableListenerList = listeners
+    val immutableListenerList = synchronized(listeners)
     Swing.onEDT {
       immutableListenerList.foreach(l => Try {
         l.bagsStatusChanged(key, oldStatus.asGeminiOpt, newStatus.asGeminiOpt)
