@@ -72,7 +72,7 @@ public final class Resources {
      * being properly installed to the resources directory.
      *
      * @return Icon constructed from data in <code>iconFileName</code>.
-     * Even though the method interface can't guarentee this, the icon
+     * Even though the method interface can't guarantee this, the icon
      * implementation will be <code>Serializable</code>.
      * Returns null (does not throw an Exception) if specified
      * resource is not found.
