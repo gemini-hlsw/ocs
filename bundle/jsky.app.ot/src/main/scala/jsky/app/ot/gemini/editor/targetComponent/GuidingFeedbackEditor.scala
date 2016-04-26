@@ -11,12 +11,14 @@ import jsky.app.ot.OT
 import jsky.app.ot.ags.BagsManager
 import jsky.app.ot.gemini.editor.targetComponent.GuidingFeedback.BagsStatusRow
 
+import scala.swing.Swing
+
 
 class GuidingFeedbackEditor extends TelescopePosEditor {
   private val tab: GuidingFeedback.Table = new GuidingFeedback.Table
   def getComponent: Component = tab.peer
 
-  override def edit(ctxOpt: GOption[ObsContext], target: SPTarget, node: ISPNode): Unit = {
+  override def edit(ctxOpt: GOption[ObsContext], target: SPTarget, node: ISPNode): Unit =  Swing.onEDT {
     val mt = OT.getMagnitudeTable
 
     // Construct the rows for the table. Optionally a BAGS row, and then a list of AGS analysis rows.
