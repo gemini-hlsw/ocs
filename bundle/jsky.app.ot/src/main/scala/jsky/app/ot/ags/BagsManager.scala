@@ -56,28 +56,31 @@ final class BagsManager(executorService: ExecutorService) {
   /** The status of programs and observations being managed by BAGS. */
   @volatile private var bagsStatuses: Map[SPNodeKey, BagsStatus] = Map.empty
 
-  private def setStatus(key: SPNodeKey, statusOpt: Option[BagsStatus]): Unit =
+  private def setStatus(key: SPNodeKey, statusOpt: Option[BagsStatus]): Unit = {
+    println(s"+++ setStatus: $key, $statusOpt")
     bagsStatuses.synchronized {
-      val oldStatusOpt = bagsStatuses.get(key)
-      if (oldStatusOpt != statusOpt) {
-        bagsStatuses = statusOpt match {
-          case Some(status) => bagsStatuses + ((key, status))
-          case None         => bagsStatuses - key
+        val oldStatusOpt = bagsStatuses.get(key)
+        if (oldStatusOpt != statusOpt) {
+          bagsStatuses = statusOpt match {
+            case Some(status) => bagsStatuses + ((key, status))
+            case None => bagsStatuses - key
+          }
+          notifyBagsStatusListeners(key, oldStatusOpt, statusOpt)
         }
-        notifyBagsStatusListeners(key, oldStatusOpt, statusOpt)
       }
-    }
+    println(s"+++ setStatus done for $key")
+  }
 
   private def clearStatusForProgram(prog: ISPProgram): Unit = {
     bagsStatuses.synchronized {
-      prog.getObservations.asScala.foreach { obs =>
-        val key = obs.getNodeKey
-        bagsStatuses.get(key).foreach { oldStatus =>
-          bagsStatuses = bagsStatuses - key
-          notifyBagsStatusListeners(key, Some(oldStatus), None)
+        prog.getObservations.asScala.foreach { obs =>
+          val key = obs.getNodeKey
+          bagsStatuses.get(key).foreach { oldStatus =>
+            bagsStatuses = bagsStatuses - key
+            notifyBagsStatusListeners(key, Some(oldStatus), None)
+          }
         }
       }
-    }
   }
 
   def bagsStatus(key: SPNodeKey): Option[BagsStatus] =
@@ -144,14 +147,18 @@ final class BagsManager(executorService: ExecutorService) {
         ObsClassService.lookupObsClass(observation) != ObsClass.DAY_CAL
     }
 
-    def hasBeenUpdated(o: ISPObservation, ctx: ObsContext): Boolean = {
+    // Determine if the observation has been updated since the last successful BAGS lookup.
+    // Returns true / false indicating this, as well as the most recent hash value for the observation.
+    def hasBeenUpdated(o: ISPObservation, ctx: ObsContext): (Boolean, Int) = {
       val key = o.getNodeKey
       val when = o.getDataObject.asInstanceOf[SPObservation].getSchedulingBlock.asScalaOpt.map(_.start) | Instant.now.toEpochMilli
       val newHash = AgsHash.hash(ctx, when)
       val curHash = Option(hashes.get(key))
-      hashes.put(key, newHash)
-      !curHash.contains(newHash)
+      (!curHash.contains(newHash), newHash)
     }
+
+    def updateHash(o: ISPObservation, newHash: Int): Unit =
+      hashes.put(o.getNodeKey, newHash)
 
     def notObserved(o: ISPObservation): Boolean =
       ObservationStatus.computeFor(o) != ObservationStatus.OBSERVED
@@ -170,75 +177,87 @@ final class BagsManager(executorService: ExecutorService) {
 
         val key = obs.getNodeKey
         state += key
-        setStatus(key, Some(BagsStatus.NewPending))
+        if (bagsStatus(key).isEmpty)
+          setStatus(key, BagsStatus.NewPending.some)
 
         Future {
+          // Wait the delay before running.
+          Thread.sleep(delay)
+
           // If dequeue is false this means that (a) another task scheduled *after* me ended up
           // running before me, so their result is as good as mine would have been and we're done;
           // or (b) we don't care about that program anymore, so we're done.
           if (dequeue(key, obs.getProgramID)) {
             // Otherwise construct an obs context, verify that it's bags-worthy, and go.
             ObsContext.create(obs).asScalaOpt.foreach { ctx =>
-              val eligibleForBags = isEligibleForBags(ctx)
-              if (eligibleForBags
-                && hasBeenUpdated(obs, ctx)
-                && notObserved(obs)) {
+              if (isEligibleForBags(ctx)) {
+                // Note that we perform these checks AFTER eligibility since they are much more computationally
+                // intensive, and we need to store the hash value of hasBeenUpdated.
+                val (updated, hash) = hasBeenUpdated(obs, ctx)
+                if (updated && notObserved(obs)) {
+                  //   do the lookup
+                  //   on success {
+                  //      if we're in the queue again, it means something changed while this task was
+                  //      running, so discard this result and do nothing,
+                  //      otherwise update the model
+                  //   }
+                  //   on failure enqueue again, maybe with a delay depending on the failure
+                  val bagsIdMsg = s"BAGS lookup on thread=${Thread.currentThread.getId} for observation=${obs.getObservationID}"
+                  LOG.info(s"Performing $bagsIdMsg.")
 
-                //   do the lookup
-                //   on success {
-                //      if we're in the queue again, it means something changed while this task was
-                //      running, so discard this result and do nothing,
-                //      otherwise update the model
-                //   }
-                //   on failure enqueue again, maybe with a delay depending on the failure
-                val bagsIdMsg = s"BAGS lookup on thread=${Thread.currentThread.getId} for observation=${obs.getObservationID}"
-                LOG.info(s"Performing $bagsIdMsg.")
+                  val newStatus = bagsStatus(key).fold(BagsStatus.NewRunning)(_.toRunning)
+                  setStatus(key, newStatus.some)
+                  Thread.sleep(1000)
 
-                val oldStatusOpt = bagsStatus(key)
-                val newStatusOpt = oldStatusOpt.fold(BagsStatus.NewRunning)(_.toRunning).some
-                setStatus(key, newStatusOpt)
+                  AgsRegistrar.currentStrategy(ctx).foreach { strategy =>
+                    val fut = strategy.select(ctx, OT.getMagnitudeTable)
+                    fut onComplete {
+                      case Success(opt) =>
+                        // If this observation is once again in the queue, then something changed while this task
+                        // was running, so discard the result.
+                        if (!state.keys(key)) {
+                          LOG.info(s"$bagsIdMsg successful. Results=${opt ? "Yes" | "No"}.")
+                          applySwingResults(opt)
+                          setStatus(key, None)
+                          updateHash(obs, hash)
+                        }
 
-                AgsRegistrar.currentStrategy(ctx).foreach { strategy =>
-                  val fut = strategy.select(ctx, OT.getMagnitudeTable)
-                  fut onComplete {
-                    case Success(opt) =>
-                      // If this observation is once again in the queue, then something changed while this task
-                      // was running, so discard the result.
-                      if (!state.keys(key)) {
-                        LOG.info(s"$bagsIdMsg successful. Results=${opt ? "Yes" | "No"}.")
-                        applySwingResults(opt)
-                        //setStatus(key, None)
-                      }
+                      // Note that we have to sleep after reporting a bags failure, as otherwise, there is no time for
+                      // the failure status message to be read before we change back to pending.
 
-                    // Note that we have to sleep after reporting a bags failure, as otherwise, there is no time for
-                    // the failure status message to be read before we change back to pending.
+                      // We don't want to print the stack trace if the host is simply unreachable.
+                      // This is reported only as a GenericError in a CatalogException, unfortunately.
+                      case Failure(CatalogException((e: GenericError) :: _)) =>
+                        LOG.warning(s"$bagsIdMsg failed: ${e.msg}")
+                        setStatus(key, BagsStatus.Pending("Catalog lookup failed.".some).some)
+                        enqueue(obs, 5000L)
 
-                    // We don't want to print the stack trace if the host is simply unreachable.
-                    // This is reported only as a GenericError in a CatalogException, unfortunately.
-                    case Failure(CatalogException((e: GenericError) :: _)) =>
-                      LOG.warning(s"$bagsIdMsg failed: ${e.msg}")
-                      setStatus(key, BagsStatus.Pending("Catalog lookup failed.".some).some)
-                      enqueue(obs, 5000L)
+                      // If we timed out, we don't want to delay.
+                      case Failure(ex: TimeoutException) =>
+                        LOG.warning(s"$bagsIdMsg failed: ${ex.getMessage}")
+                        setStatus(key, BagsStatus.Pending("Catalog timed out.".some).some)
+                        enqueue(obs, 0L)
 
-                    // If we timed out, we don't want to delay.
-                    case Failure(ex: TimeoutException) =>
-                      LOG.warning(s"$bagsIdMsg failed: ${ex.getMessage}")
-                      setStatus(key, BagsStatus.Pending("Catalog timed out.".some).some)
-                      enqueue(obs, 0L)
-
-                    // For all other exceptions, print the full stack trace.
-                    case Failure(ex) =>
-                      LOG.log(Level.WARNING, s"$bagsIdMsg} failed.", ex)
-                      setStatus(key, BagsStatus.Pending(s"${ex.getMessage}.".some).some)
-                      enqueue(obs, 5000L)
+                      // For all other exceptions, print the full stack trace.
+                      case Failure(ex) =>
+                        LOG.log(Level.WARNING, s"$bagsIdMsg} failed.", ex)
+                        setStatus(key, BagsStatus.Pending(s"${ex.getMessage}.".some).some)
+                        enqueue(obs, 5000L)
+                    }
                   }
+                } else {
+                  // Either not updated or is observed, so just clear the status.
+                  setStatus(key, None)
                 }
-              } else if (!eligibleForBags) {
+              } else {
                 LOG.info(s"${obs.getObservationID} not eligible for BAGS. Clearing auto group.")
-                //setStatus(key, None)
                 applySwingResults(None)
+                setStatus(key, None)
               }
             }
+          } else {
+            LOG.info(s"${obs.getObservationID} not enqueued for BAGS.")
+            setStatus(key, None)
           }
         }
       }
