@@ -323,7 +323,10 @@ public class SPObservation extends AbstractDataObject implements ISPStaffOnlyFie
      * Get the scheduling block's starting time.
      */
     public Option<Long> getSchedulingBlockStart() {
-        return getSchedulingBlockStart();
+        return _schedulingBlock.flatMap(b -> {
+            final scala.Option<Object> osb = b.duration(); // boxing
+            return (osb.isDefined()) ? new Some((Long) osb.get()) : None.instance();
+        });
     }
 
     /**
