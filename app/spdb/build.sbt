@@ -214,6 +214,7 @@ def swalker(version: Version) = AppConfig(
     "edu.gemini.auxfile.other.dest"              -> "/gemsoft/var/data/finder/GSqueue/Finders-Test/@SEMESTER@/@PROG_ID@",
     "edu.gemini.auxfile.root"                    -> "/Users/swalker/.auxfile",
     "edu.gemini.dataman.gsa.summit.host"         -> "cpofits-lv1new.cl.gemini.edu",
+    "edu.gemini.dbTools.tcs.ephemeris.directory" -> "/Users/swalker/.ephemeris",
     "edu.gemini.services.server.start"           -> "false",
     "edu.gemini.smartgcal.host"                  -> "localhost",
     "edu.gemini.spdb.dir"                        -> "/Users/swalker/.spdb/",
@@ -387,11 +388,12 @@ def odbtest(version: Version) = AppConfig(
     "-XX:MaxPermSize=512M"
   ),
   props = Map(
-    "edu.gemini.spdb.dir"                  -> "/home/software/ugemini/spdb/spdb.active",
-    "edu.gemini.auxfile.root"              -> "/home/software/ugemini/auxfile",
-    "edu.gemini.smartgcal.svnRootUrl"      -> "http://source.gemini.edu/gcal/branches/development/calibrations",
-    "edu.gemini.util.trpc.name"            -> "Gemini ODB (Test)",
-    "edu.gemini.dbTools.archive.directory" -> "/home/software/ugemini/spdb/spdb.archive"
+    "edu.gemini.auxfile.root"                    -> "/home/software/ugemini/auxfile",
+    "edu.gemini.dbTools.archive.directory"       -> "/home/software/ugemini/spdb/spdb.archive",
+    "edu.gemini.dbTools.tcs.ephemeris.directory" -> "/home/software/ugemini/ephemeris",
+    "edu.gemini.smartgcal.svnRootUrl"            -> "http://source.gemini.edu/gcal/branches/development/calibrations",
+    "edu.gemini.spdb.dir"                        -> "/home/software/ugemini/spdb/spdb.active",
+    "edu.gemini.util.trpc.name"                  -> "Gemini ODB (Test)"
   )
 ) extending List(with_remote_gogo(version), odbtest_credentials(version))
 
