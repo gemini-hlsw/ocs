@@ -11,7 +11,7 @@ object NonSiderealObservationTest extends TestSupport {
   "NonSiderealObservation.findScheduleable" should {
     "include every ready nonsidereal observation in an active program" ! forAllPrograms { (odb, progs) =>
       progs.forall { prog =>
-        val obsList = NonSiderealObservation.findScheduleableIn(prog)
+        val obsList = NonSiderealObservation.findRelevantIn(prog)
         obsList.size == prog.getAllObservations.size
       }
     }
@@ -19,13 +19,13 @@ object NonSiderealObservationTest extends TestSupport {
     "include no observations in an inactive program" ! forAllPrograms { (odb, progs) =>
       progs.forall { prog =>
         genInactiveProgram.sample.get.apply(odb.getFactory, prog)
-        NonSiderealObservation.findScheduleableIn(prog).isEmpty
+        NonSiderealObservation.findRelevantIn(prog).isEmpty
       }
     }
 
     "find matching observation information" ! forAllPrograms { (odb, progs) =>
       progs.forall { prog =>
-        val expected = NonSiderealObservation.findScheduleableIn(prog).toSet
+        val expected = NonSiderealObservation.findRelevantIn(prog).toSet
         val actual   = (Set.empty[NonSiderealObservation]/:prog.getAllObservations.asScala) { (s, o) =>
           val oid = o.getObservationID
           val tc  = SPTreeUtil.findTargetEnvNode(o)
@@ -44,7 +44,7 @@ object NonSiderealObservationTest extends TestSupport {
     "skip sidereal targets" ! forAllPrograms { (odb, progs) =>
       progs.forall { prog =>
         genSiderealEdit.sample.get.apply(odb.getFactory, prog)
-        val nsSize  = NonSiderealObservation.findScheduleableIn(prog).size
+        val nsSize  = NonSiderealObservation.findRelevantIn(prog).size
         val allSize = prog.getAllObservations.size
         ((allSize == 0) && (nsSize == 0)) || (allSize - 1 == nsSize)
       }
@@ -53,7 +53,7 @@ object NonSiderealObservationTest extends TestSupport {
     "skip inactive observations" ! forAllPrograms { (odb, progs) =>
       progs.forall { prog =>
         genInactiveObsStatus.sample.get.apply(odb.getFactory, prog)
-        val nsSize  = NonSiderealObservation.findScheduleableIn(prog).size
+        val nsSize  = NonSiderealObservation.findRelevantIn(prog).size
         val allSize = prog.getAllObservations.size
         ((allSize == 0) && (nsSize == 0)) || (allSize - 1 == nsSize)
       }

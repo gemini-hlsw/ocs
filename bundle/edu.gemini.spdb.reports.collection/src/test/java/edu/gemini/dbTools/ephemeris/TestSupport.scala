@@ -73,10 +73,7 @@ trait TestSupport extends ProgramTestSupport {
   val genInactiveObsStatus: Gen[ProgEdit] =
     for {
       f <- maybePickObservation
-      s <- Gen.oneOf(ObservationStatus.values().filter {
-        case ObservationStatus.READY | ObservationStatus.ONGOING => false
-        case _                                                   => true
-      })
+      s <- Gen.oneOf(ObservationStatus.OBSERVED, ObservationStatus.INACTIVE)
     } yield { (_: ISPFactory, p: ISPProgram) =>
       f(p).foreach { obs =>
         val dob = obs.getDataObject.asInstanceOf[SPObservation]
