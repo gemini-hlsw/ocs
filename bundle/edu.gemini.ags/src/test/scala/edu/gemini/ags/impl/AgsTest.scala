@@ -61,8 +61,8 @@ object AgsTest extends TargetsHelper {
     }
     inst.setPosAngleDegrees(0.0)
 
-    val ctx = if (site.isDefined) ObsContext.create(targetEnv, inst, site.asGeminiOpt, BEST, java.util.Collections.emptySet(), null, JNone.instance())
-              else ObsContext.create(targetEnv, inst, BEST, java.util.Collections.emptySet(), null, JNone.instance())
+    val ctx = if (site.isDefined) ObsContext.create(targetEnv, inst, site.asGeminiOpt, BEST, java.util.Collections.emptySet(), null, JNone.instance(), JNone.instance())
+              else ObsContext.create(targetEnv, inst, BEST, java.util.Collections.emptySet(), null, JNone.instance(), JNone.instance())
     AgsTest(
       ctx,
       guideProbe,

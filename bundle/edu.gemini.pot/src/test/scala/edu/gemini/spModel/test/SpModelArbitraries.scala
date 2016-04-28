@@ -200,6 +200,6 @@ trait SpModelArbitraries extends Arbitraries with edu.gemini.spModel.target.env.
         site  = inst.getSite.asScala.headOption.asGeminiOpt
         cond <- arbitrary[Conditions]
         offs <- arbitrary[java.util.Set[SkyCalcOffset]]
-      } yield ObsContext.create(ags.asGeminiOpt, env, inst, site, cond, offs, null, None.instance())
+      } yield ObsContext.create(ags.asGeminiOpt, env, inst, site, cond, offs, null, None.instance(), None.instance())
     }
 }

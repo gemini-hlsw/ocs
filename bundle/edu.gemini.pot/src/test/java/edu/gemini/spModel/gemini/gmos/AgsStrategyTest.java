@@ -25,7 +25,7 @@ public class AgsStrategyTest {
         inst.setPosAngle(0);
         inst.setIssPort(IssPort.UP_LOOKING);
 
-        baseContext = ObsContext.create(env, inst, None.<Site>instance(), SPSiteQuality.Conditions.BEST, null, null, None.instance());
+        baseContext = ObsContext.create(env, inst, None.<Site>instance(), SPSiteQuality.Conditions.BEST, null, null, None.instance(), None.instance());
     }
 
 

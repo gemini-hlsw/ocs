@@ -71,7 +71,7 @@ class SingleProbeStrategySpec extends Specification {
 
       val strategy = SingleProbeStrategy(AltairAowfsKey, SingleProbeStrategyParams.AltairAowfsParams, TestVoTableBackend("/ocsadv245.xml"))
       val aoComp = new InstAltair <| {_.setMode(AltairParams.Mode.NGS)}
-      val ctx = ObsContext.create(env, inst, new Some(Site.GN), SPSiteQuality.Conditions.BEST, null, aoComp, JNone.instance())
+      val ctx = ObsContext.create(env, inst, new Some(Site.GN), SPSiteQuality.Conditions.BEST, null, aoComp, JNone.instance(), JNone.instance())
 
       val selection = Await.result(strategy.select(ctx, magTable), 10.seconds)
 
@@ -87,7 +87,7 @@ class SingleProbeStrategySpec extends Specification {
 
       val strategy = SingleProbeStrategy(AltairAowfsKey, SingleProbeStrategyParams.AltairAowfsParams, TestVoTableBackend("/ocsadv-245-lgs.xml"))
       val aoComp = new InstAltair <| {_.setMode(AltairParams.Mode.LGS)}
-      val ctx = ObsContext.create(env, inst, new Some(Site.GN), SPSiteQuality.Conditions.NOMINAL.sb(SPSiteQuality.SkyBackground.ANY), null, aoComp, JNone.instance())
+      val ctx = ObsContext.create(env, inst, new Some(Site.GN), SPSiteQuality.Conditions.NOMINAL.sb(SPSiteQuality.SkyBackground.ANY), null, aoComp, JNone.instance(), JNone.instance())
 
       val selection = Await.result(strategy.select(ctx, magTable), 10.seconds)
 
@@ -105,7 +105,7 @@ class SingleProbeStrategySpec extends Specification {
       val strategy = SingleProbeStrategy(Pwfs1NorthKey, SingleProbeStrategyParams.PwfsParams(Site.GN, PwfsGuideProbe.pwfs1), TestVoTableBackend("/niri_pwfs1.xml"))
 
       val conditions = SPSiteQuality.Conditions.NOMINAL.sb(SPSiteQuality.SkyBackground.ANY).cc(SPSiteQuality.CloudCover.PERCENT_80).iq(SPSiteQuality.ImageQuality.PERCENT_85)
-      val ctx = ObsContext.create(env, inst, new Some(Site.GN), conditions, null, null, JNone.instance())
+      val ctx = ObsContext.create(env, inst, new Some(Site.GN), conditions, null, null, JNone.instance(), JNone.instance())
 
       val selection = Await.result(strategy.select(ctx, magTable), 10.seconds)
 
@@ -123,7 +123,7 @@ class SingleProbeStrategySpec extends Specification {
       val strategy = SingleProbeStrategy(Pwfs2NorthKey, SingleProbeStrategyParams.PwfsParams(Site.GN, PwfsGuideProbe.pwfs2), TestVoTableBackend("/niri_pwfs2.xml"))
 
       val conditions = SPSiteQuality.Conditions.NOMINAL.sb(SPSiteQuality.SkyBackground.ANY).cc(SPSiteQuality.CloudCover.PERCENT_80).iq(SPSiteQuality.ImageQuality.PERCENT_85)
-      val ctx = ObsContext.create(env, inst, new Some(Site.GN), conditions, null, null, JNone.instance())
+      val ctx = ObsContext.create(env, inst, new Some(Site.GN), conditions, null, null, JNone.instance(), JNone.instance())
 
       val selection = Await.result(strategy.select(ctx, magTable), 10.seconds)
 
@@ -141,7 +141,7 @@ class SingleProbeStrategySpec extends Specification {
       val strategy = SingleProbeStrategy(GmosNorthOiwfsKey, SingleProbeStrategyParams.GmosOiwfsParams(Site.GN), TestVoTableBackend("/gmosn_oiwfs.xml"))
 
       val conditions = SPSiteQuality.Conditions.NOMINAL.sb(SPSiteQuality.SkyBackground.ANY)
-      val ctx = ObsContext.create(env, inst, new Some(Site.GN), conditions, null, null, JNone.instance())
+      val ctx = ObsContext.create(env, inst, new Some(Site.GN), conditions, null, null, JNone.instance(), JNone.instance())
 
       val selection = Await.result(strategy.select(ctx, magTable), 10.seconds)
 
@@ -171,7 +171,7 @@ class SingleProbeStrategySpec extends Specification {
 
       val strategy   = SingleProbeStrategy(GmosNorthOiwfsKey, SingleProbeStrategyParams.GmosOiwfsParams(Site.GN), voTable)
       val conditions = SPSiteQuality.Conditions.NOMINAL
-      val ctx        = ObsContext.create(env, inst, new Some(Site.GN), conditions, os.asJava, null, JNone.instance())
+      val ctx        = ObsContext.create(env, inst, new Some(Site.GN), conditions, os.asJava, null, JNone.instance(), JNone.instance())
       val selection  = Await.result(strategy.select(ctx, magTable), 10.seconds)
       verifyGuideStarSelection(strategy, ctx, selection, "Biff", GmosOiwfsGuideProbe.instance, PossibleIqDegradation)
     }
@@ -199,7 +199,7 @@ class SingleProbeStrategySpec extends Specification {
 
       val strategy   = SingleProbeStrategy(GmosNorthOiwfsKey, SingleProbeStrategyParams.GmosOiwfsParams(Site.GN), voTable)
       val conditions = SPSiteQuality.Conditions.NOMINAL
-      val ctx        = ObsContext.create(env, inst, new Some(Site.GN), conditions, os.asJava, null, JNone.instance())
+      val ctx        = ObsContext.create(env, inst, new Some(Site.GN), conditions, os.asJava, null, JNone.instance(), JNone.instance())
       val selection  = Await.result(strategy.select(ctx, magTable), 10.seconds)
       verifyGuideStarSelection(strategy, ctx, selection, "Biff Bright", GmosOiwfsGuideProbe.instance)
     }
@@ -231,7 +231,7 @@ class SingleProbeStrategySpec extends Specification {
 
       val strategy   = SingleProbeStrategy(GmosNorthOiwfsKey, SingleProbeStrategyParams.GmosOiwfsParams(Site.GN), voTable)
       val conditions = SPSiteQuality.Conditions.NOMINAL
-      val ctx        = ObsContext.create(env, inst, new Some(Site.GN), conditions, os.asJava, null, JNone.instance())
+      val ctx        = ObsContext.create(env, inst, new Some(Site.GN), conditions, os.asJava, null, JNone.instance(), JNone.instance())
       val selection  = Await.result(strategy.select(ctx, magTable), 10.seconds)
       verifyGuideStarSelection(strategy, ctx, selection, "Biff Flip Bright", GmosOiwfsGuideProbe.instance)
     }
@@ -247,7 +247,7 @@ class SingleProbeStrategySpec extends Specification {
       val strategy = SingleProbeStrategy(Pwfs2NorthKey, SingleProbeStrategyParams.PwfsParams(Site.GN, PwfsGuideProbe.pwfs2), TestVoTableBackend("/gmosn_pwfs2.xml"))
 
       val conditions = SPSiteQuality.Conditions.WORST
-      val ctx = ObsContext.create(env, inst, new Some(Site.GN), conditions, null, null, JNone.instance())
+      val ctx = ObsContext.create(env, inst, new Some(Site.GN), conditions, null, null, JNone.instance(), JNone.instance())
 
       val selection = Await.result(strategy.select(ctx, magTable), 10.seconds)
 
@@ -265,7 +265,7 @@ class SingleProbeStrategySpec extends Specification {
       val strategy = SingleProbeStrategy(Flamingos2OiwfsKey, SingleProbeStrategyParams.Flamingos2OiwfsParams, TestVoTableBackend("/f2_oiwfs.xml"))
 
       val conditions = SPSiteQuality.Conditions.WORST
-      val ctx = ObsContext.create(env, inst, new Some(Site.GS), conditions, null, null, JNone.instance())
+      val ctx = ObsContext.create(env, inst, new Some(Site.GS), conditions, null, null, JNone.instance(), JNone.instance())
 
       val selection = Await.result(strategy.select(ctx, magTable), 10.seconds)
 
@@ -283,7 +283,7 @@ class SingleProbeStrategySpec extends Specification {
       val strategy = SingleProbeStrategy(Pwfs2SouthKey, SingleProbeStrategyParams.PwfsParams(Site.GS, PwfsGuideProbe.pwfs2), TestVoTableBackend("/f2_pwfs2.xml"))
 
       val conditions = SPSiteQuality.Conditions.WORST.cc(SPSiteQuality.CloudCover.PERCENT_70)
-      val ctx = ObsContext.create(env, inst, new Some(Site.GS), conditions, null, null, JNone.instance())
+      val ctx = ObsContext.create(env, inst, new Some(Site.GS), conditions, null, null, JNone.instance(), JNone.instance())
 
       val selection = Await.result(strategy.select(ctx, magTable), 10.seconds)
 
@@ -301,7 +301,7 @@ class SingleProbeStrategySpec extends Specification {
       val strategy = SingleProbeStrategy(GmosSouthOiwfsKey, SingleProbeStrategyParams.GmosOiwfsParams(Site.GS), TestVoTableBackend("/gmoss_oiwfs.xml"))
 
       val conditions = SPSiteQuality.Conditions.NOMINAL.sb(SPSiteQuality.SkyBackground.ANY)
-      val ctx = ObsContext.create(env, inst, new Some(Site.GS), conditions, null, null, JNone.instance())
+      val ctx = ObsContext.create(env, inst, new Some(Site.GS), conditions, null, null, JNone.instance(), JNone.instance())
 
       val selection = Await.result(strategy.select(ctx, magTable), 10.seconds)
 
@@ -320,7 +320,7 @@ class SingleProbeStrategySpec extends Specification {
       val strategy = SingleProbeStrategy(Pwfs2SouthKey, SingleProbeStrategyParams.PwfsParams(Site.GS, PwfsGuideProbe.pwfs2), TestVoTableBackend("/gmoss_pwfs2.xml"))
 
       val conditions = SPSiteQuality.Conditions.NOMINAL.sb(SPSiteQuality.SkyBackground.ANY)
-      val ctx = ObsContext.create(env, inst, new Some(Site.GS), conditions, null, null, JNone.instance())
+      val ctx = ObsContext.create(env, inst, new Some(Site.GS), conditions, null, null, JNone.instance(), JNone.instance())
 
       val selection = Await.result(strategy.select(ctx, magTable), 10.seconds)
 
@@ -338,7 +338,7 @@ class SingleProbeStrategySpec extends Specification {
       val strategy = SingleProbeStrategy(Pwfs2NorthKey, SingleProbeStrategyParams.PwfsParams(Site.GN, PwfsGuideProbe.pwfs2), TestVoTableBackend("/gnirs_1.xml"))
 
       val conditions = SPSiteQuality.Conditions.NOMINAL.cc(SPSiteQuality.CloudCover.PERCENT_70).sb(SPSiteQuality.SkyBackground.ANY)
-      val ctx = ObsContext.create(env, inst, new Some(Site.GN), conditions, null, null, JNone.instance())
+      val ctx = ObsContext.create(env, inst, new Some(Site.GN), conditions, null, null, JNone.instance(), JNone.instance())
 
       val selection = Await.result(strategy.select(ctx, magTable), 10.seconds)
 
@@ -356,7 +356,7 @@ class SingleProbeStrategySpec extends Specification {
       val strategy = SingleProbeStrategy(Pwfs2NorthKey, SingleProbeStrategyParams.PwfsParams(Site.GN, PwfsGuideProbe.pwfs2), TestVoTableBackend("/gnirs_2.xml"))
 
       val conditions = SPSiteQuality.Conditions.NOMINAL.cc(SPSiteQuality.CloudCover.PERCENT_70).sb(SPSiteQuality.SkyBackground.ANY)
-      val ctx = ObsContext.create(env, inst, new Some(Site.GN), conditions, null, null, JNone.instance())
+      val ctx = ObsContext.create(env, inst, new Some(Site.GN), conditions, null, null, JNone.instance(), JNone.instance())
 
       val selection = Await.result(strategy.select(ctx, magTable), 10.seconds)
 
@@ -374,7 +374,7 @@ class SingleProbeStrategySpec extends Specification {
 
       // Conditions will not let it go through
       val conditions = SPSiteQuality.Conditions.WORST
-      val ctx = ObsContext.create(env, inst, new Some(Site.GS), conditions, null, null, JNone.instance())
+      val ctx = ObsContext.create(env, inst, new Some(Site.GS), conditions, null, null, JNone.instance(), JNone.instance())
 
       val estimate = Await.result(strategy.estimate(ctx, magTable), 10.seconds)
 
@@ -395,7 +395,7 @@ class SingleProbeStrategySpec extends Specification {
 
       // Conditions not that bad
       val conditions = SPSiteQuality.Conditions.WORST.cc(SPSiteQuality.CloudCover.PERCENT_70).iq(SPSiteQuality.ImageQuality.PERCENT_85)
-      val ctx = ObsContext.create(env, inst, new Some(Site.GS), conditions, null, null, JNone.instance())
+      val ctx = ObsContext.create(env, inst, new Some(Site.GS), conditions, null, null, JNone.instance(), JNone.instance())
 
       val estimate = Await.result(strategy.estimate(ctx, magTable), 10.seconds)
 
@@ -417,7 +417,7 @@ class SingleProbeStrategySpec extends Specification {
 
       // Conditions not that bad
       val conditions = SPSiteQuality.Conditions.WORST.cc(SPSiteQuality.CloudCover.PERCENT_70).iq(SPSiteQuality.ImageQuality.PERCENT_85)
-      val ctx = ObsContext.create(env, inst, new Some(Site.GS), conditions, null, null, JNone.instance())
+      val ctx = ObsContext.create(env, inst, new Some(Site.GS), conditions, null, null, JNone.instance(), JNone.instance())
 
       val estimate = Await.result(strategy.estimate(ctx, magTable), 10.seconds)
 
@@ -438,7 +438,7 @@ class SingleProbeStrategySpec extends Specification {
 
       val conditions = SPSiteQuality.Conditions.WORST.cc(SPSiteQuality.CloudCover.PERCENT_70).iq(SPSiteQuality.ImageQuality.PERCENT_85)
       // Note, no site defined
-      val ctx = ObsContext.create(env, inst, JNone.instance(), conditions, null, null, JNone.instance())
+      val ctx = ObsContext.create(env, inst, JNone.instance(), conditions, null, null, JNone.instance(), JNone.instance())
 
       val estimate = Await.result(strategy.estimate(ctx, magTable), 10.seconds)
 

@@ -123,6 +123,13 @@ object ProgramId {
       case s: StandardProgramId => Some(s)
       case _                    => None
     }
+
+  def fromSPProgramID(sp: SPProgramID): ProgramId =
+    parse(sp.stringValue());
+
+  def fromStandardSPProgramID(sp: SPProgramID): Option[ProgramId] =
+    parseStandardId(sp.stringValue());
+
 }
 
 

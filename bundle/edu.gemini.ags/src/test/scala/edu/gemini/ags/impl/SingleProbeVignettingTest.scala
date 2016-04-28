@@ -79,7 +79,7 @@ object SingleProbeVignettingTest extends Specification with ScalaCheck with Vign
         gmos <- arbitrary[InstGmosNorth]
         offs <- arbitrary[java.util.Set[SkyCalcOffset]]
         pac  <- Gen.oneOf(FIXED, FIXED_180)
-        ctx   = ObsContext.create(env, gmos <| (_.setPosAngleConstraint(pac)), Conditions.NOMINAL, offs, null, ImOption.empty())
+        ctx   = ObsContext.create(env, gmos <| (_.setPosAngleConstraint(pac)), Conditions.NOMINAL, offs, null, ImOption.empty(), ImOption.empty())
         gs   <- genGuideStars(ctx)
       } yield (ctx, gs)
     }
