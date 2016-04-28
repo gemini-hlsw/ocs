@@ -48,7 +48,7 @@ public class GmosOiwfsGuideProbeTest extends TestCase {
         inst.setPosAngle(0);
         inst.setIssPort(IssPort.UP_LOOKING);
 
-        baseContext = ObsContext.create(env, inst, None.<Site>instance(), SPSiteQuality.Conditions.BEST, null, null, None.instance());
+        baseContext = ObsContext.create(env, inst, None.<Site>instance(), SPSiteQuality.Conditions.BEST, null, null, None.instance(), None.instance());
     }
 
     /**
@@ -148,7 +148,7 @@ public class GmosOiwfsGuideProbeTest extends TestCase {
 
         InstGmosNorth ign = (InstGmosNorth) baseContext.getInstrument();
         ign.setFPUnit(GmosNorthType.FPUnitNorth.IFU_2);
-        ObsContext    ctx = ObsContext.create(env, ign, None.<Site>instance(), SPSiteQuality.Conditions.BEST, null, null, None.instance());
+        ObsContext    ctx = ObsContext.create(env, ign, None.<Site>instance(), SPSiteQuality.Conditions.BEST, null, null, None.instance(), None.instance());
 
         assertFalse("Point outside of fov, after IFU selected.",
                 GmosOiwfsGuideProbe.instance.validate(

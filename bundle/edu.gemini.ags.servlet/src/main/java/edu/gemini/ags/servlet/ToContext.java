@@ -1,5 +1,6 @@
 package edu.gemini.ags.servlet;
 
+import edu.gemini.shared.util.immutable.None;
 import edu.gemini.skycalc.Angle;
 import edu.gemini.skycalc.DDMMSS;
 import edu.gemini.skycalc.HHMMSS;
@@ -210,7 +211,7 @@ public enum ToContext {
 
         final TargetObsComp toc = new TargetObsComp();
         toc.setTargetEnvironment(env);
-        return ObsContext.create(env, inst, site, conds, Collections.emptySet(), altair, new Some<>(sb));
+        return ObsContext.create(env, inst, site, conds, Collections.emptySet(), altair, new Some<>(sb), None.instance());
     }
 
     private InstAltair getAltair(HttpServletRequest req) throws RequestException {

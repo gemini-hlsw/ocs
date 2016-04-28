@@ -43,7 +43,7 @@ public class GsaoiDetectorArrayTest extends TestCase {
         inst.setPosAngle(0);
         inst.setIssPort(IssPort.SIDE_LOOKING);
 
-        baseContext = ObsContext.create(env, inst, None.<Site>instance(), SPSiteQuality.Conditions.BEST, null, null, None.instance());
+        baseContext = ObsContext.create(env, inst, None.<Site>instance(), SPSiteQuality.Conditions.BEST, null, null, None.instance(), None.instance());
     }
 
     private void assertEmpty(Coordinates[] coordsArray) {

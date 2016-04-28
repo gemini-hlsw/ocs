@@ -37,7 +37,7 @@ public class BoundaryValidatorTest {
         inst.setPosAngle(0);
         inst.setIssPort(IssPort.UP_LOOKING);
 
-        ObsContext ctxt = ObsContext.create(env, inst, None.<Site>instance(), SPSiteQuality.Conditions.BEST, null, null, None.instance());
+        ObsContext ctxt = ObsContext.create(env, inst, None.<Site>instance(), SPSiteQuality.Conditions.BEST, null, null, None.instance(), None.instance());
 
 
         //Assert.notFalse(BoundaryValidator.instance.validate(coords, ctxt, GmosOiwfsGuideProbe.instance), "Expected valid, got 'false' ");
@@ -59,7 +59,7 @@ public class BoundaryValidatorTest {
         inst.setPosAngle(0);
         inst.setIssPort(IssPort.UP_LOOKING);
 
-        ObsContext ctxt = ObsContext.create(env, inst, None.<Site>instance(), SPSiteQuality.Conditions.BEST, null, null, None.instance());
+        ObsContext ctxt = ObsContext.create(env, inst, None.<Site>instance(), SPSiteQuality.Conditions.BEST, null, null, None.instance(), None.instance());
 
 
        // Assert.notFalse(BoundaryValidator.instance.validate(coords, ctxt, PwfsGuideProbe.pwfs1), "Expected valid, got 'false' ");

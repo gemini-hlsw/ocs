@@ -110,7 +110,7 @@ case class ObservationInfo(ctx: Option[ObsContext],
       val altair = strategy.collect {
         case SupportedStrategy(_, _, Some(m)) => new InstAltair() <| {_.setMode(m)}
       }
-      ObsContext.create(env, i, site.flatten.asGeminiOpt, cond, offsets.map(_.toOldModel).asJava, altair.orNull, JNone.instance()).withPositionAngle(positionAngle.toOldModel)
+      ObsContext.create(env, i, site.flatten.asGeminiOpt, cond, offsets.map(_.toOldModel).asJava, altair.orNull, JNone.instance(), JNone.instance()).withPositionAngle(positionAngle.toOldModel)
     }
   }
 }

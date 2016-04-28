@@ -6,6 +6,8 @@ import edu.gemini.skycalc.Coordinates;
 import edu.gemini.skycalc.Offset;
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.ags.AgsStrategyKey;
+import edu.gemini.spModel.core.ProgramId$;
+import edu.gemini.spModel.core.Semester;
 import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.data.AbstractDataObject;
 import edu.gemini.spModel.gemini.altair.InstAltair;
@@ -83,8 +85,9 @@ public final class ObsContext {
                                     Conditions conds,
                                     Set<Offset> sciencePos,
                                     AbstractDataObject aoComp,
-                                    Option<SchedulingBlock> schedulingBlock) {
-        return create(None.instance(), targets, inst, getSiteFromInstrument(inst), conds, sciencePos, aoComp, schedulingBlock);
+                                    Option<SchedulingBlock> schedulingBlock,
+                                    Option<Semester> semester) {
+        return create(None.instance(), targets, inst, getSiteFromInstrument(inst), conds, sciencePos, aoComp, schedulingBlock, semester);
     }
 
 
@@ -105,8 +108,9 @@ public final class ObsContext {
                                     Conditions conds,
                                     Set<Offset> sciencePos,
                                     AbstractDataObject aoComp,
-                                    Option<SchedulingBlock> schedulingBlock) {
-        return create(None.instance(), targets, inst, site, conds, sciencePos, aoComp, schedulingBlock);
+                                    Option<SchedulingBlock> schedulingBlock,
+                                    Option<Semester> semester) {
+        return create(None.instance(), targets, inst, site, conds, sciencePos, aoComp, schedulingBlock, semester);
     }
 
     public static ObsContext create(Option<AgsStrategyKey> ags,
@@ -116,7 +120,8 @@ public final class ObsContext {
                                     Conditions conds,
                                     Set<Offset> sciencePos,
                                     AbstractDataObject aoComp,
-                                    Option<SchedulingBlock> schedulingBlock) {
+                                    Option<SchedulingBlock> schedulingBlock,
+                                    Option<Semester> semester) {
 
         // If no explicit observing positions are provided, use an offset list
         // with a single "offset" to represent the base position.
@@ -127,9 +132,9 @@ public final class ObsContext {
             offsets = Collections.unmodifiableSet(new LinkedHashSet<>(sciencePos));
         }
         if (aoComp != null) {
-            return new ObsContext(ags, targets, inst, site, conds, offsets, new Some<>(aoComp), schedulingBlock);
+            return new ObsContext(ags, targets, inst, site, conds, offsets, new Some<>(aoComp), schedulingBlock, semester);
         } else {
-            return new ObsContext(ags, targets, inst, site, conds, offsets, None.instance(), schedulingBlock);
+            return new ObsContext(ags, targets, inst, site, conds, offsets, None.instance(), schedulingBlock, semester);
         }
     }
 
@@ -163,9 +168,15 @@ public final class ObsContext {
 
         final Set<Offset> offsets = OffsetUtil.getSciencePositions(posListA);
 
+        final Option<Semester> semester =
+            ImOption.apply(obs.getProgramID())
+                    .flatMap(id -> ImOption.fromScalaOpt(ProgramId$.MODULE$.fromStandardSPProgramID(id)))
+                    .flatMap(id -> ImOption.fromScalaOpt(id.semester()));
+
+
         final SPObservation spObs = (SPObservation) obs.getDataObject();
         return new Some<>(ObsContext.create(spObs.getAgsStrategyOverride(), env, inst, site, conds,
-                offsets, aoCompOpt.getOrNull(), spObs.getSchedulingBlock()));
+                offsets, aoCompOpt.getOrNull(), spObs.getSchedulingBlock(), semester));
     }
 
     // Fish out the target, instrument and AO component data objects
@@ -215,10 +226,11 @@ public final class ObsContext {
     private final Option<AbstractDataObject> aoCompOpt;
     private final Option<Site> site;
     private final Option<SchedulingBlock> schedulingBlock;
+    private final Option<Semester> semester;
 
     private ObsContext(Option<AgsStrategyKey> ags, TargetEnvironment targets, SPInstObsComp inst, Option<Site> site,
                        Conditions conds, Set<Offset> sciencePositions, Option<AbstractDataObject> aoCompOpt,
-                       Option<SchedulingBlock> schedulingBlock) {
+                       Option<SchedulingBlock> schedulingBlock, Option<Semester> semester) {
         this.agsOverride = ags;
         this.targets          = targets;
         this.inst             = (SPInstObsComp) inst.clone();
@@ -227,18 +239,19 @@ public final class ObsContext {
         this.sciencePositions = sciencePositions;
         this.aoCompOpt        = aoCompOpt;
         this.schedulingBlock  = schedulingBlock;
+        this.semester         = semester;
     }
 
     private ObsContext(Option<AgsStrategyKey> ags, TargetEnvironment targets, SPInstObsComp inst, Option<Site> site,
                        Conditions conds, Set<Offset> sciencePositions, Option<AbstractDataObject> aoCompOpt,
-                       Angle posAngle, Option<SchedulingBlock> schedulingBlock) {
-        this(ags, targets, inst, site, conds, sciencePositions, aoCompOpt, schedulingBlock);
+                       Angle posAngle, Option<SchedulingBlock> schedulingBlock, Option<Semester> semester) {
+        this(ags, targets, inst, site, conds, sciencePositions, aoCompOpt, schedulingBlock, semester);
         this.inst.setPosAngle(posAngle.toDegrees().getMagnitude());
     }
     private ObsContext(Option<AgsStrategyKey> ags, TargetEnvironment targets, SPInstObsComp inst, Option<Site> site,
                        Conditions conds, Set<Offset> sciencePositions, Option<AbstractDataObject> aoCompOpt,
-                       IssPort port, Option<SchedulingBlock> schedulingBlock) {
-        this(ags, targets, inst, site, conds, sciencePositions, aoCompOpt, schedulingBlock);
+                       IssPort port, Option<SchedulingBlock> schedulingBlock, Option<Semester> semester) {
+        this(ags, targets, inst, site, conds, sciencePositions, aoCompOpt, schedulingBlock, semester);
         if (this.inst instanceof IssPortProvider) {
             ((IssPortProvider) this.inst).setIssPort(port);
         }
@@ -250,7 +263,7 @@ public final class ObsContext {
 
     public ObsContext withAgsStrategyOverride(Option<AgsStrategyKey> s) {
         if (s.equals(agsOverride)) return this;
-        return new ObsContext(s, targets, inst, site, conds, sciencePositions, aoCompOpt, schedulingBlock);
+        return new ObsContext(s, targets, inst, site, conds, sciencePositions, aoCompOpt, schedulingBlock, semester);
     }
 
     public TargetEnvironment getTargets() {
@@ -259,7 +272,7 @@ public final class ObsContext {
 
     public ObsContext withTargets(TargetEnvironment targets) {
         if (targets.equals(this.targets)) return this;
-        return new ObsContext(agsOverride, targets, inst, site, conds, sciencePositions, aoCompOpt, schedulingBlock);
+        return new ObsContext(agsOverride, targets, inst, site, conds, sciencePositions, aoCompOpt, schedulingBlock, semester);
     }
 
     public Option<Coordinates> getBaseCoordinates() {
@@ -279,7 +292,7 @@ public final class ObsContext {
 
     public ObsContext withPositionAngle(Angle angle) {
         if (angle.equals(getPositionAngle())) return this;
-        return new ObsContext(agsOverride, targets, inst, site, conds, sciencePositions, aoCompOpt, angle, schedulingBlock);
+        return new ObsContext(agsOverride, targets, inst, site, conds, sciencePositions, aoCompOpt, angle, schedulingBlock, semester);
     }
 
     public PosAngleConstraint getPosAngleConstraint() {
@@ -309,7 +322,7 @@ public final class ObsContext {
 
     public ObsContext withIssPort(IssPort port) {
         if (getIssPort() == port) return this;
-        return new ObsContext(agsOverride, targets, inst, site, conds, sciencePositions, aoCompOpt, port, schedulingBlock);
+        return new ObsContext(agsOverride, targets, inst, site, conds, sciencePositions, aoCompOpt, port, schedulingBlock, semester);
     }
 
     public SPInstObsComp getInstrument(){
@@ -317,13 +330,13 @@ public final class ObsContext {
     }
 
     public ObsContext withInstrument(SPInstObsComp inst) {
-        return create(agsOverride, targets, inst, site, conds, sciencePositions, aoCompOpt.getOrNull(), schedulingBlock);
+        return create(agsOverride, targets, inst, site, conds, sciencePositions, aoCompOpt.getOrNull(), schedulingBlock, semester);
     }
 
     public Option<Site> getSite() { return site; }
 
     public ObsContext withSite(final Option<Site> site) {
-        return new ObsContext(agsOverride, targets, inst, site, conds, sciencePositions, aoCompOpt, schedulingBlock);
+        return new ObsContext(agsOverride, targets, inst, site, conds, sciencePositions, aoCompOpt, schedulingBlock, semester);
     }
 
     public Conditions getConditions() {
@@ -332,7 +345,7 @@ public final class ObsContext {
 
     public ObsContext withConditions(Conditions conds) {
         if (getConditions().equals(conds)) return this;
-        return new ObsContext(agsOverride, targets, inst, site, conds, sciencePositions, aoCompOpt, schedulingBlock);
+        return new ObsContext(agsOverride, targets, inst, site, conds, sciencePositions, aoCompOpt, schedulingBlock, semester);
     }
 
     public Option<AbstractDataObject> getAOComponent(){
@@ -340,11 +353,11 @@ public final class ObsContext {
     }
 
     public ObsContext withAOComponent(AbstractDataObject aoCompOpt){
-        return new ObsContext(agsOverride, targets,  inst, site, conds, sciencePositions, new Some<>(aoCompOpt), schedulingBlock);
+        return new ObsContext(agsOverride, targets,  inst, site, conds, sciencePositions, new Some<>(aoCompOpt), schedulingBlock, semester);
     }
 
     public ObsContext withoutAOComponent(){
-        return new ObsContext(agsOverride, targets,  inst, site, conds, sciencePositions, None.instance(), schedulingBlock);
+        return new ObsContext(agsOverride, targets,  inst, site, conds, sciencePositions, None.instance(), schedulingBlock, semester);
     }
 
 
@@ -354,7 +367,7 @@ public final class ObsContext {
 
     public ObsContext withSciencePositions(Set<Offset> sciencePos) {
         if (sciencePos.equals(this.sciencePositions)) return this;
-        return create(agsOverride, targets, inst, site, conds, sciencePos, aoCompOpt.getOrNull(), schedulingBlock);
+        return create(agsOverride, targets, inst, site, conds, sciencePos, aoCompOpt.getOrNull(), schedulingBlock, semester);
     }
 
     public Option<SchedulingBlock> getSchedulingBlock() {
@@ -363,6 +376,10 @@ public final class ObsContext {
 
     public Option<Long> getSchedulingBlockStart() {
         return schedulingBlock.map(SchedulingBlock::start);
+    }
+
+    public Option<Semester> getSemester() {
+        return semester;
     }
 
     public String toString() {

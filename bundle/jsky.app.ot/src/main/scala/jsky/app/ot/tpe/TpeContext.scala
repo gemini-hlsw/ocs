@@ -4,7 +4,7 @@ import edu.gemini.pot.sp._
 
 import edu.gemini.shared.util.immutable.{None => JNone, Option => JOption}
 import edu.gemini.shared.util.immutable.ScalaConverters._
-import edu.gemini.spModel.core.Site
+import edu.gemini.spModel.core.{ProgramId, Site}
 import edu.gemini.spModel.data.{ISPDataObject, IOffsetPosListProvider}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.Conditions
@@ -197,7 +197,8 @@ case class TpeContext(node: Option[ISPNode]) {
     i <- instrument.dataObject
     ao = (gems.dataObject orElse altair.dataObject).orNull
     obs = s.getDataObject.asInstanceOf[SPObservation]
-  } yield ObsContext.create(obs.getAgsStrategyOverride, t, i, site, c, offsets.scienceOffsetsJava, ao, obs.getSchedulingBlock)
+    sem = Option(s.getProgramID).flatMap(ProgramId.fromStandardSPProgramID).flatMap(_.semester).asGeminiOpt
+  } yield ObsContext.create(obs.getAgsStrategyOverride, t, i, site, c, offsets.scienceOffsetsJava, ao, obs.getSchedulingBlock, sem)
 
   def obsContextJavaWithConditions(c: Conditions): JOption[ObsContext] =
     obsContextWithConditions(c).asGeminiOpt

@@ -25,7 +25,7 @@ class AgsRegistrarSpec extends Specification {
       val env = TargetEnvironment.create(target)
       val inst = new InstPhoenix <| {_.setPosAngle(0.0)}
 
-      val ctx = ObsContext.create(env, inst, new JSome(Site.GS), null, null, null, JNone.instance())
+      val ctx = ObsContext.create(env, inst, new JSome(Site.GS), null, null, null, JNone.instance(), JNone.instance())
 
       AgsRegistrar.defaultStrategy(ctx) should beSome(SingleProbeStrategy(Pwfs2SouthKey,PwfsParams(Site.GS, PwfsGuideProbe.pwfs2),ConeSearchBackend))
     }

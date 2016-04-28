@@ -213,7 +213,7 @@ class MascotGuideStarSpec extends Specification {
       val inst = new Gsaoi()
       inst.setPosAngle(0.0)
       inst.setIssPort(IssPort.SIDE_LOOKING)
-      val ctx = ObsContext.create(env, inst, JNone.instance(), SPSiteQuality.Conditions.BEST, null, null, JNone.instance())
+      val ctx = ObsContext.create(env, inst, JNone.instance(), SPSiteQuality.Conditions.BEST, null, null, JNone.instance(), JNone.instance())
 
       val result = MascotGuideStar.findBestAsterismInQueryResult(loadedTargets, ctx, MascotGuideStar.CWFS, 180.0, 10.0)
 
@@ -230,7 +230,7 @@ class MascotGuideStarSpec extends Specification {
       val inst = new Gsaoi()
       inst.setPosAngle(0.0)
       inst.setIssPort(IssPort.SIDE_LOOKING)
-      val ctx = ObsContext.create(env, inst, JNone.instance(), SPSiteQuality.Conditions.BEST, null, null, JNone.instance())
+      val ctx = ObsContext.create(env, inst, JNone.instance(), SPSiteQuality.Conditions.BEST, null, null, JNone.instance(), JNone.instance())
 
       val result = MascotGuideStar.findBestAsterismInQueryResult(UCAC3Regression.replaceRBands(loadedTargets), ctx, MascotGuideStar.CWFS, 180.0, 10.0)
 
@@ -250,7 +250,7 @@ class MascotGuideStarSpec extends Specification {
         val inst = new Gsaoi()
         inst.setPosAngle(0.0)
         inst.setIssPort(IssPort.SIDE_LOOKING)
-        val ctx = ObsContext.create(env, inst, JNone.instance(), SPSiteQuality.Conditions.BEST, null, null, JNone.instance())
+        val ctx = ObsContext.create(env, inst, JNone.instance(), SPSiteQuality.Conditions.BEST, null, null, JNone.instance(), JNone.instance())
 
         val targets = t.result.targets.rows
         val result = MascotGuideStar.findBestAsterismInQueryResult(targets, ctx, MascotGuideStar.CWFS, 180.0, 10.0)
