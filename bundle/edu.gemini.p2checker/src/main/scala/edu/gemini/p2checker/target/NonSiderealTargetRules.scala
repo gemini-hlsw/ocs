@@ -31,7 +31,7 @@ final class NonSiderealTargetRules extends IRule {
         tar <- toc.getTargetEnvironment.getTargets.asScalaList
         nst <- tar.getNonSiderealTarget.toList
                if nst.horizonsDesignation.isEmpty
-      } p2p.addWarning(ERR_NO_HORIZONS_DESIGNATION,
+      } p2p.addError(ERR_NO_HORIZONS_DESIGNATION,
           s"Target ${nst.name} has no HORIZONS identifier; high-resolution ephemeris cannot be updated automatically.",
           ocn)
     }
