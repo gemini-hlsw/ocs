@@ -10,7 +10,7 @@ import java.io.IOException
 import CgiHorizonsConstants._
 import java.time.ZoneOffset.UTC
 import java.time.format.DateTimeFormatter
-import java.util.Date
+import java.util.{Calendar, Date}
 import java.util.Locale.US
 
 import scala.collection.JavaConverters._
@@ -73,6 +73,14 @@ object HorizonsService2 {
   /** Convenience method; looks up ephemeris for the given semester. */
   def lookupEphemeris(target: HorizonsDesignation, site: Site, elems: Int, sem: Semester): HS2[Ephemeris] =
     lookupEphemeris(target, site, sem.getStartDate(site), sem.getEndDate(site), elems)
+
+  /** Convenience method; looks up ephemeris for the given semester, with a month of padding on either side. */
+  def lookupEphemerisWithPadding(target: HorizonsDesignation, site: Site, elems: Int, sem: Semester): HS2[Ephemeris] = {
+    val cal   = Calendar.getInstance(site.timezone)
+    val start = { cal.setTime(sem.getStartDate(site)); cal.add(Calendar.MONTH, -1); cal.getTime }
+    val end   = { cal.setTime(sem.getEndDate(site));   cal.add(Calendar.MONTH,  1); cal.getTime }
+    lookupEphemeris(target, site, start, end, elems)
+  }
 
   /**
    * Look up the ephemeris for the given target when viewed from the given site, requesting `elems`
