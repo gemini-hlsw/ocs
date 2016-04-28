@@ -14,9 +14,11 @@ import java.nio.file.Path
 import java.security.Principal
 import java.time.Instant
 import java.util.logging.{Level, Logger}
+import javax.mail.internet.InternetAddress
 
 import scalaz.Scalaz._
 import scalaz._
+import scalaz.effect.IO
 
 /** TCS ephemeris export cron job. */
 object TcsEphemerisCron {
@@ -24,13 +26,45 @@ object TcsEphemerisCron {
   /** If specified, this property identifies the directory where ephemeris
     * files will be written.
     */
-  val DirectoryProp = "edu.gemini.dbTools.tcs.ephemeris.directory"
+  val DirectoryProp  = "edu.gemini.dbTools.tcs.ephemeris.directory"
+
+  /** A config property that lists email recipients for error reports. */
+  val RecipientsProp = "edu.gemini.dbTools.tcs.ephemeris.recipients"
+
+  /** A config property that specifies the SMTP server to use. */
+  val SmtpProp       = "cron.odbMail.SITE_SMTP_SERVER"
 
   import TcsEphemerisExport.FileUpdate  // (FileStatus, ExportError \/ Path)
 
+  // Creates a mailer for sending error reports, extracting smtp and recipients
+  // from bundle properties.
+  private def reportMailer(ctx: BundleContext, site: Site, log: Logger): ReportMailer = {
+    def parseRecipients(s: String): String \/ List[InternetAddress] =
+      \/.fromTryCatchNonFatal {
+        InternetAddress.parse(s, false).toList
+      }.leftMap(_ => s"Could not parse address list '$s'").ensure("Empty address list.") { _.nonEmpty }
+
+    val mailer = for {
+      rprop <- Option(ctx.getProperty(RecipientsProp)) \/> s"Missing $RecipientsProp"
+      rs    <- parseRecipients(rprop)
+      host  <- Option(ctx.getProperty(SmtpProp))       \/> s"Missing $SmtpProp"
+    } yield ReportMailer(site, host, rs)
+
+    mailer match {
+      case -\/(msg) =>
+        // If anything is missing use a test mailer.
+        log.warning(s"TcsEphemerisCron using test mailer ($msg).")
+        ReportMailer.forTesting(site)
+      case \/-(m)   =>
+        log.info(s"TcsEphemerisCron using host '${m.smtpHost}' and recipients '${m.recipients.mkString(",")}'")
+        m
+    }
+  }
+
   /** Cron job entry point.  See edu.gemini.spdb.cron.osgi.Activator. */
-  def run(ctx: BundleContext)(tmpDir: File, log: Logger, env: java.util.Map[String, String], user: java.util.Set[Principal]): Unit = {
-    val site = Option(SiteProperty.get(ctx)) | sys.error(s"Property `${SiteProperty.NAME}` not specified.")
+  def run(ctx: BundleContext)(tmpDir: File, logger: Logger, env: java.util.Map[String, String], user: java.util.Set[Principal]): Unit = {
+    val site   = Option(SiteProperty.get(ctx)) | sys.error(s"Property `${SiteProperty.NAME}` not specified.")
+    val mailer = reportMailer(ctx, site, logger)
 
     val exportDir = Option(ctx.getProperty(DirectoryProp)).fold(tmpDir) { pathString =>
       new File(pathString)
@@ -55,21 +89,38 @@ object TcsEphemerisCron {
         res <- TcsEphemerisExport(exportDir.toPath, night, site).update(hid)
       } yield res
 
-    log.info(s"Starting ephemeris lookup for $site, writing into $exportDir")
-    try {
-      action.run.unsafePerformIO() match {
-        case -\/(err)     =>
-          log.log(Level.WARNING, "Could not refresh ephemeris data: " + err.message, err.exception.orNull)
+    def log(level: Level, msg: String, ex: Option[Throwable] = None): IO[Unit] =
+      IO { logger.log(level, msg, ex.orNull) }
 
+    def logAndMail(results: ExportError \/ (HorizonsDesignation ==>> FileUpdate)): IO[Unit] =
+      results match {
+        case -\/(err)     =>
+          val msg = "Could not refresh ephemeris data: " + err.message
+          for {
+            _ <- log(Level.WARNING, msg, err.exception)
+            _ <- mailer.notifyError(msg)
+          } yield ()
         case \/-(updates) =>
-          val (errors, successes) = splitResults(updates)
-          if (!successes.isEmpty) log.log(Level.INFO, successReport(successes)) // hmm, no nonEmpty?
-          if (!errors.isEmpty) log.log(Level.WARNING, errorReport(errors))
+          val (em, sm) = splitResults(updates)
+          val sr       = (!sm.isEmpty) option successReport(sm)
+          val er       = (!em.isEmpty) option errorReport(em)
+          for {
+            _ <- sr.traverse_(log(Level.INFO, _))
+            _ <- er.traverse_(log(Level.WARNING, _))
+            _ <- er.traverse_(mailer.notifyError)
+          } yield ()
       }
+
+    try {
+      (for {
+        _   <- log(Level.INFO, s"Starting ephemeris lookup for $site, writing into $exportDir")
+        res <- action.run
+        _   <- logAndMail(res)
+        _   <- log(Level.INFO, "Finish ephemeris lookup.")
+      } yield ()).unsafePerformIO()
     } finally {
       ctx.ungetService(odbRef)
     }
-    log.info("Finish ephemeris lookup.")
   }
 
   // **** Report Formatting ****
@@ -153,7 +204,7 @@ object TcsEphemerisCron {
       // After the header, add the stack trace if any.
       val causedBy = (stack == "") ? "" | s"Caused By:\n$stack"
       s"$header\n$causedBy"
-    }.mkString(s"\n${"-" * 80}\n", "\n", "")
+    }.mkString("\n", s"\n${"-" * 80}\n", "")
 
   // The success report will group the files by what happened, indicating
   // whether they were updated, deleted, created or skipped.
