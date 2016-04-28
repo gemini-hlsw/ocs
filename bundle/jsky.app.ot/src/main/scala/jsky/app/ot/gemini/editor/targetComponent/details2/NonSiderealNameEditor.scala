@@ -10,7 +10,7 @@ import edu.gemini.pot.sp.ISPNode
 import edu.gemini.shared.gui.GlassLabel
 import edu.gemini.shared.util.immutable.{Option => GOption}
 import edu.gemini.shared.util.immutable.ScalaConverters._
-import edu.gemini.spModel.core.{Site, Ephemeris, HorizonsDesignation, Target}
+import edu.gemini.spModel.core._
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
 
@@ -22,8 +22,9 @@ import scalaz._, Scalaz._, effect.IO, concurrent.Task
 
 final class NonSiderealNameEditor extends TelescopePosEditor with ReentrancyHack {
 
-  private[this] var site = Option.empty[Site]
-  private[this] var spt = new SPTarget // never null
+  private[this] var site  = Option.empty[Site]
+  private[this] var start = Option.empty[Long]
+  private[this] var spt   = new SPTarget // never null
 
   def lookup(site: Option[Site]): Unit = {
     import HorizonsService2.{ Search, Row }, Search._
@@ -53,8 +54,15 @@ final class NonSiderealNameEditor extends TelescopePosEditor with ReentrancyHack
     def hide: HS2[Unit] =
       HS2.delay(Swing.onEDT(GlassLabel.hide(SwingUtilities.getRootPane(name))))
 
-    def lookup(d: HorizonsDesignation, site: Site): HS2[Ephemeris] =
-      show("Fetching Ephemeris...") *> HorizonsService2.lookupEphemeris(d, site, 1000) // arbitrary
+    // semester for scheduling block if any, or current time
+    def semester(site: Site): Semester =
+      new Semester(site, start.getOrElse(System.currentTimeMillis))
+
+    def lookup(d: HorizonsDesignation, site: Site): HS2[Ephemeris] = {
+      val s = semester(site)
+      show(s"Fetching Ephemeris for $s ...") *>
+      HorizonsService2.lookupEphemerisWithPadding(d, site, 1200, s)
+    }
 
     def updateDesignation(hd: HorizonsDesignation, name: String): HS2[Unit] =
       HS2.delay {
@@ -142,8 +150,9 @@ final class NonSiderealNameEditor extends TelescopePosEditor with ReentrancyHack
     hd.fold("--")(_.queryString)
 
   def edit(ctx: GOption[ObsContext], target: SPTarget, node: ISPNode): Unit = {
-    this.spt = target
-    this.site = ctx.asScalaOpt.flatMap(_.getSite.asScalaOpt)
+    this.spt   = target
+    this.start = ctx.asScalaOpt.flatMap(_.getSchedulingBlockStart.asScalaOpt.map(_.toLong))
+    this.site  = ctx.asScalaOpt.flatMap(_.getSite.asScalaOpt)
     nonreentrant {
       name.setText(Target.name.get(target.getTarget))
       Target.horizonsDesignation.get(target.getTarget).map(hidText).foreach(hid.setText)
