@@ -14,6 +14,7 @@ import edu.gemini.spModel.gemini.nici.SeqRepeatNiciOffset;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 import edu.gemini.spModel.gemini.seqcomp.SeqRepeatOffset;
 import edu.gemini.spModel.guide.GuideProbeAvailabilityVolatileDataObject;
+import edu.gemini.spModel.obs.SPObservation;
 import edu.gemini.spModel.obs.SchedulingBlock;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
@@ -266,7 +267,7 @@ public final class TelescopePosEditor extends JSkyCat implements TpeMouseObserve
 
         final ISPNode src = (ISPNode) evt.getSource();
         final ISPDataObject obj = src.getDataObject();
-        if (isTpeObject(src) || (obj instanceof GuideProbeAvailabilityVolatileDataObject)) {
+        if (isTpeObject(src) || (obj instanceof GuideProbeAvailabilityVolatileDataObject) || (obj instanceof SPObservation)) {
             if (_ctx.node().isDefined()) {
                 reset(_ctx.node().get());
             }
