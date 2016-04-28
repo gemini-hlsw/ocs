@@ -19,7 +19,6 @@ import javax.mail.internet.InternetAddress
 import scalaz.Scalaz._
 import scalaz._
 import scalaz.effect.IO
-import scalaz.effect.IO.ioUnit
 
 /** TCS ephemeris export cron job. */
 object TcsEphemerisCron {
@@ -106,9 +105,9 @@ object TcsEphemerisCron {
           val sr       = (!sm.isEmpty) option successReport(sm)
           val er       = (!em.isEmpty) option errorReport(em)
           for {
-            _ <- sr.fold(ioUnit) { log(Level.INFO, _)    }
-            _ <- er.fold(ioUnit) { log(Level.WARNING, _) }
-            _ <- er.fold(ioUnit) { mailer.notifyError    }
+            _ <- sr.traverse_(log(Level.INFO, _))
+            _ <- er.traverse_(log(Level.WARNING, _))
+            _ <- er.traverse_(mailer.notifyError)
           } yield ()
       }
 
@@ -205,7 +204,7 @@ object TcsEphemerisCron {
       // After the header, add the stack trace if any.
       val causedBy = (stack == "") ? "" | s"Caused By:\n$stack"
       s"$header\n$causedBy"
-    }.mkString(s"\n", s"\n${"-" * 80}\n", "")
+    }.mkString("\n", s"\n${"-" * 80}\n", "")
 
   // The success report will group the files by what happened, indicating
   // whether they were updated, deleted, created or skipped.
