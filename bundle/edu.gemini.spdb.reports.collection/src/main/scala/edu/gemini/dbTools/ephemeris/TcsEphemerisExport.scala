@@ -63,9 +63,8 @@ object TcsEphemerisExport {
   val MaxGap = Duration.ofMinutes(2)
 
   // We will request this many elements from horizons, though the actual number
-  // provided may differ.  The TCS maximum is 1440, but horizons may return a
-  // few more than requested.
-  val ElementCount  = 1430
+  // provided may differ.
+  val ElementCount  = 1440
 
   // Single file result.  Status before, error from operation or file path
   type FileUpdate = (FileStatus, ExportError \/ Path)
@@ -169,11 +168,19 @@ object TcsEphemerisExport {
           p  <- files.write(hid, em)
         } yield p
 
-      def lookupEphemeris(hid: HorizonsDesignation): TryExport[EphemerisMap] =
-        HorizonsService2.lookupEphemerisE[EphemerisElement](hid, site, new Date(start.toEpochMilli), new Date(end.toEpochMilli), ElementCount) {
+      def lookupEphemeris(hid: HorizonsDesignation): TryExport[EphemerisMap] = {
+        val s = start.toEpochMilli
+        val e = end.toEpochMilli
+        HorizonsService2.lookupEphemerisE[EphemerisElement](hid, site, new Date(s), new Date(e), ElementCount) {
           (ee: EphemerisEntry) => ee.coords.map((_, ee.getRATrack, ee.getDecTrack))
-        }.leftMap(e => HorizonsError(hid, e): ExportError).map {
-          _.mapKeys(Instant.ofEpochMilli)
+        }.leftMap(e => HorizonsError(hid, e): ExportError).map { m =>
+          // Convert to an EphemerisMap that contains no elements before the
+          // start time, and no elements at or after the end time.  Make sure
+          // that no more than the first ElementCount entries are included.
+          ==>>.fromList {
+            m.filterWithKey { (t, _) => (s <= t) && (t < e) }.mapKeys(Instant.ofEpochMilli).toAscList.take(ElementCount)
+          }
         }
+      }
     }
 }

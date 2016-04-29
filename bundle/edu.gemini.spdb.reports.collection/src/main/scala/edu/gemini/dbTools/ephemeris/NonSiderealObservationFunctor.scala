@@ -18,13 +18,13 @@ object NonSiderealObservationFunctor {
 }
 
 private class NonSiderealObservationFunctor extends DBAbstractQueryFunctor{
-  import NonSiderealObservation.findScheduleableIn
+  import NonSiderealObservation.findRelevantIn
 
   var results: List[NonSiderealObservation] = Nil
 
   override def execute(db: IDBDatabaseService, node: ISPNode, principals: JSet[Principal]): Unit =
     node match {
-      case p: ISPProgram => results = findScheduleableIn(p) ++ results
+      case p: ISPProgram => results = findRelevantIn(p) ++ results
       case _             => // do nothing
     }
 }

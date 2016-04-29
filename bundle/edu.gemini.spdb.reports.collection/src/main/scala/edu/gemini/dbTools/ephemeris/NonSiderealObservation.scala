@@ -20,7 +20,7 @@ object NonSiderealObservation {
     * queue for immediate observation.  The program itself must be active and
     * the observation status must be `READY` or `ONGOING`.
     */
-  def findScheduleableIn(p: ISPProgram): List[NonSiderealObservation] =
+  def findRelevantIn(p: ISPProgram): List[NonSiderealObservation] =
     if (includeProgram(p)) activeObservations(p).flatMap(obsRef)
     else Nil
 
@@ -34,8 +34,8 @@ object NonSiderealObservation {
     import ObservationStatus._
     p.getAllObservations.asScala.filter { obs =>
       computeFor(obs) match {
-        case READY | ONGOING => true
-        case _               => false
+        case OBSERVED | INACTIVE => false
+        case _                   => true
       }
     }.toList
   }

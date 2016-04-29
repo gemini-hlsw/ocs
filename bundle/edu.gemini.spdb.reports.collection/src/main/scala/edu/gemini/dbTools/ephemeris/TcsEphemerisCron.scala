@@ -3,8 +3,9 @@ package edu.gemini.dbTools.ephemeris
 import edu.gemini.dbTools.ephemeris.ExportError.OdbError
 import edu.gemini.dbTools.ephemeris.FileStatus._
 import edu.gemini.pot.spdb.IDBDatabaseService
-import edu.gemini.skycalc.TwilightBoundType.NAUTICAL
-import edu.gemini.skycalc.TwilightBoundedNight
+import edu.gemini.skycalc.TwilightBoundType
+import edu.gemini.skycalc.TwilightBoundType.OFFICIAL
+import edu.gemini.skycalc.{Night, TwilightBoundedNight}
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.core.osgi.SiteProperty
 import org.osgi.framework.BundleContext
@@ -12,10 +13,12 @@ import org.osgi.framework.BundleContext
 import java.io.File
 import java.nio.file.Path
 import java.security.Principal
-import java.time.Instant
+import java.time.{Duration, Instant}
+import java.time.temporal.ChronoUnit.MINUTES
 import java.util.logging.{Level, Logger}
 import javax.mail.internet.InternetAddress
 
+import scala.collection.JavaConverters._
 import scalaz.Scalaz._
 import scalaz._
 import scalaz.effect.IO
@@ -30,6 +33,13 @@ object TcsEphemerisCron {
 
   /** A config property that lists email recipients for error reports. */
   val RecipientsProp = "edu.gemini.dbTools.tcs.ephemeris.recipients"
+
+  /** An optional config property that specifies the twilight bounds to use.
+    * Valid values are: official, civil, nautical, or astronomical.  If not
+    * specified the time range will end at the next sunrise local time and
+    * start 24 hours before.
+    */
+  val NightProp      = "edu.gemini.dbTools.tcs.ephemeris.night"
 
   /** A config property that specifies the SMTP server to use. */
   val SmtpProp       = "cron.odbMail.SITE_SMTP_SERVER"
@@ -61,6 +71,70 @@ object TcsEphemerisCron {
     }
   }
 
+  private implicit class InstantOps(i: Instant) {
+    /** Returns this instant truncated to minutes (ie, with no seconds,
+      * milliseconds, etc.)
+      */
+    def roundDown: Instant =
+      i.truncatedTo(MINUTES)
+
+    /** Returns this instant rounded up to the next whole number of minutes
+      * with no seconds, milliseconds, etc.)
+      */
+    def roundUp: Instant = {
+      val rnd = i.roundDown
+      (rnd == i) ? rnd | rnd.plus(Duration.ofMinutes(1))
+    }
+  }
+
+  /** A Night implementation for a specific start and end time. */
+  private class SpecificNight(site: Site, s: Instant, e: Instant) extends Night {
+    val start = s.toEpochMilli
+    val end   = e.toEpochMilli
+
+    override def getSite: Site      = site
+    override def getStartTime: Long = start
+    override def getEndTime: Long   = end
+    override def getTotalTime: Long = end - start
+
+    override def includes(time: Long): Boolean =
+      (start <= time) && (time < end)
+  }
+
+  /** Calculates the bounds for the ephemeris data. */
+  private def calcNight(ctx: BundleContext, site: Site, logger: Logger): Night = {
+    /** Produces a "night" that ends on the nearest whole minute after the
+      * next sunrise local time and starts exactly 24 hours before.
+      */
+    def allDay: Night = {
+      val tonight = TwilightBoundedNight.forTime(OFFICIAL, Instant.now.toEpochMilli, site)
+      val end     = Instant.ofEpochMilli(tonight.getEndTime).roundUp
+      val start   = end.minus(Duration.ofHours(24))
+      new SpecificNight(site, start, end)
+    }
+
+    val boundsTypeS = Option(ctx.getProperty(NightProp))
+    val boundType   = boundsTypeS.fold(Option.empty[TwilightBoundType]) { s =>
+      TwilightBoundType.ALL.asScala.find(_.getName.equalsIgnoreCase(s))
+    }
+
+    val night = boundType.fold(allDay) { b =>
+      val boundNight = TwilightBoundedNight.forTime(b, Instant.now.toEpochMilli, site)
+      val start      = Instant.ofEpochMilli(boundNight.getStartTime).roundDown
+      val end        = Instant.ofEpochMilli(boundNight.getEndTime).roundUp
+      new SpecificNight(site, start, end)
+    }
+
+    logger.info(s"""
+        |TcsEphemerisCron using twilight bounds: ${boundType.map(_.getName).getOrElse("none")}
+        |
+        |  start time = ${Instant.ofEpochMilli(night.getStartTime)}
+        |  end time   = ${Instant.ofEpochMilli(night.getEndTime)}
+      """.stripMargin)
+
+    night
+  }
+
   /** Cron job entry point.  See edu.gemini.spdb.cron.osgi.Activator. */
   def run(ctx: BundleContext)(tmpDir: File, logger: Logger, env: java.util.Map[String, String], user: java.util.Set[Principal]): Unit = {
     val site   = Option(SiteProperty.get(ctx)) | sys.error(s"Property `${SiteProperty.NAME}` not specified.")
@@ -72,7 +146,7 @@ object TcsEphemerisCron {
 
     val odbRef = ctx.getServiceReference(classOf[IDBDatabaseService])
     val odb    = ctx.getService(odbRef)
-    val night  = TwilightBoundedNight.forTime(NAUTICAL, Instant.now.toEpochMilli, site)
+    val night  = calcNight(ctx, site, logger)
 
     // Extract horizons ids for all non-sidereal observations in the database.
     val nonSid: TryExport[ISet[HorizonsDesignation]] =
