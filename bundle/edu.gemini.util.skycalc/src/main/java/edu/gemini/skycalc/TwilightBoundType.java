@@ -1,6 +1,9 @@
 package edu.gemini.skycalc;
 
 import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Definition for how the range from sunset to sunrise should be defined for
@@ -23,6 +26,9 @@ public final class TwilightBoundType implements Comparable<TwilightBoundType>, S
 
     public static final TwilightBoundType ASTRONOMICAL =
             new TwilightBoundType("Astronomical", 18.0);
+
+    public static final List<TwilightBoundType> ALL =
+            Collections.unmodifiableList(Arrays.asList(OFFICIAL, CIVIL, NAUTICAL, ASTRONOMICAL));
 
     private String _name;
     private double _horizAngle; // angle below the horizon
