@@ -29,9 +29,15 @@ package object details2 {
   }
 
   def searchButton(doSearch: => Unit): JButton =
-    FlatButtonUtil.create("eclipse/search.gif") <| { b =>
+    button("eclipse/search.gif")(doSearch)
+
+  def refreshButton(doRefresh: => Unit): JButton =
+    button("eclipse/refresh.gif")(doRefresh)
+
+  def button(image: String)(action: => Unit): JButton =
+    FlatButtonUtil.create(image) <| { b =>
       b.addActionListener(new ActionListener() {
-        override def actionPerformed(e: ActionEvent) = doSearch
+        override def actionPerformed(e: ActionEvent) = action
       })
     }
 
