@@ -60,7 +60,7 @@ final class NonSiderealDetailEditor extends TargetDetailEditor {
       c.fill   = GridBagConstraints.HORIZONTAL
     })
 
-    p.add(name.search, new GridBagConstraints <| { c =>
+    p.add(name.buttons.search, new GridBagConstraints <| { c =>
       c.anchor = GridBagConstraints.WEST
       c.gridx  = 2
       c.gridy  = 1
@@ -80,6 +80,14 @@ final class NonSiderealDetailEditor extends TargetDetailEditor {
       c.gridy  = 3
       c.insets = new Insets(1, 1, 0, 0)
     })
+
+    p.add(name.buttons.refresh, new GridBagConstraints <| { c =>
+      c.anchor = GridBagConstraints.WEST
+      c.gridx  = 2
+      c.gridy  = 3
+      c.insets = new Insets(2, 0, 0, 0)
+    })
+
 
   }
 
