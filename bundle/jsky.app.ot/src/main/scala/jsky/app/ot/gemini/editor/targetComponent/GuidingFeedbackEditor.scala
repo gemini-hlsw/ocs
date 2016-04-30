@@ -26,7 +26,8 @@ class GuidingFeedbackEditor extends TelescopePosEditor {
       val bagsRow = for {
         n <- Option(node)
         o <- Option(n.getContextObservation)
-        s <- BagsManager.instance.bagsStatus(o.getNodeKey)
+        s <- BagsManager.instance.bagsStatus(o)
+        if s.message.isDefined
       } yield BagsStatusRow(s)
 
       // If the BAGS row is defined, then use it. If not, create the rows corresponding to the analysis.

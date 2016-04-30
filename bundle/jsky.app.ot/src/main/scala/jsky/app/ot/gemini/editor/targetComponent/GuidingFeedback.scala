@@ -21,6 +21,9 @@ import scala.collection.JavaConverters._
 import scala.swing._
 import scala.swing.GridBagPanel.Fill
 
+import scalaz._
+import Scalaz._
+
 object GuidingFeedback {
   import OtColor._
 
@@ -66,7 +69,7 @@ object GuidingFeedback {
       border              = labelBorder
       foreground          = DARK_GRAY
       background          = bgColor
-      text                = bagsStatus.message
+      text                = bagsStatus.message | ""
       icon                = statusIcon
       opaque              = true
       horizontalAlignment = Alignment.Left
