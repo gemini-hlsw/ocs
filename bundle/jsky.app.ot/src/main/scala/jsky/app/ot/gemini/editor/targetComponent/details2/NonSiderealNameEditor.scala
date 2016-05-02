@@ -25,9 +25,7 @@ final class NonSiderealNameEditor extends TelescopePosEditor with ReentrancyHack
 
   private[this] var site  = Option.empty[Site]
   private[this] var start = Option.empty[Long]
-  private[this] var hd    = Option.empty[HorizonsDesignation]
   private[this] var spt   = new SPTarget // never null
-
 
   /// Some IO actions for looking up targets and epherimides
 
@@ -127,8 +125,11 @@ final class NonSiderealNameEditor extends TelescopePosEditor with ReentrancyHack
   def lookup(site: Option[Site]): Unit =
     unsafeRun(search.run.ensuring(hide.run))
 
+  def horizonsDesignation: Option[HorizonsDesignation] =
+    spt.getNonSiderealTarget.flatMap(Target.horizonsDesignation.get).flatten
+
   def refreshEphemeris(): Unit =
-    hd.map(hd => oneResult(Row(hd, "Unused")).run).foreach(unsafeRun)
+    horizonsDesignation.map(hd => oneResult(Row(hd, spt.getName)).run).foreach(unsafeRun)
 
   val name = new TextBoxWidget <| { w =>
     w.setMinimumSize(w.getPreferredSize)
@@ -161,10 +162,9 @@ final class NonSiderealNameEditor extends TelescopePosEditor with ReentrancyHack
     this.spt   = target
     this.start = ctx.asScalaOpt.flatMap(_.getSchedulingBlockStart.asScalaOpt.map(_.toLong))
     this.site  = ctx.asScalaOpt.flatMap(_.getSite.asScalaOpt)
-    this.hd    = Target.horizonsDesignation.get(target.getTarget).flatten
     nonreentrant {
       name.setText(Target.name.get(target.getTarget))
-      buttons.refresh.setEnabled(hd.isDefined && site.isDefined)
+      buttons.refresh.setEnabled(horizonsDesignation.isDefined && site.isDefined)
       Target.horizonsDesignation.get(target.getTarget).map(hidText).foreach(hid.setText)
     }
   }
