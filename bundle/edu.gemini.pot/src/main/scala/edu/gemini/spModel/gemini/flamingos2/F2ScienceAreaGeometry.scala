@@ -84,13 +84,14 @@ object F2ScienceAreaGeometry extends ScienceAreaGeometry {
   private def longSlitFOV(plateScale: Double, scienceAreaWidth: Double): Shape = {
     val slitHeight = LongSlitFOVHeight * plateScale
     val slitSouth  = LongSlitFOVSouthPos * plateScale
+    val slitNorth  = LongSlitFOVNorthPos * plateScale
 
     val x = -scienceAreaWidth / 2.0
     val y = slitSouth - slitHeight
-    new Rectangle2D.Double(x, y, x + scienceAreaWidth, y + slitHeight)
+    new Rectangle2D.Double(x, y, x + scienceAreaWidth, y + slitHeight + slitNorth)
   }
 
-  // Geometry features for F2, in arcseconds.
+  // Geometry features for F2, in mm.
   val LongSlitFOVHeight   = 164.10
   val LongSlitFOVSouthPos = 112.00
   val LongSlitFOVNorthPos =  52.10
