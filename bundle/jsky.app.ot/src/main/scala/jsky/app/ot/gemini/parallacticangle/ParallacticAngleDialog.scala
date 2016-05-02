@@ -132,7 +132,6 @@ class ParallacticAngleDialog(
 
     // The duration field information.
     private val durationLabel = new Label("Duration")
-
     if (showDuration) layout(durationLabel) = new Constraints() {
       anchor     = GridBagPanel.Anchor.NorthWest
       gridx      = 2
