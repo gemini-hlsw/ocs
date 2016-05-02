@@ -71,7 +71,7 @@ final class NonSiderealTargetRules extends IRule {
         nst <- tar.getNonSiderealTarget.toList
         sb  <- es.getObservation.getSchedulingBlock.asScalaOpt
                if nst.coords(sb.start).isEmpty
-      } p2p.addWarning(ERR_NO_EPHEMERIS_FOR_BLOCK,
+      } p2p.addError(ERR_NO_EPHEMERIS_FOR_BLOCK,
           s"Target ${nst.name} has no defined coordinates for its scheduling block.",
           ocn)
     }
