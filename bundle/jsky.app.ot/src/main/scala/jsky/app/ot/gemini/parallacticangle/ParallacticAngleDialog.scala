@@ -8,27 +8,31 @@ import edu.gemini.pot.sp.ISPObservation
 import edu.gemini.shared.gui.monthview.MonthView.Ymd
 import edu.gemini.shared.gui.monthview.{DateSelectionMode, MonthView}
 import edu.gemini.shared.gui.textComponent.{NumberField, SelectOnFocus, TimeOfDayText}
-import edu.gemini.spModel.core.Site
 import edu.gemini.spModel.obs.SchedulingBlock
-import edu.gemini.spModel.obs.plannedtime.{PlannedTimeCalculator, PlannedTime}
+import edu.gemini.spModel.obs.plannedtime.PlannedTimeCalculator
 import jsky.app.ot.util.TimeZonePreference
 
 import scala.collection.JavaConverters._
 import scala.swing.Swing._
 import scala.swing._
-import scala.swing.event.{FocusGained, ValueChanged, ButtonClicked, FocusLost}
+import scala.swing.event.{ ValueChanged, ButtonClicked, FocusLost}
 
 // Dialog to set the settings needed for the parallactic angle computation.
 
 // This is horrific, but it seems that Scala Windows and Java Windows are not compatible.
-class ParallacticAngleDialog(owner: java.awt.Window, observation: ISPObservation,
-                             osb: Option[SchedulingBlock], local: Option[TimeZone]) extends Dialog {
+class ParallacticAngleDialog(
+  owner:        java.awt.Window,
+  observation:  ISPObservation,
+  osb:          Option[SchedulingBlock],
+  local:        Option[TimeZone],
+  showDuration: Boolean
+) extends Dialog {
 
   var schedulingBlock = osb.getOrElse(SchedulingBlock.apply(System.currentTimeMillis, 0L))
   val utc = TimeZone.getTimeZone("UTC")
   private var _timeZone = local.filter(_ == TimeZonePreference.get).getOrElse(utc)
 
-  title     = "Parallactic Angle Calculation"
+  title     = if (showDuration) "Parallactic Angle Calculation" else "Observation Scheduling"
   modal     = true
   resizable = false
 
@@ -40,7 +44,7 @@ class ParallacticAngleDialog(owner: java.awt.Window, observation: ISPObservation
 
     // The instructional label.
     private val instructionLabel = new Label("Select the time and duration for the average parallactic angle calculation.")
-    layout(instructionLabel) = new Constraints() {
+    if (showDuration) layout(instructionLabel) = new Constraints() {
       anchor     = GridBagPanel.Anchor.NorthWest
       gridx      = 0
       gridy      = 0
@@ -128,7 +132,8 @@ class ParallacticAngleDialog(owner: java.awt.Window, observation: ISPObservation
 
     // The duration field information.
     private val durationLabel = new Label("Duration")
-    layout(durationLabel) = new Constraints() {
+
+    if (showDuration) layout(durationLabel) = new Constraints() {
       anchor     = GridBagPanel.Anchor.NorthWest
       gridx      = 2
       gridy      = 1
@@ -140,7 +145,7 @@ class ParallacticAngleDialog(owner: java.awt.Window, observation: ISPObservation
       val remainingTime = ParallacticAngleDialog.calculateRemainingTime(observation).toDouble / 1000 / 60
       text = f"Use Remaining Execution Time Estimate ($remainingTime%.1f min)"
     }
-    layout(remainingTimeButton) = new Constraints() {
+    if (showDuration) layout(remainingTimeButton) = new Constraints() {
       anchor     = GridBagPanel.Anchor.NorthWest
       gridx      = 2
       gridy      = 2
@@ -149,7 +154,7 @@ class ParallacticAngleDialog(owner: java.awt.Window, observation: ISPObservation
     }
 
     object setToButton extends RadioButton("Set To:")
-    layout(setToButton) = new Constraints() {
+    if (showDuration) layout(setToButton) = new Constraints() {
       anchor     = GridBagPanel.Anchor.NorthWest
       gridx      = 2
       gridy      = 3
@@ -181,7 +186,7 @@ class ParallacticAngleDialog(owner: java.awt.Window, observation: ISPObservation
         okButton.enabled = durationField.valid
     }
 
-    layout(durationField) = new Constraints() {
+    if (showDuration) layout(durationField) = new Constraints() {
       anchor     = GridBagPanel.Anchor.NorthWest
       gridx      = 3
       gridy      = 3
@@ -191,7 +196,7 @@ class ParallacticAngleDialog(owner: java.awt.Window, observation: ISPObservation
     private val minLabel = new Label("min") {
       foreground = Color.black
     }
-    layout(minLabel) = new Constraints() {
+    if (showDuration) layout(minLabel) = new Constraints() {
       anchor     = GridBagPanel.Anchor.NorthWest
       gridx      = 4
       gridy      = 3
@@ -250,8 +255,8 @@ class ParallacticAngleDialog(owner: java.awt.Window, observation: ISPObservation
     }
 
     // The duration managed by this widget.
-    def fetchDuration: Long =
-      (durationField.text.toDouble * 60 * 1000).toLong
+    def fetchDuration: Option[Long] =
+      if (setToButton.selected) Some((durationField.text.toDouble * 60 * 1000).toLong) else scala.None
 
     listenTo(okButton, cancelButton)
     reactions += {

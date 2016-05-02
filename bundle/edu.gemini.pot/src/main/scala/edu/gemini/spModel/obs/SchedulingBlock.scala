@@ -30,7 +30,7 @@ object SchedulingBlock {
     apply(start, Some(duration))
 
   def apply(start: Long, duration: Option[Long]): SchedulingBlock =
-    new Impl(start, duration.filter(_ > 0))
+    new Impl(start, duration.filter(_ >= 0))
 
   def unsafeFromStrings(startString: String, durationString: String): SchedulingBlock =
     apply(startString.toLong, durationString.toLong)
