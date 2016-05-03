@@ -30,9 +30,9 @@ object HorizonsDesignation {
 
   /**
    * Designation for a comet, in the current apparition. Example: `C/1973 E1` for Kohoutek, yielding
-   * the query string `DES=C/1973 E1;CAP`.
+   * the query string `NAME=C/1973 E1;CAP`.
    */
-  final case class Comet(des: String) extends HorizonsDesignation(s"DES=$des;CAP")
+  final case class Comet(des: String) extends HorizonsDesignation(s"NAME=$des;CAP")
   object Comet {
     val des: Comet @> String = Lens.lensu((a, b) => a.copy(des = b), _.des)
   }
@@ -41,9 +41,9 @@ object HorizonsDesignation {
 
   /**
    * Designation for an asteroid under modern naming conventions. Example: `1971 UC1` for
-   * 1896 Beer, yielding a query string `DES=1971 UC1`.
+   * 1896 Beer, yielding a query string `ASTNAM=1971 UC1`.
    */
-  final case class AsteroidNewStyle(des: String) extends Asteroid(s"DES=$des")
+  final case class AsteroidNewStyle(des: String) extends Asteroid(s"ASTNAM=$des")
   object AsteroidNewStyle {
     val des: AsteroidNewStyle @> String = Lens.lensu((a, b) => a.copy(des = b), _.des)
   }

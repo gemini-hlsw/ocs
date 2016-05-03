@@ -182,9 +182,6 @@ object HorizonsService2 {
   // Parse the result of the given search
   private def parseResponse[A](s: Search[A], lines: List[String]): \/[String, List[Row[A]]] =
     parseHeader[Row[A]](lines) { case (header, tail) =>
-
-      lines.foreach(println)
-
       s match {
 
         case Search.Comet(_) =>
