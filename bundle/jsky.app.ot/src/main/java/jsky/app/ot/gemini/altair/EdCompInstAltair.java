@@ -63,9 +63,9 @@ public final class EdCompInstAltair extends OtItemEditor<ISPObsComponent, InstAl
         _w.adcCheck.setSelected(inst.getAdc() == ADC.ON);
 
         final Wavelength wl = inst.getWavelength();
-        if (wl == Wavelength.WAVELENGTH_B) {
+        if (wl == Wavelength.BS_850_2500) {
             _w.wavelength850_2500_Button.setSelected(true);
-        } else if (wl == Wavelength.WAVELENGTH_A) {
+        } else if (wl == Wavelength.BS_850_5000) {
             _w.wavelength850_5000_Button.setSelected(true);
         } else {
             _w.wavelength589_Button.setSelected(true);
@@ -114,9 +114,9 @@ public final class EdCompInstAltair extends OtItemEditor<ISPObsComponent, InstAl
         if (w == _w.adcCheck) {
             getDataObject().setAdc(_w.adcCheck.isSelected() ? ADC.ON : ADC.OFF);
         } else if (w == _w.wavelength850_5000_Button) {
-            getDataObject().setWavelength(Wavelength.WAVELENGTH_A);
+            getDataObject().setWavelength(Wavelength.BS_850_5000);
         } else if (w == _w.wavelength850_2500_Button) {
-            getDataObject().setWavelength(Wavelength.WAVELENGTH_B);
+            getDataObject().setWavelength(Wavelength.BS_850_2500);
         } else if (w == _w.wavelength589_Button) {
             getDataObject().setWavelength(Wavelength.BS_589);
         } else if (w == _w.cassRotatorFollowingButton) {

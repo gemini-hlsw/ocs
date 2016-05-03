@@ -74,7 +74,7 @@ public final class InstAltair extends AbstractDataObject implements PropertyProv
         MODE_PROP = initProp(AltairConstants.MODE_PROP, query_yes, iter_no);
     }
 
-    private static final String VERSION = "2006B-1";
+    private static final String VERSION = "2016B-1";
     private Wavelength _wavelength = Wavelength.DEFAULT;
     private ADC _adc = ADC.DEFAULT;
     private CassRotator _cassRotator = CassRotator.DEFAULT;

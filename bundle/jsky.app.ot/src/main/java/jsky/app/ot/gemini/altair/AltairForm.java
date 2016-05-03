@@ -54,13 +54,13 @@ public class AltairForm extends JPanel {
                 new Insets(11, 11, 0, 0), 0, 0));
 
         //---- wavelength850_2500_Button ----
-        wavelength850_2500_Button = new JRadioButton(AltairParams.Wavelength.WAVELENGTH_B.displayValue());
+        wavelength850_2500_Button = new JRadioButton(AltairParams.Wavelength.BS_850_2500.displayValue());
         add(wavelength850_2500_Button, new GridBagConstraints(1, 1, 1, 1, 0.0, 0.0,
                 GridBagConstraints.WEST, GridBagConstraints.NONE,
                 new Insets(11, 11, 0, 0), 0, 0));
 
         //---- wavelength850_5000_Button ----
-        wavelength850_5000_Button = new JRadioButton(AltairParams.Wavelength.WAVELENGTH_A.displayValue());
+        wavelength850_5000_Button = new JRadioButton(AltairParams.Wavelength.BS_850_5000.displayValue());
         add(wavelength850_5000_Button, new GridBagConstraints(1, 2, 1, 1, 0.0, 0.0,
                 GridBagConstraints.WEST, GridBagConstraints.NONE,
                 new Insets(0, 11, 0, 0), 0, 0));
