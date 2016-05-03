@@ -89,10 +89,7 @@ object To2016B extends Migration {
     for {
       (o, b) <- obsAndBases(d) if o.value("schedulingBlockStart").isEmpty
       date   <- b.value("validAt").map(SPTargetPio.parseDate)
-    } {
-      Pio.addLongParam(fact, o, "schedulingBlockStart", date.getTime)
-      Pio.addLongParam(fact, o, "schedulingBlockDuration", 0L)
-    }
+    } Pio.addLongParam(fact, o, "schedulingBlockStart", date.getTime)
 
   def isTooProgram(d: Document): Boolean =
     d.findContainers(SPProgram.SP_TYPE).exists { c =>

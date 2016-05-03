@@ -595,7 +595,8 @@ public class SPObservation extends AbstractDataObject implements ISPStaffOnlyFie
         }
         if (!_schedulingBlock.isEmpty()) {
             Pio.addLongParam(factory, paramSet, SCHEDULING_BLOCK_START_PROP, getSchedulingBlock().getValue().start());
-            Pio.addLongParam(factory, paramSet, SCHEDULING_BLOCK_DURATION_PROP, getSchedulingBlock().getValue().durationOrZero());
+            if (getSchedulingBlock().getValue().duration().nonEmpty())
+                Pio.addLongParam(factory, paramSet, SCHEDULING_BLOCK_DURATION_PROP, getSchedulingBlock().getValue().durationOrZero());
         }
 
         Pio.addParam(factory, paramSet, QA_STATE_PROP, getOverriddenObsQaState().name());
@@ -660,8 +661,10 @@ public class SPObservation extends AbstractDataObject implements ISPStaffOnlyFie
         // Set the scheduling block if it exists for both start and duration properties.
         v = Pio.getValue(paramSet, SCHEDULING_BLOCK_START_PROP);
         String v2 = Pio.getValue(paramSet, SCHEDULING_BLOCK_DURATION_PROP);
-        if (v == null || v2 == null) {
+        if (v == null) {
             setSchedulingBlock(None.instance());
+        } else if (v2 == null) {
+            setSchedulingBlock(new Some<>(SchedulingBlock.unsafeFromStrings(v)));
         } else {
             setSchedulingBlock(new Some<>(SchedulingBlock.unsafeFromStrings(v, v2)));
         }

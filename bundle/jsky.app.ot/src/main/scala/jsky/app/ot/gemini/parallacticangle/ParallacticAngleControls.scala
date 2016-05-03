@@ -11,7 +11,7 @@ import edu.gemini.spModel.core.Site
 import edu.gemini.spModel.inst.ParallacticAngleSupport
 import edu.gemini.spModel.obs.{ObsTargetCalculatorService, SPObservation, SchedulingBlock}
 import edu.gemini.spModel.rich.shared.immutable._
-import edu.gemini.shared.util.immutable.{ Option => JOption }
+import edu.gemini.shared.util.immutable.{Option => JOption, ImOption}
 import jsky.app.ot.editor.OtItemEditor
 import jsky.app.ot.util.TimeZonePreference
 
@@ -34,7 +34,9 @@ class ParallacticAngleControls(showParallacticAngleFeedback: Boolean) extends Gr
 
       private case class RelativeTime(desc: String, timeInMs: Long) extends MenuItem(desc) {
         action = Action(desc) {
-          updateSchedulingBlock(SchedulingBlock(System.currentTimeMillis, timeInMs))
+          val start = System.currentTimeMillis + timeInMs
+          val sb    = schedulingBlock.fold(SchedulingBlock(start))(sb => SchedulingBlock(start, sb.duration))
+          updateSchedulingBlock(sb)
         }
       }
 
@@ -131,21 +133,23 @@ class ParallacticAngleControls(showParallacticAngleFeedback: Boolean) extends Gr
   def init(e: OtItemEditor[_, _], s: JOption[Site], f: Format): Unit =
     init(e, s.asScalaOpt, f)
 
-  /**
-   * Call this whenever the state of the parallactic controls change
-   */
+  /** Current scheduling block, if any. */
+  private def schedulingBlock: Option[SchedulingBlock] =
+    for {
+      e   <- editor
+      obs <- Option(e.getContextObservation)
+      sb  <- obs.getDataObject.asInstanceOf[SPObservation].getSchedulingBlock.asScalaOpt
+    } yield sb
+
+  /** Replace the scheduling block. */
   private def updateSchedulingBlock(sb: SchedulingBlock): Unit =
     for {
       e      <- editor
       ispObs <- Option(e.getContextObservation)
     } {
       val spObs = ispObs.getDataObject.asInstanceOf[SPObservation]
-
-      // Set the scheduling block.
-      spObs.setSchedulingBlock(Some(sb).asGeminiOpt)
+      spObs.setSchedulingBlock(ImOption.apply(sb))
       ispObs.setDataObject(spObs)
-
-      // Update the components to reflect the change.
       resetComponents()
     }
 
@@ -163,7 +167,8 @@ class ParallacticAngleControls(showParallacticAngleFeedback: Boolean) extends Gr
         e.getViewer.getParentFrame,
         o,
         o.getDataObject.asInstanceOf[SPObservation].getSchedulingBlock.asScalaOpt,
-        site.map(_.timezone))
+        site.map(_.timezone),
+        showParallacticAngleFeedback)
       dialog.pack()
       dialog.visible = true
       updateSchedulingBlock(dialog.schedulingBlock)
@@ -210,14 +215,14 @@ class ParallacticAngleControls(showParallacticAngleFeedback: Boolean) extends Gr
       // Include tenths of a minute if not even.
       val duration = sb.duration.getOrElse(ParallacticAngleDialog.calculateRemainingTime(ispObservation)) / 60000.0
       val durationFmt = if (Math.round(duration * 10) == (Math.floor(duration) * 10).toLong) "%.0f" else "%.1f"
-      val when = s"$dateTimeStr, ${durationFmt.format(duration)}m"
+      val when = s"$dateTimeStr"
 
       ui.parallacticAngleFeedback.text =
         e.getDataObject match {
           case p: ParallacticAngleSupport if showParallacticAngleFeedback =>
             parallacticAngle.fold(
               s"Target not visible ($when)")(angle =>
-              s"${fmt.format(ParallacticAngleControls.angleToDegrees(angle))}\u00b0 ($when)")
+              s"${fmt.format(ParallacticAngleControls.angleToDegrees(angle))}\u00b0 ($when, ${durationFmt.format(duration)}m)")
           case _ =>
             s"$when"
         }
