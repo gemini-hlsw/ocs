@@ -5,7 +5,6 @@ import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.spModel.core.HorizonsDesignation.MajorBody
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.gemini.obscomp.SPProgram
-import edu.gemini.spModel.pio.codec.ParamSetCodec
 import edu.gemini.spModel.pio.xml.PioXmlFactory
 import edu.gemini.spModel.pio.{Document, ParamSet, Pio, Version}
 import edu.gemini.spModel.target.{SPTargetPio, SourcePio, TargetParamSetCodecs}
@@ -13,7 +12,6 @@ import edu.gemini.spModel.target.env.GuideGroup
 
 import scala.collection.JavaConverters._
 import PioSyntax._
-import edu.gemini.spModel.gemini.altair.AltairConstants
 
 import scalaz._
 import Scalaz._
