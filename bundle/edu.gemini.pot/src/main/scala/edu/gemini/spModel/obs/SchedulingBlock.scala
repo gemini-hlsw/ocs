@@ -35,4 +35,7 @@ object SchedulingBlock {
   def unsafeFromStrings(startString: String, durationString: String): SchedulingBlock =
     apply(startString.toLong, durationString.toLong)
 
+  def unsafeFromStrings(startString: String): SchedulingBlock =
+    apply(startString.toLong)
+
 }
