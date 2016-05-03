@@ -80,9 +80,9 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
         final Option<AOSystem> altair;
         if (niriParameters.altair().isDefined()) {
             final Altair ao = new Altair(instrument.getEffectiveWavelength(), _telescope.getTelescopeDiameter(), IQcalc.getImageQuality(), niriParameters.altair().get(), 0.0);
-            altair = Option.apply((AOSystem) ao);
+            altair = Option.<AOSystem>apply((AOSystem) ao);
         } else {
-            altair = Option.empty();
+            altair = Option.<AOSystem>empty();
         }
 
         final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, _sdParameters, _obsConditionParameters, _telescope, altair);
@@ -147,9 +147,9 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
         final Option<AOSystem> altair;
         if (niriParameters.altair().isDefined()) {
             final Altair ao = new Altair(instrument.getEffectiveWavelength(), _telescope.getTelescopeDiameter(), IQcalc.getImageQuality(), niriParameters.altair().get(), 0.0);
-            altair = Option.apply((AOSystem) ao);
+            altair = Option.<AOSystem>apply((AOSystem) ao);
         } else {
-            altair = Option.empty();
+            altair = Option.<AOSystem>empty();
         }
 
         final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, _sdParameters, _obsConditionParameters, _telescope, altair);

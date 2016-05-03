@@ -68,9 +68,9 @@ public final class NifsRecipe implements SpectroscopyRecipe {
         final Option<AOSystem> altair;
         if (_nifsParameters.altair().isDefined()) {
             final Altair ao = new Altair(instrument.getEffectiveWavelength(), _telescope.getTelescopeDiameter(), IQcalc.getImageQuality(), _nifsParameters.altair().get(), 0.0);
-            altair = Option.apply((AOSystem) ao);
+            altair = Option.<AOSystem>apply((AOSystem) ao);
         } else {
-            altair = Option.empty();
+            altair = Option.<AOSystem>empty();
         }
 
         final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, _sdParameters, _obsConditionParameters, _telescope, altair);
