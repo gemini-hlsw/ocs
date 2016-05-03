@@ -1,9 +1,3 @@
-// Copyright 1997-2000
-// Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-//
 package edu.gemini.spModel.gemini.altair;
 
 public final class AltairConstants {

@@ -46,8 +46,8 @@ public final class InstAltairCase {
         assertTrue(altOrig.getTitle().equals(title));
 
         // defined in InstAltair
-        altOrig.setWavelength(Wavelength.WAVELENGTH_B);
-        assertTrue(altOrig.getWavelength() == Wavelength.WAVELENGTH_B);
+        altOrig.setWavelength(Wavelength.WAVELENGTH_A);
+        assertTrue(altOrig.getWavelength() == Wavelength.WAVELENGTH_A);
         altOrig.setAdc(ADC.ON);
         assertTrue(altOrig.getAdc() == ADC.ON);
         altOrig.setAdc(ADC.OFF);
@@ -73,10 +73,10 @@ public final class InstAltairCase {
 
         // Create change
         outObject.setAdc(ADC.ON);
-        outObject.setWavelength(Wavelength.WAVELENGTH_B);
+        outObject.setWavelength(Wavelength.WAVELENGTH_A);
 
         final InstAltair inObject = ser(outObject);
         assertSame("ADC", ADC.ON, inObject.getAdc());
-        assertSame("Wavelength", Wavelength.WAVELENGTH_B, inObject.getWavelength());
+        assertSame("Wavelength", Wavelength.WAVELENGTH_A, inObject.getWavelength());
     }
 }
