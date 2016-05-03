@@ -178,7 +178,7 @@ object To2015B extends Migration {
   private def appendMagNote(target: ParamSet, s: String): Unit =
     appendNote(target, s, MagnitudeNoteTitle, MagnitudeNoteText)
 
-  private def appendNote(target: ParamSet, s: String, title: String, text: String => String): Unit = {
+  def appendNote(target: ParamSet, s: String, title: String, text: String => String, append: Boolean = true): Unit = {
     // Find the parent that should hold the note.
     @tailrec
     def noteParent(node: PioNode): Option[Container] = {
@@ -192,10 +192,12 @@ object To2015B extends Migration {
 
     noteParent(target).foreach { parent =>
       val pset  = noteText(parent, title, text)
-      val param   = pset.getParam(PARAM_NOTE_TEXT)
-      val curText = param.getValue
-      val tName   = target.value(PARAM_NAME).getOrElse(VALUE_NAME_UNTITLED)
-      param.setValue(s"$curText  $tName $s\n")
+      if (append) {
+        val param   = pset.getParam(PARAM_NOTE_TEXT)
+        val curText = param.getValue
+        val tName   = target.value(PARAM_NAME).getOrElse(VALUE_NAME_UNTITLED)
+        param.setValue(s"$curText  $tName $s\n")
+      }
     }
   }
 
