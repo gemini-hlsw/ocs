@@ -40,7 +40,7 @@ object HorizonsService2 {
   /** A partial-name search specification for HORIZONS. */
   sealed abstract class Search[A](val queryString: String) extends Product with Serializable
   object Search {
-    final case class Comet(partial: String)     extends Search[HorizonsDesignation.Comet](s"COMNAM=$partial*;CAP")
+    final case class Comet(partial: String)     extends Search[HorizonsDesignation.Comet](s"NAME=$partial*;CAP")
     final case class Asteroid(partial: String)  extends Search[HorizonsDesignation.Asteroid](s"ASTNAM=$partial*")
     final case class MajorBody(partial: String) extends Search[HorizonsDesignation.MajorBody](s"$partial")
   }
@@ -188,11 +188,11 @@ object HorizonsService2 {
 
           // Common case is that we have many results, or none.
           lazy val case0 =
-            parseMany[Row[HorizonsDesignation.Comet]](header, tail, """  +Small-body Search Results  """.r) { os =>
+            parseMany[Row[HorizonsDesignation.Comet]](header, tail, """  +Small-body Index Search Results  """.r) { os =>
               (os.lift(2) |@| os.lift(3)).tupled.map {
                 case ((ods, ode), (ons, one)) => { row =>
                   val desig = row.substring(ods, ode).trim
-                  val name  = row.substring(ons, one).trim
+                  val name  = row.substring(ons     ).trim // last column, so no end index because rows are ragged
                   Row(HorizonsDesignation.Comet(desig), name)
                 }
               }
