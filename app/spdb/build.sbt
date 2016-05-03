@@ -233,16 +233,16 @@ def fnussber(version: Version) = AppConfig(
     "-XX:MaxPermSize=196M",
     "-Dedu.gemini.site=north",
     "-Dcron.*.edu.gemini.dbTools.html.ftpHost=localhost",
-    "-Dcron.*.edu.gemini.dbTools.html.ftpDestDir=/Users/fnussber/.spdb/sftp",
+    "-Dcron.*.edu.gemini.dbTools.html.ftpDestDir=/Users/osmirnov/.spdb/sftp",
     "-Dcron.reports.edu.gemini.spdb.reports.public.host=localhost",
-    "-Dcron.reports.edu.gemini.spdb.reports.public.remotedir=/Users/fnussber/.spdb/cron",
+    "-Dcron.reports.edu.gemini.spdb.reports.public.remotedir=/Users/osmirnov/.spdb/cron",
     "-Dcron.archive.edu.gemini.dbTools.html.ftpHost=localhost",
-    "-Dcron.archive.edu.gemini.dbTools.html.ftpDestDir=/Users/fnussber/.spdb/cron"
+    "-Dcron.archive.edu.gemini.dbTools.html.ftpDestDir=/Users/osmirnov/.spdb/cron"
   ),
   props = Map(
     "edu.gemini.smartgcal.host"          -> "localhost",
-    "edu.gemini.spdb.dir"                -> "/Users/fnussber/.spdb/",
-    "edu.gemini.auxfile.root"            -> "/Users/fnussber/.auxfile",
+    "edu.gemini.spdb.dir"                -> "/Users/osmirnov/.spdb/",
+    "edu.gemini.auxfile.root"            -> "/Users/osmirnov/.auxfile",
     "edu.gemini.dataman.gsa.summit.host" -> "mkofits-lv1new.hi.gemini.edu",
     "edu.gemini.util.trpc.name"          -> "Florian's ODB (Test)",
     "edu.gemini.auxfile.fits.dest"       -> "/gemsoft/var/data/ictd/test/GS@SEMESTER@/@PROG_ID@",

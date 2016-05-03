@@ -785,6 +785,7 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
         sc.putParameter(DefaultParameter.getInstance(GNIRSConstants.CROSS_DISPERSED_PROP, getCrossDispersed()));
         sc.putParameter(DefaultParameter.getInstance(GNIRSConstants.WOLLASTON_PRISM_PROP, getWollastonPrism()));
         sc.putParameter(DefaultParameter.getInstance(GNIRSConstants.READ_MODE_PROP, getReadMode()));
+        sc.putParameter(DefaultParameter.getInstance(GNIRSConstants.FILTER_PROP, getFilter()));
         sc.putParameter(DefaultParameter.getInstance(WELL_DEPTH_PROP, getWellDepth()));
         sc.putParameter(DefaultParameter.getInstance(GNIRSConstants.ACQUISITION_MIRROR_PROP, getAcquisitionMirror()));
         sc.putParameter(DefaultParameter.getInstance(GNIRSConstants.CENTRAL_WAVELENGTH_PROP, getCentralWavelength()));
@@ -813,7 +814,7 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
         // REL-379: REQUIREMENT: The OT browser must include the GNIRS acquisition mirror,
         // filters, ISS port, well depth, camera and decker.
 //        configInfo.add(new InstConfigInfo(ACQUISITION_MIRROR_PROP));
-//        configInfo.add(new InstConfigInfo(FILTER_PROP));
+        configInfo.add(new InstConfigInfo(FILTER_PROP));
         configInfo.add(new InstConfigInfo(PORT_PROP));
         configInfo.add(new InstConfigInfo(WELL_DEPTH_PROP));
 //        configInfo.add(new InstConfigInfo(CAMERA_PROP));

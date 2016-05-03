@@ -21,8 +21,10 @@ public class GnirsGUI extends JPanel {
 
     GridBagLayout gridBagLayout1 = new GridBagLayout();
     JLabel pixelScaleLabel = new JLabel();
+    JLabel filterLabel = new JLabel();
     JLabel exposureTimeLabel = new JLabel();
     SingleSelectComboBox pixelScale = new SingleSelectComboBox();
+    SingleSelectComboBox filter = new SingleSelectComboBox();
     NumberBoxWidget exposureTime = new NumberBoxWidget();
     JLabel jLabel3 = new JLabel();
     JLabel disperserLabel = new JLabel();
@@ -134,6 +136,8 @@ public class GnirsGUI extends JPanel {
         this.setPreferredSize(new Dimension(400, 453));
         this.setToolTipText("");
         this.setLayout(gridBagLayout1);
+        filterLabel.setLabelFor(filter);
+        filterLabel.setText("Filter");
         exposureTimeLabel.setLabelFor(exposureTime);
         exposureTimeLabel.setText("Exposure Time");
         exposureTime.setMaximumSize(new Dimension(1000, 1000));
@@ -197,6 +201,10 @@ public class GnirsGUI extends JPanel {
         top1.add(disperserLabel, new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0
                 , GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(11, 11, 0, 0), 0, 0));
         top1.add(disperser, new GridBagConstraints(0, 3, 1, 1, 0.0, 0.0
+                , GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(0, 11, 0, 0), 0, 0));
+        top1.add(filterLabel, new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0
+                , GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(11, 11, 0, 0), 0, 0));
+        top1.add(filter, new GridBagConstraints(0, 3, 1, 1, 0.0, 0.0
                 , GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(0, 11, 0, 0), 0, 0));
         top1.add(slitWidthLabel, new GridBagConstraints(1, 2, 2, 1, 1.0, 0.0
                 , GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(11, 11, 0, 0), 0, 0));

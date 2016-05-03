@@ -31,10 +31,12 @@ public class GnirsForm extends JPanel {
 		JPanel top1 = new JPanel();
 		JLabel pixelScaleLabel = new JLabel();
 		JLabel slitWidthLabel = new JLabel();
+		JLabel filterLabel = new JLabel();
 		pixelScale = new SingleSelectComboBox();
 		JLabel disperserLabel = new JLabel();
 		disperser = new SingleSelectComboBox();
 		slitWidth = new SingleSelectComboBox();
+		filter = new SingleSelectComboBox();
 		JPanel wollastonPrismPanel = new JPanel();
 		JLabel component2 = new JLabel();
 		JLabel scienceFovLabel = new JLabel();
@@ -102,6 +104,13 @@ public class GnirsForm extends JPanel {
 				GridBagConstraints.WEST, GridBagConstraints.NONE,
 				new Insets(11, 11, 0, 0), 0, 0));
 
+			//---- filterLabel ----
+			filterLabel.setLabelFor(null);
+			filterLabel.setText("Filter");
+			top1.add(filterLabel, new GridBagConstraints(4, 0, 1, 1, 1.0, 0.0,   ///????????
+					GridBagConstraints.WEST, GridBagConstraints.NONE,
+					new Insets(11, 11, 0, 0), 0, 0));
+
             // TODO: REMOVE
 			//---- posAngleLabel ----
 			//posAngleLabel.setText("Position Angle");
@@ -133,6 +142,12 @@ public class GnirsForm extends JPanel {
 			top1.add(slitWidth, new GridBagConstraints(2, 1, 1, 1, 0.0, 0.0,
 				GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
 				new Insets(0, 11, 0, 0), 0, 0));
+
+			//---- filter ----
+			filter.setFont(new Font("Dialog", Font.PLAIN, 12));
+			top1.add(filter, new GridBagConstraints(4, 1, 1, 1, 0.0, 0.0,       //////????????
+					GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+					new Insets(0, 11, 0, 0), 0, 0));
 
             // TODO: REMOVE
 			//---- posAngle ----
@@ -465,6 +480,7 @@ public class GnirsForm extends JPanel {
 	SingleSelectComboBox pixelScale;
 	SingleSelectComboBox disperser;
 	SingleSelectComboBox slitWidth;
+	SingleSelectComboBox filter;
 	JLabel scienceFOV;
 	JLabel centralWavelengthLabel;
 	DropDownListBoxWidget centralWavelength;

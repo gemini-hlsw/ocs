@@ -73,8 +73,15 @@ public class EdCompInstGNIRS extends EdCompInstBase<InstGNIRS> implements Action
         _w = new GnirsForm();
 
         _w.pixelScale.setChoices(SpTypeUtil.getFormattedDisplayValueAndDescriptions(PixelScale.class));
+      //  _w.filter.setChoices(SpTypeUtil.getFormattedDisplayValueAndDescriptions(Filter.class));
         _w.disperser.setChoices(SpTypeUtil.getFormattedDisplayValueAndDescriptions(Disperser.class));
         _w.centralWavelength.setChoices(_getDefaultWavelengths());
+
+        final SpTypeComboBoxModel<Filter> fModel = new SpTypeComboBoxModel<Filter>(Filter.class);
+        _w.filter.setModel(fModel);
+        _w.filter.setRenderer(new SpTypeComboBoxRenderer());
+        _w.filter.setMaximumRowCount(Filter.class.getEnumConstants().length);
+        _w.filter.addActionListener(this);
 
         final SpTypeComboBoxModel<WellDepth> wdModel = new SpTypeComboBoxModel<WellDepth>(WellDepth.class);
         _w.well.setModel(wdModel);
@@ -255,6 +262,7 @@ public class EdCompInstGNIRS extends EdCompInstBase<InstGNIRS> implements Action
         _updatePixelScale();
         _updateDisperser();
         _updateSlitWidth();
+        _updateFilter();
         _updateCentralWavelength();
         _updateCrossDispersed();
         _updateWeelDepth();
@@ -427,6 +435,9 @@ public class EdCompInstGNIRS extends EdCompInstBase<InstGNIRS> implements Action
         _w.slitWidth.getModel().setSelectedItem(getDataObject().getSlitWidth());
     }
 
+    // Update the filter display from the data object.
+    private void _updateFilter() { _w.filter.getModel().setSelectedItem(getDataObject().getFilter()); }
+
     // Update the Weel Depth display from the data object.
     private void _updateWeelDepth() {
         _w.well.getModel().setSelectedItem(getDataObject().getWellDepth());
@@ -590,6 +601,8 @@ public class EdCompInstGNIRS extends EdCompInstBase<InstGNIRS> implements Action
             getDataObject().setPixelScale(PixelScale.getPixelScaleByIndex(_w.pixelScale.getSelectedIndex()));
         } else if (w == _w.disperser) {
             getDataObject().setDisperser(Disperser.getDisperserByIndex(_w.disperser.getSelectedIndex()));
+        } else if (w == _w.filter) {
+            getDataObject().setFilter((Filter) _w.filter.getModel().getSelectedItem());
         } else if (w == _w.slitWidth) {
             getDataObject().setSlitWidth((SlitWidth) _w.slitWidth.getModel().getSelectedItem());
         } else if (w == _w.well) {

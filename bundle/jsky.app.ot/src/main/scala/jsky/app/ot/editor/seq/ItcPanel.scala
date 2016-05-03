@@ -164,6 +164,7 @@ class ItcImagingPanel(val owner: EdIteratorFolder) extends ItcPanel {
     case SPComponentType.INSTRUMENT_NIFS        => false
     case SPComponentType.INSTRUMENT_NIRI        => true
     case SPComponentType.INSTRUMENT_TRECS       => false // may or may not be supported in OT at some point
+    case SPComponentType.INSTRUMENT_GNIRS       => true
     case _                                      => false
   }
 }
