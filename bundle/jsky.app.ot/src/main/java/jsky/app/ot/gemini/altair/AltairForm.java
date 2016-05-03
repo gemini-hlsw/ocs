@@ -10,8 +10,6 @@ public class AltairForm extends JPanel {
         JLabel adcLabel = new JLabel();
         JLabel beamSplitterLabel = new JLabel();
         adcCheck = new JCheckBox();
-        eight50Button = new JRadioButton();
-        oneButton = new JRadioButton();
         JLabel cassRotatorLabel = new JLabel();
         cassRotatorFollowingButton = new JRadioButton();
         cassRotatorFixedButton = new JRadioButton();
@@ -55,15 +53,21 @@ public class AltairForm extends JPanel {
                 GridBagConstraints.EAST, GridBagConstraints.NONE,
                 new Insets(11, 11, 0, 0), 0, 0));
 
-        //---- eight50Button ----
-        eight50Button.setText(AltairParams.Wavelength.WAVELENGTH_B.displayValue());
-        add(eight50Button, new GridBagConstraints(1, 1, 1, 1, 0.0, 0.0,
+        //---- wavelength850_2500_Button ----
+        wavelength850_2500_Button = new JRadioButton(AltairParams.Wavelength.BS_850_2500.displayValue());
+        add(wavelength850_2500_Button, new GridBagConstraints(1, 1, 1, 1, 0.0, 0.0,
                 GridBagConstraints.WEST, GridBagConstraints.NONE,
                 new Insets(11, 11, 0, 0), 0, 0));
 
-        //---- oneButton ----
-        oneButton.setText(AltairParams.Wavelength.WAVELENGTH_A.displayValue());
-        add(oneButton, new GridBagConstraints(1, 2, 1, 1, 0.0, 0.0,
+        //---- wavelength850_5000_Button ----
+        wavelength850_5000_Button = new JRadioButton(AltairParams.Wavelength.BS_850_5000.displayValue());
+        add(wavelength850_5000_Button, new GridBagConstraints(1, 2, 1, 1, 0.0, 0.0,
+                GridBagConstraints.WEST, GridBagConstraints.NONE,
+                new Insets(0, 11, 0, 0), 0, 0));
+
+        //---- wavelength589_Button ----
+        wavelength589_Button = new JRadioButton(AltairParams.Wavelength.BS_589.displayValue());
+        add(wavelength589_Button, new GridBagConstraints(1, 3, 1, 1, 0.0, 0.0,
                 GridBagConstraints.WEST, GridBagConstraints.NONE,
                 new Insets(0, 11, 0, 0), 0, 0));
 
@@ -71,75 +75,75 @@ public class AltairForm extends JPanel {
         cassRotatorLabel.setToolTipText("");
         cassRotatorLabel.setVerifyInputWhenFocusTarget(true);
         cassRotatorLabel.setText("Cass Rotator");
-        add(cassRotatorLabel, new GridBagConstraints(0, 3, 1, 1, 0.0, 0.0,
+        add(cassRotatorLabel, new GridBagConstraints(0, 4, 1, 1, 0.0, 0.0,
                 GridBagConstraints.EAST, GridBagConstraints.NONE,
                 new Insets(11, 11, 0, 0), 0, 0));
 
         //---- cassRotatorFollowingButton ----
         cassRotatorFollowingButton.setText("Following");
-        add(cassRotatorFollowingButton, new GridBagConstraints(1, 3, 1, 1, 0.0, 0.0,
+        add(cassRotatorFollowingButton, new GridBagConstraints(1, 4, 1, 1, 0.0, 0.0,
                 GridBagConstraints.WEST, GridBagConstraints.NONE,
                 new Insets(11, 11, 0, 0), 0, 0));
 
         //---- cassRotatorFixedButton ----
         cassRotatorFixedButton.setText("Fixed");
-        add(cassRotatorFixedButton, new GridBagConstraints(1, 4, 1, 1, 0.0, 0.0,
+        add(cassRotatorFixedButton, new GridBagConstraints(1, 5, 1, 1, 0.0, 0.0,
                 GridBagConstraints.WEST, GridBagConstraints.NONE,
                 new Insets(0, 11, 0, 0), 0, 0));
 
         //---- ndFilterLabel ----
         ndFilterLabel.setText("ND Filter");
-        add(ndFilterLabel, new GridBagConstraints(0, 5, 1, 1, 0.0, 0.0,
+        add(ndFilterLabel, new GridBagConstraints(0, 6, 1, 1, 0.0, 0.0,
                 GridBagConstraints.EAST, GridBagConstraints.NONE,
                 new Insets(11, 11, 0, 0), 0, 0));
 
         //---- ndFilterInButton ----
         ndFilterInButton.setText("In");
-        add(ndFilterInButton, new GridBagConstraints(1, 5, 1, 1, 0.0, 0.0,
+        add(ndFilterInButton, new GridBagConstraints(1, 6, 1, 1, 0.0, 0.0,
                 GridBagConstraints.WEST, GridBagConstraints.NONE,
                 new Insets(11, 11, 0, 0), 0, 0));
 
         //---- ndFilterOutButton ----
         ndFilterOutButton.setText("Out");
-        add(ndFilterOutButton, new GridBagConstraints(1, 6, 1, 1, 0.0, 0.0,
+        add(ndFilterOutButton, new GridBagConstraints(1, 7, 1, 1, 0.0, 0.0,
                 GridBagConstraints.WEST, GridBagConstraints.NONE,
                 new Insets(0, 11, 0, 0), 0, 0));
 
         //---- guideStarType ----
         guideStarType.setText("Guide Star Type");
-        add(guideStarType, new GridBagConstraints(0, 7, 1, 1, 0.0, 0.0,
+        add(guideStarType, new GridBagConstraints(0, 8, 1, 1, 0.0, 0.0,
                 GridBagConstraints.EAST, GridBagConstraints.NONE,
                 new Insets(11, 11, 0, 0), 0, 0));
 
         //---- ngsRadioButton ----
         ngsRadioButton.setText("Natural Guide Star");
-        add(ngsRadioButton, new GridBagConstraints(1, 7, 1, 1, 0.0, 0.0,
+        add(ngsRadioButton, new GridBagConstraints(1, 8, 1, 1, 0.0, 0.0,
                 GridBagConstraints.WEST, GridBagConstraints.NONE,
                 new Insets(11, 11, 0, 0), 0, 0));
 
         //---- ngsWithFieldLensRadioButton ----
         ngsWithFieldLensRadioButton.setText("Natural Guide Star with Field Lens");
-        add(ngsWithFieldLensRadioButton, new GridBagConstraints(1, 8, 1, 1, 0.0, 0.0,
+        add(ngsWithFieldLensRadioButton, new GridBagConstraints(1, 9, 1, 1, 0.0, 0.0,
                 GridBagConstraints.WEST, GridBagConstraints.NONE,
                 new Insets(0, 11, 0, 0), 0, 0));
 
         //---- lgsRadioButton ----
         lgsRadioButton.setText("Laser Guide Star + AOWFS");
-        add(lgsRadioButton, new GridBagConstraints(1, 9, 1, 1, 0.0, 0.0,
+        add(lgsRadioButton, new GridBagConstraints(1, 10, 1, 1, 0.0, 0.0,
                 GridBagConstraints.WEST, GridBagConstraints.NONE,
                 new Insets(0, 11, 0, 0), 0, 0));
         withFlLabel1.setText("(with Field Lens)");
-        add(withFlLabel1, new GridBagConstraints(2, 9, 1, 1, 1.0, 0.0,
+        add(withFlLabel1, new GridBagConstraints(2, 10, 1, 1, 1.0, 0.0,
                 GridBagConstraints.WEST, GridBagConstraints.NONE,
                 new Insets(0, 11, 0, 0), 0, 0));
 
         //---- lgsP1RadioButton ----
         lgsP1RadioButton.setText("Laser Guide Star + PWFS1");
-        add(lgsP1RadioButton, new GridBagConstraints(1, 10, 1, 1, 0.0, 0.0,
+        add(lgsP1RadioButton, new GridBagConstraints(1, 11, 1, 1, 0.0, 0.0,
                 GridBagConstraints.WEST, GridBagConstraints.NONE,
                 new Insets(0, 11, 0, 0), 0, 0));
         withFlLabel2.setText("(with Field Lens)");
-        add(withFlLabel2, new GridBagConstraints(2, 10, 1, 1, 1.0, 0.0,
+        add(withFlLabel2, new GridBagConstraints(2, 11, 1, 1, 1.0, 0.0,
                 GridBagConstraints.WEST, GridBagConstraints.NONE,
                 new Insets(0, 11, 0, 0), 0, 0));
 
@@ -147,18 +151,19 @@ public class AltairForm extends JPanel {
         // LAYOUT NOTE: bring both elements to the top left and let the last element
         // consume all remaining space (fill weight = 1.0 for x and y)
         lgsOiRadioButton.setText("Laser Guide Star + OIWFS");
-        add(lgsOiRadioButton, new GridBagConstraints(1, 11, 1, 1, 0.0, 0.0,
+        add(lgsOiRadioButton, new GridBagConstraints(1, 12, 1, 1, 0.0, 0.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
                 new Insets(0, 11, 0, 0), 0, 0));
         withFlLabel3.setText("(with Field Lens)");
-        add(withFlLabel3, new GridBagConstraints(2, 11, 1, 1, 1.0, 1.0,
+        add(withFlLabel3, new GridBagConstraints(2, 12, 1, 1, 1.0, 1.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
                 new Insets(0, 11, 0, 0), 0, 0));
 
         //---- beamSplitterButtonGroup ----
         ButtonGroup beamSplitterButtonGroup = new ButtonGroup();
-        beamSplitterButtonGroup.add(eight50Button);
-        beamSplitterButtonGroup.add(oneButton);
+        beamSplitterButtonGroup.add(wavelength850_2500_Button);
+        beamSplitterButtonGroup.add(wavelength850_5000_Button);
+        beamSplitterButtonGroup.add(wavelength589_Button);
 
         //---- cassRotatorButtonGroup ----
         ButtonGroup cassRotatorButtonGroup = new ButtonGroup();
@@ -181,8 +186,9 @@ public class AltairForm extends JPanel {
     }
 
     final JCheckBox    adcCheck;
-    final JRadioButton eight50Button;
-    final JRadioButton oneButton;
+    final JRadioButton wavelength850_2500_Button;
+    final JRadioButton wavelength850_5000_Button;
+    final JRadioButton wavelength589_Button;
     final JRadioButton cassRotatorFollowingButton;
     final JRadioButton cassRotatorFixedButton;
     final JRadioButton ndFilterInButton;

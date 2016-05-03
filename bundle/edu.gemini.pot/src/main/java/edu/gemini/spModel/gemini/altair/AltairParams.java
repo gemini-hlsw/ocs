@@ -27,11 +27,13 @@ public final class AltairParams {
      */
     public enum Wavelength implements DisplayableSpType, SequenceableSpType {
 
-        WAVELENGTH_A("750 nm - 5 μm science", "WAVELENGTH_A"),
-        WAVELENGTH_B("850 nm - 2.5 μm science", "WAVELENGTH_B");
+        BS_850_2500("850 nm - 2.5 μm science",         "BS_850_2500"),
+        BS_850_5000("850 nm - 5 μm science",           "BS_850_5000"),
+        BS_589("589 nm notch (400 nm - 1 μm science)", "BS_589");
+
 
         /* The default Wavelength index value */
-        public static final Wavelength DEFAULT = WAVELENGTH_B;
+        public static final Wavelength DEFAULT = BS_850_2500;
         private final String _displayValue;
         private final String _sequenceValue;
 
