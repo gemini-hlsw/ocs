@@ -33,13 +33,12 @@ trait Migration {
   val ParamSetTarget             = "spTarget"
   val ParamSetTemplateParameters = "Template Parameters"
 
-  // Extract all the target paramsets, be they part of an observation or
-  // template parameters.
-  protected def allTargets(d: Document): List[ParamSet] = {
+  // Extract all the target paramsets
+  protected def allTargets(d: Document, includeTemplates: Boolean = true): List[ParamSet] = {
     val names = Set(ParamSetBase, ParamSetTarget)
 
     val templateTargets = for {
-      cs  <- d.findContainers(SPComponentType.TEMPLATE_PARAMETERS)
+      cs  <- d.findContainers(SPComponentType.TEMPLATE_PARAMETERS) if includeTemplates
       tps <- cs.allParamSets if tps.getName == ParamSetTemplateParameters
       ps  <- tps.allParamSets if names(ps.getName)
     } yield ps
@@ -52,7 +51,6 @@ trait Migration {
 
     templateTargets ++ obsTargets
   }
-
 
   /** (obs paramset, target paramset) paramset pairs **/
   protected def obsAndBases(d: Document): List[(ParamSet, ParamSet)] =

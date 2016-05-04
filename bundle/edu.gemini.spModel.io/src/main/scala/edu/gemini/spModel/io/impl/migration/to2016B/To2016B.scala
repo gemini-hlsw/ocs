@@ -5,6 +5,7 @@ import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.spModel.core.HorizonsDesignation.MajorBody
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.gemini.obscomp.SPProgram
+import edu.gemini.spModel.io.impl.migration.to2015B.To2015B
 import edu.gemini.spModel.pio.xml.PioXmlFactory
 import edu.gemini.spModel.pio.{Document, ParamSet, Pio, Version}
 import edu.gemini.spModel.target.{SPTargetPio, SourcePio, TargetParamSetCodecs}
@@ -28,7 +29,7 @@ object To2016B extends Migration {
   }
 
   val conversions: List[Document => Unit] = List(
-    updateGuideEnvironment, updateSchedulingBlocks, updateTargets, updateAltair // order matters!
+    updateGuideEnvironment, updateSchedulingBlocks, updateTargets, updateTargetNotes, updateAltair // order matters!
   )
 
   val fact = new PioXmlFactory
@@ -125,6 +126,14 @@ object To2016B extends Migration {
 
     }
 
+  // Add notes to obs targets only, since template targets have no orbital elements
+  def updateTargetNotes(d: Document): Unit =
+    allTargets(d, false).foreach { t =>
+      conicTargetNote(t).foreach { case (title, body) =>
+        To2015B.appendNote(t, "", title, _ => body, false)
+      }
+    }
+
   // Properties common to all target types
   def common(ps: ParamSet): State[Target, Unit] =
     for {
@@ -192,6 +201,39 @@ object To2016B extends Migration {
       case "NEPTUNE" => 899
       case _         => sys.error("Unknown named target: " + name)
     })
+
+  // Construct a note describing the old conic target
+  def conicTargetNote(ps: ParamSet): Option[(String, String)] =
+    for {
+      name  <- ps.value("name")
+      mpc   <- ps.value("system").map(_ == "MPC minor planet")
+      epoch <- ps.value("epoch")
+      in    <- ps.value("inclination")
+      om    <- ps.value("anode")
+      w     <- ps.value("perihelion")
+      aq    <- ps.value("aq")
+      ec    <- ps.value("e")
+      matp  <- ps.value(mpc ? "lm" | "epochOfPeri")
+    } yield (
+      s"Migration: $name",
+      s"""
+         |Starting with 2016B, the Observing Tool supports all nonsidereal targets with ephemerides
+         |automatically downloaded from JPL HORIZONS.  This observation used the following orbital
+         |elements which have been migrated to a single-point ephemeris.
+         |
+         |     Name: $name
+         |    Epoch: $epoch
+         |       IN: $in
+         |       OM: $om
+         |        W: $w
+         |       ${mpc ? " A" | "QR"}: $aq
+         |       EC: $ec
+         |       ${mpc ? "MA" | "TP"}: $matp
+         |
+         |Re-resolve the target to set the unique target identifier and to update to the most recent
+         |ephemeris.
+       """.stripMargin
+      )
 
   def updateAltair(d: Document): Unit = {
     for {

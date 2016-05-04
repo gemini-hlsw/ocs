@@ -1,10 +1,11 @@
 package edu.gemini.spModel.io.impl.migration.to2016B
 
-import edu.gemini.pot.sp.{SPComponentType, ISPProgram}
+import edu.gemini.pot.sp.{ISPObservation, ISPNode, SPComponentType, ISPProgram}
 import edu.gemini.spModel.core.HorizonsDesignation.MajorBody
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.io.impl.migration.MigrationTest
 import edu.gemini.spModel.obs.{SchedulingBlock, SPObservation}
+import edu.gemini.spModel.obscomp.{SPNote, ProgramNote}
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.obsComp.TargetObsComp
 import org.specs2.mutable.Specification
@@ -109,6 +110,30 @@ class TargetMigrationTest extends Specification with MigrationTest {
       )
     }
 
+    "Add a migration note for MPC Minor Planet 'beer'" in withTestProgram2("targetMigration.xml") { p =>
+      findNoteTextByPath(p, "mpc-minor-planet", "Migration: beer").exists(_ contains "W: 180.0542620681246")
+    }
+
+    "Add a migration note for JPL Major Body 'Halley'" in withTestProgram2("targetMigration.xml") { p =>
+      findNoteTextByPath(p, "jpl-minor-body", "Migration: halley").exists(_ contains "EC: 0.9671429084623044")
+    }
+
   }
+
+  def findNoteTextByPath(n: ISPNode, title: String, more: String*): Option[String] =
+    findByPath(n, title, more: _*).map(_.getDataObject).collect {
+      case n: SPNote => n.getNote
+    }
+
+  def findByPath(n: ISPNode, title: String, more: String*): Option[ISPNode] =
+    findByName(n, title).flatMap { node =>
+      more.toList match {
+        case Nil    => Some(node)
+        case t :: m => findByPath(node, t, m: _*)
+      }
+    }
+
+  def findByName(n: ISPNode, title: String): Option[ISPNode] =
+    n.findDescendant(_.getDataObject.getTitle == title)
 
 }
