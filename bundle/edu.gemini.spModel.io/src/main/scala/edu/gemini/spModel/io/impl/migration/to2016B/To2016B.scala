@@ -219,7 +219,7 @@ object To2016B extends Migration {
       s"""
          |Starting with 2016B, the Observing Tool supports all nonsidereal targets with ephemerides
          |automatically downloaded from JPL HORIZONS.  This observation used the following orbital
-         |elements for which have been migrated to a single-point ephemeris.
+         |elements which have been migrated to a single-point ephemeris.
          |
          |     Name: $name
          |    Epoch: $epoch
