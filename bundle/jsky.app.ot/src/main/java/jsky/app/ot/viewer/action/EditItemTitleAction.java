@@ -2,6 +2,7 @@ package jsky.app.ot.viewer.action;
 
 import edu.gemini.pot.sp.ISPNode;
 import edu.gemini.spModel.data.ISPDataObject;
+import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import jsky.app.ot.viewer.SPViewer;
 import jsky.util.gui.DialogUtil;
 
@@ -41,6 +42,10 @@ public final class EditItemTitleAction extends AbstractViewerAction {
 
     @Override
     public boolean computeEnabledState() throws Exception {
-        return isEditableContext() && getContextNode(ISPNode.class) != null;
+        if (isEditableContext()) {
+            ISPNode n = getContextNode(ISPNode.class);
+            return !(n.getDataObject() instanceof TargetObsComp);
+        }
+        return false;
     }
 }
