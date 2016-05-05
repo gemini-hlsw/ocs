@@ -82,13 +82,18 @@ object To2016B extends Migration {
     }
   }
 
-  // Add a scheduling block to nonsidereal observations that don't have one. A duration of 0ms means
-  // that the planned time will be used by internal calculations, which is a reasonable default.
+  // Add a scheduling block to nonsidereal observations (discarding any existing block) such that
+  // the old valid-at date becomes the scheduling block start. The ensures that coordinates will
+  // be available.
   def updateSchedulingBlocks(d: Document): Unit =
     for {
-      (o, b) <- obsAndBases(d) if o.value("schedulingBlockStart").isEmpty
+      (o, b) <- obsAndBases(d)
       date   <- b.value("validAt").map(SPTargetPio.parseDate)
-    } Pio.addLongParam(fact, o, "schedulingBlockStart", date.getTime)
+    } {
+      o.removeChild("schedulingBlockDuration")
+      o.removeChild("schedulingBlockStart")
+      Pio.addLongParam(fact, o, "schedulingBlockStart", date.getTime)
+    }
 
   def isTooProgram(d: Document): Boolean =
     d.findContainers(SPProgram.SP_TYPE).exists { c =>
