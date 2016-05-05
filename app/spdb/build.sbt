@@ -50,7 +50,9 @@ def common(version: Version) = AppConfig(
     "-Dcom.sun.management.jmxremote.port=2407",
     "-Dcom.sun.management.jmxremote.ssl=false",
     "-Djava.awt.headless=true",
-    "-Dnetworkaddress.cache.ttl=60"
+    "-Dnetworkaddress.cache.ttl=60",
+    "-Duser.language=en",
+    "-Duser.country=US"
   ),
   props = Map(
     "edu.gemini.auxfile.chunkSize"                     -> "32768",

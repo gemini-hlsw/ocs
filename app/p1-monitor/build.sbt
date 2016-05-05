@@ -30,7 +30,9 @@ def common(ov: Version, pv: Version) = AppConfig(
   id = "common",
   vmargs = List(
     "-Xmx512M",
-    "-Djava.util.logging.config.file=conf/log.properties"
+    "-Djava.util.logging.config.file=conf/log.properties",
+    "-Duser.language=en",
+    "-Duser.country=US"
   ),
   props = Map(
     "org.osgi.framework.storage.clean"        -> "onFirstInit",

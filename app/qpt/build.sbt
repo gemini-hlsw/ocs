@@ -34,7 +34,9 @@ ocsAppManifest := {
 def common(version: Version) = AppConfig(
   id = "common",
   vmargs = List(
-    "-Xmx1024M"
+    "-Xmx1024M",
+    "-Duser.language=en",
+    "-Duser.country=US"
   ),
   props = Map(
     "org.osgi.framework.storage.clean"                 -> "onFirstInit",
