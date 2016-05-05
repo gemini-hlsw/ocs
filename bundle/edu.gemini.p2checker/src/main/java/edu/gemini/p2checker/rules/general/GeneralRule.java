@@ -124,6 +124,18 @@ public class GeneralRule implements IRule {
         //TODO: Rule to check if the WFS is in the patrol field, whatever that means
         //private static final String WFS_OUT_PATROL_FIELD_TEMPLATE = "%s outside of the patrol field";
 
+        private String formatGuiderString(final Iterator<GuideProbe> iter) {
+            if (iter == null || !iter.hasNext())
+                return "";
+
+            final StringBuilder buf = new StringBuilder();
+            buf.append(iter.next().getKey());
+            while (iter.hasNext()) {
+                buf.append(", ").append(iter.next().getKey());
+            }
+            return buf.toString();
+        }
+
         private void reportAltairLgsGuideIssues(P2Problems problems, Set<GuideProbe> guiders, AltairParams.Mode mode, ISPObsComponent targetComp) {
             final ImList<GuideProbe> usedGuiders = mode.guiders();
 
