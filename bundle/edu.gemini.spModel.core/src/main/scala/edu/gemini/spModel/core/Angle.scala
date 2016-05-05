@@ -421,8 +421,8 @@ object Angle {
 
     val x = a + carryB
 
-    if (x == max) s"0${sep}00$sep${df.format(0)}"
-    else f"$x%d$sep$m$sep$s"
+    if (x == max) s"00${sep}00$sep${df.format(0)}"
+    else f"$x%02d$sep$m$sep$s"
   }
 
   def signedDegrees(d: Double): Double =
