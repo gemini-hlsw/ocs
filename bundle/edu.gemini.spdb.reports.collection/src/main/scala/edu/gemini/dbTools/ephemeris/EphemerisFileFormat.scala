@@ -57,7 +57,7 @@ object EphemerisFileFormat {
       val coordsS   = formatCoords(coords)
       val raTrackS  = f"$raTrack%9.5f"
       val decTrackS = f"$decTrack%9.5f"
-      s" $timeS $jdS     $coordsS $raTrackS $decTrackS"
+      s" $timeS $jdS    $coordsS $raTrackS $decTrackS"
     }
 
     lines.mkString(s"$SOE\n", "\n", (lines.isEmpty ? "" | "\n") + s"$EOE\n")
