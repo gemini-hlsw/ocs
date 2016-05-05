@@ -366,7 +366,7 @@ public final class InstAltair extends AbstractDataObject implements PropertyProv
     private static Set<GuideProbe> allMinus(final ImList<GuideProbe> guideProbes) {
         final Set<GuideProbe> guiders = new TreeSet<>(GuideProbe.KeyComparator.instance);
         guiders.addAll(GuideProbeMap.instance.values());
-        guiders.removeAll(guideProbes);
+        guideProbes.foreach(guiders::remove);
         return guiders;
     }
 
