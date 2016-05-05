@@ -62,10 +62,15 @@ final class NonSiderealNameEditor extends TelescopePosEditor with ReentrancyHack
     HorizonsService2.lookupEphemerisWithPadding(d, site, 1200, s)
   }
 
-  def updateDesignation(hd: HorizonsDesignation, name: String): HS2[Unit] =
+  // Given designation and name from horizons, along with the current target name, provide a new
+  // target name. We try to find a match, and if there is none we just return the old name.
+  def modifyName(hd: HorizonsDesignation, hn: String)(n: String): String =
+    List(hn, hd.des).find(s => s.toLowerCase.indexOf(n.toLowerCase) >= 0).getOrElse(n)
+
+  def updateDesignation(hd: HorizonsDesignation, name: String, rename: Boolean): HS2[Unit] =
     HS2.delay {
       Swing.onEDT {
-        val t0 = Target.name.set(spt.getTarget, name)
+        val t0 = if (rename) Target.name.mod(modifyName(hd, name), spt.getTarget) else spt.getTarget
         Target.horizonsDesignation.set(t0, Some(hd)).foreach(spt.setTarget)
       }
     }
@@ -93,12 +98,12 @@ final class NonSiderealNameEditor extends TelescopePosEditor with ReentrancyHack
           null)
       } .map(_.asInstanceOf[Wrapper].unwrap)
     } >>= {
-      case Some(r) => oneResult(r)
+      case Some(r) => oneResult(r, true)
       case None    => ().point[HS2]
     }
 
-  def oneResult(r: Row[_ <: HorizonsDesignation]): HS2[Unit] =
-    updateDesignation(r.a, r.name).as(site) >>= {
+  def oneResult(r: Row[_ <: HorizonsDesignation], rename: Boolean): HS2[Unit] =
+    updateDesignation(r.a, r.name, rename).as(site) >>= {
       case Some(site) => lookup(r.a, site) <* hide >>= updateEphem
       case None       => HS2.delay(Swing.onEDT(DialogUtil.error(name, "Cannot determine site for this observation; this is needed for ephemeris lookup.")))
     }
@@ -111,7 +116,7 @@ final class NonSiderealNameEditor extends TelescopePosEditor with ReentrancyHack
     case Some(s) =>
       (HorizonsService2.search(s) <* hide) >>= {
         case Nil     => noResults
-        case List(r) => oneResult(r)
+        case List(r) => oneResult(r, true)
         case rs      => manyResults(rs)
       }
   }
@@ -129,7 +134,7 @@ final class NonSiderealNameEditor extends TelescopePosEditor with ReentrancyHack
     spt.getNonSiderealTarget.flatMap(Target.horizonsDesignation.get).flatten
 
   def refreshEphemeris(): Unit =
-    horizonsDesignation.map(hd => oneResult(Row(hd, spt.getName)).run).foreach(unsafeRun)
+    horizonsDesignation.map(hd => oneResult(Row(hd, spt.getName), false).run).foreach(unsafeRun)
 
   val name = new TextBoxWidget <| { w =>
     w.setMinimumSize(w.getPreferredSize)
