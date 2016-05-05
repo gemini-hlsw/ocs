@@ -9,6 +9,7 @@ import edu.gemini.spModel.core.SPProgramID;
 import edu.gemini.spModel.core.Semester;
 import edu.gemini.spModel.data.ISPDataObject;
 import edu.gemini.spModel.obs.SPObservation;
+import edu.gemini.spModel.util.DefaultSchedulingBlock;
 import edu.gemini.spModel.util.SPTreeUtil;
 import jsky.app.ot.OTOptions;
 import jsky.app.ot.viewer.SPViewer;
@@ -66,7 +67,7 @@ public final class AddObservationAction extends AbstractViewerAction implements 
 
                 // Add a default scheduling block.
                 final SPObservation spo = (SPObservation) o.getDataObject();
-                spo.setSchedulingBlock(ImOption.apply(AddObservationActionHelper.getSchedulingBlock(c)));
+                spo.setSchedulingBlock(ImOption.apply(DefaultSchedulingBlock.forProgram(c)));
                 o.setDataObject(spo);
 
                 c.addObservation(o);

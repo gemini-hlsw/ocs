@@ -3,6 +3,7 @@ package edu.gemini.spModel.template;
 import edu.gemini.pot.sp.*;
 import edu.gemini.pot.spdb.DBAbstractFunctor;
 import edu.gemini.pot.spdb.IDBDatabaseService;
+import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 import edu.gemini.spModel.obs.ObsClassService;
 import edu.gemini.spModel.obs.SPObservation;
@@ -10,6 +11,7 @@ import edu.gemini.spModel.obsclass.ObsClass;
 import edu.gemini.spModel.obscomp.SPGroup;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
+import edu.gemini.spModel.util.DefaultSchedulingBlock;
 
 
 import java.security.Principal;
@@ -87,6 +89,9 @@ public class InstantiationFunctor extends DBAbstractFunctor {
             // Clone the template obs
             final ISPObservation newObs = fact.createObservationCopy(prog, templateObs, false);
             final SPObservation newObsData = (SPObservation) newObs.getDataObject();
+
+            // Add a default scheduling block
+            newObsData.setSchedulingBlock(ImOption.apply(DefaultSchedulingBlock.forProgram(prog)));
 
             // Save a pointer to the template
             newObsData.setOriginatingTemplate(templateObs.getNodeKey());
