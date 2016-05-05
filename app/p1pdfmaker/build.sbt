@@ -27,7 +27,9 @@ def common(pv: Version) = AppConfig(
   vmargs = List(
     "-Xmx512M",
     "-Dedu.gemini.ui.workspace.impl.Workspace.fonts.shrunk=true",
-    "-Dfile.encoding=UTF-8"
+    "-Dfile.encoding=UTF-8",
+    "-Duser.language=en",
+    "-Duser.country=US"
   ),
   props = Map(
     "org.osgi.framework.storage.clean"        -> "onFirstInit",

@@ -41,7 +41,9 @@ def common(version: Version) = AppConfig(
   id = "common",
   vmargs = List(
     "-Xmx1024M",
-    "-XX:MaxPermSize=196M"
+    "-XX:MaxPermSize=196M",
+    "-Duser.language=en",
+    "-Duser.country=US"
   ),
   props = Map(
     "org.osgi.framework.storage.clean"        -> "onFirstInit",
