@@ -71,24 +71,17 @@ public final class TargetObsComp extends AbstractDataObject implements GuideProb
         return toc;
     }
 
-    /**
-     * Override getTitle to return the name of the base position if set.
-     */
     public String getTitle() {
-        // By default, append the name of the base position.  If a title
-        // has been directly set though, use that instead.
-        final String title = super.getTitle();
-        if (!isTitleChanged()) {
-            final TargetEnvironment env = getTargetEnvironment();
-            final SPTarget tp = env.getBase();
-            if (tp != null) {
-                final String initName  = tp.getName();
-                final String finalName = initName == null || initName.trim().isEmpty() ? "<Untitled>" : initName;
-                return helper.targetTag(tp.getTarget()) + ": " + finalName;
-            }
+        // Always compute the name; the UI disallows changes.
+        final TargetEnvironment env = getTargetEnvironment();
+        final SPTarget tp = env.getBase();
+        if (tp != null) {
+            final String initName  = tp.getName();
+            final String finalName = initName == null || initName.trim().isEmpty() ? "<Untitled>" : initName;
+            return helper.targetTag(tp.getTarget()) + ": " + finalName;
+        } else {
+            return super.getTitle();
         }
-
-        return title;
     }
 
     /**
