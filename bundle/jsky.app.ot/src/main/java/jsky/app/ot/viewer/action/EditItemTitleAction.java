@@ -44,7 +44,7 @@ public final class EditItemTitleAction extends AbstractViewerAction {
     public boolean computeEnabledState() throws Exception {
         if (isEditableContext()) {
             ISPNode n = getContextNode(ISPNode.class);
-            return !(n.getDataObject() instanceof TargetObsComp);
+            return (n != null) && !(n.getDataObject() instanceof TargetObsComp);
         }
         return false;
     }
