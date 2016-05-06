@@ -55,7 +55,7 @@ class MultiProbeStrategy(val key: AgsStrategyKey, paStrategy: AgsStrategy, paSym
   val probeBands = RBandsList
 
   override val guideProbes: List[GuideProbe] =
-    strategies.flatMap(_.guideProbes)
+    strategies.flatMap(_.guideProbes).distinct
 }
 
 case object GmosNorthOiwfsAltair extends MultiProbeStrategy(AgsStrategyKey.GmosNorthAltairOiwfsKey, Strategy.GmosNorthOiwfs, List(Strategy.AltairAowfs))
