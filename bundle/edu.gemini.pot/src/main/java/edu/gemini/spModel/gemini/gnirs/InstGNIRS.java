@@ -813,7 +813,7 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
 
         // REL-379: REQUIREMENT: The OT browser must include the GNIRS acquisition mirror,
         // filters, ISS port, well depth, camera and decker.
-//        configInfo.add(new InstConfigInfo(ACQUISITION_MIRROR_PROP));
+        configInfo.add(new InstConfigInfo(ACQUISITION_MIRROR_PROP));
         configInfo.add(new InstConfigInfo(FILTER_PROP));
         configInfo.add(new InstConfigInfo(PORT_PROP));
         configInfo.add(new InstConfigInfo(WELL_DEPTH_PROP));

@@ -89,6 +89,12 @@ public class EdCompInstGNIRS extends EdCompInstBase<InstGNIRS> implements Action
         _w.well.setMaximumRowCount(WellDepth.values().length);
         _w.well.addActionListener(this);
 
+        final SpTypeComboBoxModel<AcquisitionMirror> amModel = new SpTypeComboBoxModel<AcquisitionMirror>(AcquisitionMirror.class);
+        _w.acqMirror.setModel(amModel);
+        _w.acqMirror.setRenderer(new SpTypeComboBoxRenderer());
+        _w.acqMirror.setMaximumRowCount(AcquisitionMirror.class.getEnumConstants().length);
+        _w.acqMirror.addActionListener(this);
+
         _w.pixelScale.addActionListener(this);
         _w.disperser.addActionListener(this);
 
@@ -263,6 +269,7 @@ public class EdCompInstGNIRS extends EdCompInstBase<InstGNIRS> implements Action
         _updateDisperser();
         _updateSlitWidth();
         _updateFilter();
+        _updateAcqMirror();
         _updateCentralWavelength();
         _updateCrossDispersed();
         _updateWeelDepth();
@@ -438,6 +445,9 @@ public class EdCompInstGNIRS extends EdCompInstBase<InstGNIRS> implements Action
     // Update the filter display from the data object.
     private void _updateFilter() { _w.filter.getModel().setSelectedItem(getDataObject().getFilter()); }
 
+    // Update the acquisition mirror display from the data object.
+    private void _updateAcqMirror() { _w.acqMirror.getModel().setSelectedItem(getDataObject().getAcquisitionMirror()); }
+
     // Update the Weel Depth display from the data object.
     private void _updateWeelDepth() {
         _w.well.getModel().setSelectedItem(getDataObject().getWellDepth());
@@ -601,6 +611,8 @@ public class EdCompInstGNIRS extends EdCompInstBase<InstGNIRS> implements Action
             getDataObject().setPixelScale(PixelScale.getPixelScaleByIndex(_w.pixelScale.getSelectedIndex()));
         } else if (w == _w.disperser) {
             getDataObject().setDisperser(Disperser.getDisperserByIndex(_w.disperser.getSelectedIndex()));
+        } else if (w == _w.acqMirror) {
+            getDataObject().setAcquisitionMirror((AcquisitionMirror) _w.acqMirror.getModel().getSelectedItem());
         } else if (w == _w.filter) {
             getDataObject().setFilter((Filter) _w.filter.getModel().getSelectedItem());
         } else if (w == _w.slitWidth) {

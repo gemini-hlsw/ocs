@@ -101,13 +101,36 @@ object ConfigExtractor {
 
   private def extractGnirs(targetEnv: TargetEnvironment, probe: GuideProbe, c: Config): String \/ GnirsParameters = {
     import GNIRSParams._
+/*
+    def extractFilter(acqMirror: AcquisitionMirror): String \/ Option[GNIRSParams.Filter] = acqMirror match {
+      case AcquisitionMirror.IN => extract[GNIRSParams.Filter](c, FilterKey).map(Some(_))
+      case _                    => None.right
+    }
+
+    def extractDisperser(acqMirror: AcquisitionMirror): String \/ Option[GNIRSParams.Disperser] = acqMirror match {
+      case AcquisitionMirror.IN => extract[GNIRSParams.Disperser](c, DisperserKey).map(Some(_))
+      case _                    => None.right
+    }
+*/
+    def extractFilter(slitWidth: SlitWidth): String \/ Option[GNIRSParams.Filter] = slitWidth match {
+      case SlitWidth.ACQUISITION => extract[GNIRSParams.Filter](c, FilterKey).map(Some(_))
+      case _                    => None.right
+    }
+
+    def extractDisperser(slitWidth: SlitWidth): String \/ Option[GNIRSParams.Disperser] = slitWidth match {
+      case SlitWidth.ACQUISITION => extract[GNIRSParams.Disperser](c, DisperserKey).map(Some(_))
+      case _                    => None.right
+    }
+
     for {
       pixelScale  <- extract[PixelScale]        (c, PixelScaleKey)
-      filter      <- extract[Option[Filter]]    (c, FilterKey)
-      grating     <- extract[Option[Disperser]] (c, DisperserKey)
+    //  filter      <- extract[Option[GNIRSParams.Filter]]    (c, FilterKey)
+    //  grating     <- extract[Option[GNIRSParams.Disperser]] (c, DisperserKey)
       readMode    <- extract[ReadMode]          (c, ReadModeKey)
       xDisp       <- extract[CrossDispersed]    (c, CrossDispersedKey)
       slitWidth   <- extract[SlitWidth]         (c, SlitWidthKey)
+      filter      <- extractFilter(slitWidth)
+      grating      <- extractDisperser(slitWidth)
       altair      <- extractAltair             (targetEnv, probe, c)
       wavelen     <- extractObservingWavelength(c)
     } yield GnirsParameters(pixelScale, filter, grating, readMode, xDisp, wavelen, slitWidth, altair)

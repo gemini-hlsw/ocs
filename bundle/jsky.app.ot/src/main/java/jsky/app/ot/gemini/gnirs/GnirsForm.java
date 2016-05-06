@@ -32,7 +32,9 @@ public class GnirsForm extends JPanel {
 		JLabel pixelScaleLabel = new JLabel();
 		JLabel slitWidthLabel = new JLabel();
 		JLabel filterLabel = new JLabel();
+		JLabel acqMirrorLabel = new JLabel();
 		pixelScale = new SingleSelectComboBox();
+		acqMirror = new SingleSelectComboBox();
 		JLabel disperserLabel = new JLabel();
 		disperser = new SingleSelectComboBox();
 		slitWidth = new SingleSelectComboBox();
@@ -190,6 +192,18 @@ public class GnirsForm extends JPanel {
 			top1.add(goodiesFormsSeparator1, new GridBagConstraints(0, 4, 6, 1, 0.0, 0.0,
 				GridBagConstraints.CENTER, GridBagConstraints.BOTH,
 				new Insets(0, 0, 0, 0), 0, 0));
+
+			//---- aqcMirrorLabel ----
+			acqMirrorLabel.setText("Acquisition Mirror");
+			top1.add(acqMirrorLabel, new GridBagConstraints(2, 2, 1, 1, 0.0, 0.0,
+					GridBagConstraints.WEST, GridBagConstraints.NONE,
+					new Insets(11, 11, 0, 0), 0, 0));
+
+			//---- acqMirror ----
+			acqMirror.setMaximumRowCount(2);
+			top1.add(acqMirror, new GridBagConstraints(4, 2, 1, 1, 0.0, 0.0,
+					GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+					new Insets(11, 11, 0, 0), 0, 0));
 
 			//---- centralWavelengthLabel ----
 			centralWavelengthLabel.setToolTipText("");
@@ -481,6 +495,7 @@ public class GnirsForm extends JPanel {
 	SingleSelectComboBox disperser;
 	SingleSelectComboBox slitWidth;
 	SingleSelectComboBox filter;
+	SingleSelectComboBox acqMirror;
 	JLabel scienceFOV;
 	JLabel centralWavelengthLabel;
 	DropDownListBoxWidget centralWavelength;
