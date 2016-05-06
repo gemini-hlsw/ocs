@@ -1,7 +1,15 @@
 package jsky.app.ot.viewer.action;
 
 import edu.gemini.pot.sp.*;
+import edu.gemini.shared.util.immutable.ImOption;
+import edu.gemini.shared.util.immutable.Option;
+import edu.gemini.spModel.core.ProgramId;
+import edu.gemini.spModel.core.ProgramId$;
+import edu.gemini.spModel.core.SPProgramID;
+import edu.gemini.spModel.core.Semester;
 import edu.gemini.spModel.data.ISPDataObject;
+import edu.gemini.spModel.obs.SPObservation;
+import edu.gemini.spModel.util.DefaultSchedulingBlock;
 import edu.gemini.spModel.util.SPTreeUtil;
 import jsky.app.ot.OTOptions;
 import jsky.app.ot.viewer.SPViewer;
@@ -56,6 +64,12 @@ public final class AddObservationAction extends AbstractViewerAction implements 
                     dataObject.setTitle(componentType.readableStr + " Observation");
                     o.setDataObject(dataObject);
                 }
+
+                // Add a default scheduling block.
+                final SPObservation spo = (SPObservation) o.getDataObject();
+                spo.setSchedulingBlock(ImOption.apply(DefaultSchedulingBlock.forProgram(c)));
+                o.setDataObject(spo);
+
                 c.addObservation(o);
             }
         } catch (Exception e) {
