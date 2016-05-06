@@ -275,7 +275,8 @@ def sraaphorst(version: Version) = AppConfig(
     "edu.gemini.auxfile.other.dest"        -> "/gemsoft/var/data/finder/GSqueue/Finders-Test/@SEMESTER@/@PROG_ID@",
     "edu.gemini.auxfile.fits.host"         -> "gsconfig.gemini.edu",
     "edu.gemini.dataman.gsa.summit.host"   -> "cpofits-lv1new.cl.gemini.edu",
-    "edu.gemini.dbTools.archive.directory" -> "/Users/sraaphor/tmp/archiver"
+    "edu.gemini.dbTools.archive.directory" -> "/Users/sraaphor/tmp/archiver",
+    "osgi.shell.telnet.ip"                 -> "172.16.77.56"
   )
 ) extending List(with_gogo(version), sraaphorst_credentials(version))
 

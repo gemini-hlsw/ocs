@@ -21,14 +21,6 @@ final class TcsConfigTest extends TestBase {
   }
 
   @Test
-  def testNonSiderealWithHorizonsDesignation(): Unit = {
-    val titan = HorizonsDesignation.MajorBody(606)
-    setBase(NonSiderealTarget("Titan", ==>>.empty, Some(titan), List.empty, None, None))
-    val m   = getTcsConfigurationMap(getSouthResults)
-    assertEquals(TcsConfig.ephemerisFile(titan), m.get(TccNames.EPHEMERIS))
-  }
-
-  @Test
   def testNonSiderealWithoutHorizonsDesignation(): Unit = {
     setBase(NonSiderealTarget("Titan", ==>>.empty, None, List.empty, None, None))
     val m = getTcsConfigurationMap(getSouthResults)
