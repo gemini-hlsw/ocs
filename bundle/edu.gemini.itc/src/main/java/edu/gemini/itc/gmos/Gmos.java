@@ -330,10 +330,12 @@ public abstract class Gmos extends Instrument implements BinningProvider, Spectr
         return new ArrayList<ItcWarning>() {{
             // How to display gaps in proper location for IFU-2 case? Currently we don't display them at all
             // in the wavelength charts. They are displayed in the pixel space chart for IFU-2 only.
-            if (isIfu2()) add(new ItcWarning("Chip gaps are not shown in wavelength charts in IFU-2 mode."));
-
+            if (isIfu2()) add(new ItcWarning("Chip gaps are not shown in wavelength charts in IFU-2 mode. "));
             if ((gp.fpMask().isIFU() || isIfu2()) && gp.spatialBinning() != 1) {
-                add (new ItcWarning("Spatial binning is strongly discouraged with IFU observations."));
+                add (new ItcWarning("Spatial binning is strongly discouraged with IFU observations." +
+                        " This is because the GMOS fiber traces on the detector blend together if" +
+                        " the detector is binned spatially and the fibers cannot be extracted" +
+                        " reliably using the Gemini IRAF data reduction package. "));
             }
             if ((gp.fpMask().isIFU() || isIfu2()) && gp.spectralBinning() == 4) {
                 add (new ItcWarning("THE SPECTRAL RESOLUTION IS UNDERSAMPLED. " +
