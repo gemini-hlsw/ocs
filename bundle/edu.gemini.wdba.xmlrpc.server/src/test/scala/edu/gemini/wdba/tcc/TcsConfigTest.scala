@@ -1,6 +1,6 @@
 package edu.gemini.wdba.tcc
 
-import edu.gemini.spModel.core.{Declination, Angle, RightAscension, Coordinates, SiderealTarget, HorizonsDesignation, NonSiderealTarget, Target}
+import edu.gemini.spModel.core.{Declination, Angle, RightAscension, Coordinates, SiderealTarget, NonSiderealTarget, Target}
 import edu.gemini.spModel.target.obsComp.TargetObsComp
 import edu.gemini.spModel.util.SPTreeUtil
 import org.junit.Assert._
@@ -18,14 +18,6 @@ final class TcsConfigTest extends TestBase {
     env.getBase.setTarget(target)
 
     oc.setDataObject(toc)
-  }
-
-  @Test
-  def testNonSiderealWithHorizonsDesignation(): Unit = {
-    val titan = HorizonsDesignation.MajorBody(606)
-    setBase(NonSiderealTarget("Titan", ==>>.empty, Some(titan), List.empty, None, None))
-    val m   = getTcsConfigurationMap(getSouthResults)
-    assertEquals(TcsConfig.ephemerisFile(titan), m.get(TccNames.EPHEMERIS))
   }
 
   @Test

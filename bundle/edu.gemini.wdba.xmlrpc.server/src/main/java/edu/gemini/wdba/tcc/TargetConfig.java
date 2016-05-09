@@ -1,19 +1,7 @@
-//
-// $Id: TargetConfig.java 756 2007-01-08 18:01:24Z gillies $
-//
 package edu.gemini.wdba.tcc;
 
-import edu.gemini.shared.util.immutable.ImList;
-import edu.gemini.shared.util.immutable.None;
-import edu.gemini.shared.util.immutable.Option;
-import edu.gemini.shared.util.immutable.Some;
-import edu.gemini.spModel.core.Coordinates;
-import edu.gemini.spModel.core.Magnitude;
-import edu.gemini.spModel.core.Parallax;
-import edu.gemini.spModel.core.ProperMotion;
-import edu.gemini.spModel.core.Redshift;
-import edu.gemini.spModel.core.SiderealTarget;
-import edu.gemini.spModel.core.Target;
+import edu.gemini.shared.util.immutable.*;
+import edu.gemini.spModel.core.*;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.gemini.gsaoi.GsaoiOdgw;
@@ -21,6 +9,10 @@ import edu.gemini.spModel.gemini.gems.Canopus;
 import edu.gemini.wdba.glue.api.WdbaGlueException;
 import org.dom4j.Element;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -37,8 +29,8 @@ public final class TargetConfig extends ParamSet {
      * "OIWFS" and "AOWFS" as though it were a single guider and not a class
      * of guiders.
      */
-    public static String getTag(GuideProbe guider) {
-        GuideProbe.Type type = guider.getType();
+    public static String getTag(final GuideProbe guider) {
+        final GuideProbe.Type type = guider.getType();
 
         if ((type == GuideProbe.Type.OIWFS) && !(guider instanceof GsaoiOdgw)) {
             return GuideProbe.Type.OIWFS.name();
@@ -51,11 +43,11 @@ public final class TargetConfig extends ParamSet {
         return guider.getKey();
     }
 
-    public static String formatName(String tag, int position) {
+    public static String formatName(final String tag, final int position) {
         return String.format("%s (%d)", tag, position);
     }
 
-    public TargetConfig(SPTarget spt) throws WdbaGlueException {
+    public TargetConfig(final SPTarget spt) throws WdbaGlueException {
         super(spt.getName());
         final Target t = spt.getTarget();
 
@@ -77,14 +69,32 @@ public final class TargetConfig extends ParamSet {
         if (t instanceof SiderealTarget) {
             add(_addProperMotion((SiderealTarget) t));
         }
+        if (t instanceof NonSiderealTarget) {
+            final NonSiderealTarget ns = (NonSiderealTarget) t;
+            ImOption.fromScalaOpt(ns.horizonsDesignation()).foreach(hd ->
+                    putParameter(TccNames.EPHEMERIS, ephemerisFile(hd)));
+        }
 
         Option<Element> mags = _createMagnitudes(spt);
         if (!mags.isEmpty()) add(mags.getValue());
-
     }
 
-    private Element _addProperMotion(SiderealTarget t) {
-        ParamSet ps = new ParamSet(TccNames.PROPER_MOTION);
+    /**
+     * Returns the name of the ephemeris file associated with the given
+     * horizons designation.
+     */
+    public static String ephemerisFile(final HorizonsDesignation hd) {
+        try {
+            // See TcsEphemerisExport.
+            return URLEncoder.encode(hd.show() + ".eph", StandardCharsets.UTF_8.name());
+        } catch (final UnsupportedEncodingException ex) {
+            LOG.log(Level.SEVERE, "UTF-8 is not supported!", ex);
+            throw new RuntimeException(ex);
+        }
+    }
+
+    private Element _addProperMotion(final SiderealTarget t) {
+        final ParamSet ps = new ParamSet(TccNames.PROPER_MOTION);
 
         final scala.Option<ProperMotion> opm = t.properMotion();
         final ProperMotion pm = opm.isDefined() ? opm.get() : ProperMotion.zero();
@@ -104,8 +114,8 @@ public final class TargetConfig extends ParamSet {
         return ps;
     }
 
-    private Option<Element> _createMagnitudes(SPTarget target) {
-        ImList<Magnitude> magList = target.getMagnitudesJava();
+    private Option<Element> _createMagnitudes(final SPTarget target) {
+        final ImList<Magnitude> magList = target.getMagnitudesJava();
         if (magList.size() == 0) return None.instance();
         final ParamSet ps = new ParamSet(TccNames.MAGNITUDES);
         magList.foreach(mag -> {
