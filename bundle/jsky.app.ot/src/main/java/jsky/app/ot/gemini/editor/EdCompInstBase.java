@@ -107,7 +107,6 @@ public abstract class EdCompInstBase<T extends SPInstObsComp> extends OtItemEdit
             final TextBoxWidget posAngleTextBox = getPosAngleTextBox();
             if (posAngleTextBox != null && getDataObject() != null && (ignoreFocus || !posAngleTextBox.hasFocus())) {
                 final String newAngle = getDataObject().getPosAngleDegreesStr();
-                System.out.println("--- newAngle=" + newAngle);
                 if (!newAngle.equals(posAngleTextBox.getText())) {
                     posAngleTextBox.setText(newAngle);
                 }
