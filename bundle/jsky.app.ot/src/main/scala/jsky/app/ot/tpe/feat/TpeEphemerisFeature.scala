@@ -11,6 +11,7 @@ import java.util.{ Date, TimeZone }
 import edu.gemini.pot.sp.ISPObservation
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.obs.plannedtime.PlannedTimeCalculator
+import edu.gemini.shared.util.immutable.ScalaConverters._
 import jsky.app.ot.tpe.{TpeContext, TpeImageFeature, TpeImageFeatureCategory, TpeImageInfo}
 import jsky.coords.CoordinateConverter.{ WORLD, SCREEN }
 
@@ -39,6 +40,15 @@ class TpeEphemerisFeature extends TpeImageFeature("Ephemeris", "Show interpolate
       .flatMap(_.getNonSiderealTarget)
       .fold(Ephemeris.empty)(_.ephemeris)
 
+  def getGuideEphemerides: List[Ephemeris] =
+    for {
+      env   <- getContext.targets.env.toList
+      probe <- env.getGuideEnvironment.getPrimaryReferencedGuiders.asScala.toList
+      gpts  <- env.getPrimaryGuideProbeTargets(probe).asScalaOpt.toList
+      spt   <- gpts.getPrimary.asScalaOpt.toList
+      nst   <- spt.getNonSiderealTarget
+    } yield nst.ephemeris
+
   def getScreenEphemeris: ScreenEphemeris =
     toScreenEphemeris(getEphemeris)
 
@@ -46,17 +56,20 @@ class TpeEphemerisFeature extends TpeImageFeature("Ephemeris", "Show interpolate
     getContext.schedulingBlock.flatMap(_.duration) orElse
     getContext.obsShell.map(remainingTime)
 
-  def obsScreenEphemeris: Option[ScreenEphemeris] =
+  def obsScreenEphemeris(e: Ephemeris): Option[ScreenEphemeris] =
     for {
       lo <- getContext.schedulingBlockStart
       hi <- obsTime.map(_ + lo)
-      e  <- getEphemeris.iSlice(lo, hi)
+      e  <- e.iSlice(lo, hi)
     } yield toScreenEphemeris(e)
 
-  def draw(g: Graphics, tii: TpeImageInfo): Unit =
-    draw2D(g.asInstanceOf[Graphics2D])
+  def draw(g: Graphics, tii: TpeImageInfo): Unit = {
+    val g2d = g.asInstanceOf[Graphics2D]
+    getGuideEphemerides.foreach(draw2D(g2d, _, Color.GRAY))
+    draw2D(g2d, getEphemeris, Color.RED)
+  }
 
-  def draw2D(g: Graphics2D): Unit = {
+  def draw2D(g: Graphics2D, e: Ephemeris, color: Color): Unit = {
 
     // This seems to help
     g.setRenderingHint(KEY_ANTIALIASING,      VALUE_ANTIALIAS_ON)
@@ -67,17 +80,17 @@ class TpeEphemerisFeature extends TpeImageFeature("Ephemeris", "Show interpolate
     val origColor = g.getColor
     val origFont  = g.getFont
 
-    g.setColor(Color.RED)
+    g.setColor(color)
     g.setFont(TpeImageFeature.FONT)
 
     // The main ephemeris track
-    val se = getScreenEphemeris
+    val se = toScreenEphemeris(e)
     drawTrack (g, se)
     drawLabels(g, se)
 
     // Highlighted track for remainder of observation, and label at the last point
     // on the highlighted track.
-    obsScreenEphemeris.foreach { se =>
+    obsScreenEphemeris(e).foreach { se =>
       g.setColor(Color.GREEN)
       drawTrack(g, se)
       se.takeRight(2) match {
@@ -89,7 +102,7 @@ class TpeEphemerisFeature extends TpeImageFeature("Ephemeris", "Show interpolate
     // Restore old values
     g.setColor(origColor)
     g.setFont(origFont)
-    
+
   }
 
   def drawTrack(g: Graphics2D, e: ScreenEphemeris): Unit =
