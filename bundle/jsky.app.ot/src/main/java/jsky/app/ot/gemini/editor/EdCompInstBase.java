@@ -80,7 +80,6 @@ public abstract class EdCompInstBase<T extends SPInstObsComp> extends OtItemEdit
      * A key was pressed in the given TextBoxWidget.
      */
     public void textBoxKeyPress(final TextBoxWidget tbwe) {
-        System.out.println("--- textBoxKeyPress");
         if (getDataObject() != null) {
             _ignoreChanges = true;
             try {
@@ -102,7 +101,6 @@ public abstract class EdCompInstBase<T extends SPInstObsComp> extends OtItemEdit
 
     // Copy the data model pos angle value to the pos angle text field.
     private void updatePosAngle(final boolean ignoreFocus) {
-        System.out.println("--- Updating pos angle: ignoreFocus=" + ignoreFocus + " _ignoreChanges=" + _ignoreChanges);
         if (!_ignoreChanges) {
             // Ignore model changes to the pos angle if the pos angle text box has the focus.
             // This is to avoid changing the text box value when BAGS selects an auto group at +180.
@@ -131,7 +129,6 @@ public abstract class EdCompInstBase<T extends SPInstObsComp> extends OtItemEdit
     }
 
     public void propertyChange(final PropertyChangeEvent evt) {
-        System.out.println("--- PropertyChange");
         updatePosAngle(false);
         updateExpTime();
     }
