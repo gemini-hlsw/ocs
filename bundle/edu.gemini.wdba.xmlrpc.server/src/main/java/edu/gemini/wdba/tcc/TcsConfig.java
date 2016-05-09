@@ -1,18 +1,6 @@
 package edu.gemini.wdba.tcc;
 
-import edu.gemini.spModel.core.HorizonsDesignation;
-import edu.gemini.spModel.core.NonSiderealTarget;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 public final class TcsConfig extends ParamSet {
-
-    private static final Logger LOG = Logger.getLogger(TcsConfig.class.getName());
-
     private ObservationEnvironment _oe;
 
     public TcsConfig(ObservationEnvironment oe) {

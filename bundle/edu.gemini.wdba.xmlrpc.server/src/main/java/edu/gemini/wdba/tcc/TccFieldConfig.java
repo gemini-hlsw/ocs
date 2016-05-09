@@ -9,11 +9,7 @@ import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.wdba.glue.api.WdbaGlueException;
 import edu.gemini.spModel.target.env.GuideGroup;
 
-/**
- *
- */
 public class TccFieldConfig extends ParamSet {
-    //private static final Logger LOG = LogUtil.getLogger(TccFieldConfig.class);
     private ObservationEnvironment _oe;
     private String _name;
 
@@ -87,9 +83,7 @@ public class TccFieldConfig extends ParamSet {
         if (!gg.getName().isEmpty()) return gg.getName().getValue();
 
         final Option<Tuple2<GuideGroup, Integer>> res = env.getGroups().zipWithIndex().find(tup -> tup._1() == gg);
-        return res.map(new Function1<Tuple2<GuideGroup,Integer>,String>() {
-            @Override public String apply(Tuple2<GuideGroup, Integer> tup) { return "Guide Group " + (tup._2() + 1); }
-        }).getOrElse("");
+        return res.map(tup -> "Guide Group " + (tup._2() + 1)).getOrElse("");
     }
 
     private void addTargets(TargetEnvironment env) throws WdbaGlueException {

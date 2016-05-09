@@ -1,6 +1,6 @@
 package edu.gemini.wdba.tcc
 
-import edu.gemini.spModel.core.{Declination, Angle, RightAscension, Coordinates, SiderealTarget, HorizonsDesignation, NonSiderealTarget, Target}
+import edu.gemini.spModel.core.{Declination, Angle, RightAscension, Coordinates, SiderealTarget, NonSiderealTarget, Target}
 import edu.gemini.spModel.target.obsComp.TargetObsComp
 import edu.gemini.spModel.util.SPTreeUtil
 import org.junit.Assert._
