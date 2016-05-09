@@ -271,6 +271,8 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
         ObservingMode(String name) {
             _displayValue = name;
             _logValue = name;
+            _brightLimitPrism = None.instance();
+            _brightLimitWollaston = None.instance();
         }
 
         ObservingMode(String name, Filter filter, boolean filterIterable, Apodizer apodizer,
