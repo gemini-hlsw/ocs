@@ -7,6 +7,8 @@ import jsky.util.gui.TextBoxWidget;
 
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
@@ -47,10 +49,17 @@ public abstract class EdCompInstBase<T extends SPInstObsComp> extends OtItemEdit
                 // As a result, make sure everything is synched when editing starts / stops.
                 getPosAngleTextBox().addFocusListener(new FocusAdapter() {
                     @Override public void focusLost(final FocusEvent e) {
-                        updatePosAngle();
+                        updatePosAngle(false);
                     }
                     @Override public void focusGained(final FocusEvent e) {
-                        updatePosAngle();
+                        updatePosAngle(false);
+                    }
+                });
+                getPosAngleTextBox().addKeyListener(new KeyAdapter() {
+                    @Override public void keyPressed(final KeyEvent e) {
+                        super.keyPressed(e);
+                        if (e.getKeyCode() == KeyEvent.VK_ENTER)
+                            updatePosAngle(true);
                     }
                 });
             }
@@ -71,6 +80,7 @@ public abstract class EdCompInstBase<T extends SPInstObsComp> extends OtItemEdit
      * A key was pressed in the given TextBoxWidget.
      */
     public void textBoxKeyPress(final TextBoxWidget tbwe) {
+        System.out.println("--- textBoxKeyPress");
         if (getDataObject() != null) {
             _ignoreChanges = true;
             try {
@@ -91,13 +101,15 @@ public abstract class EdCompInstBase<T extends SPInstObsComp> extends OtItemEdit
     }
 
     // Copy the data model pos angle value to the pos angle text field.
-    private void updatePosAngle() {
+    private void updatePosAngle(final boolean ignoreFocus) {
+        System.out.println("--- Updating pos angle: ignoreFocus=" + ignoreFocus + " _ignoreChanges=" + _ignoreChanges);
         if (!_ignoreChanges) {
             // Ignore model changes to the pos angle if the pos angle text box has the focus.
             // This is to avoid changing the text box value when BAGS selects an auto group at +180.
             final TextBoxWidget posAngleTextBox = getPosAngleTextBox();
-            if (posAngleTextBox != null && getDataObject() != null && !posAngleTextBox.hasFocus()) {
+            if (posAngleTextBox != null && getDataObject() != null && (ignoreFocus || !posAngleTextBox.hasFocus())) {
                 final String newAngle = getDataObject().getPosAngleDegreesStr();
+                System.out.println("--- newAngle=" + newAngle);
                 if (!newAngle.equals(posAngleTextBox.getText())) {
                     posAngleTextBox.setText(newAngle);
                 }
@@ -119,7 +131,8 @@ public abstract class EdCompInstBase<T extends SPInstObsComp> extends OtItemEdit
     }
 
     public void propertyChange(final PropertyChangeEvent evt) {
-        updatePosAngle();
+        System.out.println("--- PropertyChange");
+        updatePosAngle(false);
         updateExpTime();
     }
 

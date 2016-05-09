@@ -19,7 +19,7 @@ import jsky.app.ot.util.OtColor
 
 import scala.swing.GridBagPanel.{Anchor, Fill}
 import scala.swing._
-import scala.swing.event.{FocusGained, FocusLost, SelectionChanged, ValueChanged}
+import scala.swing.event._
 import scala.util.Try
 import scalaz._
 import Scalaz._
@@ -70,6 +70,7 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
     // We want the parallactic angle controls to be notified every time the position angle changes.
     // A warning icon will be displayed if the two values are not the same according to the chosen formatter.
     listenTo(positionAngleTextField)
+    listenTo(positionAngleTextField.keys)
     reactions += {
       case ValueChanged(`positionAngleTextField`) =>
         ui.parallacticAngleControlsOpt.foreach(_.positionAngleChanged(positionAngleTextField.text))
@@ -77,6 +78,9 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
         copyPosAngleToInstrument()
 
       case FocusGained(`positionAngleTextField`, _, _) | FocusLost(`positionAngleTextField`, _, _) =>
+        copyPosAngleToTextField()
+
+      case KeyPressed(`positionAngleTextField`, Key.Enter, _, _) =>
         copyPosAngleToTextField()
     }
 
