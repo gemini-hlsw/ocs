@@ -1,4 +1,3 @@
-//$Id$
 package edu.gemini.p2checker.rules.gpi;
 
 import edu.gemini.p2checker.api.*;
@@ -10,7 +9,6 @@ import edu.gemini.spModel.core.MagnitudeBand;
 import edu.gemini.spModel.gemini.gpi.Gpi;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.TargetEnvironment;
-import edu.gemini.spModel.target.obsComp.TargetObsComp;
 
 import java.util.*;
 
@@ -21,7 +19,7 @@ public class GpiRule implements IRule {
     private static final String PREFIX = "GpiRule_";
     private static final Collection<IConfigRule> GPI_RULES = new ArrayList<>();
 
-    public static final IConfigMatcher ANY_MATCHER = (config, step, elems) -> true;
+    private static final IConfigMatcher ANY_MATCHER = (config, step, elems) -> true;
 
     // OT-106: Filter iteration only allowed in Observation Modes direct and NRM
     private static IConfigRule FILTER_ITER_RULE = new IConfigRule() {
@@ -160,7 +158,7 @@ public class GpiRule implements IRule {
 
         @Override
         public IP2Problems check(ObservationElements elements)  {
-            for (TargetObsComp obsComp : elements.getTargetObsComp()) {
+            return elements.getTargetObsComp().map((obsComp) -> {
 
                 P2Problems problems = new P2Problems();
                 TargetEnvironment env = obsComp.getTargetEnvironment();
@@ -211,8 +209,7 @@ public class GpiRule implements IRule {
                 }
 
                 return problems;
-            }
-            return null;
+            }).getOrNull();
         }
     };
 

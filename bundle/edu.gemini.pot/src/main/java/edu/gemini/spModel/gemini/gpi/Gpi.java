@@ -290,7 +290,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
 
         ObservingMode(String name, Filter filter, boolean filterIterable, Apodizer apodizer,
                       FPM fpm, Lyot lyot, double brightLimitPrism, double brightLimitWollaston) {
-            this(name, filter, filterIterable, apodizer, fpm, lyot, new Some<>(brightLimitPrism), new Some(brightLimitWollaston));
+            this(name, filter, filterIterable, apodizer, fpm, lyot, new Some<>(brightLimitPrism), new Some<>(brightLimitWollaston));
         }
 
             /**
@@ -362,7 +362,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
         }
 
         /** returns all values (OT-102) */
-        @SuppressWarnings("rawtypes")
+        @SuppressWarnings({"unchecked", "rawtypes"})
         private static Option<ObservingMode>[] engineeringValues() {
             ObservingMode[] ar = values();
             Option<ObservingMode>[] result = new Option[ar.length];
@@ -373,7 +373,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
         }
 
         /** returns all values except NONSTANDARD (OT-102) */
-        @SuppressWarnings("rawtypes")
+        @SuppressWarnings({"unchecked", "rawtypes"})
         private static Option<ObservingMode>[] nonEngineeringValues() {
             ObservingMode[] ar = values();
             Option<ObservingMode>[] result = new Option[ar.length-1];
@@ -526,7 +526,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
     /**
      * Manual Detector Readout Area: see OT-53.
      */
-    public static class ReadoutArea implements Serializable {
+    private static class ReadoutArea implements Serializable {
         private static final long serialVersionUID = 1L;
         private static final int MIN_VALUE = 0;
         private static final int MAX_VALUE = 2047;
@@ -646,7 +646,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
     /**
      * DetectorReadoutArea: see OT-52.
      */
-    public enum DetectorReadoutArea implements DisplayableSpType {
+    enum DetectorReadoutArea implements DisplayableSpType {
         FULL("Full (2048x2048)", new ReadoutArea(0, 0, 2047, 2047)),
         CENTRAL_1024("Central (1024x1024)", new ReadoutArea(512, 512, 1535, 1535)),
         CENTRAL_512("Central (512x512)", new ReadoutArea(768, 768, 1279, 1279)),
@@ -685,10 +685,6 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
             return MANUAL;
         }
 
-        /** values() returns all values, but MANUAL is only for use in the engineering component (OT-53) */
-        public static DetectorReadoutArea[] nonEngineeringValues() {
-            return new DetectorReadoutArea[] {FULL, CENTRAL_1024, CENTRAL_512, CENTRAL_256};
-        }
     }
 
 
@@ -1024,7 +1020,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
     /**
      * Detector Sampling Mode: OT-91
      */
-    public enum DetectorSamplingMode implements DisplayableSpType, SequenceableSpType {
+    enum DetectorSamplingMode implements DisplayableSpType, SequenceableSpType {
         FAST("Fast"),
         SINGLE_CDS("Single CDS"),
         MULTIPLE_CDS("Multiple CDS"),
@@ -1061,7 +1057,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
     /**
      * Cassegrain (PositionAngle): see OT-84.
      */
-    public enum Cassegrain implements DisplayableSpType, SequenceableSpType {
+    private enum Cassegrain implements DisplayableSpType, SequenceableSpType {
         A0(0),
         A180(180),
         ;
