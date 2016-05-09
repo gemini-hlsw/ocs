@@ -8,20 +8,20 @@ import edu.gemini.spModel.target.env.TargetEnvironment
 import edu.gemini.spModel.target.obsComp.TargetObsComp
 import edu.gemini.spModel.util.SPTreeUtil
 
-/** A reference to an individual non-sidereal observation. */
-case class NonSiderealObservation(oid: SPObservationID, hid: HorizonsDesignation, targetName: String)
+/** A reference to an individual non-sidereal target reference. */
+case class NonSiderealTargetRef(oid: SPObservationID, hid: HorizonsDesignation, targetName: String)
 
 import scala.collection.JavaConverters._
 
-object NonSiderealObservation {
+object NonSiderealTargetRef {
 
   /** Finds all scheduleable non-sidereal observations in the given program,
     * if any.  A scheduleable observation is one that could be included in a
     * queue for immediate observation.  The program itself must be active and
     * the observation status must be `READY` or `ONGOING`.
     */
-  def findRelevantIn(p: ISPProgram): List[NonSiderealObservation] =
-    if (includeProgram(p)) activeObservations(p).flatMap(obsRef)
+  def findRelevantIn(p: ISPProgram): List[NonSiderealTargetRef] =
+    if (includeProgram(p)) activeObservations(p).flatMap(targetRef)
     else Nil
 
   private def includeProgram(p: ISPProgram): Boolean =
@@ -40,24 +40,21 @@ object NonSiderealObservation {
     }.toList
   }
 
-  private def obsRef(o: ISPObservation): Option[NonSiderealObservation] = {
+  private def targetRef(o: ISPObservation): List[NonSiderealTargetRef] = {
     def env(tc: ISPObsComponent): Option[TargetEnvironment] =
       Option(tc.getDataObject).collect {
         case toc: TargetObsComp => toc.getTargetEnvironment
       }
 
-    def ref(env: TargetEnvironment): Option[NonSiderealObservation] =
-      env.getBase.getTarget match {
+    def ref(env: TargetEnvironment): List[NonSiderealTargetRef] =
+      env.getTargets.asScala.map(_.getTarget).collect {
         case NonSiderealTarget(name, _, Some(hid), _, _, _) =>
-          Some(NonSiderealObservation(o.getObservationID, hid, name))
-
-        case _                                              =>
-          None
-      }
+          NonSiderealTargetRef(o.getObservationID, hid, name)
+      }.toList
 
     for {
-      t <- Option(SPTreeUtil.findTargetEnvNode(o))
-      e <- env(t)
+      t <- Option(SPTreeUtil.findTargetEnvNode(o)).toList
+      e <- env(t).toList
       r <- ref(e)
     } yield r
   }

@@ -151,7 +151,7 @@ object TcsEphemerisCron {
     // Extract horizons ids for all non-sidereal observations in the database.
     val nonSid: TryExport[ISet[HorizonsDesignation]] =
       TryExport.fromTryCatch(OdbError) {
-        ISet.fromList(NonSiderealObservationFunctor.query(odb, user).map(_.hid))
+        ISet.fromList(NonSiderealTargetRefFunctor.query(odb, user).map(_.hid))
       }
 
     // Updates the TCS ephemeris file directory to contain only ephemeris files

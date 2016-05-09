@@ -6,14 +6,17 @@ import edu.gemini.spModel.core.{SiderealTarget, NonSiderealTarget, HorizonsDesig
 import edu.gemini.spModel.gemini.obscomp.SPProgram
 import edu.gemini.spModel.obs.{ObservationStatus, ObsPhase2Status, SPObservation}
 import edu.gemini.spModel.obsrecord.ObsExecStatus
+import edu.gemini.spModel.target.env.TargetEnvironment
 import edu.gemini.spModel.target.obsComp.TargetObsComp
 import edu.gemini.spModel.util.SPTreeUtil
 import edu.gemini.util.security.principal.StaffPrincipal
 import org.scalacheck.Gen
+import org.scalacheck.Arbitrary._
 
 import java.security.Principal
 
 import scala.collection.JavaConverters._
+import scala.util.Random
 import scalaz.==>>
 
 trait TestSupport extends ProgramTestSupport {
@@ -91,13 +94,26 @@ trait TestSupport extends ProgramTestSupport {
       }
     }
 
+  val genTargetEnv: Gen[TargetEnvironment] = {
+    val r = new Random
+    arbitrary[TargetEnvironment].map { te =>
+      te.getTargets.asScala.foreach { t =>
+        // set half the targets on average to non-sidereal
+        if (r.nextInt(2) == 0) {
+          t.setTarget(genNonSiderealTarget.sample.get)
+        }
+      }
+      te
+    }
+  }
+
   val genTestProg: Gen[ISPFactory => ISPProgram] =
     genProg.map { pCons => (fact: ISPFactory) => {
         val p = pCons(fact)
         p.getAllObservations.asScala.foreach { obs =>
           val tc  = findOrCreateTargetComp(fact, obs)
           val toc = tc.getDataObject.asInstanceOf[TargetObsComp]
-          toc.getBase.setTarget(genNonSiderealTarget.sample.get)
+          toc.setTargetEnvironment(genTargetEnv.sample.get)
           tc.setDataObject(toc)
 
           val dob = obs.getDataObject.asInstanceOf[SPObservation]

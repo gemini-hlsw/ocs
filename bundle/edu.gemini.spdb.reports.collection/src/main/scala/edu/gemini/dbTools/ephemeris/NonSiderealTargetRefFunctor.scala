@@ -12,15 +12,15 @@ import scalaz._, Scalaz._
 /** An ODB query functor that finds all scheduleable non-sidereal
   * observations.
   */
-object NonSiderealObservationFunctor {
-  def query(db: IDBDatabaseService, users: JSet[Principal]): List[NonSiderealObservation] =
-    new NonSiderealObservationFunctor |> (f => db.getQueryRunner(users).queryPrograms(f).results)
+object NonSiderealTargetRefFunctor {
+  def query(db: IDBDatabaseService, users: JSet[Principal]): List[NonSiderealTargetRef] =
+    new NonSiderealTargetRefFunctor |> (f => db.getQueryRunner(users).queryPrograms(f).results)
 }
 
-private class NonSiderealObservationFunctor extends DBAbstractQueryFunctor{
-  import NonSiderealObservation.findRelevantIn
+private class NonSiderealTargetRefFunctor extends DBAbstractQueryFunctor{
+  import NonSiderealTargetRef.findRelevantIn
 
-  var results: List[NonSiderealObservation] = Nil
+  var results: List[NonSiderealTargetRef] = Nil
 
   override def execute(db: IDBDatabaseService, node: ISPNode, principals: JSet[Principal]): Unit =
     node match {
