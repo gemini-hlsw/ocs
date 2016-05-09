@@ -193,12 +193,12 @@ object TpeEphemerisFeature {
     }
   }
 
-  def remainingTime(ispObservation: ISPObservation): Long =
-    PlannedTimeCalculator.instance
-      .calc(ispObservation)
-      .steps.asScala
+  def remainingTime(ispObservation: ISPObservation): Long = {
+    val c = PlannedTimeCalculator.instance.calc(ispObservation)
+    c.setup.time + c.steps.asScala
       .filterNot(_.executed)
       .map(_.totalTime)
       .sum
+  }
 
 }

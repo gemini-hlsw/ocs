@@ -22,15 +22,16 @@ import scala.swing.event.{ButtonClicked, Event}
 /**
  * This class encompasses all of the logic required to manage the average parallactic angle information associated
  * with an instrument configuration.
+ * @param isPaUi should be true for PA controls, false for Scheduling Block controls
  */
-class ParallacticAngleControls(showParallacticAngleFeedback: Boolean) extends GridBagPanel with Publisher {
+class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publisher {
   private var editor:    Option[OtItemEditor[_, _]] = None
   private var site:      Option[Site]   = None
   private var formatter: Option[Format] = None
 
   object ui {
     object relativeTimeMenu extends Menu("Set To:") {
-      private val incrementsInMinutes = List(10, 20, 30, 45, 60)
+      private val incrementsInMinutes = List(5, 10, 20, 30, 45, 60)
 
       private case class RelativeTime(desc: String, timeInMs: Long) extends MenuItem(desc) {
         action = Action(desc) {
@@ -54,7 +55,7 @@ class ParallacticAngleControls(showParallacticAngleFeedback: Boolean) extends Gr
 
         // menu items that require an observation and instrument to compute
         val instItems = for {
-          e    <- editor
+          e    <- editor if isPaUi // we don't want these for scheduling block ui
           obs  <- Option(e.getContextObservation)
           inst <- Option(e.getContextInstrumentDataObject)
         } yield {
@@ -168,7 +169,7 @@ class ParallacticAngleControls(showParallacticAngleFeedback: Boolean) extends Gr
         o,
         o.getDataObject.asInstanceOf[SPObservation].getSchedulingBlock.asScalaOpt,
         site.map(_.timezone),
-        showParallacticAngleFeedback)
+        isPaUi)
       dialog.pack()
       dialog.visible = true
       updateSchedulingBlock(dialog.schedulingBlock)
@@ -219,7 +220,7 @@ class ParallacticAngleControls(showParallacticAngleFeedback: Boolean) extends Gr
 
       ui.parallacticAngleFeedback.text =
         e.getDataObject match {
-          case p: ParallacticAngleSupport if showParallacticAngleFeedback =>
+          case p: ParallacticAngleSupport if isPaUi =>
             parallacticAngle.fold(
               s"Target not visible ($when)")(angle =>
               s"${fmt.format(ParallacticAngleControls.angleToDegrees(angle))}\u00b0 ($when, ${durationFmt.format(duration)}m)")
