@@ -128,7 +128,8 @@ public class AltairForm extends JPanel {
                 new Insets(0, 11, 0, 0), 0, 0));
 
         //---- lgsRadioButton ----
-        lgsRadioButton.setText("Laser Guide Star + AOWFS");
+        lgsRadioButton.setText("Laser Guide Star + AOWFS TTF"); 
+        lgsRadioButton.setToolTipText("LGS using AOWFS to measure Tip, Tilt, and Focus");
         add(lgsRadioButton, new GridBagConstraints(1, 10, 1, 1, 0.0, 0.0,
                 GridBagConstraints.WEST, GridBagConstraints.NONE,
                 new Insets(0, 11, 0, 0), 0, 0));
@@ -138,7 +139,8 @@ public class AltairForm extends JPanel {
                 new Insets(0, 11, 0, 0), 0, 0));
 
         //---- lgsP1RadioButton ----
-        lgsP1RadioButton.setText("Laser Guide Star + PWFS1");
+        lgsP1RadioButton.setText("Laser Guide Star + PWFS1 TTF"); 
+        lgsP1RadioButton.setToolTipText("LGS using PWFS1 to measure Tip, Tilt, and Focus");
         add(lgsP1RadioButton, new GridBagConstraints(1, 11, 1, 1, 0.0, 0.0,
                 GridBagConstraints.WEST, GridBagConstraints.NONE,
                 new Insets(0, 11, 0, 0), 0, 0));
@@ -150,7 +152,8 @@ public class AltairForm extends JPanel {
         //---- lgsP1RadioButton ----
         // LAYOUT NOTE: bring both elements to the top left and let the last element
         // consume all remaining space (fill weight = 1.0 for x and y)
-        lgsOiRadioButton.setText("Laser Guide Star + OIWFS");
+        lgsOiRadioButton.setText("Laser Guide Star + OIWFS TTF"); 
+        lgsOiRadioButton.setToolTipText("LGS using OIWFS to measure Tip, Tilt, and Focus");
         add(lgsOiRadioButton, new GridBagConstraints(1, 12, 1, 1, 0.0, 0.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
                 new Insets(0, 11, 0, 0), 0, 0));
