@@ -70,6 +70,11 @@ public final class Nifs extends Instrument implements SpectroscopyInstrument {
             throw new RuntimeException("Central wavelength must be between 1.00um and 6.0um.");
         }
 
+        if (gp.altair().isDefined()) {
+            if (gp.altair().get().guideStarSeparation() < 0 || gp.altair().get().guideStarSeparation() > 25)
+                throw new RuntimeException("Altair Guide star distance must be between 0 and 25 arcsecs for NIFS.\n");
+        }
+
         //Set read noise and Well depth values by obsevation type
         _readNoiseValue = gp.readMode().getReadNoise();
 

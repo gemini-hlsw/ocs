@@ -55,9 +55,6 @@ public class Altair implements AOSystem {
 
     public void validateInputParameters(final AltairParameters p) {
         // validation
-        if (p.guideStarSeparation() < 0 || p.guideStarSeparation() > 25)
-            throw new IllegalArgumentException(" Altair Guide star distance must be between 0 and 25 arcsecs.");
-
         if (p.wfsMode().equals(AltairParams.GuideStarType.LGS) && p.guideStarMagnitude() > 19.5)
             throw new IllegalArgumentException(" Altair Guide star Magnitude must be <= 19.5 in R for LGS mode. ");
 

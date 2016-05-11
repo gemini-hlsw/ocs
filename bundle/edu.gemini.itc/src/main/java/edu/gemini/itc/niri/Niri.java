@@ -112,6 +112,10 @@ public class Niri extends Instrument implements SpectroscopyInstrument {
                         " or change the method to spectroscopy.");
         }
 
+        if (np.altair().isDefined()) {
+            if (np.altair().get().guideStarSeparation() < 0 || np.altair().get().guideStarSeparation() > 45)
+                throw new RuntimeException("Altair Guide star distance must be between 0 and 45 arcsecs for NIRI.\n");
+        }
 
         switch (np.camera()) {
             case F6:    addComponent(new F6Optics(getDirectory() + "/"));  break;

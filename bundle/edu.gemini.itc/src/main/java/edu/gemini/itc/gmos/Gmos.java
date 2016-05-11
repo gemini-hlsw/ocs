@@ -323,6 +323,12 @@ public abstract class Gmos extends Instrument implements BinningProvider, Spectr
             throw new RuntimeException("An IFU analysis method is selected but no IFU is selected.\nPlease select the IFU or" +
                     " select another analysis method.");
         }
+
+        // TODO: Implement once GMOS can be used with Altair
+//        if (gp.altair().isDefined()) {
+//            if (gp.altair().get().guideStarSeparation() < 0 || gp.altair().get().guideStarSeparation() > 45)
+//                throw new RuntimeException("Altair Guide star distance must be between 0 and 45 arcsecs for GMOS.\n");
+//        }
     }
 
     @Override
