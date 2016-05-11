@@ -25,8 +25,6 @@ ocsAppManifest := {
           rnorris(v),   
           swalker(v),
           jluhrs(v),
-          abrighton(v),
-          fnussber(v),
           cquiroz(v),
           sraaphorst(v),
           anunez(v),
@@ -320,35 +318,6 @@ def jluhrs(version: Version) = AppConfig(
     "edu.gemini.auxfile.fits.host"       -> "gsconfig.gemini.edu"
   )
 ) extending List(with_gogo(version), jluhrs_credentials(version))
-
-// ABRIGHTON
-def abrighton(version: Version) = AppConfig(
-  id = "abrighton",
-  distribution = List(TestDistro),
-  vmargs = List(
-    "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005",
-    "-Dcom.cosylab.epics.caj.CAJContext.addr_list=172.17.2.255",
-    "-Dcron.*.edu.gemini.dbTools.html.ftpDestDir=/Users/abrighto/sftp",
-    "-Dcron.*.edu.gemini.dbTools.html.ftpHost=localhost",
-    "-Dcron.archive.edu.gemini.dbTools.html.ftpDestDir=/Users/abrighto/cron",
-    "-Dcron.archive.edu.gemini.dbTools.html.ftpHost=localhost",
-    "-Dcron.reports.edu.gemini.spdb.reports.public.host=localhost",
-    "-Dcron.reports.edu.gemini.spdb.reports.public.remotedir=/Users/abrighto/cron",
-    "-Dedu.gemini.site=south",
-    "-Xmx1024M",
-    "-XX:MaxPermSize=196M"
-  ),
-  props = Map(
-    "edu.gemini.auxfile.fits.dest"               -> "/gemsoft/var/data/ictd/test/GS@SEMESTER@/@PROG_ID@",
-    "edu.gemini.auxfile.fits.host"               -> "gsconfig.gemini.edu",
-    "edu.gemini.auxfile.other.dest"              -> "/gemsoft/var/data/finder/GSqueue/Finders-Test/@SEMESTER@/@PROG_ID@",
-    "edu.gemini.auxfile.root"                    -> "/Users/abrighto/.auxfile",
-    "edu.gemini.dataman.gsa.summit.host"         -> "mkofits-lv1new.hi.gemini.edu",
-    "edu.gemini.smartgcal.host"                  -> "localhost",
-    "edu.gemini.spdb.dir"                        -> "/Users/abrighto/.spdb/",
-    "edu.gemini.util.trpc.name"                  -> "Brightons's ODB (Test)"
-  )
-) extending List(with_gogo(version), abrighton_credentials(version))
 
 // ANUNEZ
 def anunez(version: Version) = AppConfig(
