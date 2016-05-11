@@ -68,8 +68,7 @@ def common(version: Version) = AppConfig(
     BundleSpec("org.apache.commons.io",        Version(2, 0, 1)),
     BundleSpec("jsky.app.ot",                  version),
     BundleSpec("jsky.app.ot.visitlog",         version),
-    BundleSpec("org.apache.commons.logging",   Version(1, 1, 0)),
-    BundleSpec("com.squants",                  Version(0, 6, 1))
+    BundleSpec("org.apache.commons.logging",   Version(1, 1, 0))
   ),
   spec = Some(file("app/ot/dist/RPM64/ot.spec.template"))
 ) extending List(common_credentials(version))

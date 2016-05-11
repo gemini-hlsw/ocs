@@ -132,7 +132,6 @@ def common(version: Version) = AppConfig(
     BundleSpec("org.ops4j.pax.web.pax-web-spi",          Version(1, 1, 13)),
     BundleSpec("slf4j.api",                              Version(1, 6, 4)),
     BundleSpec("slf4j.jdk14",                            Version(1, 6, 4)),
-    BundleSpec("com.squants",                            Version(0, 6, 1)),
     BundleSpec("org.apache.commons.logging",             Version(1, 1, 0)),
     BundleSpec("com.cosylab.epics.caj",                  Version(1, 0, 2)),
     BundleSpec("io.argonaut",                            Version(6, 2, 0)),
