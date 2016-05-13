@@ -1,15 +1,15 @@
 package edu.gemini.catalog.ui.tpe
 
 import java.io._
-import java.net.URL
+import java.net.{URL, URLConnection}
 import java.util.logging.Logger
 
 import jsky.util.Preferences
 import jsky.util.gui._
 
 import scala.swing.Swing
-import scalaz.concurrent.Task
 import scalaz.{-\/, \/-}
+import scalaz.concurrent.Task
 
 object ImageCatalogLoader {
   val instance = this
@@ -42,21 +42,28 @@ class ImageCatalogLoader {
     * Download the given image URL to a temporary file and return the file
     * Note that to support the legacy progress bar we explicitly expect a ProgressBarFilterInputStream
     */
-  private def imageToTmpFile(url: URL, contentType: String, in: ProgressBarFilterInputStream): (File, URL) = {
+  private def imageToTmpFile(url: URL, contentType: String, in: ProgressBarFilterInputStream): Task[(File, URL)] = {
     val dir = Preferences.getPreferences.getCacheDir.getPath
-    val suffix = Option(contentType) match {
-      case Some(s) if s.endsWith("hfits")                        => ".hfits"
-      case Some(s) if s.endsWith("zfits") || s == "image/x-fits" => ".fits.gz"
-      case Some(s) if s.endsWith("fits")                         => ".fits"
-      case _                                                     => ".tmp"
+
+    def suffix: Task[String] =
+      Option(contentType) match {
+        case Some(s) if s.endsWith("hfits")                                           => Task.now(".hfits")
+        case Some(s) if s.endsWith("zfits") || s == "image/x-fits"                    => Task.now(".fits.gz")
+        case Some(s) if s.endsWith("fits")                                            => Task.now(".fits")
+        // REL-2776 At some places on the sky DSS returns an error, the HTTP error code is ok but the body contains no image
+        case Some(s) if s.contains("text/html") && url.getPath.contains("dss_search") => Task.fail(new RuntimeException("Image not found at image server"))
+        case _                                                                        => Task.now(".tmp")
+      }
+
+    def createTmpFile(suffix: String): Task[File] = Task {
+      File.createTempFile("jsky", suffix, new File(dir))
     }
 
-    def openTmpFile(): (File, OutputStream) = {
-      val file = File.createTempFile("jsky", suffix, new File(dir))
-      (file, new FileOutputStream(file))
+    def openTmpFile(file: File): Task[OutputStream] = Task {
+      new FileOutputStream(file)
     }
 
-    def readFile(in: ProgressBarFilterInputStream, out: OutputStream): Unit = {
+    def readFile(in: ProgressBarFilterInputStream, out: OutputStream): Task[Unit] = Task {
       val buffer = new Array[Byte](8 * 1024)
       Iterator
         .continually(in.read(buffer))
@@ -64,9 +71,12 @@ class ImageCatalogLoader {
         .foreach(read => out.write(buffer, 0, read))
     }
 
-    val f = openTmpFile()
-    readFile(in, f._2)
-    (f._1, url)
+    for {
+      s <- suffix
+      t <- createTmpFile(s)
+      o <- openTmpFile(t)
+      r <- readFile(in, o)
+    } yield (t, url)
   }
 
   /**
@@ -78,13 +88,13 @@ class ImageCatalogLoader {
     // This isn't very nice, we are mixing UI with IO but the ProgressPanel is required for now
     val progress = ProgressPanel.makeProgressPanel("Accessing catalog server ...")
 
-    def imageLoad(url: URL): Task[(File, URL)] = Task {
+    def imageStreams: Task[(URLConnection, ProgressBarFilterInputStream)] = Task {
       val connection = progress.openConnection(url)
       val in = progress.getLoggedInputStream(url)
-      imageToTmpFile(url, connection.getContentType, in)
+      (connection, in)
     }
 
-    val f = imageLoad(url)
-    (progress, f)
+    val r = imageStreams.flatMap {case (c, u) => imageToTmpFile(url, c.getContentType, u)}
+    (progress, r)
   }
 }
