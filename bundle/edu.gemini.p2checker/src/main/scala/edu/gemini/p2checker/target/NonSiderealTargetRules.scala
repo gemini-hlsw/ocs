@@ -88,9 +88,9 @@ final class NonSiderealTargetRules extends IRule {
         cs  <- nst.coords(sb.start)
         d   <- nst.ephemeris.lookupClosest(sb.start).map(cs.angularDistance(_).toArcmins)
         if d > 10 // arcmins
-      } p2p.addWarning(ERR_EPHEMERIS_TOO_SPARSE,
+      } p2p.addError(ERR_EPHEMERIS_TOO_SPARSE,
         f"""
-           |Reference point for ${nst.name}%s at scheduling block start is ${d.toInt}' away.
+           |Nearest ephemeris data point for ${nst.name}%s is ${d.toInt}' away.
            |Refresh to re-center the high-resolution portion of the ephemeris.
          """.stripMargin,
         ocn)
