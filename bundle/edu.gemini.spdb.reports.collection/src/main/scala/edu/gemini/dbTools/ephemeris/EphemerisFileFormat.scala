@@ -54,7 +54,8 @@ object EphemerisFileFormat {
     def formatCoords(coords: Coordinates): String = {
       val ra  = Angle.formatHMS(coords.ra.toAngle, " ", 4)
       val dec = Declination.formatDMS(coords.dec, " ", 3)
-      s"$ra $dec"
+      // Add spacing as required for TCS.
+      f"$ra%14s $dec%13s"
     }
 
     val lines = ephemeris.toList.map { case (time, (coords, raTrack, decTrack)) =>
@@ -146,7 +147,11 @@ object EphemerisFileFormat {
     private val timestampList: Parser[ISet[Instant]] =
       rep(timestamp).map(lst => ISet.fromList(lst))
 
-    val timestamps: Parser[ISet[Instant]] = soeLine~>timestampList<~eoeLine
+    val timestampsSection: Parser[ISet[Instant]] =
+      soeLine~>timestampList<~eoeLine
+
+    val timestamps: Parser[ISet[Instant]] =
+      headerSection~>timestampsSection
 
     def toDisjunction[A](p: Parser[A], input: String): String \/ A =
       parse(p, input) match {

@@ -18,7 +18,6 @@ object EphemerisFileFormatTest extends Specification with ScalaCheck with Arbitr
       }
     }
 
-    /*
     "permit parsing timestamps" in {
       Prop.forAll { (em0: EphemerisMap) =>
         val s  = EphemerisFileFormat.format(em0)
@@ -26,6 +25,5 @@ object EphemerisFileFormatTest extends Specification with ScalaCheck with Arbitr
         em0.keySet == ts
       }
     }
-    */
   }
 }

@@ -128,7 +128,7 @@ object Declination {
    */
   def formatSexigesimal(dec: Declination, sep: String = ":", fractionalDigits: Int = 2): String = {
     val a0       = dec.toDegrees
-    val (a, sgn) = if (a0 < 0) (a0.abs, "-") else (a0, "+")
+    val (a, sgn) = if (a0 < 0) (a0.abs, "-") else (a0, "")
     s"$sgn${Angle.formatSexigesimal(Angle.fromDegrees(a), sep, fractionalDigits)}"
   }
 
