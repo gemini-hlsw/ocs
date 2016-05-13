@@ -91,7 +91,7 @@ final class NonSiderealTargetRules extends IRule {
       } p2p.addWarning(ERR_EPHEMERIS_TOO_SPARSE,
         f"""
            |Reference point for ${nst.name}%s at scheduling block start is ${d.toInt}' away.
-           |Refresh to re-center the high-resolution portion of the ephemeris."
+           |Refresh to re-center the high-resolution portion of the ephemeris.
          """.stripMargin,
         ocn)
     }
