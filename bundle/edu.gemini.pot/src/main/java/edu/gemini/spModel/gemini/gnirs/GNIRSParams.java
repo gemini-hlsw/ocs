@@ -752,7 +752,7 @@ public class GNIRSParams {
         X_DISPERSED("x-dispersed", "XD"),
         ORDER_6("order 6 (X)", "X", 1.10),
         ORDER_5("order 5 (J)", "J", 1.25),
-        ORDER_4("order 4 (H-MK)", "H", "order 4 (H)", 1.65),
+        ORDER_4("order 4 (H-MK: 1.65um)", "H", "order 4 (H)", 1.65),
         ORDER_3("order 3 (K)", "K", 2.20),
         ORDER_2("order 2 (L)", "L"),
         ORDER_1("order 1 (M)", "M"),

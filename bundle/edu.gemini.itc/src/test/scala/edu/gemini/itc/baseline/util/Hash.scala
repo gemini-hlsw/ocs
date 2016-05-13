@@ -41,6 +41,8 @@ object Hash {
       p.readMode.name,
       f"${p.centralWavelength.toNanometers}%.0f",
       p.slitWidth.name,
+      p.camera.map(_.name),
+      p.wellDepth.map(_.name),
       calc(p.altair)
     )
 

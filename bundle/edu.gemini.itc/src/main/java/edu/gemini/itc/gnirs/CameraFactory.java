@@ -6,11 +6,11 @@ import edu.gemini.spModel.gemini.gnirs.GNIRSParams.PixelScale;
 
 public final class CameraFactory {
 
-    private static final String BLUE    = "BC";
-    private static final String RED     = "RC";
+    private static final String BLUE    = "_BLUE";
+    private static final String RED     = "_RED";
 
-    private static final String LONG    = "L";
-    private static final String SHORT   = "S";
+    private static final String LONG    = "LONG";
+    private static final String SHORT   = "SHORT";
 
 
     public static TransmissionElement camera(final PixelScale pixelScale, final double wavelength, final String directory) {
@@ -21,8 +21,8 @@ public final class CameraFactory {
         return new TransmissionElement(directory + "/" + Gnirs.getPrefix() + cameraLength + cameraColor + Instrument.getSuffix()) {
             public String toString() {
                 // prepare a pretty string which is used as the name of this transmission element
-                final String length = cameraLength.equals("L") ? "Long" : "Short";
-                final String color  = cameraColor.equals("BC") ? "Blue" : "Red";
+                final String length = cameraLength.equals("LONG") ? "Long" : "Short";
+                final String color  = cameraColor.equals("_BLUE") ? "Blue" : "Red";
                 return String.format("Camera: %.2farcsec/pix (%s %s)", pixelScale.getValue(), length, color);
             }
         };

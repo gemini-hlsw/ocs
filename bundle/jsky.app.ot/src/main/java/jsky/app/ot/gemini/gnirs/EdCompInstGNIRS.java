@@ -73,7 +73,6 @@ public class EdCompInstGNIRS extends EdCompInstBase<InstGNIRS> implements Action
         _w = new GnirsForm();
 
         _w.pixelScale.setChoices(SpTypeUtil.getFormattedDisplayValueAndDescriptions(PixelScale.class));
-      //  _w.filter.setChoices(SpTypeUtil.getFormattedDisplayValueAndDescriptions(Filter.class));
         _w.disperser.setChoices(SpTypeUtil.getFormattedDisplayValueAndDescriptions(Disperser.class));
         _w.centralWavelength.setChoices(_getDefaultWavelengths());
 

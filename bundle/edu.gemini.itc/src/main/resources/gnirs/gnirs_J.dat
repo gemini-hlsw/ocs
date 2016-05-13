@@ -1,4 +1,6 @@
-# MK-J photometric filter from web, set negative values to zeros
+# Input NDF:     /Users/tgeballe/GNIRS/FILTER_XMISSION/jmkdbxd_455_trans_sm1_scr
+# Wavelength
+# Nanometers
 1130   0.000000
 1131   0.001365
 1132   0.002431
