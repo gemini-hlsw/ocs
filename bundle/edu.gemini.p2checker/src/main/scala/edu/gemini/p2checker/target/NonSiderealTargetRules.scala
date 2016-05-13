@@ -20,6 +20,7 @@ final class NonSiderealTargetRules extends IRule {
     p2p.append(checkNoSchedulingBlock(es))
     p2p.append(checkSchedulingBlockOutsideSemester(es))
     p2p.append(checkNoEphemerisForSchedulingBlock(es))
+    p2p.append(checkEphemerisTooSparse(es))
     p2p
   }
 
@@ -76,6 +77,25 @@ final class NonSiderealTargetRules extends IRule {
           ocn)
     }
 
+  def checkEphemerisTooSparse(es: ObservationElements): IP2Problems =
+    new P2Problems <| { p2p =>
+      for {
+        ocn <- es.getTargetObsComponentNode.asScalaOpt.toList
+        toc <- es.getTargetObsComp.asScalaOpt.toList
+        tar <- toc.getTargetEnvironment.getTargets.asScalaList
+        nst <- tar.getNonSiderealTarget.toList
+        sb  <- es.getObservation.getSchedulingBlock.asScalaOpt
+        cs  <- nst.coords(sb.start)
+        d   <- nst.ephemeris.lookupClosest(sb.start).map(cs.angularDistance(_).toArcmins)
+        if d > 10 // arcmins
+      } p2p.addWarning(ERR_EPHEMERIS_TOO_SPARSE,
+        f"""
+           |Reference point for ${nst.name}%s at scheduling block start is ${d.toInt}' away.
+           |Refresh to re-center the high-resolution portion of the ephemeris."
+         """.stripMargin,
+        ocn)
+    }
+
 }
 
 object NonSiderealTargetRules {
@@ -83,6 +103,7 @@ object NonSiderealTargetRules {
   val ERR_NO_SCHEDULING_BLOCK     = "NoSchedulingBlock"
   val ERR_SCHEDULING_BLOCK_SEM    = "SchedulingBlockOutsideSemester"
   val ERR_NO_EPHEMERIS_FOR_BLOCK  = "NoEphemerisForSchedulingBlock"
+  val ERR_EPHEMERIS_TOO_SPARSE    = "EphemerisTooSparse"
   val ERR_NO_HORIZONS_DESIGNATION = "NoHorizonsDesignation"
 
 }
