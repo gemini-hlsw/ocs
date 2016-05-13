@@ -15,6 +15,12 @@ import scalaz._, Scalaz._
 /** Support for formatting and parsing TCS ephemeris files. */
 object EphemerisFileFormat {
 
+  /** Header required by the TCS. */
+  val Header =
+    """***************************************************************************************
+      |Date_(UT)HR:MN Date_______JDUT R.A._(ICRF/J2000.0)__DEC dRA*cosD d(DEC)/dt
+      |***************************************************************************************""".stripMargin
+
   /** Marker for the start of ephemeris elements in the file. */
   val SOE = "$$SOE"
 
@@ -48,7 +54,8 @@ object EphemerisFileFormat {
     def formatCoords(coords: Coordinates): String = {
       val ra  = Angle.formatHMS(coords.ra.toAngle, " ", 4)
       val dec = Declination.formatDMS(coords.dec, " ", 3)
-      s"$ra $dec"
+      // Add spacing as required for TCS.
+      f"$ra%14s $dec%13s"
     }
 
     val lines = ephemeris.toList.map { case (time, (coords, raTrack, decTrack)) =>
@@ -60,7 +67,7 @@ object EphemerisFileFormat {
       s" $timeS $jdS    $coordsS $raTrackS $decTrackS"
     }
 
-    lines.mkString(s"$SOE\n", "\n", (lines.isEmpty ? "" | "\n") + s"$EOE\n")
+    lines.mkString(s"$Header\n$SOE\n", "\n", (lines.isEmpty ? "" | "\n") + s"$EOE\n")
   }
 
   object Parser extends JavaTokenParsers {
@@ -70,6 +77,9 @@ object EphemerisFileFormat {
     private val soeLine: Parser[Any] = SOE~eol
     private val eoeLine: Parser[Any] = EOE
     private val chaff: Parser[Any]   = """.*""".r ~ eol
+
+    def headerLine    = not(SOE | EOE)~>chaff
+    def headerSection = rep(headerLine)
 
     private val utc: Parser[Instant] =
       Time.TimeRegex >> { timeString =>
@@ -125,8 +135,11 @@ object EphemerisFileFormat {
     private val ephemerisList: Parser[List[(Instant, EphemerisElement)]] =
       rep(ephemerisLine)
 
-    val ephemeris: Parser[EphemerisMap] =
+    val ephemerisSection: Parser[EphemerisMap] =
       (soeLine~>ephemerisList<~eoeLine).map { lines => ==>>.fromList(lines) }
+
+    val ephemeris: Parser[EphemerisMap] =
+      headerSection~>ephemerisSection
 
     private val timestamp: Parser[Instant] =
       utc<~chaff
@@ -134,7 +147,11 @@ object EphemerisFileFormat {
     private val timestampList: Parser[ISet[Instant]] =
       rep(timestamp).map(lst => ISet.fromList(lst))
 
-    val timestamps: Parser[ISet[Instant]] = soeLine~>timestampList<~eoeLine
+    val timestampsSection: Parser[ISet[Instant]] =
+      soeLine~>timestampList<~eoeLine
+
+    val timestamps: Parser[ISet[Instant]] =
+      headerSection~>timestampsSection
 
     def toDisjunction[A](p: Parser[A], input: String): String \/ A =
       parse(p, input) match {
