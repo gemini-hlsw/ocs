@@ -32,7 +32,6 @@ class EphemerisEditor extends TelescopePosEditor with ReentrancyHack {
 
   val start, end, size, now, sched, schedCoords  = new JLabel <| { l =>
     l.setForeground(Color.DARK_GRAY)
-    l.setMinimumSize(l.getMinimumSize <| (_.width = 200))
     l.setHorizontalTextPosition(SwingConstants.LEFT)
   }
 
