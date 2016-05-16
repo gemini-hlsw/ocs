@@ -10,6 +10,7 @@ import edu.gemini.pot.sp.ISPNode
 import edu.gemini.shared.gui.GlassLabel
 import edu.gemini.shared.util.immutable.{Option => GOption}
 import edu.gemini.shared.util.immutable.ScalaConverters._
+import edu.gemini.skycalc.ObservingNight
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
@@ -58,8 +59,15 @@ final class NonSiderealNameEditor extends TelescopePosEditor with ReentrancyHack
 
   def lookup(d: HorizonsDesignation, site: Site): HS2[Ephemeris] = {
     val s = semester(site)
-    show(s"Fetching Ephemeris for $s ...") *>
-    HorizonsService2.lookupEphemerisWithPadding(d, site, 1200, s)
+    val n = start.map(new ObservingNight(site, _))
+    for {
+      _  <- show(s"Fetching Ephemeris for $s ...")
+      e1 <- HorizonsService2.lookupEphemerisWithPadding(d, site, 1000, s)
+      e2 <- n.fold(Ephemeris.empty.point[HS2]) { n =>
+              show(s"Fetching Ephemeris for ${n.getNightString} ...") *>
+              HorizonsService2.lookupEphemeris(d, site, new Date(n.getStartTime), new Date(n.getEndTime), 300)
+            }
+    } yield e1.union(e2)
   }
 
   // Given designation and name from horizons, along with the current target name, provide a new

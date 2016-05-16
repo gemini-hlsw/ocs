@@ -9,7 +9,7 @@ import squants.motion.VelocityConversions._
 import squants.radio.IrradianceConversions._
 import squants.radio.SpectralIrradianceConversions._
 
-import scalaz.==>>
+import scalaz.{ ==>>, Order }
 import scalaz.std.anyVal._
 
 trait Arbitraries {
@@ -161,5 +161,8 @@ trait Arbitraries {
 
   implicit val arbWavelength: Arbitrary[Wavelength] =
     Arbitrary(arbitrary[Short].map(n => Math.abs(n).nm))
+
+  implicit def arbMap[K: Arbitrary: Order, V: Arbitrary]: Arbitrary[K ==>> V] =
+    Arbitrary(arbitrary[List[(K, V)]].map(==>>.fromList(_)))
 
 }

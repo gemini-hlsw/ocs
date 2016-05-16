@@ -62,10 +62,7 @@ class EphemerisEditor extends TelescopePosEditor with ReentrancyHack {
       } {
         start.setText(formatDate(a))
         end  .setText(formatDate(b))
-        val hrs: Double = (b - a) / (e.size.toDouble * 1000 * 60 * 60)
-        e.findMin.map(_._1).map(formatDate).foreach(start.setText)
-        e.findMax.map(_._1).map(formatDate).foreach(end.setText)
-        size.setText(f"${e.size} elems @ ~$hrs%3.1f hrs")
+        size.setText(e.size.toString)
       }
 
       // Scheduled time and coordinates
@@ -87,7 +84,7 @@ class EphemerisEditor extends TelescopePosEditor with ReentrancyHack {
     p.setBorder(BorderFactory.createCompoundBorder(titleBorder("Ephemeris"),
       BorderFactory.createEmptyBorder(1, 2, 1, 2)))
 
-    p.add(new JLabel("Resolution"), new GridBagConstraints <| { c =>
+    p.add(new JLabel("Elements"), new GridBagConstraints <| { c =>
       c.anchor = GridBagConstraints.WEST
       c.gridx  = 0
       c.gridy  = 0

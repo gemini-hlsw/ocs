@@ -28,3 +28,9 @@ OsgiKeys.exportPackage := Seq(
   "edu.gemini.horizons.api",
   "edu.gemini.horizons.server.backend"
 )
+
+initialCommands :=
+  """
+    |import edu.gemini.spModel.core._
+    |import edu.gemini.horizons.server.backend.HorizonsService2._
+  """.stripMargin

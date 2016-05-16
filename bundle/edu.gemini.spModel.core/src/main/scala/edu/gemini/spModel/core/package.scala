@@ -1,5 +1,6 @@
 package edu.gemini.spModel
 
+import scala.math.Numeric.Implicits._
 import scala.util.control.NonFatal
 import scalaz._, Scalaz._
 import scala.collection.immutable.NumericRange
@@ -56,6 +57,29 @@ package object core {
     /** Construct a table of (K, V) values on the given interval. */
     def iTable(lo: K, hi: K, step: K)(implicit ev: Integral[K]): Option[List[(K, V)]] =
       NumericRange.inclusive(lo, hi, step).toList.traverse(k => iLookup(k).strengthL(k))
+
+  }
+
+  /** For keys you can subtract we can find the closest matching pair.  */
+  implicit class NumericKeyedMapOps[K, V](m: K ==>> V)(implicit N: Numeric[K]) {
+    implicit val KOrder = Order.fromScalaOrdering(N)
+
+    /** Find the closest matching pair, if any. */
+    def lookupClosestAssoc(k: K): Option[(K, V)] =
+      m.foldlWithKey(Option.empty[(K, V)]) {
+        case (None, k, v)      => Some((k, v))
+        case (a @ Some((k0, v0)), k1, v1) =>
+          if ((k0 - k).abs <= (k1 - k).abs) a
+          else Some((k1, v1))
+      }
+
+    /** Find the closest matching value, if any. This is O(N) */
+    def lookupClosest(k: K): Option[V] =
+      lookupClosestAssoc(k).map(_._2)
+
+    /** Find the closest matching value, if any. */
+    def lookupClosestKey(k: K): Option[K] =
+      lookupClosestAssoc(k).map(_._1)
 
   }
 
