@@ -14,7 +14,7 @@ public enum Affiliate {
     UNITED_STATES("United States", "US"),
 
     GEMINI_STAFF("Gemini Staff"),
-    UNIVERSITY_OF_HAWAII("University of Hawaii"),;
+    UNIVERSITY_OF_HAWAII("University of Hawaii", "UH"),;
 
     private static final Logger LOG = Logger.getLogger(Affiliate.class.getName());
 
@@ -26,8 +26,8 @@ public enum Affiliate {
         this(displayValue, null);
     }
 
-    Affiliate(final String displayValue, final String isoCode) {
-        this(displayValue, isoCode, true);
+    Affiliate(final String displayValue, final String code) {
+        this(displayValue, code, true);
     }
 
     Affiliate(final String displayValue, final String isoCode, final boolean isActive) {
