@@ -6,7 +6,7 @@ import edu.gemini.spModel.core.HorizonsDesignation.MajorBody
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.gemini.obscomp.SPProgram
 import edu.gemini.spModel.io.impl.migration.to2015B.To2015B
-import edu.gemini.spModel.pio.xml.PioXmlFactory
+import edu.gemini.spModel.pio.xml.{PioXmlUtil, PioXmlFactory}
 import edu.gemini.spModel.pio.{Document, ParamSet, Pio, Version}
 import edu.gemini.spModel.target.{SPTargetPio, SourcePio, TargetParamSetCodecs}
 import edu.gemini.spModel.target.env.GuideGroup
@@ -123,7 +123,7 @@ object To2016B extends Migration {
           case ("JPL minor body",      cs) => nonsidereal(t, cs).exec(NonSiderealTarget.empty)
           case ("MPC minor planet",    cs) => nonsidereal(t, cs).exec(NonSiderealTarget.empty)
           case ("Solar system object", cs) => (nonsidereal(t, cs) *> named(t)).exec(NonSiderealTarget.empty)
-        }.map(common(t).exec) getOrElse sys.error("Can't recognize target.")
+        }.map(common(t).exec) getOrElse sys.error("Can't recognize target:\n" + PioXmlUtil.toXmlString(t))
 
       // Drop it into the paramset.
       // TODO: remove everything else!
