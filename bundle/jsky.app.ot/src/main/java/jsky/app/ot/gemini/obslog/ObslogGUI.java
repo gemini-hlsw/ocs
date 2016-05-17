@@ -512,7 +512,7 @@ class ObslogGUI extends JPanel {
      */
     private final class CommentsComponent extends JPanel implements ObslogTableModels, ListSelectionListener {
 
-        private final JTable table;
+        private final CommentsTable table;
         private final JTextArea area = new JTextArea();
 
         private final DocumentListener docListener = new DocumentListener() {
@@ -530,8 +530,11 @@ class ObslogGUI extends JPanel {
 
             private void updateText() {
                 final int row = table.getSelectedRow();
-                if (row > -1)
+                if (row > -1) {
                     table.getModel().setValueAt(area.getText(), row, CommentTableModel.COL_COMMENT);
+                    // The comment width may have changed, let's expand it
+                    table.expandCommentColumn();
+                }
             }
         };
 
@@ -623,6 +626,27 @@ class ObslogGUI extends JPanel {
                     attachCommentRenderer(CommentTableModel.COL_COMMENT);
                     sizeColumnsToFitData();
                 }
+            }
+
+            // Recalculates the width of the columns comment
+            void expandCommentColumn() {
+                TableColumn column = getColumnModel().getColumn(CommentTableModel.COL_COMMENT);
+                int preferredWidth = 0;
+                for (int i = 0; i < getModel().getRowCount(); i++) {
+                    final TableCellRenderer cellRenderer = this.getCellRenderer(i, CommentTableModel.COL_COMMENT);
+                    final Component c = table.prepareRenderer(cellRenderer, i, CommentTableModel.COL_COMMENT);
+                    final int width = c.getPreferredSize().width + table.getIntercellSpacing().width;
+                    preferredWidth = Math.max(preferredWidth, width);
+                }
+
+                int gutter = 10;
+                preferredWidth += gutter;
+
+                // NB The order of these calls is critical to get the width correct
+                // DON'T reorder
+                column.setMinWidth(preferredWidth);
+                column.setMaxWidth(preferredWidth);
+                column.setPreferredWidth(preferredWidth);
             }
 
             private void attachCommentRenderer(int i) {
