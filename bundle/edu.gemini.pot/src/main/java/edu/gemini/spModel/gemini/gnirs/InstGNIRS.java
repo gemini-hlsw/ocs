@@ -785,6 +785,7 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
         sc.putParameter(DefaultParameter.getInstance(GNIRSConstants.CROSS_DISPERSED_PROP, getCrossDispersed()));
         sc.putParameter(DefaultParameter.getInstance(GNIRSConstants.WOLLASTON_PRISM_PROP, getWollastonPrism()));
         sc.putParameter(DefaultParameter.getInstance(GNIRSConstants.READ_MODE_PROP, getReadMode()));
+    //    sc.putParameter(DefaultParameter.getInstance(GNIRSConstants.FILTER_PROP, getFilter()));
         sc.putParameter(DefaultParameter.getInstance(WELL_DEPTH_PROP, getWellDepth()));
         sc.putParameter(DefaultParameter.getInstance(GNIRSConstants.ACQUISITION_MIRROR_PROP, getAcquisitionMirror()));
         sc.putParameter(DefaultParameter.getInstance(GNIRSConstants.CENTRAL_WAVELENGTH_PROP, getCentralWavelength()));

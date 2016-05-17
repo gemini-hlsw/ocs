@@ -1,6 +1,18 @@
-# Temporary transmission curve, data taken from web for H-blocking filter.
-# Negative values set to zeros.
-1431   0.000000
+#   Input NDF:   /Users/tgeb   alle/GNIRS/FILTER_XMISSION/hdbxd_464_h_trans_sm1_scr
+#   Wavelength
+#   Nanometers
+1420   0.000000
+1421   0.000000
+1422   0.000192
+1423   0.000000
+1424   0.000000
+1425   0.000000
+1426   0.000000
+1427   0.000000
+1428   0.000000
+1429   0.000000
+1430   0.000022
+1431   0.000109
 1432   0.000000
 1433   0.000080
 1434   0.000314

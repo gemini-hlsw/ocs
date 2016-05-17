@@ -53,12 +53,6 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
     }
 
     private void validateInputParameters() {
-        if (_gnirsParameters.altair().isDefined()) {
-            if (_obsDetailParameters.calculationMethod() instanceof Spectroscopy) {
-                throw new IllegalArgumentException(
-                        "Altair cannot currently be used with Spectroscopy mode in the ITC.  Please deselect either altair or spectroscopy and resubmit the form.");
-            }
-        }
 
         // some general validations
         Validation.validate(instrument, _obsDetailParameters, _sdParameters);
@@ -90,25 +84,42 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
         // calculates: redshifted SED
         // output: redshifteed SED
 
+
         // Calculate image quality
         final ImageQualityCalculatable IQcalc = ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _telescope, instrument);
         IQcalc.calculate();
 
+        // Altair specific section
+        final Option<AOSystem> altair;
+        if (_gnirsParameters.altair().isDefined()) {
+            final Altair ao = new Altair(instrument.getEffectiveWavelength(), _telescope.getTelescopeDiameter(), IQcalc.getImageQuality(), _gnirsParameters.altair().get(), 0.1);
+            altair = Option.<AOSystem>apply((AOSystem) ao);
+
+        } else {
+            altair = Option.<AOSystem>empty();
+        }
 
         // Get the summed source and sky
-        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, _sdParameters, _obsConditionParameters, _telescope);
+        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, _sdParameters, _obsConditionParameters, _telescope, altair);
         final VisitableSampledSpectrum sed = calcSource.sed;
         final VisitableSampledSpectrum sky = calcSource.sky;
+        final Option<VisitableSampledSpectrum> halo = calcSource.halo;
+
 
         // In this version we are bypassing morphology modules 3a-5a.
         // i.e. the output morphology is same as the input morphology.
         // Might implement these modules at a later time.
+        final double im_qual = altair.isDefined() ? altair.get().getAOCorrectedFWHM() : IQcalc.getImageQuality();
 
-        final Slit slit = Slit$.MODULE$.apply(_sdParameters, _obsDetailParameters, instrument, instrument.getSlitWidth(), IQcalc.getImageQuality());
-        final SlitThroughput throughput = new SlitThroughput(_sdParameters, slit, IQcalc.getImageQuality());
+        final Slit slit = Slit$.MODULE$.apply(_sdParameters, _obsDetailParameters, instrument, instrument.getSlitWidth(), im_qual);
+        final SlitThroughput throughput = new SlitThroughput(_sdParameters, slit, im_qual);
+        final Option<SlitThroughput> haloThroughput = altair.isDefined()
+                ? Option.<SlitThroughput>apply(new SlitThroughput(_sdParameters, slit, IQcalc.getImageQuality()))
+                : Option.<SlitThroughput>empty();
+
 
         // TODO: why, oh why?
-        final double im_qual = _sdParameters.isUniform() ? 10000 : IQcalc.getImageQuality();
+        final double im_qual1 = _sdParameters.isUniform() ? 10000 : IQcalc.getImageQuality();
 
         final SpecS2NSlitVisitor specS2N = new SpecS2NSlitVisitor(
                 slit,
@@ -117,7 +128,7 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
                 instrument.getSpectralPixelWidth() / instrument.getOrder(),
                 instrument.getObservingStart(),
                 instrument.getObservingEnd(),
-                im_qual,
+                im_qual1,
                 instrument.getReadNoise(),
                 instrument.getDarkCurrent(),
                 _obsDetailParameters);
@@ -132,6 +143,7 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
             }
 
             final VisitableSampledSpectrum[] sedOrder = new VisitableSampledSpectrum[ORDERS];
+            final VisitableSampledSpectrum[] haloOrder = new VisitableSampledSpectrum[ORDERS];
             final VisitableSampledSpectrum[] skyOrder = new VisitableSampledSpectrum[ORDERS];
             for (int i = 0; i < ORDERS; i++) {
                 final int order = i + 3;
@@ -142,6 +154,13 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
                 sedOrder[i] = (VisitableSampledSpectrum) sed.clone();
                 sedOrder[i].accept(instrument.getGratingOrderNTransmission(order));
                 sedOrder[i].trim(trimStart, trimEnd);
+
+                if (halo.nonEmpty()) {
+                    haloOrder[i] = (VisitableSampledSpectrum) halo.get().clone();
+                    haloOrder[i].accept(instrument.getGratingOrderNTransmission(order));
+                    haloOrder[i].trim(trimStart, trimEnd);
+                    specS2N.setHaloSpectrum(haloOrder[i], haloThroughput.get(), IQcalc.getImageQuality()); // ??????????
+                }
 
                 skyOrder[i] = (VisitableSampledSpectrum) sky.clone();
                 skyOrder[i].accept(instrument.getGratingOrderNTransmission(order));
@@ -166,6 +185,9 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
                 final int order = i + 3;
                 specS2N.setSourceSpectrum(sedOrder[i]);
                 specS2N.setBackgroundSpectrum(skyOrder[i]);
+                if (haloThroughput.nonEmpty()) {
+                    specS2N.setHaloSpectrum(haloOrder[i], haloThroughput.get(), IQcalc.getImageQuality());
+                }
 
                 specS2N.setDisperser(instrument.disperser(order));
                 specS2N.setSpectralPixelWidth(instrument.getSpectralPixelWidth() / order);
@@ -184,7 +206,7 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
                 specS2Narr[i] = s2n;
             }
 
-            return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), Option.<AOSystem>empty());
+            return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), altair);
 
         } else {
 
@@ -192,10 +214,13 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
 
             specS2N.setSourceSpectrum(sed);
             specS2N.setBackgroundSpectrum(sky);
+            if (haloThroughput.nonEmpty()) {
+                specS2N.setHaloSpectrum(sed, haloThroughput.get(), IQcalc.getImageQuality());
+            }
             sed.accept(specS2N);
 
             final SpecS2N[] specS2Narr = new SpecS2N[] {specS2N};
-            return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), Option.<AOSystem>empty());
+            return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), altair);
         }
 
 
@@ -280,9 +305,9 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
         final Option<AOSystem> altair;
         if (_gnirsParameters.altair().isDefined()) {
             final Altair ao = new Altair(instrument.getEffectiveWavelength(), _telescope.getTelescopeDiameter(), IQcalc.getImageQuality(), _gnirsParameters.altair().get(), 0.1); // Since GNIRS does not have perfect optics, the PSF delivered by Altair is convolved with a ~0.10" Gaussian to reproduce the ~0.12" images which are measured under optimal conditions.
-            altair = Option.apply((AOSystem) ao);
+            altair = Option.<AOSystem>apply((AOSystem) ao);
         } else {
-            altair = Option.empty();
+            altair = Option.<AOSystem>empty();
         }
 
         final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, _sdParameters, _obsConditionParameters, _telescope, altair);

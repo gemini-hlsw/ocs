@@ -1,5 +1,6 @@
-# H2 filter transmission from web, added for testing purposes.
-# Negative values set to zeros.
+# Input NDF:   /Users/tgeballe/GNIRS/FILTER_XMISSION/h2dbxd_451_sm1_trans_scr
+# Wavelength
+# Nanometers
 2060   0.000000
 2061   0.000000
 2062   0.000077
@@ -118,6 +119,3 @@
 2175   0.000003
 2176   0.000000
 2177   0.000000
-2178   0.000000
-2179   0.000000
-2180   0.000000

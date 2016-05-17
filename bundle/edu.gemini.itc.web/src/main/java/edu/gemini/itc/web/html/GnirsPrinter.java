@@ -50,14 +50,15 @@ public final class GnirsPrinter extends PrinterBase {
 
         _println("");
 
-        // Altair specific section
-        // if (result.aoSystem().isDefined()) {
-        //    _println(HtmlPrinter.printSummary((Altair) result.aoSystem().get()));
-        //}
-
         _printSoftwareAperture(result, 1 / instrument.getSlitWidth());
 
-        _println(String.format("derived image size(FWHM) for a point source = %.2f arcsec\n", result.iqCalc().getImageQuality()));
+        // Altair specific section
+        if (result.aoSystem().isDefined()) {
+            _println(HtmlPrinter.printSummary((Altair) result.aoSystem().get()));
+            _println(String.format("derived image halo size (FWHM) for a point source = %.2f arcsec.\n", result.iqCalc().getImageQuality()));
+        } else {
+            _println(String.format("derived image size(FWHM) for a point source = %.2f arcsec\n", result.iqCalc().getImageQuality()));
+        }
 
         _printSkyAperture(result);
 

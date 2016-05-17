@@ -52,6 +52,8 @@ final case class GnirsParameters(
                      crossDispersed:    GNIRSParams.CrossDispersed,
                      centralWavelength: Wavelength,
                      slitWidth:         GNIRSParams.SlitWidth,
+                     camera:            Option[GNIRSParams.Camera],
+                     wellDepth:         Option[GNIRSParams.WellDepth],
                      altair:            Option[AltairParameters]) extends InstrumentDetails
 
 final case class GsaoiParameters(

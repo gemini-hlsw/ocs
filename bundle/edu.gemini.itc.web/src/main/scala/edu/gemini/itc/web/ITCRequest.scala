@@ -168,13 +168,15 @@ object ITCRequest {
     val filter      = r.parameter("Filter") match {
       case "spectroscopy" => None
       case _ => Some(r.enumParameter(classOf[GNIRSParams.Filter])) }
-    val camera      = r.enumParameter(classOf[GNIRSParams.PixelScale])
+    val pixelScale = r.enumParameter(classOf[GNIRSParams.PixelScale])
     val xDisp       = r.enumParameter(classOf[GNIRSParams.CrossDispersed])
     val readMode    = r.enumParameter(classOf[GNIRSParams.ReadMode])
     val centralWl   = r.centralWavelengthInMicrons()
     val fpMask      = r.enumParameter(classOf[GNIRSParams.SlitWidth])
+    val wellDepth   = None                            // this is because in the web-ITC these two components
+    val camera      = None                            //    are selected automatically and not controlled by user
     val altair      = altairParameters(r)
-    GnirsParameters(camera, filter, grating, readMode, xDisp, centralWl, fpMask, altair)
+    GnirsParameters(pixelScale, filter, grating, readMode, xDisp, centralWl, fpMask, camera, wellDepth, altair)
   }
 
   def gsaoiParameters(r: ITCRequest): GsaoiParameters = {

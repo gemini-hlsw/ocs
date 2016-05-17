@@ -1,5 +1,6 @@
 package edu.gemini.itc.web.html;
 
+import edu.gemini.itc.base.AOSystem;
 import edu.gemini.itc.base.Instrument;
 import edu.gemini.itc.base.Result;
 import edu.gemini.itc.base.SpectroscopyResult;
@@ -9,6 +10,7 @@ import edu.gemini.itc.web.servlets.ServerInfo;
 import edu.gemini.spModel.core.PointSource$;
 import edu.gemini.spModel.core.UniformSource$;
 import scala.collection.JavaConversions;
+import scalaz.Alpha;
 
 import java.io.PrintWriter;
 import java.util.Optional;
@@ -142,7 +144,12 @@ public abstract class PrinterBase {
             if (result.source().profile() == UniformSource$.MODULE$) {
                 _println(String.format("software aperture extent along slit = %.2f arcsec", slitWidth));
             } else if (result.source().profile() == PointSource$.MODULE$) {
-                _println(String.format("software aperture extent along slit = %.2f arcsec", 1.4 * result.iqCalc().getImageQuality()));
+                if (result.aoSystem().nonEmpty()) {
+                     AOSystem ao = result.aoSystem().get();
+                    _println(String.format("software aperture extent along slit = %.2f arcsec", 1.4 * ao.getAOCorrectedFWHM()));
+                } else {
+                    _println(String.format("software aperture extent along slit = %.2f arcsec", 1.4 * result.iqCalc().getImageQuality()));
+                }
             }
         }
 

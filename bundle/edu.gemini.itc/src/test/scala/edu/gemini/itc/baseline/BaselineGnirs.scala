@@ -21,6 +21,8 @@ object BaselineGnirs {
       CrossDispersed.LXD,
       2.4.microns,
       SlitWidth.SW_1,
+      None,
+      None,
       Fixture.NoAltair),
 
     new GnirsParameters(
@@ -31,6 +33,8 @@ object BaselineGnirs {
       CrossDispersed.NO,
       2.4.microns,
       SlitWidth.SW_3,
+      None,
+      None,
       Fixture.NoAltair),
 
     new GnirsParameters(
@@ -41,6 +45,8 @@ object BaselineGnirs {
       CrossDispersed.LXD,
       2.6.microns,
       SlitWidth.SW_6,
+      None,
+      None,
       Fixture.NoAltair),
 
     new GnirsParameters(
@@ -51,6 +57,8 @@ object BaselineGnirs {
       CrossDispersed.NO,
       2.6.microns,
       SlitWidth.SW_8,
+      None,
+      None,
       Fixture.NoAltair)
 
   ))
@@ -64,6 +72,8 @@ object BaselineGnirs {
       CrossDispersed.NO,
       2.4.microns,
       SlitWidth.ACQUISITION,
+      None,
+      None,
       Fixture.NoAltair),
 
     new GnirsParameters(
@@ -74,6 +84,8 @@ object BaselineGnirs {
       CrossDispersed.NO,
       2.4.microns,
       SlitWidth.ACQUISITION,
+      None,
+      None,
       Fixture.AltairNgs),
 
     new GnirsParameters(
@@ -84,6 +96,8 @@ object BaselineGnirs {
       CrossDispersed.NO,
       2.4.microns,
       SlitWidth.ACQUISITION,
+      None,
+      None,
       Fixture.AltairLgs),
 
 
@@ -96,6 +110,8 @@ object BaselineGnirs {
       CrossDispersed.NO,
       2.4.microns,
       SlitWidth.ACQUISITION,
+      None,
+      None,
       Fixture.AltairNgsFL),
 
     new GnirsParameters(
@@ -106,6 +122,8 @@ object BaselineGnirs {
       CrossDispersed.NO,
       2.4.microns,
       SlitWidth.ACQUISITION,
+      None,
+      None,
       Fixture.AltairNgs),
 
     new GnirsParameters(
@@ -116,6 +134,8 @@ object BaselineGnirs {
       CrossDispersed.NO,
       2.4.microns,
       SlitWidth.ACQUISITION,
+      None,
+      None,
       Fixture.AltairLgs)
   ))
 

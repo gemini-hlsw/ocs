@@ -101,16 +101,31 @@ object ConfigExtractor {
 
   private def extractGnirs(targetEnv: TargetEnvironment, probe: GuideProbe, c: Config): String \/ GnirsParameters = {
     import GNIRSParams._
+
+    def extractDisperser: String \/ Option[GNIRSParams.Disperser] =
+      extract[GNIRSParams.Disperser](c, DisperserKey).map(Some(_))
+
+    def extractFilter: String \/ Option[GNIRSParams.Filter] =
+      if (c.containsItem(FilterKey)) extract[GNIRSParams.Filter](c, FilterKey).map(Some(_)) else None.right
+
+    def extractCamera: String \/ Option[GNIRSParams.Camera] =
+       extract[GNIRSParams.Camera](c, CameraKey).map(Some(_))
+
+    def extractWellDepth: String \/ Option[GNIRSParams.WellDepth] =
+      extract[GNIRSParams.WellDepth](c, WellDepthKey).map(Some(_))
+
     for {
       pixelScale  <- extract[PixelScale]        (c, PixelScaleKey)
-      filter      <- extract[Option[Filter]]    (c, FilterKey)
-      grating     <- extract[Option[Disperser]] (c, DisperserKey)
+      filter      <- extractFilter
       readMode    <- extract[ReadMode]          (c, ReadModeKey)
       xDisp       <- extract[CrossDispersed]    (c, CrossDispersedKey)
       slitWidth   <- extract[SlitWidth]         (c, SlitWidthKey)
+      grating     <- extractDisperser
+      camera      <- extractCamera
+      wellDepth   <- extractWellDepth
       altair      <- extractAltair             (targetEnv, probe, c)
       wavelen     <- extractObservingWavelength(c)
-    } yield GnirsParameters(pixelScale, filter, grating, readMode, xDisp, wavelen, slitWidth, altair)
+    } yield GnirsParameters(pixelScale, filter, grating, readMode, xDisp, wavelen, slitWidth, camera, wellDepth, altair)
   }
 
   private def extractGmos(c: Config): String \/ GmosParameters = {

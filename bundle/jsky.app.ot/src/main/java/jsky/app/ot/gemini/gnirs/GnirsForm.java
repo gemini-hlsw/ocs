@@ -31,6 +31,10 @@ public class GnirsForm extends JPanel {
 		JPanel top1 = new JPanel();
 		JLabel pixelScaleLabel = new JLabel();
 		JLabel slitWidthLabel = new JLabel();
+//		JLabel filterLabel = new JLabel();
+//		filter = new SingleSelectComboBox();
+//		JLabel acqMirrorLabel = new JLabel();
+// 		acqMirror = new SingleSelectComboBox();
 		pixelScale = new SingleSelectComboBox();
 		JLabel disperserLabel = new JLabel();
 		disperser = new SingleSelectComboBox();
@@ -101,6 +105,32 @@ public class GnirsForm extends JPanel {
 			top1.add(slitWidthLabel, new GridBagConstraints(2, 0, 2, 1, 1.0, 0.0,
 				GridBagConstraints.WEST, GridBagConstraints.NONE,
 				new Insets(11, 11, 0, 0), 0, 0));
+
+			// TODO: Add Filter and AcqMirror to GNIRS instrument component
+	/*		//---- filterLabel ----
+			filterLabel.setLabelFor(null);
+			filterLabel.setText("Filter");
+			top1.add(filterLabel, new GridBagConstraints(4, 0, 1, 1, 1.0, 0.0,
+					GridBagConstraints.WEST, GridBagConstraints.NONE,
+					new Insets(11, 11, 0, 0), 0, 0));
+
+			//---- filter ----
+			filter.setFont(new Font("Dialog", Font.PLAIN, 12));
+			top1.add(filter, new GridBagConstraints(4, 1, 1, 1, 0.0, 0.0,
+					GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+					new Insets(0, 11, 0, 0), 0, 0));
+
+			//---- aqcMirrorLabel ----
+			acqMirrorLabel.setText("Acquisition Mirror");
+			top1.add(acqMirrorLabel, new GridBagConstraints(2, 2, 1, 1, 0.0, 0.0,
+					GridBagConstraints.WEST, GridBagConstraints.NONE,
+					new Insets(11, 11, 0, 0), 0, 0));
+
+			//---- acqMirror ----
+			acqMirror.setMaximumRowCount(2);
+			top1.add(acqMirror, new GridBagConstraints(4, 2, 1, 1, 0.0, 0.0,
+					GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+					new Insets(11, 11, 0, 0), 0, 0)); */
 
             // TODO: REMOVE
 			//---- posAngleLabel ----
@@ -465,6 +495,8 @@ public class GnirsForm extends JPanel {
 	SingleSelectComboBox pixelScale;
 	SingleSelectComboBox disperser;
 	SingleSelectComboBox slitWidth;
+//	SingleSelectComboBox filter;
+//	SingleSelectComboBox acqMirror;
 	JLabel scienceFOV;
 	JLabel centralWavelengthLabel;
 	DropDownListBoxWidget centralWavelength;

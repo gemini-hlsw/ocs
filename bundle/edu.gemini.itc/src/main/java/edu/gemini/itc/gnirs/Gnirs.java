@@ -67,41 +67,61 @@ public final class Gnirs extends Instrument implements SpectroscopyInstrument {
         _grating = gp.grating();
         _mode = odp.calculationMethod();
 
-        //Test to see that all conditions for Spectroscopy are met
-        if (_mode instanceof Spectroscopy) {
-            if (gp.slitWidth() == SlitWidth.ACQUISITION && gp.filter().isDefined())
-                throw new RuntimeException("Spectroscopy calculation method is selected," +
-                        " but an imaging <b>Filter</b> is also selected, and a <b>Focal" +
-                        " plane mask</b> is set to \"imaging\".\nPlease set Filter to \"spectroscopy\"" +
-                        " and select a Focal plane mask, or change the method to imaging.");
+        //Test to see that all conditions for Spectroscopy and Imaging are met
+        //The first condition is to distinguish between the OT-ITC and the web-ITC,
+        // since the web one is more restrictive.
+        if (gp.camera().isEmpty()) {          // This condition is true only for the web-ITC
+            if (_mode instanceof Spectroscopy) {
+                if (gp.slitWidth() == SlitWidth.ACQUISITION && gp.filter().isDefined())
+                    throw new RuntimeException("Spectroscopy calculation method is selected," +
+                            " but an imaging filterf is also selected, and a focal" +
+                            " plane mask is set to \"imaging\".\nPlease set <b>Filter</b> to \"spectroscopy\"" +
+                            " and select a <b>Focal plane mask</b>, or change the method to imaging.");
 
-            if (gp.slitWidth() == SlitWidth.ACQUISITION)
-                throw new RuntimeException("Spectroscopy calculation method is selected, but a <b>Focal" +
-                        " plane mask</b> is not.\nPlease select a " +
-                        "Focal plane mask in the Instrument " +
-                        "configuration section.");
+                if (gp.slitWidth() == SlitWidth.ACQUISITION)
+                    throw new RuntimeException("Spectroscopy calculation method is selected, but a focal" +
+                            " plane mask is not.\nPlease select a " +
+                            "<b>Focal plane mask</b> in the Instrument configuration section.");
 
-            if (gp.filter().isDefined())
-                throw new RuntimeException("Spectroscopy calculation method is selected, but an imaging " +
-                        "<b>Filter</b> is also selected. \nPlease set Filter to \"spectroscopy\"" +
-                        " in the Instrument configuration section.");
+                if (gp.filter().isDefined())
+                    throw new RuntimeException("Spectroscopy calculation method is selected, but an imaging " +
+                            "filter is also selected. \nPlease set <b>Filter</b> to \"spectroscopy\"" +
+                            " in the Instrument configuration section.");
+            }
+
+            if (_mode instanceof Imaging) {
+                if (gp.slitWidth() != SlitWidth.ACQUISITION && gp.filter().isEmpty())
+                    throw new RuntimeException("Imaging calculation method is selected, but a focal" +
+                            " plane mask is also selected, and a filter is set to \"spectroscopy\"." +
+                            " \nPlease set <b>Focal plane mask</b> to \"imaging\" and  select an " +
+                            "imaging <b>Filter</b>, or change the method to spectroscopy.");
+
+                if (gp.slitWidth() != SlitWidth.ACQUISITION)
+                    throw new RuntimeException("Imaging calculation method is selected, but a focal" +
+                            " plane mask is also selected.\nPlease " +
+                            "set <b>Focal plane mask</b> to \"imaging\" in the Instrument " +
+                            "configuration section.");
+
+                if (gp.filter().isEmpty())
+                    throw new RuntimeException("Imaging calculation method is selected, but filter " +
+                            "is set to \"spectroscopy\". \nPlease select an imaging <b>Filter</b> in" +
+                            " the Instrument configuration section.");
+            }
         }
-
-        if (_mode instanceof Imaging) {
-            if (gp.slitWidth() != SlitWidth.ACQUISITION && gp.filter().isEmpty())
-                throw new RuntimeException("Imaging calculation method is selected, but a <b>Focal" +
-                         " plane mask</b> is also selected, and a <b>Filter</b> is set to \"spectroscopy\"." +
-                         " \nPlease set Focal plane mask to \"imaging\" and  select an imaging filter, " +
-                         "or change the method to spectroscopy.");
-
-            if (gp.slitWidth() != SlitWidth.ACQUISITION)
-                throw new RuntimeException("Imaging calculation method is selected, but a <b>Focal" +
-                        " plane mask</b> is also selected.\nPlease " +
-                        "set Focal plane mask to \"imaging\" in the Instrument " +
-                        "configuration section.");
-            if (gp.filter().isEmpty())
-                throw new RuntimeException("Imaging calculation method is selected, but a Filter " +
-                        "is not. \nPlease select an imaging Filter in the Instrument configuration section.");
+        else {
+            if (_mode instanceof Spectroscopy) {
+                if (gp.slitWidth() == SlitWidth.ACQUISITION ||
+                    gp.slitWidth() == SlitWidth.PUPIL_VIEWER ||
+                    gp.slitWidth() == SlitWidth.PINHOLE_1 ||
+                    gp.slitWidth() == SlitWidth.PINHOLE_3)
+                    throw new RuntimeException("This configuration is not supported by the ITC:" +
+                            " focal plane unit should be a slit in spectroscopy mode.");
+            }
+            if (_mode instanceof Imaging) {
+                if (gp.slitWidth() != SlitWidth.ACQUISITION)
+                    throw new RuntimeException("This configuration is not supported by the ITC: " +
+                    " focal plane unit should be \"acquisition\" in imaging mode.");
+            }
         }
 
         _centralWavelength = correctedCentralWavelength(); // correct central wavelength if cross dispersion is used
@@ -111,29 +131,43 @@ public final class Gnirs extends Instrument implements SpectroscopyInstrument {
             throw new RuntimeException("Central wavelength must be between 1.03um and 6.0um.");
         }
 
+
         if (gp.altair().isDefined()) {
             if ((gp.altair().get().guideStarSeparation() < 0 || gp.altair().get().guideStarSeparation() > 25))
                 throw new RuntimeException("Altair Guide star distance must be between 0 and 25 arcsecs for GNIRS.\n");
         }
 
-        //set read noise by exporsure time
-        if (odp.exposureTime() <= 1.0) {
-            _wellDepth      = DEEP_WELL;
+
+        if (gp.wellDepth().isEmpty()) {
+            //set read noise by exporsure time for the web-ITC
+            if (odp.exposureTime() <= 1.0) {
+                _wellDepth = DEEP_WELL;
+                _linearityLimit = DEEP_WELL_LINEARTY_LIMIT;
+            } else {
+                _wellDepth = SHALLOW_WELL;
+                _linearityLimit = SHALLOW_WELL_LINEARITY_LIMIT;
+            }
+        } else if (gp.wellDepth().get().equals(GNIRSParams.WellDepth.DEEP)) {
+            _wellDepth = DEEP_WELL;
             _linearityLimit = DEEP_WELL_LINEARTY_LIMIT;
         } else {
-            _wellDepth      = SHALLOW_WELL;
+            _wellDepth = SHALLOW_WELL;
             _linearityLimit = SHALLOW_WELL_LINEARITY_LIMIT;
         }
 
-        //Select filter depending on if Cross dispersion is used.
+        //Select filter depending on mode and if Cross dispersion is used.
         if (_mode instanceof Imaging) {
             _Filter = Filter.fromFile(getPrefix(), getFilter().name(), getDirectory() + "/");
         } else if (_XDisp) {
-            _filterUsed = "XD";
+            _filterUsed = "X_DISPERSED";
             _Filter = Filter.fromFile(getPrefix(), _filterUsed, getDirectory() + "/");
+        } else if (gp.filter().isDefined()) {
+            // don't apply automatic filter selection if filter is defined (OT-ITC case)
+            _Filter = Filter.fromFile(getPrefix(), getFilter().name(), getDirectory() + "/");
+            _filterUsed = getFilter().name();
         } else {
             //Use GnirsOrderSelecter to decide which filter to put in
-            _filterUsed = "order";
+            _filterUsed = "ORDER_";
             _Filter = Filter.fromFile(getPrefix(), _filterUsed + GnirsOrderSelector.getOrder(_centralWavelength), getDirectory() + "/");
         }
         addComponent(_Filter);
@@ -152,8 +186,14 @@ public final class Gnirs extends Instrument implements SpectroscopyInstrument {
         final FixedOptics _fixedOptics = new FixedOptics(getDirectory() + "/", getPrefix());
         addComponent(_fixedOptics);
 
-        _camera = CameraFactory.camera(params.pixelScale(), _centralWavelength, getDirectory());
-        addComponent(_camera);
+
+        if (gp.camera().isEmpty()) {
+            _camera = CameraFactory.camera(params.pixelScale(), _centralWavelength, getDirectory());
+            addComponent(_camera);
+        } else {
+            _camera = new TransmissionElement(getDirectory() + "/" + getPrefix() + gp.camera().get().name() + Instrument.getSuffix());
+            addComponent(_camera);
+        }
 
         _detector = new Detector(getDirectory() + "/", getPrefix(), "aladdin", "1K x 1K ALADDIN III InSb CCD");
         _detector.setDetectorPixels(DETECTOR_PIXELS);
@@ -175,10 +215,10 @@ public final class Gnirs extends Instrument implements SpectroscopyInstrument {
             if (!_filterUsed.equals("none"))
                 if ((_Filter.getStart() >= _gratingOptics.getEnd()) ||
                         (_Filter.getEnd() <= _gratingOptics.getStart())) {
-                    throw new RuntimeException("The " + _filterUsed + " filter" +
+                    throw new RuntimeException("The " + gp.filter().get().displayValue() + " filter" +
                             " and the " + getGrating() +
                             " do not overlap with the requested wavelength.\n" +
-                            " Please select a different filter, grating or wavelength.");
+                            " Please select a different filter, grating or wavelength." + "\n\n");
                 }
         }
         addComponent(_detector);
