@@ -33,7 +33,7 @@ object BaselineGnirs {
       CrossDispersed.NO,
       2.4.microns,
       SlitWidth.SW_3,
-      Some(Camera.LONG_BLUE),
+      None,
       None,
       Fixture.NoAltair),
 
@@ -46,7 +46,7 @@ object BaselineGnirs {
       2.6.microns,
       SlitWidth.SW_6,
       None,
-      Some(WellDepth.DEEP),
+      None,
       Fixture.NoAltair),
 
     new GnirsParameters(
@@ -57,8 +57,8 @@ object BaselineGnirs {
       CrossDispersed.NO,
       2.6.microns,
       SlitWidth.SW_8,
-      Some(Camera.LONG_RED),
-      Some(WellDepth.SHALLOW),
+      None,
+      None,
       Fixture.NoAltair)
 
   ))
@@ -84,7 +84,7 @@ object BaselineGnirs {
       CrossDispersed.NO,
       2.4.microns,
       SlitWidth.ACQUISITION,
-      Some(Camera.LONG_RED),
+      None,
       None,
       Fixture.AltairNgs),
 
@@ -97,7 +97,7 @@ object BaselineGnirs {
       2.4.microns,
       SlitWidth.ACQUISITION,
       None,
-      Some(WellDepth.SHALLOW),
+      None,
       Fixture.AltairLgs),
 
 
@@ -110,8 +110,8 @@ object BaselineGnirs {
       CrossDispersed.NO,
       2.4.microns,
       SlitWidth.ACQUISITION,
-      Some(Camera.SHORT_BLUE),
-      Some(WellDepth.DEEP),
+      None,
+      None,
       Fixture.AltairNgsFL),
 
     new GnirsParameters(
@@ -134,8 +134,8 @@ object BaselineGnirs {
       CrossDispersed.NO,
       2.4.microns,
       SlitWidth.ACQUISITION,
-      Some(Camera.LONG_BLUE),
-      Some(WellDepth.SHALLOW),
+      None,
+      None,
       Fixture.AltairLgs)
   ))
 
