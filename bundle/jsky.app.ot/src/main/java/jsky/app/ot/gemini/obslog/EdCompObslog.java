@@ -13,7 +13,6 @@ import java.beans.PropertyChangeListener;
 import java.util.*;
 import java.util.logging.Logger;
 
-
 /**
  * An ObsLog editor component.
  * @author rnorris (then hacked by swalker)
@@ -21,33 +20,29 @@ import java.util.logging.Logger;
 public class EdCompObslog extends OtItemEditor<ISPObsQaLog, ObsQaLog> {
     private static final Logger LOG = Logger.getLogger(EdCompObslog.class.getName());
 
-	private final ObslogGUI gui = new ObslogGUI();
-	private ObsQaLog currentLog;
-	private Map<DatasetLabel,String> originalComments; // original comments, so we can tell what is dirty
+    private final ObslogGUI gui = new ObslogGUI();
+    private ObsQaLog currentLog;
+    private Map<DatasetLabel,String> originalComments; // original comments, so we can tell what is dirty
     private ISPNode prev;
 
     // Watches for changes to the ObsExecLog so that it can update the GUI,
     // showing the latest datasets that have arrived, etc.
-    private final PropertyChangeListener execLogListener = new PropertyChangeListener() {
-        @Override public void propertyChange(final PropertyChangeEvent evt) {
-            if (SPUtil.getDataObjectPropertyName().equals(evt.getPropertyName())) {
-                SwingUtilities.invokeLater(new Runnable() {
-                    @Override public void run() {
-                        final ISPObsExecLog execLogShell = (ISPObsExecLog) evt.getSource();
-                        gui.setup(new ObsLog(getNode(), getDataObject(), execLogShell, (ObsExecLog) evt.getNewValue()));
-                    }
-                });
-            }
+    private final PropertyChangeListener execLogListener = evt -> {
+        if (SPUtil.getDataObjectPropertyName().equals(evt.getPropertyName())) {
+            SwingUtilities.invokeLater(() -> {
+                final ISPObsExecLog execLogShell = (ISPObsExecLog) evt.getSource();
+                gui.setup(new ObsLog(getNode(), getDataObject(), execLogShell, (ObsExecLog) evt.getNewValue()));
+            });
         }
     };
 
-	protected void updateEnabledState(boolean enabled) {
-		// Do nothing. I will control my own enabled state, thank you.
-	}
+    protected void updateEnabledState(boolean enabled) {
+        // Do nothing. I will control my own enabled state, thank you.
+    }
 
-	public JPanel getWindow() {
-		return gui;
-	}
+    public JPanel getWindow() {
+        return gui;
+    }
 
     // Forwards events as property change events so that updates are stored
     // in the ISPObsQaLog shell.
@@ -100,8 +95,8 @@ public class EdCompObslog extends OtItemEditor<ISPObsQaLog, ObsQaLog> {
                 for (DatasetLabel lab : labels) {
                     final String currentComment  = currentLog.getComment(lab);
                     final String incomingComment = incomingLog.getComment(lab);
-			        final String resolved        = resolveComment(originalComments.get(lab), currentComment, incomingComment);
-			        incomingLog.setComment(lab, resolved);
+                    final String resolved        = resolveComment(originalComments.get(lab), currentComment, incomingComment);
+                    incomingLog.setComment(lab, resolved);
                 }
             }
 
@@ -122,20 +117,20 @@ public class EdCompObslog extends OtItemEditor<ISPObsQaLog, ObsQaLog> {
         }
     }
 
-    private static final Map<DatasetLabel, String> comments(ObsQaLog qa, Collection<DatasetLabel> labels) {
-        final Map<DatasetLabel,String> res = new HashMap<DatasetLabel, String>(Math.round(labels.size() / 0.75f));
+    private static Map<DatasetLabel, String> comments(ObsQaLog qa, Collection<DatasetLabel> labels) {
+        final Map<DatasetLabel,String> res = new HashMap<>(Math.round(labels.size() / 0.75f));
         for (DatasetLabel lab : labels) res.put(lab, qa.getComment(lab));
         return res;
     }
 
-	private String resolveComment(String original, String current, String incoming) {
-		// Originally this was kind of a complex set of rules, but it turns out
-		// that a simple rule works fine. Just use whichever one is newer. That
-		// is, if we have unsaved edits, keep them. Otherwise use the incoming value.
-		return equiv(original, current) ? incoming : current;
-	}
+    private String resolveComment(String original, String current, String incoming) {
+        // Originally this was kind of a complex set of rules, but it turns out
+        // that a simple rule works fine. Just use whichever one is newer. That
+        // is, if we have unsaved edits, keep them. Otherwise use the incoming value.
+        return equiv(original, current) ? incoming : current;
+    }
 
-	private boolean equiv(Object a, Object b) {
-		return (a == null && b == null) || (a != null && a.equals(b));
-	}
+    private boolean equiv(Object a, Object b) {
+        return (a == null && b == null) || (a != null && a.equals(b));
+    }
 }

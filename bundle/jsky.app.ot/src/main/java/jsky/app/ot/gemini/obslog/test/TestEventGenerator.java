@@ -22,62 +22,59 @@ public final class TestEventGenerator implements Runnable {
         this.obsId = obsId;
     }
 
-	private void addEvent(final ObsExecEvent event) {
-		try {
+    private void addEvent(final ObsExecEvent event) {
+        try {
             System.out.println("Adding event: "+ event);
 
-			// Get a copy of the data object.
-            ObsLog.update(odb, obsId, new ObsLog.UpdateOp() {
-                @Override public void apply(ISPObservation obs, ObsLog log) {
-                    // Now add the event and update the UI.
-                    log.getExecRecord().addEvent(event, new DefaultConfig());
-                }
+            // Get a copy of the data object.
+            ObsLog.update(odb, obsId, (obs, log) -> {
+                // Now add the event and update the UI.
+                log.getExecRecord().addEvent(event, new DefaultConfig());
             });
 
-			// Sleep a while so it's not totally nuts
-			Thread.sleep(2000);
+            // Sleep a while so it's not totally nuts
+            Thread.sleep(2000);
 
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.exit(-1);
-		}
-	}
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(-1);
+        }
+    }
 
     public void run() {
-		int index = 0;
+        int index = 0;
 
-		// Now add some visits, sequences, and data sets.
-		addEvent(new StartVisitEvent(System.currentTimeMillis(), obsId));
-		addEvent(new StartSequenceEvent(System.currentTimeMillis(), obsId));
+        // Now add some visits, sequences, and data sets.
+        addEvent(new StartVisitEvent(System.currentTimeMillis(), obsId));
+        addEvent(new StartSequenceEvent(System.currentTimeMillis(), obsId));
 
-		// Add a good one.
-		{
-			final Dataset dataset = new Dataset(new DatasetLabel(obsId, ++index), "GOOD-" + index, System.currentTimeMillis());
-			addEvent(new StartDatasetEvent(System.currentTimeMillis(), dataset));
-			addEvent(new EndDatasetEvent(System.currentTimeMillis(), dataset.getLabel()));
-		}
+        // Add a good one.
+        {
+            final Dataset dataset = new Dataset(new DatasetLabel(obsId, ++index), "GOOD-" + index, System.currentTimeMillis());
+            addEvent(new StartDatasetEvent(System.currentTimeMillis(), dataset));
+            addEvent(new EndDatasetEvent(System.currentTimeMillis(), dataset.getLabel()));
+        }
 
-		// Add a bad one.
-		{
-			final Dataset dataset = new Dataset(new DatasetLabel(obsId, ++index), "BAD-" + index, System.currentTimeMillis());
-			addEvent(new StartDatasetEvent(System.currentTimeMillis(), dataset));
-//			addEvent(new EndDatasetEvent(System.currentTimeMillis(), dataset.getLabel()));
-		}
+        // Add a bad one.
+        {
+            final Dataset dataset = new Dataset(new DatasetLabel(obsId, ++index), "BAD-" + index, System.currentTimeMillis());
+            addEvent(new StartDatasetEvent(System.currentTimeMillis(), dataset));
+        }
 
-		for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 10; i++) {
 
-		// And another good one
-		{
-			final Dataset dataset = new Dataset(new DatasetLabel(obsId, ++index), "GOOD-" + index, System.currentTimeMillis());
-			addEvent(new StartDatasetEvent(System.currentTimeMillis(), dataset));
-			addEvent(new EndDatasetEvent(System.currentTimeMillis(), dataset.getLabel()));
-		}
+        // And another good one
+        {
+            final Dataset dataset = new Dataset(new DatasetLabel(obsId, ++index), "GOOD-" + index, System.currentTimeMillis());
+            addEvent(new StartDatasetEvent(System.currentTimeMillis(), dataset));
+            addEvent(new EndDatasetEvent(System.currentTimeMillis(), dataset.getLabel()));
+        }
 
-		}
+        }
 
-		addEvent(new EndSequenceEvent(System.currentTimeMillis(), obsId));
-		addEvent(new EndVisitEvent(System.currentTimeMillis(), obsId));
-	}
+        addEvent(new EndSequenceEvent(System.currentTimeMillis(), obsId));
+        addEvent(new EndVisitEvent(System.currentTimeMillis(), obsId));
+    }
 
     public static void test(IDBDatabaseService odb, SPObservationID obsId) {
         final TestEventGenerator teg = new TestEventGenerator(odb, obsId);

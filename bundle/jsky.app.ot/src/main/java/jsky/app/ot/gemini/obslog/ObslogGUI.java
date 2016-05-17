@@ -33,7 +33,7 @@ import java.util.List;
  * GUI component for the ObsLog editor component.
  * @author rnorris
  */
-public class ObslogGUI extends JPanel {
+class ObslogGUI extends JPanel {
     private final DataAnalysisComponent tabDataAnalysis = new DataAnalysisComponent("Data Analysis");
     private final VisitsComponent tabVisits = new VisitsComponent("Visits");
     private final CommentsComponent tabComments = new CommentsComponent("Comments");
@@ -83,7 +83,7 @@ public class ObslogGUI extends JPanel {
     };
 
 
-    public ObslogGUI() {
+    ObslogGUI() {
         setLayout(new BorderLayout());
         add(new JTabbedPane() {{
             add(tabComments);
@@ -105,11 +105,11 @@ public class ObslogGUI extends JPanel {
 
     class AbstractDatasetRecordTable extends JTable implements ObslogTableModels {
 
-        protected AbstractDatasetRecordTable() {
+        AbstractDatasetRecordTable() {
             setAutoResizeMode(AUTO_RESIZE_OFF);
         }
 
-        protected AbstractDatasetRecordTable(TableModel model) {
+        AbstractDatasetRecordTable(TableModel model) {
             super(model);
             setAutoResizeMode(AUTO_RESIZE_OFF);
         }
@@ -180,12 +180,12 @@ public class ObslogGUI extends JPanel {
      * Information extracted from an ActiveRequest object for formatting and
      * display.
      */
-    static final class RequestDetail {
+    private static final class RequestDetail {
         final QaRequestStatus status;
         final Instant when;
         final int retry;
 
-        public RequestDetail(QaRequestStatus status, Instant when, int retry) {
+        RequestDetail(QaRequestStatus status, Instant when, int retry) {
             this.status = status;
             this.when   = when;
             this.retry  = retry;
@@ -206,7 +206,7 @@ public class ObslogGUI extends JPanel {
             return Objects.hash(status, when, retry);
         }
 
-        public String formatWhen() {
+        String formatWhen() {
             final ZoneId z = ZoneId.systemDefault();
             final OffsetDateTime    whenOff = OffsetDateTime.ofInstant(when, z);
             final OffsetDateTime    nowOff  = OffsetDateTime.ofInstant(Instant.now(), z);
@@ -220,17 +220,17 @@ public class ObslogGUI extends JPanel {
                     dateFmt.format(whenDate) + " " + timeString;
         }
 
-        public static RequestDetail fromActiveRequest(SummitState.ActiveRequest ar) {
+        static RequestDetail fromActiveRequest(SummitState.ActiveRequest ar) {
             return new RequestDetail(ar.status(), ar.when(), ar.retryCount());
         }
 
-        public static Optional<RequestDetail> fromSummitState(SummitState ss) {
+        static Optional<RequestDetail> fromSummitState(SummitState ss) {
             return (ss instanceof SummitState.ActiveRequest) ?
                 Optional.of(fromActiveRequest((SummitState.ActiveRequest) ss)) :
                 Optional.empty();
         }
 
-        public static Optional<RequestDetail> fromDatasetRecord(DatasetRecord dr) {
+        static Optional<RequestDetail> fromDatasetRecord(DatasetRecord dr) {
             return fromSummitState(dr.exec().summit());
         }
     }
@@ -241,13 +241,13 @@ public class ObslogGUI extends JPanel {
      *
      * @author rnorris
      */
-    class DataAnalysisComponent extends JPanel implements ObslogTableModels {
+    private class DataAnalysisComponent extends JPanel implements ObslogTableModels {
 
         private final DataAnalysisTable table = new DataAnalysisTable();
         private final JPanel editArea = new Editor();
         private Optional<Boolean> isStaffMode = Optional.empty();
 
-        public DataAnalysisComponent(String name) {
+        DataAnalysisComponent(String name) {
             super(new BorderLayout());
             setName(name);
         }
@@ -424,7 +424,7 @@ public class ObslogGUI extends JPanel {
             JPanel editArea;
             boolean adjusting = false;
 
-            public DataAnalysisTable() {
+            DataAnalysisTable() {
                 setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
             }
 
@@ -510,7 +510,7 @@ public class ObslogGUI extends JPanel {
      *
      * @author rnorris
      */
-    final class CommentsComponent extends JPanel implements ObslogTableModels, ListSelectionListener {
+    private final class CommentsComponent extends JPanel implements ObslogTableModels, ListSelectionListener {
 
         private final JTable table;
         private final JTextArea area = new JTextArea();
@@ -535,7 +535,7 @@ public class ObslogGUI extends JPanel {
             }
         };
 
-        public CommentsComponent(String name) {
+        CommentsComponent(String name) {
             super(new BorderLayout());
             setName(name);
 
@@ -594,7 +594,7 @@ public class ObslogGUI extends JPanel {
 
         private class CommentsTable extends AbstractDatasetRecordTable {
 
-            public CommentsTable() {
+            CommentsTable() {
                 super();
                 setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
                 getSelectionModel().addListSelectionListener(this);
@@ -667,12 +667,12 @@ public class ObslogGUI extends JPanel {
      *
      * @author rnorris
      */
-    final class VisitsComponent extends JScrollPane implements ObslogTableModels {
+    private final class VisitsComponent extends JScrollPane implements ObslogTableModels {
 
         private final DateFormat OBSLOG_DATE_FORMAT = ObslogGUI.OBSLOG_DATE_FORMAT;
         private final Box clientArea;
 
-        public VisitsComponent(String name) {
+        VisitsComponent(String name) {
             super(new Box(BoxLayout.Y_AXIS));
             clientArea = (Box) getViewport().getView();
             clientArea.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 10));
@@ -767,7 +767,7 @@ public class ObslogGUI extends JPanel {
 
         private class DatasetRecordTable extends AbstractDatasetRecordTable {
 
-            public DatasetRecordTable(TableModel model) {
+            DatasetRecordTable(TableModel model) {
                 super(model);
                 setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
             }

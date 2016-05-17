@@ -36,18 +36,18 @@ public interface ObslogTableModels {
         /**
          * The {@link edu.gemini.spModel.dataset.DatasetExecRecord} instances known to this model.
          */
-        protected final ObsLog obsLog;
-        protected final List<DatasetRecord> records;
+        final ObsLog obsLog;
+        final List<DatasetRecord> records;
 
         /**
          * Constructs a table model that keeps an array of {@link edu.gemini.spModel.dataset.DatasetExecRecord} instances in
          * protected member {@link #records} and registers for change events on each.
          */
-        protected AbstractDatasetRecordTableModel(ObsLog obsLog) {
+        AbstractDatasetRecordTableModel(ObsLog obsLog) {
             this(obsLog, obsLog.getAllDatasetRecords());
         }
 
-        protected AbstractDatasetRecordTableModel(ObsLog obsLog, List<DatasetRecord> records) {
+        AbstractDatasetRecordTableModel(ObsLog obsLog, List<DatasetRecord> records) {
             this.obsLog  = obsLog;
             this.records = new ArrayList<>(records);
 
@@ -70,7 +70,7 @@ public interface ObslogTableModels {
             });
         }
 
-        public boolean isUnavailable(int row) {
+        boolean isUnavailable(int row) {
             final DatasetRecord rec = records.get(row);
             return !obsLog.getExecRecord().inSummitStorage(rec.label());
         }
@@ -103,20 +103,20 @@ public interface ObslogTableModels {
      */
     class DatasetAnalysisTableModel extends AbstractDatasetRecordTableModel {
 
-        public static final int COL_LABEL    = 0;
-        public static final int COL_FILENAME = 1;
-        public static final int COL_QA_STATE = 2;
-        public static final int COL_STATUS   = 3;
+        static final int COL_LABEL    = 0;
+        static final int COL_FILENAME = 1;
+        static final int COL_QA_STATE = 2;
+        static final int COL_STATUS   = 3;
 
         private static final String[] COL_NAMES = new String[]{
                 "Label", "Filename", "QA State", "Dataset Status"
         };
 
-        public DatasetAnalysisTableModel(ObsLog log) {
+        DatasetAnalysisTableModel(ObsLog log) {
             super(log);
         }
 
-        public DatasetAnalysisTableModel(ObsLog log, List<DatasetRecord> records) {
+        DatasetAnalysisTableModel(ObsLog log, List<DatasetRecord> records) {
             super(log, records);
         }
 
@@ -128,7 +128,7 @@ public interface ObslogTableModels {
             return COL_NAMES[i];
         }
 
-        public DatasetRecord getRecordAt(int row) {
+        DatasetRecord getRecordAt(int row) {
             return records.get(row);
         }
 
@@ -186,18 +186,17 @@ public interface ObslogTableModels {
      */
     class CommentTableModel extends AbstractDatasetRecordTableModel {
 
-        public static final int COL_LABEL = 0;
-        public static final int COL_FILENAME = 1;
-        public static final int COL_COMMENT = 2;
+        static final int COL_LABEL = 0;
+        static final int COL_FILENAME = 1;
+        static final int COL_COMMENT = 2;
 
         private static final String[] COL_NAMES = new String[]{
                 "Label", "Filename", "Comment",
         };
 
-        public CommentTableModel(ObsLog log) {
+        CommentTableModel(ObsLog log) {
             super(log);
         }
-
 
         public int getColumnCount() {
             return COL_NAMES.length;
@@ -253,8 +252,8 @@ public interface ObslogTableModels {
      */
     class ConfigTableModel extends AbstractTableModel {
 
-        public static final int COL_PARAMETER = 0;
-        public static final int COL_VALUE = 1;
+        static final int COL_PARAMETER = 0;
+        static final int COL_VALUE = 1;
 
         private static final String[] COL_NAMES = new String[]{
                 "Parameter", "Value",
@@ -262,7 +261,7 @@ public interface ObslogTableModels {
 
         private final Config config;
 
-        public ConfigTableModel(Config config) {
+        ConfigTableModel(Config config) {
             this.config = config;
         }
 
@@ -309,9 +308,9 @@ public interface ObslogTableModels {
      */
     class EventTableModel extends AbstractTableModel {
 
-        public static final int COL_TIME = 0;
-        public static final int COL_EVENT = 1;
-        public static final int COL_DATASET = 2;
+        static final int COL_TIME = 0;
+        static final int COL_EVENT = 1;
+        static final int COL_DATASET = 2;
 
         private static final String[] COL_NAMES = new String[]{
                 "Time", "Event", "Dataset",
@@ -319,7 +318,7 @@ public interface ObslogTableModels {
 
         private final ObsExecEvent[] events;
 
-        public EventTableModel(ObsExecEvent[] events) {
+        EventTableModel(ObsExecEvent[] events) {
             this.events = events;
         }
 
