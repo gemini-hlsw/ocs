@@ -407,6 +407,8 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         _w.guidingControls.manualGuideStarButton().peer().setVisible(GuideStarSupport.supportsManualGuideStarSelection(getNode()));
         updateGuiding();
         _agsPub.watch(ImOption.apply(getContextObservation()));
+
+        updateTargetDetails(newTOC.getTargetEnvironment());
     }
 
     // OtItemEditor
@@ -488,12 +490,15 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         _w.tag.setRenderer(tagRenderer);
         showTargetTag();
 
-        // Update target details
-        selectedTarget().foreach(t -> _w.detailEditor.edit(getObsContext(env), t, getNode()));
+        updateTargetDetails(env);
 
         // Set the status of the buttons and detail editors.
         updateUIForTarget();
         updateGuideStarAdders();
+    }
+
+    private void updateTargetDetails(TargetEnvironment env) {
+        selectedTarget().foreach(t -> _w.detailEditor.edit(getObsContext(env), t, getNode()));
     }
 
     private void showTargetTag() {
