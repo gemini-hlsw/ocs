@@ -53,12 +53,6 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
     }
 
     private void validateInputParameters() {
-       /* if (_gnirsParameters.altair().isDefined()) {
-            if (_obsDetailParameters.calculationMethod() instanceof Spectroscopy) {
-                throw new IllegalArgumentException(
-                        "Altair cannot currently be used with Spectroscopy mode in the ITC.  Please deselect either altair or spectroscopy and resubmit the form.");
-            }
-        } */
 
         // some general validations
         Validation.validate(instrument, _obsDetailParameters, _sdParameters);
@@ -90,8 +84,6 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
         // calculates: redshifted SED
         // output: redshifteed SED
 
-        //???final double pixel_size = instrument.getPixelSize();
-        //???double ap_diam = 0;
 
         // Calculate image quality
         final ImageQualityCalculatable IQcalc = ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _telescope, instrument);
@@ -113,22 +105,6 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
         final VisitableSampledSpectrum sky = calcSource.sky;
         final Option<VisitableSampledSpectrum> halo = calcSource.halo;
 
-        // Calculate the Fraction of source in the aperture
-        //final SourceFraction SFcalc = SourceFractionFactory.calculate(_sdParameters, _obsDetailParameters, instrument, IQcalc.getImageQuality());
-
-       /* final SourceFraction SFcalc;
-        if (altair.isDefined()) {
-            final double aoCorrImgQual = altair.get().getAOCorrectedFWHM();
-            if (_obsDetailParameters.isAutoAperture()) {
-                SFcalc = SourceFractionFactory.calculate(_sdParameters.isUniform(), _obsDetailParameters.isAutoAperture(), 1.18 * aoCorrImgQual, instrument.getPixelSize(), aoCorrImgQual);
-            } else {
-                SFcalc = SourceFractionFactory.calculate(_sdParameters, _obsDetailParameters, instrument, aoCorrImgQual);
-            }
-        } else {
-            // this will be the core for an altair source; unchanged for non altair.
-            SFcalc = SourceFractionFactory.calculate(_sdParameters, _obsDetailParameters, instrument, IQcalc.getImageQuality());
-        }
-        */
 
         // In this version we are bypassing morphology modules 3a-5a.
         // i.e. the output morphology is same as the input morphology.
@@ -140,11 +116,7 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
         final Option<SlitThroughput> haloThroughput = altair.isDefined()
                 ? Option.<SlitThroughput>apply(new SlitThroughput(_sdParameters, slit, IQcalc.getImageQuality()))
                 : Option.<SlitThroughput>empty();
-        /*
-        if (altair.isDefined()) {
-            SlitThroughput haloThroughput = new SlitThroughput(_sdParameters, slit, IQcalc.getImageQuality());
-        }
-        */
+
 
         // TODO: why, oh why?
         final double im_qual1 = _sdParameters.isUniform() ? 10000 : IQcalc.getImageQuality();

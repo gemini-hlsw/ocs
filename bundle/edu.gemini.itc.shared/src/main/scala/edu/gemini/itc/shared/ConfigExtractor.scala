@@ -103,14 +103,13 @@ object ConfigExtractor {
     import GNIRSParams._
 
     def extractDisperser: String \/ Option[GNIRSParams.Disperser] =
-  extract[GNIRSParams.Disperser](c, DisperserKey).map(Some(_))
-
+      extract[GNIRSParams.Disperser](c, DisperserKey).map(Some(_))
 
     def extractFilter: String \/ Option[GNIRSParams.Filter] =
-      extract[GNIRSParams.Filter](c, FilterKey).map(Some(_))
+      if (c.containsItem(FilterKey)) extract[GNIRSParams.Filter](c, FilterKey).map(Some(_)) else None.right
 
     def extractCamera: String \/ Option[GNIRSParams.Camera] =
-      extract[GNIRSParams.Camera](c, CameraKey).map(Some(_))
+       extract[GNIRSParams.Camera](c, CameraKey).map(Some(_))
 
     def extractWellDepth: String \/ Option[GNIRSParams.WellDepth] =
       extract[GNIRSParams.WellDepth](c, WellDepthKey).map(Some(_))
