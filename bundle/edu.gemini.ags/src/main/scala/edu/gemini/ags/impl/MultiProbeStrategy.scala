@@ -95,14 +95,12 @@ sealed case class MultiProbeStrategy(key: AgsStrategyKey, strategies: List[AgsSt
         case AgsStrategy.Assignment(gp: SingleProbeStrategy.VProbe, t) => gp.calculator(cCtx).calc(t.coordinates)
       }.sum
 
-      // We can use default value of 0.0 as the guide probes for which targets with magnitudes exist should be
-      // consistent across all selections.
       val brightestMag = sel.assignments.collect {
         case AgsStrategy.Assignment(_, t) if qualitiesByTarget.get(t).exists(_ === bestQuality) =>
           probeBands.extract(t).map(_.value)
       }.collect {
         case Some(v) => v
-      }.minimum.getOrElse(0.0)
+      }.minimum.getOrElse(Double.MaxValue)
 
       (qualityIdx, vignettingIdx, bestQuality, brightestMag)
     }
