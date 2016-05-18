@@ -1,16 +1,9 @@
-/*
- * ImageColorLUTs.java
- */
-
 package jsky.image;
-
-import jsky.util.Resources;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StreamTokenizer;
-import java.net.URL;
 
 /**
  * Defines a number of static, standard  color lookup
@@ -21,7 +14,6 @@ import java.net.URL;
  * @version $Revision: 4414 $
  * @author Allan Brighton
  */
-
 public class ImageColorLUTs {
 
     /** A standard ramp colormap. */
@@ -594,7 +586,7 @@ public class ImageColorLUTs {
     /** Holds the lookup table data. */
     private static float[][][] luts = new float[lutNames.length][][];
 
-    /** return the numbr of lookup tables */
+    /** return the number of lookup tables */
     public static int getNumLUTs() {
         return lutNames.length;
     }
@@ -610,7 +602,7 @@ public class ImageColorLUTs {
     }
 
     /** return the named lookup table */
-    public static float[][] getLUT(String name) {
+    static float[][] getLUT(String name) {
         if (name.equals("Real"))
             return real;
         if (name.equals("Ramp"))
@@ -641,7 +633,8 @@ public class ImageColorLUTs {
         String filename = "colormaps/" + name + ".lasc";
         BufferedReader in;
         try {
-            in = new BufferedReader(new InputStreamReader(Resources.getResourceAsStream(filename)));
+            // NB This may not work properly launching from IDEA
+            in = new BufferedReader(new InputStreamReader(ImageColorLUTs.class.getClassLoader().getResourceAsStream(filename)));
         } catch (Exception e) {
             throw new RuntimeException("Can't open colormap file: " + filename);
         }
