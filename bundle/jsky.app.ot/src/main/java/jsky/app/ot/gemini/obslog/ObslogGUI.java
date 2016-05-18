@@ -631,7 +631,9 @@ class ObslogGUI extends JPanel {
             // Recalculates the width of the columns comment
             void expandCommentColumn() {
                 TableColumn column = getColumnModel().getColumn(CommentTableModel.COL_COMMENT);
-                int preferredWidth = 0;
+                Component headerRenderer = getTableHeader().getDefaultRenderer()    .getTableCellRendererComponent(this, column.getHeaderValue(), false, false, -1, CommentTableModel.COL_COMMENT);
+
+                int preferredWidth = headerRenderer.getPreferredSize().width;
                 for (int i = 0; i < getModel().getRowCount(); i++) {
                     final TableCellRenderer cellRenderer = this.getCellRenderer(i, CommentTableModel.COL_COMMENT);
                     final Component c = table.prepareRenderer(cellRenderer, i, CommentTableModel.COL_COMMENT);
@@ -639,7 +641,8 @@ class ObslogGUI extends JPanel {
                     preferredWidth = Math.max(preferredWidth, width);
                 }
 
-                int gutter = 10;
+                // Give it a bit of space to breathe
+                int gutter = table.getFontMetrics(table.getFont()).charWidth('A');
                 preferredWidth += gutter;
 
                 // NB The order of these calls is critical to get the width correct
