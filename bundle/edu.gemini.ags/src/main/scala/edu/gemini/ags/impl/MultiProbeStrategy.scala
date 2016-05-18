@@ -65,20 +65,16 @@ sealed case class MultiProbeStrategy(key: AgsStrategyKey, strategies: List[AgsSt
       }).map(a => ctxFixed.withPositionAngle(ctx.getPositionAngle.add(a, Angle.Unit.DEGREES)))
     }
 
-    // We have a List[ObsContext], and we want to get a Future[Option[AgsStrategy.Selection]]
-    // We can take the List[ObsContext] to a Future[List[Option[AgsStrategy.Selection]]].
-    // Then we simply filter out the empty Options, and of the remaining, fold to get the best selection.
+    // For each ObsContext, perform the selection and return it as a future.
     val noStrategy: Option[AgsStrategy.Selection] = None
-    def ctxSelect(cCtx: ObsContext): Future[(ObsContext, Option[AgsStrategy.Selection])] = {
-      val lOfF = strategies.map(_.select(cCtx, mt))
-      Future.fold(lOfF)(cCtx -> noStrategy) {
+    def ctxSelect(cCtx: ObsContext): Future[(ObsContext, Option[AgsStrategy.Selection])] =
+      Future.fold(strategies.map(_.select(cCtx, mt)))(cCtx -> noStrategy) {
         case ((_, resOpt), curOpt) =>
           cCtx -> curOpt.map(cur => AgsStrategy.Selection(cur.posAngle, resOpt.fold(cur.assignments)(cur.assignments ++ _.assignments))).orElse(resOpt)
       }
-    }
 
-    // Now we convert to a future of lists of (ObsContext, Option[AgsStrategy.Selection]), and pick the best one,
-    // if one exists. This entails picking the best quality, followed by vignetting, followed by magnitude.
+    // Now we convert to a Future[List[(ObsContext, Option[AgsStrategy.Selection])]], and pick the best selection
+    // in the list if one exists. This entails picking the best quality, followed by vignetting, followed by magnitude.
     // To calculate this for multiple selections:
     // 1. Quality index is the quality converted to an int, and then summed over all targets. Lowest wins.
     // 2. Vignetting index is vignetting for each vignetting guide probe, summed across all. Lowest wins.
@@ -96,7 +92,7 @@ sealed case class MultiProbeStrategy(key: AgsStrategyKey, strategies: List[AgsSt
       }
 
       val vignettingIdx = sel.assignments.collect {
-        case AgsStrategy.Assignment(gp: SingleProbeStrategy.VProbe,t) => gp.calculator(cCtx).calc(t.coordinates)
+        case AgsStrategy.Assignment(gp: SingleProbeStrategy.VProbe, t) => gp.calculator(cCtx).calc(t.coordinates)
       }.sum
 
       // We can use default value of 0.0 as the guide probes for which targets with magnitudes exist should be
