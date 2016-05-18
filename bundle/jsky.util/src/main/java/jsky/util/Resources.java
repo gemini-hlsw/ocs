@@ -18,26 +18,19 @@ import javax.swing.ImageIcon;
 public final class Resources {
 
     /** Base path to resources. */
-    public static final String RESOURCE_PATH = "/resources";
+    private static final String RESOURCE_PATH = "/resources";
 
     /** Subpath to images, within the resources area. */
-    public static final String IMAGES_SUBPATH = "images";
-
-    /** Path to images, within the resources area. */
-    public static final String IMAGES_PATH = RESOURCE_PATH + "/" + IMAGES_SUBPATH + "/";
+    private static final String IMAGES_SUBPATH = "images";
 
     /** Subpath to config files, within the resources area. */
-    public static final String CONFIG_SUBPATH = "conf";
-
-    /** Path to config files, within the resources area. */
-    public static final String CONFIG_PATH = RESOURCE_PATH + "/" + CONFIG_SUBPATH + "/";
+    private static final String CONFIG_SUBPATH = "conf";
 
     // ImageCache provides a cache of already present icons.
     private static Map<String, Icon> _rmap = new HashMap<>();
 
     // Disallow instances
-    private Resources() {
-    }
+    private Resources() {}
 
     /**
      * Gets a URL associated with the given resource.
@@ -85,7 +78,6 @@ public final class Resources {
         // First check the map under the iconFileName
         Icon icon = _rmap.get(iconFileName);
         if (icon != null) {
-            //System.out.println("Found icon: " + iconFileName);
             return icon;
         }
 
