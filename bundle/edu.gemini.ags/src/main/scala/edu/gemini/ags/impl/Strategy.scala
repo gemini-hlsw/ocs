@@ -1,6 +1,7 @@
 package edu.gemini.ags.impl
 
 import edu.gemini.ags.api.AgsStrategy
+import edu.gemini.ags.impl.MultiProbeStrategy._
 import edu.gemini.catalog.votable.ConeSearchBackend
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.spModel.ags.AgsStrategyKey

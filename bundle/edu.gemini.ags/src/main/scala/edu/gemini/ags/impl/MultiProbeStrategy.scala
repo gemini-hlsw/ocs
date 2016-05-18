@@ -17,13 +17,10 @@ import scala.concurrent.Future
 import scalaz._
 import Scalaz._
 
-
 /**
- * Represents an AGS strategy consisting of multiple substrategies.
- *
- * Currently, this is only used to represent combinations of SingleProbeStrategies.
+ * Represents an AGS strategy consisting of multiple substrategies acting together.
  */
-class MultiProbeStrategy(val key: AgsStrategyKey, val strategies: List[AgsStrategy]) extends AgsStrategy {
+sealed case class MultiProbeStrategy(key: AgsStrategyKey, strategies: List[AgsStrategy]) extends AgsStrategy {
 
   override def magnitudes(ctx: ObsContext, mt: MagnitudeTable): List[(GuideProbe, AgsMagnitude.MagnitudeCalc)] =
     strategies.flatMap(_.magnitudes(ctx, mt))
@@ -71,13 +68,12 @@ class MultiProbeStrategy(val key: AgsStrategyKey, val strategies: List[AgsStrate
     // We have a List[ObsContext], and we want to get a Future[Option[AgsStrategy.Selection]]
     // We can take the List[ObsContext] to a Future[List[Option[AgsStrategy.Selection]]].
     // Then we simply filter out the empty Options, and of the remaining, fold to get the best selection.
-    // We MAY want to make a comparator for AgsStrategy.Selection. I'm just not sure the best way to do this.
-    // Assign values to GuideQualities, add together, pick the maximum, and then break ties by vignetting?
     val noStrategy: Option[AgsStrategy.Selection] = None
     def ctxSelect(cCtx: ObsContext): Future[(ObsContext, Option[AgsStrategy.Selection])] = {
-      val lOfF = strategies.map(_.select(cCtx, mt).map(opt => (ctx, opt)))
-      Future.fold(lOfF)(ctx -> noStrategy) { case ((_, resOpt), (_, curOpt)) =>
-        cCtx -> curOpt.map(cur => AgsStrategy.Selection(cur.posAngle, resOpt.fold(cur.assignments)(cur.assignments ++ _.assignments))).orElse(resOpt)
+      val lOfF = strategies.map(_.select(cCtx, mt))
+      Future.fold(lOfF)(cCtx -> noStrategy) {
+        case ((_, resOpt), curOpt) =>
+          cCtx -> curOpt.map(cur => AgsStrategy.Selection(cur.posAngle, resOpt.fold(cur.assignments)(cur.assignments ++ _.assignments))).orElse(resOpt)
       }
     }
 
@@ -132,5 +128,7 @@ class MultiProbeStrategy(val key: AgsStrategyKey, val strategies: List[AgsStrate
     strategies.flatMap(_.guideProbes).distinct
 }
 
-case object GmosNorthOiwfsAltair extends MultiProbeStrategy(AgsStrategyKey.GmosNorthAltairOiwfsKey, List(Strategy.GmosNorthOiwfs, Strategy.AltairAowfs))
-case object GmosNorthOiwfsPwfs1 extends MultiProbeStrategy(AgsStrategyKey.GmosNorthPwfs1OiwfsKey, List(Strategy.GmosNorthOiwfs, Strategy.Pwfs1North))
+object MultiProbeStrategy {
+  val GmosNorthOiwfsAltair = MultiProbeStrategy(AgsStrategyKey.GmosNorthAltairOiwfsKey, List(Strategy.GmosNorthOiwfs, Strategy.AltairAowfs))
+  val GmosNorthOiwfsPwfs1  = MultiProbeStrategy(AgsStrategyKey.GmosNorthPwfs1OiwfsKey, List(Strategy.GmosNorthOiwfs, Strategy.Pwfs1North))
+}
