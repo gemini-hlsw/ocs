@@ -73,11 +73,11 @@ sealed case class MultiProbeStrategy(key: AgsStrategyKey, strategies: List[AgsSt
           cCtx -> curOpt.map(cur => AgsStrategy.Selection(cur.posAngle, resOpt.fold(cur.assignments)(cur.assignments ++ _.assignments))).orElse(resOpt)
       }
 
-    // Now we convert to a Future[List[(ObsContext, Option[AgsStrategy.Selection])]], and pick the best selection
-    // in the list if one exists. This entails picking the best quality, followed by vignetting, followed by magnitude.
-    // To calculate this for multiple selections:
-    // 1. Quality index is the quality converted to an int, and then summed over all targets. Lowest wins.
-    // 2. Vignetting index is vignetting for each vignetting guide probe, summed across all. Lowest wins.
+    // We need a way to compare AGS selections to determine which is the best across the list of generated
+    // ObsContexts. We assign a 4-tuple to each selection in such a way that the minimum of the 4-tuples represents
+    // the best selection.
+    // 1. Quality index is the quality converted to an int, and then summed over all targets.
+    // 2. Vignetting index is vignetting for each vignetting guide probe, summed across all.
     // 3. Best quality across all targets. Used because for magnitude, we only want best quality class in comparison.
     // 4. Magnitude is magnitude of the brightest star in the assignment in the best quality class.
     def selValue(cCtx: ObsContext, sel: AgsStrategy.Selection): (Int, Double, Int, Double) = {
@@ -107,7 +107,7 @@ sealed case class MultiProbeStrategy(key: AgsStrategyKey, strategies: List[AgsSt
       (qualityIdx, vignettingIdx, bestQuality, brightestMag)
     }
 
-    // Turn into a Future of List[(ObsContext, Option[AgsStrategy.Selection]), collect the results that have
+    // Turn into a Future[List[(ObsContext, Option[AgsStrategy.Selection])]], collect the results that have
     // a defined selection while calculating their value, and then return the one (if one exists) of minimum value.
     Future.sequence(ctxToFixedList.map(ctxSelect))
       .map(_.collect { case (cCtx, Some(sel)) => (cCtx, sel, selValue(cCtx, sel)) }.minimumBy(_._3).map(_._2))
