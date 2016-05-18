@@ -710,6 +710,11 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
         dragSource = new TelescopePosTableDragSource(this);
     }
 
+    @Override public void setEnabled(boolean enabled) {
+        // Don't disable, the rest of the controls get disabled
+        // but this table should always be enabled to let the user select targets
+    }
+
     @Override public void telescopePosUpdate(final WatchablePos tp) {
         final int index = getSelectedRow();
         _resetTable(_env);
