@@ -393,7 +393,7 @@ def odbtest(version: Version) = AppConfig(
   props = Map(
     "edu.gemini.auxfile.root"                    -> "/home/software/ugemini/auxfile",
     "edu.gemini.dbTools.archive.directory"       -> "/home/software/ugemini/spdb/spdb.archive",
-    "edu.gemini.dbTools.tcs.ephemeris.directory" -> "/home/software/ugemini/ephemeris",
+    "edu.gemini.dbTools.tcs.ephemeris.directory" -> "/gemsoft/var/ephemerides",
     "edu.gemini.smartgcal.svnRootUrl"            -> "http://source.gemini.edu/gcal/branches/development/calibrations",
     "edu.gemini.spdb.dir"                        -> "/home/software/ugemini/spdb/spdb.active",
     "edu.gemini.util.trpc.name"                  -> "Gemini ODB (Test)"
@@ -417,6 +417,7 @@ def odbproduction(version: Version) = AppConfig(
     "-XX:MaxPermSize=512M"
   ),
   props = Map(
+    "edu.gemini.dbTools.tcs.ephemeris.directory"       -> "/gemsoft/var/ephemerides",
     "edu.gemini.smartgcal.host"                        -> "gsodb",
     "edu.gemini.smartgcal.svnRootUrl"                  -> "http://source.gemini.edu/gcal/trunk/calibrations",
     "edu.gemini.services.telescope.schedule.id.north"  -> "00h6i49qldh5qrteote4nfhldo@group.calendar.google.com",
