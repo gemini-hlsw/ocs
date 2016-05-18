@@ -2,6 +2,7 @@ package jsky.app.ot.gemini.editor.targetComponent;
 
 import edu.gemini.shared.gui.ButtonFlattener;
 import jsky.app.ot.gemini.editor.targetComponent.details2.TargetDetailPanel;
+import jsky.app.ot.gemini.parallacticangle.ParallacticAngleControls;
 import jsky.app.ot.util.Resources;
 import jsky.util.gui.TextBoxWidget;
 
@@ -16,6 +17,7 @@ class TelescopeForm extends JPanel {
 
     final GuidingControls guidingControls = new GuidingControls();
     final TargetDetailPanel detailEditor = new TargetDetailPanel();
+    final ParallacticAngleControls schedulingBlock = new ParallacticAngleControls(false);
 
     final JMenu newMenu = new JMenu() {{
         setToolTipText("Create a new target or guide group");
@@ -152,16 +154,35 @@ class TelescopeForm extends JPanel {
             weightx = 1000;
         }});
 
-        add(detailEditor, new GridBagConstraints() {{
+        final JPanel schedulingPanel = new JPanel() {{
+            setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createEmptyBorder(0, 2, 0, 2),
+                    BorderFactory.createTitledBorder("Scheduling")
+            ));
+            setLayout(new BorderLayout());
+            schedulingBlock.peer().setBorder(
+                    BorderFactory.createEmptyBorder(0, 5, 0, 0)
+            );
+            add(schedulingBlock.peer(), BorderLayout.WEST);
+        }};
+
+        add(schedulingPanel, new GridBagConstraints() {{
             gridx = 0;
             gridy = 1;
             fill = HORIZONTAL;
             insets = new Insets(5, 0, 5, 0);
         }});
 
-        add(guideGroupPanel, new GridBagConstraints() {{
+        add(detailEditor, new GridBagConstraints() {{
             gridx = 0;
             gridy = 2;
+            fill = HORIZONTAL;
+            insets = new Insets(5, 0, 5, 0);
+        }});
+
+        add(guideGroupPanel, new GridBagConstraints() {{
+            gridx = 0;
+            gridy = 3;
             fill = HORIZONTAL;
             insets = new Insets(5, 0, 5, 0);
         }});
