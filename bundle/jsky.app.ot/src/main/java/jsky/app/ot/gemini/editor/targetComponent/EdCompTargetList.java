@@ -4,6 +4,7 @@ import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.pot.sp.SPNodeKey;
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.core.Magnitude;
+import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.core.Target;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.guide.GuideProbeUtil;
@@ -30,6 +31,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.text.NumberFormat;
 import java.util.*;
 import java.util.List;
 
@@ -407,6 +409,17 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         _w.guidingControls.manualGuideStarButton().peer().setVisible(GuideStarSupport.supportsManualGuideStarSelection(getNode()));
         updateGuiding();
         _agsPub.watch(ImOption.apply(getContextObservation()));
+
+        final Option<Site> site = ObsContext.getSiteFromObservation(getContextObservation());
+        final NumberFormat numberFormatter = NumberFormat.getInstance(Locale.US);
+        numberFormatter.setMaximumFractionDigits(2);
+        numberFormatter.setMaximumIntegerDigits(3);
+        _w.schedulingBlock.init(this, site, numberFormatter, new Runnable() {
+            public void run() {
+                final TargetEnvironment env = getDataObject().getTargetEnvironment();
+                updateTargetDetails(env);
+            }
+        });
 
         updateTargetDetails(newTOC.getTargetEnvironment());
     }

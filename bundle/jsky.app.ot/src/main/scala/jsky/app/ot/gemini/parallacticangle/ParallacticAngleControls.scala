@@ -25,9 +25,13 @@ import scala.swing.event.{ButtonClicked, Event}
  * @param isPaUi should be true for PA controls, false for Scheduling Block controls
  */
 class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publisher {
+
+  val Nop = new Runnable { def run = () }
+
   private var editor:    Option[OtItemEditor[_, _]] = None
   private var site:      Option[Site]   = None
   private var formatter: Option[Format] = None
+  private var callback:  Runnable = Nop
 
   object ui {
     object relativeTimeMenu extends Menu("Set To:") {
@@ -119,20 +123,25 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
 
   /**
    * Initialize the UI and set the instrument editor to allow for the parallactic angle updates.
+   * The `Runnable` is a callback that will be invoked on the EDT after the target is updated.
    */
-  def init(e: OtItemEditor[_, _], s: Option[Site], f: Format): Unit = {
+  def init(e: OtItemEditor[_, _], s: Option[Site], f: Format, c: Runnable): Unit = {
     editor    = Some(e)
     site      = s
     formatter = Some(f)
+    callback  = c
     ui.relativeTimeMenu.rebuild()
     resetComponents()
   }
 
   def init(e: OtItemEditor[_, _], s: Site, f: Format): Unit =
-    init(e, Some(s), f)
+    init(e, Some(s), f, Nop)
 
   def init(e: OtItemEditor[_, _], s: JOption[Site], f: Format): Unit =
-    init(e, s.asScalaOpt, f)
+    init(e, s.asScalaOpt, f, Nop)
+
+  def init(e: OtItemEditor[_, _], s: JOption[Site], f: Format, callback: Runnable): Unit =
+    init(e, s.asScalaOpt, f, callback)
 
   /** Current scheduling block, if any. */
   private def schedulingBlock: Option[SchedulingBlock] =
@@ -151,6 +160,7 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
       val spObs = ispObs.getDataObject.asInstanceOf[SPObservation]
       spObs.setSchedulingBlock(ImOption.apply(sb))
       ispObs.setDataObject(spObs)
+      callback.run()
       resetComponents()
     }
 
