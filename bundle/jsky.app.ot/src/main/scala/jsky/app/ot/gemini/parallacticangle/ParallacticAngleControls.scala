@@ -160,7 +160,7 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
       val spObs = ispObs.getDataObject.asInstanceOf[SPObservation]
       spObs.setSchedulingBlock(ImOption.apply(sb))
       ispObs.setDataObject(spObs)
-      Swing.onEDT(callback.run())
+      callback.run()
       resetComponents()
     }
 
