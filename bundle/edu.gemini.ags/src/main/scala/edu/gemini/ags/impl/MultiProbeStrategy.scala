@@ -70,7 +70,7 @@ sealed case class MultiProbeStrategy(key: AgsStrategyKey, strategies: List[AgsSt
     def ctxSelect(cCtx: ObsContext): Future[(ObsContext, Option[AgsStrategy.Selection])] =
       Future.fold(strategies.map(_.select(cCtx, mt)))(cCtx -> noStrategy) {
         case ((_, resOpt), curOpt) =>
-          cCtx -> curOpt.map(cur => AgsStrategy.Selection(cur.posAngle, resOpt.fold(cur.assignments)(cur.assignments ++ _.assignments))).orElse(resOpt)
+          cCtx -> curOpt.map(cur => AgsStrategy.Selection(cur.posAngle, resOpt.fold(cur.assignments)(cur.assignments ++ _.assignments)))
       }
 
     // We need a way to compare AGS selections to determine which is the best across the list of generated
