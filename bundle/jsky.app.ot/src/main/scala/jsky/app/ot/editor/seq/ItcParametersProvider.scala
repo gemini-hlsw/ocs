@@ -10,6 +10,8 @@ import edu.gemini.spModel.obscomp.SPInstObsComp
 import edu.gemini.spModel.target.env.TargetEnvironment
 import edu.gemini.spModel.telescope.IssPort
 
+import edu.gemini.shared.util.immutable.{Option => GOption}
+
 import scalaz._
 import Scalaz._
 
@@ -19,6 +21,7 @@ import Scalaz._
 trait ItcParametersProvider {
   def sequence: ConfigSequence
   def instrument: Option[SPInstObsComp]
+  def schedulingBlockStart: GOption[java.lang.Long]
   def observation: Option[ISPObservation]
   def analysisMethod: String \/ AnalysisMethod
   def conditions: String \/ ObservingConditions
@@ -36,6 +39,9 @@ object ItcParametersProvider {
 
     def instrument: Option[SPInstObsComp] =
       Option(owner.getContextInstrumentDataObject)
+
+    def schedulingBlockStart: GOption[java.lang.Long] =
+      owner.getSchedulingBlockStart
 
     def observation: Option[ISPObservation] =
       Option(owner.getContextObservation)

@@ -2,9 +2,12 @@ package jsky.app.ot.editor;
 
 import edu.gemini.pot.sp.*;
 import edu.gemini.shared.gui.calendar.JCalendarPopup;
+import edu.gemini.shared.util.immutable.ImOption;
+import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.data.ISPDataObject;
 import edu.gemini.spModel.gemini.obscomp.SPProgram;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
+import edu.gemini.spModel.obs.SPObservation;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
@@ -236,6 +239,10 @@ public abstract class OtItemEditor<N extends ISPNode, T extends ISPDataObject> {
     public ISPObservation getContextObservation() {
         final ISPNode n = getNode();
         return (n != null) ? n.getContextObservation() : null;
+    }
+
+    public Option<Long> getSchedulingBlockStart() {
+        return ImOption.apply(getContextObservation()).flatMap(o -> ((SPObservation) o.getDataObject()).getSchedulingBlockStart());
     }
 
     private Optional<ISPObsComponent> findObsComponent(final Predicate<ISPObsComponent> p) {

@@ -173,7 +173,7 @@ object GuidingFeedback {
 
   // GuidingFeedback.Row related to the given guide star itself.
   def guideStarAnalysis(ctx: ObsContext, mt: MagnitudeTable, gp: ValidatableGuideProbe, target: SPTarget): Option[Row] =
-    AgsRegistrar.currentStrategy(ctx).flatMap(_.analyze(ctx, mt, gp, target.toNewModel).map { a =>
+    AgsRegistrar.currentStrategy(ctx).flatMap(_.analyze(ctx, mt, gp, target.toSiderealTarget(ctx.getSchedulingBlockStart)).map { a =>
       val plo = mt(ctx, gp).flatMap(ProbeLimits(a.probeBands, ctx, _))
       Row(a, plo, includeProbeName = false)
     })

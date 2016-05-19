@@ -20,6 +20,7 @@ import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.env.{GuideProbeTargets, TargetEnvironment}
 import edu.gemini.spModel.telescope.IssPort
 import edu.gemini.spModel.core.WavelengthConversions._
+import edu.gemini.shared.util.immutable.{Option => GOption}
 
 import scala.reflect.ClassTag
 import scalaz.Scalaz._
@@ -56,15 +57,15 @@ object ConfigExtractor {
   private val AoFieldLensKey      = new ItemKey("adaptive optics:fieldLens")
   private val AoGuideStarTypeKey  = new ItemKey("adaptive optics:guideStarType")
 
-  def extractInstrumentDetails(instrument: SPInstObsComp, probe: GuideProbe, targetEnv: TargetEnvironment, c: Config, cond: ObservingConditions): String \/ InstrumentDetails =
+  def extractInstrumentDetails(instrument: SPInstObsComp, probe: GuideProbe, targetEnv: TargetEnvironment, when: GOption[java.lang.Long], c: Config, cond: ObservingConditions): String \/ InstrumentDetails =
     instrument.getType match {
       case INSTRUMENT_ACQCAM                      => extractAcqCam(c)
       case INSTRUMENT_FLAMINGOS2                  => extractF2(c)
-      case INSTRUMENT_GNIRS                       => extractGnirs(targetEnv, probe, c)
+      case INSTRUMENT_GNIRS                       => extractGnirs(targetEnv, probe, when, c)
       case INSTRUMENT_GMOS | INSTRUMENT_GMOSSOUTH => extractGmos(c)
       case INSTRUMENT_GSAOI                       => extractGsaoi(c, cond)
-      case INSTRUMENT_NIFS                        => extractNifs(targetEnv, probe, c)
-      case INSTRUMENT_NIRI                        => extractNiri(targetEnv, probe, c)
+      case INSTRUMENT_NIFS                        => extractNifs(targetEnv, probe, when, c)
+      case INSTRUMENT_NIRI                        => extractNiri(targetEnv, probe, when, c)
       case _                                      => "Instrument is not supported".left
     }
 
@@ -99,7 +100,7 @@ object ConfigExtractor {
     } yield Flamingos2Parameters(filter, grism, mask, customSlit, readMode)
   }
 
-  private def extractGnirs(targetEnv: TargetEnvironment, probe: GuideProbe, c: Config): String \/ GnirsParameters = {
+  private def extractGnirs(targetEnv: TargetEnvironment, probe: GuideProbe, when: GOption[java.lang.Long], c: Config): String \/ GnirsParameters = {
     import GNIRSParams._
 
     def extractDisperser: String \/ Option[GNIRSParams.Disperser] =
@@ -123,7 +124,7 @@ object ConfigExtractor {
       grating     <- extractDisperser
       camera      <- extractCamera
       wellDepth   <- extractWellDepth
-      altair      <- extractAltair             (targetEnv, probe, c)
+      altair      <- extractAltair             (targetEnv, probe, when, c)
       wavelen     <- extractObservingWavelength(c)
     } yield GnirsParameters(pixelScale, filter, grating, readMode, xDisp, wavelen, slitWidth, camera, wellDepth, altair)
   }
@@ -208,7 +209,7 @@ object ConfigExtractor {
     }
   }
 
-  private def extractNifs(targetEnv: TargetEnvironment, probe: GuideProbe, c: Config): String \/ NifsParameters = {
+  private def extractNifs(targetEnv: TargetEnvironment, probe: GuideProbe, when: GOption[java.lang.Long], c: Config): String \/ NifsParameters = {
 
     import NIFSParams._
 
@@ -216,14 +217,14 @@ object ConfigExtractor {
       filter      <- extract[Filter]        (c, FilterKey)
       grating     <- extract[Disperser]     (c, DisperserKey)
       readMode    <- extract[ReadMode]      (c, ReadModeKey)
-      altair      <- extractAltair          (targetEnv, probe, c)
+      altair      <- extractAltair          (targetEnv, probe, when, c)
       wavelen     <- extractObservingWavelength(c)
     } yield {
       NifsParameters(filter, grating, readMode, wavelen, altair)
     }
   }
 
-  private def extractNiri(targetEnv: TargetEnvironment, probe: GuideProbe, c: Config): String \/ NiriParameters = {
+  private def extractNiri(targetEnv: TargetEnvironment, probe: GuideProbe, when: GOption[java.lang.Long], c: Config): String \/ NiriParameters = {
     import Niri._
     for {
       filter      <- extract[Filter]        (c, FilterKey)
@@ -232,11 +233,11 @@ object ConfigExtractor {
       readMode    <- extract[ReadMode]      (c, ReadModeKey)
       wellDepth   <- extract[WellDepth]     (c, WellDepthKey)
       mask        <- extract[Mask]          (c, MaskKey)
-      altair      <- extractAltair          (targetEnv, probe, c)
+      altair      <- extractAltair          (targetEnv, probe, when, c)
     } yield NiriParameters(filter, grism, camera, readMode, wellDepth, mask, altair)
   }
 
-  private def extractAltair(targetEnv: TargetEnvironment, probe: GuideProbe, c: Config): String \/ Option[AltairParameters] = {
+  private def extractAltair(targetEnv: TargetEnvironment, probe: GuideProbe, when: GOption[java.lang.Long], c: Config): String \/ Option[AltairParameters] = {
     import AltairParams._
 
     def altairIsPresent =
@@ -266,7 +267,7 @@ object ConfigExtractor {
         fieldLens <- extract[FieldLens]     (c, AoFieldLensKey)
         wfsMode   <- extract[GuideStarType] (c, AoGuideStarTypeKey)
       } yield {
-        val separation = distance(targetEnv.getBase, guideStar)
+        val separation = distance(targetEnv.getBase, guideStar, when)
         Some(AltairParameters(separation, magnitude, fieldLens, wfsMode))
       }
     } else {
@@ -328,9 +329,9 @@ object ConfigExtractor {
   }
 
   // Calculate distance between two coordinates in arc seconds
-  private def distance(t0: SPTarget, t1: SPTarget) = {
-    val c0 = t0.toNewModel.coordinates
-    val c1 = t1.toNewModel.coordinates
+  private def distance(t0: SPTarget, t1: SPTarget, when: GOption[java.lang.Long]) = {
+    val c0 = t0.toSiderealTarget(when).coordinates
+    val c1 = t1.toSiderealTarget(when).coordinates
     Coordinates.difference(c0, c1).distance.toArcsecs
   }
 

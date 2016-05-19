@@ -7,7 +7,7 @@ import edu.gemini.spModel.gems.GemsGuideProbeGroup
 import edu.gemini.spModel.target.env.GuideGroup
 import edu.gemini.spModel.target.env.GuideProbeTargets
 import edu.gemini.shared.util.immutable.ScalaConverters._
-import edu.gemini.shared.util.immutable.{ None => JNone }
+import edu.gemini.shared.util.immutable.{None => JNone}
 import edu.gemini.pot.ModelConverters._
 
 import scala.annotation.tailrec
@@ -121,7 +121,7 @@ case class GemsGuideStars(pa: Angle, tiptiltGroup: GemsGuideProbeGroup, strehl: 
     val r = for {
       g <- gp
       p <- g.getPrimary.asScalaOpt
-      m <- RBandsList.extract(p.toNewModel)
+      m <- RBandsList.extract(p.toSiderealTarget(None))
     } yield m.value
     r.getOrElse(99.0)
   }

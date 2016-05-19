@@ -97,7 +97,7 @@ sealed class OiwfsPlotFeature(probe: OffsetValidatingGuideProbe, probeArm: Probe
           for {
             gpt   <- tpeCtx.targets.envOrDefault.getPrimaryGuideProbeTargets(probe).asScalaOpt
             gsOld <- gpt.getPrimary.asScalaOpt
-            gs     = gsOld.toNewModel.coordinates // TODO: when?
+            gs     = gsOld.toSiderealTarget(obsCtx.getSchedulingBlockStart).coordinates
             shape <- probeArm.geometry(obsCtx, gs, offset)
           } yield new Figure(shape, ProbeArmColor, Blocked, ProbeArmStroke)
         else None

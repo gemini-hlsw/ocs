@@ -196,7 +196,7 @@ trait GemsStrategy extends AgsStrategy {
       gemsGuideStars.map { x =>
         val assignments = x.guideGroup.getAll.asScalaList.flatMap(targets => {
           val guider = targets.getGuider
-          targets.getTargets.asScalaList.map(target => Assignment(guider, target.toNewModel))
+          targets.getTargets.asScalaList.map(target => Assignment(guider, target.toSiderealTarget(ctx.getSchedulingBlockStart)))
         })
         Selection(x.pa, assignments)
       }
