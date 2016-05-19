@@ -47,10 +47,10 @@ import jsky.util.gui.DialogUtil;
 public class ImageProcessor {
 
     /** The default number of X pixels to skip for histograms and statistics */
-    public static final int DEFAULT_X_PERIOD = 4;
+    static final int DEFAULT_X_PERIOD = 4;
 
     /** The default number of Y pixels to skip for histograms and statistics */
-    public static final int DEFAULT_Y_PERIOD = 4;
+    static final int DEFAULT_Y_PERIOD = 4;
 
     // The original source image
     private PlanarImage _sourceImage;
@@ -382,8 +382,6 @@ public class ImageProcessor {
             return;
         }
 
-        //System.out.println("XXX ImageProcessor: " + _name + ": updateImage()");
-
         // notify listeners of changes in the image
         fireChange(_imageChangeEvent);
     }
@@ -392,7 +390,7 @@ public class ImageProcessor {
      * Rescale the given image, if needed, using the given factor and offset and return the result.
      * The resulting image is converted to float, to avoid loosing data.
      */
-    protected PlanarImage rescaleImage(PlanarImage im) {
+    private PlanarImage rescaleImage(PlanarImage im) {
         if (_bscale != 1. || _bzero != 0.) {
             RenderingHints hints = ImageUtil.getSampleModelHint(im.getTileWidth(),
                                                                 im.getTileHeight(),
@@ -407,7 +405,7 @@ public class ImageProcessor {
      * Perform a transpose operation on the given image using the current
      * rotate, flipX and flipY settings and return the resulting image.
      */
-    protected PlanarImage setTrans(PlanarImage im) {
+    private PlanarImage setTrans(PlanarImage im) {
         if (_flipX)
             im = ImageOps.transpose(im, TransposeDescriptor.FLIP_HORIZONTAL);
         if (_flipY != _reverseY) {
@@ -437,7 +435,7 @@ public class ImageProcessor {
      *
      * @param region the region of interest in the image
      */
-    protected void setRegionOfInterest(Rectangle2D.Double region) {
+    private void setRegionOfInterest(Rectangle2D.Double region) {
         if (_roi != null && this._region != null && region.equals(this._region))
             return;
         this._region = region;
@@ -462,7 +460,7 @@ public class ImageProcessor {
      *
      * @param region the region of interest in the image
      */
-    protected void calculateImageStatistics(Rectangle2D.Double region) {
+    private void calculateImageStatistics(Rectangle2D.Double region) {
         // clip to image boundary to form the region of interest
         setRegionOfInterest(region);
 
@@ -508,7 +506,7 @@ public class ImageProcessor {
     /**
      * Copy the settings from the given ImageProcessor to this one.
      */
-    public void copySettings(ImageProcessor ip) {
+    private void copySettings(ImageProcessor ip) {
         // Note: this method tends to be called more often than needed, due to
         // change events being fired and propagated. Try to avoid unnecessary
         // calls to update() by checking if any of the publicly accessible settings
@@ -695,7 +693,6 @@ public class ImageProcessor {
 
             // set high cut value
             npixels = 0;
-            nprev = 0;
             for (int i = numBins - 1; i > 0; i--) {
                 nprev = npixels;
                 npixels += bins[i];
@@ -747,7 +744,7 @@ public class ImageProcessor {
     /**
      * Notify any listeners of a change in the image or cut levels.
      */
-    protected void fireChange(ImageChangeEvent changeEvent) {
+    private void fireChange(ImageChangeEvent changeEvent) {
         Object[] listeners = _listenerList.getListenerList();
         for (int i = listeners.length - 2; i >= 0; i -= 2) {
             if (listeners[i] == ChangeListener.class) {

@@ -32,7 +32,7 @@ import jsky.util.I18N;
  * @version $Revision: 4414 $
  * @author Allan Brighton
  */
-public class ImageColors extends JPanel {
+class ImageColors extends JPanel {
 
     // Used to access internationalized strings (see i18n/gui*.proprties)
     private static final I18N _I18N = I18N.getInstance(ImageColors.class);
@@ -47,31 +47,31 @@ public class ImageColors extends JPanel {
     protected ImageProcessor imageProcessor;
 
     /** Array of predefined colormap names */
-    String[] colormaps = ImageColorLUTs.getLUTNames();
+    private String[] colormaps = ImageColorLUTs.getLUTNames();
 
     /** List displaying colormap names */
-    JList<String> colormapList = new JList<>(colormaps);
+    private JList<String> colormapList = new JList<>(colormaps);
 
     /** Array of predefined intensity transfer table names */
-    String[] itts = ImageColorITTs.getITTNames();
+    private String[] itts = ImageColorITTs.getITTNames();
 
     /** List displaying itt names */
-    JList<String> intensityList = new JList<>(itts);
+    private JList<String> intensityList = new JList<>(itts);
 
     /** Linear Scale button */
-    protected JRadioButton linearScale = new JRadioButton(_I18N.getString("linearScale"));
+    private JRadioButton linearScale = new JRadioButton(_I18N.getString("linearScale"));
 
     /** Logarithmic Scale button */
-    JRadioButton logScale = new JRadioButton(_I18N.getString("logarithmic"));
+    private JRadioButton logScale = new JRadioButton(_I18N.getString("logarithmic"));
 
     /** Square Root Scale button */
-    JRadioButton sqrtScale = new JRadioButton(_I18N.getString("squareRoot"));
+    private JRadioButton sqrtScale = new JRadioButton(_I18N.getString("squareRoot"));
 
     /** Histogram Equalization button */
-    JRadioButton histeqScale = new JRadioButton(_I18N.getString("histogram"));
+    private JRadioButton histeqScale = new JRadioButton(_I18N.getString("histogram"));
 
     /** True if GUI events should be ignored */
-    protected boolean ignoreEvents = false;
+    private boolean ignoreEvents = false;
 
     /**
      * Constructor
@@ -79,7 +79,7 @@ public class ImageColors extends JPanel {
      * @param parent The top level parent frame (or internal frame) used to close the window
      * @param imageDisplay The image display window
      */
-    public ImageColors(Component parent, BasicImageReadableProcessor imageDisplay) {
+    ImageColors(Component parent, BasicImageReadableProcessor imageDisplay) {
         this.parent = parent;
         this.imageDisplay = imageDisplay;
         imageProcessor = imageDisplay.getImageProcessor();
@@ -100,7 +100,7 @@ public class ImageColors extends JPanel {
 
 
     /** Make and return the main panel */
-    protected JPanel makeMainPanel() {
+    private JPanel makeMainPanel() {
         JPanel panel = new JPanel();
         panel.add(makeColorScalePanel());
         panel.add(makeColormapListPanel());
@@ -110,7 +110,7 @@ public class ImageColors extends JPanel {
 
 
     /** Make and return the color scale panel */
-    protected JPanel makeColorScalePanel() {
+    private JPanel makeColorScalePanel() {
         JPanel panel = new JPanel();
         Border border = BorderFactory.createEtchedBorder();
         panel.setBorder(BorderFactory.createTitledBorder(border,
@@ -153,7 +153,7 @@ public class ImageColors extends JPanel {
      * Called when a radio button is selected with the name of the image
      * color scaling algorithm.
      */
-    protected void setScaleAlgorithm(String name) {
+    private void setScaleAlgorithm(String name) {
         if (name.equals(_I18N.getString("linearScale"))) {
             imageProcessor.setScaleAlgorithm(ImageLookup.LINEAR_SCALE);
         } else if (name.equals(_I18N.getString("logarithmic"))) {
@@ -169,7 +169,7 @@ public class ImageColors extends JPanel {
 
     /** Make and return the list box with the list of colormaps  */
     @SuppressWarnings("unchecked")
-    protected JPanel makeColormapListPanel() {
+    private JPanel makeColormapListPanel() {
         JPanel panel = new JPanel();
         Border border = BorderFactory.createEtchedBorder();
         panel.setBorder(BorderFactory.createTitledBorder(border,
@@ -208,7 +208,7 @@ public class ImageColors extends JPanel {
 
     /** Make and return the list box with the list of intensity tables  */
     @SuppressWarnings("unchecked")
-    protected JPanel makeIntensityListPanel() {
+    private JPanel makeIntensityListPanel() {
         JPanel panel = new JPanel();
         Border border = BorderFactory.createEtchedBorder();
         panel.setBorder(BorderFactory.createTitledBorder(border,
@@ -238,7 +238,7 @@ public class ImageColors extends JPanel {
     /**
      * Called when an intensity lookup table is selected from the list
      */
-    protected void setIntensityLookupTable(String name) {
+    private void setIntensityLookupTable(String name) {
         imageProcessor.setIntensityLookupTable(name);
         imageProcessor.update();
     }
@@ -247,7 +247,7 @@ public class ImageColors extends JPanel {
     /**
      * Make the dialog button panel
      */
-    protected JPanel makeButtonPanel() {
+    private JPanel makeButtonPanel() {
         JPanel panel = new JPanel();
         panel.setLayout(new FlowLayout(FlowLayout.RIGHT));
 
@@ -282,7 +282,7 @@ public class ImageColors extends JPanel {
     /**
      * Update the display to show the current cut levels and pixel distribution
      */
-    void updateDisplay() {
+    private void updateDisplay() {
         ignoreEvents = true;
         try {
             int scaleAlg = imageProcessor.getScaleAlgorithm();
