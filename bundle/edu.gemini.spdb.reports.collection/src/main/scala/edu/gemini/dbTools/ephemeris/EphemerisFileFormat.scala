@@ -18,7 +18,7 @@ object EphemerisFileFormat {
   /** Header required by the TCS. */
   val Header =
     """***************************************************************************************
-      |Date_(UT)HR:MN Date_______JDUT R.A._(ICRF/J2000.0)__DEC dRA*cosD d(DEC)/dt
+      | Date__(UT)__HR:MN Date_________JDUT     R.A.___(ICRF/J2000.0)___DEC dRA*cosD d(DEC)/dt
       |***************************************************************************************""".stripMargin
 
   /** Marker for the start of ephemeris elements in the file. */
