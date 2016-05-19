@@ -50,7 +50,7 @@ sealed case class MultiProbeStrategy(key: AgsStrategyKey, strategies: List[AgsSt
     def ctxToFixedList: List[ObsContext] = {
       val ctxFixed = {
         val instFixed = ctx.getInstrument match {
-          case pac : PosAngleConstraintAware =>
+          case pac : SPInstObsComp with PosAngleConstraintAware =>
             val newPac = pac.clone.asInstanceOf[SPInstObsComp with PosAngleConstraintAware]
             newPac.setPosAngleConstraint(PosAngleConstraint.FIXED)
             newPac
