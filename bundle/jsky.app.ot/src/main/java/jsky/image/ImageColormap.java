@@ -12,7 +12,7 @@
 package jsky.image;
 
 import javax.media.jai.*;
-
+import java.util.Arrays;
 
 /**
  * Manages the colormap for an image and provides methods to select a
@@ -25,31 +25,31 @@ import javax.media.jai.*;
 public class ImageColormap implements Cloneable {
 
     /** Used to make a color image froma grayscale image using a selected colormap */
-    protected LookupTableJAI colorLookupTable;
+    private LookupTableJAI colorLookupTable;
 
     /** Name of the current color lookup table */
-    protected String colorLookupTableName = "Ramp";
+    private String colorLookupTableName = "Ramp";
 
     /** Copy of current color lookup table data to use for shift, rotate, scale ops */
-    protected byte[][] colorLut;
+    private byte[][] colorLut;
 
     /** Used to modify the order of the colors in the color lookup table */
-    protected float[] intensityLookupTable;
+    private float[] intensityLookupTable;
 
     /** Name of the current intensity lookup table */
-    protected String intensityLookupTableName = "Ramp";
+    private String intensityLookupTableName = "Ramp";
 
     /** Default color lookup table to use */
     public static final String DEFAULT_COLOR_LUT = "Real";
 
     /** The number of colors in the display image */
-    protected static final int NUM_COLORS = 256;
+    private static final int NUM_COLORS = 256;
 
 
     /**
      * Default constructor: Initialize with the default colormap.
      */
-    public ImageColormap() {
+    ImageColormap() {
         setColorLookupTable(DEFAULT_COLOR_LUT);
     }
 
@@ -63,7 +63,7 @@ public class ImageColormap implements Cloneable {
      * "Ramp", "Real", "Smooth", "Staircase", "Standard".
      * User defined maps will be implemented in a later release.
      */
-    public void setColorLookupTable(String name) {
+    void setColorLookupTable(String name) {
         colorLookupTableName = name;
         int maxLut = NUM_COLORS - 1;
         byte[][] blut = new byte[3][NUM_COLORS];
@@ -102,7 +102,7 @@ public class ImageColormap implements Cloneable {
      *
      * User defined intensity lookup tables will be implemented in a later release.
      */
-    public void setIntensityLookupTable(String name) {
+    void setIntensityLookupTable(String name) {
         intensityLookupTableName = name;
         intensityLookupTable = ImageColorITTs.getITT(name);
         setColorLookupTable(colorLookupTableName);
@@ -112,7 +112,7 @@ public class ImageColormap implements Cloneable {
     /**
      * Save the current colormap state for the next shift, rotate or scale operation.
      */
-    public void saveColormap() {
+    void saveColormap() {
         colorLut = colorLookupTable.getByteData().clone();
     }
 
@@ -120,7 +120,7 @@ public class ImageColormap implements Cloneable {
     /**
      * Rotate the colormap by the given amount.
      */
-    public void rotateColormap(int amount) {
+    void rotateColormap(int amount) {
         byte[][] newLut = new byte[3][NUM_COLORS];
         for (int i = 0; i < NUM_COLORS; i++) {
             int index = (i - amount) % NUM_COLORS;
@@ -138,7 +138,7 @@ public class ImageColormap implements Cloneable {
     /**
      * Shift the colormap by the given amount.
      */
-    public void shiftColormap(int amount) {
+    void shiftColormap(int amount) {
         byte[][] newLut = new byte[3][NUM_COLORS];
 
         for (int i = 0; i < NUM_COLORS; i++) {
@@ -158,11 +158,11 @@ public class ImageColormap implements Cloneable {
     /**
      * Scale the colormap by the given amount.
      */
-    public void scaleColormap(int amount) {
+    void scaleColormap(int amount) {
         byte[][] newLut = new byte[3][NUM_COLORS];
 
         int n = NUM_COLORS - 1;
-        int index = 0, value = 0;
+        int index;
         int start = Math.min(amount, NUM_COLORS / 2);
         int end = NUM_COLORS - start;
         if (end <= start)
@@ -197,7 +197,7 @@ public class ImageColormap implements Cloneable {
     /**
      * Reset the colormap to the default.
      */
-    public void setDefaultColormap() {
+    void setDefaultColormap() {
         intensityLookupTableName = "Ramp";
         setColorLookupTable(DEFAULT_COLOR_LUT);
     }
@@ -206,24 +206,24 @@ public class ImageColormap implements Cloneable {
     /**
      * Reset the colormap shift, rotate and scale settings to 0.
      */
-    public void resetColormap() {
+    void resetColormap() {
         setColorLookupTable(colorLookupTableName);
     }
 
 
     /** Return the current lookup table used to add color to a grayscale image. */
-    public LookupTableJAI getColorLookupTable() {
+    LookupTableJAI getColorLookupTable() {
         return colorLookupTable;
     }
 
 
     /** Return the name of the current color lookup table */
-    public String getColorLookupTableName() {
+    String getColorLookupTableName() {
         return colorLookupTableName;
     }
 
     /** Return the name of the current intensity lookup table */
-    public String getIntensityLookupTableName() {
+    String getIntensityLookupTableName() {
         return intensityLookupTableName;
     }
 
@@ -231,11 +231,11 @@ public class ImageColormap implements Cloneable {
      * Return true if this object is equivalent to the given one.
      */
     public boolean equals(ImageColormap colormap) {
-        return (colorLookupTable == colormap.colorLookupTable
-                && colorLookupTableName == colormap.colorLookupTableName
-                && colorLut == colormap.colorLut
-                && intensityLookupTable == colormap.intensityLookupTable
-                && intensityLookupTableName == colormap.intensityLookupTableName);
+        return (colorLookupTable.equals(colormap.colorLookupTable)
+                && colorLookupTableName.equals(colormap.colorLookupTableName)
+                && Arrays.equals(colorLut, colormap.colorLut)
+                && Arrays.equals(intensityLookupTable, colormap.intensityLookupTable)
+                && intensityLookupTableName.equals(colormap.intensityLookupTableName));
     }
 
 

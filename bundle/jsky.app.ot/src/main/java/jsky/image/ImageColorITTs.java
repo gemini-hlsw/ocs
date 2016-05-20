@@ -1,10 +1,4 @@
-/*
- * ImageColorITTs.java
- */
-
 package jsky.image;
-
-import jsky.util.Resources;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -316,7 +310,7 @@ public class ImageColorITTs {
     }
 
     /** return the named lookup table */
-    public static float[] getITT(String name) {
+    static float[] getITT(String name) {
         if (name.equals("Ramp"))
             return ramp;
         for (int i = 0; i < ittNames.length; i++) {
@@ -345,7 +339,8 @@ public class ImageColorITTs {
         String filename = "colormaps/" + name + ".iasc";
         BufferedReader in;
         try {
-            in = new BufferedReader(new InputStreamReader(Resources.getResourceAsStream(filename)));
+            // NB This may not work properly launching from IDEA
+            in = new BufferedReader(new InputStreamReader(ImageColorITTs.class.getClassLoader().getResourceAsStream(filename)));
         } catch (Exception e) {
             throw new RuntimeException("Can't open colormap file: " + filename);
         }
