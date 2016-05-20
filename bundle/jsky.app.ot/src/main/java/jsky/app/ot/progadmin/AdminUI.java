@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package jsky.app.ot.progadmin;
 
 import javax.swing.*;
@@ -15,7 +11,7 @@ final class AdminUI extends JPanel {
     private TimeAcctUI timeAcctUI;
     private GsaUI gsaUI;
 
-    public AdminUI() {
+    AdminUI() {
         super(new GridBagLayout());
 
         GridBagConstraints gbc = new GridBagConstraints();
@@ -38,7 +34,7 @@ final class AdminUI extends JPanel {
         add(wrap, gbc);
 
         gsaUI = new GsaUI();
-        wrap = new PanelWrapper("GSA Attributes", gsaUI);
+        wrap = new PanelWrapper("Archive Attributes", gsaUI);
         gbc.fill    = GridBagConstraints.HORIZONTAL;
         gbc.gridy   = 2;
         add(wrap, gbc);
@@ -48,13 +44,14 @@ final class AdminUI extends JPanel {
         add(Box.createHorizontalStrut(520), gbc);
     }
 
-    public ProgramAttrUI getProgramAttrUI() {
+    ProgramAttrUI getProgramAttrUI() {
         return programAttrUI;
     }
 
-    public TimeAcctUI getTimeAcctUI() {
+    TimeAcctUI getTimeAcctUI() {
         return timeAcctUI;
     }
+
 
     public GsaUI getGsaUI() {
         return gsaUI;
