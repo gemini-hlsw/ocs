@@ -23,18 +23,18 @@ object Strategy {
   // Backend for searching on catalogs
   val backend = ConeSearchBackend
 
-  val AltairAowfs          = SingleProbeStrategy(AltairAowfsKey,     AltairAowfsParams)
-  val Flamingos2Oiwfs      = SingleProbeStrategy(Flamingos2OiwfsKey, Flamingos2OiwfsParams)
-  val GmosNorthOiwfs       = SingleProbeStrategy(GmosNorthOiwfsKey,  GmosOiwfsParams(Site.GN))
-  val GmosSouthOiwfs       = SingleProbeStrategy(GmosSouthOiwfsKey,  GmosOiwfsParams(Site.GS))
-  val GnirsOiwfs           = SingleProbeStrategy(GnirsOiwfsKey,      GnirsOiwfsParams)
-  val NifsOiwfs            = SingleProbeStrategy(NifsOiwfsKey,       NifsOiwfsParams)
-  val NiriOiwfs            = SingleProbeStrategy(NiriOiwfsKey,       NiriOiwfsParams)
-  val Pwfs1North           = SingleProbeStrategy(Pwfs1NorthKey,      PwfsParams(Site.GN, PwfsGuideProbe.pwfs1))
-  val Pwfs2North           = SingleProbeStrategy(Pwfs2NorthKey,      PwfsParams(Site.GN, PwfsGuideProbe.pwfs2))
-  val Pwfs1South           = SingleProbeStrategy(Pwfs1SouthKey,      PwfsParams(Site.GS, PwfsGuideProbe.pwfs1))
-  val Pwfs2South           = SingleProbeStrategy(Pwfs2SouthKey,      PwfsParams(Site.GS, PwfsGuideProbe.pwfs2))
-  val NiciOiwfs            = ScienceTargetStrategy(NiciOiwfsKey,     NiciOiwfsGuideProbe.instance, NiciBandsList)
+  val AltairAowfs     = SingleProbeStrategy(AltairAowfsKey,     AltairAowfsParams)
+  val Flamingos2Oiwfs = SingleProbeStrategy(Flamingos2OiwfsKey, Flamingos2OiwfsParams)
+  val GmosNorthOiwfs  = SingleProbeStrategy(GmosNorthOiwfsKey,  GmosOiwfsParams(Site.GN))
+  val GmosSouthOiwfs  = SingleProbeStrategy(GmosSouthOiwfsKey,  GmosOiwfsParams(Site.GS))
+  val GnirsOiwfs      = SingleProbeStrategy(GnirsOiwfsKey,      GnirsOiwfsParams)
+  val NifsOiwfs       = SingleProbeStrategy(NifsOiwfsKey,       NifsOiwfsParams)
+  val NiriOiwfs       = SingleProbeStrategy(NiriOiwfsKey,       NiriOiwfsParams)
+  val Pwfs1North      = SingleProbeStrategy(Pwfs1NorthKey,      PwfsParams(Site.GN, PwfsGuideProbe.pwfs1))
+  val Pwfs2North      = SingleProbeStrategy(Pwfs2NorthKey,      PwfsParams(Site.GN, PwfsGuideProbe.pwfs2))
+  val Pwfs1South      = SingleProbeStrategy(Pwfs1SouthKey,      PwfsParams(Site.GS, PwfsGuideProbe.pwfs1))
+  val Pwfs2South      = SingleProbeStrategy(Pwfs2SouthKey,      PwfsParams(Site.GS, PwfsGuideProbe.pwfs2))
+  val NiciOiwfs       = ScienceTargetStrategy(NiciOiwfsKey,     NiciOiwfsGuideProbe.instance, NiciBandsList)
 
   val All = List(
     AltairAowfs,
