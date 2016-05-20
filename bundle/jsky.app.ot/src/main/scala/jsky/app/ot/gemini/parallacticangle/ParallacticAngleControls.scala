@@ -13,6 +13,7 @@ import edu.gemini.spModel.obs.{ObsTargetCalculatorService, SPObservation, Schedu
 import edu.gemini.spModel.rich.shared.immutable._
 import edu.gemini.shared.util.immutable.{Option => JOption, ImOption}
 import jsky.app.ot.editor.OtItemEditor
+import jsky.app.ot.gemini.editor.EphemerisUpdater
 import jsky.app.ot.util.TimeZonePreference
 
 import scala.swing.GridBagPanel.{Anchor, Fill}
@@ -22,6 +23,7 @@ import scala.swing.event.{ButtonClicked, Event}
 /**
  * This class encompasses all of the logic required to manage the average parallactic angle information associated
  * with an instrument configuration.
+ *
  * @param isPaUi should be true for PA controls, false for Scheduling Block controls
  */
 class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publisher {
@@ -160,6 +162,7 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
       val spObs = ispObs.getDataObject.asInstanceOf[SPObservation]
       spObs.setSchedulingBlock(ImOption.apply(sb))
       ispObs.setDataObject(spObs)
+      EphemerisUpdater.unsafeRefreshEphemerides(ispObs, e.getWindow)
       callback.run()
       resetComponents()
     }
