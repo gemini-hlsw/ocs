@@ -4,7 +4,6 @@ import edu.gemini.pot.sp.*;
 import static edu.gemini.pot.sp.SPComponentBroadType.INSTRUMENT;
 import edu.gemini.pot.spdb.IDBDatabaseService;
 import edu.gemini.shared.util.immutable.ImOption;
-import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.core.SPBadIDException;
 import edu.gemini.spModel.core.SPProgramID;
 import edu.gemini.spModel.gemini.altair.AltairAowfsGuider;
@@ -18,8 +17,7 @@ import edu.gemini.spModel.obscomp.SPGroup;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.obscomp.SPNote;
 import edu.gemini.spModel.target.SPTarget;
-import edu.gemini.spModel.target.env.GuideProbeTargets;
-import edu.gemini.spModel.target.env.TargetEnvironment;
+import edu.gemini.spModel.target.env.*;
 import edu.gemini.spModel.target.obsComp.PwfsGuideProbe;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.too.TooConstraintService;
@@ -222,12 +220,17 @@ public final class TooUpdateServiceImpl implements TooUpdateService {
         }
 
         final TargetObsComp targetObsComp = (TargetObsComp) targetComp.getDataObject();
-        final TargetEnvironment targetEnv = targetObsComp.getTargetEnvironment();
 
-        final SPTarget base = targetEnv.getBase();
+        // Create a new sidereal target matching the request.
+        final SPTarget base = new SPTarget();
         base.setName(tooTarget.getName());
         base.setRaDecDegrees(tooTarget.getRa(), tooTarget.getDec());
         base.setMagnitudes(tooTarget.getMagnitudes());
+
+        // Create a new target environment using this base position and store
+        // it in the target data object.
+        final TargetEnvironment env0 = TargetEnvironment.create(base);
+        targetObsComp.setTargetEnvironment(env0);
 
         // Set the guide star, if present.
         final TooGuideTarget gs = update.getGuideStar();
@@ -255,19 +258,22 @@ public final class TooUpdateServiceImpl implements TooUpdateService {
                 }
 
                 if (probe != null) {
-                    final GuideProbeTargets gt = targetEnv.getPrimaryGuideProbeTargets(probe).getOrElse(GuideProbeTargets.create(probe));
-
-                    final Option<SPTarget> targetOpt = gt.getPrimary();
-                    final SPTarget target = targetOpt.getOrElse(new SPTarget());
+                    // Create a new sidereal guide star matching the request.
+                    final SPTarget target = new SPTarget();
                     target.setRaDecDegrees(gs.getRa(), gs.getDec());
                     ImOption.apply(gs.getName()).foreach(target::setName);
                     target.setMagnitudes(gs.getMagnitudes());
 
-                    if (targetOpt.isEmpty()) {
-                        final GuideProbeTargets gtNew = GuideProbeTargets.create(probe, gt.getOptions().cons(target));
-                        final TargetEnvironment targetEnvNew = targetEnv.putPrimaryGuideProbeTargets(gtNew);
-                        targetObsComp.setTargetEnvironment(targetEnvNew);
-                    }
+                    // Create a simple manual primary guide group with this
+                    // guide star tied to the requested probe.
+                    final GuideProbeTargets gpt        = GuideProbeTargets.create(probe, target);
+                    final GuideGroup gg                = GuideGroup$.MODULE$.create("Manual Group", gpt);
+                    final OptionsList<GuideGroup> opts = OptionsListImpl.create(gg);
+                    final GuideEnvironment genv        = GuideEnvironment$.MODULE$.create(opts);
+
+                    // Update the target environment to include this guide env.
+                    final TargetEnvironment env1       = env0.setGuideEnvironment(genv);
+                    targetObsComp.setTargetEnvironment(env1);
                 }
             }
         }
