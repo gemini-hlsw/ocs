@@ -88,10 +88,17 @@ object ModelConverters {
       sp.getTarget.fold(
         too => SiderealTarget.empty.copy(name = too.name),
         sid => sid,
-        ns  => {
-          val coords = when.flatMap(ns.coords).getOrElse(Coordinates.zero)
-          SiderealTarget.empty.copy(name = ns.name, coordinates = coords, magnitudes = ns.magnitudes, spectralDistribution = ns.spectralDistribution, spatialProfile = ns.spatialProfile)
-        }
+        ns  =>
+          SiderealTarget(
+            name                 = ns.name,
+            coordinates          = when.flatMap(ns.coords).getOrElse(Coordinates.zero),
+            properMotion         = None,
+            redshift             = None,
+            parallax             = None,
+            magnitudes           = ns.magnitudes,
+            spectralDistribution = ns.spectralDistribution,
+            spatialProfile       = ns.spatialProfile
+          )
       )
 
   }
