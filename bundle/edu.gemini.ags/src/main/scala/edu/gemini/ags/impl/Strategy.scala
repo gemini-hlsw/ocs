@@ -86,7 +86,7 @@ object Strategy {
         ao.get.asInstanceOf[InstAltair].getMode match {
           case AltairParams.Mode.LGS_P1 => List(Pwfs1North)
           case AltairParams.Mode.LGS_OI => List(GmosNorthOiwfs)
-          case _                        => List(AltairAowfs, Pwfs1North, GmosNorthOiwfs)
+          case _                        => List(AltairAowfs)
         }
       } else oiStategies(ctx, GmosNorthOiwfs)
     }),
