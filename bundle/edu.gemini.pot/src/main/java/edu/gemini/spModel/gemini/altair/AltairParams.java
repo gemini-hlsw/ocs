@@ -6,6 +6,8 @@
 //
 package edu.gemini.spModel.gemini.altair;
 
+import edu.gemini.shared.util.immutable.DefaultImList;
+import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.spModel.gemini.gmos.GmosOiwfsGuideProbe;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.target.obsComp.PwfsGuideProbe;
@@ -244,24 +246,24 @@ public final class AltairParams {
      */
     public enum Mode implements DisplayableSpType, SequenceableSpType {
 
-        NGS     ("NGS",     GuideStarType.NGS, FieldLens.OUT, AltairAowfsGuider.instance),
-        NGS_FL  ("NGS+FL",  GuideStarType.NGS, FieldLens.IN,  AltairAowfsGuider.instance),
-        LGS     ("LGS",     GuideStarType.LGS, FieldLens.IN,  AltairAowfsGuider.instance),
-        LGS_P1  ("LGS+P1",  GuideStarType.LGS, FieldLens.IN,  PwfsGuideProbe.pwfs1),
-        LGS_OI  ("LGS+OI",  GuideStarType.LGS, FieldLens.IN,  GmosOiwfsGuideProbe.instance)
+        NGS     ("NGS",     GuideStarType.NGS, FieldLens.OUT, DefaultImList.create(AltairAowfsGuider.instance)),
+        NGS_FL  ("NGS+FL",  GuideStarType.NGS, FieldLens.IN,  DefaultImList.create(AltairAowfsGuider.instance)),
+        LGS     ("LGS",     GuideStarType.LGS, FieldLens.IN,  DefaultImList.create(AltairAowfsGuider.instance, GmosOiwfsGuideProbe.instance)),
+        LGS_P1  ("LGS+P1",  GuideStarType.LGS, FieldLens.IN,  DefaultImList.create(PwfsGuideProbe.pwfs1, GmosOiwfsGuideProbe.instance)),
+        LGS_OI  ("LGS+OI",  GuideStarType.LGS, FieldLens.IN,  DefaultImList.create(GmosOiwfsGuideProbe.instance))
         ;
 
         public static final Mode DEFAULT = NGS;
         private final String _displayValue;
         private final GuideStarType _guideStarType;
         private final FieldLens _fieldLens;
-        private final GuideProbe _guider;
+        private final ImList<GuideProbe> _guiders;
 
-        Mode(String displayValue, GuideStarType guideStarType, FieldLens fieldLens, GuideProbe guider) {
+        Mode(final String displayValue, final GuideStarType guideStarType, final FieldLens fieldLens, final ImList<GuideProbe> guiders) {
             _displayValue = displayValue;
             _guideStarType = guideStarType;
             _fieldLens = fieldLens;
-            _guider = guider;
+            _guiders = guiders;
         }
 
         public String displayValue() {
@@ -280,8 +282,8 @@ public final class AltairParams {
             return _guideStarType;
         }
 
-        public GuideProbe guider() {
-            return _guider;
+        public ImList<GuideProbe> guiders() {
+            return _guiders;
         }
 
         /**
@@ -293,5 +295,3 @@ public final class AltairParams {
     }
 
 }
-
-
