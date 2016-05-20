@@ -471,7 +471,7 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
                     final ValidatableGuideProbe vgp = (ValidatableGuideProbe) guideProbe;
                     return AgsRegistrar.instance().currentStrategyForJava(ctx).map(strategy -> {
                         final Option<AgsAnalysis> agsAnalysis = strategy.analyzeForJava(ctx, magTable, vgp,
-                                ModelConverters.toSideralTarget(guideStar));
+                                ModelConverters.toSideralTarget(guideStar, ctx.getSchedulingBlockStart()));
                         return agsAnalysis.map(AgsAnalysis::quality);
                     }).getOrElse(None.instance());
                 } else {

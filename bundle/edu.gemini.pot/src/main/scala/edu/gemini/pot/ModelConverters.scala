@@ -7,6 +7,9 @@ import edu.gemini.spModel.core.AngleSyntax._
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.offset.OffsetPosBase
 
+import edu.gemini.shared.util.immutable.{Option => GOption}
+import edu.gemini.shared.util.immutable.ScalaConverters.ImOptionOps
+
 import scalaz._
 import Scalaz._
 
@@ -20,7 +23,7 @@ object ModelConverters {
 
   def toCoordinates(coords: skycalc.Coordinates): Coordinates = coords.toNewModel
 
-  def toSideralTarget(spTarget: SPTarget):SiderealTarget = spTarget.toNewModel
+  def toSideralTarget(spTarget: SPTarget, when: GOption[java.lang.Long]):SiderealTarget = spTarget.toSiderealTarget(when)
 
   def toOffset(pos: OffsetPosBase): Offset = pos.toNewModel
 
@@ -78,12 +81,24 @@ object ModelConverters {
 
   implicit class SPTarget2SiderealTarget(val sp:SPTarget) extends AnyVal {
 
-    // RCN: this is suuper sketchy but it's what the old code was doing, so ... ?
-    def toNewModel:SiderealTarget =
+    def toSiderealTarget(when: GOption[java.lang.Long]): SiderealTarget =
+       toSiderealTarget(when.asScalaOpt.map(_.longValue))
+
+    def toSiderealTarget(when: Option[Long]): SiderealTarget =
       sp.getTarget.fold(
         too => SiderealTarget.empty.copy(name = too.name),
         sid => sid,
-        ns  => SiderealTarget.empty.copy(name = ns.name, magnitudes = ns.magnitudes, spectralDistribution = ns.spectralDistribution, spatialProfile = ns.spatialProfile)
+        ns  =>
+          SiderealTarget(
+            name                 = ns.name,
+            coordinates          = when.flatMap(ns.coords).getOrElse(Coordinates.zero),
+            properMotion         = None,
+            redshift             = None,
+            parallax             = None,
+            magnitudes           = ns.magnitudes,
+            spectralDistribution = ns.spectralDistribution,
+            spatialProfile       = ns.spatialProfile
+          )
       )
 
   }

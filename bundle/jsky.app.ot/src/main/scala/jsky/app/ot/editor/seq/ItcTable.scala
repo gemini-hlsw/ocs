@@ -16,6 +16,8 @@ import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.obscomp.SPInstObsComp
 import edu.gemini.spModel.rich.shared.immutable.asScalaOpt
 import edu.gemini.spModel.target.SPTarget
+import edu.gemini.shared.util.immutable.{Option => GOption}
+
 import jsky.app.ot.userprefs.observer.ObservingPeer
 import jsky.app.ot.util.OtColor
 
@@ -115,7 +117,7 @@ trait ItcTable extends Table {
 
   }
 
-  protected def extractInputs(instrument: SPInstObsComp, uc: ItcUniqueConfig, method: Double => CalculationMethod): String \/ ItcParameters =
+  protected def extractInputs(instrument: SPInstObsComp, when: GOption[java.lang.Long], uc: ItcUniqueConfig, method: Double => CalculationMethod): String \/ ItcParameters =
     for {
       cond      <- parameters.conditions
       port      <- parameters.instrumentPort
@@ -124,7 +126,7 @@ trait ItcTable extends Table {
       probe     <- extractGuideProbe()
       src       <- extractSource(targetEnv.getBase, uc)
       tele      <- ConfigExtractor.extractTelescope(port, probe, targetEnv, uc.config)
-      ins       <- ConfigExtractor.extractInstrumentDetails(instrument, probe, targetEnv, uc.config, cond)
+      ins       <- ConfigExtractor.extractInstrumentDetails(instrument, probe, targetEnv, when, uc.config, cond)
       srcFrac   <- extractSourceFraction(uc, instrument)
 
     } yield ItcParameters(src, new ObservationDetails(method(srcFrac), analysis), cond, tele, ins)
@@ -254,7 +256,7 @@ class ItcImagingTable(val parameters: ItcParametersProvider) extends ItcTable {
 
     } yield {
       val uniqueConfigs = ItcUniqueConfig.imagingConfigs(seq)
-      val inputs        = uniqueConfigs.map(uc => extractInputs(instrument, uc, frac => ImagingS2N(uc.count * uc.coadds.getOrElse(1), uc.singleExposureTime, frac)))
+      val inputs        = uniqueConfigs.map(uc => extractInputs(instrument, parameters.schedulingBlockStart, uc, frac => ImagingS2N(uc.count * uc.coadds.getOrElse(1), uc.singleExposureTime, frac)))
       val results       = uniqueConfigs.zip(inputs).map { case (uc, i) => doServiceCall(peer, i) }
 
       instrument.getType match {
@@ -290,7 +292,7 @@ class ItcSpectroscopyTable(val parameters: ItcParametersProvider) extends ItcTab
 
     } yield {
       val uniqueConfigs = ItcUniqueConfig.spectroscopyConfigs(seq)
-      val inputs        = uniqueConfigs.map(uc => extractInputs(instrument, uc, frac => SpectroscopyS2N(uc.count * uc.coadds.getOrElse(1), uc.singleExposureTime, frac)))
+      val inputs        = uniqueConfigs.map(uc => extractInputs(instrument, parameters.schedulingBlockStart, uc, frac => SpectroscopyS2N(uc.count * uc.coadds.getOrElse(1), uc.singleExposureTime, frac)))
       val results       = uniqueConfigs.zip(inputs).map { case (uc, i) => doServiceCall(peer, i) }
 
       instrument.getType match {

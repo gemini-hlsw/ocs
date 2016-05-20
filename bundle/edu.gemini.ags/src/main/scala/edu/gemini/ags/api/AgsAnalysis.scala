@@ -141,7 +141,7 @@ object AgsAnalysis {
       } yield gStar
 
     selection(ctx, guideProbe).fold(Some(NoGuideStarForProbe(guideProbe, bands)): Option[AgsAnalysis]) { guideStar =>
-      AgsAnalysis.analysis(ctx, mt, guideProbe, guideStar.toNewModel, bands)
+      AgsAnalysis.analysis(ctx, mt, guideProbe, guideStar.toSiderealTarget(ctx.getSchedulingBlockStart), bands)
     }
   }
 
@@ -151,6 +151,7 @@ object AgsAnalysis {
    */
   protected [ags] def analysis(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SiderealTarget, bands: BandsList): Option[AgsAnalysis] = {
     val spTarget = new SPTarget(SiderealTarget.empty.copy(coordinates = Coordinates(guideStar.coordinates.ra, guideStar.coordinates.dec)))
+
     if (guideProbe.validate(spTarget, ctx) != GuideStarValidation.VALID) Some(NotReachable(guideProbe, guideStar, bands))
     else magnitudeAnalysis(ctx, mt, guideProbe, guideStar, bands)
   }
