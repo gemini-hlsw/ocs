@@ -29,6 +29,16 @@ object AgsStrategyKey {
     val id = "GMOS-N_OIWFS"
   }
 
+  case object GmosNorthAltairOiwfsKey extends AgsStrategyKey {
+    val id = "ALTAIR_GMOS-N_OIWFS"
+    override def displayName = "Altair + GMOS-N OIWFS"
+  }
+
+  case object GmosNorthPwfs1OiwfsKey extends AgsStrategyKey {
+    val id = "GN_PWFS1_GMOS-N_OIWFS"
+    override def displayName = "GN PWFS1 + GMOS-N OIWFS"
+  }
+
   case object GmosSouthOiwfsKey extends AgsStrategyKey {
     val id = "GMOS-S_OIWFS"
   }
@@ -74,6 +84,8 @@ object AgsStrategyKey {
     Flamingos2OiwfsKey,
     GemsKey,
     GmosNorthOiwfsKey,
+    GmosNorthAltairOiwfsKey,
+    GmosNorthPwfs1OiwfsKey,
     GmosSouthOiwfsKey,
     GnirsOiwfsKey,
     NiciOiwfsKey,

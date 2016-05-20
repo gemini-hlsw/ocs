@@ -23,24 +23,28 @@ object Strategy {
   // Backend for searching on catalogs
   val backend = ConeSearchBackend
 
-  val AltairAowfs     = SingleProbeStrategy(AltairAowfsKey,     AltairAowfsParams)
-  val Flamingos2Oiwfs = SingleProbeStrategy(Flamingos2OiwfsKey, Flamingos2OiwfsParams)
-  val GmosNorthOiwfs  = SingleProbeStrategy(GmosNorthOiwfsKey,  GmosOiwfsParams(Site.GN))
-  val GmosSouthOiwfs  = SingleProbeStrategy(GmosSouthOiwfsKey,  GmosOiwfsParams(Site.GS))
-  val GnirsOiwfs      = SingleProbeStrategy(GnirsOiwfsKey,      GnirsOiwfsParams)
-  val NifsOiwfs       = SingleProbeStrategy(NifsOiwfsKey,       NifsOiwfsParams)
-  val NiriOiwfs       = SingleProbeStrategy(NiriOiwfsKey,       NiriOiwfsParams)
-  val Pwfs1North      = SingleProbeStrategy(Pwfs1NorthKey,      PwfsParams(Site.GN, PwfsGuideProbe.pwfs1))
-  val Pwfs2North      = SingleProbeStrategy(Pwfs2NorthKey,      PwfsParams(Site.GN, PwfsGuideProbe.pwfs2))
-  val Pwfs1South      = SingleProbeStrategy(Pwfs1SouthKey,      PwfsParams(Site.GS, PwfsGuideProbe.pwfs1))
-  val Pwfs2South      = SingleProbeStrategy(Pwfs2SouthKey,      PwfsParams(Site.GS, PwfsGuideProbe.pwfs2))
-  val NiciOiwfs       = ScienceTargetStrategy(NiciOiwfsKey,     NiciOiwfsGuideProbe.instance, NiciBandsList)
+  val AltairAowfs          = SingleProbeStrategy(AltairAowfsKey,     AltairAowfsParams)
+  val Flamingos2Oiwfs      = SingleProbeStrategy(Flamingos2OiwfsKey, Flamingos2OiwfsParams)
+  val GmosNorthOiwfs       = SingleProbeStrategy(GmosNorthOiwfsKey,  GmosOiwfsParams(Site.GN))
+  val GmosNorthOiwfsAltair = UnimplementedStrategy(AgsStrategyKey.GmosNorthAltairOiwfsKey)
+  val GmosNorthOiwfsPwfs1  = UnimplementedStrategy(AgsStrategyKey.GmosNorthPwfs1OiwfsKey)
+  val GmosSouthOiwfs       = SingleProbeStrategy(GmosSouthOiwfsKey,  GmosOiwfsParams(Site.GS))
+  val GnirsOiwfs           = SingleProbeStrategy(GnirsOiwfsKey,      GnirsOiwfsParams)
+  val NifsOiwfs            = SingleProbeStrategy(NifsOiwfsKey,       NifsOiwfsParams)
+  val NiriOiwfs            = SingleProbeStrategy(NiriOiwfsKey,       NiriOiwfsParams)
+  val Pwfs1North           = SingleProbeStrategy(Pwfs1NorthKey,      PwfsParams(Site.GN, PwfsGuideProbe.pwfs1))
+  val Pwfs2North           = SingleProbeStrategy(Pwfs2NorthKey,      PwfsParams(Site.GN, PwfsGuideProbe.pwfs2))
+  val Pwfs1South           = SingleProbeStrategy(Pwfs1SouthKey,      PwfsParams(Site.GS, PwfsGuideProbe.pwfs1))
+  val Pwfs2South           = SingleProbeStrategy(Pwfs2SouthKey,      PwfsParams(Site.GS, PwfsGuideProbe.pwfs2))
+  val NiciOiwfs            = ScienceTargetStrategy(NiciOiwfsKey,     NiciOiwfsGuideProbe.instance, NiciBandsList)
 
   val All = List(
     AltairAowfs,
     Flamingos2Oiwfs,
     GemsStrategy,
     GmosNorthOiwfs,
+    GmosNorthOiwfsAltair,
+    GmosNorthOiwfsPwfs1,
     GmosSouthOiwfs,
     GnirsOiwfs,
     NiciOiwfs,
@@ -84,9 +88,9 @@ object Strategy {
       val ao = ctx.getAOComponent.asScalaOpt
       if (ao.exists(_.isInstanceOf[InstAltair])) {
         ao.get.asInstanceOf[InstAltair].getMode match {
-          case AltairParams.Mode.LGS_P1 => List(Pwfs1North)
+          case AltairParams.Mode.LGS_P1 => List(Pwfs1North, GmosNorthOiwfsPwfs1)
           case AltairParams.Mode.LGS_OI => List(GmosNorthOiwfs)
-          case _                        => List(AltairAowfs, Pwfs1North, GmosNorthOiwfs)
+          case _                        => List(AltairAowfs, GmosNorthOiwfsAltair)
         }
       } else oiStategies(ctx, GmosNorthOiwfs)
     }),
@@ -111,6 +115,7 @@ object Strategy {
       case SingleProbeStrategy(_, params, _) => isAvailable(params.guideProbe)
       case ScienceTargetStrategy(_, gp, _)   => isAvailable(gp)
       case GemsStrategy                      => isAvailable(Canopus.Wfs.cwfs3) // any canopus would serve
+      case UnimplementedStrategy(_)          => true
       case _                                 => false
     }
   }

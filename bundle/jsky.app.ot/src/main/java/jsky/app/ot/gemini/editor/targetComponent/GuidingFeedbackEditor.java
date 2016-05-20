@@ -1,6 +1,7 @@
 package jsky.app.ot.gemini.editor.targetComponent;
 
 import edu.gemini.ags.api.AgsMagnitude;
+import edu.gemini.ags.impl.UnimplementedStrategy$;
 import edu.gemini.pot.sp.ISPNode;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.obs.context.ObsContext;
@@ -20,6 +21,13 @@ public final class GuidingFeedbackEditor implements TelescopePosEditor {
     @Override
     public void edit(final Option<ObsContext> ctxOpt, final SPTarget target, ISPNode node) {
         final AgsMagnitude.MagnitudeTable mt = OT.getMagnitudeTable();
+
+        // If the AGS strategy is unimplemented, we add a warning row to this effect.
+        final Option<GuidingFeedback.Row> agsWarning;
+        if (ctxOpt.exists(ctx -> ctx.getAgsStrategyOverride().exists(key -> UnimplementedStrategy$.MODULE$.unimplementedKeys().contains(key)))) {
+
+        }
+
         if (ctxOpt.isEmpty() || target.isTooTarget()) {
             tab.clear();
         } else {
