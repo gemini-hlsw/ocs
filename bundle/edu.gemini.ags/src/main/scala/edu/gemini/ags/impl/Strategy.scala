@@ -26,8 +26,6 @@ object Strategy {
   val AltairAowfs          = SingleProbeStrategy(AltairAowfsKey,     AltairAowfsParams)
   val Flamingos2Oiwfs      = SingleProbeStrategy(Flamingos2OiwfsKey, Flamingos2OiwfsParams)
   val GmosNorthOiwfs       = SingleProbeStrategy(GmosNorthOiwfsKey,  GmosOiwfsParams(Site.GN))
-  val GmosNorthOiwfsAltair = UnimplementedStrategy(AgsStrategyKey.GmosNorthAltairOiwfsKey)
-  val GmosNorthOiwfsPwfs1  = UnimplementedStrategy(AgsStrategyKey.GmosNorthPwfs1OiwfsKey)
   val GmosSouthOiwfs       = SingleProbeStrategy(GmosSouthOiwfsKey,  GmosOiwfsParams(Site.GS))
   val GnirsOiwfs           = SingleProbeStrategy(GnirsOiwfsKey,      GnirsOiwfsParams)
   val NifsOiwfs            = SingleProbeStrategy(NifsOiwfsKey,       NifsOiwfsParams)
@@ -43,8 +41,6 @@ object Strategy {
     Flamingos2Oiwfs,
     GemsStrategy,
     GmosNorthOiwfs,
-    GmosNorthOiwfsAltair,
-    GmosNorthOiwfsPwfs1,
     GmosSouthOiwfs,
     GnirsOiwfs,
     NiciOiwfs,
@@ -88,9 +84,9 @@ object Strategy {
       val ao = ctx.getAOComponent.asScalaOpt
       if (ao.exists(_.isInstanceOf[InstAltair])) {
         ao.get.asInstanceOf[InstAltair].getMode match {
-          case AltairParams.Mode.LGS_P1 => List(Pwfs1North, GmosNorthOiwfsPwfs1)
+          case AltairParams.Mode.LGS_P1 => List(Pwfs1North)
           case AltairParams.Mode.LGS_OI => List(GmosNorthOiwfs)
-          case _                        => List(AltairAowfs, GmosNorthOiwfsAltair)
+          case _                        => List(AltairAowfs)
         }
       } else oiStategies(ctx, GmosNorthOiwfs)
     }),
@@ -115,7 +111,6 @@ object Strategy {
       case SingleProbeStrategy(_, params, _) => isAvailable(params.guideProbe)
       case ScienceTargetStrategy(_, gp, _)   => isAvailable(gp)
       case GemsStrategy                      => isAvailable(Canopus.Wfs.cwfs3) // any canopus would serve
-      case UnimplementedStrategy(_)          => true
       case _                                 => false
     }
   }
