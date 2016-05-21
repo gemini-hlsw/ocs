@@ -117,10 +117,10 @@ public final class GuideConfig extends ParamSet {
     }
 
     public String guideName() {
-        String guideName;
+        final String guideName;
 
         // Indicate which one is selected
-        if (_oe.containsTargets(AltairAowfsGuider.instance)) {
+        if (contains(AltairAowfsGuider.instance)) {
             guideName = _getAOGuideConfig();
         } else if (isAltairP1()) {
             // REL-542.
@@ -142,7 +142,7 @@ public final class GuideConfig extends ParamSet {
      * an XML document.
      */
     public boolean build() throws WdbaGlueException {
-        String guideWith = guideName();
+        final String guideWith = guideName();
         putParameter(TccNames.GUIDE_WITH, guideWith);
 
         // Hack in special configuration for GeMS.  Ideally this would be
@@ -155,7 +155,7 @@ public final class GuideConfig extends ParamSet {
 
     private Option<ParamSet> createGemsConfig(String guideWith) throws WdbaGlueException {
         // Only relevant if using GSAOI
-        SPInstObsComp inst = _oe.getInstrument();
+        final SPInstObsComp inst = _oe.getInstrument();
         if (inst == null) return None.instance();
         if (!Gsaoi.SP_TYPE.equals(inst.getType())) return None.instance();
 
@@ -163,9 +163,9 @@ public final class GuideConfig extends ParamSet {
         if (!guideWith.contains(TccNames.GeMS)) return None.instance();
         if (!containsGsaoi()) return None.instance();
 
-        Gsaoi.OdgwSize size = ((Gsaoi) inst).getOdgwSize();
-        ParamSet gems = new ParamSet(TccNames.GeMS);
-        ParamSet odgw = new ParamSet("odgw");
+        final Gsaoi.OdgwSize size = ((Gsaoi) inst).getOdgwSize();
+        final ParamSet gems = new ParamSet(TccNames.GeMS);
+        final ParamSet odgw = new ParamSet("odgw");
         gems.putParamSet(odgw);
         odgw.putParameter("size", size.displayValue());
         return new Some<>(gems);
