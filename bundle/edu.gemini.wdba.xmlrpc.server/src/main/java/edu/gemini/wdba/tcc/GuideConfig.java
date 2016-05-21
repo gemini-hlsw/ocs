@@ -22,7 +22,7 @@ import java.util.Set;
 /**
  *  Class to evaluate the {@link ObservationEnvironment} and produce a guide config and guide config  name.
  */
-public final class GuideConfigSouth extends ParamSet {
+public final class GuideConfig extends ParamSet {
     private static final Set<GuideProbe> ODGW_PROBES = Collections.unmodifiableSet(
             new HashSet<>(Arrays.asList(GsaoiOdgw.values()))
     );
@@ -33,7 +33,7 @@ public final class GuideConfigSouth extends ParamSet {
 
     private final ObservationEnvironment _oe;
 
-    public GuideConfigSouth(ObservationEnvironment oe) {
+    public GuideConfig(ObservationEnvironment oe) {
         super(TccNames.GUIDE_CONFIG);
         if (oe == null) throw new NullPointerException("Config requires a non-null observation environment");
         _oe = oe;
