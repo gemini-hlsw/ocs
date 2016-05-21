@@ -10,12 +10,11 @@ import edu.gemini.spModel.gemini.gsaoi.Gsaoi;
 import edu.gemini.spModel.gemini.gsaoi.GsaoiOdgw;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
-import edu.gemini.spModel.target.env.GuideGroup;
-import edu.gemini.spModel.target.env.GuideProbeTargets;
-import edu.gemini.spModel.target.obsComp.PwfsGuideProbe;
+import static edu.gemini.spModel.target.obsComp.PwfsGuideProbe.*;
 import edu.gemini.wdba.glue.api.WdbaGlueException;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -23,10 +22,16 @@ import java.util.Set;
 /**
  *  Class to evaluate the {@link ObservationEnvironment} and produce a guide config and guide config  name.
  */
-public class GuideConfigSouth extends ParamSet {
-    //private static final Logger LOG = LogUtil.getLogger(GuideConfigSouth.class);
+public final class GuideConfigSouth extends ParamSet {
+    private static final Set<GuideProbe> ODGW_PROBES = Collections.unmodifiableSet(
+            new HashSet<>(Arrays.asList(GsaoiOdgw.values()))
+    );
 
-    private ObservationEnvironment _oe;
+    private static final Set<GuideProbe> CWFS_PROBES = Collections.unmodifiableSet(
+            new HashSet<>(Arrays.asList(Canopus.Wfs.values()))
+    );
+
+    private final ObservationEnvironment _oe;
 
     public GuideConfigSouth(ObservationEnvironment oe) {
         super(TccNames.GUIDE_CONFIG);
@@ -34,34 +39,30 @@ public class GuideConfigSouth extends ParamSet {
         _oe = oe;
     }
 
-    private static boolean containsP1(ObservationEnvironment oe) {
-        return oe.containsTargets(PwfsGuideProbe.pwfs1);
+    private boolean contains(GuideProbe gp) {
+        return _oe.containsTargets(gp);
     }
 
-    private static boolean containsOiwfs(ObservationEnvironment oe) {
+    private boolean containsOiwfs() {
         // Hack here because the TCC, TCS, Seqexec don't consider the GSAOI
         // ODGW to be "on instrument".  Explicitly check for these probes.
-        if (!oe.containsTargets(GuideProbe.Type.OIWFS)) return false;
-        Set<GuideProbe> odgwSet = new HashSet<>(Arrays.asList(GsaoiOdgw.values()));
-        GuideGroup grp = oe.getTargetEnvironment().getPrimaryGuideGroup();
-        for (GuideProbeTargets gt : grp.getAllMatching(GuideProbe.Type.OIWFS)) {
-            if (!odgwSet.contains(gt.getGuider())) return true;
-        }
-        return false;
+        final Set<GuideProbe> gs = _oe.usedGuiders();
+        gs.removeAll(ODGW_PROBES);
+        return gs.stream().anyMatch(gp -> gp.getType() == GuideProbe.Type.OIWFS);
     }
 
-    private static boolean containsGsaoi(ObservationEnvironment oe) {
-        for (GuideProbe probe : GsaoiOdgw.values()) {
-            if (oe.containsTargets(probe)) return true;
-        }
-        return false;
+    private boolean containsOneOf(Set<GuideProbe> probes) {
+        final Set<GuideProbe> gs = _oe.usedGuiders();
+        gs.retainAll(probes);
+        return !gs.isEmpty();
     }
 
-    private static boolean containsGems(ObservationEnvironment oe) {
-        for (GuideProbe probe : Canopus.Wfs.values()) {
-            if (oe.containsTargets(probe)) return true;
-        }
-        return false;
+    private boolean containsGsaoi() {
+        return containsOneOf(ODGW_PROBES);
+    }
+
+    private boolean containsGems() {
+        return containsOneOf(CWFS_PROBES);
     }
 
     /**
@@ -76,43 +77,44 @@ public class GuideConfigSouth extends ParamSet {
      * @return a String that is the AO guiding config or Null
      */
     private String _getAOGuideConfig() {
-        if (containsOiwfs(_oe)) return TccNames.AOOI;
-        if (_oe.containsTargets(PwfsGuideProbe.pwfs1)) return TccNames.AOP1;
-        if (_oe.containsTargets(PwfsGuideProbe.pwfs2)) return TccNames.AOP2;
+        if (containsOiwfs()) return TccNames.AOOI;
+        if (contains(pwfs1)) return TccNames.AOP1;
+        if (contains(pwfs2)) return TccNames.AOP2;
         return TccNames.AO;
     }
 
     private String _getGeMSGuideConfig() {
-        if (containsOiwfs(_oe)) {
-            return containsP1(_oe) ? TccNames.GeMSP1OI : TccNames.GeMSOI;
+        if (containsOiwfs()) {
+            return contains(pwfs1) ? TccNames.GeMSP1OI : TccNames.GeMSOI;
         }
-        return containsP1(_oe) ? TccNames.GeMSP1 : TccNames.GeMS;
+        return contains(pwfs1) ? TccNames.GeMSP1 : TccNames.GeMS;
     }
 
     private String _getOIGuideConfig() {
-        if (_oe.containsTargets(PwfsGuideProbe.pwfs1)) return TccNames.P1OI;
-        if (_oe.containsTargets(PwfsGuideProbe.pwfs2)) return TccNames.P2OI;
+        if (contains(pwfs1)) return TccNames.P1OI;
+        if (contains(pwfs2)) return TccNames.P2OI;
         return TccNames.OI;
     }
 
     private String _getPWFSGuideConfig() {
-        if (_oe.containsTargets(PwfsGuideProbe.pwfs1)) {
-            return _oe.containsTargets(PwfsGuideProbe.pwfs2) ? TccNames.P1P2 : TccNames.P1;
+        if (contains(pwfs1)) {
+            return contains(pwfs2) ? TccNames.P1P2 : TccNames.P1;
         }
         // If we get here, then P1 isn't set so check for P2 if not P2 return null
-        return _oe.containsTargets(PwfsGuideProbe.pwfs2) ? TccNames.P2 : TccNames.NO_GUIDING;
+        return contains(pwfs2) ? TccNames.P2 : TccNames.NO_GUIDING;
+    }
+
+    private boolean isAltairMode(AltairParams.Mode m) {
+        return ImOption.apply(_oe.getAltairConfig()).map(InstAltair::getMode).contains(m);
     }
 
     private boolean isAltairP1() {
-        return containsP1(_oe) && _oe.isAltair() &&
-                ImOption.apply(_oe.getAltairConfig()).map(InstAltair::getMode).contains(AltairParams.Mode.LGS_P1);
+        return contains(pwfs1) && isAltairMode(AltairParams.Mode.LGS_P1);
     }
 
     private boolean isAltairOi() {
-        return _oe.containsTargets(GmosOiwfsGuideProbe.instance) && _oe.isAltair() &&
-                ImOption.apply(_oe.getAltairConfig()).map(InstAltair::getMode).contains(AltairParams.Mode.LGS_OI);
+        return contains(GmosOiwfsGuideProbe.instance) && isAltairMode(AltairParams.Mode.LGS_OI);
     }
-
 
     public String guideName() {
         String guideName;
@@ -125,9 +127,9 @@ public class GuideConfigSouth extends ParamSet {
             guideName = TccNames.AOP1;
         } else if (isAltairOi()) {
             guideName = TccNames.AOOI;
-        } else if (containsGems(_oe)) {
+        } else if (containsGems()) {
             guideName = _getGeMSGuideConfig();
-        } else if (containsOiwfs(_oe)) {
+        } else if (containsOiwfs()) {
             guideName = _getOIGuideConfig();
         } else {
             guideName = _getPWFSGuideConfig();
@@ -159,7 +161,7 @@ public class GuideConfigSouth extends ParamSet {
 
         // Only relevant if guiding with GeMS and GSAOI
         if (!guideWith.contains(TccNames.GeMS)) return None.instance();
-        if (!containsGsaoi(_oe)) return None.instance();
+        if (!containsGsaoi()) return None.instance();
 
         Gsaoi.OdgwSize size = ((Gsaoi) inst).getOdgwSize();
         ParamSet gems = new ParamSet(TccNames.GeMS);

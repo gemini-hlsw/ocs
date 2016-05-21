@@ -152,16 +152,16 @@ public final class ObservationEnvironment {
         return _targetEnv;
     }
 
-    private SortedSet<GuideProbe> guiders() {
+    public SortedSet<GuideProbe> usedGuiders() {
         return _targetEnv.getGuideEnvironment().getPrimaryReferencedGuiders();
     }
 
     public boolean containsTargets(GuideProbe probe) {
-        return guiders().contains(probe);
+        return usedGuiders().contains(probe);
     }
 
     public boolean containsTargets(GuideProbe.Type type) {
-        return guiders().stream().anyMatch(gp -> gp.getType() == type);
+        return usedGuiders().stream().anyMatch(gp -> gp.getType() == type);
     }
 
     public enum AoAspect {
