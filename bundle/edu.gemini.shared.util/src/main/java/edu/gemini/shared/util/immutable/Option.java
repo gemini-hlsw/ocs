@@ -89,6 +89,12 @@ public interface Option<T> extends Iterable<T>, Serializable {
     void foreach(ApplyOp<? super T> op);
 
     /**
+     * Returns <code>true</code> if Some and the contained value is equal to the
+     * given value.
+     */
+    boolean contains(T that);
+
+    /**
      * Returns <code>true</code> if Some and the contained value matches the
      * predicate.
      */

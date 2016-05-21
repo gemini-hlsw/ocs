@@ -1,11 +1,9 @@
 package edu.gemini.wdba.tcc;
 
-import edu.gemini.shared.util.immutable.ApplyOp;
-import edu.gemini.shared.util.immutable.None;
-import edu.gemini.shared.util.immutable.Option;
-import edu.gemini.shared.util.immutable.Some;
+import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.gemini.altair.AltairAowfsGuider;
 import edu.gemini.spModel.gemini.altair.AltairParams;
+import edu.gemini.spModel.gemini.altair.InstAltair;
 import edu.gemini.spModel.gemini.gems.Canopus;
 import edu.gemini.spModel.gemini.gmos.GmosOiwfsGuideProbe;
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi;
@@ -29,22 +27,11 @@ public class GuideConfigSouth extends ParamSet {
     //private static final Logger LOG = LogUtil.getLogger(GuideConfigSouth.class);
 
     private ObservationEnvironment _oe;
-    private String _guideName;
 
     public GuideConfigSouth(ObservationEnvironment oe) {
         super(TccNames.GUIDE_CONFIG);
         if (oe == null) throw new NullPointerException("Config requires a non-null observation environment");
         _oe = oe;
-        _guideName = _oe.getBasePositionName();
-    }
-
-    /**
-     * The name to be used in the "value" of the field rotator param
-     *
-     * @return String that is name
-     */
-    String getConfigName() {
-        return _guideName;
     }
 
     private static boolean containsP1(ObservationEnvironment oe) {
@@ -55,7 +42,7 @@ public class GuideConfigSouth extends ParamSet {
         // Hack here because the TCC, TCS, Seqexec don't consider the GSAOI
         // ODGW to be "on instrument".  Explicitly check for these probes.
         if (!oe.containsTargets(GuideProbe.Type.OIWFS)) return false;
-        Set<GuideProbe> odgwSet = new HashSet<GuideProbe>(Arrays.asList(GsaoiOdgw.values()));
+        Set<GuideProbe> odgwSet = new HashSet<>(Arrays.asList(GsaoiOdgw.values()));
         GuideGroup grp = oe.getTargetEnvironment().getPrimaryGuideGroup();
         for (GuideProbeTargets gt : grp.getAllMatching(GuideProbe.Type.OIWFS)) {
             if (!odgwSet.contains(gt.getGuider())) return true;
@@ -118,12 +105,12 @@ public class GuideConfigSouth extends ParamSet {
 
     private boolean isAltairP1() {
         return containsP1(_oe) && _oe.isAltair() &&
-                _oe.getAltairConfig().getMode() == AltairParams.Mode.LGS_P1;
+                ImOption.apply(_oe.getAltairConfig()).map(InstAltair::getMode).contains(AltairParams.Mode.LGS_P1);
     }
 
     private boolean isAltairOi() {
         return _oe.containsTargets(GmosOiwfsGuideProbe.instance) && _oe.isAltair() &&
-                _oe.getAltairConfig().getMode() == AltairParams.Mode.LGS_OI;
+                ImOption.apply(_oe.getAltairConfig()).map(InstAltair::getMode).contains(AltairParams.Mode.LGS_OI);
     }
 
 
@@ -159,11 +146,7 @@ public class GuideConfigSouth extends ParamSet {
         // Hack in special configuration for GeMS.  Ideally this would be
         // relegated to something in the _oe I suppose.  Some day all of this
         // TCC xml stuff should just go away and die.
-        createGemsConfig(guideWith).foreach(new ApplyOp<ParamSet>() {
-            @Override public void apply(ParamSet paramSet) {
-                putParamSet(paramSet);
-            }
-        });
+        createGemsConfig(guideWith).foreach(this::putParamSet);
 
         return true;
     }
@@ -183,7 +166,7 @@ public class GuideConfigSouth extends ParamSet {
         ParamSet odgw = new ParamSet("odgw");
         gems.putParamSet(odgw);
         odgw.putParameter("size", size.displayValue());
-        return new Some<ParamSet>(gems);
+        return new Some<>(gems);
     }
 
 }
