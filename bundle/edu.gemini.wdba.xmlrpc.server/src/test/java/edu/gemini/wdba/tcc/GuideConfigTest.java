@@ -4,6 +4,7 @@ import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.shared.util.immutable.DefaultImList;
 import edu.gemini.shared.util.immutable.ImCollections;
 import edu.gemini.shared.util.immutable.ImList;
+import edu.gemini.shared.util.immutable.None;
 import edu.gemini.spModel.ext.ObservationNode;
 import edu.gemini.spModel.ext.TargetNode;
 import edu.gemini.spModel.gemini.altair.AltairAowfsGuider;
@@ -17,8 +18,7 @@ import edu.gemini.spModel.gemini.nici.NiciOiwfsGuideProbe;
 import edu.gemini.spModel.gemini.niri.NiriOiwfsGuideProbe;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.target.SPTarget;
-import edu.gemini.spModel.target.env.GuideProbeTargets;
-import edu.gemini.spModel.target.env.TargetEnvironment;
+import edu.gemini.spModel.target.env.*;
 import edu.gemini.spModel.target.obsComp.PwfsGuideProbe;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import org.dom4j.Document;
@@ -27,8 +27,7 @@ import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  *
@@ -89,6 +88,34 @@ public final class GuideConfigTest extends TestBase {
 
     @Test public void testP2OI() throws Exception {
         testTargetEnvironment(TccNames.P2OI, create(PwfsGuideProbe.pwfs2, NiciOiwfsGuideProbe.instance));
+    }
+
+    // If you have a disabled P2 and an enabled OI, the guide config should
+    // be OI only, not P2OI.
+    @Test public void testRel2789() throws Exception {
+        // Make a target environment with a manual group with active PWFS2 and
+        // OI targets.
+        final GuideProbeTargets      gptP2 = GuideProbeTargets.create(PwfsGuideProbe.pwfs2, new SPTarget());
+        final GuideProbeTargets      gptOi = GuideProbeTargets.create(NiciOiwfsGuideProbe.instance, new SPTarget());
+        final GuideGroup              grp  = GuideGroup.create("Manual Group", gptP2, gptOi);
+        final OptionsList<GuideGroup> opts = OptionsListImpl.create(GuideGroup.AutomaticInitial(), grp).setPrimaryIndex(1);
+        final GuideEnvironment        genv = GuideEnvironment.create(opts);
+        final TargetEnvironment        env = TargetEnvironment.create(new SPTarget(), genv, DefaultImList.create());
+
+        // Disable the PWFS2 target in env.
+        final TargetEnvironment env2 = env.putPrimaryGuideProbeTargets(gptP2.setPrimaryIndex(None.instance()));
+
+        // Primary now only includes OIWFS
+        final Set<GuideProbe> guiders = new HashSet<>();
+        guiders.add(NiciOiwfsGuideProbe.instance);
+        assertEquals(guiders, env2.getGuideEnvironment().getPrimaryReferencedGuiders());
+
+        // All guiders still includes both PWFS2 and OI
+        guiders.add(PwfsGuideProbe.pwfs2);
+        assertEquals(guiders, env2.getGuideEnvironment().getReferencedGuiders());
+
+        // But the guide config will only have OI since it is the only one active.
+        testTargetEnvironment(TccNames.OI, env2);
     }
 
     @Test public void testGeMS() throws Exception {
