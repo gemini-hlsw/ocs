@@ -48,8 +48,20 @@ public final class GmosSouthSupportTest extends InstrumentSupportTestBase<InstGm
         verifyInstrumentConfig(getSouthResults(), "GMOS3");
     }
 
+    @Test public void testSideLookingP2() throws Exception {
+        setPort(IssPort.SIDE_LOOKING);
+        addGuideStar(PwfsGuideProbe.pwfs2);
+        verifyInstrumentConfig(getSouthResults(), "GMOS3_P2");
+    }
+
     @Test public void testUpLooking() throws Exception {
         setPort(IssPort.UP_LOOKING);
         verifyInstrumentConfig(getSouthResults(), "GMOS");
+    }
+
+    @Test public void testUpLookingP2() throws Exception {
+        setPort(IssPort.UP_LOOKING);
+        addGuideStar(PwfsGuideProbe.pwfs2);
+        verifyInstrumentConfig(getSouthResults(), "GMOS_P2");
     }
 }

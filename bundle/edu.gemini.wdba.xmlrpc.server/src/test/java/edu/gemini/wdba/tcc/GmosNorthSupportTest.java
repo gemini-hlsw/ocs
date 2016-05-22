@@ -85,10 +85,44 @@ public final class GmosNorthSupportTest extends InstrumentSupportTestBase<InstGm
         verifyInstrumentConfig(getNorthResults(), "AO2GMOS5");
     }
 
+    @Test public void testAoP1SideLooking() throws Exception {
+        setPort(IssPort.SIDE_LOOKING);
+        addAltair();
+        addGuideStar(PwfsGuideProbe.pwfs1);
+        verifyInstrumentConfig(getNorthResults(), "AO2GMOS5_P1");
+    }
+
+    @Test public void testAoOiSideLooking() throws Exception {
+        setPort(IssPort.SIDE_LOOKING);
+        addAltair();
+        addGuideStar(GmosOiwfsGuideProbe.instance);
+        verifyInstrumentConfig(getNorthResults(), "AO2GMOS5_OI");
+    }
+
+    @Test public void testAoP1OiSideLooking() throws Exception {
+        setPort(IssPort.SIDE_LOOKING);
+        addAltair();
+        addGuideStar(PwfsGuideProbe.pwfs1);
+        addGuideStar(GmosOiwfsGuideProbe.instance);
+        verifyInstrumentConfig(getNorthResults(), "AO2GMOS5_P1_OI");
+    }
+
     @Test public void testAoUpLooking() throws Exception {
         setPort(IssPort.UP_LOOKING);
         addAltair();
         verifyInstrumentConfig(getNorthResults(), "AO2GMOS");
+    }
+
+    @Test public void testSideLookingP2() throws Exception {
+        setPort(IssPort.SIDE_LOOKING);
+        addGuideStar(PwfsGuideProbe.pwfs2);
+        verifyInstrumentConfig(getNorthResults(), "GMOS5_P2");
+    }
+
+    @Test public void testUpLookingP2() throws Exception {
+        setPort(IssPort.UP_LOOKING);
+        addGuideStar(PwfsGuideProbe.pwfs2);
+        verifyInstrumentConfig(getNorthResults(), "GMOS_P2");
     }
 
 }

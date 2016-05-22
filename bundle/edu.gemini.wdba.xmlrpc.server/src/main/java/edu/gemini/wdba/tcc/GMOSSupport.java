@@ -6,7 +6,7 @@ import edu.gemini.spModel.gemini.gmos.InstGmosNorth;
 import edu.gemini.spModel.target.obsComp.PwfsGuideProbe;
 import edu.gemini.spModel.telescope.IssPort;
 
-public class GMOSSupport implements ITccInstrumentSupport {
+public final class GMOSSupport implements ITccInstrumentSupport {
 
     private String _wavelength;
     private ObservationEnvironment _oe;
@@ -56,11 +56,17 @@ public class GMOSSupport implements ITccInstrumentSupport {
     }
 
     public String getTccConfigInstrument() {
-        String side = _oe.isNorth() ? "5" : "3";
-        String port = (((InstGmosCommon) _oe.getInstrument()).getIssPort() == IssPort.UP_LOOKING) ? "" : side;
-        String ao   = (_oe.isNorth() && _oe.isAltair()) ? "AO2" : "";
-        String p2   = (_oe.containsTargets(PwfsGuideProbe.pwfs2)) ? "_P2" : "";
-        return ao + "GMOS" + port + p2;
+        final String side = _oe.isNorth() ? "5" : "3";
+        final String port = (((InstGmosCommon) _oe.getInstrument()).getIssPort() == IssPort.UP_LOOKING) ? "" : side;
+
+        if (_oe.isNorth() && _oe.isAltair()) {
+            final String oi = _oe.containsTargets(GmosOiwfsGuideProbe.instance) ? "_OI" : "";
+            final String p1 = _oe.containsTargets(PwfsGuideProbe.pwfs1) ? "_P1" : "";
+            return "AO2GMOS" + port + p1 + oi;
+        } else {
+            final String p2 = (_oe.containsTargets(PwfsGuideProbe.pwfs2)) ? "_P2" : "";
+            return "GMOS" + port + p2;
+        }
     }
 
     /**
@@ -78,7 +84,7 @@ public class GMOSSupport implements ITccInstrumentSupport {
      * @return String that is the name of a TCC config file.  See WDBA-5.
      */
     public String getTccConfigInstrumentOrigin() {
-        InstGmosCommon<?, ?, ?, ?> inst = (InstGmosCommon) _oe.getInstrument();
+        final InstGmosCommon<?, ?, ?, ?> inst = (InstGmosCommon) _oe.getInstrument();
         return (inst instanceof InstGmosNorth) ? northOrigin(inst) : southOrigin(inst);
     }
 
