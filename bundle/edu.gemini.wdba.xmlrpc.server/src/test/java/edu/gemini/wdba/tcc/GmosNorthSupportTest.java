@@ -6,6 +6,7 @@ package edu.gemini.wdba.tcc;
 
 import edu.gemini.spModel.gemini.altair.AltairParams;
 import edu.gemini.spModel.gemini.gmos.GmosNorthType;
+import edu.gemini.spModel.gemini.gmos.GmosOiwfsGuideProbe;
 import edu.gemini.spModel.gemini.gmos.InstGmosNorth;
 import edu.gemini.spModel.target.obsComp.PwfsGuideProbe;
 import edu.gemini.spModel.telescope.IssPort;
@@ -45,8 +46,27 @@ public final class GmosNorthSupportTest extends InstrumentSupportTestBase<InstGm
         verifyPointOrig(getSouthResults(), "lgs2gmos_p1");
     }
 
+    @Test public void testLgsOiPointOrig() throws Exception {
+        addAltair(AltairParams.Mode.LGS_OI);
+        addGuideStar(GmosOiwfsGuideProbe.instance);
+        verifyPointOrig(getSouthResults(), "lgs2gmos_oi");
+    }
+
+    @Test public void testLgsP1OiPointOrig() throws Exception {
+        addAltair(AltairParams.Mode.LGS_P1);
+        addGuideStar(PwfsGuideProbe.pwfs1);
+        addGuideStar(GmosOiwfsGuideProbe.instance);
+        verifyPointOrig(getSouthResults(), "lgs2gmos_p1_oi");
+    }
+
     @Test public void testNgsPointOrig() throws Exception {
         addAltair(NGS); verifyPointOrig(getSouthResults(), "ngs2gmos");
+    }
+
+    @Test public void testNgsOiPointOrig() throws Exception {
+        addAltair(NGS);
+        addGuideStar(GmosOiwfsGuideProbe.instance);
+        verifyPointOrig(getSouthResults(), "ngs2gmos_oi");
     }
 
     @Test public void testNoAoSideLooking() throws Exception {
