@@ -17,7 +17,7 @@ import static edu.gemini.spModel.gemini.altair.AltairParams.GuideStarType.NGS;
 /**
  * Test cases for GMOS instrument support.
  */
-public class GmosNorthSupportTest extends InstrumentSupportTestBase<InstGmosNorth>{
+public final class GmosNorthSupportTest extends InstrumentSupportTestBase<InstGmosNorth>{
 
     public GmosNorthSupportTest() {
         super(InstGmosNorth.SP_TYPE);

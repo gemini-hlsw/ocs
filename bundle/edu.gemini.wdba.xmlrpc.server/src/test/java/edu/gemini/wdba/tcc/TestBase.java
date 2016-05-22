@@ -16,10 +16,11 @@ import edu.gemini.wdba.glue.WdbaGlueService;
 import edu.gemini.wdba.glue.api.WdbaContext;
 import edu.gemini.wdba.glue.api.WdbaDatabaseAccessService;
 import edu.gemini.wdba.xmlrpc.ITccXmlRpc;
-import junit.framework.TestCase;
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
+import org.junit.After;
+import org.junit.Before;
 
 import java.io.Reader;
 import java.io.StringReader;
@@ -36,7 +37,7 @@ import java.util.*;
  * <b>The property <code>HLPG_PROJECT_BASE</code> must be set to OCS
  * installation dir.</b>
  */
-public abstract class TestBase extends TestCase {
+public abstract class TestBase /*extends TestCase*/ {
 
     protected IDBDatabaseService odb;
 
@@ -52,7 +53,7 @@ public abstract class TestBase extends TestCase {
     final Set<Principal> user = Collections.<Principal>singleton(StaffPrincipal.Gemini());
 
     @SuppressWarnings({"ResultOfMethodCallIgnored"})
-    protected void setUp() throws Exception {
+    @Before public void setUp() throws Exception {
         odb = DBLocalDatabase.createTransient();
 
         progId  = SPProgramID.toProgramID("GS-2009B-Q-1");
@@ -67,7 +68,7 @@ public abstract class TestBase extends TestCase {
         databaseAccessService = new WdbaGlueService(odb, user);
     }
 
-    protected void tearDown() throws Exception {
+    @After public void tearDown() throws Exception {
         odb.getDBAdmin().shutdown();
     }
 

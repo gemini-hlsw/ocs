@@ -12,7 +12,6 @@ import edu.gemini.spModel.gemini.altair.InstAltair;
 import edu.gemini.spModel.gemini.gems.Gems;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.target.SPTarget;
-import edu.gemini.spModel.target.env.GuideEnvironment;
 import edu.gemini.spModel.target.env.GuideGroup;
 import edu.gemini.spModel.target.env.GuideProbeTargets;
 import edu.gemini.spModel.target.env.TargetEnvironment;
@@ -22,6 +21,8 @@ import edu.gemini.spModel.telescope.IssPortProvider;
 import edu.gemini.spModel.util.SPTreeUtil;
 import org.dom4j.Document;
 import org.dom4j.Element;
+import org.junit.Assert;
+import org.junit.Before;
 
 /**
  * Test cases for {@link edu.gemini.wdba.tcc.Flamingos2Support}.
@@ -35,7 +36,7 @@ public abstract class InstrumentSupportTestBase<T extends ISPDataObject> extends
         this.instrumentType = instrumentType;
     }
 
-    protected void setUp() throws Exception {
+    @Before public void setUp() throws Exception {
         super.setUp();
 
         // Add an instrument component to the observation.
@@ -128,17 +129,17 @@ public abstract class InstrumentSupportTestBase<T extends ISPDataObject> extends
 
     protected void verifyPointOrig(Document doc, String expected) throws Exception {
         String actual = getPointOrig(doc);
-        assertEquals(expected, actual);
+        Assert.assertEquals(expected, actual);
     }
 
     protected void verifyInstrumentConfig(Document doc, String expected) throws Exception {
         String actual = getInstrumentConfig(doc);
-        assertEquals("Instrument config mismatch", expected, actual);
+        Assert.assertEquals("Instrument config mismatch", expected, actual);
     }
 
     protected void verifyInstrumentChopConfig(Document doc, String expected) throws Exception {
         String actual = getInstrumentChop(doc);
-        assertEquals("Instrument chop config mismatch", expected, actual);
+        Assert.assertEquals("Instrument chop config mismatch", expected, actual);
     }
 
     protected String getWavelength(Document doc) throws Exception {

@@ -6,6 +6,9 @@ package edu.gemini.wdba.tcc;
 
 import edu.gemini.spModel.gemini.gpi.Gpi;
 
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
 /**
  * Test cases for {@link GpiSupport}.
  */
@@ -15,21 +18,21 @@ public final class GpiSupportTest extends InstrumentSupportTestBase<Gpi> {
         super(Gpi.SP_TYPE);
     }
 
-    public void testName() throws Exception {
+    @Test public void testName() throws Exception {
         Gpi gpi = getInstrument();
         setInstrument(gpi);
 
         verifyInstrumentConfig(getSouthResults(), "GPI");
     }
 
-    public void testChopState() throws Exception {
+    @Test public void testChopState() throws Exception {
         Gpi gpi = getInstrument();
         setInstrument(gpi);
 
         verifyInstrumentChopConfig(getSouthResults(), "NoChop");
     }
 
-    public void testPointOrigin() throws Exception {
+    @Test public void testPointOrigin() throws Exception {
         Gpi gpi = getInstrument();
         gpi.setAdc(Gpi.Adc.IN);
         setInstrument(gpi);
@@ -42,7 +45,7 @@ public final class GpiSupportTest extends InstrumentSupportTestBase<Gpi> {
         verifyPointOrig(getSouthResults(), "gpi");
     }
 
-    public void testWavelength() throws Exception {
+    @Test public void testWavelength() throws Exception {
         Gpi gpi = getInstrument();
         setInstrument(gpi);
 

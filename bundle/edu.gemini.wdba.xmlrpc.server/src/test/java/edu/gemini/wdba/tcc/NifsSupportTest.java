@@ -6,6 +6,7 @@ import edu.gemini.spModel.gemini.altair.AltairParams;
 import edu.gemini.spModel.gemini.nifs.InstNIFS;
 import edu.gemini.spModel.gemini.nifs.NIFSParams;
 import org.junit.Test;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Test cases for NIFS instrument support.

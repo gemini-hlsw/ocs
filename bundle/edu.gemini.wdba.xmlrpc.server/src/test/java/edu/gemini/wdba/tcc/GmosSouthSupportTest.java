@@ -14,7 +14,7 @@ import org.junit.Test;
 /**
  * Test cases for GMOS instrument support.
  */
-public class GmosSouthSupportTest extends InstrumentSupportTestBase<InstGmosSouth>{
+public final class GmosSouthSupportTest extends InstrumentSupportTestBase<InstGmosSouth>{
 
     public GmosSouthSupportTest() {
         super(InstGmosSouth.SP_TYPE);

@@ -14,6 +14,10 @@ import org.dom4j.Document;
 import org.dom4j.Element;
 import scala.collection.JavaConversions$;
 
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
+
 import java.util.*;
 
 /**
@@ -26,7 +30,7 @@ public final class TargetMagnitudeTest extends TestBase {
     private SPTarget pwfs1_1;
     private TargetEnvironment env;
 
-    protected void setUp() throws Exception {
+    @Before public void setUp() throws Exception {
         super.setUp();
 
         final SPTarget base = new SPTarget();
@@ -40,23 +44,23 @@ public final class TargetMagnitudeTest extends TestBase {
         env = TargetEnvironment.create(base).setPrimaryGuideGroup(grp);
     }
 
-    public void testNoMagnitudeInfo() throws Exception {
+    @Test public void testNoMagnitudeInfo() throws Exception {
         testTargetEnvironment(env);
     }
 
-    public void testOneMagnitude() throws Exception {
+    @Test public void testOneMagnitude() throws Exception {
         pwfs1_1.putMagnitude(new Magnitude(10, MagnitudeBand.J$.MODULE$));
         testTargetEnvironment(env);
     }
 
-    public void testNonSiderealMagnitude() throws Exception {
+    @Test public void testNonSiderealMagnitude() throws Exception {
         pwfs1_1.putMagnitude(new Magnitude(10, MagnitudeBand.J$.MODULE$));
         pwfs1_1.setNonSidereal();
         pwfs1_1.setName("PWFS1-1");
         testTargetEnvironment(env);
     }
 
-    public void testTwoMagnitudes() throws Exception {
+    @Test public void testTwoMagnitudes() throws Exception {
         pwfs1_1.putMagnitude(new Magnitude(10, MagnitudeBand.J$.MODULE$));
         pwfs1_1.putMagnitude(new Magnitude(10, MagnitudeBand.K$.MODULE$));
         testTargetEnvironment(env);

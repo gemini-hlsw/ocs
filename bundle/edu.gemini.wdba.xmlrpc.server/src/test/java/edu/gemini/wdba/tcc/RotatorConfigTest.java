@@ -16,6 +16,9 @@ import edu.gemini.spModel.gemini.niri.InstNIRI;
 import org.dom4j.Document;
 import org.dom4j.Element;
 
+import static org.junit.Assert.*;
+import org.junit.Test;
+
 import java.util.List;
 
 /**
@@ -149,7 +152,7 @@ public class RotatorConfigTest extends TestBase {
 
     }
 
-    public void testPosAngle() throws Exception {
+    @Test public void testPosAngle() throws Exception {
         InstGmosSouth gmos = addGmos();
         gmos.setPosAngle(10.5);
         instObsComp.setDataObject(gmos);
@@ -163,7 +166,7 @@ public class RotatorConfigTest extends TestBase {
         val.validate();
     }
 
-    public void testAltairPosAngle() throws Exception {
+    @Test public void testAltairPosAngle() throws Exception {
         InstNIRI niri = addNiri();
         niri.setPosAngle(10.5);
         instObsComp.setDataObject(niri);
@@ -180,7 +183,7 @@ public class RotatorConfigTest extends TestBase {
         val.validate();
     }
 
-    public void testAltairFixed() throws Exception {
+    @Test public void testAltairFixed() throws Exception {
         InstNIRI niri = addNiri();
         niri.setPosAngle(10.5);
         instObsComp.setDataObject(niri);
@@ -195,7 +198,7 @@ public class RotatorConfigTest extends TestBase {
         assertEquals(0, getTccFieldContainedParamSet(res, "rotator").size());
     }
 
-    public void testNiciFixed() throws Exception {
+    @Test public void testNiciFixed() throws Exception {
         InstNICI nici = addNici();
         nici.setPosAngle(10.5);
         nici.setCassRotator(NICIParams.CassRotator.FIXED);
@@ -210,7 +213,7 @@ public class RotatorConfigTest extends TestBase {
         val.validate();
     }
 
-    public void testNiciPosAngle() throws Exception {
+    @Test public void testNiciPosAngle() throws Exception {
         InstNICI nici = addNici();
         nici.setCassRotator(NICIParams.CassRotator.FOLLOW);
         nici.setPosAngle(10.5);
@@ -225,7 +228,7 @@ public class RotatorConfigTest extends TestBase {
         val.validate();
     }
 
-    public void testGpiFixed() throws Exception {
+    @Test public void testGpiFixed() throws Exception {
         Gpi gpi = addGpi();
         instObsComp.setDataObject(gpi);
 
@@ -238,7 +241,7 @@ public class RotatorConfigTest extends TestBase {
         val.validate();
     }
 
-    public void testGpiPosAngle0() throws Exception {
+    @Test public void testGpiPosAngle0() throws Exception {
         Gpi gpi = addGpi();
         gpi.setPosAngle(0);
         instObsComp.setDataObject(gpi);
@@ -252,7 +255,7 @@ public class RotatorConfigTest extends TestBase {
         val.validate();
     }
 
-    public void testGpiPosAngle180() throws Exception {
+    @Test public void testGpiPosAngle180() throws Exception {
         Gpi gpi = addGpi();
         gpi.setPosAngle(180);
         instObsComp.setDataObject(gpi);

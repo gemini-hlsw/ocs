@@ -20,6 +20,10 @@ import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import org.dom4j.Document;
 import org.dom4j.Element;
 
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
+
 import java.util.*;
 
 /**
@@ -38,7 +42,7 @@ public final class TargetGroupTest extends TestBase {
     private NameMap nameMap;
     private SPTarget base, pwfs1_1, pwfs1_2, pwfs2_1, pwfs2_2;
 
-    protected void setUp() throws Exception {
+    @Before public void setUp() throws Exception {
         super.setUp();
         nameMap = new NameMap();
 
@@ -59,7 +63,7 @@ public final class TargetGroupTest extends TestBase {
     /**
      * Single unamed base position.
      */
-    public void testUnamedBase() throws Exception {
+    @Test public void testUnamedBase() throws Exception {
         final SPTarget base = new SPTarget();
         base.setName("");
         nameMap.putTargetName(base, TccNames.BASE);
@@ -69,14 +73,14 @@ public final class TargetGroupTest extends TestBase {
     /**
      * Single unamed base position.
      */
-    public void testNamedBase() throws Exception {
+    @Test public void testNamedBase() throws Exception {
         testTargetEnvironment(TargetEnvironment.create(base));
     }
 
     /**
      * An unamed base and user target.
      */
-    public void testUnamedBaseAndUser() throws Exception {
+    @Test public void testUnamedBaseAndUser() throws Exception {
         final SPTarget base = new SPTarget(); base.setName("");
         final SPTarget user = new SPTarget(); user.setName("");
         final ImList<SPTarget> userTargets = ImCollections.singletonList(user);
@@ -100,35 +104,35 @@ public final class TargetGroupTest extends TestBase {
     /**
      * A base position and single guide target for single guider.
      */
-    public void testSingleGuideTargetSingleGuider() throws Exception {
+    @Test public void testSingleGuideTargetSingleGuider() throws Exception {
         testSingleGuider(pwfs2_1);
     }
 
     /**
      * A base position and multiple guide targets for a single guider.
      */
-    public void testMultipleGuideTargetsSingleGuider() throws Exception {
+    @Test public void testMultipleGuideTargetsSingleGuider() throws Exception {
         testSingleGuider(pwfs2_1, pwfs2_2);
     }
 
     /**
      * Using the second guide star as the primary wfs star.
      */
-    public void testNonDefaultPrimary() throws Exception {
+    @Test public void testNonDefaultPrimary() throws Exception {
         testSingleGuider(pwfs2_1, pwfs2_2);
     }
 
     /**
      * Having no primary guide star.
      */
-    public void testNoExplicitPrimary() throws Exception {
+    @Test public void testNoExplicitPrimary() throws Exception {
         testSingleGuider(pwfs2_1, pwfs2_2);
     }
 
     /**
      * Disabled guide targets.
      */
-    public void testDisabledGuideTargets() throws Exception {
+    @Test public void testDisabledGuideTargets() throws Exception {
 
         // Add a GMOS-S component so that the guider is available.
         final ISPObsComponent gmosComp = odb.getFactory().createObsComponent(prog, InstGmosSouth.SP_TYPE, null);
@@ -150,7 +154,7 @@ public final class TargetGroupTest extends TestBase {
         testTargetEnvironment(env);
     }
 
-    public void testMultipleGuiders() throws Exception {
+    @Test public void testMultipleGuiders() throws Exception {
         // Create the target environment with multiple guiders.
         final ImList<SPTarget> targetList1 = DefaultImList.create(pwfs1_1, pwfs1_2);
         final GuideProbeTargets pwfs1 = GuideProbeTargets.create(PwfsGuideProbe.pwfs1, targetList1);
@@ -162,7 +166,7 @@ public final class TargetGroupTest extends TestBase {
         testTargetEnvironment(env);
     }
 
-    public void testNoPrimary() throws Exception {
+    @Test public void testNoPrimary() throws Exception {
         // Create the target environment with multiple guiders.
         final ImList<SPTarget> targetList1 = DefaultImList.create(pwfs1_1, pwfs1_2);
         final GuideProbeTargets pwfs1 = GuideProbeTargets.create(PwfsGuideProbe.pwfs1, targetList1);
@@ -174,7 +178,7 @@ public final class TargetGroupTest extends TestBase {
         testTargetEnvironment(env);
     }
 
-    public void testOiwfsMapping() throws Exception {
+    @Test public void testOiwfsMapping() throws Exception {
         // Create a target environment that uses an instrument OIWFS.
         final SPTarget oiwfsTarget = new SPTarget(); oiwfsTarget.setName("");
 
@@ -195,7 +199,7 @@ public final class TargetGroupTest extends TestBase {
         testTargetEnvironment(env);
     }
 
-    public void testGsaoiOdgwMapping() throws Exception {
+    @Test public void testGsaoiOdgwMapping() throws Exception {
         // Create a target environment that uses an instrument OIWFS.
         final SPTarget odgwTarget = new SPTarget(); odgwTarget.setName("");
 
@@ -216,7 +220,7 @@ public final class TargetGroupTest extends TestBase {
         testTargetEnvironment(env);
     }
 
-    public void testAowfsMapping() throws Exception {
+    @Test public void testAowfsMapping() throws Exception {
         // Create a target environment that uses the altair AOWFS.
         final SPTarget aowfsTarget = new SPTarget(); aowfsTarget.setName("");
 
@@ -237,7 +241,7 @@ public final class TargetGroupTest extends TestBase {
         testTargetEnvironment(env);
     }
 
-    public void testGemsMapping() throws Exception {
+    @Test public void testGemsMapping() throws Exception {
         // Create a target environment that uses Gems canopus wfs.
         final SPTarget cwfsTarget = new SPTarget(); cwfsTarget.setName("");
 
@@ -259,7 +263,7 @@ public final class TargetGroupTest extends TestBase {
     }
 
 
-    public void testDefaultGroupName() throws Exception {
+    @Test public void testDefaultGroupName() throws Exception {
         final ImList<SPTarget> targetList1 = ImCollections.singletonList(pwfs1_1);
         final GuideProbeTargets gpt_pwfs1_1 = GuideProbeTargets.create(PwfsGuideProbe.pwfs1, targetList1);
         final ImList<GuideProbeTargets> gpt1 = ImCollections.singletonList(gpt_pwfs1_1);

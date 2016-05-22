@@ -15,6 +15,7 @@ import edu.gemini.spModel.target.obsComp.PwfsGuideProbe;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.telescope.IssPort;
 import org.junit.Test;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -68,7 +69,7 @@ public final class Flamingos2SupportTest extends InstrumentSupportTestBase<Flami
         targetNode.getRemoteNode().setDataObject(obsComp);
     }
 
-    public void testF2_SIDE() throws Exception {
+    @Test public void testF2_SIDE() throws Exception {
         final Flamingos2 flam2 = getInstrument();
         flam2.setIssPort(IssPort.SIDE_LOOKING);
         assertEquals(flam2.getDisperser(), Flamingos2.Disperser.NONE);
@@ -77,7 +78,7 @@ public final class Flamingos2SupportTest extends InstrumentSupportTestBase<Flami
         verifyInstrumentConfig(getSouthResults(), "F25");
     }
 
-    public void testF2_UP() throws Exception {
+    @Test public void testF2_UP() throws Exception {
         final Flamingos2 flam2 = getInstrument();
         flam2.setIssPort(IssPort.UP_LOOKING);
         assertEquals(flam2.getDisperser(), Flamingos2.Disperser.NONE);
@@ -96,7 +97,7 @@ public final class Flamingos2SupportTest extends InstrumentSupportTestBase<Flami
         verifyInstrumentConfig(getSouthResults(), "F25_P2");
     }
 
-    public void testF2_P2_UP() throws Exception {
+    @Test public void testF2_P2_UP() throws Exception {
         final Flamingos2 flam2 = getInstrument();
         flam2.setIssPort(IssPort.UP_LOOKING);
         assertEquals(flam2.getDisperser(), Flamingos2.Disperser.NONE);
@@ -106,7 +107,7 @@ public final class Flamingos2SupportTest extends InstrumentSupportTestBase<Flami
         verifyInstrumentConfig(getSouthResults(), "F2_P2");
     }
 
-    public void testF2_SIDE_SPEC() throws Exception {
+    @Test public void testF2_SIDE_SPEC() throws Exception {
         final Flamingos2 flam2 = getInstrument();
         flam2.setIssPort(IssPort.SIDE_LOOKING);
         flam2.setDisperser(Flamingos2.Disperser.R3000);
@@ -115,7 +116,7 @@ public final class Flamingos2SupportTest extends InstrumentSupportTestBase<Flami
         verifyInstrumentConfig(getSouthResults(), "F25");
     }
 
-    public void testF2_UP_SPEC() throws Exception {
+    @Test public void testF2_UP_SPEC() throws Exception {
         final Flamingos2 flam2 = getInstrument();
         flam2.setIssPort(IssPort.UP_LOOKING);
         flam2.setDisperser(Flamingos2.Disperser.R3000);
@@ -125,7 +126,7 @@ public final class Flamingos2SupportTest extends InstrumentSupportTestBase<Flami
     }
 
     @SuppressWarnings({"ResultOfMethodCallIgnored","unchecked","rawtypes"})
-    public void testWavelength() throws Exception {
+    @Test public void testWavelength() throws Exception {
         final Flamingos2 flam2 = getInstrument();
         flam2.setFilter(Filter.OPEN);
         flam2.setDisperser(Disperser.NONE);
@@ -189,11 +190,11 @@ public final class Flamingos2SupportTest extends InstrumentSupportTestBase<Flami
         }
     }
 
-    public void testNoAoPointOrig() throws Exception {
+    @Test public void testNoAoPointOrig() throws Exception {
         verifyPointOrig(getSouthResults(), "f2");
     }
 
-    public void testLgsPointOrig() throws Exception {
+    @Test public void testLgsPointOrig() throws Exception {
         addGems();
         verifyPointOrig(getSouthResults(), "lgs2f2");
     }
