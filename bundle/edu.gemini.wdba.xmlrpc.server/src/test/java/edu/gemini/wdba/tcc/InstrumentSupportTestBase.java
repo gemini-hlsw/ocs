@@ -10,8 +10,16 @@ import edu.gemini.spModel.data.ISPDataObject;
 import edu.gemini.spModel.gemini.altair.AltairParams;
 import edu.gemini.spModel.gemini.altair.InstAltair;
 import edu.gemini.spModel.gemini.gems.Gems;
+import edu.gemini.spModel.guide.GuideProbe;
+import edu.gemini.spModel.target.SPTarget;
+import edu.gemini.spModel.target.env.GuideEnvironment;
+import edu.gemini.spModel.target.env.GuideGroup;
+import edu.gemini.spModel.target.env.GuideProbeTargets;
+import edu.gemini.spModel.target.env.TargetEnvironment;
+import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.telescope.IssPort;
 import edu.gemini.spModel.telescope.IssPortProvider;
+import edu.gemini.spModel.util.SPTreeUtil;
 import org.dom4j.Document;
 import org.dom4j.Element;
 
@@ -51,6 +59,31 @@ public abstract class InstrumentSupportTestBase<T extends ISPDataObject> extends
         public void store() throws Exception {
             obsComp.setDataObject(dataObject);
         }
+    }
+
+    protected TargetEnvironment getTargetEnvironment() {
+        final ISPObsComponent oc = SPTreeUtil.findTargetEnvNode(obs);
+        @SuppressWarnings("ConstantConditions")
+        final TargetObsComp toc  = (TargetObsComp) oc.getDataObject();
+        return toc.getTargetEnvironment();
+    }
+
+    protected void setTargetEnvironment(TargetEnvironment env) {
+        final ISPObsComponent oc = SPTreeUtil.findTargetEnvNode(obs);
+        @SuppressWarnings("ConstantConditions")
+        final TargetObsComp toc  = (TargetObsComp) oc.getDataObject();
+        toc.setTargetEnvironment(env);
+        oc.setDataObject(toc);
+    }
+
+    protected void addGuideStar(GuideProbe probe) {
+        TargetEnvironment env = getTargetEnvironment();
+        GuideGroup        grp = env.getPrimaryGuideGroup();
+        if (grp.isAutomatic()) {
+            grp = GuideGroup.create("Manual Group");
+            env = env.setGuideEnvironment(env.getGuideEnvironment().setOptions(env.getGroups().append(grp))).setPrimaryGuideGroup(grp);
+        }
+        setTargetEnvironment(env.putPrimaryGuideProbeTargets(GuideProbeTargets.create(probe, new SPTarget())));
     }
 
     protected ObsComponentPair<InstAltair> addAltair() throws Exception {

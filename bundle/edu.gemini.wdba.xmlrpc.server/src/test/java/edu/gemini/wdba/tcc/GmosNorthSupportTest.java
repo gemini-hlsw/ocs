@@ -7,6 +7,7 @@ package edu.gemini.wdba.tcc;
 import edu.gemini.spModel.gemini.altair.AltairParams;
 import edu.gemini.spModel.gemini.gmos.GmosNorthType;
 import edu.gemini.spModel.gemini.gmos.InstGmosNorth;
+import edu.gemini.spModel.target.obsComp.PwfsGuideProbe;
 import edu.gemini.spModel.telescope.IssPort;
 import org.junit.Test;
 
@@ -40,6 +41,7 @@ public class GmosNorthSupportTest extends InstrumentSupportTestBase<InstGmosNort
 
     @Test public void testLgsP1PointOrig() throws Exception {
         addAltair(AltairParams.Mode.LGS_P1);
+        addGuideStar(PwfsGuideProbe.pwfs1);
         verifyPointOrig(getSouthResults(), "lgs2gmos_p1");
     }
 
