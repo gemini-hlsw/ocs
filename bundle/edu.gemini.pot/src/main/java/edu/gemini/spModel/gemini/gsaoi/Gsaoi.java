@@ -9,7 +9,6 @@ import edu.gemini.spModel.config.injector.obswavelength.ObsWavelengthCalc1;
 import edu.gemini.spModel.config2.Config;
 import edu.gemini.spModel.config2.ItemKey;
 import edu.gemini.spModel.core.BandsList;
-import edu.gemini.spModel.core.Magnitude;
 import edu.gemini.spModel.core.MagnitudeBand;
 import edu.gemini.spModel.core.SingleBand;
 import edu.gemini.spModel.core.Site;
@@ -422,7 +421,6 @@ public final class Gsaoi extends SPInstObsComp implements PropertyProvider, Guid
 
     }
 
-
     private static final String VERSION = "2011A-1";
 
     public static final SPComponentType SP_TYPE =
@@ -430,9 +428,12 @@ public final class Gsaoi extends SPInstObsComp implements PropertyProvider, Guid
 
     public static final String INSTRUMENT_NAME_PROP = "GSAOI";
 
-    // REL-1103
-    public static final double GUIDED_OFFSET_OVERHEAD = 30.0; // sec
-    public static final CategorizedTime GUIDED_OFFSET_OVERHEAD_CATEGORIZED_TIME =
+    // REL-2645 offset overhead is 15 secs
+    private static final double GUIDED_OFFSET_OVERHEAD = 15.0; // sec
+    private static final int MCAO_SETUP_TIME = 30; // min
+    private static final int GSAOI_REACQUISITION_TIME = 10; // min
+
+    private static final CategorizedTime GUIDED_OFFSET_OVERHEAD_CATEGORIZED_TIME =
             CategorizedTime.fromSeconds(Category.CONFIG_CHANGE, GUIDED_OFFSET_OVERHEAD, OffsetOverheadCalculator.DETAIL);
 
     public static final PropertyDescriptor FILTER_PROP;
@@ -627,7 +628,7 @@ public final class Gsaoi extends SPInstObsComp implements PropertyProvider, Guid
      * @return time in seconds
      */
     public double getSetupTime(ISPObservation obs) {
-        return 30 * 60;//MCAO setup time: 30m
+        return MCAO_SETUP_TIME * 60;//MCAO setup time: 30m
     }
 
     /**
@@ -637,7 +638,7 @@ public final class Gsaoi extends SPInstObsComp implements PropertyProvider, Guid
      * @return time in seconds
      */
     public double getReacquisitionTime(ISPObservation obs) {
-        return 10 * 60; // 10 mins as defined in REL-1346
+        return GSAOI_REACQUISITION_TIME * 60; // 10 mins as defined in REL-1346
     }
 
     public static CategorizedTime getWheelMoveOverhead() {
