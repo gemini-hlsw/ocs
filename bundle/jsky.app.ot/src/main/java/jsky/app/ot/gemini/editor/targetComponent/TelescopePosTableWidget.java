@@ -1137,16 +1137,17 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
      * Selects the relevant row in the table.
      */
     private void _setSelectedRow(final int index) {
-        if ((index < 0) || (index >= getRowCount())) return;
-        getSelectionModel().setSelectionInterval(index, index);
+        if ((index < 0) || (index >= getRowCount())) {
+            getSelectionModel().setSelectionInterval(0, 0);
+        } else {
+            getSelectionModel().setSelectionInterval(index, index);
+        }
     }
 
     void setIgnoreSelection(boolean ignore) {
         _ignoreSelection = ignore;
     }
 
-    /**
-     */
     public String toString() {
         final String head = getClass().getName() + "[\n";
         String body = "";
