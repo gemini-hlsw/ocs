@@ -2,7 +2,7 @@
 <!DOCTYPE document PUBLIC "-//Gemini Observatory//DTD for Storage of P1 and P2 Documents//EN" "http://ftp.gemini.edu/Support/xml/dtds/SpXML2.dtd">
 
 <document>
-  <container kind="program" type="Program" version="2015B-1" subtype="basic" key="8be6cf9b-6442-4546-b603-f20d88d6a6a7" name="F2-BP">
+  <container kind="program" type="Program" version="2016A-1" subtype="basic" key="8be6cf9b-6442-4546-b603-f20d88d6a6a7" name="F2-BP">
     <paramset name="Science Program" kind="dataObj">
       <param name="title" value="FLAMINGOS-2 PHASE I/II MAPPING BPS"/>
       <param name="programMode" value="QUEUE"/>
@@ -38,7 +38,7 @@
 2013-Jun-28: Add templates and some examples (astephens)
 2013-Nov-25: Added a F2 iterator to setup GCALs as bright read mode.
 2015-Oct-07: Add arcs to Telluric standards (rdiaz)
-
+2016-Feb-10: Put ABBA offsets into Repeat iterators.  Change Tellurc "Night Baseline GCAL" to Arc. (astephens)
 </value>
         </param>
       </paramset>
@@ -354,15 +354,9 @@
                 <param name="pm1" value="0.0" units="milli-arcsecs/year"/>
                 <param name="pm2" value="0.0" units="milli-arcsecs/year"/>
                 <param name="parallax" value="0.0" units="arcsecs"/>
-                <param name="rv" value="0.0" units="km/sec"/>
+                <param name="z" value="0.0"/>
               </paramset>
-              <paramset name="guideEnv">
-                <param name="active">
-                  <value sequence="0">FII OIWFS</value>
-                  <value sequence="1">PWFS1</value>
-                  <value sequence="2">PWFS2</value>
-                </param>
-              </paramset>
+              <paramset name="guideEnv"/>
             </paramset>
           </paramset>
         </container>
@@ -448,10 +442,31 @@
 
 8. Please attach finder charts via the OT "File Attachment" tab.
 
-9. There is no need to include the darks, these are taken on a weekly basis.
+9. There is no need to include the darks; these are taken on a weekly basis.
 
 10. Feel free to include a note with any any special advice for the observer.
 </value>
+          </param>
+        </paramset>
+      </container>
+      <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="7edd72bf-3eb0-4725-9dbb-43feecd6494c" name="Note">
+        <paramset name="Note" kind="dataObj">
+          <param name="title" value="Repeats contain the ABBA offsets"/>
+          <param name="NoteText">
+            <value>The standard strategy for point like or compact objects involves the use of ABBA offsets. In this template, a Repeat iterator contains the ABBA offsets, in this way the offset strategy is conserved in each Repeat iteration (e.g. ABBAABBAABBA).
+
+However, different approaches are possible: some PI's observing bright objects want to have the repeat a few times in each offset, in order to save overhead time (i.e. AAABBBAAABBB).  After a couple of minutes of short spectral exposures in the same node, the telescope is moved to next node. Other strategies involve using ABABABAB offsets because the sky contribution is modeled and uniform time sampling is needed.
+
+Any offset strategy must take into account that the sky emission lines can vary significatively in scales of 2 to 5 minutes.
+</value>
+          </param>
+        </paramset>
+      </container>
+      <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="e6f7dd86-c65c-49b8-8fc1-0a1457d956df" name="Note">
+        <paramset name="Note" kind="dataObj">
+          <param name="title" value="Use same PA for science and Telluric"/>
+          <param name="NoteText">
+            <value>Using the same position angle for the science and Telluric standard will save telescope time, and will also diminish the effect of flexure.</value>
           </param>
         </paramset>
       </container>
@@ -643,41 +658,46 @@
               <param name="exposureTime" value="30.0"/>
               <param name="filter" value="H"/>
             </paramset>
-            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="c309735b-eeb6-4fda-bd88-1ae3ce30cf56" name="Offset">
-              <paramset name="Offset" kind="dataObj">
-                <param name="title" value="ABBA 15&quot; Offsets"/>
-                <paramset name="offsets">
-                  <paramset name="Offset1" sequence="0">
-                    <param name="p" value="0.0"/>
-                    <param name="q" value="15.0"/>
-                    <param name="defaultGuideOption" value="on"/>
-                  </paramset>
-                  <paramset name="Offset5" sequence="1">
-                    <param name="p" value="0.0"/>
-                    <param name="q" value="-15.0"/>
-                    <param name="defaultGuideOption" value="on"/>
-                  </paramset>
-                  <paramset name="Offset4" sequence="2">
-                    <param name="p" value="0.0"/>
-                    <param name="q" value="-15.0"/>
-                    <param name="defaultGuideOption" value="on"/>
-                  </paramset>
-                  <paramset name="Offset2" sequence="3">
-                    <param name="p" value="0.0"/>
-                    <param name="q" value="15.0"/>
-                    <param name="defaultGuideOption" value="on"/>
-                  </paramset>
-                </paramset>
+            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="repeat" key="549db403-9de3-4faf-9959-149aa5a7cf21" name="Repeat">
+              <paramset name="Repeat" kind="dataObj">
+                <param name="repeatCount" value="1"/>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="bd249857-eace-453f-a787-8292638e1c33" name="Observe">
-                <paramset name="Observe" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="class" value="PARTNER_CAL"/>
+              <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="c309735b-eeb6-4fda-bd88-1ae3ce30cf56" name="Offset">
+                <paramset name="Offset" kind="dataObj">
+                  <param name="title" value="ABBA 15&quot; Offsets"/>
+                  <paramset name="offsets">
+                    <paramset name="Offset1" sequence="0">
+                      <param name="p" value="0.0"/>
+                      <param name="q" value="15.0"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                    <paramset name="Offset5" sequence="1">
+                      <param name="p" value="0.0"/>
+                      <param name="q" value="-15.0"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                    <paramset name="Offset4" sequence="2">
+                      <param name="p" value="0.0"/>
+                      <param name="q" value="-15.0"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                    <paramset name="Offset2" sequence="3">
+                      <param name="p" value="0.0"/>
+                      <param name="q" value="15.0"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                  </paramset>
                 </paramset>
+                <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="bd249857-eace-453f-a787-8292638e1c33" name="Observe">
+                  <paramset name="Observe" kind="dataObj">
+                    <param name="repeatCount" value="1"/>
+                    <param name="class" value="PARTNER_CAL"/>
+                  </paramset>
+                </container>
               </container>
             </container>
-            <container kind="seqComp" type="Observer" version="2009A-1" subtype="BaselineNight" key="c4d0222e-78a8-4232-8afe-b093f3055b20" name="Night Baseline GCAL">
-              <paramset name="Night Baseline GCAL" kind="dataObj">
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartArc" key="cca7dd29-7f91-4581-823b-34e05347c8f1" name="Arc">
+              <paramset name="Arc" kind="dataObj">
                 <param name="repeatCount" value="1"/>
                 <param name="coadds" value="1"/>
                 <param name="exposureTime" value="10.0"/>
@@ -1020,42 +1040,47 @@
               <param name="exposureTime" value="300.0"/>
               <param name="filter" value="H"/>
             </paramset>
-            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="41e436db-5b18-45f9-92f9-ba63c93417ae" name="Offset">
-              <paramset name="Offset" kind="dataObj">
-                <param name="title" value="ABBA 10&quot; Offsets"/>
-                <paramset name="offsets">
-                  <paramset name="Offset0" sequence="0">
-                    <param name="p" value="0.0"/>
-                    <param name="q" value="10.0"/>
-                    <param name="defaultGuideOption" value="on"/>
-                  </paramset>
-                  <paramset name="Offset1" sequence="1">
-                    <param name="p" value="0.0"/>
-                    <param name="q" value="-10.0"/>
-                    <param name="defaultGuideOption" value="on"/>
-                  </paramset>
-                  <paramset name="Offset2" sequence="2">
-                    <param name="p" value="0.0"/>
-                    <param name="q" value="-10.0"/>
-                    <param name="defaultGuideOption" value="on"/>
-                  </paramset>
-                  <paramset name="Offset3" sequence="3">
-                    <param name="p" value="0.0"/>
-                    <param name="q" value="10.0"/>
-                    <param name="defaultGuideOption" value="on"/>
-                  </paramset>
-                </paramset>
+            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="repeat" key="80fc2c3c-72cd-4991-af26-986093b3a048" name="Repeat">
+              <paramset name="Repeat" kind="dataObj">
+                <param name="repeatCount" value="1"/>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="189881a8-073f-4048-b839-ee5a4a600770" name="Observe">
-                <paramset name="Observe" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="class" value="SCIENCE"/>
+              <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="41e436db-5b18-45f9-92f9-ba63c93417ae" name="Offset">
+                <paramset name="Offset" kind="dataObj">
+                  <param name="title" value="ABBA 10&quot; Offsets"/>
+                  <paramset name="offsets">
+                    <paramset name="Offset0" sequence="0">
+                      <param name="p" value="0.0"/>
+                      <param name="q" value="10.0"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                    <paramset name="Offset1" sequence="1">
+                      <param name="p" value="0.0"/>
+                      <param name="q" value="-10.0"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                    <paramset name="Offset2" sequence="2">
+                      <param name="p" value="0.0"/>
+                      <param name="q" value="-10.0"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                    <paramset name="Offset3" sequence="3">
+                      <param name="p" value="0.0"/>
+                      <param name="q" value="10.0"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                  </paramset>
                 </paramset>
+                <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="189881a8-073f-4048-b839-ee5a4a600770" name="Observe">
+                  <paramset name="Observe" kind="dataObj">
+                    <param name="repeatCount" value="1"/>
+                    <param name="class" value="SCIENCE"/>
+                  </paramset>
+                </container>
               </container>
             </container>
             <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="c48be3b2-e9cd-4ac7-8642-7216f74da2b2" name="Flamingos2 Sequence">
               <paramset name="Flamingos2 Sequence" kind="dataObj">
-                <param name="title" value="Flamingos2: GCAL sequence"/>
+                <param name="title" value="Flamingos2: GCAL Sequence"/>
                 <param name="readMode" value="BRIGHT_OBJECT_SPEC"/>
               </paramset>
               <container kind="seqComp" type="Observer" version="2009A-1" subtype="BaselineNight" key="f54aac7b-426a-41ea-9de3-3d3975cca05e" name="Night Baseline GCAL">
@@ -1121,62 +1146,67 @@
               <param name="exposureTime" value="300.0"/>
               <param name="filter" value="H"/>
             </paramset>
-            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="25277d64-66fd-4efb-b40a-71c199372380" name="Offset">
-              <paramset name="Offset" kind="dataObj">
-                <param name="title" value="Offsets"/>
-                <paramset name="offsets">
-                  <paramset name="Offset0" sequence="0">
-                    <param name="p" value="0.0"/>
-                    <param name="q" value="10.0"/>
-                    <param name="defaultGuideOption" value="on"/>
-                  </paramset>
-                  <paramset name="Offset1" sequence="1">
-                    <param name="p" value="0.0"/>
-                    <param name="q" value="-10.0"/>
-                    <param name="defaultGuideOption" value="on"/>
-                  </paramset>
-                  <paramset name="Offset4" sequence="2">
-                    <param name="p" value="300.0"/>
-                    <param name="q" value="0.0"/>
-                    <param name="defaultGuideOption" value="off"/>
-                  </paramset>
-                  <paramset name="Offset5" sequence="3">
-                    <param name="p" value="310.0"/>
-                    <param name="q" value="0.0"/>
-                    <param name="defaultGuideOption" value="off"/>
-                  </paramset>
-                  <paramset name="Offset2" sequence="4">
-                    <param name="p" value="0.0"/>
-                    <param name="q" value="-10.0"/>
-                    <param name="defaultGuideOption" value="on"/>
-                  </paramset>
-                  <paramset name="Offset3" sequence="5">
-                    <param name="p" value="0.0"/>
-                    <param name="q" value="10.0"/>
-                    <param name="defaultGuideOption" value="on"/>
-                  </paramset>
-                  <paramset name="Offset6" sequence="6">
-                    <param name="p" value="-300.0"/>
-                    <param name="q" value="0.0"/>
-                    <param name="defaultGuideOption" value="off"/>
-                  </paramset>
-                  <paramset name="Offset7" sequence="7">
-                    <param name="p" value="-310.0"/>
-                    <param name="q" value="0.0"/>
-                    <param name="defaultGuideOption" value="off"/>
-                  </paramset>
-                </paramset>
+            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="repeat" key="2272b975-9156-4d79-baed-b67b80bd0852" name="Repeat">
+              <paramset name="Repeat" kind="dataObj">
+                <param name="repeatCount" value="1"/>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="9ff20ce6-5215-41e8-a4e5-c84a6fb52214" name="Observe">
-                <paramset name="Observe" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="class" value="SCIENCE"/>
+              <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="25277d64-66fd-4efb-b40a-71c199372380" name="Offset">
+                <paramset name="Offset" kind="dataObj">
+                  <param name="title" value="Offsets"/>
+                  <paramset name="offsets">
+                    <paramset name="Offset0" sequence="0">
+                      <param name="p" value="0.0"/>
+                      <param name="q" value="10.0"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                    <paramset name="Offset1" sequence="1">
+                      <param name="p" value="0.0"/>
+                      <param name="q" value="-10.0"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                    <paramset name="Offset4" sequence="2">
+                      <param name="p" value="300.0"/>
+                      <param name="q" value="0.0"/>
+                      <param name="defaultGuideOption" value="off"/>
+                    </paramset>
+                    <paramset name="Offset5" sequence="3">
+                      <param name="p" value="310.0"/>
+                      <param name="q" value="0.0"/>
+                      <param name="defaultGuideOption" value="off"/>
+                    </paramset>
+                    <paramset name="Offset2" sequence="4">
+                      <param name="p" value="0.0"/>
+                      <param name="q" value="-10.0"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                    <paramset name="Offset3" sequence="5">
+                      <param name="p" value="0.0"/>
+                      <param name="q" value="10.0"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                    <paramset name="Offset6" sequence="6">
+                      <param name="p" value="-300.0"/>
+                      <param name="q" value="0.0"/>
+                      <param name="defaultGuideOption" value="off"/>
+                    </paramset>
+                    <paramset name="Offset7" sequence="7">
+                      <param name="p" value="-310.0"/>
+                      <param name="q" value="0.0"/>
+                      <param name="defaultGuideOption" value="off"/>
+                    </paramset>
+                  </paramset>
                 </paramset>
+                <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="9ff20ce6-5215-41e8-a4e5-c84a6fb52214" name="Observe">
+                  <paramset name="Observe" kind="dataObj">
+                    <param name="repeatCount" value="1"/>
+                    <param name="class" value="SCIENCE"/>
+                  </paramset>
+                </container>
               </container>
             </container>
             <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="6fac89cb-3936-48ff-af0c-306b942cde9e" name="Flamingos2 Sequence">
               <paramset name="Flamingos2 Sequence" kind="dataObj">
-                <param name="title" value="Flamingos2: GCAL sequence"/>
+                <param name="title" value="Flamingos2: GCAL Sequence"/>
                 <param name="readMode" value="BRIGHT_OBJECT_SPEC"/>
               </paramset>
               <container kind="seqComp" type="Observer" version="2009A-1" subtype="BaselineNight" key="88396487-e988-4065-8694-12eda0134f19" name="Night Baseline GCAL">
@@ -1378,41 +1408,46 @@
               <param name="exposureTime" value="30.0"/>
               <param name="filter" value="H"/>
             </paramset>
-            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="a4e0b02e-9bcb-4d4f-a334-c317942d59d6" name="Offset">
-              <paramset name="Offset" kind="dataObj">
-                <param name="title" value="ABBA 15&quot; Offsets"/>
-                <paramset name="offsets">
-                  <paramset name="Offset1" sequence="0">
-                    <param name="p" value="0.0"/>
-                    <param name="q" value="15.0"/>
-                    <param name="defaultGuideOption" value="on"/>
-                  </paramset>
-                  <paramset name="Offset5" sequence="1">
-                    <param name="p" value="0.0"/>
-                    <param name="q" value="-15.0"/>
-                    <param name="defaultGuideOption" value="on"/>
-                  </paramset>
-                  <paramset name="Offset4" sequence="2">
-                    <param name="p" value="0.0"/>
-                    <param name="q" value="-15.0"/>
-                    <param name="defaultGuideOption" value="on"/>
-                  </paramset>
-                  <paramset name="Offset2" sequence="3">
-                    <param name="p" value="0.0"/>
-                    <param name="q" value="15.0"/>
-                    <param name="defaultGuideOption" value="on"/>
-                  </paramset>
-                </paramset>
+            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="repeat" key="3818e0a7-7f4e-40cf-a5e3-ccc8ec276265" name="Repeat">
+              <paramset name="Repeat" kind="dataObj">
+                <param name="repeatCount" value="1"/>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="4441ff78-52bd-4df0-9b48-03530ad93af3" name="Observe">
-                <paramset name="Observe" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="class" value="PARTNER_CAL"/>
+              <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="a4e0b02e-9bcb-4d4f-a334-c317942d59d6" name="Offset">
+                <paramset name="Offset" kind="dataObj">
+                  <param name="title" value="ABBA 15&quot; Offsets"/>
+                  <paramset name="offsets">
+                    <paramset name="Offset1" sequence="0">
+                      <param name="p" value="0.0"/>
+                      <param name="q" value="15.0"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                    <paramset name="Offset5" sequence="1">
+                      <param name="p" value="0.0"/>
+                      <param name="q" value="-15.0"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                    <paramset name="Offset4" sequence="2">
+                      <param name="p" value="0.0"/>
+                      <param name="q" value="-15.0"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                    <paramset name="Offset2" sequence="3">
+                      <param name="p" value="0.0"/>
+                      <param name="q" value="15.0"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                  </paramset>
                 </paramset>
+                <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="4441ff78-52bd-4df0-9b48-03530ad93af3" name="Observe">
+                  <paramset name="Observe" kind="dataObj">
+                    <param name="repeatCount" value="1"/>
+                    <param name="class" value="PARTNER_CAL"/>
+                  </paramset>
+                </container>
               </container>
             </container>
-            <container kind="seqComp" type="Observer" version="2009A-1" subtype="BaselineNight" key="3b0cf7cc-05e9-4ab0-ac35-2d6eb3074493" name="Night Baseline GCAL">
-              <paramset name="Night Baseline GCAL" kind="dataObj">
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartArc" key="71dcd334-324e-4939-843f-f447c31b4065" name="Arc">
+              <paramset name="Arc" kind="dataObj">
                 <param name="repeatCount" value="1"/>
                 <param name="coadds" value="1"/>
                 <param name="exposureTime" value="10.0"/>
@@ -1442,9 +1477,18 @@
 
 4. Include TWO Telluric standard observations; one which is (observation time / 2) in RA before and another which is (observation time / 2) after the science target with similar Declination.
 
-5. There is no need to include the darks, these are taken on a weekly basis.
+5. There is no need to include the darks; these are taken on a weekly basis.
 
+6. Feel free to include a note with any any special advice for the observer.
 </value>
+          </param>
+        </paramset>
+      </container>
+      <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="34ed8564-bc8d-4a87-8651-f6932a554b26" name="Note">
+        <paramset name="Note" kind="dataObj">
+          <param name="title" value="Use same PA for science and Telluric"/>
+          <param name="NoteText">
+            <value>Using the same position angle for the science and Telluric standard will save telescope time, and will also diminish the effect of flexure.</value>
           </param>
         </paramset>
       </container>
@@ -1749,48 +1793,60 @@
               <param name="exposureTime" value="30.0"/>
               <param name="filter" value="H"/>
             </paramset>
-            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="2154f1f4-f9b1-41a2-98ff-5f72fa2f51e8" name="Offset">
-              <paramset name="Offset" kind="dataObj">
-                <param name="title" value="MOS Telluric Offsets"/>
-                <paramset name="offsets">
-                  <paramset name="Offset1" sequence="0">
-                    <param name="p" value="0.0"/>
-                    <param name="q" value="60.0"/>
-                    <param name="defaultGuideOption" value="on"/>
-                  </paramset>
-                  <paramset name="Offset5" sequence="1">
-                    <param name="p" value="0.0"/>
-                    <param name="q" value="40.0"/>
-                    <param name="defaultGuideOption" value="on"/>
-                  </paramset>
-                  <paramset name="Offset4" sequence="2">
-                    <param name="p" value="0.0"/>
-                    <param name="q" value="20.0"/>
-                    <param name="defaultGuideOption" value="on"/>
-                  </paramset>
-                  <paramset name="Offset2" sequence="3">
-                    <param name="p" value="0.0"/>
-                    <param name="q" value="-20.0"/>
-                    <param name="defaultGuideOption" value="on"/>
-                  </paramset>
-                  <paramset name="Offset0" sequence="4">
-                    <param name="p" value="0.0"/>
-                    <param name="q" value="-40.0"/>
-                    <param name="defaultGuideOption" value="on"/>
-                  </paramset>
-                  <paramset name="Offset3" sequence="5">
-                    <param name="p" value="0.0"/>
-                    <param name="q" value="-60.0"/>
-                    <param name="defaultGuideOption" value="on"/>
-                  </paramset>
-                </paramset>
+            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="repeat" key="b2668a44-82f0-424e-a8f4-857881504c22" name="Repeat">
+              <paramset name="Repeat" kind="dataObj">
+                <param name="repeatCount" value="1"/>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="b183a572-574a-458c-a062-4236791b62e5" name="Observe">
-                <paramset name="Observe" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="class" value="PARTNER_CAL"/>
+              <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="2154f1f4-f9b1-41a2-98ff-5f72fa2f51e8" name="Offset">
+                <paramset name="Offset" kind="dataObj">
+                  <param name="title" value="MOS Telluric Offsets"/>
+                  <paramset name="offsets">
+                    <paramset name="Offset1" sequence="0">
+                      <param name="p" value="0.0"/>
+                      <param name="q" value="60.0"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                    <paramset name="Offset5" sequence="1">
+                      <param name="p" value="0.0"/>
+                      <param name="q" value="40.0"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                    <paramset name="Offset4" sequence="2">
+                      <param name="p" value="0.0"/>
+                      <param name="q" value="20.0"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                    <paramset name="Offset2" sequence="3">
+                      <param name="p" value="0.0"/>
+                      <param name="q" value="-20.0"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                    <paramset name="Offset0" sequence="4">
+                      <param name="p" value="0.0"/>
+                      <param name="q" value="-40.0"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                    <paramset name="Offset3" sequence="5">
+                      <param name="p" value="0.0"/>
+                      <param name="q" value="-60.0"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                  </paramset>
                 </paramset>
+                <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="b183a572-574a-458c-a062-4236791b62e5" name="Observe">
+                  <paramset name="Observe" kind="dataObj">
+                    <param name="repeatCount" value="1"/>
+                    <param name="class" value="PARTNER_CAL"/>
+                  </paramset>
+                </container>
               </container>
+            </container>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartArc" key="4358f6ba-b81d-4dec-ad62-79faeda70489" name="Arc">
+              <paramset name="Arc" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
+              </paramset>
             </container>
           </container>
         </container>
@@ -1822,6 +1878,7 @@
             <param name="posAngleConstraint" value="FIXED"/>
             <param name="fpu" value="CUSTOM_MASK"/>
             <param name="fpuCustomMask" value="GSYYYYSQXXX-NN"/>
+            <param name="customSlitWidth" value="OTHER"/>
             <param name="mosPreimaging" value="NO"/>
             <param name="useElectronicOffsetting" value="false"/>
             <param name="decker" value="MOS"/>
@@ -1946,6 +2003,7 @@
             <param name="posAngleConstraint" value="FIXED"/>
             <param name="fpu" value="CUSTOM_MASK"/>
             <param name="fpuCustomMask" value="GSYYYYSQXXX-NN"/>
+            <param name="customSlitWidth" value="OTHER"/>
             <param name="mosPreimaging" value="NO"/>
             <param name="useElectronicOffsetting" value="false"/>
             <param name="decker" value="MOS"/>
@@ -1972,65 +2030,54 @@
               <param name="exposureTime" value="300.0"/>
               <param name="filter" value="H"/>
             </paramset>
-            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="8160f83b-3266-43e8-9b21-324cabb91a43" name="Offset">
-              <paramset name="Offset" kind="dataObj">
-                <param name="title" value="ABBA 5&quot; Offsets"/>
-                <paramset name="offsets">
-                  <paramset name="Offset0" sequence="0">
-                    <param name="p" value="0.0"/>
-                    <param name="q" value="5.0"/>
-                    <param name="defaultGuideOption" value="on"/>
-                  </paramset>
-                  <paramset name="Offset1" sequence="1">
-                    <param name="p" value="0.0"/>
-                    <param name="q" value="-5.0"/>
-                    <param name="defaultGuideOption" value="on"/>
-                  </paramset>
-                  <paramset name="Offset2" sequence="2">
-                    <param name="p" value="0.0"/>
-                    <param name="q" value="-5.0"/>
-                    <param name="defaultGuideOption" value="on"/>
-                  </paramset>
-                  <paramset name="Offset3" sequence="3">
-                    <param name="p" value="0.0"/>
-                    <param name="q" value="5.0"/>
-                    <param name="defaultGuideOption" value="on"/>
-                  </paramset>
-                </paramset>
+            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="repeat" key="fe202072-7759-4ea7-8843-3c72d7794f41" name="Repeat">
+              <paramset name="Repeat" kind="dataObj">
+                <param name="repeatCount" value="1"/>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="70def726-cd29-4532-88ae-499be3513b5b" name="Observe">
-                <paramset name="Observe" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="class" value="SCIENCE"/>
+              <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="8160f83b-3266-43e8-9b21-324cabb91a43" name="Offset">
+                <paramset name="Offset" kind="dataObj">
+                  <param name="title" value="ABBA 5&quot; Offsets"/>
+                  <paramset name="offsets">
+                    <paramset name="Offset0" sequence="0">
+                      <param name="p" value="0.0"/>
+                      <param name="q" value="5.0"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                    <paramset name="Offset1" sequence="1">
+                      <param name="p" value="0.0"/>
+                      <param name="q" value="-5.0"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                    <paramset name="Offset2" sequence="2">
+                      <param name="p" value="0.0"/>
+                      <param name="q" value="-5.0"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                    <paramset name="Offset3" sequence="3">
+                      <param name="p" value="0.0"/>
+                      <param name="q" value="5.0"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                  </paramset>
                 </paramset>
+                <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="70def726-cd29-4532-88ae-499be3513b5b" name="Observe">
+                  <paramset name="Observe" kind="dataObj">
+                    <param name="repeatCount" value="1"/>
+                    <param name="class" value="SCIENCE"/>
+                  </paramset>
+                </container>
               </container>
             </container>
             <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="24869041-3da7-4bc6-a663-4eb5535cae37" name="Flamingos2 Sequence">
               <paramset name="Flamingos2 Sequence" kind="dataObj">
+                <param name="title" value="Flamingos2: GCAL Sequence"/>
                 <param name="readMode" value="BRIGHT_OBJECT_SPEC"/>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="GemFlat" key="b2c5a2d1-455a-410d-8cf6-a6266bfa3d35" name="Manual Flat/Arc">
-                <paramset name="Manual Flat/Arc" kind="dataObj">
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="BaselineNight" key="61b530b5-ae3c-4a5b-b4e3-bb71bb15e67e" name="Night Baseline GCAL">
+                <paramset name="Night Baseline GCAL" kind="dataObj">
                   <param name="repeatCount" value="1"/>
-                  <param name="class" value="PARTNER_CAL"/>
                   <param name="coadds" value="1"/>
-                  <param name="exposureTime" value="180.0"/>
-                  <param name="lamp" value="IR_GREY_BODY_HIGH"/>
-                  <param name="shutter" value="OPEN"/>
-                  <param name="filter" value="NIR"/>
-                  <param name="diffuser" value="IR"/>
-                </paramset>
-              </container>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="GemFlat" key="47577442-24a0-47a1-a303-ed0e38d957e3" name="Manual Flat/Arc">
-                <paramset name="Manual Flat/Arc" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="class" value="PARTNER_CAL"/>
-                  <param name="coadds" value="1"/>
-                  <param name="exposureTime" value="50.0"/>
-                  <param name="lamp" value="IR_GREY_BODY_HIGH"/>
-                  <param name="shutter" value="OPEN"/>
-                  <param name="filter" value="ND_20"/>
-                  <param name="diffuser" value="IR"/>
+                  <param name="exposureTime" value="10.0"/>
                 </paramset>
               </container>
             </container>
@@ -2225,51 +2272,56 @@
               <param name="exposureTime" value="30.0"/>
               <param name="filter" value="H"/>
             </paramset>
-            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="96efc2fe-25a9-4dc9-ab43-1a3cfd6c59fb" name="Offset">
-              <paramset name="Offset" kind="dataObj">
-                <param name="title" value="MOS Telluric Offsets"/>
-                <paramset name="offsets">
-                  <paramset name="Offset1" sequence="0">
-                    <param name="p" value="0.0"/>
-                    <param name="q" value="60.0"/>
-                    <param name="defaultGuideOption" value="on"/>
-                  </paramset>
-                  <paramset name="Offset5" sequence="1">
-                    <param name="p" value="0.0"/>
-                    <param name="q" value="40.0"/>
-                    <param name="defaultGuideOption" value="on"/>
-                  </paramset>
-                  <paramset name="Offset4" sequence="2">
-                    <param name="p" value="0.0"/>
-                    <param name="q" value="20.0"/>
-                    <param name="defaultGuideOption" value="on"/>
-                  </paramset>
-                  <paramset name="Offset2" sequence="3">
-                    <param name="p" value="0.0"/>
-                    <param name="q" value="-20.0"/>
-                    <param name="defaultGuideOption" value="on"/>
-                  </paramset>
-                  <paramset name="Offset0" sequence="4">
-                    <param name="p" value="0.0"/>
-                    <param name="q" value="-40.0"/>
-                    <param name="defaultGuideOption" value="on"/>
-                  </paramset>
-                  <paramset name="Offset3" sequence="5">
-                    <param name="p" value="0.0"/>
-                    <param name="q" value="-60.0"/>
-                    <param name="defaultGuideOption" value="on"/>
-                  </paramset>
-                </paramset>
+            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="repeat" key="e36daf1d-de19-4c40-90e8-8c8f3ff47826" name="Repeat">
+              <paramset name="Repeat" kind="dataObj">
+                <param name="repeatCount" value="1"/>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="794d1fd6-5f08-45a1-83f6-1c7878329211" name="Observe">
-                <paramset name="Observe" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="class" value="PARTNER_CAL"/>
+              <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="96efc2fe-25a9-4dc9-ab43-1a3cfd6c59fb" name="Offset">
+                <paramset name="Offset" kind="dataObj">
+                  <param name="title" value="MOS Telluric Offsets"/>
+                  <paramset name="offsets">
+                    <paramset name="Offset1" sequence="0">
+                      <param name="p" value="0.0"/>
+                      <param name="q" value="60.0"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                    <paramset name="Offset5" sequence="1">
+                      <param name="p" value="0.0"/>
+                      <param name="q" value="40.0"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                    <paramset name="Offset4" sequence="2">
+                      <param name="p" value="0.0"/>
+                      <param name="q" value="20.0"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                    <paramset name="Offset2" sequence="3">
+                      <param name="p" value="0.0"/>
+                      <param name="q" value="-20.0"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                    <paramset name="Offset0" sequence="4">
+                      <param name="p" value="0.0"/>
+                      <param name="q" value="-40.0"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                    <paramset name="Offset3" sequence="5">
+                      <param name="p" value="0.0"/>
+                      <param name="q" value="-60.0"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                  </paramset>
                 </paramset>
+                <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="794d1fd6-5f08-45a1-83f6-1c7878329211" name="Observe">
+                  <paramset name="Observe" kind="dataObj">
+                    <param name="repeatCount" value="1"/>
+                    <param name="class" value="PARTNER_CAL"/>
+                  </paramset>
+                </container>
               </container>
             </container>
-            <container kind="seqComp" type="Observer" version="2009A-1" subtype="BaselineNight" key="e2350246-903f-4506-a3e4-0d0941376849" name="Night Baseline GCAL">
-              <paramset name="Night Baseline GCAL" kind="dataObj">
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartArc" key="0fb83e94-a233-49c3-97be-85c17e124e84" name="Arc">
+              <paramset name="Arc" kind="dataObj">
                 <param name="repeatCount" value="1"/>
                 <param name="coadds" value="1"/>
                 <param name="exposureTime" value="10.0"/>
@@ -2296,6 +2348,7 @@
     <paramset name="node">
       <param name="key" value="b1a6a17b-4359-4a93-93dd-c66942e243c1"/>
       <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
+      <param name="39d88771-4d89-438a-9bc3-0c6dfde5c523" value="5"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="26de3cf6-3ec3-4c92-adc1-c7dcf63b068a"/>
@@ -2336,6 +2389,10 @@
     <paramset name="node">
       <param name="key" value="8a5038f7-fb31-489c-9a03-f13b1120dc4c"/>
       <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="0fb83e94-a233-49c3-97be-85c17e124e84"/>
+      <param name="39d88771-4d89-438a-9bc3-0c6dfde5c523" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="c70d765e-998f-4d5f-b0d1-79f2cdb8e57c"/>
@@ -2404,6 +2461,7 @@
     <paramset name="node">
       <param name="key" value="d413afe8-ae86-4c35-9c2c-350b087f3466"/>
       <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="98"/>
+      <param name="39d88771-4d89-438a-9bc3-0c6dfde5c523" value="130"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="94b99ed6-9201-4dd9-b832-22ae3f2d1701"/>
@@ -2418,6 +2476,10 @@
       <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="e36daf1d-de19-4c40-90e8-8c8f3ff47826"/>
+      <param name="39d88771-4d89-438a-9bc3-0c6dfde5c523" value="2"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="dcf2172d-38b1-477f-943e-88258c12e1d1"/>
       <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
@@ -2428,6 +2490,7 @@
     <paramset name="node">
       <param name="key" value="24869041-3da7-4bc6-a663-4eb5535cae37"/>
       <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
+      <param name="39d88771-4d89-438a-9bc3-0c6dfde5c523" value="16"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="5324e9a3-5c98-4505-bf33-5bc3c5fb666b"/>
@@ -2456,6 +2519,10 @@
     <paramset name="node">
       <param name="key" value="5ba9c8f7-ec29-40c1-925a-92d8cb9663e7"/>
       <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="71dcd334-324e-4939-843f-f447c31b4065"/>
+      <param name="39d88771-4d89-438a-9bc3-0c6dfde5c523" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="0b9a5dbd-7cb5-42e5-bac6-fc997ebb5b45"/>
@@ -2490,6 +2557,10 @@
       <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="3818e0a7-7f4e-40cf-a5e3-ccc8ec276265"/>
+      <param name="39d88771-4d89-438a-9bc3-0c6dfde5c523" value="2"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="927c529e-5e78-489e-8c14-4c0344ce61c9"/>
       <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
@@ -2512,6 +2583,7 @@
     <paramset name="node">
       <param name="key" value="3d39acef-6b8d-4296-8ee6-e434589428dc"/>
       <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
+      <param name="39d88771-4d89-438a-9bc3-0c6dfde5c523" value="5"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="b99861bd-a1bc-4e60-b27c-fcadb2d7eb42"/>
@@ -2524,6 +2596,7 @@
     <paramset name="node">
       <param name="key" value="80597ba1-8a6a-4367-a5e8-f3d59d7bb349"/>
       <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
+      <param name="39d88771-4d89-438a-9bc3-0c6dfde5c523" value="3"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="96efc2fe-25a9-4dc9-ab43-1a3cfd6c59fb"/>
@@ -2568,6 +2641,10 @@
     <paramset name="node">
       <param name="key" value="c1ba0c27-b0cc-4c7b-a9e4-a15eea16a8d0"/>
       <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="2272b975-9156-4d79-baed-b67b80bd0852"/>
+      <param name="39d88771-4d89-438a-9bc3-0c6dfde5c523" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="2154f1f4-f9b1-41a2-98ff-5f72fa2f51e8"/>
@@ -2630,6 +2707,10 @@
       <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="cca7dd29-7f91-4581-823b-34e05347c8f1"/>
+      <param name="39d88771-4d89-438a-9bc3-0c6dfde5c523" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="4ffeb15e-b233-4fea-8817-f6fa7d1467fd"/>
       <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
@@ -2664,6 +2745,10 @@
     <paramset name="node">
       <param name="key" value="377520de-9c85-4f9f-9f41-dce000f2e69d"/>
       <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="80fc2c3c-72cd-4991-af26-986093b3a048"/>
+      <param name="39d88771-4d89-438a-9bc3-0c6dfde5c523" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="223c4720-276d-4558-afc9-bfe64493de94"/>
@@ -2708,6 +2793,7 @@
     <paramset name="node">
       <param name="key" value="c48be3b2-e9cd-4ac7-8642-7216f74da2b2"/>
       <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
+      <param name="39d88771-4d89-438a-9bc3-0c6dfde5c523" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="a811afb0-b999-49d7-a304-dfe750bf9655"/>
@@ -2734,6 +2820,10 @@
       <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="34ed8564-bc8d-4a87-8651-f6932a554b26"/>
+      <param name="39d88771-4d89-438a-9bc3-0c6dfde5c523" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="be49195f-5438-4dff-8ba5-24b4ec574dac"/>
       <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
@@ -2752,14 +2842,23 @@
     <paramset name="node">
       <param name="key" value="c4309d32-7b0d-4944-b9a9-41f11de6c20a"/>
       <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="2"/>
+      <param name="39d88771-4d89-438a-9bc3-0c6dfde5c523" value="18"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="43d4a42b-4b32-42d7-8295-c4a78fc662d4"/>
       <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="e6f7dd86-c65c-49b8-8fc1-0a1457d956df"/>
+      <param name="39d88771-4d89-438a-9bc3-0c6dfde5c523" value="101"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="a7260717-9ada-4029-9b82-5ceb638ec424"/>
       <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="4358f6ba-b81d-4dec-ad62-79faeda70489"/>
+      <param name="39d88771-4d89-438a-9bc3-0c6dfde5c523" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="2857e9a1-d2bb-4abe-9221-8dab61c81d18"/>
@@ -2774,6 +2873,10 @@
       <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="fe202072-7759-4ea7-8843-3c72d7794f41"/>
+      <param name="39d88771-4d89-438a-9bc3-0c6dfde5c523" value="2"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="d5bbd4c2-8479-4cd9-91f3-a6a620c10977"/>
       <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
@@ -2784,6 +2887,7 @@
     <paramset name="node">
       <param name="key" value="e415422d-054c-46af-8ff2-f95563eb2c7a"/>
       <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
+      <param name="39d88771-4d89-438a-9bc3-0c6dfde5c523" value="5"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="69b3d343-4d36-4f9c-b003-550444041897"/>
@@ -2804,6 +2908,7 @@
     <paramset name="node">
       <param name="key" value="5d69db48-77d8-43fe-915a-904474c4d09d"/>
       <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
+      <param name="39d88771-4d89-438a-9bc3-0c6dfde5c523" value="3"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="c5e81be7-13ab-485a-8f97-61a401ed5257"/>
@@ -2848,6 +2953,7 @@
     <paramset name="node">
       <param name="key" value="ec86544b-9bbd-4a5e-ab25-25091929f6f5"/>
       <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
+      <param name="39d88771-4d89-438a-9bc3-0c6dfde5c523" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="49ddd0fa-3d36-46f0-bffc-51aae2cd8e5c"/>
@@ -2894,6 +3000,10 @@
       <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="b2668a44-82f0-424e-a8f4-857881504c22"/>
+      <param name="39d88771-4d89-438a-9bc3-0c6dfde5c523" value="2"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="0e21edf3-21ad-404a-811f-da6e713b16b4"/>
       <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
@@ -2912,6 +3022,7 @@
     <paramset name="node">
       <param name="key" value="5e03016a-a9f4-45a0-99a4-a0fca9816915"/>
       <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
+      <param name="39d88771-4d89-438a-9bc3-0c6dfde5c523" value="4"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="b47f0a75-cb0e-4c76-b362-06ebef396371"/>
@@ -2920,6 +3031,7 @@
     <paramset name="node">
       <param name="key" value="29edaec7-c1f0-4137-9e7a-535ca29ea0da"/>
       <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
+      <param name="39d88771-4d89-438a-9bc3-0c6dfde5c523" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="9ff20ce6-5215-41e8-a4e5-c84a6fb52214"/>
@@ -2932,6 +3044,7 @@
     <paramset name="node">
       <param name="key" value="4a8fd70b-50e0-4dc4-97af-3a58b4e1171a"/>
       <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
+      <param name="39d88771-4d89-438a-9bc3-0c6dfde5c523" value="3"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="dce09d6d-70db-4cff-bcca-df8e988461ef"/>
@@ -3006,6 +3119,10 @@
       <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="549db403-9de3-4faf-9959-149aa5a7cf21"/>
+      <param name="39d88771-4d89-438a-9bc3-0c6dfde5c523" value="2"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="8b03fee3-4eca-4895-b783-be7872c4ce98"/>
       <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
@@ -3062,8 +3179,13 @@
       <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="61b530b5-ae3c-4a5b-b4e3-bb71bb15e67e"/>
+      <param name="39d88771-4d89-438a-9bc3-0c6dfde5c523" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="6fac89cb-3936-48ff-af0c-306b942cde9e"/>
       <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
+      <param name="39d88771-4d89-438a-9bc3-0c6dfde5c523" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="4d4494a2-1498-4fa2-873e-529e38195789"/>
@@ -3120,6 +3242,7 @@
     <paramset name="node">
       <param name="key" value="4a4dd0ef-d7d0-4d0a-a710-df17d0f61bed"/>
       <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
+      <param name="39d88771-4d89-438a-9bc3-0c6dfde5c523" value="3"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="735e3aa3-973b-44b3-acc7-915154cc3cf2"/>
@@ -3128,6 +3251,10 @@
     <paramset name="node">
       <param name="key" value="c181f180-dacf-48cd-b8c6-48e394b4e998"/>
       <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="7edd72bf-3eb0-4725-9dbb-43feecd6494c"/>
+      <param name="39d88771-4d89-438a-9bc3-0c6dfde5c523" value="1"/>
     </paramset>
   </container>
 </document>
