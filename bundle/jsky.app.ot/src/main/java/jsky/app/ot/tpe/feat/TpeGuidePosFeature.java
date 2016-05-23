@@ -188,7 +188,7 @@ public class TpeGuidePosFeature extends TpePositionFeature
 
                 // Only the auto group exists, so create a new manual group and add it as the primary group.
                 final ImList<GuideGroup> oldGroups = genvInit.getOptions();
-                gp  = GuideGroup.create("Manual Group");
+                gp  = GuideGroup.create(GuideGroup.ManualGroupDefaultName());
                 idx = oldGroups.size();
                 env = envInit.setGuideEnvironment(genvInit.setOptions(oldGroups.append(gp)).setPrimaryIndex(idx));
             } else {

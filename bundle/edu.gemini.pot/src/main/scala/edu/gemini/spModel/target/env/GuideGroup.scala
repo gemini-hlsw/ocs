@@ -280,8 +280,10 @@ object GuideGroup extends ((GuideGrp) => GuideGroup) {
   val AutomaticInitial  = GuideGroup(Initial)
   val AutomaticDisabled = GuideGroup(Disabled)
 
+  val ManualGroupDefaultName = "Manual"
+
   /** An empty manual group. */
-  val ManualEmpty      = GuideGroup(ManualGroup("Manual Group", ==>>.empty))
+  val ManualEmpty      = GuideGroup(ManualGroup(ManualGroupDefaultName, ==>>.empty))
 
   val grp: GuideGroup @> GuideGrp =
     Lens.lensu((jGrp, sGrp) => jGrp.copy(grp = sGrp), _.grp)
@@ -303,7 +305,7 @@ object GuideGroup extends ((GuideGrp) => GuideGroup) {
   private val AllTags = List(AutoInitialTag, AutoDisabledTag, AutoActiveTag, ManualTag)
 
   def fromParamSet(ps: ParamSet): GuideGroup = {
-    val name    = Pio.getValue(ps, NameParam, "Manual Group")
+    val name    = Pio.getValue(ps, NameParam, ManualGroupDefaultName)
     val targets = ps.getParamSets.asScala.toList.map { GuideProbeTargets.fromParamSet }.asImList
 
     val typeTag = for {
@@ -335,7 +337,7 @@ object GuideGroup extends ((GuideGrp) => GuideGroup) {
     createManual(name, targets)
 
   def create(name: GemOption[String], targets: ImList[GuideProbeTargets]): GuideGroup =
-    createManual(name.getOrElse("Manual Group"), targets)
+    createManual(name.getOrElse(ManualGroupDefaultName), targets)
 
   def createManual(name: String, targets: ImList[GuideProbeTargets]): GuideGroup = {
     val m = ==>>.fromList(targets.asScalaList.flatMap { gpt =>

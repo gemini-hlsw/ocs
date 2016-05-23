@@ -21,7 +21,7 @@ public final class GuideGroupTest extends TestCase {
     private final Fixture fix = new Fixture();
 
     public void testEmpty() {
-        assertEquals(ImOption.apply("Manual Group"), GuideGroup.ManualEmpty().getName());
+        assertEquals(ImOption.apply(GuideGroup.ManualGroupDefaultName()), GuideGroup.ManualEmpty().getName());
         assertEquals(GuideProbeTargets.EMPTY_LIST, GuideGroup.ManualEmpty().getAll());
     }
 
