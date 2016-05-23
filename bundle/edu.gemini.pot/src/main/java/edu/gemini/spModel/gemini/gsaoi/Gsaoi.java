@@ -429,7 +429,7 @@ public final class Gsaoi extends SPInstObsComp implements PropertyProvider, Guid
     public static final String INSTRUMENT_NAME_PROP = "GSAOI";
 
     // REL-2645 offset overhead is 15 secs
-    private static final double GUIDED_OFFSET_OVERHEAD = 15.0; // sec
+    static final double GUIDED_OFFSET_OVERHEAD = 15.0; // sec
     private static final int MCAO_SETUP_TIME = 30; // min
     private static final int GSAOI_REACQUISITION_TIME = 10; // min
 

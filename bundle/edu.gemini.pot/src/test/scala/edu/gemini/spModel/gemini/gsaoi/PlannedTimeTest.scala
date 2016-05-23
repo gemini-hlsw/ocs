@@ -5,22 +5,22 @@ import edu.gemini.spModel.gemini.gsaoi.Gsaoi._
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi.Filter._
 import edu.gemini.spModel.gemini.seqcomp.SeqRepeatOffset
 import edu.gemini.spModel.guide.DefaultGuideOptions
-import edu.gemini.spModel.guide.DefaultGuideOptions.Value.{on, off}
+import edu.gemini.spModel.guide.DefaultGuideOptions.Value.{off, on}
 import edu.gemini.spModel.obs.plannedtime.{OffsetOverheadCalculator, PlannedTimeCalculator}
 import edu.gemini.spModel.target.offset.OffsetPos
 import edu.gemini.spModel.test.InstrumentSequenceTestBase
 import edu.gemini.spModel.test.InstrumentSequenceTestBase._
-
 import org.junit.Test
 import org.junit.Assert._
-
 import java.beans.PropertyDescriptor
+
 import scala.collection.JavaConverters._
 import edu.gemini.spModel.target.env.GuideProbeTargets
 import edu.gemini.spModel.gemini.gems.Canopus
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.obsComp.TargetObsComp
-import edu.gemini.skycalc.{Offset, Angle}
+import edu.gemini.skycalc.{Angle, Offset}
+import edu.gemini.spModel.core.SiderealTarget
 
 
 class PlannedTimeTest extends InstrumentSequenceTestBase[Gsaoi, GsaoiSeqConfig] {
@@ -36,7 +36,7 @@ class PlannedTimeTest extends InstrumentSequenceTestBase[Gsaoi, GsaoiSeqConfig] 
     // Add a canopus guide star so that guiding will be turned on
     val env  = getTargetEnvironment
     val grp  = env.getPrimaryGuideGroup
-    val target = new SPTarget(0.0, 0.0)
+    val target = new SPTarget(SiderealTarget.empty)
     val env2 = env.setPrimaryGuideGroup(grp.put(GuideProbeTargets.create(Canopus.Wfs.cwfs3, target)))
 
     val dobj = getTarget.getDataObject.asInstanceOf[TargetObsComp]
@@ -125,7 +125,7 @@ class PlannedTimeTest extends InstrumentSequenceTestBase[Gsaoi, GsaoiSeqConfig] 
 
     val (time, _) = ((0.0,offsets.head)/:offsets.tail) { case ((time,prev),cur) =>
       if (isStandardOffset(prev, cur)) (time + standardOffsetTime, cur)
-      else (time + 30.0, cur)
+      else (time + Gsaoi.GUIDED_OFFSET_OVERHEAD, cur)
     }
     (time * 1000).round
   }
