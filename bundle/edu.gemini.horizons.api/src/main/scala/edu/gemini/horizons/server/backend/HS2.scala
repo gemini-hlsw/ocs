@@ -1,5 +1,7 @@
 package edu.gemini.horizons.server.backend
 
+import java.util.logging.{Level, Logger}
+
 import edu.gemini.spModel.core._
 import org.apache.commons.httpclient.HttpClient
 import org.apache.commons.httpclient.HttpException
@@ -26,6 +28,24 @@ object HorizonsService2 {
   object HS2 {
     def fromDisjunction[A](a: HS2Error \/ A): HS2[A] = EitherT(IO(a))
     def delay[A](a: => A): HS2[A] = EitherT(IO(a.right))
+    val unit: HS2[Unit] = ().point[HS2]
+  }
+
+  implicit class HS2Ops[A](hs2: HS2[A]) {
+
+    /** Return an equivalent action that logs failures. */
+    def withResultLogging(log: Logger): HS2[A] =
+      EitherT(hs2.run >>! {
+        case -\/(HorizonsError(e))    => IO(log.log(Level.SEVERE, e.getMessage, e))
+        case -\/(ParseError(in, msg)) => IO(log.log(Level.SEVERE, msg + "; input follows:" + in.mkString("\n")))
+        case -\/(EphemerisEmpty)      => IO(log.warning("Ephemeris was empty."))
+        case \/-(_)                   => IO.ioUnit
+      })
+
+    /** Return an equivalent action that ensures the provided `coda` is run in all cases. */
+    def ensuring(coda: HS2[Unit]): HS2[A] =
+      EitherT(hs2.run ensuring coda.run)
+
   }
 
   /** The type of failures that might arise when talking to HORIZONS. */
