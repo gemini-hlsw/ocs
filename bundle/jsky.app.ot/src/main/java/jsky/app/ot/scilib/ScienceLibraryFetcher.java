@@ -80,9 +80,9 @@ final public class ScienceLibraryFetcher {
         final Map<SPComponentType, List<ScienceLibraryState>> stateMap = _libraryState(instruments);
 
         //Decide which ones need to be fetched
-        final Collection<ScienceLibraryState> toFetch = new ArrayList<ScienceLibraryState>();
-        final List<ISPProgram> fetchedLibraries = new ArrayList<ISPProgram>();
-        final Collection<SPComponentType> unavailableLibraries = new ArrayList<SPComponentType>();
+        final Collection<ScienceLibraryState> toFetch = new ArrayList<>();
+        final List<ISPProgram> fetchedLibraries = new ArrayList<>();
+        final Collection<SPComponentType> unavailableLibraries = new ArrayList<>();
         final IDBDatabaseService odb = SPDB.get();
 
         for (final SPComponentType instrument : instruments) {
@@ -159,7 +159,7 @@ final public class ScienceLibraryFetcher {
                     DialogUtil.error(parent, "An unexpected error has occurred. Please try again later. \nError message: " + e.getMessage());
                 } else {
                     //lets reconstruct the list
-                    final List<ISPProgram> libraries = new ArrayList<ISPProgram>();
+                    final List<ISPProgram> libraries = new ArrayList<>();
                     if (o instanceof List) {
                         final Iterable lib = (Iterable) o;
                         for (final Object obj : lib) {
@@ -201,7 +201,7 @@ final public class ScienceLibraryFetcher {
     private static Object doFetch(final Collection<ScienceLibraryState> states, final ProgressPanel pp) {
         final int total = states.size();
 
-        final Collection<ISPProgram> libraries = new ArrayList<ISPProgram>();
+        final Collection<ISPProgram> libraries = new ArrayList<>();
         try {
             int count = 0;
             for (ScienceLibraryState state : states) {
@@ -228,14 +228,14 @@ final public class ScienceLibraryFetcher {
     //already present in the local database
     private static Map<SPComponentType, List<ScienceLibraryState>> _libraryState(final Iterable<SPComponentType> instruments) {
         final Map<SPComponentType, ScienceLibraryInfo> map = ScienceLibraryInfo.getLibraryInfoMap();
-        final Map<SPComponentType, List<ScienceLibraryState>> stateMap = new HashMap<SPComponentType, List<ScienceLibraryState>>();
+        final Map<SPComponentType, List<ScienceLibraryState>> stateMap = new HashMap<>();
 
         final IDBDatabaseService db = SPDB.get();
         for (final SPComponentType instrument : instruments) {
             final ScienceLibraryInfo info = map.get(instrument);
-            final List<ScienceLibraryState> instLibraries = new ArrayList<ScienceLibraryState>();
+            final List<ScienceLibraryState> instLibraries = new ArrayList<>();
 
-            final Collection<SPProgramID> ps = (info == null) ? Collections.<SPProgramID>emptyList() : info.getLibraries();
+            final Collection<SPProgramID> ps = (info == null) ? Collections.emptyList() : info.getLibraries();
             for (final SPProgramID p : ps) {
                 final ISPProgram prog = db.lookupProgramByID(p);
                 //noinspection ConstantConditions

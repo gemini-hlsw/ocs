@@ -8,6 +8,7 @@ import edu.gemini.spModel.gemini.flamingos2.Flamingos2;
 import edu.gemini.spModel.gemini.gmos.InstGmosNorth;
 import edu.gemini.spModel.gemini.gmos.InstGmosSouth;
 import edu.gemini.spModel.gemini.gnirs.InstGNIRS;
+import edu.gemini.spModel.gemini.gpi.Gpi;
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi;
 import edu.gemini.spModel.gemini.michelle.InstMichelle;
 import edu.gemini.spModel.gemini.nici.InstNICI;
@@ -26,11 +27,11 @@ import java.util.*;
  */
 final class ScienceLibraryInfo {
 
-    private static final Map<SPComponentType, ScienceLibraryInfo> _libInfo = new HashMap<SPComponentType, ScienceLibraryInfo>();
+    private static final Map<SPComponentType, ScienceLibraryInfo> _libInfo = new HashMap<>();
     private static final Set<String> _allLibraries = Collections.synchronizedSet(new HashSet<String>());
 
     private final Site _site;
-    private final List<SPProgramID> _libraries = new ArrayList<SPProgramID>();
+    private final List<SPProgramID> _libraries = new ArrayList<>();
 
     //the data
     static {
@@ -47,6 +48,7 @@ final class ScienceLibraryInfo {
         //SOUTH
         _libInfo.put(Flamingos2.SP_TYPE, new ScienceLibraryInfo(Site.GS, "GS-Flamingos2-library"));
         _libInfo.put(InstGmosSouth.SP_TYPE, new ScienceLibraryInfo(Site.GS, "GS-GMOS-library"));
+        _libInfo.put(Gpi.SP_TYPE, new ScienceLibraryInfo(Site.GS, "GS-GPI-library"));
         _libInfo.put(Gsaoi.SP_TYPE, new ScienceLibraryInfo(Site.GS, "GS-GSAOI-library"));
         _libInfo.put(InstNICI.SP_TYPE, new ScienceLibraryInfo(Site.GS, "GS-NICI-library"));
         _libInfo.put(InstPhoenix.SP_TYPE, new ScienceLibraryInfo(Site.GS, "GS-PHOENIX-library"));
@@ -70,14 +72,14 @@ final class ScienceLibraryInfo {
     /**
      * Return an unmodifiable map associating instruments to ScienceLibraryInfo objects
      */
-    public static Map<SPComponentType, ScienceLibraryInfo> getLibraryInfoMap() {
+    static Map<SPComponentType, ScienceLibraryInfo> getLibraryInfoMap() {
         return Collections.unmodifiableMap(_libInfo);
     }
 
     /**
      * Return an unmodifiable list of the libraries associated to this instrument
      */
-    public Collection<SPProgramID> getLibraries() {
+    Collection<SPProgramID> getLibraries() {
         return Collections.unmodifiableList(_libraries);
     }
 
