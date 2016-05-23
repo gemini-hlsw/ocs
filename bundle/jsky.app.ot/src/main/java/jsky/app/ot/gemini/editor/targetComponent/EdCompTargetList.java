@@ -414,11 +414,9 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         final NumberFormat numberFormatter = NumberFormat.getInstance(Locale.US);
         numberFormatter.setMaximumFractionDigits(2);
         numberFormatter.setMaximumIntegerDigits(3);
-        _w.schedulingBlock.init(this, site, numberFormatter, new Runnable() {
-            public void run() {
-                final TargetEnvironment env = getDataObject().getTargetEnvironment();
-                updateTargetDetails(env);
-            }
+        _w.schedulingBlock.init(this, site, numberFormatter, () -> {
+            final TargetEnvironment env1 = getDataObject().getTargetEnvironment();
+            updateTargetDetails(env1);
         });
 
         updateTargetDetails(newTOC.getTargetEnvironment());
@@ -632,7 +630,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
         final ImList<GuideGroup> oldGroups = ge.getOptions();
         final int newGroupIdx              = oldGroups.size();
-        final GuideGroup newGroup          = GuideGroup.create("Manual Group");
+        final GuideGroup newGroup          = GuideGroup.create(GuideGroup.ManualGroupDefaultName());
         final IndexedGuideGroup igg        = new IndexedGuideGroup(newGroupIdx, newGroup);
         final ImList<GuideGroup> newGroups = oldGroups.append(newGroup);
 
@@ -844,7 +842,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 // This used to be done with origGroup.cloneTargets(), but if origGroup is an auto group, this creates
                 // another auto group, which is problematic, so we specifically force a manual group to be created
                 // and receive an appropriate name.
-                final String newGroupName     = origGroup.getName().filter(s -> !s.isEmpty()).getOrElse("Manual Group");
+                final String newGroupName     = origGroup.getName().filter(s -> !s.isEmpty()).getOrElse("Manual");
                 final GuideGroup newGroup     = origGroup.toManualGroup().setName(newGroupName);
 
                 final TargetEnvironment env   = dataObject.getTargetEnvironment();

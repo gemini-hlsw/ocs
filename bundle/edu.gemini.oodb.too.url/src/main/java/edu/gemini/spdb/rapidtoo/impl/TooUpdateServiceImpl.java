@@ -34,15 +34,12 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
- *
- */
-public final class TooUpdateServiceImpl implements TooUpdateService {
+final class TooUpdateServiceImpl implements TooUpdateService {
     private static final Logger LOG = Logger.getLogger(TooUpdateServiceImpl.class.getName());
 
     private final KeyService keyservice;
 
-    public TooUpdateServiceImpl(KeyService keyservice) {
+    TooUpdateServiceImpl(KeyService keyservice) {
         this.keyservice = keyservice;
     }
 
@@ -267,9 +264,9 @@ public final class TooUpdateServiceImpl implements TooUpdateService {
                     // Create a simple manual primary guide group with this
                     // guide star tied to the requested probe.
                     final GuideProbeTargets gpt        = GuideProbeTargets.create(probe, target);
-                    final GuideGroup gg                = GuideGroup$.MODULE$.create("Manual Group", gpt);
+                    final GuideGroup gg                = GuideGroup.create(GuideGroup.ManualGroupDefaultName(), gpt);
                     final OptionsList<GuideGroup> opts = OptionsListImpl.create(gg);
-                    final GuideEnvironment genv        = GuideEnvironment$.MODULE$.create(opts);
+                    final GuideEnvironment genv        = GuideEnvironment.create(opts);
 
                     // Update the target environment to include this guide env.
                     final TargetEnvironment env1       = env0.setGuideEnvironment(genv);
