@@ -81,7 +81,7 @@ public abstract class InstrumentSupportTestBase<T extends ISPDataObject> extends
         TargetEnvironment env = getTargetEnvironment();
         GuideGroup        grp = env.getPrimaryGuideGroup();
         if (grp.isAutomatic()) {
-            grp = GuideGroup.create("Manual Group");
+            grp = GuideGroup.create(GuideGroup.ManualGroupDefaultName());
             env = env.setGuideEnvironment(env.getGuideEnvironment().setOptions(env.getGroups().append(grp))).setPrimaryGuideGroup(grp);
         }
         setTargetEnvironment(env.putPrimaryGuideProbeTargets(GuideProbeTargets.create(probe, new SPTarget())));
