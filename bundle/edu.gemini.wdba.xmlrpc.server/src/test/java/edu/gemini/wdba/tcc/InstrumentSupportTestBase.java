@@ -10,10 +10,19 @@ import edu.gemini.spModel.data.ISPDataObject;
 import edu.gemini.spModel.gemini.altair.AltairParams;
 import edu.gemini.spModel.gemini.altair.InstAltair;
 import edu.gemini.spModel.gemini.gems.Gems;
+import edu.gemini.spModel.guide.GuideProbe;
+import edu.gemini.spModel.target.SPTarget;
+import edu.gemini.spModel.target.env.GuideGroup;
+import edu.gemini.spModel.target.env.GuideProbeTargets;
+import edu.gemini.spModel.target.env.TargetEnvironment;
+import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.telescope.IssPort;
 import edu.gemini.spModel.telescope.IssPortProvider;
+import edu.gemini.spModel.util.SPTreeUtil;
 import org.dom4j.Document;
 import org.dom4j.Element;
+import org.junit.Assert;
+import org.junit.Before;
 
 /**
  * Test cases for {@link edu.gemini.wdba.tcc.Flamingos2Support}.
@@ -27,7 +36,7 @@ public abstract class InstrumentSupportTestBase<T extends ISPDataObject> extends
         this.instrumentType = instrumentType;
     }
 
-    protected void setUp() throws Exception {
+    @Before public void setUp() throws Exception {
         super.setUp();
 
         // Add an instrument component to the observation.
@@ -51,6 +60,31 @@ public abstract class InstrumentSupportTestBase<T extends ISPDataObject> extends
         public void store() throws Exception {
             obsComp.setDataObject(dataObject);
         }
+    }
+
+    protected TargetEnvironment getTargetEnvironment() {
+        final ISPObsComponent oc = SPTreeUtil.findTargetEnvNode(obs);
+        @SuppressWarnings("ConstantConditions")
+        final TargetObsComp toc  = (TargetObsComp) oc.getDataObject();
+        return toc.getTargetEnvironment();
+    }
+
+    protected void setTargetEnvironment(TargetEnvironment env) {
+        final ISPObsComponent oc = SPTreeUtil.findTargetEnvNode(obs);
+        @SuppressWarnings("ConstantConditions")
+        final TargetObsComp toc  = (TargetObsComp) oc.getDataObject();
+        toc.setTargetEnvironment(env);
+        oc.setDataObject(toc);
+    }
+
+    protected void addGuideStar(GuideProbe probe) {
+        TargetEnvironment env = getTargetEnvironment();
+        GuideGroup        grp = env.getPrimaryGuideGroup();
+        if (grp.isAutomatic()) {
+            grp = GuideGroup.create(GuideGroup.ManualGroupDefaultName());
+            env = env.setGuideEnvironment(env.getGuideEnvironment().setOptions(env.getGroups().append(grp))).setPrimaryGuideGroup(grp);
+        }
+        setTargetEnvironment(env.putPrimaryGuideProbeTargets(GuideProbeTargets.create(probe, new SPTarget())));
     }
 
     protected ObsComponentPair<InstAltair> addAltair() throws Exception {
@@ -95,17 +129,17 @@ public abstract class InstrumentSupportTestBase<T extends ISPDataObject> extends
 
     protected void verifyPointOrig(Document doc, String expected) throws Exception {
         String actual = getPointOrig(doc);
-        assertEquals(expected, actual);
+        Assert.assertEquals(expected, actual);
     }
 
     protected void verifyInstrumentConfig(Document doc, String expected) throws Exception {
         String actual = getInstrumentConfig(doc);
-        assertEquals("Instrument config mismatch", expected, actual);
+        Assert.assertEquals("Instrument config mismatch", expected, actual);
     }
 
     protected void verifyInstrumentChopConfig(Document doc, String expected) throws Exception {
         String actual = getInstrumentChop(doc);
-        assertEquals("Instrument chop config mismatch", expected, actual);
+        Assert.assertEquals("Instrument chop config mismatch", expected, actual);
     }
 
     protected String getWavelength(Document doc) throws Exception {

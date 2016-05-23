@@ -67,7 +67,7 @@ public class TccFieldConfig extends ParamSet {
             }
         }
 
-        GuideConfigSouth gc = new GuideConfigSouth(_oe);
+        GuideConfig gc = new GuideConfig(_oe);
         if (gc.build()) putParamSet(gc);
 
         addTargets(obsComp.getTargetEnvironment());

@@ -19,13 +19,17 @@ import edu.gemini.spModel.target.env.OptionsListImpl;
 import org.dom4j.Document;
 import org.dom4j.Element;
 
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public final class GuideGroupTest extends TestBase {
     private SPTarget base;
 
-    protected void setUp() throws Exception {
+    @Before public void setUp() throws Exception {
         super.setUp();
 
         base = new SPTarget();
@@ -51,7 +55,7 @@ public final class GuideGroupTest extends TestBase {
         return TargetEnvironment.create(base).setAllPrimaryGuideProbeTargets(gtCollection).setUserTargets(userTargets);
     }
 
-    public void testLoneGroup() throws Exception {
+    @Test public void testLoneGroup() throws Exception {
         // Create a target environment that uses Gems canopus wfs.
         final TargetEnvironment env = TargetEnvironment.create(base);
         final ImList<GuideProbeTargets> gtCollection = createGuideTargetsList(Canopus.Wfs.cwfs1, Canopus.Wfs.cwfs2, Canopus.Wfs.cwfs3);
@@ -66,7 +70,7 @@ public final class GuideGroupTest extends TestBase {
         testTargetEnvironment("LoneGroup", env2);
     }
 
-    public void testNamedGroup() throws Exception {
+    @Test public void testNamedGroup() throws Exception {
         // Create a target environment that uses Gems canopus wfs.
         final TargetEnvironment env = TargetEnvironment.create(base);
         final ImList<GuideProbeTargets> gtCollection = createGuideTargetsList(Canopus.Wfs.cwfs1, Canopus.Wfs.cwfs2, Canopus.Wfs.cwfs3);
@@ -86,10 +90,10 @@ public final class GuideGroupTest extends TestBase {
 
     private String getGuideGroup(final Document doc) throws Exception {
         final Element tccFieldConfig = getTccFieldConfig(doc);
-        if (tccFieldConfig == null) fail("no tcc_tcs_config_file element");
+        if (tccFieldConfig == null) Assert.fail("no tcc_tcs_config_file element");
 
         final Element param = (Element) tccFieldConfig.selectSingleNode("//param[@name='guideGroup']");
-        if (param == null) fail("missing 'guideGroup' param");
+        if (param == null) Assert.fail("missing 'guideGroup' param");
         return param.attributeValue("value");
     }
 
@@ -105,7 +109,7 @@ public final class GuideGroupTest extends TestBase {
         // Get the results.
         final Document doc = getSouthResults();
 
-        assertEquals(guideGroupName, getGuideGroup(doc));
+        Assert.assertEquals(guideGroupName, getGuideGroup(doc));
     }
 
 }

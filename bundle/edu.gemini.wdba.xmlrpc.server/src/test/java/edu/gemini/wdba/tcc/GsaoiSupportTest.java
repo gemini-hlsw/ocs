@@ -16,6 +16,9 @@ import edu.gemini.spModel.telescope.IssPort;
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -102,34 +105,34 @@ public final class GsaoiSupportTest extends InstrumentSupportTestBase<Gsaoi> {
         verify(new Some<>(size));
     }
 
-    public void testDefaultGuideConfig() throws Exception {
+    @Test public void testDefaultGuideConfig() throws Exception {
         setTargetEnv(Canopus.Wfs.cwfs1, GsaoiOdgw.odgw1);
         verify(Gsaoi.OdgwSize.DEFAULT);
     }
 
-    public void testExplicitGuideConfig() throws Exception {
+    @Test public void testExplicitGuideConfig() throws Exception {
         setTargetEnv(Canopus.Wfs.cwfs1, GsaoiOdgw.odgw1);
         setOdgw(Gsaoi.OdgwSize.SIZE_8);
         verify(Gsaoi.OdgwSize.SIZE_8);
     }
 
-    public void testNoGsaoi() throws Exception {
+    @Test public void testNoGsaoi() throws Exception {
         setTargetEnv(Canopus.Wfs.cwfs1);
         final Option<Gsaoi.OdgwSize> none = None.instance();
         verify(none);
     }
 
-    public void testNotGems() throws Exception {
+    @Test public void testNotGems() throws Exception {
         setTargetEnv(PwfsGuideProbe.pwfs1);
         final Option<Gsaoi.OdgwSize> none = None.instance();
         verify(none);
     }
 
-    public void testPointOrig() throws Exception {
+    @Test public void testPointOrig() throws Exception {
         verifyPointOrig(getSouthResults(), "lgs2gsaoi");
     }
 
-    public void testConfig() throws Exception {
+    @Test public void testConfig() throws Exception {
         final Gsaoi gsaoi = getInstrument();
 
         gsaoi.setIssPort(IssPort.SIDE_LOOKING);

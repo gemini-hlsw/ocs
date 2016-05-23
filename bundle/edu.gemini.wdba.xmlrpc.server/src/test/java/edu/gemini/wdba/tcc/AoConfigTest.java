@@ -17,20 +17,22 @@ import edu.gemini.spModel.gemini.niri.InstNIRI;
 import org.dom4j.Document;
 import org.dom4j.Element;
 
+import org.junit.Test;
+import static org.junit.Assert.*;
+
 import java.util.List;
 
 /**
  * Test cases for RotatorConfig.  The logic is about as convoluted as the
  * class itself ...
  */
-public class AoConfigTest extends TestBase {
+public final class AoConfigTest extends TestBase {
 
-    private ISPObsComponent instObsComp;
     private ISPObsComponent gemsObsComp;
     private ISPObsComponent altairObsComp;
 
     private ISPObsComponent addInstrument(SPComponentType type) throws Exception {
-        instObsComp = odb.getFactory().createObsComponent(prog, type, null);
+        final ISPObsComponent instObsComp = odb.getFactory().createObsComponent(prog, type, null);
         obs.addObsComponent(instObsComp);
         return instObsComp;
     }
@@ -90,7 +92,7 @@ public class AoConfigTest extends TestBase {
             String type = site == Site.north ? TccNames.GAOS : "gems";
             Element e = getSubconfig(doc, type);
             if (e == null) return None.instance();
-            return new Some<Element>(e);
+            return new Some<>(e);
         }
 
 
@@ -157,11 +159,11 @@ public class AoConfigTest extends TestBase {
         val.validate();
     }
 
-    public void testAltairDefault()  throws Exception {
+    @Test public void testAltairDefault()  throws Exception {
         testAltair( new InstAltair() );
     }
 
-    public void testAltairNdFilter() throws Exception {
+    @Test public void testAltairNdFilter() throws Exception {
         InstAltair altair = new InstAltair();
         for(AltairParams.NdFilter ndFilter: AltairParams.NdFilter.values()) {
             altair.setNdFilter(ndFilter);
@@ -169,7 +171,7 @@ public class AoConfigTest extends TestBase {
         }
     }
 
-    public void testAltairWavelength() throws Exception {
+    @Test public void testAltairWavelength() throws Exception {
         InstAltair altair = new InstAltair();
         for(AltairParams.Wavelength wavelength: AltairParams.Wavelength.values()) {
             altair.setWavelength(wavelength);
@@ -189,11 +191,11 @@ public class AoConfigTest extends TestBase {
         val.validate();
     }
 
-    public void testGemsDefault() throws Exception {
+    @Test public void testGemsDefault() throws Exception {
         testGems(new Gems());
     }
 
-    public void testGemsAdc() throws Exception {
+    @Test public void testGemsAdc() throws Exception {
         Gems gems = new Gems();
         for (Gems.Adc adc : Gems.Adc.values()) {
             gems.setAdc(adc);
@@ -201,7 +203,7 @@ public class AoConfigTest extends TestBase {
         }
     }
 
-    public void testGemsDichroic() throws Exception {
+    @Test public void testGemsDichroic() throws Exception {
         Gems gems = new Gems();
         for (Gems.DichroicBeamsplitter bs : Gems.DichroicBeamsplitter.values()) {
             gems.setDichroicBeamsplitter(bs);
@@ -209,7 +211,7 @@ public class AoConfigTest extends TestBase {
         }
     }
 
-    public void testGemsAstrometric() throws Exception {
+    @Test public void testGemsAstrometric() throws Exception {
         Gems gems = new Gems();
         for (Gems.AstrometricMode am : Gems.AstrometricMode.values()) {
             gems.setAstrometricMode(am);
@@ -217,7 +219,7 @@ public class AoConfigTest extends TestBase {
         }
     }
 
-    public void testSouthNoGems() throws Exception {
+    @Test public void testSouthNoGems() throws Exception {
         addGsaoi();
 
         AoConfigValidator val = new GemsAoConfigValidator();

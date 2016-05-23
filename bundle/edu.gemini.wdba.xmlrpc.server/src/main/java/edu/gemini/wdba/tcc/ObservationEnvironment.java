@@ -14,18 +14,13 @@ import edu.gemini.spModel.gemini.seqcomp.SeqRepeatOffsetBase;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.guide.GuideProbeUtil;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
-import edu.gemini.spModel.target.env.GuideGroup;
-import edu.gemini.spModel.target.env.GuideProbeTargets;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.wdba.glue.api.WdbaGlueException;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -157,15 +152,16 @@ public final class ObservationEnvironment {
         return _targetEnv;
     }
 
+    public SortedSet<GuideProbe> usedGuiders() {
+        return _targetEnv.getGuideEnvironment().getPrimaryReferencedGuiders();
+    }
+
     public boolean containsTargets(GuideProbe probe) {
-        final Option<GuideProbeTargets> gtOpt = _targetEnv.getPrimaryGuideProbeTargets(probe);
-        return gtOpt.exists(GuideProbeTargets::containsTargets);
+        return usedGuiders().contains(probe);
     }
 
     public boolean containsTargets(GuideProbe.Type type) {
-        final GuideGroup grp = _targetEnv.getPrimaryGuideGroup();
-        final ImList<GuideProbeTargets> gtList = grp.getAllMatching(type);
-        return gtList.exists(GuideProbeTargets::containsTargets);
+        return usedGuiders().stream().anyMatch(gp -> gp.getType() == type);
     }
 
     public enum AoAspect {

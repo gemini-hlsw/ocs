@@ -4,6 +4,7 @@ import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.shared.util.immutable.DefaultImList;
 import edu.gemini.shared.util.immutable.ImCollections;
 import edu.gemini.shared.util.immutable.ImList;
+import edu.gemini.shared.util.immutable.None;
 import edu.gemini.spModel.ext.ObservationNode;
 import edu.gemini.spModel.ext.TargetNode;
 import edu.gemini.spModel.gemini.altair.AltairAowfsGuider;
@@ -17,24 +18,25 @@ import edu.gemini.spModel.gemini.nici.NiciOiwfsGuideProbe;
 import edu.gemini.spModel.gemini.niri.NiriOiwfsGuideProbe;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.target.SPTarget;
-import edu.gemini.spModel.target.env.GuideProbeTargets;
-import edu.gemini.spModel.target.env.TargetEnvironment;
+import edu.gemini.spModel.target.env.*;
 import edu.gemini.spModel.target.obsComp.PwfsGuideProbe;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import org.dom4j.Document;
 import org.dom4j.Element;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  *
  */
-public class GuideConfigTest extends TestBase {
+public final class GuideConfigTest extends TestBase {
 
     private SPTarget base;
 
-    protected void setUp() throws Exception {
+    @Before public void setUp() throws Exception {
         super.setUp();
 
         base = new SPTarget();
@@ -60,61 +62,89 @@ public class GuideConfigTest extends TestBase {
         return TargetEnvironment.create(base).setAllPrimaryGuideProbeTargets(gtCollection).setUserTargets(userTargets);
     }
 
-    public void testNoGuide() throws Exception {
+    @Test public void testNoGuide() throws Exception {
         testTargetEnvironment(TccNames.NO_GUIDING, create());
     }
 
-    public void testP1() throws Exception {
+    @Test public void testP1() throws Exception {
         testTargetEnvironment(TccNames.P1, create(PwfsGuideProbe.pwfs1));
     }
 
-    public void testP2() throws Exception {
+    @Test public void testP2() throws Exception {
         testTargetEnvironment(TccNames.P2, create(PwfsGuideProbe.pwfs2));
     }
 
-    public void testP1P2() throws Exception {
+    @Test public void testP1P2() throws Exception {
         testTargetEnvironment(TccNames.P1P2, create(PwfsGuideProbe.values()));
     }
 
-    public void testOI() throws Exception {
+    @Test public void testOI() throws Exception {
         testTargetEnvironment(TccNames.OI, create(NiciOiwfsGuideProbe.instance));
     }
 
-    public void testP1OI() throws Exception {
+    @Test public void testP1OI() throws Exception {
         testTargetEnvironment(TccNames.P1OI, create(PwfsGuideProbe.pwfs1, NiciOiwfsGuideProbe.instance));
     }
 
-    public void testP2OI() throws Exception {
+    @Test public void testP2OI() throws Exception {
         testTargetEnvironment(TccNames.P2OI, create(PwfsGuideProbe.pwfs2, NiciOiwfsGuideProbe.instance));
     }
 
-    public void testGeMS() throws Exception {
+    // If you have a disabled P2 and an enabled OI, the guide config should
+    // be OI only, not P2OI.
+    @Test public void testRel2789() throws Exception {
+        // Make a target environment with a manual group with active PWFS2 and
+        // OI targets.
+        final GuideProbeTargets      gptP2 = GuideProbeTargets.create(PwfsGuideProbe.pwfs2, new SPTarget());
+        final GuideProbeTargets      gptOi = GuideProbeTargets.create(NiciOiwfsGuideProbe.instance, new SPTarget());
+        final GuideGroup              grp  = GuideGroup.create("Manual Group", gptP2, gptOi);
+        final OptionsList<GuideGroup> opts = OptionsListImpl.create(GuideGroup.AutomaticInitial(), grp).setPrimaryIndex(1);
+        final GuideEnvironment        genv = GuideEnvironment.create(opts);
+        final TargetEnvironment        env = TargetEnvironment.create(new SPTarget(), genv, DefaultImList.create());
+
+        // Disable the PWFS2 target in env.
+        final TargetEnvironment env2 = env.putPrimaryGuideProbeTargets(gptP2.setPrimaryIndex(None.instance()));
+
+        // Primary now only includes OIWFS
+        final Set<GuideProbe> guiders = new HashSet<>();
+        guiders.add(NiciOiwfsGuideProbe.instance);
+        assertEquals(guiders, env2.getGuideEnvironment().getPrimaryReferencedGuiders());
+
+        // All guiders still includes both PWFS2 and OI
+        guiders.add(PwfsGuideProbe.pwfs2);
+        assertEquals(guiders, env2.getGuideEnvironment().getReferencedGuiders());
+
+        // But the guide config will only have OI since it is the only one active.
+        testTargetEnvironment(TccNames.OI, env2);
+    }
+
+    @Test public void testGeMS() throws Exception {
         testTargetEnvironment(TccNames.GeMS, create(Canopus.Wfs.values()));
         testTargetEnvironment(TccNames.GeMS, create(Canopus.Wfs.cwfs1, Canopus.Wfs.cwfs2, GsaoiOdgw.odgw1));
     }
 
-    public void testGeMSOI() throws Exception {
+    @Test public void testGeMSOI() throws Exception {
         testTargetEnvironment(TccNames.GeMSOI, create(Canopus.Wfs.cwfs1, Flamingos2OiwfsGuideProbe.instance));
         testTargetEnvironment(TccNames.GeMSOI, create(Canopus.Wfs.cwfs1, GsaoiOdgw.odgw1, Flamingos2OiwfsGuideProbe.instance));
     }
 
-    public void testGeMSP1() throws Exception {
+    @Test public void testGeMSP1() throws Exception {
         testTargetEnvironment(TccNames.GeMSP1, create(PwfsGuideProbe.pwfs1, Canopus.Wfs.cwfs1));
     }
 
-    public void testGeMSP1OI() throws Exception {
+    @Test public void testGeMSP1OI() throws Exception {
         testTargetEnvironment(TccNames.GeMSP1OI, create(PwfsGuideProbe.pwfs1, Canopus.Wfs.cwfs1, Flamingos2OiwfsGuideProbe.instance));
     }
 
-    public void testAO() throws Exception {
+    @Test public void testAO() throws Exception {
         testTargetEnvironment(TccNames.AO, create(AltairAowfsGuider.instance));
     }
 
-    public void testAOOI() throws Exception {
+    @Test public void testAOOI() throws Exception {
         testTargetEnvironment(TccNames.AOOI, create(AltairAowfsGuider.instance, NiriOiwfsGuideProbe.instance));
     }
 
-    public void testAOP1() throws Exception {
+    @Test public void testAOP1() throws Exception {
         testTargetEnvironment(TccNames.AOP1, create(AltairAowfsGuider.instance, PwfsGuideProbe.pwfs1));
     }
 
@@ -126,22 +156,22 @@ public class GuideConfigTest extends TestBase {
         obs.addObsComponent(altairComp);
     }
 
-    public void testLGSP1() throws Exception {
+    @Test public void testLGSP1() throws Exception {
         addAltair(AltairParams.Mode.LGS_P1);
         testTargetEnvironment(TccNames.AOP1, create(PwfsGuideProbe.pwfs1));
     }
 
-    public void testLGSOI() throws Exception {
+    @Test public void testLGSOI() throws Exception {
         addAltair(AltairParams.Mode.LGS_OI);
         testTargetEnvironment(TccNames.AOOI, create(GmosOiwfsGuideProbe.instance));
     }
 
-    public void testNGSAO() throws Exception {
+    @Test public void testNGSAO() throws Exception {
         addAltair(AltairParams.Mode.NGS); // altair but no AO guide star
         testTargetEnvironment(TccNames.P1, create(PwfsGuideProbe.pwfs1));
     }
 
-    public void testAOP2() throws Exception {
+    @Test public void testAOP2() throws Exception {
         testTargetEnvironment(TccNames.AOP2, create(AltairAowfsGuider.instance, PwfsGuideProbe.pwfs2));
     }
 

@@ -7,13 +7,14 @@ package edu.gemini.wdba.tcc;
 import edu.gemini.spModel.gemini.altair.AltairParams;
 import edu.gemini.spModel.gemini.gmos.GmosSouthType;
 import edu.gemini.spModel.gemini.gmos.InstGmosSouth;
+import edu.gemini.spModel.target.obsComp.PwfsGuideProbe;
 import edu.gemini.spModel.telescope.IssPort;
 import org.junit.Test;
 
 /**
  * Test cases for GMOS instrument support.
  */
-public class GmosSouthSupportTest extends InstrumentSupportTestBase<InstGmosSouth>{
+public final class GmosSouthSupportTest extends InstrumentSupportTestBase<InstGmosSouth>{
 
     public GmosSouthSupportTest() {
         super(InstGmosSouth.SP_TYPE);
@@ -38,6 +39,7 @@ public class GmosSouthSupportTest extends InstrumentSupportTestBase<InstGmosSout
 
     @Test public void testLgsP1PointOrig() throws Exception {
         addAltair(AltairParams.Mode.LGS_P1);
+        addGuideStar(PwfsGuideProbe.pwfs1);
         verifyPointOrig(getSouthResults(), "lgs2gmos_p1");
     }
 
@@ -46,8 +48,20 @@ public class GmosSouthSupportTest extends InstrumentSupportTestBase<InstGmosSout
         verifyInstrumentConfig(getSouthResults(), "GMOS3");
     }
 
+    @Test public void testSideLookingP2() throws Exception {
+        setPort(IssPort.SIDE_LOOKING);
+        addGuideStar(PwfsGuideProbe.pwfs2);
+        verifyInstrumentConfig(getSouthResults(), "GMOS3_P2");
+    }
+
     @Test public void testUpLooking() throws Exception {
         setPort(IssPort.UP_LOOKING);
         verifyInstrumentConfig(getSouthResults(), "GMOS");
+    }
+
+    @Test public void testUpLookingP2() throws Exception {
+        setPort(IssPort.UP_LOOKING);
+        addGuideStar(PwfsGuideProbe.pwfs2);
+        verifyInstrumentConfig(getSouthResults(), "GMOS_P2");
     }
 }

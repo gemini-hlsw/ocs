@@ -71,6 +71,11 @@ public final class Some<T> implements Option<T> {
     }
 
     @Override
+    public boolean contains(final T that) {
+        return val.equals(that);
+    }
+
+    @Override
     public boolean exists(final Function1<? super T, Boolean> op) {
         return op.apply(val);
     }

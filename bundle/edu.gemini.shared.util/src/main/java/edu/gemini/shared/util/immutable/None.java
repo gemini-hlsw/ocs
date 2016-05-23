@@ -115,6 +115,9 @@ public final class None<T> implements Option<T>, Serializable {
     }
 
     @Override
+    public boolean contains(final T that) { return false; }
+
+    @Override
     public boolean exists(final Function1<? super T, Boolean> op) { return false; }
 
     @Override

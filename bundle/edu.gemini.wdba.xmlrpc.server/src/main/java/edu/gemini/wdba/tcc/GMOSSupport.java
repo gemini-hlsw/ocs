@@ -2,10 +2,11 @@ package edu.gemini.wdba.tcc;
 
 import edu.gemini.spModel.gemini.gmos.InstGmosCommon;
 import edu.gemini.spModel.gemini.gmos.GmosOiwfsGuideProbe;
+import edu.gemini.spModel.gemini.gmos.InstGmosNorth;
 import edu.gemini.spModel.target.obsComp.PwfsGuideProbe;
 import edu.gemini.spModel.telescope.IssPort;
 
-public class GMOSSupport implements ITccInstrumentSupport {
+public final class GMOSSupport implements ITccInstrumentSupport {
 
     private String _wavelength;
     private ObservationEnvironment _oe;
@@ -55,11 +56,17 @@ public class GMOSSupport implements ITccInstrumentSupport {
     }
 
     public String getTccConfigInstrument() {
-        String side = _oe.isNorth() ? "5" : "3";
-        String port = (((InstGmosCommon) _oe.getInstrument()).getIssPort() == IssPort.UP_LOOKING) ? "" : side;
-        String ao   = (_oe.isNorth() && _oe.isAltair()) ? "AO2" : "";
-        String p2   = (_oe.containsTargets(PwfsGuideProbe.pwfs2)) ? "_P2" : "";
-        return ao + "GMOS" + port + p2;
+        final String side = _oe.isNorth() ? "5" : "3";
+        final String port = (((InstGmosCommon) _oe.getInstrument()).getIssPort() == IssPort.UP_LOOKING) ? "" : side;
+
+        if (_oe.isNorth() && _oe.isAltair()) {
+            final String oi = _oe.containsTargets(GmosOiwfsGuideProbe.instance) ? "_OI" : "";
+            final String p1 = _oe.containsTargets(PwfsGuideProbe.pwfs1) ? "_P1" : "";
+            return "AO2GMOS" + port + p1 + oi;
+        } else {
+            final String p2 = (_oe.containsTargets(PwfsGuideProbe.pwfs2)) ? "_P2" : "";
+            return "GMOS" + port + p2;
+        }
     }
 
     /**
@@ -77,12 +84,39 @@ public class GMOSSupport implements ITccInstrumentSupport {
      * @return String that is the name of a TCC config file.  See WDBA-5.
      */
     public String getTccConfigInstrumentOrigin() {
-        InstGmosCommon<?, ?, ?, ?> inst = (InstGmosCommon) _oe.getInstrument();
+        final InstGmosCommon<?, ?, ?, ?> inst = (InstGmosCommon) _oe.getInstrument();
+        return (inst instanceof InstGmosNorth) ? northOrigin(inst) : southOrigin(inst);
+    }
+
+    private static final String NGS   = "ngs2gmos";
+    private static final String LGS   = "lgs2gmos";
+    private static final String NO_AO = "gmos";
+
+    private String oi() {
+        return _oe.containsTargets(GmosOiwfsGuideProbe.instance) ? "_oi" : "";
+    }
+
+    private String p1() {
+        return _oe.containsTargets(PwfsGuideProbe.pwfs1) ? "_p1" : "";
+    }
+
+    private static String ifu(InstGmosCommon<?, ?, ?, ?> inst) {
+        return inst.getFPUnit().isIFU() ? "_ifu" : "";
+    }
+
+    private String northOrigin(InstGmosCommon<?, ?, ?, ?> gmos) {
         switch (_oe.getAoAspect()) {
-            case ngs : return "ngs2gmos";
-            case lgs : return _oe.adjustInstrumentOriginForLGS_P1("lgs2gmos");
-            default:
-                return inst.getFPUnit().isIFU() ? "gmos_ifu" : "gmos";
+            case ngs: return NGS   + oi();
+            case lgs: return LGS   + p1() + oi();
+            default:  return NO_AO + ifu(gmos);
+        }
+    }
+
+    private String southOrigin(InstGmosCommon<?, ?, ?, ?> gmos) {
+        switch (_oe.getAoAspect()) {
+            case ngs : return NGS;
+            case lgs : return LGS   + p1();
+            default:   return NO_AO + ifu(gmos);
         }
     }
 
