@@ -1,5 +1,8 @@
 package edu.gemini.spModel.obs
 
+import edu.gemini.skycalc.ObservingNight
+import edu.gemini.spModel.core.Site
+
 /** A reference time for planning observations. */
 sealed abstract class SchedulingBlock {
 
@@ -11,6 +14,14 @@ sealed abstract class SchedulingBlock {
 
   /** Duration, if any, otherwise zero. */
   def durationOrZero = duration.getOrElse(0L)
+
+  /** Observing night of the scheduling block start, at the given site. */
+  def observingNight(site: Site): ObservingNight =
+    new ObservingNight(site, start)
+
+  /** True if these blocks fall on the same observing night. */
+  def sameObservingNightAs(other: SchedulingBlock): Boolean =
+    observingNight(Site.GN) == other.observingNight(Site.GN) // site is arbitrary
 
 }
 

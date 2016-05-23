@@ -160,9 +160,12 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
       ispObs <- Option(e.getContextObservation)
     } {
       val spObs = ispObs.getDataObject.asInstanceOf[SPObservation]
+      val sameNight = spObs.getSchedulingBlock.asScalaOpt.exists(_.sameObservingNightAs(sb))
       spObs.setSchedulingBlock(ImOption.apply(sb))
       ispObs.setDataObject(spObs)
-      EphemerisUpdater.unsafeRefreshEphemerides(ispObs, e.getWindow)
+      if (!sameNight) {
+        EphemerisUpdater.unsafeRefreshEphemerides(ispObs, e.getWindow)
+      }
       callback.run()
       resetComponents()
     }

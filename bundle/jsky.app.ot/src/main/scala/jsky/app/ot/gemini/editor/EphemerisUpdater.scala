@@ -30,10 +30,9 @@ object EphemerisUpdater {
 
   /**
    * Module of actions in `HS2` for displaying status messages and doing things on the EDT.
- *
    * @param c any component; `UI` will use its parent `RootPane`
    */
-  class UI private (c: () => Component) {
+  final class UI private (c: () => Component) {
 
     private def rootPane: Option[JRootPane] =
       Option(SwingUtilities.getRootPane(c()))
@@ -42,10 +41,7 @@ object EphemerisUpdater {
       HS2.delay(Swing.onEDT(f))
 
     def show(msg: String): HS2[Unit] =
-      onEDT {
-        println("show: " + msg + " ... " + rootPane)
-        rootPane.foreach(GlassLabel.show(_, msg))
-      }
+      onEDT(rootPane.foreach(GlassLabel.show(_, msg)))
 
     val hide: HS2[Unit] =
       onEDT(rootPane.foreach(GlassLabel.hide))
@@ -73,25 +69,16 @@ object EphemerisUpdater {
   private def args(obsN: ISPObservation): Option[(ISPObsComponent, Long, Site)] =
     for {
       tocN  <- obsN.findObsComponentByType(TargetObsComp.SP_TYPE)
-      _ = println(tocN)
-      _ = println(obsN.getDataObject.asInstanceOf[SPObservation].getSchedulingBlock)
-      _ = println(obsN.getDataObject.asInstanceOf[SPObservation].getSchedulingBlockStart)
       start <- obsN.getDataObject.asInstanceOf[SPObservation].getSchedulingBlockStart.asScalaOpt
-      _ = println(start)
       site  <- ObsContext.getSiteFromObservation(obsN).asScalaOpt
-      _ = println(site)
     } yield (tocN, start, site)
 
   /**
    * Action to refresh the ephimerides for all nonsidereal targets in `obs`, showing
    * status in the given `UI`.
    */
-  def refreshEphemerides(obsN: ISPObservation, ui: UI): HS2[Unit] = {
-    val x = args(obsN)
-    println(getClass.getName + " ... " + x)
-    x.traverseU_ { case (tocN, start, site) =>
-
-      println("UPDATING ...")
+  def refreshEphemerides(obsN: ISPObservation, ui: UI): HS2[Unit] =
+    args(obsN).traverseU_ { case (tocN, start, site) =>
 
       val toc  = tocN.getDataObject.asInstanceOf[TargetObsComp]
       val env  = toc.getTargetEnvironment
@@ -116,7 +103,6 @@ object EphemerisUpdater {
       ui.hide
 
     }
-  }
 
   /**
    * Refresh the ephimerides for all nonsidereal targets in `obs`, on another thread, showing status
