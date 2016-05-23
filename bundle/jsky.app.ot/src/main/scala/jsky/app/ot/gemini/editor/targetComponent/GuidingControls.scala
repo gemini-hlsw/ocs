@@ -10,7 +10,7 @@ class GuidingControls extends GridBagPanel {
   opaque = false
 
   private object guiderLabel extends Label {
-    text                = "Guide with:"
+    text                = "Auto Guide Search:"
     horizontalAlignment = Alignment.Right
     opaque              = false
   }
