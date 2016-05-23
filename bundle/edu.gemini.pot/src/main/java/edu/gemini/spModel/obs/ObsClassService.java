@@ -1,7 +1,3 @@
-//
-// $Id: ObsClassService.java 46768 2012-07-16 18:58:53Z rnorris $
-//
-
 package edu.gemini.spModel.obs;
 
 import edu.gemini.pot.sp.ISPObservation;
@@ -10,8 +6,6 @@ import edu.gemini.spModel.config.map.ConfigValMapInstances;
 import edu.gemini.spModel.config2.ConfigSequence;
 import edu.gemini.spModel.config2.ItemKey;
 import edu.gemini.spModel.obsclass.ObsClass;
-
-
 
 /**
  * A service used to determine the observing class for an observation.

@@ -1,5 +1,3 @@
-//$Id: NiriRule.java 8208 2007-11-15 18:44:43Z anunez $
-
 package edu.gemini.p2checker.rules.gsaoi;
 
 import edu.gemini.p2checker.api.*;
@@ -12,13 +10,12 @@ import edu.gemini.spModel.gemini.gsaoi.Gsaoi;
 import java.util.ArrayList;
 import java.util.Collection;
 
-
 /**
  *  GSAOI Rule set
  */
 public class GsaoiRule implements IRule {
     private static final String PREFIX = "GsaoiRule_";
-    private static final Collection<IConfigRule> GSAOI_RULES = new ArrayList<IConfigRule>();
+    private static final Collection<IConfigRule> GSAOI_RULES = new ArrayList<>();
 
     private static IConfigRule SHORT_EXPOSURE_TIME_RULE = new IConfigRule() {
 
@@ -26,10 +23,6 @@ public class GsaoiRule implements IRule {
                 "Exposure time (%.1f sec) is shorter than the minimum (%.1f sec) for read mode '%s'";
 
         public Problem check(Config config, int step, ObservationElements elems, Object state) {
-            // Only apply this rule for science observations?
-//            String type = SequenceRule.getObserveType(config);
-//            if ((type != null) && !type.equals(InstConstants.SCIENCE_OBSERVE_TYPE)) return null;
-
             Double expTime = SequenceRule.getExposureTime(config);
             if (expTime == null) return null;
 
@@ -40,7 +33,7 @@ public class GsaoiRule implements IRule {
 
             if (expTime < minTime) {
                 String msg = String.format(MESSAGE, expTime, minTime, readMode.displayValue());
-                return new Problem(ERROR, PREFIX+"SHORT_EXPOSURE_TIME_RULE", msg, SequenceRule.getInstrumentOrSequenceNode(step, elems, config));
+                return new Problem(ERROR, PREFIX + "SHORT_EXPOSURE_TIME_RULE", msg, SequenceRule.getInstrumentOrSequenceNode(step, elems, config));
             }
 
             return null;
@@ -68,7 +61,7 @@ public class GsaoiRule implements IRule {
 
             if (expTime > maxTime) {
                 String msg = String.format(MESSAGE, expTime, filter.logValue(), maxTime);
-                return new Problem(WARNING, PREFIX+"LONG_EXPOSURE_TIME_RULE", msg, SequenceRule.getInstrumentOrSequenceNode(step, elems, config));
+                return new Problem(WARNING, PREFIX + "LONG_EXPOSURE_TIME_RULE", msg, SequenceRule.getInstrumentOrSequenceNode(step, elems, config));
             }
             return null;
         }
@@ -78,7 +71,7 @@ public class GsaoiRule implements IRule {
         }
     };
 
-    /**
+    /*
      * Register all the GSAOI rules to apply
      */
     static {

@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package edu.gemini.p2checker.rules.gems;
 
 import edu.gemini.p2checker.api.IP2Problems;
@@ -20,7 +16,9 @@ import edu.gemini.spModel.gemini.gsaoi.GsaoiOdgw;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 import edu.gemini.spModel.guide.GuideStarValidation;
 import edu.gemini.spModel.guide.ValidatableGuideProbe;
+import edu.gemini.spModel.obs.ObsClassService;
 import edu.gemini.spModel.obs.context.ObsContext;
+import edu.gemini.spModel.obsclass.ObsClass;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.GuideGroup;
@@ -64,6 +62,8 @@ public final class GemsGuideStarRule implements IRule {
 
         ObsContext ctx = opt.getValue();
         TargetEnvironment env = ctx.getTargets();
+        // REL-2098 Some p2 checks are not verified for day calibrations
+        final boolean isDayCal = ObsClassService.lookupObsClass(elements.getObservationNode()) == ObsClass.DAY_CAL;
 
         P2Problems problems = new P2Problems();
         for (ISPProgramNode targetNode : elements.getTargetObsComponentNode()) {
@@ -88,7 +88,7 @@ public final class GemsGuideStarRule implements IRule {
                 // REL-1321:
                 // ERROR if GeMS component in observation AND IQ=Any, "GeMS cannot be used in IQAny conditions."
                 // ERROR if GeMS component in observation AND CC>50, "GeMS cannot be used in cloudy conditions."
-                if (!elements.getSiteQuality().isEmpty()) {
+                if (!elements.getSiteQuality().isEmpty() && !isDayCal) {
                     SPSiteQuality q = elements.getSiteQuality().getValue();
                     if (q.getImageQuality() == SPSiteQuality.ImageQuality.ANY) {
                         problems.addError(PREFIX + "IQ", NoIqAny, targetNode);
@@ -123,7 +123,7 @@ public final class GemsGuideStarRule implements IRule {
                     problems.addError(PREFIX + "ConfigError", ConfigError, targetNode);
                 }
                 //When using less than 3 of either CANOPUS CWFS or ODGW when 1 of the complementary type (CWFS3 or ODGW/F2 OIWFS)
-                if ((odgws <= 1 && cwfs < 3) || (cwfs <= 1 && odgws < 3)) {
+                if (((odgws <= 1 && cwfs < 3) || (cwfs <= 1 && odgws < 3)) && !isDayCal) {
                     problems.addWarning(PREFIX + "TipTilt", TipTilt, targetNode);
                 }
                 //No Canopus Slow-focus Sensor guide star (CWFS) when using 2 or 3 ODGW.
@@ -150,7 +150,7 @@ public final class GemsGuideStarRule implements IRule {
                     }
                 }
                 //When using less than 3 of either CANOPUS CWFS or ODGW when 1 of the complementary type (CWFS3 or ODGW/F2 OIWFS)
-                if ((f2oiwfs && cwfs < 3)) {
+                if ((f2oiwfs && cwfs < 3) && !isDayCal) {
                     problems.addWarning(PREFIX + "TipTilt", TipTilt, targetNode);
                 }
             }
