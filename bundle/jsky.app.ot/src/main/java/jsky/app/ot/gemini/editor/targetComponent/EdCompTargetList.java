@@ -1006,30 +1006,32 @@ class GuidePositionType implements PositionType {
     }
 
     @Override public void morphTarget(final TargetObsComp obsComp, final SPTarget target) {
-        TargetEnvironment env = obsComp.getTargetEnvironment();
-        if (isMember(env, target)) return;
-        env = env.removeTarget(target);
+        final TargetEnvironment env1              = obsComp.getTargetEnvironment();
+        final Option<IndexedGuideGroup> oldIggOpt = env1.getGroups().zipWithIndex()
+                .find(t -> t._1().containsTarget(target))
+                .map(t -> new IndexedGuideGroup(t._2(), t._1()));
 
-        // Cases to consider here:
-        // 1. Manual group primary: move the target inside it.
-        // 2. Auto group primary, manual groups exist: move target inside first manual group.
-        // 3. No manual group: create a manual group and move the target inside it.
+        if (isMember(env1, target)) return;
+        final TargetEnvironment env = env1.removeTarget(target);
+
+        // Extra case to consider: if auto group target, do NOT remove it!
+        // 1. Auto group target, no manual groups; and
+        // 2. Auto group target, manual groups exist.
         final Option<Tuple2<TargetEnvironment, IndexedGuideGroup>> resultOpt;
-        if (env.getGroups().size() == 1) {
-            resultOpt = EdCompTargetList.appendNewGroup(env, obsComp, positionTable);
-        } else if (env.getPrimaryGuideGroup().isManual()) {
-            final int index = env.getGuideEnvironment().getPrimaryIndex();
-            final GuideGroup group = env.getPrimaryGuideGroup();
-            resultOpt = new Some<>(new Pair<>(env, new IndexedGuideGroup(index, group)));
-        } else {
-            final GuideGroup group = env.getGroups().get(1);
-            resultOpt = new Some<>(new Pair<>(env, new IndexedGuideGroup(1, group)));
+        if (oldIggOpt.exists(igg -> igg.group().isAutomatic())) {
+            resultOpt = env.getGroups().size() == 1 ?
+                    EdCompTargetList.appendNewGroup(env1, obsComp, positionTable) :
+                    new Some<>(new Pair<>(env1, new IndexedGuideGroup(1, env.getGroups().get(1))));
+        }
+        // 3. Manual group target.
+        else {
+            resultOpt = oldIggOpt.map(igg -> new Pair<>(env, igg));
         }
 
         resultOpt.foreach(result -> {
             final TargetEnvironment newEnv = result._1();
             final IndexedGuideGroup igg    = result._2();
-            EdCompTargetList.addTargetToGroup(newEnv, igg, guider, target, obsComp, positionTable);
+            EdCompTargetList.addTargetToGroup(newEnv, igg, guider, target.clone(), obsComp, positionTable);
         });
     }
 
