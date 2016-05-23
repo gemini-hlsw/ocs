@@ -18,7 +18,6 @@ final class NonSiderealTargetRules extends IRule {
     val p2p = new P2Problems
     p2p.append(checkNoHorizonsDesignation(es))
     p2p.append(checkNoSchedulingBlock(es))
-    p2p.append(checkSchedulingBlockOutsideSemester(es))
     p2p.append(checkNoEphemerisForSchedulingBlock(es))
     p2p.append(checkEphemerisTooSparse(es))
     p2p
@@ -47,20 +46,6 @@ final class NonSiderealTargetRules extends IRule {
           es.getObservationNode)
         }
       }
-    }
-
-  def checkSchedulingBlockOutsideSemester(es: ObservationElements): IP2Problems =
-    new P2Problems <| { p2p =>
-      for {
-        toc  <- es.getTargetObsComp.asScalaOpt
-                if toc.getTargetEnvironment.getTargets.asScalaList.exists(_.isNonSidereal)
-        sb   <- es.getObservation.getSchedulingBlock.asScalaOpt
-        site <- Option(es.getObservationNode.getProgramID).flatMap(pid => Option(pid.site))
-        sem  <- es.getObservationNode.getProgramID.semester
-                if !sem.contains(sb.start, site)
-      } p2p.addWarning(ERR_SCHEDULING_BLOCK_SEM,
-          s"Scheduling block for ${es.getObservationNode.getObservationID} falls outside of ${sem}.",
-          es.getObservationNode)
     }
 
   def checkNoEphemerisForSchedulingBlock(es: ObservationElements): IP2Problems =
@@ -101,7 +86,6 @@ final class NonSiderealTargetRules extends IRule {
 object NonSiderealTargetRules {
 
   val ERR_NO_SCHEDULING_BLOCK     = "NoSchedulingBlock"
-  val ERR_SCHEDULING_BLOCK_SEM    = "SchedulingBlockOutsideSemester"
   val ERR_NO_EPHEMERIS_FOR_BLOCK  = "NoEphemerisForSchedulingBlock"
   val ERR_EPHEMERIS_TOO_SPARSE    = "EphemerisTooSparse"
   val ERR_NO_HORIZONS_DESIGNATION = "NoHorizonsDesignation"

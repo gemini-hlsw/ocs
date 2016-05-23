@@ -38,20 +38,6 @@ class NonSiderealTargetRulesSpec extends RuleSpec {
 
   }
 
-  ERR_SCHEDULING_BLOCK_SEM should {
-
-    "error if scheduling block is outside semester" in
-      expectAllOf(ERR_SCHEDULING_BLOCK_SEM) {
-        obs(NonSiderealTarget.empty, Some(SchedulingBlock(0L)))
-      }
-
-    "no error if scheduling block is within semester" in
-      expectNoneOf(ERR_SCHEDULING_BLOCK_SEM) {
-        obs(NonSiderealTarget.empty, Some(SchedulingBlock(Semester.parse("2015A").getStartDate(Site.GS).getTime)))
-      }
-
-  }
-
   ERR_NO_EPHEMERIS_FOR_BLOCK should {
 
     "error if no ephemeris for scheduling block" in
