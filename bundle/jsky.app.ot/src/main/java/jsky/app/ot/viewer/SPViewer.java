@@ -923,7 +923,7 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
         if (!shouldClose(allPrograms())) {
             return;
         }
-        _orderedInstances.forEach(SPViewer::closeViewer);
+        instances().forEach(SPViewer::closeViewer);
 
         // TODO: Potentially there are still plugins an other parts of the application open.
         System.exit(0);
