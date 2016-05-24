@@ -57,7 +57,11 @@ object ObsTargetCalculatorService {
       // If the duration is going to be smaller than the default step size of 30 seconds used by the
       // target calc, we will have divide by 0 issues, so take this into account.
       val stepSize = if (duration >= TimeUtils.seconds(30)) TimeUtils.seconds(30) else duration
-      TargetCalculator(s, st, Interval(b.start, end), stepSize)
+      if (end > b.start) {
+        TargetCalculator(s, st, Interval(b.start, end), stepSize)
+      } else {
+        TargetCalculator(s, st, b.start)
+      }
     }
 
     for {
