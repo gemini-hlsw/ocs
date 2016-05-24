@@ -3,6 +3,7 @@ package edu.gemini.ags.api
 import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.shared.util.immutable.{Option => GemOption}
 import edu.gemini.spModel.ags.AgsStrategyKey
+import edu.gemini.spModel.gemini.altair.InstAltair
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
 import edu.gemini.spModel.gemini.gmos.{InstGmosNorth, InstGmosSouth}
 import edu.gemini.spModel.obs.context.ObsContext
@@ -128,6 +129,13 @@ object AgsHash {
         }
 
       case _                             =>
+    }
+
+    // Altair mode, which impacts not only the strategy but also the
+    // magnitude limits.
+    ctx.getAOComponent.asScalaOpt.foreach {
+      case a: InstAltair => a.getMode.## +=: buf
+      case _             =>
     }
 
     M3.orderedHash(buf)

@@ -6,6 +6,7 @@ import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.skycalc.{Offset => SkyCalcOffset}
 import edu.gemini.spModel.ags.AgsStrategyKey
 import edu.gemini.spModel.core.{Site, Declination, Angle}
+import edu.gemini.spModel.gemini.altair.{AltairParams, InstAltair}
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
 import edu.gemini.spModel.gemini.gems.Gems
 import edu.gemini.spModel.gemini.gmos.{GmosCommonType, InstGmosSouth, GmosSouthType, GmosNorthType, InstGmosNorth}
@@ -253,6 +254,18 @@ class AgsHashSpec extends Specification with ScalaCheck with edu.gemini.spModel.
         val ctx2 = ctx1.withInstrument(g)
 
         hashDiffers(ctx1, ctx2)
+      }
+
+    "differ if Altair mode differs" in
+      forAll { (ctx: ObsContext, gmosN: InstGmosNorth, altair1: InstAltair, mode2: AltairParams.Mode) =>
+        val ctx1    = ctx.withInstrument(gmosN).withAOComponent(altair1)
+        val mode1   = altair1.getMode
+
+        val altair2 = altair1.clone.asInstanceOf[InstAltair]
+        altair2.setMode(mode2)
+        val ctx2    = ctx1.withAOComponent(altair2)
+
+        (mode1 == mode2) == hashSame(ctx1, ctx2)
       }
   }
 }
