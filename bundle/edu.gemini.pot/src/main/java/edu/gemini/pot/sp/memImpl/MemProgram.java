@@ -292,7 +292,7 @@ public final class MemProgram extends MemAbstractContainer implements ISPProgram
     private void checkForDuplicate(MemObservation localObs) throws SPTreeStateException {
         // Check for duplicate observation id.
         int newObsNum = localObs.getObservationNumber();
-        for (ISPObservation ispObservation : getObservations()) {
+        for (ISPObservation ispObservation : getAllObservations()) {
             MemObservation obs = (MemObservation) ispObservation;
             int obsNum = obs.getObservationNumber();
             if (newObsNum == obsNum) {
