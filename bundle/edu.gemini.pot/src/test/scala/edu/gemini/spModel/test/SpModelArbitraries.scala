@@ -7,6 +7,7 @@ import edu.gemini.skycalc.{Offset => SkyCalcOffset}
 import edu.gemini.spModel.ags.AgsStrategyKey
 import edu.gemini.spModel.core.{OffsetQ, OffsetP, Offset, Angle, Arbitraries}
 import edu.gemini.spModel.core.AngleSyntax._
+import edu.gemini.spModel.gemini.altair.{AltairParams, InstAltair}
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
 import edu.gemini.spModel.gemini.gmos.GmosCommonType.FPUnitMode._
 import edu.gemini.spModel.gemini.gmos.{GmosCommonType, GmosSouthType, InstGmosSouth, GmosNorthType, InstGmosNorth}
@@ -32,6 +33,17 @@ trait SpModelArbitraries extends Arbitraries with edu.gemini.spModel.target.env.
   // TODO: Eventually all instruments should be included and all instrument
   // TODO: features as well.  They should probably also be broken out into
   // TODO: individual Arbitraries.
+
+  implicit val arbAltairMode: Arbitrary[AltairParams.Mode] =
+    Arbitrary { Gen.oneOf(AltairParams.Mode.values) }
+
+  implicit val arbAltair: Arbitrary[InstAltair] =
+    Arbitrary {
+      arbitrary[AltairParams.Mode].map { mode =>
+        new InstAltair <|
+          (_.setMode(mode))
+      }
+    }
 
   implicit val arbFlamingos2Fpu: Arbitrary[Flamingos2.FPUnit] =
     Arbitrary { Gen.oneOf(Flamingos2.FPUnit.values) }
