@@ -417,8 +417,11 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         numberFormatter.setMaximumFractionDigits(2);
         numberFormatter.setMaximumIntegerDigits(3);
         _w.schedulingBlock.init(this, site, numberFormatter, () -> {
-                final TargetEnvironment env1 = getDataObject().getTargetEnvironment();
-                updateTargetDetails(env1);
+            final TargetObsComp toc      = getDataObject();
+            final TargetEnvironment env1 = toc.getTargetEnvironment();
+            updateTargetDetails(env1);
+            _w.positionTable.reinit(toc, false);
+
         });
 
         updateTargetDetails(newTOC.getTargetEnvironment());
