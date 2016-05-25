@@ -52,9 +52,6 @@ public class ObsForm extends JPanel {
         phase2StatusBox = new SingleSelectComboBox<>();
         execStatusPanel = new JPanel();
 
-        final JLabel schedulingBlockLabel = new JLabel();
-        schedulingBlock = new ParallacticAngleControls(false);
-
         JLabel label3 = new JLabel();
         qaStateBox = new DropDownListBoxWidget<>();
         override = new JCheckBox();
@@ -237,12 +234,6 @@ public class ObsForm extends JPanel {
             panel1.add(tooCardPanel, cc.xywh(7, 1, 5, 1, CellConstraints.FILL, CellConstraints.FILL));
         }
         add(panel1, cc.xywh(3, row, 9, 1));
-
-        row += 2;
-
-        schedulingBlockLabel.setText("Scheduling ");
-        add(schedulingBlockLabel, cc.xy(1, row));
-        add(schedulingBlock.peer(), cc.xywh(3, row, 9, 1));
 
         row += 2;
 
@@ -540,7 +531,4 @@ public class ObsForm extends JPanel {
     JPanel tooLabelOnlyPanel;
     JLabel tooSinglePriorityLabel;
     // JFormDesigner - End of variables declaration  //GEN-END:variables
-
-    ParallacticAngleControls schedulingBlock;
-
 }

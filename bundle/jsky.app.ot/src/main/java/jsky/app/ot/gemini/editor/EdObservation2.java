@@ -9,13 +9,11 @@ import edu.gemini.shared.util.TimeValue;
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.shared.util.immutable.Some;
-import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.dataset.DataflowStatus;
 import edu.gemini.spModel.dataset.DatasetQaState;
 import edu.gemini.spModel.dataset.DatasetQaStateSums;
 import edu.gemini.spModel.obs.*;
 import edu.gemini.spModel.obs.ObservationStatus;
-import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obs.plannedtime.PlannedTimeSummary;
 import edu.gemini.spModel.obs.plannedtime.PlannedTimeSummaryService;
 import edu.gemini.spModel.obsclass.ObsClass;
@@ -326,12 +324,6 @@ public final class EdObservation2 extends OtItemEditor<ISPObservation, SPObserva
 
         _updateObsTimeCorrectionTable();
         _updateTotalUsedTime(false);
-
-        final Option<Site> site = ObsContext.getSiteFromObservation(getNode());
-        final NumberFormat numberFormatter = NumberFormat.getInstance(Locale.US);
-        numberFormatter.setMaximumFractionDigits(2);
-        numberFormatter.setMaximumIntegerDigits(3);
-        _editorPanel.schedulingBlock.init(this, site, numberFormatter);
 
         // GUI editable state depends on the observation status
         OT.updateEditableState(getNode());
