@@ -421,7 +421,9 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             _w.positionTable.reinit(toc, false);
         });
 
-        updateTargetDetails(newTOC.getTargetEnvironment());
+        if (!autoGroupChanged) {
+            updateTargetDetails(newTOC.getTargetEnvironment());
+        }
     }
 
     // OtItemEditor
