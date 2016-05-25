@@ -19,8 +19,8 @@ import java.util.UUID;
  */
 class ProgramData extends DocumentData {
 
-    // The index of the next observation created in this program.
-    private int _nextObsNumber;
+    // The highest index of the any observation ever created in this program.
+    private int _maxObsNumber;
 
     ProgramData(SPNodeKey progKey, SPProgramID progId, UUID uuid, LifespanId lifespanId) {
         super(progKey, progId, uuid, lifespanId);
@@ -29,21 +29,19 @@ class ProgramData extends DocumentData {
     int nextObsNumber() {
         getProgramWriteLock();
         try {
-            return ++_nextObsNumber;
+            return ++_maxObsNumber;
         } finally {
             returnProgramWriteLock();
         }
     }
 
-    // make sure _nextObsNumber >= n
+    // make sure _maxObsNumber >= n
     void updateNextObsNumber(int n) {
-        if (n > _nextObsNumber) {
-            getProgramWriteLock();
-            try {
-                _nextObsNumber = n;
-            } finally {
-                returnProgramWriteLock();
-            }
+        getProgramWriteLock();
+        try {
+            _maxObsNumber = Math.max(n, _maxObsNumber);
+        } finally {
+            returnProgramWriteLock();
         }
     }
 }
