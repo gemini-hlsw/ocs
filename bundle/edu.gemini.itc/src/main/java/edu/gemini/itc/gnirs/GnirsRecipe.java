@@ -53,6 +53,12 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
     }
 
     private void validateInputParameters() {
+            if (_gnirsParameters.altair().isDefined()) {
+                if (_obsDetailParameters.calculationMethod() instanceof Spectroscopy) {
+                    throw new IllegalArgumentException(
+                            "Altair with Spectroscopy mode is not currently supported by the ITC.");
+                }
+            }
 
         // some general validations
         Validation.validate(instrument, _obsDetailParameters, _sdParameters);
@@ -119,7 +125,7 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
 
 
         // TODO: why, oh why?
-        final double im_qual1 = _sdParameters.isUniform() ? 10000 : IQcalc.getImageQuality();
+        final double im_qual1 = _sdParameters.isUniform() ? 10000 : im_qual;
 
         final SpecS2NSlitVisitor specS2N = new SpecS2NSlitVisitor(
                 slit,
@@ -287,7 +293,7 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
         }
 
     }
-    
+
 
     public ImagingResult calculateImaging() {
         // Module 1b
