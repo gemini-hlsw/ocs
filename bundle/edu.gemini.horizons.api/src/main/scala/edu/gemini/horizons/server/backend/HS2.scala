@@ -1,5 +1,7 @@
 package edu.gemini.horizons.server.backend
 
+import edu.gemini.spModel.core.HorizonsDesignation.{MajorBody, AsteroidOldStyle, AsteroidNewStyle, Comet}
+
 import java.util.logging.{Level, Logger}
 
 import edu.gemini.spModel.core._
@@ -160,8 +162,15 @@ object HorizonsService2 {
         TIME_DIGITS      -> FRACTIONAL_SEC
       )
 
+    val replyType = target match {
+      case Comet(des)            => HorizonsReply.ReplyType.COMET
+      case AsteroidNewStyle(des) => HorizonsReply.ReplyType.MINOR_OBJECT
+      case AsteroidOldStyle(num) => HorizonsReply.ReplyType.MINOR_OBJECT
+      case MajorBody(num)        => HorizonsReply.ReplyType.MAJOR_PLANET
+    }
+
     def buildEphemeris(m: GetMethod): IO[Long ==>> E]  =
-      IO(CgiReplyBuilder.buildResponse(m.getResponseBodyAsStream, m.getRequestCharSet)).map(toEphemeris)
+      IO(CgiReplyBuilder.readEphemeris(m.getResponseBodyAsStream, replyType, m.getRequestCharSet)).map(toEphemeris)
 
     // And finally
     horizonsRequest(queryParams)(buildEphemeris).ensure(EphemerisEmpty)(_.size > 0)

@@ -150,6 +150,26 @@ public class CgiReplyBuilder {
     }
 
     /**
+     * Builds a <code>HorizonsReply</code> of the given type, assuming the
+     * stream contains valid ephemeris data.  This method is like buildResponse
+     * but it skips the header parsing and uses the given reply type directly.
+     *
+     * @return results from the CGI query
+     */
+    public static HorizonsReply readEphemeris(InputStream stream, HorizonsReply.ReplyType replyType, String charset) throws HorizonsException {
+        final HorizonsReply reply = new HorizonsReply();
+        reply.setReplyType(replyType);
+
+        try {
+            _buildEphemeris(_readFully(new InputStreamReader(stream, charset)), reply);
+        } catch (IOException ex) {
+            throw HorizonsException.create("Exception reading data from Server", ex);
+        }
+
+        return reply;
+    }
+
+    /**
      * Process the header in the CGI reply. The header defines the content type of the
      * reply, mostly
      *
