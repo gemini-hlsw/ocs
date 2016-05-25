@@ -2,11 +2,6 @@ package jsky.app.ot.viewer.action;
 
 import edu.gemini.pot.sp.*;
 import edu.gemini.shared.util.immutable.ImOption;
-import edu.gemini.shared.util.immutable.Option;
-import edu.gemini.spModel.core.ProgramId;
-import edu.gemini.spModel.core.ProgramId$;
-import edu.gemini.spModel.core.SPProgramID;
-import edu.gemini.spModel.core.Semester;
 import edu.gemini.spModel.data.ISPDataObject;
 import edu.gemini.spModel.obs.SPObservation;
 import edu.gemini.spModel.util.DefaultSchedulingBlock;
@@ -35,7 +30,7 @@ public final class AddObservationAction extends AbstractViewerAction implements 
         if (requires == null) {
             this.requires = Collections.emptySet();
         } else {
-            this.requires = Collections.unmodifiableSet(new HashSet<SPComponentType>(requires));
+            this.requires = Collections.unmodifiableSet(new HashSet<>(requires));
         }
     }
 
@@ -81,6 +76,7 @@ public final class AddObservationAction extends AbstractViewerAction implements 
         return componentType;
     }
 
+    @SuppressWarnings("NullableProblems")
     public int compareTo(AddObservationAction action) {
         return componentType.readableStr.compareToIgnoreCase(action.componentType.readableStr);
     }
