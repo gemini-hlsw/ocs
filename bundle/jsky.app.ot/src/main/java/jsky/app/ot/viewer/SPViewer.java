@@ -667,7 +667,7 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
 
             // If there was an old root, clean up
             if (getRoot() != null) {
-                BagsManager.instance().unwatch(getRoot());
+                BagsManager.unwatch(getRoot());
                 getDatabase().checkpoint();
                 getRoot().removePropertyChangeListener(ISPProgram.DATA_OBJECT_KEY, authListener);
                 updateEngToolWindow(null);
@@ -711,7 +711,7 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
                 if (getRoot() != null && OTOptions.isCheckingEngineEnabled()) {
                     _checker.check(getRoot(), getTree(), OT.getMagnitudeTable());
                 }
-                BagsManager.instance().watch(getRoot());
+                BagsManager.watch(getRoot());
             }
 
             // Finally, update title and actions
@@ -876,7 +876,7 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
             return;
         }
         if (p != null) {
-            BagsManager.instance().unwatch(p);
+            BagsManager.unwatch(p);
             treeSnapshots.remove(p.getNodeKey());
         }
         tryNavigate(_history.delete());
@@ -884,7 +884,7 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
 
     public void closeProgram(ISPProgram node) {
         if (node != null) {
-            BagsManager.instance().unwatch(node);
+            BagsManager.unwatch(node);
             treeSnapshots.remove(node.getNodeKey());
         }
         tryNavigate(_history.delete(node));
@@ -893,7 +893,7 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
     /** Close the current viewer window, but don't exit the application, even if it is the last window. */
     private void closeViewer() {
         if (getRoot() != null) {
-            BagsManager.instance().unwatch(getRoot());
+            BagsManager.unwatch(getRoot());
         }
 
         tryNavigate(_history.empty());
