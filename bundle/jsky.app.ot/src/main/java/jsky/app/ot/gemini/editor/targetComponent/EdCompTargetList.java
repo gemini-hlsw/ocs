@@ -288,7 +288,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     /**
      * Determine whether or not the auto group has changed for a specific observation.
      */
-    private boolean autoGroupChanged(final ISPObsComponent oldObsComp, final TargetObsComp oldTOC) {
+    private boolean isBagsUpdate(final ISPObsComponent oldObsComp, final TargetObsComp oldTOC) {
         final TargetObsComp newTOC = getDataObject();
 
         // If either of the TargetObsComps are null, this was not triggered by an auto group change.
@@ -329,14 +329,14 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     }
 
     @Override public void init(final ISPObsComponent oldNode, final TargetObsComp oldTOC) {
-        final boolean autoGroupChanged = autoGroupChanged(oldNode, oldTOC);
+        final boolean isBagsUpdate = isBagsUpdate(oldNode, oldTOC);
         final TargetObsComp newTOC = getDataObject();
 
         // If only the auto group has changed, we do not want to use a completely reset target environment, as this
         // will contain clones of all targets and thus will require the target detail editors to be reset to use these
         // new clones: this is bad as it will reformat the RA and Dec fields and thus any modifications being made
         // to them will be lost as they are repopulated and the caret moved to the end.
-        if (autoGroupChanged) {
+        if (isBagsUpdate) {
             // Determine if there was an auto group in the old env and what the primary index was.
             final TargetEnvironment oldEnv     = oldTOC.getTargetEnvironment();
             final GuideEnvironment oldGuideEnv = oldEnv.getGuideEnvironment();
@@ -358,7 +358,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         final TargetEnvironment env = newTOC.getTargetEnvironment();
 
         // If more than the auto group has changed, we need to maintain the selection, or default to the base.
-        if (!autoGroupChanged) {
+        if (!isBagsUpdate) {
             final boolean targetSet = TargetSelection.getTargetForNode(env, node).map(t ->
                     manageCurPosIfEnvContainsTarget(t, () -> setSelectionToTarget(t))
             ).getOrElse(false);
@@ -404,7 +404,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             }
         }
 
-        _w.positionTable.reinit(newTOC, autoGroupChanged);
+        _w.positionTable.reinit(newTOC, isBagsUpdate);
 
         _w.guidingControls.manualGuideStarButton().peer().setVisible(GuideStarSupport.supportsManualGuideStarSelection(getNode()));
         updateGuiding();
@@ -421,7 +421,17 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             _w.positionTable.reinit(toc, false);
         });
 
-        updateTargetDetails(newTOC.getTargetEnvironment());
+        // If this update is due to BAGS updating the auto group, then we will
+        // skip the target detail editor reset.  Otherwise we could be in the
+        // middle of typing in an RA or dec and we'd reset the text field,
+        // causing the cursor to jump to the end and generating frustration.
+        // If the update comes from anything other than BAGS though, we need to
+        // show the target details.  (TODO: Ideally we'd update the target
+        // details for a BAGS update too if we're parked on a BAGS target in the
+        // target table.)
+        if (!isBagsUpdate) {
+            updateTargetDetails(newTOC.getTargetEnvironment());
+        }
     }
 
     // OtItemEditor
