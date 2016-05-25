@@ -91,7 +91,7 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
       anchor = Anchor.West
     }
 
-    private object dateTimeButton extends Button {
+    object dateTimeButton extends Button {
       icon    = Resources.getIcon("dates.gif")
       tooltip = "Select the time and duration for the average parallactic angle calculation."
     }
@@ -261,6 +261,13 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
         case _                          => None
       }
     } yield a
+
+  override def enabled_=(b: Boolean): Unit = {
+    super.enabled_=(b)
+    ui.relativeTimeMenu.enabled = b
+    ui.dateTimeButton.enabled = b
+  }
+
 }
 
 object ParallacticAngleControls {
