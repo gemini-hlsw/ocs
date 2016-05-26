@@ -124,12 +124,10 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
         final SPInstObsComp inst = getContextInstrumentDataObject();
         _w.newMenu.setEnabled(enabled && inst != null);
-        _w.tag.setEnabled(enabled && !selectionIsBasePosition());
 
         // The scheduling block editor does not necessarily become enabled when the rest of the
         // editor does. See the implementation for an explanation.
         updateSchedulingBlockEnabledState(enabled);
-
     }
 
     // The scheduling block editor should not be enabled unless there is at least one non-sidereal
@@ -143,6 +141,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 toc.getTargetEnvironment().getTargets().exists(SPTarget::isNonSidereal)
             );
         }
+        _w.tag.setEnabled(enabled && selectedGroup().isEmpty() && !selectionIsAutoTarget() && !selectionIsBasePosition());
     }
 
     private void updateDetailEditorEnabledState(final boolean enabled) {
@@ -247,7 +246,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         _w.pasteButton.setEnabled(editable && notAutoTarget);
         _w.duplicateButton.setEnabled(editable && notAutoTarget);
         updateDetailEditorEnabledState(editable && notAutoTarget);
-        _w.tag.setEnabled(notAutoTarget);
+        _w.tag.setEnabled(notAutoTarget && notBase);
     }
 
     /**
@@ -605,6 +604,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 final IndexedGuideGroup igg    = result._2();
                 final SPTarget target          = new SPTarget();
                 addTargetToGroup(newEnv, igg, probe, target, obsComp, positionTable);
+                positionTable.selectTarget(target);
                 SwingUtilities.invokeLater(EdCompTargetList.this::showTargetTag);
             });
         }
@@ -680,7 +680,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 .getOrElse(() -> GuideProbeTargets.create(probe, target));
         final TargetEnvironment newEnv = env.setGuideEnvironment(env.getGuideEnvironment().putGuideProbeTargets(groupIndex, newGpt));
         obsComp.setTargetEnvironment(newEnv);
-        positionTable.selectTarget(target);
     }
 
     /**
@@ -1075,6 +1074,7 @@ class GuidePositionType implements PositionType {
             final TargetEnvironment envNew = tup._1();
             final IndexedGuideGroup igg    = tup._2();
             EdCompTargetList.addTargetToGroup(envNew, igg, guider, target.clone(), obsComp, positionTable);
+            positionTable.selectTarget(target);
         });
     }
 
