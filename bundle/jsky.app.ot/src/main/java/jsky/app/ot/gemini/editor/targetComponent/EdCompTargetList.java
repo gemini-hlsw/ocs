@@ -124,7 +124,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
         final SPInstObsComp inst = getContextInstrumentDataObject();
         _w.newMenu.setEnabled(enabled && inst != null);
-        _w.tag.setEnabled(enabled && !selectionIsBasePosition());
+        _w.tag.setEnabled(enabled && selectedGroup().isEmpty() && !selectionIsAutoTarget() && !selectionIsBasePosition());
     }
 
     private void updateDetailEditorEnabledState(final boolean enabled) {
@@ -229,7 +229,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         _w.pasteButton.setEnabled(editable && notAutoTarget);
         _w.duplicateButton.setEnabled(editable && notAutoTarget);
         updateDetailEditorEnabledState(editable && notAutoTarget);
-        _w.tag.setEnabled(notAutoTarget);
+        _w.tag.setEnabled(notAutoTarget && notBase);
     }
 
     /**
