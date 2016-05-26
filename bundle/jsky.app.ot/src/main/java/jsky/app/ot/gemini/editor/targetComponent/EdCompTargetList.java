@@ -125,6 +125,24 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         final SPInstObsComp inst = getContextInstrumentDataObject();
         _w.newMenu.setEnabled(enabled && inst != null);
         _w.tag.setEnabled(enabled && !selectionIsBasePosition());
+
+        // The scheduling block editor does not necessarily become enabled when the rest of the
+        // editor does. See the implementation for an explanation.
+        updateSchedulingBlockEnabledState(enabled);
+
+    }
+
+    // The scheduling block editor should not be enabled unless there is at least one non-sidereal
+    // target in the target environment. So in the case where the editor is enabled we need to do
+    // another check to see if the scheduling block editor should then be disabled. Good times.
+    private void updateSchedulingBlockEnabledState(final boolean enabled) {
+        if (enabled) {
+            final TargetObsComp toc = getDataObject();
+            _w.schedulingBlock.enabled_$eq(
+                toc != null &&
+                toc.getTargetEnvironment().getTargets().exists(SPTarget::isNonSidereal)
+            );
+        }
     }
 
     private void updateDetailEditorEnabledState(final boolean enabled) {
@@ -356,6 +374,10 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         newTOC.addPropertyChangeListener(TargetObsComp.TARGET_ENV_PROP, primaryButtonUpdater);
         newTOC.addPropertyChangeListener(TargetObsComp.TARGET_ENV_PROP, guidingPanelUpdater);
 
+        // Any change to the target env (or its contained SPTargets) can cause the enabled state of
+        // the scheduling block editor to become invalid. So listen to all property changes.
+        newTOC.addPropertyChangeListener(schedulingEnablementListener);
+
         // Note that in TPE, when this is issued, the selection does not seem to change in the table.
         final TargetEnvironment env = newTOC.getTargetEnvironment();
 
@@ -442,6 +464,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         TargetSelection.deafTo(getContextTargetObsComp(), selectionListener);
         getDataObject().removePropertyChangeListener(TargetObsComp.TARGET_ENV_PROP, primaryButtonUpdater);
         getDataObject().removePropertyChangeListener(TargetObsComp.TARGET_ENV_PROP, guidingPanelUpdater);
+        getDataObject().removePropertyChangeListener(schedulingEnablementListener);
         super.cleanup();
     }
 
@@ -760,6 +783,9 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     // Guider panel property change listener to modify status and magnitude limits.
     private final PropertyChangeListener guidingPanelUpdater = evt ->
             updateGuiding((TargetEnvironment) evt.getNewValue());
+
+    private final PropertyChangeListener schedulingEnablementListener = evt ->
+        updateSchedulingBlockEnabledState(isEnabled());
 
     @SuppressWarnings("FieldCanBeLocal")
     private final ActionListener removeListener = evt -> {
