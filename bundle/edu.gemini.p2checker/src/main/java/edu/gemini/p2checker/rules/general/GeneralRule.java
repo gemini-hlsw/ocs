@@ -43,6 +43,7 @@ import edu.gemini.spModel.too.TooType;
 
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * General Rules are rules that are not instrument-specific
@@ -57,19 +58,17 @@ public class GeneralRule implements IRule {
 
     private static final GeneralRuleHelper helper = new GeneralRuleHelper();
 
-    public IP2Problems check(ObservationElements elements)  {
-        P2Problems problems = new P2Problems();
-        for (IRule rule : GENERAL_RULES) {
-            problems.append(rule.check(elements));
-        }
+    public IP2Problems check(final ObservationElements elements)  {
+        final P2Problems problems = new P2Problems();
+        GENERAL_RULES.stream().forEach(rule -> problems.append(rule.check(elements)));
         return problems;
     }
 
     // Currently Altair is only supported on NIRI, GNIRS and NIFS, and GMOS-N
-    private static boolean isAltairSupported(ObservationElements elements){
-        SPInstObsComp instObsComp = elements.getInstrument();
+    private static boolean isAltairSupported(final ObservationElements elements){
+        final SPInstObsComp instObsComp = elements.getInstrument();
         if (instObsComp == null) return false;
-        SPComponentType type = instObsComp.getType();
+        final SPComponentType type = instObsComp.getType();
         return (type.equals(InstNIRI.SP_TYPE) || type.equals(InstNIFS.SP_TYPE)
             || type.equals(InstGNIRS.SP_TYPE) || type.equals(SPComponentType.INSTRUMENT_GMOS));
     }
@@ -80,13 +79,13 @@ public class GeneralRule implements IRule {
     private static IRule AO_RULE = new IRule() {
         private static final String MESSAGE = "Altair is currently only commissioned for use with NIRI, NIFS, GNIRS and GMOS-N";
 
-        public IP2Problems check(ObservationElements elements)  {
+        public IP2Problems check(final ObservationElements elements)  {
             if (!elements.hasAltair()){
                 return null;
             }
 
             if (!isAltairSupported(elements)) {
-                P2Problems problems = new P2Problems();
+                final P2Problems problems = new P2Problems();
                 problems.addError(PREFIX + "AO_RULE", MESSAGE, elements.getAOComponentNode().getValue());
                 return problems;
             }
@@ -103,16 +102,10 @@ public class GeneralRule implements IRule {
 
         private static final String WFS_EMPTY_NAME_TEMPLATE = "%s name field should not be empty";
         private static final String P2_PREFERRED = "PWFS2 is the preferred peripheral wavefront sensor.";
-        private static final String NO_AO_OTHER = "Altair cannot use both %s and %s.";
+        private static final String NO_AO_OTHER = "Altair cannot use %s and %s.";
         private static final String NGS_AOWFS = "Altair NGS must have an AOWFS target.";
         private static final String LGS_WFS = "Altair %s must have %s tip-tilt star.";
-
         private static final String LGS_OI_NO_GMOS = "Altair LGS + OI mode requires GMOS-N.";
-
-        // SCT-346: changes the checking and message below to make it more general
-        // Now applies to any WFS
-//        private static final String AOWFS_MESSAGE = "Please make sure that the AOWFS coordinates, proper motions, and " +
-//                "tracking details are exactly the same as those of the target";
         private static final String COORD_CLASH_MESSAGE =
             "Objects with the same name must have the same coordinates.";
         private static final String NAME_CLASH_MESSAGE =
@@ -120,44 +113,38 @@ public class GeneralRule implements IRule {
         private static final String TAG_CLASH_MESSAGE =
                 "Objects with the same name must have the same type and coordinates.";
 
-        private static final String WFS_DEFINED_MESSAGE = "WFS should be defined";
-        //TODO: Rule to check if the WFS is in the patrol field, whatever that means
-        //private static final String WFS_OUT_PATROL_FIELD_TEMPLATE = "%s outside of the patrol field";
-
-        private String formatGuiderString(final Iterator<GuideProbe> iter) {
-            if (iter == null || !iter.hasNext())
-                return "";
-
-            final StringBuilder buf = new StringBuilder();
-            buf.append(iter.next().getKey());
-            while (iter.hasNext()) {
-                buf.append(", ").append(iter.next().getKey());
-            }
-            return buf.toString();
+        private String formatGuiderString(final Collection<GuideProbe> probes) {
+            final String startDelim = probes.size() >= 2 ? "[" : "";
+            final String endDelim   = probes.size() >= 2 ? "]" : "";
+            final String sep        = ",";
+            final List<String> probeKeys = probes.stream().map(GuideProbe::getKey).collect(Collectors.toList());
+            return startDelim + String.join(sep, probeKeys) + endDelim;
         }
 
-        private void reportAltairLgsGuideIssues(P2Problems problems, Set<GuideProbe> guiders, AltairParams.Mode mode, ISPObsComponent targetComp) {
-            final ImList<GuideProbe> usedGuiders = mode.guiders();
+        private void reportAltairLgsGuideIssues(final P2Problems problems, final Set<GuideProbe> usedGuiders,
+                                                final AltairParams.Mode mode, final ISPObsComponent targetComp) {
+            // The "bad guiders", i.e. the used guiders that cannot be used with the mode.
+            final Set<GuideProbe> badGuiders = new TreeSet<>(GuideProbe.KeyComparator.instance);
+            badGuiders.addAll(usedGuiders);
+            mode.guiders().foreach(badGuiders::remove);
 
-            // Check to see if we are using any guiders that are not in the set of guiders in the parameter list.
-            // Then check to see if there are any unused guiders in the set of guiders parameter list.
-            final ImList<GuideProbe> badGuiders = usedGuiders.filter(gp -> !guiders.contains(gp));
-            if (badGuiders.nonEmpty()) {
-                final String badGuiderNames = formatGuiderString(badGuiders.iterator());
-                problems.addError(PREFIX + "LGS_WFS", String.format(LGS_WFS, mode.displayValue(), badGuiderNames), targetComp);
-            } else if (guiders.size() - usedGuiders.size() > 1) {
-                final Set<GuideProbe> otherGuiders = new TreeSet<>(GuideProbe.KeyComparator.instance);
-                otherGuiders.addAll(guiders);
-                badGuiders.foreach(otherGuiders::remove);
+            // We must be using the TTF guider, which is the head of the mode guider list.
+            final GuideProbe ttfGuider = mode.guiders().head();
+            if (!usedGuiders.contains(ttfGuider)) {
+                problems.addError(PREFIX + "LGS_WFS", String.format(LGS_WFS, mode.displayValue(), ttfGuider), targetComp);
+            } else if (!badGuiders.isEmpty()) {
+                // The good guiders, i.e. the ones that can be used with the mode and are in use.
+                final Set<GuideProbe> goodGuiders = new TreeSet<>(GuideProbe.KeyComparator.instance);
+                usedGuiders.stream().filter(mode.guiders()::contains).forEach(goodGuiders::add);
 
                 // Format the guider names
-                final String guiderNames     = formatGuiderString(otherGuiders.iterator());
-                final String usedGuiderNames = formatGuiderString(usedGuiders.iterator());
-                problems.addError(PREFIX+"NO_AO_OTHER", String.format(NO_AO_OTHER, usedGuiderNames, guiderNames), targetComp);
+                final String goodGuiderNames = formatGuiderString(goodGuiders);
+                final String badGuiderNames  = formatGuiderString(badGuiders);
+                problems.addError(PREFIX+"NO_AO_OTHER", String.format(NO_AO_OTHER, goodGuiderNames, badGuiderNames), targetComp);
             }
         }
 
-        public IP2Problems check(ObservationElements elements)  {
+        public IP2Problems check(final ObservationElements elements)  {
             if (elements.getTargetObsComp().isEmpty()) return null; //can't check
 
             final TargetEnvironment env = elements.getTargetObsComp().getValue().getTargetEnvironment();
@@ -201,7 +188,6 @@ public class GeneralRule implements IRule {
 
             for (final GuideProbeTargets guideTargets : env.getPrimaryGuideGroup()) {
                 final GuideProbe guider = guideTargets.getGuider();
-                // TODO: GuideProbeTargets.isEnabled
 
                 final boolean dis = elements.getObsContext().exists(c -> !GuideProbeUtil.instance.isAvailable(c, guider) &&
                                                                          (guideTargets.getTargets().size() > 0));
@@ -214,7 +200,7 @@ public class GeneralRule implements IRule {
                 if (guider == PwfsGuideProbe.pwfs1) {
                     if (guideTargets.getTargets().size() > 0) {
                         final SPInstObsComp instrument = elements.getInstrument();
-                        if(instrument!=null && instrument.getSite().contains(Site.GN) && !isLgs){
+                        if (instrument!=null && instrument.getSite().contains(Site.GN) && !isLgs) {
                             problems.addWarning(PREFIX+"P2_PREFERRED", P2_PREFERRED,elements.getTargetObsComponentNode().getValue());
                         }
                     }
@@ -235,7 +221,7 @@ public class GeneralRule implements IRule {
                     final Target t2 = target.getTarget();
 
                     final boolean sameName = t1.name().equals(t2.name());
-                    final boolean sameTag  = t1.getClass().getName() == t2.getClass().getName();
+                    final boolean sameTag  = t1.getClass().getName().equals(t2.getClass().getName());
 
                     if (sameName) {
                         if (sameTag) {
@@ -253,11 +239,11 @@ public class GeneralRule implements IRule {
                     }
 
                 }
-                for (final String error : errorSet) {
+                errorSet.stream().forEach(error -> {
                     final String id = error.equals(WFS_EMPTY_NAME_TEMPLATE) ? "WFS_EMPTY_NAME_TEMPLATE" :
-                              (error.equals(NAME_CLASH_MESSAGE) ? "NAME_CLASH_MESSAGE" : "COORD_CLASH_MESSAGE");
+                            (error.equals(NAME_CLASH_MESSAGE) ? "NAME_CLASH_MESSAGE" : "COORD_CLASH_MESSAGE");
                     problems.addError(PREFIX+id, error, elements.getTargetObsComponentNode().getValue());
-                }
+                });
             }
 
             return problems;
@@ -267,7 +253,7 @@ public class GeneralRule implements IRule {
     private static IRule EXTRA_ADVANCED_GUIDERS_RULE = new IRule() {
         private static final String EXTRA_ADVANCED_GUIDER_MSG = "Advanced guiding is configured for %s, but it hasn't been assigned a guide star.";
 
-        @Override public IP2Problems check(ObservationElements elements)  {
+        @Override public IP2Problems check(final ObservationElements elements)  {
             if (elements.getSeqComponentNode() == null) return null;
             if (elements.getTargetObsComp().isEmpty()) return null;
 
@@ -275,7 +261,7 @@ public class GeneralRule implements IRule {
             final Option<TargetEnvironment> env = elements.getTargetObsComp().map(TargetObsComp::getTargetEnvironment);
             final ImList<GuideProbe> guiders = GuideSequence.getRequiredGuiders(env);
             final Set<GuideProbe> guiderSet = new HashSet<>();
-            for (GuideProbe gp : guiders) guiderSet.add(gp);
+            guiders.foreach(guiderSet::add);
 
             // Get all the offset position lists in the sequence.
             final List<OffsetPosList<?>> posListList = getPosLists(elements.getSeqComponentNode());
@@ -283,19 +269,16 @@ public class GeneralRule implements IRule {
             // If any position list has an advanced guider that doesn't have
             // an assigned guide star, remember it in the "extraSet".
             final Set<GuideProbe> extraSet = new TreeSet<>(GuideProbe.KeyComparator.instance);
-            for (OffsetPosList<?> posList : posListList) {
-                Set<GuideProbe> advancedSet = posList.getAdvancedGuiding();
-                for (GuideProbe adv : advancedSet) {
-                    if (!guiderSet.contains(adv)) extraSet.add(adv);
-                }
+            for (final OffsetPosList<?> posList : posListList) {
+                posList.getAdvancedGuiding().stream().filter(adv -> !guiderSet.contains(adv)).forEach(extraSet::add);
             }
 
             // Generate an error for each extra guider.
-            P2Problems problems = new P2Problems();
-            for (GuideProbe guider : extraSet) {
-                String message = String.format(EXTRA_ADVANCED_GUIDER_MSG, guider.getKey());
+            final P2Problems problems = new P2Problems();
+            extraSet.stream().forEach(guider -> {
+                final String message = String.format(EXTRA_ADVANCED_GUIDER_MSG, guider.getKey());
                 problems.addError(PREFIX+"EXTRA_ADV_GUIDING", message, elements.getSeqComponentNode());
-            }
+            });
             return problems;
         }
 
@@ -305,14 +288,12 @@ public class GeneralRule implements IRule {
             return res;
         }
 
-        private void addOffsetPosLists(ISPSeqComponent root, List<OffsetPosList<?>> lst)  {
+        private void addOffsetPosLists(final ISPSeqComponent root, final List<OffsetPosList<?>> lst)  {
             final Object dataObj = root.getDataObject();
             if (dataObj instanceof SeqRepeatOffsetBase) {
                 lst.add(((SeqRepeatOffsetBase) dataObj).getPosList());
             }
-            for (ISPSeqComponent child : root.getSeqComponents()) {
-                addOffsetPosLists(child, lst);
-            }
+            root.getSeqComponents().stream().forEach(child -> addOffsetPosLists(child, lst));
         }
     };
 
@@ -325,13 +306,11 @@ public class GeneralRule implements IRule {
         private static final String EMPTY_TARGET_NAME_MSG = "TARGET name field should not be empty";
         private static final String NO_SCIENCE_TARGET_MSG = "No science target was found";
 
-        public IP2Problems check(ObservationElements elements)  {
-
-            //TargetObsComp targetEnv = elements.getTargetObsComp();
+        public IP2Problems check(final ObservationElements elements)  {
             if (elements.getTargetObsComp().isEmpty()) return null; // can't perform this check without a target environment
 
-            P2Problems problems = new P2Problems();
-            SPTarget scienceTarget = elements.getTargetObsComp().getValue().getBase();
+            final P2Problems problems = new P2Problems();
+            final SPTarget scienceTarget = elements.getTargetObsComp().getValue().getBase();
 
             if (!hasScienceObserves(elements.getSequence())) return null; //if there are not observes, ignore this check (SCT-260)
 
@@ -350,9 +329,9 @@ public class GeneralRule implements IRule {
     /**
      * Returns true if a sequence contains at least one science observe type.
      */
-    public static boolean hasScienceObserves(ConfigSequence sequence) {
-        Object[] objs = sequence.getDistinctItemValues(OBSTYPE_KEY);
-        for (Object o: objs)
+    private static boolean hasScienceObserves(final ConfigSequence sequence) {
+        final Object[] objs = sequence.getDistinctItemValues(OBSTYPE_KEY);
+        for (final Object o: objs)
             if (InstConstants.SCIENCE_OBSERVE_TYPE.equals(o))
                 return true;
         return false;
@@ -365,10 +344,10 @@ public class GeneralRule implements IRule {
     private static IRule TARGET_PM_RULE = new IRule() {
         private static final String MESSAGE = "Very large proper motion. Please double check your proper motion";
         private static final double MAX_PM = 1000.0; //Max PM is 1000 milli-arcsecs. W
-        public IP2Problems check(ObservationElements elements)  {
+        public IP2Problems check(final ObservationElements elements)  {
             if (elements.getTargetObsComp().isEmpty()) return null; // can't perform this check without a target environment
 
-            SPTarget baseTarget = elements.getTargetObsComp().getValue().getBase();
+            final SPTarget baseTarget = elements.getTargetObsComp().getValue().getBase();
             if (baseTarget != null) {
                 final Target t = baseTarget.getTarget();
                 if (t instanceof SiderealTarget) {
@@ -377,12 +356,12 @@ public class GeneralRule implements IRule {
                     if (opm.isDefined()) {
                         final ProperMotion pm = opm.get();
 
-                        double pm_ra = pm.deltaRA().velocity();
-                        double pm_dec = pm.deltaDec().velocity();
-                        double total = pm_ra * pm_ra + pm_dec * pm_dec;
+                        final double pm_ra = pm.deltaRA().velocity();
+                        final double pm_dec = pm.deltaDec().velocity();
+                        final double total = pm_ra * pm_ra + pm_dec * pm_dec;
 
                         if (total > MAX_PM * MAX_PM) { //to avoid sqrt call
-                            P2Problems problems = new P2Problems();
+                            final P2Problems problems = new P2Problems();
                             problems.addWarning(PREFIX + "TARGET_PM_RULE", MESSAGE, elements.getTargetObsComponentNode().getValue());
                             return problems;
                         }
@@ -394,15 +373,15 @@ public class GeneralRule implements IRule {
     };
 
     // targets are equal only if positions are defined and within _getMinDistance
-    private static boolean _areTargetsEquals(SPTarget p1Target, SPTarget target, ObservationElements elems) {
+    private static boolean _areTargetsEquals(final SPTarget p1Target, final SPTarget target, final ObservationElements elems) {
 
         final Option<Long> when = elems.getSchedulingBlockStart();
 
-        Option<Double> spRA = target.getRaHours(when);
-        Option<Double> spDec = target.getDecDegrees(when);
+        final Option<Double> spRA = target.getRaHours(when);
+        final Option<Double> spDec = target.getDecDegrees(when);
 
-        Option<Double> p1RA = p1Target.getRaHours(when);
-        Option<Double> p1Dec = p1Target.getDecDegrees(when);
+        final Option<Double> p1RA = p1Target.getRaHours(when);
+        final Option<Double> p1Dec = p1Target.getDecDegrees(when);
 
         double minDistance = _getMinDistance(elems);
 
@@ -415,28 +394,24 @@ public class GeneralRule implements IRule {
     // P1Target is at (0,0).  This will likely match triplets in the template
     // that aren't really associated with the generated observation but it won't
     // miss any.
-    private static boolean _isTooTarget(SPTarget p1Target, ObservationElements elems) {
+    private static boolean _isTooTarget(final SPTarget p1Target, final ObservationElements elems) {
         final ISPObservation obs = elems.getObservationNode();
         if (obs == null || !Too.isToo(obs)) return false;
         return p1Target.isTooTarget();
     }
 
     // true if both defined and diff <= tolerance
-    private static boolean _close(Option<Double> a, Option<Double> b, Double tolerance) {
-        return a.flatMap(a0 -> b.map(b0 -> Math.abs(a0 - b0) <= tolerance)).getOrElse(false);
+    private static boolean _close(final Option<Double> a, final Option<Double> b, final double tolerance) {
+        return a.exists(a0 -> b.exists(b0 -> Math.abs(a0 - b0) <= tolerance));
     }
 
 
-    private static double _getMinDistance(ObservationElements elems) {
-        SPInstObsComp inst = elems.getInstrument();
-        double[] scienceArea = inst.getScienceArea();
+    private static double _getMinDistance(final ObservationElements elems) {
+        final SPInstObsComp inst = elems.getInstrument();
+        final double[] scienceArea = inst.getScienceArea();
 
-        double minDistance = scienceArea[1] / 2.0;
-
-        if (minDistance < 10.0) {
-            minDistance = 10.0;
-        }
-        return minDistance / 3600;
+        final double minDistance = scienceArea[1] / 2.0;
+        return Math.max(minDistance, 10.0) / 3600;
     }
 
 
@@ -448,11 +423,11 @@ public class GeneralRule implements IRule {
         private static final String ZERO_MESSAGE = "The Band 3 minimum time must not be 0";
         private static final String ALLOC_MESSAGE = "The Band 3 minimum time must be less than or equal to the allocated time";
 
-        public IP2Problems check(ObservationElements elements) {
+        public IP2Problems check(final ObservationElements elements) {
             try {
-                P2Problems probs = new P2Problems();
+                final P2Problems probs = new P2Problems();
                 if (elements.getProgram().getQueueBand().equals("3")) {
-                    double t = elements.getProgram().getMinimumTime().getTimeAmount();
+                    final double t = elements.getProgram().getMinimumTime().getTimeAmount();
                     if (t == 0.0) {
                         probs.addError(PREFIX+"BAND3TIME_RULE_ZERO_MESSAGE", ZERO_MESSAGE, elements.getProgramNode()); // REL-337
                     }
@@ -477,7 +452,7 @@ public class GeneralRule implements IRule {
                 "A default timing window of %s (starting when the TOO is triggered) " +
                 "will be applied if none is specified.";
 
-        public IP2Problems check(ObservationElements elements)  {
+        public IP2Problems check(final ObservationElements elements)  {
             if (elements == null) return null;
 
             // Make sure this is a TOO observation.
@@ -492,28 +467,22 @@ public class GeneralRule implements IRule {
             }
 
             // Make sure there are no timing windows.
-            Option<SPSiteQuality> sqOpt = elements.getSiteQuality();
+            final Option<SPSiteQuality> sqOpt = elements.getSiteQuality();
             if (!sqOpt.isEmpty()) {
-                List<SPSiteQuality.TimingWindow> windows = sqOpt.getValue().getTimingWindows();
+                final List<SPSiteQuality.TimingWindow> windows = sqOpt.getValue().getTimingWindows();
                 if ((windows != null) && (windows.size() > 0)) return null;
             }
 
-            // Generate the warning message.  First figure out which node to
-            // apply it to.  Prefer the site quality node, if present.
-            if ( elements.getSiteQualityNode().isEmpty()) {
-                // TODO: I don't think we can add a problem directly to the
-                // TODO: observation node, seems to screw up the summary that
-                // TODO: is otherwise shown on the obs node.  So, since there
-                // TODO: is no where to put the warning, returning null ...
-                //n = elements.getObservationNode();
+            if (elements.getSiteQualityNode().isEmpty()) {
+                // Cannot add a problem directly to the observation node, so return null.
                 return null;
             }
 
             // Now figure out how long the default window will be.
-            String timePeriod = too.getDurationDisplayString();
-            String message = String.format(TEMPLATE, timePeriod);
+            final String timePeriod = too.getDurationDisplayString();
+            final String message = String.format(TEMPLATE, timePeriod);
 
-            P2Problems probs = new P2Problems();
+            final P2Problems probs = new P2Problems();
             probs.addWarning(PREFIX+"TOO_TIMING_WINDOW_RULE", message,  elements.getSiteQualityNode().getValue());
             return probs;
         }
@@ -527,26 +496,22 @@ public class GeneralRule implements IRule {
         private static final String MESSAGE =
                 "Day time calibrations in step %s must not be mixed with night time operations.";
 
-        public IP2Problems check(ObservationElements elements)  {
+        public IP2Problems check(final ObservationElements elements)  {
             if (elements == null) return null;
 
             // Get overall obs class
-            ObsClass overall = ObsClassService.lookupObsClass(elements.getObservationNode());
+            final ObsClass overall = ObsClassService.lookupObsClass(elements.getObservationNode());
             if (overall == ObsClass.DAY_CAL) return null; // no problem by definition; anything goes during the day
 
             // Now if any step has class DAY_CAL then we have a problem.
-            P2Problems probs = new P2Problems();
-            for (Config config : elements.getSequence().getAllSteps()) {
+            final P2Problems probs = new P2Problems();
+            for (final Config config : elements.getSequence().getAllSteps()) {
                 if (ObsClass.DAY_CAL.sequenceValue().equals(config.getItemValue(OBSCLASS_KEY))) {
                     probs.addError(PREFIX+"NO_DAYTIME_CALS_AT_NIGHT_RULE", String.format(MESSAGE, (String)config.getItemValue(OBSLABEL_KEY)), elements.getSeqComponentNode());
                 }
             }
 
-            if (probs.getProblemCount() > 0) {
-                return probs;
-            } else {
-                return null;
-            }
+            return probs.getProblemCount() > 0 ? probs : null;
         }
     };
 
@@ -604,12 +569,12 @@ public class GeneralRule implements IRule {
             return ps;
         }
 
-        private SPTarget getObsTarget(ObservationElements elements)  {
-            TargetObsComp targetEnv = elements.getTargetObsComp().getOrNull();
+        private SPTarget getObsTarget(final ObservationElements elements)  {
+            final TargetObsComp targetEnv = elements.getTargetObsComp().getOrNull();
             if (targetEnv != null) {
-                ObsClass obsClass = ObsClassService.lookupObsClass(elements.getObservationNode());
+                final ObsClass obsClass = ObsClassService.lookupObsClass(elements.getObservationNode());
                 if (obsClass == ObsClass.SCIENCE) {
-                    SPTarget target = targetEnv.getBase();
+                    final SPTarget target = targetEnv.getBase();
                     if (target.isSidereal())
                         return target;
                 }
@@ -617,8 +582,8 @@ public class GeneralRule implements IRule {
             return null;
         }
 
-        private boolean isAcceptable(SPSiteQuality expected, SPSiteQuality actual) {
-            if (actual == null || expected == null) return true; // I guess
+        private boolean isAcceptable(final SPSiteQuality expected, final SPSiteQuality actual) {
+            if (actual == null || expected == null) return true;
             return expected.getCloudCover().getPercentage() <= actual.getCloudCover().getPercentage() &&
                     expected.getImageQuality().getPercentage() <= actual.getImageQuality().getPercentage() &&
                     expected.getSkyBackground().getPercentage() <= actual.getSkyBackground().getPercentage() &&
