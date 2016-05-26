@@ -1,9 +1,11 @@
 package edu.gemini.util.security.auth.keychain
 
+import java.util.logging.{Level, Logger}
+
 import edu.gemini.util.security.principal.GeminiPrincipal
 import edu.gemini.spModel.core.Peer
 import edu.gemini.spModel.core.Site
-import java.io.File
+import java.io.{IOException, File}
 import java.security.Principal
 import javax.security.auth.Subject
 import scalaz._
@@ -147,9 +149,10 @@ abstract class KeyChain(kCell: KeyChain.KCell, pCell: KeyChain.PCell, lCell: Key
     } yield ()
 
   /** Action to reset keychain to empty. */
-  def reset: Action[Unit] =
+  def reset(p: Option[Password]): Action[Unit] =
     for {
-      _ <- pCell.put(None)
+      _ <- KeyChain.warn("Resetting keychain. Initial peers are " + initialPeers)
+      _ <- pCell.put(p)
       _ <- commit(Kernel.empty(initialPeers))
       _ <- updateSubject
     } yield ()
@@ -187,7 +190,15 @@ abstract class KeyChain(kCell: KeyChain.KCell, pCell: KeyChain.PCell, lCell: Key
     for {
       p <- pCell.get.map(_.getOrElse(Password.default))
       v <- kCell.get.map(_.get(p))
-      k <- v.fold(_ => Action.fail(KeyFailure.KeychainLocked), Action(_))
+      k <- v match {
+             case -\/(_: IOException) =>
+
+               // Kernel is corrupted; reset and retry. See comment in tryPass below.
+               KeyChain.warn("Discarding corrupted kernel.") *> reset(Some(p)) *> kernel
+
+             case -\/(_) => Action.fail(KeyFailure.KeychainLocked)
+             case \/-(x) => x.point[Action]
+           }
     } yield k
 
   private def checkLock: Action[Unit] =
@@ -209,8 +220,21 @@ abstract class KeyChain(kCell: KeyChain.KCell, pCell: KeyChain.PCell, lCell: Key
       _ <- commit(k)
     } yield ()
 
+  // Discard the kernel and replace with a new one
+  private def discardCorruptedKernel(p: Password): Action[Unit] =
+    KeyChain.warn("Discarding corrupted kernel.") *> reset(Some(p)) *> setPass(Some(p))
+
   protected def tryPass(p: Password): Action[Boolean] =
-    kCell.get.map(_.get(p).isRight)
+    kCell.get.map(_.get(p)).flatMap {
+      case -\/(_: IOException) =>
+
+        // This means the password is correct but the kernel can't be deserialized, so throw it
+        // away and replace it with a new kernel and set the password. To the user it will seem
+        // like their keys just disappeared, which is irritating but unavoidable in this case.
+        discardCorruptedKernel(p).as(true)
+
+      case e => e.isRight.point[Action]
+    }
 
   protected def modify(f: Kernel => Kernel): Action[Unit] =
     for {
@@ -280,6 +304,7 @@ abstract class PersistentKeyChain(
 }
 
 object KeyChain {
+  private val Log = Logger.getLogger(getClass.getName)
 
   type Listener = IO[Boolean]
 
@@ -386,7 +411,7 @@ object KeyChain {
       p <- PCell.newInstance
       l <- LCell.newInstance
       o <- k.get >>= (s => PersistentObject(f, s).liftIO[Action])
-      _ <- o.get.liftIO[Action] >>= k.put
+      _ <- replaceKernelFromPersistentObject(k, o)
 
       keychain = new PersistentKeyChain(k, p, l, initialPeers, o) {
 
@@ -411,6 +436,26 @@ object KeyChain {
       _ <- keychain.updateSubject // IMPORTANT, see note at declaration of subject above
     } yield keychain
 
+  def log(level: Level, s: String): Action[Unit] =
+    IO(Log.warning(s)).liftIO[Action]
+
+  def warn(s: String): Action[Unit] =
+    log(Level.WARNING, s)
+
+  /**
+   * Replace the kernel in the given cell with one from the PersistentObject, or do nothing (other
+   * than logging) if the PersistentObject is corrupted.
+   */
+  def replaceKernelFromPersistentObject(k: KCell, o: PersistentObject[Sealed[Kernel]]): Action[Unit] =
+    for {
+      v <- k.get
+      e <- o.get.catchLeft.liftIO[Action]
+      _ <- e match {
+             case -\/(_: IOException) => warn("Ignoring corrupted keychain: " + o.file.getAbsolutePath)
+             case -\/(t)              => IO.throwIO(t).liftIO[Action]
+             case \/-(s)              => k.put(s)
+           }
+    } yield ()
 
 }
 
