@@ -582,6 +582,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 final IndexedGuideGroup igg    = result._2();
                 final SPTarget target          = new SPTarget();
                 addTargetToGroup(newEnv, igg, probe, target, obsComp, positionTable);
+                positionTable.selectTarget(target);
                 SwingUtilities.invokeLater(EdCompTargetList.this::showTargetTag);
             });
         }
@@ -657,7 +658,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 .getOrElse(() -> GuideProbeTargets.create(probe, target));
         final TargetEnvironment newEnv = env.setGuideEnvironment(env.getGuideEnvironment().putGuideProbeTargets(groupIndex, newGpt));
         obsComp.setTargetEnvironment(newEnv);
-        positionTable.selectTarget(target);
     }
 
     /**
@@ -1049,6 +1049,7 @@ class GuidePositionType implements PositionType {
             final TargetEnvironment envNew = tup._1();
             final IndexedGuideGroup igg    = tup._2();
             EdCompTargetList.addTargetToGroup(envNew, igg, guider, target.clone(), obsComp, positionTable);
+            positionTable.selectTarget(target);
         });
     }
 
