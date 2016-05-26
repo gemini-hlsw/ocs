@@ -6,7 +6,6 @@ import javax.swing.{Icon, ListSelectionModel}
 
 import edu.gemini.ags.api.AgsRegistrar
 import edu.gemini.itc.shared._
-import edu.gemini.pot.ModelConverters
 import edu.gemini.pot.sp.SPComponentType._
 import edu.gemini.spModel.`type`.DisplayableSpType
 import edu.gemini.spModel.config2.{Config, ConfigSequence, ItemKey}
@@ -21,7 +20,6 @@ import edu.gemini.shared.util.immutable.{Option => GOption}
 import jsky.app.ot.userprefs.observer.ObservingPeer
 import jsky.app.ot.util.OtColor
 
-import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.swing._
@@ -61,7 +59,6 @@ trait ItcTable extends Table {
 
   def update() = {
     val seq      = parameters.sequence
-    val allKeys  = seq.getStaticKeys ++ seq.getIteratedKeys
     val showKeys = seq.getIteratedKeys.toList.
       filterNot(k => ExcludedParentKeys(k.getParent)).
       filterNot(ExcludedKeys).
@@ -76,7 +73,6 @@ trait ItcTable extends Table {
 
     // make all columns as wide as needed
     SequenceTabUtil.resizeTableColumns(this.peer, this.model)
-
   }
 
   // Add headers to the table columns.
