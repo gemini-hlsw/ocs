@@ -85,7 +85,9 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
       contents    += relativeTimeMenu
       border      =  BorderFactory.createEtchedBorder(EtchedBorder.LOWERED)
       minimumSize =  preferredSize
-      tooltip     = "Select a duration for the average parallactic angle calculation from the current time."
+      tooltip     =
+        if (isPaUi) "Select a duration for the average parallactic angle calculation from the current time."
+        else        "Time of slew for non-sidereal targets."
     }
     layout(relativeTimeMenuBar) = new Constraints() {
       anchor = Anchor.West
@@ -93,7 +95,9 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
 
     object dateTimeButton extends Button {
       icon    = Resources.getIcon("dates.gif")
-      tooltip = "Select the time and duration for the average parallactic angle calculation."
+      tooltip =
+        if (isPaUi) "Select the time and duration for the average parallactic angle calculation."
+        else        "Time of slew for non-sidereal targets."
     }
     layout(dateTimeButton) = new Constraints() {
       gridx  = 1
