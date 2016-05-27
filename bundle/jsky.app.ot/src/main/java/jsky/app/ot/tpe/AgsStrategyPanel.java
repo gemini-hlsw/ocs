@@ -21,7 +21,7 @@ public final class AgsStrategyPanel extends AgsSelectorControl {
 
     public AgsStrategyPanel() {
         pan.setLayout(new BoxLayout(pan, BoxLayout.PAGE_AXIS));
-        this.label       = new JLabel("Guide With");
+        this.label       = new JLabel("Auto Guide Search");
         this.buttonGroup = new ButtonGroup();
         this.buttons     = new ArrayList<>();
     }
@@ -62,7 +62,7 @@ public final class AgsStrategyPanel extends AgsSelectorControl {
     }
 
     private JRadioButton mkButton(final AgsStrategy s, final boolean isDefault) {
-        final String name = String.format(isDefault ? "Auto (%s)" : "%s", s.key().displayName());
+        final String name = String.format(isDefault ? "Default (%s)" : "%s", s.key().displayName());
         return new JRadioButton(name) {{
             setToolTipText("Perform AGS search for " + s.key().displayName());
             addActionListener(e -> fireSelectionUpdate(isDefault ? None.<AgsStrategy>instance() : new Some<>(s)));
