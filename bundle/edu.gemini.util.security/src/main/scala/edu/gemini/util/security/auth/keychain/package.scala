@@ -21,6 +21,7 @@ package object keychain {
 
   object Action {
 
+    val unit = ().point[Action]
     def apply[A](a: => A): Action[A] = EitherT(IO(a.right))
     def fail[A](kf: => KeyFailure): Action[A] = EitherT.left[IO, KeyFailure, A](IO(kf))
 
