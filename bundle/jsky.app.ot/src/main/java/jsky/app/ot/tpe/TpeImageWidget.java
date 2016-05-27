@@ -1,15 +1,11 @@
 package jsky.app.ot.tpe;
 
-import edu.gemini.ags.api.AgsRegistrar;
 import edu.gemini.catalog.ui.QueryResultsFrame;
 import edu.gemini.catalog.ui.tpe.CatalogImageDisplay;
-import edu.gemini.shared.skyobject.coords.HmsDegCoordinates;
 import edu.gemini.shared.util.immutable.*;
-import edu.gemini.spModel.ags.AgsStrategyKey;
 import edu.gemini.spModel.core.Coordinates;
 import edu.gemini.spModel.core.SiderealTarget;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
-import edu.gemini.spModel.obs.SchedulingBlock;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.target.*;
@@ -984,16 +980,17 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
             tif.reinit(this, _imgInfo);
         }
 
-        _baseOutOfView = false;
-        if (_imgInfoValid) {
-            Point2D.Double p = _imgInfo.getBaseScreenPos();
-            if ((p.x < 0) || (p.y < 0) || (p.x >= getWidth()) || (p.y >= getHeight())) {
-                _baseOutOfView = true;
-            }
-        }
+        _baseOutOfView = _imgInfoValid && !isVisible(_imgInfo.getBaseScreenPos());
         return true;
     }
 
+    /**
+     * @return <code>true</code> if the point is visible in the image widget;
+     * <code>false</code> otherwise
+     */
+    public boolean isVisible(Point2D.Double p) {
+        return (p.x >= 0) && (p.y >= 0) && (p.x < getWidth()) && (p.y < getHeight());
+    }
 
     /**
      * Return the base or center position in world coordinates.

@@ -32,8 +32,18 @@ class TpeEphemerisFeature extends TpeImageFeature("Ephemeris", "Show interpolate
       p
     }.toOption
 
-  def toScreenEphemeris(e: Ephemeris): ScreenEphemeris =
-    e.toList.flatMap { case (t, c) => toScreenCoordinates(c).strengthL(t) }
+  // Convert ephemeris elements into groups of screen points. Each group
+  // represents consecutive ephemeris elements that could be successfully
+  // located on the image widget.
+  def toScreenEphemeris(e: Ephemeris): List[ScreenEphemeris] = {
+    val (last, others) = ((List.empty[(Long, Point)], List.empty[ScreenEphemeris])/:e.toDescList) { case ((cur, res), (t, c)) =>
+      toScreenCoordinates(c).filter(_iw.isVisible).fold {
+        cur.isEmpty ? ((cur, res)) | ((List.empty[(Long, Point)], cur :: res))
+      } { p => ((t, p) :: cur, res) }
+    }
+
+    last.isEmpty ? others | last :: others
+  }
 
   def getEphemeris: Ephemeris =
     getContext.targets.base
@@ -49,14 +59,14 @@ class TpeEphemerisFeature extends TpeImageFeature("Ephemeris", "Show interpolate
       nst   <- spt.getNonSiderealTarget
     } yield nst.ephemeris
 
-  def getScreenEphemeris: ScreenEphemeris =
+  def getScreenEphemeris: List[ScreenEphemeris] =
     toScreenEphemeris(getEphemeris)
 
   def obsTime: Option[Long] =
     getContext.schedulingBlock.flatMap(_.duration) orElse
     getContext.obsShell.map(remainingTime)
 
-  def obsScreenEphemeris(e: Ephemeris): Option[ScreenEphemeris] =
+  def obsScreenEphemeris(e: Ephemeris): Option[List[ScreenEphemeris]] =
     for {
       lo <- getContext.schedulingBlockStart
       hi <- obsTime.map(_ + lo)
@@ -85,17 +95,19 @@ class TpeEphemerisFeature extends TpeImageFeature("Ephemeris", "Show interpolate
 
     // The main ephemeris track
     val se = toScreenEphemeris(e)
-    drawTrack (g, se)
-    drawLabels(g, se)
+    se.foreach(drawTrack(g, _))
+    se.foreach(drawLabels(g, _))
 
     // Highlighted track for remainder of observation, and label at the last point
     // on the highlighted track.
     obsScreenEphemeris(e).foreach { se =>
       g.setColor(Color.GREEN)
-      drawTrack(g, se)
-      se.takeRight(2) match {
-        case List((_, p1), (t, p2)) => drawLabel(g, t, p2, ang(p1, p2))
-        case _ => // degenerate ephemeris; no track was drawn, ignore
+      se.foreach(drawTrack(g, _))
+      se.foreach { lst =>
+        lst.takeRight(2) match {
+          case List((_, p1), (t, p2)) => drawLabel(g, t, p2, ang(p1, p2))
+          case _ => // degenerate ephemeris; no track was drawn, ignore
+        }
       }
     }
 
@@ -149,7 +161,7 @@ object TpeEphemerisFeature {
 
   val TickSize      = 3.0   // size of tick marks in pixels
   val PixelDistance = 100.0 // min distance between labeled points
-  
+
   // angle of line from p1 to p2 in screen coordinates
   def ang(p1: Point, p2: Point): Double =
     if ((p1.x - p2.x).abs < 0.1) 0.0 // ~inf = 0
