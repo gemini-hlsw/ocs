@@ -36,13 +36,13 @@ class TpeEphemerisFeature extends TpeImageFeature("Ephemeris", "Show interpolate
   // represents consecutive ephemeris elements that could be successfully
   // located on the image widget.
   def toScreenEphemeris(e: Ephemeris): List[ScreenEphemeris] = {
-    val (last, others) = ((List.empty[(Long, Point)], List.empty[ScreenEphemeris])/:e.toDescList) { case ((cur, res), (t, c)) =>
-      toScreenCoordinates(c).filter(_iw.isVisible).fold {
-        cur.isEmpty ? ((cur, res)) | ((List.empty[(Long, Point)], cur :: res))
-      } { p => ((t, p) :: cur, res) }
+    val (lastSe, prevSes) = ((EmptyScreenEphemeris, List.empty[ScreenEphemeris])/:e.toDescList) { case ((se, ses), (time, coords)) =>
+      toScreenCoordinates(coords).filter(_iw.isVisible).fold {
+        se.isEmpty ? ((se, ses)) | ((EmptyScreenEphemeris, se :: ses))
+      } { p => ((time, p) :: se, ses) }
     }
 
-    last.isEmpty ? others | last :: others
+    lastSe.isEmpty ? prevSes | lastSe :: prevSes
   }
 
   def getEphemeris: Ephemeris =
@@ -158,6 +158,7 @@ class TpeEphemerisFeature extends TpeImageFeature("Ephemeris", "Show interpolate
 object TpeEphemerisFeature {
 
   type ScreenEphemeris = List[(Long, Point)]
+  val EmptyScreenEphemeris: ScreenEphemeris = List.empty
 
   val TickSize      = 3.0   // size of tick marks in pixels
   val PixelDistance = 100.0 // min distance between labeled points
