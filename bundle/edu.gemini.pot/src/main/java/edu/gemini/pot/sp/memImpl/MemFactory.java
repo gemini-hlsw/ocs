@@ -143,9 +143,9 @@ public class MemFactory extends SPAbstractFactory {
         final MemProgram  mp = (MemProgram) prog;
         final ProgramData pd = (ProgramData) mp.getDocumentData();
         if (index < 0) {
-            index = pd.nextObsNumber();
+            index = pd.incrAndGetMaxObsNumber();
         } else {
-            pd.updateMaxObsNumber(index);
+            pd.ensureMaxEqualToOrGreaterThan(index);
         }
         return new MemObservation(mp, index, key);
     }
@@ -164,9 +164,9 @@ public class MemFactory extends SPAbstractFactory {
             // Updated to avoid renumbering observations on fetch/store.
             //
             index = observation.getObservationNumber();
-            progData.updateMaxObsNumber(index);
+            progData.ensureMaxEqualToOrGreaterThan(index);
         } else {
-            index = progData.nextObsNumber();
+            index = progData.incrAndGetMaxObsNumber();
         }
         MemObservation obs = new MemObservation(mprog, index, this, observation,
                                                 preserveKeys);

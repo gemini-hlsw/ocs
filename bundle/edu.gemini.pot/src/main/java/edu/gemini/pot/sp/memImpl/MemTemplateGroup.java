@@ -128,10 +128,11 @@ public final class MemTemplateGroup extends MemAbstractContainer implements ISPT
     }
 
     public void setObservations(List<? extends ISPObservation> newObsList) throws SPNodeNotLocalException, SPTreeStateException {
-        List<ISPObservation> newCopy = new ArrayList<>(newObsList);
+        final List<ISPObservation> newCopy = new ArrayList<>(newObsList);
         getProgramWriteLock();
         try {
-            List<ISPObservation> oldCopy = new ArrayList<>(obsList);
+            SPAssert.setsNoDuplicateObs(this, newCopy);
+            final List<ISPObservation> oldCopy = new ArrayList<>(obsList);
             updateChildren(obsList, newCopy);
             firePropertyChange(TEMPLATE_OBSERVATIONS_PROP, oldCopy, newCopy);
             fireStructureChange(TEMPLATE_OBSERVATIONS_PROP, this, oldCopy, newCopy);
@@ -147,9 +148,10 @@ public final class MemTemplateGroup extends MemAbstractContainer implements ISPT
     public void addObservation(int index, ISPObservation obs) throws IndexOutOfBoundsException, SPNodeNotLocalException, SPTreeStateException {
         // Get the local component (throwing an SPNodeNotLocalException if not
         // local).
-        MemObservation node = (MemObservation) obs;
+        final MemObservation node = (MemObservation) obs;
         getProgramWriteLock();
         try {
+            SPAssert.addsNoDuplicateObs(this, obs);
             List<ISPObservation> oldCopy = new ArrayList<>(obsList);
             node.attachTo(this);
             if (index >= 0) obsList.add(index, node); else obsList.add(node);

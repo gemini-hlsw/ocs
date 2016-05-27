@@ -109,7 +109,13 @@ public final class MemObservation extends MemAbstractContainer implements ISPObs
     }
 
     public void setObservationNumber(int number) {
-        _obsNumber = number;
+        getProgramWriteLock();
+        try {
+            _obsNumber = number;
+            ((ProgramData) getProgram().getDocumentData()).ensureMaxEqualToOrGreaterThan(number);
+        } finally {
+            returnProgramWriteLock();
+        }
     }
 
     public SPObservationID getObservationID() {

@@ -86,6 +86,7 @@ public final class MemTemplateFolder extends MemAbstractContainer implements ISP
         List<ISPTemplateGroup> newCopy = new ArrayList<>(newGroupList);
         getProgramWriteLock();
         try {
+            SPAssert.setsNoDuplicateObs(this, newCopy);
             List<ISPTemplateGroup> oldCopy = new ArrayList<>(templates);
             updateChildren(templates, newCopy);
             firePropertyChange(TEMPLATE_GROUP_PROP, oldCopy, newCopy);
@@ -105,6 +106,7 @@ public final class MemTemplateFolder extends MemAbstractContainer implements ISP
         MemTemplateGroup node = (MemTemplateGroup) group;
         getProgramWriteLock();
         try {
+            SPAssert.addsNoDuplicateObs(this, group);
             List<ISPTemplateGroup> oldCopy = new ArrayList<>(templates);
             node.attachTo(this);
             if (index >= 0) templates.add(index, node); else templates.add(node);

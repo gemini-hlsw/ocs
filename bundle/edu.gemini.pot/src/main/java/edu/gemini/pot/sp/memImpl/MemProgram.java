@@ -157,6 +157,7 @@ public final class MemProgram extends MemAbstractContainer implements ISPProgram
 
         getProgramWriteLock();
         try {
+            SPAssert.setsNoDuplicateObs(this, Collections.singletonList(templateFolder));
             MemTemplateFolder oldValue = this.templateFolder;
             this.templateFolder = node;
             updateParentLinks(oldValue, node);
@@ -266,21 +267,11 @@ public final class MemProgram extends MemAbstractContainer implements ISPProgram
     public void setObservations(List<? extends ISPObservation> newObsList) throws SPNodeNotLocalException, SPTreeStateException {
         checkChildTypes(newObsList, ISPObservation.class);
 
-        List<ISPObservation> newCopy = new ArrayList<>(newObsList);
-
-        // Check for duplicate sequence ids in the new obs list.
-        Set<Integer> taken = new HashSet<>(newCopy.size());
-        for (ISPObservation aNewCopy : newCopy) {
-            MemObservation obs = (MemObservation) aNewCopy;
-            Integer obsNum = obs.getObservationNumber();
-            if (taken.contains(obsNum)) {
-                throw new SPTreeStateException("There are at least two observations with number: " + obsNum);
-            }
-            taken.add(obsNum);
-        }
+        final List<ISPObservation> newCopy = new ArrayList<>(newObsList);
         getProgramWriteLock();
         try {
-            List<ISPObservation> oldCopy = new ArrayList<>(_obsList);
+            SPAssert.setsNoDuplicateObs(this, newCopy);
+            final List<ISPObservation> oldCopy = new ArrayList<>(_obsList);
             updateChildren(_obsList, newCopy);
             firePropertyChange(OBSERVATIONS_PROP, oldCopy, newCopy);
             fireStructureChange(OBSERVATIONS_PROP, this, oldCopy, newCopy);
@@ -289,29 +280,17 @@ public final class MemProgram extends MemAbstractContainer implements ISPProgram
         }
     }
 
-    private void checkForDuplicate(MemObservation localObs) throws SPTreeStateException {
-        // Check for duplicate observation id.
-        int newObsNum = localObs.getObservationNumber();
-        for (ISPObservation ispObservation : getAllObservations()) {
-            MemObservation obs = (MemObservation) ispObservation;
-            int obsNum = obs.getObservationNumber();
-            if (newObsNum == obsNum) {
-                throw new SPTreeStateException("There is an existing observation with number: " + obsNum);
-            }
-        }
-    }
-
     public void addObservation(ISPObservation obs) throws SPNodeNotLocalException, SPTreeStateException {
         // Get the local observation (throwing an SPNodeNotLocalException if not
         // local).
-        MemObservation node = (MemObservation) obs;
-        checkForDuplicate(node);
+        final MemObservation node = (MemObservation) obs;
         getProgramWriteLock();
         try {
-            List<ISPObservation> oldCopy = new ArrayList<>(_obsList);
+            SPAssert.addsNoDuplicateObs(this, obs);
+            final List<ISPObservation> oldCopy = new ArrayList<>(_obsList);
             node.attachTo(this);
             _obsList.add(node);
-            List<ISPObservation> newCopy = new ArrayList<>(_obsList);
+            final List<ISPObservation> newCopy = new ArrayList<>(_obsList);
             firePropertyChange(OBSERVATIONS_PROP, oldCopy, newCopy);
             fireStructureChange(OBSERVATIONS_PROP, this, oldCopy, newCopy);
         } finally {
@@ -322,14 +301,14 @@ public final class MemProgram extends MemAbstractContainer implements ISPProgram
     public void addObservation(int pos, ISPObservation obs) throws IndexOutOfBoundsException, SPNodeNotLocalException, SPTreeStateException {
         // Get the local observation (throwing an SPNodeNotLocalException if not
         // local).
-        MemObservation node = (MemObservation) obs;
-        checkForDuplicate(node);
+        final MemObservation node = (MemObservation) obs;
         getProgramWriteLock();
         try {
-            List<ISPObservation> oldCopy = new ArrayList<>(_obsList);
+            SPAssert.addsNoDuplicateObs(this, obs);
+            final List<ISPObservation> oldCopy = new ArrayList<>(_obsList);
             node.attachTo(this);
             _obsList.add(pos, node);
-            List<ISPObservation> newCopy = new ArrayList<>(_obsList);
+            final List<ISPObservation> newCopy = new ArrayList<>(_obsList);
             firePropertyChange(OBSERVATIONS_PROP, oldCopy, newCopy);
             fireStructureChange(OBSERVATIONS_PROP, this, oldCopy, newCopy);
         } finally {
@@ -372,6 +351,7 @@ public final class MemProgram extends MemAbstractContainer implements ISPProgram
         List<ISPGroup> newCopy = new ArrayList<>(newGroupList);
         getProgramWriteLock();
         try {
+            SPAssert.setsNoDuplicateObs(this, newCopy);
             List<ISPGroup> oldCopy = new ArrayList<>(_groupList);
             updateChildren(_groupList, newCopy);
             firePropertyChange(OBS_GROUP_PROP, oldCopy, newCopy);
@@ -386,6 +366,7 @@ public final class MemProgram extends MemAbstractContainer implements ISPProgram
         MemGroup node = (MemGroup) group;
         getProgramWriteLock();
         try {
+            SPAssert.addsNoDuplicateObs(this, group);
             List<ISPGroup> oldCopy = new ArrayList<>(_groupList);
             node.attachTo(this);
             _groupList.add(node);
@@ -403,6 +384,7 @@ public final class MemProgram extends MemAbstractContainer implements ISPProgram
         MemGroup node = (MemGroup) group;
         getProgramWriteLock();
         try {
+            SPAssert.addsNoDuplicateObs(this, group);
             List<ISPGroup> oldCopy = new ArrayList<>(_groupList);
             node.attachTo(this);
             _groupList.add(pos, node);
@@ -471,59 +453,5 @@ public final class MemProgram extends MemAbstractContainer implements ISPProgram
     }
 
     @Override public MemProgram getProgram() { return this; }
-
-    // Gets a map of observation key to observation number for the given
-    // program.
-    private static Map<SPNodeKey, Integer> mapNumbers(ISPProgram prog) {
-        final Map<SPNodeKey, Integer> res = new HashMap<>();
-        for (ISPObservation obs : new ObservationIterator(prog)) {
-            res.put(obs.getNodeKey(), obs.getObservationNumber());
-        }
-        return res;
-    }
-
-    public void renumberObservationsToMatch(ISPProgram that) {
-        // Renumber the existing observations in target to match those in the
-        // input program.  Keep up with any "new" observations that don't
-        // appear in the input program.
-        final Map<SPNodeKey, Integer> inMap = mapNumbers(that);
-        final List<MemObservation> newObsList = new ArrayList<>();
-        for (ISPObservation obs : new ObservationIterator(this)) {
-            MemObservation memObs = (MemObservation) obs;
-            Integer inObsNumber = inMap.get(obs.getNodeKey());
-            if (inObsNumber == null) {
-                newObsList.add(memObs);
-            } else {
-                memObs.setObservationNumber(inObsNumber);
-            }
-        }
-
-        // Get the biggest observation number that was known in the incoming
-        // program.  This + 1 is where the numbers for the "new" observations
-        // in this program will start
-        Integer max = (inMap.size() == 0) ? 0 : Collections.max(inMap.values());
-
-        // Sort the "new" observations by their old observation number.  That
-        // way when we renumber them at least they stay in the same order.
-        Collections.sort(newObsList, new Comparator<MemObservation>() {
-            @Override public int compare(MemObservation o1, MemObservation o2) {
-                return o1.getObservationNumber() - o2.getObservationNumber();
-            }
-        });
-
-        // Renumber the "new" observations starting with max + 1
-        for (MemObservation obs : newObsList) {
-            final int cur = obs.getObservationNumber();
-            if (cur >= max+1) {
-                max = cur; // no need to renumber it, already a new number.
-            } else {
-                obs.setObservationNumber(++max);
-            }
-        }
-
-        // Remember where to start counting again if we make any new
-        // observations.
-        ((ProgramData) getDocumentData()).updateMaxObsNumber(max);
-    }
 }
 

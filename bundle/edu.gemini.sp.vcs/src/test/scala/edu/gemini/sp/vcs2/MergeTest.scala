@@ -1,5 +1,6 @@
 package edu.gemini.sp.vcs2
 
+import edu.gemini.pot.sp.memImpl.MemProgram
 import edu.gemini.spModel.conflict.ConflictFolder
 import edu.gemini.spModel.obs.ObservationStatus
 
@@ -748,6 +749,18 @@ class MergeTest extends JUnitSuite {
         }
 
         expected.toSet == actual.toSet
+      }
+    ),
+
+    ("Updated local program has no observations with numbers greater than the program data max obs counter",
+      (start, local, remote, pc) => {
+        pc.updatedLocalProgram.exists { ulp =>
+          val allObsNumbers = ulp.getAllObservations.asScala.map(_.getObservationNumber)
+          val max = if (allObsNumbers.isEmpty) 0 else allObsNumbers.max
+
+          val newObs = pc.fact.createObservation(ulp, null)
+          newObs.getObservationNumber > max
+        }.unsafePerformSync
       }
     )
   )

@@ -48,17 +48,5 @@ public interface ISPProgram extends ISPGroupContainer, ISPObservationContainer,
 
     VersionVector<LifespanId, Integer> getVersions(SPNodeKey key);
     void setVersions(SPNodeKey key, VersionVector<LifespanId, Integer> vv);
-
-    /**
-     * Renumbers the observations in this program to match those in
-     * <code>that</code> program where a matching observation is determined by
-     * observation key.  This is used when merging two versions of the same
-     * program together.
-     * <p>
-     * This is really a horrible method, an embarrassment, and a reflection of
-     * how bad this model really is.  Please don't call this method.
-     * </p>
-     */
-    void renumberObservationsToMatch(ISPProgram that);
 }
 
