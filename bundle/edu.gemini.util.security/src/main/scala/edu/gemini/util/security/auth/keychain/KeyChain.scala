@@ -437,7 +437,7 @@ object KeyChain {
     } yield keychain
 
   def log(level: Level, s: String): Action[Unit] =
-    IO(Log.warning(s)).liftIO[Action]
+    IO(Log.log(level, s)).liftIO[Action]
 
   def warn(s: String): Action[Unit] =
     log(Level.WARNING, s)
