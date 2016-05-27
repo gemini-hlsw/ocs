@@ -36,7 +36,7 @@ class ProgramData extends DocumentData {
     }
 
     // make sure _maxObsNumber >= n
-    void updateNextObsNumber(int n) {
+    void updateMaxObsNumber(int n) {
         getProgramWriteLock();
         try {
             _maxObsNumber = Math.max(n, _maxObsNumber);

@@ -523,7 +523,7 @@ public final class MemProgram extends MemAbstractContainer implements ISPProgram
 
         // Remember where to start counting again if we make any new
         // observations.
-        ((ProgramData) getDocumentData()).updateNextObsNumber(max);
+        ((ProgramData) getDocumentData()).updateMaxObsNumber(max);
     }
 }
 
