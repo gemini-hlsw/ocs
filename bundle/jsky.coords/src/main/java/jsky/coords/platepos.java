@@ -56,7 +56,7 @@ import java.awt.geom.*;
 public class platepos {
 
     // Terms used by all methods
-    private static final double COND2R = 1.745329252e-2;
+    private static final double COND2R = Math.PI / 180.0;
 
     // Terms used by getPosition()
     private static final double CONS2R = 206264.8062470964;
@@ -66,6 +66,7 @@ public class platepos {
     private static final int MAX_ITERATIONS = 50;
     private static final double TOLERANCE = 0.0000005;
     private static final double CONR2S = 206264.8062470964;
+    private static final double QUARTER_CIRCLE = Math.PI / 2.0;
 
     /* Routine to determine accurate position for pixel coordinates */
     /* returns 0 if successful otherwise 1 = angle too large for projection; */
@@ -165,12 +166,20 @@ public class platepos {
         /* Convert RA and Dec in radians to standard coordinates on a plate */
         xr = xpos * COND2R;
         yr = ypos * COND2R;
+
+        // Difference between RA and plate_ra in radians
+        double xdiff = xr - wcs.plate_ra;
+
+        // If the RA of the point is further away than 6 hours from the RA of
+        // the image center then punt because the (x,y) projection wraps around.
+        if (Math.abs(xdiff) >= QUARTER_CIRCLE) return null;
+
         sypos = Math.sin(yr);
         cypos = Math.cos(yr);
         syplate = Math.sin(wcs.plate_dec);
         cyplate = Math.cos(wcs.plate_dec);
-        sxdiff = Math.sin(xr - wcs.plate_ra);
-        cxdiff = Math.cos(xr - wcs.plate_ra);
+        sxdiff = Math.sin(xdiff);
+        cxdiff = Math.cos(xdiff);
         div = (sypos * syplate) + (cypos * cyplate * cxdiff);
         xi = cypos * sxdiff * CONR2S / div;
         eta = ((sypos * cyplate) - (cypos * syplate * cxdiff)) * CONR2S / div;
