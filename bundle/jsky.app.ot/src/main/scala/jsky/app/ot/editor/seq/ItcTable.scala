@@ -1,11 +1,11 @@
 package jsky.app.ot.editor.seq
 
-import javax.swing.table.AbstractTableModel
+import java.awt.event.MouseEvent
+import javax.swing.table.{AbstractTableModel, JTableHeader}
 import javax.swing.{Icon, ListSelectionModel}
 
 import edu.gemini.ags.api.AgsRegistrar
 import edu.gemini.itc.shared._
-import edu.gemini.pot.ModelConverters
 import edu.gemini.pot.sp.SPComponentType._
 import edu.gemini.spModel.`type`.DisplayableSpType
 import edu.gemini.spModel.config2.{Config, ConfigSequence, ItemKey}
@@ -17,15 +17,12 @@ import edu.gemini.spModel.obscomp.SPInstObsComp
 import edu.gemini.spModel.rich.shared.immutable.asScalaOpt
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.shared.util.immutable.{Option => GOption}
-
 import jsky.app.ot.userprefs.observer.ObservingPeer
 import jsky.app.ot.util.OtColor
 
-import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.swing._
-
 import scalaz._
 import Scalaz._
 
@@ -59,11 +56,9 @@ trait ItcTable extends Table {
   peer.setRowSelectionAllowed(true)
   peer.setColumnSelectionAllowed(false)
   peer.setSelectionMode(ListSelectionModel.SINGLE_SELECTION)
-  peer.getTableHeader.setReorderingAllowed(false)
 
   def update() = {
     val seq      = parameters.sequence
-    val allKeys  = seq.getStaticKeys ++ seq.getIteratedKeys
     val showKeys = seq.getIteratedKeys.toList.
       filterNot(k => ExcludedParentKeys(k.getParent)).
       filterNot(ExcludedKeys).
@@ -78,8 +73,20 @@ trait ItcTable extends Table {
 
     // make all columns as wide as needed
     SequenceTabUtil.resizeTableColumns(this.peer, this.model)
-
   }
+
+  // Add headers to the table columns.
+  val newHeader = {
+    val oldHeader = peer.getTableHeader
+    new JTableHeader() {
+      override def getToolTipText(e: MouseEvent): String = {
+        val idx     = columnModel.getColumnIndexAtX(e.getPoint.x)
+        val realIdx = columnModel.getColumn(idx).getModelIndex
+        model.asInstanceOf[ItcTableModel].tooltip(realIdx)
+      }
+    } <| (_.setReorderingAllowed(false)) <| (_.setColumnModel(oldHeader.getColumnModel))
+  }
+  peer.setTableHeader(newHeader)
 
   // implement our own renderer that deals with alignment, formatting of double numbers, background colors etc.
   override def rendererComponent(sel: Boolean, foc: Boolean, row: Int, col: Int): Component = {

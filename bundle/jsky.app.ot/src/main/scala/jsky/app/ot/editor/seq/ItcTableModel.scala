@@ -15,9 +15,9 @@ import scalaz._
 case class Column(label: String, value: (ItcUniqueConfig, String\/ItcParameters, Future[ItcService.Result]) => AnyRef, tooltip: String = "")
 
 object ItcTableModel {
-  val PeakPixelETooltip   = "Peak (e): Signal + Background in electrons"
-  val PeakPixelAduTooltip = "Peak (ADU): Signal + Background in ADU"
-  val PeakPixelFWTooltip  = "Peak (%FW): Signal + Background in percent of the detector full well"
+  val PeakPixelETooltip   = "Peak Signal + Background in electrons / coadd"
+  val PeakPixelAduTooltip = "Peak Signal + Background in ADU / coadd"
+  val PeakPixelFWTooltip  = "Peak Signal + Background in percent of the detector full well"
 }
 
 /** ITC tables have three types of columns: a series of header columns, then all the dynamic values that change and are
@@ -27,19 +27,19 @@ object ItcTableModel {
 sealed trait ItcTableModel extends AbstractTableModel {
 
   /// Define some generic columns. Values are rendered as strings in order to have them left aligned, similar to other sequence tables.
-  val LabelsColumn  = Column("Data\nLabels",          (c, i, r) => (resultIcon(r).orNull, c.labels))
-  val ImagesColumn  = Column("Images",                (c, i, r) => s"${c.count}",                     tooltip = "Number of exposures used in S/N calculation")
-  val CoaddsColumn  = Column("Coadds",                (c, i, r) => s"${c.coadds.getOrElse(1.0)}",     tooltip = "Number of coadds")
-  val ExpTimeColumn = Column("Exposure\nTime (s)",    (c, i, r) => f"${c.singleExposureTime}%.1f",    tooltip = "Exposure time of each image")
-  val TotTimeColumn = Column("Total Exp.\nTime (s)",  (c, i, r) => f"${c.totalExposureTime}%.1f",     tooltip = "Total exposure time")
-  val SrcMagColumn  = Column("Source\nMag",           (c, i, r) => i.map(sourceMag).toOption,         tooltip = "Source magnitude (mag)")
-  val SrcFracColumn = Column("Source\nFraction",      (c, i, r) => i.map(sourceFraction).toOption,    tooltip = "Fraction of images on source")
+  val LabelsColumn  = Column("Data\nLabels",           (c, i, r) => (resultIcon(r).orNull, c.labels))
+  val ImagesColumn  = Column("Images",                 (c, i, r) => s"${c.count}",                     tooltip = "Number of exposures used in S/N calculation")
+  val CoaddsColumn  = Column("Coadds",                 (c, i, r) => s"${c.coadds.getOrElse(1.0)}",     tooltip = "Number of coadds")
+  val ExpTimeColumn = Column("Exposure\nTime (s)",     (c, i, r) => f"${c.singleExposureTime}%.1f",    tooltip = "Exposure time of each image")
+  val TotTimeColumn = Column("Total Exp.\nTime (s)",   (c, i, r) => f"${c.totalExposureTime}%.1f",     tooltip = "Total exposure time")
+  val SrcMagColumn  = Column("Source\nMag",            (c, i, r) => i.map(sourceMag).toOption,         tooltip = "Source magnitude (mag)")
+  val SrcFracColumn = Column("Source\nFraction",       (c, i, r) => i.map(sourceFraction).toOption,    tooltip = "Fraction of images on source")
 
-  val PeakPixelColumn     = Column("Peak\n(e-)",      (c, i, r) => peakPixelFlux(r),                  tooltip = ItcTableModel.PeakPixelETooltip)
-  val PeakADUColumn       = Column("Peak\n(ADU)",     (c, i, r) => imgAdu(r),                         tooltip = ItcTableModel.PeakPixelAduTooltip)
-  val PeakFullWellColumn  = Column("Peak\n(%FW)",     (c, i, r) => imgPercentWell(r),                 tooltip = ItcTableModel.PeakPixelFWTooltip)
-  val SNSingleColumn      = Column("S/N Single",      (c, i, r) => singleSNRatio(r))
-  val SNTotalColumn       = Column("S/N Total",       (c, i, r) => totalSNRatio (r))
+  val PeakPixelColumn     = Column("Peak\n(e-)",       (c, i, r) => peakPixelFlux(r),                  tooltip = ItcTableModel.PeakPixelETooltip)
+  val PeakADUColumn       = Column("Peak\n(ADU)",      (c, i, r) => imgAdu(r),                         tooltip = ItcTableModel.PeakPixelAduTooltip)
+  val PeakFullWellColumn  = Column("Peak\n(%FW)",      (c, i, r) => imgPercentWell(r),                 tooltip = ItcTableModel.PeakPixelFWTooltip)
+  val SNSingleColumn      = Column("S/N Single Coadd", (c, i, r) => singleSNRatio(r),                  tooltip = "Signal / Noise for one exposure with one coadd")
+  val SNTotalColumn       = Column("S/N Total",        (c, i, r) => totalSNRatio (r),                  tooltip = "Total Signal / Noise for all exposures and coadds")
 
   // Define different sets of columns as headers
   val PeakColumns       = List(PeakPixelColumn, PeakADUColumn, PeakFullWellColumn)
@@ -71,7 +71,7 @@ sealed trait ItcTableModel extends AbstractTableModel {
       calcResult    <- serviceResult.toOption // unwrap validation
     } yield calcResult
 
-  // Gets an icon to represen the state of this result (none if all is ok)
+  // Gets an icon to represent the state of this result (none if all is ok)
   protected def resultIcon(f: Future[ItcService.Result]): Option[Icon] =
     f.value.fold {
       Some(ItcPanel.SpinnerIcon).asInstanceOf[Option[Icon]]
@@ -111,16 +111,12 @@ sealed trait ItcTableModel extends AbstractTableModel {
       // returning an html snippet allows for column headers with multiple lines
       "<html>" + label.replaceFirst(separator, "<br/>") + "</html>"
 
-    column(col) match {
-      case Some(c) => multiLineHeader(c.label, "\n")
-      case None    => multiLineHeader(StringUtil.toDisplayName(toKey(col).getName), " ") // create column name for key columns
-    }
+    column(col).map(c => multiLineHeader(c.label, "\n"))
+        .getOrElse(multiLineHeader(StringUtil.toDisplayName(toKey(col).getName), " "))
   }
 
-  def tooltip(col: Int): String = column(col) match {
-    case Some(c) => c.tooltip
-    case None    => null  // no tooltip for key columns
-  }
+  def tooltip(col: Int): String =
+    column(col).map(_.tooltip).orNull
 
   /** Gets the column description for the given {{{col}}} index. Returns {{{None}}} for dynamic key columns. */
   def column(col: Int): Option[Column] = col match {
