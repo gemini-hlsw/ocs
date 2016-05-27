@@ -18,7 +18,7 @@ object KeyChainSpec extends Specification {
   /** Construct a KeyChain with a copy of the resource at the provided path. */
   def keychain(resourcePath: String): Action[KeyChain] = {
     val path = Files.createTempFile("KeyChainSpec", ".ser")
-    val file = path.toFile; file.deleteOnExit()
+    val file = path.toFile <| (_.deleteOnExit())
     val in   = getClass.getResourceAsStream(resourcePath)
     Files.copy(in, path, StandardCopyOption.REPLACE_EXISTING)
     in.close()
