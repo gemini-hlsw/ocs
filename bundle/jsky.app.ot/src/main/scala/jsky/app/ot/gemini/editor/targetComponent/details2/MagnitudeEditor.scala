@@ -26,8 +26,6 @@ import language.implicitConversions
 // Ported from Java, so slightly nasty.
 class MagnitudeEditor2 extends TelescopePosEditor {
 
-  val bandOrdering = Order[Wavelength].contramap((b: MagnitudeBand) => b.center).toScalaOrdering
-
   val MAG_FORMAT = new DecimalFormat("0.0##")
   def formatBrightness(mag: Magnitude): String = MAG_FORMAT.format(mag.value)
 
@@ -132,9 +130,8 @@ class MagnitudeEditor2 extends TelescopePosEditor {
       magOpt.foreach { mag =>
 
         val options: Set[MagnitudeBand] = {
-          val bandOrdering = Order[Wavelength].contramap((b: MagnitudeBand) => b.center).toScalaOrdering
           val existingBands = Target.magnitudes.get(target.getTarget).map(_.map(_.band)).orZero
-          TreeSet.empty[MagnitudeBand](bandOrdering) ++ MagnitudeBand.all -- existingBands + band
+          TreeSet.empty[MagnitudeBand](MagnitudeBand.MagnitudeBandOrdering) ++ MagnitudeBand.all -- existingBands + band
         }
 
         cb.removeActionListener(changeBandAction)
@@ -197,7 +194,7 @@ class MagnitudeEditor2 extends TelescopePosEditor {
 
         val options: Set[MagnitudeBand] = {
           val existingBands = Target.magnitudes.get(target.getTarget).map(_.map(_.band)).orZero
-          TreeSet.empty[MagnitudeBand](bandOrdering) ++ MagnitudeBand.all -- existingBands
+          TreeSet.empty[MagnitudeBand](MagnitudeBand.MagnitudeBandOrdering) ++ MagnitudeBand.all -- existingBands
         }
 
         cb.setMaximumRowCount(options.size)
@@ -239,7 +236,7 @@ class MagnitudeEditor2 extends TelescopePosEditor {
   private val newRow = new MagNewRow
 
   private val rows: List[MagWidgetRow] =
-    MagnitudeBand.all.sorted(bandOrdering).map(new MagEditRow(_)) :+ newRow :+ new MagPlusRow
+    MagnitudeBand.all.sorted(MagnitudeBand.MagnitudeBandOrdering).map(new MagEditRow(_)) :+ newRow :+ new MagPlusRow
 
   val content: JPanel =
     new JPanel(new GridBagLayout) {
