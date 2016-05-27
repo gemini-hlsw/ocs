@@ -19,14 +19,9 @@ package object keychain {
   type KeyVersion = Int
   type Action[A] = EitherT[IO, KeyFailure, A]
 
-  implicit object ActionMonadIO extends MonadIO[Action] {
-    def point[A](a: => A): Action[A] = Action(a)
-    def bind[A, B](fa: Action[A])(f: A => Action[B]): Action[B] = fa.flatMap(f)
-    def liftIO[A](ioa: IO[A]): Action[A] = EitherT(ioa.map(_.right))
-  }
-
   object Action {
 
+    val unit = ().point[Action]
     def apply[A](a: => A): Action[A] = EitherT(IO(a.right))
     def fail[A](kf: => KeyFailure): Action[A] = EitherT.left[IO, KeyFailure, A](IO(kf))
 
@@ -41,6 +36,12 @@ package object keychain {
       def unsafeRunAndThrow: A =
         unsafeRun.fold(throw _, identity)
 
+    }
+
+    implicit object ActionMonadIO extends MonadIO[Action] {
+      def point[A](a: => A): Action[A] = Action(a)
+      def bind[A, B](fa: Action[A])(f: A => Action[B]): Action[B] = fa.flatMap(f)
+      def liftIO[A](ioa: IO[A]): Action[A] = EitherT(ioa.map(_.right))
     }
 
   }

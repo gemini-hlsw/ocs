@@ -20,7 +20,7 @@ object Reset {
       "Continue?",
       "Confirm Reset", Dialog.Options.YesNo, Dialog.Message.Question, null) == Dialog.Result.Ok) {
 
-      ac.reset.unsafeRun.fold(
+      ac.reset(None).unsafeRun.fold(
         e => Log.log(Level.SEVERE, "Could not reset keychain.", e),
         _ => ())
 
