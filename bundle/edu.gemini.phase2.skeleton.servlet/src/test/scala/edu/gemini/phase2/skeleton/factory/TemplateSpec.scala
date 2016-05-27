@@ -149,7 +149,7 @@ abstract class TemplateSpec(xmlName: String) { this: SpecificationLike =>
    * Construct a phase-1 proposal with a target for each magnitude in the given band, plus a target
    * with no magnitude information, with an observation for each using the supplied blueprint.
    */
-  def proposal(bp: BlueprintBase, kmags: List[Double], band: MagnitudeBand) = {
+  def proposal(bp: BlueprintBase, kmags: List[Double], band: MagnitudeBand): Proposal = {
 
     val os: List[Observation] =
       p1Obs(bp, p1Target(Nil)) :: // one obs with no mags
