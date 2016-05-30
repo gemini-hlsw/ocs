@@ -95,24 +95,30 @@ case class MergePlan(update: Tree[MergeNode], delete: Set[Missing]) {
       }
 
     // Edit the ISPNode, applying the changes in the MergeNode if any.
-    def edit(t: Tree[(MergeNode, ISPNode)]): Unit = {
+    def edit(t: Tree[(MergeNode, ISPNode)]): ISPNode = {
       t.rootLabel match {
-
-        case (Modified(_, nv, dob, det, con), n) =>
-          n.setDataObject(dob)
-          n.setConflicts(con)
-
+        case (Modified(_, _, dob, det, con), n) =>
           // If it is an observation, set the observation number.
-          (det, n) match {
-            case (Obs(num), o: ISPObservation) => o.setObservationNumber(num)
+          val n2 = (det, n) match {
+            case (Obs(num), o: ISPObservation) =>
+              // If the observation number must change, make a new observation
+              // with the correct number.  Set the "initializer" to null though
+              // since we'll be setting up the observation ourselves below.
+              if (num === o.getObservationNumber) o
+              else f.createObservation(p, num, null, o.getNodeKey)
             case _                             => // not an observation
+              n
           }
 
-          // Edit then set the children.
-          t.subForest.foreach(edit)
-          n.children = t.subForest.toList.map(_.rootLabel._2)
+          n2.setDataObject(dob)
+          n2.setConflicts(con)
 
-        case (Unmodified(_), _) => // do nothing
+          // Edit then set the children.
+          n2.children = t.subForest.toList.map(edit)
+          n2
+
+        case (Unmodified(_), n) => // do nothing
+          n
       }
     }
 

@@ -23,7 +23,7 @@ public final class MemObservation extends MemAbstractContainer implements ISPObs
     public static final String OBS_EXEC_LOG_PROP = "ObsExecLog";
 
     private final MemProgram _program;
-    private int _obsNumber;
+    private final int _obsNumber;
 
     // The list of observation components
     private final List<ISPObsComponent> _compList = new ArrayList<>();
@@ -106,16 +106,6 @@ public final class MemObservation extends MemAbstractContainer implements ISPObs
 
     public int getObservationNumber() {
         return _obsNumber;
-    }
-
-    public void setObservationNumber(int number) {
-        getProgramWriteLock();
-        try {
-            _obsNumber = number;
-            ((ProgramData) getProgram().getDocumentData()).ensureMaxEqualToOrGreaterThan(number);
-        } finally {
-            returnProgramWriteLock();
-        }
     }
 
     public SPObservationID getObservationID() {
