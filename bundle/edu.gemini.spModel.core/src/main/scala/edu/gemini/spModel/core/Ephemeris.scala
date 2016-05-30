@@ -24,9 +24,13 @@ final case class Ephemeris(site: Site, data: Long ==>> Coordinates) {
   def toList: List[(Long, Coordinates)] =
     data.toList
 
-  /** Is the ephemeris empty? */
+  /** Are there no elements? */
   def isEmpty: Boolean =
     data.isEmpty
+
+  /** Is there at least one element? */
+  def nonEmpty: Boolean =
+    !isEmpty
 
   /** Find the closest matching element, if any. */
   def lookupClosestAssoc(k: Long): Option[(Long, Coordinates)] =
