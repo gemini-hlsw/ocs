@@ -157,7 +157,16 @@ public final class MemProgram extends MemAbstractContainer implements ISPProgram
 
         getProgramWriteLock();
         try {
-            SPAssert.setsNoDuplicateObs(this, Collections.singletonList(templateFolder));
+            // Create the new child list to use for the duplicate check, then
+            // ensure there are no duplicate observations.
+            if (templateFolder != null) {
+                final List<ISPNode> newChildren = new ArrayList<>();
+                newChildren.add(templateFolder);
+                newChildren.addAll(_obsList);
+                newChildren.addAll(_groupList);
+                SPAssert.setsNoDuplicateObs(this, newChildren);
+            }
+
             MemTemplateFolder oldValue = this.templateFolder;
             this.templateFolder = node;
             updateParentLinks(oldValue, node);
@@ -270,7 +279,15 @@ public final class MemProgram extends MemAbstractContainer implements ISPProgram
         final List<ISPObservation> newCopy = new ArrayList<>(newObsList);
         getProgramWriteLock();
         try {
-            SPAssert.setsNoDuplicateObs(this, newCopy);
+            // Create the new child list to use for the duplicate check, then
+            // ensure there are no duplicate observations.
+            if (!newObsList.isEmpty()) {
+                final List<ISPNode> newChildren = new ArrayList<>(newObsList);
+                if (templateFolder != null) newChildren.add(templateFolder);
+                newChildren.addAll(_groupList);
+                SPAssert.setsNoDuplicateObs(this, newChildren);
+            }
+
             final List<ISPObservation> oldCopy = new ArrayList<>(_obsList);
             updateChildren(_obsList, newCopy);
             firePropertyChange(OBSERVATIONS_PROP, oldCopy, newCopy);
@@ -351,7 +368,15 @@ public final class MemProgram extends MemAbstractContainer implements ISPProgram
         List<ISPGroup> newCopy = new ArrayList<>(newGroupList);
         getProgramWriteLock();
         try {
-            SPAssert.setsNoDuplicateObs(this, newCopy);
+            // Create the new child list to use for the duplicate check, then
+            // ensure there are no duplicate observations.
+            if (!newGroupList.isEmpty()) {
+                final List<ISPNode> newChildren = new ArrayList<>(newGroupList);
+                if (templateFolder != null) newChildren.add(templateFolder);
+                newChildren.addAll(_obsList);
+                SPAssert.setsNoDuplicateObs(this, newChildren);
+            }
+
             List<ISPGroup> oldCopy = new ArrayList<>(_groupList);
             updateChildren(_groupList, newCopy);
             firePropertyChange(OBS_GROUP_PROP, oldCopy, newCopy);

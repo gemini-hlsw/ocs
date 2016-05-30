@@ -18,11 +18,11 @@ object SPAssert {
     *
     * @throws SPTreeStateException if the assertion doesn't hold
     */
-  def setsNoDuplicateObs[T <: ISPNode](parent: ISPContainerNode, children: java.util.List[T]): Unit =
-    setsNoDuplicateObs(parent, children.asScala.toList)
+  def setsNoDuplicateObs[T <: ISPNode](parent: ISPContainerNode, newChildren: java.util.List[T]): Unit =
+    setsNoDuplicateObs(parent, newChildren.asScala.toList)
 
   // Scala implementation used by assertion methods designed for use in Java code.
-  private def setsNoDuplicateObs[T <: ISPNode](parent: ISPContainerNode, children: List[T]): Unit = {
+  private def setsNoDuplicateObs[T <: ISPNode](parent: ISPContainerNode, newChildren: List[T]): Unit = {
     @tailrec
     def go(rem: List[ISPNode], all: Set[Int], dups: Set[Int]): Set[Int] =
       rem match {
@@ -33,7 +33,7 @@ object SPAssert {
             go(t, all + n, if (all(n)) dups + n else dups)
 
           case c: ISPContainerNode =>
-            val cs = if (c == parent) children else c.children
+            val cs = if (c == parent) newChildren else c.children
             go(cs ++ t, all, dups)
 
           case _                   =>
@@ -46,7 +46,7 @@ object SPAssert {
     val msg = dups.size match {
       case 0 => None
       case 1 => Some("There is an existing observation " + dups.mkString(", "))
-      case _ => Some("There are existing observations " + dups.mkString(", "))
+      case _ => Some("There are existing observations: " + dups.mkString(", "))
     }
     msg.foreach { s => throw new SPTreeStateException(s) }
   }
