@@ -470,5 +470,4 @@ object BagsManager {
     obs.getProgram.addCompositeChangeListener(ChangeListener)
     obs.getProgram.addStructureChangeListener(StructureListener)
   }
-
 }
