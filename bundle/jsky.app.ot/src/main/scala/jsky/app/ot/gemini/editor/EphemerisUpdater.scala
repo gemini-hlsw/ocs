@@ -107,8 +107,8 @@ object EphemerisUpdater {
     }
 
   /**
-   * Refresh the ephimerides for all nonsidereal targets in `obs`, on another thread, showing status
-   * in the root pane associated with the given `Component`.
+   * Refresh the ephemerides for all nonsidereal targets in `obs`, showing status in the root pane
+   * associated with the given `Component`, logging failures.
    */
   def refreshEphemerides(obsN: ISPObservation, c: Component): IO[Unit] = {
     val ui = UI(c)

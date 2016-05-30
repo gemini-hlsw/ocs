@@ -471,6 +471,7 @@ object BagsManager {
     obs.getProgram.addStructureChangeListener(StructureListener)
   }
 
+  /** Bracket an IO action with unwatch/watch for the given program. */
   def pause[A](prog: ISPProgram)(io: IO[A]): IO[A] =
     IO(unwatch(prog)) *> io ensuring IO(watch(prog))
 

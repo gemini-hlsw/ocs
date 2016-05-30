@@ -181,18 +181,20 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
         } yield ()
 
       // Without sending events
-      val action2 =
+      val quiet: IO[Unit] =
         IO(ispObs.setSendingEvents(false)) *> action ensuring IO(ispObs.setSendingEvents(true))
 
-      // With bagman paused and an exception handler too
-      val safeAction: IO[Unit] =
-        BagsManager.pause(ispObs.getProgram)(action2) except {
-          case t: Throwable => edt(DialogUtil.error(peer, t))
-        }
+      // With bagman paused
+      val bagless: IO[Unit] =
+        BagsManager.pause(ispObs.getProgram)(quiet)
+
+      // And an exception handler
+      val safe: IO[Unit] =
+        bagless except { case t: Throwable => edt(DialogUtil.error(peer, t)) }
 
       // Run it on a short-lived worker
       new Thread(new Runnable() {
-        def run = safeAction.unsafePerformIO
+        def run = safe.unsafePerformIO
       }).start()
 
     }
