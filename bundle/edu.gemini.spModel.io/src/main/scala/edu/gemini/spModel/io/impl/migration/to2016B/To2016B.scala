@@ -103,7 +103,13 @@ object To2016B extends Migration {
     }
 
   // Update targets to the new model
-  def updateTargets(d: Document): Unit =
+  def updateTargets(d: Document): Unit = {
+
+    // For normal programs the site is known from the program ID. For weirdo programs like `Andy`
+    // we'll just pick GN arbitrarily. It's the best we can do for now; some observations will end
+    // up with a 1-element ephemeris (which needs to be refreshed anyway) with the wrong site.
+    val site = programSite(d).getOrElse(Ephemeris.empty.site)
+
     allTargets(d).foreach { t =>
 
       // In order to determine the target type we need the system as well as the coordinates
@@ -114,10 +120,6 @@ object To2016B extends Migration {
           ra     <- t.value("c1").flatMap(s => (Angle.parseHMS(s) orElse Angle.parseDegrees(s)).toOption).map(RightAscension.fromAngle)
           dec    <- t.value("c2").flatMap(s => (Angle.parseDMS(s) orElse Angle.parseDegrees(s)).toOption).flatMap(Declination.fromAngle)
         } yield (system, Coordinates(ra, dec))
-
-      // NO NO NO NO
-      val site: Site =
-        Site.GS
 
       // Construct a new target
       val newTarget: Target =
@@ -134,6 +136,7 @@ object To2016B extends Migration {
       t.addParamSet(TargetParamSetCodecs.TargetParamSetCodec.encode("target", newTarget))
 
     }
+  }
 
   // Add notes to obs targets only, since template targets have no orbital elements
   def updateTargetNotes(d: Document): Unit =

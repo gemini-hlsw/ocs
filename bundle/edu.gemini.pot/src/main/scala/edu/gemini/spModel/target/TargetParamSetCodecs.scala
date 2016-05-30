@@ -109,7 +109,7 @@ object TargetParamSetCodecs {
 
   implicit val EphemerisParamSetCodec: ParamSetCodec[Ephemeris] =
     ParamSetCodec.initial(Ephemeris.empty)
-      .withParam("site", Ephemeris.site)
+      .withParam("site",                     Ephemeris.site)
       .withManyParamSet("ephemeris-element", Ephemeris.ephemerisElements)
 
   implicit val NonSiderealTargetParamSetCodec: ParamSetCodec[NonSiderealTarget] =

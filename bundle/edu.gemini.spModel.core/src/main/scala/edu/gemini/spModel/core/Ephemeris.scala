@@ -52,10 +52,6 @@ object Ephemeris extends EphemerisInstances with EphemerisLenses {
   def singleton(site: Site, time: Long, coordinates: Coordinates): Ephemeris =
     apply(site, ==>>.singleton(time, coordinates))
 
-  /** An empty ephemeris with the given site affinity. */
-  def apply(site: Site): Ephemeris =
-    apply(site, ==>>.empty)
-
 }
 
 trait EphemerisInstances {
