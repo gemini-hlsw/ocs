@@ -3,9 +3,11 @@ package jsky.app.ot.gemini.parallacticangle
 import java.awt.{Color, Insets}
 import java.text.{Format, SimpleDateFormat}
 import java.util.Date
+import java.util.logging.Logger
 import javax.swing.BorderFactory
 import javax.swing.border.EtchedBorder
 
+import edu.gemini.pot.sp.ISPNode
 import edu.gemini.skycalc.Angle
 import edu.gemini.spModel.core.Site
 import edu.gemini.spModel.inst.ParallacticAngleSupport
@@ -31,6 +33,7 @@ import scalaz.syntax.std.boolean._, scalaz.syntax.apply._, scalaz.effect.IO
  * @param isPaUi should be true for PA controls, false for Scheduling Block controls
  */
 class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publisher {
+  import ParallacticAngleControls._
 
   val Nop = new Runnable { def run = () }
 
@@ -166,32 +169,42 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
       val spObs = ispObs.getDataObject.asInstanceOf[SPObservation]
       val sameNight = spObs.getSchedulingBlock.asScalaOpt.exists(_.sameObservingNightAs(sb))
 
-      // IO action on EDT
-      def edt[A](a: => Unit): IO[Unit] =
-        IO(Swing.onEDT(a))
+      // Ok, this is an IO action that goes and fetches the ephemerides and returns ANOTHER action
+      // that will actually update the model and clear out the glass pane UI.
+      val fetch: IO[IO[Unit]] =
+        if (sameNight) IO(IO.ioUnit)
+        else EphemerisUpdater.refreshEphemerides(ispObs, sb.start, e.getWindow).map { completion =>
 
-      // The update we want to do
+          // This is the action that will update the model
+          val up: IO[Unit] =
+            for {
+              _ <- IO(spObs.setSchedulingBlock(ImOption.apply(sb)))
+              _ <- IO(ispObs.setDataObject(spObs))
+              _ <- completion
+            } yield ()
+
+          // Here we bracket the update to disable/enable events and grab/release the program lock
+          ispObs.silentAndLocked(up)
+
+        }
+
+      // Our final program
       val action: IO[Unit] =
         for {
-          _ <- IO(spObs.setSchedulingBlock(ImOption.apply(sb)))
-          _ <- IO(ispObs.setDataObject(spObs))
-          _ <- sameNight.unlessM(EphemerisUpdater.refreshEphemerides(ispObs, e.getWindow))
-          _ <- edt(callback.run())
-          _ <- edt(resetComponents())
+          up <- time(fetch)("fetch ephemerides and construct completion")
+          _  <- time(up)("perform model update without events, holding lock")
+          _  <- edt(callback.run())
+          _  <- edt(resetComponents())
         } yield ()
 
-      // Without sending events
-      val quiet: IO[Unit] =
-        IO(ispObs.setSendingEvents(false)) *> action ensuring IO(ispObs.setSendingEvents(true))
-
-      // And with an exception handler
+      // ... with an exception handler
       val safe: IO[Unit] =
-        quiet except { case t: Throwable => edt(DialogUtil.error(peer, t)) }
+        action except { case t: Throwable => edt(DialogUtil.error(peer, t)) }
 
       // Run it on a short-lived worker
       new Thread(new Runnable() {
         def run = safe.unsafePerformIO
-      }).start()
+      }, s"Ephemeris Update Worker for ${ispObs.getObservationID}").start()
 
     }
 
@@ -296,7 +309,36 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
 }
 
 object ParallacticAngleControls {
+  val Log = Logger.getLogger(getClass.getName)
   case object ParallacticAngleChangedEvent extends Event
 
   def angleToDegrees(a: Angle): Double = a.toPositive.toDegrees.getMagnitude
+
+  /** Wrap an IO action with a logging timer. */
+  def time[A](io: IO[A])(msg: String): IO[A] =
+    for {
+      start <- IO(System.currentTimeMillis())
+      a     <- io
+      end   <- IO(System.currentTimeMillis())
+      _     <- IO(ParallacticAngleControls.Log.info(s"$msg: ${end - start}ms"))
+    } yield a
+
+  /** Construct an IO action that runs on the EDT. */
+  def edt[A](a: => Unit): IO[Unit] =
+    IO(Swing.onEDT(a))
+
+  /** Some useful operations for ISPNodes. */
+  implicit class ParallacticAngleControlsISPNodeOps(n: ISPNode) {
+
+    def silent[A](a: IO[A]): IO[A] =
+      IO(n.setSendingEvents(false)) *> a ensuring IO(n.setSendingEvents(true))
+
+    def locked[A](a: IO[A]): IO[A] =
+      IO(n.getProgramWriteLock()) *> a ensuring IO(n.returnProgramWriteLock())
+
+    def silentAndLocked[A](a: IO[A]): IO[A] =
+      silent(locked(a))
+
+  }
+
 }

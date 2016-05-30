@@ -67,52 +67,63 @@ object EphemerisUpdater {
     } yield e1.union(e2)
   }
 
-  /** Get the target node, scheduling block start, and site; we need all of these. */
-  private def args(obsN: ISPObservation): Option[(ISPObsComponent, Long, Site)] =
+  /** Get the target node and site; we need both of these. */
+  private def args(obsN: ISPObservation): Option[(ISPObsComponent, Site)] =
     for {
       tocN  <- obsN.findObsComponentByType(TargetObsComp.SP_TYPE)
-      start <- obsN.getDataObject.asInstanceOf[SPObservation].getSchedulingBlockStart.asScalaOpt
       site  <- ObsContext.getSiteFromObservation(obsN).asScalaOpt
-    } yield (tocN, start, site)
+    } yield (tocN, site)
 
   /**
-   * Action to refresh the ephimerides for all nonsidereal targets in `obs`, showing
-   * status in the given `UI`.
+   * Action to compute a program to update the ephimerides for all nonsidereal targets in `obs`,
+   * showing status in the given `UI`. So, running this fetches all the ephemerides and constructs
+   * a program that updates the model all at once. The idea is that we can perform this final action
+   * quickly holding the program lock.
    */
-  def refreshEphemerides(obsN: ISPObservation, ui: UI): HS2[Unit] =
-    args(obsN).traverseU_ { case (tocN, start, site) =>
+  def refreshEphemerides(obsN: ISPObservation, start: Long, ui: UI): HS2[HS2[Unit]] =
+    args(obsN) match {
 
-      val toc  = tocN.getDataObject.asInstanceOf[TargetObsComp]
-      val env  = toc.getTargetEnvironment
-      val spts = env.getTargets.asScalaList
+      case Some((tocN, site)) =>
 
-      val nstArgs: List[(SPTarget, NonSiderealTarget, HorizonsDesignation)] =
-        for {
-          spt <- spts
-          nst <- spt.getNonSiderealTarget.toList
-          hd  <- nst.horizonsDesignation.toList
-        } yield (spt, nst, hd)
+        val toc  = tocN.getDataObject.asInstanceOf[TargetObsComp]
+        val env  = toc.getTargetEnvironment
+        val spts = env.getTargets.asScalaList
 
-      def update(spt: SPTarget, nst: NonSiderealTarget, hd: HorizonsDesignation, n: Int): HS2[Unit] =
-        for {
-          _ <- ui.show(s"Updating Ephemeris ${n + 1} of ${nstArgs.length} ...")
-          e <- lookup(hd, site, start)
-          _ <- HS2.delay(spt.setTarget(NonSiderealTarget.ephemeris.set(nst, e)))
-        } yield ()
+        val nstArgs: List[(SPTarget, NonSiderealTarget, HorizonsDesignation)] =
+          for {
+            spt <- spts
+            nst <- spt.getNonSiderealTarget.toList
+            hd  <- nst.horizonsDesignation.toList
+          } yield (spt, nst, hd)
 
-      nstArgs.zipWithIndex.traverseU { case ((spt, nst, hd), n) => update(spt, nst, hd, n) } *>
-      ui.onEDT(tocN.setDataObject(toc)) *>
-      ui.hide
+        def update(spt: SPTarget, nst: NonSiderealTarget, hd: HorizonsDesignation, n: Int): HS2[HS2[Unit]] =
+          for {
+            _ <- ui.show(s"Updating Ephemeris ${n + 1} of ${nstArgs.length} ...")
+            e <- lookup(hd, site, start)
+          } yield HS2.delay(spt.setTarget(NonSiderealTarget.ephemeris.set(nst, e)))
+
+        val updates: HS2[HS2[Unit]] =
+          nstArgs.zipWithIndex
+                 .traverseU { case ((spt, nst, hd), n) => update(spt, nst, hd, n) }
+                 .map(_.sequenceU.void)
+
+        updates.map(_ *> HS2.delay(tocN.setDataObject(toc)))
+
+      case None => HS2.unit.point[HS2]
 
     }
 
   /**
-   * Refresh the ephemerides for all nonsidereal targets in `obs`, showing status in the root pane
-   * associated with the given `Component`, logging failures.
+   * Fetch updated ephemerides for all nonsidereal targets in `obs`, showing status in the root pane
+   * associated with the given `Component`, returning *another* program that completes the update
+   * without any further network access (i.e., quickly) and clears out the UI.
    */
-  def refreshEphemerides(obsN: ISPObservation, c: Component): IO[Unit] = {
+  def refreshEphemerides(obsN: ISPObservation, start: Long, c: Component): IO[IO[Unit]] = {
     val ui = UI(c)
-    (refreshEphemerides(obsN, ui).withResultLogging(Log) ensuring ui.hide).run.void
+    refreshEphemerides(obsN, start, ui).withResultLogging(Log).run.map {
+      case -\/(e) => IO.ioUnit
+      case \/-(a) => (a.withResultLogging(Log) ensuring ui.hide).run.void
+    }
   }
 
 }
