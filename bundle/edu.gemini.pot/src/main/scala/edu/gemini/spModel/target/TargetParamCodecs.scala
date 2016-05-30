@@ -12,6 +12,9 @@ import scalaz._, Scalaz._
 
 object TargetParamCodecs {
 
+  implicit val SiteParamCodec: ParamCodec[Site] =
+    ParamCodec[String].xmap(Site.parse, _.abbreviation)
+
   implicit val RedshiftParamCodec: ParamCodec[Redshift] =
     ParamCodec[Double].xmap(Redshift(_), _.z)
 

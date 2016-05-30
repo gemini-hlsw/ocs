@@ -5,7 +5,7 @@ import java.util.UUID
 import edu.gemini.p2checker.target.NonSiderealTargetRules
 import edu.gemini.pot.sp.{ISPObservation, SPComponentType}
 import edu.gemini.pot.util.POTUtil
-import edu.gemini.spModel.core.{Coordinates, Site, Semester, SiderealTarget, HorizonsDesignation, NonSiderealTarget, Target, SPProgramID}
+import edu.gemini.spModel.core._
 import edu.gemini.spModel.obs.{SPObservation, SchedulingBlock}
 import edu.gemini.spModel.rich.pot.sp._
 import edu.gemini.spModel.target.SPTarget
@@ -47,7 +47,7 @@ class NonSiderealTargetRulesSpec extends RuleSpec {
 
     "on error if ephemeris for scheduling block" in
       expectNoneOf(ERR_NO_EPHEMERIS_FOR_BLOCK) {
-        obs(NonSiderealTarget.empty.copy(ephemeris = ==>>.singleton(0L, Coordinates.zero)), Some(SchedulingBlock(0L)))
+        obs(NonSiderealTarget.empty.copy(ephemeris = Ephemeris(Site.GS, ==>>.singleton(0L, Coordinates.zero))), Some(SchedulingBlock(0L)))
       }
 
   }

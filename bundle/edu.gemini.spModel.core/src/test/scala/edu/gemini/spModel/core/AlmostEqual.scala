@@ -125,11 +125,18 @@ object AlmostEqual {
         (a.spatialProfile       ~= b.spatialProfile)
     }
 
+  implicit val EphemerisAlmostEqual =
+    new AlmostEqual[Ephemeris] {
+      def almostEqual(a: Ephemeris, b: Ephemeris) =
+        (a.site   == b.site)   &&
+        (a.toList ~= b.toList)
+    }
+
   implicit val NonSiderealTargetAlmostEqual =
     new AlmostEqual[NonSiderealTarget] {
       def almostEqual(a: NonSiderealTarget, b: NonSiderealTarget) =
         (a.name                 == b.name)                 &&
-        (a.ephemeris.toList     ~= b.ephemeris.toList)     &&
+        (a.ephemeris            ~= b.ephemeris)            &&
         (a.horizonsDesignation  == b.horizonsDesignation)  &&
         (a.magnitudes           ~= b.magnitudes)           &&
         (a.spectralDistribution ~= b.spectralDistribution) &&

@@ -89,7 +89,7 @@ object TargetParamSetCodecs {
       def encode(key: String, a: HorizonsDesignation): ParamSet = {
         val (tag, ps) = a match {
           case d: HorizonsDesignation.Comet            => ("comet", CometParamSetCodec.encode(key, d))
-          case d: HorizonsDesignation.AsteroidNewStyle         => ("asteroid", AsteroidParamSetCodec.encode(key, d))
+          case d: HorizonsDesignation.AsteroidNewStyle => ("asteroid", AsteroidParamSetCodec.encode(key, d))
           case d: HorizonsDesignation.AsteroidOldStyle => ("asteroid-old-style", AsteroidOldStyleParamSetCodec.encode(key, d))
           case d: HorizonsDesignation.MajorBody        => ("major-body", MajorBodyParamSetCodec.encode(key, d))
         }
@@ -107,11 +107,16 @@ object TargetParamSetCodecs {
       }
     }
 
+  implicit val EphemerisParamSetCodec: ParamSetCodec[Ephemeris] =
+    ParamSetCodec.initial(Ephemeris.empty)
+      .withParam("site", Ephemeris.site)
+      .withManyParamSet("ephemeris-element", Ephemeris.ephemerisElements)
+
   implicit val NonSiderealTargetParamSetCodec: ParamSetCodec[NonSiderealTarget] =
     ParamSetCodec.initial(NonSiderealTarget.empty)
       .withParam("name",                             NonSiderealTarget.name)
       .withOptionalParamSet("horizons-designation",  NonSiderealTarget.horizonsDesignation)
-      .withManyParamSet("ephemeris-element",         NonSiderealTarget.ephemerisElements)
+      .withParamSet("ephemeris",                     NonSiderealTarget.ephemeris)
       .withManyParamSet("magnitude",                 NonSiderealTarget.magnitudes)
       .withOptionalParamSet("spectral-distribution", NonSiderealTarget.spectralDistribution)
       .withOptionalParamSet("spatial-profile",       NonSiderealTarget.spatialProfile)

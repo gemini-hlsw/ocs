@@ -44,6 +44,7 @@ object TargetParamCodecsSpec extends Specification with ScalaCheck with Arbitrar
     close[Dec]
     close[RightAscensionAngularVelocity]
     close[DeclinationAngularVelocity]
+    exact[Site]
   }
 
 }

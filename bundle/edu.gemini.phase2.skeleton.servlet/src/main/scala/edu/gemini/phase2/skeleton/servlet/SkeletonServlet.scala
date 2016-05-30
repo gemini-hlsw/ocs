@@ -190,7 +190,8 @@ final class SkeletonServlet(odb: IDBDatabaseService, templateFactory: TemplateFa
 
   private def makeSkeleton(id: StandardProgramId, p: Proposal): Either[Failure, SkeletonShell] =
     (for {
-      f <- Phase1FolderFactory.create(p).right
+      s <- id.site.toRight("Program ID has no Site: " + id).right
+      f <- Phase1FolderFactory.create(s, p).right
     } yield new SkeletonShell(id.toSp, SpProgramFactory.create(p), f)).left map { Failure.badRequest }
 
   private def expandTemplates(folder: Phase1Folder): Either[Failure, TemplateFolderExpansion] =

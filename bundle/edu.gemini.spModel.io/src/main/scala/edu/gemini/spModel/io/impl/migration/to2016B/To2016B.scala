@@ -115,14 +115,18 @@ object To2016B extends Migration {
           dec    <- t.value("c2").flatMap(s => (Angle.parseDMS(s) orElse Angle.parseDegrees(s)).toOption).flatMap(Declination.fromAngle)
         } yield (system, Coordinates(ra, dec))
 
+      // NO NO NO NO
+      val site: Site =
+        Site.GS
+
       // Construct a new target
       val newTarget: Target =
         data.map {
           case ("J2000", Coordinates.zero) if isTooProgram(d) => TooTarget.empty
           case ("J2000",               cs) => sidereal(t, cs).exec(SiderealTarget.empty)
-          case ("JPL minor body",      cs) => nonsidereal(t, cs).exec(NonSiderealTarget.empty)
-          case ("MPC minor planet",    cs) => nonsidereal(t, cs).exec(NonSiderealTarget.empty)
-          case ("Solar system object", cs) => (nonsidereal(t, cs) *> named(t)).exec(NonSiderealTarget.empty)
+          case ("JPL minor body",      cs) => nonsidereal(site, t, cs).exec(NonSiderealTarget.empty)
+          case ("MPC minor planet",    cs) => nonsidereal(site, t, cs).exec(NonSiderealTarget.empty)
+          case ("Solar system object", cs) => (nonsidereal(site, t, cs) *> named(t)).exec(NonSiderealTarget.empty)
         }.map(common(t).exec) getOrElse sys.error("Can't recognize target:\n" + PioXmlUtil.toXmlString(t))
 
       // Drop it into the paramset.
@@ -187,11 +191,11 @@ object To2016B extends Migration {
     NonSiderealTarget.horizonsDesignation := ps.value("object").map(horizonsDesignation)
 
   // Generic Nonsidereal
-  def nonsidereal(ps: ParamSet, cs: Coordinates): State[NonSiderealTarget, Ephemeris] =
+  def nonsidereal(site: Site, ps: ParamSet, cs: Coordinates): State[NonSiderealTarget, Ephemeris] =
     NonSiderealTarget.ephemeris := ps.value("validAt")
                                      .map(SPTargetPio.parseDate)
-                                     .map(d => IMap(d.getTime -> cs))
-                                     .getOrElse(IMap.empty)
+                                     .map(d => Ephemeris(site, IMap(d.getTime -> cs)))
+                                     .getOrElse(Ephemeris.empty)
 
   // Horizons designation from named target
   def horizonsDesignation(name: String): HorizonsDesignation =

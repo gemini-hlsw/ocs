@@ -79,7 +79,7 @@ class TargetMigrationTest extends Specification with MigrationTest {
       p.findBaseByObsTitle("named") must_== Some(
         NonSiderealTarget(
           "Mars",
-          IMap(1457994429000L -> Coordinates.fromDegrees(240.99149999999997, 340.4314722222223).get),
+          Ephemeris(Site.GS, IMap(1457994429000L -> Coordinates.fromDegrees(240.99149999999997, 340.4314722222223).get)),
           Some(MajorBody(499)),
           List(),
           None,
@@ -91,7 +91,7 @@ class TargetMigrationTest extends Specification with MigrationTest {
       p.findBaseByObsTitle("jpl-minor-body") must_== Some(
         NonSiderealTarget(
           "halley",
-          IMap(1457994460000L -> Coordinates.fromDegrees(125.49337500000001, 1.8927499999999782).get),
+          Ephemeris(Site.GS, IMap(1457994460000L -> Coordinates.fromDegrees(125.49337500000001, 1.8927499999999782).get)),
           None,
           List(),
           None,
@@ -102,7 +102,7 @@ class TargetMigrationTest extends Specification with MigrationTest {
     "Migrate MPC Minor Planets" in withTestProgram2("targetMigration.xml") { p =>
       p.findBaseByObsTitle("mpc-minor-planet") must_== Some(NonSiderealTarget(
         "beer",
-        IMap(1457994485000L -> Coordinates.fromDegrees(88.769, 21.08299999999997).get),
+        Ephemeris(Site.GS, IMap(1457994485000L -> Coordinates.fromDegrees(88.769, 21.08299999999997).get)),
         None,
         List(),
         None,

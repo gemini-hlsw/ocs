@@ -36,7 +36,7 @@ class TpeEphemerisFeature extends TpeImageFeature("Ephemeris", "Show interpolate
   // represents consecutive ephemeris elements that could be successfully
   // located on the image widget.
   def toScreenEphemeris(e: Ephemeris): List[ScreenEphemeris] = {
-    val (lastSe, prevSes) = ((EmptyScreenEphemeris, List.empty[ScreenEphemeris])/:e.toDescList) { case ((se, ses), (time, coords)) =>
+    val (lastSe, prevSes) = ((EmptyScreenEphemeris, List.empty[ScreenEphemeris])/:e.data.toDescList) { case ((se, ses), (time, coords)) =>
       toScreenCoordinates(coords).filter(_iw.isVisible).fold {
         se.isEmpty ? ((se, ses)) | ((EmptyScreenEphemeris, se :: ses))
       } { p => ((time, p) :: se, ses) }

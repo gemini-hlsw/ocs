@@ -56,8 +56,8 @@ class EphemerisEditor extends TelescopePosEditor with ReentrancyHack {
       // Ephemeris bounds and resolution
       for {
         e <- Target.ephemeris.get(spt.getTarget).filterNot(_.isEmpty)
-        a <- e.findMin.map(_._1)
-        b <- e.findMax.map(_._1)
+        a <- e.data.findMin.map(_._1)
+        b <- e.data.findMax.map(_._1)
       } {
         start.setText(formatDate(a))
         end  .setText(formatDate(b))

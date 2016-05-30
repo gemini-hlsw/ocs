@@ -241,7 +241,7 @@ case class NonSiderealTarget(
 }
 
 object NonSiderealTarget extends NonSiderealTargetLenses {
-  val empty = NonSiderealTarget("Untitled", ==>>.empty, None, Nil, None, None)
+  val empty = NonSiderealTarget("Untitled", Ephemeris.empty, None, Nil, None, None)
 }
 
 trait NonSiderealTargetLenses {
@@ -257,9 +257,6 @@ trait NonSiderealTargetLenses {
 
   val magnitudes: NonSiderealTarget @> List[Magnitude] =
     Lens.lensu((a, b) => a.copy(magnitudes = b), _.magnitudes)
-
-  val ephemerisElements: NonSiderealTarget @> List[(Long, Coordinates)] =
-    ephemeris.xmapB(_.toList)(==>>.fromList(_))
 
   val spectralDistribution: NonSiderealTarget @> Option[SpectralDistribution] =
     Lens.lensu((a, b) => a.copy(spectralDistribution = b), _.spectralDistribution)

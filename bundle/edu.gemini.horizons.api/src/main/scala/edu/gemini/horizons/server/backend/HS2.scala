@@ -111,7 +111,7 @@ object HorizonsService2 {
    * short timespans (no more than one entry will be returned per minute).
    */
   def lookupEphemeris(target: HorizonsDesignation, site: Site, start: Date, stop: Date, elems: Int): HS2[Ephemeris] =
-    lookupEphemerisE(target, site, start, stop, elems) { _.coords }
+    lookupEphemerisE(target, site, start, stop, elems)(_.coords).map(Ephemeris(site, _))
 
   /** Date formatter used for formatting the Horizons start/stop time parameters. */
   val DateFormat = DateTimeFormatter.ofPattern("yyyy-MMM-dd HH:mm:ss", US).withZone(UTC)
