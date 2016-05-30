@@ -19,17 +19,19 @@ import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.spModel.rich.pot.sp._
 import edu.gemini.spModel.target.env.TargetEnvironment
 import edu.gemini.spModel.target.obsComp.TargetObsComp
+import jsky.app.ot.ags.BagsManager
 import jsky.util.gui.DialogUtil
 
 import scala.swing.Swing
 import scalaz._, Scalaz._
-import scalaz.concurrent.Task
+import scalaz.effect.IO
 
 object EphemerisUpdater {
   val Log = Logger.getLogger(getClass.getName)
 
   /**
    * Module of actions in `HS2` for displaying status messages and doing things on the EDT.
+ *
    * @param c any component; `UI` will use its parent `RootPane`
    */
   final class UI private (c: () => Component) {
@@ -108,13 +110,9 @@ object EphemerisUpdater {
    * Refresh the ephimerides for all nonsidereal targets in `obs`, on another thread, showing status
    * in the root pane associated with the given `Component`.
    */
-  def unsafeRefreshEphemerides(obsN: ISPObservation, c: Component): Unit = {
+  def refreshEphemerides(obsN: ISPObservation, c: Component): IO[Unit] = {
     val ui = UI(c)
-    val action = (refreshEphemerides(obsN, ui) ensuring ui.hide).withResultLogging(Log)
-    Task(action.run.unsafePerformIO).unsafePerformAsync {
-      case -\/(t) => Swing.onEDT(DialogUtil.error(c, t))
-      case \/-(_) => () // done!
-    }
+    (refreshEphemerides(obsN, ui).withResultLogging(Log) ensuring ui.hide).run.void
   }
 
 }

@@ -12,13 +12,17 @@ import edu.gemini.spModel.inst.ParallacticAngleSupport
 import edu.gemini.spModel.obs.{ObsTargetCalculatorService, SPObservation, SchedulingBlock}
 import edu.gemini.spModel.rich.shared.immutable._
 import edu.gemini.shared.util.immutable.{Option => JOption, ImOption}
+import jsky.app.ot.ags.BagsManager
 import jsky.app.ot.editor.OtItemEditor
 import jsky.app.ot.gemini.editor.EphemerisUpdater
 import jsky.app.ot.util.TimeZonePreference
+import jsky.util.gui.DialogUtil
 
 import scala.swing.GridBagPanel.{Anchor, Fill}
 import scala.swing._
 import scala.swing.event.{ButtonClicked, Event}
+
+import scalaz.syntax.std.boolean._, scalaz.syntax.apply._, scalaz.effect.IO
 
 /**
  * This class encompasses all of the logic required to manage the average parallactic angle information associated
@@ -161,13 +165,36 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
     } {
       val spObs = ispObs.getDataObject.asInstanceOf[SPObservation]
       val sameNight = spObs.getSchedulingBlock.asScalaOpt.exists(_.sameObservingNightAs(sb))
-      spObs.setSchedulingBlock(ImOption.apply(sb))
-      ispObs.setDataObject(spObs)
-      if (!sameNight) {
-        EphemerisUpdater.unsafeRefreshEphemerides(ispObs, e.getWindow)
-      }
-      callback.run()
-      resetComponents()
+
+      // IO action on EDT
+      def edt[A](a: => Unit): IO[Unit] =
+        IO(Swing.onEDT(a))
+
+      // The update we want to do
+      val action: IO[Unit] =
+        for {
+          _ <- IO(spObs.setSchedulingBlock(ImOption.apply(sb)))
+          _ <- IO(ispObs.setDataObject(spObs))
+          _ <- sameNight.unlessM(EphemerisUpdater.refreshEphemerides(ispObs, e.getWindow))
+          _ <- edt(callback.run())
+          _ <- edt(resetComponents())
+        } yield ()
+
+      // Without sending events
+      val action2 =
+        IO(ispObs.setSendingEvents(false)) *> action ensuring IO(ispObs.setSendingEvents(true))
+
+      // With bagman paused and an exception handler too
+      val safeAction: IO[Unit] =
+        BagsManager.pause(ispObs.getProgram)(action2) except {
+          case t: Throwable => edt(DialogUtil.error(peer, t))
+        }
+
+      // Run it on a short-lived worker
+      new Thread(new Runnable() {
+        def run = safeAction.unsafePerformIO
+      }).start()
+
     }
 
 

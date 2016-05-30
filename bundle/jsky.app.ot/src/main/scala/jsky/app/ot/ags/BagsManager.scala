@@ -470,4 +470,8 @@ object BagsManager {
     obs.getProgram.addCompositeChangeListener(ChangeListener)
     obs.getProgram.addStructureChangeListener(StructureListener)
   }
+
+  def pause[A](prog: ISPProgram)(io: IO[A]): IO[A] =
+    IO(unwatch(prog)) *> io ensuring IO(watch(prog))
+
 }
