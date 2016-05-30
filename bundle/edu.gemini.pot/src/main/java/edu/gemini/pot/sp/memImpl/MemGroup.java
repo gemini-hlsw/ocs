@@ -5,8 +5,6 @@ import edu.gemini.pot.sp.*;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.ListIterator;
-import java.util.Set;
-import java.util.HashSet;
 
 /**
  * This class provides an in-memory, non-persistent implementation of the
@@ -175,21 +173,12 @@ public final class MemGroup extends MemAbstractContainer implements ISPGroup {
     public void setObservations(List<? extends ISPObservation> newObsList) throws SPNodeNotLocalException, SPTreeStateException {
         checkChildTypes(newObsList, ISPObservation.class);
 
-        List<ISPObservation> newCopy = new ArrayList<>(newObsList);
+        final List<ISPObservation> newCopy = new ArrayList<>(newObsList);
 
-        // Check for duplicate sequence ids in the new obs list.
-        Set<Integer> taken = new HashSet<>(newCopy.size());
-        for (ISPObservation aNewCopy : newCopy) {
-            MemObservation obs = (MemObservation) aNewCopy;
-            Integer obsNum = obs.getObservationNumber();
-            if (taken.contains(obsNum)) {
-                throw new SPTreeStateException("There are at least two observations with number: " + obsNum);
-            }
-            taken.add(obsNum);
-        }
         getProgramWriteLock();
         try {
-            List<ISPObservation> oldCopy = new ArrayList<>(_obsList);
+            SPAssert.setsNoDuplicateObs(this, newCopy);
+            final List<ISPObservation> oldCopy = new ArrayList<>(_obsList);
             updateChildren(_obsList, newCopy);
             firePropertyChange(OBSERVATIONS_PROP, oldCopy, newCopy);
             fireStructureChange(OBSERVATIONS_PROP, this, oldCopy, newCopy);
@@ -198,29 +187,17 @@ public final class MemGroup extends MemAbstractContainer implements ISPGroup {
         }
     }
 
-    private void checkForDuplicate(MemObservation localObs) throws SPTreeStateException {
-        // Check for duplicate observation id.
-        int newObsNum = localObs.getObservationNumber();
-        for (ISPObservation ispObservation : getObservations()) {
-            MemObservation obs = (MemObservation) ispObservation;
-            int obsNum = obs.getObservationNumber();
-            if (newObsNum == obsNum) {
-                throw new SPTreeStateException("There is an existing observation with number: " + obsNum);
-            }
-        }
-    }
-
     public void addObservation(ISPObservation obs) throws SPNodeNotLocalException, SPTreeStateException {
         // Get the local observation (throwing an SPNodeNotLocalException if not
         // local).
-        MemObservation node = (MemObservation) obs;
-        checkForDuplicate(node);
+        final MemObservation node = (MemObservation) obs;
         getProgramWriteLock();
         try {
-            List<ISPObservation> oldCopy = new ArrayList<>(_obsList);
+            SPAssert.addsNoDuplicateObs(this, obs);
+            final List<ISPObservation> oldCopy = new ArrayList<>(_obsList);
             node.attachTo(this);
             _obsList.add(node);
-            List<ISPObservation> newCopy = new ArrayList<>(_obsList);
+            final List<ISPObservation> newCopy = new ArrayList<>(_obsList);
             firePropertyChange(OBSERVATIONS_PROP, oldCopy, newCopy);
             fireStructureChange(OBSERVATIONS_PROP, this, oldCopy, newCopy);
         } finally {
@@ -232,9 +209,9 @@ public final class MemGroup extends MemAbstractContainer implements ISPGroup {
         // Get the local observation (throwing an SPNodeNotLocalException if not
         // local).
         MemObservation node = (MemObservation) obs;
-        checkForDuplicate(node);
         getProgramWriteLock();
         try {
+            SPAssert.addsNoDuplicateObs(this, obs);
             List<ISPObservation> oldCopy = new ArrayList<>(_obsList);
             node.attachTo(this);
             _obsList.add(pos, node);

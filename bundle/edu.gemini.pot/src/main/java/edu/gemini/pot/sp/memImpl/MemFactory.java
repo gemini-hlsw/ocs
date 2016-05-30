@@ -8,7 +8,6 @@
 package edu.gemini.pot.sp.memImpl;
 
 import edu.gemini.pot.sp.*;
-import edu.gemini.pot.sp.version.LifespanId;
 import edu.gemini.spModel.core.SPProgramID;
 
 
@@ -144,9 +143,9 @@ public class MemFactory extends SPAbstractFactory {
         final MemProgram  mp = (MemProgram) prog;
         final ProgramData pd = (ProgramData) mp.getDocumentData();
         if (index < 0) {
-            index = pd.nextObsNumber();
+            index = pd.incrAndGetMaxObsNumber();
         } else {
-            pd.updateNextObsNumber(index);
+            pd.ensureMaxEqualToOrGreaterThan(index);
         }
         return new MemObservation(mp, index, key);
     }
@@ -165,9 +164,9 @@ public class MemFactory extends SPAbstractFactory {
             // Updated to avoid renumbering observations on fetch/store.
             //
             index = observation.getObservationNumber();
-            progData.updateNextObsNumber(index);
+            progData.ensureMaxEqualToOrGreaterThan(index);
         } else {
-            index = progData.nextObsNumber();
+            index = progData.incrAndGetMaxObsNumber();
         }
         MemObservation obs = new MemObservation(mprog, index, this, observation,
                                                 preserveKeys);
