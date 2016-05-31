@@ -1,9 +1,13 @@
 package edu.gemini.sp.vcs2
 
-import edu.gemini.pot.sp.SPNodeKey
+import edu.gemini.pot.sp.{ISPObservation, SPNodeKey}
 import edu.gemini.pot.spdb.DBLocalDatabase
 import edu.gemini.sp.vcs2.VcsAction._
+import edu.gemini.spModel.config.IConfigBuilder
 import edu.gemini.spModel.core.SPProgramID
+import edu.gemini.spModel.gemini.obscomp.GemObservationCB
+import edu.gemini.spModel.seqcomp.InstrumentSequenceSync
+import edu.gemini.spModel.telescope.IssPortSync
 import org.junit.Test
 import org.junit.Assert
 
@@ -58,6 +62,13 @@ class DuplicateObsNumberTest {
       val obsKeys = progB.getObservations.asScala.map(_.getNodeKey).toSet
       Assert.assertEquals(Set(obsB1.getNodeKey, obsA2.getNodeKey), obsKeys)
 
+      // Check that the renumbered observation is fully initialized
+      Assert.assertTrue {
+        progB.getObservations.asScala.find(_.getObservationNumber == 3).exists { obs =>
+          hasConfigBuilder(obs) && hasInstrumentSequenceSync(obs) && hasIssPortSync(obs)
+        }
+      }
+
       // Create a new observation for progB.  It should get number 4.
       val obsB4 = fact.createObservation(progB, null)
       progB.addObservation(obsB4)
@@ -68,4 +79,24 @@ class DuplicateObsNumberTest {
       odb.getDBAdmin.shutdown()
     }
   }
+
+  def hasConfigBuilder(o: ISPObservation): Boolean =
+    o.getClientData(IConfigBuilder.USER_OBJ_KEY) match {
+      case _: GemObservationCB => true
+      case _                   => false
+    }
+
+  def hasInstrumentSequenceSync(o: ISPObservation): Boolean =
+    o.getClientData(InstrumentSequenceSync.USER_OBJ_KEY) match {
+      case _: InstrumentSequenceSync => true
+      case _                         => false
+    }
+
+  def hasIssPortSync(o: ISPObservation): Boolean =
+    o.getClientData("IssPortSync") match {
+      case _: IssPortSync => true
+      case _              => false
+    }
+
+
 }

@@ -6,6 +6,7 @@ import edu.gemini.shared.util._
 import edu.gemini.shared.util.IntegerIsIntegral._
 import edu.gemini.sp.vcs2.NodeDetail.Obs
 import edu.gemini.sp.vcs2.VcsFailure._
+import edu.gemini.spModel.gemini.init.ObservationNI
 import edu.gemini.spModel.rich.pot.sp._
 
 import scalaz._
@@ -105,7 +106,7 @@ case class MergePlan(update: Tree[MergeNode], delete: Set[Missing]) {
               // with the correct number.  Set the "initializer" to null though
               // since we'll be setting up the observation ourselves below.
               if (num === o.getObservationNumber) o
-              else f.createObservation(p, num, null, o.getNodeKey)
+              else f.createObservation(p, num, ObservationNI.NO_CHILDREN_INSTANCE, o.getNodeKey)
             case _                             => // not an observation
               n
           }

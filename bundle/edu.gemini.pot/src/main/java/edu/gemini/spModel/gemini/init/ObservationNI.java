@@ -42,7 +42,7 @@ public class ObservationNI implements ISPNodeInitializer {
     /**
      * A special instance for use when importing programs from XML
      */
-    public static ObservationNI NO_CHILDREN_INSTANCE = new ObservationNI() {
+    public static final ObservationNI NO_CHILDREN_INSTANCE = new ObservationNI() {
         protected void addSubnodes(ISPFactory factory, ISPObservation obsNode) {
         }
     };
