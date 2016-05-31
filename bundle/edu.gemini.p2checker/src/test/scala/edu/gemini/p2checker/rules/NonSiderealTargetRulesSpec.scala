@@ -6,6 +6,8 @@ import edu.gemini.p2checker.target.NonSiderealTargetRules
 import edu.gemini.pot.sp.{ISPObservation, SPComponentType}
 import edu.gemini.pot.util.POTUtil
 import edu.gemini.spModel.core._
+import edu.gemini.spModel.gemini.gmos.{InstGmosNorth, InstGmosSouth}
+import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.obs.{SPObservation, SchedulingBlock}
 import edu.gemini.spModel.rich.pot.sp._
 import edu.gemini.spModel.target.SPTarget
@@ -68,9 +70,53 @@ class NonSiderealTargetRulesSpec extends RuleSpec {
 
   }
 
-  def obs(target: Target, sb: Option[SchedulingBlock]): ISPObservation = {
+  ERR_EPHEMERIS_WRONG_SITE should {
+
+    "no error for sidereal target" in {
+      expectNoneOf(ERR_EPHEMERIS_WRONG_SITE) {
+        obs(SiderealTarget.empty, None)
+      }
+    }
+
+    "no error for TOO target" in {
+      expectNoneOf(ERR_EPHEMERIS_WRONG_SITE) {
+        obs(TooTarget.empty, None)
+      }
+    }
+
+    "no error for non-sidereal target with wrong site and empty ephemeris" in {
+      expectNoneOf(ERR_EPHEMERIS_WRONG_SITE) {
+        val t = NonSiderealTarget.ephemeris.set(NonSiderealTarget.empty, Ephemeris(Site.GS, ==>>.empty))
+        obs(t, None, InstGmosNorth.SP_TYPE)
+      }
+    }
+
+    "no error for non-sidereal target with wrong site and trivial ephemeris" in {
+      expectNoneOf(ERR_EPHEMERIS_WRONG_SITE) {
+        val t = NonSiderealTarget.ephemeris.set(NonSiderealTarget.empty, Ephemeris.singleton(Site.GS, 0L, Coordinates.zero))
+        obs(t, None, InstGmosNorth.SP_TYPE)
+      }
+    }
+
+    "no error for non-sidereal target with correct site and nontrivial ephemeris" in {
+      expectNoneOf(ERR_EPHEMERIS_WRONG_SITE) {
+        val t = NonSiderealTarget.ephemeris.set(NonSiderealTarget.empty, Ephemeris(Site.GS, ==>>((0L, Coordinates.zero), (1L, Coordinates.zero)) ))
+        obs(t, None, InstGmosSouth.SP_TYPE)
+      }
+    }
+
+    "error for non-sidereal target with wrong site and nontrivial ephemeris" in {
+      expectAllOf(ERR_EPHEMERIS_WRONG_SITE) {
+        val t = NonSiderealTarget.ephemeris.set(NonSiderealTarget.empty, Ephemeris(Site.GS, ==>>((0L, Coordinates.zero), (1L, Coordinates.zero)) ))
+        obs(t, None, InstGmosNorth.SP_TYPE)
+      }
+    }
+
+  }
+
+  def obs(target: Target, sb: Option[SchedulingBlock], inst: SPComponentType = InstGmosSouth.SP_TYPE): ISPObservation = {
     val f = POTUtil.createFactory(UUID.randomUUID())
-    val p = f.createProgram(null, SPProgramID.toProgramID("GS-2015A-Q-1"))
+    val p = f.createProgram(null, SPProgramID.toProgramID("no-site"))
     val o = f.createObservation(p, null) <| { on =>
       p.addObservation(on)
       on.getDataObject.asInstanceOf[SPObservation] <| { o =>
@@ -86,6 +132,7 @@ class NonSiderealTargetRulesSpec extends RuleSpec {
       }
       e.setDataObject(toc)
     }
+    f.createObsComponent(p, inst, null) <| { i => o.addObsComponent(i) }
     o
   }
 

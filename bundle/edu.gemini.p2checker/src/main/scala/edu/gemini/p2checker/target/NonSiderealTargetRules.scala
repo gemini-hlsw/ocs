@@ -92,8 +92,8 @@ final class NonSiderealTargetRules extends IRule {
         nst <- tar.getNonSiderealTarget.toList
         sit <- ObsContext.getSiteFromObservation(es.getObservationNode).asScalaOpt.toList
         eph  = nst.ephemeris
-        if eph.nonEmpty && eph.site != sit
-      } p2p.addError(ERR_EPHEMERIS_TOO_SPARSE,
+        if eph.size > 1 && eph.site != sit
+      } p2p.addError(ERR_EPHEMERIS_WRONG_SITE,
         s"The ephemeris for ${nst.name} was computed for ${eph.site} but the observation is " +
         s"associated with ${sit}. Refresh the ephemeris to correct this.",
         ocn)
