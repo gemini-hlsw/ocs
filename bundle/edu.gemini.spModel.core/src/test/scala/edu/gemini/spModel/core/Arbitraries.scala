@@ -141,16 +141,24 @@ trait Arbitraries {
       } yield SiderealTarget(name, coordinates, properMotion, redshift, parallax, magnitudes, spectralDistr, spatialProfile)
     }
 
+  implicit val arbEphemeris: Arbitrary[Ephemeris] =
+    Arbitrary {
+      for {
+        site <- arbitrary[Site]
+        data <- arbitrary[List[(Long, Coordinates)]]
+      } yield Ephemeris(site, ==>>.fromList(data))
+    }
+
   implicit val arbNonSiderealTarget: Arbitrary[NonSiderealTarget] =
     Arbitrary {
       for {
          name           <- arbitrary[String]
-         ephemeris      <- arbitrary[List[(Long, Coordinates)]]
+         ephemeris      <- arbitrary[Ephemeris]
          horizonsDes    <- arbitrary[Option[HorizonsDesignation]]
          magnitudes     <- arbitrary[List[Magnitude]]
          spectralDistr  <- arbitrary[Option[SpectralDistribution]]
          spatialProfile <- arbitrary[Option[SpatialProfile]]
-      } yield NonSiderealTarget(name, ==>>.fromList(ephemeris), horizonsDes, magnitudes, spectralDistr, spatialProfile)
+      } yield NonSiderealTarget(name, ephemeris, horizonsDes, magnitudes, spectralDistr, spatialProfile)
     }
 
   implicit val arbTarget: Arbitrary[Target] =

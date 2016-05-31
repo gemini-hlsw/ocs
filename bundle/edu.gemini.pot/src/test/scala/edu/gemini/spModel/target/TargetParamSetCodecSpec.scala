@@ -44,6 +44,7 @@ object TargetParamSetCodecsSpec extends Specification with ScalaCheck with Arbit
     exact[TooTarget]
     close[NonSiderealTarget]
     close[Target]
+    close[Ephemeris]
   }
 
 }

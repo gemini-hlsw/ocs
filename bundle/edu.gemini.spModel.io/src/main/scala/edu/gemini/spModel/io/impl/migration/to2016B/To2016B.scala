@@ -103,7 +103,13 @@ object To2016B extends Migration {
     }
 
   // Update targets to the new model
-  def updateTargets(d: Document): Unit =
+  def updateTargets(d: Document): Unit = {
+
+    // For normal programs the site is known from the program ID. For weirdo programs like `Andy`
+    // we'll just pick GN arbitrarily. It's the best we can do for now; some observations will end
+    // up with a 1-element ephemeris (which needs to be refreshed anyway) with the wrong site.
+    val site = programSite(d).getOrElse(Ephemeris.empty.site)
+
     allTargets(d).foreach { t =>
 
       // In order to determine the target type we need the system as well as the coordinates
@@ -120,9 +126,9 @@ object To2016B extends Migration {
         data.map {
           case ("J2000", Coordinates.zero) if isTooProgram(d) => TooTarget.empty
           case ("J2000",               cs) => sidereal(t, cs).exec(SiderealTarget.empty)
-          case ("JPL minor body",      cs) => nonsidereal(t, cs).exec(NonSiderealTarget.empty)
-          case ("MPC minor planet",    cs) => nonsidereal(t, cs).exec(NonSiderealTarget.empty)
-          case ("Solar system object", cs) => (nonsidereal(t, cs) *> named(t)).exec(NonSiderealTarget.empty)
+          case ("JPL minor body",      cs) => nonsidereal(site, t, cs).exec(NonSiderealTarget.empty)
+          case ("MPC minor planet",    cs) => nonsidereal(site, t, cs).exec(NonSiderealTarget.empty)
+          case ("Solar system object", cs) => (nonsidereal(site, t, cs) *> named(t)).exec(NonSiderealTarget.empty)
         }.map(common(t).exec) getOrElse sys.error("Can't recognize target:\n" + PioXmlUtil.toXmlString(t))
 
       // Drop it into the paramset.
@@ -130,6 +136,7 @@ object To2016B extends Migration {
       t.addParamSet(TargetParamSetCodecs.TargetParamSetCodec.encode("target", newTarget))
 
     }
+  }
 
   // Add notes to obs targets only, since template targets have no orbital elements
   def updateTargetNotes(d: Document): Unit =
@@ -187,11 +194,11 @@ object To2016B extends Migration {
     NonSiderealTarget.horizonsDesignation := ps.value("object").map(horizonsDesignation)
 
   // Generic Nonsidereal
-  def nonsidereal(ps: ParamSet, cs: Coordinates): State[NonSiderealTarget, Ephemeris] =
+  def nonsidereal(site: Site, ps: ParamSet, cs: Coordinates): State[NonSiderealTarget, Ephemeris] =
     NonSiderealTarget.ephemeris := ps.value("validAt")
                                      .map(SPTargetPio.parseDate)
-                                     .map(d => IMap(d.getTime -> cs))
-                                     .getOrElse(IMap.empty)
+                                     .map(d => Ephemeris(site, IMap(d.getTime -> cs)))
+                                     .getOrElse(Ephemeris.empty)
 
   // Horizons designation from named target
   def horizonsDesignation(name: String): HorizonsDesignation =

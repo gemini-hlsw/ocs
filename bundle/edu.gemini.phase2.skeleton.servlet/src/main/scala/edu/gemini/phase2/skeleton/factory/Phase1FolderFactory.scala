@@ -12,28 +12,30 @@ import edu.gemini.spModel.gemini.gnirs.blueprint.SpGnirsBlueprintSpectroscopy
 import edu.gemini.spModel.gemini.nifs.blueprint.SpNifsBlueprintBase
 import edu.gemini.shared.util.TimeValue
 import edu.gemini.spModel.gemini.flamingos2.blueprint.SpFlamingos2BlueprintLongslit
+import edu.gemini.spModel.core
 
 object Phase1FolderFactory {
 
   case class ObsQuad(bName: String, target: SPTarget, siteQuality: SPSiteQuality, time: TimeValue)
 
   object Folder {
-    def empty = new Folder(new Namer, Map.empty, Nil)
+    def empty(site: core.Site) = new Folder(site, new Namer, Map.empty, Nil)
   }
 
   implicit def RightProjection[A,B](v: Either[A,B]): Either.RightProjection[A,B] = v.right
 
-  case class Folder(namer: Namer,
+  case class Folder(site: core.Site,
+                    namer: Namer,
                     bMap: Map[String, SpBlueprint],
                     oList: List[ObsQuad]) {
 
     def add(o: Observation, time: Long): Either[String, Folder] =
       for {
         blueprintE  <- extractBlueprintEntry(o).right
-        target      <- extractTarget(o, time).right
+        target      <- extractTarget(site, o, time).right
         siteQuality <- extractSiteQuality(o).right
         timeValue   <- extractObsTime(o).right
-      } yield Folder(namer,
+      } yield Folder(site, namer,
                 bMap + blueprintE,
                 ObsQuad(blueprintE._1, target, siteQuality, timeValue) :: oList)
 
@@ -44,10 +46,10 @@ object Phase1FolderFactory {
         bn = namer.nameOf(b1)
       } yield bn -> bMap.getOrElse(bn, b2)
 
-    private def extractTarget(o: Observation, time: Long): Either[String, SPTarget] =
+    private def extractTarget(s: core.Site, o: Observation, time: Long): Either[String, SPTarget] =
       for {
         t1 <- o.target.toRight("Observation missing target").right
-        t2 <- SpTargetFactory.create(t1, time).right
+        t2 <- SpTargetFactory.create(s, t1, time).right
       } yield t2
 
     private def extractSiteQuality(o: Observation): Either[String, SPSiteQuality] =
@@ -98,8 +100,8 @@ object Phase1FolderFactory {
       case _ => Band.BAND_1_2
     }
 
-  def create(proposal: Proposal): Either[String, Phase1Folder] = {
-    val empty: Either[String, Folder] = Right(Folder.empty)
+  def create(site: core.Site, proposal: Proposal): Either[String, Phase1Folder] = {
+    val empty: Either[String, Folder] = Right(Folder.empty(site))
 
     val b       = band(proposal)
     val time    = proposal.semester.midPoint

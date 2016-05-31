@@ -12,18 +12,18 @@ object SpTargetFactory {
   val dra  = core.ProperMotion.deltaRA  >=> core.RightAscensionAngularVelocity.velocity >=> core.AngularVelocity.masPerYear
   val ddec = core.ProperMotion.deltaDec >=> core.DeclinationAngularVelocity.velocity    >=> core.AngularVelocity.masPerYear
 
-  def create(t: Target, time: Long): Either[String, SPTarget] = {
+  def create(s: core.Site, t: Target, time: Long): Either[String, SPTarget] = {
     val ct: core.Target =
       t match {
         case too: TooTarget         => core.TooTarget(too.name)
-        case nsd: NonSiderealTarget => initNonSidereal(nsd, time).exec(core.NonSiderealTarget.empty)
+        case nsd: NonSiderealTarget => initNonSidereal(s, nsd, time).exec(core.NonSiderealTarget.empty)
         case sid: SiderealTarget    => initSidereal(sid, time).exec(core.SiderealTarget.empty)
       }
     Right(new SPTarget(ct))
   }
 
-  private def toCoreEphemeris(e: List[EphemerisElement]): core.Ephemeris =
-    ==>>.fromList(e.map { case EphemerisElement(coords, _, time) => (time -> coords) })
+  private def toCoreEphemeris(s: core.Site, e: List[EphemerisElement]): core.Ephemeris =
+    core.Ephemeris(s, ==>>.fromList(e.map { case EphemerisElement(coords, _, time) => (time -> coords) }))
 
   private def apparentMag(d: Double): core.Magnitude =
     new core.Magnitude(d, core.MagnitudeBand.AP, core.MagnitudeSystem.AB)
@@ -31,10 +31,10 @@ object SpTargetFactory {
   def coreProperMotion(pm: ProperMotion): core.ProperMotion =
     ((dra  := pm.deltaRA) *> (ddec := pm.deltaDec)).exec(core.ProperMotion.zero)
 
-  private def initNonSidereal(nsid: NonSiderealTarget, time: Long): State[core.NonSiderealTarget, Unit] =
+  private def initNonSidereal(s: core.Site, nsid: NonSiderealTarget, time: Long): State[core.NonSiderealTarget, Unit] =
     for {
       _ <- core.NonSiderealTarget.name       := nsid.name
-      _ <- core.NonSiderealTarget.ephemeris  := toCoreEphemeris(nsid.ephemeris)
+      _ <- core.NonSiderealTarget.ephemeris  := toCoreEphemeris(s, nsid.ephemeris)
       _ <- core.NonSiderealTarget.magnitudes := nsid.magnitude(time).map(apparentMag).toList
     } yield ()
 

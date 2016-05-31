@@ -64,7 +64,7 @@ object EphemerisUpdater {
     for {
       e1 <- lookupEphemerisWithPadding(d, site, 1000, s)
       e2 <- lookupEphemeris(d, site, new Date(n.getStartTime), new Date(n.getEndTime), 300)
-    } yield e1.union(e2)
+    } yield Ephemeris(site, e1.data.union(e2.data))
   }
 
   /** Get the target node and site; we need both of these. */

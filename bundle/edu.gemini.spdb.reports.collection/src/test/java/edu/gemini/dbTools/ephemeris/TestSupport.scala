@@ -2,7 +2,7 @@ package edu.gemini.dbTools.ephemeris
 
 import edu.gemini.pot.sp.{ISPObsComponent, ISPObservation, ProgramTestSupport, SPComponentType, ISPFactory, ISPProgram, ProgramGen}
 import edu.gemini.shared.util.immutable.ScalaConverters._
-import edu.gemini.spModel.core.{SiderealTarget, NonSiderealTarget, HorizonsDesignation}
+import edu.gemini.spModel.core.{Ephemeris, SiderealTarget, NonSiderealTarget, HorizonsDesignation}
 import edu.gemini.spModel.gemini.obscomp.SPProgram
 import edu.gemini.spModel.obs.{ObservationStatus, ObsPhase2Status, SPObservation}
 import edu.gemini.spModel.obsrecord.ObsExecStatus
@@ -17,7 +17,6 @@ import java.security.Principal
 
 import scala.collection.JavaConverters._
 import scala.util.Random
-import scalaz.==>>
 
 trait TestSupport extends ProgramTestSupport {
   val User = java.util.Collections.singleton[Principal](StaffPrincipal.Gemini)
@@ -33,7 +32,7 @@ trait TestSupport extends ProgramTestSupport {
 
   val genNonSiderealTarget: Gen[NonSiderealTarget] =
     Gen.oneOf(nonSids).map { case (hid, name) =>
-      NonSiderealTarget(name, ==>>.empty, Some(hid), List.empty, None, None)
+      NonSiderealTarget(name, Ephemeris.empty, Some(hid), List.empty, None, None)
     }
 
   def findOrCreateTargetComp(f: ISPFactory, o: ISPObservation): ISPObsComponent =

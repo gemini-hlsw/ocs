@@ -51,7 +51,7 @@ abstract class TemplateSpec(xmlName: String) { this: SpecificationLike =>
     val db = DBLocalDatabase.createTransient()
     try {
       val pid = SPProgramID.toProgramID("GS-2015A-Q-1")
-      val f   = Phase1FolderFactory.create(p).unsafeGet
+      val f   = Phase1FolderFactory.create(pid.site, p).unsafeGet
       val ss  = new SkeletonShell(pid, SpProgramFactory.create(p), f)
       val tf  = TemplateFactoryImpl(templateDb)
       val tfe = TemplateFolderExpansionFactory.expand(ss.folder, tf, preserveLibraryIds = true).unsafeGet

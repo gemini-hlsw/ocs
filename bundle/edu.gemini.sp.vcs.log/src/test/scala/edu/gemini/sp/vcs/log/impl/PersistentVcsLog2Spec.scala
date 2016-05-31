@@ -46,28 +46,28 @@ object PersistentVcsLog2Spec extends Specification {
       _   <- checkSchema("«in memory»")
     } yield ()
 
-  "compatibility" should {
-
-    "query old database with identical result" in go {
-
-      // result as constructed by the old implementation
-      val expected = {
-        val pid = SPProgramID.toProgramID("GN-2015B-Q-10")
-        (List(
-          VcsEventSet(2061 to 2061, Map(OpFetch -> 1), (1449531008701L,1449531008701L), pid, Set(ProgramPrincipal(pid))), 
-          VcsEventSet(1982 to 1988, Map(OpFetch -> 2, OpStore -> 1), (1449523267535L,1449523650543L), pid, Set(StaffPrincipal.Gemini)),
-          VcsEventSet(1960 to 1965, Map(OpFetch -> 2, OpStore -> 2), (1449516911922L,1449517556842L), pid, Set(ProgramPrincipal(pid))) //,
-        ), true)
-      }
-
-      for {
-        _ <- initTestData
-        x <- doSelectByProgram(SPProgramID.toProgramID("GN-2015B-Q-10"), 1, 3)
-      } yield x must_== expected
-
-    }.pendingUntilFixed("See REL-2682")
-
-  }
+//  "compatibility" should {
+//
+//    "query old database with identical result" in go {
+//
+//      // result as constructed by the old implementation
+//      val expected = {
+//        val pid = SPProgramID.toProgramID("GN-2015B-Q-10")
+//        (List(
+//          VcsEventSet(2061 to 2061, Map(OpFetch -> 1), (1449531008701L,1449531008701L), pid, Set(ProgramPrincipal(pid))),
+//          VcsEventSet(1982 to 1988, Map(OpFetch -> 2, OpStore -> 1), (1449523267535L,1449523650543L), pid, Set(StaffPrincipal.Gemini)),
+//          VcsEventSet(1960 to 1965, Map(OpFetch -> 2, OpStore -> 2), (1449516911922L,1449517556842L), pid, Set(ProgramPrincipal(pid))) //,
+//        ), true)
+//      }
+//
+//      for {
+//        _ <- initTestData
+//        x <- doSelectByProgram(SPProgramID.toProgramID("GN-2015B-Q-10"), 1, 3)
+//      } yield x must_== expected
+//
+//    }
+//
+//  }
 
   "checkSchema" should {
 

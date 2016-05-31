@@ -1,6 +1,7 @@
 package edu.gemini.spModel.io.impl.migration
 
 import edu.gemini.pot.sp.SPComponentType
+import edu.gemini.spModel.core.{ProgramId, StandardProgramId, Site}
 import edu.gemini.spModel.io.impl.SpIOTags
 import edu.gemini.spModel.pio.xml.PioXmlUtil
 import edu.gemini.spModel.pio.{Container, ParamSet, Document, Version}
@@ -66,4 +67,13 @@ trait Migration {
     PioXmlUtil.write(d, writer)
     writer.toString
   }
+
+  /** Gets the site from the Program ID, if any. */
+  protected def programSite(d: Document): Option[Site] =
+    for {
+      cont <- d.containers.find(_.getKind == SpIOTags.PROGRAM)
+      pid  <- ProgramId.parseStandardId(cont.getName)
+      site <- pid.site
+    } yield site
+
 }

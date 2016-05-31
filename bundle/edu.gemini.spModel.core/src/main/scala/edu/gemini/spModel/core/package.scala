@@ -24,11 +24,6 @@ package object core {
   type Dec = Declination
   val  Dec = Declination
 
-  type Ephemeris = Long ==>> Coordinates
-  object Ephemeris {
-    val empty: Ephemeris = ==>>.empty
-  }
-
   implicit def SPProgramIdToRichProgramId(id: SPProgramID): RichSpProgramId =
     new RichSpProgramId(id)
 
