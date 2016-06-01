@@ -23,6 +23,7 @@ import scalaz._
 import Scalaz._
 
 import scala.concurrent.Await
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.collection.JavaConverters._
 
 class GemsVoTableCatalogSpec extends Specification {

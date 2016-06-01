@@ -1021,7 +1021,7 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
 
     private void showGemsGuideStarSearchDialog() {
         if (_gemsGuideStarSearchDialog == null) {
-            _gemsGuideStarSearchDialog = new GemsGuideStarSearchDialog(this);
+            _gemsGuideStarSearchDialog = new GemsGuideStarSearchDialog(this, scala.concurrent.ExecutionContext$.MODULE$.global());
         } else {
             _gemsGuideStarSearchDialog.reset();
             _gemsGuideStarSearchDialog.setVisible(true);

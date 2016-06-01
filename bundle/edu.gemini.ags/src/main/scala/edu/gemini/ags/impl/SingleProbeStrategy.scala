@@ -16,7 +16,6 @@ import edu.gemini.shared.util.immutable.ScalaConverters._
 
 import scala.collection.JavaConverters._
 import scala.concurrent._
-import ExecutionContext.Implicits.global
 
 import scalaz._
 import Scalaz._
@@ -41,7 +40,7 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
   override def catalogQueries(ctx: ObsContext, mt: MagnitudeTable): List[CatalogQuery] =
     params.catalogQueries(withCorrectedSite(ctx), mt).toList
 
-  override def candidates(ctx: ObsContext, mt: MagnitudeTable): Future[List[(GuideProbe, List[SiderealTarget])]] = {
+  override def candidates(ctx: ObsContext, mt: MagnitudeTable)(implicit ec: ExecutionContext): Future[List[(GuideProbe, List[SiderealTarget])]] = {
     val empty = Future.successful(List((params.guideProbe: GuideProbe, List.empty[SiderealTarget])))
 
     // We cannot let VoTableClient to filter targets as usual, instead we provide an empty magnitude constraint and filter locally
@@ -51,7 +50,7 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
     }).getOrElse(empty)
   }
 
-  private def catalogResult(ctx: ObsContext, mt: MagnitudeTable): Future[List[SiderealTarget]] =
+  private def catalogResult(ctx: ObsContext, mt: MagnitudeTable)(implicit ec: ExecutionContext): Future[List[SiderealTarget]] =
     // call candidates and extract the one and only tuple for this strategy,
     // throw away the guide probe (which we know anyway), and obtain just the
     // list of guide stars
@@ -59,7 +58,7 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
       lst.headOption.foldMap(_._2)
     }
 
-  override def estimate(ctx: ObsContext, mt: MagnitudeTable): Future[AgsStrategy.Estimate] = {
+  override def estimate(ctx: ObsContext, mt: MagnitudeTable)(implicit ec: ExecutionContext): Future[AgsStrategy.Estimate] = {
     val ct = withCorrectedSite(ctx)
     catalogResult(ct, mt).map(estimate(ct, mt, _))
   }
@@ -74,7 +73,7 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
     AgsStrategy.Estimate.toEstimate(successProbability)
   }
 
-  override def select(ctx: ObsContext, mt: MagnitudeTable): Future[Option[AgsStrategy.Selection]] = {
+  override def select(ctx: ObsContext, mt: MagnitudeTable)(implicit ec: ExecutionContext): Future[Option[AgsStrategy.Selection]] = {
     val ct = withCorrectedSite(ctx)
     catalogResult(ct, mt).map(select(ct, mt, _))
   }

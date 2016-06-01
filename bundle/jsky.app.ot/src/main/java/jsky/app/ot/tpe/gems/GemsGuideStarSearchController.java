@@ -48,7 +48,7 @@ class GemsGuideStarSearchController {
     /**
      * Searches for guide star candidates and saves the results in the model
      */
-    public void query() throws Exception {
+    public void query(scala.concurrent.ExecutionContext ec) throws Exception {
         WorldCoords basePos = _tpe.getBasePos();
         ObsContext obsContext = _worker.getObsContext(basePos.getRaDeg(), basePos.getDecDeg());
         Set<edu.gemini.spModel.core.Angle> posAngles = getPosAngles(obsContext);
@@ -59,7 +59,7 @@ class GemsGuideStarSearchController {
         List<GemsCatalogSearchResults> results;
         try {
             results = _worker.search(_model.getCatalog(), tipTiltMode, obsContext, posAngles,
-                    new scala.Some<>(nirBand));
+                    new scala.Some<>(nirBand), ec);
         } catch(Exception e) {
             DialogUtil.error(_dialog, e);
             results = new ArrayList<>();

@@ -12,6 +12,7 @@ import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 import javax.servlet.http.HttpServletResponse.{SC_BAD_GATEWAY, SC_BAD_REQUEST, SC_INTERNAL_SERVER_ERROR, SC_OK}
 
 import scala.concurrent.Await
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Failure, Success, Try}
 
 object AgsServlet {

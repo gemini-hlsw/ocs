@@ -9,12 +9,12 @@ import edu.gemini.spModel.core.SiderealTarget
 import edu.gemini.spModel.guide.{ValidatableGuideProbe, GuideProbe}
 import edu.gemini.spModel.obs.context.ObsContext
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 case class ScienceTargetStrategy(key: AgsStrategyKey, guideProbe: ValidatableGuideProbe, override val probeBands: BandsList) extends AgsStrategy {
 
   // Since the science target is the used as the guide star, success is always guaranteed.
-  override def estimate(ctx: ObsContext, mt: MagnitudeTable): Future[AgsStrategy.Estimate] =
+  override def estimate(ctx: ObsContext, mt: MagnitudeTable)(implicit ec: ExecutionContext): Future[AgsStrategy.Estimate] =
     Future.successful(AgsStrategy.Estimate.GuaranteedSuccess)
 
   override def analyze(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SiderealTarget): Option[AgsAnalysis] =
@@ -23,12 +23,12 @@ case class ScienceTargetStrategy(key: AgsStrategyKey, guideProbe: ValidatableGui
   override def analyze(ctx: ObsContext, mt: MagnitudeTable): List[AgsAnalysis] =
     AgsAnalysis.analysis(ctx, mt, guideProbe, probeBands).toList
 
-  override def candidates(ctx: ObsContext, mt: MagnitudeTable): Future[List[(GuideProbe, List[SiderealTarget])]] = {
+  override def candidates(ctx: ObsContext, mt: MagnitudeTable)(implicit ec: ExecutionContext): Future[List[(GuideProbe, List[SiderealTarget])]] = {
     val so = ctx.getTargets.getBase.toSiderealTarget(ctx.getSchedulingBlockStart)
     Future.successful(List((guideProbe, List(so))))
   }
 
-  override def select(ctx: ObsContext, mt: MagnitudeTable): Future[Option[AgsStrategy.Selection]] = {
+  override def select(ctx: ObsContext, mt: MagnitudeTable)(implicit ec: ExecutionContext): Future[Option[AgsStrategy.Selection]] = {
     // The science target is the guide star, but must be converted from SPTarget to SkyObject.
     val siderealTarget = ctx.getTargets.getBase.toSiderealTarget(ctx.getSchedulingBlockStart)
     val posAngle       = ctx.getPositionAngle.toNewModel
