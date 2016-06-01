@@ -170,16 +170,18 @@ public class platepos {
         // Difference between RA and plate_ra in radians
         double xdiff = xr - wcs.plate_ra;
 
-        // If the RA of the point is further away than 6 hours from the RA of
-        // the image center then punt because the (x,y) projection wraps around.
-        if (Math.abs(xdiff) >= QUARTER_CIRCLE) return null;
-
         sypos = Math.sin(yr);
         cypos = Math.cos(yr);
         syplate = Math.sin(wcs.plate_dec);
         cyplate = Math.cos(wcs.plate_dec);
         sxdiff = Math.sin(xdiff);
         cxdiff = Math.cos(xdiff);
+
+        // If the RA of the point is further away than 6 hours from the RA of
+        // the image center then punt because the (x,y) projection wraps around.
+        double distance = Math.abs(Math.atan2(sxdiff, cxdiff));
+        if (distance >= QUARTER_CIRCLE) return null;
+
         div = (sypos * syplate) + (cypos * cyplate * cxdiff);
         xi = cypos * sxdiff * CONR2S / div;
         eta = ((sypos * cyplate) - (cypos * syplate * cxdiff)) * CONR2S / div;
