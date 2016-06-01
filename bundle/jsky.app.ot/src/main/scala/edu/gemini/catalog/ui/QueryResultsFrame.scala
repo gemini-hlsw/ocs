@@ -26,7 +26,7 @@ import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.core._
 import edu.gemini.ui.miglayout.MigPanel
 import edu.gemini.ui.miglayout.constraints._
-import jsky.app.ot.gemini.editor.targetComponent.GuidingFeedback.ProbeLimits
+import .ProbeLimits
 import jsky.app.ot.gemini.editor.targetComponent.GuidingIcon
 import jsky.app.ot.tpe.{TpeManager, TpeContext}
 import jsky.app.ot.util.{OtColor, Resources}

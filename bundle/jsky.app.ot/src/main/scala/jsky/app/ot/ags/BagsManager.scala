@@ -148,7 +148,7 @@ object BagsState {
 
   /** RunningEdited. This state corresponds to a running AGS search for an
     * observation that was subsequently edited.  Since it has been edited, the
-    * resuls we're expecting may no longer be valid when they arrive.
+    * results we're expecting may no longer be valid when they arrive.
     */
   case class RunningEditedState(obs: ISPObservation, hash: AgsHashVal) extends BagsState {
     // If we're edited again while running, just loop back.  Once the results of
@@ -264,6 +264,12 @@ object BagsManager {
 
   // This is our mutable state.  It is only read/written by the Swing thread.
   private var stateMap  = ==>>.empty[ProgKey, ObsKey ==>> BagsState]
+
+  def stateLookup(k: ProgKey, o: ObsKey): Option[BagsState] =
+    for {
+      obsMap <- stateMap.lookup(k)
+      s      <- obsMap.lookup(o)
+    } yield s
 
   // Handle a state machine transition.  Note we switch to the Swing thread
   // here so that the calling thread continues immediately.  All updates are

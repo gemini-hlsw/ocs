@@ -8,7 +8,7 @@ import edu.gemini.shared.util.immutable.{Option => GOption}
 import edu.gemini.shared.util.immutable.ScalaConverters.ScalaOptionOps
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
-import jsky.app.ot.gemini.editor.targetComponent.{GuidingFeedbackEditor, TelescopePosEditor}
+import jsky.app.ot.gemini.editor.targetComponent.{TargetFeedbackEditor$, TelescopePosEditor}
 
 import scala.collection.JavaConverters._
 
@@ -36,7 +36,7 @@ final class TargetDetailPanel extends JPanel with TelescopePosEditor with Reentr
   def curDetailEditorJava: GOption[TargetDetailEditor] = curDetailEditor.asGeminiOpt
 
   val source                = new SourceDetailsEditor
-  val guidingFeedbackEditor = new GuidingFeedbackEditor
+  val guidingFeedbackEditor = new TargetFeedbackEditor
 
   // Put it all together
   setLayout(new GridBagLayout)
