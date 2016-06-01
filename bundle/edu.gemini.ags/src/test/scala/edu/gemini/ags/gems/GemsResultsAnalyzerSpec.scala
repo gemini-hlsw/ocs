@@ -32,6 +32,7 @@ import scala.concurrent.duration._
 import org.specs2.mutable.SpecificationLike
 import AlmostEqual.AlmostEqualOps
 import scala.concurrent.Await
+import scala.concurrent.ExecutionContext.Implicits.global
 
 import scalaz._
 import Scalaz._

@@ -8,8 +8,7 @@ import edu.gemini.spModel.gemini.gems.GemsInstrument
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.Conditions
 import edu.gemini.spModel.obs.context.ObsContext
 
-import scala.concurrent.{Await, Future}
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.{ExecutionContext, Await, Future}
 import scala.concurrent.duration._
 import scala.collection.JavaConverters._
 import scala.math._
@@ -38,8 +37,8 @@ case class GemsVoTableCatalog(backend: VoTableBackend = ConeSearchBackend, catal
    * @param timeout      Timeout in seconds
    * @return list of search results
    */
-  def search4Java(obsContext: ObsContext, basePosition: Coordinates, options: GemsGuideStarSearchOptions, nirBand: Option[MagnitudeBand], timeout: Int = 10): java.util.List[GemsCatalogSearchResults] =
-    Await.result(search(obsContext, basePosition, options, nirBand), timeout.seconds).asJava
+  def search4Java(obsContext: ObsContext, basePosition: Coordinates, options: GemsGuideStarSearchOptions, nirBand: Option[MagnitudeBand], timeout: Int = 10, ec: ExecutionContext): java.util.List[GemsCatalogSearchResults] =
+    Await.result(search(obsContext, basePosition, options, nirBand)(ec), timeout.seconds).asJava
 
   /**
    * Searches for the given base position according to the given options.
@@ -51,7 +50,7 @@ case class GemsVoTableCatalog(backend: VoTableBackend = ConeSearchBackend, catal
    * @param nirBand      optional NIR magnitude band (default is H)
    * @return  Future with a list of search results
    */
-  def search(obsContext: ObsContext, basePosition: Coordinates, options: GemsGuideStarSearchOptions, nirBand: Option[MagnitudeBand]): Future[List[GemsCatalogSearchResults]] = {
+  def search(obsContext: ObsContext, basePosition: Coordinates, options: GemsGuideStarSearchOptions, nirBand: Option[MagnitudeBand])(implicit ec: ExecutionContext): Future[List[GemsCatalogSearchResults]] = {
     val criteria = options.searchCriteria(obsContext, nirBand).asScala.toList
     val inst = options.getInstrument
 
@@ -67,7 +66,7 @@ case class GemsVoTableCatalog(backend: VoTableBackend = ConeSearchBackend, catal
     }))
   }
 
-  private def searchCatalog(basePosition: Coordinates, criteria: List[GemsCatalogSearchCriterion]): Future[List[GemsCatalogSearchResults]] = {
+  private def searchCatalog(basePosition: Coordinates, criteria: List[GemsCatalogSearchCriterion])(implicit ec: ExecutionContext): Future[List[GemsCatalogSearchResults]] = {
     val queryArgs = criteria.map { c =>
       (CatalogQuery(basePosition, c.criterion.radiusConstraint, c.criterion.magConstraint, catalog), c)
     }
@@ -86,7 +85,7 @@ case class GemsVoTableCatalog(backend: VoTableBackend = ConeSearchBackend, catal
    * @param inst the instrument option for the search
    * @return a list of threads used for background catalog searches
    */
-  private def searchOptimized(basePosition: Coordinates, conditions: Conditions, criterions: List[GemsCatalogSearchCriterion], inst: GemsInstrument): Future[List[GemsCatalogSearchResults]] = {
+  private def searchOptimized(basePosition: Coordinates, conditions: Conditions, criterions: List[GemsCatalogSearchCriterion], inst: GemsInstrument)(implicit ec: ExecutionContext): Future[List[GemsCatalogSearchResults]] = {
     val radiusConstraints = getRadiusConstraints(inst, criterions)
     val magConstraints = optimizeMagnitudeConstraints(criterions)
 

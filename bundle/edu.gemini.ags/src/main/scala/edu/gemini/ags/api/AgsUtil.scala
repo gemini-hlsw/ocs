@@ -4,7 +4,7 @@ import edu.gemini.ags.api.AgsMagnitude.MagnitudeTable
 import edu.gemini.pot.sp.ISPObservation
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable._
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 object AgsUtil {
   private def lookupAndThen[A](obs: ISPObservation, default: => A)(op: (AgsStrategy, ObsContext) => Future[A]): Future[A] =
@@ -13,10 +13,10 @@ object AgsUtil {
       strategy <- AgsRegistrar.currentStrategy(ctx)
     } yield op(strategy, ctx)).getOrElse(Future.successful(default))
 
-  def lookupAndEstimate(obs: ISPObservation, mt: MagnitudeTable): Future[AgsStrategy.Estimate] =
+  def lookupAndEstimate(obs: ISPObservation, mt: MagnitudeTable)(implicit ec: ExecutionContext): Future[AgsStrategy.Estimate] =
     lookupAndThen(obs, AgsStrategy.Estimate.CompleteFailure)((s,c) => s.estimate(c, mt))
 
-  def lookupAndSelect(obs: ISPObservation, mt: MagnitudeTable): Future[Option[AgsStrategy.Selection]] =
+  def lookupAndSelect(obs: ISPObservation, mt: MagnitudeTable)(implicit ec: ExecutionContext): Future[Option[AgsStrategy.Selection]] =
     lookupAndThen(obs, Option.empty[AgsStrategy.Selection])((s,c) => s.select(c, mt))
 
   def currentStrategy(obs: ISPObservation): Option[AgsStrategy] =

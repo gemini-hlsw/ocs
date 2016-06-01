@@ -13,7 +13,7 @@ import edu.gemini.shared.util.immutable.{Option => JOption, Some => JSome}
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.env._
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scalaz._
 import Scalaz._
 
@@ -32,16 +32,16 @@ trait AgsStrategy {
     else analyze(ctx, mt, guideProbe, guideStar).asGeminiOpt
   }
 
-  def candidates(ctx: ObsContext, mt: MagnitudeTable): Future[List[(GuideProbe, List[SiderealTarget])]]
+  def candidates(ctx: ObsContext, mt: MagnitudeTable)(implicit ec: ExecutionContext): Future[List[(GuideProbe, List[SiderealTarget])]]
 
   /**
    * Returns a list of catalog queries that would be used to search for guide stars with the given context
    */
   def catalogQueries(ctx: ObsContext, mt: MagnitudeTable): List[CatalogQuery]
 
-  def estimate(ctx: ObsContext, mt: MagnitudeTable): Future[AgsStrategy.Estimate]
+  def estimate(ctx: ObsContext, mt: MagnitudeTable)(implicit ec: ExecutionContext): Future[AgsStrategy.Estimate]
 
-  def select(ctx: ObsContext, mt: MagnitudeTable): Future[Option[AgsStrategy.Selection]]
+  def select(ctx: ObsContext, mt: MagnitudeTable)(implicit ec: ExecutionContext): Future[Option[AgsStrategy.Selection]]
 
   def guideProbes: List[GuideProbe]
 

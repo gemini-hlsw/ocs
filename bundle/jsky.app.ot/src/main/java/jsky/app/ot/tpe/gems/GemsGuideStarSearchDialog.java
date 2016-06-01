@@ -164,14 +164,17 @@ public class GemsGuideStarSearchDialog extends JFrame {
     private boolean _ignoreSelection;
     private TargetEnvironment _savedTargetEnv;
 
+    private final scala.concurrent.ExecutionContext ec;
+
     private TargetEnvironment getEnvironment(TpeImageWidget tpe) {
         return tpe.getContext().targets().envOrDefault();
     }
 
-    public GemsGuideStarSearchDialog(TpeImageWidget tpe) {
+    public GemsGuideStarSearchDialog(TpeImageWidget tpe, scala.concurrent.ExecutionContext ec) {
         super("GeMS Guide Star Search");
         _tpe = tpe;
         _plotter = tpe.plotter();
+        this.ec = ec;
 
         _candidateGuideStarsTable = new CandidateGuideStarsTable(_plotter);
 
@@ -183,7 +186,7 @@ public class GemsGuideStarSearchDialog extends JFrame {
         getContentPane().add(makeBottomPanel(), BorderLayout.SOUTH);
 
         _model = new GemsGuideStarSearchModel();
-        _worker = new GemsGuideStarWorker(_statusPanel);
+        _worker = new GemsGuideStarWorker(_statusPanel, ec);
         _statusPanel.setText("");
 
         _controller = new GemsGuideStarSearchController(_model, _worker, this, _tpe);
@@ -489,7 +492,7 @@ public class GemsGuideStarSearchDialog extends JFrame {
             @Override
             public Object construct() {
                 try {
-                    _controller.query();
+                    _controller.query(ec);
                     return null;
                 } catch (Exception e) {
                     return e;

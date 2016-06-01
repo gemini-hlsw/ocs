@@ -18,7 +18,6 @@ import edu.gemini.spModel.gems.{GemsTipTiltMode, GemsGuideProbeGroup, GemsGuideS
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable._
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.collection.JavaConverters._
 import scala.concurrent._
 import edu.gemini.ags.api.AgsMagnitude.{MagnitudeCalc, MagnitudeTable}
@@ -46,7 +45,7 @@ trait GemsStrategy extends AgsStrategy {
 
   // Query the catalog for each constraint and compile a list of results with the necessary
   // information for GeMS.
-  private def catalogResult(ctx: ObsContext, mt: MagnitudeTable): Future[List[CatalogResultWithKey]] = {
+  private def catalogResult(ctx: ObsContext, mt: MagnitudeTable)(implicit ec: ExecutionContext): Future[List[CatalogResultWithKey]] = {
     // Maps for IDs to types needed by GeMS.
     def GuideStarTypeMap = Map[Int, GemsGuideStarType](
       CanopusTipTiltId -> GemsGuideStarType.tiptilt,
@@ -71,7 +70,7 @@ trait GemsStrategy extends AgsStrategy {
   }
 
   // Convert from catalog results to GeMS-specific results.
-  private def toGemsCatalogSearchResults(ctx: ObsContext, futureAgsCatalogResults: Future[List[CatalogResultWithKey]]): Future[List[GemsCatalogSearchResults]] = {
+  private def toGemsCatalogSearchResults(ctx: ObsContext, futureAgsCatalogResults: Future[List[CatalogResultWithKey]])(implicit ec: ExecutionContext): Future[List[GemsCatalogSearchResults]] = {
     val anglesToTry = (0 until 360 by 45).map(Angle.fromDegrees(_))
 
     futureAgsCatalogResults.map { agsCatalogResults =>
@@ -117,7 +116,7 @@ trait GemsStrategy extends AgsStrategy {
     mapGroup(Canopus.Wfs.Group.instance) ++ mapGroup(GsaoiOdgw.Group.instance)
   }
 
-  override def candidates(ctx: ObsContext, mt: MagnitudeTable): Future[List[(GuideProbe, List[SiderealTarget])]] = {
+  override def candidates(ctx: ObsContext, mt: MagnitudeTable)(implicit ec: ExecutionContext): Future[List[(GuideProbe, List[SiderealTarget])]] = {
 
     // Extract something we can understand from the GemsCatalogSearchResults.
     def simplifiedResult(results: List[GemsCatalogSearchResults]): List[(GuideProbe, List[SiderealTarget])] =
@@ -136,7 +135,7 @@ trait GemsStrategy extends AgsStrategy {
     search(GemsTipTiltMode.canopus, ctx, posAngles, None).map(simplifiedResult)
   }
 
-  override def estimate(ctx: ObsContext, mt: MagnitudeTable): Future[Estimate] = {
+  override def estimate(ctx: ObsContext, mt: MagnitudeTable)(implicit ec: ExecutionContext): Future[Estimate] = {
     // Get the query results and convert them to GeMS-specific ones.
     val results = toGemsCatalogSearchResults(ctx, catalogResult(ctx, mt))
 
@@ -160,7 +159,7 @@ trait GemsStrategy extends AgsStrategy {
     }
   }
 
-  protected [impl] def search(tipTiltMode: GemsTipTiltMode, ctx: ObsContext, posAngles: Set[Angle], nirBand: Option[MagnitudeBand]): Future[List[GemsCatalogSearchResults]] =
+  protected [impl] def search(tipTiltMode: GemsTipTiltMode, ctx: ObsContext, posAngles: Set[Angle], nirBand: Option[MagnitudeBand])(implicit ec: ExecutionContext): Future[List[GemsCatalogSearchResults]] =
     ctx.getBaseCoordinates.asScalaOpt.fold(Future.successful(List.empty[GemsCatalogSearchResults])) { base =>
     // Get the instrument: F2 or GSAOI?
     val gemsInstrument =
@@ -186,7 +185,7 @@ trait GemsStrategy extends AgsStrategy {
     gemsResults.headOption
   }
 
-  override def select(ctx: ObsContext, mt: MagnitudeTable): Future[Option[Selection]] = {
+  override def select(ctx: ObsContext, mt: MagnitudeTable)(implicit ec: ExecutionContext): Future[Option[Selection]] = {
     val posAngles = Set(ctx.getPositionAngle.toNewModel, Angle.zero, Angle.fromDegrees(90), Angle.fromDegrees(180), Angle.fromDegrees(270))
     val results = search(GemsTipTiltMode.canopus, ctx, posAngles, None)
     results.map { r =>

@@ -243,7 +243,7 @@ object BagsManager {
   private val worker = new ScheduledThreadPoolExecutor(NumWorkers, new ThreadFactory() {
     override def newThread(r: Runnable): Thread = {
       val t = new Thread(r, "BagsManager - Worker")
-      t.setPriority(Thread.NORM_PRIORITY - 1)
+      t.setPriority(Thread.NORM_PRIORITY - 2)
       t.setDaemon(true)
       t
     }
