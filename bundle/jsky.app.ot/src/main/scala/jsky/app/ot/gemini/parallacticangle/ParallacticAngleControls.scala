@@ -183,7 +183,7 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
       // Ok, this is an IO action that goes and fetches the ephemerides and returns ANOTHER action
       // that will actually update the model and clear out the glass pane UI.
       val fetch: IO[IO[Unit]] =
-        if (sameNight) IO(updateSchedBlock)
+        if (sameNight) IO(ispObs.silentAndLocked(updateSchedBlock))
         else EphemerisUpdater.refreshEphemerides(ispObs, sb.start, e.getWindow).map { completion =>
 
           // This is the action that will update the model
