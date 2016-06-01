@@ -173,17 +173,23 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
       val spObs = ispObs.getDataObject.asInstanceOf[SPObservation]
       val sameNight = spObs.getSchedulingBlock.asScalaOpt.exists(_.sameObservingNightAs(sb))
 
+      // This is the action that will update the scheduling block
+      val updateSchedBlock: IO[Unit] =
+        for {
+          _ <- IO(spObs.setSchedulingBlock(ImOption.apply(sb)))
+          _ <- IO(ispObs.setDataObject(spObs))
+        } yield ()
+
       // Ok, this is an IO action that goes and fetches the ephemerides and returns ANOTHER action
       // that will actually update the model and clear out the glass pane UI.
       val fetch: IO[IO[Unit]] =
-        if (sameNight) IO(IO.ioUnit)
+        if (sameNight) IO(updateSchedBlock)
         else EphemerisUpdater.refreshEphemerides(ispObs, sb.start, e.getWindow).map { completion =>
 
           // This is the action that will update the model
           val up: IO[Unit] =
             for {
-              _ <- IO(spObs.setSchedulingBlock(ImOption.apply(sb)))
-              _ <- IO(ispObs.setDataObject(spObs))
+              _ <- updateSchedBlock
               _ <- completion
             } yield ()
 
