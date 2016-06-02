@@ -6,6 +6,11 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.logging.Logger;
 
+//
+// Gemini Observatory/AURA
+// $Id: OlBasicConfiguration.java,v 1.5 2005/12/11 15:54:15 gillies Exp $
+//
+
 /**
  * OlBasicConfiguration is the top level model of configuration information.
  */
@@ -24,7 +29,7 @@ public class OlBasicConfiguration implements OlConfiguration, Serializable {
 
     // Internal class to model the keyed set of entries
     private class LogItems implements Serializable {
-        private Map<String, OlLogItem> items = new HashMap<>();
+        private Map<String, OlLogItem> items = new HashMap<String, OlLogItem>();
 
         void addLogItem(OlLogItem logItem) {
             if (logItem == null) throw new NullPointerException();
@@ -57,7 +62,7 @@ public class OlBasicConfiguration implements OlConfiguration, Serializable {
             return items.size();
         }
 
-        Iterator<String> iterator() {
+        Iterator iterator() {
             return items.keySet().iterator();
         }
     }
@@ -66,7 +71,7 @@ public class OlBasicConfiguration implements OlConfiguration, Serializable {
      * This class is a <tt>Hashmap</tt> of instrument names to OlBasicLogEntries which are a list of entries.
      */
     private class ObsLogs implements Serializable {
-        private Map<String, OlObsLogData> obsLogs = new HashMap<>();
+        private Map<String, OlObsLogData> obsLogs = new HashMap<String, OlObsLogData>();
 
         void addLogData(OlObsLogData obsLogData) {
             obsLogs.put(obsLogData.getKey(), obsLogData);
@@ -120,7 +125,7 @@ public class OlBasicConfiguration implements OlConfiguration, Serializable {
     // Key is the name of an instrument or obslog containing a list of logItems
     private class OlBasicLogData implements OlObsLogData, Serializable {
         private String _key;
-        private List<OlLogItem> _items = new ArrayList<>();
+        private List<OlLogItem> _items = new ArrayList<OlLogItem>();
         private OlSegmentType _type;
 
         OlBasicLogData(String key) {
@@ -150,11 +155,27 @@ public class OlBasicConfiguration implements OlConfiguration, Serializable {
             return logItem;
         }
 
+        public OlLogItem getLogItem(String itemKey) {
+            for (int i = 0, size = _items.size(); i < size; i++) {
+                OlLogItem item = _items.get(i);
+                if (item.getKey().equals(itemKey)) return item;
+            }
+            return null;
+        }
+
+        public OlLogItem getBySequenceName(String sequenceName) {
+            for (int i = 0, size = _items.size(); i < size; i++) {
+                OlLogItem item = _items.get(i);
+                if (sequenceName.equals(item.getSequenceName())) return item;
+            }
+            return null;
+        }
+
         public List<OlLogItem> getLogTableData() {
             return _items;
         }
 
-        public Iterator<OlLogItem> iterator() {
+        public Iterator iterator() {
             return _items.iterator();
         }
 
@@ -168,7 +189,6 @@ public class OlBasicConfiguration implements OlConfiguration, Serializable {
         }
     }
 
-    @Override
     public String getVersion() {
         return _VERSION;
     }
@@ -187,22 +207,67 @@ public class OlBasicConfiguration implements OlConfiguration, Serializable {
         return _allLogItems;
     }
 
-    @Override
+    /**
+     * public void addObsLogLogEntry(String logKey, String entryKey) throws OlModelException {
+     * OlObsLogData logEntry = _logEntries.getLogEntry(logKey);
+     * logEntry.addEntryKey(entryKey);
+     * <p/>
+     * <p/>
+     * <p/>
+     * <p/>
+     * public int getNumberLogEntries() {
+     * return _getLogEntries().getSize();
+     * }
+     * public void addLogItem(String entryKey) {
+     * if (entryKey == null) throw new IllegalArgumentException();
+     * OlBasicLogItem entry = new OlBasicLogItem(entryKey);
+     * _getEntries().addEntry(entry);
+     * }
+     */
+
+    public OlLogItem getItemInObsLog(String logKey, String itemKey) {
+        if (logKey == null || itemKey == null) throw new NullPointerException();
+
+        OlObsLogData obsLogData = _getObsLogs().getLogData(logKey);
+        if (obsLogData == null) return null;
+        return obsLogData.getLogItem(itemKey);
+    }
+
     public OlLogItem addItemToObsLog(String logKey, String itemKey) throws OlModelException {
         return _getObsLogs().addItemToObsLog(logKey, itemKey);
+    }
+
+    public OlLogItem getLogItem(String itemKey) {
+        return _getLogItems().getLogItem(itemKey);
     }
 
     public OlLogItem addLogItem(String itemKey) {
         return _getLogItems().addLogItem(itemKey);
     }
 
-    @Override
+    public OlObsLogData getDataForLog(String logKey) {
+        return _getObsLogs().getLogData(logKey);
+    }
+
     public OlObsLogData getDataForLogByType(String logKey) {
         return _getObsLogs().getDataForLogByType(logKey);
     }
 
-    @Override
-    public Iterator<String> getItems() {
+    public int getNumberObsLogs() {
+        return _getObsLogs().getSize();
+    }
+
+    public int getNumberLogItems() {
+        return _getLogItems().getSize();
+    }
+
+    public Iterator getObsLogItems(String logKey) {
+        OlObsLogData obsLogData = _getObsLogs().getLogData(logKey);
+        if (obsLogData == null) return new ArrayList().iterator();
+        return obsLogData.iterator();
+    }
+
+    public Iterator getItems() {
         return _getLogItems().iterator();
     }
 }

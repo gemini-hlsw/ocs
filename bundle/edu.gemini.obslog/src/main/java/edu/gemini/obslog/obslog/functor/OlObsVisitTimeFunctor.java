@@ -16,6 +16,11 @@ import edu.gemini.shared.util.GeminiRuntimeException;
 import java.security.Principal;
 import java.util.*;
 
+//
+// Gemini Observatory/AURA
+// $Id: OlObsVisitTimeFunctor.java,v 1.2 2006/10/17 21:37:11 shane Exp $
+//
+
 public final class OlObsVisitTimeFunctor extends BaseTransferDataFunctor {
     private List<EChargeObslogVisit> _result;
 
@@ -27,13 +32,15 @@ public final class OlObsVisitTimeFunctor extends BaseTransferDataFunctor {
      * This private method takes a list of {@link edu.gemini.pot.sp.ISPObservation} instances and constructs
      * their ObservationData objects.
      *
+     * @param observations
      * @return a new <tt>List</tt> of <tt>ObservationData</tt> objects.
+     * @throws java.rmi.RemoteException
      */
-    private List<EChargeObslogVisit> fetchObservationData(List<ISPObservation> observations)  {
-        List<EChargeObslogVisit> obsData = new ArrayList<>();
+    protected List<EChargeObslogVisit> fetchObservationData(List<ISPObservation> observations)  {
+        List<EChargeObslogVisit> obsData = new ArrayList<EChargeObslogVisit>();
 
-        for (ISPObservation observation : observations) {
-            List<EChargeObslogVisit> od = ObservationObsVisitTimeFactory.build(observation, _getObsLogOptions());
+        for (int i = 0, size = observations.size(); i < size; i++) {
+            List<EChargeObslogVisit> od = ObservationObsVisitTimeFactory.build(observations.get(i), _getObsLogOptions());
             obsData.addAll(od);
         }
 
@@ -42,10 +49,15 @@ public final class OlObsVisitTimeFunctor extends BaseTransferDataFunctor {
         return obsData;
     }
 
-    @Override
     public void execute(IDBDatabaseService db, ISPNode node, Set<Principal> principals) {
-        List<ISPObservation> observations = _fetchObservations(db);
-        _result = fetchObservationData(observations);
+//        try {
+            List<ISPObservation> observations = _fetchObservations(db);
+            _result = fetchObservationData(observations);
+
+//        } catch (RemoteException ex) {
+            //LOG.error("Remote exception in local code!", ex);
+//            throw GeminiRuntimeException.newException(ex);
+//        }
     }
 
     /**
@@ -58,7 +70,7 @@ public final class OlObsVisitTimeFunctor extends BaseTransferDataFunctor {
     }
 
 
-    public static List<EChargeObslogVisit> create(IDBDatabaseService db, OlLogOptions obsLogOptions, List<SPObservationID> observationIDs, Set<Principal> user)  {
+    public static List create(IDBDatabaseService db, OlLogOptions obsLogOptions, List<SPObservationID> observationIDs, Set<Principal> user)  {
 
         OlObsVisitTimeFunctor lf = new OlObsVisitTimeFunctor(obsLogOptions, observationIDs);
         try {
@@ -70,9 +82,8 @@ public final class OlObsVisitTimeFunctor extends BaseTransferDataFunctor {
         return lf.getResult();
     }
 
-    @Override
     public void mergeResults(Collection<IDBFunctor> functorCollection) {
-        List<EChargeObslogVisit> res = new ArrayList<>();
+        List<EChargeObslogVisit> res = new ArrayList<EChargeObslogVisit>();
         for (IDBFunctor f : functorCollection) {
             res.addAll(((OlObsVisitTimeFunctor) f).getResult());
         }
