@@ -352,7 +352,7 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
 
     val options = new GemsGuideStarSearchOptions(instrument, tipTiltMode, posAngles)
 
-    val results = Await.result(catalog.search(obsContext, base.toNewModel, options, scala.None), 5.seconds)
+    val results = Await.result(catalog.search(obsContext, base.toNewModel, options, scala.None)(implicitly), 5.seconds)
     val gemsResults = GemsResultsAnalyzer.analyze(obsContext, posAngles, results.asJava, scala.None)
     (results, gemsResults.asScala.toList)
   }

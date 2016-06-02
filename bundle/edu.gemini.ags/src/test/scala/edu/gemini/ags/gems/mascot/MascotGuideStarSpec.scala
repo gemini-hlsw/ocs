@@ -244,7 +244,7 @@ class MascotGuideStarSpec extends Specification {
       val coordinates = Coordinates(RightAscension.fromAngle(Angle.fromHMS(3, 19, 48.2341).getOrElse(Angle.zero)), Declination.fromAngle(Angle.fromDMS(41, 30, 42.078).getOrElse(Angle.zero)).getOrElse(Declination.zero))
 
       val query = CatalogQuery(coordinates, RadiusConstraint.between(Angle.fromArcmin(MascotCat.defaultMinRadius), Angle.fromArcmin(MascotCat.defaultMaxRadius)), PPMXL)
-      val r = VoTableClient.catalog(query, TestVoTableBackend("/mascotquery.xml")).map { t =>
+      val r = VoTableClient.catalog(query, TestVoTableBackend("/mascotquery.xml"))(implicitly).map { t =>
         val base = new SPTarget(coordinates.ra.toAngle.toDegrees, coordinates.dec.toDegrees)
         val env = TargetEnvironment.create(base)
         val inst = new Gsaoi()

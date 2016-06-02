@@ -6,6 +6,7 @@ import java.io._
 import java.util.logging.{Level, Logger}
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext.Implicits.global
 import scalaz._
 import Scalaz._
 
@@ -46,7 +47,7 @@ object OTBrowserPresetsPersistence {
     dir.ifNone(Log.warning("Must initialize the OTBrowser history"))
   }
 
-  def saveAsync(conf: OTBrowserConf)(implicit ctx: ExecutionContext): Future[Unit] = Future.apply(save(conf))
+  def saveAsync(conf: OTBrowserConf)(ctx: ExecutionContext): Future[Unit] = Future.apply(save(conf))
 
   private def save(conf: OTBrowserConf): Unit = catchingAll {
     dir.foreach { d =>

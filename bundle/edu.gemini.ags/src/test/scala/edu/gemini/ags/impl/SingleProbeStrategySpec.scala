@@ -74,7 +74,7 @@ class SingleProbeStrategySpec extends Specification {
       val aoComp = new InstAltair <| {_.setMode(AltairParams.Mode.NGS)}
       val ctx = ObsContext.create(env, inst, new Some(Site.GN), SPSiteQuality.Conditions.BEST, null, aoComp, JNone.instance())
 
-      val selection = Await.result(strategy.select(ctx, magTable), 10.seconds)
+      val selection = Await.result(strategy.select(ctx, magTable)(implicitly), 10.seconds)
 
       verifyGuideStarSelection(strategy, ctx, selection, "553-036128", AltairAowfsGuider.instance)
     }
@@ -90,7 +90,7 @@ class SingleProbeStrategySpec extends Specification {
       val aoComp = new InstAltair <| {_.setMode(AltairParams.Mode.LGS)}
       val ctx = ObsContext.create(env, inst, new Some(Site.GN), SPSiteQuality.Conditions.NOMINAL.sb(SPSiteQuality.SkyBackground.ANY), null, aoComp, JNone.instance())
 
-      val selection = Await.result(strategy.select(ctx, magTable), 10.seconds)
+      val selection = Await.result(strategy.select(ctx, magTable)(implicitly), 10.seconds)
 
       verifyGuideStarSelection(strategy, ctx, selection, "344-198748", AltairAowfsGuider.instance)
     }
@@ -108,7 +108,7 @@ class SingleProbeStrategySpec extends Specification {
       val conditions = SPSiteQuality.Conditions.NOMINAL.sb(SPSiteQuality.SkyBackground.ANY).cc(SPSiteQuality.CloudCover.PERCENT_80).iq(SPSiteQuality.ImageQuality.PERCENT_85)
       val ctx = ObsContext.create(env, inst, new Some(Site.GN), conditions, null, null, JNone.instance())
 
-      val selection = Await.result(strategy.select(ctx, magTable), 10.seconds)
+      val selection = Await.result(strategy.select(ctx, magTable)(implicitly), 10.seconds)
 
       verifyGuideStarSelection(strategy, ctx, selection, "340-000202", PwfsGuideProbe.pwfs1)
     }
@@ -126,7 +126,7 @@ class SingleProbeStrategySpec extends Specification {
       val conditions = SPSiteQuality.Conditions.NOMINAL.sb(SPSiteQuality.SkyBackground.ANY).cc(SPSiteQuality.CloudCover.PERCENT_80).iq(SPSiteQuality.ImageQuality.PERCENT_85)
       val ctx = ObsContext.create(env, inst, new Some(Site.GN), conditions, null, null, JNone.instance())
 
-      val selection = Await.result(strategy.select(ctx, magTable), 10.seconds)
+      val selection = Await.result(strategy.select(ctx, magTable)(implicitly), 10.seconds)
 
       verifyGuideStarSelection(strategy, ctx, selection, "458-000297", PwfsGuideProbe.pwfs2)
     }
@@ -144,7 +144,7 @@ class SingleProbeStrategySpec extends Specification {
       val conditions = SPSiteQuality.Conditions.NOMINAL.sb(SPSiteQuality.SkyBackground.ANY)
       val ctx = ObsContext.create(env, inst, new Some(Site.GN), conditions, null, null, JNone.instance())
 
-      val selection = Await.result(strategy.select(ctx, magTable), 10.seconds)
+      val selection = Await.result(strategy.select(ctx, magTable)(implicitly), 10.seconds)
 
       verifyGuideStarSelection(strategy, ctx, selection, "288-000438", GmosOiwfsGuideProbe.instance)
     }
@@ -173,7 +173,7 @@ class SingleProbeStrategySpec extends Specification {
       val strategy   = SingleProbeStrategy(GmosNorthOiwfsKey, SingleProbeStrategyParams.GmosOiwfsParams(Site.GN), voTable)
       val conditions = SPSiteQuality.Conditions.NOMINAL
       val ctx        = ObsContext.create(env, inst, new Some(Site.GN), conditions, os.asJava, null, JNone.instance())
-      val selection  = Await.result(strategy.select(ctx, magTable), 10.seconds)
+      val selection  = Await.result(strategy.select(ctx, magTable)(implicitly), 10.seconds)
       verifyGuideStarSelection(strategy, ctx, selection, "Biff", GmosOiwfsGuideProbe.instance, PossibleIqDegradation)
     }
     "when there is equal vignetting at a given pos angle, pick the brightest option" in {
@@ -201,7 +201,7 @@ class SingleProbeStrategySpec extends Specification {
       val strategy   = SingleProbeStrategy(GmosNorthOiwfsKey, SingleProbeStrategyParams.GmosOiwfsParams(Site.GN), voTable)
       val conditions = SPSiteQuality.Conditions.NOMINAL
       val ctx        = ObsContext.create(env, inst, new Some(Site.GN), conditions, os.asJava, null, JNone.instance())
-      val selection  = Await.result(strategy.select(ctx, magTable), 10.seconds)
+      val selection  = Await.result(strategy.select(ctx, magTable)(implicitly), 10.seconds)
       verifyGuideStarSelection(strategy, ctx, selection, "Biff Bright", GmosOiwfsGuideProbe.instance)
     }
     "when there is equal vignetting at a multiple pos angles, pick the brightest option" in {
@@ -233,7 +233,7 @@ class SingleProbeStrategySpec extends Specification {
       val strategy   = SingleProbeStrategy(GmosNorthOiwfsKey, SingleProbeStrategyParams.GmosOiwfsParams(Site.GN), voTable)
       val conditions = SPSiteQuality.Conditions.NOMINAL
       val ctx        = ObsContext.create(env, inst, new Some(Site.GN), conditions, os.asJava, null, JNone.instance())
-      val selection  = Await.result(strategy.select(ctx, magTable), 10.seconds)
+      val selection  = Await.result(strategy.select(ctx, magTable)(implicitly), 10.seconds)
       verifyGuideStarSelection(strategy, ctx, selection, "Biff Flip Bright", GmosOiwfsGuideProbe.instance)
     }
     "find a guide star for GMOS-N+PWFS2, OCSADV-255" in {
@@ -250,7 +250,7 @@ class SingleProbeStrategySpec extends Specification {
       val conditions = SPSiteQuality.Conditions.WORST
       val ctx = ObsContext.create(env, inst, new Some(Site.GN), conditions, null, null, JNone.instance())
 
-      val selection = Await.result(strategy.select(ctx, magTable), 10.seconds)
+      val selection = Await.result(strategy.select(ctx, magTable)(implicitly), 10.seconds)
 
       verifyGuideStarSelection(strategy, ctx, selection, "560-017530", PwfsGuideProbe.pwfs2)
     }
@@ -268,7 +268,7 @@ class SingleProbeStrategySpec extends Specification {
       val conditions = SPSiteQuality.Conditions.WORST
       val ctx = ObsContext.create(env, inst, new Some(Site.GS), conditions, null, null, JNone.instance())
 
-      val selection = Await.result(strategy.select(ctx, magTable), 10.seconds)
+      val selection = Await.result(strategy.select(ctx, magTable)(implicitly), 10.seconds)
 
       verifyGuideStarSelection(strategy, ctx, selection, "105-014127", Flamingos2OiwfsGuideProbe.instance)
     }
@@ -286,7 +286,7 @@ class SingleProbeStrategySpec extends Specification {
       val conditions = SPSiteQuality.Conditions.WORST.cc(SPSiteQuality.CloudCover.PERCENT_70)
       val ctx = ObsContext.create(env, inst, new Some(Site.GS), conditions, null, null, JNone.instance())
 
-      val selection = Await.result(strategy.select(ctx, magTable), 10.seconds)
+      val selection = Await.result(strategy.select(ctx, magTable)(implicitly), 10.seconds)
 
       verifyGuideStarSelection(strategy, ctx, selection, "105-014476", PwfsGuideProbe.pwfs2)
     }
@@ -304,7 +304,7 @@ class SingleProbeStrategySpec extends Specification {
       val conditions = SPSiteQuality.Conditions.NOMINAL.sb(SPSiteQuality.SkyBackground.ANY)
       val ctx = ObsContext.create(env, inst, new Some(Site.GS), conditions, null, null, JNone.instance())
 
-      val selection = Await.result(strategy.select(ctx, magTable), 10.seconds)
+      val selection = Await.result(strategy.select(ctx, magTable)(implicitly), 10.seconds)
 
       // 138-005574 is slightly brighter but vignettes a bit more
       verifyGuideStarSelection(strategy, ctx, selection, "138-005571", GmosOiwfsGuideProbe.instance)
@@ -323,7 +323,7 @@ class SingleProbeStrategySpec extends Specification {
       val conditions = SPSiteQuality.Conditions.NOMINAL.sb(SPSiteQuality.SkyBackground.ANY)
       val ctx = ObsContext.create(env, inst, new Some(Site.GS), conditions, null, null, JNone.instance())
 
-      val selection = Await.result(strategy.select(ctx, magTable), 10.seconds)
+      val selection = Await.result(strategy.select(ctx, magTable)(implicitly), 10.seconds)
 
       verifyGuideStarSelection(strategy, ctx, selection, "302-000084", PwfsGuideProbe.pwfs2)
     }
@@ -341,7 +341,7 @@ class SingleProbeStrategySpec extends Specification {
       val conditions = SPSiteQuality.Conditions.NOMINAL.cc(SPSiteQuality.CloudCover.PERCENT_70).sb(SPSiteQuality.SkyBackground.ANY)
       val ctx = ObsContext.create(env, inst, new Some(Site.GN), conditions, null, null, JNone.instance())
 
-      val selection = Await.result(strategy.select(ctx, magTable), 10.seconds)
+      val selection = Await.result(strategy.select(ctx, magTable)(implicitly), 10.seconds)
 
       verifyGuideStarSelection(strategy, ctx, selection, "571-008701", PwfsGuideProbe.pwfs2)
     }
@@ -359,7 +359,7 @@ class SingleProbeStrategySpec extends Specification {
       val conditions = SPSiteQuality.Conditions.NOMINAL.cc(SPSiteQuality.CloudCover.PERCENT_70).sb(SPSiteQuality.SkyBackground.ANY)
       val ctx = ObsContext.create(env, inst, new Some(Site.GN), conditions, null, null, JNone.instance())
 
-      val selection = Await.result(strategy.select(ctx, magTable), 10.seconds)
+      val selection = Await.result(strategy.select(ctx, magTable)(implicitly), 10.seconds)
 
       verifyGuideStarSelection(strategy, ctx, selection, "424-010170", PwfsGuideProbe.pwfs2)
     }
@@ -377,11 +377,11 @@ class SingleProbeStrategySpec extends Specification {
       val conditions = SPSiteQuality.Conditions.WORST
       val ctx = ObsContext.create(env, inst, new Some(Site.GS), conditions, null, null, JNone.instance())
 
-      val estimate = Await.result(strategy.estimate(ctx, magTable), 10.seconds)
+      val estimate = Await.result(strategy.estimate(ctx, magTable)(implicitly), 10.seconds)
 
       estimate should beEqualTo(Estimate.CompleteFailure)
 
-      val selection = Await.result(strategy.select(ctx, magTable), 10.seconds)
+      val selection = Await.result(strategy.select(ctx, magTable)(implicitly), 10.seconds)
       selection should beNone
     }
     "find a guide star for Phoenix with slightly better conditions, REL-2436" in {
@@ -398,11 +398,11 @@ class SingleProbeStrategySpec extends Specification {
       val conditions = SPSiteQuality.Conditions.WORST.cc(SPSiteQuality.CloudCover.PERCENT_70).iq(SPSiteQuality.ImageQuality.PERCENT_85)
       val ctx = ObsContext.create(env, inst, new Some(Site.GS), conditions, null, null, JNone.instance())
 
-      val estimate = Await.result(strategy.estimate(ctx, magTable), 10.seconds)
+      val estimate = Await.result(strategy.estimate(ctx, magTable)(implicitly), 10.seconds)
 
       estimate should beEqualTo(Estimate.GuaranteedSuccess)
 
-      val selection = Await.result(strategy.select(ctx, magTable), 10.seconds)
+      val selection = Await.result(strategy.select(ctx, magTable)(implicitly), 10.seconds)
 
       verifyGuideStarSelection(strategy, ctx, selection, "195-006563", PwfsGuideProbe.pwfs2)
     }
@@ -420,11 +420,11 @@ class SingleProbeStrategySpec extends Specification {
       val conditions = SPSiteQuality.Conditions.WORST.cc(SPSiteQuality.CloudCover.PERCENT_70).iq(SPSiteQuality.ImageQuality.PERCENT_85)
       val ctx = ObsContext.create(env, inst, new Some(Site.GS), conditions, null, null, JNone.instance())
 
-      val estimate = Await.result(strategy.estimate(ctx, magTable), 10.seconds)
+      val estimate = Await.result(strategy.estimate(ctx, magTable)(implicitly), 10.seconds)
 
       estimate should beEqualTo(Estimate.CompleteFailure)
 
-      val selection = Await.result(strategy.select(ctx, magTable), 10.seconds)
+      val selection = Await.result(strategy.select(ctx, magTable)(implicitly), 10.seconds)
       selection should beNone
     }
     "find a guide star for Visitor even if the site is not defined, REL-2476" in {
@@ -441,11 +441,11 @@ class SingleProbeStrategySpec extends Specification {
       // Note, no site defined
       val ctx = ObsContext.create(env, inst, JNone.instance(), conditions, null, null, JNone.instance())
 
-      val estimate = Await.result(strategy.estimate(ctx, magTable), 10.seconds)
+      val estimate = Await.result(strategy.estimate(ctx, magTable)(implicitly), 10.seconds)
 
       estimate should beEqualTo(Estimate.GuaranteedSuccess)
 
-      val selection = Await.result(strategy.select(ctx, magTable), 10.seconds)
+      val selection = Await.result(strategy.select(ctx, magTable)(implicitly), 10.seconds)
 
       verifyGuideStarSelection(strategy, ctx.withSite(new Some(Site.GS)), selection, "195-006563", PwfsGuideProbe.pwfs2)
     }

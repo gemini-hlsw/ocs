@@ -12,6 +12,7 @@ import org.apache.commons.httpclient.methods.GetMethod
 
 import scala.annotation.tailrec
 import scala.concurrent.{ExecutionContext, Promise, Future}
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Failure, Success}
 import scala.math.min
 
@@ -20,7 +21,7 @@ import Scalaz._
 
 trait VoTableBackend {
   val catalogUrls: NonEmptyList[URL]
-  protected [votable] def doQuery(query: CatalogQuery, url: URL)(implicit ec: ExecutionContext): Future[QueryResult]
+  protected [votable] def doQuery(query: CatalogQuery, url: URL)(ec: ExecutionContext): Future[QueryResult]
 }
 
 trait CachedBackend extends VoTableBackend {
@@ -129,11 +130,12 @@ trait CachedBackend extends VoTableBackend {
   protected def query(e: SearchKey): QueryResult
 
   // Cache the query not the future so that failed queries are executed again
-  override protected [votable] def doQuery(query: CatalogQuery, url: URL)(implicit ec: ExecutionContext): Future[QueryResult] = Future {
+  override protected [votable] def doQuery(query: CatalogQuery, url: URL)(ec: ExecutionContext): Future[QueryResult] = Future {
+    Logger.getLogger(getClass.getName).info(s"Starting BAGS lookup on ${Thread.currentThread}")
     val qr = cachedQuery(SearchKey(query, url))
     // Filter on the cached query results
     qr.copy(query = query, result = qr.result.filter(query))
-  }
+  } (ec)
 
 }
 
@@ -210,7 +212,7 @@ case object SimbadNameBackend extends CachedBackend with RemoteCallBackend {
 case class CannedBackend(results: List[SiderealTarget]) extends VoTableBackend {
   // Needs some fake list of urls to hit
   override val catalogUrls = NonEmptyList(new URL("file:////"))
-  override protected[votable] def doQuery(query: CatalogQuery, url: URL)(implicit ec: ExecutionContext): Future[QueryResult] =
+  override protected[votable] def doQuery(query: CatalogQuery, url: URL)(ec: ExecutionContext): Future[QueryResult] =
     Future.successful {
       QueryResult(query, CatalogQueryResult(TargetsTable(results), Nil))
     }
@@ -218,7 +220,7 @@ case class CannedBackend(results: List[SiderealTarget]) extends VoTableBackend {
 
 trait VoTableClient {
   // First success or last failure
-  protected def selectOne[A](fs: NonEmptyList[Future[A]])(implicit ec: ExecutionContext): Future[A] = {
+  protected def selectOne[A](fs: NonEmptyList[Future[A]])(ec: ExecutionContext): Future[A] = {
     val p = Promise[A]()
     val n = new AtomicInteger(fs.size)
     fs.foreach { f =>
@@ -230,8 +232,8 @@ trait VoTableClient {
     p.future
   }
 
-  protected def doQuery(query: CatalogQuery, url: URL, backend: VoTableBackend)(implicit ec: ExecutionContext): Future[QueryResult] =
-    backend.doQuery(query, url)
+  protected def doQuery(query: CatalogQuery, url: URL, backend: VoTableBackend)(ec: ExecutionContext): Future[QueryResult] =
+    backend.doQuery(query, url)(ec)
 
 }
 
@@ -239,11 +241,11 @@ object VoTableClient extends VoTableClient {
   /**
    * Do a query for targets, it returns a list of targets and possible problems found
    */
-  def catalog(query: CatalogQuery, backend: VoTableBackend = ConeSearchBackend)(implicit ec: ExecutionContext): Future[QueryResult] = {
+  def catalog(query: CatalogQuery, backend: VoTableBackend = ConeSearchBackend)(ec: ExecutionContext): Future[QueryResult] = {
     val f = for {
       url <- backend.catalogUrls
-    } yield doQuery(query, url, backend)
-    selectOne(f).recover {
+    } yield doQuery(query, url, backend)(ec)
+    selectOne(f)(ec).recover {
        case t:UnknownHostException => QueryResult(query, CatalogQueryResult(TargetsTable.Zero, List(GenericError(s"Unreachable host ${t.getMessage}"))))
        case t                      => QueryResult(query, CatalogQueryResult(TargetsTable.Zero, List(GenericError(t.getMessage))))
     }
@@ -252,8 +254,8 @@ object VoTableClient extends VoTableClient {
   /**
    * Do multiple parallel queries, it returns a consolidated list of targets and possible problems found
    */
-  def catalogs(queries: List[CatalogQuery], backend: VoTableBackend = ConeSearchBackend)(implicit ec: ExecutionContext): Future[List[QueryResult]] = {
-    val r = queries.strengthR(backend).map(Function.tupled(catalog))
+  def catalogs(queries: List[CatalogQuery], backend: VoTableBackend = ConeSearchBackend)(ec: ExecutionContext): Future[List[QueryResult]] = {
+    val r = queries.strengthR(backend).map { case (a, b) => catalog(a, b)(ec) }
     Future.sequence(r)
   }
 

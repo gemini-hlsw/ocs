@@ -13,11 +13,11 @@ object AgsUtil {
       strategy <- AgsRegistrar.currentStrategy(ctx)
     } yield op(strategy, ctx)).getOrElse(Future.successful(default))
 
-  def lookupAndEstimate(obs: ISPObservation, mt: MagnitudeTable)(implicit ec: ExecutionContext): Future[AgsStrategy.Estimate] =
-    lookupAndThen(obs, AgsStrategy.Estimate.CompleteFailure)((s,c) => s.estimate(c, mt))
+  def lookupAndEstimate(obs: ISPObservation, mt: MagnitudeTable)(ec: ExecutionContext): Future[AgsStrategy.Estimate] =
+    lookupAndThen(obs, AgsStrategy.Estimate.CompleteFailure)((s,c) => s.estimate(c, mt)(ec))
 
-  def lookupAndSelect(obs: ISPObservation, mt: MagnitudeTable)(implicit ec: ExecutionContext): Future[Option[AgsStrategy.Selection]] =
-    lookupAndThen(obs, Option.empty[AgsStrategy.Selection])((s,c) => s.select(c, mt))
+  def lookupAndSelect(obs: ISPObservation, mt: MagnitudeTable)(ec: ExecutionContext): Future[Option[AgsStrategy.Selection]] =
+    lookupAndThen(obs, Option.empty[AgsStrategy.Selection])((s,c) => s.select(c, mt)(ec))
 
   def currentStrategy(obs: ISPObservation): Option[AgsStrategy] =
     ObsContext.create(obs).asScalaOpt.flatMap(AgsRegistrar.currentStrategy)
