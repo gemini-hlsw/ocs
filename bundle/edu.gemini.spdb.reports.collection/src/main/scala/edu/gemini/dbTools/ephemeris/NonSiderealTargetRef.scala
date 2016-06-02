@@ -8,12 +8,17 @@ import edu.gemini.spModel.target.env.TargetEnvironment
 import edu.gemini.spModel.target.obsComp.TargetObsComp
 import edu.gemini.spModel.util.SPTreeUtil
 
+import java.util.logging.{Level, Logger}
+
+import scalaz._
+
 /** A reference to an individual non-sidereal target reference. */
 case class NonSiderealTargetRef(oid: SPObservationID, hid: HorizonsDesignation, targetName: String)
 
 import scala.collection.JavaConverters._
 
 object NonSiderealTargetRef {
+  private val Log = Logger.getLogger(NonSiderealTargetRef.getClass.getName)
 
   /** Finds all scheduleable non-sidereal observations in the given program,
     * if any.  A scheduleable observation is one that could be included in a
@@ -33,9 +38,19 @@ object NonSiderealTargetRef {
   private def activeObservations(p: ISPProgram): List[ISPObservation] = {
     import ObservationStatus._
     p.getAllObservations.asScala.filter { obs =>
-      computeFor(obs) match {
-        case OBSERVED | INACTIVE => false
-        case _                   => true
+      \/.fromTryCatchNonFatal(computeFor(obs)) match {
+        case \/-(OBSERVED) | \/-(INACTIVE) =>
+          false
+
+        case -\/(t)                        =>
+          // Computing the observation status is error-prone with smart-gcal
+          // sequences. We'll conservatively assume that an observation is still
+          // of use if we can't figure out the observation status.
+          Log.log(Level.WARNING, s"Couldn't compute obs status for obs ${Option(obs.getObservationID).getOrElse(obs.getNodeKey)}", t)
+          true
+
+        case _                             =>
+          true
       }
     }.toList
   }

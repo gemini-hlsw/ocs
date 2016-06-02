@@ -1,8 +1,9 @@
 package edu.gemini.dbTools.ephemeris
 
 import edu.gemini.pot.sp.{ISPObservation, ISPProgram}
+import edu.gemini.spModel.config.IConfigBuilder
 import edu.gemini.spModel.core.{SiderealTarget, Target, NonSiderealTarget}
-import edu.gemini.spModel.obs.ObservationStatus
+import edu.gemini.spModel.obs.{ObsPhase2Status, SPObservation, ObservationStatus}
 import edu.gemini.spModel.obs.ObservationStatus.{INACTIVE, OBSERVED}
 import edu.gemini.spModel.target.env.TargetEnvironment
 import edu.gemini.spModel.target.obsComp.TargetObsComp
@@ -107,5 +108,31 @@ object NonSiderealTargetRefTest extends TestSupport {
         nsSize + inactiveCount == allSize
       }
     }
+
+    /* TODO: This works but fills the log with frightening stack traces because
+       TODO: we set it up to throw an exception.  Need a way to limit output.
+    "include observations for which we cannot compute the obs status" ! forAllPrograms { (odb, progs) =>
+      progs.forall { prog =>
+
+        // Figure out all the references w/o exceptions.
+        val refs0 = NonSiderealTargetRef.findRelevantIn(prog)
+
+        // Doctor all the observations to blow up when you compute the obs
+        // status.
+        prog.getAllObservations.asScala.foreach { obs =>
+          val sp = obs.getDataObject.asInstanceOf[SPObservation]
+          sp.setPhase2Status(ObsPhase2Status.PHASE_2_COMPLETE)
+          sp.setExecStatusOverride(edu.gemini.shared.util.immutable.ImOption.empty())
+          obs.setDataObject(sp)
+          obs.removeClientData(IConfigBuilder.USER_OBJ_KEY)
+        }
+
+        NonSiderealTargetRef.Log.setLevel(Level.WARNING)
+
+        // They should be the same
+        refs0 == refs1
+      }
+    }
+    */
   }
 }
