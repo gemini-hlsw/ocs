@@ -7,6 +7,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+//
+// Gemini Observatory/AURA
+// $Id: OlDefaultObservingLog.java,v 1.4 2005/12/11 15:54:15 gillies Exp $
+//
+
 public class OlDefaultObservingLog implements IObservingLog, Serializable {
 
     private List<IObservingLogSegment> _logSegments;
@@ -15,7 +20,7 @@ public class OlDefaultObservingLog implements IObservingLog, Serializable {
 
     private synchronized List<IObservingLogSegment> _getLogSegments() {
         if (_logSegments == null) {
-            _logSegments = new ArrayList<>();
+            _logSegments = new ArrayList<IObservingLogSegment>();
         }
         return _logSegments;
     }
@@ -26,12 +31,24 @@ public class OlDefaultObservingLog implements IObservingLog, Serializable {
     }
 
     public List<IObservingLogSegment> getLogSegments() {
-        return Collections.unmodifiableList(new ArrayList<>(_getLogSegments()));
+        return Collections.unmodifiableList(new ArrayList<IObservingLogSegment>(_getLogSegments()));
+    }
+
+    public void setLogSegments(List<IObservingLogSegment> segments) {
+        if (segments == null) segments = new ArrayList<IObservingLogSegment>();
+        _logSegments = segments;
     }
 
     public void addLogSegment(IObservingLogSegment segment) {
         List<IObservingLogSegment> logSegments = _getLogSegments();
         logSegments.add(segment);
+    }
+
+    public IObservingLogSegment getLogSegment(int segmentIndex) {
+        if (segmentIndex < getLogSegmentCount()) {
+            return getLogSegments().get(segmentIndex);
+        }
+        return null;
     }
 
     /**
@@ -61,9 +78,9 @@ public class OlDefaultObservingLog implements IObservingLog, Serializable {
     }
 
     public void dump() {
-        List<IObservingLogSegment> segs = getLogSegments();
+        List segs = getLogSegments();
         for (int i = 0; i < getLogSegmentCount(); i++) {
-            segs.get(i).dump();
+            ((IObservingLogSegment) segs.get(i)).dump();
         }
     }
 }

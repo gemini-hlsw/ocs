@@ -39,8 +39,9 @@ public class GsaoiLogSegment extends InstrumentLogSegment {
     */
 
     // must match ObsLogConfig.xml
-    private static final String FILTER_KEY    = "filter";
-    private static final String READ_MODE_KEY = "readMode";
+    public static final String FILTER_KEY    = "filter";
+    public static final String READ_MODE_KEY = "readMode";
+    public static final String COADDS_KEY    = "coadds";
 
     public GsaoiLogSegment(List<OlLogItem> logItems, OlLogOptions obsLogOptions) {
         super(SEG_TYPE, logItems, obsLogOptions);
@@ -58,7 +59,7 @@ public class GsaoiLogSegment extends InstrumentLogSegment {
         decorateVal(map, READ_MODE_KEY, Gsaoi.ReadMode.class);
     }
 
-    private void decorateVal(ConfigMap map, String key, Class<?> c) {
+    private void decorateVal(ConfigMap map, String key, Class c) {
         if (map == null) return;
 
         String strValue = map.sget(key);

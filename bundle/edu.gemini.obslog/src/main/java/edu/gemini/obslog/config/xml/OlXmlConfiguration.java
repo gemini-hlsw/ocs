@@ -12,13 +12,19 @@ import org.dom4j.Node;
 import org.dom4j.io.SAXReader;
 
 import java.net.URL;
+import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
+
+//
+// Gemini Observatory/AURA
+// $Id: OlXmlConfiguration.java,v 1.3 2005/03/17 06:04:33 gillies Exp $
+//
 
 public final class OlXmlConfiguration {
     public static final Logger LOG = Logger.getLogger(OlXmlConfiguration.class.getName());
 
-    private static String _CONFIG_FILE;
+    static public String _CONFIG_FILE;
 
     public OlXmlConfiguration(String configFile) throws NullPointerException {
         if (configFile == null) throw new NullPointerException();
@@ -44,8 +50,9 @@ public final class OlXmlConfiguration {
 
     /**
      * Build a configuration from the XML file.
+     *
+     * @param d
      */
-    @SuppressWarnings("unchecked")
     private OlConfiguration _buildModel(Document d) throws OlModelException {
         Node versionNode = d.selectSingleNode("//obslog/@version");
         if (versionNode == null) throw new NullPointerException("No obslog version attribute.");
@@ -55,10 +62,12 @@ public final class OlXmlConfiguration {
         OlConfiguration config = new OlBasicConfiguration(version);
 
         // Get the entryGroups and foreach add the entries
-        List<Element> list = d.selectNodes("/configuration/entry");
+        List list = d.selectNodes("/configuration/entry");
         if (list == null) throw new NullPointerException();
 
-        for (Element node : list) {
+        for (Iterator iter = list.iterator(); iter.hasNext();) {
+
+            Element node = (Element) iter.next();
             String entryKey = node.attribute("key").getStringValue();
             LOG.fine("EntryKey: " + entryKey);
             String isVisible = node.attributeValue("visible");
@@ -71,18 +80,22 @@ public final class OlXmlConfiguration {
             String sequenceName = node.elementText("sequenceName");
             logItem.setSequenceName(sequenceName);
             // Set to true unless present and false
-            logItem.setVisible(isVisible == null || Boolean.getBoolean(isVisible));
+            logItem.setVisible(isVisible != null ? Boolean.getBoolean(isVisible) : true);
         }
 
         // Now add the instruments
-        List<Element> logEntries = d.selectNodes("//logEntry");
-        for (Element node : logEntries) {
+        List logEntries = d.selectNodes("//logEntry");
+        for (Iterator iter = logEntries.iterator(); iter.hasNext();) {
+            Element node = (Element) iter.next();
+
             String logKey = node.attribute("key").getStringValue();
             LOG.fine("logEntry key: " + logKey);
 
 
-            List<Element> glist = node.selectNodes("entry");
-            for (Element gnode: glist) {
+            List glist = node.selectNodes("entry");
+            for (Iterator giter = glist.iterator(); giter.hasNext();) {
+                Element gnode = (Element) giter.next();
+
                 String entryKey = gnode.attribute("key").getStringValue();
                 LOG.fine("Entry name: " + entryKey);
 

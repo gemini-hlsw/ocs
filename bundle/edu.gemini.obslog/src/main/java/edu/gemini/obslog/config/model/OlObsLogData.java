@@ -5,18 +5,27 @@ import edu.gemini.obslog.core.OlSegmentType;
 import java.util.Iterator;
 import java.util.List;
 
+//
+// Gemini Observatory/AURA
+// $Id: OlObsLogData.java,v 1.2 2005/12/11 15:54:15 gillies Exp $
+//
+
 public interface OlObsLogData {
 
-    String getKey();
+    public String getKey();
 
-    OlSegmentType getType();
+    public OlSegmentType getType();
 
-    OlLogItem addLogItem(String key) throws OlModelException;
+    public OlLogItem addLogItem(String key) throws OlModelException;
 
-    Iterator<OlLogItem> iterator();
+    public OlLogItem getLogItem(String key);
 
-    List<OlLogItem> getLogTableData();
+    public Iterator iterator();
 
-    int getSize();
+    public OlLogItem getBySequenceName(String sequenceKey);
+
+    public List<OlLogItem> getLogTableData();
+
+    public int getSize();
 }
 

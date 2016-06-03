@@ -8,29 +8,30 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import java.util.logging.Logger;
 
-class DatabaseTracker extends ServiceTracker<IDBDatabaseService, IDBDatabaseService> {
+public class DatabaseTracker extends ServiceTracker {
 
-    private static final Logger LOGGER = Logger.getLogger(DatabaseTracker.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(DatabaseTracker.class.getName());
 
-    DatabaseTracker(BundleContext context) {
-        super(context, IDBDatabaseService.class.getName(), null);
-    }
+	public DatabaseTracker(BundleContext context) {
+		super(context, IDBDatabaseService.class.getName(), null);
+	}
 
-    @Override
-    public IDBDatabaseService addingService(ServiceReference<IDBDatabaseService> ref) {
-        IDBDatabaseService db = context.getService(ref);
-        SPDB.init(db);
-        LOGGER.info("Adding " + db.getUuid());
-        return db;
+	@Override
+	public Object addingService(ServiceReference ref) {
+		IDBDatabaseService db = (IDBDatabaseService) context.getService(ref);
+		SPDB.init(db);
+		LOGGER.info("Adding " + db.getUuid());
+		return db;
 
-    }
+	}
 
-    @Override
-    public void removedService(ServiceReference<IDBDatabaseService> ref, IDBDatabaseService db) {
+	@Override
+	public void removedService(ServiceReference ref, Object service) {
+		IDBDatabaseService db = (IDBDatabaseService) service;
         LOGGER.info("Removing " + db.getUuid());
         SPDB.clear();
-        context.ungetService(ref);
-    }
+		context.ungetService(ref);
+	}
 
 }
 
