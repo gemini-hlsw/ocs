@@ -72,11 +72,11 @@ public class PlotViewer extends GViewer<Variant, Alloc> {
     }
 
     @Override
-    protected Runnable getSelectionTask(final GSelection<Alloc> newSelection) {
+    protected Runnable getSelectionTask(final GSelection<?> newSelection) {
         return () -> {
             // Translator will guarantee that the cast works.
-            getControl().setSelection(newSelection);
-            setPulledSelection(newSelection);
+            getControl().setSelection((GSelection<Alloc>) newSelection);
+            setPulledSelection((GSelection<Alloc>) newSelection);
         };
     }
 

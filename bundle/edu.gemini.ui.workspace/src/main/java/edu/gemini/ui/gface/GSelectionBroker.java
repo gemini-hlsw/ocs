@@ -8,5 +8,5 @@ public interface GSelectionBroker<E> extends PropertyChangeSource {
 
     GSelection<E> getSelection();
 
-    void setSelection(GSelection<E> newSelection);
+    void setSelection(GSelection<?> newSelection);
 }

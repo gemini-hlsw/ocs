@@ -83,15 +83,15 @@ public class GTreeViewer<M, E> extends GViewer<M, E> implements TreeSelectionLis
 
     private class SetSelectionTask implements Runnable {
 
-        private final Set<E> set = new HashSet<>();
+        private final Set<Object> set = new HashSet<>();
 
-        public SetSelectionTask(final GSelection<E> newSelection) {
+        public SetSelectionTask(final GSelection<?> newSelection) {
 
             // Only select the first item if we're in single selection mode.
             boolean single = tree.getSelectionModel().getSelectionMode() ==
                 TreeSelectionModel.SINGLE_TREE_SELECTION;
 
-            for (E o: newSelection) {
+            for (Object o: newSelection) {
                 set.add(o);
                 if (single) break;
             }
@@ -102,7 +102,7 @@ public class GTreeViewer<M, E> extends GViewer<M, E> implements TreeSelectionLis
             pushingSelection = true;
             TreeSelectionModel tsm = tree.getSelectionModel();
             tsm.clearSelection();
-            for (E o: set) {
+            for (Object o: set) {
                 TreePath path = pathMap.get(o);
                 if (path != null) {
                     tsm.addSelectionPath(path);
@@ -229,7 +229,7 @@ public class GTreeViewer<M, E> extends GViewer<M, E> implements TreeSelectionLis
     };
 
     @Override
-    protected Runnable getSelectionTask(GSelection<E> newSelection) {
+    protected Runnable getSelectionTask(GSelection<?> newSelection) {
         return new SetSelectionTask(newSelection);
     }
 

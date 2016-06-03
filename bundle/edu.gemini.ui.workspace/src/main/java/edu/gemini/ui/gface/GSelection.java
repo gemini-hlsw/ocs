@@ -149,9 +149,9 @@ public final class GSelection<E> implements Iterable<E>, Transferable {
         return new GSelection<>(accum.toArray((E[]) Array.newInstance(store.getClass().getComponentType(), accum.size())));
     }
 
-    public <M> GSelection<E> translate(GTranslator<M, E> translator) {
+    public <M> GSelection<E> translate(GTranslator<?, ?> translator) {
         if (translator == null) return this;
-        ArrayList<E> ret = new ArrayList<>();
+        ArrayList ret = new ArrayList<>();
         for (E e: store) {
             ret.addAll(translator.translate(e));
         }
