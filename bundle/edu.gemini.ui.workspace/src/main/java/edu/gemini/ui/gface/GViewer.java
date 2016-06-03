@@ -70,14 +70,14 @@ public abstract class GViewer<M, E> implements GSelectionBroker<E> {
     }
 
 
-    private GSelection<E> selection = GSelection.emptySelection();
+    private GSelection selection = GSelection.emptySelection();
 
     public final GSelection<E> getSelection() {
         return selection;
     }
 
 	@Override
-    public final void setSelection(GSelection<E> newSelection) {
+    public final void setSelection(GSelection<?> newSelection) {
         assert newSelection != null;
         newSelection = newSelection.translate(getTranslator());
         if (interloper != null) interloper.beforeSetSelection(newSelection);
@@ -95,11 +95,11 @@ public abstract class GViewer<M, E> implements GSelectionBroker<E> {
      * Returns a Runnable that will set the specified selection. This runnable will be executed
      * on the Swing thread.
      */
-    protected abstract Runnable getSelectionTask(GSelection<E> newSelection);
+    protected abstract Runnable getSelectionTask(GSelection<?> newSelection);
 
 
-    protected void setPulledSelection(GSelection<E> newSelection) {
-        GSelection<E> previous = selection;
+    protected void setPulledSelection(GSelection<?> newSelection) {
+        GSelection<?> previous = selection;
         selection = newSelection;
         pcs.firePropertyChange(PROP_SELECTION, previous, selection);
     }

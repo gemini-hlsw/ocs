@@ -19,7 +19,7 @@ public class HistoViewer extends GViewer<Schedule, Variant> {
     }
 
     @Override
-    protected Runnable getSelectionTask(GSelection<Variant> newSelection) {
+    protected Runnable getSelectionTask(GSelection<?> newSelection) {
         return null;
     }
 

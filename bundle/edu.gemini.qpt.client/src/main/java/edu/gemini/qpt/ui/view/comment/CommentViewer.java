@@ -20,9 +20,9 @@ public class CommentViewer extends GViewer<Commentable, Commentable> {
     }
 
     @Override
-    protected Runnable getSelectionTask(GSelection<Commentable> newSelection) {
-        Commentable sel = newSelection.size() == 1 ? newSelection.first() : null;
-        return new SelectionTask(sel != null ? sel : null);
+    protected Runnable getSelectionTask(GSelection<?> newSelection) {
+        Object sel = newSelection.size() == 1 ? newSelection.first() : null;
+        return new SelectionTask(sel instanceof Commentable ? (Commentable) sel : null);
     }
 
     @Override

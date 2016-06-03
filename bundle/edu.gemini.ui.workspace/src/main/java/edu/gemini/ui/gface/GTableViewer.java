@@ -188,10 +188,10 @@ public class GTableViewer<M, E, S> extends GViewer<M, E> {
 
     private class SetSelectionTask implements Runnable {
 
-        private final Set<E> set = new HashSet<>();
+        private final Set<Object> set = new HashSet<>();
 
-        public SetSelectionTask(final GSelection<E> newSelection) {
-            for (E o : newSelection)
+        public SetSelectionTask(final GSelection<?> newSelection) {
+            for (Object o : newSelection)
                 set.add(o);
         }
 
@@ -340,7 +340,7 @@ public class GTableViewer<M, E, S> extends GViewer<M, E> {
     }
 
     @Override
-    protected Runnable getSelectionTask(GSelection<E> newSelection) {
+    protected Runnable getSelectionTask(GSelection<?> newSelection) {
         return new SetSelectionTask(newSelection);
     }
 

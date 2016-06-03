@@ -65,7 +65,7 @@ public class SelectionHub<E> implements GSelectionBroker<E> {
     };
 
     @Override
-    public synchronized void setSelection(GSelection<E> newSelection) {
+    public synchronized void setSelection(GSelection<?> newSelection) {
         broadcasting = true;
         LOGGER.fine("External actor: selection set: + " + newSelection);
         for (GSelectionBroker<E> b: brokers)
