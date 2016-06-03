@@ -54,7 +54,8 @@ object PersistentVcsLog2Spec extends Specification {
     } yield ()
 
   // A query to count some rows, for checking archive fidelity
-  val count = sql"select count(*) from event".query[Int].unique
+  val count: ConnectionIO[Int] =
+    sql"select count(*) from event".query[Int].unique
 
   // unzip a file and return output directory
   def unzip(zip: File): ConnectionIO[File] =
