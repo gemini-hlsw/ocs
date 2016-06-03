@@ -21,8 +21,8 @@ trait AgsClient {
    * Performs an asynchronous estimation request, providing the result to the
    * given callback function when available.
    */
-  def estimate(obs: Observation, time: Long)(callback: Callback)(implicit ec: ExecutionContext) {
-    Future.apply { callback(estimateNow(obs, time)) }
+  def estimate(obs: Observation, time: Long)(callback: Callback)(ec: ExecutionContext) {
+    Future.apply { callback(estimateNow(obs, time)) }(ec)
   }
 
   /**

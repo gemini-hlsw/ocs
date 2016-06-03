@@ -45,7 +45,7 @@ class GemsVoTableCatalogSpec extends Specification {
       val posAngles = new java.util.HashSet[Angle]()
       val options = new GemsGuideStarSearchOptions(instrument, tipTiltMode, posAngles)
 
-      val results = Await.result(GemsVoTableCatalog(TestVoTableBackend("/gemsvotablecatalogquery.xml")).search(ctx, base, options, scala.None), 30.seconds)
+      val results = Await.result(GemsVoTableCatalog(TestVoTableBackend("/gemsvotablecatalogquery.xml")).search(ctx, base, options, scala.None)(implicitly), 30.seconds)
       results should be size 2
 
       results.head.criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, GsaoiOdgw.Group.instance), CatalogSearchCriterion("On-detector Guide Window tiptilt", RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), MagnitudeConstraints(SingleBand(MagnitudeBand.H), FaintnessConstraint(14.5), Some(SaturationConstraint(7.3))), Some(Offset(0.0014984027777700248.degrees[OffsetP], 0.0014984027777700248.degrees[OffsetQ])), scala.None)))

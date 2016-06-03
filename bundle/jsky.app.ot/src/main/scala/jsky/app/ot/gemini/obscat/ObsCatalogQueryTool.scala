@@ -167,7 +167,7 @@ final class ObsCatalogQueryTool(catalog: Catalog) {
               model.setSelectedItem(preset)
               this.peer.setModel(model)
               // Optimistically assume the save works ok
-              OTBrowserPresetsPersistence.saveAsync(presetsToSave(model))
+              OTBrowserPresetsPersistence.saveAsync(presetsToSave(model))(implicitly)
             }
             existingNames.find(_ == name).foreach { n =>
               DialogUtil.error(s"Name '$n' already in used")
@@ -181,7 +181,7 @@ final class ObsCatalogQueryTool(catalog: Catalog) {
             val model = new DefaultComboBoxModel[ObsQueryPreset]((existingElements.toList ::: (SaveNewPreset :: ~head)).toArray)
             existingElements.headOption.foreach(model.setSelectedItem)
             // Optimistically assume the save works ok
-            OTBrowserPresetsPersistence.saveAsync(presetsToSave(model))
+            OTBrowserPresetsPersistence.saveAsync(presetsToSave(model))(implicitly)
             this.peer.setModel(model)
           case SaveExistingPreset(preset) =>
             val updatedPreset = SavedPreset(queryPanel.selectionPreset(preset.name, remote.selected))
@@ -194,13 +194,13 @@ final class ObsCatalogQueryTool(catalog: Catalog) {
             this.peer.setModel(model)
             this.selection.item = updatedPreset
             // Save the updated preset
-            OTBrowserPresetsPersistence.saveAsync(presetsToSave(model))
+            OTBrowserPresetsPersistence.saveAsync(presetsToSave(model))(implicitly)
           case s @ SavedPreset(preset) =>
             // Update the model
             val previousModel = this.peer.getModel
             val existingElements = (0 until previousModel.getSize).map(previousModel.getElementAt).filter(_.hasSettings)
             val model = new DefaultComboBoxModel[ObsQueryPreset]((existingElements.toList ::: List(SaveNewPreset, SaveExistingPreset(s), DeletePreset(s))).toArray)
-            OTBrowserPresetsPersistence.saveAsync(presetsToSave(model))
+            OTBrowserPresetsPersistence.saveAsync(presetsToSave(model))(implicitly)
             this.peer.setModel(model)
             this.selection.item = s
             remote.selected = preset.includeRemote

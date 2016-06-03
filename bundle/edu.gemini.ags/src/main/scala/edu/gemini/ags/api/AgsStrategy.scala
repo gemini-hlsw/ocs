@@ -32,16 +32,16 @@ trait AgsStrategy {
     else analyze(ctx, mt, guideProbe, guideStar).asGeminiOpt
   }
 
-  def candidates(ctx: ObsContext, mt: MagnitudeTable)(implicit ec: ExecutionContext): Future[List[(GuideProbe, List[SiderealTarget])]]
+  def candidates(ctx: ObsContext, mt: MagnitudeTable)(ec: ExecutionContext): Future[List[(GuideProbe, List[SiderealTarget])]]
 
   /**
    * Returns a list of catalog queries that would be used to search for guide stars with the given context
    */
   def catalogQueries(ctx: ObsContext, mt: MagnitudeTable): List[CatalogQuery]
 
-  def estimate(ctx: ObsContext, mt: MagnitudeTable)(implicit ec: ExecutionContext): Future[AgsStrategy.Estimate]
+  def estimate(ctx: ObsContext, mt: MagnitudeTable)(ec: ExecutionContext): Future[AgsStrategy.Estimate]
 
-  def select(ctx: ObsContext, mt: MagnitudeTable)(implicit ec: ExecutionContext): Future[Option[AgsStrategy.Selection]]
+  def select(ctx: ObsContext, mt: MagnitudeTable)(ec: ExecutionContext): Future[Option[AgsStrategy.Selection]]
 
   def guideProbes: List[GuideProbe]
 

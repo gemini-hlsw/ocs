@@ -250,6 +250,18 @@ object BagsManager {
   })
   private implicit val executionContext = ExecutionContext.fromExecutor(worker)
 
+
+  // Worker pool running the blocking queries.
+  private val blockingWorker = new ScheduledThreadPoolExecutor(16, new ThreadFactory() {
+    override def newThread(r: Runnable): Thread = {
+      val t = new Thread(r, "BagsManager - Blocking Query Worker")
+      t.setPriority(Thread.NORM_PRIORITY - 2)
+      t.setDaemon(true)
+      t
+    }
+  })
+  val blockingExecutionContext = ExecutionContext.fromExecutor(blockingWorker)
+
   // This is our mutable state.  It is only read/written by the Swing thread.
   private var stateMap  = ==>>.empty[ProgKey, ObsKey ==>> BagsState]
 
@@ -394,10 +406,9 @@ object BagsManager {
   }
 
   private[ags] def triggerAgsAction(obs: ISPObservation, ctx: ObsContext, ags: AgsStrategy): IO[Unit] = IO {
-    Log.info(s"Performing BAGS lookup on thread=${Thread.currentThread.getId} for observation=${obs.getObservationID}.")
-
-    ags.select(ctx, OT.getMagnitudeTable).onComplete {
+    ags.select(ctx, OT.getMagnitudeTable)(blockingExecutionContext).onComplete {
       case Success(opt) =>
+        Log.info(s"Successful BAGS lookup for observation=${obs.getObservationID}; applying on ${Thread.currentThread}")
         BagsManager.success(obs, opt)
 
       case Failure(CatalogException((e: GenericError) :: _)) =>

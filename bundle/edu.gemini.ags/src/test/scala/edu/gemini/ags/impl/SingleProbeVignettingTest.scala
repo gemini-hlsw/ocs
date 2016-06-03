@@ -109,7 +109,7 @@ object SingleProbeVignettingTest extends Specification with ScalaCheck with Vign
         val (ctx, candidates) = env
 
         val strategy  = SingleProbeStrategy(GmosNorthOiwfsKey, SingleProbeStrategyParams.GmosOiwfsParams(Site.GN), CannedBackend(candidates))
-        val selection = Await.result(strategy.select(ctx, magTable), 10.seconds)
+        val selection = Await.result(strategy.select(ctx, magTable)(implicitly), 10.seconds)
 
         val analyzedCandidates = for {
           gs <- candidates

@@ -790,7 +790,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
     import scala.concurrent.ExecutionContext.Implicits.global
 
     GlassLabel.show(peer.getRootPane, message)
-    VoTableClient.catalog(query, backend).onComplete {
+    VoTableClient.catalog(query, backend)(global).onComplete {
       case scala.util.Failure(f)                           =>
         GlassLabel.hide(peer.getRootPane)
         errorLabel.show(s"Exception: ${f.getMessage}")

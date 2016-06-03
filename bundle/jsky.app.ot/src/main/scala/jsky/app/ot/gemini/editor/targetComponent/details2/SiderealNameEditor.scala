@@ -26,7 +26,7 @@ final class SiderealNameEditor(mags: MagnitudeEditor2) extends TelescopePosEdito
   private def forkSearch(): Unit = {
     val searchItem = name.getValue
     GlassLabel.show(SwingUtilities.getRootPane(name), "Searching...") // We are on the EDT
-    VoTableClient.catalog(CatalogQuery(searchItem), SimbadNameBackend).onComplete { case t =>
+    VoTableClient.catalog(CatalogQuery(searchItem), SimbadNameBackend)(implicitly).onComplete { case t =>
       Swing.onEDT {
         GlassLabel.hide(SwingUtilities.getRootPane(name))
         t.map(r => (r.result.problems, r.result.targets.rows.headOption)) match {
