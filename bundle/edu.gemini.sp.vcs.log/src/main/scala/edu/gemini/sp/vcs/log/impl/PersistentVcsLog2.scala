@@ -245,5 +245,9 @@ object PersistentVcsLog2 {
       where  CLASS = ${gp.clazz}
       and    NAME  = ${gp.getName}
     """.query[Id[GeminiPrincipal]].option
+
+  def doArchive(f: File): ConnectionIO[Unit] =
+    sql"""backup to ${f.getAbsolutePath}""".update.run.void
+
 }
 

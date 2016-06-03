@@ -59,7 +59,8 @@ object VcsLog {
       x <- checkSchema(p).transact(xa)
     } yield new VcsLog {     
 
-      def archive(f: File): Unit = ???
+      def archive(f: File): Unit =
+        doArchive(f).transact(xa).unsafePerformIO
 
       def log(op: VcsOp, pid: SPProgramID, principals: Set[GeminiPrincipal]): VcsEvent =
         doLog(op, new Timestamp(System.currentTimeMillis), pid, principals.toList).transact(xa).unsafePerformIO

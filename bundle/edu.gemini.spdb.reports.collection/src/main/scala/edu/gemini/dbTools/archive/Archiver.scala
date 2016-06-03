@@ -73,8 +73,7 @@ class Archiver(log: Logger, ks: KeyServer, vl: VcsLog, user: java.util.Set[Princ
       _ <- IO(log.info(s"exporting to $dir"))
       _ <- IO(new ExportXmlApp(SPDB.get, user).exportAll(dir))
       _ <- ks.backup(new File(dir, "keydb.zip")).run
-// REL-2824: removing this until it can be implemented
-//      _ <- IO(vl.archive(new File(dir, "vcsdb.zip")))
+      _ <- IO(vl.archive(new File(dir, "vcsdb.zip")))
     } yield ()
 
   def zip(dir: File): IO[File] =

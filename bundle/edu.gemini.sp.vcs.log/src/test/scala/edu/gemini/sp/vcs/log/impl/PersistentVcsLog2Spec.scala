@@ -10,6 +10,7 @@ import edu.gemini.spModel.core.Affiliate.CHILE
 import java.io.File
 import java.sql.Timestamp
 import java.util.TimeZone
+import scala.sys.process._
 
 object PersistentVcsLog2Spec extends Specification {
   import PersistentVcsLog2._
@@ -33,6 +34,12 @@ object PersistentVcsLog2Spec extends Specification {
     f.transact(xa).ensuring(sql"SHUTDOWN IMMEDIATELY".update.run.transact(xa).attempt).unsafePerformIO
   }
 
+  // Test with a persistent db
+  def go[A](db: File)(f: File => ConnectionIO[A]): A = {
+    val xa = DriverManagerTransactor[IO]("org.h2.Driver", s"jdbc:h2:file:${db.getAbsolutePath}")
+    f(db).transact(xa).ensuring(sql"SHUTDOWN IMMEDIATELY".update.run.transact(xa).attempt).unsafePerformIO
+  }
+
   // Read in the test database and offset the event timestamps to what they would be if they had
   // been read with a local timezone of PST, which is the timezone where the example data was
   // written. This ensures that the hardcoded values below match what's in the db.
@@ -45,6 +52,30 @@ object PersistentVcsLog2Spec extends Specification {
       _   <- sql"update event e set e.timestamp = timestampadd('MS', ${ loc - pst }, e.timestamp)".update.run
       _   <- checkSchema("«in memory»")
     } yield ()
+
+  // A query to count some rows, for checking archive fidelity
+  val count = sql"select count(*) from event".query[Int].unique
+
+  // unzip a file and return output directory
+  def unzip(zip: File): ConnectionIO[File] =
+    for {
+      d <- HC.delay(File.createTempFile("unzipped-", ".dir"))
+      _ <- HC.delay(d.delete) // will re-create as a dir
+      n <- HC.delay(Seq("unzip", zip.getAbsolutePath, "-d", d.getAbsolutePath).!)
+    } yield if (n == 0) d else sys.error("unzip failed!")
+
+  "checkArchive" should {
+    "write a readable archive file" in go(File.createTempFile("test-db-", ".sql")) { db =>
+      for {
+        _  <- initTestData
+        n1 <- count
+        f  <- FC.delay(File.createTempFile("test-archive-", ".zip"))
+        _  <- doArchive(f)
+        d  <- unzip(f).map(new File(_, db.getName))
+        n2 <- FC.delay(go(d)(_ => count))
+      } yield n1 == 2406 && n1 == n2
+    }
+  }
 
 //  "compatibility" should {
 //
