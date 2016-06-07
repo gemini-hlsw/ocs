@@ -68,7 +68,7 @@ object ProgramId {
     lazy val toSp: SPProgramID = SPProgramID.toProgramID(toString)
 
     override def toString: String =
-      s"${siteVal.abbreviation}-${ptypeVal.abbreviation}$year$month$day"
+      f"${siteVal.abbreviation}-${ptypeVal.abbreviation}$year%04d$month%02d$day%02d"
   }
 
   case class Arbitrary(site: Option[Site], semester: Option[Semester], ptype: Option[ProgramType], idString: String) extends ProgramId {
