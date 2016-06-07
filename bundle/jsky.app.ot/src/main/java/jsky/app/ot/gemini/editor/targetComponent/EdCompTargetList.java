@@ -104,7 +104,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
         _agsPub.subscribe((obs, oldOptions, newOptions) -> updateGuiding());
 
-        BagsManager.instance().addBagsStatusListener((key, oldStatus, newStatus) -> {
+        BagsManager.addBagsStatusListener((key, oldStatus, newStatus) -> {
             // Need to compare by reference here.
             if (key.equals(getContextObservation().getNodeKey()))
                 updateGuiding();
@@ -491,7 +491,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
         // Update the guiding feedback.
         final ISPObsComponent node = getContextTargetObsComp();
-        TargetSelection.getTargetForNode(env, node).foreach(target -> _w.detailEditor.guidingFeedbackEditor().edit(ctx, target, node));
+        TargetSelection.getTargetForNode(env, node).foreach(target -> _w.detailEditor.targetFeedbackEditor().edit(ctx, target, node));
     }
 
 
@@ -607,7 +607,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 final TargetEnvironment newEnv = result._1();
                 final IndexedGuideGroup igg    = result._2();
                 final SPTarget target          = new SPTarget();
-                addTargetToGroup(newEnv, igg, probe, target, obsComp, positionTable);
+                addTargetToGroup(newEnv, igg, probe, target, obsComp);
                 positionTable.selectTarget(target);
                 SwingUtilities.invokeLater(EdCompTargetList.this::showTargetTag);
             });
@@ -676,7 +676,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
      */
     static void addTargetToGroup(final TargetEnvironment env, final IndexedGuideGroup igg,
                                  final GuideProbe probe, final SPTarget target,
-                                 final TargetObsComp obsComp, final TelescopePosTableWidget positionTable) {
+                                 final TargetObsComp obsComp) {
         final Option<GuideProbeTargets> gptOpt = igg.group().get(probe);
         final int groupIndex                   = igg.index();
 
@@ -1076,7 +1076,7 @@ class GuidePositionType implements PositionType {
         resultOpt.foreach(tup -> {
             final TargetEnvironment envNew = tup._1();
             final IndexedGuideGroup igg    = tup._2();
-            EdCompTargetList.addTargetToGroup(envNew, igg, guider, target.clone(), obsComp, positionTable);
+            EdCompTargetList.addTargetToGroup(envNew, igg, guider, target.clone(), obsComp);
             positionTable.selectTarget(target);
         });
     }

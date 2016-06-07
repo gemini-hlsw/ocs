@@ -16,7 +16,7 @@ import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.env.TargetEnvironment
 import jsky.app.ot.ags.BagsState._
-import jsky.app.ot.ags.{BagsManager, BagsState}
+import jsky.app.ot.ags.{BagsManager, BagsState, BagsStatus}
 import jsky.app.ot.gemini.editor.targetComponent.TargetFeedback.Row
 import jsky.app.ot.util.OtColor._
 import jsky.app.ot.util.Resources
@@ -173,9 +173,11 @@ object TargetGuidingFeedback {
 
 
 object BagsFeedback {
+  import BagsStatus._
+
   private val spinner = Resources.getIcon("spinner16-transparent.png").some
 
-  case class BagsStateRow private (state: BagsState, bgColor: Color, message: String, iconOpt: Option[Icon]) extends Row {
+  sealed class BagsStatusRow(bgColor: Color, message: String, iconOpt: Option[Icon]) extends Row {
     object feedbackLabel extends Label {
       border = labelBorder
       foreground = Color.DARK_GRAY
@@ -192,19 +194,15 @@ object BagsFeedback {
     }
   }
 
-  // IdleState: nothing happens, no row is constructed.
-  case object ErrorStateRow extends BagsStateRow(ErrorState, LIGHT_SALMON, "An error has occurred when trying to run BAGS.", None)
-  case class PendingStateRow(pendingState: PendingState) extends BagsStateRow(pendingState, BANANA, "Waiting for BAGS to run...", spinner)
-  case class RunningStateRow(runningState: RunningState) extends BagsStateRow(runningState, BANANA, "BAGS is running...", spinner)
-  case class RunningEditedStateRow(runningEditedState: RunningEditedState) extends BagsStateRow(runningEditedState, BANANA, "BAGS is running...", spinner)
-  case class FailureStateRow(failureState: FailureState) extends BagsStateRow(failureState, LIGHT_SALMON, s"BAGS failed: ${failureState.why}", None)
+  case object ErrorStatusRow   extends BagsStatusRow(LIGHT_SALMON, "An error has occurred when trying to run BAGS.", None)
+  case object PendingStatusRow extends BagsStatusRow(BANANA, "Waiting for BAGS to run...", spinner)
+  case object RunningStatusRow extends BagsStatusRow(BANANA, "BAGS is running...", spinner)
+  case class  FailureStatusRow(why: String) extends BagsStatusRow(LIGHT_SALMON, s"BAGS failed: $why", None)
 
-  def toRow(state: BagsState): Option[Row] = state match {
-    case ErrorState                => ErrorStateRow.some
-    case s@PendingState(_,_)       => PendingStateRow(s).some
-    case s@RunningState(_,_)       => RunningStateRow(s).some
-    case s@RunningEditedState(_,_) => RunningEditedStateRow(s).some
-    case s@FailureState(_,_)       => FailureStateRow(s).some
-    case _                         => None
+  def toRow(state: BagsStatus): Row = state match {
+    case ErrorStatus        => ErrorStatusRow
+    case PendingStatus      => PendingStatusRow
+    case RunningStatus      => RunningStatusRow
+    case FailureStatus(why) => FailureStatusRow(why)
   }
 }

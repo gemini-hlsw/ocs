@@ -8,10 +8,10 @@ import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable._
 import edu.gemini.spModel.target.SPTarget
 import jsky.app.ot.OT
-import jsky.app.ot.ags.{BagsManager, ObsKey, ProgKey}
-import .BagsStatusRow
+import jsky.app.ot.ags.BagsManager
+import jsky.app.ot.gemini.editor.targetComponent.TargetFeedback.Row
 
-import scala.swing.GridBagPanel.{Constraints, Fill}
+import scala.swing.GridBagPanel.Fill
 import scala.swing.{GridBagPanel, Swing}
 
 
@@ -27,11 +27,10 @@ class TargetFeedbackEditor extends TelescopePosEditor {
       val bagsRow = for {
         n  <- Option(node)
         o  <- Option(n.getContextObservation)
-        pk <- Option(o.getProgram).map(_.getProgramKey).map(ProgKey.apply)
-        ok <- Option(o.getNodeKey).map(ObsKey.apply)
-        s  <- BagsManager.stateLookup(pk, ok)
-        if s.message.isDefined
-      } yield BagsStatusRow(s)
+        pk <- Option(o.getProgram).map(_.getProgramKey)
+        ok <- Option(o.getNodeKey)
+        s  <- BagsManager.statusLookup(pk, ok)
+      } yield BagsFeedback.toRow(s)
 
       // If the BAGS row is defined, then use it. If not, create the rows corresponding to the analysis.
       // NOTE that is target.isTooTarget, we don't want an analysis.
@@ -65,7 +64,6 @@ object TargetFeedbackEditor {
           insets  = new Insets(0, 0, 1, 0)
         }
       }
-
       revalidate()
     }
   }

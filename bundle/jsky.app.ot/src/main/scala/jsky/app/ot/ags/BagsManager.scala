@@ -1,16 +1,17 @@
 package jsky.app.ot.ags
 
-import jsky.app.ot.ags.BagsState.{IdleState, ErrorTransition, StateTransition}
-
+import jsky.app.ot.ags.BagsState.{ErrorTransition, IdleState, StateTransition}
 import java.beans.{PropertyChangeEvent, PropertyChangeListener}
 import java.time.Instant
 import java.util.concurrent.TimeoutException
 import java.util.concurrent._
 import java.util.logging.Logger
+import javax.swing.SwingUtilities
 
 import edu.gemini.ags.api.{AgsHash, AgsRegistrar, AgsStrategy}
 import edu.gemini.catalog.votable.{CatalogException, GenericError}
 import edu.gemini.pot.sp._
+import edu.gemini.shared.util.immutable.ImOption
 import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.spModel.obs.{ObsClassService, ObservationStatus}
 import edu.gemini.spModel.obs.context.ObsContext
@@ -32,8 +33,18 @@ import Scalaz._
 import scalaz.effect.IO
 import scalaz.effect.IO.ioUnit
 
+/** The status of BAGS for a given observation, for UI feedback purposes. */
+sealed class BagsStatus
+
+object BagsStatus {
+  case object ErrorStatus                extends BagsStatus
+  case object PendingStatus              extends BagsStatus
+  case object RunningStatus              extends BagsStatus
+  case class  FailureStatus(why: String) extends BagsStatus
+}
+
 /** The state of AGS lookup for a single observation. */
-sealed trait BagsState {
+sealed class BagsState(val status: Option[BagsStatus]) {
   /** Called when an observation is edited to determine what should be the new
     * state.  This is typically called in response to a listener on the
     * science program.
@@ -61,6 +72,7 @@ sealed trait BagsState {
 
 
 object BagsState {
+  import BagsStatus._
   type AgsHashVal      = Long
   type StateTransition = (BagsState, IO[Unit]) // Next BagsState, side-effects
   val ErrorTransition  = (ErrorState, ioUnit)  // Default transition for unexpected events
@@ -68,14 +80,14 @@ object BagsState {
   /** Error.  This state represents a logic error.  There are no transitions out
     * of the error state.
     */
-  case object ErrorState extends BagsState
+  case object ErrorState extends BagsState(ErrorStatus.some)
 
   /** Idle.  When idle, there are no pending or running AGS look-ups.  This is
     * where we hang out waiting for something to be edited in order to kick off
     * another AGS search.  We hang on to the last known AGS hash value so that
     * we can discard irrelevant edits if possible.
     */
-  case class IdleState(obs: ISPObservation, hash: Option[AgsHashVal]) extends BagsState {
+  case class IdleState(obs: ISPObservation, hash: Option[AgsHashVal]) extends BagsState(None) {
     override val edit: StateTransition =
       (PendingState(obs, hash), BagsManager.wakeUpAction(obs, 0))
   }
@@ -85,7 +97,7 @@ object BagsState {
     * the timer to go off, wake us up and then we'll decide whether to do an
     * AGS lookup, update the AGS hash code, etc.
     */
-  case class PendingState(obs: ISPObservation, hash: Option[AgsHashVal]) extends BagsState {
+  case class PendingState(obs: ISPObservation, hash: Option[AgsHashVal]) extends BagsState(PendingStatus.some) {
     override val edit: StateTransition =
       (this, ioUnit)
 
@@ -126,7 +138,7 @@ object BagsState {
     * since the search began since we will transition to RunningEditedState
     * if something is edited in the meantime.
     */
-  case class RunningState(obs: ISPObservation, hash: AgsHashVal) extends BagsState {
+  case class RunningState(obs: ISPObservation, hash: AgsHashVal) extends BagsState(RunningStatus.some) {
     // When edited while running, we continue running but remember we were
     // edited by moving to RunningEditedState.  When the results eventually
     // come back from the AGS lookup when in RunningEditedState, we store them
@@ -150,7 +162,7 @@ object BagsState {
     * observation that was subsequently edited.  Since it has been edited, the
     * results we're expecting may no longer be valid when they arrive.
     */
-  case class RunningEditedState(obs: ISPObservation, hash: AgsHashVal) extends BagsState {
+  case class RunningEditedState(obs: ISPObservation, hash: AgsHashVal) extends BagsState(RunningStatus.some) {
     // If we're edited again while running, just loop back.  Once the results of
     // the previous edit that got us into RunningState in the first place
     // finish, we'll switch to Pending and go again.
@@ -179,7 +191,7 @@ object BagsState {
     * transient state since a timer is expected to eventually go off and move
     * us back to pending to retry the search.
     */
-  case class FailureState(obs: ISPObservation, why: String) extends BagsState {
+  case class FailureState(obs: ISPObservation, why: String) extends BagsState(FailureStatus(why).some) {
     // If edited while in failed, we just loop back.  When the timer eventually
     // goes off we'll move to pending and redo the AGS lookup anyway.
     override val edit: StateTransition =
@@ -265,11 +277,35 @@ object BagsManager {
   // This is our mutable state.  It is only read/written by the Swing thread.
   private var stateMap  = ==>>.empty[ProgKey, ObsKey ==>> BagsState]
 
-  def stateLookup(k: ProgKey, o: ObsKey): Option[BagsState] =
+  def statusLookup(p: SPNodeKey, o: SPNodeKey): Option[BagsStatus] =
     for {
-      obsMap <- stateMap.lookup(k)
-      s      <- obsMap.lookup(o)
-    } yield s
+      obsMap <- stateMap.lookup(ProgKey(p))
+      s      <- obsMap.lookup(ObsKey(o))
+      st     <- s.status
+    } yield st
+
+  // Listeners for changes to the Bags Status.
+  // Management must be done on the Swing EDT.
+  private var listeners: List[BagsStatusListener] = Nil
+
+  def addBagsStatusListener(l: BagsStatusListener): Unit = {
+    if (SwingUtilities.isEventDispatchThread) {
+      if (!listeners.contains(l))
+        listeners = l :: listeners
+    }
+    else throw new IllegalStateException("BagsStatusListeners can only be added on the Swing EDT.")
+  }
+
+  def removeBagsStatusListener(l: BagsStatusListener): Unit = {
+    if (SwingUtilities.isEventDispatchThread) {
+      if (listeners.contains(l))
+        listeners = listeners.diff(List(l))
+    }
+    else throw new IllegalStateException("BagsStatusListeners can only be removed on the Swing EDT.")
+  }
+
+  private def fireBagsStatusChanged(k: SPNodeKey, oldStatus: Option[BagsStatus], newStatus: Option[BagsStatus]): Unit =
+    listeners.foreach(_.bagsStatusChanged(k, ImOption.fromScalaOpt(oldStatus), ImOption.fromScalaOpt(newStatus)))
 
   // Handle a state machine transition.  Note we switch to the Swing thread
   // here so that the calling thread continues immediately.  All updates are
@@ -311,7 +347,7 @@ object BagsManager {
         _ <- logTransition(state, newState)
         _ <- sideEffect
       } yield ()
-
+      fireBagsStatusChanged(obs.getNodeKey, state.status, newState.status)
       action.unsafePerformIO()
     }
   }

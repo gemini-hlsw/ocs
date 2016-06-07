@@ -5,7 +5,7 @@ import java.io._
 import java.nio.charset.Charset
 import javax.swing.BorderFactory._
 import javax.swing.border.Border
-import javax.swing.{JOptionPane, BorderFactory, UIManager, DefaultComboBoxModel}
+import javax.swing.{BorderFactory, DefaultComboBoxModel, JOptionPane, UIManager}
 
 import edu.gemini.ags.api.AgsMagnitude.MagnitudeTable
 import edu.gemini.ags.api.{AgsGuideQuality, AgsRegistrar}
@@ -16,7 +16,7 @@ import edu.gemini.catalog.votable._
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.pot.ModelConverters._
 import edu.gemini.shared.util.immutable.ScalaConverters._
-import edu.gemini.shared.gui.textComponent.{SelectOnFocus, TextRenderer, NumberField}
+import edu.gemini.shared.gui.textComponent.{NumberField, SelectOnFocus, TextRenderer}
 import edu.gemini.shared.gui.{ButtonFlattener, GlassLabel, SortableTable}
 import edu.gemini.spModel.core.SiderealTarget
 import edu.gemini.spModel.gemini.altair.AltairParams
@@ -26,9 +26,9 @@ import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.core._
 import edu.gemini.ui.miglayout.MigPanel
 import edu.gemini.ui.miglayout.constraints._
-import .ProbeLimits
 import jsky.app.ot.gemini.editor.targetComponent.GuidingIcon
-import jsky.app.ot.tpe.{TpeManager, TpeContext}
+import jsky.app.ot.gemini.editor.targetComponent.TargetGuidingFeedback.ProbeLimits
+import jsky.app.ot.tpe.{TpeContext, TpeManager}
 import jsky.app.ot.util.{OtColor, Resources}
 import jsky.catalog.gui.{SymbolSelectionEvent, SymbolSelectionListener}
 import jsky.util.gui.DialogUtil
@@ -38,7 +38,6 @@ import scala.swing._
 import scala.collection.mutable
 import scala.collection.JavaConverters._
 import scala.swing.event._
-
 import scalaz._
 import Scalaz._
 

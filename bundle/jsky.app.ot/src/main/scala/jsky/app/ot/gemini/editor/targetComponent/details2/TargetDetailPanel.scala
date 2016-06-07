@@ -1,6 +1,6 @@
 package jsky.app.ot.gemini.editor.targetComponent.details2
 
-import java.awt.{Insets, GridBagConstraints, GridBagLayout}
+import java.awt.{GridBagConstraints, GridBagLayout, Insets}
 import javax.swing.JPanel
 
 import edu.gemini.pot.sp.ISPNode
@@ -8,10 +8,9 @@ import edu.gemini.shared.util.immutable.{Option => GOption}
 import edu.gemini.shared.util.immutable.ScalaConverters.ScalaOptionOps
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
-import jsky.app.ot.gemini.editor.targetComponent.{TargetFeedbackEditor$, TelescopePosEditor}
+import jsky.app.ot.gemini.editor.targetComponent.{TargetFeedbackEditor, TargetFeedbackEditor$, TelescopePosEditor}
 
 import scala.collection.JavaConverters._
-
 import scalaz.syntax.id._
 
 final class TargetDetailPanel extends JPanel with TelescopePosEditor with ReentrancyHack {
@@ -35,8 +34,8 @@ final class TargetDetailPanel extends JPanel with TelescopePosEditor with Reentr
 
   def curDetailEditorJava: GOption[TargetDetailEditor] = curDetailEditor.asGeminiOpt
 
-  val source                = new SourceDetailsEditor
-  val guidingFeedbackEditor = new TargetFeedbackEditor
+  val source               = new SourceDetailsEditor
+  val targetFeedbackEditor = new TargetFeedbackEditor
 
   // Put it all together
   setLayout(new GridBagLayout)
@@ -48,7 +47,7 @@ final class TargetDetailPanel extends JPanel with TelescopePosEditor with Reentr
     c.weighty   = 1.0
     c.fill      = GridBagConstraints.BOTH
   })
-  add(guidingFeedbackEditor.getComponent, new GridBagConstraints() <| { c =>
+  add(targetFeedbackEditor.getComponent, new GridBagConstraints() <| { c =>
     c.gridx     = 0
     c.gridy     = 1
     c.weightx   = 1
@@ -77,7 +76,7 @@ final class TargetDetailPanel extends JPanel with TelescopePosEditor with Reentr
     // Forward the `edit` call.
     tpw.                  edit(obsContext, spTarget, node)
     tde.                  edit(obsContext, spTarget, node)
-    guidingFeedbackEditor.edit(obsContext, spTarget, node)
+    targetFeedbackEditor.edit(obsContext, spTarget, node)
     source.               edit(obsContext, spTarget, node)
 
   }
