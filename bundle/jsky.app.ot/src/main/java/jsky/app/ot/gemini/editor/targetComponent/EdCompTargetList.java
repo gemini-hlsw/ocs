@@ -10,8 +10,6 @@ import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.guide.GuideProbeUtil;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
-import edu.gemini.spModel.pio.ParamSet;
-import edu.gemini.spModel.pio.xml.PioXmlFactory;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.TelescopePosWatcher;
 import edu.gemini.spModel.target.env.*;
@@ -847,9 +845,8 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             targetOpt.foreach(target -> {
 
                 // Clone the target.
-                final ParamSet ps = target.getParamSet(new PioXmlFactory());
                 final SPTarget newTarget = new SPTarget();
-                newTarget.setParamSet(ps);
+                newTarget.setTarget(target.getTarget());
 
                 // Add it to the environment.  First we have to figure out what it is.
                 final TargetEnvironment env = dataObject.getTargetEnvironment();
