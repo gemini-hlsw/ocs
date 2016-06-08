@@ -1,5 +1,8 @@
 package edu.gemini.spModel.pio.codec
 
+import edu.gemini.spModel.core.Deflated
+import sun.misc.{BASE64Decoder, BASE64Encoder}
+
 import scalaz._, Scalaz._
 
 import edu.gemini.spModel.pio._
@@ -26,6 +29,17 @@ object ParamCodec {
       def encode(key: String, a: String): Param = pf.createParam(key) <| (_.setValue(a))
       def decode(p: Param): PioError \/ String = Option(p.getValue) \/> NullValue(p.getName)
     }
+
+  implicit val ByteArrayParamCodec: ParamCodec[Array[Byte]] =
+    StringParamCodec.xmap[Array[Byte]](
+      new BASE64Decoder().decodeBuffer,
+      new BASE64Encoder().encode
+    )
+
+  implicit def deflatedParamCodec[A]: ParamCodec[Deflated[A]] =
+    ByteArrayParamCodec.xmap[Deflated[A]](
+      Deflated.unsafeFromBytes[A], _.data
+    )
 
   implicit val DoubleParamCodec: ParamCodec[Double] =
     new ParamCodec[Double] {

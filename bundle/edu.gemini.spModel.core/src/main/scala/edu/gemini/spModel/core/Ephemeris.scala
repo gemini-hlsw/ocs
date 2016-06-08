@@ -2,7 +2,19 @@ package edu.gemini.spModel.core
 
 import scalaz._, Scalaz._
 
-final case class Ephemeris(site: Site, data: Long ==>> Coordinates) {
+final class Ephemeris(val site: Site, val compressedData: Deflated[List[(Long, Float, Float)]]) extends Serializable {
+
+  @transient lazy val data: Long ==>> Coordinates =
+    ==>>.fromList(compressedData.inflate.map { case (t, r, d) =>
+      t -> Coordinates.fromDegrees(r, d).getOrElse(sys.error(s"corrupted ephemeris data: $t $r $d"))
+    })
+
+  /** True if the ephemeris data is compressed (will be uncompressed by need). */
+  def isCompressed: Boolean = {
+    val f = getClass.getDeclaredField("data")
+    f.setAccessible(true)
+    f.get(this) == null
+  }
 
   /** Perform an exact or interpolated lookup. */
   def iLookup(k: Long): Option[Coordinates] =
@@ -44,6 +56,19 @@ final case class Ephemeris(site: Site, data: Long ==>> Coordinates) {
   def lookupClosestKey(k: Long): Option[Long] =
     data.lookupClosestKey(k)
 
+  /** Copy. */
+  def copy(site: Site = site, data: (Long ==>> Coordinates) = data): Ephemeris =
+    Ephemeris.apply(site, data)
+
+  override def equals(a: Any): Boolean =
+    a match { 
+      case e: Ephemeris => e.site == site && e.compressedData == compressedData
+      case _            => false
+    }
+
+  override def hashCode: Int =
+    site.## ^ compressedData.##
+
 }
 
 object Ephemeris extends EphemerisInstances with EphemerisLenses {
@@ -55,6 +80,13 @@ object Ephemeris extends EphemerisInstances with EphemerisLenses {
   /** A single-point ephemeris. */
   def singleton(site: Site, time: Long, coordinates: Coordinates): Ephemeris =
     apply(site, ==>>.singleton(time, coordinates))
+
+  /** Construct an ephemeris from a time/coordinate map. */
+  def apply(site: Site, data: Long ==>> Coordinates): Ephemeris = {
+    new Ephemeris(site, Deflated(data.toList.map { case (t, cs) =>
+      (t, cs.ra.toDegrees.toFloat, cs.dec.toDegrees.toFloat)
+    }))
+  }
 
 }
 
@@ -73,7 +105,7 @@ trait EphemerisLenses {
   val data: Ephemeris @> (Long ==>> Coordinates) =
     Lens.lensu((a, b) => a.copy(data = b), _.data)
 
-  val ephemerisElements: Ephemeris @> List[(Long, Coordinates)] =
-    data.xmapB(_.toList)(==>>.fromList(_))
+  val compressedData: Ephemeris @> Deflated[List[(Long, Float, Float)]] =
+    Lens.lensu((a, b) => new Ephemeris(a.site, b), _.compressedData)
 
 }
