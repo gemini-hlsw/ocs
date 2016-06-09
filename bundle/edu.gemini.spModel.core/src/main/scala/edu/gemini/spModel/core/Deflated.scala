@@ -8,8 +8,7 @@ import scalaz.Functor
 
 /** A value that has been serialized and compressed. */
 final class Deflated[A] private (
-  private val blob: Array[Byte], 
-  private val k: Object => A
+  private val blob: Array[Byte]
 ) extends Serializable {
 
   /** Return a *reference* to the deflated blob. */
@@ -46,13 +45,9 @@ final class Deflated[A] private (
     val ois  = new ObjectInputStream(bais)
 
     // Done
-    k(ois.readObject)
+    ois.readObject.asInstanceOf[A]
 
   }
-
-  /** Return a new `Deflated` that applies `f` to its inflated value. */
-  def map[B](f: A => B): Deflated[B] =
-    new Deflated(blob, k andThen f)
 
   override def equals(a: Any): Boolean =
     a match {
@@ -106,17 +101,10 @@ object Deflated {
 
   /** Construct a deflated object using a *reference* to the passed byte array. */
   def unsafeFromByteArray[A](blob: Array[Byte]): Deflated[A] =
-    new Deflated(blob, _.asInstanceOf[A])
+    new Deflated(blob)
 
   /** Construct a deflated object using a *copy* of the passed byte array. */
   def fromByteArray[A](blob: Array[Byte]): Deflated[A] =
     unsafeFromByteArray(blob.clone)
-
-  /** Deflated is a covariant functor. */
-  implicit val DeflatedFunctor: Functor[Deflated] =
-    new Functor[Deflated] {
-      def map[A, B](fa: Deflated[A])(f: A => B): Deflated[B] =
-        fa.map(f)
-    }
 
 }
