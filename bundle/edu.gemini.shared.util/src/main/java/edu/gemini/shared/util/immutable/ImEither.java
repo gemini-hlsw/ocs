@@ -17,6 +17,17 @@ public final class ImEither<L,R> implements Serializable {
         return new ImEither<>(None.instance(), new Some<>(right));
     }
 
+    /**
+     * Returns the left value or the right value depending upon which one is
+     * defined.
+     */
+    public static <T> T merge(ImEither<T, T> e) {
+        return e.getLeft().orElse(e.getRight()).getValue();
+    }
+
+    // TODO: an ImEither(None, None) wouldn't make any sense.  Reimplement
+    // TODO: with an ImEither interface and Left and Right implementations.
+
     private ImEither(final Option<L> left, final Option<R> right) {
         this.left  = left;
         this.right = right;
@@ -74,6 +85,10 @@ public final class ImEither<L,R> implements Serializable {
 
     public <T> ImEither<L,T> map(final Function1<? super R, ? extends T> rightFunc) {
         return new ImEither<>(left, right.map(rightFunc));
+    }
+
+    public <T> ImEither<L,T> flatMap(final Function1<? super R, ImEither<L, T>> rightFunc) {
+        return left.isDefined() ? ImEither.<L,T>left(left.getValue()) : rightFunc.apply(right.getValue());
     }
 
     /**

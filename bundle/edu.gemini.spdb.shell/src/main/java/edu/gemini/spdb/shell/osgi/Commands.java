@@ -6,9 +6,12 @@ import edu.gemini.pot.spdb.DBAbstractQueryFunctor;
 import edu.gemini.pot.spdb.IDBDatabaseService;
 import edu.gemini.pot.spdb.IDBQueryFunctor;
 import edu.gemini.pot.spdb.IDBQueryRunner;
+import edu.gemini.shared.util.immutable.ImEither;
 import edu.gemini.spModel.core.SPBadIDException;
 import edu.gemini.spModel.core.SPProgramID;
 import edu.gemini.spModel.io.SpImportService;
+import edu.gemini.spdb.shell.misc.EphemerisPurgeCommand;
+import static edu.gemini.spdb.shell.misc.EphemerisPurgeCommand.*;
 import edu.gemini.spdb.shell.misc.ExportXmlCommand;
 import edu.gemini.spdb.shell.misc.ImportXmlCommand;
 import edu.gemini.spdb.shell.misc.LsProgs;
@@ -41,17 +44,9 @@ class Commands {
         IDBQueryFunctor doQuery(IDBQueryRunner run, IDBQueryFunctor fun);
     }
 
-    private static final Query PROG_QUERY = new Query() {
-        public IDBQueryFunctor doQuery(final IDBQueryRunner run, final IDBQueryFunctor fun) {
-            return run.queryPrograms(fun);
-        }
-    };
+    private static final Query PROG_QUERY = IDBQueryRunner::queryPrograms;
 
-    private static final Query PLAN_QUERY = new Query() {
-        public IDBQueryFunctor doQuery(final IDBQueryRunner run, final IDBQueryFunctor fun) {
-            return run.queryNightlyPlans(fun);
-        }
-    };
+    private static final Query PLAN_QUERY = IDBQueryRunner::queryNightlyPlans;
 
     // return all the program ids formatted in columns
     public String lsprogs() {
@@ -109,7 +104,7 @@ class Commands {
     public String exportXml(final File path, final String... progIdStrings) {
         if (!path.isDirectory()) return ("Not a directory: " + path);
 
-        final List<SPProgramID> progIds = new ArrayList<SPProgramID>(progIdStrings.length);
+        final List<SPProgramID> progIds = new ArrayList<>(progIdStrings.length);
         for (String id : progIdStrings) {
             try {
                 progIds.add(SPProgramID.toProgramID(id));
@@ -160,22 +155,23 @@ class Commands {
         }
     }
 
-    public String rmprog(String programId) {
+    private ImEither<String, ISPProgram> prog(String programId) {
         final IDBDatabaseService db = db();
         final SPProgramID pid;
         try {
             pid = SPProgramID.toProgramID(programId);
         } catch (SPBadIDException ex) {
-            return String.format("%s: illegal program id", programId);
+            return ImEither.left(String.format("%s: illegal program id", programId));
         }
 
         final ISPProgram p = db.lookupProgramByID(pid);
-        if (p == null) {
-            return String.format("%s: not in db", programId);
-        }
+        return (p == null) ? ImEither.left(String.format("%s: not in db", programId)) : ImEither.right(p);
+    }
 
-        db.remove(p);
-        return "";
+    public String rmprog(String programId) {
+        final ImEither<String, ISPProgram> e = prog(programId);
+        e.foreach(p -> db().remove(p));
+        return e.fold(s -> s, p -> "");
     }
 
     public String rmprog(String[] programIds) {
@@ -189,5 +185,19 @@ class Commands {
 
     public String rmprog(List<String> programIds) {
         return rmprog(programIds.toArray(new String[programIds.size()]));
+    }
+
+    public String purgeEphemeris(String programId) {
+        return purgeEphemeris(programId, ObservedOnly$.MODULE$.displayValue());
+    }
+
+    public String purgeEphemeris(String programId, String purgeOption) {
+        final ImEither<String, ISPProgram> e = prog(programId);
+        final scala.Option<PurgeOption>   po = PurgeOption$.MODULE$.fromDisplayValue(purgeOption);
+
+        return ImEither.merge(e.flatMap(p -> po.isDefined() ?
+            ImEither.<String, String>right(EphemerisPurgeCommand.apply(p, po.get())) :
+            ImEither.<String, String>left("Usage: purgeEphemeris programId " + PurgeOption$.MODULE$.usageString())
+        ));
     }
 }

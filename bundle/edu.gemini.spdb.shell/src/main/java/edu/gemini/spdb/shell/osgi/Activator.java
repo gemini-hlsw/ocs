@@ -21,11 +21,11 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer<IDBD
 
     public void start(final BundleContext context) throws Exception {
         this.context = context;
-        this.tracker = new ServiceTracker<IDBDatabaseService, IDBDatabaseService>(context, IDBDatabaseService.class, this);
+        this.tracker = new ServiceTracker<>(context, IDBDatabaseService.class, this);
 
         tracker.open();
 
-        final Dictionary<String, Object> dict = new Hashtable<String, Object>();
+        final Dictionary<String, Object> dict = new Hashtable<>();
         dict.put(COMMAND_SCOPE, "spdb");
         dict.put(COMMAND_FUNCTION, new String[]{
                 "lsprogs",
@@ -35,9 +35,10 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer<IDBD
                 "exportXml",
                 "du",
                 "purge",
-                "migrateAltair"
+                "migrateAltair",
+                "purgeEphemeris"
         });
-        final Set<Principal> user = Collections.<Principal>singleton(StaffPrincipal.Gemini());
+        final Set<Principal> user = Collections.singleton(StaffPrincipal.Gemini());
         context.registerService(Commands.class.getName(), new Commands(tracker, user), dict);
         System.out.println("edu.gemini.spdb.shell started.");
     }
@@ -45,7 +46,6 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer<IDBD
     public void stop(BundleContext context) throws Exception {
         tracker.close();
         tracker = null;
-        context = null;
         System.out.println("edu.gemini.spdb.shell stopped.");
     }
 
