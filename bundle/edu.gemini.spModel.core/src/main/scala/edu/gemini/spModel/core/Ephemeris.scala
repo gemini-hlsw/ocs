@@ -1,17 +1,45 @@
 package edu.gemini.spModel.core
 
+import java.util.TimerTask
+import java.util.logging.Logger
+
 import scalaz._, Scalaz._
 
 final class Ephemeris(val site: Site, val compressedData: Deflated[List[(Long, Float, Float)]]) extends Serializable {
 
+  // Internal state for managing the inflated ephemeris data.
+  @transient @volatile private var _data: Long ==>> Coordinates = null
+  @transient @volatile private var _task: TimerTask = null
+
   /**
    * A map from time to coordinates. This value is stored in compressed form and is deflated (and
-   * memoized) on demand. The deflated value is transient, and is thus not serialized.
+   * cached for a while) on demand. The deflated value is transient, and is thus not serialized.
    */
-  @transient lazy val data: Long ==>> Coordinates =
-    ==>>.fromList(compressedData.inflate.map { case (t, r, d) =>
-      t -> Coordinates.fromDegrees(r, d).getOrElse(sys.error(s"corrupted ephemeris data: $t $r $d"))
-    })
+  def data: Long ==>> Coordinates = synchronized {
+    import Ephemeris.{ timer, logger }
+
+    // Decompress if needed
+    if (_data == null) {
+      logger.info("Inflating compressed ephemeris.")
+      _data = ==>>.fromList(compressedData.inflate.map { case (t, r, d) =>
+        t -> Coordinates.fromDegrees(r, d).getOrElse(sys.error(s"corrupted ephemeris data: $t $r $d"))
+      })
+    }
+
+    // Reset the cache timer to a point the future
+    if (_task != null) _task.cancel()
+    _task = new TimerTask {
+      def run(): Unit = {
+        logger.info("Discarding inflated ephemeris.")
+        Ephemeris.this.synchronized(_data = null)
+      }
+    }
+    timer.schedule(_task, 3000)
+
+    // Done
+    _data
+
+  }
     
   /** Perform an exact or interpolated lookup. */
   def iLookup(k: Long): Option[Coordinates] =
@@ -69,6 +97,10 @@ final class Ephemeris(val site: Site, val compressedData: Deflated[List[(Long, F
 }
 
 object Ephemeris extends EphemerisInstances with EphemerisLenses {
+
+  // A timer to discard inflated ephemerides after a while
+  private val timer  = new java.util.Timer
+  private val logger = Logger.getLogger(classOf[Ephemeris].getName)
 
   /** The empty ephemeris, with site arbitrarily chosen to be GN. */
   val empty: Ephemeris =

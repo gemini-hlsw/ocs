@@ -12,9 +12,10 @@ object EphemerisSpec extends Specification with ScalaCheck with Arbitraries with
 
   implicit class EphemerisTrickery(e: Ephemeris) {
 
-    // Peek at the transient lazy field to see if it has been assigned
+    // Peek at the transient lazy field to see if it has been assigned.
+    // Look how nutty the mangled field name is!
     def isCompressed: Boolean = {
-      val f = e.getClass.getDeclaredField("data")
+      val f = e.getClass.getDeclaredField("edu$gemini$spModel$core$Ephemeris$$_data")
       f.setAccessible(true)
       f.get(e) == null
     }
@@ -32,7 +33,7 @@ object EphemerisSpec extends Specification with ScalaCheck with Arbitraries with
     }
 
 
-    "be decompressed on access to 'data' field" ! forAll { (e: Ephemeris) =>
+    "be decompressed on access to '_data' field" ! forAll { (e: Ephemeris) =>
       e.data
       e.isCompressed == false
     }
