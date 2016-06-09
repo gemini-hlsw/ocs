@@ -11,7 +11,6 @@ import javax.swing.SwingUtilities
 import edu.gemini.ags.api.{AgsHash, AgsRegistrar, AgsStrategy}
 import edu.gemini.catalog.votable.{CatalogException, GenericError}
 import edu.gemini.pot.sp._
-import edu.gemini.shared.util.immutable.ImOption
 import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.spModel.obs.{ObsClassService, ObservationStatus}
 import edu.gemini.spModel.obs.context.ObsContext
@@ -76,7 +75,7 @@ object BagsState {
     * another AGS search.  We hang on to the last known AGS hash value so that
     * we can discard irrelevant edits if possible.
     */
-  case class IdleState(obs: ISPObservation, hash: Option[AgsHashVal]) extends BagsState(None) {
+  case class IdleState(obs: ISPObservation, hash: Option[AgsHashVal]) extends BagsState {
     override val edit: StateTransition =
       (PendingState(obs, hash), BagsManager.wakeUpAction(obs, 0))
   }
@@ -266,34 +265,34 @@ object BagsManager {
   // This is our mutable state.  It is only read/written by the Swing thread.
   private var stateMap  = ==>>.empty[ProgKey, ObsKey ==>> BagsState]
 
-  def statusLookup(p: SPNodeKey, o: SPNodeKey): Option[BagsState] =
-    for {
-      obsMap <- stateMap.lookup(ProgKey(p))
-      s      <- obsMap.lookup(ObsKey(o))
-    } yield s
-
   // Listeners for changes to the Bags Status.
   // Management must be done on the Swing EDT.
-  private var listeners: List[BagsStatusListener] = Nil
+  private var listeners: List[BagsStateListener] = Nil
 
-  def addBagsStatusListener(l: BagsStatusListener): Unit = {
-    if (SwingUtilities.isEventDispatchThread) {
-      if (!listeners.contains(l))
-        listeners = l :: listeners
+  private def assertingSwingEDT[A](message: String)(block: => A): A =
+    if (SwingUtilities.isEventDispatchThread) block
+    else throw new IllegalStateException(message)
+
+  def addBagsStateListener(l: BagsStateListener): Unit =
+    assertingSwingEDT("BagsStatusListeners can only be added on the Swing EDT.") {
+      if (!listeners.contains(l)) listeners = l :: listeners
     }
-    else throw new IllegalStateException("BagsStatusListeners can only be added on the Swing EDT.")
-  }
 
-  def removeBagsStatusListener(l: BagsStatusListener): Unit = {
-    if (SwingUtilities.isEventDispatchThread) {
-      if (listeners.contains(l))
-        listeners = listeners.diff(List(l))
+  def removeBagsStateListener(l: BagsStateListener): Unit =
+    assertingSwingEDT("BagsStatusListeners can only be removed on the Swing EDT.") {
+      if (listeners.contains(l)) listeners = listeners.diff(List(l))
     }
-    else throw new IllegalStateException("BagsStatusListeners can only be removed on the Swing EDT.")
-  }
 
-  private def fireBagsStatusChanged(k: SPNodeKey, oldState: BagsState, newState: BagsState): Unit =
-    listeners.foreach(_.bagsStatusChanged(k, oldState, newState))
+  private def fireBagsStateChanged(k: SPNodeKey, oldState: BagsState, newState: BagsState): Unit =
+    listeners.foreach(_.bagsStateChanged(k, oldState, newState))
+
+  def stateLookup(p: SPNodeKey, o: SPNodeKey): Option[BagsState] =
+    assertingSwingEDT("BagsStates can only be queried on the Swing EDT.") {
+      for {
+        obsMap <- stateMap.lookup(ProgKey(p))
+        s <- obsMap.lookup(ObsKey(o))
+      } yield s
+    }
 
   // Handle a state machine transition.  Note we switch to the Swing thread
   // here so that the calling thread continues immediately.  All updates are
@@ -337,7 +336,7 @@ object BagsManager {
       } yield ()
       action.unsafePerformIO()
 
-      fireBagsStatusChanged(obs.getNodeKey, state, newState)
+      fireBagsStateChanged(obs.getNodeKey, state, newState)
     }
   }
 

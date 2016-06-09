@@ -14,9 +14,8 @@ import edu.gemini.spModel.guide.{GuideSpeed, ValidatableGuideProbe}
 import edu.gemini.spModel.guide.GuideSpeed._
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
-import edu.gemini.spModel.target.env.TargetEnvironment
-import jsky.app.ot.ags.BagsState._
-import jsky.app.ot.ags.{BagsManager, BagsState, BagsStatus}
+import edu.gemini.spModel.target.env.{AutomaticGroup, TargetEnvironment}
+import jsky.app.ot.ags.BagsState
 import jsky.app.ot.gemini.editor.targetComponent.TargetFeedback.Row
 import jsky.app.ot.util.OtColor._
 import jsky.app.ot.util.Resources
@@ -173,17 +172,17 @@ object TargetGuidingFeedback {
 
 
 object BagsFeedback {
-  import BagsStatus._
+  private val spinnerIcon = Resources.getIcon("spinner16-transparent.png")
+  private val warningIcon = Resources.getIcon("eclipse/alert.gif")
+  private val errorIcon   = Resources.getIcon("eclipse/error.gif")
 
-  private val spinner = Resources.getIcon("spinner16-transparent.png").some
-
-  sealed class BagsStatusRow(bgColor: Color, message: String, iconOpt: Option[Icon]) extends Row {
+  sealed class BagsStateRow(bgColor: Color, message: String, stateIcon: Icon) extends Row {
     object feedbackLabel extends Label {
       border = labelBorder
       foreground = Color.DARK_GRAY
       background = bgColor
       text = message
-      icon = iconOpt.orNull
+      icon = stateIcon
       opaque = true
       horizontalAlignment = Alignment.Left
     }
@@ -194,15 +193,20 @@ object BagsFeedback {
     }
   }
 
-  case object ErrorStatusRow   extends BagsStatusRow(LIGHT_SALMON, "An error has occurred when trying to run BAGS.", None)
-  case object PendingStatusRow extends BagsStatusRow(BANANA, "Waiting for BAGS to run...", spinner)
-  case object RunningStatusRow extends BagsStatusRow(BANANA, "BAGS is running...", spinner)
-  case class  FailureStatusRow(why: String) extends BagsStatusRow(LIGHT_SALMON, s"BAGS failed: $why", None)
+  case object NoStarsRow      extends BagsStateRow(BANANA, "Automatic guide star lookup found nothing.", warningIcon)
+  case object ErrorStateRow   extends BagsStateRow(LIGHT_SALMON, "An error occurred when trying to run automatic guide star lookup.", errorIcon)
+  case object PendingStateRow extends BagsStateRow(BANANA, "Waiting for automatic guide star lookup to run...", spinnerIcon)
+  case object RunningStateRow extends BagsStateRow(BANANA, "Automatic guide star lookup is running...", spinnerIcon)
+  case class  FailureStateRow(why: String) extends BagsStateRow(LIGHT_SALMON, s"Automatic guide star lookup failed: $why", errorIcon)
 
-  def toRow(state: BagsStatus): Row = state match {
-    case ErrorStatus        => ErrorStatusRow
-    case PendingStatus      => PendingStatusRow
-    case RunningStatus      => RunningStatusRow
-    case FailureStatus(why) => FailureStatusRow(why)
+  import BagsState._
+  def toRow(state: BagsState, ctx: Option[ObsContext]): Option[Row] = state match {
+    case ErrorState              => ErrorStateRow.some
+    case PendingState(_,_)       => PendingStateRow.some
+    case RunningState(_,_)       => RunningStateRow.some
+    case RunningEditedState(_,_) => RunningStateRow.some
+    case FailureState(_,why)     => FailureStateRow(why).some
+    case IdleState(_,_) if ctx.exists(_.getTargets.getGuideEnvironment.guideEnv.auto === AutomaticGroup.Initial) => NoStarsRow.some
+    case _                       => None
   }
 }
