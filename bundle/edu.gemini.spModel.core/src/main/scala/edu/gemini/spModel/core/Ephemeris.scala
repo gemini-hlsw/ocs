@@ -4,18 +4,15 @@ import scalaz._, Scalaz._
 
 final class Ephemeris(val site: Site, val compressedData: Deflated[List[(Long, Float, Float)]]) extends Serializable {
 
+  /**
+   * A map from time to coordinates. This value is stored in compressed form and is deflated (and
+   * memoized) on demand. The deflated value is transient, and is thus not serialized.
+   */
   @transient lazy val data: Long ==>> Coordinates =
     ==>>.fromList(compressedData.inflate.map { case (t, r, d) =>
       t -> Coordinates.fromDegrees(r, d).getOrElse(sys.error(s"corrupted ephemeris data: $t $r $d"))
     })
-
-  /** True if the ephemeris data is compressed (will be uncompressed by need). */
-  def isCompressed: Boolean = {
-    val f = getClass.getDeclaredField("data")
-    f.setAccessible(true)
-    f.get(this) == null
-  }
-
+    
   /** Perform an exact or interpolated lookup. */
   def iLookup(k: Long): Option[Coordinates] =
     data.iLookup(k)

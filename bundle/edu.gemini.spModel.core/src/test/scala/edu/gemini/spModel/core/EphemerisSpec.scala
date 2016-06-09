@@ -10,6 +10,17 @@ import org.specs2.mutable.Specification
 
 object EphemerisSpec extends Specification with ScalaCheck with Arbitraries with Helpers {
 
+  implicit class EphemerisTrickery(e: Ephemeris) {
+
+    // Peek at the transient lazy field to see if it has been assigned
+    def isCompressed: Boolean = {
+      val f = e.getClass.getDeclaredField("data")
+      f.setAccessible(true)
+      f.get(e) == null
+    }
+
+  }
+
   "Ephemeris Data" should {
 
     "be serializable" ! forAll { (e: Ephemeris) =>

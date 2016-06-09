@@ -1,7 +1,7 @@
 package edu.gemini.spModel.pio.codec
 
 import edu.gemini.spModel.core.Deflated
-import sun.misc.{BASE64Decoder, BASE64Encoder}
+import java.util.Base64
 
 import scalaz._, Scalaz._
 
@@ -32,13 +32,13 @@ object ParamCodec {
 
   implicit val ByteArrayParamCodec: ParamCodec[Array[Byte]] =
     StringParamCodec.xmap[Array[Byte]](
-      new BASE64Decoder().decodeBuffer,
-      new BASE64Encoder().encode
+      Base64.getMimeDecoder.decode,
+      Base64.getMimeEncoder.encodeToString
     )
 
   implicit def deflatedParamCodec[A]: ParamCodec[Deflated[A]] =
     ByteArrayParamCodec.xmap[Deflated[A]](
-      Deflated.unsafeFromBytes[A], _.data
+      Deflated.unsafeFromByteArray[A], _.unsafeToByteArray
     )
 
   implicit val DoubleParamCodec: ParamCodec[Double] =
