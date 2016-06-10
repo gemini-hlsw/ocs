@@ -2,10 +2,11 @@ package edu.gemini.spModel.rich.pot.sp
 
 import edu.gemini.pot.sp._
 import edu.gemini.spModel.core.Site
-import edu.gemini.spModel.obs.SPObservation
+import edu.gemini.spModel.obs.{ObservationStatus, SPObservation}
 import edu.gemini.spModel.obscomp.SPInstObsComp
 
 import scala.collection.JavaConverters._
+import scalaz.\/
 
 /**
  * Adds convenience to ISPObservation instances.
@@ -53,4 +54,7 @@ class RichObservation(obs: ISPObservation) {
     findObsComponent { _.getType.broadType == SPComponentBroadType.INSTRUMENT }.map { oc =>
       oc.getDataObject.asInstanceOf[SPInstObsComp].getSite.asScala.toSet
     }.fold(Set.empty[Site])(identity)
+
+  def isObserved: Boolean =
+    \/.fromTryCatchNonFatal(ObservationStatus.computeFor(obs)).exists(_ == ObservationStatus.OBSERVED)
 }

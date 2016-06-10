@@ -59,6 +59,7 @@ public final class SPViewerActions {
     public final AbstractViewerAction addInfoNoteAction;
     public final AbstractViewerAction addInfoSchedulingNoteAction;
     public final AbstractViewerAction addInfoProgramNoteAction;
+    public final AbstractViewerAction purgeEphemerisAction;
 
     // Groups of actions. In some cases these appear in the list above, in other cases not.
     final List<AbstractViewerAction> templateActions = new ArrayList<AbstractViewerAction>();
@@ -144,6 +145,7 @@ public final class SPViewerActions {
 
         // Program-level Actions
         programAdminAction = new ProgramAdminAction(viewer);
+        purgeEphemerisAction = new EphemerisPurgeAction(viewer);
 
         // Group actions
         addSchedulingGroupAction = new AddGroupAction(viewer, SPGroup.GroupType.TYPE_SCHEDULING);
