@@ -21,35 +21,31 @@ class TargetFeedbackEditor extends TelescopePosEditor {
   def getComponent: Component = tab.peer
 
   override def edit(ctxOpt: GOption[ObsContext], target: SPTarget, node: ISPNode): Unit = {
-    println("--- Starting edit")
     val analysis = {
       val mt = OT.getMagnitudeTable
       ctxOpt.asScalaOpt.map(TargetGuidingFeedback.targetAnalysis(_, mt, target)).getOrElse(Nil)
     }
 
-    //Swing.onEDT {
-      // Construct the rows for the table. Optionally a BAGS row, and then a list of AGS analysis rows.
-      val rows = {
-        val bagsRow = for {
-          n   <- Option(node)
-          o   <- Option(n.getContextObservation)
-          pk  <- Option(o.getProgram).map(_.getProgramKey)
-          ok  <- Option(o.getNodeKey)
-          s   <- BagsManager.stateLookup(pk, ok)
-          row <- BagsFeedback.toRow(s, ctxOpt.asScalaOpt)
-        } yield row
+    // Construct the rows for the table. Optionally a BAGS row, and then a list of AGS analysis rows.
+    val rows = {
+      val bagsRow = for {
+        n <- Option(node)
+        o <- Option(n.getContextObservation)
+        pk <- Option(o.getProgram).map(_.getProgramKey)
+        ok <- Option(o.getNodeKey)
+        s <- BagsManager.stateLookup(pk, ok)
+        row <- BagsFeedback.toRow(s, ctxOpt.asScalaOpt)
+      } yield row
 
-        // If the BAGS row is defined, then use it. If not, create the rows corresponding to the analysis.
-        // NOTE that is target.isTooTarget, we don't want an analysis.
-        bagsRow.fold(if (target.isTooTarget) Nil else analysis)(List(_))
-      }
+      // If the BAGS row is defined, then use it. If not, create the rows corresponding to the analysis.
+      // NOTE that is target.isTooTarget, we don't want an analysis.
+      bagsRow.fold(if (target.isTooTarget) Nil else analysis)(List(_))
+    }
 
-      if (rows.isEmpty)
-        tab.clear()
-      else
-        tab.showRows(rows)
-    //}
-    println("+++ Ending edit")
+    if (rows.isEmpty)
+      tab.clear()
+    else
+      tab.showRows(rows)
   }
 }
 
@@ -70,7 +66,6 @@ object TargetFeedbackEditor {
           insets  = new Insets(0, 0, 1, 0)
         }
       }
-      println("Revalidating...")
       revalidate()
     }
   }
