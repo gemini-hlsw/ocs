@@ -1,12 +1,12 @@
 package jsky.app.ot.ags
 
-import jsky.app.ot.ags.BagsState.{IdleState, ErrorTransition, StateTransition}
-
+import jsky.app.ot.ags.BagsState.{ErrorTransition, IdleState, StateTransition}
 import java.beans.{PropertyChangeEvent, PropertyChangeListener}
 import java.time.Instant
 import java.util.concurrent.TimeoutException
 import java.util.concurrent._
 import java.util.logging.Logger
+import javax.swing.SwingUtilities
 
 import edu.gemini.ags.api.{AgsHash, AgsRegistrar, AgsStrategy}
 import edu.gemini.catalog.votable.{CatalogException, GenericError}
@@ -38,7 +38,7 @@ sealed trait BagsState {
     * state.  This is typically called in response to a listener on the
     * science program.
     */
-  def edit: StateTransition =
+  private[ags] def edit: StateTransition =
     ErrorTransition
 
   /** Called when a timer goes off to evaluate what should be done next and
@@ -47,15 +47,15 @@ sealed trait BagsState {
     * a few seconds are added before transitioning in order to provide an
     * opportunity for network issues, etc. to sort themselves out.
     */
-  def wakeUp: StateTransition =
+  private[ags] def wakeUp: StateTransition =
     (this, ioUnit)
 
   /** Called with the successful results of an AGS lookup. */
-  def succeed(results: Option[AgsStrategy.Selection]): StateTransition =
+  private[ags] def succeed(results: Option[AgsStrategy.Selection]): StateTransition =
     ErrorTransition
 
   /** Called to notify that an AGS lookup failed. */
-  def fail(why: String, delayMs: Long): StateTransition =
+  private[ags] def fail(why: String, delayMs: Long): StateTransition =
     ErrorTransition
 }
 
@@ -76,7 +76,7 @@ object BagsState {
     * we can discard irrelevant edits if possible.
     */
   case class IdleState(obs: ISPObservation, hash: Option[AgsHashVal]) extends BagsState {
-    override val edit: StateTransition =
+    private[ags] override val edit: StateTransition =
       (PendingState(obs, hash), BagsManager.wakeUpAction(obs, 0))
   }
 
@@ -86,10 +86,10 @@ object BagsState {
     * AGS lookup, update the AGS hash code, etc.
     */
   case class PendingState(obs: ISPObservation, hash: Option[AgsHashVal]) extends BagsState {
-    override val edit: StateTransition =
+    private[ags] override val edit: StateTransition =
       (this, ioUnit)
 
-    override def wakeUp: StateTransition = {
+    private[ags] override def wakeUp: StateTransition = {
       def notObserved: Boolean =
         ObservationStatus.computeFor(obs) != ObservationStatus.OBSERVED
 
@@ -131,36 +131,36 @@ object BagsState {
     // edited by moving to RunningEditedState.  When the results eventually
     // come back from the AGS lookup when in RunningEditedState, we store them
     // but move to PendingState to run again.
-    override val edit: StateTransition =
+    private[ags] override val edit: StateTransition =
       (RunningEditedState(obs, hash), ioUnit)
 
     // Successful AGS lookup while running (and not edited).  Apply the update
     // and move to IdleState.
-    override def succeed(results: Option[AgsStrategy.Selection]): StateTransition =
+    private[ags] override def succeed(results: Option[AgsStrategy.Selection]): StateTransition =
       (IdleState(obs, Some(hash)), BagsManager.applyAction(obs, results))
 
     // Failed AGS lookup.  Move to FailedState for a while and ask the timer to
     // wake us up in a bit.  When the timer eventually goes off we will switch
     // to PendingState (see FailedState.wakeUp).
-    override def fail(why: String, delayMs: Long): StateTransition =
+    private[ags] override def fail(why: String, delayMs: Long): StateTransition =
       (FailureState(obs, why), BagsManager.wakeUpAction(obs, delayMs))
   }
 
   /** RunningEdited. This state corresponds to a running AGS search for an
     * observation that was subsequently edited.  Since it has been edited, the
-    * resuls we're expecting may no longer be valid when they arrive.
+    * results we're expecting may no longer be valid when they arrive.
     */
   case class RunningEditedState(obs: ISPObservation, hash: AgsHashVal) extends BagsState {
     // If we're edited again while running, just loop back.  Once the results of
     // the previous edit that got us into RunningState in the first place
     // finish, we'll switch to Pending and go again.
-    override val edit: StateTransition =
+    private[ags] override val edit: StateTransition =
       (this, ioUnit)
 
     // Success, but now the observation has been edited so the AGS selection
     // may not be valid.  Apply the results anyway in case the edit is not
     // to a field that impacts AGS and go to pending to run again if necessary.
-    override def succeed(results: Option[AgsStrategy.Selection]): StateTransition = {
+    private[ags] override def succeed(results: Option[AgsStrategy.Selection]): StateTransition = {
       val action = for {
         _ <- BagsManager.applyAction(obs, results)
         _ <- BagsManager.wakeUpAction(obs, 0)
@@ -171,7 +171,7 @@ object BagsState {
     // Failed AGS but we've been edited in the meantime anyway.  Go back to
     // PendingState so we can run again.  Here we pass in no AgsHash value to
     // ensure that pending will count this as an AGS-worthy edit.
-    override def fail(why: String, delayMs: Long): StateTransition =
+    private[ags] override def fail(why: String, delayMs: Long): StateTransition =
       (PendingState(obs, None), BagsManager.wakeUpAction(obs, delayMs))
   }
 
@@ -182,12 +182,12 @@ object BagsState {
   case class FailureState(obs: ISPObservation, why: String) extends BagsState {
     // If edited while in failed, we just loop back.  When the timer eventually
     // goes off we'll move to pending and redo the AGS lookup anyway.
-    override val edit: StateTransition =
+    private[ags] override val edit: StateTransition =
       (this, ioUnit)
 
     // When the timer goes off we can go back to pending (with no AgsHash value
     // since we want to ensure that the AGS search runs again).
-    override val wakeUp: StateTransition =
+    private[ags] override val wakeUp: StateTransition =
       (PendingState(obs, None), BagsManager.wakeUpAction(obs, 0))
   }
 
@@ -265,6 +265,35 @@ object BagsManager {
   // This is our mutable state.  It is only read/written by the Swing thread.
   private var stateMap  = ==>>.empty[ProgKey, ObsKey ==>> BagsState]
 
+  // Listeners for changes to the Bags Status.
+  // Management must be done on the Swing EDT.
+  private var listeners: List[BagsStateListener] = Nil
+
+  private def assertingSwingEDT[A](message: String)(block: => A): A =
+    if (SwingUtilities.isEventDispatchThread) block
+    else throw new IllegalStateException(message)
+
+  def addBagsStateListener(l: BagsStateListener): Unit =
+    assertingSwingEDT("BagsStatusListeners can only be added on the Swing EDT.") {
+      if (!listeners.contains(l)) listeners = l :: listeners
+    }
+
+  def removeBagsStateListener(l: BagsStateListener): Unit =
+    assertingSwingEDT("BagsStatusListeners can only be removed on the Swing EDT.") {
+      if (listeners.contains(l)) listeners = listeners.diff(List(l))
+    }
+
+  private def fireBagsStateChanged(k: SPNodeKey, oldState: BagsState, newState: BagsState): Unit =
+    listeners.foreach(_.bagsStateChanged(k, oldState, newState))
+
+  def stateLookup(p: SPNodeKey, o: SPNodeKey): Option[BagsState] =
+    assertingSwingEDT("BagsStates can only be queried on the Swing EDT.") {
+      for {
+        obsMap <- stateMap.lookup(ProgKey(p))
+        s <- obsMap.lookup(ObsKey(o))
+      } yield s
+    }
+
   // Handle a state machine transition.  Note we switch to the Swing thread
   // here so that the calling thread continues immediately.  All updates are
   // done from the Swing thread.
@@ -305,8 +334,9 @@ object BagsManager {
         _ <- logTransition(state, newState)
         _ <- sideEffect
       } yield ()
-
       action.unsafePerformIO()
+
+      fireBagsStateChanged(obs.getNodeKey, state, newState)
     }
   }
 
