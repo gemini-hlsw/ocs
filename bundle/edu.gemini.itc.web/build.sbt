@@ -15,6 +15,10 @@ unmanagedJars in Compile ++= Seq(
   new File(baseDirectory.value, "../../lib/bundle/pax-web-jsp-1.1.13.jar")
 )
 
+libraryDependencies ++= Seq(
+  "com.squants"  %% "squants"  % "0.6.2"
+  )
+
 osgiSettings
 
 ocsBundleSettings
