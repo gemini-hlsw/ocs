@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Produced with astropy.io.votable version 0.3.2
+     http://www.astropy.org/ -->
+<VOTABLE version="1.2" xmlns="http://www.ivoa.net/xml/VOTable/v1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.ivoa.net/xml/VOTable/v1.2">
+ <RESOURCE type="results">
+  <TABLE>
+   <FIELD ID="jmag" datatype="double" name="jmag" ucd="phot.mag;em.IR.J"/>
+   <FIELD ID="b2mag" datatype="double" name="b2mag" ucd="phot.mag;em.opt.B"/>
+   <FIELD ID="pmde" datatype="double" name="pmde" ucd="pos.pm;pos.eq.dec"/>
+   <FIELD ID="e_jmag" datatype="double" name="e_jmag" ucd="stat.error;phot.mag;em.IR.J"/>
+   <FIELD ID="decj2000" datatype="double" name="decj2000" ucd="pos.eq.dec;meta.main"/>
+   <FIELD ID="no" datatype="int" name="no" ucd="meta.number"/>
+   <FIELD ID="b1mag" datatype="double" name="b1mag" ucd="phot.mag;em.opt.B"/>
+   <FIELD ID="pmra" datatype="double" name="pmra" ucd="pos.pm;pos.eq.ra"/>
+   <FIELD ID="e_dej2000" datatype="double" name="e_dej2000" ucd="stat.error;pos.eq.dec"/>
+   <FIELD ID="flags" datatype="int" name="flags" ucd="meta.note"/>
+   <FIELD ID="imag" datatype="double" name="imag" ucd="phot.mag;em.opt.I"/>
+   <FIELD ID="r2mag" datatype="double" name="r2mag" ucd="phot.mag;em.opt.R"/>
+   <FIELD ID="smags" arraysize="*" datatype="char" name="smags" ucd="meta.id"/>
+   <FIELD ID="e_raj2000" datatype="double" name="e_raj2000" ucd="stat.error;pos.eq.ra"/>
+   <FIELD ID="epde" datatype="double" name="epde" ucd="time.epoch"/>
+   <FIELD ID="kmag" datatype="double" name="kmag" ucd="phot.mag;em.IR.K"/>
+   <FIELD ID="raj2000" datatype="double" name="raj2000" ucd="pos.eq.ra;meta.main"/>
+   <FIELD ID="e_pmra" datatype="double" name="e_pmra" ucd="stat.error;pos.pm;pos.eq.ra"/>
+   <FIELD ID="r1mag" datatype="double" name="r1mag" ucd="phot.mag;em.opt.R"/>
+   <FIELD ID="epra" datatype="double" name="epra" ucd="time.epoch"/>
+   <FIELD ID="e_pmde" datatype="double" name="e_pmde" ucd="stat.error;pos.pm;pos.eq.dec"/>
+   <FIELD ID="e_hmag" datatype="double" name="e_hmag" ucd="stat.error;phot.mag;em.IR.H"/>
+   <FIELD ID="ppmxl" datatype="int" name="ppmxl" ucd="meta.id;meta.main"/>
+   <FIELD ID="hmag" datatype="double" name="hmag" ucd="phot.mag;em.IR.H"/>
+   <FIELD ID="e_kmag" datatype="double" name="e_kmag" ucd="stat.error;phot.mag;em.IR.K"/>
+   <DATA>
+    <TABLEDATA>
+     <TR>
+      <TD>16.009</TD>
+      <TD>17.829999999999998</TD>
+      <TD>-2.0999999999999998e-06</TD>
+      <TD>0.067000000000000004</TD>
+      <TD>50.006605999999998</TD>
+      <TD>6</TD>
+      <TD>18.469999999999999</TD>
+      <TD>-3.8888999999999998e-07</TD>
+      <TD>2.3300000000000001e-05</TD>
+      <TD>0</TD>
+      <TD>16.91</TD>
+      <TD>17.059999999999999</TD>
+      <TD>02137</TD>
+      <TD>2.3300000000000001e-05</TD>
+      <TD>1984.49</TD>
+      <TD>15.321999999999999</TD>
+      <TD>149.988767</TD>
+      <TD>1.22e-06</TD>
+      <TD>17.210000000000001</TD>
+      <TD>1984.49</TD>
+      <TD>1.22e-06</TD>
+      <TD>0.078</TD>
+      <TD>-1201792896</TD>
+      <TD>15.259</TD>
+      <TD>0.156</TD>
+     </TR>
+     <TR>
+      <TD>NaN</TD>
+      <TD>19.48</TD>
+      <TD>-1.4472000000000001e-06</TD>
+      <TD>NaN</TD>
+      <TD>49.998708000000001</TD>
+      <TD>5</TD>
+      <TD>19.93</TD>
+      <TD>4.4443999999999997e-08</TD>
+      <TD>2.8600000000000001e-05</TD>
+      <TD>0</TD>
+      <TD>18.77</TD>
+      <TD>19.48</TD>
+      <TD>02137</TD>
+      <TD>2.8600000000000001e-05</TD>
+      <TD>1977.49</TD>
+      <TD>NaN</TD>
+      <TD>150.00690800000001</TD>
+      <TD>1.42e-06</TD>
+      <TD>19.579999999999998</TD>
+      <TD>1977.49</TD>
+      <TD>1.42e-06</TD>
+      <TD>NaN</TD>
+      <TD>-1675120545</TD>
+      <TD>NaN</TD>
+      <TD>NaN</TD>
+     </TR>
+    </TABLEDATA>
+   </DATA>
+  </TABLE>
+ </RESOURCE>
+</VOTABLE>

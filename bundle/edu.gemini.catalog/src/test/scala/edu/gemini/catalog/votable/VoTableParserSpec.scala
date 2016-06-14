@@ -609,5 +609,21 @@ class VoTableParserSpec extends Specification with VoTableParser {
       val result = VoTableParser.parse(SIMBAD, getClass.getResourceAsStream(s"/$xmlFile"), checkValidity = false)
       result must beEqualTo(\/.right(ParsedVoResource(List())))
     }
+    "ppmxl proper motion should be in mas/y. REL-2841" in {
+      val xmlFile = "votable-ppmxl-proper-motion.xml"
+      // PPMXL returns proper motion on degrees per year, it should be converted to mas/year
+      val result = VoTableParser.parse(PPMXL, getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil))
+
+      val targets = for {
+        t <- result.tables.map(TargetsTable.apply)
+        r <- t.rows
+        if r.name == "-1201792896"
+      } yield r
+
+      val pmRA = targets.headOption >>= {_.properMotion} >>= {_.deltaRA.some}
+      val pmDec = targets.headOption >>= {_.properMotion} >>= {_.deltaDec.some}
+      pmRA must beSome(RightAscensionAngularVelocity(AngularVelocity(-1.400004)))
+      pmDec must beSome(DeclinationAngularVelocity(AngularVelocity(-7.56)))
+    }
   }
 }

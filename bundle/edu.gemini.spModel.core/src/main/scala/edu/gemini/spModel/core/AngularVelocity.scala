@@ -22,10 +22,18 @@ case class DeclinationAngularVelocity(velocity: AngularVelocity)
 
 object AngularVelocity {
 
+  /**
+    * Builds an AngularVelocity expressed on degrees per year, converting
+    * to milli arcsecs per year
+    */
+  def fromDegreesPerYear(dpy: Double): AngularVelocity =
+    AngularVelocity(dpy * DegreesYearToMilliArcSecsYear)
+
   val masPerYear: AngularVelocity @> Double =
     Lens.lensu((a, b) => a.copy(masPerYear = b), _.masPerYear)
 
   val MilliArcSecsInADegree:Double = 1296000000
+  val DegreesYearToMilliArcSecsYear:Double = 3.6e06
 
   val Zero = AngularVelocity(0.0)
 
@@ -48,7 +56,7 @@ object RightAscensionAngularVelocity {
   val velocity: RightAscensionAngularVelocity @> AngularVelocity =
     Lens.lensu((a, b) => a.copy(velocity = b), _.velocity)
 
-  /** 
+  /**
    * The `RightAscensionAngularVelocity` of zero miliarcsecs/year.
    * @group Constructors
    */
@@ -73,7 +81,7 @@ object DeclinationAngularVelocity {
   val velocity: DeclinationAngularVelocity @> AngularVelocity =
     Lens.lensu((a, b) => a.copy(velocity = b), _.velocity)
 
-  /** 
+  /**
    * The `DeclinationAngularVelocity` of zero miliarcsecs/year.
    * @group Constructors
    */
