@@ -18,7 +18,10 @@ ocsAppManifest := {
     configs = List(
       common(v),
         with_gogo(v),
-          itc(v)
+          itc(v),
+          with_remote_gogo(v),
+            itctest(v),
+            itcproduction(v)
     )
   )
 }
@@ -45,7 +48,7 @@ def common(version: Version) = AppConfig(
     "org.osgi.service.http.port"                 -> "8442",
     "org.osgi.service.http.secure.enabled"       -> "false" // testing only, don't turn on secure port
   ),
-  log = Some("log/spdb.%u.%g.log"),
+  log = Some("log/itc.%u.%g.log"),
   bundles = List(
     BundleSpec("com.jgoodies.looks",                     Version(2, 4, 1)),
     BundleSpec("com.mchange.c3p0",                       Version(0, 9, 5)),
@@ -78,6 +81,20 @@ def with_gogo(version: Version) = AppConfig(
   )
 ) extending List(common(version), with_gogo_credentials(version))
 
+// WITH-REMOTE-GOGO
+def with_remote_gogo(version: Version) = AppConfig(
+  id = "with-remote-gogo",
+  props = Map(
+    "gosh.args"                       -> "--nointeractive",
+    "osgi.shell.telnet.port"          -> "8224",
+    "osgi.shell.telnet.maxconn"       -> "4",
+    "osgi.shell.telnet.socketTimeout" -> "30000"
+  ),
+  bundles = List(
+    BundleSpec(10, "org.apache.felix.shell.remote", Version(1, 1, 2))
+  )
+) extending List(with_gogo(version), with_remote_gogo_credentials(version))
+
 // ITC
 def itc(version: Version) = AppConfig(
   id = "itc",
@@ -90,4 +107,32 @@ def itc(version: Version) = AppConfig(
   props = Map(
   )
 ) extending List(with_gogo(version))
+
+// ITC test
+def itctest(version: Version) = AppConfig(
+  id = "itctest",
+  distribution = List(Linux32),
+  vmargs = List(
+    "-Xmx1024M",
+    "-XX:MaxPermSize=196M"
+  ),
+  props = Map(
+    "org.osgi.service.http.port" -> "9080",
+    "osgi.shell.telnet.ip"       -> "172.16.55.80"
+  )
+) extending List(with_remote_gogo(version))
+
+// ITC production
+def itcproduction(version: Version) = AppConfig(
+  id = "itcproduction",
+  distribution = List(Linux32),
+  vmargs = List(
+    "-Xmx1024M",
+    "-XX:MaxPermSize=196M"
+  ),
+  props = Map(
+    "org.osgi.service.http.port" -> "9080",
+    "osgi.shell.telnet.ip"       -> "172.16.5.80"
+  )
+) extending List(with_remote_gogo(version))
 
