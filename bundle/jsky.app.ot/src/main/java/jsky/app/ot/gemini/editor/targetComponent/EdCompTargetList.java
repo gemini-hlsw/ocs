@@ -105,7 +105,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         _agsPub.subscribe((obs, oldOptions, newOptions) -> updateGuiding());
 
         BagsManager.addBagsStateListener((key, oldStatus, newStatus) -> {
-            // Need to compare by reference here.
             if (key.equals(getContextObservation().getNodeKey()))
                 updateTargetFeedback();
         });
