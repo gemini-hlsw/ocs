@@ -21,12 +21,13 @@ class TargetFeedbackEditor extends TelescopePosEditor {
   def getComponent: Component = tab.peer
 
   override def edit(ctxOpt: GOption[ObsContext], target: SPTarget, node: ISPNode): Unit = {
+    println("--- Starting edit")
     val analysis = {
       val mt = OT.getMagnitudeTable
       ctxOpt.asScalaOpt.map(TargetGuidingFeedback.targetAnalysis(_, mt, target)).getOrElse(Nil)
     }
 
-    Swing.onEDT {
+    //Swing.onEDT {
       // Construct the rows for the table. Optionally a BAGS row, and then a list of AGS analysis rows.
       val rows = {
         val bagsRow = for {
@@ -47,7 +48,8 @@ class TargetFeedbackEditor extends TelescopePosEditor {
         tab.clear()
       else
         tab.showRows(rows)
-    }
+    //}
+    println("+++ Ending edit")
   }
 }
 
@@ -68,6 +70,7 @@ object TargetFeedbackEditor {
           insets  = new Insets(0, 0, 1, 0)
         }
       }
+      println("Revalidating...")
       revalidate()
     }
   }
