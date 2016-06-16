@@ -40,14 +40,14 @@ final class NonSiderealTargetRules extends IRule {
 
   def checkNoSchedulingBlock(es: ObservationElements): IP2Problems =
     new P2Problems <| { p2p =>
-      es.getTargetObsComp.asScalaOpt.foreach { toc =>
-        if (toc.getTargetEnvironment.getTargets.asScalaList.exists(_.isNonSidereal) &&
-            es.getSchedulingBlock.isEmpty) {
-        p2p.addWarning(ERR_NO_SCHEDULING_BLOCK,
+      for {
+        ocn <- es.getTargetObsComponentNode.asScalaOpt
+        toc <- es.getTargetObsComp.asScalaOpt
+        if toc.getTargetEnvironment.getTargets.asScalaList.exists(_.isNonSidereal) &&
+           es.getSchedulingBlock.isEmpty
+      } p2p.addError(ERR_NO_SCHEDULING_BLOCK,
           s"Observation ${Option(es.getObservationNode.getObservationID).getOrElse(es.getObservation.getTitle)} has nonsidereal targets but no scheduling block.",
-          es.getObservationNode)
-        }
-      }
+          ocn)
     }
 
   def checkNoEphemerisForSchedulingBlock(es: ObservationElements): IP2Problems =
