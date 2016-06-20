@@ -56,31 +56,42 @@ class GmosSDtaXRuleTest extends AbstractRuleTest {
     rule.check(elems).getProblems.asScala.toList
   }
 
-  private def expectSuccess(): Unit = {
-//    println(runCheck.mkString(",\n"))
-    assertTrue(runCheck.isEmpty)
-  }
+  private def expectSuccess(hasId: Set[String]): Unit =
+    assertTrue(!runCheck.exists{p => hasId(p.getId)})
 
-  private def expectFailure(ybin: String): Unit =
+  private def expectSuccessBinY(): Unit =
+    expectSuccess(Set(
+      GmosRule.GMOS_S_DTA_X_RULE_Y1_ID,
+      GmosRule.GMOS_S_DTA_X_RULE_Y2_4_ID)
+    )
+
+  private def expectSuccessBinMultiple(): Unit =
+    expectSuccess(Set(GmosRule.DTA_X_Y_MULTIPLE_BINNING_RULE_ID))
+
+  private def expectFailure(problemType: Problem.Type, hasId: Set[String]): Unit =
     assertTrue(runCheck.exists { p =>
-      p.getType == Problem.Type.ERROR &&
-      p.getDescription.contains(ybin)
+      p.getType == problemType && hasId(p.getId)
     })
 
-  private def expectFailure1(): Unit = expectFailure("Ybin=1")
+  private def expectFailureY1(): Unit =
+    expectFailure(Problem.Type.ERROR, Set(GmosRule.GMOS_S_DTA_X_RULE_Y1_ID))
 
-  private def expectFailure2(): Unit = expectFailure("Ybin=2")
+  private def expectFailureY2_4(): Unit =
+    expectFailure(Problem.Type.ERROR, Set(GmosRule.GMOS_S_DTA_X_RULE_Y2_4_ID))
+
+  private def expectFailureBinMultiple(): Unit =
+      expectFailure(Problem.Type.WARNING, Set(GmosRule.DTA_X_Y_MULTIPLE_BINNING_RULE_ID))
 
   @Test def testStaticComponentSuccess1(): Unit =
     (-4 to 6).foreach { x =>
       initGmos((1, x))
-      expectSuccess()
+      expectSuccessBinY()
     }
 
   @Test def testStaticComponentSuccess2(): Unit =
     (-2 to 6).foreach { x =>
       initGmos((2, x))
-      expectSuccess()
+      expectSuccessBinY()
     }
 
   @Test def testIteratorSuccess1(): Unit =
@@ -89,7 +100,7 @@ class GmosSDtaXRuleTest extends AbstractRuleTest {
       x1 <- -4 to 0
     } {
       initGmos((1, x0), (1, x1))
-      expectSuccess()
+      expectSuccessBinY()
     }
 
   @Test def testIteratorSuccess2(): Unit =
@@ -98,31 +109,31 @@ class GmosSDtaXRuleTest extends AbstractRuleTest {
       x1 <- -2 to 0
     } {
       initGmos((2, x0), (2, x1))
-      expectSuccess()
+      expectSuccessBinY()
     }
 
   @Test def testStaticComponentFailure1(): Unit =
     (-6 to -5).foreach { x =>
       initGmos((1, x))
-      expectFailure1()
+      expectFailureY1()
     }
 
   @Test def testIteratorComponentFailure1(): Unit =
     (-6 to -5).foreach { x =>
       initGmos((1, 2), (1, x))
-      expectFailure1()
+      expectFailureY1()
     }
 
   @Test def testStaticComponentFailure2(): Unit =
     (-6 to -3).foreach { x =>
       initGmos((2, x))
-      expectFailure2()
+      expectFailureY2_4()
     }
 
   @Test def testIteratorComponentFailure2(): Unit =
     (-6 to -3).foreach { x =>
       initGmos((2, 2), (2, x))
-      expectFailure2()
+      expectFailureY2_4()
     }
 
   @Test def testGmosNorthIgnored(): Unit = {
@@ -136,6 +147,15 @@ class GmosSDtaXRuleTest extends AbstractRuleTest {
 
     gmos.setDataObject(dataObj)
 
-    expectSuccess()
+    expectSuccessBinY()
+  }
+
+  @Test def testDtaXYMultipleBinningSuccess(): Unit = {
+    initGmos((1,4), (2, 4))
+    expectSuccessBinMultiple()
+  }
+  @Test def testDtaXYMultipleBinningFailure(): Unit = {
+    initGmos((2, 3), (2,5))
+    expectFailureBinMultiple()
   }
 }

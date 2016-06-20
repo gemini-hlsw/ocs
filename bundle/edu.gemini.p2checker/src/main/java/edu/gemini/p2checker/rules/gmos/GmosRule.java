@@ -419,6 +419,9 @@ public final class GmosRule implements IRule {
         }
     };
 
+    public static final String GMOS_S_DTA_X_RULE_Y1_ID = PREFIX + "Y1";
+    public static final String GMOS_S_DTA_X_RULE_Y2_4_ID = PREFIX + "Y2_4";
+
     private static IConfigRule GMOS_S_DTA_X_RULE = new IConfigRule() {
 
         private static final String Y1   = "The GMOS-S Hamamatsu allowed DTA X range is -4 to +6 for Ybin=1";
@@ -430,9 +433,9 @@ public final class GmosRule implements IRule {
 
             final ISPProgramNode node = SequenceRule.getInstrumentOrSequenceNode(step, elems, config);
             if ((y == Binning.ONE) && (dtaX.intValue() < -4)) {
-                return new Problem(ERROR, PREFIX + "Y1", Y1, node);
+                return new Problem(ERROR, GMOS_S_DTA_X_RULE_Y1_ID, Y1, node);
             } else if ((y != Binning.ONE) && (dtaX.intValue() < -2)) {
-                return new Problem(ERROR, PREFIX + "Y2_4", Y2_4, node);
+                return new Problem(ERROR, GMOS_S_DTA_X_RULE_Y2_4_ID, Y2_4, node);
             } else {
                 return null;
             }
@@ -1611,6 +1614,11 @@ public final class GmosRule implements IRule {
         return (Binning) SequenceRule.getItem(config, Binning.class, CCD_Y_BINNING_KEY);
     }
 
+    private static DTAX getDtaXOffset(Config config) {
+        return (DTAX) SequenceRule.getInstrumentItem(config, InstGmosCommon.DTAX_OFFSET_PROP);
+    }
+
+
     private static Double getExposureTime(InstGmosCommon<?,?,?,?> inst, Config config) {
         // REL-196.  If there are no observes, there will be no observe exposure time.
         final Double obsExp = SequenceRule.getExposureTime(config);
@@ -1849,6 +1857,35 @@ public final class GmosRule implements IRule {
         }
     };
 
+    public static final String DTA_X_Y_MULTIPLE_BINNING_RULE_ID = PREFIX + "DTA_X_Y_MULTIPLE_BINNING_RULE";
+
+    /**
+     * REL-2456: We request a Phase II check to give a warning if the DTA-X
+     * position is not a multiple of the y-pixel binning.
+     */
+    private static IConfigRule DTA_X_Y_MULTIPLE_BINNING_RULE = new IConfigRule() {
+        private static final String errMsg = "The DTA X offset (%d) should be multiple of the Y-binning (%d)";
+
+        @Override
+        public Problem check(Config config, int step, ObservationElements elems, Object state) {
+            final int y = getYBinning(config).getValue();
+            final int dtaX = getDtaXOffset(config).intValue();
+
+            if (dtaX % y != 0) {
+                final String msg = String.format(errMsg, dtaX, y);
+                return new Problem(WARNING, DTA_X_Y_MULTIPLE_BINNING_RULE_ID, msg,
+                        SequenceRule.getInstrumentOrSequenceNode(step, elems));
+            }
+
+            return null;
+        }
+
+        @Override
+        public IConfigMatcher getMatcher() {
+            return IConfigMatcher.ALWAYS;
+        }
+    };
+
     /**
      * Register all the GMOS rules to apply
      */
@@ -1892,6 +1929,7 @@ public final class GmosRule implements IRule {
         GMOS_RULES.add(ROI_INVALID_RULE);
         GMOS_RULES.add(CUSTOM_ROI_NOT_DECLARED_RULE);
         GMOS_RULES.add(IFU_NO_SPATIAL_BINNING_RULE);
+        GMOS_RULES.add(DTA_X_Y_MULTIPLE_BINNING_RULE);
         GMOS_RULES.add(NO_P_OFFSETS_WITH_SLIT_SPECTROSCOPY_RULE);
         GMOS_RULES.add(new MdfMaskNameRule(Problem.Type.ERROR));
         GMOS_RULES.add(new MdfMaskNameRule(Problem.Type.WARNING));
