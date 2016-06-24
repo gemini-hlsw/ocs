@@ -625,5 +625,19 @@ class VoTableParserSpec extends Specification with VoTableParser {
       pmRA must beSome(RightAscensionAngularVelocity(AngularVelocity(-1.400004)))
       pmDec must beSome(DeclinationAngularVelocity(AngularVelocity(-7.56)))
     }
+    "support simbad repeated magnitude entries, REL-2853" in {
+      val xmlFile = "simbad-ngc-2438.xml"
+      // Simbad returns an xml with multiple measurements of the same band, use only the first one
+      println(VoTableParser.parse(SIMBAD, getClass.getResourceAsStream(s"/$xmlFile"), checkValidity = false))
+      val result = VoTableParser.parse(SIMBAD, getClass.getResourceAsStream(s"/$xmlFile"), checkValidity = false).getOrElse(ParsedVoResource(Nil))
+
+      val target = (for {
+          t <- result.tables.map(TargetsTable.apply)
+          r <- t.rows
+        } yield r).headOption
+      target.map(_.name) should beSome("NGC  2438")
+      target.map(_.magnitudeIn(MagnitudeBand.J)) should beSome(Some(new Magnitude(17.02, MagnitudeBand.J, 0.15, MagnitudeSystem.Vega)))
+    }
+
   }
 }
