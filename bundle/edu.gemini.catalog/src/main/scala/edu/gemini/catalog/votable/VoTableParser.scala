@@ -193,6 +193,8 @@ case object PPMXLAdapter extends CatalogAdapter with StandardAdapter {
 }
 
 case object SimbadAdapter extends CatalogAdapter {
+  private val errorFluxIDExtra = "FLUX_ERROR_(.)_.+"
+  private val fluxIDExtra = "FLUX_(.)_.+"
   private val errorFluxID = "FLUX_ERROR_(.)".r
   private val fluxID = "FLUX_(.)".r
   private val magSystemID = "FLUX_SYSTEM_(.)".r
@@ -202,8 +204,11 @@ case object SimbadAdapter extends CatalogAdapter {
   override val pmRaField = FieldId("PMRA", VoTableParser.UCD_PMRA)
   override val pmDecField = FieldId("PMDEC", VoTableParser.UCD_PMDEC)
 
-  override def ignoreMagnitudeField(v: FieldId) = !v.id.toLowerCase.startsWith("flux")
-  override def isMagnitudeSystemField(v: (FieldId, String)): Boolean = v._1.id.toLowerCase.startsWith("flux_system")
+  override def ignoreMagnitudeField(v: FieldId): Boolean =
+    !v.id.toLowerCase.startsWith("flux") || v.id.matches(errorFluxIDExtra) || v.id.matches(fluxIDExtra)
+
+  override def isMagnitudeSystemField(v: (FieldId, String)): Boolean =
+    v._1.id.toLowerCase.startsWith("flux_system")
 
   // Simbad has a few special cases to map sloan magnitudes
   def findBand(id: FieldId): Option[MagnitudeBand] = (id.id, id.ucd) match {
@@ -217,11 +222,11 @@ case object SimbadAdapter extends CatalogAdapter {
 
   // Simbad doesn't put the band in the ucd for magnitude errors
   override def isMagnitudeErrorField(v: (FieldId, String)): Boolean =
-    v._1.ucd.includes(VoTableParser.UCD_MAG) && v._1.ucd.includes(VoTableParser.STAT_ERR) && errorFluxID.findFirstIn(v._1.id).isDefined && !ignoreMagnitudeField(v._1) && v._2.nonEmpty
+    v._1.ucd.includes(VoTableParser.UCD_MAG) && v._1.ucd.includes(VoTableParser.STAT_ERR) &&
+    errorFluxID.findFirstIn(v._1.id).isDefined && !ignoreMagnitudeField(v._1) && v._2.nonEmpty
 
   protected def findBand(band: String): Option[MagnitudeBand] =
-    MagnitudeBand.all.
-      find(_.name == band)
+    MagnitudeBand.all.find(_.name == band)
 
   override def fieldToBand(field: FieldId): Option[MagnitudeBand] = {
     ((field.ucd.includes(VoTableParser.UCD_MAG) && !ignoreMagnitudeField(field)) option {
