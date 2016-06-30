@@ -10,7 +10,8 @@ import jsky.util.Preferences
 import jsky.util.gui._
 
 import scala.swing.Swing
-import scalaz.{-\/, \/-}
+import scalaz._
+import Scalaz._
 import scalaz.concurrent.Task
 
 object ImageCatalogLoader {
@@ -18,26 +19,24 @@ object ImageCatalogLoader {
 
   val Log = Logger.getLogger(this.getClass.getName)
 
-  val imageMemo = Memo.mutableHashMapMemo[URL, File](imageLoad)
-
-  def imageLoad(url: URL): File = {
+  def imageLoad(url: URL): Task[(File, URL)] = {
     // TODO run this asynchronously and support retry
     Task {
       val connection = url.openConnection()
       val in = url.openStream()
-      ImageCatalogLoader.imageToTmpFile(url, connection.getContentType, in)
-    }.run._1
+      (url, connection.getContentType, in)
+    } >>= {Function.tupled(ImageCatalogLoader.imageToTmpFile)}
   }
 
-  def loadImage(c: Coordinates) = {
+  def loadImage(c: Coordinates): Task[Unit] = {
     val url = ImageCatalog.user().queryUrl(c)
-    imageMemo(url)
+    imageLoad(url).void
   }
 
   /**
     * Load an image and display it on the TPE or display an error
     */
-  def display4Java(display: CatalogImageDisplay, url: URL):Unit = {
+  def display4Java(display: CatalogImageDisplay, url: URL): Unit = {
     val (p, f) = new ImageCatalogLoader().queryImage(url)
     f.unsafePerformAsync {
       case -\/(t) =>
@@ -55,7 +54,8 @@ object ImageCatalogLoader {
     * Download the given image URL to a temporary file and return the file
     * Note that to support the legacy progress bar we explicitly expect a ProgressBarFilterInputStream
     */
-  private def imageToTmpFile(url: URL, contentType: String, in: ProgressBarFilterInputStream): Task[(File, URL)] = {
+  private def imageToTmpFile(url: URL, contentType: String, in: InputStream): Task[(File, URL)] = {
+    Log.info(s"Downloading image at $url")
     val dir = Preferences.getPreferences.getCacheDir.getPath
 
     def suffix: Task[String] =
@@ -76,7 +76,7 @@ object ImageCatalogLoader {
       new FileOutputStream(file)
     }
 
-    def readFile(in: ProgressBarFilterInputStream, out: OutputStream): Task[Unit] = Task {
+    def readFile(in: InputStream, out: OutputStream): Task[Unit] = Task {
       val buffer = new Array[Byte](8 * 1024)
       Iterator
         .continually(in.read(buffer))
@@ -91,12 +91,12 @@ object ImageCatalogLoader {
       r <- readFile(in, o)
     } yield (t, url)
   }
+}
 
 /**
   * Class able to retrieve images from the old catalog and put them on display
   */
 class ImageCatalogLoader {
-
 
   /**
     * Retrieve image query and pass it to the display
@@ -112,7 +112,7 @@ class ImageCatalogLoader {
       (connection, in)
     }
 
-    val r = imageStreams.flatMap {case (c, u) => imageToTmpFile(url, c.getContentType, u)}
+    val r = imageStreams.flatMap { case (c, u) => ImageCatalogLoader.imageToTmpFile(url, c.getContentType, u) }
     (progress, r)
   }
 }

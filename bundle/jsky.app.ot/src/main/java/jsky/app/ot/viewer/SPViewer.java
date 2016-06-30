@@ -900,6 +900,7 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
         if (getRoot() != null) {
             for (RootEntry e : _history.rootEntriesAsJava()) {
                 BagsManager.unwatch(e.root());
+                BackgroundImageLoader.unwatch(e.root());
             }
         }
 
