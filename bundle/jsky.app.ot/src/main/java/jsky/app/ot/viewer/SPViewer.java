@@ -31,6 +31,7 @@ import jsky.app.ot.ui.util.UIConstants;
 import jsky.app.ot.util.History;
 import jsky.app.ot.util.PropertyChangeMultiplexer;
 import jsky.app.ot.util.Resources;
+import jsky.app.ot.util.RootEntry;
 import jsky.app.ot.vcs.VcsStateTracker;
 import jsky.app.ot.vcs.SyncAllDialog;
 import jsky.app.ot.vcs.VcsOtClient;
@@ -667,7 +668,6 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
 
             // If there was an old root, clean up
             if (getRoot() != null) {
-                BagsManager.unwatch(getRoot());
                 getDatabase().checkpoint();
                 getRoot().removePropertyChangeListener(ISPProgram.DATA_OBJECT_KEY, authListener);
                 updateEngToolWindow(null);
@@ -893,7 +893,9 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
     /** Close the current viewer window, but don't exit the application, even if it is the last window. */
     private void closeViewer() {
         if (getRoot() != null) {
-            BagsManager.unwatch(getRoot());
+            for (RootEntry e : _history.rootEntriesAsJava()) {
+                BagsManager.unwatch(e.root());
+            }
         }
 
         tryNavigate(_history.empty());
