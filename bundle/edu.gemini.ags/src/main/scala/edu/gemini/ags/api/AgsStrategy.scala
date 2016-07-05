@@ -85,24 +85,26 @@ object AgsStrategy {
      * the Selection.
      */
     def applyTo(env: TargetEnvironment): TargetEnvironment = {
-      val targetMap = ==>>.fromList(assignments.map { case Assignment(gp,gs) =>
-        gp -> new SPTarget(gs)})
-      val newAuto: AutomaticGroup = AutomaticGroup.Active(targetMap, posAngle)
+      import AutomaticGroup.Active
 
-      // If this is different from the old automatic GG, then replace.
-      val oldGuideEnvironment = env.getGuideEnvironment
-      val oldGuideEnv         = oldGuideEnvironment.guideEnv
+      val targetMap = ==>>.fromList(assignments.map { case Assignment(gp,gs) =>
+        gp -> new SPTarget(gs)
+      })
+      val newAuto = Active(targetMap, posAngle): AutomaticGroup
+      val oldAuto = TargetEnv.auto.get(env)
+
+      // True if the pos angle differs.
+      def posAngleUpdated = oldAuto match {
+        case Active(_, oldPa) => oldPa =/= posAngle
+        case _                => true
+      }
 
       // SPTargets are compared by references, so we extract the names and compare.
       def extractNames(auto: AutomaticGroup) = auto.targetMap.map(_.getName)
 
-      if (extractNames(oldGuideEnv.auto) =/= extractNames(newAuto)) {
-        val newGuideEnv = oldGuideEnv.copy(auto = newAuto)
-        val newGuideEnvironment = oldGuideEnvironment.copy(guideEnv = newGuideEnv)
-        env.setGuideEnvironment(newGuideEnvironment)
-      } else {
-        env
-      }
+      // If this is different from the old automatic GG, then replace.
+      val updated = (extractNames(oldAuto) =/= extractNames(newAuto)) || posAngleUpdated
+      if (updated) TargetEnv.auto.set(env, newAuto) else env
     }
 
     def applyTo(ctx: ObsContext): ObsContext = {
