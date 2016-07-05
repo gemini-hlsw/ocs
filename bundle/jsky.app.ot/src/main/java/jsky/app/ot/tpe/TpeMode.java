@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package jsky.app.ot.tpe;
 
 /**

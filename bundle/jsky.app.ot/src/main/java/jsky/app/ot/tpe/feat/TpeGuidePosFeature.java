@@ -95,7 +95,7 @@ public class TpeGuidePosFeature extends TpePositionFeature
     /**
      * Get the "draw position tags" property.
      */
-    public boolean getDrawTags() {
+    boolean getDrawTags() {
         return _props.getBoolean(PROP_SHOW_TAGS, true);
     }
 
@@ -109,7 +109,7 @@ public class TpeGuidePosFeature extends TpePositionFeature
     /**
      * Get the "indicate primary guide star" property value.
      */
-    public boolean getIdentifyPrimary() {
+    boolean getIdentifyPrimary() {
         return _props.getBoolean(PROP_IDENTIFY_PRIMARY, true);
     }
 
