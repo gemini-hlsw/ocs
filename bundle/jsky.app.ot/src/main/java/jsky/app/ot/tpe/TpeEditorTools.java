@@ -122,22 +122,11 @@ final class TpeEditorTools {
         return ctx.progShell().isDefined() && ctx.obsShell().isDefined() && OTOptions.isProgramEditable(ctx.progShell().get()) && OTOptions.isObservationEditable(ctx.obsShell().get());
     }
 
-    private boolean isManual() {
-        return ImOption.fromScalaOpt(_tpe.getImageWidget().getContext().targets().env())
-                .exists(te -> te.getGuideEnvironment().getPrimary().isManual());
-    }
-
-    // Returns true if the only group is an auto group.
-    private boolean onlyAutomatic() {
-        return ImOption.fromScalaOpt(_tpe.getImageWidget().getContext().targets().env())
-                .exists(te -> te.getGuideEnvironment().manualGroups().isEmpty());
-    }
-
     /**
      * Update the enable states of the buttons based on the OT editable state and whether or not the group is
      * the automatic guide group.
      */
-    public void updateEnabledStates() {
+    void updateEnabledStates() {
         final boolean enabled = isEnabled();
         _dragButton.setEnabled(enabled);
         _eraseButton.setEnabled(enabled);
@@ -205,12 +194,6 @@ final class TpeEditorTools {
 
         // If not enabled, then we're done.
         if (enabled) {
-            // Determine if we are in a manual group.
-            final boolean manual = isManual();
-
-            // Determine if the only group is the auto group.
-            final boolean onlyAuto = onlyAutomatic();
-
             // Add create buttons according to the enabled state of each item.
             for (final TpeImageFeature feature : feats) {
                 if (!(feature instanceof TpeCreatableFeature)) continue;
@@ -218,12 +201,8 @@ final class TpeEditorTools {
                 final TpeCreatableFeature cFeature = (TpeCreatableFeature) feature;
                 for (final TpeCreatableItem item : cFeature.getCreatableItems()) {
                     if (item.isEnabled(_tpe.getImageWidget().getContext())) {
-                        final boolean isWFSTarget = item.getType() == TpeCreatableItem.Type.wfsTarget;
                         final JToggleButton btn = _createButtonMap.get(item.getLabel());
                         btn.setVisible(true);
-
-                        // If we are on the auto group, only allow non WFS targets to be created.
-                        btn.setEnabled(manual || onlyAuto || !isWFSTarget);
                     }
                 }
             }
