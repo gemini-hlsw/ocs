@@ -32,7 +32,7 @@ object VoTableParser extends VoTableParser {
   val STAT_ERR = UcdWord("stat.error")
 
   val xsd = "/votable-1.2.xsd"
-  
+
   private def validate(xmlText: String): Throwable \/ String = \/.fromTryCatchNonFatal {
     import javax.xml.transform.stream.StreamSource
     import javax.xml.validation.SchemaFactory
@@ -85,6 +85,9 @@ sealed trait CatalogAdapter {
   def validMagnitude(m: Magnitude): Boolean = !(m.value.isNaN || m.error.exists(_.isNaN))
   // Attempts to extract a magnitude system for a particular band
   def parseMagnitudeSys(p: (FieldId, String)): CatalogProblem \/ Option[(MagnitudeBand, MagnitudeSystem)] = \/-(None)
+  // Attempts to extract the angular velocity of a field
+  def parseAngularVelocity(ucd: Ucd, v: String): CatalogProblem \/ AngularVelocity =
+    CatalogAdapter.parseDoubleValue(ucd, v).map(AngularVelocity.apply)
   // Attempts to extract a band and value for a magnitude from a pair of field and value
   def parseMagnitude(p: (FieldId, String)): CatalogProblem \/ (FieldId, MagnitudeBand, Double) = {
     val (fieldId: FieldId, value: String) = p
@@ -171,6 +174,10 @@ case object PPMXLAdapter extends CatalogAdapter with StandardAdapter {
   val alternateMagnitudesIds = List("r2mag", "b2mag")
   val idsMapping = primaryMagnitudesIds.zip(alternateMagnitudesIds)
 
+  // Convert angular velocity to mas per year as provided by ppmxl
+  override def parseAngularVelocity(ucd: Ucd, v: String): CatalogProblem \/ AngularVelocity =
+    CatalogAdapter.parseDoubleValue(ucd, v).map(AngularVelocity.fromDegreesPerYear)
+
   override def filterAndDeduplicateMagnitudes(magnitudeFields: List[(FieldId, Magnitude)]): List[Magnitude] = {
     // Read all magnitudes, including duplicates
     val magMap1 = (Map.empty[String, Magnitude]/:magnitudeFields) {
@@ -186,6 +193,8 @@ case object PPMXLAdapter extends CatalogAdapter with StandardAdapter {
 }
 
 case object SimbadAdapter extends CatalogAdapter {
+  private val errorFluxIDExtra = "FLUX_ERROR_(.)_.+"
+  private val fluxIDExtra = "FLUX_(.)_.+"
   private val errorFluxID = "FLUX_ERROR_(.)".r
   private val fluxID = "FLUX_(.)".r
   private val magSystemID = "FLUX_SYSTEM_(.)".r
@@ -195,8 +204,11 @@ case object SimbadAdapter extends CatalogAdapter {
   override val pmRaField = FieldId("PMRA", VoTableParser.UCD_PMRA)
   override val pmDecField = FieldId("PMDEC", VoTableParser.UCD_PMDEC)
 
-  override def ignoreMagnitudeField(v: FieldId) = !v.id.toLowerCase.startsWith("flux")
-  override def isMagnitudeSystemField(v: (FieldId, String)): Boolean = v._1.id.toLowerCase.startsWith("flux_system")
+  override def ignoreMagnitudeField(v: FieldId): Boolean =
+    !v.id.toLowerCase.startsWith("flux") || v.id.matches(errorFluxIDExtra) || v.id.matches(fluxIDExtra)
+
+  override def isMagnitudeSystemField(v: (FieldId, String)): Boolean =
+    v._1.id.toLowerCase.startsWith("flux_system")
 
   // Simbad has a few special cases to map sloan magnitudes
   def findBand(id: FieldId): Option[MagnitudeBand] = (id.id, id.ucd) match {
@@ -210,11 +222,11 @@ case object SimbadAdapter extends CatalogAdapter {
 
   // Simbad doesn't put the band in the ucd for magnitude errors
   override def isMagnitudeErrorField(v: (FieldId, String)): Boolean =
-    v._1.ucd.includes(VoTableParser.UCD_MAG) && v._1.ucd.includes(VoTableParser.STAT_ERR) && errorFluxID.findFirstIn(v._1.id).isDefined && !ignoreMagnitudeField(v._1) && v._2.nonEmpty
+    v._1.ucd.includes(VoTableParser.UCD_MAG) && v._1.ucd.includes(VoTableParser.STAT_ERR) &&
+    errorFluxID.findFirstIn(v._1.id).isDefined && !ignoreMagnitudeField(v._1) && v._2.nonEmpty
 
   protected def findBand(band: String): Option[MagnitudeBand] =
-    MagnitudeBand.all.
-      find(_.name == band)
+    MagnitudeBand.all.find(_.name == band)
 
   override def fieldToBand(field: FieldId): Option[MagnitudeBand] = {
     ((field.ucd.includes(VoTableParser.UCD_MAG) && !ignoreMagnitudeField(field)) option {
@@ -295,18 +307,13 @@ trait VoTableParser {
       if (isUCAC4) UCAC4Adapter.right else if (isPPMXL) PPMXLAdapter.right else if (isSimbad) SimbadAdapter.right else UnknownCatalog.left
     }
 
-    def parseProperMotion(pm: (Option[String], Option[String])): CatalogProblem \/ Option[ProperMotion] = {
-      val k = for {
-        pmra  <- pm._1.filter(_.nonEmpty)
-        pmdec <- pm._2.filter(_.nonEmpty)
-      } yield for {
-          pmrav  <- CatalogAdapter.parseDoubleValue(VoTableParser.UCD_PMRA, pmra)
-          pmdecv <- CatalogAdapter.parseDoubleValue(VoTableParser.UCD_PMDEC, pmdec)
-        } yield ProperMotion(RightAscensionAngularVelocity(AngularVelocity(pmrav)), DeclinationAngularVelocity(AngularVelocity(pmdecv)))
-
-      k.sequenceU
-    }
-
+    def parseProperMotion(adapter: CatalogAdapter, pm: (Option[String], Option[String])): CatalogProblem \/ Option[ProperMotion] =
+      (pm._1.filter(_.nonEmpty) |@| pm._2.filter(_.nonEmpty)) { (pmra, pmdec) =>
+        for {
+          pmrav  <- adapter.parseAngularVelocity(VoTableParser.UCD_PMRA, pmra)
+          pmdecv <- adapter.parseAngularVelocity(VoTableParser.UCD_PMDEC, pmdec)
+        } yield ProperMotion(RightAscensionAngularVelocity(pmrav), DeclinationAngularVelocity(pmdecv))
+      }.sequenceU
 
     def parseZ(z: Option[String]): CatalogProblem \/ Option[Redshift] =
       (for {
@@ -338,7 +345,7 @@ trait VoTableParser {
         r              <- Angle.parseDegrees(ra).leftMap(_ => FieldValueProblem(VoTableParser.UCD_RA, ra))
         d              <- Angle.parseDegrees(dec).leftMap(_ => FieldValueProblem(VoTableParser.UCD_DEC, dec))
         declination    <- Declination.fromAngle(d) \/> FieldValueProblem(VoTableParser.UCD_DEC, dec)
-        properMotion   <- parseProperMotion(pm)
+        properMotion   <- parseProperMotion(adapter, pm)
         redshift       <- parseZ(z)
         parallax       <- parsePlx(plx)
         mags            = entries.filter(adapter.isMagnitudeField)
