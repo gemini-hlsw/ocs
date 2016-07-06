@@ -95,7 +95,7 @@ public class TpeGuidePosFeature extends TpePositionFeature
     /**
      * Get the "draw position tags" property.
      */
-    public boolean getDrawTags() {
+    boolean getDrawTags() {
         return _props.getBoolean(PROP_SHOW_TAGS, true);
     }
 
@@ -109,7 +109,7 @@ public class TpeGuidePosFeature extends TpePositionFeature
     /**
      * Get the "indicate primary guide star" property value.
      */
-    public boolean getIdentifyPrimary() {
+    boolean getIdentifyPrimary() {
         return _props.getBoolean(PROP_IDENTIFY_PRIMARY, true);
     }
 
@@ -177,16 +177,13 @@ public class TpeGuidePosFeature extends TpePositionFeature
             final TargetEnvironment envInit = obsComp.getTargetEnvironment();
             final GuideEnvironment genvInit = envInit.getGuideEnvironment();
             final GuideGroup gpInit         = genvInit.getPrimary();
-            final boolean onlyAuto          = envInit.getGuideEnvironment().manualGroups().isEmpty();
 
             final GuideGroup        gp;
             final TargetEnvironment env;
             final int idx;
 
             if (gpInit.isAutomatic()) {
-                if (!onlyAuto) return;
-
-                // Only the auto group exists, so create a new manual group and add it as the primary group.
+                // Only the auto group is enabled, create a new manual group and add it as the primary group.
                 final ImList<GuideGroup> oldGroups = genvInit.getOptions();
                 gp  = GuideGroup.create(GuideGroup.ManualGroupDefaultName());
                 idx = oldGroups.size();

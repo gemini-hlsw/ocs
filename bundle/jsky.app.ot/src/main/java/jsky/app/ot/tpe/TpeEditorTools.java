@@ -22,7 +22,7 @@ import java.util.Map;
  */
 final class TpeEditorTools {
 
-    static class ButtonState {
+    private static class ButtonState {
         private static final String KEY = ButtonState.class.getName();
         final TpeMode mode;
         final TpeImageFeature feature;
@@ -55,7 +55,7 @@ final class TpeEditorTools {
     private final JToggleButton _dragButton;
     private final JToggleButton _eraseButton;
 
-    private Map<String, JToggleButton> _createButtonMap = new HashMap<>();
+    private final Map<String, JToggleButton> _createButtonMap = new HashMap<>();
 
     /** Create with the Presentation that contains the tool buttons. */
     TpeEditorTools(final TelescopePosEditor tpe) {
@@ -122,27 +122,15 @@ final class TpeEditorTools {
         return ctx.progShell().isDefined() && ctx.obsShell().isDefined() && OTOptions.isProgramEditable(ctx.progShell().get()) && OTOptions.isObservationEditable(ctx.obsShell().get());
     }
 
-    private boolean isManual() {
-        return ImOption.fromScalaOpt(_tpe.getImageWidget().getContext().targets().env())
-                .exists(te -> te.getGuideEnvironment().getPrimary().isManual());
-    }
-
-    // Returns true if the only group is an auto group.
-    private boolean onlyAutomatic() {
-        return ImOption.fromScalaOpt(_tpe.getImageWidget().getContext().targets().env())
-                .exists(te -> te.getGuideEnvironment().manualGroups().isEmpty());
-    }
-
     /**
      * Update the enable states of the buttons based on the OT editable state and whether or not the group is
      * the automatic guide group.
      */
-    public void updateEnabledStates() {
+    void updateEnabledStates() {
         final boolean enabled = isEnabled();
         _dragButton.setEnabled(enabled);
         _eraseButton.setEnabled(enabled);
     }
-
 
     //
     // Add a create tool.
@@ -175,11 +163,10 @@ final class TpeEditorTools {
         _createButtonMap.put(label, btn);
     }
 
-
     /**
      * Add the create tools for the given feature.
      */
-    public void addFeature(final TpeImageFeature tif) {
+    void addFeature(final TpeImageFeature tif) {
         if (!(tif instanceof TpeCreatableFeature)) return;  // nothing to add
         final TpeCreatableItem[] items = ((TpeCreatableFeature) tif).getCreatableItems();
         for (TpeCreatableItem item : items) _addCreateTool(item, tif);
@@ -189,7 +176,7 @@ final class TpeEditorTools {
      * Disable or enable the set of creation tools associated with the
      * given image features.
      */
-    public void updateAvailableOptions(final Collection<TpeImageFeature> feats) {
+    void updateAvailableOptions(final Collection<TpeImageFeature> feats) {
         boolean enabled = true;
         if (!isEnabled()) {
             _browseButton.setSelected(true); // make sure we are only in browse mode
@@ -206,33 +193,23 @@ final class TpeEditorTools {
         }
 
         // If not enabled, then we're done.
-        if (!enabled) return;
+        if (enabled) {
+            // Add create buttons according to the enabled state of each item.
+            for (final TpeImageFeature feature : feats) {
+                if (!(feature instanceof TpeCreatableFeature)) continue;
 
-        // Determine if we are in a manual group.
-        final boolean manual = isManual();
-
-        // Determine if the only group is the auto group.
-        final boolean onlyAuto = onlyAutomatic();
-
-        // Add create buttons according to the enabled state of each item.
-        for (final TpeImageFeature feature : feats) {
-            if (!(feature instanceof TpeCreatableFeature)) continue;
-
-            final TpeCreatableFeature cFeature = (TpeCreatableFeature) feature;
-            for (final TpeCreatableItem item : cFeature.getCreatableItems()) {
-                if (item.isEnabled(_tpe.getImageWidget().getContext())) {
-                    final boolean isWFSTarget = item.getType() == TpeCreatableItem.Type.wfsTarget;
-                    final JToggleButton btn   = _createButtonMap.get(item.getLabel());
-                    btn.setVisible(true);
-
-                    // If we are on the auto group, only allow non WFS targets to be created.
-                    btn.setEnabled(manual || onlyAuto || !isWFSTarget);
+                final TpeCreatableFeature cFeature = (TpeCreatableFeature) feature;
+                for (final TpeCreatableItem item : cFeature.getCreatableItems()) {
+                    if (item.isEnabled(_tpe.getImageWidget().getContext())) {
+                        final JToggleButton btn = _createButtonMap.get(item.getLabel());
+                        btn.setVisible(true);
+                    }
                 }
             }
-        }
 
-        if ((selected != null) && !(selected.isVisible() && selected.isEnabled())) {
-            _browseButton.doClick();
+            if ((selected != null) && !(selected.isVisible() && selected.isEnabled())) {
+                _browseButton.doClick();
+            }
         }
     }
 
@@ -258,7 +235,7 @@ final class TpeEditorTools {
     /**
      * Get the creatable item currently selected.
      */
-    public TpeCreatableItem getCurrentCreatableItem() {
+    TpeCreatableItem getCurrentCreatableItem() {
         if (_current == null) return null;
         return ButtonState.get(_current).item;
     }
@@ -266,7 +243,7 @@ final class TpeEditorTools {
     /**
      * Go to browse mode.
      */
-    public void gotoBrowseMode() {
+    void gotoBrowseMode() {
         _browseButton.setSelected(true);
     }
 
@@ -275,5 +252,3 @@ final class TpeEditorTools {
         return getClass().getName() + "[tool=" + getCurrentCreatableItem() + "]";
     }
 }
-
-
