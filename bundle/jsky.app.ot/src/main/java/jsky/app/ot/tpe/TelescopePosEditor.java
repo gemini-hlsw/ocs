@@ -273,7 +273,7 @@ public final class TelescopePosEditor extends JSkyCat implements TpeMouseObserve
             }
         }
     };
-    
+
     private final PropertyChangeListener selListener = evt -> {
         reset((ISPNode) evt.getSource());
     };

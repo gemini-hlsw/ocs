@@ -1,10 +1,3 @@
-/*
- * Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: TpeToolBar.java 45662 2012-05-31 02:54:05Z fnussber $
- */
-
 package jsky.app.ot.tpe;
 
 import jsky.app.ot.ags.AgsSelectorControl;
@@ -22,7 +15,7 @@ import java.awt.event.ComponentListener;
  *
  * @version $Revision: 45662 $
  * @author Allan Brighton */
-public final class TpeToolBar extends JPanel {
+final class TpeToolBar extends JPanel {
 
     private static GridBagConstraints gbc(final int y) {
         return new GridBagConstraints() {{
@@ -49,21 +42,21 @@ public final class TpeToolBar extends JPanel {
     /**
      * The left side toolbar for the position editor.
      */
-    public TpeToolBar() {
+    TpeToolBar() {
         super(new GridBagLayout());
 
         setBorder(BorderFactory.createEmptyBorder(10, 5, 10, 5));
 
         _modePanel = new JPanel(new GridBagLayout());
         add(_modePanel, new GridBagConstraints() {{
-            gridx=0; gridy=0; anchor=NORTH; fill=HORIZONTAL; weightx=1;
-            insets=new Insets(0, 5, 0, 0);
+            gridx = 0; gridy = 0; anchor = NORTH; fill = HORIZONTAL; weightx = 1;
+            insets = new Insets(0, 5, 0, 0);
         }});
 
         _createPanel = new JPanel(new GridBagLayout());
         add(_createPanel, new GridBagConstraints() {{
-            gridx=0; gridy=1; anchor=NORTH; fill=HORIZONTAL; weightx=1;
-            insets=new Insets(5, 5, 0, 0);
+            gridx = 0; gridy = 1; anchor = NORTH; fill = HORIZONTAL; weightx = 1;
+            insets = new Insets(5, 5, 0, 0);
         }});
 
         int i=0;
@@ -71,8 +64,8 @@ public final class TpeToolBar extends JPanel {
             _viewPanel[i] = new JPanel(new GridBagLayout());
 
             GridBagConstraints gbc = new GridBagConstraints() {{
-                gridx=0; anchor=NORTH; fill=HORIZONTAL;
-                insets=new Insets(10, 0, 0, 0);
+                gridx = 0; anchor = NORTH; fill = HORIZONTAL;
+                insets = new Insets(10, 0, 0, 0);
             }};
             gbc.gridy = 2+i;
 
@@ -81,15 +74,15 @@ public final class TpeToolBar extends JPanel {
         }
 
         final int yPos = 2+i;
-        JPanel wrappedGuiderSelector = wrapPanel("", _guiderSelector.getUi());
+        final JPanel wrappedGuiderSelector = wrapPanel("", _guiderSelector.getUi());
         add(wrappedGuiderSelector, new GridBagConstraints() {{
-            gridx=0; gridy=yPos; anchor=NORTH; fill=HORIZONTAL;
-            insets=new Insets(10, 0, 0, 0);
+            gridx = 0; gridy = yPos; anchor = NORTH; fill = HORIZONTAL;
+            insets = new Insets(10, 0, 0, 0);
         }});
 
         // consume remaining vertical space
-        GridBagConstraints gbc = new GridBagConstraints() {{
-            gridx=0; fill=BOTH; weighty=1.0;
+        final GridBagConstraints gbc = new GridBagConstraints() {{
+            gridx = 0; fill = BOTH; weighty = 1.0;
         }};
         gbc.gridy = 3+i;
         add(new JPanel(), gbc);
@@ -97,16 +90,16 @@ public final class TpeToolBar extends JPanel {
     }
 
     private JPanel wrapPanel(String label, JComponent panel) {
-        JPanel res = new JPanel(new GridBagLayout());
+        final JPanel res = new JPanel(new GridBagLayout());
 
-        JLabel lab = new JLabel(label);
+        final JLabel lab = new JLabel(label);
         res.add(lab, new GridBagConstraints() {{
-            gridx=0; gridy=0; anchor=WEST; fill=HORIZONTAL; weightx=1;
-            insets=new Insets(0, 0, 3, 0);
+            gridx = 0; gridy = 0; anchor = WEST; fill = HORIZONTAL; weightx = 1;
+            insets = new Insets(0, 0, 3, 0);
         }});
         res.add(panel, new GridBagConstraints() {{
-            gridx=0; gridy=1; fill=BOTH; weightx=1;
-            insets=new Insets(0, 5, 0, 0);
+            gridx = 0; gridy = 1; fill = BOTH; weightx = 1;
+            insets = new Insets(0, 5, 0, 0);
         }});
 
         return res;
@@ -122,22 +115,22 @@ public final class TpeToolBar extends JPanel {
         }
     }
 
-    public void addModeButton(JToggleButton button) {
+    void addModeButton(JToggleButton button) {
         _buttonGroup.add(button);
         add(button, _modePanel);
     }
 
-    public void addCreateButton(JToggleButton button) {
+    void addCreateButton(JToggleButton button) {
         _buttonGroup.add(button);
         add(button, _createPanel);
     }
 
-    public void hideCreateButtons() {
+    void hideCreateButtons() {
         hide(_createPanel);
     }
 
-    public static Component createKeyPanel(Component key) {
-        JPanel pan = new JPanel(new GridBagLayout());
+    static Component createKeyPanel(Component key) {
+        final JPanel pan = new JPanel(new GridBagLayout());
 
         final Dimension d = new Dimension(16, 16);
         JPanel spacer = new JPanel() {{
@@ -152,7 +145,7 @@ public final class TpeToolBar extends JPanel {
         return pan;
     }
 
-    public void addViewItem(Component comp, TpeImageFeatureCategory cat) {
+    void addViewItem(Component comp, TpeImageFeatureCategory cat) {
         final JPanel viewPanel = _viewPanel[cat.ordinal()];
         add(comp, viewPanel);
 
@@ -185,11 +178,11 @@ public final class TpeToolBar extends JPanel {
         });
     }
 
-    public void hideViewButtons() {
+    void hideViewButtons() {
         for (JPanel pan : _viewPanel) hide(pan);
     }
 
-    public AgsSelectorControl getGuiderSelector() {
+    AgsSelectorControl getGuiderSelector() {
         return _guiderSelector;
     }
 }
