@@ -20,7 +20,6 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.TimeZone;
-import java.util.concurrent.CountDownLatch;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -40,11 +39,6 @@ public class PublishAction extends AbstractAsyncAction implements PropertyChange
 //	private static final String[] MONTHS = { "jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec" };
 
     private static final long serialVersionUID = 1L;
-    private CountDownLatch latch = new CountDownLatch(1);
-    private boolean utc;
-    private boolean web;
-    private boolean qcMarkers;
-    private boolean cancel;
 
     private final IShell shell;
 
@@ -88,7 +82,7 @@ public class PublishAction extends AbstractAsyncAction implements PropertyChange
 				shell.getPeer(),
 				"Select a publish option.",
 				"Publish Plan",
-				JOptionPane.OK_CANCEL_OPTION,
+				JOptionPane.QUESTION_MESSAGE,
 				SharedIcons.ICON_PUBLISH,
 				OPTIONS,
 				OPTIONS[0]);
@@ -96,8 +90,8 @@ public class PublishAction extends AbstractAsyncAction implements PropertyChange
 			if (option == null)
 				return; // cancelled
 
-			web = option == OPTIONS[2];
-			qcMarkers = option == OPTIONS[1];
+            final boolean web = option == OPTIONS[2];
+            final boolean qcMarkers = option == OPTIONS[1];
 
 
             String[] TIME_OPTIONS = { "Local time at site", "UTC"};
@@ -115,87 +109,8 @@ public class PublishAction extends AbstractAsyncAction implements PropertyChange
             if (timeOption == null)
                 return; // cancelled
 
-            utc = timeOption.equals(1);
+            final boolean utc = timeOption.equals(1);
 
-
-
-//            latch = new CountDownLatch(1);
-//            final JDialog dialog = new JDialog(shell.getPeer(), "Publish Plan");
-//            dialog.setResizable(true);
-//            dialog.setSize(100,50);
-//            CellConstraints cc = new CellConstraints();
-//
-//            JPanel contentPane = new JPanel(new FormLayout(
-//                    new ColumnSpec[] {
-//                            new ColumnSpec("max(min;30dlu)"),
-//                            FormFactory.UNRELATED_GAP_COLSPEC,
-//                            new ColumnSpec("max(min;30dlu)"),
-//                            FormFactory.UNRELATED_GAP_COLSPEC,
-//                            new ColumnSpec("max(min;30dlu)"),
-//                    },
-//                    new RowSpec[] {
-//                            new RowSpec(RowSpec.FILL, Sizes.DLUY1, FormSpec.DEFAULT_GROW),
-//                            FormFactory.RELATED_GAP_ROWSPEC,
-//                            new RowSpec(RowSpec.FILL, Sizes.DLUY1, FormSpec.DEFAULT_GROW),
-//
-//
-//                    }));
-//            final JComboBox combo = new JComboBox(OPTIONS);
-//            contentPane.add(combo, cc.xywh(1, 1, 5, 1));
-//            JButton localBtn;
-//            localBtn = new JButton("Publish in Local Time");
-//            localBtn.addActionListener(new ActionListener() {
-//                @Override
-//                public void actionPerformed(ActionEvent actionEvent) {
-//                    utc = true;
-//                    web = combo.getSelectedIndex() == 2;
-//                    qcMarkers = combo.getSelectedIndex() == 1;
-//                    cancel = false;
-//                    latch.countDown();
-//                    dialog.dispose();
-//                }
-//            });
-//            JButton utcBtn;
-//            utcBtn = new JButton("Publish in UTC");
-//            utcBtn.addActionListener(new ActionListener() {
-//                @Override
-//                public void actionPerformed(ActionEvent actionEvent) {
-//                    utc = true;
-//                    web = combo.getSelectedIndex() == 2;
-//                    qcMarkers = combo.getSelectedIndex() == 1;
-//                    cancel = false;
-//                    latch.countDown();
-//                    dialog.dispose();
-//                }
-//            });
-//
-//            JButton cancelBtn;
-//            cancelBtn = new JButton("Cancel");
-//            cancelBtn.addActionListener(new ActionListener() {
-//                @Override
-//                public void actionPerformed(ActionEvent actionEvent) {
-//                    cancel = true;
-//                    latch.countDown();
-//                    dialog.dispose();
-//                }
-//            });
-//            contentPane.add(localBtn,cc.xywh(1,3,1,1));
-//            contentPane.add(utcBtn,cc.xywh(3,3,1,1));
-//            contentPane.add(cancelBtn,cc.xywh(5,3,1,1));
-//            dialog.setContentPane(contentPane);
-//
-//
-//            dialog.setVisible(true);
-//            try {
-//                latch.await();
-//            } catch (InterruptedException e1) {
-//                System.out.println("sldjfhskfgh");
-//            }
-//            System.out.println("utc " + utc + " web " + web + " qc " + qcMarkers + " cancel " + cancel);
-//
-//            if (cancel) {
-//                return;
-//            }
             final Destination[] destinations;
             if (web) {
 
