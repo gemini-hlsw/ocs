@@ -54,7 +54,7 @@ object Recipe {
   }
 
   def createS2NChart(result: SpectroscopyResult, index: Int): SpcChartData = {
-    createS2NChart(result, "Intermediate Single Exp and Final S/N", index)
+    createS2NChart(result, "Intermediate Single Exp and Final S/N in aperture", index)
   }
 
   def createS2NChart(result: SpectroscopyResult, title: String, index: Int): SpcChartData = {
