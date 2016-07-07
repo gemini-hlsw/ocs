@@ -16,7 +16,7 @@ sealed trait Slit {
   def length: Double
   def area: Double
 
-  // According to Andy Stephens we do want to take partial pixels into account for throughput calculations.
+  // Ignore partial pixels for throughput calculations.
   // The values here are rounded to the next full pixel, so depending on future usage of these values this
   // may or may not be what is needed. Please use with care. This current implementation follows the original
   // implementation.
@@ -26,16 +26,17 @@ sealed trait Slit {
 
 }
 
-/** Slit that covers exactly one pixel². This is used to calculate the peak pixel flux for a single pixel. */
-final case class OnePixelSlit(pixelSize: Double) extends Slit {
+/** Slit that is 1-pixel long for calculating the peak pixel flux. */
+final case class OnePixelSlit(width: Double, pixelSize: Double) extends Slit {
 
-  val width                   = pixelSize
-  val length                  = pixelSize
-  val area                    = width * length
+  // width = slit width in arcseconds
+  // pixelSize = pixel size in arcseconds
+  val length                  = pixelSize        // slit length in arcseconds
+  val area                    = width * length   // slit area in square arcseconds
 
-  override val widthPixels    = 1
+  override val widthPixels    = Math.max(1, (width / pixelSize).round).toInt
   override val lengthPixels   = 1
-  override val areaPixels     = 1
+  override val areaPixels     = widthPixels * lengthPixels
 
 }
 
