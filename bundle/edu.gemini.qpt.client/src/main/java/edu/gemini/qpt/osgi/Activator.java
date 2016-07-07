@@ -91,11 +91,9 @@ public final class Activator implements BundleActivator {
 
                 // If the keychain is locked, give the user the chance to unlock it here. If they
                 // choose not to, they can do it via Edit > Manage Keys
-                SwingUtilities.invokeLater(new Runnable() {
-                    public void run() {
-                        if (ac.asJava().isLocked())
-                            PasswordDialog.unlock(ac, null);
-                    }
+                SwingUtilities.invokeLater(() -> {
+                    if (ac.asJava().isLocked())
+                        PasswordDialog.unlock(ac, null);
                 });
 
                 Activator.this.advisor = new ShellAdvisor("Gemini QPT", Version.current.toString(), root, ac, internal, pachon, ProbeLimitsTable.loadOrThrow());
