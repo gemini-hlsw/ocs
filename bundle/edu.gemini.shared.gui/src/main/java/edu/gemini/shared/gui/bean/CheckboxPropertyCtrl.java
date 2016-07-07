@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package edu.gemini.shared.gui.bean;
 
 import javax.swing.*;
