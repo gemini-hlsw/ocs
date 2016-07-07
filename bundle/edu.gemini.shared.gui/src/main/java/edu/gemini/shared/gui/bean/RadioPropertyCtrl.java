@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package edu.gemini.shared.gui.bean;
 
 import javax.swing.*;
@@ -19,13 +15,11 @@ public final class RadioPropertyCtrl<B, T extends Enum> extends PropertyCtrl<B, 
     private final JRadioButton[] radio;
 
 
-    private ActionListener actionListener = new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-            T oldVal = getVal();
-            T newVal = getSelectedRadioButtonValue();
-            setVal(newVal);
-            fireEditEvent(oldVal, newVal);
-        }
+    private ActionListener actionListener = e -> {
+        T oldVal = getVal();
+        T newVal = getSelectedRadioButtonValue();
+        setVal(newVal);
+        fireEditEvent(oldVal, newVal);
     };
 
     public RadioPropertyCtrl(final PropertyDescriptor pd) {

@@ -2,10 +2,8 @@ package jsky.app.ot.tpe.gems;
 
 import edu.gemini.ags.gems.GemsGuideStarSearchOptions.*;
 import edu.gemini.ags.gems.GemsGuideStars;
-import edu.gemini.pot.ModelConverters;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.core.SiderealTarget;
-import edu.gemini.spModel.obs.SchedulingBlock;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
@@ -126,7 +124,7 @@ public class GemsGuideStarSearchDialog extends JFrame {
         }
     };
 
-    protected static NumberFormat NF = NumberFormat.getInstance(Locale.US);
+    private static NumberFormat NF = NumberFormat.getInstance(Locale.US);
 
     static {
         NF.setMaximumFractionDigits(1);
@@ -157,7 +155,6 @@ public class GemsGuideStarSearchDialog extends JFrame {
     private final StatusPanel _statusPanel = new StatusPanel();
     private final TpeImageWidget _tpe;
 
-    private final TablePlotter _plotter;
     private final JPanel _candidateGuideStarsPanel = new JPanel(new BorderLayout(5, 5));
 
     // Set to true in selection handling
@@ -173,7 +170,7 @@ public class GemsGuideStarSearchDialog extends JFrame {
     public GemsGuideStarSearchDialog(TpeImageWidget tpe, scala.concurrent.ExecutionContext ec) {
         super("GeMS Guide Star Search");
         _tpe = tpe;
-        _plotter = tpe.plotter();
+        TablePlotter _plotter = tpe.plotter();
         this.ec = ec;
 
         _candidateGuideStarsTable = new CandidateGuideStarsTable(_plotter);

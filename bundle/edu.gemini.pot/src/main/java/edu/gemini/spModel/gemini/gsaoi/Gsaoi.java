@@ -41,6 +41,8 @@ import edu.gemini.spModel.seqcomp.SeqConfigNames;
 import edu.gemini.spModel.target.offset.OffsetPosBase;
 import edu.gemini.spModel.telescope.IssPort;
 import edu.gemini.spModel.telescope.IssPortProvider;
+import edu.gemini.spModel.telescope.PosAngleConstraint;
+import edu.gemini.spModel.telescope.PosAngleConstraintAware;
 import edu.gemini.spModel.type.DisplayableSpType;
 import edu.gemini.spModel.type.LoggableSpType;
 import edu.gemini.spModel.type.SequenceableSpType;
@@ -54,7 +56,7 @@ import static edu.gemini.spModel.seqcomp.SeqConfigNames.INSTRUMENT_KEY;
 /**
  * This class defines the GS AOI instrument.
  */
-public final class Gsaoi extends SPInstObsComp implements PropertyProvider, GuideProbeProvider, IssPortProvider, StepCalculator {
+public final class Gsaoi extends SPInstObsComp implements PropertyProvider, GuideProbeProvider, IssPortProvider, StepCalculator, PosAngleConstraintAware {
 //    From REL-439:
 //    ----
 //    OT changes:
@@ -442,6 +444,7 @@ public final class Gsaoi extends SPInstObsComp implements PropertyProvider, Guid
     public static final PropertyDescriptor EXPOSURE_TIME_PROP;
     public static final PropertyDescriptor COADDS_PROP;
     public static final PropertyDescriptor POS_ANGLE_PROP;
+    public static final PropertyDescriptor POS_ANGLE_CONSTRAINT_PROP;
     public static final PropertyDescriptor UTILITY_WHEEL_PROP;
     public static final PropertyDescriptor ROI_PROP;
     public static final PropertyDescriptor ODGW_SIZE_PROP;
@@ -468,6 +471,7 @@ public final class Gsaoi extends SPInstObsComp implements PropertyProvider, Guid
         EXPOSURE_TIME_PROP = initProp("exposureTime", query_no, iter_yes);
         COADDS_PROP = initProp("coadds", query_no, iter_yes);
         POS_ANGLE_PROP = initProp("posAngle", query_no, iter_no);
+        POS_ANGLE_CONSTRAINT_PROP = initProp("posAngleConstraint", query_no, iter_no);
 
         UTILITY_WHEEL_PROP = initProp(UtilityWheel.KEY.getName(), query_no, iter_yes);
         UTILITY_WHEEL_PROP.setExpert(true);
@@ -483,6 +487,8 @@ public final class Gsaoi extends SPInstObsComp implements PropertyProvider, Guid
         ROI_PROP.setDisplayName("Region of Interest");
         PropertySupport.setWrappedType(ROI_PROP, Roi.class);
     }
+
+    private PosAngleConstraint _posAngleConstraint = PosAngleConstraint.UNBOUNDED;
 
     private Filter filter = Filter.DEFAULT;
     private ReadMode readMode;
@@ -737,6 +743,7 @@ public final class Gsaoi extends SPInstObsComp implements PropertyProvider, Guid
         Pio.addParam(factory, paramSet, FILTER_PROP.getName(), filter.name());
         Pio.addParam(factory, paramSet, READ_MODE_PROP.getName(), readMode.name());
         Pio.addParam(factory, paramSet, PORT_PROP.getName(), port.name());
+        Pio.addParam(factory, paramSet, POS_ANGLE_CONSTRAINT_PROP.getName(), getPosAngleConstraint().name());
         Pio.addParam(factory, paramSet, UTILITY_WHEEL_PROP.getName(), utilityWheel.name());
         Pio.addParam(factory, paramSet, ODGW_SIZE_PROP.getName(), odgwSize.name());
         Pio.addParam(factory, paramSet, ROI_PROP.getName(), roi.name());
@@ -763,6 +770,9 @@ public final class Gsaoi extends SPInstObsComp implements PropertyProvider, Guid
         v = Pio.getValue(paramSet, PORT_PROP.getName());
         if (v != null) setIssPort(IssPort.valueOf(v));
 
+        v = Pio.getValue(paramSet, POS_ANGLE_CONSTRAINT_PROP.getName());
+        if (v != null) setPosAngleConstraint(PosAngleConstraint.valueOf(v));
+
         v = Pio.getValue(paramSet, UTILITY_WHEEL_PROP.getName());
         if (v != null) setUtilityWheel(UtilityWheel.valueOf(v, getUtilityWheel()));
 
@@ -786,6 +796,7 @@ public final class Gsaoi extends SPInstObsComp implements PropertyProvider, Guid
         sc.putParameter(DefaultParameter.getInstance(ROI_PROP.getName(), getRoi()));
         sc.putParameter(DefaultParameter.getInstance(EXPOSURE_TIME_PROP.getName(), getExposureTime()));
         sc.putParameter(DefaultParameter.getInstance(POS_ANGLE_PROP.getName(), getPosAngleDegrees()));
+        sc.putParameter(DefaultParameter.getInstance(POS_ANGLE_CONSTRAINT_PROP.getName(), getPosAngleConstraint()));
         sc.putParameter(DefaultParameter.getInstance(COADDS_PROP.getName(), getCoadds()));
 
         return sc;
@@ -821,6 +832,34 @@ public final class Gsaoi extends SPInstObsComp implements PropertyProvider, Guid
     private static final Angle PWFS1_VIG = Angle.arcmins(5.8);
     @Override public Angle pwfs1VignettingClearance() { return PWFS1_VIG; }
 
+    @Override
+    public PosAngleConstraint getPosAngleConstraint() {
+        return (_posAngleConstraint == null) ? PosAngleConstraint.UNBOUNDED : _posAngleConstraint;
+    }
+
+    @Override
+    public void setPosAngleConstraint(PosAngleConstraint newValue) {
+        PosAngleConstraint oldValue = getPosAngleConstraint();
+        if (oldValue != newValue) {
+            _posAngleConstraint = newValue;
+            firePropertyChange(POS_ANGLE_CONSTRAINT_PROP.getName(), oldValue, newValue);
+        }
+    }
+
+    @Override
+    public String getPosAngleConstraintDescriptorKey() {
+        return POS_ANGLE_CONSTRAINT_PROP.getName();
+    }
+
+    @Override
+    public ImList<PosAngleConstraint> getSupportedPosAngleConstraints() {
+        return DefaultImList.create(PosAngleConstraint.FIXED,
+                                    PosAngleConstraint.UNBOUNDED);
+    }
+
+    @Override
+    public boolean allowUnboundedPositionAngle() {
+        return true;
+    }
+
 }
-
-

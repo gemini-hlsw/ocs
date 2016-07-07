@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package jsky.app.ot.gemini.gsaoi;
 
 import edu.gemini.pot.sp.ISPObsComponent;
@@ -128,15 +124,13 @@ public final class GsaoiEditor extends ComponentEditor<ISPObsComponent, Gsaoi> i
         }
     }
 
-    private final EditListener<Gsaoi, Gsaoi.Filter> filterChangeListener = new EditListener<Gsaoi, Gsaoi.Filter>() {
-        public void valueChanged(EditEvent<Gsaoi, Gsaoi.Filter> evt) {
-            final Gsaoi.Filter f = evt.getNewValue();
-            if (f == null) return;
+    private final EditListener<Gsaoi, Gsaoi.Filter> filterChangeListener = evt -> {
+        final Filter f = evt.getNewValue();
+        if (f == null) return;
 
-            final Gsaoi.ReadMode readMode = f.readMode();
-            if (readMode == null) return;
-            getDataObject().setReadMode(readMode);
-        }
+        final ReadMode readMode = f.readMode();
+        if (readMode == null) return;
+        getDataObject().setReadMode(readMode);
     };
 
     private final class ExposureTimeMessageUpdater implements EditListener<Gsaoi, Double>, PropertyChangeListener {
@@ -243,8 +237,8 @@ public final class GsaoiEditor extends ComponentEditor<ISPObsComponent, Gsaoi> i
     public GsaoiEditor() {
 
         filterCtrl   = ComboPropertyCtrl.enumInstance(FILTER_PROP);
-        portCtrl     = new RadioPropertyCtrl<Gsaoi, IssPort>(PORT_PROP);
-        readModeCtrl = new RadioPropertyCtrl<Gsaoi, ReadMode>(READ_MODE_PROP);
+        portCtrl     = new RadioPropertyCtrl<>(PORT_PROP);
+        readModeCtrl = new RadioPropertyCtrl<>(READ_MODE_PROP);
         odgwSizeCtrl = ComboPropertyCtrl.enumInstance(ODGW_SIZE_PROP);
         utilWheelCtrl= ComboPropertyCtrl.enumInstance(UTILITY_WHEEL_PROP);
         roiCtrl= ComboPropertyCtrl.enumInstance(ROI_PROP);
@@ -331,7 +325,7 @@ public final class GsaoiEditor extends ComponentEditor<ISPObsComponent, Gsaoi> i
         addCtrl(pan, 0, 2, roiCtrl);
 
         pan.add(new JPanel(), new GridBagConstraints(){{
-            gridx=0; gridy=3; weighty=1.0; fill=VERTICAL;
+            gridx = 0; gridy = 3; weighty = 1.0; fill = VERTICAL;
         }});
 
         return pan;
@@ -360,7 +354,7 @@ public final class GsaoiEditor extends ComponentEditor<ISPObsComponent, Gsaoi> i
     }
 
     @Override
-    protected void handlePostDataObjectUpdate(Gsaoi gsaoi) {
+    protected void handlePostDataObjectUpdate(final Gsaoi gsaoi) {
         filterCtrl.removeEditListener(filterChangeListener);
 
         posAngleCtrl.setBean(gsaoi);

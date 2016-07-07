@@ -24,7 +24,6 @@ import scala.util.Try
 import scalaz._
 import Scalaz._
 
-
 class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
                          E <: OtItemEditor[ISPObsComponent, I]](instType: SPComponentType) extends GridBagPanel with Reactor {
   private var editor: Option[E] = None
