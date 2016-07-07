@@ -9,6 +9,8 @@ import jsky.util.Preferences
 sealed abstract class ImageCatalog(val id: String, val displayName: String) {
   /** Returns the url that can load the passed coordinates */
   def queryUrl(c: Coordinates): URL
+
+  override def toString = id
 }
 /** Base class for DSS based image catalogs */
 abstract class DssCatalog(id: String, displayName: String) extends ImageCatalog(id, displayName) {

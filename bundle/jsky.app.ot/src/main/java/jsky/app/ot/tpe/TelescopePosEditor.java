@@ -348,8 +348,8 @@ public final class TelescopePosEditor extends JSkyCat implements TpeMouseObserve
             _baseTarget.getDecDegrees(when).flatMap( dec -> {
                 final HmsDegCoordinates hmsDegCoordinates = new HmsDegCoordinates.Builder(new Angle(ra, Angle.Unit.DEGREES), new Angle(dec, Angle.Unit.DEGREES)).build();
                 final Coordinates coordinates = ModelConverters.toCoordinates(hmsDegCoordinates);
-                final URL queryUrl = imageCatalog.queryUrl(coordinates);
-                ImageCatalogLoader.instance().display4Java(getImageWidget(), queryUrl);
+                ImageCatalogLoader.instance().display4Java(getImageWidget(), coordinates, imageCatalog);
+                // TODO Fix integration with the legacy image loader
                 return null;
             }));
     }
