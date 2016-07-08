@@ -12,6 +12,9 @@ trait ParamSetCodec[A] { outer =>
   
   def decode(ps: ParamSet): PioError \/ A
 
+  def unsafeDecode(ps: ParamSet): A =
+    outer.decode(ps).fold(e => throw new PioParseException(e.toString), a => a)
+
   def withParam[B](key: String, lens: A @> B)(implicit pc: ParamCodec[B]): ParamSetCodec[A] =
     new ParamSetCodec[A] {
       def encode(key0: String, a: A): ParamSet = {

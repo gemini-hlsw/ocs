@@ -12,6 +12,8 @@ import edu.gemini.skycalc.Angle
 import edu.gemini.spModel.core.Site
 import edu.gemini.spModel.inst.ParallacticAngleSupport
 import edu.gemini.spModel.obs.{ObsTargetCalculatorService, SPObservation, SchedulingBlock}
+import edu.gemini.spModel.obs.SchedulingBlock.Duration
+import edu.gemini.spModel.obs.SchedulingBlock.Duration._
 import edu.gemini.spModel.rich.shared.immutable._
 import edu.gemini.shared.util.immutable.{Option => JOption, ImOption}
 import jsky.app.ot.ags.BagsManager
@@ -48,14 +50,18 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
 
       private case class RelativeTime(desc: String, timeInMs: Long) extends MenuItem(desc) {
         action = Action(desc) {
+
+          // Our start time, based on current clock time plus an offset
           val start = System.currentTimeMillis + timeInMs
 
-          // If there is a scheduling block with positive duration, replace only the start time.
-          // Otherwise replace the start time AND duration (current remaining time, negated).
-          val sb = schedulingBlock
-            .filter(_.duration.exists(_ >= 0))
-            .map(sb => SchedulingBlock(start, sb.duration))
-            .getOrElse(SchedulingBlock(start, remainingTime.map(- _)))
+          // New duration based on remaining time, if any
+          lazy val remainingDuration = remainingTime.fold[Duration](Unstated)(Computed(_))
+
+          // Current duration
+          val currentDuration = schedulingBlock.fold[Duration](Unstated)(_.duration)
+
+          // New Scheduling block with updated start time, and updated duration (if not explicit).
+          val sb = SchedulingBlock(start, currentDuration.fold(remainingDuration)(Explicit(_))(_ => remainingDuration))
 
           updateSchedulingBlock(sb)
         }
@@ -294,7 +300,7 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
       }
 
       // Scheduling block duration, in minutes
-      val durStr = sb.duration.map(_.abs / 60000.0).foldMap(n => f", $n%2.1f min")
+      val durStr = sb.duration.toOption.map(_ / 60000.0).foldMap(n => f", $n%2.1f min")
 
       // Parallactic Angle
       val paStr = parallacticAngle

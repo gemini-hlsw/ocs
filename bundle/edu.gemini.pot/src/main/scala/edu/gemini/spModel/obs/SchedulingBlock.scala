@@ -3,17 +3,14 @@ package edu.gemini.spModel.obs
 import edu.gemini.skycalc.ObservingNight
 import edu.gemini.spModel.core.Site
 
-/** A reference time for planning observations. */
-sealed abstract class SchedulingBlock {
+import scalaz._, Scalaz._
 
-  /** A point in time. */
-  def start: Long
-
-  /** An optional duration, positive if explicit, negative if computed. */
-  def duration: Option[Long]
-
-  /** Duration, if any, otherwise zero. */
-  def durationOrZero = duration.getOrElse(0L)
+/**
+ * A reference time for planning observations and for computing mean parallactic angle. The duration
+ * of a scheduling block can be unstated, explicitly specified by the user, or computed based on
+ * remaining unexecuted steps.
+ */
+final case class SchedulingBlock(start: Long, duration: SchedulingBlock.Duration) {
 
   /** Observing night of the scheduling block start, at the given site. */
   def observingNight(site: Site): ObservingNight =
@@ -27,26 +24,45 @@ sealed abstract class SchedulingBlock {
 
 object SchedulingBlock {
 
-  // Private impl allows us to have default equality and so on with smart constructors
-  private case class Impl(val start: Long, val duration: Option[Long]) extends SchedulingBlock
-
-  // N.B. yes, return type should be Some[...]
-  def unapply(s: SchedulingBlock): Some[(Long, Option[Long])] =
-    Some((s.start, s.duration))
-
+  /** Construct a SchedulingBlock with an unstated duration. */
   def apply(start: Long): SchedulingBlock =
-    apply(start, None)
+    apply(start, Duration.Unstated)
 
-  def apply(start: Long, duration: Long): SchedulingBlock =
-    apply(start, Some(duration))
+  val start:    SchedulingBlock @> Long     = Lens.lensu((a, b) => a.copy(start = b), _.start)
+  val duration: SchedulingBlock @> Duration = Lens.lensu((a, b) => a.copy(duration = b), _.duration)
 
-  def apply(start: Long, duration: Option[Long]): SchedulingBlock =
-    new Impl(start, duration)
+  sealed abstract class Duration extends Product with Serializable {
+    import Duration._
 
-  def unsafeFromStrings(startString: String, durationString: String): SchedulingBlock =
-    apply(startString.toLong, durationString.toLong)
+    def fold[A](u: => A)(e: Long => A)(c: Long => A): A =
+      this match {
+        case Unstated     => u
+        case Explicit(ms) => e(ms)
+        case Computed(ms) => c(ms)
+      }
 
-  def unsafeFromStrings(startString: String): SchedulingBlock =
-    apply(startString.toLong)
+    def toOption: Option[Long] =
+      fold(none[Long])(some)(some)
+
+    def isExplicit: Boolean =
+      fold(false)(_ => true)(_ => false)
+
+  }
+
+  object Duration {
+
+    final case object Unstated extends Duration
+
+    final case class Explicit(ms: Long) extends Duration
+    object Explicit extends (Long => Explicit) {
+      val ms: Explicit @> Long = Lens.lensu((a, b) => a.copy(ms = b), _.ms)
+    }
+
+    final case class Computed(ms: Long) extends Duration
+    object Computed extends (Long => Computed) {
+      val ms: Computed @> Long = Lens.lensu((a, b) => a.copy(ms = b), _.ms)
+    }
+
+  }
 
 }
