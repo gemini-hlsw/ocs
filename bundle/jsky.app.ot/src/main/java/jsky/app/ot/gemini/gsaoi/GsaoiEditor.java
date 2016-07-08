@@ -5,6 +5,7 @@ import edu.gemini.shared.gui.ThinBorder;
 import edu.gemini.shared.gui.bean.*;
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi;
 import edu.gemini.spModel.telescope.IssPort;
+import edu.gemini.spModel.telescope.PosAngleConstraint;
 import jsky.app.ot.editor.eng.EngEditor;
 import jsky.app.ot.gemini.editor.ComponentEditor;
 
@@ -227,6 +228,7 @@ public final class GsaoiEditor extends ComponentEditor<ISPObsComponent, Gsaoi> i
 
 
     private final TextFieldPropertyCtrl<Gsaoi, Double> posAngleCtrl;
+    private final CheckboxEnumPropertyCtrl<Gsaoi, PosAngleConstraint> posAngleConstraintCtrl;
     private final TextFieldPropertyCtrl<Gsaoi, Double> exposureTimeCtrl;
     private final ExposureTimeMessageUpdater exposureTimeMessageUpdater;
     private final TextFieldPropertyCtrl<Gsaoi, Integer> coaddsCtrl;
@@ -246,6 +248,9 @@ public final class GsaoiEditor extends ComponentEditor<ISPObsComponent, Gsaoi> i
         // Position Angle
         PropertyDescriptor pd = Gsaoi.POS_ANGLE_PROP;
         posAngleCtrl = TextFieldPropertyCtrl.createDoubleInstance(pd, 1);
+
+        posAngleConstraintCtrl = new CheckboxEnumPropertyCtrl<>("Allow position angle adjustments",
+                POS_ANGLE_CONSTRAINT_PROP, PosAngleConstraint.UNBOUNDED, PosAngleConstraint.FIXED);
 
         // Exposure Time
         pd = Gsaoi.EXPOSURE_TIME_PROP;
@@ -273,22 +278,23 @@ public final class GsaoiEditor extends ComponentEditor<ISPObsComponent, Gsaoi> i
 
         posAngleCtrl.setColumns(4);
         addCtrl(pan, 4, 0, posAngleCtrl, "deg E of N");
+        addCtrl(pan, 0, 1, posAngleConstraintCtrl);
 
         // ------ Separator --------
-        pan.add(new JSeparator(JSeparator.HORIZONTAL), separatorGbc(0, 1, 7));
+        pan.add(new JSeparator(JSeparator.HORIZONTAL), separatorGbc(0, 2, 7));
 
         exposureTimeCtrl.setColumns(4);
-        pan.add(new JLabel("Exp Time"), propLabelGbc(0, 2));
-        pan.add(exposureTimeCtrl.getComponent(), propWidgetGbc(1, 2));
-        pan.add(new JLabel("sec"), propUnitsGbc(2, 2));
-        pan.add(exposureTimeMessageUpdater.getLabel(), warningLabelGbc(0, 3, 3));
+        pan.add(new JLabel("Exp Time"), propLabelGbc(0, 3));
+        pan.add(exposureTimeCtrl.getComponent(), propWidgetGbc(1, 3));
+        pan.add(new JLabel("sec"), propUnitsGbc(2, 3));
+        pan.add(exposureTimeMessageUpdater.getLabel(), warningLabelGbc(0, 4, 3));
 
-        addCtrl(pan, 4, 2, coaddsCtrl, "exp/obs");
+        addCtrl(pan, 4, 3, coaddsCtrl, "exp/obs");
         coaddsCtrl.setColumns(3);
 
         final JLabel coaddsWarning = coaddsMessageUpdater.getLabel();
         coaddsWarning.setForeground(WARNING_FG_COLOR);
-        pan.add(coaddsWarning, warningLabelGbc(4, 3, 3));
+        pan.add(coaddsWarning, warningLabelGbc(4, 4, 3));
 
         final JTabbedPane tabPane = new JTabbedPane();
         tabPane.addTab("Read Mode", getTabPanel(readModeCtrl.getComponent()));
@@ -296,7 +302,7 @@ public final class GsaoiEditor extends ComponentEditor<ISPObsComponent, Gsaoi> i
 
         // Tab Pane
         pan.add(tabPane, new GridBagConstraints(){{
-            gridx     = 0;    gridy      = 4;
+            gridx     = 0;    gridy      = 5;
             gridwidth = 7;    gridheight = 1;
             weightx   = 1.0;  weighty    = 0;
             anchor    = WEST; fill       = HORIZONTAL;
@@ -307,7 +313,7 @@ public final class GsaoiEditor extends ComponentEditor<ISPObsComponent, Gsaoi> i
         final Border b = new ThinBorder(BevelBorder.RAISED);
         msgPanel.setBorder(BorderFactory.createCompoundBorder(b, BorderFactory.createEmptyBorder(5, 15, 5, 5)));
         pan.add(msgPanel, new GridBagConstraints(){{
-            gridx     = 0;    gridy      = 5;
+            gridx     = 0;    gridy      = 6;
             gridwidth = 7;    gridheight = 1;
             weightx   = 1.0;  weighty    = 0;
             anchor    = WEST; fill       = HORIZONTAL;
@@ -358,6 +364,7 @@ public final class GsaoiEditor extends ComponentEditor<ISPObsComponent, Gsaoi> i
         filterCtrl.removeEditListener(filterChangeListener);
 
         posAngleCtrl.setBean(gsaoi);
+        posAngleConstraintCtrl.setBean(gsaoi);
         exposureTimeCtrl.setBean(gsaoi);
         coaddsCtrl.setBean(gsaoi);
         filterCtrl.setBean(gsaoi);
