@@ -9,7 +9,7 @@ sealed abstract class SchedulingBlock {
   /** A point in time. */
   def start: Long
 
-  /** An optional duration, always positive if present. */
+  /** An optional duration, positive if explicit, negative if computed. */
   def duration: Option[Long]
 
   /** Duration, if any, otherwise zero. */
@@ -41,7 +41,7 @@ object SchedulingBlock {
     apply(start, Some(duration))
 
   def apply(start: Long, duration: Option[Long]): SchedulingBlock =
-    new Impl(start, duration.filter(_ >= 0))
+    new Impl(start, duration)
 
   def unsafeFromStrings(startString: String, durationString: String): SchedulingBlock =
     apply(startString.toLong, durationString.toLong)

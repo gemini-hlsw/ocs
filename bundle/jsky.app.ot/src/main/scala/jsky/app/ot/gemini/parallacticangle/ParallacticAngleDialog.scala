@@ -8,6 +8,7 @@ import edu.gemini.pot.sp.ISPObservation
 import edu.gemini.shared.gui.monthview.MonthView.Ymd
 import edu.gemini.shared.gui.monthview.{DateSelectionMode, MonthView}
 import edu.gemini.shared.gui.textComponent.{NumberField, SelectOnFocus, TimeOfDayText}
+import edu.gemini.spModel.obs.ObsTargetCalculatorService
 import edu.gemini.spModel.obs.SchedulingBlock
 import edu.gemini.spModel.obs.plannedtime.PlannedTimeCalculator
 import jsky.app.ot.util.TimeZonePreference
@@ -28,7 +29,7 @@ class ParallacticAngleDialog(
   showDuration: Boolean
 ) extends Dialog {
 
-  var schedulingBlock = osb.getOrElse(SchedulingBlock.apply(System.currentTimeMillis, 0L))
+  var schedulingBlock = osb.getOrElse(SchedulingBlock.apply(System.currentTimeMillis, None))
   val utc = TimeZone.getTimeZone("UTC")
   private var _timeZone = local.filter(_ == TimeZonePreference.get).getOrElse(utc)
 
@@ -141,7 +142,7 @@ class ParallacticAngleDialog(
     }
 
     object remainingTimeButton extends RadioButton {
-      val remainingTime = ParallacticAngleDialog.calculateRemainingTime(observation).toDouble / 1000 / 60
+      val remainingTime = ObsTargetCalculatorService.calculateRemainingTime(observation).toDouble / 1000 / 60
       text = f"Use Remaining Execution Time Estimate ($remainingTime%.1f min)"
     }
     if (showDuration) layout(remainingTimeButton) = new Constraints() {
@@ -171,9 +172,9 @@ class ParallacticAngleDialog(
     }
 
     // Set the number of minutes of duration, converting from ms.
-    val durationField = new NumberField(Some(schedulingBlock.durationOrZero / 60000.0), allowEmpty = false) {
+    val durationField = new NumberField(Some(schedulingBlock.duration.filter(_ >= 0).getOrElse(0L) / 60000.0), allowEmpty = false) {
       peer.setColumns(5)
-      enabled = schedulingBlock.duration.isDefined
+      enabled = schedulingBlock.duration.exists(_ >= 0)
     }
 
     // Reset duration to 0.0 if nonsense is typed in and the focus is lost.
@@ -203,7 +204,7 @@ class ParallacticAngleDialog(
     }
 
     new ButtonGroup(remainingTimeButton, setToButton) {
-      if (schedulingBlock.duration.isEmpty) select(remainingTimeButton)
+      if (schedulingBlock.duration.forall(_ < 0)) select(remainingTimeButton)
       else select(setToButton)
     }
 
@@ -255,7 +256,8 @@ class ParallacticAngleDialog(
 
     // The duration managed by this widget.
     def fetchDuration: Option[Long] =
-      if (setToButton.selected) Some((durationField.text.toDouble * 60 * 1000).toLong) else scala.None
+      if (setToButton.selected) Some((durationField.text.toDouble * 60 * 1000).toLong)
+      else Some(-ObsTargetCalculatorService.calculateRemainingTime(observation))
 
     listenTo(okButton, cancelButton)
     reactions += {
@@ -288,14 +290,3 @@ class ParallacticAngleDialog(
   location = owner.getLocationOnScreen
 
 }
-
-object ParallacticAngleDialog {
-  def calculateRemainingTime(ispObservation: ISPObservation): Long =
-    PlannedTimeCalculator.instance
-      .calc(ispObservation)
-      .steps.asScala
-      .filterNot(_.executed)
-      .map(_.totalTime)
-      .sum
-
-  }
