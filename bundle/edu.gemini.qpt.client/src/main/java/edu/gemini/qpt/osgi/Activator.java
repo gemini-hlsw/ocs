@@ -41,10 +41,7 @@ public final class Activator implements BundleActivator {
     private BundleContext context;
 
     // Credentials for publishing
-    private static final String PROP_INTERNAL_USER = "edu.gemini.qpt.ui.action.destination.internal.user";
-    private static final String PROP_INTERNAL_PASS = "edu.gemini.qpt.ui.action.destination.internal.pass";
-    private static final String PROP_PACHON_USER   = "edu.gemini.qpt.ui.action.destination.pachon.user";
-    private static final String PROP_PACHON_PASS   = "edu.gemini.qpt.ui.action.destination.pachon.pass";
+    private static final String PROP_USER = "edu.gemini.qpt.ui.action.destination.user";
     private ServiceTracker<KeyChain, KeyChain> keyChainServiceTracker = null;
     private final CtrKeyListener ctrKeyListener = new CtrKeyListener();
 
@@ -77,25 +74,21 @@ public final class Activator implements BundleActivator {
 
                 internal = new PublishAction.Destination(
                     "gnconfig.gemini.edu",
-                    getProp(PROP_INTERNAL_USER),
-                    getProp(PROP_INTERNAL_PASS),
+                    getProp(PROP_USER),
                     "/gemsoft/var/data/qpt",
                     "http://internal.gemini.edu/science/");
 
                 pachon = new PublishAction.Destination(
                     "gsconfig.gemini.edu",
-                    getProp(PROP_PACHON_USER),
-                    getProp(PROP_PACHON_PASS),
+                    getProp(PROP_USER),
                     "/gemsoft/var/data/qpt",
                     null);
 
                 // If the keychain is locked, give the user the chance to unlock it here. If they
                 // choose not to, they can do it via Edit > Manage Keys
-                SwingUtilities.invokeLater(new Runnable() {
-                    public void run() {
-                        if (ac.asJava().isLocked())
-                            PasswordDialog.unlock(ac, null);
-                    }
+                SwingUtilities.invokeLater(() -> {
+                    if (ac.asJava().isLocked())
+                        PasswordDialog.unlock(ac, null);
                 });
 
                 Activator.this.advisor = new ShellAdvisor("Gemini QPT", Version.current.toString(), root, ac, internal, pachon, ProbeLimitsTable.loadOrThrow());
