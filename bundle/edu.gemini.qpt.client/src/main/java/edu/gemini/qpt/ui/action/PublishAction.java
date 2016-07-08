@@ -20,7 +20,6 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.TimeZone;
-import java.util.concurrent.CountDownLatch;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -40,15 +39,12 @@ public class PublishAction extends AbstractAsyncAction implements PropertyChange
 //	private static final String[] MONTHS = { "jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec" };
 
     private static final long serialVersionUID = 1L;
-    private CountDownLatch latch = new CountDownLatch(1);
-    private boolean utc;
-    private boolean web;
-    private boolean qcMarkers;
-    private boolean cancel;
 
     private final IShell shell;
 
     private final Destination INTERNAL, PACHON;
+
+    private PublishDialog.PublishOptions opts = PublishDialog.defaultOptions();
 
     public PublishAction(IShell shell, KeyChain authClient, Destination internal, Destination pachon) {
         super("Publish...", authClient);
@@ -82,120 +78,16 @@ public class PublishAction extends AbstractAsyncAction implements PropertyChange
 
         try {
 
-            String[] OPTIONS = {"Preview Locally", "Preview Locally w/ QC Markers", "Publish to the Web"};
+            final scala.Option<PublishDialog.PublishOptions> res = PublishDialog.prompt(shell.getPeer(), opts);
+            if (res.isEmpty()) return; // cancelled
 
-			Object option = JOptionPane.showInputDialog(
-				shell.getPeer(),
-				"Select a publish option.",
-				"Publish Plan",
-				JOptionPane.OK_CANCEL_OPTION,
-				SharedIcons.ICON_PUBLISH,
-				OPTIONS,
-				OPTIONS[0]);
+            opts = res.get();
 
-			if (option == null)
-				return; // cancelled
+            final boolean web       = opts.publishType() == PublishDialog.PublishWeb$.MODULE$;
+            final boolean qcMarkers = opts.publishType() == PublishDialog.PublishPreviewWithMarkers$.MODULE$;
+            final String password   = opts.password();
+            final boolean utc       = opts.time() == PublishDialog.Utc$.MODULE$;
 
-			web = option == OPTIONS[2];
-			qcMarkers = option == OPTIONS[1];
-
-
-            String[] TIME_OPTIONS = { "Local time at site", "UTC"};
-
-            Object timeOption = JOptionPane.showOptionDialog(
-                    shell.getPeer(),
-                    "Select a timezone.",
-                    "Publish Plan",
-                    JOptionPane.YES_NO_OPTION,
-                    JOptionPane.QUESTION_MESSAGE,
-                    SharedIcons.ICON_PUBLISH,
-                    TIME_OPTIONS,
-                    TIME_OPTIONS[0]);
-
-            if (timeOption == null)
-                return; // cancelled
-
-            utc = timeOption.equals(1);
-
-
-
-//            latch = new CountDownLatch(1);
-//            final JDialog dialog = new JDialog(shell.getPeer(), "Publish Plan");
-//            dialog.setResizable(true);
-//            dialog.setSize(100,50);
-//            CellConstraints cc = new CellConstraints();
-//
-//            JPanel contentPane = new JPanel(new FormLayout(
-//                    new ColumnSpec[] {
-//                            new ColumnSpec("max(min;30dlu)"),
-//                            FormFactory.UNRELATED_GAP_COLSPEC,
-//                            new ColumnSpec("max(min;30dlu)"),
-//                            FormFactory.UNRELATED_GAP_COLSPEC,
-//                            new ColumnSpec("max(min;30dlu)"),
-//                    },
-//                    new RowSpec[] {
-//                            new RowSpec(RowSpec.FILL, Sizes.DLUY1, FormSpec.DEFAULT_GROW),
-//                            FormFactory.RELATED_GAP_ROWSPEC,
-//                            new RowSpec(RowSpec.FILL, Sizes.DLUY1, FormSpec.DEFAULT_GROW),
-//
-//
-//                    }));
-//            final JComboBox combo = new JComboBox(OPTIONS);
-//            contentPane.add(combo, cc.xywh(1, 1, 5, 1));
-//            JButton localBtn;
-//            localBtn = new JButton("Publish in Local Time");
-//            localBtn.addActionListener(new ActionListener() {
-//                @Override
-//                public void actionPerformed(ActionEvent actionEvent) {
-//                    utc = true;
-//                    web = combo.getSelectedIndex() == 2;
-//                    qcMarkers = combo.getSelectedIndex() == 1;
-//                    cancel = false;
-//                    latch.countDown();
-//                    dialog.dispose();
-//                }
-//            });
-//            JButton utcBtn;
-//            utcBtn = new JButton("Publish in UTC");
-//            utcBtn.addActionListener(new ActionListener() {
-//                @Override
-//                public void actionPerformed(ActionEvent actionEvent) {
-//                    utc = true;
-//                    web = combo.getSelectedIndex() == 2;
-//                    qcMarkers = combo.getSelectedIndex() == 1;
-//                    cancel = false;
-//                    latch.countDown();
-//                    dialog.dispose();
-//                }
-//            });
-//
-//            JButton cancelBtn;
-//            cancelBtn = new JButton("Cancel");
-//            cancelBtn.addActionListener(new ActionListener() {
-//                @Override
-//                public void actionPerformed(ActionEvent actionEvent) {
-//                    cancel = true;
-//                    latch.countDown();
-//                    dialog.dispose();
-//                }
-//            });
-//            contentPane.add(localBtn,cc.xywh(1,3,1,1));
-//            contentPane.add(utcBtn,cc.xywh(3,3,1,1));
-//            contentPane.add(cancelBtn,cc.xywh(5,3,1,1));
-//            dialog.setContentPane(contentPane);
-//
-//
-//            dialog.setVisible(true);
-//            try {
-//                latch.await();
-//            } catch (InterruptedException e1) {
-//                System.out.println("sldjfhskfgh");
-//            }
-//            System.out.println("utc " + utc + " web " + web + " qc " + qcMarkers + " cancel " + cancel);
-//
-//            if (cancel) {
-//                return;
-//            }
             final Destination[] destinations;
             if (web) {
 
@@ -254,10 +146,12 @@ public class PublishAction extends AbstractAsyncAction implements PropertyChange
                 pm.setMessage("Connecting to " + dest.config.getHost());
 
                 SftpSession session;
-                final Try<SftpSession> result = SftpSession$.MODULE$.connect(dest.config);
+                final Try<SftpSession> result = SftpSession$.MODULE$.connect(dest.withPassword(password).config);
                 if (result.isFailure()) {
-                    //final Failure<SftpSession> failure = (Failure<SftpSession>) result;
-                    LOG.severe(String.format("Could not sftp %s", dest.config.toString()));
+                    final Throwable t = ((scala.util.Failure<SftpSession>) result).exception();
+                    final String destString = dest.config.toString();
+                    LOG.log(Level.WARNING, String.format("Could not sftp %s", destString), t);
+                    throw new RuntimeException(String.format("Couldn't connect to %s: %s",  destString, t.getMessage()));
                 } else {
                     session = result.get();
 
@@ -315,7 +209,7 @@ public class PublishAction extends AbstractAsyncAction implements PropertyChange
             LOG.log(Level.WARNING, "Trouble publishing schedule.", ex);
             pid.setVisible(false);
             JOptionPane.showMessageDialog(shell.getPeer(),
-                    "There was a problem printing to PDF:\n" + ex.getMessage(),
+                    "There was a problem publishing the schedule:\n" + ex.getMessage(),
                     getName(), JOptionPane.ERROR_MESSAGE);
 
         } finally {
@@ -330,18 +224,24 @@ public class PublishAction extends AbstractAsyncAction implements PropertyChange
 
     }
 
-    public static class Destination {
-
+    public static final class Destination {
         final SshConfig config;
         final String root;
         final String httpRoot;
 
-        public Destination(String host, String user, String password, String root, String httpRoot) {
-            this.config = new DefaultSshConfig(host, user, password, SshConfig$.MODULE$.DEFAULT_TIMEOUT());
-            this.root = root;
+        public Destination(String host, String user, String root, String httpRoot) {
+            this(new DefaultSshConfig(host, user, "", SshConfig$.MODULE$.DEFAULT_TIMEOUT()), root, httpRoot);
+        }
+
+        private Destination(SshConfig config, String root, String httpRoot) {
+            this.config   = config;
+            this.root     = root;
             this.httpRoot = httpRoot;
         }
 
+        public Destination withPassword(String password) {
+            final SshConfig c = new DefaultSshConfig(config.getHost(), config.getUser(), password, config.getTimeout());
+            return new Destination(c, root, httpRoot);
+        }
     }
-
 }
