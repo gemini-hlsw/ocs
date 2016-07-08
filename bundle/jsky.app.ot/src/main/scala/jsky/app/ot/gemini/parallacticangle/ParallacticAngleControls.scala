@@ -24,7 +24,7 @@ import scala.swing.GridBagPanel.{Anchor, Fill}
 import scala.swing._
 import scala.swing.event.{ButtonClicked, Event}
 
-import scalaz.syntax.std.boolean._, scalaz.syntax.apply._, scalaz.effect.IO
+import scalaz._, Scalaz._, scalaz.effect.IO
 
 /**
  * This class encompasses all of the logic required to manage the average parallactic angle information associated
@@ -49,7 +49,14 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
       private case class RelativeTime(desc: String, timeInMs: Long) extends MenuItem(desc) {
         action = Action(desc) {
           val start = System.currentTimeMillis + timeInMs
-          val sb    = schedulingBlock.fold(SchedulingBlock(start))(sb => SchedulingBlock(start, sb.duration))
+
+          // If there is a scheduling block with positive duration, replace only the start time.
+          // Otherwise replace the start time AND duration (current remaining time, negated).
+          val sb = schedulingBlock
+            .filter(_.duration.exists(_ >= 0))
+            .map(sb => SchedulingBlock(start, sb.duration))
+            .getOrElse(SchedulingBlock(start, remainingTime.map(- _)))
+
           updateSchedulingBlock(sb)
         }
       }
@@ -164,6 +171,13 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
       sb  <- obs.getDataObject.asInstanceOf[SPObservation].getSchedulingBlock.asScalaOpt
     } yield sb
 
+  /** Remaining time for context observation, if any. */
+  private def remainingTime: Option[Long] =
+    for {
+      e   <- editor
+      obs <- Option(e.getContextObservation)
+    } yield ObsTargetCalculatorService.calculateRemainingTime(obs)
+
   /** Replace the scheduling block. */
   private def updateSchedulingBlock(sb: SchedulingBlock): Unit =
     for {
@@ -271,26 +285,25 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
       sb             <- spObservation.getSchedulingBlock.asScalaOpt
       fmt            <- formatter
     } {
-      //object dateFormat extends SimpleDateFormat("MM/dd/yy 'at' HH:mm:ss z") {
-      object dateFormat extends SimpleDateFormat("MM/dd/yy HH:mm:ss z") {
-        setTimeZone(TimeZonePreference.get)
-      }
-      val dateTimeStr = dateFormat.format(new Date(sb.start))
 
-      // Include tenths of a minute if not even.
-      val duration = sb.duration.getOrElse(ParallacticAngleDialog.calculateRemainingTime(ispObservation)) / 60000.0
-      val durationFmt = if (Math.round(duration * 10) == (Math.floor(duration) * 10).toLong) "%.0f" else "%.1f"
-      val when = s"$dateTimeStr"
+      // Scheduling block date and time
+      val dateTimeStr = {
+        val df = new SimpleDateFormat("MM/dd/yy HH:mm:ss z")
+        df.setTimeZone(TimeZonePreference.get)
+        df.format(new Date(sb.start))
+      }
+
+      // Scheduling block duration, in minutes
+      val durStr = sb.duration.map(_.abs / 60000.0).foldMap(n => f", $n%2.1f min")
+
+      // Parallactic Angle
+      val paStr = parallacticAngle
+        .map(ParallacticAngleControls.angleToDegrees)
+        .fold(", not visible")(a => f", $a%3.1f°")
 
       ui.parallacticAngleFeedback.text =
-        e.getDataObject match {
-          case p: ParallacticAngleSupport if isPaUi =>
-            parallacticAngle.fold(
-              s"Target not visible ($when)")(angle =>
-              s"${fmt.format(ParallacticAngleControls.angleToDegrees(angle))}\u00b0 ($when, ${durationFmt.format(duration)}m)")
-          case _ =>
-            s"$when"
-        }
+        if (isPaUi) dateTimeStr + durStr + paStr
+        else dateTimeStr
 
       publish(ParallacticAngleControls.ParallacticAngleChangedEvent)
     }
