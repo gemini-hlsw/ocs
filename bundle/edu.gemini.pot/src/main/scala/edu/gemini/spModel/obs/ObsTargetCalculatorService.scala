@@ -51,7 +51,7 @@ object ObsTargetCalculatorService {
       // Ideally, if you hover over duration box in GUI, should say acquisition + science time OR not.
 
       // Since we need start < end explicitly, if the duration is None, we cannot use it.
-      val duration = b.duration.map(_.abs) getOrElse calculateRemainingTime(obs)
+      val duration = b.duration.toOption getOrElse calculateRemainingTime(obs)
       val end      = b.start + duration
 
       // If the duration is going to be smaller than the default step size of 30 seconds used by the

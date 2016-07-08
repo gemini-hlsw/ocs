@@ -10,6 +10,8 @@ import edu.gemini.shared.gui.monthview.{DateSelectionMode, MonthView}
 import edu.gemini.shared.gui.textComponent.{NumberField, SelectOnFocus, TimeOfDayText}
 import edu.gemini.spModel.obs.ObsTargetCalculatorService
 import edu.gemini.spModel.obs.SchedulingBlock
+import edu.gemini.spModel.obs.SchedulingBlock.Duration
+import edu.gemini.spModel.obs.SchedulingBlock.Duration._
 import edu.gemini.spModel.obs.plannedtime.PlannedTimeCalculator
 import jsky.app.ot.util.TimeZonePreference
 
@@ -29,7 +31,7 @@ class ParallacticAngleDialog(
   showDuration: Boolean
 ) extends Dialog {
 
-  var schedulingBlock = osb.getOrElse(SchedulingBlock.apply(System.currentTimeMillis, None))
+  var schedulingBlock = osb.getOrElse(SchedulingBlock.apply(System.currentTimeMillis))
   val utc = TimeZone.getTimeZone("UTC")
   private var _timeZone = local.filter(_ == TimeZonePreference.get).getOrElse(utc)
 
@@ -172,9 +174,9 @@ class ParallacticAngleDialog(
     }
 
     // Set the number of minutes of duration, converting from ms.
-    val durationField = new NumberField(Some(schedulingBlock.duration.filter(_ >= 0).getOrElse(0L) / 60000.0), allowEmpty = false) {
+    val durationField = new NumberField(Some(schedulingBlock.duration.toOption.getOrElse(0L) / 60000.0), allowEmpty = false) {
       peer.setColumns(5)
-      enabled = schedulingBlock.duration.exists(_ >= 0)
+      enabled = schedulingBlock.duration.isExplicit
     }
 
     // Reset duration to 0.0 if nonsense is typed in and the focus is lost.
@@ -204,8 +206,8 @@ class ParallacticAngleDialog(
     }
 
     new ButtonGroup(remainingTimeButton, setToButton) {
-      if (schedulingBlock.duration.forall(_ < 0)) select(remainingTimeButton)
-      else select(setToButton)
+      if (schedulingBlock.duration.isExplicit) select(setToButton)
+      else select(remainingTimeButton)
     }
 
     // Create the OK and Cancel buttons.
@@ -255,9 +257,9 @@ class ParallacticAngleDialog(
     }
 
     // The duration managed by this widget.
-    def fetchDuration: Option[Long] =
-      if (setToButton.selected) Some((durationField.text.toDouble * 60 * 1000).toLong)
-      else Some(-ObsTargetCalculatorService.calculateRemainingTime(observation))
+    def fetchDuration: Duration =
+      if (setToButton.selected) Explicit((durationField.text.toDouble * 60 * 1000).toLong)
+      else Computed(ObsTargetCalculatorService.calculateRemainingTime(observation))
 
     listenTo(okButton, cancelButton)
     reactions += {
