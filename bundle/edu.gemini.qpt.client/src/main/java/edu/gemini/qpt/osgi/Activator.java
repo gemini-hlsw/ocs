@@ -41,10 +41,7 @@ public final class Activator implements BundleActivator {
     private BundleContext context;
 
     // Credentials for publishing
-    private static final String PROP_INTERNAL_USER = "edu.gemini.qpt.ui.action.destination.internal.user";
-    private static final String PROP_INTERNAL_PASS = "edu.gemini.qpt.ui.action.destination.internal.pass";
-    private static final String PROP_PACHON_USER   = "edu.gemini.qpt.ui.action.destination.pachon.user";
-    private static final String PROP_PACHON_PASS   = "edu.gemini.qpt.ui.action.destination.pachon.pass";
+    private static final String PROP_USER = "edu.gemini.qpt.ui.action.destination.user";
     private ServiceTracker<KeyChain, KeyChain> keyChainServiceTracker = null;
     private final CtrKeyListener ctrKeyListener = new CtrKeyListener();
 
@@ -77,15 +74,13 @@ public final class Activator implements BundleActivator {
 
                 internal = new PublishAction.Destination(
                     "gnconfig.gemini.edu",
-                    getProp(PROP_INTERNAL_USER),
-                    getProp(PROP_INTERNAL_PASS),
+                    getProp(PROP_USER),
                     "/gemsoft/var/data/qpt",
                     "http://internal.gemini.edu/science/");
 
                 pachon = new PublishAction.Destination(
                     "gsconfig.gemini.edu",
-                    getProp(PROP_PACHON_USER),
-                    getProp(PROP_PACHON_PASS),
+                    getProp(PROP_USER),
                     "/gemsoft/var/data/qpt",
                     null);
 

@@ -44,6 +44,8 @@ public class PublishAction extends AbstractAsyncAction implements PropertyChange
 
     private final Destination INTERNAL, PACHON;
 
+    private PublishDialog.PublishOptions opts = PublishDialog.defaultOptions();
+
     public PublishAction(IShell shell, KeyChain authClient, Destination internal, Destination pachon) {
         super("Publish...", authClient);
         this.INTERNAL = internal;
@@ -76,40 +78,15 @@ public class PublishAction extends AbstractAsyncAction implements PropertyChange
 
         try {
 
-            String[] OPTIONS = {"Preview Locally", "Preview Locally w/ QC Markers", "Publish to the Web"};
+            final scala.Option<PublishDialog.PublishOptions> res = PublishDialog.prompt(shell.getPeer(), opts);
+            if (res.isEmpty()) return; // cancelled
 
-			Object option = JOptionPane.showInputDialog(
-				shell.getPeer(),
-				"Select a publish option.",
-				"Publish Plan",
-				JOptionPane.QUESTION_MESSAGE,
-				SharedIcons.ICON_PUBLISH,
-				OPTIONS,
-				OPTIONS[0]);
+            opts = res.get();
 
-			if (option == null)
-				return; // cancelled
-
-            final boolean web = option == OPTIONS[2];
-            final boolean qcMarkers = option == OPTIONS[1];
-
-
-            String[] TIME_OPTIONS = { "Local time at site", "UTC"};
-
-            Object timeOption = JOptionPane.showOptionDialog(
-                    shell.getPeer(),
-                    "Select a timezone.",
-                    "Publish Plan",
-                    JOptionPane.YES_NO_OPTION,
-                    JOptionPane.QUESTION_MESSAGE,
-                    SharedIcons.ICON_PUBLISH,
-                    TIME_OPTIONS,
-                    TIME_OPTIONS[0]);
-
-            if (timeOption == null)
-                return; // cancelled
-
-            final boolean utc = timeOption.equals(1);
+            final boolean web       = opts.publishType() == PublishDialog.PublishWeb$.MODULE$;
+            final boolean qcMarkers = opts.publishType() == PublishDialog.PublishPreviewWithMarkers$.MODULE$;
+            final String password   = opts.password();
+            final boolean utc       = opts.time() == PublishDialog.Utc$.MODULE$;
 
             final Destination[] destinations;
             if (web) {
@@ -169,10 +146,12 @@ public class PublishAction extends AbstractAsyncAction implements PropertyChange
                 pm.setMessage("Connecting to " + dest.config.getHost());
 
                 SftpSession session;
-                final Try<SftpSession> result = SftpSession$.MODULE$.connect(dest.config);
+                final Try<SftpSession> result = SftpSession$.MODULE$.connect(dest.withPassword(password).config);
                 if (result.isFailure()) {
-                    //final Failure<SftpSession> failure = (Failure<SftpSession>) result;
-                    LOG.severe(String.format("Could not sftp %s", dest.config.toString()));
+                    final Throwable t = ((scala.util.Failure<SftpSession>) result).exception();
+                    final String destString = dest.config.toString();
+                    LOG.log(Level.WARNING, String.format("Could not sftp %s", destString), t);
+                    throw new RuntimeException(String.format("Couldn't connect to %s: %s",  destString, t.getMessage()));
                 } else {
                     session = result.get();
 
@@ -230,7 +209,7 @@ public class PublishAction extends AbstractAsyncAction implements PropertyChange
             LOG.log(Level.WARNING, "Trouble publishing schedule.", ex);
             pid.setVisible(false);
             JOptionPane.showMessageDialog(shell.getPeer(),
-                    "There was a problem printing to PDF:\n" + ex.getMessage(),
+                    "There was a problem publishing the schedule:\n" + ex.getMessage(),
                     getName(), JOptionPane.ERROR_MESSAGE);
 
         } finally {
@@ -245,18 +224,24 @@ public class PublishAction extends AbstractAsyncAction implements PropertyChange
 
     }
 
-    public static class Destination {
-
+    public static final class Destination {
         final SshConfig config;
         final String root;
         final String httpRoot;
 
-        public Destination(String host, String user, String password, String root, String httpRoot) {
-            this.config = new DefaultSshConfig(host, user, password, SshConfig$.MODULE$.DEFAULT_TIMEOUT());
-            this.root = root;
+        public Destination(String host, String user, String root, String httpRoot) {
+            this(new DefaultSshConfig(host, user, "", SshConfig$.MODULE$.DEFAULT_TIMEOUT()), root, httpRoot);
+        }
+
+        private Destination(SshConfig config, String root, String httpRoot) {
+            this.config   = config;
+            this.root     = root;
             this.httpRoot = httpRoot;
         }
 
+        public Destination withPassword(String password) {
+            final SshConfig c = new DefaultSshConfig(config.getHost(), config.getUser(), password, config.getTimeout());
+            return new Destination(c, root, httpRoot);
+        }
     }
-
 }
