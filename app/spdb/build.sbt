@@ -24,12 +24,14 @@ ocsAppManifest := {
         with_gogo(v),
           rnorris(v),   
           swalker(v),
+          dnavarro(v),
           jluhrs(v),
           abrighton(v),
           fnussber(v),
           cquiroz(v),
           sraaphorst(v),
           anunez(v),
+          astephens(v),
           with_remote_gogo(v),
             odbtest(v),
               gsodbtest(v),
@@ -224,6 +226,37 @@ def swalker(version: Version) = AppConfig(
   )
 ) extending List(with_gogo(version), swalker_credentials(version))
 
+// DNAVARRO
+def dnavarro(version: Version) = AppConfig(
+  id = "dnavarro",
+  distribution = List(TestDistro),
+  vmargs = List(
+    "-Xmx1024M",
+    "-XX:MaxPermSize=196M",
+    "-Dcom.cosylab.epics.caj.CAJContext.addr_list=172.17.2.255",
+    "-Dedu.gemini.site=south",
+    "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005",
+    "-Dcron.*.edu.gemini.dbTools.html.ftpHost=localhost",
+    "-Dcron.*.edu.gemini.dbTools.html.ftpDestDir=/Users/jnavarro/sftp",
+    "-Dcron.reports.edu.gemini.spdb.reports.public.host=localhost",
+    "-Dcron.reports.edu.gemini.spdb.reports.public.remotedir=/Users/jnavarro/cron",
+    "-Dcron.archive.edu.gemini.dbTools.html.ftpHost=localhost",
+    "-Dcron.archive.edu.gemini.dbTools.html.ftpDestDir=/Users/jnavarro/cron"
+  ),
+  props = Map(
+    "edu.gemini.auxfile.fits.dest"               -> "/gemsoft/var/data/ictd/test/GS@SEMESTER@/@PROG_ID@",
+    "edu.gemini.auxfile.fits.host"               -> "gsconfig.gemini.edu",
+    "edu.gemini.auxfile.other.dest"              -> "/gemsoft/var/data/finder/GSqueue/Finders-Test/@SEMESTER@/@PROG_ID@",
+    "edu.gemini.auxfile.root"                    -> "/Users/jnavarro/.auxfile",
+    "edu.gemini.dataman.gsa.summit.host"         -> "cpofits-lv1new.cl.gemini.edu",
+    "edu.gemini.dbTools.tcs.ephemeris.directory" -> "/Users/jnavarro/.ephemeris",
+    "edu.gemini.services.server.start"           -> "false",
+    "edu.gemini.smartgcal.host"                  -> "localhost",
+    "edu.gemini.spdb.dir"                        -> "/Users/jnavarro/.spdb/",
+    "edu.gemini.util.trpc.name"                  -> "Dannys's ODB (Test)"
+  )
+) extending List(with_gogo(version), dnavarro_credentials(version))
+
 // FNUSSBER
 def fnussber(version: Version) = AppConfig(
   id = "fnussber",
@@ -373,6 +406,35 @@ def anunez(version: Version) = AppConfig(
     "edu.gemini.util.trpc.name"                  -> "Art's ODB (Test)"
   )
 ) extending List(with_gogo(version), anunez_credentials(version))
+
+// ASTEPHENS
+def astephens(version: Version) = AppConfig(
+  id = "astephens",
+  distribution = List(TestDistro),
+  vmargs = List(
+    "-Xmx2048M",
+    "-XX:MaxPermSize=196M",
+    "-Dedu.gemini.site=north",
+    "-Djava.util.logging.config.file=/home/astephens/ocs/logging.properties",
+    "-Dcron.*.edu.gemini.dbTools.html.ftpHost=localhost",
+    "-Dcron.*.edu.gemini.dbTools.html.ftpDestDir=/home/astephens/ocs/sftp",
+    "-Dcron.reports.edu.gemini.spdb.reports.public.host=localhost",
+    "-Dcron.reports.edu.gemini.spdb.reports.public.remotedir=/home/astephens/ocs/cron",
+    "-Dcron.archive.edu.gemini.dbTools.html.ftpHost=localhost",
+    "-Dcron.archive.edu.gemini.dbTools.html.ftpDestDir=/home/astephens/ocs/cron"
+  ),
+  props = Map(
+    "edu.gemini.smartgcal.host"                  -> "localhost",
+    "edu.gemini.spdb.dir"                        -> "/home/astephens/ocs/spdb/",
+    "edu.gemini.auxfile.root"                    -> "/home/astephens/ocs/auxfile",
+    "edu.gemini.dbTools.tcs.ephemeris.directory" -> "/home/astephens/ocs/ephemeris",
+    "edu.gemini.dataman.gsa.summit.host"         -> "mkofits-lv1new.hi.gemini.edu",
+    "edu.gemini.util.trpc.name"                  -> "Andy's ODB (Test)",
+    "edu.gemini.auxfile.fits.dest"               -> "/gemsoft/var/data/ictd/test/GS@SEMESTER@/@PROG_ID@",
+    "edu.gemini.auxfile.other.dest"              -> "/gemsoft/var/data/finder/GSqueue/Finders-Test/@SEMESTER@/@PROG_ID@",
+    "edu.gemini.auxfile.fits.host"               -> "gsconfig.gemini.edu"
+  )
+) extending List(with_gogo(version), astephens_credentials(version))
 
 // ODBTEST
 def odbtest(version: Version) = AppConfig(
