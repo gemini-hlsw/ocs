@@ -249,7 +249,7 @@ public final class GsaoiEditor extends ComponentEditor<ISPObsComponent, Gsaoi> i
         PropertyDescriptor pd = Gsaoi.POS_ANGLE_PROP;
         posAngleCtrl = TextFieldPropertyCtrl.createDoubleInstance(pd, 1);
 
-        posAngleConstraintCtrl = new CheckboxEnumPropertyCtrl<>("Allow position angle adjustments",
+        posAngleConstraintCtrl = new CheckboxEnumPropertyCtrl<>("Allow Auto Guide Search to select PA",
                 POS_ANGLE_CONSTRAINT_PROP, PosAngleConstraint.UNBOUNDED, PosAngleConstraint.FIXED);
 
         // Exposure Time
@@ -273,28 +273,28 @@ public final class GsaoiEditor extends ComponentEditor<ISPObsComponent, Gsaoi> i
         pan.setBorder(PANEL_BORDER);
         addCtrl(pan, 0, 0, filterCtrl);
 
-        // Column Gap
-        pan.add(new JPanel(), colGapGbc(3, 0));
-
         posAngleCtrl.setColumns(4);
-        addCtrl(pan, 4, 0, posAngleCtrl, "deg E of N");
-        addCtrl(pan, 0, 1, posAngleConstraintCtrl);
+        addCtrl(pan, 0, 1, posAngleCtrl, "deg E of N");
+        // Column Gap
+        pan.add(new JPanel(), colGapGbc(3, 1));
+
+        pan.add(posAngleConstraintCtrl.getComponent(), propWidgetGbc(6, 1));
 
         // ------ Separator --------
-        pan.add(new JSeparator(JSeparator.HORIZONTAL), separatorGbc(0, 2, 7));
+        pan.add(new JSeparator(JSeparator.HORIZONTAL), separatorGbc(0, 3, 7));
 
         exposureTimeCtrl.setColumns(4);
-        pan.add(new JLabel("Exp Time"), propLabelGbc(0, 3));
-        pan.add(exposureTimeCtrl.getComponent(), propWidgetGbc(1, 3));
-        pan.add(new JLabel("sec"), propUnitsGbc(2, 3));
-        pan.add(exposureTimeMessageUpdater.getLabel(), warningLabelGbc(0, 4, 3));
+        pan.add(new JLabel("Exp Time"), propLabelGbc(0, 4));
+        pan.add(exposureTimeCtrl.getComponent(), propWidgetGbc(1, 4));
+        pan.add(new JLabel("sec"), propUnitsGbc(2, 4));
+        pan.add(exposureTimeMessageUpdater.getLabel(), warningLabelGbc(0, 5, 3));
 
-        addCtrl(pan, 4, 3, coaddsCtrl, "exp/obs");
         coaddsCtrl.setColumns(3);
+        addCtrl(pan, 4, 4, coaddsCtrl, "exp/obs");
 
         final JLabel coaddsWarning = coaddsMessageUpdater.getLabel();
         coaddsWarning.setForeground(WARNING_FG_COLOR);
-        pan.add(coaddsWarning, warningLabelGbc(4, 4, 3));
+        pan.add(coaddsWarning, warningLabelGbc(4, 5, 3));
 
         final JTabbedPane tabPane = new JTabbedPane();
         tabPane.addTab("Read Mode", getTabPanel(readModeCtrl.getComponent()));
@@ -302,7 +302,7 @@ public final class GsaoiEditor extends ComponentEditor<ISPObsComponent, Gsaoi> i
 
         // Tab Pane
         pan.add(tabPane, new GridBagConstraints(){{
-            gridx     = 0;    gridy      = 5;
+            gridx     = 0;    gridy      = 6;
             gridwidth = 7;    gridheight = 1;
             weightx   = 1.0;  weighty    = 0;
             anchor    = WEST; fill       = HORIZONTAL;
@@ -313,7 +313,7 @@ public final class GsaoiEditor extends ComponentEditor<ISPObsComponent, Gsaoi> i
         final Border b = new ThinBorder(BevelBorder.RAISED);
         msgPanel.setBorder(BorderFactory.createCompoundBorder(b, BorderFactory.createEmptyBorder(5, 15, 5, 5)));
         pan.add(msgPanel, new GridBagConstraints(){{
-            gridx     = 0;    gridy      = 6;
+            gridx     = 0;    gridy      = 7;
             gridwidth = 7;    gridheight = 1;
             weightx   = 1.0;  weighty    = 0;
             anchor    = WEST; fill       = HORIZONTAL;
