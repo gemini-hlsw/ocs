@@ -389,8 +389,11 @@ public class GemsGuideStarSearchDialog extends JFrame {
         });
     }
 
+    /**
+     * Called when the selection of pos angle constraint changes on the UI
+     *
+     */
     private void updateModelPosAngleConstraint(final boolean selected) {
-        // This is setting the model value for pos angle constraint from the UI
         Option<SPInstObsComp> gems = ImOption.fromScalaOpt(_tpe.getContext().instrument().ifIs(SPComponentType.INSTRUMENT_GSAOI));
         gems.forEach(g -> {
             if (selected) {

@@ -8,6 +8,9 @@ import java.beans.PropertyDescriptor
 import scalaz._
 import Scalaz._
 
+/**
+  * This UI control is a checkbox with two states linked to two specific values of a property
+  */
 final class CheckboxEnumPropertyCtrl[B, T](title: String, pd: PropertyDescriptor, trueValue: T, falseValue: T) extends PropertyCtrl[B, T](pd) {
   val check = new JCheckBox(title)
   def this(pd: PropertyDescriptor, trueValue: T, falseValue: T) = this(pd.getDisplayName, pd, trueValue, falseValue)

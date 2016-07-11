@@ -56,7 +56,8 @@ import static edu.gemini.spModel.seqcomp.SeqConfigNames.INSTRUMENT_KEY;
 /**
  * This class defines the GS AOI instrument.
  */
-public final class Gsaoi extends SPInstObsComp implements PropertyProvider, GuideProbeProvider, IssPortProvider, StepCalculator, PosAngleConstraintAware {
+public final class Gsaoi extends SPInstObsComp
+   implements PropertyProvider, GuideProbeProvider, IssPortProvider, StepCalculator, PosAngleConstraintAware {
 //    From REL-439:
 //    ----
 //    OT changes:
@@ -839,10 +840,12 @@ public final class Gsaoi extends SPInstObsComp implements PropertyProvider, Guid
 
     @Override
     public void setPosAngleConstraint(PosAngleConstraint newValue) {
-        PosAngleConstraint oldValue = getPosAngleConstraint();
-        if (oldValue != newValue) {
-            _posAngleConstraint = newValue;
-            firePropertyChange(POS_ANGLE_CONSTRAINT_PROP.getName(), oldValue, newValue);
+        if (getSupportedPosAngleConstraints().contains(newValue)) { // Ignore unknown values
+            PosAngleConstraint oldValue = getPosAngleConstraint();
+            if (oldValue != newValue) {
+                _posAngleConstraint = newValue;
+                firePropertyChange(POS_ANGLE_CONSTRAINT_PROP.getName(), oldValue, newValue);
+            }
         }
     }
 
