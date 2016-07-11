@@ -363,6 +363,9 @@ public class GemsGuideStarSearchDialog extends JFrame {
         _reviewCandidatesCheckBox.addActionListener(a);
         _analyseComboBox.addActionListener(a);
         _allowPosAngleChangesCheckBox.addActionListener(a);
+        _allowPosAngleChangesCheckBox.addActionListener(e ->
+            updateModelPosAngleConstraint(_allowPosAngleChangesCheckBox.isSelected())
+        );
 
         // If unchecked, the “Candidate Guide Stars” tab should be removed.
         _reviewCandidatesCheckBox.addActionListener(e -> {
@@ -383,6 +386,19 @@ public class GemsGuideStarSearchDialog extends JFrame {
                     _ignoreSelection = false;
                 }
             }
+        });
+    }
+
+    private void updateModelPosAngleConstraint(final boolean selected) {
+        // This is setting the model value for pos angle constraint from the UI
+        Option<SPInstObsComp> gems = ImOption.fromScalaOpt(_tpe.getContext().instrument().ifIs(SPComponentType.INSTRUMENT_GSAOI));
+        gems.forEach(g -> {
+            if (selected) {
+                ((Gsaoi) g).setPosAngleConstraint(PosAngleConstraint.UNBOUNDED);
+            } else {
+                ((Gsaoi) g).setPosAngleConstraint(PosAngleConstraint.FIXED);
+            }
+            _tpe.getContext().instrument().commit();
         });
     }
 
