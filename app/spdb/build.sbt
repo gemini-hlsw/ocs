@@ -434,7 +434,7 @@ def astephens(version: Version) = AppConfig(
     "edu.gemini.auxfile.other.dest"              -> "/gemsoft/var/data/finder/GSqueue/Finders-Test/@SEMESTER@/@PROG_ID@",
     "edu.gemini.auxfile.fits.host"               -> "gsconfig.gemini.edu"
   )
-) extending List(with_gogo(version), fnussber_credentials(version))
+) extending List(with_gogo(version), astephens_credentials(version))
 
 // ODBTEST
 def odbtest(version: Version) = AppConfig(
