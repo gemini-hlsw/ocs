@@ -2,14 +2,20 @@ package jsky.app.ot.tpe.gems;
 
 import edu.gemini.ags.gems.GemsGuideStarSearchOptions.*;
 import edu.gemini.ags.gems.GemsGuideStars;
-import edu.gemini.pot.ModelConverters;
+import edu.gemini.pot.sp.ISPProgram;
+import edu.gemini.pot.sp.SPComponentType;
+import edu.gemini.pot.sp.SPUtil;
+import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.core.SiderealTarget;
-import edu.gemini.spModel.obs.SchedulingBlock;
+import edu.gemini.spModel.gemini.gsaoi.Gsaoi;
 import edu.gemini.spModel.obs.context.ObsContext;
+import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
+import edu.gemini.spModel.telescope.PosAngleConstraint;
 import jsky.app.ot.tpe.GemsGuideStarWorker;
+import jsky.app.ot.tpe.InstrumentContext;
 import jsky.app.ot.tpe.TpeImageWidget;
 import jsky.catalog.gui.TablePlotter;
 import jsky.util.Preferences;
@@ -126,7 +132,7 @@ public class GemsGuideStarSearchDialog extends JFrame {
         }
     };
 
-    protected static NumberFormat NF = NumberFormat.getInstance(Locale.US);
+    private static NumberFormat NF = NumberFormat.getInstance(Locale.US);
 
     static {
         NF.setMaximumFractionDigits(1);
@@ -146,7 +152,7 @@ public class GemsGuideStarSearchDialog extends JFrame {
     private final JComboBox<NirBandChoice> _nirBandComboBox = new JComboBox<>(NirBandChoice.values());
     private final JCheckBox _reviewCandidatesCheckBox = new JCheckBox("Review candidates before asterism search", true);
     private final JComboBox<AnalyseChoice> _analyseComboBox = new JComboBox<>(AnalyseChoice.values());
-    private final JCheckBox _allowPosAngleChangesCheckBox = new JCheckBox("Allow position angle adjustments", true);
+    private final JCheckBox _allowPosAngleChangesCheckBox;
     private final JTabbedPane _tabbedPane = new JTabbedPane();
     private final CandidateGuideStarsTable _candidateGuideStarsTable;
 
@@ -156,8 +162,8 @@ public class GemsGuideStarSearchDialog extends JFrame {
 
     private final StatusPanel _statusPanel = new StatusPanel();
     private final TpeImageWidget _tpe;
+    private final PosAngleConstraint posAngleConstraint;
 
-    private final TablePlotter _plotter;
     private final JPanel _candidateGuideStarsPanel = new JPanel(new BorderLayout(5, 5));
 
     // Set to true in selection handling
@@ -173,10 +179,16 @@ public class GemsGuideStarSearchDialog extends JFrame {
     public GemsGuideStarSearchDialog(TpeImageWidget tpe, scala.concurrent.ExecutionContext ec) {
         super("GeMS Guide Star Search");
         _tpe = tpe;
-        _plotter = tpe.plotter();
+
+        TablePlotter _plotter = tpe.plotter();
         this.ec = ec;
 
         _candidateGuideStarsTable = new CandidateGuideStarsTable(_plotter);
+
+        Option<SPInstObsComp> gems = ImOption.fromScalaOpt(tpe.getContext().instrument().ifIs(SPComponentType.INSTRUMENT_GSAOI));
+
+        posAngleConstraint = gems.map(v -> ((Gsaoi) v).getPosAngleConstraint()).getOrElse(PosAngleConstraint.UNBOUNDED);
+        _allowPosAngleChangesCheckBox = new JCheckBox("Allow position angle adjustments", posAngleConstraint == PosAngleConstraint.UNBOUNDED);
 
         // TPE REFACTOR -- i suppose we're assuming this isn't created from
         // scratch, in which case we'd have no environment yet
@@ -198,6 +210,18 @@ public class GemsGuideStarSearchDialog extends JFrame {
         Preferences.manageLocation(this);
         pack();
         setVisible(true);
+    }
+
+    /**
+     * Called when the instrument changes, in that case we can update the UI
+     * to reflect the change
+     */
+    public void updatedInstrument(InstrumentContext instrument) {
+        Option<SPInstObsComp> gems = ImOption.fromScalaOpt(instrument.ifIs(SPComponentType.INSTRUMENT_GSAOI));
+        gems.filter(i -> (((Gsaoi) i).getPosAngleConstraint() == PosAngleConstraint.UNBOUNDED) != _allowPosAngleChangesCheckBox.isSelected()).forEach( c -> {
+            _allowPosAngleChangesCheckBox.setSelected(((Gsaoi) c).getPosAngleConstraint() == PosAngleConstraint.UNBOUNDED);
+            setState(State.PRE_QUERY);
+        });
     }
 
     private JPanel makeMainPanel() {
@@ -339,6 +363,9 @@ public class GemsGuideStarSearchDialog extends JFrame {
         _reviewCandidatesCheckBox.addActionListener(a);
         _analyseComboBox.addActionListener(a);
         _allowPosAngleChangesCheckBox.addActionListener(a);
+        _allowPosAngleChangesCheckBox.addActionListener(e ->
+            updateModelPosAngleConstraint(_allowPosAngleChangesCheckBox.isSelected())
+        );
 
         // If unchecked, the “Candidate Guide Stars” tab should be removed.
         _reviewCandidatesCheckBox.addActionListener(e -> {
@@ -359,6 +386,22 @@ public class GemsGuideStarSearchDialog extends JFrame {
                     _ignoreSelection = false;
                 }
             }
+        });
+    }
+
+    /**
+     * Called when the selection of pos angle constraint changes on the UI
+     *
+     */
+    private void updateModelPosAngleConstraint(final boolean selected) {
+        Option<SPInstObsComp> gems = ImOption.fromScalaOpt(_tpe.getContext().instrument().ifIs(SPComponentType.INSTRUMENT_GSAOI));
+        gems.forEach(g -> {
+            if (selected) {
+                ((Gsaoi) g).setPosAngleConstraint(PosAngleConstraint.UNBOUNDED);
+            } else {
+                ((Gsaoi) g).setPosAngleConstraint(PosAngleConstraint.FIXED);
+            }
+            _tpe.getContext().instrument().commit();
         });
     }
 
@@ -461,7 +504,7 @@ public class GemsGuideStarSearchDialog extends JFrame {
         _nirBandComboBox.setSelectedItem(NirBandChoice.DEFAULT);
         _analyseComboBox.setSelectedItem(AnalyseChoice.DEFAULT);
         _reviewCandidatesCheckBox.setSelected(true);
-        _allowPosAngleChangesCheckBox.setSelected(true);
+        _allowPosAngleChangesCheckBox.setSelected(posAngleConstraint == PosAngleConstraint.UNBOUNDED);
 
         _tabbedPane.remove(_candidateGuideStarsPanel);
         _tabbedPane.add(_candidateGuideStarsPanel, 0);
@@ -473,7 +516,7 @@ public class GemsGuideStarSearchDialog extends JFrame {
                 && _nirBandComboBox.getSelectedItem() == NirBandChoice.DEFAULT
                 && _analyseComboBox.getSelectedItem() == AnalyseChoice.DEFAULT
                 && _reviewCandidatesCheckBox.isSelected()
-                && _allowPosAngleChangesCheckBox.isSelected();
+                && posAngleConstraint == PosAngleConstraint.UNBOUNDED;
     }
 
     public void query() throws Exception {

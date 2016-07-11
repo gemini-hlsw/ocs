@@ -35,16 +35,14 @@ public abstract class PropertyCtrl<B, T> {
      */
     public PropertyCtrl(PropertyDescriptor desc) {
         this.desc = desc;
-        listeners = new HashSet<EditListener<B, T>>();
+        listeners = new HashSet<>();
 
         // Create the bean listener.  When the property described by desc is
         // updated, the component is updated.
-        beanListener = new PropertyChangeListener() {
-            public void propertyChange(PropertyChangeEvent evt) {
-                removeComponentChangeListener();
-                updateComponent();
-                addComponentChangeListener();
-            }
+        beanListener = evt -> {
+            removeComponentChangeListener();
+            updateComponent();
+            addComponentChangeListener();
         };
     }
 
@@ -80,10 +78,10 @@ public abstract class PropertyCtrl<B, T> {
      */
     protected void fireEditEvent(T oldValue, T newValue) {
         EditEvent<B, T> event;
-        event = new EditEvent<B, T>(this, oldValue, newValue);
+        event = new EditEvent<>(this, oldValue, newValue);
 
         List<EditListener<B, T>> copy;
-        copy = new ArrayList<EditListener<B, T>>(listeners);
+        copy = new ArrayList<>(listeners);
 
         for (EditListener<B, T> l : copy) {
             l.valueChanged(event);

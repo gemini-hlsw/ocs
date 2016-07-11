@@ -633,6 +633,11 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
 
         // add new listeners
         if (_ctx.instrument().isDefined()) {
+            // This is bad but it is the only way to link changes from the instrument
+            // to the dialog box, talk about side-effects
+            if (_gemsGuideStarSearchDialog != null) {
+                _gemsGuideStarSearchDialog.updatedInstrument(ctx.instrument());
+            }
             _ctx.instrument().get().addPropertyChangeListener(this);
             setPosAngle(_ctx.instrument().get().getPosAngleDegrees());
         }
