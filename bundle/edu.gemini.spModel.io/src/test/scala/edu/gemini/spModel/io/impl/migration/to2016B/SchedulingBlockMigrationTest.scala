@@ -26,7 +26,7 @@ class SchedulingBlockMigrationTest extends Specification with MigrationTest {
     }
 
     "Use Valid-At For Non-Sidereal Base Positions" in withTestProgram2("schedulingBlock.xml") { p =>
-      p.findSchedulingBlock("nonsidereal") must_== Some(SchedulingBlock(1454284800000L))
+      p.findSchedulingBlock("nonsidereal") must_== Some(SchedulingBlock(1454284800000L, SchedulingBlock.Duration.Unstated))
     }
 
     "Ignore Sidereal Observations" in withTestProgram2("schedulingBlock.xml") { p =>

@@ -51,6 +51,9 @@ object PioSyntax {
     def value(key: String): Option[String] =
       Option(p.getParam(key)).map(_.getValue)
 
+    def long(key: String): Option[Long] =
+      Option(p.getParam(key)).map(_.getValue.toLong)
+
     def double(key: String): Option[Double] =
       Option(p.getParam(key)).map(_.getValue.toDouble)
 
