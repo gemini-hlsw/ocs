@@ -61,6 +61,11 @@ trait Migration {
       ps  <- env.allParamSets if ps.getName == ParamSetBase
     } yield (obs.getParamSet(ParamSetObservation), ps)
 
+  /** all observation paramsets **/
+  protected def obs(d: Document): List[ParamSet] =
+    d.findContainers(SPComponentType.OBSERVATION_BASIC)
+     .map(_.getParamSet(ParamSetObservation))
+
   /** Writes the document to an XML String for debugging. */
   protected def formatDocument(d: Document): String = {
     val writer = new StringWriter()

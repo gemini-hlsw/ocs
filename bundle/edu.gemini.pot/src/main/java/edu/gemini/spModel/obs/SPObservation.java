@@ -16,6 +16,8 @@ import edu.gemini.spModel.pio.Pio;
 import edu.gemini.spModel.pio.PioFactory;
 import edu.gemini.spModel.pio.PioParseException;
 import edu.gemini.spModel.seqcomp.IObserveSeqComponent;
+import edu.gemini.spModel.obs.ObsParamSetCodecs;
+import edu.gemini.spModel.target.TargetParamSetCodecs;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.time.ChargeClass;
 import edu.gemini.spModel.time.ObsTimeCharges;
@@ -59,8 +61,6 @@ public class SPObservation extends AbstractDataObject implements ISPStaffOnlyFie
 
     /* This attribute records the scheduling block */
     public static final String SCHEDULING_BLOCK_PROP = "schedulingBlock";
-    public static final String SCHEDULING_BLOCK_START_PROP = "schedulingBlockStart";
-    public static final String SCHEDULING_BLOCK_DURATION_PROP = "schedulingBlockDuration";
 
     /** This attribute records the observation QA state. */
     public static final String QA_STATE_PROP = "qaState";
@@ -590,11 +590,11 @@ public class SPObservation extends AbstractDataObject implements ISPStaffOnlyFie
         if (!_execStatusOverride.isEmpty()) {
             Pio.addParam(factory, paramSet, EXEC_STATUS_OVERRIDE_PROP, getExecStatusOverride().getValue().name());
         }
-        if (!_schedulingBlock.isEmpty()) {
-            Pio.addLongParam(factory, paramSet, SCHEDULING_BLOCK_START_PROP, getSchedulingBlock().getValue().start());
-            if (getSchedulingBlock().getValue().duration().nonEmpty())
-                Pio.addLongParam(factory, paramSet, SCHEDULING_BLOCK_DURATION_PROP, getSchedulingBlock().getValue().durationOrZero());
-        }
+
+        _schedulingBlock.foreach(sb -> {
+            final ParamSet ps = ObsParamSetCodecs.SchedulingBlockParamSetCodec().encode(SCHEDULING_BLOCK_PROP, sb);
+            paramSet.addParamSet(ps);
+        });
 
         Pio.addParam(factory, paramSet, QA_STATE_PROP, getOverriddenObsQaState().name());
         Pio.addBooleanParam(factory, paramSet, OVERRIDE_QA_STATE_PROP, _overrideQaState);
@@ -655,15 +655,13 @@ public class SPObservation extends AbstractDataObject implements ISPStaffOnlyFie
             setExecStatusOverride(new Some<>(ObsExecStatus.valueOf(v)));
         }
 
-        // Set the scheduling block if it exists for both start and duration properties.
-        v = Pio.getValue(paramSet, SCHEDULING_BLOCK_START_PROP);
-        String v2 = Pio.getValue(paramSet, SCHEDULING_BLOCK_DURATION_PROP);
-        if (v == null) {
+        // Set the scheduling block if it exists
+        final ParamSet sbParamSet = paramSet.getParamSet(SCHEDULING_BLOCK_PROP);
+        if (sbParamSet == null) {
             setSchedulingBlock(None.instance());
-        } else if (v2 == null) {
-            setSchedulingBlock(new Some<>(SchedulingBlock.unsafeFromStrings(v)));
         } else {
-            setSchedulingBlock(new Some<>(SchedulingBlock.unsafeFromStrings(v, v2)));
+            SchedulingBlock sb = ObsParamSetCodecs.SchedulingBlockParamSetCodec().unsafeDecode(sbParamSet);
+            setSchedulingBlock(new Some<>(sb));
         }
 
         v = Pio.getValue(paramSet, QA_STATE_PROP);
