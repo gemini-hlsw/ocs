@@ -218,9 +218,10 @@ public class GemsGuideStarSearchDialog extends JFrame {
      */
     public void updatedInstrument(InstrumentContext instrument) {
         Option<SPInstObsComp> gems = ImOption.fromScalaOpt(instrument.ifIs(SPComponentType.INSTRUMENT_GSAOI));
-        gems.forEach( c ->
-            _allowPosAngleChangesCheckBox.setSelected(((Gsaoi) c).getPosAngleConstraint() == PosAngleConstraint.UNBOUNDED)
-        );
+        gems.filter(i -> (((Gsaoi) i).getPosAngleConstraint() == PosAngleConstraint.UNBOUNDED) != _allowPosAngleChangesCheckBox.isSelected()).forEach( c -> {
+            _allowPosAngleChangesCheckBox.setSelected(((Gsaoi) c).getPosAngleConstraint() == PosAngleConstraint.UNBOUNDED);
+            setState(State.PRE_QUERY);
+        });
     }
 
     private JPanel makeMainPanel() {
