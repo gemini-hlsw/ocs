@@ -9,12 +9,11 @@ import edu.gemini.catalog.votable._
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.pot.ModelConverters._
 import edu.gemini.spModel.core.SiderealTarget
-
 import edu.gemini.spModel.ags.AgsStrategyKey.GemsKey
-import edu.gemini.spModel.gemini.flamingos2.Flamingos2OiwfsGuideProbe
-import edu.gemini.spModel.gemini.gems.{GemsInstrument, Canopus}
-import edu.gemini.spModel.gemini.gsaoi.GsaoiOdgw
-import edu.gemini.spModel.gems.{GemsTipTiltMode, GemsGuideProbeGroup, GemsGuideStarType}
+import edu.gemini.spModel.gemini.flamingos2.{Flamingos2, Flamingos2OiwfsGuideProbe}
+import edu.gemini.spModel.gemini.gems.{Canopus, GemsInstrument}
+import edu.gemini.spModel.gemini.gsaoi.{Gsaoi, GsaoiOdgw}
+import edu.gemini.spModel.gems.{GemsGuideProbeGroup, GemsGuideStarType, GemsTipTiltMode}
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable._
 
@@ -22,8 +21,9 @@ import scala.collection.JavaConverters._
 import scala.concurrent._
 import scala.concurrent.ExecutionContext.Implicits.global
 import edu.gemini.ags.api.AgsMagnitude.{MagnitudeCalc, MagnitudeTable}
-import edu.gemini.spModel.guide.{ValidatableGuideProbe, GuideProbeGroup, GuideProbe}
+import edu.gemini.spModel.guide.{GuideProbe, GuideProbeGroup, ValidatableGuideProbe}
 import edu.gemini.spModel.core._
+import edu.gemini.spModel.telescope.PosAngleConstraint
 
 import scalaz._
 import Scalaz._
@@ -187,7 +187,15 @@ trait GemsStrategy extends AgsStrategy {
   }
 
   override def select(ctx: ObsContext, mt: MagnitudeTable)(ec: ExecutionContext): Future[Option[Selection]] = {
-    val posAngles = Set(ctx.getPositionAngle.toNewModel, Angle.zero, Angle.fromDegrees(90), Angle.fromDegrees(180), Angle.fromDegrees(270))
+    val posAngles = ctx.getInstrument.getType match {
+      case SPComponentType.INSTRUMENT_GSAOI if ctx.getInstrument.asInstanceOf[Gsaoi].getPosAngleConstraint == PosAngleConstraint.FIXED =>
+        Set(ctx.getPositionAngle.toNewModel)
+      case SPComponentType.INSTRUMENT_FLAMINGOS2 if ctx.getInstrument.asInstanceOf[Flamingos2].getPosAngleConstraint == PosAngleConstraint.FIXED =>
+        Set(ctx.getPositionAngle.toNewModel)
+      case _ =>
+        Set(ctx.getPositionAngle.toNewModel, Angle.zero, Angle.fromDegrees(90), Angle.fromDegrees(180), Angle.fromDegrees(270))
+    }
+
     val results = search(GemsTipTiltMode.canopus, ctx, posAngles, None)(ec)
     results.map { r =>
       val gemsGuideStars = findGuideStars(ctx, posAngles, r)

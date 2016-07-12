@@ -9,6 +9,7 @@ import edu.gemini.spModel.time.ChargeClass;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Step-by-step detailed planned time accounting information for an observation.
@@ -42,12 +43,6 @@ public final class PlannedTime implements Serializable {
         return false;
     }
 
-    // A Comparator of two Comparable items of a given type that reverses the
-    // outcome of the natural ordering.
-//    private static final class RevComparator<T extends Comparable<T>> implements Comparator<T> {
-//        @Override public int compare(T o1, T o2) { return o2.compareTo(o1); }
-//    }
-
     public interface StepCalculator {
         CategorizedTimeGroup calc(Config stepConfig, Option<Config> prevStepConfig);
     }
@@ -65,7 +60,7 @@ public final class PlannedTime implements Serializable {
 
         public final String display;
 
-        private Category(String display) {
+        Category(String display) {
             this.display = display;
         }
 
@@ -76,8 +71,6 @@ public final class PlannedTime implements Serializable {
     }
 
     public static final class CategorizedTime implements Comparable<CategorizedTime>, Serializable {
-//        public static Comparator<CategorizedTime> REV_COMPARATOR = new RevComparator<CategorizedTime>();
-
         public final Category category;
 
         /** Time in milliseconds. */
@@ -166,19 +159,17 @@ public final class PlannedTime implements Serializable {
          * returning only those in this category.
          */
         public Set<CategorizedTime> times(Category cat) {
-            Set<CategorizedTime> res = new TreeSet<CategorizedTime>();
-            for (CategorizedTime ct : times) if (ct.category == cat) res.add(ct);
+            Set<CategorizedTime> res = times.stream().filter(ct -> ct.category == cat).collect(Collectors.toCollection(TreeSet::new));
             return res;
         }
 
         public CategorizedTimeGroup filter(PredicateOp<CategorizedTime> op) {
-            Set<CategorizedTime> res = new TreeSet<CategorizedTime>();
-            for (CategorizedTime ct : times) if (op.apply(ct)) res.add(ct);
+            Set<CategorizedTime> res = times.stream().filter(op::apply).collect(Collectors.toCollection(TreeSet::new));
             return (times.size() == res.size()) ? this : new CategorizedTimeGroup(res);
         }
 
         public CategorizedTimeGroup add(CategorizedTime ct) {
-            Set<CategorizedTime> s = new TreeSet<CategorizedTime>(times);
+            Set<CategorizedTime> s = new TreeSet<>(times);
             s.add(ct);
             return new CategorizedTimeGroup(Collections.unmodifiableSet(s));
         }
@@ -187,14 +178,14 @@ public final class PlannedTime implements Serializable {
             if (times.size() == 0) return ctg;
             if (ctg.times.size() == 0) return this;
 
-            Set<CategorizedTime> s = new TreeSet<CategorizedTime>(times);
+            Set<CategorizedTime> s = new TreeSet<>(times);
             s.addAll(ctg.times);
             return new CategorizedTimeGroup(Collections.unmodifiableSet(s));
         }
 
         public CategorizedTimeGroup addAll(Collection<CategorizedTime> times) {
             if (times.size() == 0) return this;
-            Set<CategorizedTime> s = new TreeSet<CategorizedTime>(this.times);
+            Set<CategorizedTime> s = new TreeSet<>(this.times);
             s.addAll(times);
             return new CategorizedTimeGroup(Collections.unmodifiableSet(s));
         }
@@ -233,7 +224,7 @@ public final class PlannedTime implements Serializable {
         }
 
         public Map<Category, CategorizedTime> maxTimes() {
-            Map<Category, CategorizedTime> max = new TreeMap<Category, CategorizedTime>();
+            Map<Category, CategorizedTime> max = new TreeMap<>();
             for (CategorizedTime ct : times) {
                 CategorizedTime cur = max.get(ct.category);
                 if ((cur == null) || (cur.compareTo(ct) < 0)) {
@@ -414,11 +405,11 @@ public final class PlannedTime implements Serializable {
     }
 
     public static PlannedTime apply(Setup setup) {
-        return new PlannedTime(setup, Collections.<Step>emptyList(), ConfigSequence.EMPTY);
+        return new PlannedTime(setup, Collections.emptyList(), ConfigSequence.EMPTY);
     }
 
     public static PlannedTime apply(Setup setup, List<Step> steps, ConfigSequence sequence) {
-        steps = Collections.unmodifiableList(new ArrayList<Step>(steps));
+        steps = Collections.unmodifiableList(new ArrayList<>(steps));
         return new PlannedTime(setup, steps, sequence);
     }
 }

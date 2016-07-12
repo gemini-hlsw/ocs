@@ -125,7 +125,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
     /**
      * AGS failed to run, so clear the AGS results.
      */
-    public void clearResults() {
+    private void clearResults() {
         apply(tpe.getContext(), 0.0, GuideGroup.AutomaticInitial());
     }
 
@@ -134,7 +134,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
      * Apply the results of the guide star search to the current observation,
      * setting the selected position angle and guide probe.
      */
-    public void applyResults(GemsGuideStars gemsGuideStars) {
+    private void applyResults(GemsGuideStars gemsGuideStars) {
         final edu.gemini.spModel.core.Angle posAngle;
         posAngle = Angle$.MODULE$.fromDegrees(gemsGuideStars.pa().toDegrees());
         apply(tpe.getContext(), gemsGuideStars.pa().toDegrees(), GuideGroup.createActive(gemsGuideStars.guideGroup().getAll(), posAngle));
@@ -174,7 +174,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
         applyResults(tpe.getContext(), selectedAsterisms, primaryIndex);
     }
 
-    public static void applyResults(final TpeContext ctx, final List<GemsGuideStars> selectedAsterisms, final int primaryIndex) {
+    private static void applyResults(final TpeContext ctx, final List<GemsGuideStars> selectedAsterisms, final int primaryIndex) {
         final TargetObsComp targetObsComp = ctx.targets().orNull();
         if (targetObsComp != null) {
             final TargetEnvironment env = targetObsComp.getTargetEnvironment();
@@ -222,10 +222,8 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
      *
      * @param obsContext used to getthe current pos angle
      */
-    public static Set<edu.gemini.spModel.core.Angle> getPosAngles(ObsContext obsContext) {
-        final Set<edu.gemini.spModel.core.Angle> posAngles = new TreeSet<>((a1, a2) -> {
-            return Double.compare(a1.toDegrees(), a2.toDegrees());
-        });
+    private static Set<edu.gemini.spModel.core.Angle> getPosAngles(ObsContext obsContext) {
+        final Set<edu.gemini.spModel.core.Angle> posAngles = new TreeSet<>((a1, a2) -> Double.compare(a1.toDegrees(), a2.toDegrees()));
 
         posAngles.add(ModelConverters.toNewAngle(obsContext.getPositionAngle()));
         posAngles.add(ModelConverters.toNewAngle(new Angle(0., Angle.Unit.DEGREES)));
@@ -261,15 +259,6 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
         }
     }
 
-    public static List<GemsCatalogSearchResults> unloggedSearch(GemsGuideStarSearchOptions.CatalogChoice catalog, GemsTipTiltMode tipTiltMode,
-                                                                ObsContext obsContext, Set<edu.gemini.spModel.core.Angle> posAngles,
-                                                                scala.Option<MagnitudeBand> nirBand,
-                                                                scala.concurrent.ExecutionContext ec) throws Exception {
-        final List<GemsCatalogSearchResults> results = searchUnchecked(catalog, tipTiltMode, obsContext, posAngles, nirBand, ec);
-        checkResults(results);
-        return results;
-    }
-
     private static List<GemsCatalogSearchResults> searchUnchecked(GemsGuideStarSearchOptions.CatalogChoice catalog, GemsTipTiltMode tipTiltMode,
                                                          ObsContext obsContext, Set<edu.gemini.spModel.core.Angle> posAngles,
                                                          scala.Option<MagnitudeBand> nirBand,
@@ -291,7 +280,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
     /**
      * Returns the set of Gems guide stars with the highest ranking using the default settings.
      */
-    public GemsGuideStars findGuideStars(scala.concurrent.ExecutionContext ec) throws Exception {
+    private GemsGuideStars findGuideStars(scala.concurrent.ExecutionContext ec) throws Exception {
         final WorldCoords basePos = tpe.getBasePos();
         final ObsContext obsContext = getObsContext(basePos.getRaDeg(), basePos.getDecDeg());
         final Set<edu.gemini.spModel.core.Angle> posAngles = getPosAngles(obsContext);

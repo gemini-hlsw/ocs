@@ -250,7 +250,6 @@ object BagsManager {
   })
   private implicit val executionContext = ExecutionContext.fromExecutor(worker)
 
-
   // Worker pool running the blocking queries.
   private val blockingWorker = new ScheduledThreadPoolExecutor(16, new ThreadFactory() {
     override def newThread(r: Runnable): Thread = {

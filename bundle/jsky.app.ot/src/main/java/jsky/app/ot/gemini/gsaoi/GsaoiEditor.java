@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package jsky.app.ot.gemini.gsaoi;
 
 import edu.gemini.pot.sp.ISPObsComponent;
@@ -9,6 +5,7 @@ import edu.gemini.shared.gui.ThinBorder;
 import edu.gemini.shared.gui.bean.*;
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi;
 import edu.gemini.spModel.telescope.IssPort;
+import edu.gemini.spModel.telescope.PosAngleConstraint;
 import jsky.app.ot.editor.eng.EngEditor;
 import jsky.app.ot.gemini.editor.ComponentEditor;
 
@@ -128,15 +125,13 @@ public final class GsaoiEditor extends ComponentEditor<ISPObsComponent, Gsaoi> i
         }
     }
 
-    private final EditListener<Gsaoi, Gsaoi.Filter> filterChangeListener = new EditListener<Gsaoi, Gsaoi.Filter>() {
-        public void valueChanged(EditEvent<Gsaoi, Gsaoi.Filter> evt) {
-            final Gsaoi.Filter f = evt.getNewValue();
-            if (f == null) return;
+    private final EditListener<Gsaoi, Gsaoi.Filter> filterChangeListener = evt -> {
+        final Filter f = evt.getNewValue();
+        if (f == null) return;
 
-            final Gsaoi.ReadMode readMode = f.readMode();
-            if (readMode == null) return;
-            getDataObject().setReadMode(readMode);
-        }
+        final ReadMode readMode = f.readMode();
+        if (readMode == null) return;
+        getDataObject().setReadMode(readMode);
     };
 
     private final class ExposureTimeMessageUpdater implements EditListener<Gsaoi, Double>, PropertyChangeListener {
@@ -233,6 +228,7 @@ public final class GsaoiEditor extends ComponentEditor<ISPObsComponent, Gsaoi> i
 
 
     private final TextFieldPropertyCtrl<Gsaoi, Double> posAngleCtrl;
+    private final CheckboxEnumPropertyCtrl<Gsaoi, PosAngleConstraint> posAngleConstraintCtrl;
     private final TextFieldPropertyCtrl<Gsaoi, Double> exposureTimeCtrl;
     private final ExposureTimeMessageUpdater exposureTimeMessageUpdater;
     private final TextFieldPropertyCtrl<Gsaoi, Integer> coaddsCtrl;
@@ -243,8 +239,8 @@ public final class GsaoiEditor extends ComponentEditor<ISPObsComponent, Gsaoi> i
     public GsaoiEditor() {
 
         filterCtrl   = ComboPropertyCtrl.enumInstance(FILTER_PROP);
-        portCtrl     = new RadioPropertyCtrl<Gsaoi, IssPort>(PORT_PROP);
-        readModeCtrl = new RadioPropertyCtrl<Gsaoi, ReadMode>(READ_MODE_PROP);
+        portCtrl     = new RadioPropertyCtrl<>(PORT_PROP);
+        readModeCtrl = new RadioPropertyCtrl<>(READ_MODE_PROP);
         odgwSizeCtrl = ComboPropertyCtrl.enumInstance(ODGW_SIZE_PROP);
         utilWheelCtrl= ComboPropertyCtrl.enumInstance(UTILITY_WHEEL_PROP);
         roiCtrl= ComboPropertyCtrl.enumInstance(ROI_PROP);
@@ -252,6 +248,9 @@ public final class GsaoiEditor extends ComponentEditor<ISPObsComponent, Gsaoi> i
         // Position Angle
         PropertyDescriptor pd = Gsaoi.POS_ANGLE_PROP;
         posAngleCtrl = TextFieldPropertyCtrl.createDoubleInstance(pd, 1);
+
+        posAngleConstraintCtrl = new CheckboxEnumPropertyCtrl<>("Allow Auto Guide Search to select PA",
+                POS_ANGLE_CONSTRAINT_PROP, PosAngleConstraint.UNBOUNDED, PosAngleConstraint.FIXED);
 
         // Exposure Time
         pd = Gsaoi.EXPOSURE_TIME_PROP;
@@ -274,27 +273,28 @@ public final class GsaoiEditor extends ComponentEditor<ISPObsComponent, Gsaoi> i
         pan.setBorder(PANEL_BORDER);
         addCtrl(pan, 0, 0, filterCtrl);
 
-        // Column Gap
-        pan.add(new JPanel(), colGapGbc(3, 0));
-
         posAngleCtrl.setColumns(4);
-        addCtrl(pan, 4, 0, posAngleCtrl, "deg E of N");
+        addCtrl(pan, 0, 1, posAngleCtrl, "deg E of N");
+        // Column Gap
+        pan.add(new JPanel(), colGapGbc(3, 1));
+
+        pan.add(posAngleConstraintCtrl.getComponent(), propWidgetGbc(6, 1));
 
         // ------ Separator --------
-        pan.add(new JSeparator(JSeparator.HORIZONTAL), separatorGbc(0, 1, 7));
+        pan.add(new JSeparator(JSeparator.HORIZONTAL), separatorGbc(0, 3, 7));
 
         exposureTimeCtrl.setColumns(4);
-        pan.add(new JLabel("Exp Time"), propLabelGbc(0, 2));
-        pan.add(exposureTimeCtrl.getComponent(), propWidgetGbc(1, 2));
-        pan.add(new JLabel("sec"), propUnitsGbc(2, 2));
-        pan.add(exposureTimeMessageUpdater.getLabel(), warningLabelGbc(0, 3, 3));
+        pan.add(new JLabel("Exp Time"), propLabelGbc(0, 4));
+        pan.add(exposureTimeCtrl.getComponent(), propWidgetGbc(1, 4));
+        pan.add(new JLabel("sec"), propUnitsGbc(2, 4));
+        pan.add(exposureTimeMessageUpdater.getLabel(), warningLabelGbc(0, 5, 3));
 
-        addCtrl(pan, 4, 2, coaddsCtrl, "exp/obs");
         coaddsCtrl.setColumns(3);
+        addCtrl(pan, 4, 4, coaddsCtrl, "exp/obs");
 
         final JLabel coaddsWarning = coaddsMessageUpdater.getLabel();
         coaddsWarning.setForeground(WARNING_FG_COLOR);
-        pan.add(coaddsWarning, warningLabelGbc(4, 3, 3));
+        pan.add(coaddsWarning, warningLabelGbc(4, 5, 3));
 
         final JTabbedPane tabPane = new JTabbedPane();
         tabPane.addTab("Read Mode", getTabPanel(readModeCtrl.getComponent()));
@@ -302,7 +302,7 @@ public final class GsaoiEditor extends ComponentEditor<ISPObsComponent, Gsaoi> i
 
         // Tab Pane
         pan.add(tabPane, new GridBagConstraints(){{
-            gridx     = 0;    gridy      = 4;
+            gridx     = 0;    gridy      = 6;
             gridwidth = 7;    gridheight = 1;
             weightx   = 1.0;  weighty    = 0;
             anchor    = WEST; fill       = HORIZONTAL;
@@ -313,7 +313,7 @@ public final class GsaoiEditor extends ComponentEditor<ISPObsComponent, Gsaoi> i
         final Border b = new ThinBorder(BevelBorder.RAISED);
         msgPanel.setBorder(BorderFactory.createCompoundBorder(b, BorderFactory.createEmptyBorder(5, 15, 5, 5)));
         pan.add(msgPanel, new GridBagConstraints(){{
-            gridx     = 0;    gridy      = 5;
+            gridx     = 0;    gridy      = 7;
             gridwidth = 7;    gridheight = 1;
             weightx   = 1.0;  weighty    = 0;
             anchor    = WEST; fill       = HORIZONTAL;
@@ -331,7 +331,7 @@ public final class GsaoiEditor extends ComponentEditor<ISPObsComponent, Gsaoi> i
         addCtrl(pan, 0, 2, roiCtrl);
 
         pan.add(new JPanel(), new GridBagConstraints(){{
-            gridx=0; gridy=3; weighty=1.0; fill=VERTICAL;
+            gridx = 0; gridy = 3; weighty = 1.0; fill = VERTICAL;
         }});
 
         return pan;
@@ -360,10 +360,11 @@ public final class GsaoiEditor extends ComponentEditor<ISPObsComponent, Gsaoi> i
     }
 
     @Override
-    protected void handlePostDataObjectUpdate(Gsaoi gsaoi) {
+    protected void handlePostDataObjectUpdate(final Gsaoi gsaoi) {
         filterCtrl.removeEditListener(filterChangeListener);
 
         posAngleCtrl.setBean(gsaoi);
+        posAngleConstraintCtrl.setBean(gsaoi);
         exposureTimeCtrl.setBean(gsaoi);
         coaddsCtrl.setBean(gsaoi);
         filterCtrl.setBean(gsaoi);

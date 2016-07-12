@@ -36,43 +36,43 @@ class GemsGuideStarSearchModel {
         _band = band;
     }
 
-    public AnalyseChoice getAnalyseChoice() {
+    AnalyseChoice getAnalyseChoice() {
         return _analyseChoice;
     }
 
-    public void setAnalyseChoice(AnalyseChoice analyseChoice) {
+    void setAnalyseChoice(AnalyseChoice analyseChoice) {
         _analyseChoice = analyseChoice;
     }
 
-    public void setReviewCandidatesBeforeSearch(boolean reviewCanditatesBeforeSearch) {
+    void setReviewCandidatesBeforeSearch(boolean reviewCanditatesBeforeSearch) {
         _reviewCandidatesBeforeSearch = reviewCanditatesBeforeSearch;
     }
 
-    public boolean isReviewCandidatesBeforeSearch() {
+    boolean isReviewCandidatesBeforeSearch() {
         return _reviewCandidatesBeforeSearch;
     }
 
-    public void setAllowPosAngleAdjustments(boolean allowPosAngleAdjustments) {
+    void setAllowPosAngleAdjustments(boolean allowPosAngleAdjustments) {
         _allowPosAngleAdjustments = allowPosAngleAdjustments;
     }
 
-    public boolean isAllowPosAngleAdjustments() {
+    boolean isAllowPosAngleAdjustments() {
         return _allowPosAngleAdjustments;
     }
 
-    public List<GemsCatalogSearchResults> getGemsCatalogSearchResults() {
+    List<GemsCatalogSearchResults> getGemsCatalogSearchResults() {
         return _gemsCatalogSearchResults;
     }
 
-    public void setGemsCatalogSearchResults(List<GemsCatalogSearchResults> gemsCatalogSearchResults) {
+    void setGemsCatalogSearchResults(List<GemsCatalogSearchResults> gemsCatalogSearchResults) {
         _gemsCatalogSearchResults = gemsCatalogSearchResults;
     }
 
-    public List<GemsGuideStars> getGemsGuideStars() {
+    List<GemsGuideStars> getGemsGuideStars() {
         return _gemsGuideStars;
     }
 
-    public void setGemsGuideStars(List<GemsGuideStars> gemsGuideStars) {
+    void setGemsGuideStars(List<GemsGuideStars> gemsGuideStars) {
         _gemsGuideStars = gemsGuideStars;
     }
 }

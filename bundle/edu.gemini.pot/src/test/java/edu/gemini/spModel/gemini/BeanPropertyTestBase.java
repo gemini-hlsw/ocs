@@ -149,9 +149,9 @@ public abstract class BeanPropertyTestBase<B extends ISPDataObject> extends Test
 
         // Add a listener.
         class TestPropertyChangeListener implements PropertyChangeListener {
-            int count;
-            Object oldValue;
-            Object newValue;
+            private int count;
+            private Object oldValue;
+            private Object newValue;
             public void propertyChange(PropertyChangeEvent evt) {
                 ++count;
                 oldValue = evt.getOldValue();
@@ -224,13 +224,11 @@ public abstract class BeanPropertyTestBase<B extends ISPDataObject> extends Test
         assertEquals(testName, newValue, getValue(desc));
     }
 
-    private final PropertyTestExecutor paramSetTestExecutor = new PropertyTestExecutor(new ApplyTest() {
-        public void apply(PropertyDescriptor desc, Object oldValue, Object newValue) {
-            try {
-                testParamSet(desc, newValue);
-            } catch (Exception ex) {
-                throw new RuntimeException(ex);
-            }
+    private final PropertyTestExecutor paramSetTestExecutor = new PropertyTestExecutor((desc, oldValue, newValue) -> {
+        try {
+            testParamSet(desc, newValue);
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
         }
     });
 
@@ -254,13 +252,11 @@ public abstract class BeanPropertyTestBase<B extends ISPDataObject> extends Test
         assertEquals(testName, newValue, param.getValue());
     }
 
-    private final PropertyTestExecutor sysConfigTestExecutor = new PropertyTestExecutor(new ApplyTest() {
-        public void apply(PropertyDescriptor desc, Object oldValue, Object newValue) {
-            try {
-                testSysConfig(desc, newValue);
-            } catch (Exception ex) {
-                throw new RuntimeException(ex);
-            }
+    private final PropertyTestExecutor sysConfigTestExecutor = new PropertyTestExecutor((desc, oldValue, newValue) -> {
+        try {
+            testSysConfig(desc, newValue);
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
         }
     });
 
