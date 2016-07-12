@@ -11,6 +11,7 @@ import edu.gemini.util.skycalc.calc.{Interval, TargetCalculator}
 
 import jsky.coords.WorldCoords
 import edu.gemini.skycalc.{TimeUtils, Coordinates}
+import scala.collection.JavaConverters._
 
 /**
  * Created with IntelliJ IDEA.
@@ -43,7 +44,6 @@ object ObsTargetCalculatorService {
 
     def calc(s: Site, b: SchedulingBlock, c: Coordinates): TargetCalculator = {
       val st = SiderealTarget(new WorldCoords(c.getRaDeg, c.getDecDeg))
-      val plannedTime = PlannedTimeCalculator.instance.calc(obs)
 
       // Andy says:
       // duration is equivalent to science time, if specific explicitly
@@ -51,7 +51,7 @@ object ObsTargetCalculatorService {
       // Ideally, if you hover over duration box in GUI, should say acquisition + science time OR not.
 
       // Since we need start < end explicitly, if the duration is None, we cannot use it.
-      val duration = b.duration getOrElse plannedTime.totalTime
+      val duration = b.duration.toOption getOrElse calculateRemainingTime(obs)
       val end      = b.start + duration
 
       // If the duration is going to be smaller than the default step size of 30 seconds used by the
@@ -86,4 +86,13 @@ object ObsTargetCalculatorService {
   def targetCalculationForJava(obs: ISPObservation): edu.gemini.shared.util.immutable.Option[TargetCalculator] = {
     targetCalculation(obs).asGeminiOpt
   }
+
+  def calculateRemainingTime(ispObservation: ISPObservation): Long =
+    PlannedTimeCalculator.instance
+      .calc(ispObservation)
+      .steps.asScala
+      .filterNot(_.executed)
+      .map(_.totalTime)
+      .sum
+
 }

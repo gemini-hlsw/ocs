@@ -63,7 +63,7 @@ class TpeEphemerisFeature extends TpeImageFeature("Ephemeris", "Show interpolate
     toScreenEphemeris(getEphemeris)
 
   def obsTime: Option[Long] =
-    getContext.schedulingBlock.flatMap(_.duration) orElse
+    getContext.schedulingBlock.flatMap(_.duration.toOption) orElse
     getContext.obsShell.map(remainingTime)
 
   def obsScreenEphemeris(e: Ephemeris): Option[List[ScreenEphemeris]] =
