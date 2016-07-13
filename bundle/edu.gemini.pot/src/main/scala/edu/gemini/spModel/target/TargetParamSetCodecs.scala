@@ -29,11 +29,6 @@ object TargetParamSetCodecs {
       .withParam("system",        Magnitude.system)
       .withOptionalParam("error", Magnitude.error)
 
-  implicit val EphemerisElementParamSetCodec: ParamSetCodec[(Long, Coordinates)] =
-    ParamSetCodec.initial((0L, Coordinates.zero))
-      .withParam("time",           Lens.firstLens[Long, Coordinates])
-      .withParamSet("coordinates", Lens.secondLens[Long, Coordinates])
-
   implicit val SpectralDistributionParamSetCodec: ParamSetCodec[SpectralDistribution] =
     new ParamSetCodec[SpectralDistribution] {
       val pf = new PioXmlFactory
@@ -109,8 +104,8 @@ object TargetParamSetCodecs {
 
   implicit val EphemerisParamSetCodec: ParamSetCodec[Ephemeris] =
     ParamSetCodec.initial(Ephemeris.empty)
-      .withParam("site",                     Ephemeris.site)
-      .withManyParamSet("ephemeris-element", Ephemeris.ephemerisElements)
+      .withParam("site", Ephemeris.site)
+      .withParam("data", Ephemeris.compressedData)
 
   implicit val NonSiderealTargetParamSetCodec: ParamSetCodec[NonSiderealTarget] =
     ParamSetCodec.initial(NonSiderealTarget.empty)

@@ -37,7 +37,6 @@ object TargetParamSetCodecsSpec extends Specification with ScalaCheck with Arbit
     close[Coordinates]
     close[ProperMotion]
     close[Magnitude]
-    close[(Long, Coordinates)]
     close[SpectralDistribution]
     close[SpatialProfile]
     close[SiderealTarget]

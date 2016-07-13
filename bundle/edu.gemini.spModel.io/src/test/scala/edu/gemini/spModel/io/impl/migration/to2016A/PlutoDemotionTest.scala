@@ -29,7 +29,7 @@ class PlutoDemotionTest extends MigrationTest {
               case List((t, c)) =>
 
                   Assert.assertEquals("ValidAt", "10/28/15 7:39:58 PM UTC", SPTargetPio.formatter.format(t))
-                  Assert.assertEquals("RA",      "15:41:38.380", c.ra.toAngle.formatHMS)
+                  Assert.assertEquals("RA",      "15:41:38.379", c.ra.toAngle.formatHMS)
                   Assert.assertEquals("Dec",     "-15:52:28.70", c.dec.formatDMS)
 
               case e => Assert.fail("Expected 1-element ephemeris, found " + e)
