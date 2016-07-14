@@ -2,6 +2,7 @@ package jsky.image.gui;
 
 import com.sun.media.jai.codec.*;
 import diva.canvas.GraphicsPane;
+import edu.gemini.shared.util.immutable.Option;
 import jsky.coords.WorldCoordinateConverter;
 import jsky.coords.WorldCoords;
 import jsky.image.ImageChangeEvent;
@@ -532,7 +533,7 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
         ImageHistoryItem hi = getImageHistoryItem(new File(_filename));
         float scale;
         if (hi != null) {
-            scale = hi.data.scale;
+            scale = hi.data.scale();
             addChangeListener(hi); // This will restore the history settings for the image
         } else {
             scale = getScale();
@@ -582,7 +583,7 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
         ListIterator<ImageHistoryItem> it = ((LinkedList<ImageHistoryItem>) _historyList.clone()).listIterator(0);
         for (int i = 0; it.hasNext(); i++) {
             ImageHistoryItem item = it.next();
-            if (item.data.title.equals(historyItem.data.title)) {
+            if (item.data.title().equals(historyItem.data.title())) {
                 _historyList.remove(i);
             }
         }
@@ -595,8 +596,8 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
             ImageHistoryItem item = _historyList.removeLast();
             // remove the file, if it is in cache
             String cacheDir = Preferences.getPreferences().getCacheDir().getPath();
-            if (item.data.filename.startsWith(cacheDir))
-                new File(item.data.filename).deleteOnExit();
+            if (item.data.filename().startsWith(cacheDir))
+                new File(item.data.filename()).deleteOnExit();
         }
     }
 
@@ -661,8 +662,8 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
         ListIterator<ImageHistoryItem> it = _historyList.listIterator(0);
         while (it.hasNext()) {
             ImageHistoryItem historyItem = it.next();
-            if (historyItem.data.filename.startsWith(cacheDir)) {
-                File file = new File(historyItem.data.filename);
+            if (historyItem.data.filename().startsWith(cacheDir)) {
+                File file = new File(historyItem.data.filename());
                 if (file.exists()) {
                     try {
                         if (!file.delete()) {
@@ -708,7 +709,7 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
     @SuppressWarnings("unchecked")
     protected void loadHistory() {
         try {
-            _historyList = ImageHistoryItem.apply((LinkedList<ImageHistoryItem.Data>) Preferences.getPreferences().deserialize(HISTORY_LIST_DATA_NAME));
+            _historyList = ImageHistoryItem.apply((LinkedList<ImageItemDescriptor>) Preferences.getPreferences().deserialize(HISTORY_LIST_DATA_NAME));
         } catch (Exception e) {
             _historyList = new LinkedList<>();
         }
@@ -752,7 +753,7 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
         ListIterator<ImageHistoryItem> it = ((LinkedList<ImageHistoryItem>) _historyList.clone()).listIterator(0);
         while (it.hasNext()) {
             ImageHistoryItem historyItem = it.next();
-            File f = new File(historyItem.data.filename);
+            File f = new File(historyItem.data.filename());
             if (f.equals(file.getAbsoluteFile())) {
                 return historyItem;
             }
@@ -933,22 +934,22 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
         ListIterator<ImageHistoryItem> it = l.listIterator(0);
         while (it.hasNext()) {
             ImageHistoryItem historyItem = it.next();
-            File file = new File(historyItem.data.filename);
+            File file = new File(historyItem.data.filename());
             if (!file.exists()) {
                 // remove dead item
                 _historyList.remove(historyItem);
                 continue;
             }
-            Double dist = historyItem.match(ra, dec);
-            if (dist != null) {
-                if (closestDist == null || dist < closestDist) {
-                    closestDist = dist;
+            Option<Double> dist = historyItem.match(ra, dec);
+            if (dist.isDefined()) {
+                if (closestDist == null || dist.getValue() < closestDist) {
+                    closestDist = dist.getValue();
                     closestHistoryItem = historyItem;
                 }
             }
         }
         if (closestHistoryItem != null) {
-            if (_filename != null && _filename.equals(closestHistoryItem.data.filename))
+            if (_filename != null && _filename.equals(closestHistoryItem.data.filename()))
                 return false; // already displaying the file
             ImageDisplayMenuBar.setCurrentImageDisplay(this);
             closestHistoryItem.actionPerformed(null);
@@ -967,7 +968,7 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
         ListIterator<ImageHistoryItem> it = _historyList.listIterator(0);
         while (it.hasNext()) {
             ImageHistoryItem historyItem = it.next();
-            File file = new File(historyItem.data.filename);
+            File file = new File(historyItem.data.filename());
             if (!file.exists()) {
                 // remove dead item
                 it.remove();
