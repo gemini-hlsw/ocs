@@ -1,23 +1,23 @@
 package jsky.app.ot.gemini.obscat
 
 import java.io.File
-import javax.swing.{JComponent, JTextField, DefaultComboBoxModel, ImageIcon}
+import javax.swing.{DefaultComboBoxModel, ImageIcon, JComponent, JTextField}
 
 import edu.gemini.catalog.ui.PreferredSizeFrame
 import edu.gemini.shared.gui.textComponent.TextRenderer
 import edu.gemini.ui.miglayout.MigPanel
 import edu.gemini.ui.miglayout.constraints._
 import edu.gemini.shared.util.immutable.ScalaConverters._
-import jsky.app.ot.userprefs.ui.{PreferencePanel, PreferenceDialog}
-import jsky.catalog.{FieldDescAdapter, Catalog}
+import jsky.app.ot.userprefs.ui.{PreferenceDialog, PreferencePanel}
+import jsky.app.ot.util.Resources
+import jsky.catalog.{Catalog, FieldDescAdapter}
 import jsky.util.Preferences
-import jsky.util.gui.{MultiSelectComboBox, DialogUtil}
+import jsky.util.gui.{DialogUtil, MultiSelectComboBox}
 
 import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.swing._
-import scala.swing.event.{SelectionChanged, ButtonClicked}
-
+import scala.swing.event.{ButtonClicked, SelectionChanged}
 import scalaz._
 import Scalaz._
 

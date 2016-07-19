@@ -51,7 +51,6 @@ abstract class CatalogImageDisplay(parent: Component, navigatorPane: NavigatorPa
     try {
       val fitsImage = getFitsImage
       val table = new NavigatorFITSTable(getFilename, fitsImage.getFits, hdu)
-      //openCatalogWindow(table.getCatalog)
       val fitsKeywordsFrame = getFitsKeywordsFrame
       Option(fitsKeywordsFrame).foreach {
         case frame: FITSKeywordsFrame =>

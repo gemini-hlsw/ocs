@@ -7,6 +7,7 @@
 
 package jsky.app.ot.util;
 
+import java.awt.*;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.net.URL;
@@ -92,6 +93,14 @@ public final class Resources {
         icon = new ImageIcon(url);
         _rmap.put(iconFileName, icon);
         return icon;
+    }
+
+    public static void setOTFrameIcon(java.awt.Frame frame) {
+        ImageIcon icon = Resources.getIcon("ot.png");
+        if (icon != null) {
+            Image image = icon.getImage();
+            frame.setIconImage(image);
+        }
     }
 
 
