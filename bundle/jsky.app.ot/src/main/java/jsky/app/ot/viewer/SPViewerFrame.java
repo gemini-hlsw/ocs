@@ -24,8 +24,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -64,7 +62,10 @@ public final class SPViewerFrame extends JFrame {
         Preferences.manageSize(this, new Dimension(875, 680));
         Preferences.manageLocation(this, -1, -1, getClass().getName() + _count + ".pos");
 
-        if (Platform.get() == Platform.osx) hookMacQuitMenu();
+        if (Platform.get() == Platform.osx) {
+            hookMacQuitMenu();
+        }
+        Resources.setOTFrameIcon(this);
 
         pack();
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -75,7 +76,6 @@ public final class SPViewerFrame extends JFrame {
         });
         _viewer.updateConflictToolWindow();
         setVisible(true);
-
     }
 
     @SuppressWarnings("unchecked")
@@ -91,13 +91,11 @@ public final class SPViewerFrame extends JFrame {
             applicationClass.getMethod("removeAboutMenuItem").invoke(app);
             applicationClass.getMethod("setQuitHandler", applicationQuitHandlerClass).invoke(app,
                 Proxy.newProxyInstance(getClass().getClassLoader(), new Class[]{applicationQuitHandlerClass},
-                          new InvocationHandler() {
-                              public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                                  getViewer().exit(); // will prompt for save, etc
-                                  applicationQuitResponseClass.getMethod("cancelQuit").invoke(args[1]);
-                                  return null; // fortunately all methods on this interface are void
-                              }
-                          }));
+                        (proxy, method, args) -> {
+                            getViewer().exit(); // will prompt for save, etc
+                            applicationQuitResponseClass.getMethod("cancelQuit").invoke(args[1]);
+                            return null; // fortunately all methods on this interface are void
+                        }));
 
         } catch (Exception e) {
             LOG.log(Level.WARNING, "Trouble installing Quit hook for Mac.", e);
@@ -119,7 +117,6 @@ public final class SPViewerFrame extends JFrame {
         // Create a new instance of MyDoggyToolWindowManager passing the frame.
         MyDoggyToolWindowManager myDoggyToolWindowManager = new MyDoggyToolWindowManager(this);
         _toolWindowManager = myDoggyToolWindowManager;
-
 
         //Lock the drag and drop of the tabs
         DragAndDropLock.setLocked(true);

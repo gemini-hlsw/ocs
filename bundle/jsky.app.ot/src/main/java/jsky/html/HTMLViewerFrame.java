@@ -13,6 +13,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import javax.swing.JFrame;
 
+import jsky.app.ot.util.Resources;
 import jsky.util.Preferences;
 import jsky.util.gui.GenericToolBar;
 
@@ -42,6 +43,7 @@ public class HTMLViewerFrame extends JFrame {
         Preferences.manageLocation(this);
         Preferences.manageSize(viewer, new Dimension(600, 500));
 
+        Resources.setOTFrameIcon(this);
         pack();
         setVisible(true);
         setDefaultCloseOperation(HIDE_ON_CLOSE);

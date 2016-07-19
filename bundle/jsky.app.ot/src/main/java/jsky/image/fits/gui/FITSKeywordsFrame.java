@@ -11,6 +11,7 @@ package jsky.image.fits.gui;
 import java.awt.BorderLayout;
 import javax.swing.JFrame;
 
+import jsky.app.ot.util.Resources;
 import jsky.image.gui.MainImageDisplay;
 import jsky.util.Preferences;
 
@@ -33,11 +34,11 @@ public class FITSKeywordsFrame extends JFrame {
         super("FITS Keywords");
         fitsKeywords = new FITSKeywords(this, imageDisplay);
         getContentPane().add(fitsKeywords, BorderLayout.CENTER);
+        Resources.setOTFrameIcon(this);
         pack();
         Preferences.manageLocation(this);
         setVisible(true);
         setDefaultCloseOperation(HIDE_ON_CLOSE);
-
     }
 
     /**
