@@ -290,6 +290,11 @@ public class EdCompInstGNIRS extends EdCompInstBase<InstGNIRS> implements Action
         inst.addPropertyChangeListener(InstGNIRS.DISPERSER_PROP.getName(),  updateParallacticAnglePCL);
     }
 
+    protected void updateEnabledState(final boolean enabled) {
+        super.updateEnabledState(enabled);
+        _w.posAnglePanel.updateEnabledState(enabled);
+    }
+
     // Return an array of default wavelength description strings (wavelength (order n))
     private String[] _getDefaultWavelengths() {
         final int n = Order.values().length;
