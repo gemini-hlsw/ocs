@@ -16,6 +16,7 @@ import edu.gemini.spModel.data.YesNoType;
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2;
 import edu.gemini.spModel.telescope.IssPort;
 import edu.gemini.spModel.type.SpTypeUtil;
+import jsky.app.ot.OTOptions;
 import jsky.app.ot.editor.eng.EngEditor;
 import jsky.app.ot.gemini.editor.ComponentEditor;
 import jsky.app.ot.gemini.parallacticangle.PositionAnglePanel;
@@ -584,6 +585,8 @@ public class Flamingos2Editor extends ComponentEditor<ISPObsComponent, Flamingos
         messagePanel.update();
 
         posAnglePanel.init(this, Site.GS);
+        final boolean editable = OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation());
+        posAnglePanel.updateEnabledState(editable);
 
         // If the position angle mode or FPU mode properties change, force an update on the parallactic angle mode.
         inst.addPropertyChangeListener(Flamingos2.POS_ANGLE_PROP.getName(), updateParallacticAnglePCL);

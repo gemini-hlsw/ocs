@@ -663,6 +663,7 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
         _w.builtinComboBox.setEnabled(enabled && !customMask);
         _w.focalPlaneMask.setEnabled(enabled && customMask);
         _w.customSlitWidthComboBox.setEnabled(enabled && customMask);
+        _w.posAnglePanel.updateEnabledState(enabled);
     }
 
     protected void _updateCustomSlitWidth() {
