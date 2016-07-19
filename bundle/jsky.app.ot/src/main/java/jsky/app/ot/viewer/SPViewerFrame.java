@@ -64,9 +64,8 @@ public final class SPViewerFrame extends JFrame {
 
         if (Platform.get() == Platform.osx) {
             hookMacQuitMenu();
-        } else {
-            Resources.setOTFrameIcon(this);
         }
+        Resources.setOTFrameIcon(this);
 
         pack();
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
