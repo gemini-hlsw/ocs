@@ -16,6 +16,7 @@ import java.util.Properties;
 import javax.swing.ImageIcon;
 
 import edu.gemini.shared.util.LruCache;
+import edu.gemini.spModel.core.Platform;
 
 
 /**
@@ -96,13 +97,18 @@ public final class Resources {
     }
 
     public static void setOTFrameIcon(java.awt.Frame frame) {
-        ImageIcon icon = Resources.getIcon("ot.png");
-        if (icon != null) {
-            Image image = icon.getImage();
-            frame.setIconImage(image);
+        if (Platform.get() != Platform.osx) {
+            // This has been reported to crash the JVM on OSX when the application
+            // is bundled as a DMG. Starting from the DMG The application fails to start
+            // without any visible indication on why it has failed
+            // However, we want to do this on Windows and Linux
+            ImageIcon icon = Resources.getIcon("ot.png");
+            if (icon != null) {
+                Image image = icon.getImage();
+                frame.setIconImage(image);
+            }
         }
     }
-
 
     /**
      * Loads an installed <code>Properties</code> file.

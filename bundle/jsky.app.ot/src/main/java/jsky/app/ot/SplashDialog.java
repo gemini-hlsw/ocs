@@ -65,10 +65,7 @@ public final class SplashDialog extends JFrame {
             });
         }
 
-        if (Platform.get() != Platform.osx) {
-            // Set the frame icon, useful for Windows and Linux
-            Resources.setOTFrameIcon(this);
-        }
+        Resources.setOTFrameIcon(this);
 
         pack();
         setVisible(true);
