@@ -360,7 +360,6 @@ public final class OT {
     private static void initLogging() {
         // Set logging to email problems when using a test version or the OTR.
         LOG.info("Not starting email logger, sorry.");
-//        JavaLoggingEmailer.install();
     }
 
     private static void initNetwork() {
