@@ -1,4 +1,3 @@
-
 package edu.gemini.lchquery.servlet;
 
 import edu.gemini.odb.browser.QueryResult;
@@ -78,12 +77,12 @@ public final class LchQueryServlet extends HttpServlet {
      * @param response
      * @throws IOException
      */
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
 
-        OutputStream out = response.getOutputStream();
-        BufferedOutputStream bos = new BufferedOutputStream(out);
+        final OutputStream out = response.getOutputStream();
+        final BufferedOutputStream bos = new BufferedOutputStream(out);
 
-        String pathInfo = request.getPathInfo();
+        final String pathInfo = request.getPathInfo();
         final LchQueryFunctor.QueryType queryType;
         if (pathInfo.startsWith("/programs")) {
             queryType = LchQueryFunctor.QueryType.PROGRAMS;
@@ -100,20 +99,30 @@ public final class LchQueryServlet extends HttpServlet {
             return;
         }
 
-        String programSemester = request.getParameter(LchQueryService.PARAMETER_PROGRAM_SEMESTER);
-        String programTitle = request.getParameter(LchQueryService.PARAMETER_PROGRAM_TITLE);
-        String programReference = request.getParameter(LchQueryService.PARAMETER_PROGRAM_REFERENCE);
-        String programActive = request.getParameter(LchQueryService.PARAMETER_PROGRAM_ACTIVE);
-        String programCompleted = request.getParameter(LchQueryService.PARAMETER_PROGRAM_COMPLETED);
-        String programNotifyPi = request.getParameter(LchQueryService.PARAMETER_PROGRAM_NOTIFY_PI);
-        String programRollover = request.getParameter(LchQueryService.PARAMETER_PROGRAM_ROLLOVER);
+        final String programSemester = request.getParameter(LchQueryService.PARAMETER_PROGRAM_SEMESTER);
+        final String programTitle = request.getParameter(LchQueryService.PARAMETER_PROGRAM_TITLE);
+        final String programInvestigatorNames = request.getParameter(LchQueryService.PARAMETER_PROGRAM_INVESTIGATOR_NAMES);
+        final String programPiEmail = request.getParameter(LchQueryService.PARAMETER_PROGRAM_PI_EMAIL);
+        final String programCoIEmails = request.getParameter(LchQueryService.PARAMETER_PROGRAM_COI_EMAILS);
+        final String programAbstract = request.getParameter(LchQueryService.PARAMETER_PROGRAM_ABSTRACT);
+        final String programBand = request.getParameter(LchQueryService.PARAMETER_PROGRAM_BAND);
+        final String programPartners = request.getParameter(LchQueryService.PARAMETER_PROGRAM_PARTNERS);
+        final String programReference = request.getParameter(LchQueryService.PARAMETER_PROGRAM_REFERENCE);
 
-        String observationTooStatus = request.getParameter(LchQueryService.PARAMETER_OBSERVATION_TOO_STATUS);
-        String observationName = request.getParameter(LchQueryService.PARAMETER_OBSERVATION_NAME);
-        String observationStatus = request.getParameter(LchQueryService.PARAMETER_OBSERVATION_STATUS);
-        String observationInstrument = request.getParameter(LchQueryService.PARAMETER_OBSERVATION_INSTRUMENT);
-        String observationAo = request.getParameter(LchQueryService.PARAMETER_OBSERVATION_AO);
-        String observationClass = request.getParameter(LchQueryService.PARAMETER_OBSERVATION_CLASS);
+        final String programActive = request.getParameter(LchQueryService.PARAMETER_PROGRAM_ACTIVE);
+        final String programCompleted = request.getParameter(LchQueryService.PARAMETER_PROGRAM_COMPLETED);
+        final String programNotifyPi = request.getParameter(LchQueryService.PARAMETER_PROGRAM_NOTIFY_PI);
+        final String programRollover = request.getParameter(LchQueryService.PARAMETER_PROGRAM_ROLLOVER);
+        final String programTooStatus = request.getParameter(LchQueryService.PARAMETER_PROGRAM_TOO_STATUS);
+        final String programAllocTime = request.getParameter(LchQueryService.PARAMETER_PROGRAM_ALLOC_TIME);
+        final String programRemainTime = request.getParameter(LchQueryService.PARAMETER_PROGRAM_REMAIN_TIME);
+
+        final String observationTooStatus = request.getParameter(LchQueryService.PARAMETER_OBSERVATION_TOO_STATUS);
+        final String observationName = request.getParameter(LchQueryService.PARAMETER_OBSERVATION_NAME);
+        final String observationStatus = request.getParameter(LchQueryService.PARAMETER_OBSERVATION_STATUS);
+        final String observationInstrument = request.getParameter(LchQueryService.PARAMETER_OBSERVATION_INSTRUMENT);
+        final String observationAo = request.getParameter(LchQueryService.PARAMETER_OBSERVATION_AO);
+        final String observationClass = request.getParameter(LchQueryService.PARAMETER_OBSERVATION_CLASS);
 
         try {
             _checkParameters(request);
