@@ -211,6 +211,14 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
     updateUnboundedControls()
   }
 
+  /** Sets the enabled state of contained widgets to match the provided value. */
+  def updateEnabledState(enabled: Boolean): Unit = {
+    ui.positionAngleConstraintComboBox.enabled = enabled
+    ui.positionAngleTextField.enabled = enabled
+    ui.parallacticAngleControlsOpt.foreach { p =>
+      p.enabled = enabled
+    }
+  }
 
   /**
    * Copies, if possible, the position angle text field contents to the data object.
