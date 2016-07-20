@@ -31,7 +31,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.swing._
 import scala.swing.Swing._
 import scala.util.{Failure, Success}
-import scalaz.{-\/, \/-, Failure => _, Success => _}
+import scalaz.{-\/, \/-}
 
 object ProgTableModel {
   lazy val Log = java.util.logging.Logger.getLogger(getClass.getName)

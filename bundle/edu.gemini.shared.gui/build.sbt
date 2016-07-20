@@ -23,6 +23,7 @@ OsgiKeys.bundleSymbolicName := name.value
 OsgiKeys.dynamicImportPackage := Seq("")
 
 OsgiKeys.exportPackage := Seq(
+  "edu.gemini.shared",
   "edu.gemini.shared.gui",
   "edu.gemini.shared.gui.bean",
   "edu.gemini.shared.gui.calendar",
