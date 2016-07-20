@@ -1,15 +1,17 @@
-package edu.gemini.pit.ui.util
+package edu.gemini.shared.gui
 
-import java.net.{URL, URI}
 import java.awt.Desktop._
-import java.util.logging.{Logger, Level}
+import java.net.{URI, URL}
+import java.util.logging.{Level, Logger}
+
+import edu.gemini.shared.Platform
 
 /**
  * Utility for launching a browser on a URL, which is problematic on Linux.
  * This utility first tries to use the java.awt.Desktop method and then resorts
  * to low-level OS-specific exec if that doesn't work.
  */
-object  Browser {
+object Browser {
   private val LOG = Logger.getLogger(Browser.getClass.getName)
 
   def open(url: URL) {

@@ -1,11 +1,10 @@
-package edu.gemini.pit.ui.util
+package edu.gemini.shared
 
-import java.awt.event.InputEvent
 import java.awt.Toolkit
+import java.awt.event.InputEvent
 import java.net.URL
 import java.util.logging.Logger
-
-import javax.swing.{ KeyStroke, JTextField, JTextArea, InputMap }
+import javax.swing.{InputMap, JTextArea, JTextField, KeyStroke}
 
 object Platform extends Enumeration {
 
@@ -42,7 +41,7 @@ object Platform extends Enumeration {
         ks <- keys
 
         // And new modifiers
-        mod = ks.getModifiers if ((mod & CTRL) != 0)
+        mod = ks.getModifiers if (mod & CTRL) != 0
         newMod = (mod & ~CTRL) | MENU_ACTION_MASK
         newKs = KeyStroke.getKeyStroke(ks.getKeyCode, newMod, ks.isOnKeyRelease)
         action = map.get(ks)
@@ -62,8 +61,8 @@ object Platform extends Enumeration {
   }
 
   /*
-	 * Derived from http://www.javaworld.com/javaworld/javatips/jw-javatip66.html
-	 */
+   * Derived from http://www.javaworld.com/javaworld/javatips/jw-javatip66.html
+   */
   def displayURL(url: URL) { displayURL(url.toString) }
   def displayURL(url: String) {
     current match {
