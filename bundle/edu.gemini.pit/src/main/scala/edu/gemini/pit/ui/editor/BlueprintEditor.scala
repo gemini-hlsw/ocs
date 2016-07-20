@@ -1,15 +1,17 @@
 package edu.gemini.pit.ui.editor
 
 import edu.gemini.model.p1.dtree._
-import edu.gemini.pit.ui.util.Platform
 import edu.gemini.pit.ui.util.StdModalWizard
+
 import scala.swing._
 import scala.swing.Swing._
 import javax.swing
 import java.awt
 import swing.JLabel
+
 import edu.gemini.model.p1.immutable._
-import edu.gemini.model.p1.dtree.exchange.{Subaru, Keck}
+import edu.gemini.model.p1.dtree.exchange.{Keck, Subaru}
+import edu.gemini.shared.Platform
 
 import scalaz._
 import Scalaz._

@@ -7,19 +7,23 @@ import edu.gemini.pit.ui.util.SharedIcons._
 import edu.gemini.pit.ui.util._
 import java.awt.datatransfer._
 import javax.swing.TransferHandler._
+
 import scala.swing._
 import scalaz.Scalaz._
 import scalaz._
 import javax.swing.{Action => _, _}
+
 import edu.gemini.gsa.client.api.GsaParams
 import edu.gemini.gsa.client.impl.GsaUrl
 import edu.gemini.pit.ui.CommonActions._
 import java.awt.Color
+
 import edu.gemini.pit.ui.{HackClipboard, ShellAdvisor}
 import edu.gemini.pit.ui.binding._
 import edu.gemini.pit.ui.robot.{AgsRobot, GsaRobot}
 import edu.gemini.pit.ui.DataFlavors._
 import edu.gemini.pit.ui.util.gface.SimpleListViewer
+import edu.gemini.shared.gui.Browser
 
 // The observation list/tree, which has two visible instances (Band 1/2 and Band 3). This is by far the most complex
 // view, in particular because of drag/drop and copy/paste. The main structure we use here is an ObsListModel which is
