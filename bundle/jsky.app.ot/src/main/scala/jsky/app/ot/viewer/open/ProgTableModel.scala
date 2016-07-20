@@ -1,7 +1,7 @@
 package jsky.app.ot.viewer.open
 
 import edu.gemini.pot.sp.version.VersionMap
-import edu.gemini.pot.spdb.{IDBQueryRunner, IDBDatabaseService}
+import edu.gemini.pot.spdb.{IDBDatabaseService, IDBQueryRunner}
 import edu.gemini.pot.sp.{ISPProgram, SPNodeKey}
 import edu.gemini.shared.util.VersionComparison
 import edu.gemini.shared.util.VersionComparison.{Conflicting, Newer, Older}
@@ -9,18 +9,17 @@ import edu.gemini.shared.util.immutable.MapOp
 import edu.gemini.sp.vcs2.VcsAction._
 import edu.gemini.sp.vcs2.VcsFailure
 import edu.gemini.sp.vcs2.VcsFailure.VcsException
-import edu.gemini.spModel.core.{ProgramId, SPProgramID, Peer, VersionException}
+import edu.gemini.spModel.core.{Peer, ProgramId, SPProgramID, VersionException}
 import edu.gemini.spModel.util.DBProgramInfo
 import edu.gemini.util.security.auth.keychain.KeyChain
 import edu.gemini.util.security.auth.keychain.Action._
 import edu.gemini.util.trpc.client.TrpcClient
-
+import edu.gemini.shared.gui.ErrorBoxWithHyperlink
 import jsky.app.ot.OT
 import jsky.app.ot.shared.spModel.util.DBProgramListFunctor
 import jsky.app.ot.vcs.VcsOtClient
 import jsky.app.ot.viewer.DBProgramChooserFilter
 import jsky.util.gui.DialogUtil
-
 import java.io.{IOException, InvalidClassException}
 import java.net.{ConnectException, SocketTimeoutException}
 import java.util.concurrent.atomic.AtomicReference
@@ -31,8 +30,8 @@ import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.swing._
 import scala.swing.Swing._
-import scala.util.{Success, Failure}
-import scalaz.{Success => _, Failure => _, -\/, \/-}
+import scala.util.{Failure, Success}
+import scalaz.{-\/, \/-, Failure => _, Success => _}
 
 object ProgTableModel {
   lazy val Log = java.util.logging.Logger.getLogger(getClass.getName)
@@ -177,9 +176,9 @@ class ProgTableModel(filter: DBProgramChooserFilter, db: IDBDatabaseService, aut
           peer <- reg.registration(pid)
         } yield peer
 
-        programPeer.forall(p => selectedPeer.exists(_ == p))
+        programPeer.forall(selectedPeer.contains)
       }
-      
+
       locals.set(progs.map { info =>
         db.lookupProgram(info.nodeKey)
       })
@@ -226,7 +225,7 @@ class ProgTableModel(filter: DBProgramChooserFilter, db: IDBDatabaseService, aut
         t match {
           case e: VersionException =>
             Log.log(Level.WARNING, msg)
-            DialogUtil.error(e.getLongMessage(s"${peer.host}:${peer.port}"))
+            ErrorBoxWithHyperlink.showErrorBoxWithLink(e.getHtmlMessage(s"${peer.host}:${peer.port}"))
 
           case _: InvalidClassException =>
             val versionMsg =
