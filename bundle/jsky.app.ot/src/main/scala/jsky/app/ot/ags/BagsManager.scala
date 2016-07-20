@@ -131,7 +131,7 @@ object BagsState {
     // come back from the AGS lookup when in RunningEditedState, we store them
     // but move to PendingState to run again.
     override val edit: StateTransition =
-      (RunningEditedState(obs, hash), ioUnit)
+      (RunningEditedState(obs), ioUnit)
 
     // Successful AGS lookup while running (and not edited).  Apply the update
     // and move to IdleState.
@@ -149,7 +149,7 @@ object BagsState {
     * observation that was subsequently edited.  Since it has been edited, the
     * results we're expecting may no longer be valid when they arrive.
     */
-  case class RunningEditedState(obs: ISPObservation, hash: AgsHashVal) extends BagsState {
+  case class RunningEditedState(obs: ISPObservation) extends BagsState {
     // If we're edited again while running, just loop back.  Once the results of
     // the previous edit that got us into RunningState in the first place
     // finish, we'll switch to Pending and go again.
@@ -162,7 +162,7 @@ object BagsState {
     // and as this was causing issues for BAGS overwriting PA edits, we only allow
     // BAGS to apply to unedited observations.
     override def succeed(results: Option[AgsStrategy.Selection]): StateTransition =
-      (PendingState(obs, Some(hash)), BagsManager.wakeUpAction(obs, 0))
+      (PendingState(obs, None), BagsManager.wakeUpAction(obs, 0))
 
     // Failed AGS but we've been edited in the meantime anyway.  Go back to
     // PendingState so we can run again.  Here we pass in no AgsHash value to
@@ -267,12 +267,12 @@ object BagsManager {
 
     def logTransition(from: BagsState, to: BagsState): IO[Unit] = IO {
       def stateString(s: BagsState): String = s match {
-        case BagsState.ErrorState                  => "Error"
-        case BagsState.IdleState(_, hash)          => s"Idle($hash)"
-        case BagsState.PendingState(_, hash)       => s"Pending($hash)"
-        case BagsState.RunningState(_, hash)       => s"Running($hash)"
-        case BagsState.RunningEditedState(_, hash) => s"RunningEdited($hash)"
-        case BagsState.FailureState(_, why)        => s"Failure($why)"
+        case BagsState.ErrorState            => "Error"
+        case BagsState.IdleState(_, hash)    => s"Idle($hash)"
+        case BagsState.PendingState(_, hash) => s"Pending($hash)"
+        case BagsState.RunningState(_, hash) => s"Running($hash)"
+        case BagsState.RunningEditedState(_) => s"RunningEdited"
+        case BagsState.FailureState(_, why)  => s"Failure($why)"
       }
 
       val obsId = Option(obs.getObservationID).getOrElse(obs.getNodeKey)
@@ -457,7 +457,6 @@ object BagsManager {
 
     obs.getProgram.removeStructureChangeListener(StructureListener)
     obs.getProgram.removeCompositeChangeListener(ChangeListener)
-
     applySelection(TpeContext(obs))
 
     // Update the TPE if it is visible
