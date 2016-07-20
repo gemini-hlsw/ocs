@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 
 import javax.swing.JFrame;
 
+import jsky.app.ot.util.Resources;
 import jsky.util.I18N;
 import jsky.util.Preferences;
 
@@ -29,6 +30,7 @@ public class ImageColorsFrame extends JFrame {
         super(_I18N.getString("imageColors"));
         imageColors = new ImageColors(this, imageDisplay);
         getContentPane().add(imageColors, BorderLayout.CENTER);
+        Resources.setOTFrameIcon(this);
         pack();
         Preferences.manageLocation(this);
         setVisible(true);

@@ -3,6 +3,7 @@ package jsky.image.fits.gui;
 import java.awt.BorderLayout;
 import javax.swing.JFrame;
 
+import jsky.app.ot.util.Resources;
 import jsky.image.fits.codec.FITSImage;
 import jsky.image.gui.MainImageDisplay;
 import jsky.util.Preferences;
@@ -25,6 +26,7 @@ public class FITSHDUChooserFrame extends JFrame {
         super("Image Extensions");
         fitsHDUChooser = new FITSHDUChooser(this, imageDisplay, fitsImage);
         getContentPane().add(fitsHDUChooser, BorderLayout.CENTER);
+        Resources.setOTFrameIcon(this);
         pack();
         Preferences.manageLocation(this);
         setVisible(true);

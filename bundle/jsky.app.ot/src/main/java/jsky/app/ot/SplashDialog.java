@@ -8,13 +8,14 @@
 package jsky.app.ot;
 
 import javax.swing.*;
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.Toolkit;
+import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.net.URL;
+
+import edu.gemini.spModel.core.Platform;
 import edu.gemini.spModel.core.Version;
+import jsky.app.ot.util.Resources;
 import jsky.app.ot.viewer.ViewerService;
 
 public final class SplashDialog extends JFrame {
@@ -63,6 +64,8 @@ public final class SplashDialog extends JFrame {
                 }
             });
         }
+
+        Resources.setOTFrameIcon(this);
 
         pack();
         setVisible(true);

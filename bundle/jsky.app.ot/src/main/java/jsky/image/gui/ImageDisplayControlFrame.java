@@ -7,6 +7,7 @@ import java.awt.event.WindowEvent;
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 
+import jsky.app.ot.util.Resources;
 import jsky.util.I18N;
 import jsky.util.Preferences;
 
@@ -54,6 +55,7 @@ public class ImageDisplayControlFrame extends JFrame {
         Preferences.manageLocation(this);
         openFrameCount++;
 
+        Resources.setOTFrameIcon(this);
         pack();
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         addWindowListener(new WindowAdapter() {

@@ -24,6 +24,7 @@ import jsky.app.jskycat.JSkyCat;
 import jsky.app.ot.OT;
 import jsky.app.ot.ags.*;
 import jsky.app.ot.util.BasicPropertyList;
+import jsky.app.ot.util.Resources;
 import jsky.catalog.CatalogException;
 import jsky.image.gui.ImageDisplayControlFrame;
 
@@ -97,6 +98,8 @@ public final class TelescopePosEditor extends JSkyCat implements TpeMouseObserve
         // This is terrible, the constructor of JSkyCat sets _iw indirectly calling makeNavigatorImageDisplayFrame
         _iw.setTitle("Position Editor");
 
+        Resources.setOTFrameIcon(this);
+
         // get the TPE toolbar handle
         final Component parent = _iw.getParentFrame();
         _tpeToolBar = ((TpeImageDisplayFrame) parent).getTpeToolBar();
@@ -166,6 +169,7 @@ public final class TelescopePosEditor extends JSkyCat implements TpeMouseObserve
     @Override
     protected ImageDisplayControlFrame makeNavigatorImageDisplayFrame(final String imageFileOrUrl) {
         final TpeImageDisplayFrame frame = new  TpeImageDisplayFrame(imageFileOrUrl);
+        Resources.setOTFrameIcon(frame);
         // Very ugly: this sets _iw indirectly on the constructor.
         _iw = (TpeImageWidget) frame.getImageDisplayControl().getImageDisplay();
         return frame;

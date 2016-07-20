@@ -7,6 +7,7 @@
 
 package jsky.app.ot.session;
 
+import jsky.app.ot.util.Resources;
 import jsky.util.Preferences;
 
 import javax.swing.*;
@@ -31,6 +32,7 @@ public class SessionQueueFrame extends JFrame {
         super("Session Queue");
         sessionQueuePanel = new SessionQueuePanel();
         getContentPane().add(sessionQueuePanel, BorderLayout.CENTER);
+        Resources.setOTFrameIcon(this);
         pack();
         Preferences.manageLocation(this);
 
