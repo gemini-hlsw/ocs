@@ -1,7 +1,6 @@
 package jsky.app.ot.ags
 
-import jsky.app.ot.ags.BagsState.{IdleState, ErrorTransition, StateTransition}
-
+import jsky.app.ot.ags.BagsState.{ErrorTransition, IdleState, StateTransition}
 import java.beans.{PropertyChangeEvent, PropertyChangeListener}
 import java.time.Instant
 import java.util.concurrent.TimeoutException
@@ -148,7 +147,7 @@ object BagsState {
 
   /** RunningEdited. This state corresponds to a running AGS search for an
     * observation that was subsequently edited.  Since it has been edited, the
-    * resuls we're expecting may no longer be valid when they arrive.
+    * results we're expecting may no longer be valid when they arrive.
     */
   case class RunningEditedState(obs: ISPObservation, hash: AgsHashVal) extends BagsState {
     // If we're edited again while running, just loop back.  Once the results of
@@ -158,15 +157,12 @@ object BagsState {
       (this, ioUnit)
 
     // Success, but now the observation has been edited so the AGS selection
-    // may not be valid.  Apply the results anyway in case the edit is not
-    // to a field that impacts AGS and go to pending to run again if necessary.
-    override def succeed(results: Option[AgsStrategy.Selection]): StateTransition = {
-      val action = for {
-        _ <- BagsManager.applyAction(obs, results)
-        _ <- BagsManager.wakeUpAction(obs, 0)
-      } yield ()
-      (PendingState(obs, Some(hash)), action)
-    }
+    // may not be valid. We could apply the results in case the edits made to the
+    // observation do not change the AGS selection, but in the interests of safety
+    // and as this was causing issues for BAGS overwriting PA edits, we only allow
+    // BAGS to apply to unedited observations.
+    override def succeed(results: Option[AgsStrategy.Selection]): StateTransition =
+      (PendingState(obs, Some(hash)), BagsManager.wakeUpAction(obs, 0))
 
     // Failed AGS but we've been edited in the meantime anyway.  Go back to
     // PendingState so we can run again.  Here we pass in no AgsHash value to
@@ -461,6 +457,7 @@ object BagsManager {
 
     obs.getProgram.removeStructureChangeListener(StructureListener)
     obs.getProgram.removeCompositeChangeListener(ChangeListener)
+
     applySelection(TpeContext(obs))
 
     // Update the TPE if it is visible
