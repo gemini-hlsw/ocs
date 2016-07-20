@@ -378,7 +378,6 @@ class GemsStrategySpec extends Specification {
       selection.map(_.posAngle) should beSome(Angle.fromDegrees(90))
       val assignments = ~selection.map(_.assignments)
       assignments should be size 4
-      assignments.foreach(println)
 
       assignments.exists(_.guideProbe == Canopus.Wfs.cwfs1) should beTrue
       val cwfs1 = assignments.find(_.guideProbe == Canopus.Wfs.cwfs1).map(_.guideStar)

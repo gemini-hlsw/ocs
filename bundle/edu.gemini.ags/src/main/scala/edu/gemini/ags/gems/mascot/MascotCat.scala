@@ -27,11 +27,11 @@ object MascotCat {
 
   // Default progress callback, called for each asterism as it is calculated
   val defaultProgress: ProgressFunction = (s: Strehl, count: Int, total: Int) => {
-    Log.info(s"Asterism #$count")
+    Log.fine(s"Asterism #$count")
     for (i <- s.stars.indices) {
       Log.finer(s.stars(i).target.coordinates.toString)
     }
-    Log.info(f"Strehl over ${s.halffield * 2}%.1f: avg=${s.avgstrehl * 100}%.1f rms=${s.rmsstrehl * 100}%.1f min=${s.minstrehl * 100}%.1f max=${s.maxstrehl * 100}%.1f")
+    Log.fine(f"Strehl over ${s.halffield * 2}%.1f: avg=${s.avgstrehl * 100}%.1f rms=${s.rmsstrehl * 100}%.1f min=${s.minstrehl * 100}%.1f max=${s.maxstrehl * 100}%.1f")
     true
   }
 

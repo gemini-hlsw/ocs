@@ -79,7 +79,7 @@ object GemsResultsAnalyzer {
           gemsGuideStars
         }
       }
-      sortResultsByRanking(gemsGuideStars.toList).asJava
+      sortResultsByRanking(gemsGuideStars).asJava
     }.getOrElse(List.empty[GemsGuideStars].asJava)
   }
 
@@ -125,14 +125,14 @@ object GemsResultsAnalyzer {
         }
       }
       val gemsGuideStars = go(Nil, TiptiltFlexurePair.pairs(catalogSearch))
-      sortResultsByRanking(gemsGuideStars.toList)
+      sortResultsByRanking(gemsGuideStars)
     }
   }
 
   private def printResults(result: List[GemsGuideStars]) {
-    Log.info("Results:")
+    Log.fine("Results:")
     result.zipWithIndex.foreach { case (s, i) =>
-      Log.info(s"result #$i : $s")
+      Log.fine(s"result #$i : $s")
     }
   }
 
@@ -173,7 +173,7 @@ object GemsResultsAnalyzer {
     val tiptiltTargetList = targetListFromStrehl(strehl)
     // XXX The TPE assumes canopus tiptilt if there are only 2 stars (one of each ODGW and CWFS),
     // So don't add any items to the list that have only 2 stars and GSAOI as tiptilt.
-    (tiptiltGroup, tiptiltTargetList.toList) match {
+    (tiptiltGroup, tiptiltTargetList) match {
       case (GsaoiOdgw.Group.instance, _ :: Nil)                                                  =>
         Nil
       case _ if areAllTargetsValidInGroup(obsContext, tiptiltTargetList, tiptiltGroup, posAngle) =>
@@ -403,7 +403,7 @@ object GemsResultsAnalyzer {
   // Returns true if the target magnitude is within the given limits
   def containsMagnitudeInLimits(target: SiderealTarget, magLimits: MagnitudeConstraints): Boolean =
     // The true default is suspicious but changing it to false breaks backwards compatibility
-    magLimits.searchBands.extract(target).map(m => magLimits.contains(m)).getOrElse(true)
+    magLimits.searchBands.extract(target).forall(magLimits.contains)
 
   def toSPTarget(siderealTarget: SiderealTarget):SPTarget = new SPTarget(siderealTarget)
 
