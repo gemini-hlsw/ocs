@@ -7,20 +7,22 @@ import edu.gemini.pit.ui.CommonActions._
 import edu.gemini.pit.ui.view.proposal._
 import edu.gemini.pit.ui.view.problem._
 import edu.gemini.pit.ui.view.obs._
-import edu.gemini.pit.ui.util.Platform.MENU_ACTION_MASK
+import edu.gemini.shared.Platform.MENU_ACTION_MASK
 import edu.gemini.pit.ui.action._
 import edu.gemini.ui.workspace.IViewAdvisor.Relation._
 import edu.gemini.ui.workspace.IActionManager.Relation._
 import edu.gemini.ui.workspace.scala.{RichShell, RichShellAdvisor, RichShellContext}
 import edu.gemini.ui.workspace.util.{InternalFrameHelp, RetargetAction}
 import java.awt.event.KeyEvent._
-import java.lang.reflect.{Method, Proxy, InvocationHandler}
-import java.util.logging.{Logger, Level}
+import java.lang.reflect.{InvocationHandler, Method, Proxy}
+import java.util.logging.{Level, Logger}
 import javax.swing.KeyStroke.getKeyStroke
-import javax.swing.JOptionPane.{showConfirmDialog, YES_OPTION, YES_NO_CANCEL_OPTION, WARNING_MESSAGE, NO_OPTION}
+import javax.swing.JOptionPane.{NO_OPTION, WARNING_MESSAGE, YES_NO_CANCEL_OPTION, YES_OPTION, showConfirmDialog}
+
 import edu.gemini.pit.ui.util._
 import edu.gemini.pit.model._
 import java.awt.BorderLayout
+
 import view.partner.PartnerView
 import view.scheduling.SchedulingView
 import view.submit.SubmitView
@@ -28,12 +30,16 @@ import edu.gemini.model.p1.immutable._
 import java.io.File
 import java.awt.event.ActionEvent
 import javax.swing.{AbstractAction, JFrame}
+
 import view.tac.TacView
 import view.target.TargetView
-import java.util.{Optional, Locale}
+import java.util.{Locale, Optional}
+
 import edu.gemini.model.p1.submit.SubmitClient
 import edu.gemini.pit.ui.binding._
-import edu.gemini.pit.ui.robot.{ProblemRobot, AgsRobot, GsaRobot, VisibilityRobot, CatalogRobot}
+import edu.gemini.pit.ui.robot.{AgsRobot, CatalogRobot, GsaRobot, ProblemRobot, VisibilityRobot}
+import edu.gemini.shared.Platform
+import edu.gemini.shared.gui.Browser
 
 // GFace (written for QPT and modeled on Eclipse JFace) is a little awkward to use from Scala, sorry. It depends on
 // lifecycle callbacks and has a bit of mutable state. It works and in practice you don't have to mess with it too

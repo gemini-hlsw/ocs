@@ -3,7 +3,7 @@ package edu.gemini.pit.ui.view.proposal
 import com.jgoodies.forms.factories.Borders.DLU4_BORDER
 import edu.gemini.model.p1.immutable._
 import edu.gemini.pit.model.Model
-import edu.gemini.pit.ui.{URLConstants, ShellAdvisor}
+import edu.gemini.pit.ui.{ShellAdvisor, URLConstants}
 import edu.gemini.pit.ui.binding.BoundControls._
 import edu.gemini.pit.ui.binding._
 import edu.gemini.pit.ui.editor._
@@ -11,13 +11,16 @@ import edu.gemini.pit.ui.util.SimpleToolbar.StaticText
 import edu.gemini.pit.ui.util._
 import edu.gemini.pit.util._
 import java.io.File
-import javax.swing.{Icon, BorderFactory}
+import javax.swing.{BorderFactory, Icon}
+
 import scalaz._
 import swing._
 import event.ButtonClicked
 import Scalaz._
 import edu.gemini.pit.ui.util.gface.SimpleListViewer
 import java.net.URI
+
+import edu.gemini.shared.gui.Browser
 
 class ProposalView(advisor:ShellAdvisor) extends BorderPanel with BoundView[Proposal] {panel =>
   implicit val boolMonoid = Monoid.instance[Boolean](_ || _,  false)
