@@ -307,6 +307,21 @@ case object SemesterConverter2014BTo2015A extends SemesterConverter {
 }
 
 /**
+  * This converter only changes the schema version but retains the semester
+  */
+case object SchemaVersionConverter extends SemesterConverter {
+  val current = Semester.current
+  val schemaVersionTransformToCurrent:TransformFunction = {
+    case p @ <proposal>{ns @ _*}</proposal> if (p \ "@tacCategory").nonEmpty =>
+      StepResult(s"Updated schema version to ${Proposal.currentSchemaVersion}", <proposal tacCategory={(p \ "@tacCategory").text} schemaVersion={Proposal.currentSchemaVersion}>{ns}</proposal>).successNel
+    case <proposal>{ns @ _*}</proposal>                                      =>
+      StepResult(s"Updated schema version to ${Proposal.currentSchemaVersion}", <proposal schemaVersion={Proposal.currentSchemaVersion}>{ns}</proposal>).successNel
+  }
+
+  override val transformers = List(schemaVersionTransformToCurrent)
+}
+
+/**
  * This converter is to current, as a minimum you need to convert a proposal to be the current version and semester
  */
 case object SemesterConverterToCurrent extends SemesterConverter {
