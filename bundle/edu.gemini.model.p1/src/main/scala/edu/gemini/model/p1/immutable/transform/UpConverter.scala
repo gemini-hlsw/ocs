@@ -34,17 +34,18 @@ object UpConverter {
   }
 
   // Sequence of conversions for proposals from a given semester
-  val from2016BToFT:List[SemesterConverter] = List(SchemaVersionConverter) // No changes besides the schema version
-  val from2016A:List[SemesterConverter]     = List(SemesterConverterToCurrent, SemesterConverter2016ATo2016B, LastStepConverter(Semester(2016, SemesterOption.A)))
-  val from2015B:List[SemesterConverter]     = List(SemesterConverterToCurrent, SemesterConverter2016ATo2016B, SemesterConverter2015BTo2016A, LastStepConverter(Semester(2015, SemesterOption.B)))
-  val from2015A:List[SemesterConverter]     = List(SemesterConverterToCurrent, SemesterConverter2016ATo2016B, SemesterConverter2015ATo2015B, LastStepConverter(Semester(2015, SemesterOption.A)))
-  val from2015AToKR:List[SemesterConverter] = List(SemesterConverterToCurrent, SemesterConverter2016ATo2016B, SemesterConverter2015ATo2015B, LastStepConverter(Semester(2015, SemesterOption.A)))
-  val from2014BSV:List[SemesterConverter]   = List(SemesterConverterToCurrent, SemesterConverter2016ATo2016B, SemesterConverter2015ATo2015B, SemesterConverter2014BTo2015A, SemesterConverter2014BTo2014BSV, LastStepConverter(Semester(2014, SemesterOption.B)))
-  val from2014BToSV:List[SemesterConverter] = List(SemesterConverterToCurrent, SemesterConverter2016ATo2016B, SemesterConverter2015ATo2015B, SemesterConverter2014BTo2015A, SemesterConverter2014BTo2014BSV, SemesterConverter2014ATo2014B, LastStepConverter(Semester(2014, SemesterOption.B)))
-  val from2014A:List[SemesterConverter]     = List(SemesterConverterToCurrent, SemesterConverter2016ATo2016B, SemesterConverter2015ATo2015B, SemesterConverter2014BTo2015A, SemesterConverter2014BTo2014BSV, SemesterConverter2014ATo2014B, LastStepConverter(Semester(2014, SemesterOption.A)))
-  val from2013B:List[SemesterConverter]     = List(SemesterConverterToCurrent, SemesterConverter2016ATo2016B, SemesterConverter2015ATo2015B, SemesterConverter2014BTo2015A, SemesterConverter2014BTo2014BSV, SemesterConverter2013BTo2014A, SemesterConverter2014ATo2014B, LastStepConverter(Semester(2013, SemesterOption.B)))
-  val from2013A:List[SemesterConverter]     = List(SemesterConverterToCurrent, SemesterConverter2016ATo2016B, SemesterConverter2015ATo2015B, SemesterConverter2014BTo2015A, SemesterConverter2014BTo2014BSV, SemesterConverter2013ATo2013B, SemesterConverter2013BTo2014A, SemesterConverter2014ATo2014B, LastStepConverter(Semester(2013, SemesterOption.A)))
-  val from2012B:List[SemesterConverter]     = List(SemesterConverterToCurrent, SemesterConverter2016ATo2016B, SemesterConverter2015ATo2015B, SemesterConverter2014BTo2015A, SemesterConverter2014BTo2014BSV, SemesterConverter2012BTo2013A, SemesterConverter2013ATo2013B, SemesterConverter2013BTo2014A, SemesterConverter2014ATo2014B, LastStepConverter(Semester(2012, SemesterOption.B)))
+  val from2016B:List[SemesterConverter]     = List(SemesterConverterToCurrent, SemesterConverter2016BTo2017A, LastStepConverter(Semester(2016, SemesterOption.B)))
+  val from2016BToFT:List[SemesterConverter] = List(SemesterConverterToCurrent, SemesterConverter2016BTo2017A, LastStepConverter(Semester(2016, SemesterOption.A)))
+  val from2016A:List[SemesterConverter]     = List(SemesterConverterToCurrent, SemesterConverter2016BTo2017A, SemesterConverter2016ATo2016B, LastStepConverter(Semester(2016, SemesterOption.A)))
+  val from2015B:List[SemesterConverter]     = List(SemesterConverterToCurrent, SemesterConverter2016BTo2017A, SemesterConverter2016ATo2016B, SemesterConverter2015BTo2016A, LastStepConverter(Semester(2015, SemesterOption.B)))
+  val from2015A:List[SemesterConverter]     = List(SemesterConverterToCurrent, SemesterConverter2016BTo2017A, SemesterConverter2016ATo2016B, SemesterConverter2015ATo2015B, LastStepConverter(Semester(2015, SemesterOption.A)))
+  val from2015AToKR:List[SemesterConverter] = List(SemesterConverterToCurrent, SemesterConverter2016BTo2017A, SemesterConverter2016ATo2016B, SemesterConverter2015ATo2015B, LastStepConverter(Semester(2015, SemesterOption.A)))
+  val from2014BSV:List[SemesterConverter]   = List(SemesterConverterToCurrent, SemesterConverter2016BTo2017A, SemesterConverter2016ATo2016B, SemesterConverter2015ATo2015B, SemesterConverter2014BTo2015A, SemesterConverter2014BTo2014BSV, LastStepConverter(Semester(2014, SemesterOption.B)))
+  val from2014BToSV:List[SemesterConverter] = List(SemesterConverterToCurrent, SemesterConverter2016BTo2017A, SemesterConverter2016ATo2016B, SemesterConverter2015ATo2015B, SemesterConverter2014BTo2015A, SemesterConverter2014BTo2014BSV, SemesterConverter2014ATo2014B, LastStepConverter(Semester(2014, SemesterOption.B)))
+  val from2014A:List[SemesterConverter]     = List(SemesterConverterToCurrent, SemesterConverter2016BTo2017A, SemesterConverter2016ATo2016B, SemesterConverter2015ATo2015B, SemesterConverter2014BTo2015A, SemesterConverter2014BTo2014BSV, SemesterConverter2014ATo2014B, LastStepConverter(Semester(2014, SemesterOption.A)))
+  val from2013B:List[SemesterConverter]     = List(SemesterConverterToCurrent, SemesterConverter2016BTo2017A, SemesterConverter2016ATo2016B, SemesterConverter2015ATo2015B, SemesterConverter2014BTo2015A, SemesterConverter2014BTo2014BSV, SemesterConverter2013BTo2014A, SemesterConverter2014ATo2014B, LastStepConverter(Semester(2013, SemesterOption.B)))
+  val from2013A:List[SemesterConverter]     = List(SemesterConverterToCurrent, SemesterConverter2016BTo2017A, SemesterConverter2016ATo2016B, SemesterConverter2015ATo2015B, SemesterConverter2014BTo2015A, SemesterConverter2014BTo2014BSV, SemesterConverter2013ATo2013B, SemesterConverter2013BTo2014A, SemesterConverter2014ATo2014B, LastStepConverter(Semester(2013, SemesterOption.A)))
+  val from2012B:List[SemesterConverter]     = List(SemesterConverterToCurrent, SemesterConverter2016BTo2017A, SemesterConverter2016ATo2016B, SemesterConverter2015ATo2015B, SemesterConverter2014BTo2015A, SemesterConverter2014BTo2014BSV, SemesterConverter2012BTo2013A, SemesterConverter2013ATo2013B, SemesterConverter2013BTo2014A, SemesterConverter2014ATo2014B, LastStepConverter(Semester(2012, SemesterOption.B)))
 
   /**
    * Converts one version of a proposal node to the next
@@ -55,6 +56,8 @@ object UpConverter {
   def convert(node: XMLNode):Result = node match {
     case p @ <proposal>{ns @ _*}</proposal> if (p \ "@schemaVersion").text == Proposal.currentSchemaVersion =>
       StepResult(Nil, node).successNel[String]
+    case p @ <proposal>{ns @ _*}</proposal> if (p \ "@schemaVersion").text == "2016.2.2"                    =>
+      from2016B.concatenate.convert(node)
     case p @ <proposal>{ns @ _*}</proposal> if (p \ "@schemaVersion").text == "2016.2.1"                    =>
       from2016BToFT.concatenate.convert(node)
     case p @ <proposal>{ns @ _*}</proposal> if (p \ "@schemaVersion").text == "2016.1.1"                    =>
@@ -128,6 +131,13 @@ case class LastStepConverter(semester: Semester) extends SemesterConverter {
       StepResult(s"Please use the PIT from semester ${semester.display} to view the unmodified proposal", n).successNel
   }
   override val transformers = List(notifyToUseOlderPIT)
+}
+
+/**
+ * This converter will upgrade to 2017A
+ */
+case object SemesterConverter2016BTo2017A extends SemesterConverter {
+  override val transformers = Nil
 }
 
 /**
@@ -295,9 +305,10 @@ case object SemesterConverter2014BTo2015A extends SemesterConverter {
   }
   override val transformers = List(gsSubmission)
 }
+
 /**
- * This converter only changes the schema version but retains the semester
- */
+  * This converter only changes the schema version but retains the semester
+  */
 case object SchemaVersionConverter extends SemesterConverter {
   val current = Semester.current
   val schemaVersionTransformToCurrent:TransformFunction = {
