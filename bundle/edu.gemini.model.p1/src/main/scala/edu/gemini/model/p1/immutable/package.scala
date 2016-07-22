@@ -100,7 +100,14 @@ package object immutable {
   object Flamingos2Fpu extends EnumObject[M.Flamingos2Fpu]
 
   type GmosNDisperser = M.GmosNDisperser
-  object GmosNDisperser extends EnumObject[M.GmosNDisperser]
+  object GmosNDisperser extends EnumObject[M.GmosNDisperser] {
+    val B1200 = M.GmosNDisperser.B1200_G5301
+    val R831  = M.GmosNDisperser.R831_G5302
+    val B600  = M.GmosNDisperser.B600_G5307
+    val R600  = M.GmosNDisperser.R600_G5304
+    val R400  = M.GmosNDisperser.R400_G5305
+    val R150  = M.GmosNDisperser.R150_G5306
+  }
 
   type GmosNFilter = M.GmosNFilter
   object GmosNFilter extends EnumObject[M.GmosNFilter] {
@@ -159,7 +166,14 @@ package object immutable {
   object GmosNWavelengthRegime extends EnumObject[M.GmosNWavelengthRegime]
 
   type GmosSDisperser = M.GmosSDisperser
-  object GmosSDisperser extends EnumObject[M.GmosSDisperser]
+  object GmosSDisperser extends EnumObject[M.GmosSDisperser] {
+    val B1200 = M.GmosSDisperser.B1200_G5321
+    val R831  = M.GmosSDisperser.R831_G5322
+    val B600  = M.GmosSDisperser.B600_G5323
+    val R600  = M.GmosSDisperser.R600_G5324
+    val R400  = M.GmosSDisperser.R400_G5325
+    val R150  = M.GmosSDisperser.R150_G5326
+  }
 
   type GmosSFilter = M.GmosSFilter
   object GmosSFilter extends EnumObject[M.GmosSFilter] {
