@@ -831,6 +831,483 @@
        </contact>
     </site>
     <site>
+        <institution>Chiba University</institution>
+        <address>Department of Physics</address>
+        <address>Astrophysics Laboratory</address>
+        <address>1-33 Yayoi-cho, Inage-ku</address>
+        <address>Chiba, 263-8522</address>
+        <country>Japan</country>
+    </site>
+    <site>
+        <institution>Ibaraki University</institution>
+        <address>Center for Astronomy</address>
+        <address>627-1, Ishitaki Kamidai, Takahagi</address>
+        <address>Ibaraki, 318-0022</address>
+        <country>Japan</country>
+    </site>
+    <site>
+        <institution>Science Council of Japan</institution>
+        <address>7-22-34, Roppongi, Minato-ku</address>
+        <address>Tokyo 106-8555</address>
+        <country>Japan</country>
+        <contact>
+            <phone>+81-3-340-36291</phone>
+            <fax>+81-3-340-36224</fax>
+            <email>info@scj.go.jp</email>
+        </contact>
+    </site>
+    <site>
+        <institution>Kanagawa University</institution>
+        <address>Institute of Physics</address>
+        <address>3-27-1 Rokkakubashi</address>
+        <address>Kanagawaku, Yokohama 221-8686</address>
+        <country>Japan</country>
+        <contact>
+            <phone>+81-454815661</phone>
+            <fax>+81-454137288</fax>
+        </contact>
+    </site>
+    <site>
+        <institution>Kobe University (Physics)</institution>
+        <address>Department of Physics</address>
+        <address>Particle Physics Laboratory</address>
+        <address>1-1 Rokkodai-cho</address>
+        <address>Nada-ku, Kobe 657-8501</address>
+        <country>Japan</country>
+    </site>
+    <site>
+        <institution>Kobe University (Planetology)</institution>
+        <address>Department of Planetology</address>
+        <address>1-1 Rokkodai-cho</address>
+        <address>Nada-ku, Kobe 657-8501</address>
+        <country>Japan</country>
+    </site>
+    <site>
+        <institution>Kyoto University (Astronomy)</institution>
+        <address>Department of Astronomy</address>
+        <address>Faculty of Science</address>
+        <address>Kitashirakawa-Oiwake-cho</address>
+        <address>Sakyo-ku, Kyoto 606-8502</address>
+        <country>Japan</country>
+        <contact>
+            <phone>+81-75-753-3890</phone>
+            <fax>+81-75-753-3897</fax>
+            <email>user@kusastro.kyoto-u.ac.jp</email>
+        </contact>
+    </site>
+    <site>
+        <institution>Hida Observatory</institution>
+        <address>Kurabashira, Kamitakara-cho</address>
+        <address>Takayama, Gifu, 506-1314</address>
+        <country>Japan</country>
+        <contact>
+            <phone>+81-578-6-2311</phone>
+            <fax>+81-578-6-2118</fax>
+        </contact>
+    </site>
+    <site>
+        <institution>Kwasan Observatory</institution>
+        <address>17-1 Kitakazan-ohmine-cho</address>
+        <address>Yamashina-ku, Kyoto, 607-8471</address>
+        <country>Japan</country>
+        <contact>
+            <phone>+81-75-581-1235</phone>
+            <fax>+81-75593-9617</fax>
+        </contact>
+    </site>
+    <site>
+        <institution>Kyoto Sangyo University</institution>
+        <address>Motoyama, Kamigamo</address>
+        <address>Kita-Ku, Kyoto-City, 603-8555</address>
+        <country>Japan</country>
+    </site>
+    <site>
+        <institution>Kyushu University</institution>
+        <address>Dept of Earth &amp; Planetary Sciences</address>
+        <address>744 Motooka, Nishi-ku</address>
+        <address>Fukuoka 819-0395</address>
+        <country>Japan</country>
+        <contact>
+            <phone>+81-92-642-2573</phone>
+            <fax>+81-92-642-2685</fax>
+        </contact>
+    </site>
+    <site>
+        <institution>Nagoya University (Physics)</institution>
+        <address>Department of Physics</address>
+        <address>School of Science</address>
+        <address>Nagoya University</address>
+        <address>Furo-cho, Chikusa-ku</address>
+        <address>Nagoya, Aichi 464-8602</address>
+        <country>Japan</country>
+        <contact>
+            <phone>+81-52-789-2840</phone>
+            <phone>+81-52-789-2923</phone>
+            <fax>+81-52-789-2845</fax>
+            <email>user@alab3.a.phys.nagoya-u.ac.jp</email>
+        </contact>
+    </site>
+    <site>
+        <institution>Nagoya University (Solar Terrestrial)</institution>
+        <address>Solar-Terrestrial Environment Laboratory</address>
+        <address>Honohara 3-12, Tuyokawa City</address>
+        <address>Aichi 442-8507</address>
+        <country>Japan</country>
+        <contact>
+            <phone>+81-533-86-3154</phone>
+            <fax>+81-533-89-5090</fax>
+        </contact>
+    </site>
+    <site>
+        <institution>National Astronomical Observatory of Japan (NAOJ)</institution>
+        <address>Division of Optical and IR Astronomy</address>
+        <address>2-21-1 Osawa</address>
+        <address>Mitaka, Tokyo</address>
+        <country>Japan</country>
+        <contact>
+            <phone>+81-422-34-3600</phone>
+            <fax>+81-422-34-3690</fax>
+        </contact>
+    </site>
+    <site>
+        <institution>National Astronomical Observatory of Japan (NAOJ-Chile)</institution>
+        <address>NAOJ Chile Observatory</address>
+        <address>Alonso de Cordova 3107</address>
+        <address>Vitacura, Santiago 7630355</address>
+        <country>Chile</country>
+    </site>
+    <site>
+        <institution>Mizusawa VLBI Observatory (NAOJ)</institution>
+        <address>National Astronomical Observatory of Japan</address>
+        <address>Mizusawa, Oshu, Iwate, 023-0861</address>
+        <country>Japan</country>
+    </site>
+    <site>
+        <institution>Nobeyama Radio Observatory (NAOJ)</institution>
+        <address>462-2 Nobeyama</address>
+        <address>Minamimaki, Minamisaku, Nagano, 384-1305</address>
+        <country>Japan</country>
+        <contact>
+            <phone>+81-267-98-4300</phone>
+            <fax>+81-267-98-2884</fax>
+        </contact>
+    </site>
+    <site>
+        <institution>Okayama Astrophysical Observatory (NAOJ)</institution>
+        <address>3037-5 Honjou, Kamogata</address>
+        <address>Asakuchi, Okayama 719-0232</address>
+        <country>Japan</country>
+        <contact>
+            <phone>+81-8654-4-2155</phone>
+        </contact>
+    </site>
+    <site>
+        <institution>Subaru Telescope (NAOJ)</institution>
+        <address>650 North A'ohoku Place</address>
+        <address>Hllo, HI 96720</address>
+        <country>USA</country>
+        <contact>
+            <phone>808-934-7788</phone>
+            <fax>808-934-5099</fax>
+        </contact>
+    </site>
+    <site>
+        <institution>Japan Aerospace Exploration Agency (JAXA)</institution>
+        <address>3-1-1 Yoshinodai</address>
+        <address>Chuo-ku, Sagamihara 252-5210</address>
+        <country>Japan</country>
+    </site>
+    <site>
+        <institution>Physical Society of Japan</institution>
+        <address>Yushima Urban Building 8F</address>
+        <address>2-31-22 Yushima</address>
+        <address>Bunkyo-ku, Tokyo 113-0034</address>
+        <country>Japan</country>
+    </site>
+    <site>
+        <institution>Sophia University</institution>
+        <address>Department of Physics</address>
+        <address>7-1 Kioi-Cho</address>
+        <address>Chiyoda-ku, Tokyo, 102-8554</address>
+        <country>Japan</country>
+        <contact>
+            <phone>+81-3-3238-3431</phone>
+            <fax>+81-3-3238-3341</fax>
+        </contact>
+    </site>
+    <site>
+        <institution>Institute of Space and Astronautical Science (ISAS)</institution>
+        <address>3-1-1 Yoshinodai</address>
+        <address>Sagamihara, Kanagawa 229-8510</address>
+        <country>Japan</country>
+        <contact>
+            <phone>+81-42-751-3911</phone>
+            <phone>+81-42-751-1185</phone>
+            <fax>+81-42-759-4251</fax>
+        </contact>
+    </site>
+    <site>
+        <institution>Usuda Deep Space Center (UDSC)</institution>
+        <address>1831-6 Omagari, Kamiodagiri, Saku-shi</address>
+        <address>Nagano 384-0306</address>
+        <country>Japan</country>
+        <contact>
+            <phone>+81-267-81-1230</phone>
+            <fax>+81-267-81-1234</fax>
+        </contact>
+    </site>
+    <site>
+        <institution>Tohoku University (Astronomy)</institution>
+        <address>Astronomical Institute</address>
+        <address>Tohoku University</address>
+        <address>6-3 Aramaki</address>
+        <address>Aoba-ku, Sendai, 980-8578</address>
+        <country>Japan</country>
+        <contact>
+            <phone>+81-22-217-6503</phone>
+            <fax>+81-22-217-6513</fax>
+        </contact>
+    </site>
+    <site>
+        <institution>Tohoku University (Geophysics)</institution>
+        <address>Department of Geophysics</address>
+        <address>Tohoku University</address>
+        <address>6-3 Aramaki</address>
+        <address>Aoba-ku, Sendai, 980-8578</address>
+        <country>Japan</country>
+    </site>
+    <site>
+        <institution>University of Tokyo at Komaba</institution>
+        <address>Department of Earth Science &amp; Astronomy</address>
+        <address>University of Tokyo</address>
+        <address>3-8-1 Komaba</address>
+        <address>Meguro-ku, Tokyo, 153-8902</address>
+        <country>Japan</country>
+        <contact>
+            <phone>+81-3-545-466-18</phone>
+            <fax>+81-3-545-539-25</fax>
+        </contact>
+    </site>
+    <site>
+        <institution>University of Tokyo (Astronomy)</institution>
+        <address>Department of Astronomy</address>
+        <address>University of Tokyo</address>
+        <address>7-3-1 Hongo</address>
+        <address>Bunkyo-ku, Tokyo, 113-0033</address>
+        <country>Japan</country>
+        <contact>
+            <phone>+81-3-5841-4253</phone>
+            <fax>+81-3-5841-7644</fax>
+        </contact>
+    </site>
+    <site>
+        <institution>University of Tokyo (Earth &amp; Planetary)</institution>
+        <address>Departement of Earth &amp; Planetary Physics</address>
+        <address>University of Tokyo</address>
+        <address>7-3-1 Hongo</address>
+        <address>Bunkyo-ku, Tokyo, 113-0033</address>
+        <country>Japan</country>
+        <contact>
+            <phone>+81-3-281-22111x4251</phone>
+            <fax>+81-3-381-39439</fax>
+        </contact>
+    </site>
+    <site>
+        <institution>University of Tokyo (Cosmic Ray)</institution>
+        <address>Institute for Cosmic Ray Research</address>
+        <address>University of Tokyo</address>
+        <address>5-1-5 Kashiwanoha</address>
+        <address>Kashiwashi, Chiba 277-8582</address>
+        <country>Japan</country>
+        <contact>
+            <phone>+81-471-36-3102</phone>
+            <fax>+81-471-36-3115</fax>
+        </contact>
+    </site>
+    <site>
+        <institution>University of Tokyo (Institute of Astronomy)</institution>
+        <address>Institute of Astronomy</address>
+        <address>University of Tokyo</address>
+        <address>2-21-1 Osawa</address>
+        <address>Mitaka, Tokyo 181-0015</address>
+        <country>Japan</country>
+    </site>
+    <site>
+        <institution>Kiso Observatory</institution>
+        <address>Institute of Astronomy</address>
+        <address>University of Tokyo</address>
+        <address>10762-30 Mitake, Kiso-machi</address>
+        <address>Kiso-gun, Nagano 397-0101</address>
+        <country>Japan</country>
+    </site>
+    <site>
+        <institution>University of Tokyo (RESCEU)</institution>
+        <address>Research Center for the Early Universe</address>
+        <address>School of Science</address>
+        <address>7-3-1 Hongo, Bunkyo-ku, 113-0033</address>
+        <country>Japan</country>
+        <contact>
+            <phone>+81-3-5841-4169</phone>
+            <fax>+81-3-5841-7638</fax>
+        </contact>
+    </site>
+    <site>
+        <institution>Akeno Observatory</institution>
+        <address>5259 Asao, Akeno-mura</address>
+        <address>Kitakyoma-gun, Yamanashi 407-0201</address>
+        <country>Japan</country>
+        <contact>
+            <phone>+81-551-25-2301</phone>
+            <fax>+81-551-25-2303</fax>
+        </contact>
+    </site>
+    <site>
+        <institution>Kamioka Observatory</institution>
+        <address>456 Higashi-Mozumi, Kamioka-cho</address>
+        <address>Yoshiki-gun, Gifu 506-1205</address>
+        <country>Japan</country>
+        <contact>
+            <phone>+81-578-5-2116</phone>
+            <fax>+81-578-5-2121</fax>
+        </contact>
+    </site>
+    <site>
+        <institution>Kavli-IPMU</institution>
+        <address>University of Tokyo</address>
+        <address>5-1-5 Kashiwanoha</address>
+        <address>Kashiwa-shi, Chiba-ken, 277-8583</address>
+        <country>Japan</country>
+    </site>
+    <site>
+        <institution>University of Tsukuba</institution>
+        <address>Center for Computational Physics</address>
+        <address>1-1-1 Ten-nodai</address>
+        <address>Tsukuba, Ibaraki 305-8577</address>
+        <country>Japan</country>
+        <contact>
+            <phone>+81-298-S3-6494</phone>
+            <fax>+81-298-53-6489</fax>
+        </contact>
+    </site>
+    <site>
+        <institution>National Institute of Advanced Industrial Science and Technology (AIST)</institution>
+        <address>1-1-1 Umezono</address>
+        <address>Tsukuba, Ibaraki 305-8563</address>
+        <country>Japan</country>
+    </site>
+    <site>
+        <institution>Astrobiology Center, National Institutes of Natural Sciences (NOAJ)</institution>
+        <address>2-21-1 Osawa</address>
+        <address>Mitaka, Tokyo 181-8588</address>
+        <country>Japan</country>
+    </site>
+    <site>
+        <institution>Ehime University</institution>
+        <address>2-5 Bunkyo-cho</address>
+        <address>Matsuyama, Ehime, 790-8577</address>
+        <country>Japan</country>
+    </site>
+    <site>
+        <institution>Hiroshima University</institution>
+        <address>1-3-1 Kagamiyama</address>
+        <address>Higashi-Hiroshima, Hiroshima 739-8526</address>
+        <country>Japan</country>
+    </site>
+    <site>
+        <institution>International Christian University</institution>
+        <address>3-10-2 Osawa</address>
+        <address>Mitaka, Tokyo 181-8585</address>
+        <country>Japan</country>
+    </site>
+    <site>
+        <institution>Iwate University</institution>
+        <address>3-18-8 Ueda</address>
+        <address>Morioka, Iwate, 020-8550</address>
+        <country>Japan</country>
+    </site>
+    <site>
+        <institution>Keio University</institution>
+        <address>3-14-1 Hiyoshi</address>
+        <address>Kohoku-ku</address>
+        <address>Yokohama, Kanagawa 223-8522</address>
+        <country>Japan</country>
+    </site>
+    <site>
+        <institution>Kinki University</institution>
+        <address>3-4-1 Kowakae</address>
+        <address>Higashi-Osaka, Osaka 577-8502</address>
+        <country>Japan</country>
+    </site>
+    <site>
+        <institution>Konan University</institution>
+        <address>8-9-1 Okamoto</address>
+        <address>Higashinada</address>
+        <address>Kobe, Hyogo, 658-8501</address>
+        <country>Japan</country>
+    </site>
+    <site>
+        <institution>Osaka Sangyo University</institution>
+        <address>3-1-1 Nakagaito</address>
+        <address>Daito, Osaka 574-8530</address>
+        <country>Japan</country>
+    </site>
+    <site>
+        <institution>Osaka University</institution>
+        <address>1-1 Machikaneyama</address>
+        <address>Toyonaka, Osaka 560-0043</address>
+        <country>Japan</country>
+    </site>
+    <site>
+        <institution>Saitama University</institution>
+        <address>255 Shimo-okubo</address>
+        <address>Sakura, Saitama, 338-8510</address>
+        <country>Japan</country>
+    </site>
+    <site>
+        <institution>Sapporo Medical University</institution>
+        <address>S1 W17</address>
+        <address>Chuo-ku, Sapporo 060-8556</address>
+        <country>Japan</country>
+    </site>
+    <site>
+        <institution>Shinshu University</institution>
+        <address>3-1-1 Asahi</address>
+        <address>Matsumoto, Nagano, 390-8621</address>
+        <country>Japan</country>
+    </site>
+    <site>
+        <institution>Sokendai/GUAS</institution>
+        <address>2-21-1 Osawa</address>
+        <address>Mitaka, Tokyo, 181-8588</address>
+        <country>Japan</country>
+    </site>
+    <site>
+        <institution>Tokyo Institute of Technology</institution>
+        <address>2-12-1 Ookayama</address>
+        <address>Meguro-ku, Tokyo, 152-8550/8551</address>
+        <country>Japan</country>
+    </site>
+    <site>
+        <institution>Tokyo University of Science</institution>
+        <address>1-3 Kagurazaka</address>
+        <address>Shinjuku, Tokyo 162-0825</address>
+        <country>Japan</country>
+    </site>
+    <site>
+        <institution>Tokyo University of Technology</institution>
+        <address>5-23-22 Nishikamata</address>
+        <address>Ota-ku, Tokyo, 144-8650</address>
+        <country>Japan</country>
+    </site>
+    <site>
+        <institution>University of Hyogo</institution>
+        <address>Astronomy and Astrophysics Division</address>
+        <address>Institute of Natural and Environmental Sciences</address>
+        <address>407-2 Nishigaichi</address>
+        <address>Sayo-cho, Sayo-gun, Hyogo, 679-5313</address>
+        <country>Japan</country>
+    </site>
+    <site>
        <institution>Armagh Observatory</institution>
        <address>College Hill</address>
        <address>Armagh BT61 9DG</address>
