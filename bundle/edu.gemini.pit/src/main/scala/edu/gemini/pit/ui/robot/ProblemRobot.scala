@@ -260,21 +260,23 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
     } yield new Problem(Severity.Warning, s"GMOS is usually unaffected by atmospheric water vapor", "Observations", s.inObsListView(o.band, _.Fixes.fixConditions(c)))
 
 
-    def gmosNDisperser(b: BlueprintBase, d: GmosNDisperser) = b match {
+    private def gmosNDisperser(b: BlueprintBase, d: GmosNDisperser) = b match {
       case gn: GmosNBlueprintSpectrosopyBase => gn.disperser == d
       case _                                 => false
     }
-    def gmosSDisperser(b: BlueprintBase, d: GmosSDisperser) = b match {
+    private def gmosSDisperser(b: BlueprintBase, d: GmosSDisperser) = b match {
       case gs: GmosSBlueprintSpectrosopyBase => gs.disperser == d
       case _                                 => false
     }
 
-    private val gmosR600Check = for {
-      o <- p.observations
-      b <- o.blueprint
-      if p.proposalClass.isInstanceOf[ClassicalProposalClass]
-      if gmosNDisperser(b, GmosNDisperser.R600) || gmosSDisperser(b, GmosSDisperser.R600)
-    } yield new Problem(Severity.Warning, s"The R600 is little used and may be difficult to schedule.", "Observations", s.inObsListView(o.band, _.Fixes.fixBlueprint(b)))
+    private val gmosR600Check =
+      if (!p.proposalClass.isInstanceOf[ClassicalProposalClass])
+        for {
+          o <- p.observations
+          b <- o.blueprint
+          if gmosNDisperser(b, GmosNDisperser.R600) || gmosSDisperser(b, GmosSDisperser.R600)
+        } yield new Problem(Severity.Warning, s"The R600 is little used and may be difficult to schedule.", "Observations", s.inObsListView(o.band, _.Fixes.fixBlueprint(b)))
+      else Nil
 
     def isBand3(o: Observation) = o.band == Band.BAND_3 && (p.proposalClass match {
                   case q: QueueProposalClass if q.band3request.isDefined => true
