@@ -269,14 +269,15 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       case _                                 => false
     }
 
-    private val gmosR600Check =
-      if (!p.proposalClass.isInstanceOf[ClassicalProposalClass])
+    private val gmosR600Check = p.proposalClass match {
+      case _: ClassicalProposalClass => Nil
+      case _                         =>
         for {
           o <- p.observations
           b <- o.blueprint
           if gmosNDisperser(b, GmosNDisperser.R600) || gmosSDisperser(b, GmosSDisperser.R600)
         } yield new Problem(Severity.Warning, s"The R600 is little used and may be difficult to schedule.", "Observations", s.inObsListView(o.band, _.Fixes.fixBlueprint(b)))
-      else Nil
+    }
 
     def isBand3(o: Observation) = o.band == Band.BAND_3 && (p.proposalClass match {
                   case q: QueueProposalClass if q.band3request.isDefined => true
