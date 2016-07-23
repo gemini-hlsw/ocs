@@ -687,6 +687,19 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band, queueLookup: Target => U
       }
     }
 
+    // Edit the blueprint
+    def fixBlueprint(b: BlueprintBase) {
+      model.foreach { m =>
+        m.elems.find {
+          case g @ BlueprintGroup(_, Some(gb), _) if b == gb =>
+            viewer.edit(g, p => BlueprintEditor.open(p, b.some, canEdit, panel), Observation.blueprint)
+            viewer.selection = Some(g)
+            true
+          case _                                             => false
+        }
+      }
+    }
+
     def indicateObservation(o:Observation) {
       model.foreach { m =>
         m.elems.find {

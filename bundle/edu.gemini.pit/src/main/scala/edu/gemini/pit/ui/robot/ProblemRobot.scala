@@ -3,17 +3,18 @@ package edu.gemini.pit.ui.robot
 import edu.gemini.pit.ui._
 import action.AppPreferencesAction
 import edu.gemini.model.p1.immutable._
-import edu.gemini.model.p1.immutable.Partners._
 import edu.gemini.pit.ui.editor.Institutions
 import edu.gemini.pit.util.PDF
 import edu.gemini.pit.catalog._
 import java.util.Date
+
 import edu.gemini.spModel.core.MagnitudeBand
 import view.obs.ObsListGrouping
 import edu.gemini.model.p1.visibility.TargetVisibilityCalc
 import edu.gemini.pit.ui.view.tac.TacView
 import java.text.SimpleDateFormat
 import java.io.File
+
 import edu.gemini.pit.model.{AppPreferences, Model}
 import edu.gemini.pit.catalog.NotFound
 import edu.gemini.pit.catalog.Error
@@ -88,7 +89,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
           TacProblems(p, s).all ++
           List(incompleteInvestigator, missingObsElementCheck, cfCheck, emptyTargetCheck, emptyEphemerisCheck, initialEphemerisCheck, finalEphemerisCheck,
             badGuiding, badVisibility, iffyVisibility, singlePointEphemerisCheck, minTimeCheck, wrongSite, band3Orphan2, gpiCheck, lgsCC50Check, lgsIQCheck,
-            texesCCCheck, texesWVCheck, gmosWVCheck, band3IQ, band3LGS, band3RapidToO, sbIrObservation).flatten
+            texesCCCheck, texesWVCheck, gmosWVCheck, gmosR600Check, band3IQ, band3LGS, band3RapidToO, sbIrObservation).flatten
       ps.sorted
     }
 
@@ -257,6 +258,26 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       if b.isInstanceOf[GmosNBlueprintBase] || b.isInstanceOf[GmosSBlueprintBase]
       if c.wv != WaterVapor.ANY
     } yield new Problem(Severity.Warning, s"GMOS is usually unaffected by atmospheric water vapor", "Observations", s.inObsListView(o.band, _.Fixes.fixConditions(c)))
+
+
+    private def gmosNDisperser(b: BlueprintBase, d: GmosNDisperser) = b match {
+      case gn: GmosNBlueprintSpectrosopyBase => gn.disperser == d
+      case _                                 => false
+    }
+    private def gmosSDisperser(b: BlueprintBase, d: GmosSDisperser) = b match {
+      case gs: GmosSBlueprintSpectrosopyBase => gs.disperser == d
+      case _                                 => false
+    }
+
+    private val gmosR600Check = p.proposalClass match {
+      case _: ClassicalProposalClass => Nil
+      case _                         =>
+        for {
+          o <- p.observations
+          b <- o.blueprint
+          if gmosNDisperser(b, GmosNDisperser.R600) || gmosSDisperser(b, GmosSDisperser.R600)
+        } yield new Problem(Severity.Warning, s"The R600 is little used and may be difficult to schedule.", "Observations", s.inObsListView(o.band, _.Fixes.fixBlueprint(b)))
+    }
 
     def isBand3(o: Observation) = o.band == Band.BAND_3 && (p.proposalClass match {
                   case q: QueueProposalClass if q.band3request.isDefined => true
