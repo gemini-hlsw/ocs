@@ -1002,16 +1002,6 @@
         </contact>
     </site>
     <site>
-        <institution>Subaru Telescope (NAOJ)</institution>
-        <address>650 North A'ohoku Place</address>
-        <address>Hllo, HI 96720</address>
-        <country>USA</country>
-        <contact>
-            <phone>808-934-7788</phone>
-            <fax>808-934-5099</fax>
-        </contact>
-    </site>
-    <site>
         <institution>Japan Aerospace Exploration Agency (JAXA)</institution>
         <address>3-1-1 Yoshinodai</address>
         <address>Chuo-ku, Sagamihara 252-5210</address>
@@ -3584,5 +3574,9 @@
        <address>HI</address>
        <address>96720</address>
        <country>USA</country>
+       <contact>
+           <phone>808-934-7788</phone>
+           <fax>808-934-5099</fax>
+       </contact>
     </site>
 </institutions>
