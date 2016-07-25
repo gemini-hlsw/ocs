@@ -5,17 +5,18 @@ import edu.gemini.util.security.auth.keychain.KeyException
 import edu.gemini.util.security.auth.keychain.KeyFailure
 import edu.gemini.util.security.auth.keychain.Action.ActionOps
 import edu.gemini.util.security.auth.keychain.{Action => KAction}
+
 import scala.swing._
-import event.{ValueChanged, SelectionChanged}
+import event.{SelectionChanged, ValueChanged}
 import java.awt
 import javax.swing
 import javax.swing.{Icon, ImageIcon}
-import java.util.UUID
-import java.security.Principal
+
 import edu.gemini.util.security.principal._
-import java.util.logging.{Logger, Level}
+import java.util.logging.{Level, Logger}
 import java.io.IOException
-import edu.gemini.spModel.core.{SPProgramID, Affiliate, VersionException, Peer}
+
+import edu.gemini.spModel.core.{Affiliate, Peer, SPProgramID, VersionException}
 
 object AddKeyDialog {
 
@@ -183,7 +184,7 @@ class AddKeyDialog(ac: KeyChain) extends Dialog with CloseOnEsc { dialog =>
 
     // Space things out a little more
     peer.setLayout(new awt.BorderLayout(8, 8))
-    border = swing.BorderFactory.createEmptyBorder(8, 8, 8, 8);
+    border = swing.BorderFactory.createEmptyBorder(8, 8, 8, 8)
 
     // Add our content, defined below
     add(Header, BorderPanel.Position.North)
