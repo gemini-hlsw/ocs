@@ -409,6 +409,4 @@ class ProposalView(advisor:ShellAdvisor) extends BorderPanel with BoundView[Prop
 
   // public edit method for quick fix
   def edit(i:Investigator) = investigators.listViewer.edit(i)
-
-
 }

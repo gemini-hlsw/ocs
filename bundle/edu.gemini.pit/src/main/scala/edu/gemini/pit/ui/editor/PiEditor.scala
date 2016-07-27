@@ -112,7 +112,7 @@ class PiEditor private (pi: PrincipalInvestigator, editable:Boolean) extends Std
       address = Institution.Address.text,
       country = Institution.Country.text),
     status = Status.selection.item.asInstanceOf[InvestigatorStatus], // :-/
-    phone = Phone.text.split(",").map(_.trim).toList,
+    phone = Phone.text.split(",").map(_.trim).filter(_.nonEmpty).toList,
     email = Email.text)
 
 }
