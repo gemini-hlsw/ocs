@@ -156,7 +156,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       (sev, msg) = f match {
         case Offline      => (Severity.Error, s"Catalog lookup failed for ${t.name} due to network connectivity problems.")
         case NotFound(n)  => (Severity.Error, s"""Catalog lookup returned no results for target "$n".""")
-        case Error(e)     => (Severity.Error, s"Catalog lookup failed for ${t.name} due to an unexpected error: ${e.getMessage}.")
+        case Error(e)     => (Severity.Error, s"Catalog lookup failed for ${t.name} due to an unexpected error.")
       }
     } yield new Problem(sev, msg, "Targets", s.inTargetsView(_.edit(t)))
 
