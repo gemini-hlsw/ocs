@@ -533,7 +533,7 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
         ImageHistoryItem hi = getImageHistoryItem(new File(_filename));
         float scale;
         if (hi != null) {
-            scale = hi.data.scale();
+            scale = hi.data.imageDisplayProperties().scale();
             addChangeListener(hi); // This will restore the history settings for the image
         } else {
             scale = getScale();
@@ -583,7 +583,7 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
         ListIterator<ImageHistoryItem> it = ((LinkedList<ImageHistoryItem>) _historyList.clone()).listIterator(0);
         for (int i = 0; it.hasNext(); i++) {
             ImageHistoryItem item = it.next();
-            if (item.data.title().equals(historyItem.data.title())) {
+            if (item.data.imageId().title().equals(historyItem.data.imageId().title())) {
                 _historyList.remove(i);
             }
         }
@@ -596,8 +596,8 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
             ImageHistoryItem item = _historyList.removeLast();
             // remove the file, if it is in cache
             String cacheDir = Preferences.getPreferences().getCacheDir().getPath();
-            if (item.data.filename().startsWith(cacheDir))
-                new File(item.data.filename()).deleteOnExit();
+            if (item.data.imageId().filename().startsWith(cacheDir))
+                new File(item.data.imageId().filename()).deleteOnExit();
         }
     }
 
@@ -662,8 +662,8 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
         ListIterator<ImageHistoryItem> it = _historyList.listIterator(0);
         while (it.hasNext()) {
             ImageHistoryItem historyItem = it.next();
-            if (historyItem.data.filename().startsWith(cacheDir)) {
-                File file = new File(historyItem.data.filename());
+            if (historyItem.data.imageId().filename().startsWith(cacheDir)) {
+                File file = new File(historyItem.data.imageId().filename());
                 if (file.exists()) {
                     try {
                         if (!file.delete()) {
@@ -753,7 +753,7 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
         ListIterator<ImageHistoryItem> it = ((LinkedList<ImageHistoryItem>) _historyList.clone()).listIterator(0);
         while (it.hasNext()) {
             ImageHistoryItem historyItem = it.next();
-            File f = new File(historyItem.data.filename());
+            File f = new File(historyItem.data.imageId().filename());
             if (f.equals(file.getAbsoluteFile())) {
                 return historyItem;
             }
@@ -934,7 +934,7 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
         ListIterator<ImageHistoryItem> it = l.listIterator(0);
         while (it.hasNext()) {
             ImageHistoryItem historyItem = it.next();
-            File file = new File(historyItem.data.filename());
+            File file = new File(historyItem.data.imageId().filename());
             if (!file.exists()) {
                 // remove dead item
                 _historyList.remove(historyItem);
@@ -949,7 +949,7 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
             }
         }
         if (closestHistoryItem != null) {
-            if (_filename != null && _filename.equals(closestHistoryItem.data.filename()))
+            if (_filename != null && _filename.equals(closestHistoryItem.data.imageId().filename()))
                 return false; // already displaying the file
             ImageDisplayMenuBar.setCurrentImageDisplay(this);
             closestHistoryItem.actionPerformed(null);
@@ -968,7 +968,7 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
         ListIterator<ImageHistoryItem> it = _historyList.listIterator(0);
         while (it.hasNext()) {
             ImageHistoryItem historyItem = it.next();
-            File file = new File(historyItem.data.filename());
+            File file = new File(historyItem.data.imageId().filename());
             if (!file.exists()) {
                 // remove dead item
                 it.remove();

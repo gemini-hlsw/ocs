@@ -8,10 +8,12 @@ import java.net.URL
 import scalaz._
 import Scalaz._
 
+case class ImageItemDisplayProperties(scale: Float, cmap: String, itt: String, hcut: Double, lcut: Double, userSetCutLevels: Boolean, scaleAlg: Int)
+case class ImageItemId(title: String, url: URL, filename: String)
+
 // immutable serializable core separate from the Action part
-final case class ImageItemDescriptor private (raDeg: Double, decDeg: Double, widthDeg: Double,
-     heightDeg: Double, title: String, url: URL, filename: String, scale: Float, cmap: String,
-     itt: String, hcut: Double, lcut: Double, userSetCutLevels: Boolean, scaleAlg: Int) extends Serializable {
+case class ImageItemDescriptor private (imageId: ImageItemId, raDeg: Double, decDeg: Double, widthDeg: Double,
+     heightDeg: Double, imageDisplayProperties: ImageItemDisplayProperties) extends Serializable {
 
   /**
     * Returns the distance from the history item image center to the given ra,dec position
@@ -78,6 +80,9 @@ object ImageItemDescriptor {
     val lcut = imageProcessor.getLowCut
     val userSetCutLevels = imageProcessor.isUserSetCutLevels
     val scaleAlg = imageProcessor.getScaleAlgorithm
-    ImageItemDescriptor(raDeg, decDeg, widthDeg, heightDeg, title, url, filename, scale, cmap, itt, hcut, lcut, userSetCutLevels, scaleAlg)
+
+    val imageId = ImageItemId(title, url, filename)
+    val displayProperties = ImageItemDisplayProperties(scale, cmap, itt, hcut, lcut, userSetCutLevels, scaleAlg)
+    ImageItemDescriptor(imageId, raDeg, decDeg, widthDeg, heightDeg, displayProperties)
   }
 }

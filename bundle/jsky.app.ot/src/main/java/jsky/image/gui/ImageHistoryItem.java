@@ -44,7 +44,7 @@ final class ImageHistoryItem extends AbstractAction implements ChangeListener {
     }
 
     private ImageHistoryItem(ImageItemDescriptor d) {
-        super(d.title());
+        super(d.imageId().title());
         data = d;
     }
 
@@ -62,12 +62,12 @@ final class ImageHistoryItem extends AbstractAction implements ChangeListener {
      */
     public void actionPerformed(ActionEvent evt) {
         MainImageDisplay imageDisplay = ImageDisplayMenuBar.getCurrentImageDisplay();
-        if (data.filename() != null && new File(data.filename()).exists()) {
+        if (data.imageId().filename() != null && new File(data.imageId().filename()).exists()) {
             imageDisplay.addChangeListener(this);
-            imageDisplay.setFilename(data.filename(), data.url());
-        } else if (data.url() != null) {
+            imageDisplay.setFilename(data.imageId().filename(), data.imageId().url());
+        } else if (data.imageId().url() != null) {
             imageDisplay.addChangeListener(this);
-            imageDisplay.setURL(data.url());
+            imageDisplay.setURL(data.imageId().url());
         } else {
             System.out.println("XXX ImageHistoryItem.actionPerformed: no file and no URL");
         }
@@ -82,11 +82,11 @@ final class ImageHistoryItem extends AbstractAction implements ChangeListener {
             imageDisplay.removeChangeListener(this);
 
             // restore image processor settings
-            imageProcessor.setColorLookupTable(data.cmap());
-            imageProcessor.setIntensityLookupTable(data.itt());
-            imageProcessor.setScaleAlgorithm(data.scaleAlg());
-            imageProcessor.setCutLevels(data.lcut(), data.hcut(), data.userSetCutLevels());
-            imageDisplay.setScale(data.scale());
+            imageProcessor.setColorLookupTable(data.imageDisplayProperties().cmap());
+            imageProcessor.setIntensityLookupTable(data.imageDisplayProperties().itt());
+            imageProcessor.setScaleAlgorithm(data.imageDisplayProperties().scaleAlg());
+            imageProcessor.setCutLevels(data.imageDisplayProperties().lcut(), data.imageDisplayProperties().hcut(), data.imageDisplayProperties().userSetCutLevels());
+            imageDisplay.setScale(data.imageDisplayProperties().scale());
 
             imageProcessor.update();
         }
