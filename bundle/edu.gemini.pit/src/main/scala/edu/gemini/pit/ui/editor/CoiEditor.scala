@@ -14,10 +14,14 @@ import edu.gemini.pit.ui.util._
 import swing.event.ValueChanged
 
 object CoiEditor {
-  def open(coi: CoInvestigator, editable:Boolean, parent: UIElement) = new CoiEditor(coi, editable).open(parent)
+  def open(coi: CoInvestigator, editable: Boolean, parent: UIElement, setup: CoiEditor => Unit = _ => {}) = {
+    val editor = new CoiEditor(coi, editable)
+    setup(editor)
+    editor.open(parent)
+  }
 }
 
-class CoiEditor private (coi: CoInvestigator, editable:Boolean) extends StdModalEditor[CoInvestigator]("Edit Co-Investigator") {
+class CoiEditor(coi: CoInvestigator, editable:Boolean) extends StdModalEditor[CoInvestigator]("Edit Co-Investigator") {
 
   // Our main editor component
   object Editor extends GridBagPanel with Rows {

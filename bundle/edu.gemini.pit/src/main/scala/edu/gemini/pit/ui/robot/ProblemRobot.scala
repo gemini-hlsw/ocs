@@ -3,7 +3,7 @@ package edu.gemini.pit.ui.robot
 import edu.gemini.pit.ui._
 import action.AppPreferencesAction
 import edu.gemini.model.p1.immutable._
-import edu.gemini.pit.ui.editor.Institutions
+import edu.gemini.pit.ui.editor.{Institutions, PiEditor}
 import edu.gemini.pit.util.PDF
 import edu.gemini.pit.catalog._
 import java.util.Date
@@ -607,7 +607,9 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
 
     private val noPIPhoneNumber = when (p.investigators.pi.phone.isEmpty) {
       new Problem(Severity.Warning, s"No phone number given for ${investigatorFullName(p.investigators.pi, "PI")}. This is for improved user support.",
-        "Overview", s.inOverview{_.edit(p.investigators.pi)})
+        "Overview", s.inOverview{
+          _.editPi(_.Phone.requestFocus)
+        })
     }
 
   }
