@@ -56,10 +56,10 @@ class Horizons private (/*host: String, port: Int,*/ site: Site, start: Date, en
           // Ambiguous
           case MUTLIPLE_ANSWER =>
             val table = hr.getResultsTable
-            val header = table.getHeader.asScala.toSeq
+            val header = table.getHeader.asScala
 
             val options = for {
-              row <- table.getResults.asScala.map(_.asScala.toSeq).toSeq
+              row <- table.getResults.asScala.map(_.asScala.toSeq)
               map = Map(header.zip(row): _*)
               id <- map.get("ID#")
               name <- map.get("Name")
