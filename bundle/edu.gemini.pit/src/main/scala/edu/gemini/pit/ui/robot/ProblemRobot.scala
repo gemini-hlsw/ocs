@@ -587,19 +587,23 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       new Problem(Severity.Todo, "Please create observations with conditions, targets, and resources.", "Observations", ())
     }
 
-    private def investigatorFullName(i: Investigator, default: String = "Investigator"): String = i.fullName.trim match {
-      case ""                       => default
-      case "Principal Investigator" => "PI"
-      case n                        => n
+    private def investigatorFullName(i: Investigator, default: String = "Investigator"): String = {
+      val piEmptyName = PrincipalInvestigator.empty.fullName
+      i.fullName.trim match {
+        case ""            => default
+        case `piEmptyName` => "PI"
+        case n             => n
+      }
     }
 
     private lazy val incompleteInvestigator = for {
       i <- p.investigators.all if !i.isComplete
     } yield new Problem(Severity.Todo, s"Please provide full contact information for ${investigatorFullName(i)}.", "Overview", s.inOverview{_.edit(i)})
 
-    private val nonUpdatedInvestigatorName = when(p.investigators.pi.firstName === "Principal" && p.investigators.pi.lastName === "Investigator") {
-      new Problem(Severity.Todo, s"Please provide PI's full name.", "Overview", s.inOverview{_.edit(p.investigators.pi)})
-    }
+    private val nonUpdatedInvestigatorName =
+      when(p.investigators.pi.fullName.trim === PrincipalInvestigator.empty.fullName || p.investigators.pi.fullName.trim.isEmpty) {
+        new Problem(Severity.Todo, s"Please provide PI's full name.", "Overview", s.inOverview{_.edit(p.investigators.pi)})
+      }
 
     private val noPIPhoneNumber = when (p.investigators.pi.phone.isEmpty) {
       new Problem(Severity.Warning, s"No phone number given for ${investigatorFullName(p.investigators.pi, "PI")}. This is for improved user support.",
