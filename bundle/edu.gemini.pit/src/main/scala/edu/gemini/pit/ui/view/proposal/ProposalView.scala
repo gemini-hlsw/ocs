@@ -344,7 +344,7 @@ class ProposalView(advisor:ShellAdvisor) extends BorderPanel with BoundView[Prop
     object listViewer extends SimpleListViewer[Proposal, Investigators, Investigator] {
 
       // Our action handlers
-      onDoubleClick { editInv(_) }
+      onDoubleClick { edit(_) }
 
       def editPi(setup: PiEditor => Unit = _ => {}) =
         for {
@@ -358,10 +358,11 @@ class ProposalView(advisor:ShellAdvisor) extends BorderPanel with BoundView[Prop
           i <- CoiEditor.open(inv, canEdit, panel, setup)
         } model = Some(Investigators.cois.set(m, m.cois.replace(inv, i)))
 
-      def editInv(inv: Investigator) = inv match {
+      def edit[A <: Investigator](inv: A) = inv match {
         case pi: PrincipalInvestigator => editPi()
         case coi: CoInvestigator       => editCoi(coi)
       }
+
       // One-liners
       val lens = Proposal.investigators
       def all(m:Investigators) = m.pi :: m.cois
@@ -405,8 +406,8 @@ class ProposalView(advisor:ShellAdvisor) extends BorderPanel with BoundView[Prop
 
   }
 
-  // public edit method for quick fix
+  // public edit methods for quick fixes
   def editPi(setup: PiEditor => Unit = _ => {}) = investigators.listViewer.editPi(setup)
   def editCoi(i: CoInvestigator, setup: CoiEditor => Unit = _ => {}) = investigators.listViewer.editCoi(i, setup)
-  def edit(i: Investigator) = investigators.listViewer.editInv(i)
+  def edit(i: Investigator) = investigators.listViewer.edit(i)
 }
