@@ -82,8 +82,9 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
 
     lazy val all = {
       val ps =
-        List(noObs, nonUpdatedInvestigatorName, titleCheck, band3option, abstractCheck, tacCategoryCheck, keywordCheck, attachmentCheck, attachmentValidityCheck,
-          attachmentSizeCheck, missingObsDetailsCheck, duplicateInvestigatorCheck, ftReviewerOrMentor, ftAffiliationMismatch, band3Obs).flatten ++
+        List(noObs, nonUpdatedInvestigatorName, noPIPhoneNumber, titleCheck, band3option, abstractCheck, tacCategoryCheck,
+          keywordCheck, attachmentCheck, attachmentValidityCheck, attachmentSizeCheck, missingObsDetailsCheck,
+          duplicateInvestigatorCheck, ftReviewerOrMentor, ftAffiliationMismatch, band3Obs).flatten ++
           TimeProblems(p, s).all ++
           TimeProblems.partnerZeroTimeRequest(p, s) ++
           TacProblems(p, s).all ++
@@ -586,21 +587,32 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       new Problem(Severity.Todo, "Please create observations with conditions, targets, and resources.", "Observations", ())
     }
 
+    private def investigatorFullName(i: Investigator, default: String = "Investigator"): String = {
+      val PiEmptyName = PrincipalInvestigator.empty.fullName
+      i.fullName.trim match {
+        case ""          => default
+        case PiEmptyName => "PI"
+        case n           => n
+      }
+    }
+
     private lazy val incompleteInvestigator = for {
       i <- p.investigators.all if !i.isComplete
-    } yield new Problem(Severity.Todo, s"Please provide full contact information for ${i.fullName}.", "Overview", s.inOverview {
-        v =>
-          v.edit(i)
-      })
+    } yield new Problem(Severity.Todo, s"Please provide full contact information for ${investigatorFullName(i)}.", "Overview", s.inOverview{_.edit(i)})
 
-    private val nonUpdatedInvestigatorName = when(p.investigators.pi.firstName === "Principal" && p.investigators.pi.lastName === "Investigator") {
-      new Problem(Severity.Todo, s"Please provide PI's full name.", "Overview", s.inOverview {
-        _.edit(p.investigators.pi)
-      })
+    private val nonUpdatedInvestigatorName =
+      when(p.investigators.pi.fullName.trim === PrincipalInvestigator.empty.fullName || p.investigators.pi.fullName.trim.isEmpty) {
+        new Problem(Severity.Todo, s"Please provide PI's full name.", "Overview", s.inOverview{_.edit(p.investigators.pi)})
+      }
+
+    private val noPIPhoneNumber = when (p.investigators.pi.phone.isEmpty) {
+      new Problem(Severity.Warning, s"No phone number given for ${investigatorFullName(p.investigators.pi, "PI")}. This is for improved user support.",
+        "Overview", s.inOverview{
+          _.editPi(_.Phone.requestFocus)
+        })
     }
 
   }
-
 }
 
 import ProblemRobot._
