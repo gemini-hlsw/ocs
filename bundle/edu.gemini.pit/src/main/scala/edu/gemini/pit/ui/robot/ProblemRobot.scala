@@ -588,11 +588,11 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
     }
 
     private def investigatorFullName(i: Investigator, default: String = "Investigator"): String = {
-      val piEmptyName = PrincipalInvestigator.empty.fullName
+      val PiEmptyName = PrincipalInvestigator.empty.fullName
       i.fullName.trim match {
-        case ""            => default
-        case `piEmptyName` => "PI"
-        case n             => n
+        case ""          => default
+        case PiEmptyName => "PI"
+        case n           => n
       }
     }
 

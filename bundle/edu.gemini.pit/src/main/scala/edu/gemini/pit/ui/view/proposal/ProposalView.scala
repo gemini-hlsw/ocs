@@ -346,13 +346,13 @@ class ProposalView(advisor:ShellAdvisor) extends BorderPanel with BoundView[Prop
       // Our action handlers
       onDoubleClick { edit(_) }
 
-      def editPi(setup: PiEditor => Unit = _ => {}) =
+      def editPi(setup: PiEditor => Unit = _ => ()) =
         for {
           m <- model
           i <- PiEditor.open(m.pi, canEdit, panel, setup)
         } model = Some(Investigators.pi.set(m, i))
 
-      def editCoi(inv: CoInvestigator, setup: CoiEditor => Unit = _ => {}) =
+      def editCoi(inv: CoInvestigator, setup: CoiEditor => Unit = _ => ()) =
         for {
           m <- model
           i <- CoiEditor.open(inv, canEdit, panel, setup)
@@ -407,7 +407,7 @@ class ProposalView(advisor:ShellAdvisor) extends BorderPanel with BoundView[Prop
   }
 
   // public edit methods for quick fixes
-  def editPi(setup: PiEditor => Unit = _ => {}) = investigators.listViewer.editPi(setup)
-  def editCoi(i: CoInvestigator, setup: CoiEditor => Unit = _ => {}) = investigators.listViewer.editCoi(i, setup)
+  def editPi(setup: PiEditor => Unit = _ => ()) = investigators.listViewer.editPi(setup)
+  def editCoi(i: CoInvestigator, setup: CoiEditor => Unit = _ => ()) = investigators.listViewer.editCoi(i, setup)
   def edit(i: Investigator) = investigators.listViewer.edit(i)
 }

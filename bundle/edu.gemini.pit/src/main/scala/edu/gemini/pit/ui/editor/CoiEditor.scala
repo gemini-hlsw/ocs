@@ -14,7 +14,7 @@ import edu.gemini.pit.ui.util._
 import swing.event.ValueChanged
 
 object CoiEditor {
-  def open(coi: CoInvestigator, editable: Boolean, parent: UIElement, setup: CoiEditor => Unit = _ => {}) = {
+  def open(coi: CoInvestigator, editable: Boolean, parent: UIElement, setup: CoiEditor => Unit = _ => ()): Option[CoInvestigator] = {
     val editor = new CoiEditor(coi, editable)
     setup(editor)
     editor.open(parent)

@@ -13,7 +13,7 @@ import swing._
 import event.ValueChanged
 
 object PiEditor {
-  def open(coi: PrincipalInvestigator, editable: Boolean, parent: UIElement, setup: PiEditor => Unit = _ => {}) = {
+  def open(coi: PrincipalInvestigator, editable: Boolean, parent: UIElement, setup: PiEditor => Unit = _ => ()): Option[PrincipalInvestigator] = {
     val editor = new PiEditor(coi, editable)
     setup(editor)
     editor.open(parent)
