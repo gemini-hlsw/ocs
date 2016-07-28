@@ -3,7 +3,7 @@ package edu.gemini.pit.ui.robot
 import edu.gemini.pit.ui._
 import action.AppPreferencesAction
 import edu.gemini.model.p1.immutable._
-import edu.gemini.pit.ui.editor.{Institutions, PiEditor}
+import edu.gemini.pit.ui.editor.Institutions
 import edu.gemini.pit.util.PDF
 import edu.gemini.pit.catalog._
 import java.util.Date
