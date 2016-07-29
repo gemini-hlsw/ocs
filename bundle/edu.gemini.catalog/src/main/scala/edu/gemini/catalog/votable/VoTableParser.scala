@@ -53,20 +53,19 @@ object VoTableParser extends VoTableParser {
     // Load in memory (Could be a problem for large responses)
     val xmlText = Source.fromInputStream(is, "UTF-8").getLines().mkString
 
-    validate(xmlText) match {
-      case -\/(e) if catalog.checkValidity => \/.left(ValidationError(catalog))
-      case -\/(e) if catalog == SIMBAD     =>
+    catalog match {
+      case SIMBAD =>
         // Simbad is a special case as it is not fully votable-compliant.
-        // We want to catch some errors at this level to simplify the parses that assumes
-        // we are votable compliant
+        // We want to catch some errors at this level to simplify the parse method
+        // that assumes we are votable compliant
         val xml = XML.loadString(xmlText)
         if (SimbadAdapter.containsExceptions(xml)) {
           \/.left(ValidationError(catalog))
         } else {
           \/.right(parse(xml))
         }
-      case -\/(e)                          => \/.right(parse(XML.loadString(xmlText)))
-      case \/-(r)                          => \/.right(parse(XML.loadString(r)))
+      case _ if validate(xmlText).isLeft => \/.left(ValidationError(catalog))
+      case _                             => \/.right(parse(XML.loadString(xmlText)))
     }
   }
 }
