@@ -36,11 +36,23 @@ object ImageCatalogLoader {
   def loadImage(c: Coordinates): Task[ImageEntry] = {
     val catalog = ImageCatalog.user()
     val url = catalog.queryUrl(c)
-    Task {
+    Task.delay {
       val connection = url.openConnection()
       val in = url.openStream()
       (c, catalog, connection.getContentType, in)
     } >>= { Function.tupled(ImageCatalogLoader.imageToTmpFile) } >>= { case (f, _) => Task.now(ImageEntry(c, catalog, f)) }
+  }
+
+  /**
+    * Attempts to find if there is an image previously downloaded at the given coordinates
+    */
+  def findImage(c: Coordinates): Task[Option[File]] = {
+    val catalog = ImageCatalog.user()
+    val dir = Preferences.getPreferences.getCacheDir
+    tmpFileName(catalog, c, ".fits.gz").map { filename =>
+      val f = new File(dir, filename)
+      f.exists option f
+    }
   }
 
   /**
@@ -59,6 +71,8 @@ object ImageCatalogLoader {
         }
     }
   }
+
+  def tmpFileName(catalog: ImageCatalog, c: Coordinates, suffix: String): Task[String] = Task.now(s"img_${catalog.id}_${c.toFilePart}$suffix")
 
   /**
     * Download the given image URL to a temporary file and return the file
@@ -79,15 +93,15 @@ object ImageCatalogLoader {
         case _                                                                        => Task.now(".tmp")
       }
 
-    def createTmpFile(suffix: String): Task[File] = Task {
-      new File(dir, s"img_${catalog.id}_${c.toFilePart}")
+    def createTmpFile(fileName: String): Task[File] = Task.delay {
+      new File(dir, fileName)
     }
 
-    def openTmpFile(file: File): Task[OutputStream] = Task {
+    def openTmpFile(file: File): Task[OutputStream] = Task.delay {
       new FileOutputStream(file)
     }
 
-    def readFile(in: InputStream, out: OutputStream): Task[Unit] = Task {
+    def readFile(in: InputStream, out: OutputStream): Task[Unit] = Task.delay {
       val buffer = new Array[Byte](8 * 1024)
       Iterator
         .continually(in.read(buffer))
@@ -97,7 +111,8 @@ object ImageCatalogLoader {
 
     for {
       s <- suffix
-      t <- createTmpFile(s)
+      f <- tmpFileName(catalog, c, s)
+      t <- createTmpFile(f)
       o <- openTmpFile(t)
       r <- readFile(in, o)
     } yield (t, url)

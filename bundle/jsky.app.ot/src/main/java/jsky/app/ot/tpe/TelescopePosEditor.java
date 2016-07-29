@@ -1,7 +1,6 @@
 package jsky.app.ot.tpe;
 
-import edu.gemini.catalog.image.ImageCatalog;
-import edu.gemini.catalog.ui.tpe.ImageCatalogLoader;
+import edu.gemini.catalog.ui.image.BackgroundImageLoader;
 import edu.gemini.pot.ModelConverters;
 import edu.gemini.pot.sp.*;
 import edu.gemini.shared.skyobject.coords.HmsDegCoordinates;
@@ -32,7 +31,6 @@ import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
 
-import java.net.URL;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -247,6 +245,7 @@ public final class TelescopePosEditor extends JSkyCat implements TpeMouseObserve
             dec = 0.0;
         }
 
+        _iw.loadSkyImage();
         _iw.loadCachedImage(ra, dec);
     }
 
@@ -277,9 +276,7 @@ public final class TelescopePosEditor extends JSkyCat implements TpeMouseObserve
         }
     };
 
-    private final PropertyChangeListener selListener = evt -> {
-        reset((ISPNode) evt.getSource());
-    };
+    private final PropertyChangeListener selListener = evt -> reset((ISPNode) evt.getSource());
 
     /**
      * Reset the position editor based on the currently selected science program
@@ -340,16 +337,14 @@ public final class TelescopePosEditor extends JSkyCat implements TpeMouseObserve
         final SPTarget _baseTarget = ctx.targets().baseOrNull();
         if (_baseTarget == null) return;
 
-        final ImageCatalog imageCatalog = ImageCatalog.instance().user();
-
         final Option<Long> when = ctx.schedulingBlockStartJava();
 
         _baseTarget.getRaDegrees(when).flatMap(ra ->
             _baseTarget.getDecDegrees(when).flatMap( dec -> {
                 final HmsDegCoordinates hmsDegCoordinates = new HmsDegCoordinates.Builder(new Angle(ra, Angle.Unit.DEGREES), new Angle(dec, Angle.Unit.DEGREES)).build();
                 final Coordinates coordinates = ModelConverters.toCoordinates(hmsDegCoordinates);
-                ImageCatalogLoader.instance().display4Java(getImageWidget(), coordinates, imageCatalog);
-                // TODO Fix integration with the legacy image loader
+                // TODO What to do if not found, sync download?
+                BackgroundImageLoader.findIfAvailable(coordinates).forEach(f -> getImageWidget().setFilename(f.getAbsolutePath()));
                 return null;
             }));
     }

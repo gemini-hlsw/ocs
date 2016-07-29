@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
  * be accessed only in this session. If the application is restarted, the
  * URL will have to be used instead.
  */
-final class ImageHistoryItem extends AbstractAction implements ChangeListener {
+public final class ImageHistoryItem extends AbstractAction implements ChangeListener {
 
     final ImageItemDescriptor data;
 

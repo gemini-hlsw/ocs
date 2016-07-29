@@ -45,7 +45,6 @@ case class ImageItemDescriptor private (imageId: ImageItemId, raDeg: Double, dec
       }
 
       isInsideImageOnDec.fold(calcDiff, None)
-
     }
     List(this.raDeg, this.decDeg, widthDeg, heightDeg).forall(!_.isNaN).fold(calcDistance, None)
   }

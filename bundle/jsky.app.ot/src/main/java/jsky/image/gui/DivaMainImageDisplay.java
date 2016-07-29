@@ -579,7 +579,7 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
      * keeping the list size to a maximum of 20.
      */
     @SuppressWarnings("unchecked")
-    protected void addToHistory(ImageHistoryItem historyItem) {
+    public void addToHistory(ImageHistoryItem historyItem) {
         ListIterator<ImageHistoryItem> it = ((LinkedList<ImageHistoryItem>) _historyList.clone()).listIterator(0);
         for (int i = 0; it.hasNext(); i++) {
             ImageHistoryItem item = it.next();
@@ -604,7 +604,14 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
     /**
      * Make and return an ImageHistoryItem for the current image
      */
-    protected ImageHistoryItem makeImageHistoryItem() {
+    public ImageHistoryItem makeImageHistoryItem() {
+        return makeImageHistoryItem(_filename);
+    }
+
+    /**
+     * Make and return an ImageHistoryItem for the current image
+     */
+    public ImageHistoryItem makeImageHistoryItem(String filename) {
         // make the title
         double ra = Double.NaN, dec = Double.NaN;
         double widthDeg = Double.NaN, heightDeg = Double.NaN;
@@ -621,8 +628,8 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
         }
 
         String name = "";
-        if (_filename != null) {
-            name = new File(_filename).getName();
+        if (filename != null) {
+            name = new File(filename).getName();
         }
 
         String object = getObjectName();
@@ -634,7 +641,7 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
         String title = name;
         if (object.length() != 0 || radecStr.length() != 0)
             title = title + " [" + object + radecStr + "]";
-        return new ImageHistoryItem(this, ra, dec, widthDeg, heightDeg, title, _origURL, _filename);
+        return new ImageHistoryItem(this, ra, dec, widthDeg, heightDeg, title, _origURL, filename);
     }
 
     /**
@@ -1035,15 +1042,6 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
     protected void newImage(boolean before) {
         super.newImage(before);
         if (!before) {
-//            // If there are multiple images and/or tables in the image file, pop up
-//            // a dialog to select one. (Wait a bit, in case main image window is not
-//            // up yet.)
-//            SwingUtilities.invokeLater(new Runnable() {
-//                public void run() {
-//                    checkExtensions(false);
-//                }
-//            });
-
             // check for graphics items saved in a FITS binary table named ".GRAPHICS"
             // (also produced by skycat)
             _fitsGraphics.loadGraphicsFromImage(".GRAPHICS");

@@ -1,15 +1,16 @@
 package edu.gemini.catalog.ui.image
 
 import java.beans.{PropertyChangeEvent, PropertyChangeListener}
+import java.io.File
 
-import edu.gemini.catalog.image.ImageCatalog
-import edu.gemini.catalog.ui.tpe.{CatalogImageDisplay, ImageCatalogLoader, ImageEntry}
+import edu.gemini.catalog.ui.tpe.{ImageCatalogLoader, ImageEntry}
 import edu.gemini.spModel.target.obsComp.TargetObsComp
-
+import edu.gemini.shared.util.immutable.ScalaConverters._
+import edu.gemini.shared.util.immutable.{Option => JOption}
 import scala.collection.JavaConverters._
-import scala.collection.JavaConversions._
 import edu.gemini.pot.sp.{ISPNode, ISPProgram}
 import edu.gemini.spModel.core.Coordinates
+
 
 import scalaz._
 import Scalaz._
@@ -18,9 +19,11 @@ import scalaz.concurrent.Task
 object BackgroundImageLoader {
   val instance = this
 
-  def downloadImageAndDisplay(coordinates: Coordinates, display: CatalogImageDisplay): Unit = {
-    val queryUrl = ImageCatalog.instance.user().queryUrl(coordinates)
-
+  /**
+    * Called from the java side
+    */
+  def findIfAvailable(c: Coordinates): JOption[File] = {
+    ImageCatalogLoader.findImage(c).map(_.asGeminiOpt).unsafePerformSync
   }
 
   def downloadImage(c: Coordinates): Task[ImageEntry] = {
@@ -40,16 +43,15 @@ object BackgroundImageLoader {
     }
   }
 
-  def unwatch(prog: ISPProgram): Unit = {
+  def unwatch(prog: ISPProgram): Unit =
     prog.removeCompositeChangeListener(CompositePropertyChangeListener)
-  }
 
   private object CompositePropertyChangeListener extends PropertyChangeListener {
     override def propertyChange(evt: PropertyChangeEvent): Unit = {
       val task = Option(evt.getSource).collect {
         case node: ISPNode => node.getDataObject match {
           case t: TargetObsComp => Option(t.getTargetEnvironment.getBase).flatMap(_.getTarget.coords(0)).map(downloadImage)
-          case _ => Task.now(()).some
+          case _                => Task.now(()).some
         }
       }
       task.flatten.foreach(_.unsafePerformAsync {
