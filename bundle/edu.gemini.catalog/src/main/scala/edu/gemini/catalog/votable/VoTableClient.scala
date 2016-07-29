@@ -149,9 +149,6 @@ trait RemoteCallBackend {this: CachedBackend =>
 
   protected [votable] def queryParams(q: CatalogQuery): Array[NameValuePair]
   protected [votable] def queryUrl(e: SearchKey): String
-  // Indicates if the backend should validate the queries
-  protected def validate: Boolean
-
 
   override protected def query(e: SearchKey): QueryResult = {
     val method = new GetMethod(queryUrl(e))
@@ -165,7 +162,7 @@ trait RemoteCallBackend {this: CachedBackend =>
 
     try {
       client.executeMethod(method)
-      VoTableParser.parse(e.query.catalog, method.getResponseBodyAsStream, validate) match {
+      VoTableParser.parse(e.query.catalog, method.getResponseBodyAsStream) match {
         case -\/(p) => QueryResult(widerQuery, CatalogQueryResult(TargetsTable.Zero, List(p)))
         case \/-(y) => QueryResult(widerQuery, CatalogQueryResult(y))
       }
@@ -178,7 +175,6 @@ trait RemoteCallBackend {this: CachedBackend =>
 case object ConeSearchBackend extends CachedBackend with RemoteCallBackend {
   val instance = this
   override val catalogUrls = NonEmptyList(new URL("http://gscatalog.gemini.edu"), new URL("http://gncatalog.gemini.edu"))
-  override val validate = true
 
   private def format(a: Angle)= f"${a.toDegrees}%4.03f"
 
@@ -196,7 +192,6 @@ case object ConeSearchBackend extends CachedBackend with RemoteCallBackend {
 
 case object SimbadNameBackend extends CachedBackend with RemoteCallBackend {
   override val catalogUrls = NonEmptyList(new URL("http://simbad.cfa.harvard.edu/simbad"), new URL("http://simbad.u-strasbg.fr/simbad"))
-  override val validate = false // Simbad sometimes returns non-valid XML, in particular in errors
 
   protected [votable] def queryParams(q: CatalogQuery): Array[NameValuePair] = q match {
     case qs: NameCatalogQuery => Array(
@@ -206,7 +201,6 @@ case object SimbadNameBackend extends CachedBackend with RemoteCallBackend {
   }
 
   override def queryUrl(e: SearchKey): String = s"${e.url}/sim-id"
-
 }
 
 case class CannedBackend(results: List[SiderealTarget]) extends VoTableBackend {

@@ -19,8 +19,10 @@ case class MagnitudeQueryFilter(mc: MagnitudeConstraints) extends QueryResultsFi
 
 sealed abstract class CatalogName(val id: String, val displayName: String) {
   def supportedBands: List[MagnitudeBand] = Nil
-  // Indicates what is the band used when a generic R band is requried
+  // Indicates what is the band used when a generic R band is required
   def rBand: MagnitudeBand = MagnitudeBand.UC
+  // Whether we should validate the xml on parsing
+  def checkValidity: Boolean = true
 }
 
 case object SDSS extends CatalogName("sdss9", "SDSS9 @ Gemini")
@@ -34,11 +36,12 @@ case object UCAC4 extends CatalogName("ucac4", "UCAC4 @ Gemini") {
 }
 case object TWOMASS_PSC extends CatalogName("twomass_psc", "TwoMass PSC @ Gemini")
 case object TWOMASS_XSC extends CatalogName("twomass_xsc", "TwoMass XSC @ Gemini")
-case object SIMBAD extends CatalogName("simbad", "Simbad")
+case object SIMBAD extends CatalogName("simbad", "Simbad") {
+  override def checkValidity = false // Simbad sometimes returns non-valid XML, in particular in errors
+}
 
 object CatalogName {
   implicit val equals = Equal.equal[CatalogName]((a, b) => a.id === b.id)
-
 }
 
 /**
