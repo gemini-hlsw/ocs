@@ -606,8 +606,14 @@ class VoTableParserSpec extends Specification with VoTableParser {
     "parse simbad with a not-found name" in {
       val xmlFile = "simbad-not-found.xml"
       // Simbad returns non-valid xml when an element is not found, we need to skip validation :S
-      val result = VoTableParser.parse(SIMBAD, getClass.getResourceAsStream(s"/$xmlFile"), checkValidity = false)
+      val result = VoTableParser.parse(SIMBAD, getClass.getResourceAsStream(s"/$xmlFile"))
       result must beEqualTo(\/.right(ParsedVoResource(List())))
+    }
+    "parse simbad with an npe" in {
+      val xmlFile = "simbad-npe.xml"
+      // Simbad returns non-valid xml when there is an internal error like an NPE
+      val result = VoTableParser.parse(SIMBAD, getClass.getResourceAsStream(s"/$xmlFile"))
+      result must beEqualTo(\/.left(ValidationError(SIMBAD)))
     }
     "ppmxl proper motion should be in mas/y. REL-2841" in {
       val xmlFile = "votable-ppmxl-proper-motion.xml"
@@ -628,8 +634,7 @@ class VoTableParserSpec extends Specification with VoTableParser {
     "support simbad repeated magnitude entries, REL-2853" in {
       val xmlFile = "simbad-ngc-2438.xml"
       // Simbad returns an xml with multiple measurements of the same band, use only the first one
-      println(VoTableParser.parse(SIMBAD, getClass.getResourceAsStream(s"/$xmlFile"), checkValidity = false))
-      val result = VoTableParser.parse(SIMBAD, getClass.getResourceAsStream(s"/$xmlFile"), checkValidity = false).getOrElse(ParsedVoResource(Nil))
+      val result = VoTableParser.parse(SIMBAD, getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil))
 
       val target = (for {
           t <- result.tables.map(TargetsTable.apply)
