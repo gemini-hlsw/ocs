@@ -12,14 +12,24 @@ public final class LchQueryService {
     /**
      * valid parameters
      */
-    public static final String PARAMETER_PROGRAM_SEMESTER = "programSemester";
-    public static final String PARAMETER_PROGRAM_TITLE = "programTitle";
-    public static final String PARAMETER_PROGRAM_INVESTIGATOR_NAMES = "programInvestigatorNames"; // new
-    public static final String PARAMETER_PROGRAM_PI_EMAIL = "programPiEmail"; // new
-    public static final String PARAMETER_PROGRAM_COI_EMAILS = "programCoIEmails"; // new
-    public static final String PARAMETER_PROGRAM_ABSTRACT = "programAbstract"; // new
-    public static final String PARAMETER_PROGRAM_BAND = "programBand"; // new
-    public static final String PARAMETER_PROGRAM_PARTNERS = "programPartners"; // new
+    public enum LchParameter {
+        PROGRAM_SEMESTER("programSemester"),
+        PROGRAM_TITLE("programTitle"),
+        PROGRAM_INVESTIGATOR_NAMES("programInvestigatorNames"),
+        PROGRAM_PI_EMAIL("programPiEmail"),
+        PROGRAM_COI_EMAILS("programCoiEmails"),
+        PROGRAM_ABSTRACT("programAbstract"),
+        PROGRAM_BAND("programBand"),
+        PROGRAM_PARTNERS("programPartners"),
+        PROGRAM_REFERENCE("programReference"),
+        PROGRAM_ACTIVE("programActive"),
+
+        private final String paramName;
+        LchParameter(final String paramName) {
+            this.paramName = paramName;
+        }
+    }
+
     public static final String PARAMETER_PROGRAM_REFERENCE = "programReference";
     public static final String PARAMETER_PROGRAM_ACTIVE = "programActive";
     public static final String PARAMETER_PROGRAM_COMPLETED = "programCompleted";
