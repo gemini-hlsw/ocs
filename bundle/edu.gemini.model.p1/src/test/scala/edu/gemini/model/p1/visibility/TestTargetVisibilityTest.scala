@@ -233,20 +233,20 @@ class TestTargetVisibilityTest {
   }
 
   @Test def testDecForGNLgs() {
-    // between higher than -27 and less or equal than -22 is warning
-    gnLgsB(Limited, ("9:00:00",  "-26:59:59.999"))
-    gnLgsB(Limited, ("9:00:00",  "-22:00:00"))
-    // between higher or equal than 65 and less than 68 is warning
+    // between higher than -30 and less or equal than -25 is warning
+    gnLgsB(Limited, ("9:00:00",  "-29:59:59.999"))
+    gnLgsB(Limited, ("9:00:00",  "-25:00:00"))
+    // between higher or equal than 65 and less than 70 is warning
     gnLgsB(Limited, ("9:00:00",  "65:00:00"))
-    gnLgsB(Limited, ("9:00:00",  "67:59:59.999"))
-    // Less or equal to -27 is Bad
-    gnLgsB(Bad, ("9:00:00",  "-27:00:00"))
+    gnLgsB(Limited, ("9:00:00",  "69:59:59.999"))
+    // Less or equal to -30 is Bad
+    gnLgsB(Bad, ("9:00:00",  "-30:00:00"))
     gnLgsB(Bad, ("9:00:00",  "-90:00:00"))
-    // More or or equal to 68 is Bad
-    gnLgsB(Bad, ("9:00:00",  "68:00:00"))
+    // More or or equal to 70 is Bad
+    gnLgsB(Bad, ("9:00:00",  "70:00:00"))
     gnLgsB(Bad, ("9:00:00",  "90:00:00"))
-    // Between more than -22 and less than 65 is Good
-    gnLgsB(Good, ("0:00:00",  "22:00:00.001"))
+    // Between more than -25 and less than 65 is Good
+    gnLgsB(Good, ("0:00:00",  "-24:59:59.999"))
     gnLgsB(Good, ("0:00:00",  "64:59:59.001"))
   }
 
