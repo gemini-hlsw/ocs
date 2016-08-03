@@ -1,6 +1,6 @@
 package edu.gemini.model.p1.immutable
 
-import edu.gemini.model.p1.{ mutable => M }
+import edu.gemini.model.p1.{mutable => M}
 import java.util.GregorianCalendar
 
 import edu.gemini.spModel.core.Coordinates

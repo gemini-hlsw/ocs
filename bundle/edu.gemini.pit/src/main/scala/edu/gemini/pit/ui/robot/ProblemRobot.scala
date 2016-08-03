@@ -6,7 +6,7 @@ import edu.gemini.model.p1.immutable._
 import edu.gemini.pit.ui.editor.Institutions
 import edu.gemini.pit.util.PDF
 import edu.gemini.pit.catalog._
-import java.util.Date
+import java.util.TimeZone
 
 import edu.gemini.spModel.core.MagnitudeBand
 import view.obs.ObsListGrouping
@@ -51,7 +51,6 @@ object ProblemRobot {
     def hours = mins * 60
     def days = hours * 24
   }
-
 }
 
 class ProblemRobot(s: ShellAdvisor) extends Robot {
@@ -88,8 +87,9 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
           TimeProblems(p, s).all ++
           TimeProblems.partnerZeroTimeRequest(p, s) ++
           TacProblems(p, s).all ++
-          List(incompleteInvestigator, missingObsElementCheck, cfCheck, emptyTargetCheck, emptyEphemerisCheck, initialEphemerisCheck, finalEphemerisCheck,
-            badGuiding, badVisibility, iffyVisibility, singlePointEphemerisCheck, minTimeCheck, wrongSite, band3Orphan2, gpiCheck, lgsIQ70Check, lgsGemsIQ85Check,
+          List(incompleteInvestigator, missingObsElementCheck, cfCheck, emptyTargetCheck,
+            emptyEphemerisCheck, singlePointEphemerisCheck, initialEphemerisCheck, finalEphemerisCheck,
+            badGuiding, badVisibility, iffyVisibility, minTimeCheck, wrongSite, band3Orphan2, gpiCheck, lgsIQ70Check, lgsGemsIQ85Check,
             lgsCC50Check, texesCCCheck, texesWVCheck, gmosWVCheck, gmosR600Check, band3IQ, band3LGS, band3RapidToO, sbIrObservation).flatten
       ps.sorted
     }
@@ -168,43 +168,57 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       msg = s"""Target "${t.name}" appears to be empty."""
     } yield new Problem(Severity.Error, msg, "Targets", s.inTargetsView(_.edit(t)))
 
-    lazy val utc = new SimpleDateFormat("dd-MMM-yyyy")
+
+    private lazy val emptyEphemerisCheck = for {
+      t @ NonSiderealTarget(_, n, e, _) <- p.targets
+      if e.isEmpty
+      if !s.catalogHandler.state.contains(t)
+      msg = s"""Ephemeris for target "$n" is undefined."""
+    } yield new Problem(Severity.Warning, msg, "Targets", s.inTargetsView(_.edit(t)))
+
+    private lazy val singlePointEphemerisCheck = for {
+      t @ NonSiderealTarget(_, n, e, _) <- p.targets
+      if e.size == 1
+      if !s.catalogHandler.state.contains(t)
+      msg = s"""Ephemeris for target "$n" contains only one point; please specify at least two."""
+    } yield new Problem(Severity.Warning, msg, "Targets", s.inTargetsView(_.edit(t)))
+
+    lazy val utc = new SimpleDateFormat("dd-MMM-yyyy") {
+      setTimeZone(TimeZone.getTimeZone("UTC"))
+    }
 
     private lazy val initialEphemerisCheck = for {
       t @ NonSiderealTarget(_, n, e, _) <- p.targets
-      if !t.isEmpty
+      if !e.isEmpty
       if !s.catalogHandler.state.contains(t)
-      ds = e.map(_.validAt) if ds.size > 1 // only for an ephemeris with defined points
-      diff = ds.min - p.semester.firstDay
-      if diff > 1.days
-      date = new Date(ds.min)
-      msg = if (ds.min >= p.semester.lastDay)
-        s"""Ephemeris for target "${t.name}" is undefined between ${utc.format(p.semester.firstDay)} and ${utc.format(p.semester.lastDay)} UTC."""
-      else
-        s"""Ephemeris for target "${t.name}" is undefined before ${utc.format(p.semester.firstDay)} and ${utc.format(date)} UTC."""
+      ds = e.map(_.validAt) if ds.size > 1
+      dsMin = ds.min
+      diff = dsMin - p.semester.firstDay
+      if diff >= 1.days
+      msg = if (diff < 2.days)
+        s"""Ephemeris for target "$n" is undefined for ${utc.format(p.semester.firstDay)} UTC."""
+      else {
+        val lastDay = (dsMin < p.semester.lastDay + 1.days) ? (dsMin - 1.days) | p.semester.lastDay
+        s"""Ephemeris for target "$n" is undefined between ${utc.format(p.semester.firstDay)} and ${utc.format(lastDay)} UTC."""
+      }
     } yield new Problem(Severity.Warning, msg, "Targets", s.inTargetsView(_.edit(t)))
 
     private lazy val finalEphemerisCheck = for {
       t @ NonSiderealTarget(_, n, e, _) <- p.targets
-      if !t.isEmpty
+      if !e.isEmpty
       if !s.catalogHandler.state.contains(t)
-      ds = e.map(_.validAt) if ds.size > 1 // only for an ephemeris with defined points
-      diff = p.semester.lastDay - ds.max
-      if diff > 1.days
-      date = new Date(ds.max)
-      msg = if (ds.max <= p.semester.firstDay)
-        s"""Ephemeris for target "${t.name}" is undefined between ${utc.format(p.semester.firstDay)} and ${utc.format(p.semester.lastDay)} UTC."""
-      else
-        s"""Ephemeris for target "${t.name}" is undefined between ${utc.format(date)} and ${utc.format(p.semester.lastDay)} UTC."""
+      ds = e.map(_.validAt) if ds.size > 1
+      dsMax = ds.max
+      diff = p.semester.lastDay - dsMax
+      if diff >= 1.days
+      msg = if (diff == 1.days)
+        s"""Ephemeris for target "$n" is undefined for ${utc.format(p.semester.lastDay)} UTC."""
+      else {
+        val firstDay = (dsMax > p.semester.firstDay) ? (dsMax + 1.days) | p.semester.firstDay
+        s"""Ephemeris for target "$n" is undefined between ${utc.format(firstDay)} and ${utc.format(p.semester.lastDay)} UTC."""
+      }
     } yield new Problem(Severity.Warning, msg, "Targets", s.inTargetsView(_.edit(t)))
 
-    private lazy val emptyEphemerisCheck = for {
-      t @ NonSiderealTarget(_, n, e, _) <- p.targets
-      if !t.isEmpty
-      if !s.catalogHandler.state.contains(t)
-      if e.isEmpty
-      msg = s"""Ephemeris for target "${t.name}" is undefined."""
-    } yield new Problem(Severity.Warning, msg, "Targets", s.inTargetsView(_.edit(t)))
 
     def aoPerspectiveIsLgs(ao: AoPerspective): Boolean = ao match {
       case AoLgs => true
@@ -419,14 +433,6 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
         message     =  problem._2
       } yield new Problem(severity, message, "Targets", s.inTargetsView(_.edit(target)))
     }
-
-    private lazy val singlePointEphemerisCheck = for {
-      t @ NonSiderealTarget(_, n, e, _) <- p.targets
-      if !t.isEmpty
-      if !s.catalogHandler.state.contains(t)
-      if e.size == 1
-      msg = s"""Ephemeris for target "${t.name}" contains only one point; please specify at least two."""
-    } yield new Problem(Severity.Warning, msg, "Targets", s.inTargetsView(_.edit(t)))
 
     private lazy val missingObsElementCheck = {
       def fix[A](b: Band, g: ObsListGrouping[A]) {
