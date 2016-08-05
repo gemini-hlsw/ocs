@@ -81,18 +81,6 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
     // Dialog for GeMS manual guide star selection
     private GemsGuideStarSearchDialog _gemsGuideStarSearchDialog;
 
-    private final AbstractAction _skyImageAction = new AbstractAction(
-            "Sky Images...",
-            Resources.getIcon("guidestars24.gif")) {
-        {
-            putValue(Action.SHORT_DESCRIPTION, "Get sky image using default parameters");
-        }
-
-        @Override public void actionPerformed(ActionEvent evt) {
-            loadSkyImage();
-        }
-    };
-
     // Action to use to show the guide star search window
     private final AbstractAction _manualGuideStarAction = new AbstractAction(
             "Manual GS",
@@ -1041,15 +1029,6 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
      */
     public AbstractAction getManualGuideStarAction() {
         return _manualGuideStarAction;
-    }
-
-    // Called from GemsGuideStarWorker when finished
-    void setGemsGuideStarWorkerFinished() {
-        _gemsGuideStarWorker = null;
-    }
-
-    public AbstractAction getSkyImageAction() {
-        return _skyImageAction;
     }
 
     @Override

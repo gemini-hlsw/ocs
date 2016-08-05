@@ -29,10 +29,6 @@ class TpeImageDisplayToolBar extends ImageDisplayToolBar {
 
         addSeparator();
 
-        add(makeImageButton());
-
-        addSeparator();
-
         add(makeManualGuideStarButton());
     }
 
@@ -55,30 +51,12 @@ class TpeImageDisplayToolBar extends ImageDisplayToolBar {
     }
 
     /**
-     * Make the default Image search button, if it does not yet exists.
-     *
-     * @return the Image Search button
-     */
-    protected JButton makeImageButton() {
-        if (skyImageButton == null) {
-            final AbstractAction a = ((TpeImageWidget)getImageDisplay()).getSkyImageAction();
-            skyImageButton = makeButton((String)a.getValue(Action.SHORT_DESCRIPTION), a);
-        }
-
-        updateButton(skyImageButton,
-                     "Images",
-                     jsky.util.Resources.getIcon("sky.gif", this.getClass()));
-        return skyImageButton;
-    }
-
-    /**
      * Update the toolbar display using the current text/pictures options.
      * (redefined from the parent class).
      */
     public void update() {
         super.update();
         makeManualGuideStarButton();
-        makeImageButton();
     }
 
 }
