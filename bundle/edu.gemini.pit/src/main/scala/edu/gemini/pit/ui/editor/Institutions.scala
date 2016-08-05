@@ -60,6 +60,7 @@ object Institutions {
     case "Brazil"    => Some(-\/(NgoPartner.BR))
     case "Canada"    => Some(-\/(NgoPartner.CA))
     case "Chile"     => Some(-\/(NgoPartner.CL))
+    case "Korea"     => Some(-\/(NgoPartner.KR))
     case "USA"       => Some(-\/(NgoPartner.US))
     case "Japan"     => Some(\/-(ExchangePartner.SUBARU))
     case _           => None

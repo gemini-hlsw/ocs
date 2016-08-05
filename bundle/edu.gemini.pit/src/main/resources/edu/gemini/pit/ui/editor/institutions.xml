@@ -3108,4 +3108,180 @@
        <address>96720</address>
        <country>USA</country>
     </site>
+    <site>
+        <institution>Korea Astronomy and Space Science Institute (KASI)</institution>
+        <address>776, Daedeokdae-ro, Yuseong-gu</address>
+        <address>Daejeon, 34055</address>
+        <country>Korea</country>
+        <contact>
+            <phone>+82-42-865-3332</phone>
+            <fax>+82-42-861-5610</fax>
+        </contact>
+    </site>
+    <site>
+        <institution>Bohyunsan Optical Astronomy Observatory (BOAO)</institution>
+        <address>Korea Astronomy and Space Science Institute (KASI)</address>
+        <address>San 6-2, Jeonggak-ri, Hwabuk-myeon, Yeongcheon-si</address>
+        <address>Gyeongsangbuk-do, 38812</address>
+        <country>Korea</country>
+        <contact>
+            <phone>+82-54-330-1000</phone>
+            <fax>+82-54-336-9450</fax>
+        </contact>
+    </site>
+    <site>
+        <institution>Sobaeksan Optical Astronomy Observatory (SOAO)</institution>
+        <address>Korea Astronomy and Space Science Institute (KASI)</address>
+        <address>Danyang PO Box 132, Danyang-eup, Danyang-gun</address>
+        <address>Chungcheongbuk-do, 27010</address>
+        <country>Korea</country>
+        <contact>
+            <phone>+82-43-422-1108</phone>
+            <fax>+82-43-423-4878</fax>
+        </contact>
+    </site>
+    <site>
+        <institution>Taeduk Radio Astronomy Observatory (TRAO)</institution>
+        <address>Korea Astronomy and Space Science Institute (KASI)</address>
+        <address>776 Daedeokdae-ro, Yuseong-gu</address>
+        <address>Daejeon, 34055</address>
+        <country>Korea</country>
+        <contact>
+            <phone>+82-42-865-3285</phone>
+            <fax>+82-42-865-3304</fax>
+        </contact>
+    </site>
+    <site>
+        <institution>Chungbuk National University</institution>
+        <address>Dept of Astronomy and Space Science</address>
+        <address>Chungdae-ro 1, Seowon-Gu, Cheongju</address>
+        <address>Chungbuk, 28644</address>
+        <country>Korea</country>
+        <contact>
+            <phone>+82-43-261-2312</phone>
+            <fax>+82-43-274-2312</fax>
+        </contact>
+    </site>
+    <site>
+        <institution>Chungnam National University</institution>
+        <address>Dept of Astronomy &amp; Space Science</address>
+        <address>99, Daehak-ro, Yuseong-gu</address>
+        <address>Daejeon, 34134</address>
+        <country>Korea</country>
+        <contact>
+            <phone>+82-42-821-5461</phone>
+            <fax>+82-42-821-8891</fax>
+        </contact>
+    </site>
+    <site>
+        <institution>Korea Institute for Advanced Study (KIAS)</institution>
+        <address>School of Physics</address>
+        <address>85, Hoegiro, Dongdaemun-gu</address>
+        <address>Seoul, 02455</address>
+        <country>Korea</country>
+        <contact>
+            <phone>+82-2-958-3711</phone>
+            <phone>+82-2-958-3771</phone>
+            <fax>+82-2-958-3770</fax>
+        </contact>
+    </site>
+    <site>
+        <institution>Kyunghee University</institution>
+        <address>Dept of Astronomy &amp; Space Science</address>
+        <address>1732, Deogyeong-daero, Giheung-gu, Yongin-si</address>
+        <address>Gyeonggi-do, 17104</address>
+        <country>Korea</country>
+        <contact>
+            <phone>+82-31-201-2440</phone>
+            <fax>+82-31-204-8122</fax>
+        </contact>
+    </site>
+    <site>
+        <institution>Kyunghee Astronomical Observatory</institution>
+        <address>Kyunghee University</address>
+        <address>1732, Deogyeong-daero, Giheung-gu, Yongin-si</address>
+        <address>Gyeonggi-do, 17104</address>
+        <country>Korea</country>
+        <contact>
+            <phone>+82-31-201-2470</phone>
+            <fax>+82-31-206-2470</fax>
+        </contact>
+    </site>
+    <site>
+        <institution>Kyungpook National Unlversity</institution>
+        <address>Dept of Astronomy &amp; Atmospheric Sciences</address>
+        <address>80, Daehak-ro, Buk-gu</address>
+        <address>Daegu, 41566</address>
+        <country>Korea</country>
+        <contact>
+            <phone>+82-53-950-6360</phone>
+            <fax>+82-53-950-6359</fax>
+        </contact>
+    </site>
+    <site>
+        <institution>Pusan National University (Earth Science)</institution>
+        <address>Department of Earth Science</address>
+        <address>2, Busandaehak-ro 63beon-gil, Geumjeong-gu</address>
+        <address>Busan, 46241</address>
+        <country>Korea</country>
+        <contact>
+            <phone>+82-51-510-1626</phone>
+            <fax>+82-51-513-7495</fax>
+        </contact>
+    </site>
+    <site>
+        <institution>Pusan National University (Physics)</institution>
+        <address>Department of Physics</address>
+        <address>2, Busandaehak-ro 63beon-gil, Geumjeong-gu</address>
+        <address>Busan, 46241</address>
+        <country>Korea</country>
+        <contact>
+            <phone>+82-51-510-1769</phone>
+            <fax>+82-51-513-7664</fax>
+        </contact>
+    </site>
+    <site>
+        <institution>Sejong University</institution>
+        <address>Department of Physics and Astronomy</address>
+        <address>209, Neungdong-ro, Gwangjin-gu</address>
+        <address>Seoul, 05006</address>
+        <country>Korea</country>
+        <contact>
+            <phone>+82-2-3408-3920</phone>
+            <fax>+82-2-3408-4335</fax>
+        </contact>
+    </site>
+    <site>
+        <institution>Seoul National University</institution>
+        <address>Department of Physics and Astronomy</address>
+        <address>1, Gwanak-ro, Gwanak-gu</address>
+        <address>Seoul, 08826</address>
+        <country>Korea</country>
+        <contact>
+            <phone>+82-2-880-6621</phone>
+            <phone>+82-2-880-6622</phone>
+            <fax>+82-2-887-1435</fax>
+        </contact>
+    </site>
+    <site>
+        <institution>Yonsei University (Astronomy)</institution>
+        <address>Department of Astronomy</address>
+        <address>50, Yonsei-ro, Seodaemun-gu</address>
+        <address>Seoul, 03722</address>
+        <country>Korea</country>
+        <contact>
+            <phone>+82-2-2123-2680</phone>
+            <fax>+82-2-392-7680</fax>
+        </contact>
+    </site>
+    <site>
+        <institution>Yonsei University (Center for Galaxy Evolution Research)</institution>
+        <address>50, Yonsei-ro, Seodaemun-gu</address>
+        <address>Seoul, 03722</address>
+        <country>Korea</country>
+        <contact>
+            <phone>+82-2-2123-4143</phone>
+            <fax>+82-2-362-5136</fax>
+        </contact>
+    </site>
 </institutions>
