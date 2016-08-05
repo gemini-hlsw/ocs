@@ -36,6 +36,9 @@ import javax.swing.{Icon, BorderFactory, ListSelectionModel}
 import java.util.{TimeZone, Date}
 import java.text.{SimpleDateFormat, DecimalFormat}
 
+import scalaz._
+import Scalaz._
+
 object TargetEditor {
 
   def open(sem:Semester, t0:Option[Target], canEdit:Boolean, parent:UIElement):Option[Target] = {
@@ -504,11 +507,7 @@ class TargetEditor private (semester:Semester, target:Target, canEdit:Boolean) e
 
             val defaultDay = {
               val now = System.currentTimeMillis()
-              if (now < semester.firstDay || now > semester.lastDay) {
-                semester.firstDay + 1000 * 60 * 60 * 24
-              } else {
-                now
-              }
+              (now < semester.firstDay || now > semester.lastDay) ? semester.firstDay | now
             }
 
             for {
