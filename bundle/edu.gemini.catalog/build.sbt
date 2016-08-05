@@ -14,6 +14,10 @@ unmanagedJars in Compile ++= Seq(
   new File(baseDirectory.value, "../../lib/bundle/osgi.cmpn-4.3.1.jar")
 )
 
+libraryDependencies ++= Seq(
+  "org.scalaz" %% "scalaz-core"       % ScalaZVersion,
+  "org.scalaz" %% "scalaz-concurrent" % ScalaZVersion)
+
 osgiSettings
 
 ocsBundleSettings

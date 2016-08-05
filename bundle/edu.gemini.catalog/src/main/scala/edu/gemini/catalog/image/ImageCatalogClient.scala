@@ -1,22 +1,18 @@
-package edu.gemini.catalog.ui.tpe
+package edu.gemini.catalog.image
 
 import java.io._
-import java.net.{URL, URLConnection}
+import java.net.URL
 import java.util.logging.Logger
 
-import edu.gemini.catalog.image.ImageCatalog
 import edu.gemini.spModel.core.{Coordinates, Declination, RightAscension}
-import jsky.util.Preferences
-import jsky.util.gui._
 
-import scala.swing.Swing
+import scalaz.Scalaz._
 import scalaz._
-import Scalaz._
 import scalaz.concurrent.Task
 
 case class ImageEntry(coordinates: Coordinates, catalog: ImageCatalog, file: File)
 
-object ImageCatalogLoader {
+object ImageCatalogClient {
   val instance = this
 
   val Log = Logger.getLogger(this.getClass.getName)
@@ -33,24 +29,23 @@ object ImageCatalogLoader {
     def toFilePart: String = s"ra_${c.ra.toFilePart}_dec_${c.dec.toFilePart}"
   }
 
-  def loadImage(c: Coordinates): Task[ImageEntry] = {
+  def loadImage(cacheDir: File)(c: Coordinates): Task[ImageEntry] = {
     val catalog = ImageCatalog.user()
     val url = catalog.queryUrl(c)
     Task.delay {
       val connection = url.openConnection()
       val in = url.openStream()
-      (c, catalog, connection.getContentType, in)
-    } >>= { Function.tupled(ImageCatalogLoader.imageToTmpFile) } >>= { case (f, _) => Task.now(ImageEntry(c, catalog, f)) }
+      (c, catalog, connection.getContentType, in, cacheDir)
+    } >>= { Function.tupled(ImageCatalogClient.imageToTmpFile) } >>= { case (f, _) => Task.now(ImageEntry(c, catalog, f)) }
   }
 
   /**
     * Attempts to find if there is an image previously downloaded at the given coordinates
     */
-  def findImage(c: Coordinates): Task[Option[File]] = {
+  def findImage(c: Coordinates, cacheDir: File): Task[Option[File]] = {
     val catalog = ImageCatalog.user()
-    val dir = Preferences.getPreferences.getCacheDir
     tmpFileName(catalog, c, ".fits.gz").map { filename =>
-      val f = new File(dir, filename)
+      val f = new File(cacheDir, filename)
       f.exists option f
     }
   }
@@ -58,6 +53,7 @@ object ImageCatalogLoader {
   /**
     * Load an image and display it on the TPE or display an error
     */
+  /*@deprecated
   def display4Java(display: CatalogImageDisplay, c: Coordinates, catalog: ImageCatalog): Unit = {
     val (p, f) = new ImageCatalogLoader().queryImage(c, catalog)
     f.unsafePerformAsync {
@@ -70,7 +66,7 @@ object ImageCatalogLoader {
           display.setFilename(t._1.getAbsolutePath, t._2)
         }
     }
-  }
+  }*/
 
   def tmpFileName(catalog: ImageCatalog, c: Coordinates, suffix: String): Task[String] = Task.now(s"img_${catalog.id}_${c.toFilePart}$suffix")
 
@@ -78,10 +74,9 @@ object ImageCatalogLoader {
     * Download the given image URL to a temporary file and return the file
     * Note that to support the legacy progress bar we explicitly expect a ProgressBarFilterInputStream
     */
-  private def imageToTmpFile(c: Coordinates, catalog: ImageCatalog, contentType: String, in: InputStream): Task[(File, URL)] = {
+  private def imageToTmpFile(c: Coordinates, catalog: ImageCatalog, contentType: String, in: InputStream, cacheDir: File): Task[(File, URL)] = {
     val url = catalog.queryUrl(c)
     Log.info(s"Downloading image at $url")
-    val dir = Preferences.getPreferences.getCacheDir
 
     def suffix: Task[String] =
       Option(contentType) match {
@@ -94,7 +89,7 @@ object ImageCatalogLoader {
       }
 
     def createTmpFile(fileName: String): Task[File] = Task.delay {
-      new File(dir, fileName)
+      new File(cacheDir, fileName)
     }
 
     def openTmpFile(file: File): Task[OutputStream] = Task.delay {
@@ -119,27 +114,4 @@ object ImageCatalogLoader {
   }
 }
 
-/**
-  * Class able to retrieve images from the old catalog and put them on display
-  */
-class ImageCatalogLoader {
-
-  /**
-    * Retrieve image query and pass it to the display
-    */
-  def queryImage(c: Coordinates, catalog: ImageCatalog): (ProgressPanel, Task[(File, URL)]) = {
-
-    // This isn't very nice, we are mixing UI with IO but the ProgressPanel is required for now
-    val progress = ProgressPanel.makeProgressPanel("Accessing catalog server ...")
-
-    def imageStreams: Task[(URLConnection, ProgressBarFilterInputStream)] = Task {
-      val url = catalog.queryUrl(c)
-      val connection = progress.openConnection(url)
-      val in = progress.getLoggedInputStream(url)
-      (connection, in)
-    }
-
-    val r = imageStreams.flatMap { case (conn, u) => ImageCatalogLoader.imageToTmpFile(c, catalog, conn.getContentType, u) }
-    (progress, r)
-  }
-}
+abstract class ImageCatalogClient
