@@ -2,8 +2,9 @@ package edu.gemini.catalog.ui.image
 
 import java.beans.{PropertyChangeEvent, PropertyChangeListener}
 import java.io.File
+import java.time.Instant
 
-import edu.gemini.catalog.image.ImageCatalogClient
+import edu.gemini.catalog.image.{ImageCatalogClient, ImageEntry}
 import edu.gemini.spModel.target.obsComp.TargetObsComp
 import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.shared.util.immutable.{Option => JOption}
@@ -11,6 +12,7 @@ import edu.gemini.shared.util.immutable.{Option => JOption}
 import scala.collection.JavaConverters._
 import edu.gemini.pot.sp.{ISPNode, ISPProgram}
 import edu.gemini.spModel.core.Coordinates
+import edu.gemini.spModel.obs.context.ObsContext
 import jsky.util.Preferences
 
 import scalaz._
@@ -30,8 +32,8 @@ object BackgroundImageLoader {
 
   def watch(prog: ISPProgram): Unit = {
     prog.addCompositeChangeListener(CompositePropertyChangeListener)
-    val tasks = prog.getAllObservations.asScala.toList.flatMap(_.getObsComponents.asScala).flatMap(k => k.getDataObject match {
-      case t: TargetObsComp => Option(t.getTargetEnvironment.getBase).flatMap(_.getTarget.coords(0)).map(ImageCatalogClient.loadImage(cacheDir))
+    val tasks = prog.getAllObservations.asScala.toList.flatMap(_.getObsComponents.asScala).flatMap(node => node.getDataObject match {
+      case t: TargetObsComp => requestImageDownload(node, t)
       case _                => Task.now(()).some
     })
     // Run
@@ -41,16 +43,26 @@ object BackgroundImageLoader {
     }
   }
 
+  def requestImageDownload(node: ISPNode, t: TargetObsComp): Option[Task[ImageEntry]] =
+    // Read the context, scheduling block, target and read the image
+    for {
+      ctx <- ObsContext.create(node.getContextObservation).asScalaOpt
+      te <- Option(t.getTargetEnvironment.getBase)
+      when = ctx.getSchedulingBlockStart.asScalaOpt | Instant.now.toEpochMilli
+      c <- te.getTarget.coords(when)
+    } yield ImageCatalogClient.loadImage(cacheDir)(c)
+
   def unwatch(prog: ISPProgram): Unit =
     prog.removeCompositeChangeListener(CompositePropertyChangeListener)
 
   private object CompositePropertyChangeListener extends PropertyChangeListener {
     override def propertyChange(evt: PropertyChangeEvent): Unit = {
       val task = Option(evt.getSource).collect {
-        case node: ISPNode => node.getDataObject match {
-          case t: TargetObsComp => Option(t.getTargetEnvironment.getBase).flatMap(_.getTarget.coords(0)).map(ImageCatalogClient.loadImage(cacheDir))
-          case _                => Task.now(()).some
-        }
+        case node: ISPNode =>
+          node.getDataObject match {
+            case t: TargetObsComp => requestImageDownload(node, t)
+            case _                => Task.now(()).some
+          }
       }
       task.flatten.foreach(_.unsafePerformAsync {
         case \/-(_) => // Sucessful case

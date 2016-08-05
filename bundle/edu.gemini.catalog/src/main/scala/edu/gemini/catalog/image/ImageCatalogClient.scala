@@ -13,8 +13,6 @@ import scalaz.concurrent.Task
 case class ImageEntry(coordinates: Coordinates, catalog: ImageCatalog, file: File)
 
 object ImageCatalogClient {
-  val instance = this
-
   val Log = Logger.getLogger(this.getClass.getName)
 
   implicit class DeclinationShow(val d: Declination) extends AnyVal {
@@ -114,4 +112,5 @@ object ImageCatalogClient {
   }
 }
 
+// Make it easier to call from Java
 abstract class ImageCatalogClient
