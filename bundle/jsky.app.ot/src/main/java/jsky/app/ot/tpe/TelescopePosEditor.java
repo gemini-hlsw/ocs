@@ -1,6 +1,7 @@
 package jsky.app.ot.tpe;
 
 import edu.gemini.catalog.ui.image.BackgroundImageLoader;
+import edu.gemini.catalog.ui.image.BackgroundImageLoader4Java;
 import edu.gemini.pot.ModelConverters;
 import edu.gemini.pot.sp.*;
 import edu.gemini.shared.skyobject.coords.HmsDegCoordinates;
@@ -343,8 +344,8 @@ public final class TelescopePosEditor extends JSkyCat implements TpeMouseObserve
             _baseTarget.getDecDegrees(when).flatMap( dec -> {
                 final HmsDegCoordinates hmsDegCoordinates = new HmsDegCoordinates.Builder(new Angle(ra, Angle.Unit.DEGREES), new Angle(dec, Angle.Unit.DEGREES)).build();
                 final Coordinates coordinates = ModelConverters.toCoordinates(hmsDegCoordinates);
-                // TODO What to do if not found, sync download?
-                BackgroundImageLoader.findIfAvailable(coordinates).forEach(f -> getImageWidget().setFilename(f.getAbsolutePath()));
+                System.out.println("Get sky image at " + coordinates);
+                BackgroundImageLoader4Java.findIfAvailable(ctx, coordinates, getImageWidget());
                 return null;
             }));
     }

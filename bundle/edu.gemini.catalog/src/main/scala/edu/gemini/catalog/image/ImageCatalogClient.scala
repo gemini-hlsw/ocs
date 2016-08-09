@@ -27,24 +27,35 @@ object ImageCatalogClient {
     def toFilePart: String = s"ra_${c.ra.toFilePart}_dec_${c.dec.toFilePart}"
   }
 
+  /**
+    * Load an image for the given coordinates on the user catalog
+    */
   def loadImage(cacheDir: File)(c: Coordinates): Task[ImageEntry] = {
+    // TODO Catalog should be a parameter
     val catalog = ImageCatalog.user()
     val url = catalog.queryUrl(c)
-    Task.delay {
-      val connection = url.openConnection()
-      val in = url.openStream()
-      (c, catalog, connection.getContentType, in, cacheDir)
-    } >>= { Function.tupled(ImageCatalogClient.imageToTmpFile) } >>= { case (f, _) => Task.now(ImageEntry(c, catalog, f)) }
+
+    def imageEntry: Task[ImageEntry] = {
+      Task.delay {
+        val connection = url.openConnection()
+        val in = url.openStream()
+        (c, catalog, connection.getContentType, in, cacheDir)
+      } >>= { Function.tupled(ImageCatalogClient.imageToTmpFile) } >>= { case (f, _) => Task.now(ImageEntry(c, catalog, f)) }
+    }
+
+    findImage(c, cacheDir) >>= { _.fold(imageEntry)(f => Task.now(f)) }
   }
 
   /**
     * Attempts to find if there is an image previously downloaded at the given coordinates
     */
-  def findImage(c: Coordinates, cacheDir: File): Task[Option[File]] = {
+  def findImage(c: Coordinates, cacheDir: File): Task[Option[ImageEntry]] = {
+    // TODO Checksums
+    // TODO move the catalog out
     val catalog = ImageCatalog.user()
     tmpFileName(catalog, c, ".fits.gz").map { filename =>
       val f = new File(cacheDir, filename)
-      f.exists option f
+      f.exists option ImageEntry(c, catalog, f)
     }
   }
 
@@ -66,6 +77,9 @@ object ImageCatalogClient {
     }
   }*/
 
+  /**
+    * Creates a filename to store the image
+    */
   def tmpFileName(catalog: ImageCatalog, c: Coordinates, suffix: String): Task[String] = Task.now(s"img_${catalog.id}_${c.toFilePart}$suffix")
 
   /**
