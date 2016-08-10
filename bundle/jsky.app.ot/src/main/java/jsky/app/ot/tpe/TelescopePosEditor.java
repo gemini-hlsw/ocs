@@ -1,14 +1,9 @@
 package jsky.app.ot.tpe;
 
 import edu.gemini.catalog.ui.image.BackgroundImageLoader;
-import edu.gemini.catalog.ui.image.BackgroundImageLoader4Java;
-import edu.gemini.pot.ModelConverters;
 import edu.gemini.pot.sp.*;
-import edu.gemini.shared.skyobject.coords.HmsDegCoordinates;
 import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.shared.util.immutable.Option;
-import edu.gemini.skycalc.Angle;
-import edu.gemini.spModel.core.Coordinates;
 import edu.gemini.spModel.data.ISPDataObject;
 import edu.gemini.spModel.gemini.nici.SeqRepeatNiciOffset;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
@@ -176,7 +171,7 @@ public final class TelescopePosEditor extends JSkyCat implements TpeMouseObserve
     /**
      * Return the telescope position editor toolbar (the one with the toggle buttons)
      */
-    public TpeToolBar getTpeToolBar() {
+    TpeToolBar getTpeToolBar() {
         return _tpeToolBar;
     }
 
@@ -334,20 +329,10 @@ public final class TelescopePosEditor extends JSkyCat implements TpeMouseObserve
      * @throws IOException      If a problem happens reading from the catalog
      * @throws CatalogException if a Catalog Problem is found
      */
-    public void getSkyImage(final TpeContext ctx) throws IOException, CatalogException {
+    void getSkyImage(final TpeContext ctx) throws IOException, CatalogException {
         final SPTarget _baseTarget = ctx.targets().baseOrNull();
         if (_baseTarget == null) return;
-
-        final Option<Long> when = ctx.schedulingBlockStartJava();
-
-        _baseTarget.getRaDegrees(when).flatMap(ra ->
-            _baseTarget.getDecDegrees(when).flatMap( dec -> {
-                final HmsDegCoordinates hmsDegCoordinates = new HmsDegCoordinates.Builder(new Angle(ra, Angle.Unit.DEGREES), new Angle(dec, Angle.Unit.DEGREES)).build();
-                final Coordinates coordinates = ModelConverters.toCoordinates(hmsDegCoordinates);
-                System.out.println("Get sky image at " + coordinates);
-                BackgroundImageLoader4Java.findIfAvailable(ctx, coordinates, getImageWidget());
-                return null;
-            }));
+        BackgroundImageLoader.loadImageOnTheTpe(ctx);
     }
 
 

@@ -275,8 +275,10 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
     @Override
     public void loadSkyImage() {
         try {
-            TelescopePosEditor tpe = TpeManager.open();
-            tpe.getSkyImage(_ctx);
+            TelescopePosEditor tpe = TpeManager.get();
+            if (tpe != null) {
+                tpe.getSkyImage(_ctx);
+            }
         } catch (Exception e) {
             DialogUtil.error(e);
         }
