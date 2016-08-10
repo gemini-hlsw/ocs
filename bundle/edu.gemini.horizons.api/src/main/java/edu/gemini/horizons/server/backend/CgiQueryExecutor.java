@@ -94,10 +94,6 @@ public enum CgiQueryExecutor implements IQueryExecutor {
             client.executeMethod(method);
             reply = CgiReplyBuilder.buildResponse(method.getResponseBodyAsStream(), method.getRequestCharSet());
             method.releaseConnection();
-        } catch (HorizonsException ex) {
-            throw ex;
-        } catch (HttpException ex) {
-            throw HorizonsException.create(ex);
         } catch (IOException ex) {
             throw HorizonsException.create(ex);
         }

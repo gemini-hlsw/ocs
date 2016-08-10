@@ -2,7 +2,10 @@ package edu.gemini.pit.ui.editor
 
 import edu.gemini.model.p1.immutable._
 import javax.swing.BorderFactory
-import edu.gemini.pit.ui.util.{Platform, StdModalEditor}
+
+import edu.gemini.pit.ui.util.StdModalEditor
+import edu.gemini.shared.Platform
+
 import swing._
 import Swing._
 import BorderPanel.Position._

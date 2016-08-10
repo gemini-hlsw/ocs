@@ -3,17 +3,18 @@ package edu.gemini.pit.ui.robot
 import edu.gemini.pit.ui._
 import action.AppPreferencesAction
 import edu.gemini.model.p1.immutable._
-import edu.gemini.model.p1.immutable.Partners._
 import edu.gemini.pit.ui.editor.Institutions
 import edu.gemini.pit.util.PDF
 import edu.gemini.pit.catalog._
-import java.util.Date
+import java.util.TimeZone
+
 import edu.gemini.spModel.core.MagnitudeBand
 import view.obs.ObsListGrouping
 import edu.gemini.model.p1.visibility.TargetVisibilityCalc
 import edu.gemini.pit.ui.view.tac.TacView
 import java.text.SimpleDateFormat
 import java.io.File
+
 import edu.gemini.pit.model.{AppPreferences, Model}
 import edu.gemini.pit.catalog.NotFound
 import edu.gemini.pit.catalog.Error
@@ -50,7 +51,6 @@ object ProblemRobot {
     def hours = mins * 60
     def days = hours * 24
   }
-
 }
 
 class ProblemRobot(s: ShellAdvisor) extends Robot {
@@ -81,14 +81,16 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
 
     lazy val all = {
       val ps =
-        List(noObs, nonUpdatedInvestigatorName, titleCheck, band3option, abstractCheck, tacCategoryCheck, keywordCheck, attachmentCheck, attachmentValidityCheck,
-          attachmentSizeCheck, missingObsDetailsCheck, duplicateInvestigatorCheck, ftReviewerOrMentor, ftAffiliationMismatch, band3Obs).flatten ++
+        List(noObs, nonUpdatedInvestigatorName, noPIPhoneNumber, titleCheck, band3option, abstractCheck, tacCategoryCheck,
+          keywordCheck, attachmentCheck, attachmentValidityCheck, attachmentSizeCheck, missingObsDetailsCheck,
+          duplicateInvestigatorCheck, ftReviewerOrMentor, ftAffiliationMismatch, band3Obs).flatten ++
           TimeProblems(p, s).all ++
           TimeProblems.partnerZeroTimeRequest(p, s) ++
           TacProblems(p, s).all ++
-          List(incompleteInvestigator, missingObsElementCheck, cfCheck, emptyTargetCheck, emptyEphemerisCheck, initialEphemerisCheck, finalEphemerisCheck,
-            badGuiding, badVisibility, iffyVisibility, singlePointEphemerisCheck, minTimeCheck, wrongSite, band3Orphan2, gpiCheck, lgsCC50Check, lgsIQCheck,
-            texesCCCheck, texesWVCheck, gmosWVCheck, band3IQ, band3LGS, band3RapidToO, sbIrObservation).flatten
+          List(incompleteInvestigator, missingObsElementCheck, cfCheck, emptyTargetCheck,
+            emptyEphemerisCheck, singlePointEphemerisCheck, initialEphemerisCheck, finalEphemerisCheck,
+            badGuiding, badVisibility, iffyVisibility, minTimeCheck, wrongSite, band3Orphan2, gpiCheck, lgsIQ70Check, lgsGemsIQ85Check,
+            lgsCC50Check, texesCCCheck, texesWVCheck, gmosWVCheck, gmosR600Check, band3IQ, band3LGS, band3RapidToO, sbIrObservation).flatten
       ps.sorted
     }
 
@@ -154,8 +156,8 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       (t, Some(f)) <- s.catalogHandler.state
       (sev, msg) = f match {
         case Offline      => (Severity.Error, s"Catalog lookup failed for ${t.name} due to network connectivity problems.")
-        case NotFound(n)  => (Severity.Error, s"""Catalog lookup returned no results for target "$n" """)
-        case Error(e)     => (Severity.Error, s"Catalog lookup failed for ${t.name} due to an unexpected error: ")
+        case NotFound(n)  => (Severity.Error, s"""Catalog lookup returned no results for target "$n".""")
+        case Error(e)     => (Severity.Error, s"Catalog lookup failed for ${t.name} due to an unexpected error.")
       }
     } yield new Problem(sev, msg, "Targets", s.inTargetsView(_.edit(t)))
 
@@ -166,73 +168,101 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       msg = s"""Target "${t.name}" appears to be empty."""
     } yield new Problem(Severity.Error, msg, "Targets", s.inTargetsView(_.edit(t)))
 
-    lazy val utc = new SimpleDateFormat("dd-MMM-yyyy")
+
+    private lazy val emptyEphemerisCheck = for {
+      t @ NonSiderealTarget(_, n, e, _) <- p.targets
+      if e.isEmpty
+      if !s.catalogHandler.state.contains(t)
+      msg = s"""Ephemeris for target "$n" is undefined."""
+    } yield new Problem(Severity.Warning, msg, "Targets", s.inTargetsView(_.edit(t)))
+
+    private lazy val singlePointEphemerisCheck = for {
+      t @ NonSiderealTarget(_, n, e, _) <- p.targets
+      if e.size == 1
+      if !s.catalogHandler.state.contains(t)
+      msg = s"""Ephemeris for target "$n" contains only one point; please specify at least two."""
+    } yield new Problem(Severity.Warning, msg, "Targets", s.inTargetsView(_.edit(t)))
+
+    lazy val utc = new SimpleDateFormat("dd-MMM-yyyy") {
+      setTimeZone(TimeZone.getTimeZone("UTC"))
+    }
 
     private lazy val initialEphemerisCheck = for {
       t @ NonSiderealTarget(_, n, e, _) <- p.targets
-      if !t.isEmpty
+      if !e.isEmpty
       if !s.catalogHandler.state.contains(t)
-      ds = e.map(_.validAt) if ds.size > 1 // only for an ephemeris with defined points
-      diff = ds.min - p.semester.firstDay
-      if diff > 1.days
-      date = new Date(ds.min)
-      msg = if (ds.min >= p.semester.lastDay)
-        s"""Ephemeris for target "${t.name}" is undefined between ${utc.format(p.semester.firstDay)} and ${utc.format(p.semester.lastDay)} UTC."""
-      else
-        s"""Ephemeris for target "${t.name}" is undefined before ${utc.format(p.semester.firstDay)} and ${utc.format(date)} UTC."""
+      ds = e.map(_.validAt) if ds.size > 1
+      dsMin = ds.min
+      diff = dsMin - p.semester.firstDay
+      if diff >= 1.days
+      msg = if (diff < 2.days)
+        s"""Ephemeris for target "$n" is undefined for ${utc.format(p.semester.firstDay)} UTC."""
+      else {
+        val lastDay = (dsMin < p.semester.lastDay + 1.days) ? (dsMin - 1.days) | p.semester.lastDay
+        s"""Ephemeris for target "$n" is undefined between ${utc.format(p.semester.firstDay)} and ${utc.format(lastDay)} UTC."""
+      }
     } yield new Problem(Severity.Warning, msg, "Targets", s.inTargetsView(_.edit(t)))
 
     private lazy val finalEphemerisCheck = for {
       t @ NonSiderealTarget(_, n, e, _) <- p.targets
-      if !t.isEmpty
+      if !e.isEmpty
       if !s.catalogHandler.state.contains(t)
-      ds = e.map(_.validAt) if ds.size > 1 // only for an ephemeris with defined points
-      diff = p.semester.lastDay - ds.max
-      if diff > 1.days
-      date = new Date(ds.max)
-      msg = if (ds.max <= p.semester.firstDay)
-        s"""Ephemeris for target "${t.name}" is undefined between ${utc.format(p.semester.firstDay)} and ${utc.format(p.semester.lastDay)} UTC."""
-      else
-        s"""Ephemeris for target "${t.name}" is undefined between ${utc.format(date)} and ${utc.format(p.semester.lastDay)} UTC."""
-    } yield new Problem(Severity.Warning, msg, "Targets", s.inTargetsView(_.edit(t)))
-
-    private lazy val emptyEphemerisCheck = for {
-      t @ NonSiderealTarget(_, n, e, _) <- p.targets
-      if !t.isEmpty
-      if !s.catalogHandler.state.contains(t)
-      if e.isEmpty
-      msg = s"""Ephemeris for target "${t.name}" is undefined."""
-    } yield new Problem(Severity.Warning, msg, "Targets", s.inTargetsView(_.edit(t)))
-
-    def bpIsLgs(b: BlueprintBase): Boolean = {
-      val lgs = b match {
-        case a: GmosNBlueprintBase         => a.altair.ao.some
-        case a: GnirsBlueprintImaging      => a.altair.ao.some
-        case a: GnirsBlueprintSpectroscopy => a.altair.ao.some
-        case a: NifsBlueprintAo            => a.altair.ao.some
-        case a: NiriBlueprint              => a.altair.ao.some
-        case a: GsaoiBlueprint             => a.ao.some
-        case _                             => None
+      ds = e.map(_.validAt) if ds.size > 1
+      dsMax = ds.max
+      diff = p.semester.lastDay - dsMax
+      if diff >= 1.days
+      msg = if (diff == 1.days)
+        s"""Ephemeris for target "$n" is undefined for ${utc.format(p.semester.lastDay)} UTC."""
+      else {
+        val firstDay = (dsMax > p.semester.firstDay) ? (dsMax + 1.days) | p.semester.firstDay
+        s"""Ephemeris for target "$n" is undefined between ${utc.format(firstDay)} and ${utc.format(p.semester.lastDay)} UTC."""
       }
-      lgs.collect {
-        case AoLgs => true
-        case _     => false
-      }.getOrElse(false)
+    } yield new Problem(Severity.Warning, msg, "Targets", s.inTargetsView(_.edit(t)))
+
+
+    def aoPerspectiveIsLgs(ao: AoPerspective): Boolean = ao match {
+      case AoLgs => true
+      case _     => false
     }
+
+    def bpIsLgs(b: BlueprintBase): Boolean =
+      aoPerspectiveIsLgs(b match {
+        case a: GmosNBlueprintBase         => a.altair.ao
+        case a: GnirsBlueprintImaging      => a.altair.ao
+        case a: GnirsBlueprintSpectroscopy => a.altair.ao
+        case a: NifsBlueprintAo            => a.altair.ao
+        case a: NiriBlueprint              => a.altair.ao
+        case a: GsaoiBlueprint             => a.ao
+        case _                             => AoNone
+      })
+
+    // NOTE: This needs to be maintained for any future instruments that use GeMS.
+    def bpIsGemsLgs(b: BlueprintBase): Boolean =
+      b match {
+        case a: GsaoiBlueprint => aoPerspectiveIsLgs(a.ao)
+        case _                 => false
+      }
+
+    private val lgsIQ70Check = for {
+      o  <- p.observations
+      c  <- o.condition
+      b  <- o.blueprint
+      if bpIsLgs(b) && (!bpIsGemsLgs(b)) && (!List(ImageQuality.IQ70, ImageQuality.BEST).contains(c.iq))
+    } yield new Problem(Severity.Error, s"LGS requires IQ70 or better.", "Observations", s.inObsListView(o.band, _.Fixes.fixConditions(c)))
+
+    private val lgsGemsIQ85Check = for {
+      o <- p.observations
+      c <- o.condition
+      b <- o.blueprint
+      if bpIsGemsLgs(b) && (!List(ImageQuality.IQ85, ImageQuality.IQ70, ImageQuality.BEST).contains(c.iq))
+    } yield new Problem(Severity.Error, s"GeMS LGS requires IQ85 or better.", "Observations", s.inObsListView(o.band, _.Fixes.fixConditions(c)))
 
     private val lgsCC50Check = for {
       o  <- p.observations
       c  <- o.condition
       b  <- o.blueprint
-      if bpIsLgs(b) && (c.iq != ImageQuality.IQ70 && c.iq != ImageQuality.BEST)
-    } yield new Problem(Severity.Error, s"LGS requires IQ70 or better", "Observations", s.inObsListView(o.band, _.Fixes.fixConditions(c)))
-
-    private val lgsIQCheck = for {
-      o  <- p.observations
-      c  <- o.condition
-      b  <- o.blueprint
       if bpIsLgs(b) && (c.cc != CloudCover.BEST)
-    } yield new Problem(Severity.Error, s"LGS requires CC50 conditions", "Observations", s.inObsListView(o.band, _.Fixes.fixConditions(c)))
+    } yield new Problem(Severity.Error, s"LGS requires CC50 conditions.", "Observations", s.inObsListView(o.band, _.Fixes.fixConditions(c)))
 
     private val texesCCCheck = for {
       o  <- p.observations
@@ -240,7 +270,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       b  <- o.blueprint
       if b.isInstanceOf[TexesBlueprint]
       if c.cc == CloudCover.ANY || c.cc == CloudCover.CC80
-    } yield new Problem(Severity.Warning, s"TEXES is not recommended for worse than CC70", "Observations", s.inObsListView(o.band, _.Fixes.fixConditions(c)))
+    } yield new Problem(Severity.Warning, s"TEXES is not recommended for worse than CC70.", "Observations", s.inObsListView(o.band, _.Fixes.fixConditions(c)))
 
     private val texesWVCheck = for {
       o  <- p.observations
@@ -248,7 +278,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       b  <- o.blueprint
       if b.isInstanceOf[TexesBlueprint]
       if c.wv == WaterVapor.ANY
-    } yield new Problem(Severity.Warning, s"TEXES is not recommended for worse than WV80", "Observations", s.inObsListView(o.band, _.Fixes.fixConditions(c)))
+    } yield new Problem(Severity.Warning, s"TEXES is not recommended for worse than WV80.", "Observations", s.inObsListView(o.band, _.Fixes.fixConditions(c)))
 
     private val gmosWVCheck = for {
       o  <- p.observations
@@ -256,7 +286,27 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       b  <- o.blueprint
       if b.isInstanceOf[GmosNBlueprintBase] || b.isInstanceOf[GmosSBlueprintBase]
       if c.wv != WaterVapor.ANY
-    } yield new Problem(Severity.Warning, s"GMOS is usually unaffected by atmospheric water vapor", "Observations", s.inObsListView(o.band, _.Fixes.fixConditions(c)))
+    } yield new Problem(Severity.Warning, s"GMOS is usually unaffected by atmospheric water vapor.", "Observations", s.inObsListView(o.band, _.Fixes.fixConditions(c)))
+
+
+    private def gmosNDisperser(b: BlueprintBase, d: GmosNDisperser) = b match {
+      case gn: GmosNBlueprintSpectrosopyBase => gn.disperser == d
+      case _                                 => false
+    }
+    private def gmosSDisperser(b: BlueprintBase, d: GmosSDisperser) = b match {
+      case gs: GmosSBlueprintSpectrosopyBase => gs.disperser == d
+      case _                                 => false
+    }
+
+    private val gmosR600Check = p.proposalClass match {
+      case _: ClassicalProposalClass => Nil
+      case _                         =>
+        for {
+          o <- p.observations
+          b <- o.blueprint
+          if gmosNDisperser(b, GmosNDisperser.R600) || gmosSDisperser(b, GmosSDisperser.R600)
+        } yield new Problem(Severity.Warning, s"The R600 is little used and may be difficult to schedule.", "Observations", s.inObsListView(o.band, _.Fixes.fixBlueprint(b)))
+    }
 
     def isBand3(o: Observation) = o.band == Band.BAND_3 && (p.proposalClass match {
                   case q: QueueProposalClass if q.band3request.isDefined => true
@@ -273,13 +323,13 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       if isBand3(o)
       c  <- o.condition
       if c.iq == ImageQuality.BEST
-    } yield new Problem(Severity.Warning, s"IQ20 observations are unlikely to be executed in Band-3", "Band 3", s.inObsListView(o.band, _.Fixes.fixConditions(c)))
+    } yield new Problem(Severity.Warning, s"IQ20 observations are unlikely to be executed in Band-3.", "Band 3", s.inObsListView(o.band, _.Fixes.fixConditions(c)))
 
     private val band3LGS = for {
       o  <- p.observations
       b  <- o.blueprint
       if bpIsLgs(b) && isBand3(o)
-    } yield new Problem(Severity.Error, s"LGS cannot be scheduled in Band 3", "Band 3", s.showObsListView(Band.BAND_3))
+    } yield new Problem(Severity.Error, s"LGS cannot be scheduled in Band 3.", "Band 3", s.showObsListView(Band.BAND_3))
 
     def proposalToO(p: ProposalClass): Option[ToOChoice] = p match {
       case q: QueueProposalClass         => q.tooOption.some
@@ -292,9 +342,10 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       o  <- p.observations
       to <- proposalToO(p.proposalClass)
       if isBand3(o) && to == ToOChoice.Rapid
-    } yield new Problem(Severity.Error, s"Rapid ToO observations cannot be scheduled in Band 3", "Time Requests", s.showPartnersView())
+    } yield new Problem(Severity.Error, s"Rapid ToO observations cannot be scheduled in Band 3.", "Time Requests", s.showPartnersView())
 
-    private val band3Obs = (!p.observations.exists(_.band == Band.BAND_3) && isBand3(p)) option new Problem(Severity.Todo, s"Please create Band 3 observations with conditions, targets, and resources.", "Band 3", s.showObsListView(Band.BAND_3))
+    private val band3Obs = (!p.observations.exists(_.band == Band.BAND_3) && isBand3(p)) option
+      new Problem(Severity.Todo, s"Please create Band 3 observations with conditions, targets, and resources.", "Band 3", s.showObsListView(Band.BAND_3))
 
     def isIR(b: BlueprintBase): Boolean = b match {
       case _: GsaoiBlueprint                           => true
@@ -318,13 +369,13 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       b  <- o.blueprint
       c  <- o.condition
       if isIR(b) && !bpIsLgs(b) && c.sb != SkyBackground.ANY
-    } yield new Problem(Severity.Warning, s"Infrared observations usually do not require background constraints", "Observations", s.inObsListView(o.band, _.Fixes.fixConditions(c)))
+    } yield new Problem(Severity.Warning, s"Infrared observations usually do not require background constraints.", "Observations", s.inObsListView(o.band, _.Fixes.fixConditions(c)))
 
     private val gpiCheck = {
       def gpiMagnitudesPresent(target: SiderealTarget):List[(Severity, String)] = {
         val requiredBands = Set(MagnitudeBand.I, MagnitudeBand.Y, MagnitudeBand.J, MagnitudeBand.H, MagnitudeBand.K)
         val observationBands = target.magnitudes.map(_.band).toSet
-        ~(((requiredBands & observationBands) =/= requiredBands) option {List((Severity.Error, "The magnitude information in the GPI target component should include the bandpasses I, Y, J, H, and K"))})
+        ~(((requiredBands & observationBands) =/= requiredBands) option {List((Severity.Error, "The magnitude information in the GPI target component should include the bandpasses I, Y, J, H, and K."))})
       }
 
       def gpiIChecks(target: SiderealTarget):List[(Severity.Value, String)] = for {
@@ -334,11 +385,11 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
           if iMag < 3.0 || iMag > 8.0
           severity = if (iMag <= 1.0 || iMag > 10.0) Severity.Error else Severity.Warning
           message = if (iMag < 3.0 && iMag > 1.0) {
-              s"""GPI Target "${target.name}" may be too bright for the OIWFS"""
+              s"""GPI Target "${target.name}" may be too bright for the OIWFS."""
             } else if (iMag <= 1.0) {
-              s"""GPI Target "${target.name}" too bright to work with the OIWFS"""
+              s"""GPI Target "${target.name}" too bright to work with the OIWFS."""
             } else {
-              s"""GPI Target "${target.name}" is too faint for proper AO (OIWFS) operation, the AO performance will be poor"""
+              s"""GPI Target "${target.name}" is too faint for proper AO (OIWFS) operation, the AO performance will be poor."""
             }
         } yield (severity, message)
 
@@ -351,7 +402,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
           coronographLimit = 0.0 + disperserLimit
           directLimit = 8.5 + disperserLimit
           if (scienceMag < coronographLimit && GpiObservingMode.isCoronographMode(obsMode)) || (scienceMag < directLimit && GpiObservingMode.isDirectMode(obsMode))
-        } yield (Severity.Warning, s"""GPI Target "${target.name}" risks saturating the science detector even for short exposure times""")
+        } yield (Severity.Warning, s"""GPI Target "${target.name}" risks saturating the science detector even for short exposure times.""")
 
       def gpiLowfsChecks(obsMode: GpiObservingMode, target: SiderealTarget):List[(Severity.Value, String)] = for {
         m <- target.magnitudes
@@ -359,9 +410,9 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
         hMag = m.value
         if hMag < 2.0 || hMag > 10.0
         message = if (hMag < 2.0) {
-            s"""GPI Target "${target.name}" is too bright, it will saturate the LOWFS"""
+            s"""GPI Target "${target.name}" is too bright, it will saturate the LOWFS."""
           } else  {
-            s"""GPI Target "${target.name}" is too faint for proper CAL (LOWFS) operation and thus mask centering on the coronograph will be severely affected"""
+            s"""GPI Target "${target.name}" is too faint for proper CAL (LOWFS) operation and thus mask centering on the coronograph will be severely affected."""
           }
       } yield (Severity.Warning, message)
 
@@ -382,14 +433,6 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
         message     =  problem._2
       } yield new Problem(severity, message, "Targets", s.inTargetsView(_.edit(target)))
     }
-
-    private lazy val singlePointEphemerisCheck = for {
-      t @ NonSiderealTarget(_, n, e, _) <- p.targets
-      if !t.isEmpty
-      if !s.catalogHandler.state.contains(t)
-      if e.size == 1
-      msg = s"""Ephemeris for target "${t.name}" contains only one point; please specify at least two."""
-    } yield new Problem(Severity.Warning, msg, "Targets", s.inTargetsView(_.edit(t)))
 
     private lazy val missingObsElementCheck = {
       def fix[A](b: Band, g: ObsListGrouping[A]) {
@@ -512,7 +555,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
         f @ FastTurnaroundProgramClass(_, _, _, _, _, _, r, m, _, _) <- Some(p.proposalClass)
         if r.isEmpty || (~r.map(_.status != InvestigatorStatus.PH_D) && m.isEmpty)
       } yield new Problem(Severity.Error,
-            "A Fast Turnaround program must select a reviewer or a mentor with PhD degree", TimeProblems.SCHEDULING_SECTION, {
+            "A Fast Turnaround program must select a reviewer or a mentor with PhD degree.", TimeProblems.SCHEDULING_SECTION, {
               s.showPartnersView()
             })
 
@@ -540,7 +583,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
         case e: ExchangeProposalClass if e.partner == ExchangePartner.SUBARU => Site.Subaru.name
         case _                                                               => "Gemini"
       }
-      new Problem(Severity.Error, s"Scheduling request is for $host but resource resides at ${b.site.name}", "Observations", {
+      new Problem(Severity.Error, s"Scheduling request is for $host but resource resides at ${b.site.name}.", "Observations", {
         s.showPartnersView()
         s.inObsListView(o.band, v => v.Fixes.indicateObservation(o))
       })
@@ -550,21 +593,32 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       new Problem(Severity.Todo, "Please create observations with conditions, targets, and resources.", "Observations", ())
     }
 
+    private def investigatorFullName(i: Investigator, default: String = "Investigator"): String = {
+      val PiEmptyName = PrincipalInvestigator.empty.fullName
+      i.fullName.trim match {
+        case ""          => default
+        case PiEmptyName => "PI"
+        case n           => n
+      }
+    }
+
     private lazy val incompleteInvestigator = for {
       i <- p.investigators.all if !i.isComplete
-    } yield new Problem(Severity.Todo, s"Please provide full contact information for ${i.fullName}.", "Overview", s.inOverview {
-        v =>
-          v.edit(i)
-      })
+    } yield new Problem(Severity.Todo, s"Please provide full contact information for ${investigatorFullName(i)}.", "Overview", s.inOverview{_.edit(i)})
 
-    private val nonUpdatedInvestigatorName = when(p.investigators.pi.firstName === "Principal" && p.investigators.pi.lastName === "Investigator") {
-      new Problem(Severity.Todo, s"Please provide PI's full name", "Overview", s.inOverview {
-        _.edit(p.investigators.pi)
-      })
+    private val nonUpdatedInvestigatorName =
+      when(p.investigators.pi.fullName.trim === PrincipalInvestigator.empty.fullName || p.investigators.pi.fullName.trim.isEmpty) {
+        new Problem(Severity.Todo, s"Please provide PI's full name.", "Overview", s.inOverview{_.edit(p.investigators.pi)})
+      }
+
+    private val noPIPhoneNumber = when (p.investigators.pi.phone.isEmpty) {
+      new Problem(Severity.Warning, s"No phone number given for ${investigatorFullName(p.investigators.pi, "PI")}. This is for improved user support.",
+        "Overview", s.inOverview{
+          _.editPi(_.Phone.requestFocus)
+        })
     }
 
   }
-
 }
 
 import ProblemRobot._
@@ -600,7 +654,7 @@ object TimeProblems {
         } yield for {
             ps <- sub
             if ps.request.time.value <= 0.0
-          } yield new Problem(Severity.Error, s"Please specify a time request for ${Partners.name.getOrElse(ps.partner, "")} or remove partner", SCHEDULING_SECTION, s.inPartnersView(_.editSubmissionTime(ps)))
+          } yield new Problem(Severity.Error, s"Please specify a time request for ${Partners.name.getOrElse(ps.partner, "")} or remove partner.", SCHEDULING_SECTION, s.inPartnersView(_.editSubmissionTime(ps)))
       probs.right.getOrElse(Nil)
     case _                            => Nil
   }

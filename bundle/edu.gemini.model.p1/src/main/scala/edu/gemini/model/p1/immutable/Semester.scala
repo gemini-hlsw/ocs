@@ -1,7 +1,7 @@
 package edu.gemini.model.p1.immutable
 
-import edu.gemini.model.p1.{ mutable => M }
-import java.util.{TimeZone, Calendar}
+import edu.gemini.model.p1.{mutable => M}
+import java.util.{Calendar, TimeZone}
 
 object Semester {
 
@@ -65,8 +65,8 @@ case class Semester(year: Int, half: SemesterOption) {
     cal.setTimeZone(TimeZone.getTimeZone("UTC"))
     cal.set(Calendar.YEAR, year)
     cal.set(Calendar.MONTH, half.firstMonth)
-    cal.set(Calendar.DAY_OF_MONTH, 0)
-    cal.set(Calendar.HOUR, 0)
+    cal.set(Calendar.DAY_OF_MONTH, 1)
+    cal.set(Calendar.HOUR_OF_DAY, 0)
     cal.set(Calendar.MINUTE, 0)
     cal.set(Calendar.SECOND, 0)
     cal.set(Calendar.MILLISECOND, 0)
@@ -81,8 +81,8 @@ case class Semester(year: Int, half: SemesterOption) {
       case SemesterOption.B => year + 1
     })
     cal.set(Calendar.MONTH, half.lastMonth)
-    cal.set(Calendar.DAY_OF_MONTH, 0)
-    cal.set(Calendar.HOUR, 0)
+    cal.set(Calendar.DAY_OF_MONTH, 1)
+    cal.set(Calendar.HOUR_OF_DAY, 0)
     cal.set(Calendar.MINUTE, 0)
     cal.set(Calendar.SECOND, 0)
     cal.set(Calendar.MILLISECOND, 0)

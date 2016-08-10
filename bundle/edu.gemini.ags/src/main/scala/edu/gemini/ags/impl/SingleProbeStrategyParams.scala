@@ -65,7 +65,6 @@ object SingleProbeStrategyParams {
   case object Flamingos2OiwfsParams extends SingleProbeStrategyParams {
     override val guideProbe = Flamingos2OiwfsGuideProbe.instance
     override val site       = Site.GS
-    override def stepSize   = Angle.fromDegrees(90)
   }
 
   case class GmosOiwfsParams(site: Site) extends SingleProbeStrategyParams {

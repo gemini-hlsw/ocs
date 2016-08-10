@@ -1,14 +1,13 @@
 package edu.gemini.pit.ui.editor
 
 import edu.gemini.model.p1.immutable.EphemerisElement
-
 import edu.gemini.pit.ui.util._
 import edu.gemini.shared.gui.textComponent.NumberField
 import edu.gemini.spModel.core.Coordinates
 
 import scala.swing._
 import scala.swing.event.ValueChanged
-import java.util.{TimeZone, Date}
+import java.util.{Date, TimeZone}
 import javax.swing.{JSpinner, SpinnerDateModel}
 
 import scalaz._

@@ -13,10 +13,14 @@ import swing._
 import event.ValueChanged
 
 object PiEditor {
-  def open(pi: PrincipalInvestigator, editable:Boolean,  parent: UIElement) = new PiEditor(pi, editable).open(parent)
+  def open(coi: PrincipalInvestigator, editable: Boolean, parent: UIElement, setup: PiEditor => Unit = _ => ()): Option[PrincipalInvestigator] = {
+    val editor = new PiEditor(coi, editable)
+    setup(editor)
+    editor.open(parent)
+  }
 }
 
-class PiEditor private (pi: PrincipalInvestigator, editable:Boolean) extends StdModalEditor[PrincipalInvestigator]("Edit Principal Investigator") {
+class PiEditor(pi: PrincipalInvestigator, editable:Boolean) extends StdModalEditor[PrincipalInvestigator]("Edit Principal Investigator") {
 
   // Our editor
   object Editor extends GridBagPanel with Rows {
@@ -112,7 +116,7 @@ class PiEditor private (pi: PrincipalInvestigator, editable:Boolean) extends Std
       address = Institution.Address.text,
       country = Institution.Country.text),
     status = Status.selection.item.asInstanceOf[InvestigatorStatus], // :-/
-    phone = Phone.text.split(",").map(_.trim).toList,
+    phone = Phone.text.split(",").map(_.trim).filter(_.nonEmpty).toList,
     email = Email.text)
 
 }
