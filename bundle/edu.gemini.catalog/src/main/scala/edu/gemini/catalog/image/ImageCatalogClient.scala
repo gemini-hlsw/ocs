@@ -60,24 +60,6 @@ object ImageCatalogClient {
   }
 
   /**
-    * Load an image and display it on the TPE or display an error
-    */
-  /*@deprecated
-  def display4Java(display: CatalogImageDisplay, c: Coordinates, catalog: ImageCatalog): Unit = {
-    val (p, f) = new ImageCatalogLoader().queryImage(c, catalog)
-    f.unsafePerformAsync {
-      case -\/(t) =>
-        p.stop()
-        DialogUtil.error(t)
-      case \/-(t) =>
-        Swing.onEDT {
-          p.stop()
-          display.setFilename(t._1.getAbsolutePath, t._2)
-        }
-    }
-  }*/
-
-  /**
     * Creates a filename to store the image
     */
   def tmpFileName(catalog: ImageCatalog, c: Coordinates, suffix: String): Task[String] = Task.now(s"img_${catalog.id}_${c.toFilePart}$suffix")
