@@ -20,13 +20,13 @@ object Institutions {
     val name    = (n \ "institution").text
     val address = strList(n, "address")
     val country = (n \ "country").text
-
+    val affiliate = (n \ "affiliate").headOption.map(_.text)
     val contact = (n \ "contact").toList match {
       case h :: _ => toContact(h)
       case _ => Contact.empty
     }
 
-    Institution(name, address, country, contact)
+    Institution(name, address, country, affiliate, contact)
   }
 
   private def toContact(n: Node): Contact = {
@@ -74,6 +74,6 @@ object Contact {
 case class Contact(phone: List[String], email: List[String])
 
 object Institution {
-  val empty = Institution("", Nil, "", Contact.empty)
+  val empty = Institution("", Nil, "", None, Contact.empty)
 }
-case class Institution(name: String, addr: List[String], country: String, contact: Contact)
+case class Institution(name: String, addr: List[String], country: String, affiliate: Option[String], contact: Contact)

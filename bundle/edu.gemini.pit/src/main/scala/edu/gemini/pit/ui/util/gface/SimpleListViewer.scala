@@ -63,7 +63,7 @@ abstract class SimpleListViewer[A, B, C <: Object](implicit ev: Null <:< B, ev2:
   def elementAt(b: B, i: Int): C
 
   override lazy val peer = {
-    val p = Factory.createStrippedScrollPane(viewer.getTable);
+    val p = Factory.createStrippedScrollPane(viewer.getTable)
     ScrollPanes.setViewportWidth(p)
     ScrollPanes.setViewportHeight(p, 5)
     p
