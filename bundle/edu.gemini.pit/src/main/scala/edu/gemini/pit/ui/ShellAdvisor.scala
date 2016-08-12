@@ -41,7 +41,6 @@ import edu.gemini.pit.ui.robot.{AgsRobot, CatalogRobot, GsaRobot, ProblemRobot, 
 import edu.gemini.shared.Platform
 import edu.gemini.shared.gui.Browser
 
-import scalaz.\/
 
 // GFace (written for QPT and modeled on Eclipse JFace) is a little awkward to use from Scala, sorry. It depends on
 // lifecycle callbacks and has a bit of mutable state. It works and in practice you don't have to mess with it too
