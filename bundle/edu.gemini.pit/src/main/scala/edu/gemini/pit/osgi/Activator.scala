@@ -2,15 +2,19 @@ package edu.gemini.pit.osgi
 
 import edu.gemini.ui.workspace.IShellAdvisor
 import edu.gemini.pit.ui.ShellAdvisor
-import edu.gemini.pit.model.Model
+import edu.gemini.pit.model.{AppMode, Model}
 import org.osgi.util.tracker.ServiceTracker
 import edu.gemini.ags.client.api.AgsClient
-import org.osgi.framework.{ServiceReference, BundleActivator, BundleContext}
+import org.osgi.framework.{BundleActivator, BundleContext, ServiceReference}
 import edu.gemini.pit.ui.robot.AgsRobot
 import java.io.File
 import java.util.Locale
+import java.util.logging.Logger
+
+import scalaz.\/
 
 class Activator extends BundleActivator {
+  private val Log = Logger.getLogger(Activator.this.getClass.getName)
 
   // We will track the AGS service, which can come and go
   var agsTracker:Option[ServiceTracker[AgsClient, AgsClient]] = None
@@ -24,9 +28,10 @@ class Activator extends BundleActivator {
 
     // Turn this bundle property into the system property.
     // TODO: Not sure if this is used anymore.
-    Option(context.getProperty("edu.gemini.pit.test")) foreach { v =>
-      System.setProperty("edu.gemini.pit.test", v)
-    }
+    \/.fromTryCatchNonFatal(context.getProperty(AppMode.TestProperty).toBoolean).fold(
+      _ => Log.warning(s"Context property ${AppMode.TestProperty} should be defined and have a boolean value."),
+      v => System.setProperty(AppMode.TestProperty, v.toString)
+    )
 
     // The way Workspace works is that you create an IShellAdvisor and register it as a service. Workspace sees this and
     // pops up a corresponding top-level window (an IShell). Because our shell advisor needs the ability to open new
