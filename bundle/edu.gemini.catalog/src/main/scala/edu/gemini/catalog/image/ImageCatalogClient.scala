@@ -1,19 +1,25 @@
 package edu.gemini.catalog.image
 
 import java.io._
-import java.net.URL
+import java.nio.file.Path
 import java.util.logging.Logger
 
-import edu.gemini.spModel.core.{Coordinates, Declination, RightAscension}
+import edu.gemini.spModel.core.{Angle, Coordinates, Declination, RightAscension}
 
 import scalaz.Scalaz._
 import scalaz._
 import scalaz.concurrent.Task
 
-case class ImageEntry(coordinates: Coordinates, catalog: ImageCatalog, file: File)
+case class ImageSearchQuery(catalog: ImageCatalog, coordinates: Coordinates) {
+  import ImageSearchQuery._
 
-object ImageCatalogClient {
-  val Log = Logger.getLogger(this.getClass.getName)
+  def url = catalog.queryUrl(coordinates)
+
+  def fileName(suffix: String) = s"img_${catalog.id}_${coordinates.toFilePart}$suffix"
+}
+
+object ImageSearchQuery {
+  implicit val equals = Equal.equalA[ImageSearchQuery]
 
   implicit class DeclinationShow(val d: Declination) extends AnyVal {
     def toFilePart: String = Declination.formatDMS(d, ":", 2)
@@ -26,50 +32,61 @@ object ImageCatalogClient {
   implicit class CoordinatesShow(val c: Coordinates) extends AnyVal {
     def toFilePart: String = s"ra_${c.ra.toFilePart}_dec_${c.dec.toFilePart}"
   }
+}
+
+case class ImageEntry(query: ImageSearchQuery, file: File)
+
+object ImageEntry {
+  implicit val equals = Equal.equalA[ImageEntry]
+
+  /**
+    * Decode a file name to an image entry
+    */
+  def entryFromFile(file: File): Option[ImageEntry] = {
+    // TODO Support multiple suffixes
+    val fileRegex = """img_(.*)_ra_(.*)_dec_(.*)\.fits\.gz""".r
+    file.getName match {
+      case fileRegex(c, raStr, decStr) =>
+        for {
+          catalog <- ImageCatalog.byName(c)
+          ra <- Angle.parseHMS(raStr).map(RightAscension.fromAngle).toOption
+          dec <- Angle.parseDMS(decStr).toOption.map(_.toDegrees).flatMap(Declination.fromDegrees)
+        } yield ImageEntry(ImageSearchQuery(catalog, Coordinates(ra, dec)), file)
+      case _ => None
+    }
+  }
+}
+
+object ImageCatalogClient {
+  val Log = Logger.getLogger(this.getClass.getName)
 
   /**
     * Load an image for the given coordinates on the user catalog
     */
-  def loadImage(cacheDir: File)(c: Coordinates): Task[ImageEntry] = {
-    // TODO Catalog should be a parameter
-    val catalog = ImageCatalog.user()
-    val url = catalog.queryUrl(c)
+  def loadImage(cacheDir: Path)(query: ImageSearchQuery): Task[ImageEntry] = {
+    def addToCacheAndGet(f: File): Task[ImageEntry] = {
+      val i = ImageEntry(query, f)
+      ImageLocalCache.add(i) *> Task.now(i)
+    }
 
-    def imageEntry: Task[ImageEntry] = {
+    def imageEntry: Task[ImageEntry] =
       Task.delay {
-        val connection = url.openConnection()
-        val in = url.openStream()
-        (c, catalog, connection.getContentType, in, cacheDir)
-      } >>= { Function.tupled(ImageCatalogClient.imageToTmpFile) } >>= { case (f, _) => Task.now(ImageEntry(c, catalog, f)) }
-    }
+        // Open the connection to the remote URL
+        val connection = query.url.openConnection()
+        val in = query.url.openStream()
+        (connection.getContentType, in)
+      } >>= { Function.tupled(ImageCatalogClient.imageToTmpFile(cacheDir, query)) } >>= addToCacheAndGet
 
-    findImage(c, cacheDir) >>= { _.fold(imageEntry)(f => Task.now(f)) }
+    // Try to find the image on the cache, else download
+    ImageLocalCache.find(query) >>= { _.fold(imageEntry)(f => Task.now(f)) }
   }
-
-  /**
-    * Attempts to find if there is an image previously downloaded at the given coordinates
-    */
-  def findImage(c: Coordinates, cacheDir: File): Task[Option[ImageEntry]] = {
-    // TODO Checksums
-    // TODO move the catalog out
-    val catalog = ImageCatalog.user()
-    tmpFileName(catalog, c, ".fits.gz").map { filename =>
-      val f = new File(cacheDir, filename)
-      f.exists option ImageEntry(c, catalog, f)
-    }
-  }
-
-  /**
-    * Creates a filename to store the image
-    */
-  def tmpFileName(catalog: ImageCatalog, c: Coordinates, suffix: String): Task[String] = Task.now(s"img_${catalog.id}_${c.toFilePart}$suffix")
 
   /**
     * Download the given image URL to a temporary file and return the file
     * Note that to support the legacy progress bar we explicitly expect a ProgressBarFilterInputStream
     */
-  private def imageToTmpFile(c: Coordinates, catalog: ImageCatalog, contentType: String, in: InputStream, cacheDir: File): Task[(File, URL)] = {
-    val url = catalog.queryUrl(c)
+  private def imageToTmpFile(cacheDir: Path, query: ImageSearchQuery)(contentType: String, in: InputStream): Task[File] = {
+    val url = query.url
     Log.info(s"Downloading image at $url")
 
     def suffix: Task[String] =
@@ -82,8 +99,13 @@ object ImageCatalogClient {
         case _                                                                        => Task.now(".tmp")
       }
 
+    /**
+      * Creates a filename to store the image
+      */
+    def tmpFileName(suffix: String): Task[String] = Task.now(query.fileName(suffix))
+
     def createTmpFile(fileName: String): Task[File] = Task.delay {
-      new File(cacheDir, fileName)
+      new File(cacheDir.toFile, fileName)
     }
 
     def openTmpFile(file: File): Task[OutputStream] = Task.delay {
@@ -100,11 +122,11 @@ object ImageCatalogClient {
 
     for {
       s <- suffix
-      f <- tmpFileName(catalog, c, s)
+      f <- tmpFileName(s)
       t <- createTmpFile(f)
       o <- openTmpFile(t)
       r <- readFile(in, o)
-    } yield (t, url)
+    } yield t
   }
 }
 

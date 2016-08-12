@@ -4,7 +4,7 @@ import java.time.Instant
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.{ExecutorService, Executors, ThreadFactory}
 
-import edu.gemini.catalog.image.{ImageCatalog, ImageCatalogClient, ImageEntry}
+import edu.gemini.catalog.image.{ImageCatalog, ImageCatalogClient, ImageEntry, ImageSearchQuery}
 import edu.gemini.spModel.target.obsComp.TargetObsComp
 import edu.gemini.shared.util.immutable.ScalaConverters._
 
@@ -22,7 +22,7 @@ import scalaz.concurrent.{Strategy, Task}
 case class ImageLoadRequest(catalog: ImageCatalog, c: Coordinates)
 
 object BackgroundImageLoader {
-  val cacheDir = Preferences.getPreferences.getCacheDir
+  val cacheDir = Preferences.getPreferences.getCacheDir.toPath
 
   val ImageDownloadsThreadFactory = new ThreadFactory {
     private val threadNumber: AtomicInteger = new AtomicInteger(1)
@@ -51,7 +51,7 @@ object BackgroundImageLoader {
       val tasks = targets.flatten.distinct.map(requestImageDownload)
       // Run
       runAsync(tasks) {
-        case \/-(e) => // done
+        case \/-(e) => println(e)// done
         case -\/(e) => println(e)
       }(ec)
     }
@@ -83,7 +83,7 @@ object BackgroundImageLoader {
     * Creates a task to load an image and set it on the tpe
     */
   private[image] def requestImageDownload(c: Coordinates): Task[Unit] =
-    ImageCatalogClient.loadImage(cacheDir)(c).map(setTpeImage)
+    ImageCatalogClient.loadImage(cacheDir)(ImageSearchQuery(ImageCatalog.user(), c)).map(setTpeImage)
 
   /**
     * Finds the coordinates for the base target of the tpe
@@ -118,7 +118,7 @@ object BackgroundImageLoader {
         tpe <- Option(TpeManager.get())
         iw  <- Option(tpe.getImageWidget)
         c   <- tpeCoordinates(iw.getContext)
-        if c == entry.coordinates // The TPE may have moved so only display if the coordinates match
+        if c == entry.query.coordinates // The TPE may have moved so only display if the coordinates match
       } {
         iw.setFilename(entry.file.getAbsolutePath)
       }

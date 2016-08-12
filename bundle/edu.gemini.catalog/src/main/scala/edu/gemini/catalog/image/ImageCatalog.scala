@@ -63,10 +63,7 @@ object MassImgK extends AstroCatalog("2massK", "2MASS Quick-Look Image Retrieval
   * Contains definitions for ImageCatalogs including a list of all the available image servers
   */
 object ImageCatalog {
-  // For Java usage
-  val instance = this
-
-  protected [image] val defaultSize = Angle.fromArcmin(15.0)
+  val defaultSize = Angle.fromArcmin(15.0)
 
   private val SKY_USER_CATALOG = "jsky.catalog.sky"
 
@@ -75,6 +72,8 @@ object ImageCatalog {
 
   /** Default image server */
   val defaultImageServer = DssGeminiNorth
+
+  def byName(id: String): Option[ImageCatalog] = all.find(_.id == id)
 
   /**
     * Indicates the user preferred Image Server
