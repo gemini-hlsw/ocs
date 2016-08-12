@@ -57,10 +57,6 @@ class Activator extends BundleActivator {
 
 }
 
-//object Activator {
-//  val TestProperty = "edu.gemini.pit.test"
-//}
-
 // Track AGS service changes and pass them to the AgsRobot$ singleton. This is a little ugly but it hides the OSGI
 // abstractions, which is what we want.
 class AgsTracker(context:BundleContext) extends ServiceTracker[AgsClient, AgsClient](context, classOf[AgsClient].getName, null) {
