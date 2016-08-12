@@ -600,6 +600,7 @@
         <address>HI</address>
         <address>96743</address>
         <country>USA</country>
+        <affiliate>Canada</affiliate>
         <contact>
             <phone>808-885-7944</phone>
             <phone>808-885-7288</phone>
@@ -2093,7 +2094,7 @@
         </contact>
     </site>
     <site>
-        <institution>Carnegie Institution of Washington (Headquartes)</institution>
+        <institution>Carnegie Institution of Washington (Headquarters)</institution>
         <address>Carnegie Observatories</address>
         <address>Headquarters</address>
         <address>813 Santa Barbara Street</address>
@@ -2114,6 +2115,7 @@
         <address>Casilla 601</address>
         <address>La Serena</address>
         <country>Chile</country>
+        <affiliate>USA</affiliate>
         <contact>
             <phone>+56-51-213032</phone>
             <email>user@ociw.edu</email>
@@ -2166,6 +2168,7 @@
         <address>Casilla 603</address>
         <address>La Serena</address>
         <country>Chile</country>
+        <affiliate>USA</affiliate>
         <contact>
             <phone>56-51-225-415</phone>
             <fax>56-51-205-212</fax>
@@ -3588,6 +3591,7 @@
         <address>Colina El Pino s/n</address>
         <address>La Serena</address>
         <country>Chile</country>
+        <affiliate>USA</affiliate>
         <contact>
             <phone>011-5651-205-600</phone>
             <fax>011-5651-205-650</fax>
