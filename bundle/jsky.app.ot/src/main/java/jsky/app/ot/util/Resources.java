@@ -59,7 +59,6 @@ public final class Resources {
      */
     public static URL getResource(String fileName) {
         String path = RESOURCE_PATH + '/' + fileName;
-        //System.out.println("getResource: " + path);
         URL u = Resources.class.getResource(path);
         if (u == null) System.out.println("Failed to get: " + path);
         return u;
@@ -96,7 +95,7 @@ public final class Resources {
         return icon;
     }
 
-    public static void setOTFrameIcon(java.awt.Frame frame) {
+    public static void setOTFrameIcon(java.awt.Window frame) {
         if (Platform.get() != Platform.osx) {
             // This has been reported to crash the JVM on OSX when the application
             // is bundled as a DMG. Starting from the DMG The application fails to start

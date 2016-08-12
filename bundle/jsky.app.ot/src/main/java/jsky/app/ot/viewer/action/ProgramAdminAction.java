@@ -26,7 +26,7 @@ public final class ProgramAdminAction extends AbstractViewerAction {
         ISPProgram prog = viewer.getProgram();
         if (prog != null) {
             try {
-                final ISPProgram res = AdminDialog.showAdminDialog(null, viewer.getDatabase(), prog);
+                final ISPProgram res = AdminDialog.showAdminDialog(viewer.getDatabase(), prog);
                 if (res != prog)
                     ViewerManager.open(res, viewer);
             } catch (Exception e) {
