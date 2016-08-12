@@ -30,7 +30,7 @@ class Activator extends BundleActivator {
     // TODO: Not sure if this is used anymore.
     \/.fromTryCatchNonFatal(context.getProperty(Activator.TestProperty).toBoolean).fold(
       _ => Log.warning(s"Context property ${Activator.TestProperty} should be defined and have a boolean value."),
-      v => System.setProperty("edu.gemini.pit.test", v.toString)
+      v => System.setProperty(Activator.TestProperty, v.toString)
     )
 
     // The way Workspace works is that you create an IShellAdvisor and register it as a service. Workspace sees this and
