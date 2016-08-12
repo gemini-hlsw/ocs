@@ -2,7 +2,7 @@ package edu.gemini.pit.osgi
 
 import edu.gemini.ui.workspace.IShellAdvisor
 import edu.gemini.pit.ui.ShellAdvisor
-import edu.gemini.pit.model.Model
+import edu.gemini.pit.model.{AppMode, Model}
 import org.osgi.util.tracker.ServiceTracker
 import edu.gemini.ags.client.api.AgsClient
 import org.osgi.framework.{BundleActivator, BundleContext, ServiceReference}
@@ -28,9 +28,9 @@ class Activator extends BundleActivator {
 
     // Turn this bundle property into the system property.
     // TODO: Not sure if this is used anymore.
-    \/.fromTryCatchNonFatal(context.getProperty(Activator.TestProperty).toBoolean).fold(
-      _ => Log.warning(s"Context property ${Activator.TestProperty} should be defined and have a boolean value."),
-      v => System.setProperty(Activator.TestProperty, v.toString)
+    \/.fromTryCatchNonFatal(context.getProperty(AppMode.TestProperty).toBoolean).fold(
+      _ => Log.warning(s"Context property ${AppMode.TestProperty} should be defined and have a boolean value."),
+      v => System.setProperty(AppMode.TestProperty, v.toString)
     )
 
     // The way Workspace works is that you create an IShellAdvisor and register it as a service. Workspace sees this and
@@ -57,9 +57,9 @@ class Activator extends BundleActivator {
 
 }
 
-object Activator {
-  val TestProperty = "edu.gemini.pit.test"
-}
+//object Activator {
+//  val TestProperty = "edu.gemini.pit.test"
+//}
 
 // Track AGS service changes and pass them to the AgsRobot$ singleton. This is a little ugly but it hides the OSGI
 // abstractions, which is what we want.

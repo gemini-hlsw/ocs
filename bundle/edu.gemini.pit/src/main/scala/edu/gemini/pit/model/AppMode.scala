@@ -7,13 +7,11 @@ import scala.util.Try
 object AppMode {
   private val Log = Logger.getLogger(AppMode.getClass.getName)
 
-  lazy val isTAC  = isDefinedAndTrue("edu.gemini.pit.tac")
-  lazy val isTest = isDefinedAndTrue("edu.gemini.pit.test")
-
-  private def isDefinedAndTrue(prop: String): Boolean = Try {
-    System.getProperty(prop).toBoolean
+  val TestProperty = "edu.gemini.pit.test"
+  lazy val isTest = Try {
+    System.getProperty(TestProperty).toBoolean
   } getOrElse {
-    Log.warning(s"System property $prop should be defined and have a boolean value. Using false as default.")
+    Log.warning(s"System property $TestProperty should be defined and have a boolean value. Using false as default.")
     false
   }
 }
