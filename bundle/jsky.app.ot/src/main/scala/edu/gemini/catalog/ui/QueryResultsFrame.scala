@@ -408,6 +408,13 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
       listenTo(selection)
       reactions += {
         case SelectionChanged(_) =>
+          // REL-2910 Set the radius range to the selected guider settings
+          selection.item.query.headOption.foreach {
+            case ConeSearchCatalogQuery(_, _, rc, _, _) =>
+              radiusStart.updateAngle(rc.minLimit)
+              radiusEnd.updateAngle(rc.maxLimit)
+            case _                                      =>
+          }
           updateGuideSpeedText()
           magnitudeFiltersFromControls(selection.item.query.headOption)
       }
@@ -438,7 +445,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
       listenTo(selection)
       reactions += {
         case SelectionChanged(_) =>
-          foreground = originalConditions.map(_.sb).exists(_ == selection.item) ? Color.black | Color.red
+          foreground = originalConditions.map(_.sb).contains(selection.item) ? Color.black | Color.red
           resultsTable.model match {
             case t: TargetsModel =>
               Swing.onEDT {
@@ -452,13 +459,14 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
 
       override def text(a: SPSiteQuality.SkyBackground) = a.displayValue()
     }
+
     lazy val ccBox = new ComboBox(List(SPSiteQuality.CloudCover.values().filter(!_.isObsolete): _*)) with TextRenderer[SPSiteQuality.CloudCover] {
       renderer = conditionsRenderer(_.map(_.cc), this)
 
       listenTo(selection)
       reactions += {
         case SelectionChanged(_) =>
-          foreground = originalConditions.map(_.cc).exists(_ == selection.item) ? Color.black | Color.red
+          foreground = originalConditions.map(_.cc).contains(selection.item) ? Color.black | Color.red
           resultsTable.model match {
             case t: TargetsModel =>
               Swing.onEDT {
@@ -472,13 +480,14 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
 
       override def text(a: SPSiteQuality.CloudCover) = a.displayValue()
     }
+
     lazy val iqBox = new ComboBox(List(SPSiteQuality.ImageQuality.values(): _*)) with TextRenderer[SPSiteQuality.ImageQuality] {
       renderer = conditionsRenderer(_.map(_.iq), this)
 
       listenTo(selection)
       reactions += {
         case SelectionChanged(_) =>
-          foreground = originalConditions.map(_.iq).exists(_ == selection.item) ? Color.black | Color.red
+          foreground = originalConditions.map(_.iq).contains(selection.item) ? Color.black | Color.red
           resultsTable.model match {
             case t: TargetsModel =>
               Swing.onEDT {
@@ -492,6 +501,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
 
       override def text(a: SPSiteQuality.ImageQuality) = a.displayValue()
     }
+
     lazy val limitsLabel = new Label() {
       font = font.deriveFont(font.getSize2D * 0.8f)
     }
