@@ -28,6 +28,7 @@ public class ElevationPlotFrame extends JFrame {
         getContentPane().add(_plotPanel, BorderLayout.CENTER);
         pack();
         Preferences.manageLocation(this);
+        Resources.setOTFrameIcon(this);
         setVisible(true);
         setDefaultCloseOperation(HIDE_ON_CLOSE);
     }
