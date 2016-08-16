@@ -3,7 +3,7 @@
 //
 package jsky.app.ot;
 
-import jsky.app.ot.util.Resources;
+import jsky.util.gui.Resources;
 import jsky.util.gui.ProgressBarUtil;
 
 import javax.swing.*;

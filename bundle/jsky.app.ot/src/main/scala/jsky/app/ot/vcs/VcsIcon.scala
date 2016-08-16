@@ -1,11 +1,13 @@
 package jsky.app.ot.vcs
 
-import jsky.app.ot.util.{OtColor, Resources, Rendering}
-
+import jsky.app.ot.util.{OtColor, Rendering}
 import java.awt._
-import java.awt.geom.{Path2D, Arc2D, Ellipse2D}
+import java.awt.geom.{Arc2D, Ellipse2D, Path2D}
 import java.awt.image.BufferedImage
 import javax.swing.ImageIcon
+
+import jsky.util.gui.Resources
+
 import scala.swing.Graphics2D
 
 /**

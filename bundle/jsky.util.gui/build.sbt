@@ -14,10 +14,10 @@ OsgiKeys.bundleActivator := None
 
 OsgiKeys.bundleSymbolicName := name.value
 
-OsgiKeys.dynamicImportPackage := Seq("")
+OsgiKeys.dynamicImportPackage := Seq("*") // To load resources like icons, images, etc
 
 OsgiKeys.exportPackage := Seq(
   "jsky.util.gui")
 
-OsgiKeys.additionalHeaders += 
-  ("Import-Package" -> "!com.sun.java.swing.plaf.windows,*")        
+OsgiKeys.additionalHeaders +=
+  ("Import-Package" -> "!com.sun.java.swing.plaf.windows,*")

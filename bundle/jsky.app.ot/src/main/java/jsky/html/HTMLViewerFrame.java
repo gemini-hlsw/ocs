@@ -13,7 +13,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import javax.swing.JFrame;
 
-import jsky.app.ot.util.Resources;
+import jsky.util.gui.Resources;
 import jsky.util.Preferences;
 import jsky.util.gui.GenericToolBar;
 

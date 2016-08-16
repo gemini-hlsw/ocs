@@ -23,7 +23,7 @@ import edu.gemini.spModel.util.VersionToken;
 import jsky.app.ot.OTOptions;
 import jsky.app.ot.nsp.UIInfo;
 import jsky.app.ot.ui.util.UIConstants;
-import jsky.app.ot.util.Resources;
+import jsky.util.gui.Resources;
 
 import javax.swing.Icon;
 

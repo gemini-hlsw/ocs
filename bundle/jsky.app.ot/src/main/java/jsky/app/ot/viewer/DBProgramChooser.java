@@ -12,7 +12,7 @@ import edu.gemini.pot.spdb.IDBDatabaseService;
 import edu.gemini.spModel.util.DBProgramInfo;
 import jsky.app.ot.OT;
 import jsky.app.ot.shared.spModel.util.DBProgramListFunctor;
-import jsky.app.ot.util.Resources;
+import jsky.util.gui.Resources;
 import jsky.app.ot.viewer.open.KeySelectionCombo;
 import jsky.util.Preferences;
 import jsky.util.gui.GridBagUtil;

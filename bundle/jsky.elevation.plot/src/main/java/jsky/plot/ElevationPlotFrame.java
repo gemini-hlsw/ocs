@@ -1,17 +1,11 @@
-// Copyright 2003
-// Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-//
-// $Id: ElevationPlotFrame.java 4731 2004-05-17 20:46:49Z brighton $
-
 package jsky.plot;
 
 import java.awt.BorderLayout;
 
 import javax.swing.JFrame;
 
+import jsky.util.gui.Resources;
 import jsky.util.Preferences;
-
 
 /**
  * Provides a top level window for an ElevationPlotPanel panel.

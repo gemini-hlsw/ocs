@@ -22,7 +22,7 @@ import jsky.app.ot.userprefs.observer.ObserverPreferencesPanel;
 import jsky.app.ot.userprefs.ui.PreferenceDialog;
 import jsky.app.ot.userprefs.ui.PreferencePanel;
 import jsky.app.ot.util.History;
-import jsky.app.ot.util.Resources;
+import jsky.util.gui.Resources;
 import jsky.app.ot.util.RootEntry;
 import jsky.app.ot.viewer.action.*;
 import jsky.app.ot.viewer.plugin.PluginViewerAction;
@@ -358,7 +358,7 @@ final class SPViewerMenuBar extends JMenuBar {
 
         // Template submenu
         final JMenu _templateMenu = new JMenu("Template");
-        _templateMenu.setIcon(jsky.app.ot.util.Resources.getIcon("template.gif"));
+        _templateMenu.setIcon(Resources.getIcon("template.gif"));
         for (final Action a : _viewer._actions.templateActions)
             _templateMenu.add(new JMenuItem(a));
         menu.add(_templateMenu);

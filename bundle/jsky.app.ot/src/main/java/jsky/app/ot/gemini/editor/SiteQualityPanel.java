@@ -4,7 +4,7 @@ import edu.gemini.shared.gui.ButtonFlattener;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.*;
 import jsky.app.ot.editor.type.SpTypeUIUtil;
-import jsky.app.ot.util.Resources;
+import jsky.util.gui.Resources;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;

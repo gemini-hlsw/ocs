@@ -3,7 +3,7 @@ package jsky.image.gui;
 import java.awt.*;
 import javax.swing.*;
 
-import jsky.app.ot.util.Resources;
+import jsky.util.gui.Resources;
 import jsky.util.Preferences;
 
 /**

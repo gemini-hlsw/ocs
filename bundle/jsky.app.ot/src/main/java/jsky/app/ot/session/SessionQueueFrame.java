@@ -7,7 +7,7 @@
 
 package jsky.app.ot.session;
 
-import jsky.app.ot.util.Resources;
+import jsky.util.gui.Resources;
 import jsky.util.Preferences;
 
 import javax.swing.*;

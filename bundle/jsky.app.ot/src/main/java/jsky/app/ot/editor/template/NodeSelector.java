@@ -4,7 +4,7 @@ import edu.gemini.pot.sp.ISPContainerNode;
 import edu.gemini.pot.sp.ISPNode;
 import edu.gemini.spModel.gemini.security.UserRolePrivileges;
 import edu.gemini.spModel.util.DBTreeListService;
-import jsky.app.ot.util.Resources;
+import jsky.util.gui.Resources;
 import jsky.app.ot.viewer.NodeData;
 import jsky.app.ot.viewer.SPTree;
 

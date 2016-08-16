@@ -15,7 +15,6 @@ import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 import edu.gemini.spModel.gemini.seqcomp.SeqRepeatOffset;
 import edu.gemini.spModel.guide.GuideProbeAvailabilityVolatileDataObject;
 import edu.gemini.spModel.obs.SPObservation;
-import edu.gemini.spModel.obs.SchedulingBlock;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.target.obsComp.TargetSelection;
@@ -24,7 +23,7 @@ import jsky.app.jskycat.JSkyCat;
 import jsky.app.ot.OT;
 import jsky.app.ot.ags.*;
 import jsky.app.ot.util.BasicPropertyList;
-import jsky.app.ot.util.Resources;
+import jsky.util.gui.Resources;
 import jsky.catalog.CatalogException;
 import jsky.image.gui.ImageDisplayControlFrame;
 

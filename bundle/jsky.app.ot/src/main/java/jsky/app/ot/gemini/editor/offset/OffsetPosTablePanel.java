@@ -4,7 +4,7 @@
 
 package jsky.app.ot.gemini.editor.offset;
 
-import jsky.app.ot.util.Resources;
+import jsky.util.gui.Resources;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;

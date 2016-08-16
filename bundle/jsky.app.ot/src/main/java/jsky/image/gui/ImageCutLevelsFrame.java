@@ -5,7 +5,7 @@ import java.awt.Dimension;
 
 import javax.swing.JFrame;
 
-import jsky.app.ot.util.Resources;
+import jsky.util.gui.Resources;
 import jsky.util.I18N;
 import jsky.util.Preferences;
 

@@ -3,7 +3,7 @@ package jsky.app.ot.progadmin;
 import edu.gemini.pot.sp.ISPProgram;
 import edu.gemini.pot.spdb.DBIDClashException;
 import edu.gemini.pot.spdb.IDBDatabaseService;
-import jsky.app.ot.util.Resources;
+import jsky.util.gui.Resources;
 
 import javax.swing.*;
 

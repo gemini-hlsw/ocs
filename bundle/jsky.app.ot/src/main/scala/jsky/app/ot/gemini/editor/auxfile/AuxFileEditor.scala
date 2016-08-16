@@ -2,18 +2,17 @@ package jsky.app.ot.gemini.editor.auxfile
 
 import edu.gemini.auxfile.api.AuxFile
 import edu.gemini.spModel.core.SPProgramID
-
 import jsky.app.ot.gemini.editor.ProgramForm
-import jsky.app.ot.util.Resources
 import jsky.app.ot.vcs.VcsOtClient
-
 import java.text.SimpleDateFormat
 import java.util.{Collections, Date, TimeZone}
+
+import jsky.util.gui.Resources
 
 import scala.collection.JavaConverters._
 import scala.swing._
 import scala.swing.BorderPanel.Position._
-import scala.swing.event.{TableRowsSelected, MouseClicked}
+import scala.swing.event.{MouseClicked, TableRowsSelected}
 
 
 object AuxFileEditor {

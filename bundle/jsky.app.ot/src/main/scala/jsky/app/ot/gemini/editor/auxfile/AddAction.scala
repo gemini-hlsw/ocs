@@ -3,15 +3,13 @@ package jsky.app.ot.gemini.editor.auxfile
 import edu.gemini.spModel.core.SPProgramID
 import edu.gemini.auxfile.client.AuxFileClient
 import edu.gemini.auxfile.api.AuxFileException
-
 import jsky.app.ot.ui.util.{ProgressDialog, ProgressModel}
-import jsky.app.ot.util.Resources
-
 import java.io.File
+
 import scala.swing._
 import scala.swing.Swing.onEDT
-
 import AuxFileAction.transferListener
+import jsky.util.gui.Resources
 
 class AddAction(c: Component, model: AuxFileModel) extends AuxFileAction("Add", c, model) {
   icon    = Resources.getIcon("eclipse/add.gif")

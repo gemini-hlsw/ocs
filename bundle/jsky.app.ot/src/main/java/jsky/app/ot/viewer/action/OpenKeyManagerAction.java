@@ -4,7 +4,7 @@ import edu.gemini.util.security.auth.ui.AuthDialog;
 import jsky.app.ot.OT;
 import jsky.app.ot.viewer.SPViewer;
 import jsky.util.gui.DialogUtil;
-import jsky.app.ot.util.Resources;
+import jsky.util.gui.Resources;
 
 import java.awt.event.ActionEvent;
 

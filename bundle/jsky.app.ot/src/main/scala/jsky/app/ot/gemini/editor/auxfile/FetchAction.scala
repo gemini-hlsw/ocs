@@ -3,15 +3,13 @@ package jsky.app.ot.gemini.editor.auxfile
 import edu.gemini.auxfile.api.{AuxFile, AuxFileException}
 import edu.gemini.auxfile.client.AuxFileClient
 import edu.gemini.spModel.core.SPProgramID
-
-import jsky.app.ot.util.Resources
 import jsky.app.ot.ui.util.{ProgressDialog, ProgressModel}
-
 import java.io.File
-import scala.swing.{Dialog, FileChooser, Component}
-import scala.swing.Swing._
 
+import scala.swing.{Component, Dialog, FileChooser}
+import scala.swing.Swing._
 import AuxFileAction.transferListener
+import jsky.util.gui.Resources
 
 class FetchAction(c: Component, model: AuxFileModel) extends AuxFileAction("Fetch", c, model) {
   icon    = Resources.getIcon("eclipse/download.gif")

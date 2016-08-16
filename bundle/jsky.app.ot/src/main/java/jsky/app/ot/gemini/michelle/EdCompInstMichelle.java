@@ -18,7 +18,7 @@ import jsky.app.ot.editor.eng.EngEditor;
 import jsky.app.ot.editor.type.SpTypeUIUtil;
 import jsky.app.ot.gemini.editor.ComponentEditor;
 import jsky.app.ot.gemini.editor.EdCompInstBase;
-import jsky.app.ot.util.Resources;
+import jsky.util.gui.Resources;
 import jsky.util.gui.DialogUtil;
 import jsky.util.gui.TextBoxWidget;
 

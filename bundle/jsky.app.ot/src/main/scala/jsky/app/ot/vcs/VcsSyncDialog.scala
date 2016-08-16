@@ -6,12 +6,12 @@ import edu.gemini.sp.vcs2._
 import edu.gemini.sp.vcs2.VcsAction.VcsActionOps
 import edu.gemini.sp.vcs2.VcsFailure.{Cancelled, HasConflict, NotFound}
 import edu.gemini.spModel.core.SPProgramID
-import jsky.app.ot.util.Resources
 import jsky.app.ot.viewer.action.ResolveConflictsAction
-
 import java.awt.Color
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.swing.UIManager
+
+import jsky.util.gui.Resources
 
 import scala.swing.GridBagPanel.Anchor.West
 import scala.swing.GridBagPanel.Fill.Horizontal

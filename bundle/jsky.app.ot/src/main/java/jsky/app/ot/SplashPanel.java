@@ -5,7 +5,7 @@ import jsky.app.ot.gemini.obscat.ObsCatalog;
 import jsky.app.ot.plugin.OtActionPlugin;
 import jsky.app.ot.plugin.OtContext;
 import jsky.app.ot.userprefs.observer.ObservingPeer;
-import jsky.app.ot.util.Resources;
+import jsky.util.gui.Resources;
 import jsky.app.ot.viewer.SPViewer;
 import jsky.app.ot.viewer.action.*;
 import jsky.app.ot.viewer.plugin.PluginConsumer;

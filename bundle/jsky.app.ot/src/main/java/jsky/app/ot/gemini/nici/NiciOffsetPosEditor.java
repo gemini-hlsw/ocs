@@ -7,7 +7,7 @@ package jsky.app.ot.gemini.nici;
 import edu.gemini.shared.gui.text.AbstractDocumentListener;
 import edu.gemini.spModel.gemini.nici.NiciOffsetPos;
 import jsky.app.ot.gemini.editor.offset.AbstractOffsetPosEditor;
-import jsky.app.ot.util.Resources;
+import jsky.util.gui.Resources;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;

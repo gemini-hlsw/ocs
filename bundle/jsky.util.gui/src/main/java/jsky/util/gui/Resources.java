@@ -1,11 +1,4 @@
-// Copyright 1999 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: Resources.java 24803 2010-03-28 03:13:18Z swalker $
-//
-
-package jsky.app.ot.util;
+package jsky.util.gui;
 
 import java.awt.*;
 import java.io.BufferedInputStream;
@@ -46,7 +39,7 @@ public final class Resources {
     public static final String I18N_PATH = "resources/ot/" + I18N_SUBPATH + "/";
 
     // ImageCache provides a cache of already present icons.
-    private static LruCache<String, ImageIcon> _rmap = new LruCache<String, ImageIcon>(100);
+    private static LruCache<String, ImageIcon> _rmap = new LruCache<>(100);
 
     // Disallow instances
     private Resources() {

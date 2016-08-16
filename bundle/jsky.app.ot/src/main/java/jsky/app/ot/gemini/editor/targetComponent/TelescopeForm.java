@@ -3,7 +3,7 @@ package jsky.app.ot.gemini.editor.targetComponent;
 import edu.gemini.shared.gui.ButtonFlattener;
 import jsky.app.ot.gemini.editor.targetComponent.details2.TargetDetailPanel;
 import jsky.app.ot.gemini.parallacticangle.ParallacticAngleControls;
-import jsky.app.ot.util.Resources;
+import jsky.util.gui.Resources;
 import jsky.util.gui.TextBoxWidget;
 
 import javax.swing.*;

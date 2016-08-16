@@ -13,7 +13,7 @@ import edu.gemini.spModel.target.offset.OffsetPosList;
 import edu.gemini.spModel.target.offset.OffsetPosSelection;
 import edu.gemini.spModel.telescope.IssPort;
 import jsky.app.ot.editor.OtItemEditor;
-import jsky.app.ot.util.Resources;
+import jsky.util.gui.Resources;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;

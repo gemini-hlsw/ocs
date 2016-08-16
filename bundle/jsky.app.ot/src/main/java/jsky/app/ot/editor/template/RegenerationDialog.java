@@ -12,7 +12,7 @@ import edu.gemini.spModel.template.Phase1Folder;
 import jsky.app.ot.OT;
 import jsky.app.ot.editor.template.RegenerationClient.Result;
 import jsky.app.ot.userprefs.observer.ObservingPeer;
-import jsky.app.ot.util.Resources;
+import jsky.util.gui.Resources;
 
 import javax.swing.*;
 import java.awt.*;

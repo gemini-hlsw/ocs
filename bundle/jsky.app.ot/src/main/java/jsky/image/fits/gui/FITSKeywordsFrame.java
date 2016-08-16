@@ -11,7 +11,7 @@ package jsky.image.fits.gui;
 import java.awt.BorderLayout;
 import javax.swing.JFrame;
 
-import jsky.app.ot.util.Resources;
+import jsky.util.gui.Resources;
 import jsky.image.gui.MainImageDisplay;
 import jsky.util.Preferences;
 

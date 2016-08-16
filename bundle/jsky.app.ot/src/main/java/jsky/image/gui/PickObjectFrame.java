@@ -3,7 +3,7 @@ package jsky.image.gui;
 import java.awt.BorderLayout;
 import javax.swing.JFrame;
 
-import jsky.app.ot.util.Resources;
+import jsky.util.gui.Resources;
 import jsky.util.Preferences;
 
 /**

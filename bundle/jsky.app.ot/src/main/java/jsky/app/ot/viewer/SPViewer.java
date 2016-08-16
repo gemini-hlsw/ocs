@@ -30,7 +30,7 @@ import jsky.app.ot.tpe.TpeManager;
 import jsky.app.ot.ui.util.UIConstants;
 import jsky.app.ot.util.History;
 import jsky.app.ot.util.PropertyChangeMultiplexer;
-import jsky.app.ot.util.Resources;
+import jsky.util.gui.Resources;
 import jsky.app.ot.util.RootEntry;
 import jsky.app.ot.vcs.VcsStateTracker;
 import jsky.app.ot.vcs.SyncAllDialog;
@@ -231,7 +231,7 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
 
         // Template submenu
         final JMenu _templateMenu = new JMenu("Template");
-        _templateMenu.setIcon(jsky.app.ot.util.Resources.getIcon("template.gif"));
+        _templateMenu.setIcon(Resources.getIcon("template.gif"));
         for (final Action a : _actions.templateActions)
             _templateMenu.add(new JMenuItem(a));
         menu.add(_templateMenu);
@@ -239,7 +239,7 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
 
         // Observation menu
         final JMenu obsMenu = new JMenu("Create an Observation");
-        obsMenu.setIcon(jsky.app.ot.util.Resources.getIcon("observation.gif"));
+        obsMenu.setIcon(Resources.getIcon("observation.gif"));
         for (final AbstractAction action : _actions.addObservationActions) {
             obsMenu.add(new JMenuItem(action));
         }
@@ -255,7 +255,7 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
 
         // Note menu
         final JMenu noteMenu = new JMenu("Create a Note");
-        noteMenu.setIcon(jsky.app.ot.util.Resources.getIcon("post-it-note18.gif"));
+        noteMenu.setIcon(Resources.getIcon("post-it-note18.gif"));
         for (final Action action : _actions.addNoteActions) {
             noteMenu.add(new JMenuItem(action));
         }
@@ -263,7 +263,7 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
 
         // Observation Component submenu
         final JMenu compMenu = new JMenu("Create an Observation Component");
-        compMenu.setIcon(jsky.app.ot.util.Resources.getIcon("component.gif"));
+        compMenu.setIcon(Resources.getIcon("component.gif"));
         compMenu.add(new JMenuItem(_actions.addSiteQualityAction));
         compMenu.add(new JMenuItem(_actions.addTargetListAction));
         compMenu.addSeparator();
@@ -285,7 +285,7 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
 
         // Iterator Component submenu
         final JMenu iterCompMenu = new JMenu("Create an Iterator Component");
-        iterCompMenu.setIcon(jsky.app.ot.util.Resources.getIcon("iterComp.gif"));
+        iterCompMenu.setIcon(Resources.getIcon("iterComp.gif"));
         iterCompMenu.add(new JMenuItem(_actions.addSequenceAction));
 
         iterCompMenu.addSeparator();
@@ -297,7 +297,7 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
 
         // Observation Iterator submenu
         final JMenu iterObsMenu = new JMenu("Create an Observe Iterator");
-        iterObsMenu.setIcon(jsky.app.ot.util.Resources.getIcon("iterObs.gif"));
+        iterObsMenu.setIcon(Resources.getIcon("iterObs.gif"));
         for (final AbstractAction action : _actions.addGenericSeqCompActions) {
             iterObsMenu.add(new JMenuItem(action));
         }

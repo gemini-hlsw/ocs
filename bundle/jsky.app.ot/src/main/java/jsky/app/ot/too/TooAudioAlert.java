@@ -1,6 +1,6 @@
 package jsky.app.ot.too;
 
-import jsky.app.ot.util.Resources;
+import jsky.util.gui.Resources;
 
 import java.net.URL;
 import java.applet.AudioClip;

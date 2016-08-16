@@ -8,7 +8,7 @@ import edu.gemini.spModel.obsrecord.UniqueConfig;
 import edu.gemini.spModel.type.DisplayableSpType;
 import jsky.app.ot.OTOptions;
 import jsky.app.ot.util.OtColor;
-import jsky.app.ot.util.Resources;
+import jsky.util.gui.Resources;
 import jsky.util.gui.DropDownListBoxWidget;
 
 import javax.swing.*;

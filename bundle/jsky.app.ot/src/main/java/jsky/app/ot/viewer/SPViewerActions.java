@@ -8,7 +8,7 @@ import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import jsky.app.ot.OTOptions;
 import jsky.app.ot.nsp.UIInfo;
 import jsky.app.ot.util.History;
-import jsky.app.ot.util.Resources;
+import jsky.util.gui.Resources;
 import jsky.app.ot.viewer.action.*;
 
 import java.util.*;
