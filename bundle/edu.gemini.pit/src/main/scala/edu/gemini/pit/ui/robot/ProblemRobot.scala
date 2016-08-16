@@ -81,7 +81,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
 
     lazy val all = {
       val ps =
-        List(noObs, nonUpdatedInvestigatorName, noPIPhoneNumber, titleCheck, band3option, abstractCheck, tacCategoryCheck,
+        List(noObs, nonUpdatedInvestigatorName, noPIPhoneNumber, invalidPIPhoneNumber, titleCheck, band3option, abstractCheck, tacCategoryCheck,
           keywordCheck, attachmentCheck, attachmentValidityCheck, attachmentSizeCheck, missingObsDetailsCheck,
           duplicateInvestigatorCheck, ftReviewerOrMentor, ftAffiliationMismatch, band3Obs).flatten ++
           TimeProblems(p, s).all ++
@@ -612,12 +612,19 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       }
 
     private val noPIPhoneNumber = when (p.investigators.pi.phone.isEmpty) {
-      new Problem(Severity.Warning, s"No phone number given for ${investigatorFullName(p.investigators.pi, "PI")}. This is for improved user support.",
-        "Overview", s.inOverview{
-          _.editPi(_.Phone.requestFocus)
-        })
+      new Problem(Severity.Warning,
+        s"No phone number given for ${investigatorFullName(p.investigators.pi, "PI")}. This is for improved user support.",
+        "Overview", s.inOverview(_.editPi(_.Phone.requestFocus)))
     }
 
+    private val invalidPIPhoneNumber = {
+      val MinDigits = 8
+      p.investigators.pi.phone.find(_.count(_.isDigit) < MinDigits).map { _ =>
+        new Problem(Severity.Warning,
+          s"The phone number given for ${investigatorFullName(p.investigators.pi, "PI")} contains less than $MinDigits digits and thus is not valid.",
+          "Overview", s.inOverview(_.editPi(_.Phone.requestFocus())))
+      }
+    }
   }
 }
 
