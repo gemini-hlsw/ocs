@@ -271,6 +271,33 @@
        </contact>
     </site>
     <site>
+        <institution>Curtin University</institution>
+        <address>GPO Box U1987</address>
+        <address>Perth</address>
+        <address>WA 6845</address>
+        <country>Australia</country>
+    </site>
+    <site>
+        <institution>University of Southern Queensland</institution>
+        <address>Toowoomba</address>
+        <address>QLD 4350</address>
+        <country>Australia</country>
+    </site>
+    <site>
+        <institution>University of Western Australia</institution>
+        <address>35 Stirling Highway</address>
+        <address>Crawley</address>
+        <address>WA 6009</address>
+        <country>Australia</country>
+    </site>
+    <site>
+        <institution>Western Sydney University</institution>
+        <address>Locked Bag 1797</address>
+        <address>Penrith</address>
+        <address>NSW 2751</address>
+        <country>Australia</country>
+    </site>
+    <site>
        <institution>Centro de Radio-Astronomia e Apl. Espacias (EPUSP)</institution>
        <address>CRAAE/EPUSP</address>
        <address>C.P. 61548</address>
@@ -2894,7 +2921,7 @@
        </contact>
     </site>
     <site>
-       <institution>University of  New Hampshire</institution>
+       <institution>University of New Hampshire</institution>
        <address>Department of Physics</address>
        <address>Demeritt Hall</address>
        <address>Durham</address>
@@ -3130,7 +3157,7 @@
        </contact>
     </site>
     <site>
-       <institution>University of  Pittsburgh</institution>
+       <institution>University of Pittsburgh</institution>
        <address>Department of Physics and Astronomy</address>
        <address>100 Allen Hall</address>
        <address>Pittsburgh</address>
