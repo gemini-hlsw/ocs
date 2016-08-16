@@ -617,11 +617,14 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
         "Overview", s.inOverview(_.editPi(_.Phone.requestFocus)))
     }
 
-    private val invalidPIPhoneNumber = (for {
-      badPhone <- p.investigators.pi.phone if badPhone.count(_.isDigit) < 10
-    } yield new Problem(Severity.Warning,
-        s"The phone number given for ${investigatorFullName(p.investigators.pi, "PI")} contains less than 10 digits and thus is not valid.",
-        "Overview", s.inOverview(_.editPi(_.Phone.requestFocus())))).headOption
+    private val invalidPIPhoneNumber = {
+      val MinDigits = 8
+      p.investigators.pi.phone.find(_.count(_.isDigit) < MinDigits).map { _ =>
+        new Problem(Severity.Warning,
+          s"The phone number given for ${investigatorFullName(p.investigators.pi, "PI")} contains less than $MinDigits digits and thus is not valid.",
+          "Overview", s.inOverview(_.editPi(_.Phone.requestFocus())))
+      }
+    }
   }
 }
 
