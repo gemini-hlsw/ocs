@@ -20,7 +20,7 @@ class Activator extends BundleActivator {
 
   def start(ctx: BundleContext): Unit = {
 
-    QvTool.defaultsFile = ExternalStorage.getPermanentDataFile(ctx, Version.current.isTest, "userFilters.v1.xml", migrationSteps)
+    QvTool.defaultsFile = Option(ExternalStorage.getPermanentDataFile(ctx, Version.current.isTest, "userFilters.v1.xml", migrationSteps))
 
     reg = Option(ctx.registerService(classOf[OtActionPlugin], new ShowQvToolAction, new java.util.Hashtable[String, Object]()))
 

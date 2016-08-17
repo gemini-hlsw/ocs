@@ -44,7 +44,7 @@ class QvTool(ctx: QvContext) extends Frame {
  * Make utility services used in QV available throughout the plugin.
  */
 object QvTool {
-  var defaultsFile: File = _
+  var defaultsFile: Option[File] = None
   var viewerService: Option[OtViewerService] = None
   var authClient: Option[KeyChain] = None
 

@@ -107,7 +107,7 @@ class AuthDialog(ac: KeyChain, detailText: String =  "Database keys allow you to
     def apply {
       DatabaseTab.Table.selectedItem.foreach { db =>
         val keysExist: Boolean =
-          ac.keys.map(!_.get(db).forall(_.isEmpty)).unsafeRun.fold(throw _, identity)
+          ac.keys.map(_.get(db).exists(_.nonEmpty)).unsafeRun.fold(throw _, identity)
         if (!keysExist || confirmDelete) {
           ac.removePeer(db).unsafeRunAndThrow
         }

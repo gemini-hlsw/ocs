@@ -37,7 +37,7 @@ public final class AdminDialog {
 
         pane.setMessage(ui);
 
-        JDialog dialog = pane.createDialog(null, title);
+        JDialog dialog = pane.createDialog(title);
         dialog.setModal(modal);
         Resources.setOTFrameIcon(dialog);
         dialog.setVisible(true);
