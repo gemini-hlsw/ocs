@@ -10,7 +10,7 @@ object Texes {
   class SiteNode extends SingleSelectNode[Unit, VisitorSite, Site](()) {
     val title       = "Site"
     val description = "Select the site."
-    def choices     = GNVisitorSite :: GSVisitorSite :: Nil
+    def choices     = GNVisitorSite :: Nil
 
     def apply(s: VisitorSite) = Left(new DisperserNode(s.site))
 

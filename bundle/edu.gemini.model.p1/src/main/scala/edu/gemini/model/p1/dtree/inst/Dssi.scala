@@ -10,7 +10,7 @@ object Dssi {
   class SiteNode extends SingleSelectNode[Unit, VisitorSite, DssiBlueprint](()) {
     val title       = "Site"
     val description = "Select the site."
-    def choices     = GNVisitorSite :: Nil
+    def choices     = GNVisitorSite :: GSVisitorSite :: Nil
 
     def apply(fs: VisitorSite) = Right(DssiBlueprint(fs))
 
