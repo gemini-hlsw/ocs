@@ -226,7 +226,6 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
     val oldAngleDegrees = e.getDataObject.getPosAngle
     if (Math.abs(oldAngleDegrees - newAngleDegrees) >= Precision
       && (e.getDataObject.getPosAngleConstraint != PosAngleConstraint.PARALLACTIC_ANGLE || Math.abs(Math.abs(oldAngleDegrees - newAngleDegrees) - 180) >= Precision)) {
-      println(s"+++ setting pos angle from $oldAngleDegrees to $newAngleDegrees")
       e.getDataObject.setPosAngle(newAngleDegrees)
     }
   }
