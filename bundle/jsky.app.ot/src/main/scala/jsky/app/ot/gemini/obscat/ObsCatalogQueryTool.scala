@@ -9,10 +9,9 @@ import edu.gemini.ui.miglayout.MigPanel
 import edu.gemini.ui.miglayout.constraints._
 import edu.gemini.shared.util.immutable.ScalaConverters._
 import jsky.app.ot.userprefs.ui.{PreferenceDialog, PreferencePanel}
-import jsky.app.ot.util.Resources
 import jsky.catalog.{Catalog, FieldDescAdapter}
 import jsky.util.Preferences
-import jsky.util.gui.{DialogUtil, MultiSelectComboBox}
+import jsky.util.gui.{DialogUtil, MultiSelectComboBox, Resources}
 
 import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext.Implicits.global

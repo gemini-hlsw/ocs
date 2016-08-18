@@ -2,7 +2,7 @@ package jsky.app.ot.gemini.gpi;
 
 import edu.gemini.spModel.gemini.gpi.GpiOffsetPos;
 import jsky.app.ot.gemini.editor.offset.AbstractOffsetPosEditor;
-import jsky.app.ot.util.Resources;
+import jsky.util.gui.Resources;
 
 import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;

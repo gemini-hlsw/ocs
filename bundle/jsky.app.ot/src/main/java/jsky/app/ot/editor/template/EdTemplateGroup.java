@@ -18,7 +18,7 @@ import edu.gemini.spModel.util.ReadableNodeName;
 import jsky.app.ot.OTOptions;
 import jsky.app.ot.StaffBean;
 import jsky.app.ot.editor.OtItemEditor;
-import jsky.app.ot.util.Resources;
+import jsky.util.gui.Resources;
 import jsky.app.ot.viewer.SPDragDropObject;
 import jsky.app.ot.viewer.SPTree;
 import jsky.app.ot.viewer.SPViewer;

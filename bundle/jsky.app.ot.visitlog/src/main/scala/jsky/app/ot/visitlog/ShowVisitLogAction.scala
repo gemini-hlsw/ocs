@@ -1,7 +1,8 @@
 package jsky.app.ot.visitlog
 
-import jsky.app.ot.plugin.{OtContext, OtActionPlugin}
+import jsky.app.ot.plugin.{OtActionPlugin, OtContext}
 import edu.gemini.skycalc.ObservingNight
+import jsky.util.gui.Resources
 
 class ShowVisitLogAction extends OtActionPlugin("Observation Visit Log") {
   override val toolTip = "View the observation visit log for a given night"
@@ -16,6 +17,7 @@ class ShowVisitLogAction extends OtActionPlugin("Observation Visit Log") {
       dialog.pack()
       dialog.location = window.getLocationOnScreen
       dialog.load(night)
+      Resources.setOTFrameIcon(dialog.peer)
       dialog.visible  = true
     }
 }

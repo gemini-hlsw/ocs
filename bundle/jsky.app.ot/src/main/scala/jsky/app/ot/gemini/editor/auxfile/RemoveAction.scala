@@ -1,10 +1,10 @@
 package jsky.app.ot.gemini.editor.auxfile
 
 import edu.gemini.auxfile.api.AuxFileException
-import jsky.app.ot.util.Resources
+import jsky.util.gui.Resources
 
 import scala.collection.JavaConverters._
-import scala.swing.{Dialog, Component}
+import scala.swing.{Component, Dialog}
 
 class RemoveAction(c: Component, model: AuxFileModel) extends AuxFileAction("Remove", c, model) {
   icon    = Resources.getIcon("eclipse/remove.gif")

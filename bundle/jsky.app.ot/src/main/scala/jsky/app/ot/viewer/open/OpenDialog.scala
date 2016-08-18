@@ -4,7 +4,7 @@ import edu.gemini.pot.client.SPDB
 import edu.gemini.pot.sp.{ISPProgram, SPNodeKey}
 import edu.gemini.pot.spdb.IDBDatabaseService
 import edu.gemini.shared.gui.SizePreference
-import edu.gemini.shared.util.VersionComparison.{Newer, Conflicting}
+import edu.gemini.shared.util.VersionComparison.{Conflicting, Newer}
 import edu.gemini.shared.util.immutable.ApplyOp
 import edu.gemini.sp.vcs.reg.VcsRegistrar
 import edu.gemini.sp.vcs2.VcsAction._
@@ -15,10 +15,8 @@ import edu.gemini.util.security.auth.keychain.Action._
 import edu.gemini.util.security.auth.keychain.{Key, KeyChain, Action => KAction}
 import edu.gemini.util.security.auth.ui.{AuthDialog, CloseOnEsc, Instructions}
 import jsky.app.ot.OT
-import jsky.app.ot.util.Resources
 import jsky.app.ot.vcs.VcsOtClient
 import jsky.app.ot.viewer.DBProgramChooserFilter
-
 import java.awt
 import java.awt.Color
 import java.awt.event.{MouseAdapter, MouseEvent}
@@ -27,6 +25,8 @@ import javax.swing
 import javax.swing._
 import javax.swing.event.{ListSelectionEvent, ListSelectionListener, TableModelEvent}
 import javax.swing.table.DefaultTableCellRenderer
+
+import jsky.util.gui.Resources
 
 import scala.actors.Futures.future
 import scala.collection.JavaConverters._

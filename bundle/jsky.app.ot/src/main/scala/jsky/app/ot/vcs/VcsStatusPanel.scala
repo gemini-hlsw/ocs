@@ -1,15 +1,15 @@
 package jsky.app.ot.vcs
 
 import edu.gemini.shared.util.VersionComparison
-import edu.gemini.shared.util.VersionComparison.{Newer, Older, Conflicting, Same}
+import edu.gemini.shared.util.VersionComparison.{Conflicting, Newer, Older, Same}
 import jsky.app.ot.util.OtColor._
-import jsky.app.ot.util.Resources
 
 import scala.swing.{Alignment, BorderPanel, Label}
 import scala.swing.Swing.EmptyBorder
-
 import java.awt.Color
 import javax.swing.Icon
+
+import jsky.util.gui.Resources
 
 object VcsStatusPanel {
   private val alertIcon = Resources.getIcon("eclipse/alert.gif")

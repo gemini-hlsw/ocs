@@ -12,7 +12,7 @@ import edu.gemini.spModel.core.Platform;
 import jsky.app.ot.OT;
 import jsky.app.ot.OTOptions;
 import jsky.app.ot.editor.eng.EngToolWindow;
-import jsky.app.ot.util.Resources;
+import jsky.util.gui.Resources;
 import jsky.app.ot.vcs.VcsStatusPanel;
 import jsky.util.Preferences;
 import jsky.util.gui.BusyWin;

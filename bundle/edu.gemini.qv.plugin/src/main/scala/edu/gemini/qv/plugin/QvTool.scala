@@ -9,6 +9,7 @@ import edu.gemini.qv.plugin.ui.QvGui
 import edu.gemini.spModel.core.Peer
 import edu.gemini.util.security.auth.keychain.KeyChain
 import jsky.app.ot.plugin.{OtContext, OtViewerService}
+import jsky.util.gui.Resources
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -22,7 +23,7 @@ import scala.swing.{Frame, Swing}
 class QvTool(ctx: QvContext) extends Frame {
 
   // -- create UI and register frame
-  QvTool.viewerService.map(_.registerView(this))
+  QvTool.viewerService.foreach(_.registerView(this))
   title = s"Queue Visualization - ${ctx.site.displayName}"
   menuBar = new QvToolMenu(this, ctx)
   contents = new QvToolPanel(ctx)
@@ -30,11 +31,12 @@ class QvTool(ctx: QvContext) extends Frame {
   // -- reactions
   reactions += {
     case WindowClosing(e) =>
-      QvTool.viewerService.map(_.unregisterView(this)) // un-register frame when frame is closed
+      QvTool.viewerService.foreach(_.unregisterView(this)) // un-register frame when frame is closed
   }
 
   // -- show the QV tool
   pack
+  Resources.setOTFrameIcon(peer)
   visible = true
 }
 
@@ -42,7 +44,7 @@ class QvTool(ctx: QvContext) extends Frame {
  * Make utility services used in QV available throughout the plugin.
  */
 object QvTool {
-  var defaultsFile: File = null
+  var defaultsFile: Option[File] = None
   var viewerService: Option[OtViewerService] = None
   var authClient: Option[KeyChain] = None
 

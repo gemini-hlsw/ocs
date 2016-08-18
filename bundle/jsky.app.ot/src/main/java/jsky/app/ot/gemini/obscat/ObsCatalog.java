@@ -21,7 +21,6 @@ import edu.gemini.spModel.type.DisplayableSpType;
 import edu.gemini.spModel.type.ObsoletableSpType;
 import edu.gemini.spModel.type.SpTypeUtil;
 import jsky.app.ot.shared.gemini.obscat.ObsCatalogInfo;
-import jsky.app.ot.util.Resources;
 import jsky.app.ot.viewer.QueryManager;
 import jsky.app.ot.viewer.ViewerService;
 import jsky.catalog.FieldDescAdapter;

@@ -51,14 +51,14 @@ object QvStore extends Publisher {
     Axis.Priorities, Axis.Bands, Axis.BigSheet
   )
   val DefaultHistograms: Seq[Histogram] = Seq(
-    new Histogram(DefaultHistogramName, Axis.RA1, Axis.Instruments, edu.gemini.qv.plugin.chart.Chart.ObservationCount)
+    Histogram(DefaultHistogramName, Axis.RA1, Axis.Instruments, edu.gemini.qv.plugin.chart.Chart.ObservationCount)
   )
   val DefaultTables: Seq[Table] = Seq(
-    new Table(DefaultTableName, Axis.Instruments, Axis.RA1, CellRenderer.Renderers(0)),
-    new Table("Big Sheet", Axis.BigSheet, Axis.RA05, CellRenderer.Renderers(7))
+    Table(DefaultTableName, Axis.Instruments, Axis.RA1, CellRenderer.Renderers(0)),
+    Table("Big Sheet", Axis.BigSheet, Axis.RA05, CellRenderer.Renderers(7))
   )
   val DefaultBarCharts: Seq[BarChart] = Seq(
-    new BarChart(DefaultBarChartName, Axis.Instruments, Axis.Bands)
+    BarChart(DefaultBarChartName, Axis.Instruments, Axis.Bands)
   )
 
   private var filtersMap: Map[String, FilterSet] = DefaultFilters.map(a => (a.label, a)).toMap
@@ -118,8 +118,6 @@ object QvStore extends Publisher {
   def visChart(label: String) = visChartMap(label)
   def visChartIndex(label: String) = visCharts.indexOf(table(label))
 
-
-
   // these values can not change for now:
   val functionsMap: Map[String, Calculation] = edu.gemini.qv.plugin.chart.Chart.Calculations.map(c => (c.label, c)).toMap
   val renderersMap: Map[String, CellRenderer] = CellRenderer.Renderers.map(r => (r.label, r)).toMap
@@ -127,9 +125,9 @@ object QvStore extends Publisher {
   val renderers = renderersMap.values.toSeq.sortBy(_.label)
 
   def loadDefaults() {
-    if (QvTool.defaultsFile.exists()) {
+    if (QvTool.defaultsFile.forall(_.exists())) {
       // set defaults to whatever was read from disk in case of success or show error dialog otherwise
-      loadFromFile(QvTool.defaultsFile) match {
+      QvTool.defaultsFile.foreach(f => loadFromFile(f) match {
         case Success((fMap, aMap, cMap, tMap, vcMap)) =>
           filtersMap = fMap
           axesMap = aMap
@@ -138,7 +136,7 @@ object QvStore extends Publisher {
           visChartMap = vcMap
         case Failure(t) =>
           showError("Error while loading QV defaults: " + t.getMessage);
-      }
+      })
     }
   }
 
@@ -159,7 +157,7 @@ object QvStore extends Publisher {
 
   def saveDefaults() {
     try {
-      XML.save(QvTool.defaultsFile.getAbsolutePath, FilterXMLFormatter.formatAll)
+      QvTool.defaultsFile.foreach(f => XML.save(f.getAbsolutePath, FilterXMLFormatter.formatAll))
     } catch {
       case t: Throwable =>
         showError("Error while storing QV defaults: " + t.getMessage)
@@ -193,13 +191,13 @@ object QvStore extends Publisher {
   }
 
   def histogramFromXml(n: Node, axes: Map[String, Axis]): Histogram =
-    new Histogram(n \ "label" text, axes(n \ "xAxis" text), axes(n \ "yAxis" text), QvStore.functionsMap(n \ "function" text))
+    Histogram(n \ "label" text, axes(n \ "xAxis" text), axes(n \ "yAxis" text), QvStore.functionsMap(n \ "function" text))
 
   def tableFromXml(n: Node, axes: Map[String, Axis]): Table =
-    new Table(n \ "label" text, axes(n \ "xAxis" text), axes(n \ "yAxis" text), QvStore.renderersMap(n \ "renderer" text))
+    Table(n \ "label" text, axes(n \ "xAxis" text), axes(n \ "yAxis" text), QvStore.renderersMap(n \ "renderer" text))
 
   def barChartFromXml(n: Node, axes: Map[String, Axis]): BarChart =
-    new BarChart(n \ "label" text, axes(n \ "yAxis" text), axes(n \ "colorCoding" text))
+    BarChart(n \ "label" text, axes(n \ "yAxis" text), axes(n \ "colorCoding" text))
 
   trait NamedElement {
     def isEditable: Boolean = true

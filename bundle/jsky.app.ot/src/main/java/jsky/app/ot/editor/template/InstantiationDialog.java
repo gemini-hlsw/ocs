@@ -7,7 +7,7 @@ import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.template.InstantiationFunctor;
 import edu.gemini.spModel.template.TemplateParameters;
 import jsky.app.ot.OT;
-import jsky.app.ot.util.Resources;
+import jsky.util.gui.Resources;
 import jsky.app.ot.viewer.NodeData;
 
 import javax.swing.*;

@@ -1,7 +1,7 @@
 package jsky.app.ot.gemini.gmos;
 
 import jsky.app.ot.util.OtColor;
-import jsky.app.ot.util.Resources;
+import jsky.util.gui.Resources;
 import jsky.util.gui.*;
 
 import javax.swing.*;

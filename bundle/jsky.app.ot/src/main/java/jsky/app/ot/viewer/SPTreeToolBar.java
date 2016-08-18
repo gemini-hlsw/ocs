@@ -1,7 +1,7 @@
 package jsky.app.ot.viewer;
 
 import jsky.app.ot.OTOptions;
-import jsky.app.ot.util.Resources;
+import jsky.util.gui.Resources;
 import jsky.util.gui.GenericToolBar;
 
 import javax.swing.*;

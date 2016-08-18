@@ -23,7 +23,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import jsky.app.ot.util.Resources;
 import jsky.catalog.MemoryCatalog;
 import jsky.catalog.QueryResult;
 import jsky.catalog.TableQueryResult;

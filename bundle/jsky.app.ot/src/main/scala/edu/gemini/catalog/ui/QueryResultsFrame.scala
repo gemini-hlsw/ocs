@@ -29,9 +29,9 @@ import edu.gemini.ui.miglayout.constraints._
 import jsky.app.ot.gemini.editor.targetComponent.GuidingIcon
 import jsky.app.ot.gemini.editor.targetComponent.TargetGuidingFeedback.ProbeLimits
 import jsky.app.ot.tpe.{TpeContext, TpeManager}
-import jsky.app.ot.util.{OtColor, Resources}
+import jsky.app.ot.util.OtColor
 import jsky.catalog.gui.{SymbolSelectionEvent, SymbolSelectionListener}
-import jsky.util.gui.DialogUtil
+import jsky.util.gui.{DialogUtil, Resources}
 
 import scala.swing.Reactions.Reaction
 import scala.swing._

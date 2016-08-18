@@ -2,7 +2,7 @@ package jsky.app.ot.tpe.gems;
 
 import edu.gemini.ags.gems.GemsGuideStars;
 import edu.gemini.ags.gems.GemsStrehl;
-import jsky.app.ot.util.Resources;
+import jsky.util.gui.Resources;
 import org.jdesktop.swingx.JXTreeTable;
 import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.jdesktop.swingx.decorator.FontHighlighter;

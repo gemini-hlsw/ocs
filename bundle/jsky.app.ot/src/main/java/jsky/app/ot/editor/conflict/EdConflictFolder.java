@@ -4,7 +4,7 @@ import edu.gemini.pot.sp.ISPConflictFolder;
 import edu.gemini.shared.gui.MultilineLabel;
 import edu.gemini.spModel.conflict.ConflictFolder;
 import jsky.app.ot.editor.OtItemEditor;
-import jsky.app.ot.util.Resources;
+import jsky.util.gui.Resources;
 
 import javax.swing.*;
 import java.awt.*;

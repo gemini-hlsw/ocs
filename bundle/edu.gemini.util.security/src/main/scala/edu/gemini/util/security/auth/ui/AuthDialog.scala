@@ -3,28 +3,30 @@ package edu.gemini.util.security.auth.ui
 import edu.gemini.util.security.auth.keychain.Key
 import edu.gemini.util.security.auth.keychain.KeyChain
 import edu.gemini.util.security.auth.keychain.Action._
+
 import scalaz.effect.IO
 import java.awt
-import java.awt.{Font, Color}
+import java.awt.event.MouseAdapter
+import java.awt.{Color, Font}
 import javax.swing
+
 import scala.swing._
 import Swing._
 import swing.event.{ListSelectionEvent, ListSelectionListener}
 import swing._
 import swing.Icon
-import swing.table.{DefaultTableCellRenderer, AbstractTableModel}
-import edu.gemini.util.security.auth._
+import swing.table.{AbstractTableModel, DefaultTableCellRenderer}
+
 import edu.gemini.util.security.principal._
+
 import scala.swing.TabbedPane.Page
-import java.util.UUID
-import java.security.Principal
-import scala.Some
 import scala.swing.Action
 import scala.swing.event.ButtonClicked
 import edu.gemini.spModel.core.Peer
-import java.awt.event.MouseAdapter
 
 object AuthDialog {
+  val instance = this
+
   // This is set by the activator
   var showDatabaseTab = false
 
@@ -32,8 +34,7 @@ object AuthDialog {
   def open(ac: KeyChain, parent: JComponent):Unit = new AuthDialog(ac).open(Component.wrap(parent))
 
   def openWithDetailText(ac: KeyChain, detailText: String, parent: UIElement):Unit = new AuthDialog(ac, detailText).open(parent)
-  def openWithDetailText(ac: KeyChain, detailText: String, parent: JComponent):Unit = new AuthDialog(ac, detailText).open(Component.wrap(parent))
-
+  def createWithDetailText(ac: KeyChain, detailText: String): AuthDialog = new AuthDialog(ac, detailText)
 }
 
 class AuthDialog(ac: KeyChain, detailText: String =  "Database keys allow you to access data and features in OCS tools.") extends Dialog with CloseOnEsc {  dialog =>
@@ -106,7 +107,7 @@ class AuthDialog(ac: KeyChain, detailText: String =  "Database keys allow you to
     def apply {
       DatabaseTab.Table.selectedItem.foreach { db =>
         val keysExist: Boolean =
-          ac.keys.map(_.get(db).filterNot(_.isEmpty).isDefined).unsafeRun.fold(throw _, identity)
+          ac.keys.map(_.get(db).exists(_.nonEmpty)).unsafeRun.fold(throw _, identity)
         if (!keysExist || confirmDelete) {
           ac.removePeer(db).unsafeRunAndThrow
         }
@@ -116,15 +117,13 @@ class AuthDialog(ac: KeyChain, detailText: String =  "Database keys allow you to
 
   DatabaseTab.Table.table.getSelectionModel.addListSelectionListener(new ListSelectionListener {
     def valueChanged(e: ListSelectionEvent) {
-      DeleteDbAction.enabled = DatabaseTab.Table.selectedItem.map {
-        case p => Option(p.site).isEmpty
-      }.getOrElse(false)
+      DeleteDbAction.enabled = DatabaseTab.Table.selectedItem.exists { p =>
+        Option(p.site).isEmpty
+      }
     }
   })
 
   object ToggleLockAction extends Action("Lock") {
-
-    import KeyChain._
 
     val iconL = getIcon("icons/lock_closed.png")
     val iconU = getIcon("icons/lock_open.png")
@@ -219,7 +218,7 @@ class AuthDialog(ac: KeyChain, detailText: String =  "Database keys allow you to
 
     // Space things out a little more
     peer.setLayout(new awt.BorderLayout(8, 8))
-    border = swing.BorderFactory.createEmptyBorder(8, 8, 8, 8);
+    border = swing.BorderFactory.createEmptyBorder(8, 8, 8, 8)
 
     // Add our content, defined below
     add(Header, BorderPanel.Position.North)
@@ -278,7 +277,7 @@ class AuthDialog(ac: KeyChain, detailText: String =  "Database keys allow you to
     AddKeyAction,
     DeleteKeyAction,
     getIcon("icons/key_small.png"),
-    { case (k, p) => ac.selection.unsafeRun.fold(_ => false, _ == Some((p, k))) },
+    { case (k, p) => ac.selection.unsafeRun.fold(_ => false, _.contains((p, k))) },
     Seq(125, 125, 225),
     Some("Double-click to change the current active key."))
 
@@ -334,11 +333,11 @@ class AuthDialog(ac: KeyChain, detailText: String =  "Database keys allow you to
     lock()
 
     add(new FlowPanel {
-      contents += (new Button("Close") {
+      contents += new Button("Close") {
         reactions += {
           case ButtonClicked(_) => dialog.close()
         }
-      })
+      }
     }, BorderPanel.Position.East)
   }
 
@@ -425,7 +424,7 @@ class DatabaseTableModel(ac: KeyChain, alive: => Boolean) extends MyTableModel[P
         case 2 => db.port.toString
         case 3 => Option(db.site).map(_.abbreviation).orNull
       }
-  }.getOrElse(null)
+  }.orNull
 
   override def getColumnName(column: Int): String = column match {
     case 0 => "Database"
@@ -491,7 +490,7 @@ class TablePanel[A, M <: MyTableModel[A]](val model:M, addAction:Action, deleteA
         val r = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column).asInstanceOf[DefaultTableCellRenderer]
         r.setIcon(if (column == 0) icon else null)
         r.setBorder(swing.BorderFactory.createEmptyBorder(1, 2, 1, 2))
-        r.setFont(model.get(row).map(_.asInstanceOf[A]).map(bold).getOrElse(false).fold(Fonts.bold, Fonts.normal))
+        r.setFont(model.get(row).exists(bold).fold(Fonts.bold, Fonts.normal))
         r
       }
     }

@@ -11,7 +11,7 @@ import edu.gemini.pot.sp.ISPNode;
 import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.spModel.core.Site;
 import jsky.app.ot.nsp.UIInfo;
-import jsky.app.ot.util.Resources;
+import jsky.util.gui.Resources;
 import org.dom4j.Attribute;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;

@@ -21,7 +21,7 @@ import jsky.app.ot.editor.OtItemEditor;
 import jsky.app.ot.tpe.GuideStarSupport;
 import jsky.app.ot.tpe.TelescopePosEditor;
 import jsky.app.ot.tpe.TpeManager;
-import jsky.app.ot.util.Resources;
+import jsky.util.gui.Resources;
 import jsky.util.gui.*;
 
 import javax.swing.*;

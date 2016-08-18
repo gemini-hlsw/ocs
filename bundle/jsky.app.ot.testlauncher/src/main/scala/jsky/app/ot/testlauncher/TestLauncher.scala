@@ -44,7 +44,7 @@ object TestLauncher extends App {
 
   // QV expects a defaultsFile variable to be initialized by the activator so
   // set it to something here.
-  QvTool.defaultsFile = File.createTempFile("qvDefaults", "xml")
+  QvTool.defaultsFile = Option(File.createTempFile("qvDefaults", "xml"))
   PluginRegistry.add(new ShowQvToolAction())
 
   // Run!

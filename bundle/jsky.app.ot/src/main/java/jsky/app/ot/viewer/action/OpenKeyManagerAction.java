@@ -1,9 +1,10 @@
 package jsky.app.ot.viewer.action;
 
-import edu.gemini.util.security.auth.ui.AuthDialog$;
+import edu.gemini.util.security.auth.ui.AuthDialog;
 import jsky.app.ot.OT;
 import jsky.app.ot.viewer.SPViewer;
 import jsky.util.gui.DialogUtil;
+import jsky.util.gui.Resources;
 
 import java.awt.event.ActionEvent;
 
@@ -16,8 +17,7 @@ import java.awt.event.ActionEvent;
 */
 public class OpenKeyManagerAction extends AbstractViewerAction {
 
-    final String detailText = "Database keys allow you to access programs and OT features.";
-
+    private final String detailText = "Database keys allow you to access programs and OT features.";
 
     public OpenKeyManagerAction(final SPViewer viewer) {
         super(viewer, "Manage Keys...");
@@ -28,7 +28,13 @@ public class OpenKeyManagerAction extends AbstractViewerAction {
 
             // Let the user muck around with keys. This can change the content
             // of our current Subject, affecting our privileges.
-            AuthDialog$.MODULE$.openWithDetailText(OT.getKeyChain(), detailText, viewer);
+            AuthDialog authDialog = AuthDialog.instance().createWithDetailText(OT.getKeyChain(), detailText);
+            // Need to set the icon before opening
+            Resources.setOTFrameIcon(authDialog.peer());
+            authDialog.open(scala.swing.Component.wrap(viewer));
+
+            Resources.setOTFrameIcon(authDialog.peer());
+
             if (viewer != null) {
                 viewer.authListener.propertyChange(null); // force redraw of menu and editor
             }

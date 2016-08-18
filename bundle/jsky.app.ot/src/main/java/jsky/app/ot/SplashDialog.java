@@ -13,9 +13,8 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.net.URL;
 
-import edu.gemini.spModel.core.Platform;
 import edu.gemini.spModel.core.Version;
-import jsky.app.ot.util.Resources;
+import jsky.util.gui.Resources;
 import jsky.app.ot.viewer.ViewerService;
 
 public final class SplashDialog extends JFrame {

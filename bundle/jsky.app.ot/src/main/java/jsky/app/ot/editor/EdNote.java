@@ -10,7 +10,7 @@ import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.spModel.obscomp.ProgramNote;
 import edu.gemini.spModel.obscomp.SPNote;
 import edu.gemini.spModel.obscomp.SchedNote;
-import jsky.app.ot.util.Resources;
+import jsky.util.gui.Resources;
 
 import javax.swing.JPanel;
 import javax.swing.event.DocumentEvent;

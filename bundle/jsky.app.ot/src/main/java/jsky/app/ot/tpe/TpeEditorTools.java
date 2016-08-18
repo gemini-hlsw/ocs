@@ -1,13 +1,12 @@
 package jsky.app.ot.tpe;
 
 import edu.gemini.pot.sp.ISPNode;
-import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.shared.util.immutable.Some;
 import jsky.app.ot.OT;
 import jsky.app.ot.OTOptions;
-import jsky.app.ot.util.Resources;
+import jsky.util.gui.Resources;
 
 import javax.swing.*;
 import java.util.Collection;

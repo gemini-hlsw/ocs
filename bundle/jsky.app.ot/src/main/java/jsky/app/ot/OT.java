@@ -28,7 +28,7 @@ import jsky.app.ot.too.TooPoll;
 import jsky.app.ot.tpe.TelescopePosEditor;
 import jsky.app.ot.userprefs.observer.ObservingPeer;
 import jsky.app.ot.userprefs.observer.ObservingSite;
-import jsky.app.ot.util.Resources;
+import jsky.util.gui.Resources;
 import jsky.app.ot.vcs.vm.VmUpdater;
 import jsky.app.ot.viewer.*;
 import jsky.util.ProxyServerUtil;

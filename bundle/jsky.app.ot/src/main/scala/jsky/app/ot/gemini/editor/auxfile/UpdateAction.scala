@@ -1,7 +1,7 @@
 package jsky.app.ot.gemini.editor.auxfile
 
 import edu.gemini.auxfile.api.AuxFileException
-import jsky.app.ot.util.Resources
+import jsky.util.gui.Resources
 
 import scala.swing.Component
 

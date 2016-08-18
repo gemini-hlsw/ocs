@@ -12,8 +12,9 @@ import jsky.image.graphics.MeasureBand;
 import jsky.image.graphics.gui.CanvasDraw;
 import jsky.image.graphics.gui.FITSGraphics;
 import jsky.util.*;
-import jsky.util.gui.SwingWorker;
+import jsky.util.Resources;
 import jsky.util.gui.*;
+import jsky.util.gui.SwingWorker;
 import nom.tam.fits.FitsException;
 import nom.tam.fits.ImageHDU;
 import nom.tam.util.BufferedFile;
@@ -961,7 +962,7 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
 
 
     /**
-     * Add history items (for previously loaded images) to the given menu
+     * Add history items (for previously loaded images) to the given menus
      */
     public void addHistoryMenuItems(JMenu menu) {
         ListIterator<ImageHistoryItem> it = _historyList.listIterator(0);

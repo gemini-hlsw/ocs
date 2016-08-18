@@ -23,7 +23,7 @@ import edu.gemini.spModel.target.offset.OffsetUtil;
 import edu.gemini.spModel.util.SPTreeUtil;
 import jsky.app.ot.OT;
 import jsky.app.ot.OTOptions;
-import jsky.app.ot.util.Resources;
+import jsky.util.gui.Resources;
 import jsky.util.gui.TableUtil;
 
 import javax.swing.*;

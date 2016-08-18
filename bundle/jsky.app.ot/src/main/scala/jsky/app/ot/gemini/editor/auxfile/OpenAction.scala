@@ -4,10 +4,11 @@ import edu.gemini.auxfile.api.{AuxFile, AuxFileException}
 import edu.gemini.auxfile.client.AuxFileClient
 import edu.gemini.spModel.core.SPProgramID
 import jsky.app.ot.ui.util.{ProgressDialog, ProgressModel}
-import jsky.app.ot.util.Resources
-
 import java.awt.Desktop
 import java.io.File
+
+import jsky.util.gui.Resources
+
 import scala.swing.Component
 import scala.swing.Swing._
 

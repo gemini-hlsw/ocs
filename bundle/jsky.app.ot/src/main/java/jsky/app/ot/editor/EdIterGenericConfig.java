@@ -23,7 +23,7 @@ import edu.gemini.spModel.type.SpTypeUtil;
 import edu.gemini.spModel.util.SPTreeUtil;
 import jsky.app.ot.OTOptions;
 import jsky.app.ot.nsp.SPTreeEditUtil;
-import jsky.app.ot.util.Resources;
+import jsky.util.gui.Resources;
 import jsky.util.gui.*;
 
 import javax.swing.*;

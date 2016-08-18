@@ -5,7 +5,7 @@
 package jsky.app.ot.ui.util;
 
 import edu.gemini.shared.gui.ButtonFlattener;
-import jsky.app.ot.util.Resources;
+import jsky.util.gui.Resources;
 
 import javax.swing.*;
 

@@ -18,7 +18,7 @@ import edu.gemini.spModel.target.env.{AutomaticGroup, TargetEnvironment}
 import jsky.app.ot.ags.BagsState
 import jsky.app.ot.gemini.editor.targetComponent.TargetFeedback.Row
 import jsky.app.ot.util.OtColor._
-import jsky.app.ot.util.Resources
+import jsky.util.gui.Resources
 
 import scala.collection.JavaConverters._
 import scala.swing.GridBagPanel.Fill

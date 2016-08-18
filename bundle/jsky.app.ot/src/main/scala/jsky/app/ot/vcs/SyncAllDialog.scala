@@ -4,31 +4,29 @@ import edu.gemini.pot.sp.ISPProgram
 import edu.gemini.pot.sp.version.VersionMap
 import edu.gemini.pot.spdb.IDBDatabaseService
 import edu.gemini.shared.util.VersionComparison
-import edu.gemini.shared.util.VersionComparison.{Same, Older, Newer, Conflicting}
+import edu.gemini.shared.util.VersionComparison.{Conflicting, Newer, Older, Same}
 import edu.gemini.sp.vcs.reg.VcsRegistrar
-import edu.gemini.sp.vcs2.{VcsFailure, ProgramLocationSet, TryVcs}
+import edu.gemini.sp.vcs2.{ProgramLocationSet, TryVcs, VcsFailure}
 import edu.gemini.sp.vcs2.VcsAction._
 import edu.gemini.sp.vcs2.VcsFailure.{HasConflict, VcsException}
-import edu.gemini.spModel.core.{SPProgramID, Peer}
+import edu.gemini.spModel.core.{Peer, SPProgramID}
 import edu.gemini.spModel.rich.pot.spdb._
 import edu.gemini.util.security.auth.keychain.Action._
 import edu.gemini.util.security.auth.keychain.KeyChain
 import edu.gemini.util.security.auth.ui.CloseOnEsc
-
 import jsky.app.ot.OT
 import jsky.app.ot.shared.vcs.VersionMapFunctor.VmUpdate
 import jsky.app.ot.userprefs.general.GeneralPreferences
-import jsky.app.ot.util.{OtColor, Resources}
-import jsky.app.ot.vcs.vm.{VmUpdater, VmStore}
+import jsky.app.ot.util.OtColor
+import jsky.app.ot.vcs.vm.{VmStore, VmUpdater}
 import jsky.app.ot.viewer.ViewerManager
-
-import java.awt.{Font, Color, Component}
+import java.awt.{Color, Component, Font}
 import java.awt.event.{MouseAdapter, MouseEvent}
-
 import java.util.concurrent.atomic.AtomicBoolean
-import javax.swing.{ListSelectionModel, JTable, BorderFactory}
-import javax.swing.table.{TableColumn, DefaultTableCellRenderer}
+import javax.swing.{BorderFactory, JTable, ListSelectionModel}
+import javax.swing.table.{DefaultTableCellRenderer, TableColumn}
 
+import jsky.util.gui.Resources
 
 import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -37,7 +35,6 @@ import scala.swing.GridBagPanel.Anchor._
 import scala.swing.GridBagPanel.Fill._
 import scala.swing.Swing._
 import scala.swing.event.ActionEvent
-
 import scalaz._
 import Scalaz._
 

@@ -16,7 +16,7 @@ import edu.gemini.spModel.util.Angle;
 import jsky.app.ot.tpe.gems.GemsGuideStarSearchDialog;
 import jsky.app.ot.util.OtColor;
 import jsky.app.ot.util.PolygonD;
-import jsky.app.ot.util.Resources;
+import jsky.util.gui.Resources;
 import jsky.app.ot.util.ScreenMath;
 import jsky.coords.CoordinateConverter;
 import jsky.coords.WorldCoords;

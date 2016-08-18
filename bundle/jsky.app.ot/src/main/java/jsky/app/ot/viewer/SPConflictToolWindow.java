@@ -8,7 +8,7 @@ import edu.gemini.spModel.util.SPTreeUtil;
 import jsky.app.ot.editor.OtItemEditor;
 import jsky.app.ot.editor.template.EdTemplateGroup;
 import jsky.app.ot.util.OtColor;
-import jsky.app.ot.util.Resources;
+import jsky.util.gui.Resources;
 
 import javax.swing.*;
 import javax.swing.event.HyperlinkEvent;
