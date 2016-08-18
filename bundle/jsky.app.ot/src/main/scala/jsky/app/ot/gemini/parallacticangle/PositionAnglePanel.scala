@@ -219,12 +219,14 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
   /**
     * The actual copying of a given pos angle to the data object.
     * This is done explicitly to avoid overwriting based on minor differences in double precision and to avoid
-    * adding 180 to the position angle, which causes issues.
+    * adding 180 to the position angle for parallactic angle mode, which overrides BAGS flips.
     **/
   private def setInstPosAngle(newAngleDegrees: Double): Unit = editor.foreach { e =>
     val Precision = 0.005
     val oldAngleDegrees = e.getDataObject.getPosAngle
-    if (Math.abs(oldAngleDegrees - newAngleDegrees) >= Precision && Math.abs(Math.abs(oldAngleDegrees - newAngleDegrees) - 180) >= Precision) {
+    if (Math.abs(oldAngleDegrees - newAngleDegrees) >= Precision
+      && (e.getDataObject.getPosAngleConstraint != PosAngleConstraint.PARALLACTIC_ANGLE || Math.abs(Math.abs(oldAngleDegrees - newAngleDegrees) - 180) >= Precision)) {
+      println(s"+++ setting pos angle from $oldAngleDegrees to $newAngleDegrees")
       e.getDataObject.setPosAngle(newAngleDegrees)
     }
   }
@@ -232,11 +234,7 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
   /**
    * Copies, if possible, the position angle text field contents to the data object.
    */
-  private def copyPosAngleToInstrument(): Unit =
-    for {
-      e <- editor
-      a <- ui.positionAngleTextField.angle
-    } setInstPosAngle(a)
+  private def copyPosAngleToInstrument(): Unit = ui.positionAngleTextField.angle.foreach(setInstPosAngle)
 
   /**
     * Copies the position angle in the data object to the position angle text field.
@@ -280,17 +278,11 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
    * A listener method that is called whenever the parallactic angle changes.
    * We set the position angle to the parallactic angle.
    */
-  private def parallacticAngleChanged(angleOpt: Option[Angle]): Unit = {
-    for {
-      angle <- angleOpt
-      e     <- editor
-      pa    <- ui.parallacticAngleControlsOpt
-    } {
-      val angleAsDouble = angle.toDegrees.toPositive.getMagnitude
-      ui.positionAngleTextField.text = numberFormatter.format(angleAsDouble)
-      setInstPosAngle(angleAsDouble)
-    }
-  }
+  private def parallacticAngleChanged(angleOpt: Option[Angle]): Unit =
+    angleOpt.map(_.toDegrees.toPositive.getMagnitude).foreach(angle => {
+      ui.positionAngleTextField.text = numberFormatter.format(angle)
+      setInstPosAngle(angle)
+    })
 
 
   /**
