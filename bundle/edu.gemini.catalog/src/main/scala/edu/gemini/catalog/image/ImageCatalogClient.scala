@@ -39,12 +39,13 @@ case class ImageEntry(query: ImageSearchQuery, file: File)
 object ImageEntry {
   implicit val equals = Equal.equalA[ImageEntry]
 
+  // TODO Support multiple suffixes
+  val fileRegex = """img_(.*)_ra_(.*)_dec_(.*)\.fits\.gz""".r
+
   /**
     * Decode a file name to an image entry
     */
   def entryFromFile(file: File): Option[ImageEntry] = {
-    // TODO Support multiple suffixes
-    val fileRegex = """img_(.*)_ra_(.*)_dec_(.*)\.fits\.gz""".r
     file.getName match {
       case fileRegex(c, raStr, decStr) =>
         for {
@@ -66,7 +67,7 @@ object ImageCatalogClient {
   def loadImage(cacheDir: Path)(query: ImageSearchQuery): Task[ImageEntry] = {
     def addToCacheAndGet(f: File): Task[ImageEntry] = {
       val i = ImageEntry(query, f)
-      ImageLocalCache.add(i) *> Task.now(i)
+      StoredImagesCache.add(i) *> Task.now(i)
     }
 
     def imageEntry: Task[ImageEntry] =
@@ -78,7 +79,7 @@ object ImageCatalogClient {
       } >>= { Function.tupled(ImageCatalogClient.imageToTmpFile(cacheDir, query)) } >>= addToCacheAndGet
 
     // Try to find the image on the cache, else download
-    ImageLocalCache.find(query) >>= { _.fold(imageEntry)(f => Task.now(f)) }
+    StoredImagesCache.find(query) >>= { _.filter(_.file.exists()).fold(imageEntry)(f => Task.now(f)) }
   }
 
   /**

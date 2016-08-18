@@ -26,8 +26,8 @@ object ImageCacheWatcher {
     def readFiles(stream: DirectoryStream[Path]): Task[StoredImages] =
       Task.delay {
         val u = stream.iterator().asScala.toList
-        val p = u.flatMap(f => ImageEntry.entryFromFile(f.toFile)).map(ImageLocalCache.add)
-        (p.sequenceU >>= {_ => ImageLocalCache.get}).unsafePerformSync
+        val p = u.flatMap(f => ImageEntry.entryFromFile(f.toFile)).map(StoredImagesCache.add)
+        (p.sequenceU *> StoredImagesCache.get).unsafePerformSync
       }.onFinish(f => Task.delay(f.foreach(u => stream.close()))) // Make sure the stream is closed
 
     for {
@@ -45,7 +45,7 @@ object ImageCacheWatcher {
             val p = ev.context()
             val task = for {
                 e <- ImageEntry.entryFromFile(p.toFile)
-              } yield ImageLocalCache.remove(e)
+              } yield StoredImagesCache.remove(e)
             task.getOrElse(Task.now(()))
         }
       // Update the cache

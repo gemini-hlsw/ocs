@@ -20,21 +20,21 @@ object StoredImages {
 /**
   * In memory cache of images on disk
   */
-object ImageLocalCache {
-  val cacheRef = TaskRef.newTaskRef[StoredImages](StoredImages.zero).unsafePerformSync
+object StoredImagesCache {
+  private val cacheRef = TaskRef.newTaskRef[StoredImages](StoredImages.zero).unsafePerformSync
 
-  def add(i: ImageEntry): Task[Unit] = cacheRef.modify(_ + i)
+  def add(i: ImageEntry): Task[StoredImages] = cacheRef.modify(_ + i) *> cacheRef.get
 
-  def remove(i: ImageEntry): Task[Unit] = cacheRef.modify(_ - i)
+  def remove(i: ImageEntry): Task[StoredImages] = cacheRef.modify(_ - i) *> cacheRef.get
 
   def get: Task[StoredImages] = cacheRef.get
 
+  def clean: Task[StoredImages] = cacheRef.modify(_ => StoredImages.zero) *> cacheRef.get
+
   /**
     * Find if the search query is in the cache
-    * It will verify that the file actually exists
     */
-  def find(query: ImageSearchQuery): Task[Option[ImageEntry]] = {
-    cacheRef.get.map(_.find(query)).map(_.filter(_.file.exists()))
-  }
+  def find(query: ImageSearchQuery): Task[Option[ImageEntry]] =
+    cacheRef.get.map(_.find(query))
 
 }
