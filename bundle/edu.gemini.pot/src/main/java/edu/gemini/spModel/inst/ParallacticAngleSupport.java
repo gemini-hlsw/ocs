@@ -16,10 +16,10 @@ public interface ParallacticAngleSupport {
     /**
      * Perform the parallactic angle computation for the observation.
      */
-    public Option<Angle> calculateParallacticAngle(ISPObservation obs);
+    Option<Angle> calculateParallacticAngle(ISPObservation obs);
 
     /**
      * Determine if the current instrument configuration is compatible or not with parallactic angle support.
      */
-    public boolean isCompatibleWithMeanParallacticAngleMode();
+    boolean isCompatibleWithMeanParallacticAngleMode();
 }

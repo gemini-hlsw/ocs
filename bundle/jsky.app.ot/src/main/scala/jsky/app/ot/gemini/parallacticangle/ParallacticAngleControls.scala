@@ -16,7 +16,6 @@ import edu.gemini.spModel.obs.SchedulingBlock.Duration
 import edu.gemini.spModel.obs.SchedulingBlock.Duration._
 import edu.gemini.spModel.rich.shared.immutable._
 import edu.gemini.shared.util.immutable.{Option => JOption, ImOption}
-import jsky.app.ot.ags.BagsManager
 import jsky.app.ot.editor.OtItemEditor
 import jsky.app.ot.gemini.editor.EphemerisUpdater
 import jsky.app.ot.util.TimeZonePreference
@@ -37,7 +36,9 @@ import scalaz._, Scalaz._, scalaz.effect.IO
 class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publisher {
   import ParallacticAngleControls._
 
-  val Nop = new Runnable { def run = () }
+  val Nop = new Runnable {
+    override def run() = ()
+  }
 
   private var editor:    Option[OtItemEditor[_, _]] = None
   private var site:      Option[Site]   = None
@@ -271,7 +272,7 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
       e     <- editor
       angle <- parallacticAngle
       fmt   <- formatter
-    } yield {
+    } {
       val explicitlySet = !fmt.format(ParallacticAngleControls.angleToDegrees(angle)).equals(positionAngleText) &&
                           !fmt.format(ParallacticAngleControls.angleToDegrees(angle.add(Angle.ANGLE_PI))).equals(positionAngleText)
       ui.parallacticAngleFeedback.warningState(explicitlySet)
