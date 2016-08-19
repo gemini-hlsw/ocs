@@ -65,13 +65,21 @@ object ImageCatalogClient {
   /**
     * Load an image for the given coordinates on the user catalog
     */
-  def loadImage(cacheDir: Path)(query: ImageSearchQuery): Task[ImageEntry] = {
+  def loadImage(cacheDir: Path)(query: ImageSearchQuery): Task[Option[ImageEntry]] = {
     def addToCacheAndGet(f: File): Task[ImageEntry] = {
       val i = ImageEntry(query, f)
       StoredImagesCache.add(i) *> Task.now(i)
     }
 
-    def imageEntry: Task[ImageEntry] =
+    def checkIfNeededAndDownload: Task[Option[ImageEntry]] = {
+      ImagesInProgress.contains(query) >>= { inProcess => if (inProcess) Task.now(None) else markAndDownload.map(Some.apply) }
+    }
+
+    def markAndDownload: Task[ImageEntry] = {
+      ImagesInProgress.add(query) *> downloadImage.onFinish(_ => ImagesInProgress.remove(query) *> Task.now(()))
+    }
+
+    def downloadImage: Task[ImageEntry] =
       Task.delay {
         // Open the connection to the remote URL
         val connection = query.url.openConnection()
@@ -80,7 +88,7 @@ object ImageCatalogClient {
       } >>= { Function.tupled(ImageCatalogClient.imageToTmpFile(cacheDir, query)) } >>= addToCacheAndGet
 
     // Try to find the image on the cache, else download
-    StoredImagesCache.find(query) >>= { _.filter(_.file.exists()).fold(imageEntry)(f => Task.now(f)) }
+    StoredImagesCache.find(query) >>= { _.filter(_.file.exists()).fold(checkIfNeededAndDownload)(f => Task.now(Some(f))) }
   }
 
   /**

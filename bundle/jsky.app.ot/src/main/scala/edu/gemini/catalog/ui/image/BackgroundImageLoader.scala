@@ -83,7 +83,10 @@ object BackgroundImageLoader {
     * Creates a task to load an image and set it on the tpe
     */
   private[image] def requestImageDownload(c: Coordinates): Task[Unit] =
-    ImageCatalogClient.loadImage(cacheDir)(ImageSearchQuery(ImageCatalog.user(), c)).map(setTpeImage)
+    ImageCatalogClient.loadImage(cacheDir)(ImageSearchQuery(ImageCatalog.user(), c)).map {
+      case Some(e) => setTpeImage(e)
+      case _       => // Ignore
+    }
 
   /**
     * Finds the coordinates for the base target of the tpe
