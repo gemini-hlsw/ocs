@@ -1,6 +1,7 @@
 package edu.gemini.catalog.image
 
 import java.io._
+import java.nio.channels.FileLock
 import java.nio.file.Path
 import java.util.logging.Logger
 
@@ -109,8 +110,10 @@ object ImageCatalogClient {
       new File(cacheDir.toFile, fileName)
     }
 
-    def openTmpFile(file: File): Task[OutputStream] = Task.delay {
-      new FileOutputStream(file)
+    def openTmpFile(file: File): Task[(FileLock, OutputStream)] = Task.delay {
+      val stream = new FileOutputStream(file)
+      val lock = stream.getChannel.lock()
+      (lock, stream)
     }
 
     def readFile(in: InputStream, out: OutputStream): Task[Unit] = Task.delay {
@@ -126,7 +129,7 @@ object ImageCatalogClient {
       f <- tmpFileName(s)
       t <- createTmpFile(f)
       o <- openTmpFile(t)
-      r <- readFile(in, o)
+      r <- readFile(in, o._2).onFinish(_ => Task.delay(o._1.release()))
     } yield t
   }
 }
