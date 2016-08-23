@@ -9,7 +9,7 @@ public enum Affiliate {
     BRAZIL("Brazil", "BR"),
     CANADA("Canada", "CA"),
     CHILE("Chile", "CL"),
-    KOREA("Korea", "KR"),
+    KOREA("Republic of Korea", "KR"),
     UNITED_KINGDOM("United Kingdom", "UK", false),
     UNITED_STATES("United States", "US"),
 

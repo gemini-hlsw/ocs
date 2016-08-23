@@ -19,7 +19,7 @@ public enum TimeAcctCategory implements Serializable {
         BR("Brazil"),
         CA("Canada"),
         CL("Chile"),
-        KR("Korea"),
+        KR("Republic of Korea"),
         DD("Director's Time"),
         DS("Demo Science"),
         GS("Gemini Staff"),

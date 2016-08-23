@@ -280,7 +280,7 @@
             <xsl:when test="$partner = 'ca'">Canada</xsl:when>
             <xsl:when test="$partner = 'cl'">Chile</xsl:when>
             <xsl:when test="$partner = 'gs'">Gemini Staff</xsl:when>
-            <xsl:when test="$partner = 'kr'">Korea</xsl:when>
+            <xsl:when test="$partner = 'kr'">Republic of Korea</xsl:when>
             <xsl:when test="$partner = 'uk'">UK</xsl:when>
             <xsl:when test="$partner = 'us'">USA</xsl:when>
             <xsl:when test="$partner = 'uh'">Univ. Hawaii</xsl:when>
