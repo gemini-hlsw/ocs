@@ -21,10 +21,6 @@ object ImagesInProgress  {
 
   def remove(i: ImageSearchQuery): Task[ImagesInProgress] = cacheRef.modify(_ - i) *> cacheRef.get
 
-  def get: Task[ImagesInProgress] = cacheRef.get
-
-  def clean: Task[ImagesInProgress ] = cacheRef.modify(_ => ImagesInProgress.zero) *> cacheRef.get
-
   /**
     * Find if the search query is in the cache
     */

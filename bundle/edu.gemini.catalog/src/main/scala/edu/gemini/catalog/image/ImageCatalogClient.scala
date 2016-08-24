@@ -17,10 +17,19 @@ case class ImageSearchQuery(catalog: ImageCatalog, coordinates: Coordinates) {
   def url = catalog.queryUrl(coordinates)
 
   def fileName(suffix: String) = s"img_${catalog.id}_${coordinates.toFilePart}$suffix"
+
+  def isNearby(query: ImageSearchQuery): Boolean =
+    catalog === query.catalog && isNearby(query.coordinates)
+
+  def isNearby(c: Coordinates): Boolean = {
+    val (diffRa, diffDec) = coordinates.diff(c)
+    diffRa <= maxDistance && diffDec <= maxDistance
+  }
 }
 
 object ImageSearchQuery {
   implicit val equals = Equal.equalA[ImageSearchQuery]
+  val maxDistance = (ImageCatalog.defaultSize / 2).getOrElse(Angle.zero)
 
   implicit class DeclinationShow(val d: Declination) extends AnyVal {
     def toFilePart: String = Declination.formatDMS(d, ":", 2)

@@ -1,5 +1,7 @@
 package edu.gemini.catalog.image
 
+import edu.gemini.spModel.core.Coordinates
+
 import scalaz._
 import Scalaz._
 import scalaz.concurrent.Task
@@ -9,6 +11,9 @@ case class StoredImages(images: List[ImageEntry]) {
   def -(i: ImageEntry) = copy(images.filterNot(_ === i))
 
   def find(query: ImageSearchQuery): Option[ImageEntry] = images.find(_.query == query)
+
+  def findNearby(query: ImageSearchQuery): Option[ImageEntry] =
+    images.find(q => q.query === query || (q.query.catalog === query.catalog && q.query.isNearby(query)))
 }
 
 object StoredImages {
@@ -33,8 +38,8 @@ object StoredImagesCache {
 
   /**
     * Find if the search query is in the cache
+    * Find allows for nearby images to be reused
     */
   def find(query: ImageSearchQuery): Task[Option[ImageEntry]] =
-    cacheRef.get.map(_.find(query))
-
+    cacheRef.get.map(_.findNearby(query))
 }

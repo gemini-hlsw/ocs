@@ -121,7 +121,7 @@ object BackgroundImageLoader {
         tpe <- Option(TpeManager.get())
         iw  <- Option(tpe.getImageWidget)
         c   <- tpeCoordinates(iw.getContext)
-        if c == entry.query.coordinates // The TPE may have moved so only display if the coordinates match
+        if entry.query.isNearby(c) // The TPE may have moved so only display if the coordinates match
       } {
         iw.setFilename(entry.file.getAbsolutePath)
       }

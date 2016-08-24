@@ -2,8 +2,10 @@ package edu.gemini.catalog.image
 
 import java.net.URL
 
-import edu.gemini.spModel.core.{MagnitudeBand, Angle, Coordinates}
+import edu.gemini.spModel.core.{Angle, Coordinates, MagnitudeBand}
 import jsky.util.Preferences
+
+import scalaz.Equal
 
 /** Represents an end point that can load an image for a given set of coordinates */
 sealed abstract class ImageCatalog(val id: String, val displayName: String) {
@@ -12,12 +14,14 @@ sealed abstract class ImageCatalog(val id: String, val displayName: String) {
 
   override def toString = id
 }
+
 /** Base class for DSS based image catalogs */
 abstract class DssCatalog(id: String, displayName: String) extends ImageCatalog(id, displayName) {
   def baseUrl: String
   def extraParams: String = ""
   override def queryUrl(c: Coordinates): URL = new URL(s"$baseUrl?ra=${c.ra.toAngle.formatHMS}&dec=${c.dec.formatDMS}&mime-type=application/x-fits&x=${ImageCatalog.defaultSize.toArcmins}&y=${ImageCatalog.defaultSize.toArcmins}$extraParams")
 }
+
 /** Base class for 2MASSImg based image catalogs */
 abstract class AstroCatalog(id: String, displayName: String) extends ImageCatalog(id, displayName) {
   def band: MagnitudeBand
@@ -64,6 +68,7 @@ object MassImgK extends AstroCatalog("2massK", "2MASS Quick-Look Image Retrieval
   */
 object ImageCatalog {
   val defaultSize = Angle.fromArcmin(15.0)
+  implicit val equals = Equal.equalA[ImageCatalog]
 
   private val SKY_USER_CATALOG = "jsky.catalog.sky"
 

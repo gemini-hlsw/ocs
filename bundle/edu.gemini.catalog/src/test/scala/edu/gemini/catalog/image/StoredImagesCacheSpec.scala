@@ -27,7 +27,7 @@ class StoredImagesCacheSpec extends FlatSpec with Matchers with PropertyChecks w
         cache.getOrElse(fail("Should not happen")).images should not contain e
       }
     }
-    it should "find entries and clean" in {
+    it should "find entries" in {
       forAll { (e: ImageEntry) =>
         val entry = (StoredImagesCache.add(e) >> StoredImagesCache.find(e.query)).unsafePerformSyncAttempt
         entry.isRight shouldBe true
