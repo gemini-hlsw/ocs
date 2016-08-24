@@ -408,7 +408,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
         } yield QueueProposalClass.band3request.set(q, Some(r))
 
         def ftEditor = for {
-          ft@FastTurnaroundProgramClass(_, _, _, _, Some(r), _, _, _, _, _) <- model
+          ft@FastTurnaroundProgramClass(_, _, _, _, Some(r), _, _, _, _) <- model
           (r, _, _) <- SubmissionRequestEditor.open(r, None, Nil, None, button)
         } yield FastTurnaroundProgramClass.band3request.set(ft, Some(r))
 
@@ -570,7 +570,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
 
       def currentReviewer(m: Option[Proposal]): Option[Investigator] = for {
           p <- m
-          f @ FastTurnaroundProgramClass(_, _, _, _, _, _, Some(r), _, _, _) <- Some(p.proposalClass)
+          f @ FastTurnaroundProgramClass(_, _, _, _, _, _, Some(r), _, _) <- Some(p.proposalClass)
         } yield r
 
       override def refresh(m:Option[Proposal]) {
@@ -641,7 +641,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
 
       def currentMentor(m: Option[Proposal]): Option[Investigator] = for {
           p                                                                  <- m
-          f @ FastTurnaroundProgramClass(_, _, _, _, _, _, _, Some(m), _, _) <- Some(p.proposalClass)
+          f @ FastTurnaroundProgramClass(_, _, _, _, _, _, _, Some(m), _) <- Some(p.proposalClass)
         } yield m
 
       def updateP1Model(selection: Option[Investigator]) {
@@ -701,6 +701,11 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
 
       val pcLens = Proposal.proposalClass
 
+      def currentAffiliation(pOpt: Option[Proposal]): FtPartner = pOpt.map(_.proposalClass).flatMap {
+        case f: FastTurnaroundProgramClass => f.partnerAffiliation
+        case _                             => None
+      }
+
       override def refresh(m:Option[Proposal]) {
         enabled = canEdit
         visible = ~m.map(_.proposalClass).map {
@@ -708,33 +713,18 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
           case _                            => false
         }
 
-        val currentAffiliation = m.map(_.proposalClass).flatMap {
-            case f:FastTurnaroundProgramClass => f.partnerAffiliation
-            case _                            => None
-          }
-        val previousAffiliation = m.map(_.proposalClass).flatMap {
-            case f: FastTurnaroundProgramClass => f.previousPartnerAffiliation
-            case _ => None
-          }
-        val pi = currentPi(m)
-        val piPartner = Institutions.institution2Ngo(pi.address.institution, pi.address.country)
-        pi.address match {
-          case a if piPartner.isDefined && previousAffiliation.isEmpty =>
-            selection.item = Partners.ftPartners.toMap.getOrElse(piPartner, Partners.NoPartnerAffiliation)
-          case a if currentAffiliation =/= piPartner                   =>
-            selection.item = Partners.ftPartners.toMap.getOrElse(currentAffiliation, Partners.NoPartnerAffiliation)
-          case _                                                       =>
+        // Use the current affiliation, if it exists, and otherwise, the affiliation associated with the
+        // PI's institution.
+        selection.item = {
+          val partner = currentAffiliation(m).orElse(Institutions.institution2Ngo(currentPi(m).address))
+          Partners.ftPartners.toMap.getOrElse(partner, Partners.NoPartnerAffiliation)
         }
       }
 
       selection.reactions += {
         case SelectionChanged(_) =>
-          val currentAffiliation = model.map(_.proposalClass).flatMap {
-              case f:FastTurnaroundProgramClass => f.partnerAffiliation
-              case _                            => None
-            }
           val selected = Partners.toPartner(selection.item)
-          if (currentAffiliation =/= Partners.toPartner(selection.item)) {
+          if (currentAffiliation(model) =/= selected) {
             selection.item = Partners.ftPartners.toMap.getOrElse(selected, Partners.NoPartnerAffiliation)
             updateP1Model(selected)
           }
@@ -836,7 +826,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
           } yield Some(lp.set(l, req))
 
         def ftRequest = for {
-            l @ FastTurnaroundProgramClass(_, _, _, sub, _, _, _, _, _, _) <- model
+            l @ FastTurnaroundProgramClass(_, _, _, sub, _, _, _, _, _) <- model
             req                                                <- SubmissionRequestEditor.open(sub.request, None, Nil, None, button)
           } yield Some(ft.set(l, req._1))
 
