@@ -8,6 +8,7 @@
             <xsd:element name="attachment" type="xsd:string"/>
         </xsd:sequence>
         <xsd:attribute name="band3optionChosen" type="xsd:boolean" use="required"/>
+        <xsd:attribute name="overrideAffiliate" type="xsd:boolean" use="required"/>
     </xsd:complexType>
 
 </xsd:schema>

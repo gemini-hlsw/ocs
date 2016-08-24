@@ -299,17 +299,15 @@ object LargeProgramClass {
 
 }
 
-case class FastTurnaroundProgramClass(itac                       :Option[Itac],
-                                      comment                    :Option[String],
-                                      key                        :Option[UUID],
-                                      sub                        :FastTurnaroundSubmission,
-                                      band3request               :Option[SubmissionRequest],
-                                      tooOption                  :ToOChoice,
-                                      reviewer                   :Option[Investigator],
-                                      mentor                     :Option[Investigator],
-                                      partnerAffiliation         :FtPartner,
-                                      previousPartnerAffiliation :FtPartner = None) extends ProposalClass {
-
+case class FastTurnaroundProgramClass(itac               : Option[Itac],
+                                      comment            : Option[String],
+                                      key                : Option[UUID],
+                                      sub                : FastTurnaroundSubmission,
+                                      band3request       : Option[SubmissionRequest],
+                                      tooOption          : ToOChoice,
+                                      reviewer           : Option[Investigator],
+                                      mentor             : Option[Investigator],
+                                      partnerAffiliation : FtPartner) extends ProposalClass {
   def mutable(n: Namer):M.FastTurnaroundProgramClass = {
     val m = Factory.createFastTurnaroundProgramClass
     m.setItac(itac.map(_.mutable).orNull)
@@ -354,12 +352,14 @@ object FastTurnaroundProgramClass {
   val reviewer:Lens[FastTurnaroundProgramClass, Option[Investigator]] = Lens.lensu((a, b) => a.copy(reviewer = b), _.reviewer)
   val reviewerAndMentor:Lens[FastTurnaroundProgramClass, (Option[Investigator], Option[Investigator])] = Lens.lensu((a, b) => a.copy(reviewer = b._1, mentor = b._2), f => (f.reviewer, f.mentor))
   val mentor:Lens[FastTurnaroundProgramClass, Option[Investigator]] = Lens.lensu((a, b) => a.copy(mentor = b), _.mentor)
-  val affiliation:Lens[FastTurnaroundProgramClass, FtPartner] = Lens.lensu((a, b) => a.copy(partnerAffiliation = b, previousPartnerAffiliation = a.partnerAffiliation), _.partnerAffiliation)
+  val affiliation:Lens[FastTurnaroundProgramClass, FtPartner] = Lens.lensu((a, b) => a.copy(partnerAffiliation = b), _.partnerAffiliation)
 
-  def affiliation(m: M.FastTurnaroundProgramClass): FtPartner = (Option(m.getPartnerAffiliation), Option(m.getExchangeAffiliation)) match {
-    case (Some(p), _)                      => Some(-\/(p))
-    case (_, Some(ExchangePartner.SUBARU)) => Some(\/-(ExchangePartner.SUBARU))
-    case _                                 => None
+  def affiliation(m: M.FastTurnaroundProgramClass): FtPartner = {
+    (Option(m.getPartnerAffiliation), Option(m.getExchangeAffiliation)) match {
+      case (Some(p), _)                      => Some(-\/(p))
+      case (_, Some(ExchangePartner.SUBARU)) => Some(\/-(ExchangePartner.SUBARU))
+      case _                                 => None
+    }
   }
 
   def apply(m:M.FastTurnaroundProgramClass):FastTurnaroundProgramClass = apply(

@@ -552,7 +552,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
     }
 
     private lazy val ftReviewerOrMentor = for {
-        f @ FastTurnaroundProgramClass(_, _, _, _, _, _, r, m, _, _) <- Some(p.proposalClass)
+        f @ FastTurnaroundProgramClass(_, _, _, _, _, _, r, m, _) <- Some(p.proposalClass)
         if r.isEmpty || (~r.map(_.status != InvestigatorStatus.PH_D) && m.isEmpty)
       } yield new Problem(Severity.Error,
             "A Fast Turnaround program must select a reviewer or a mentor with PhD degree.", TimeProblems.SCHEDULING_SECTION, {
@@ -560,10 +560,10 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
             })
 
     private lazy val ftAffiliationMismatch = for {
-        pi                                                                      <- Option(p.investigators.pi)
-        piNgo                                                                   <- Option(Institutions.institution2Ngo(pi.address.institution, pi.address.country))
-        f @ FastTurnaroundProgramClass(_, _, _, _, _, _, _, _, affiliateNgo, _) <- Option(p.proposalClass)
-        samePartner                                                             <- (affiliateNgo |@| piNgo){_ === _}
+        pi                                                                   <- Option(p.investigators.pi)
+        piNgo                                                                <- Option(Institutions.institution2Ngo(pi.address))
+        f @ FastTurnaroundProgramClass(_, _, _, _, _, _, _, _, affiliateNgo) <- Option(p.proposalClass)
+        samePartner                                                          <- (affiliateNgo |@| piNgo){_ === _}
         if !samePartner // Show a warning if the PI's institution partner isn't the same as the partner affiliation
       } yield new Problem(Severity.Info,
             s"The Fast Turnaround affiliation country: '${~Partners.nameOfFTPartner(affiliateNgo)}' is different from the PI's country: '${~Partners.nameOfFTPartner(piNgo)}'.", TimeProblems.SCHEDULING_SECTION, {

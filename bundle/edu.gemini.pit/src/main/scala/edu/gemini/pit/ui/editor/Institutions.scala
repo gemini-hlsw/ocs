@@ -1,6 +1,6 @@
 package edu.gemini.pit.ui.editor
 
-import edu.gemini.model.p1.immutable.{ExchangePartner, NgoPartner}
+import edu.gemini.model.p1.immutable.{ExchangePartner, InstitutionAddress, NgoPartner}
 import edu.gemini.model.p1.immutable.Partners.FtPartner
 
 import scalaz.{-\/, \/-}
@@ -47,13 +47,14 @@ object Institutions {
     case _      => None
   }
 
-  def institution2Ngo(institution: String, country: String): FtPartner = {
+  def institution2Ngo(address: InstitutionAddress): FtPartner = {
     val geminiRegex = "Gemini.Observatory.*".r
-    institution match {
+    address.institution match {
       case geminiRegex() => Some(-\/(NgoPartner.US)) // Gemini Staff always go as US
-      case _             => country2Ngo(country)
+      case _             => country2Ngo(address.country)
     }
   }
+
   def country2Ngo(country: String): FtPartner = country match {
     case "Argentina"         => Some(-\/(NgoPartner.AR))
     case "Australia"         => Some(-\/(NgoPartner.AU))
