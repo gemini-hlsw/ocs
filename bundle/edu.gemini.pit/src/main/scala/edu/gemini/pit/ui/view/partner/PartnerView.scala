@@ -716,18 +716,33 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
         // Use the current affiliation, if it exists, and otherwise, the affiliation associated with the
         // PI's institution.
         selection.item = {
-          val partner = currentAffiliation(m).orElse(Institutions.institution2Ngo(currentPi(m).address))
+          val currentAffiliate          = currentAffiliation(m)
+          lazy val institutionAffiliate = Institutions.institution2Ngo(currentPi(m).address)
+          val partner = if (m.exists(_.meta.overrideAffiliate) && currentAffiliate.isDefined) currentAffiliate else institutionAffiliate
           Partners.ftPartners.toMap.getOrElse(partner, Partners.NoPartnerAffiliation)
         }
       }
 
       selection.reactions += {
         case SelectionChanged(_) =>
-          val selected = Partners.toPartner(selection.item)
-          if (currentAffiliation(model) =/= selected) {
-            selection.item = Partners.ftPartners.toMap.getOrElse(selected, Partners.NoPartnerAffiliation)
-            updateP1Model(selected)
+          val selectedAffiliate    = Partners.toPartner(selection.item)
+          val currentAffiliate     = currentAffiliation(model)
+          val institutionAffiliate = Institutions.institution2Ngo(currentPi(model).address)
+
+          if (currentAffiliate =/= selectedAffiliate) {
+            selection.item = Partners.ftPartners.toMap.getOrElse(selectedAffiliate, Partners.NoPartnerAffiliation)
+            updateP1Model(selectedAffiliate)
           }
+
+          val overrideAffiliate = selectedAffiliate =/= institutionAffiliate
+          if (model.exists(_.meta.overrideAffiliate != overrideAffiliate)) updateP1ModelOverrideAffiliate(overrideAffiliate)
+      }
+
+      def updateP1ModelOverrideAffiliate(overrideAffiliate: Boolean) {
+        model.foreach { p =>
+          val p0 = (Proposal.meta andThen Meta.overrideAffiliate).set(p, overrideAffiliate)
+          model = Some(p0)
+        }
       }
 
       def updateP1Model(partner: FtPartner) {

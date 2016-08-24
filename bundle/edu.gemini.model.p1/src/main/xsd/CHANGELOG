@@ -1,5 +1,11 @@
 Gemini Phase I Schema Changes
 
+# Version 2017.1.1 - 2017A
+##########################
+
+* Added an overrideAffiliate flag to Meta to allow discrepancy between PI institution affiliate and chosen affiliate.
+  Set to default "true", as if PI institution affiliate and chosen affiliate are the same, it resets to false.
+
 # Version 2016.2.2 - 2016B
 ##########################
 

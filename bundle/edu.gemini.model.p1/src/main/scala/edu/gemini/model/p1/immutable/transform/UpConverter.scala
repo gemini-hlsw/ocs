@@ -128,7 +128,13 @@ case class LastStepConverter(semester: Semester) extends SemesterConverter {
  * This converter will upgrade to 2017A
  */
 case object SemesterConverter2016BTo2017A extends SemesterConverter {
-  override val transformers = Nil
+  // Set overrideAffiliate as true by default. It will automatically set to false if current FT affiliate is undefined
+  // or the same as the PI institution affiliate.
+  val overrideAffiliate:TransformFunction = {
+    case m @ <meta>{ns @ _*}</meta> if (m \ "@overrideAffiliate").isEmpty =>
+      StepResult("Affiliate override flag is missing", <meta overrideAffiliate="true">{ns}</meta>).successNel
+  }
+  override val transformers = List(overrideAffiliate)
 }
 
 /**
