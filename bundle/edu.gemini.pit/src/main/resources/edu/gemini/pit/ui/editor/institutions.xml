@@ -836,7 +836,7 @@
         <address>Department of Astronomy</address>
         <address>London</address>
         <address>Ontario</address>
-        <address>N6A  3K7</address>
+        <address>N6A 3K7</address>
         <country>Canada</country>
         <contact>
             <phone>519-661-3183</phone>
@@ -1003,6 +1003,7 @@
         <address>Alonso de Cordova 3107</address>
         <address>Vitacura, Santiago 7630355</address>
         <country>Chile</country>
+        <affiliate>Japan</affiliate>
     </site>
     <site>
         <institution>Mizusawa VLBI Observatory (NAOJ)</institution>
@@ -2015,7 +2016,7 @@
         </contact>
     </site>
     <site>
-        <institution>Caltech (Physics, Maths  and Astronomy)</institution>
+        <institution>Caltech (Physics, Maths and Astronomy)</institution>
         <address>Division of Physics, Mathematics and Astronomy</address>
         <address>MS 103-33</address>
         <address>Pasadena</address>
@@ -2094,7 +2095,7 @@
         </contact>
     </site>
     <site>
-        <institution>Carnegie Institution of Washington (Headquarters)</institution>
+        <institution>Carnegie Institution for Science (Observatories)</institution>
         <address>Carnegie Observatories</address>
         <address>Headquarters</address>
         <address>813 Santa Barbara Street</address>
@@ -2109,7 +2110,7 @@
         </contact>
     </site>
     <site>
-        <institution>Carnegie Institution of Washington (Carnegie Obs.)</institution>
+        <institution>Carnegie Institution for Science (Las Campanas)</institution>
         <address>Carnegie Observatories</address>
         <address>Las Campanas Observatory</address>
         <address>Casilla 601</address>
@@ -2122,7 +2123,7 @@
         </contact>
     </site>
     <site>
-        <institution>Carnegie Institution of Washington (Terrestrial Magn.)</institution>
+        <institution>Carnegie Institution for Science (Terrestrial Magn.)</institution>
         <address>Department of Terrestrial Magnetism</address>
         <address>5241 Broad Branch Road, NW</address>
         <address>Washington</address>
@@ -2507,6 +2508,7 @@
         <address>HI</address>
         <address>96822</address>
         <country>USA</country>
+        <affiliate>University of Hawaii</affiliate>
         <contact>
             <phone>808-956-8312</phone>
             <phone>808-988-2790</phone>
@@ -3605,6 +3607,7 @@
         <address>HI</address>
         <address>96720</address>
         <country>USA</country>
+        <affiliate>Japan</affiliate>
         <contact>
             <phone>808-934-7788</phone>
             <fax>808-934-5099</fax>
