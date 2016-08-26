@@ -26,7 +26,7 @@ object Institutions {
     val name    = (n \ "institution").text
     val address = strList(n, "address")
     val country = (n \ "country").text
-    val affiliate = (n \ "affiliate").headOption.map(_.text)
+    val affiliate = (n \ "affiliate").headOption.map(a => country2Ngo(a.text))
     val contact = (n \ "contact").toList match {
       case h :: _ => toContact(h)
       case _ => Contact.empty
@@ -57,7 +57,7 @@ object Institutions {
     val geminiRegex = "Gemini.Observatory.*".r
     address.institution match {
       case geminiRegex() => Some(-\/(NgoPartner.US)) // Gemini Staff always go as US
-      case _             => country2Ngo(alternateAffiliates.getOrElse(address.institution, address.country))
+      case _             => alternateAffiliates.getOrElse(address.institution, country2Ngo(address.country))
     }
   }
 
@@ -83,4 +83,4 @@ case class Contact(phone: List[String], email: List[String])
 object Institution {
   val empty = Institution("", Nil, "", None, Contact.empty)
 }
-case class Institution(name: String, addr: List[String], country: String, affiliate: Option[String], contact: Contact)
+case class Institution(name: String, addr: List[String], country: String, affiliate: Option[FtPartner], contact: Contact)

@@ -20,7 +20,7 @@ class InstitutionsSpec extends Specification {
       Institutions.all must contain((i: Institution) => i.name must beEqualTo(SubaruNAOJ))
       val subaru = Institutions.all.find(_.name == SubaruNAOJ).head
       subaru.country must beEqualTo("USA")
-      subaru.affiliate must beSome("Japan")
+      subaru.affiliate must beSome(Institutions.country2Ngo("Japan"))
     }
 
     "include the Canada-France-Hawaii Telescope Corporation, with a country of US but an NGO partner of Canada" in {
