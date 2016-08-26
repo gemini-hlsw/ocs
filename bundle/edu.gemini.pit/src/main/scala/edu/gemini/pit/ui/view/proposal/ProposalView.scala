@@ -241,7 +241,7 @@ class ProposalView(advisor:ShellAdvisor) extends BorderPanel with BoundView[Prop
             def defaultInstitution(n: String): InstitutionAddress = {
               val inst = Institutions.bestMatch(coi.institution)
               def toIa(inst: Institution) = InstitutionAddress(inst.name, inst.addr.mkString("\n"), inst.country)
-              inst.map(toIa(_)).getOrElse(InstitutionAddress(n))
+              inst.map(toIa).getOrElse(InstitutionAddress(n))
             }
 
             coi.toPi.copy(address = addrMap.getOrElse(coi, defaultInstitution(coi.institution)))
@@ -344,7 +344,7 @@ class ProposalView(advisor:ShellAdvisor) extends BorderPanel with BoundView[Prop
     object listViewer extends SimpleListViewer[Proposal, Investigators, Investigator] {
 
       // Our action handlers
-      onDoubleClick { edit(_) }
+      onDoubleClick(edit)
 
       def editPi(setup: PiEditor => Unit = _ => ()) =
         for {

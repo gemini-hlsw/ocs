@@ -13,6 +13,12 @@ object Institutions {
     res.sortBy(_.name)
   }
 
+  // Institutions whose affiliation is different from the one dictated by their location.
+  lazy val alternateAffiliates = (for {
+    i <- all
+    a <- i.affiliate
+  } yield (i.name, a)).toMap
+
   private def strList(n: Node, tag: String): List[String] =
     (n \ tag).map(_.text).toList
 
@@ -20,13 +26,13 @@ object Institutions {
     val name    = (n \ "institution").text
     val address = strList(n, "address")
     val country = (n \ "country").text
-
+    val affiliate = (n \ "affiliate").headOption.map(a => country2Ngo(a.text))
     val contact = (n \ "contact").toList match {
       case h :: _ => toContact(h)
       case _ => Contact.empty
     }
 
-    Institution(name, address, country, contact)
+    Institution(name, address, country, affiliate, contact)
   }
 
   private def toContact(n: Node): Contact = {
@@ -51,20 +57,21 @@ object Institutions {
     val geminiRegex = "Gemini.Observatory.*".r
     address.institution match {
       case geminiRegex() => Some(-\/(NgoPartner.US)) // Gemini Staff always go as US
-      case _             => country2Ngo(address.country)
+      case _             => alternateAffiliates.getOrElse(address.institution, country2Ngo(address.country))
     }
   }
 
   def country2Ngo(country: String): FtPartner = country match {
-    case "Argentina"         => Some(-\/(NgoPartner.AR))
-    case "Australia"         => Some(-\/(NgoPartner.AU))
-    case "Brazil"            => Some(-\/(NgoPartner.BR))
-    case "Canada"            => Some(-\/(NgoPartner.CA))
-    case "Chile"             => Some(-\/(NgoPartner.CL))
-    case "Republic of Korea" => Some(-\/(NgoPartner.KR))
-    case "USA"               => Some(-\/(NgoPartner.US))
-    case "Japan"             => Some(\/-(ExchangePartner.SUBARU))
-    case _                   => None
+    case "Argentina"            => Some(-\/(NgoPartner.AR))
+    case "Australia"            => Some(-\/(NgoPartner.AU))
+    case "Brazil"               => Some(-\/(NgoPartner.BR))
+    case "Canada"               => Some(-\/(NgoPartner.CA))
+    case "Chile"                => Some(-\/(NgoPartner.CL))
+    case "Republic of Korea"    => Some(-\/(NgoPartner.KR))
+    case "USA"                  => Some(-\/(NgoPartner.US))
+    case "University of Hawaii" => Some(-\/(NgoPartner.UH))
+    case "Japan"                => Some(\/-(ExchangePartner.SUBARU))
+    case _                      => None
   }
 }
 
@@ -74,6 +81,6 @@ object Contact {
 case class Contact(phone: List[String], email: List[String])
 
 object Institution {
-  val empty = Institution("", Nil, "", Contact.empty)
+  val empty = Institution("", Nil, "", None, Contact.empty)
 }
-case class Institution(name: String, addr: List[String], country: String, contact: Contact)
+case class Institution(name: String, addr: List[String], country: String, affiliate: Option[FtPartner], contact: Contact)
