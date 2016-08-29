@@ -566,7 +566,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
         samePartner                                                          <- (affiliateNgo |@| piNgo){_ === _}
         if !samePartner // Show a warning if the PI's institution partner isn't the same as the partner affiliation
       } yield new Problem(Severity.Info,
-            s"The Fast Turnaround affiliation country: '${~Partners.nameOfFTPartner(affiliateNgo)}' is different from the PI's country: '${~Partners.nameOfFTPartner(piNgo)}'.", TimeProblems.SCHEDULING_SECTION, {
+            s"The Fast Turnaround affiliation, '${~Partners.nameOfFTPartner(affiliateNgo)}', is different from the PI's default affiliation, '${~Partners.nameOfFTPartner(piNgo)}'.", TimeProblems.SCHEDULING_SECTION, {
               s.showPartnersView()
             })
 
