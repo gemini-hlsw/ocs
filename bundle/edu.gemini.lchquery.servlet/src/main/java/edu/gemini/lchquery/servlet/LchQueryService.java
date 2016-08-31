@@ -1,5 +1,6 @@
 package edu.gemini.lchquery.servlet;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -12,24 +13,14 @@ public final class LchQueryService {
     /**
      * valid parameters
      */
-    public enum LchParameter {
-        PROGRAM_SEMESTER("programSemester"),
-        PROGRAM_TITLE("programTitle"),
-        PROGRAM_INVESTIGATOR_NAMES("programInvestigatorNames"),
-        PROGRAM_PI_EMAIL("programPiEmail"),
-        PROGRAM_COI_EMAILS("programCoiEmails"),
-        PROGRAM_ABSTRACT("programAbstract"),
-        PROGRAM_BAND("programBand"),
-        PROGRAM_PARTNERS("programPartners"),
-        PROGRAM_REFERENCE("programReference"),
-        PROGRAM_ACTIVE("programActive"),
-
-        private final String paramName;
-        LchParameter(final String paramName) {
-            this.paramName = paramName;
-        }
-    }
-
+    public static final String PARAMETER_PROGRAM_SEMESTER = "programSemester";
+    public static final String PARAMETER_PROGRAM_TITLE = "programTitle";
+    public static final String PARAMETER_PROGRAM_INVESTIGATOR_NAMES = "programInvestigatorNames";
+    public static final String PARAMETER_PROGRAM_PI_EMAIL = "programPiEmail";
+    public static final String PARAMETER_PROGRAM_COI_EMAILS = "programCoiEmails";
+    public static final String PARAMETER_PROGRAM_ABSTRACT = "programAbstract";
+    public static final String PARAMETER_PROGRAM_BAND = "programBand";
+    public static final String PARAMETER_PROGRAM_PARTNERS = "programPartners";
     public static final String PARAMETER_PROGRAM_REFERENCE = "programReference";
     public static final String PARAMETER_PROGRAM_ACTIVE = "programActive";
     public static final String PARAMETER_PROGRAM_COMPLETED = "programCompleted";
@@ -38,7 +29,6 @@ public final class LchQueryService {
     public static final String PARAMETER_PROGRAM_TOO_STATUS = "programTooStatus"; // new
     public static final String PARAMETER_PROGRAM_ALLOC_TIME = "programAllocatedTime"; // new
     public static final String PARAMETER_PROGRAM_REMAIN_TIME = "programRemainTime"; // new
-
 
     public static final String PARAMETER_OBSERVATION_TOO_STATUS = "observationTooStatus";
     public static final String PARAMETER_OBSERVATION_NAME = "observationName";
@@ -74,6 +64,7 @@ public final class LchQueryService {
         PARAM_SET.add(PARAMETER_OBSERVATION_CLASS);
     }
 
+    public static final Set<String> PARAMS = Collections.unmodifiableSet(PARAM_SET)
     public static final boolean isValidParameter(String s) {
         return PARAM_SET.contains(s);
     }

@@ -82,107 +82,13 @@ public class LchQueryFunctor extends DBAbstractQueryFunctor implements IDBParall
 
     private QueryResult _queryResult;
     private QueryType _queryType;
+    private final ImList<ValueMatcher> _params;
 
-    private String _programSemester;
-    private String _programTitle;
-    private String _programInvestigatorNames;
-    private String _programPiEmail;
-    private String _programCoIEmails;
-    private String _programAbstract;
-    private String _programBand;
-    private String _programPartners;
-    private String _programReference;
-    private String _programActive;
-    private String _programCompleted;
-    private String _programNotifyPi;
-    private String _programRollover;
-    private String _programTooStatus;
-    private String _programAllocTime;
-    private String _programRemainTime;
-
-    private String _observationTooStatus;
-    private String _observationName;
-    private String _observationStatus;
-    private String _observationInstrument;
-    private String _observationAo;
-    private String _observationClass;
-
-    public LchQueryFunctor(QueryType queryType, String programSemester, String programTitle, String programReference,
-                           String programActive, String programCompleted, String programNotifyPi, String programRollover,
-                           String observationTooStatus, String observationName, String observationStatus, String observationInstrument,
-                           String observationAo, String observationClass) {
+    public LchQueryFunctor(final QueryType queryType, final ImList<ValueMatcher> params) {
         _queryResult = new QueryResult();
         _queryResult.setProgramsNode(new ProgramsNode());
-
         _queryType = queryType;
-
-        _programSemester = programSemester;
-        _programTitle = programTitle;
-        _programReference = programReference;
-        _programActive = programActive;
-        _programCompleted = programCompleted;
-        _programNotifyPi = programNotifyPi;
-        _programRollover = programRollover;
-
-        _observationTooStatus = observationTooStatus;
-        _observationName = observationName;
-        _observationStatus = observationStatus;
-        _observationInstrument = observationInstrument;
-        _observationAo = observationAo;
-        _observationClass = observationClass;
-    }
-
-    public LchQueryFunctor(final QueryType queryType,
-                           final String programSemester,
-                           final String programTitle,
-                           final String programInvestigatorNames,
-                           final String programPiEmail,
-                           final String programCoIEmails,
-                           final String programAbstract,
-                           final String programBand,
-                           final String programPartners,
-                           final String programReference,
-                           final String programActive,
-                           final String programCompleted,
-                           final String programNotifyPi,
-                           final String programRollover,
-                           final String programTooStatus,
-                           final String programAllocTime,
-                           final String programRemainTime,
-                           final String observationTooStatus,
-                           final String observationName,
-                           final String observationStatus,
-                           final String observationInstrument,
-                           final String observationAo,
-                           final String observationClass) {
-        _queryResult = new QueryResult();
-        _queryResult.setProgramsNode(new ProgramsNode());
-
-        _queryType = queryType;
-
-        _programSemester = programSemester;
-        _programTitle = programTitle;
-        _programInvestigatorNames = programInvestigatorNames;
-        _programPiEmail = programPiEmail;
-        _programCoIEmails = programCoIEmails;
-        _programAbstract = programAbstract;
-        _programBand = programBand;
-        _programPartners = programPartners;
-        _programReference = programReference;
-        _programActive = programActive;
-        _programCompleted = programCompleted;
-        _programNotifyPi = programNotifyPi;
-        _programRollover = programRollover;
-        _programTooStatus = programTooStatus;
-        _programAllocTime = programAllocTime;
-        _programRemainTime = programRemainTime;
-
-        _observationTooStatus = observationTooStatus;
-        _observationName = observationName;
-        _observationStatus = observationStatus;
-        _observationInstrument = observationInstrument;
-        _observationAo = observationAo;
-        _observationClass = observationClass;
+        _params = params;
     }
 
     /**
@@ -193,15 +99,16 @@ public class LchQueryFunctor extends DBAbstractQueryFunctor implements IDBParall
         ISPProgram prog = (ISPProgram) node;
         try {
             if (_match(prog)) {
-                List<ISPObservation> obsList = new ArrayList<ISPObservation>();
-                for (ISPObservation obs : prog.getAllObservations()) {
+                final List<ISPObservation> obsList = new ArrayList<>();
+                for (final ISPObservation obs : prog.getAllObservations()) {
                     if (_match(prog, obs)) {
                         obsList.add(obs);
                     }
                 }
-                if (obsList.size() != 0) {
+
+                if (!obsList.isEmpty()) {
                     if (_queryType == QueryType.PROGRAMS) {
-                        addProgram(prog, new ArrayList<ISPObservation>());
+                        addProgram(prog, new ArrayList<>());
                     } else {
                         addProgram(prog, obsList);
                     }

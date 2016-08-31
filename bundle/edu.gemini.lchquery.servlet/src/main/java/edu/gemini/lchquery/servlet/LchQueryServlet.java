@@ -2,6 +2,8 @@ package edu.gemini.lchquery.servlet;
 
 import edu.gemini.odb.browser.QueryResult;
 import edu.gemini.pot.spdb.IDBDatabaseService;
+import edu.gemini.shared.util.immutable.DefaultImList;
+import edu.gemini.shared.util.immutable.ImList;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -17,6 +19,7 @@ import java.util.Enumeration;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  * <p>A web service that allows for simple get requests with some
@@ -99,6 +102,12 @@ public final class LchQueryServlet extends HttpServlet {
             return;
         }
 
+        final ImList<String> params = DefaultImList.create(LchQueryService.PARAMS.stream().
+                map(request::getParameter).
+                filter(p -> p != null).
+                collect(Collectors.toList()));
+
+        final ImList<ValueMatcher> params = DefaultImList(LchQueryService.PARAMS.stream().map(request::getParameter))
         final String programSemester = request.getParameter(LchQueryService.PARAMETER_PROGRAM_SEMESTER);
         final String programTitle = request.getParameter(LchQueryService.PARAMETER_PROGRAM_TITLE);
         final String programInvestigatorNames = request.getParameter(LchQueryService.PARAMETER_PROGRAM_INVESTIGATOR_NAMES);
