@@ -66,4 +66,4 @@ done
 [ -z "$PDFOUT" ] && PDFOUT="-Dp=${_CWD}"
 [ -z "$XMLIN" ] && usage
 
-$APP_HOME/jre/bin/java -Xmx1024M $COUNTRY $PDFOUT $RECURSIVE $XMLIN -Dedu.gemini.osgi.main.app=p1pdfmaker -jar edu-gemini-osgi-main_2.10-4.2.1.jar  $@
+$APP_HOME/jre/bin/java -Xmx1024M $COUNTRY $PDFOUT $RECURSIVE $XMLIN -Dedu.gemini.osgi.main.app=p1pdfmaker -jar edu-gemini-osgi-main_2.11-4.2.1.jar  $@
