@@ -44,6 +44,7 @@ import edu.gemini.spModel.type.*;
 import java.beans.PropertyDescriptor;
 import java.io.Serializable;
 import java.util.*;
+import java.util.stream.Stream;
 
 import static edu.gemini.spModel.seqcomp.SeqConfigNames.INSTRUMENT_KEY;
 
@@ -741,7 +742,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
      * <p/>
      * And the default is CLEAR      *
      */
-    public enum Apodizer implements DisplayableSpType, SequenceableSpType, LoggableSpType {
+    public enum Apodizer implements DisplayableSpType, SequenceableSpType, LoggableSpType, ObsoletableSpType {
         CLEAR("Clear"),
         CLEARGP("CLEAR GP"),
         APOD_Y("APOD_Y_56"),
@@ -751,7 +752,12 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
         APOD_K2("APOD_K2_56"),
         NRM("NRM"),
         APOD_HL("APOD_HL"),
-        APOD_STAR("APOD_star"),
+        APOD_STAR("APOD_star") {
+            public boolean isObsolete() {
+                return true;
+            }
+        },
+        ND3("ND3")
         ;
 
         public static Apodizer DEFAULT = CLEAR;
@@ -775,6 +781,11 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
         }
 
         @Override
+        public boolean isObsolete() {
+                    return false;
+                }
+
+        @Override
         public String logValue() {
             return displayValue();
         }
@@ -791,6 +802,10 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
                 }
             }
             return None.instance();
+        }
+
+        public static Apodizer[] validValues() {
+            return Arrays.stream(values()).filter(a -> !a.isObsolete()).toArray(Apodizer[]::new);
         }
     }
 

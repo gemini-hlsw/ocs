@@ -381,7 +381,7 @@ public class GpiEditor extends ComponentEditor<ISPObsComponent, Gpi> implements 
         // Disperser
         disperserCtrl = ComboPropertyCtrl.enumInstance(Gpi.DISPERSER_PROP);
         // See OT-50: Disperser.OPEN only available in engineering screen
-        ((JComboBox)disperserCtrl.getComponent()).setModel(new DefaultComboBoxModel<>(Gpi.Disperser.nonEngineeringValues()));
+        ((JComboBox<Gpi.Disperser>)disperserCtrl.getComponent()).setModel(new DefaultComboBoxModel<>(Gpi.Disperser.nonEngineeringValues()));
         addCtrl(pan, leftLabelCol, row, disperserCtrl);
 
         // ADC
@@ -451,7 +451,7 @@ public class GpiEditor extends ComponentEditor<ISPObsComponent, Gpi> implements 
         calEntranceShutterCtrl = ComboPropertyCtrl.enumInstance(Gpi.CAL_ENTRANCE_SHUTTER_PROP);
         referenceArmShutterCtrl = ComboPropertyCtrl.enumInstance(Gpi.REFERENCE_ARM_SHUTTER_PROP);
 
-        apodizerCtrl = ComboPropertyCtrl.enumInstance(Gpi.APODIZER_PROP);
+        apodizerCtrl = new ComboPropertyCtrl<>(Gpi.APODIZER_PROP, Gpi.Apodizer.validValues());
         lyotCtrl = ComboPropertyCtrl.enumInstance(Gpi.LYOT_PROP);
 
         artificialSourceLabel = new JLabel("                   Artificial Source");
