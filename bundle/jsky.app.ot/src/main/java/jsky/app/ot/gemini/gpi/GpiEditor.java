@@ -451,7 +451,7 @@ public class GpiEditor extends ComponentEditor<ISPObsComponent, Gpi> implements 
         calEntranceShutterCtrl = ComboPropertyCtrl.enumInstance(Gpi.CAL_ENTRANCE_SHUTTER_PROP);
         referenceArmShutterCtrl = ComboPropertyCtrl.enumInstance(Gpi.REFERENCE_ARM_SHUTTER_PROP);
 
-        apodizerCtrl = new ComboPropertyCtrl<>(Gpi.APODIZER_PROP, Gpi.Apodizer.validValues());
+        apodizerCtrl = new ComboPropertyCtrl<>(Gpi.APODIZER_PROP, Gpi.Apodizer.nonObsoleteValues());
         lyotCtrl = ComboPropertyCtrl.enumInstance(Gpi.LYOT_PROP);
 
         artificialSourceLabel = new JLabel("                   Artificial Source");
