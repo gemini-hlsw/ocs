@@ -155,7 +155,6 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
       }
     }
 
-    //controlsPanel.layout(positionAngleFeedback) = BorderPanel.Position.Center
     layout(controlsPanel) = new Constraints() {
       gridy = 1
       gridwidth = 3
@@ -221,32 +220,26 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
     * This is done explicitly to avoid overwriting based on minor differences in double precision and to avoid
     * adding 180 to the position angle for parallactic angle mode, which overrides BAGS flips.
     **/
-  private def setInstPosAngle(newAngleDegrees: Double): Unit = editor.foreach { e =>
-    val Precision = 0.005
-    val oldAngleDegrees = e.getDataObject.getPosAngle
-    if (Math.abs(oldAngleDegrees - newAngleDegrees) >= Precision
-      && (e.getDataObject.getPosAngleConstraint != PosAngleConstraint.PARALLACTIC_ANGLE || Math.abs(Math.abs(oldAngleDegrees - newAngleDegrees) - 180) >= Precision)) {
-      e.getDataObject.setPosAngle(newAngleDegrees)
-    }
-  }
+  private def setInstPosAngle(newAngleDegrees: Double): Unit =
+    editor.foreach(_.getDataObject.setPosAngleDegrees(newAngleDegrees))
 
   /**
    * Copies, if possible, the position angle text field contents to the data object.
    */
-  private def copyPosAngleToInstrument(): Unit = ui.positionAngleTextField.angle.foreach(setInstPosAngle)
+  private def copyPosAngleToInstrument(): Unit =
+    ui.positionAngleTextField.angle.foreach(setInstPosAngle)
 
   /**
     * Copies the position angle in the data object to the position angle text field.
     */
-  private def copyPosAngleToTextField(): Unit = {
-    editor.foreach(e => {
+  private def copyPosAngleToTextField(): Unit =
+    editor.foreach { e =>
       val newAngleStr = numberFormatter.format(e.getDataObject.getPosAngleDegrees)
       val oldAngleStr = ui.positionAngleTextField.text
       if (!newAngleStr.equals(oldAngleStr)) {
         ui.positionAngleTextField.text = newAngleStr
       }
-    })
-  }
+    }
 
   /**
    * Called whenever a selection is made in the position angle constraint combo box.
@@ -292,20 +285,18 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
   def updateParallacticControls(): Unit =
     for {
       p <- ui.parallacticAngleControlsOpt
-      e <- editor
-      o <- Option(e.getContextObservation)
+      i <- editor.map(_.getDataObject)
+      o <- editor.map(_.getContextObservation)
     } {
-      val instrument = e.getDataObject
-
       // Determine if the parallactic angle option can be selected.
-      val isParInstAndOk = instrument.isInstanceOf[ParallacticAngleSupport] &&
-                           instrument.asInstanceOf[ParallacticAngleSupport].isCompatibleWithMeanParallacticAngleMode
+      val isParInstAndOk = i.isInstanceOf[ParallacticAngleSupport] &&
+                           i.asInstanceOf[ParallacticAngleSupport].isCompatibleWithMeanParallacticAngleMode
       val canUseAvgPar   = isParInstAndOk &&
                            !ObsClassService.lookupObsClass(o).equals(ObsClass.DAY_CAL)
       setOptionEnabled(PosAngleConstraint.PARALLACTIC_ANGLE, canUseAvgPar)
 
       // Now the parallactic angle is in use if it can be used and is selected.
-      if (canUseAvgPar && instrument.getPosAngleConstraint.equals(PosAngleConstraint.PARALLACTIC_ANGLE))
+      if (canUseAvgPar && i.getPosAngleConstraint.equals(PosAngleConstraint.PARALLACTIC_ANGLE))
         p.ui.relativeTimeMenu.rebuild()
     }
 

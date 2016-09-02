@@ -12,7 +12,6 @@ import edu.gemini.skycalc.Angle;
  * in ParallacticAngleSupportInst.
  */
 public interface ParallacticAngleSupport {
-
     /**
      * Perform the parallactic angle computation for the observation.
      */
@@ -20,6 +19,10 @@ public interface ParallacticAngleSupport {
 
     /**
      * Determine if the current instrument configuration is compatible or not with parallactic angle support.
+     * By default, assume that the instrument is compatible with the parallactic angle feature unless indicated
+     * otherwise.
      */
-    boolean isCompatibleWithMeanParallacticAngleMode();
+    default boolean isCompatibleWithMeanParallacticAngleMode() {
+        return true;
+    }
 }
