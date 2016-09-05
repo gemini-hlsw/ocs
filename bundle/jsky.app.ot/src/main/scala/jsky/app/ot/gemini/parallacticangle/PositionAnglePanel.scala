@@ -260,9 +260,7 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
     } {
       // Set the position angle constraint on the instrument.
       val posAngleConstraint = ui.positionAngleConstraintComboBox.selection.item
-      println(s"+++ Pos angle constraint was: ${e.getDataObject.getPosAngleConstraint}")
       e.getDataObject.setPosAngleConstraint(posAngleConstraint)
-      println(s"+++ Pos angle constraint now: ${e.getDataObject.getPosAngleConstraint}")
 
       // Set up the UI.
       ui.positionAngleTextField.enabled = posAngleConstraint != PosAngleConstraint.UNBOUNDED
@@ -283,7 +281,6 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
     if (editor.exists(_.getDataObject.getPosAngleConstraint == PosAngleConstraint.PARALLACTIC_ANGLE)) {
       angleOpt.foreach(angle => {
         val degrees = angle.toDegrees
-        println(s"+++ Parallactic angle changed, now is ${numberFormatter.format(degrees)}")
         ui.positionAngleTextField.text = numberFormatter.format(degrees)
         setInstPosAngle(degrees)
       })
@@ -309,7 +306,7 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
       setOptionEnabled(PosAngleConstraint.PARALLACTIC_ANGLE, canUseAvgPar)
 
       // Now the parallactic angle is in use if it can be used and is selected.
-      if (canUseAvgPar && i.getPosAngleConstraint.equals(PosAngleConstraint.PARALLACTIC_ANGLE)) {
+      if (canUseAvgPar && i.getPosAngleConstraint == PosAngleConstraint.PARALLACTIC_ANGLE) {
         p.ui.relativeTimeMenu.rebuild()
       }
     }
