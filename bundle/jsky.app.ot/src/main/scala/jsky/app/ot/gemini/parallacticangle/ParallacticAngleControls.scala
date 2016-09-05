@@ -305,7 +305,7 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
       // Parallactic Angle
       val paStr = parallacticAngle
         .map(ParallacticAngleControls.angleToDegrees)
-        .fold(", not visible")(a => f", $a%3.1f°")
+        .fold(", not visible")(a => s", ${fmt.format(a)}°")
 
       ui.parallacticAngleFeedback.text =
         if (isPaUi) dateTimeStr + durStr + paStr
