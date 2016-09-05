@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package edu.gemini.shared.gui.bean;
 
 import edu.gemini.shared.util.immutable.None;
@@ -36,7 +32,7 @@ public final class ComboPropertyCtrl<B, T> extends PropertyCtrl<B, T> {
     public static <B, T> ComboPropertyCtrl<B, T> enumInstance(PropertyDescriptor pd) {
         Class c = pd.getPropertyType();
         T[] vals = (T[]) c.getEnumConstants();
-        return new ComboPropertyCtrl<B, T>(pd, vals);
+        return new ComboPropertyCtrl<>(pd, vals);
     }
 
     /**
@@ -79,11 +75,11 @@ public final class ComboPropertyCtrl<B, T> extends PropertyCtrl<B, T> {
         vals[0] = None.instance();
         int i = 1;
         for (T enumVal : enumVals) {
-            vals[i++] = new Some<T>(enumVal);
+            vals[i++] = new Some<>(enumVal);
         }
 
         ComboPropertyCtrl<B, Option<T>> res;
-        res = new ComboPropertyCtrl<B, Option<T>>(pd, vals);
+        res = new ComboPropertyCtrl<>(pd, vals);
         ((JComboBox) res.getComponent()).setRenderer(new OptionRenderer());
         return res;
     }

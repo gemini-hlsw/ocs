@@ -44,6 +44,7 @@ import edu.gemini.spModel.type.*;
 import java.beans.PropertyDescriptor;
 import java.io.Serializable;
 import java.util.*;
+import java.util.function.IntFunction;
 
 import static edu.gemini.spModel.seqcomp.SeqConfigNames.INSTRUMENT_KEY;
 
@@ -123,7 +124,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
      * OT-102: Added Non-standard item
      * </p>
      */
-    public enum ObservingMode implements DisplayableSpType, LoggableSpType, SequenceableSpType {
+    public enum ObservingMode implements DisplayableSpType, LoggableSpType, SequenceableSpType, ObsoletableSpType {
 
         // Y_coron
         CORON_Y_BAND("Coronograph Y-band", Filter.Y, false, Apodizer.APOD_Y, FPM.FPM_Y, Lyot.LYOT_080m12_03, 0.5, 3.0) {
@@ -148,6 +149,9 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
 
         // H_starcor
         H_STAR("H_STAR", Filter.H, false, Apodizer.APOD_STAR, FPM.FPM_H, Lyot.LYOT_080m12_03) {
+            @Override
+            public boolean isObsolete() { return true; }
+
             @Override public ObservingMode correspondingH() { return this; }
         },
         // H_LIWAcor
@@ -320,6 +324,11 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
             return _logValue;
         }
 
+        @Override
+        public boolean isObsolete() {
+            return false;
+        }
+
         public static ObservingMode valueOf(String name, ObservingMode value) {
             ObservingMode res = SpTypeUtil.noExceptionValueOf(ObservingMode.class, name);
             return res == null ? value : res;
@@ -369,7 +378,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
             for(int i = 0; i < ar.length; i++) {
                 result[i] = new Some<>(ar[i]);
             }
-            return result;
+            return nonObsoleteValues(result);
         }
 
         /** returns all values except NONSTANDARD (OT-102) */
@@ -380,7 +389,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
             for(int i = 0; i < ar.length-1; i++) {
                 result[i] = new Some<>(ar[i]);
             }
-            return result;
+            return nonObsoleteValues(result);
         }
 
         /** returns all direct and modes (OT-136, REL-1741) */
@@ -415,6 +424,13 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
                 return 0;
             }
         };
+
+        private static Option<ObservingMode>[] nonObsoleteValues(Option<ObservingMode>[] values) {
+            return Arrays.stream(values)
+                    .filter(a -> !a.exists(ObservingMode::isObsolete))
+                    .toArray((IntFunction<Option<ObservingMode>[]>) Option[]::new);
+        }
+
     }
 
     /**
@@ -741,7 +757,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
      * <p/>
      * And the default is CLEAR      *
      */
-    public enum Apodizer implements DisplayableSpType, SequenceableSpType, LoggableSpType {
+    public enum Apodizer implements DisplayableSpType, SequenceableSpType, LoggableSpType, ObsoletableSpType {
         CLEAR("Clear"),
         CLEARGP("CLEAR GP"),
         APOD_Y("APOD_Y_56"),
@@ -751,7 +767,12 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
         APOD_K2("APOD_K2_56"),
         NRM("NRM"),
         APOD_HL("APOD_HL"),
-        APOD_STAR("APOD_star"),
+        APOD_STAR("APOD_star") {
+            public boolean isObsolete() {
+                return true;
+            }
+        },
+        ND3("ND3")
         ;
 
         public static Apodizer DEFAULT = CLEAR;
@@ -775,6 +796,11 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
         }
 
         @Override
+        public boolean isObsolete() {
+                    return false;
+                }
+
+        @Override
         public String logValue() {
             return displayValue();
         }
@@ -791,6 +817,10 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
                 }
             }
             return None.instance();
+        }
+
+        public static Apodizer[] nonObsoleteValues() {
+            return Arrays.stream(values()).filter(a -> !a.isObsolete()).toArray(Apodizer[]::new);
         }
     }
 
