@@ -1,33 +1,26 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: CalUnitParams.java 38751 2011-11-16 19:37:18Z swalker $
-//
 package edu.gemini.spModel.gemini.calunit;
 
 import edu.gemini.shared.util.StringUtil;
-import edu.gemini.shared.util.StringUtil.MapToString;
-
 import edu.gemini.spModel.type.DisplayableSpType;
 import edu.gemini.spModel.type.ObsoletableSpType;
 import edu.gemini.spModel.type.SequenceableSpType;
 import edu.gemini.spModel.type.SpTypeUtil;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public final class CalUnitParams {
-    public static enum LampType {
+    public enum LampType {
         arc,
-        flat;
+        flat
     }
 
     /**
      * Lamps
      */
-    public static enum Lamp implements DisplayableSpType, SequenceableSpType {
+    public enum Lamp implements DisplayableSpType, SequenceableSpType {
         IR_GREY_BODY_HIGH("IR grey body - high", "GCALflat", LampType.flat),
         IR_GREY_BODY_LOW("IR grey body - low", "GCALflat", LampType.flat),
         QUARTZ("Quartz Halogen", "GCALflat", LampType.flat),
@@ -51,7 +44,7 @@ public final class CalUnitParams {
         // Set to true for arcs
         private LampType _type;
 
-        private Lamp(String displayValue, String tccName, LampType lampType) {
+        Lamp(String displayValue, String tccName, LampType lampType) {
             _displayValue = displayValue;
             _tccName      = tccName;
             _type         = lampType;
@@ -100,11 +93,8 @@ public final class CalUnitParams {
         private static List<Lamp> _arcLamps;
 
         private static List<Lamp> _getLamps(LampType lampType) {
-            List<Lamp> res = new ArrayList<Lamp>();
-            for (Lamp l : values()) {
-                if (l.type() == lampType) res.add(l);
-            }
-            return res;
+            return Arrays.stream(values()).filter(l -> l.type() == lampType)
+                    .collect(Collectors.toList());
         }
 
         public synchronized static List<Lamp> flatLamps() {
@@ -116,18 +106,6 @@ public final class CalUnitParams {
             if (_arcLamps == null) _arcLamps = _getLamps(LampType.arc);
             return _arcLamps;
         }
-
-        public static MapToString<Lamp> NAME_MAPPER = new MapToString<Lamp>() {
-            @Override public String apply(Lamp l) { return l.name(); }
-        };
-
-        public static MapToString<Lamp> DISPLAY_MAPPER = new MapToString<Lamp>() {
-            @Override public String apply(Lamp l) { return l.displayValue(); }
-        };
-
-        public static MapToString<Lamp> TCC_MAPPER = new MapToString<Lamp>() {
-            @Override public String apply(Lamp l) { return l.getTccName(); }
-        };
 
         public static String show(Collection<Lamp> lamps, StringUtil.MapToString<Lamp> mapper) {
             return StringUtil.mkString(lamps, "", ",", "", mapper);
@@ -144,27 +122,31 @@ public final class CalUnitParams {
 
         public static List<Lamp> read(String formattedList) {
             String[] ar = formattedList.split(",");
-            List<Lamp> lst = new ArrayList<Lamp>(ar.length);
-            for (String anAr : ar) lst.add(Lamp.getLamp(anAr));
-            return lst;
+            return Arrays.stream(ar).map(Lamp::getLamp).collect(Collectors.toList());
         }
     }
 
     /**
      * Filters
      */
-    public static enum Filter implements DisplayableSpType, ObsoletableSpType, SequenceableSpType {
+    public enum Filter implements DisplayableSpType, ObsoletableSpType, SequenceableSpType {
 
         NONE("none"),
         ND_10("ND1.0"),
-        ND_16("ND1.6", true),
+        ND_16("ND1.6") {
+            @Override public boolean isObsolete() { return true; }
+        },
         ND_20("ND2.0"),
         ND_30("ND3.0"),
         ND_40("ND4.0"),
         ND_45("ND4-5"),
-        ND_50("ND5.0", true),
+        ND_50("ND5.0") {
+            @Override public boolean isObsolete() { return true; }
+        },
         GMOS("GMOS balance"),
-        HROS("HROS balance", true),
+        HROS("HROS balance") {
+            @Override public boolean isObsolete() { return true; }
+        },
         NIR("NIR balance"),
 
         ;
@@ -173,23 +155,13 @@ public final class CalUnitParams {
         public static Filter DEFAULT = NONE;
 
         private String _displayValue;
-        private boolean _obsolete;
 
-        private Filter(String displayVal) {
-            this(displayVal, false);
-        }
-
-        private Filter(String displayVal, boolean obsolete) {
+        Filter(String displayVal) {
             _displayValue = displayVal;
-            _obsolete     = obsolete;
         }
 
         public String displayValue() {
             return _displayValue;
-        }
-
-        public boolean isObsolete() {
-            return _obsolete;
         }
 
         public String sequenceValue() {
@@ -220,7 +192,7 @@ public final class CalUnitParams {
     /**
      * Diffusers
      */
-    public static enum Diffuser implements DisplayableSpType, SequenceableSpType {
+    public enum Diffuser implements DisplayableSpType, SequenceableSpType {
         IR("IR"),
         VISIBLE("visible"),
         ;
@@ -230,7 +202,7 @@ public final class CalUnitParams {
 
         private String _displayValue;
 
-        private Diffuser(String displayValue) {
+        Diffuser(String displayValue) {
             _displayValue = displayValue;
         }
 
@@ -266,7 +238,7 @@ public final class CalUnitParams {
     /**
      * IR grey body shutter
      */
-    public static enum Shutter implements DisplayableSpType, SequenceableSpType {
+    public enum Shutter implements DisplayableSpType, SequenceableSpType {
 
         OPEN("Open"),
         CLOSED("Closed"),
@@ -277,7 +249,7 @@ public final class CalUnitParams {
 
         private String _displayValue;
 
-        private Shutter(String displayValue) {
+        Shutter(String displayValue) {
             _displayValue = displayValue;
         }
 

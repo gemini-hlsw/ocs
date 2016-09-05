@@ -1,10 +1,3 @@
-// Copyright 2002
-// Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-//
-// $Id: TReCSParams.java 38188 2011-10-24 14:17:39Z swalker $
-//
-
 package edu.gemini.spModel.gemini.trecs;
 
 import static edu.gemini.spModel.seqcomp.SeqConfigNames.INSTRUMENT_KEY;
@@ -25,7 +18,7 @@ public final class TReCSParams {
     /**
      * TReCS Dispersers.
      */
-    public static enum Disperser implements DisplayableSpType, LoggableSpType, SequenceableSpType {
+    public enum Disperser implements DisplayableSpType, LoggableSpType, SequenceableSpType {
 
         MIRROR("Mirror", "Mirror"),
         LOW_RES_10("Low Res 10um Grating", "LR10"),
@@ -46,7 +39,7 @@ public final class TReCSParams {
          */
         private String _logValue;
 
-        private Disperser(String displayValue, String logValue) {
+        Disperser(String displayValue, String logValue) {
             _displayValue = displayValue;
             _logValue = logValue;
         }
@@ -94,7 +87,7 @@ public final class TReCSParams {
     /**
      * Masks
      */
-    public static enum Mask implements DisplayableSpType, LoggableSpType, SequenceableSpType {
+    public enum Mask implements DisplayableSpType, LoggableSpType, SequenceableSpType {
 
         MASK_IMAGING("Imaging", 28.5, 21.5, "open"), // according to Kevin
         MASK_IMAGING_W("Imaging w/o Flexure Mask", 28.8, 21.6, "open"),
@@ -124,7 +117,7 @@ public final class TReCSParams {
         // The height (length) of the mask in arcsec
         private double _height;
 
-        private Mask(String displayValue, double width, double height, String logValue) {
+        Mask(String displayValue, double width, double height, String logValue) {
             _displayValue = displayValue;
             _width = width;
             _height = height;
@@ -186,7 +179,7 @@ public final class TReCSParams {
     /**
      * User Filters
      */
-    public static enum Filter implements DisplayableSpType, LoggableSpType, SequenceableSpType, ObsoletableSpType {
+    public enum Filter implements DisplayableSpType, LoggableSpType, SequenceableSpType, ObsoletableSpType {
 
         NONE("None", "None", "none"),
         N("N (broad 10um)", "N", "10"),
@@ -203,7 +196,9 @@ public final class TReCSParams {
         NE_II_CONT("[Ne II] cont 13.10um", "NeII13.1", "13.10"),
         PAH_8_6("PAH 8.6um", "PAH1", "8.6"),
         PAH_11_3("PAH 11.3um", "PAH2", "11.3"),
-        Q_SHORT("Q short 17.65um", "Qone", "17.65", true),
+        Q_SHORT("Q short 17.65um", "Qone", "17.65") {
+            @Override public boolean isObsolete() { return true; }
+        },
         QA("Qa 18.30um", "Qa", "18.30"),
         QB("Qb 24.56um", "Qb", "24.56"),
         Q("Q (broad 20.8um)", "Qw", "20.8"),
@@ -217,17 +212,11 @@ public final class TReCSParams {
         private String _displayValue;
         private String _logValue;
         private String _wavelength;  // in µm
-        private boolean _isObsolete = false;
 
-        private Filter(String displayValue, String logValue, String wavelength) {
+        Filter(String displayValue, String logValue, String wavelength) {
             _displayValue = displayValue;
             _logValue = logValue;
             _wavelength = wavelength;
-        }
-
-        private Filter(String displayValue, String logValue, String wavelength, boolean isObsolete) {
-            this(displayValue, logValue, wavelength);
-            _isObsolete = isObsolete;
         }
 
         /**
@@ -250,10 +239,6 @@ public final class TReCSParams {
 
         public String sequenceValue() {
             return _displayValue;
-        }
-
-        public boolean isObsolete() {
-            return _isObsolete;
         }
 
 
@@ -288,7 +273,7 @@ public final class TReCSParams {
     /**
      * DataMode values.
      */
-    public static enum DataMode implements SequenceableSpType, DisplayableSpType {
+    public enum DataMode implements SequenceableSpType, DisplayableSpType {
 
         SAVE("Save"),
         DISCARD("Discard"),
@@ -303,7 +288,7 @@ public final class TReCSParams {
 
         private String _displayValue;
 
-        private DataMode(String displayValue) {
+        DataMode(String displayValue) {
             _displayValue = displayValue;
         }
 
@@ -346,7 +331,7 @@ public final class TReCSParams {
     /**
      * ObsMode values.
      */
-    public static enum ObsMode implements SequenceableSpType, DisplayableSpType, LoggableSpType {
+    public enum ObsMode implements SequenceableSpType, DisplayableSpType, LoggableSpType {
 
         CHOP_NOD("Chop-Nod", "C-N"),
         STARE("Stare", "S"),
@@ -362,7 +347,7 @@ public final class TReCSParams {
         private String _logValue;
         private String _displayValue;
 
-        private ObsMode(String displayValue, String logValue) {
+        ObsMode(String displayValue, String logValue) {
             _displayValue = displayValue;
             _logValue = logValue;
         }
@@ -416,7 +401,7 @@ public final class TReCSParams {
     /**
      * Window Wheel values.
      */
-    public static enum WindowWheel implements SequenceableSpType,  DisplayableSpType {
+    public enum WindowWheel implements SequenceableSpType,  DisplayableSpType {
 
         AUTO("auto"),
         BLOCK("Block"),
@@ -433,7 +418,7 @@ public final class TReCSParams {
         public static WindowWheel DEFAULT = AUTO;
         private String _displayValue;
 
-        private WindowWheel(String displayValue) {
+        WindowWheel(String displayValue) {
             _displayValue = displayValue;
         }
 
@@ -477,7 +462,7 @@ public final class TReCSParams {
     /**
      * Sector Wheel values.
      */
-    public static enum SectorWheel implements SequenceableSpType, DisplayableSpType {
+    public enum SectorWheel implements SequenceableSpType, DisplayableSpType {
 
         OPEN("Open"),
         POLY_115("Poly_115"),
@@ -493,7 +478,7 @@ public final class TReCSParams {
 
         private String _displayValue;
 
-        private SectorWheel(String displayValue) {
+        SectorWheel(String displayValue) {
             _displayValue = displayValue;
         }
 
@@ -534,7 +519,7 @@ public final class TReCSParams {
     /**
      * Lyot Wheel Values
      */
-    public static enum LyotWheel implements SequenceableSpType, DisplayableSpType {
+    public enum LyotWheel implements SequenceableSpType, DisplayableSpType {
 
         GRID_MASK("Grid_Mask"),
         SPOT_MASK("Spot_Mask"),
@@ -559,7 +544,7 @@ public final class TReCSParams {
 
         private String _displayValue;
 
-        private LyotWheel(String displayValue) {
+        LyotWheel(String displayValue) {
             _displayValue = displayValue;
         }
 
@@ -600,7 +585,7 @@ public final class TReCSParams {
     /**
      * Pupil Imaging Wheel values.
      */
-    public static enum PupilImagingWheel implements DisplayableSpType, SequenceableSpType {
+    public enum PupilImagingWheel implements DisplayableSpType, SequenceableSpType {
 
         OPEN_1("Open-1"),
         PUPIL_IMAGER("Pupil_Imager"),
@@ -615,7 +600,7 @@ public final class TReCSParams {
         public static PupilImagingWheel DEFAULT = OPEN_1;
         private String _displayValue;
 
-        private PupilImagingWheel(String displayValue) {
+        PupilImagingWheel(String displayValue) {
             _displayValue = displayValue;
         }
 
@@ -656,11 +641,13 @@ public final class TReCSParams {
     /**
      * Aperture Wheel values.
      */
-    public static enum ApertureWheel implements DisplayableSpType, SequenceableSpType, ObsoletableSpType {
+    public enum ApertureWheel implements DisplayableSpType, SequenceableSpType, ObsoletableSpType {
 
         GRID_MASK("Grid_Mask"),
         MATCHED("Matched"),
-        OCCULTING_BAR("Occulting_Bar", true), //SCT-139
+        OCCULTING_BAR("Occulting_Bar") {
+            @Override public boolean isObsolete() { return true; }
+        },
         WINDOW_IMAGER("Window_Imager"),
         SPOT_MASK("Spot_Mask"),
         DATUM("Datum"),
@@ -671,15 +658,9 @@ public final class TReCSParams {
          */
         public static ApertureWheel DEFAULT = MATCHED;
         private String _displayValue;
-        private boolean _isObsolete;
 
-        private ApertureWheel(String displayValue) {
-            this(displayValue, false);
-        }
-
-        private ApertureWheel(String displayValue, boolean isObsolete) {
+        ApertureWheel(String displayValue) {
             _displayValue = displayValue;
-            _isObsolete = isObsolete;
         }
 
         public String displayValue() {
@@ -692,10 +673,6 @@ public final class TReCSParams {
 
         public String toString() {
             return _displayValue;
-        }
-
-        public boolean isObsolete() {
-            return _isObsolete;
         }
 
         /**
@@ -724,7 +701,7 @@ public final class TReCSParams {
     /**
      * Nod orientation values.
      */
-    public static enum NodOrientation implements DisplayableSpType, SequenceableSpType {
+    public enum NodOrientation implements DisplayableSpType, SequenceableSpType {
 
         PARALLEL("Parallel to Chop"),
         ORTHOGONAL("Orthogonal to Chop"),
@@ -736,7 +713,7 @@ public final class TReCSParams {
         public static NodOrientation DEFAULT = PARALLEL;
         private String _displayValue;
 
-        private NodOrientation(String displayValue) {
+        NodOrientation(String displayValue) {
             _displayValue = displayValue;
         }
 
@@ -777,7 +754,7 @@ public final class TReCSParams {
     /**
      * ReadoutMode values.
      */
-    public static enum ReadoutMode implements DisplayableSpType, SequenceableSpType {
+    public enum ReadoutMode implements DisplayableSpType, SequenceableSpType {
 
         NORMAL_IMAGING("Normal Imaging and Spectroscopy"),
         FAINT_SOURCE("Faint-source Spectroscopy"),
@@ -789,7 +766,7 @@ public final class TReCSParams {
         public static ReadoutMode DEFAULT = NORMAL_IMAGING;
         private String _displayValue;
 
-        private ReadoutMode(String displayValue) {
+        ReadoutMode(String displayValue) {
             _displayValue = displayValue;
         }
 
@@ -834,7 +811,7 @@ public final class TReCSParams {
     /**
      * Well depth - SCT-109/OT-
      */
-    public static enum WellDepth implements DisplayableSpType, SequenceableSpType {
+    public enum WellDepth implements DisplayableSpType, SequenceableSpType {
 
         AUTO("auto"),
         SHALLOW("Shallow"),
@@ -847,7 +824,7 @@ public final class TReCSParams {
         public static WellDepth DEFAULT = AUTO;
         private String _displayValue;
 
-        private WellDepth(String displayValue) {
+        WellDepth(String displayValue) {
             _displayValue = displayValue;
         }
 

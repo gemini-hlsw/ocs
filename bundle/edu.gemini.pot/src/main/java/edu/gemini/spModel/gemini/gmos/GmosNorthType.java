@@ -13,9 +13,13 @@ public class GmosNorthType {
      */
     public enum StageModeNorth implements GmosCommonType.StageMode {
         NO_FOLLOW("Do Not Follow"),
-        FOLLOW_XYZ("Follow in XYZ(focus)") { public boolean isObsolete() { return true;}},
+        FOLLOW_XYZ("Follow in XYZ(focus)") {
+            @Override public boolean isObsolete() { return true; }
+        },
         FOLLOW_XY("Follow in XY"),
-        FOLLOW_Z_ONLY("Follow in Z Only") { public boolean isObsolete() { return true;}}
+        FOLLOW_Z_ONLY("Follow in Z Only") {
+            @Override public boolean isObsolete() { return true; }
+        }
         ;
 
         public static final StageModeNorth DEFAULT = StageModeNorth.FOLLOW_XY;
@@ -47,10 +51,6 @@ public class GmosNorthType {
         public static StageModeNorth getStageMode(String name, StageModeNorth nvalue) {
             return SpTypeUtil.oldValueOf(StageModeNorth.class, name, nvalue);
         }
-
-        public boolean isObsolete() {
-            return false;
-        }
     }
 
     public static GmosCommonType.StageModeBridge<StageModeNorth> STAGE_MODE_BRIDGE = new GmosCommonType.StageModeBridge<StageModeNorth>() {
@@ -71,7 +71,9 @@ public class GmosNorthType {
         MIRROR("Mirror", "mirror", 0),
         B1200_G5301("B1200_G5301", "B1200", 1200),
         R831_G5302("R831_G5302", "R831", 831),
-        B600_G5303("B600_G5303", "B600", 600) {public boolean isObsolete() {return true;}},
+        B600_G5303("B600_G5303", "B600", 600) {
+            @Override public boolean isObsolete() { return true; }
+        },
         B600_G5307("B600_G5307", "B600", 600),
         R600_G5304("R600_G5304", "R600", 600),
         R400_G5305("R400_G5305", "R400", 400),
@@ -116,9 +118,6 @@ public class GmosNorthType {
             return displayValue();
         }
 
-        public boolean isObsolete() {
-            return false;
-        }
 
         /** Return a Disperser by index **/
         public static DisperserNorth getDisperserByIndex(int index) {
@@ -178,9 +177,7 @@ public class GmosNorthType {
         i_G0302_CaT_G0309("i_G0302 + CaT_G0309", "i+CaT", "0.815"),
         z_G0304_CaT_G0309("z_G0304 + CaT_G0309", "z+CaT", "0.890"),
         u_G0308("u_G0308", "u_G0308", "0.350") {
-            public boolean isObsolete() {
-                return true;
-            }
+            @Override public boolean isObsolete() { return true; }
         }
         ;
 
@@ -200,10 +197,6 @@ public class GmosNorthType {
             _displayValue = displayValue;
             _logValue     = logValue;
             _wavelength   = wavelength;
-        }
-
-        public boolean isObsolete() {
-            return false;
         }
 
         public String displayValue() {

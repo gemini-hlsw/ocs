@@ -1,7 +1,3 @@
-//
-// $Id: ObsoletableSpType.java 6980 2006-04-27 13:24:45Z shane $
-//
-
 package edu.gemini.spModel.type;
 
 /**
@@ -16,5 +12,7 @@ public interface ObsoletableSpType extends SpType {
      * Returns <code>true</code> if the item should no longer be used;
      * <code>false</code> if it is still valid.
      */
-    boolean isObsolete();
+    default boolean isObsolete() {
+        return false;
+    }
 }

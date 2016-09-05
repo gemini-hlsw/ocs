@@ -199,9 +199,15 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         // scientifically useful option, but is used for focusing)
 
         OPEN("f/16 (open)", "f/16", 1.61, 0.18),
-        HIGH("f/32 MCAO high background", "f/32 high", 0.805, 0.09, true),
-        LOW("f/32 MCAO low background", "f/32 low", 0.805, 0.09, true),
-        GEMS("f/33 (Gems)", "f/33 Gems", 0.784, 0.09, true),
+        HIGH("f/32 MCAO high background", "f/32 high", 0.805, 0.09) {
+            @Override public boolean isObsolete() { return true; }
+        },
+        LOW("f/32 MCAO low background", "f/32 low", 0.805, 0.09) {
+            @Override public boolean isObsolete() { return true; }
+        },
+        GEMS("f/33 (Gems)", "f/33 Gems", 0.784, 0.09) {
+            @Override public boolean isObsolete() { return true; }
+        },
         GEMS_UNDER("f/33 (GeMS under-sized)", "GeMS under", 0.784, 0.09),
         GEMS_OVER("f/33 (GeMS over-sized)", "GeMS over", 0.784, 0.09),
         H1("Hartmann A (H1)"),
@@ -218,18 +224,12 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
 
         private final String _displayName;
         private final String _logValue;
-        private final boolean _obsolete;
 
         LyotWheel(String name, String logValue, double plateScale, double pixelScale) {
-            this(name, logValue, plateScale, pixelScale, false);
-        }
-
-        LyotWheel(String name, String logValue, double plateScale, double pixelScale, boolean obsolete) {
             _displayName = name;
             _logValue    = logValue;
             _plateScale  = plateScale;
             _pixelScale  = pixelScale;
-            _obsolete    = obsolete;
         }
 
         LyotWheel(String name) {
@@ -264,11 +264,6 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
 
         public String toString() {
             return displayValue();
-        }
-
-        @Override
-        public boolean isObsolete() {
-            return _obsolete;
         }
 
         // REL-1522
@@ -525,10 +520,7 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         }
 
         public static Option<WindowCover> valueOf(String name, Option<WindowCover> nvalue) {
-            WindowCover def = nvalue.isEmpty() ? null : nvalue.getValue();
-            WindowCover val = SpTypeUtil.oldValueOf(WindowCover.class, name, def);
-            Option<WindowCover> none = None.instance();
-            return val == null ? none : new Some<>(val);
+            return nvalue.map(def -> valueOf(name, def));
         }
     }
 
@@ -552,10 +544,7 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         }
 
         public static Option<Decker> valueOf(String name, Option<Decker> nvalue) {
-            Decker def = nvalue.isEmpty() ? null : nvalue.getValue();
-            Decker val = SpTypeUtil.oldValueOf(Decker.class, name, def);
-            Option<Decker> none = None.instance();
-            return val == null ? none : new Some<>(val);
+            return nvalue.map(def -> valueOf(name, def));
         }
     }
 
@@ -578,10 +567,7 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         }
 
         public static Option<ReadoutMode> valueOf(String name, Option<ReadoutMode> nvalue) {
-            ReadoutMode def = nvalue.isEmpty() ? null : nvalue.getValue();
-            ReadoutMode val = SpTypeUtil.oldValueOf(ReadoutMode.class, name, def);
-            Option<ReadoutMode> none = None.instance();
-            return val == null ? none : new Some<>(val);
+            return nvalue.map(def -> valueOf(name, def));
         }
     }
 
@@ -618,10 +604,7 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         }
 
         public static Option<Reads> valueOf(String name, Option<Reads> nvalue) {
-            Reads def = nvalue.isEmpty() ? null : nvalue.getValue();
-            Reads val = SpTypeUtil.oldValueOf(Reads.class, name, def);
-            Option<Reads> none = None.instance();
-            return val == null ? none : new Some<>(val);
+            return nvalue.map(def -> valueOf(name, def));
         }
     }
 

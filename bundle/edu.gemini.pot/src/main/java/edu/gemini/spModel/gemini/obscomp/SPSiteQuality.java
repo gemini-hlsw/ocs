@@ -246,11 +246,15 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
      * Cloud Cover Options.
      */
     public enum CloudCover implements DisplayableSpType, ObsoletableSpType, SequenceableSpType, PercentageContainer {
-        PERCENT_20("20%",        20),
+        PERCENT_20("20%",        20) {
+            @Override public boolean isObsolete() { return true; }
+        },
         PERCENT_50("50%/Clear",  50),
         PERCENT_70("70%/Cirrus", 70),
         PERCENT_80("80%/Cloudy", 80),
-        PERCENT_90("90%",        90),
+        PERCENT_90("90%",        90) {
+            @Override public boolean isObsolete() { return true; }
+        },
         ANY(       "Any",       100),
         ;
 
@@ -287,10 +291,6 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
         /** Return a CloudCover by name with a value to return upon error **/
         public static CloudCover getCloudCover(String name, CloudCover nvalue) {
             return SpTypeUtil.oldValueOf(CloudCover.class, name, nvalue);
-        }
-
-        public boolean isObsolete() {
-            return (this == PERCENT_20) || (this == PERCENT_90);
         }
 
         public String toString() {

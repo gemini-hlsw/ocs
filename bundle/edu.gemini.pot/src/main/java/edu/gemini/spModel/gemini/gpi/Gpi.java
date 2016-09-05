@@ -493,18 +493,9 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
      * Disperser: see OT-50
      */
     public enum Disperser implements DisplayableSpType, SequenceableSpType, PartiallyEngineeringSpType, LoggableSpType {
-        PRISM("Prism") {
-            @Override
-            public boolean isEngineering() {
-                return false;
-            }
-        },
-        WOLLASTON("Wollaston") {
-            @Override
-            public boolean isEngineering() {
-                return false;
-            }
-        };
+        PRISM("Prism"),
+        WOLLASTON("Wollaston"),
+        ;
 
         /** The default Disperser value **/
         public static final Disperser DEFAULT = PRISM;
@@ -693,12 +684,9 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
 
         // Returns the DetectorReadoutArea matching the given ReadoutArea values.
         public static DetectorReadoutArea valueOf(ReadoutArea readoutArea) {
-            for(DetectorReadoutArea detectorReadoutArea : values()) {
-                if (detectorReadoutArea.getReadoutArea().equals(readoutArea)) {
-                    return detectorReadoutArea;
-                }
-            }
-            return MANUAL;
+            return Arrays.stream(values())
+                    .filter(dRA -> dRA.getReadoutArea().equals(readoutArea))
+                    .findFirst().orElse(MANUAL);
         }
 
     }

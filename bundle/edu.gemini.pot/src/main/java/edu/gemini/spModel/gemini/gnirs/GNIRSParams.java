@@ -1,10 +1,3 @@
-// Copyright 1997-2000
-// Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: GNIRSParams.java 45360 2012-05-18 19:57:50Z nbarriga $
-//
 package edu.gemini.spModel.gemini.gnirs;
 
 import edu.gemini.spModel.config2.ItemKey;
@@ -28,7 +21,7 @@ public class GNIRSParams {
     /**
      * CrossDispersed values (yes/no).
      */
-    public static enum CrossDispersed implements DisplayableSpType, SequenceableSpType {
+    public enum CrossDispersed implements DisplayableSpType, SequenceableSpType {
 
         NO("No"),
         SXD("SXD"),
@@ -42,8 +35,8 @@ public class GNIRSParams {
 
         private String _displayValue;
 
-        private CrossDispersed(String displayValue) {
-            _displayValue      = displayValue;
+        CrossDispersed(String displayValue) {
+            _displayValue = displayValue;
         }
 
         public String displayValue() {
@@ -87,7 +80,7 @@ public class GNIRSParams {
     /**
      * PixelScale choices
      */
-    public static enum PixelScale implements DisplayableSpType, SequenceableSpType {
+    public enum PixelScale implements DisplayableSpType, SequenceableSpType {
 
         PS_015("0.15\"/pix", 0.15, CrossDispersed.NO, CrossDispersed.SXD),
         PS_005("0.05\"/pix", 0.05, CrossDispersed.values()),
@@ -99,10 +92,10 @@ public class GNIRSParams {
         private String _displayValue;
         private Set<CrossDispersed> _xdOptions;
 
-        private PixelScale(String displayValue, double pixelScale, CrossDispersed... xd) {
+        PixelScale(String displayValue, double pixelScale, CrossDispersed... xd) {
             _displayValue = displayValue;
             _pixelScale   = pixelScale;
-            _xdOptions    = Collections.unmodifiableSet(new HashSet<CrossDispersed>(Arrays.asList(xd)));
+            _xdOptions    = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(xd)));
         }
 
         public String displayValue() {
@@ -150,7 +143,7 @@ public class GNIRSParams {
     /**
      * SlitWidth choices
      */
-    public static enum SlitWidth implements DisplayableSpType, SequenceableSpType, LoggableSpType, ObsoletableSpType {
+    public enum SlitWidth implements DisplayableSpType, SequenceableSpType, LoggableSpType, ObsoletableSpType {
 
         SW_1("0.10 arcsec", 0.10, "0.10"),
         SW_2("0.15 arcsec", 0.15, "0.15"),
@@ -160,14 +153,10 @@ public class GNIRSParams {
         SW_6("0.675 arcsec", 0.675, "0.675"),
         SW_7("1.0 arcsec", 1.0, "1.0"),
         SW_8("3.0 arcsec", 3.0, "3.0") {
-            public boolean isObsolete() {
-                return true;
-            }
+            @Override public boolean isObsolete() { return true; }
         },
         IFU("IFU", 4.8, "IFU") {
-            public boolean isObsolete() {
-                return true;
-            }
+            @Override public boolean isObsolete() { return true; }
         },
         ACQUISITION("acquisition", "ACQ"),
         PUPIL_VIEWER("pupil viewer", "PV"),
@@ -185,14 +174,14 @@ public class GNIRSParams {
         private String _displayValue;
         private String _logValue;
 
-        private SlitWidth(String displayValue, double slitWidth, String logValue) {
+        SlitWidth(String displayValue, double slitWidth, String logValue) {
             _displayValue = displayValue;
             _slitWidth = slitWidth;
             _logValue = logValue;
         }
 
         // Note hardcoded default slit width because one can't use static in enum constructor
-        private SlitWidth(String displayValue, String logValue) {
+        SlitWidth(String displayValue, String logValue) {
             this(displayValue, Defaults.DEFAULT_SLIT_WIDTH, logValue);
         }
 
@@ -209,10 +198,6 @@ public class GNIRSParams {
 
         public String sequenceValue() {
             return _displayValue;
-        }
-
-        public boolean isObsolete() {
-            return false;
         }
 
         public double getValue() {
@@ -261,7 +246,7 @@ public class GNIRSParams {
     /**
      * Disperser choices
      */
-    public static enum Disperser implements DisplayableSpType, SequenceableSpType, LoggableSpType {
+    public enum Disperser implements DisplayableSpType, SequenceableSpType, LoggableSpType {
         //For the disperser, to do the conversion you will need to check pixel scale.
         //The translation is:
         //
@@ -299,7 +284,7 @@ public class GNIRSParams {
 
         // Initialize with the name, grating value and spectral resolutions at
         // 0.05 and 0.15 "/pix
-        private Disperser(String displayValue, int value, int sr005, int sr015, String logValue) {
+        Disperser(String displayValue, int value, int sr005, int sr015, String logValue) {
             _displayValue = displayValue;
             _value = value;
             _sr005 = sr005;
@@ -425,7 +410,7 @@ public class GNIRSParams {
     /**
      * Central Wavelength Order
      */
-    public static enum Order implements DisplayableSpType, SequenceableSpType {
+    public enum Order implements DisplayableSpType, SequenceableSpType {
 
         // Note: If you change the order here, look at EdCompInstGNIRS._getDefaultWavelengths()
         // and the event handler, since the last two items (7,8) are not included in the menu and the
@@ -458,9 +443,9 @@ public class GNIRSParams {
         private String _displayValue;
 
         // Constructor
-        private Order(int order, double defaultWavelength,
-                      double minWavelength, double maxWavelength,
-                      double deltaWavelength, String band, boolean isXD) {
+        Order(int order, double defaultWavelength,
+              double minWavelength, double maxWavelength,
+              double deltaWavelength, String band, boolean isXD) {
 
             _displayValue = String.valueOf(order);
             _order = order;
@@ -592,7 +577,7 @@ public class GNIRSParams {
     /**
      * WollastonPrism values (yes/no).
      */
-    public static enum WollastonPrism implements DisplayableSpType, SequenceableSpType {
+    public enum WollastonPrism implements DisplayableSpType, SequenceableSpType {
 
         NO("No"),
         YES("Yes"),
@@ -604,7 +589,7 @@ public class GNIRSParams {
         public static WollastonPrism DEFAULT = NO;
         private String _displayValue;
 
-        private WollastonPrism(String displayValue) {
+        WollastonPrism(String displayValue) {
             _displayValue = displayValue;
         }
 
@@ -646,7 +631,7 @@ public class GNIRSParams {
     /**
      * Read Mode
      */
-    public static enum ReadMode implements DisplayableSpType, SequenceableSpType, LoggableSpType {
+    public enum ReadMode implements DisplayableSpType, SequenceableSpType, LoggableSpType {
         // Updated for REL-175
         BRIGHT("Bright Objects", 1, 0.6, 30, "bright"),
         FAINT("Faint Objects", 16, 9., 10, "faint"),
@@ -666,8 +651,8 @@ public class GNIRSParams {
         private String _logValue;
         private String _displayValue;
 
-        private ReadMode(String displayValue, int lowNoiseReads,
-                         double minExp, double readNoise, String logValue) {
+        ReadMode(String displayValue, int lowNoiseReads,
+                 double minExp, double readNoise, String logValue) {
             _displayValue = displayValue;
             _lowNoiseReads = lowNoiseReads;
             _minExp = minExp;
@@ -747,7 +732,7 @@ public class GNIRSParams {
     /**
      * Filters (for on-site sequencing only)
      */
-    public static enum Filter implements DisplayableSpType, SequenceableSpType, LoggableSpType {
+    public enum Filter implements DisplayableSpType, SequenceableSpType, LoggableSpType {
 
         X_DISPERSED("x-dispersed", "XD"),
         ORDER_6("order 6 (X)", "X", 1.10),
@@ -777,15 +762,15 @@ public class GNIRSParams {
         private String _sequenceValue;
         private Double _wavelength;
 
-        private Filter(String displayValue, String logValue) {
+        Filter(String displayValue, String logValue) {
             this(displayValue, logValue, null);
         }
 
-        private Filter(String displayValue, String logValue, Double wavelength) {
+        Filter(String displayValue, String logValue, Double wavelength) {
             this(displayValue,logValue,displayValue, wavelength);
         }
 
-        private Filter(String displayValue, String logValue, String sequenceValue, Double wavelength) {
+        Filter(String displayValue, String logValue, String sequenceValue, Double wavelength) {
             _displayValue = displayValue;
             _logValue = logValue;
             _sequenceValue = sequenceValue;
@@ -842,7 +827,7 @@ public class GNIRSParams {
      * short red
      * long red
      */
-    public static enum Camera implements DisplayableSpType, SequenceableSpType, LoggableSpType {
+    public enum Camera implements DisplayableSpType, SequenceableSpType, LoggableSpType {
 
         SHORT_BLUE("short blue", "SB"),
         LONG_BLUE("long blue", "LB"),
@@ -857,7 +842,7 @@ public class GNIRSParams {
         private String _logValue;
         private String _displayValue;
 
-        private Camera(String displayValue, String logValue) {
+        Camera(String displayValue, String logValue) {
             _displayValue = displayValue;
             _logValue = logValue;
         }
@@ -913,16 +898,14 @@ public class GNIRSParams {
     /**
      * Deckers (for on-site sequencing only)
      */
-    public static enum Decker implements DisplayableSpType, SequenceableSpType, ObsoletableSpType {
+    public enum Decker implements DisplayableSpType, SequenceableSpType, ObsoletableSpType {
 
         ACQUISITION("acquisition"),
         PUPIL_VIEWER("pupil viewer"),
         SHORT_CAM_LONG_SLIT("short camera long slit"),
         SHORT_CAM_X_DISP("short camera x-disp"),
         IFU("IFU") {
-            public boolean isObsolete() {
-                return true;
-            }
+            @Override public boolean isObsolete() { return true; }
         },
         LONG_CAM_LONG_SLIT("long camera long slit"),
         LONG_CAM_X_DISP("long camera x-disp"),
@@ -935,7 +918,7 @@ public class GNIRSParams {
         public static Decker DEFAULT = ACQUISITION;
         private String _displayValue;
 
-        private Decker(String displayValue) {
+        Decker(String displayValue) {
             _displayValue = displayValue;
         }
 
@@ -952,10 +935,6 @@ public class GNIRSParams {
 
         public String sequenceValue() {
             return _displayValue;
-        }
-
-        public boolean isObsolete() {
-            return false;
         }
 
         public String toString() {
@@ -985,7 +964,7 @@ public class GNIRSParams {
     /**
      * Acquisition Mirror (for on-site sequencing only)
      */
-    public static enum AcquisitionMirror implements DisplayableSpType, SequenceableSpType {
+    public enum AcquisitionMirror implements DisplayableSpType, SequenceableSpType {
 
         IN("in"),
         OUT("out"),
@@ -997,7 +976,7 @@ public class GNIRSParams {
         public static AcquisitionMirror DEFAULT = OUT;
         private String _displayValue;
 
-        private AcquisitionMirror(String displayValue) {
+        AcquisitionMirror(String displayValue) {
             _displayValue = displayValue;
         }
 
@@ -1036,7 +1015,7 @@ public class GNIRSParams {
     }
 
     /**Well Depth Values **/
-    public static enum WellDepth implements DisplayableSpType, SequenceableSpType {
+    public enum WellDepth implements DisplayableSpType, SequenceableSpType {
 
         SHALLOW("Shallow", 300),
         DEEP("Deep", 600);
@@ -1046,7 +1025,7 @@ public class GNIRSParams {
         private String _displayValue;
         private int _biasLevel; //in mV
 
-        private WellDepth(String name, int biasLevel) {
+        WellDepth(String name, int biasLevel) {
             _displayValue = name;
             _biasLevel = biasLevel;
         }
@@ -1070,7 +1049,7 @@ public class GNIRSParams {
 
 
     /** Wavelength values **/
-    public static enum WavelengthSuggestion implements DisplayableSpType, SequenceableSpType {
+    public enum WavelengthSuggestion implements DisplayableSpType, SequenceableSpType {
         VAL1("4.85"),
         VAL2("3.4"),
         VAL3("2.22"),
@@ -1085,7 +1064,7 @@ public class GNIRSParams {
 
         private String _displayValue;
 
-        private WavelengthSuggestion(String displayValue) {
+        WavelengthSuggestion(String displayValue) {
             _displayValue = displayValue;
         }
 
@@ -1120,7 +1099,7 @@ public class GNIRSParams {
         }
     }
 
-    public  static class Wavelength extends SuggestibleString {
+    public static class Wavelength extends SuggestibleString {
 
         public Wavelength() {
             super(WavelengthSuggestion.class);

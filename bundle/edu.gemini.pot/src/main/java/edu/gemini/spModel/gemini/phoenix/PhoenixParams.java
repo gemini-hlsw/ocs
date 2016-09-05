@@ -30,9 +30,7 @@ public final class PhoenixParams {
         L3290("L3290"),
 
         K4132("K4132") {
-            @Override public boolean isObsolete() {
-                return true;
-            }
+            @Override public boolean isObsolete() { return true; }
         },
         K4220("K4220"),
         K4308("K4308"),
@@ -47,16 +45,12 @@ public final class PhoenixParams {
 
         J7799("J7799"),
         J8265("J8265") {
-            @Override public boolean isObsolete() {
-                return true;
-            }
+            @Override public boolean isObsolete() { return true; }
         },
         J9232("J9232"),
         J9440("J9440"),
         J9671("J9671") {
-            @Override public boolean isObsolete() {
-                return true;
-            }
+            @Override public boolean isObsolete() { return true; }
         },
         ;
 
@@ -76,10 +70,6 @@ public final class PhoenixParams {
 
         public String sequenceValue() {
             return _displayValue;
-        }
-
-        public boolean isObsolete() {
-            return false;
         }
 
         /** Return the Filter by searching through the known types. **/
