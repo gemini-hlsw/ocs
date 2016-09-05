@@ -8,7 +8,7 @@ import javax.swing.BorderFactory
 import javax.swing.border.EtchedBorder
 
 import edu.gemini.pot.sp.ISPNode
-import edu.gemini.skycalc.Angle
+import edu.gemini.spModel.core.Angle
 import edu.gemini.spModel.core.Site
 import edu.gemini.spModel.inst.ParallacticAngleSupport
 import edu.gemini.spModel.obs.{ObsTargetCalculatorService, SPObservation, SchedulingBlock}
@@ -16,7 +16,6 @@ import edu.gemini.spModel.obs.SchedulingBlock.Duration
 import edu.gemini.spModel.obs.SchedulingBlock.Duration._
 import edu.gemini.spModel.rich.shared.immutable._
 import edu.gemini.shared.util.immutable.{Option => JOption, ImOption}
-import jsky.app.ot.ags.BagsManager
 import jsky.app.ot.editor.OtItemEditor
 import jsky.app.ot.gemini.editor.EphemerisUpdater
 import jsky.app.ot.util.TimeZonePreference
@@ -37,7 +36,9 @@ import scalaz._, Scalaz._, scalaz.effect.IO
 class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publisher {
   import ParallacticAngleControls._
 
-  val Nop = new Runnable { def run = () }
+  val Nop = new Runnable {
+    override def run() = ()
+  }
 
   private var editor:    Option[OtItemEditor[_, _]] = None
   private var site:      Option[Site]   = None
@@ -229,11 +230,11 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
 
       // ... with an exception handler
       val safe: IO[Unit] =
-        action except { case t: Throwable => edt(DialogUtil.error(peer, t)) }
+        action except { t => edt(DialogUtil.error(peer, t)) }
 
       // Run it on a short-lived worker
       new Thread(new Runnable() {
-        def run = safe.unsafePerformIO
+        override def run() = safe.unsafePerformIO
       }, s"Ephemeris Update Worker for ${ispObs.getObservationID}").start()
 
     }
@@ -246,7 +247,7 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
   private def displayParallacticAngleDialog(): Unit =
     for {
       e <- editor
-      o <- Option(e.getContextObservation)
+      o <- editor.map(_.getContextObservation)
     } {
       val dialog = new ParallacticAngleDialog(
         e.getViewer.getParentFrame,
@@ -271,9 +272,9 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
       e     <- editor
       angle <- parallacticAngle
       fmt   <- formatter
-    } yield {
+    } {
       val explicitlySet = !fmt.format(ParallacticAngleControls.angleToDegrees(angle)).equals(positionAngleText) &&
-                          !fmt.format(ParallacticAngleControls.angleToDegrees(angle.add(Angle.ANGLE_PI))).equals(positionAngleText)
+                          !fmt.format(ParallacticAngleControls.angleToDegrees(angle + Angle.fromDegrees(180))).equals(positionAngleText)
       ui.parallacticAngleFeedback.warningState(explicitlySet)
     }
   }
@@ -285,13 +286,9 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
   def resetComponents(): Unit = {
     ui.parallacticAngleFeedback.text = ""
     for {
-      e              <- editor
-      ispObservation <- Option(e.getContextObservation)
-      spObservation  = ispObservation.getDataObject.asInstanceOf[SPObservation]
-      sb             <- spObservation.getSchedulingBlock.asScalaOpt
-      fmt            <- formatter
+      sb  <- editor.flatMap(_.getContextObservation.getDataObject.asInstanceOf[SPObservation].getSchedulingBlock.asScalaOpt)
+      fmt <- formatter
     } {
-
       // Scheduling block date and time
       val dateTimeStr = {
         val df = new SimpleDateFormat("MM/dd/yy HH:mm:ss z")
@@ -311,10 +308,27 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
         if (isPaUi) dateTimeStr + durStr + paStr
         else dateTimeStr
 
-      publish(ParallacticAngleControls.ParallacticAngleChangedEvent)
+      if (didParllacticAngleChange) {
+        publish(ParallacticAngleControls.ParallacticAngleChangedEvent)
+      }
     }
   }
 
+  /**
+    * Check if the parallactic angle changed from what is currently recorded for the instrument.
+    * The angle is considered to have remained constant if it is within 0.005
+    */
+  def didParllacticAngleChange: Boolean =
+    editor.exists { e =>
+      parallacticAngle.forall { newAngle =>
+        val angleDiff = {
+          val newAngleDegrees = angleToDegrees(newAngle)
+          val oldAngleDegrees = e.getContextInstrumentDataObject.getPosAngleDegrees
+          Math.abs(oldAngleDegrees - newAngleDegrees)
+        }
+        angleDiff >= Precision && Math.abs(angleDiff - 180) >= Precision
+      }
+    }
 
   /**
    * The parallactic angle calculation, if it can be calculated
@@ -322,7 +336,7 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
   def parallacticAngle: Option[Angle] =
     for {
       e <- editor
-      o <- Option(e.getContextObservation)
+      o =  e.getContextObservation
       a <- e.getDataObject match {
         case p: ParallacticAngleSupport => p.calculateParallacticAngle(o).asScalaOpt
         case _                          => None
@@ -341,7 +355,10 @@ object ParallacticAngleControls {
   val Log = Logger.getLogger(getClass.getName)
   case object ParallacticAngleChangedEvent extends Event
 
-  def angleToDegrees(a: Angle): Double = a.toPositive.toDegrees.getMagnitude
+  // Precision limit for which two parallactic angles are considered equivalent.
+  val Precision = 0.005
+
+  def angleToDegrees(a: Angle): Double = a.toDegrees
 
   /** Wrap an IO action with a logging timer. */
   def time[A](io: IO[A])(msg: String): IO[A] =

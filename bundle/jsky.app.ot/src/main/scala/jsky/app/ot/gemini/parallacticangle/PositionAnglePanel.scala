@@ -6,7 +6,7 @@ import java.util.Locale
 
 import edu.gemini.pot.sp.{ISPObsComponent, SPComponentType}
 import edu.gemini.shared.gui.EnableDisableComboBox
-import edu.gemini.skycalc.Angle
+import edu.gemini.spModel.core.Angle
 import edu.gemini.spModel.core.Site
 import edu.gemini.spModel.inst.ParallacticAngleSupport
 import edu.gemini.spModel.obs.ObsClassService
@@ -57,7 +57,7 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
         Try { text.toDouble }.toOption
 
       override def validate(): Unit =
-        background = angle.fold(if (positionAngleConstraintComboBox.selection.item == PosAngleConstraint.UNBOUNDED) background else badBackground)(x => defaultBackground)
+        background = angle.fold(if (positionAngleConstraintComboBox.selection.item == PosAngleConstraint.UNBOUNDED) background else badBackground)(_ => defaultBackground)
     }
 
     layout(positionAngleTextField) = new Constraints() {
@@ -148,18 +148,13 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
         cardLayout.show(this.peer, positionAngleFeedbackPanel.cardId)
 
       // Convenience method to set the appropriate card.
-      def updatePanel(): Unit =
-        for {
-          e <- editor
-        } yield {
-          e.getDataObject.getPosAngleConstraint match {
-            case PosAngleConstraint.PARALLACTIC_ANGLE => showParallacticAngleControls()
-            case _                                    => showPositionAngleFeedback()
-          }
+      def updatePanel(): Unit = editor.foreach { _.getDataObject.getPosAngleConstraint match {
+          case PosAngleConstraint.PARALLACTIC_ANGLE => showParallacticAngleControls()
+          case _                                    => showPositionAngleFeedback()
         }
+      }
     }
 
-    //controlsPanel.layout(positionAngleFeedback) = BorderPanel.Position.Center
     layout(controlsPanel) = new Constraints() {
       gridy = 1
       gridwidth = 3
@@ -221,28 +216,30 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
   }
 
   /**
+    * The actual copying of a given pos angle to the data object.
+    * This is done explicitly to avoid overwriting based on minor differences in double precision and to avoid
+    * adding 180 to the position angle for parallactic angle mode, which overrides BAGS flips.
+    **/
+  private def setInstPosAngle(newAngleDegrees: Double): Unit =
+    editor.foreach(_.getDataObject.setPosAngleDegrees(newAngleDegrees))
+
+  /**
    * Copies, if possible, the position angle text field contents to the data object.
    */
   private def copyPosAngleToInstrument(): Unit =
-    for {
-      e <- editor
-      a <- ui.positionAngleTextField.angle
-    } yield {
-      e.getDataObject.setPosAngle(a)
-    }
+    ui.positionAngleTextField.angle.foreach(setInstPosAngle)
 
   /**
     * Copies the position angle in the data object to the position angle text field.
     */
-  private def copyPosAngleToTextField(): Unit = {
-    editor.foreach(e => {
+  private def copyPosAngleToTextField(): Unit =
+    editor.foreach { e =>
       val newAngleStr = numberFormatter.format(e.getDataObject.getPosAngleDegrees)
       val oldAngleStr = ui.positionAngleTextField.text
       if (!newAngleStr.equals(oldAngleStr)) {
         ui.positionAngleTextField.text = newAngleStr
       }
-    })
-  }
+    }
 
   /**
    * Called whenever a selection is made in the position angle constraint combo box.
@@ -253,24 +250,17 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
     for {
       e <- editor
       p <- ui.parallacticAngleControlsOpt
-    } yield {
-      val posAngleConstraint = ui.positionAngleConstraintComboBox.selection.item
-
+    } {
       // Set the position angle constraint on the instrument.
+      val posAngleConstraint = ui.positionAngleConstraintComboBox.selection.item
       e.getDataObject.setPosAngleConstraint(posAngleConstraint)
 
       // Set up the UI.
-      // TODO: Remove this when background AGS is implemented.
       ui.positionAngleTextField.enabled = posAngleConstraint != PosAngleConstraint.UNBOUNDED
       ui.controlsPanel.updatePanel()
       ui.positionAngleConstraintComboBox.selection.item match {
-        case PosAngleConstraint.PARALLACTIC_ANGLE =>
-          p.resetComponents()
-        // TODO: Remove this case when background AGS is implemented.
-        case PosAngleConstraint.UNBOUNDED =>
-          ui.positionAngleTextField.text    = "0"
-        // TODO: Stop removing here.
-        case _ =>
+        case PosAngleConstraint.PARALLACTIC_ANGLE => p.resetComponents()
+        case _                                    =>
       }
     }
   }
@@ -280,17 +270,12 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
    * A listener method that is called whenever the parallactic angle changes.
    * We set the position angle to the parallactic angle.
    */
-  private def parallacticAngleChanged(angleOpt: Option[Angle]): Unit = {
-    for {
-      angle <- angleOpt
-      e     <- editor
-      pa    <- ui.parallacticAngleControlsOpt
-    } yield {
-      val angleAsDouble = angle.toDegrees.toPositive.getMagnitude
-      ui.positionAngleTextField.text = numberFormatter.format(angleAsDouble)
-      e.getDataObject.setPosAngle(angleAsDouble)
-    }
-  }
+  private def parallacticAngleChanged(angleOpt: Option[Angle]): Unit =
+    angleOpt.foreach(angle => {
+      val degrees = angle.toDegrees
+      ui.positionAngleTextField.text = numberFormatter.format(degrees)
+      setInstPosAngle(degrees)
+    })
 
 
   /**
@@ -301,21 +286,19 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
   def updateParallacticControls(): Unit =
     for {
       p <- ui.parallacticAngleControlsOpt
-      e <- editor
-      o <- Option(e.getContextObservation)
+      i <- editor.map(_.getDataObject)
+      o <- editor.map(_.getContextObservation)
     } {
-      val instrument = e.getDataObject
-
       // Determine if the parallactic angle option can be selected.
-      val isParInstAndOk = instrument.isInstanceOf[ParallacticAngleSupport] &&
-                           instrument.asInstanceOf[ParallacticAngleSupport].isCompatibleWithMeanParallacticAngleMode
+      val isParInstAndOk = i.isInstanceOf[ParallacticAngleSupport] &&
+                           i.asInstanceOf[ParallacticAngleSupport].isCompatibleWithMeanParallacticAngleMode
       val canUseAvgPar   = isParInstAndOk &&
                            !ObsClassService.lookupObsClass(o).equals(ObsClass.DAY_CAL)
       setOptionEnabled(PosAngleConstraint.PARALLACTIC_ANGLE, canUseAvgPar)
 
       // Now the parallactic angle is in use if it can be used and is selected.
-      if (canUseAvgPar && instrument.getPosAngleConstraint.equals(PosAngleConstraint.PARALLACTIC_ANGLE))
-        ui.parallacticAngleControlsOpt.foreach(_.ui.relativeTimeMenu.rebuild())
+      if (canUseAvgPar && i.getPosAngleConstraint.equals(PosAngleConstraint.PARALLACTIC_ANGLE))
+        p.ui.relativeTimeMenu.rebuild()
     }
 
 

@@ -4,7 +4,6 @@ import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.pot.sp.SPComponentBroadType;
 import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.shared.util.immutable.DefaultImList;
-import edu.gemini.shared.util.immutable.Function1;
 import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.skycalc.Angle;
@@ -12,6 +11,7 @@ import edu.gemini.spModel.config.injector.ConfigInjector;
 import edu.gemini.spModel.config.injector.ConfigInjectorCalc3;
 import edu.gemini.spModel.config2.Config;
 import edu.gemini.spModel.config2.ItemKey;
+import edu.gemini.spModel.core.Angle$;
 import edu.gemini.spModel.data.IOffsetPosListProvider;
 import edu.gemini.spModel.data.ISPDataObject;
 import edu.gemini.spModel.data.PreImagingType;
@@ -791,9 +791,9 @@ public abstract class InstGmosCommon<
      * slits.
      */
     @Override
-    public Option<Angle> calculateParallacticAngle(ISPObservation obs) {
+    public Option<edu.gemini.spModel.core.Angle> calculateParallacticAngle(ISPObservation obs) {
         return super.calculateParallacticAngle(obs).map(angle -> _fpu.isWideSlit() ?
-                angle.add(Angle.ANGLE_PI_OVER_2).toPositive() :
+                angle.$plus(Angle$.MODULE$.fromDegrees(90)) :
                 angle);
     }
 
