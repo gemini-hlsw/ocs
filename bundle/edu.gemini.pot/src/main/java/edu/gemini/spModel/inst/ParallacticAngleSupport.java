@@ -2,7 +2,7 @@ package edu.gemini.spModel.inst;
 
 import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.shared.util.immutable.Option;
-import edu.gemini.skycalc.Angle;
+import edu.gemini.spModel.core.Angle;
 
 /**
  * Support for parallactic angle calculations.

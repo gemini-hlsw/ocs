@@ -8,7 +8,7 @@ import javax.swing.BorderFactory
 import javax.swing.border.EtchedBorder
 
 import edu.gemini.pot.sp.ISPNode
-import edu.gemini.skycalc.Angle
+import edu.gemini.spModel.core.Angle
 import edu.gemini.spModel.core.Site
 import edu.gemini.spModel.inst.ParallacticAngleSupport
 import edu.gemini.spModel.obs.{ObsTargetCalculatorService, SPObservation, SchedulingBlock}
@@ -274,7 +274,7 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
       fmt   <- formatter
     } {
       val explicitlySet = !fmt.format(ParallacticAngleControls.angleToDegrees(angle)).equals(positionAngleText) &&
-                          !fmt.format(ParallacticAngleControls.angleToDegrees(angle.add(Angle.ANGLE_PI))).equals(positionAngleText)
+                          !fmt.format(ParallacticAngleControls.angleToDegrees(angle + Angle.fromDegrees(180))).equals(positionAngleText)
       ui.parallacticAngleFeedback.warningState(explicitlySet)
     }
   }
@@ -358,7 +358,7 @@ object ParallacticAngleControls {
   // Precision limit for which two parallactic angles are considered equivalent.
   val Precision = 0.005
 
-  def angleToDegrees(a: Angle): Double = a.toPositive.toDegrees.getMagnitude
+  def angleToDegrees(a: Angle): Double = a.toDegrees
 
   /** Wrap an IO action with a logging timer. */
   def time[A](io: IO[A])(msg: String): IO[A] =
