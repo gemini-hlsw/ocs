@@ -2,7 +2,7 @@ package edu.gemini.spModel.inst;
 
 import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.shared.util.immutable.Option;
-import edu.gemini.skycalc.Angle;
+import edu.gemini.spModel.core.Angle;
 
 /**
  * Support for parallactic angle calculations.
@@ -12,14 +12,17 @@ import edu.gemini.skycalc.Angle;
  * in ParallacticAngleSupportInst.
  */
 public interface ParallacticAngleSupport {
-
     /**
      * Perform the parallactic angle computation for the observation.
      */
-    public Option<Angle> calculateParallacticAngle(ISPObservation obs);
+    Option<Angle> calculateParallacticAngle(ISPObservation obs);
 
     /**
      * Determine if the current instrument configuration is compatible or not with parallactic angle support.
+     * By default, assume that the instrument is compatible with the parallactic angle feature unless indicated
+     * otherwise.
      */
-    public boolean isCompatibleWithMeanParallacticAngleMode();
+    default boolean isCompatibleWithMeanParallacticAngleMode() {
+        return true;
+    }
 }

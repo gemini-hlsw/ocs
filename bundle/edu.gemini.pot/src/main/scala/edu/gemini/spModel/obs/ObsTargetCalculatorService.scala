@@ -13,13 +13,6 @@ import jsky.coords.WorldCoords
 import edu.gemini.skycalc.{TimeUtils, Coordinates}
 import scala.collection.JavaConverters._
 
-/**
- * Created with IntelliJ IDEA.
- * User: sraaphor
- * Date: 3/23/14
- * Time: 1:44 AM
- * To change this template use File | Settings | File Templates.
- */
 object ObsTargetCalculatorService {
   private def create(obs: ISPObservation): Option[TargetCalculator] = {
     // First, determine the Site at which the instrument is located based on
@@ -81,10 +74,6 @@ object ObsTargetCalculatorService {
     val res = lookupOrCreate(obs)
     SPObsCache.setTargetCalculator(obs, res.asGeminiOpt)
     res
-  }
-
-  def targetCalculationForJava(obs: ISPObservation): edu.gemini.shared.util.immutable.Option[TargetCalculator] = {
-    targetCalculation(obs).asGeminiOpt
   }
 
   def calculateRemainingTime(ispObservation: ISPObservation): Long =

@@ -4,7 +4,6 @@ import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.pot.sp.SPComponentBroadType;
 import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.shared.util.immutable.DefaultImList;
-import edu.gemini.shared.util.immutable.Function1;
 import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.skycalc.Angle;
@@ -12,6 +11,7 @@ import edu.gemini.spModel.config.injector.ConfigInjector;
 import edu.gemini.spModel.config.injector.ConfigInjectorCalc3;
 import edu.gemini.spModel.config2.Config;
 import edu.gemini.spModel.config2.ItemKey;
+import edu.gemini.spModel.core.Angle$;
 import edu.gemini.spModel.data.IOffsetPosListProvider;
 import edu.gemini.spModel.data.ISPDataObject;
 import edu.gemini.spModel.data.PreImagingType;
@@ -63,7 +63,7 @@ public abstract class InstGmosCommon<
         P extends Enum<P> & GmosCommonType.FPUnit,
         SM extends Enum<SM> & GmosCommonType.StageMode>
         extends ParallacticAngleSupportInst implements IOffsetPosListProvider<OffsetPos>, GuideProbeProvider,
-            IssPortProvider, PosAngleConstraintAware, StepCalculator, VignettableScienceAreaInstrument {
+        IssPortProvider, PosAngleConstraintAware, StepCalculator, VignettableScienceAreaInstrument {
 
     private static final Logger LOG = Logger.getLogger(InstGmosCommon.class.getName());
 
@@ -499,8 +499,8 @@ public abstract class InstGmosCommon<
      * selected.
      */
     public static int getActualGain(final GmosCommonType.AmpGain gain,
-                                       final GmosCommonType.AmpReadMode readMode,
-                                       final GmosCommonType.DetectorManufacturer detectorManufacturer) {
+                                    final GmosCommonType.AmpReadMode readMode,
+                                    final GmosCommonType.DetectorManufacturer detectorManufacturer) {
         // Complicated switch nesting like this cries out for building a type hierarchy.  The parallel
         // type classes (GmosNorthType, et al) look promising, but I'm not willing to embed this information
         // there yet.  I'm changing this to an if-then just for brevity and lack of fall through, but
@@ -791,9 +791,9 @@ public abstract class InstGmosCommon<
      * slits.
      */
     @Override
-    public Option<Angle> calculateParallacticAngle(ISPObservation obs) {
+    public Option<edu.gemini.spModel.core.Angle> calculateParallacticAngle(ISPObservation obs) {
         return super.calculateParallacticAngle(obs).map(angle -> _fpu.isWideSlit() ?
-                angle.add(Angle.ANGLE_PI_OVER_2).toPositive() :
+                angle.$plus(Angle$.MODULE$.fromDegrees(90)) :
                 angle);
     }
 
@@ -1866,9 +1866,9 @@ public abstract class InstGmosCommon<
     @Override
     public ImList<PosAngleConstraint> getSupportedPosAngleConstraints() {
         return DefaultImList.create(PosAngleConstraint.FIXED,
-                                    PosAngleConstraint.FIXED_180,
-                                    PosAngleConstraint.UNBOUNDED,
-                                    PosAngleConstraint.PARALLACTIC_ANGLE);
+                PosAngleConstraint.FIXED_180,
+                PosAngleConstraint.UNBOUNDED,
+                PosAngleConstraint.PARALLACTIC_ANGLE);
     }
 
     @Override

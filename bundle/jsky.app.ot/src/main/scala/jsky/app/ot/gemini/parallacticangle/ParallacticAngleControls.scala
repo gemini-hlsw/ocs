@@ -8,7 +8,7 @@ import javax.swing.BorderFactory
 import javax.swing.border.EtchedBorder
 
 import edu.gemini.pot.sp.ISPNode
-import edu.gemini.skycalc.Angle
+import edu.gemini.spModel.core.Angle
 import edu.gemini.spModel.core.Site
 import edu.gemini.spModel.inst.ParallacticAngleSupport
 import edu.gemini.spModel.obs.{ObsTargetCalculatorService, SPObservation, SchedulingBlock}
@@ -16,7 +16,6 @@ import edu.gemini.spModel.obs.SchedulingBlock.Duration
 import edu.gemini.spModel.obs.SchedulingBlock.Duration._
 import edu.gemini.spModel.rich.shared.immutable._
 import edu.gemini.shared.util.immutable.{Option => JOption, ImOption}
-import jsky.app.ot.ags.BagsManager
 import jsky.app.ot.editor.OtItemEditor
 import jsky.app.ot.gemini.editor.EphemerisUpdater
 import jsky.app.ot.util.TimeZonePreference
@@ -29,15 +28,17 @@ import scala.swing.event.{ButtonClicked, Event}
 import scalaz._, Scalaz._, scalaz.effect.IO
 
 /**
- * This class encompasses all of the logic required to manage the average parallactic angle information associated
- * with an instrument configuration.
- *
- * @param isPaUi should be true for PA controls, false for Scheduling Block controls
- */
+  * This class encompasses all of the logic required to manage the average parallactic angle information associated
+  * with an instrument configuration.
+  *
+  * @param isPaUi should be true for PA controls, false for Scheduling Block controls
+  */
 class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publisher {
   import ParallacticAngleControls._
 
-  val Nop = new Runnable { def run = () }
+  val Nop = new Runnable {
+    override def run() = ()
+  }
 
   private var editor:    Option[OtItemEditor[_, _]] = None
   private var site:      Option[Site]   = None
@@ -148,9 +149,9 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
 
 
   /**
-   * Initialize the UI and set the instrument editor to allow for the parallactic angle updates.
-   * The `Runnable` is a callback that will be invoked on the EDT after the target is updated.
-   */
+    * Initialize the UI and set the instrument editor to allow for the parallactic angle updates.
+    * The `Runnable` is a callback that will be invoked on the EDT after the target is updated.
+    */
   def init(e: OtItemEditor[_, _], s: Option[Site], f: Format, c: Runnable): Unit = {
     editor    = Some(e)
     site      = s
@@ -171,127 +172,123 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
 
   /** Current scheduling block, if any. */
   private def schedulingBlock: Option[SchedulingBlock] =
-    for {
-      e   <- editor
-      obs <- Option(e.getContextObservation)
-      sb  <- obs.getDataObject.asInstanceOf[SPObservation].getSchedulingBlock.asScalaOpt
-    } yield sb
+  for {
+    e   <- editor
+    obs <- Option(e.getContextObservation)
+    sb  <- obs.getDataObject.asInstanceOf[SPObservation].getSchedulingBlock.asScalaOpt
+  } yield sb
 
   /** Remaining time for context observation, if any. */
   private def remainingTime: Option[Long] =
-    for {
-      e   <- editor
-      obs <- Option(e.getContextObservation)
-    } yield ObsTargetCalculatorService.calculateRemainingTime(obs)
+  for {
+    e   <- editor
+    obs <- Option(e.getContextObservation)
+  } yield ObsTargetCalculatorService.calculateRemainingTime(obs)
 
   /** Replace the scheduling block. */
   private def updateSchedulingBlock(sb: SchedulingBlock): Unit =
+  for {
+    e      <- editor
+    ispObs <- Option(e.getContextObservation)
+  } {
+    val spObs = ispObs.getDataObject.asInstanceOf[SPObservation]
+    val sameNight = spObs.getSchedulingBlock.asScalaOpt.exists(_.sameObservingNightAs(sb))
+
+    // This is the action that will update the scheduling block
+    val updateSchedBlock: IO[Unit] =
     for {
-      e      <- editor
-      ispObs <- Option(e.getContextObservation)
-    } {
-      val spObs = ispObs.getDataObject.asInstanceOf[SPObservation]
-      val sameNight = spObs.getSchedulingBlock.asScalaOpt.exists(_.sameObservingNightAs(sb))
+      _ <- IO(spObs.setSchedulingBlock(ImOption.apply(sb)))
+      _ <- IO(ispObs.setDataObject(spObs))
+    } yield ()
 
-      // This is the action that will update the scheduling block
-      val updateSchedBlock: IO[Unit] =
+    // Ok, this is an IO action that goes and fetches the ephemerides and returns ANOTHER action
+    // that will actually update the model and clear out the glass pane UI.
+    val fetch: IO[IO[Unit]] =
+    if (sameNight) IO(ispObs.silentAndLocked(updateSchedBlock))
+    else EphemerisUpdater.refreshEphemerides(ispObs, sb.start, e.getWindow).map { completion =>
+
+      // This is the action that will update the model
+      val up: IO[Unit] =
         for {
-          _ <- IO(spObs.setSchedulingBlock(ImOption.apply(sb)))
-          _ <- IO(ispObs.setDataObject(spObs))
+          _ <- updateSchedBlock
+          _ <- completion
         } yield ()
 
-      // Ok, this is an IO action that goes and fetches the ephemerides and returns ANOTHER action
-      // that will actually update the model and clear out the glass pane UI.
-      val fetch: IO[IO[Unit]] =
-        if (sameNight) IO(ispObs.silentAndLocked(updateSchedBlock))
-        else EphemerisUpdater.refreshEphemerides(ispObs, sb.start, e.getWindow).map { completion =>
-
-          // This is the action that will update the model
-          val up: IO[Unit] =
-            for {
-              _ <- updateSchedBlock
-              _ <- completion
-            } yield ()
-
-          // Here we bracket the update to disable/enable events and grab/release the program lock
-          ispObs.silentAndLocked(up)
-
-        }
-
-      // Our final program
-      val action: IO[Unit] =
-        for {
-          up <- time(fetch)("fetch ephemerides and construct completion")
-          _  <- time(up)("perform model update without events, holding lock")
-          _  <- edt(callback.run())
-          _  <- edt(resetComponents())
-        } yield ()
-
-      // ... with an exception handler
-      val safe: IO[Unit] =
-        action except { case t: Throwable => edt(DialogUtil.error(peer, t)) }
-
-      // Run it on a short-lived worker
-      new Thread(new Runnable() {
-        def run = safe.unsafePerformIO
-      }, s"Ephemeris Update Worker for ${ispObs.getObservationID}").start()
+      // Here we bracket the update to disable/enable events and grab/release the program lock
+      ispObs.silentAndLocked(up)
 
     }
 
+    // Our final program
+    val action: IO[Unit] =
+    for {
+      up <- time(fetch)("fetch ephemerides and construct completion")
+      _  <- time(up)("perform model update without events, holding lock")
+      _  <- edt(callback.run())
+      _  <- edt(resetComponents())
+    } yield ()
+
+    // ... with an exception handler
+    val safe: IO[Unit] =
+    action except { t => edt(DialogUtil.error(peer, t)) }
+
+    // Run it on a short-lived worker
+    new Thread(new Runnable() {
+      override def run() = safe.unsafePerformIO
+    }, s"Ephemeris Update Worker for ${ispObs.getObservationID}").start()
+
+  }
+
 
   /**
-   * Triggered when the date time button is clicked. Shows the ParallacticAngleDialog to allow the user to
-   * explicitly set a date and duration for the parallactic angle calculation.
-   */
+    * Triggered when the date time button is clicked. Shows the ParallacticAngleDialog to allow the user to
+    * explicitly set a date and duration for the parallactic angle calculation.
+    */
   private def displayParallacticAngleDialog(): Unit =
-    for {
-      e <- editor
-      o <- Option(e.getContextObservation)
-    } {
-      val dialog = new ParallacticAngleDialog(
-        e.getViewer.getParentFrame,
-        o,
-        o.getDataObject.asInstanceOf[SPObservation].getSchedulingBlock.asScalaOpt,
-        site.map(_.timezone),
-        isPaUi)
-      dialog.pack()
-      dialog.visible = true
-      updateSchedulingBlock(dialog.schedulingBlock)
-    }
+  for {
+    e <- editor
+    o <- editor.map(_.getContextObservation)
+  } {
+    val dialog = new ParallacticAngleDialog(
+      e.getViewer.getParentFrame,
+      o,
+      o.getDataObject.asInstanceOf[SPObservation].getSchedulingBlock.asScalaOpt,
+      site.map(_.timezone),
+      isPaUi)
+    dialog.pack()
+    dialog.visible = true
+    updateSchedulingBlock(dialog.schedulingBlock)
+  }
 
 
   /**
-   * This should be called whenever the position angle changes to compare it to the parallactic angle.
-   * A warning icon is displayed if the two are different. This is a consequence of allowing the user to
-   * set the PA to something other than the parallactic angle, even when it is selected.
-   */
+    * This should be called whenever the position angle changes to compare it to the parallactic angle.
+    * A warning icon is displayed if the two are different. This is a consequence of allowing the user to
+    * set the PA to something other than the parallactic angle, even when it is selected.
+    */
   def positionAngleChanged(positionAngleText: String): Unit = {
     // We only do this if the parallactic angle can be calculated, and is different from the PA.
     for {
       e     <- editor
       angle <- parallacticAngle
       fmt   <- formatter
-    } yield {
+    } {
       val explicitlySet = !fmt.format(ParallacticAngleControls.angleToDegrees(angle)).equals(positionAngleText) &&
-                          !fmt.format(ParallacticAngleControls.angleToDegrees(angle.add(Angle.ANGLE_PI))).equals(positionAngleText)
+        !fmt.format(ParallacticAngleControls.angleToDegrees(angle + Angle.fromDegrees(180))).equals(positionAngleText)
       ui.parallacticAngleFeedback.warningState(explicitlySet)
     }
   }
 
 
   /**
-   * This should be called whenever the parallactic angle components need to be reinitialized, and at initialization.
-   */
+    * This should be called whenever the parallactic angle components need to be reinitialized, and at initialization.
+    */
   def resetComponents(): Unit = {
     ui.parallacticAngleFeedback.text = ""
     for {
-      e              <- editor
-      ispObservation <- Option(e.getContextObservation)
-      spObservation  = ispObservation.getDataObject.asInstanceOf[SPObservation]
-      sb             <- spObservation.getSchedulingBlock.asScalaOpt
-      fmt            <- formatter
+      sb  <- editor.flatMap(_.getContextObservation.getDataObject.asInstanceOf[SPObservation].getSchedulingBlock.asScalaOpt)
+      fmt <- formatter
     } {
-
       // Scheduling block date and time
       val dateTimeStr = {
         val df = new SimpleDateFormat("MM/dd/yy HH:mm:ss z")
@@ -311,23 +308,40 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
         if (isPaUi) dateTimeStr + durStr + paStr
         else dateTimeStr
 
-      publish(ParallacticAngleControls.ParallacticAngleChangedEvent)
+      if (didParllacticAngleChange) {
+        publish(ParallacticAngleControls.ParallacticAngleChangedEvent)
+      }
     }
   }
 
+  /**
+    * Check if the parallactic angle changed from what is currently recorded for the instrument.
+    * The angle is considered to have remained constant if it is within 0.005
+    */
+  def didParllacticAngleChange: Boolean =
+  editor.exists { e =>
+    parallacticAngle.forall { newAngle =>
+      val angleDiff = {
+        val newAngleDegrees = angleToDegrees(newAngle)
+        val oldAngleDegrees = e.getContextInstrumentDataObject.getPosAngleDegrees
+        Math.abs(oldAngleDegrees - newAngleDegrees)
+      }
+      angleDiff >= Precision && Math.abs(angleDiff - 180) >= Precision
+    }
+  }
 
   /**
-   * The parallactic angle calculation, if it can be calculated
-   */
+    * The parallactic angle calculation, if it can be calculated
+    */
   def parallacticAngle: Option[Angle] =
-    for {
-      e <- editor
-      o <- Option(e.getContextObservation)
-      a <- e.getDataObject match {
-        case p: ParallacticAngleSupport => p.calculateParallacticAngle(o).asScalaOpt
-        case _                          => None
-      }
-    } yield a
+  for {
+    e <- editor
+    o =  e.getContextObservation
+    a <- e.getDataObject match {
+      case p: ParallacticAngleSupport => p.calculateParallacticAngle(o).asScalaOpt
+      case _                          => None
+    }
+  } yield a
 
   override def enabled_=(b: Boolean): Unit = {
     super.enabled_=(b)
@@ -341,20 +355,23 @@ object ParallacticAngleControls {
   val Log = Logger.getLogger(getClass.getName)
   case object ParallacticAngleChangedEvent extends Event
 
-  def angleToDegrees(a: Angle): Double = a.toPositive.toDegrees.getMagnitude
+  // Precision limit for which two parallactic angles are considered equivalent.
+  val Precision = 0.005
+
+  def angleToDegrees(a: Angle): Double = a.toDegrees
 
   /** Wrap an IO action with a logging timer. */
   def time[A](io: IO[A])(msg: String): IO[A] =
-    for {
-      start <- IO(System.currentTimeMillis())
-      a     <- io
-      end   <- IO(System.currentTimeMillis())
-      _     <- IO(ParallacticAngleControls.Log.info(s"$msg: ${end - start}ms"))
-    } yield a
+  for {
+    start <- IO(System.currentTimeMillis())
+    a     <- io
+    end   <- IO(System.currentTimeMillis())
+    _     <- IO(ParallacticAngleControls.Log.info(s"$msg: ${end - start}ms"))
+  } yield a
 
   /** Construct an IO action that runs on the EDT. */
   def edt[A](a: => Unit): IO[Unit] =
-    IO(Swing.onEDT(a))
+  IO(Swing.onEDT(a))
 
   /** Some useful operations for ISPNodes. */
   implicit class ParallacticAngleControlsISPNodeOps(n: ISPNode) {
