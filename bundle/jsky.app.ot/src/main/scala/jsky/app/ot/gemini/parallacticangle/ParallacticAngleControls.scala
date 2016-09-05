@@ -74,7 +74,7 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
       icon                   = Resources.getIcon("eclipse/menu-trimmed.gif")
       margin                 = new Insets(-1, -10, -1, -5)
 
-      def rebuild(): Unit = {
+      def rebuild(): Unit = Swing.onEDT {
         contents.clear()
 
         // menu items that don't depend on the context
@@ -152,7 +152,7 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
    * Initialize the UI and set the instrument editor to allow for the parallactic angle updates.
    * The `Runnable` is a callback that will be invoked on the EDT after the target is updated.
    */
-  def init(e: OtItemEditor[_, _], s: Option[Site], f: Format, c: Runnable): Unit = {
+  def init(e: OtItemEditor[_, _], s: Option[Site], f: Format, c: Runnable): Unit = Swing.onEDT {
     editor    = Some(e)
     site      = s
     formatter = Some(f)
@@ -244,7 +244,7 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
    * Triggered when the date time button is clicked. Shows the ParallacticAngleDialog to allow the user to
    * explicitly set a date and duration for the parallactic angle calculation.
    */
-  private def displayParallacticAngleDialog(): Unit =
+  private def displayParallacticAngleDialog(): Unit = Swing.onEDT {
     for {
       e <- editor
       o <- editor.map(_.getContextObservation)
@@ -259,6 +259,7 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
       dialog.visible = true
       updateSchedulingBlock(dialog.schedulingBlock)
     }
+  }
 
 
   /**
@@ -266,15 +267,15 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
    * A warning icon is displayed if the two are different. This is a consequence of allowing the user to
    * set the PA to something other than the parallactic angle, even when it is selected.
    */
-  def positionAngleChanged(positionAngleText: String): Unit = {
+  def positionAngleChanged(positionAngleText: String): Unit = Swing.onEDT {
     // We only do this if the parallactic angle can be calculated, and is different from the PA.
     for {
       e     <- editor
       angle <- parallacticAngle
       fmt   <- formatter
     } {
-      val explicitlySet = !fmt.format(ParallacticAngleControls.angleToDegrees(angle)).equals(positionAngleText) &&
-                          !fmt.format(ParallacticAngleControls.angleToDegrees(angle + Angle.fromDegrees(180))).equals(positionAngleText)
+      val explicitlySet = !fmt.format(angle.toDegrees).equals(positionAngleText) &&
+                          !fmt.format((angle + Angle.fromDegrees(180)).toDegrees).equals(positionAngleText)
       ui.parallacticAngleFeedback.warningState(explicitlySet)
     }
   }
@@ -283,7 +284,7 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
   /**
    * This should be called whenever the parallactic angle components need to be reinitialized, and at initialization.
    */
-  def resetComponents(): Unit = {
+  def resetComponents(): Unit = Swing.onEDT {
     ui.parallacticAngleFeedback.text = ""
     for {
       sb  <- editor.flatMap(_.getContextObservation.getDataObject.asInstanceOf[SPObservation].getSchedulingBlock.asScalaOpt)
@@ -301,7 +302,7 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
 
       // Parallactic Angle
       val paStr = parallacticAngle
-        .map(ParallacticAngleControls.angleToDegrees)
+        .map(_.toDegrees)
         .fold(", not visible")(a => s", ${fmt.format(a)}°")
 
       ui.parallacticAngleFeedback.text =
@@ -322,9 +323,8 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
     editor.exists { e =>
       parallacticAngle.forall { newAngle =>
         val angleDiff = {
-          val newAngleDegrees = angleToDegrees(newAngle)
           val oldAngleDegrees = e.getContextInstrumentDataObject.getPosAngleDegrees
-          Math.abs(oldAngleDegrees - newAngleDegrees)
+          Math.abs(oldAngleDegrees - newAngle.toDegrees)
         }
         angleDiff >= Precision && Math.abs(angleDiff - 180) >= Precision
       }
@@ -357,8 +357,6 @@ object ParallacticAngleControls {
 
   // Precision limit for which two parallactic angles are considered equivalent.
   val Precision = 0.005
-
-  def angleToDegrees(a: Angle): Double = a.toDegrees
 
   /** Wrap an IO action with a logging timer. */
   def time[A](io: IO[A])(msg: String): IO[A] =
