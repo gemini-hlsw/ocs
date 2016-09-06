@@ -142,13 +142,15 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
       }
       peer.add(positionAngleFeedbackPanel.peer, positionAngleFeedbackPanel.cardId)
 
-      private def showParallacticAngleControls(): Unit =
+      private def showParallacticAngleControls(): Unit = Swing.onEDT {
         cardLayout.show(this.peer, parallacticAngleControlsPanel.cardId)
+      }
 
-      private def showPositionAngleFeedback(): Unit =
+      private def showPositionAngleFeedback(): Unit = Swing.onEDT {
         cardLayout.show(this.peer, positionAngleFeedbackPanel.cardId)
+      }
 
-      // Convenience method to set the appropriate card.
+      // Set the appropriate card based on the pos angle constraint.
       def updatePanel(): Unit = Swing.onEDT {
         editor.foreach {
           _.getDataObject.getPosAngleConstraint match {
