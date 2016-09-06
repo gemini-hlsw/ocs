@@ -1,7 +1,3 @@
-//
-// $Id: GmosCommonType.java 45335 2012-05-17 18:40:04Z nbarriga $
-//
-
 package edu.gemini.spModel.gemini.gmos;
 
 import edu.gemini.shared.util.immutable.None;
@@ -35,7 +31,7 @@ public class GmosCommonType {
         int rulingDensity();
     }
 
-    public static interface DisperserBridge<D extends Enum<D> & Disperser> {
+    public interface DisperserBridge<D extends Enum<D> & Disperser> {
         Class<D> getPropertyType();
         D getDefaultValue();
         D parse(String name, D defaultValue);
@@ -46,30 +42,26 @@ public class GmosCommonType {
         String getWavelength();
     }
 
-    public static interface FilterBridge<F extends Enum<F> & Filter> {
+    public interface FilterBridge<F extends Enum<F> & Filter> {
         Class<F> getPropertyType();
         F getDefaultValue();
         F parse(String name, F defaultValue);
     }
 
     public interface FPUnit extends DisplayableSpType, LoggableSpType, SequenceableSpType {
-    // IFU visualisation in TPE
-    //
-    // nbarriga: For details, see jsky.app.ot.gemini.gmos.GMOS_SciAreaFeature.
-    //          the getWFSOffset() method was moved from there.
-    //
-    // The offset from the base position in arcsec
-     static final double IFU_FOV_OFFSET = 30.;
+        // IFU visualisation in TPE
+        // The offset from the base position in arcsec
+        double IFU_FOV_OFFSET = 30.;
 
-    // The offsets (from the base pos) and dimensions of the IFU FOV (in arcsec)
-     static final Rectangle2D.Double[] IFU_FOV = new Rectangle2D.Double[]{
-        new Rectangle2D.Double(-30. - IFU_FOV_OFFSET, 0., 3.5, 5.),
-        new Rectangle2D.Double(30. - IFU_FOV_OFFSET, 0., 7., 5.)
-    };
+        // The offsets (from the base pos) and dimensions of the IFU FOV (in arcsec)
+        Rectangle2D.Double[] IFU_FOV = new Rectangle2D.Double[]{
+            new Rectangle2D.Double(-30. - IFU_FOV_OFFSET, 0., 3.5, 5.),
+            new Rectangle2D.Double(30. - IFU_FOV_OFFSET, 0., 7., 5.)
+        };
 
-    // Indexes for above array
-     static final int IFU_FOV_SMALLER_RECT_INDEX = 0;
-     static final int IFU_FOV_LARGER_RECT_INDEX = 1;
+        // Indexes for above array
+        int IFU_FOV_SMALLER_RECT_INDEX = 0;
+        int IFU_FOV_LARGER_RECT_INDEX = 1;
 
 
         double getWidth();
@@ -93,7 +85,7 @@ public class GmosCommonType {
         double getWFSOffset();
     }
 
-    public static interface FPUnitBridge<P extends Enum<P> & FPUnit> {
+    public interface FPUnitBridge<P extends Enum<P> & FPUnit> {
         Class<P> getPropertyType();
         P getDefaultValue();
         P parse(String name, P defaultValue);
@@ -106,7 +98,7 @@ public class GmosCommonType {
      * AmpCount indicates the number of amps that should be used
      * when reading out the detectors.
      */
-    public static enum AmpCount implements DisplayableSpType, LoggableSpType, SequenceableSpType, ObsoletableSpType {
+    public enum AmpCount implements DisplayableSpType, LoggableSpType, SequenceableSpType, ObsoletableSpType {
         THREE("Three", DetectorManufacturer.E2V),
         SIX("Six", DetectorManufacturer.E2V, DetectorManufacturer.HAMAMATSU),
         TWELVE("Twelve", DetectorManufacturer.HAMAMATSU),
@@ -120,7 +112,7 @@ public class GmosCommonType {
         private final String _displayValue;
         private final Set<DetectorManufacturer> supportedBy;
 
-        private AmpCount(String displayValue, DetectorManufacturer... supportedBy) {
+        AmpCount(String displayValue, DetectorManufacturer... supportedBy) {
             _displayValue = displayValue;
             Set<DetectorManufacturer> tmp = new HashSet<DetectorManufacturer>(Arrays.asList(supportedBy));
             this.supportedBy = Collections.unmodifiableSet(tmp);
@@ -136,10 +128,6 @@ public class GmosCommonType {
 
         public String logValue() {
             return _displayValue;
-        }
-
-        public boolean isObsolete() {
-            return false;
         }
 
         // This is backwards, but DetectorManufacturer is a common type
@@ -164,7 +152,7 @@ public class GmosCommonType {
 
     }
 
-    public static interface StageModeBridge<SM extends Enum<SM> & StageMode> {
+    public interface StageModeBridge<SM extends Enum<SM> & StageMode> {
         SM parse(String name, SM defaultValue);
         SM getDefaultValue();
     }
@@ -172,7 +160,7 @@ public class GmosCommonType {
     /**
      * ADC
      */
-    public static enum ADC implements DisplayableSpType, LoggableSpType, SequenceableSpType {
+    public enum ADC implements DisplayableSpType, LoggableSpType, SequenceableSpType {
 
         NONE("No Correction"),
         BEST_STATIC("Best Static Correction"),
@@ -184,7 +172,7 @@ public class GmosCommonType {
 
         private String _displayValue;
 
-        private ADC(String displayValue) {
+        ADC(String displayValue) {
             _displayValue = displayValue;
         }
 
@@ -271,7 +259,7 @@ public class GmosCommonType {
     /**
      * CCD Gain indicates which gain mode to use
      */
-    public static enum AmpGain implements DisplayableSpType, LoggableSpType, SequenceableSpType {
+    public enum AmpGain implements DisplayableSpType, LoggableSpType, SequenceableSpType {
         LOW("Low"),
         HIGH("High"),
         ;
@@ -281,7 +269,7 @@ public class GmosCommonType {
 
         private String _displayValue;
 
-        private AmpGain(String displayValue) {
+        AmpGain(String displayValue) {
             _displayValue = displayValue;
         }
 
@@ -311,7 +299,7 @@ public class GmosCommonType {
     /**
      * CCD ReadoutSpead indicates speed of CCD readout.
      */
-    public static enum AmpReadMode implements DisplayableSpType, LoggableSpType, SequenceableSpType {
+    public enum AmpReadMode implements DisplayableSpType, LoggableSpType, SequenceableSpType {
         SLOW("Slow", "slow"),
         FAST("Fast", "fast"),
         ;
@@ -322,7 +310,7 @@ public class GmosCommonType {
         public static final AmpReadMode DEFAULT = SLOW;
         public static final ItemKey KEY = new ItemKey(INSTRUMENT_KEY, "ampReadMode");
 
-        private AmpReadMode(String displayValue, String logValue) {
+        AmpReadMode(String displayValue, String logValue) {
             _displayValue = displayValue;
             _logValue     = logValue;
         }
@@ -354,7 +342,7 @@ public class GmosCommonType {
     /**
      * CCD Bin factor.
      */
-    public static enum Binning implements DisplayableSpType, LoggableSpType, SequenceableSpType {
+    public enum Binning implements DisplayableSpType, LoggableSpType, SequenceableSpType {
         ONE(1),
         TWO(2),
         FOUR(4),
@@ -364,7 +352,7 @@ public class GmosCommonType {
 
         private int _value;
 
-        private Binning(int value) {
+        Binning(int value) {
             _value = value;
         }
 
@@ -404,7 +392,7 @@ public class GmosCommonType {
     /**
      * Disperser Order
      */
-    public static enum Order implements DisplayableSpType, LoggableSpType, SequenceableSpType {
+    public enum Order implements DisplayableSpType, LoggableSpType, SequenceableSpType {
         ZERO("0"),
         ONE("1"),
         TWO("2"),
@@ -414,7 +402,7 @@ public class GmosCommonType {
 
         private String _displayValue;
 
-        private Order(String displayValue) {
+        Order(String displayValue) {
             _displayValue = displayValue;
         }
 
@@ -451,7 +439,7 @@ public class GmosCommonType {
      * UseNS is True if using nod & shuffle, otherwise False
      * (XXX Using true/false instead of yes/no for backward compatibility)
      */
-    public static enum UseNS implements DisplayableSpType, LoggableSpType, SequenceableSpType {
+    public enum UseNS implements DisplayableSpType, LoggableSpType, SequenceableSpType {
         TRUE("Yes"),
         FALSE("No"),
         ;
@@ -460,7 +448,7 @@ public class GmosCommonType {
 
         private String _displayValue;
 
-        private UseNS(String displayValue) {
+        UseNS(String displayValue) {
             _displayValue = displayValue;
         }
 
@@ -493,7 +481,7 @@ public class GmosCommonType {
      * FP unit mode indicates a custom mask is in use or a built in
      * is in use.
      */
-    public static enum FPUnitMode implements DisplayableSpType, LoggableSpType, SequenceableSpType {
+    public enum FPUnitMode implements DisplayableSpType, LoggableSpType, SequenceableSpType {
         BUILTIN("Builtin"),
         CUSTOM_MASK("Custom Mask"),
         ;
@@ -502,7 +490,7 @@ public class GmosCommonType {
 
         private String _displayValue;
 
-        private FPUnitMode(String displayValue) {
+        FPUnitMode(String displayValue) {
             _displayValue = displayValue;
         }
 
@@ -534,15 +522,21 @@ public class GmosCommonType {
     /**
      * BuiltInROI is a class to select from a small set of selected Regions of Interest.
      */
-    public static enum BuiltinROI implements DisplayableSpType, LoggableSpType, SequenceableSpType, ObsoletableSpType, PartiallyEngineeringSpType {
+    public enum BuiltinROI implements DisplayableSpType, LoggableSpType, SequenceableSpType, ObsoletableSpType, PartiallyEngineeringSpType {
 
-        FULL_FRAME("Full Frame Readout", new Some<ROIDescription>(DEFAULT_BUILTIN_ROID), "full"),
-        CCD2("CCD 2", new Some<ROIDescription>(new ROIDescription(2049, 1, 2048, 4608)), "ccd2"),
-        CENTRAL_SPECTRUM("Central Spectrum", new Some<ROIDescription>(new ROIDescription(1, 1792, 6144, 1024)), "cspec"),
-        CENTRAL_STAMP("Central Stamp", new Some<ROIDescription>(new ROIDescription(2922, 2154, 300, 300)), "stamp"),
-        TOP_SPECTRUM("Top Spectrum", new Some<ROIDescription>(new ROIDescription(1, 3328, 6144, 1024)), "tspec") { public boolean isObsolete() {return true;}},
-        BOTTOM_SPECTRUM("Bottom Spectrum", new Some<ROIDescription>(new ROIDescription(1, 256, 6144, 1024)), "bspec") { public boolean isObsolete() {return true;}},
-        CUSTOM("Custom ROI", None.<ROIDescription>instance(), "custom") { public boolean isEngineering() {return true;}},
+        FULL_FRAME("Full Frame Readout", new Some<>(DEFAULT_BUILTIN_ROID), "full"),
+        CCD2("CCD 2", new Some<>(new ROIDescription(2049, 1, 2048, 4608)), "ccd2"),
+        CENTRAL_SPECTRUM("Central Spectrum", new Some<>(new ROIDescription(1, 1792, 6144, 1024)), "cspec"),
+        CENTRAL_STAMP("Central Stamp", new Some<>(new ROIDescription(2922, 2154, 300, 300)), "stamp"),
+        TOP_SPECTRUM("Top Spectrum", new Some<>(new ROIDescription(1, 3328, 6144, 1024)), "tspec") {
+            @Override public boolean isObsolete() { return true; }
+        },
+        BOTTOM_SPECTRUM("Bottom Spectrum", new Some<>(new ROIDescription(1, 256, 6144, 1024)), "bspec") {
+            @Override public boolean isObsolete() { return true; }
+        },
+        CUSTOM("Custom ROI", None.instance(), "custom") {
+            public boolean isEngineering() { return true; }
+        },
         ;
 
 
@@ -554,7 +548,7 @@ public class GmosCommonType {
         private Option<ROIDescription> _roid;
         private String _logValue;
 
-        private BuiltinROI(String displayValue, Option<ROIDescription> roid, String logValue) {
+        BuiltinROI(String displayValue, Option<ROIDescription> roid, String logValue) {
             _displayValue = displayValue;
             _roid = roid;
             _logValue = logValue;
@@ -584,15 +578,6 @@ public class GmosCommonType {
         /** Return a BuiltinROI by name giving a value to return upon error **/
         public static BuiltinROI getBuiltinROI(String name, BuiltinROI nvalue) {
             return SpTypeUtil.oldValueOf(BuiltinROI.class, name, nvalue);
-        }
-
-        public boolean isObsolete() {
-            return false;
-        }
-
-        @Override
-        public boolean isEngineering() {
-            return false;
         }
     }
 
@@ -635,7 +620,7 @@ public class GmosCommonType {
         }
 
         public List<IParameter> getSysConfig(int i) {
-            List<IParameter> params = new ArrayList<IParameter>();
+            List<IParameter> params = new ArrayList<>();
             params.add(DefaultParameter.getInstance("customROI" + i + paramNames[0], getXStart()));
             params.add(DefaultParameter.getInstance("customROI" + i + paramNames[1], getYStart()));
             params.add(DefaultParameter.getInstance("customROI" + i + paramNames[2], getXSize()));
@@ -765,7 +750,7 @@ public class GmosCommonType {
     /**
      * DTAX Offset Values - restricted to +/- 6, zero default
      */
-    public static enum DTAX implements DisplayableSpType, LoggableSpType, SequenceableSpType {
+    public enum DTAX implements DisplayableSpType, LoggableSpType, SequenceableSpType {
 
         MSIX("-6", -6),
         MFIVE("-5", -5),
@@ -787,7 +772,7 @@ public class GmosCommonType {
         private String _displayValue;
         private int _dtax;
 
-        private DTAX(String displayValue, int value) {
+        DTAX(String displayValue, int value) {
             _displayValue = displayValue;
             _dtax = value;
         }
@@ -861,7 +846,7 @@ public class GmosCommonType {
     public static final double HAMAMATSU_PIXEL_SIZE = 0.0809;
     public static final int HAMAMATSU_SHUFFLE_OFFSET = 1392; // pixel
 
-    public static enum DetectorManufacturer implements DisplayableSpType, ObsoletableSpType {
+    public enum DetectorManufacturer implements DisplayableSpType {
         E2V("E2V", E2V_NORTH_PIXEL_SIZE, E2V_SOUTH_PIXEL_SIZE, E2V_SHUFFLE_OFFSET, 6144, 4608, 4),
         HAMAMATSU("HAMAMATSU", HAMAMATSU_PIXEL_SIZE, HAMAMATSU_PIXEL_SIZE, HAMAMATSU_SHUFFLE_OFFSET, 6144, 4224, 5);
 
@@ -876,7 +861,7 @@ public class GmosCommonType {
         private final int ySize;
         private final int maxROIs;
 
-        private DetectorManufacturer(final String displayValue, final double pixelSizeNorth, final double pixelSizeSouth,
+        DetectorManufacturer(final String displayValue, final double pixelSizeNorth, final double pixelSizeSouth,
                                      final int offset, final int xSize, final int ySize, final int maxROIs) {
             this._displayValue = displayValue;
             this._pixelSizeNorth = pixelSizeNorth;
@@ -924,17 +909,13 @@ public class GmosCommonType {
         public int getMaxROIs() {
             return maxROIs;
         }
-
-        public boolean isObsolete() {
-            return false;
-        }
     }
 
 
     /**
      * GMOS custom mask slit widths
      */
-    public static enum CustomSlitWidth implements DisplayableSpType {
+    public enum CustomSlitWidth implements DisplayableSpType {
         OTHER("Other", 0),
         CUSTOM_WIDTH_0_25("0.25 arcsec", 0.25),
         CUSTOM_WIDTH_0_50("0.50 arcsec", 0.50),
@@ -947,7 +928,7 @@ public class GmosCommonType {
         private String _displayValue;
         private double _width;
 
-        private CustomSlitWidth(String displayValue, double width) {
+        CustomSlitWidth(String displayValue, double width) {
             this._displayValue = displayValue;
             this._width = width;
         }
@@ -981,15 +962,13 @@ public class GmosCommonType {
         }
 
         public static CustomROIList create(ParamSet paramSet) {
-            ArrayList<ROIDescription> newList = new ArrayList<ROIDescription>();
-            for (ParamSet p : paramSet.getParamSets()) {
-                newList.add(new ROIDescription(p));
-            }
+            final ArrayList<ROIDescription> newList = new ArrayList<>();
+            paramSet.getParamSets().stream().map(ROIDescription::new).forEach(newList::add);
             return new CustomROIList(newList);
         }
 
         private CustomROIList() {
-            rois = new ArrayList<ROIDescription>();
+            rois = new ArrayList<>();
         }
 
         private CustomROIList(ArrayList<ROIDescription> rois) {
@@ -1001,13 +980,13 @@ public class GmosCommonType {
         }
 
         public CustomROIList add(ROIDescription roi) {
-            ArrayList<ROIDescription> newList = new ArrayList<ROIDescription>(rois);
+            final ArrayList<ROIDescription> newList = new ArrayList<>(rois);
             newList.add(roi);
             return new CustomROIList(newList);
         }
 
         public CustomROIList remove(int i) {
-            ArrayList<ROIDescription> newList= new ArrayList<ROIDescription>(rois);
+            final ArrayList<ROIDescription> newList= new ArrayList<>(rois);
             newList.remove(i);
             return new CustomROIList(newList);
         }
@@ -1017,7 +996,7 @@ public class GmosCommonType {
         }
 
         public CustomROIList update(int i, ROIDescription roi) {
-            ArrayList<ROIDescription> newList= new ArrayList<ROIDescription>(rois);
+            final ArrayList<ROIDescription> newList= new ArrayList<>(rois);
             newList.remove(i);
             newList.add(i, roi);
             return new CustomROIList(newList);
@@ -1048,7 +1027,7 @@ public class GmosCommonType {
         }
 
         public List<IParameter> getSysConfig() {
-            List<IParameter> params = new ArrayList<IParameter>();
+            List<IParameter> params = new ArrayList<>();
             for (int i = 0; i < rois.size(); i++) {
                 params.addAll(rois.get(i).getSysConfig(i+1));
             }
@@ -1081,11 +1060,7 @@ public class GmosCommonType {
          * (0/:rois) { _ + _.getYSize }
          */
         public int totalUnbinnedRows() {
-            int rows = 0;
-            for (ROIDescription roi : rois) {
-                rows = rows + roi.getYSize();
-            }
-            return rows;
+            return rois.stream().reduce(0, (rows, roi) -> rows + roi.getYSize(), (a,b) -> a+b);
         }
     }
 }

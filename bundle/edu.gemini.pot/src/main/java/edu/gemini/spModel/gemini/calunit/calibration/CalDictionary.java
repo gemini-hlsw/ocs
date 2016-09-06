@@ -1,5 +1,6 @@
 package edu.gemini.spModel.gemini.calunit.calibration;
 
+import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.spModel.config2.ItemKey;
 import edu.gemini.spModel.gemini.calunit.CalUnitParams.Diffuser;
 import edu.gemini.spModel.gemini.calunit.CalUnitParams.Filter;
@@ -8,6 +9,7 @@ import edu.gemini.spModel.gemini.calunit.CalUnitParams.Shutter;
 import edu.gemini.spModel.gemini.seqcomp.smartgcal.SmartgcalSysConfig;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static edu.gemini.spModel.gemini.calunit.CalUnitConstants.*;
 import static edu.gemini.spModel.obscomp.InstConstants.*;
@@ -27,17 +29,10 @@ public final class CalDictionary {
 
     /** Converts a calibration object to a String. */
     public interface Show { String apply(Object value); }
-
-    public static final Show SHOW_TO_STRING = new Show() { public String apply(Object value) { return value.toString(); }};
-    public static final Show SHOW_ENUM_NAME = new Show() { public String apply(Object value) { return ((Enum) value).name(); }};
+    public static final Show SHOW_ENUM_NAME = value -> ((Enum) value).name();
 
     /** Converts a String returned by Show to a calibration object. */
     public interface Read { Object apply(String str); }
-
-    public static final Read READ_BOOLEAN = new Read() { public Object apply(String str) { return Boolean.parseBoolean(str); }};
-    public static final Read READ_DOUBLE  = new Read() { public Object apply(String str) { return Double.parseDouble(str); }};
-    public static final Read READ_INTEGER = new Read() { public Object apply(String str) { return Integer.parseInt(str); }};
-    public static final Read READ_STRING  = new Read() { public Object apply(String str) { return str; }};
 
     /** Extracts the value of an item from an indexed calibrtion step. */
     public interface Extract { Object apply(IndexedCalibrationStep that); }
@@ -86,113 +81,106 @@ public final class CalDictionary {
 
     public static final Item LAMP_ITEM = new Item(
        LAMP_PROP,
-       new Show() { public String apply(Object value) {return Lamp.show((Collection<Lamp>) value, Lamp.NAME_MAPPER);} },
-       new Read() { public Object apply(String str) { return Lamp.read(str); } },
-       new Extract() { public Object apply(IndexedCalibrationStep that) { return that.getLamps(); } }
+       value ->  Lamp.show((Collection<Lamp>) value, Lamp::name),
+       Lamp::read,
+       IndexedCalibrationStep::getLamps
     );
 
     public static final Item SHUTTER_ITEM = new Item(
        SHUTTER_PROP,
        SHOW_ENUM_NAME,
-       new Read() { public Object apply(String str) { return Shutter.getShutter(str); } },
-       new Extract() { public Object apply(IndexedCalibrationStep that) { return that.getShutter(); } }
+       Shutter::getShutter,
+       IndexedCalibrationStep::getShutter
     );
 
     public static final Item FILTER_ITEM = new Item(
        FILTER_PROP,
        SHOW_ENUM_NAME,
-       new Read() { public Object apply(String str) { return Filter.getFilter(str); } },
-       new Extract() { public Object apply(IndexedCalibrationStep that) { return that.getFilter(); } }
+       Filter::getFilter,
+       IndexedCalibrationStep::getFilter
     );
 
     public static final Item DIFFUSER_ITEM = new Item(
        DIFFUSER_PROP,
        SHOW_ENUM_NAME,
-       new Read() { public Object apply(String str) { return Diffuser.getDiffuser(str); } },
-       new Extract() { public Object apply(IndexedCalibrationStep that) { return that.getDiffuser(); } }
+       Diffuser::getDiffuser,
+       IndexedCalibrationStep::getDiffuser
     );
 
     public static final Item EXPOSURE_TIME_ITEM = new Item(
        EXPOSURE_TIME_PROP,
-       SHOW_TO_STRING,
-       READ_DOUBLE,
-       new Extract() { public Object apply(IndexedCalibrationStep that) { return that.getExposureTime(); } }
+       Object::toString,
+       Double::parseDouble,
+       IndexedCalibrationStep::getExposureTime
     );
 
     public static final Item COADDS_ITEM = new Item(
        COADDS_PROP,
-       SHOW_TO_STRING,
-       READ_INTEGER,
-       new Extract() { public Object apply(IndexedCalibrationStep that) { return that.getCoadds(); } }
+       Object::toString,
+       Integer::parseInt,
+       IndexedCalibrationStep::getCoadds
     );
 
     public static final Item BASECAL_DAY_ITEM = new Item(
        BASECAL_DAY_PROP,
-       SHOW_TO_STRING,
-       READ_BOOLEAN,
-       new Extract() { public Object apply(IndexedCalibrationStep that) { return that.isBasecalDay(); } }
+       Object::toString,
+       Boolean::parseBoolean,
+       IndexedCalibrationStep::isBasecalDay
     );
 
     public static final Item BASECAL_NIGHT_ITEM = new Item(
        BASECAL_NIGHT_PROP,
-       SHOW_TO_STRING,
-       READ_BOOLEAN,
-       new Extract() { public Object apply(IndexedCalibrationStep that) { return that.isBasecalNight(); } }
+       Object::toString,
+       Boolean::parseBoolean,
+       IndexedCalibrationStep::isBasecalNight
     );
 
     public static final Item STEP_COUNT_ITEM = new Item(
       SmartgcalSysConfig.STEP_KEY,
-      SHOW_TO_STRING,
-      READ_INTEGER,
-      new Extract() { public Object apply(IndexedCalibrationStep that) { return that.getIndex(); } },
+      Object::toString,
+      Integer::parseInt,
+      IndexedCalibrationStep::getIndex,
       PropertyKind.fundamental,
       DataAspect.meta
     );
 
     public static final Item OBS_CLASS_ITEM = new Item(
       new ItemKey(OBS_KEY, OBS_CLASS_PROP),
-      SHOW_TO_STRING,
-      READ_STRING,
-      new Extract() { public Object apply(IndexedCalibrationStep that) {
-          return that.getObsClass();
-      }},
+      Object::toString,
+      t -> t,
+      IndexedCalibrationStep::getObsClass,
       PropertyKind.fundamental
     );
 
     public static final Item OBS_TYPE_ITEM = new Item(
       new ItemKey(OBS_KEY, OBSERVE_TYPE_PROP),
-      SHOW_TO_STRING,
-      READ_STRING,
-      new Extract() { public Object apply(IndexedCalibrationStep that) {
-          return that.isFlat() ? FLAT_OBSERVE_TYPE : ARC_OBSERVE_TYPE;
-      }},
+      Object::toString,
+      t -> t,
+      ics -> ics.isFlat() ? FLAT_OBSERVE_TYPE : ARC_OBSERVE_TYPE,
       PropertyKind.derived
     );
 
     public static final Item OBS_EXPOSURE_TIME_ITEM = new Item(
       new ItemKey(OBS_KEY, EXPOSURE_TIME_PROP),
-      SHOW_TO_STRING,
-      READ_DOUBLE,
-      new Extract() { public Object apply(IndexedCalibrationStep that) { return that.getExposureTime(); } },
+      Object::toString,
+      Double::parseDouble,
+      IndexedCalibrationStep::getExposureTime,
       PropertyKind.derived
     );
 
     public static final Item OBS_COADDS_ITEM = new Item(
       new ItemKey(OBS_KEY, COADDS_PROP),
-      SHOW_TO_STRING,
-      READ_INTEGER,
-      new Extract() { public Object apply(IndexedCalibrationStep that) { return that.getCoadds(); } },
+      Object::toString,
+      Integer::parseInt,
+      IndexedCalibrationStep::getCoadds,
       PropertyKind.derived
     );
 
     public static final Item OBS_OBJECT_ITEM = new Item(
       new ItemKey(OBS_KEY, OBJECT_PROP),
-      SHOW_TO_STRING,
-      READ_STRING,
-      new Extract() { public Object apply(IndexedCalibrationStep that) {
-          Set<Lamp> lamps = that.getLamps();
-          return lamps == null ? "" : Lamp.show(lamps, Lamp.TCC_MAPPER);
-      }},
+      Object::toString,
+      t -> t,
+      that -> ImOption.apply(that.getLamps()).map(lamps -> Lamp.show(lamps, Lamp::getTccName)).getOrElse(""),
       PropertyKind.derived
     );
 
@@ -214,17 +202,14 @@ public final class CalDictionary {
     );
 
     /** ItemKeys for all systems that are used to configure a calibration. */
-    public static final Set<ItemKey> SYSTEM_KEYS = new HashSet<ItemKey>() {{
-        for (Item item : ITEMS) add(item.key.getParent());
-    }};
+    public static final Set<ItemKey> SYSTEM_KEYS =
+            ITEMS.stream().map(i -> i.key.getParent()).collect(Collectors.toSet());
 
     /** The subset of all items that are fundamental properties of a calibration step. */
-    public static final Collection<Item> FUNDAMENTAL_ITEMS = new ArrayList<Item>() {{
-        for (Item item : ITEMS) if (item.kind == PropertyKind.fundamental) add(item);
-    }};
+    public static final Collection<Item> FUNDAMENTAL_ITEMS =
+            ITEMS.stream().filter(i -> i.kind == PropertyKind.fundamental).collect(Collectors.toList());
 
     /** The subset of all items that are derived from fundamental properties. */
-    public static final Collection<Item> DERIVED_ITEMS = new ArrayList<Item>() {{
-        for (Item item : ITEMS) if (item.kind == PropertyKind.derived) add(item);
-    }};
+    public static final Collection<Item> DERIVED_ITEMS =
+            ITEMS.stream().filter(i -> i.kind == PropertyKind.derived).collect(Collectors.toList());
 }

@@ -1,10 +1,3 @@
-// Copyright 1997-2000
-// Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: SeqRepeatFlatObs.java 38751 2011-11-16 19:37:18Z swalker $
-//
 package edu.gemini.spModel.gemini.seqcomp;
 
 import edu.gemini.pot.sp.SPComponentType;
@@ -59,7 +52,7 @@ public class SeqRepeatFlatObs extends SeqRepeatCoaddExp
      * Override getTitle to return the observe count.
      */
     public String getTitle() {
-        return (isArc() ? "Manual Arc: " : "Manual Flat: ") + Lamp.show(_lamps, Lamp.DISPLAY_MAPPER) + " (" + getStepCount() + "X)";
+        return (isArc() ? "Manual Arc: " : "Manual Flat: ") + Lamp.show(_lamps, Lamp::displayValue) + " (" + getStepCount() + "X)";
     }
 
     /**
@@ -217,7 +210,7 @@ public class SeqRepeatFlatObs extends SeqRepeatCoaddExp
     public ParamSet getParamSet(PioFactory factory) {
         ParamSet paramSet = super.getParamSet(factory);
 
-        Pio.addParam(factory, paramSet, CalUnitConstants.LAMP_PROP,     Lamp.show(getLamps(), Lamp.NAME_MAPPER));
+        Pio.addParam(factory, paramSet, CalUnitConstants.LAMP_PROP,     Lamp.show(getLamps(), Lamp::name));
         Pio.addParam(factory, paramSet, CalUnitConstants.SHUTTER_PROP,  getShutter().name());
         Pio.addParam(factory, paramSet, CalUnitConstants.FILTER_PROP,   getFilter().name());
         Pio.addParam(factory, paramSet, CalUnitConstants.DIFFUSER_PROP, getDiffuser().name());

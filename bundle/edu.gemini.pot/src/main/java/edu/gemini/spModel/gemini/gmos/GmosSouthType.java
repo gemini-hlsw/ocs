@@ -16,7 +16,9 @@ public class GmosSouthType {
     public enum StageModeSouth implements GmosCommonType.StageMode {
         NO_FOLLOW("Do Not Follow"),
         FOLLOW_XYZ("Follow in XYZ(focus)"),
-        FOLLOW_XY("Follow in XY") { public boolean isObsolete() { return true;}},
+        FOLLOW_XY("Follow in XY") {
+            @Override public boolean isObsolete() { return true; }
+        },
         FOLLOW_Z_ONLY("Follow in Z Only")
         ;
 
@@ -48,10 +50,6 @@ public class GmosSouthType {
         /** Return a StageMode by name giving a value to return upon error **/
         public static StageModeSouth getStageMode(String name, StageModeSouth nvalue) {
             return SpTypeUtil.oldValueOf(StageModeSouth.class, name, nvalue);
-        }
-
-        public boolean isObsolete() {
-            return false;
         }
     }
 

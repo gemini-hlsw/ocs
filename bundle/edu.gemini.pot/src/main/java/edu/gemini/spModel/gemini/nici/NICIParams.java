@@ -11,12 +11,10 @@ import java.util.HashMap;
 
 public final class NICIParams {
 
-    public static enum FocalPlaneMask implements DisplayableSpType, SequenceableSpType, ObsoletableSpType {
+    public enum FocalPlaneMask implements DisplayableSpType, SequenceableSpType, ObsoletableSpType {
 
         OPEN("Open") {
-            public boolean isObsolete() {
-                return true;
-            }
+            @Override public boolean isObsolete() { return true; }
         },
         CLEAR("Clear"),
         MASK_1("0.90 arcsec"),
@@ -32,7 +30,7 @@ public final class NICIParams {
 
         private String _displayValue;
 
-        private FocalPlaneMask(String name) {
+        FocalPlaneMask(String name) {
             _displayValue = name;
         }
 
@@ -43,13 +41,9 @@ public final class NICIParams {
         public String sequenceValue() {
             return name();
         }
-
-        public boolean isObsolete() {
-            return false;
-        }
     }
 
-    public static enum PupilMask implements DisplayableSpType, SequenceableSpType, ObsoletableSpType {
+    public enum PupilMask implements DisplayableSpType, SequenceableSpType {
 
         BLOCK("Block"),
         OPEN("Open"),
@@ -67,15 +61,9 @@ public final class NICIParams {
         public static final ItemKey KEY = new ItemKey(INSTRUMENT_KEY, "pupilMask");
 
         private final String _displayName;
-        private final boolean _isObsolete;
 
-        private PupilMask(String name) {
-            this(name,false);
-        }
-
-        private PupilMask(String name, boolean obsolete){
+        PupilMask(String name){
             _displayName = name;
-            _isObsolete=obsolete;
         }
 
         public String displayValue() {
@@ -85,16 +73,11 @@ public final class NICIParams {
         public String sequenceValue() {
             return name();
         }
-
-        @Override
-        public boolean isObsolete() {
-            return _isObsolete;
-        }
     }
 
     private static final Angle DEF_FIXED_ANGLE = new Angle(180, Angle.Unit.DEGREES);
 
-    public static enum CassRotator implements DisplayableSpType, SequenceableSpType {
+    public enum CassRotator implements DisplayableSpType, SequenceableSpType {
 
         FIXED("Fixed") {
             public Angle defaultAngle() { return DEF_FIXED_ANGLE; }
@@ -109,7 +92,7 @@ public final class NICIParams {
 
         private String _displayName;
 
-        private CassRotator(String name) {
+        CassRotator(String name) {
             _displayName = name;
         }
 
@@ -126,7 +109,7 @@ public final class NICIParams {
     }
 
 
-    public static enum ImagingMode implements DisplayableSpType, SequenceableSpType, ObsoletableSpType {
+    public enum ImagingMode implements DisplayableSpType, SequenceableSpType, ObsoletableSpType {
 
         MANUAL("Manual"),
         H1SLA("H 1% S,L A"),
@@ -136,9 +119,7 @@ public final class NICIParams {
         H4SLA("H 4% S,L A"),
         H4SLB("H 4% S,L B"),
         PUPIL_IMAGING("Pupil Imaging") {
-            public boolean isObsolete() {
-                return true;
-            }
+            @Override public boolean isObsolete() { return true; }
         }
 
         ;
@@ -147,7 +128,7 @@ public final class NICIParams {
 
         private String _displayValue;
 
-        private ImagingMode(String name) {
+        ImagingMode(String name) {
             _displayValue = name;
         }
 
@@ -158,14 +139,10 @@ public final class NICIParams {
         public String displayValue() {
             return _displayValue;
         }
-
-        public boolean isObsolete() {
-            return false;
-        }
     }
 
 
-    public static enum DichroicWheel implements DisplayableSpType, SequenceableSpType {
+    public enum DichroicWheel implements DisplayableSpType, SequenceableSpType {
 
         H5050_BEAMSPLITTER("H 50-50 Beamsplitter"),
         CH4_H_DICHROIC("CH4 H Dichroic"),
@@ -179,7 +156,7 @@ public final class NICIParams {
 
         private String _displayValue;
 
-        private DichroicWheel(String name) {
+        DichroicWheel(String name) {
             _displayValue = name;
         }
 
@@ -198,17 +175,22 @@ public final class NICIParams {
      * NICI Filters
      * </a>
      */
-    public static enum Channel1FW implements DisplayableSpType, SequenceableSpType, ObsoletableSpType {
+    public enum Channel1FW implements DisplayableSpType, SequenceableSpType, ObsoletableSpType {
 
         BLOCK("Block", Double.NaN),
-        OPEN("Open", Double.NaN, true),
+        OPEN("Open", Double.NaN) {
+            @Override public boolean isObsolete() { return true; }
+        },
         KS("Ks", 2.15),
         K("K", 2.20),
         K_PRIMMA("Kprime", 2.12),
         L_PRIMMA("Lprime", 3.78),
         M_PRIMMA("Mprime", 4.68),
         K_CONT("Kcont", 2.2718),
-        BR_GAMMA("Br-gamma", 2.1686, true), //moved to blue filter wheel (SCT-231)
+        BR_GAMMA("Br-gamma", 2.1686) {
+            //moved to blue filter wheel (SCT-231)
+            @Override public boolean isObsolete() { return true; }
+        },
         CH4H1S("CH4 H 1% S", 1.587),
         CH4H1SP("CH4 H 1% Sp", 1.603),
         CH4H1L("CH4 H 1% L", 1.628),
@@ -224,16 +206,10 @@ public final class NICIParams {
 
         private final String _displayValue;
         private final double _centralWavelength;
-        private final boolean _isObsolete;
 
-        private Channel1FW(String name, double wavelength) {
-            this(name, wavelength, false);
-        }
-
-        private Channel1FW(String name, double wavelength, boolean isObsolete) {
+        Channel1FW(String name, double wavelength) {
             _displayValue      = name;
             _centralWavelength = wavelength;
-            _isObsolete        = isObsolete;
         }
 
         public String sequenceValue() {
@@ -242,10 +218,6 @@ public final class NICIParams {
 
         public String displayValue() {
             return _displayValue;
-        }
-
-        public boolean isObsolete() {
-            return _isObsolete;
         }
 
         public double centralWavelength() {
@@ -259,10 +231,12 @@ public final class NICIParams {
      * NICI Filters
      * </a>
      */
-    public static enum Channel2FW implements DisplayableSpType, SequenceableSpType, ObsoletableSpType {
+    public enum Channel2FW implements DisplayableSpType, SequenceableSpType, ObsoletableSpType {
 
         BLOCK("Block", Double.NaN),
-        OPEN("Open", Double.NaN, true),
+        OPEN("Open", Double.NaN) {
+            @Override public boolean isObsolete() { return true; }
+        },
         J("J", 1.25),
         H("H", 1.65),
         FE_II("[Fe II]", 1.644),
@@ -275,7 +249,9 @@ public final class NICIParams {
         CH4H4L("CH4 H 4% L", 1.652),
         CH4H65S("CH4 H 6.5% S", 1.596),
         K_CH4("CH4 K 5% S",2.028),
-        H20("H20 Ice",3.1,true),
+        H20("H20 Ice",3.1) {
+            @Override public boolean isObsolete() { return true; }
+        },
         ;
 
         public static final Channel2FW DEFAULT = BLOCK;
@@ -283,16 +259,10 @@ public final class NICIParams {
 
         private String _displayValue;
         private final double _centralWavelength;
-        private boolean _isObsolete = false;
 
-        private Channel2FW(String name, double wavelength) {
-            this(name, wavelength, false);
-        }
-
-        private Channel2FW(String name, double wavelength, boolean isObsolete) {
+        Channel2FW(String name, double wavelength) {
             _displayValue      = name;
             _centralWavelength = wavelength;
-            _isObsolete        = isObsolete;
         }
 
 
@@ -304,17 +274,13 @@ public final class NICIParams {
             return _displayValue;
         }
 
-        public boolean isObsolete() {
-            return _isObsolete;
-        }
-
         public double centralWavelength() {
             return _centralWavelength;
         }
     }
 
 
-    public static enum WellDepth implements DisplayableSpType, SequenceableSpType {
+    public enum WellDepth implements DisplayableSpType, SequenceableSpType {
         SHALLOW("Shallow (200 mV)"),
         NORMAL("Normal (300 mV)"),
         DEEP("Deep (400 mV)"),
@@ -324,7 +290,7 @@ public final class NICIParams {
 
         private String _displayValue;
 
-        private WellDepth(String text) {
+        WellDepth(String text) {
             _displayValue = text;
         }
 
@@ -339,7 +305,7 @@ public final class NICIParams {
 
 
     // Obsolete -- replaced by WellDepth
-    public static enum BiasVoltage implements DisplayableSpType, SequenceableSpType, ObsoletableSpType {
+    public enum BiasVoltage implements DisplayableSpType, SequenceableSpType, ObsoletableSpType {
 
         LOW("Low 200 mV", WellDepth.SHALLOW),
         MEDIUM("Medium 400 mV", WellDepth.NORMAL),
@@ -348,7 +314,7 @@ public final class NICIParams {
         private String _displayValue;
         private WellDepth _wellDepth;
 
-        private BiasVoltage(String text, WellDepth wellDepth) {
+        BiasVoltage(String text, WellDepth wellDepth) {
             _displayValue = text;
             _wellDepth = wellDepth;
         }
@@ -365,15 +331,13 @@ public final class NICIParams {
             return _wellDepth;
         }
 
-        public boolean isObsolete() {
+        @Override public boolean isObsolete() {
             return true;
         }
     }
 
-    public static enum DHSMode implements DisplayableSpType, SequenceableSpType, ObsoletableSpType {
+    public enum DHSMode implements DisplayableSpType, SequenceableSpType {
 
-//        BOTH("Both", true),
-//        QUICK_LOOK("QuickLook", true),
         SAVE("Save"),
         DISCARD("Discard");
 
@@ -381,14 +345,7 @@ public final class NICIParams {
 
         private String _displayName;
 
-        private boolean _isObsolete = false;
-
-        private DHSMode(String name) {
-            this(name, false);
-        }
-
-        private DHSMode(String name, boolean isObsolete) {
-            _isObsolete = isObsolete;
+        DHSMode(String name) {
             _displayName = name;
         }
 
@@ -401,17 +358,13 @@ public final class NICIParams {
         public String sequenceValue() {
             return name();
         }
-
-        public boolean isObsolete() {
-            return _isObsolete;
-        }
     }
 
     /**
      * Following are the types requested for engineering use
      */
 
-    public static enum Focs implements DisplayableSpType, SequenceableSpType {
+    public enum Focs implements DisplayableSpType, SequenceableSpType {
 
         IN_OFF("In/Off"),
         IN_ON("In/On"),
@@ -424,7 +377,7 @@ public final class NICIParams {
 
         private String _displayValue;
 
-        private Focs(String name) {
+        Focs(String name) {
             _displayValue = name;
         }
 
@@ -437,12 +390,14 @@ public final class NICIParams {
         }
     }
 
-    public static enum NDFW implements DisplayableSpType, SequenceableSpType, ObsoletableSpType {
+    public enum NDFW implements DisplayableSpType, SequenceableSpType, ObsoletableSpType {
 
         AUTO("Auto"),
         BLOCK("Block"),
         ND5("ND5"),
-        ND4("ND4", true),
+        ND4("ND4") {
+            @Override public boolean isObsolete() { return true; }
+        },
         ND3("ND3"),
         ND2("ND2"),
         RED("Red"),
@@ -452,15 +407,8 @@ public final class NICIParams {
 
         private String _displayValue;
 
-        private boolean _isObsolete = false;
-
-        private NDFW(String name) {
-            this(name, false);
-        }
-
-        private NDFW(String name, boolean isObsolete) {
+        NDFW(String name) {
             _displayValue = name;
-            _isObsolete = isObsolete;
         }
 
         public String displayValue() {
@@ -470,13 +418,9 @@ public final class NICIParams {
         public String sequenceValue() {
             return name();
         }
-
-        public boolean isObsolete() {
-            return _isObsolete;
-        }
     }
 
-    public static enum PupilImager implements DisplayableSpType, SequenceableSpType {
+    public enum PupilImager implements DisplayableSpType, SequenceableSpType {
 
         OPEN("Open"),
         PUPIL_IMAGING("Pupil Imaging");
@@ -486,7 +430,7 @@ public final class NICIParams {
 
         private String _displayValue;
 
-        private PupilImager(String name) {
+        PupilImager(String name) {
             _displayValue = name;
         }
 
@@ -499,7 +443,7 @@ public final class NICIParams {
         }
     }
 
-    public static enum SpiderMask implements DisplayableSpType, SequenceableSpType {
+    public enum SpiderMask implements DisplayableSpType, SequenceableSpType {
 
         UPDATE("Update between Int."),
         FOLLOW("Cont. Follow"),
@@ -509,7 +453,7 @@ public final class NICIParams {
 
         private String _displayValue;
 
-        private SpiderMask(String name) {
+        SpiderMask(String name) {
             _displayValue = name;
         }
 
@@ -554,7 +498,7 @@ public final class NICIParams {
         private Channel2FW channel2Fw;
         private PupilImager pupilImager;
 
-        private static HashMap<ImagingMode, ImagingModeMetaconfig> metaConfigs = new HashMap<ImagingMode, ImagingModeMetaconfig>();
+        private static HashMap<ImagingMode, ImagingModeMetaconfig> metaConfigs = new HashMap<>();
 
         static {
             metaConfigs.put(ImagingMode.H1SLA,

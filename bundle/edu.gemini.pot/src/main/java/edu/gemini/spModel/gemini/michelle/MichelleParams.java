@@ -1,15 +1,6 @@
-// Copyright 2002
-// Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-//
-// $Id: MichelleParams.java 38186 2011-10-24 13:21:33Z swalker $
-//
-
 package edu.gemini.spModel.gemini.michelle;
 
-import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
-import edu.gemini.shared.util.immutable.Some;
 import static edu.gemini.spModel.seqcomp.SeqConfigNames.INSTRUMENT_KEY;
 
 import edu.gemini.spModel.config2.ItemKey;
@@ -26,7 +17,7 @@ public final class MichelleParams {
     /**
      * Chop mode.
      */
-    public static enum ChopMode implements SequenceableSpType, DisplayableSpType {
+    public enum ChopMode implements SequenceableSpType, DisplayableSpType {
         CHOP("Chop"),
         NDSTARE("ND Stare"),
         STARE("Stare"),
@@ -54,17 +45,14 @@ public final class MichelleParams {
         }
 
         public static Option<ChopMode> valueOf(String name, Option<ChopMode> nvalue) {
-            ChopMode def = nvalue.isEmpty() ? null : nvalue.getValue();
-            ChopMode val = SpTypeUtil.oldValueOf(ChopMode.class, name, def);
-            Option<ChopMode> none = None.instance();
-            return val == null ? none : new Some<ChopMode>(val);
+            return nvalue.map(def -> valueOf(name, def));
         }
     }
 
     /**
      * Chop waveform.
      */
-    public static enum ChopWaveform implements SequenceableSpType, DisplayableSpType {
+    public enum ChopWaveform implements SequenceableSpType, DisplayableSpType {
         DEEP_WELL("Deep Well"),
         SHALLOW_WELL_NDR("Shallow Well NDR"),
         ;
@@ -91,17 +79,14 @@ public final class MichelleParams {
         }
 
         public static Option<ChopWaveform> valueOf(String name, Option<ChopWaveform> nvalue) {
-            ChopWaveform def = nvalue.isEmpty() ? null : nvalue.getValue();
-            ChopWaveform val = SpTypeUtil.oldValueOf(ChopWaveform.class, name, def);
-            Option<ChopWaveform> none = None.instance();
-            return val == null ? none : new Some<ChopWaveform>(val);
+            return nvalue.map(def -> valueOf(name, def));
         }
     }
 
     /**
      * Grating Order (engineering param).
      */
-    public static enum DisperserOrder implements SequenceableSpType, DisplayableSpType {
+    public enum DisperserOrder implements SequenceableSpType, DisplayableSpType {
         ORDER0("0"),
         ;
 
@@ -127,17 +112,14 @@ public final class MichelleParams {
         }
 
         public static Option<DisperserOrder> valueOf(String name, Option<DisperserOrder> nvalue) {
-            DisperserOrder def = nvalue.isEmpty() ? null : nvalue.getValue();
-            DisperserOrder val = SpTypeUtil.oldValueOf(DisperserOrder.class, name, def);
-            Option<DisperserOrder> none = None.instance();
-            return val == null ? none : new Some<DisperserOrder>(val);
+            return nvalue.map(def -> valueOf(name, def));
         }
     }
 
     /**
      * Mode in which the disperser is used with respect to chopping.
      */
-    public static enum DisperserMode {
+    public enum DisperserMode {
         CHOP,
         NOD
     }
@@ -146,7 +128,7 @@ public final class MichelleParams {
     /**
      * Michelle Dispersers.
      */
-    public static enum Disperser implements StandardSpType {
+    public enum Disperser implements StandardSpType {
 
 
 
@@ -197,7 +179,7 @@ public final class MichelleParams {
         private final int    _order1Steps;
         private final double _lamda;
 
-        private Disperser(String displayValue, DisperserMode mode, double efficiency, int order0Steps, int order1Steps, double lamda) {
+        Disperser(String displayValue, DisperserMode mode, double efficiency, int order0Steps, int order1Steps, double lamda) {
             _displayValue = displayValue;
             _mode         = mode;
             _efficiency   = efficiency;
@@ -274,7 +256,7 @@ public final class MichelleParams {
     /**
      * InjectorPosition (engineering param).
      */
-    public static enum Position implements SequenceableSpType, DisplayableSpType {
+    public enum Position implements SequenceableSpType, DisplayableSpType {
         IMAGING("Imaging"),
         PARK("Park"),
         SPECTROSCOPY("Spectroscopy"),
@@ -292,17 +274,14 @@ public final class MichelleParams {
         }
 
         public static Option<Position> valueOf(String name, Option<Position> nvalue) {
-            Position def = nvalue.isEmpty() ? null : nvalue.getValue();
-            Position val = SpTypeUtil.oldValueOf(Position.class, name, def);
-            Option<Position> none = None.instance();
-            return val == null ? none : new Some<Position>(val);
+            return nvalue.map(def -> valueOf(name, def));
         }
     }
 
     /**
      * Engineering Focal Plane Mask options.
      */
-    public static enum EngMask implements StandardSpType {
+    public enum EngMask implements StandardSpType {
         CLEAR("Clear Slit Mask", "clear", 21,     48),
         PINHOLE("Pinhole Mask", "pinhole", 0.402, 45),
         ;
@@ -312,7 +291,7 @@ public final class MichelleParams {
         private double width;  // arcsec
         private double height; // arcsec
 
-        private EngMask(String displayValue, String log, double width, double height) {
+        EngMask(String displayValue, String log, double width, double height) {
             this.displayValue = displayValue;
             this.logValue     = log;
             this.width        = width;
@@ -354,17 +333,14 @@ public final class MichelleParams {
         }
 
         public static Option<EngMask> valueOf(String name, Option<EngMask> nvalue) {
-            EngMask def = nvalue.isEmpty() ? null : nvalue.getValue();
-            EngMask val = SpTypeUtil.oldValueOf(EngMask.class, name, def);
-            Option<EngMask> none = None.instance();
-            return val == null ? none : new Some<EngMask>(val);
+            return nvalue.map(def -> valueOf(name, def));
         }
     }
 
     /**
      * Masks
      */
-    public static enum Mask implements StandardSpType {
+    public enum Mask implements StandardSpType {
 //        Focal Plane Mask:
 //        1_pixel
 //        2_pixels
@@ -406,7 +382,7 @@ public final class MichelleParams {
         // The height (length) of the mask in arcsec
         private double _height;
 
-        private Mask(String displayValue, double width, double height) {
+        Mask(String displayValue, double width, double height) {
             _displayValue = displayValue;
             _width = width;
             _height = height;
@@ -470,7 +446,7 @@ public final class MichelleParams {
     /**
      * Filter Wheel A (engineering) parameter values.
      */
-    public static enum FilterWheelA implements SequenceableSpType, DisplayableSpType {
+    public enum FilterWheelA implements SequenceableSpType, DisplayableSpType {
         CLEARA1("ClearA1"),
         F22B15,
         F34B9,
@@ -520,17 +496,15 @@ public final class MichelleParams {
         }
 
         public static Option<FilterWheelA> valueOf(String name, Option<FilterWheelA> nvalue) {
-            FilterWheelA def = nvalue.isEmpty() ? null : nvalue.getValue();
-            FilterWheelA val = SpTypeUtil.oldValueOf(FilterWheelA.class, name, def);
-            Option<FilterWheelA> none = None.instance();
-            return val == null ? none : new Some<FilterWheelA>(val);
+            return nvalue.map(def -> valueOf(name, def));
         }
     }
+
 
     /**
      * Filter Wheel B (engineering) parameter values.
      */
-    public static enum FilterWheelB implements SequenceableSpType, DisplayableSpType {
+    public enum FilterWheelB implements SequenceableSpType, DisplayableSpType {
         F86B2,
         CLEAR_B("Clear_B"),
         GRID_T("Grid_T"),
@@ -573,17 +547,14 @@ public final class MichelleParams {
         }
 
         public static Option<FilterWheelB> valueOf(String name, Option<FilterWheelB> nvalue) {
-            FilterWheelB def = nvalue.isEmpty() ? null : nvalue.getValue();
-            FilterWheelB val = SpTypeUtil.oldValueOf(FilterWheelB.class, name, def);
-            Option<FilterWheelB> none = None.instance();
-            return val == null ? none : new Some<FilterWheelB>(val);
+            return nvalue.map(def -> valueOf(name, def));
         }
     }
 
     /**
      * User Filters
      */
-    public static enum Filter implements StandardSpType, ObsoletableSpType {
+    public enum Filter implements StandardSpType, ObsoletableSpType {
 
         NONE("None", "none"),
         F86B2("F86B2 8.5um", "8.5"),
@@ -596,12 +567,22 @@ public final class MichelleParams {
         SI_4("Si-4 10.4um", "10.4"),
         SI_5("Si-5 11.7um", "11.7"),
         SI_6("Si-6 12.3um", "12.3"),
-        N_PRIME_SEMI_BROAD("N' (semi-broad)", "11.2", true),
-        Q("Q' (semi-broad)", "19.8", true),
-        Q_BROAD("Q (broad)", "20.9", true),
+        N_PRIME_SEMI_BROAD("N' (semi-broad)", "11.2") {
+            @Override public boolean isObsolete() { return true; }
+        },
+        Q("Q' (semi-broad)", "19.8") {
+            @Override public boolean isObsolete() { return true; }
+        },
+        Q_BROAD("Q (broad)", "20.9") {
+            @Override public boolean isObsolete() { return true; }
+        },
         QA("Qa 18.1um", "18.1"),
-        N10("N 10.4um", "10.4", true),
-        Q20("Q 20.9um", "20.9", true),
+        N10("N 10.4um", "10.4") {
+            @Override public boolean isObsolete() { return true; }
+        },
+        Q20("Q 20.9um", "20.9") {
+            @Override public boolean isObsolete() { return true; }
+        },
         Q19("Q' 19.8um", "20.9"),
         ;
 
@@ -611,16 +592,10 @@ public final class MichelleParams {
 
         private String _wavelength;  // in µm
         private String _displayValue;
-        private boolean _isObsolete;
 
-        private Filter(String displayValue, String wavelength) {
-            this(displayValue, wavelength, false);
-        }
-
-        private Filter(String displayValue, String wavelength, boolean isObsolete) {
+        Filter(String displayValue, String wavelength) {
             _displayValue = displayValue;
             _wavelength = wavelength;
-            _isObsolete = isObsolete;
         }
 
 
@@ -649,10 +624,6 @@ public final class MichelleParams {
             return _displayValue;
         }
 
-        public boolean isObsolete() {
-            return _isObsolete;
-        }
-
         /** Return a Filter by name **/
         static public Filter getFilter(String name) {
             return getFilter(name, DEFAULT);
@@ -678,7 +649,7 @@ public final class MichelleParams {
     /**
      * AutoConfigure values (yes/no).
      */
-    public static enum AutoConfigure implements SequenceableSpType, DisplayableSpType {
+    public enum AutoConfigure implements SequenceableSpType, DisplayableSpType {
 
         NO("No"),
         YES("Yes"),
@@ -689,7 +660,7 @@ public final class MichelleParams {
 
         private String _displayValue;
 
-        private AutoConfigure(String displayValue) {
+        AutoConfigure(String displayValue) {
             _displayValue = displayValue;
         }
 
@@ -723,7 +694,7 @@ public final class MichelleParams {
     /**
      * Nod orientation values.
      */
-    public static enum NodOrientation implements SequenceableSpType, DisplayableSpType {
+    public enum NodOrientation implements SequenceableSpType, DisplayableSpType {
 
         PARALLEL("Parallel to Chop"),
         ORTHOGONAL("Orthogonal to Chop"),
@@ -733,7 +704,7 @@ public final class MichelleParams {
         public static NodOrientation DEFAULT = PARALLEL;
         private String _displayValue;
 
-        private NodOrientation(String displayValue) {
+        NodOrientation(String displayValue) {
             _displayValue = displayValue;
         }
 

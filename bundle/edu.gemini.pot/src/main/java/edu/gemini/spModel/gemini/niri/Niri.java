@@ -1,8 +1,3 @@
-// Copyright 1997-2000
-// Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
 package edu.gemini.spModel.gemini.niri;
 
 import edu.gemini.spModel.config2.ItemKey;
@@ -624,10 +619,14 @@ public final class Niri {
         BBF_M_ORDER_SORT("Order sorting M", "Order sorting M (5.00 um)", "M/OS", 5.00, Type.broadband),
 
         // narrowband
-        J_CONTINUUM_106("J-continuum (1.065 um)", "J-continuum (1.065 um)", "J-cont(1.065)", 1.065, Type.narrowband, true), //REL-2399 - this filter is now obsolete
+        J_CONTINUUM_106("J-continuum (1.065 um)", "J-continuum (1.065 um)", "J-cont(1.065)", 1.065, Type.narrowband) {
+            @Override public boolean isObsolete() { return true; }
+        },
         NBF_HEI("HeI", "HeI (1.083 um)", "HeI", 1.083, Type.narrowband),
         NBF_PAGAMMA("Pa(gamma)", "Pa(gamma) (1.094 um)", "Pa-gam", 1.094, Type.narrowband),
-        J_CONTINUUM_122("J-continuum (1.122 um)", "J-continuum (1.122 um)", "J-cont(1.122)", 1.122, Type.narrowband, true), //REL-2399 - this filter is now obsolete
+        J_CONTINUUM_122("J-continuum (1.122 um)", "J-continuum (1.122 um)", "J-cont(1.122)", 1.122, Type.narrowband) {
+            @Override public boolean isObsolete() { return true; }
+        },
         NBF_H("J-continuum(1.207)", "J-continuum (1.207 um)", "J-cont", 1.207, Type.narrowband),
         NBF_PABETA("Pa(beta)", "Pa(beta) (1.282 um)", "Pa-beta", 1.282, Type.narrowband),
         NBF_HCONT("H-continuum(1.57)", "H-continuum (1.570 um)", "H-cont", 1.570, Type.narrowband),
@@ -663,23 +662,16 @@ public final class Niri {
         private final String _displayValue;
         private final String _description;
         private final String _logValue;
-        private final boolean _isObsolete;
         private final double _wavelength;
         private final Type _type;
 
         Filter(String displayValue, String desc, String logValue,
                        double wavelength, Type type) {
-            this(displayValue, desc, logValue, wavelength, type, false);
-        }
-
-        Filter(String displayValue, String desc, String logValue,
-                       double wavelength, Type type, boolean isObsolete) {
             _displayValue = displayValue;
             _description = desc;
             _logValue = logValue;
             _wavelength = wavelength;
             _type = type;
-            _isObsolete = isObsolete;
         }
 
         public String displayValue() {
@@ -697,9 +689,6 @@ public final class Niri {
         public String logValue() {
             return _logValue;
         }
-
-        @Override
-        public boolean isObsolete() { return _isObsolete; }
 
         public Type type() {
             return _type;
