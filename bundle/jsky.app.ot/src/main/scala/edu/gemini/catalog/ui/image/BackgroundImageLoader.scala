@@ -4,7 +4,7 @@ import java.time.Instant
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.{ExecutorService, Executors, ThreadFactory}
 
-import edu.gemini.catalog.image.{ImageCatalog, ImageCatalogClient, ImageEntry, ImageSearchQuery}
+import edu.gemini.catalog.image._
 import edu.gemini.spModel.target.obsComp.TargetObsComp
 import edu.gemini.shared.util.immutable.ScalaConverters._
 
@@ -123,7 +123,8 @@ object BackgroundImageLoader {
         c   <- tpeCoordinates(iw.getContext)
         if entry.query.isNearby(c) // The TPE may have moved so only display if the coordinates match
       } {
-        iw.setFilename(entry.file.getAbsolutePath)
+        val r = ImagesInProgress.contains(entry.query) >>= { inProgress => if (!inProgress) Task.now(iw.setFilename(entry.file.getAbsolutePath)) else Task.now(())}
+        r.unsafePerformSync
       }
     }
   }

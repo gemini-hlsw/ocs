@@ -1,7 +1,5 @@
 package edu.gemini.catalog.image
 
-import java.io.File
-
 import scalaz._
 import Scalaz._
 import scalaz.concurrent.Task
