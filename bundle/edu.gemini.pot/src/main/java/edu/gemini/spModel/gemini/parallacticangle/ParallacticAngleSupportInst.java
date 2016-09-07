@@ -4,8 +4,7 @@ import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.shared.util.immutable.Option;
-import edu.gemini.spModel.core.Angle;
-import edu.gemini.spModel.core.Angle$;
+import edu.gemini.skycalc.Angle;
 import edu.gemini.spModel.inst.ParallacticAngleSupport;
 import edu.gemini.spModel.obs.ObsTargetCalculatorService;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
@@ -30,6 +29,12 @@ public abstract class ParallacticAngleSupportInst extends SPInstObsComp implemen
     public Option<Angle> calculateParallacticAngle(final ISPObservation obs) {
         return ImOption.fromScalaOpt(ObsTargetCalculatorService.targetCalculation(obs))
                 .flatMap(targetCalculator -> ImOption.fromScalaOpt(targetCalculator.weightedMeanParallacticAngle()))
-                .map(angleObj -> Angle$.MODULE$.fromDegrees((double)angleObj));
+                .map(angleObj -> (double) angleObj)
+                .map(angle -> (new edu.gemini.skycalc.Angle(angle, edu.gemini.skycalc.Angle.Unit.DEGREES)).toPositive());
+    }
+
+    @Override
+    public boolean isCompatibleWithMeanParallacticAngleMode() {
+        return true;
     }
 }

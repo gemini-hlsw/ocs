@@ -791,9 +791,9 @@ public abstract class InstGmosCommon<
      * slits.
      */
     @Override
-    public Option<edu.gemini.spModel.core.Angle> calculateParallacticAngle(ISPObservation obs) {
+    public Option<Angle> calculateParallacticAngle(ISPObservation obs) {
         return super.calculateParallacticAngle(obs).map(angle -> _fpu.isWideSlit() ?
-                angle.$plus(Angle$.MODULE$.fromDegrees(90)) :
+                angle.add(Angle.ANGLE_PI_OVER_2).toPositive() :
                 angle);
     }
 
