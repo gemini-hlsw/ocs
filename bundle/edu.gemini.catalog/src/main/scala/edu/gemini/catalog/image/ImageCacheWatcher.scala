@@ -3,8 +3,7 @@ package edu.gemini.catalog.image
 import java.io.File
 import java.nio.file._
 import java.nio.file.StandardWatchEventKinds._
-
-import edu.gemini.spModel.core.Coordinates
+import java.nio.file.attribute.BasicFileAttributes
 
 import scalaz.concurrent.Task
 import scala.collection.JavaConverters._
@@ -14,12 +13,13 @@ import Scalaz._
 /**
   * Observes the file system to keep the cache populated
   */
+// Fill the in-memory cache with references to the existing images
 object ImageCacheWatcher {
-  // Fill the in-memory cache with references to the existing images
-  def populateInitialCache(path: File): Task[StoredImages] = {
-    // TODO Support more file extensions?
-    // TODO Should we somehow validate the files?
-    def initStream: Task[DirectoryStream[Path]] = Task.delay(Files.newDirectoryStream(path.toPath, "img_*.fits.gz"))
+  // TODO Support more file extensions?
+  // TODO Should we somehow validate the files?
+  def initStream(cacheDir: File): Task[DirectoryStream[Path]] = Task.delay(Files.newDirectoryStream(cacheDir.toPath, "img_*.fits.gz"))
+
+  def populateInitialCache(cacheDir: File): Task[StoredImages] = {
 
     def closeStream(stream: DirectoryStream[Path]): Task[Unit] = Task.delay(stream.close())
 
@@ -31,10 +31,23 @@ object ImageCacheWatcher {
       }.onFinish(f => Task.delay(f.foreach(u => stream.close()))) // Make sure the stream is closed
 
     for {
-      ds <- initStream
+      ds <- initStream(cacheDir)
       ab <- readFiles(ds)
       _  <- closeStream(ds)
     } yield ab
+  }
+
+  def trimStoredImages(cacheDir: File): Task[Unit] = {
+    def findObsoleteFiles(stream: DirectoryStream[Path]): Task[List[Any]] =
+      Task.delay {
+        val u = stream.iterator().asScala.toList
+        u.sortBy(f => {Files.readAttributes(f, "lastAccessTime");f.toFile.lastModified()}).map(f => (new java.util.Date(f.toFile.lastModified()), f.toFile.getName))
+      }
+
+    for {
+      ds <- initStream(cacheDir)
+      f <- findObsoleteFiles(ds)
+    } yield ()
   }
 
   def watch(cacheDir: File)(implicit B: Bind[Task]): Task[Unit] = {
@@ -61,6 +74,7 @@ object ImageCacheWatcher {
   def run(cacheDir: File): Unit = {
     val task = for {
       _ <- populateInitialCache(cacheDir)
+      _ <- trimStoredImages(cacheDir)
       c <- watch(cacheDir)
     } yield c
     Task.fork(task).unsafePerformAsync(println)

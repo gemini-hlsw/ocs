@@ -11,7 +11,7 @@ import edu.gemini.shared.util.immutable.ScalaConverters._
 import scala.collection.JavaConverters._
 import edu.gemini.pot.sp.ISPProgram
 import edu.gemini.spModel.core.Coordinates
-import jsky.app.ot.tpe.{TpeContext, TpeManager}
+import jsky.app.ot.tpe.{TpeContext, TpeImageWidget, TpeManager}
 import jsky.util.Preferences
 
 import scalaz._
@@ -103,7 +103,7 @@ object BackgroundImageLoader {
     * Utility methods to run the tasks on separate threads of the pool
     */
   private def runAsync[A](tasks: List[Task[A]])(f: Throwable \/ List[A] => Unit)(pool: ExecutorService) = {
-    Task.gatherUnordered(tasks.map(t => Task.fork(t))).unsafePerformAsync(f)
+    Task.gatherUnordered(tasks.map(t => Task.fork(t)(pool))).unsafePerformAsync(f)
   }
 
   private def runAsync[A](task: Task[A])(f: Throwable \/ A => Unit)(pool: ExecutorService) =
@@ -116,6 +116,8 @@ object BackgroundImageLoader {
     * We'll only update the position if the coordinates match
     */
   private def setTpeImage(entry: ImageEntry): Unit = {
+    def markAndSet(iw: TpeImageWidget): Task[Unit] = StoredImagesCache.markAsUsed(entry) *> Task.now(iw.setFilename(entry.file.getAbsolutePath))
+
     Swing.onEDT {
       for {
         tpe <- Option(TpeManager.get())
@@ -123,7 +125,8 @@ object BackgroundImageLoader {
         c   <- tpeCoordinates(iw.getContext)
         if entry.query.isNearby(c) // The TPE may have moved so only display if the coordinates match
       } {
-        val r = ImagesInProgress.contains(entry.query) >>= { inProgress => if (!inProgress) Task.now(iw.setFilename(entry.file.getAbsolutePath)) else Task.now(())}
+        val r = ImagesInProgress.contains(entry.query) >>= { inProgress => if (!inProgress) markAndSet(iw) else Task.now(())}
+        // TODO: Handle errors
         r.unsafePerformSync
       }
     }

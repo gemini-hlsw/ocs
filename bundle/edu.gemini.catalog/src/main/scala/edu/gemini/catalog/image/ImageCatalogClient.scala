@@ -44,7 +44,7 @@ object ImageSearchQuery {
   }
 }
 
-case class ImageEntry(query: ImageSearchQuery, file: File)
+case class ImageEntry(query: ImageSearchQuery, file: File, fileSize: Long)
 
 object ImageEntry {
   implicit val equals = Equal.equalA[ImageEntry]
@@ -62,7 +62,7 @@ object ImageEntry {
           catalog <- ImageCatalog.byName(c)
           ra <- Angle.parseHMS(raStr).map(RightAscension.fromAngle).toOption
           dec <- Angle.parseDMS(decStr).toOption.map(_.toDegrees).flatMap(Declination.fromDegrees)
-        } yield ImageEntry(ImageSearchQuery(catalog, Coordinates(ra, dec)), file)
+        } yield ImageEntry(ImageSearchQuery(catalog, Coordinates(ra, dec)), file, file.length())
       case _ => None
     }
   }
@@ -75,18 +75,48 @@ object ImageCatalogClient {
     * Load an image for the given coordinates on the user catalog
     */
   def loadImage(cacheDir: Path)(query: ImageSearchQuery): Task[Option[ImageEntry]] = {
+    val maxUsedSize = 500 * 1024 * 1024
+
+    /**
+      * Method to prune the cache if we are using to much disk space
+      * @return
+      */
+    def pruneCache: Task[Unit] = Task.fork {
+      // Remove files from the in memory cache and delete from drive
+      def deleteOldFiles(files: List[ImageEntry]): Task[Unit] =
+        Task.gatherUnordered(files.map(StoredImagesCache.remove)) *>
+        Task.delay {
+          files.foreach(_.file.delete())
+        }
+
+      // Find the files that sholud be removed to keep the max size limited
+      def filesToRemove(s: StoredImages): Task[List[ImageEntry]] = Task.delay {
+        val u = s.sortedByAccess.foldLeft((0L, List.empty[ImageEntry])) { (s,e) =>
+          val accSize = s._1 + e.fileSize
+          if (accSize > maxUsedSize) {
+            (accSize, e :: s._2)
+          } else {
+            (accSize, s._2)
+          }
+        }
+        u._2
+      }
+
+      StoredImagesCache.get >>= filesToRemove >>= deleteOldFiles
+    }
+
     def addToCacheAndGet(f: File): Task[ImageEntry] = {
-      val i = ImageEntry(query, f)
-      StoredImagesCache.add(i) *> Task.now(i)
+      val i = ImageEntry(query, f, f.length())
+      // Add to cache, set as not in progress and prune the cache
+      // Note that cache prunning goes in a different thread
+      StoredImagesCache.add(i) *> ImagesInProgress.remove(query) *> pruneCache *> Task.now(i)
     }
 
-    def checkIfNeededAndDownload: Task[Option[ImageEntry]] = {
+    def checkIfNeededAndDownload: Task[Option[ImageEntry]] =
       ImagesInProgress.contains(query) >>= { inProcess => if (inProcess) Task.now(None) else markAndDownload.map(Some.apply) }
-    }
 
-    def markAndDownload: Task[ImageEntry] = {
-      ImagesInProgress.add(query) *> downloadImage.onFinish(_ => ImagesInProgress.remove(query) *> Task.now(()))
-    }
+    def markAndDownload: Task[ImageEntry] =
+      ImagesInProgress.add(query) *> downloadImage
 
     def downloadImage: Task[ImageEntry] =
       Task.delay {

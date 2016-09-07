@@ -24,6 +24,6 @@ trait ImageCatalogArbitraries extends Arbitraries {
     for {
       query <- arbitrary[ImageSearchQuery]
       file  <- arbitrary[File]
-    } yield ImageEntry(query, file)
+    } yield ImageEntry(query, file, file.length)
   }
 }
