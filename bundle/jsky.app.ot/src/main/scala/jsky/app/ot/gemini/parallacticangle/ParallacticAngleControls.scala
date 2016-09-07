@@ -8,14 +8,14 @@ import javax.swing.BorderFactory
 import javax.swing.border.EtchedBorder
 
 import edu.gemini.pot.sp.ISPNode
-import edu.gemini.spModel.core.Angle
 import edu.gemini.spModel.core.Site
 import edu.gemini.spModel.inst.ParallacticAngleSupport
 import edu.gemini.spModel.obs.{ObsTargetCalculatorService, SPObservation, SchedulingBlock}
 import edu.gemini.spModel.obs.SchedulingBlock.Duration
 import edu.gemini.spModel.obs.SchedulingBlock.Duration._
 import edu.gemini.spModel.rich.shared.immutable._
-import edu.gemini.shared.util.immutable.{Option => JOption, ImOption}
+import edu.gemini.shared.util.immutable.{ImOption, Option => JOption}
+import edu.gemini.skycalc.Angle
 import jsky.app.ot.editor.OtItemEditor
 import jsky.app.ot.gemini.editor.EphemerisUpdater
 import jsky.app.ot.util.TimeZonePreference
@@ -24,8 +24,9 @@ import jsky.util.gui.DialogUtil
 import scala.swing.GridBagPanel.{Anchor, Fill}
 import scala.swing._
 import scala.swing.event.{ButtonClicked, Event}
-
-import scalaz._, Scalaz._, scalaz.effect.IO
+import scalaz._
+import Scalaz._
+import scalaz.effect.IO
 
 /**
   * This class encompasses all of the logic required to manage the average parallactic angle information associated
@@ -274,8 +275,8 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
       angle <- parallacticAngle
       fmt   <- formatter
     } {
-      val explicitlySet = !fmt.format(angle.toDegrees).equals(positionAngleText) &&
-                          !fmt.format((angle + Angle.fromDegrees(180)).toDegrees).equals(positionAngleText)
+      val explicitlySet = !fmt.format(ParallacticAngleControls.angleToDegrees(angle)).equals(positionAngleText) &&
+                          !fmt.format(ParallacticAngleControls.angleToDegrees(angle.add(Angle.ANGLE_PI))).equals(positionAngleText)
       ui.parallacticAngleFeedback.warningState(explicitlySet)
     }
   }
@@ -323,8 +324,9 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
   editor.exists { e =>
     parallacticAngle.forall { newAngle =>
       val angleDiff = {
+        val newAngleDegrees = angleToDegrees(newAngle)
         val oldAngleDegrees = e.getContextInstrumentDataObject.getPosAngleDegrees
-        Math.abs(oldAngleDegrees - newAngle.toDegrees)
+        Math.abs(oldAngleDegrees - newAngleDegrees)
       }
       angleDiff >= Precision && Math.abs(angleDiff - 180) >= Precision
     }
@@ -357,6 +359,8 @@ object ParallacticAngleControls {
 
   // Precision limit for which two parallactic angles are considered equivalent.
   val Precision = 0.005
+
+  def angleToDegrees(a: Angle): Double = a.toPositive.toDegrees.getMagnitude
 
   /** Wrap an IO action with a logging timer. */
   def time[A](io: IO[A])(msg: String): IO[A] =

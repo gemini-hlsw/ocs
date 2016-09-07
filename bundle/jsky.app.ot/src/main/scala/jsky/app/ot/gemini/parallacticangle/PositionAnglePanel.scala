@@ -6,7 +6,7 @@ import java.util.Locale
 
 import edu.gemini.pot.sp.{ISPObsComponent, SPComponentType}
 import edu.gemini.shared.gui.EnableDisableComboBox
-import edu.gemini.spModel.core.Angle
+import edu.gemini.skycalc.Angle
 import edu.gemini.spModel.core.Site
 import edu.gemini.spModel.inst.ParallacticAngleSupport
 import edu.gemini.spModel.obs.ObsClassService
@@ -281,10 +281,9 @@ E <: OtItemEditor[ISPObsComponent, I]](instType: SPComponentType) extends GridBa
     */
   private def parallacticAngleChanged(angleOpt: Option[Angle]): Unit = Swing.onEDT {
     if (editor.exists(_.getDataObject.getPosAngleConstraint == PosAngleConstraint.PARALLACTIC_ANGLE)) {
-      angleOpt.foreach(angle => {
-        val degrees = angle.toDegrees
-        ui.positionAngleTextField.text = numberFormatter.format(degrees)
-        setInstPosAngle(degrees)
+      angleOpt.map(_.toDegrees.toPositive.getMagnitude).foreach(angle => {
+        ui.positionAngleTextField.text = numberFormatter.format(angle)
+        setInstPosAngle(angle)
       })
     }
   }
