@@ -30,6 +30,7 @@ E <: OtItemEditor[ISPObsComponent, I]](instType: SPComponentType) extends GridBa
 
   private val numberFormatter = NumberFormat.getInstance(Locale.US) <|
     (_.setMaximumFractionDigits(2)) <|
+    (_.setMinimumFractionDigits(2)) <|
     (_.setMaximumIntegerDigits(3))
 
   private object ui {
