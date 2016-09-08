@@ -280,12 +280,18 @@ object HorizonsService2 {
               List(Row(HorizonsDesignation.AsteroidNewStyle(m.group(1)) : HorizonsDesignation.Asteroid, m.group(1)))
             } \/> "Could not match '(2016 GB222)' header pattern."
 
+          // Single result with form: JPL/HORIZONS        418993 (2009 MS9)            2016-Sep-07 18:23:54
+          lazy val case4 =
+            """  +\d+\s+\((.+?)\)  """.r.findFirstMatchIn(header).map { m =>
+              List(Row(HorizonsDesignation.AsteroidNewStyle(m.group(1)) : HorizonsDesignation.Asteroid, m.group(1)))
+            } \/> "Could not match '418993 (2009 MS9)' header pattern."
 
           // First one that works!
           case0 orElse
           case1 orElse
           case2 orElse
-          case3 orElse "Could not parse the header line as an asteroid".left
+          case3 orElse
+          case4 orElse "Could not parse the header line as an asteroid".left
 
 
         case Search.MajorBody(_) =>
@@ -358,5 +364,3 @@ object HorizonsService2 {
     }
 
 }
-
-
