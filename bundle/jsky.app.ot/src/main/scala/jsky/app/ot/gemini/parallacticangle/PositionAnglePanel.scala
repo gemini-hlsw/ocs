@@ -222,7 +222,7 @@ E <: OtItemEditor[ISPObsComponent, I]](instType: SPComponentType) extends GridBa
     }
   }
 
-  def updatePATextFieldEditableState(pac: PosAngleConstraint) =
+  private def updatePATextFieldEditableState(pac: PosAngleConstraint) =
     ui.positionAngleTextField.editable = pac == PosAngleConstraint.FIXED || pac == PosAngleConstraint.FIXED_180
 
   /**
