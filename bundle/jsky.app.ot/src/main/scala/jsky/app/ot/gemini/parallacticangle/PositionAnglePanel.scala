@@ -58,7 +58,8 @@ E <: OtItemEditor[ISPObsComponent, I]](instType: SPComponentType) extends GridBa
         Try { text.toDouble }.toOption
 
       override def validate(): Unit = Swing.onEDT {
-        background = angle.fold(if (positionAngleConstraintComboBox.selection.item == PosAngleConstraint.UNBOUNDED) background else badBackground)(_ => defaultBackground)
+        // Since parallactic angle editing is disabled for the 2016B release, we do not do this.
+//        background = angle.fold(if (positionAngleConstraintComboBox.selection.item == PosAngleConstraint.UNBOUNDED) background else badBackground)(_ => defaultBackground)
       }
     }
 
@@ -217,14 +218,17 @@ E <: OtItemEditor[ISPObsComponent, I]](instType: SPComponentType) extends GridBa
   /** Sets the enabled state of contained widgets to match the provided value. */
   def updateEnabledState(enabled: Boolean): Unit = Swing.onEDT {
     ui.positionAngleConstraintComboBox.enabled = enabled
-    ui.positionAngleTextField.enabled = enabled
+    editor.map(_.getDataObject.getPosAngleConstraint).foreach(updatePATextFieldEditableState)
     ui.parallacticAngleControlsOpt.foreach { p =>
       p.enabled = enabled
     }
   }
 
-  private def updatePATextFieldEditableState(pac: PosAngleConstraint) =
-    ui.positionAngleTextField.editable = pac == PosAngleConstraint.FIXED || pac == PosAngleConstraint.FIXED_180
+  private def updatePATextFieldEditableState(pac: PosAngleConstraint) = {
+    val editable = pac == PosAngleConstraint.FIXED || pac == PosAngleConstraint.FIXED_180
+    ui.positionAngleTextField.editable = editable
+    ui.positionAngleTextField.enabled  = editable
+  }
 
   /**
     * The actual copying of a given pos angle to the data object.
