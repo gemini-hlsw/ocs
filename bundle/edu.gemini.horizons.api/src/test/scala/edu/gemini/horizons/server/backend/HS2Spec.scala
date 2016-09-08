@@ -78,6 +78,18 @@ object HS2Spec extends Specification with ScalaCheck {
       ))
     }   
 
+    "handle single result (Format 3) (2016 GB222)" in {
+      runSearch(Search.Asteroid("2016 GB222")) must_== \/-(List(
+        Row(HD.AsteroidNewStyle("2016 GB222"), "2016 GB222")
+      ))
+    }
+
+    "handle single result (Format 4) 418993 (2009 MS9)" in {
+      runSearch(Search.Asteroid("2009 MS9")) must_== \/-(List(
+        Row(HD.AsteroidNewStyle("2009 MS9"), "2009 MS9")
+      ))
+    }
+
   }
 
   "major body search" should {
