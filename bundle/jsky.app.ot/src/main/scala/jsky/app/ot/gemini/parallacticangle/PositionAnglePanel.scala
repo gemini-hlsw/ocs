@@ -200,7 +200,8 @@ E <: OtItemEditor[ISPObsComponent, I]](instType: SPComponentType) extends GridBa
     if (!ui.positionAngleTextField.hasFocus) {
       copyPosAngleToTextField()
     }
-    ui.positionAngleTextField.enabled = instrument.getPosAngleConstraint != PosAngleConstraint.UNBOUNDED
+
+    updatePATextFieldEditableState(instrument.getPosAngleConstraint)
     ui.controlsPanel.updatePanel()
     listenTo(ui.positionAngleConstraintComboBox.selection)
 
@@ -220,6 +221,9 @@ E <: OtItemEditor[ISPObsComponent, I]](instType: SPComponentType) extends GridBa
       p.enabled = enabled
     }
   }
+
+  def updatePATextFieldEditableState(pac: PosAngleConstraint) =
+    ui.positionAngleTextField.editable = pac == PosAngleConstraint.FIXED || pac == PosAngleConstraint.FIXED_180
 
   /**
     * The actual copying of a given pos angle to the data object.
@@ -265,7 +269,7 @@ E <: OtItemEditor[ISPObsComponent, I]](instType: SPComponentType) extends GridBa
       e.getDataObject.setPosAngleConstraint(posAngleConstraint)
 
       // Set up the UI.
-      ui.positionAngleTextField.enabled = posAngleConstraint != PosAngleConstraint.UNBOUNDED
+      updatePATextFieldEditableState(posAngleConstraint)
       ui.controlsPanel.updatePanel()
       ui.positionAngleConstraintComboBox.selection.item match {
         case PosAngleConstraint.PARALLACTIC_ANGLE => p.resetComponents()
