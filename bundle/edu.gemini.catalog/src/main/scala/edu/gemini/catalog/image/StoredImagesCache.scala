@@ -10,6 +10,7 @@ case class StoredImages(entries: List[(Instant, ImageEntry)]) {
   def images = entries.map(_._2)
 
   def +(i: ImageEntry) = copy((Instant.now, i) :: entries)
+  def +(i: Instant, e: ImageEntry) = copy((i, e) :: entries)
 
   def -(i: ImageEntry) = copy(entries.filterNot(_._2 === i))
 
@@ -37,6 +38,8 @@ object StoredImagesCache {
   private val cacheRef = TaskRef.newTaskRef[StoredImages](StoredImages.zero).unsafePerformSync
 
   def add(i: ImageEntry): Task[StoredImages] = cacheRef.modify(_ + i) *> cacheRef.get
+
+  def addAt(instant: Instant, i: ImageEntry): Task[StoredImages] = cacheRef.modify(_ + (instant, i)) *> cacheRef.get
 
   def markAsUsed(i: ImageEntry): Task[StoredImages] = cacheRef.modify(_.mark(i)) *> cacheRef.get
 

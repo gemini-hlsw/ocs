@@ -13,20 +13,21 @@ import Scalaz._
 /**
   * Observes the file system to keep the cache populated
   */
-// Fill the in-memory cache with references to the existing images
 object ImageCacheWatcher {
-  // TODO Support more file extensions?
-  // TODO Should we somehow validate the files?
-  def initStream(cacheDir: File): Task[DirectoryStream[Path]] = Task.delay(Files.newDirectoryStream(cacheDir.toPath, "img_*.fits.gz"))
-
-  def populateInitialCache(cacheDir: File): Task[StoredImages] = {
+  /**
+    * Populates the cache when the application starts
+    */
+  private def populateInitialCache(cacheDir: File): Task[StoredImages] = {
+    // TODO Support more file extensions?
+    // TODO Should we somehow validate the files?
+    def initStream(cacheDir: File): Task[DirectoryStream[Path]] = Task.delay(Files.newDirectoryStream(cacheDir.toPath, "img_*.fits.gz"))
 
     def closeStream(stream: DirectoryStream[Path]): Task[Unit] = Task.delay(stream.close())
 
     def readFiles(stream: DirectoryStream[Path]): Task[StoredImages] =
       Task.delay {
         val u = stream.iterator().asScala.toList
-        val p = u.flatMap(f => ImageEntry.entryFromFile(f.toFile)).map(StoredImagesCache.add)
+        val p = u.flatMap(f => ImageEntry.entryFromFile(f.toFile).map(e => StoredImagesCache.addAt(Files.readAttributes(f, classOf[BasicFileAttributes]).lastAccessTime.toInstant, e)))
         (p.sequenceU *> StoredImagesCache.get).unsafePerformSync
       }.onFinish(f => Task.delay(f.foreach(u => stream.close()))) // Make sure the stream is closed
 
@@ -37,20 +38,10 @@ object ImageCacheWatcher {
     } yield ab
   }
 
-  def trimStoredImages(cacheDir: File): Task[Unit] = {
-    def findObsoleteFiles(stream: DirectoryStream[Path]): Task[List[Any]] =
-      Task.delay {
-        val u = stream.iterator().asScala.toList
-        u.sortBy(f => {Files.readAttributes(f, "lastAccessTime");f.toFile.lastModified()}).map(f => (new java.util.Date(f.toFile.lastModified()), f.toFile.getName))
-      }
-
-    for {
-      ds <- initStream(cacheDir)
-      f <- findObsoleteFiles(ds)
-    } yield ()
-  }
-
-  def watch(cacheDir: File)(implicit B: Bind[Task]): Task[Unit] = {
+  /**
+    * Observe the file system to detect when files are modified and update the cache accordingly
+    */
+  private def watch(cacheDir: File)(implicit B: Bind[Task]): Task[Unit] = {
     def waitForWatcher(watcher: WatchService) : Task[Unit] = Task.delay {
       val watchKey = watcher.take()
       val tasks = watchKey.pollEvents().asScala.toList.collect {
@@ -71,10 +62,12 @@ object ImageCacheWatcher {
     B.forever(waitForWatcher(watcher)).onFinish(_ => Task.delay(watcher.close()))
   }
 
+  /**
+    * Run the ImageCacheWatcher
+    */
   def run(cacheDir: File): Unit = {
     val task = for {
       _ <- populateInitialCache(cacheDir)
-      _ <- trimStoredImages(cacheDir)
       c <- watch(cacheDir)
     } yield c
     Task.fork(task).unsafePerformAsync(println)
