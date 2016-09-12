@@ -6,9 +6,9 @@ import edu.gemini.spModel.core._
 import edu.gemini.spModel.core.AngleSyntax._
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.offset.OffsetPosBase
-
 import edu.gemini.shared.util.immutable.{Option => GOption}
 import edu.gemini.shared.util.immutable.ScalaConverters.ImOptionOps
+import jsky.coords.WorldCoords
 
 import scalaz._
 import Scalaz._
@@ -22,6 +22,8 @@ object ModelConverters {
   def toCoordinates(coords: skyobject.coords.SkyCoordinates): Coordinates = coords.toHmsDeg(0L).toNewModel
 
   def toCoordinates(coords: skycalc.Coordinates): Coordinates = coords.toNewModel
+
+  def toCoordinates(coords: WorldCoords): Coordinates = coords.toNewModel
 
   def toSideralTarget(spTarget: SPTarget, when: GOption[java.lang.Long]):SiderealTarget = spTarget.toSiderealTarget(when)
 
@@ -73,6 +75,10 @@ object ModelConverters {
 
   implicit class OldCoordinates2New(val c: skycalc.Coordinates) extends AnyVal {
     def toNewModel: Coordinates = Coordinates(RightAscension.fromAngle(c.getRa.toNewModel), Declination.fromAngle(c.getDec.toNewModel).getOrElse(Declination.zero))
+  }
+
+  implicit class WorldCoords2New(val c: WorldCoords) extends AnyVal {
+    def toNewModel: Coordinates = Coordinates(RightAscension.fromAngle(Angle.fromDegrees(c.getRaDeg)), Declination.fromAngle(Angle.fromDegrees(c.getDecDeg)).getOrElse(Declination.zero))
   }
 
   implicit class HmsDegCoords2Coordinates(val c: skyobject.coords.HmsDegCoordinates) extends AnyVal {

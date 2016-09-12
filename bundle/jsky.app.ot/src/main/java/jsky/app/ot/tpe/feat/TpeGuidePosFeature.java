@@ -95,7 +95,7 @@ public class TpeGuidePosFeature extends TpePositionFeature
     /**
      * Get the "draw position tags" property.
      */
-    boolean getDrawTags() {
+    private boolean getDrawTags() {
         return _props.getBoolean(PROP_SHOW_TAGS, true);
     }
 
@@ -109,7 +109,7 @@ public class TpeGuidePosFeature extends TpePositionFeature
     /**
      * Get the "indicate primary guide star" property value.
      */
-    boolean getIdentifyPrimary() {
+    private boolean getIdentifyPrimary() {
         return _props.getBoolean(PROP_IDENTIFY_PRIMARY, true);
     }
 
@@ -125,12 +125,12 @@ public class TpeGuidePosFeature extends TpePositionFeature
         } else {
             // No SkyObject info is present so we use the old way of creating
             // a target from a mouse event.
-            final double ra  = tme.pos.getRaDeg();
-            final double dec = tme.pos.getDecDeg();
+            final double ra  = tme.pos.ra().toDegrees();
+            final double dec = tme.pos.dec().toDegrees();
 
             pos = new SPTarget(ra, dec);
             if (tme.name != null) {
-                pos.setName(tme.name);
+                pos.setName(tme.name.getOrNull());
             }
         }
 
@@ -240,10 +240,10 @@ public class TpeGuidePosFeature extends TpePositionFeature
             if (obsComp == null) return;
 
             final SPTarget   pos = createNewTarget(tme);
-            tme.source.getObsContext().foreach(ctx -> {
+            tme.source.foreach(iw -> iw.getObsContext().foreach(ctx -> {
                 obsComp.setTargetEnvironment(group.add(pos, ctx));
                 _iw.getContext().targets().commit();
-            });
+            }));
         }
     }
 
@@ -516,7 +516,7 @@ public class TpeGuidePosFeature extends TpePositionFeature
             _dragObject.screenPos.y = tme.yWidget;
 
             final SPTarget tp = _dragObject.taggedPos;
-            tp.setRaDecDegrees(tme.pos.getRaDeg(), tme.pos.getDecDeg());
+            tp.setRaDecDegrees(tme.pos.ra().toDegrees(), tme.pos.dec().toDegrees());
         }
     }
 }

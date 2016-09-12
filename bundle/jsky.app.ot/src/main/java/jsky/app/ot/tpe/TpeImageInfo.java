@@ -149,7 +149,7 @@ public final class TpeImageInfo {
     /**
      * Return the current position angle (in radians).
      */
-    public double getPosAngleRadians() {
+    private double getPosAngleRadians() {
         return Angle.degreesToRadians(_posAngleDegrees);
     }
 

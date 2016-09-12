@@ -113,7 +113,7 @@ public class TpeBasePosFeature extends TpePositionFeature {
             }
 
             final SPTarget tp = _dragObject.taggedPos;
-            tp.setRaDecDegrees(tme.pos.getRaDeg(), tme.pos.getDecDeg());
+            tp.setRaDecDegrees(tme.pos.ra().toDegrees(), tme.pos.dec().toDegrees());
         }
     }
 

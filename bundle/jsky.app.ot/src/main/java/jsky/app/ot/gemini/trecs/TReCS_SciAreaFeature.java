@@ -8,9 +8,11 @@
 package jsky.app.ot.gemini.trecs;
 
 import diva.util.java2d.Polygon2D;
+import edu.gemini.pot.ModelConverters;
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.shared.util.immutable.Some;
+import edu.gemini.spModel.core.Coordinates;
 import edu.gemini.spModel.gemini.trecs.InstTReCS;
 import edu.gemini.spModel.util.Angle;
 import jsky.app.ot.gemini.inst.SciAreaFeature;
@@ -46,7 +48,7 @@ public class TReCS_SciAreaFeature extends SciAreaFeatureBase {
                               0.0F);
 
     // The color to use to draw the chop beams
-    protected static final Color CHOP_BEAM_COLOR = FOV_COLOR.darker();
+    private static final Color CHOP_BEAM_COLOR = FOV_COLOR.darker();
 
     // Used to translate the chop slit figures to the correct location
     private AffineTransform _chopTrans1 = new AffineTransform();
@@ -121,7 +123,7 @@ public class TReCS_SciAreaFeature extends SciAreaFeatureBase {
     /**
      * Update the figures to draw.
      */
-    protected void _updateFigures() {
+    private void _updateFigures() {
         if (SciAreaFeature.getDisplayChopBeams()) {
             _addChopBeams();
         }
@@ -306,7 +308,7 @@ public class TReCS_SciAreaFeature extends SciAreaFeatureBase {
             inst.setChopAngleRadians(_tii.positionAngle(tme).toRadians());
 
             // get distance between base position and the mouse position in arcsec
-            double dist = _basePos.dist(tme.pos) * 60;
+            double dist = Coordinates.difference(ModelConverters.toCoordinates(_basePos), tme.pos).distance().toArcsecs();
             inst.setChopThrow(Math.round(dist));
 
             _iw.repaint();

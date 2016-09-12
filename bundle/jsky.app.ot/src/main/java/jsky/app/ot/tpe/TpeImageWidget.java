@@ -240,15 +240,13 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
      * Tell all the mouse observers about the new mouse event.
      */
     private void _notifyMouseObs(final MouseEvent e) {
-        final TpeMouseEvent tme = new TpeMouseEvent(e);
         try {
-            _initMouseEvent(e, tme);
+            final TpeMouseEvent tme = _initMouseEvent(e);
+            for (final TpeMouseObserver mo : _mouseObs) {
+                mo.tpeMouseEvent(this, tme);
+            }
         } catch (Exception ex) {
             ex.printStackTrace();
-            return;
-        }
-        for (final TpeMouseObserver mo : _mouseObs) {
-            mo.tpeMouseEvent(this, tme);
         }
     }
 
@@ -347,7 +345,7 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
     /**
      * Return true if there is valid image info, and try to update it if needed
      */
-    private boolean _checkImgInfo() {
+    private boolean _isImageValid() {
         if (!_imgInfoValid) {
             setBasePos(_imgInfo.getBasePos());
         }
@@ -405,7 +403,7 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
      * Convert an offset from the base position (in arcsec) to a screen coordinates location.
      */
     public Point2D.Double offsetToScreenCoords(final double xOff, final double yOff) {
-        if (!_checkImgInfo()) {
+        if (!_isImageValid()) {
             return null;
         }
 
@@ -420,7 +418,7 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
      * Convert the given screen coordinates to an offset from the base position (in arcsec).
      */
     private double[] screenCoordsToOffset(final double x, final double y) {
-        if (!_checkImgInfo()) {
+        if (!_isImageValid()) {
             return null;
         }
 
@@ -464,7 +462,7 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
      * the base position, correcting for sky rotation.
      */
     private Point2D.Double skyRotate(final double x, final double y) {
-        if (!_checkImgInfo()) {
+        if (!_isImageValid()) {
             return null;
         }
 
@@ -481,7 +479,7 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
      * the base position, correcting for sky rotation.
      */
     public void skyRotate(final PolygonD p) {
-        if (!_checkImgInfo()) {
+        if (!_isImageValid()) {
             return;
         }
 
@@ -494,39 +492,30 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
     }
 
 
-    protected void _initMouseEvent(final MouseEvent evt, final TpeMouseEvent tme) {
-        if (!_checkImgInfo()) return;
+    private TpeMouseEvent _initMouseEvent(final MouseEvent evt) {
+        if (_isImageValid()) {
+            final Point2D.Double mp = new Point2D.Double(evt.getX(), evt.getY());
 
-        final Point2D.Double mp = new Point2D.Double(evt.getX(), evt.getY());
+            // snap to catalog symbol position, if user clicked on one
+            final Point2D.Double p = new Point2D.Double(mp.x, mp.y);
+            final double[] d = screenCoordsToOffset(mp.x, mp.y);
 
-        // snap to catalog symbol position, if user clicked on one
-        final Point2D.Double p = new Point2D.Double(mp.x, mp.y);
-        getCoordinateConverter().screenToUserCoords(p, false);
-        if (evt.getID() == MouseEvent.MOUSE_CLICKED) {
-            Option<SiderealTarget> skyObject = getCatalogPosition(mp);
-            skyObject.forEach(s -> {
-                final Coordinates coords = s.coordinates();
-                tme.pos = new WorldCoords(coords.ra().toDegrees(), coords.dec().toDegrees());
-                tme.name = s.name();
-            });
-            tme.setSkyObject(skyObject);
-            if (!skyObject.isDefined()) {
-                tme.pos = userToWorldCoords(p.x, p.y);
+            getCoordinateConverter().screenToUserCoords(p, false);
+            if (evt.getID() == MouseEvent.MOUSE_CLICKED) {
+                final Option<SiderealTarget> skyObject = getCatalogPosition(mp);
+                final String name = skyObject.map(SiderealTarget::name).getOrNull();
+                if (!skyObject.isDefined()) {
+                    return new TpeMouseEvent(evt, evt.getID(), this, CoordinatesUtilities.userToWorldCoords(getCoordinateConverter(), p.x, p.y), name, (int) Math.round(mp.x), (int) Math.round(mp.y), skyObject, d[0], d[1]);
+                } else {
+                    Coordinates pos = skyObject.map(SiderealTarget::coordinates).getOrElse(Coordinates.zero());
+                    return new TpeMouseEvent(evt, evt.getID(), this, pos, name, (int) Math.round(mp.x), (int) Math.round(mp.y), skyObject, d[0], d[1]);
+                }
+            } else {
+                return new TpeMouseEvent(evt, evt.getID(), this, CoordinatesUtilities.userToWorldCoords(getCoordinateConverter(), p.x, p.y), "", (int) Math.round(mp.x), (int) Math.round(mp.y), None.instance(), d[0], d[1]);
             }
         } else {
-            tme.pos = userToWorldCoords(p.x, p.y);
+            return new TpeMouseEvent(evt);
         }
-
-        tme.id = evt.getID();
-        tme.source = this;
-        tme.xView = p.x;
-        tme.yView = p.y;
-        tme.xWidget = (int) Math.round(mp.x);
-        tme.yWidget = (int) Math.round(mp.y);
-
-        final double[] d = screenCoordsToOffset(mp.x, mp.y);
-        tme.xOffset = d[0];
-        tme.yOffset = d[1];
     }
 
     /**
