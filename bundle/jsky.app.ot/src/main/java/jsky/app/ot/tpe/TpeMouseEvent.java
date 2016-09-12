@@ -41,7 +41,7 @@ public class TpeMouseEvent {
     public final Option<String> name;
 
     // Optional details of the object.
-    private final Option<SiderealTarget> skyObject;
+    public final Option<SiderealTarget> skyObject;
 
     /** The X offset of the event from the base position in arcsec. */
     public final double xOffset;
@@ -75,10 +75,6 @@ public class TpeMouseEvent {
         this.skyObject = skyObject;
         this.xOffset = xOffset;
         this.yOffset = yOffset;
-    }
-
-    public Option<SiderealTarget> getSkyObject() {
-        return skyObject;
     }
 
     /**

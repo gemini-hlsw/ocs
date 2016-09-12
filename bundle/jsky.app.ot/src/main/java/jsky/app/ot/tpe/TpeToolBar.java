@@ -67,16 +67,23 @@ final class TpeToolBar extends JPanel {
                 gridx = 0; anchor = NORTH; fill = HORIZONTAL;
                 insets = new Insets(10, 0, 0, 0);
             }};
-            gbc.gridy = 2+i;
+            gbc.gridy = 2 + i;
 
             add(wrapPanel(cat.displayName(), _viewPanel[i]), gbc);
             ++i;
         }
 
-        final int yPos = 2+i;
+        final int yPos = 2 + i;
         final JPanel wrappedGuiderSelector = wrapPanel("", _guiderSelector.getUi());
         add(wrappedGuiderSelector, new GridBagConstraints() {{
             gridx = 0; gridy = yPos; anchor = NORTH; fill = HORIZONTAL;
+            insets = new Insets(10, 0, 0, 0);
+        }});
+        final int catalogYPos = yPos + i;
+        ImageCatalogPanel _imageCatalogPanel = new ImageCatalogPanel(display);
+        final JPanel wrappedCatalogSelector = wrapPanel("", _imageCatalogPanel.panel());
+        add(wrappedCatalogSelector, new GridBagConstraints() {{
+            gridx = 0; gridy = catalogYPos; anchor = NORTH; fill = HORIZONTAL;
             insets = new Insets(10, 0, 0, 0);
         }});
 
@@ -84,7 +91,7 @@ final class TpeToolBar extends JPanel {
         final GridBagConstraints gbc = new GridBagConstraints() {{
             gridx = 0; fill = BOTH; weighty = 1.0;
         }};
-        gbc.gridy = 3+i;
+        gbc.gridy = 4 + i;
         add(new JPanel(), gbc);
 
     }

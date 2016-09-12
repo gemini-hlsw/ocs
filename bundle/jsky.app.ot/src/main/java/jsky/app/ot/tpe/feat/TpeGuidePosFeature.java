@@ -116,7 +116,7 @@ public class TpeGuidePosFeature extends TpePositionFeature
     private SPTarget createNewTarget(final TpeMouseEvent tme) {
         final SPTarget pos;
 
-        final Option<SiderealTarget> skyObjectOpt = tme.getSkyObject();
+        final Option<SiderealTarget> skyObjectOpt = tme.skyObject;
         if (!skyObjectOpt.isEmpty()) {
 
             final SiderealTarget st = skyObjectOpt.getValue();
