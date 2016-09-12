@@ -1,5 +1,6 @@
 package jsky.app.ot.tpe;
 
+import edu.gemini.catalog.ui.tpe.CatalogImageDisplay;
 import jsky.app.ot.ags.AgsSelectorControl;
 
 import javax.swing.*;
@@ -38,11 +39,10 @@ final class TpeToolBar extends JPanel {
     // The ags guider selection panel
     private final AgsSelectorControl _guiderSelector = new AgsStrategyPanel();
 
-
     /**
      * The left side toolbar for the position editor.
      */
-    TpeToolBar() {
+    TpeToolBar(CatalogImageDisplay display) {
         super(new GridBagLayout());
 
         setBorder(BorderFactory.createEmptyBorder(10, 5, 10, 5));

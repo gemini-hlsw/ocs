@@ -12,4 +12,3 @@ public interface TpeViewObserver {
      */
     void tpeViewChange(TpeImageWidget iw);
 }
-

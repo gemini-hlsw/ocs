@@ -14,13 +14,12 @@ import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.target.obsComp.TargetSelection;
 import edu.gemini.spModel.target.offset.OffsetPosSelection;
-import jsky.app.jskycat.JSkyCat;
 import jsky.app.ot.OT;
 import jsky.app.ot.ags.*;
 import jsky.app.ot.util.BasicPropertyList;
-import jsky.util.gui.Resources;
 import jsky.catalog.CatalogException;
 import jsky.image.gui.ImageDisplayControlFrame;
+import jsky.util.gui.SwingUtil;
 
 import java.awt.*;
 import java.awt.event.MouseEvent;
@@ -40,7 +39,9 @@ import java.util.stream.Collectors;
  * @author Allan Brighton (based on code from original OT version)
  * @version $Revision: 46768 $ $Date: 2012-07-16 14:58:53 -0400 (Mon, 16 Jul 2012) $
  */
-public final class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
+public final class TelescopePosEditor implements TpeMouseObserver {
+    /** The main image frame (or internal frame) */
+    private final ImageDisplayControlFrame _imageFrame;
 
     /**
      * All feature class names
@@ -57,7 +58,7 @@ public final class TelescopePosEditor extends JSkyCat implements TpeMouseObserve
     /**
      * The image widget
      */
-    private TpeImageWidget _iw;
+    private final TpeImageWidget _iw;
 
     /**
      * Tool button helper
@@ -86,12 +87,10 @@ public final class TelescopePosEditor extends JSkyCat implements TpeMouseObserve
      * given image file or URL, if not null.
      */
     public TelescopePosEditor() {
-        super(null);
+        _imageFrame = new TpeImageDisplayFrame(null);
 
-        // This is terrible, the constructor of JSkyCat sets _iw indirectly calling makeNavigatorImageDisplayFrame
+        _iw = _imageFrame.getImageDisplayControl().getImageDisplay();
         _iw.setTitle("Position Editor");
-
-        Resources.setOTFrameIcon(this);
 
         // get the TPE toolbar handle
         final Component parent = _iw.getParentFrame();
@@ -155,17 +154,14 @@ public final class TelescopePosEditor extends JSkyCat implements TpeMouseObserve
     }
 
     /**
-     * Make and return a frame for displaying the given image (may be null).
-     *
-     * @param imageFileOrUrl specifies the image file or URL to display
+     * Convenience method to set the visibility of the image JFrame (or JInternalFrame).
      */
-    @Override
-    protected ImageDisplayControlFrame makeNavigatorImageDisplayFrame(final String imageFileOrUrl) {
-        final TpeImageDisplayFrame frame = new  TpeImageDisplayFrame(imageFileOrUrl);
-        Resources.setOTFrameIcon(frame);
-        // Very ugly: this sets _iw indirectly on the constructor.
-        _iw = (TpeImageWidget) frame.getImageDisplayControl().getImageDisplay();
-        return frame;
+    void setImageFrameVisible(boolean visible) {
+        _imageFrame.setVisible(visible);
+
+        if (visible) {
+            SwingUtil.showFrame(_imageFrame);
+        }
     }
 
     /**
@@ -414,7 +410,7 @@ public final class TelescopePosEditor extends JSkyCat implements TpeMouseObserve
                     c = TpeCursor.add;
                     break;
             }
-            ((TpeImageDisplayFrame) getImageFrame()).getImageDisplayControl().setCursor(c.get());
+            _imageFrame.getImageDisplayControl().setCursor(c.get());
         }
     }
 
@@ -424,5 +420,12 @@ public final class TelescopePosEditor extends JSkyCat implements TpeMouseObserve
      */
     public TpeImageWidget getImageWidget() {
         return _iw;
+    }
+
+    /**
+     * Indicates if the TPE is visible
+     */
+    public boolean isVisible() {
+        return _imageFrame.isVisible();
     }
 }

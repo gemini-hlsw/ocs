@@ -1,7 +1,6 @@
 package jsky.app.ot.tpe;
 
 import edu.gemini.catalog.ui.QueryResultsFrame;
-import edu.gemini.catalog.ui.image.BackgroundImageLoader;
 import edu.gemini.catalog.ui.tpe.CatalogImageDisplay;
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.core.Coordinates;
@@ -231,7 +230,7 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
         }
     }
 
-    public synchronized void addMouseObserver(final TpeMouseObserver obs) {
+    synchronized void addMouseObserver(final TpeMouseObserver obs) {
         if (!_mouseObs.contains(obs)) {
             _mouseObs.addElement(obs);
         }
@@ -256,19 +255,19 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
     /**
      * Tell all the view observers that the view has changed.
      */
-    protected void _notifyViewObs() {
+    private void _notifyViewObs() {
         for (final TpeViewObserver vo : _viewObs) {
             vo.tpeViewChange(this);
         }
     }
 
-    public synchronized void addViewObserver(final TpeViewObserver obs) {
+    synchronized void addViewObserver(final TpeViewObserver obs) {
         if (!_viewObs.contains(obs)) {
             _viewObs.addElement(obs);
         }
     }
 
-    public synchronized void deleteViewObserver(final TpeViewObserver obs) {
+    synchronized void deleteViewObserver(final TpeViewObserver obs) {
         _viewObs.removeElement(obs);
     }
 
@@ -319,7 +318,7 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
     /**
      * Is the TpeImageWidget initialized?
      */
-    public boolean isImgInfoValid() {
+    boolean isImgInfoValid() {
         return _imgInfoValid;
     }
 
@@ -376,7 +375,7 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
     /**
      * Convert the given user coordinates location to world coordinates.
      */
-    public WorldCoords userToWorldCoords(final double x, final double y) {
+    private WorldCoords userToWorldCoords(final double x, final double y) {
         final Point2D.Double p = new Point2D.Double(x, y);
         getCoordinateConverter().userToWorldCoords(p, false);
         return new WorldCoords(p.x, p.y, getCoordinateConverter().getEquinox());
@@ -385,7 +384,7 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
     /**
      * Convert the given world coordinate position to a user coordinates position.
      */
-    public Point2D.Double worldToUserCoords(final WorldCoords pos) {
+    private Point2D.Double worldToUserCoords(final WorldCoords pos) {
         final double[] raDec = pos.getRaDec(getCoordinateConverter().getEquinox());
         final Point2D.Double p = new Point2D.Double(raDec[0], raDec[1]);
         getCoordinateConverter().worldToUserCoords(p, false);
@@ -395,7 +394,7 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
     /**
      * Convert the given world coordinate position to screen coordinates.
      */
-    public Point2D.Double worldToScreenCoords(final WorldCoords pos) {
+    private Point2D.Double worldToScreenCoords(final WorldCoords pos) {
         final double[] raDec = pos.getRaDec(getCoordinateConverter().getEquinox());
         final Point2D.Double p = new Point2D.Double(raDec[0], raDec[1]);
         getCoordinateConverter().worldToScreenCoords(p, false);
@@ -420,7 +419,7 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
     /**
      * Convert the given screen coordinates to an offset from the base position (in arcsec).
      */
-    public double[] screenCoordsToOffset(final double x, final double y) {
+    private double[] screenCoordsToOffset(final double x, final double y) {
         if (!_checkImgInfo()) {
             return null;
         }
@@ -443,7 +442,7 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
     /**
      * Convert a TaggedPos to a screen coordinates.
      */
-    public Point2D.Double taggedPosToScreenCoords(final WatchablePos tp) {
+    Point2D.Double taggedPosToScreenCoords(final WatchablePos tp) {
         if (tp instanceof OffsetPosBase) {
             final double x = ((OffsetPosBase) tp).getXaxis();
             final double y = ((OffsetPosBase) tp).getYaxis();
@@ -464,7 +463,7 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
      * Rotate a point through the current position angle, relative to
      * the base position, correcting for sky rotation.
      */
-    public Point2D.Double skyRotate(final double x, final double y) {
+    private Point2D.Double skyRotate(final double x, final double y) {
         if (!_checkImgInfo()) {
             return null;
         }
@@ -642,7 +641,7 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
     /**
      * Add the given image feature to the list.
      */
-    public void addFeature(final TpeImageFeature tif) {
+    void addFeature(final TpeImageFeature tif) {
         if (featureAdded(tif)) {
             return;
         }
@@ -657,14 +656,14 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
     /**
      * Return true if the given image feature has been added already.
      */
-    public final boolean featureAdded(final TpeImageFeature tif) {
+    private boolean featureAdded(final TpeImageFeature tif) {
         return _featureList.contains(tif);
     }
 
     /**
      * Delete the given image feature from the list.
      */
-    public void deleteFeature(final TpeImageFeature tif) {
+    void deleteFeature(final TpeImageFeature tif) {
         if (!featureAdded(tif)) {
             return;
         }
@@ -790,7 +789,7 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
     /**
      * The Base position has been updated.
      */
-    public void basePosUpdate(final SPTarget target) {
+    private void basePosUpdate(final SPTarget target) {
         final Option<Long> when = _ctx.schedulingBlockStartJava();
         final double x = target.getRaDegrees(when).getOrElse(0.0);
         final double y = target.getDecDegrees(when).getOrElse(0.0);
@@ -888,7 +887,7 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
     /**
      * Set the base position to the given coordinates (overrides parent class version).
      */
-    public boolean setBasePos(final WorldCoords pos) {
+    private boolean setBasePos(final WorldCoords pos) {
         _basePos = pos;
 
         final CoordinateConverter cc = getCoordinateConverter();
@@ -1008,7 +1007,7 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
         }
     }
 
-    public void openCatalogNavigator() {
+    private void openCatalogNavigator() {
         QueryResultsFrame.instance().showOn(this, _ctx);
     }
 
@@ -1029,7 +1028,7 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
     /**
      * Return the action that displays the guide star dialog
      */
-    public AbstractAction getManualGuideStarAction() {
+    AbstractAction getManualGuideStarAction() {
         return _manualGuideStarAction;
     }
 

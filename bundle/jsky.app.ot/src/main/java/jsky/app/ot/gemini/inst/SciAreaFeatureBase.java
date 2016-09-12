@@ -1,10 +1,3 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: SciAreaFeatureBase.java 46768 2012-07-16 18:58:53Z rnorris $
-//
-
 package jsky.app.ot.gemini.inst;
 
 import edu.gemini.shared.util.immutable.None;
@@ -44,7 +37,7 @@ public abstract class SciAreaFeatureBase extends TpeImageFeature
     protected PolygonD _tickMarkPD;
 
     /** Font used to draw text for position angle  */
-    public static final Font POS_ANGLE_FONT = new Font("dialog", Font.PLAIN, 12);
+    protected static final Font POS_ANGLE_FONT = new Font("dialog", Font.PLAIN, 12);
 
     // Used for rotating the science area
     protected boolean _dragging = false;
@@ -58,7 +51,7 @@ public abstract class SciAreaFeatureBase extends TpeImageFeature
     protected Point2D.Double _baseScreenPos;
 
     // The corrected position angle.
-    protected double _posAngle;
+    private double _posAngle;
 
     // TODO: We can probably get rid of this.
     // Used to rotate figures by the position angle
