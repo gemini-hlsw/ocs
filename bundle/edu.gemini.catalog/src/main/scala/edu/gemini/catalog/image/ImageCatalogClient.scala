@@ -23,7 +23,7 @@ case class ImageSearchQuery(catalog: ImageCatalog, coordinates: Coordinates) {
 
   def isNearby(c: Coordinates): Boolean = {
     val (diffRa, diffDec) = coordinates.diff(c)
-    diffRa <= maxDistance && diffDec <= maxDistance
+    (diffRa <= maxDistance || (Angle.zero - diffRa) <= maxDistance) && (diffDec <= maxDistance || (Angle.zero - diffDec) <= maxDistance)
   }
 }
 

@@ -1,6 +1,6 @@
 package edu.gemini.catalog.image
 
-import edu.gemini.spModel.core.{Angle, Coordinates}
+import edu.gemini.spModel.core.{Angle, Coordinates, Declination, RightAscension}
 import org.scalacheck.Arbitrary._
 import org.scalacheck.Gen._
 import org.scalacheck.{Arbitrary, Shrink}
@@ -65,6 +65,13 @@ class ImageSearchQuerySpec extends FlatSpec with Matchers with PropertyChecks wi
         val c1 = t.c.copy(dec = t.c.dec.offset(t.delta)._1)
         ImageSearchQuery(t.catalog, t.c).isNearby(ImageSearchQuery(t.catalog, c1)) shouldBe ImageSearchQuery(t.catalog, c1).isNearby(ImageSearchQuery(t.catalog, t.c))
       }(implicitly[PropertyCheckConfiguration], testCase(Angle.zero, Angle.fromDegrees(359.99)), implicitly[Shrink[TestCase]], implicitly[CheckerAsserting[Assertion]])
+    }
+    it should "work near zero" in {
+      // Special case when the diff is very close to zero but negative
+      val c1 = Coordinates(RightAscension.fromAngle(Angle.fromDegrees(263.94917083333326)),Declination.fromAngle(Angle.fromDegrees(329.5302805555556)).getOrElse(Declination.zero))
+      val c2 = Coordinates(RightAscension.fromAngle(Angle.fromDegrees(263.94917)),Declination.fromAngle(Angle.fromDegrees(329.53027999999995)).getOrElse(Declination.zero))
+      ImageSearchQuery(DssGeminiNorth, c1).isNearby(ImageSearchQuery(DssGeminiNorth, c2)) shouldBe true
+      ImageSearchQuery(DssGeminiNorth, c2).isNearby(ImageSearchQuery(DssGeminiNorth, c1)) shouldBe true
     }
 
 }
