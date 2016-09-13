@@ -11,7 +11,8 @@ import edu.gemini.odb.browser.QueryResult
 import edu.gemini.pot.spdb.IDBDatabaseService
 
 import scala.collection.JavaConverters._
-import scala.util.Try
+
+import scalaz._
 
 /**
   * A web service that allows for simple get requests with some
@@ -91,7 +92,7 @@ final case class LchQueryServlet(odb: IDBDatabaseService, user: Set[Principal]) 
         val programParams     = extractParams(LchQueryParam.ProgramParams)
         val observationParams = extractParams(LchQueryParam.ObservationParams)
 
-        Try {
+        \/.fromTryCatchNonFatal {
           // Check that no illegal params have been supplied.
           for {
             p <- request.getParameterNames.asScala.map(_.asInstanceOf[String])
@@ -105,7 +106,6 @@ final case class LchQueryServlet(odb: IDBDatabaseService, user: Set[Principal]) 
           odb.getQueryRunner(user.asJava).
             queryPrograms(new LchQueryFunctor(queryType, programParams, observationParams)).
             queryResult.toXml
-
         } recover {
           case ex: IllegalArgumentException           => illegalArgument(ex)
           case ex@(_:RemoteException | _:IOException) => otherThrowable(ex, LchQueryServlet.HttpResponseCodes.ServerError)

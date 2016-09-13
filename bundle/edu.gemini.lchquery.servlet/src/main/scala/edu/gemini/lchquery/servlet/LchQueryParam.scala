@@ -3,6 +3,8 @@ package edu.gemini.lchquery.servlet
 import edu.gemini.pot.sp.{ISPObservation, ISPProgram}
 import edu.gemini.spModel.`type`.DisplayableSpType
 import edu.gemini.spModel.ao.{AOConstants, AOTreeUtil}
+import edu.gemini.spModel.core.ProgramId
+import edu.gemini.spModel.core.ProgramId.Science
 import edu.gemini.spModel.data.YesNoType
 import edu.gemini.spModel.gemini.altair.{AltairParams, InstAltair}
 import edu.gemini.spModel.gemini.obscomp.{SPProgram, SPSiteQuality}
@@ -78,10 +80,11 @@ object LchQueryParam {
     def toSPProg: Option[SPProgram] =
       Option(prog).map(_.getDataObject.asInstanceOf[SPProgram])
 
-    def semester: Option[String] = {
-      val semesterRe = "(?i)\\-(2\\d{3}[AB])".r
-      Option(prog.getProgramID).flatMap(id => semesterRe.findFirstMatchIn(id.stringValue()).map(_.group(1)))
-    }
+    def scienceSemester: Option[String] =
+      ProgramId.parse(prog.getProgramID.toString) match {
+        case Science(_, sem, _, _) => Some(sem.toString)
+        case _                     => None
+      }
   }
 
 
@@ -119,7 +122,7 @@ object LchQueryParam {
   private[servlet] val ProgramSemesterParam = LchQueryParam("programSemester",
     new StringValueMatcher[ISPProgram] {
       override protected def extractor(prog: ISPProgram): Option[String] =
-        prog.semester
+        prog.scienceSemester
     }
   )
 

@@ -19,8 +19,8 @@ import edu.gemini.spModel.target.env.TargetEnvironment
 import edu.gemini.spModel.too.Too
 
 import scala.collection.JavaConverters._
-import scala.util.{Failure, Success, Try}
 
+import scalaz._
 
 class LchQueryFunctor(queryType: LchQueryFunctor.QueryType,
                       programParams: List[(LchQueryParam[ISPProgram], String)],
@@ -41,7 +41,7 @@ class LchQueryFunctor(queryType: LchQueryFunctor.QueryType,
       case (LchQueryParam(_, valueMatcher), paramValue) => valueMatcher.matches(paramValue, obs)
     }
 
-    Try {
+    \/.fromTryCatchNonFatal {
       // See if an ISPProgram matches the query specifications.
       if (programMatches) {
         val matchingObs = prog.getAllObservations.asScala.toList.filter(observationMatches)
@@ -50,8 +50,8 @@ class LchQueryFunctor(queryType: LchQueryFunctor.QueryType,
         }
       }
     } match {
-      case Success(_) =>
-      case Failure(t) =>
+      case \/-(s) =>
+      case -\/(t) =>
         LchQueryFunctor.Log.log(Level.SEVERE, "problem running LchQueryFunctor", t)
         throw new RuntimeException(t)
     }
@@ -138,7 +138,7 @@ class LchQueryFunctor(queryType: LchQueryFunctor.QueryType,
         setActive(spProg.getActive.displayValue)
         setCompleted(spProg.isCompleted.toYesNo.displayValue)
         Option(prog.getProgramID).foreach(id => setReference(id.stringValue()))
-        setSemester(prog.semester.orNull)
+        setSemester(prog.scienceSemester.orNull)
         setTitle(spProg.getTitle)
         setContactScientistEmail(spProg.getContactPerson)
         setNgoEmail(spProg.getNGOContactEmail)
