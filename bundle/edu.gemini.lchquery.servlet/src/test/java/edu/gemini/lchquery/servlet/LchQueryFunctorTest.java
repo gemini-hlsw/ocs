@@ -141,7 +141,7 @@ public class LchQueryFunctorTest {
                         observationInstrument, observationAo, observationClass
                 ));
         functor.execute(null, prog, Collections.emptySet());
-        final QueryResult result = functor.getResult();
+        final QueryResult result = functor.queryResult();
         final List<Program> programs = result.getProgramsNode().getPrograms();
         if (programs.size() != expectedPrograms) return false;
         final List<Observation> observations = programs.get(0).getObservationsNode().getObservations();

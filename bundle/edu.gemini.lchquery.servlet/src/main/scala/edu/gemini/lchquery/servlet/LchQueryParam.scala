@@ -78,11 +78,10 @@ object LchQueryParam {
     def toSPProg: Option[SPProgram] =
       Option(prog).map(_.getDataObject.asInstanceOf[SPProgram])
 
-    def semester: Option[String] = for {
-      s <- Option(prog.getProgramID).map(_.stringValue)
-      i = s.indexOf('-')
-      if i != -1 && s.length > i+6 && s.charAt(i+1) == '2'
-    } yield s.substring(i+1, i+6)
+    def semester: Option[String] = {
+      val semesterRe = "(?i)\\-(2\\d{3}[AB])".r
+      Option(prog.getProgramID).flatMap(id => semesterRe.findFirstMatchIn(id.stringValue()).map(_.group(1)))
+    }
   }
 
 

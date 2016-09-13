@@ -24,11 +24,9 @@ import scala.util.{Failure, Success, Try}
 
 class LchQueryFunctor(queryType: LchQueryFunctor.QueryType,
                       programParams: List[(LchQueryParam[ISPProgram], String)],
-                      observationParams: List[(LchQueryParam[ISPObservation], String)])
-  extends DBAbstractQueryFunctor with IDBParallelFunctor {
+                      observationParams: List[(LchQueryParam[ISPObservation], String)]) extends DBAbstractQueryFunctor {
 
-  // The current QueryResult. Must be mutable.
-  var queryResult: QueryResult = new QueryResult() {
+  val queryResult: QueryResult = new QueryResult() {
     setProgramsNode(new ProgramsNode())
   }
 
@@ -190,16 +188,6 @@ class LchQueryFunctor(queryType: LchQueryFunctor.QueryType,
     }
   }
 
-  def getResult: QueryResult = queryResult
-
-  override def mergeResults(functorCollection: util.Collection[IDBFunctor]): Unit = {
-    queryResult = new QueryResult() {
-      setProgramsNode(new ProgramsNode())
-    }
-    functorCollection.asScala.map(_.asInstanceOf[LchQueryFunctor]).foreach { f =>
-      queryResult.getProgramsNode.getPrograms.addAll(f.getResult.getProgramsNode.getPrograms)
-    }
-  }
 }
 
 object LchQueryFunctor {

@@ -104,7 +104,7 @@ final case class LchQueryServlet(odb: IDBDatabaseService, user: Set[Principal]) 
 
           odb.getQueryRunner(user.asJava).
             queryPrograms(new LchQueryFunctor(queryType, programParams, observationParams)).
-            getResult.toXml
+            queryResult.toXml
 
         } recover {
           case ex: IllegalArgumentException           => illegalArgument(ex)
