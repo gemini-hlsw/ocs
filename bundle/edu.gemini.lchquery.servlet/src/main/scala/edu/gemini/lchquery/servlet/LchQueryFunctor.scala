@@ -2,14 +2,14 @@ package edu.gemini.lchquery.servlet
 
 import java.io.Serializable
 import java.security.Principal
-import java.text.SimpleDateFormat
+import java.time.{Instant, ZoneId, ZonedDateTime}
+import java.time.format.DateTimeFormatter
 import java.util
-import java.util.{Date, TimeZone}
 import java.util.logging.{Level, Logger}
 
 import edu.gemini.odb.browser._
 import edu.gemini.pot.sp.{ISPNode, ISPObservation, ISPProgram}
-import edu.gemini.pot.spdb.{DBAbstractQueryFunctor, IDBDatabaseService, IDBFunctor, IDBParallelFunctor}
+import edu.gemini.pot.spdb.{DBAbstractQueryFunctor, IDBDatabaseService}
 import edu.gemini.skycalc.{DDMMSS, HHMMSS}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.obs.{ObsClassService, ObservationStatus}
@@ -105,7 +105,7 @@ class LchQueryFunctor(queryType: LchQueryFunctor.QueryType,
           map(timingString)
 
       def formatWindow: String =
-        LchQueryFunctor.dateFormat.format(new Date(spTW.getStart))
+        LchQueryFunctor.dateFormat.format(ZonedDateTime.ofInstant(Instant.ofEpochMilli(spTW.getStart), ZoneId.of("UTC")))
 
       def formatPeriod: Option[String] =
         Option(spTW).
@@ -196,9 +196,7 @@ object LchQueryFunctor {
   private[LchQueryFunctor] val MsPerMinute = MsPerSecond * 60
   private[LchQueryFunctor] val MsPerHour   = MsPerMinute * 60
 
-  private[LchQueryFunctor] val dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z") {
-    setTimeZone(TimeZone.getTimeZone("UTC"))
-  }
+  private[LchQueryFunctor] val dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss z").withZone(ZoneId.of("UTC"))
 
   sealed abstract class QueryType(val prefix: String)
   object QueryType {
