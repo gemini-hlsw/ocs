@@ -132,9 +132,6 @@ object LchQueryServlet {
     case object ServerError extends HttpResponseCode(500)
   }
 
-  def apply(odb: IDBDatabaseService, user: java.util.Set[Principal]): LchQueryServlet =
-    LchQueryServlet(odb, user.asScala.toSet)
-
   private[LchQueryServlet] implicit class QueryResultToXml(val queryResult: QueryResult) extends AnyVal {
     def toXml: Array[Byte] = {
       val marshaller = JAXBContext.newInstance(classOf[QueryResult].getName.substring(0, classOf[QueryResult].getName.lastIndexOf("."))).createMarshaller()
