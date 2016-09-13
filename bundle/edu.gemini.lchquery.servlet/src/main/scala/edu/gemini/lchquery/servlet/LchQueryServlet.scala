@@ -103,9 +103,9 @@ final case class LchQueryServlet(odb: IDBDatabaseService, user: Set[Principal]) 
           response.setStatus(LchQueryServlet.HttpResponseCodes.AllOK.code)
           response.setContentType("application/xml")
 
-          odb.getQueryRunner(user.asJava).
+          out.write(odb.getQueryRunner(user.asJava).
             queryPrograms(new LchQueryFunctor(queryType, programParams, observationParams)).
-            queryResult.toXml
+            queryResult.toXml)
         } recover {
           case ex: IllegalArgumentException           => illegalArgument(ex)
           case ex@(_:RemoteException | _:IOException) => otherThrowable(ex, LchQueryServlet.HttpResponseCodes.ServerError)
