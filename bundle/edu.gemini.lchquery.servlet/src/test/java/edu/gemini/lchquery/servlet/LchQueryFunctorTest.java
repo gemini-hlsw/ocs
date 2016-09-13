@@ -55,6 +55,7 @@ public class LchQueryFunctorTest {
     private String observationAo;
     private String observationClass;
 
+
     private ISPObsComponent createObsComp(final ISPProgram prog, final AbstractDataObject dataObj) throws RemoteException, SPUnknownIDException {
         final ISPObsComponent obscomp = fact.doCreateObsComponent(prog, dataObj.getType(), KEY);
         obscomp.setDataObject(dataObj);
@@ -130,11 +131,15 @@ public class LchQueryFunctorTest {
     }
 
     private boolean matches(final ISPProgram prog, final int expectedPrograms, final int expectedObservations) {
-        final LchQueryFunctor functor = new LchQueryFunctor(LchQueryFunctor.QueryType.OBSERVATIONS,
-                programSemester, programTitle, programReference,
-                programActive, programCompleted, programNotifyPi, programRollover,
-                observationTooStatus, observationName, observationStatus, observationInstrument,
-                observationAo, observationClass);
+        final LchQueryFunctor functor = new LchQueryFunctor(LchQueryFunctorTestFuncs.obsQuery(),
+                LchQueryFunctorTestFuncs.progParamsToList(
+                        programSemester, programTitle, programReference,
+                        programActive, programCompleted, programNotifyPi, programRollover
+                ),
+                LchQueryFunctorTestFuncs.obsParamsToList(
+                        observationTooStatus, observationName, observationStatus,
+                        observationInstrument, observationAo, observationClass
+                ));
         functor.execute(null, prog, Collections.emptySet());
         final QueryResult result = functor.getResult();
         final List<Program> programs = result.getProgramsNode().getPrograms();

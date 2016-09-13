@@ -34,7 +34,7 @@ final class Activator extends BundleActivator {
     Log.info("Start LCH ODB Query Service")
     tracker = track[IDBDatabaseService, HttpService, HttpService](ctx) { (odb, http) =>
       Log.info(s"Registering $AppContext servlet")
-      http.registerServlet(AppContext, new LchQueryServlet(odb, user), new Hashtable(), null)
+      http.registerServlet(AppContext, LchQueryServlet(odb, user), new Hashtable(), null)
       http
     } { http =>
       http.unregister(AppContext)
