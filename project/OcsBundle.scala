@@ -535,23 +535,23 @@ trait OcsBundle {
       bundle_jsky_app_ot_visitlog
     )
 
-  lazy val bundle_jsky_app_ot = 
+  lazy val bundle_jsky_app_ot =
     project.in(file("bundle/jsky.app.ot")).dependsOn(
       bundle_edu_gemini_auxfile_workflow,
-      bundle_edu_gemini_shared_skyobject,
       bundle_edu_gemini_ags,
+      bundle_edu_gemini_catalog % "test->test;compile->compile",
       bundle_edu_gemini_horizons_api,
       bundle_edu_gemini_itc_shared,
       bundle_edu_gemini_p2checker,
       bundle_edu_gemini_phase2_core,
       bundle_edu_gemini_pot,
       bundle_edu_gemini_shared_gui,
+      bundle_edu_gemini_shared_skyobject,
       bundle_edu_gemini_shared_util,
       bundle_edu_gemini_sp_vcs,
       bundle_edu_gemini_sp_vcs_log,
       bundle_edu_gemini_sp_vcs_reg,
       bundle_edu_gemini_spModel_core,
-      bundle_edu_gemini_ags,
       bundle_edu_gemini_spModel_io,
       bundle_edu_gemini_spModel_pio,
       bundle_edu_gemini_spModel_smartgcal,

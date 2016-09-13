@@ -1,7 +1,9 @@
 package jsky.app.ot.tpe;
 
 import edu.gemini.catalog.ui.tpe.CatalogImageDisplay;
+import edu.gemini.pot.sp.ISPObservation;
 import jsky.app.ot.ags.AgsSelectorControl;
+import scala.Option;
 
 import javax.swing.*;
 import java.awt.*;
@@ -17,6 +19,8 @@ import java.awt.event.ComponentListener;
  * @version $Revision: 45662 $
  * @author Allan Brighton */
 final class TpeToolBar extends JPanel {
+
+    private final ImageCatalogPanel _imageCatalogPanel;
 
     private static GridBagConstraints gbc(final int y) {
         return new GridBagConstraints() {{
@@ -80,7 +84,7 @@ final class TpeToolBar extends JPanel {
             insets = new Insets(10, 0, 0, 0);
         }});
         final int catalogYPos = yPos + i;
-        ImageCatalogPanel _imageCatalogPanel = new ImageCatalogPanel(display);
+        _imageCatalogPanel = new ImageCatalogPanel(display);
         final JPanel wrappedCatalogSelector = wrapPanel("", _imageCatalogPanel.panel());
         add(wrappedCatalogSelector, new GridBagConstraints() {{
             gridx = 0; gridy = catalogYPos; anchor = NORTH; fill = HORIZONTAL;
@@ -191,6 +195,13 @@ final class TpeToolBar extends JPanel {
 
     AgsSelectorControl getGuiderSelector() {
         return _guiderSelector;
+    }
+
+    /**
+     * Updates the image catalogue when the selection changes
+     */
+    void resetImageCatalogue(Option<ISPObservation> observation) {
+        _imageCatalogPanel.resetCatalogue(observation);
     }
 }
 

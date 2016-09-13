@@ -310,6 +310,7 @@ public final class TelescopePosEditor implements TpeMouseObserver {
         final Option<ISPObservation> obsShell = ImOption.fromScalaOpt(_ctx.obsShell());
         _agsPub.watch(obsShell);
         _tpeToolBar.getGuiderSelector().setAgsOptions(_agsPub.getAgsContext());
+        _tpeToolBar.resetImageCatalogue(_ctx.obsShell());
         obsShell.foreach(obs -> {
             obs.addCompositeChangeListener(obsListener);
             obs.addStructureChangeListener(obsListener);

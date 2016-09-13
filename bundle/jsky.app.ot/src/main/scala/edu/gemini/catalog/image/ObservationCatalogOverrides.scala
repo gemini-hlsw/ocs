@@ -1,0 +1,90 @@
+package edu.gemini.catalog.image
+
+import java.io.File
+import java.nio.charset.StandardCharsets
+import java.nio.file.Files
+
+import java.util.UUID
+
+import argonaut.Argonaut._
+import argonaut._
+import edu.gemini.pot.sp.SPNodeKey
+import jsky.util.Preferences
+
+import scalaz.concurrent.Task
+import scalaz._
+import Scalaz._
+
+/**
+  * Handles saving/reading overrides of observation catalogues
+  * Basically it keeps a map of observations to catalogue backed up on a file
+  */
+object ObservationCatalogOverrides {
+  case class CatalogOverride(key: SPNodeKey, catalog: ImageCatalog)
+
+  object CatalogOverride {
+
+    // Argonaut codec
+    implicit def CatalogOverrideCodecJson: CodecJson[CatalogOverride] =
+      CodecJson(
+        (p: CatalogOverride) =>
+          ("catalog" := p.catalog.id) ->:
+          ("uuid" := p.key.uuid.toString) ->:
+          jEmptyObject,
+        cur =>
+          (for {
+            uuid <- (cur --\ "uuid").as[String]
+            id   <- (cur --\ "catalog").as[String]
+          } yield ImageCatalog.byName(id).map((_, UUID.fromString(uuid)))).flatMap {
+            case Some((c, u)) => DecodeResult.ok(CatalogOverride(new SPNodeKey(u), c))
+            case None => DecodeResult.fail("Unknown catalog id", cur.history)
+          }
+      )
+  }
+
+  case class Overrides(overrides: List[CatalogOverride]) {
+    /**
+      * Finds the catalog for the key or goes to the default user catalog
+      */
+    def obsCatalog(key: SPNodeKey): ImageCatalog = overrides.find(_.key == key).map(_.catalog).getOrElse(ImageCatalog.user())
+  }
+
+  object Overrides {
+    var zero = Overrides(Nil)
+
+    implicit def OverridesCodecJson: CodecJson[Overrides] =
+      casecodec1(Overrides.apply, Overrides.unapply)("overrides")
+  }
+
+  // Try to read or use a default if any errors are found
+  def readOverrides = \/.fromTryCatchNonFatal {
+      val lines = new String(Files.readAllBytes(overridesFile.toPath), StandardCharsets.UTF_8)
+      Parse.decodeOr[Overrides, Overrides](lines, identity, Overrides.zero)
+    }.orElse(\/.right(Overrides.zero))
+
+  val preferencesDir = Preferences.getPreferences.getDir
+  val overridesFile = new File(preferencesDir, "catalogOverrides.json")
+
+  def catalogFor(key: SPNodeKey): Task[ImageCatalog] = Task.delay {
+    // Synchronize file reads and writes
+    this.synchronized {
+      (for {
+        over <- readOverrides // TODO this maybe expensive, reading the file each time
+      } yield over.obsCatalog(key)).getOrElse(ImageCatalog.user())
+    }
+  }
+
+  def storeOverride(key: SPNodeKey, c: ImageCatalog): Task[Unit] = Task.delay {
+    this.synchronized {
+      def writeOverrides(overrides: Overrides) = \/.fromTryCatchNonFatal {
+          Files.write(overridesFile.toPath, overrides.asJson.spaces2.getBytes(StandardCharsets.UTF_8))
+        }
+
+      for {
+        old         <- readOverrides
+        newOverrides = old.copy(overrides = CatalogOverride(key, c) :: old.overrides.filter(_.key != key))
+        _           <- writeOverrides(newOverrides)
+      } yield ()
+    }
+  }
+}

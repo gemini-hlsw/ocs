@@ -5,8 +5,11 @@ import javax.swing._
 
 import scalaz._
 import Scalaz._
-import edu.gemini.catalog.image.ImageCatalog
+import edu.gemini.catalog.image.{ImageCatalog, ObservationCatalogOverrides}
 import edu.gemini.catalog.ui.tpe.CatalogImageDisplay
+import edu.gemini.pot.sp.ISPObservation
+
+import scalaz.concurrent.Task
 
 /**
   * Panel of radio buttons of Image catalogs offered by the TPE.
@@ -24,10 +27,40 @@ final class ImageCatalogPanel(imageDisplay: CatalogImageDisplay) {
     buttonGroup.add(b)
     b.addActionListener(new ActionListener() {
       override def actionPerformed(e: ActionEvent): Unit = {
-        ImageCatalog.user(c)
-        imageDisplay.loadSkyImage()
+        // Read the current key on the tpe
+        val key = for {
+            tpe <- Option(TpeManager.get())
+            iw  <- Option(tpe.getImageWidget)
+            c   <- Option(iw.getContext)
+            o   <- c.obsShell
+          } yield o.getNodeKey
+
+        // Update the image and store the override
+        key.foreach { k =>
+          val actions = for {
+            _ <- Task.delay(imageDisplay.loadSkyImage())
+            _ <- Task.fork(ObservationCatalogOverrides.storeOverride(k, c))
+          } yield ()
+          actions.unsafePerformSync
+        }
       }
     })
+  }
+
+  private def updateSelection(catalog: ImageCatalog): Unit = {
+    buttons.find(_._1 === catalog).foreach { _._2.setSelected(true)}
+  }
+
+  def resetCatalogue(catalogue: Option[ISPObservation]): Unit = {
+    // Verify we are on the EDT. We don't want to use Swing.onEDT
+    assert(SwingUtilities.isEventDispatchThread)
+    catalogue.map(_.getNodeKey).foreach { key =>
+      val actions = for {
+        c <- ObservationCatalogOverrides.catalogFor(key)
+        _ <- Task.delay(updateSelection(c))
+      } yield ()
+      actions.unsafePerformSync
+    }
   }
 
   private def mkButton(c: ImageCatalog): (ImageCatalog, JRadioButton) =
