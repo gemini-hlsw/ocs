@@ -18,7 +18,7 @@ import scala.util.Try
   * query parameters that replies with an XML containing the program / observation / target data.
   *
   * <p>The queries can have any combination of the following parameters, the
-  * values should allow the same wildcards (*,?) and OR operators (||) as does
+  * values should allow the same wildcards (*,?) and OR operators (|) as does
   * the OT browser and missing parameters equal to "Any":</p>
   *
   * programSemester
@@ -26,12 +26,15 @@ import scala.util.Try
   * programReference
   * programActive
   * programCompleted
+  * programNotifyPi
+  * programRollover
   *
   * observationTooStatus
   * observationName
   * observationStatus
   * observationInstrument
   * observationAo
+  * observationClass
   *
   * <p>A typical query will be something like this (queries all GN observations
   * and targets for Semester 2012B with the given observation status and using

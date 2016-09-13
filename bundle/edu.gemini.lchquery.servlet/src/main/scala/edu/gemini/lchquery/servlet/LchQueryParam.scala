@@ -12,7 +12,7 @@ import edu.gemini.spModel.obsclass.ObsClass
 import edu.gemini.spModel.obscomp.SPInstObsComp
 import edu.gemini.spModel.target.env.TargetEnvironment
 import edu.gemini.spModel.target.obsComp.TargetObsComp
-import edu.gemini.spModel.too.{Too, TooType}
+import edu.gemini.spModel.too.Too
 import edu.gemini.spModel.util.SPTreeUtil
 
 import scala.collection.JavaConverters._
