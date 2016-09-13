@@ -14,7 +14,7 @@ import edu.gemini.util.trpc.auth.TrpcKeyChain
 import edu.gemini.util.security.auth.keychain.Action._
 import java.io.File
 
-import edu.gemini.catalog.image.ImageCacheWatcher
+import edu.gemini.catalog.image.{ImageCacheWatcher, ObservationCatalogOverrides}
 import edu.gemini.sp.vcs.reg.impl.VcsRegistrarImpl
 import edu.gemini.pot.client.SPDB
 import jsky.catalog.skycat.SkycatConfigFile
@@ -34,9 +34,8 @@ object TestLauncher extends App {
   val reg   = new VcsRegistrarImpl(new File(dir, "vcs-reg.xml"))
   val odb   = DBLocalDatabase.create(new File(dir, "spdb")) <| SPDB.init
 
-  val cacheDir = Preferences.getPreferences.getCacheDir
   // Initialize the image cache
-  ImageCacheWatcher.run(cacheDir)
+  ImageCacheWatcher.run()
 
   // Irritation, then open the OT
   AuthDialog.showDatabaseTab = true

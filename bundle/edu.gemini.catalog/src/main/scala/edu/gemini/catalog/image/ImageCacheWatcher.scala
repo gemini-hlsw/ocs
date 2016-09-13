@@ -4,6 +4,9 @@ import java.io.File
 import java.nio.file._
 import java.nio.file.StandardWatchEventKinds._
 import java.nio.file.attribute.BasicFileAttributes
+import java.util.logging.{Level, Logger}
+
+import jsky.util.Preferences
 
 import scalaz.concurrent.Task
 import scala.collection.JavaConverters._
@@ -14,6 +17,8 @@ import Scalaz._
   * Observes the file system to keep the cache populated
   */
 object ImageCacheWatcher {
+  val log = Logger.getLogger(this.getClass.getCanonicalName)
+
   /**
     * Populates the cache when the application starts
     */
@@ -58,6 +63,7 @@ object ImageCacheWatcher {
 
     val watcher = cacheDir.toPath.getFileSystem.newWatchService()
     cacheDir.toPath.register(watcher, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY)
+    log.info(s"Start watching the images cache at ${cacheDir.getAbsolutePath}")
     // Keep listening for updates and close at the end
     B.forever(waitForWatcher(watcher)).onFinish(_ => Task.delay(watcher.close()))
   }
@@ -65,11 +71,17 @@ object ImageCacheWatcher {
   /**
     * Run the ImageCacheWatcher
     */
-  def run(cacheDir: File): Unit = {
+  def run(): Unit = {
+    val cacheDir = Preferences.getPreferences.getCacheDir
     val task = for {
       _ <- populateInitialCache(cacheDir)
       c <- watch(cacheDir)
     } yield c
-    Task.fork(task).unsafePerformAsync(println)
+
+    // Execute the watcher in a separate thread
+    Task.fork(task).unsafePerformAsync {
+      case \/-(_) =>
+      case -\/(e) => log.log(Level.SEVERE, "Error starting the images cache watcher", e)
+    }
   }
 }
