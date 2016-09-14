@@ -14,7 +14,7 @@ import edu.gemini.util.trpc.auth.TrpcKeyChain
 import edu.gemini.util.security.auth.keychain.Action._
 import java.io.File
 
-import edu.gemini.catalog.image.{ImageCacheWatcher, ObservationCatalogOverrides}
+import edu.gemini.catalog.image.ImageCacheWatcher
 import edu.gemini.sp.vcs.reg.impl.VcsRegistrarImpl
 import edu.gemini.pot.client.SPDB
 import jsky.catalog.skycat.SkycatConfigFile

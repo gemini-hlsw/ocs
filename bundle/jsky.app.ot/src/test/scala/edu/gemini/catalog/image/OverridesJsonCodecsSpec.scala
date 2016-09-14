@@ -3,7 +3,7 @@ package edu.gemini.catalog.image
 import java.util.UUID
 
 import argonaut.{CodecJson, DecodeResult}
-import edu.gemini.catalog.image.ObservationCatalogOverrides.CatalogOverride
+import edu.gemini.catalog.ui.image.ObservationCatalogOverrides.CatalogOverride
 import edu.gemini.pot.sp.SPNodeKey
 import org.scalacheck.Prop.forAll
 import org.scalacheck.Arbitrary

@@ -1,19 +1,18 @@
-package edu.gemini.catalog.image
+package edu.gemini.catalog.ui.image
 
 import java.io.File
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
-
 import java.util.UUID
 
 import argonaut.Argonaut._
 import argonaut._
+import edu.gemini.catalog.image.ImageCatalog
 import edu.gemini.pot.sp.SPNodeKey
 import jsky.util.Preferences
 
-import scalaz.concurrent.Task
 import scalaz._
-import Scalaz._
+import scalaz.concurrent.Task
 
 /**
   * Handles saving/reading overrides of observation catalogues

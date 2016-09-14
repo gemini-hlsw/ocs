@@ -5,7 +5,8 @@ import javax.swing._
 
 import scalaz._
 import Scalaz._
-import edu.gemini.catalog.image.{ImageCatalog, ObservationCatalogOverrides}
+import edu.gemini.catalog.image.ImageCatalog
+import edu.gemini.catalog.ui.image.ObservationCatalogOverrides
 import edu.gemini.catalog.ui.tpe.CatalogImageDisplay
 import edu.gemini.pot.sp.ISPObservation
 
@@ -38,8 +39,8 @@ final class ImageCatalogPanel(imageDisplay: CatalogImageDisplay) {
         // Update the image and store the override
         key.foreach { k =>
           val actions = for {
+            _ <- ObservationCatalogOverrides.storeOverride(k, c)
             _ <- Task.delay(imageDisplay.loadSkyImage())
-            _ <- Task.fork(ObservationCatalogOverrides.storeOverride(k, c))
           } yield ()
           actions.unsafePerformSync
         }
