@@ -6,12 +6,14 @@ import edu.gemini.spModel.ao.{AOConstants, AOTreeUtil}
 import edu.gemini.spModel.core.ProgramId
 import edu.gemini.spModel.core.ProgramId.Science
 import edu.gemini.spModel.data.YesNoType
+import edu.gemini.spModel.dataset.{DatasetLabel, DatasetQaRecord}
 import edu.gemini.spModel.gemini.altair.{AltairParams, InstAltair}
 import edu.gemini.spModel.gemini.obscomp.{SPProgram, SPSiteQuality}
 import edu.gemini.spModel.gemini.obscomp.SPProgram.Active
-import edu.gemini.spModel.obs.{ObsClassService, ObservationStatus, SPObservation}
-import edu.gemini.spModel.obsclass.ObsClass
+import edu.gemini.spModel.gemini.phase1.GsaPhase1Data
+import edu.gemini.spModel.obs.{ObsClassService, ObsTargetCalculatorService, ObservationStatus, SPObservation}
 import edu.gemini.spModel.obscomp.SPInstObsComp
+import edu.gemini.spModel.obslog.ObsLog
 import edu.gemini.spModel.target.env.TargetEnvironment
 import edu.gemini.spModel.target.obsComp.TargetObsComp
 import edu.gemini.spModel.too.Too
@@ -85,6 +87,39 @@ object LchQueryParam {
         case Science(_, sem, _, _) => Some(sem.toString)
         case _                     => None
       }
+
+    def investigatorNames: Option[List[String]] = {
+      def investigatorName(inv: GsaPhase1Data.Investigator): Option[String] =
+        Option(inv).map(i => s"${i.getFirst} ${i.getLast}").filterNot(_.trim.isEmpty)
+
+      toSPProg.map { spProg =>
+        (investigatorName(spProg.getGsaPhase1Data.getPi) :: spProg.getGsaPhase1Data.getCois.asScala.map(investigatorName).toList).
+          collect { case Some(i) => i }
+      }
+    }
+
+    def coIEmails: Option[List[String]] =
+      toSPProg.map(_.getGsaPhase1Data.getCois.asScala.toList.map(_.getEmail).filterNot(_.isEmpty))
+
+    def abstrakt: Option[String] =
+      toSPProg.map(_.getGsaPhase1Data.getAbstract.toString)
+
+    def scienceBand: Option[String] =
+      toSPProg.map(_.getQueueBand)
+
+    def partners: Option[List[String]] =
+      toSPProg.map(_.getTimeAcctAllocation.getCategories.asScala.toList.map(_.getDisplayName))
+
+    def tooStatus: Option[YesNoType] =
+      toSPProg.map(_.isToo.toYesNo)
+
+    // Allocated time in ms.
+    def allocatedTime: Long =
+      toSPProg.map(spProg => (spProg.getTimeAcctAllocation.getTotalTime * 60 * 60 * 1000).toLong).getOrElse(0)
+
+    // Remaining time in ms.
+    def remainingTime: Long =
+      prog.getAllObservations.asScala.map(ObsTargetCalculatorService.calculateRemainingTime).sum
   }
 
 
@@ -115,6 +150,11 @@ object LchQueryParam {
       n <- Option(SPTreeUtil.findObsCondNode(obs))
       c <- Option(n.getDataObject).map(_.asInstanceOf[SPSiteQuality])
     } yield c.getTimingWindows.asScala.toList
+
+    def obsLogComments: Option[Map[DatasetLabel,DatasetQaRecord]] =
+      Option(ObsLog.getIfExists(obs)).map(_.getQaRecord.qaMap.filterNot {
+        case (_,rec) => rec.comment.isEmpty
+      })
   }
 
 

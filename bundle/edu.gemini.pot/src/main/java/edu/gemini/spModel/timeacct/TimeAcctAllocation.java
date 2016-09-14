@@ -129,7 +129,7 @@ public final class TimeAcctAllocation implements Serializable {
      * be 0.5.
      */
     public SortedMap<TimeAcctCategory, Double> getRatios() {
-        SortedMap<TimeAcctCategory, Double> res = new TreeMap<TimeAcctCategory, Double>();
+        SortedMap<TimeAcctCategory, Double> res = new TreeMap<>();
         if (totalTime == 0) return res;
 
         for (Map.Entry<TimeAcctCategory, Double> me : allocMap.entrySet()) {
