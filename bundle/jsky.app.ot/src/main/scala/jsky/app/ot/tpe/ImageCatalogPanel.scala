@@ -33,8 +33,8 @@ final class ImageCatalogPanel(imageDisplay: CatalogImageDisplay) {
             tpe <- Option(TpeManager.get())
             iw  <- Option(tpe.getImageWidget)
             c   <- Option(iw.getContext)
-            o   <- c.obsShell
-          } yield o.getNodeKey
+            k   <- c.obsKey
+          } yield k
 
         // Update the image and store the override
         key.foreach { k =>

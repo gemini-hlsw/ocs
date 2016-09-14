@@ -9,7 +9,7 @@ import edu.gemini.spModel.target.obsComp.TargetObsComp
 import edu.gemini.shared.util.immutable.ScalaConverters._
 
 import scala.collection.JavaConverters._
-import edu.gemini.pot.sp.ISPProgram
+import edu.gemini.pot.sp.{ISPProgram, SPNodeKey}
 import edu.gemini.spModel.core.Coordinates
 import jsky.app.ot.tpe.{TpeContext, TpeImageWidget, TpeManager}
 import jsky.util.Preferences
@@ -43,18 +43,18 @@ object BackgroundImageLoader {
 
   /** Called when a program is created to download its images */
   def watch(prog: ISPProgram): Unit = {
-      val targets = prog.getAllObservations.asScala.toList.flatMap(_.getObsComponents.asScala.map(n => (n, n.getDataObject)).collect {
-        case (node, t: TargetObsComp) =>
-          tpeCoordinates(TpeContext(node))
-      })
-      // remove duplicates
-      val tasks = targets.flatten.distinct.map(requestImageDownload)
-      // Run
-      runAsync(tasks) {
-        case \/-(e) => println(e)// done
-        case -\/(e) => println(e)
-      }(ec)
-    }
+    val targets = prog.getAllObservations.asScala.toList.flatMap(_.getObsComponents.asScala.map(n => (n, n.getDataObject)).collect {
+      case (node, t: TargetObsComp) =>
+        tpeCoordinates(TpeContext(node))
+    })
+    // remove duplicates
+    val tasks = targets.flatten.distinct.map(Function.tupled(requestImageDownload))
+    // Run
+    runAsync(tasks) {
+      case \/-(e) => println(e)// done
+      case -\/(e) => println(e)
+    }(ec)
+  }
 
   /** Called when a program is removed to clear the cache */
   def unwatch(prog: ISPProgram): Unit = {
@@ -68,7 +68,7 @@ object BackgroundImageLoader {
     * Display an image if available on disk or request the download if necessary
     */
   def loadImageOnTheTpe(tpe: TpeContext): Unit = {
-    val t = tpeCoordinates(tpe).map(requestImageDownload).getOrElse(Task.now(()))
+    val t = tpeCoordinates(tpe).map(Function.tupled(requestImageDownload)).getOrElse(Task.now(()))
 
     // This is called on an explicit user interaction so we'd rather
     // Request the execution in a higher priority thread
@@ -82,8 +82,11 @@ object BackgroundImageLoader {
   /**
     * Creates a task to load an image and set it on the tpe
     */
-  private[image] def requestImageDownload(c: Coordinates): Task[Unit] =
-    ImageCatalogClient.loadImage(cacheDir)(ImageSearchQuery(ImageCatalog.user(), c)).map {
+  private[image] def requestImageDownload(key: SPNodeKey, c: Coordinates): Task[Unit] =
+    for {
+      catalog <- ObservationCatalogOverrides.catalogFor(key)
+      image   <- ImageCatalogClient.loadImage(cacheDir)(ImageSearchQuery(catalog, c))
+    } yield image match {
       case Some(e) => setTpeImage(e)
       case _       => // Ignore
     }
@@ -91,13 +94,14 @@ object BackgroundImageLoader {
   /**
     * Finds the coordinates for the base target of the tpe
     */
-  private def tpeCoordinates(tpe: TpeContext): Option[Coordinates] =
+  private def tpeCoordinates(tpe: TpeContext): Option[(SPNodeKey, Coordinates)] =
     for {
       ctx <- tpe.obsContext
       te  <- tpe.targets.base
       when = ctx.getSchedulingBlockStart.asScalaOpt | Instant.now.toEpochMilli
       c   <- te.getTarget.coords(when)
-    } yield c
+      k   <- tpe.obsKey
+    } yield (k, c)
 
   /**
     * Utility methods to run the tasks on separate threads of the pool
@@ -123,7 +127,7 @@ object BackgroundImageLoader {
         tpe <- Option(TpeManager.get())
         iw  <- Option(tpe.getImageWidget)
         c   <- tpeCoordinates(iw.getContext)
-        if entry.query.isNearby(c) // The TPE may have moved so only display if the coordinates match
+        if entry.query.isNearby(c._2) // The TPE may have moved so only display if the coordinates match
       } {
         val r = ImagesInProgress.contains(entry.query) >>= { inProgress => if (!inProgress) markAndSet(iw) else Task.now(())}
         // TODO: Handle errors

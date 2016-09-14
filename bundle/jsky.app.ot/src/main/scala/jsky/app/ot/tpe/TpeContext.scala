@@ -173,6 +173,7 @@ case class TpeContext(node: Option[ISPNode]) {
   val nodeOrNull: ISPNode = node.orNull
   val progShell: Option[ISPProgram] = node.flatMap(n => Option(n.getProgram))
   val obsShell: Option[ISPObservation] = node.flatMap(n => Option(n.getContextObservation))
+  val obsKey: Option[SPNodeKey] = obsShell.map(_.getNodeKey)
   val obsShellOrNull: ISPObservation = obsShell.orNull
 
   val noneSite: JOption[Site] = JNone.instance[Site]

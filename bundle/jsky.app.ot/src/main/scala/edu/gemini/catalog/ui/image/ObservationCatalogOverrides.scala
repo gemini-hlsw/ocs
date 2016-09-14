@@ -45,7 +45,7 @@ object ObservationCatalogOverrides {
     /**
       * Finds the catalog for the key or goes to the default user catalog
       */
-    def obsCatalog(key: SPNodeKey): ImageCatalog = overrides.find(_.key == key).map(_.catalog).getOrElse(ImageCatalog.user())
+    def obsCatalog(key: SPNodeKey): Option[ImageCatalog] = overrides.find(_.key == key).map(_.catalog)
   }
 
   object Overrides {
@@ -56,10 +56,10 @@ object ObservationCatalogOverrides {
   }
 
   // Try to read or use a default if any errors are found
-  def readOverrides = \/.fromTryCatchNonFatal {
-      val lines = new String(Files.readAllBytes(overridesFile.toPath), StandardCharsets.UTF_8)
-      Parse.decodeOr[Overrides, Overrides](lines, identity, Overrides.zero)
-    }.orElse(\/.right(Overrides.zero))
+  private def readOverrides: Overrides = \/.fromTryCatchNonFatal {
+        val lines = new String(Files.readAllBytes(overridesFile.toPath), StandardCharsets.UTF_8)
+        Parse.decodeOr[Overrides, Overrides](lines, identity, Overrides.zero)
+      }.getOrElse(Overrides.zero)
 
   val preferencesDir = Preferences.getPreferences.getDir
   val overridesFile = new File(preferencesDir, "catalogOverrides.json")
@@ -67,9 +67,7 @@ object ObservationCatalogOverrides {
   def catalogFor(key: SPNodeKey): Task[ImageCatalog] = Task.delay {
     // Synchronize file reads and writes
     this.synchronized {
-      (for {
-        over <- readOverrides // TODO this maybe expensive, reading the file each time
-      } yield over.obsCatalog(key)).getOrElse(ImageCatalog.user())
+      readOverrides.obsCatalog(key).getOrElse(ImageCatalog.user())
     }
   }
 
@@ -80,7 +78,7 @@ object ObservationCatalogOverrides {
         }
 
       for {
-        old         <- readOverrides
+        old         <- \/.right(readOverrides)
         newOverrides = old.copy(overrides = CatalogOverride(key, c) :: old.overrides.filter(_.key != key))
         _           <- writeOverrides(newOverrides)
       } yield ()
