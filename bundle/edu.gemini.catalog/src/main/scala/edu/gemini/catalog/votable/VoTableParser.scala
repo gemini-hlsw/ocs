@@ -2,12 +2,12 @@ package edu.gemini.catalog.votable
 
 import java.io.{ByteArrayInputStream, InputStream}
 
-import edu.gemini.catalog.api.CatalogName
+import edu.gemini.catalog.api.{CatalogName, SIMBAD}
 import edu.gemini.spModel.core._
 
 import scala.io.Source
 import scala.xml.XML
-
+import scala.xml.Node
 import scalaz._
 import Scalaz._
 
@@ -49,14 +49,23 @@ object VoTableParser extends VoTableParser {
   /**
    * parse takes an input stream and attempts to read the xml content and convert it to a VoTable resource
    */
-  def parse(catalog: CatalogName, is: InputStream, checkValidity: Boolean = true): CatalogResult = {
+  def parse(catalog: CatalogName, is: InputStream): CatalogResult = {
     // Load in memory (Could be a problem for large responses)
     val xmlText = Source.fromInputStream(is, "UTF-8").getLines().mkString
 
-    (checkValidity, validate(xmlText)) match {
-      case (true, -\/(e))  => \/.left(ValidationError(catalog))
-      case (false, -\/(e)) => \/.right(parse(XML.loadString(xmlText)))
-      case (_, \/-(r))     => \/.right(parse(XML.loadString(r)))
+    catalog match {
+      case SIMBAD =>
+        // Simbad is a special case as it is not fully votable-compliant.
+        // We want to catch some errors at this level to simplify the parse method
+        // that assumes we are votable compliant
+        val xml = XML.loadString(xmlText)
+        if (SimbadAdapter.containsExceptions(xml)) {
+          \/.left(ValidationError(catalog))
+        } else {
+          \/.right(parse(xml))
+        }
+      case _ if validate(xmlText).isLeft => \/.left(ValidationError(catalog))
+      case _                             => \/.right(parse(XML.loadString(xmlText)))
     }
   }
 }
@@ -243,6 +252,12 @@ case object SimbadAdapter extends CatalogAdapter {
       }
     }
     \/-((band.flatten |@| MagnitudeSystem.fromString(p._2))((b, s) => (b, s)))
+  }
+
+  def containsExceptions(xml: Node): Boolean = {
+    // The only case known is with java.lang.NullPointerException but let's make the check
+    // more general.
+    (xml \\ "INFO" \ "@value").text.matches("java\\..*Exception")
   }
 }
 

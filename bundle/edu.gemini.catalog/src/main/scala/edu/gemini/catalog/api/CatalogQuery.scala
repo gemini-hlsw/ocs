@@ -19,7 +19,7 @@ case class MagnitudeQueryFilter(mc: MagnitudeConstraints) extends QueryResultsFi
 
 sealed abstract class CatalogName(val id: String, val displayName: String) {
   def supportedBands: List[MagnitudeBand] = Nil
-  // Indicates what is the band used when a generic R band is requried
+  // Indicates what is the band used when a generic R band is required
   def rBand: MagnitudeBand = MagnitudeBand.UC
 }
 
@@ -38,7 +38,6 @@ case object SIMBAD extends CatalogName("simbad", "Simbad")
 
 object CatalogName {
   implicit val equals = Equal.equal[CatalogName]((a, b) => a.id === b.id)
-
 }
 
 /**
