@@ -145,6 +145,15 @@ class LchQueryFunctor(queryType: LchQueryFunctor.QueryType,
         setNotifyPi(spProg.getNotifyPi.displayValue)
         setPiEmail(Option(spProg.getPIInfo).map(_.getEmail).orNull)
         setRollover(spProg.getRolloverStatus.toYesNo.displayValue)
+        prog.investigatorNames.foreach(_.foreach(getInvestigatorNames.add))
+        prog.coIEmails.foreach(_.foreach(getCoIEmails.add))
+        prog.abstrakt.foreach(setAbstrakt)
+        prog.scienceBand.foreach(setScienceBand)
+        prog.partners.foreach(_.foreach(getPartners.add))
+        prog.tooStatus.foreach(s => setTooStatus(s.displayValue()))
+        prog.allocatedTime(t => setAllocatedTime(t.toString))
+        prog.remainingTime(t => setRemainingTime(t.toString))
+
 
         if (queryType != LchQueryFunctor.QueryType.ProgramQuery) {
           setObservationsNode(new ObservationsNode() {
