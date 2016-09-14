@@ -90,12 +90,6 @@ public class LchQueryFunctorTest {
 
     /**
      * Add an Altair component of the specified type
-     *
-     * @param mode  mode (LGS or NGS)
-     * @throws edu.gemini.pot.sp.SPUnknownIDException
-     * @throws java.rmi.RemoteException
-     * @throws edu.gemini.pot.sp.SPTreeStateException
-     * @throws edu.gemini.pot.sp.SPNodeNotLocalException
      */
     private void addAltair(final ISPProgram prog, final AltairParams.Mode mode)
             throws SPUnknownIDException, RemoteException, SPTreeStateException, SPNodeNotLocalException {
@@ -109,11 +103,6 @@ public class LchQueryFunctorTest {
 
     /**
      * Add a GMOS north component
-     *
-     * @throws edu.gemini.pot.sp.SPUnknownIDException
-     * @throws java.rmi.RemoteException
-     * @throws edu.gemini.pot.sp.SPTreeStateException
-     * @throws edu.gemini.pot.sp.SPNodeNotLocalException
      */
     private void addGmosNorth(final ISPProgram prog, final GmosCommonType.Binning xBin, final GmosCommonType.Binning yBin)
             throws SPUnknownIDException, RemoteException, SPTreeStateException, SPNodeNotLocalException {

@@ -204,9 +204,9 @@ object LchQueryParam {
   )
 
   private[servlet] val ObservationClassParam = LchQueryParam("observationClass",
-    new BooleanValueMatcher[ISPObservation, ObsClass] {
-      override protected def extractor(obs: ISPObservation): Option[ObsClass] =
-        Option(obs).map(ObsClassService.lookupObsClass)
+    new StringValueMatcher[ISPObservation] {
+      override protected def extractor(obs: ISPObservation): Option[String] =
+        Option(obs).map(o => ObsClassService.lookupObsClass(o).displayValue)
     }
   )
 
