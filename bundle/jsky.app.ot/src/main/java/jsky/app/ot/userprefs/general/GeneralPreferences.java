@@ -21,22 +21,16 @@ public final class GeneralPreferences implements ExternalizablePreferences {
      */
     public static final class Builder {
         private boolean phase2Checking = true;
-        private boolean guideStarAlternatives = true;
         private boolean warnUnsavedChanges = true;
 
-        public Builder() { /* empty */ }
+        Builder() { /* empty */ }
 
-        public Builder phase2Checking(boolean val) {
+        Builder phase2Checking(boolean val) {
             phase2Checking = val;
             return this;
         }
 
-        public Builder guideStarAlternatives(boolean val) {
-            guideStarAlternatives = val;
-            return this;
-        }
-
-        public Builder warnUnsavedChanges(boolean val) {
+        Builder warnUnsavedChanges(boolean val) {
             warnUnsavedChanges = val;
             return this;
         }
@@ -63,26 +57,22 @@ public final class GeneralPreferences implements ExternalizablePreferences {
             Builder b = new Builder();
             ParamSet pset = psetOpt.getValue();
             b.phase2Checking(Pio.getBooleanValue(pset, PHASE_2_CHECKING_PARAM, true));
-            b.guideStarAlternatives(Pio.getBooleanValue(pset, GUIDE_STAR_ALT_PARAM, true));
             b.warnUnsavedChanges(Pio.getBooleanValue(pset, WARN_UNSAVED_CHANGES_PARAM, true));
             return b.build();
         }
     }
 
-    public static final Factory FACTORY = new Factory();
-    public static final String PSET_NAME = "general";
+    private static final Factory FACTORY = new Factory();
+    private static final String PSET_NAME = "general";
 
     private static final String PHASE_2_CHECKING_PARAM = "phase2Checking";
-    private static final String GUIDE_STAR_ALT_PARAM = "guideStarAlt";
     private static final String WARN_UNSAVED_CHANGES_PARAM = "warnUnsavedChanges";
 
     private final boolean phase2Checking;
-    private final boolean guideStarAlternatives;
     private final boolean warnUnsavedChanges;
 
     private GeneralPreferences(Builder builder) {
         this.phase2Checking = builder.phase2Checking;
-        this.guideStarAlternatives = builder.guideStarAlternatives;
         this.warnUnsavedChanges = builder.warnUnsavedChanges;
     }
 
@@ -94,16 +84,6 @@ public final class GeneralPreferences implements ExternalizablePreferences {
         return phase2Checking;
     }
 
-    /**
-     * @return <code>true</code> if guide star alternatives should be
-     *         suggested; <code>false</code> to ignore better alternatives and
-     *         automatically pick an inferior guide star that matches the observing
-     *         context
-     */
-    public boolean showGuideStarAlternatives() {
-        return guideStarAlternatives;
-    }
-
     public boolean warnUnsavedChanges() {
         return warnUnsavedChanges;
     }
@@ -111,17 +91,12 @@ public final class GeneralPreferences implements ExternalizablePreferences {
     private Builder getBuilder() {
         Builder b = new Builder();
         b.phase2Checking(this.phase2Checking);
-        b.guideStarAlternatives(this.guideStarAlternatives);
         b.warnUnsavedChanges(this.warnUnsavedChanges);
         return b;
     }
 
-    public GeneralPreferences withPhase2Checking(boolean val) {
+    GeneralPreferences withPhase2Checking(boolean val) {
         return getBuilder().phase2Checking(val).build();
-    }
-
-    public GeneralPreferences withGuideStarAlternatives(boolean val) {
-        return getBuilder().guideStarAlternatives(val).build();
     }
 
     public GeneralPreferences withWarnUnsavedChanges(boolean val) {
@@ -135,7 +110,6 @@ public final class GeneralPreferences implements ExternalizablePreferences {
     public ParamSet toParamSet(PioFactory factory) {
         ParamSet res = factory.createParamSet(PSET_NAME);
         Pio.addBooleanParam(factory, res, PHASE_2_CHECKING_PARAM, phase2Checking);
-        Pio.addBooleanParam(factory, res, GUIDE_STAR_ALT_PARAM, guideStarAlternatives);
         Pio.addBooleanParam(factory, res, WARN_UNSAVED_CHANGES_PARAM, warnUnsavedChanges);
         return res;
     }
@@ -148,25 +122,23 @@ public final class GeneralPreferences implements ExternalizablePreferences {
         GeneralPreferences that = (GeneralPreferences) o;
 
         if (phase2Checking != that.phase2Checking) return false;
-        if (guideStarAlternatives != that.guideStarAlternatives) return false;
         return warnUnsavedChanges == that.warnUnsavedChanges;
     }
 
     @Override
     public int hashCode() {
         int result = phase2Checking ? 1 : 0;
-        result = 31 * result + (guideStarAlternatives ? 1 : 0);
         result = 31 * result + (warnUnsavedChanges ? 1 : 0);
         return result;
     }
 
     @Override
     public String toString() {
-        return String.format("[phase2Checking=%b, guideStarAlt=%b, warnUnsavedChanges=%b]", phase2Checking, guideStarAlternatives, warnUnsavedChanges);
+        return String.format("[phase2Checking=%b, warnUnsavedChanges=%b]", phase2Checking, warnUnsavedChanges);
     }
 
     private static final PreferencesSupport<GeneralPreferences> sup =
-            new PreferencesSupport<GeneralPreferences>(PSET_NAME, FACTORY);
+            new PreferencesSupport<>(PSET_NAME, FACTORY);
 
     public static GeneralPreferences fetch() {
         return sup.fetch();

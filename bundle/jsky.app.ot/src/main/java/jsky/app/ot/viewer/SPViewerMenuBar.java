@@ -32,8 +32,6 @@ import jsky.util.Preferences;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.List;
 
@@ -53,9 +51,8 @@ final class SPViewerMenuBar extends JMenuBar {
     /** The OT toolbar with tree related items. */
     private final SPTreeToolBar _treeToolBar;
 
-    final JMenu navMenu;
-    final JMenu pluginMenu;
-
+    private final JMenu navMenu;
+    private final JMenu pluginMenu;
 
     SPViewerMenuBar(final SPViewer viewer, final SPViewerToolBar mainToolBar, final SPTreeToolBar treeToolBar) {
         _viewer = viewer;
@@ -104,18 +101,15 @@ final class SPViewerMenuBar extends JMenuBar {
         return menu;
     }
 
-
     private JMenuItem createPreferencesItem() {
         final JMenuItem menuItem = new JMenuItem("Preferences ...");
-        menuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(final ActionEvent e) {
-                final PreferencePanel pref = new GeneralPreferencesPanel(_viewer);
-                final ImList<PreferencePanel> lst = OTOptions.isStaffGlobally() ?
-                        DefaultImList.create(pref, new ObserverPreferencesPanel()) :
-                        DefaultImList.create(pref);
-                final PreferenceDialog dialog = new PreferenceDialog(lst);
-                dialog.show(getFrame(), pref);
-            }
+        menuItem.addActionListener(e -> {
+            final PreferencePanel pref = new GeneralPreferencesPanel(_viewer);
+            final ImList<PreferencePanel> lst = OTOptions.isStaffGlobally() ?
+                    DefaultImList.create(pref, new ObserverPreferencesPanel()) :
+                    DefaultImList.create(pref);
+            final PreferenceDialog dialog = new PreferenceDialog(lst);
+            dialog.show(getFrame(), pref);
         });
         return menuItem;
     }
@@ -127,22 +121,13 @@ final class SPViewerMenuBar extends JMenuBar {
 
     private JMenuItem createFileSessionQueueMenuItem() {
         final JMenuItem menuItem = new JMenuItem("Display Session Queue");
-        menuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(final ActionEvent e) {
-                SessionQueuePanel.getInstance().showFrame();
-            }
-        });
+        menuItem.addActionListener(e -> SessionQueuePanel.getInstance().showFrame());
         return menuItem;
     }
 
-
     private JMenuItem createFileExitMenuItem() {
         final JMenuItem menuItem = new JMenuItem("Exit");
-        menuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(final ActionEvent ae) {
-                _viewer.exit();
-            }
-        });
+        menuItem.addActionListener(ae -> _viewer.exit());
         return menuItem;
     }
 
@@ -165,19 +150,16 @@ final class SPViewerMenuBar extends JMenuBar {
         return menu;
     }
 
-
     private JCheckBoxMenuItem createViewMainToolBarMenuItem() {
         final JCheckBoxMenuItem menuItem = new JCheckBoxMenuItem("Main Toolbar");
         final String prefName = getClass().getName() + ".ShowMainToolBar";
-        menuItem.addItemListener(new ItemListener() {
-            public void itemStateChanged(final ItemEvent e) {
-                final JCheckBoxMenuItem rb = (JCheckBoxMenuItem) e.getSource();
-                _mainToolBar.setVisible(rb.getState());
-                if (rb.getState())
-                    Preferences.set(prefName, "true");
-                else
-                    Preferences.set(prefName, "false");
-            }
+        menuItem.addItemListener(e -> {
+            final JCheckBoxMenuItem rb = (JCheckBoxMenuItem) e.getSource();
+            _mainToolBar.setVisible(rb.getState());
+            if (rb.getState())
+                Preferences.set(prefName, "true");
+            else
+                Preferences.set(prefName, "false");
         });
         final String pref = Preferences.get(prefName);
         if (pref != null)
@@ -190,15 +172,13 @@ final class SPViewerMenuBar extends JMenuBar {
     private JCheckBoxMenuItem createViewTreeToolBarMenuItem() {
         final JCheckBoxMenuItem menuItem = new JCheckBoxMenuItem("Tree Toolbar");
         final String prefName = getClass().getName() + ".ShowTreeToolBar";
-        menuItem.addItemListener(new ItemListener() {
-            public void itemStateChanged(final ItemEvent e) {
-                final JCheckBoxMenuItem rb = (JCheckBoxMenuItem) e.getSource();
-                _treeToolBar.setVisible(rb.getState());
-                if (rb.getState())
-                    Preferences.set(prefName, "true");
-                else
-                    Preferences.set(prefName, "false");
-            }
+        menuItem.addItemListener(e -> {
+            final JCheckBoxMenuItem rb = (JCheckBoxMenuItem) e.getSource();
+            _treeToolBar.setVisible(rb.getState());
+            if (rb.getState())
+                Preferences.set(prefName, "true");
+            else
+                Preferences.set(prefName, "false");
         });
         final String pref = Preferences.get(prefName);
         if (pref != null)
@@ -230,23 +210,21 @@ final class SPViewerMenuBar extends JMenuBar {
         // name used to store setting in user preferences
         final String prefName = getClass().getName() + ".ShowMainToolBarAs";
 
-        final ItemListener itemListener = new ItemListener() {
-            public void itemStateChanged(final ItemEvent e) {
-                final JRadioButtonMenuItem rb = (JRadioButtonMenuItem) e.getSource();
-                if (rb.isSelected()) {
-                    if (rb.getText().equals("Pictures and Text")) {
-                        _mainToolBar.setShowPictures(true);
-                        _mainToolBar.setShowText(true);
-                        Preferences.set(prefName, "1");
-                    } else if (rb.getText().equals("Pictures Only")) {
-                        _mainToolBar.setShowPictures(true);
-                        _mainToolBar.setShowText(false);
-                        Preferences.set(prefName, "2");
-                    } else if (rb.getText().equals("Text Only")) {
-                        _mainToolBar.setShowPictures(false);
-                        _mainToolBar.setShowText(true);
-                        Preferences.set(prefName, "3");
-                    }
+        final ItemListener itemListener = e -> {
+            final JRadioButtonMenuItem rb = (JRadioButtonMenuItem) e.getSource();
+            if (rb.isSelected()) {
+                if (rb.getText().equals("Pictures and Text")) {
+                    _mainToolBar.setShowPictures(true);
+                    _mainToolBar.setShowText(true);
+                    Preferences.set(prefName, "1");
+                } else if (rb.getText().equals("Pictures Only")) {
+                    _mainToolBar.setShowPictures(true);
+                    _mainToolBar.setShowText(false);
+                    Preferences.set(prefName, "2");
+                } else if (rb.getText().equals("Text Only")) {
+                    _mainToolBar.setShowPictures(false);
+                    _mainToolBar.setShowText(true);
+                    Preferences.set(prefName, "3");
                 }
             }
         };
@@ -268,7 +246,6 @@ final class SPViewerMenuBar extends JMenuBar {
 
         return menu;
     }
-
 
     private JMenu createViewShowTreeToolBarAsMenu() {
         final JMenu menu = new JMenu("Show Tree Toolbar As");
@@ -293,23 +270,21 @@ final class SPViewerMenuBar extends JMenuBar {
         // name used to store setting in user preferences
         final String prefName = getClass().getName() + ".ShowTreeToolBarAs";
 
-        final ItemListener itemListener = new ItemListener() {
-            public void itemStateChanged(final ItemEvent e) {
-                final JRadioButtonMenuItem rb = (JRadioButtonMenuItem) e.getSource();
-                if (rb.isSelected()) {
-                    if (rb.getText().equals("Pictures and Text")) {
-                        _treeToolBar.setShowPictures(true);
-                        _treeToolBar.setShowText(true);
-                        Preferences.set(prefName, "1");
-                    } else if (rb.getText().equals("Pictures Only")) {
-                        _treeToolBar.setShowPictures(true);
-                        _treeToolBar.setShowText(false);
-                        Preferences.set(prefName, "2");
-                    } else if (rb.getText().equals("Text Only")) {
-                        _treeToolBar.setShowPictures(false);
-                        _treeToolBar.setShowText(true);
-                        Preferences.set(prefName, "3");
-                    }
+        final ItemListener itemListener = e -> {
+            final JRadioButtonMenuItem rb = (JRadioButtonMenuItem) e.getSource();
+            if (rb.isSelected()) {
+                if (rb.getText().equals("Pictures and Text")) {
+                    _treeToolBar.setShowPictures(true);
+                    _treeToolBar.setShowText(true);
+                    Preferences.set(prefName, "1");
+                } else if (rb.getText().equals("Pictures Only")) {
+                    _treeToolBar.setShowPictures(true);
+                    _treeToolBar.setShowText(false);
+                    Preferences.set(prefName, "2");
+                } else if (rb.getText().equals("Text Only")) {
+                    _treeToolBar.setShowPictures(false);
+                    _treeToolBar.setShowText(true);
+                    Preferences.set(prefName, "3");
                 }
             }
         };
@@ -331,7 +306,6 @@ final class SPViewerMenuBar extends JMenuBar {
 
         return menu;
     }
-
 
     private JMenu createGoMenu() {
         final JMenu menu = new JMenu("Go");
@@ -462,7 +436,7 @@ final class SPViewerMenuBar extends JMenuBar {
         return menu;
     }
 
-    public void rebuildNavMenu() {
+    void rebuildNavMenu() {
         rebuildNavMenu(navMenu);
     }
 
@@ -492,7 +466,7 @@ final class SPViewerMenuBar extends JMenuBar {
         }
     }
 
-    public void rebuildPluginMenu() {
+    void rebuildPluginMenu() {
         rebuildPluginMenu(pluginMenu);
     }
 
@@ -513,8 +487,3 @@ final class SPViewerMenuBar extends JMenuBar {
         menu.setVisible(plugins.size() > 0);
     }
 }
-
-
-
-
-

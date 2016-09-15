@@ -29,6 +29,6 @@ object ObservingPeer {
   def peerFor(site: Site): Option[Peer] =
     OT.getKeyChain.peerForSite(site).unsafeRun.fold(_ => None, identity)
 
-  def peerFor(site: Option[Site]): Option[Peer] = site.flatMap(peerFor(_))
+  def peerFor(site: Option[Site]): Option[Peer] = site.flatMap(peerFor)
   def peerOrNullFor(site: Site): Peer = peerFor(site).orNull
 }
