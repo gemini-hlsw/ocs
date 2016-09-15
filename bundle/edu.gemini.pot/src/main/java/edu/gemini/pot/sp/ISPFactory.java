@@ -301,7 +301,7 @@ public interface ISPFactory {
      * @throws SPUnknownIDException if the given <code>progKey</code> refers
      * to a program that is not known by this factory
      */
-    public ISPObservation createObservation(ISPProgram prog, int index, ISPNodeInitializer init, SPNodeKey key) throws SPException;
+    ISPObservation createObservation(ISPProgram prog, int index, ISPNodeInitializer init, SPNodeKey key) throws SPException;
 
     /**
      * Creates an ISPObservation that is a deep copy of the given

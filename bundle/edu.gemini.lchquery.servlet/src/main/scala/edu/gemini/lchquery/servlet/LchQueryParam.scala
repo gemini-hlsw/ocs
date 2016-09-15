@@ -12,11 +12,12 @@ import edu.gemini.spModel.gemini.obscomp.{SPProgram, SPSiteQuality}
 import edu.gemini.spModel.gemini.obscomp.SPProgram.Active
 import edu.gemini.spModel.gemini.phase1.GsaPhase1Data
 import edu.gemini.spModel.obs.{ObsClassService, ObsTargetCalculatorService, ObservationStatus, SPObservation}
+import edu.gemini.spModel.obsclass.ObsClass
 import edu.gemini.spModel.obscomp.SPInstObsComp
 import edu.gemini.spModel.obslog.ObsLog
 import edu.gemini.spModel.target.env.TargetEnvironment
 import edu.gemini.spModel.target.obsComp.TargetObsComp
-import edu.gemini.spModel.too.Too
+import edu.gemini.spModel.too.{Too, TooType}
 import edu.gemini.spModel.util.SPTreeUtil
 
 import scala.collection.JavaConverters._
@@ -79,8 +80,8 @@ object LchQueryParam {
 
 
   private[servlet] implicit class ISPProgramExtractors(val prog: ISPProgram) extends AnyVal {
-    def toSPProg: Option[SPProgram] =
-      Option(prog).map(_.getDataObject.asInstanceOf[SPProgram])
+    def toSPProg: SPProgram =
+      prog.getDataObject.asInstanceOf[SPProgram]
 
     def scienceSemester: Option[String] =
       ProgramId.parse(prog.getProgramID.toString) match {
@@ -88,34 +89,39 @@ object LchQueryParam {
         case _                     => None
       }
 
-    def investigatorNames: Option[List[String]] = {
+    def investigatorNames: List[String] = {
       def investigatorName(inv: GsaPhase1Data.Investigator): Option[String] =
         Option(inv).map(i => s"${i.getFirst} ${i.getLast}").filterNot(_.trim.isEmpty)
 
-      toSPProg.map { spProg =>
-        (investigatorName(spProg.getGsaPhase1Data.getPi) :: spProg.getGsaPhase1Data.getCois.asScala.map(investigatorName).toList).
-          collect { case Some(i) => i }
-      }
+      val spProg = toSPProg
+      (investigatorName(spProg.getGsaPhase1Data.getPi) :: spProg.getGsaPhase1Data.getCois.asScala.map(investigatorName).toList).
+        collect { case Some(i) => i }
     }
 
-    def coIEmails: Option[List[String]] =
-      toSPProg.map(_.getGsaPhase1Data.getCois.asScala.toList.map(_.getEmail).filterNot(_.isEmpty))
+    def coIEmails: List[String] =
+      toSPProg.getGsaPhase1Data.getCois.asScala.toList.map(_.getEmail).filterNot(_.isEmpty)
 
-    def abstrakt: Option[String] =
-      toSPProg.map(_.getGsaPhase1Data.getAbstract.toString)
+    def abstrakt: String =
+      toSPProg.getGsaPhase1Data.getAbstract.toString
 
-    def scienceBand: Option[String] =
-      toSPProg.map(_.getQueueBand)
+    def scienceBand: String =
+      toSPProg.getQueueBand
 
-    def partners: Option[List[String]] =
-      toSPProg.map(_.getTimeAcctAllocation.getCategories.asScala.toList.map(_.getDisplayName))
+    def partners: List[String] =
+      toSPProg.getTimeAcctAllocation.getCategories.asScala.toList.map(_.getDisplayName)
 
-    def tooStatus: Option[YesNoType] =
-      toSPProg.map(_.isToo.toYesNo)
+    def tooStatus: YesNoType =
+      toSPProg.isToo.toYesNo
+
+    def rolloverStatus: YesNoType =
+      prog.toSPProg.getRolloverStatus.toYesNo
+
+    def completed: YesNoType =
+      prog.toSPProg.isCompleted.toYesNo
 
     // Allocated time in ms.
     def allocatedTime: Long =
-      toSPProg.map(spProg => (spProg.getTimeAcctAllocation.getTotalTime * 60 * 60 * 1000).toLong).getOrElse(0)
+      (toSPProg.getTimeAcctAllocation.getTotalTime * 60 * 60 * 1000).toLong
 
     // Remaining time in ms.
     def remainingTime: Long =
@@ -124,8 +130,8 @@ object LchQueryParam {
 
 
   private[servlet] implicit class ISPObservationExtractors(val obs: ISPObservation) extends AnyVal {
-    def toSPObs: Option[SPObservation] =
-      Option(obs).map(_.getDataObject.asInstanceOf[SPObservation])
+    def toSPObs: SPObservation =
+      obs.getDataObject.asInstanceOf[SPObservation]
 
     def instrumentType: Option[String] =
       SPTreeUtil.findInstruments(obs).asScala.map(_.getDataObject).collect {
@@ -139,6 +145,15 @@ object LchQueryParam {
           case inst: InstAltair if inst.getGuideStarType == AltairParams.GuideStarType.NGS => AOConstants.AO.Altair_NGS
         }.getOrElse(AOConstants.AO.NONE)
     }
+
+    def tooStatus: TooType =
+      Too.get(obs)
+
+    def status: ObservationStatus =
+      ObservationStatus.computeFor(obs)
+
+    def obsClass: ObsClass =
+      ObsClassService.lookupObsClass(obs)
 
     def targetEnvironment: Option[TargetEnvironment] = for {
       n <- Option(SPTreeUtil.findTargetEnvNode(obs))
@@ -169,63 +184,63 @@ object LchQueryParam {
   private[servlet] val ProgramTitleParam = LchQueryParam("programTitle",
     new StringValueMatcher[ISPProgram] {
       override protected def extractor(prog: ISPProgram): Option[String] =
-        prog.toSPProg.map(_.getTitle)
+        prog.toSPProg.getTitle.some
     }
   )
 
   private[servlet] val ProgramReferenceParam = LchQueryParam("programReference",
     new StringValueMatcher[ISPProgram] {
       override protected def extractor(prog: ISPProgram): Option[String] =
-        Option(prog).map(_.getProgramID.stringValue)
+        prog.getProgramID.stringValue.some
     }
   )
 
   private[servlet] val ProgramActiveParam = LchQueryParam("programActive",
     new BooleanValueMatcher[ISPProgram,SPProgram.Active] {
       override protected def extractor(prog: ISPProgram): Option[Active] =
-        prog.toSPProg.flatMap(sp => Option(sp.getActive))
+        prog.toSPProg.getActive.some
     }
   )
 
   private[servlet] val ProgramCompletedParam = LchQueryParam("programCompleted",
     new BooleanValueMatcher[ISPProgram,YesNoType] {
       override protected def extractor(prog: ISPProgram): Option[YesNoType] =
-        prog.toSPProg.map(_.isCompleted.toYesNo)
+        prog.completed.some
     }
   )
 
   private[servlet] val ProgramNotifyPIParam = LchQueryParam("programNotifyPi",
     new BooleanValueMatcher[ISPProgram,YesNoType] {
       override protected def extractor(prog: ISPProgram): Option[YesNoType] =
-        prog.toSPProg.map(_.getNotifyPi)
+        prog.toSPProg.getNotifyPi.some
     }
   )
 
   private[servlet] val ProgramRolloverParam = LchQueryParam("programRollover",
     new BooleanValueMatcher[ISPProgram,YesNoType] {
       override protected def extractor(prog: ISPProgram): Option[YesNoType] =
-        prog.toSPProg.map(_.getRolloverStatus.toYesNo)
+        prog.rolloverStatus.some
     }
   )
 
   private[servlet] val ObservationTOOStatusParam = LchQueryParam("observationTooStatus",
     new StringValueMatcher[ISPObservation] {
       override protected def extractor(obs: ISPObservation): Option[String] =
-        Option(obs).map(o => Too.get(o).getDisplayValue)
+        obs.tooStatus.getDisplayValue.some
     }
   )
 
   private[servlet] val ObservationNameParam = LchQueryParam("observationName",
     new StringValueMatcher[ISPObservation] {
       override protected def extractor(obs: ISPObservation): Option[String] =
-        obs.toSPObs.map(_.getTitle)
+        obs.toSPObs.getTitle.some
     }
   )
 
   private[servlet] val ObservationStatusParam = LchQueryParam("observationStatus",
     new BooleanValueMatcher[ISPObservation,ObservationStatus] {
       override protected def extractor(obs: ISPObservation): Option[ObservationStatus] =
-        Option(obs).map(ObservationStatus.computeFor)
+        obs.status.some
     }
   )
 
@@ -246,7 +261,7 @@ object LchQueryParam {
   private[servlet] val ObservationClassParam = LchQueryParam("observationClass",
     new StringValueMatcher[ISPObservation] {
       override protected def extractor(obs: ISPObservation): Option[String] =
-        Option(obs).map(o => ObsClassService.lookupObsClass(o).displayValue)
+        obs.obsClass.displayValue.some
     }
   )
 

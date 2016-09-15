@@ -133,10 +133,10 @@ class LchQueryFunctor(queryType: LchQueryFunctor.QueryType,
     }
 
     queryResult.getProgramsNode.getPrograms.add {
-      val spProg = prog.toSPProg.get
+      val spProg = prog.toSPProg
       new Program() {
         setActive(spProg.getActive.displayValue)
-        setCompleted(spProg.isCompleted.toYesNo.displayValue)
+        setCompleted(prog.completed.displayValue)
         Option(prog.getProgramID).foreach(id => setReference(id.stringValue()))
         setSemester(prog.scienceSemester.orNull)
         setTitle(spProg.getTitle)
@@ -144,26 +144,28 @@ class LchQueryFunctor(queryType: LchQueryFunctor.QueryType,
         setNgoEmail(spProg.getNGOContactEmail)
         setNotifyPi(spProg.getNotifyPi.displayValue)
         setPiEmail(Option(spProg.getPIInfo).map(_.getEmail).orNull)
-        setRollover(spProg.getRolloverStatus.toYesNo.displayValue)
-        prog.investigatorNames.foreach(_.foreach(getInvestigatorNames.add))
-        prog.coIEmails.foreach(_.foreach(getCoIEmails.add))
-        prog.abstrakt.foreach(setAbstrakt)
-        prog.scienceBand.foreach(setScienceBand)
-        prog.partners.foreach(_.foreach(getPartners.add))
-        prog.tooStatus.foreach(s => setTooStatus(s.displayValue()))
-        prog.allocatedTime(t => setAllocatedTime(t.toString))
-        prog.remainingTime(t => setRemainingTime(t.toString))
+        setRollover(prog.rolloverStatus.displayValue)
+        prog.investigatorNames.foreach(getInvestigatorNames.add)
+        prog.coIEmails.foreach(getCoIEmails.add)
 
+        val progAbstrakt = prog.abstrakt
+        if (!progAbstrakt.isEmpty) setAbstrakt(progAbstrakt)
+
+        setScienceBand(prog.scienceBand)
+        prog.partners.foreach(getPartners.add)
+        setTooStatus(prog.tooStatus.displayValue)
+        setAllocatedTime(prog.allocatedTime.toString)
+        setRemainingTime(prog.remainingTime.toString)
 
         if (queryType != LchQueryFunctor.QueryType.ProgramQuery) {
           setObservationsNode(new ObservationsNode() {
             obsList.map { obs =>
               new Observation() {
-                val spObs = obs.toSPObs.get
+                val spObs = obs.toSPObs
                 setAo(obs.ao.displayValue)
                 obs.instrumentType.foreach(setInstrument)
                 setName(spObs.getTitle)
-                Option(ObsClassService.lookupObsClass(obs)).foreach(c => setObsClass(c.displayValue))
+                setObsClass(obs.obsClass.displayValue)
                 setId(obs.getObservationID.stringValue)
                 setStatus(ObservationStatus.computeFor(obs).displayValue)
                 setTooPriority(Too.get(obs).getDisplayValue)
@@ -174,6 +176,16 @@ class LchQueryFunctor(queryType: LchQueryFunctor.QueryType,
                     setTimingWindowsNode(new TimingWindowsNode() {
                       tws.map(makeTimingWindow).foreach(getTimingWindows.add)
                     })
+                  })
+                }
+
+                // Set the obs log comments.
+                obs.obsLogComments.filter(_.nonEmpty).foreach { obsLog =>
+                  setObsLogNode(new ObsLog() {
+                    obsLog.toList.foreach { case (lab,rec) =>
+                        setDataset(lab.toString)
+                        setRecord(rec.comment)
+                    }
                   })
                 }
 

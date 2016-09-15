@@ -61,7 +61,7 @@ class ReapplicationFunctorTest {
     // Set a custom MDF name
     tGmos.setFPUnitCustomMask("Custom name on the template")
 
-    val tGmosObscomp = fact.doCreateObsComponent(templateProgram, tGmos.getType, TEMPLATE_GMOS_OBS_KEY)
+    val tGmosObscomp = fact.createObsComponent(templateProgram, tGmos.getType, TEMPLATE_GMOS_OBS_KEY)
     tGmosObscomp.setDataObject(tGmos)
 
     tGmosObscomps.add(tGmosObscomp)
@@ -78,7 +78,7 @@ class ReapplicationFunctorTest {
     // Set a custom fpu mask name
     tf2.setFpuCustomMask("Custom mask on the template")
 
-    val tf2Obscomp = fact.doCreateObsComponent(templateProgram, tf2.getType, TEMPLATE_F2_OBS_KEY)
+    val tf2Obscomp = fact.createObsComponent(templateProgram, tf2.getType, TEMPLATE_F2_OBS_KEY)
     tf2Obscomp.setDataObject(tf2)
 
     tf2Obscomps.add(tf2Obscomp)
@@ -107,7 +107,7 @@ class ReapplicationFunctorTest {
     // Override the custom MDF name
     gmos.setFPUnitCustomMask("Custom name on the observation")
 
-    val gmosObscomp = fact.doCreateObsComponent(templateProgram, gmos.getType, GMOS_OBSERVATION_KEY)
+    val gmosObscomp = fact.createObsComponent(templateProgram, gmos.getType, GMOS_OBSERVATION_KEY)
     gmosObscomp.setDataObject(gmos)
 
     gmosObscomps.add(gmosObscomp)
@@ -131,7 +131,7 @@ class ReapplicationFunctorTest {
     // Override the custom MDF name
     f2.setFpuCustomMask("Custom name on the f2 observation")
 
-    val f2Obscomp = fact.doCreateObsComponent(templateProgram, f2.getType, F2_OBSERVATION_KEY)
+    val f2Obscomp = fact.createObsComponent(templateProgram, f2.getType, F2_OBSERVATION_KEY)
     f2Obscomp.setDataObject(f2)
 
     f2Obscomps.add(f2Obscomp)

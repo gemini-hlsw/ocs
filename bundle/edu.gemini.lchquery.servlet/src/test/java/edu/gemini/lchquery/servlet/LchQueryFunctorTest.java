@@ -11,10 +11,11 @@ import edu.gemini.spModel.core.SPProgramID;
 import edu.gemini.spModel.data.AbstractDataObject;
 import edu.gemini.spModel.gemini.altair.AltairParams;
 import edu.gemini.spModel.gemini.altair.InstAltair;
-import edu.gemini.spModel.gemini.altair.InstAltairCB;
 import edu.gemini.spModel.gemini.gmos.GmosCommonType;
-import edu.gemini.spModel.gemini.gmos.InstGMOSCB;
 import edu.gemini.spModel.gemini.gmos.InstGmosNorth;
+import edu.gemini.spModel.gemini.gmos.InstGmosNorthNI;
+import edu.gemini.spModel.gemini.init.ObservationNI;
+import edu.gemini.spModel.gemini.obscomp.GemObservationCB;
 import edu.gemini.spModel.gemini.obscomp.SPProgram;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 import edu.gemini.spModel.obs.ObsPhase2Status;
@@ -35,11 +36,7 @@ import java.util.*;
  */
 public class LchQueryFunctorTest {
 
-    private final SPNodeKey PROG_KEY = new SPNodeKey("6d026d22-d642-4f50-8f99-ab666e286d47");
-    private final SPNodeKey KEY = new SPNodeKey("2f7a8b79-1d10-416a-baf3-9b982f77da53");
-    private MemFactory fact;
-    private List<ISPObsComponent> obscomps;
-    private ISPObservation obs;
+    private ISPFactory fact;
 
     private String programSemester;
     private String programTitle;
@@ -57,33 +54,30 @@ public class LchQueryFunctorTest {
 
 
     private ISPObsComponent createObsComp(final ISPProgram prog, final AbstractDataObject dataObj) throws RemoteException, SPUnknownIDException {
-        final ISPObsComponent obscomp = fact.doCreateObsComponent(prog, dataObj.getType(), KEY);
+        final ISPObsComponent obscomp = fact.createObsComponent(prog, dataObj.getType(), null);
         obscomp.setDataObject(dataObj);
         return obscomp;
     }
 
     private ISPProgram createBasicProgram(final String id)  throws  RemoteException, SPBadIDException, SPException {
         final SPProgram spProg = new SPProgram();
-        final ISPProgram prog = fact.createProgram(PROG_KEY, SPProgramID.toProgramID(id));
+        final ISPProgram prog = fact.createProgram(null, SPProgramID.toProgramID(id));
         spProg.setTitle(id);
         spProg.setActive(SPProgram.Active.YES);
         spProg.setCompleted(false);
         prog.setDataObject(spProg);
         Too.set(prog, TooType.standard);
 
-        obs = fact.createObservation(prog, KEY);
+        final ISPObservation obs = fact.createObservation(prog, -1, ObservationNI.NO_CHILDREN_INSTANCE, null);
         final SPObservation spObs = new SPObservation();
         spObs.setTitle("Test Observation");
         spObs.setPhase2Status(ObsPhase2Status.PHASE_2_COMPLETE);
         obs.setDataObject(spObs);
-        obs.setSeqComponent(fact.createSeqComponent(prog, SPComponentType.OBSERVER_OBSERVE, KEY));
+        obs.setSeqComponent(fact.createSeqComponent(prog, SPComponentType.OBSERVER_OBSERVE, null));
 
-        final List<ISPObservation> observations = new ArrayList<>();
+        final List<ISPObservation> observations = prog.getObservations();
         observations.add(obs);
         prog.setObservations(observations);
-
-        obscomps = new ArrayList<>();
-        obs.setObsComponents(obscomps);
 
         return prog;
     }
@@ -96,8 +90,9 @@ public class LchQueryFunctorTest {
         final InstAltair altair = new InstAltair();
         altair.setMode(mode);
         final ISPObsComponent altairObsComp = createObsComp(prog, altair);
+        final ISPObservation obs = prog.getObservations().get(0);
+        final List<ISPObsComponent> obscomps = obs.getObsComponents();
         obscomps.add(altairObsComp);
-        obs.putClientData(IConfigBuilder.USER_OBJ_KEY, new InstAltairCB(altairObsComp));
         obs.setObsComponents(obscomps);
     }
 
@@ -110,8 +105,9 @@ public class LchQueryFunctorTest {
         gmos.setCcdXBinning(xBin);
         gmos.setCcdYBinning(yBin);
         final ISPObsComponent gmosObsComp = createObsComp(prog, gmos);
+        final ISPObservation obs = prog.getObservations().get(0);
+        final List<ISPObsComponent> obscomps = obs.getObsComponents();
         obscomps.add(gmosObsComp);
-        obs.putClientData(IConfigBuilder.USER_OBJ_KEY, new InstGMOSCB(gmosObsComp));
         obs.setObsComponents(obscomps);
     }
 

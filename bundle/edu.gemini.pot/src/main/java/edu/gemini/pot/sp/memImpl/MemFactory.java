@@ -198,7 +198,8 @@ public class MemFactory extends SPAbstractFactory {
     /**
      * Creates an <code>ISPObsComponent</code>.
      */
-    public ISPObsComponent doCreateObsComponent(ISPProgram prog,
+    @Override
+    protected ISPObsComponent doCreateObsComponent(ISPProgram prog,
                                                 SPComponentType type,
                                                 SPNodeKey key)
             throws SPUnknownIDException {
