@@ -18,6 +18,7 @@ import jsky.app.ot.gemini.obscat.ObsCatalog;
 import jsky.app.ot.plugin.OtActionPlugin;
 import jsky.app.ot.session.SessionQueuePanel;
 import jsky.app.ot.userprefs.general.GeneralPreferencesPanel;
+import jsky.app.ot.userprefs.images.ImageCatalogPreferencesPanel;
 import jsky.app.ot.userprefs.observer.ObserverPreferencesPanel;
 import jsky.app.ot.userprefs.ui.PreferenceDialog;
 import jsky.app.ot.userprefs.ui.PreferencePanel;
@@ -106,8 +107,8 @@ final class SPViewerMenuBar extends JMenuBar {
         menuItem.addActionListener(e -> {
             final PreferencePanel pref = new GeneralPreferencesPanel(_viewer);
             final ImList<PreferencePanel> lst = OTOptions.isStaffGlobally() ?
-                    DefaultImList.create(pref, new ObserverPreferencesPanel()) :
-                    DefaultImList.create(pref);
+                    DefaultImList.create(pref, new ImageCatalogPreferencesPanel(), new ObserverPreferencesPanel()) :
+                    DefaultImList.create(pref, new ImageCatalogPreferencesPanel());
             final PreferenceDialog dialog = new PreferenceDialog(lst);
             dialog.show(getFrame(), pref);
         });

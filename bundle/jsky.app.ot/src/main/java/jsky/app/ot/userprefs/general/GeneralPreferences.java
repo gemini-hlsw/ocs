@@ -51,6 +51,7 @@ public final class GeneralPreferences implements ExternalizablePreferences {
             return b.build();
         }
 
+        @Override
         public GeneralPreferences create(Option<ParamSet> psetOpt) {
             if (None.instance().equals(psetOpt)) return createDefault();
 
@@ -107,6 +108,7 @@ public final class GeneralPreferences implements ExternalizablePreferences {
         return store(this);
     }
 
+    @Override
     public ParamSet toParamSet(PioFactory factory) {
         ParamSet res = factory.createParamSet(PSET_NAME);
         Pio.addBooleanParam(factory, res, PHASE_2_CHECKING_PARAM, phase2Checking);
