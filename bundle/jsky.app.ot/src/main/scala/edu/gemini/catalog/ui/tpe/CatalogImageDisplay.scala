@@ -1,18 +1,18 @@
 package edu.gemini.catalog.ui.tpe
 
-import edu.gemini.catalog.image.ImageCatalog
+import edu.gemini.catalog.image.{ImageCatalog, ImageCatalogPreferences}
 import jsky.catalog.TableQueryResult
-import jsky.catalog.gui.{TablePlotter, BasicTablePlotter}
+import jsky.catalog.gui.{BasicTablePlotter, TablePlotter}
 import jsky.coords.WorldCoords
 import jsky.image.fits.gui.FITSKeywordsFrame
 import jsky.image.gui.ImageDisplayMenuBar
 import jsky.image.gui.ImageDisplayToolBar
 import jsky.image.gui.DivaMainImageDisplay
 import jsky.navigator._
-import jsky.util.gui.{ProxyServerDialog, DialogUtil}
+import jsky.util.gui.{DialogUtil, ProxyServerDialog}
 import javax.swing._
 import java.awt._
-import java.awt.event.{ActionListener, ActionEvent}
+import java.awt.event.{ActionEvent, ActionListener}
 import java.awt.geom.AffineTransform
 
 import scalaz._
@@ -126,6 +126,7 @@ abstract class CatalogImageDisplay(parent: Component, navigatorPane: NavigatorPa
 /**
   * Extends the image display menubar by adding a catalog menu.
   */
+@Deprecated
 class CatalogImageDisplayMenuBar(protected val imageDisplay: CatalogImageDisplay, toolBar: ImageDisplayToolBar) extends ImageDisplayMenuBar(imageDisplay, toolBar) {
   /** Handle for the Image menu */
   private val _catalogMenu = new JMenu("Catalog")
@@ -152,7 +153,7 @@ class CatalogImageDisplayMenuBar(protected val imageDisplay: CatalogImageDisplay
     */
   private def imageServersMenu: JMenu =
     ImageCatalog.all.foldLeft((new JMenu("Image Servers"), new ButtonGroup)) { case ((m, b), c) =>
-      imageServersMenuItem(c) <| {m.add} <| {b.add} <| {_.setSelected(c == ImageCatalog.user)}
+      imageServersMenuItem(c) <| {m.add} <| {b.add} <| {_.setSelected(c === ImageCatalogPreferences.DefaultImageServer)}
       (m, b)
     }._1
 

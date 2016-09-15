@@ -1,6 +1,8 @@
 package edu.gemini.catalog.image
 
 import java.net.URL
+import java.nio.file.attribute.BasicFileAttributes
+import java.nio.file.{FileVisitResult, Files, Path, SimpleFileVisitor}
 
 import edu.gemini.spModel.core.{Angle, Coordinates, MagnitudeBand}
 import jsky.util.Preferences
@@ -71,12 +73,14 @@ object MassImgK extends AstroCatalog("2massK", "2MASS Quick-Look Image Retrieval
   * Preferences handling the image catalog, like cache size, etc
   * This are backed up to disk with the other jsky properties
   */
-case class ImageCatalogPreferences(imageCacheSize: Information)
+case class ImageCatalogPreferences(imageCacheSize: Information, defaultCatalog: ImageCatalog)
 
 object ImageCatalogPreferences {
   val DefaultCacheSize = 500.mb
+  /** Default image server */
+  val DefaultImageServer = DssGeminiNorth
 
-  val zero = ImageCatalogPreferences(DefaultCacheSize)
+  val zero = ImageCatalogPreferences(DefaultCacheSize, DefaultImageServer)
 }
 
 /**
@@ -92,30 +96,41 @@ object ImageCatalog {
   /** List of all known image server in preference order */
   val all = List(DssGeminiNorth, DssGeminiSouth, DssESO, Dss2ESO, Dss2iESO, MassImgJ, MassImgH, MassImgK)
 
-  /** Default image server */
-  val defaultImageServer = DssGeminiNorth
-
   def byName(id: String): Option[ImageCatalog] = all.find(_.id == id)
 
   /**
-    * Indicates the user preferred Image Server
+    * Indicates the user preferences about Image Catalogs
     */
   def preferences(): Task[ImageCatalogPreferences] = Task.delay { // Inside task as it reads the preferences file
     \/.fromTryCatchNonFatal {
       // Try to parse preferences
       val size = Option(Preferences.get(IMAGES_CACHE_SIZE)).map(_.toDouble)
-      ImageCatalogPreferences(size.map(_.megabytes).getOrElse(ImageCatalogPreferences.DefaultCacheSize))
+      val catalog = all.find(_.id == Preferences.get(IMAGE_DEFAULT_CATALOG)).getOrElse(ImageCatalogPreferences.DefaultImageServer)
+
+      ImageCatalogPreferences(size.map(_.megabytes).getOrElse(ImageCatalogPreferences.DefaultCacheSize), catalog)
     }.getOrElse(ImageCatalogPreferences.zero)
   }
 
+  /**
+    * Sets the user preferences about Image Catalogs
+    */
   def preferences(prefs: ImageCatalogPreferences): Task[Unit] = Task.delay { // Inside task as it writes the preferences file
     Preferences.set(IMAGES_CACHE_SIZE, prefs.imageCacheSize.toMegabytes.toString)
   }
 
   /**
-    * Indicates the user preferred Image Server
+    * Clear the image cache
     */
-  def user(): ImageCatalog = all.find(_.id == Preferences.get(IMAGE_DEFAULT_CATALOG, defaultImageServer.id)).getOrElse(defaultImageServer)
+  def clearCache: Task[Unit] = Task.delay {
+    val cacheDir = Preferences.getPreferences.getCacheDir
+    Files.walkFileTree(cacheDir.toPath, new SimpleFileVisitor[Path] {
+      override def visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult = {
+        super.visitFile(file, attrs)
+        file.toFile.delete()
+        FileVisitResult.CONTINUE
+      }
+    })
+  }
 
   /**
     * Stores the user preferred image catalog

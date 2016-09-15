@@ -12,6 +12,7 @@ import edu.gemini.pot.sp.SPNodeKey
 import jsky.util.Preferences
 
 import scalaz._
+import Scalaz._
 import scalaz.concurrent.Task
 
 /**
@@ -64,10 +65,10 @@ object ObservationCatalogOverrides {
   val preferencesDir = Preferences.getPreferences.getDir
   val overridesFile = new File(preferencesDir, "catalogOverrides.json")
 
-  def catalogFor(key: SPNodeKey): Task[ImageCatalog] = Task.delay {
+  def catalogFor(key: SPNodeKey): Task[ImageCatalog] = {
     // Synchronize file reads and writes
     this.synchronized {
-      readOverrides.obsCatalog(key).getOrElse(ImageCatalog.user())
+      ImageCatalog.preferences().map{p => readOverrides.obsCatalog(key).getOrElse(p.defaultCatalog)}
     }
   }
 

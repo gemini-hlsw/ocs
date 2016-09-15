@@ -16,6 +16,8 @@ import scalaz.concurrent.Task
   * Panel of radio buttons of Image catalogs offered by the TPE.
   */
 final class ImageCatalogPanel(imageDisplay: CatalogImageDisplay) {
+  val defaultCatalog = ImageCatalog.preferences().map(_.defaultCatalog).unsafePerformSync
+
   val panel = new JPanel
   val label = new JLabel("Image Catalog")
   val buttonGroup = new ButtonGroup
@@ -65,5 +67,5 @@ final class ImageCatalogPanel(imageDisplay: CatalogImageDisplay) {
   }
 
   private def mkButton(c: ImageCatalog): (ImageCatalog, JRadioButton) =
-    (c, new JRadioButton(s"${c.shortName}") <| {_.setToolTipText(c.displayName)} <| {_.setSelected(c === ImageCatalog.user)})
+    (c, new JRadioButton(s"${c.shortName}") <| {_.setToolTipText(c.displayName)} <| {_.setSelected(c === defaultCatalog)})
 }
