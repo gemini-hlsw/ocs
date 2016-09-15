@@ -30,11 +30,7 @@ public class ObserverPreferencesPanel implements PreferencePanel {
         final JCheckBox tooAlerts = new JCheckBox("Enable audible ToO alerts") {{
             setSelected(ObserverPreferences.fetch().isAudibleTooAlerts());
             setFocusable(false);
-            addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    ObserverPreferences.fetch().withAudibleTooAlerts(isSelected()).store();
-                }
-            });
+            addActionListener(e -> ObserverPreferences.fetch().withAudibleTooAlerts(isSelected()).store());
         }};
         panel.add(tooAlerts, new GridBagConstraints() {{
             gridx = 0;
@@ -139,7 +135,7 @@ public class ObserverPreferencesPanel implements PreferencePanel {
     }
 
     public Option<String> getToolTip() {
-        return new Some<String>("Observer preferences.");
+        return new Some<>("Observer preferences.");
     }
 
     public Option<Icon> getIcon() {

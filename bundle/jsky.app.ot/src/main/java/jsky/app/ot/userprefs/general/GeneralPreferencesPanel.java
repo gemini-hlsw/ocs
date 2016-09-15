@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package jsky.app.ot.userprefs.general;
 
 import edu.gemini.shared.util.immutable.None;
@@ -21,9 +17,7 @@ import java.awt.event.ActionListener;
  */
 public class GeneralPreferencesPanel implements PreferencePanel {
     private static final String P2_TEXT = "Select this option to turn on program validity checking.";
-    private static final String GUIDE_TEXT = "If selected, automated guide star search results will notify you when a valid guide star is found yet there are better alternatives available than your current settings allow.";
     private static final String UNSAVED_TEXT = "Warn me if I close a program with unsynchronized changes.";
-
 
     private final SPViewer viewer;
 
@@ -67,46 +61,14 @@ public class GeneralPreferencesPanel implements PreferencePanel {
             insets = new Insets(0, 15, 0, 0);
         }});
 
-        final JCheckBox gsAlt = new JCheckBox("Show alternative guide star options") {{
-            setSelected(GeneralPreferences.fetch().showGuideStarAlternatives());
-            setFocusable(false);
-            addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    GeneralPreferences.fetch().withGuideStarAlternatives(isSelected()).store();
-                }
-            });
-        }};
-        panel.add(gsAlt, new GridBagConstraints() {{
-            gridx = 0;
-            gridy = 2;
-            anchor = WEST;
-            fill = HORIZONTAL;
-            weightx = 1.0;
-            insets = new Insets(10, 0, 0, 0);
-        }});
-
-        final JTextArea gsTxt = PreferenceDialog.mkNote(GUIDE_TEXT);
-        panel.add(gsTxt, new GridBagConstraints() {{
-            gridx = 0;
-            gridy = 3;
-            anchor = WEST;
-            fill = HORIZONTAL;
-            weightx = 1.0;
-            insets = new Insets(0, 15, 0, 0);
-        }});
-
         final JCheckBox usPrompt = new JCheckBox("Warn for unsaved changes on close") {{
             setSelected(GeneralPreferences.fetch().warnUnsavedChanges());
             setFocusable(false);
-            addActionListener(new ActionListener() {
-                @Override public void actionPerformed(ActionEvent e) {
-                    GeneralPreferences.fetch().withWarnUnsavedChanges(isSelected()).store();
-                }
-            });
+            addActionListener(e -> GeneralPreferences.fetch().withWarnUnsavedChanges(isSelected()).store());
         }};
         panel.add(usPrompt, new GridBagConstraints() {{
             gridx   = 0;
-            gridy   = 4;
+            gridy   = 2;
             anchor  = WEST;
             fill    = HORIZONTAL;
             weightx = 1.0;
@@ -116,7 +78,7 @@ public class GeneralPreferencesPanel implements PreferencePanel {
         final JTextArea usTxt = PreferenceDialog.mkNote(UNSAVED_TEXT);
         panel.add(usTxt, new GridBagConstraints() {{
             gridx = 0;
-            gridy = 5;
+            gridy = 3;
             anchor = WEST;
             fill   = HORIZONTAL;
             weightx = 1.0;
@@ -129,7 +91,7 @@ public class GeneralPreferencesPanel implements PreferencePanel {
     }
 
     public Option<String> getToolTip() {
-        return new Some<String>("General preferences.");
+        return new Some<>("General preferences.");
     }
 
     public Option<Icon> getIcon() {

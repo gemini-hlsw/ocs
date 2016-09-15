@@ -1,9 +1,3 @@
-// Copyright 2002 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: OTOptions.java 47000 2012-07-26 19:15:10Z swalker $
-//
 package jsky.app.ot;
 
 import edu.gemini.pot.sp.ISPObservation;
@@ -21,7 +15,6 @@ import edu.gemini.util.security.policy.ImplicitPolicyForJava;
 import jsky.app.ot.userprefs.general.GeneralPreferences;
 import java.security.Permission;
 import java.util.logging.Logger;
-
 
 /**
  * Stores the values of the OT application command line options.
@@ -46,9 +39,7 @@ public class OTOptions {
     }
 
     public static boolean areRootAndCurrentObsIfAnyEditable(ISPProgram prog, ISPObservation obsOrNull) {
-
         // SANITY CLAUSE
-//        if ((obsOrNull != null) && (root != null) && (obsOrNull.getProgram() != root))
         if ((obsOrNull != null) && (obsOrNull.getProgram() != prog))
             throw new IllegalArgumentException("obs is from another program");
 
@@ -129,4 +120,3 @@ public class OTOptions {
     }
 
 }
-
