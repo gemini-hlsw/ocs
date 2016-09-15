@@ -12,8 +12,8 @@ import static javax.swing.JOptionPane.YES_NO_OPTION;
  * Prompt the user for an observing site selection.
  */
 public final class ObservingSitePrompt {
-    public static final String TITLE = "Specify Gemini Site";
-    public static final String MESSAGE =
+    private static final String TITLE = "Specify Gemini Site";
+    private static final String MESSAGE =
             "Select the site for queuing observations and monitoring for ToO alerts.";
     private static final String[] OPTIONS = new String[] {
             "Use Gemini North", "Use Gemini South"

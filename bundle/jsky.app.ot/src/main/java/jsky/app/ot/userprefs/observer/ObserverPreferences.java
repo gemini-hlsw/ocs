@@ -19,14 +19,14 @@ public final class ObserverPreferences implements ExternalizablePreferences {
         private Site observingSite = null;
         private boolean audibleTooAlerts = false;
 
-        public Builder() { /* empty */ }
+        Builder() { /* empty */ }
 
-        public Builder observingSite(Site val) {
+        Builder observingSite(Site val) {
             observingSite = val;
             return this;
         }
 
-        public Builder audibleTooAlerts(boolean val) {
+        Builder audibleTooAlerts(boolean val) {
             audibleTooAlerts = val;
             return this;
         }
@@ -62,9 +62,8 @@ public final class ObserverPreferences implements ExternalizablePreferences {
         }
     }
 
-    public static final Factory FACTORY = new Factory();
-    public static final String PSET_NAME = "observer";
-
+    private static final Factory FACTORY = new Factory();
+    private static final String PSET_NAME = "observer";
 
     private static final String OBSERVING_SITE_PARAM = "observingSite";
     private static final String AUDIBLE_TOO_PARAM = "audibleToo";
@@ -102,11 +101,11 @@ public final class ObserverPreferences implements ExternalizablePreferences {
         return b;
     }
 
-    public ObserverPreferences withObservingSite(Site val) {
+    ObserverPreferences withObservingSite(Site val) {
         return getBuilder().observingSite(val).build();
     }
 
-    public ObserverPreferences withAudibleTooAlerts(boolean val) {
+    ObserverPreferences withAudibleTooAlerts(boolean val) {
         return getBuilder().audibleTooAlerts(val).build();
     }
 
@@ -144,7 +143,7 @@ public final class ObserverPreferences implements ExternalizablePreferences {
     }
 
     private static final PreferencesSupport<ObserverPreferences> sup =
-            new PreferencesSupport<ObserverPreferences>(PSET_NAME, FACTORY);
+            new PreferencesSupport<>(PSET_NAME, FACTORY);
 
     public static ObserverPreferences fetch() {
         return sup.fetch();
