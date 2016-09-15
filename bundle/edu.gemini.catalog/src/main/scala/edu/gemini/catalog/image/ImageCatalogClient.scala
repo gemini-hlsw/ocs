@@ -75,7 +75,6 @@ object ImageCatalogClient {
     * Load an image for the given coordinates on the user catalog
     */
   def loadImage(cacheDir: Path)(query: ImageSearchQuery): Task[Option[ImageEntry]] = {
-    val maxUsedSize = 500 * 1024 * 1024
 
     /**
       * Method to prune the cache if we are using to much disk space
@@ -90,10 +89,10 @@ object ImageCatalogClient {
         }
 
       // Find the files that sholud be removed to keep the max size limited
-      def filesToRemove(s: StoredImages): Task[List[ImageEntry]] = Task.delay {
+      def filesToRemove(s: StoredImages, maxCacheSize: Long): Task[List[ImageEntry]] = Task.delay {
         val u = s.sortedByAccess.foldLeft((0L, List.empty[ImageEntry])) { (s,e) =>
           val accSize = s._1 + e.fileSize
-          if (accSize > maxUsedSize) {
+          if (accSize > maxCacheSize) {
             (accSize, e :: s._2)
           } else {
             (accSize, s._2)
@@ -102,7 +101,12 @@ object ImageCatalogClient {
         u._2
       }
 
-      StoredImagesCache.get >>= filesToRemove >>= deleteOldFiles
+      for {
+        cache <- StoredImagesCache.get
+        pref  <- ImageCatalog.preferences()
+        ftr   <- filesToRemove(cache, pref.imageCacheSize.toBytes.toLong)
+        _     <- deleteOldFiles(ftr)
+      } yield ()
     }
 
     def addToCacheAndGet(f: File): Task[ImageEntry] = {

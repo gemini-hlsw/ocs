@@ -3,6 +3,7 @@ package jsky.app.ot.userprefs.images
 import java.awt.{Component => JComponent}
 import javax.swing.Icon
 
+import edu.gemini.catalog.image.{ImageCatalog, ImageCatalogPreferences}
 import edu.gemini.shared.gui.textComponent.NumberField
 import edu.gemini.shared.util.immutable.{None => JNone, Option => JOption, Some => JSome}
 import edu.gemini.ui.miglayout.MigPanel
@@ -11,19 +12,21 @@ import jsky.app.ot.userprefs.ui.PreferencePanel
 
 import scalaz._
 import Scalaz._
-
 import squants.information.InformationConversions._
 
 import scala.swing.Label
 import scala.swing.event.ValueChanged
 
 class ImageCatalogPreferencesPanel extends PreferencePanel {
-  val cacheSizeField = new NumberField(ImageCatalogPreferences.get.imageCacheSize.toMegabytes.some, false) {
+
+  val initialValue = ImageCatalog.preferences().unsafePerformSync
+
+  val cacheSizeField = new NumberField(initialValue.imageCacheSize.toMegabytes.some, false) {
     override def valid(d: Double): Boolean = d >= 0
     reactions += {
       case ValueChanged(_) if text.nonEmpty =>
         // this is guaranteed to be a positive double
-        ImageCatalogPreferences.set(this.text.toDouble.megabytes)
+        ImageCatalog.preferences(ImageCatalogPreferences(this.text.toDouble.megabytes)).unsafePerformSync
     }
   }
 

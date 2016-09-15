@@ -4,8 +4,12 @@ import java.net.URL
 
 import edu.gemini.spModel.core.{Angle, Coordinates, MagnitudeBand}
 import jsky.util.Preferences
+import squants.information.Information
+import squants.information.InformationConversions._
 
-import scalaz.Equal
+import scalaz._
+import Scalaz._
+import scalaz.concurrent.Task
 
 /** Represents an end point that can load an image for a given set of coordinates */
 sealed abstract class ImageCatalog(val id: String, val displayName: String, val shortName: String) {
@@ -64,13 +68,26 @@ object MassImgK extends AstroCatalog("2massK", "2MASS Quick-Look Image Retrieval
 }
 
 /**
+  * Preferences handling the image catalog, like cache size, etc
+  * This are backed up to disk with the other jsky properties
+  */
+case class ImageCatalogPreferences(imageCacheSize: Information)
+
+object ImageCatalogPreferences {
+  val DefaultCacheSize = 500.mb
+
+  val zero = ImageCatalogPreferences(DefaultCacheSize)
+}
+
+/**
   * Contains definitions for ImageCatalogs including a list of all the available image servers
   */
 object ImageCatalog {
   val defaultSize = Angle.fromArcmin(15.0)
   implicit val equals = Equal.equalA[ImageCatalog]
 
-  private val SKY_USER_CATALOG = "jsky.catalog.sky"
+  private val IMAGE_DEFAULT_CATALOG = "ot.catalog.default"
+  private val IMAGES_CACHE_SIZE = "ot.cache.size"
 
   /** List of all known image server in preference order */
   val all = List(DssGeminiNorth, DssGeminiSouth, DssESO, Dss2ESO, Dss2iESO, MassImgJ, MassImgH, MassImgK)
@@ -83,10 +100,25 @@ object ImageCatalog {
   /**
     * Indicates the user preferred Image Server
     */
-  def user():ImageCatalog = all.find(_.id == Preferences.get(SKY_USER_CATALOG, defaultImageServer.id)).getOrElse(defaultImageServer)
+  def preferences(): Task[ImageCatalogPreferences] = Task.delay { // Inside task as it reads the preferences file
+    \/.fromTryCatchNonFatal {
+      // Try to parse preferences
+      val size = Option(Preferences.get(IMAGES_CACHE_SIZE)).map(_.toDouble)
+      ImageCatalogPreferences(size.map(_.megabytes).getOrElse(ImageCatalogPreferences.DefaultCacheSize))
+    }.getOrElse(ImageCatalogPreferences.zero)
+  }
+
+  def preferences(prefs: ImageCatalogPreferences): Task[Unit] = Task.delay { // Inside task as it writes the preferences file
+    Preferences.set(IMAGES_CACHE_SIZE, prefs.imageCacheSize.toMegabytes.toString)
+  }
+
+  /**
+    * Indicates the user preferred Image Server
+    */
+  def user(): ImageCatalog = all.find(_.id == Preferences.get(IMAGE_DEFAULT_CATALOG, defaultImageServer.id)).getOrElse(defaultImageServer)
 
   /**
     * Stores the user preferred image catalog
     */
-  def user(ic: ImageCatalog):Unit = Preferences.set(SKY_USER_CATALOG, ic.id)
+  def user(ic: ImageCatalog): Unit = Preferences.set(IMAGE_DEFAULT_CATALOG, ic.id)
 }

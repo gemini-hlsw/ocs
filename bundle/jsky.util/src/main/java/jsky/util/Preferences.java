@@ -104,7 +104,7 @@ public class Preferences {
     }
 
     /** Remove a key from the set of preferences. */
-    public void unsetPreference(String key) {
+    private void unsetPreference(String key) {
         _properties.remove(key);
     }
 
@@ -114,7 +114,7 @@ public class Preferences {
     }
 
     /** Return the preference value for the given key, or the default value if not found. */
-    public String getPreference(String key, String defaultValue) {
+    private String getPreference(String key, String defaultValue) {
         return _properties.getProperty(key, defaultValue);
     }
 
