@@ -325,7 +325,7 @@ public final class OT {
         new Thread("Smart GCAL Initializer") {
             @Override
             public void run() {
-                if (!storageDir.exists() && !storageDir.mkdir()) {
+                if (!storageDir.exists() && !storageDir.mkdirs()) {
                     LOG.log(Level.SEVERE, "Could not initialize smart gcal at " + storageDir.getAbsolutePath());
                     return;
                 }
