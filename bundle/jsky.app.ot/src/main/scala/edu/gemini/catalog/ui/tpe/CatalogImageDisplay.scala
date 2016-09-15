@@ -164,7 +164,7 @@ class CatalogImageDisplayMenuBar(protected val imageDisplay: CatalogImageDisplay
     val menuItem = new JRadioButtonMenuItem(cat.displayName) <| {_.addActionListener(new ActionListener() {
         override def actionPerformed(e: ActionEvent): Unit = {
           // First save the preference, then load the image
-          ImageCatalog.user(cat)
+          //ImageCatalog.user(cat)
           imageDisplay.loadSkyImage()
         }
       })}

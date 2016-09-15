@@ -116,6 +116,7 @@ object ImageCatalog {
     */
   def preferences(prefs: ImageCatalogPreferences): Task[Unit] = Task.delay { // Inside task as it writes the preferences file
     Preferences.set(IMAGES_CACHE_SIZE, prefs.imageCacheSize.toMegabytes.toString)
+    Preferences.set(IMAGE_DEFAULT_CATALOG, prefs.defaultCatalog.id)
   }
 
   /**
@@ -131,9 +132,4 @@ object ImageCatalog {
       }
     })
   }
-
-  /**
-    * Stores the user preferred image catalog
-    */
-  def user(ic: ImageCatalog): Unit = Preferences.set(IMAGE_DEFAULT_CATALOG, ic.id)
 }
