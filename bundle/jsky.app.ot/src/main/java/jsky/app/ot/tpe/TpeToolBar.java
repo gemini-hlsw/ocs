@@ -85,7 +85,7 @@ final class TpeToolBar extends JPanel {
         }});
         final int catalogYPos = yPos + i;
         _imageCatalogPanel = new ImageCatalogPanel(display);
-        final JPanel wrappedCatalogSelector = wrapPanel("", _imageCatalogPanel.panel());
+        final JPanel wrappedCatalogSelector = wrapPanel("", _imageCatalogPanel.panel().peer());
         add(wrappedCatalogSelector, new GridBagConstraints() {{
             gridx = 0; gridy = catalogYPos; anchor = NORTH; fill = HORIZONTAL;
             insets = new Insets(10, 0, 0, 0);
