@@ -48,7 +48,7 @@ object BackgroundImageLoader {
         tpeCoordinates(TpeContext(node))
     })
     // remove duplicates
-    val tasks = targets.flatten.distinct.map(Function.tupled(requestImageDownload))
+    val tasks = targets.flatten.distinct.map(Function.tupled(requestImageDownload(ImageLoadingListener.zero)))
     // Run
     runAsync(tasks) {
       case \/-(e) => println(e)// done
@@ -67,8 +67,8 @@ object BackgroundImageLoader {
   /**
     * Display an image if available on disk or request the download if necessary
     */
-  def loadImageOnTheTpe(tpe: TpeContext): Unit = {
-    val t = tpeCoordinates(tpe).map(Function.tupled(requestImageDownload)).getOrElse(Task.now(()))
+  def loadImageOnTheTpe(tpe: TpeContext, listener: ImageLoadingListener): Unit = {
+    val t = tpeCoordinates(tpe).map(Function.tupled(requestImageDownload(listener))).getOrElse(Task.now(()))
 
     // This is called on an explicit user interaction so we'd rather
     // Request the execution in a higher priority thread
@@ -82,10 +82,10 @@ object BackgroundImageLoader {
   /**
     * Creates a task to load an image and set it on the tpe
     */
-  private[image] def requestImageDownload(key: SPNodeKey, c: Coordinates): Task[Unit] =
+  private[image] def requestImageDownload(listener: ImageLoadingListener)(key: SPNodeKey, c: Coordinates): Task[Unit] =
     for {
       catalog <- ObservationCatalogOverrides.catalogFor(key)
-      image   <- ImageCatalogClient.loadImage(cacheDir)(ImageSearchQuery(catalog, c))
+      image   <- ImageCatalogClient.loadImage(cacheDir)(ImageSearchQuery(catalog, c))(listener)
     } yield image match {
       case Some(e) => setTpeImage(e)
       case _       => // Ignore

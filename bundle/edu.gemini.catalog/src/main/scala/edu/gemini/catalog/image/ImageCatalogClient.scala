@@ -68,29 +68,43 @@ object ImageEntry {
   }
 }
 
+/**
+  * This interface can be used to listen when the image is being lodaded
+  */
+trait ImageLoadingListener {
+  def downloadStarts(): Unit
+  def downloadCompletes(): Unit
+}
+
+object ImageLoadingListener {
+  val zero = new ImageLoadingListener {
+    override def downloadStarts(): Unit = {}
+
+    override def downloadCompletes(): Unit = {}
+  }
+}
+
 object ImageCatalogClient {
   val Log = Logger.getLogger(this.getClass.getName)
 
   /**
     * Load an image for the given coordinates on the user catalog
     */
-  def loadImage(cacheDir: Path)(query: ImageSearchQuery): Task[Option[ImageEntry]] = {
+  def loadImage(cacheDir: Path)(query: ImageSearchQuery)(listener: ImageLoadingListener): Task[Option[ImageEntry]] = {
 
     /**
       * Method to prune the cache if we are using to much disk space
+      *
       * @return
       */
     def pruneCache: Task[Unit] = Task.fork {
       // Remove files from the in memory cache and delete from drive
       def deleteOldFiles(files: List[ImageEntry]): Task[Unit] =
-        Task.gatherUnordered(files.map(StoredImagesCache.remove)) *>
-        Task.delay {
-          files.foreach(_.file.delete())
-        }
+        Task.gatherUnordered(files.map(StoredImagesCache.remove)) *> Task.delay(files.foreach(_.file.delete()))
 
-      // Find the files that sholud be removed to keep the max size limited
+      // Find the files that should be removed to keep the max size limited
       def filesToRemove(s: StoredImages, maxCacheSize: Long): Task[List[ImageEntry]] = Task.delay {
-        val u = s.sortedByAccess.foldLeft((0L, List.empty[ImageEntry])) { (s,e) =>
+        val u = s.sortedByAccess.foldLeft((0L, List.empty[ImageEntry])) { (s, e) =>
           val accSize = s._1 + e.fileSize
           if (accSize > maxCacheSize) {
             (accSize, e :: s._2)
@@ -112,23 +126,39 @@ object ImageCatalogClient {
     def addToCacheAndGet(f: File): Task[ImageEntry] = {
       val i = ImageEntry(query, f, f.length())
       // Add to cache, set as not in progress and prune the cache
-      // Note that cache prunning goes in a different thread
+      // Note that cache pruning goes in a different thread
       StoredImagesCache.add(i) *> ImagesInProgress.remove(query) *> pruneCache *> Task.now(i)
     }
 
-    def checkIfNeededAndDownload: Task[Option[ImageEntry]] =
-      ImagesInProgress.contains(query) >>= { inProcess => if (inProcess) Task.now(None) else markAndDownload.map(Some.apply) }
+    def readImageToFile: Task[File] =
+      Task.delay {
+        // Inform the listener
+        listener.downloadStarts()
+        // Open the connection to the remote
+        val connection = query.url.openConnection()
+        val in = query.url.openStream()
+        (connection.getContentType, in)
+      } >>= { Function.tupled(ImageCatalogClient.imageToTmpFile(cacheDir, query)) }
+
+    def downloadImage: Task[ImageEntry] = {
+      val task = for {
+        _ <- Task.delay(listener.downloadStarts()) // Inform the listener
+        f <- readImageToFile
+        e <- addToCacheAndGet(f)
+      } yield e
+
+      // Inform listeners at the end
+      task.onFinish {
+        case Some(x) => Task.now(())// Ignore
+        case _       => Task.now(listener.downloadCompletes())
+      }
+    }
 
     def markAndDownload: Task[ImageEntry] =
       ImagesInProgress.add(query) *> downloadImage
 
-    def downloadImage: Task[ImageEntry] =
-      Task.delay {
-        // Open the connection to the remote URL
-        val connection = query.url.openConnection()
-        val in = query.url.openStream()
-        (connection.getContentType, in)
-      } >>= { Function.tupled(ImageCatalogClient.imageToTmpFile(cacheDir, query)) } >>= addToCacheAndGet
+    def checkIfNeededAndDownload: Task[Option[ImageEntry]] =
+      ImagesInProgress.contains(query) >>= { inProcess => if (inProcess) Task.now(None) else markAndDownload.map(Some.apply) }
 
     // Try to find the image on the cache, else download
     StoredImagesCache.find(query) >>= { _.filter(_.file.exists()).fold(checkIfNeededAndDownload)(f => Task.now(Some(f))) }

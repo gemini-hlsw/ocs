@@ -4,17 +4,37 @@ import javax.swing._
 
 import scalaz._
 import Scalaz._
-import edu.gemini.catalog.image.{ImageCatalog, ImageCatalogPreferences}
+import edu.gemini.catalog.image.{ImageCatalog, ImageLoadingListener}
 import edu.gemini.catalog.ui.image.ObservationCatalogOverrides
 import edu.gemini.catalog.ui.tpe.CatalogImageDisplay
 import edu.gemini.pot.sp.ISPObservation
 import edu.gemini.ui.miglayout.MigPanel
 import edu.gemini.ui.miglayout.constraints._
 import jsky.app.ot.userprefs.images.ImageCatalogPreferencesPanel
+import jsky.util.gui.Resources
 
 import scala.swing.event.ButtonClicked
-import scala.swing.{Button, Component, Dialog, Label, RadioButton, Window}
+import scala.swing.{Button, Dialog, Label, RadioButton, Swing}
 import scalaz.concurrent.Task
+
+case class ImageLoadingFeedback() extends Label {
+}
+
+object ImageLoadingFeedback {
+  val spinnerIcon = Resources.getIcon("spinner16.gif")
+  val warningIcon = Resources.getIcon("eclipse/alert.gif")
+  val errorIcon   = Resources.getIcon("eclipse/error.gif")
+
+  /*case class FeedbackLabel() extends Label {
+        border = labelBorder
+        foreground = Color.DARK_GRAY
+        background = bgColor
+        text = message
+        icon = stateIcon
+        opaque = true
+        horizontalAlignment = Alignment.Left
+      }*/
+}
 
 /**
   * Panel of radio buttons of Image catalogs offered by the TPE.
@@ -37,7 +57,7 @@ final class ImageCatalogPanel(imageDisplay: CatalogImageDisplay) {
                 // Reset the image if needed
                 val r = for {
                   p <- ImageCatalog.preferences()
-                } yield if (selectedCatalog.forall(_ =/= p.defaultCatalog)) imageDisplay.loadSkyImage() else ()
+                } yield if (selectedCatalog.forall(_ =/= p.defaultCatalog)) imageDisplay.loadSkyImage(ImageLoadingListener.zero) else ()
                 r.unsafePerformSync
 
                 // Reset the selection
@@ -63,8 +83,9 @@ final class ImageCatalogPanel(imageDisplay: CatalogImageDisplay) {
   lazy val panel = new MigPanel(LC().fill().insets(0.px)) {
     add(new Label("Image Catalog:"), CC())
     add(toolsButton, CC())
-    buttons.foreach { case (c, b) =>
+    buttons.foreach { case (c, b, f) =>
       add(b, CC().newline())
+      add(f, CC())
       buttonGroup.add(b.peer)
       b.reactions += {
         case ButtonClicked(_) =>
@@ -80,11 +101,21 @@ final class ImageCatalogPanel(imageDisplay: CatalogImageDisplay) {
           key.foreach { k =>
             val actions = for {
               _ <- ObservationCatalogOverrides.storeOverride(k, c)
-              _ <- Task.delay(imageDisplay.loadSkyImage())
+              _ <- Task.delay(imageDisplay.loadSkyImage(listenerFor(f)))
             } yield ()
             actions.unsafePerformSync
           }
         }
+    }
+  }
+
+  def listenerFor(f: ImageLoadingFeedback) = new ImageLoadingListener {
+    override def downloadStarts(): Unit = Swing.onEDT {
+      f.icon = ImageLoadingFeedback.spinnerIcon
+    }
+
+    override def downloadCompletes(): Unit = Swing.onEDT {
+      f.icon = null
     }
   }
 
@@ -104,6 +135,6 @@ final class ImageCatalogPanel(imageDisplay: CatalogImageDisplay) {
     catalogue.map(updateSelection).unsafePerformSync
   }
 
-  private def mkButton(c: ImageCatalog): (ImageCatalog, RadioButton) =
-    (c, new RadioButton(s"${c.shortName}") <| {_.tooltip = c.displayName})
+  private def mkButton(c: ImageCatalog): (ImageCatalog, RadioButton, ImageLoadingFeedback) =
+    (c, new RadioButton(s"${c.shortName}") <| {_.tooltip = c.displayName} , new ImageLoadingFeedback())
 }

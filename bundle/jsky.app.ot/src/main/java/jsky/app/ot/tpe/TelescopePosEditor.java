@@ -1,5 +1,7 @@
 package jsky.app.ot.tpe;
 
+import edu.gemini.catalog.image.ImageLoadingListener;
+import edu.gemini.catalog.image.ImageLoadingListener$;
 import edu.gemini.catalog.ui.image.BackgroundImageLoader;
 import edu.gemini.pot.sp.*;
 import edu.gemini.shared.util.immutable.ImOption;
@@ -237,7 +239,7 @@ public final class TelescopePosEditor implements TpeMouseObserver {
             dec = 0.0;
         }
 
-        _iw.loadSkyImage();
+        _iw.loadSkyImage(ImageLoadingListener$.MODULE$.zero());
         _iw.loadCachedImage(ra, dec);
     }
 
@@ -326,12 +328,11 @@ public final class TelescopePosEditor implements TpeMouseObserver {
      * @throws IOException      If a problem happens reading from the catalog
      * @throws CatalogException if a Catalog Problem is found
      */
-    void getSkyImage(final TpeContext ctx) throws IOException, CatalogException {
+    void getSkyImage(final TpeContext ctx, ImageLoadingListener listener) throws IOException, CatalogException {
         final SPTarget _baseTarget = ctx.targets().baseOrNull();
         if (_baseTarget == null) return;
-        BackgroundImageLoader.loadImageOnTheTpe(ctx);
+        BackgroundImageLoader.loadImageOnTheTpe(ctx, listener);
     }
-
 
     /**
      * Receive a mouse event in the image widget.

@@ -172,9 +172,9 @@ object TargetGuidingFeedback {
 
 
 object BagsFeedback {
-  private val spinnerIcon = Resources.getIcon("spinner16-transparent.png")
-  private val warningIcon = Resources.getIcon("eclipse/alert.gif")
-  private val errorIcon   = Resources.getIcon("eclipse/error.gif")
+    private val spinnerIcon = Resources.getIcon("spinner16-transparent.png")
+    private val warningIcon = Resources.getIcon("eclipse/alert.gif")
+    private val errorIcon   = Resources.getIcon("eclipse/error.gif")
 
   sealed class BagsStateRow(bgColor: Color, message: String, stateIcon: Icon) extends Row {
     object feedbackLabel extends Label {

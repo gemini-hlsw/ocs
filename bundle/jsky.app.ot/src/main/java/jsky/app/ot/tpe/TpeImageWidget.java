@@ -1,5 +1,6 @@
 package jsky.app.ot.tpe;
 
+import edu.gemini.catalog.image.ImageLoadingListener;
 import edu.gemini.catalog.ui.QueryResultsFrame;
 import edu.gemini.catalog.ui.tpe.CatalogImageDisplay;
 import edu.gemini.shared.util.immutable.*;
@@ -270,11 +271,11 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
     }
 
     @Override
-    public void loadSkyImage() {
+    public void loadSkyImage(ImageLoadingListener listener) {
         try {
             TelescopePosEditor tpe = TpeManager.get();
             if (tpe != null) {
-                tpe.getSkyImage(_ctx);
+                tpe.getSkyImage(_ctx, listener);
             }
         } catch (Exception e) {
             DialogUtil.error(e);

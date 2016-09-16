@@ -14,6 +14,8 @@ import java.awt._
 import java.awt.event.{ActionEvent, ActionListener}
 import java.awt.geom.AffineTransform
 
+import edu.gemini.catalog.image.ImageLoadingListener
+
 import scalaz._
 import Scalaz._
 
@@ -43,7 +45,7 @@ abstract class CatalogImageDisplay(parent: Component, navigatorPane: NavigatorPa
   /**
     * Load the sky image for the current location
    */
-  def loadSkyImage(): Unit
+  def loadSkyImage(listener: ImageLoadingListener): Unit
 
   /** Display the FITS table at the given HDU index. */
   override def displayFITSTable(hdu: Int):Unit = {
