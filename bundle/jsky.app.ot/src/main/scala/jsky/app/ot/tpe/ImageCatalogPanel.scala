@@ -23,17 +23,7 @@ case class ImageLoadingFeedback() extends Label {
 object ImageLoadingFeedback {
   val spinnerIcon = Resources.getIcon("spinner16.gif")
   val warningIcon = Resources.getIcon("eclipse/alert.gif")
-  val errorIcon   = Resources.getIcon("eclipse/error.gif")
-
-  /*case class FeedbackLabel() extends Label {
-        border = labelBorder
-        foreground = Color.DARK_GRAY
-        background = bgColor
-        text = message
-        icon = stateIcon
-        opaque = true
-        horizontalAlignment = Alignment.Left
-      }*/
+  val errorIcon   = Resources.getIcon("error_tsk.gif")
 }
 
 /**
@@ -112,10 +102,17 @@ final class ImageCatalogPanel(imageDisplay: CatalogImageDisplay) {
   def listenerFor(f: ImageLoadingFeedback) = new ImageLoadingListener {
     override def downloadStarts(): Unit = Swing.onEDT {
       f.icon = ImageLoadingFeedback.spinnerIcon
+      f.tooltip = "Downloading..."
     }
 
     override def downloadCompletes(): Unit = Swing.onEDT {
       f.icon = null
+      f.tooltip = ""
+    }
+
+    override def downloadError(): Unit = Swing.onEDT {
+      f.icon = ImageLoadingFeedback.errorIcon
+      f.tooltip = "Error when downloading"
     }
   }
 

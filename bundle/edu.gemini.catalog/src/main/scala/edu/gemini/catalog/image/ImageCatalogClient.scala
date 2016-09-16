@@ -74,6 +74,7 @@ object ImageEntry {
 trait ImageLoadingListener {
   def downloadStarts(): Unit
   def downloadCompletes(): Unit
+  def downloadError(): Unit
 }
 
 object ImageLoadingListener {
@@ -81,6 +82,8 @@ object ImageLoadingListener {
     override def downloadStarts(): Unit = {}
 
     override def downloadCompletes(): Unit = {}
+
+    override def downloadError(): Unit = {}
   }
 }
 
@@ -125,15 +128,14 @@ object ImageCatalogClient {
 
     def addToCacheAndGet(f: File): Task[ImageEntry] = {
       val i = ImageEntry(query, f, f.length())
-      // Add to cache, set as not in progress and prune the cache
+      // Add to cache and prune the cache
       // Note that cache pruning goes in a different thread
-      StoredImagesCache.add(i) *> ImagesInProgress.remove(query) *> pruneCache *> Task.now(i)
+      StoredImagesCache.add(i) *> pruneCache *> Task.now(i)
     }
 
     def readImageToFile: Task[File] =
       Task.delay {
-        // Inform the listener
-        listener.downloadStarts()
+        Log.info(s"Downloading image at ${query.url}")
         // Open the connection to the remote
         val connection = query.url.openConnection()
         val in = query.url.openStream()
@@ -142,6 +144,7 @@ object ImageCatalogClient {
 
     def downloadImage: Task[ImageEntry] = {
       val task = for {
+        _ <- ImagesInProgress.add(query)
         _ <- Task.delay(listener.downloadStarts()) // Inform the listener
         f <- readImageToFile
         e <- addToCacheAndGet(f)
@@ -149,16 +152,13 @@ object ImageCatalogClient {
 
       // Inform listeners at the end
       task.onFinish {
-        case Some(x) => Task.now(())// Ignore
-        case _       => Task.now(listener.downloadCompletes())
+        case Some(x) => ImagesInProgress.remove(query) *> Task.now(listener.downloadError()) // Ignore
+        case _       => ImagesInProgress.remove(query) *> Task.now(listener.downloadCompletes())
       }
     }
 
-    def markAndDownload: Task[ImageEntry] =
-      ImagesInProgress.add(query) *> downloadImage
-
     def checkIfNeededAndDownload: Task[Option[ImageEntry]] =
-      ImagesInProgress.contains(query) >>= { inProcess => if (inProcess) Task.now(None) else markAndDownload.map(Some.apply) }
+      ImagesInProgress.contains(query) >>= { inProcess => if (inProcess) Task.now(None) else downloadImage.map(Some.apply) }
 
     // Try to find the image on the cache, else download
     StoredImagesCache.find(query) >>= { _.filter(_.file.exists()).fold(checkIfNeededAndDownload)(f => Task.now(Some(f))) }
@@ -170,7 +170,6 @@ object ImageCatalogClient {
     */
   private def imageToTmpFile(cacheDir: Path, query: ImageSearchQuery)(contentType: String, in: InputStream): Task[File] = {
     val url = query.url
-    Log.info(s"Downloading image at $url")
 
     def suffix: Task[String] =
       Option(contentType) match {
