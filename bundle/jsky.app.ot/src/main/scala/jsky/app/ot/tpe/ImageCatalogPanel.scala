@@ -4,7 +4,7 @@ import javax.swing._
 
 import scalaz._
 import Scalaz._
-import edu.gemini.catalog.image.ImageCatalog
+import edu.gemini.catalog.image.{ImageCatalog, ImageCatalogPreferences}
 import edu.gemini.catalog.ui.image.ObservationCatalogOverrides
 import edu.gemini.catalog.ui.tpe.CatalogImageDisplay
 import edu.gemini.pot.sp.ISPObservation
@@ -33,6 +33,19 @@ final class ImageCatalogPanel(imageDisplay: CatalogImageDisplay) {
             reactions += {
               case ButtonClicked(_) =>
                 close()
+
+                // Reset the image if needed
+                val r = for {
+                  p <- ImageCatalog.preferences()
+                } yield if (selectedCatalog.forall(_ =/= p.defaultCatalog)) imageDisplay.loadSkyImage() else ()
+                r.unsafePerformSync
+
+                // Reset the selection
+                for {
+                  tpe <- Option(TpeManager.get())
+                  iw  <- Option(tpe.getImageWidget)
+                  c   <- Option(iw.getContext)
+                } yield resetCatalogue(c.obsShell)
             }
           }
 
@@ -77,6 +90,9 @@ final class ImageCatalogPanel(imageDisplay: CatalogImageDisplay) {
 
   private def updateSelection(catalog: ImageCatalog): Unit =
     buttons.find(_._1 === catalog).foreach { _._2.selected = true}
+
+  private def selectedCatalog: Option[ImageCatalog] =
+    buttons.find(_._2.selected).map(_._1)
 
   def resetCatalogue(observation: Option[ISPObservation]): Unit = {
     // Verify we are on the EDT. We don't want to use Swing.onEDT
