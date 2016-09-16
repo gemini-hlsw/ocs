@@ -68,7 +68,7 @@ object ObservationCatalogOverrides {
   def catalogFor(key: SPNodeKey): Task[ImageCatalog] = {
     // Synchronize file reads and writes
     this.synchronized {
-      ImageCatalog.preferences().map{p => readOverrides.obsCatalog(key).getOrElse(p.defaultCatalog)}
+      ImageCatalog.preferences().map { p => readOverrides.obsCatalog(key).getOrElse(p.defaultCatalog)}
     }
   }
 

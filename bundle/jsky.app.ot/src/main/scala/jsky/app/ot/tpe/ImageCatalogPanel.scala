@@ -16,8 +16,6 @@ import scalaz.concurrent.Task
   * Panel of radio buttons of Image catalogs offered by the TPE.
   */
 final class ImageCatalogPanel(imageDisplay: CatalogImageDisplay) {
-  val defaultCatalog = ImageCatalog.preferences().map(_.defaultCatalog).unsafePerformSync
-
   val panel = new JPanel
   val label = new JLabel("Image Catalog")
   val buttonGroup = new ButtonGroup
@@ -50,22 +48,19 @@ final class ImageCatalogPanel(imageDisplay: CatalogImageDisplay) {
     })
   }
 
-  private def updateSelection(catalog: ImageCatalog): Unit = {
+  private def updateSelection(catalog: ImageCatalog): Unit =
     buttons.find(_._1 === catalog).foreach { _._2.setSelected(true)}
-  }
 
-  def resetCatalogue(catalogue: Option[ISPObservation]): Unit = {
+  def resetCatalogue(observation: Option[ISPObservation]): Unit = {
     // Verify we are on the EDT. We don't want to use Swing.onEDT
     assert(SwingUtilities.isEventDispatchThread)
-    catalogue.map(_.getNodeKey).foreach { key =>
-      val actions = for {
-        c <- ObservationCatalogOverrides.catalogFor(key)
-        _ <- Task.delay(updateSelection(c))
-      } yield ()
-      actions.unsafePerformSync
-    }
+
+    val catalogue = observation.map(_.getNodeKey)
+      .fold(ImageCatalog.preferences().map(_.defaultCatalog))(ObservationCatalogOverrides.catalogFor)
+
+    catalogue.map(updateSelection).unsafePerformSync
   }
 
   private def mkButton(c: ImageCatalog): (ImageCatalog, JRadioButton) =
-    (c, new JRadioButton(s"${c.shortName}") <| {_.setToolTipText(c.displayName)} <| {_.setSelected(c === defaultCatalog)})
+    (c, new JRadioButton(s"${c.shortName}") <| {_.setToolTipText(c.displayName)})
 }
