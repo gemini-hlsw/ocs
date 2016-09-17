@@ -106,9 +106,8 @@ object BackgroundImageLoader {
   /**
     * Utility methods to run the tasks on separate threads of the pool
     */
-  private def runAsync[A](tasks: List[Task[A]])(f: Throwable \/ List[A] => Unit)(pool: ExecutorService) = {
+  private def runAsync[A](tasks: List[Task[A]])(f: Throwable \/ List[A] => Unit)(pool: ExecutorService) =
     Task.gatherUnordered(tasks.map(t => Task.fork(t)(pool))).unsafePerformAsync(f)
-  }
 
   private def runAsync[A](task: Task[A])(f: Throwable \/ A => Unit)(pool: ExecutorService) =
     Task.fork(task).unsafePerformAsync(f)

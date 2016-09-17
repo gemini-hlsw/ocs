@@ -46,8 +46,14 @@ final class ImageCatalogPanel(imageDisplay: CatalogImageDisplay) {
 
                 // Reset the image if needed
                 val r = for {
-                  p <- ImageCatalog.preferences()
-                } yield if (selectedCatalog.forall(_ =/= p.defaultCatalog)) imageDisplay.loadSkyImage(ImageLoadingListener.zero) else ()
+                  p <- ImageCatalog.preferences() // At this moment the default catalog may have changed
+                } yield {
+                  val f = buttons.find(_._1 === p.defaultCatalog).map(_._3)
+                  f match {
+                    case Some(x) if selectedCatalog.forall(_ =/= p.defaultCatalog) => imageDisplay.loadSkyImage(listenerFor(x)) // Reload if the selected catalog is not the default
+                    case _                                                         => ()
+                  }
+                }
                 r.unsafePerformSync
 
                 // Reset the selection
