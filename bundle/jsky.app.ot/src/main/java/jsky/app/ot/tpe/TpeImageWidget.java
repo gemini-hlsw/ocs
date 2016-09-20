@@ -499,20 +499,22 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
 
             // snap to catalog symbol position, if user clicked on one
             final Point2D.Double p = new Point2D.Double(mp.x, mp.y);
+            getCoordinateConverter().screenToUserCoords(p, false);
             final double[] d = screenCoordsToOffset(mp.x, mp.y);
 
-            getCoordinateConverter().screenToUserCoords(p, false);
             if (evt.getID() == MouseEvent.MOUSE_CLICKED) {
                 final Option<SiderealTarget> skyObject = getCatalogPosition(mp);
                 final String name = skyObject.map(SiderealTarget::name).getOrNull();
                 if (!skyObject.isDefined()) {
-                    return new TpeMouseEvent(evt, evt.getID(), this, CoordinatesUtilities.userToWorldCoords(getCoordinateConverter(), p.x, p.y), name, (int) Math.round(mp.x), (int) Math.round(mp.y), skyObject, d[0], d[1]);
+                    Coordinates pos = CoordinatesUtilities.userToWorldCoords(getCoordinateConverter(), p.x, p.y);
+                    return new TpeMouseEvent(evt, evt.getID(), this, pos, name, (int) Math.round(mp.x), (int) Math.round(mp.y), skyObject, d[0], d[1]);
                 } else {
                     Coordinates pos = skyObject.map(SiderealTarget::coordinates).getOrElse(Coordinates.zero());
                     return new TpeMouseEvent(evt, evt.getID(), this, pos, name, (int) Math.round(mp.x), (int) Math.round(mp.y), skyObject, d[0], d[1]);
                 }
             } else {
-                return new TpeMouseEvent(evt, evt.getID(), this, CoordinatesUtilities.userToWorldCoords(getCoordinateConverter(), p.x, p.y), "", (int) Math.round(mp.x), (int) Math.round(mp.y), None.instance(), d[0], d[1]);
+                Coordinates pos = CoordinatesUtilities.userToWorldCoords(getCoordinateConverter(), p.x, p.y);
+                return new TpeMouseEvent(evt, evt.getID(), this, pos, "", (int) Math.round(mp.x), (int) Math.round(mp.y), None.instance(), d[0], d[1]);
             }
         } else {
             return new TpeMouseEvent(evt);

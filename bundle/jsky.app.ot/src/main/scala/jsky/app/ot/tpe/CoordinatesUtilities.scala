@@ -15,6 +15,6 @@ object CoordinatesUtilities {
   def userToWorldCoords(cc: CoordinateConverter, x: Double, y: Double): Coordinates = {
     val p = new Point2D.Double(x, y)
     cc.userToWorldCoords(p, false)
-    Coordinates(RightAscension.fromDegrees(x), Declination.fromDegrees(y).getOrElse(Declination.zero))
+    Coordinates(RightAscension.fromDegrees(p.x), Declination.fromDegrees(p.y).getOrElse(Declination.zero))
   }
 }
