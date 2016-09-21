@@ -1,15 +1,16 @@
 package edu.gemini.catalog.ui.image
 
+import java.beans.{PropertyChangeEvent, PropertyChangeListener}
+import java.nio.file.Path
 import java.time.Instant
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.{ExecutorService, Executors, ThreadFactory}
 
 import edu.gemini.catalog.image._
-import edu.gemini.spModel.target.obsComp.TargetObsComp
 import edu.gemini.shared.util.immutable.ScalaConverters._
 
 import scala.collection.JavaConverters._
-import edu.gemini.pot.sp.{ISPProgram, SPNodeKey}
+import edu.gemini.pot.sp.{ISPNode, ISPProgram, SPNodeKey}
 import edu.gemini.spModel.core.Coordinates
 import jsky.app.ot.tpe.{TpeContext, TpeImageWidget, TpeManager}
 import jsky.util.Preferences
@@ -22,12 +23,13 @@ import scalaz.concurrent.{Strategy, Task}
 case class ImageLoadRequest(catalog: ImageCatalog, c: Coordinates)
 
 object BackgroundImageLoader {
-  val cacheDir = Preferences.getPreferences.getCacheDir.toPath
+  val cacheDir: Path = Preferences.getPreferences.getCacheDir.toPath
 
   val ImageDownloadsThreadFactory = new ThreadFactory {
     private val threadNumber: AtomicInteger = new AtomicInteger(1)
-    val defaultThreadFactory = Executors.defaultThreadFactory()
-    def newThread(r: Runnable) = {
+    private val defaultThreadFactory = Executors.defaultThreadFactory()
+
+    override def newThread(r: Runnable): Thread = {
       val t = defaultThreadFactory.newThread(r)
       t.setDaemon(true)
       t.setName("Background Image Downloads - " + threadNumber.getAndIncrement())
@@ -39,26 +41,29 @@ object BackgroundImageLoader {
   /**
     * Execution context lets up to 4 low priority threads
     */
-  val ec = Executors.newFixedThreadPool(4, ImageDownloadsThreadFactory)
+  private val lowPriorityEC = Executors.newFixedThreadPool(4, ImageDownloadsThreadFactory)
+
+  /**
+    * Regular execution context
+    */
+  private val highPriorityEC = Strategy.DefaultExecutorService
 
   /** Called when a program is created to download its images */
   def watch(prog: ISPProgram): Unit = {
-    val targets = prog.getAllObservations.asScala.toList.flatMap(_.getObsComponents.asScala.map(n => (n, n.getDataObject)).collect {
-      case (node, t: TargetObsComp) =>
-        tpeCoordinates(TpeContext(node))
-    })
+    prog.addCompositeChangeListener(ChangeListener)
+    val targets = prog.getAllObservations.asScala.toList.flatMap(_.getObsComponents.asScala.map(n => tpeCoordinates(TpeContext(n))))
     // remove duplicates
     val tasks = targets.flatten.distinct.map(Function.tupled(requestImageDownload(ImageLoadingListener.zero)))
     // Run
     runAsync(tasks) {
       case \/-(e) => println(e)// done
       case -\/(e) => println(e)
-    }(ec)
+    }(lowPriorityEC)
   }
 
   /** Called when a program is removed to clear the cache */
   def unwatch(prog: ISPProgram): Unit = {
-    // not necessary
+    prog.removeCompositeChangeListener(ChangeListener)
   }
 
   /******************************************
@@ -68,15 +73,32 @@ object BackgroundImageLoader {
     * Display an image if available on disk or request the download if necessary
     */
   def loadImageOnTheTpe(tpe: TpeContext, listener: ImageLoadingListener): Unit = {
-    val t = tpeCoordinates(tpe).map(Function.tupled(requestImageDownload(listener))).getOrElse(Task.now(()))
+    val task = tpeCoordinates(tpe).map(Function.tupled(requestImageDownload(listener))).getOrElse(Task.now(()))
 
     // This is called on an explicit user interaction so we'd rather
     // Request the execution in a higher priority thread
     // Execute and set the image on the tpe
-    runAsync(t) {
+    runAsync(task) {
       case \/-(_)       => // No image was found, don't do anything
       case -\/(e)       => // Ignore the errors
-    }(Strategy.DefaultExecutorService)
+    }(highPriorityEC)
+  }
+
+  // Watches for changes to existing observations, runs BAGS on them when updated.
+  object ChangeListener extends PropertyChangeListener {
+    override def propertyChange(evt: PropertyChangeEvent): Unit =
+      evt.getSource match {
+        case node: ISPNode => Option(node.getContextObservation).foreach { o =>
+          val task = tpeCoordinates(TpeContext(o)).map(Function.tupled(requestImageDownload(ImageLoadingListener.zero))).getOrElse(Task.now(()))
+
+          // Run it in the background as it is lower priority than GUI
+          runAsync(task) {
+            case \/-(_)       => // No image was found, don't do anything
+            case -\/(e)       => // Ignore the errors
+          }(lowPriorityEC)
+
+        }
+      }
   }
 
   /**
