@@ -153,7 +153,7 @@ class LchQueryFunctor(queryType: LchQueryFunctor.QueryType,
 
         setScienceBand(prog.scienceBand)
         prog.partners.foreach(getPartners.add)
-        setTooStatus(prog.tooStatus.displayValue)
+        setTooStatus(prog.tooStatus.getDisplayValue)
         setAllocatedTime(prog.allocatedTime.toString)
         setRemainingTime(prog.remainingTime.toString)
 

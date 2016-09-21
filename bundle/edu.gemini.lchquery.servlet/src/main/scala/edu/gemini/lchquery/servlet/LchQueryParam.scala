@@ -94,7 +94,14 @@ object LchQueryParam {
         Option(inv).map(i => s"${i.getFirst} ${i.getLast}").filterNot(_.trim.isEmpty)
 
       val spProg = toSPProg
-      (investigatorName(spProg.getGsaPhase1Data.getPi) :: spProg.getGsaPhase1Data.getCois.asScala.map(investigatorName).toList).
+      val piName = for {
+        f <- Option(spProg.getPIFirstName)
+        l <- Option(spProg.getPILastName)
+        n = s"$f $l".trim
+        if !n.isEmpty
+      } yield n
+
+      (piName :: spProg.getGsaPhase1Data.getCois.asScala.map(investigatorName).toList).
         collect { case Some(i) => i }
     }
 
@@ -110,8 +117,8 @@ object LchQueryParam {
     def partners: List[String] =
       toSPProg.getTimeAcctAllocation.getCategories.asScala.toList.map(_.getDisplayName)
 
-    def tooStatus: YesNoType =
-      toSPProg.isToo.toYesNo
+    def tooStatus: TooType =
+      toSPProg.getTooType
 
     def rolloverStatus: YesNoType =
       prog.toSPProg.getRolloverStatus.toYesNo
