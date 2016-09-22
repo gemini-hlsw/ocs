@@ -24,6 +24,7 @@ import javax.print.attribute.standard.OrientationRequested;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
 import java.awt.print.PrinterException;
 import java.text.DecimalFormat;
 import java.text.FieldPosition;
@@ -32,6 +33,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.function.Supplier;
 
 /**
  * A panel for displaying an elevation plot for given target positions.
@@ -75,6 +77,23 @@ public class ElevationPanel extends JPanel implements PrintableWithDialog, Savea
     // Color used to display elevation constraints
     private static final Color CONSTRAINT_COLOR = new Color(0.0F, 1.0F, 0.0F, 0.5F);
 
+    private static final Paint TIMING_WINDOW_PAINT;
+
+    static {
+        final BufferedImage bi = new BufferedImage(4, 4,  BufferedImage.TYPE_4BYTE_ABGR);
+        final int rgb = new Color(164, 160, 203).getRGB();
+        bi.setRGB(2, 0, rgb);
+        bi.setRGB(3, 0, rgb);
+        bi.setRGB(1, 1, rgb);
+        bi.setRGB(2, 1, rgb);
+        bi.setRGB(0, 2, rgb);
+        bi.setRGB(1, 2, rgb);
+        bi.setRGB(0, 3, rgb);
+        bi.setRGB(3, 3, rgb);
+
+        TIMING_WINDOW_PAINT = new TexturePaint(bi, new Rectangle2D.Double(0, 0, bi.getWidth(), bi.getHeight()));
+    }
+
     // Provides the model data for the graph and tables
     private ElevationPlotModel _model;
 
@@ -97,9 +116,10 @@ public class ElevationPanel extends JPanel implements PrintableWithDialog, Savea
     private boolean _altitudePlotVisible = true;
 
     // Controls the visibility of the elevation constraints plot
-    private boolean _constraintsMarkerVisible = true;
+    private boolean _elevationConstraintsMarkerVisible = true;
 
-
+    // Controls the visibility of the timing windows plot
+    private boolean _timingWindowsMarkerVisible = true;
 
     // Label for primary Y axis
     private String _yAxisLabel = _I18N.getString("AltitudeInDeg");
@@ -338,11 +358,15 @@ public class ElevationPanel extends JPanel implements PrintableWithDialog, Savea
         _update();
     }
 
-    public void setConstraintsMarkerVisible(boolean visible) {
-        _constraintsMarkerVisible = visible;
+    public void setElevationConstraintsMarkerVisible(boolean visible) {
+        _elevationConstraintsMarkerVisible = visible;
         _update();
     }
 
+    public void setTimingWindowsMarkerVisible(boolean visible) {
+        _timingWindowsMarkerVisible = visible;
+        _update();
+    }
 
     // Return the label for the time axis
     private String _getXAxisLabel() {
@@ -413,18 +437,19 @@ public class ElevationPanel extends JPanel implements PrintableWithDialog, Savea
                 new Date(_model.getAstronomicalTwilightEnd()), DARKNESS_ALPHA, Color.black);
 
         xyPlot.addRangeMarker(new ValueMarker(ElevationPlotModel.getObsThreshold()));
-        if (_constraintsMarkerVisible && _altitudePlotVisible) {
-            XYDataset constraintsDataset = _model.getConstraintsDataset();
-            xyPlot.setDataset(2, constraintsDataset);
-            XYStepAreaRenderer constraintsRenderer = new XYStepAreaRenderer() {
-                @Override
-                public Paint getSeriesPaint(int series) {
-                    return CONSTRAINT_COLOR;
-                }
-            };
-            xyPlot.setRenderer(2, constraintsRenderer);
+
+        plotCons(xyPlot, _elevationConstraintsMarkerVisible, 2, _model::getConstraintsDataset,   CONSTRAINT_COLOR);
+        plotCons(xyPlot, _timingWindowsMarkerVisible, 3, _model::getTimingWindowsDataset, TIMING_WINDOW_PAINT);
+    }
+
+    private void plotCons(XYPlot xyPlot, boolean visible, int index, Supplier<XYDataset> dataset, final Paint p) {
+        if (visible && _altitudePlotVisible) {
+            xyPlot.setDataset(index, dataset.get());
+            xyPlot.setRenderer(index, new XYStepAreaRenderer() {
+                @Override public Paint getSeriesPaint(int series) { return p; }
+            });
         } else {
-            xyPlot.setDataset(2, null);
+            xyPlot.setDataset(index, null);
         }
     }
 
