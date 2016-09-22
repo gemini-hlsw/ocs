@@ -36,7 +36,6 @@ object ValueMatcher {
       (expression.contains("|") ? s"($expression)" | expression).
         replaceAllLiterally("+", "\\+").
         replaceAllLiterally("*", ".*").
-        replaceAllLiterally("%", ".*").
         replaceAllLiterally("?", ".")
       + "$").r
   }
