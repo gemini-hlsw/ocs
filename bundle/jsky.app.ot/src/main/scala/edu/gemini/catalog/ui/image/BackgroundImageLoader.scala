@@ -11,17 +11,12 @@ import edu.gemini.shared.util.immutable.ScalaConverters._
 
 import scala.collection.JavaConverters._
 import edu.gemini.pot.sp._
-import edu.gemini.spModel.config.ConfigBridge
-import edu.gemini.spModel.config.map.ConfigValMapInstances
-import edu.gemini.spModel.config2.{ConfigSequence, ItemKey}
 import edu.gemini.spModel.core.{Coordinates, Wavelength}
-import edu.gemini.spModel.core.WavelengthConversions._
-import jsky.app.ot.tpe.{InstrumentContext, TpeContext, TpeImageWidget, TpeManager}
+import jsky.app.ot.tpe.{TpeContext, TpeImageWidget, TpeManager}
 import jsky.util.Preferences
 
 import scalaz._
 import Scalaz._
-import scala.reflect.ClassTag
 import scala.swing.Swing
 import scalaz.concurrent.{Strategy, Task}
 
@@ -35,18 +30,14 @@ case class TargetImageRequest(key: SPNodeKey, coordinates: Coordinates, obsWavel
   */
 object BackgroundImageLoader {
   val cacheDir: Path = Preferences.getPreferences.getCacheDir.toPath
-  private val ObsWavelengthKey    = new ItemKey("instrument:observingWavelength")
 
-  val ImageDownloadsThreadFactory = new ThreadFactory {
+  private val ImageDownloadsThreadFactory = new ThreadFactory {
     private val threadNumber: AtomicInteger = new AtomicInteger(1)
     private val defaultThreadFactory = Executors.defaultThreadFactory()
 
     override def newThread(r: Runnable): Thread = {
-      val t = defaultThreadFactory.newThread(r)
-      t.setDaemon(true)
-      t.setName("Background Image Downloads - " + threadNumber.getAndIncrement())
-      t.setPriority(Thread.MIN_PRIORITY)
-      t
+      val name = s"Background Image Downloads - ${threadNumber.getAndIncrement()}"
+      defaultThreadFactory.newThread(r) <| {_.setDaemon(true)} <| {_.setName(name)} <| {_.setPriority(Thread.MIN_PRIORITY)}
     }
   }
 
@@ -136,43 +127,7 @@ object BackgroundImageLoader {
       when   = ctx.getSchedulingBlockStart.asScalaOpt | Instant.now.toEpochMilli
       coords <- base.getTarget.coords(when)
       key    <- tpe.obsKey
-    } yield TargetImageRequest(key, coords, extractObsWavelength(tpe.instrument, obs))
-
-  /**
-    * Attempt to extract the Wavelength for the observation. Assume everything can be null
-    */
-  private def extractObsWavelength(ctx: InstrumentContext, obs: ISPObservation): Option[Wavelength] = {
-    // Extract a double value from a string in the configuration
-    def extractDoubleFromString(c: ConfigSequence, key: ItemKey): Throwable \/ Double =
-      for {
-        s <- extractAs[String](c, key)
-        d <- \/.fromTryCatchNonFatal(s.toDouble)
-      } yield d
-
-    // Helper method that enforces that whatever we get from the config
-    // for the given key is not null and matches the type we expect.
-    def extractAs[A](cs: ConfigSequence, key: ItemKey)(implicit clazz: ClassTag[A]): Throwable \/ A = {
-      def missingKey(key: ItemKey): \/[Throwable, A] =
-        new RuntimeException(s"Missing config value for key ${key.getPath}").left[A]
-
-      Option(cs.getItemValue(0, key)).fold(missingKey(key)) { v =>
-        \/.fromTryCatchNonFatal(clazz.runtimeClass.cast(v).asInstanceOf[A])
-      }
-    }
-
-    def parseWavelength(cs: ConfigSequence): Option[Wavelength] = {
-      if (ctx.is(SPComponentType.INSTRUMENT_ACQCAM)) {
-        None
-      } else if (ctx.is(SPComponentType.INSTRUMENT_GNIRS)) {
-        None
-      } else {
-        // regular instrument
-        extractDoubleFromString(cs, ObsWavelengthKey).map(_.microns).toOption
-      }
-    }
-
-    Option(ConfigBridge.extractSequence(obs, new java.util.HashMap(), ConfigValMapInstances.IDENTITY_MAP)).flatMap(parseWavelength)
-  }
+    } yield TargetImageRequest(key, coords, ConfigExtractor.extractObsWavelength(tpe.instrument, obs))
 
   /**
     * Utility methods to run the tasks on separate threads of the pool

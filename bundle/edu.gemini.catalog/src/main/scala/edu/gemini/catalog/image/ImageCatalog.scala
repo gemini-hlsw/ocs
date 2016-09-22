@@ -91,8 +91,8 @@ object ImageCatalog {
   val defaultSize: Angle = Angle.fromArcmin(15.0)
   implicit val equals = Equal.equalA[ImageCatalog]
 
-  private val IMAGE_DEFAULT_CATALOG = "ot.catalog.default"
-  private val IMAGES_CACHE_SIZE = "ot.cache.size"
+  private val ImageDefaultCatalog = "ot.catalog.default"
+  private val ImageMaxCacheSize = "ot.cache.size"
 
   private val DssCutoff   = 1.0.microns
   private val MassJCutoff = 1.4.microns
@@ -120,8 +120,8 @@ object ImageCatalog {
   def preferences(): Task[ImageCatalogPreferences] = Task.delay { // Inside task as it reads the preferences file
     \/.fromTryCatchNonFatal {
       // Try to parse preferences
-      val size = Option(Preferences.get(IMAGES_CACHE_SIZE)).map(_.toDouble)
-      val catalog = all.find(_.id == Preferences.get(IMAGE_DEFAULT_CATALOG)).getOrElse(ImageCatalogPreferences.DefaultImageServer)
+      val size = Option(Preferences.get(ImageMaxCacheSize)).map(_.toDouble)
+      val catalog = all.find(_.id == Preferences.get(ImageDefaultCatalog)).getOrElse(ImageCatalogPreferences.DefaultImageServer)
 
       ImageCatalogPreferences(size.map(_.megabytes).getOrElse(ImageCatalogPreferences.DefaultCacheSize), catalog)
     }.getOrElse(ImageCatalogPreferences.zero)
@@ -131,8 +131,8 @@ object ImageCatalog {
     * Sets the user preferences about Image Catalogs
     */
   def preferences(prefs: ImageCatalogPreferences): Task[Unit] = Task.delay { // Inside task as it writes the preferences file
-    Preferences.set(IMAGES_CACHE_SIZE, prefs.imageCacheSize.toMegabytes.toString)
-    Preferences.set(IMAGE_DEFAULT_CATALOG, prefs.defaultCatalog.id)
+    Preferences.set(ImageMaxCacheSize, prefs.imageCacheSize.toMegabytes.toString)
+    Preferences.set(ImageDefaultCatalog, prefs.defaultCatalog.id)
   }
 
   /**
