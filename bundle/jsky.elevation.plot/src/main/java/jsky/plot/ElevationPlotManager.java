@@ -15,7 +15,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import edu.gemini.spModel.core.Site;
-import jsky.coords.TargetDesc;
 import jsky.util.Preferences;
 import jsky.util.gui.DialogUtil;
 import jsky.util.gui.SwingUtil;

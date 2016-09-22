@@ -5,7 +5,6 @@ import edu.gemini.shared.util.immutable.Some;
 import edu.gemini.skycalc.ImprovedSkyCalcMethods;
 import edu.gemini.skycalc.SunRiseSet;
 import edu.gemini.spModel.core.Site;
-import jsky.coords.TargetDesc;
 import jsky.plot.util.CalendarUtil;
 import jsky.util.Preferences;
 import jsky.util.StringUtil;

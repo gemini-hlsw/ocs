@@ -5,10 +5,11 @@
  * $Id: TargetDesc.java 42349 2012-03-01 13:03:51Z swalker $
  */
 
-package jsky.coords;
+package jsky.plot;
 
 
 import edu.gemini.shared.util.immutable.Option;
+import jsky.coords.WorldCoords;
 
 import java.util.function.Function;
 

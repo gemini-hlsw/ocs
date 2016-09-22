@@ -5,7 +5,7 @@
  * $Id: ObsTargetDesc.java 46768 2012-07-16 18:58:53Z rnorris $
  */
 
-package edu.gemini.spModel.target;
+package jsky.app.ot.plot;
 
 import edu.gemini.pot.sp.*;
 import edu.gemini.pot.spdb.IDBDatabaseService;
@@ -14,11 +14,12 @@ import edu.gemini.spModel.gemini.obscomp.SPProgram;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 import edu.gemini.spModel.obs.SPObservation;
 import edu.gemini.spModel.obs.plannedtime.PlannedTimeSummaryService;
+import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.time.TimeAmountFormatter;
 import edu.gemini.spModel.util.SPTreeUtil;
-import jsky.coords.TargetDesc;
+import jsky.plot.TargetDesc;
 import jsky.coords.WorldCoords;
 
 import java.util.function.Function;

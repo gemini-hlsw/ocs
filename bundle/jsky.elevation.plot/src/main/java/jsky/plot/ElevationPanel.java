@@ -1,6 +1,5 @@
 package jsky.plot;
 
-import jsky.coords.TargetDesc;
 import jsky.util.I18N;
 import jsky.util.PrintableWithDialog;
 import jsky.util.SaveableWithDialog;
