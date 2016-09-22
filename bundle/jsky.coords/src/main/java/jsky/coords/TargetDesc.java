@@ -19,7 +19,7 @@ import java.util.function.Function;
  * @author Allan Brighton
  */
 public abstract class TargetDesc {
-    public static enum ElConstraintType {
+    public enum ElConstraintType {
     	NONE, HOUR_ANGLE, AIRMASS
     }
 
@@ -31,15 +31,20 @@ public abstract class TargetDesc {
     private double _elMin;
     private double _elMax;
 
-    protected TargetDesc(String name, Function<Option<Long>, Option<WorldCoords>> coords, String priority, String category,
-                          ElConstraintType elType, Double elMin, Double elMax) {
-        _name = name;
-        _coords = coords;
+    protected TargetDesc(String name,
+                         Function<Option<Long>, Option<WorldCoords>> coords,
+                         String priority,
+                         String category,
+                         ElConstraintType elType,
+                         Double elMin,
+                         Double elMax) {
+        _name     = name;
+        _coords   = coords;
         _priority = priority;
         _category = category;
-        _elType = elType;
-        _elMin = elMin;
-        _elMax = elMax;
+        _elType   = elType;
+        _elMin    = elMin;
+        _elMax    = elMax;
     }
 
     public String getName() {
