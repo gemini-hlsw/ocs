@@ -13,7 +13,7 @@ import java.io.Serializable;
  */
 public final class DefaultConfig implements Config, Serializable {
 
-    public static final DefaultConfig[] EMPTY_ARRAY = new DefaultConfig[0];
+    public static final Config[] EMPTY_ARRAY = new DefaultConfig[0];
 
     private TreeMap<ItemKey, Object> _configMap = new TreeMap<>();
 

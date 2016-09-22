@@ -7,6 +7,7 @@ import java.util.logging.Logger
 
 import edu.gemini.spModel.core.{Angle, Coordinates, Declination, RightAscension}
 
+import scala.util.matching.Regex
 import scalaz.Scalaz._
 import scalaz._
 import scalaz.concurrent.Task
@@ -29,7 +30,7 @@ case class ImageSearchQuery(catalog: ImageCatalog, coordinates: Coordinates) {
 
 object ImageSearchQuery {
   implicit val equals = Equal.equalA[ImageSearchQuery]
-  val maxDistance = (ImageCatalog.defaultSize / 2).getOrElse(Angle.zero)
+  val maxDistance: Angle = (ImageCatalog.defaultSize / 2).getOrElse(Angle.zero)
 
   implicit class DeclinationShow(val d: Declination) extends AnyVal {
     def toFilePart: String = Declination.formatDMS(d, ":", 2)
@@ -50,7 +51,7 @@ object ImageEntry {
   implicit val equals = Equal.equalA[ImageEntry]
 
   // TODO Support multiple suffixes
-  val fileRegex = """img_(.*)_ra_(.*)_dec_(.*)\.fits\.gz""".r
+  val fileRegex: Regex = """img_(.*)_ra_(.*)_dec_(.*)\.fits\.gz""".r
 
   /**
     * Decode a file name to an image entry
@@ -69,7 +70,7 @@ object ImageEntry {
 }
 
 /**
-  * This interface can be used to listen when the image is being lodaded
+  * This interface can be used to listen when the image is being loaded
   */
 trait ImageLoadingListener {
   def downloadStarts(): Unit
@@ -88,7 +89,7 @@ object ImageLoadingListener {
 }
 
 object ImageCatalogClient {
-  val Log = Logger.getLogger(this.getClass.getName)
+  val Log: Logger = Logger.getLogger(this.getClass.getName)
 
   /**
     * Load an image for the given coordinates on the user catalog

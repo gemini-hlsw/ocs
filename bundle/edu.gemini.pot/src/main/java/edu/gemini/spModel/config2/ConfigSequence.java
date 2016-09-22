@@ -1,6 +1,3 @@
-//
-// $Id: ConfigSequence.java 38365 2011-11-03 20:37:20Z swalker $
-//
 package edu.gemini.spModel.config2;
 
 import java.util.*;
@@ -43,7 +40,7 @@ public class ConfigSequence implements Serializable {
         boolean matches(Config config);
     }
 
-    private List<Config> _configs = new ArrayList<Config>();
+    private List<Config> _configs = new ArrayList<>();
     private boolean _isCompact = true;
 
     private transient List<Config> _completeConfigs;
@@ -94,7 +91,7 @@ public class ConfigSequence implements Serializable {
      * Creates a ConfigSequence that is a copy of the given sequence.
      */
     public ConfigSequence(ConfigSequence copy) {
-        _configs = new ArrayList<Config>(copy._configs);
+        _configs = new ArrayList<>(copy._configs);
 
         for (ListIterator<Config> lit=_configs.listIterator(); lit.hasNext(); ) {
             lit.set(new DefaultConfig(lit.next()));
@@ -115,7 +112,7 @@ public class ConfigSequence implements Serializable {
             return;
         }
 
-        List<Config> res = new ArrayList<Config>();
+        List<Config> res = new ArrayList<>();
         Config curConfig = new DefaultConfig();
         for (Config next : _configs) {
 
@@ -137,7 +134,7 @@ public class ConfigSequence implements Serializable {
     private void _complete() {
         if (_completeConfigs != null) return;
 
-        _completeConfigs = new ArrayList<Config>();
+        _completeConfigs = new ArrayList<>();
         if (_configs.size() == 0) return;
 
         Config curConfig = new DefaultConfig();
@@ -178,7 +175,7 @@ public class ConfigSequence implements Serializable {
      */
     public ConfigSequence filter(Predicate p) {
         _complete();
-        List<Config> res = new ArrayList<Config>(_completeConfigs.size());
+        List<Config> res = new ArrayList<>(_completeConfigs.size());
         for (Config c : _completeConfigs) {
             if (p.matches(c)) res.add(c);
         }
@@ -266,7 +263,7 @@ public class ConfigSequence implements Serializable {
      */
     public Object[] getDistinctItemValues(ItemKey key) {
         _complete();
-        Set<Object> s = new HashSet<Object>();
+        Set<Object> s = new HashSet<>();
         for (Config completeConfig : _completeConfigs) {
             s.add(completeConfig.getItemValue(key));
         }
@@ -287,7 +284,7 @@ public class ConfigSequence implements Serializable {
 
         Config startConfig = _configs.get(0);
 
-        Set<ItemKey> res = new HashSet<ItemKey>();
+        Set<ItemKey> res = new HashSet<>();
         for (int i=1; i<_configs.size(); ++i) {
             Config conf = _configs.get(i);
             ItemEntry[] itemEntryArray = conf.itemEntries();
@@ -315,10 +312,8 @@ public class ConfigSequence implements Serializable {
         if (_configs.size() <= 0) return ItemKey.EMPTY_ARRAY;
 
         Config startConfig = _configs.get(0);
-        Set<ItemKey> res = new HashSet<ItemKey>();
-        for (ItemKey key : startConfig.getKeys()) {
-            res.add(key);
-        }
+        Set<ItemKey> res = new HashSet<>();
+        Collections.addAll(res, startConfig.getKeys());
 
         for (int i=1; i<_configs.size(); ++i) {
             Config conf = _configs.get(i);
@@ -357,7 +352,7 @@ public class ConfigSequence implements Serializable {
      * @return the index of the first Config that matches the given template, if
      * any; -1 otherwise
      */
-    public int indexMatching(Config template) {
+    private int indexMatching(Config template) {
        _complete();
         int i=0;
         for (Config conf : _completeConfigs) {

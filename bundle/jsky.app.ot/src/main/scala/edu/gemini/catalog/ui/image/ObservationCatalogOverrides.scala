@@ -9,6 +9,7 @@ import argonaut.Argonaut._
 import argonaut._
 import edu.gemini.catalog.image.ImageCatalog
 import edu.gemini.pot.sp.SPNodeKey
+import edu.gemini.spModel.core.Wavelength
 import jsky.util.Preferences
 
 import scalaz._
@@ -20,6 +21,10 @@ import scalaz.concurrent.Task
   * Basically it keeps a map of observations to catalogue backed up on a file
   */
 object ObservationCatalogOverrides {
+  // TODO Convert these to Task
+  private val preferencesDir = Preferences.getPreferences.getDir
+  private val overridesFile = new File(preferencesDir, "catalogOverrides.json")
+
   case class CatalogOverride(key: SPNodeKey, catalog: ImageCatalog)
 
   object CatalogOverride {
@@ -62,19 +67,16 @@ object ObservationCatalogOverrides {
         Parse.decodeOr[Overrides, Overrides](lines, identity, Overrides.zero)
       }.getOrElse(Overrides.zero)
 
-  val preferencesDir = Preferences.getPreferences.getDir
-  val overridesFile = new File(preferencesDir, "catalogOverrides.json")
-
-  def catalogFor(key: SPNodeKey): Task[ImageCatalog] = {
-    // Synchronize file reads and writes
+  def catalogFor(key: SPNodeKey, wavelength: Option[Wavelength]): Task[ImageCatalog] = {
     this.synchronized {
-      ImageCatalog.preferences().map { p => readOverrides.obsCatalog(key).getOrElse(p.defaultCatalog)}
+      ImageCatalog.preferences().map { p => readOverrides.obsCatalog(key).getOrElse(ImageCatalog.catalogForWavelength(wavelength))}
     }
   }
 
   def storeOverride(key: SPNodeKey, c: ImageCatalog): Task[Unit] = Task.delay {
     this.synchronized {
-      def writeOverrides(overrides: Overrides) = \/.fromTryCatchNonFatal {
+      def writeOverrides(overrides: Overrides) =
+        \/.fromTryCatchNonFatal {
           Files.write(overridesFile.toPath, overrides.asJson.spaces2.getBytes(StandardCharsets.UTF_8))
         }
 

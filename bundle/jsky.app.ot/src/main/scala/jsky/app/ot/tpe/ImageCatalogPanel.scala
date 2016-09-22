@@ -132,8 +132,10 @@ final class ImageCatalogPanel(imageDisplay: CatalogImageDisplay) {
     // Verify we are on the EDT. We don't want to use Swing.onEDT
     assert(SwingUtilities.isEventDispatchThread)
 
-    val catalogue = observation.map(_.getNodeKey)
-      .fold(ImageCatalog.preferences().map(_.defaultCatalog))(ObservationCatalogOverrides.catalogFor)
+    // FIXME
+    /*val catalogue = observation.map(_.getNodeKey)
+      .fold(ImageCatalog.preferences().map(_.defaultCatalog))(ObservationCatalogOverrides.catalogFor)*/
+    val catalogue = ImageCatalog.preferences().map(_.defaultCatalog)
 
     catalogue.map(updateSelection).unsafePerformSync
   }

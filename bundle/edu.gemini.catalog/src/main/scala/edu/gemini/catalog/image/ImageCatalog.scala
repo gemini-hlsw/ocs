@@ -4,10 +4,11 @@ import java.net.URL
 import java.nio.file.attribute.BasicFileAttributes
 import java.nio.file.{FileVisitResult, Files, Path, SimpleFileVisitor}
 
-import edu.gemini.spModel.core.{Angle, Coordinates, MagnitudeBand}
+import edu.gemini.spModel.core.{Angle, Coordinates, MagnitudeBand, Wavelength}
 import jsky.util.Preferences
 import squants.information.Information
 import squants.information.InformationConversions._
+import edu.gemini.spModel.core.WavelengthConversions._
 
 import scalaz._
 import Scalaz._
@@ -18,7 +19,7 @@ sealed abstract class ImageCatalog(val id: String, val displayName: String, val 
   /** Returns the url that can load the passed coordinates */
   def queryUrl(c: Coordinates): URL
 
-  override def toString = id
+  override def toString: String = id
 }
 
 /** Base class for DSS based image catalogs */
@@ -76,7 +77,7 @@ object MassImgK extends AstroCatalog("2massK", "2MASS Quick-Look Image Retrieval
 case class ImageCatalogPreferences(imageCacheSize: Information, defaultCatalog: ImageCatalog)
 
 object ImageCatalogPreferences {
-  val DefaultCacheSize = 500.mb
+  val DefaultCacheSize: Information = 500.mb
   /** Default image server */
   val DefaultImageServer = DssGeminiNorth
 
@@ -87,16 +88,31 @@ object ImageCatalogPreferences {
   * Contains definitions for ImageCatalogs including a list of all the available image servers
   */
 object ImageCatalog {
-  val defaultSize = Angle.fromArcmin(15.0)
+  val defaultSize: Angle = Angle.fromArcmin(15.0)
   implicit val equals = Equal.equalA[ImageCatalog]
 
   private val IMAGE_DEFAULT_CATALOG = "ot.catalog.default"
   private val IMAGES_CACHE_SIZE = "ot.cache.size"
 
+  private val DssCutoff   = 1.0.microns
+  private val MassJCutoff = 1.4.microns
+  private val MassHCutoff = 1.9.microns
+
   /** List of all known image server in preference order */
   val all = List(DssGeminiNorth, DssGeminiSouth, DssESO, Dss2ESO, Dss2iESO, MassImgJ, MassImgH, MassImgK)
 
   def byName(id: String): Option[ImageCatalog] = all.find(_.id == id)
+
+  /**
+    * Returns the catalog appropriate for the given wavelength
+    */
+  def catalogForWavelength(w: Option[Wavelength]): ImageCatalog = w match {
+    case Some(d) if d <= DssCutoff   => DssGeminiSouth
+    case Some(d) if d <= MassJCutoff => MassImgJ
+    case Some(d) if d <= MassHCutoff => MassImgH
+    case Some(d)                     => MassImgK
+    case None                        => DssGeminiNorth
+  }
 
   /**
     * Indicates the user preferences about Image Catalogs
