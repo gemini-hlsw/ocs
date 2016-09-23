@@ -93,46 +93,15 @@ object ImageCatalogClient {
   val Log: Logger = Logger.getLogger(this.getClass.getName)
 
   /**
-    * Load an image for the given coordinates on the user catalog
+    * Load an image for the given query
     */
-  def loadImage(cacheDir: Path)(query: ImageSearchQuery)(listener: ImageLoadingListener): Task[Option[ImageEntry]] = {
-
-    /**
-      * Method to prune the cache if we are using to much disk space
-      *
-      * @return
-      */
-    def pruneCache: Task[Unit] = Task.fork {
-      // Remove files from the in memory cache and delete from drive
-      def deleteOldFiles(files: List[ImageEntry]): Task[Unit] =
-        Task.gatherUnordered(files.map(StoredImagesCache.remove)) *> Task.delay(files.foreach(_.file.toFile.delete()))
-
-      // Find the files that should be removed to keep the max size limited
-      def filesToRemove(s: StoredImages, maxCacheSize: Long): Task[List[ImageEntry]] = Task.delay {
-        val u = s.sortedByAccess.foldLeft((0L, List.empty[ImageEntry])) { (s, e) =>
-          val accSize = s._1 + e.fileSize
-          if (accSize > maxCacheSize) {
-            (accSize, e :: s._2)
-          } else {
-            (accSize, s._2)
-          }
-        }
-        u._2
-      }
-
-      for {
-        cache <- StoredImagesCache.get
-        pref  <- ImageCatalog.preferences()
-        ftr   <- filesToRemove(cache, pref.imageCacheSize.toBytes.toLong)
-        _     <- deleteOldFiles(ftr)
-      } yield ()
-    }
+  def loadImage(query: ImageSearchQuery, dir: Path, listener: ImageLoadingListener): Task[Option[ImageEntry]] = {
 
     def addToCacheAndGet(f: Path): Task[ImageEntry] = {
       val i = ImageEntry(query, f, f.toFile.length())
       // Add to cache and prune the cache
       // Note that cache pruning goes in a different thread
-      StoredImagesCache.add(i) *> pruneCache *> Task.now(i)
+      StoredImagesCache.add(i) *> ImageCacheOnDisk.pruneCache *> Task.now(i)
     }
 
     def readImageToFile: Task[Path] =
@@ -142,7 +111,7 @@ object ImageCatalogClient {
         val connection = query.url.openConnection()
         val in = query.url.openStream()
         (connection.getContentType, in)
-      } >>= { Function.tupled(ImageCatalogClient.imageToTmpFile(cacheDir, query)) }
+      } >>= { Function.tupled(ImageCatalogClient.imageToTmpFile(dir, query)) }
 
     def downloadImage: Task[ImageEntry] = {
       val task = for {

@@ -1,6 +1,11 @@
 package edu.gemini.catalog.image
 
+import java.io.File
+import java.nio.file.attribute.BasicFileAttributes
+import java.nio.file.{FileVisitResult, Files, Path, SimpleFileVisitor}
 import java.time.Instant
+
+import jsky.util.Preferences
 
 import scalaz._
 import Scalaz._
@@ -55,4 +60,59 @@ object StoredImagesCache {
     */
   def find(query: ImageSearchQuery): Task[Option[ImageEntry]] =
     cacheRef.get.map(_.findNearby(query))
+}
+
+object ImageCacheOnDisk {
+
+  /**
+    * Method to prune the cache if we are using to much disk space
+    */
+  def pruneCache: Task[Unit] = Task.fork {
+    // Remove files from the in memory cache and delete from drive
+    def deleteOldFiles(files: List[ImageEntry]): Task[Unit] =
+      Task.gatherUnordered(files.map(StoredImagesCache.remove)) *> Task.delay(files.foreach(_.file.toFile.delete()))
+
+    // Find the files that should be removed to keep the max size limited
+    def filesToRemove(s: StoredImages, maxCacheSize: Long): Task[List[ImageEntry]] = Task.delay {
+      val u = s.sortedByAccess.foldLeft((0L, List.empty[ImageEntry])) { (s, e) =>
+        val accSize = s._1 + e.fileSize
+        if (accSize > maxCacheSize) {
+          (accSize, e :: s._2)
+        } else {
+          (accSize, s._2)
+        }
+      }
+      u._2
+    }
+
+    for {
+      cache <- StoredImagesCache.get
+      pref  <- ImageCatalogPreferences.preferences()
+      ftr   <- filesToRemove(cache, pref.imageCacheSize.toBytes.toLong)
+      _     <- deleteOldFiles(ftr)
+    } yield ()
+  }
+
+  /**
+    * Clear the image cache, deleting the files
+    */
+  def clearCache: Task[Unit] = {
+    def cacheDir = Task.delay(Preferences.getPreferences.getCacheDir)
+
+    def deleteCacheFiles(cacheDir: File): Task[Path] = Task.delay {
+      Files.walkFileTree(cacheDir.toPath, new SimpleFileVisitor[Path] {
+        override def visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult = {
+          super.visitFile(file, attrs)
+          file.toFile.delete()
+          FileVisitResult.CONTINUE
+        }
+      })
+    }
+
+    for {
+      cd <- cacheDir
+      _  <- deleteCacheFiles(cd)
+    } yield ()
+  }
+
 }

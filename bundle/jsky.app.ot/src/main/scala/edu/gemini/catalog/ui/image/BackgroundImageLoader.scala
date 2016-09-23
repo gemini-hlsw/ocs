@@ -29,8 +29,6 @@ case class TargetImageRequest(key: SPNodeKey, coordinates: Coordinates, obsWavel
   * Listens for program changes and download images as required
   */
 object BackgroundImageLoader {
-  def cacheDir: Task[Path] = Task.delay(Preferences.getPreferences.getCacheDir.toPath)
-
   private val ImageDownloadsThreadFactory = new ThreadFactory {
     private val threadNumber: AtomicInteger = new AtomicInteger(1)
     private val defaultThreadFactory = Executors.defaultThreadFactory()
@@ -51,6 +49,8 @@ object BackgroundImageLoader {
     */
   private val highPriorityEC = Strategy.DefaultExecutorService
 
+  def cacheDir: Task[Path] = Task.delay(Preferences.getPreferences.getCacheDir.toPath)
+
   /** Called when a program is created to download its images */
   def watch(prog: ISPProgram): Unit = {
     prog.addCompositeChangeListener(ChangeListener)
@@ -69,9 +69,6 @@ object BackgroundImageLoader {
     prog.removeCompositeChangeListener(ChangeListener)
   }
 
-  /******************************************
-    * Methods interacting with the java side
-    *****************************************/
   /**
     * Display an image if available on disk or request the download if necessary
     */
@@ -111,7 +108,7 @@ object BackgroundImageLoader {
     for {
       cd      <- cacheDir
       catalog <- ObservationCatalogOverrides.catalogFor(t.key, t.obsWavelength)
-      image   <- ImageCatalogClient.loadImage(cd)(ImageSearchQuery(catalog, t.coordinates))(listener)
+      image   <- ImageCatalogClient.loadImage(ImageSearchQuery(catalog, t.coordinates), cd, listener)
     } yield image match {
       case Some(e) => setTpeImage(e)
       case _       => // Ignore

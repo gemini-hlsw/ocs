@@ -3,7 +3,7 @@ package jsky.app.ot.userprefs.images
 import java.awt.{Component => JComponent}
 import javax.swing.Icon
 
-import edu.gemini.catalog.image.{ImageCatalog, ImageCatalogPreferences}
+import edu.gemini.catalog.image.{ImageCacheOnDisk, ImageCatalog, ImageCatalogPreferences}
 import edu.gemini.shared.gui.textComponent.{NumberField, TextRenderer}
 import edu.gemini.shared.util.immutable.{None => JNone, Option => JOption, Some => JSome}
 import edu.gemini.ui.miglayout.MigPanel
@@ -23,7 +23,7 @@ class ImageCatalogPreferencesPanel extends PreferencePanel {
   val CacheSizeDescription = "Change the max allowed size of the cache and/or clear"
   val DefaultCatalogDescription = "Select the default image catalog"
 
-  val initialValue = ImageCatalog.preferences().unsafePerformSync
+  val initialValue = ImageCatalogPreferences.preferences().unsafePerformSync
 
   lazy val catalogsComboBox = new ComboBox[ImageCatalog](ImageCatalog.all) with TextRenderer[ImageCatalog] {
     override def text(a: ImageCatalog): String = a.displayName
@@ -32,7 +32,7 @@ class ImageCatalogPreferencesPanel extends PreferencePanel {
     selection.item = initialValue.defaultCatalog
     reactions += {
       case SelectionChanged(_) if cacheSizeField.text.nonEmpty =>
-        ImageCatalog.preferences(ImageCatalogPreferences(cacheSizeField.text.toDouble.megabytes, selection.item)).unsafePerformSync
+        ImageCatalogPreferences.preferences(ImageCatalogPreferences(cacheSizeField.text.toDouble.megabytes, selection.item)).unsafePerformSync
     }
   }
 
@@ -44,7 +44,7 @@ class ImageCatalogPreferencesPanel extends PreferencePanel {
     reactions += {
       case ValueChanged(_) if text.nonEmpty =>
         // this is guaranteed to be a positive double
-        ImageCatalog.preferences(ImageCatalogPreferences(this.text.toDouble.megabytes, catalogsComboBox.selection.item)).unsafePerformSync
+        ImageCatalogPreferences.preferences(ImageCatalogPreferences(this.text.toDouble.megabytes, catalogsComboBox.selection.item)).unsafePerformSync
     }
   }
 
@@ -53,7 +53,7 @@ class ImageCatalogPreferencesPanel extends PreferencePanel {
   lazy val clearCacheButton = new Button("Clear cache") {
     reactions += {
       case ButtonClicked(_) =>
-        Task.fork(ImageCatalog.clearCache).unsafePerformAsync {
+        Task.fork(ImageCacheOnDisk.clearCache).unsafePerformAsync {
           case \/-(_) => // Ignore
           case -\/(e) => DialogUtil.error(s"Error while cleaning the cache: ${e.getMessage}")
         }

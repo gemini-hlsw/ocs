@@ -7,7 +7,7 @@ import java.util.UUID
 
 import argonaut.Argonaut._
 import argonaut._
-import edu.gemini.catalog.image.ImageCatalog
+import edu.gemini.catalog.image.{ImageCatalog, ImageCatalogPreferences}
 import edu.gemini.pot.sp.SPNodeKey
 import edu.gemini.spModel.core.Wavelength
 import jsky.util.Preferences
@@ -69,7 +69,7 @@ object ObservationCatalogOverrides {
 
   def catalogFor(key: SPNodeKey, wavelength: Option[Wavelength]): Task[ImageCatalog] = {
     this.synchronized {
-      ImageCatalog.preferences().map { p => readOverrides.obsCatalog(key).getOrElse(ImageCatalog.catalogForWavelength(wavelength))}
+      ImageCatalogPreferences.preferences().map { p => readOverrides.obsCatalog(key).getOrElse(ImageCatalog.catalogForWavelength(wavelength))}
     }
   }
 

@@ -1,9 +1,6 @@
 package edu.gemini.catalog.image
 
-import java.io.File
 import java.net.URL
-import java.nio.file.attribute.BasicFileAttributes
-import java.nio.file.{FileVisitResult, Files, Path, SimpleFileVisitor}
 
 import edu.gemini.spModel.core.{Angle, Coordinates, MagnitudeBand, Wavelength}
 import jsky.util.Preferences
@@ -72,28 +69,14 @@ object MassImgK extends AstroCatalog("2massK", "2MASS Quick-Look Image Retrieval
 }
 
 /**
-  * Preferences handling the image catalog, like cache size, etc
-  * This are backed up to disk with the other jsky properties
-  */
-case class ImageCatalogPreferences(imageCacheSize: Information, defaultCatalog: ImageCatalog)
-
-object ImageCatalogPreferences {
-  val DefaultCacheSize: Information = 500.mb
-  /** Default image server */
-  val DefaultImageServer = DssGeminiNorth
-
-  val zero = ImageCatalogPreferences(DefaultCacheSize, DefaultImageServer)
-}
-
-/**
   * Contains definitions for ImageCatalogs including a list of all the available image servers
   */
 object ImageCatalog {
   val defaultSize: Angle = Angle.fromArcmin(15.0)
-  implicit val equals = Equal.equalA[ImageCatalog]
+  /** Default image server */
+  val DefaultImageServer = DssGeminiNorth
 
-  private val ImageDefaultCatalog = "ot.catalog.default"
-  private val ImageMaxCacheSize = "ot.cache.size"
+  implicit val equals = Equal.equalA[ImageCatalog]
 
   private val DssCutoff   = 1.0.microns
   private val MassJCutoff = 1.4.microns
@@ -112,8 +95,23 @@ object ImageCatalog {
     case Some(d) if d <= MassJCutoff => MassImgJ
     case Some(d) if d <= MassHCutoff => MassImgH
     case Some(_)                     => MassImgK
-    case None                        => DssGeminiNorth
+    case None                        => DefaultImageServer
   }
+}
+
+/**
+  * Preferences handling the image catalog, like cache size, etc
+  * This are backed up to disk with the other jsky properties
+  */
+case class ImageCatalogPreferences(imageCacheSize: Information, defaultCatalog: ImageCatalog)
+
+object ImageCatalogPreferences {
+  val DefaultCacheSize: Information = 500.mb
+
+  private val ImageDefaultCatalog = "ot.catalog.default"
+  private val ImageMaxCacheSize = "ot.cache.size"
+
+  val zero = ImageCatalogPreferences(DefaultCacheSize, ImageCatalog.DefaultImageServer)
 
   /**
     * Indicates the user preferences about Image Catalogs
@@ -122,7 +120,7 @@ object ImageCatalog {
     \/.fromTryCatchNonFatal {
       // Try to parse preferences
       val size = Option(Preferences.get(ImageMaxCacheSize)).map(_.toDouble)
-      val catalog = all.find(_.id == Preferences.get(ImageDefaultCatalog)).getOrElse(ImageCatalogPreferences.DefaultImageServer)
+      val catalog = ImageCatalog.all.find(_.id == Preferences.get(ImageDefaultCatalog)).getOrElse(ImageCatalog.DefaultImageServer)
 
       ImageCatalogPreferences(size.map(_.megabytes).getOrElse(ImageCatalogPreferences.DefaultCacheSize), catalog)
     }.getOrElse(ImageCatalogPreferences.zero)
@@ -134,27 +132,5 @@ object ImageCatalog {
   def preferences(prefs: ImageCatalogPreferences): Task[Unit] = Task.delay { // Inside task as it writes the preferences file
     Preferences.set(ImageMaxCacheSize, prefs.imageCacheSize.toMegabytes.toString)
     Preferences.set(ImageDefaultCatalog, prefs.defaultCatalog.id)
-  }
-
-  /**
-    * Clear the image cache
-    */
-  def clearCache: Task[Unit] = {
-    def cacheDir = Task.delay(Preferences.getPreferences.getCacheDir)
-
-    def deleteCacheFiles(cacheDir: File): Task[Path] = Task.delay {
-      Files.walkFileTree(cacheDir.toPath, new SimpleFileVisitor[Path] {
-        override def visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult = {
-          super.visitFile(file, attrs)
-          file.toFile.delete()
-          FileVisitResult.CONTINUE
-        }
-      })
-    }
-
-    for {
-      cd <- cacheDir
-      _  <- deleteCacheFiles(cd)
-    } yield ()
   }
 }

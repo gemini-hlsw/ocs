@@ -4,7 +4,7 @@ import javax.swing._
 
 import scalaz._
 import Scalaz._
-import edu.gemini.catalog.image.{ImageCatalog, ImageLoadingListener}
+import edu.gemini.catalog.image.{ImageCatalog, ImageCatalogPreferences, ImageLoadingListener}
 import edu.gemini.catalog.ui.image.{ObsWavelengthExtractor, ObservationCatalogOverrides}
 import edu.gemini.catalog.ui.tpe.CatalogImageDisplay
 import edu.gemini.pot.sp.ISPObservation
@@ -46,7 +46,7 @@ final class ImageCatalogPanel(imageDisplay: CatalogImageDisplay) {
 
                 // Reset the image if needed
                 val r = for {
-                  p <- ImageCatalog.preferences() // At this moment the default catalog may have changed
+                  p <- ImageCatalogPreferences.preferences() // At this moment the default catalog may have changed
                 } yield {
                   val f = buttons.find(_._1 === p.defaultCatalog).map(_._3)
                   f match {
@@ -126,7 +126,7 @@ final class ImageCatalogPanel(imageDisplay: CatalogImageDisplay) {
     val wavelength = TpeContext.fromTpeManager.flatMap(ObsWavelengthExtractor.extractObsWavelength)
 
     val catalogue = observation.map(_.getNodeKey)
-      .fold(ImageCatalog.preferences().map(_.defaultCatalog))(ObservationCatalogOverrides.catalogFor(_, wavelength))
+      .fold(ImageCatalogPreferences.preferences().map(_.defaultCatalog))(ObservationCatalogOverrides.catalogFor(_, wavelength))
 
     catalogue.map(updateSelection).unsafePerformSync
   }
