@@ -5,8 +5,8 @@ import Scalaz._
 import scalaz.concurrent.Task
 
 case class ImagesInProgress (images: List[ImageSearchQuery]) {
-  def +(i: ImageSearchQuery) = copy(i :: images)
-  def -(i: ImageSearchQuery) = copy(images.filterNot(_ == i))
+  def +(i: ImageSearchQuery): ImagesInProgress = copy(i :: images)
+  def -(i: ImageSearchQuery): ImagesInProgress = copy(images.filterNot(_ == i))
 }
 
 object ImagesInProgress  {

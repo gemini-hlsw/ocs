@@ -35,6 +35,16 @@ object TpeContext {
     c <- Option(f(o))
   } yield c
 
+  /**
+    * Attempts to get the TpeContext from the observation on the TPE
+    * @return
+    */
+  def fromTpeManager: Option[TpeContext] =
+    for {
+      tpe <- Option(TpeManager.get())
+      iw  <- Option(tpe.getImageWidget)
+      ctx <- Option(iw.getContext)
+    } yield ctx
 }
 
 import TpeContext._

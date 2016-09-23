@@ -40,7 +40,7 @@ trait CatalogDisplay {
   * browsing catalogs and plotting catalog symbols on the image.
   */
 abstract class CatalogImageDisplay(parent: Component, navigatorPane: NavigatorPane) extends DivaMainImageDisplay(navigatorPane, parent) with CatalogDisplay {
-  val plotter = new BasicTablePlotter(getCanvasGraphics, getCoordinateConverter) <| {navigatorPane.setPlotter}
+  override val plotter: TablePlotter = new BasicTablePlotter(getCanvasGraphics, getCoordinateConverter) <| {navigatorPane.setPlotter}
 
   /**
     * Load the sky image for the current location
@@ -131,7 +131,7 @@ class CatalogImageDisplayMenuBar(protected val imageDisplay: CatalogImageDisplay
   /** Handle for the Help menu */
   private val _helpMenu = new JMenu("Help")
 
-  val pickObjectMenuItem = getPickObjectMenuItem
+  private val pickObjectMenuItem = getPickObjectMenuItem
   getViewMenu.remove(pickObjectMenuItem)
   _catalogMenu.add(proxySettingsMenuItem)
   _catalogMenu.add(pickObjectMenuItem)

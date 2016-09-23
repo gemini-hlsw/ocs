@@ -9,12 +9,12 @@ import scalaz.concurrent.Task
 case class StoredImages(entries: List[(Instant, ImageEntry)]) {
   def images = entries.map(_._2)
 
-  def +(i: ImageEntry) = copy((Instant.now, i) :: entries)
-  def +(i: Instant, e: ImageEntry) = copy((i, e) :: entries)
+  def +(i: ImageEntry): StoredImages = copy((Instant.now, i) :: entries)
+  def +(i: Instant, e: ImageEntry): StoredImages = copy((i, e) :: entries)
 
-  def -(i: ImageEntry) = copy(entries.filterNot(_._2 === i))
+  def -(i: ImageEntry): StoredImages = copy(entries.filterNot(_._2 === i))
 
-  def mark(i: ImageEntry) = copy(entries.collect {
+  def mark(i: ImageEntry): StoredImages = copy(entries.collect {
     case x if x._2 === i => (Instant.now, x._2)
     case x               => x
   })

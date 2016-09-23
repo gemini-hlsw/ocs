@@ -57,11 +57,7 @@ final class ImageCatalogPanel(imageDisplay: CatalogImageDisplay) {
                 r.unsafePerformSync
 
                 // Reset the selection
-                for {
-                  tpe <- Option(TpeManager.get())
-                  iw  <- Option(tpe.getImageWidget)
-                  c   <- Option(iw.getContext)
-                } yield resetCatalogue(c.obsShell)
+                TpeContext.fromTpeManager.foreach(t => resetCatalogue(t.obsShell))
             }
           }
 
@@ -86,12 +82,7 @@ final class ImageCatalogPanel(imageDisplay: CatalogImageDisplay) {
       b.reactions += {
         case ButtonClicked(_) =>
           // Read the current key on the tpe
-          val key = for {
-            tpe <- Option(TpeManager.get())
-            iw <- Option(tpe.getImageWidget)
-            c <- Option(iw.getContext)
-            k <- c.obsKey
-          } yield k
+          val key = TpeContext.fromTpeManager.flatMap(_.obsKey)
 
           // Update the image and store the override
           key.foreach { k =>
@@ -132,11 +123,7 @@ final class ImageCatalogPanel(imageDisplay: CatalogImageDisplay) {
     // Verify we are on the EDT. We don't want to use Swing.onEDT
     assert(SwingUtilities.isEventDispatchThread)
 
-    val wavelength = for {
-        tpe <- Option(TpeManager.get())
-        iw  <- Option(tpe.getImageWidget)
-        wv  <- ObsWavelengthExtractor.extractObsWavelength(iw.getContext)
-      } yield wv
+    val wavelength = TpeContext.fromTpeManager.flatMap(ObsWavelengthExtractor.extractObsWavelength)
 
     val catalogue = observation.map(_.getNodeKey)
       .fold(ImageCatalog.preferences().map(_.defaultCatalog))(ObservationCatalogOverrides.catalogFor(_, wavelength))

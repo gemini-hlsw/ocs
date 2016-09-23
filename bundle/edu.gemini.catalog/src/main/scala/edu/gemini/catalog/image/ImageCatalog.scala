@@ -110,7 +110,7 @@ object ImageCatalog {
     case Some(d) if d <= DssCutoff   => DssGeminiSouth
     case Some(d) if d <= MassJCutoff => MassImgJ
     case Some(d) if d <= MassHCutoff => MassImgH
-    case Some(d)                     => MassImgK
+    case Some(_)                     => MassImgK
     case None                        => DssGeminiNorth
   }
 

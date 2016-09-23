@@ -148,10 +148,10 @@ object BackgroundImageLoader {
 
     Swing.onEDT {
       for {
-        tpe <- Option(TpeManager.get())
-        iw  <- Option(tpe.getImageWidget)
-        c   <- requestedImage(iw.getContext)
-        if entry.query.isNearby(c.coordinates) // The TPE may have moved so only display if the coordinates match
+        tpe     <- Option(TpeManager.get())
+        iw      <- Option(tpe.getImageWidget)
+        request <- requestedImage(iw.getContext)
+        if entry.query.isNearby(request.coordinates) // The TPE may have moved so only display if the coordinates match
       } {
         val r = ImagesInProgress.contains(entry.query) >>= { inProgress => if (!inProgress) markAndSet(iw) else Task.now(())}
         // TODO: Handle errors
