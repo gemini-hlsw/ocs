@@ -33,11 +33,13 @@ sealed trait ValueMatcher[A] {
 object ValueMatcher {
   private[servlet] implicit class ToRegex(val expression: String) extends AnyVal {
     def toRegex: Regex = ("^(?i)" +
-      (expression.contains("|") ? s"($expression)" | expression).
-        replaceAllLiterally("+", "\\+").
-        replaceAllLiterally("*", ".*").
-        replaceAllLiterally("?", ".")
-      + "$").r
+        (expression.contains("|") ? s"($expression)" | expression).
+          replaceAllLiterally("-", "\\-").
+          replaceAllLiterally("+", "\\+").
+          replaceAllLiterally("*", ".*").
+          replaceAllLiterally("%", ".*").
+          replaceAllLiterally("?", ".")
+        + "$").r
   }
 
   abstract class StringValueMatcher[A] extends ValueMatcher[A] {
