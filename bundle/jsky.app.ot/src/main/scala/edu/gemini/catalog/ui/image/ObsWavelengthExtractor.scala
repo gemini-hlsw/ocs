@@ -8,22 +8,30 @@ import edu.gemini.spModel.core.Wavelength
 import edu.gemini.spModel.core.WavelengthConversions._
 import edu.gemini.spModel.gemini.acqcam.AcqCamParams
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams
-import jsky.app.ot.tpe.InstrumentContext
-
+import jsky.app.ot.tpe.{InstrumentContext, TpeContext}
 
 import scala.reflect.ClassTag
 import scalaz._
 import Scalaz._
 
-object ConfigExtractor {
+/**
+  * Can read the wavelength from a given observation
+  */
+object ObsWavelengthExtractor {
   private val ObsWavelengthKey    = new ItemKey("instrument:observingWavelength")
   private val ColorFilterKey      = new ItemKey("instrument:colorFilter")
 
   /**
-    * Attempt to extract the Wavelength for the observation. Assume everything can be null
-    * Based on ITC's configExtract
+    * Attempt to extract the Wavelength for the observation
     */
-  def extractObsWavelength(ctx: InstrumentContext, obs: ISPObservation): Option[Wavelength] = {
+  def extractObsWavelength(tpe: TpeContext): Option[Wavelength] = {
+    tpe.obsShell.flatMap(extractObsWavelength(tpe.instrument, _))
+  }
+
+  /**
+    * Read the configuration of the current observation to find the Observing Wavelength
+    */
+  private def extractObsWavelength(ctx: InstrumentContext, obs: ISPObservation): Option[Wavelength] = {
     // Extract a double value from a string in the configuration
     def extractDoubleFromString(c: ConfigSequence, key: ItemKey): Throwable \/ Double =
       for {
@@ -37,6 +45,7 @@ object ConfigExtractor {
       def missingKey(key: ItemKey): \/[Throwable, A] =
         new RuntimeException(s"Missing config value for key ${key.getPath}").left[A]
 
+      // Read item 0 corresponding to the static configuration
       Option(cs.getItemValue(0, key)).fold(missingKey(key)) { v =>
         \/.fromTryCatchNonFatal(clazz.runtimeClass.cast(v).asInstanceOf[A])
       }

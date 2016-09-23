@@ -123,11 +123,10 @@ object BackgroundImageLoader {
     for {
       ctx    <- tpe.obsContext
       base   <- tpe.targets.base
-      obs    <- tpe.obsShell
       when   = ctx.getSchedulingBlockStart.asScalaOpt | Instant.now.toEpochMilli
       coords <- base.getTarget.coords(when)
       key    <- tpe.obsKey
-    } yield TargetImageRequest(key, coords, ConfigExtractor.extractObsWavelength(tpe.instrument, obs))
+    } yield TargetImageRequest(key, coords, ObsWavelengthExtractor.extractObsWavelength(tpe))
 
   /**
     * Utility methods to run the tasks on separate threads of the pool

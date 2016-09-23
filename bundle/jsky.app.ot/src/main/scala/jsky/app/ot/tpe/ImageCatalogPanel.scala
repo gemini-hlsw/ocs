@@ -5,7 +5,7 @@ import javax.swing._
 import scalaz._
 import Scalaz._
 import edu.gemini.catalog.image.{ImageCatalog, ImageLoadingListener}
-import edu.gemini.catalog.ui.image.ObservationCatalogOverrides
+import edu.gemini.catalog.ui.image.{ObsWavelengthExtractor, ObservationCatalogOverrides}
 import edu.gemini.catalog.ui.tpe.CatalogImageDisplay
 import edu.gemini.pot.sp.ISPObservation
 import edu.gemini.ui.miglayout.MigPanel
@@ -14,25 +14,25 @@ import jsky.app.ot.userprefs.images.ImageCatalogPreferencesPanel
 import jsky.util.gui.Resources
 
 import scala.swing.event.ButtonClicked
-import scala.swing.{Button, Dialog, Label, RadioButton, Swing}
+import scala.swing.{Button, Component, Dialog, Label, RadioButton, Swing}
 import scalaz.concurrent.Task
 
 case class ImageLoadingFeedback() extends Label {
 }
 
 object ImageLoadingFeedback {
-  val spinnerIcon = Resources.getIcon("spinner16.gif")
-  val warningIcon = Resources.getIcon("eclipse/alert.gif")
-  val errorIcon   = Resources.getIcon("error_tsk.gif")
+  val spinnerIcon: ImageIcon = Resources.getIcon("spinner16.gif")
+  val warningIcon: ImageIcon = Resources.getIcon("eclipse/alert.gif")
+  val errorIcon: ImageIcon   = Resources.getIcon("error_tsk.gif")
 }
 
 /**
   * Panel of radio buttons of Image catalogs offered by the TPE.
   */
 final class ImageCatalogPanel(imageDisplay: CatalogImageDisplay) {
-  lazy val buttonGroup = new ButtonGroup
-  lazy val buttons =  ImageCatalog.all.map(mkButton)
-  lazy val toolsButton = new Button("") {
+  private lazy val buttonGroup = new ButtonGroup
+  private lazy val buttons =  ImageCatalog.all.map(mkButton)
+  private lazy val toolsButton = new Button("") {
     tooltip = "Preferences..."
     icon = new ImageIcon(getClass.getResource("/resources/images/eclipse/engineering.gif"))
 
@@ -76,7 +76,7 @@ final class ImageCatalogPanel(imageDisplay: CatalogImageDisplay) {
     }
   }
 
-  lazy val panel = new MigPanel(LC().fill().insets(0.px)) {
+  lazy val panel: Component = new MigPanel(LC().fill().insets(0.px)) {
     add(new Label("Image Catalog:"), CC())
     add(toolsButton, CC())
     buttons.foreach { case (c, b, f) =>
@@ -132,10 +132,14 @@ final class ImageCatalogPanel(imageDisplay: CatalogImageDisplay) {
     // Verify we are on the EDT. We don't want to use Swing.onEDT
     assert(SwingUtilities.isEventDispatchThread)
 
-    // FIXME
-    /*val catalogue = observation.map(_.getNodeKey)
-      .fold(ImageCatalog.preferences().map(_.defaultCatalog))(ObservationCatalogOverrides.catalogFor)*/
-    val catalogue = ImageCatalog.preferences().map(_.defaultCatalog)
+    val wavelength = for {
+        tpe <- Option(TpeManager.get())
+        iw  <- Option(tpe.getImageWidget)
+        wv  <- ObsWavelengthExtractor.extractObsWavelength(iw.getContext)
+      } yield wv
+
+    val catalogue = observation.map(_.getNodeKey)
+      .fold(ImageCatalog.preferences().map(_.defaultCatalog))(ObservationCatalogOverrides.catalogFor(_, wavelength))
 
     catalogue.map(updateSelection).unsafePerformSync
   }
