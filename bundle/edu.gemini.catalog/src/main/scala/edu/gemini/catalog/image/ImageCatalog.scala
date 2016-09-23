@@ -1,5 +1,6 @@
 package edu.gemini.catalog.image
 
+import java.io.File
 import java.net.URL
 import java.nio.file.attribute.BasicFileAttributes
 import java.nio.file.{FileVisitResult, Files, Path, SimpleFileVisitor}
@@ -138,14 +139,22 @@ object ImageCatalog {
   /**
     * Clear the image cache
     */
-  def clearCache: Task[Unit] = Task.delay {
-    val cacheDir = Preferences.getPreferences.getCacheDir
-    Files.walkFileTree(cacheDir.toPath, new SimpleFileVisitor[Path] {
-      override def visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult = {
-        super.visitFile(file, attrs)
-        file.toFile.delete()
-        FileVisitResult.CONTINUE
-      }
-    })
+  def clearCache: Task[Unit] = {
+    def cacheDir = Task.delay(Preferences.getPreferences.getCacheDir)
+
+    def deleteCacheFiles(cacheDir: File): Task[Path] = Task.delay {
+      Files.walkFileTree(cacheDir.toPath, new SimpleFileVisitor[Path] {
+        override def visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult = {
+          super.visitFile(file, attrs)
+          file.toFile.delete()
+          FileVisitResult.CONTINUE
+        }
+      })
+    }
+
+    for {
+      cd <- cacheDir
+      _  <- deleteCacheFiles(cd)
+    } yield ()
   }
 }

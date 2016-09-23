@@ -17,7 +17,7 @@ import Scalaz._
   * Observes the file system to keep the cache populated
   */
 object ImageCacheWatcher {
-  val log = Logger.getLogger(this.getClass.getCanonicalName)
+  val log: Logger = Logger.getLogger(this.getClass.getCanonicalName)
 
   /**
     * Populates the cache when the application starts
@@ -72,10 +72,10 @@ object ImageCacheWatcher {
     * Run the ImageCacheWatcher
     */
   def run(): Unit = {
-    val cacheDir = Preferences.getPreferences.getCacheDir
     val task = for {
-      _ <- populateInitialCache(cacheDir)
-      c <- watch(cacheDir)
+      cd <- Task.delay(Preferences.getPreferences.getCacheDir)
+      _  <- populateInitialCache(cd)
+      c  <- watch(cd)
     } yield c
 
     // Execute the watcher in a separate thread

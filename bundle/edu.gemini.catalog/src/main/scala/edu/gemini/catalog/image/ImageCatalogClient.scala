@@ -1,8 +1,9 @@
 package edu.gemini.catalog.image
 
 import java.io._
+import java.net.URL
 import java.nio.channels.FileLock
-import java.nio.file.Path
+import java.nio.file.{Files, Path, StandardCopyOption}
 import java.util.logging.Logger
 
 import edu.gemini.spModel.core.{Angle, Coordinates, Declination, RightAscension}
@@ -15,9 +16,9 @@ import scalaz.concurrent.Task
 case class ImageSearchQuery(catalog: ImageCatalog, coordinates: Coordinates) {
   import ImageSearchQuery._
 
-  def url = catalog.queryUrl(coordinates)
+  def url: URL = catalog.queryUrl(coordinates)
 
-  def fileName(suffix: String) = s"img_${catalog.id}_${coordinates.toFilePart}$suffix"
+  def fileName(suffix: String): String = s"img_${catalog.id}_${coordinates.toFilePart}$suffix"
 
   def isNearby(query: ImageSearchQuery): Boolean =
     catalog === query.catalog && isNearby(query.coordinates)
@@ -45,7 +46,7 @@ object ImageSearchQuery {
   }
 }
 
-case class ImageEntry(query: ImageSearchQuery, file: File, fileSize: Long)
+case class ImageEntry(query: ImageSearchQuery, file: Path, fileSize: Long)
 
 object ImageEntry {
   implicit val equals = Equal.equalA[ImageEntry]
@@ -61,9 +62,9 @@ object ImageEntry {
       case fileRegex(c, raStr, decStr) =>
         for {
           catalog <- ImageCatalog.byName(c)
-          ra <- Angle.parseHMS(raStr).map(RightAscension.fromAngle).toOption
-          dec <- Angle.parseDMS(decStr).toOption.map(_.toDegrees).flatMap(Declination.fromDegrees)
-        } yield ImageEntry(ImageSearchQuery(catalog, Coordinates(ra, dec)), file, file.length())
+          ra      <- Angle.parseHMS(raStr).map(RightAscension.fromAngle).toOption
+          dec     <- Angle.parseDMS(decStr).toOption.map(_.toDegrees).flatMap(Declination.fromDegrees)
+        } yield ImageEntry(ImageSearchQuery(catalog, Coordinates(ra, dec)), file.toPath, file.length())
       case _ => None
     }
   }
@@ -104,7 +105,7 @@ object ImageCatalogClient {
     def pruneCache: Task[Unit] = Task.fork {
       // Remove files from the in memory cache and delete from drive
       def deleteOldFiles(files: List[ImageEntry]): Task[Unit] =
-        Task.gatherUnordered(files.map(StoredImagesCache.remove)) *> Task.delay(files.foreach(_.file.delete()))
+        Task.gatherUnordered(files.map(StoredImagesCache.remove)) *> Task.delay(files.foreach(_.file.toFile.delete()))
 
       // Find the files that should be removed to keep the max size limited
       def filesToRemove(s: StoredImages, maxCacheSize: Long): Task[List[ImageEntry]] = Task.delay {
@@ -127,14 +128,14 @@ object ImageCatalogClient {
       } yield ()
     }
 
-    def addToCacheAndGet(f: File): Task[ImageEntry] = {
-      val i = ImageEntry(query, f, f.length())
+    def addToCacheAndGet(f: Path): Task[ImageEntry] = {
+      val i = ImageEntry(query, f, f.toFile.length())
       // Add to cache and prune the cache
       // Note that cache pruning goes in a different thread
       StoredImagesCache.add(i) *> pruneCache *> Task.now(i)
     }
 
-    def readImageToFile: Task[File] =
+    def readImageToFile: Task[Path] =
       Task.delay {
         Log.info(s"Downloading image at ${query.url}")
         // Open the connection to the remote
@@ -162,14 +163,14 @@ object ImageCatalogClient {
       ImagesInProgress.contains(query) >>= { inProcess => if (inProcess) Task.now(None) else downloadImage.map(Some.apply) }
 
     // Try to find the image on the cache, else download
-    StoredImagesCache.find(query) >>= { _.filter(_.file.exists()).fold(checkIfNeededAndDownload)(f => Task.now(Some(f))) }
+    StoredImagesCache.find(query) >>= { _.filter(_.file.toFile.exists()).fold(checkIfNeededAndDownload)(f => Task.now(Some(f))) }
   }
 
   /**
     * Download the given image URL to a temporary file and return the file
     * Note that to support the legacy progress bar we explicitly expect a ProgressBarFilterInputStream
     */
-  private def imageToTmpFile(cacheDir: Path, query: ImageSearchQuery)(contentType: String, in: InputStream): Task[File] = {
+  private def imageToTmpFile(cacheDir: Path, query: ImageSearchQuery)(contentType: String, in: InputStream): Task[Path] = {
     val url = query.url
 
     def suffix: Task[String] =
@@ -188,7 +189,11 @@ object ImageCatalogClient {
     def tmpFileName(suffix: String): Task[String] = Task.now(query.fileName(suffix))
 
     def createTmpFile(fileName: String): Task[File] = Task.delay {
-      new File(cacheDir.toFile, fileName)
+      File.createTempFile(".img", ".fits", cacheDir.toFile)
+    }
+
+    def moveFile(suffix: String, tmpFile: File): Task[Path] = Task.delay {
+      Files.move(tmpFile.toPath, cacheDir.resolve(query.fileName(suffix)), StandardCopyOption.ATOMIC_MOVE)
     }
 
     def openTmpFile(file: File): Task[(FileLock, OutputStream)] = Task.delay {
@@ -210,8 +215,9 @@ object ImageCatalogClient {
       f <- tmpFileName(s)
       t <- createTmpFile(f)
       o <- openTmpFile(t)
-      r <- readFile(in, o._2).onFinish(_ => Task.delay(o._1.release()))
-    } yield t
+      _ <- readFile(in, o._2).onFinish(_ => Task.delay(o._1.release()))
+      f <- moveFile(s, t)
+    } yield f
   }
 }
 

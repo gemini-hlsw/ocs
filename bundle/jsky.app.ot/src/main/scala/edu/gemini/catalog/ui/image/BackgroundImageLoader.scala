@@ -29,7 +29,7 @@ case class TargetImageRequest(key: SPNodeKey, coordinates: Coordinates, obsWavel
   * Listens for program changes and download images as required
   */
 object BackgroundImageLoader {
-  val cacheDir: Path = Preferences.getPreferences.getCacheDir.toPath
+  def cacheDir: Task[Path] = Task.delay(Preferences.getPreferences.getCacheDir.toPath)
 
   private val ImageDownloadsThreadFactory = new ThreadFactory {
     private val threadNumber: AtomicInteger = new AtomicInteger(1)
@@ -109,8 +109,9 @@ object BackgroundImageLoader {
     */
   private[image] def requestImageDownload(listener: ImageLoadingListener)(t: TargetImageRequest): Task[Unit] =
     for {
+      cd      <- cacheDir
       catalog <- ObservationCatalogOverrides.catalogFor(t.key, t.obsWavelength)
-      image   <- ImageCatalogClient.loadImage(cacheDir)(ImageSearchQuery(catalog, t.coordinates))(listener)
+      image   <- ImageCatalogClient.loadImage(cd)(ImageSearchQuery(catalog, t.coordinates))(listener)
     } yield image match {
       case Some(e) => setTpeImage(e)
       case _       => // Ignore
@@ -144,7 +145,7 @@ object BackgroundImageLoader {
     * We'll only update the position if the coordinates match
     */
   private def setTpeImage(entry: ImageEntry): Unit = {
-    def markAndSet(iw: TpeImageWidget): Task[Unit] = StoredImagesCache.markAsUsed(entry) *> Task.now(iw.setFilename(entry.file.getAbsolutePath))
+    def markAndSet(iw: TpeImageWidget): Task[Unit] = StoredImagesCache.markAsUsed(entry) *> Task.now(iw.setFilename(entry.file.toAbsolutePath.toString))
 
     Swing.onEDT {
       for {
