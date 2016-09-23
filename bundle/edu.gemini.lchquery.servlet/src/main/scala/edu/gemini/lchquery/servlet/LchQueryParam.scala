@@ -93,12 +93,13 @@ object LchQueryParam {
         Option(inv).map(i => s"${i.getFirst} ${i.getLast}").filterNot(_.trim.isEmpty)
 
       val spProg = toSPProg
-      val piName = for {
-        f <- Option(spProg.getPIFirstName)
-        l <- Option(spProg.getPILastName)
-        n = s"$f $l".trim
-        if !n.isEmpty
-      } yield n
+      val piName = {
+        val piInfo    = spProg.getPIInfo
+        val firstName = piInfo.getFirstName
+        val lastName  = piInfo.getLastName
+        val piNameStr = s"$firstName $lastName".trim
+        if (piNameStr.isEmpty) None else piNameStr.some
+      }
 
       (piName :: spProg.getGsaPhase1Data.getCois.asScala.map(investigatorName).toList).
         collect { case Some(i) => i }
