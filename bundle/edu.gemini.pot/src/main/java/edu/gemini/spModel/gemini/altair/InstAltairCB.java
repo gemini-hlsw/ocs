@@ -33,7 +33,7 @@ public class InstAltairCB extends AbstractObsComponentCB {
     protected void thisReset(Map<String, Object> options) {
         InstAltair dataObj = (InstAltair) getDataObject();
         if (dataObj == null)
-            throw new IllegalArgumentException("The data objectfor Altair can not be null");
+            throw new IllegalArgumentException("The data object for Altair can not be null");
         _sysConfig = dataObj.getSysConfig();
     }
 

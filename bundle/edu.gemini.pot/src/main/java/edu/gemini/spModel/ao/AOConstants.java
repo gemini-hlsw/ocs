@@ -32,7 +32,7 @@ public final class AOConstants {
     /**
      * Types of adaptive optics
      */
-    public static enum AO implements DisplayableSpType, LoggableSpType, SequenceableSpType {
+    public enum AO implements DisplayableSpType, LoggableSpType, SequenceableSpType {
 
         NONE("None"),
         Altair_LGS("Altair + LGS"),
@@ -44,7 +44,7 @@ public final class AOConstants {
 
         private String _displayValue;
 
-        private AO(String displayValue) {
+        AO(String displayValue) {
             _displayValue = displayValue;
         }
 

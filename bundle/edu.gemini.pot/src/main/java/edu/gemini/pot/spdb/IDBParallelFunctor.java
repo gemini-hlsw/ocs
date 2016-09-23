@@ -1,7 +1,3 @@
-//
-// $Id: IDBParallelFunctor.java 7397 2006-10-17 13:55:11Z shane $
-//
-
 package edu.gemini.pot.spdb;
 
 import java.util.Collection;
@@ -17,6 +13,7 @@ import java.util.Collection;
  * returned by the slaves to the {@link #mergeResults} method to be combined
  * in a single result and returned to the caller.
  */
+@Deprecated
 public interface IDBParallelFunctor extends IDBFunctor {
 
     /**

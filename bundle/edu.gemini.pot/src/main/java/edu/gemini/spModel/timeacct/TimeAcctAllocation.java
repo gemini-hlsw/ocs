@@ -33,7 +33,7 @@ public final class TimeAcctAllocation implements Serializable {
      * greater than or equal to 0
      */
     public TimeAcctAllocation(Map<TimeAcctCategory, Double> allocationMap) {
-        final Map<TimeAcctCategory, Double> tmpAllocMap = new TreeMap<TimeAcctCategory, Double>(allocationMap);
+        final Map<TimeAcctCategory, Double> tmpAllocMap = new TreeMap<>(allocationMap);
 
         for (Map.Entry<TimeAcctCategory, Double> me : tmpAllocMap.entrySet()) {
             Double d = me.getValue();
@@ -68,7 +68,7 @@ public final class TimeAcctAllocation implements Serializable {
      * <code>ratioMap</code> does not equal 1
      */
     public TimeAcctAllocation(double totalHours, Map<TimeAcctCategory, Double> ratioMap) {
-        final Map<TimeAcctCategory, Double> tmpAllocMap = new TreeMap<TimeAcctCategory, Double>();
+        final Map<TimeAcctCategory, Double> tmpAllocMap = new TreeMap<>();
 
         if (ratioMap.size() == 0) {
             // not clear how to award time, so the total time and allocation
@@ -129,7 +129,7 @@ public final class TimeAcctAllocation implements Serializable {
      * be 0.5.
      */
     public SortedMap<TimeAcctCategory, Double> getRatios() {
-        SortedMap<TimeAcctCategory, Double> res = new TreeMap<TimeAcctCategory, Double>();
+        SortedMap<TimeAcctCategory, Double> res = new TreeMap<>();
         if (totalTime == 0) return res;
 
         for (Map.Entry<TimeAcctCategory, Double> me : allocMap.entrySet()) {

@@ -39,9 +39,9 @@ public final class GsaPhase1Data implements Serializable {
     public static final GsaPhase1Data EMPTY = new GsaPhase1Data(
             Abstract.EMPTY,
             Category.EMPTY,
-            Collections.EMPTY_LIST,
+            Collections.emptyList(),
             Investigator.EMPTY,
-            Collections.EMPTY_LIST
+            Collections.emptyList()
     );
 
     /** Just an interface to give a type to an otherwise raw String value. */

@@ -13,6 +13,8 @@ import java.util.Hashtable
 import java.security.Principal
 import edu.gemini.util.security.principal.StaffPrincipal
 
+import scala.collection.JavaConversions._
+
 /**
  *
  */
@@ -34,7 +36,7 @@ final class Activator extends BundleActivator {
     Log.info("Start LCH ODB Query Service")
     tracker = track[IDBDatabaseService, HttpService, HttpService](ctx) { (odb, http) =>
       Log.info(s"Registering $AppContext servlet")
-      http.registerServlet(AppContext, new LchQueryServlet(odb, user), new Hashtable(), null)
+      http.registerServlet(AppContext, LchQueryServlet(odb, user.toSet), new Hashtable(), null)
       http
     } { http =>
       http.unregister(AppContext)

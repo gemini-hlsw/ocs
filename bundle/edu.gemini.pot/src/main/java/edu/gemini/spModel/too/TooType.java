@@ -14,7 +14,7 @@ public enum TooType {
     private long _windowDuration;
     private String _durationDisplay;
 
-    private TooType(String displayValue, long defaultWindowDuration, String dur) {
+    TooType(String displayValue, long defaultWindowDuration, String dur) {
         _displayValue = displayValue;
         _windowDuration = defaultWindowDuration;
         _durationDisplay = dur;
