@@ -56,7 +56,7 @@ object BackgroundImageLoader {
     prog.addCompositeChangeListener(ChangeListener)
     val targets = prog.getAllObservations.asScala.toList.flatMap(_.getObsComponents.asScala.map(n => requestedImage(TpeContext(n))))
     // remove duplicates
-    val tasks = targets.flatten.distinct.map(requestImageDownload(ImageLoadingListener.zero))
+    val tasks = targets.flatten.distinct.map(requestImageDownload(ImageLoadingListener.zero, lowPriorityEC))
     // Run
     runAsync(tasks) {
       case \/-(e) => println(e)// done
@@ -73,7 +73,7 @@ object BackgroundImageLoader {
     * Display an image if available on disk or request the download if necessary
     */
   def loadImageOnTheTpe(tpe: TpeContext, listener: ImageLoadingListener): Unit = {
-    val task = requestedImage(tpe).map(requestImageDownload(listener)).getOrElse(Task.now(()))
+    val task = requestedImage(tpe).map(requestImageDownload(listener, highPriorityEC)).getOrElse(Task.now(()))
 
     // This is called on an explicit user interaction so we'd rather
     // Request the execution in a higher priority thread
@@ -89,7 +89,7 @@ object BackgroundImageLoader {
     override def propertyChange(evt: PropertyChangeEvent): Unit =
       evt.getSource match {
         case node: ISPNode => Option(node.getContextObservation).foreach { o =>
-          val task = requestedImage(TpeContext(o)).map(requestImageDownload(ImageLoadingListener.zero)).getOrElse(Task.now(()))
+          val task = requestedImage(TpeContext(o)).map(requestImageDownload(ImageLoadingListener.zero, lowPriorityEC)).getOrElse(Task.now(()))
 
           // Run it in the background as it is lower priority than GUI
           runAsync(task) {
@@ -104,11 +104,11 @@ object BackgroundImageLoader {
   /**
     * Creates a task to load an image and set it on the tpe
     */
-  private[image] def requestImageDownload(listener: ImageLoadingListener)(t: TargetImageRequest): Task[Unit] =
+  private[image] def requestImageDownload(listener: ImageLoadingListener, pool: ExecutorService)(t: TargetImageRequest): Task[Unit] =
     for {
       cd      <- cacheDir
       catalog <- ObservationCatalogOverrides.catalogFor(t.key, t.obsWavelength)
-      image   <- ImageCatalogClient.loadImage(ImageSearchQuery(catalog, t.coordinates), cd, listener)
+      image   <- ImageCatalogClient.loadImage(ImageSearchQuery(catalog, t.coordinates), cd, listener)(pool)
     } yield image match {
       case Some(e) => setTpeImage(e)
       case _       => // Ignore

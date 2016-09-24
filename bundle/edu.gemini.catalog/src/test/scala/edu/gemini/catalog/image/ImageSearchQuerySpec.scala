@@ -70,8 +70,8 @@ class ImageSearchQuerySpec extends FlatSpec with Matchers with PropertyChecks wi
       // Special case when the diff is very close to zero but negative
       val c1 = Coordinates(RightAscension.fromAngle(Angle.fromDegrees(263.94917083333326)),Declination.fromAngle(Angle.fromDegrees(329.5302805555556)).getOrElse(Declination.zero))
       val c2 = Coordinates(RightAscension.fromAngle(Angle.fromDegrees(263.94917)),Declination.fromAngle(Angle.fromDegrees(329.53027999999995)).getOrElse(Declination.zero))
-      ImageSearchQuery(DssGeminiNorth, c1).isNearby(ImageSearchQuery(DssGeminiNorth, c2)) shouldBe true
-      ImageSearchQuery(DssGeminiNorth, c2).isNearby(ImageSearchQuery(DssGeminiNorth, c1)) shouldBe true
+      ImageSearchQuery(DssGemini, c1).isNearby(ImageSearchQuery(DssGemini, c2)) shouldBe true
+      ImageSearchQuery(DssGemini, c2).isNearby(ImageSearchQuery(DssGemini, c1)) shouldBe true
     }
 
 }

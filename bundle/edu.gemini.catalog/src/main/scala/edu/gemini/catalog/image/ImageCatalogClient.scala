@@ -4,6 +4,7 @@ import java.io._
 import java.net.URL
 import java.nio.channels.FileLock
 import java.nio.file.{Files, Path, StandardCopyOption}
+import java.util.concurrent.ExecutorService
 import java.util.logging.Logger
 
 import edu.gemini.spModel.core.{Angle, Coordinates, Declination, RightAscension}
@@ -16,7 +17,7 @@ import scalaz.concurrent.Task
 case class ImageSearchQuery(catalog: ImageCatalog, coordinates: Coordinates) {
   import ImageSearchQuery._
 
-  def url: URL = catalog.queryUrl(coordinates)
+  def url: NonEmptyList[URL] = catalog.queryUrl(coordinates)
 
   def fileName(suffix: String): String = s"img_${catalog.id}_${coordinates.toFilePart}$suffix"
 
@@ -95,7 +96,7 @@ object ImageCatalogClient {
   /**
     * Load an image for the given query
     */
-  def loadImage(query: ImageSearchQuery, dir: Path, listener: ImageLoadingListener): Task[Option[ImageEntry]] = {
+  def loadImage(query: ImageSearchQuery, dir: Path, listener: ImageLoadingListener)(pool: ExecutorService): Task[Option[ImageEntry]] = {
 
     def addToCacheAndGet(f: Path): Task[ImageEntry] = {
       val i = ImageEntry(query, f, f.toFile.length())
@@ -104,26 +105,27 @@ object ImageCatalogClient {
       StoredImagesCache.add(i) *> ImageCacheOnDisk.pruneCache *> Task.now(i)
     }
 
-    def readImageToFile: Task[Path] =
-      Task.delay {
-        Log.info(s"Downloading image at ${query.url}")
+    def readImageToFile: NonEmptyList[Task[Path]] =
+      query.url.map(url => Task.delay {
+        Log.info(s"Downloading image at $url")
         // Open the connection to the remote
-        val connection = query.url.openConnection()
-        val in = query.url.openStream()
+        val connection = url.openConnection()
+        val in = url.openStream()
         (connection.getContentType, in)
-      } >>= { Function.tupled(ImageCatalogClient.imageToTmpFile(dir, query)) }
+        } >>= { Function.tupled(ImageCatalogClient.imageToTmpFile(dir, url, query.fileName)) }
+      )
 
     def downloadImage: Task[ImageEntry] = {
       val task = for {
         _ <- ImagesInProgress.add(query)
         _ <- Task.delay(listener.downloadStarts()) // Inform the listener
-        f <- readImageToFile
+        f <- TaskHelper.selectFirstToComplete(readImageToFile)(pool)
         e <- addToCacheAndGet(f)
       } yield e
 
-      // Inform listeners at the end
+      // Remove query from registry and Inform listeners at the end
       task.onFinish {
-        case Some(x) => ImagesInProgress.remove(query) *> Task.now(listener.downloadError()) // Ignore
+        case Some(x) => ImagesInProgress.remove(query) *> Task.now(listener.downloadError())
         case _       => ImagesInProgress.remove(query) *> Task.now(listener.downloadCompletes())
       }
     }
@@ -139,8 +141,7 @@ object ImageCatalogClient {
     * Download the given image URL to a temporary file and return the file
     * Note that to support the legacy progress bar we explicitly expect a ProgressBarFilterInputStream
     */
-  private def imageToTmpFile(cacheDir: Path, query: ImageSearchQuery)(contentType: String, in: InputStream): Task[Path] = {
-    val url = query.url
+  private def imageToTmpFile(cacheDir: Path, url: URL, fileName: String => String)(contentType: String, in: InputStream): Task[Path] = {
 
     def suffix: Task[String] =
       Option(contentType) match {
@@ -155,14 +156,14 @@ object ImageCatalogClient {
     /**
       * Creates a filename to store the image
       */
-    def tmpFileName(suffix: String): Task[String] = Task.now(query.fileName(suffix))
+    def tmpFileName(suffix: String): Task[String] = Task.now(fileName(suffix))
 
     def createTmpFile(fileName: String): Task[File] = Task.delay {
       File.createTempFile(".img", ".fits", cacheDir.toFile)
     }
 
     def moveFile(suffix: String, tmpFile: File): Task[Path] = Task.delay {
-      Files.move(tmpFile.toPath, cacheDir.resolve(query.fileName(suffix)), StandardCopyOption.ATOMIC_MOVE)
+      Files.move(tmpFile.toPath, cacheDir.resolve(fileName(suffix)), StandardCopyOption.ATOMIC_MOVE)
     }
 
     def openTmpFile(file: File): Task[(FileLock, OutputStream)] = Task.delay {
