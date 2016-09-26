@@ -25,7 +25,6 @@ import javax.swing.table.TableModel;
 import jsky.catalog.FieldDesc;
 import jsky.catalog.FieldDescAdapter;
 import jsky.catalog.MemoryCatalog;
-import jsky.coords.TargetDesc;
 import jsky.coords.gui.SexagesimalTableCellRenderer;
 import jsky.util.I18N;
 import jsky.util.PrintableWithDialog;

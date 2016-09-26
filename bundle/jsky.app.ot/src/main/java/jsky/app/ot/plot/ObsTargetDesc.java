@@ -5,22 +5,27 @@
  * $Id: ObsTargetDesc.java 46768 2012-07-16 18:58:53Z rnorris $
  */
 
-package edu.gemini.spModel.target;
+package jsky.app.ot.plot;
 
 import edu.gemini.pot.sp.*;
 import edu.gemini.pot.spdb.IDBDatabaseService;
 import edu.gemini.shared.util.immutable.Option;
+import edu.gemini.skycalc.Interval;
+import edu.gemini.skycalc.Union;
 import edu.gemini.spModel.gemini.obscomp.SPProgram;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 import edu.gemini.spModel.obs.SPObservation;
+import edu.gemini.spModel.obs.TimingWindowSolver;
 import edu.gemini.spModel.obs.plannedtime.PlannedTimeSummaryService;
+import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.time.TimeAmountFormatter;
 import edu.gemini.spModel.util.SPTreeUtil;
-import jsky.coords.TargetDesc;
+import jsky.plot.TargetDesc;
 import jsky.coords.WorldCoords;
 
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 
@@ -34,9 +39,9 @@ public class ObsTargetDesc extends TargetDesc {
     private ObsTargetDesc(String name, Function<Option<Long>, Option<WorldCoords>> coords,
                           String priority, String category, String obsId,
                           String targetName, String timeStr,
-                          TargetDesc.ElConstraintType elType, double elMin, double elMax) {
-        super(name, coords, priority, category,
-                elType, elMin, elMax);
+                          TargetDesc.ElConstraintType elType, double elMin, double elMax,
+                          BiFunction<Long, Long, Union<Interval>> timingWindows) {
+        super(name, coords, priority, category, elType, elMin, elMax, timingWindows);
         _obsId = obsId;
         _targetName = targetName;
         _timeStr = timeStr;
@@ -100,10 +105,16 @@ public class ObsTargetDesc extends TargetDesc {
             max = siteQuality.getElevationConstraintMax();
         }
 
-        if (useTargetName)
-            return new ObsTargetDesc(targetName, pos, prio, category, obsId, targetName, timeStr, elType, min, max);
-        else
-            return new ObsTargetDesc(obsId, pos, prio, category, obsId, targetName, timeStr, elType, min, max);
+        // Function (start timestamp, end timestamp) => Union<Interval>.
+        // The Union indicates the time intervals where the target can be
+        // observed according to the observation's timing windows.
+        final BiFunction<Long, Long, Union<Interval>> timingWindows = (s, e) ->
+            (siteQuality == null) ?
+                new Union<>(new Interval(s, e)) :
+                new TimingWindowSolver(siteQuality.getTimingWindows()).solve(s, e);
+
+        final String name = useTargetName ? targetName : obsId;
+        return new ObsTargetDesc(name, pos, prio, category, obsId, targetName, timeStr, elType, min, max, timingWindows);
     }
 
     private static TargetEnvironment _findTargetEnv(ISPObservation obs)  {

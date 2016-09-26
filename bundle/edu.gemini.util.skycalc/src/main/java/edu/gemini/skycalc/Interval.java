@@ -2,11 +2,6 @@ package edu.gemini.skycalc;
 
 import java.io.Serializable;
 
-//import edu.gemini.spModel.pio.ParamSet;
-//import edu.gemini.spModel.pio.Pio;
-//import edu.gemini.spModel.pio.PioFactory;
-//import edu.gemini.spModel.pio.PioSerializable;
-
 /**
  * Pair of longs representing the interval <code>(start .. end]</code>.
  * @author rnorris
@@ -14,9 +9,6 @@ import java.io.Serializable;
 public class Interval implements Comparable<Interval>, Serializable /*, PioSerializable */ {
 
 	private final long start, end;
-
-	public static final String PROP_START = "start";
-	public static final String PROP_END = "end";
 
 	/**
 	 * Enum representing the different ways in which intervals may overlap.<p>
@@ -70,13 +62,6 @@ public class Interval implements Comparable<Interval>, Serializable /*, PioSeria
 	}
 
 	/**
-	 * Creates a new Interval from the passed ParamSet.
-	 */
-//	public Interval(ParamSet params) {
-//		this(Pio.getLongValue(params, PROP_START, 1), Pio.getLongValue(params, PROP_END, 0)); // force IAE on fail
-//	}
-
-	/**
 	 * Returns <code>true</code> if the specified value falls within the interval. Note that
 	 * the <code>end</code> value does <i>not</i> fall within the interval.
 	 * @param value
@@ -97,10 +82,10 @@ public class Interval implements Comparable<Interval>, Serializable /*, PioSeria
 	 * @return true if this Interval overlaps <code>interval</code> in the specified manner
 	 */
 	public final boolean overlaps(final Interval interval,final  Overlap overlap) {
-		
+
 		boolean first = start == interval.start || contains(interval.start);
 		boolean last = end == interval.end || contains(interval.start + interval.getLength());
-		
+
 		switch (overlap) {
 		case TOTAL : return first && last;
 		case EITHER : return first || last;
@@ -215,17 +200,4 @@ public class Interval implements Comparable<Interval>, Serializable /*, PioSeria
 	protected Interval create(long start, long end) {
 		return new Interval(start, end);
 	}
-
-	///
-	/// PIO
-	///
-
-
-//	public ParamSet getParamSet(PioFactory factory, String name) {
-//		ParamSet params = factory.createParamSet(name);
-//		Pio.addLongParam(factory, params, PROP_START, start);
-//		Pio.addLongParam(factory, params, PROP_END, end);
-//		return params;
-//	}
-
 }

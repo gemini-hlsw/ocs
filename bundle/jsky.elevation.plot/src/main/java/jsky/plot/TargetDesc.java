@@ -5,11 +5,15 @@
  * $Id: TargetDesc.java 42349 2012-03-01 13:03:51Z swalker $
  */
 
-package jsky.coords;
+package jsky.plot;
 
 
 import edu.gemini.shared.util.immutable.Option;
+import edu.gemini.skycalc.Interval;
+import edu.gemini.skycalc.Union;
+import jsky.coords.WorldCoords;
 
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /**
@@ -19,7 +23,7 @@ import java.util.function.Function;
  * @author Allan Brighton
  */
 public abstract class TargetDesc {
-    public static enum ElConstraintType {
+    public enum ElConstraintType {
     	NONE, HOUR_ANGLE, AIRMASS
     }
 
@@ -30,16 +34,25 @@ public abstract class TargetDesc {
     private ElConstraintType _elType;
     private double _elMin;
     private double _elMax;
+    private BiFunction<Long, Long, Union<Interval>> _timingWindows;
 
-    protected TargetDesc(String name, Function<Option<Long>, Option<WorldCoords>> coords, String priority, String category,
-                          ElConstraintType elType, Double elMin, Double elMax) {
-        _name = name;
-        _coords = coords;
-        _priority = priority;
-        _category = category;
-        _elType = elType;
-        _elMin = elMin;
-        _elMax = elMax;
+    protected TargetDesc(String name,
+                         Function<Option<Long>, Option<WorldCoords>> coords,
+                         String priority,
+                         String category,
+                         ElConstraintType elType,
+                         Double elMin,
+                         Double elMax,
+                         BiFunction<Long, Long, Union<Interval>> timingWindows) {
+
+        _name          = name;
+        _coords        = coords;
+        _priority      = priority;
+        _category      = category;
+        _elType        = elType;
+        _elMin         = elMin;
+        _elMax         = elMax;
+        _timingWindows = timingWindows;
     }
 
     public String getName() {
@@ -77,6 +90,10 @@ public abstract class TargetDesc {
 
     public ElConstraintType getElType() {
         return _elType;
+    }
+
+    public Union<Interval> getTimingWindows(long start, long end) {
+        return _timingWindows.apply(start, end);
     }
 }
 

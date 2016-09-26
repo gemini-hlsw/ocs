@@ -6,7 +6,6 @@ import edu.gemini.skycalc.ImprovedSkyCalcMethods;
 import edu.gemini.spModel.core.Site;
 import edu.gemini.skycalc.ImprovedSkyCalc;
 
-import jsky.coords.TargetDesc;
 import jsky.coords.WorldCoords;
 
 import java.util.Calendar;

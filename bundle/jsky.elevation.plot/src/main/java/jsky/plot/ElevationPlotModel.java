@@ -3,9 +3,10 @@ package jsky.plot;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.shared.util.immutable.Some;
 import edu.gemini.skycalc.ImprovedSkyCalcMethods;
+import edu.gemini.skycalc.Interval;
 import edu.gemini.skycalc.SunRiseSet;
+import edu.gemini.skycalc.Union;
 import edu.gemini.spModel.core.Site;
-import jsky.coords.TargetDesc;
 import jsky.plot.util.CalendarUtil;
 import jsky.util.Preferences;
 import jsky.util.StringUtil;
@@ -128,7 +129,7 @@ public class ElevationPlotModel {
      * Set the sample interval for the plot.
      */
     public void setSampleInterval(int minutes) {
-        ElevationPlotUtil.setDefaultNumSteps((24*60)/minutes);
+        ElevationPlotUtil.setDefaultNumSteps((24 * 60) / minutes);
         _updateModel();
         _fireChangeEvent();
     }
@@ -351,6 +352,38 @@ public class ElevationPlotModel {
         return tsc;
     }
 
+    /**
+     * Return an XYDataset that covers the time outside of the timing windows.
+     * In other words, all time for the day except those periods where it is ok
+     * to observe according to the timing windows.
+     */
+    public XYDataset getTimingWindowsDataset() {
+        final TimeSeriesCollection tsc = new TimeSeriesCollection(_timeZone);
+        final int steps                = _plotUtil.getNumSteps();
+
+        final long start = _startDate.getTime();
+        final long end   = _endDate.getTime();
+
+        for (int i=0; i<_targets.length; ++i) {
+            final TargetDesc        t = _targets[i];
+
+            // Get intervals describing time outside of the timing windows.
+            final Union<Interval>  ws = new Union<>(new Interval(start, end));
+            ws.remove(t.getTimingWindows(start, end));
+
+            final TimeSeries       ts = new TimeSeries(t.getName(), FixedMillisecond.class);
+            final Date[]        times = _xDate[i];
+            final double[] elevations = _yData[i];
+
+            for (int j=0; j<steps; ++j) {
+                final long time = times[j].getTime();
+                ts.add(new FixedMillisecond(time), ws.contains(time) ? elevations[j] : 0.0);
+            }
+            tsc.addSeries(ts);
+        }
+
+        return tsc;
+    }
 
     /** Returns an XYDataset that displays the area that meets the given elevation constraints */
     public XYDataset getConstraintsDataset() {

@@ -3,13 +3,13 @@ package jsky.app.ot.viewer.action;
 import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.shared.util.immutable.Pair;
 import edu.gemini.spModel.core.Site;
-import edu.gemini.spModel.target.ObsTargetDesc;
+import jsky.app.ot.plot.ObsTargetDesc;
 import edu.gemini.spModel.util.SPTreeUtil;
 import jsky.app.ot.userprefs.observer.ObservingSite;
 import jsky.app.ot.viewer.SPElevationPlotPlugin;
 import jsky.app.ot.viewer.SPViewer;
 import jsky.app.ot.viewer.SPViewerActions;
-import jsky.coords.TargetDesc;
+import jsky.plot.TargetDesc;
 import jsky.plot.ElevationPlotManager;
 import jsky.util.gui.DialogUtil;
 

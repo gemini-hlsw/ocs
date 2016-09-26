@@ -55,9 +55,10 @@ public class ElevationPlotPanel extends JPanel implements ChangeListener {
     };
 
     // Plot Types
-    private static final String ALTITUDE  = _I18N.getString("Altitude");
-    private static final String PA  = _I18N.getString("ParallacticAngle");
-    private static final String CONSTRAINTS  = _I18N.getString("Constraints");
+    private static final String ALTITUDE       = _I18N.getString("Altitude");
+    private static final String PA             = _I18N.getString("ParallacticAngle");
+    private static final String CONSTRAINTS    = _I18N.getString("Constraints");
+    private static final String TIMING_WINDOWS = _I18N.getString("TimingWindows");
 
     // for saving and restoring user preferences
     private static final String _altitudePlotVisiblePrefName =
@@ -68,6 +69,9 @@ public class ElevationPlotPanel extends JPanel implements ChangeListener {
 
     private static final String _constraintsMarkerVisiblePrefName =
             ElevationPanel.class.getName() + ".constraintsMarkerVisible";
+
+    private static final String _timingWindowsMarkerVisiblePrefName =
+            ElevationPanel.class.getName() + ".timingWindowsMarkerVisible";
 
     // Displays the elevation plot
     private ElevationPanel _elevationPanel;
@@ -286,11 +290,12 @@ public class ElevationPlotPanel extends JPanel implements ChangeListener {
     // Create and return the plot type button panel.
     private JPanel _makePlotTypePanel() {
         _plotTypePanel = new JPanel();
-        String[] types = new String[] {ALTITUDE, PA, CONSTRAINTS};
+        String[] types = new String[] {ALTITUDE, PA, CONSTRAINTS, TIMING_WINDOWS};
         boolean[] selected = new boolean[] {
             Preferences.get(_altitudePlotVisiblePrefName, true),
             Preferences.get(_paPlotVisiblePrefName, false),
-            Preferences.get(_constraintsMarkerVisiblePrefName, false)
+            Preferences.get(_constraintsMarkerVisiblePrefName, false),
+            Preferences.get(_timingWindowsMarkerVisiblePrefName, false)
         };
         ItemListener itemListener = new ItemListener() {
             public void itemStateChanged(ItemEvent e) {
@@ -388,8 +393,12 @@ public class ElevationPlotPanel extends JPanel implements ChangeListener {
                 _elevationPanel.setY2AxisLabel(ElevationPanel.Y2_AXIS_AIRMASS);
             }
         } else if (name.endsWith(CONSTRAINTS)) {
-            _elevationPanel.setConstraintsMarkerVisible(visible);
+            _elevationPanel.setElevationConstraintsMarkerVisible(visible);
             Preferences.set(_constraintsMarkerVisiblePrefName, visible);
+
+        } else if (name.equals(TIMING_WINDOWS)) {
+            _elevationPanel.setTimingWindowsMarkerVisible(visible);
+            Preferences.set(_timingWindowsMarkerVisiblePrefName, visible);
         }
     }
 
