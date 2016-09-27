@@ -25,7 +25,7 @@ object ImageCacheWatcher {
   private def populateInitialCache(cacheDir: File): Task[StoredImages] = {
     // TODO Support more file extensions?
     // TODO Should we somehow validate the files?
-    def initStream(cacheDir: File): Task[DirectoryStream[Path]] = Task.delay(Files.newDirectoryStream(cacheDir.toPath, "img_*.fits.gz"))
+    def initStream(cacheDir: File): Task[DirectoryStream[Path]] = Task.delay(Files.newDirectoryStream(cacheDir.toPath, "img_*"))
 
     def closeStream(stream: DirectoryStream[Path]): Task[Unit] = Task.delay(stream.close())
 

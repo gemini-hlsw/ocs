@@ -52,8 +52,7 @@ case class ImageEntry(query: ImageSearchQuery, file: Path, fileSize: Long)
 object ImageEntry {
   implicit val equals = Equal.equalA[ImageEntry]
 
-  // TODO Support multiple suffixes
-  val fileRegex: Regex = """img_(.*)_ra_(.*)_dec_(.*)\.fits\.gz""".r
+  val fileRegex: Regex = """img_(.*)_ra_(.*)_dec_(.*)\.fits.*""".r
 
   /**
     * Decode a file name to an image entry
