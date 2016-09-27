@@ -106,9 +106,9 @@ object BackgroundImageLoader {
     */
   private[image] def requestImageDownload(listener: ImageLoadingListener, pool: ExecutorService)(t: TargetImageRequest): Task[Unit] =
     for {
-      cd      <- cacheDir
-      catalog <- ObservationCatalogOverrides.catalogFor(t.key, t.obsWavelength)
-      image   <- ImageCatalogClient.loadImage(ImageSearchQuery(catalog, t.coordinates), cd, listener)(pool)
+      cacheDir <- cacheDir
+      catalog  <- ObservationCatalogOverrides.catalogFor(t.key, t.obsWavelength)
+      image    <- ImageCatalogClient.loadImage(ImageSearchQuery(catalog, t.coordinates), cacheDir, listener)(pool)
     } yield image match {
       case Some(e) => setTpeImage(e)
       case _       => // Ignore

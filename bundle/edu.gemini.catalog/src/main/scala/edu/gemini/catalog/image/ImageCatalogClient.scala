@@ -106,14 +106,7 @@ object ImageCatalogClient {
     }
 
     def readImageToFile: NonEmptyList[Task[Path]] =
-      query.url.map(url => Task.delay {
-        Log.info(s"Downloading image at $url")
-        // Open the connection to the remote
-        val connection = url.openConnection()
-        val in = url.openStream()
-        (connection.getContentType, in)
-        } >>= { Function.tupled(ImageCatalogClient.imageToTmpFile(dir, url, query.fileName)) }
-      )
+      query.url.map(ImageCatalogClient.downloadImageToFile(dir, _, query.fileName))
 
     def downloadImage: Task[ImageEntry] = {
       val task = for {
@@ -141,38 +134,39 @@ object ImageCatalogClient {
     * Download the given image URL to a temporary file and return the file
     * Note that to support the legacy progress bar we explicitly expect a ProgressBarFilterInputStream
     */
-  private def imageToTmpFile(cacheDir: Path, url: URL, fileName: String => String)(contentType: String, in: InputStream): Task[Path] = {
+  private def downloadImageToFile(cacheDir: Path, url: URL, fileName: String => String): Task[Path] = {
+    case class ConnectionDescriptor(contentType: Option[String], contentEncoding: Option[String]) {
 
-    def suffix: Task[String] =
-      Option(contentType) match {
-        case Some(s) if s.endsWith("hfits")                                           => Task.now(".hfits")
-        case Some(s) if s.endsWith("zfits") || s == "image/x-fits"                    => Task.now(".fits.gz")
-        case Some(s) if s.endsWith("fits")                                            => Task.now(".fits")
-        // REL-2776 At some places on the sky DSS returns an error, the HTTP error code is ok but the body contains no image
-        case Some(s) if s.contains("text/html") && url.getPath.contains("dss_search") => Task.fail(new RuntimeException("Image not found at image server"))
-        case _                                                                        => Task.now(".tmp")
-      }
+      def extension: String = (contentEncoding, contentType) match {
+          case (Some("x-gzip"), _) => ".fits.gz"
+          // REL-2776 At some places on the sky DSS returns an error, the HTTP error code is ok but the body contains no image
+          case (None, Some(s)) if s.contains("text/html") && url.getPath.contains("dss_search") => throw new RuntimeException("Image not found at image server")
+          case (None, Some(s)) if s.endsWith("fits") => ".fits"
+          case _ => ".tmp"
+        }
+    }
 
-    /**
-      * Creates a filename to store the image
-      */
-    def tmpFileName(suffix: String): Task[String] = Task.now(fileName(suffix))
-
-    def createTmpFile(fileName: String): Task[File] = Task.delay {
+    def createTmpFile: Task[File] = Task.delay {
       File.createTempFile(".img", ".fits", cacheDir.toFile)
     }
 
     def moveFile(suffix: String, tmpFile: File): Task[Path] = Task.delay {
-      Files.move(tmpFile.toPath, cacheDir.resolve(fileName(suffix)), StandardCopyOption.ATOMIC_MOVE)
+      val destFileName = cacheDir.resolve(fileName(suffix))
+      // If the destination file is present don't overwrite
+      if (!destFileName.toFile.exists()) {
+        Files.move(tmpFile.toPath, destFileName, StandardCopyOption.ATOMIC_MOVE)
+      } else {
+        tmpFile.delete()
+        destFileName
+      }
     }
 
-    def openTmpFile(file: File): Task[(FileLock, OutputStream)] = Task.delay {
-      val stream = new FileOutputStream(file)
-      val lock = stream.getChannel.lock()
-      (lock, stream)
+    def lockTmpFile(file: File): Task[OutputStream] = Task.delay {
+      new FileOutputStream(file)
     }
 
-    def readFile(in: InputStream, out: OutputStream): Task[Unit] = Task.delay {
+    def readFile(out: OutputStream): Task[Unit] = Task.delay {
+      val in = url.openStream()
       val buffer = new Array[Byte](8 * 1024)
       Iterator
         .continually(in.read(buffer))
@@ -180,14 +174,19 @@ object ImageCatalogClient {
         .foreach(read => out.write(buffer, 0, read))
     }
 
+    def openConnection: Task[ConnectionDescriptor] = Task.delay {
+      Log.info(s"Downloading image at $url")
+      val connection = url.openConnection()
+      ConnectionDescriptor(Option(connection.getContentType), Option(connection.getContentEncoding))
+    }
+
     for {
-      s <- suffix
-      f <- tmpFileName(s)
-      t <- createTmpFile(f)
-      o <- openTmpFile(t)
-      _ <- readFile(in, o._2).onFinish(_ => Task.delay(o._1.release()))
-      f <- moveFile(s, t)
-    } yield f
+      tempFile <- createTmpFile
+      desc     <- openConnection
+      output   <- lockTmpFile(tempFile)
+      _        <- readFile(output)
+      file     <- moveFile(desc.extension, tempFile)
+    } yield file
   }
 }
 
