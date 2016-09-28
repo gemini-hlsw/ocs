@@ -31,7 +31,7 @@ case class ImageSearchQuery(catalog: ImageCatalog, coordinates: Coordinates) {
 }
 
 object ImageSearchQuery {
-  implicit val equals = Equal.equalA[ImageSearchQuery]
+  implicit val equals: Equal[ImageSearchQuery] = Equal.equalA[ImageSearchQuery]
   val maxDistance: Angle = (ImageCatalog.defaultSize / 2).getOrElse(Angle.zero)
 
   implicit class DeclinationShow(val d: Declination) extends AnyVal {
@@ -50,7 +50,7 @@ object ImageSearchQuery {
 case class ImageEntry(query: ImageSearchQuery, file: Path, fileSize: Long)
 
 object ImageEntry {
-  implicit val equals = Equal.equalA[ImageEntry]
+  implicit val equals: Equal[ImageEntry] = Equal.equalA[ImageEntry]
 
   val fileRegex: Regex = """img_(.*)_ra_(.*)_dec_(.*)\.fits.*""".r
 
@@ -109,7 +109,7 @@ object ImageCatalogClient {
 
     def downloadImage: Task[ImageEntry] = {
       val task = for {
-        _ <- ImagesInProgress.add(query)
+        _ <- ImagesInProgress.start(query)
         _ <- Task.delay(listener.downloadStarts()) // Inform the listener
         f <- TaskHelper.selectFirstToComplete(readImageToFile)(pool)
         e <- addToCacheAndGet(f)
@@ -117,13 +117,13 @@ object ImageCatalogClient {
 
       // Remove query from registry and Inform listeners at the end
       task.onFinish {
-        case Some(x) => ImagesInProgress.remove(query) *> Task.now(listener.downloadError())
-        case _       => ImagesInProgress.remove(query) *> Task.now(listener.downloadCompletes())
+        case Some(_) => ImagesInProgress.failed(query) *> Task.now(listener.downloadError())
+        case _       => ImagesInProgress.completed(query) *> Task.now(listener.downloadCompletes())
       }
     }
 
     def checkIfNeededAndDownload: Task[Option[ImageEntry]] =
-      ImagesInProgress.contains(query) >>= { inProcess => if (inProcess) Task.now(None) else downloadImage.map(Some.apply) }
+      ImagesInProgress.inProgress(query) >>= { inProcess => if (inProcess) Task.now(None) else downloadImage.map(Some.apply) }
 
     // Try to find the image on the cache, else download
     StoredImagesCache.find(query) >>= { _.filter(_.file.toFile.exists()).fold(checkIfNeededAndDownload)(f => Task.now(Some(f))) }

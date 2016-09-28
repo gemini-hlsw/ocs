@@ -200,8 +200,8 @@ final class TpeToolBar extends JPanel {
     /**
      * Updates the image catalogue when the selection changes
      */
-    void resetImageCatalogue(Option<ISPObservation> observation) {
-        _imageCatalogPanel.resetCatalogue(observation);
+    void resetImageCatalogue() {
+        _imageCatalogPanel.resetCatalogProgressState();
     }
 }
 

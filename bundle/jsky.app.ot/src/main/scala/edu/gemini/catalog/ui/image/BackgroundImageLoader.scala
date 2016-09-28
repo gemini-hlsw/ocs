@@ -25,6 +25,10 @@ import scalaz.concurrent.{Strategy, Task}
   */
 case class TargetImageRequest(key: SPNodeKey, coordinates: Coordinates, obsWavelength: Option[Wavelength])
 
+object TargetImageRequest {
+  implicit val equal: Equal[TargetImageRequest] = Equal.equalA[TargetImageRequest]
+}
+
 /**
   * Listens for program changes and download images as required
   */
@@ -151,7 +155,7 @@ object BackgroundImageLoader {
         request <- requestedImage(iw.getContext)
         if entry.query.isNearby(request.coordinates) // The TPE may have moved so only display if the coordinates match
       } {
-        val r = ImagesInProgress.contains(entry.query) >>= { inProgress => if (!inProgress) markAndSet(iw) else Task.now(())}
+        val r = ImagesInProgress.inProgress(entry.query) >>= { inProgress => if (!inProgress) markAndSet(iw) else Task.now(())}
         // TODO: Handle errors
         r.unsafePerformSync
       }

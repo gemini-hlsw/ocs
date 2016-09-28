@@ -1,5 +1,6 @@
 package jsky.app.ot.tpe;
 
+import edu.gemini.catalog.image.ImageCatalog;
 import edu.gemini.catalog.image.ImageLoadingListener;
 import edu.gemini.catalog.image.ImageLoadingListener$;
 import edu.gemini.catalog.ui.image.BackgroundImageLoader;
@@ -312,7 +313,7 @@ public final class TelescopePosEditor implements TpeMouseObserver {
         final Option<ISPObservation> obsShell = ImOption.fromScalaOpt(_ctx.obsShell());
         _agsPub.watch(obsShell);
         _tpeToolBar.getGuiderSelector().setAgsOptions(_agsPub.getAgsContext());
-        _tpeToolBar.resetImageCatalogue(_ctx.obsShell());
+        _tpeToolBar.resetImageCatalogue();
         obsShell.foreach(obs -> {
             obs.addCompositeChangeListener(obsListener);
             obs.addStructureChangeListener(obsListener);

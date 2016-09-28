@@ -12,7 +12,7 @@ import Scalaz._
 import scalaz.concurrent.Task
 
 case class StoredImages(entries: List[(Instant, ImageEntry)]) {
-  def images = entries.map(_._2)
+  def images: List[ImageEntry] = entries.map(_._2)
 
   def +(i: ImageEntry): StoredImages = copy((Instant.now, i) :: entries)
   def +(i: Instant, e: ImageEntry): StoredImages = copy((i, e) :: entries)

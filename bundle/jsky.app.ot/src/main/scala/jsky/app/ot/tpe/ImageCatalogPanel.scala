@@ -1,13 +1,15 @@
 package jsky.app.ot.tpe
 
+import java.time.Instant
 import javax.swing._
 
 import scalaz._
 import Scalaz._
-import edu.gemini.catalog.image.{ImageCatalog, ImageCatalogPreferences, ImageLoadingListener}
+import edu.gemini.catalog.image._
 import edu.gemini.catalog.ui.image.{ObsWavelengthExtractor, ObservationCatalogOverrides}
 import edu.gemini.catalog.ui.tpe.CatalogImageDisplay
 import edu.gemini.pot.sp.ISPObservation
+import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.ui.miglayout.MigPanel
 import edu.gemini.ui.miglayout.constraints._
 import jsky.app.ot.userprefs.images.ImageCatalogPreferencesPanel
@@ -32,6 +34,7 @@ object ImageLoadingFeedback {
 final class ImageCatalogPanel(imageDisplay: CatalogImageDisplay) {
   private lazy val buttonGroup = new ButtonGroup
   private lazy val buttons =  ImageCatalog.all.map(mkButton)
+  private lazy val feedbackPerCatalog =  buttons.collect { case (c, _, f) => c -> f }.toMap
   private lazy val toolsButton = new Button("") {
     tooltip = "Preferences..."
     icon = new ImageIcon(getClass.getResource("/resources/images/eclipse/engineering.gif"))
@@ -119,16 +122,50 @@ final class ImageCatalogPanel(imageDisplay: CatalogImageDisplay) {
   private def selectedCatalog: Option[ImageCatalog] =
     buttons.find(_._2.selected).map(_._1)
 
+  private def showAsLoading(catalogues: CataloguesInUse): Unit = {
+    val cataloguesInProgress = feedbackPerCatalog.filter(u => catalogues.inProgress.contains(u._1))
+    val cataloguesInError = feedbackPerCatalog.filter(u => catalogues.failed.contains(u._1))
+    val cataloguesIdle = feedbackPerCatalog.filterNot(u => cataloguesInError.contains(u._1) || cataloguesInProgress.contains(u._1))
+    cataloguesInProgress.foreach { _._2.icon = ImageLoadingFeedback.spinnerIcon }
+    cataloguesInError.foreach { _._2.icon = ImageLoadingFeedback.errorIcon }
+    cataloguesIdle.foreach { _._2.icon = null }
+  }
+
+  /**
+    * Updates the UI to reflect the state of downloading images
+    *
+    * Must be called from the EDT
+    */
+  def resetCatalogProgressState(): Unit = {
+    // Verify we are on the EDT. We don't want to use Swing.onEDT inside
+    assert(SwingUtilities.isEventDispatchThread)
+    val tpeManager = TpeContext.fromTpeManager
+
+    val catalogButtonsUpdate = for {
+        tpe    <- tpeManager
+        ctx    <- tpe.obsContext
+        base   <- tpe.targets.base
+        when   = ctx.getSchedulingBlockStart.asScalaOpt | Instant.now.toEpochMilli
+        coords <- base.getTarget.coords(when)
+      } yield ImagesInProgress.cataloguesInUse(coords).map(showAsLoading)
+
+    catalogButtonsUpdate.sequenceU.unsafePerformSync
+  }
+
   def resetCatalogue(observation: Option[ISPObservation]): Unit = {
     // Verify we are on the EDT. We don't want to use Swing.onEDT
     assert(SwingUtilities.isEventDispatchThread)
 
-    val wavelength = TpeContext.fromTpeManager.flatMap(ObsWavelengthExtractor.extractObsWavelength)
+    val tpeManager = TpeContext.fromTpeManager
 
-    val catalogue = observation.map(_.getNodeKey)
+    val wavelength = tpeManager.flatMap(ObsWavelengthExtractor.extractObsWavelength)
+
+    val selectedCatalog = observation.map(_.getNodeKey)
       .fold(ImageCatalogPreferences.preferences().map(_.defaultCatalog))(ObservationCatalogOverrides.catalogFor(_, wavelength))
 
-    catalogue.map(updateSelection).unsafePerformSync
+    selectedCatalog.map(updateSelection).unsafePerformSync
+
+    resetCatalogProgressState()
   }
 
   private def mkButton(c: ImageCatalog): (ImageCatalog, RadioButton, ImageLoadingFeedback) =
