@@ -19,7 +19,7 @@ import scala.swing.event.ButtonClicked
 import scala.swing.{Button, Component, Dialog, Label, RadioButton, Swing}
 import scalaz.concurrent.Task
 
-case class ImageLoadingFeedback() extends Label {
+case class ImageLoadingFeedback(catalog: ImageCatalog) extends Label {
 
   def markDownloading(): Unit = {
     icon = ImageLoadingFeedback.spinnerIcon
@@ -36,6 +36,8 @@ case class ImageLoadingFeedback() extends Label {
     tooltip = "Error when downloading"
   }
 }
+
+case class CatalogRow(button: RadioButton, feedback: ImageLoadingFeedback)
 
 object ImageLoadingFeedback {
   val spinnerIcon: ImageIcon = Resources.getIcon("spinner16.gif")
@@ -71,8 +73,7 @@ object ImageCatalogPanel {
   */
 final class ImageCatalogPanel(imageDisplay: CatalogImageDisplay) {
   private lazy val buttonGroup = new ButtonGroup
-  private lazy val buttons =  ImageCatalog.all.map(mkButton)
-  private lazy val feedbackPerCatalog =  buttons.collect { case (c, _, f) => c -> f }.toMap
+  private lazy val catalogRows =  ImageCatalog.all.map(mkRow)
   private lazy val toolsButton = new Button("") {
     tooltip = "Preferences..."
     icon = new ImageIcon(getClass.getResource("/resources/images/eclipse/engineering.gif"))
@@ -89,7 +90,7 @@ final class ImageCatalogPanel(imageDisplay: CatalogImageDisplay) {
                 val r = for {
                   p <- ImageCatalogPreferences.preferences() // At this moment the default catalog may have changed
                 } yield {
-                  val f = buttons.find(_._1 === p.defaultCatalog).map(_._3)
+                  val f = catalogRows.find(_.feedback.catalog === p.defaultCatalog).map(_.feedback)
                   f match {
                     case Some(x) if selectedCatalog.forall(_ =/= p.defaultCatalog) => imageDisplay.loadSkyImage() // Reload if the selected catalog is not the default
                     case _                                                         => ()
@@ -116,11 +117,11 @@ final class ImageCatalogPanel(imageDisplay: CatalogImageDisplay) {
   lazy val panel: Component = new MigPanel(LC().fill().insets(0.px)) {
     add(new Label("Image Catalog:"), CC())
     add(toolsButton, CC())
-    buttons.foreach { case (c, b, f) =>
-      add(b, CC().newline())
-      add(f, CC())
-      buttonGroup.add(b.peer)
-      b.reactions += {
+    catalogRows.foreach { case row =>
+      add(row.button, CC().newline())
+      add(row.feedback, CC())
+      buttonGroup.add(row.button.peer)
+      row.button.reactions += {
         case ButtonClicked(_) =>
           // Read the current key on the tpe
           val key = TpeContext.fromTpeManager.flatMap(_.obsKey)
@@ -128,7 +129,7 @@ final class ImageCatalogPanel(imageDisplay: CatalogImageDisplay) {
           // Update the image and store the override
           key.foreach { k =>
             val actions = for {
-              _ <- ObservationCatalogOverrides.storeOverride(k, c)
+              _ <- ObservationCatalogOverrides.storeOverride(k, row.feedback.catalog)
               _ <- Task.delay(imageDisplay.loadSkyImage())
             } yield ()
             actions.unsafePerformSync
@@ -138,18 +139,18 @@ final class ImageCatalogPanel(imageDisplay: CatalogImageDisplay) {
   }
 
   private def updateSelection(catalog: ImageCatalog): Unit =
-    buttons.find(_._1 === catalog).foreach { _._2.selected = true}
+    catalogRows.find(_.feedback.catalog === catalog).foreach { _.button.selected = true}
 
   private def selectedCatalog: Option[ImageCatalog] =
-    buttons.find(_._2.selected).map(_._1)
+    catalogRows.find(_.button.selected).map(_.feedback.catalog)
 
   private def showAsLoading(catalogues: CataloguesInUse): Unit = {
-    val cataloguesInProgress = feedbackPerCatalog.filter(u => catalogues.inProgress.contains(u._1))
-    val cataloguesInError = feedbackPerCatalog.filter(u => catalogues.failed.contains(u._1))
-    val cataloguesIdle = feedbackPerCatalog.filterNot(u => cataloguesInError.contains(u._1) || cataloguesInProgress.contains(u._1))
-    cataloguesInProgress.foreach(_._2.markDownloading())
-    cataloguesInError.foreach { _._2.markError() }
-    cataloguesIdle.foreach {_._2.markIdle() }
+    val cataloguesInProgress = catalogRows.filter(r => catalogues.inProgress.contains(r.feedback.catalog))
+    val cataloguesInError = catalogRows.filter(r => catalogues.failed.contains(r.feedback.catalog))
+    val cataloguesIdle = catalogRows.filterNot(u => cataloguesInError.contains(u) || cataloguesInProgress.contains(u))
+    cataloguesInProgress.foreach(_.feedback.markDownloading())
+    cataloguesInError.foreach { _.feedback.markError() }
+    cataloguesIdle.foreach {_.feedback.markIdle() }
   }
 
   /**
@@ -183,6 +184,6 @@ final class ImageCatalogPanel(imageDisplay: CatalogImageDisplay) {
     Nondeterminism[Task].both(updateSelectedCatalog, resetCatalogProgressState).unsafePerformSync
   }
 
-  private def mkButton(c: ImageCatalog): (ImageCatalog, RadioButton, ImageLoadingFeedback) =
-    (c, new RadioButton(s"${c.shortName}") <| {_.tooltip = c.displayName} , new ImageLoadingFeedback())
+  private def mkRow(c: ImageCatalog): CatalogRow =
+    CatalogRow(new RadioButton(s"${c.shortName}") <| {_.tooltip = c.displayName} , new ImageLoadingFeedback(c))
 }
