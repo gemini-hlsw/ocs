@@ -1,6 +1,6 @@
 package jsky.app.ot.ags
 
-import jsky.app.ot.ags.BagsState.{ErrorTransition, IdleState, StateTransition}
+import jsky.app.ot.ags.BagsState._
 import java.beans.{PropertyChangeEvent, PropertyChangeListener}
 import java.time.Instant
 import java.util.concurrent.TimeoutException
@@ -188,7 +188,7 @@ object BagsState {
       (PendingState(obs, None), BagsManager.wakeUpAction(obs, 0))
   }
 
-  private def hashObs(ctx: ObsContext): AgsHashVal = {
+  def hashObs(ctx: ObsContext): AgsHashVal = {
     val when = ctx.getSchedulingBlockStart.asScalaOpt | Instant.now.toEpochMilli
     AgsHash.hash(ctx, when)
   }
@@ -348,31 +348,65 @@ object BagsManager {
   private def fail(obs: ISPObservation, why: String, delay: Long): Unit =
     transition(obs, "fail", _.fail(why, delay))
 
-  /** Add a program to our watch list and attach listeners. Enqueue all
+  /** Add a program to our watch list and attach listeners. Enqueue modified
     * observations for consideration for a BAGS lookup.
     */
   def watch(prog: ISPProgram): Unit = Swing.onEDT {
-    // Check that the program isn't being managed already. If it is, do nothing.
+    Log.info("watch")
+
+    // Remove existing listeners, if any.
+    prog.removeStructureChangeListener(StructureListener)
+    prog.removeCompositeChangeListener(ChangeListener)
+
     val progKey = ProgKey(prog)
-    if (stateMap.lookup(progKey).isEmpty) {
-      prog.addCompositeChangeListener(ChangeListener)
-      prog.addStructureChangeListener(StructureListener)
+    val obsList = prog.getAllObservations.asScala.toList
+    val obsKeys = obsList.map(ObsKey(_)).toSet
 
-      // Place all observations in the IdleState and record them in our stateMap.
-      val obsList = prog.getAllObservations.asScala.toList
-      val obsMap = ==>>.fromList(obsList.map(o => ObsKey(o) -> (IdleState(o, None): BagsState)))
-
-      stateMap = stateMap + (ProgKey(prog) -> obsMap)
-
-      // Now mark all the observations "edited" in order to kick off AGS searches
-      // and hash calculations.
-      obsList.foreach(edited)
+    // Get the initial existing (if any) obs key -> BagsState map, filtered to
+    // remove any entries for observations not in the program.
+    val obsMap0 = stateMap.lookup(progKey).getOrElse(==>>.empty[ObsKey, BagsState]).filterWithKey { (k, _) =>
+      obsKeys(k)
     }
+
+    // Scan the list of observations updating the BagsState to use the new
+    // observation reference.  If currently running, treat this as an edit in
+    // order to force the calculation to be redone.
+    val obsMap  = (obsMap0/:obsList) { (m,o) =>
+      val k = ObsKey(o)
+      val s = m.lookup(k).fold(IdleState(o, None): BagsState) {
+        case IdleState(_, Some(hash)) => IdleState(o, ObsContext.create(o).asScalaOpt.map(hashObs).filter(_ == hash))
+        case PendingState(_, h)       => PendingState(o, h)
+        case RunningState(_, _)       => RunningEditedState(o) // yes, switch to edited
+        case RunningEditedState(_)    => RunningEditedState(o)
+        case FailureState(_, w)       => FailureState(o, w)
+        case _                        => IdleState(o, None)
+      }
+      m + (k -> s)
+    }
+
+    // Add or replace the map associated with the program.
+    stateMap = stateMap + (ProgKey(prog) -> obsMap)
+
+    // Now mark all the new and updated observations "edited" in order to kick
+    // off AGS searches.  We can tell that they have been updated or else never
+    // before checked because the hash value is None.  Unchanged idle
+    // observations (which should account for most of an existing program's
+    // observations) will have an AgsHashVal that still matches in the new
+    // program and so they will be skipped.
+    obsMap.values.foreach {
+      case IdleState(o, None) => edited(o)
+      case _                  => // do nothing
+    }
+
+    // Watch the program for future edits.
+    prog.addCompositeChangeListener(ChangeListener)
+    prog.addStructureChangeListener(StructureListener)
   }
 
   /** Remove a program from our watch list and remove listeners.
     */
   def unwatch(prog: ISPProgram): Unit = Swing.onEDT {
+    Log.info("unwatch")
     prog.removeStructureChangeListener(StructureListener)
     prog.removeCompositeChangeListener(ChangeListener)
     stateMap = stateMap - ProgKey(prog)
