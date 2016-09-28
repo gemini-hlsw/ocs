@@ -12,7 +12,7 @@ import edu.gemini.shared.util.immutable.ScalaConverters._
 import scala.collection.JavaConverters._
 import edu.gemini.pot.sp._
 import edu.gemini.spModel.core.{Coordinates, Wavelength}
-import jsky.app.ot.tpe.{TpeContext, TpeImageWidget, TpeManager}
+import jsky.app.ot.tpe.{ImageCatalogPanel, TpeContext, TpeImageWidget, TpeManager}
 import jsky.util.Preferences
 
 import scalaz._
@@ -59,8 +59,8 @@ object BackgroundImageLoader {
   def watch(prog: ISPProgram): Unit = {
     prog.addCompositeChangeListener(ChangeListener)
     val targets = prog.getAllObservations.asScala.toList.flatMap(_.getObsComponents.asScala.map(n => requestedImage(TpeContext(n))))
-    // remove duplicates
-    val tasks = targets.flatten.distinct.map(requestImageDownload(ImageLoadingListener.zero, lowPriorityEC))
+    // remove duplicates and request images
+    val tasks = targets.flatten.distinct.map(requestImageDownload(ImageCatalogPanel.resetListener, lowPriorityEC))
     // Run
     runAsync(tasks) {
       case \/-(e) => println(e)// done

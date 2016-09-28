@@ -1,8 +1,6 @@
 package jsky.app.ot.tpe;
 
-import edu.gemini.catalog.image.ImageCatalog;
 import edu.gemini.catalog.image.ImageLoadingListener;
-import edu.gemini.catalog.image.ImageLoadingListener$;
 import edu.gemini.catalog.ui.image.BackgroundImageLoader;
 import edu.gemini.pot.sp.*;
 import edu.gemini.shared.util.immutable.ImOption;
@@ -240,7 +238,7 @@ public final class TelescopePosEditor implements TpeMouseObserver {
             dec = 0.0;
         }
 
-        _iw.loadSkyImage(ImageLoadingListener$.MODULE$.zero());
+        _iw.loadSkyImage();
         _iw.loadCachedImage(ra, dec);
     }
 
@@ -308,12 +306,11 @@ public final class TelescopePosEditor implements TpeMouseObserver {
         _editorTools.updateAvailableOptions(_allFeatures);
 
         _editorTools.updateEnabledStates();
-
-        // update selected guiders in toolbar
         final Option<ISPObservation> obsShell = ImOption.fromScalaOpt(_ctx.obsShell());
+        // update selected guiders in toolbar
         _agsPub.watch(obsShell);
         _tpeToolBar.getGuiderSelector().setAgsOptions(_agsPub.getAgsContext());
-        _tpeToolBar.resetImageCatalogue();
+        obsShell.foreach(_tpeToolBar::updateImageCatalogState);
         obsShell.foreach(obs -> {
             obs.addCompositeChangeListener(obsListener);
             obs.addStructureChangeListener(obsListener);
@@ -329,10 +326,10 @@ public final class TelescopePosEditor implements TpeMouseObserver {
      * @throws IOException      If a problem happens reading from the catalog
      * @throws CatalogException if a Catalog Problem is found
      */
-    void getSkyImage(final TpeContext ctx, ImageLoadingListener listener) throws IOException, CatalogException {
+    void getSkyImage(final TpeContext ctx) throws IOException, CatalogException {
         final SPTarget _baseTarget = ctx.targets().baseOrNull();
         if (_baseTarget == null) return;
-        BackgroundImageLoader.loadImageOnTheTpe(ctx, listener);
+        BackgroundImageLoader.loadImageOnTheTpe(ctx, ImageCatalogPanel$.MODULE$.resetListener());
     }
 
     /**

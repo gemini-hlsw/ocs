@@ -20,12 +20,50 @@ import scala.swing.{Button, Component, Dialog, Label, RadioButton, Swing}
 import scalaz.concurrent.Task
 
 case class ImageLoadingFeedback() extends Label {
+
+  def markDownloading(): Unit = {
+    icon = ImageLoadingFeedback.spinnerIcon
+    tooltip = "Downloading..."
+  }
+
+  def markIdle(): Unit = {
+    icon = null
+    tooltip = ""
+  }
+
+  def markError(): Unit = {
+    icon = ImageLoadingFeedback.errorIcon
+    tooltip = "Error when downloading"
+  }
 }
 
 object ImageLoadingFeedback {
   val spinnerIcon: ImageIcon = Resources.getIcon("spinner16.gif")
   val warningIcon: ImageIcon = Resources.getIcon("eclipse/alert.gif")
   val errorIcon: ImageIcon   = Resources.getIcon("error_tsk.gif")
+}
+
+object ImageCatalogPanel {
+  /**
+    * Tries to reset the catalog panel state if open
+    */
+  private def resetCatalogPanel: Task[Unit] = Task.delay {
+    for {
+      tpe <- Option(TpeManager.get())
+      ctx <- TpeContext.fromTpeManager
+      obs <- ctx.obsShell
+    } {
+      tpe.getTpeToolBar.updateImageCatalogState(obs)
+    }
+  }
+
+  def resetListener: ImageLoadingListener = new ImageLoadingListener {
+    override def downloadStarts(): Unit = Swing.onEDT(ImageCatalogPanel.resetCatalogPanel.unsafePerformSync)
+
+    override def downloadCompletes(): Unit = Swing.onEDT(ImageCatalogPanel.resetCatalogPanel.unsafePerformSync)
+
+    override def downloadError(): Unit = Swing.onEDT(ImageCatalogPanel.resetCatalogPanel.unsafePerformSync)
+  }
 }
 
 /**
@@ -53,14 +91,14 @@ final class ImageCatalogPanel(imageDisplay: CatalogImageDisplay) {
                 } yield {
                   val f = buttons.find(_._1 === p.defaultCatalog).map(_._3)
                   f match {
-                    case Some(x) if selectedCatalog.forall(_ =/= p.defaultCatalog) => imageDisplay.loadSkyImage(listenerFor(x)) // Reload if the selected catalog is not the default
+                    case Some(x) if selectedCatalog.forall(_ =/= p.defaultCatalog) => imageDisplay.loadSkyImage() // Reload if the selected catalog is not the default
                     case _                                                         => ()
                   }
                 }
                 r.unsafePerformSync
 
                 // Reset the selection
-                TpeContext.fromTpeManager.foreach(t => resetCatalogue(t.obsShell))
+                TpeContext.fromTpeManager.flatMap(_.obsShell).foreach(t => resetCatalogue(t))
             }
           }
 
@@ -91,28 +129,11 @@ final class ImageCatalogPanel(imageDisplay: CatalogImageDisplay) {
           key.foreach { k =>
             val actions = for {
               _ <- ObservationCatalogOverrides.storeOverride(k, c)
-              _ <- Task.delay(imageDisplay.loadSkyImage(listenerFor(f)))
+              _ <- Task.delay(imageDisplay.loadSkyImage())
             } yield ()
             actions.unsafePerformSync
           }
         }
-    }
-  }
-
-  def listenerFor(f: ImageLoadingFeedback) = new ImageLoadingListener {
-    override def downloadStarts(): Unit = Swing.onEDT {
-      f.icon = ImageLoadingFeedback.spinnerIcon
-      f.tooltip = "Downloading..."
-    }
-
-    override def downloadCompletes(): Unit = Swing.onEDT {
-      f.icon = null
-      f.tooltip = ""
-    }
-
-    override def downloadError(): Unit = Swing.onEDT {
-      f.icon = ImageLoadingFeedback.errorIcon
-      f.tooltip = "Error when downloading"
     }
   }
 
@@ -126,9 +147,9 @@ final class ImageCatalogPanel(imageDisplay: CatalogImageDisplay) {
     val cataloguesInProgress = feedbackPerCatalog.filter(u => catalogues.inProgress.contains(u._1))
     val cataloguesInError = feedbackPerCatalog.filter(u => catalogues.failed.contains(u._1))
     val cataloguesIdle = feedbackPerCatalog.filterNot(u => cataloguesInError.contains(u._1) || cataloguesInProgress.contains(u._1))
-    cataloguesInProgress.foreach { _._2.icon = ImageLoadingFeedback.spinnerIcon }
-    cataloguesInError.foreach { _._2.icon = ImageLoadingFeedback.errorIcon }
-    cataloguesIdle.foreach { _._2.icon = null }
+    cataloguesInProgress.foreach(_._2.markDownloading())
+    cataloguesInError.foreach { _._2.markError() }
+    cataloguesIdle.foreach {_._2.markIdle() }
   }
 
   /**
@@ -136,36 +157,30 @@ final class ImageCatalogPanel(imageDisplay: CatalogImageDisplay) {
     *
     * Must be called from the EDT
     */
-  def resetCatalogProgressState(): Unit = {
+  private def resetCatalogProgressState: Task[Option[Unit]] = {
     // Verify we are on the EDT. We don't want to use Swing.onEDT inside
-    assert(SwingUtilities.isEventDispatchThread)
-    val tpeManager = TpeContext.fromTpeManager
+    val tpeContext = TpeContext.fromTpeManager
 
     val catalogButtonsUpdate = for {
-        tpe    <- tpeManager
+        tpe    <- tpeContext
         ctx    <- tpe.obsContext
         base   <- tpe.targets.base
         when   = ctx.getSchedulingBlockStart.asScalaOpt | Instant.now.toEpochMilli
         coords <- base.getTarget.coords(when)
-      } yield ImagesInProgress.cataloguesInUse(coords).map(showAsLoading)
+       } yield ImagesInProgress.cataloguesInUse(coords).map(showAsLoading)
 
-    catalogButtonsUpdate.sequenceU.unsafePerformSync
+    catalogButtonsUpdate.sequenceU
   }
 
-  def resetCatalogue(observation: Option[ISPObservation]): Unit = {
+  def resetCatalogue(observation: ISPObservation): Unit = {
     // Verify we are on the EDT. We don't want to use Swing.onEDT
     assert(SwingUtilities.isEventDispatchThread)
 
-    val tpeManager = TpeContext.fromTpeManager
+    val wavelength = TpeContext.fromTpeManager.flatMap(ObsWavelengthExtractor.extractObsWavelength)
 
-    val wavelength = tpeManager.flatMap(ObsWavelengthExtractor.extractObsWavelength)
-
-    val selectedCatalog = observation.map(_.getNodeKey)
-      .fold(ImageCatalogPreferences.preferences().map(_.defaultCatalog))(ObservationCatalogOverrides.catalogFor(_, wavelength))
-
-    selectedCatalog.map(updateSelection).unsafePerformSync
-
-    resetCatalogProgressState()
+    val updateSelectedCatalog = ObservationCatalogOverrides.catalogFor(observation.getNodeKey, wavelength).map(updateSelection)
+    // run both side effects synchronously inside EDT
+    Nondeterminism[Task].both(updateSelectedCatalog, resetCatalogProgressState).unsafePerformSync
   }
 
   private def mkButton(c: ImageCatalog): (ImageCatalog, RadioButton, ImageLoadingFeedback) =

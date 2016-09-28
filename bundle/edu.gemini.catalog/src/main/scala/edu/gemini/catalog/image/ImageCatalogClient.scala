@@ -80,7 +80,7 @@ trait ImageLoadingListener {
 }
 
 object ImageLoadingListener {
-  val zero = new ImageLoadingListener {
+  val zero: ImageLoadingListener = new ImageLoadingListener {
     override def downloadStarts(): Unit = {}
 
     override def downloadCompletes(): Unit = {}

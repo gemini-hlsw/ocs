@@ -45,7 +45,7 @@ abstract class CatalogImageDisplay(parent: Component, navigatorPane: NavigatorPa
   /**
     * Load the sky image for the current location
    */
-  def loadSkyImage(listener: ImageLoadingListener): Unit
+  def loadSkyImage(): Unit
 
   /** Display the FITS table at the given HDU index. */
   override def displayFITSTable(hdu: Int):Unit = {

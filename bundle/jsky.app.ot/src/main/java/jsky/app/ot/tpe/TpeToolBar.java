@@ -2,8 +2,8 @@ package jsky.app.ot.tpe;
 
 import edu.gemini.catalog.ui.tpe.CatalogImageDisplay;
 import edu.gemini.pot.sp.ISPObservation;
+import edu.gemini.shared.util.immutable.Option;
 import jsky.app.ot.ags.AgsSelectorControl;
-import scala.Option;
 
 import javax.swing.*;
 import java.awt.*;
@@ -198,10 +198,10 @@ final class TpeToolBar extends JPanel {
     }
 
     /**
-     * Updates the image catalogue when the selection changes
+     * Updates the image catalogue selection
      */
-    void resetImageCatalogue() {
-        _imageCatalogPanel.resetCatalogProgressState();
+    void updateImageCatalogState(ISPObservation obs) {
+        _imageCatalogPanel.resetCatalogue(obs);
     }
 }
 
