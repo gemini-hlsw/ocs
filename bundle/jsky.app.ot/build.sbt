@@ -42,6 +42,7 @@ OsgiKeys.privatePackage := Seq(
   "jsky.app.ot.log.*",
   "jsky.app.ot.modelconfig.*",
   "jsky.app.ot.nsp.*",
+  "jsky.app.ot.plot",
   "jsky.app.ot.progadmin.*",
   "jsky.app.ot.scilib.*",
   "jsky.app.ot.session.*",
