@@ -14,8 +14,6 @@ import java.awt._
 import java.awt.event.{ActionEvent, ActionListener}
 import java.awt.geom.AffineTransform
 
-import edu.gemini.catalog.image.ImageLoadingListener
-
 import scalaz._
 import Scalaz._
 

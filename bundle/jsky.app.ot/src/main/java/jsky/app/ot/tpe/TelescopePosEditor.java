@@ -1,6 +1,5 @@
 package jsky.app.ot.tpe;
 
-import edu.gemini.catalog.image.ImageLoadingListener;
 import edu.gemini.catalog.ui.image.BackgroundImageLoader;
 import edu.gemini.pot.sp.*;
 import edu.gemini.shared.util.immutable.ImOption;

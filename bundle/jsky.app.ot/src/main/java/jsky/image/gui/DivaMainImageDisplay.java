@@ -381,7 +381,8 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
     /**
      * Set the image file to display.
      */
-    public void setFilename(String fileOrUrl) {
+    @Override
+    public void setFilename(String fileOrUrl, boolean displayError) {
         if (fileOrUrl.startsWith("http:")) {
             setURL(FileUtil.makeURL(null, fileOrUrl));
             return;
@@ -406,7 +407,13 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
             try {
                 setImage(JAI.create("fileload", _filename));
             } catch (Exception e) {
-                DialogUtil.error(e);
+                // This is horrible but certain paths require displaying the error
+                // while on the background case we want to handle the exception
+                if (displayError) {
+                    DialogUtil.error(e);
+                } else {
+                    throw e;
+                }
                 _filename = null;
                 _url = _origURL = null;
                 clear();
@@ -421,10 +428,16 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
                 try {
                     setImage(JAI.create("fileload", _filename));
                 } catch (Exception ex) {
-                    DialogUtil.error(e);
                     _filename = null;
                     _url = _origURL = null;
                     clear();
+                    // This is horrible but certain paths require displaying the error
+                    // while on the background case we want to handle the exception
+                    if (displayError) {
+                        DialogUtil.error(e);
+                    } else {
+                        throw new ImageLoadingException(e);
+                    }
                 }
             }
             updateTitle();
@@ -436,7 +449,7 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
      * (the URL is used if the file is deleted).
      */
     public void setFilename(String fileOrUrl, URL url) {
-        setFilename(fileOrUrl);
+        setFilename(fileOrUrl, true);
         _origURL = url;
     }
 
@@ -504,7 +517,7 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
         _origURL = url;
         String s = url.getProtocol();
         if (s.equals("file")) {
-            setFilename(url.getFile());
+            setFilename(url.getFile(), true);
         } else if (s.equals("http")) {
             downloadImageToTempFile(url);
         } else {
@@ -548,7 +561,7 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
      */
     public void updateImageData() {
         if (_filename != null)
-            setFilename(_filename);
+            setFilename(_filename, true);
         else if (_url != null)
             setURL(_url);
     }
@@ -822,7 +835,7 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
                     return;
                 }
                 if (!_progressPanel.isInterrupted())
-                    setFilename(filename);
+                    setFilename(filename, true);
             }
 
         };
@@ -1300,7 +1313,7 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
         }
         int option = _fileChooser.showOpenDialog(this);
         if (option == JFileChooser.APPROVE_OPTION && _fileChooser.getSelectedFile() != null) {
-            setFilename(_fileChooser.getSelectedFile().getAbsolutePath());
+            setFilename(_fileChooser.getSelectedFile().getAbsolutePath(), true);
         }
     }
 
@@ -1517,7 +1530,7 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
         // make sure we are viewing the new file
         _noStack = true;
         try {
-            setFilename(filename);
+            setFilename(filename, true);
         } catch (Exception e) {
             DialogUtil.error(e);
         }

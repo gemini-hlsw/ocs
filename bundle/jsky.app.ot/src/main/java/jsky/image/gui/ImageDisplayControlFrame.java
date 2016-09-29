@@ -82,7 +82,7 @@ public class ImageDisplayControlFrame extends JFrame {
         this(size);
 
         if (fileOrUrl != null) {
-            imageDisplayControl.getImageDisplay().setFilename(fileOrUrl);
+            imageDisplayControl.getImageDisplay().setFilename(fileOrUrl, true);
         } else {
             imageDisplayControl.getImageDisplay().blankImage(0., 0.);
         }
@@ -138,4 +138,3 @@ public class ImageDisplayControlFrame extends JFrame {
         frame.setVisible(true);
     }
 }
-

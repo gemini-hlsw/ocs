@@ -13,6 +13,7 @@ import scala.collection.JavaConverters._
 import edu.gemini.pot.sp._
 import edu.gemini.spModel.core.{Coordinates, Wavelength}
 import jsky.app.ot.tpe.{ImageCatalogPanel, TpeContext, TpeImageWidget, TpeManager}
+import jsky.image.gui.ImageLoadingException
 import jsky.util.Preferences
 
 import scalaz._
@@ -75,7 +76,7 @@ object BackgroundImageLoader {
     val targets = prog.getAllObservations.asScala.toList.flatMap(_.getObsComponents.asScala.flatMap(n => requestedImage(TpeContext(n))))
     // remove duplicates and request images
     val tasks = targets.distinct.map(requestImageDownload(lowPriorityEC))
-    // Run as low priorirty
+    // Run as low priority
     runAsync(tasks)(_ => ())(lowPriorityEC)
   }
 
@@ -84,11 +85,13 @@ object BackgroundImageLoader {
     prog.removeCompositeChangeListener(ChangeListener)
   }
 
+  private val taskUnit = Task.now(())
+
   /**
     * Display an image if available on disk or request the download if necessary
     */
   def loadImageOnTheTpe(tpe: TpeContext): Unit = {
-    val task = requestedImage(tpe).map(requestImageDownload(highPriorityEC)).getOrElse(Task.now(()))
+    val task = requestedImage(tpe).map(requestImageDownload(highPriorityEC)).getOrElse(taskUnit)
 
     // This method called on an explicit user interaction so we'd rather
     // Request the execution in a higher priority thread
@@ -101,7 +104,7 @@ object BackgroundImageLoader {
     override def propertyChange(evt: PropertyChangeEvent): Unit =
       evt.getSource match {
         case node: ISPNode => Option(node.getContextObservation).foreach { o =>
-          val task = requestedImage(TpeContext(o)).map(requestImageDownload(highPriorityEC)).getOrElse(Task.now(()))
+          val task = requestedImage(TpeContext(o)).map(requestImageDownload(highPriorityEC)).getOrElse(taskUnit)
 
           // Run it in the background as it is lower priority than GUI
           runAsync(task)(_ => ())(lowPriorityEC)
@@ -189,7 +192,7 @@ object BackgroundImageLoader {
     *
     */
   private def updateTpeImage(entry: ImageEntry): Unit = {
-    def updateCacheAndDisplay(iw: TpeImageWidget): Task[Unit] = StoredImagesCache.markAsUsed(entry) *> Task.now(iw.setFilename(entry.file.toAbsolutePath.toString))
+    def updateCacheAndDisplay(iw: TpeImageWidget): Task[Unit] = StoredImagesCache.markAsUsed(entry) *> Task.delay(iw.setFilename(entry.file.toAbsolutePath.toString, false))
 
     Swing.onEDT {
       for {
@@ -199,9 +202,18 @@ object BackgroundImageLoader {
         if entry.query.isNearby(request.coordinates) // The TPE may have moved so only display if the coordinates match
         if ImageCatalogPanel.isCatalogSelected(entry.query.catalog) // Only set the image if the catalog matches
       } {
-        val r = ImagesInProgress.inProgress(entry.query) >>= { inProgress => if (!inProgress) updateCacheAndDisplay(iw) else Task.now(())}
-        // TODO: Handle errors
-        r.unsafePerformSyncAttempt
+        val r = ImagesInProgress.inProgress(entry.query) >>= { inProgress => if (!inProgress) updateCacheAndDisplay(iw) else taskUnit}
+
+        // Function to capture an exception and request a new download
+        val reDownload: PartialFunction[Throwable, Task[Unit]] = {
+          case _: ImageLoadingException =>
+            // This happens typically if the image is corrupted
+            // Let's try to re-download
+            Task.delay(entry.file.toFile.delete).ifM(Task.delay(TpeContext.fromTpeManager.foreach(loadImageOnTheTpe)), taskUnit)
+        }
+        // We don't really care about the result but want to intercept
+          // file errors to redownload the image
+        r.handleWith(reDownload).unsafePerformSync
       }
     }
   }

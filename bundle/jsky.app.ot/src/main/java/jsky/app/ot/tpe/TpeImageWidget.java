@@ -1,6 +1,5 @@
 package jsky.app.ot.tpe;
 
-import edu.gemini.catalog.image.ImageLoadingListener;
 import edu.gemini.catalog.ui.QueryResultsFrame;
 import edu.gemini.catalog.ui.tpe.CatalogImageDisplay;
 import edu.gemini.shared.util.immutable.*;
