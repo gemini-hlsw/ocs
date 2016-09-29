@@ -15,35 +15,9 @@ import edu.gemini.ui.miglayout.constraints._
 import jsky.app.ot.userprefs.images.ImageCatalogPreferencesPanel
 import jsky.util.gui.Resources
 
-import scala.swing.event.ButtonClicked
+import scala.swing.event.{ButtonClicked, MouseClicked}
 import scala.swing.{Button, Component, Dialog, Label, RadioButton, Swing}
 import scalaz.concurrent.Task
-
-case class ImageLoadingFeedback(catalog: ImageCatalog) extends Label {
-
-  def markDownloading(): Unit = {
-    icon = ImageLoadingFeedback.spinnerIcon
-    tooltip = "Downloading..."
-  }
-
-  def markIdle(): Unit = {
-    icon = null
-    tooltip = ""
-  }
-
-  def markError(): Unit = {
-    icon = ImageLoadingFeedback.errorIcon
-    tooltip = "Error when downloading"
-  }
-}
-
-case class CatalogRow(button: RadioButton, feedback: ImageLoadingFeedback)
-
-object ImageLoadingFeedback {
-  val spinnerIcon: ImageIcon = Resources.getIcon("spinner16.gif")
-  val warningIcon: ImageIcon = Resources.getIcon("eclipse/alert.gif")
-  val errorIcon: ImageIcon   = Resources.getIcon("error_tsk.gif")
-}
 
 object ImageCatalogPanel {
   /**
@@ -75,6 +49,40 @@ object ImageCatalogPanel {
   * Panel of radio buttons of Image catalogs offered by the TPE.
   */
 final class ImageCatalogPanel(imageDisplay: CatalogImageDisplay) {
+
+  case class ImageLoadingFeedback(catalog: ImageCatalog) extends Label {
+
+    def markDownloading(): Unit = {
+      icon = ImageLoadingFeedback.spinnerIcon
+      tooltip = "Downloading..."
+      deafTo(mouse.clicks)
+    }
+
+    def markIdle(): Unit = {
+      icon = null
+      tooltip = ""
+      deafTo(mouse.clicks)
+    }
+
+    def markError(): Unit = {
+      icon = ImageLoadingFeedback.errorIcon
+      tooltip = "Error when downloading"
+      listenTo(mouse.clicks)
+      reactions += {
+        case MouseClicked(_, _, _, _, _) =>
+          requestImage(catalog)
+      }
+    }
+  }
+
+  case class CatalogRow(button: RadioButton, feedback: ImageLoadingFeedback)
+
+  object ImageLoadingFeedback {
+    val spinnerIcon: ImageIcon = Resources.getIcon("spinner16.gif")
+    val warningIcon: ImageIcon = Resources.getIcon("eclipse/alert.gif")
+    val errorIcon: ImageIcon   = Resources.getIcon("error_tsk.gif")
+  }
+
   private lazy val buttonGroup = new ButtonGroup
   private lazy val catalogRows =  ImageCatalog.all.map(mkRow)
   private lazy val toolsButton = new Button("") {
@@ -126,18 +134,22 @@ final class ImageCatalogPanel(imageDisplay: CatalogImageDisplay) {
       buttonGroup.add(row.button.peer)
       row.button.reactions += {
         case ButtonClicked(_) =>
-          // Read the current key on the tpe
-          val key = TpeContext.fromTpeManager.flatMap(_.obsKey)
-
-          // Update the image and store the override
-          key.foreach { k =>
-            val actions = for {
-              _ <- ObservationCatalogOverrides.storeOverride(k, row.feedback.catalog)
-              _ <- Task.delay(imageDisplay.loadSkyImage())
-            } yield ()
-            actions.unsafePerformSync
-          }
+          requestImage(row.feedback.catalog)
         }
+    }
+  }
+
+  private def requestImage(catalog: ImageCatalog) = {
+    // Read the current key on the tpe
+    val key = TpeContext.fromTpeManager.flatMap(_.obsKey)
+
+    // Update the image and store the override
+    key.foreach { k =>
+      val actions = for {
+        _ <- ObservationCatalogOverrides.storeOverride(k, catalog)
+        _ <- Task.delay(imageDisplay.loadSkyImage())
+      } yield ()
+      actions.unsafePerformSync
     }
   }
 
