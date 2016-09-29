@@ -24,9 +24,8 @@ object ObsWavelengthExtractor {
   /**
     * Attempt to extract the Wavelength for the observation
     */
-  def extractObsWavelength(tpe: TpeContext): Option[Wavelength] = {
+  def extractObsWavelength(tpe: TpeContext): Option[Wavelength] =
     tpe.obsShell.flatMap(extractObsWavelength(tpe.instrument, _))
-  }
 
   /**
     * Read the configuration of the current observation to find the Observing Wavelength

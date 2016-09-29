@@ -57,6 +57,7 @@ object ObservationCatalogOverrides {
   object Overrides {
     var zero = Overrides(Nil)
 
+    // Argonaut codec
     implicit def OverridesCodecJson: CodecJson[Overrides] =
       casecodec1(Overrides.apply, Overrides.unapply)("overrides")
   }
@@ -67,12 +68,18 @@ object ObservationCatalogOverrides {
         Parse.decodeOr[Overrides, Overrides](lines, identity, Overrides.zero)
       }.getOrElse(Overrides.zero)
 
+  /**
+    * Finds the catalog for the given node and wavelength
+    */
   def catalogFor(key: SPNodeKey, wavelength: Option[Wavelength]): Task[ImageCatalog] = {
     this.synchronized {
       ImageCatalogPreferences.preferences().map { p => readOverrides.obsCatalog(key).getOrElse(ImageCatalog.catalogForWavelength(wavelength))}
     }
   }
 
+  /**
+    * Store the overriden catalog for a given node
+    */
   def storeOverride(key: SPNodeKey, c: ImageCatalog): Task[Unit] = Task.delay {
     this.synchronized {
       def writeOverrides(overrides: Overrides) =

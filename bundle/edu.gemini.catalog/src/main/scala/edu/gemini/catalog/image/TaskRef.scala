@@ -6,14 +6,14 @@ import scalaz.concurrent.Task
 sealed trait TaskRef[A] {
 
   /** Atomic modification. */
-  def modify(f: A => A): Task[Unit]
+  def mod(f: A => A): Task[Unit]
 
   /** Return the current value. */
   def get: Task[A]
 
   /** Replace the current value. */
   def put(a: A): Task[Unit] =
-    modify(_ => a)
+    mod(_ => a)
 
 }
 
@@ -24,8 +24,8 @@ object TaskRef {
     Task.delay {
       @volatile var value = a
       new TaskRef[A] { ref =>
-        def get = Task.delay(value)
-        def modify(f: A => A) = Task.delay(ref.synchronized(value = f(value)))
+        def get: Task[A] = Task.delay(value)
+        def mod(f: A => A): Task[Unit] = Task.delay(ref.synchronized(value = f(value)))
       }
     }
 

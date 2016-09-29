@@ -12,12 +12,15 @@ import scalaz.Scalaz._
 import scalaz._
 import scalaz.concurrent.Task
 
+/**
+  * Query to request an image for a catalog and coordinates
+  */
 case class ImageSearchQuery(catalog: ImageCatalog, coordinates: Coordinates) {
   import ImageSearchQuery._
 
   def url: NonEmptyList[URL] = catalog.queryUrl(coordinates)
 
-  def fileName(suffix: String): String = s"img_${catalog.id}_${coordinates.toFilePart}$suffix"
+  def fileName(extension: String): String = s"img_${catalog.id}_${coordinates.toFilePart}$extension"
 
   def isNearby(query: ImageSearchQuery): Boolean =
     catalog === query.catalog && isNearby(query.coordinates)
@@ -45,6 +48,9 @@ object ImageSearchQuery {
   }
 }
 
+/**
+  * Image in the file system
+  */
 case class ImageEntry(query: ImageSearchQuery, file: Path, fileSize: Long)
 
 object ImageEntry {
@@ -53,7 +59,7 @@ object ImageEntry {
   val fileRegex: Regex = """img_(.*)_ra_(.*)_dec_(.*)\.fits.*""".r
 
   /**
-    * Decode a file name to an image entry
+    * Decode a file name into an image entry
     */
   def entryFromFile(file: File): Option[ImageEntry] = {
     file.getName match {
@@ -68,6 +74,9 @@ object ImageEntry {
   }
 }
 
+/**
+  * Downloads images from a remote server and stores them in the file system
+  */
 object ImageCatalogClient {
   val Log: Logger = Logger.getLogger(this.getClass.getName)
 
@@ -131,5 +140,3 @@ object ImageCatalogClient {
   }
 }
 
-// Make it easier to call from Java
-abstract class ImageCatalogClient

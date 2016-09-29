@@ -6,6 +6,9 @@ import scalaz._
 import Scalaz._
 import scalaz.concurrent.Task
 
+/**
+  * Keeps track of images currently being dowloaded
+  */
 case class ImagesInProgress(images: List[ImageSearchQuery]) {
   def +(i: ImageSearchQuery): ImagesInProgress = copy(i :: images)
   def -(i: ImageSearchQuery): ImagesInProgress = copy(images.filterNot(_ === i))
@@ -22,11 +25,11 @@ object ImagesInProgress  {
   // Contains images that have failed
   private val failedRef = TaskRef.newTaskRef[ImagesInProgress](ImagesInProgress.zero).unsafePerformSync
 
-  def start(i: ImageSearchQuery): Task[ImagesInProgress] = inUseRef.modify(_ + i) *> failedRef.modify(_ - i) *> inUseRef.get
+  def start(i: ImageSearchQuery): Task[ImagesInProgress] = inUseRef.mod(_ + i) *> failedRef.mod(_ - i) *> inUseRef.get
 
-  def completed(i: ImageSearchQuery): Task[ImagesInProgress] = inUseRef.modify(_ - i) *> failedRef.modify(_ - i) *> inUseRef.get
+  def completed(i: ImageSearchQuery): Task[ImagesInProgress] = inUseRef.mod(_ - i) *> failedRef.mod(_ - i) *> inUseRef.get
 
-  def failed(i: ImageSearchQuery): Task[ImagesInProgress] = inUseRef.modify(_ - i) *> failedRef.modify(_ + i) *> failedRef.get
+  def failed(i: ImageSearchQuery): Task[ImagesInProgress] = inUseRef.mod(_ - i) *> failedRef.mod(_ + i) *> failedRef.get
 
   /**
     * Find if the search query is in progress

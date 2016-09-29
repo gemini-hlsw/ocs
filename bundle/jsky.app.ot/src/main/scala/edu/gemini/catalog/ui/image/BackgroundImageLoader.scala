@@ -21,7 +21,7 @@ import scala.swing.Swing
 import scalaz.concurrent.{Strategy, Task}
 
 /**
-  * Describes a requested target image
+  * Describes a requested image for an observation and wavelength
   */
 case class TargetImageRequest(key: SPNodeKey, coordinates: Coordinates, obsWavelength: Option[Wavelength])
 
@@ -39,7 +39,10 @@ trait ImageLoadingListener {
 }
 
 /**
-  * Listens for program changes and download images as required
+  * Listens for program changes and download images as required. It listens
+  * for program changes and requests downloading images if they are not already
+  * presents.
+  * It also updates the UI as needed
   */
 object BackgroundImageLoader {
   private val ImageDownloadsThreadFactory = new ThreadFactory {
@@ -53,24 +56,26 @@ object BackgroundImageLoader {
   }
 
   /**
-    * Execution context lets up to 4 low priority threads
+    * Execution context lets up to 6 low priority threads
     */
-  private val lowPriorityEC = Executors.newFixedThreadPool(4, ImageDownloadsThreadFactory)
+  private val lowPriorityEC = Executors.newFixedThreadPool(6, ImageDownloadsThreadFactory)
 
   /**
     * Regular execution context
     */
   private val highPriorityEC = Strategy.DefaultExecutorService
 
-  def cacheDir: Task[Path] = Task.delay(Preferences.getPreferences.getCacheDir.toPath)
+  // Directory where the image cache exists. Note that getPreferences calls to disk
+  private def cacheDir: Task[Path] = Task.delay(Preferences.getPreferences.getCacheDir.toPath)
 
   /** Called when a program is created to download its images */
   def watch(prog: ISPProgram): Unit = {
+    // Listen for future changes
     prog.addCompositeChangeListener(ChangeListener)
-    val targets = prog.getAllObservations.asScala.toList.flatMap(_.getObsComponents.asScala.map(n => requestedImage(TpeContext(n))))
+    val targets = prog.getAllObservations.asScala.toList.flatMap(_.getObsComponents.asScala.flatMap(n => requestedImage(TpeContext(n))))
     // remove duplicates and request images
-    val tasks = targets.flatten.distinct.map(requestImageDownload(lowPriorityEC))
-    // Run
+    val tasks = targets.distinct.map(requestImageDownload(lowPriorityEC))
+    // Run as low priorirty
     runAsync(tasks)(_ => ())(lowPriorityEC)
   }
 
@@ -85,7 +90,7 @@ object BackgroundImageLoader {
   def loadImageOnTheTpe(tpe: TpeContext): Unit = {
     val task = requestedImage(tpe).map(requestImageDownload(highPriorityEC)).getOrElse(Task.now(()))
 
-    // This is called on an explicit user interaction so we'd rather
+    // This method called on an explicit user interaction so we'd rather
     // Request the execution in a higher priority thread
     // Execute and set the image on the tpe
     runAsync(task)(_ => ())(highPriorityEC)
@@ -100,7 +105,6 @@ object BackgroundImageLoader {
 
           // Run it in the background as it is lower priority than GUI
           runAsync(task)(_ => ())(lowPriorityEC)
-
         }
       }
   }
@@ -114,14 +118,14 @@ object BackgroundImageLoader {
       catalog  <- ObservationCatalogOverrides.catalogFor(t.key, t.obsWavelength)
       image    <- loadImage(ImageSearchQuery(catalog, t.coordinates), cacheDir, ImageCatalogPanel.resetListener)(pool)
     } yield image match {
-      case Some(e) => setTpeImage(e)
-      case _       => // Ignore
+      case Some(e) => updateTpeImage(e) // Try to set it on the UI
+      case _       => // Ignore, the image was invalid or not found
     }
 
   /**
     * Load an image for the given query
     * It will check if the image is in the cache or in progress before requesting a download
-    * It updates the listner as needed to update the UI
+    * It updates the listener as needed to update the UI
     */
   private def loadImage(query: ImageSearchQuery, dir: Path, listener: ImageLoadingListener)(pool: ExecutorService): Task[Option[ImageEntry]] = {
 
@@ -178,12 +182,14 @@ object BackgroundImageLoader {
 
   /**
     * Attempts to set the image on the tpe, note that this is called from a separate
-    * thread so we need to go to Swing for updating the UI
+    * thread, typically after an image download so we need to go to Swing for updating the UI
+    *
     * Since an image download may take a while the tpe may have moved.
     * We'll only update the position if the coordinates match
+    *
     */
-  private def setTpeImage(entry: ImageEntry): Unit = {
-    def markAndSet(iw: TpeImageWidget): Task[Unit] = StoredImagesCache.markAsUsed(entry) *> Task.now(iw.setFilename(entry.file.toAbsolutePath.toString))
+  private def updateTpeImage(entry: ImageEntry): Unit = {
+    def updateCacheAndDisplay(iw: TpeImageWidget): Task[Unit] = StoredImagesCache.markAsUsed(entry) *> Task.now(iw.setFilename(entry.file.toAbsolutePath.toString))
 
     Swing.onEDT {
       for {
@@ -193,9 +199,9 @@ object BackgroundImageLoader {
         if entry.query.isNearby(request.coordinates) // The TPE may have moved so only display if the coordinates match
         if ImageCatalogPanel.isCatalogSelected(entry.query.catalog) // Only set the image if the catalog matches
       } {
-        val r = ImagesInProgress.inProgress(entry.query) >>= { inProgress => if (!inProgress) markAndSet(iw) else Task.now(())}
+        val r = ImagesInProgress.inProgress(entry.query) >>= { inProgress => if (!inProgress) updateCacheAndDisplay(iw) else Task.now(())}
         // TODO: Handle errors
-        r.unsafePerformSync
+        r.unsafePerformSyncAttempt
       }
     }
   }

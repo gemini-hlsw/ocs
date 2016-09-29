@@ -11,29 +11,39 @@ import scalaz._
 import Scalaz._
 import scalaz.concurrent.Task
 
-case class StoredImages(entries: List[(Instant, ImageEntry)]) {
+/**
+  * Keeps track of images in the file system and access time
+  */
+protected case class StoredImages(entries: List[(Instant, ImageEntry)]) {
   def images: List[ImageEntry] = entries.map(_._2)
 
   def +(i: ImageEntry): StoredImages = copy((Instant.now, i) :: entries)
   def +(i: Instant, e: ImageEntry): StoredImages = copy((i, e) :: entries)
-
   def -(i: ImageEntry): StoredImages = copy(entries.filterNot(_._2 === i))
 
-  def mark(i: ImageEntry): StoredImages = copy(entries.collect {
+  /**
+    * Indicates the image was used, update the access time
+    */
+  def touch(i: ImageEntry): StoredImages = copy(entries.collect {
     case x if x._2 === i => (Instant.now, x._2)
     case x               => x
   })
 
+  /**
+    * Return imagessorted by access time
+    */
   def sortedByAccess: List[ImageEntry] = entries.sortBy(_._1).map(_._2).reverse
 
+  /**
+    * Find images near the requested query
+    */
   def findNearby(query: ImageSearchQuery): Option[ImageEntry] =
     entries.find(q => q._2.query === query || (q._2.query.catalog === query.catalog && q._2.query.isNearby(query))).map(_._2)
 }
 
 object StoredImages {
   val zero = StoredImages(Nil)
-  implicit val equals = Equal.equalA[StoredImages]
-  implicit val monoid = Monoid.instance[StoredImages]((a, b) => StoredImages(a.entries ++ b.entries), zero)
+  implicit val equals: Equal[StoredImages] = Equal.equalA[StoredImages]
 }
 
 /**
@@ -42,17 +52,17 @@ object StoredImages {
 object StoredImagesCache {
   private val cacheRef = TaskRef.newTaskRef[StoredImages](StoredImages.zero).unsafePerformSync
 
-  def add(i: ImageEntry): Task[StoredImages] = cacheRef.modify(_ + i) *> cacheRef.get
+  def add(i: ImageEntry): Task[StoredImages] = cacheRef.mod(_ + i) *> cacheRef.get
 
-  def addAt(instant: Instant, i: ImageEntry): Task[StoredImages] = cacheRef.modify(_ + (instant, i)) *> cacheRef.get
+  def addAt(instant: Instant, i: ImageEntry): Task[StoredImages] = cacheRef.mod(_ + (instant, i)) *> cacheRef.get
 
-  def markAsUsed(i: ImageEntry): Task[StoredImages] = cacheRef.modify(_.mark(i)) *> cacheRef.get
+  def markAsUsed(i: ImageEntry): Task[StoredImages] = cacheRef.mod(_.touch(i)) *> cacheRef.get
 
-  def remove(i: ImageEntry): Task[StoredImages] = cacheRef.modify(_ - i) *> cacheRef.get
+  def remove(i: ImageEntry): Task[StoredImages] = cacheRef.mod(_ - i) *> cacheRef.get
 
   def get: Task[StoredImages] = cacheRef.get
 
-  def clean: Task[StoredImages] = cacheRef.modify(_ => StoredImages.zero) *> cacheRef.get
+  def clean: Task[StoredImages] = cacheRef.mod(_ => StoredImages.zero) *> cacheRef.get
 
   /**
     * Find if the search query is in the cache
