@@ -349,8 +349,6 @@ object BagsManager {
     * observations for consideration for a BAGS lookup.
     */
   def watch(prog: ISPProgram): Unit = Swing.onEDT {
-    Log.info("watch")
-
     // Remove existing listeners, if any.
     prog.removeStructureChangeListener(StructureListener)
     prog.removeCompositeChangeListener(ChangeListener)
@@ -409,7 +407,6 @@ object BagsManager {
   /** Remove a program from our watch list and remove listeners.
     */
   def unwatch(prog: ISPProgram): Unit = Swing.onEDT {
-    Log.info("unwatch")
     prog.removeStructureChangeListener(StructureListener)
     prog.removeCompositeChangeListener(ChangeListener)
     stateMap = stateMap - ProgKey(prog)
