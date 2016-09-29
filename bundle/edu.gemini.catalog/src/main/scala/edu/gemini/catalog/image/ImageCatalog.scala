@@ -73,7 +73,7 @@ object ImageCatalog {
   /** Default image server */
   val DefaultImageServer = DssGemini
 
-  implicit val equals = Equal.equalA[ImageCatalog]
+  implicit val equals: Equal[ImageCatalog] = Equal.equalA[ImageCatalog]
 
   private val DssCutoff   = 1.0.microns
   private val MassJCutoff = 1.4.microns

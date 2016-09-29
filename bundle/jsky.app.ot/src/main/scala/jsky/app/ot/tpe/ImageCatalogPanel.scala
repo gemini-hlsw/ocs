@@ -6,7 +6,7 @@ import javax.swing._
 import scalaz._
 import Scalaz._
 import edu.gemini.catalog.image._
-import edu.gemini.catalog.ui.image.{ObsWavelengthExtractor, ObservationCatalogOverrides}
+import edu.gemini.catalog.ui.image.{ImageLoadingListener, ObsWavelengthExtractor, ObservationCatalogOverrides}
 import edu.gemini.catalog.ui.tpe.CatalogImageDisplay
 import edu.gemini.pot.sp.ISPObservation
 import edu.gemini.shared.util.immutable.ScalaConverters._
@@ -60,11 +60,11 @@ object ImageCatalogPanel {
   }
 
   def resetListener: ImageLoadingListener = new ImageLoadingListener {
-    override def downloadStarts(): Unit = Swing.onEDT(ImageCatalogPanel.resetCatalogPanel.unsafePerformSync)
+    override def downloadStarts(): Task[Unit] = Task.delay(Swing.onEDT(ImageCatalogPanel.resetCatalogPanel.unsafePerformSync))
 
-    override def downloadCompletes(): Unit = Swing.onEDT(ImageCatalogPanel.resetCatalogPanel.unsafePerformSync)
+    override def downloadCompletes(): Task[Unit] = Task.delay(Swing.onEDT(ImageCatalogPanel.resetCatalogPanel.unsafePerformSync))
 
-    override def downloadError(): Unit = Swing.onEDT(ImageCatalogPanel.resetCatalogPanel.unsafePerformSync)
+    override def downloadError(): Task[Unit] = Task.delay(Swing.onEDT(ImageCatalogPanel.resetCatalogPanel.unsafePerformSync))
   }
 
   def isCatalogSelected(catalog: ImageCatalog): Boolean =

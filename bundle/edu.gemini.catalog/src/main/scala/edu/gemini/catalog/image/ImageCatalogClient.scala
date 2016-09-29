@@ -2,9 +2,7 @@ package edu.gemini.catalog.image
 
 import java.io._
 import java.net.URL
-import java.nio.channels.FileLock
 import java.nio.file.{Files, Path, StandardCopyOption}
-import java.util.concurrent.ExecutorService
 import java.util.logging.Logger
 
 import edu.gemini.spModel.core.{Angle, Coordinates, Declination, RightAscension}
@@ -70,70 +68,14 @@ object ImageEntry {
   }
 }
 
-/**
-  * This interface can be used to listen when the image is being loaded
-  */
-trait ImageLoadingListener {
-  def downloadStarts(): Unit
-  def downloadCompletes(): Unit
-  def downloadError(): Unit
-}
-
-object ImageLoadingListener {
-  val zero: ImageLoadingListener = new ImageLoadingListener {
-    override def downloadStarts(): Unit = {}
-
-    override def downloadCompletes(): Unit = {}
-
-    override def downloadError(): Unit = {}
-  }
-}
-
 object ImageCatalogClient {
   val Log: Logger = Logger.getLogger(this.getClass.getName)
-
-  /**
-    * Load an image for the given query
-    */
-  def loadImage(query: ImageSearchQuery, dir: Path, listener: ImageLoadingListener)(pool: ExecutorService): Task[Option[ImageEntry]] = {
-
-    def addToCacheAndGet(f: Path): Task[ImageEntry] = {
-      val i = ImageEntry(query, f, f.toFile.length())
-      // Add to cache and prune the cache
-      // Note that cache pruning goes in a different thread
-      StoredImagesCache.add(i) *> ImageCacheOnDisk.pruneCache *> Task.now(i)
-    }
-
-    def readImageToFile: NonEmptyList[Task[Path]] =
-      query.url.map(ImageCatalogClient.downloadImageToFile(dir, _, query.fileName))
-
-    def downloadImage: Task[ImageEntry] = {
-      val task = for {
-        _ <- ImagesInProgress.start(query)
-        _ <- Task.delay(listener.downloadStarts()) // Inform the listener
-        f <- TaskHelper.selectFirstToComplete(readImageToFile)(pool)
-        e <- addToCacheAndGet(f)
-      } yield e
-
-      // Remove query from registry and Inform listeners at the end
-      task.onFinish {
-        case Some(_) => ImagesInProgress.failed(query) *> Task.now(listener.downloadError())
-        case _       => ImagesInProgress.completed(query) *> Task.now(listener.downloadCompletes())
-      }
-    }
-
-    def checkIfNeededAndDownload: Task[Option[ImageEntry]] =
-      ImagesInProgress.inProgress(query) >>= { inProcess => if (inProcess) Task.now(None) else downloadImage.map(Some.apply) }
-
-    // Try to find the image on the cache, else download
-    StoredImagesCache.find(query) >>= { _.filter(_.file.toFile.exists()).fold(checkIfNeededAndDownload)(f => Task.now(Some(f))) }
-  }
 
   /**
     * Download the given image URL to a temporary file and return the file
     * Note that to support the legacy progress bar we explicitly expect a ProgressBarFilterInputStream
     */
-  private def downloadImageToFile(cacheDir: Path, url: URL, fileName: String => String): Task[Path] = {
+  def downloadImageToFile(cacheDir: Path, url: URL, fileName: String => String): Task[Path] = {
     case class ConnectionDescriptor(contentType: Option[String], contentEncoding: Option[String]) {
 
       def extension: String = (contentEncoding, contentType) match {
