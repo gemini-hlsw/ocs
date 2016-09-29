@@ -27,7 +27,7 @@ class ImageSearchQuerySpec extends FlatSpec with Matchers with PropertyChecks wi
     "generate an appropriate filename" in {
       forAll { (catalog: ImageCatalog, c: Coordinates) =>
         val suffix = ".fits.gz"
-        ImageSearchQuery(catalog, c).fileName(suffix) should fullyMatch regex ImageEntry.fileRegex
+        ImageSearchQuery(catalog, c).fileName(suffix) should fullyMatch regex ImageInFile.fileRegex
       }
     }
 

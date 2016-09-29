@@ -14,21 +14,21 @@ class StoredImagesCacheSpec extends FlatSpec with Matchers with PropertyChecks w
       cache.getOrElse(fail("Should not happen")) shouldBe StoredImages.zero
     }
     it should "add entries" in {
-      forAll { (e: ImageEntry) =>
+      forAll { (e: ImageInFile) =>
         val cache = StoredImagesCache.add(e).unsafePerformSyncAttempt
         cache.isRight shouldBe true
         cache.getOrElse(fail("Should not happen")).images should contain(e)
       }
     }
     it should "delete entries" in {
-      forAll { (e: ImageEntry) =>
+      forAll { (e: ImageInFile) =>
         val cache = (StoredImagesCache.add(e) *> StoredImagesCache.remove(e)).unsafePerformSyncAttempt
         cache.isRight shouldBe true
         cache.getOrElse(fail("Should not happen")).images should not contain e
       }
     }
     it should "find entries" in {
-      forAll { (e: ImageEntry) =>
+      forAll { (e: ImageInFile) =>
         val entry = (StoredImagesCache.add(e) >> StoredImagesCache.find(e.query)).unsafePerformSyncAttempt
         entry.isRight shouldBe true
         entry.getOrElse(fail("Should not happen")).value shouldBe e

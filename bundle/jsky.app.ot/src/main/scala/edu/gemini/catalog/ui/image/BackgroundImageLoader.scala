@@ -46,6 +46,8 @@ trait ImageLoadingListener {
   * It also updates the UI as needed
   */
 object BackgroundImageLoader {
+  private val taskUnit = Task.now(())
+
   private val ImageDownloadsThreadFactory = new ThreadFactory {
     private val threadNumber: AtomicInteger = new AtomicInteger(1)
     private val defaultThreadFactory = Executors.defaultThreadFactory()
@@ -62,7 +64,7 @@ object BackgroundImageLoader {
   private val lowPriorityEC = Executors.newFixedThreadPool(6, ImageDownloadsThreadFactory)
 
   /**
-    * Regular execution context
+    * Regular execution context for higher priority tasks, i.e. UI requests
     */
   private val highPriorityEC = Strategy.DefaultExecutorService
 
@@ -85,13 +87,11 @@ object BackgroundImageLoader {
     prog.removeCompositeChangeListener(ChangeListener)
   }
 
-  private val taskUnit = Task.now(())
-
   /**
     * Display an image if available on disk or request the download if necessary
     */
   def loadImageOnTheTpe(tpe: TpeContext): Unit = {
-    val task = requestedImage(tpe).map(requestImageDownload(highPriorityEC)).getOrElse(taskUnit)
+    val task = requestedImage(tpe).fold(taskUnit)(requestImageDownload(highPriorityEC))
 
     // This method called on an explicit user interaction so we'd rather
     // Request the execution in a higher priority thread
@@ -104,7 +104,7 @@ object BackgroundImageLoader {
     override def propertyChange(evt: PropertyChangeEvent): Unit =
       evt.getSource match {
         case node: ISPNode => Option(node.getContextObservation).foreach { o =>
-          val task = requestedImage(TpeContext(o)).map(requestImageDownload(highPriorityEC)).getOrElse(taskUnit)
+          val task = requestedImage(TpeContext(o)).fold(taskUnit)(requestImageDownload(highPriorityEC))
 
           // Run it in the background as it is lower priority than GUI
           runAsync(task)(_ => ())(lowPriorityEC)
@@ -122,7 +122,7 @@ object BackgroundImageLoader {
       image    <- loadImage(ImageSearchQuery(catalog, t.coordinates), cacheDir, ImageCatalogPanel.resetListener)(pool)
     } yield image match {
       case Some(e) => updateTpeImage(e) // Try to set it on the UI
-      case _       => // Ignore, the image was invalid or not found
+      case _       => // Ignore, some other thread is downloading the image
     }
 
   /**
@@ -130,10 +130,10 @@ object BackgroundImageLoader {
     * It will check if the image is in the cache or in progress before requesting a download
     * It updates the listener as needed to update the UI
     */
-  private def loadImage(query: ImageSearchQuery, dir: Path, listener: ImageLoadingListener)(pool: ExecutorService): Task[Option[ImageEntry]] = {
+  private def loadImage(query: ImageSearchQuery, dir: Path, listener: ImageLoadingListener)(pool: ExecutorService): Task[Option[ImageInFile]] = {
 
-    def addToCacheAndGet(f: Path): Task[ImageEntry] = {
-      val i = ImageEntry(query, f, f.toFile.length())
+    def addToCacheAndGet(f: Path): Task[ImageInFile] = {
+      val i = ImageInFile(query, f, f.toFile.length())
       // Add to cache and prune the cache
       // Note that cache pruning goes in a different thread
       StoredImagesCache.add(i) *> ImageCacheOnDisk.pruneCache *> Task.now(i)
@@ -142,26 +142,31 @@ object BackgroundImageLoader {
     def readImageToFile: NonEmptyList[Task[Path]] =
       query.url.map(ImageCatalogClient.downloadImageToFile(dir, _, query.fileName))
 
-    def downloadImage: Task[ImageEntry] = {
+    def downloadImage: Task[ImageInFile] = {
       val task = for {
-        _ <- ImagesInProgress.start(query) *> listener.downloadStarts()
+        _ <- KnownImagesSets.start(query) *> listener.downloadStarts()
         f <- TaskHelper.selectFirstToComplete(readImageToFile)(pool)
         e <- addToCacheAndGet(f)
       } yield e
 
-      // Remove query from registry and Inform listeners at the end
+      // Remove query from registry and inform listeners at the end
       task.onFinish {
-        case Some(_) => ImagesInProgress.failed(query) *> listener.downloadError()
-        case _       => ImagesInProgress.completed(query) *> listener.downloadCompletes()
+        case Some(_) => KnownImagesSets.failed(query) *> listener.downloadError()
+        case _       => KnownImagesSets.completed(query) *> listener.downloadCompletes()
       }
     }
 
-    def checkIfNeededAndDownload: Task[Option[ImageEntry]] =
-      ImagesInProgress.inProgress(query) >>= { inProcess => if (inProcess) Task.now(None) else downloadImage.map(Some.apply) }
+    def checkIfNeededAndDownload: Task[Option[ImageInFile]] =
+      KnownImagesSets.inProgress(query).ifM(Task.now(none), downloadImage.map(Some.apply))
 
     // Try to find the image on the cache, else download
-    StoredImagesCache.find(query) >>= { _.filter(_.file.toFile.exists()).fold(checkIfNeededAndDownload)(f => Task.now(Some(f))) }
+    for {
+      inCache <- StoredImagesCache.find(query)
+      exists  <- Task.delay(inCache.filter(_.file.toFile.exists()))
+      file    <- exists.fold(checkIfNeededAndDownload)(f => Task.now(f.some))
+    } yield file
   }
+
   /**
     * Extracts the data to request an image from the current context
     */
@@ -191,29 +196,32 @@ object BackgroundImageLoader {
     * We'll only update the position if the coordinates match
     *
     */
-  private def updateTpeImage(entry: ImageEntry): Unit = {
+  private def updateTpeImage(entry: ImageInFile): Unit = {
     def updateCacheAndDisplay(iw: TpeImageWidget): Task[Unit] = StoredImagesCache.markAsUsed(entry) *> Task.delay(iw.setFilename(entry.file.toAbsolutePath.toString, false))
 
     Swing.onEDT {
+      // Run inside the EDT, we need to catch possible exceptions when setting the file on the UI
       for {
         tpe     <- Option(TpeManager.get())
         iw      <- Option(tpe.getImageWidget)
-        request <- requestedImage(iw.getContext)
+        ctx     =  iw.getContext
+        request <- requestedImage(ctx)
         if entry.query.isNearby(request.coordinates) // The TPE may have moved so only display if the coordinates match
         if ImageCatalogPanel.isCatalogSelected(entry.query.catalog) // Only set the image if the catalog matches
       } {
-        val r = ImagesInProgress.inProgress(entry.query) >>= { inProgress => if (!inProgress) updateCacheAndDisplay(iw) else taskUnit}
+        val task = KnownImagesSets.inProgress(entry.query).ifM(taskUnit, updateCacheAndDisplay(iw))
 
         // Function to capture an exception and request a new download
         val reDownload: PartialFunction[Throwable, Task[Unit]] = {
           case _: ImageLoadingException =>
             // This happens typically if the image is corrupted
             // Let's try to re-download
-            Task.delay(entry.file.toFile.delete).ifM(Task.delay(TpeContext.fromTpeManager.foreach(loadImageOnTheTpe)), taskUnit)
+            Task.delay(entry.file.toFile.delete).ifM(Task.delay(loadImageOnTheTpe(ctx)), taskUnit)
         }
+
         // We don't really care about the result but want to intercept
-          // file errors to redownload the image
-        r.handleWith(reDownload).unsafePerformSync
+        // file errors to redownload the image
+        task.handleWith(reDownload).unsafePerformSync
       }
     }
   }

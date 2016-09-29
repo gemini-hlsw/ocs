@@ -63,10 +63,11 @@ object ObservationCatalogOverrides {
   }
 
   // Try to read or use a default if any errors are found
-  private def readOverrides: Overrides = \/.fromTryCatchNonFatal {
-        val lines = new String(Files.readAllBytes(overridesFile.toPath), StandardCharsets.UTF_8)
-        Parse.decodeOr[Overrides, Overrides](lines, identity, Overrides.zero)
-      }.getOrElse(Overrides.zero)
+  private def readOverrides: Overrides =
+    \/.fromTryCatchNonFatal {
+      val lines = new String(Files.readAllBytes(overridesFile.toPath), StandardCharsets.UTF_8)
+      Parse.decodeOr[Overrides, Overrides](lines, identity, Overrides.zero)
+    }.getOrElse(Overrides.zero)
 
   /**
     * Finds the catalog for the given node and wavelength

@@ -14,17 +14,17 @@ import scalaz.concurrent.Task
 /**
   * Keeps track of images in the file system and access time
   */
-protected case class StoredImages(entries: List[(Instant, ImageEntry)]) {
-  def images: List[ImageEntry] = entries.map(_._2)
+protected case class StoredImages(entries: List[(Instant, ImageInFile)]) {
+  def images: List[ImageInFile] = entries.map(_._2)
 
-  def +(i: ImageEntry): StoredImages = copy((Instant.now, i) :: entries)
-  def +(i: Instant, e: ImageEntry): StoredImages = copy((i, e) :: entries)
-  def -(i: ImageEntry): StoredImages = copy(entries.filterNot(_._2 === i))
+  def +(i: ImageInFile): StoredImages = copy((Instant.now, i) :: entries)
+  def +(i: Instant, e: ImageInFile): StoredImages = copy((i, e) :: entries)
+  def -(i: ImageInFile): StoredImages = copy(entries.filterNot(_._2 === i))
 
   /**
     * Indicates the image was used, update the access time
     */
-  def touch(i: ImageEntry): StoredImages = copy(entries.collect {
+  def touch(i: ImageInFile): StoredImages = copy(entries.collect {
     case x if x._2 === i => (Instant.now, x._2)
     case x               => x
   })
@@ -32,12 +32,12 @@ protected case class StoredImages(entries: List[(Instant, ImageEntry)]) {
   /**
     * Return imagessorted by access time
     */
-  def sortedByAccess: List[ImageEntry] = entries.sortBy(_._1).map(_._2).reverse
+  def sortedByAccess: List[ImageInFile] = entries.sortBy(_._1).map(_._2).reverse
 
   /**
     * Find images near the requested query
     */
-  def findNearby(query: ImageSearchQuery): Option[ImageEntry] =
+  def findNearby(query: ImageSearchQuery): Option[ImageInFile] =
     entries.find(q => q._2.query === query || (q._2.query.catalog === query.catalog && q._2.query.isNearby(query))).map(_._2)
 }
 
@@ -52,13 +52,13 @@ object StoredImages {
 object StoredImagesCache {
   private val cacheRef = TaskRef.newTaskRef[StoredImages](StoredImages.zero).unsafePerformSync
 
-  def add(i: ImageEntry): Task[StoredImages] = cacheRef.mod(_ + i) *> cacheRef.get
+  def add(i: ImageInFile): Task[StoredImages] = cacheRef.mod(_ + i) *> cacheRef.get
 
-  def addAt(instant: Instant, i: ImageEntry): Task[StoredImages] = cacheRef.mod(_ + (instant, i)) *> cacheRef.get
+  def addAt(instant: Instant, i: ImageInFile): Task[StoredImages] = cacheRef.mod(_ + (instant, i)) *> cacheRef.get
 
-  def markAsUsed(i: ImageEntry): Task[StoredImages] = cacheRef.mod(_.touch(i)) *> cacheRef.get
+  def markAsUsed(i: ImageInFile): Task[StoredImages] = cacheRef.mod(_.touch(i)) *> cacheRef.get
 
-  def remove(i: ImageEntry): Task[StoredImages] = cacheRef.mod(_ - i) *> cacheRef.get
+  def remove(i: ImageInFile): Task[StoredImages] = cacheRef.mod(_ - i) *> cacheRef.get
 
   def get: Task[StoredImages] = cacheRef.get
 
@@ -68,7 +68,7 @@ object StoredImagesCache {
     * Find if the search query is in the cache
     * Find allows for nearby images to be reused
     */
-  def find(query: ImageSearchQuery): Task[Option[ImageEntry]] =
+  def find(query: ImageSearchQuery): Task[Option[ImageInFile]] =
     cacheRef.get.map(_.findNearby(query))
 }
 
@@ -79,12 +79,12 @@ object ImageCacheOnDisk {
     */
   def pruneCache: Task[Unit] = Task.fork {
     // Remove files from the in memory cache and delete from drive
-    def deleteOldFiles(files: List[ImageEntry]): Task[Unit] =
+    def deleteOldFiles(files: List[ImageInFile]): Task[Unit] =
       Task.gatherUnordered(files.map(StoredImagesCache.remove)) *> Task.delay(files.foreach(_.file.toFile.delete()))
 
     // Find the files that should be removed to keep the max size limited
-    def filesToRemove(s: StoredImages, maxCacheSize: Long): Task[List[ImageEntry]] = Task.delay {
-      val u = s.sortedByAccess.foldLeft((0L, List.empty[ImageEntry])) { (s, e) =>
+    def filesToRemove(s: StoredImages, maxCacheSize: Long): Task[List[ImageInFile]] = Task.delay {
+      val u = s.sortedByAccess.foldLeft((0L, List.empty[ImageInFile])) { (s, e) =>
         val accSize = s._1 + e.fileSize
         if (accSize > maxCacheSize) {
           (accSize, e :: s._2)

@@ -171,7 +171,7 @@ final class ImageCatalogPanel(imageDisplay: CatalogImageDisplay) {
         base   <- tpe.targets.base
         when   = ctx.getSchedulingBlockStart.asScalaOpt | Instant.now.toEpochMilli
         coords <- base.getTarget.coords(when)
-       } yield ImagesInProgress.cataloguesInUse(coords).map(showAsLoading)
+       } yield KnownImagesSets.cataloguesInUse(coords).map(showAsLoading)
 
     catalogButtonsUpdate.sequenceU
   }

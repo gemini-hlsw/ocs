@@ -20,10 +20,10 @@ trait ImageCatalogArbitraries extends Arbitraries {
     arbitrary[String].map(new File(_))
   }
 
-  implicit val arbImageEntry: Arbitrary[ImageEntry] = Arbitrary {
+  implicit val arbImageEntry: Arbitrary[ImageInFile] = Arbitrary {
     for {
       query <- arbitrary[ImageSearchQuery]
       file  <- arbitrary[File]
-    } yield ImageEntry(query, file.toPath, file.length)
+    } yield ImageInFile(query, file.toPath, file.length)
   }
 }

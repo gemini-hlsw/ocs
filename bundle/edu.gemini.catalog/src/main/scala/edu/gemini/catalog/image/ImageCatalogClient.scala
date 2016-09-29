@@ -51,24 +51,24 @@ object ImageSearchQuery {
 /**
   * Image in the file system
   */
-case class ImageEntry(query: ImageSearchQuery, file: Path, fileSize: Long)
+case class ImageInFile(query: ImageSearchQuery, file: Path, fileSize: Long)
 
-object ImageEntry {
-  implicit val equals: Equal[ImageEntry] = Equal.equalA[ImageEntry]
+object ImageInFile {
+  implicit val equals: Equal[ImageInFile] = Equal.equalA[ImageInFile]
 
   val fileRegex: Regex = """img_(.*)_ra_(.*)_dec_(.*)\.fits.*""".r
 
   /**
     * Decode a file name into an image entry
     */
-  def entryFromFile(file: File): Option[ImageEntry] = {
+  def entryFromFile(file: File): Option[ImageInFile] = {
     file.getName match {
       case fileRegex(c, raStr, decStr) =>
         for {
           catalog <- ImageCatalog.byName(c)
           ra      <- Angle.parseHMS(raStr).map(RightAscension.fromAngle).toOption
           dec     <- Angle.parseDMS(decStr).toOption.map(_.toDegrees).flatMap(Declination.fromDegrees)
-        } yield ImageEntry(ImageSearchQuery(catalog, Coordinates(ra, dec)), file.toPath, file.length())
+        } yield ImageInFile(ImageSearchQuery(catalog, Coordinates(ra, dec)), file.toPath, file.length())
       case _ => None
     }
   }
@@ -88,11 +88,11 @@ object ImageCatalogClient {
     case class ConnectionDescriptor(contentType: Option[String], contentEncoding: Option[String]) {
 
       def extension: String = (contentEncoding, contentType) match {
-          case (Some("x-gzip"), _) => ".fits.gz"
+          case (Some("x-gzip"), _)                                                              => ".fits.gz"
           // REL-2776 At some places on the sky DSS returns an error, the HTTP error code is ok but the body contains no image
           case (None, Some(s)) if s.contains("text/html") && url.getPath.contains("dss_search") => throw new RuntimeException("Image not found at image server")
-          case (None, Some(s)) if s.endsWith("fits") => ".fits"
-          case _ => ".tmp"
+          case (None, Some(s)) if s.endsWith("fits")                                            => ".fits"
+          case _                                                                                => ".tmp"
         }
     }
 

@@ -27,12 +27,11 @@ object ImageCacheWatcher {
 
     def closeStream(stream: DirectoryStream[Path]): Task[Unit] = Task.delay(stream.close())
 
-    def readFiles(stream: DirectoryStream[Path]): Task[StoredImages] =
-      Task.delay {
-        val u = stream.iterator().asScala.toList
-        val p = u.flatMap(f => ImageEntry.entryFromFile(f.toFile).map(e => StoredImagesCache.addAt(Files.readAttributes(f, classOf[BasicFileAttributes]).lastAccessTime.toInstant, e)))
-        (p.sequenceU *> StoredImagesCache.get).unsafePerformSync
-      }.onFinish(f => Task.delay(f.foreach(u => stream.close()))) // Make sure the stream is closed
+    def readFiles(stream: DirectoryStream[Path]): Task[StoredImages] = {
+      val u = stream.iterator().asScala.toList
+      val p = u.flatMap(f => ImageInFile.entryFromFile(f.toFile).map(e => StoredImagesCache.addAt(Files.readAttributes(f, classOf[BasicFileAttributes]).lastAccessTime.toInstant, e)))
+      (p.sequenceU *> StoredImagesCache.get).onFinish(f => Task.delay(f.foreach(_ => stream.close()))) // Make sure the stream is closed
+    }
 
     for {
       ds <- initStream(cacheDir)
@@ -50,8 +49,9 @@ object ImageCacheWatcher {
       val tasks = watchKey.pollEvents().asScala.toList.collect {
           case ev: WatchEvent[Path] if ev.kind() == ENTRY_DELETE =>
             val p = ev.context()
-            val task = for {
-                e <- ImageEntry.entryFromFile(p.toFile)
+            val task =
+              for {
+                e <- ImageInFile.entryFromFile(p.toFile)
               } yield StoredImagesCache.remove(e)
             task.getOrElse(Task.now(()))
         }

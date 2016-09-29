@@ -6,44 +6,45 @@ import scalaz._
 import Scalaz._
 import scalaz.concurrent.Task
 
-/**
-  * Keeps track of images currently being dowloaded
-  */
-case class ImagesInProgress(images: List[ImageSearchQuery]) {
+protected case class ImagesInProgress(images: List[ImageSearchQuery]) {
   def +(i: ImageSearchQuery): ImagesInProgress = copy(i :: images)
   def -(i: ImageSearchQuery): ImagesInProgress = copy(images.filterNot(_ === i))
 }
 
+/**
+  * Keeps track of images currently being downloaded or failed
+  */
+case class KnownImagesSets(inProgress: ImagesInProgress, failed: ImagesInProgress) {
+  def start(i: ImageSearchQuery): KnownImagesSets = copy(inProgress + i, failed - i)
+  def completed(i: ImageSearchQuery): KnownImagesSets = copy(inProgress - i, failed - i)
+  def failed(i: ImageSearchQuery): KnownImagesSets = copy(inProgress - i, failed + i)
+}
+
 case class CataloguesInUse(inProgress: List[ImageCatalog], failed: List[ImageCatalog])
 
-object ImagesInProgress  {
+object KnownImagesSets {
   val zero = ImagesInProgress(Nil)
-  implicit val equals: Equal[ImagesInProgress] = Equal.equalA[ImagesInProgress]
 
-  // Contains the images being downloaded
-  private val inUseRef = TaskRef.newTaskRef[ImagesInProgress](ImagesInProgress.zero).unsafePerformSync
-  // Contains images that have failed
-  private val failedRef = TaskRef.newTaskRef[ImagesInProgress](ImagesInProgress.zero).unsafePerformSync
+  private val imagesSets = TaskRef.newTaskRef[KnownImagesSets](KnownImagesSets(zero, zero)).unsafePerformSync
 
-  def start(i: ImageSearchQuery): Task[ImagesInProgress] = inUseRef.mod(_ + i) *> failedRef.mod(_ - i) *> inUseRef.get
+  def start(i: ImageSearchQuery): Task[KnownImagesSets] = imagesSets.mod(_.start(i)) *> imagesSets.get
 
-  def completed(i: ImageSearchQuery): Task[ImagesInProgress] = inUseRef.mod(_ - i) *> failedRef.mod(_ - i) *> inUseRef.get
+  def completed(i: ImageSearchQuery): Task[KnownImagesSets] = imagesSets.mod(_.completed(i)) *> imagesSets.get
 
-  def failed(i: ImageSearchQuery): Task[ImagesInProgress] = inUseRef.mod(_ - i) *> failedRef.mod(_ + i) *> failedRef.get
+  def failed(i: ImageSearchQuery): Task[KnownImagesSets] = imagesSets.mod(_.failed(i)) *> imagesSets.get
 
   /**
     * Find if the search query is in progress
     */
   def inProgress(query: ImageSearchQuery): Task[Boolean] =
-    inUseRef.get.map(_.images.contains(query))
+    imagesSets.get.map(_.inProgress.images.contains(query))
 
   /**
     * Find the catalogues being searched or failed near the given coordinates
     */
   def cataloguesInUse(coordinates: Coordinates): Task[CataloguesInUse] = {
-   val u = inUseRef.get.map(_.images.filter(_.isNearby(coordinates)).map(_.catalog))
-   val v = failedRef.get.map(_.images.filter(_.isNearby(coordinates)).map(_.catalog))
+   val u = imagesSets.get.map(_.inProgress.images.filter(_.isNearby(coordinates)).map(_.catalog))
+   val v = imagesSets.get.map(_.failed.images.filter(_.isNearby(coordinates)).map(_.catalog))
     u.tuple(v).map(Function.tupled(CataloguesInUse.apply))
   }
-
 }

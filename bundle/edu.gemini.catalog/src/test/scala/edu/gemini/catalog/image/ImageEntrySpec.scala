@@ -10,13 +10,13 @@ class ImageEntrySpec extends FlatSpec with Matchers with PropertyChecks with Ima
     "return a generated index with production files on production mode" in {
       forAll { (query: ImageSearchQuery) =>
         val suffix = ".fits.gz"
-        ImageEntry.entryFromFile(new File(query.fileName(suffix))).value.query == query
+        ImageInFile.entryFromFile(new File(query.fileName(suffix))).value.query == query
       }
     }
     it should "ignore bad names" in {
       forAll { (query: ImageSearchQuery) =>
         val suffix = ".fits.gz"
-        ImageEntry.entryFromFile(new File("A" + query.fileName(suffix))) shouldBe None
+        ImageInFile.entryFromFile(new File("A" + query.fileName(suffix))) shouldBe None
       }
     }
 }
