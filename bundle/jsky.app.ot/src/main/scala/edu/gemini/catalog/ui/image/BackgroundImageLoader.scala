@@ -76,8 +76,8 @@ object BackgroundImageLoader {
   /**
     * Display an image if available on disk or request the download if necessary
     */
-  def loadImageOnTheTpe(tpe: TpeContext, listener: ImageLoadingListener): Unit = {
-    val task = requestedImage(tpe).map(requestImageDownload(listener, highPriorityEC)).getOrElse(Task.now(()))
+  def loadImageOnTheTpe(tpe: TpeContext): Unit = {
+    val task = requestedImage(tpe).map(requestImageDownload(ImageCatalogPanel.resetListener, highPriorityEC)).getOrElse(Task.now(()))
 
     // This is called on an explicit user interaction so we'd rather
     // Request the execution in a higher priority thread
@@ -93,7 +93,7 @@ object BackgroundImageLoader {
     override def propertyChange(evt: PropertyChangeEvent): Unit =
       evt.getSource match {
         case node: ISPNode => Option(node.getContextObservation).foreach { o =>
-          val task = requestedImage(TpeContext(o)).map(requestImageDownload(ImageLoadingListener.zero, lowPriorityEC)).getOrElse(Task.now(()))
+          val task = requestedImage(TpeContext(o)).map(requestImageDownload(ImageCatalogPanel.resetListener, highPriorityEC)).getOrElse(Task.now(()))
 
           // Run it in the background as it is lower priority than GUI
           runAsync(task) {

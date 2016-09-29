@@ -329,7 +329,7 @@ public final class TelescopePosEditor implements TpeMouseObserver {
     void getSkyImage(final TpeContext ctx) throws IOException, CatalogException {
         final SPTarget _baseTarget = ctx.targets().baseOrNull();
         if (_baseTarget == null) return;
-        BackgroundImageLoader.loadImageOnTheTpe(ctx, ImageCatalogPanel$.MODULE$.resetListener());
+        BackgroundImageLoader.loadImageOnTheTpe(ctx);
     }
 
     /**

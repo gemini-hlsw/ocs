@@ -116,10 +116,10 @@ final class ImageCatalogPanel(imageDisplay: CatalogImageDisplay) {
 
   lazy val panel: Component = new MigPanel(LC().fill().insets(0.px)) {
     add(new Label("Image Catalog:"), CC())
-    add(toolsButton, CC())
-    catalogRows.foreach { case row =>
+    add(toolsButton, CC().alignX(RightAlign))
+    catalogRows.foreach { row =>
       add(row.button, CC().newline())
-      add(row.feedback, CC())
+      add(row.feedback, CC().alignX(RightAlign))
       buttonGroup.add(row.button.peer)
       row.button.reactions += {
         case ButtonClicked(_) =>
