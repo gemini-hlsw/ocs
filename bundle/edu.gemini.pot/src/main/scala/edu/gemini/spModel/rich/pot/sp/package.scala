@@ -41,7 +41,8 @@ package object sp {
     t.drawTree(ev).zipWithIndex.collect { case (s, n0) if n0 % 2 == 0 => s}.mkString("\n")
   }
 
-  implicit def SpNodeKeyEqual: Equal[SPNodeKey] = Equal.equalA
+  implicit def SpNodeKeyOrder: Order[SPNodeKey] =
+    Order.order((k0, k1) => Ordering.fromInt(k0.compareTo(k1)))
 
   implicit class RichDataObject[A <: ISPDataObject](dob: A) {
     def copy: A = dob.clone(dob)
