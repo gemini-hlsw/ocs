@@ -66,6 +66,9 @@ object ImageCatalogPanel {
 
     override def downloadError(): Unit = Swing.onEDT(ImageCatalogPanel.resetCatalogPanel.unsafePerformSync)
   }
+
+  def isCatalogSelected(catalog: ImageCatalog): Boolean =
+    Option(TpeManager.get()).exists(_.getTpeToolBar.isCatalogSelected(catalog))
 }
 
 /**
@@ -182,6 +185,10 @@ final class ImageCatalogPanel(imageDisplay: CatalogImageDisplay) {
     val updateSelectedCatalog = ObservationCatalogOverrides.catalogFor(observation.getNodeKey, wavelength).map(updateSelection)
     // run both side effects synchronously inside EDT
     Nondeterminism[Task].both(updateSelectedCatalog, resetCatalogProgressState).unsafePerformSync
+  }
+
+  def isCatalogSelected(catalog: ImageCatalog): Boolean = {
+    catalogRows.find(_.button.selected).exists(_.feedback.catalog === catalog)
   }
 
   private def mkRow(c: ImageCatalog): CatalogRow =

@@ -154,6 +154,7 @@ object BackgroundImageLoader {
         iw      <- Option(tpe.getImageWidget)
         request <- requestedImage(iw.getContext)
         if entry.query.isNearby(request.coordinates) // The TPE may have moved so only display if the coordinates match
+        if ImageCatalogPanel.isCatalogSelected(entry.query.catalog) // Only set the image if the catalog matches
       } {
         val r = ImagesInProgress.inProgress(entry.query) >>= { inProgress => if (!inProgress) markAndSet(iw) else Task.now(())}
         // TODO: Handle errors
