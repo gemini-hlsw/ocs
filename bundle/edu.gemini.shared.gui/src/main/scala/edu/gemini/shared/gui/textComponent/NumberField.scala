@@ -17,7 +17,7 @@ object NumberField {
   }
 }
 
-class NumberField(d: Option[Double], allowEmpty: Boolean) extends FormattedTextField(NumberField.df) with SelectOnFocus {
+class NumberField(d: Option[Double], allowEmpty: Boolean, format: java.text.Format = NumberField.df) extends FormattedTextField(format) with SelectOnFocus {
   d.orElse(Some(0)).foreach { d =>
     import NumberField.df
     text = df.format(d)

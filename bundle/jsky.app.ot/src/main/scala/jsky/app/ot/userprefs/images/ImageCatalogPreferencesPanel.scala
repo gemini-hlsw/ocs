@@ -1,10 +1,11 @@
 package jsky.app.ot.userprefs.images
 
 import java.awt.{Component => JComponent}
+import java.text.DecimalFormat
 import javax.swing.Icon
 
-import edu.gemini.catalog.image.{ImageCacheOnDisk, ImageCatalog, ImageCatalogPreferences}
-import edu.gemini.shared.gui.textComponent.{NumberField, TextRenderer}
+import edu.gemini.catalog.image.{ImageCacheOnDisk, ImageCatalogPreferences}
+import edu.gemini.shared.gui.textComponent.NumberField
 import edu.gemini.shared.util.immutable.{None => JNone, Option => JOption, Some => JSome}
 import edu.gemini.ui.miglayout.MigPanel
 import edu.gemini.ui.miglayout.constraints._
@@ -15,36 +16,27 @@ import scalaz._
 import Scalaz._
 import squants.information.InformationConversions._
 
-import scala.swing.{Button, ComboBox, Component, Label}
-import scala.swing.event.{ButtonClicked, SelectionChanged, ValueChanged}
+import scala.swing.{Button, Component, Label}
+import scala.swing.event.{ButtonClicked, ValueChanged}
 import scalaz.concurrent.Task
 
+/**
+  * Preferences panel to give access to the images cache
+  */
 class ImageCatalogPreferencesPanel extends PreferencePanel {
   val CacheSizeDescription = "Change the max allowed size of the cache and/or clear"
-  val DefaultCatalogDescription = "Select the default image catalog"
 
   val initialValue = ImageCatalogPreferences.preferences().unsafePerformSync
 
-  lazy val catalogsComboBox = new ComboBox[ImageCatalog](ImageCatalog.all) with TextRenderer[ImageCatalog] {
-    override def text(a: ImageCatalog): String = a.displayName
+  val df = new DecimalFormat <| {_.setParseIntegerOnly(true)} <| {_.setMinimumFractionDigits(0)} <| {_.setMinimumIntegerDigits(0)} <| {_.setGroupingUsed(false)}
 
-    listenTo(selection)
-    selection.item = initialValue.defaultCatalog
-    reactions += {
-      case SelectionChanged(_) if cacheSizeField.text.nonEmpty =>
-        ImageCatalogPreferences.preferences(ImageCatalogPreferences(cacheSizeField.text.toDouble.megabytes, selection.item)).unsafePerformSync
-    }
-  }
-
-  lazy val catalogsTxt = PreferenceDialog.mkNote(DefaultCatalogDescription)
-
-  lazy val cacheSizeField: NumberField = new NumberField(initialValue.imageCacheSize.toMegabytes.some, false) {
+  lazy val cacheSizeField: NumberField = new NumberField(initialValue.imageCacheSize.toMegabytes.some, false, df) {
     override def valid(d: Double): Boolean = d >= 0
 
     reactions += {
       case ValueChanged(_) if text.nonEmpty =>
         // this is guaranteed to be a positive double
-        ImageCatalogPreferences.preferences(ImageCatalogPreferences(this.text.toDouble.megabytes, catalogsComboBox.selection.item)).unsafePerformSync
+        ImageCatalogPreferences.preferences(ImageCatalogPreferences.zero.copy(this.text.toDouble.megabytes)).unsafePerformSync
     }
   }
 
@@ -62,8 +54,6 @@ class ImageCatalogPreferencesPanel extends PreferencePanel {
 
   lazy val component = new MigPanel(LC().insets(20, 10, 20, 10).fill()) {
       add(new Label("Default Image Catalog:"), CC())
-      add(catalogsComboBox, CC().span(3).growX())
-      add(Component.wrap(catalogsTxt), CC().span(4).growX().newline())
       add(new Label("Cache size:"), CC().growX().newline())
       add(cacheSizeField, CC())
       add(new Label("MB"), CC())

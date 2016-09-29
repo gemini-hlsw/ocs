@@ -96,21 +96,6 @@ final class ImageCatalogPanel(imageDisplay: CatalogImageDisplay) {
             reactions += {
               case ButtonClicked(_) =>
                 close()
-
-                // Reset the image if needed
-                val r = for {
-                  p <- ImageCatalogPreferences.preferences() // At this moment the default catalog may have changed
-                } yield {
-                  val f = catalogRows.find(_.feedback.catalog === p.defaultCatalog).map(_.feedback)
-                  f match {
-                    case Some(x) if selectedCatalog.forall(_ =/= p.defaultCatalog) => imageDisplay.loadSkyImage() // Reload if the selected catalog is not the default
-                    case _                                                         => ()
-                  }
-                }
-                r.unsafePerformSync
-
-                // Reset the selection
-                TpeContext.fromTpeManager.flatMap(_.obsShell).foreach(t => resetCatalogue(t))
             }
           }
 
