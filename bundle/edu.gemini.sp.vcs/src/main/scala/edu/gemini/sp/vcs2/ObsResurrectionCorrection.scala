@@ -3,7 +3,7 @@ package edu.gemini.sp.vcs2
 import edu.gemini.pot.sp.SPNodeKey
 import edu.gemini.pot.sp.version.EmptyNodeVersions
 import edu.gemini.sp.vcs2.MergeCorrection.CorrectionFunction
-import edu.gemini.spModel.rich.pot.sp.SpNodeKeyEqual
+import edu.gemini.spModel.rich.pot.sp.SpNodeKeyOrder
 
 import scalaz._
 import Scalaz._

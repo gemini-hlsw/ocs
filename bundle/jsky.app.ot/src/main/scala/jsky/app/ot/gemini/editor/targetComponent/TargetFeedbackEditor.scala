@@ -8,7 +8,7 @@ import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable._
 import edu.gemini.spModel.target.SPTarget
 import jsky.app.ot.OT
-import jsky.app.ot.ags.BagsManager
+import jsky.app.ot.ags.{ObsKey, BagsManager}
 import jsky.app.ot.gemini.editor.targetComponent.TargetFeedback.Row
 
 import scala.swing.GridBagPanel.Fill
@@ -31,9 +31,7 @@ class TargetFeedbackEditor extends TelescopePosEditor {
       val bagsRow = for {
         n <- Option(node)
         o <- Option(n.getContextObservation)
-        pk <- Option(o.getProgram).map(_.getProgramKey)
-        ok <- Option(o.getNodeKey)
-        s <- BagsManager.stateLookup(pk, ok)
+        s <- BagsManager.stateLookup(ObsKey(o))
         row <- BagsFeedback.toRow(s, ctxOpt.asScalaOpt)
       } yield row
 
