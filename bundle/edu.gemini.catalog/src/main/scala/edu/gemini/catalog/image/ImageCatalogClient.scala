@@ -25,10 +25,8 @@ case class ImageSearchQuery(catalog: ImageCatalog, coordinates: Coordinates) {
   def isNearby(query: ImageSearchQuery): Boolean =
     catalog === query.catalog && isNearby(query.coordinates)
 
-  def isNearby(c: Coordinates): Boolean = {
-    val (diffRa, diffDec) = coordinates.diff(c)
-    (diffRa <= maxDistance || (Angle.zero - diffRa) <= maxDistance) && (diffDec <= maxDistance || (Angle.zero - diffDec) <= maxDistance)
-  }
+  def isNearby(c: Coordinates): Boolean =
+    coordinates.angularDistance(c) <= maxDistance
 }
 
 object ImageSearchQuery {

@@ -38,7 +38,7 @@ protected case class StoredImages(entries: List[(Instant, ImageInFile)]) {
     * Find images near the requested query
     */
   def findNearby(query: ImageSearchQuery): Option[ImageInFile] =
-    entries.find(q => q._2.query === query || (q._2.query.catalog === query.catalog && q._2.query.isNearby(query))).map(_._2)
+    entries.find(q => q._2.query === query || q._2.query.isNearby(query)).map(_._2)
 }
 
 object StoredImages {
