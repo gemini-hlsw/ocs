@@ -165,6 +165,7 @@ object BackgroundImageLoader {
       exists  <- Task.delay(inCache.filter(_.file.toFile.exists()))
       file    <- exists.fold(checkIfNeededAndDownload)(f => Task.now(f.some))
     } yield file
+
   }
 
   /**

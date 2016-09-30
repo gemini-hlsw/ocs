@@ -42,12 +42,6 @@ class ImageSearchQuerySpec extends FlatSpec with Matchers with PropertyChecks wi
         ImageSearchQuery(t.catalog, t.c).isNearby(ImageSearchQuery(t.catalog, c1)) shouldBe true
       }(implicitly[PropertyCheckConfiguration], testCase(Angle.zero, ImageSearchQuery.maxDistance), implicitly[Shrink[TestCase]], implicitly[CheckerAsserting[Assertion]])
     }
-    it should "not be nearby farther coordinates in ra" in {
-      forAll { (t: TestCase) =>
-        val c1 = t.c.copy(ra = t.c.ra.offset(t.delta))
-        ImageSearchQuery(t.catalog, t.c).isNearby(ImageSearchQuery(t.catalog, c1)) shouldBe false
-      }(implicitly[PropertyCheckConfiguration], testCase(ImageSearchQuery.maxDistance, ImageSearchQuery.maxDistance * 2), implicitly[Shrink[TestCase]], implicitly[CheckerAsserting[Assertion]])
-    }
     it should "be nearby close coordinates in dec" in {
       forAll { (t: TestCase) =>
         val c1 = t.c.copy(dec = t.c.dec.offset(t.delta)._1)

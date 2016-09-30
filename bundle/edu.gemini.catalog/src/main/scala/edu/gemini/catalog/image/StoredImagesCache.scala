@@ -18,7 +18,9 @@ protected case class StoredImages(entries: List[(Instant, ImageInFile)]) {
   def images: List[ImageInFile] = entries.map(_._2)
 
   def +(i: ImageInFile): StoredImages = copy((Instant.now, i) :: entries)
+
   def +(i: Instant, e: ImageInFile): StoredImages = copy((i, e) :: entries)
+
   def -(i: ImageInFile): StoredImages = copy(entries.filterNot(_._2 === i))
 
   /**
@@ -30,15 +32,24 @@ protected case class StoredImages(entries: List[(Instant, ImageInFile)]) {
   })
 
   /**
-    * Return imagessorted by access time
+    * Return images sorted by access time
     */
   def sortedByAccess: List[ImageInFile] = entries.sortBy(_._1).map(_._2).reverse
 
   /**
-    * Find images near the requested query
+    * Find the image in the cache closest to the requested query
     */
-  def findNearby(query: ImageSearchQuery): Option[ImageInFile] =
-    entries.find(q => q._2.query === query || q._2.query.isNearby(query)).map(_._2)
+  def closestImage(query: ImageSearchQuery): Option[ImageInFile] = {
+    val distances = for {
+        (_, e) <- entries
+        if e.query.catalog === query.catalog
+        distance = query.coordinates.angularDistance(e.query.coordinates)
+        if distance <= ImageSearchQuery.maxDistance
+      } yield (distance, e)
+
+    distances.minimumBy(_._1).map(_._2)
+  }
+
 }
 
 object StoredImages {
@@ -69,7 +80,7 @@ object StoredImagesCache {
     * Find allows for nearby images to be reused
     */
   def find(query: ImageSearchQuery): Task[Option[ImageInFile]] =
-    cacheRef.get.map(_.findNearby(query))
+    cacheRef.get.map(_.closestImage(query))
 }
 
 object ImageCacheOnDisk {

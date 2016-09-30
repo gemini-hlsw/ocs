@@ -1,6 +1,7 @@
 package edu.gemini.catalog.image
 
 import java.io.File
+import java.nio.file.Path
 
 import edu.gemini.spModel.core.{Arbitraries, Coordinates}
 import org.scalacheck._
@@ -16,14 +17,16 @@ trait ImageCatalogArbitraries extends Arbitraries {
     } yield ImageSearchQuery(catalog, coord)
   }
 
-  implicit val arbFile: Arbitrary[File] = Arbitrary {
-    arbitrary[String].map(new File(_))
+  implicit val arbPath: Arbitrary[Path] = Arbitrary {
+    // Use UUID to ensure the filename is valid
+    Gen.uuid.map(u => new File(u.toString).toPath)
   }
 
   implicit val arbImageEntry: Arbitrary[ImageInFile] = Arbitrary {
     for {
       query <- arbitrary[ImageSearchQuery]
-      file  <- arbitrary[File]
-    } yield ImageInFile(query, file.toPath, file.length)
+      file  <- arbitrary[Path]
+      size  <- arbitrary[Long]
+    } yield ImageInFile(query, file, size)
   }
 }
