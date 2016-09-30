@@ -31,7 +31,7 @@ case class ImageSearchQuery(catalog: ImageCatalog, coordinates: Coordinates) {
 
 object ImageSearchQuery {
   implicit val equals: Equal[ImageSearchQuery] = Equal.equalA[ImageSearchQuery]
-  val maxDistance: Angle = (ImageCatalog.DefaultImageSize / 2).getOrElse(Angle.zero)
+  val maxDistance: Angle = Angle.fromArcmin(4.5)
 
   implicit class DeclinationShow(val d: Declination) extends AnyVal {
     def toFilePart: String = Declination.formatDMS(d, ":", 2)
