@@ -44,9 +44,29 @@ object ImageCacheWatcher {
       populateCache *> StoredImagesCache.get
     }
 
+    /**
+      * Delete temporary files. This is done at startup, there maybe temporal
+      * files if the OT exits in the middle of a download
+      */
+    def rmTempFiles: Task[Path] = Task.delay {
+      val matcher = FileSystems.getDefault.getPathMatcher("glob:.img*.fits")
+
+      Files.walkFileTree(cacheDir, new SimpleFileVisitor[Path] {
+        override def visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult = {
+          super.visitFile(file, attrs)
+          if (matcher.matches(file.getFileName)) {
+            file.toFile.delete()
+          }
+          FileVisitResult.CONTINUE
+        }
+      })
+    }
+
+
     def closeStream(stream: DirectoryStream[Path]): Task[Unit] = Task.delay(stream.close())
 
     for {
+      _  <- rmTempFiles
       ds <- initStream
       ab <- readFiles(ds).onFinish(_ => closeStream(ds)) // Make sure the stream is closed
     } yield ab
