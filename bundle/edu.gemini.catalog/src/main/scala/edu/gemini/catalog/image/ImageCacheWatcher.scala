@@ -1,9 +1,9 @@
 package edu.gemini.catalog.image
 
-import java.io.File
 import java.nio.file._
 import java.nio.file.StandardWatchEventKinds._
 import java.nio.file.attribute.BasicFileAttributes
+import java.time.Instant
 import java.util.logging.{Level, Logger}
 
 import jsky.util.Preferences
@@ -22,47 +22,58 @@ object ImageCacheWatcher {
   /**
     * Populates the cache when the application starts
     */
-  private def populateInitialCache(cacheDir: File): Task[StoredImages] = {
-    def initStream(cacheDir: File): Task[DirectoryStream[Path]] = Task.delay(Files.newDirectoryStream(cacheDir.toPath, "img_*"))
+  private def populateInitialCache(cacheDir: Path): Task[StoredImages] = {
+    /**
+      * Creates a stream of files in a dir
+      */
+    def initStream: Task[DirectoryStream[Path]] = Task.delay(Files.newDirectoryStream(cacheDir, "img_*"))
+
+    /**
+      * Read each file and its access time to populate the cache
+      */
+    def readFiles(stream: DirectoryStream[Path]): Task[StoredImages] = {
+      // This will read the last access time of the file. Note that this is OS dependent, it may be disabled in some systems
+      def lastAccessTime(file: Path): Instant = Files.readAttributes(file, classOf[BasicFileAttributes]).lastAccessTime.toInstant
+
+      def fileAndTime(f: Path): Option[Task[StoredImages]] = ImageInFile.entryFromFile(f.toFile).map(StoredImagesCache.addAt(lastAccessTime(f), _))
+
+      val populateCache = for {
+        cacheFiles <- Task.delay(stream.iterator().asScala.toList)
+        accessTimes <- cacheFiles.flatMap(fileAndTime).sequenceU
+      } yield accessTimes
+      populateCache *> StoredImagesCache.get
+    }
 
     def closeStream(stream: DirectoryStream[Path]): Task[Unit] = Task.delay(stream.close())
 
-    def readFiles(stream: DirectoryStream[Path]): Task[StoredImages] = {
-      val u = stream.iterator().asScala.toList
-      val p = u.flatMap(f => ImageInFile.entryFromFile(f.toFile).map(e => StoredImagesCache.addAt(Files.readAttributes(f, classOf[BasicFileAttributes]).lastAccessTime.toInstant, e)))
-      (p.sequenceU *> StoredImagesCache.get).onFinish(f => Task.delay(f.foreach(_ => stream.close()))) // Make sure the stream is closed
-    }
-
     for {
-      ds <- initStream(cacheDir)
-      ab <- readFiles(ds)
-      _  <- closeStream(ds)
+      ds <- initStream
+      ab <- readFiles(ds).onFinish(_ => closeStream(ds)) // Make sure the stream is closed
     } yield ab
   }
 
   /**
     * Observe the file system to detect when files are modified and update the cache accordingly
     */
-  private def watch(cacheDir: File)(implicit B: Bind[Task]): Task[Unit] = {
+  private def watch(cacheDir: Path)(implicit B: Bind[Task]): Task[Unit] = {
     def waitForWatcher(watcher: WatchService) : Task[Unit] = Task.delay {
       val watchKey = watcher.take()
       val tasks = watchKey.pollEvents().asScala.toList.collect {
           case ev: WatchEvent[Path] if ev.kind() == ENTRY_DELETE =>
             val p = ev.context()
-            val task =
-              for {
-                e <- ImageInFile.entryFromFile(p.toFile)
-              } yield StoredImagesCache.remove(e)
+            val task = ImageInFile.entryFromFile(p.toFile).map(StoredImagesCache.remove)
             task.getOrElse(Task.now(()))
         }
       // Update the cache
       tasks.sequenceU.unsafePerformSync
     }
 
-    val watcher = cacheDir.toPath.getFileSystem.newWatchService()
-    cacheDir.toPath.register(watcher, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY)
-    log.info(s"Start watching the images cache at ${cacheDir.getAbsolutePath}")
-    // Keep listening for updates and close at the end
+    log.info(s"Start watching the images cache at ${cacheDir.toFile.getAbsolutePath}")
+
+    val watcher = cacheDir.getFileSystem.newWatchService()
+    // Listen for out-of-band deletion to keep the cache up to date
+    cacheDir.register(watcher, ENTRY_DELETE)
+    // Keep listening for updates and close the watcher at the end
     B.forever(waitForWatcher(watcher)).onFinish(_ => Task.delay(watcher.close()))
   }
 
@@ -71,14 +82,14 @@ object ImageCacheWatcher {
     */
   def run(): Unit = {
     val task = for {
-      cd <- Task.delay(Preferences.getPreferences.getCacheDir)
-      _  <- populateInitialCache(cd)
-      c  <- watch(cd)
+      cd <- Task.delay(Preferences.getPreferences.getCacheDir).map(_.toPath)
+      e  <- populateInitialCache(cd)
+      c  <- {println(e.entries);watch(cd)}
     } yield c
 
     // Execute the watcher in a separate thread
     Task.fork(task).unsafePerformAsync {
-      case \/-(_) =>
+      case \/-(_) => // Ignore, nothing to report
       case -\/(e) => log.log(Level.SEVERE, "Error starting the images cache watcher", e)
     }
   }

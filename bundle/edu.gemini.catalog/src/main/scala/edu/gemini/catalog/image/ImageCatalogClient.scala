@@ -31,7 +31,7 @@ case class ImageSearchQuery(catalog: ImageCatalog, coordinates: Coordinates) {
 
 object ImageSearchQuery {
   implicit val equals: Equal[ImageSearchQuery] = Equal.equalA[ImageSearchQuery]
-  val maxDistance: Angle = (ImageCatalog.defaultSize / 2).getOrElse(Angle.zero)
+  val maxDistance: Angle = (ImageCatalog.DefaultImageSize / 2).getOrElse(Angle.zero)
 
   implicit class DeclinationShow(val d: Declination) extends AnyVal {
     def toFilePart: String = Declination.formatDMS(d, ":", 2)
@@ -79,12 +79,11 @@ object ImageCatalogClient {
   val Log: Logger = Logger.getLogger(this.getClass.getName)
 
   /**
-    * Download the given image URL to a temporary file and return the file
-    * Note that to support the legacy progress bar we explicitly expect a ProgressBarFilterInputStream
+    * Downloads the given image URL to a temporary file and returns the file
     */
   def downloadImageToFile(cacheDir: Path, url: URL, fileName: String => String): Task[Path] = {
-    case class ConnectionDescriptor(contentType: Option[String], contentEncoding: Option[String]) {
 
+    case class ConnectionDescriptor(contentType: Option[String], contentEncoding: Option[String]) {
       def extension: String = (contentEncoding, contentType) match {
           case (Some("x-gzip"), _)                                                              => ".fits.gz"
           // REL-2776 At some places on the sky DSS returns an error, the HTTP error code is ok but the body contains no image
@@ -109,11 +108,8 @@ object ImageCatalogClient {
       }
     }
 
-    def lockTmpFile(file: File): Task[OutputStream] = Task.delay {
-      new FileOutputStream(file)
-    }
-
-    def readFile(out: OutputStream): Task[Unit] = Task.delay {
+    def readFile(file: File): Task[Unit] = Task.delay {
+      val out = new FileOutputStream(file)
       val in = url.openStream()
       val buffer = new Array[Byte](8 * 1024)
       Iterator
@@ -131,8 +127,7 @@ object ImageCatalogClient {
     for {
       tempFile <- createTmpFile
       desc     <- openConnection
-      output   <- lockTmpFile(tempFile)
-      _        <- readFile(output)
+      _        <- readFile(tempFile)
       file     <- moveFile(desc.extension, tempFile)
     } yield file
   }

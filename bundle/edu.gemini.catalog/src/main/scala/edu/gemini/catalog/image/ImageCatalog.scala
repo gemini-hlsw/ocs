@@ -15,7 +15,7 @@ import scalaz.concurrent.Task
 
 /** Represents an end point that can load an image for a given set of coordinates */
 sealed abstract class ImageCatalog(val id: String, val displayName: String, val shortName: String) {
-  /** Returns the url that can load the passed coordinates */
+  /** Returns the urls that can load the passed coordinates */
   def queryUrl(c: Coordinates): NonEmptyList[URL]
 
   override def toString: String = id
@@ -25,18 +25,21 @@ sealed abstract class ImageCatalog(val id: String, val displayName: String, val 
 abstract class DssCatalog(id: String, displayName: String, shortName: String) extends ImageCatalog(id, displayName, shortName) {
   def baseUrl: NonEmptyList[String]
   def extraParams: String = ""
-  override def queryUrl(c: Coordinates): NonEmptyList[URL] = baseUrl.map(u => new URL(s"$u?ra=${c.ra.toAngle.formatHMS}&dec=${c.dec.formatDMS}&mime-type=application/x-fits&x=${ImageCatalog.defaultSize.toArcmins}&y=${ImageCatalog.defaultSize.toArcmins}$extraParams"))
+  override def queryUrl(c: Coordinates): NonEmptyList[URL] = baseUrl.map(u => new URL(s"$u?ra=${c.ra.toAngle.formatHMS}&dec=${c.dec.formatDMS}&mime-type=application/x-fits&x=${ImageCatalog.DefaultImageSize.toArcmins}&y=${ImageCatalog.DefaultImageSize.toArcmins}$extraParams"))
 }
 
 /** Base class for 2MASSImg based image catalogs */
 abstract class AstroCatalog(id: String, displayName: String, shortName: String) extends ImageCatalog(id, displayName, shortName) {
   def band: MagnitudeBand
-  override def queryUrl(c: Coordinates): NonEmptyList[URL] = NonEmptyList(new URL(s" http://irsa.ipac.caltech.edu/cgi-bin/Oasis/2MASSImg/nph-2massimg?objstr=${c.ra.toAngle.formatHMS}%20${c.dec.formatDMS}&size=${ImageCatalog.defaultSize.toArcsecs}&band=${band.name}"))
+  override def queryUrl(c: Coordinates): NonEmptyList[URL] = NonEmptyList(new URL(s" http://irsa.ipac.caltech.edu/cgi-bin/Oasis/2MASSImg/nph-2massimg?objstr=${c.ra.toAngle.formatHMS}%20${c.dec.formatDMS}&size=${ImageCatalog.DefaultImageSize.toArcsecs}&band=${band.name}"))
 }
 
 // Concrete instances of image catalogs
+/**
+  * DSS at Gemini, distributes the load among MKO and CPO
+  */
 object DssGemini extends DssCatalog("dss@Gemini", "Digitized Sky at Gemini", "DSS Gemini") {
-  override val baseUrl: NonEmptyList[String] = nels("http://mkocatalog.gemini.edu/cgi-bin/dss_search", "http://cpocatalog.gemini.edu/cgi-bin/dss_search")
+  override val baseUrl: NonEmptyList[String] = NonEmptyList("mko", "cpo").map(c => s"http://${c}catalog.gemini.edu/cgi-bin/dss_search")
 }
 
 object DssESO extends DssCatalog("dss@eso", "Digitized Sky at ESO", "DSS ESO") {
@@ -69,12 +72,12 @@ object MassImgK extends AstroCatalog("2massK", "2MASS Quick-Look Image Retrieval
   * Contains definitions for ImageCatalogs including a list of all the available image servers
   */
 object ImageCatalog {
-  val defaultSize: Angle = Angle.fromArcmin(15.0)
-  /** Default image server */
+  val DefaultImageSize: Angle = Angle.fromArcmin(15.0)
   val DefaultImageServer = DssGemini
 
   implicit val equals: Equal[ImageCatalog] = Equal.equalA[ImageCatalog]
 
+  // Wavelength cutoffs to select a given catalog
   private val DssCutoff   = 1.0.microns
   private val MassJCutoff = 1.4.microns
   private val MassHCutoff = 1.9.microns
@@ -85,7 +88,7 @@ object ImageCatalog {
   def byName(id: String): Option[ImageCatalog] = all.find(_.id == id)
 
   /**
-    * Returns the catalog appropriate for the given wavelength
+    * Returns a catalog appropriate for a given wavelength
     */
   def catalogForWavelength(w: Option[Wavelength]): ImageCatalog = w match {
     case Some(d) if d <= DssCutoff   => DssGemini
@@ -113,9 +116,9 @@ object ImageCatalogPreferences {
   /**
     * Indicates the user preferences about Image Catalogs
     */
-  def preferences(): Task[ImageCatalogPreferences] = Task.delay { // Inside task as it reads the preferences file
+  def preferences(): Task[ImageCatalogPreferences] = Task.delay {
     \/.fromTryCatchNonFatal {
-      // Try to parse preferences
+      // Try to parse preferences, Preferences.get read a file
       val size = Option(Preferences.get(ImageMaxCacheSize)).map(_.toDouble)
       val catalog = ImageCatalog.all.find(_.id == Preferences.get(ImageDefaultCatalog)).getOrElse(ImageCatalog.DefaultImageServer)
 
@@ -126,7 +129,8 @@ object ImageCatalogPreferences {
   /**
     * Sets the user preferences about Image Catalogs
     */
-  def preferences(prefs: ImageCatalogPreferences): Task[Unit] = Task.delay { // Inside task as it writes the preferences file
+  def preferences(prefs: ImageCatalogPreferences): Task[Unit] = Task.delay {
+    // These calls write to a file
     Preferences.set(ImageMaxCacheSize, prefs.imageCacheSize.toMegabytes.toString)
     Preferences.set(ImageDefaultCatalog, prefs.defaultCatalog.id)
   }
