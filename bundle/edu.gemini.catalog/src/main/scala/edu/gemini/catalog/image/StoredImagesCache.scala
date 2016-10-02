@@ -6,6 +6,7 @@ import java.nio.file.{FileVisitResult, Files, Path, SimpleFileVisitor}
 import java.time.Instant
 
 import jsky.util.Preferences
+import squants.information.Information
 
 import scalaz._
 import Scalaz._
@@ -88,7 +89,7 @@ object ImageCacheOnDisk {
   /**
     * Method to prune the cache if we are using to much disk space
     */
-  def pruneCache: Task[Unit] = Task.fork {
+  def pruneCache(maxSize: Information): Task[Unit] = Task.fork {
     // Remove files from the in memory cache and delete from drive
     def deleteOldFiles(files: List[ImageInFile]): Task[Unit] =
       Task.gatherUnordered(files.map(StoredImagesCache.remove)) *> Task.delay(files.foreach(_.file.toFile.delete()))
@@ -108,8 +109,7 @@ object ImageCacheOnDisk {
 
     for {
       cache <- StoredImagesCache.get
-      pref  <- ImageCatalogPreferences.preferences()
-      ftr   <- filesToRemove(cache, pref.imageCacheSize.toBytes.toLong)
+      ftr   <- filesToRemove(cache, maxSize.toBytes.toLong)
       _     <- deleteOldFiles(ftr)
     } yield ()
   }

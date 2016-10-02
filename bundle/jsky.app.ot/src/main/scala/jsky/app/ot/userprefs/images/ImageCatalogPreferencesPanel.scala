@@ -4,7 +4,8 @@ import java.awt.{Component => JComponent}
 import java.text.DecimalFormat
 import javax.swing.Icon
 
-import edu.gemini.catalog.image.{ImageCacheOnDisk, ImageCatalogPreferences}
+import edu.gemini.catalog.image.ImageCacheOnDisk
+import edu.gemini.catalog.ui.image.ImageCatalogPreferences
 import edu.gemini.shared.gui.textComponent.NumberField
 import edu.gemini.shared.util.immutable.{None => JNone, Option => JOption, Some => JSome}
 import edu.gemini.ui.miglayout.MigPanel
@@ -36,7 +37,11 @@ class ImageCatalogPreferencesPanel extends PreferencePanel {
     reactions += {
       case ValueChanged(_) if text.nonEmpty =>
         // this is guaranteed to be a positive double
-        ImageCatalogPreferences.preferences(ImageCatalogPreferences.zero.copy(this.text.toDouble.megabytes)).unsafePerformSync
+        val task = for {
+          prefs <- ImageCatalogPreferences.preferences()
+          save  <- ImageCatalogPreferences.preferences(prefs.copy(imageCacheSize = this.text.toDouble.megabytes))
+        } yield save
+        task.unsafePerformSync
     }
   }
 

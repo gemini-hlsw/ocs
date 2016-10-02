@@ -14,7 +14,6 @@ import edu.gemini.pot.sp._
 import edu.gemini.spModel.core.{Coordinates, Wavelength}
 import jsky.app.ot.tpe.{ImageCatalogPanel, TpeContext, TpeImageWidget, TpeManager}
 import jsky.image.gui.ImageLoadingException
-import jsky.util.Preferences
 
 import scalaz._
 import Scalaz._
@@ -68,9 +67,6 @@ object BackgroundImageLoader {
     */
   private val highPriorityEC = Strategy.DefaultExecutorService
 
-  // Directory where the image cache exists. Note that getPreferences calls to disk
-  private def cacheDir: Task[Path] = Task.delay(Preferences.getPreferences.getCacheDir.toPath)
-
   /** Called when a program is created to download its images */
   def watch(prog: ISPProgram): Unit = {
     // Listen for future changes
@@ -117,9 +113,8 @@ object BackgroundImageLoader {
     */
   private[image] def requestImageDownload(pool: ExecutorService)(t: TargetImageRequest): Task[Unit] =
     for {
-      cacheDir <- cacheDir
       catalog  <- ObservationCatalogOverrides.catalogFor(t.key, t.obsWavelength)
-      image    <- loadImage(ImageSearchQuery(catalog, t.coordinates), cacheDir, ImageCatalogPanel.resetListener)(pool)
+      image    <- loadImage(ImageSearchQuery(catalog, t.coordinates), ImageCatalogPanel.resetListener)(pool)
     } yield image match {
       case Some(e) => updateTpeImage(e) // Try to set it on the UI
       case _       => // Ignore, some other thread is downloading the image
@@ -130,23 +125,23 @@ object BackgroundImageLoader {
     * It will check if the image is in the cache or in progress before requesting a download
     * It updates the listener as needed to update the UI
     */
-  private def loadImage(query: ImageSearchQuery, dir: Path, listener: ImageLoadingListener)(pool: ExecutorService): Task[Option[ImageInFile]] = {
+  private def loadImage(query: ImageSearchQuery, listener: ImageLoadingListener)(pool: ExecutorService): Task[Option[ImageInFile]] = {
 
     def addToCacheAndGet(f: Path): Task[ImageInFile] = {
       val i = ImageInFile(query, f, f.toFile.length())
-      // Add to cache and prune the cache
-      // Note that cache pruning goes in a different thread
-      StoredImagesCache.add(i) *> ImageCacheOnDisk.pruneCache *> Task.now(i)
+      // Add to cache and return
+      StoredImagesCache.add(i) *> Task.now(i)
     }
 
-    def readImageToFile: NonEmptyList[Task[Path]] =
+    def readImageToFile(dir: Path): NonEmptyList[Task[Path]] =
       query.url.map(ImageCatalogClient.downloadImageToFile(dir, _, query.fileName))
 
-    def downloadImage: Task[ImageInFile] = {
+    def downloadImage(prefs: ImageCatalogPreferences): Task[ImageInFile] = {
       val task = for {
         _ <- KnownImagesSets.start(query) *> listener.downloadStarts()
-        f <- TaskHelper.selectFirstToComplete(readImageToFile)(pool)
+        f <- TaskHelper.selectFirstToComplete(readImageToFile(prefs.cacheDir))(pool)
         e <- addToCacheAndGet(f)
+        _ <- ImageCacheOnDisk.pruneCache(prefs.imageCacheSize) // Cache pruning goes in a different thread
       } yield e
 
       // Remove query from registry and inform listeners at the end
@@ -156,14 +151,15 @@ object BackgroundImageLoader {
       }
     }
 
-    def checkIfNeededAndDownload: Task[Option[ImageInFile]] =
-      KnownImagesSets.inProgress(query).ifM(Task.now(none), downloadImage.map(Some.apply))
+    def checkIfNeededAndDownload(prefs: ImageCatalogPreferences): Task[Option[ImageInFile]] =
+      KnownImagesSets.inProgress(query).ifM(Task.now(none), downloadImage(prefs).map(Some.apply))
 
     // Try to find the image on the cache, else download
     for {
+      prefs   <- ImageCatalogPreferences.preferences()
       inCache <- StoredImagesCache.find(query)
       exists  <- Task.delay(inCache.filter(_.file.toFile.exists()))
-      file    <- exists.fold(checkIfNeededAndDownload)(f => Task.now(f.some))
+      file    <- exists.fold(checkIfNeededAndDownload(prefs))(f => Task.now(f.some))
     } yield file
 
   }

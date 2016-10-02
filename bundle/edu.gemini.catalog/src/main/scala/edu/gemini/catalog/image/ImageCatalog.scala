@@ -3,15 +3,11 @@ package edu.gemini.catalog.image
 import java.net.URL
 
 import edu.gemini.spModel.core.{Angle, Coordinates, MagnitudeBand, Wavelength}
-import jsky.util.Preferences
-import squants.information.Information
-import squants.information.InformationConversions._
 import edu.gemini.spModel.core.WavelengthConversions._
 
 import scalaz._
 import scalaz.NonEmptyList._
 import Scalaz._
-import scalaz.concurrent.Task
 
 /** Represents an end point that can load an image for a given set of coordinates */
 sealed abstract class ImageCatalog(val id: String, val displayName: String, val shortName: String) {
@@ -96,42 +92,5 @@ object ImageCatalog {
     case Some(d) if d <= MassHCutoff => MassImgH
     case Some(_)                     => MassImgK
     case None                        => DefaultImageServer
-  }
-}
-
-/**
-  * Preferences handling the image catalog, like cache size, etc
-  * This are backed up to disk with the other jsky properties
-  */
-case class ImageCatalogPreferences(imageCacheSize: Information, defaultCatalog: ImageCatalog)
-
-object ImageCatalogPreferences {
-  val DefaultCacheSize: Information = 500.mb
-
-  private val ImageDefaultCatalog = "ot.catalog.default"
-  private val ImageMaxCacheSize = "ot.cache.size"
-
-  val zero = ImageCatalogPreferences(DefaultCacheSize, ImageCatalog.DefaultImageServer)
-
-  /**
-    * Indicates the user preferences about Image Catalogs
-    */
-  def preferences(): Task[ImageCatalogPreferences] = Task.delay {
-    \/.fromTryCatchNonFatal {
-      // Try to parse preferences, Preferences.get read a file
-      val size = Option(Preferences.get(ImageMaxCacheSize)).map(_.toDouble)
-      val catalog = ImageCatalog.all.find(_.id == Preferences.get(ImageDefaultCatalog)).getOrElse(ImageCatalog.DefaultImageServer)
-
-      ImageCatalogPreferences(size.map(_.megabytes).getOrElse(ImageCatalogPreferences.DefaultCacheSize), catalog)
-    }.getOrElse(ImageCatalogPreferences.zero)
-  }
-
-  /**
-    * Sets the user preferences about Image Catalogs
-    */
-  def preferences(prefs: ImageCatalogPreferences): Task[Unit] = Task.delay {
-    // These calls write to a file
-    Preferences.set(ImageMaxCacheSize, prefs.imageCacheSize.toMegabytes.toString)
-    Preferences.set(ImageDefaultCatalog, prefs.defaultCatalog.id)
   }
 }
