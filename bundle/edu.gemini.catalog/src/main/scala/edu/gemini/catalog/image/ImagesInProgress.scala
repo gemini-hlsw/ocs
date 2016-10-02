@@ -15,22 +15,34 @@ protected case class ImagesInProgress(images: List[ImageSearchQuery]) {
   * Keeps track of images currently being downloaded or failed
   */
 case class KnownImagesSets(inProgress: ImagesInProgress, failed: ImagesInProgress) {
-  def start(i: ImageSearchQuery): KnownImagesSets = copy(inProgress + i, failed - i)
+  def start(i: ImageSearchQuery): KnownImagesSets     = copy(inProgress + i, failed - i)
   def completed(i: ImageSearchQuery): KnownImagesSets = copy(inProgress - i, failed - i)
-  def failed(i: ImageSearchQuery): KnownImagesSets = copy(inProgress - i, failed + i)
+  def failed(i: ImageSearchQuery): KnownImagesSets    = copy(inProgress - i, failed + i)
 }
 
 case class CataloguesInUse(inProgress: List[ImageCatalog], failed: List[ImageCatalog])
 
+/**
+  * Keep references to images being downloaded and images with failed downloads
+  */
 object KnownImagesSets {
   val zero = ImagesInProgress(Nil)
 
   private val imagesSets = TaskRef.newTaskRef[KnownImagesSets](KnownImagesSets(zero, zero)).unsafePerformSync
 
+  /**
+    * Mark image as in progress
+    */
   def start(i: ImageSearchQuery): Task[KnownImagesSets] = imagesSets.mod(_.start(i)) *> imagesSets.get
 
+  /**
+    * Mark image as done
+    */
   def completed(i: ImageSearchQuery): Task[KnownImagesSets] = imagesSets.mod(_.completed(i)) *> imagesSets.get
 
+  /**
+    * Mark image as failed
+    */
   def failed(i: ImageSearchQuery): Task[KnownImagesSets] = imagesSets.mod(_.failed(i)) *> imagesSets.get
 
   /**

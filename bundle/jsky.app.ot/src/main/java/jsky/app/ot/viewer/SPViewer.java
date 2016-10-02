@@ -92,7 +92,7 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
 
     private final IDBDatabaseService _db;
 
-    public final SPViewerActions _actions;
+    final SPViewerActions _actions;
 
     // Listener that rebuilds the menu, toolbars, and editor in response to changes to stuff that can cause the
     // authorization situation to change. Right now this means any manipulation of the keychain and any change to
@@ -432,7 +432,7 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
         if (tpe != null) tpe.reset(getNode());
     }
 
-    public void updateAfterPermissionsChange() {
+    void updateAfterPermissionsChange() {
         _updateEditableState();
     }
 
@@ -661,7 +661,7 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
      * SPViewer.tryNavigate or ViewerManager.open, but calling this directly can be useful because it forces a complete
      * redraw of the viewer. This is not ideal.
      */
-    public void setRootNode(final ISPProgram root) {
+    private void setRootNode(final ISPProgram root) {
         try {
             // Reset the TPE to the new root
             final TelescopePosEditor tpe = TpeManager.get();
@@ -669,7 +669,6 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
 
             // If there was an old root, clean up
             if (getRoot() != null) {
-                BagsManager.unwatch(getRoot());
                 getDatabase().checkpoint();
                 getRoot().removePropertyChangeListener(ISPProgram.DATA_OBJECT_KEY, authListener);
                 updateEngToolWindow(null);
@@ -759,7 +758,7 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
     private boolean visible = false; //to have control of the last state selected by the user for the problem window
 
     //Update the ToolWindow that contains the problems details, if possible
-    public void updateProblemToolWindow(final IP2Problems problems) {
+    void updateProblemToolWindow(final IP2Problems problems) {
         SwingUtilities.invokeLater(() -> {
             final SPViewerFrame f = getParentFrame();
             final ToolWindowManager toolWindowManager = f.getToolWindowManager();
@@ -950,7 +949,7 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
     }
 
     // Enable/Disable the listeners on the science program
-    public void setProgramListenersEnabled(final boolean enabled) {
+    void setProgramListenersEnabled(final boolean enabled) {
         _eventManager.setRootNode(enabled ? getRoot() : null);
     }
 
@@ -993,12 +992,12 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
         return _problemViewer;
     }
 
-    public SPConflictToolWindow getConflictToolWindow() {
+    SPConflictToolWindow getConflictToolWindow() {
         return _conflictPanel;
     }
 
     /** Returns the {@link EngToolWindow} for this viewer. */
-    public EngToolWindow getEngToolWindow() {
+    EngToolWindow getEngToolWindow() {
         return _engToolWindow;
     }
 

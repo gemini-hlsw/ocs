@@ -7,8 +7,7 @@ import jsky.app.ot.gemini.obscat.OTBrowserPresetsPersistence
 import jsky.app.ot.vcs.VcsOtClient
 import jsky.app.ot.viewer.plugin.PluginRegistry
 
-import scalaz._
-import Scalaz._
+import scalaz._, Scalaz._
 import edu.gemini.pot.spdb.DBLocalDatabase
 import edu.gemini.util.trpc.auth.TrpcKeyChain
 import edu.gemini.util.security.auth.keychain.Action._
@@ -23,7 +22,6 @@ import jsky.app.ot.viewer.ViewerService
 import jsky.app.ot.visitlog.ShowVisitLogAction
 import edu.gemini.spModel.core._
 import edu.gemini.util.security.auth.ui.{AuthDialog, PasswordDialog}
-import jsky.util.Preferences
 
 object TestLauncher extends App {
 

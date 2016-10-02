@@ -21,13 +21,15 @@ sealed abstract class ImageCatalog(val id: String, val displayName: String, val 
 abstract class DssCatalog(id: String, displayName: String, shortName: String) extends ImageCatalog(id, displayName, shortName) {
   def baseUrl: NonEmptyList[String]
   def extraParams: String = ""
-  override def queryUrl(c: Coordinates): NonEmptyList[URL] = baseUrl.map(u => new URL(s"$u?ra=${c.ra.toAngle.formatHMS}&dec=${c.dec.formatDMS}&mime-type=application/x-fits&x=${ImageCatalog.DefaultImageSize.toArcmins}&y=${ImageCatalog.DefaultImageSize.toArcmins}$extraParams"))
+  override def queryUrl(c: Coordinates): NonEmptyList[URL] =
+    baseUrl.map(u => new URL(s"$u?ra=${c.ra.toAngle.formatHMS}&dec=${c.dec.formatDMS}&mime-type=application/x-fits&x=${ImageCatalog.DefaultImageSize.toArcmins}&y=${ImageCatalog.DefaultImageSize.toArcmins}$extraParams"))
 }
 
 /** Base class for 2MASSImg based image catalogs */
 abstract class AstroCatalog(id: String, displayName: String, shortName: String) extends ImageCatalog(id, displayName, shortName) {
   def band: MagnitudeBand
-  override def queryUrl(c: Coordinates): NonEmptyList[URL] = NonEmptyList(new URL(s" http://irsa.ipac.caltech.edu/cgi-bin/Oasis/2MASSImg/nph-2massimg?objstr=${c.ra.toAngle.formatHMS}%20${c.dec.formatDMS}&size=${ImageCatalog.DefaultImageSize.toArcsecs}&band=${band.name}"))
+  override def queryUrl(c: Coordinates): NonEmptyList[URL] =
+    NonEmptyList(new URL(s" http://irsa.ipac.caltech.edu/cgi-bin/Oasis/2MASSImg/nph-2massimg?objstr=${c.ra.toAngle.formatHMS}%20${c.dec.formatDMS}&size=${ImageCatalog.DefaultImageSize.toArcsecs}&band=${band.name}"))
 }
 
 // Concrete instances of image catalogs
@@ -35,7 +37,8 @@ abstract class AstroCatalog(id: String, displayName: String, shortName: String) 
   * DSS at Gemini, distributes the load among MKO and CPO
   */
 object DssGemini extends DssCatalog("dss@Gemini", "Digitized Sky at Gemini", "DSS Gemini") {
-  override val baseUrl: NonEmptyList[String] = NonEmptyList("mko", "cpo").map(c => s"http://${c}catalog.gemini.edu/cgi-bin/dss_search")
+  override val baseUrl: NonEmptyList[String] =
+    NonEmptyList("mko", "cpo").map(c => s"http://${c}catalog.gemini.edu/cgi-bin/dss_search")
 }
 
 object DssESO extends DssCatalog("dss@eso", "Digitized Sky at ESO", "DSS ESO") {
@@ -69,7 +72,7 @@ object MassImgK extends AstroCatalog("2massK", "2MASS Quick-Look Image Retrieval
   */
 object ImageCatalog {
   val DefaultImageSize: Angle = Angle.fromArcmin(15.0)
-  val DefaultImageServer = DssGemini
+  val DefaultImageCatalog = DssGemini
 
   implicit val equals: Equal[ImageCatalog] = Equal.equalA[ImageCatalog]
 
@@ -81,7 +84,9 @@ object ImageCatalog {
   /** List of all known image server in preference order */
   val all = List(DssGemini, DssESO, Dss2ESO, Dss2iESO, MassImgJ, MassImgH, MassImgK)
 
-  def byName(id: String): Option[ImageCatalog] = all.find(_.id == id)
+  private val catalogsById = all.map(c => c.id -> c).toMap
+
+  def byId(id: String): Option[ImageCatalog] = catalogsById.get(id)
 
   /**
     * Returns a catalog appropriate for a given wavelength
@@ -91,6 +96,6 @@ object ImageCatalog {
     case Some(d) if d <= MassJCutoff => MassImgJ
     case Some(d) if d <= MassHCutoff => MassImgH
     case Some(_)                     => MassImgK
-    case None                        => DefaultImageServer
+    case None                        => DefaultImageCatalog
   }
 }

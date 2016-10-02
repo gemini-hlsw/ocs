@@ -8,7 +8,7 @@ import scalaz.concurrent.{Future, Task}
 
 object TaskHelper {
   /**
-   * From a list of task create a new Task that will return the first available results
+   * From a list of task create a new Task that will return the first available result
    * or a failure if all the tasks fail
    */
   def selectFirstToComplete[A](tasks: NonEmptyList[Task[A]])(implicit pool: ExecutorService): Task[A] = {
@@ -27,7 +27,7 @@ object TaskHelper {
             case _                                                  => // Other failures are ignored
           }
           // Call each task in its own thread on the pool
-          tasks.map(Task.fork(_)(pool).unsafePerformAsyncInterruptibly(handle))
+          tasks.map(Task.fork(_)(pool).unsafePerformAsyncInterruptibly(handle, interrupt))
         }))
     }
   }

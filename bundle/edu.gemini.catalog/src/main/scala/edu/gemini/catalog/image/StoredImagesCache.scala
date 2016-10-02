@@ -18,11 +18,9 @@ import scalaz.concurrent.Task
 protected case class StoredImages(entries: List[(Instant, ImageInFile)]) {
   def images: List[ImageInFile] = entries.map(_._2)
 
-  def +(i: ImageInFile): StoredImages = copy((Instant.now, i) :: entries)
-
+  def +(i: ImageInFile): StoredImages             = copy((Instant.now, i) :: entries)
   def +(i: Instant, e: ImageInFile): StoredImages = copy((i, e) :: entries)
-
-  def -(i: ImageInFile): StoredImages = copy(entries.filterNot(_._2 === i))
+  def -(i: ImageInFile): StoredImages             = copy(entries.filterNot(_._2 === i))
 
   /**
     * Indicates the image was used, update the access time
@@ -77,17 +75,19 @@ object StoredImagesCache {
   def clean: Task[StoredImages] = cacheRef.mod(_ => StoredImages.zero) *> cacheRef.get
 
   /**
-    * Find if the search query is in the cache
-    * Find allows for nearby images to be reused
+    * Find if the search query is in the cache, returning the closest image if present
     */
   def find(query: ImageSearchQuery): Task[Option[ImageInFile]] =
     cacheRef.get.map(_.closestImage(query))
 }
 
+/**
+  * Useful methods to update the cached files
+  */
 object ImageCacheOnDisk {
 
   /**
-    * Method to prune the cache if we are using to much disk space
+    * Method to prune the cache, limiting the space used
     */
   def pruneCache(maxSize: Information): Task[Unit] = Task.fork {
     // Remove files from the in memory cache and delete from drive
@@ -96,12 +96,12 @@ object ImageCacheOnDisk {
 
     // Find the files that should be removed to keep the max size limited
     def filesToRemove(s: StoredImages, maxCacheSize: Long): Task[List[ImageInFile]] = Task.delay {
-      val u = s.sortedByAccess.foldLeft((0L, List.empty[ImageInFile])) { (s, e) =>
-        val accSize = s._1 + e.fileSize
+      val u = s.sortedByAccess.foldLeft((0L, List.empty[ImageInFile])) { case ((currSize, toDelete), e) =>
+        val accSize = currSize + e.fileSize
         if (accSize > maxCacheSize) {
-          (accSize, e :: s._2)
+          (accSize, e :: toDelete)
         } else {
-          (accSize, s._2)
+          (accSize, toDelete)
         }
       }
       u._2
@@ -115,7 +115,7 @@ object ImageCacheOnDisk {
   }
 
   /**
-    * Clear the image cache, deleting the files
+    * Clear the image cache, deleting all the files
     */
   def clearCache: Task[Unit] = {
     def cacheDir = Task.delay(Preferences.getPreferences.getCacheDir)

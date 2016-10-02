@@ -63,11 +63,11 @@ object ImageInFile {
     file.getName match {
       case fileRegex(c, raStr, decStr) =>
         for {
-          catalog <- ImageCatalog.byName(c)
+          catalog <- ImageCatalog.byId(c)
           ra      <- Angle.parseHMS(raStr).map(RightAscension.fromAngle).toOption
           dec     <- Angle.parseDMS(decStr).toOption.map(_.toDegrees).flatMap(Declination.fromDegrees)
         } yield ImageInFile(ImageSearchQuery(catalog, Coordinates(ra, dec)), file.toPath, file.length())
-      case _ => None
+      case _                           => None
     }
   }
 }
@@ -97,7 +97,28 @@ object ImageCatalogClient {
       File.createTempFile(".img", ".fits", cacheDir.toFile)
     }
 
-    def moveFile(suffix: String, tmpFile: File): Task[Path] = Task.delay {
+    def openConnection: Task[ConnectionDescriptor] = Task.delay {
+      Log.info(s"Downloading image at $url")
+      val connection = url.openConnection()
+      ConnectionDescriptor(Option(connection.getContentType), Option(connection.getContentEncoding))
+    }
+
+    def writeToTempFile(file: File): Task[Unit] = Task.delay {
+      val out = new FileOutputStream(file)
+      val in = url.openStream()
+      try {
+        val buffer = new Array[Byte](8 * 1024)
+        Iterator
+          .continually(in.read(buffer))
+          .takeWhile(-1 != _)
+          .foreach(read => out.write(buffer, 0, read))
+      } finally {
+        out.close()
+        in.close()
+      }
+    }
+
+    def moveToFinalFile(suffix: String, tmpFile: File): Task[Path] = Task.delay {
       val destFileName = cacheDir.resolve(fileName(suffix))
       // If the destination file is present don't overwrite
       if (!destFileName.toFile.exists()) {
@@ -108,27 +129,11 @@ object ImageCatalogClient {
       }
     }
 
-    def readFile(file: File): Task[Unit] = Task.delay {
-      val out = new FileOutputStream(file)
-      val in = url.openStream()
-      val buffer = new Array[Byte](8 * 1024)
-      Iterator
-        .continually(in.read(buffer))
-        .takeWhile(-1 != _)
-        .foreach(read => out.write(buffer, 0, read))
-    }
-
-    def openConnection: Task[ConnectionDescriptor] = Task.delay {
-      Log.info(s"Downloading image at $url")
-      val connection = url.openConnection()
-      ConnectionDescriptor(Option(connection.getContentType), Option(connection.getContentEncoding))
-    }
-
     for {
       tempFile <- createTmpFile
       desc     <- openConnection
-      _        <- readFile(tempFile)
-      file     <- moveFile(desc.extension, tempFile)
+      _        <- writeToTempFile(tempFile)
+      file     <- moveToFinalFile(desc.extension, tempFile)
     } yield file
   }
 }

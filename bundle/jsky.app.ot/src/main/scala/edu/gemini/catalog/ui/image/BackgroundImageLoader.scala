@@ -47,25 +47,25 @@ trait ImageLoadingListener {
 object BackgroundImageLoader {
   private val taskUnit = Task.now(())
 
-  private val ImageDownloadsThreadFactory = new ThreadFactory {
+  private def imageDownloadsThreadFactory(priority: Int) = new ThreadFactory {
     private val threadNumber: AtomicInteger = new AtomicInteger(1)
     private val defaultThreadFactory = Executors.defaultThreadFactory()
 
     override def newThread(r: Runnable): Thread = {
-      val name = s"Background Image Downloads - ${threadNumber.getAndIncrement()}"
-      defaultThreadFactory.newThread(r) <| {_.setDaemon(true)} <| {_.setName(name)} <| {_.setPriority(Thread.MIN_PRIORITY)}
+      val name = s"Background Image Downloads - ${threadNumber.getAndIncrement()} - priority: $priority"
+      defaultThreadFactory.newThread(r) <| {_.setDaemon(true)} <| {_.setName(name)} <| {_.setPriority(priority)}
     }
   }
 
   /**
-    * Execution context lets up to 6 low priority threads
+    * Execution context for lower priority downloads
     */
-  private val lowPriorityEC = Executors.newFixedThreadPool(6, ImageDownloadsThreadFactory)
+  private val lowPriorityEC = Executors.newFixedThreadPool(ImageCatalog.all.length, imageDownloadsThreadFactory(Thread.MIN_PRIORITY))
 
   /**
     * Regular execution context for higher priority tasks, i.e. UI requests
     */
-  private val highPriorityEC = Strategy.DefaultExecutorService
+  private val highPriorityEC = Executors.newFixedThreadPool(ImageCatalog.all.length, imageDownloadsThreadFactory(Thread.NORM_PRIORITY))
 
   /** Called when a program is created to download its images */
   def watch(prog: ISPProgram): Unit = {
@@ -190,7 +190,7 @@ object BackgroundImageLoader {
     * thread, typically after an image download so we need to go to Swing for updating the UI
     *
     * Since an image download may take a while the tpe may have moved.
-    * We'll only update the position if the coordinates match
+    * We'll only update the position if the coordinates and catalog match
     *
     */
   private def updateTpeImage(entry: ImageInFile): Unit = {

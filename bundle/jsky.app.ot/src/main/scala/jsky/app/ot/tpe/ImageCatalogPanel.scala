@@ -149,8 +149,8 @@ final class ImageCatalogPanel(imageDisplay: CatalogImageDisplay) {
     val cataloguesInError = catalogRows.filter(r => catalogues.failed.contains(r.feedback.catalog))
     val cataloguesIdle = catalogRows.filterNot(u => cataloguesInError.contains(u) || cataloguesInProgress.contains(u))
     cataloguesInProgress.foreach(_.feedback.markDownloading())
-    cataloguesInError.foreach { _.feedback.markError() }
-    cataloguesIdle.foreach {_.feedback.markIdle() }
+    cataloguesInError.foreach(_.feedback.markError())
+    cataloguesIdle.foreach(_.feedback.markIdle())
   }
 
   /**

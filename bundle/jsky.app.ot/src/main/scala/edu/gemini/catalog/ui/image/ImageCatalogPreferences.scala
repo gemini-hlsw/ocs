@@ -26,7 +26,7 @@ object ImageCatalogPreferences {
 
   private def zero: ImageCatalogPreferences = {
     val tmpDir = new File(System.getProperty("java.io.tmpdir")).toPath
-    ImageCatalogPreferences(tmpDir, DefaultCacheSize, ImageCatalog.DefaultImageServer)
+    ImageCatalogPreferences(tmpDir, DefaultCacheSize, ImageCatalog.DefaultImageCatalog)
   }
 
   /**
@@ -34,10 +34,10 @@ object ImageCatalogPreferences {
     */
   def preferences(): Task[ImageCatalogPreferences] = Task.delay {
     \/.fromTryCatchNonFatal {
-      val cachePath =Preferences.getPreferences.getCacheDir.toPath
+      val cachePath = Preferences.getPreferences.getCacheDir.toPath
       // Try to parse preferences, Preferences.get reads a file
       val size = Option(Preferences.get(ImageMaxCacheSize)).map(_.toDouble)
-      val catalog = ImageCatalog.all.find(_.id === Preferences.get(ImageDefaultCatalog)).getOrElse(ImageCatalog.DefaultImageServer)
+      val catalog = ImageCatalog.all.find(_.id === Preferences.get(ImageDefaultCatalog)).getOrElse(ImageCatalog.DefaultImageCatalog)
 
       ImageCatalogPreferences(cachePath, size.map(_.megabytes).getOrElse(ImageCatalogPreferences.DefaultCacheSize), catalog)
     }.getOrElse(zero)

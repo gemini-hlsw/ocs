@@ -22,7 +22,6 @@ import java.util.logging.Logger
 import javax.swing.{JOptionPane, SwingUtilities}
 
 import edu.gemini.catalog.image.ImageCacheWatcher
-import jsky.util.Preferences
 
 import scala.swing.Swing
 

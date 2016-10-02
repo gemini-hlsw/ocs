@@ -1,8 +1,7 @@
 package edu.gemini.catalog.ui.image
 
-import java.io.File
 import java.nio.charset.StandardCharsets
-import java.nio.file.Files
+import java.nio.file.{Files, Path}
 import java.util.UUID
 
 import argonaut.Argonaut._
@@ -13,7 +12,6 @@ import edu.gemini.spModel.core.Wavelength
 import jsky.util.Preferences
 
 import scalaz._
-import Scalaz._
 import scalaz.concurrent.Task
 
 /**
@@ -21,10 +19,11 @@ import scalaz.concurrent.Task
   * Basically it keeps a map of observations to catalogue backed up on a file
   */
 object ObservationCatalogOverrides {
-  // TODO Convert these to Task
-  private val preferencesDir = Preferences.getPreferences.getDir
-  private val overridesFile = new File(preferencesDir, "catalogOverrides.json")
+  val OverridesFileName = "catalogOverrides.json"
 
+  /**
+    * Overrides the default catalog for the given key
+    */
   case class CatalogOverride(key: SPNodeKey, catalog: ImageCatalog)
 
   object CatalogOverride {
@@ -40,7 +39,7 @@ object ObservationCatalogOverrides {
           (for {
             uuid <- (cur --\ "uuid").as[String]
             id   <- (cur --\ "catalog").as[String]
-          } yield ImageCatalog.byName(id).map((_, UUID.fromString(uuid)))).flatMap {
+          } yield ImageCatalog.byId(id).map((_, UUID.fromString(uuid)))).flatMap {
             case Some((c, u)) => DecodeResult.ok(CatalogOverride(new SPNodeKey(u), c))
             case None => DecodeResult.fail("Unknown catalog id", cur.history)
           }
@@ -48,9 +47,6 @@ object ObservationCatalogOverrides {
   }
 
   case class Overrides(overrides: List[CatalogOverride]) {
-    /**
-      * Finds the catalog for the key or goes to the default user catalog
-      */
     def obsCatalog(key: SPNodeKey): Option[ImageCatalog] = overrides.find(_.key == key).map(_.catalog)
   }
 
@@ -62,10 +58,20 @@ object ObservationCatalogOverrides {
       casecodec1(Overrides.apply, Overrides.unapply)("overrides")
   }
 
-  // Try to read or use a default if any errors are found
-  private def readOverrides: Overrides =
+  /**
+    * Find out what's the location of the overrides file
+    */
+  private def overridesFile: Task[Path] = Task.delay {
+    val preferencesDir = Preferences.getPreferences.getDir.toPath
+    preferencesDir.resolve(OverridesFileName)
+  }
+
+  /**
+    * Try to read or use a default if any errors are found
+    */
+  private def readOverrides(overridesFile: Path): Overrides =
     \/.fromTryCatchNonFatal {
-      val lines = new String(Files.readAllBytes(overridesFile.toPath), StandardCharsets.UTF_8)
+      val lines = new String(Files.readAllBytes(overridesFile), StandardCharsets.UTF_8)
       Parse.decodeOr[Overrides, Overrides](lines, identity, Overrides.zero)
     }.getOrElse(Overrides.zero)
 
@@ -74,25 +80,27 @@ object ObservationCatalogOverrides {
     */
   def catalogFor(key: SPNodeKey, wavelength: Option[Wavelength]): Task[ImageCatalog] = {
     this.synchronized {
-      ImageCatalogPreferences.preferences().map { p => readOverrides.obsCatalog(key).getOrElse(ImageCatalog.catalogForWavelength(wavelength))}
+      overridesFile.map(readOverrides(_).obsCatalog(key).getOrElse(ImageCatalog.catalogForWavelength(wavelength)))
     }
   }
 
   /**
-    * Store the overriden catalog for a given node
+    * Store the overridden catalog for a given node
     */
-  def storeOverride(key: SPNodeKey, c: ImageCatalog): Task[Unit] = Task.delay {
-    this.synchronized {
-      def writeOverrides(overrides: Overrides) =
+  def storeOverride(key: SPNodeKey, c: ImageCatalog): Task[Unit] = {
+    def writeOverrides(overridesFile: Path, overrides: Overrides) = Task.delay {
+      this.synchronized {
         \/.fromTryCatchNonFatal {
-          Files.write(overridesFile.toPath, overrides.asJson.spaces2.getBytes(StandardCharsets.UTF_8))
+          Files.write(overridesFile, overrides.asJson.spaces2.getBytes(StandardCharsets.UTF_8))
         }
-
-      for {
-        old         <- \/.right(readOverrides)
-        newOverrides = old.copy(overrides = CatalogOverride(key, c) :: old.overrides.filter(_.key != key))
-        _           <- writeOverrides(newOverrides)
-      } yield ()
+      }
     }
+
+    for {
+      overridesFile <- overridesFile
+      old           <- Task.delay(readOverrides(overridesFile))
+      newOverrides  = old.copy(overrides = CatalogOverride(key, c) :: old.overrides.filter(_.key != key))
+      _             <- writeOverrides(overridesFile, newOverrides)
+    } yield ()
   }
 }
