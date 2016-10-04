@@ -66,9 +66,10 @@ object ImageSearchQuery {
   */
 case class ImageInFile(query: ImageSearchQuery, file: Path, fileSize: Long) {
   def contains(c: Coordinates): Boolean = {
+    val gap = query.catalog.overlapGap
     // Convert everything to doubles, Angle complicates things
-    val Δλ = ((query.size.width / 2).getOrElse(Angle.zero)).toDegrees
-    val Δφ = ((query.size.height / 2).getOrElse(Angle.zero)).toDegrees
+    val Δλ = ((query.size.width / 2).getOrElse(Angle.zero) - gap).toDegrees
+    val Δφ = ((query.size.height / 2).getOrElse(Angle.zero) - gap).toDegrees
     val φ = c.dec.toDegrees
     val λ = c.ra.toAngle.toDegrees
     val φ0 = query.coordinates.dec.toDegrees

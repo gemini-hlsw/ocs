@@ -50,13 +50,30 @@ class StoredImagesCacheSpec extends FlatSpec with Matchers with PropertyChecks
         entry.getOrElse(fail("Should not happen")).map(_.query).value shouldBe e.query
       }
     }
+    it should "find itself inside" in {
+      forAll { (e: ImageInFile) =>
+        val entry = (StoredImagesCache.add(e) *> StoredImagesCache.get.map(_.inside(e.query))).unsafePerformSyncAttempt
+        entry.isRight shouldBe true
+        entry.getOrElse(fail("Should not happen")).map(_.query).value shouldBe e.query
+      }
+    }
     it should "find itself as closest among several" in {
       forAll { (e: List[ImageInFile]) =>
         whenever(e.nonEmpty) {
           val head = e.head
           val entry = (e.map(StoredImagesCache.add).sequenceU >> StoredImagesCache.get.map(_.closestImage(head.query))).unsafePerformSyncAttempt
           entry.isRight shouldBe true
-          entry.getOrElse(fail("Should not happen")).map(_.query).value shouldBe head.query
+          entry.getOrElse(fail("Should not happen")).map(_.query.coordinates).value shouldBe head.query.coordinates
+        }
+      }
+    }
+    it should "find itself inside among several" in {
+      forAll { (e: List[ImageInFile]) =>
+        whenever(e.nonEmpty) {
+          val head = e.head
+          val entry = (e.map(StoredImagesCache.add).sequenceU >> StoredImagesCache.get.map(_.inside(head.query))).unsafePerformSyncAttempt
+          entry.isRight shouldBe true
+          entry.getOrElse(fail("Should not happen")).map(_.query.coordinates).value shouldBe head.query.coordinates
         }
       }
     }
@@ -71,6 +88,30 @@ class StoredImagesCacheSpec extends FlatSpec with Matchers with PropertyChecks
 
       entry.isRight shouldBe true
       entry.getOrElse(fail("Should not happen")).value shouldBe b
+    }
+    it should "find inside" in {
+      val size = AngularSize(Angle.fromArcmin(8.5), Angle.fromArcmin(10))
+      val a = ImageSearchQuery(DssGemini, Coordinates.zero, size)
+      val b = ImageInFile(ImageSearchQuery(DssGemini, Coordinates.zero.copy(RightAscension.fromAngle(Angle.fromArcmin(8.5 / 2) - DssGemini.overlapGap)), size), new File("b").toPath, 0)
+      val c = ImageInFile(ImageSearchQuery(DssGemini, Coordinates.zero.copy(RightAscension.fromAngle(Angle.fromArcmin(6))), size), new File("c").toPath, 0)
+
+      val e = List(b, c)
+      val entry = (e.map(StoredImagesCache.add).sequenceU >> StoredImagesCache.get.map(_.inside(a))).unsafePerformSyncAttempt
+
+      entry.isRight shouldBe true
+      entry.getOrElse(fail("Should not happen")).value shouldBe b
+    }
+    it should "find net fit inside due to the overlap" in {
+      val size = AngularSize(Angle.fromArcmin(8.5), Angle.fromArcmin(10))
+      val a = ImageSearchQuery(DssGemini, Coordinates.zero, size)
+      val b = ImageInFile(ImageSearchQuery(DssGemini, Coordinates.zero.copy(RightAscension.fromAngle(Angle.fromArcmin(8.5 / 2))), size), new File("b").toPath, 0)
+      val c = ImageInFile(ImageSearchQuery(DssGemini, Coordinates.zero.copy(RightAscension.fromAngle(Angle.fromArcmin(6))), size), new File("c").toPath, 0)
+
+      val e = List(b, c)
+      val entry = (e.map(StoredImagesCache.add).sequenceU >> StoredImagesCache.get.map(_.inside(a))).unsafePerformSyncAttempt
+
+      entry.isRight shouldBe true
+      entry.getOrElse(fail("Should not happen")) shouldBe None
     }
     it should "find non if nearest is farther than max distance" in {
       val size = AngularSize(Angle.fromArcmin(8.5), Angle.fromArcmin(10))
