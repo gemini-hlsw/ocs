@@ -438,4 +438,3 @@ object Angle {
       case nd               => nd - 360.0
     }
 }
-

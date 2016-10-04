@@ -14,6 +14,9 @@ sealed abstract class ImageCatalog(val id: String, val displayName: String, val 
   /** Returns the urls that can load the passed coordinates */
   def queryUrl(c: Coordinates): NonEmptyList[URL]
 
+  /** Size of the requested image */
+  def imageSize: AngularSize
+
   override def toString: String = id
 }
 
@@ -21,15 +24,19 @@ sealed abstract class ImageCatalog(val id: String, val displayName: String, val 
 abstract class DssCatalog(id: String, displayName: String, shortName: String) extends ImageCatalog(id, displayName, shortName) {
   def baseUrl: NonEmptyList[String]
   def extraParams: String = ""
+  def imageSize: AngularSize = AngularSize(ImageCatalog.DefaultImageSize, ImageCatalog.DefaultImageSize)
+  def isDss: Boolean = true
   override def queryUrl(c: Coordinates): NonEmptyList[URL] =
-    baseUrl.map(u => new URL(s"$u?ra=${c.ra.toAngle.formatHMS}&dec=${c.dec.formatDMS}&mime-type=application/x-fits&x=${ImageCatalog.DefaultImageSize.toArcmins}&y=${ImageCatalog.DefaultImageSize.toArcmins}$extraParams"))
+    baseUrl.map(u => new URL(s"$u?ra=${c.ra.toAngle.formatHMS}&dec=${c.dec.formatDMS}&mime-type=application/x-fits&x=${imageSize.width.toArcmins}&y=${imageSize.height.toArcmins}$extraParams"))
 }
 
 /** Base class for 2MASSImg based image catalogs */
 abstract class AstroCatalog(id: String, displayName: String, shortName: String) extends ImageCatalog(id, displayName, shortName) {
   def band: MagnitudeBand
+  def imageSize: AngularSize = AngularSize(ImageCatalog.DefaultImageSize, ImageCatalog.DefaultImageSize)
+  private val size = List(imageSize.width, imageSize.height).max
   override def queryUrl(c: Coordinates): NonEmptyList[URL] =
-    NonEmptyList(new URL(s" http://irsa.ipac.caltech.edu/cgi-bin/Oasis/2MASSImg/nph-2massimg?objstr=${c.ra.toAngle.formatHMS}%20${c.dec.formatDMS}&size=${ImageCatalog.DefaultImageSize.toArcsecs}&band=${band.name}"))
+    NonEmptyList(new URL(s" http://irsa.ipac.caltech.edu/cgi-bin/Oasis/2MASSImg/nph-2massimg?objstr=${c.ra.toAngle.formatHMS}%20${c.dec.formatDMS}&size=${size.toArcsecs}&band=${band.name}"))
 }
 
 // Concrete instances of image catalogs

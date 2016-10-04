@@ -11,7 +11,8 @@ unmanagedJars in Compile ++= Seq(
   new File(baseDirectory.value, "../../lib/bundle/org-apache-commons-httpclient_2.10-2.0.0.jar"),
   new File(baseDirectory.value, "../../lib/bundle/org-apache-commons-logging_2.10-1.1.0.jar"),
   new File(baseDirectory.value, "../../lib/bundle/javax-servlet_2.10-2.5.0.jar"),
-  new File(baseDirectory.value, "../../lib/bundle/osgi.cmpn-4.3.1.jar")
+  new File(baseDirectory.value, "../../lib/bundle/osgi.cmpn-4.3.1.jar"),
+  new File(baseDirectory.value, "../../lib/bundle/nom-tam-fits_2.10-0.99.3.jar")
 )
 
 libraryDependencies ++= Seq(

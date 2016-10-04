@@ -5,6 +5,7 @@ import java.nio.file.attribute.BasicFileAttributes
 import java.nio.file.{FileVisitResult, Files, Path, SimpleFileVisitor}
 import java.time.Instant
 
+import edu.gemini.spModel.core.Angle
 import jsky.util.Preferences
 import squants.information.Information
 
@@ -49,6 +50,19 @@ protected case class StoredImages(entries: List[(Instant, ImageInFile)]) {
     distances.minimumBy(_._1).map(_._2)
   }
 
+  /**
+    * Return the closest image in the cache containing containing the query
+    */
+  def inside(query: ImageSearchQuery): Option[ImageInFile] = {
+    val distances = for {
+        (_, e) <- entries
+        if e.query.catalog === query.catalog
+        if e.contains(query.coordinates)
+      } yield (query.coordinates.angularDistance(e.query.coordinates), e)
+
+    distances.minimumBy(_._1).map(_._2)
+  }
+
 }
 
 object StoredImages {
@@ -78,7 +92,7 @@ object StoredImagesCache {
     * Find if the search query is in the cache, returning the closest image if present
     */
   def find(query: ImageSearchQuery): Task[Option[ImageInFile]] =
-    cacheRef.get.map(_.closestImage(query))
+    cacheRef.get.map(_.inside(query))
 }
 
 /**

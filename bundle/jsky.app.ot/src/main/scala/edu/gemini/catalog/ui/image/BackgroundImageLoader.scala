@@ -18,7 +18,7 @@ import jsky.image.gui.ImageLoadingException
 import scalaz._
 import Scalaz._
 import scala.swing.Swing
-import scalaz.concurrent.{Strategy, Task}
+import scalaz.concurrent.Task
 
 /**
   * Describes a requested image for an observation and wavelength
@@ -114,7 +114,7 @@ object BackgroundImageLoader {
   private[image] def requestImageDownload(pool: ExecutorService)(t: TargetImageRequest): Task[Unit] =
     for {
       catalog  <- ObservationCatalogOverrides.catalogFor(t.key, t.obsWavelength)
-      image    <- loadImage(ImageSearchQuery(catalog, t.coordinates), ImageCatalogPanel.resetListener)(pool)
+      image    <- loadImage(ImageSearchQuery(catalog, t.coordinates, catalog.imageSize), ImageCatalogPanel.resetListener)(pool)
     } yield image match {
       case Some(e) => updateTpeImage(e) // Try to set it on the UI
       case _       => // Ignore, some other thread is downloading the image
@@ -127,22 +127,15 @@ object BackgroundImageLoader {
     */
   private def loadImage(query: ImageSearchQuery, listener: ImageLoadingListener)(pool: ExecutorService): Task[Option[ImageInFile]] = {
 
-    def addToCacheAndGet(f: Path): Task[ImageInFile] = {
-      val i = ImageInFile(query, f, f.toFile.length())
-      // Add to cache and return
-      StoredImagesCache.add(i) *> Task.now(i)
-    }
-
-    def readImageToFile(dir: Path): NonEmptyList[Task[Path]] =
-      query.url.map(ImageCatalogClient.downloadImageToFile(dir, _, query.fileName))
+    def readImageToFile(dir: Path): NonEmptyList[Task[ImageInFile]] =
+      query.url.map(ImageCatalogClient.downloadImageToFile(dir, _, query))
 
     def downloadImage(prefs: ImageCatalogPreferences): Task[ImageInFile] = {
       val task = for {
         _ <- KnownImagesSets.start(query) *> listener.downloadStarts()
         f <- TaskHelper.selectFirstToComplete(readImageToFile(prefs.cacheDir))(pool)
-        e <- addToCacheAndGet(f)
-        _ <- ImageCacheOnDisk.pruneCache(prefs.imageCacheSize) // Cache pruning goes in a different thread
-      } yield e
+        _ <- StoredImagesCache.add(f) *> ImageCacheOnDisk.pruneCache(prefs.imageCacheSize) // Add to cache and prune. Cache pruning goes in a different thread
+      } yield f
 
       // Remove query from registry and inform listeners at the end
       task.onFinish {
@@ -203,7 +196,7 @@ object BackgroundImageLoader {
         iw      <- Option(tpe.getImageWidget)
         ctx     =  iw.getContext
         request <- requestedImage(ctx)
-        if entry.query.isNearby(request.coordinates) // The TPE may have moved so only display if the coordinates match
+        if entry.contains(request.coordinates) // The TPE may have moved so only display if the coordinates match
         if ImageCatalogPanel.isCatalogSelected(entry.query.catalog) // Only set the image if the catalog matches
       } {
         val task = KnownImagesSets.inProgress(entry.query).ifM(taskUnit, updateCacheAndDisplay(iw))

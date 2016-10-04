@@ -61,9 +61,10 @@ class StoredImagesCacheSpec extends FlatSpec with Matchers with PropertyChecks
       }
     }
     it should "find nearest" in {
-      val a = ImageSearchQuery(DssGemini, Coordinates.zero)
-      val b = ImageInFile(ImageSearchQuery(DssGemini, Coordinates.zero.copy(RightAscension.fromAngle(Angle.fromArcmin(4.5)))), new File("b").toPath, 0)
-      val c = ImageInFile(ImageSearchQuery(DssGemini, Coordinates.zero.copy(RightAscension.fromAngle(Angle.fromArcmin(6)))), new File("c").toPath, 0)
+      val size = AngularSize(Angle.fromArcmin(8.5), Angle.fromArcmin(10))
+      val a = ImageSearchQuery(DssGemini, Coordinates.zero, size)
+      val b = ImageInFile(ImageSearchQuery(DssGemini, Coordinates.zero.copy(RightAscension.fromAngle(Angle.fromArcmin(4.5))), size), new File("b").toPath, 0)
+      val c = ImageInFile(ImageSearchQuery(DssGemini, Coordinates.zero.copy(RightAscension.fromAngle(Angle.fromArcmin(6))), size), new File("c").toPath, 0)
 
       val e = List(b, c)
       val entry = (e.map(StoredImagesCache.add).sequenceU >> StoredImagesCache.get.map(_.closestImage(a))).unsafePerformSyncAttempt
@@ -72,9 +73,10 @@ class StoredImagesCacheSpec extends FlatSpec with Matchers with PropertyChecks
       entry.getOrElse(fail("Should not happen")).value shouldBe b
     }
     it should "find non if nearest is farther than max distance" in {
-      val a = ImageSearchQuery(DssGemini, Coordinates.zero)
-      val b = ImageInFile(ImageSearchQuery(DssGemini, Coordinates.zero.copy(dec = Declination.fromAngle(Angle.fromArcmin(5)).getOrElse(Declination.zero))), new File("b").toPath, 0)
-      val c = ImageInFile(ImageSearchQuery(DssGemini, Coordinates.zero.copy(dec = Declination.fromAngle(Angle.fromArcmin(15)).getOrElse(Declination.zero))), new File("b").toPath, 0)
+      val size = AngularSize(Angle.fromArcmin(8.5), Angle.fromArcmin(10))
+      val a = ImageSearchQuery(DssGemini, Coordinates.zero, size)
+      val b = ImageInFile(ImageSearchQuery(DssGemini, Coordinates.zero.copy(dec = Declination.fromAngle(Angle.fromArcmin(5)).getOrElse(Declination.zero)), size), new File("b").toPath, 0)
+      val c = ImageInFile(ImageSearchQuery(DssGemini, Coordinates.zero.copy(dec = Declination.fromAngle(Angle.fromArcmin(15)).getOrElse(Declination.zero)), size), new File("b").toPath, 0)
 
       val e = List(b, c)
       val entry = (e.map(StoredImagesCache.add).sequenceU >> StoredImagesCache.get.map(_.closestImage(a))).unsafePerformSyncAttempt

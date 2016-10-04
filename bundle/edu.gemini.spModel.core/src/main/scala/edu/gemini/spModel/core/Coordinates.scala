@@ -40,7 +40,6 @@ final case class Coordinates(ra: RightAscension, dec: Declination) {
     Angle.fromRadians(2 * atan2(sqrt(a), sqrt(1 - a)))
   }
 
-
   /**
    * Interpolate between `this` and `that` at a position specified by `f`, where `0.0` is `this`,
    * `1.0` is `other`, and `0.5` is halfway along the great circle connecting them. Note that this
@@ -66,6 +65,18 @@ final case class Coordinates(ra: RightAscension, dec: Declination) {
     }
   }
 
+  /**
+    * Finds out if the coordinates are inside the area defined on the region (c1, c2)
+    */
+  def inside(c1: Coordinates, c2: Coordinates): Boolean = {
+    val φ0 = this.dec.toAngle.toDegrees
+    val λ0 = this.ra.toAngle.toDegrees
+    val φ1 = c1.dec.max(c2.dec).toDegrees
+    val λ1 = c1.ra.max(c2.ra).toAngle.toDegrees
+    val φ2 = c1.dec.min(c2.dec).toDegrees
+    val λ2 = c1.ra.min(c2.ra).toAngle.toDegrees
+    (φ0 >= φ2 && φ0 <= φ1) && (λ0 >= λ2 && λ0 <= λ1)
+  }
 }
 
 object Coordinates extends ((RightAscension, Declination) => Coordinates) {
