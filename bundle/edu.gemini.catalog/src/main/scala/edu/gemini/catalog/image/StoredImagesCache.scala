@@ -39,14 +39,14 @@ protected case class StoredImages(entries: List[(Instant, ImageInFile)]) {
   // We need a special order for finding the best match for images that
   // takes into account the image distance and size
   val imageInFileOrder: Order[(Angle, ImageInFile)] =
-    Order.orderBy(pk => (pk._1, pk._2.query.size))
+    Order.orderBy(i => (i._1, i._2.query.size))
 
   /**
     * Find the image in the cache closest to the requested query
     */
   def closestImage(query: ImageSearchQuery): Option[ImageInFile] = {
     val distances = for {
-        (_, e) <- entries
+        (_, e)   <- entries
         if e.query.catalog === query.catalog
         distance = query.coordinates.angularDistance(e.query.coordinates)
         if distance <= ImageSearchQuery.maxDistance
@@ -72,6 +72,7 @@ protected case class StoredImages(entries: List[(Instant, ImageInFile)]) {
 
 object StoredImages {
   val zero = StoredImages(Nil)
+
   /** @group Typeclass Instances */
   implicit val equals: Equal[StoredImages] = Equal.equalA[StoredImages]
 }

@@ -11,7 +11,6 @@ import Scalaz._
 case class ImageItemDisplayProperties(scale: Float, cmap: String, itt: String, hcut: Double, lcut: Double, userSetCutLevels: Boolean, scaleAlg: Int)
 case class ImageItemId(title: String, url: URL, filename: String)
 
-// immutable serializable core separate from the Action part
 case class ImageItemDescriptor private (imageId: ImageItemId, raDeg: Double, decDeg: Double, widthDeg: Double,
      heightDeg: Double, imageDisplayProperties: ImageItemDisplayProperties) extends Serializable {
 

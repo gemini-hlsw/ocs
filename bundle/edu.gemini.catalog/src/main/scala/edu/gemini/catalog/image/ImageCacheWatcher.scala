@@ -4,6 +4,7 @@ import java.nio.file._
 import java.nio.file.StandardWatchEventKinds._
 import java.nio.file.attribute.BasicFileAttributes
 import java.time.Instant
+import java.util.concurrent.Executors
 import java.util.logging.{Level, Logger}
 
 import jsky.util.Preferences
@@ -105,6 +106,9 @@ object ImageCacheWatcher {
     * Run the ImageCacheWatcher
     */
   def run(): Unit = {
+    // Don't use the default executor
+    val executor = Executors.newFixedThreadPool(1)
+
     val task = for {
       cachePath <- Task.delay(Preferences.getPreferences.getCacheDir).map(_.toPath)
       _         <- populateInitialCache(cachePath)
@@ -112,7 +116,7 @@ object ImageCacheWatcher {
     } yield cache
 
     // Execute the watcher in a separate thread
-    Task.fork(task).unsafePerformAsync {
+    Task.fork(task)(executor).unsafePerformAsync {
       case \/-(_) => // Ignore, nothing to report
       case -\/(e) => Log.log(Level.SEVERE, "Error starting the images cache watcher", e)
     }

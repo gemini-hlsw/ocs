@@ -137,7 +137,7 @@ class StoredImagesCacheSpec extends FlatSpec with Matchers with PropertyChecks
     ignore should "find image inside" in {
       val raWidth = Angle.fromArcmin(8.5)
       val decWidth = Angle.fromArcmin(10)
-      val gap = DssGemini.overlapGap
+      val gap = DssGemini.adjacentOverlap
       val size = AngularSize(Angle.fromArcmin(8.5), Angle.fromArcmin(10))
       val a = ImageSearchQuery(DssGemini, Coordinates.zero, size)
       val b = ImageInFile(ImageSearchQuery(DssGemini, Coordinates.zero.copy(RightAscension.fromAngle((raWidth / 2).getOrElse(Angle.zero) - gap)), size), new File("b").toPath, 0)

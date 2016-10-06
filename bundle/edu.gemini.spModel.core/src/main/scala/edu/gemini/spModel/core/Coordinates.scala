@@ -64,19 +64,6 @@ final case class Coordinates(ra: RightAscension, dec: Declination) {
       Coordinates(RA.fromAngle(Angle.fromRadians(λi)), Dec.fromAngle(Angle.fromRadians(φi)).get)
     }
   }
-
-  /**
-    * Finds out if the coordinates are inside the area defined on the region (c1, c2)
-    */
-  def inside(c1: Coordinates, c2: Coordinates): Boolean = {
-    val φ0 = this.dec.toAngle.toDegrees
-    val λ0 = this.ra.toAngle.toDegrees
-    val φ1 = c1.dec.max(c2.dec).toDegrees
-    val λ1 = c1.ra.max(c2.ra).toAngle.toDegrees
-    val φ2 = c1.dec.min(c2.dec).toDegrees
-    val λ2 = c1.ra.min(c2.ra).toAngle.toDegrees
-    (φ0 >= φ2 && φ0 <= φ1) && (λ0 >= λ2 && λ0 <= λ1)
-  }
 }
 
 object Coordinates extends ((RightAscension, Declination) => Coordinates) {

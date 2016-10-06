@@ -15,11 +15,14 @@ import scalaz.Scalaz._
 import scalaz._
 import scalaz.concurrent.Task
 
+/**
+  * Angular size of an image. Used to store the real size of images instead to the requested size
+  */
 case class AngularSize(ra: Angle, dec: Angle) {
   def this(size: Angle) = this(size, size)
 
   def halfDec = (dec / 2).getOrElse(Angle.zero)
-  def halfRa = (ra/ 2).getOrElse(Angle.zero)
+  def halfRa = (ra / 2).getOrElse(Angle.zero)
 }
 
 case object AngularSize {
@@ -83,7 +86,7 @@ case class ImageInFile(query: ImageSearchQuery, file: Path, fileSize: Long) {
     * Tests if the image contains the coordinates parameter
     */
   def contains(c: Coordinates): Boolean = {
-    val ε = query.catalog.overlapGap
+    val ε = query.catalog.adjacentOverlap
     // Convert everything to radians, calculations in Angle-space don't work due to range overflow
     // Image size
     val εφ = (query.size.halfDec.toRadians - ε.toRadians).max(0)
@@ -185,11 +188,10 @@ object ImageCatalogClient {
 
     /**
       * Attempts to calculate the center and size of the downloaded image from the actual header
-      *
       */
     def parseHeader(descriptor: ConnectionDescriptor, tmpFile: File): Task[ImageSearchQuery] = Task.delay {
       // This means we do a second read on the file. It could be done in one go but this approach is simpler
-      // This is justa a one-time cost for each image
+      // This is a one-time cost for each image after the download. Note that only the header is read
       FitsHeadersParser.parseFitsGeometry(tmpFile, descriptor.compressed).fold(_ => query, g =>
         g.bifoldLeft(query)
           { (q, c) => c.fold(q)(c => q.copy(coordinates = c)) }

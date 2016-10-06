@@ -84,7 +84,7 @@ final class ImageCatalogPanel(imageDisplay: CatalogImageDisplay) {
   }
 
   private lazy val buttonGroup = new ButtonGroup
-  private lazy val catalogRows =  ImageCatalog.all.map(mkRow)
+  private lazy val catalogRows = ImageCatalog.all.map(mkRow)
   private lazy val toolsButton = new Button("") {
     tooltip = "Preferences..."
     icon = new ImageIcon(getClass.getResource("/resources/images/eclipse/engineering.gif"))

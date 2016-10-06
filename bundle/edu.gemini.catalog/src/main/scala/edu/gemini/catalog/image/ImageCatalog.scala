@@ -14,10 +14,12 @@ sealed abstract class ImageCatalog(val id: String, val displayName: String, val 
   /** Returns the urls that can load the passed coordinates */
   def queryUrl(c: Coordinates): NonEmptyList[URL]
 
-  /** Size of the requested image */
+  /** Size of the default requested image */
   def imageSize: AngularSize
 
-  def overlapGap: Angle
+  /** Overlap angle between adjacent images */
+  // TODO Should be corrected for dec?
+  def adjacentOverlap: Angle
 
   override def toString: String = id
 }
@@ -30,7 +32,7 @@ abstract class DssCatalog(id: String, displayName: String, shortName: String) ex
 
   def imageSize: AngularSize = AngularSize(ImageCatalog.DefaultImageSize, ImageCatalog.DefaultImageSize)
 
-  def overlapGap: Angle = Angle.fromArcmin(3)
+  def adjacentOverlap: Angle = Angle.fromArcmin(3)
 
   override def queryUrl(c: Coordinates): NonEmptyList[URL] =
     baseUrl.map(u => new URL(s"$u?ra=${c.ra.toAngle.formatHMS}&dec=${c.dec.formatDMS}&mime-type=application/x-fits&x=${imageSize.ra.toArcmins}&y=${imageSize.dec.toArcmins}$extraParams"))
@@ -42,9 +44,9 @@ abstract class AstroCatalog(id: String, displayName: String, shortName: String) 
 
   def imageSize: AngularSize = AngularSize(ImageCatalog.DefaultImageSize, ImageCatalog.DefaultImageSize)
 
-  private val size = List(imageSize.ra, imageSize.dec).max
+  private val size = imageSize.ra.max(imageSize.dec)
 
-  def overlapGap: Angle = Angle.zero
+  def adjacentOverlap: Angle = Angle.zero
 
   override def queryUrl(c: Coordinates): NonEmptyList[URL] =
     NonEmptyList(new URL(s" http://irsa.ipac.caltech.edu/cgi-bin/Oasis/2MASSImg/nph-2massimg?objstr=${c.ra.toAngle.formatHMS}%20${c.dec.formatDMS}&size=${size.toArcsecs.toInt}&band=${band.name}"))
@@ -52,7 +54,7 @@ abstract class AstroCatalog(id: String, displayName: String, shortName: String) 
 
 // Concrete instances of image catalogs
 /**
-  * DSS at Gemini, distributes the load among MKO and CPO
+  * DSS at Gemini, it communicates with both servers at GN and GS
   */
 object DssGemini extends DssCatalog("dss@Gemini", "Digitized Sky at Gemini", "DSS Gemini") {
   override val baseUrl: NonEmptyList[String] =
