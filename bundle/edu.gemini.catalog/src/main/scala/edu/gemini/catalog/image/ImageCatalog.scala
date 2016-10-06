@@ -27,7 +27,7 @@ abstract class DssCatalog(id: String, displayName: String, shortName: String) ex
   def baseUrl: NonEmptyList[String]
   def extraParams: String = ""
   def imageSize: AngularSize = AngularSize(ImageCatalog.DefaultImageSize, ImageCatalog.DefaultImageSize)
-  def overlapGap: Angle = Angle.fromArcmin(0.5)
+  def overlapGap: Angle = Angle.fromArcmin(3)
   override def queryUrl(c: Coordinates): NonEmptyList[URL] =
     baseUrl.map(u => new URL(s"$u?ra=${c.ra.toAngle.formatHMS}&dec=${c.dec.formatDMS}&mime-type=application/x-fits&x=${imageSize.ra.toArcmins}&y=${imageSize.dec.toArcmins}$extraParams"))
 }
@@ -36,7 +36,7 @@ abstract class DssCatalog(id: String, displayName: String, shortName: String) ex
 abstract class AstroCatalog(id: String, displayName: String, shortName: String) extends ImageCatalog(id, displayName, shortName) {
   def band: MagnitudeBand
   def imageSize: AngularSize = AngularSize(ImageCatalog.DefaultImageSize, ImageCatalog.DefaultImageSize)
-  def overlapGap: Angle = Angle.fromArcmin(3)
+  def overlapGap: Angle = Angle.zero
   private val size = List(imageSize.ra, imageSize.dec).max
   override def queryUrl(c: Coordinates): NonEmptyList[URL] =
     NonEmptyList(new URL(s" http://irsa.ipac.caltech.edu/cgi-bin/Oasis/2MASSImg/nph-2massimg?objstr=${c.ra.toAngle.formatHMS}%20${c.dec.formatDMS}&size=${size.toArcsecs.toInt}&band=${band.name}"))
