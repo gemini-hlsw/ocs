@@ -152,7 +152,8 @@ object ImageCacheOnDisk {
 
     for {
       cd <- cacheDir
-      _  <- deleteCacheFiles(cd)
+      _  <- deleteCacheFiles(cd) // Delete the files
+      _  <- StoredImagesCache.clean // Delete in memory representation
     } yield ()
   }
 
