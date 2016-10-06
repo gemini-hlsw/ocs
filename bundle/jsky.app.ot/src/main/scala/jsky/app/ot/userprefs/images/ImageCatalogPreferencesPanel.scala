@@ -57,12 +57,11 @@ class ImageCatalogPreferencesPanel extends PreferencePanel {
     }
   }
 
-  lazy val component = new MigPanel(LC().insets(20, 10, 20, 10).fill()) {
-      add(new Label("Default Image Catalog:"), CC())
-      add(new Label("Cache size:"), CC().growX().newline())
-      add(cacheSizeField, CC())
+  lazy val component = new MigPanel(LC().insets(10, 10, 20, 10).fill()) {
+      add(new Label("Cache size:"), CC().alignX(LeftAlign).newline())
+      add(cacheSizeField, CC().growX().pushX())
       add(new Label("MB"), CC())
-      add(clearCacheButton, CC().pushX().alignX(RightAlign))
+      add(clearCacheButton, CC().alignX(RightAlign))
       add(Component.wrap(cacheTxt), CC().span(4).growX().newline())
     }
 

@@ -25,9 +25,13 @@ sealed abstract class ImageCatalog(val id: String, val displayName: String, val 
 /** Base class for DSS based image catalogs */
 abstract class DssCatalog(id: String, displayName: String, shortName: String) extends ImageCatalog(id, displayName, shortName) {
   def baseUrl: NonEmptyList[String]
+
   def extraParams: String = ""
+
   def imageSize: AngularSize = AngularSize(ImageCatalog.DefaultImageSize, ImageCatalog.DefaultImageSize)
+
   def overlapGap: Angle = Angle.fromArcmin(3)
+
   override def queryUrl(c: Coordinates): NonEmptyList[URL] =
     baseUrl.map(u => new URL(s"$u?ra=${c.ra.toAngle.formatHMS}&dec=${c.dec.formatDMS}&mime-type=application/x-fits&x=${imageSize.ra.toArcmins}&y=${imageSize.dec.toArcmins}$extraParams"))
 }
@@ -35,9 +39,13 @@ abstract class DssCatalog(id: String, displayName: String, shortName: String) ex
 /** Base class for 2MASSImg based image catalogs */
 abstract class AstroCatalog(id: String, displayName: String, shortName: String) extends ImageCatalog(id, displayName, shortName) {
   def band: MagnitudeBand
+
   def imageSize: AngularSize = AngularSize(ImageCatalog.DefaultImageSize, ImageCatalog.DefaultImageSize)
-  def overlapGap: Angle = Angle.zero
+
   private val size = List(imageSize.ra, imageSize.dec).max
+
+  def overlapGap: Angle = Angle.zero
+
   override def queryUrl(c: Coordinates): NonEmptyList[URL] =
     NonEmptyList(new URL(s" http://irsa.ipac.caltech.edu/cgi-bin/Oasis/2MASSImg/nph-2massimg?objstr=${c.ra.toAngle.formatHMS}%20${c.dec.formatDMS}&size=${size.toArcsecs.toInt}&band=${band.name}"))
 }
@@ -84,6 +92,7 @@ object ImageCatalog {
   val DefaultImageSize: Angle = Angle.fromArcmin(15.0)
   val DefaultImageCatalog = DssGemini
 
+  /** @group Typeclass Instances */
   implicit val equals: Equal[ImageCatalog] = Equal.equalA[ImageCatalog]
 
   // Wavelength cutoffs to select a given catalog

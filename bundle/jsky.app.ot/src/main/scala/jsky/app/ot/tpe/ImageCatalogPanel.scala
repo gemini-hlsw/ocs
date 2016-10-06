@@ -92,6 +92,9 @@ final class ImageCatalogPanel(imageDisplay: CatalogImageDisplay) {
     reactions += {
       case ButtonClicked(_) =>
         new Dialog() {
+          title = "Image Catalog Preferences"
+          Resources.setOTFrameIcon(this.peer)
+
           val closeButton = new Button("Close") {
             reactions += {
               case ButtonClicked(_) =>

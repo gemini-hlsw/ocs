@@ -29,6 +29,7 @@ object ObservationCatalogOverrides {
   object CatalogOverride {
 
     // Argonaut codec
+    /** @group Typeclass Instances */
     implicit def CatalogOverrideCodecJson: CodecJson[CatalogOverride] =
       CodecJson(
         (p: CatalogOverride) =>
@@ -54,6 +55,7 @@ object ObservationCatalogOverrides {
     var zero = Overrides(Nil)
 
     // Argonaut codec
+    /** @group Typeclass Instances */
     implicit def OverridesCodecJson: CodecJson[Overrides] =
       casecodec1(Overrides.apply, Overrides.unapply)("overrides")
   }

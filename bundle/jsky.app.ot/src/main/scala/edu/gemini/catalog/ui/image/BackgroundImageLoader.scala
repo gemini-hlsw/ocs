@@ -26,6 +26,7 @@ import scalaz.concurrent.Task
 case class TargetImageRequest(key: SPNodeKey, coordinates: Coordinates, obsWavelength: Option[Wavelength])
 
 object TargetImageRequest {
+  /** @group Typeclass Instances */
   implicit val equal: Equal[TargetImageRequest] = Equal.equalA[TargetImageRequest]
 }
 

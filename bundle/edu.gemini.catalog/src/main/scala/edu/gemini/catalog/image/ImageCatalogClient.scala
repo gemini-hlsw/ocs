@@ -230,8 +230,8 @@ object FitsHeadersParser {
 
   def headerValue[A](header: Header, key: String)(implicit clazz: ClassTag[A]): Option[A] =
     clazz match {
-      case ClassTag.Int(_)    if header.containsKey(key) => clazz.unapply(header.getIntValue(key))
-      case ClassTag.Double(_) if header.containsKey(key) => clazz.unapply(header.getDoubleValue(key))
+      case ClassTag.Int    if header.containsKey(key) => clazz.unapply(header.getIntValue(key))
+      case ClassTag.Double if header.containsKey(key) => clazz.unapply(header.getDoubleValue(key))
       case _                                          => none
     }
 
@@ -244,18 +244,18 @@ object FitsHeadersParser {
       val basicHDU = fits.getHDU(0).getHeader
       val coord =
         for {
-          raD  <- basicHDU.containsKey(RaHeader) option basicHDU.getDoubleValue(RaHeader)
-          decD <- basicHDU.containsKey(DecHeader) option basicHDU.getDoubleValue(DecHeader)
+          raD  <- headerValue[Double](basicHDU, RaHeader)
+          decD <- headerValue[Double](basicHDU, DecHeader)
           ra   <- RightAscension.fromAngle(Angle.fromDegrees(raD)).some
           dec  <- Declination.fromDegrees(decD)
         } yield Coordinates(ra, dec)
 
       val size =
         for {
-          raPix   <- basicHDU.containsKey(RaAxisPixels) option basicHDU.getIntValue(RaAxisPixels)
-          decPix  <- basicHDU.containsKey(DecAxisPixels) option basicHDU.getIntValue(DecAxisPixels)
-          raSize  <- basicHDU.containsKey(RaPixelSize) option basicHDU.getDoubleValue(RaPixelSize)
-          decSize <- basicHDU.containsKey(DecPixelSize) option basicHDU.getDoubleValue(DecPixelSize)
+          raPix   <- headerValue[Int](basicHDU, RaAxisPixels)
+          decPix  <- headerValue[Int](basicHDU, DecAxisPixels)
+          raSize  <- headerValue[Double](basicHDU, RaPixelSize)
+          decSize <- headerValue[Double](basicHDU, DecPixelSize)
         } yield AngularSize(Angle.fromDegrees(raPix * abs(raSize)), Angle.fromDegrees(decPix * abs(decSize)))
 
       (coord, size.orElse(AngularSize(ImageCatalog.DefaultImageSize, ImageCatalog.DefaultImageSize).some))
