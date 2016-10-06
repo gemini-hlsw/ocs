@@ -196,6 +196,7 @@ object BackgroundImageLoader {
         iw      <- Option(tpe.getImageWidget)
         ctx     =  iw.getContext
         request <- requestedImage(ctx)
+        // TODO This check seems to be failing in a few spots on the sky, it may need to be loosened
         if entry.contains(request.coordinates) // The TPE may have moved so only display if the coordinates match
         if ImageCatalogPanel.isCatalogSelected(entry.query.catalog) // Only set the image if the catalog matches
       } {

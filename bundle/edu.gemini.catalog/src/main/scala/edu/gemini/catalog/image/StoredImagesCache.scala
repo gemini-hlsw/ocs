@@ -36,6 +36,11 @@ protected case class StoredImages(entries: List[(Instant, ImageInFile)]) {
     */
   def sortedByAccess: List[ImageInFile] = entries.sortBy(_._1).map(_._2).reverse
 
+  // We need a special order for finding the best match for images that
+  // takes into account the image distance and size
+  val imageInFileOrder: Order[(Angle, ImageInFile)] =
+    Order.orderBy(pk => (pk._1, pk._2.query.size))
+
   /**
     * Find the image in the cache closest to the requested query
     */
@@ -47,7 +52,7 @@ protected case class StoredImages(entries: List[(Instant, ImageInFile)]) {
         if distance <= ImageSearchQuery.maxDistance
       } yield (distance, e)
 
-    distances.minimumBy(_._1).map(_._2)
+    distances.minimum(imageInFileOrder).map(_._2)
   }
 
   /**
@@ -60,13 +65,14 @@ protected case class StoredImages(entries: List[(Instant, ImageInFile)]) {
         if e.contains(query.coordinates)
       } yield (query.coordinates.angularDistance(e.query.coordinates), e)
 
-    distances.minimumBy(_._1).map(_._2)
+    distances.minimum(imageInFileOrder).map(_._2)
   }
 
 }
 
 object StoredImages {
   val zero = StoredImages(Nil)
+  /** @group Typeclass Instances */
   implicit val equals: Equal[StoredImages] = Equal.equalA[StoredImages]
 }
 

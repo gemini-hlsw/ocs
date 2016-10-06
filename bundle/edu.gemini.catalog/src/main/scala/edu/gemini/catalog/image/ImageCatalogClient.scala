@@ -15,12 +15,22 @@ import scalaz.Scalaz._
 import scalaz._
 import scalaz.concurrent.Task
 
-case class AngularSize(width: Angle, height: Angle) {
+case class AngularSize(ra: Angle, dec: Angle) {
   def this(size: Angle) = this(size, size)
+
+  def halfDec = (dec / 2).getOrElse(Angle.zero)
+  def halfRa = (ra/ 2).getOrElse(Angle.zero)
 }
 
 case object AngularSize {
+  val zero = AngularSize(Angle.zero, Angle.zero)
+
+  /** @group Typeclass Instances */
   implicit val equal = Equal.equalA[AngularSize]
+
+  /** @group Typeclass Instances */
+  implicit val order: Order[AngularSize] =
+    Order.orderBy(a => (a.ra.toRadians * a.dec.toRadians))
 }
 
 /**
@@ -41,7 +51,10 @@ case class ImageSearchQuery(catalog: ImageCatalog, coordinates: Coordinates, siz
 }
 
 object ImageSearchQuery {
+  /** @group Typeclass Instances */
   implicit val equals: Equal[ImageSearchQuery] = Equal.equalA[ImageSearchQuery]
+
+  /** Harcoded value of the max FoV for any Gemini instrument */
   val maxDistance: Angle = Angle.fromArcmin(4.5)
 
   implicit class DeclinationShow(val d: Declination) extends AnyVal {
@@ -57,7 +70,7 @@ object ImageSearchQuery {
   }
 
   implicit class AngularSizeShow(val s: AngularSize) extends AnyVal {
-    def toFilePart: String = f"w_${s.width.toArcsecs.toInt}_h_${s.height.toArcsecs.toInt}"
+    def toFilePart: String = f"w_${s.ra.toArcsecs.toInt}_h_${s.dec.toArcsecs.toInt}"
   }
 }
 
@@ -65,25 +78,37 @@ object ImageSearchQuery {
   * Image in the file system
   */
 case class ImageInFile(query: ImageSearchQuery, file: Path, fileSize: Long) {
-  def contains(c: Coordinates): Boolean = {
-    val gap = query.catalog.overlapGap
-    // Convert everything to doubles, Angle complicates things
-    val Δλ = ((query.size.width / 2).getOrElse(Angle.zero) - gap).toDegrees
-    val Δφ = ((query.size.height / 2).getOrElse(Angle.zero) - gap).toDegrees
-    val φ = c.dec.toDegrees
-    val λ = c.ra.toAngle.toDegrees
-    val φ0 = query.coordinates.dec.toDegrees
-    val λ0 = query.coordinates.ra.toAngle.toDegrees
-    val φ1 = φ0 + Δφ
-    val λ1 = λ0 + Δλ
-    val φ2 = φ0 - Δφ
-    val λ2 = λ0 - Δλ
 
-    (φ1 >= φ && φ2 <= φ) && (λ1 >= λ && λ2 <= λ)
+  /**
+    * Tests if the image contains the coordinates parameter
+    */
+  def contains(c: Coordinates): Boolean = {
+    val ε = query.catalog.overlapGap
+    // Convert everything to radians, calculations in Angle-space don't work due to range overflow
+    // Image size
+    val εφ = (query.size.halfDec.toRadians - ε.toRadians).max(0)
+    val ελ = (query.size.halfRa.toRadians  - ε.toRadians).max(0)
+
+    // target coordinates
+    val φ = toRadians(c.dec.toDegrees)
+    val λ = c.ra.toAngle.toRadians
+
+    // image coordinates
+    val φ0 = toRadians(query.coordinates.dec.toDegrees)
+    val λ0 = query.coordinates.ra.toAngle.toRadians
+
+    val θ = cos(φ0)
+
+    // Distance
+    val Δφ = abs(φ - φ0)
+    val Δλ = abs(λ - λ0)
+
+    Δφ <= εφ && Δλ*θ <= ελ
   }
 }
 
 object ImageInFile {
+  /** @group Typeclass Instances */
   implicit val equals: Equal[ImageInFile] = Equal.equalA[ImageInFile]
 
   val fileRegex: Regex = """img_(.*)_ra_(.*)_dec_(.*)_w_(\d*)_h_(\d*)\.fits.*""".r
@@ -113,7 +138,7 @@ object ImageCatalogClient {
   val Log: Logger = Logger.getLogger(this.getClass.getName)
 
   /**
-    * Downloads the given image URL to a temporary file and returns the file
+    * Downloads the requested image to file in the cache
     */
   def downloadImageToFile(cacheDir: Path, url: URL, query: ImageSearchQuery): Task[ImageInFile] = {
 
@@ -139,7 +164,11 @@ object ImageCatalogClient {
       ConnectionDescriptor(Option(connection.getContentType), Option(connection.getContentEncoding))
     }
 
+    /**
+      * Downloads the url and writes it to a file
+      */
     def writeToTempFile(file: File): Task[Unit] = Task.delay {
+      // Simple old fashioned download
       val out = new FileOutputStream(file)
       val in = url.openStream()
       try {
@@ -155,14 +184,17 @@ object ImageCatalogClient {
     }
 
     /**
-      * Attempts to calculate the center and size of the query from the actual header
+      * Attempts to calculate the center and size of the downloaded image from the actual header
+      *
       */
     def parseHeader(descriptor: ConnectionDescriptor, tmpFile: File): Task[ImageSearchQuery] = Task.delay {
-      FitsHeadersParser.parseFitsGeometry(tmpFile, descriptor.compressed).map { g =>
+      // This means we do a second read on the file. It could be done in one go but this approach is simpler
+      // This is justa a one-time cost for each image
+      FitsHeadersParser.parseFitsGeometry(tmpFile, descriptor.compressed).fold(_ => query, g =>
         g.bifoldLeft(query)
           { (q, c) => c.fold(q)(c => q.copy(coordinates = c)) }
           { (q, s) => s.fold(q)(s => q.copy(size = s )) }
-      }.getOrElse(query)
+      )
     }
 
     def moveToFinalFile(extension: String, tmpFile: File, query: ImageSearchQuery): Task[ImageInFile] = Task.delay {

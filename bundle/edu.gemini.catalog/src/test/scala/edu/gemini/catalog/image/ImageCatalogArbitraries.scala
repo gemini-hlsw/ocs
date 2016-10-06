@@ -7,22 +7,24 @@ import edu.gemini.spModel.core.{Angle, Arbitraries, Coordinates}
 import org.scalacheck._
 import org.scalacheck.Arbitrary._
 
+import scalaz._
+import Scalaz._
+
 trait ImageCatalogArbitraries extends Arbitraries {
   implicit val arbCatalog: Arbitrary[ImageCatalog] = Arbitrary(Gen.oneOf(ImageCatalog.all))
 
+  val minRa = DssGemini.imageSize.ra.max(MassImgJ.imageSize.ra)
+  val minDec = DssGemini.imageSize.dec.max(MassImgJ.imageSize.dec)
+
   implicit val arbAngularSize: Arbitrary[AngularSize] = Arbitrary {
-    for {
-      w <- Gen.choose(0.0, 30.0).map(Angle.fromArcmin)
-      h <- Gen.choose(0.0, 30.0).map(Angle.fromArcmin)
-    } yield AngularSize(w, h)
+    AngularSize(minRa, minDec)
   }
 
   implicit val arbImageSearchQuery: Arbitrary[ImageSearchQuery] = Arbitrary {
     for {
       catalog <- arbitrary[ImageCatalog]
       coord   <- arbitrary[Coordinates]
-      size    <- arbitrary[AngularSize]
-    } yield ImageSearchQuery(catalog, coord, size)
+    } yield ImageSearchQuery(catalog, coord, catalog.imageSize)
   }
 
   implicit val arbPath: Arbitrary[Path] = Arbitrary {
