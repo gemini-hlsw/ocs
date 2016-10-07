@@ -68,9 +68,9 @@ public enum InstrumentSequenceSync implements ISPEventMonitor {
             return false;
 
         // What did we add (if anything)
-        final Set<ISPObsComponent> oldSet = new HashSet<ISPObsComponent>((Collection<ISPObsComponent>) change.getOldValue());
-        final Set<ISPObsComponent> newSet = new HashSet<ISPObsComponent>((Collection<ISPObsComponent>) change.getNewValue());
-        final Set<ISPObsComponent> addedSet = new HashSet<ISPObsComponent>(newSet);
+        final Set<ISPObsComponent> oldSet = new HashSet<>((Collection<ISPObsComponent>) change.getOldValue());
+        final Set<ISPObsComponent> newSet = new HashSet<>((Collection<ISPObsComponent>) change.getNewValue());
+        final Set<ISPObsComponent> addedSet = new HashSet<>(newSet);
         addedSet.removeAll(oldSet);
 
         // Did we add an instrument or eng component?
@@ -289,8 +289,8 @@ public enum InstrumentSequenceSync implements ISPEventMonitor {
     private static Tuple2<Collection<IParameter>, Collection<IParameter>> separateVolatileParameters(
             ISysConfig sysConfig,
             Map<String, PropertyDescriptor> props) {
-        final List<IParameter> vParams = new ArrayList<IParameter>();
-        final List<IParameter> nvParams = new ArrayList<IParameter>();
+        final List<IParameter> vParams = new ArrayList<>();
+        final List<IParameter> nvParams = new ArrayList<>();
 
         for (IParameter p : sysConfig.getParameters()) {
             final PropertyDescriptor pd = props.get(p.getName());
@@ -298,7 +298,7 @@ public enum InstrumentSequenceSync implements ISPEventMonitor {
             (PropertySupport.isVolatile(pd) ? vParams : nvParams).add(p);
         }
 
-        return new Pair<Collection<IParameter>, Collection<IParameter>>(vParams, nvParams);
+        return new Pair<>(vParams, nvParams);
     }
 
     // Applies the first row values to the instrument static component.
@@ -383,13 +383,10 @@ public enum InstrumentSequenceSync implements ISPEventMonitor {
 
         boolean updated = false;
         for (IParameter param : sysConfig.getParameters()) {
+            // Get a mutable value list.
             //noinspection unchecked
-            // SR: The List<Object> valueList as defined below does not support the set(int, Object) method called
-            //     below, resulting in an UnsupportedOperationException being thrown. We can fix this by making sure
-            //     that the list is mutable and supports set(int, Object).
-            //final List<Object> valueList = (List<Object>) param.getValue();
-            final List<Object> valueList = new ArrayList<Object>((List<Object>) param.getValue());
-            if ((valueList == null) || (valueList.size() == 0)) continue;
+            final List<Object> valueList = new ArrayList<>((List<Object>) param.getValue());
+            if (valueList.size() == 0) continue;
 
             final String propertyName = param.getName();
             final PropertyDescriptor pd = props.get(propertyName);
@@ -403,10 +400,6 @@ public enum InstrumentSequenceSync implements ISPEventMonitor {
             }
 
             valueList.set(0, val);
-
-            // SR: Now this may cause problems, as valueList is now a java.util.ArrayList<Object> as opposed to a
-            //     java.util.List<Object>, but it seems like it should be okay, since a java.util.ArrayList is an
-            //     implementation of a java.util.List.
             param.setValue(valueList);
         }
 

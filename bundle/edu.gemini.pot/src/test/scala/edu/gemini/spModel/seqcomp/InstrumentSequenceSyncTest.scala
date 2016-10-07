@@ -58,6 +58,10 @@ class InstrumentSequenceSyncTest extends InstrumentSequenceTestBase[InstGmosSout
 
   @Test
   def testRearrangeIterators(): Unit = {
+    // REL-1939: Top level configuration overwrites instrument iterators
+    // Changed behavior to reverse the sync direction when a new or different
+    // iterator becomes the first iterator.  Was inst => iterator,
+    // now iterator => inst.
 
     val cmp1 = getInstSeqComp
 
