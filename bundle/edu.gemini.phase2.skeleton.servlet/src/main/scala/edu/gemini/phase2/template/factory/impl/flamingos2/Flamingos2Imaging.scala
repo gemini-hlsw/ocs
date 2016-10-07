@@ -4,8 +4,6 @@ import edu.gemini.pot.sp._
 import edu.gemini.phase2.template.factory.impl._
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
 import edu.gemini.spModel.gemini.flamingos2.blueprint.SpFlamingos2BlueprintImaging
-import edu.gemini.spModel.rich.pot.sp._
-import edu.gemini.spModel.seqcomp.SeqRepeatDarkObs
 
 import scala.collection.JavaConverters._
 
@@ -25,8 +23,6 @@ case class Flamingos2Imaging(blueprint:SpFlamingos2BlueprintImaging) extends Fla
 //                  H = 10s
 //                  Ks = 30s
 //
-//          FOR EACH UNIQUE COMBINATION OF EXPOSURE TIME & READ MODE in {1,2}:
-//              Add a Manual Dark to {3} with 6X Observes before the flats
 
   val targetGroup = Seq(1, 2, 3)
   val baselineFolder = Seq.empty
@@ -54,10 +50,8 @@ case class Flamingos2Imaging(blueprint:SpFlamingos2BlueprintImaging) extends Fla
     _ <- obs.setExposureTimes(blueprint.filters.asScala.map(exposureTimes)).right
   } yield ()
 
-  def forCalibrations(db: TemplateDb)(obs: ISPObservation): Maybe[Unit] = for {
-    _ <- setFlatFilters(obs, blueprint.filters.asScala).right
-    _ <- addDarks(db.odb.getFactory, obs).right
-  } yield ()
+  def forCalibrations(db: TemplateDb)(obs: ISPObservation): Maybe[Unit] =
+    setFlatFilters(obs, blueprint.filters.asScala)
 
   // Update the static component and the first iterator to set the filters to use.
   private def setFlatFilters(obs: ISPObservation, lst: Iterable[Flamingos2.Filter]): Maybe[Unit] = for {
@@ -65,27 +59,4 @@ case class Flamingos2Imaging(blueprint:SpFlamingos2BlueprintImaging) extends Fla
     _ <- obs.setFilter(lst.head).right
     _ <- obs.ed.iterateFirst(Flamingos2.FILTER_PROP.getName, lst.toList).right
   } yield ()
-
-  private def addDarks(f: ISPFactory, obs: ISPObservation): Maybe[Unit] = for {
-    s <- Option(obs.getSeqComponent).toRight("Observation '%s' missing sequence component".format(obs.libraryId)).right
-  } yield addDarks(f, s)
-
-  private def addDarks(f: ISPFactory, root: ISPSeqComponent) {
-    for {
-      t <- blueprint.filters.asScala.map(exposureTimes).reverse.distinct
-    } addDark(f, root, t)
-  }
-
-  private def addDark(f: ISPFactory, root: ISPSeqComponent, exposureTime: Double) {
-    root.addSeqComponent(makeDark(f, root.getProgram, exposureTime))
-  }
-
-  private def makeDark(f: ISPFactory, p: ISPProgram, exposureTime: Double): ISPSeqComponent = {
-    val sc = f.createSeqComponent(p, SeqRepeatDarkObs.SP_TYPE, null)
-    val dj = sc.getDataObject.asInstanceOf[SeqRepeatDarkObs]
-    dj.setStepCount(6)
-    dj.setExposureTime(exposureTime)
-    sc.setDataObject(dj)
-    sc
-  }
 }

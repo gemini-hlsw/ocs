@@ -19,7 +19,7 @@ public abstract class SpFlamingos2BlueprintBase extends SpBlueprint {
     public final List<Filter> filters;
 
     protected SpFlamingos2BlueprintBase(List<Filter> filters) {
-        this.filters = Collections.unmodifiableList(new ArrayList<Filter>(filters));
+        this.filters = Collections.unmodifiableList(new ArrayList<>(filters));
     }
 
     protected SpFlamingos2BlueprintBase(ParamSet paramSet) {

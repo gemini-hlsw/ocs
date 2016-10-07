@@ -1,6 +1,8 @@
 Instrument: FLAMINGOS-2
 Blueprints : F2_BP.xml
-Version:  2013 May 1
+Version 2013 May 1
+Version 2014 Dec 11, BMiller, specific setting conditions from PI (change to add science conditions to tellurics)
+Version 2016 Aug 9, rdiaz, remove imaging darks
 
 Observations identified by library IDs, indicated with {}
 
@@ -9,8 +11,8 @@ Observations identified by library IDs, indicated with {}
 
         INCLUDE {1,2,3}
         FOR {1, 2, 3}:
-	    Put FILTERS from PI into F2 ITERATOR
-	    SET EXPOSURE TIME in Iterator/Static component:
+        Put FILTERS from PI into F2 ITERATOR
+        SET EXPOSURE TIME in Iterator/Static component:
                 Y = 60s
                 F1056 = 60s
                 F1063 = 60s
@@ -19,40 +21,41 @@ Observations identified by library IDs, indicated with {}
                 H = 10s
                 Ks = 30s
 
-        FOR EACH UNIQUE COMBINATION OF EXPOSURE TIME & READ MODE in {1,2}:
-            Add a Manual Dark to {3} with 6X Observes before the flats
-
 
 **** IF INSTRUMENT MODE == SPECTROSCOPY ***
 
 IF SPECTROSCOPY MODE = LONGSLIT
 
-	INCLUDE {11,12}                           # Telluric std
+    INCLUDE {11,12}                           # Telluric std
 
         IF TARGET H-MAGNITUDE <= 12 INCLUDE {13}  # Bright, no sky subtraction
         IF TARGET H-MAGNITUDE  > 12 INCLUDE {14}  # Faint, with sky subtraction
         ELSE INCLUDE {13,14}                      # Unknown mag so include both acq templates
 
-	INCLUDE {15,16}                           # Science
-	INCLUDE {17,18}                           # Telluric std
+    INCLUDE {15,16}                           # Science
+    INCLUDE {17,18}                           # Telluric std
 
-	FOR {11,12,13,14,15,16,17,18}:            # All
-	    SET FPU FROM PI
+    FOR {11,12,13,14,15,16,17,18}:            # All
+        SET CONDITIONS FROM PI
+        SET FPU FROM PI
 
         FOR {12,15,16,18}:                        # Science and Tellurics
-	    SET DISPERSER FROM PI
+        SET DISPERSER FROM PI
             Put FILTERS from PI into F2 ITERATOR
 
 
 IF SPECTROSCOPY MODE = MOS
 
-	IF PRE-IMAGING REQUIRED = YES
-	    INCLUDE {21}
+    IF PRE-IMAGING REQUIRED = YES
+        INCLUDE {21}
 
-	INCLUDE {22,23}                           # Telluric std
-	INCLUDE {24,25}                           # Science
-	INCLUDE {26,27}                           # Telluric std
+    INCLUDE {22,23}                           # Telluric std
+    INCLUDE {24,25}                           # Science
+    INCLUDE {26,27}                           # Telluric std
 
         FOR {23,25,27}:                           # Science and Tellurics
-	    SET DISPERSER FROM PI
+        SET DISPERSER FROM PI
             Put FILTERS from PI into F2 ITERATOR
+
+        FOR {21,22,23,24,25,26,27}:
+            SET CONDITIONS FROM PI
