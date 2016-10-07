@@ -43,9 +43,7 @@ public enum InstrumentSequenceSync implements ISPEventMonitor {
         final ISPObservation obs = change.getModifiedNode().getContextObservation();
         if (obs == null) return;
 
-        if (addedFirstInstrumentIterator(change)) {
-            syncFromInstrument(obs);
-        } else if (addedInstrumentOrEngineeringComponent(change)) {
+        if (addedFirstInstrumentIterator(change) || addedInstrumentOrEngineeringComponent(change)) {
             syncFromIterator(obs);
         }
     }
