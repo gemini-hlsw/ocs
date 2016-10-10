@@ -20,7 +20,7 @@ import scalaz._, Scalaz._
 import Observation.{blueprint, target, condition, time}
 import Proposal.{ targets, observations }
 
-/** 
+/**
  * Mixin for a specs test for template expansion. This provides code to expand a Phase 1 Proposal
  * into a skeleton, then test that the expansion was correct.
  *
@@ -43,8 +43,8 @@ abstract class TemplateSpec(xmlName: String) { this: SpecificationLike =>
     def execState(s: State[A, Unit]): A = s.exec(a)
   }
 
-  /** 
-   * Expand the given Phase 1 `Proposal`, passing it and its expansion (an `ISPProgram`) to the 
+  /**
+   * Expand the given Phase 1 `Proposal`, passing it and its expansion (an `ISPProgram`) to the
    * provided continuation. You will typically define your specs test inside the passed function.
    */
   def expand[A](p: => Proposal)(func: (Proposal, ISPProgram) => A): A = {
@@ -166,15 +166,4 @@ abstract class TemplateSpec(xmlName: String) { this: SpecificationLike =>
 
   }
 
-
 }
-
-
-
-
-
-
-
-
-
-
