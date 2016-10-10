@@ -16,22 +16,25 @@ case class Flamingos2Longslit(blueprint:SpFlamingos2BlueprintLongslit, exampleTa
 //
 //  IF SPECTROSCOPY MODE = LONGSLIT
 //
-//  	INCLUDE {11,12}                           # Telluric std
+//    INCLUDE {11,12}                           # Telluric std
 //
 //          IF TARGET H-MAGNITUDE <= 12 INCLUDE {13}  # Bright, no sky subtraction
 //          IF TARGET H-MAGNITUDE  > 12 INCLUDE {14}  # Faint, with sky subtraction
 //          ELSE INCLUDE {13,14}                      # Unknown mag so include both acq templates
 //
-//  	INCLUDE {15,16}                           # Science
-//  	INCLUDE {17,18}                           # Telluric std
+//    INCLUDE {15,16}                           # Science
+//    INCLUDE {17,18}                           # Telluric std
 //
-//  	FOR {11,12,13,14,15,16,17,18}:            # All
-//  	    SET FPU FROM PI
+//    FOR {11,12,13,14,15,16,17,18}:            # All
+//        SET CONDITIONS FROM PI
+//        SET FPU FROM PI
 //
-//          FOR {12,15,16,18}:                        # Science and Tellurics
-//  	    SET DISPERSER FROM PI
-//              Put FILTERS from PI into F2 ITERATOR
+//        FOR {12,15,16,18}:                        # Science and Tellurics
+//        SET DISPERSER FROM PI
+//            Put FILTERS from PI into F2 ITERATOR
 //
+//        FOR {21,22,23,24,25,26,27}:
+//            SET CONDITIONS FROM PI
 
   val acq = exampleTarget.flatMap(t => t.getMagnitude(H)).map(_.value) match {
     case Some(h) if h <= 12 => Seq(13)

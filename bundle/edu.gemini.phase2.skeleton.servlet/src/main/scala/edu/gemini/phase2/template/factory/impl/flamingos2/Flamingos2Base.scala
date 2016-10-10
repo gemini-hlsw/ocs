@@ -40,5 +40,4 @@ trait Flamingos2Base[B <: SpFlamingos2BlueprintBase] extends GroupInitializer[B]
 
   val program = "FLAMINGOS-2 PHASE I/II MAPPING BPS"
 
-
 }
