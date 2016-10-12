@@ -49,6 +49,39 @@ public final class IFUComponent extends TransmissionElement {
         IFUOffsets.add(IFUOffsetX);
     }
 
+    /**
+     * Constructor for a user-defined centered circular aperture set.
+     *
+     * @param  radius       Radius of summation
+     * @throws java.lang.Exception Thrown if IFU cannot be created
+     */
+
+    public IFUComponent(final String prefix, final double radius, final Boolean isIfu2) {
+
+        super(ITCConstants.LIB + "/" + Gmos.INSTR_DIR + "/" + prefix + "ifu_trans" + Instrument.DATA_SUFFIX);
+
+        IFUApertures = new ApertureComposite();
+        IFUOffsets = new ArrayList<>();
+
+        int numX = 20;            // number of elements in the IFU in the x-direction
+        int numY = 25;            // number of elements in the IFU in the y-direction
+        if (isIfu2) {
+            numX = 40;            // number of elements in the IFU in the x-direction
+            }
+
+        for (int i = 0; i < numY; i++) {
+            double y = (i - (numY-1)/2.) * IFU_DIAMETER;
+            for (int j = 0; j < numX; j++) {
+                double x = (j - (numX-1)/2.) * IFU_DIAMETER;
+                double r = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
+                if (r < radius) {
+                    IFUApertures.addAperture(new HexagonalAperture(x, y, IFU_DIAMETER));
+                    IFUOffsets.add(x);
+                    IFUOffsets.add(y);
+                }
+            }
+        }
+    }
 
     public ApertureComponent getAperture() {
         return IFUApertures;
