@@ -10,7 +10,8 @@ import edu.gemini.spModel.data.YesNoType
 import edu.gemini.spModel.gemini.acqcam.AcqCamParams
 import edu.gemini.spModel.gemini.altair.AltairParams
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
-import edu.gemini.spModel.gemini.gmos.GmosCommonType.{AmpReadMode, AmpGain, DetectorManufacturer}
+import edu.gemini.spModel.gemini.gmos.GmosCommonType
+import edu.gemini.spModel.gemini.gmos.GmosCommonType.{AmpGain, AmpReadMode, DetectorManufacturer}
 import edu.gemini.spModel.gemini.gmos.GmosNorthType.{DisperserNorth, FPUnitNorth, FilterNorth}
 import edu.gemini.spModel.gemini.gmos.GmosSouthType.{DisperserSouth, FPUnitSouth, FilterSouth}
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams
@@ -21,7 +22,6 @@ import edu.gemini.spModel.gemini.niri.Niri
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.gemini.trecs.TReCSParams
 import edu.gemini.spModel.guide.GuideProbe
-import edu.gemini.spModel.target._
 import edu.gemini.spModel.telescope.IssPort
 import squants.motion.KilometersPerSecond
 import squants.motion.VelocityConversions._
@@ -57,6 +57,9 @@ sealed abstract class ITCRequest {
         case e: NumberFormatException => throw new IllegalArgumentException(s"$i is not a valid integer number value for parameter $name")
       }
   }
+
+  /** Gets the named value as a boolean, it accepts several types of strings as true/false. */
+  def booleanParameter(name: String): Boolean = java.lang.Boolean.parseBoolean(parameter(name).trim())
 
   /** Gets the named value as a double. */
   def doubleParameter(name: String): Double = parameter(name).trim() match {
@@ -143,16 +146,16 @@ object ITCRequest {
   }
 
   def gmosParameters(r: ITCRequest): GmosParameters = {
-    val site        = r.enumParameter(classOf[Site])
-    val filter      = if (site.equals(Site.GN)) r.enumParameter(classOf[FilterNorth],    "instrumentFilter")    else r.enumParameter(classOf[FilterSouth],    "instrumentFilter")
-    val grating     = if (site.equals(Site.GN)) r.enumParameter(classOf[DisperserNorth], "instrumentDisperser") else r.enumParameter(classOf[DisperserSouth], "instrumentDisperser")
-    val spatBinning = r.intParameter("spatBinning")
-    val specBinning = r.intParameter("specBinning")
-    val ccdType     = r.enumParameter(classOf[DetectorManufacturer])
-    val centralWl   = r.centralWavelengthInNanometers()
-    val fpMask      = if (site.equals(Site.GN)) r.enumParameter(classOf[FPUnitNorth],    "instrumentFPMask")   else r.enumParameter(classOf[FPUnitSouth],      "instrumentFPMask")
-    val ampGain     = r.enumParameter(classOf[AmpGain])
-    val ampReadMode = r.enumParameter(classOf[AmpReadMode])
+    val site                              = r.enumParameter(classOf[Site])
+    val filter: GmosCommonType.Filter     = if (site.equals(Site.GN)) r.enumParameter(classOf[FilterNorth],    "instrumentFilter")    else r.enumParameter(classOf[FilterSouth],    "instrumentFilter")
+    val grating: GmosCommonType.Disperser = if (site.equals(Site.GN)) r.enumParameter(classOf[DisperserNorth], "instrumentDisperser") else r.enumParameter(classOf[DisperserSouth], "instrumentDisperser")
+    val spatBinning                       = r.intParameter("spatBinning")
+    val specBinning                       = r.intParameter("specBinning")
+    val ccdType                           = r.enumParameter(classOf[DetectorManufacturer])
+    val centralWl                         = r.centralWavelengthInNanometers()
+    val fpMask: GmosCommonType.FPUnit     = if (site.equals(Site.GN)) r.enumParameter(classOf[FPUnitNorth],    "instrumentFPMask")   else r.enumParameter(classOf[FPUnitSouth],      "instrumentFPMask")
+    val ampGain                           = r.enumParameter(classOf[AmpGain])
+    val ampReadMode                       = r.enumParameter(classOf[AmpReadMode])
     GmosParameters(filter, grating, centralWl, fpMask, ampGain, ampReadMode, None, spatBinning, specBinning, ccdType, site)
   }
 
@@ -239,8 +242,8 @@ object ITCRequest {
         val guideStarMagnitude  = r.doubleParameter("guideMag")
         val fieldLens           = r.enumParameter(classOf[AltairParams.FieldLens])
         val wfsMode             = r.enumParameter(classOf[AltairParams.GuideStarType])
-        val altair              = new AltairParameters(guideStarSeparation, guideStarMagnitude, fieldLens, wfsMode)
-        new Some(altair)
+        val altair              = AltairParameters(guideStarSeparation, guideStarMagnitude, fieldLens, wfsMode)
+        Some(altair)
 
       case _ =>
         None
@@ -250,7 +253,7 @@ object ITCRequest {
   def gemsParameters(r: ITCRequest): GemsParameters = {
     val avgStrehl  = r.doubleParameter("avgStrehl") / 100.0
     val strehlBand = r.parameter("strehlBand")
-    new GemsParameters(avgStrehl, strehlBand)
+    GemsParameters(avgStrehl, strehlBand)
   }
 
   def observationParameters(r: ITCRequest, i: InstrumentDetails): ObservationDetails = {
@@ -277,7 +280,7 @@ object ITCRequest {
       case _ => throw new IllegalArgumentException("Total integration time to achieve a specific \nS/N ratio is not supported in spectroscopy mode.  \nPlease select the Total S/N method.")
     }
 
-    new ObservationDetails(calculationMethod, analysisMethod(r))
+    ObservationDetails(calculationMethod, analysisMethod(r))
 
   }
 
@@ -356,7 +359,7 @@ object ITCRequest {
     }
 
     // WOW, finally we've got everything in place..
-    new SourceDefinition(spatialProfile, sourceDefinition, norm, units, normBand, redshift)
+    SourceDefinition(spatialProfile, sourceDefinition, norm, units, normBand, redshift)
   }
 
   def analysisMethod(r: ITCRequest): AnalysisMethod = r.parameter("analysisMethod") match {
@@ -365,7 +368,7 @@ object ITCRequest {
     case "singleIFU"  => IfuSingle(r.intParameter("ifuSkyFibres"), r.doubleParameter("ifuOffset"))
     case "radialIFU"  => IfuRadial(r.intParameter("ifuSkyFibres"), r.doubleParameter("ifuMinOffset"), r.doubleParameter("ifuMaxOffset"))
     case "summedIFU"  => IfuSummed(r.intParameter("ifuSkyFibres"), r.intParameter("ifuNumX"), r.intParameter("ifuNumY"), r.doubleParameter("ifuCenterX"), r.doubleParameter("ifuCenterY"))
-    case "sumIFU"  => IfuSum(r.intParameter("ifuSkyFibres"), r.doubleParameter("ifuNum"), true);
+    case "sumIFU"     => IfuSum(r.intParameter("ifuSkyFibres"), r.doubleParameter("ifuNum"), true);
     case _            => throw new NoSuchElementException(s"Unknown analysis method ${r.parameter("analysisMethod")}")
   }
 
