@@ -123,7 +123,7 @@ class StoredImagesCacheSpec extends FlatSpec with Matchers with PropertyChecks
         // too far in dec
         val dec1 = c.copy(dec = c.dec.offset(decHeight + delta)._1)
         val dec2 = c.copy(dec = c.dec.offset(Angle.zero - decHeight - delta)._1)
-        val nearEntries = List(ra1, ra2, dec1, dec2).map(c => ImageInFile(ImageSearchQuery(MassImgJ, c, size), new File(c.toString).toPath, 0))
+        val nearEntries = List(ra1, ra2, dec1, dec2).map(c => ImageInFile(ImageSearchQuery(TwoMassJ, c, size), new File(c.toString).toPath, 0))
         val entry = (StoredImagesCache.clean *> nearEntries.map(StoredImagesCache.add).sequenceU >> StoredImagesCache.get.map(_.inside(ref))).unsafePerformSyncAttempt
 
         entry.isRight shouldBe true
@@ -137,10 +137,10 @@ class StoredImagesCacheSpec extends FlatSpec with Matchers with PropertyChecks
       val size = AngularSize(raWidth, decHeight)
       val ra = RightAscension.fromAngle(Angle.fromDegrees(90.0))
       val baseCoordinates = Coordinates.zero.copy(ra)
-      val a = ImageSearchQuery(MassImgJ, baseCoordinates, size)
+      val a = ImageSearchQuery(TwoMassJ, baseCoordinates, size)
       // b includes a thanks to the delta
-      val b = ImageInFile(ImageSearchQuery(MassImgJ, baseCoordinates.copy(RightAscension.fromAngle(ra.toAngle + ~(raWidth / 2) - delta)), size), new File("b").toPath, 0)
-      val c = ImageInFile(ImageSearchQuery(MassImgJ, baseCoordinates.copy(RightAscension.fromAngle(ra.toAngle + Angle.fromArcmin(6))), size), new File("c").toPath, 0)
+      val b = ImageInFile(ImageSearchQuery(TwoMassJ, baseCoordinates.copy(RightAscension.fromAngle(ra.toAngle + ~(raWidth / 2) - delta)), size), new File("b").toPath, 0)
+      val c = ImageInFile(ImageSearchQuery(TwoMassJ, baseCoordinates.copy(RightAscension.fromAngle(ra.toAngle + Angle.fromArcmin(6))), size), new File("c").toPath, 0)
 
       val e = List(b, c)
       val entry = (StoredImagesCache.clean *> e.map(StoredImagesCache.add).sequenceU >> StoredImagesCache.get.map(_.inside(a))).unsafePerformSyncAttempt

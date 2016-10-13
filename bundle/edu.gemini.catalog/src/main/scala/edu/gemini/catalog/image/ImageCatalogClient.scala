@@ -44,7 +44,7 @@ case class ImageSearchQuery(catalog: ImageCatalog, coordinates: Coordinates, siz
 
   def url: NonEmptyList[URL] = catalog.queryUrl(coordinates)
 
-  def fileName(extension: String): String = s"img_${catalog.id}_${coordinates.toFilePart}_${size.toFilePart}.$extension"
+  def fileName(extension: String): String = s"img_${catalog.id.filePrefix}_${coordinates.toFilePart}_${size.toFilePart}.$extension"
 
   def isNearby(query: ImageSearchQuery): Boolean =
     catalog === query.catalog && isNearby(query.coordinates)
@@ -122,8 +122,8 @@ case class ImageInFile(query: ImageSearchQuery, file: Path, fileSize: Long) {
 object ImageInFile {
   /** @group Typeclass Instances */
   implicit val equals: Equal[ImageInFile] = Equal.equalA[ImageInFile]
-
-  val FileRegex: Regex = """img_(.+)_ra_([^_]+)_dec_([^_]+)_w_(\d*)_h_(\d*)\.fits.*""".r
+  val IdsRegex: String = CatalogId.all.map(f => s"${f.filePrefix}").mkString("|")
+  val FileRegex: Regex = s"""img_($IdsRegex)_ra_([^_]+)_dec_([^_]+)_w_(\\d*)_h_(\\d*)\\.fits.*""".r
 
   val π = Pi
 
@@ -136,18 +136,16 @@ object ImageInFile {
   /**
     * Decode a file name into an image entry
     */
-  def entryFromFile(file: File): Option[ImageInFile] = {
-    file.getName match {
-      case FileRegex(c, raStr, decStr, w, h) =>
-        for {
-          catalog <- ImageCatalog.byId(c)
-          ra      <- Angle.parseHMS(raStr).map(RightAscension.fromAngle).toOption
-          dec     <- Angle.parseDMS(decStr).toOption.map(_.toDegrees).flatMap(Declination.fromDegrees)
-          width   <- Angle.fromArcsecs(w.toInt).some
-          height  <- Angle.fromArcsecs(h.toInt).some
-        } yield ImageInFile(ImageSearchQuery(catalog, Coordinates(ra, dec), AngularSize(width, height)), file.toPath, file.length())
-      case _                           => None
-    }
+  def entryFromFile(file: File): Option[ImageInFile] = file.getName match {
+    case FileRegex(c, raStr, decStr, w, h) =>
+      for {
+        catalog <- ImageCatalog.byId(c)
+        ra      <- Angle.parseHMS(raStr).map(RightAscension.fromAngle).toOption
+        dec     <- Angle.parseDMS(decStr).toOption.map(_.toDegrees).flatMap(Declination.fromDegrees)
+        width   <- Angle.fromArcsecs(w.toInt).some
+        height  <- Angle.fromArcsecs(h.toInt).some
+      } yield ImageInFile(ImageSearchQuery(catalog, Coordinates(ra, dec), AngularSize(width, height)), file.toPath, file.length())
+    case _                                => None
   }
 }
 

@@ -33,7 +33,7 @@ object ObservationCatalogOverrides {
     implicit def CatalogOverrideCodecJson: CodecJson[CatalogOverride] =
       CodecJson(
         (p: CatalogOverride) =>
-          ("catalog" := p.catalog.id) ->:
+          ("catalog" := p.catalog.id.filePrefix) ->:
           ("uuid" := p.key.uuid.toString) ->:
           jEmptyObject,
         cur =>
