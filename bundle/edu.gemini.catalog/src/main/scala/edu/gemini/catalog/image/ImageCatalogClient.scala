@@ -33,7 +33,7 @@ case object AngularSize {
 
   /** @group Typeclass Instances */
   implicit val order: Order[AngularSize] =
-    Order.orderBy(a => (a.ra.toRadians * a.dec.toRadians))
+    Order.orderBy(a => (a.ra, a.dec))
 }
 
 /**
@@ -101,6 +101,10 @@ case class ImageInFile(query: ImageSearchQuery, file: Path, fileSize: Long) {
     val φ0 = query.coordinates.dec.toDegrees.toRadians
     val λ0 = query.coordinates.ra.toAngle.toRadians
 
+    // In principle dec can be 90 leading to a 0 on θ
+    // In practice it is just very close to zero so it doesn't produce a zero
+    // division but as a result essentially the whole sky matches
+    // TODO: Perhaps the zenith case should be handled in praticular
     val θ = cos(φ0)
 
     // Distance
@@ -115,7 +119,7 @@ object ImageInFile {
   /** @group Typeclass Instances */
   implicit val equals: Equal[ImageInFile] = Equal.equalA[ImageInFile]
 
-  val fileRegex: Regex = """img_(.*)_ra_(.*)_dec_(.*)_w_(\d*)_h_(\d*)\.fits.*""".r
+  val FileRegex: Regex = """img_(.+)_ra_([^_]+)_dec_([^_]+)_w_(\d*)_h_(\d*)\.fits.*""".r
 
   val π = Pi
 
@@ -130,7 +134,7 @@ object ImageInFile {
     */
   def entryFromFile(file: File): Option[ImageInFile] = {
     file.getName match {
-      case fileRegex(c, raStr, decStr, w, h) =>
+      case FileRegex(c, raStr, decStr, w, h) =>
         for {
           catalog <- ImageCatalog.byId(c)
           ra      <- Angle.parseHMS(raStr).map(RightAscension.fromAngle).toOption

@@ -17,7 +17,12 @@ sealed abstract class ImageCatalog(val id: String, val displayName: String, val 
   /** Size of the default requested image */
   def imageSize: AngularSize
 
-  /** Overlap angle between adjacent images */
+  /**
+    * Overlap angle between adjacent images.
+    * In certain catalogs images can overlap to a certain degree. In that case we would get multiple hits
+    * for the same target. We use the value adjacentOverlap to correct this and request images on the overlap
+    * area if there is another closer
+    */
   // TODO Should be corrected for dec?
   def adjacentOverlap: Angle
 

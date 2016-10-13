@@ -26,9 +26,9 @@ protected case class StoredImages(entries: List[(Instant, ImageInFile)]) {
   /**
     * Indicates the image was used, update the access time
     */
-  def touch(i: ImageInFile): StoredImages = copy(entries.collect {
-    case x if x._2 === i => (Instant.now, x._2)
-    case x               => x
+  def touch(i: ImageInFile): StoredImages = copy(entries.map {
+    case (_, `i`) => (Instant.now, i)
+    case x        => x
   })
 
   /**
@@ -113,7 +113,7 @@ object ImageCacheOnDisk {
   def pruneCache(maxSize: Information): Task[Unit] = Task.fork {
     // Remove files from the in memory cache and delete from drive
     def deleteOldFiles(files: List[ImageInFile]): Task[Unit] =
-      Task.gatherUnordered(files.map(StoredImagesCache.remove)) *> Task.delay(files.foreach(_.file.toFile.delete()))
+      files.traverseU(StoredImagesCache.remove) *> Task.delay(files.foreach(_.file.toFile.delete()))
 
     // Find the files that should be removed to keep the max size limited
     def filesToRemove(s: StoredImages, maxCacheSize: Long): Task[List[ImageInFile]] = Task.delay {

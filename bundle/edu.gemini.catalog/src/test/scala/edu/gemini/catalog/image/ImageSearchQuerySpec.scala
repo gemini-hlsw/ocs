@@ -31,7 +31,7 @@ class ImageSearchQuerySpec extends FlatSpec with Matchers with PropertyChecks wi
       forAll { (catalog: ImageCatalog, c: Coordinates) =>
         val suffix = "fits.gz"
         val size = AngularSize(Angle.fromArcmin(8.5), Angle.fromArcmin(10))
-        ImageSearchQuery(catalog, c, size).fileName(suffix) should fullyMatch regex ImageInFile.fileRegex
+        ImageSearchQuery(catalog, c, size).fileName(suffix) should fullyMatch regex ImageInFile.FileRegex
       }
     }
 

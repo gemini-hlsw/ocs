@@ -5,6 +5,7 @@ import java.nio.file.Path
 import java.time.Instant
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.{ExecutorService, Executors, ThreadFactory}
+import java.util.logging.{Level, Logger}
 
 import edu.gemini.catalog.image._
 import edu.gemini.shared.util.immutable.ScalaConverters._
@@ -33,11 +34,7 @@ object TargetImageRequest {
 /**
   * This interface can be used to listen when the image is being loaded and update the UI
   */
-trait ImageLoadingListener {
-  def downloadStarts(): Task[Unit]
-  def downloadCompletes(): Task[Unit]
-  def downloadError(): Task[Unit]
-}
+case class ImageLoadingListener[A](downloadStarts: Task[A], downloadCompletes: Task[A], downloadError: Task[A])
 
 /**
   * Listens for program changes and download images as required. It listens
@@ -46,6 +43,7 @@ trait ImageLoadingListener {
   * It also updates the UI as needed
   */
 object BackgroundImageLoader {
+  val Log: Logger = Logger.getLogger(this.getClass.getName)
   private val taskUnit = Task.now(())
 
   private def imageDownloadsThreadFactory(priority: Int) = new ThreadFactory {
@@ -58,25 +56,38 @@ object BackgroundImageLoader {
     }
   }
 
+  def newExecutor(priority: Int): ExecutorService =
+    Executors.newFixedThreadPool(ImageCatalog.all.length, imageDownloadsThreadFactory(priority))
+
   /**
     * Execution context for lower priority downloads
     */
-  private val lowPriorityEC = Executors.newFixedThreadPool(ImageCatalog.all.length, imageDownloadsThreadFactory(Thread.MIN_PRIORITY))
+  private val lowPriorityEC = newExecutor(Thread.MIN_PRIORITY)
 
   /**
     * Regular execution context for higher priority tasks, i.e. UI requests
     */
-  private val highPriorityEC = Executors.newFixedThreadPool(ImageCatalog.all.length, imageDownloadsThreadFactory(Thread.NORM_PRIORITY))
+  private val highPriorityEC = newExecutor(Thread.NORM_PRIORITY)
+
+  private def logError[A](x: Throwable \/ A): Unit = x match {
+    case -\/(e) => Log.log(Level.SEVERE, e.getMessage, e)
+    case \/-(_) => // Ignore, successful case
+  }
 
   /** Called when a program is created to download its images */
   def watch(prog: ISPProgram): Unit = {
     // Listen for future changes
     prog.addCompositeChangeListener(ChangeListener)
-    val targets = prog.getAllObservations.asScala.toList.flatMap(_.getObsComponents.asScala.flatMap(n => requestedImage(TpeContext(n))))
+    val targets = for {
+        p   <- prog.getAllObservations.asScala.toList
+        obs <- p.getObsComponents.asScala
+        i   <- requestedImage(TpeContext(obs))
+      } yield i
+
     // remove duplicates and request images
     val tasks = targets.distinct.map(requestImageDownload(lowPriorityEC))
     // Run as low priority
-    runAsync(tasks)(_ => ())(lowPriorityEC)
+    runAsync(tasks)(logError)(lowPriorityEC)
   }
 
   /** Called when a program is removed to clear the cache */
@@ -93,7 +104,7 @@ object BackgroundImageLoader {
     // This method called on an explicit user interaction so we'd rather
     // Request the execution in a higher priority thread
     // Execute and set the image on the tpe
-    runAsync(task)(_ => ())(highPriorityEC)
+    runAsync(task)(logError)(highPriorityEC)
   }
 
   // Watches for changes to existing observations, runs BAGS on them when updated.
@@ -104,7 +115,7 @@ object BackgroundImageLoader {
           val task = requestedImage(TpeContext(o)).fold(taskUnit)(requestImageDownload(highPriorityEC))
 
           // Run it in the background as it is lower priority than GUI
-          runAsync(task)(_ => ())(lowPriorityEC)
+          runAsync(task)(logError)(lowPriorityEC)
         }
       }
   }
@@ -116,32 +127,30 @@ object BackgroundImageLoader {
     for {
       catalog  <- ObservationCatalogOverrides.catalogFor(t.key, t.obsWavelength)
       image    <- loadImage(ImageSearchQuery(catalog, t.coordinates, catalog.imageSize), ImageCatalogPanel.resetListener)(pool)
-    } yield image match {
-      case Some(e) => updateTpeImage(e) // Try to set it on the UI
-      case _       => // Ignore, some other thread is downloading the image
-    }
+      _        <- image.fold(taskUnit)(e => Task.delay(updateTpeImage(e)))
+    } yield ()
 
   /**
     * Load an image for the given query
     * It will check if the image is in the cache or in progress before requesting a download
     * It updates the listener as needed to update the UI
     */
-  private def loadImage(query: ImageSearchQuery, listener: ImageLoadingListener)(pool: ExecutorService): Task[Option[ImageInFile]] = {
+  private def loadImage(query: ImageSearchQuery, listener: ImageLoadingListener[Unit])(pool: ExecutorService): Task[Option[ImageInFile]] = {
 
     def readImageToFile(dir: Path): NonEmptyList[Task[ImageInFile]] =
       query.url.map(ImageCatalogClient.downloadImageToFile(dir, _, query))
 
     def downloadImage(prefs: ImageCatalogPreferences): Task[ImageInFile] = {
       val task = for {
-        _ <- KnownImagesSets.start(query) *> listener.downloadStarts()
+        _ <- KnownImagesSets.start(query) *> listener.downloadStarts
         f <- TaskHelper.selectFirstToComplete(readImageToFile(prefs.cacheDir))(pool)
         _ <- StoredImagesCache.add(f) *> ImageCacheOnDisk.pruneCache(prefs.imageCacheSize) // Add to cache and prune. Cache pruning goes in a different thread
       } yield f
 
       // Remove query from registry and inform listeners at the end
       task.onFinish {
-        case Some(_) => KnownImagesSets.failed(query) *> listener.downloadError()
-        case _       => KnownImagesSets.completed(query) *> listener.downloadCompletes()
+        case Some(_) => KnownImagesSets.failed(query) *> listener.downloadError
+        case _       => KnownImagesSets.completed(query) *> listener.downloadCompletes
       }
     }
 

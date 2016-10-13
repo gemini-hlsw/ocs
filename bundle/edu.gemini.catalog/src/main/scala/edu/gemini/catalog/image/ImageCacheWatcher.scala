@@ -42,12 +42,11 @@ object ImageCacheWatcher {
       def fileAndTime(f: Path): Option[Task[StoredImages]] =
         ImageInFile.entryFromFile(f.toFile).map(StoredImagesCache.addAt(lastAccessTime(f), _))
 
-      val populateCache =
-        for {
-          cacheFiles  <- Task.delay(stream.iterator().asScala.toList)
-          accessTimes <- cacheFiles.flatMap(fileAndTime).sequenceU
-        } yield accessTimes
-      populateCache *> StoredImagesCache.get
+      for {
+        cacheFiles   <- Task.delay(stream.iterator().asScala.toList)
+        _            <- cacheFiles.flatMap(fileAndTime).sequenceU
+        initialCache <- StoredImagesCache.get
+      } yield initialCache
     }
 
     /**
@@ -80,13 +79,12 @@ object ImageCacheWatcher {
   /**
     * Observe the file system to detect when files are modified and update the cache accordingly
     */
-  private def watch(cacheDir: Path)(implicit B: Bind[Task]): Task[Unit] = {
+  private def watch(cacheDir: Path): Task[Unit] = {
     def waitForWatcher(watcher: WatchService) : Task[Unit] = Task.delay {
       val watchKey = watcher.take()
       // Called when a file is deleted
-      val tasks = watchKey.pollEvents().asScala.toList.collect {
-          case ev: WatchEvent[Path] if ev.kind() == ENTRY_DELETE =>
-            val p = ev.context()
+      val tasks = watchKey.pollEvents().asScala.toList.map(e => (e.context(), e.kind())).collect {
+          case (p: Path, ENTRY_DELETE) =>
             ImageInFile.entryFromFile(p.toFile).map(StoredImagesCache.remove)
         }
       // Update the cache, removing deleted files
@@ -99,7 +97,7 @@ object ImageCacheWatcher {
     // Register to listen for out-of-band deletion keeping the cache up to date
     cacheDir.register(watcher, ENTRY_DELETE)
     // Keep listening for updates and close the watcher at the end
-    B.forever(waitForWatcher(watcher)).onFinish(_ => Task.delay(watcher.close()))
+    Bind[Task].forever(waitForWatcher(watcher)).onFinish(_ => Task.delay(watcher.close()))
   }
 
   /**
@@ -118,7 +116,7 @@ object ImageCacheWatcher {
     // Execute the watcher in a separate thread
     Task.fork(task)(executor).unsafePerformAsync {
       case \/-(_) => // Ignore, nothing to report
-      case -\/(e) => Log.log(Level.SEVERE, "Error starting the images cache watcher", e)
+      case -\/(e) => Log.log(Level.SEVERE, "Error on images cache watcher", e)
     }
   }
 }

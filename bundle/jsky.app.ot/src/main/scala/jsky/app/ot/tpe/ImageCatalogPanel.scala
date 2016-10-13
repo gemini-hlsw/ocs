@@ -33,13 +33,11 @@ object ImageCatalogPanel {
     }
   }
 
-  def resetListener: ImageLoadingListener = new ImageLoadingListener {
-    override def downloadStarts(): Task[Unit] = Task.delay(Swing.onEDT(ImageCatalogPanel.resetCatalogPanel.unsafePerformSync))
-
-    override def downloadCompletes(): Task[Unit] = Task.delay(Swing.onEDT(ImageCatalogPanel.resetCatalogPanel.unsafePerformSync))
-
-    override def downloadError(): Task[Unit] = Task.delay(Swing.onEDT(ImageCatalogPanel.resetCatalogPanel.unsafePerformSync))
-  }
+  def resetListener: ImageLoadingListener[Unit] =
+    ImageLoadingListener(
+      Task.delay(Swing.onEDT(ImageCatalogPanel.resetCatalogPanel.unsafePerformSync)),
+      Task.delay(Swing.onEDT(ImageCatalogPanel.resetCatalogPanel.unsafePerformSync)),
+      Task.delay(Swing.onEDT(ImageCatalogPanel.resetCatalogPanel.unsafePerformSync)))
 
   def isCatalogSelected(catalog: ImageCatalog): Boolean =
     Option(TpeManager.get()).exists(_.getTpeToolBar.isCatalogSelected(catalog))
