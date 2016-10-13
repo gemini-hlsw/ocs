@@ -12,7 +12,7 @@ import edu.gemini.shared.util.immutable.ScalaConverters._
 
 import scala.collection.JavaConverters._
 import edu.gemini.pot.sp._
-import edu.gemini.spModel.core.{Coordinates, Wavelength}
+import edu.gemini.spModel.core.{Angle, Coordinates, Wavelength}
 import jsky.app.ot.tpe.{ImageCatalogPanel, TpeContext, TpeImageWidget, TpeManager}
 import jsky.image.gui.ImageLoadingException
 
@@ -207,7 +207,7 @@ object BackgroundImageLoader {
         ctx     =  iw.getContext
         request <- requestedImage(ctx)
         // TODO This check seems to be failing in a few spots on the sky, it may need to be loosened
-        if entry.contains(request.coordinates) // The TPE may have moved so only display if the coordinates match
+        if entry.contains(request.coordinates, Angle.zero) // The TPE may have moved so only display if the coordinates match
         if ImageCatalogPanel.isCatalogSelected(entry.query.catalog) // Only set the image if the catalog matches
       } {
         val task = KnownImagesSets.inProgress(entry.query).ifM(taskUnit, updateCacheAndDisplay(iw))

@@ -82,12 +82,16 @@ object ImageSearchQuery {
   */
 case class ImageInFile(query: ImageSearchQuery, file: Path, fileSize: Long) {
   /**
+    * Tests if the image contains the coordinates considering the catalog overlay
+    */
+  def contains(c: Coordinates): Boolean = contains(c, query.catalog.adjacentOverlap)
+
+    /**
     * Tests if the image contains the coordinates parameter
     */
-  def contains(c: Coordinates): Boolean = {
+  def contains(c: Coordinates, ε: Angle): Boolean = {
     import ImageInFile.δ
 
-    val ε = query.catalog.adjacentOverlap
     // Convert everything to radians, calculations in Angle-space don't work due to range overflow
     // Image size
     val εφ = (query.size.halfDec.toRadians - ε.toRadians).max(0)
