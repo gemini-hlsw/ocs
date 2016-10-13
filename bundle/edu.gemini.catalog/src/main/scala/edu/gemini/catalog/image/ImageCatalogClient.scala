@@ -21,8 +21,8 @@ import scalaz.concurrent.Task
 case class AngularSize(ra: Angle, dec: Angle) {
   def this(size: Angle) = this(size, size)
 
-  def halfDec = (dec / 2).getOrElse(Angle.zero)
-  def halfRa = (ra / 2).getOrElse(Angle.zero)
+  def halfDec: Angle = ~(dec / 2)
+  def halfRa: Angle = ~(ra / 2)
 }
 
 case object AngularSize {
@@ -81,11 +81,12 @@ object ImageSearchQuery {
   * Image in the file system
   */
 case class ImageInFile(query: ImageSearchQuery, file: Path, fileSize: Long) {
-
   /**
     * Tests if the image contains the coordinates parameter
     */
   def contains(c: Coordinates): Boolean = {
+    import ImageInFile.δ
+
     val ε = query.catalog.adjacentOverlap
     // Convert everything to radians, calculations in Angle-space don't work due to range overflow
     // Image size
@@ -93,18 +94,18 @@ case class ImageInFile(query: ImageSearchQuery, file: Path, fileSize: Long) {
     val ελ = (query.size.halfRa.toRadians  - ε.toRadians).max(0)
 
     // target coordinates
-    val φ = toRadians(c.dec.toDegrees)
+    val φ = c.dec.toDegrees.toRadians
     val λ = c.ra.toAngle.toRadians
 
     // image coordinates
-    val φ0 = toRadians(query.coordinates.dec.toDegrees)
+    val φ0 = query.coordinates.dec.toDegrees.toRadians
     val λ0 = query.coordinates.ra.toAngle.toRadians
 
     val θ = cos(φ0)
 
     // Distance
-    val Δφ = abs(φ - φ0)
-    val Δλ = abs(λ - λ0)
+    val Δφ = δ(φ, φ0)
+    val Δλ = δ(λ, λ0)
 
     Δφ <= εφ && Δλ*θ <= ελ
   }
@@ -115,6 +116,14 @@ object ImageInFile {
   implicit val equals: Equal[ImageInFile] = Equal.equalA[ImageInFile]
 
   val fileRegex: Regex = """img_(.*)_ra_(.*)_dec_(.*)_w_(\d*)_h_(\d*)\.fits.*""".r
+
+  val π = Pi
+
+  /**
+    * Calculates the minimal distance between two angles in radians
+    */
+  def δ(α: Double, β: Double): Double =
+    min(2*π - abs(α - β), abs(α - β))
 
   /**
     * Decode a file name into an image entry

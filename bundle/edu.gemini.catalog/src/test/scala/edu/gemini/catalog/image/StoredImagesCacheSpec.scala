@@ -8,6 +8,7 @@ import org.scalatest.prop.PropertyChecks
 import edu.gemini.spModel.core.AlmostEqual
 import edu.gemini.spModel.core.AlmostEqual._
 
+import scala.math._
 import scalaz._
 import Scalaz._
 
@@ -15,7 +16,7 @@ class StoredImagesCacheSpec extends FlatSpec with Matchers with PropertyChecks
   with ImageCatalogArbitraries with OptionValues with BeforeAndAfterEach {
 
   // Do more tests to uncover edge cases
-  implicit override val generatorDrivenConfig = PropertyCheckConfiguration(minSize = 5000, minSuccessful = 5000)
+  implicit override val generatorDrivenConfig = PropertyCheckConfiguration(minSize = 1000, minSuccessful = 1000)
 
   override def beforeEach {
     // Clean the cache before each test
@@ -41,12 +42,7 @@ class StoredImagesCacheSpec extends FlatSpec with Matchers with PropertyChecks
     }
 
   "StoredImagesCache" should
-    "start empty" in {
-      val cache = StoredImagesCache.get.unsafePerformSyncAttempt
-      cache.isRight shouldBe true
-      cache.getOrElse(fail("Should not happen")) shouldBe StoredImages.zero
-    }
-    it should "add entries" in {
+    "add entries" in {
       forAll { (e: ImageInFile) =>
         val cache = StoredImagesCache.add(e).unsafePerformSyncAttempt
         cache.isRight shouldBe true
@@ -55,48 +51,48 @@ class StoredImagesCacheSpec extends FlatSpec with Matchers with PropertyChecks
     }
     it should "delete entries" in {
       forAll { (e: ImageInFile) =>
-        val cache = (StoredImagesCache.add(e) *> StoredImagesCache.remove(e)).unsafePerformSyncAttempt
+        val cache = (StoredImagesCache.clean *> StoredImagesCache.add(e) *> StoredImagesCache.remove(e)).unsafePerformSyncAttempt
         cache.isRight shouldBe true
         cache.getOrElse(fail("Should not happen")).images should not contain e
       }
     }
-    ignore should "find entries" in {
+    it should "find entries" in {
       forAll { (e: ImageInFile) =>
-        val entry = (StoredImagesCache.add(e) *> StoredImagesCache.find(e.query)).unsafePerformSyncAttempt
+        val entry = (StoredImagesCache.clean *> StoredImagesCache.add(e) *> StoredImagesCache.find(e.query)).unsafePerformSyncAttempt
         entry.isRight shouldBe true
-        entry.getOrElse(fail("Should not happen")).value.query shouldBe e.query
+        entry.getOrElse(fail("Should not happen")).map(_.query ~= e.query).value shouldBe true
       }
     }
     it should "find itself as closest" in {
       forAll { (e: ImageInFile) =>
-        val entry = (StoredImagesCache.add(e) *> StoredImagesCache.get.map(_.closestImage(e.query))).unsafePerformSyncAttempt
+        val entry = (StoredImagesCache.clean *> StoredImagesCache.add(e) *> StoredImagesCache.get.map(_.closestImage(e.query))).unsafePerformSyncAttempt
         entry.isRight shouldBe true
-        entry.getOrElse(fail("Should not happen")).map(_.query).value shouldBe e.query
+        entry.getOrElse(fail("Should not happen")).value shouldBe e
       }
     }
-    ignore should "find itself inside" in {
+    it should "find itself inside" in {
       forAll { (e: ImageInFile) =>
-        val entry = (StoredImagesCache.add(e) *> StoredImagesCache.get.map(_.inside(e.query))).unsafePerformSyncAttempt
+        val entry = (StoredImagesCache.clean *> StoredImagesCache.add(e) *> StoredImagesCache.get.map(_.inside(e.query))).unsafePerformSyncAttempt
         entry.isRight shouldBe true
-        entry.getOrElse(fail("Should not happen")).map(_.query).value shouldBe e.query
+        entry.getOrElse(fail("Should not happen")).map(_.query ~= e.query).value shouldBe true
       }
     }
-    ignore should "find itself as closest among several" in {
+    it should "find itself as closest among several" in {
       forAll { (h: ImageInFile, e: List[ImageInFile]) =>
         val minSize = e.map(_.query.size).minimum.getOrElse(AngularSize.zero)
         val ref = h.copy(query = h.query.copy(size = minSize)) // Set size to the minimum available to make the test viable
         val images = ref :: e
-        val entry = (images.map(StoredImagesCache.add).sequenceU >> StoredImagesCache.get.map(_.closestImage(ref.query))).unsafePerformSyncAttempt
+        val entry = (StoredImagesCache.clean *> images.map(StoredImagesCache.add).sequenceU >> StoredImagesCache.get.map(_.closestImage(ref.query))).unsafePerformSyncAttempt
         entry.isRight shouldBe true
         entry.getOrElse(fail("Should not happen")).map(_ ~= ref).value shouldBe true
       }
     }
-    ignore should "find itself inside among several" in {
+    it should "find itself inside among several" in {
       forAll { (h: ImageInFile, e: List[ImageInFile]) =>
         val minSize = e.map(_.query.size).minimum.getOrElse(AngularSize.zero)
         val ref = h.copy(query = h.query.copy(size = minSize)) // Set size to the minimum available to make the test viable
         val images = ref :: e
-        val entry = (images.map(StoredImagesCache.add).sequenceU >> StoredImagesCache.get.map(_.inside(ref.query))).unsafePerformSyncAttempt
+        val entry = (StoredImagesCache.clean *> images.map(StoredImagesCache.add).sequenceU >> StoredImagesCache.get.map(_.inside(ref.query))).unsafePerformSyncAttempt
         entry.isRight shouldBe true
         entry.getOrElse(fail("Should not happen")).map(_ ~= ref).value shouldBe true
       }
@@ -108,55 +104,65 @@ class StoredImagesCacheSpec extends FlatSpec with Matchers with PropertyChecks
       val c = ImageInFile(ImageSearchQuery(DssGemini, Coordinates.zero.copy(RightAscension.fromAngle(Angle.fromArcmin(6))), size), new File("c").toPath, 0)
 
       val e = List(b, c)
-      val entry = (e.map(StoredImagesCache.add).sequenceU >> StoredImagesCache.get.map(_.closestImage(a))).unsafePerformSyncAttempt
+      val entry = (StoredImagesCache.clean *> e.map(StoredImagesCache.add).sequenceU >> StoredImagesCache.get.map(_.closestImage(a))).unsafePerformSyncAttempt
 
       entry.isRight shouldBe true
       entry.getOrElse(fail("Should not happen")).value shouldBe b
     }
-    ignore should "find no one inside if they don't overlap" in {
+    it should "find no one inside if they don't overlap" in {
       forAll { (c: Coordinates) =>
         val delta = Angle.fromArcsecs(0.01)
         val raWidth = Angle.fromArcmin(8.5)
         val decHeight = Angle.fromArcmin(10)
-        val gap = Angle.zero
         val size = AngularSize(raWidth, decHeight)
         val ref = ImageSearchQuery(DssGemini, c, size)
+        val θ = cos(toRadians(c.dec.toDegrees))
         // too far in Ra
-        val ra1 = c.copy(ra = c.ra.offset(raWidth + delta))
-        val ra2 = c.copy(ra = RightAscension.zero.max(c.ra.offset(Angle.zero - raWidth - delta)))
+        val ra1 = c.copy(ra = c.ra.offset(~(raWidth/θ) + delta))
+        val ra2 = c.copy(ra = RightAscension.zero.max(c.ra.offset(Angle.zero - ~(raWidth/θ) - delta)))
         // too far in dec
         val dec1 = c.copy(dec = c.dec.offset(decHeight + delta)._1)
         val dec2 = c.copy(dec = c.dec.offset(Angle.zero - decHeight - delta)._1)
-        val nearEntries = List(ra1, ra2, dec1, dec2).map(c => ImageInFile(ImageSearchQuery(DssGemini, c, size), new File(c.toString).toPath, 0))
-        val entry = (nearEntries.map(StoredImagesCache.add).sequenceU >> StoredImagesCache.get.map(_.inside(ref))).unsafePerformSyncAttempt
+        val nearEntries = List(ra1, ra2, dec1, dec2).map(c => ImageInFile(ImageSearchQuery(MassImgJ, c, size), new File(c.toString).toPath, 0))
+        val entry = (StoredImagesCache.clean *> nearEntries.map(StoredImagesCache.add).sequenceU >> StoredImagesCache.get.map(_.inside(ref))).unsafePerformSyncAttempt
 
         entry.isRight shouldBe true
         entry.toOption.value shouldBe None
       }
     }
-    ignore should "find image inside" in {
+    it should "find image inside" in {
+      val delta = Angle.fromArcsecs(0.01)
       val raWidth = Angle.fromArcmin(8.5)
-      val decWidth = Angle.fromArcmin(10)
-      val gap = DssGemini.adjacentOverlap
-      val size = AngularSize(Angle.fromArcmin(8.5), Angle.fromArcmin(10))
-      val a = ImageSearchQuery(DssGemini, Coordinates.zero, size)
-      val b = ImageInFile(ImageSearchQuery(DssGemini, Coordinates.zero.copy(RightAscension.fromAngle((raWidth / 2).getOrElse(Angle.zero) - gap)), size), new File("b").toPath, 0)
-      val c = ImageInFile(ImageSearchQuery(DssGemini, Coordinates.zero.copy(RightAscension.fromAngle(Angle.fromArcmin(6))), size), new File("c").toPath, 0)
+      val decHeight = Angle.fromArcmin(10)
+      val size = AngularSize(raWidth, decHeight)
+      val ra = RightAscension.fromAngle(Angle.fromDegrees(90.0))
+      val baseCoordinates = Coordinates.zero.copy(ra)
+      val a = ImageSearchQuery(MassImgJ, baseCoordinates, size)
+      // b includes a thanks to the delta
+      val b = ImageInFile(ImageSearchQuery(MassImgJ, baseCoordinates.copy(RightAscension.fromAngle(ra.toAngle + ~(raWidth / 2) - delta)), size), new File("b").toPath, 0)
+      val c = ImageInFile(ImageSearchQuery(MassImgJ, baseCoordinates.copy(RightAscension.fromAngle(ra.toAngle + Angle.fromArcmin(6))), size), new File("c").toPath, 0)
 
       val e = List(b, c)
-      val entry = (e.map(StoredImagesCache.add).sequenceU >> StoredImagesCache.get.map(_.inside(a))).unsafePerformSyncAttempt
+      val entry = (StoredImagesCache.clean *> e.map(StoredImagesCache.add).sequenceU >> StoredImagesCache.get.map(_.inside(a))).unsafePerformSyncAttempt
 
       entry.isRight shouldBe true
       entry.getOrElse(fail("Should not happen")).value shouldBe b
     }
-    ignore should "find no fit inside due to the overlap" in {
-      val size = AngularSize(Angle.fromArcmin(8.5), Angle.fromArcmin(10))
-      val a = ImageSearchQuery(DssGemini, Coordinates.zero, size)
-      val b = ImageInFile(ImageSearchQuery(DssGemini, Coordinates.zero.copy(RightAscension.fromAngle(Angle.fromArcmin(8.5 / 2))), size), new File("b").toPath, 0)
-      val c = ImageInFile(ImageSearchQuery(DssGemini, Coordinates.zero.copy(RightAscension.fromAngle(Angle.fromArcmin(6))), size), new File("c").toPath, 0)
+    it should "find no fit inside due to the overlap" in {
+      val delta = Angle.fromArcsecs(0.01)
+      val raWidth = Angle.fromArcmin(8.5)
+      val decHeight = Angle.fromArcmin(10)
+      val size = AngularSize(raWidth, decHeight)
+      val ra = RightAscension.fromAngle(Angle.fromDegrees(90.0))
+
+      val baseCoordinates = Coordinates.zero.copy(ra)
+      val a = ImageSearchQuery(DssGemini, baseCoordinates, size)
+      // b doesn't include the image as DssGemini has an adjacentOverlay
+      val b = ImageInFile(ImageSearchQuery(DssGemini, baseCoordinates.copy(RightAscension.fromAngle(ra.toAngle + ~(raWidth / 2) - delta)), size), new File("b").toPath, 0)
+      val c = ImageInFile(ImageSearchQuery(DssGemini, baseCoordinates.copy(RightAscension.fromAngle(ra.toAngle + Angle.fromArcmin(6))), size), new File("c").toPath, 0)
 
       val e = List(b, c)
-      val entry = (e.map(StoredImagesCache.add).sequenceU >> StoredImagesCache.get.map(_.inside(a))).unsafePerformSyncAttempt
+      val entry = (StoredImagesCache.clean *> e.map(StoredImagesCache.add).sequenceU >> StoredImagesCache.get.map(_.inside(a))).unsafePerformSyncAttempt
 
       entry.isRight shouldBe true
       entry.getOrElse(fail("Should not happen")) shouldBe None
