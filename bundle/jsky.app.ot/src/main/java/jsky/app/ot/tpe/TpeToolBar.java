@@ -1,5 +1,9 @@
 package jsky.app.ot.tpe;
 
+import edu.gemini.catalog.image.ImageCatalog;
+import edu.gemini.catalog.ui.tpe.CatalogImageDisplay;
+import edu.gemini.pot.sp.ISPObservation;
+import edu.gemini.shared.util.immutable.Option;
 import jsky.app.ot.ags.AgsSelectorControl;
 
 import javax.swing.*;
@@ -16,6 +20,8 @@ import java.awt.event.ComponentListener;
  * @version $Revision: 45662 $
  * @author Allan Brighton */
 final class TpeToolBar extends JPanel {
+
+    private final ImageCatalogPanel _imageCatalogPanel;
 
     private static GridBagConstraints gbc(final int y) {
         return new GridBagConstraints() {{
@@ -38,11 +44,10 @@ final class TpeToolBar extends JPanel {
     // The ags guider selection panel
     private final AgsSelectorControl _guiderSelector = new AgsStrategyPanel();
 
-
     /**
      * The left side toolbar for the position editor.
      */
-    TpeToolBar() {
+    TpeToolBar(CatalogImageDisplay display) {
         super(new GridBagLayout());
 
         setBorder(BorderFactory.createEmptyBorder(10, 5, 10, 5));
@@ -67,16 +72,23 @@ final class TpeToolBar extends JPanel {
                 gridx = 0; anchor = NORTH; fill = HORIZONTAL;
                 insets = new Insets(10, 0, 0, 0);
             }};
-            gbc.gridy = 2+i;
+            gbc.gridy = 2 + i;
 
             add(wrapPanel(cat.displayName(), _viewPanel[i]), gbc);
             ++i;
         }
 
-        final int yPos = 2+i;
+        final int yPos = 2 + i;
         final JPanel wrappedGuiderSelector = wrapPanel("", _guiderSelector.getUi());
         add(wrappedGuiderSelector, new GridBagConstraints() {{
             gridx = 0; gridy = yPos; anchor = NORTH; fill = HORIZONTAL;
+            insets = new Insets(10, 0, 0, 0);
+        }});
+        final int catalogYPos = yPos + i;
+        _imageCatalogPanel = new ImageCatalogPanel(display);
+        final JPanel wrappedCatalogSelector = wrapPanel("", _imageCatalogPanel.panel().peer());
+        add(wrappedCatalogSelector, new GridBagConstraints() {{
+            gridx = 0; gridy = catalogYPos; anchor = NORTH; fill = HORIZONTAL;
             insets = new Insets(10, 0, 0, 0);
         }});
 
@@ -84,7 +96,7 @@ final class TpeToolBar extends JPanel {
         final GridBagConstraints gbc = new GridBagConstraints() {{
             gridx = 0; fill = BOTH; weighty = 1.0;
         }};
-        gbc.gridy = 3+i;
+        gbc.gridy = 4 + i;
         add(new JPanel(), gbc);
 
     }
@@ -184,6 +196,20 @@ final class TpeToolBar extends JPanel {
 
     AgsSelectorControl getGuiderSelector() {
         return _guiderSelector;
+    }
+
+    /**
+     * Updates the image catalogue selection panel
+     */
+    void updateImageCatalogState(ISPObservation obs) {
+        _imageCatalogPanel.resetCatalogue(obs);
+    }
+
+    /**
+     * Verifies that the catalog is selected on the UI
+     */
+    boolean isCatalogSelected(ImageCatalog catalog) {
+        return _imageCatalogPanel.isCatalogSelected(catalog);
     }
 }
 

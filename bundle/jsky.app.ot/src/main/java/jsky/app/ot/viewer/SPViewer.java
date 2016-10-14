@@ -1,5 +1,6 @@
 package jsky.app.ot.viewer;
 
+import edu.gemini.catalog.ui.image.BackgroundImageLoader;
 import edu.gemini.p2checker.api.IP2Problems;
 import edu.gemini.p2checker.api.Problem;
 import edu.gemini.pot.sp.*;
@@ -91,7 +92,7 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
 
     private final IDBDatabaseService _db;
 
-    public final SPViewerActions _actions;
+    final SPViewerActions _actions;
 
     // Listener that rebuilds the menu, toolbars, and editor in response to changes to stuff that can cause the
     // authorization situation to change. Right now this means any manipulation of the keychain and any change to
@@ -431,7 +432,7 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
         if (tpe != null) tpe.reset(getNode());
     }
 
-    public void updateAfterPermissionsChange() {
+    void updateAfterPermissionsChange() {
         _updateEditableState();
     }
 
@@ -660,7 +661,7 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
      * SPViewer.tryNavigate or ViewerManager.open, but calling this directly can be useful because it forces a complete
      * redraw of the viewer. This is not ideal.
      */
-    public void setRootNode(final ISPProgram root) {
+    private void setRootNode(final ISPProgram root) {
         try {
             // Reset the TPE to the new root
             final TelescopePosEditor tpe = TpeManager.get();
@@ -712,6 +713,7 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
                     _checker.check(getRoot(), getTree(), OT.getMagnitudeTable());
                 }
                 BagsManager.watch(getRoot());
+                BackgroundImageLoader.watch(getRoot());
             }
 
             // Finally, update title and actions
@@ -756,7 +758,7 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
     private boolean visible = false; //to have control of the last state selected by the user for the problem window
 
     //Update the ToolWindow that contains the problems details, if possible
-    public void updateProblemToolWindow(final IP2Problems problems) {
+    void updateProblemToolWindow(final IP2Problems problems) {
         SwingUtilities.invokeLater(() -> {
             final SPViewerFrame f = getParentFrame();
             final ToolWindowManager toolWindowManager = f.getToolWindowManager();
@@ -877,6 +879,7 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
         }
         if (p != null) {
             BagsManager.unwatch(p);
+            BackgroundImageLoader.unwatch(p);
             treeSnapshots.remove(p.getNodeKey());
         }
         tryNavigate(_history.delete());
@@ -885,6 +888,7 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
     public void closeProgram(ISPProgram node) {
         if (node != null) {
             BagsManager.unwatch(node);
+            BackgroundImageLoader.unwatch(node);
             treeSnapshots.remove(node.getNodeKey());
         }
         tryNavigate(_history.delete(node));
@@ -895,6 +899,7 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
         if (getRoot() != null) {
             for (RootEntry e : _history.rootEntriesAsJava()) {
                 BagsManager.unwatch(e.root());
+                BackgroundImageLoader.unwatch(e.root());
             }
         }
 
@@ -944,7 +949,7 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
     }
 
     // Enable/Disable the listeners on the science program
-    public void setProgramListenersEnabled(final boolean enabled) {
+    void setProgramListenersEnabled(final boolean enabled) {
         _eventManager.setRootNode(enabled ? getRoot() : null);
     }
 
@@ -987,12 +992,12 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
         return _problemViewer;
     }
 
-    public SPConflictToolWindow getConflictToolWindow() {
+    SPConflictToolWindow getConflictToolWindow() {
         return _conflictPanel;
     }
 
     /** Returns the {@link EngToolWindow} for this viewer. */
-    public EngToolWindow getEngToolWindow() {
+    EngToolWindow getEngToolWindow() {
         return _engToolWindow;
     }
 

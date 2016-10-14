@@ -63,7 +63,12 @@ object CoordinatesSpec extends Specification with ScalaCheck with Arbitraries wi
         deg >= 0 && deg <= 180
       }
 
-    "be consistent with RA offsetting at the equator" ! 
+    "be 0 for the same Coordinates" !
+      forAll { (a: Coordinates) =>
+        a.angularDistance(a) === Angle.zero
+      }
+
+    "be consistent with RA offsetting at the equator" !
       forAll { (ra: RA, da: Angle) =>
         val a = Coordinates(ra, Dec.zero)
         val b = a.offset(da, Angle.zero)

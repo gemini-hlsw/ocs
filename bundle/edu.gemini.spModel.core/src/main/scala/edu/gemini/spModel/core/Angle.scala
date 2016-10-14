@@ -107,6 +107,13 @@ sealed trait Angle extends java.io.Serializable {
     Angle.fromDegrees(toDegrees * factor)
 
   /**
+   * Scalar division
+   * @group Operations
+   */
+  def /(factor: Double): Option[Angle] =
+    (factor != 0) option Angle.fromDegrees(toDegrees / factor)
+
+  /**
    * Flip by 180°.
    * @group Operations
    */
@@ -431,4 +438,3 @@ object Angle {
       case nd               => nd - 360.0
     }
 }
-

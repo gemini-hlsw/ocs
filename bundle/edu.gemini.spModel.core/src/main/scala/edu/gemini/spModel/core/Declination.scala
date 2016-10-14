@@ -140,6 +140,3 @@ object Declination {
     formatSexigesimal(dec, sep, fractionalDigits)
 
 }
-
-
-

@@ -20,13 +20,13 @@ public class TpeImageDisplayControl extends ImageDisplayControl {
      * @param parent the top level parent frame (or internal frame) used to close the window
      * @param size   the size (width, height) to use for the pan and zoom windows.
      */
-    public TpeImageDisplayControl(Component parent, int size) {
+    TpeImageDisplayControl(Component parent, int size) {
         super(parent, size);
     }
 
     /** Make and return the image display window */
     @Override
-    protected DivaMainImageDisplay makeImageDisplay() {
+    protected TpeImageWidget makeImageDisplay() {
         return new TpeImageWidget(parent);
     }
 

@@ -1,12 +1,4 @@
-// Copyright 1999 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: ISPObservation.java 46768 2012-07-16 18:58:53Z rnorris $
-//
-
 package edu.gemini.pot.sp;
-
 
 /**
  * This is the interface for a Science Program Observation node.  Note that

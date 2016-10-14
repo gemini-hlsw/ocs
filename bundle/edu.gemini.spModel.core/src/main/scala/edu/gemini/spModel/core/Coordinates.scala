@@ -40,7 +40,6 @@ final case class Coordinates(ra: RightAscension, dec: Declination) {
     Angle.fromRadians(2 * atan2(sqrt(a), sqrt(1 - a)))
   }
 
-
   /**
    * Interpolate between `this` and `that` at a position specified by `f`, where `0.0` is `this`,
    * `1.0` is `other`, and `0.5` is halfway along the great circle connecting them. Note that this
@@ -65,7 +64,6 @@ final case class Coordinates(ra: RightAscension, dec: Declination) {
       Coordinates(RA.fromAngle(Angle.fromRadians(λi)), Dec.fromAngle(Angle.fromRadians(φi)).get)
     }
   }
-
 }
 
 object Coordinates extends ((RightAscension, Declination) => Coordinates) {

@@ -13,7 +13,8 @@ unmanagedJars in Compile ++= Seq(
   new File(baseDirectory.value, "../../lib/bundle/nom-tam-fits_2.10-0.99.3.jar"),
   new File(baseDirectory.value, "../../lib/bundle/org-apache-commons-httpclient_2.10-2.0.0.jar"),
   new File(baseDirectory.value, "../../lib/bundle/org-jfree_2.10-1.0.14.jar"),
-  new File(baseDirectory.value, "../../lib/bundle/org-dom4j_2.10-1.5.1.jar")
+  new File(baseDirectory.value, "../../lib/bundle/org-dom4j_2.10-1.5.1.jar"),
+  new File(baseDirectory.value, "../../lib/bundle/argonaut_2.11-6.2.jar")
 )
 
 libraryDependencies ++= Seq(

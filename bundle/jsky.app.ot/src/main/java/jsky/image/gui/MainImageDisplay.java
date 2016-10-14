@@ -1,11 +1,13 @@
 package jsky.image.gui;
 
 import java.awt.Graphics2D;
+import java.io.IOException;
 import java.net.URL;
 import javax.swing.event.ChangeListener;
 
 import jsky.coords.WorldCoords;
 import jsky.util.gui.GenericToolBarTarget;
+import nom.tam.fits.FitsException;
 
 /**
  * This defines the interface for a main application image display window.
@@ -17,7 +19,7 @@ public interface MainImageDisplay
         extends GraphicsImageDisplay, GenericToolBarTarget {
 
     /** Set the image file to display. */
-    void setFilename(String fileOrUrl);
+    void setFilename(String fileOrUrl, boolean displayError);
 
     /**
      * Set the image file to display, and indicate that the file was downloaded from

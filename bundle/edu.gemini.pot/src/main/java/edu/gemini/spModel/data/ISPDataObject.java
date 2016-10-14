@@ -1,10 +1,3 @@
-// Copyright 1999-2000
-// Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: ISPDataObject.java 44536 2012-04-15 16:42:55Z swalker $
-//
 package edu.gemini.spModel.data;
 
 import edu.gemini.pot.sp.ISPCloneable;
@@ -38,17 +31,17 @@ public interface ISPDataObject extends ISPCloneable, Serializable {
     /**
      * Names the version property of all data objects.
      */
-    public static final String VERSION_PROP = "version";
+    String VERSION_PROP = "version";
 
     /**
      * The name of the title property.
      */
-    public static final String TITLE_PROP = "title";
+    String TITLE_PROP = "title";
 
     /**
      * Name of the parameter set kind.
      */
-    public static final String PARAM_SET_KIND = "dataObj";
+    String PARAM_SET_KIND = "dataObj";
 
     /**
      * Adds a property change listener that will receive
@@ -113,7 +106,7 @@ public interface ISPDataObject extends ISPCloneable, Serializable {
      * Returns the part of the title that may be edited by a user. Some data objects
      * automatically insert a fixed part, which is not included here.
      */
-    public String getEditableTitle();
+    String getEditableTitle();
 
     /**
      * Return a version String for this data object.  The implication is that
@@ -129,7 +122,6 @@ public interface ISPDataObject extends ISPCloneable, Serializable {
 
     /**
      * Return a parameter set describing the current state of this object.
-     * @param factory
      */
     ParamSet getParamSet(PioFactory factory);
 

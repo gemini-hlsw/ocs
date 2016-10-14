@@ -2,6 +2,8 @@ package jsky.app.ot.tpe;
 
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
+import edu.gemini.shared.util.immutable.Some;
+import edu.gemini.spModel.core.Coordinates;
 import edu.gemini.spModel.core.SiderealTarget;
 import jsky.coords.WorldCoords;
 
@@ -18,53 +20,61 @@ import java.awt.event.MouseEvent;
 public class TpeMouseEvent {
 
     /** The original mouse event  */
-    public MouseEvent mouseEvent;
+    public final MouseEvent mouseEvent;
 
     /** Event id, same as java.awt.Event.  */
-    public int id;
+    public final int id;
 
     /** Event source.  */
-    public TpeImageWidget source;
-
-    /** X pos of event relative to the real image being viewed.  */
-    public double xView;
-
-    /** Y pos of event relative to the real image being viewed.  */
-    public double yView;
+    public final Option<TpeImageWidget> source;
 
     /** X pos of event relative to the widget.  */
-    public int xWidget;
+    public final int xWidget;
 
     /** Y pos of event relative to the widget.  */
-    public int yWidget;
+    public final int yWidget;
 
     /** The world coordinate position */
-    public WorldCoords pos;
+    public final Coordinates pos;
 
     /** Optional object name or id */
-    public String name;
+    public final Option<String> name;
 
     // Optional details of the object.
-    private Option<SiderealTarget> skyObject = None.instance();
+    public final Option<SiderealTarget> skyObject;
 
     /** The X offset of the event from the base position in arcsec. */
-    public double xOffset;
+    public final double xOffset;
 
     /** The Y offset of the event from the base position in arcsec. */
-    public double yOffset;
+    public final double yOffset;
 
     /** Default Constructor: initialize all fields to null. */
     public TpeMouseEvent(MouseEvent e) {
         mouseEvent = e;
+        this.id = 0;
+        this.source = None.instance();
+        this.pos = Coordinates.zero();
+        this.name = None.instance();
+        this.skyObject = None.instance();
+        this.xWidget = 0;
+        this.yWidget = 0;
+        this.xOffset = 0;
+        this.yOffset = 0;
     }
 
-    public Option<SiderealTarget> getSkyObject() {
-        return skyObject;
-    }
-
-    public void setSkyObject(Option<SiderealTarget> skyObject) {
-        if (skyObject == null) throw new IllegalArgumentException();
+    /** Default Constructor: initialize all fields to null. */
+    public TpeMouseEvent(MouseEvent e, int id, TpeImageWidget source, Coordinates pos, String name, int xWidget, int yWidget, Option<SiderealTarget> skyObject, double xOffset, double yOffset) {
+        mouseEvent = e;
+        this.id = id;
+        this.source = new Some<>(source);
+        this.pos = pos;
+        this.name = new Some<>(name);
+        this.xWidget = xWidget;
+        this.yWidget = yWidget;
         this.skyObject = skyObject;
+        this.xOffset = xOffset;
+        this.yOffset = yOffset;
     }
 
     /**
@@ -88,8 +98,6 @@ public class TpeMouseEvent {
                 break;
         }
         return "TpeMouseEvent[id=" + event
-                + ", xView=" + xView
-                + ", yView=" + yView
                 + ", xWidget=" + xWidget
                 + ", yWidget=" + yWidget
                 + ", pos=" + pos

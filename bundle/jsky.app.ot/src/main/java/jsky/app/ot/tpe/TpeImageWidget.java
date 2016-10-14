@@ -77,23 +77,8 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
     // Base pos not visible
     private boolean _baseOutOfView = false;
 
-    // Background task to automatically select GEMS guide stars
-    private GemsGuideStarWorker _gemsGuideStarWorker;
-
     // Dialog for GeMS manual guide star selection
     private GemsGuideStarSearchDialog _gemsGuideStarSearchDialog;
-
-    private final AbstractAction _skyImageAction = new AbstractAction(
-            "Sky Images...",
-            Resources.getIcon("guidestars24.gif")) {
-        {
-            putValue(Action.SHORT_DESCRIPTION, "Get sky image using default parameters");
-        }
-
-        @Override public void actionPerformed(ActionEvent evt) {
-            loadSkyImage();
-        }
-    };
 
     // Action to use to show the guide star search window
     private final AbstractAction _manualGuideStarAction = new AbstractAction(
@@ -245,7 +230,7 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
         }
     }
 
-    public synchronized void addMouseObserver(final TpeMouseObserver obs) {
+    synchronized void addMouseObserver(final TpeMouseObserver obs) {
         if (!_mouseObs.contains(obs)) {
             _mouseObs.addElement(obs);
         }
@@ -255,42 +240,42 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
      * Tell all the mouse observers about the new mouse event.
      */
     private void _notifyMouseObs(final MouseEvent e) {
-        final TpeMouseEvent tme = new TpeMouseEvent(e);
         try {
-            _initMouseEvent(e, tme);
+            final TpeMouseEvent tme = _initMouseEvent(e);
+            for (final TpeMouseObserver mo : _mouseObs) {
+                mo.tpeMouseEvent(this, tme);
+            }
         } catch (Exception ex) {
             ex.printStackTrace();
-            return;
-        }
-        for (final TpeMouseObserver mo : _mouseObs) {
-            mo.tpeMouseEvent(this, tme);
         }
     }
 
     /**
      * Tell all the view observers that the view has changed.
      */
-    protected void _notifyViewObs() {
+    private void _notifyViewObs() {
         for (final TpeViewObserver vo : _viewObs) {
             vo.tpeViewChange(this);
         }
     }
 
-    public synchronized void addViewObserver(final TpeViewObserver obs) {
+    synchronized void addViewObserver(final TpeViewObserver obs) {
         if (!_viewObs.contains(obs)) {
             _viewObs.addElement(obs);
         }
     }
 
-    public synchronized void deleteViewObserver(final TpeViewObserver obs) {
+    synchronized void deleteViewObserver(final TpeViewObserver obs) {
         _viewObs.removeElement(obs);
     }
 
     @Override
     public void loadSkyImage() {
         try {
-            TelescopePosEditor tpe = TpeManager.open();
-            tpe.getSkyImage(_ctx);
+            TelescopePosEditor tpe = TpeManager.get();
+            if (tpe != null) {
+                tpe.getSkyImage(_ctx);
+            }
         } catch (Exception e) {
             DialogUtil.error(e);
         }
@@ -331,7 +316,7 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
     /**
      * Is the TpeImageWidget initialized?
      */
-    public boolean isImgInfoValid() {
+    boolean isImgInfoValid() {
         return _imgInfoValid;
     }
 
@@ -360,7 +345,7 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
     /**
      * Return true if there is valid image info, and try to update it if needed
      */
-    private boolean _checkImgInfo() {
+    private boolean _isImageValid() {
         if (!_imgInfoValid) {
             setBasePos(_imgInfo.getBasePos());
         }
@@ -388,7 +373,7 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
     /**
      * Convert the given user coordinates location to world coordinates.
      */
-    public WorldCoords userToWorldCoords(final double x, final double y) {
+    private WorldCoords userToWorldCoords(final double x, final double y) {
         final Point2D.Double p = new Point2D.Double(x, y);
         getCoordinateConverter().userToWorldCoords(p, false);
         return new WorldCoords(p.x, p.y, getCoordinateConverter().getEquinox());
@@ -397,7 +382,7 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
     /**
      * Convert the given world coordinate position to a user coordinates position.
      */
-    public Point2D.Double worldToUserCoords(final WorldCoords pos) {
+    private Point2D.Double worldToUserCoords(final WorldCoords pos) {
         final double[] raDec = pos.getRaDec(getCoordinateConverter().getEquinox());
         final Point2D.Double p = new Point2D.Double(raDec[0], raDec[1]);
         getCoordinateConverter().worldToUserCoords(p, false);
@@ -407,7 +392,7 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
     /**
      * Convert the given world coordinate position to screen coordinates.
      */
-    public Point2D.Double worldToScreenCoords(final WorldCoords pos) {
+    private Point2D.Double worldToScreenCoords(final WorldCoords pos) {
         final double[] raDec = pos.getRaDec(getCoordinateConverter().getEquinox());
         final Point2D.Double p = new Point2D.Double(raDec[0], raDec[1]);
         getCoordinateConverter().worldToScreenCoords(p, false);
@@ -418,7 +403,7 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
      * Convert an offset from the base position (in arcsec) to a screen coordinates location.
      */
     public Point2D.Double offsetToScreenCoords(final double xOff, final double yOff) {
-        if (!_checkImgInfo()) {
+        if (!_isImageValid()) {
             return null;
         }
 
@@ -432,8 +417,8 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
     /**
      * Convert the given screen coordinates to an offset from the base position (in arcsec).
      */
-    public double[] screenCoordsToOffset(final double x, final double y) {
-        if (!_checkImgInfo()) {
+    private double[] screenCoordsToOffset(final double x, final double y) {
+        if (!_isImageValid()) {
             return null;
         }
 
@@ -455,7 +440,7 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
     /**
      * Convert a TaggedPos to a screen coordinates.
      */
-    public Point2D.Double taggedPosToScreenCoords(final WatchablePos tp) {
+    Point2D.Double taggedPosToScreenCoords(final WatchablePos tp) {
         if (tp instanceof OffsetPosBase) {
             final double x = ((OffsetPosBase) tp).getXaxis();
             final double y = ((OffsetPosBase) tp).getYaxis();
@@ -476,8 +461,8 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
      * Rotate a point through the current position angle, relative to
      * the base position, correcting for sky rotation.
      */
-    public Point2D.Double skyRotate(final double x, final double y) {
-        if (!_checkImgInfo()) {
+    private Point2D.Double skyRotate(final double x, final double y) {
+        if (!_isImageValid()) {
             return null;
         }
 
@@ -494,7 +479,7 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
      * the base position, correcting for sky rotation.
      */
     public void skyRotate(final PolygonD p) {
-        if (!_checkImgInfo()) {
+        if (!_isImageValid()) {
             return;
         }
 
@@ -507,39 +492,32 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
     }
 
 
-    protected void _initMouseEvent(final MouseEvent evt, final TpeMouseEvent tme) {
-        if (!_checkImgInfo()) return;
+    private TpeMouseEvent _initMouseEvent(final MouseEvent evt) {
+        if (_isImageValid()) {
+            final Point2D.Double mp = new Point2D.Double(evt.getX(), evt.getY());
 
-        final Point2D.Double mp = new Point2D.Double(evt.getX(), evt.getY());
+            // snap to catalog symbol position, if user clicked on one
+            final Point2D.Double p = new Point2D.Double(mp.x, mp.y);
+            getCoordinateConverter().screenToUserCoords(p, false);
+            final double[] d = screenCoordsToOffset(mp.x, mp.y);
 
-        // snap to catalog symbol position, if user clicked on one
-        final Point2D.Double p = new Point2D.Double(mp.x, mp.y);
-        getCoordinateConverter().screenToUserCoords(p, false);
-        if (evt.getID() == MouseEvent.MOUSE_CLICKED) {
-            Option<SiderealTarget> skyObject = getCatalogPosition(mp);
-            skyObject.forEach(s -> {
-                final Coordinates coords = s.coordinates();
-                tme.pos = new WorldCoords(coords.ra().toDegrees(), coords.dec().toDegrees());
-                tme.name = s.name();
-            });
-            tme.setSkyObject(skyObject);
-            if (!skyObject.isDefined()) {
-                tme.pos = userToWorldCoords(p.x, p.y);
+            if (evt.getID() == MouseEvent.MOUSE_CLICKED) {
+                final Option<SiderealTarget> skyObject = getCatalogPosition(mp);
+                final String name = skyObject.map(SiderealTarget::name).getOrNull();
+                if (!skyObject.isDefined()) {
+                    Coordinates pos = CoordinatesUtilities.userToWorldCoords(getCoordinateConverter(), p.x, p.y);
+                    return new TpeMouseEvent(evt, evt.getID(), this, pos, name, (int) Math.round(mp.x), (int) Math.round(mp.y), skyObject, d[0], d[1]);
+                } else {
+                    Coordinates pos = skyObject.map(SiderealTarget::coordinates).getOrElse(Coordinates.zero());
+                    return new TpeMouseEvent(evt, evt.getID(), this, pos, name, (int) Math.round(mp.x), (int) Math.round(mp.y), skyObject, d[0], d[1]);
+                }
+            } else {
+                Coordinates pos = CoordinatesUtilities.userToWorldCoords(getCoordinateConverter(), p.x, p.y);
+                return new TpeMouseEvent(evt, evt.getID(), this, pos, "", (int) Math.round(mp.x), (int) Math.round(mp.y), None.instance(), d[0], d[1]);
             }
         } else {
-            tme.pos = userToWorldCoords(p.x, p.y);
+            return new TpeMouseEvent(evt);
         }
-
-        tme.id = evt.getID();
-        tme.source = this;
-        tme.xView = p.x;
-        tme.yView = p.y;
-        tme.xWidget = (int) Math.round(mp.x);
-        tme.yWidget = (int) Math.round(mp.y);
-
-        final double[] d = screenCoordsToOffset(mp.x, mp.y);
-        tme.xOffset = d[0];
-        tme.yOffset = d[1];
     }
 
     /**
@@ -654,7 +632,7 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
     /**
      * Add the given image feature to the list.
      */
-    public void addFeature(final TpeImageFeature tif) {
+    void addFeature(final TpeImageFeature tif) {
         if (featureAdded(tif)) {
             return;
         }
@@ -669,14 +647,14 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
     /**
      * Return true if the given image feature has been added already.
      */
-    public final boolean featureAdded(final TpeImageFeature tif) {
+    private boolean featureAdded(final TpeImageFeature tif) {
         return _featureList.contains(tif);
     }
 
     /**
      * Delete the given image feature from the list.
      */
-    public void deleteFeature(final TpeImageFeature tif) {
+    void deleteFeature(final TpeImageFeature tif) {
         if (!featureAdded(tif)) {
             return;
         }
@@ -802,7 +780,7 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
     /**
      * The Base position has been updated.
      */
-    public void basePosUpdate(final SPTarget target) {
+    private void basePosUpdate(final SPTarget target) {
         final Option<Long> when = _ctx.schedulingBlockStartJava();
         final double x = target.getRaDegrees(when).getOrElse(0.0);
         final double y = target.getDecDegrees(when).getOrElse(0.0);
@@ -900,7 +878,7 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
     /**
      * Set the base position to the given coordinates (overrides parent class version).
      */
-    public boolean setBasePos(final WorldCoords pos) {
+    private boolean setBasePos(final WorldCoords pos) {
         _basePos = pos;
 
         final CoordinateConverter cc = getCoordinateConverter();
@@ -1020,7 +998,7 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
         }
     }
 
-    public void openCatalogNavigator() {
+    private void openCatalogNavigator() {
         QueryResultsFrame.instance().showOn(this, _ctx);
     }
 
@@ -1041,17 +1019,8 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
     /**
      * Return the action that displays the guide star dialog
      */
-    public AbstractAction getManualGuideStarAction() {
+    AbstractAction getManualGuideStarAction() {
         return _manualGuideStarAction;
-    }
-
-    // Called from GemsGuideStarWorker when finished
-    void setGemsGuideStarWorkerFinished() {
-        _gemsGuideStarWorker = null;
-    }
-
-    public AbstractAction getSkyImageAction() {
-        return _skyImageAction;
     }
 
     @Override

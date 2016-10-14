@@ -1,18 +1,17 @@
 package edu.gemini.catalog.ui.tpe
 
-import edu.gemini.catalog.image.ImageCatalog
 import jsky.catalog.TableQueryResult
-import jsky.catalog.gui.{TablePlotter, BasicTablePlotter}
+import jsky.catalog.gui.{BasicTablePlotter, TablePlotter}
 import jsky.coords.WorldCoords
 import jsky.image.fits.gui.FITSKeywordsFrame
 import jsky.image.gui.ImageDisplayMenuBar
 import jsky.image.gui.ImageDisplayToolBar
 import jsky.image.gui.DivaMainImageDisplay
 import jsky.navigator._
-import jsky.util.gui.{ProxyServerDialog, DialogUtil}
+import jsky.util.gui.{DialogUtil, ProxyServerDialog}
 import javax.swing._
 import java.awt._
-import java.awt.event.{ActionListener, ActionEvent}
+import java.awt.event.{ActionEvent, ActionListener}
 import java.awt.geom.AffineTransform
 
 import scalaz._
@@ -39,7 +38,7 @@ trait CatalogDisplay {
   * browsing catalogs and plotting catalog symbols on the image.
   */
 abstract class CatalogImageDisplay(parent: Component, navigatorPane: NavigatorPane) extends DivaMainImageDisplay(navigatorPane, parent) with CatalogDisplay {
-  val plotter = new BasicTablePlotter(getCanvasGraphics, getCoordinateConverter) <| {navigatorPane.setPlotter}
+  override val plotter: TablePlotter = new BasicTablePlotter(getCanvasGraphics, getCoordinateConverter) <| {navigatorPane.setPlotter}
 
   /**
     * Load the sky image for the current location
@@ -78,8 +77,6 @@ abstract class CatalogImageDisplay(parent: Component, navigatorPane: NavigatorPa
           setSaveNeeded(true)
           checkExtensions(true)
           plotter.unplot(table)
-          // TODO Should the table be displaye?
-          //setQueryResult(newTable.getCatalog)
         }
       } catch {
         case e: Exception =>
@@ -132,9 +129,8 @@ class CatalogImageDisplayMenuBar(protected val imageDisplay: CatalogImageDisplay
   /** Handle for the Help menu */
   private val _helpMenu = new JMenu("Help")
 
-  val pickObjectMenuItem = getPickObjectMenuItem
+  private val pickObjectMenuItem = getPickObjectMenuItem
   getViewMenu.remove(pickObjectMenuItem)
-  _catalogMenu.add(imageServersMenu)
   _catalogMenu.add(proxySettingsMenuItem)
   _catalogMenu.add(pickObjectMenuItem)
   add(_catalogMenu)
@@ -144,31 +140,6 @@ class CatalogImageDisplayMenuBar(protected val imageDisplay: CatalogImageDisplay
 
   /** Return the handle for the Help menu */
   override def getHelpMenu: JMenu = _helpMenu
-
-  /**
-    * Create and return a submenu listing catalogs of the given type.
-    *
-    * @return the ne or updated menu
-    */
-  private def imageServersMenu: JMenu =
-    ImageCatalog.all.foldLeft((new JMenu("Image Servers"), new ButtonGroup)) { case ((m, b), c) =>
-      imageServersMenuItem(c) <| {m.add} <| {b.add} <| {_.setSelected(c == ImageCatalog.user)}
-      (m, b)
-    }._1
-
-  /**
-    * Create a menu item for accessing a specific catalog.
-    */
-  private def imageServersMenuItem(cat: ImageCatalog): JMenuItem = {
-    val menuItem = new JRadioButtonMenuItem(cat.displayName) <| {_.addActionListener(new ActionListener() {
-        override def actionPerformed(e: ActionEvent): Unit = {
-          // First save the preference, then load the image
-          ImageCatalog.user(cat)
-          imageDisplay.loadSkyImage()
-        }
-      })}
-    menuItem
-  }
 
   /**
     * Create the Catalog => "Proxy Settings..." menu item

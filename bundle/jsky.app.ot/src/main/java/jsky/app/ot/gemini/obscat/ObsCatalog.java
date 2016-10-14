@@ -72,7 +72,6 @@ public final class ObsCatalog extends SkycatCatalog {
         return _configEntry;
     }
 
-
     // Return an array describing the query parameters for this catalog
     private static FieldDescAdapter[] newParamDesc() {
         final Collection<FieldDescAdapter> params = new ArrayList<>();

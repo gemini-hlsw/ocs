@@ -10,20 +10,18 @@ import edu.gemini.util.osgi.ExternalStorage
 import edu.gemini.util.security.auth.keychain.KeyChain
 import edu.gemini.util.security.auth.keychain.Action._
 import edu.gemini.util.security.auth.ui.PasswordDialog
-
 import jsky.app.ot.OT
 import jsky.app.ot.gemini.obscat.OTBrowserPresetsPersistence
 import jsky.app.ot.plugin.{OtActionPlugin, OtViewerService}
 import jsky.app.ot.vcs.VcsOtClient
 import jsky.app.ot.viewer.ViewerService
-
-import org.osgi.framework.{ServiceRegistration, BundleContext, BundleActivator}
+import org.osgi.framework.{BundleActivator, BundleContext, ServiceRegistration}
 import org.osgi.util.tracker.ServiceTracker
-
 import jsky.app.ot.viewer.plugin.PluginRegistry
-
 import java.util.logging.Logger
 import javax.swing.{JOptionPane, SwingUtilities}
+
+import edu.gemini.catalog.image.ImageCacheWatcher
 
 import scala.swing.Swing
 
@@ -42,6 +40,8 @@ class Activator extends BundleActivator {
 
       SwingUtilities.invokeLater(new Runnable {
         def run() {
+          // Initialize the image cache
+          ImageCacheWatcher.run()
 
           // Prompt for password
           if (auth.isLocked.unsafeRunAndThrow) {
@@ -65,7 +65,6 @@ class Activator extends BundleActivator {
 
       ViewerService.instance = Some(new ViewerService(odb, reg))
       ctx.registerService(classOf[OtViewerService], ViewerService.instance.get, new java.util.Hashtable[String, Any])
-
     } { viewerReg =>
       viewerReg.unregister()
       SPDB.clear()

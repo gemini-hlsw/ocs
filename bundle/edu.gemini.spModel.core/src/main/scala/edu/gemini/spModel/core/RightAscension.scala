@@ -5,8 +5,8 @@ import scalaz._, Scalaz._
 /** Newtype for `Angle`, tagging it as a right ascension. */
 sealed trait RightAscension extends java.io.Serializable {
 
-  /** 
-   * This `RightAscension` as an untagged `Angle`. 
+  /**
+   * This `RightAscension` as an untagged `Angle`.
    * @group Conversions
    */
   def toAngle: Angle
@@ -25,7 +25,7 @@ sealed trait RightAscension extends java.io.Serializable {
     RightAscension.fromAngle(toAngle + a)
 
   /** @group Overrides */
-  override final def toString = 
+  override final def toString =
     f"RA($toAngle)"
 
   /** @group Overrides */
@@ -43,7 +43,7 @@ sealed trait RightAscension extends java.io.Serializable {
 
 object RightAscension {
 
-  /** 
+  /**
    * Construct a `RightAscension` from an `Angle`.
    * @group Constructors
    */
@@ -66,11 +66,11 @@ object RightAscension {
   def fromHours(h: Double): RightAscension =
     fromAngle(Angle.fromHours(h))
 
-  /** 
+  /**
    * The `RightAscension` at zero degrees.
    * @group Constructors
    */
-  val zero: RightAscension = 
+  val zero: RightAscension =
     fromAngle(Angle.zero)
 
   /** @group Typeclass Instances */
@@ -82,7 +82,3 @@ object RightAscension {
     scala.Ordering.by(_.toAngle)
 
 }
-
-
-
-

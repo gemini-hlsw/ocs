@@ -20,7 +20,7 @@ public class TpeImageDisplayFrame extends ImageDisplayControlFrame {
      *
      * @param fileOrUrl The file name or URL of an image to display.
      */
-    public TpeImageDisplayFrame(String fileOrUrl) {
+    TpeImageDisplayFrame(String fileOrUrl) {
         super(fileOrUrl);
     }
 
@@ -42,24 +42,19 @@ public class TpeImageDisplayFrame extends ImageDisplayControlFrame {
 
     /** Make and return the toolbar */
     @Override
-    protected ImageDisplayToolBar makeToolBar(DivaMainImageDisplay mainImageDisplay) {
-        // add the Tpe tool bar while we are at it...
-        addTpeToolBar();
+    protected ImageDisplayToolBar makeToolBar(TpeImageWidget mainImageDisplay) {
+        // add the Tpe side bar while we are at it...
+        tpeToolBar = new TpeToolBar(mainImageDisplay);
+        getContentPane().add(tpeToolBar, BorderLayout.WEST);
 
         // Dragging can cause problems with two tool bars...
-        ImageDisplayToolBar toolBar = new TpeImageDisplayToolBar((TpeImageWidget)mainImageDisplay);
+        ImageDisplayToolBar toolBar = new TpeImageDisplayToolBar(mainImageDisplay);
         toolBar.setFloatable(false);
         return toolBar;
     }
 
-    /** Add a tool bar for OT/TPE specific operations. */
-    protected void addTpeToolBar() {
-        tpeToolBar = new TpeToolBar();
-        getContentPane().add(tpeToolBar, BorderLayout.WEST);
-    }
-
     /** Return the Tool bar with OT/TPE specific commands */
-    protected TpeToolBar getTpeToolBar() {
+    TpeToolBar getTpeToolBar() {
         return tpeToolBar;
     }
 

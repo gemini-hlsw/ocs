@@ -23,116 +23,112 @@ import edu.gemini.util.security.auth.keychain.KeyChain;
 
 public abstract class AbstractOpenAction extends AbstractAsyncAction {
 
-	private static final Logger LOGGER = Logger.getLogger(AbstractOpenAction.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(AbstractOpenAction.class.getName());
 
-	private final IShell shell;
+    private final IShell shell;
     protected final KeyChain authClient;
     protected final AgsMagnitude.MagnitudeTable magTable;
 
-	protected AbstractOpenAction(String title, IShell shell, KeyChain authClient, AgsMagnitude.MagnitudeTable magTable) {
-		super(title, authClient);
-		this.shell = shell;
+    protected AbstractOpenAction(String title, IShell shell, KeyChain authClient, AgsMagnitude.MagnitudeTable magTable) {
+        super(title, authClient);
+        this.shell = shell;
         this.authClient = authClient;
         this.magTable = magTable;
-        authClient.asJava().addListener(new Runnable() {
-            public void run() {
-                updateEnabled();
-            }
-        });
+        authClient.asJava().addListener(this::updateEnabled);
     }
 
-	protected IShell getShell() {
-		return shell;
-	}
+    protected IShell getShell() {
+        return shell;
+    }
 
-	protected Schedule open() {
+    protected Schedule open() {
 
-		JFileChooser chooser = new JFileChooser(DefaultDirectory.get());
-		chooser.setFileFilter(new javax.swing.filechooser.FileFilter() {
+        JFileChooser chooser = new JFileChooser(DefaultDirectory.get());
+        chooser.setFileFilter(new javax.swing.filechooser.FileFilter() {
 
-			@Override
-			public String getDescription() {
-				return "QPT Files";
-			}
+            @Override
+            public String getDescription() {
+                return "QPT Files";
+            }
 
-			@Override
-			public boolean accept(File file) {
-				return file.getName().endsWith(".qpt") || file.isDirectory();
-			}
+            @Override
+            public boolean accept(File file) {
+                return file.getName().endsWith(".qpt") || file.isDirectory();
+            }
 
-		});
-		if (JFileChooser.APPROVE_OPTION == chooser.showOpenDialog(shell.getPeer())) {
+        });
+        if (JFileChooser.APPROVE_OPTION == chooser.showOpenDialog(shell.getPeer())) {
 
-			ProgressModel pm = new ProgressModel("Opening...", 0);
-			pm.setIndeterminate(true);
+            ProgressModel pm = new ProgressModel("Opening...", 0);
+            pm.setIndeterminate(true);
 
-			ProgressDialog pd = new ProgressDialog(shell.getPeer(), getName(), false, pm);
+            ProgressDialog pd = new ProgressDialog(shell.getPeer(), getName(), false, pm);
 
-			try {
+            try {
 
-				pd.setVisible(true);
+                pd.setVisible(true);
 
 
-				pm.setMessage("Querying Database...");
-				File file = chooser.getSelectedFile();
-				Schedule sched = null;
+                pm.setMessage("Querying Database...");
+                File file = chooser.getSelectedFile();
+                Schedule sched = null;
                 LttsServicesClient.clearInstance();
 
                 for (int i = 0; sched == null ; i++) {
-					try {
-						sched = ScheduleIO.read(file, 1000, authClient, magTable);
-					} catch (TimeoutException te) {
-						pm.setMessage("Retrying (" + i + ") ...");
-						if (pm.isCancelled())
-							throw te;
-					}
-				}
+                    try {
+                        sched = ScheduleIO.read(file, 1000, authClient, magTable);
+                    } catch (TimeoutException te) {
+                        pm.setMessage("Retrying (" + i + ") ...");
+                        if (pm.isCancelled())
+                            throw te;
+                    }
+                }
 
-				if (pm.isCancelled()) return null;
+                if (pm.isCancelled()) return null;
                 LttsServicesClient.getInstance().showStatus(shell.getPeer());
                 sched.setFile(file);
-				return sched;
+                return sched;
 
-			} catch (RemoteException re) {
+            } catch (RemoteException re) {
 
-				LOGGER.log(Level.SEVERE, "Remote Exception", re);
+                LOGGER.log(Level.SEVERE, "Remote Exception", re);
 
-				pd.setVisible(false);
-				JOptionPane.showMessageDialog(
-					shell.getPeer(),
-					"There was a problem communicating with the database, sorry.",
-					"Database Error",
-					JOptionPane.ERROR_MESSAGE);
+                pd.setVisible(false);
+                JOptionPane.showMessageDialog(
+                    shell.getPeer(),
+                    "There was a problem communicating with the database, sorry.",
+                    "Database Error",
+                    JOptionPane.ERROR_MESSAGE);
 
 
-			} catch (TimeoutException te) {
+            } catch (TimeoutException te) {
 
-				pd.setVisible(false);
-				JOptionPane.showMessageDialog(
+                pd.setVisible(false);
+                JOptionPane.showMessageDialog(
                         shell.getPeer(),
                         "The database is not available right now, but I will continue searching for it.\n" +
                                 "Try back in a few minutes.",
                         "Database Unavailable",
                         JOptionPane.ERROR_MESSAGE);
 
-			} catch (IOException ex) {
+            } catch (IOException ex) {
 
-				LOGGER.log(Level.SEVERE, "Trouble opening file.", ex);
-				pd.setVisible(false);
-				JOptionPane.showMessageDialog(shell.getPeer(),
-					"This schedule could not be opened. The error was:\n" + ex.getMessage(),
-					"Problem Opening Schedule", JOptionPane.ERROR_MESSAGE);
+                LOGGER.log(Level.SEVERE, "Trouble opening file.", ex);
+                pd.setVisible(false);
+                JOptionPane.showMessageDialog(shell.getPeer(),
+                    "This schedule could not be opened. The error was:\n" + ex.getMessage(),
+                    "Problem Opening Schedule", JOptionPane.ERROR_MESSAGE);
 
-			} finally {
-				pd.setVisible(false);
-				pd.dispose();
-			}
+            } finally {
+                pd.setVisible(false);
+                pd.dispose();
+            }
 
-		}
+        }
 
-		return null;
+        return null;
 
-	}
+    }
 
     protected void updateEnabled() {
         setEnabled(!authClient.asJava().isLocked());

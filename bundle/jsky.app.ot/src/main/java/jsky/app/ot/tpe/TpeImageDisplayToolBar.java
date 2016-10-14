@@ -7,16 +7,15 @@ import javax.swing.*;
 /**
  * A tool bar for the image display window.
  */
-public class TpeImageDisplayToolBar extends ImageDisplayToolBar {
+class TpeImageDisplayToolBar extends ImageDisplayToolBar {
 
     // toolbar buttons
-    private JButton skyImageButton;
     private JButton manualGuideStarButton;
 
     /**
      * Create the toolbar for the given window
      */
-    public TpeImageDisplayToolBar(TpeImageWidget imageDisplay) {
+    TpeImageDisplayToolBar(TpeImageWidget imageDisplay) {
         super(imageDisplay);
     }
 
@@ -30,10 +29,6 @@ public class TpeImageDisplayToolBar extends ImageDisplayToolBar {
 
         addSeparator();
 
-        add(makeImageButton());
-
-        addSeparator();
-
         add(makeManualGuideStarButton());
     }
 
@@ -43,7 +38,7 @@ public class TpeImageDisplayToolBar extends ImageDisplayToolBar {
      *
      * @return the guide star button
      */
-    protected JButton makeManualGuideStarButton() {
+    private JButton makeManualGuideStarButton() {
         if (manualGuideStarButton == null) {
             final AbstractAction a = ((TpeImageWidget)getImageDisplay()).getManualGuideStarAction();
             manualGuideStarButton = makeButton((String)a.getValue(Action.SHORT_DESCRIPTION), a);
@@ -56,30 +51,12 @@ public class TpeImageDisplayToolBar extends ImageDisplayToolBar {
     }
 
     /**
-     * Make the default Image search button, if it does not yet exists.
-     *
-     * @return the Image Search button
-     */
-    protected JButton makeImageButton() {
-        if (skyImageButton == null) {
-            final AbstractAction a = ((TpeImageWidget)getImageDisplay()).getSkyImageAction();
-            skyImageButton = makeButton((String)a.getValue(Action.SHORT_DESCRIPTION), a);
-        }
-
-        updateButton(skyImageButton,
-                     "Images",
-                     jsky.util.Resources.getIcon("sky.gif", this.getClass()));
-        return skyImageButton;
-    }
-
-    /**
      * Update the toolbar display using the current text/pictures options.
      * (redefined from the parent class).
      */
     public void update() {
         super.update();
         makeManualGuideStarButton();
-        makeImageButton();
     }
 
 }

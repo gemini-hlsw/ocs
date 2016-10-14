@@ -102,8 +102,8 @@ public class TpeTargetPosFeature extends TpePositionFeature
                 TargetObsComp obsComp = getTargetObsComp();
                 if (obsComp == null) return;
 
-                double ra  = tme.pos.getRaDeg();
-                double dec = tme.pos.getDecDeg();
+                double ra  = tme.pos.ra().toDegrees();
+                double dec = tme.pos.dec().toDegrees();
                 SPTarget userPos = new SPTarget(ra, dec);
 
                 TargetEnvironment env = obsComp.getTargetEnvironment();

@@ -1,14 +1,13 @@
 package edu.gemini.pot
 
 import edu.gemini.pot.ModelConverters._
-import edu.gemini.shared.skyobject
 import edu.gemini.skycalc
 import edu.gemini.spModel.core._
-import edu.gemini.spModel.target.SPTarget
 import org.specs2.ScalaCheck
 import org.scalacheck.Prop._
 import org.specs2.mutable.Specification
 import AlmostEqual.AlmostEqualOps
+import jsky.coords.WorldCoords
 
 import scalaz._
 import Scalaz._
@@ -31,6 +30,14 @@ class ModelConversionsSpec extends Specification with ScalaCheck with Arbitrarie
         val ra = skycalc.Angle.degrees(c.ra.toAngle.toDegrees)
         val dec = skycalc.Angle.degrees(c.dec.toAngle.toDegrees)
         val oldCoordinates = new skycalc.Coordinates(ra, dec)
+        oldCoordinates.toNewModel ~= c
+      }
+    }
+    "convert WorldCoords to new" in {
+      forAll { (c: Coordinates) =>
+        val ra = c.ra.toAngle.toDegrees
+        val dec = c.dec.toAngle.toDegrees
+        val oldCoordinates = new WorldCoords(ra, dec, 2000)
         oldCoordinates.toNewModel ~= c
       }
     }

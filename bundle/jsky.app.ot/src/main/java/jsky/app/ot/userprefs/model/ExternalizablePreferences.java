@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package jsky.app.ot.userprefs.model;
 
 import edu.gemini.shared.util.immutable.Option;

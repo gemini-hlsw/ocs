@@ -1,20 +1,8 @@
-/*
- * Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: ImageGraphicsMenu.java 6013 2005-05-02 20:55:16Z brighton $
- */
-
 package jsky.image.graphics.gui;
 
-
 import java.awt.BorderLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 import jsky.image.ImageChangeEvent;
 import jsky.image.gui.DivaMainImageDisplay;
@@ -31,17 +19,17 @@ import jsky.util.gui.BasicWindowMonitor;
  */
 public class ImageGraphicsMenu extends JMenu {
 
-    // Used to access internationalized strings (see i18n/gui*.proprties)
+    // Used to access internationalized strings (see i18n/gui*.properties)
     private static final I18N _I18N = I18N.getInstance(ImageGraphicsMenu.class);
 
     /** Object managing the drawing */
-    protected CanvasDraw canvasDraw;
+    private CanvasDraw canvasDraw;
 
     /** Array of menu items. */
-    protected JRadioButtonMenuItem[] drawingModeMenuItems = new JRadioButtonMenuItem[CanvasDraw.NUM_DRAWING_MODES];
+    private JRadioButtonMenuItem[] drawingModeMenuItems = new JRadioButtonMenuItem[CanvasDraw.NUM_DRAWING_MODES];
 
     /** "Save Graphics With Image" Menu item */
-    protected JMenuItem saveGraphicsMenuItem;
+    private JMenuItem saveGraphicsMenuItem;
 
 
     /** Create a menu with graphics related items */
@@ -63,26 +51,23 @@ public class ImageGraphicsMenu extends JMenu {
         add(saveGraphicsMenuItem = createSaveGraphicsWithImageMenuItem());
 
         // register to receive notification when the image changes, to enable/disable some menu items
-        canvasDraw.getImageDisplay().addChangeListener(new ChangeListener() {
-
-            public void stateChanged(ChangeEvent ce) {
-                ImageChangeEvent e = (ImageChangeEvent) ce;
-                if (e.isNewImage() && !e.isBefore())
-                    updateStates();
-            }
+        canvasDraw.getImageDisplay().addChangeListener(ce -> {
+            ImageChangeEvent e = (ImageChangeEvent) ce;
+            if (e.isNewImage() && !e.isBefore())
+                updateStates();
         });
         updateStates();
     }
 
 
     /** Update the enabled states of some menu items */
-    protected void updateStates() {
+    private void updateStates() {
         saveGraphicsMenuItem.setEnabled(canvasDraw.getImageDisplay().getFitsImage() != null);
     }
 
 
     /** Create the "Drawing Mode" menu */
-    protected JMenu createDrawingModeMenu() {
+    private JMenu createDrawingModeMenu() {
         JMenu menu = new JMenu(_I18N.getString("drawingMode"));
         ButtonGroup group = new ButtonGroup();
 
@@ -92,21 +77,18 @@ public class ImageGraphicsMenu extends JMenu {
         drawingModeMenuItems[0].setSelected(true);
 
         // arrange to select the menu item when the mode is changed
-        canvasDraw.addChangeListener(new ChangeListener() {
-
-            public void stateChanged(ChangeEvent e) {
-                int drawingMode = canvasDraw.getDrawingMode();
-                if (!drawingModeMenuItems[drawingMode].isSelected())
-                    drawingModeMenuItems[drawingMode].setSelected(true);
-            }
+        canvasDraw.addChangeListener(e -> {
+            int drawingMode = canvasDraw.getDrawingMode();
+            if (!drawingModeMenuItems[drawingMode].isSelected())
+                drawingModeMenuItems[drawingMode].setSelected(true);
         });
 
         return menu;
     }
 
     /** Create the menu item for the given mode */
-    protected void createDrawingModeMenuItem(int drawingMode, JMenu menu,
-                                             ButtonGroup group) {
+    private void createDrawingModeMenuItem(int drawingMode, JMenu menu,
+                                           ButtonGroup group) {
         AbstractAction a = canvasDraw.getDrawingModeAction(drawingMode);
         JRadioButtonMenuItem menuItem = new JRadioButtonMenuItem(a);
         menu.add(menuItem);
@@ -116,7 +98,7 @@ public class ImageGraphicsMenu extends JMenu {
 
 
     /** Create the "Line Width" menu */
-    protected JMenu createLineWidthMenu() {
+    private JMenu createLineWidthMenu() {
         JMenu menu = new JMenu(_I18N.getString("lineWidth"));
         ButtonGroup group = new ButtonGroup();
         int n = CanvasDraw.NUM_LINE_WIDTHS;
@@ -130,7 +112,7 @@ public class ImageGraphicsMenu extends JMenu {
     }
 
     /** Create the "Outline" menu */
-    protected JMenu createOutlineMenu() {
+    private JMenu createOutlineMenu() {
         JMenu menu = new JMenu(_I18N.getString("outline"));
         ButtonGroup group = new ButtonGroup();
         int n = CanvasDraw.NUM_COLORS;
@@ -144,7 +126,7 @@ public class ImageGraphicsMenu extends JMenu {
     }
 
     /** Create the "Fill" menu */
-    protected JMenu createFillMenu() {
+    private JMenu createFillMenu() {
         JMenu menu = new JMenu(_I18N.getString("fill"));
         ButtonGroup group = new ButtonGroup();
         int n = CanvasDraw.NUM_COLORS;
@@ -158,7 +140,7 @@ public class ImageGraphicsMenu extends JMenu {
     }
 
     /** Create the "Composite" menu */
-    protected JMenu createCompositeMenu() {
+    private JMenu createCompositeMenu() {
         JMenu menu = new JMenu(_I18N.getString("composite"));
         ButtonGroup group = new ButtonGroup();
         int n = CanvasDraw.NUM_COMPOSITES;
@@ -171,7 +153,7 @@ public class ImageGraphicsMenu extends JMenu {
     }
 
     /** Create the "Font" menu */
-    protected JMenu createFontMenu() {
+    private JMenu createFontMenu() {
         JMenu menu = new JMenu(_I18N.getString("font"));
         ButtonGroup group = new ButtonGroup();
         int n = CanvasDraw.NUM_FONTS;
@@ -185,14 +167,9 @@ public class ImageGraphicsMenu extends JMenu {
     }
 
     /** Create and return the "Save Graphics With Image" menu item. */
-    protected JMenuItem createSaveGraphicsWithImageMenuItem() {
+    private JMenuItem createSaveGraphicsWithImageMenuItem() {
         JMenuItem menuItem = new JMenuItem(_I18N.getString("saveGraphicsWithImage"));
-        menuItem.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent ae) {
-                canvasDraw.imageDisplay.saveGraphicsWithImage();
-            }
-        });
+        menuItem.addActionListener(ae -> canvasDraw.imageDisplay.saveGraphicsWithImage());
         return menuItem;
     }
 
@@ -205,7 +182,7 @@ public class ImageGraphicsMenu extends JMenu {
         DivaMainImageDisplay imageDisplay = new DivaMainImageDisplay();
         if (args.length > 0) {
             try {
-                imageDisplay.setFilename(args[0]);
+                imageDisplay.setFilename(args[0], true);
             } catch (Exception e) {
                 System.out.println("error: " + e.toString());
                 System.exit(1);

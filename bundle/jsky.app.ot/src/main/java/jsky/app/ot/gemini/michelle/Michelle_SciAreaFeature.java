@@ -1,16 +1,11 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: Michelle_SciAreaFeature.java 46768 2012-07-16 18:58:53Z rnorris $
-//
-
 package jsky.app.ot.gemini.michelle;
 
 import diva.util.java2d.Polygon2D;
+import edu.gemini.pot.ModelConverters;
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.shared.util.immutable.Some;
+import edu.gemini.spModel.core.Coordinates;
 import edu.gemini.spModel.gemini.michelle.InstMichelle;
 import edu.gemini.spModel.gemini.michelle.MichelleParams;
 import edu.gemini.spModel.util.Angle;
@@ -25,8 +20,6 @@ import jsky.util.gui.DrawUtil;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
-
-
 
 /**
  * Draws the Science Area, the detector or slit.
@@ -46,7 +39,7 @@ public class Michelle_SciAreaFeature extends SciAreaFeatureBase {
                               0.0F);
 
     // The color to use to draw the chop beams
-    protected static final Color CHOP_BEAM_COLOR = FOV_COLOR.darker();
+    private static final Color CHOP_BEAM_COLOR = FOV_COLOR.darker();
 
     // Used to translate the chop slit figures to the correct location
     private AffineTransform _chopTrans1 = new AffineTransform();
@@ -117,7 +110,7 @@ public class Michelle_SciAreaFeature extends SciAreaFeatureBase {
     /**
      * Update the figures to draw.
      */
-    protected void _updateFigures() {
+    private void _updateFigures() {
         if (SciAreaFeature.getDisplayChopBeams()) {
             _addChopBeams();
         }
@@ -304,7 +297,7 @@ public class Michelle_SciAreaFeature extends SciAreaFeatureBase {
             inst.setChopAngleRadians(_tii.positionAngle(tme).toRadians());
 
             // get distance between base position and the mouse position in arcsec
-            double dist = _basePos.dist(tme.pos) * 60;
+            double dist = Coordinates.difference(ModelConverters.toCoordinates(_basePos), tme.pos).distance().toArcsecs();
             inst.setChopThrow(Math.round(dist));
 
             _iw.repaint();

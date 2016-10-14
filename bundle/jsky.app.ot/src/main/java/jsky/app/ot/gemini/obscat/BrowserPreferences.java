@@ -16,9 +16,9 @@ public final class BrowserPreferences implements ExternalizablePreferences {
     public static class Builder {
         private boolean showObsoleteOptions = true;
 
-        public Builder() { /* empty */ }
+        Builder() { /* empty */ }
 
-        public Builder showObsoleteOptions(boolean val) {
+        Builder showObsoleteOptions(boolean val) {
             showObsoleteOptions = val;
             return this;
         }
@@ -34,6 +34,7 @@ public final class BrowserPreferences implements ExternalizablePreferences {
             return (new Builder()).build();
         }
 
+        @Override
         public BrowserPreferences create(Option<ParamSet> psetOpt) {
             if (None.instance().equals(psetOpt)) return createDefault();
 
@@ -53,7 +54,7 @@ public final class BrowserPreferences implements ExternalizablePreferences {
         this.showObsoleteOptions = builder.showObsoleteOptions;
     }
 
-    public boolean showObsoleteOptions() { return showObsoleteOptions; }
+    boolean showObsoleteOptions() { return showObsoleteOptions; }
 
     private Builder getBuilder() {
         final Builder b = new Builder();
@@ -61,7 +62,7 @@ public final class BrowserPreferences implements ExternalizablePreferences {
         return b;
     }
 
-    public BrowserPreferences withShowObsoleteOptions(boolean val) {
+    BrowserPreferences withShowObsoleteOptions(boolean val) {
         return getBuilder().showObsoleteOptions(val).build();
     }
 
@@ -69,6 +70,7 @@ public final class BrowserPreferences implements ExternalizablePreferences {
         store(this);
     }
 
+    @Override
     public ParamSet toParamSet(PioFactory factory) {
         final ParamSet res = factory.createParamSet(BROWSER_PREFS);
         Pio.addBooleanParam(factory, res, OBSOLETE_OPTION_PARAM, showObsoleteOptions);

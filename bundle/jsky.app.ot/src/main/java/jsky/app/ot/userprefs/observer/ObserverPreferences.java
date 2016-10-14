@@ -51,6 +51,7 @@ public final class ObserverPreferences implements ExternalizablePreferences {
             return (s == null) ? null : Site.tryParse(s);
         }
 
+        @Override
         public ObserverPreferences create(Option<ParamSet> psetOpt) {
             if (None.instance().equals(psetOpt)) return createDefault();
 
@@ -113,6 +114,7 @@ public final class ObserverPreferences implements ExternalizablePreferences {
         return store(this);
     }
 
+    @Override
     public ParamSet toParamSet(PioFactory factory) {
         ParamSet res = factory.createParamSet(PSET_NAME);
         Pio.addParam(factory, res, OBSERVING_SITE_PARAM, (observingSite == null) ? "" : observingSite.name());

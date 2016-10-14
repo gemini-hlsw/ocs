@@ -2,7 +2,7 @@ package jsky.app.ot.testlauncher
 
 import edu.gemini.ags.conf.ProbeLimitsTable
 import edu.gemini.qv.plugin.{QvTool, ShowQvToolAction}
-import edu.gemini.sp.vcs2.{VcsServer, Vcs}
+import edu.gemini.sp.vcs2.{Vcs, VcsServer}
 import jsky.app.ot.gemini.obscat.OTBrowserPresetsPersistence
 import jsky.app.ot.vcs.VcsOtClient
 import jsky.app.ot.viewer.plugin.PluginRegistry
@@ -12,6 +12,8 @@ import edu.gemini.pot.spdb.DBLocalDatabase
 import edu.gemini.util.trpc.auth.TrpcKeyChain
 import edu.gemini.util.security.auth.keychain.Action._
 import java.io.File
+
+import edu.gemini.catalog.image.ImageCacheWatcher
 import edu.gemini.sp.vcs.reg.impl.VcsRegistrarImpl
 import edu.gemini.pot.client.SPDB
 import jsky.catalog.skycat.SkycatConfigFile
@@ -19,7 +21,7 @@ import jsky.app.ot.OT
 import jsky.app.ot.viewer.ViewerService
 import jsky.app.ot.visitlog.ShowVisitLogAction
 import edu.gemini.spModel.core._
-import edu.gemini.util.security.auth.ui.{PasswordDialog, AuthDialog}
+import edu.gemini.util.security.auth.ui.{AuthDialog, PasswordDialog}
 
 object TestLauncher extends App {
 
@@ -29,6 +31,9 @@ object TestLauncher extends App {
   val keys  = TrpcKeyChain(new File(dir, "keys.ser"), peers).unsafeRunAndThrow
   val reg   = new VcsRegistrarImpl(new File(dir, "vcs-reg.xml"))
   val odb   = DBLocalDatabase.create(new File(dir, "spdb")) <| SPDB.init
+
+  // Initialize the image cache
+  ImageCacheWatcher.run()
 
   // Irritation, then open the OT
   AuthDialog.showDatabaseTab = true

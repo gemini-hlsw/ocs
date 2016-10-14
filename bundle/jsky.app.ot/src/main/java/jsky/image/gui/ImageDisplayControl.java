@@ -7,6 +7,7 @@ import javax.swing.*;
 import javax.swing.border.LineBorder;
 import javax.swing.plaf.basic.BasicArrowButton;
 
+import jsky.app.ot.tpe.TpeImageWidget;
 import jsky.util.I18N;
 
 /**
@@ -24,29 +25,28 @@ public class ImageDisplayControl extends JPanel {
     protected Component parent;
 
     /** Pan window */
-    protected ImagePanner imagePanner;
+    private ImagePanner imagePanner;
 
     /** Panel containing the pan and zoom windows */
-    protected JPanel panZoomPanel;
+    private JPanel panZoomPanel;
 
     /** Zoom window */
-    protected ImageZoom imageZoom;
+    private ImageZoom imageZoom;
 
     /** Main image display */
-    protected DivaMainImageDisplay imageDisplay;
+    protected TpeImageWidget imageDisplay;
 
     /** Color bar */
-    protected ImageColorbar colorbar;
+    private ImageColorbar colorbar;
 
     /** Panel displaying information about the current mouse position */
-    protected ImageDisplayStatusPanel imageDisplayStatusPanel;
+    private ImageDisplayStatusPanel imageDisplayStatusPanel;
 
     /** Optional filename to load image from. */
-    protected String filename = "";	// name of image file, if known
+    protected String filename; // name of image file, if known
 
     /** Used to toggle the visibility of the pan/zoom windows */
-    protected BasicArrowButton panZoomToggleButton;
-
+    private BasicArrowButton panZoomToggleButton;
 
     /**
      * Construct an ImageDisplayControl widget.
@@ -61,7 +61,6 @@ public class ImageDisplayControl extends JPanel {
 
         imageDisplay = makeImageDisplay();
         imagePanner = makePanWindow(size);
-        //imageDisplayPanel = makeImagePanel();
         imageZoom = makeZoomWindow(size);
         panZoomToggleButton = makePanZoomToggleButton();
 
@@ -81,47 +80,12 @@ public class ImageDisplayControl extends JPanel {
         imageDisplayStatusPanel.setImageDisplay(imageDisplay);
 
         makeLayout(size);
-    }
-
-    /**
-     * Make an ImageDisplayControl widget with the default settings
-     *
-     * @param parent The top level parent frame (or internal frame) used to close the window
-     *
-     */
-    public ImageDisplayControl(Component parent) {
-        this(parent, ImagePanner.DEFAULT_SIZE);
-    }
-
-
-    /**
-     * Make an ImageDisplayControl widget with the default settings and display the contents
-     * of the image file pointed to by the URL.
-     *
-     * @param parent The top level parent frame (or internal frame) used to close the window
-     * @param url The URL for the image to load
-     */
-    public ImageDisplayControl(Component parent, URL url) {
-        this(parent);
-        imageDisplay.setURL(url);
-    }
-
-
-    /**
-     * Make an ImageDisplayControl widget with the default settings and display the contents
-     * of the image file.
-     *
-     * @param parent The top level parent frame (or internal frame) used to close the window
-     * @param filename The image file to load
-     */
-    public ImageDisplayControl(Component parent, String filename) {
-        this(parent);
-        imageDisplay.setFilename(filename);
+        filename = "";
     }
 
     /** Make and return the image display window */
-    protected DivaMainImageDisplay makeImageDisplay() {
-        return new DivaMainImageDisplay(parent);
+    protected TpeImageWidget makeImageDisplay() {
+        return (TpeImageWidget)new DivaMainImageDisplay(parent);
     }
 
     /**
@@ -129,7 +93,7 @@ public class ImageDisplayControl extends JPanel {
      *
      * @param size the size (width, height) to use for the pan window.
      */
-    protected ImagePanner makePanWindow(int size) {
+    private ImagePanner makePanWindow(int size) {
         return new ImagePanner(imageDisplay, size, size);
     }
 
@@ -138,7 +102,7 @@ public class ImageDisplayControl extends JPanel {
      *
      * @param size the size (width, height) to use for the zoom window.
      */
-    protected ImageZoom makeZoomWindow(int size) {
+    private ImageZoom makeZoomWindow(int size) {
         return new ImageZoom(imageDisplay, size, size, 4.0F);
     }
 
@@ -146,7 +110,7 @@ public class ImageDisplayControl extends JPanel {
     /**
      * Make and return a button for showing and hiding the pan/zoom panel
      */
-    protected BasicArrowButton makePanZoomToggleButton() {
+    private BasicArrowButton makePanZoomToggleButton() {
         final BasicArrowButton b = new BasicArrowButton(SwingConstants.NORTH);
         b.setToolTipText(_I18N.getString("panZoomToggleTip"));
         b.addActionListener(e -> {
@@ -167,7 +131,7 @@ public class ImageDisplayControl extends JPanel {
     /**
      * Make and return the colorbar window.
      */
-    protected ImageColorbar makeColorbar() {
+    private ImageColorbar makeColorbar() {
         return new ImageColorbar(imageDisplay);
     }
 
@@ -177,11 +141,11 @@ public class ImageDisplayControl extends JPanel {
     }
 
     /**
-     * This method is resposible for the window layout for this widget.
+     * This method is responsible for the window layout for this widget.
      *
      * @param size the initial size (width, height) to use for the pan and zoom windows.
      */
-    protected void makeLayout(int size) {
+    private void makeLayout(int size) {
         setLayout(new BorderLayout());
         colorbar.setBorder(BorderFactory.createEtchedBorder());
         colorbar.setPreferredSize(new Dimension(0, 20));
@@ -231,23 +195,8 @@ public class ImageDisplayControl extends JPanel {
 
 
     /** Return the main image display widget */
-    public DivaMainImageDisplay getImageDisplay() {
+    public TpeImageWidget getImageDisplay() {
         return imageDisplay;
-    }
-
-    /** Return the pan window */
-    public ImagePanner getImagePanner() {
-        return imagePanner;
-    }
-
-    /** Return the zoom window */
-    public ImageZoom getImageZoom() {
-        return imageZoom;
-    }
-
-    /** Return the status panel window */
-    public ImageDisplayStatusPanel getImageDisplayStatusPanel() {
-        return imageDisplayStatusPanel;
     }
 
     /**

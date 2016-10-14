@@ -16,7 +16,7 @@ import java.util.logging.Logger;
 
 /**
  * A singleton "database" of user preferences.  Handles externalizing and
- * reconsituting user preferences via PIO {@link ParamSet}s.
+ * reconstituting user preferences via PIO {@link ParamSet}s.
  */
 public enum PreferencesDatabase {
     instance;
@@ -42,7 +42,7 @@ public enum PreferencesDatabase {
         File f = getPreferencesFile();
         if (f.exists()) {
             try {
-                return new Some<ParamSet>((ParamSet) PioXmlUtil.read(f));
+                return new Some<>((ParamSet) PioXmlUtil.read(f));
             } catch (PioXmlException ex) {
                 LOG.log(Level.WARNING, "Could not load preferences file '" + f.getPath() + "'", ex);
             }
@@ -106,7 +106,7 @@ public enum PreferencesDatabase {
             Option<ParamSet> empty = None.instance();
             res = factory.create(empty);
         } else {
-            res = factory.create(new Some<ParamSet>(cont));
+            res = factory.create(new Some<>(cont));
         }
 
         return res;

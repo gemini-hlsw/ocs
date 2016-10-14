@@ -9,20 +9,15 @@ package edu.gemini.spModel.obscomp;
 
 import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.pot.sp.SPComponentType;
-import edu.gemini.shared.util.immutable.None;
-import edu.gemini.shared.util.immutable.Option;
-import edu.gemini.shared.util.immutable.Some;
 import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.data.AbstractDataObject;
 import edu.gemini.spModel.data.config.IConfig;
 import edu.gemini.spModel.data.config.IParameter;
 import edu.gemini.spModel.data.config.ISysConfig;
-import edu.gemini.spModel.obs.ObsTargetCalculatorService;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.Pio;
 import edu.gemini.spModel.pio.PioFactory;
 import edu.gemini.spModel.util.Angle;
-import edu.gemini.util.skycalc.calc.TargetCalculator;
 
 import java.beans.PropertyDescriptor;
 import java.text.NumberFormat;

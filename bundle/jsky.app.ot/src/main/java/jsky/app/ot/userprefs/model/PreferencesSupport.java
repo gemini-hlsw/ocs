@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package jsky.app.ot.userprefs.model;
 
 import edu.gemini.shared.util.immutable.Option;
@@ -19,7 +15,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public final class PreferencesSupport<T extends ExternalizablePreferences> {
     private final String name;
     private final ExternalizablePreferences.Factory<T> factory;
-    private final List<PreferencesChangeListener<T>> listeners = new CopyOnWriteArrayList<PreferencesChangeListener<T>>();
+    private final List<PreferencesChangeListener<T>> listeners = new CopyOnWriteArrayList<>();
 
     private T currentValue;
 
@@ -56,7 +52,7 @@ public final class PreferencesSupport<T extends ExternalizablePreferences> {
 
         boolean res;
         synchronized (this) {
-            if (currentValue != null) oldVal = new Some<T>(currentValue);
+            if (currentValue != null) oldVal = new Some<>(currentValue);
             currentValue = newValue;
             res = PreferencesDatabase.instance.store(name, newValue);
         }
@@ -67,7 +63,7 @@ public final class PreferencesSupport<T extends ExternalizablePreferences> {
 
     private void fireChangeEvent(Option<T> oldVal, T newVal) {
         final PreferencesChangeEvent<T> evt;
-        evt = new PreferencesChangeEvent<T>(oldVal, newVal);
+        evt = new PreferencesChangeEvent<>(oldVal, newVal);
 
         // unsynchronized here, but using CopyOnWriteArrayList and its
         // snapshot iterator
