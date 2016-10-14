@@ -54,7 +54,7 @@ sealed abstract class ITCRequest {
     case ""   => 0
     case i    =>
       try i.toInt catch {
-        case e: NumberFormatException => throw new IllegalArgumentException(s"$i is not a valid integer number value for parameter $name")
+        case _: NumberFormatException => throw new IllegalArgumentException(s"$i is not a valid integer number value for parameter $name")
       }
   }
 
@@ -66,7 +66,7 @@ sealed abstract class ITCRequest {
     case ""   => 0.0
     case d    =>
       try d.toDouble catch {
-        case e: NumberFormatException => throw new IllegalArgumentException(s"$d is not a valid double number value for parameter $name")
+        case _: NumberFormatException => throw new IllegalArgumentException(s"$d is not a valid double number value for parameter $name")
       }
   }
 
@@ -368,7 +368,7 @@ object ITCRequest {
     case "singleIFU"  => IfuSingle(r.intParameter("ifuSkyFibres"), r.doubleParameter("ifuOffset"))
     case "radialIFU"  => IfuRadial(r.intParameter("ifuSkyFibres"), r.doubleParameter("ifuMinOffset"), r.doubleParameter("ifuMaxOffset"))
     case "summedIFU"  => IfuSummed(r.intParameter("ifuSkyFibres"), r.intParameter("ifuNumX"), r.intParameter("ifuNumY"), r.doubleParameter("ifuCenterX"), r.doubleParameter("ifuCenterY"))
-    case "sumIFU"     => IfuSum(r.intParameter("ifuSkyFibres"), r.doubleParameter("ifuNum"), true);
+    case "sumIFU"     => IfuSum(r.intParameter("ifuSkyFibres"), r.doubleParameter("ifuNum"), r.booleanParameter("ifu2"));
     case _            => throw new NoSuchElementException(s"Unknown analysis method ${r.parameter("analysisMethod")}")
   }
 
