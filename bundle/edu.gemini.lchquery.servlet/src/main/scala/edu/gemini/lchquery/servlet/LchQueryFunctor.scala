@@ -191,15 +191,9 @@ class LchQueryFunctor(queryType: LchQueryFunctor.QueryType,
 
                 if (queryType == LchQueryFunctor.QueryType.TargetQuery) {
                   obs.targetEnvironment.foreach { env =>
-                    Option(env.getTargets) collect {
-                      case lst if lst.nonEmpty => lst.asScalaList
-                    } foreach { tgts =>
-                      setTargetsNode(new TargetsNode() {
-                        tgts.map(tgt => makeTargetNode(tgt, env)).collect {
-                          case Some(t) => t
-                        }.foreach(getTargets.add)
-                      })
-                    }
+                    setTargetsNode(new TargetsNode() {
+                      getTargets.addAll(env.getTargets.asScalaList.flatMap(t => makeTargetNode(t, env)).asJavaCollection)
+                    })
                   }
                 }
               }
