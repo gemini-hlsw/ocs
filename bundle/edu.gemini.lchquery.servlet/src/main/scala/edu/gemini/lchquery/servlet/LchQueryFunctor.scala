@@ -12,7 +12,7 @@ import edu.gemini.pot.sp.{ISPNode, ISPObservation, ISPProgram}
 import edu.gemini.pot.spdb.{DBAbstractQueryFunctor, IDBDatabaseService}
 import edu.gemini.skycalc.{DDMMSS, HHMMSS}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
-import edu.gemini.spModel.obs.{ObsClassService, ObservationStatus}
+import edu.gemini.spModel.obs.ObservationStatus
 import edu.gemini.spModel.rich.shared.immutable._
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.env.TargetEnvironment
@@ -59,7 +59,7 @@ class LchQueryFunctor(queryType: LchQueryFunctor.QueryType,
 
 
   private def addProgram(prog: ISPProgram, obsList: List[ISPObservation]): Unit = {
-    import LchQueryParam.{ISPProgramExtractors, ISPObservationExtractors, ToYesNo}
+    import LchQueryParam.{ISPProgramExtractors, ISPObservationExtractors}
 
     def makeTargetNode(target: SPTarget, env: TargetEnvironment): Option[Serializable] = {
       def targetType: Option[String] = {
@@ -191,18 +191,13 @@ class LchQueryFunctor(queryType: LchQueryFunctor.QueryType,
 
                 if (queryType == LchQueryFunctor.QueryType.TargetQuery) {
                   obs.targetEnvironment.foreach { env =>
-                    Option(env.getTargets) collect {
-                      case lst if lst.nonEmpty => lst.asScalaList
-                    } foreach { tgts =>
-                      setTargetsNode(new TargetsNode() {
-                        tgts.map(tgt => makeTargetNode(tgt, env)).foreach(getTargets.add)
-                      })
-                    }
+                    setTargetsNode(new TargetsNode() {
+                      getTargets.addAll(env.getTargets.asScalaList.flatMap(t => makeTargetNode(t, env)).asJavaCollection)
+                    })
                   }
-
                 }
               }
-            } foreach getObservations.add
+            }.foreach(getObservations.add)
           })
         }
       }
