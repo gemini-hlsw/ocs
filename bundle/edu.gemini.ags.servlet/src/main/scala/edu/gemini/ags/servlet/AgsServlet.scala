@@ -7,16 +7,23 @@ import edu.gemini.spModel.obs.context.ObsContext
 
 import java.io.{BufferedOutputStream, IOException}
 import java.net.URLDecoder
+import java.util.concurrent.{ThreadFactory, LinkedBlockingDeque, TimeUnit, ThreadPoolExecutor}
 import java.util.logging.{Level, Logger}
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 import javax.servlet.http.HttpServletResponse.{SC_BAD_GATEWAY, SC_BAD_REQUEST, SC_INTERNAL_SERVER_ERROR, SC_OK}
 
-import scala.concurrent.Await
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.{ExecutionContext, Await}
 import scala.util.{Failure, Success, Try}
 
 object AgsServlet {
   private val Log = Logger.getLogger(getClass.getName)
+
+  // How many concurrent AGS estimations can be running.  Queries block on
+  // catalog requests and then do a relatively quick calculation so more threads
+  // means we hit the catalog server with more simultaneous requests and
+  // throughput goes up. If we increase the thread count too much, the catalog
+  // server begins failing and producing HTML 500 and 504 responses.
+  val ThreadCount = 16
 
   type Response = (Int, String)
 
@@ -43,6 +50,28 @@ object AgsServlet {
       bos.close()
     }
   }
+
+  // An executor for use with AGS estimations.  For the most part, threads are
+  // only kept alive while there are outstanding AGS estimation requests.
+  private val executor = new ThreadPoolExecutor(
+                       ThreadCount,
+                       ThreadCount,
+                       30, TimeUnit.SECONDS,                 // 30 sec timeout
+                       new LinkedBlockingDeque[Runnable](),  // unbounded queue
+                       new ThreadFactory() {
+                         override def newThread(r: Runnable): Thread = {
+                           val t = new Thread(r, "AgsServlet Worker")
+                           t.setPriority(Thread.NORM_PRIORITY - 1)
+                           t.setDaemon(true)
+                           t
+                         }
+                       })
+
+  // Except at the end of the proposal deadline, there will rarely be AGS
+  // estimation requests so we might as well let these threads be removed.
+  executor.allowCoreThreadTimeOut(true)
+
+  private val executionContext = ExecutionContext.fromExecutor(executor)
 }
 
 import AgsServlet._
@@ -69,7 +98,7 @@ class AgsServlet(magTable: MagnitudeTable) extends HttpServlet {
     def estimate(ctx: ObsContext, s: AgsStrategy): Either[Response, AgsStrategy.Estimate] = {
       import scala.concurrent.duration._
       Try {
-        Await.result(s.estimate(ctx, magTable)(implicitly), 1.minute)
+        Await.result(s.estimate(ctx, magTable)(executionContext), 2.minutes)
       } match {
         case Success(e)               => Right(e)
         case Failure(io: IOException) => Left(failure(SC_BAD_GATEWAY, io))
