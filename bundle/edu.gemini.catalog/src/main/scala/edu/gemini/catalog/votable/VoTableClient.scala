@@ -25,6 +25,8 @@ trait VoTableBackend {
 }
 
 trait CachedBackend extends VoTableBackend {
+  val Log = Logger.getLogger(this.getClass.getName)
+
   case class SearchKey(query: CatalogQuery, url: URL)
 
   case class CacheEntry[K, V](k: K, v: V)
@@ -131,7 +133,7 @@ trait CachedBackend extends VoTableBackend {
 
   // Cache the query not the future so that failed queries are executed again
   override protected [votable] def doQuery(query: CatalogQuery, url: URL)(ec: ExecutionContext): Future[QueryResult] = Future {
-    Logger.getLogger(getClass.getName).info(s"Starting BAGS lookup on ${Thread.currentThread}")
+    Log.fine(s"Starting catalog lookup on ${Thread.currentThread}")
     val qr = cachedQuery(SearchKey(query, url))
     // Filter on the cached query results
     qr.copy(query = query, result = qr.result.filter(query))
@@ -142,9 +144,7 @@ trait CachedBackend extends VoTableBackend {
 /**
  * Common methods to do query calls to remote servers
  */
-trait RemoteCallBackend {this: CachedBackend =>
-  val Log = Logger.getLogger(this.getClass.getName)
-
+trait RemoteCallBackend { this: CachedBackend =>
   private val timeout = 30 * 1000 // Max time to wait
 
   protected [votable] def queryParams(q: CatalogQuery): Array[NameValuePair]
