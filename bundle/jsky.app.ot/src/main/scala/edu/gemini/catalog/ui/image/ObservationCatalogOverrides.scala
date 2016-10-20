@@ -102,9 +102,9 @@ object ObservationCatalogOverrides {
     // Updates the overrides file, removing the existing entries if needed
     def newOverrides(overrides: Overrides): Overrides =
       if (ImageCatalog.catalogForWavelength(wv.some) =/= c) {
-          overrides.copy(overrides = CatalogOverride(key, c) :: overrides.overrides.filter(_.key != key))
+        overrides.copy(overrides = CatalogOverride(key, c) :: overrides.overrides.filter(_.key != key))
       } else {
-          overrides.copy(overrides =overrides.overrides.filter(_.key != key))
+        overrides.copy(overrides = overrides.overrides.filter(_.key != key))
       }
 
     for {

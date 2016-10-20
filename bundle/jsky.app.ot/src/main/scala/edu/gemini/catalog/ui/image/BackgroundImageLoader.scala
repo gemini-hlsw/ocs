@@ -14,6 +14,7 @@ import scala.collection.JavaConverters._
 import edu.gemini.pot.sp._
 import edu.gemini.spModel.core.{Angle, Coordinates, Wavelength}
 import edu.gemini.spModel.obs.ObservationStatus
+import edu.gemini.spModel.rich.pot.sp._
 import jsky.app.ot.tpe.{ImageCatalogPanel, TpeContext, TpeImageWidget, TpeManager}
 import jsky.image.gui.ImageLoadingException
 
@@ -78,19 +79,14 @@ object BackgroundImageLoader {
   /** Called when a program is created to download its images */
   def watch(prog: ISPProgram): Unit = {
     // At startup only load images for active programs
-    def needsImage(ctx: TpeContext): Boolean = {
-      ctx.obsShell.exists(ObservationStatus.computeFor(_) match {
-        case ObservationStatus.INACTIVE | ObservationStatus.OBSERVED => false
-        case _                                                       => true
-      })
-    }
+    def needsImage(ctx: TpeContext): Boolean =
+      ctx.obsShell.exists(ObservationStatus.computeFor(_).isActive)
 
     // Listen for future changes
     prog.addCompositeChangeListener(ChangeListener)
     val targets = for {
-        p      <- prog.getAllObservations.asScala.toList
-        obs    <- p.getObsComponents.asScala
-        tpeCtx  = TpeContext(obs)
+        p      <- prog.allObservations
+        tpeCtx  = TpeContext(p)
         if needsImage(tpeCtx)
         i      <- requestedImage(tpeCtx)
       } yield i
