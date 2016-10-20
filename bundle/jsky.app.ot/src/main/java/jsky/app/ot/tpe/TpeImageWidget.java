@@ -503,7 +503,7 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
 
             if (evt.getID() == MouseEvent.MOUSE_CLICKED) {
                 final Option<SiderealTarget> skyObject = getCatalogPosition(mp);
-                final String name = skyObject.map(SiderealTarget::name).getOrNull();
+                final Option<String> name = skyObject.map(SiderealTarget::name);
                 if (!skyObject.isDefined()) {
                     Coordinates pos = CoordinatesUtilities.userToWorldCoords(getCoordinateConverter(), p.x, p.y);
                     return new TpeMouseEvent(evt, evt.getID(), this, pos, name, (int) Math.round(mp.x), (int) Math.round(mp.y), skyObject, d[0], d[1]);
@@ -513,7 +513,7 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
                 }
             } else {
                 Coordinates pos = CoordinatesUtilities.userToWorldCoords(getCoordinateConverter(), p.x, p.y);
-                return new TpeMouseEvent(evt, evt.getID(), this, pos, "", (int) Math.round(mp.x), (int) Math.round(mp.y), None.instance(), d[0], d[1]);
+                return new TpeMouseEvent(evt, evt.getID(), this, pos, None.instance(), (int) Math.round(mp.x), (int) Math.round(mp.y), None.instance(), d[0], d[1]);
             }
         } else {
             return new TpeMouseEvent(evt);
