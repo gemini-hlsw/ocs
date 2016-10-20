@@ -126,17 +126,20 @@ final class ImageCatalogPanel(imageDisplay: CatalogImageDisplay) {
   }
 
   private def requestImage(catalog: ImageCatalog) = {
-    // Read the current key on the tpe
-    val key = TpeContext.fromTpeManager.flatMap(_.obsKey)
-
-    // Update the image and store the override
-    key.foreach { k =>
-      val actions = for {
-        _ <- ObservationCatalogOverrides.storeOverride(k, catalog)
-        _ <- Task.delay(imageDisplay.loadSkyImage())
-      } yield ()
-      actions.unsafePerformSync
-    }
+    // Read the current key and wavelength on the tpe
+    for {
+        tpe <- TpeContext.fromTpeManager
+        key <- tpe.obsKey
+        wv  <- ObsWavelengthExtractor.extractObsWavelength(tpe)
+      } {
+        // Update the image and store the override
+        val actions =
+            for {
+              _ <- ObservationCatalogOverrides.storeOverride(key, catalog, wv)
+              _ <- Task.delay(imageDisplay.loadSkyImage())
+            } yield ()
+          actions.unsafePerformSync
+      }
   }
 
   private def updateSelection(catalog: ImageCatalog): Unit =
