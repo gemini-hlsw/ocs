@@ -106,6 +106,11 @@ object StoredImagesCache {
   * Useful methods to update the cached files
   */
 object ImageCacheOnDisk {
+  def mkCacheDir(cacheDir: Path): Task[Unit] =
+    Task.delay {
+      val f = cacheDir.toFile
+      if (f.exists()) f.isDirectory else f.mkdirs()
+    }.ifM(Task.now(()), Task.fail(new RuntimeException(s"Cannot create cache dir ${cacheDir.toAbsolutePath}")))
 
   /**
     * Method to prune the cache, limiting the space used

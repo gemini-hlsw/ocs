@@ -228,6 +228,7 @@ object ImageCatalogClient {
     }
 
     for {
+      _           <- ImageCacheOnDisk.mkCacheDir(cacheDir)
       tempFile    <- createTmpFile
       desc        <- openConnection
       _           <- writeToTempFile(tempFile)
