@@ -1,5 +1,6 @@
 package jsky.app.ot.tpe;
 
+import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.shared.util.immutable.Some;
@@ -64,12 +65,12 @@ public class TpeMouseEvent {
     }
 
     /** Default Constructor: initialize all fields to null. */
-    public TpeMouseEvent(MouseEvent e, int id, TpeImageWidget source, Coordinates pos, String name, int xWidget, int yWidget, Option<SiderealTarget> skyObject, double xOffset, double yOffset) {
+    public TpeMouseEvent(MouseEvent e, int id, Option<TpeImageWidget> source, Coordinates pos, Option<String> name, int xWidget, int yWidget, Option<SiderealTarget> skyObject, double xOffset, double yOffset) {
         mouseEvent = e;
         this.id = id;
-        this.source = new Some<>(source);
+        this.source = source;
         this.pos = pos;
-        this.name = new Some<>(name);
+        this.name = name;
         this.xWidget = xWidget;
         this.yWidget = yWidget;
         this.skyObject = skyObject;

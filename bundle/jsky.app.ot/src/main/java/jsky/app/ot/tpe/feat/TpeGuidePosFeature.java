@@ -129,9 +129,7 @@ public class TpeGuidePosFeature extends TpePositionFeature
             final double dec = tme.pos.dec().toDegrees();
 
             pos = new SPTarget(ra, dec);
-            if (tme.name != null) {
-                pos.setName(tme.name.getOrNull());
-            }
+            pos.setName(tme.name.getOrElse(""));
         }
 
         return pos;
