@@ -3,6 +3,9 @@ package jsky.app.ot.tpe.gems;
 import edu.gemini.ags.gems.GemsGuideStarSearchOptions.*;
 import edu.gemini.ags.gems.GemsCatalogSearchResults;
 import edu.gemini.ags.gems.GemsGuideStars;
+import edu.gemini.shared.util.immutable.ImOption;
+import edu.gemini.shared.util.immutable.Option;
+import edu.gemini.spModel.core.SiderealTarget;
 
 import java.util.List;
 
@@ -74,5 +77,9 @@ class GemsGuideStarSearchModel {
 
     void setGemsGuideStars(List<GemsGuideStars> gemsGuideStars) {
         _gemsGuideStars = gemsGuideStars;
+    }
+
+    Option<SiderealTarget> targetAt(int i) {
+        return ImOption.apply(_gemsCatalogSearchResults.get(0)).flatMap(c -> c.targetAt(i));
     }
 }

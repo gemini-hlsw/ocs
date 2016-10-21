@@ -1,6 +1,7 @@
 package jsky.app.ot.tpe.gems;
 
 import edu.gemini.ags.gems.GemsUtils4Java;
+import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.core.SiderealTarget;
 import edu.gemini.catalog.api.UCAC4$;
 import jsky.catalog.FieldDesc;
@@ -44,7 +45,7 @@ class CandidateGuideStarsTableModel extends DefaultTableModel {
     // SkyObjects corresponding to the table rows
     private List<SiderealTarget> _siderealTargets;
 
-    public CandidateGuideStarsTableModel(GemsGuideStarSearchModel model) {
+    CandidateGuideStarsTableModel(GemsGuideStarSearchModel model) {
         _model = model;
         _nirBand = _model.getBand().name();
         _unusedBands = getOtherNirBands(_nirBand);
@@ -99,7 +100,6 @@ class CandidateGuideStarsTableModel extends DefaultTableModel {
         return rows;
     }
 
-
     @Override
     public boolean isCellEditable(int row, int column) {
         return column == 0;
@@ -137,7 +137,7 @@ class CandidateGuideStarsTableModel extends DefaultTableModel {
     }
 
     @SuppressWarnings("unchecked")
-    public TableQueryResult getTableQueryResult() {
+    TableQueryResult getTableQueryResult() {
         String raPosition = String.valueOf(_columnNames.indexOf(RA_TITLE));
         String decPosition = String.valueOf(_columnNames.indexOf(DEC_TITLE));
         Properties props = new Properties();
@@ -147,6 +147,11 @@ class CandidateGuideStarsTableModel extends DefaultTableModel {
         props.setProperty(SkycatConfigFile.LONG_NAME, "ucac4");
         SkycatConfigEntry entry = new SkycatConfigEntry(props);
         SkycatTable skycatTable = new SkycatTable(entry, getDataVector(), getFields()) {
+            @Override
+            public Option<SiderealTarget> getSiderealTarget(int i) {
+                return _model.targetAt(i);
+            }
+
             @Override
             public boolean isCellEditable(int rowIndex, int columnIndex) {
                 return columnIndex == Cols.CHECK.ordinal();
@@ -165,12 +170,12 @@ class CandidateGuideStarsTableModel extends DefaultTableModel {
      * Returns a list of SkyObjects corresponding to the checked (or unchecked) rows in the table
      * @param checked if true, return the checked rows (candidates), otherwise the unchecked (non-candidates)
      */
-    public List<SiderealTarget> getCandidates(boolean checked) {
+    List<SiderealTarget> getCandidates() {
         List<SiderealTarget> result = new ArrayList<>();
         int numRows = getRowCount();
         int col = Cols.CHECK.ordinal();
         for(int row = 0; row < numRows; row++) {
-            if ((Boolean)getValueAt(row, col) == checked) {
+            if (!((Boolean) getValueAt(row, col))) {
                 result.add(_siderealTargets.get(row));
             }
         }

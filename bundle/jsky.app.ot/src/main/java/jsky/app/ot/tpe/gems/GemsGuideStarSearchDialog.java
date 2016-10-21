@@ -2,9 +2,7 @@ package jsky.app.ot.tpe.gems;
 
 import edu.gemini.ags.gems.GemsGuideStarSearchOptions.*;
 import edu.gemini.ags.gems.GemsGuideStars;
-import edu.gemini.pot.sp.ISPProgram;
 import edu.gemini.pot.sp.SPComponentType;
-import edu.gemini.pot.sp.SPUtil;
 import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.core.SiderealTarget;
@@ -589,7 +587,7 @@ public class GemsGuideStarSearchDialog extends JFrame {
         _model.setAnalyseChoice((AnalyseChoice) _analyseComboBox.getSelectedItem());
         _model.setAllowPosAngleAdjustments(_allowPosAngleChangesCheckBox.isSelected());
 
-        final List<SiderealTarget> excludeCandidates = _candidateGuideStarsTable.getTableModel().getCandidates(false);
+        final List<SiderealTarget> excludeCandidates = _candidateGuideStarsTable.getTableModel().getCandidates();
 
         new SwingWorker() {
 

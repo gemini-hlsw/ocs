@@ -270,7 +270,7 @@ public class TpeGuidePosFeature extends TpePositionFeature
         groups.forEach(group -> res.add(new GuiderGroupCreatableItem(group)));
 
         // Sort the list by label.
-        Collections.sort(res, (item1, item2) -> item1.getLabel().compareTo(item2.getLabel()));
+        res.sort(Comparator.comparing(TpeCreatableItem::getLabel));
 
         return res;
     }

@@ -1,11 +1,11 @@
 package edu.gemini.ags.gems
 
 import edu.gemini.catalog.api.{MagnitudeConstraints, RadiusConstraint}
-import edu.gemini.pot.ModelConverters._
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.core.AngleSyntax._
-import edu.gemini.shared.skyobject
 import edu.gemini.spModel.gems.{GemsGuideProbeGroup, GemsGuideStarType}
+import edu.gemini.shared.util.immutable.ScalaConverters._
+import edu.gemini.shared.util.immutable.{Option => GOption}
 import scala.collection.JavaConverters._
 
 import scalaz._
@@ -107,6 +107,8 @@ case class GemsCatalogSearchResults(criterion: GemsCatalogSearchCriterion, resul
   def this(results: java.util.List[SiderealTarget], criterion: GemsCatalogSearchCriterion) = this(criterion, results.asScala.toList)
 
   def resultsAsJava: java.util.List[SiderealTarget] = new java.util.ArrayList[SiderealTarget](results.asJava)
+
+  def targetAt(i: Int): GOption[SiderealTarget] = \/.fromTryCatchNonFatal(results(i)).toOption.asGeminiOpt
 }
 
 /**
