@@ -4,6 +4,7 @@ import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.shared.util.immutable.Some;
+import edu.gemini.spModel.core.SiderealTarget;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
@@ -33,19 +34,19 @@ public class TpeTargetPosFeature extends TpePositionFeature
     }
 
 
-    public void reinit(TpeImageWidget iw, TpeImageInfo tii) {
+    public void reinit(final TpeImageWidget iw, final TpeImageInfo tii) {
         super.reinit(iw, tii);
 
         _props.addWatcher(this);
 
         // Tell the position map that the target positions are visible.
-        TpePositionMap pm = TpePositionMap.getMap(iw);
+        final TpePositionMap pm = TpePositionMap.getMap(iw);
         pm.setFindUserTarget(true);
     }
 
     public void unloaded() {
         // Tell the position map that the target positions are not visible.
-        TpePositionMap pm = TpePositionMap.getExistingMap();
+        final TpePositionMap pm = TpePositionMap.getExistingMap();
         if (pm != null) pm.setFindUserTarget(false);
 
         _props.deleteWatcher(this);
@@ -58,7 +59,7 @@ public class TpeTargetPosFeature extends TpePositionFeature
      *
      * @see PropertyWatcher
      */
-    public void propertyChange(String propName) {
+    public void propertyChange(final String propName) {
         _iw.repaint();
     }
 
@@ -73,14 +74,14 @@ public class TpeTargetPosFeature extends TpePositionFeature
     /**
      * Turn on/off the drawing of position tags.
      */
-    public void setDrawTags(boolean drawTags) {
+    public void setDrawTags(final boolean drawTags) {
         _props.setBoolean(PROP_SHOW_TAGS, drawTags);
     }
 
     /**
      * Get the "draw position tags" property.
      */
-    public boolean getDrawTags() {
+    private boolean getDrawTags() {
         return _props.getBoolean(PROP_SHOW_TAGS, true);
     }
 
@@ -99,15 +100,20 @@ public class TpeTargetPosFeature extends TpePositionFeature
             }
 
             public void create(TpeMouseEvent tme, TpeImageInfo tii) {
-                TargetObsComp obsComp = getTargetObsComp();
+                final TargetObsComp obsComp = getTargetObsComp();
                 if (obsComp == null) return;
 
-                double ra  = tme.pos.ra().toDegrees();
-                double dec = tme.pos.dec().toDegrees();
-                SPTarget userPos = new SPTarget(ra, dec);
+                final Option<SiderealTarget> skyObjectOpt = tme.skyObject;
+                SPTarget userPos = skyObjectOpt.map(SPTarget::new).getOrElse(() -> {
+                    final double ra  = tme.pos.ra().toDegrees();
+                    final double dec = tme.pos.dec().toDegrees();
+                    // No SkyObject info is present so we use the old way of creating
+                    // a target from a mouse event using only the coordinates.
+                    return new SPTarget(ra, dec);
+                });
 
-                TargetEnvironment env = obsComp.getTargetEnvironment();
-                ImList<SPTarget> userList = env.getUserTargets().append(userPos);
+                final TargetEnvironment env = obsComp.getTargetEnvironment();
+                final ImList<SPTarget> userList = env.getUserTargets().append(userPos);
                 obsComp.setTargetEnvironment(env.setUserTargets(userList));
                 _iw.getContext().targets().commit();
             }
@@ -149,15 +155,15 @@ public class TpeTargetPosFeature extends TpePositionFeature
     /**
      * @see jsky.app.ot.tpe.TpeSelectableFeature
      */
-    public Object select(TpeMouseEvent tme) {
-        TargetObsComp obsComp = getTargetObsComp();
+    public Object select(final TpeMouseEvent tme) {
+        final TargetObsComp obsComp = getTargetObsComp();
         if (obsComp == null) return null;
 
-        TpePositionMap pm = TpePositionMap.getMap(_iw);
-        SPTarget tp = (SPTarget) pm.locatePos(tme.xWidget, tme.yWidget);
+        final TpePositionMap pm = TpePositionMap.getMap(_iw);
+        final SPTarget tp = (SPTarget) pm.locatePos(tme.xWidget, tme.yWidget);
         if (tp == null) return null;
 
-        TargetEnvironment env = obsComp.getTargetEnvironment();
+        final TargetEnvironment env = obsComp.getTargetEnvironment();
         if (!env.getUserTargets().contains(tp)) return null;
 
         TargetSelection.setTargetForNode(env, getContext().targets().shell().get(), tp);
@@ -166,13 +172,13 @@ public class TpeTargetPosFeature extends TpePositionFeature
 
     /**
      */
-    public void draw(Graphics g, TpeImageInfo tii) {
-        TargetObsComp obsComp = getTargetObsComp();
+    public void draw(final Graphics g, final TpeImageInfo tii) {
+        final TargetObsComp obsComp = getTargetObsComp();
         if (obsComp == null) return;
 
-        TargetEnvironment env = obsComp.getTargetEnvironment();
+        final TargetEnvironment env = obsComp.getTargetEnvironment();
 
-        TpePositionMap pm = TpePositionMap.getMap(_iw);
+        final TpePositionMap pm = TpePositionMap.getMap(_iw);
 
         g.setColor(Color.yellow);
 
@@ -181,12 +187,12 @@ public class TpeTargetPosFeature extends TpePositionFeature
 
         int index = 1;
         for (SPTarget target : env.getUserTargets()) {
-            PosMapEntry<SPTarget> pme = pm.getPositionMapEntry(target);
+            final PosMapEntry<SPTarget> pme = pm.getPositionMapEntry(target);
             if (pme == null) continue;
 
-            String tag = String.format("User (%d)", index++);
+            final String tag = String.format("User (%d)", index++);
 
-            Point2D.Double p = pme.screenPos;
+            final Point2D.Double p = pme.screenPos;
             if (p == null) continue;
 
             g.drawLine((int) p.x, (int) (p.y - MARKER_SIZE), (int) p.x, (int) (p.y + MARKER_SIZE));
@@ -202,16 +208,16 @@ public class TpeTargetPosFeature extends TpePositionFeature
     /**
      */
     public Option<Object> dragStart(TpeMouseEvent tme, TpeImageInfo tii) {
-        TargetObsComp obsComp = getTargetObsComp();
+        final TargetObsComp obsComp = getTargetObsComp();
         if (obsComp == null) return None.instance();
 
-        TargetEnvironment env = obsComp.getTargetEnvironment();
+        final TargetEnvironment env = obsComp.getTargetEnvironment();
 
-        TpePositionMap pm = TpePositionMap.getMap(_iw);
+        final TpePositionMap pm = TpePositionMap.getMap(_iw);
 
-        Iterator<PosMapEntry<SPTarget>> it = pm.getAllPositionMapEntries();
+        final Iterator<PosMapEntry<SPTarget>> it = pm.getAllPositionMapEntries();
         while (it.hasNext()) {
-            PosMapEntry<SPTarget> pme = it.next();
+            final PosMapEntry<SPTarget> pme = it.next();
 
             if (positionIsClose(pme, tme.xWidget, tme.yWidget) &&
                     env.isUserPosition(pme.taggedPos)) {
