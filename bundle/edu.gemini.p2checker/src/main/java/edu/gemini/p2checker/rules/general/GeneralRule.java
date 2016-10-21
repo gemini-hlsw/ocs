@@ -210,7 +210,7 @@ public class GeneralRule implements IRule {
                 final Set<String> errorSet = new TreeSet<>();
                 for (final SPTarget target : guideTargets) {
                     //Check for empty name
-                    if (target.getName() == null || "".equals(target.getName().trim())) {
+                    if (target.getName() == null || target.getName().trim().isEmpty()) {
                         errorSet.add(String.format(WFS_EMPTY_NAME_TEMPLATE, guider.getKey()));
                     }
 

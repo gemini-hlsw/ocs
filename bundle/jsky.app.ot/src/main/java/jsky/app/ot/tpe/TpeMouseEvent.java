@@ -65,10 +65,10 @@ public class TpeMouseEvent {
     }
 
     /** Default Constructor: initialize all fields to null. */
-    public TpeMouseEvent(MouseEvent e, int id, TpeImageWidget source, Coordinates pos, Option<String> name, int xWidget, int yWidget, Option<SiderealTarget> skyObject, double xOffset, double yOffset) {
+    public TpeMouseEvent(MouseEvent e, int id, Option<TpeImageWidget> source, Coordinates pos, Option<String> name, int xWidget, int yWidget, Option<SiderealTarget> skyObject, double xOffset, double yOffset) {
         mouseEvent = e;
         this.id = id;
-        this.source = ImOption.apply(source);
+        this.source = source;
         this.pos = pos;
         this.name = name;
         this.xWidget = xWidget;
