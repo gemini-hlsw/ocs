@@ -12,6 +12,7 @@ import edu.gemini.spModel.core.Wavelength
 import jsky.util.Preferences
 
 import scalaz._
+import Scalaz._
 import scalaz.concurrent.Task
 
 /**
@@ -89,7 +90,7 @@ object ObservationCatalogOverrides {
   /**
     * Store the overridden catalog for a given node
     */
-  def storeOverride(key: SPNodeKey, c: ImageCatalog): Task[Unit] = {
+  def storeOverride(key: SPNodeKey, c: ImageCatalog, wv: Wavelength): Task[Unit] = {
     def writeOverrides(overridesFile: Path, overrides: Overrides) = Task.delay {
       this.synchronized {
         \/.fromTryCatchNonFatal {
@@ -98,11 +99,18 @@ object ObservationCatalogOverrides {
       }
     }
 
+    // Updates the overrides file, removing the existing entries if needed
+    def newOverrides(overrides: Overrides): Overrides =
+      if (ImageCatalog.catalogForWavelength(wv.some) =/= c) {
+        overrides.copy(overrides = CatalogOverride(key, c) :: overrides.overrides.filter(_.key != key))
+      } else {
+        overrides.copy(overrides = overrides.overrides.filter(_.key != key))
+      }
+
     for {
       overridesFile <- overridesFile
       old           <- Task.delay(readOverrides(overridesFile))
-      newOverrides  = old.copy(overrides = CatalogOverride(key, c) :: old.overrides.filter(_.key != key))
-      _             <- writeOverrides(overridesFile, newOverrides)
+      _             <- writeOverrides(overridesFile, newOverrides(old))
     } yield ()
   }
 }
