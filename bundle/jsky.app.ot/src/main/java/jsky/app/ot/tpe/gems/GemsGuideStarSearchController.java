@@ -37,8 +37,8 @@ class GemsGuideStarSearchController {
      * @param dialog the main dialog
      * @param imageDisplay the Tpe reference
      */
-    public GemsGuideStarSearchController(GemsGuideStarSearchModel model, GemsGuideStarWorker worker,
-                                         GemsGuideStarSearchDialog dialog, CatalogImageDisplay imageDisplay) {
+    GemsGuideStarSearchController(GemsGuideStarSearchModel model, GemsGuideStarWorker worker,
+                                  GemsGuideStarSearchDialog dialog, CatalogImageDisplay imageDisplay) {
         _model = model;
         _worker = worker;
         _dialog = dialog;
@@ -91,7 +91,7 @@ class GemsGuideStarSearchController {
      * @param excludeCandidates list of SkyObjects to exclude
      */
     // Called from the TPE
-    public void analyze(List<SiderealTarget> excludeCandidates) throws Exception {
+    void analyze(List<SiderealTarget> excludeCandidates) throws Exception {
         TpeImageWidget tpe = TpeManager.create().getImageWidget();
         WorldCoords basePos = tpe.getBasePos();
         ObsContext obsContext = _worker.getObsContext(basePos.getRaDeg(), basePos.getDecDeg());
@@ -100,7 +100,7 @@ class GemsGuideStarSearchController {
                 filter(excludeCandidates, _model.getGemsCatalogSearchResults())));
     }
 
-    // Returns a list of the given gemsCatalogSearchResults, with any SkyObjects removed that are not
+    // Returns a list of the given gemsCatalogSearchResults, with any SiderealTargets removed that are not
     // in the candidates list.
     private List<GemsCatalogSearchResults> filter(List<SiderealTarget> excludeCandidates,
                                                   List<GemsCatalogSearchResults> gemsCatalogSearchResults) {

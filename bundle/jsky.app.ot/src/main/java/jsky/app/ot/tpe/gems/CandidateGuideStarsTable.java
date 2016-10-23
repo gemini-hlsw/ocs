@@ -72,6 +72,7 @@ class CandidateGuideStarsTable extends TableDisplay {
 
 
     public CandidateGuideStarsTable(TablePlotter plotter) {
+        super();
         _plotter = plotter;
         getTable().setSortingAllowed(false); // REL-560: Sorting code doesn't seem to handle editable columns correctly
     }

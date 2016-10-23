@@ -7,7 +7,6 @@ import edu.gemini.catalog.api.UCAC4$;
 import jsky.catalog.FieldDesc;
 import jsky.catalog.FieldDescAdapter;
 import jsky.catalog.TableQueryResult;
-import jsky.catalog.skycat.SkycatCatalog;
 import jsky.catalog.skycat.SkycatConfigEntry;
 import jsky.catalog.skycat.SkycatConfigFile;
 import jsky.catalog.skycat.SkycatTable;
@@ -25,6 +24,11 @@ class CandidateGuideStarsTableModel extends DefaultTableModel {
     private enum Cols {
         CHECK, ID, _r, R, UC, NIR_BAND, RA, DEC, UNUSED_BAND1, UNUSED_BAND2
     }
+
+    private static final String RA_COL = "ra_col";
+    private static final String DEC_COL = "dec_col";
+    private static final String SERV_TYPE = "serv_type";
+    private static final String LONG_NAME = "long_name";
 
     private final String RA_TITLE = "RA";
     private final String DEC_TITLE = "Dec";
@@ -141,12 +145,12 @@ class CandidateGuideStarsTableModel extends DefaultTableModel {
         String raPosition = String.valueOf(_columnNames.indexOf(RA_TITLE));
         String decPosition = String.valueOf(_columnNames.indexOf(DEC_TITLE));
         Properties props = new Properties();
-        props.setProperty(SkycatConfigFile.RA_COL, raPosition);
-        props.setProperty(SkycatConfigFile.DEC_COL, decPosition);
-        props.setProperty(SkycatConfigFile.SERV_TYPE, "catalog");
-        props.setProperty(SkycatConfigFile.LONG_NAME, "ucac4");
+        props.setProperty(RA_COL, raPosition);
+        props.setProperty(DEC_COL, decPosition);
+        props.setProperty(SERV_TYPE, "catalog");
+        props.setProperty(LONG_NAME, "ucac4");
         SkycatConfigEntry entry = new SkycatConfigEntry(props);
-        SkycatTable skycatTable = new SkycatTable(entry, getDataVector(), getFields()) {
+        return new SkycatTable(entry, CandidateGuideStarsTableModel.this.getDataVector(), getFields()) {
             @Override
             public Option<SiderealTarget> getSiderealTarget(int i) {
                 return _model.targetAt(i);
@@ -162,13 +166,10 @@ class CandidateGuideStarsTableModel extends DefaultTableModel {
                 return "GEMS"; // see entry in ot.skycat.cfg - needed for GemsSkyObjectFactory
             }
         };
-        skycatTable.setCatalog(new SkycatCatalog(entry));
-        return skycatTable;
     }
 
     /**
-     * Returns a list of SkyObjects corresponding to the checked (or unchecked) rows in the table
-     * @param checked if true, return the checked rows (candidates), otherwise the unchecked (non-candidates)
+     * Returns a list of SideralTargets corresponding to the checked (or unchecked) rows in the table
      */
     List<SiderealTarget> getCandidates() {
         List<SiderealTarget> result = new ArrayList<>();

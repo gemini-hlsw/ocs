@@ -121,7 +121,7 @@ public class TableDisplay extends JPanel
      * Initialize an empty table. Call setModel() to set the data to display,
      * and setQueryResultDisplay to set the display class to use when following links.
      */
-    public TableDisplay() {
+    protected TableDisplay() {
         this(null, null);
     }
 

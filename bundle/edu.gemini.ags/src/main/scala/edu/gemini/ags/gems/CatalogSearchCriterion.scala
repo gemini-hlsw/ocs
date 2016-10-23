@@ -65,9 +65,8 @@ case class CatalogSearchCriterion(name: String, radiusConstraint: RadiusConstrai
      * @param obj the SiderealTarget to match
      * @return true if the object matches the magnitude and radius limits
      */
-    def matches(obj: SiderealTarget): Boolean = {
+    def matches(obj: SiderealTarget): Boolean =
       matches(obj.magnitudes) && matches(obj.coordinates)
-    }
 
     private def matches(coords: Coordinates): Boolean = {
       val distance = Coordinates.difference(adjBase, coords).distance
