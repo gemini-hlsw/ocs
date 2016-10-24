@@ -525,8 +525,8 @@ public class GemsGuideStarSearchDialog extends JFrame {
         _model.setAnalyseChoice((AnalyseChoice) _analyseComboBox.getSelectedItem());
         _model.setReviewCandidatesBeforeSearch(_reviewCandidatesCheckBox.isSelected());
         _model.setAllowPosAngleAdjustments(_allowPosAngleChangesCheckBox.isSelected());
-        _model.setGemsCatalogSearchResults(null);
-        _model.setGemsGuideStars(null);
+        _model.setGemsCatalogSearchResults(new ArrayList<>());
+        _model.setGemsGuideStars(new ArrayList<>());
 
         new SwingWorker() {
 

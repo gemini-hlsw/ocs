@@ -1,10 +1,3 @@
-/*
- * Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: ConnectionUtil.java 4414 2004-02-03 16:21:36Z brighton $
- */
-
 package jsky.util.gui;
 
 import java.io.IOException;
@@ -49,7 +42,6 @@ public class ConnectionUtil {
      * Background thread making the connection.
      */
     private SwingWorker worker;
-
 
     /**
      * Initialize with the given URL

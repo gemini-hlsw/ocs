@@ -114,8 +114,8 @@ public class TpeGuidePosFeature extends TpePositionFeature
     }
 
     private SPTarget createNewTarget(final TpeMouseEvent tme) {
-        final Option<SiderealTarget> skyObjectOpt = tme.skyObject;
-        return skyObjectOpt.map(SPTarget::new).getOrElse(() -> {
+        final Option<SiderealTarget> targetOpt = tme.target;
+        return targetOpt.map(SPTarget::new).getOrElse(() -> {
             final double ra  = tme.pos.ra().toDegrees();
             final double dec = tme.pos.dec().toDegrees();
             // No SkyObject info is present so we use the old way of creating

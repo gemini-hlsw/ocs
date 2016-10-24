@@ -1,12 +1,9 @@
 package jsky.app.ot.tpe;
 
-import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
-import edu.gemini.shared.util.immutable.Some;
 import edu.gemini.spModel.core.Coordinates;
 import edu.gemini.spModel.core.SiderealTarget;
-import jsky.coords.WorldCoords;
 
 import java.awt.event.MouseEvent;
 
@@ -42,7 +39,7 @@ public class TpeMouseEvent {
     public final Option<String> name;
 
     // Optional details of the object.
-    public final Option<SiderealTarget> skyObject;
+    public final Option<SiderealTarget> target;
 
     /** The X offset of the event from the base position in arcsec. */
     public final double xOffset;
@@ -57,7 +54,7 @@ public class TpeMouseEvent {
         this.source = None.instance();
         this.pos = Coordinates.zero();
         this.name = None.instance();
-        this.skyObject = None.instance();
+        this.target = None.instance();
         this.xWidget = 0;
         this.yWidget = 0;
         this.xOffset = 0;
@@ -65,7 +62,7 @@ public class TpeMouseEvent {
     }
 
     /** Default Constructor: initialize all fields to null. */
-    public TpeMouseEvent(MouseEvent e, int id, Option<TpeImageWidget> source, Coordinates pos, Option<String> name, int xWidget, int yWidget, Option<SiderealTarget> skyObject, double xOffset, double yOffset) {
+    public TpeMouseEvent(MouseEvent e, int id, Option<TpeImageWidget> source, Coordinates pos, Option<String> name, int xWidget, int yWidget, Option<SiderealTarget> target, double xOffset, double yOffset) {
         mouseEvent = e;
         this.id = id;
         this.source = source;
@@ -73,7 +70,7 @@ public class TpeMouseEvent {
         this.name = name;
         this.xWidget = xWidget;
         this.yWidget = yWidget;
-        this.skyObject = skyObject;
+        this.target = target;
         this.xOffset = xOffset;
         this.yOffset = yOffset;
     }
