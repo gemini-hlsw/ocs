@@ -168,7 +168,7 @@ class CandidateGuideStarsTableModel extends DefaultTableModel {
     }
 
     /**
-     * Returns a list of SideralTargets corresponding to the checked (or unchecked) rows in the table
+     * Returns a list of SiderealTargets corresponding to the checked rows in the table
      */
     List<SiderealTarget> getCandidates() {
         final List<SiderealTarget> result = new ArrayList<>();

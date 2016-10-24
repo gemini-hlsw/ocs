@@ -107,7 +107,7 @@ case class GemsCatalogSearchResults(criterion: GemsCatalogSearchCriterion, resul
 
   def resultsAsJava: java.util.List[SiderealTarget] = new java.util.ArrayList[SiderealTarget](results.asJava)
 
-  def targetAt(i: Int): GOption[SiderealTarget] = \/.fromTryCatchNonFatal(results(i)).toOption.asGeminiOpt
+  def targetAt(i: Int): GOption[SiderealTarget] = results.lift(i).asGeminiOpt
 }
 
 /**
