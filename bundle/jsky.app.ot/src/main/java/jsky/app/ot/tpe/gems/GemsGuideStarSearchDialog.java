@@ -21,21 +21,8 @@ import jsky.util.gui.SwingWorker;
 import jsky.util.gui.DialogUtil;
 import jsky.util.gui.StatusPanel;
 
-import javax.swing.AbstractAction;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JComponent;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTabbedPane;
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.NumberFormat;
@@ -145,6 +132,7 @@ public class GemsGuideStarSearchDialog extends JFrame {
 
     // Context dependent message (title)
     private final JLabel _actionLabel = new JLabel();
+    private final JLabel _manualSelectionLabel = new JLabel("<html><body><p style='font-style:italic'>To manually add a target to a manual guide group, select one of the +CWFS1/2/3 options in the Position Editor and then click on a guide star.</p></body></html>");
 
     private final JComboBox<CatalogChoice> _catalogComboBox = new JComboBox<>(CatalogChoice.values());
     private final JComboBox<NirBandChoice> _nirBandComboBox = new JComboBox<>(NirBandChoice.values());
@@ -235,9 +223,18 @@ public class GemsGuideStarSearchDialog extends JFrame {
             insets = labelInsets;
         }});
 
-        panel.add(new JLabel("Catalog"), new GridBagConstraints() {{
+        panel.add(_manualSelectionLabel, new GridBagConstraints() {{
             gridx = 0;
             gridy = 1;
+            gridwidth = 4;
+            anchor = WEST;
+            fill = HORIZONTAL;
+            insets = labelInsets;
+        }});
+
+        panel.add(new JLabel("Catalog"), new GridBagConstraints() {{
+            gridx = 0;
+            gridy = 2;
             insets = labelInsets;
             anchor = EAST;
         }});
@@ -246,28 +243,28 @@ public class GemsGuideStarSearchDialog extends JFrame {
         catalogPanel.add(_catalogComboBox);
         panel.add(catalogPanel, new GridBagConstraints() {{
             gridx = 1;
-            gridy = 1;
+            gridy = 2;
             insets = valueInsets;
             anchor = WEST;
         }});
 
         panel.add(new JLabel("NIR"), new GridBagConstraints() {{
             gridx = 2;
-            gridy = 1;
+            gridy = 2;
             insets = labelInsets;
             anchor = EAST;
         }});
 
         panel.add(_nirBandComboBox, new GridBagConstraints() {{
             gridx = 3;
-            gridy = 1;
+            gridy = 2;
             anchor = WEST;
             insets = valueInsets;
         }});
 
         panel.add(_reviewCandidatesCheckBox, new GridBagConstraints() {{
             gridx = 1;
-            gridy = 2;
+            gridy = 3;
             gridwidth = 3;
             anchor = WEST;
             insets = valueInsets;
@@ -275,21 +272,21 @@ public class GemsGuideStarSearchDialog extends JFrame {
 
         panel.add(new JLabel("Asterism"), new GridBagConstraints() {{
             gridx = 0;
-            gridy = 4;
+            gridy = 5;
             insets = labelInsets;
             anchor = EAST;
         }});
 
         panel.add(_analyseComboBox, new GridBagConstraints() {{
             gridx = 1;
-            gridy = 4;
+            gridy = 5;
             insets = valueInsets;
             anchor = WEST;
         }});
 
         panel.add(_allowPosAngleChangesCheckBox, new GridBagConstraints() {{
             gridx = 1;
-            gridy = 5;
+            gridy = 6;
             gridwidth = 3;
             anchor = WEST;
             insets = valueInsets;
@@ -300,7 +297,7 @@ public class GemsGuideStarSearchDialog extends JFrame {
         _tabbedPane.add(makeCandidateAsterismsPanel());
         panel.add(_tabbedPane, new GridBagConstraints() {{
             gridx = 0;
-            gridy = 6;
+            gridy = 7;
             gridwidth = 4;
             weightx = 1;
             weighty = 1;
@@ -467,7 +464,7 @@ public class GemsGuideStarSearchDialog extends JFrame {
     private void makeCandidateGuideStarsPanel() {
         _candidateGuideStarsPanel.setName("Candidate Guide Stars");
         _candidateGuideStarsPanel.add(_candidateGuideStarsTable, BorderLayout.CENTER);
-        _candidateGuideStarsPanel.add(new JLabel("Select to view in position editor. Uncheck to exclude from asterism search."),
+        _candidateGuideStarsPanel.add(new JLabel("Select to highlight in the Position Editor. Uncheck to exclude from the automatic asterism search."),
                 BorderLayout.SOUTH);
     }
 
