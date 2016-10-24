@@ -114,25 +114,16 @@ public class TpeGuidePosFeature extends TpePositionFeature
     }
 
     private SPTarget createNewTarget(final TpeMouseEvent tme) {
-        final SPTarget pos;
-
-        final Option<SiderealTarget> skyObjectOpt = tme.skyObject;
-        if (!skyObjectOpt.isEmpty()) {
-
-            final SiderealTarget st = skyObjectOpt.getValue();
-
-            pos = new SPTarget(st);
-        } else {
-            // No SkyObject info is present so we use the old way of creating
-            // a target from a mouse event.
+        final Option<SiderealTarget> targetOpt = tme.target;
+        return targetOpt.map(SPTarget::new).getOrElse(() -> {
             final double ra  = tme.pos.ra().toDegrees();
             final double dec = tme.pos.dec().toDegrees();
-
-            pos = new SPTarget(ra, dec);
-            pos.setName(tme.name.getOrElse(""));
-        }
-
-        return pos;
+            // No SkyObject info is present so we use the old way of creating
+            // a target from a mouse event using only the coordinates.
+            SPTarget target = new SPTarget(ra, dec);
+            target.setName(tme.name.getOrElse(""));
+            return target;
+        });
     }
 
     // Creatable item for a particular guider.  There will be one for each
@@ -270,7 +261,7 @@ public class TpeGuidePosFeature extends TpePositionFeature
         groups.forEach(group -> res.add(new GuiderGroupCreatableItem(group)));
 
         // Sort the list by label.
-        Collections.sort(res, (item1, item2) -> item1.getLabel().compareTo(item2.getLabel()));
+        res.sort(Comparator.comparing(TpeCreatableItem::getLabel));
 
         return res;
     }

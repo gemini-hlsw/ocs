@@ -23,7 +23,7 @@ class CandidateGuideStarsTable extends TableDisplay {
     // Used to select a table row when the symbol is selected
     private SymbolSelectionListener symbolListener = new SymbolSelectionListener() {
 
-        public void symbolSelected(SymbolSelectionEvent e) {
+        public void symbolSelected(final SymbolSelectionEvent e) {
             if (!_ignoreSelection && e.getTable() == getTableQueryResult()) {
                 _ignoreSelection = true;
                 try {
@@ -35,7 +35,7 @@ class CandidateGuideStarsTable extends TableDisplay {
             }
         }
 
-        public void symbolDeselected(SymbolSelectionEvent e) {
+        public void symbolDeselected(final SymbolSelectionEvent e) {
             if (!_ignoreSelection && e.getTable() == getTableQueryResult()) {
                 _ignoreSelection = true;
                 try {
@@ -54,12 +54,12 @@ class CandidateGuideStarsTable extends TableDisplay {
         public void valueChanged(ListSelectionEvent e) {
             if (e.getValueIsAdjusting() || _ignoreSelection)
                 return;
-            ListSelectionModel model = getTable().getSelectionModel();
-            int first = e.getFirstIndex();
-            int last = e.getLastIndex();
+            final ListSelectionModel model = getTable().getSelectionModel();
+            final int first = e.getFirstIndex();
+            final int last = e.getLastIndex();
             if (first != -1 && last != -1) {
                 for (int i = first; i <= last; i++) {
-                    int index = getTable().getSortedRowIndex(i);
+                    final int index = getTable().getSortedRowIndex(i);
                     if (model.isSelectedIndex(i)) {
                         _plotter.selectSymbol(getTableQueryResult(), index);
                     } else {
@@ -71,12 +71,13 @@ class CandidateGuideStarsTable extends TableDisplay {
     };
 
 
-    public CandidateGuideStarsTable(TablePlotter plotter) {
+    CandidateGuideStarsTable(final TablePlotter plotter) {
+        super();
         _plotter = plotter;
         getTable().setSortingAllowed(false); // REL-560: Sorting code doesn't seem to handle editable columns correctly
     }
 
-    public void setTableModel(CandidateGuideStarsTableModel tableModel) {
+    public void setTableModel(final CandidateGuideStarsTableModel tableModel) {
         unplot();
         _tableModel = tableModel;
         setModel(_tableModel.getTableQueryResult());

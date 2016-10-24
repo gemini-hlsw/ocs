@@ -1,14 +1,13 @@
 package jsky.app.ot.tpe.gems;
 
 import edu.gemini.ags.gems.GemsUtils4Java;
+import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.core.SiderealTarget;
 import edu.gemini.catalog.api.UCAC4$;
 import jsky.catalog.FieldDesc;
 import jsky.catalog.FieldDescAdapter;
 import jsky.catalog.TableQueryResult;
-import jsky.catalog.skycat.SkycatCatalog;
 import jsky.catalog.skycat.SkycatConfigEntry;
-import jsky.catalog.skycat.SkycatConfigFile;
 import jsky.catalog.skycat.SkycatTable;
 
 import javax.swing.table.DefaultTableModel;
@@ -25,26 +24,31 @@ class CandidateGuideStarsTableModel extends DefaultTableModel {
         CHECK, ID, _r, R, UC, NIR_BAND, RA, DEC, UNUSED_BAND1, UNUSED_BAND2
     }
 
+    private static final String RA_COL = "ra_col";
+    private static final String DEC_COL = "dec_col";
+    private static final String SERV_TYPE = "serv_type";
+    private static final String LONG_NAME = "long_name";
+
     private final String RA_TITLE = "RA";
     private final String DEC_TITLE = "Dec";
 
     // User interface model
-    private GemsGuideStarSearchModel _model;
+    private final GemsGuideStarSearchModel _model;
     private final boolean _isUCAC4;
 
     // The selected NIR band
-    private String _nirBand;
+    private final String _nirBand;
 
     // The unselected bands (displayed at end)
-    private String[] _unusedBands;
+    private final String[] _unusedBands;
 
     // Table column names
-    private Vector<String> _columnNames;
+    private final Vector<String> _columnNames;
 
-    // SkyObjects corresponding to the table rows
+    // SideralTargets corresponding to the table rows
     private List<SiderealTarget> _siderealTargets;
 
-    public CandidateGuideStarsTableModel(GemsGuideStarSearchModel model) {
+    CandidateGuideStarsTableModel(final GemsGuideStarSearchModel model) {
         _model = model;
         _nirBand = _model.getBand().name();
         _unusedBands = getOtherNirBands(_nirBand);
@@ -54,7 +58,7 @@ class CandidateGuideStarsTableModel extends DefaultTableModel {
     }
 
     private Vector<String> makeColumnNames() {
-        Vector<String> columnNames = new Vector<>();
+        final Vector<String> columnNames = new Vector<>();
         columnNames.add(""); // checkbox column
         columnNames.add("Id");
         if (_isUCAC4) {
@@ -72,7 +76,7 @@ class CandidateGuideStarsTableModel extends DefaultTableModel {
     }
 
     private String[] getOtherNirBands(String band) {
-        String[] bands = new String[2];
+        final String[] bands = new String[2];
         if ("J".equals(band)) {
             bands[0] = "H";
             bands[1] = "K";
@@ -88,7 +92,7 @@ class CandidateGuideStarsTableModel extends DefaultTableModel {
 
     private Vector<Vector<Object>> makeDataVector() {
         _siderealTargets = GemsUtils4Java.uniqueTargets(_model.getGemsCatalogSearchResults());
-        Vector<Vector<Object>> rows = new Vector<>();
+        final Vector<Vector<Object>> rows = new Vector<>();
         for (SiderealTarget siderealTarget : _siderealTargets) {
             if (_isUCAC4) {
                 rows.add(CatalogUtils4Java.makeUCAC4Row(siderealTarget, _nirBand, _unusedBands));
@@ -99,14 +103,13 @@ class CandidateGuideStarsTableModel extends DefaultTableModel {
         return rows;
     }
 
-
     @Override
-    public boolean isCellEditable(int row, int column) {
-        return column == 0;
+    public boolean isCellEditable(final int row, final int column) {
+        return column == Cols.CHECK.ordinal();
     }
 
     @Override
-    public Class<?> getColumnClass(int columnIndex) {
+    public Class<?> getColumnClass(final int columnIndex) {
         if (columnIndex == Cols.CHECK.ordinal())
             return Boolean.class;
         if (columnIndex == Cols.ID.ordinal())
@@ -118,7 +121,7 @@ class CandidateGuideStarsTableModel extends DefaultTableModel {
     }
 
     public FieldDesc[] getFields() {
-        List<FieldDescAdapter> fields = new ArrayList<>();
+        final List<FieldDescAdapter> fields = new ArrayList<>();
         for(String columnName: _columnNames) {
             FieldDescAdapter desc = new FieldDescAdapter(columnName);
             if (columnName.equals(RA_TITLE)) {
@@ -137,16 +140,21 @@ class CandidateGuideStarsTableModel extends DefaultTableModel {
     }
 
     @SuppressWarnings("unchecked")
-    public TableQueryResult getTableQueryResult() {
-        String raPosition = String.valueOf(_columnNames.indexOf(RA_TITLE));
-        String decPosition = String.valueOf(_columnNames.indexOf(DEC_TITLE));
-        Properties props = new Properties();
-        props.setProperty(SkycatConfigFile.RA_COL, raPosition);
-        props.setProperty(SkycatConfigFile.DEC_COL, decPosition);
-        props.setProperty(SkycatConfigFile.SERV_TYPE, "catalog");
-        props.setProperty(SkycatConfigFile.LONG_NAME, "ucac4");
-        SkycatConfigEntry entry = new SkycatConfigEntry(props);
-        SkycatTable skycatTable = new SkycatTable(entry, getDataVector(), getFields()) {
+    TableQueryResult getTableQueryResult() {
+        final String raPosition = String.valueOf(_columnNames.indexOf(RA_TITLE));
+        final String decPosition = String.valueOf(_columnNames.indexOf(DEC_TITLE));
+        final Properties props = new Properties();
+        props.setProperty(RA_COL, raPosition);
+        props.setProperty(DEC_COL, decPosition);
+        props.setProperty(SERV_TYPE, "catalog");
+        props.setProperty(LONG_NAME, "ucac4");
+        final SkycatConfigEntry entry = new SkycatConfigEntry(props);
+        return new SkycatTable(entry, CandidateGuideStarsTableModel.this.getDataVector(), getFields()) {
+            @Override
+            public Option<SiderealTarget> getSiderealTarget(int i) {
+                return _model.targetAt(i);
+            }
+
             @Override
             public boolean isCellEditable(int rowIndex, int columnIndex) {
                 return columnIndex == Cols.CHECK.ordinal();
@@ -157,20 +165,17 @@ class CandidateGuideStarsTableModel extends DefaultTableModel {
                 return "GEMS"; // see entry in ot.skycat.cfg - needed for GemsSkyObjectFactory
             }
         };
-        skycatTable.setCatalog(new SkycatCatalog(entry));
-        return skycatTable;
     }
 
     /**
-     * Returns a list of SkyObjects corresponding to the checked (or unchecked) rows in the table
-     * @param checked if true, return the checked rows (candidates), otherwise the unchecked (non-candidates)
+     * Returns a list of SiderealTargets corresponding to the checked rows in the table
      */
-    public List<SiderealTarget> getCandidates(boolean checked) {
-        List<SiderealTarget> result = new ArrayList<>();
-        int numRows = getRowCount();
-        int col = Cols.CHECK.ordinal();
+    List<SiderealTarget> getCandidates() {
+        final List<SiderealTarget> result = new ArrayList<>();
+        final int numRows = getRowCount();
+        final int col = Cols.CHECK.ordinal();
         for(int row = 0; row < numRows; row++) {
-            if ((Boolean)getValueAt(row, col) == checked) {
+            if (!((Boolean) getValueAt(row, col))) {
                 result.add(_siderealTargets.get(row));
             }
         }

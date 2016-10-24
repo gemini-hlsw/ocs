@@ -3,6 +3,9 @@ package jsky.app.ot.tpe.gems;
 import edu.gemini.ags.gems.GemsGuideStarSearchOptions.*;
 import edu.gemini.ags.gems.GemsCatalogSearchResults;
 import edu.gemini.ags.gems.GemsGuideStars;
+import edu.gemini.shared.util.immutable.ImOption;
+import edu.gemini.shared.util.immutable.Option;
+import edu.gemini.spModel.core.SiderealTarget;
 
 import java.util.List;
 
@@ -12,7 +15,6 @@ import java.util.List;
 class GemsGuideStarSearchModel {
 
     private CatalogChoice _catalog;
-
     private NirBandChoice _band;
     private AnalyseChoice _analyseChoice;
     private boolean _reviewCandidatesBeforeSearch;
@@ -24,7 +26,7 @@ class GemsGuideStarSearchModel {
         return _catalog;
     }
 
-    public void setCatalog(CatalogChoice catalog) {
+    public void setCatalog(final CatalogChoice catalog) {
         _catalog = catalog;
     }
 
@@ -32,7 +34,7 @@ class GemsGuideStarSearchModel {
         return _band;
     }
 
-    public void setBand(NirBandChoice band) {
+    public void setBand(final NirBandChoice band) {
         _band = band;
     }
 
@@ -40,11 +42,11 @@ class GemsGuideStarSearchModel {
         return _analyseChoice;
     }
 
-    void setAnalyseChoice(AnalyseChoice analyseChoice) {
+    void setAnalyseChoice(final AnalyseChoice analyseChoice) {
         _analyseChoice = analyseChoice;
     }
 
-    void setReviewCandidatesBeforeSearch(boolean reviewCanditatesBeforeSearch) {
+    void setReviewCandidatesBeforeSearch(final boolean reviewCanditatesBeforeSearch) {
         _reviewCandidatesBeforeSearch = reviewCanditatesBeforeSearch;
     }
 
@@ -52,7 +54,7 @@ class GemsGuideStarSearchModel {
         return _reviewCandidatesBeforeSearch;
     }
 
-    void setAllowPosAngleAdjustments(boolean allowPosAngleAdjustments) {
+    void setAllowPosAngleAdjustments(final boolean allowPosAngleAdjustments) {
         _allowPosAngleAdjustments = allowPosAngleAdjustments;
     }
 
@@ -64,7 +66,7 @@ class GemsGuideStarSearchModel {
         return _gemsCatalogSearchResults;
     }
 
-    void setGemsCatalogSearchResults(List<GemsCatalogSearchResults> gemsCatalogSearchResults) {
+    void setGemsCatalogSearchResults(final List<GemsCatalogSearchResults> gemsCatalogSearchResults) {
         _gemsCatalogSearchResults = gemsCatalogSearchResults;
     }
 
@@ -72,7 +74,11 @@ class GemsGuideStarSearchModel {
         return _gemsGuideStars;
     }
 
-    void setGemsGuideStars(List<GemsGuideStars> gemsGuideStars) {
+    void setGemsGuideStars(final List<GemsGuideStars> gemsGuideStars) {
         _gemsGuideStars = gemsGuideStars;
+    }
+
+    Option<SiderealTarget> targetAt(final int i) {
+        return ImOption.apply(_gemsCatalogSearchResults.get(0)).flatMap(c -> c.targetAt(i));
     }
 }

@@ -103,8 +103,8 @@ public class TpeTargetPosFeature extends TpePositionFeature
                 final TargetObsComp obsComp = getTargetObsComp();
                 if (obsComp == null) return;
 
-                final Option<SiderealTarget> skyObjectOpt = tme.skyObject;
-                SPTarget userPos = skyObjectOpt.map(SPTarget::new).getOrElse(() -> {
+                final Option<SiderealTarget> targetOpt = tme.target;
+                SPTarget userPos = targetOpt.map(SPTarget::new).getOrElse(() -> {
                     final double ra  = tme.pos.ra().toDegrees();
                     final double dec = tme.pos.dec().toDegrees();
                     // No SkyObject info is present so we use the old way of creating

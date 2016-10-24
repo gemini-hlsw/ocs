@@ -63,17 +63,6 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
     }
 
     /**
-     * Create an instance for one time use.
-     */
-    public GemsGuideStarWorker(scala.concurrent.ExecutionContext ec) {
-        ProgressPanel progressPanel = ProgressPanel.makeProgressPanel("GeMS Strehl Calculations",
-                TpeManager.create().getImageWidget());
-        progressPanel.addActionListener(e -> interrupted = true);
-        init(progressPanel);
-        this.ec = ec;
-    }
-
-    /**
      * Called by constructors
      */
     public void init(StatusLogger statusLogger) {
@@ -222,7 +211,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
      * @param obsContext used to getthe current pos angle
      */
     private static Set<edu.gemini.spModel.core.Angle> getPosAngles(ObsContext obsContext) {
-        final Set<edu.gemini.spModel.core.Angle> posAngles = new TreeSet<>((a1, a2) -> Double.compare(a1.toDegrees(), a2.toDegrees()));
+        final Set<edu.gemini.spModel.core.Angle> posAngles = new TreeSet<>(Comparator.comparingDouble(edu.gemini.spModel.core.Angle::toDegrees));
 
         posAngles.add(ModelConverters.toNewAngle(obsContext.getPositionAngle()));
         posAngles.add(ModelConverters.toNewAngle(new Angle(0., Angle.Unit.DEGREES)));
