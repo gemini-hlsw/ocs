@@ -182,6 +182,9 @@ public final class GmosPrinter extends PrinterBase {
             } else if (instrument.getIfuMethod().get() instanceof IfuRadial) {
                 final IfuRadial ifu = (IfuRadial) instrument.getIfuMethod().get();
                 s += "with mulitple IFU elements arranged from " + ifu.minOffset() + " to " + ifu.maxOffset() + "arcsecs.";
+            } else if (instrument.getIfuMethod().get() instanceof IfuSum) {
+                final IfuSum ifu = (IfuSum) instrument.getIfuMethod().get();
+                s += " with IFU elements summed within " + ifu.num() + "arcsecs of center.";
             } else {
                 throw new Error("invalid IFU type");
             }
