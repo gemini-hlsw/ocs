@@ -29,7 +29,9 @@ public final class GNIRSConstants extends InstConstants {
     public static final ItemKey CENTRAL_WAVELENGTH_KEY = key(CENTRAL_WAVELENGTH_PROP);
     public static final String CENTRAL_WAVELENGTH_ORDER_N_PROP = "centralWavelengthOrderN";
     public static final String FILTER_PROP = "filter";
+    public static final ItemKey FILTER_KEY = key(FILTER_PROP);
     public static final String ACQUISITION_MIRROR_PROP = "acquisitionMirror";
+    public static final ItemKey ACQUISITION_MIRROR_KEY = key(ACQUISITION_MIRROR_PROP);
 
     public static final double DEF_EXPOSURE_TIME = 17.0; // sec (by default settings)
     public static final double DEF_CENTRAL_WAVELENGTH = 2.2; // um (band=K)

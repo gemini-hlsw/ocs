@@ -4,6 +4,7 @@ import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.shared.util.immutable.DefaultImList;
 import edu.gemini.shared.util.immutable.ImList;
+import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.skycalc.Angle;
 import edu.gemini.spModel.config.ConfigPostProcessor;
@@ -883,6 +884,14 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
         final Config[] configs = in.getAllSteps();
 
         for (Config c : configs) {
+            // Override the observing wavelength for acquisition steps.
+            final AcquisitionMirror am = (AcquisitionMirror) c.getItemValue(GNIRSConstants.ACQUISITION_MIRROR_KEY);
+            if (am == AcquisitionMirror.IN) {
+                final Option<Filter> f  = ImOption.apply((Filter) c.getItemValue(GNIRSConstants.FILTER_KEY));
+                final Option<Double> wl = f.flatMap(f0 -> ImOption.apply(f0.wavelength()));
+                wl.foreach(d -> c.putItem(GNIRSConstants.OBSERVING_WAVELENGTH_KEY, String.format("%.3f", d)));
+            }
+
             if (isCalStep(c)) {
                 final Double expTime = calExposureTime(c);
                 if (expTime != null) {

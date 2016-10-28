@@ -9,6 +9,7 @@ package edu.gemini.spModel.obscomp;
 
 import edu.gemini.spModel.config2.ItemKey;
 
+import static edu.gemini.spModel.seqcomp.SeqConfigNames.INSTRUMENT_KEY;
 import static edu.gemini.spModel.seqcomp.SeqConfigNames.OBSERVE_KEY;
 
 /**
@@ -28,6 +29,7 @@ public class InstConstants {
     public static final ItemKey EXPOSURE_TIME_KEY = new ItemKey(OBSERVE_KEY, EXPOSURE_TIME_PROP);
 
     public static final String OBSERVING_WAVELENGTH_PROP = "observingWavelength";
+    public static final ItemKey OBSERVING_WAVELENGTH_KEY = new ItemKey(INSTRUMENT_KEY, OBSERVING_WAVELENGTH_PROP);
 
     public static final String OBSERVATIONID_PROP = "observationId";
 
