@@ -6,6 +6,7 @@
 //
 package edu.gemini.spModel.gemini.gnirs;
 
+import edu.gemini.pot.sp.ISPNode;
 import edu.gemini.pot.sp.ISPObsComponent;
 
 import edu.gemini.pot.sp.SPComponentType;
@@ -26,6 +27,16 @@ public final class InstGNIRSNI extends DefaultInstNodeInitializer {
 
     @Override public SPInstObsComp createDataObject() {
         return new InstGNIRS();
+    }
+
+    @Override public void updateNode(ISPNode n) {
+        super.updateNode(n);
+
+        // REL-2646: make sure that new GNIRS components correctly set the
+        // acquisition observing wavelength.
+        final InstGNIRS gnirs = (InstGNIRS) n.getDataObject();
+        gnirs.setOverrideAcqObsWavelength(true);
+        n.setDataObject(gnirs);
     }
 
 }

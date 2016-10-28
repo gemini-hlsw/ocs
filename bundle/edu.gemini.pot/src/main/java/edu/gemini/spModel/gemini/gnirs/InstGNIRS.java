@@ -80,6 +80,14 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
     public static final PropertyDescriptor ACQUISITION_MIRROR_PROP;
     public static final PropertyDescriptor POS_ANGLE_CONSTRAINT_PROP;
 
+    // REL-2646.  This is an unfortunate requirement that falls out of REL-2646.
+    // The observing wavelength for acquisition observations should be computed
+    // based on the imaging filter.  Unfortunately in the past this was not
+    // done.  To avoid setting the observing wavelength during sequence
+    // construction for old observed observations, we have to track a property
+    // in the model that is set during migration.
+    public static final PropertyDescriptor OVERRIDE_ACQ_OBS_WAVELENGTH_PROP;
+
     public static final PropertyDescriptor PORT_PROP;
 
     private static final Map<String, PropertyDescriptor> PRIVATE_PROP_MAP = new TreeMap<>();
@@ -119,6 +127,8 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
         WELL_DEPTH_PROP = initProp("wellDepth", query_yes, iter_no);
         PORT_PROP = initProp("issPort", query_yes, iter_no);
         POS_ANGLE_CONSTRAINT_PROP = initProp("posAngleConstraint", query_no, iter_no);
+
+        OVERRIDE_ACQ_OBS_WAVELENGTH_PROP = initProp("overrideAcqObsWavelength", query_no, iter_no);
     }
 
     private PixelScale _pixelScale = PixelScale.DEFAULT;
@@ -138,7 +148,9 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
 
     private PosAngleConstraint _posAngleConstraint = PosAngleConstraint.FIXED;
 
-    private static final String _VERSION = "2014A-1";
+    private boolean _overrideAcqObsWavelength = true;
+
+    private static final String _VERSION = "2017A-1";
 
     // table of wavelengths per order
     private transient double[] _centralWavelengthOrderN = null;
@@ -283,6 +295,14 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
             _acquisitionMirror = newValue;
             firePropertyChange(ACQUISITION_MIRROR_PROP.getName(), oldValue, newValue);
         }
+    }
+
+    public boolean isOverrideAcqObsWavelength() {
+        return _overrideAcqObsWavelength;
+    }
+
+    public void setOverrideAcqObsWavelength(boolean newValue) {
+        _overrideAcqObsWavelength = newValue;
     }
 
     // ------------------------------------------------------------------------
@@ -692,6 +712,8 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
         Pio.addParam(factory, paramSet, FILTER_PROP, getFilter().name());
         Pio.addParam(factory, paramSet, POS_ANGLE_CONSTRAINT_PROP.getName(), getPosAngleConstraint().name());
 
+        Pio.addBooleanParam(factory, paramSet, OVERRIDE_ACQ_OBS_WAVELENGTH_PROP.getName(), isOverrideAcqObsWavelength());
+
         Pio.addParam(factory, paramSet, PORT_PROP, port.name());
 
         return paramSet;
@@ -761,6 +783,10 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
             _setPosAngleConstraint(PosAngleConstraint.PARALLACTIC_ANGLE);
         else if (v != null)
             _setPosAngleConstraint(v);
+
+        setOverrideAcqObsWavelength(
+            Pio.getBooleanValue(paramSet, OVERRIDE_ACQ_OBS_WAVELENGTH_PROP.getName(), true)
+        );
 
         v = Pio.getValue(paramSet, PORT_PROP);
         if (v == null) {
@@ -886,7 +912,7 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
         for (Config c : configs) {
             // Override the observing wavelength for acquisition steps.
             final AcquisitionMirror am = (AcquisitionMirror) c.getItemValue(GNIRSConstants.ACQUISITION_MIRROR_KEY);
-            if (am == AcquisitionMirror.IN) {
+            if (isOverrideAcqObsWavelength() && (am == AcquisitionMirror.IN)) {
                 final Option<Filter> f  = ImOption.apply((Filter) c.getItemValue(GNIRSConstants.FILTER_KEY));
                 final Option<Double> wl = f.flatMap(f0 -> ImOption.apply(f0.wavelength()));
                 wl.foreach(d -> c.putItem(GNIRSConstants.OBSERVING_WAVELENGTH_KEY, String.format("%.2f", d)));

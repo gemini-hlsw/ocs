@@ -3,6 +3,7 @@ package edu.gemini.spModel.io.impl.migration
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.spModel.core.{ProgramId, StandardProgramId, Site}
 import edu.gemini.spModel.io.impl.SpIOTags
+import edu.gemini.spModel.obsrecord.ObsExecRecord
 import edu.gemini.spModel.pio.xml.PioXmlUtil
 import edu.gemini.spModel.pio.{Container, ParamSet, Document, Version}
 
@@ -65,6 +66,18 @@ trait Migration {
   protected def obs(d: Document): List[ParamSet] =
     d.findContainers(SPComponentType.OBSERVATION_BASIC)
      .map(_.getParamSet(ParamSetObservation))
+
+  protected def isExecuted(obs: Container): Boolean =
+    (for {
+      log <- obs.findContainers(SPComponentType.OBS_EXEC_LOG)
+      dob <- log.dataObject.toList
+      oer <- dob.paramSet(ObsExecRecord.PARAM_SET).toList
+      dst <- oer.paramSet(ObsExecRecord.DATASETS_PARAM_SET).toList
+    } yield dst.getParamSetCount).exists(_ > 0)
+
+  /** all observation containers that match a predicate */
+  protected def findObservations(doc: Document)(p: Container => Boolean): List[Container] =
+    doc.findContainers(SPComponentType.OBSERVATION_BASIC).filter(p)
 
   /** Writes the document to an XML String for debugging. */
   protected def formatDocument(d: Document): String = {

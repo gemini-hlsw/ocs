@@ -1,6 +1,7 @@
 package edu.gemini.spModel.io.impl.migration
 
 import edu.gemini.pot.sp.SPComponentType
+import edu.gemini.spModel.data.ISPDataObject
 import edu.gemini.spModel.pio.{Container, ContainerParent, ParamSet}
 
 import scala.collection.JavaConverters._
@@ -31,6 +32,9 @@ object PioSyntax {
     def paramSets: List[ParamSet] =
       c.getParamSets.asInstanceOf[java.util.List[ParamSet]].asScala.toList
 
+    def dataObject: Option[ParamSet] =
+      paramSets.find(_.getKind == ISPDataObject.PARAM_SET_KIND)
+
     def allParamSets: List[ParamSet] = {
       val ps = paramSets
       ps ++ ps.flatMap(_.allParamSets)
@@ -42,6 +46,9 @@ object PioSyntax {
 
     def paramSets: List[ParamSet] =
       p.getParamSets.asScala.toList
+
+    def paramSet(n: String): Option[ParamSet] =
+      paramSets.find(_.getName == n)
 
     def allParamSets: List[ParamSet] = {
       val ps = paramSets
