@@ -880,11 +880,11 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
     }
 
     @Override public ConfigSequence postProcessSequence(ConfigSequence in) {
-        Config[] configs = in.getAllSteps();
+        final Config[] configs = in.getAllSteps();
 
         for (Config c : configs) {
             if (isCalStep(c)) {
-                Double expTime = calExposureTime(c);
+                final Double expTime = calExposureTime(c);
                 if (expTime != null) {
                     c.putItem(ReadMode.KEY, selectCalReadMode(expTime));
                 }

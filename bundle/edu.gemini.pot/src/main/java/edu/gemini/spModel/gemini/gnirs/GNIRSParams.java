@@ -890,7 +890,7 @@ public class GNIRSParams {
                 case PS_005: return (blue) ? LONG_BLUE  : LONG_RED;
                 case PS_015: return (blue) ? SHORT_BLUE : SHORT_RED;
             }
-            throw new RuntimeException("Unexecpted pixel scale: " + ps);
+            throw new RuntimeException("Unexpected pixel scale: " + ps);
         }
     }
 
