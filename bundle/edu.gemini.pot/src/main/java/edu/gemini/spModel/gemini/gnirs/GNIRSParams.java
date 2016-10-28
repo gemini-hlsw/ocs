@@ -739,13 +739,13 @@ public class GNIRSParams {
         ORDER_5("order 5 (J)", "J", 1.25),
         ORDER_4("order 4 (H-MK: 1.65um)", "H", "order 4 (H)", 1.65),
         ORDER_3("order 3 (K)", "K", 2.20),
-        ORDER_2("order 2 (L)", "L"),
-        ORDER_1("order 1 (M)", "M"),
+        ORDER_2("order 2 (L)", "L", 3.50),
+        ORDER_1("order 1 (M)", "M", 4.80),
         // Added for OT-349
-        H2("H2: 2.12um", "H2", 2.122),
-        H_plus_ND100X("H + ND100X","H+ND100X"),
-        H2_plus_ND100X("H2 + ND100X","H2+ND100X"),
-        PAH("PAH: 3.3um", "PAH", 3.295),
+        H2("H2: 2.12um", "H2", 2.12),
+        H_plus_ND100X("H + ND100X","H+ND100X",    1.65),
+        H2_plus_ND100X("H2 + ND100X","H2+ND100X", 2.12),
+        PAH("PAH: 3.3um", "PAH", 3.30),
 
         // Added for REL-444
         Y("Y-MK: 1.03um", "Y", "Y: 1.03um", 1.03),

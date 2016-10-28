@@ -889,7 +889,7 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
             if (am == AcquisitionMirror.IN) {
                 final Option<Filter> f  = ImOption.apply((Filter) c.getItemValue(GNIRSConstants.FILTER_KEY));
                 final Option<Double> wl = f.flatMap(f0 -> ImOption.apply(f0.wavelength()));
-                wl.foreach(d -> c.putItem(GNIRSConstants.OBSERVING_WAVELENGTH_KEY, String.format("%.3f", d)));
+                wl.foreach(d -> c.putItem(GNIRSConstants.OBSERVING_WAVELENGTH_KEY, String.format("%.2f", d)));
             }
 
             if (isCalStep(c)) {
