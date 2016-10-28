@@ -23,7 +23,6 @@ import edu.gemini.spModel.gemini.calunit.smartgcal.CalibrationKey;
 import edu.gemini.spModel.gemini.calunit.smartgcal.CalibrationKeyProvider;
 import edu.gemini.spModel.gemini.calunit.smartgcal.keys.CalibrationKeyImpl;
 import edu.gemini.spModel.gemini.calunit.smartgcal.keys.ConfigKeyFlamingos2;
-import edu.gemini.spModel.gemini.parallacticangle.ParallacticAngleSupportInst;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.guide.GuideProbeProvider;
 import edu.gemini.spModel.guide.GuideProbeUtil;
@@ -46,10 +45,7 @@ import edu.gemini.spModel.target.env.GuideGroup;
 import edu.gemini.spModel.target.env.GuideProbeTargets;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
-import edu.gemini.spModel.telescope.IssPort;
-import edu.gemini.spModel.telescope.IssPortProvider;
-import edu.gemini.spModel.telescope.PosAngleConstraint;
-import edu.gemini.spModel.telescope.PosAngleConstraintAware;
+import edu.gemini.spModel.telescope.*;
 import edu.gemini.spModel.type.*;
 import edu.gemini.spModel.util.SPTreeUtil;
 
@@ -59,7 +55,7 @@ import java.util.*;
 import static edu.gemini.spModel.seqcomp.SeqConfigNames.INSTRUMENT_CONFIG_NAME;
 import static edu.gemini.spModel.seqcomp.SeqConfigNames.INSTRUMENT_KEY;
 
-public final class Flamingos2 extends ParallacticAngleSupportInst
+public final class Flamingos2 extends ParallacticAngleInstrument
         implements PropertyProvider, GuideProbeProvider, IssPortProvider, ElectronicOffsetProvider,
         PlannedTime.StepCalculator, PosAngleConstraintAware, CalibrationKeyProvider, VignettableScienceAreaInstrument {
 

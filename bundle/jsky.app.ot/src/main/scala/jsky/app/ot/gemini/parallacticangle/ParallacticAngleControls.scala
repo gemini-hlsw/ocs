@@ -64,6 +64,7 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
           // New Scheduling block with updated start time, and updated duration (if not explicit).
           val sb = SchedulingBlock(start, currentDuration.fold(remainingDuration)(Explicit(_))(_ => remainingDuration))
 
+          println("*** Action")
           updateSchedulingBlock(sb)
         }
       }
@@ -158,6 +159,7 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
     formatter = Some(f)
     callback  = c
     ui.relativeTimeMenu.rebuild()
+    println("*** init")
     resetComponents()
   }
 
@@ -191,6 +193,7 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
       e      <- editor
       ispObs <- Option(e.getContextObservation)
     } {
+      println("*** updateSchedulingBlock")
       val spObs = ispObs.getDataObject.asInstanceOf[SPObservation]
       val sameNight = spObs.getSchedulingBlock.asScalaOpt.exists(_.sameObservingNightAs(sb))
 
@@ -257,6 +260,7 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
         isPaUi)
       dialog.pack()
       dialog.visible = true
+      println("*** displayParallacticAngleDialog")
       updateSchedulingBlock(dialog.schedulingBlock)
     }
   }
@@ -285,6 +289,7 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
    * This should be called whenever the parallactic angle components need to be reinitialized, and at initialization.
    */
   def resetComponents(): Unit = Swing.onEDT {
+    println("*** resetComponents called")
     ui.parallacticAngleFeedback.text = ""
     for {
       sb  <- editor.flatMap(_.getContextObservation.getDataObject.asInstanceOf[SPObservation].getSchedulingBlock.asScalaOpt)

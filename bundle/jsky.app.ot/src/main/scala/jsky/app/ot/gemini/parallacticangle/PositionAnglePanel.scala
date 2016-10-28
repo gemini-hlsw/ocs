@@ -181,6 +181,7 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
     // Turn off the parallactic angle changing event handling as it triggers an AGS lookup.
     ui.parallacticAngleControlsOpt.foreach(p => {
       deafTo(p)
+      println("*** PositionAnglePanel.init")
       p.init(e, s, numberFormatter)
     })
 
@@ -285,6 +286,7 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
       angleOpt.foreach(angle => {
         val degrees = angle.toDegrees
         ui.positionAngleTextField.text = numberFormatter.format(degrees)
+        println(s"*** parallacticAngleChanged: posAngle=${editor.get.getContextInstrumentDataObject.getPosAngleDegrees}, parAngle=$degrees")
         setInstPosAngle(degrees)
       })
     }

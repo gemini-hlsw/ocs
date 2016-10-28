@@ -31,7 +31,6 @@ import edu.gemini.spModel.obs.plannedtime.PlannedTime.CategorizedTimeGroup;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.Category;
 import edu.gemini.spModel.obscomp.InstConfigInfo;
 import edu.gemini.spModel.obscomp.InstConstants;
-import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.Pio;
 import edu.gemini.spModel.pio.PioFactory;
@@ -39,6 +38,7 @@ import edu.gemini.spModel.seqcomp.SeqConfigNames;
 import edu.gemini.spModel.target.obsComp.PwfsGuideProbe;
 import edu.gemini.spModel.target.obsComp.TargetObsCompConstants;
 import edu.gemini.spModel.target.offset.OffsetPosBase;
+import edu.gemini.spModel.telescope.FixedPositionAngleInstrument;
 import edu.gemini.spModel.type.*;
 
 import java.beans.PropertyDescriptor;
@@ -52,7 +52,7 @@ import static edu.gemini.spModel.seqcomp.SeqConfigNames.INSTRUMENT_KEY;
  * GPI - Gemini Planet Imager.
  * See OT tasks starting with OT-45.
  */
-public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeConsumer, PlannedTime.StepCalculator, ConfigPostProcessor {
+public class Gpi extends FixedPositionAngleInstrument implements PropertyProvider, GuideProbeConsumer, PlannedTime.StepCalculator, ConfigPostProcessor {
     // for serialization
     private static final long serialVersionUID = 4L;
 

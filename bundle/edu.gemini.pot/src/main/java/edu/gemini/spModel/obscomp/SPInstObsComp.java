@@ -1,10 +1,3 @@
-// Copyright 1997-2000
-// Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: SPInstObsComp.java 39389 2011-11-25 18:00:51Z swalker $
-//
 package edu.gemini.spModel.obscomp;
 
 import edu.gemini.pot.sp.ISPObservation;
@@ -208,6 +201,7 @@ public abstract class SPInstObsComp extends AbstractDataObject {
      */
     public void setPosAngleDegrees(double newValue) {
         double oldValue = getPosAngleDegrees();
+        System.out.println("*** setPosAngleDegrees for " + getType() + ": oldValue=" + oldValue + ", newValue=" + newValue);
         if (oldValue != newValue) {
             newValue = Angle.normalizeDegrees(newValue);
             _positionAngle = newValue;
@@ -404,8 +398,6 @@ public abstract class SPInstObsComp extends AbstractDataObject {
      * @param oldData Reference to the previous version of the instrument
      */
     public void restoreScienceDetails(final SPInstObsComp oldData) {
-        setPosAngle(oldData.getPosAngle());
     }
-
 }
 
