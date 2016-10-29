@@ -52,7 +52,6 @@ public final class Gnirs extends Instrument implements SpectroscopyInstrument {
     protected final TransmissionElement _camera;
     protected final boolean _XDisp;
     protected double _wellDepth;
-    protected String _readMode;
     protected double _linearityLimit;
 
     public Gnirs(GnirsParameters gp, ObservationDetails odp) {
