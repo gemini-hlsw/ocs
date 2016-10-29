@@ -51,8 +51,9 @@ public final class Gnirs extends Instrument implements SpectroscopyInstrument {
 
     protected final TransmissionElement _camera;
     protected final boolean _XDisp;
-    protected final double _wellDepth;
-    protected final double _linearityLimit;
+    protected double _wellDepth;
+    protected String _readMode;
+    protected double _linearityLimit;
 
     public Gnirs(GnirsParameters gp, ObservationDetails odp) {
         super(Site.GN, Bands.NEAR_IR, INSTR_DIR, FILENAME);
@@ -137,17 +138,7 @@ public final class Gnirs extends Instrument implements SpectroscopyInstrument {
                 throw new RuntimeException("Altair Guide star distance must be between 0 and 25 arcsecs for GNIRS.\n");
         }
 
-
-        if (gp.wellDepth().isEmpty()) {
-            //set read noise by exporsure time for the web-ITC
-            if (odp.exposureTime() <= 1.0) {
-                _wellDepth = DEEP_WELL;
-                _linearityLimit = DEEP_WELL_LINEARTY_LIMIT;
-            } else {
-                _wellDepth = SHALLOW_WELL;
-                _linearityLimit = SHALLOW_WELL_LINEARITY_LIMIT;
-            }
-        } else if (gp.wellDepth().get().equals(GNIRSParams.WellDepth.DEEP)) {
+        if (gp.wellDepth().equals(GNIRSParams.WellDepth.DEEP)) {
             _wellDepth = DEEP_WELL;
             _linearityLimit = DEEP_WELL_LINEARTY_LIMIT;
         } else {
