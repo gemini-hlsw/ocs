@@ -137,6 +137,7 @@ public final class Gnirs extends Instrument implements SpectroscopyInstrument {
                 throw new RuntimeException("Altair Guide star distance must be between 0 and 25 arcsecs for GNIRS.\n");
         }
 
+        //if (gp.wellDepth().get().equals(GNIRSParams.WellDepth.DEEP)) {
         if (gp.wellDepth().equals(GNIRSParams.WellDepth.DEEP)) {
             _wellDepth = DEEP_WELL;
             _linearityLimit = DEEP_WELL_LINEARTY_LIMIT;
