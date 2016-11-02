@@ -68,8 +68,8 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
     // If we are unbounded and there are any candidates, we are guaranteed success.
     val pac   = ctx.getPosAngleConstraint(UNBOUNDED)
     val cv    = CandidateValidator(params, mt, candidates)
-    val steps = pac.steps(ctx.getPositionAngle, params.stepSize.toOldModel).toList.asScala
-    val anglesWithResults  = steps.filter { angle => cv.exists(ctx.withPositionAngle(angle)) }
+    val steps = pac.steps(ctx.getPositionAngle.toNewModel, params.stepSize).toList.asScala
+    val anglesWithResults  = steps.filter { angle => cv.exists(ctx.withPositionAngle(angle.toOldModel)) }
     val successProbability = anglesWithResults.size.toDouble / steps.size.toDouble
     AgsStrategy.Estimate.toEstimate(successProbability)
   }
