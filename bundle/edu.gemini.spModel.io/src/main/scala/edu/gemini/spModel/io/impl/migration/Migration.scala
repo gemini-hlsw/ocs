@@ -67,6 +67,11 @@ trait Migration {
     d.findContainers(SPComponentType.OBSERVATION_BASIC)
      .map(_.getParamSet(ParamSetObservation))
 
+  /** Determines whether an observation should count as having been executed.
+    * @param obs observation container
+    * @return `true` if the observation has at least one dataset record;
+    *        `false` otherwise
+    */
   protected def isExecuted(obs: Container): Boolean =
     (for {
       log <- obs.findContainers(SPComponentType.OBS_EXEC_LOG)

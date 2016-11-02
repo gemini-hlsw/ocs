@@ -33,7 +33,12 @@ public final class InstGNIRSNI extends DefaultInstNodeInitializer {
         super.updateNode(n);
 
         // REL-2646: make sure that new GNIRS components correctly set the
-        // acquisition observing wavelength.
+        // acquisition observing wavelength.  This method is called by the
+        // factory after copying an instance so that new copies will definitely
+        // have the override flag set to true.  Otherwise, copies of old
+        // executed observations would still have the override flag set to false
+        // and would use the incorrect method of calculating observing
+        // wavelength from the grating central wavelength.
         final InstGNIRS gnirs = (InstGNIRS) n.getDataObject();
         gnirs.setOverrideAcqObsWavelength(true);
         n.setDataObject(gnirs);

@@ -83,9 +83,18 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
     // REL-2646.  This is an unfortunate requirement that falls out of REL-2646.
     // The observing wavelength for acquisition observations should be computed
     // based on the imaging filter.  Unfortunately in the past this was not
-    // done.  To avoid setting the observing wavelength during sequence
-    // construction for old observed observations, we have to track a property
-    // in the model that is set during migration.
+    // done and instead the observing wavelength was always taken from the
+    // grating central wavelength during sequence construction.  Old
+    // observations therefore used the wrong observing wavelength and we must
+    // continue to compute the value that was actually used for them.  To avoid
+    // setting the observing wavelength during sequence construction for old
+    // observed observations, we have to track a property in the model that is
+    // set during migration.
+    //
+    // If "override acquisition observing wavelength" is true (which it will be
+    // by default for new observations), then the new method of setting the
+    // observing wavelength from the filter will be used.  If not, the old
+    // method of using the grating central wavelength will be used.
     public static final PropertyDescriptor OVERRIDE_ACQ_OBS_WAVELENGTH_PROP;
 
     public static final PropertyDescriptor PORT_PROP;
@@ -148,6 +157,7 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
 
     private PosAngleConstraint _posAngleConstraint = PosAngleConstraint.FIXED;
 
+    // See note above where OVERRIDE_ACQ_OBS_WAVELENGTH PROP is declared.
     private boolean _overrideAcqObsWavelength = true;
 
     private static final String _VERSION = "2017A-1";
@@ -910,11 +920,15 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
         final Config[] configs = in.getAllSteps();
 
         for (Config c : configs) {
-            // Override the observing wavelength for acquisition steps.
+            // Override the observing wavelength for acquisition steps.  It must
+            // match the filter wavelength in this case (unless this is an old
+            // executed pre-2017A observation in which case we must continue to
+            // use the old method for calculating the observing wavelength).
             final AcquisitionMirror am = (AcquisitionMirror) c.getItemValue(GNIRSConstants.ACQUISITION_MIRROR_KEY);
             if (isOverrideAcqObsWavelength() && (am == AcquisitionMirror.IN)) {
                 final Option<Filter> f  = ImOption.apply((Filter) c.getItemValue(GNIRSConstants.FILTER_KEY));
                 final Option<Double> wl = f.flatMap(f0 -> ImOption.apply(f0.wavelength()));
+                // Sorry, yes observing wavelength stored as a String for GNRIS.
                 wl.foreach(d -> c.putItem(GNIRSConstants.OBSERVING_WAVELENGTH_KEY, String.format("%.2f", d)));
             }
 

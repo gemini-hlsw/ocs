@@ -16,6 +16,15 @@ object To2017A extends Migration {
 
   val fact = new PioXmlFactory
 
+  // REL-2646: Updates executed GNIRS observations with a flag that tells the
+  // sequence generation code to use the old, incorrect, observing wavelength
+  // calculation that existed before 2017A.
+  private def updateExecutedGnirs(d: Document): Unit =
+    for {
+      o <- findObservations(d)(c => hasGnirs(c) && isExecuted(c))
+      d <- gnirs(o)
+    } Pio.addBooleanParam(fact, d, InstGNIRS.OVERRIDE_ACQ_OBS_WAVELENGTH_PROP.getName, false)
+
   private def gnirs(obs: Container): Option[ParamSet] =
     for {
       g <- obs.findContainers(SPComponentType.INSTRUMENT_GNIRS).headOption
@@ -25,9 +34,4 @@ object To2017A extends Migration {
   private def hasGnirs(obs: Container): Boolean =
     gnirs(obs).isDefined
 
-  private def updateExecutedGnirs(d: Document): Unit =
-    for {
-      o <- findObservations(d)(c => hasGnirs(c) && isExecuted(c))
-      d <- gnirs(o)
-    } Pio.addBooleanParam(fact, d, InstGNIRS.OVERRIDE_ACQ_OBS_WAVELENGTH_PROP.getName, false)
 }
