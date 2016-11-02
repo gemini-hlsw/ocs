@@ -58,7 +58,10 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
         Try { text.toDouble }.toOption
 
       override def validate(): Unit = Swing.onEDT {
-        background = angle.fold(if (positionAngleConstraintComboBox.selection.item == PosAngleConstraint.UNBOUNDED) background else badBackground)(_ => defaultBackground)
+        // If this mode is computed, then do nothing.
+        if (!positionAngleConstraintComboBox.selection.item.isCalculated) {
+          background = angle.fold(badBackground)(_ => defaultBackground)
+        }
       }
     }
 
@@ -172,8 +175,8 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
 
 
   /**
-   * Initialization of the components.
-   */
+    * Initialization of the components.
+    */
   def init(e: E, s: Site): Unit = Swing.onEDT {
     editor = Some(e)
     val instrument = e.getDataObject
@@ -201,7 +204,7 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
     if (!ui.positionAngleTextField.hasFocus) {
       copyPosAngleToTextField()
     }
-    ui.positionAngleTextField.enabled = instrument.getPosAngleConstraint != PosAngleConstraint.UNBOUNDED
+    updatePATextFieldEditableState(instrument.getPosAngleConstraint)
     ui.controlsPanel.updatePanel()
     listenTo(ui.positionAngleConstraintComboBox.selection)
 
@@ -222,8 +225,10 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
     }
   }
 
-  /**
-    * The actual copying of a given pos angle to the data object.
+  private def updatePATextFieldEditableState(pac: PosAngleConstraint) =
+    ui.positionAngleTextField.editable = !pac.isCalculated
+
+  /** The actual copying of a given pos angle to the data object.
     * This is done explicitly to avoid overwriting based on minor differences in double precision and to avoid
     * adding 180 to the position angle for parallactic angle mode, which overrides BAGS flips.
     **/
@@ -252,10 +257,10 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
   }
 
   /**
-   * Called whenever a selection is made in the position angle constraint combo box.
-   * Sets the position angle constraint on the instrument, and sets up the lower controls to account for the new
-   * selection.
-   */
+    * Called whenever a selection is made in the position angle constraint combo box.
+    * Sets the position angle constraint on the instrument, and sets up the lower controls to account for the new
+    * selection.
+    */
   private def positionAngleConstraintSelected(): Unit = Swing.onEDT {
     for {
       e <- editor
@@ -266,7 +271,7 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
       e.getDataObject.setPosAngleConstraint(posAngleConstraint)
 
       // Set up the UI.
-      ui.positionAngleTextField.enabled = posAngleConstraint != PosAngleConstraint.UNBOUNDED
+      updatePATextFieldEditableState(posAngleConstraint)
       ui.controlsPanel.updatePanel()
       ui.positionAngleConstraintComboBox.selection.item match {
         case PosAngleConstraint.PARALLACTIC_ANGLE => p.resetComponents()
@@ -277,9 +282,9 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
 
 
   /**
-   * A listener method that is called whenever the parallactic angle changes.
-   * We set the position angle to the parallactic angle.
-   */
+    * A listener method that is called whenever the parallactic angle changes.
+    * We set the position angle to the parallactic angle.
+    */
   private def parallacticAngleChanged(angleOpt: Option[Angle]): Unit = Swing.onEDT {
     if (editor.exists(_.getDataObject.getPosAngleConstraint == PosAngleConstraint.PARALLACTIC_ANGLE)) {
       angleOpt.foreach(angle => {
@@ -292,10 +297,10 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
 
 
   /**
-   * Called to update the status of the parallactic angle controls. This allows / disallows the parallactic
-   * angle to be selected in the position angle constraint combo box, and if it is selected but not allowed,
-   * resets to FIXED.
-   */
+    * Called to update the status of the parallactic angle controls. This allows / disallows the parallactic
+    * angle to be selected in the position angle constraint combo box, and if it is selected but not allowed,
+    * resets to FIXED.
+    */
   def updateParallacticControls(): Unit = Swing.onEDT {
     for {
       p <- ui.parallacticAngleControlsOpt

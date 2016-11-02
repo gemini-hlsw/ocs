@@ -55,12 +55,22 @@ public enum PosAngleConstraint {
         public String description() {
             return "Best position angle";
         }
+
+        @Override
+        public boolean isCalculated() {
+            return true;
+        }
     },
 
     /** Parallactic angle allows provided pos angle, or pos angle plus 180 deg. */
     PARALLACTIC_ANGLE() {
         @Override
         public String description() { return "Average parallactic"; }
+
+        @Override
+        public boolean isCalculated() {
+            return true;
+        }
     },
 
     /** Parallactic angle is displayed, but overridden by a FIXED_180 value specified by user. */
@@ -85,6 +95,13 @@ public enum PosAngleConstraint {
      * Description of the constraint for use in creating GUI combo boxes.
      */
     public abstract String description();
+
+    /**
+     * Is this value automatically calculated?
+     */
+    public boolean isCalculated() {
+        return false;
+    }
 
     @Override
     public String toString() { return description(); }
