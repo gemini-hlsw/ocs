@@ -13,19 +13,12 @@ import junit.framework.TestCase;
 import org.junit.Test;
 
 import edu.gemini.shared.util.immutable.None;
-import edu.gemini.spModel.core.Site;
 
 import java.awt.geom.Rectangle2D;
 
 import static edu.gemini.skycalc.Angle.Unit.ARCSECS;
 import static edu.gemini.skycalc.Angle.Unit.DEGREES;
 
-/**
- * Test class for GmosOiwfsGuideProbe
- *
- * @author Nicolas A. Barriga
- * Date: Aug 25, 2010
- */
 public class GmosOiwfsGuideProbeTest extends TestCase {
 
     // test offsetIntersection
@@ -48,7 +41,7 @@ public class GmosOiwfsGuideProbeTest extends TestCase {
         inst.setPosAngle(0);
         inst.setIssPort(IssPort.UP_LOOKING);
 
-        baseContext = ObsContext.create(env, inst, None.<Site>instance(), SPSiteQuality.Conditions.BEST, null, null, None.instance());
+        baseContext = ObsContext.create(env, inst, None.instance(), SPSiteQuality.Conditions.BEST, null, null, None.instance());
     }
 
     /**
@@ -111,13 +104,13 @@ public class GmosOiwfsGuideProbeTest extends TestCase {
                         new SPTarget(coords.getRaDeg(), coords.getDecDeg()),
                         baseContext) == GuideStarValidation.VALID);
 
-        ObsContext ctx = baseContext.withPositionAngle(new Angle(90, DEGREES));
+        ObsContext ctx = baseContext.withPositionAngleJava(new Angle(90, DEGREES));
         assertFalse("Mid point of fov, after 90 degree rotation of fov.",
                 GmosOiwfsGuideProbe.instance.validate(
                         new SPTarget(coords.getRaDeg(), coords.getDecDeg()),
                         ctx) == GuideStarValidation.VALID);
 
-        ctx = baseContext.withPositionAngle(new Angle(45, DEGREES));
+        ctx = baseContext.withPositionAngleJava(new Angle(45, DEGREES));
         assertTrue("Mid point of fov, after 45 degree rotation of fov.",
                 GmosOiwfsGuideProbe.instance.validate(
                         new SPTarget(coords.getRaDeg(), coords.getDecDeg()),
@@ -148,7 +141,7 @@ public class GmosOiwfsGuideProbeTest extends TestCase {
 
         InstGmosNorth ign = (InstGmosNorth) baseContext.getInstrument();
         ign.setFPUnit(GmosNorthType.FPUnitNorth.IFU_2);
-        ObsContext    ctx = ObsContext.create(env, ign, None.<Site>instance(), SPSiteQuality.Conditions.BEST, null, null, None.instance());
+        ObsContext    ctx = ObsContext.create(env, ign, None.instance(), SPSiteQuality.Conditions.BEST, null, null, None.instance());
 
         assertFalse("Point outside of fov, after IFU selected.",
                 GmosOiwfsGuideProbe.instance.validate(
@@ -164,7 +157,6 @@ public class GmosOiwfsGuideProbeTest extends TestCase {
      *
      * @param rect where to get the corners from
      * @param shift distance to be moved. >0 means move to the outside
-     * @return
      */
     private Coordinates[] getCorners(Rectangle2D rect, Double shift){
            return new Coordinates[]{

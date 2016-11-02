@@ -101,7 +101,7 @@ case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(Sidere
     copy(usable = AgsTest.usableSiderealTarget(so: _*))
 
   def rotated(deg: Double): AgsTest =
-    copy(ctx.withPositionAngle(Angle.fromDegrees(deg).toOldModel))
+    copy(ctx.withPositionAngle(Angle.fromDegrees(deg)))
 
   def withConditions(c: Conditions): AgsTest =
     copy(ctx.withConditions(c))
@@ -313,7 +313,7 @@ case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(Sidere
 
   // Convenience function to calculate the proper rotation.
   private def rotation: AffineTransform =
-    AffineTransform.getRotateInstance(-ctx.getPositionAngle.toRadians.getMagnitude)
+    AffineTransform.getRotateInstance(-ctx.getPositionAngle.toRadians)
 
   def testBase(): Unit =
     allConditions().foreach(_.testXform())
@@ -428,7 +428,7 @@ case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(Sidere
         res match {
           case None                                       => // ok
           case Some(AgsStrategy.Selection(posAngle, Nil)) =>
-            equalPosAngles(ctx.getPositionAngle.toNewModel, posAngle)
+            equalPosAngles(ctx.getPositionAngle, posAngle)
           case Some(AgsStrategy.Selection(_,        asn)) =>
               fail("Expected nothing but got: " + asn.map { a =>
                 s"(${a.guideStar.toString}, ${a.guideProbe})"
@@ -440,14 +440,14 @@ case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(Sidere
           case None      =>
             fail(s"Expected: ($expStar, $expSpeed), but nothing selected")
           case Some(AgsStrategy.Selection(posAngle, asn)) =>
-            equalPosAngles(ctx.getPositionAngle.toNewModel, posAngle)
+            equalPosAngles(ctx.getPositionAngle, posAngle)
             asn match {
               case List(AgsStrategy.Assignment(actProbe, actStar)) =>
                 assertEquals(guideProbe, actProbe)
                 assertEqualTarget(expStar, actStar)
                 strategy.params.referenceMagnitude(actStar).foreach { mag =>
                   val actSpeed = AgsMagnitude.fastestGuideSpeed(mc, mag, ctx.getConditions)
-                  assertTrue(s"Expected: $expSpeed , actual: $actSpeed", actSpeed.exists(_ == expSpeed))
+                  assertTrue(s"Expected: $expSpeed , actual: $actSpeed", actSpeed.contains(expSpeed))
                 }
               case Nil => fail(s"Expected: ($expStar, $expSpeed), but nothing selected")
               case _   => fail(s"Multiple guide probe assignments: $asn")

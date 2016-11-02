@@ -23,7 +23,7 @@ trait VignettingArbitraries extends edu.gemini.spModel.test.SpModelArbitraries {
   def genCandidates(ctx: ObsContext): Gen[List[Coordinates]] =
     ctx.getInstrument match {
       case paca: PosAngleConstraintAware if paca.getPosAngleConstraint == FIXED_180 =>
-        val ctx180 = ctx.withPositionAngle(ctx.getPositionAngle.add(180, edu.gemini.skycalc.Angle.Unit.DEGREES))
+        val ctx180 = ctx.withPositionAngle(ctx.getPositionAngle.flip)
         for {
           a0 <- genFixedPosAngleCandidates(ctx)
           a1 <- genFixedPosAngleCandidates(ctx180)
@@ -50,7 +50,7 @@ trait VignettingArbitraries extends edu.gemini.spModel.test.SpModelArbitraries {
         // Rotate the offset in p and q by the position angle. To get the
         // p delta and q delta (which are negated because screen coords
         // are flipped)
-        val rot      = AffineTransform.getRotateInstance(-ctx.getPositionAngle.toRadians.getMagnitude)
+        val rot      = AffineTransform.getRotateInstance(-ctx.getPositionAngle.toRadians)
         val offsetPt = rot.transform(new Point2D.Double(p, q), new Point2D.Double())
         val pd       = -offsetPt.getX // arcsecs
         val qd       = -offsetPt.getY // arcsecs

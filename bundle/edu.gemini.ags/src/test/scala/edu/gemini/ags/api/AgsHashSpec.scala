@@ -101,10 +101,10 @@ class AgsHashSpec extends Specification with ScalaCheck with edu.gemini.spModel.
 
     "differ if the position angle changes significantly" in
       forAll { (ctx0: ObsContext, pa: Angle) =>
-        val ctx1 = ctx0.withPositionAngle(pa.toOldModel)
+        val ctx1 = ctx0.withPositionAngle(pa)
 
-        val pa0  = ctx0.getPositionAngle.toDegrees.getMagnitude
-        val pa1  = ctx1.getPositionAngle.toDegrees.getMagnitude
+        val pa0  = ctx0.getPositionAngle.toDegrees
+        val pa1  = ctx1.getPositionAngle.toDegrees
 
         (pa0 == pa1) == hashSame(ctx0, ctx1)
       }

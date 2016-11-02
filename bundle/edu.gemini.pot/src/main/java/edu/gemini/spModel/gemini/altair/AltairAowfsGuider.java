@@ -4,10 +4,8 @@ import edu.gemini.shared.util.immutable.*;
 import edu.gemini.skycalc.Angle;
 import edu.gemini.skycalc.Coordinates;
 import edu.gemini.skycalc.Offset;
-import edu.gemini.spModel.data.AbstractDataObject;
 import edu.gemini.spModel.gemini.nifs.InstNIFS;
 import edu.gemini.spModel.guide.*;
-import edu.gemini.spModel.obs.SchedulingBlock;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.target.SPTarget;
 
@@ -109,16 +107,13 @@ public enum AltairAowfsGuider implements OffsetValidatingGuideProbe, Validatable
 
     public Option<BoundaryPosition> checkBoundaries(final Coordinates coords, final ObsContext ctx) {
         return ctx.getBaseCoordinates().map(baseCoordinates -> {
-            final Angle positionAngle = ctx.getPositionAngle();
+            final Angle positionAngle = ctx.getPositionAngleJava();
             final Set<Offset> sciencePositions = ctx.getSciencePositions();
 
             // check positions against corrected patrol field
-            return getCorrectedPatrolField(ctx).map(new MapOp<PatrolField, BoundaryPosition>() {
-                @Override
-                public BoundaryPosition apply(PatrolField patrolField) {
-                    return patrolField.checkBoundaries(coords, baseCoordinates, positionAngle, sciencePositions);
-                }
-            }).getOrElse(BoundaryPosition.outside);
+            return getCorrectedPatrolField(ctx).map(pf ->
+                    patrolField.checkBoundaries(coords, baseCoordinates, positionAngle, sciencePositions)
+            ).getOrElse(BoundaryPosition.outside);
         });
     }
 
@@ -131,20 +126,18 @@ public enum AltairAowfsGuider implements OffsetValidatingGuideProbe, Validatable
     }
 
     @Override public Option<PatrolField> getCorrectedPatrolField(final ObsContext ctx) {
-        return ctx.getAOComponent().flatMap(new MapOp<AbstractDataObject, Option<PatrolField>>() {
-            @Override public Option<PatrolField> apply(final AbstractDataObject ado) {
-                if (ado instanceof InstAltair) {
-                    // for NIFS we must correct the patrol
-                    // (this is SCT-361 related and has been moved here from Altair_WFS_Feature class)
-                    if (ctx.getInstrument() instanceof InstNIFS) {
-                        AffineTransform correction = AffineTransform.getTranslateInstance(-InstNIFS.ALTAIR_P_OFFSET, -InstNIFS.ALTAIR_Q_OFFSET);
-                        return new Some<>(getPatrolField().getTransformed(correction));
-                    }
-                    // for all other instruments Altair does not have any correction (offsets) we need to apply to the patrol field
-                    return new Some<>(patrolField);
-                } else {
-                    return None.instance();
+        return ctx.getAOComponent().flatMap(ado -> {
+            if (ado instanceof InstAltair) {
+                // for NIFS we must correct the patrol
+                // (this is SCT-361 related and has been moved here from Altair_WFS_Feature class)
+                if (ctx.getInstrument() instanceof InstNIFS) {
+                    AffineTransform correction = AffineTransform.getTranslateInstance(-InstNIFS.ALTAIR_P_OFFSET, -InstNIFS.ALTAIR_Q_OFFSET);
+                    return new Some<>(getPatrolField().getTransformed(correction));
                 }
+                // for all other instruments Altair does not have any correction (offsets) we need to apply to the patrol field
+                return new Some<>(patrolField);
+            } else {
+                return None.instance();
             }
         });
     }

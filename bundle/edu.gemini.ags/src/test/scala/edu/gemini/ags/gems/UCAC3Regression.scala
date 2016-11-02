@@ -41,7 +41,7 @@ trait UCAC3Regression {
     val env = TargetEnvironment.create(baseTarget)
     val offsets = new java.util.HashSet[edu.gemini.skycalc.Offset]
 
-    val obsContext = ObsContext.create(env, new Gsaoi, new JSome(Site.GS), conditions, offsets, new Gems, JNone.instance()).withPositionAngle(Angle.zero.toOldModel)
+    val obsContext = ObsContext.create(env, new Gsaoi, new JSome(Site.GS), conditions, offsets, new Gems, JNone.instance()).withPositionAngle(Angle.zero)
     val gemsResults = GemsResultsAnalyzer.analyze(obsContext, posAngles.asJava, results.asJava, None)
     areGuideStarListsEqual(expectedGuideStars, gemsResults.asScala.toList)
   }

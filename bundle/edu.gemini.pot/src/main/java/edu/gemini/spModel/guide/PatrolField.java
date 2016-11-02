@@ -254,7 +254,7 @@ public class PatrolField {
     public Area usableArea(ObsContext ctx) {
         Area a = offsetIntersection(ctx.getSciencePositions());
         AffineTransform xform = new AffineTransform();
-        xform.rotate(-ctx.getPositionAngle().toRadians().getMagnitude());
+        xform.rotate(-ctx.getPositionAngle().toRadians());
         a.transform(xform);
         return a;
     }

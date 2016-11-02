@@ -78,7 +78,7 @@ object AgsHash {
 
     // Position Angle
     Option(ctx.getPositionAngle).foreach { a =>
-      a.degrees.## +=: buf
+      a.toDegrees.## +=: buf
     }
 
     // Position Angle Constraint

@@ -454,7 +454,7 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
             final Option<ObsContext> adjCtxOpt;
             final GuideGrp grp = group.grp();
             if (grp instanceof AutomaticGroup.Active) {
-                adjCtxOpt = ctxOpt.map(ctx -> ctx.withPositionAngle(edu.gemini.skycalc.Angle.degrees(((AutomaticGroup.Active) grp).posAngle().toDegrees())));
+                adjCtxOpt = ctxOpt.map(ctx -> ctx.withPositionAngle(((AutomaticGroup.Active) grp).posAngle()));
             } else {
                 adjCtxOpt = ctxOpt;
             }

@@ -80,7 +80,7 @@ object GmosOiwfsProbeArm extends ProbeArmGeometry {
     } yield {
       val ifuOffset = Offset(ifu.arcsecs[OffsetP], OffsetQ.Zero)
       val flip = ctx.getIssPort == IssPort.SIDE_LOOKING
-      val posAngle = ctx.getPositionAngle.toNewModel
+      val posAngle = ctx.getPositionAngle
       val angle = armAngle(posAngle, gsOffset, offset, ifuOffset, flip)
       ArmAdjustment(angle, gsOffset)
     }

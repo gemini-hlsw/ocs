@@ -7,10 +7,8 @@ import edu.gemini.skycalc.Angle;
 import edu.gemini.skycalc.CoordinateDiff;
 import edu.gemini.skycalc.Coordinates;
 import edu.gemini.skycalc.Offset;
-import edu.gemini.shared.skyobject.coords.HmsDegCoordinates;
 import edu.gemini.spModel.data.AbstractDataObject;
 import edu.gemini.spModel.data.ISPDataObject;
-import edu.gemini.spModel.obs.SchedulingBlock;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.target.SPTarget;
@@ -108,7 +106,7 @@ public enum GuideProbeUtil {
     }
 
     public GuideStarValidation validate(final Coordinates coords, final GuideProbe guideProbe, final ObsContext ctx) {
-        final Angle positionAngle = ctx.getPositionAngle();
+        final Angle positionAngle = ctx.getPositionAngleJava();
         final Set<Offset> sciencePositions = ctx.getSciencePositions();
         return ctx.getBaseCoordinates().map(bcs ->
             guideProbe.getCorrectedPatrolField(ctx).exists(patrolField -> {
@@ -138,7 +136,7 @@ public enum GuideProbeUtil {
             final double yOffset = -offset.q().toArcsecs().getMagnitude();
             final PatrolField offsetPatrolField = patrolField.getTransformed(AffineTransform.getTranslateInstance(xOffset, yOffset));
             // and we must rotate the patrol field according to position angle
-            final PatrolField rotatedPatrolField = offsetPatrolField.getTransformed(AffineTransform.getRotateInstance(-ctx.getPositionAngle().toRadians().getMagnitude()));
+            final PatrolField rotatedPatrolField = offsetPatrolField.getTransformed(AffineTransform.getRotateInstance(-ctx.getPositionAngle().toRadians()));
             // find distance of base position to the guide star
             return
                 guideStar.getSkycalcCoordinates(ctx.getSchedulingBlockStart()).flatMap(gcs ->

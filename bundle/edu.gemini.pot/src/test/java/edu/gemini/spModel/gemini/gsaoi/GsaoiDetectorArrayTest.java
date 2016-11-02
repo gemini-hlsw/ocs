@@ -43,7 +43,7 @@ public class GsaoiDetectorArrayTest extends TestCase {
         inst.setPosAngle(0);
         inst.setIssPort(IssPort.SIDE_LOOKING);
 
-        baseContext = ObsContext.create(env, inst, None.<Site>instance(), SPSiteQuality.Conditions.BEST, null, null, None.instance());
+        baseContext = ObsContext.create(env, inst, None.instance(), SPSiteQuality.Conditions.BEST, null, null, None.instance());
     }
 
     private void assertEmpty(Coordinates[] coordsArray) {
@@ -121,7 +121,7 @@ public class GsaoiDetectorArrayTest extends TestCase {
                 new Coordinates(new Angle( midDetector, ARCSECS), new Angle( midDetector, ARCSECS)), // 3
                 new Coordinates(new Angle( midDetector, ARCSECS), new Angle(-midDetector, ARCSECS)), // 4
         };
-        assertOrdered(coordsArray, baseContext.withPositionAngle(new Angle(90, DEGREES)));
+        assertOrdered(coordsArray, baseContext.withPositionAngleJava(new Angle(90, DEGREES)));
 
         // These fall in the gaps when the pos angle is 0, but should be in the
         // detector when rotated 45 degrees.
@@ -131,7 +131,7 @@ public class GsaoiDetectorArrayTest extends TestCase {
                 new Coordinates(new Angle(0, ARCSECS),            new Angle( midDetector, ARCSECS)), // 3
                 new Coordinates(new Angle( midDetector, ARCSECS), new Angle(0, ARCSECS)),            // 4
         };
-        assertOrdered(coordsArray, baseContext.withPositionAngle(new Angle(45, DEGREES)));
+        assertOrdered(coordsArray, baseContext.withPositionAngleJava(new Angle(45, DEGREES)));
     }
 
     @Test

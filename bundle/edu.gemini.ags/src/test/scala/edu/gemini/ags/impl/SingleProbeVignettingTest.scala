@@ -86,7 +86,7 @@ object SingleProbeVignettingTest extends Specification with ScalaCheck with Vign
     }
 
   def ctx180(ctx: ObsContext): ObsContext =
-    ctx.withPositionAngle(ctx.getPositionAngle.add(180, edu.gemini.skycalc.Angle.Unit.DEGREES))
+    ctx.withPositionAngle(ctx.getPositionAngle.flip)
 
   def contexts(ctx: ObsContext): List[ObsContext] =
     ctx.getInstrument match {
@@ -140,7 +140,7 @@ object SingleProbeVignettingTest extends Specification with ScalaCheck with Vign
 
             val res = selection.exists { sel =>
               winners.exists { case (gs, c, _, _, _) =>
-                almostEqual(sel.posAngle.toDegrees, c.getPositionAngle.toNewModel.toDegrees) &&
+                almostEqual(sel.posAngle.toDegrees, c.getPositionAngle.toDegrees) &&
                   sel.assignments.exists { _.guideStar == gs }
               }
             }

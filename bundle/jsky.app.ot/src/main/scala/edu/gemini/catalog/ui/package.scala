@@ -110,7 +110,7 @@ case class ObservationInfo(ctx: Option[ObsContext],
       val altair = strategy.collect {
         case SupportedStrategy(_, _, Some(m)) => new InstAltair() <| {_.setMode(m)}
       }
-      ObsContext.create(env, i, site.flatten.asGeminiOpt, cond, offsets.map(_.toOldModel).asJava, altair.orNull, JNone.instance()).withPositionAngle(positionAngle.toOldModel)
+      ObsContext.create(env, i, site.flatten.asGeminiOpt, cond, offsets.map(_.toOldModel).asJava, altair.orNull, JNone.instance()).withPositionAngle(positionAngle)
     }
   }
 }
@@ -164,7 +164,7 @@ object ObservationInfo {
     AgsRegistrar.currentStrategy(ctx).map(toSupportedStrategy(ctx, _, mt)),
     expandAltairModes(ctx).flatMap(c => AgsRegistrar.validStrategies(c).map(toSupportedStrategy(c, _, mt))).sorted,
     ctx.getConditions.some,
-    ctx.getPositionAngle.toNewModel,
+    ctx.getPositionAngle,
     Option(ctx.getInstrument).collect{case p: PosAngleConstraintAware => p.getPosAngleConstraint == PosAngleConstraint.FIXED_180}.getOrElse(false),
     ctx.getSciencePositions.asScala.map(_.toNewModel).toSet,
     UCAC4,
@@ -221,7 +221,7 @@ object GuidingQuality {
       gp                                          <- o.guideProbe
       st @ SiderealTarget(_, _, _, _, _, _, _, _) = t
       ctx                                         <- o.toContext
-    } yield s.strategy.analyze(ctx.withPositionAngle(ctx.getPositionAngle.add(shift.toOldModel)), o.mt, gp, st)).flatten
+    } yield s.strategy.analyze(ctx.withPositionAngle(ctx.getPositionAngle + shift), o.mt, gp, st)).flatten
   }
 }
 
@@ -230,7 +230,7 @@ case class GuidingQuality(info: Option[ObservationInfo], title: String) extends 
 
   override val lens: Target @?> AgsGuideQuality = PLens(_.fold(
     PLens.nil.run,
-    (gf.run _) andThen (_.map(_.map(x => x: Target))),
+    gf.run _ andThen (_.map(_.map(x => x: Target))),
     PLens.nil.run
   ))
 
