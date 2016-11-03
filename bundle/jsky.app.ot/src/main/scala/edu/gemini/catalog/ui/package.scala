@@ -154,7 +154,8 @@ object ObservationInfo {
     case Some(i: InstAltair) => AltairParams.Mode.values().toList.map(m => obsCtx.withAOComponent(new InstAltair() <| {_.setMode(m)})) :+ obsCtx.withoutAOComponent()
     case _                   => List(obsCtx)
   }
-  
+
+  val PosAngleConstraints = Set(PosAngleConstraint.FIXED_180, PosAngleConstraint.PARALLACTIC_OVERRIDE)
 
   def apply(ctx: ObsContext, mt: MagnitudeTable):ObservationInfo = ObservationInfo(
     ctx.some,
@@ -165,7 +166,7 @@ object ObservationInfo {
     expandAltairModes(ctx).flatMap(c => AgsRegistrar.validStrategies(c).map(toSupportedStrategy(c, _, mt))).sorted,
     ctx.getConditions.some,
     ctx.getPositionAngle,
-    Option(ctx.getInstrument).collect{case p: PosAngleConstraintAware => p.getPosAngleConstraint == PosAngleConstraint.FIXED_180}.getOrElse(false),
+    Option(ctx.getInstrument).collect{case p: PosAngleConstraintAware => PosAngleConstraints.contains(p.getPosAngleConstraint)}.getOrElse(false),
     ctx.getSciencePositions.asScala.map(_.toNewModel).toSet,
     UCAC4,
     mt)

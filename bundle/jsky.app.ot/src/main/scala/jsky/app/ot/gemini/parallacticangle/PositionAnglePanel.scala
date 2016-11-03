@@ -280,10 +280,8 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
       // Set up the UI.
       updatePATextFieldEditableState(posAngleConstraint)
       ui.controlsPanel.updatePanel()
-      ui.positionAngleConstraintComboBox.selection.item match {
-        case PosAngleConstraint.PARALLACTIC_ANGLE => p.resetComponents()
-        case _                                    =>
-      }
+      if (ParallacticAnglePosConstraints.contains(posAngleConstraint))
+        p.resetComponents()
     }
   }
 

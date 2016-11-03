@@ -164,9 +164,9 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
         case vprobe: VProbe =>
           // Filter for brightness constraints and reachability.
           val results = ctx.getPosAngleConstraint match {
-            case FIXED                         => filterBounded(List(ctx), mt, candidates)
-            case FIXED_180 | PARALLACTIC_ANGLE => filterBounded(List(ctx, ctx180(ctx)), mt, candidates)
-            case UNBOUNDED                     => filterUnbounded(ctx, mt, candidates)
+            case FIXED                                                => filterBounded(List(ctx), mt, candidates)
+            case FIXED_180 | PARALLACTIC_ANGLE | PARALLACTIC_OVERRIDE => filterBounded(List(ctx, ctx180(ctx)), mt, candidates)
+            case UNBOUNDED                                            => filterUnbounded(ctx, mt, candidates)
           }
 
           // Select the highest quality target that vignettes the least.
@@ -175,9 +175,9 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
         // Otherwise proceed as normal.
         case _ =>
           val results = ctx.getPosAngleConstraint match {
-            case FIXED                         => selectBounded(List(ctx), mt, candidates)
-            case FIXED_180 | PARALLACTIC_ANGLE => selectBounded(List(ctx, ctx180(ctx)), mt, candidates)
-            case UNBOUNDED                     => selectUnbounded(ctx, mt, candidates)
+            case FIXED                                                => selectBounded(List(ctx), mt, candidates)
+            case FIXED_180 | PARALLACTIC_ANGLE | PARALLACTIC_OVERRIDE => selectBounded(List(ctx, ctx180(ctx)), mt, candidates)
+            case UNBOUNDED                                            => selectUnbounded(ctx, mt, candidates)
           }
           params.brightest(results)(_._2).map {
             case (angle, st) => AgsStrategy.Selection(angle, List(AgsStrategy.Assignment(params.guideProbe, st)))
