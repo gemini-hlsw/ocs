@@ -68,7 +68,7 @@ object To2017A extends Migration {
     for {
       t0 <- allTargets(d)
       t1 <- t0.paramSet("target").toList
-      es <- t1.paramSet("ephemeris").toList
+      es <- t1.paramSet("ephemeris").toList if Option(es.getParam("data")).isEmpty
     } {
       t1.removeChild(es)
       t1.addParamSet(convertEphemeris(es))
