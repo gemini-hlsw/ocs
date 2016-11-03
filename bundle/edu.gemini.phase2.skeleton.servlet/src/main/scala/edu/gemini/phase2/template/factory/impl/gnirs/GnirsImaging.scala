@@ -31,12 +31,13 @@ case class GnirsImaging(blueprint:SpGnirsBlueprintImaging) extends GnirsBase[SpG
   //                 H2 (2.122um) => H2: 2.12um
   //                 PAH (3.295) => PAH: 3.3um
   //             IF FILTER == PAH SET Well Depth = Deep
-  //             SET Central Wavelength according to FILTER in all GNIRS iterators
+  //             REL-2646 removes the following line:
+  //             X - SET Central Wavelength according to FILTER in all GNIRS iterators
 
   val filter = oldFilter match {
     case Filter.ORDER_5 => Filter.J // J (1.25um) => J-MK: 1.25um
     case Filter.ORDER_3 => Filter.K // K (2.20um) => K-MK: 2.20um
-    case _ => oldFilter
+    case _              => oldFilter
   }
 
   include(16, 17, 18, 19, 20, 21) in TargetGroup
@@ -58,11 +59,5 @@ case class GnirsImaging(blueprint:SpGnirsBlueprintImaging) extends GnirsBase[SpG
     mutateSeq(
       iterate(PARAM_FILTER, List(filter))),
     ifTrue(filter == PAH)(
-      setWellDepth(DEEP)),
-    ifTrue(filter.wavelength() != null)(
-      mutateSeq(
-        iterate(PARAM_WAVELENGTH, List(new Wavelength(f"${filter.wavelength().doubleValue()}%.2f"))))
-    ))
-
-
+      setWellDepth(DEEP)))
 }
