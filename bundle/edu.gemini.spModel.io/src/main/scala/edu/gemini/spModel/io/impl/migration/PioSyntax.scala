@@ -47,6 +47,9 @@ object PioSyntax {
     def paramSets: List[ParamSet] =
       p.getParamSets.asScala.toList
 
+    def paramSets(n: String): List[ParamSet] =
+      paramSets.filter(_.getName == n)
+
     def paramSet(n: String): Option[ParamSet] =
       paramSets.find(_.getName == n)
 
