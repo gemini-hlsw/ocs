@@ -14,44 +14,32 @@ import edu.gemini.ui.gface.GViewer;
 
 public class VariantDecorator implements GSubElementDecorator<Schedule, Variant, VariantAttribute> {
 
-//	private static final Logger LOGGER = Logger.getLogger(VariantDecorator.class.getName());
-	
-	public static final Icon ICON_VARIANT = SharedIcons.ICON_VARIANT;
-	public static final Icon ICON_VARIANT_WARNING = new CompositeIcon(ICON_VARIANT, SharedIcons.OVL_WARN);
-	public static final Icon ICON_VARIANT_ERROR = new CompositeIcon(ICON_VARIANT, SharedIcons.OVL_ERROR);
-	
-	public void decorate(JLabel label, Variant element, VariantAttribute subElement, Object value) {
-		
-		if (subElement == VariantAttribute.Name) {
-			
-			// Icon
-			Severity sev = element.getSeverity();
-			if (sev != null) {
-				switch (sev) {			
-				case Error:	  label.setIcon(ICON_VARIANT_ERROR);   break;				
-				case Warning: label.setIcon(ICON_VARIANT_WARNING); break;
-				default:	  label.setIcon(ICON_VARIANT); 				
-				}
-			} else {
-				label.setIcon(ICON_VARIANT); 	
-			}
-			
-			// Alignment
-			label.setHorizontalAlignment(SwingConstants.LEFT);
-			
-		} else if (subElement == VariantAttribute.Wind) {
+//  private static final Logger LOGGER = Logger.getLogger(VariantDecorator.class.getName());
 
-			if (value == null) value = "-";
-			
-			// Icon
-			label.setIcon(null);
-			
-			// Alignment
-			label.setHorizontalAlignment(SwingConstants.CENTER);
+    public static final Icon ICON_VARIANT = SharedIcons.ICON_VARIANT;
+    public static final Icon ICON_VARIANT_WARNING = new CompositeIcon(ICON_VARIANT, SharedIcons.OVL_WARN);
+    public static final Icon ICON_VARIANT_ERROR = new CompositeIcon(ICON_VARIANT, SharedIcons.OVL_ERROR);
 
-		} else if (subElement == VariantAttribute.LGS) {
+    public void decorate(JLabel label, Variant element, VariantAttribute subElement, Object value) {
 
-            if (value == null) value = "-";
+        if (subElement == VariantAttribute.Name) {
+
+            // Icon
+            Severity sev = element.getSeverity();
+            if (sev != null) {
+                switch (sev) {
+                    case Error:   label.setIcon(ICON_VARIANT_ERROR);   break;
+                    case Warning: label.setIcon(ICON_VARIANT_WARNING); break;
+                    default:      label.setIcon(ICON_VARIANT);
+                }
+            } else {
+                label.setIcon(ICON_VARIANT);
+            }
+
+            // Alignment
+            label.setHorizontalAlignment(SwingConstants.LEFT);
+
+        } else if (subElement == VariantAttribute.Wind) {
 
             // Icon
             label.setIcon(null);
@@ -59,27 +47,34 @@ public class VariantDecorator implements GSubElementDecorator<Schedule, Variant,
             // Alignment
             label.setHorizontalAlignment(SwingConstants.CENTER);
 
-        } else {
-			
-			// Value is a byte
-			switch ((Byte) value) {
-			case (byte)   0: label.setText("-"); break;
-			case (byte) 100: label.setText("A"); break;
-			}
-			
-			// Icon
-			label.setIcon(null);
-			
-			// Alignment
-			label.setHorizontalAlignment(SwingConstants.CENTER);
-			
-		}		
-		
-	}
+        } else if (subElement == VariantAttribute.LGS) {
 
-	public void modelChanged(GViewer<Schedule, Variant> viewer, Schedule oldModel, Schedule newModel) {
-		// We don't care; decorations don't depend on the model.
-	}
+            // Icon
+            label.setIcon(null);
+
+            // Alignment
+            label.setHorizontalAlignment(SwingConstants.CENTER);
+
+        } else if (value != null && value instanceof Byte) {
+
+            // Value is a byte
+            switch ((Byte) value) {
+                case (byte)   0: label.setText("-"); break;
+                case (byte) 100: label.setText("A"); break;
+            }
+
+            // Icon
+            label.setIcon(null);
+
+            // Alignment
+            label.setHorizontalAlignment(SwingConstants.CENTER);
+
+        }
+
+    }
+
+    public void modelChanged(GViewer<Schedule, Variant> viewer, Schedule oldModel, Schedule newModel) {
+        // We don't care; decorations don't depend on the model.
+    }
 
 }
-
