@@ -20,7 +20,7 @@ import jsky.app.ot.util.OtColor
 import scala.swing.GridBagPanel.{Anchor, Fill}
 import scala.swing._
 import scala.swing.event._
-import scala.util.Try
+
 import scalaz._
 import Scalaz._
 
@@ -60,7 +60,7 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
       // disallow any alphabetic characters.
       def angle: Option[Double] = for {
         t <- "^-?\\d*\\.?\\d*$".r.findFirstMatchIn(text.trim)
-        d <- Try { t.group(0).toDouble }.toOption
+        d <- \/.fromTryCatchNonFatal{ t.group(0).toDouble }.toOption
       } yield d
 
       override def validate(): Unit = Swing.onEDT {
