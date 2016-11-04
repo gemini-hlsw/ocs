@@ -125,7 +125,7 @@ public enum Inst {
             join(Niri.Mask.values(), Niri.Disperser.values(), Niri.Camera.values())),
 
     // Not currently in use
-    PHOENIX(InstPhoenix.SP_TYPE, false, false, false),
+    PHOENIX(InstPhoenix.SP_TYPE, false, true, true),
 
     PWFS(SPComponentType.QPT_PWFS, // new SPInstComponentType(SPInstComponentType.INST_BROAD_TYPE, "PWFS", "PWFS"),
             true, true, true, PwfsGuideProbe.values(), PwfsGuideProbe.values()),
