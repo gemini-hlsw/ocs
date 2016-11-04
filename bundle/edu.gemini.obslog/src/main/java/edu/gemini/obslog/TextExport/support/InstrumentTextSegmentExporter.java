@@ -6,6 +6,7 @@ import edu.gemini.obslog.obslog.ConfigMapUtil;
 import edu.gemini.obslog.obslog.IObservingLogSegment;
 import edu.gemini.pot.sp.SPObservationID;
 import edu.gemini.shared.util.immutable.ImOption;
+import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.core.SPBadIDException;
 import edu.gemini.spModel.core.SPProgramID;
@@ -24,7 +25,8 @@ public class InstrumentTextSegmentExporter extends AbstractDatasetExporterSuppor
     private final Option<SPProgramID> _thisProgramOnly;
 
     public InstrumentTextSegmentExporter(IObservingLogSegment segment) {
-        this(segment, null);
+        super(segment);
+        _thisProgramOnly = None.instance();
     }
 
     public InstrumentTextSegmentExporter(IObservingLogSegment segment, SPProgramID pid) {
