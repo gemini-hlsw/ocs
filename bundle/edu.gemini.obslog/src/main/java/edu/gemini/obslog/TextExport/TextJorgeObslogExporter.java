@@ -129,8 +129,7 @@ public class TextJorgeObslogExporter {
             StringBuilder segsBuffer = new StringBuilder();
 
             for (IObservingLogSegment segment: mergedSegments) {
-                InstrumentTextSegmentExporter exporter  = new InstrumentTextSegmentExporter(segment, spProg.stringValue());
-                segsBuffer = exporter.export(segsBuffer);
+                segsBuffer = new InstrumentTextSegmentExporter(segment, spProg).export(segsBuffer);
             }
 
             fullView.append(infoBuffer);
