@@ -112,7 +112,7 @@ public enum AltairAowfsGuider implements OffsetValidatingGuideProbe, Validatable
 
             // check positions against corrected patrol field
             return getCorrectedPatrolField(ctx).map(pf ->
-                    patrolField.checkBoundaries(coords, baseCoordinates, positionAngle, sciencePositions)
+                    pf.checkBoundaries(coords, baseCoordinates, positionAngle, sciencePositions)
             ).getOrElse(BoundaryPosition.outside);
         });
     }

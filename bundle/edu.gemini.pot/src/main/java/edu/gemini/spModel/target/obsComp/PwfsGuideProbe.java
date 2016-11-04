@@ -305,7 +305,7 @@ public enum PwfsGuideProbe implements ValidatableGuideProbe, OffsetValidatingGui
 
             // check positions against corrected outer patrol field bounds
             return getCorrectedPatrolField(ctx).map(pf -> {
-                final BoundaryPosition bp = patrolField.checkBoundaries(coords, baseCoordinates, positionAngle, sciencePositions);
+                final BoundaryPosition bp = pf.checkBoundaries(coords, baseCoordinates, positionAngle, sciencePositions);
                 if (bp != BoundaryPosition.inside) {
                     return BoundaryPosition.outside;
                 }

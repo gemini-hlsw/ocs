@@ -1,5 +1,6 @@
 package edu.gemini.spModel.gemini.gmos;
 
+import edu.gemini.shared.util.immutable.MapOp;
 import edu.gemini.shared.util.immutable.Some;
 import edu.gemini.skycalc.Angle;
 import edu.gemini.skycalc.Coordinates;
@@ -77,7 +78,7 @@ public enum GmosOiwfsGuideProbe implements ValidatableGuideProbe, OffsetValidati
 
             // check positions against corrected patrol field
             return getCorrectedPatrolField(ctx).map(pf ->
-                    patrolField.checkBoundaries(coords, baseCoordinates, positionAngle, sciencePositions)
+                    pf.checkBoundaries(coords, baseCoordinates, positionAngle, sciencePositions)
             ).getOrElse(BoundaryPosition.outside);
         });
     }
