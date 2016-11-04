@@ -112,9 +112,6 @@ object ConfigExtractor {
     def extractCamera: String \/ Option[GNIRSParams.Camera] =
        extract[GNIRSParams.Camera](c, CameraKey).map(Some(_))
 
-    def extractWellDepth: String \/ Option[GNIRSParams.WellDepth] =
-      extract[GNIRSParams.WellDepth](c, WellDepthKey).map(Some(_))
-
     for {
       pixelScale  <- extract[PixelScale]        (c, PixelScaleKey)
       filter      <- extractFilter
@@ -123,7 +120,7 @@ object ConfigExtractor {
       slitWidth   <- extract[SlitWidth]         (c, SlitWidthKey)
       grating     <- extractDisperser
       camera      <- extractCamera
-      wellDepth   <- extractWellDepth
+      wellDepth   <- extract[WellDepth]         (c, WellDepthKey)
       altair      <- extractAltair             (targetEnv, probe, when, c)
       wavelen     <- extractObservingWavelength(c)
     } yield GnirsParameters(pixelScale, filter, grating, readMode, xDisp, wavelen, slitWidth, camera, wellDepth, altair)

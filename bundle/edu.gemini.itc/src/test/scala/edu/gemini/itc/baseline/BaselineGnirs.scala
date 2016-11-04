@@ -22,7 +22,7 @@ object BaselineGnirs {
       2.4.microns,
       SlitWidth.SW_1,
       None,
-      None,
+      WellDepth.SHALLOW,
       Fixture.NoAltair),
 
     new GnirsParameters(
@@ -34,7 +34,7 @@ object BaselineGnirs {
       2.4.microns,
       SlitWidth.SW_3,
       None,
-      None,
+      WellDepth.SHALLOW,
       Fixture.NoAltair),
 
     new GnirsParameters(
@@ -46,7 +46,7 @@ object BaselineGnirs {
       2.6.microns,
       SlitWidth.SW_6,
       None,
-      None,
+      WellDepth.SHALLOW,
       Fixture.NoAltair),
 
     new GnirsParameters(
@@ -58,7 +58,7 @@ object BaselineGnirs {
       2.6.microns,
       SlitWidth.SW_8,
       None,
-      None,
+      WellDepth.SHALLOW,
       Fixture.NoAltair)
 
   ))
@@ -73,7 +73,7 @@ object BaselineGnirs {
       2.4.microns,
       SlitWidth.ACQUISITION,
       None,
-      None,
+      WellDepth.SHALLOW,
       Fixture.NoAltair),
 
     new GnirsParameters(
@@ -85,7 +85,7 @@ object BaselineGnirs {
       2.4.microns,
       SlitWidth.ACQUISITION,
       None,
-      None,
+      WellDepth.SHALLOW,
       Fixture.AltairNgs),
 
     new GnirsParameters(
@@ -97,7 +97,7 @@ object BaselineGnirs {
       2.4.microns,
       SlitWidth.ACQUISITION,
       None,
-      None,
+      WellDepth.SHALLOW,
       Fixture.AltairLgs),
 
 
@@ -111,7 +111,7 @@ object BaselineGnirs {
       2.4.microns,
       SlitWidth.ACQUISITION,
       None,
-      None,
+      WellDepth.SHALLOW,
       Fixture.AltairNgsFL),
 
     new GnirsParameters(
@@ -123,7 +123,7 @@ object BaselineGnirs {
       2.4.microns,
       SlitWidth.ACQUISITION,
       None,
-      None,
+      WellDepth.SHALLOW,
       Fixture.AltairNgs),
 
     new GnirsParameters(
@@ -135,7 +135,7 @@ object BaselineGnirs {
       2.4.microns,
       SlitWidth.ACQUISITION,
       None,
-      None,
+      WellDepth.SHALLOW,
       Fixture.AltairLgs)
   ))
 

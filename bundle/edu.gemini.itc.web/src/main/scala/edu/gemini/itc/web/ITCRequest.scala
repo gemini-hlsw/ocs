@@ -176,7 +176,7 @@ object ITCRequest {
     val readMode    = r.enumParameter(classOf[GNIRSParams.ReadMode])
     val centralWl   = r.centralWavelengthInMicrons()
     val fpMask      = r.enumParameter(classOf[GNIRSParams.SlitWidth])
-    val wellDepth   = None                            // this is because in the web-ITC these two components
+    val wellDepth   = r.enumParameter(classOf[GNIRSParams.WellDepth])
     val camera      = None                            //    are selected automatically and not controlled by user
     val altair      = altairParameters(r)
     GnirsParameters(pixelScale, filter, grating, readMode, xDisp, centralWl, fpMask, camera, wellDepth, altair)

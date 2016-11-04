@@ -53,7 +53,7 @@ final case class GnirsParameters(
                      centralWavelength: Wavelength,
                      slitWidth:         GNIRSParams.SlitWidth,
                      camera:            Option[GNIRSParams.Camera],
-                     wellDepth:         Option[GNIRSParams.WellDepth],
+                     wellDepth:         GNIRSParams.WellDepth,
                      altair:            Option[AltairParameters]) extends InstrumentDetails
 
 final case class GsaoiParameters(
