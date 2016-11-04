@@ -4,6 +4,11 @@ import edu.gemini.obslog.config.model.OlLogItem;
 import edu.gemini.obslog.obslog.ConfigMap;
 import edu.gemini.obslog.obslog.ConfigMapUtil;
 import edu.gemini.obslog.obslog.IObservingLogSegment;
+import edu.gemini.pot.sp.SPObservationID;
+import edu.gemini.shared.util.immutable.ImOption;
+import edu.gemini.shared.util.immutable.Option;
+import edu.gemini.spModel.core.SPBadIDException;
+import edu.gemini.spModel.core.SPProgramID;
 
 import java.util.List;
 import java.util.Map;
@@ -14,25 +19,18 @@ import java.util.Map;
  */
 public class InstrumentTextSegmentExporter extends AbstractDatasetExporterSupport implements ITextExporter {
     static protected final String OBSERVATION_ID_PROPERTY_NAME = ConfigMapUtil.OBSLOG_OBSERVATIONID_ITEM_NAME;
-    static protected final String DATASETCOMMENT_PROPERTY_NAME = ConfigMapUtil.OBSLOG_DATASETCOMMENTS_ITEM_NAME;
 
     // When set, only look for observations from  this program
-    private String _thisProgramOnly;
+    private final Option<SPProgramID> _thisProgramOnly;
 
     public InstrumentTextSegmentExporter(IObservingLogSegment segment) {
-        super(segment);
+        this(segment, null);
     }
 
-    public InstrumentTextSegmentExporter(IObservingLogSegment segment, String programID) {
+    public InstrumentTextSegmentExporter(IObservingLogSegment segment, SPProgramID pid) {
         super(segment);
-        _thisProgramOnly = programID;
+        _thisProgramOnly = ImOption.apply(pid);
     }
-
-    public static ITextExporterFactory FACTORY = new ITextExporterFactory() {
-        public ITextExporter create(IObservingLogSegment segment) {
-            return new InstrumentTextSegmentExporter(segment);
-        }
-    };
 
     protected void _setupColumns() {
         Map<String, ColumnInfo> columns = _getColumnInfoMap();
@@ -58,11 +56,16 @@ public class InstrumentTextSegmentExporter extends AbstractDatasetExporterSuppor
 
     // Check to make the text a little clearer
     private boolean _oneProgramOnly() {
-        return _thisProgramOnly != null;
+        return _thisProgramOnly.isDefined();
     }
     private boolean _useThisRow(ConfigMap rowMap) {
-        String observationID = rowMap.sget(OBSERVATION_ID_PROPERTY_NAME);
-        return observationID.startsWith(_thisProgramOnly);
+        return _thisProgramOnly.forall(pid -> {
+            try {
+                return new SPObservationID(rowMap.sget(OBSERVATION_ID_PROPERTY_NAME)).getProgramID().equals(pid);
+            } catch (SPBadIDException ex) {
+                return false;
+            }
+        });
     }
 
     // This goes through all the rows in the segment checking to see if an observation matches the sample observation
