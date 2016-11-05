@@ -132,7 +132,7 @@ trait GemsStrategy extends AgsStrategy {
 
     // why do we need multiple position angles?  catalog results are given in
     // a ring (limited by radius limits) around a base position ... confusion
-    val posAngles   = (ctx.getPositionAngle.toNewModel :: (0 until 360 by 90).map(Angle.fromDegrees(_)).toList).toSet
+    val posAngles   = (ctx.getPositionAngle :: (0 until 360 by 90).map(Angle.fromDegrees(_)).toList).toSet
     search(GemsTipTiltMode.canopus, ctx, posAngles, None)(ec).map(simplifiedResult)
   }
 
@@ -189,11 +189,11 @@ trait GemsStrategy extends AgsStrategy {
   override def select(ctx: ObsContext, mt: MagnitudeTable)(ec: ExecutionContext): Future[Option[Selection]] = {
     val posAngles = ctx.getInstrument.getType match {
       case SPComponentType.INSTRUMENT_GSAOI if ctx.getInstrument.asInstanceOf[Gsaoi].getPosAngleConstraint == PosAngleConstraint.FIXED =>
-        Set(ctx.getPositionAngle.toNewModel)
+        Set(ctx.getPositionAngle)
       case SPComponentType.INSTRUMENT_FLAMINGOS2 if ctx.getInstrument.asInstanceOf[Flamingos2].getPosAngleConstraint == PosAngleConstraint.FIXED =>
-        Set(ctx.getPositionAngle.toNewModel)
+        Set(ctx.getPositionAngle)
       case _ =>
-        Set(ctx.getPositionAngle.toNewModel, Angle.zero, Angle.fromDegrees(90), Angle.fromDegrees(180), Angle.fromDegrees(270))
+        Set(ctx.getPositionAngle, Angle.zero, Angle.fromDegrees(90), Angle.fromDegrees(180), Angle.fromDegrees(270))
     }
 
     val results = search(GemsTipTiltMode.canopus, ctx, posAngles, None)(ec)

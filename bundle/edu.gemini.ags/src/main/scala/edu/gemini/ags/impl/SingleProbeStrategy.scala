@@ -5,7 +5,6 @@ import edu.gemini.ags.api.AgsMagnitude._
 import edu.gemini.catalog.api.CatalogQuery
 import edu.gemini.catalog.votable.{ConeSearchBackend, VoTableBackend, CatalogException, VoTableClient}
 import edu.gemini.pot.ModelConverters._
-import edu.gemini.skycalc
 import edu.gemini.spModel.ags.AgsStrategyKey
 import edu.gemini.spModel.core.{Coordinates, Angle}
 import edu.gemini.spModel.core.SiderealTarget
@@ -68,7 +67,7 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
     // If we are unbounded and there are any candidates, we are guaranteed success.
     val pac   = ctx.getPosAngleConstraint(UNBOUNDED)
     val cv    = CandidateValidator(params, mt, candidates)
-    val steps = pac.steps(ctx.getPositionAngle, params.stepSize.toOldModel).toList.asScala
+    val steps = pac.steps(ctx.getPositionAngle, params.stepSize).toList.asScala
     val anglesWithResults  = steps.filter { angle => cv.exists(ctx.withPositionAngle(angle)) }
     val successProbability = anglesWithResults.size.toDouble / steps.size.toDouble
     AgsStrategy.Estimate.toEstimate(successProbability)
@@ -112,7 +111,7 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
         // position angle and the Double is the percent of vignetting.
         val ctxResults = analyzed.flatMap { case (ctx0, targets) =>
 
-          feedback { f"Analyzing pos angle: ${ctx0.getPositionAngle.toDegrees.getMagnitude}%.2f degrees" }
+          feedback { f"Analyzing pos angle: ${ctx0.getPositionAngle.toDegrees}%.2f degrees" }
 
           // Filter out anything but the best quality targets.
           val qualityTargets = targets.filter { case (_,_,q) => q === quality }
@@ -142,7 +141,7 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
 
           // Finally extract the pos angle, sidereal target, vignetting, and mag
           minVig.map { case ((target,mag,_), vignetting) =>
-            (ctx0.getPositionAngle.toNewModel, target, vignetting, mag)
+            (ctx0.getPositionAngle, target, vignetting, mag)
           }
         }
 
@@ -165,9 +164,9 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
         case vprobe: VProbe =>
           // Filter for brightness constraints and reachability.
           val results = ctx.getPosAngleConstraint match {
-            case FIXED                         => filterBounded(List(ctx), mt, candidates)
-            case FIXED_180 | PARALLACTIC_ANGLE => filterBounded(List(ctx, ctx180(ctx)), mt, candidates)
-            case UNBOUNDED                     => filterUnbounded(ctx, mt, candidates)
+            case FIXED                                                => filterBounded(List(ctx), mt, candidates)
+            case FIXED_180 | PARALLACTIC_ANGLE | PARALLACTIC_OVERRIDE => filterBounded(List(ctx, ctx180(ctx)), mt, candidates)
+            case UNBOUNDED                                            => filterUnbounded(ctx, mt, candidates)
           }
 
           // Select the highest quality target that vignettes the least.
@@ -176,9 +175,9 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
         // Otherwise proceed as normal.
         case _ =>
           val results = ctx.getPosAngleConstraint match {
-            case FIXED                         => selectBounded(List(ctx), mt, candidates)
-            case FIXED_180 | PARALLACTIC_ANGLE => selectBounded(List(ctx, ctx180(ctx)), mt, candidates)
-            case UNBOUNDED                     => selectUnbounded(ctx, mt, candidates)
+            case FIXED                                                => selectBounded(List(ctx), mt, candidates)
+            case FIXED_180 | PARALLACTIC_ANGLE | PARALLACTIC_OVERRIDE => selectBounded(List(ctx, ctx180(ctx)), mt, candidates)
+            case UNBOUNDED                                            => selectUnbounded(ctx, mt, candidates)
           }
           params.brightest(results)(_._2).map {
             case (angle, st) => AgsStrategy.Selection(angle, List(AgsStrategy.Assignment(params.guideProbe, st)))
@@ -199,7 +198,7 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
       base <- ctx.getBaseCoordinates.asScalaOpt.toList
       so <- candidates
       pa = SingleProbeStrategy.calculatePositionAngle(base.toNewModel, so)
-      ctxSo = ctx.withPositionAngle(pa.toOldModel)
+      ctxSo = ctx.withPositionAngle(pa)
       if CandidateValidator(params, mt, List(so)).exists(ctxSo)
     } yield (ctxSo, List(so))
   }
@@ -208,7 +207,7 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
   private def selectBounded(alternatives: List[ObsContext], mt: MagnitudeTable, candidates: List[SiderealTarget]): List[(Angle, SiderealTarget)] = {
     val cv = CandidateValidator(params, mt, candidates)
     alternatives.map(a => (a, cv.select(a))).collect {
-      case (c, Some(st)) => (Angle.fromDegrees(c.getPositionAngle.toDegrees.getMagnitude), st)
+      case (c, Some(st)) => (Angle.fromDegrees(c.getPositionAngle.toDegrees), st)
     }
   }
 
@@ -222,13 +221,13 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
       } yield (SingleProbeStrategy.calculatePositionAngle(base.toNewModel, so), so)
 
     pairs.filter {
-      case (angle, st) => CandidateValidator(params, mt, List(st)).exists(ctx.withPositionAngle(angle.toOldModel))
+      case (angle, st) => CandidateValidator(params, mt, List(st)).exists(ctx.withPositionAngle(angle))
     }
 
   }
 
   private def ctx180(c: ObsContext): ObsContext =
-    c.withPositionAngle(c.getPositionAngle.add(180.0, skycalc.Angle.Unit.DEGREES))
+    c.withPositionAngle(c.getPositionAngle.flip)
 
   override val guideProbes: List[GuideProbe] = List(params.guideProbe)
 

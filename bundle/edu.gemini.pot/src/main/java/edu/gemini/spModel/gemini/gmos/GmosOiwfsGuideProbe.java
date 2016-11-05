@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package edu.gemini.spModel.gemini.gmos;
 
 import edu.gemini.shared.util.immutable.MapOp;
@@ -13,7 +9,6 @@ import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.guide.VignettingCalculator;
 import edu.gemini.spModel.guide.*;
-import edu.gemini.spModel.obs.SchedulingBlock;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.telescope.IssPort;
@@ -78,16 +73,13 @@ public enum GmosOiwfsGuideProbe implements ValidatableGuideProbe, OffsetValidati
 
     public Option<BoundaryPosition> checkBoundaries(final Coordinates coords, final ObsContext ctx) {
         return ctx.getBaseCoordinates().map(baseCoordinates -> {
-            final Angle positionAngle = ctx.getPositionAngle();
+            final Angle positionAngle = ctx.getPositionAngleJava();
             final Set<Offset> sciencePositions = ctx.getSciencePositions();
 
             // check positions against corrected patrol field
-            return getCorrectedPatrolField(ctx).map(new MapOp<PatrolField, BoundaryPosition>() {
-                @Override
-                public BoundaryPosition apply(PatrolField patrolField) {
-                    return patrolField.checkBoundaries(coords, baseCoordinates, positionAngle, sciencePositions);
-                }
-            }).getOrElse(BoundaryPosition.outside);
+            return getCorrectedPatrolField(ctx).map(pf ->
+                    pf.checkBoundaries(coords, baseCoordinates, positionAngle, sciencePositions)
+            ).getOrElse(BoundaryPosition.outside);
         });
     }
 

@@ -222,9 +222,9 @@ public enum GsaoiDetectorArray {
 
 
     private List<Tuple2<Quadrant, Shape>> defaultQuadrantShapes() {
-        List<Tuple2<Quadrant, Shape>> res = new ArrayList<Tuple2<Quadrant, Shape>>();
+        List<Tuple2<Quadrant, Shape>> res = new ArrayList<>();
         for (Quadrant q : Quadrant.values()) {
-            res.add(new Pair<Quadrant, Shape>(q, q.shape()));
+            res.add(new Pair<>(q, q.shape()));
         }
         return res;
     }
@@ -241,8 +241,8 @@ public enum GsaoiDetectorArray {
             return defaultQuadrantShapes();
         }
 
-        Map<Quadrant, Area> map = new HashMap<Quadrant, Area>();
-        for (Offset off : offsets) {
+        final Map<Quadrant, Area> map = new HashMap<>();
+        for (final Offset off : offsets) {
             double x = -off.p().toArcsecs().getMagnitude();
             double y = -off.q().toArcsecs().getMagnitude();
             AffineTransform xform = AffineTransform.getTranslateInstance(x, y);
@@ -260,9 +260,9 @@ public enum GsaoiDetectorArray {
             }
         }
 
-        List<Tuple2<Quadrant, Shape>> res = new ArrayList<Tuple2<Quadrant, Shape>>();
+        List<Tuple2<Quadrant, Shape>> res = new ArrayList<>();
         for (Quadrant q : Quadrant.values()) {
-            res.add(new Pair<Quadrant, Shape>(q, map.get(q)));
+            res.add(new Pair<>(q, map.get(q)));
         }
         return res;
     }
@@ -297,7 +297,7 @@ public enum GsaoiDetectorArray {
 
             // Get a rotation to transform the shape to the position angle.
             AffineTransform xform = new AffineTransform();
-            xform.rotate(-ctx.getPositionAngle().toRadians().getMagnitude());
+            xform.rotate(-ctx.getPositionAngle().toRadians());
 
             // Check each quadrant to see if it contains the point, returning
             // a new Some if so.
@@ -305,7 +305,7 @@ public enum GsaoiDetectorArray {
             for (Tuple2<Quadrant, Shape> t : quadrantIntersection(offsets)) {
                 Area a = new Area(t._2());
                 a.transform(xform);
-                if (a.contains(p, q)) return new Some<Id>(t._1().id(ctx.getIssPort()));
+                if (a.contains(p, q)) return new Some<>(t._1().id(ctx.getIssPort()));
             }
 
             // Not on the detector for all offset positions.

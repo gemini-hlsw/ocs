@@ -257,7 +257,7 @@ object GemsResultsAnalyzer {
 
   // Returns true if the given target is valid for the given group
   private def isTargetValidInGroup(obsContext: ObsContext, target: SiderealTarget, group: GemsGuideProbeGroup, posAngle: Angle): Boolean = {
-    val ctx = obsContext.withPositionAngle(posAngle.toOldModel)
+    val ctx = obsContext.withPositionAngle(posAngle)
     val st = toSPTarget(target)
     group.getMembers.asScala.exists(_.validate(st, ctx) == GuideStarValidation.VALID)
   }
@@ -270,7 +270,7 @@ object GemsResultsAnalyzer {
   // If reverseOrder is true, reverse the order in which guide probes are tried (to make sure to get all
   // combinations of cwfs1 and cwfs2, since cwfs3 is otherwise fixed)
   private def guideProbe(obsContext: ObsContext, target: SiderealTarget, group: GemsGuideProbeGroup, posAngle: Angle, tiptiltGroup: GemsGuideProbeGroup, otherTargets: List[GuideProbeTargets], tiptiltTargetList: List[SiderealTarget], assignCwfs3ToBrightest: Boolean, reverseOrder: Boolean): Option[ValidatableGuideProbe] = {
-    val ctx = obsContext.withPositionAngle(posAngle.toOldModel)
+    val ctx = obsContext.withPositionAngle(posAngle)
     val isFlexure = tiptiltGroup != group
     val isTiptilt = !isFlexure
 

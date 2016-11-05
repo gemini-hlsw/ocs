@@ -18,7 +18,7 @@ trait ScienceAreaGeometry {
   /** Adjusted science area shapes in context, ready to be used in further
     * calculations or transformed to a screen plot. */
   def geometry(ctx: ObsContext, offset: Offset): Option[Shape] =
-    offsetTransform(ctx.getPositionAngle.toNewModel, offset) |> { trans =>
+    offsetTransform(ctx.getPositionAngle, offset) |> { trans =>
       unadjustedGeometry(ctx).map { trans.createTransformedShape }
     }
 

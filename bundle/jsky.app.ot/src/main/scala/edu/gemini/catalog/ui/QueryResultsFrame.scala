@@ -662,7 +662,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
           iqBox.selection.item = c.iq
         }
         List(sbBox, ccBox, iqBox).foreach(i => i.listenTo(i.selection))
-        i.ctx.map(_.getPositionAngle).foreach(a => pa = a.toNewModel)
+        i.ctx.map(_.getPositionAngle).foreach(a => pa = a)
         i.ctx.map(_.getSciencePositions).foreach(o => offsets = o.asScala.map(_.toNewModel).toSet)
         updateGuideSpeedText()
       }

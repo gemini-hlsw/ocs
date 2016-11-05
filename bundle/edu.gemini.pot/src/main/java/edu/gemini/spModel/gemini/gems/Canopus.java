@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package edu.gemini.spModel.gemini.gems;
 
 import edu.gemini.shared.util.immutable.*;
@@ -9,10 +5,8 @@ import edu.gemini.skycalc.Angle;
 import edu.gemini.skycalc.CoordinateDiff;
 import edu.gemini.skycalc.Coordinates;
 import edu.gemini.skycalc.Offset;
-import edu.gemini.spModel.data.AbstractDataObject;
 import edu.gemini.spModel.gems.GemsGuideProbeGroup;
 import edu.gemini.spModel.guide.*;
-import edu.gemini.spModel.obs.SchedulingBlock;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.GuideProbeTargets;
@@ -37,7 +31,7 @@ public enum Canopus {
      * CWFS2 can vignette only CWFS3<br>
      * CWFS3 does not vignette other probe arms<br>
      */
-    public static enum Wfs implements GuideProbe, ValidatableGuideProbe, OffsetValidatingGuideProbe {
+    public enum Wfs implements GuideProbe, ValidatableGuideProbe, OffsetValidatingGuideProbe {
         cwfs1(1) {
             @Override
             public Area probeRange(ObsContext ctx) {
@@ -118,16 +112,8 @@ public enum Canopus {
         };
 
         private static Option<PatrolField> correctedPatrolField(ObsContext ctx) {
-            return ctx.getAOComponent().filter(new PredicateOp<AbstractDataObject>() {
-                @Override public Boolean apply(AbstractDataObject ado) {
-                    return ado instanceof Gems;
-                }
-            }).map(new MapOp<AbstractDataObject, PatrolField>() {
-                @Override public PatrolField apply(AbstractDataObject abstractDataObject) {
-                    // not implemented yet, return an empty area
-                    return new PatrolField(new Area());
-                }
-            });
+            // Not implemented yet: return an empty area.
+            return ctx.getAOComponent().filter(ado -> ado instanceof Gems).map(a -> new PatrolField(new Area()));
         }
 
         /**
@@ -142,7 +128,7 @@ public enum Canopus {
          * Gets the group of Canopus guide stars.
          * See OT-21.
          */
-        public static enum Group implements GemsGuideProbeGroup {
+        public enum Group implements GemsGuideProbeGroup {
             instance;
 
             public Angle getRadiusLimits() {
@@ -165,7 +151,7 @@ public enum Canopus {
 
         private int index;
 
-        private Wfs(int index) {
+        Wfs(int index) {
             this.index = index;
         }
 
@@ -198,7 +184,7 @@ public enum Canopus {
         }
 
         public Option<GuideProbeGroup> getGroup() {
-            return new Some<GuideProbeGroup>(Group.instance);
+            return new Some<>(Group.instance);
         }
 
         /**
@@ -281,7 +267,7 @@ public enum Canopus {
                         Offset dis = diff.getOffset();
                         double p = -dis.p().toArcsecs().getMagnitude();
                         double q = -dis.q().toArcsecs().getMagnitude();
-                        Set<Offset> offsets = new TreeSet<Offset>();
+                        Set<Offset> offsets = new TreeSet<>();
                         offsets.add(offset);
 
                         Area a = Canopus.instance.offsetIntersection(ctx, offsets);
@@ -305,11 +291,11 @@ public enum Canopus {
     // P2 can access a square field of 4.2 x 3.0 arcmin, but the center is at (0.0,-0.33)
     private static final Point2D.Double PROBE1_CENTER = new Point2D.Double(0.11 * 60.0, 0.3 * 60.0);
     private static final Point2D.Double PROBE2_CENTER = new Point2D.Double(0.0, -0.33 * 60.0);
-    private static final Tuple2<Double, Double> PROBE1_DIM = new Pair<Double, Double>(3.7 * 60.0, 3.0 * 60.0);
+    private static final Tuple2<Double, Double> PROBE1_DIM = new Pair<>(3.7 * 60.0, 3.0 * 60.0);
 
         //     REL-1042: Update the Canopus probe limits in the OT
 //    private static final Tuple2<Double, Double> PROBE2_DIM = new Pair<Double, Double>(4.2 * 60.0, 3.0 * 60.0);
-    private static final Tuple2<Double, Double> PROBE2_DIM = new Pair<Double, Double>(4.2 * 60.0, 2.5 * 60.0);
+    private static final Tuple2<Double, Double> PROBE2_DIM = new Pair<>(4.2 * 60.0, 2.5 * 60.0);
 
     private static final Ellipse2D AO_PORT = new Ellipse2D.Double(-RADIUS_ARCSEC, -RADIUS_ARCSEC, RADIUS_ARCSEC*2, RADIUS_ARCSEC*2);
 
@@ -320,24 +306,12 @@ public enum Canopus {
     // Probe arm end, as distance in arcsec from the CWFS guide star
     private static final double PROBE_ARM_END = 8.9;
 
-    // OT-12: Use offset (in arcsec) when instrument is GSAOI
-    private static double getOffsetArcsec(ObsContext ctx) {
-        //     REL-1042: Update the Canopus probe limits in the OT
-//        if (ctx.getInstrument() instanceof Gsaoi) {
-//            return GsaoiDetectorArray.ODGW_HOTSPOT_OFFSET;
-//        }
-        return 0.;
-    }
 
     /**
      * Returns a Shape that defines the AO port in arcsecs, centered at
      * <code>(0,0)</code>.
      */
-    public Shape shape(ObsContext ctx) {
-        double offset = getOffsetArcsec(ctx);
-        return new Ellipse2D.Double(AO_PORT.getX()+offset, AO_PORT.getY()+offset,
-                AO_PORT.getWidth(), AO_PORT.getHeight());
-    }
+    private static final Shape AO_PORT_SHAPE = new Ellipse2D.Double(AO_PORT.getX(), AO_PORT.getY(), AO_PORT.getWidth(), AO_PORT.getHeight());
 
     // Gets the primary CWFS 3 guide star, if any.
     private Option<SPTarget> getPrimaryCwfs3(ObsContext ctx) {
@@ -401,7 +375,7 @@ public enum Canopus {
         // that positive y is down and a positive rotation rotates the positive
         // x axis toward the positive y axis.  Position angle is expressed as
         // an angle east of north.
-        double t = ctx.getPositionAngle().toRadians().getMagnitude();
+        double t = ctx.getPositionAngle().toRadians();
         t = t + getRotationConfig(ctx.getIssPort()).toRadians().getMagnitude();
         AffineTransform rotWithPosAngle = AffineTransform.getRotateInstance(-t);
         AffineTransform rotAgainstPosAngle = AffineTransform.getRotateInstance(t);
@@ -464,10 +438,10 @@ public enum Canopus {
     public Area offsetIntersection(ObsContext ctx, Set<Offset> offsets) {
         Area res = null;
 
-        double t = ctx.getPositionAngle().toRadians().getMagnitude();
+        double t = ctx.getPositionAngle().toRadians();
 
         for (Offset pos : offsets) {
-            Area cur = new Area(shape(ctx));
+            Area cur = new Area(AO_PORT_SHAPE);
 
             double p = pos.p().toArcsecs().getMagnitude();
             double q = pos.q().toArcsecs().getMagnitude();
@@ -518,7 +492,7 @@ public enum Canopus {
                         double q = -dis.q().toArcsecs().getMagnitude();
 
                         // Get current transformations
-                        double t = ctx.getPositionAngle().toRadians().getMagnitude();
+                        double t = ctx.getPositionAngle().toRadians();
                         t = t + getRotationConfig(ctx.getIssPort()).toRadians().getMagnitude();
                         AffineTransform xform = new AffineTransform();
                         xform.translate(p, q);
@@ -547,7 +521,7 @@ public enum Canopus {
      * in the given observing context (if any).
      */
     public Set<Wfs> getProbesInRange(Coordinates coords, ObsContext ctx) {
-        Set<Wfs> res = new HashSet<Wfs>();
+        Set<Wfs> res = new HashSet<>();
 
         ctx.getBaseCoordinates().foreach(bcs -> {
             // Calculate the difference between the coordinate and the observation's

@@ -83,7 +83,7 @@ class GemsStrategySpec extends Specification {
       val ctx = ObsContext.create(env, inst, new JSome(Site.GS), conditions, null, new Gems, JNone.instance())
       val tipTiltMode = GemsTipTiltMode.canopus
 
-      val posAngles = Set(ctx.getPositionAngle.toNewModel, Angle.zero, Angle.fromDegrees(90), Angle.fromDegrees(180), Angle.fromDegrees(270))
+      val posAngles = Set(ctx.getPositionAngle, Angle.zero, Angle.fromDegrees(90), Angle.fromDegrees(180), Angle.fromDegrees(270))
 
       testSearchOnNominal("/gems_pal1.xml", ctx, tipTiltMode, posAngles, 2, 2)
 
@@ -151,7 +151,7 @@ class GemsStrategySpec extends Specification {
       val ctx = ObsContext.create(env, inst, new JSome(Site.GS), conditions, null, new Gems, JNone.instance())
       val tipTiltMode = GemsTipTiltMode.canopus
 
-      val posAngles = Set(ctx.getPositionAngle.toNewModel, Angle.zero, Angle.fromDegrees(90), Angle.fromDegrees(180), Angle.fromDegrees(270))
+      val posAngles = Set(ctx.getPositionAngle, Angle.zero, Angle.fromDegrees(90), Angle.fromDegrees(180), Angle.fromDegrees(270))
 
       testSearchOnStandardConditions("/gems_sn1987A.xml", ctx, tipTiltMode, posAngles, 9, 9)
 
@@ -229,7 +229,7 @@ class GemsStrategySpec extends Specification {
       val ctx = ObsContext.create(env, inst, new JSome(Site.GS), conditions, null, new Gems, JNone.instance())
       val tipTiltMode = GemsTipTiltMode.canopus
 
-      val posAngles = Set(ctx.getPositionAngle.toNewModel, Angle.zero, Angle.fromDegrees(90), Angle.fromDegrees(180), Angle.fromDegrees(270))
+      val posAngles = Set(ctx.getPositionAngle, Angle.zero, Angle.fromDegrees(90), Angle.fromDegrees(180), Angle.fromDegrees(270))
 
       testSearchOnBestConditions("/gems_sn1987A.xml", ctx, tipTiltMode, posAngles, 12, 9)
 
@@ -294,7 +294,7 @@ class GemsStrategySpec extends Specification {
       val ctx = ObsContext.create(env, inst, new JSome(Site.GS), conditions, null, new Gems, JNone.instance())
       val tipTiltMode = GemsTipTiltMode.canopus
 
-      val posAngles = Set(ctx.getPositionAngle.toNewModel, Angle.zero, Angle.fromDegrees(90), Angle.fromDegrees(180), Angle.fromDegrees(270))
+      val posAngles = Set(ctx.getPositionAngle, Angle.zero, Angle.fromDegrees(90), Angle.fromDegrees(180), Angle.fromDegrees(270))
 
       testSearchOnStandardConditions("/gems_TYC_8345_1155_1.xml", ctx, tipTiltMode, posAngles, 25, 28)
 
@@ -369,7 +369,7 @@ class GemsStrategySpec extends Specification {
       val ctx = ObsContext.create(env, inst, new JSome(Site.GS), conditions, null, new Gems, JNone.instance())
       val tipTiltMode = GemsTipTiltMode.canopus
 
-      val posAngles = Set(ctx.getPositionAngle.toNewModel, Angle.zero, Angle.fromDegrees(90), Angle.fromDegrees(180), Angle.fromDegrees(270))
+      val posAngles = Set(ctx.getPositionAngle, Angle.zero, Angle.fromDegrees(90), Angle.fromDegrees(180), Angle.fromDegrees(270))
 
       testSearchOnStandardConditions("/gems_m6.xml", ctx, tipTiltMode, posAngles, 5, 7)
 
@@ -445,7 +445,7 @@ class GemsStrategySpec extends Specification {
       val ctx = ObsContext.create(env, inst, new JSome(Site.GS), conditions, null, new Gems, JNone.instance())
       val tipTiltMode = GemsTipTiltMode.canopus
 
-      val posAngles = Set(ctx.getPositionAngle.toNewModel, Angle.zero, Angle.fromDegrees(90), Angle.fromDegrees(180), Angle.fromDegrees(270))
+      val posAngles = Set(ctx.getPositionAngle, Angle.zero, Angle.fromDegrees(90), Angle.fromDegrees(180), Angle.fromDegrees(270))
 
       testSearchOnStandardConditions("/gems_bpm_37093.xml", ctx, tipTiltMode, posAngles, 4, 5)
 
@@ -509,7 +509,7 @@ class GemsStrategySpec extends Specification {
       val ctx = ObsContext.create(env, inst, new JSome(Site.GS), conditions, null, new Gems, JNone.instance())
       val tipTiltMode = GemsTipTiltMode.canopus
 
-      val posAngles = Set(ctx.getPositionAngle.toNewModel, Angle.zero, Angle.fromDegrees(90), Angle.fromDegrees(180), Angle.fromDegrees(270))
+      val posAngles = Set(ctx.getPositionAngle, Angle.zero, Angle.fromDegrees(90), Angle.fromDegrees(180), Angle.fromDegrees(270))
 
       testSearchOnBestConditions("/gems_bpm_37093.xml", ctx, tipTiltMode, posAngles, 5, 5)
 

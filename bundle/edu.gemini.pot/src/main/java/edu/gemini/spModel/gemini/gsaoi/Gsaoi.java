@@ -850,11 +850,6 @@ public final class Gsaoi extends SPInstObsComp
     }
 
     @Override
-    public String getPosAngleConstraintDescriptorKey() {
-        return POS_ANGLE_CONSTRAINT_PROP.getName();
-    }
-
-    @Override
     public ImList<PosAngleConstraint> getSupportedPosAngleConstraints() {
         return DefaultImList.create(PosAngleConstraint.FIXED,
                                     PosAngleConstraint.UNBOUNDED);

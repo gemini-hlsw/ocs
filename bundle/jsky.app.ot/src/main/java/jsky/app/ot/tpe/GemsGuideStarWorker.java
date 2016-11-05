@@ -213,7 +213,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
     private static Set<edu.gemini.spModel.core.Angle> getPosAngles(ObsContext obsContext) {
         final Set<edu.gemini.spModel.core.Angle> posAngles = new TreeSet<>(Comparator.comparingDouble(edu.gemini.spModel.core.Angle::toDegrees));
 
-        posAngles.add(ModelConverters.toNewAngle(obsContext.getPositionAngle()));
+        posAngles.add(obsContext.getPositionAngle());
         posAngles.add(ModelConverters.toNewAngle(new Angle(0., Angle.Unit.DEGREES)));
         posAngles.add(ModelConverters.toNewAngle(new Angle(90., Angle.Unit.DEGREES)));
         posAngles.add(ModelConverters.toNewAngle(new Angle(180., Angle.Unit.DEGREES)));

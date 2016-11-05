@@ -88,7 +88,7 @@ object F2OiwfsProbeArm extends ProbeArmGeometry {
 
     val flamingos2  = ctx.getInstrument.asInstanceOf[Flamingos2]
     val flip        = flamingos2.getFlipConfig(gemsFlag)
-    val posAngle    = ctx.getPositionAngle.toNewModel
+    val posAngle    = ctx.getPositionAngle
     val fovRotation = flamingos2.getRotationConfig(gemsFlag).toNewModel
     guideStarOffset(ctx, guideStar).map { gsOffset =>
       val angle = armAngle(posAngle, fovRotation, gsOffset, offset, flip, flamingos2.getLyotWheel.getPlateScale)

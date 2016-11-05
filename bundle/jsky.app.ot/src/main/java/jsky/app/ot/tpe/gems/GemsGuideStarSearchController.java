@@ -76,7 +76,7 @@ class GemsGuideStarSearchController {
 
     private Set<edu.gemini.spModel.core.Angle> getPosAngles(final ObsContext obsContext) {
         final Set<edu.gemini.spModel.core.Angle> posAngles = new HashSet<>();
-        posAngles.add(ModelConverters.toNewAngle(obsContext.getPositionAngle()));
+        posAngles.add(obsContext.getPositionAngle());
         if (_model.isAllowPosAngleAdjustments()) {
             posAngles.add(ModelConverters.toNewAngle(new Angle(0., Angle.Unit.DEGREES)));
             posAngles.add(ModelConverters.toNewAngle(new Angle(90., Angle.Unit.DEGREES)));

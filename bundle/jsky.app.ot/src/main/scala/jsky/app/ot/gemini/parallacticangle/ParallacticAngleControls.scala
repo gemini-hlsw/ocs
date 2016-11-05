@@ -28,11 +28,11 @@ import scala.swing.event.{ButtonClicked, Event}
 import scalaz._, Scalaz._, scalaz.effect.IO
 
 /**
- * This class encompasses all of the logic required to manage the average parallactic angle information associated
- * with an instrument configuration.
- *
- * @param isPaUi should be true for PA controls, false for Scheduling Block controls
- */
+  * This class encompasses all of the logic required to manage the average parallactic angle information associated
+  * with an instrument configuration.
+  *
+  * @param isPaUi should be true for PA controls, false for Scheduling Block controls
+  */
 class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publisher {
   import ParallacticAngleControls._
 
@@ -149,9 +149,9 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
 
 
   /**
-   * Initialize the UI and set the instrument editor to allow for the parallactic angle updates.
-   * The `Runnable` is a callback that will be invoked on the EDT after the target is updated.
-   */
+    * Initialize the UI and set the instrument editor to allow for the parallactic angle updates.
+    * The `Runnable` is a callback that will be invoked on the EDT after the target is updated.
+    */
   def init(e: OtItemEditor[_, _], s: Option[Site], f: Format, c: Runnable): Unit = Swing.onEDT {
     editor    = Some(e)
     site      = s
@@ -241,9 +241,9 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
 
 
   /**
-   * Triggered when the date time button is clicked. Shows the ParallacticAngleDialog to allow the user to
-   * explicitly set a date and duration for the parallactic angle calculation.
-   */
+    * Triggered when the date time button is clicked. Shows the ParallacticAngleDialog to allow the user to
+    * explicitly set a date and duration for the parallactic angle calculation.
+    */
   private def displayParallacticAngleDialog(): Unit = Swing.onEDT {
     for {
       e <- editor
@@ -263,10 +263,10 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
 
 
   /**
-   * This should be called whenever the position angle changes to compare it to the parallactic angle.
-   * A warning icon is displayed if the two are different. This is a consequence of allowing the user to
-   * set the PA to something other than the parallactic angle, even when it is selected.
-   */
+    * This should be called whenever the position angle changes to compare it to the parallactic angle.
+    * A warning icon is displayed if the two are different. This is a consequence of allowing the user to
+    * set the PA to something other than the parallactic angle, even when it is selected.
+    */
   def positionAngleChanged(positionAngleText: String): Unit = Swing.onEDT {
     // We only do this if the parallactic angle can be calculated, and is different from the PA.
     for {
@@ -282,8 +282,8 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
 
 
   /**
-   * This should be called whenever the parallactic angle components need to be reinitialized, and at initialization.
-   */
+    * This should be called whenever the parallactic angle components need to be reinitialized, and at initialization.
+    */
   def resetComponents(): Unit = Swing.onEDT {
     ui.parallacticAngleFeedback.text = ""
     for {
@@ -331,8 +331,8 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
     }
 
   /**
-   * The parallactic angle calculation, if it can be calculated
-   */
+    * The parallactic angle calculation, if it can be calculated
+    */
   def parallacticAngle: Option[Angle] =
     for {
       e <- editor

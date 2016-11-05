@@ -1,11 +1,13 @@
 package edu.gemini.spModel.obs.context;
 
+import edu.gemini.pot.ModelConverters;
 import edu.gemini.pot.sp.*;
-import edu.gemini.skycalc.Angle;
 import edu.gemini.skycalc.Coordinates;
 import edu.gemini.skycalc.Offset;
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.ags.AgsStrategyKey;
+import edu.gemini.spModel.core.Angle;
+import edu.gemini.spModel.core.Angle$;
 import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.data.AbstractDataObject;
 import edu.gemini.spModel.gemini.altair.InstAltair;
@@ -63,7 +65,7 @@ public final class ObsContext {
     public static Option<Site> getSiteFromInstrument(final SPInstObsComp instrument) {
         if (instrument == null) return None.instance();
         final Set<Site> siteSet = instrument.getSite();
-        return siteSet.size() == 1 ? new Some<>(siteSet.iterator().next()) : None.<Site>instance();
+        return siteSet.size() == 1 ? new Some<>(siteSet.iterator().next()) : None.instance();
     }
 
 
@@ -233,7 +235,7 @@ public final class ObsContext {
                        Conditions conds, Set<Offset> sciencePositions, Option<AbstractDataObject> aoCompOpt,
                        Angle posAngle, Option<SchedulingBlock> schedulingBlock) {
         this(ags, targets, inst, site, conds, sciencePositions, aoCompOpt, schedulingBlock);
-        this.inst.setPosAngle(posAngle.toDegrees().getMagnitude());
+        this.inst.setPosAngle(posAngle.toDegrees());
     }
     private ObsContext(Option<AgsStrategyKey> ags, TargetEnvironment targets, SPInstObsComp inst, Option<Site> site,
                        Conditions conds, Set<Offset> sciencePositions, Option<AbstractDataObject> aoCompOpt,
@@ -273,13 +275,20 @@ public final class ObsContext {
     }
 
     public Angle getPositionAngle() {
-        double deg = inst.getPosAngle();
-        return new Angle(deg, Angle.Unit.DEGREES);
+        return Angle$.MODULE$.fromDegrees(inst.getPosAngleDegrees());
     }
 
-    public ObsContext withPositionAngle(Angle angle) {
+    public edu.gemini.skycalc.Angle getPositionAngleJava() {
+        return edu.gemini.skycalc.Angle.degrees(inst.getPosAngleDegrees());
+    }
+
+    public ObsContext withPositionAngle(final Angle angle) {
         if (angle.equals(getPositionAngle())) return this;
         return new ObsContext(agsOverride, targets, inst, site, conds, sciencePositions, aoCompOpt, angle, schedulingBlock);
+    }
+
+    public ObsContext withPositionAngleJava(final edu.gemini.skycalc.Angle angleJava) {
+        return withPositionAngle(ModelConverters.toNewAngle(angleJava));
     }
 
     public PosAngleConstraint getPosAngleConstraint() {
@@ -367,7 +376,7 @@ public final class ObsContext {
 
     public String toString() {
         return String.format("ObsContext [posAngle=%8.4f, issPort=%4s, targets=[%s], offsets=[%s], aoComponent=[%s]",
-                getPositionAngle().toDegrees().getMagnitude(), getIssPort().shortName(), targets, sciencePositions,
+                getPositionAngle().toDegrees(), getIssPort().shortName(), targets, sciencePositions,
                 aoCompOpt.isEmpty() ? "None" : aoCompOpt.getValue().getNarrowType());
     }
 }

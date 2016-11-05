@@ -1382,16 +1382,12 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
     }
 
     @Override
-    public String getPosAngleConstraintDescriptorKey() {
-        return POS_ANGLE_CONSTRAINT_PROP.getName();
-    }
-
-    @Override
     public ImList<PosAngleConstraint> getSupportedPosAngleConstraints() {
         return DefaultImList.create(PosAngleConstraint.FIXED,
                                     PosAngleConstraint.FIXED_180,
                                     PosAngleConstraint.UNBOUNDED,
-                                    PosAngleConstraint.PARALLACTIC_ANGLE);
+                                    PosAngleConstraint.PARALLACTIC_ANGLE,
+                                    PosAngleConstraint.PARALLACTIC_OVERRIDE);
     }
 
     @Override

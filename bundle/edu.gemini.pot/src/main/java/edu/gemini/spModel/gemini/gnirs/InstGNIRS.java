@@ -1031,14 +1031,10 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
     }
 
     @Override
-    public String getPosAngleConstraintDescriptorKey() {
-        return POS_ANGLE_CONSTRAINT_PROP.getName();
-    }
-
-    @Override
     public ImList<PosAngleConstraint> getSupportedPosAngleConstraints() {
         return DefaultImList.create(PosAngleConstraint.FIXED,
-                                    PosAngleConstraint.PARALLACTIC_ANGLE);
+                                    PosAngleConstraint.PARALLACTIC_ANGLE,
+                                    PosAngleConstraint.PARALLACTIC_OVERRIDE);
     }
 
     @Override

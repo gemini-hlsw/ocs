@@ -11,12 +11,6 @@ public interface PosAngleConstraintAware {
     void setPosAngleConstraint(PosAngleConstraint pac);
 
     /**
-     * Used to configure property change listeners.
-     * @return the descriptor corresponding to the position angle constraint.
-     */
-    String getPosAngleConstraintDescriptorKey();
-
-    /**
      * The list of valid position angle constraints for this instrument.
      * @return a list of the supported position angle constraints.
      */

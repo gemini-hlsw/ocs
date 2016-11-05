@@ -31,7 +31,7 @@ case class ScienceTargetStrategy(key: AgsStrategyKey, guideProbe: ValidatableGui
   override def select(ctx: ObsContext, mt: MagnitudeTable)(ec: ExecutionContext): Future[Option[AgsStrategy.Selection]] = {
     // The science target is the guide star, but must be converted from SPTarget to SkyObject.
     val siderealTarget = ctx.getTargets.getBase.toSiderealTarget(ctx.getSchedulingBlockStart)
-    val posAngle       = ctx.getPositionAngle.toNewModel
+    val posAngle       = ctx.getPositionAngle
     val assignment     = AgsStrategy.Assignment(guideProbe, siderealTarget)
     val selection      = AgsStrategy.Selection(posAngle, List(assignment))
     Future.successful(Some(selection))
