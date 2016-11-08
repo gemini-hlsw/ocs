@@ -14,6 +14,8 @@ import jsky.app.ot.gemini.editor.targetComponent.TargetFeedback.Row
 import scala.swing.GridBagPanel
 import scala.swing.GridBagPanel.Fill
 
+import scalaz._
+import Scalaz._
 
 class TargetFeedbackEditor extends TelescopePosEditor {
   private val tab: TargetFeedbackEditor.Table = new TargetFeedbackEditor.Table
@@ -23,11 +25,7 @@ class TargetFeedbackEditor extends TelescopePosEditor {
   override def edit(ctxOpt: GOption[ObsContext], target: SPTarget, node: ISPNode): Unit = {
     // Construct the rows for the table. Optionally a BAGS row, and then a list of AGS analysis rows.
     val rows = {
-      val analysisRows = for {
-        c <- ctxOpt.asScalaOpt.toList
-        a <- TargetGuidingFeedback.targetAnalysis(c, OT.getMagnitudeTable, target)
-        if !target.isTooTarget
-      } yield a
+      val analysisRows = target.isTooTarget fold (Nil, ctxOpt.asScalaOpt.toList.flatMap(TargetGuidingFeedback.targetAnalysis(_, OT.getMagnitudeTable, target)))
 
       val bagsRow = for {
         n <- Option(node)
