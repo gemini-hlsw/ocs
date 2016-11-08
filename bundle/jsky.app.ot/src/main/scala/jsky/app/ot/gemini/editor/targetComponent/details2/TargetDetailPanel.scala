@@ -74,10 +74,10 @@ final class TargetDetailPanel extends JPanel with TelescopePosEditor with Reentr
     }
 
     // Forward the `edit` call.
-    tpw.                  edit(obsContext, spTarget, node)
-    tde.                  edit(obsContext, spTarget, node)
+    tpw.                 edit(obsContext, spTarget, node)
+    tde.                 edit(obsContext, spTarget, node)
     targetFeedbackEditor.edit(obsContext, spTarget, node)
-    source.               edit(obsContext, spTarget, node)
+    source.              edit(obsContext, spTarget, node)
 
   }
 
