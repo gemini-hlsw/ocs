@@ -499,7 +499,8 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     private void updateTargetFeedback(final TargetEnvironment env) {
         final Option<ObsContext> ctx = getObsContext(env);
         final ISPObsComponent node   = getContextTargetObsComp();
-        TargetSelection.getTargetForNode(env, node).foreach(target -> _w.detailEditor.targetFeedbackEditor().edit(ctx, target, node));
+        final SPTarget target        = TargetSelection.getTargetForNode(env, node).getOrElse(env.getBase());
+        _w.detailEditor.targetFeedbackEditor().edit(ctx, target, node);
     }
 
 

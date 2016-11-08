@@ -11,9 +11,11 @@ import jsky.app.ot.OT
 import jsky.app.ot.ags.{ObsKey, BagsManager}
 import jsky.app.ot.gemini.editor.targetComponent.TargetFeedback.Row
 
+import scala.swing.GridBagPanel
 import scala.swing.GridBagPanel.Fill
-import scala.swing.{GridBagPanel, Swing}
 
+import scalaz._
+import Scalaz._
 
 class TargetFeedbackEditor extends TelescopePosEditor {
   private val tab: TargetFeedbackEditor.Table = new TargetFeedbackEditor.Table
@@ -21,13 +23,10 @@ class TargetFeedbackEditor extends TelescopePosEditor {
   def getComponent: Component = tab.peer
 
   override def edit(ctxOpt: GOption[ObsContext], target: SPTarget, node: ISPNode): Unit = {
-    val analysis = {
-      val mt = OT.getMagnitudeTable
-      ctxOpt.asScalaOpt.map(TargetGuidingFeedback.targetAnalysis(_, mt, target)).getOrElse(Nil)
-    }
-
     // Construct the rows for the table. Optionally a BAGS row, and then a list of AGS analysis rows.
     val rows = {
+      val analysisRows = target.isTooTarget fold (Nil, ctxOpt.asScalaOpt.toList.flatMap(TargetGuidingFeedback.targetAnalysis(_, OT.getMagnitudeTable, target)))
+
       val bagsRow = for {
         n <- Option(node)
         o <- Option(n.getContextObservation)
@@ -37,7 +36,8 @@ class TargetFeedbackEditor extends TelescopePosEditor {
 
       // If the BAGS row is defined, then use it. If not, create the rows corresponding to the analysis.
       // NOTE that is target.isTooTarget, we don't want an analysis.
-      bagsRow.fold(if (target.isTooTarget) Nil else analysis)(List(_))
+
+      analysisRows ++ bagsRow
     }
 
     if (rows.isEmpty)
@@ -53,7 +53,7 @@ object TargetFeedbackEditor {
 
     def showRow(row: Row): Unit = showRows(List(row))
 
-    def showRows(rows: List[Row]): Unit = {
+    def showRows(rows: Iterable[Row]): Unit = {
       layout.clear()
 
       rows.zipWithIndex.foreach { case (row, rowIndex) =>
