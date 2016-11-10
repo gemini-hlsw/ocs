@@ -15,6 +15,8 @@ import java.security.{Permission, Principal}
 
 import edu.gemini.util.security.principal.GeminiPrincipal
 
+import java.util.logging.Logger
+
 import scalaz._
 import Scalaz._
 
@@ -162,7 +164,10 @@ class VcsServer(odb: IDBDatabaseService) { vs =>
   private def accessControlled[A](id: SPProgramID, user: Set[Principal])(body: => VcsAction[A]): VcsAction[A] =
     hasPermission(new ProgramPermission.Read(id), user) >>= { hp =>
       if (hp) body
-      else VcsAction.fail(Forbidden(s"You don't have permission to access program '$id'"))
+      else {
+        VcsServer.Log.info(s"VCS op forbidden: pid=$id, user=[${user.toList.mkString(", ")}]")
+        VcsAction.fail(Forbidden(s"You don't have permission to access program '$id'"))
+      }
     }
 
   private def locked[A](k: SPNodeKey, lock: SPNodeKey => Unit, unlock: SPNodeKey => Unit)(body: => VcsAction[A]): VcsAction[A] =
@@ -173,4 +178,8 @@ class VcsServer(odb: IDBDatabaseService) { vs =>
       case clash: DBIDClashException => VcsFailure.idClash(clash)
       case ex                        => VcsException(ex)
     }.as(())
+}
+
+object VcsServer {
+  private val Log = Logger.getLogger(VcsServer.getClass.getName)
 }
