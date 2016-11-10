@@ -1,5 +1,6 @@
 package edu.gemini.lchquery.servlet
 
+import edu.gemini.odb.browser.Investigator
 import edu.gemini.pot.sp.{ISPObservation, ISPProgram}
 import edu.gemini.spModel.`type`.DisplayableSpType
 import edu.gemini.spModel.ao.{AOConstants, AOTreeUtil}
@@ -68,11 +69,24 @@ object ValueMatcher {
   }
 }
 
+sealed case class InvestigatorInfo(name: String, email: Option[String], isPrincipal: Boolean)
+object InvestigatorInfo {
+  private[servlet] implicit class ToInvestigator(val i: InvestigatorInfo) extends AnyVal {
+    def toInvestigator: Investigator = new Investigator() {
+      setName(i.name)
+      i.email.foreach(setEmail)
+      setPi(i.isPrincipal)
+    }
+  }
+}
 
 sealed case class LchQueryParam[A](name: String, v: ValueMatcher[A])
 
 object LchQueryParam {
   import ValueMatcher._
+
+  def stringToOpt(s: String): Option[String] =
+    Option(s.trim).filterNot(_.isEmpty)
 
   private[servlet] implicit class ToYesNo(val b: Boolean) extends AnyVal {
     def toYesNo: YesNoType =
@@ -90,25 +104,22 @@ object LchQueryParam {
         case _                     => None
       }
 
-    def investigatorNames: List[String] = {
-      def investigatorName(inv: GsaPhase1Data.Investigator): Option[String] =
-        Option(inv).map(i => s"${i.getFirst} ${i.getLast}").filterNot(_.trim.isEmpty)
+    // Returns a tuple of investigator info in the form name /
 
-      val spProg = toSPProg
-      val piName = {
-        val piInfo    = spProg.getPIInfo
-        val firstName = piInfo.getFirstName
-        val lastName  = piInfo.getLastName
-        val piNameStr = s"$firstName $lastName".trim
-        if (piNameStr.isEmpty) None else piNameStr.some
+    def investigatorInfo: List[InvestigatorInfo] = {
+      def extractPi: Option[InvestigatorInfo] = {
+        val piInfo       = toSPProg.getPIInfo
+        val piNameStrOpt = stringToOpt(s"${piInfo.getFirstName} ${piInfo.getLastName}")
+        piNameStrOpt.map(InvestigatorInfo(_, stringToOpt(piInfo.getEmail), isPrincipal = true))
       }
 
-      (piName :: spProg.getGsaPhase1Data.getCois.asScala.map(investigatorName).toList).
-        collect { case Some(i) => i }
-    }
+      def extractCoi(coi: GsaPhase1Data.Investigator): Option[InvestigatorInfo] = for {
+        c <- Option(coi)
+        n <- stringToOpt(s"${c.getFirst} ${c.getLast}")
+      } yield InvestigatorInfo(n, stringToOpt(c.getEmail), isPrincipal = false)
 
-    def coIEmails: List[String] =
-      toSPProg.getGsaPhase1Data.getCois.asScala.toList.map(_.getEmail).filterNot(_.isEmpty)
+      (extractPi :: toSPProg.getGsaPhase1Data.getCois.asScala.map(extractCoi).toList).flatten
+    }
 
     def abstrakt: String =
       toSPProg.getGsaPhase1Data.getAbstract.toString

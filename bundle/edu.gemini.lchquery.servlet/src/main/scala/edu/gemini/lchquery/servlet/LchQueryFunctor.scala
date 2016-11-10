@@ -143,10 +143,12 @@ class LchQueryFunctor(queryType: LchQueryFunctor.QueryType,
         setContactScientistEmail(spProg.getContactPerson)
         setNgoEmail(spProg.getNGOContactEmail)
         setNotifyPi(spProg.getNotifyPi.displayValue)
-        setPiEmail(Option(spProg.getPIInfo).map(_.getEmail).orNull)
         setRollover(prog.rolloverStatus.displayValue)
-        prog.investigatorNames.foreach(getInvestigatorNames.add)
-        prog.coIEmails.foreach(getCoIEmails.add)
+
+        //import InvestigatorInfo._
+        setInvestigatorsNode(new InvestigatorsNode() {
+          prog.investigatorInfo.foreach(i => getInvestigators.add(i.toInvestigator))
+        })
 
         val progAbstrakt = prog.abstrakt
         if (!progAbstrakt.isEmpty) setAbstrakt(progAbstrakt)
@@ -180,11 +182,14 @@ class LchQueryFunctor(queryType: LchQueryFunctor.QueryType,
                 }
 
                 // Set the obs log comments.
-                obs.obsLogComments.filter(_.nonEmpty).foreach { obsLog =>
-                  setObsLogNode(new ObsLog() {
-                    obsLog.toList.foreach { case (lab,rec) =>
-                        setDataset(lab.toString)
-                        setRecord(rec.comment)
+                // If there are none, no setObsLogNode should be called.
+                obs.obsLogComments.filter(_.nonEmpty).foreach { log =>
+                  setObsLogNode(new ObsLogNode() {
+                    log.toList.foreach { case (lb,rc) =>
+                      getObsLog.add(new ObsLogRecord() {
+                        setId(lb.toString)
+                        setRecord(rc.comment)
+                      })
                     }
                   })
                 }
