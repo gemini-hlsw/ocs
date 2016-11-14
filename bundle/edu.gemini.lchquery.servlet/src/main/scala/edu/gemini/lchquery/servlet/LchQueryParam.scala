@@ -107,8 +107,10 @@ object LchQueryParam {
     // Returns a tuple of investigator info in the form name /
 
     def investigatorInfo: List[InvestigatorInfo] = {
+      val spProg = toSPProg
+
       def extractPi: Option[InvestigatorInfo] = {
-        val piInfo       = toSPProg.getPIInfo
+        val piInfo       = spProg.getPIInfo
         val piNameStrOpt = stringToOpt(s"${piInfo.getFirstName} ${piInfo.getLastName}")
         piNameStrOpt.map(InvestigatorInfo(_, stringToOpt(piInfo.getEmail), isPrincipal = true))
       }
@@ -118,7 +120,7 @@ object LchQueryParam {
         n <- stringToOpt(s"${c.getFirst} ${c.getLast}")
       } yield InvestigatorInfo(n, stringToOpt(c.getEmail), isPrincipal = false)
 
-      (extractPi :: toSPProg.getGsaPhase1Data.getCois.asScala.map(extractCoi).toList).flatten
+      (extractPi :: spProg.getGsaPhase1Data.getCois.asScala.map(extractCoi).toList).flatten
     }
 
     def abstrakt: String =
