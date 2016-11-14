@@ -350,7 +350,7 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
           val oldAngleDegrees = e.getContextInstrumentDataObject.getPosAngleDegrees
           Math.abs(oldAngleDegrees - newAngle.toDegrees)
         }
-        angleDiff >= Precision || Math.abs(angleDiff - 180) >= Precision
+        angleDiff >= Precision && Math.abs(angleDiff - 180) >= Precision
       }
     }
 
