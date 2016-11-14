@@ -162,7 +162,6 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
         } {
           val explicitlySet = !fmt.format(angle.toDegrees).equals(paStr) &&
                               !fmt.format((angle + Angle.fromDegrees(180)).toDegrees).equals(paStr)
-          println(s"*** paStr=$paStr, parAngle=${fmt.format(angle.toDegrees)}, explicitlySet=$explicitlySet")
           if (explicitlySet) {
             icon = Resources.getIcon("eclipse/alert.gif")
             tooltip = "The PA is not at the average parallactic value."
