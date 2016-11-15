@@ -12,6 +12,8 @@ import edu.gemini.spModel.target.*;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.target.offset.OffsetPosBase;
+import edu.gemini.spModel.telescope.PosAngleConstraint;
+import edu.gemini.spModel.telescope.PosAngleConstraintAware;
 import edu.gemini.spModel.util.Angle;
 import jsky.app.ot.tpe.gems.GemsGuideStarSearchDialog;
 import jsky.app.ot.util.OtColor;
@@ -853,6 +855,11 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
         final Double d = _ctx.instrument().posAngleOrZero();
         if ((d != posAngle) && (inst != null)) {
             inst.setPosAngle(posAngle);
+            if (inst instanceof PosAngleConstraintAware) {
+                final PosAngleConstraintAware pacInst = (PosAngleConstraintAware) inst;
+                if (pacInst.getPosAngleConstraint() == PosAngleConstraint.PARALLACTIC_ANGLE)
+                    pacInst.setPosAngleConstraint(PosAngleConstraint.PARALLACTIC_OVERRIDE);
+            }
         }
 
         if (!getCoordinateConverter().isWCS()) {

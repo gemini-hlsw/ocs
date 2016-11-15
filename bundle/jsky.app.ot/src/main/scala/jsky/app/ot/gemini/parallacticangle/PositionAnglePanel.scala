@@ -83,9 +83,9 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
     listenTo(positionAngleTextField.keys)
     reactions += {
       case ValueChanged(`positionAngleTextField`) =>
-        ui.parallacticAngleControlsOpt.foreach(_.positionAngleChanged(positionAngleTextField.text))
         ui.positionAngleTextField.validate()
         copyPosAngleToInstrument()
+        ui.parallacticAngleControlsOpt.foreach(_.positionAngleChanged(positionAngleTextField.text))
 
       case FocusGained(`positionAngleTextField`, _, _) | FocusLost(`positionAngleTextField`, _, _) =>
         copyPosAngleToTextField()

@@ -15,7 +15,8 @@ import edu.gemini.spModel.obs.{ObsTargetCalculatorService, SPObservation, Schedu
 import edu.gemini.spModel.obs.SchedulingBlock.Duration
 import edu.gemini.spModel.obs.SchedulingBlock.Duration._
 import edu.gemini.spModel.rich.shared.immutable._
-import edu.gemini.shared.util.immutable.{Option => JOption, ImOption}
+import edu.gemini.shared.util.immutable.{ImOption, Option => JOption}
+import edu.gemini.spModel.obscomp.SPInstObsComp
 import jsky.app.ot.editor.OtItemEditor
 import jsky.app.ot.gemini.editor.EphemerisUpdater
 import jsky.app.ot.util.TimeZonePreference
@@ -24,8 +25,9 @@ import jsky.util.gui.DialogUtil
 import scala.swing.GridBagPanel.{Anchor, Fill}
 import scala.swing._
 import scala.swing.event.{ButtonClicked, Event}
-
-import scalaz._, Scalaz._, scalaz.effect.IO
+import scalaz._
+import Scalaz._
+import scalaz.effect.IO
 
 /**
   * This class encompasses all of the logic required to manage the average parallactic angle information associated
@@ -131,13 +133,43 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
     }
 
     object parallacticAngleFeedback extends Label {
-      foreground             = Color.black
-      horizontalAlignment    = Alignment.Left
-      iconTextGap            = iconTextGap - 2
+      foreground          = Color.black
+      horizontalAlignment = Alignment.Left
+      icon                = Resources.getIcon("eclipse/blank.gif")
+      iconTextGap         = iconTextGap - 2
 
-      def warningState(warn: Boolean): Unit =
-        icon = if (warn) Resources.getIcon("eclipse/alert.gif") else Resources.getIcon("eclipse/blank.gif")
+      /**
+        * This should be called whenever the position angle or parallactic angle changes.
+        * A warning icon and tooltip are displayed if the two are different.
+        */
+      def warningState(): Unit = Swing.onEDT {
+        for {
+          e     <- editor
+          fmt   <- formatter
+          inst  <- Option(e.getContextInstrumentDataObject).collect { case s: SPInstObsComp => s }
+        } warningStateFromPAString(inst.getPosAngleDegrees.toString)
+      }
+
+      def warningStateFromPAString(paStr: String): Unit = Swing.onEDT {
+        for {
+          e     <- editor
+          fmt   <- formatter
+          inst  <- Option(e.getContextInstrumentDataObject).collect { case s: SPInstObsComp => s }
+          angle <- parallacticAngle
+        } {
+          val explicitlySet = !fmt.format(angle.toDegrees).equals(paStr) &&
+                              !fmt.format((angle + Angle.fromDegrees(180)).toDegrees).equals(paStr)
+          if (explicitlySet) {
+            icon = Resources.getIcon("eclipse/alert.gif")
+            tooltip = "The PA is not at the average parallactic value."
+          } else {
+            icon = Resources.getIcon("eclipse/blank.gif")
+            tooltip = ""
+          }
+        }
+      }
     }
+
     layout(parallacticAngleFeedback) = new Constraints() {
       gridx   = 2
       weightx = 1.0
@@ -239,7 +271,6 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
 
     }
 
-
   /**
     * Triggered when the date time button is clicked. Shows the ParallacticAngleDialog to allow the user to
     * explicitly set a date and duration for the parallactic angle calculation.
@@ -261,23 +292,11 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
     }
   }
 
-
   /**
     * This should be called whenever the position angle changes to compare it to the parallactic angle.
-    * A warning icon is displayed if the two are different. This is a consequence of allowing the user to
-    * set the PA to something other than the parallactic angle, even when it is selected.
     */
-  def positionAngleChanged(positionAngleText: String): Unit = Swing.onEDT {
-    // We only do this if the parallactic angle can be calculated, and is different from the PA.
-    for {
-      e     <- editor
-      angle <- parallacticAngle
-      fmt   <- formatter
-    } {
-      val explicitlySet = !fmt.format(angle.toDegrees).equals(positionAngleText) &&
-                          !fmt.format((angle + Angle.fromDegrees(180)).toDegrees).equals(positionAngleText)
-      ui.parallacticAngleFeedback.warningState(explicitlySet)
-    }
+  def positionAngleChanged(positionAngleText: String): Unit = {
+    ui.parallacticAngleFeedback.warningStateFromPAString(positionAngleText)
   }
 
 
@@ -300,16 +319,17 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
       // Scheduling block duration, in minutes
       val durStr = sb.duration.toOption.map(_ / 60000.0).foldMap(n => f", $n%2.1f min")
 
-      // Parallactic Angle
+      // Parallactic angle. If it can be calculated, display its value and its 180 flip value.
       val paStr = parallacticAngle
-        .map(_.toDegrees)
-        .fold(", not visible")(a => s", ${fmt.format(a)}°")
+        .map(a => List(a.toDegrees, a.flip.toDegrees).sorted.map(a0 => s"${fmt.format(a0)}°").mkString(" / "))
+        .fold(", not visible")(a => s", $a")
 
       ui.parallacticAngleFeedback.text =
         if (isPaUi) dateTimeStr + durStr + paStr
         else dateTimeStr
 
       if (didParllacticAngleChange) {
+        ui.parallacticAngleFeedback.warningState()
         publish(ParallacticAngleControls.ParallacticAngleChangedEvent)
       }
     }
