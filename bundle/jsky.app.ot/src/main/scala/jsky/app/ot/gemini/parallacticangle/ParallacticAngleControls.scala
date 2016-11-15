@@ -147,10 +147,7 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
           e     <- editor
           fmt   <- formatter
           inst  <- Option(e.getContextInstrumentDataObject).collect { case s: SPInstObsComp => s }
-        } {
-          //warningStateFromPAString(fmt.format(inst.getPosAngleDegrees))
-          warningStateFromPAString(inst.getPosAngleDegrees.toString)
-        }
+        } warningStateFromPAString(inst.getPosAngleDegrees.toString)
       }
 
       def warningStateFromPAString(paStr: String): Unit = Swing.onEDT {
