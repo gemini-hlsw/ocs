@@ -37,7 +37,7 @@ object ImageCatalogPreferences {
       val cachePath = Preferences.getPreferences.getCacheDir.toPath
       // Try to parse preferences, Preferences.get reads a file
       val size = Option(Preferences.get(ImageMaxCacheSize)).map(_.toDouble)
-      val catalog = ImageCatalog.all.find(_.id.filePrefix === Preferences.get(ImageDefaultCatalog)).getOrElse(ImageCatalog.DefaultImageCatalog)
+      val catalog = ImageCatalog.allVisible.find(_.id.filePrefix === Preferences.get(ImageDefaultCatalog)).getOrElse(ImageCatalog.DefaultImageCatalog)
 
       ImageCatalogPreferences(cachePath, size.map(_.megabytes).getOrElse(ImageCatalogPreferences.DefaultCacheSize), catalog)
     }.getOrElse(zero)

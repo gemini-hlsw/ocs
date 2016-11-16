@@ -2,7 +2,7 @@ package edu.gemini.catalog.image
 
 import java.net.URL
 
-import edu.gemini.spModel.core.{Angle, Coordinates, MagnitudeBand, Wavelength}
+import edu.gemini.spModel.core.{Angle, Coordinates, MagnitudeBand, Site, Wavelength}
 import edu.gemini.spModel.core.WavelengthConversions._
 
 import scalaz._
@@ -15,6 +15,12 @@ sealed trait CatalogId {
 
 case object DssGeminiId extends CatalogId {
   val filePrefix = "dssGemini"
+}
+case object DssGeminiSouthId extends CatalogId {
+  val filePrefix = "dssGeminiSouth"
+}
+case object DssGeminiNorthId extends CatalogId {
+  val filePrefix = "dssGeminiNorth"
 }
 case object DssEsoId extends CatalogId {
   val filePrefix = "dssEso"
@@ -36,7 +42,7 @@ case object TwoMassKId extends CatalogId {
 }
 
 object CatalogId {
-  val all: List[CatalogId] = List(DssGeminiId, DssEsoId, Dss2EsoId, Dss2IREsoId, TwoMassJId, TwoMassHId, TwoMassKId)
+  val all: List[CatalogId] = List(DssGeminiId, DssGeminiSouthId, DssGeminiNorthId, DssEsoId, Dss2EsoId, Dss2IREsoId, TwoMassJId, TwoMassHId, TwoMassKId)
 }
 
 /** Represents an end point that can load an image for a given set of coordinates */
@@ -94,6 +100,17 @@ object DssGemini extends DssCatalog(DssGeminiId, "Digitized Sky at Gemini", "DSS
     NonEmptyList("mko", "cpo").map(c => s"http://${c}catalog.gemini.edu/cgi-bin/dss_search")
 }
 
+// If we can, we use the Gemini catalog for the users' site
+object DssGeminiGS extends DssCatalog(DssGeminiSouthId, "Digitized Sky at Gemini South", "DSS Gemini@GS") {
+  override val baseUrl: NonEmptyList[String] =
+    nel("http://cpocatalog.gemini.edu/cgi-bin/dss_search", IList.empty)
+}
+
+object DssGeminiGN extends DssCatalog(DssGeminiNorthId, "Digitized Sky at Gemini North", "DSS Gemini@GN") {
+  override val baseUrl: NonEmptyList[String] =
+    nel("http://mkocatalog.gemini.edu/cgi-bin/dss_search", IList.empty)
+}
+
 object DssESO extends DssCatalog(DssEsoId, "Digitized Sky at ESO", "DSS ESO") {
   override val baseUrl: NonEmptyList[String] = nels("http://archive.eso.org/dss/dss")
 }
@@ -135,8 +152,10 @@ object ImageCatalog {
   private val MassJCutoff = 1.4.microns
   private val MassHCutoff = 1.9.microns
 
-  /** List of all known image server in preference order */
-  val all = List(DssGemini, DssESO, Dss2ESO, Dss2iESO, TwoMassJ, TwoMassH, TwoMassK)
+  /** List of all known public image server in preference order */
+  val allVisible = List(DssGemini, DssESO, Dss2ESO, Dss2iESO, TwoMassJ, TwoMassH, TwoMassK)
+
+  private val all = List(DssGemini, DssGeminiGS, DssGeminiGN, DssESO, Dss2ESO, Dss2iESO, TwoMassJ, TwoMassH, TwoMassK)
 
   private val catalogsById = all.map(c => c.id.filePrefix -> c).toMap
 
@@ -145,11 +164,13 @@ object ImageCatalog {
   /**
     * Returns a catalog appropriate for a given wavelength
     */
-  def catalogForWavelength(w: Option[Wavelength]): ImageCatalog = w match {
-    case Some(d) if d <= DssCutoff   => DssGemini
-    case Some(d) if d <= MassJCutoff => TwoMassJ
-    case Some(d) if d <= MassHCutoff => TwoMassH
-    case Some(_)                     => TwoMassK
-    case None                        => DefaultImageCatalog
-  }
+  def catalogForWavelength(w: Option[Wavelength], site: Option[Site]): ImageCatalog = w match {
+      case Some(d) if d <= DssCutoff && site === Site.GS.some  => DssGeminiGS // If the site can be determined use the site's image server
+      case Some(d) if d <= DssCutoff && site === Site.GN.some  => DssGeminiGN
+      case Some(d) if d <= DssCutoff                           => DssGemini
+      case Some(d) if d <= MassJCutoff                         => TwoMassJ
+      case Some(d) if d <= MassHCutoff                         => TwoMassH
+      case Some(_)                                             => TwoMassK
+      case None                                                => DefaultImageCatalog
+    }
 }

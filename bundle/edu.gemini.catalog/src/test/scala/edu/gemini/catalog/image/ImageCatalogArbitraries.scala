@@ -11,7 +11,7 @@ import scalaz._
 import Scalaz._
 
 trait ImageCatalogArbitraries extends Arbitraries {
-  implicit val arbCatalog: Arbitrary[ImageCatalog] = Arbitrary(Gen.oneOf(ImageCatalog.all))
+  implicit val arbCatalog: Arbitrary[ImageCatalog] = Arbitrary(Gen.oneOf(ImageCatalog.allVisible))
 
   val minRa = DssGemini.imageSize.ra.max(TwoMassJ.imageSize.ra)
   val minDec = DssGemini.imageSize.dec.max(TwoMassJ.imageSize.dec)

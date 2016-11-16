@@ -59,7 +59,7 @@ object BackgroundImageLoader {
   }
 
   def newExecutor(priority: Int): ExecutorService =
-    Executors.newFixedThreadPool(ImageCatalog.all.length, imageDownloadsThreadFactory(priority))
+    Executors.newFixedThreadPool(ImageCatalog.allVisible.length, imageDownloadsThreadFactory(priority))
 
   /**
     * Execution context for lower priority downloads
