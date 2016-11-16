@@ -111,7 +111,7 @@ final class ImageCatalogPanel(imageDisplay: CatalogImageDisplay) {
     }
   }
 
-  lazy val panel: Component = new MigPanel(LC().fill().insets(0.px)) {
+  lazy val panel: Component = new MigPanel(LC().fill().insets(0.px).gridGap(0.px, 0.px)) {
     add(new Label("Image Catalog:"), CC())
     add(toolsButton, CC().alignX(RightAlign))
     catalogRows.foreach { row =>

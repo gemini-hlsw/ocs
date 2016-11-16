@@ -405,12 +405,12 @@ public final class CanopusFeature extends TpeImageFeature implements PropertyWat
         );
         pan.add(new JLabel("CWFS2", new ProbeRangeIcon(Orientation.vertical), JLabel.LEFT) {{ setForeground(Color.black); }},
             new GridBagConstraints() {{
-                gridx=0; gridy=1; anchor=WEST; fill=HORIZONTAL;
+                gridx=1; gridy=0; anchor=WEST; fill=HORIZONTAL;
             }}
         );
         pan.add(new JLabel("Both", new ProbeRangeIcon(Orientation.horizontal, Orientation.vertical), JLabel.LEFT) {{ setForeground(Color.black); }},
             new GridBagConstraints() {{
-                gridx=0; gridy=2; anchor=WEST; fill=HORIZONTAL;
+                gridx=2; gridy=0; anchor=WEST; fill=HORIZONTAL;
             }}
         );
 
