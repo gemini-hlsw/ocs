@@ -31,7 +31,6 @@ import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Collection;
 import java.util.Collections;
@@ -111,15 +110,11 @@ public final class CanopusFeature extends TpeImageFeature implements PropertyWat
     /**
      * Gets the drawing of probe ranges.
      */
-    public boolean getDrawProbeRanges() {
+    private boolean getDrawProbeRanges() {
         return props.getBoolean(PROP_SHOW_RANGES, true);
     }
 
-    private PropertyChangeListener selListener = new PropertyChangeListener() {
-        public void propertyChange(PropertyChangeEvent evt) {
-            _redraw();
-        }
-    };
+    private PropertyChangeListener selListener = evt -> _redraw();
 
     /**
      * Reinitialize (recalculate the positions and redraw).
@@ -157,7 +152,6 @@ public final class CanopusFeature extends TpeImageFeature implements PropertyWat
 
     /**
      * Implements the TelescopePosWatcher interface.
-     * @param tp
      */
     public void telescopePosLocationUpdate(WatchablePos tp) {
         _redraw();
@@ -165,7 +159,6 @@ public final class CanopusFeature extends TpeImageFeature implements PropertyWat
 
     /**
      * Implements the TelescopePosWatcher interface.
-     * @param tp
      */
     public void telescopePosGenericUpdate(WatchablePos tp) {
         _redraw();
@@ -284,8 +277,8 @@ public final class CanopusFeature extends TpeImageFeature implements PropertyWat
             g2d.setPaint(p);
         }
 
-        drawProbeArm(g2d, tii, ctx, Canopus.Wfs.cwfs1);
-        drawProbeArm(g2d, tii, ctx, Canopus.Wfs.cwfs2);
+        drawProbeArm(g2d, ctx, Canopus.Wfs.cwfs1);
+        drawProbeArm(g2d, ctx, Canopus.Wfs.cwfs2);
         // cwfs3 probe arm is not displayed
 //        drawProbeArm(g2d, tii, ctx, Canopus.Wfs.cwfs3);
 
@@ -293,7 +286,7 @@ public final class CanopusFeature extends TpeImageFeature implements PropertyWat
     }
 
     // draw the probe arm for the given wfs
-    private void drawProbeArm(Graphics2D g2d, TpeImageInfo tii, ObsContext ctx, Canopus.Wfs wfs) {
+    private void drawProbeArm(Graphics2D g2d, ObsContext ctx, Canopus.Wfs wfs) {
         wfs.probeArm(ctx, true).foreach(a -> {
             if (a != null) {
                 Shape s = trans.createTransformedShape(flipArea(a));
@@ -308,8 +301,7 @@ public final class CanopusFeature extends TpeImageFeature implements PropertyWat
     }
 
     @Override public boolean isEnabled(TpeContext ctx) {
-        if (!super.isEnabled(ctx)) return false;
-        return ctx.gems().isDefined();
+        return super.isEnabled(ctx) && ctx.gems().isDefined();
     }
 
     private void setRangeDisplayMode(RangeDisplayMode mode) {
@@ -414,7 +406,7 @@ public final class CanopusFeature extends TpeImageFeature implements PropertyWat
             }}
         );
 
-        return new Some<Component>(pan);
+        return new Some<>(pan);
     }
 
     public TpeImageFeatureCategory getCategory() {
@@ -426,7 +418,7 @@ public final class CanopusFeature extends TpeImageFeature implements PropertyWat
 
     public Option<Collection<TpeMessage>> getMessages() {
         if (!isEmpty) return None.instance();
-        return new Some<Collection<TpeMessage>>(Collections.singletonList(WARNING));
+        return new Some<>(Collections.singletonList(WARNING));
     }
 
 }

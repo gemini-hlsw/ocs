@@ -45,7 +45,7 @@ class KeySelectionCombo(auth: KeyChain, keyChangedOp: edu.gemini.shared.util.imm
   renderer = Renderer { _.map(Model.keyDisplay).getOrElse("None") }
 
   val selectionReaction: Reaction = {
-    case e: SelectionEvent => Model.selectKeyFromComboBox()
+    case _: SelectionEvent => Model.selectKeyFromComboBox()
   }
 
   def refresh(): Unit = {
