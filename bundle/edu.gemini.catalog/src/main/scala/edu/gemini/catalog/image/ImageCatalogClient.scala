@@ -108,7 +108,7 @@ case class ImageInFile(query: ImageSearchQuery, file: Path, fileSize: Long) {
     // In principle dec can be 90 leading to a 0 on θ
     // In practice it is just very close to zero so it doesn't produce a zero
     // division but as a result essentially the whole sky matches
-    // TODO: Perhaps the zenith case should be handled in praticular
+    // TODO: Perhaps the zenith case should be handled in particular
     val θ = cos(φ0)
 
     // Distance
@@ -204,14 +204,21 @@ object ImageCatalogClient {
     /**
       * Attempts to calculate the center and size of the downloaded image from the actual header
       */
-    def parseHeader(descriptor: ConnectionDescriptor, tmpFile: File): Task[ImageSearchQuery] = Task.delay {
-      // This means we do a second read on the file. It could be done in one go but this approach is simpler
-      // This is a one-time cost for each image after the download. Note that only the header is read
-      FitsHeadersParser.parseFitsGeometry(tmpFile, descriptor.compressed).fold(_ => query, g =>
-        g.bifoldLeft(query)
+    def parseHeader(descriptor: ConnectionDescriptor, tmpFile: File): Task[ImageSearchQuery] = {
+      def parse(fin: FileInputStream): Task[ImageSearchQuery] = Task.delay {
+        // This means we do a second read on the file. It could be done in one go but this approach is simpler
+        // This is a one-time cost for each image after the download. Note that only the header is read
+        FitsHeadersParser.parseFitsGeometry(fin, descriptor.compressed).fold(_ => query, g =>
+          g.bifoldLeft(query)
           { (q, c) => c.fold(q)(c => q.copy(coordinates = c)) }
           { (q, s) => s.fold(q)(s => q.copy(size = s )) }
-      )
+        )
+      }
+
+      for {
+        in <- Task.delay(new FileInputStream(tmpFile))
+        q  <- parse(in).onFinish(_ => Task.delay(in.close()))
+      } yield q
     }
 
     def moveToFinalFile(extension: String, tmpFile: File, query: ImageSearchQuery): Task[ImageInFile] = Task.delay {
@@ -256,9 +263,9 @@ object FitsHeadersParser {
   /**
     * Attempts to read a fits file header and extract the center coordinates and dimensions
     */
-  def parseFitsGeometry(file: File, compressed: Boolean): Throwable \/ (Option[Coordinates], Option[AngularSize]) = {
+  def parseFitsGeometry(fin: FileInputStream, compressed: Boolean): Throwable \/ (Option[Coordinates], Option[AngularSize]) = {
     \/.fromTryCatchNonFatal {
-      val fits = new Fits(new FileInputStream(file), compressed)
+      val fits = new Fits(fin, compressed)
       val basicHDU = fits.getHDU(0).getHeader
       val coord =
         for {
