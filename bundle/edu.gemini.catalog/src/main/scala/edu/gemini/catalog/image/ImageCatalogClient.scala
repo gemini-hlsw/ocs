@@ -61,11 +61,11 @@ object ImageSearchQuery {
   val maxDistance: Angle = Angle.fromArcmin(4.5)
 
   implicit class DeclinationShow(val d: Declination) extends AnyVal {
-    def toFilePart: String = Declination.formatDMS(d, ":", 2)
+    def toFilePart: String = Declination.formatDMS(d, "#", 2)
   }
 
   implicit class RightAscensionShow(val a: RightAscension) extends AnyVal {
-    def toFilePart: String = a.toAngle.formatHMS
+    def toFilePart: String = a.toAngle.formatHMS.replace(":", "#")
   }
 
   implicit class CoordinatesShow(val c: Coordinates) extends AnyVal {
@@ -140,8 +140,8 @@ object ImageInFile {
     case FileRegex(c, raStr, decStr, w, h) =>
       for {
         catalog <- ImageCatalog.byId(c)
-        ra      <- Angle.parseHMS(raStr).map(RightAscension.fromAngle).toOption
-        dec     <- Angle.parseDMS(decStr).toOption.map(_.toDegrees).flatMap(Declination.fromDegrees)
+        ra      <- Angle.parseHMS(raStr.replace("#", ":")).map(RightAscension.fromAngle).toOption
+        dec     <- Angle.parseDMS(decStr.replace("#", ":")).toOption.map(_.toDegrees).flatMap(Declination.fromDegrees)
         width   <- Angle.fromArcsecs(w.toInt).some
         height  <- Angle.fromArcsecs(h.toInt).some
       } yield ImageInFile(ImageSearchQuery(catalog, Coordinates(ra, dec), AngularSize(width, height)), file.toPath, file.length())
