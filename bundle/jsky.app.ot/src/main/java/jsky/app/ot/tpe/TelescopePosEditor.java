@@ -241,19 +241,6 @@ public final class TelescopePosEditor implements TpeMouseObserver {
         _iw.loadCachedImage(ra, dec);
     }
 
-    private boolean basePosUpdated(final TpeContext oldCtx, final TpeContext newCtx) {
-        final SPTarget oldBasePos = oldCtx.targets().baseOrNull();
-        final SPTarget newBasePos = newCtx.targets().baseOrNull();
-        if (newBasePos == null) return oldBasePos != null;
-        if (oldBasePos == null) return true;
-
-        final Option<Long> oldWhen = oldCtx.schedulingBlockStartJava();
-        final Option<Long> newWhen = newCtx.schedulingBlockStartJava();
-
-        return !(oldBasePos.getRaDegrees(oldWhen).equals(newBasePos.getRaDegrees(newWhen)) &&
-                oldBasePos.getDecDegrees(oldWhen).equals(newBasePos.getDecDegrees(newWhen)));
-    }
-
     private final PropertyChangeListener obsListener = evt -> {
         if (!(evt.getSource() instanceof ISPNode)) return;
         if (!evt.getPropertyName().equals(SPUtil.getDataObjectPropertyName()) &&
@@ -294,10 +281,10 @@ public final class TelescopePosEditor implements TpeMouseObserver {
         if (_ctx.isEmpty()) {
             _iw.clear();
         } else {
-            if (basePosUpdated(oldCtx, _ctx)) {
-                loadImage();
-            } else if (_ctx.targets().baseOrNull() == null) {
+            if (_ctx.targets().base().isEmpty()) {
                 _iw.clear();
+            } else {
+                loadImage();
             }
         }
 

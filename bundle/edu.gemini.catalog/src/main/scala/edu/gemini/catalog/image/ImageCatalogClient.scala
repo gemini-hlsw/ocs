@@ -5,7 +5,7 @@ import java.net.URL
 import java.nio.file.{Files, Path, StandardCopyOption}
 import java.util.logging.Logger
 
-import edu.gemini.spModel.core.{Angle, Coordinates, Declination, RightAscension}
+import edu.gemini.spModel.core.{Angle, Coordinates, Declination, RightAscension, Site}
 import nom.tam.fits.{Fits, Header}
 
 import scala.util.matching.Regex
@@ -29,7 +29,7 @@ case object AngularSize {
   val zero = AngularSize(Angle.zero, Angle.zero)
 
   /** @group Typeclass Instances */
-  implicit val equal = Equal.equalA[AngularSize]
+  implicit val equal: Equal[AngularSize] = Equal.equalA[AngularSize]
 
   /** @group Typeclass Instances */
   implicit val order: Order[AngularSize] =
@@ -39,10 +39,10 @@ case object AngularSize {
 /**
   * Query to request an image for a catalog and coordinates
   */
-case class ImageSearchQuery(catalog: ImageCatalog, coordinates: Coordinates, size: AngularSize) {
+case class ImageSearchQuery(catalog: ImageCatalog, coordinates: Coordinates, size: AngularSize, site: Option[Site]) {
   import ImageSearchQuery._
 
-  def url: NonEmptyList[URL] = catalog.queryUrl(coordinates)
+  def url: NonEmptyList[URL] = catalog.queryUrl(coordinates, site)
 
   def fileName(extension: String): String = s"img_${catalog.id.filePrefix}_${coordinates.toFilePart}_${size.toFilePart}.$extension"
 
@@ -61,11 +61,11 @@ object ImageSearchQuery {
   val maxDistance: Angle = Angle.fromArcmin(4.5)
 
   implicit class DeclinationShow(val d: Declination) extends AnyVal {
-    def toFilePart: String = Declination.formatDMS(d, ":", 2)
+    def toFilePart: String = Declination.formatDMS(d, "#", 2)
   }
 
   implicit class RightAscensionShow(val a: RightAscension) extends AnyVal {
-    def toFilePart: String = a.toAngle.formatHMS
+    def toFilePart: String = a.toAngle.formatHMS.replace(":", "#")
   }
 
   implicit class CoordinatesShow(val c: Coordinates) extends AnyVal {
@@ -108,7 +108,7 @@ case class ImageInFile(query: ImageSearchQuery, file: Path, fileSize: Long) {
     // In principle dec can be 90 leading to a 0 on θ
     // In practice it is just very close to zero so it doesn't produce a zero
     // division but as a result essentially the whole sky matches
-    // TODO: Perhaps the zenith case should be handled in praticular
+    // TODO: Perhaps the zenith case should be handled in particular
     val θ = cos(φ0)
 
     // Distance
@@ -140,11 +140,11 @@ object ImageInFile {
     case FileRegex(c, raStr, decStr, w, h) =>
       for {
         catalog <- ImageCatalog.byId(c)
-        ra      <- Angle.parseHMS(raStr).map(RightAscension.fromAngle).toOption
-        dec     <- Angle.parseDMS(decStr).toOption.map(_.toDegrees).flatMap(Declination.fromDegrees)
+        ra      <- Angle.parseHMS(raStr.replace("#", ":")).map(RightAscension.fromAngle).toOption
+        dec     <- Angle.parseDMS(decStr.replace("#", ":")).toOption.map(_.toDegrees).flatMap(Declination.fromDegrees)
         width   <- Angle.fromArcsecs(w.toInt).some
         height  <- Angle.fromArcsecs(h.toInt).some
-      } yield ImageInFile(ImageSearchQuery(catalog, Coordinates(ra, dec), AngularSize(width, height)), file.toPath, file.length())
+      } yield ImageInFile(ImageSearchQuery(catalog, Coordinates(ra, dec), AngularSize(width, height), none), file.toPath, file.length())
     case _                                => None
   }
 }
@@ -188,30 +188,40 @@ object ImageCatalogClient {
     def writeToTempFile(file: File): Task[Unit] = Task.delay {
       // Simple old fashioned download
       val out = new FileOutputStream(file)
-      val in = url.openStream()
       try {
+        val in = url.openStream()
         val buffer = new Array[Byte](8 * 1024)
-        Iterator
-          .continually(in.read(buffer))
-          .takeWhile(-1 != _)
-          .foreach(read => out.write(buffer, 0, read))
+        try {
+          Iterator
+            .continually(in.read(buffer))
+            .takeWhile(-1 != _)
+            .foreach(read => out.write(buffer, 0, read))
+        } finally {
+          in.close()
+        }
       } finally {
         out.close()
-        in.close()
       }
     }
 
     /**
       * Attempts to calculate the center and size of the downloaded image from the actual header
       */
-    def parseHeader(descriptor: ConnectionDescriptor, tmpFile: File): Task[ImageSearchQuery] = Task.delay {
-      // This means we do a second read on the file. It could be done in one go but this approach is simpler
-      // This is a one-time cost for each image after the download. Note that only the header is read
-      FitsHeadersParser.parseFitsGeometry(tmpFile, descriptor.compressed).fold(_ => query, g =>
-        g.bifoldLeft(query)
+    def parseHeader(descriptor: ConnectionDescriptor, tmpFile: File): Task[ImageSearchQuery] = {
+      def parse(fin: FileInputStream): Task[ImageSearchQuery] = Task.delay {
+        // This means we do a second read on the file. It could be done in one go but this approach is simpler
+        // This is a one-time cost for each image after the download. Note that only the header is read
+        FitsHeadersParser.parseFitsGeometry(fin, descriptor.compressed).fold(_ => query, g =>
+          g.bifoldLeft(query)
           { (q, c) => c.fold(q)(c => q.copy(coordinates = c)) }
           { (q, s) => s.fold(q)(s => q.copy(size = s )) }
-      )
+        )
+      }
+
+      for {
+        in <- Task.delay(new FileInputStream(tmpFile))
+        q  <- parse(in).onFinish(_ => Task.delay(in.close()))
+      } yield q
     }
 
     def moveToFinalFile(extension: String, tmpFile: File, query: ImageSearchQuery): Task[ImageInFile] = Task.delay {
@@ -227,13 +237,18 @@ object ImageCatalogClient {
       }
     }
 
+    def deleteIfInError(f: File): Option[Throwable] => Task[Unit] = {
+      case Some(_) => Task.delay(f.delete)
+      case None    => Task.now(())
+    }
+
     for {
       _           <- ImageCacheOnDisk.mkCacheDir(cacheDir)
       tempFile    <- createTmpFile
       desc        <- openConnection
-      _           <- writeToTempFile(tempFile)
-      queryHeader <- parseHeader(desc, tempFile)
-      file        <- moveToFinalFile(desc.extension, tempFile, queryHeader)
+      _           <- writeToTempFile(tempFile).onFinish(deleteIfInError(tempFile))
+      queryHeader <- parseHeader(desc, tempFile).onFinish(deleteIfInError(tempFile))
+      file        <- moveToFinalFile(desc.extension, tempFile, queryHeader).onFinish(deleteIfInError(tempFile))
     } yield file
   }
 }
@@ -256,9 +271,9 @@ object FitsHeadersParser {
   /**
     * Attempts to read a fits file header and extract the center coordinates and dimensions
     */
-  def parseFitsGeometry(file: File, compressed: Boolean): Throwable \/ (Option[Coordinates], Option[AngularSize]) = {
+  def parseFitsGeometry(fin: FileInputStream, compressed: Boolean): Throwable \/ (Option[Coordinates], Option[AngularSize]) = {
     \/.fromTryCatchNonFatal {
-      val fits = new Fits(new FileInputStream(file), compressed)
+      val fits = new Fits(fin, compressed)
       val basicHDU = fits.getHDU(0).getHeader
       val coord =
         for {

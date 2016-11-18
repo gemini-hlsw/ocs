@@ -10,12 +10,12 @@ import java.util.logging.{Level, Logger}
 import edu.gemini.catalog.image._
 import edu.gemini.shared.util.immutable.ScalaConverters._
 
-import scala.collection.JavaConverters._
 import edu.gemini.pot.sp._
-import edu.gemini.spModel.core.{Angle, Coordinates, Wavelength}
+import edu.gemini.spModel.core.{Angle, Coordinates, Site, Wavelength}
 import edu.gemini.spModel.obs.ObservationStatus
 import edu.gemini.spModel.rich.pot.sp._
 import jsky.app.ot.tpe.{ImageCatalogPanel, TpeContext, TpeImageWidget, TpeManager}
+import jsky.app.ot.userprefs.observer.ObserverPreferences
 import jsky.image.gui.ImageLoadingException
 
 import scalaz._
@@ -26,7 +26,7 @@ import scalaz.concurrent.Task
 /**
   * Describes a requested image for an observation and wavelength
   */
-case class TargetImageRequest(key: SPNodeKey, coordinates: Coordinates, obsWavelength: Option[Wavelength])
+case class TargetImageRequest(key: SPNodeKey, coordinates: Coordinates, obsWavelength: Option[Wavelength], site: Option[Site])
 
 object TargetImageRequest {
   /** @group Typeclass Instances */
@@ -133,7 +133,7 @@ object BackgroundImageLoader {
   private[image] def requestImageDownload(pool: ExecutorService)(t: TargetImageRequest): Task[Unit] =
     for {
       catalog  <- ObservationCatalogOverrides.catalogFor(t.key, t.obsWavelength)
-      image    <- loadImage(ImageSearchQuery(catalog, t.coordinates, catalog.imageSize), ImageCatalogPanel.resetListener)(pool)
+      image    <- loadImage(ImageSearchQuery(catalog, t.coordinates, catalog.imageSize, t.site), ImageCatalogPanel.resetListener)(pool)
       _        <- image.fold(taskUnit)(e => Task.delay(updateTpeImage(e)))
     } yield ()
 
@@ -184,7 +184,8 @@ object BackgroundImageLoader {
       when   = ctx.getSchedulingBlockStart.asScalaOpt | Instant.now.toEpochMilli
       coords <- base.getTarget.coords(when)
       key    <- tpe.obsKey
-    } yield TargetImageRequest(key, coords, ObsWavelengthExtractor.extractObsWavelength(tpe))
+      site   = Option(ObserverPreferences.fetch.observingSite())
+    } yield TargetImageRequest(key, coords, ObsWavelengthExtractor.extractObsWavelength(tpe), site)
 
   /**
     * Utility methods to run the tasks on separate threads of the pool

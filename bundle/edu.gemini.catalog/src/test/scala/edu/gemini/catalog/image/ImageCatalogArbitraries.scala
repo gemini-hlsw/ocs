@@ -13,8 +13,8 @@ import Scalaz._
 trait ImageCatalogArbitraries extends Arbitraries {
   implicit val arbCatalog: Arbitrary[ImageCatalog] = Arbitrary(Gen.oneOf(ImageCatalog.all))
 
-  val minRa = DssGemini.imageSize.ra.max(TwoMassJ.imageSize.ra)
-  val minDec = DssGemini.imageSize.dec.max(TwoMassJ.imageSize.dec)
+  private val minRa: Angle = DssGemini.imageSize.ra.max(TwoMassJ.imageSize.ra)
+  private val minDec: Angle = DssGemini.imageSize.dec.max(TwoMassJ.imageSize.dec)
 
   implicit val arbAngularSize: Arbitrary[AngularSize] = Arbitrary {
     AngularSize(minRa, minDec)
@@ -24,7 +24,7 @@ trait ImageCatalogArbitraries extends Arbitraries {
     for {
       catalog <- arbitrary[ImageCatalog]
       coord   <- arbitrary[Coordinates]
-    } yield ImageSearchQuery(catalog, coord, catalog.imageSize)
+    } yield ImageSearchQuery(catalog, coord, catalog.imageSize, None)
   }
 
   implicit val arbPath: Arbitrary[Path] = Arbitrary {

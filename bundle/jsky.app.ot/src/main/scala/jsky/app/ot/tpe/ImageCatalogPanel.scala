@@ -111,7 +111,7 @@ final class ImageCatalogPanel(imageDisplay: CatalogImageDisplay) {
     }
   }
 
-  lazy val panel: Component = new MigPanel(LC().fill().insets(0.px)) {
+  lazy val panel: Component = new MigPanel(LC().fill().insets(0.px).gridGap(0.px, 0.px)) {
     add(new Label("Image Catalog:"), CC())
     add(toolsButton, CC().alignX(RightAlign))
     catalogRows.foreach { row =>
@@ -134,16 +134,16 @@ final class ImageCatalogPanel(imageDisplay: CatalogImageDisplay) {
       } {
         // Update the image and store the override
         val actions =
-            for {
-              _ <- ObservationCatalogOverrides.storeOverride(key, catalog, wv)
-              _ <- Task.delay(imageDisplay.loadSkyImage())
-            } yield ()
-          actions.unsafePerformSync
+          for {
+            _ <- ObservationCatalogOverrides.storeOverride(key, catalog, wv)
+            _ <- Task.delay(imageDisplay.loadSkyImage())
+          } yield ()
+        actions.unsafePerformSync
       }
   }
 
   private def updateSelection(catalog: ImageCatalog): Unit =
-    catalogRows.find(_.feedback.catalog === catalog).foreach { _.button.selected = true}
+    catalogRows.find(_.feedback.catalog === catalog).foreach { _.button.selected = true }
 
   private def selectedCatalog: Option[ImageCatalog] =
     catalogRows.find(_.button.selected).map(_.feedback.catalog)
@@ -164,6 +164,7 @@ final class ImageCatalogPanel(imageDisplay: CatalogImageDisplay) {
     */
   private def resetCatalogProgressState: Task[Option[Unit]] = {
     // Verify we are on the EDT. We don't want to use Swing.onEDT inside
+    assert(SwingUtilities.isEventDispatchThread)
     val tpeContext = TpeContext.fromTpeManager
 
     val catalogButtonsUpdate = for {
