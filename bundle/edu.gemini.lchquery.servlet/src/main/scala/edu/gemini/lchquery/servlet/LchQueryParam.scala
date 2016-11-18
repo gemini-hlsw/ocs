@@ -69,7 +69,7 @@ object ValueMatcher {
   }
 }
 
-sealed case class InvestigatorInfo(name: String, email: Option[String], isPrincipal: Boolean)
+case class InvestigatorInfo(name: String, email: Option[String], isPrincipal: Boolean)
 object InvestigatorInfo {
   private[servlet] implicit class ToInvestigator(val i: InvestigatorInfo) extends AnyVal {
     def toInvestigator: Investigator = new Investigator() {
@@ -80,7 +80,7 @@ object InvestigatorInfo {
   }
 }
 
-sealed case class PartnerInfo(name: String, hoursAllocated: Double)
+case class PartnerInfo(name: String, hoursAllocated: Double)
 object PartnerInfo {
   private[servlet] implicit class ToPartner(val p: PartnerInfo) extends AnyVal {
     def toPartner: Partner = new Partner() {
@@ -90,7 +90,7 @@ object PartnerInfo {
   }
 }
 
-sealed case class LchQueryParam[A](name: String, v: ValueMatcher[A])
+case class LchQueryParam[A](name: String, v: ValueMatcher[A])
 
 object LchQueryParam {
   import ValueMatcher._
