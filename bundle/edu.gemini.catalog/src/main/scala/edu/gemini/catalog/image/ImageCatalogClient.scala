@@ -188,16 +188,19 @@ object ImageCatalogClient {
     def writeToTempFile(file: File): Task[Unit] = Task.delay {
       // Simple old fashioned download
       val out = new FileOutputStream(file)
-      val in = url.openStream()
       try {
+        val in = url.openStream()
         val buffer = new Array[Byte](8 * 1024)
-        Iterator
-          .continually(in.read(buffer))
-          .takeWhile(-1 != _)
-          .foreach(read => out.write(buffer, 0, read))
+        try {
+          Iterator
+            .continually(in.read(buffer))
+            .takeWhile(-1 != _)
+            .foreach(read => out.write(buffer, 0, read))
+        } finally {
+          in.close()
+        }
       } finally {
         out.close()
-        in.close()
       }
     }
 
@@ -234,13 +237,18 @@ object ImageCatalogClient {
       }
     }
 
+    def deleteIfInError(f: File): Option[Throwable] => Task[Unit] = {
+      case Some(_) => Task.delay(f.delete)
+      case None    => Task.now(())
+    }
+
     for {
       _           <- ImageCacheOnDisk.mkCacheDir(cacheDir)
       tempFile    <- createTmpFile
       desc        <- openConnection
-      _           <- writeToTempFile(tempFile)
-      queryHeader <- parseHeader(desc, tempFile)
-      file        <- moveToFinalFile(desc.extension, tempFile, queryHeader)
+      _           <- writeToTempFile(tempFile).onFinish(deleteIfInError(tempFile))
+      queryHeader <- parseHeader(desc, tempFile).onFinish(deleteIfInError(tempFile))
+      file        <- moveToFinalFile(desc.extension, tempFile, queryHeader).onFinish(deleteIfInError(tempFile))
     } yield file
   }
 }
