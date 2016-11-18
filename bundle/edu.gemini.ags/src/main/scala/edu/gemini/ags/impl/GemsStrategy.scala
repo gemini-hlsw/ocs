@@ -114,7 +114,7 @@ trait GemsStrategy extends AgsStrategy {
       }
     }
 
-    mapGroup(Canopus.Wfs.Group.instance) ++ mapGroup(GsaoiOdgw.Group.instance)
+    mapGroup(Canopus.Wfs.Group.instance) // TODO: REL-2941 ++ mapGroup(GsaoiOdgw.Group.instance)
   }
 
   override def candidates(ctx: ObsContext, mt: MagnitudeTable)(ec: ExecutionContext): Future[List[(GuideProbe, List[SiderealTarget])]] = {
@@ -202,7 +202,7 @@ trait GemsStrategy extends AgsStrategy {
 
       // Now we must convert from an Option[GemsGuideStars] to a Selection.
       gemsGuideStars.map { x =>
-        val assignments = x.guideGroup.getAll.asScalaList.flatMap(targets => {
+        val assignments = x.guideGroup.getAll.asScalaList.filter(_.getGuider.getGroup.contains(Canopus.Wfs.Group.instance)).flatMap(targets => {
           val guider = targets.getGuider
           targets.getTargets.asScalaList.map(target => Assignment(guider, target.toSiderealTarget(ctx.getSchedulingBlockStart)))
         })

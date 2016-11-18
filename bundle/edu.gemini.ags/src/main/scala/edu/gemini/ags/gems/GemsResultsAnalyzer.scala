@@ -205,6 +205,13 @@ object GemsResultsAnalyzer {
         val gpt = assignGuideProbeTarget(obsContext, posAngle, tiptiltGroup, x, tiptiltGroup, result, tiptiltTargetList, reverseOrder)
         gpt.map(x => addTipTiltGuideProbeTargets(tail, (x :: result).reverse, obsContext.withTargets(obsContext.getTargets.putPrimaryGuideProbeTargets(x)))).getOrElse((obsContext, Nil))
     }
+
+    // TODO: REL-2941
+    // addTipTiltGuideProbeTargets(tiptiltTargetList, Nil, obsContext)._2
+    //
+    // Remove everything below replacing it with the above line.  Get rid of
+    // "tiptiltGroup" since it is always Canopus.Wfs.group.instance.  Git rid
+    // of flexureGroup, flexureStars  Propagate changes ...
     val tipTiltGuideProbeTargets = addTipTiltGuideProbeTargets(tiptiltTargetList, Nil, obsContext)
 
     // assign guide probe for flexure star

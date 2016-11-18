@@ -35,7 +35,7 @@ public final class GemsGuideStarRule implements IRule {
     private static final String ConfigError = "Configuration not supported. Please select 3 CWFS + 1 ODGW or 1 CWFS + 3 ODGW";
     private static final String TipTilt = "Less than 3 GeMS guide stars of the same origin. Tip-tilt correction will not be optimal.";
     private static final String SlowFocus = "Missing Slow-focus Sensor star. Slow Focus correction will be not be applied.";
-    private static final String Flexure = "Missing flexure guide star. Flexure will not be compensated.";
+// TODO: REL-2941   private static final String Flexure = "Missing flexure guide star. Flexure will not be compensated.";
     private static final String NoIqAny = "GeMS cannot be used in IQAny conditions.";
     private static final String NoCloudy = "GeMS cannot be used in cloudy conditions.";
 
@@ -130,10 +130,13 @@ public final class GemsGuideStarRule implements IRule {
                 if ((odgws == 3 || odgws == 2) && cwfs == 0) {
                     problems.addWarning(PREFIX + "SlowFocus", SlowFocus, targetNode);
                 }
+
+                /* TODO: REL-2941
                 //No flexure guide star (GSAOI ODGW or Flamingos II OIWFS) when using 2 or 3 CWFS.
                 if ((cwfs == 3 || cwfs == 2) && odgws == 0) {
                     problems.addWarning(PREFIX + "Flexure", Flexure, targetNode);
                 }
+                */
             }
 
             if (Flamingos2.SP_TYPE.equals(elements.getInstrument().getType())) {
@@ -143,12 +146,14 @@ public final class GemsGuideStarRule implements IRule {
                 if (!gpt.isEmpty() && !gpt.getValue().getPrimary().isEmpty()) {
                     f2oiwfs = true;
                 }
+                /* TODO: REL-2941
                 //No flexure guide star (GSAOI ODGW or Flamingos II OIWFS) when using 2 or 3 CWFS.
                 if (!f2oiwfs && (cwfs == 3 || cwfs == 2)) {
                     if (gpt.isEmpty() || gpt.getValue().getPrimary().isEmpty()) {
                         problems.addWarning(PREFIX + "Flexure", Flexure, targetNode);
                     }
                 }
+                */
                 //When using less than 3 of either CANOPUS CWFS or ODGW when 1 of the complementary type (CWFS3 or ODGW/F2 OIWFS)
                 if ((f2oiwfs && cwfs < 3) && !isDayCal) {
                     problems.addWarning(PREFIX + "TipTilt", TipTilt, targetNode);
