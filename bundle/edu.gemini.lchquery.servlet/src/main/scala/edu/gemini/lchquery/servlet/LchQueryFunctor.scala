@@ -145,7 +145,6 @@ class LchQueryFunctor(queryType: LchQueryFunctor.QueryType,
         setNotifyPi(spProg.getNotifyPi.displayValue)
         setRollover(prog.rolloverStatus.displayValue)
 
-        //import InvestigatorInfo._
         setInvestigatorsNode(new InvestigatorsNode() {
           prog.investigatorInfo.foreach(i => getInvestigators.add(i.toInvestigator))
         })
@@ -154,8 +153,18 @@ class LchQueryFunctor(queryType: LchQueryFunctor.QueryType,
         if (!progAbstrakt.isEmpty) setAbstrakt(progAbstrakt)
 
         setScienceBand(prog.scienceBand)
-        prog.partners.foreach(getPartners.add)
+        prog.supportPartner.foreach(setSupportPartner)
+
+        val partnerList = prog.partnerList
+        if (partnerList.nonEmpty) {
+          setPartnersNode(new PartnersNode() {
+            partnerList.foreach(p => getPartners.add(p.toPartner))
+          })
+        }
+
         setTooStatus(prog.tooStatus.getDisplayValue)
+        setThesis(prog.thesis.displayValue)
+        prog.proprietaryMonths.map(_.toString).foreach(setProprietaryMonths)
         setAllocatedTime(prog.allocatedTime.toString)
         setRemainingTime(prog.remainingTime.toString)
 
