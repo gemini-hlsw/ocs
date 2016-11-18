@@ -47,8 +47,8 @@ object CatalogId {
 
 /** Represents an end point that can load an image for a given set of coordinates */
 sealed abstract class ImageCatalog(val id: CatalogId, val displayName: String, val shortName: String) {
-  /** Returns the urls that can load the passed coordinates */
-  def queryUrl(c: Coordinates): NonEmptyList[URL]
+  /** Returns the urls that can load the passed coordinates, site indicates the preferred site to use for the query */
+  def queryUrl(c: Coordinates, site: Option[Site]): NonEmptyList[URL]
 
   /** Size of the default requested image */
   def imageSize: AngularSize
@@ -65,16 +65,16 @@ sealed abstract class ImageCatalog(val id: CatalogId, val displayName: String, v
 
 /** Base class for DSS based image catalogs */
 abstract class DssCatalog(id: CatalogId, displayName: String, shortName: String) extends ImageCatalog(id, displayName, shortName) {
-  def baseUrl: NonEmptyList[String]
+  protected def baseUrl(site: Option[Site]): NonEmptyList[String]
 
-  def extraParams: String = ""
+  protected def extraParams: String = ""
 
   def imageSize: AngularSize = AngularSize(ImageCatalog.DefaultImageSize, ImageCatalog.DefaultImageSize)
 
   def adjacentOverlap: Angle = Angle.fromArcmin(3)
 
-  override def queryUrl(c: Coordinates): NonEmptyList[URL] =
-    baseUrl.map(u => new URL(s"$u?ra=${c.ra.toAngle.formatHMS}&dec=${c.dec.formatDMS}&mime-type=application/x-fits&x=${imageSize.ra.toArcmins}&y=${imageSize.dec.toArcmins}$extraParams"))
+  override def queryUrl(c: Coordinates, site: Option[Site]): NonEmptyList[URL] =
+    baseUrl(site).map(u => new URL(s"$u?ra=${c.ra.toAngle.formatHMS}&dec=${c.dec.formatDMS}&mime-type=application/x-fits&x=${imageSize.ra.toArcmins}&y=${imageSize.dec.toArcmins}$extraParams"))
 }
 
 /** Base class for 2MASSImg based image catalogs */
@@ -87,7 +87,7 @@ abstract class AstroCatalog(id: CatalogId, displayName: String, shortName: Strin
 
   def adjacentOverlap: Angle = Angle.zero
 
-  override def queryUrl(c: Coordinates): NonEmptyList[URL] =
+  override def queryUrl(c: Coordinates, site: Option[Site]): NonEmptyList[URL] =
     NonEmptyList(new URL(s" http://irsa.ipac.caltech.edu/cgi-bin/Oasis/2MASSImg/nph-2massimg?objstr=${c.ra.toAngle.formatHMS}%20${c.dec.formatDMS}&size=${size.toArcsecs.toInt}&band=${band.name}"))
 }
 
@@ -96,32 +96,23 @@ abstract class AstroCatalog(id: CatalogId, displayName: String, shortName: Strin
   * DSS at Gemini, it communicates with both servers at GN and GS
   */
 object DssGemini extends DssCatalog(DssGeminiId, "Digitized Sky at Gemini", "DSS Gemini") {
-  override val baseUrl: NonEmptyList[String] =
-    NonEmptyList("mko", "cpo").map(c => s"http://${c}catalog.gemini.edu/cgi-bin/dss_search")
+  override def baseUrl(site: Option[Site]): NonEmptyList[String] = site match {
+    case Some(Site.GS) => nels("http://cpocatalog.gemini.edu/cgi-bin/dss_search")
+    case Some(Site.GN) => nels("http://mkocatalog.gemini.edu/cgi-bin/dss_search")
+    case _             => NonEmptyList("mko", "cpo").map(c => s"http://${c}catalog.gemini.edu/cgi-bin/dss_search")
+  }
 }
-
-// If we can, we use the Gemini catalog for the users' site
-object DssGeminiGS extends DssCatalog(DssGeminiSouthId, "Digitized Sky at Gemini South", "DSS Gemini@GS") {
-  override val baseUrl: NonEmptyList[String] =
-    nel("http://cpocatalog.gemini.edu/cgi-bin/dss_search", IList.empty)
-}
-
-object DssGeminiGN extends DssCatalog(DssGeminiNorthId, "Digitized Sky at Gemini North", "DSS Gemini@GN") {
-  override val baseUrl: NonEmptyList[String] =
-    nel("http://mkocatalog.gemini.edu/cgi-bin/dss_search", IList.empty)
-}
-
 object DssESO extends DssCatalog(DssEsoId, "Digitized Sky at ESO", "DSS ESO") {
-  override val baseUrl: NonEmptyList[String] = nels("http://archive.eso.org/dss/dss")
+  override def baseUrl(site: Option[Site]): NonEmptyList[String] = nels("http://archive.eso.org/dss/dss")
 }
 
 object Dss2ESO extends DssCatalog(Dss2EsoId, "Digitized Sky (Version II) at ESO", "DSS ESO (II)") {
-  override val baseUrl: NonEmptyList[String] = nels("http://archive.eso.org/dss/dss")
+  override def baseUrl(site: Option[Site]): NonEmptyList[String] = nels("http://archive.eso.org/dss/dss")
   override val extraParams = "&Sky-Survey=DSS2"
 }
 
 object Dss2iESO extends DssCatalog(Dss2IREsoId, "Digitized Sky (Version II infrared) at ESO", "DSS ESO (II IR)") {
-  override val baseUrl: NonEmptyList[String] = nels("http://archive.eso.org/dss/dss")
+  override def baseUrl(site: Option[Site]): NonEmptyList[String] = nels("http://archive.eso.org/dss/dss")
   override val extraParams = "&Sky-Survey=DSS2-infrared"
 }
 
@@ -153,9 +144,7 @@ object ImageCatalog {
   private val MassHCutoff = 1.9.microns
 
   /** List of all known public image server in preference order */
-  val allVisible = List(DssGemini, DssESO, Dss2ESO, Dss2iESO, TwoMassJ, TwoMassH, TwoMassK)
-
-  private val all = List(DssGemini, DssGeminiGS, DssGeminiGN, DssESO, Dss2ESO, Dss2iESO, TwoMassJ, TwoMassH, TwoMassK)
+  val all = List(DssGemini, DssESO, Dss2ESO, Dss2iESO, TwoMassJ, TwoMassH, TwoMassK)
 
   private val catalogsById = all.map(c => c.id.filePrefix -> c).toMap
 
@@ -164,9 +153,7 @@ object ImageCatalog {
   /**
     * Returns a catalog appropriate for a given wavelength
     */
-  def catalogForWavelength(w: Option[Wavelength], site: Option[Site]): ImageCatalog = w match {
-      case Some(d) if d <= DssCutoff && site === Site.GS.some  => DssGeminiGS // If the site can be determined use the site's image server
-      case Some(d) if d <= DssCutoff && site === Site.GN.some  => DssGeminiGN
+  def catalogForWavelength(w: Option[Wavelength]): ImageCatalog = w match {
       case Some(d) if d <= DssCutoff                           => DssGemini
       case Some(d) if d <= MassJCutoff                         => TwoMassJ
       case Some(d) if d <= MassHCutoff                         => TwoMassH

@@ -99,9 +99,9 @@ class StoredImagesCacheSpec extends FlatSpec with Matchers with PropertyChecks
     }
     it should "find nearest" in {
       val size = AngularSize(Angle.fromArcmin(8.5), Angle.fromArcmin(10))
-      val a = ImageSearchQuery(DssGemini, Coordinates.zero, size)
-      val b = ImageInFile(ImageSearchQuery(DssGemini, Coordinates.zero.copy(RightAscension.fromAngle(Angle.fromArcmin(4.5))), size), new File("b").toPath, 0)
-      val c = ImageInFile(ImageSearchQuery(DssGemini, Coordinates.zero.copy(RightAscension.fromAngle(Angle.fromArcmin(6))), size), new File("c").toPath, 0)
+      val a = ImageSearchQuery(DssGemini, Coordinates.zero, size, None)
+      val b = ImageInFile(ImageSearchQuery(DssGemini, Coordinates.zero.copy(RightAscension.fromAngle(Angle.fromArcmin(4.5))), size, None), new File("b").toPath, 0)
+      val c = ImageInFile(ImageSearchQuery(DssGemini, Coordinates.zero.copy(RightAscension.fromAngle(Angle.fromArcmin(6))), size, None), new File("c").toPath, 0)
 
       val e = List(b, c)
       val entry = (StoredImagesCache.clean *> e.map(StoredImagesCache.add).sequenceU >> StoredImagesCache.get.map(_.closestImage(a))).unsafePerformSyncAttempt
@@ -115,7 +115,7 @@ class StoredImagesCacheSpec extends FlatSpec with Matchers with PropertyChecks
         val raWidth = Angle.fromArcmin(8.5)
         val decHeight = Angle.fromArcmin(10)
         val size = AngularSize(raWidth, decHeight)
-        val ref = ImageSearchQuery(DssGemini, c, size)
+        val ref = ImageSearchQuery(DssGemini, c, size, None)
         val θ = cos(toRadians(c.dec.toDegrees))
         // too far in Ra
         val ra1 = c.copy(ra = c.ra.offset(~(raWidth/θ) + delta))
@@ -123,7 +123,7 @@ class StoredImagesCacheSpec extends FlatSpec with Matchers with PropertyChecks
         // too far in dec
         val dec1 = c.copy(dec = c.dec.offset(decHeight + delta)._1)
         val dec2 = c.copy(dec = c.dec.offset(Angle.zero - decHeight - delta)._1)
-        val nearEntries = List(ra1, ra2, dec1, dec2).map(c => ImageInFile(ImageSearchQuery(TwoMassJ, c, size), new File(c.toString).toPath, 0))
+        val nearEntries = List(ra1, ra2, dec1, dec2).map(c => ImageInFile(ImageSearchQuery(TwoMassJ, c, size, None), new File(c.toString).toPath, 0))
         val entry = (StoredImagesCache.clean *> nearEntries.map(StoredImagesCache.add).sequenceU >> StoredImagesCache.get.map(_.inside(ref))).unsafePerformSyncAttempt
 
         entry.isRight shouldBe true
@@ -137,10 +137,10 @@ class StoredImagesCacheSpec extends FlatSpec with Matchers with PropertyChecks
       val size = AngularSize(raWidth, decHeight)
       val ra = RightAscension.fromAngle(Angle.fromDegrees(90.0))
       val baseCoordinates = Coordinates.zero.copy(ra)
-      val a = ImageSearchQuery(TwoMassJ, baseCoordinates, size)
+      val a = ImageSearchQuery(TwoMassJ, baseCoordinates, size, None)
       // b includes a thanks to the delta
-      val b = ImageInFile(ImageSearchQuery(TwoMassJ, baseCoordinates.copy(RightAscension.fromAngle(ra.toAngle + ~(raWidth / 2) - delta)), size), new File("b").toPath, 0)
-      val c = ImageInFile(ImageSearchQuery(TwoMassJ, baseCoordinates.copy(RightAscension.fromAngle(ra.toAngle + Angle.fromArcmin(6))), size), new File("c").toPath, 0)
+      val b = ImageInFile(ImageSearchQuery(TwoMassJ, baseCoordinates.copy(RightAscension.fromAngle(ra.toAngle + ~(raWidth / 2) - delta)), size, None), new File("b").toPath, 0)
+      val c = ImageInFile(ImageSearchQuery(TwoMassJ, baseCoordinates.copy(RightAscension.fromAngle(ra.toAngle + Angle.fromArcmin(6))), size, None), new File("c").toPath, 0)
 
       val e = List(b, c)
       val entry = (StoredImagesCache.clean *> e.map(StoredImagesCache.add).sequenceU >> StoredImagesCache.get.map(_.inside(a))).unsafePerformSyncAttempt
@@ -156,10 +156,10 @@ class StoredImagesCacheSpec extends FlatSpec with Matchers with PropertyChecks
       val ra = RightAscension.fromAngle(Angle.fromDegrees(90.0))
 
       val baseCoordinates = Coordinates.zero.copy(ra)
-      val a = ImageSearchQuery(DssGemini, baseCoordinates, size)
+      val a = ImageSearchQuery(DssGemini, baseCoordinates, size, None)
       // b doesn't include the image as DssGemini has an adjacentOverlay
-      val b = ImageInFile(ImageSearchQuery(DssGemini, baseCoordinates.copy(RightAscension.fromAngle(ra.toAngle + ~(raWidth / 2) - delta)), size), new File("b").toPath, 0)
-      val c = ImageInFile(ImageSearchQuery(DssGemini, baseCoordinates.copy(RightAscension.fromAngle(ra.toAngle + Angle.fromArcmin(6))), size), new File("c").toPath, 0)
+      val b = ImageInFile(ImageSearchQuery(DssGemini, baseCoordinates.copy(RightAscension.fromAngle(ra.toAngle + ~(raWidth / 2) - delta)), size, None), new File("b").toPath, 0)
+      val c = ImageInFile(ImageSearchQuery(DssGemini, baseCoordinates.copy(RightAscension.fromAngle(ra.toAngle + Angle.fromArcmin(6))), size, None), new File("c").toPath, 0)
 
       val e = List(b, c)
       val entry = (StoredImagesCache.clean *> e.map(StoredImagesCache.add).sequenceU >> StoredImagesCache.get.map(_.inside(a))).unsafePerformSyncAttempt
@@ -169,9 +169,9 @@ class StoredImagesCacheSpec extends FlatSpec with Matchers with PropertyChecks
     }
     it should "find none if the nearest is farther than max distance" in {
       val size = AngularSize(Angle.fromArcmin(8.5), Angle.fromArcmin(10))
-      val a = ImageSearchQuery(DssGemini, Coordinates.zero, size)
-      val b = ImageInFile(ImageSearchQuery(DssGemini, Coordinates.zero.copy(dec = Declination.fromAngle(Angle.fromArcmin(5)).getOrElse(Declination.zero)), size), new File("b").toPath, 0)
-      val c = ImageInFile(ImageSearchQuery(DssGemini, Coordinates.zero.copy(dec = Declination.fromAngle(Angle.fromArcmin(15)).getOrElse(Declination.zero)), size), new File("b").toPath, 0)
+      val a = ImageSearchQuery(DssGemini, Coordinates.zero, size, None)
+      val b = ImageInFile(ImageSearchQuery(DssGemini, Coordinates.zero.copy(dec = Declination.fromAngle(Angle.fromArcmin(5)).getOrElse(Declination.zero)), size, None), new File("b").toPath, 0)
+      val c = ImageInFile(ImageSearchQuery(DssGemini, Coordinates.zero.copy(dec = Declination.fromAngle(Angle.fromArcmin(15)).getOrElse(Declination.zero)), size, None), new File("b").toPath, 0)
 
       val e = List(b, c)
       val entry = (e.map(StoredImagesCache.add).sequenceU >> StoredImagesCache.get.map(_.closestImage(a))).unsafePerformSyncAttempt

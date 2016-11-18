@@ -55,7 +55,7 @@ class ImageInFileSpec extends FlatSpec with Matchers with PropertyChecks with Im
         whenever (c.dec =/= zenithN && c.dec =/= zenithS) {
           // inside in Ra + width - delta
           val raUpd = c.offset(raHalfWidth - delta, Angle.zero)
-          val ref = ImageSearchQuery(TwoMassH, raUpd, imageSize)
+          val ref = ImageSearchQuery(TwoMassH, raUpd, imageSize, None)
           val img = ImageInFile(ref, new File("").toPath, 0)
           img.contains(c) shouldBe true
         }
@@ -66,7 +66,7 @@ class ImageInFileSpec extends FlatSpec with Matchers with PropertyChecks with Im
         whenever (c.dec =/= zenithN && c.dec =/= zenithS) {
           // inside in Ra - (width - delta)
           val raUpd = c.offset(Angle.zero - (raHalfWidth - delta), Angle.zero)
-          val ref = ImageSearchQuery(TwoMassH, raUpd, imageSize)
+          val ref = ImageSearchQuery(TwoMassH, raUpd, imageSize, None)
           val img = ImageInFile(ref, new File("").toPath, 0)
           img.contains(c) shouldBe true
         }
@@ -78,7 +78,7 @@ class ImageInFileSpec extends FlatSpec with Matchers with PropertyChecks with Im
           // too far in Ra + 2*width
           val θ = cos(c.dec.toDegrees.toRadians)
           val raUpd = c.offset(~(raWidth / θ), Angle.zero)
-          val ref = ImageSearchQuery(TwoMassH, raUpd, imageSize)
+          val ref = ImageSearchQuery(TwoMassH, raUpd, imageSize, None)
           val img = ImageInFile(ref, new File("").toPath, 0)
           img.contains(c) shouldBe false
         }
@@ -90,7 +90,7 @@ class ImageInFileSpec extends FlatSpec with Matchers with PropertyChecks with Im
           // too far in Ra - 2*width
           val θ = cos(c.dec.toDegrees.toRadians)
           val raUpd = c.offset(Angle.zero - ~(raWidth / θ), Angle.zero)
-          val ref = ImageSearchQuery(TwoMassH, raUpd, imageSize)
+          val ref = ImageSearchQuery(TwoMassH, raUpd, imageSize, None)
           val img = ImageInFile(ref, new File("").toPath, 0)
           img.contains(c) shouldBe false
         }
@@ -101,7 +101,7 @@ class ImageInFileSpec extends FlatSpec with Matchers with PropertyChecks with Im
         whenever (c.dec =/= zenithN && c.dec =/= zenithS) {
           // inside small dec increase
           val decUpd = c.offset(Angle.zero, decHalfHeight - delta)
-          val ref = ImageSearchQuery(TwoMassH, decUpd, imageSize)
+          val ref = ImageSearchQuery(TwoMassH, decUpd, imageSize, None)
           val img = ImageInFile(ref, new File("").toPath, 0)
           img.contains(c) shouldBe true
         }
@@ -112,7 +112,7 @@ class ImageInFileSpec extends FlatSpec with Matchers with PropertyChecks with Im
         whenever (c.dec =/= zenithN && c.dec =/= zenithS) {
           // too far in dec plus
           val decUpd = c.offset(Angle.zero, decHeight)
-          val ref = ImageSearchQuery(TwoMassH, decUpd, imageSize)
+          val ref = ImageSearchQuery(TwoMassH, decUpd, imageSize, None)
           val img = ImageInFile(ref, new File("").toPath, 0)
           img.contains(c) shouldBe false
         }
@@ -123,7 +123,7 @@ class ImageInFileSpec extends FlatSpec with Matchers with PropertyChecks with Im
         whenever (c.dec =/= zenithN && c.dec =/= zenithS) {
           // inside small dec decrease
           val decUpd = c.offset(Angle.zero, Angle.zero - decHalfHeight - delta)
-          val ref = ImageSearchQuery(DssGemini, decUpd, imageSize)
+          val ref = ImageSearchQuery(DssGemini, decUpd, imageSize, None)
           val img = ImageInFile(ref, new File("").toPath, 0)
           img.contains(c) shouldBe false
         }
@@ -134,7 +134,7 @@ class ImageInFileSpec extends FlatSpec with Matchers with PropertyChecks with Im
         whenever (c.dec =/= zenithN && c.dec =/= zenithS) {
           // too far in dec minus
           val decUpd = c.offset(Angle.zero, Angle.zero - decHeight)
-          val ref = ImageSearchQuery(TwoMassH, decUpd, imageSize)
+          val ref = ImageSearchQuery(TwoMassH, decUpd, imageSize, None)
           val img = ImageInFile(ref, new File("").toPath, 0)
           img.contains(c) shouldBe false
         }
@@ -143,7 +143,7 @@ class ImageInFileSpec extends FlatSpec with Matchers with PropertyChecks with Im
     it should "find inside at declination zero" in {
       forAll { (ra: RightAscension) =>
         val c0 = Coordinates.zero.copy(ra = ra)
-        val q0 = ImageSearchQuery(TwoMassH, c0, imageSize)
+        val q0 = ImageSearchQuery(TwoMassH, c0, imageSize, None)
         val img0 = ImageInFile(q0, new File("").toPath, 0)
         img0.contains(c0) shouldBe true
         val c2 = c0.copy(ra = ra.offset(raHalfWidth - delta))

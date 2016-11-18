@@ -5,7 +5,7 @@ import java.net.URL
 import java.nio.file.{Files, Path, StandardCopyOption}
 import java.util.logging.Logger
 
-import edu.gemini.spModel.core.{Angle, Coordinates, Declination, RightAscension}
+import edu.gemini.spModel.core.{Angle, Coordinates, Declination, RightAscension, Site}
 import nom.tam.fits.{Fits, Header}
 
 import scala.util.matching.Regex
@@ -29,7 +29,7 @@ case object AngularSize {
   val zero = AngularSize(Angle.zero, Angle.zero)
 
   /** @group Typeclass Instances */
-  implicit val equal = Equal.equalA[AngularSize]
+  implicit val equal: Equal[AngularSize] = Equal.equalA[AngularSize]
 
   /** @group Typeclass Instances */
   implicit val order: Order[AngularSize] =
@@ -39,10 +39,10 @@ case object AngularSize {
 /**
   * Query to request an image for a catalog and coordinates
   */
-case class ImageSearchQuery(catalog: ImageCatalog, coordinates: Coordinates, size: AngularSize) {
+case class ImageSearchQuery(catalog: ImageCatalog, coordinates: Coordinates, size: AngularSize, site: Option[Site]) {
   import ImageSearchQuery._
 
-  def url: NonEmptyList[URL] = catalog.queryUrl(coordinates)
+  def url: NonEmptyList[URL] = catalog.queryUrl(coordinates, site)
 
   def fileName(extension: String): String = s"img_${catalog.id.filePrefix}_${coordinates.toFilePart}_${size.toFilePart}.$extension"
 
@@ -144,7 +144,7 @@ object ImageInFile {
         dec     <- Angle.parseDMS(decStr.replace("#", ":")).toOption.map(_.toDegrees).flatMap(Declination.fromDegrees)
         width   <- Angle.fromArcsecs(w.toInt).some
         height  <- Angle.fromArcsecs(h.toInt).some
-      } yield ImageInFile(ImageSearchQuery(catalog, Coordinates(ra, dec), AngularSize(width, height)), file.toPath, file.length())
+      } yield ImageInFile(ImageSearchQuery(catalog, Coordinates(ra, dec), AngularSize(width, height), none), file.toPath, file.length())
     case _                                => None
   }
 }

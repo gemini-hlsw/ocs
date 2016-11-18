@@ -8,9 +8,7 @@ import argonaut.Argonaut._
 import argonaut._
 import edu.gemini.catalog.image.ImageCatalog
 import edu.gemini.pot.sp.SPNodeKey
-import edu.gemini.spModel.core.{Site, Wavelength}
-import jsky.app.ot.OT
-import jsky.app.ot.userprefs.observer.ObserverPreferences
+import edu.gemini.spModel.core.Wavelength
 import jsky.util.Preferences
 
 import scalaz._
@@ -85,10 +83,7 @@ object ObservationCatalogOverrides {
     */
   def catalogFor(key: SPNodeKey, wavelength: Option[Wavelength]): Task[ImageCatalog] = {
     this.synchronized {
-      for {
-        site <- Task.delay(Option(ObserverPreferences.fetch.observingSite))
-        over <- overridesFile.map(readOverrides(_).obsCatalog(key).getOrElse(ImageCatalog.catalogForWavelength(wavelength, site)))
-      } yield over
+      overridesFile.map(readOverrides(_).obsCatalog(key).getOrElse(ImageCatalog.catalogForWavelength(wavelength)))
     }
   }
 
@@ -105,8 +100,8 @@ object ObservationCatalogOverrides {
     }
 
     // Updates the overrides file, removing the existing entries if needed
-    def newOverrides(overrides: Overrides, site: Option[Site]): Overrides =
-      if (ImageCatalog.catalogForWavelength(wv.some, site) =/= c) {
+    def newOverrides(overrides: Overrides): Overrides =
+      if (ImageCatalog.catalogForWavelength(wv.some) =/= c) {
         overrides.copy(overrides = CatalogOverride(key, c) :: overrides.overrides.filter(_.key != key))
       } else {
         overrides.copy(overrides = overrides.overrides.filter(_.key != key))
@@ -115,8 +110,7 @@ object ObservationCatalogOverrides {
     for {
       overridesFile <- overridesFile
       old           <- Task.delay(readOverrides(overridesFile))
-      site          <- Task.delay(Option(ObserverPreferences.fetch.observingSite))
-      _             <- writeOverrides(overridesFile, newOverrides(old, site))
+      _             <- writeOverrides(overridesFile, newOverrides(old))
     } yield ()
   }
 }
