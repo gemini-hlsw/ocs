@@ -1,5 +1,6 @@
 package edu.gemini.itc.operation;
 
+import java.util.logging.Logger;
 import edu.gemini.itc.base.Disperser;
 import edu.gemini.itc.base.SampledSpectrum;
 import edu.gemini.itc.base.SampledSpectrumVisitor;
@@ -15,6 +16,7 @@ import edu.gemini.itc.shared.*;
  */
 public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
 
+    private static final Logger Log = Logger.getLogger( SpecS2NSlitVisitor.class.getName() );
     private final ObservationDetails odp;
     private final Slit slit;
     private Disperser disperser;
@@ -175,6 +177,7 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
 
     /** Calculates signal and background. */
     private void calculateSignal() {
+        Log.fine("Calculating signal and background...");
 
         // total source flux in the aperture
         final VisitableSampledSpectrum signal         = haloIsUsed ? signalWithHalo(throughput.onePixelThroughput(), haloThroughput.onePixelThroughput()) : signal(throughput.onePixelThroughput());
@@ -195,9 +198,13 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
 
         final VisitableSampledSpectrum signal = (VisitableSampledSpectrum) sourceFlux.clone();
         final int lastPixel = lastCcdPixel(signal.getLength());
+        Log.fine("Calculating signal with " + throughput + " throughput on detector pixels " + firstCcdPixel + " - " + lastPixel);
+
+        for (int i = 0; i < firstCcdPixel; ++i) { signal.setY(i, 0); }
         for (int i = firstCcdPixel; i <= lastPixel; ++i) {
             signal.setY(i, totalFlux(sourceFlux.getY(i), throughput));
         }
+        for (int i = lastPixel+1; i < signal.getLength(); ++i) { signal.setY(i, 0); }
 
         return signal;
     }
@@ -207,9 +214,13 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
 
         final VisitableSampledSpectrum signal = (VisitableSampledSpectrum) sourceFlux.clone();
         final int lastPixel = lastCcdPixel(signal.getLength());
+        Log.fine("Calculating signal with halo with " + throughput + " throughput on detector pixels " + firstCcdPixel + " - " + lastPixel);
+
+        for (int i = 0; i < firstCcdPixel; ++i) { signal.setY(i, 0); }
         for (int i = firstCcdPixel; i <= lastPixel; ++i) {
             signal.setY(i, totalFlux(sourceFlux.getY(i), throughput) + totalFlux(haloFlux.getY(i), haloThroughput));
         }
+        for (int i = lastPixel+1; i < signal.getLength(); ++i) { signal.setY(i, 0); }
 
         return signal;
     }
@@ -219,14 +230,18 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
     private VisitableSampledSpectrum background(final Slit slit) {
 
         final VisitableSampledSpectrum background = (VisitableSampledSpectrum) backgroundFlux.clone();
+        final int lastPixel = lastCcdPixel(background.getLength());
+        Log.fine("Calculating background in " + slit.widthPixels() + " x " + slit.lengthPixels() + " pix slit on detector pixels " + firstCcdPixel + " - " + lastPixel);
 
         //Shot noise on background flux in aperture
+        for (int i = 0; i < firstCcdPixel; ++i) { background.setY(i, 0); } // Set to zero outside defined region
         for (int i = firstCcdPixel; i <= lastCcdPixel(background.getLength()); ++i) {
             background.setY(i,
                     backgroundFlux.getY(i) *
                             slit.width() * slit.pixelSize() * slit.lengthPixels() *
                             exposureTime * disperser.dispersion());
         }
+        for (int i = lastPixel+1; i < background.getLength(); ++i) { background.setY(i, 0); }
 
         return background;
     }

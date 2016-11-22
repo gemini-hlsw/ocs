@@ -1,14 +1,15 @@
 package edu.gemini.itc.operation;
 
 import edu.gemini.itc.base.VisitableSampledSpectrum;
-
 import java.util.stream.IntStream;
+import java.util.logging.Logger;
 
 /**
  * A set of common values that are accessed by service users through the SpectroscopyResult object.
  */
 public interface SpecS2N {
 
+    Logger Log = Logger.getLogger( SpecS2N.class.getName() );
     VisitableSampledSpectrum getSignalSpectrum();
     VisitableSampledSpectrum getBackgroundSpectrum();
     VisitableSampledSpectrum getExpS2NSpectrum();
@@ -25,7 +26,10 @@ public interface SpecS2N {
         if (sig.length != bck.length)                                             throw new Error();
 
         // Calculate the peak pixel
-        return IntStream.range(0, sig.length).mapToDouble(i -> bck[i]*bck[i] + sig[i]).max().getAsDouble();
+        double peak = IntStream.range(0, sig.length).mapToDouble(i -> bck[i]*bck[i] + sig[i]).max().getAsDouble();
+        Log.fine("Peak = " + peak);
+
+        return peak;
     }
 
 }
