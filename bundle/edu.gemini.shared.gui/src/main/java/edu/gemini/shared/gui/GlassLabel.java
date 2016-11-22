@@ -1,70 +1,144 @@
 package edu.gemini.shared.gui;
 
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JRootPane;
-import javax.swing.SwingConstants;
+import scala.Option$;
+
+import javax.swing.*;
 import java.awt.*;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.awt.event.*;
+import java.util.Optional;
 
-public class GlassLabel {
+/**
+ * GlassLabel is a message displayed on top of a frame while an ongoing
+ * operation is progressing in the background.  The message blocks all input to
+ * the widgets underneath, preventing user interaction until the operation
+ * completes and the label is hidden.
+ */
+public final class GlassLabel {
 
-    public static void show(final JRootPane frame, final String message) {
-        synchronized (frame) {
-            // State gets messed up somewhere if we don't set the glasspane to
-            // invisible when we swap. Swing guys did GlassPane wrong.
-            frame.getGlassPane().setVisible(false);
-            frame.setGlassPane(new JPanel() {
-                // REL-2255 Starting in Java 1.7, painting doesn't obey the alpha value set on the background color
-                // overriding paintComponent we can achieve the same result
-                @Override
-                protected void paintComponent(Graphics g) {
-                    Graphics2D g2 = (Graphics2D) g;
-                    g2.setColor(getBackground());
-                    g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.7f));
-                    g2.fillRect(0, 0, getWidth(), getHeight());
-                    // Paint children before disposing
-                    super.paintChildren(g);
-                    g2.dispose();
-                }
-
-                {
-                setLayout(new BorderLayout());
-                setOpaque(false);
-                setBackground(new Color(0, 0, 0, 64));
-                add(new FlashLabel(frame, message), BorderLayout.CENTER);
-            }});
-            frame.getGlassPane().setVisible(true);
-            frame.getGlassPane().invalidate();
-        }
+    /**
+     * Creates and displays the glass label over the root pane displaying the
+     * given message and capturing input events until hidden.  Use the returned
+     * GlassLabel instance to dismiss.
+     *
+     * @param comp component whose root component should be covered with the
+     *             glass pane
+     * @param message message to display
+     *
+     * @return a GlassLabel wrapped in a Scala Option; if None the root pane of
+     * the provided component could not be found
+     */
+    public static scala.Option<GlassLabel> show(final Component comp, final String message) {
+        final Optional<JRootPane> frame  = Optional.ofNullable(comp).flatMap(c -> Optional.ofNullable(SwingUtilities.getRootPane(c)));
+        final Optional<GlassLabel> glass = frame.map(f -> new GlassLabel(f, message));
+        return Option$.MODULE$.apply(glass.orElse(null));
     }
 
-    public static void hide(JRootPane frame) {
-        synchronized (frame) {
-            frame.getGlassPane().setVisible(false);
+    private Optional<JRootPane> frame;
+
+    private GlassLabel(final JRootPane frame, final String message) {
+        frame.getGlassPane().setVisible(false);
+        final GlassPanel glass = new GlassPanel(message);
+        frame.setGlassPane(glass);
+        glass.setVisible(true);
+        glass.invalidate();
+        glass.requestFocusInWindow();
+
+        this.frame = Optional.of(frame);
+    }
+
+    /**
+     * Dismisses the label, allowing the user to interact with the UI again.
+     */
+    public void hide() {
+        frame.ifPresent(f -> f.getGlassPane().setVisible(false));
+        frame = Optional.empty();
+    }
+
+    private static final class GlassPanel extends JPanel implements MouseListener, MouseMotionListener, FocusListener {
+        GlassPanel(String message) {
+            setLayout(new BorderLayout());
+            setOpaque(false);
+            setBackground(new Color(0, 0, 0, 64));
+            add(new FlashLabel(message), BorderLayout.CENTER);
+
+            addMouseListener(this);
+            addMouseMotionListener(this);
+            addFocusListener(this);
+        }
+
+        // REL-2255 Starting in Java 1.7, painting doesn't obey the alpha value set on the background color
+        // overriding paintComponent we can achieve the same result
+        @Override
+        protected void paintComponent(Graphics g) {
+            final Graphics2D g2 = (Graphics2D) g;
+            g2.setColor(getBackground());
+            g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.7f));
+            g2.fillRect(0, 0, getWidth(), getHeight());
+            // Paint children before disposing
+            super.paintChildren(g);
+            g2.dispose();
+        }
+
+        @Override
+        public void focusGained(FocusEvent e) {
+            // eat event
+        }
+
+        @Override
+        public void focusLost(FocusEvent e) {
+            // eat event
+        }
+
+        @Override
+        public void mouseClicked(MouseEvent e) {
+            // eat event
+        }
+
+        @Override
+        public void mousePressed(MouseEvent e) {
+            // eat event
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent e) {
+            // eat event
+        }
+
+        @Override
+        public void mouseEntered(MouseEvent e) {
+            // eat event
+        }
+
+        @Override
+        public void mouseExited(MouseEvent e) {
+            // eat event
+        }
+
+        @Override
+        public void mouseDragged(MouseEvent e) {
+            // eat event
+        }
+
+        @Override
+        public void mouseMoved(MouseEvent e) {
+            // eat event
         }
     }
 
     @SuppressWarnings("serial")
-    static class FlashLabel extends JLabel {
+    static final class FlashLabel extends JLabel {
 
-        private final JRootPane frame;
-        private Component prev;
-        private int alpha = 196;
+        private static final int alpha = 196;
+        private static final int width = 500;
 
-        FlashLabel(JRootPane frame, String message) {
+        FlashLabel(String message) {
             super(" " + message + " "); // :-/
-            this.frame = frame;
-            this.prev = frame.getGlassPane();
             setHorizontalAlignment(SwingConstants.CENTER);
             setVerticalAlignment(SwingConstants.CENTER);
             Font f = getFont();
             setFont(f.deriveFont(f.getSize2D() * 2));
         }
 
-        private static int width = 500;
-        
         @Override
         public void paint(Graphics g) {
             Graphics2D g2d = (Graphics2D) g;
@@ -75,25 +149,6 @@ public class GlassLabel {
             setForeground(new Color(255, 255, 255, alpha));
             super.paint(g);
         }
-
-        class FadeTask extends TimerTask {
-            public void run() {
-                synchronized (frame) {
-                    if (frame.getGlassPane() == FlashLabel.this) {
-                        if (alpha > 0) {
-                            alpha = Math.max(0, alpha - 32);
-                            repaint();
-                        } else {
-                            while (prev instanceof FlashLabel)
-                                prev = ((FlashLabel) prev).prev;
-                            frame.getGlassPane().setVisible(false);
-                            frame.setGlassPane(prev);
-                        }
-                    }
-                }
-            }
-        }
-
     }
 
 }

@@ -133,11 +133,11 @@ class SubmitView(ph: ProblemRobot, newShellHandler: (Model,Option[File]) => Unit
         case ButtonClicked(_) =>
           for (m <- panel.model) {
             if (saveHandler()) {
-              GlassLabel.show(panel.peer.getRootPane, "Submitting Proposal...")
+              val glass = GlassLabel.show(panel.peer, "Submitting Proposal...")
               submitClient.submit(m.proposal) { psr =>
                 SwingUtilities.invokeLater(new Runnable {
                   def run() {
-                    GlassLabel.hide(panel.peer.getRootPane)
+                    glass.foreach(_.hide())
 
                     val anySuccess = psr.results.exists(_.result.isSuccess)
                     val errors = psr.results.map(_.result).filter(!_.isSuccess)
