@@ -36,17 +36,18 @@ object EphemerisUpdater {
    */
   final class UI private (c: () => Component) {
 
-    private def rootPane: Option[JRootPane] =
-      Option(SwingUtilities.getRootPane(c()))
+    private var glass: Option[GlassLabel] = None
 
     def onEDT(f: => Unit): HS2[Unit] =
       HS2.delay(Swing.onEDT(f))
 
-    def show(msg: String): HS2[Unit] =
-      onEDT(rootPane.foreach(GlassLabel.show(_, msg)))
+    def show(msg: String): HS2[Unit] = onEDT {
+      glass = GlassLabel.show(c(), msg)
+    }
 
-    val hide: HS2[Unit] =
-      onEDT(rootPane.foreach(GlassLabel.hide))
+    val hide: HS2[Unit] = onEDT {
+      glass.foreach(_.hide())
+    }
 
   }
   object UI {

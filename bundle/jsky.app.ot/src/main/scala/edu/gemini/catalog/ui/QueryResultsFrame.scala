@@ -798,17 +798,17 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
   private def catalogSearch(query: CatalogQuery, backend: VoTableBackend, message: String, onSuccess: (QueryResult) => Unit): Unit = {
     import scala.concurrent.ExecutionContext.Implicits.global
 
-    GlassLabel.show(peer.getRootPane, message)
+    val glass = GlassLabel.show(peer, message)
     VoTableClient.catalog(query, backend)(global).onComplete {
       case scala.util.Failure(f)                           =>
-        GlassLabel.hide(peer.getRootPane)
+        glass.foreach(_.hide())
         errorLabel.show(s"Exception: ${f.getMessage}")
       case scala.util.Success(x) if x.result.containsError =>
-        GlassLabel.hide(peer.getRootPane)
+        glass.foreach(_.hide())
         errorLabel.show(s"Error: ${x.result.problems.head.displayValue}")
       case scala.util.Success(x)                           =>
         Swing.onEDT {
-          GlassLabel.hide(peer.getRootPane)
+          glass.foreach(_.hide())
           onSuccess(x)
         }
     }

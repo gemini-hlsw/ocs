@@ -1,7 +1,5 @@
 package jsky.app.ot.gemini.editor.targetComponent.details2
 
-import javax.swing.SwingUtilities
-
 import edu.gemini.catalog.api.CatalogQuery
 import edu.gemini.catalog.votable.{SimbadNameBackend, VoTableClient}
 import edu.gemini.pot.sp.ISPNode
@@ -25,15 +23,15 @@ final class SiderealNameEditor(mags: MagnitudeEditor2) extends TelescopePosEdito
 
   private def forkSearch(): Unit = {
     val searchItem = name.getValue
-    GlassLabel.show(SwingUtilities.getRootPane(name), "Searching...") // We are on the EDT
-    VoTableClient.catalog(CatalogQuery(searchItem), SimbadNameBackend)(implicitly).onComplete { case t =>
+    val glass      = GlassLabel.show(name, "Searching ...") // We are on the EDT
+    VoTableClient.catalog(CatalogQuery(searchItem), SimbadNameBackend)(implicitly).onComplete { case tqr =>
       Swing.onEDT {
-        GlassLabel.hide(SwingUtilities.getRootPane(name))
-        t.map(r => (r.result.problems, r.result.targets.rows.headOption)) match {
-          case Failure(f) => errmsg(f.getMessage)
-          case Success((Nil, None)) => errmsg(s"Target '$searchItem' not found ")
+        glass.foreach(_.hide())
+        tqr.map(r => (r.result.problems, r.result.targets.rows.headOption)) match {
+          case Failure(f)              => errmsg(f.getMessage)
+          case Success((Nil, None))    => errmsg(s"Target '$searchItem' not found ")
           case Success((Nil, Some(t))) => spt.setTarget(Target.name.set(t, name.getValue)) // REL-2717
-          case Success((ps, _)) => errmsg(ps.map(_.displayValue).mkString(", "))
+          case Success((ps, _))        => errmsg(ps.map(_.displayValue).mkString(", "))
         }
       }
     }
