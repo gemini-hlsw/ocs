@@ -164,7 +164,7 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
       def updatePanel(): Unit = Swing.onEDT {
         editor.foreach { e =>
           val pac = e.getDataObject.getPosAngleConstraint
-          if (ParallacticAnglePosConstraints.contains(pac))
+          if (pac.isParallactic)
             showParallacticAngleControls()
           else
             showPositionAngleFeedback()
@@ -280,7 +280,7 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
       // Set up the UI.
       updatePATextFieldEditableState(posAngleConstraint)
       ui.controlsPanel.updatePanel()
-      if (ParallacticAnglePosConstraints.contains(posAngleConstraint))
+      if (posAngleConstraint.isParallactic)
         p.resetComponents()
     }
   }
@@ -316,10 +316,10 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
       val isParInstAndOk = i.isInstanceOf[ParallacticAngleSupport] &&
                            i.asInstanceOf[ParallacticAngleSupport].isCompatibleWithMeanParallacticAngleMode
       val canUseAvgPar = isParInstAndOk && !ObsClassService.lookupObsClass(o).equals(ObsClass.DAY_CAL)
-      ParallacticAnglePosConstraints.foreach(c => setOptionEnabled(c, canUseAvgPar))
+      PosAngleConstraint.values().toSeq.filter(_.isParallactic).foreach(c => setOptionEnabled(c, canUseAvgPar))
 
       // Now the parallactic angle is in use if it can be used and is selected.
-      if (canUseAvgPar && ParallacticAnglePosConstraints.contains(i.getPosAngleConstraint)) {
+      if (canUseAvgPar && i.getPosAngleConstraint.isParallactic) {
         p.ui.relativeTimeMenu.rebuild()
       }
     }
@@ -345,6 +345,4 @@ object PositionAnglePanel {
   def apply[I <: SPInstObsComp with PosAngleConstraintAware with ParallacticAngleSupport,
             E <: OtItemEditor[ISPObsComponent, I]](instType: SPComponentType): PositionAnglePanel[I,E] =
     new PositionAnglePanel[I,E](instType)
-
-  val ParallacticAnglePosConstraints = Set(PosAngleConstraint.PARALLACTIC_ANGLE, PosAngleConstraint.PARALLACTIC_OVERRIDE)
 }

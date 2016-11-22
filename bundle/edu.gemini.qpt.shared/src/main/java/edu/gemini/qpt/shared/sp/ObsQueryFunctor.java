@@ -659,13 +659,11 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor implements Iterable<
      * @return true if the observation uses the average parallactic angle
      * @throws RemoteException
      */
-    private boolean usesAverageParallacticAngle(ISPObservation obsShell) throws RemoteException {
-        for (ISPObsComponent comp : obsShell.getObsComponents()) {
+    private boolean usesAverageParallacticAngle(final ISPObservation obsShell) throws RemoteException {
+        return obsShell.getObsComponents().stream().anyMatch(comp -> {
             final ISPDataObject dObj = comp.getDataObject();
-            if (dObj instanceof PosAngleConstraintAware)
-                return ((PosAngleConstraintAware) dObj).getPosAngleConstraint() == PosAngleConstraint.PARALLACTIC_ANGLE;
-        }
-        return false;
+            return (dObj instanceof PosAngleConstraintAware) && ((PosAngleConstraintAware) dObj).getPosAngleConstraint().isParallactic();
+        });
     }
 
     private void applySysConfigs(ISPObservation obsShell, ApplyOp<ISysConfig> op) {
