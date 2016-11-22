@@ -1,6 +1,6 @@
 package edu.gemini.lchquery.servlet
 
-import edu.gemini.odb.browser.Investigator
+import edu.gemini.odb.browser.{Investigator, Partner}
 import edu.gemini.pot.sp.{ISPObservation, ISPProgram}
 import edu.gemini.spModel.`type`.DisplayableSpType
 import edu.gemini.spModel.ao.{AOConstants, AOTreeUtil}
@@ -69,7 +69,7 @@ object ValueMatcher {
   }
 }
 
-sealed case class InvestigatorInfo(name: String, email: Option[String], isPrincipal: Boolean)
+case class InvestigatorInfo(name: String, email: Option[String], isPrincipal: Boolean)
 object InvestigatorInfo {
   private[servlet] implicit class ToInvestigator(val i: InvestigatorInfo) extends AnyVal {
     def toInvestigator: Investigator = new Investigator() {
@@ -80,7 +80,17 @@ object InvestigatorInfo {
   }
 }
 
-sealed case class LchQueryParam[A](name: String, v: ValueMatcher[A])
+case class PartnerInfo(name: String, hoursAllocated: Double)
+object PartnerInfo {
+  private[servlet] implicit class ToPartner(val p: PartnerInfo) extends AnyVal {
+    def toPartner: Partner = new Partner() {
+      setName(p.name)
+      setHoursAllocated(p.hoursAllocated)
+    }
+  }
+}
+
+case class LchQueryParam[A](name: String, v: ValueMatcher[A])
 
 object LchQueryParam {
   import ValueMatcher._
@@ -129,17 +139,28 @@ object LchQueryParam {
     def scienceBand: String =
       toSPProg.getQueueBand
 
-    def partners: List[String] =
-      toSPProg.getTimeAcctAllocation.getCategories.asScala.toList.map(_.getDisplayName)
+    def supportPartner: Option[String] =
+      Option(toSPProg.getPIAffiliate).map(_.displayValue)
+
+    def partnerList: List[PartnerInfo] = {
+      val taa = toSPProg.getTimeAcctAllocation
+      taa.getCategories.asScala.toList.map(c => PartnerInfo(c.getDisplayName, taa.getHours(c)))
+    }
 
     def tooStatus: TooType =
       toSPProg.getTooType
 
     def rolloverStatus: YesNoType =
-      prog.toSPProg.getRolloverStatus.toYesNo
+      toSPProg.getRolloverStatus.toYesNo
 
     def completed: YesNoType =
-      prog.toSPProg.isCompleted.toYesNo
+      toSPProg.isCompleted.toYesNo
+
+    def thesis: YesNoType =
+      toSPProg.isThesis.toYesNo
+
+    def proprietaryMonths: Option[Int] =
+      Option(toSPProg.getGsaAspect).map(_.getProprietaryMonths)
 
     // Allocated time in ms.
     def allocatedTime: Long =
@@ -155,10 +176,13 @@ object LchQueryParam {
     def toSPObs: SPObservation =
       obs.getDataObject.asInstanceOf[SPObservation]
 
-    def instrumentType: Option[String] =
+    def instrument: Option[SPInstObsComp] =
       SPTreeUtil.findInstruments(obs).asScala.map(_.getDataObject).collect {
-        case inst: SPInstObsComp => inst.getType.readableStr
+        case inst: SPInstObsComp => inst
       }.headOption
+
+    def instrumentType: Option[String] =
+      instrument.map(_.getType.readableStr)
 
     def ao: AOConstants.AO = {
       Option(AOTreeUtil.findAOSystem(obs)).map(_.getDataObject).
