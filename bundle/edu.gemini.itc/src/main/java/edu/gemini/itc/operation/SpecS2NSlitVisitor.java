@@ -234,8 +234,8 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
         Log.fine("Calculating background in " + slit.widthPixels() + " x " + slit.lengthPixels() + " pix slit on detector pixels " + firstCcdPixel + " - " + lastPixel);
 
         //Shot noise on background flux in aperture
-        for (int i = 0; i < firstCcdPixel; ++i) { background.setY(i, 0); } // Set to zero outside defined region
-        for (int i = firstCcdPixel; i <= lastCcdPixel(background.getLength()); ++i) {
+        for (int i = 0; i < firstCcdPixel; ++i) { background.setY(i, 0); }
+        for (int i = firstCcdPixel; i <= lastPixel; ++i) {
             background.setY(i,
                     backgroundFlux.getY(i) *
                             slit.width() * slit.pixelSize() * slit.lengthPixels() *
