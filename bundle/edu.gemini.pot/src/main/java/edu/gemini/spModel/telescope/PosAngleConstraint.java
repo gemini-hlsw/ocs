@@ -71,12 +71,18 @@ public enum PosAngleConstraint {
         public boolean isCalculated() {
             return true;
         }
+
+        @Override
+        public boolean isParallactic() { return true; }
     },
 
     /** Parallactic angle is displayed, but overridden by a FIXED_180 value specified by user. */
     PARALLACTIC_OVERRIDE() {
         @Override
         public String description() { return "Parallactic override"; }
+
+        @Override
+        public boolean isParallactic() { return true; }
     }
     ;
 
@@ -105,4 +111,6 @@ public enum PosAngleConstraint {
 
     @Override
     public String toString() { return description(); }
+
+    public boolean isParallactic() { return false; }
 }
