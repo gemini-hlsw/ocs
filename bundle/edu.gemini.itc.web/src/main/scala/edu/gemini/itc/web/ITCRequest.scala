@@ -368,7 +368,6 @@ object ITCRequest {
     case "singleIFU"  => IfuSingle(r.intParameter("ifuSkyFibres"), r.doubleParameter("ifuOffset"))
     case "radialIFU"  => IfuRadial(r.intParameter("ifuSkyFibres"), r.doubleParameter("ifuMinOffset"), r.doubleParameter("ifuMaxOffset"))
     case "summedIFU"  => IfuSummed(r.intParameter("ifuSkyFibres"), r.intParameter("ifuNumX"), r.intParameter("ifuNumY"), r.doubleParameter("ifuCenterX"), r.doubleParameter("ifuCenterY"))
-    //case "sumIFU"     => IfuSum(r.intParameter("ifuSkyFibres"), r.doubleParameter("ifuNum"), r.booleanParameter("IFU_1"));
     case "sumIFU"     => IfuSum(r.intParameter("ifuSkyFibres"), r.doubleParameter("ifuNum"), r.parameter("instrumentFPMask")=="IFU_1"); // IFU_1 = IFU-2
     case _            => throw new NoSuchElementException(s"Unknown analysis method ${r.parameter("analysisMethod")}")
   }
