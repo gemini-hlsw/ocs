@@ -310,14 +310,10 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
             ifuOffset = 0.0;
         }
         final List<ChartAxis> axes = new ArrayList<>();
-        String title    =
-                "Signal and SQRT(Background) in one pixel" +
-                        (ifuUsed ? "\nIFU element offset: " + String.format("%.2f", ifuOffset) + " arcsec" : "");
+        String title = "Signal and SQRT(Background) in one pixel" + (ifuUsed ? "\nIFU element offset: " + String.format("%.2f", ifuOffset) + " arcsec" : "");
         if (mainInstrument.isIfuUsed() &&  mainInstrument.getIfuMethod().get() instanceof IfuSum) {
             final IfuSum ifu = (IfuSum) mainInstrument.getIfuMethod().get();
-            title = "Signal and SQRT(Background)" +
-                        "\n"+String.format("%d", ifu.skyFibres()) + " IFU elements summed in a radius of " +
-                        String.format("%.2f", ifu.num()) + " arcsec";
+            title = "Signal and SQRT(Background)\nIFU elements summed in a radius of " + String.format("%.2f", ifu.num()) + " arcsec";
         }
         final ChartAxis xAxis = ChartAxis.apply("Wavelength (nm)");
         final ChartAxis yAxis = ChartAxis.apply("e- per exposure per spectral pixel");
@@ -348,13 +344,12 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         final double  ifuOffset = ifuUsed ? mainInstrument.getIFU().getApertureOffsetList().get(i) : 0.0;
         final List<ChartAxis> axes = new ArrayList<>();
 
-        String title    = "Intermediate Single Exp and Final S/N in aperture" + (ifuUsed ? "\nIFU element offset: " + String.format("%.2f", ifuOffset) + " arcsec" : "");
+        String title = "Intermediate Single Exp and Final S/N in aperture" + (ifuUsed ? "\nIFU element offset: " + String.format("%.2f", ifuOffset) + " arcsec" : "");
         if (mainInstrument.isIfuUsed() &&  mainInstrument.getIfuMethod().get() instanceof IfuSum) {
             final IfuSum ifu = (IfuSum) mainInstrument.getIfuMethod().get();
-            title = "Intermediate Single Exp and Final S/N in aperture " +
-                    "\n"+String.format("%d", ifu.skyFibres()) + " IFU elements summed in a radius of " +
-                    String.format("%.2f", ifu.num()) + " arcsec";
-        }final ChartAxis xAxis = ChartAxis.apply("Wavelength (nm)");
+            title = "Intermediate Single Exp and Final S/N in aperture\nIFU elements summed in a radius of " + String.format("%.2f", ifu.num()) + " arcsec";
+        }
+        final ChartAxis xAxis = ChartAxis.apply("Wavelength (nm)");
         final ChartAxis yAxis = ChartAxis.apply("Signal / Noise per spectral pixel");
 
         final List<SpcSeriesData> data = new ArrayList<>();

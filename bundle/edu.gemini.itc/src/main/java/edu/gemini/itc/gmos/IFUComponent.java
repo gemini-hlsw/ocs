@@ -1,9 +1,9 @@
 package edu.gemini.itc.gmos;
 
 import edu.gemini.itc.base.*;
-
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * This is the specific setup for the IFU of GMOS.
@@ -12,12 +12,12 @@ import java.util.List;
  */
 
 public final class IFUComponent extends TransmissionElement {
+
     public static final double IFU_DIAMETER = 0.186;  //earlier calc showed D = 0.206
     public static final double IFU_SPACING = 0.014;
-
     private final ApertureComposite IFUApertures;
     private final List<Double> IFUOffsets;
-
+    private static final Logger Log = Logger.getLogger( IFUComponent.class.getName() );
 
     /**
      * Constructor for a user defined radial ifu set.
@@ -57,18 +57,19 @@ public final class IFUComponent extends TransmissionElement {
      */
 
     public IFUComponent(final String prefix, final double radius, final Boolean isIfu2) {
-
         super(ITCConstants.LIB + "/" + Gmos.INSTR_DIR + "/" + prefix + "ifu_trans" + Instrument.DATA_SUFFIX);
+        Log.fine("Calculating IFU elements to sum within " + radius + " arcsec of center (IFU2 = " + isIfu2 + ")");
 
         IFUApertures = new ApertureComposite();
         IFUOffsets = new ArrayList<>();
 
-        int numX = 20;            // number of elements in the IFU in the x-direction
         int numY = 25;            // number of elements in the IFU in the y-direction
+        int numX = 20;            // number of elements in the IFU-1 in the x-direction
         if (isIfu2) {
-            numX = 40;            // number of elements in the IFU in the x-direction
-            }
+            numX = 40;            // number of elements in the IFU-2 in the x-direction
+        }
 
+        int Nelements = 0;
         for (int i = 0; i < numY; i++) {
             double y = (i - (numY-1)/2.) * IFU_DIAMETER;
             for (int j = 0; j < numX; j++) {
@@ -78,9 +79,12 @@ public final class IFUComponent extends TransmissionElement {
                     IFUApertures.addAperture(new HexagonalAperture(x, y, IFU_DIAMETER));
                     IFUOffsets.add(x);
                     IFUOffsets.add(y);
+                    Nelements++;
                 }
             }
         }
+        Log.fine("-> will sum " + Nelements + " IFU elements");
+
     }
 
     public ApertureComponent getAperture() {
