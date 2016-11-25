@@ -3,12 +3,12 @@ package edu.gemini.ags.impl
 import edu.gemini.ags.api._
 import edu.gemini.ags.api.AgsMagnitude._
 import edu.gemini.catalog.api.CatalogQuery
-import edu.gemini.catalog.votable.{ConeSearchBackend, VoTableBackend, CatalogException, VoTableClient}
+import edu.gemini.catalog.votable.{CatalogException, ConeSearchBackend, VoTableBackend, VoTableClient}
 import edu.gemini.pot.ModelConverters._
 import edu.gemini.spModel.ags.AgsStrategyKey
-import edu.gemini.spModel.core.{Coordinates, Angle}
+import edu.gemini.spModel.core.{Angle, Coordinates}
 import edu.gemini.spModel.core.SiderealTarget
-import edu.gemini.spModel.guide.{ValidatableGuideProbe, VignettingGuideProbe, GuideProbe}
+import edu.gemini.spModel.guide.{GuideProbe, ValidatableGuideProbe, VignettingGuideProbe}
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.telescope.PosAngleConstraint._
 import edu.gemini.shared.util.immutable.ScalaConverters._
@@ -16,7 +16,6 @@ import edu.gemini.shared.util.immutable.ScalaConverters._
 import scala.collection.JavaConverters._
 import scala.concurrent._
 import scala.concurrent.ExecutionContext.Implicits.global
-
 import scalaz._
 import Scalaz._
 
