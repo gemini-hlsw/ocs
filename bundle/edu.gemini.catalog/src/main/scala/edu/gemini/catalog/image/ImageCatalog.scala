@@ -152,12 +152,17 @@ object ImageCatalog {
 
   /**
     * Returns a catalog appropriate for a given wavelength
+    * TODO Re-enable catalog selection an a per-wavelength basis when handling
+    * of 2MASS catalogs has been improved
     */
-  def catalogForWavelength(w: Option[Wavelength]): ImageCatalog = w match {
+  def catalogForWavelength(w: Option[Wavelength]): ImageCatalog = DssGemini
+    /* As per user request, don't delete this code
+    w match {
       case Some(d) if d <= DssCutoff                           => DssGemini
       case Some(d) if d <= MassJCutoff                         => TwoMassJ
       case Some(d) if d <= MassHCutoff                         => TwoMassH
       case Some(_)                                             => TwoMassK
       case None                                                => DefaultImageCatalog
     }
+    */
 }
