@@ -26,8 +26,6 @@ import Scalaz._
 
 class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
                          E <: OtItemEditor[ISPObsComponent, I]](instType: SPComponentType) extends GridBagPanel with Reactor {
-  import PositionAnglePanel._
-
   private var editor: Option[E] = None
 
   private val numberFormatter = NumberFormat.getInstance(Locale.US) <|
@@ -82,16 +80,15 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
     listenTo(positionAngleTextField)
     listenTo(positionAngleTextField.keys)
     reactions += {
-      case ValueChanged(`positionAngleTextField`) =>
+      case ValueChanged(`positionAngleTextField`) => Swing.onEDT {
         ui.positionAngleTextField.validate()
         copyPosAngleToInstrument()
         ui.parallacticAngleControlsOpt.foreach(_.positionAngleChanged(positionAngleTextField.text))
+      }
 
-      case FocusGained(`positionAngleTextField`, _, _) | FocusLost(`positionAngleTextField`, _, _) =>
+      case FocusGained(`positionAngleTextField`, _, _) | FocusLost(`positionAngleTextField`, _, _) | KeyPressed(`positionAngleTextField`, Key.Enter, _, _) => Swing.onEDT {
         copyPosAngleToTextField()
-
-      case KeyPressed(`positionAngleTextField`, Key.Enter, _, _) =>
-        copyPosAngleToTextField()
+      }
     }
 
 
@@ -184,7 +181,7 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
   /**
     * Initialization of the components.
     */
-  def init(e: E, s: Site): Unit = Swing.onEDT {
+  def init(e: E, s: Site): Unit = {
     editor = Some(e)
     val instrument = e.getDataObject
 
@@ -235,31 +232,21 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
   private def updatePATextFieldEditableState(pac: PosAngleConstraint) =
     ui.positionAngleTextField.editable = !pac.isCalculated
 
-  /** The actual copying of a given pos angle to the data object.
-    * This is done explicitly to avoid overwriting based on minor differences in double precision and to avoid
-    * adding 180 to the position angle for parallactic angle mode, which overrides BAGS flips.
-    **/
-  private def setInstPosAngle(newAngleDegrees: Double): Unit = Swing.onEDT {
+  private def setInstPosAngle(newAngleDegrees: Double): Unit =
     editor.foreach(_.getDataObject.setPosAngleDegrees(newAngleDegrees))
-  }
 
-  /**
-   * Copies, if possible, the position angle text field contents to the data object.
-   */
-  private def copyPosAngleToInstrument(): Unit = Swing.onEDT {
+  private def copyPosAngleToInstrument(): Unit =
     ui.positionAngleTextField.angle.foreach(setInstPosAngle)
-  }
 
   /**
     * Copies the position angle in the data object to the position angle text field.
     */
-  private def copyPosAngleToTextField(): Unit = Swing.onEDT {
+  private def copyPosAngleToTextField(): Unit = {
     editor.foreach { e =>
       val newAngleStr = numberFormatter.format(e.getDataObject.getPosAngleDegrees)
       val oldAngleStr = ui.positionAngleTextField.text
-      if (!newAngleStr.equals(oldAngleStr)) {
+      if (!newAngleStr.equals(oldAngleStr))
         ui.positionAngleTextField.text = newAngleStr
-      }
     }
   }
 

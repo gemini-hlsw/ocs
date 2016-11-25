@@ -138,7 +138,6 @@ object BagsState {
         runningTransition | ((IdleState(k, newHash), idleAction))
       }
 
-
       fetchObs(k).fold((ErrorState: BagsState, ioUnit)) { wakeUp }
     }
   }
