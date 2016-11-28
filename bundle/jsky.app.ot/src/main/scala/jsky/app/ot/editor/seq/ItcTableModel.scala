@@ -35,11 +35,11 @@ sealed trait ItcTableModel extends AbstractTableModel {
   val SrcMagColumn  = Column("Source\nMag",            (_, i, _) => i.map(sourceMag).toOption,         tooltip = "Source magnitude (mag)")
   val SrcFracColumn = Column("Source\nFraction",       (_, i, _) => i.map(sourceFraction).toOption,    tooltip = "Fraction of images on source")
 
-  val PeakPixelColumn     = Column("Peak\n(e-)",       (_, _, r) => peakPixelFlux(r),                  tooltip = ItcTableModel.PeakPixelETooltip)
-  val PeakADUColumn       = Column("Peak\n(ADU)",      (_, _, r) => imgAdu(r),                         tooltip = ItcTableModel.PeakPixelAduTooltip)
-  val PeakFullWellColumn  = Column("Peak\n(%FW)",      (_, _, r) => imgPercentWell(r),                 tooltip = ItcTableModel.PeakPixelFWTooltip)
-  val SNSingleColumn      = Column("S/N Single Coadd", (_, _, r) => singleSNRatio(r),                  tooltip = "Signal / Noise for one exposure with one coadd")
-  val SNTotalColumn       = Column("S/N Total",        (_, _, r) => totalSNRatio (r),                  tooltip = "Total Signal / Noise for all exposures and coadds")
+  val PeakPixelColumn     = Column("Peak\n(e-)",       (_, _, r) => peakPixelFlux(r, 0),               tooltip = ItcTableModel.PeakPixelETooltip)
+  val PeakADUColumn       = Column("Peak\n(ADU)",      (_, _, r) => imgAdu(r, 0),                      tooltip = ItcTableModel.PeakPixelAduTooltip)
+  val PeakFullWellColumn  = Column("Peak\n(%FW)",      (_, _, r) => imgPercentWell(r, 0),              tooltip = ItcTableModel.PeakPixelFWTooltip)
+  val SNSingleColumn      = Column("S/N Single Coadd", (_, _, r) => singleSNRatio(r, 0),               tooltip = "Signal / Noise for one exposure with one coadd")
+  val SNTotalColumn       = Column("S/N Total",        (_, _, r) => totalSNRatio (r, 0),               tooltip = "Total Signal / Noise for all exposures and coadds")
 
   // Define different sets of columns as headers
   val PeakColumns       = List(PeakPixelColumn, PeakADUColumn, PeakFullWellColumn)
@@ -88,12 +88,12 @@ sealed trait ItcTableModel extends AbstractTableModel {
 
   protected def sourceFraction  (i: ItcParameters) = f"${i.observation.sourceFraction}%.2f"
 
-  protected def peakPixelFlux(result: Future[ItcService.Result], ccd: Int = 0): Option[Int] = serviceResult(result).map(_.peakPixelFlux(ccd))
+  protected def peakPixelFlux(result: Future[ItcService.Result], ccd: Int): Option[Int] = serviceResult(result).map(_.peakPixelFlux(ccd))
 
-  protected def imgPercentWell  (result: Future[ItcService.Result], ccd: Int = 0): Option[Double] = serviceResult(result).map(_.ccd(ccd).percentFullWell)
-  protected def imgAdu          (result: Future[ItcService.Result], ccd: Int = 0): Option[Int] = serviceResult(result).map(_.ccd(ccd).adu)
-  protected def singleSNRatio   (result: Future[ItcService.Result], ccd: Int = 0): Option[Double] = serviceResult(result).map(_.ccd(ccd).singleSNRatio)
-  protected def totalSNRatio    (result: Future[ItcService.Result], ccd: Int = 0): Option[Double] = serviceResult(result).map(_.ccd(ccd).totalSNRatio)
+  protected def imgPercentWell  (result: Future[ItcService.Result], ccd: Int): Option[Double] = serviceResult(result).map(_.ccd(ccd).percentFullWell)
+  protected def imgAdu          (result: Future[ItcService.Result], ccd: Int): Option[Int] = serviceResult(result).map(_.ccd(ccd).adu)
+  protected def singleSNRatio   (result: Future[ItcService.Result], ccd: Int): Option[Double] = serviceResult(result).map(_.ccd(ccd).singleSNRatio)
+  protected def totalSNRatio    (result: Future[ItcService.Result], ccd: Int): Option[Double] = serviceResult(result).map(_.ccd(ccd).totalSNRatio)
 
   // ===
 
