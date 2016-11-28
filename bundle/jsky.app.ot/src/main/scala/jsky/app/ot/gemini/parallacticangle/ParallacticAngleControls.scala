@@ -1,6 +1,7 @@
 package jsky.app.ot.gemini.parallacticangle
 
 import java.awt.{Color, Insets}
+import java.beans.{PropertyChangeEvent, PropertyChangeListener}
 import java.text.{Format, SimpleDateFormat}
 import java.util.Date
 import java.util.logging.Logger
@@ -142,24 +143,27 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
         * This should be called whenever the position angle or parallactic angle changes.
         * A warning icon and tooltip are displayed if the two are different.
         */
-      def warningState(): Unit = Swing.onEDT {
+      def warningState(): Unit =
         for {
           e     <- editor
           fmt   <- formatter
           inst  <- Option(e.getContextInstrumentDataObject).collect { case s: SPInstObsComp => s }
         } warningStateFromPAString(inst.getPosAngleDegrees.toString)
-      }
 
-      def warningStateFromPAString(paStr: String): Unit = Swing.onEDT {
+      def warningStateFromPAString(paStr: String): Unit =
         for {
           e     <- editor
           fmt   <- formatter
           inst  <- Option(e.getContextInstrumentDataObject).collect { case s: SPInstObsComp => s }
-          angle <- parallacticAngle
         } {
-          val explicitlySet = !fmt.format(angle.toDegrees).equals(paStr) &&
-                              !fmt.format((angle + Angle.fromDegrees(180)).toDegrees).equals(paStr)
-          if (explicitlySet) {
+          // We warn only if the parallactic angle exists and has been explicitly set.
+          val warningFlag = parallacticAngle.exists { angle =>
+              val fa = fmt.format(angle.toDegrees)
+              val faFlip = fmt.format(angle.flip.toDegrees)
+              !fa.equals(paStr) && !faFlip.equals(paStr)
+          }
+
+          if (warningFlag) {
             icon = Resources.getIcon("eclipse/alert.gif")
             tooltip = "The PA is not at the average parallactic value."
           } else {
@@ -167,7 +171,15 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
             tooltip = ""
           }
         }
-      }
+
+      // This is kind of horrible, but we want to recalculate the warning state whenever the text of the label
+      // changes, which can happen via a number of methods (BAGS, user, switching observations), so this is the most
+      // robust way to manually ensure that this will happen no matter where the label changes.
+      peer.addPropertyChangeListener("text", new PropertyChangeListener {
+        override def propertyChange(evt: PropertyChangeEvent): Unit = {
+          warningState()
+        }
+      })
     }
 
     layout(parallacticAngleFeedback) = new Constraints() {
@@ -295,9 +307,8 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
   /**
     * This should be called whenever the position angle changes to compare it to the parallactic angle.
     */
-  def positionAngleChanged(positionAngleText: String): Unit = {
+  def positionAngleChanged(positionAngleText: String): Unit =
     ui.parallacticAngleFeedback.warningStateFromPAString(positionAngleText)
-  }
 
 
   /**
@@ -328,10 +339,8 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
         if (isPaUi) dateTimeStr + durStr + paStr
         else dateTimeStr
 
-      if (didParllacticAngleChange) {
-        ui.parallacticAngleFeedback.warningState()
+      if (didParallacticAngleChange)
         publish(ParallacticAngleControls.ParallacticAngleChangedEvent)
-      }
     }
   }
 
@@ -339,7 +348,7 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
     * Check if the parallactic angle changed from what is currently recorded for the instrument.
     * The angle is considered to have remained constant if it is within 0.005
     */
-  def didParllacticAngleChange: Boolean =
+  def didParallacticAngleChange: Boolean =
     editor.exists { e =>
       parallacticAngle.forall { newAngle =>
         val angleDiff = {
