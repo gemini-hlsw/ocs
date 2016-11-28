@@ -145,22 +145,24 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
         */
       def warningState(): Unit =
         for {
-          e     <- editor
-          fmt   <- formatter
-          inst  <- Option(e.getContextInstrumentDataObject).collect { case s: SPInstObsComp => s }
+          e    <- editor
+          fmt  <- formatter
+          inst <- Option(e.getContextInstrumentDataObject).collect { case s: SPInstObsComp => s }
         } warningStateFromPAString(inst.getPosAngleDegrees.toString)
 
-      def warningStateFromPAString(paStr: String): Unit =
+      /**
+        * Compares the parallactic angle to the supplied position angle.
+        */
+      def warningStateFromPAString(paStr: String): Unit = Swing.onEDT {
         for {
-          e     <- editor
-          fmt   <- formatter
-          inst  <- Option(e.getContextInstrumentDataObject).collect { case s: SPInstObsComp => s }
+          e   <- editor
+          fmt <- formatter
         } {
           // We warn only if the parallactic angle exists and has been explicitly set.
           val warningFlag = parallacticAngle.exists { angle =>
-              val fa = fmt.format(angle.toDegrees)
-              val faFlip = fmt.format(angle.flip.toDegrees)
-              !fa.equals(paStr) && !faFlip.equals(paStr)
+            val fa = fmt.format(angle.toDegrees)
+            val faFlip = fmt.format(angle.flip.toDegrees)
+            !fa.equals(paStr) && !faFlip.equals(paStr)
           }
 
           if (warningFlag) {
@@ -171,6 +173,7 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
             tooltip = ""
           }
         }
+      }
 
       // This is kind of horrible, but we want to recalculate the warning state whenever the text of the label
       // changes, so this is the most robust way to ensure that this will happen no matter where the label changes.
