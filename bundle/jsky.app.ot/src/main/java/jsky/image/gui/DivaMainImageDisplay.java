@@ -387,8 +387,11 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
             setURL(FileUtil.makeURL(null, fileOrUrl));
             return;
         }
-        if (!checkSave())
+
+        // REL-2999: skip image updates when the file hasn't changed.
+        if (fileOrUrl.equals(_filename) || !checkSave()) {
             return;
+        }
 
         addToHistory();
         _filename = fileOrUrl;
