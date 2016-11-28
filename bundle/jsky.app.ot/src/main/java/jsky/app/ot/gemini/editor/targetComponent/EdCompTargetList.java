@@ -105,9 +105,10 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         _agsPub.subscribe((obs, oldOptions, newOptions) -> updateGuiding());
 
         BagsManager.addBagsStateListener((key, oldStatus, newStatus) -> {
-            if (key.equals(getContextObservation().getNodeKey()))
+            if (Optional.ofNullable(getContextObservation()).map(co -> key.equals(co.getNodeKey())).orElse(false)) {
                 updateTargetFeedback();
-        });
+            }
+       });
     }
 
     @Override protected void updateEnabledState(final boolean enabled) {
