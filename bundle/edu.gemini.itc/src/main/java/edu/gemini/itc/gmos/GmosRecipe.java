@@ -177,9 +177,9 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
             final Slit slit = Slit$.MODULE$.apply(instrument.getSlitWidth(), slitLength, instrument.getPixelSize());
 
             // for uniform sources the result is the same regardless of the IFU offsets/position
-            // in this case we only calcualte and display the result of the first IFU element
+            // in this case we only calculate and display the result of the first IFU element
             // For the summed IFU we will also only have a single S/N value.
-            int ifusToShow = (_sdParameters.isUniform()) ? 1 : sf_list.size();
+            int ifusToShow;
             if (instrument.isIfuUsed() &&  _obsDetailParameters.analysisMethod() instanceof IfuSum) {
                 ifusToShow = 1;
             } else {
@@ -190,14 +190,14 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
             // process all IFU elements
             double totalspsf = 0;
             if (instrument.isIfuUsed() &&  _obsDetailParameters.analysisMethod() instanceof IfuSum) {
-                for (int i=0; i < sf_list.size(); i++) {
-                    final double spsf = sf_list.get(i);
+                for (Double aSf_list : sf_list) {
+                    final double spsf = aSf_list;
                     totalspsf += spsf;
                 }
             }
 
             for (int i = 0; i < ifusToShow; i++) {
-                double spsf = 0;
+                double spsf;
                 if (instrument.isIfuUsed() &&  _obsDetailParameters.analysisMethod() instanceof IfuSum) {
                     spsf = totalspsf;
                 } else {

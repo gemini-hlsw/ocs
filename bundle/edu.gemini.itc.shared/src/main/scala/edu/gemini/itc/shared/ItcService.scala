@@ -35,20 +35,20 @@ final case class ItcCcd(
     ampGain:                Double,     // the amplifier gain for this CCD (used to calculate ADU)
     warnings: List[ItcWarning]          // the warnings provided by ITC for this CCD
 ) {
-  val percentFullWell = peakPixelFlux / wellDepth * 100.0   // the max percentage of the well saturation for peak pixel
-  val adu             = (peakPixelFlux / ampGain).toInt     // the ADU value
+  val percentFullWell: Double = peakPixelFlux / wellDepth * 100.0   // the max percentage of the well saturation for peak pixel
+  val adu: Int                = (peakPixelFlux / ampGain).toInt     // the ADU value
 }
 
 sealed trait ItcResult extends Serializable {
   def ccds:                         List[ItcCcd]
 
-  def ccd(i: Int = 0)               = ccds(i % ccds.length)
-  def peakPixelFlux(ccdIx: Int = 0) = ccd(ccdIx).peakPixelFlux.toInt
+  def ccd(i: Int = 0): ItcCcd            = ccds(i % ccds.length)
+  def peakPixelFlux(ccdIx: Int = 0): Int = ccd(ccdIx).peakPixelFlux.toInt
 
   val warnings: List[ItcWarning] = {
     def concatWarnings =
       ccds.zipWithIndex.flatMap { case (c, i) =>
-        c.warnings.map(w => new ItcWarning(s"CCD $i: ${w.msg}"))
+        c.warnings.map(w => ItcWarning(s"CCD $i: ${w.msg}"))
       }
 
     if (ccds.length > 1) concatWarnings
@@ -67,18 +67,18 @@ final case class ItcImagingResult(ccds: List[ItcCcd]) extends ItcResult
 
 // There are two different types of charts
 sealed trait SpcChartType
-case object SignalChart       extends SpcChartType { val instance = this } // signal and background over wavelength [nm]
-case object S2NChart          extends SpcChartType { val instance = this } // single and final S2N over wavelength [nm]
-case object SignalPixelChart  extends SpcChartType { val instance = this } // single and final S2N over wavelength [nm]
+case object SignalChart       extends SpcChartType { val instance: SpcChartType = this } // signal and background over wavelength [nm]
+case object S2NChart          extends SpcChartType { val instance: SpcChartType = this } // single and final S2N over wavelength [nm]
+case object SignalPixelChart  extends SpcChartType { val instance: SpcChartType = this } // single and final S2N over wavelength [nm]
 
 // There are four different data sets
 sealed trait SpcDataType
-case object SignalData        extends SpcDataType { val instance = this }  // signal over wavelength [nm]
-case object BackgroundData    extends SpcDataType { val instance = this }  // background over wavelength [nm]
-case object SingleS2NData     extends SpcDataType { val instance = this }  // single S2N over wavelength [nm]
-case object FinalS2NData      extends SpcDataType { val instance = this }  // final S2N over wavelength [nm]
-case object PixSigData        extends SpcDataType { val instance = this }  // signal over pixels
-case object PixBackData       extends SpcDataType { val instance = this }  // background over pixels
+case object SignalData        extends SpcDataType { val instance: SpcDataType = this }  // signal over wavelength [nm]
+case object BackgroundData    extends SpcDataType { val instance: SpcDataType = this }  // background over wavelength [nm]
+case object SingleS2NData     extends SpcDataType { val instance: SpcDataType = this }  // single S2N over wavelength [nm]
+case object FinalS2NData      extends SpcDataType { val instance: SpcDataType = this }  // final S2N over wavelength [nm]
+case object PixSigData        extends SpcDataType { val instance: SpcDataType = this }  // signal over pixels
+case object PixBackData       extends SpcDataType { val instance: SpcDataType = this }  // background over pixels
 
 /** Series of (x,y) data points used to create charts and text data files. */
 final case class SpcSeriesData(dataType: SpcDataType, title: String, data: Array[Array[Double]], color: Option[Color] = None) {

@@ -21,7 +21,7 @@ final case class SourceDefinition(
                      normBand: MagnitudeBand,
                      redshift: Redshift) {
 
-  val isUniform = profile match {
+  val isUniform: Boolean = profile match {
     case UniformSource => true
     case _             => false
   }
@@ -88,7 +88,7 @@ final case class IfuSum(skyFibres: Int, num: Double, isIfu2: Boolean) extends If
 // === Observation Details
 
 final case class ObservationDetails(calculationMethod: CalculationMethod, analysisMethod: AnalysisMethod) {
-  def exposureTime   = calculationMethod.exposureTime
-  def sourceFraction = calculationMethod.sourceFraction
-  def isAutoAperture = analysisMethod.isInstanceOf[AutoAperture]
+  def exposureTime: Double    = calculationMethod.exposureTime
+  def sourceFraction: Double  = calculationMethod.sourceFraction
+  def isAutoAperture: Boolean = analysisMethod.isInstanceOf[AutoAperture]
 }

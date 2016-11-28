@@ -40,22 +40,27 @@ public final class GmosNorth extends Gmos {
         super(gp, odp, FILENAME, detectorCcdIndex);
     }
 
+    @Override
     public boolean isIfu2() {
         return getFpMask() == GmosNorthType.FPUnitNorth.IFU_1;
     }
 
+    @Override
     protected Gmos[] createCcdArray() {
         return new Gmos[]{this, new GmosNorth(gp, odp, 1), new GmosNorth(gp, odp, 2)};
     }
 
+    @Override
     protected String getPrefix() {
         return INSTR_PREFIX;
     }
 
+    @Override
     protected String[] getCcdFiles() {
         return DETECTOR_CCD_FILES;
     }
 
+    @Override
     protected String[] getCcdNames() {
         return DETECTOR_CCD_NAMES;
     }
