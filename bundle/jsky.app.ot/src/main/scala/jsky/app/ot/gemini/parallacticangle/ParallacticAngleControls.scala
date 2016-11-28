@@ -173,8 +173,7 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
         }
 
       // This is kind of horrible, but we want to recalculate the warning state whenever the text of the label
-      // changes, which can happen via a number of methods (BAGS, user, switching observations), so this is the most
-      // robust way to manually ensure that this will happen no matter where the label changes.
+      // changes, so this is the most robust way to ensure that this will happen no matter where the label changes.
       peer.addPropertyChangeListener("text", new PropertyChangeListener {
         override def propertyChange(evt: PropertyChangeEvent): Unit = {
           warningState()
