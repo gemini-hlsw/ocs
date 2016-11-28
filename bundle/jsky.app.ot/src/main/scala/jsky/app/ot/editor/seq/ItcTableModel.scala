@@ -28,18 +28,18 @@ sealed trait ItcTableModel extends AbstractTableModel {
 
   /// Define some generic columns. Values are rendered as strings in order to have them left aligned, similar to other sequence tables.
   val LabelsColumn  = Column("Data\nLabels",           (c, _, r) => (resultIcon(r).orNull, c.labels))
-  val ImagesColumn  = Column("Images",                 (c, _, _) => s"${c.count}",                     tooltip = "Number of exposures used in S/N calculation")
-  val CoaddsColumn  = Column("Coadds",                 (c, _, _) => s"${c.coadds.getOrElse(1.0)}",     tooltip = "Number of coadds")
-  val ExpTimeColumn = Column("Exposure\nTime (s)",     (c, _, _) => f"${c.singleExposureTime}%.1f",    tooltip = "Exposure time of each image")
-  val TotTimeColumn = Column("Total Exp.\nTime (s)",   (c, _, _) => f"${c.totalExposureTime}%.1f",     tooltip = "Total exposure time")
-  val SrcMagColumn  = Column("Source\nMag",            (_, i, _) => i.map(sourceMag).toOption,         tooltip = "Source magnitude (mag)")
-  val SrcFracColumn = Column("Source\nFraction",       (_, i, _) => i.map(sourceFraction).toOption,    tooltip = "Fraction of images on source")
+  val ImagesColumn  = Column("Images",                 (c, _, _) => s"${c.count}",                  tooltip = "Number of exposures used in S/N calculation")
+  val CoaddsColumn  = Column("Coadds",                 (c, _, _) => s"${c.coadds.getOrElse(1.0)}",  tooltip = "Number of coadds")
+  val ExpTimeColumn = Column("Exposure\nTime (s)",     (c, _, _) => f"${c.singleExposureTime}%.1f", tooltip = "Exposure time of each image")
+  val TotTimeColumn = Column("Total Exp.\nTime (s)",   (c, _, _) => f"${c.totalExposureTime}%.1f",  tooltip = "Total exposure time")
+  val SrcMagColumn  = Column("Source\nMag",            (_, i, _) => i.map(sourceMag).toOption,      tooltip = "Source magnitude (mag)")
+  val SrcFracColumn = Column("Source\nFraction",       (_, i, _) => i.map(sourceFraction).toOption, tooltip = "Fraction of images on source")
 
-  val PeakPixelColumn     = Column("Peak\n(e-)",       (_, _, r) => peakPixelFlux(r, 0),               tooltip = ItcTableModel.PeakPixelETooltip)
-  val PeakADUColumn       = Column("Peak\n(ADU)",      (_, _, r) => imgAdu(r, 0),                      tooltip = ItcTableModel.PeakPixelAduTooltip)
-  val PeakFullWellColumn  = Column("Peak\n(%FW)",      (_, _, r) => imgPercentWell(r, 0),              tooltip = ItcTableModel.PeakPixelFWTooltip)
-  val SNSingleColumn      = Column("S/N Single Coadd", (_, _, r) => singleSNRatio(r, 0),               tooltip = "Signal / Noise for one exposure with one coadd")
-  val SNTotalColumn       = Column("S/N Total",        (_, _, r) => totalSNRatio (r, 0),               tooltip = "Total Signal / Noise for all exposures and coadds")
+  val PeakPixelColumn     = Column("Peak\n(e-)",       (_, _, r) => maxPeakPixelFlux(r),          tooltip = ItcTableModel.PeakPixelETooltip)
+  val PeakADUColumn       = Column("Peak\n(ADU)",      (_, _, r) => maxImgAdu(r),                 tooltip = ItcTableModel.PeakPixelAduTooltip)
+  val PeakFullWellColumn  = Column("Peak\n(%FW)",      (_, _, r) => maxImgPercentWell(r),         tooltip = ItcTableModel.PeakPixelFWTooltip)
+  val SNSingleColumn      = Column("S/N Single Coadd", (_, _, r) => maxSingleSNRatio(r),            tooltip = "Signal / Noise for one exposure with one coadd")
+  val SNTotalColumn       = Column("S/N Total",        (_, _, r) => maxTotalSNRatio(r),            tooltip = "Total Signal / Noise for all exposures and coadds")
 
   // Define different sets of columns as headers
   val PeakColumns       = List(PeakPixelColumn, PeakADUColumn, PeakFullWellColumn)
@@ -84,16 +84,21 @@ sealed trait ItcTableModel extends AbstractTableModel {
       }
     }
 
-  protected def sourceMag       (i: ItcParameters) = f"${i.source.norm}%.2f ${i.source.normBand.name}"
+  protected def sourceMag(i: ItcParameters) = f"${i.source.norm}%.2f ${i.source.normBand.name}"
 
-  protected def sourceFraction  (i: ItcParameters) = f"${i.observation.sourceFraction}%.2f"
+  protected def sourceFraction(i: ItcParameters) = f"${i.observation.sourceFraction}%.2f"
 
-  protected def peakPixelFlux(result: Future[ItcService.Result], ccd: Int): Option[Int] = serviceResult(result).map(_.peakPixelFlux(ccd))
+  protected def peakPixelFlux(result: Future[ItcService.Result], ccd: Int): Option[Int]       = serviceResult(result).map(_.peakPixelFlux(ccd))
+  protected def maxPeakPixelFlux(result: Future[ItcService.Result]): Option[Int]              = serviceResult(result).map(_.maxPeakPixelFlux)
 
-  protected def imgPercentWell  (result: Future[ItcService.Result], ccd: Int): Option[Double] = serviceResult(result).map(_.ccd(ccd).percentFullWell)
-  protected def imgAdu          (result: Future[ItcService.Result], ccd: Int): Option[Int] = serviceResult(result).map(_.ccd(ccd).adu)
-  protected def singleSNRatio   (result: Future[ItcService.Result], ccd: Int): Option[Double] = serviceResult(result).map(_.ccd(ccd).singleSNRatio)
-  protected def totalSNRatio    (result: Future[ItcService.Result], ccd: Int): Option[Double] = serviceResult(result).map(_.ccd(ccd).totalSNRatio)
+  protected def imgPercentWell(result: Future[ItcService.Result], ccd: Int): Option[Double]   = serviceResult(result).map(_.ccd(ccd).percentFullWell)
+  protected def maxImgPercentWell(result: Future[ItcService.Result]): Option[Double]          = serviceResult(result).map(_.maxPercentFullWell)
+  protected def imgAdu(result: Future[ItcService.Result], ccd: Int): Option[Int]              = serviceResult(result).map(_.ccd(ccd).adu)
+  protected def maxImgAdu(result: Future[ItcService.Result]): Option[Int]                     = serviceResult(result).map(_.maxAdu)
+  protected def singleSNRatio(result: Future[ItcService.Result], ccd: Int): Option[Double]    = serviceResult(result).map(_.ccd(ccd).singleSNRatio)
+  protected def maxSingleSNRatio(result: Future[ItcService.Result]): Option[Double]           = serviceResult(result).map(_.maxSingleSNRatio)
+  protected def totalSNRatio  (result: Future[ItcService.Result], ccd: Int): Option[Double]   = serviceResult(result).map(_.ccd(ccd).totalSNRatio)
+  protected def maxTotalSNRatio(result: Future[ItcService.Result]): Option[Double]            = serviceResult(result).map(_.maxTotalSNRatio)
 
   // ===
 

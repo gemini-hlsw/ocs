@@ -44,6 +44,11 @@ sealed trait ItcResult extends Serializable {
 
   def ccd(i: Int = 0): ItcCcd            = ccds(i % ccds.length)
   def peakPixelFlux(ccdIx: Int = 0): Int = ccd(ccdIx).peakPixelFlux.toInt
+  def maxPeakPixelFlux: Int              = ccds.map(_.peakPixelFlux).max.toInt
+  def maxAdu: Int                        = ccds.map(_.adu).max
+  def maxPercentFullWell: Double         = ccds.map(_.percentFullWell).max
+  def maxSingleSNRatio: Double           = ccds.map(_.singleSNRatio).max
+  def maxTotalSNRatio: Double            = ccds.map(_.totalSNRatio).max
 
   val warnings: List[ItcWarning] = {
     def concatWarnings =
