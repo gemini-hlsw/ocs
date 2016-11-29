@@ -20,7 +20,7 @@ import edu.gemini.spModel.too.Too
 
 import scala.collection.JavaConverters._
 
-import scalaz._
+import scalaz._, Scalaz._
 
 class LchQueryFunctor(queryType: LchQueryFunctor.QueryType,
                       programParams: List[(LchQueryParam[ISPProgram], String)],
@@ -44,10 +44,8 @@ class LchQueryFunctor(queryType: LchQueryFunctor.QueryType,
     \/.fromTryCatchNonFatal {
       // See if an ISPProgram matches the query specifications.
       if (programMatches) {
-        val matchingObs = prog.getAllObservations.asScala.toList.filter(observationMatches)
-        if (matchingObs.nonEmpty) {
-          addProgram(prog, if (queryType == LchQueryFunctor.QueryType.ProgramQuery) Nil else matchingObs)
-        }
+        import LchQueryFunctor.QueryType.ProgramQuery
+        addProgram(prog, (queryType == ProgramQuery) ? List.empty[ISPObservation] | prog.getAllObservations.asScala.toList.filter(observationMatches))
       }
     } match {
       case \/-(s) =>
