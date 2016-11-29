@@ -88,17 +88,23 @@ sealed trait ItcTableModel extends AbstractTableModel {
 
   protected def sourceFraction(i: ItcParameters) = f"${i.observation.sourceFraction}%.2f"
 
-  protected def peakPixelFlux(result: Future[ItcService.Result], ccd: Int): Option[Int]       = serviceResult(result).map(_.peakPixelFlux(ccd))
-  protected def maxPeakPixelFlux(result: Future[ItcService.Result]): Option[Int]              = serviceResult(result).map(_.maxPeakPixelFlux)
+  private def maxR[A](result: Future[ItcService.Result], f: ItcResult => A): Option[A] =
+    serviceResult(result).map(f)
 
-  protected def imgPercentWell(result: Future[ItcService.Result], ccd: Int): Option[Double]   = serviceResult(result).map(_.ccd(ccd).percentFullWell)
-  protected def maxImgPercentWell(result: Future[ItcService.Result]): Option[Double]          = serviceResult(result).map(_.maxPercentFullWell)
-  protected def imgAdu(result: Future[ItcService.Result], ccd: Int): Option[Int]              = serviceResult(result).map(_.ccd(ccd).adu)
-  protected def maxImgAdu(result: Future[ItcService.Result]): Option[Int]                     = serviceResult(result).map(_.maxAdu)
-  protected def singleSNRatio(result: Future[ItcService.Result], ccd: Int): Option[Double]    = serviceResult(result).map(_.ccd(ccd).singleSNRatio)
-  protected def maxSingleSNRatio(result: Future[ItcService.Result]): Option[Double]           = serviceResult(result).map(_.maxSingleSNRatio)
-  protected def totalSNRatio  (result: Future[ItcService.Result], ccd: Int): Option[Double]   = serviceResult(result).map(_.ccd(ccd).totalSNRatio)
-  protected def maxTotalSNRatio(result: Future[ItcService.Result]): Option[Double]            = serviceResult(result).map(_.maxTotalSNRatio)
+  private def maxR[A](result: Future[ItcService.Result], ccd: Int, f: ItcCcd => A): Option[A] =
+    serviceResult(result).flatMap(_.ccd(ccd)).map(f)
+
+  protected def peakPixelFlux(result: Future[ItcService.Result], ccd: Int): Option[Int]       = serviceResult(result).flatMap(_.peakPixelFlux(ccd))
+  protected def maxPeakPixelFlux(result: Future[ItcService.Result]): Option[Int]              = maxR(result, _.maxPeakPixelFlux)
+
+  protected def imgPercentWell(result: Future[ItcService.Result], ccd: Int): Option[Double]   = maxR(result, ccd, _.percentFullWell)
+  protected def maxImgPercentWell(result: Future[ItcService.Result]): Option[Double]          = maxR(result, _.maxPercentFullWell)
+  protected def imgAdu(result: Future[ItcService.Result], ccd: Int): Option[Int]              = maxR(result, ccd, _.adu)
+  protected def maxImgAdu(result: Future[ItcService.Result]): Option[Int]                     = maxR(result, _.maxAdu)
+  protected def singleSNRatio(result: Future[ItcService.Result], ccd: Int): Option[Double]    = maxR(result, ccd, _.singleSNRatio)
+  protected def maxSingleSNRatio(result: Future[ItcService.Result]): Option[Double]           = maxR(result, _.maxSingleSNRatio)
+  protected def totalSNRatio  (result: Future[ItcService.Result], ccd: Int): Option[Double]   = maxR(result, ccd, _.totalSNRatio)
+  protected def maxTotalSNRatio(result: Future[ItcService.Result]): Option[Double]            = maxR(result, _.maxTotalSNRatio)
 
   // ===
 

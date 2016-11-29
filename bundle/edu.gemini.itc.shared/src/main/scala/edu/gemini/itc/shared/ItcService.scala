@@ -40,21 +40,26 @@ final case class ItcCcd(
 }
 
 sealed trait ItcResult extends Serializable {
-  def ccds:                         List[ItcCcd]
+  def ccds: List[ItcCcd]
 
-  def ccd(i: Int = 0): ItcCcd            = ccds(i % ccds.length)
-  def peakPixelFlux(ccdIx: Int = 0): Int = ccd(ccdIx).peakPixelFlux.toInt
-  def maxPeakPixelFlux: Int              = ccds.map(_.peakPixelFlux).max.toInt
-  def maxAdu: Int                        = ccds.map(_.adu).max
-  def maxPercentFullWell: Double         = ccds.map(_.percentFullWell).max
-  def maxSingleSNRatio: Double           = ccds.map(_.singleSNRatio).max
-  def maxTotalSNRatio: Double            = ccds.map(_.totalSNRatio).max
+  /**
+    * Max value for a property across the CCDs
+    */
+  private def maxP[A](f: ItcCcd => A)(implicit a: scala.Ordering[A]): A = ccds.map(f).max
+
+  def ccd(i: Int = 0): Option[ItcCcd]            = ccds.index(i % ccds.length)
+  def peakPixelFlux(ccdIx: Int = 0): Option[Int] = ccd(ccdIx).map(_.peakPixelFlux.toInt)
+  def maxPeakPixelFlux: Int                      = maxP(_.peakPixelFlux).toInt
+  def maxAdu: Int                                = maxP(_.adu)
+  def maxPercentFullWell: Double                 = maxP(_.percentFullWell)
+  def maxSingleSNRatio: Double                   = maxP(_.singleSNRatio)
+  def maxTotalSNRatio: Double                    = maxP(_.totalSNRatio)
 
   val warnings: List[ItcWarning] = {
+    def compositeWarnings(i: (ItcCcd, Int)): List[ItcWarning] = i._1.warnings.map(w => ItcWarning(s"CCD ${i._2}: ${w.msg}"))
+
     def concatWarnings =
-      ccds.zipWithIndex.flatMap { case (c, i) =>
-        c.warnings.map(w => ItcWarning(s"CCD $i: ${w.msg}"))
-      }
+      ccds.zipWithIndex >>= compositeWarnings
 
     if (ccds.length > 1) concatWarnings
     else ccds.head.warnings
@@ -62,11 +67,9 @@ sealed trait ItcResult extends Serializable {
 
 }
 
-
 // === IMAGING RESULTS
 
 final case class ItcImagingResult(ccds: List[ItcCcd]) extends ItcResult
-
 
 // === SPECTROSCOPY RESULTS
 

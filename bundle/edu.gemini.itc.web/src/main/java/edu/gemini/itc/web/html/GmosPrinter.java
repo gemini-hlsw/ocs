@@ -68,8 +68,10 @@ public final class GmosPrinter extends PrinterBase {
                 printCcdTitle(instrument);
             }
             final int ccdIndex = instrument.getDetectorCcdIndex();
-            _printPeakPixelInfo(s.ccd(ccdIndex));
-            _printWarnings(s.ccd(ccdIndex).warnings());
+            if (s.ccd(ccdIndex).isDefined()) {
+                _printPeakPixelInfo(s.ccd(ccdIndex));
+                _printWarnings(s.ccd(ccdIndex).get().warnings());
+            }
         }
 
         _print("<HR align=left SIZE=3>");
@@ -124,9 +126,10 @@ public final class GmosPrinter extends PrinterBase {
 
             final int ccdIndex = ccd.getDetectorCcdIndex();
             _println(CalculatablePrinter.getTextResult(results[ccdIndex].is2nCalc(), results[ccdIndex].observation()));
-            _printPeakPixelInfo(s.ccd(ccdIndex));
-            _printWarnings(s.ccd(ccdIndex).warnings());
-
+            if (s.ccd(ccdIndex).isDefined()) {
+                _printPeakPixelInfo(s.ccd(ccdIndex));
+                _printWarnings(s.ccd(ccdIndex).get().warnings());
+            }
         }
 
         printConfiguration(results[0].parameters(), instrument);
