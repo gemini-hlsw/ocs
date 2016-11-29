@@ -2,7 +2,7 @@
 <!DOCTYPE document PUBLIC "-//Gemini Observatory//DTD for Storage of P1 and P2 Documents//EN" "http://ftp.gemini.edu/Support/xml/dtds/SpXML2.dtd">
 
 <document>
-  <container kind="program" type="Program" version="2015B-1" subtype="basic" key="d4ad9f8d-e5d1-4e36-a7c0-189f1d62531d" name="GMOS-S-BP">
+  <container kind="program" type="Program" version="2017A-1" subtype="basic" key="d4ad9f8d-e5d1-4e36-a7c0-189f1d62531d" name="GMOS-S-BP">
     <paramset name="Science Program" kind="dataObj">
       <param name="title" value="GMOS-S PHASE I/II MAPPING BPS"/>
       <param name="programMode" value="QUEUE"/>
@@ -50,10 +50,6 @@
             <param name="exposureTime" value="30.0"/>
             <param name="posAngle" value="0"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -179,10 +175,6 @@ the slit image (second step) should be left as defined at 20 seconds.
             <param name="exposureTime" value="10.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -397,10 +389,6 @@ Longslit: Twilight flat
             <param name="exposureTime" value="300.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -552,22 +540,22 @@ between the CCDs and get full wavelength coverage.
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
               <paramset name="base">
-                <param name="name" value="CuAr"/>
-                <param name="system" value="J2000"/>
-                <param name="epoch" value="2000.0" units="years"/>
-                <param name="c1" value="00:00:00.000"/>
-                <param name="c2" value="00:00:00.00"/>
-                <param name="pm1" value="0.0" units="arcsecs/year"/>
-                <param name="pm2" value="0.0" units="arcsecs/year"/>
-                <param name="parallax" value="0.0" units="arcsecs"/>
-                <param name="rv" value="0.0" units="km/sec"/>
+                <paramset name="target">
+                  <param name="name" value="CuAr"/>
+                  <param name="redshift" value="0.0"/>
+                  <param name="parallax" value="0.0"/>
+                  <paramset name="coordinates">
+                    <param name="ra" value="0.0"/>
+                    <param name="dec" value="0.0"/>
+                  </paramset>
+                  <param name="tag" value="sidereal"/>
+                </paramset>
               </paramset>
               <paramset name="guideEnv">
-                <param name="active">
-                  <value sequence="0">GMOS OIWFS</value>
-                  <value sequence="1">PWFS1</value>
-                  <value sequence="2">PWFS2</value>
-                </param>
+                <param name="primary" value="0"/>
+                <paramset name="guideGroup">
+                  <param name="tag" value="AutoDisabledTag"/>
+                </paramset>
               </paramset>
             </paramset>
           </paramset>
@@ -577,10 +565,6 @@ between the CCDs and get full wavelength coverage.
             <param name="exposureTime" value="300.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -699,10 +683,6 @@ the slit image (second step) should be left as defined at 20 seconds.
             <param name="exposureTime" value="2.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -901,10 +881,6 @@ when conditions are convenient for observing baseline standards.
             <param name="exposureTime" value="60.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -1008,22 +984,22 @@ is taken.
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
               <paramset name="base">
-                <param name="name" value="CuAr"/>
-                <param name="system" value="J2000"/>
-                <param name="epoch" value="2000.0" units="years"/>
-                <param name="c1" value="00:00:00.000"/>
-                <param name="c2" value="00:00:00.00"/>
-                <param name="pm1" value="0.0" units="arcsecs/year"/>
-                <param name="pm2" value="0.0" units="arcsecs/year"/>
-                <param name="parallax" value="0.0" units="arcsecs"/>
-                <param name="rv" value="0.0" units="km/sec"/>
+                <paramset name="target">
+                  <param name="name" value="CuAr"/>
+                  <param name="redshift" value="0.0"/>
+                  <param name="parallax" value="0.0"/>
+                  <paramset name="coordinates">
+                    <param name="ra" value="0.0"/>
+                    <param name="dec" value="0.0"/>
+                  </paramset>
+                  <param name="tag" value="sidereal"/>
+                </paramset>
               </paramset>
               <paramset name="guideEnv">
-                <param name="active">
-                  <value sequence="0">GMOS OIWFS</value>
-                  <value sequence="1">PWFS1</value>
-                  <value sequence="2">PWFS2</value>
-                </param>
+                <param name="primary" value="0"/>
+                <paramset name="guideGroup">
+                  <param name="tag" value="AutoDisabledTag"/>
+                </paramset>
               </paramset>
             </paramset>
           </paramset>
@@ -1033,10 +1009,6 @@ is taken.
             <param name="exposureTime" value="20.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -1111,22 +1083,22 @@ is taken.
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
               <paramset name="base">
-                <param name="name" value="Twilight"/>
-                <param name="system" value="J2000"/>
-                <param name="epoch" value="2000.0" units="years"/>
-                <param name="c1" value="00:00:00.000"/>
-                <param name="c2" value="00:00:00.00"/>
-                <param name="pm1" value="0.0" units="arcsecs/year"/>
-                <param name="pm2" value="0.0" units="arcsecs/year"/>
-                <param name="parallax" value="0.0" units="arcsecs"/>
-                <param name="rv" value="0.0" units="km/sec"/>
+                <paramset name="target">
+                  <param name="name" value="Twilight"/>
+                  <param name="redshift" value="0.0"/>
+                  <param name="parallax" value="0.0"/>
+                  <paramset name="coordinates">
+                    <param name="ra" value="0.0"/>
+                    <param name="dec" value="0.0"/>
+                  </paramset>
+                  <param name="tag" value="sidereal"/>
+                </paramset>
               </paramset>
               <paramset name="guideEnv">
-                <param name="active">
-                  <value sequence="0">GMOS OIWFS</value>
-                  <value sequence="1">PWFS1</value>
-                  <value sequence="2">PWFS2</value>
-                </param>
+                <param name="primary" value="0"/>
+                <paramset name="guideGroup">
+                  <param name="tag" value="AutoDisabledTag"/>
+                </paramset>
               </paramset>
             </paramset>
           </paramset>
@@ -1163,10 +1135,6 @@ The exposure is taken on the sky so the Translation stage should be
             <param name="exposureTime" value="30.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -1281,10 +1249,6 @@ the slit image (second step) should be left as defined at 20 seconds.
             <param name="exposureTime" value="30.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -1469,10 +1433,6 @@ Details:
             <param name="exposureTime" value="60.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -1767,22 +1727,22 @@ required.
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
               <paramset name="base">
-                <param name="name" value="CuAr"/>
-                <param name="system" value="J2000"/>
-                <param name="epoch" value="2000.0" units="years"/>
-                <param name="c1" value="00:00:00.000"/>
-                <param name="c2" value="00:00:00.00"/>
-                <param name="pm1" value="0.0" units="arcsecs/year"/>
-                <param name="pm2" value="0.0" units="arcsecs/year"/>
-                <param name="parallax" value="0.0" units="arcsecs"/>
-                <param name="rv" value="0.0" units="km/sec"/>
+                <paramset name="target">
+                  <param name="name" value="CuAr"/>
+                  <param name="redshift" value="0.0"/>
+                  <param name="parallax" value="0.0"/>
+                  <paramset name="coordinates">
+                    <param name="ra" value="0.0"/>
+                    <param name="dec" value="0.0"/>
+                  </paramset>
+                  <param name="tag" value="sidereal"/>
+                </paramset>
               </paramset>
               <paramset name="guideEnv">
-                <param name="active">
-                  <value sequence="0">GMOS OIWFS</value>
-                  <value sequence="1">PWFS1</value>
-                  <value sequence="2">PWFS2</value>
-                </param>
+                <param name="primary" value="0"/>
+                <paramset name="guideGroup">
+                  <param name="tag" value="AutoDisabledTag"/>
+                </paramset>
               </paramset>
             </paramset>
           </paramset>
@@ -1823,10 +1783,6 @@ wavelength coverage.
             <param name="exposureTime" value="300.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -1949,10 +1905,6 @@ closest to  the central wavelength used for the spectroscopy</value>
             <param name="exposureTime" value="2.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -2153,10 +2105,6 @@ when conditions are convenient for observing baseline standards.
             <param name="exposureTime" value="60.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -2236,22 +2184,22 @@ when conditions are convenient for observing baseline standards.
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
               <paramset name="base">
-                <param name="name" value="CuAr"/>
-                <param name="system" value="J2000"/>
-                <param name="epoch" value="2000.0" units="years"/>
-                <param name="c1" value="00:00:00.000"/>
-                <param name="c2" value="00:00:00.00"/>
-                <param name="pm1" value="0.0" units="arcsecs/year"/>
-                <param name="pm2" value="0.0" units="arcsecs/year"/>
-                <param name="parallax" value="0.0" units="arcsecs"/>
-                <param name="rv" value="0.0" units="km/sec"/>
+                <paramset name="target">
+                  <param name="name" value="CuAr"/>
+                  <param name="redshift" value="0.0"/>
+                  <param name="parallax" value="0.0"/>
+                  <paramset name="coordinates">
+                    <param name="ra" value="0.0"/>
+                    <param name="dec" value="0.0"/>
+                  </paramset>
+                  <param name="tag" value="sidereal"/>
+                </paramset>
               </paramset>
               <paramset name="guideEnv">
-                <param name="active">
-                  <value sequence="0">GMOS OIWFS</value>
-                  <value sequence="1">PWFS1</value>
-                  <value sequence="2">PWFS2</value>
-                </param>
+                <param name="primary" value="0"/>
+                <paramset name="guideGroup">
+                  <param name="tag" value="AutoDisabledTag"/>
+                </paramset>
               </paramset>
             </paramset>
           </paramset>
@@ -2292,10 +2240,6 @@ is taken.
             <param name="exposureTime" value="120.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -2370,22 +2314,22 @@ is taken.
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
               <paramset name="base">
-                <param name="name" value="Twilight"/>
-                <param name="system" value="J2000"/>
-                <param name="epoch" value="2000.0" units="years"/>
-                <param name="c1" value="00:00:00.000"/>
-                <param name="c2" value="00:00:00.00"/>
-                <param name="pm1" value="0.0" units="arcsecs/year"/>
-                <param name="pm2" value="0.0" units="arcsecs/year"/>
-                <param name="parallax" value="0.0" units="arcsecs"/>
-                <param name="rv" value="0.0" units="km/sec"/>
+                <paramset name="target">
+                  <param name="name" value="Twilight"/>
+                  <param name="redshift" value="0.0"/>
+                  <param name="parallax" value="0.0"/>
+                  <paramset name="coordinates">
+                    <param name="ra" value="0.0"/>
+                    <param name="dec" value="0.0"/>
+                  </paramset>
+                  <param name="tag" value="sidereal"/>
+                </paramset>
               </paramset>
               <paramset name="guideEnv">
-                <param name="active">
-                  <value sequence="0">GMOS OIWFS</value>
-                  <value sequence="1">PWFS1</value>
-                  <value sequence="2">PWFS2</value>
-                </param>
+                <param name="primary" value="0"/>
+                <paramset name="guideGroup">
+                  <param name="tag" value="AutoDisabledTag"/>
+                </paramset>
               </paramset>
             </paramset>
           </paramset>
@@ -2426,10 +2370,6 @@ The exposure is taken on the sky so the Translation stage should be
             <param name="exposureTime" value="30.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -2519,22 +2459,22 @@ The exposure is taken on the sky so the Translation stage should be
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
               <paramset name="base">
-                <param name="name" value="Dark"/>
-                <param name="system" value="J2000"/>
-                <param name="epoch" value="2000.0" units="years"/>
-                <param name="c1" value="00:00:00.000"/>
-                <param name="c2" value="00:00:00.00"/>
-                <param name="pm1" value="0.0" units="arcsecs/year"/>
-                <param name="pm2" value="0.0" units="arcsecs/year"/>
-                <param name="parallax" value="0.0" units="arcsecs"/>
-                <param name="rv" value="0.0" units="km/sec"/>
+                <paramset name="target">
+                  <param name="name" value="Dark"/>
+                  <param name="redshift" value="0.0"/>
+                  <param name="parallax" value="0.0"/>
+                  <paramset name="coordinates">
+                    <param name="ra" value="0.0"/>
+                    <param name="dec" value="0.0"/>
+                  </paramset>
+                  <param name="tag" value="sidereal"/>
+                </paramset>
               </paramset>
               <paramset name="guideEnv">
-                <param name="active">
-                  <value sequence="0">GMOS OIWFS</value>
-                  <value sequence="1">PWFS1</value>
-                  <value sequence="2">PWFS2</value>
-                </param>
+                <param name="primary" value="0"/>
+                <paramset name="guideGroup">
+                  <param name="tag" value="AutoDisabledTag"/>
+                </paramset>
               </paramset>
             </paramset>
           </paramset>
@@ -2585,10 +2525,6 @@ Number of N&amp;S observations is 15</value>
             <param name="exposureTime" value="60.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -2696,10 +2632,6 @@ can be submitted.</value>
             <param name="exposureTime" value="30.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -2834,10 +2766,6 @@ masks for use, with a technical limit of 99 masks).</value>
             <param name="exposureTime" value="40.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -2942,15 +2870,6 @@ for either Queue, Classical, Director's Discretionary or Science Verification pr
 PPP is the program number, and MM is the mask number (a MOS PI may design several
 masks for use, with a technical limit of 99 masks).
 
-Custom ROIs
------------
-This observation is set up to use a CUSTOM ROI where only the pixels imaging the 
-acquisition box are read out.  No other pixels are saved.  The Custom ROI cannot be 
-defined until after the mask has been designed and submitted.  The Custom ROI field
-(for up to 4 acquisiton objects currently) will be filled in by Gemini Staff.
-The Custom ROI is only used for the images when the MOS mask is in the beam.  The
-field image is read out using Full Frame.
------------
 
 
 </value>
@@ -2987,10 +2906,6 @@ gacq *filenumber*
             <param name="exposureTime" value="10.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -3008,7 +2923,7 @@ gacq *filenumber*
             <param name="posAngleConstraint" value="FIXED"/>
             <param name="stageMode" value="FOLLOW_XYZ"/>
             <param name="dtaXOffset" value="ZERO"/>
-            <param name="builtinROI" value="CUSTOM"/>
+            <param name="builtinROI" value="FULL_FRAME"/>
             <param name="useNS" value="FALSE"/>
             <param name="mosPreimaging" value="NO"/>
           </paramset>
@@ -3169,10 +3084,6 @@ masks for use, with a technical limit of 99 masks).
             <param name="exposureTime" value="300.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -3283,22 +3194,22 @@ masks for use, with a technical limit of 99 masks).
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
               <paramset name="base">
-                <param name="name" value="CuAr"/>
-                <param name="system" value="J2000"/>
-                <param name="epoch" value="2000.0" units="years"/>
-                <param name="c1" value="00:00:00.000"/>
-                <param name="c2" value="00:00:00.00"/>
-                <param name="pm1" value="0.0" units="arcsecs/year"/>
-                <param name="pm2" value="0.0" units="arcsecs/year"/>
-                <param name="parallax" value="0.0" units="arcsecs"/>
-                <param name="rv" value="0.0" units="km/sec"/>
+                <paramset name="target">
+                  <param name="name" value="CuAr"/>
+                  <param name="redshift" value="0.0"/>
+                  <param name="parallax" value="0.0"/>
+                  <paramset name="coordinates">
+                    <param name="ra" value="0.0"/>
+                    <param name="dec" value="0.0"/>
+                  </paramset>
+                  <param name="tag" value="sidereal"/>
+                </paramset>
               </paramset>
               <paramset name="guideEnv">
-                <param name="active">
-                  <value sequence="0">GMOS OIWFS</value>
-                  <value sequence="1">PWFS1</value>
-                  <value sequence="2">PWFS2</value>
-                </param>
+                <param name="primary" value="0"/>
+                <paramset name="guideGroup">
+                  <param name="tag" value="AutoDisabledTag"/>
+                </paramset>
               </paramset>
             </paramset>
           </paramset>
@@ -3342,10 +3253,6 @@ wavelength coverage.
             <param name="exposureTime" value="300.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -3431,22 +3338,22 @@ wavelength coverage.
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
               <paramset name="base">
-                <param name="name" value="Mask image"/>
-                <param name="system" value="J2000"/>
-                <param name="epoch" value="2000.0" units="years"/>
-                <param name="c1" value="00:00:00.000"/>
-                <param name="c2" value="00:00:00.00"/>
-                <param name="pm1" value="0.0" units="arcsecs/year"/>
-                <param name="pm2" value="0.0" units="arcsecs/year"/>
-                <param name="parallax" value="0.0" units="arcsecs"/>
-                <param name="rv" value="0.0" units="km/sec"/>
+                <paramset name="target">
+                  <param name="name" value="Mask image"/>
+                  <param name="redshift" value="0.0"/>
+                  <param name="parallax" value="0.0"/>
+                  <paramset name="coordinates">
+                    <param name="ra" value="0.0"/>
+                    <param name="dec" value="0.0"/>
+                  </paramset>
+                  <param name="tag" value="sidereal"/>
+                </paramset>
               </paramset>
               <paramset name="guideEnv">
-                <param name="active">
-                  <value sequence="0">GMOS OIWFS</value>
-                  <value sequence="1">PWFS1</value>
-                  <value sequence="2">PWFS2</value>
-                </param>
+                <param name="primary" value="0"/>
+                <paramset name="guideGroup">
+                  <param name="tag" value="AutoDisabledTag"/>
+                </paramset>
               </paramset>
             </paramset>
           </paramset>
@@ -3491,10 +3398,6 @@ Gemini Staff.</value>
             <param name="exposureTime" value="4.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -3574,22 +3477,22 @@ Gemini Staff.</value>
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
               <paramset name="base">
-                <param name="name" value="Twilight"/>
-                <param name="system" value="J2000"/>
-                <param name="epoch" value="2000.0" units="years"/>
-                <param name="c1" value="00:00:00.000"/>
-                <param name="c2" value="00:00:00.00"/>
-                <param name="pm1" value="0.0" units="arcsecs/year"/>
-                <param name="pm2" value="0.0" units="arcsecs/year"/>
-                <param name="parallax" value="0.0" units="arcsecs"/>
-                <param name="rv" value="0.0" units="km/sec"/>
+                <paramset name="target">
+                  <param name="name" value="Twilight"/>
+                  <param name="redshift" value="0.0"/>
+                  <param name="parallax" value="0.0"/>
+                  <paramset name="coordinates">
+                    <param name="ra" value="0.0"/>
+                    <param name="dec" value="0.0"/>
+                  </paramset>
+                  <param name="tag" value="sidereal"/>
+                </paramset>
               </paramset>
               <paramset name="guideEnv">
-                <param name="active">
-                  <value sequence="0">GMOS OIWFS</value>
-                  <value sequence="1">PWFS1</value>
-                  <value sequence="2">PWFS2</value>
-                </param>
+                <param name="primary" value="0"/>
+                <paramset name="guideGroup">
+                  <param name="tag" value="AutoDisabledTag"/>
+                </paramset>
               </paramset>
             </paramset>
           </paramset>
@@ -3629,10 +3532,6 @@ The exposure is taken on the sky so the Translation stage should be
             <param name="exposureTime" value="30.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -3746,10 +3645,6 @@ the slit image (second step) should be left as defined at 10 seconds.</value>
             <param name="exposureTime" value="2.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -3963,10 +3858,6 @@ it possible to order the exposures as follows:
             <param name="exposureTime" value="90.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -4087,22 +3978,22 @@ it possible to order the exposures as follows:
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
               <paramset name="base">
-                <param name="name" value="CuAr"/>
-                <param name="system" value="J2000"/>
-                <param name="epoch" value="2000.0" units="years"/>
-                <param name="c1" value="00:00:00.000"/>
-                <param name="c2" value="00:00:00.00"/>
-                <param name="pm1" value="0.0" units="arcsecs/year"/>
-                <param name="pm2" value="0.0" units="arcsecs/year"/>
-                <param name="parallax" value="0.0" units="arcsecs"/>
-                <param name="rv" value="0.0" units="km/sec"/>
+                <paramset name="target">
+                  <param name="name" value="CuAr"/>
+                  <param name="redshift" value="0.0"/>
+                  <param name="parallax" value="0.0"/>
+                  <paramset name="coordinates">
+                    <param name="ra" value="0.0"/>
+                    <param name="dec" value="0.0"/>
+                  </paramset>
+                  <param name="tag" value="sidereal"/>
+                </paramset>
               </paramset>
               <paramset name="guideEnv">
-                <param name="active">
-                  <value sequence="0">GMOS OIWFS</value>
-                  <value sequence="1">PWFS1</value>
-                  <value sequence="2">PWFS2</value>
-                </param>
+                <param name="primary" value="0"/>
+                <paramset name="guideGroup">
+                  <param name="tag" value="AutoDisabledTag"/>
+                </paramset>
               </paramset>
             </paramset>
           </paramset>
@@ -4145,10 +4036,6 @@ is taken.
             <param name="exposureTime" value="300.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -4240,10 +4127,6 @@ is taken.
             <param name="exposureTime" value="30.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -4365,10 +4248,6 @@ masks for use, with a technical limit of 99 masks).</value>
             <param name="exposureTime" value="10.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -4426,15 +4305,7 @@ for either Queue, Classical, Director's Discretionary or Science Verification pr
 PPP is the program number, and MM is the mask number (a MOS PI may design several
 masks for use, with a technical limit of 99 masks).
 
-Custom ROIs
------------
-This observation is set up to use a CUSTOM ROI where only the pixels imaging the 
-acquisition box are read out.  No other pixels are saved.  The Custom ROI cannot be 
-defined until after the mask has been designed and submitted.  The Custom ROI field
-(for up to 4 acquisiton objects currently) will be filled in by Gemini Staff.
-The Custom ROI is only used for the images when the MOS mask is in the beam.  The
-field image is read out using Full Frame.
------------
+
 
 
 </value>
@@ -4653,10 +4524,6 @@ masks for use, with a technical limit of 99 masks).
             <param name="exposureTime" value="60.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -4908,22 +4775,22 @@ masks for use, with a technical limit of 99 masks).
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
               <paramset name="base">
-                <param name="name" value="Dark"/>
-                <param name="system" value="J2000"/>
-                <param name="epoch" value="2000.0" units="years"/>
-                <param name="c1" value="00:00:00.000"/>
-                <param name="c2" value="00:00:00.00"/>
-                <param name="pm1" value="0.0" units="arcsecs/year"/>
-                <param name="pm2" value="0.0" units="arcsecs/year"/>
-                <param name="parallax" value="0.0" units="arcsecs"/>
-                <param name="rv" value="0.0" units="km/sec"/>
+                <paramset name="target">
+                  <param name="name" value="Dark"/>
+                  <param name="redshift" value="0.0"/>
+                  <param name="parallax" value="0.0"/>
+                  <paramset name="coordinates">
+                    <param name="ra" value="0.0"/>
+                    <param name="dec" value="0.0"/>
+                  </paramset>
+                  <param name="tag" value="sidereal"/>
+                </paramset>
               </paramset>
               <paramset name="guideEnv">
-                <param name="active">
-                  <value sequence="0">GMOS OIWFS</value>
-                  <value sequence="1">PWFS1</value>
-                  <value sequence="2">PWFS2</value>
-                </param>
+                <param name="primary" value="0"/>
+                <paramset name="guideGroup">
+                  <param name="tag" value="AutoDisabledTag"/>
+                </paramset>
               </paramset>
             </paramset>
           </paramset>
@@ -4975,10 +4842,6 @@ closed for bad weather.</value>
             <param name="exposureTime" value="60.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -5069,22 +4932,22 @@ closed for bad weather.</value>
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
               <paramset name="base">
-                <param name="name" value="CuAr"/>
-                <param name="system" value="J2000"/>
-                <param name="epoch" value="2000.0" units="years"/>
-                <param name="c1" value="00:00:00.000"/>
-                <param name="c2" value="00:00:00.00"/>
-                <param name="pm1" value="0.0" units="arcsecs/year"/>
-                <param name="pm2" value="0.0" units="arcsecs/year"/>
-                <param name="parallax" value="0.0" units="arcsecs"/>
-                <param name="rv" value="0.0" units="km/sec"/>
+                <paramset name="target">
+                  <param name="name" value="CuAr"/>
+                  <param name="redshift" value="0.0"/>
+                  <param name="parallax" value="0.0"/>
+                  <paramset name="coordinates">
+                    <param name="ra" value="0.0"/>
+                    <param name="dec" value="0.0"/>
+                  </paramset>
+                  <param name="tag" value="sidereal"/>
+                </paramset>
               </paramset>
               <paramset name="guideEnv">
-                <param name="active">
-                  <value sequence="0">GMOS OIWFS</value>
-                  <value sequence="1">PWFS1</value>
-                  <value sequence="2">PWFS2</value>
-                </param>
+                <param name="primary" value="0"/>
+                <paramset name="guideGroup">
+                  <param name="tag" value="AutoDisabledTag"/>
+                </paramset>
               </paramset>
             </paramset>
           </paramset>
@@ -5129,10 +4992,6 @@ wavelength coverage.
             <param name="exposureTime" value="300.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -5218,22 +5077,22 @@ wavelength coverage.
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
               <paramset name="base">
-                <param name="name" value="Twilight"/>
-                <param name="system" value="J2000"/>
-                <param name="epoch" value="2000.0" units="years"/>
-                <param name="c1" value="00:00:00.000"/>
-                <param name="c2" value="00:00:00.00"/>
-                <param name="pm1" value="0.0" units="arcsecs/year"/>
-                <param name="pm2" value="0.0" units="arcsecs/year"/>
-                <param name="parallax" value="0.0" units="arcsecs"/>
-                <param name="rv" value="0.0" units="km/sec"/>
+                <paramset name="target">
+                  <param name="name" value="Twilight"/>
+                  <param name="redshift" value="0.0"/>
+                  <param name="parallax" value="0.0"/>
+                  <paramset name="coordinates">
+                    <param name="ra" value="0.0"/>
+                    <param name="dec" value="0.0"/>
+                  </paramset>
+                  <param name="tag" value="sidereal"/>
+                </paramset>
               </paramset>
               <paramset name="guideEnv">
-                <param name="active">
-                  <value sequence="0">GMOS OIWFS</value>
-                  <value sequence="1">PWFS1</value>
-                  <value sequence="2">PWFS2</value>
-                </param>
+                <param name="primary" value="0"/>
+                <paramset name="guideGroup">
+                  <param name="tag" value="AutoDisabledTag"/>
+                </paramset>
               </paramset>
             </paramset>
           </paramset>
@@ -5273,10 +5132,6 @@ The exposure is taken on the sky so the Translation stage should be
             <param name="exposureTime" value="30.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -5389,10 +5244,6 @@ the slit image (second step) should be left as defined at 10 seconds.</value>
             <param name="exposureTime" value="2.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -5604,10 +5455,6 @@ it possible to order the exposures as follows:
             <param name="exposureTime" value="90.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -5728,22 +5575,22 @@ it possible to order the exposures as follows:
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
               <paramset name="base">
-                <param name="name" value="CuAr"/>
-                <param name="system" value="J2000"/>
-                <param name="epoch" value="2000.0" units="years"/>
-                <param name="c1" value="00:00:00.000"/>
-                <param name="c2" value="00:00:00.00"/>
-                <param name="pm1" value="0.0" units="arcsecs/year"/>
-                <param name="pm2" value="0.0" units="arcsecs/year"/>
-                <param name="parallax" value="0.0" units="arcsecs"/>
-                <param name="rv" value="0.0" units="km/sec"/>
+                <paramset name="target">
+                  <param name="name" value="CuAr"/>
+                  <param name="redshift" value="0.0"/>
+                  <param name="parallax" value="0.0"/>
+                  <paramset name="coordinates">
+                    <param name="ra" value="0.0"/>
+                    <param name="dec" value="0.0"/>
+                  </paramset>
+                  <param name="tag" value="sidereal"/>
+                </paramset>
               </paramset>
               <paramset name="guideEnv">
-                <param name="active">
-                  <value sequence="0">GMOS OIWFS</value>
-                  <value sequence="1">PWFS1</value>
-                  <value sequence="2">PWFS2</value>
-                </param>
+                <param name="primary" value="0"/>
+                <paramset name="guideGroup">
+                  <param name="tag" value="AutoDisabledTag"/>
+                </paramset>
               </paramset>
             </paramset>
           </paramset>
@@ -5785,10 +5632,6 @@ is taken.
             <param name="exposureTime" value="300.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -5903,10 +5746,6 @@ For help setting up the acquistion, see the Description note for the "Longslit A
             <param name="exposureTime" value="15.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -6027,10 +5866,6 @@ For help setting up the acquistion, see the Description note for the "Longslit A
             <param name="exposureTime" value="1200.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -6195,22 +6030,22 @@ For help setting up the acquistion, see the Description note for the "Longslit A
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
               <paramset name="base">
-                <param name="name" value="CuAr"/>
-                <param name="system" value="J2000"/>
-                <param name="epoch" value="2000.0" units="years"/>
-                <param name="c1" value="00:00:00.000"/>
-                <param name="c2" value="00:00:00.00"/>
-                <param name="pm1" value="0.0" units="arcsecs/year"/>
-                <param name="pm2" value="0.0" units="arcsecs/year"/>
-                <param name="parallax" value="0.0" units="arcsecs"/>
-                <param name="rv" value="0.0" units="km/sec"/>
+                <paramset name="target">
+                  <param name="name" value="CuAr"/>
+                  <param name="redshift" value="0.0"/>
+                  <param name="parallax" value="0.0"/>
+                  <paramset name="coordinates">
+                    <param name="ra" value="0.0"/>
+                    <param name="dec" value="0.0"/>
+                  </paramset>
+                  <param name="tag" value="sidereal"/>
+                </paramset>
               </paramset>
               <paramset name="guideEnv">
-                <param name="active">
-                  <value sequence="0">GMOS OIWFS</value>
-                  <value sequence="1">PWFS1</value>
-                  <value sequence="2">PWFS2</value>
-                </param>
+                <param name="primary" value="0"/>
+                <paramset name="guideGroup">
+                  <param name="tag" value="AutoDisabledTag"/>
+                </paramset>
               </paramset>
             </paramset>
           </paramset>
@@ -6243,10 +6078,6 @@ The readout is "fast" in order to save time.
             <param name="exposureTime" value="900.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -6329,22 +6160,22 @@ The readout is "fast" in order to save time.
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
               <paramset name="base">
-                <param name="name" value="Twilight"/>
-                <param name="system" value="J2000"/>
-                <param name="epoch" value="2000.0" units="years"/>
-                <param name="c1" value="00:00:00.000"/>
-                <param name="c2" value="00:00:00.00"/>
-                <param name="pm1" value="0.0" units="arcsecs/year"/>
-                <param name="pm2" value="0.0" units="arcsecs/year"/>
-                <param name="parallax" value="0.0" units="arcsecs"/>
-                <param name="rv" value="0.0" units="km/sec"/>
+                <paramset name="target">
+                  <param name="name" value="Twilight"/>
+                  <param name="redshift" value="0.0"/>
+                  <param name="parallax" value="0.0"/>
+                  <paramset name="coordinates">
+                    <param name="ra" value="0.0"/>
+                    <param name="dec" value="0.0"/>
+                  </paramset>
+                  <param name="tag" value="sidereal"/>
+                </paramset>
               </paramset>
               <paramset name="guideEnv">
-                <param name="active">
-                  <value sequence="0">GMOS OIWFS</value>
-                  <value sequence="1">PWFS1</value>
-                  <value sequence="2">PWFS2</value>
-                </param>
+                <param name="primary" value="0"/>
+                <paramset name="guideGroup">
+                  <param name="tag" value="AutoDisabledTag"/>
+                </paramset>
               </paramset>
             </paramset>
           </paramset>
@@ -6379,10 +6210,6 @@ The exposure is taken on the sky so the Translation stage should be
             <param name="exposureTime" value="60.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -6484,22 +6311,22 @@ on the side-looking ISS port.
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
               <paramset name="base">
-                <param name="name" value="CuAr"/>
-                <param name="system" value="J2000"/>
-                <param name="epoch" value="2000.0" units="years"/>
-                <param name="c1" value="00:00:00.000"/>
-                <param name="c2" value="00:00:00.00"/>
-                <param name="pm1" value="0.0" units="arcsecs/year"/>
-                <param name="pm2" value="0.0" units="arcsecs/year"/>
-                <param name="parallax" value="0.0" units="arcsecs"/>
-                <param name="rv" value="0.0" units="km/sec"/>
+                <paramset name="target">
+                  <param name="name" value="CuAr"/>
+                  <param name="redshift" value="0.0"/>
+                  <param name="parallax" value="0.0"/>
+                  <paramset name="coordinates">
+                    <param name="ra" value="0.0"/>
+                    <param name="dec" value="0.0"/>
+                  </paramset>
+                  <param name="tag" value="sidereal"/>
+                </paramset>
               </paramset>
               <paramset name="guideEnv">
-                <param name="active">
-                  <value sequence="0">GMOS OIWFS</value>
-                  <value sequence="1">PWFS1</value>
-                  <value sequence="2">PWFS2</value>
-                </param>
+                <param name="primary" value="0"/>
+                <paramset name="guideGroup">
+                  <param name="tag" value="AutoDisabledTag"/>
+                </paramset>
               </paramset>
             </paramset>
           </paramset>
@@ -6509,10 +6336,6 @@ on the side-looking ISS port.
             <param name="exposureTime" value="300.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -6617,10 +6440,6 @@ the slit image (second step) should be left as defined at 10 seconds.</value>
             <param name="exposureTime" value="2.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -6779,10 +6598,6 @@ it possible to order the exposures as follows:
             <param name="exposureTime" value="300.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -6899,10 +6714,6 @@ For help setting up the acquistion, see the Description note for the "Longslit A
             <param name="exposureTime" value="15.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -7049,10 +6860,6 @@ Assumed Conditions: IQ=70%, CC=50%, SB=50%, WV=Any (good IQ, photometric, dark)<
             <param name="exposureTime" value="60.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -7161,22 +6968,22 @@ Assumed Conditions: IQ=70%, CC=50%, SB=50%, WV=Any (good IQ, photometric, dark)<
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
               <paramset name="base">
-                <param name="name" value="CuAr"/>
-                <param name="system" value="J2000"/>
-                <param name="epoch" value="2000.0" units="years"/>
-                <param name="c1" value="00:00:00.000"/>
-                <param name="c2" value="00:00:00.00"/>
-                <param name="pm1" value="0.0" units="arcsecs/year"/>
-                <param name="pm2" value="0.0" units="arcsecs/year"/>
-                <param name="parallax" value="0.0" units="arcsecs"/>
-                <param name="rv" value="0.0" units="km/sec"/>
+                <paramset name="target">
+                  <param name="name" value="CuAr"/>
+                  <param name="redshift" value="0.0"/>
+                  <param name="parallax" value="0.0"/>
+                  <paramset name="coordinates">
+                    <param name="ra" value="0.0"/>
+                    <param name="dec" value="0.0"/>
+                  </paramset>
+                  <param name="tag" value="sidereal"/>
+                </paramset>
               </paramset>
               <paramset name="guideEnv">
-                <param name="active">
-                  <value sequence="0">GMOS OIWFS</value>
-                  <value sequence="1">PWFS1</value>
-                  <value sequence="2">PWFS2</value>
-                </param>
+                <param name="primary" value="0"/>
+                <paramset name="guideGroup">
+                  <param name="tag" value="AutoDisabledTag"/>
+                </paramset>
               </paramset>
             </paramset>
           </paramset>
@@ -7209,10 +7016,6 @@ The readout is "fast" in order to save time.
             <param name="exposureTime" value="300.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -7295,22 +7098,22 @@ The readout is "fast" in order to save time.
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
               <paramset name="base">
-                <param name="name" value="Dark"/>
-                <param name="system" value="J2000"/>
-                <param name="epoch" value="2000.0" units="years"/>
-                <param name="c1" value="00:00:00.000"/>
-                <param name="c2" value="00:00:00.00"/>
-                <param name="pm1" value="0.0" units="milli-arcsecs/year"/>
-                <param name="pm2" value="0.0" units="milli-arcsecs/year"/>
-                <param name="parallax" value="0.0" units="arcsecs"/>
-                <param name="rv" value="0.0" units="km/sec"/>
+                <paramset name="target">
+                  <param name="name" value="Dark"/>
+                  <param name="redshift" value="0.0"/>
+                  <param name="parallax" value="0.0"/>
+                  <paramset name="coordinates">
+                    <param name="ra" value="0.0"/>
+                    <param name="dec" value="0.0"/>
+                  </paramset>
+                  <param name="tag" value="sidereal"/>
+                </paramset>
               </paramset>
               <paramset name="guideEnv">
-                <param name="active">
-                  <value sequence="0">GMOS OIWFS</value>
-                  <value sequence="1">PWFS1</value>
-                  <value sequence="2">PWFS2</value>
-                </param>
+                <param name="primary" value="0"/>
+                <paramset name="guideGroup">
+                  <param name="tag" value="AutoDisabledTag"/>
+                </paramset>
               </paramset>
             </paramset>
           </paramset>
@@ -7347,10 +7150,6 @@ Number of Nod &amp; Shuffle observations is set to 15.</value>
             <param name="exposureTime" value="60.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -7453,22 +7252,22 @@ Number of Nod &amp; Shuffle observations is set to 15.</value>
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
               <paramset name="base">
-                <param name="name" value="Twilight"/>
-                <param name="system" value="J2000"/>
-                <param name="epoch" value="2000.0" units="years"/>
-                <param name="c1" value="00:00:00.000"/>
-                <param name="c2" value="00:00:00.00"/>
-                <param name="pm1" value="0.0" units="arcsecs/year"/>
-                <param name="pm2" value="0.0" units="arcsecs/year"/>
-                <param name="parallax" value="0.0" units="arcsecs"/>
-                <param name="rv" value="0.0" units="km/sec"/>
+                <paramset name="target">
+                  <param name="name" value="Twilight"/>
+                  <param name="redshift" value="0.0"/>
+                  <param name="parallax" value="0.0"/>
+                  <paramset name="coordinates">
+                    <param name="ra" value="0.0"/>
+                    <param name="dec" value="0.0"/>
+                  </paramset>
+                  <param name="tag" value="sidereal"/>
+                </paramset>
               </paramset>
               <paramset name="guideEnv">
-                <param name="active">
-                  <value sequence="0">GMOS OIWFS</value>
-                  <value sequence="1">PWFS1</value>
-                  <value sequence="2">PWFS2</value>
-                </param>
+                <param name="primary" value="0"/>
+                <paramset name="guideGroup">
+                  <param name="tag" value="AutoDisabledTag"/>
+                </paramset>
               </paramset>
             </paramset>
           </paramset>
@@ -7506,10 +7305,6 @@ The exposure is taken on the sky so the Translation stage should be
             <param name="exposureTime" value="60.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -7587,22 +7382,22 @@ The exposure is taken on the sky so the Translation stage should be
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
               <paramset name="base">
-                <param name="name" value="CuAr"/>
-                <param name="system" value="J2000"/>
-                <param name="epoch" value="2000.0" units="years"/>
-                <param name="c1" value="00:00:00.000"/>
-                <param name="c2" value="00:00:00.00"/>
-                <param name="pm1" value="0.0" units="arcsecs/year"/>
-                <param name="pm2" value="0.0" units="arcsecs/year"/>
-                <param name="parallax" value="0.0" units="arcsecs"/>
-                <param name="rv" value="0.0" units="km/sec"/>
+                <paramset name="target">
+                  <param name="name" value="CuAr"/>
+                  <param name="redshift" value="0.0"/>
+                  <param name="parallax" value="0.0"/>
+                  <paramset name="coordinates">
+                    <param name="ra" value="0.0"/>
+                    <param name="dec" value="0.0"/>
+                  </paramset>
+                  <param name="tag" value="sidereal"/>
+                </paramset>
               </paramset>
               <paramset name="guideEnv">
-                <param name="active">
-                  <value sequence="0">GMOS OIWFS</value>
-                  <value sequence="1">PWFS1</value>
-                  <value sequence="2">PWFS2</value>
-                </param>
+                <param name="primary" value="0"/>
+                <paramset name="guideGroup">
+                  <param name="tag" value="AutoDisabledTag"/>
+                </paramset>
               </paramset>
             </paramset>
           </paramset>
@@ -7637,10 +7432,6 @@ the CCDs and get full  wavelength coverage.
             <param name="exposureTime" value="300.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -7746,10 +7537,6 @@ the slit image (second step) should be left as defined at 10 seconds.</value>
             <param name="exposureTime" value="2.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -7909,10 +7696,6 @@ it possible to order the exposures as follows:
             <param name="exposureTime" value="120.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -8507,6 +8290,7 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="d528b9a9-c651-428d-ba9b-e39a8c230fe7"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+      <param name="75b50baf-18bb-4566-9c51-8150bc13dc24" value="3"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="5acf2508-b3a7-480b-9ab4-9b18eb99c319"/>
@@ -8527,6 +8311,7 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="3646c653-109b-4673-a142-b42038ae0258"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+      <param name="75b50baf-18bb-4566-9c51-8150bc13dc24" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="9e62a51f-470f-4540-bc01-3244686294f1"/>
@@ -9777,6 +9562,7 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="ccd878e1-f223-4a88-9eb9-e19e3e80a8a1"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+      <param name="75b50baf-18bb-4566-9c51-8150bc13dc24" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="9f7813a0-617e-46fb-b939-f02bf7c656c4"/>
