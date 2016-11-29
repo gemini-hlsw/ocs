@@ -12,7 +12,7 @@ import edu.gemini.spModel.gemini.altair.{AltairParams, InstAltair}
 import edu.gemini.spModel.gemini.obscomp.{SPProgram, SPSiteQuality}
 import edu.gemini.spModel.gemini.obscomp.SPProgram.Active
 import edu.gemini.spModel.gemini.phase1.GsaPhase1Data
-import edu.gemini.spModel.obs.{ObsClassService, ObsTargetCalculatorService, ObservationStatus, SPObservation}
+import edu.gemini.spModel.obs.{ObsClassService, ObsTimesService, ObservationStatus, SPObservation}
 import edu.gemini.spModel.obsclass.ObsClass
 import edu.gemini.spModel.obscomp.SPInstObsComp
 import edu.gemini.spModel.obslog.ObsLog
@@ -168,7 +168,7 @@ object LchQueryParam {
 
     // Remaining time in ms.
     def remainingTime: Long =
-      prog.getAllObservations.asScala.map(ObsTargetCalculatorService.calculateRemainingTime).sum
+      ObsTimesService.getRemainingProgramTime(prog)
   }
 
 

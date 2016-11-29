@@ -1,9 +1,14 @@
 package edu.gemini.spModel.obs;
 
+import edu.gemini.pot.sp.ISPProgram;
+import edu.gemini.shared.util.TimeValue;
+import edu.gemini.shared.util.immutable.ImOption;
+import edu.gemini.spModel.gemini.obscomp.SPProgram;
 import edu.gemini.spModel.obsclass.ObsClass;
 import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.pot.sp.ISPObservationContainer;
 import edu.gemini.spModel.obslog.ObsLog;
+import edu.gemini.spModel.time.ChargeClass;
 import edu.gemini.spModel.time.ObsTimeCharges;
 import edu.gemini.spModel.time.ObsTimes;
 
@@ -99,5 +104,18 @@ public final class ObsTimesService {
         }
 
         return new ObsTimes(elapsedTime, charges);
+    }
+
+    /**
+     * Gets the remaining time in ms for the program, which is the awarded time minus the program time,
+     * i.e. the corrected time across the observations.
+     */
+    public static long getRemainingProgramTime(final ISPProgram prog) {
+        final long awarded = ImOption.apply(prog.getDataObject()).
+                map(dataObj -> ((SPProgram)dataObj).getAwardedTime()).
+                getOrElse(TimeValue.ZERO_HOURS).
+                getMilliseconds();
+        final long progTime = getCorrectedObsTimes(prog).getTimeCharges().getTime(ChargeClass.PROGRAM);
+        return awarded - progTime;
     }
 }
