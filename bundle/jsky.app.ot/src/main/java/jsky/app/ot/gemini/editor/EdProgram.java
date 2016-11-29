@@ -1,13 +1,10 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: EdProgram.java 47001 2012-07-26 19:40:02Z swalker $
-//
 package jsky.app.ot.gemini.editor;
 
 import edu.gemini.pot.sp.ISPProgram;
-import edu.gemini.spModel.core.Affiliate;
+import edu.gemini.shared.util.immutable.ImOption;
+import edu.gemini.shared.util.immutable.None;
+import edu.gemini.shared.util.immutable.Option;
+import edu.gemini.shared.util.immutable.Some;
 import edu.gemini.spModel.core.SPProgramID;
 import edu.gemini.shared.util.TimeValue;
 import edu.gemini.spModel.data.YesNoType;
@@ -15,10 +12,7 @@ import edu.gemini.spModel.gemini.obscomp.SPProgram;
 import edu.gemini.spModel.obs.ObsTimesService;
 import edu.gemini.spModel.obs.plannedtime.PlannedTimeSummary;
 import edu.gemini.spModel.obs.plannedtime.PlannedTimeSummaryService;
-import edu.gemini.spModel.time.ChargeClass;
-import edu.gemini.spModel.time.ObsTimeCharges;
-import edu.gemini.spModel.time.ObsTimes;
-import edu.gemini.spModel.time.TimeAmountFormatter;
+import edu.gemini.spModel.time.*;
 import edu.gemini.spModel.too.TooType;
 import jsky.app.ot.OTOptions;
 import jsky.app.ot.StaffBean;
@@ -30,28 +24,25 @@ import jsky.util.gui.DialogUtil;
 import jsky.util.gui.TextBoxWidget;
 import jsky.util.gui.TextBoxWidgetWatcher;
 
-import javax.swing.JPanel;
-import javax.swing.JTable;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import java.awt.Color;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  * This is the editor for the Science Program component.
  */
-public final class EdProgram extends OtItemEditor<ISPProgram, SPProgram> implements jsky.util.gui.TextBoxWidgetWatcher, ItemListener {
-
+public final class EdProgram extends OtItemEditor<ISPProgram, SPProgram> implements TextBoxWidgetWatcher {
     private static final Logger LOGGER = Logger.getLogger(EdProgram.class.getName());
-    // table column indexes (keep in sync with _tableHead below)
+
+    // String representation in HMS of a time of zero.
+    private static String ZERO_TIME_STRING = TimeAmountFormatter.getHMSFormat(0);
 
     // the GUI layout panel
     final ProgramForm _w;
+
     private final AuxFileEditor _edAux;
+
 
     /**
      * The constructor initializes the user interface.
@@ -62,11 +53,11 @@ public final class EdProgram extends OtItemEditor<ISPProgram, SPProgram> impleme
 
         _w.contactBox.setForeground(Color.black);
 
-        _w.titleBox.addWatcher(this);
-        _w.firstNameBox.addWatcher(this);
-        _w.lastNameBox.addWatcher(this);
-        _w.emailBox.addWatcher(this);
-        _w.phoneBox.addWatcher(this);
+        _w.titleBox.     addWatcher(this);
+        _w.firstNameBox. addWatcher(this);
+        _w.lastNameBox.  addWatcher(this);
+        _w.emailBox.     addWatcher(this);
+        _w.phoneBox.     addWatcher(this);
         _w.ngoContactBox.addWatcher(this);
 
         // add menu choices
@@ -75,15 +66,16 @@ public final class EdProgram extends OtItemEditor<ISPProgram, SPProgram> impleme
         _w.historyTable.setBackground(_w.getBackground());
         _w.historyTable.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
 
-        _w.activeCheckBox.addItemListener(this);
-        _w.completedCheckBox.addItemListener(this);
+        _w.activeCheckBox.addItemListener(e ->
+                getDataObject().setActive(_w.activeCheckBox.isSelected() ? SPProgram.Active.YES : SPProgram.Active.NO));
+        _w.completedCheckBox.addItemListener(e -> getDataObject().setCompleted(_w.completedCheckBox.isSelected()));
+
         adjustStaffOnlyFields(OTOptions.isStaffGlobally());
-        StaffBean.addPropertyChangeListener(new PropertyChangeListener() {
-            @Override public void propertyChange(PropertyChangeEvent evt) {
-                adjustStaffOnlyFields(OTOptions.isStaff(getProgram().getProgramID()));
-            }
-        });
-        _w.notifyPiCheckBox.addItemListener(this);
+        StaffBean.addPropertyChangeListener(evt ->
+                adjustStaffOnlyFields(OTOptions.isStaff(getProgram().getProgramID())));
+
+        _w.notifyPiCheckBox.addItemListener(e ->
+                getDataObject().setNotifyPi(_w.notifyPiCheckBox.isSelected() ? YesNoType.YES : YesNoType.NO));
 
         // override green theme for value labels
         _w.totalPlannedPiTime.setForeground(Color.black);
@@ -147,17 +139,19 @@ public final class EdProgram extends OtItemEditor<ISPProgram, SPProgram> impleme
         // is changed. If the user didn't press Apply before selecting the program
         // node, we may need to give give the events a chance to be handled, to make
         // sure this value is updated before it is displayed.
-        SwingUtilities.invokeLater(() -> _updateTimes());
+        SwingUtilities.invokeLater(this::_updateTimes);
     }
 
     private SPProgramID _showProgId() {
 
         final StringBuilder buf = new StringBuilder();
+
         final SPProgramID spProgID = getNode().getProgramID();
-        String idStr = null;
-        if (spProgID != null) idStr = spProgID.stringValue();
-        if ((idStr == null) || "".equals(idStr.trim())) idStr = "none";
-        buf.append(idStr.trim()).append(" ");
+        final String progIdStr = ImOption.apply(getNode().getProgramID()).
+                map(id -> id.toString().trim()).
+                filter(idStr -> !("".equals(idStr))).
+                getOrElse("none");
+        buf.append(progIdStr).append(" ");
 
         buf.append("(");
         if (getDataObject().getProgramMode() == SPProgram.ProgramMode.QUEUE) {
@@ -166,7 +160,7 @@ public final class EdProgram extends OtItemEditor<ISPProgram, SPProgram> impleme
             try {
                 final Integer i = Integer.parseInt(queueBand);
                 buf.append(", Band ").append(i);
-            } catch (Exception ex) {
+            } catch (final Exception ex) {
                 // ignore
             }
         } else {
@@ -199,27 +193,18 @@ public final class EdProgram extends OtItemEditor<ISPProgram, SPProgram> impleme
     private void _showPiInfo() {
         final SPProgram.PIInfo piInfo = getDataObject().getPIInfo();
         _w.firstNameBox.setText(piInfo.getFirstName());
-        _w.lastNameBox.setText(piInfo.getLastName());
-        _w.emailBox.setText(piInfo.getEmail());
-        _w.phoneBox.setText(piInfo.getPhone());
+        _w.lastNameBox. setText(piInfo.getLastName());
+        _w.emailBox.    setText(piInfo.getEmail());
+        _w.phoneBox.    setText(piInfo.getPhone());
 
-        final Affiliate affiliate = piInfo.getAffiliate();
-        if (affiliate != null) {
-            _w.affiliationBox.setText(affiliate.displayValue);
-        } else {
-            _w.affiliationBox.setText("None");
-        }
-
+        final String affiliateStr = ImOption.apply(piInfo.getAffiliate()).map(a -> a.displayValue).getOrElse("None");
+        _w.affiliationBox.setText(affiliateStr);
     }
 
     private void _showTitle() {
-        final String val = getDataObject().getTitle();
-        if (val == null) {
-            _w.titleBox.setText("");
-        } else {
-            _w.titleBox.setText(val);
-            _w.titleBox.setCaretPosition(0);
-        }
+        final String title = ImOption.apply(getDataObject().getTitle()).getOrElse("");
+        _w.titleBox.setText(title);
+        _w.titleBox.setCaretPosition(0);
     }
 
 
@@ -229,128 +214,80 @@ public final class EdProgram extends OtItemEditor<ISPProgram, SPProgram> impleme
             if (Integer.parseInt(getDataObject().getQueueBand()) == 1) {
                 return getDataObject().getRolloverStatus();
             }
-        } catch (NumberFormatException nfe) {
-            // this is ok .. blank in new programs, etc.
-        } catch (Exception random) {
-            // we don't want the lack of rollover info to be an issue
+        } catch (final Exception e) {
+            // If a number format exception (blank in new programs), ignore.
+            // If another exception, we don't want the lack of rollover info to be an issue.
+            // This is expected, as the value will be blank in new programs.
         }
         return false;
     }
 
-//    // Update the history table from the data object
-//    private void _updateHistoryTable() {
-//        final Vector<Vector<String>> tableRows = new Vector<Vector<String>>();
-//        final HistoryList l = getDataObject().getHistoryList();
-//        final Iterator it = l.iterator();
-//        while (it.hasNext()) {
-//            final HistoryList.HistoryListItem item = (HistoryList.HistoryListItem) it.next();
-//            final long time = item.getTime();
-//            final ObsEventMsg event = item.getEvent();
-//            final String message = item.getMessage();
-//            final Vector<String> row = new Vector<String>();
-//            row.add(event.toString());
-//            row.add(DateUtil.formatUTC(time));
-//            row.add(message);
-//            tableRows.add(row);
-//        }
-//
-//        final DefaultTableModel model = new DefaultTableModel(tableRows, _historyTableHead) {
-//            public boolean isCellEditable(int row, int column) {
-//                return false;
-//            }
-//        };
-//        _w.historyTable.setModel(model);
-//        _setColumnWidths();
-//    }
 
+    // Auxiliary method to retrieve the minimum time in hours.
+    private Option<Double> getMinimumTimeInHours() {
+        try {
+            if (Integer.parseInt(getDataObject().getQueueBand()) == 3)
+                return new Some<>(getDataObject().getMinimumTime().convertTimeAmountTo(TimeValue.Units.hours));
+        } catch (final NumberFormatException nfe) {
+            // This is expected, as the value will be blank in new programs.
+        }
+        return None.instance();
+    }
+
+
+    // Auxiliary methods to easily set time labels in the form.
+    private static void setTimeLabel(final long time, final JLabel timeLabel) {
+        final String timeStr = time == 0 ? ZERO_TIME_STRING : TimeAmountFormatter.getHMSFormat(time);
+        timeLabel.setText(timeStr);
+    }
+    private static void setTimeLabel(final double time, final JLabel timeLabel) {
+        final String timeStr = time == 0d ? ZERO_TIME_STRING : new HMS(time).toString();
+        timeLabel.setText(timeStr);
+    }
 
     // Update the total planned, allocated, and remaining time displays
     private void _updateTimes() {
-        // Total Planned Time
-        long piTime = 0, execTime = 0;
+        // Total planned time.
         try {
             final PlannedTimeSummary pt = PlannedTimeSummaryService.getTotalTime(getNode());
-            piTime = pt.getPiTime();
-            execTime = pt.getExecTime();
+            setTimeLabel(pt.getPiTime(),   _w.totalPlannedPiTime);
+            setTimeLabel(pt.getExecTime(), _w.totalPlannedExecTime);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Exception at _updateTimes", e);
+            setTimeLabel(0, _w.totalPlannedPiTime);
+            setTimeLabel(0, _w.totalPlannedExecTime);
         }
-        _w.totalPlannedPiTime.setText(TimeAmountFormatter.getHMSFormat(piTime));
-        _w.totalPlannedExecTime.setText(TimeAmountFormatter.getHMSFormat(execTime));
-        // Allocated Time
-        TimeValue awardedTime = null;
+
+        // Allocated time (awarded time in hours).
         try {
-            // string is in the format "<value> units"
-            awardedTime = getDataObject().getAwardedTime();
-            if (awardedTime == null) {
-                awardedTime = new TimeValue(0, TimeValue.Units.hours);
-            } else {
-                awardedTime = awardedTime.convertTo(TimeValue.Units.hours);
-            }
-            _w.allocatedTime.setText(new HMS(awardedTime.getTimeAmount()).toString());
-        } catch (Exception e) {
+            final double awardedTime = getDataObject().getAwardedTime().getTimeAmount();
+            setTimeLabel(awardedTime, _w.allocatedTime);
+        } catch (final Exception e) {
             DialogUtil.error(e);
-            _w.allocatedTime.setText("00:00:00");
+            setTimeLabel(0, _w.allocatedTime);
         }
 
-        // Minimum time (certain 07B and later Band 3 programs only)
-        TimeValue minTime = null;
+        // Minimum time (certain 07B and later Band 3 programs only).
+        final Option<Double> minTimeOpt = getMinimumTimeInHours();
+        final boolean minTimeVisible = minTimeOpt.isDefined();
+        _w.minimumTime.     setVisible(minTimeVisible);
+        _w.minimumTimeLabel.setVisible(minTimeVisible);
+        minTimeOpt.forEach(minTime -> setTimeLabel(minTime, _w.minimumTime));
+
+        // Partner time, program time, and remaining time.
         try {
-            if (Integer.parseInt(getDataObject().getQueueBand()) == 3) {
-                minTime = getDataObject().getMinimumTime();
-            }
-        } catch (NumberFormatException nfe) {
-            // this is ok .. blank in new programs, etc.
-        }
-        if (minTime != null) {
-            final double hours = minTime.convertTimeAmountTo(TimeValue.Units.hours);
-            _w.minimumTime.setText(new HMS(hours).toString());
-            _w.minimumTime.setVisible(true);
-            _w.minimumTimeLabel.setVisible(true);
-        } else {
-            _w.minimumTime.setVisible(false);
-            _w.minimumTimeLabel.setVisible(false);
-        }
+            final ISPProgram prog = getProgram();
+            final ObsTimeCharges otc = ObsTimesService.getCorrectedObsTimes(prog).getTimeCharges();
+            setTimeLabel(otc.getTime(ChargeClass.PARTNER), _w.partnerTime);
+            setTimeLabel(otc.getTime(ChargeClass.PROGRAM), _w.programTime);
+            setTimeLabel(ObsTimesService.getRemainingProgramTime(prog), _w.timeRemaining);
 
-        // Remaining Time (total of Allocated Time minus the sum of the Program Time
-        // fields in the observations).
-        // XXX TODO: Add elapsed and non-charged times?
-        if (awardedTime == null) {
-            _w.timeRemaining.setText("00:00:00");
-        } else {
-            try {
-                final ObsTimes obsTimes = ObsTimesService.getCorrectedObsTimes(getProgram());
-                long remainingTime = (long) (awardedTime.getTimeAmount() * 3600000);
-//                String totalTimeStr = "00:00:00";
-                String progTimeStr = "00:00:00";
-                String partTimeStr = "00:00:00";
-//                String nonChargedTimeStr  = "00:00:00";
-                if (obsTimes != null) {
-//                    long totalTime = obsTimes.getTotalTime();
-//                    totalTimeStr = TimeAmountFormatter.getHMSFormat(totalTime);
-
-                    final ObsTimeCharges otc = obsTimes.getTimeCharges();
-                    final long progTime = otc.getTime(ChargeClass.PROGRAM);
-                    progTimeStr = TimeAmountFormatter.getHMSFormat(progTime);
-                    remainingTime -= progTime;
-
-                    final long partTime = otc.getTime(ChargeClass.PARTNER);
-                    partTimeStr = TimeAmountFormatter.getHMSFormat(partTime);
-
-//                    long nonChargedTime = otc.getTime(ChargeClass.NONCHARGED);
-//                    nonChargedTimeStr = TimeAmountFormatter.getHMSFormat(nonChargedTime);
-                }
-                _w.partnerTime.setText(partTimeStr);
-                _w.programTime.setText(progTimeStr);
-
-                final String remainingTimeStr = TimeAmountFormatter.getHMSFormat(remainingTime);
-                _w.timeRemaining.setText(remainingTimeStr);
-            } catch (Exception e) {
-                DialogUtil.error(e);
-                _w.partnerTime.setText("00:00:00");
-                _w.programTime.setText("00:00:00");
-                _w.timeRemaining.setText("00:00:00");
-            }
+        } catch (final Exception e) {
+            // This can fail, for example, if the program is null.
+            DialogUtil.error(e);
+            setTimeLabel(0, _w.partnerTime);
+            setTimeLabel(0, _w.programTime);
+            setTimeLabel(0, _w.timeRemaining);
         }
     }
 
@@ -367,34 +304,8 @@ public final class EdProgram extends OtItemEditor<ISPProgram, SPProgram> impleme
         _w.emailBox.setEnabled(OTOptions.isStaff(getProgram().getProgramID()));
         _w.phoneBox.setEnabled(enabled);
         _w.affiliationBox.setEnabled(enabled);
-        //_w.progStatusBox.setEnabled(enabled);
         _w.contactBox.setEnabled(OTOptions.isStaff(getProgram().getProgramID()));
         _w.ngoContactBox.setEnabled(OTOptions.isStaff(getProgram().getProgramID()) || OTOptions.isNGO(getProgram().getProgramID()));
-    }
-
-
-    // Called when a checkbox is selected or deselected.
-    public void itemStateChanged(ItemEvent evt) {
-        final Object w = evt.getSource();
-        if (w == _w.activeCheckBox) {
-            if (_w.activeCheckBox.isSelected()) {
-                getDataObject().setActive(SPProgram.Active.YES);
-            } else {
-                getDataObject().setActive(SPProgram.Active.NO);
-            }
-        } else if (w == _w.notifyPiCheckBox) {
-            if (_w.notifyPiCheckBox.isSelected()) {
-                getDataObject().setNotifyPi(YesNoType.YES);
-            } else {
-                getDataObject().setNotifyPi(YesNoType.NO);
-            }
-        } else if (w == _w.completedCheckBox) {
-            if (_w.completedCheckBox.isSelected()) {
-                getDataObject().setCompleted(true);
-            } else {
-                getDataObject().setCompleted(false);
-            }
-        }
     }
 
     /**
@@ -426,14 +337,6 @@ public final class EdProgram extends OtItemEditor<ISPProgram, SPProgram> impleme
         } else if (tbwe == _w.ngoContactBox) {
             getDataObject().setNGOContactEmail(s);
         }
-    }
-
-    /**
-     * Text box action, ignore.
-     *
-     * @see TextBoxWidgetWatcher
-     */
-    public void textBoxAction(TextBoxWidget tbwe) {
     }
 }
 

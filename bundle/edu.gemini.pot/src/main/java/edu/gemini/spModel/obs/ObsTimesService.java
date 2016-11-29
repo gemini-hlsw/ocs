@@ -107,8 +107,8 @@ public final class ObsTimesService {
     }
 
     /**
-     * Gets the remaining time for the program, which is the awarded time - the program time, i.e. the corrected time
-     * across the observations.
+     * Gets the remaining time in ms for the program, which is the awarded time minus the program time,
+     * i.e. the corrected time across the observations.
      */
     public static long getRemainingProgramTime(final ISPProgram prog) {
         final long awarded = ImOption.apply(prog.getDataObject()).
