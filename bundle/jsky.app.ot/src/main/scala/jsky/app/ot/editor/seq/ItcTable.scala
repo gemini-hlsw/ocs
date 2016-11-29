@@ -5,6 +5,7 @@ import javax.swing.table.{AbstractTableModel, JTableHeader}
 import javax.swing.{Icon, ListSelectionModel}
 
 import edu.gemini.ags.api.AgsRegistrar
+import edu.gemini.catalog.ui.TableColumnsAdjuster
 import edu.gemini.itc.shared._
 import edu.gemini.pot.sp.SPComponentType._
 import edu.gemini.spModel.`type`.DisplayableSpType
@@ -29,7 +30,7 @@ import Scalaz._
 /**
  * A table to display ITC calculation results to users.
  */
-trait ItcTable extends Table {
+trait ItcTable extends Table with TableColumnsAdjuster {
 
   import ItcUniqueConfig._
 
@@ -57,7 +58,7 @@ trait ItcTable extends Table {
   peer.setColumnSelectionAllowed(false)
   peer.setSelectionMode(ListSelectionModel.SINGLE_SELECTION)
 
-  def update() = {
+  def update(): Unit = {
     val seq      = parameters.sequence
     val showKeys = seq.getIteratedKeys.toList.
       filterNot(k => ExcludedParentKeys(k.getParent)).
@@ -72,11 +73,11 @@ trait ItcTable extends Table {
     }
 
     // make all columns as wide as needed
-    SequenceTabUtil.resizeTableColumns(this.peer, this.model)
+    adjustColumns(peer.getWidth - peer.getInsets.left - peer.getInsets.right)
   }
 
   // Add headers to the table columns.
-  val newHeader = {
+  val newHeader: JTableHeader = {
     val oldHeader = peer.getTableHeader
     new JTableHeader() {
       override def getToolTipText(e: MouseEvent): String = {
@@ -136,7 +137,7 @@ trait ItcTable extends Table {
       ins       <- ConfigExtractor.extractInstrumentDetails(instrument, probe, targetEnv, when, uc.config, cond)
       srcFrac   <- extractSourceFraction(uc, instrument)
 
-    } yield ItcParameters(src, new ObservationDetails(method(srcFrac), analysis), cond, tele, ins)
+    } yield ItcParameters(src, ObservationDetails(method(srcFrac), analysis), cond, tele, ins)
 
   protected def doServiceCall(peer: Peer, inputs: String \/ ItcParameters): Future[ItcService.Result] = inputs match {
 
@@ -150,16 +151,15 @@ trait ItcTable extends Table {
     }
 
   // whenever service call is finished notify table to update its contents
-  protected def updateResults() = Swing.onEDT {
+  protected def updateResults(): Unit = Swing.onEDT {
       // notify table of data update while keeping the current selection
       restoreSelection {
         this.peer.getModel.asInstanceOf[AbstractTableModel].fireTableDataChanged()
       }
 
       // make all columns as wide as needed
-      SequenceTabUtil.resizeTableColumns(this.peer, this.model)
+      adjustColumns(peer.getWidth - peer.getInsets.left - peer.getInsets.right)
     }
-
 
   // lacking a simple way to decide on the "closest" (i.e. "fastest to reach") peer we talk to the observing peer
   // if defined and GN or GS otherwise, if no site is defined you're out of luck and the ITC tables will stay empty
@@ -191,16 +191,13 @@ trait ItcTable extends Table {
     o.flatten.fold("Could not identify ags strategy or guide probe type".left[GuideProbe])(_.right)
   }
 
-  private def extractSource(target: SPTarget, c: ItcUniqueConfig): String \/ SourceDefinition = {
+  private def extractSource(target: SPTarget, c: ItcUniqueConfig): String \/ SourceDefinition =
     for {
       (mag, band, system) <- extractSourceMagnitude(target, c.config)
       srcProfile          <- parameters.spatialProfile
       srcDistribution     <- parameters.spectralDistribution
       srcRedshift         <- parameters.redshift
-    } yield {
-      new SourceDefinition(srcProfile, srcDistribution, mag, system, band, srcRedshift)
-    }
-  }
+    } yield SourceDefinition(srcProfile, srcDistribution, mag, system, band, srcRedshift)
 
   private def extractSourceMagnitude(target: SPTarget, c: Config): String \/ (Double, MagnitudeBand, BrightnessUnit) = {
 
@@ -251,7 +248,7 @@ trait ItcTable extends Table {
 }
 
 class ItcImagingTable(val parameters: ItcParametersProvider) extends ItcTable {
-  private val emptyTable: ItcImagingTableModel = new ItcGenericImagingTableModel(List(), List(), List(), List())
+  private val emptyTable: ItcImagingTableModel = ItcGenericImagingTableModel(List(), List(), List(), List())
 
   /** Creates a new table model for the current context (instrument) and config sequence.
     * Note that GMOS has a different table model with separate columns for its three CCDs. */
@@ -268,16 +265,16 @@ class ItcImagingTable(val parameters: ItcParametersProvider) extends ItcTable {
 
       instrument.getType match {
         case INSTRUMENT_GMOS | INSTRUMENT_GMOSSOUTH =>
-          new ItcGmosImagingTableModel(keys, uniqueConfigs, inputs, results)
+          ItcGmosImagingTableModel(keys, uniqueConfigs, inputs, results)
 
-        case INSTRUMENT_GSAOI  =>
-          new ItcGsaoiImagingTableModel(keys, uniqueConfigs, inputs, results)
+        case INSTRUMENT_GSAOI                       =>
+          ItcGsaoiImagingTableModel(keys, uniqueConfigs, inputs, results)
 
-        case INSTRUMENT_NIRI | INSTRUMENT_GNIRS =>
-          new ItcGenericImagingTableModel(keys, uniqueConfigs, inputs, results, showCoadds = true)
+        case INSTRUMENT_NIRI | INSTRUMENT_GNIRS     =>
+          ItcGenericImagingTableModel(keys, uniqueConfigs, inputs, results, showCoadds = true)
 
-        case _ =>
-          new ItcGenericImagingTableModel(keys, uniqueConfigs, inputs, results, showCoadds = false)
+        case _                                      =>
+          ItcGenericImagingTableModel(keys, uniqueConfigs, inputs, results, showCoadds = false)
       }
 
     }
@@ -303,7 +300,7 @@ class ItcSpectroscopyTable(val parameters: ItcParametersProvider) extends ItcTab
       val results       = uniqueConfigs.zip(inputs).map { case (uc, i) => doServiceCall(peer, i) }
 
       instrument.getType match {
-        case INSTRUMENT_GNIRS =>
+        case INSTRUMENT_GNIRS                                     =>
           val xDisp = instrument match {
             case i: InstGNIRS => i.checkCrossDispersed()
             case _            => false
@@ -314,7 +311,7 @@ class ItcSpectroscopyTable(val parameters: ItcParametersProvider) extends ItcTab
         case INSTRUMENT_GSAOI | INSTRUMENT_NIFS | INSTRUMENT_NIRI =>
           new ItcGenericSpectroscopyTableModel(keys, uniqueConfigs, inputs, results, showCoadds = true)
 
-        case _ =>
+        case _                                                    =>
           new ItcGenericSpectroscopyTableModel(keys, uniqueConfigs, inputs, results, showCoadds = false)
       }
     }

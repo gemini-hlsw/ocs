@@ -12,7 +12,7 @@ import scala.util.{Failure, Success}
 import scalaz._
 
 /** Columns in the table are defined by their header label and a function on the unique config of the row. */
-case class Column(label: String, value: (ItcUniqueConfig, String\/ItcParameters, Future[ItcService.Result]) => AnyRef, tooltip: String = "")
+case class Column(label: String, value: (ItcUniqueConfig, String \/ ItcParameters, Future[ItcService.Result]) => AnyRef, tooltip: String = "")
 
 object ItcTableModel {
   val PeakPixelETooltip   = "Peak Signal + Background in electrons / coadd"
@@ -157,13 +157,13 @@ sealed trait ItcTableModel extends AbstractTableModel {
 /** Generic ITC imaging tables model. */
 sealed trait ItcImagingTableModel extends ItcTableModel
 
-class ItcGenericImagingTableModel(val keys: List[ItemKey], val uniqueSteps: List[ItcUniqueConfig], val inputs: List[String\/ItcParameters], val res: List[Future[ItcService.Result]], showCoadds: Boolean = false) extends ItcImagingTableModel {
+case class ItcGenericImagingTableModel(keys: List[ItemKey], uniqueSteps: List[ItcUniqueConfig], inputs: List[String\/ItcParameters], res: List[Future[ItcService.Result]], showCoadds: Boolean = false) extends ItcImagingTableModel {
   val headers = if (showCoadds) HeadersWithCoadds else Headers
   val results = PeakColumns ++ SNColumns
 }
 
 /** GMOS specific ITC imaging table model. */
-class ItcGmosImagingTableModel(val keys: List[ItemKey], val uniqueSteps: List[ItcUniqueConfig], val inputs: List[String\/ItcParameters], val res: List[Future[ItcService.Result]]) extends ItcImagingTableModel {
+case class ItcGmosImagingTableModel(keys: List[ItemKey], uniqueSteps: List[ItcUniqueConfig], inputs: List[String\/ItcParameters], res: List[Future[ItcService.Result]]) extends ItcImagingTableModel {
   val headers = Headers
   val results = List(
     Column("CCD1 Peak\n(e-)",          (_, _, r) => peakPixelFlux  (r, ccd = 0),   tooltip = ItcTableModel.PeakPixelETooltip),
@@ -186,7 +186,7 @@ class ItcGmosImagingTableModel(val keys: List[ItemKey], val uniqueSteps: List[It
   )
 }
 
-class ItcGsaoiImagingTableModel(val keys: List[ItemKey], val uniqueSteps: List[ItcUniqueConfig], val inputs: List[String\/ItcParameters], val res: List[Future[ItcService.Result]]) extends ItcImagingTableModel {
+case class ItcGsaoiImagingTableModel(keys: List[ItemKey], uniqueSteps: List[ItcUniqueConfig], inputs: List[String\/ItcParameters], res: List[Future[ItcService.Result]]) extends ItcImagingTableModel {
   val headers = HeadersWithCoadds ++ List(
     Column("Strehl", (_, i, _) => gems(i), tooltip = "Estimated Strehl and band")
   )
