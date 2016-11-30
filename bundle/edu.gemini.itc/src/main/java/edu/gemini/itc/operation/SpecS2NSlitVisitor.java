@@ -93,6 +93,7 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
     /**
      * Implements the SampledSpectrumVisitor interface
      */
+    @Override
     public void visit(final SampledSpectrum sed) {
         // step one: do some resampling and preprocessing
         resample();

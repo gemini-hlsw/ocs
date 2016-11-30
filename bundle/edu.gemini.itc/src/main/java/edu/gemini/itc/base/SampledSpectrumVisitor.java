@@ -16,6 +16,7 @@ package edu.gemini.itc.base;
  * "recipes" of operations consisting of a list of Visitors.
  * So the operations themselves are an abstraction in this problem.
  */
+@FunctionalInterface
 public interface SampledSpectrumVisitor {
     void visit(SampledSpectrum spectrum);
 }

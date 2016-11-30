@@ -6,6 +6,9 @@ import edu.gemini.itc.shared._
 
 import scala.collection.JavaConversions._
 
+import scalaz._
+import Scalaz._
+
 sealed trait Recipe
 
 trait ImagingRecipe extends Recipe {
@@ -44,8 +47,8 @@ object Recipe {
 
   def createSignalChart(result: SpectroscopyResult, title: String, index: Int): SpcChartData = {
     val data: java.util.List[SpcSeriesData] = new java.util.ArrayList[SpcSeriesData]()
-    data.add(new SpcSeriesData(SignalData,     "Signal",               result.specS2N(index).getSignalSpectrum.getData))
-    data.add(new SpcSeriesData(BackgroundData, "SQRT(Background)",     result.specS2N(index).getBackgroundSpectrum.getData))
+    data.add(SpcSeriesData(SignalData,     "Signal",           result.specS2N(index).getSignalSpectrum.getData))
+    data.add(SpcSeriesData(BackgroundData, "SQRT(Background)", result.specS2N(index).getBackgroundSpectrum.getData))
     new SpcChartData(SignalChart, title, ChartAxis("Wavelength (nm)"), ChartAxis("e- per exposure per spectral pixel"), data.toList)
   }
 
@@ -59,8 +62,8 @@ object Recipe {
 
   def createS2NChart(result: SpectroscopyResult, title: String, index: Int): SpcChartData = {
     val data: java.util.List[SpcSeriesData] = new util.ArrayList[SpcSeriesData]
-    data.add(new SpcSeriesData(SingleS2NData, "Single Exp S/N", result.specS2N(index).getExpS2NSpectrum.getData))
-    data.add(new SpcSeriesData(FinalS2NData,  "Final S/N  ",    result.specS2N(index).getFinalS2NSpectrum.getData))
+    data.add(SpcSeriesData(SingleS2NData, "Single Exp S/N", result.specS2N(index).getExpS2NSpectrum.getData))
+    data.add(SpcSeriesData(FinalS2NData,  "Final S/N  ",    result.specS2N(index).getFinalS2NSpectrum.getData))
     new SpcChartData(S2NChart, title, ChartAxis("Wavelength (nm)"), ChartAxis("Signal / Noise per spectral pixel"), data.toList)
   }
 
@@ -72,8 +75,10 @@ object Recipe {
   def serviceResult(r: ImagingResult): ItcImagingResult =
     ItcImagingResult(List(toCcdData(r)))
 
-  def serviceResult(r: Array[ImagingResult]): ItcImagingResult =
-    ItcImagingResult(r.map(toCcdData).toList)
+  def serviceResult(r: Array[ImagingResult]): ItcImagingResult = {
+    val ccds = r.map(toCcdData).toList
+    ItcImagingResult(ccds)
+  }
 
   // === Spectroscopy
 
@@ -101,8 +106,10 @@ object Recipe {
 
   // A set of results and a set of groups of charts, this covers GMOS (3 CCDs and potentially separate groups
   // for IFU cases, if IFU is activated).
-  def serviceGroupedResult(rs: Array[SpectroscopyResult], charts: java.util.List[java.util.List[SpcChartData]]): ItcSpectroscopyResult =
-    ItcSpectroscopyResult(rs.map(r => toCcdData(r, charts.toList.flatten)).toList, charts.toList.map(l => SpcChartGroup(l.toList)))
+  def serviceGroupedResult(rs: Array[SpectroscopyResult], charts: java.util.List[java.util.List[SpcChartData]]): ItcSpectroscopyResult = {
+    val ccds = rs.map(r => toCcdData(r, charts.toList.flatten)).toList
+    ItcSpectroscopyResult(ccds, charts.toList.map(l => SpcChartGroup(l.toList)))
+  }
 
 }
 

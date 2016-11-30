@@ -2,14 +2,14 @@ package edu.gemini.itc.base;
 
 public class Detector extends TransmissionElement {
     private int _detectorPixels;
-    private String _detectorType;
-    private String _name;
+    private final String _detectorType;
+    private final String _name;
 
-    public Detector(String directory, String prefix, String filename, String detectorType) {
+    public Detector(final String directory, final String prefix, final String filename, final String detectorType) {
         this(directory, prefix, filename, detectorType, "");
     }
 
-    public Detector(String directory, String prefix, String filename, String detectorType, String name) {
+    public Detector(final String directory, final String prefix, final String filename, final String detectorType, final String name) {
         super(directory + prefix + filename + Instrument.getSuffix());
         _detectorType = detectorType;
         _name = name;
@@ -23,7 +23,7 @@ public class Detector extends TransmissionElement {
         _detectorPixels = detectorPixels;
     }
 
-    public String toString() {
+    @Override public String toString() {
         return "Detector - " + _detectorType;
     }
 

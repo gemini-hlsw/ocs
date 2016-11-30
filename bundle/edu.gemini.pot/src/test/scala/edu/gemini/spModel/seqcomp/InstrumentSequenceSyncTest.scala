@@ -29,7 +29,7 @@ class InstrumentSequenceSyncTest extends InstrumentSequenceTestBase[InstGmosSout
 
   @Test
   def testIteratorUpdatePropagates(): Unit = {
-    assertNotEquals(r_G0326, getInstDataObj.getFilter)
+    assertFalse(r_G0326 == getInstDataObj.getFilter)
 
     // Add a step that sets the "r" filter.
     val sc = createSysConfig()
