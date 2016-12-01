@@ -203,7 +203,7 @@ object BagsFeedback {
   def toRow(state: BagsState, ctx: Option[ObsContext]): Option[Row] = state match {
     case ErrorState            => ErrorStateRow.some
     case PendingState(_,_)     => PendingStateRow.some
-    case RunningState(_,_)     => RunningStateRow.some
+    case RunningState(_,_,_)   => RunningStateRow.some
     case RunningEditedState(_) => RunningStateRow.some
     case FailureState(_,why)   => FailureStateRow(why).some
     case IdleState(_,_) if ctx.exists(_.getTargets.getGuideEnvironment.guideEnv.auto === AutomaticGroup.Initial) => NoStarsRow.some

@@ -129,7 +129,7 @@ object BagsState {
           (c, s) <- tup
           h      <- newHash
           if !hash.contains(h) && notObserved
-        } yield (RunningState(k, h), BagsManager.triggerAgsAction(k, c, s)): StateTransition
+        } yield (RunningState(k, c, h), BagsManager.triggerAgsAction(k, c, s)): StateTransition
 
         // Returns the new state to switch to, either RunningState if all is well
         // and a new AGS lookup is needed or else IdleState (possibly with an
@@ -147,7 +147,7 @@ object BagsState {
     * since the search began since we will transition to RunningEditedState
     * if something is edited in the meantime.
     */
-  case class RunningState(k: ObsKey, hash: AgsHashVal) extends BagsState {
+  case class RunningState(k: ObsKey, ctx: ObsContext, hash: AgsHashVal) extends BagsState {
     // When edited while running, we continue running but remember we were
     // edited by moving to RunningEditedState.  When the results eventually
     // come back from the AGS lookup when in RunningEditedState, we store them
@@ -157,8 +157,13 @@ object BagsState {
 
     // Successful AGS lookup while running (and not edited).  Apply the update
     // and move to IdleState.
-    private[ags] override def succeed(results: Option[AgsStrategy.Selection]): StateTransition =
-      (IdleState(k, Some(hash)), BagsManager.applyAction(k, results))
+    private[ags] override def succeed(results: Option[AgsStrategy.Selection]): StateTransition = {
+      val h = results.fold(hash) { r =>
+        if (r.posAngle === ctx.getPositionAngle) hash
+        else hashObs(ctx.withPositionAngle(r.posAngle))
+      }
+      (IdleState(k, Some(h)), BagsManager.applyAction(k, results))
+    }
 
     // Failed AGS lookup.  Move to FailedState for a while and ask the timer to
     // wake us up in a bit.  When the timer eventually goes off we will switch
@@ -378,7 +383,7 @@ object BagsManager {
       val k = ObsKey(o)
       val s = m.lookup(k).fold(IdleState(k, None): BagsState) {
         case IdleState(_, Some(hash)) => IdleState(k, hashObs(o).filter(_ === hash))
-        case RunningState(_, h)       => if (hashObs(o).contains(h)) RunningState(k, h) else RunningEditedState(k)
+        case RunningState(_, c, h)    => if (hashObs(o).contains(h)) RunningState(k, c, h) else RunningEditedState(k)
         case other                    => other
       }
       m + (k -> s)
