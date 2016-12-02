@@ -31,8 +31,7 @@ class TargetFeedbackEditor extends TelescopePosEditor {
         n <- Option(node)
         o <- Option(n.getContextObservation)
         s <- BagsManager.stateLookup(ObsKey(o))
-        row <- BagsFeedback.toRow(s, ctxOpt.asScalaOpt)
-      } yield row
+      } yield BagsFeedback.toRow(s, ctxOpt.asScalaOpt)
 
       // If the BAGS row is defined, then use it. If not, create the rows corresponding to the analysis.
       // NOTE that is target.isTooTarget, we don't want an analysis.
