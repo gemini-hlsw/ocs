@@ -198,7 +198,7 @@ object BagsFeedback {
   case object PendingStateRow extends BagsStateRow(BANANA.some, "Waiting for automatic guide star lookup to run...", spinnerIcon)
   case object RunningStateRow extends BagsStateRow(BANANA.some, "Automatic guide star lookup is running...", spinnerIcon)
   case class  FailureStateRow(why: String) extends BagsStateRow(LIGHT_SALMON.some, s"Automatic guide star lookup failed: $why", errorIcon)
-  case object EmptyRow        extends BagsStateRow(None, " ", None) // Nonempy string to make label have required height.
+  case object EmptyRow        extends BagsStateRow(None, " ", None) // Nonempty string to make label have required height.
 
   import BagsState._
   def toRow(state: BagsState, ctx: Option[ObsContext]): Row = state match {
