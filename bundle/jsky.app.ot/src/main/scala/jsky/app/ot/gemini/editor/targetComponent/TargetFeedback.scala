@@ -172,17 +172,17 @@ object TargetGuidingFeedback {
 
 
 object BagsFeedback {
-  private val spinnerIcon = Resources.getIcon("spinner16-transparent.png")
-  private val warningIcon = Resources.getIcon("eclipse/alert.gif")
-  private val errorIcon   = Resources.getIcon("eclipse/error.gif")
+  private val spinnerIcon = Resources.getIcon("spinner16-transparent.png").some
+  private val warningIcon = Resources.getIcon("eclipse/alert.gif").some
+  private val errorIcon   = Resources.getIcon("eclipse/error.gif").some
 
-  sealed class BagsStateRow(bgColor: Color, message: String, stateIcon: Icon) extends Row {
+  sealed class BagsStateRow(bgColor: Option[Color], message: String, stateIcon: Option[Icon]) extends Row {
     object feedbackLabel extends Label {
       border = labelBorder
       foreground = Color.DARK_GRAY
-      background = bgColor
+      bgColor.foreach(background_=)
       text = message
-      icon = stateIcon
+      stateIcon.foreach(icon_=)
       opaque = true
       horizontalAlignment = Alignment.Left
     }
@@ -193,20 +193,21 @@ object BagsFeedback {
     }
   }
 
-  case object NoStarsRow      extends BagsStateRow(BANANA, "Automatic guide star lookup found nothing.", warningIcon)
-  case object ErrorStateRow   extends BagsStateRow(LIGHT_SALMON, "An error occurred when trying to run automatic guide star lookup.", errorIcon)
-  case object PendingStateRow extends BagsStateRow(BANANA, "Waiting for automatic guide star lookup to run...", spinnerIcon)
-  case object RunningStateRow extends BagsStateRow(BANANA, "Automatic guide star lookup is running...", spinnerIcon)
-  case class  FailureStateRow(why: String) extends BagsStateRow(LIGHT_SALMON, s"Automatic guide star lookup failed: $why", errorIcon)
+  case object NoStarsRow      extends BagsStateRow(BANANA.some, "Automatic guide star lookup found nothing.", warningIcon)
+  case object ErrorStateRow   extends BagsStateRow(LIGHT_SALMON.some, "An error occurred when trying to run automatic guide star lookup.", errorIcon)
+  case object PendingStateRow extends BagsStateRow(BANANA.some, "Waiting for automatic guide star lookup to run...", spinnerIcon)
+  case object RunningStateRow extends BagsStateRow(BANANA.some, "Automatic guide star lookup is running...", spinnerIcon)
+  case class  FailureStateRow(why: String) extends BagsStateRow(LIGHT_SALMON.some, s"Automatic guide star lookup failed: $why", errorIcon)
+  case object EmptyRow        extends BagsStateRow(None, " ", None) // Nonempy string to make label have required height.
 
   import BagsState._
-  def toRow(state: BagsState, ctx: Option[ObsContext]): Option[Row] = state match {
-    case ErrorState            => ErrorStateRow.some
-    case PendingState(_,_)     => PendingStateRow.some
-    case RunningState(_,_,_)   => RunningStateRow.some
-    case RunningEditedState(_) => RunningStateRow.some
-    case FailureState(_,why)   => FailureStateRow(why).some
-    case IdleState(_,_) if ctx.exists(_.getTargets.getGuideEnvironment.guideEnv.auto === AutomaticGroup.Initial) => NoStarsRow.some
-    case _                     => None
+  def toRow(state: BagsState, ctx: Option[ObsContext]): Row = state match {
+    case ErrorState            => ErrorStateRow
+    case PendingState(_,_)     => PendingStateRow
+    case RunningState(_,_,_)   => RunningStateRow
+    case RunningEditedState(_) => RunningStateRow
+    case FailureState(_,why)   => FailureStateRow(why)
+    case IdleState(_,_) if ctx.exists(_.getTargets.getGuideEnvironment.guideEnv.auto === AutomaticGroup.Initial) => NoStarsRow
+    case _                     => EmptyRow
   }
 }
