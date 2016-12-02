@@ -156,10 +156,10 @@ object BagsState {
       (RunningEditedState(k), ioUnit)
 
     // Successful AGS lookup while running (and not edited).  Apply the update
-    // and move to IdleState.
+    // and move to IdleState. If the PA changes, update the hash.
     private[ags] override def succeed(results: Option[AgsStrategy.Selection]): StateTransition = {
       val h = results.fold(hash) { r =>
-        if (r.posAngle === ctx.getPositionAngle) hash
+        if ((r.posAngle.toDegrees - ctx.getPositionAngle.toDegrees).abs < 1e-4) hash
         else hashObs(ctx.withPositionAngle(r.posAngle))
       }
       (IdleState(k, Some(h)), BagsManager.applyAction(k, results))
