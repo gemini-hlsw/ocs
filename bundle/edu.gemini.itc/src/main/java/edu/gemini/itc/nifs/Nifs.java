@@ -15,7 +15,7 @@ public final class Nifs extends Instrument implements SpectroscopyInstrument {
 
     // values are taken from instrument's web documentation
     private static final double WellDepth      = 134400;
-    private static final double LinearityLimit = 106400;
+    private static final double LinearityLimit =  98000; // electrons
 
     /**
      * Related files will be in this subdir of lib
@@ -230,7 +230,7 @@ public final class Nifs extends Instrument implements SpectroscopyInstrument {
     }
 
     @Override public double gain() {
-        return 1.3;
+        return 2.8; // electrons / ADU
     }
 
     @Override public List<WarningRule> warnings() {
