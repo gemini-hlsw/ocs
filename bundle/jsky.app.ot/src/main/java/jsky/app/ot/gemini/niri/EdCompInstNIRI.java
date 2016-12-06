@@ -55,7 +55,7 @@ public final class EdCompInstNIRI extends EdCompInstBase<InstNIRI>
         _w.camera.setChoices(_getCameras());
 
         _w.selectedFilter.setModel(new NiriFilterComboBoxModel());
-        _w.selectedFilter.setRenderer(new ΝiriFilterComboBoxRenderer());
+        _w.selectedFilter.setRenderer(new NiriFilterComboBoxRenderer());
         _w.selectedFilter.setMaximumRowCount(Math.min(Filter.values().length, 20));
         _w.selectedFilter.addActionListener(this);
 
@@ -374,7 +374,7 @@ public final class EdCompInstNIRI extends EdCompInstBase<InstNIRI>
      * what other SpTypes use which is the displayable field, add a mark to obsolete filters, and return
      * a <code>JComponent.Separator</code> if the filter is an <code>Optional.empty()</code>.
      */
-    private final class ΝiriFilterComboBoxRenderer extends BasicComboBoxRenderer {
+    private final class NiriFilterComboBoxRenderer extends BasicComboBoxRenderer {
 
         public Component getListCellRendererComponent(JList jList, Object value, int index, boolean isSelected, boolean hasFocus) {
 
