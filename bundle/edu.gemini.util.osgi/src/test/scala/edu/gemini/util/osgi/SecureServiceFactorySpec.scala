@@ -17,11 +17,11 @@ class SecureServiceFactorySpec extends Specification {
       ("foo", ps.asScala.toSet)
   }
 
+  case class PImpl(getName: String) extends Principal
+
   // Some Principals
-  val ps = Set[Principal](
-    new Principal { def getName = "Bob" },
-    new Principal { def getName = "Steve" }
-  )
+  val ps  = Set[Principal](PImpl("Bob"), PImpl("Steve"))
+  val ps2 = Set[Principal](PImpl("Sam"), PImpl("Harry"))
 
   // Helpers
   def withSecureServiceRegistration[A](f: BundleContext => A): A =
@@ -82,8 +82,27 @@ class SecureServiceFactorySpec extends Specification {
       }
     }
 
+    "return a new service instance each time requested" in {
+
+      // So, this is probably the root cause of http://jira.gemini.edu:8080/browse/REL-2881
+      // When you have a ServiceFactory the framework keeps a refcount for instances and doesn't
+      // dispose of them until the refcount goes to zero. This count can be > 1 if there are`
+      // simultaneous requests, a simulated below.
+
+      withSecureServiceRegistration { bc =>
+        val Some((ref1, svc1)) = getSecureService(bc, classOf[Service].getName, null, ps)
+
+        // Normally we would bc.ungetService(ref1) here before the next request, but if we don't
+        // do this the next getSecureService call will return the same instance and the passed
+        // principals are ignored.
+
+        val Some((ref2, svc2)) = getSecureService(bc, classOf[Service].getName, null, ps2)
+        svc2 must_== (("foo", ps2))
+
+      }
+    }
+
   }
 
 
 }
-
