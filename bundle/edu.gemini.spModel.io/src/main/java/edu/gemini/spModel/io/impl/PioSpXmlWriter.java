@@ -18,6 +18,7 @@ import java.util.logging.Level;
 import edu.gemini.pot.sp.ISPNightlyRecord;
 import edu.gemini.pot.sp.ISPProgram;
 import edu.gemini.pot.sp.ISPNode;
+import edu.gemini.spModel.io.PioDocumentBuilder;
 import edu.gemini.spModel.pio.Document;
 import edu.gemini.spModel.pio.xml.PioXmlUtil;
 
@@ -78,7 +79,7 @@ public class PioSpXmlWriter {
      * Write a program document
      */
     public boolean printDocument(ISPProgram prog) {
-        Document doc = new PioDocumentBuilder().toDocument(prog);
+        Document doc = PioDocumentBuilder.instance.toDocument(prog);
 
         try {
             PioXmlUtil.write(doc, _writer);
@@ -95,7 +96,7 @@ public class PioSpXmlWriter {
      * Write a program document
      */
     public boolean printDocument(ISPNightlyRecord record) {
-        Document doc = new PioDocumentBuilder().toDocument(record);
+        Document doc = PioDocumentBuilder.instance.toDocument(record);
 
         try {
             PioXmlUtil.write(doc, _writer);

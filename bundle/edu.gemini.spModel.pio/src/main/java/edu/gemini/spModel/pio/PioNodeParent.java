@@ -33,7 +33,7 @@ public interface PioNodeParent extends PioNode {
      * references another (see {@link ParamSet#getReferenceId}) but the
      * referent is not found
      */
-    List getChildren();
+    List<PioNode> getChildren();
 
     /**
      * Gets the (immediate) child with the given name, if there is one.

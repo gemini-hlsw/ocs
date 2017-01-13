@@ -38,11 +38,11 @@ abstract class PioNodeParentImpl extends PioNodeImpl implements PioNodeParent {
      * JDOM Elements match the given xpath; if nothing matches an empty
      * List
      */
-    protected List selectNodesByXpath(String xpath) {
-        List nodes = getElement().selectNodes(xpath);
+    protected List<PioNode> selectNodesByXpath(String xpath) {
+        final List nodes = getElement().selectNodes(xpath);
         if ((nodes == null) || (nodes.size() == 0)) return Collections.EMPTY_LIST;
 
-        List res = new ArrayList();
+        List<PioNode> res = new ArrayList<>();
         for (Iterator it=nodes.iterator(); it.hasNext(); ) {
             Object el = it.next();
             if (el instanceof PioNodeElement) {
@@ -102,7 +102,7 @@ abstract class PioNodeParentImpl extends PioNodeImpl implements PioNodeParent {
         return count;
     }
 
-    public List getChildren() {
+    public List<PioNode> getChildren() {
         return selectNodesByXpath("*");
     }
 
@@ -210,7 +210,7 @@ abstract class PioNodeParentImpl extends PioNodeImpl implements PioNodeParent {
      * @return subset of all the children of this node that are of the type
      * indicated by <code>elementName</code>
      */
-    protected List getChildren(String elementName) {
+    protected List<PioNode> getChildren(String elementName) {
         return selectNodesByXpath(elementName);
     }
 
@@ -230,7 +230,7 @@ abstract class PioNodeParentImpl extends PioNodeImpl implements PioNodeParent {
      * with element type <code>elementName</code> and name attribute
      * <code>name</code>
      */
-    protected List getChildren(String elementName, String name) {
+    protected List<PioNode> getChildren(String elementName, String name) {
         return selectNodesByXpath(elementName + "[@name='" + name + "']");
     }
 

@@ -1,6 +1,7 @@
 package edu.gemini.spModel.io.impl.migration.to2015B
 
-import edu.gemini.spModel.io.impl.migration.{Migration, PioSyntax}
+import edu.gemini.spModel.io.PioSyntax
+import edu.gemini.spModel.io.impl.migration.Migration
 
 import java.util.UUID
 
