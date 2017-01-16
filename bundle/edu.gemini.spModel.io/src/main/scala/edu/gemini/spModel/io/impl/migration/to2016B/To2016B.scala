@@ -5,6 +5,7 @@ import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.spModel.core.HorizonsDesignation.MajorBody
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.gemini.obscomp.SPProgram
+import edu.gemini.spModel.io.PioSyntax
 import edu.gemini.spModel.io.impl.migration.to2015B.To2015B
 import edu.gemini.spModel.pio.xml.{PioXmlUtil, PioXmlFactory}
 import edu.gemini.spModel.pio.{Document, ParamSet, Pio, Version}

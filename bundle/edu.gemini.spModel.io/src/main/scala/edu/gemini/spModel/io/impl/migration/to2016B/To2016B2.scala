@@ -1,5 +1,6 @@
 package edu.gemini.spModel.io.impl.migration.to2016B
 
+import edu.gemini.spModel.io.PioSyntax
 import edu.gemini.spModel.io.impl.migration.Migration
 import edu.gemini.spModel.obs.ObsParamSetCodecs._
 import edu.gemini.spModel.obs.SchedulingBlock
@@ -7,7 +8,7 @@ import edu.gemini.spModel.obs.SchedulingBlock.Duration
 import edu.gemini.spModel.obs.SchedulingBlock.Duration._
 import edu.gemini.spModel.pio.{Document, Version}
 import edu.gemini.spModel.pio.codec._
-import edu.gemini.spModel.io.impl.migration.PioSyntax._
+import PioSyntax._
 
 object To2016B2 extends Migration {
 

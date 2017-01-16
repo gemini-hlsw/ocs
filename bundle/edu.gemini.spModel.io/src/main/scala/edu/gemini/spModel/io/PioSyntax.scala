@@ -1,12 +1,15 @@
-package edu.gemini.spModel.io.impl.migration
+package edu.gemini.spModel.io
 
-import edu.gemini.pot.sp.SPComponentType
+import edu.gemini.pot.sp.{SPComponentType, SPNodeKey}
 import edu.gemini.spModel.data.ISPDataObject
 import edu.gemini.spModel.pio.{Container, ContainerParent, ParamSet}
 
 import scala.collection.JavaConverters._
 import scala.util.Try
 
+
+/** Syntax to simplify PIO manipulation.
+ */
 object PioSyntax {
 
   implicit class ContainerParentOps(p: ContainerParent) {
@@ -21,10 +24,12 @@ object PioSyntax {
 
     def findContainers(spc: SPComponentType): List[Container] =
       allContainers.filter(_.componentType.contains(spc))
-
   }
 
   implicit class ContainerOps(c: Container) {
+
+    def nodeKey: Option[SPNodeKey] =
+      Try(new SPNodeKey(c.getKey)).toOption
 
     def componentType: Option[SPComponentType] =
       Try(SPComponentType.getInstance(c.getType, c.getSubtype)).toOption

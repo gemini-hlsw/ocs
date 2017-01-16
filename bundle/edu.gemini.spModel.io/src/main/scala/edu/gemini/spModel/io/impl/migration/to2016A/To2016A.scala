@@ -1,8 +1,10 @@
 package edu.gemini.spModel.io.impl.migration.to2016A
 
 import edu.gemini.pot.sp.SPComponentType
+import edu.gemini.spModel.io.PioSyntax
 import edu.gemini.spModel.io.impl.migration.Migration
-import edu.gemini.spModel.io.impl.migration.PioSyntax._
+import edu.gemini.spModel.pio.{Container, Document, Param, Version}
+import PioSyntax._
 import edu.gemini.spModel.pio.{Container, Document, Param, Version}
 import edu.gemini.spModel.pio.xml.PioXmlUtil
 

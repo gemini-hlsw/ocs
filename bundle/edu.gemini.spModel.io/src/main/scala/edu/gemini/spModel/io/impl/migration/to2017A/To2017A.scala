@@ -3,8 +3,10 @@ package edu.gemini.spModel.io.impl.migration.to2017A
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.spModel.core.{Coordinates, Ephemeris}
 import edu.gemini.spModel.gemini.gnirs.InstGNIRS
+import edu.gemini.spModel.io.PioSyntax
 import edu.gemini.spModel.io.impl.migration.Migration
-import edu.gemini.spModel.io.impl.migration.PioSyntax._
+import edu.gemini.spModel.pio.{ParamSet, Container, Pio, Document, Version}
+import PioSyntax._
 import edu.gemini.spModel.pio.codec.ParamSetCodec
 import edu.gemini.spModel.target.TargetParamCodecs._
 import edu.gemini.spModel.target.TargetParamSetCodecs._

@@ -2,6 +2,7 @@ package edu.gemini.spModel.io.impl.migration
 
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.spModel.core.{ProgramId, StandardProgramId, Site}
+import edu.gemini.spModel.io.PioSyntax
 import edu.gemini.spModel.io.impl.SpIOTags
 import edu.gemini.spModel.obsrecord.ObsExecRecord
 import edu.gemini.spModel.pio.xml.PioXmlUtil

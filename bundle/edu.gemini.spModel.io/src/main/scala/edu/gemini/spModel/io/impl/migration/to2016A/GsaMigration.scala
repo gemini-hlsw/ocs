@@ -2,6 +2,7 @@ package edu.gemini.spModel.io.impl.migration.to2016A
 
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.spModel.dataset.{SummitState, DatasetQaState, DatasetLabel}
+import edu.gemini.spModel.io.PioSyntax
 import edu.gemini.spModel.pio.codec.ParamSetCodec
 import edu.gemini.spModel.pio.{Pio, ParamSet, Container, Document}
 
@@ -13,7 +14,7 @@ import Scalaz._
   */
 object GsaMigration {
 
-  import edu.gemini.spModel.io.impl.migration.PioSyntax._
+  import PioSyntax._
 
   private final case class OldExecRecord(ps: ParamSet, qaState: DatasetQaState) {
     def convert(): Unit =

@@ -1,9 +1,13 @@
-package edu.gemini.spModel.io.impl;
+package edu.gemini.spModel.io;
 
 import edu.gemini.pot.sp.*;
 import edu.gemini.spModel.core.SPProgramID;
 import edu.gemini.spModel.data.Encrypted;
 import edu.gemini.spModel.data.ISPDataObject;
+import edu.gemini.spModel.io.impl.ConflictPio;
+import edu.gemini.spModel.io.impl.Encryption;
+import edu.gemini.spModel.io.impl.SpIOTags;
+import edu.gemini.spModel.io.impl.VersionVectorPio;
 import edu.gemini.spModel.pio.*;
 import edu.gemini.spModel.pio.xml.PioXmlFactory;
 import edu.gemini.spModel.pio.xml.PioXmlUtil;
@@ -17,32 +21,20 @@ import java.util.logging.Logger;
  * Creates a {@link Document PIO document} from a {@link ISPProgram program} or
  * {@link edu.gemini.pot.sp.ISPNightlyRecord plan}.
  */
-public final class PioDocumentBuilder {
+public enum PioDocumentBuilder {
+    instance;
+
     private static final Logger LOG = Logger.getLogger(PioDocumentBuilder.class.getName());
 
-    public Document toDocument(ISPProgram program)  {
-        PioFactory factory = new PioXmlFactory();
-        Document doc = factory.createDocument();
-
-        _addContainer(factory, doc, program, doc);
-
-        // Don't want to write the password, if present.
-        _stripPassword(doc);
-
-        doc.addContainer(VersionVectorPio.toContainer(factory, program.getVersions()));
-
+    public Document toDocument(ISPNode node) {
+        final PioFactory factory = new PioXmlFactory();
+        final Document doc = factory.createDocument();
+        _addContainer(factory, doc, node, doc);
+        if (node instanceof ISPProgram) {
+            doc.addContainer(VersionVectorPio.toContainer(factory, ((ISPProgram) node).getVersions()));
+        }
         return doc;
     }
-
-    public Document toDocument(ISPNightlyRecord record)  {
-        PioFactory factory = new PioXmlFactory();
-        Document doc = factory.createDocument();
-
-        _addContainer(factory, doc, record, doc);
-
-        return doc;
-    }
-
 
     private String _getProgId(ISPNode node)  {
         SPProgramID progId = node.getProgramID();
@@ -163,18 +155,5 @@ public final class PioDocumentBuilder {
         if (node instanceof ISPObsComponent) return SpIOTags.OBSCOMP;
         if (node instanceof ISPSeqComponent) return SpIOTags.SEQCOMP;
         throw new RuntimeException("unknown node type: " + node.getClass().getName());
-    }
-
-    // Removes the science program password.
-    private void _stripPassword(Document doc) {
-        List containerList = doc.getContainers();
-        PioPath path = new PioPath("Science Program/programPassword");
-        for (Iterator it=containerList.iterator(); it.hasNext(); ) {
-            Container container = (Container) it.next();
-            PioNode node = container.lookupNode(path);
-            if (node == null) continue;
-            PioNodeParent parent = node.getParent();
-            parent.removeChild(node);
-        }
     }
 }
