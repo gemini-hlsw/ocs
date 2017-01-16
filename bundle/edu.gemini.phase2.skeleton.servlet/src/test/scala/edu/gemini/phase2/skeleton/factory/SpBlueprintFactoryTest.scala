@@ -38,6 +38,17 @@ class SpBlueprintFactoryTest {
   }
 
   @Test
+  def allF2FiltersPresentInP2(): Unit = {
+    val enumNotInOT = M.Flamingos2Filter.values() map {
+      f => Option(SpTypeUtil.noExceptionValueOf(classOf[M.Flamingos2Filter], f.toString))
+    } filter {
+      _.isEmpty
+    }
+
+    assertTrue(enumNotInOT.isEmpty)
+  }
+
+  @Test
   def buildGraces() {
     val gracesBlueprint = GracesBlueprint(M.GracesFiberMode.ONE_FIBER, M.GracesReadMode.NORMAL)
     val factory = SpBlueprintFactory.create(gracesBlueprint)

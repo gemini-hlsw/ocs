@@ -161,6 +161,8 @@ public final class Flamingos2SupportTest extends InstrumentSupportTestBase<Flami
             new Pair<>(Filter.H,       "1.65"),
             new Pair<>(Filter.K_LONG,  "2.2" ),
             new Pair<>(Filter.K_SHORT, "2.15"),
+            new Pair<>(Filter.K_BLUE, "2.06"),
+            new Pair<>(Filter.K_RED,  "2.31"),
             new Pair<>(Filter.JH,      "1.39"),
             new Pair<>(Filter.HK,      "1.871"),
         };
