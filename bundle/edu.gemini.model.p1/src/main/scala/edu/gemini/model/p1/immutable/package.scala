@@ -85,6 +85,8 @@ package object immutable {
     val H       = mutable.Flamingos2Filter.H
     val K_LONG  = mutable.Flamingos2Filter.K_LONG
     val K_SHORT = mutable.Flamingos2Filter.K_SHORT
+    val K_BLUE  = mutable.Flamingos2Filter.K_BLUE
+    val K_RED   = mutable.Flamingos2Filter.K_RED
     val JH      = mutable.Flamingos2Filter.JH
     val HK      = mutable.Flamingos2Filter.HK
   }
