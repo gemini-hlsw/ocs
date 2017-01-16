@@ -136,6 +136,8 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         H("H (1.65 um)", "H", new Some<>(1.65)),
         K_LONG("K-long (2.20 um)", "K-long", new Some<>(2.20)),
         K_SHORT("K-short (2.15 um)", "K-short", new Some<>(2.15)),
+        K_BLUE("K-blue (2.06 um)", "K-blue", new Some<>(2.06)),
+        K_RED("K-red (2.31 um)", "K-red", new Some<>(2.31)),
         JH("JH (spectroscopic)", "JH", new Some<>(1.39)),
         HK("HK (spectroscopic)", "HK", new Some<>(1.871)),
         DARK("Dark", "Dark", None.DOUBLE);

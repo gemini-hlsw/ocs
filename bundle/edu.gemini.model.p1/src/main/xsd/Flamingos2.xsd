@@ -89,6 +89,8 @@
             <xsd:enumeration value="H (1.631 um)"/>
             <xsd:enumeration value="K-long (2.20 um)"/>
             <xsd:enumeration value="Ks (2.157 um)"/>
+            <xsd:enumeration value="K-blue (2.06 um)"/>
+            <xsd:enumeration value="K-red (2.31 um)"/>
             <xsd:enumeration value="JH (1.390 um)"/>
             <xsd:enumeration value="HK (1.871 um)"/>
         </xsd:restriction>

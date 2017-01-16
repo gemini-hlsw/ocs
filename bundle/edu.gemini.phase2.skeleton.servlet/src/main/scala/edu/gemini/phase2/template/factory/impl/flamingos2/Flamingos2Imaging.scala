@@ -34,9 +34,10 @@ case class Flamingos2Imaging(blueprint:SpFlamingos2BlueprintImaging) extends Fla
   def exposureTimes(filter: Flamingos2.Filter): Double = {
     import Flamingos2.Filter._
     filter match {
-      case H                => 10.0
-      case K_LONG | K_SHORT => 30.0
-      case _                => 60.0
+      case H                        => 10.0
+      case K_LONG                   => 10.0
+      case K_SHORT | K_RED | K_BLUE => 20.0
+      case _                        => 60.0
     }
   }
 
