@@ -6,15 +6,14 @@ import java.security.Principal
 import org.osgi.framework._
 import org.osgi.framework.launch.Framework
 import org.specs2.mutable.Specification
-import scala.collection.JavaConverters._
 
 class SecureServiceFactorySpec extends Specification {
 
   // Our trivial secure service
   type Service = (String, Set[Principal])
   val factory = new SecureServiceFactory[Service] {
-    def getService(b: Bundle, reg: ServiceRegistration[Service], ps: java.util.Set[Principal]): Service =
-      ("foo", ps.asScala.toSet)
+    def getService(ps: Set[Principal]): Service =
+      ("foo", ps.toSet)
   }
 
   case class PImpl(getName: String) extends Principal
@@ -24,85 +23,98 @@ class SecureServiceFactorySpec extends Specification {
   val ps2 = Set[Principal](PImpl("Sam"), PImpl("Harry"))
 
   // Helpers
-  def withSecureServiceRegistration[A](f: BundleContext => A): A =
+  def withSecureServiceRegistration[A](props: Map[String, String] = Map())(f: BundleContext => A): A =
     withFramework { bc =>
-      bc.registerService(classOf[Service].getName, factory, emptyDict)
+      bc.registerSecureService(factory, props)
       f(bc)
     }
 
-  "Secure Service Factory getSecureServices (plural)" should {
+  "registerSecureService" should {
 
-    "work fine with normal service registrations" in {
-      withFramework { bc =>
-        bc.registerService(classOf[String].getName, "foo", emptyDict)
-        val ref1 = bc.getServiceReferences(classOf[String], null).iterator.next
-        val (ref2, svc) = getSecureServices(bc, classOf[String].getName, null, Set.empty)(0)
-        (ref1, bc.getService(ref1)) must_== ((ref2, svc))
+    "propagate service properties (positive)" in {
+      withSecureServiceRegistration(Map("woozle" -> "fnord")) { bc =>
+        val filter = SecureServiceFactory.filter("woozle", "fnord")
+        bc.withSecureService[Service](ps, filter)(identity) must_== Some(("foo", ps))
       }
     }
 
-    "pass principals correctly via getSecureServices" in {
-      withSecureServiceRegistration { bc =>
-        val (ref, svc) = getSecureServices(bc, classOf[Service].getName, null, ps).head
-        svc must_== (("foo", ps))
+    "propagate service properties (negative)" in {
+      withSecureServiceRegistration(Map("woozle" -> "fnord")) { bc =>
+        val filter = SecureServiceFactory.filter("woozle", "qux")
+        bc.withSecureService[Service](ps, filter)(identity) must_== None
       }
     }
 
-    "ignore principals when called normally" in {
-      withSecureServiceRegistration { bc =>
-        val ref = bc.getServiceReference(classOf[Service].getName)
-        bc.getService(ref) must_== (("foo", Set.empty))
+    "propagate service properties (wildcard, positive)" in {
+      withSecureServiceRegistration(Map("woozle" -> "fnord")) { bc =>
+        val filter = SecureServiceFactory.filter("woozle", "*")
+        bc.withSecureService[Service](ps, filter)(identity) must_== Some(("foo", ps))
       }
     }
 
-  }
-
-  "Secure Service Factory getSecureService (singular)" should {
-
-    "work fine with normal service registrations" in {
-      withFramework { bc =>
-        bc.registerService(classOf[String].getName, "foo", emptyDict)
-        val ref1 = bc.getServiceReferences(classOf[String], null).iterator.next
-        val Some((ref2, svc)) = getSecureService(bc, classOf[String].getName, null, Set.empty)
-        (ref1, bc.getService(ref1)) must_== ((ref2, svc))
-      }
-    }
-
-    "pass principals correctly via getSecureServices" in {
-      withSecureServiceRegistration { bc =>
-        val Some((ref, svc)) = getSecureService(bc, classOf[Service].getName, null, ps)
-        svc must_== (("foo", ps))
-      }
-    }
-
-    "ignore principals when called normally" in {
-      withSecureServiceRegistration { bc =>
-        val ref = bc.getServiceReference(classOf[Service].getName)
-        bc.getService(ref) must_== (("foo", Set.empty))
-      }
-    }
-
-    "return a new service instance each time requested" in {
-
-      // So, this is probably the root cause of http://jira.gemini.edu:8080/browse/REL-2881
-      // When you have a ServiceFactory the framework keeps a refcount for instances and doesn't
-      // dispose of them until the refcount goes to zero. This count can be > 1 if there are`
-      // simultaneous requests, a simulated below.
-
-      withSecureServiceRegistration { bc =>
-        val Some((ref1, svc1)) = getSecureService(bc, classOf[Service].getName, null, ps)
-
-        // Normally we would bc.ungetService(ref1) here before the next request, but if we don't
-        // do this the next getSecureService call will return the same instance and the passed
-        // principals are ignored.
-
-        val Some((ref2, svc2)) = getSecureService(bc, classOf[Service].getName, null, ps2)
-        svc2 must_== (("foo", ps2))
-
+    "propagate service properties (wildcard, negative)" in {
+      withSecureServiceRegistration(Map("woozle" -> "fnord")) { bc =>
+        val filter = SecureServiceFactory.filter("snoozle", "*")
+        bc.withSecureService[Service](ps, filter)(identity) must_== None
       }
     }
 
   }
+
+  "withSecureService" should {
+
+    "fail on missing service" in {
+      withSecureServiceRegistration() { bc =>
+        bc.withSecureService[ClassLoader](ps)(identity) must_== None
+      }
+    }
+
+    "pass principals correctly" in {
+      withSecureServiceRegistration() { bc =>
+        bc.withSecureService[Service](ps)(identity) must_== Some(("foo", ps))
+      }
+    }
+
+    "pass principals correctly when called concurrently" in {
+      withSecureServiceRegistration() { bc =>
+        val Some(Some((a, b))) =
+          bc.withSecureService[Service](ps) { case (_, ps) =>
+            bc.withSecureService[Service](ps2) { case (_, ps2) => (ps, ps2) }
+          }
+        (a, b) must_== ((ps, ps2))
+      }
+
+    }
+
+  }
+
+  "withSecureServiceByName" should {
+
+    "fail on missing service" in {
+      withSecureServiceRegistration() { bc =>
+        bc.withSecureServiceByName(classOf[ClassLoader].getName, ps)(identity) must_== None
+      }
+    }
+
+    "pass principals correctly" in {
+      withSecureServiceRegistration() { bc =>
+        bc.withSecureServiceByName(classOf[Service].getName, ps)(identity) must_== Some(("foo", ps))
+      }
+    }
+
+    "pass principals correctly when called concurrently" in {
+      withSecureServiceRegistration() { bc =>
+        val Some(Some((a, b))) =
+          bc.withSecureServiceByName(classOf[Service].getName, ps) { case (_, ps) =>
+            bc.withSecureServiceByName(classOf[Service].getName, ps2) { case (_, ps2) => (ps, ps2) }
+          }
+        (a, b) must_== ((ps, ps2))
+      }
+
+    }
+
+  }
+
 
 
 }

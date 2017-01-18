@@ -16,6 +16,9 @@ unmanagedJars in Test ++= Seq(
   new File(baseDirectory.value, "../../bundle/edu.gemini.osgi.main/lib/org.apache.felix-4.2.1.jar")
 )
 
+libraryDependencies ++= Seq(
+  "org.scalaz" %% "scalaz-core" % ScalaZVersion)
+
 osgiSettings
 
 ocsBundleSettings
@@ -24,8 +27,7 @@ OsgiKeys.bundleActivator := None
 
 OsgiKeys.bundleSymbolicName := name.value
 
-OsgiKeys.dynamicImportPackage := Seq("")
+OsgiKeys.dynamicImportPackage := Seq("*")
 
 OsgiKeys.exportPackage := Seq(
   "edu.gemini.util.osgi")
-

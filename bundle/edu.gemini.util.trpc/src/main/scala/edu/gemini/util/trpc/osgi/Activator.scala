@@ -35,10 +35,18 @@ class Activator extends BundleActivator with ExternalStorage {
   class Servlet(ks: KeyService) extends TrpcServlet(ks) {
 
     // We just look for a service of the requested class, with an extra attribute specified by the filter
-    def withService[B](clazz: String, ps: Set[Principal])(f: Any => B): B = 
-      context.getSecureService(clazz, Filter, ps) match {
-        case Some((ref, svc)) => try f(svc) finally context.ungetService(ref)
-        case None => throw new util.NoSuchElementException("No service of type %s available.".format(clazz))
+    def withService[B](clazz: String, ps: Set[Principal])(f: Any => B): B =
+      withNormalService(clazz, f)     orElse
+      withSecureService(clazz, ps, f) getOrElse {
+        throw new util.NoSuchElementException("No service of type %s available.".format(clazz))
+      }
+
+    def withSecureService[B](clazz: String, ps: Set[Principal], f: Any => B): Option[B] =
+      context.withSecureServiceByName(clazz, ps, Filter)(f)
+
+    def withNormalService[B](clazz: String, f: Any => B): Option[B] =
+      Option(context.getServiceReferences(clazz, Filter.toString)).flatMap(_.headOption).map { ref =>
+        try f(context.getService(ref)) finally context.ungetService(ref)
       }
 
   }
@@ -113,4 +121,3 @@ class Activator extends BundleActivator with ExternalStorage {
   }
 
 }
-

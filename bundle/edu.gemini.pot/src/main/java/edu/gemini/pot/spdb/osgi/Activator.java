@@ -76,7 +76,7 @@ public class Activator implements BundleActivator {
         private State state;
         private IDBDatabaseService db;
         private ServiceRegistration<IDBDatabaseService> dbReg;
-        private ServiceRegistration<IDBQueryRunner>     qrReg;
+        private ServiceRegistration<SecureServiceFactory<IDBQueryRunner>> qrReg;
 
         DatabaseLoader(BundleContext ctx, File dir) {
             this.ctx   = ctx;
@@ -102,12 +102,14 @@ public class Activator implements BundleActivator {
             final Dictionary<String, Object> properties2 = new Hashtable<String, Object>();
             properties2.put("trpc", ""); // publish just the QueryRunner as TRPC service
             // A factory to make a new query runner for each TRPC user
-            final ServiceFactory<IDBQueryRunner> factory = new SecureServiceFactory<IDBQueryRunner>() {
-                public IDBQueryRunner getService(Bundle b, ServiceRegistration<IDBQueryRunner> reg, Set<Principal> ps) {
+            final SecureServiceFactoryForJava<IDBQueryRunner> factory = new SecureServiceFactoryForJava<IDBQueryRunner>() {
+                public IDBQueryRunner getService(Set<Principal> ps) {
                     return DatabaseLoader.this.db.getQueryRunner(ps);
                 }
             };
-            qrReg = (ServiceRegistration<IDBQueryRunner>) ctx.registerService(IDBQueryRunner.class.getName(), (Object) factory, properties2);
+            qrReg = SecureServiceFactory$.MODULE$.<IDBQueryRunner>registerSecureServiceForJava(
+                ctx, factory, IDBQueryRunner.class, properties2
+            );
 
         }
 
