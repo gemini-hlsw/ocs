@@ -43,8 +43,7 @@ final class ExportOcs3Command(db: IDBDatabaseService, dir: File, user: java.util
 
     for {
       pids0 <- if (pids.nonEmpty) IO(pids) else lookupPids
-      res   <- pids0.traverseU(pid => export(pid).run)
-      _     <- pids0.zip(res).traverseU((report _).tupled)
+      _     <- pids0.sorted.traverseU(pid => export(pid).run >>= (report(pid, _)))
     } yield ()
   }
 
