@@ -7,6 +7,7 @@ import edu.gemini.spModel.io.{PioDocumentBuilder, SequenceOutputService}
 import edu.gemini.spModel.io.PioSyntax._
 import edu.gemini.spModel.pio.{Document, Container, Pio}
 import edu.gemini.spModel.pio.xml.{PioXmlFactory, PioXmlUtil}
+import edu.gemini.spModel.rich.pot.sp._
 
 import org.dom4j.Element
 import org.dom4j.io.{OutputFormat, XMLWriter}
@@ -38,20 +39,18 @@ final class Ocs3ExportFunctor extends DBAbstractFunctor {
   override def execute(db: IDBDatabaseService, n: ISPNode, ps: Set[Principal]): Unit = {
     val doc = PioDocumentBuilder.instance.toDocument(n)
 
-    def containedObs(oc: ISPObservationContainer): Map[SPNodeKey, ISPObservation] =
-      oc.getAllObservations.asScala.map(o => o.getNodeKey -> o).toMap
+    def mapObs(obsList: Traversable[ISPObservation]): Map[SPNodeKey, ISPObservation] =
+      obsList.map(o => o.getNodeKey -> o).toMap
 
     val nodeMap: Map[SPNodeKey, ISPObservation] =
       n match {
         case p: ISPProgram =>
           // To my surprise, template observations aren't included in
           // MemProgram's getAllObservations results.
-          (containedObs(p) /: Option(p.getTemplateFolder).toList.flatMap(_.getTemplateGroups.asScala.toList)) { (m,tg) =>
-            m ++ containedObs(tg)
-          }
+          mapObs(p.allObservationsIncludingTemplateObservations)
 
         case oc: ISPObservationContainer =>
-          containedObs(oc)
+          mapObs(oc.getAllObservations.asScala)
 
         case o: ISPObservation =>
           Map(o.getNodeKey -> o)
@@ -83,8 +82,7 @@ final class Ocs3ExportFunctor extends DBAbstractFunctor {
       }
 
       // We will rename the element from "container" to its type, except for obs
-      // log, template, and note because there are different kinds of these
-      // various template types
+      // log, template, and note because there are different kinds of these.
       import edu.gemini.pot.sp.SPComponentBroadType.{INFO, OBSLOG, TEMPLATE}
       val name = c.getType match {
         case INFO.value                    => c.getSubtype

@@ -13,7 +13,19 @@ class RichProgram(prog:ISPProgram) {
       prog.dataObject = dataObj
     }
 
-  def allObservations:List[ISPObservation] = prog.getAllObservations.asScala.toList
+  def templateGroups: List[ISPTemplateGroup] =
+    Option(prog.getTemplateFolder).toList.flatMap(_.getTemplateGroups.asScala.toList)
+
+  private def allObs(oc: ISPObservationContainer): List[ISPObservation] =
+    oc.getAllObservations.asScala.toList
+
+  def allObservations: List[ISPObservation] =
+    allObs(prog)
+
+  def allObservationsIncludingTemplateObservations: List[ISPObservation] =
+    (List(allObs(prog))/:templateGroups) { (l, tg) =>
+      allObs(tg) :: l
+    }.flatten
 
   def obsByLibraryId(lid:String):Either[String, ISPObservation] =
     allObservations.find(_.libraryId.exists(_ == lid)).toRight(s"Observation with library id '$lid' was not found.")
