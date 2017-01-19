@@ -33,6 +33,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer<IDBD
                 "rmprog",
                 "importXml",
                 "exportXml",
+                "exportOcs3",
                 "du",
                 "purge",
                 "migrateAltair",

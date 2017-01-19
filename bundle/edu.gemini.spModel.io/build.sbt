@@ -28,4 +28,5 @@ OsgiKeys.dynamicImportPackage := Seq("")
 OsgiKeys.exportPackage := Seq(
   "edu.gemini.spModel.io",
   "edu.gemini.spModel.io.updater",
-  "edu.gemini.spModel.io.app")
+  "edu.gemini.spModel.io.app",
+  "edu.gemini.spModel.io.ocs3")

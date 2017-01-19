@@ -13,6 +13,7 @@ import edu.gemini.spModel.io.SpImportService;
 import edu.gemini.spdb.shell.misc.EphemerisPurgeCommand;
 import static edu.gemini.spdb.shell.misc.EphemerisPurgeCommand.*;
 import edu.gemini.spdb.shell.misc.ExportXmlCommand;
+import edu.gemini.spdb.shell.misc.ExportOcs3Command;
 import edu.gemini.spdb.shell.misc.ImportXmlCommand;
 import edu.gemini.spdb.shell.misc.LsProgs;
 import org.osgi.util.tracker.ServiceTracker;
@@ -22,6 +23,7 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 
 class Commands {
 
@@ -101,25 +103,44 @@ class Commands {
 
     }
 
+    private static ImEither<String, List<SPProgramID>> parsePids(String[] pidStrings) {
+        final List<SPProgramID> pids = new ArrayList<>(pidStrings.length);
+        for (String id : pidStrings) {
+            try {
+                pids.add(SPProgramID.toProgramID(id));
+            } catch (SPBadIDException e) {
+                return ImEither.left("Could not parse '" + id + "' as a program ID.");
+            }
+        }
+        return ImEither.right(pids);
+    }
+
     public String exportXml(final File path, final String... progIdStrings) {
         if (!path.isDirectory()) return ("Not a directory: " + path);
 
-        final List<SPProgramID> progIds = new ArrayList<>(progIdStrings.length);
-        for (String id : progIdStrings) {
+        return parsePids(progIdStrings).fold(err -> err, pids -> {
             try {
-                progIds.add(SPProgramID.toProgramID(id));
-            } catch (SPBadIDException e) {
-                return "Could not parse '" + id + "' as a program ID.";
+                new ExportXmlCommand(db(), path, user).exportXML(pids);
+            } catch (RuntimeException e) {
+                e.printStackTrace();
+                throw e;
             }
-        }
+            return "Done.";
+        });
+    }
 
-        try {
-            new ExportXmlCommand(db(), path, user).exportXML(progIds);
-        } catch (RuntimeException e) {
-            e.printStackTrace();
-            throw e;
-        }
-        return "Done.";
+    public String exportOcs3(final File path, final String... progIdStrings) {
+        if (!path.isDirectory()) return String.format("Not a directory: %s", path);
+
+        return parsePids(progIdStrings).fold(err -> err, pids -> {
+            try {
+                new ExportOcs3Command(db(), path, user).exportOcs3(pids);
+            } catch (RuntimeException e) {
+                e.printStackTrace();
+                throw e;
+            }
+            return "Done.";
+        });
     }
 
     // export xml files

@@ -7,6 +7,7 @@ import edu.gemini.spModel.io.{PioDocumentBuilder, SequenceOutputService}
 import edu.gemini.spModel.io.PioSyntax._
 import edu.gemini.spModel.pio.{Document, Container, Pio}
 import edu.gemini.spModel.pio.xml.{PioXmlFactory, PioXmlUtil}
+import edu.gemini.spModel.rich.pot.sp._
 
 import org.dom4j.Element
 import org.dom4j.io.{OutputFormat, XMLWriter}
@@ -16,6 +17,9 @@ import java.security.Principal
 import java.util.Set
 
 import scala.collection.JavaConverters._
+
+import scalaz._
+import Scalaz._
 
 import Ocs3ExportFunctor._
 
@@ -35,11 +39,24 @@ final class Ocs3ExportFunctor extends DBAbstractFunctor {
   override def execute(db: IDBDatabaseService, n: ISPNode, ps: Set[Principal]): Unit = {
     val doc = PioDocumentBuilder.instance.toDocument(n)
 
+    def mapObs(obsList: Traversable[ISPObservation]): Map[SPNodeKey, ISPObservation] =
+      obsList.map(o => o.getNodeKey -> o).toMap
+
     val nodeMap: Map[SPNodeKey, ISPObservation] =
       n match {
-        case oc: ISPObservationContainer => oc.getAllObservations.asScala.map(o => o.getNodeKey -> o).toMap
-        case o:  ISPObservation          => Map(o.getNodeKey -> o)
-        case _                           => Map.empty
+        case p: ISPProgram =>
+          // To my surprise, template observations aren't included in
+          // MemProgram's getAllObservations results.
+          mapObs(p.allObservationsIncludingTemplateObservations)
+
+        case oc: ISPObservationContainer =>
+          mapObs(oc.getAllObservations.asScala)
+
+        case o: ISPObservation =>
+          Map(o.getNodeKey -> o)
+
+        case _ =>
+          Map.empty
       }
 
     // Go through all the observation containers removing the root sequence
@@ -64,11 +81,13 @@ final class Ocs3ExportFunctor extends DBAbstractFunctor {
         xml.rmAttrs("name", "kind")
       }
 
-      // We will rename the element from "container" to its type, except for the
-      // obs log because there are two different obslog types.
+      // We will rename the element from "container" to its type, except for obs
+      // log, template, and note because there are different kinds of these.
+      import edu.gemini.pot.sp.SPComponentBroadType.{INFO, OBSLOG, TEMPLATE}
       val name = c.getType match {
-        case "ObsLog" => c.getKind
-        case x        => x.toLowerCase
+        case INFO.value                    => c.getSubtype
+        case OBSLOG.value | TEMPLATE.value => c.getKind
+        case x                             => x.toLowerCase
       }
       val xml  = PioXmlUtil.toElement(c)
       xml.setName(name)
