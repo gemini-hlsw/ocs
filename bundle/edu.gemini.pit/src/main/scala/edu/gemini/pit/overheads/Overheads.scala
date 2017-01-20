@@ -7,6 +7,9 @@ import edu.gemini.model.p1.immutable._
 import scalaz._
 import Scalaz._
 
+// We probably want to add the actual calculations for times here, which will take integration time
+// and return the other times. That way, this is accessible to both the Observation and the ObservationEditor,
+// which will need to update its fields when the integration time is updated.
 sealed trait Overheads {
   def partnerOverheadFraction: Double
   def acquisitionOverhead: Duration
