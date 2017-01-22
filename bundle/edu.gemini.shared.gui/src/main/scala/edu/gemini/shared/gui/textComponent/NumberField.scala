@@ -31,6 +31,9 @@ class NumberField(d: Option[Double], allowEmpty: Boolean, format: java.text.Form
 
   def valid(d:Double):Boolean = true
 
+  def value: Option[Double] = Option(peer.getValue).map(_.asInstanceOf[Double])
+  def value_=(v: Double): Unit = peer.setValue(v)
+
   override def enabled_=(b:Boolean) {
     super.enabled = b
     background = if (b && !valid) pink else white

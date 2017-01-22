@@ -7,6 +7,7 @@ import edu.gemini.pit.ui.util._
 import java.awt.Color
 import javax.swing.Icon
 
+import edu.gemini.pit.overheads.Overheads
 import edu.gemini.shared.gui.textComponent.NumberField
 
 import scala.swing._
@@ -14,6 +15,7 @@ import event.{SelectionChanged, ValueChanged}
 import scala.swing.Swing._
 import scalaz._
 import Scalaz._
+
 
 object ObservationEditor {
 
@@ -29,6 +31,22 @@ class ObservationEditor private (obs:Observation, canEdit:Boolean) extends StdMo
 
   // Editor component
   object Editor extends GridBagPanel with Rows {
+    private class RightLabel(t: String) extends Label(t) {
+      horizontalAlignment = Alignment.Right
+    }
+
+    private type Named = {
+      def name: String
+    }
+
+    private class OptionLabel(a:Option[Named], icon0:Icon) extends Label() {
+      horizontalAlignment = Alignment.Left
+      icon = icon0
+      text = a.map(_.name).getOrElse("none")
+      if (a.isEmpty)
+        foreground = Color.GRAY
+    }
+
     addRow(new Label("Conditions"), new OptionLabel(obs.condition, ICON_CONDS), gw=2)
     addRow(new Label("Resources"), new OptionLabel(obs.blueprint, ICON_DEVICE), gw=2)
     addRow(new Label("Target"), new OptionLabel(obs.target, obs.target match {
@@ -43,11 +61,6 @@ class ObservationEditor private (obs:Observation, canEdit:Boolean) extends StdMo
     preferredSize = (500, preferredSize.height) // force width
   }
 
-
-  class RightLabel(t: String) extends Label(t) {
-    horizontalAlignment = Alignment.Right
-  }
-
   // Editable
   Contents.Footer.OkButton.enabled = canEdit
 
@@ -57,17 +70,8 @@ class ObservationEditor private (obs:Observation, canEdit:Boolean) extends StdMo
     case ValueChanged(_) => validateEditor()
   }
 
-  type Named = {
-    def name: String
-  }
-
-  class OptionLabel(a:Option[Named], icon0:Icon) extends Label() {
-    horizontalAlignment = Alignment.Left
-    icon = icon0
-    text = a.map(_.name).getOrElse("none")
-    if (a.isEmpty)
-      foreground = Color.GRAY
-  }
+  // Time calculator
+  val calculator = obs.blueprint.flatMap(Overheads)
 
   object IntegrationTime extends NumberField(obs.time.map(_.value).orElse(Some(1.0)), allowEmpty = false) {
     enabled = canEdit
@@ -84,37 +88,35 @@ class ObservationEditor private (obs:Observation, canEdit:Boolean) extends StdMo
       text = t
   }
 
-  object ProgramTime extends NumberField(None, allowEmpty = false) {
+  class CalculatedTimeAmountField extends NumberField(None, allowEmpty = false) {
     enabled = false
-    def update(t: Double): Unit =
-      text = t.toString
+
+    def update(t: TimeAmount): Unit =
+      value = (Units.selection.item match {
+        case TimeUnit.HR    => t.toHours
+        case TimeUnit.NIGHT => t.toNights
+      }).value
   }
+
+  object ProgramTime extends CalculatedTimeAmountField
   object ProgramTimeUnits extends UnitsLabel
 
-  object PartTime extends NumberField(None, allowEmpty = false) {
-    enabled = false
-    def update(t: Double): Unit =
-      text = t.toString
-  }
+  object PartTime extends CalculatedTimeAmountField
   object PartTimeUnits extends UnitsLabel
 
-  object TotalTime extends NumberField(None, allowEmpty = false) {
-    enabled = false
-    def update(t: Double): Unit =
-      text = t.toString
-  }
+  object TotalTime extends CalculatedTimeAmountField
   object TotalTimeUnits extends UnitsLabel
 
   def updateTimeLabels(): Unit = {
-    val t = \/.fromTryCatchNonFatal(IntegrationTime.text.toDouble).getOrElse(0.0)
-    ProgramTime.update(t)
-    PartTime.update(t)
-    TotalTime.update(t)
+    val intTime = TimeAmount(\/.fromTryCatchNonFatal(IntegrationTime.text.toDouble).getOrElse(0.0), Units.selection.item)
+    val obsTimes = calculator.map(_.calculate(intTime))
+    ProgramTime.update(obsTimes.map(_.progTime).getOrElse(TimeAmount.empty))
+    PartTime.update(obsTimes.map(_.partTime).getOrElse(TimeAmount.empty))
+    TotalTime.update(obsTimes.map(_.totalTime).getOrElse(TimeAmount.empty))
   }
   IntegrationTime.reactions += {
     case ValueChanged(_) => updateTimeLabels()
   }
-  updateTimeLabels()
 
   def updateUnitsLabels(): Unit = {
     val t = Units.selection.item.value()
@@ -123,8 +125,14 @@ class ObservationEditor private (obs:Observation, canEdit:Boolean) extends StdMo
     TotalTimeUnits.update(t)
   }
   Units.selection.reactions += {
-    case SelectionChanged(_) => updateUnitsLabels()
+    case SelectionChanged(_) =>
+      // A units change requires the labels to change and will change the calculated time amounts, so must update both.
+      updateUnitsLabels()
+      updateTimeLabels()
   }
+
+  // Initialize the dependent UI components.
+  updateTimeLabels()
   updateUnitsLabels()
 
   // Construct our editor

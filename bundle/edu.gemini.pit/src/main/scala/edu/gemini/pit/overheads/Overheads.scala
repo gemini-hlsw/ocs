@@ -15,7 +15,31 @@ sealed trait Overheads {
   def acquisitionOverhead: Duration
   def typicalExpTime: Option[Duration]
   def otherOverheadFraction: Double
+
+  def calculate(intTime: TimeAmount): ObservationTimes = {
+    // Calculate everything in hours, as per REL-2985 formulae.
+    val progTime  = {
+      val intTimeHrs = intTime.toHours.value
+      val overheadTimeHrs = (1 + otherOverheadFraction) * intTimeHrs
+      val numAcqs = ((overheadTimeHrs / 2).toInt + ((overheadTimeHrs % 2 > 0) ? 1 | 0)).toDouble
+
+      // Careful here: if we convert to hours directly using java.time API, this will be a Long value representing
+      // the floor of the number of hours.
+      val acqOverheadHrs = acquisitionOverhead.toMinutes.toDouble / 60.0
+      numAcqs * acqOverheadHrs + overheadTimeHrs
+    }
+    val partTime  = progTime * partnerOverheadFraction
+    val totalTime = progTime + partTime
+
+    ObservationTimes(
+      TimeAmount(progTime,  TimeUnit.HR),
+      TimeAmount(partTime,  TimeUnit.HR),
+      TimeAmount(totalTime, TimeUnit.HR))
+  }
 }
+
+// All time amounts are in hours, so convert as necessary to nights.
+case class ObservationTimes(progTime: TimeAmount, partTime: TimeAmount, totalTime: TimeAmount)
 
 // Due to the large number of possible blueprint bases and how each one requires different configuration params
 // to determine the overheads, it seems infeasible to read this information from a file, so for now it is hard-coded
