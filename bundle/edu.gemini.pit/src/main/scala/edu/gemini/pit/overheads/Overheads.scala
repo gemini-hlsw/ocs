@@ -16,25 +16,40 @@ sealed trait Overheads {
   def typicalExpTime: Option[Duration]
   def otherOverheadFraction: Double
 
+  // Careful here: if we convert to hours directly using java.time API, this will be a Long value representing
+  // the floor of the number of hours.
+  private def acqOverheadHrs = acquisitionOverhead.toMinutes.toDouble / 60.0
+
   def calculate(intTime: TimeAmount): ObservationTimes = {
     // Calculate everything in hours, as per REL-2985 formulae.
-    val progTime  = {
+    val progTimeHrs  = {
+      val visTimeHrs = Overheads.visTimeHrs
       val intTimeHrs = intTime.toHours.value
       val overheadTimeHrs = (1 + otherOverheadFraction) * intTimeHrs
-      val numAcqs = ((overheadTimeHrs / 2).toInt + ((overheadTimeHrs % 2 > 0) ? 1 | 0)).toDouble
+      val numAcqs = ((overheadTimeHrs / visTimeHrs).toInt + ((overheadTimeHrs % visTimeHrs > 0) ? 1 | 0)).toDouble
 
       // Careful here: if we convert to hours directly using java.time API, this will be a Long value representing
       // the floor of the number of hours.
       val acqOverheadHrs = acquisitionOverhead.toMinutes.toDouble / 60.0
       numAcqs * acqOverheadHrs + overheadTimeHrs
     }
-    val partTime  = progTime * partnerOverheadFraction
-    val totalTime = progTime + partTime
+    val partTimeHrs  = progTimeHrs * partnerOverheadFraction
+    val totalTimeHrs = progTimeHrs + partTimeHrs
 
     ObservationTimes(
-      TimeAmount(progTime,  TimeUnit.HR),
-      TimeAmount(partTime,  TimeUnit.HR),
-      TimeAmount(totalTime, TimeUnit.HR))
+      TimeAmount(progTimeHrs,  TimeUnit.HR),
+      TimeAmount(partTimeHrs,  TimeUnit.HR),
+      TimeAmount(totalTimeHrs, TimeUnit.HR))
+  }
+
+  // This is needed for 2017A to 2017B migration, as time in former proposals will be migrated to progTime, and
+  // thus intTime - the value that is user modifiable - must be calculated from this.
+  def intTimeFromProgTime(progTime: TimeAmount): TimeAmount = {
+    val visTimeHrs  = Overheads.visTimeHrs
+    val progTimeHrs = progTime.toHours.value
+    val numAcqs     = ((progTimeHrs / visTimeHrs).toInt + ((progTimeHrs % visTimeHrs > 0) ? 1 | 0)).toDouble
+    val intTimeHrs  = (progTimeHrs - numAcqs * acqOverheadHrs)/(1 + otherOverheadFraction)
+    TimeAmount(intTimeHrs, TimeUnit.HR)
   }
 }
 
@@ -45,6 +60,11 @@ case class ObservationTimes(progTime: TimeAmount, partTime: TimeAmount, totalTim
 // to determine the overheads, it seems infeasible to read this information from a file, so for now it is hard-coded
 // and will require changing here if these values change.
 object Overheads extends (BlueprintBase => Option[Overheads]) {
+  // t_vis as per REL-2985.
+  // visTime is in hours already: if this changes, this calculation should change to ensure no loss of data.
+  private lazy val visTime = Duration.ofHours(2)
+  def visTimeHrs: Double = visTime.toHours.toDouble
+
   private class SimpleOverheads(override val partnerOverheadFraction: Double,
                                 override val acquisitionOverhead: Duration,
                                 override val typicalExpTime: Option[Duration],
