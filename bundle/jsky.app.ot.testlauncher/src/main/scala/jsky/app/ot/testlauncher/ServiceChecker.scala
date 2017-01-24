@@ -25,18 +25,24 @@ object ServiceChecker extends App {
   val peers = List(gs)
   val keys  = TrpcKeyChain(new File(dir, "keys.ser"), peers).unsafeRunAndThrow
 
-  // As a sanity check ensure that all TRPC services are answering
-  def check[A](implicit ev: Manifest[A]): Unit =
-  TrpcClient(gs).withKeyChain(keys)(_[A].toString) match {
-    case -\/(e) => Console.err.println(s">> TRPC check failed for ${ev.runtimeClass.getName}"); e.printStackTrace()
-    case \/-(s) => Console.out.println(s">> TRPC check ok     for ${ev.runtimeClass.getName} - $s")
+
+  def check[A](f: (Int, Int) => Boolean)(implicit ev: Manifest[A]): Unit = {
+    val a, b = TrpcClient(gs).withKeyChain(keys)(_[A].hashCode)
+    (a tuple b) match {
+      case -\/(e)                     => Console.err.println(s">> TRPC check failed for ${ev.runtimeClass.getName}"); e.printStackTrace()
+      case \/-((s1, s2)) if f(s1, s2) => Console.out.println(s">> TRPC check ok     for ${ev.runtimeClass.getName}")
+      case _                          => Console.err.println(s">> TRPC check failed for ${ev.runtimeClass.getName} - predicate failed")
+    }
   }
 
-  check[VcsService]
-  check[IDBQueryRunner]
-  check[TooService]
-  check[AuxFileServer]
-  check[ItcService]
-  check[KeyService]
+  // These must be unique for each call
+  check[VcsService](_ =/= _)
+  check[IDBQueryRunner](_ =/= _)
+  check[TooService](_ =/= _)
+
+  // These should be the same for each call
+  check[AuxFileServer](_ === _)
+  check[ItcService](_ === _)
+  check[KeyService](_ === _)
 
 }
