@@ -10,8 +10,10 @@ import org.osgi.framework.{ServiceRegistration, Bundle, BundleActivator, BundleC
 import org.osgi.util.tracker.ServiceTracker
 import edu.gemini.spModel.core.osgi.SiteProperty
 import edu.gemini.util.osgi.SecureServiceFactory
+import edu.gemini.util.osgi.SecureServiceFactory._
 import java.security.Principal
 
+import scala.collection.JavaConverters._
 
 class Activator extends BundleActivator {
   private var tracker: Option[ServiceTracker[_,_]] = None
@@ -35,12 +37,10 @@ class Activator extends BundleActivator {
 
           // Our TooServiceApi, for TRPC clients
           val factory = new SecureServiceFactory[TooServiceApi] {
-            def getService(b: Bundle, reg: ServiceRegistration[TooServiceApi], ps: java.util.Set[Principal]): TooServiceApi =
-              service.serviceApi(ps)
+            def getService(ps: Set[Principal]): TooServiceApi =
+              service.serviceApi(ps.asJava)
           }
-          val props2 = new java.util.Hashtable[String,String]
-          props2.put("trpc", "") // publish to trpc
-          val reg2 = ctx.registerService(classOf[TooServiceApi].getName, factory, props2)
+          val reg2 = ctx.registerSecureService(factory, Map("trpc" -> ""))
 
           // Cleanup
           () => {

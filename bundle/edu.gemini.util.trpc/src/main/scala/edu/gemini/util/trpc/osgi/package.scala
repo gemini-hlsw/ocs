@@ -8,7 +8,7 @@ import edu.gemini.util.osgi.SecureServiceFactory
 package object osgi {
 
   val Attr = "trpc"
-  val Filter = "(%s=*)".format(Attr)
+  val Filter = SecureServiceFactory.filter(Attr)
   val Alias = "/%s".format(Attr)
   val Log = Logger.getLogger("edu.gemini.util.trpc.osgi") // hack hack
 

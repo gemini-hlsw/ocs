@@ -8,6 +8,7 @@ import edu.gemini.sp.vcs2.{Vcs, VcsServer, VcsService}
 import edu.gemini.sp.vcs.log.VcsLog
 import edu.gemini.sp.vcs.reg.VcsRegistrar
 import edu.gemini.util.osgi.SecureServiceFactory
+import edu.gemini.util.osgi.SecureServiceFactory._
 import edu.gemini.util.security.auth.keychain.KeyChain
 import org.osgi.framework.{Bundle, ServiceRegistration, BundleContext, BundleActivator}
 
@@ -35,18 +36,16 @@ class Activator extends BundleActivator{
         val vcsServer = new VcsServer(odb)
 
         // The public service.
-        val props = new util.Hashtable[String, Object]()
-        props.put(PUBLISH_TRPC, "true")
         val factory = new SecureServiceFactory[VcsService] {
-          def getService(b: Bundle, reg: ServiceRegistration[VcsService], ps: java.util.Set[Principal]): VcsService =
-            new vcsServer.SecureVcsService(ps.asScala.toSet, log)
+          def getService(ps: Set[Principal]): VcsService =
+            new vcsServer.SecureVcsService(ps, log)
         }
 
         // Register the Vcs client and a secure service factory for making the
         // VcsService implementation.
         List(
           ctx.registerService(classOf[Vcs], Vcs(auth, vcsServer), null),
-          ctx.registerService(classOf[VcsService].getName, factory, props)
+          ctx.registerSecureService(factory, Map(PUBLISH_TRPC -> ""))
         )
       } { _.foreach(_.unregister()) },
 
