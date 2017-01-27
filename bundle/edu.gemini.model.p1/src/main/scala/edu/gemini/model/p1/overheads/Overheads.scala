@@ -1,15 +1,12 @@
-package edu.gemini.pit.overheads
+package edu.gemini.model.p1.overheads
 
 import java.time.Duration
 
 import edu.gemini.model.p1.immutable._
 
-import scalaz._
-import Scalaz._
+import scalaz.Scalaz._
 
-// We probably want to add the actual calculations for times here, which will take integration time
-// and return the other times. That way, this is accessible to both the Observation and the ObservationEditor,
-// which will need to update its fields when the integration time is updated.
+// This is not the ideal package for this to live in, but to avoid circular bundle references, we put it here.
 sealed trait Overheads {
   def partnerOverheadFraction: Double
   def acquisitionOverhead: Duration
@@ -52,9 +49,6 @@ sealed trait Overheads {
     TimeAmount(intTimeHrs, TimeUnit.HR)
   }
 }
-
-// All time amounts are in hours, so convert as necessary to nights.
-case class ObservationTimes(progTime: TimeAmount, partTime: TimeAmount, totalTime: TimeAmount)
 
 // Due to the large number of possible blueprint bases and how each one requires different configuration params
 // to determine the overheads, it seems infeasible to read this information from a file, so for now it is hard-coded

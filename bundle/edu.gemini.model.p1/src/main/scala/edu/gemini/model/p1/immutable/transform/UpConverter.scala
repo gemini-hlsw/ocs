@@ -131,7 +131,11 @@ case class LastStepConverter(semester: Semester) extends SemesterConverter {
  * This converter will upgrade to 2017B
  */
 case object SemesterConverter2017ATo2017B extends SemesterConverter {
-  override val transformers = Nil
+  val timeToProgTime:TransformFunction = {
+    case t @ <time>{ns @ _*}</time> =>
+      StepResult("Former observation time parameter mapped to program time", <progTime>{ns}</progTime>).successNel
+  }
+  override val transformers = List(timeToProgTime)
 }
 
 /**

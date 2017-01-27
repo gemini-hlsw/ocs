@@ -17,7 +17,7 @@ import edu.gemini.spModel.template.TemplateParameters
 import org.specs2.mutable.SpecificationLike
 import scala.collection.JavaConverters._
 import scalaz._, Scalaz._
-import Observation.{blueprint, target, condition, time}
+import Observation.{blueprint, target, condition, intTime}
 import Proposal.{ targets, observations }
 
 /**
@@ -141,7 +141,7 @@ abstract class TemplateSpec(xmlName: String) { this: SpecificationLike =>
         _ <- blueprint := Some(bp)
         _ <- target    := Some(st)
         _ <- condition := Some(Condition.empty)
-        _ <- time      := Some(TimeAmount.empty)
+        _ <- intTime   := Some(TimeAmount.empty)
       } yield ()
     }
 

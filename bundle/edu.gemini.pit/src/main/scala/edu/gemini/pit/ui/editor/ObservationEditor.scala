@@ -7,7 +7,7 @@ import edu.gemini.pit.ui.util._
 import java.awt.Color
 import javax.swing.Icon
 
-import edu.gemini.pit.overheads.Overheads
+import edu.gemini.model.p1.overheads.Overheads
 import edu.gemini.shared.gui.textComponent.NumberField
 
 import scala.swing._
@@ -20,7 +20,7 @@ import Scalaz._
 object ObservationEditor {
 
   def open(c:Option[Observation], editable:Boolean, parent:UIElement) =
-    new ObservationEditor(c.getOrElse(Observation.empty.copy(time = Some(TimeAmount.empty))), editable).open(parent)
+    new ObservationEditor(c.getOrElse(Observation.empty.copy(intTime = Some(TimeAmount.empty))), editable).open(parent)
 
 }
 
@@ -73,14 +73,14 @@ class ObservationEditor private (obs:Observation, canEdit:Boolean) extends StdMo
   // Time calculator
   val calculator = obs.blueprint.flatMap(Overheads)
 
-  object IntegrationTime extends NumberField(obs.time.map(_.value).orElse(Some(1.0)), allowEmpty = false) {
+  object IntegrationTime extends NumberField(obs.intTime.map(_.value).orElse(Some(1.0)), allowEmpty = false) {
     enabled = canEdit
     override def valid(d:Double) = d > 0
   }
 
   object Units extends ComboBox(TimeUnit.values.toList) with ValueRenderer[TimeUnit] {
     enabled = canEdit
-    selection.item = obs.time.getOrElse(TimeAmount.empty).units
+    selection.item = obs.intTime.getOrElse(TimeAmount.empty).units
   }
 
   class UnitsLabel extends Label {
@@ -140,6 +140,6 @@ class ObservationEditor private (obs:Observation, canEdit:Boolean) extends StdMo
 
   // Construct a new value
   def value = obs.copy(
-    time = Some(TimeAmount(IntegrationTime.text.toDouble, Units.selection.item)),
+    intTime = Some(TimeAmount(IntegrationTime.text.toDouble, Units.selection.item)),
     meta = None)
 }
