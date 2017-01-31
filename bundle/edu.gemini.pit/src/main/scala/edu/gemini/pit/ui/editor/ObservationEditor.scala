@@ -110,9 +110,9 @@ class ObservationEditor private (obs:Observation, canEdit:Boolean) extends StdMo
   def updateTimeLabels(): Unit = {
     val intTime = TimeAmount(\/.fromTryCatchNonFatal(IntegrationTime.text.toDouble).getOrElse(0.0), Units.selection.item)
     val obsTimes = calculator.map(_.calculate(intTime))
-    ProgramTime.update(obsTimes.map(_.progTime).getOrElse(TimeAmount.empty))
-    PartTime.update(obsTimes.map(_.partTime).getOrElse(TimeAmount.empty))
-    TotalTime.update(obsTimes.map(_.totalTime).getOrElse(TimeAmount.empty))
+    ProgramTime.update(obsTimes.foldMap(_.progTime))
+    PartTime.update(obsTimes.foldMap(_.partTime))
+    TotalTime.update(obsTimes.foldMap(_.totalTime))
   }
   IntegrationTime.reactions += {
     case ValueChanged(_) => updateTimeLabels()
