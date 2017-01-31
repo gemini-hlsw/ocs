@@ -40,6 +40,8 @@ trait Rows { this: GridBagPanel =>
     row = row + 1
   }
   def addSpacer() {
+    // Empty labels are given a preferred size of 0x0, so unfortunately, we have to make one label non-empty to actually
+    // have space added to the UI.
     addRow(new Label(" "), new Label("")) // :-/
   }
   def addSeparator() {

@@ -31,12 +31,8 @@ sealed trait Overheads {
       numAcqs * acqOverheadHrs + overheadTimeHrs
     }
     val partTimeHrs  = progTimeHrs * partnerOverheadFraction
-    val totalTimeHrs = progTimeHrs + partTimeHrs
 
-    ObservationTimes(
-      TimeAmount(progTimeHrs,  TimeUnit.HR),
-      TimeAmount(partTimeHrs,  TimeUnit.HR),
-      TimeAmount(totalTimeHrs, TimeUnit.HR))
+    ObservationTimes(TimeAmount(progTimeHrs, TimeUnit.HR), TimeAmount(partTimeHrs, TimeUnit.HR))
   }
 
   // This is needed for 2017A to 2017B migration, as time in former proposals will be migrated to progTime, and
