@@ -1179,7 +1179,13 @@
                                    border-bottom-style="solid"
                                    border-bottom-width="0.25pt">
                         <fo:block font-weight="bold">
-                            Obs. Time
+                            Total
+                        </fo:block>
+                        <fo:block font-weight="bold">
+                            Program
+                        </fo:block>
+                        <fo:block font-weight="bold">
+                            Partner
                         </fo:block>
                     </fo:table-cell>
                 </fo:table-row>
@@ -1218,7 +1224,13 @@
                         </fo:table-cell>
                         <fo:table-cell>
                             <fo:block>
-                                <xsl:value-of select="format-number(time, '0.0')"/>&#160;<xsl:value-of select="time/@units"/>
+                                <xsl:value-of select="format-number(totalTime, '0.0')"/>&#160;<xsl:value-of select="totalTime/@units"/>
+                            </fo:block>
+                            <fo:block>
+                                <xsl:value-of select="format-number(progTime, '0.0')"/>&#160;<xsl:value-of select="progTime/@units"/>
+                            </fo:block>
+                            <fo:block>
+                                <xsl:value-of select="format-number(partTime, '0.0')"/>&#160;<xsl:value-of select="partTime/@units"/>
                             </fo:block>
                         </fo:table-cell>
                     </fo:table-row>
