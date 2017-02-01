@@ -17,8 +17,8 @@ import org.junit.Test
  */
 class CategorizedDataTest {
 
-  val ra1hrs = RightAscension.fromHours(1.0)
-  val ra3hrs = RightAscension.fromHours(3.0)
+  val ra1hrs: RightAscension = RightAscension.fromHours(1.0)
+  val ra3hrs: RightAscension = RightAscension.fromHours(3.0)
 
   @Test def cat1() {
 
@@ -34,7 +34,7 @@ class CategorizedDataTest {
       builder.setRa(ra3hrs).setPriority(MEDIUM).apply
     )
 
-    val catData = new CategorizedXYValues(Axis.RA1.groups, Axis.Priorities.groups, observations, Chart.ObservationCount.value)
+    val catData = CategorizedXYValues(Axis.RA1.groups, Axis.Priorities.groups, observations, Chart.ObservationCount.value)
     assertEquals(3, catData.activeYGroups.size)
     assertEquals(3, catData.value(RA(1, 2), Priorities(Set(LOW))), 0.01)
     assertEquals(2, catData.value(RA(3, 4), Priorities(Set(LOW))), 0.01)
@@ -55,7 +55,7 @@ class CategorizedDataTest {
       builder.setRa(ra3hrs).setInstrument(InstGmosNorth.SP_TYPE).apply
     )
 
-    val catData = new CategorizedXYValues(Axis.RA1.groups, Axis.Instruments.groups, observations, Chart.ObservationCount.value)
+    val catData = CategorizedXYValues(Axis.RA1.groups, Axis.Instruments.groups, observations, Chart.ObservationCount.value)
     assertEquals(4, catData.activeYGroups.size)
 
   }

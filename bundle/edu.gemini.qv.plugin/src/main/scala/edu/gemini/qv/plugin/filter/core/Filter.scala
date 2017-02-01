@@ -68,7 +68,7 @@ case class ConfigurationFilter[A](label: String, instrument: SPComponentType, gr
   def name = selection.map(valueName).mkString(",")
   def predicate(o: Obs) =
     if (!o.getInstrumentComponentType.equals(instrument)) false
-    else selection.intersect(collector(o)).size > 0
+    else selection.intersect(collector(o)).nonEmpty
 
   // implementation of copy method based on the case class copy
   def updated(selection: Set[A]) = copy(selection = selection)
@@ -93,8 +93,8 @@ sealed trait RangeFilter extends Filter {
   def name = toName
 
   override def categoryName = toCategoryName
-  def maxFromString(s: String) = try { s.toDouble } catch { case _: Throwable => highest }
-  def minFromString(s: String) = try { s.toDouble } catch { case _: Throwable => lowest }
+  def maxFromString(s: String): Double = try { s.toDouble } catch { case _: Throwable => highest }
+  def minFromString(s: String): Double = try { s.toDouble } catch { case _: Throwable => lowest }
   def predicate(o: Obs) = {
     val value = getter(o)
     value >= min && value < max
@@ -228,8 +228,8 @@ object Filter {
   }
 
   object Dec {
-    val MinValue = -90.0
-    val MaxValue = 90.0
+    val MinValue: Double = -90.0
+    val MaxValue: Double = 90.0
   }
   case class Dec(min: Double = Dec.MinValue, max: Double = Dec.MaxValue) extends SimpleRangeFilter {
     def label = "Dec"
@@ -304,7 +304,7 @@ object Filter {
     def value: Option[Boolean]
     override def name = value.toString
     override def categoryName = f"$label:$value"
-    override def predicate(o: Obs) = value.map(_ == getter(o)).getOrElse(true)
+    override def predicate(o: Obs) = value.forall(_ == getter(o))
   }
 
   /** Checks if the observation's program is active. */
@@ -390,7 +390,7 @@ object Filter {
 
   private val year = TimeUtils.year(TimeUtils.calendar(System.currentTimeMillis, TimeZone.getDefault)) - 8
   private val yearRange = Range(year, year + 10)
-  private val semesters: Set[Semester] = yearRange.map(year => Set(new Semester(year, Half.A), new Semester(year, Half.B))).flatten.toSet
+  private val semesters: Set[Semester] = yearRange.flatMap(year => Set(new Semester(year, Half.A), new Semester(year, Half.B))).toSet
   object Semester extends EnumFilterFactory[Semester](
     "Semesters",
     semesters,
@@ -476,7 +476,7 @@ object Filter {
 
   /** Helper object that allows to deal with the fact that the affiliate can indeed be null. */
   sealed case class Partner(affiliate: Option[Affiliate]) {
-    def displayValue = affiliate.map(_.displayValue).getOrElse("None")
+    def displayValue: String = affiliate.map(_.displayValue).getOrElse("None")
   }
   /** Partner filter uses the partner class which wraps an optional affiliate value. */
   object Partners extends EnumFilterFactory[Partner] (
@@ -544,14 +544,14 @@ object Filter {
 
   // Factory for enum filter creation.
   class EnumFilterFactory[A](label: String, values: Set[A], getter: Obs => A, valueName: A => String = {v: A => v.toString}) {
-    def apply(selection: Set[A]): EnumFilter[A] = new EnumFilter(label, values, getter, selection,  valueName)
+    def apply(selection: Set[A]): EnumFilter[A] = EnumFilter(label, values, getter, selection, valueName)
     def apply(selection: A): EnumFilter[A] = apply(Set(selection))
     def apply(): EnumFilter[A] = apply(values)
   }
 
   // Factory for enum filter creation.
   class ConfigurationFilterFactory[A <: DisplayableSpType](instrument: SPComponentType, group: String, values: Set[A], valueName: A => String = {v: A => v.displayValue}) {
-    def apply(selection: Set[A]): ConfigurationFilter[A] = new ConfigurationFilter(instrument.readableStr + " " + group, instrument, group,  values, selection,  valueName)
+    def apply(selection: Set[A]): ConfigurationFilter[A] = ConfigurationFilter(instrument.readableStr + " " + group, instrument, group, values, selection, valueName)
     def apply(selection: A): ConfigurationFilter[A] = apply(Set(selection))
     def apply(): ConfigurationFilter[A] = apply(values)
   }

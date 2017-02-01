@@ -21,8 +21,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 case class SemesterData(site: Site, semester: Semester) {
   require(site == Site.GN || site == Site.GS)
 
-  val start = semester.getStartDate(site).getTime
-  val end = semester.getEndDate(site).getTime
+  val start: Long = semester.getStartDate(site).getTime
+  val end: Long = semester.getEndDate(site).getTime
   val interval = Interval(start, end)
 
   /** Calculate and store all nights with their relevant data for this semester. */
@@ -45,7 +45,7 @@ object SemesterData {
 
   def lst(site: Site, range: Interval, ra: RA): Option[Long] = {
     val nights = nightsForRa(site, range, ra)
-    if (nights.size > 0) Some(nights.head.lstMiddleNightTime)
+    if (nights.nonEmpty) Some(nights.head.lstMiddleNightTime)
     else None
   }
 
@@ -74,8 +74,7 @@ object SemesterData {
    * Gets all available nights between the given start and end time.
    */
   def nights(site: Site, start: Long, end: Long): Seq[Night] =
-    semesters(site, start, end).
-      map(_.nights).flatten.
+    semesters(site, start, end).flatMap(_.nights).
       filter(n => n.sunrise > start && n.sunset < end)
 
   def semester(night: Night): SemesterData =
@@ -84,7 +83,7 @@ object SemesterData {
   def semesters(nights: Seq[Night]): Seq[SemesterData] =
     semesters(nights.head.site, nights.head.sunset, nights.last.sunrise)
 
-  def update(site: Site, range: Interval) = {
+  def update(site: Site, range: Interval): Unit = {
     // figure out which semesters we need to cover the given range, this will always return at least one semester
     @tailrec def semesters(cur: Semester, res: Seq[Semester]): Seq[Semester] =
       if (cur.getStartDate(site).getTime >= range.end) res
@@ -106,13 +105,13 @@ object SemesterData {
 
   private def add(site: Site, semester: Semester) = Cache.add(site, semester)
 
-  def get(site: Site, semester: Semester) = Cache.get(site, semester)
+  def get(site: Site, semester: Semester): SemesterData = Cache.get(site, semester)
 
-  def semesters(site: Site) = Cache.semesters(site)
+  def semesters(site: Site): Seq[SemesterData] = Cache.semesters(site)
 
-  def current(site: Site) = semesters(site, System.currentTimeMillis(), System.currentTimeMillis()).head
+  def current(site: Site): SemesterData = semesters(site, System.currentTimeMillis(), System.currentTimeMillis()).head
 
-  def next(site: Site) = semesters(site, System.currentTimeMillis(), System.currentTimeMillis() + TimeUtils.days(185))(1)
+  def next(site: Site): SemesterData = semesters(site, System.currentTimeMillis(), System.currentTimeMillis() + TimeUtils.days(185))(1)
 
   /**
    * The actual cache.
@@ -124,7 +123,6 @@ object SemesterData {
     /**
      * Adds a semester to the cache.
      * Does nothing if the semester is already available.
-     * @param semester
      */
     def add(site: Site, semester: Semester): Unit = synchronized {
       if (!semestersMap.contains((site, semester))) {
@@ -138,8 +136,6 @@ object SemesterData {
      * This will block for at most 90 seconds if the semester data is not available yet (assumption is that
      * the semester data calculation never fails and does not take longer than 90 seconds, if we don't have
      * the semester data available we can't do much anyways, so we can just as well throw a TimeoutException).
-     * @param semester
-     * @return
      */
     def get(site: Site, semester: Semester): SemesterData =  {
       Await.result(semestersMap((site, semester)), 90 seconds)
