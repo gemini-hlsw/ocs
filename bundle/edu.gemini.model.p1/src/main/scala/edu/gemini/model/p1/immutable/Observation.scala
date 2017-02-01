@@ -7,6 +7,7 @@ import scalaz._
 import Scalaz._
 
 object Observation {
+  type IntOrProgTime = TimeAmount \/ TimeAmount
 
   // Some lenses.
   val blueprint:Lens[Observation, Option[BlueprintBase]] = Lens.lensu((a, b) => a.copy(blueprint = b), _.blueprint)
@@ -19,15 +20,13 @@ object Observation {
             condition:Option[Condition],
             target:Option[Target],
             band:Band,
-            intTime:Option[TimeAmount],
-            progTime:Option[TimeAmount] = None) = new Observation(blueprint, condition, target, intTime, progTime, band)
+            time:Option[IntOrProgTime]) = new Observation(blueprint, condition, target, time, band)
 
   def apply(m:M.Observation) = new Observation(m)
 
   def unapply(o:Observation) = Some((o.blueprint, o.condition, o.target, o.intTime, o.calculatedTimes, o.band))
 
-  val empty = new Observation(None, None, None, None, None, M.Band.BAND_1_2)
-
+  val empty = new Observation(None, None, None, None, M.Band.BAND_1_2)
 }
 
 // REL-2985: It is unfortunate that we have to pass progTime here, but it is necessary for the migration to 2017B,
@@ -36,8 +35,7 @@ object Observation {
 class Observation private (val blueprint:Option[BlueprintBase],
                            val condition:Option[Condition],
                            val realTarget:Option[Target],
-                           private val intTimeParam:Option[TimeAmount],
-                           private val progTimeParam:Option[TimeAmount],
+                           private val timeParam:Option[Observation.IntOrProgTime],
                            val band:Band,
                            val meta:Option[ObservationMeta] = None,
                            val enabled:Boolean = true) {
@@ -56,13 +54,12 @@ class Observation private (val blueprint:Option[BlueprintBase],
   // 2017A and earlier: intTimeParam will be None, and calculatedTimesParam will be defined with progTime.
   // If a blueprint exists - which it should - we can calculate the intTime from the progTime and then the rest
   // of the observation times from the intTime.
-  val intTime: Option[TimeAmount] = {
-    if (intTimeParam.nonEmpty) intTimeParam
-    else for {
+  val intTime: Option[TimeAmount] = timeParam.map {
+    case -\/(intTimeParam)  => intTimeParam
+    case \/-(progTimeParam) => (for {
       b <- blueprint
       c <- Overheads(b)
-      p <- progTimeParam
-    } yield c.intTimeFromProgTime(p)
+    } yield c.intTimeFromProgTime(progTimeParam)) | TimeAmount.empty
   }
 
   // 2017B and later: if the blueprint and the intTime are defined, recalculate the calculatedTimes.
@@ -80,18 +77,16 @@ class Observation private (val blueprint:Option[BlueprintBase],
            condition:Option[Condition] = condition,
            target:Option[Target] = target,
            intTime:Option[TimeAmount] = intTime,
-           calculatedTimes:Option[ObservationTimes] = calculatedTimes,
            band:Band = band,
            meta:Option[ObservationMeta] = None, // metadata resets to None on copy, by default
            enabled:Boolean = enabled) =
-    new Observation(blueprint, condition, target, intTime, calculatedTimes.map(_.progTime), band, meta, enabled)
+    new Observation(blueprint, condition, target, intTime.map(_.left), band, meta, enabled)
 
   def this(m:M.Observation) = this (
       Option(m.getBlueprint).map(BlueprintBase(_)),
       Option(m.getCondition).map(Condition(_)),
       Option(m.getTarget).map(Target(_)),
-      Option(m.getIntTime).map(TimeAmount(_)),
-      Option(m.getProgTime).map(TimeAmount(_)),
+      Option(m.getIntTime).map(TimeAmount(_).left[TimeAmount]).orElse(Option(m.getProgTime).map(TimeAmount(_).right[TimeAmount])),
       Option(m.getBand).getOrElse(M.Band.BAND_1_2),
       Option(m.getMeta).map(ObservationMeta(_)),
       m.isEnabled

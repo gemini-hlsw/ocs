@@ -47,7 +47,7 @@ case class ObsListModel(all:List[Observation], band:Band, gs:(ObsListGrouping[_]
   def -(e:ObsListElem) = {
 
     def update(o:Observation) = e match {
-      case _:ObsElem        => o.copy(intTime = None, calculatedTimes = None)
+      case _:ObsElem        => o.copy(intTime = None)
       case _:ConditionGroup => o.copy(condition = None)
       case _:TargetGroup    => o.copy(target = None)
       case _:BlueprintGroup => o.copy(blueprint = None)
@@ -130,7 +130,7 @@ case class ObsListModel(all:List[Observation], band:Band, gs:(ObsListGrouping[_]
       // To stamp and clear we fold over the associated groups. When stamping we also want to be sure to switch the
       // band to whatever this model's primary band is. This lets us paste stuff between BAND_1_2 and BAND_3.
       def stamp(o:Observation) = (o /: toStamp)((o, g) => g.stamp(target, o).copy(band = band))
-      def clear(o:Observation) = (o.copy(intTime = None, calculatedTimes = None) /: toClear)((o, g) => g.clear(o))
+      def clear(o:Observation) = (o.copy(intTime = None) /: toClear)((o, g) => g.clear(o))
 
       // Our list of dropped Observations,
       val os = source._1.selected(source._2)
@@ -186,7 +186,7 @@ case class ObsListModel(all:List[Observation], band:Band, gs:(ObsListGrouping[_]
   def cut(elem:ObsListElem):ObsListModel = elem match {
     case target:ObsGroup[_] =>
       val (_, toClear) = Seq(gs._1, gs._2, gs._3).splitAt(depth(target))
-      def clear(o:Observation) = (o.copy(intTime = None, calculatedTimes = None) /: toClear)((o, g) => g.clear(o))
+      def clear(o:Observation) = (o.copy(intTime = None) /: toClear)((o, g) => g.clear(o))
       val os = selected(target)
       (this /: os.zip(os.map(clear)))(_.replacePair(_))
     case o:ObsElem          => this - o
