@@ -451,17 +451,19 @@
                                         </fo:table-cell>
                                     </xsl:if>
                                     <fo:table-cell>
-                                        <fo:block>
-                                            <xsl:value-of select="firstName"/>
-                                            <xsl:text>&#160;</xsl:text>
-                                            <xsl:value-of select="lastName"/>
-
+                                        <fo:block text-indent="-1em" start-indent="1em">
+                                            <fo:inline font-weight="bold">
+                                                <xsl:value-of select="firstName"/>
+                                                <xsl:text>&#160;</xsl:text>
+                                                <xsl:value-of select="lastName"/>
+                                            </fo:inline>
                                             <xsl:if test="status = 'Grad Thesis'">
                                                 <fo:inline font-weight="bold">&#160;(thesis)</fo:inline>
                                             </xsl:if>
 
                                             <xsl:text>:&#160;</xsl:text>
                                             <xsl:value-of select="institution"/>
+
                                             <xsl:text>,&#160;</xsl:text>
                                             <xsl:value-of select="email"/>
                                         </fo:block>
