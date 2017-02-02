@@ -167,52 +167,6 @@
                     </fo:block>
                     <!-- END title -->
 
-                    <!-- BEGIN Reviewer -->
-                    <xsl:for-each select="proposalClass/fastTurnaround[@reviewer]">
-                        <fo:table table-layout="fixed" space-after="0pt">
-                            <fo:table-column column-width="6cm"/>
-                            <fo:table-column column-width="2cm"/>
-                            <fo:table-column column-width="8cm"/>
-                            <fo:table-body>
-                                <fo:table-row>
-                                    <fo:table-cell>
-                                        <fo:block>
-                                            <fo:inline font-weight="bold">Reviewer:</fo:inline>
-                                            <xsl:text>&#160;</xsl:text>
-                                            <xsl:call-template name="investigator-name">
-                                                <xsl:with-param name="id" select="@reviewer"/>
-                                            </xsl:call-template>
-                                        </fo:block>
-                                    </fo:table-cell>
-                                </fo:table-row>
-                            </fo:table-body>
-                        </fo:table>
-                    </xsl:for-each>
-                    <!-- END Reviewer -->
-
-                    <!-- BEGIN Mentor -->
-                    <xsl:for-each select="proposalClass/fastTurnaround[@mentor]">
-                        <fo:table table-layout="fixed" space-after="10pt">
-                            <fo:table-column column-width="6cm"/>
-                            <fo:table-column column-width="2cm"/>
-                            <fo:table-column column-width="8cm"/>
-                            <fo:table-body>
-                                <fo:table-row>
-                                    <fo:table-cell>
-                                        <fo:block>
-                                            <fo:inline font-weight="bold">Mentor:</fo:inline>
-                                            <xsl:text>&#160;</xsl:text>
-                                            <xsl:call-template name="investigator-name">
-                                                <xsl:with-param name="id" select="@mentor"/>
-                                            </xsl:call-template>
-                                        </fo:block>
-                                    </fo:table-cell>
-                                </fo:table-row>
-                            </fo:table-body>
-                        </fo:table>
-                    </xsl:for-each>
-                    <!-- END Mentor -->
-
                     <!-- BEGIN abstract -->
                     <fo:block space-before="10pt" space-after="12pt"
                               text-align-last="start">
@@ -921,6 +875,53 @@
                         </fo:table>
                     </xsl:if>
                     <!-- END CIs -->
+
+                    <!-- BEGIN Reviewer -->
+                    <xsl:for-each select="proposalClass/fastTurnaround[@reviewer]">
+                        <fo:table table-layout="fixed" space-after="0pt">
+                            <fo:table-column column-width="6cm"/>
+                            <fo:table-column column-width="2cm"/>
+                            <fo:table-column column-width="8cm"/>
+                            <fo:table-body>
+                                <fo:table-row>
+                                    <fo:table-cell>
+                                        <fo:block>
+                                            <fo:inline font-weight="bold">Reviewer:</fo:inline>
+                                            <xsl:text>&#160;</xsl:text>
+                                            <xsl:call-template name="investigator-name">
+                                                <xsl:with-param name="id" select="@reviewer"/>
+                                            </xsl:call-template>
+                                        </fo:block>
+                                    </fo:table-cell>
+                                </fo:table-row>
+                            </fo:table-body>
+                        </fo:table>
+                    </xsl:for-each>
+                    <!-- END Reviewer -->
+
+                    <!-- BEGIN Mentor -->
+                    <xsl:for-each select="proposalClass/fastTurnaround[@mentor]">
+                        <fo:table table-layout="fixed" space-after="10pt">
+                            <fo:table-column column-width="6cm"/>
+                            <fo:table-column column-width="2cm"/>
+                            <fo:table-column column-width="8cm"/>
+                            <fo:table-body>
+                                <fo:table-row>
+                                    <fo:table-cell>
+                                        <fo:block>
+                                            <fo:inline font-weight="bold">Mentor:</fo:inline>
+                                            <xsl:text>&#160;</xsl:text>
+                                            <xsl:call-template name="investigator-name">
+                                                <xsl:with-param name="id" select="@mentor"/>
+                                            </xsl:call-template>
+                                        </fo:block>
+                                    </fo:table-cell>
+                                </fo:table-row>
+                            </fo:table-body>
+                        </fo:table>
+                    </xsl:for-each>
+                    <!-- END Mentor -->
+
                 </fo:flow>
                 <!-- END second page body -->
             </fo:page-sequence>
