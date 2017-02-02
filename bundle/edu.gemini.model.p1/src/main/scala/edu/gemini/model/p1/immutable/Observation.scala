@@ -6,6 +6,11 @@ import edu.gemini.model.p1.{mutable => M}
 import scalaz._
 import Scalaz._
 
+// TODO: Broken test scripts to fix
+// TODO: ProposalSpec
+// TODO: ItacSpec
+// TODO: TemplateSpec
+// TODO: REL_2232_Test
 object Observation {
   type IntOrProgTime = TimeAmount \/ TimeAmount
 
@@ -82,11 +87,16 @@ class Observation private (val blueprint:Option[BlueprintBase],
            enabled:Boolean = enabled) =
     new Observation(blueprint, condition, target, intTime.map(_.left), band, meta, enabled)
 
+
+  // Convenience method to extract the IntOrProgTime from the mutable observation.
+  private def mTimeDisjunction(m: M.Observation): Option[Observation.IntOrProgTime] =
+    Option(m.getIntTime).map(TimeAmount(_).left[TimeAmount]).orElse(Option(m.getProgTime).map(TimeAmount(_).right[TimeAmount]))
+
   def this(m:M.Observation) = this (
       Option(m.getBlueprint).map(BlueprintBase(_)),
       Option(m.getCondition).map(Condition(_)),
       Option(m.getTarget).map(Target(_)),
-      Option(m.getIntTime).map(TimeAmount(_).left[TimeAmount]).orElse(Option(m.getProgTime).map(TimeAmount(_).right[TimeAmount])),
+      mTimeDisjunction(m),
       Option(m.getBand).getOrElse(M.Band.BAND_1_2),
       Option(m.getMeta).map(ObservationMeta(_)),
       m.isEnabled
