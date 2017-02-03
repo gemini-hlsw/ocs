@@ -79,8 +79,8 @@ sealed class SolutionProvider(site: Site) extends Publisher {
   def value(valueType: ValueType, night: Night, obs: Obs): Double =
     constraintsCache.value(Seq(night), valueType, obs).head
 
-  def remainingHours(ctx: QvContext, o: Obs): Long = {
-    val n = SemesterData.current(ctx.site).nights.find(n => n.end > System.currentTimeMillis()).get
+  def remainingHours(ctx: QvContext, o: Obs, currentTime: Long = System.currentTimeMillis()): Long = {
+    val n = SemesterData.current(ctx.site).nights.find(n => n.end > currentTime).get
     val s = solution(Seq(n), Set[ConstraintType](Elevation), o).restrictTo(n.interval)
     val set = s.intervals.find(_.end < n.nauticalTwilightEnd).map(_.end).getOrElse(n.nauticalTwilightEnd)
     set - n.nauticalTwilightStart

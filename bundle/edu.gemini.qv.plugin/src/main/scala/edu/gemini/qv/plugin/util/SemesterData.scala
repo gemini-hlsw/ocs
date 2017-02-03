@@ -109,7 +109,7 @@ object SemesterData {
 
   def semesters(site: Site): Seq[SemesterData] = Cache.semesters(site)
 
-  def current(site: Site): SemesterData = semesters(site, System.currentTimeMillis(), System.currentTimeMillis()).head
+  def current(site: Site, currentTime: Long = System.currentTimeMillis()): SemesterData = semesters(site, currentTime, currentTime).head
 
   def next(site: Site): SemesterData = semesters(site, System.currentTimeMillis(), System.currentTimeMillis() + TimeUtils.days(185))(1)
 
