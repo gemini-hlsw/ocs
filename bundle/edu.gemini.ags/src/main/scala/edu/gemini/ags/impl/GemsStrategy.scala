@@ -1,5 +1,6 @@
 package edu.gemini.ags.impl
 
+import edu.gemini.spModel.guide.OrderGuideGroup
 import edu.gemini.ags.api.{AgsAnalysis, AgsMagnitude, AgsStrategy}
 import edu.gemini.ags.api.AgsStrategy.{Assignment, Estimate, Selection}
 import edu.gemini.ags.gems._
@@ -154,9 +155,10 @@ trait GemsStrategy extends AgsStrategy {
     // Iterate over 45 degree position angles if no asterism is found at PA = 0.
     val gemsCatalogResults = results.map(result => GemsResultsAnalyzer.analyzeGoodEnough(ctx, anglesToTry, result, progress))
 
-    // Filter out the 1-star asterisms. If anything is left, we are good to go; otherwise, no.
-    gemsCatalogResults.map { x =>
-      !x.exists(_.guideGroup.getTargets.size() >= 3) ? AgsStrategy.Estimate.CompleteFailure | AgsStrategy.Estimate.GuaranteedSuccess
+    // We only want Canopus targets, so filter to those and then determine if the asterisms are big enough.
+    gemsCatalogResults.map { ggsLst =>
+      ggsLst.exists(_.guideGroup.grp.toManualGroup.targetMap.keySet.intersection(GemsStrategy.canopusProbes).size >= 2) ?
+        AgsStrategy.Estimate.GuaranteedSuccess | AgsStrategy.Estimate.CompleteFailure
     }
   }
 
@@ -243,4 +245,6 @@ trait GemsStrategy extends AgsStrategy {
 
 object GemsStrategy extends GemsStrategy {
   override private [impl] val backend = ConeSearchBackend
+
+  private [impl] lazy val canopusProbes: ISet[GuideProbe] = ISet.fromList(List(Canopus.Wfs.cwfs1, Canopus.Wfs.cwfs2, Canopus.Wfs.cwfs3))
 }
