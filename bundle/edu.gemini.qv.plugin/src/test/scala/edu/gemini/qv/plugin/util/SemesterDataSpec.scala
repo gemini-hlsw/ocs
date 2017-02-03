@@ -31,9 +31,10 @@ class SemesterDataSpec extends Specification {
       // 2016B should be found
       val semester = SemesterData.current(Site.GN, end)
       semester should beEqualTo(SemesterData(Site.GN, Semester.parse("2016B")))
-      semester.nights.find(n => n.end > beforeSunrise) should beSome
-      semester.nights.find(n => n.end > afterSunrisePreviousDay) should beSome
-      semester.nights.find(n => n.end > afterSunrise) should beSome
+      SolutionProvider.currentNight(Site.GN, beforeSunrise) should beSome
+      SolutionProvider.currentNight(Site.GN, afterSunrisePreviousDay) should beSome
+      // With REL-3069 this returns None
+      SolutionProvider.currentNight(Site.GN, afterSunrise) should beSome
     }
   }
 }
