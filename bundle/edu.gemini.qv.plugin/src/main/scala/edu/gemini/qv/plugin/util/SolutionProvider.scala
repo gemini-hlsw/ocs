@@ -1,19 +1,21 @@
 package edu.gemini.qv.plugin.util
 
+import java.net.URI
+
 import edu.gemini.qpt.shared.sp.Obs
 import edu.gemini.qv.plugin.QvContext
 import edu.gemini.qv.plugin.ui.QvGui
 import edu.gemini.qv.plugin.util.ConstraintsCache._
 import edu.gemini.qv.plugin.util.ScheduleCache.ScheduleEvent
 import edu.gemini.qv.plugin.util.SolutionProvider.{ConstraintType, ValueType}
+import edu.gemini.services.client.TelescopeSchedule
 import edu.gemini.skycalc.TimeUtils
 import edu.gemini.spModel.core.{Peer, Site}
 import edu.gemini.util.skycalc.Night
 import edu.gemini.util.skycalc.calc._
-import scala.concurrent.ExecutionContext.Implicits.global
+
 import scala.concurrent.Future
 import scala.swing.Publisher
-import scala.util.{Failure, Success}
 
 object SolutionProvider {
 
@@ -25,9 +27,12 @@ object SolutionProvider {
     Site.GS -> new SolutionProvider(Site.GS)
   )
 
-  def apply(site: Site) = providers(site)
-  def apply(peer: Peer) = providers(peer.site)
-  def apply(ctx: QvContext) = providers(ctx.site)
+  def currentNight(site: Site, currentTime: Long): Option[Night] =
+    SemesterData.current(site, currentTime).nights.find(n => n.dayEnd > currentTime)
+
+  def apply(site: Site): SolutionProvider = providers(site)
+  def apply(peer: Peer): SolutionProvider = providers(peer.site)
+  def apply(ctx: QvContext): SolutionProvider = providers(ctx.site)
 }
 
 
@@ -43,7 +48,7 @@ sealed class SolutionProvider(site: Site) extends Publisher {
     Interval(start, end)
   }
 
-  val nights = SemesterData.nights(site, range)
+  val nights: Seq[Night] = SemesterData.nights(site, range)
   // ====================================================================
 
   val scheduleCache = new ScheduleCache()
@@ -56,7 +61,7 @@ sealed class SolutionProvider(site: Site) extends Publisher {
     case e: ScheduleEvent => publish(e) // forward
   }
 
-  def clear() = {
+  def clear(): Unit = {
     scheduleCache.clear()
     constraintsCache.clear()
   }
@@ -77,17 +82,18 @@ sealed class SolutionProvider(site: Site) extends Publisher {
   def value(valueType: ValueType, night: Night, obs: Obs): Double =
     constraintsCache.value(Seq(night), valueType, obs).head
 
-  def remainingHours(ctx: QvContext, o: Obs): Long = {
-    val n = SemesterData.current(ctx.site).nights.find(n => n.end > System.currentTimeMillis()).get
-    val s = solution(Seq(n), Set[ConstraintType](Elevation), o).restrictTo(n.interval)
-    val set = s.intervals.find(_.end < n.nauticalTwilightEnd).map(_.end).getOrElse(n.nauticalTwilightEnd)
-    set - n.nauticalTwilightStart
+  def remainingHours(ctx: QvContext, o: Obs, currentTime: Long = System.currentTimeMillis()): Option[Long] = {
+    SolutionProvider.currentNight(ctx.site, currentTime).map { n =>
+      val s = solution(Seq(n), Set[ConstraintType](Elevation), o).restrictTo(n.interval)
+      val set = s.intervals.find(_.end < n.nauticalTwilightEnd).map(_.end).getOrElse(n.nauticalTwilightEnd)
+      set - n.nauticalTwilightStart
+    }
   }
 
   def remainingNights(ctx: QvContext, obs: Obs, thisSemester: Boolean, nextSemester: Boolean): Int = {
     val now = System.currentTimeMillis()
     val nights = remainingNights(ctx.site, thisSemester, nextSemester)
-    if (nights.size > 0) {
+    if (nights.nonEmpty) {
       solution(nights, ctx.selectedConstraints, obs).intervals.
         filter(i => i.end > now).
         map(i => TimeUtils.startOfDay(i.start, ctx.site.timezone())).
@@ -98,7 +104,7 @@ sealed class SolutionProvider(site: Site) extends Publisher {
   def remainingTime(ctx: QvContext, obs: Obs, thisSemester: Boolean, nextSemester: Boolean): Long = {
     val now = System.currentTimeMillis()
     val nights = remainingNights(ctx.site, thisSemester, nextSemester)
-    if (nights.size > 0) {
+    if (nights.nonEmpty) {
       solution(nights, ctx.selectedConstraints, obs).intervals.
         filter(i => i.end > now).
         map(_.duration).
@@ -113,13 +119,13 @@ sealed class SolutionProvider(site: Site) extends Publisher {
     ts ++ ns
   }
 
-  def telescopeSchedule = scheduleCache.schedule
-  def telescopeScheduleUrl = scheduleCache.scheduleUrl
+  def telescopeSchedule: TelescopeSchedule = scheduleCache.schedule
+  def telescopeScheduleUrl: URI = scheduleCache.scheduleUrl
 
   def solution(nights: Seq[Night], constraints: Set[ConstraintType], observations: Set[Obs]): Solution = {
     val solutions: Set[Solution] = observations.map(o => solution(nights, constraints, o))
     // reduce all solutions to a single solution by combining all of them
-    if (solutions.size > 0) solutions.reduce(_ combine _) else Solution()
+    if (solutions.nonEmpty) solutions.reduce(_ combine _) else Solution()
   }
 
   // calculate the solution for one single observation applying all constraints
@@ -155,7 +161,7 @@ sealed class SolutionProvider(site: Site) extends Publisher {
       observations.
         filter(o => o.isNonSidereal && NonSiderealCache.horizonsNameFor(o).isEmpty).
         map(_.getObsId)
-    if (withoutHorizonsName.size > 0) {
+    if (withoutHorizonsName.nonEmpty) {
       val os = withoutHorizonsName.mkString(", ")
       val (plural, have, be) = if (withoutHorizonsName.size > 1) ("s", "have", "are") else ("", "has", "is")
       QvGui.showWarning(

@@ -24,7 +24,7 @@ class FilterSpec extends Specification with ScalaCheck with Arbitraries {
       forAll (dispersers, dispersers) { (obsDisp, filtDisp) =>
         val o = ObsBuilder(instrument = Array(InstGmosNorth.SP_TYPE), options = obsDisp.toSet).apply
         val f = Filter.GmosN.Dispersers(filtDisp.toSet)
-        f.predicate(o) == (obsDisp.intersect(filtDisp).length > 0)
+        f.predicate(o) == obsDisp.intersect(filtDisp).nonEmpty
       }
     }
   }

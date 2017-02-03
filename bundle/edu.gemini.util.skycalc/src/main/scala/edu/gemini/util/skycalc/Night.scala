@@ -59,22 +59,22 @@ case class Night(site: Site, date: Long, bound: Bound = SunsetSunrise) {
   val sunrise: Long = sunCalc.rise
 
   /** Civil twilight end. */
-  val civilTwilightEnd = sunCalc.civilTwilightEnd
+  val civilTwilightEnd: Long = sunCalc.civilTwilightEnd
 
   /** Civil twilight start. */
-  val civilTwilightStart = sunCalc.civilTwilightStart
+  val civilTwilightStart: Long = sunCalc.civilTwilightStart
 
   /** Nautical twilight end. */
-  val nauticalTwilightEnd = sunCalc.nauticalTwilightEnd
+  val nauticalTwilightEnd: Long = sunCalc.nauticalTwilightEnd
 
   /** Nautical twilight start. */
-  val nauticalTwilightStart = sunCalc.nauticalTwilightStart
+  val nauticalTwilightStart: Long = sunCalc.nauticalTwilightStart
 
   /** Astronomical twilight end. */
-  val astroTwilightEnd = sunCalc.astroTwilightEnd
+  val astroTwilightEnd: Long = sunCalc.astroTwilightEnd
 
   /** Astronomical twilight start. */
-  val astroTwilightStart = sunCalc.astroTwilightStart
+  val astroTwilightStart: Long = sunCalc.astroTwilightStart
 
   /** Interval between sunset and sunrise. */
   val nightTime: Interval = sunCalc.nightTime
