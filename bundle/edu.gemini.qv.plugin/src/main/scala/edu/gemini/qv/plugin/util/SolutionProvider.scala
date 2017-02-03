@@ -28,7 +28,7 @@ object SolutionProvider {
   )
 
   def currentNight(site: Site, currentTime: Long): Option[Night] =
-    SemesterData.current(site, currentTime).nights.find(n => n.end > currentTime)
+    SemesterData.current(site, currentTime).nights.find(n => n.dayEnd > currentTime)
 
   def apply(site: Site): SolutionProvider = providers(site)
   def apply(peer: Peer): SolutionProvider = providers(peer.site)
@@ -82,11 +82,12 @@ sealed class SolutionProvider(site: Site) extends Publisher {
   def value(valueType: ValueType, night: Night, obs: Obs): Double =
     constraintsCache.value(Seq(night), valueType, obs).head
 
-  def remainingHours(ctx: QvContext, o: Obs, currentTime: Long = System.currentTimeMillis()): Long = {
-    val n = SolutionProvider.currentNight(ctx.site, currentTime).get
-    val s = solution(Seq(n), Set[ConstraintType](Elevation), o).restrictTo(n.interval)
-    val set = s.intervals.find(_.end < n.nauticalTwilightEnd).map(_.end).getOrElse(n.nauticalTwilightEnd)
-    set - n.nauticalTwilightStart
+  def remainingHours(ctx: QvContext, o: Obs, currentTime: Long = System.currentTimeMillis()): Option[Long] = {
+    SolutionProvider.currentNight(ctx.site, currentTime).map { n =>
+      val s = solution(Seq(n), Set[ConstraintType](Elevation), o).restrictTo(n.interval)
+      val set = s.intervals.find(_.end < n.nauticalTwilightEnd).map(_.end).getOrElse(n.nauticalTwilightEnd)
+      set - n.nauticalTwilightStart
+    }
   }
 
   def remainingNights(ctx: QvContext, obs: Obs, thisSemester: Boolean, nextSemester: Boolean): Int = {
