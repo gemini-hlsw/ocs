@@ -128,9 +128,10 @@ class GemsStrategySpec extends Specification {
         gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), Canopus.Wfs.cwfs3, s).contains(AgsAnalysis.Usable(Canopus.Wfs.cwfs3, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq, RBandsList))
       } should beSome(true)
 
-      // Test estimate
+      // Test estimate: 2-star asterism grants 2/3 chance of success.
       val estimate = gemsStrategy.estimate(ctx, ProbeLimitsTable.loadOrThrow())(implicitly)
-      Await.result(estimate, 20.seconds) should beEqualTo(Estimate.GuaranteedSuccess)
+      val result = Await.result(estimate, 20.seconds).probability
+      math.abs(result - 2.0 / 3.0) should beLessThan(1e-4)
     }
     "support search/select and analyze on SN-1987A" in {
       val ra = Angle.fromHMS(5, 35, 28.020).getOrElse(Angle.zero)

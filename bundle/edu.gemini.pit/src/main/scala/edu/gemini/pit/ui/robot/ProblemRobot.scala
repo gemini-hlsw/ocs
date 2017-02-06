@@ -89,7 +89,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
           TacProblems(p, s).all ++
           List(incompleteInvestigator, missingObsElementCheck, cfCheck, emptyTargetCheck,
             emptyEphemerisCheck, singlePointEphemerisCheck, initialEphemerisCheck, finalEphemerisCheck,
-            badGuiding, badVisibility, iffyVisibility, minTimeCheck, wrongSite, band3Orphan2, gpiCheck, lgsIQ70Check, lgsGemsIQ85Check,
+            badGuiding, cwfsCorrectionsIssue, badVisibility, iffyVisibility, minTimeCheck, wrongSite, band3Orphan2, gpiCheck, lgsIQ70Check, lgsGemsIQ85Check,
             lgsCC50Check, texesCCCheck, texesWVCheck, gmosWVCheck, gmosR600Check, band3IQ, band3LGS, band3RapidToO, sbIrObservation).flatten
       ps.sorted
     }
@@ -479,6 +479,17 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       m <- o.meta
       g <- m.guiding if g.evaluation == GuidingEvaluation.FAILURE
     } yield new Problem(Severity.Warning, guidingMessage(o), "Observations", indicateObservation(o))
+
+    private lazy val cwfsCorrectionsIssue = for {
+      o <- p.observations
+      b <- o.blueprint if b.isInstanceOf[GsaoiBlueprint]
+      m <- o.meta
+      g <- m.guiding if g.evaluation != GuidingEvaluation.SUCCESS
+    } yield new Problem(Severity.Warning,
+      "Less than three CWFS stars. Corrections will not be optimal",
+      "Observations",
+      indicateObservation(o)
+    )
 
     private def visibilityMessage(tmpl: String, sem: Semester, o: Observation): String =
       tmpl.format(
