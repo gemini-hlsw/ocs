@@ -92,17 +92,17 @@ object MascotCat {
    * @param centerRA the base position RA coordinate
    * @param centerDec the base position Dec coordinate
    * @param band determines which magnitudes are used in the calculations: (one of "B", "V", "R", "J", "H", "K")
-   * @param shouldStop called for each asterism as it is calculated, can cancel the calculations by returning true
+   * @param shouldContinue called for each asterism as it is calculated, can cancel the calculations by returning false
    * @return a tuple: (list of stars actually used, list of asterisms found)
    */
   def findBestAsterismInTargetsList(javaList: List[SiderealTarget],
                                     centerRA: Double, centerDec: Double,
                                     band: BandsList, factor: Double,
-                                    shouldStop: (Strehl, Boolean) => Boolean): StrehlResults = {
+                                    shouldContinue: (Strehl, Boolean) => Boolean): StrehlResults = {
     val progress:ProgressFunction = (s: Strehl, count: Int, total: Int) => {
       defaultProgress(s, count, total)
       // TODO: Why is the usable parameter always true?
-      shouldStop(s, true)
+      shouldContinue(s, true)
     }
 
     val (starList, strehlList) = findBestAsterism(javaList, centerRA, centerDec, factor, progress, Mascot.defaultFilter)

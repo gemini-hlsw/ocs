@@ -29,9 +29,6 @@ object GemsResultsAnalyzer {
   val instance = this
   val Log = Logger.getLogger(GemsResultsAnalyzer.getClass.getSimpleName)
 
-  // Canopus probes.
-  val canopusProbes: ISet[GuideProbe] = ISet.fromList(List(Canopus.Wfs.cwfs1, Canopus.Wfs.cwfs2, Canopus.Wfs.cwfs3))
-
   // sort by value only
   private val MagnitudeValueOrdering: scala.math.Ordering[Magnitude] = scala.math.Ordering.by(_.value)
 
@@ -53,8 +50,8 @@ object GemsResultsAnalyzer {
 
   /**
    * Analyze the given position angles and search results to select tip tilt asterisms and flexure stars.
-    *
-    * @param obsContext observation context
+   *
+   * @param obsContext observation context
    * @param posAngles position angles to try (should contain at least one element: the current pos angle)
    * @param catalogSearch results of catalog search
    * @param mascotProgress used to report progress of Mascot Strehl calculations and interrupt if requested
