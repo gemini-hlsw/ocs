@@ -3,7 +3,7 @@ package edu.gemini.ags.gems.mascot
 import java.util.logging.Logger
 
 import edu.gemini.ags.gems.mascot.Mascot.ProgressFunction
-import edu.gemini.spModel.core.{BandsList, MagnitudeBand}
+import edu.gemini.spModel.core.BandsList
 import edu.gemini.spModel.core.SiderealTarget
 import java.util.concurrent.CancellationException
 
@@ -98,11 +98,10 @@ object MascotCat {
   def findBestAsterismInTargetsList(javaList: List[SiderealTarget],
                                     centerRA: Double, centerDec: Double,
                                     band: BandsList, factor: Double,
-                                    shouldContinue: (Strehl, Boolean) => Boolean): StrehlResults = {
+                                    shouldContinue: Strehl => Boolean): StrehlResults = {
     val progress:ProgressFunction = (s: Strehl, count: Int, total: Int) => {
       defaultProgress(s, count, total)
-      // TODO: Why is the usable parameter always true?
-      shouldContinue(s, true)
+      shouldContinue(s)
     }
 
     val (starList, strehlList) = findBestAsterism(javaList, centerRA, centerDec, factor, progress, Mascot.defaultFilter)

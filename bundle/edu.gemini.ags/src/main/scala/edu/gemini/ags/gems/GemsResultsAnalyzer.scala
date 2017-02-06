@@ -97,7 +97,7 @@ object GemsResultsAnalyzer {
    * @param shouldContinue function to determine if the search should continue: early termination possible if sufficient asterism found
    * @return a sorted List of GemsGuideStars
    */
-  def analyzeGoodEnough(obsContext: ObsContext, posAngles: Set[Angle], catalogSearch: List[GemsCatalogSearchResults], shouldContinue: (Strehl, Boolean) => Boolean): List[GemsGuideStars] = {
+  def analyzeGoodEnough(obsContext: ObsContext, posAngles: Set[Angle], catalogSearch: List[GemsCatalogSearchResults], shouldContinue: Strehl => Boolean): List[GemsGuideStars] = {
     obsContext.getBaseCoordinates.asScalaOpt.map(_.toNewModel).foldMap { base =>
 
       @tailrec
@@ -114,7 +114,7 @@ object GemsResultsAnalyzer {
             val factor = strehlFactor(obsContext.some)
 
             // tiptiltTargetsList should only contain Canopus WFS stars, so asterisms should only consist of these.
-            // Thus progressGoodEnough will only be called for Canopus WFS stars.
+            // Thus shouldContinue will only be called for Canopus WFS stars.
             val asterisms = MascotCat.findBestAsterismInTargetsList(tiptiltTargetsList, base.ra.toAngle.toDegrees, base.dec.toDegrees, band, factor, shouldContinue)
             val analyzedStars = asterisms.strehlList.map(analyzeAtAngles(obsContext, posAngles, _, flexureTargetsList, flexureGroup, tiptiltGroup))
             stars ::: analyzedStars.flatten

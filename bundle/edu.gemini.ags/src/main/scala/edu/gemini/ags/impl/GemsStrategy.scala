@@ -144,16 +144,8 @@ trait GemsStrategy extends AgsStrategy {
     // Create a set of the angles to try.
     val anglesToTry = (0 until 360 by 45).map(Angle.fromDegrees(_)).toSet
 
-    // We can terminate the Mascot algorithm immediately if we find a usable 3-star asterism or no asterism is found.
-    def shouldContinue(s: Strehl, usable: Boolean): Boolean = !(
-      // A usable three star asterism.
-      (usable && s.stars.size >= 3) ||
-      // No asterism.
-      (s.stars.size < 2)
-    )
-
-    // Iterate over 45 degree position angles if no asterism is found at PA = 0.
-    val gemsCatalogResults = results.map(result => GemsResultsAnalyzer.analyzeGoodEnough(ctx, anglesToTry, result, shouldContinue))
+    // Iterate over 45 degree position angles if no 3-star asterism is found at PA = 0.
+    val gemsCatalogResults = results.map(result => GemsResultsAnalyzer.analyzeGoodEnough(ctx, anglesToTry, result, _.stars.size < 3))
 
     // We only want Canopus targets, so filter to those and then determine if the asterisms are big enough.
     gemsCatalogResults.map { ggsLst =>
