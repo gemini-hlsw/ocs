@@ -486,7 +486,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       m <- o.meta
       g <- m.guiding if g.evaluation != GuidingEvaluation.SUCCESS
     } yield new Problem(Severity.Warning,
-      "Less than three CWFS stars. Corrections will not be optimal",
+      "Less than three CWFS stars. Corrections will not be optimal.",
       "Observations",
       indicateObservation(o)
     )
