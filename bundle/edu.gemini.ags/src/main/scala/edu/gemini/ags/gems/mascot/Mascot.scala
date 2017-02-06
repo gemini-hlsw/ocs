@@ -19,6 +19,8 @@ import Scalaz._
 object Mascot {
   val Log = Logger.getLogger(Mascot.getClass.getSimpleName)
 
+  // A function that is called for each asterism as it is found.
+  // If it returns false, the algorithm terminates.
   type ProgressFunction = (Strehl, Int, Int) => Boolean
 
   // Default star filter
