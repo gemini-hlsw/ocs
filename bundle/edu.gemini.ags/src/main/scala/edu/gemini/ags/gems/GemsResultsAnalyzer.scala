@@ -29,6 +29,9 @@ object GemsResultsAnalyzer {
   val instance = this
   val Log = Logger.getLogger(GemsResultsAnalyzer.getClass.getSimpleName)
 
+  // Canopus probes.
+  val canopusProbes: ISet[GuideProbe] = ISet.fromList(List(Canopus.Wfs.cwfs1, Canopus.Wfs.cwfs2, Canopus.Wfs.cwfs3))
+
   // sort by value only
   private val MagnitudeValueOrdering: scala.math.Ordering[Magnitude] = scala.math.Ordering.by(_.value)
 
@@ -50,7 +53,8 @@ object GemsResultsAnalyzer {
 
   /**
    * Analyze the given position angles and search results to select tip tilt asterisms and flexure stars.
-   * @param obsContext observation context
+    *
+    * @param obsContext observation context
    * @param posAngles position angles to try (should contain at least one element: the current pos angle)
    * @param catalogSearch results of catalog search
    * @param mascotProgress used to report progress of Mascot Strehl calculations and interrupt if requested
@@ -93,10 +97,10 @@ object GemsResultsAnalyzer {
    * @param obsContext observation context
    * @param posAngles position angles to try (should contain at least one element: 0. deg)
    * @param catalogSearch results of catalog search
-   * @param progressGoodEnough used to tell Mascot Strehl calculations when it can stop
+   * @param shouldContinue function to determine if the search should continue: early termination possible if sufficient asterism found
    * @return a sorted List of GemsGuideStars
    */
-  def analyzeGoodEnough(obsContext: ObsContext, posAngles: Set[Angle], catalogSearch: List[GemsCatalogSearchResults], progressGoodEnough: (Strehl, Boolean) => Boolean): List[GemsGuideStars] = {
+  def analyzeGoodEnough(obsContext: ObsContext, posAngles: Set[Angle], catalogSearch: List[GemsCatalogSearchResults], shouldContinue: (Strehl, Boolean) => Boolean): List[GemsGuideStars] = {
     obsContext.getBaseCoordinates.asScalaOpt.map(_.toNewModel).foldMap { base =>
 
       @tailrec
@@ -111,13 +115,17 @@ object GemsResultsAnalyzer {
             // Find asterisms with Mascot
             val band = bandpass(tiptiltGroup, obsContext.getInstrument)
             val factor = strehlFactor(obsContext.some)
-            val asterisms = MascotCat.findBestAsterismInTargetsList(tiptiltTargetsList, base.ra.toAngle.toDegrees, base.dec.toDegrees, band, factor, progressGoodEnough)
+
+            // tiptiltTargetsList should only contain Canopus WFS stars, so asterisms should only consist of these.
+            // Thus progressGoodEnough will only be called for Canopus WFS stars.
+            val asterisms = MascotCat.findBestAsterismInTargetsList(tiptiltTargetsList, base.ra.toAngle.toDegrees, base.dec.toDegrees, band, factor, shouldContinue)
             val analyzedStars = asterisms.strehlList.map(analyzeAtAngles(obsContext, posAngles, _, flexureTargetsList, flexureGroup, tiptiltGroup))
             stars ::: analyzedStars.flatten
           } else {
             stars
           }
         }
+
         pairs match {
           case Nil       => Nil
           case x :: Nil  => check(x)

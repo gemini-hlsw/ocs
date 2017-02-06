@@ -144,21 +144,21 @@ trait GemsStrategy extends AgsStrategy {
     // Create a set of the angles to try.
     val anglesToTry = (0 until 360 by 45).map(Angle.fromDegrees(_)).toSet
 
-    // A way to terminate the Mascot algorithm immediately in the following cases:
-    // 1. A usable 2 or 3-star asterism is found; or
-    // 2. If no asterisms were found.
-    // Returning false will stop the search
-    def progress(s: Strehl, usable: Boolean): Boolean = {
-      !((usable && s.stars.size >= 2) || (s.stars.size < 2))
-    }
+    // We can terminate the Mascot algorithm immediately if we find a usable 3-star asterism or no asterism is found.
+    def shouldContinue(s: Strehl, usable: Boolean): Boolean = !(
+      // A usable three star asterism.
+      (usable && s.stars.size >= 3) ||
+      // No asterism.
+      (s.stars.size < 2)
+    )
 
     // Iterate over 45 degree position angles if no asterism is found at PA = 0.
-    val gemsCatalogResults = results.map(result => GemsResultsAnalyzer.analyzeGoodEnough(ctx, anglesToTry, result, progress))
+    val gemsCatalogResults = results.map(result => GemsResultsAnalyzer.analyzeGoodEnough(ctx, anglesToTry, result, shouldContinue))
 
     // We only want Canopus targets, so filter to those and then determine if the asterisms are big enough.
     gemsCatalogResults.map { ggsLst =>
-      ggsLst.exists(_.guideGroup.grp.toManualGroup.targetMap.keySet.intersection(GemsStrategy.canopusProbes).size >= 2) ?
-        AgsStrategy.Estimate.GuaranteedSuccess | AgsStrategy.Estimate.CompleteFailure
+      val largestAsterism = ggsLst.map(_.guideGroup.grp.toManualGroup.targetMap.keySet.intersection(GemsStrategy.canopusProbes).size).max
+      Estimate(largestAsterism / 3.0)
     }
   }
 
