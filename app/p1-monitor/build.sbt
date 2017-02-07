@@ -18,9 +18,8 @@ ocsAppManifest := {
       common(ov, pv),
         dev(ov, pv),
         staging(ov, pv),
-        v2016B(ov, pv),
-        v2016B_2(ov, pv),
-	v2017A(ov, pv)
+	v2017A(ov, pv),
+	v2017B(ov, pv)
     )
   )
 }
@@ -78,30 +77,6 @@ def staging(ov: Version, pv: Version) = AppConfig(
   distribution = List(Linux32, Linux64)
 ) extending List(common(ov, pv))
 
-// 2016B
-def v2016B(ov: Version, pv: Version) = AppConfig(
-  id = "2016B",
-  props = Map(
-    "org.osgi.framework.storage" -> "${user.home}/.edu.gemini.p1monitor.2015B/felix-cache",
-    "p1monitor.config" -> "conf.production-2016B.xml",
-    "org.osgi.service.http.port" -> "9000",
-    "p1monitor.host" -> "phase1.gemini.edu"
-  ),
-  distribution = List(Linux32, Linux64)
-) extending List(common(ov, pv))
-
-// 2016B_2 with support for Subaru/FT
-def v2016B_2(ov: Version, pv: Version) = AppConfig(
-  id = "2016B_2",
-  props = Map(
-    "org.osgi.framework.storage" -> "${user.home}/.edu.gemini.p1monitor.2016B_2/felix-cache",
-    "p1monitor.config" -> "conf.production-2016B-2.xml",
-    "org.osgi.service.http.port" -> "9001",
-    "p1monitor.host" -> "phase1.gemini.edu"
-  ),
-  distribution = List(Linux32, Linux64)
-) extending List(common(ov, pv))
-
 // 2017A
 def v2017A(ov: Version, pv: Version) = AppConfig(
   id = "2017A",
@@ -114,6 +89,17 @@ def v2017A(ov: Version, pv: Version) = AppConfig(
   distribution = List(Linux32, Linux64)
 ) extending List(common(ov, pv))
 
+// 2017B
+def v2017B(ov: Version, pv: Version) = AppConfig(
+  id = "2017B",
+  props = Map(
+    "org.osgi.framework.storage" -> "${user.home}/.edu.gemini.p1monitor.2017B/felix-cache",
+    "p1monitor.config" -> "conf.production-2017B.xml",
+    "org.osgi.service.http.port" -> "9003",
+    "p1monitor.host" -> "phase1.gemini.edu"
+  ),
+  distribution = List(Linux32, Linux64)
+) extending List(common(ov, pv))
 
 
 
