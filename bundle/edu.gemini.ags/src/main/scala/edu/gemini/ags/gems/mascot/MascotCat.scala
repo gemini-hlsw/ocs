@@ -3,7 +3,7 @@ package edu.gemini.ags.gems.mascot
 import java.util.logging.Logger
 
 import edu.gemini.ags.gems.mascot.Mascot.ProgressFunction
-import edu.gemini.spModel.core.{BandsList, MagnitudeBand}
+import edu.gemini.spModel.core.BandsList
 import edu.gemini.spModel.core.SiderealTarget
 import java.util.concurrent.CancellationException
 
@@ -92,17 +92,16 @@ object MascotCat {
    * @param centerRA the base position RA coordinate
    * @param centerDec the base position Dec coordinate
    * @param band determines which magnitudes are used in the calculations: (one of "B", "V", "R", "J", "H", "K")
-   * @param progressCheck called for each asterism as it is calculated, can cancel the calculations by returning false
+   * @param shouldContinue called for each asterism as it is calculated, can cancel the calculations by returning false
    * @return a tuple: (list of stars actually used, list of asterisms found)
    */
   def findBestAsterismInTargetsList(javaList: List[SiderealTarget],
                                     centerRA: Double, centerDec: Double,
                                     band: BandsList, factor: Double,
-                                    progressCheck: (Strehl, Boolean) => Boolean): StrehlResults = {
+                                    shouldContinue: Strehl => Boolean): StrehlResults = {
     val progress:ProgressFunction = (s: Strehl, count: Int, total: Int) => {
       defaultProgress(s, count, total)
-      // Why usable defaults to true?
-      progressCheck(s, true)
+      shouldContinue(s)
     }
 
     val (starList, strehlList) = findBestAsterism(javaList, centerRA, centerDec, factor, progress, Mascot.defaultFilter)
