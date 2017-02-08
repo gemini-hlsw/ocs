@@ -110,7 +110,7 @@ class Observation private (val blueprint:Option[BlueprintBase],
     m.setIntTime(intTime.map(_.mutable).orNull)
     m.setProgTime(progTime.map(_.mutable).orNull)
     m.setPartTime(partTime.map(_.mutable).orNull)
-    m.setTotalTime(totalTime.map(_.mutable).orNull)
+    m.setTime(totalTime.map(_.mutable).orNull)
     m.setBand(band)
     m.setMeta(meta.map(_.mutable).orNull)
     m.setEnabled(enabled)
