@@ -76,11 +76,11 @@ object ObsPresentation {
       v <- m.visibility
     } yield v
 
-    vis.map(_ match {
+    vis.map {
       case TargetVisibility.Good    => Green(tooltip = msg("This target has good visibility at %s during %s."))
       case TargetVisibility.Limited => Yellow(tooltip = msg("<html>This target has limited visibility at %s during %s.<br>The observation time should be short and/or conditions constraints relaxed.</html>"))
       case _                        => Red(tooltip = msg("<html>This target is inaccessible at %s during %s.<br>Consider an alternative target.</html>"))
-    }).getOrElse(Blank)
+    }.getOrElse(Blank)
   }
 
   def gsa(obs: Observation): ObsPresentation = {

@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package edu.gemini.shared.util;
 
 import java.util.Map;

@@ -654,6 +654,7 @@ trait OcsBundle {
     project.in(file("bundle/edu.gemini.ags.client.impl")).dependsOn(
       bundle_edu_gemini_ags_client_api,
       bundle_edu_gemini_model_p1,
+      bundle_edu_gemini_shared_util,
       bundle_edu_gemini_util_ssl
     )
 

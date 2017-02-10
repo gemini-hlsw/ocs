@@ -1,15 +1,20 @@
 package edu.gemini.ags.client.impl
 
-import edu.gemini.model.p1.immutable.Observation
 import edu.gemini.ags.client.api._
+import edu.gemini.model.p1.immutable.Observation
+import edu.gemini.shared.util.LruCache
 import edu.gemini.util.ssl.GemSslSocketFactory
-import java.net.{URLConnection, HttpURLConnection, URL}
+import java.net.{HttpURLConnection, URL, URLConnection}
 import HttpURLConnection.HTTP_OK
-import io.Source
 
-import java.io.{InputStream, IOException}
-import javax.net.ssl.{SSLSession, HostnameVerifier, HttpsURLConnection}
+import io.Source
+import java.io.{IOException, InputStream}
+import java.util.Collections
+import javax.net.ssl.{HostnameVerifier, HttpsURLConnection, SSLSession}
 import java.util.logging.{Level, Logger}
+
+import scalaz._
+import Scalaz._
 
 /**
  * AGS client that connects to a remote AGS service to obtain estimates.
@@ -19,9 +24,12 @@ object AgsHttpClient {
   private val hostnameVerifier: HostnameVerifier = new HostnameVerifier {
      def verify(s: String, sslSession: SSLSession) = true
   }
+
+  // LRU cache to minimize lookups.
+  val lRUCache = Collections.synchronizedMap(new LruCache[String, AgsResult.Success](100))
 }
 
-import AgsHttpClient.{Log, hostnameVerifier}
+import AgsHttpClient.{Log, hostnameVerifier, lRUCache}
 
 case class AgsHttpClient(host: String, port: Int) extends AgsClient {
   val timeout = 3 * 60000  // 1 min ?
@@ -39,12 +47,18 @@ case class AgsHttpClient(host: String, port: Int) extends AgsClient {
   private def estimateNow(url: URL): AgsResult = {
     try {
       AgsHttpClient.Log.info(s"AGS Query to $url")
-      val conn = url.openConnection().asInstanceOf[HttpsURLConnection]
-      conn.setHostnameVerifier(hostnameVerifier)
-      conn.setSSLSocketFactory(GemSslSocketFactory.get)
-      conn.setReadTimeout(timeout)
-      Charset.set(conn)
-      Response(conn).result
+      Option(lRUCache.get(url.toString) : AgsResult) | {
+        val conn = url.openConnection().asInstanceOf[HttpsURLConnection]
+        conn.setHostnameVerifier(hostnameVerifier)
+        conn.setSSLSocketFactory(GemSslSocketFactory.get)
+        conn.setReadTimeout(timeout)
+        Charset.set(conn)
+
+        Response(conn).result match {
+          case s@AgsResult.Success(_) => lRUCache.put(url.toString, s)
+          case other                  => other
+        }
+      }
     } catch {
       case io: IOException =>
         Log.log(Level.INFO, "I/O Exception while fetching AGS estimate, presumed offline", io)
