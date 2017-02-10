@@ -2,7 +2,6 @@ package edu.gemini.ags.client.impl
 
 import edu.gemini.ags.client.api._
 import edu.gemini.model.p1.immutable.Observation
-import edu.gemini.shared.util.LruCache
 import edu.gemini.util.ssl.GemSslSocketFactory
 import java.net.{HttpURLConnection, URL, URLConnection}
 import HttpURLConnection.HTTP_OK
@@ -10,8 +9,11 @@ import HttpURLConnection.HTTP_OK
 import io.Source
 import java.io.{IOException, InputStream}
 import java.util.Collections
+import java.util.{LinkedHashMap, Map}
 import javax.net.ssl.{HostnameVerifier, HttpsURLConnection, SSLSession}
 import java.util.logging.{Level, Logger}
+
+import edu.gemini.ags.client.api.AgsResult.Success
 
 import scalaz._
 import Scalaz._
@@ -26,7 +28,14 @@ object AgsHttpClient {
   }
 
   // LRU cache to minimize lookups.
-  val lRUCache = Collections.synchronizedMap(new LruCache[String, AgsResult.Success](100))
+  val lRUCache = {
+    val CacheLimit = 1000
+    val cache = new LinkedHashMap[String, AgsResult.Success](CacheLimit, 0.75f, true) {
+      override def removeEldestEntry(eldest: Map.Entry[String, Success]): Boolean =
+        size() > CacheLimit
+    }
+    Collections.synchronizedMap(cache)
+  }
 }
 
 import AgsHttpClient.{Log, hostnameVerifier, lRUCache}
@@ -54,10 +63,12 @@ case class AgsHttpClient(host: String, port: Int) extends AgsClient {
         conn.setReadTimeout(timeout)
         Charset.set(conn)
 
-        Response(conn).result match {
-          case s@AgsResult.Success(_) => lRUCache.put(url.toString, s)
-          case other                  => other
+        val result = Response(conn).result
+        result match {
+          case s:AgsResult.Success => lRUCache.put(url.toString, s)
+          case _                   =>
         }
+        result
       }
     } catch {
       case io: IOException =>
