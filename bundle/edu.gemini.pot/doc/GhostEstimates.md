@@ -1,4 +1,4 @@
-# GHOST Dual Target Mode
+# GHOST Estimations for High-Level Software
 
 GHOST brings an important new feature to the science program model, the ability to observe two targets simultaneously.  All previous instruments are limited to a single science target per observation.  The purpose of this document is to sketch out ideas for how to implement this feature without refactoring the entire program model so that time estimates for doing the work may be created.
 
@@ -32,7 +32,7 @@ The `Option` result is required to handle situations when we don’t have enough
 
 By default the base position coordinate can be defined as the coordinate that minimizes the maximum distance to any target in the collection.  The “smallest-circle” algorithm runs in linear time and can be used to compute this value.  In the GHOST dual-target mode this computation is trivial.  Future instruments with multi-target modes might have different rules for computing the base position.
 
-Throughout the OCS codebase we assume a single science-target per observation.  The idea now is to replace this target with an `Asterism`.  Usages that just want the coordinate at the base position will remain basically unchanged.  Usages that require target-specific information like magnitude values would need to figure out *which* target to use.
+Throughout the OCS codebase we assume a single science-target per observation.  The idea now is to replace this target with an `Asterism`.  Usages that just want the coordinate at the base position will remain basically unchanged.  Usages that require target-specific information like magnitude values would need to figure out *which* target to use, or whether to take into account all targets.
 
 How the general `Asterism` concept might be expressed at Phase 1 vs. Phase 2 and beyond is the subject of the remainder of this document.
 
@@ -135,37 +135,6 @@ final case class SingleTarget(target: SPTarget) extends Asterism {
 ````
 
 ## GHOST-specific Asterisms
-
-Sophisticated GHOST-specific `Asterism`s would be needed to handle dual-target mode and other instrument features. Two alternatives come to mind:
-
-1. A generic `GhostAsterism` type that has fields for IFU1 and for IFU2.  These could be assigned science targets or sky coordinates as necessary.  Instrument features would be kept with the instrument itself.  For example, the observing mode (dual-target, beam-switching, or high-resolution) and mode-specific details would be edited in the instrument component.  Phase 2 checks would have to be utilized to determine whether the targets assigned in the Target Environment or TPE correspond to the configuration in the instrument.
-
-2. Specific `Asterism` types that correspond to the three overarching GHOST modes: Two-Target Standard Resolution, Beam-Switching Standard Resolution, and High Resolution.  Instrument-specific details that correspond to each mode would be kept with the asterism itself.  This prevents some invalid configurations via the type-system instead of runtime checks.
-
-We’ll cover each in turn.
-
-### Option 1. Generic GhostAsterism
-
-Using a generic `GhostAsterism`, nothing prevents us from building an `Asterism` that doesn’t match the instrument mode and configuration.
-
-````scala
-final case class GhostAsterism(
-                   ifu1: Coordinate \/ SPTarget,
-                   ifu2: Coordinate \/ SPTarget
-                 ) extends Asterism {
-
-  def targets: NonEmptyList[SPTarget] =
-    (ifu1.toList ++ ifu2.toList) match {
-       case Nil    => NonEmptyList(new SPTarget.Zero) // Misconfigured anyway
-      case h :: t => NonEmptyList(h, t: _*)
-    }
-}
-````
-
-For example, two sky positions could be assigned or IFU2 could be used in high resolution mode.  We would have to settle for detection of these types of problems during Phase 2 checking.  On the plus side, the asterism is simple and most instrument specific details would be stored in the GHOST instrument component as for all other instruments.
-
-
-### Option 2. Mode-specific GHOST Asterisms
 
 In what follows I’ve attempted to sketch out the configuration information gleaned from the GHOST Concept of Operations Document.  The specific details are somewhat interesting, but the point is that instrument-specific configuration is being kept in the `Asterism` implementation itself.  Controls for setting these values could be available in the target component and/or TPE, or could be accessed from the GHOST instrument component leaving the target environment/TPE to the task of manipulating targets and sky positions.
 
@@ -542,10 +511,21 @@ These components will need to match on the asterism type to configure themselves
 
 For the most part GHOST uses PWFS2 for guiding.  To make AGS effective though, we need to implement vignetting support for GHOST and the PWFS2 probe arm.
 
-
 ### P2 - OT Browser Support
 
 Search capability.  Needs input from science.
+
+### P2 - GHOST-specific Phase 2 Checks
+
+* Error if two targets in dual-target mode are not far enough (at least 84 arcseconds) or else too far (7 arcmins or more) apart.
+
+* Warn for explicit OIWFS guiding enabled on for dim targets.
+
+* Error when using offset positions in dual-target mode
+
+### P2 - GHOST overhead calculations
+
+* Details from science TBD.
 
 
 
