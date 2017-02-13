@@ -358,3 +358,198 @@ case class GhostHighResolution(
 
 New instruments could introduce their own types of `Asterism` in the future. For example, one can imagine 1-_n_ star asterisms, asterisms with constraints on the max difference of target magnitude, etc.
 
+# Phase 1 / PIT Tasks
+
+### P1 - Create `Asterism`
+
+Create the `Asterism` immutable class, schema definition, and smallest-circle base position calculation. (We’ll want to reuse the calculation in Phase 2 so it should be accessible.)
+
+
+### P1 - Replace `Target` with `Asterism` in `Observation`
+
+In this step the schema, model and UI are made to work with `Asterism`s instead of `Target` but we still have not introduced any controls for adding multiple targets.
+
+* AGS, GSA Lookup: this should work with the base position.  The AGS client does send “target type” which could technically be a mix of two different types eventually.I think maybe if there is a non-sidereal target then the overall type should be non-sidereal. The type is just used by AGS to select the guiding strategy.  PWFS2 for example is usually used with non-sidereal presumably because it has a larger probe range for tracking a quickly moving target.
+
+* Target visibility calculation should just work with the new definition of base position.
+
+* Skeleton creation code has to be updated to make this compile.  Since there is no place for storing multiple targets in Phase 2, we should probably just blow up if there are multiple targets in the phase 1 data.  We will need to circle back to this later when there is Phase 2 support.
+
+* Observation Editor has to be updated to show multiple targets when there are multiple targets.
+
+* The grouping by conditions, instrument config, and target is obviously impacted by this. I’m not completely sure how this works but hopefully we can swap out the target for asterism without too much strife. In Phase 1, the assignment of targets to IFUs is not possible so an asterism (t1, t2) should be the same as (t2, t1) for the purposes of grouping.
+
+* Target view deletion confirmation check will now have to check targets in asterisms in observations.
+
+* Problem robot should be straightforward to extend to asterisms where each target is checked individually.
+
+### P1 - GHOST Blueprints
+
+The GHOST instrument blueprint and decision tree can be added to schema, model, and UI at this point. There is nothing new or particularly challenging in this task.  Since there is no Phase 2 representation for this yet, this should just be made to blow up at phase 2 skeleton creation time.
+
+### P1 - Asterism Editor
+
+The target editor will have to have become an asterism editor, gaining support for adding new targets to the asterism.
+
+* Since most of the cases are single-target asterisms, we should avoid being too loud about this.  In fact, if we could avoid any change to the controls for observations that aren’t configured with GHOST dual-target mode that would be ideal.
+
+* Of course, the user can change from dual-target to single-target GHOST modes after the fact and this should be indicated as a problem of some sort in the editor.
+
+* The asterism editor should probably have a Lookup box for finding something in the target list.
+
+* Given an asterism with multiple targets, there should probably be a “Split” button to create single-target asterisms of all the targets it contains.
+
+
+### P1 - Problem Checking
+
+There will be additional problems that need to be checked.
+
+* Dual target asterisms are only used with GHOST in dual-target mode and their asterisms should have exactly two targets.
+
+* The two targets in dual target mode should fall inside the IFU range limits.
+
+
+# ITAC Tasks
+
+My hope is that ITAC need not be drastically changed.  The queue engine should continue to work more or less the same since it only cares about the base position of the observation.
+
+### ITAC - Track Model Changes
+
+ITAC has its own Phase 1 model that will have to be updated to track the changes to the real phase 1 model. This may be nontrivial.
+
+### ITAC - Reports Updates
+
+* Instrument configuration reports
+* Semester statistics report
+
+### ITAC - Queue Engine Update
+
+The queue engine just needs to extract the base position instead of the single target coordinates.  Otherwise it needs no changes.
+
+
+# Phase 2 / OT Tasks
+
+### P2 - `Asterism` trait, `SingleTargetAsterism` Implementation
+
+See details in the proposal above.  Here we just create the new `Asterism` trait and implementation without hooking it up to anything.  This should be able to take advantage of the smallest-circle algorithm developed during the P1 implementation.
+
+### P2 - GHOST Asterisms
+
+See details in the proposal above.  Here we are defining much of the GHOST model. I’m assuming that “Option 2. Mode-specific GHOST Asterisms” is the way to proceed.
+
+### P2 - Asterism PIO
+
+Should use the `ParamSetCodec`.
+
+### P2 - Replace `SPTarget` Base with `Asterism` in `TargetEnv`
+
+This is a big task but here we will mostly concentrate on fairly automatic rote changes.
+
+#### Base Coordinates
+
+Many cases just need the base position coordinate, and that translates directly
+
+* AGS works with the base position coordinates and shouldn’t have to change much.  The same consideration about sidereal vs. non-sidereal mixed asterisms applies.  I think the right answer is to consider the presence of even one non-sidereal target as counting as non-sidereal. That triggers PWFS to be preferred over any OIWFS.
+
+* ITC needs the base position coordinate in one case, but this translates directly to the asterism base.  `TargetCalculator`, which it uses extensively, is created in terms of base position as well.
+
+* Existing P2 checks look at the science target, but updates should be straightforward.
+
+* Canopus probe ranges depend on distance from base but again this translates to asterism base.  (Of course Canopus isn’t used with dual-targets but in general we have to handle these cases.)
+
+* QV / QPT extracts the RA/Dec of the target but that will become the base position RA/Dec.
+
+* ITAC extracts “rollover” observation information from the ODB.  It uses this to pre-reserve time bins.  This should continue to work if adjusted to use base position coordinates for the asterism. 
+
+
+#### Base Target Name
+
+Several usages of the name of the target at the base position will have to be replaced.  Presumably a comma-separated list of target names will suffice.
+
+* OT target component uses the name of the target by default.  Some combination of multiple target names can be used when necessary presumably.
+
+* The FITS `OBJECT` header is taken from a sequence param derived from the base position target name.  Again, this presumably can be a comma separated list.
+
+* QPT displays the target name which again should be a combination of all the targets.
+
+* WDBA sends the base position “name” to the TCC.
+
+
+#### TCC Config
+
+TODO: It isn’t clear to me what to do in the TCC config.  There may be places where just the base coordinate is needed, and others where all targets have to be listed.  This may require coordination with TCC updates.  Input from Javier on the impact of asterisms would be appreciated.
+
+#### OT Updates
+
+The OT will require extensive updates to support asterisms completely.  I think this work should be relegated to a separate task.  For now, it should suffice to get the code compiling and working with the first target in the asterism as if it were the only target.  While going through the code, split up the places where we will need to match on asterism type.  Make careful notes in comments where we’ll need to come back later.
+
+#### Other
+
+* GPI looks at base position magnitudes to set parameters in the sequence.  I think we can update this to do the same thing for all targets in the asterism (of which there will only be one of course).
+
+* `TargetEnvironment` PIO updates for `Asterism`.  
+
+* The `edu.gemini.spModel.target.obsComp.TargetSelection` class should be reviewed thoroughly. There is some code there that assumes a single base position.  It should work just as well with multiple targets but will need to be updated.
+
+* QPT adds markers for non-sidereal targets, which will now have to be checked over all the asterism targets.
+
+* QV looks for non-sidereal targets
+
+### P2 - GHOST Instrument Component
+
+A simple GHOST component with parameters for
+
+* Position angle
+* ISS Port
+* Red and Blue Camera exposure times
+
+
+### P2 - OT GHOST Editor
+
+I believe the OT editor should present the usual controls for position angle, port, exposure times.  It should also allow selection of the instrument mode, which is one of:
+
+* Standard Resolution Dual-Target
+* Standard Resolution Beam Switching
+* High Resolution (with or without precision radial velocity (PRV))
+
+Setting the instrument mode will also set the asterism in the target environment.  This implies the ability to morph from one asterism to another making sensible changes as necessary. Going between single target modes should be fairly straightforward.  
+
+* Dual-target -> Single-target: prompt for which target to keep if they are both configured and not just the default (0,0) targets?  The other can be stored in a user target?
+
+* Single-target -> Dual-target.  We could convert the sky position to a dummy target or make a dummy target at 84 arcsecs north of the single target.  It’s probably not too important since a real target will have to be selected.  It shouldn’t be (0,0) though because that will place the base position at some random place in the sky.
+
+* The TPE and target environment will be used to set the actual target and coordinates of sky positions.  Other configuration details can be edited here.  For example whether to use the guide fibers, the binning setting, whether to use the fiber agitator for high-res PRV, etc.
+
+### P2 - Skeleton Creation Updates
+
+Given `Asterism` and GHOST support in the model, we can wrap up skeleton creation. The template creation library will need to be provided by science in the end, but we can get started with basic GHOST skeletons that match the phase 1 configuration.
+
+### P2 - OT Updates For Asterisms
+
+The Target Environment component and TPE should allow the selection of targets and sky positions.  I don’t think we need to be able to switch between asterism types here though. For that, see the GHOST instrument component editor.  Nevertheless, this will be the hardest task.
+
+These components will need to match on the asterism type to configure themselves
+
+* Single-target not GHOST.  Everything as today.
+
+* Standard Resolution Dual-Target GHOST.  We need support editing two targets and for assigning the specific IFU for each. Should be able to swap between the two as well.  The TPE will need selectors for each IFU.
+
+* Standard Resolution Beam-Switching GHOST. Support for entering a sky position and assigning it to an IFU.  Swap between IFU for the target and for the sky position. Support for showing these and selecting in TPE.
+
+* High Resolution GHOST.  Much as for beam-switching mode but I believe here we need to define IFU2 as an offset position?
+
+### P2 - AGS Updates
+
+For the most part GHOST uses PWFS2 for guiding.  To make AGS effective though, we need to implement vignetting support for GHOST and the PWFS2 probe arm.
+
+
+### P2 - OT Browser Support
+
+Search capability.  Needs input from science.
+
+
+
+
+
+
+
