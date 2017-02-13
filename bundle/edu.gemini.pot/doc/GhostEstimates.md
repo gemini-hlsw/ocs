@@ -528,7 +528,11 @@ Search capability.  Needs input from science.
 * Details from science TBD.
 
 
+# ObsLog
 
+### OL - GHOST “segment”
+
+Adding a new instrument to the obslog is fairly straightforward. Currently identified configuration elements consist of: number of red/blue exposures and exposure times, which instrument mode was in use.
 
 
 
