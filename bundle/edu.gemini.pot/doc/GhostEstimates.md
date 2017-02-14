@@ -1,6 +1,6 @@
 # GHOST Estimations for High-Level Software
 
-GHOST brings an important new feature to the science program model, the ability to observe two targets simultaneously.  All previous instruments are limited to a single science target per observation.  The purpose of this document is to sketch out ideas for how to implement this feature without refactoring the entire program model so that time estimates for doing the work may be created.
+GHOST brings an important new feature to the science program model, the ability to observe two targets simultaneously.  All previous instruments are limited to a single science target per observation.  The purpose of this document is to sketch out ideas for how to implement this feature along with the rest GHOST and then make time estimates for doing the work.
 
 The GHOST concept of operations document, section 4.2 “Instrument Operating Modes”, describes a sophisticated set of modes that use the two IFUs with built in guiding capability and dedicated sky fibers in distinct ways. This prescribes a tight level of integration between target definition and instrument features that is unprecedented for Gemini instruments. A few additional facts about dual target support may be relevant to implementation ideas:
 
@@ -34,7 +34,7 @@ By default the base position coordinate can be defined as the coordinate that mi
 
 Throughout the OCS codebase we assume a single science-target per observation.  The idea now is to replace this target with an `Asterism`.  Usages that just want the coordinate at the base position will remain basically unchanged.  Usages that require target-specific information like magnitude values would need to figure out *which* target to use, or whether to take into account all targets.
 
-How the general `Asterism` concept might be expressed at Phase 1 vs. Phase 2 and beyond is the subject of the remainder of this document.
+How the general `Asterism` concept might be expressed at Phase 1 vs. Phase 2 and beyond is the subject of the next two sections.
 
 # Phase 1 Schema / Model / PIT
 
@@ -44,23 +44,15 @@ The Phase 1 observation is essentially a 4-tuple of
   (Target, Blueprint, Condition, Time)
 ````
 
-The `Target` would need to be replaced with a simple `Asterism` element that contains only a non-empty list of science targets and the default base position calculation. A single base position is required for AGS checks, the ITAC queue algorithm, etc. Ideally the inclusion of two targets in an observation would be limited in the model to GHOST dual-target instrument resources. Unfortunately that seems difficult to achieve given the current Phase 1 schema, model, and user interface.  Instead, I suggest that we place constraints in the PIT UI where possible and add proposal checks that flag invalid configurations such as dual-target high-resolution observations or dual-target anything other than GHOST.
+The `Target` will need to be replaced with a simple `Asterism` element that contains only a non-empty list of science targets and the default base position calculation. A single base position is required for AGS checks, the ITAC queue algorithm, etc. Ideally the inclusion of two targets in an observation would be limited in the model to GHOST dual-target instrument resources. Unfortunately that seems difficult to achieve given the current Phase 1 schema, model, and user interface.  Instead, I suggest that we place constraints in the PIT UI where possible and add proposal checks that flag invalid configurations such as dual-target high-resolution observations or dual-target anything other than GHOST.
 
 At phase 1 time, details of which IFU is assigned which target are presumed unimportant. Similarly, the location of sky positions, OIWFS guiding state, fiber agitator settings, etc. are either captured in the `Blueprint` or else deferred to Phase 2.
 
 Asterisms will replace targets in the UI as well.  This will require a “Target Editor” popup with controls for displaying and editing multiple targets. 
 
-## TODO
-
-* How does this impact the “Targets” tab and target import / export, or does it impact these?
-* What if a target appears in two or more asterisms?  Does it appear multiple times in the “Targets” tab?
-* Do we need a UI for grouping targets imported from a file?
-* Do we need to split asterisms if the user switches the instrument configuration from dual target to beam switching or high resolution?
-
-
 # Phase 2 / Science Program Model
 
-At Phase 2 and beyond, all the low-level configuration details must be specified and tracked.  This is challenging in the current model because the target environment is viewed as completely independent from the instrument configuration.  With GHOST, that separation may no longer be viable.  Depending on the mode there may be two targets, or one target and a sky position.  Further, because the two IFUs differ it is important to specify which particular IFU is assigned to a target or sky position.  GHOST configuration options depend heavily on the mode of use, so setting up to use the fiber agitator for standard resolution modes makes no sense for example.
+At Phase 2 and beyond, all the low-level configuration details must be specified and tracked.  This is challenging in the current model because the target environment is viewed as completely independent from the instrument configuration.  With GHOST, that separation no longer seems viable.  Depending on instrument mode there may be two targets, or one target and a sky position.  Further, because the two IFUs differ it is important to specify which particular IFU is assigned to a target or sky position.  GHOST configuration options depend heavily on the mode of use, so setting up to use the fiber agitator for standard resolution modes makes no sense for example.
 
 The proposal here to to extend the `Asterism` concept to include configuration details for the three major use cases: dual target, beam switching, and high resolution.  Before diving into GHOST details though, we’ll sketch out the Phase 2 `Asterism` trait.
 
@@ -138,7 +130,7 @@ final case class SingleTarget(target: SPTarget) extends Asterism {
 
 In what follows I’ve attempted to sketch out the configuration information gleaned from the GHOST Concept of Operations Document.  The specific details are somewhat interesting, but the point is that instrument-specific configuration is being kept in the `Asterism` implementation itself.  Controls for setting these values could be available in the target component and/or TPE, or could be accessed from the GHOST instrument component leaving the target environment/TPE to the task of manipulating targets and sky positions.
 
-Including instrument configuration in the target environment would be a fairly significant change in its own right beyond the updates to work with `Asterism` vs. a single base position target.  On the plus side, it keeps the configuration of each of the modes together with the target selection avoiding incorrect configurations like two-target high resolution.
+Including instrument configuration in the target environment would be a fairly significant change in its own right beyond the updates to work with `Asterism` vs. a single base position target.  On the plus side, it keeps the configuration of each of the modes together with the target selection avoiding inconsistent configurations like two-target high resolution.
 
 #### Shared GHOST Properties
 
@@ -327,14 +319,20 @@ case class GhostHighResolution(
 
 New instruments could introduce their own types of `Asterism` in the future. For example, one can imagine 1-_n_ star asterisms, asterisms with constraints on the max difference of target magnitude, etc.
 
+In the remaining sections we sketch out specific tasks with enough detail to get a sense of the amount of effort required assuming an implementation along the lines discussed so far.
+
 # Phase 1 / PIT Tasks
 
 ### P1 - Create `Asterism`
 
-Create the `Asterism` immutable class, schema definition, and smallest-circle base position calculation. (We’ll want to reuse the calculation in Phase 2 so it should be accessible.)
+_2 Days_
+
+Create the `Asterism` immutable class, schema definition, and smallest-circle base position calculation. (We’ll want to reuse the calculation in Phase 2 so it should be accessible.). At this point, we’re just adding the new class so there is no impact on existing code.
 
 
 ### P1 - Replace `Target` with `Asterism` in `Observation`
+
+_4 Days_
 
 In this step the schema, model and UI are made to work with `Asterism`s instead of `Target` but we still have not introduced any controls for adding multiple targets.
 
@@ -352,11 +350,21 @@ In this step the schema, model and UI are made to work with `Asterism`s instead 
 
 * Problem robot should be straightforward to extend to asterisms where each target is checked individually.
 
+### P1 - Migration
+
+_1 Day_
+
+Proposal import migration will have to swap single-target observations with the corresponding asterism.
+
 ### P1 - GHOST Blueprints
+
+_1 Day_
 
 The GHOST instrument blueprint and decision tree can be added to schema, model, and UI at this point. There is nothing new or particularly challenging in this task.  Since there is no Phase 2 representation for this yet, this should just be made to blow up at phase 2 skeleton creation time.
 
 ### P1 - Asterism Editor
+
+_8 Days_
 
 The target editor will have to have become an asterism editor, gaining support for adding new targets to the asterism.
 
@@ -371,6 +379,8 @@ The target editor will have to have become an asterism editor, gaining support f
 
 ### P1 - Problem Checking
 
+_1 Day_
+
 There will be additional problems that need to be checked.
 
 * Dual target asterisms are only used with GHOST in dual-target mode and their asterisms should have exactly two targets.
@@ -380,33 +390,45 @@ There will be additional problems that need to be checked.
 
 # ITAC Tasks
 
-My hope is that ITAC need not be drastically changed.  The queue engine should continue to work more or less the same since it only cares about the base position of the observation.
+My hope is that ITAC need not be drastically changed.  The queue engine should continue to work more or less the same since it only cares about the base position of the observation. I’m not familiar with the ITAC model, but those who are confirm that it is fragile and difficult to update.  My estimates are very tentative.
 
 ### ITAC - Track Model Changes
+
+_10 Days?_
 
 ITAC has its own Phase 1 model that will have to be updated to track the changes to the real phase 1 model. This may be nontrivial.
 
 ### ITAC - Reports Updates
+
+_2 Days?_
 
 * Instrument configuration reports
 * Semester statistics report
 
 ### ITAC - Queue Engine Update
 
-The queue engine just needs to extract the base position instead of the single target coordinates.  Otherwise it needs no changes.
+_2 Days?_
+
+The queue engine just needs to extract the base position instead of the single target coordinates.  Otherwise it needs no changes.  Nevertheless anything that involves editing, compiling, and testing ITAC will take at least a day.
 
 
 # Phase 2 / OT Tasks
 
 ### P2 - `Asterism` trait, `SingleTargetAsterism` Implementation
 
+_1 Day_
+
 See details in the proposal above.  Here we just create the new `Asterism` trait and implementation without hooking it up to anything.  This should be able to take advantage of the smallest-circle algorithm developed during the P1 implementation.
 
 ### P2 - GHOST Asterisms
 
-See details in the proposal above.  Here we are defining much of the GHOST model. I’m assuming that “Option 2. Mode-specific GHOST Asterisms” is the way to proceed.
+_2 Days_
+
+See details in the proposal above.  Here we are defining much of the GHOST model.  This will require a bit of discussion, clarification and iteration.
 
 ### P2 - Asterism PIO
+
+_1 Day_
 
 Should use the `ParamSetCodec`.
 
@@ -415,6 +437,8 @@ Should use the `ParamSetCodec`.
 This is a big task but here we will mostly concentrate on fairly automatic rote changes.
 
 #### Base Coordinates
+
+_2 Days_
 
 Many cases just need the base position coordinate, and that translates directly
 
@@ -433,6 +457,8 @@ Many cases just need the base position coordinate, and that translates directly
 
 #### Base Target Name
 
+_1 Day_
+
 Several usages of the name of the target at the base position will have to be replaced.  Presumably a comma-separated list of target names will suffice.
 
 * OT target component uses the name of the target by default.  Some combination of multiple target names can be used when necessary presumably.
@@ -444,15 +470,27 @@ Several usages of the name of the target at the base position will have to be re
 * WDBA sends the base position “name” to the TCC.
 
 
+#### Migration
+
+_2 Days_
+
+Existing programs will all have a single target base position.  We’ll need migration code to replace this with a single target asterism.
+
 #### TCC Config
+
+_4 Days_
 
 TODO: It isn’t clear to me what to do in the TCC config.  There may be places where just the base coordinate is needed, and others where all targets have to be listed.  This may require coordination with TCC updates.  Input from Javier on the impact of asterisms would be appreciated.
 
 #### OT Updates
 
+_1 Day_
+
 The OT will require extensive updates to support asterisms completely.  I think this work should be relegated to a separate task.  For now, it should suffice to get the code compiling and working with the first target in the asterism as if it were the only target.  While going through the code, split up the places where we will need to match on asterism type.  Make careful notes in comments where we’ll need to come back later.
 
 #### Other
+
+_4 Days_
 
 * GPI looks at base position magnitudes to set parameters in the sequence.  I think we can update this to do the same thing for all targets in the asterism (of which there will only be one of course).
 
@@ -466,14 +504,19 @@ The OT will require extensive updates to support asterisms completely.  I think 
 
 ### P2 - GHOST Instrument Component
 
+_2 Days_
+
 A simple GHOST component with parameters for
 
 * Position angle
 * ISS Port
 * Red and Blue Camera exposure times
 
+Editing of the instrument mode is left for a separate task.
 
 ### P2 - OT GHOST Editor
+
+_5 Days_
 
 I believe the OT editor should present the usual controls for position angle, port, exposure times.  It should also allow selection of the instrument mode, which is one of:
 
@@ -491,9 +534,12 @@ Setting the instrument mode will also set the asterism in the target environment
 
 ### P2 - Skeleton Creation Updates
 
+_2 Days_
+
 Given `Asterism` and GHOST support in the model, we can wrap up skeleton creation. The template creation library will need to be provided by science in the end, but we can get started with basic GHOST skeletons that match the phase 1 configuration.
 
 ### P2 - OT Updates For Asterisms
+
 
 The Target Environment component and TPE should allow the selection of targets and sky positions.  I don’t think we need to be able to switch between asterism types here though. For that, see the GHOST instrument component editor.  Nevertheless, this will be the hardest task.
 
@@ -507,15 +553,36 @@ These components will need to match on the asterism type to configure themselves
 
 * High Resolution GHOST.  Much as for beam-switching mode but I believe here we need to define IFU2 as an offset position?
 
+#### Target Environment
+
+_8 Days_
+
+In addition to adjustments for two-target mode, the Target Environment will have to show the sky positions for the other modes.  This will require reworking the target table a bit. We’ll need to label the IFUs and provide a mechanism for swapping the targets and offset positions between the IFUs, I’m guessing.
+
+I’m really not sure how long this will take because the target environment table is old and clunky.
+
+#### TPE
+
+_8 Days_
+
+Here we will need selection tools for the IFUs and these will depend on the modes. Are there probe arms and vignetting to plot?  The requirements aren’t clear.
+
+
 ### P2 - AGS Updates
+
+_5 Days_
 
 For the most part GHOST uses PWFS2 for guiding.  To make AGS effective though, we need to implement vignetting support for GHOST and the PWFS2 probe arm.
 
 ### P2 - OT Browser Support
 
+_2 Days_
+
 Search capability.  Needs input from science.
 
 ### P2 - GHOST-specific Phase 2 Checks
+
+_2 Days_
 
 * Error if two targets in dual-target mode are not far enough (at least 84 arcseconds) or else too far (7 arcmins or more) apart.
 
@@ -525,12 +592,16 @@ Search capability.  Needs input from science.
 
 ### P2 - GHOST overhead calculations
 
+_2 Days_
+
 * Details from science TBD.
 
 
 # ObsLog
 
 ### OL - GHOST “segment”
+
+_1 Day_
 
 Adding a new instrument to the obslog is fairly straightforward. Currently identified configuration elements consist of: number of red/blue exposures and exposure times, which instrument mode was in use.
 
