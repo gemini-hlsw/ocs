@@ -1,10 +1,12 @@
 # GHOST Estimations for High-Level Software
 
-GHOST brings an important new feature to the science program model, the ability to observe two targets simultaneously.  All previous instruments are limited to a single science target per observation.  The purpose of this document is to sketch out ideas for how to implement this feature along with the rest GHOST and then make time estimates for doing the work.
+GHOST brings an important new feature to the science program model, the ability to observe two targets simultaneously.  All previous instruments are limited to a single science target per observation.  The purpose of this document is to sketch out ideas for how to implement this feature along with the rest of GHOST and then make time estimates for doing the work.
 
 The GHOST concept of operations document, section 4.2 “Instrument Operating Modes”, describes a sophisticated set of modes that use the two IFUs with built in guiding capability and dedicated sky fibers in distinct ways. This prescribes a tight level of integration between target definition and instrument features that is unprecedented for Gemini instruments. A few additional facts about dual target support may be relevant to implementation ideas:
 
 * The two target mode applies only to GHOST, and only to GHOST in a particular mode of operations: Dual Target Standard Resolution.  There are other ways to use GHOST that occupy a single target, just as for all other instruments.
+
+* GHOST has two IFUs that offer distinct capabilities and distinct arrangements of sky fibers. Therefore tracking which IFU in particular will be observing a target or sky position is necessary.  That is, it isn’t correct to randomly assign targets to IFUs.
 
 * Because there are two IFUs, in beam-switching and high-resolution modes one can be observing a science target and the other taking sky background at a specific coordinate.
 
