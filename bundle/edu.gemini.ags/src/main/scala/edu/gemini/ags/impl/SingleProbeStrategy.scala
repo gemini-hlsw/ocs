@@ -58,6 +58,7 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
     }
 
   override def estimate(ctx: ObsContext, mt: MagnitudeTable)(ec: ExecutionContext): Future[AgsStrategy.Estimate] = {
+    println("*** SingleProbeStrategy: estimate")
     val ct = withCorrectedSite(ctx)
     catalogResult(ct, mt)(ec).map(estimate(ct, mt, _))
   }

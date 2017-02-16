@@ -121,7 +121,13 @@ object Strategy {
       case _                       => true
     }
 
-  def validStrategies(ctx: ObsContext): List[AgsStrategy] =
+  def validStrategies(ctx: ObsContext): List[AgsStrategy] = {
+    val strategies = InstMap.get(ctx.getInstrument.getType).map(_.apply(ctx)).toList.flatten
+    val availableStrategies = strategies.filter(guidersAvailable(ctx))
+    val siteAvailableStrategies = availableStrategies.filter(siteAvailability(ctx))
+    println(s"--- strategies: ${strategies.map(_.key.displayName)}")
+    println(s"--- availableStrategies: ${availableStrategies.map(_.key.displayName)}")
+    println(s"--- siteAvailableStrategies: ${siteAvailableStrategies.map(_.key.displayName)}")
     InstMap.get(ctx.getInstrument.getType).map(_.apply(ctx)).toList.flatten.filter(guidersAvailable(ctx)).filter(siteAvailability(ctx))
-
+  }
 }

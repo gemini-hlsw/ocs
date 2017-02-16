@@ -138,6 +138,32 @@ trait GemsStrategy extends AgsStrategy {
   }
 
   override def estimate(ctx: ObsContext, mt: MagnitudeTable)(ec: ExecutionContext): Future[Estimate] = {
+    println(">>> GemsStrategy: estimate")
+    // Get the query results and convert them to GeMS-specific ones.
+    val results = toGemsCatalogSearchResults(ctx, catalogResult(ctx, mt)(ec))(ec)
+
+    // Create a set of the angles to try.
+    val anglesToTry = (0 until 360 by 45).map(Angle.fromDegrees(_)).toSet
+
+    // A way to terminate the Mascot algorithm immediately in the following cases:
+    // 1. A usable 2 or 3-star asterism is found; or
+    // 2. If no asterisms were found.
+    // Returning false will stop the search
+    def progress(s: Strehl): Boolean = {
+      !((s.stars.size >= 2) || (s.stars.size < 2))
+    }
+
+    // Iterate over 45 degree position angles if no asterism is found at PA = 0.
+    val gemsCatalogResults = results.map(result => GemsResultsAnalyzer.analyzeGoodEnough(ctx, anglesToTry, result, progress))
+
+    // Filter out the 1-star asterisms. If anything is left, we are good to go; otherwise, no.
+    gemsCatalogResults.map { x =>
+      x.foreach(ggs => println(s">>> ${ggs.guideGroup.getTargets.size()}"))
+      !x.exists(_.guideGroup.getTargets.size() >= 3) ? AgsStrategy.Estimate.CompleteFailure | AgsStrategy.Estimate.GuaranteedSuccess
+    }
+  }
+  def estimate2(ctx: ObsContext, mt: MagnitudeTable)(ec: ExecutionContext): Future[Estimate] = {
+    println("*** STARTING ESTIMATE ***")
     // Get the query results and convert them to GeMS-specific ones.
     val results = toGemsCatalogSearchResults(ctx, catalogResult(ctx, mt)(ec))(ec)
 
@@ -149,7 +175,13 @@ trait GemsStrategy extends AgsStrategy {
 
     // We only want Canopus targets, so filter to those and then determine if the asterisms are big enough.
     gemsCatalogResults.map { ggsLst =>
-      val largestAsterism = ggsLst.map(_.guideGroup.grp.toManualGroup.targetMap.keySet.intersection(GemsStrategy.canopusProbes).size).max
+      val sizeAll  = ggsLst.map(_.guideGroup.getAll.asScalaList.flatMap(_.getTargets.asScalaList).size)
+      val sizeCwfs = ggsLst.map(_.guideGroup.grp.toManualGroup.targetMap.keySet.size)
+      println(s"* sizeAll=$sizeAll")
+      println(s"* sizeCwfs=$sizeCwfs")
+      println(s"* sizes=${sizeAll.zip(sizeCwfs)}")
+      val largestAsterism = ggsLst.map(_.guideGroup.grp.toManualGroup.targetMap.keySet.intersection(GemsStrategy.canopusProbes).size).fold(0)(math.max)
+      println(s"* Largest asterism=$largestAsterism")
       Estimate(largestAsterism / 3.0)
     }
   }
