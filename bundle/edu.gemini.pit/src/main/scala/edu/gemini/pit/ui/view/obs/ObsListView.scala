@@ -475,8 +475,8 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band, queueLookup: Target => U
         case _                              => null
       }
       case Time    => e match {
-        case ObsElem(o) if o.progTime.isDefined => "%3.2f %s".format(o.progTime.get.value, o.progTime.get.units)
-        case _                                  => null
+        case ObsElem(o) if o.totalTime.isDefined => "%3.2f %s".format(o.totalTime.get.value, o.totalTime.get.units)
+        case _                                   => null
       }
       case Guiding => presentation(e, guiding, _.text)
     }
