@@ -701,7 +701,7 @@
             <!-- END first page -->
 
             <!-- BEGIN investigator information -->
-            <fo:page-sequence master-reference="rest" initial-page-number="2">
+            <fo:page-sequence master-reference="rest">
 
                 <!-- BEGIN header -->
                 <fo:static-content
@@ -928,7 +928,7 @@
             <!-- END investgator information -->
 
             <!-- BEGIN science justification -->
-            <fo:page-sequence master-reference="rest" initial-page-number="3">
+            <fo:page-sequence master-reference="rest">
 
                 <!-- BEGIN header -->
                 <fo:static-content
