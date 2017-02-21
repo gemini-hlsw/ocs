@@ -245,7 +245,7 @@ class GemsStrategySpec extends Specification {
         gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), Canopus.Wfs.cwfs3, s).contains(AgsAnalysis.Usable(Canopus.Wfs.cwfs3, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq, RBandsList))
       } should beSome(true)
 
-      // Test estimate: 1-star asterism grants 1/3 chance of success.
+      // Test estimate: 3-star asterism grants guaranteed success.
       val estimate = gemsStrategy.estimate(ctx, ProbeLimitsTable.loadOrThrow())(implicitly)
       Await.result(estimate, 20.seconds) should beEqualTo(Estimate.GuaranteedSuccess)
     }
