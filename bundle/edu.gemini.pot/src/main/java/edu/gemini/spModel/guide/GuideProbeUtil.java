@@ -56,7 +56,6 @@ public enum GuideProbeUtil {
         return getAvailableGuiders(dataObjs);
     }
 
-    // TODO: for some reason, this is not returning GeMS AGS
     public Set<GuideProbe> getAvailableGuiders(ObsContext ctx) {
         final List<AbstractDataObject> dataObjects = new ArrayList<>(3);
         final TargetEnvironment env = ctx.getTargets();

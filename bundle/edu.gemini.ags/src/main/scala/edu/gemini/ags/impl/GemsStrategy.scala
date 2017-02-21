@@ -91,8 +91,6 @@ trait GemsStrategy extends AgsStrategy {
   }
 
   def estimate(ctx: ObsContext, mt: MagnitudeTable)(ec: ExecutionContext): Future[Estimate] = {
-    println("*** STARTING ESTIMATE ***")
-
     // Create a set of the angles to try.
     val anglesToTry = (0 until 360 by 90).map(Angle.fromDegrees(_)).toSet
 
@@ -104,13 +102,7 @@ trait GemsStrategy extends AgsStrategy {
 
     // We only want Canopus targets, so filter to those and then determine if the asterisms are big enough.
     gemsCatalogResults.map { ggsLst =>
-      val sizeAll  = ggsLst.map(_.guideGroup.getAll.asScalaList.flatMap(_.getTargets.asScalaList).size)
-      val sizeCwfs = ggsLst.map(_.guideGroup.grp.toManualGroup.targetMap.keySet.intersection(GemsStrategy.canopusProbes).size)
-      println(s"* sizeAll=$sizeAll")
-      println(s"* sizeCwfs=$sizeCwfs")
-      println(s"* sizes=${sizeAll.zip(sizeCwfs)}")
       val largestAsterism = ggsLst.map(_.guideGroup.grp.toManualGroup.targetMap.keySet.intersection(GemsStrategy.canopusProbes).size).fold(0)(math.max)
-      println(s"* Largest asterism=$largestAsterism")
       AgsStrategy.Estimate.toEstimate(largestAsterism / 3.0)
     }
   }
