@@ -15,6 +15,13 @@ object NumberField {
     df.setGroupingUsed(false)
     df
   }
+
+  object TimeFormatter extends DecimalFormat {
+    setMaximumFractionDigits(2)
+    setMinimumFractionDigits(2)
+    setMinimumIntegerDigits(1)
+    setGroupingUsed(false)
+  }
 }
 
 class NumberField(d: Option[Double], allowEmpty: Boolean, format: java.text.Format = NumberField.df) extends FormattedTextField(format) with SelectOnFocus {

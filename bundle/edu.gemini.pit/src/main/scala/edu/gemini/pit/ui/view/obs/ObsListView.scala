@@ -158,10 +158,10 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band, queueLookup: Target => U
         BorderFactory.createEmptyBorder(2, 4, 2, 4))
       override def refresh(m:Option[List[Observation]]) {
         text = ~panel.model.map {p =>
-          val b1 = p.observations.filter(_.band == Band.BAND_1_2).flatMap(_.progTime).map(_.hours).sum
+          val b1 = p.observations.filter(_.band == Band.BAND_1_2).flatMap(_.totalTime).map(_.hours).sum
           p.proposalClass match {
             case q:QueueProposalClass if q.band3request.isDefined =>
-              val b3 = p.observations.filter(_.band == Band.BAND_3).flatMap(_.progTime).map(_.hours).sum
+              val b3 = p.observations.filter(_.band == Band.BAND_3).flatMap(_.totalTime).map(_.hours).sum
               "Sum observation times: %3.2f hr | Sum Band 3 times: %3.2f hr".format(b1, b3)
             case _ =>
               "Sum observation times: %3.2f hr".format(b1)

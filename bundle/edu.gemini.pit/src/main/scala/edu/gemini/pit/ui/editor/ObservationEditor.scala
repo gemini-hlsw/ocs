@@ -21,7 +21,6 @@ object ObservationEditor {
 
   def open(c:Option[Observation], editable:Boolean, parent:UIElement) =
     new ObservationEditor(c.getOrElse(Observation.empty.copy(intTime = Some(TimeAmount.empty))), editable).open(parent)
-
 }
 
 /**
@@ -73,7 +72,7 @@ class ObservationEditor private (obs:Observation, canEdit:Boolean) extends StdMo
   // Time calculator
   val calculator = obs.blueprint.flatMap(Overheads)
 
-  object IntegrationTime extends NumberField(obs.intTime.map(_.value).orElse(Some(1.0)), allowEmpty = false) {
+  object IntegrationTime extends NumberField(obs.intTime.map(_.value).orElse(Some(1.0)), allowEmpty = false, format = NumberField.TimeFormatter) {
     enabled = canEdit
     override def valid(d:Double) = d > 0
   }
@@ -88,7 +87,7 @@ class ObservationEditor private (obs:Observation, canEdit:Boolean) extends StdMo
       text = t
   }
 
-  class CalculatedTimeAmountField extends NumberField(None, allowEmpty = false) {
+  class CalculatedTimeAmountField extends NumberField(None, allowEmpty = false, format = NumberField.TimeFormatter) {
     enabled = false
 
     def update(t: TimeAmount): Unit =

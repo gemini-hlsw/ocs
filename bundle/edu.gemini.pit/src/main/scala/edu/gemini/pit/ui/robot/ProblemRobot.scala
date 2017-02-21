@@ -644,8 +644,9 @@ import TimeProblems._
 
 object TimeProblems {
   // Are two time amounts close enough to be considered the same?
+  // Times are all rounded to two decimal places.
   def sameTime(t1: TimeAmount, t2: TimeAmount): Boolean =
-    (t1.hours - t2.hours).abs < 0.001
+    (t1.hours - t2.hours).abs < 0.01
 
   // The goal here is to not show too much precision and yet not say two
   // times are different and print out two amounts that look the same.
@@ -682,7 +683,7 @@ case class TimeProblems(p: Proposal, s: ShellAdvisor) {
   lazy val requested = p.proposalClass.requestedTime
   def obsTimeSum(b: Band) = TimeAmount.sum(for {
     o <- p.observations if o.band == b
-    t <- o.progTime
+    t <- o.totalTime
   } yield t)
   lazy val obs = obsTimeSum(Band.BAND_1_2)
   lazy val obsB3 = obsTimeSum(Band.BAND_3)
