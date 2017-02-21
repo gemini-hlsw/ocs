@@ -58,22 +58,18 @@ public enum GuideProbeUtil {
 
     // TODO: for some reason, this is not returning GeMS AGS
     public Set<GuideProbe> getAvailableGuiders(ObsContext ctx) {
-        System.out.println("+++ GuideProbeUtil: getAvailableGuiders");
         final List<AbstractDataObject> dataObjects = new ArrayList<>(3);
         final TargetEnvironment env = ctx.getTargets();
         if (env != null) {
-            System.out.println("+++ GuideProbeUtil: getAvailableGuiders env != null");
             final TargetObsComp toc = new TargetObsComp();
             toc.setTargetEnvironment(env);
             dataObjects.add(toc);
         }
         final SPInstObsComp inst = ctx.getInstrument();
         if (inst != null) {
-            System.out.println("+++ GuideProbeUtil: getAvailableGuiders inst != null");
             dataObjects.add(inst);
         }
         ctx.getAOComponent().foreach(dataObjects::add);
-        System.out.println("+++ GuideProbeUtil: getAvailableGuiders, size now=" + dataObjects.size());
 
         return getAvailableGuiders(dataObjects);
     }
@@ -90,12 +86,6 @@ public enum GuideProbeUtil {
                 anti.addAll(((GuideProbeConsumer) dataObj).getConsumedGuideProbes());
             }
         }
-        res.forEach(gp -> {
-            System.out.println("=== res guide probe=" + gp.getDisplayName());
-        });
-        anti.forEach(gp -> {
-            System.out.println("=== anti guide probe=" + gp.getDisplayName());
-        });
         res.removeAll(anti);
 
         return res;

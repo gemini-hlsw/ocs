@@ -139,16 +139,16 @@ trait GemsStrategy extends AgsStrategy {
 
   def estimate(ctx: ObsContext, mt: MagnitudeTable)(ec: ExecutionContext): Future[Estimate] = {
     println("*** STARTING ESTIMATE ***")
-    // Get the query results and convert them to GeMS-specific ones.
-    // TODO: Unsure as to why we are doing this differently than in search.
-    // TODO: If we use search instead, we don't seem to suffer the issues of not finding a star.
-    //val results = toGemsCatalogSearchResults(ctx, catalogResult(ctx, mt)(ec))(ec)
 
     // Create a set of the angles to try.
     // TODO: was by 45, which is bizarre since in actual candidate search, is by 90.
     val anglesToTry = (0 until 360 by 90).map(Angle.fromDegrees(_)).toSet
 
-    val results = search(GemsTipTiltMode.canopus, ctx, anglesToTry, None)(ec)
+    // Get the query results and convert them to GeMS-specific ones.
+    // TODO: Unsure as to why we are doing this differently than in search.
+    // TODO: If we use search instead, we don't seem to suffer the issues of not finding a star.
+    val results = toGemsCatalogSearchResults(ctx, catalogResult(ctx, mt)(ec))(ec)
+    //val results = search(GemsTipTiltMode.canopus, ctx, anglesToTry, None)(ec)
 
     // Iterate over 45 degree position angles if no 3-star asterism is found at PA = 0.
     val gemsCatalogResults = results.map(result => GemsResultsAnalyzer.analyzeGoodEnough(ctx, anglesToTry, result, _.stars.size < 3))
@@ -159,7 +159,6 @@ trait GemsStrategy extends AgsStrategy {
       val sizeCwfs = ggsLst.map(_.guideGroup.grp.toManualGroup.targetMap.keySet.intersection(GemsStrategy.canopusProbes).size)
       println(s"* sizeAll=$sizeAll")
       println(s"* sizeCwfs=$sizeCwfs")
-      println(s"* sizeMax=${sizeCwfs.max}")
       println(s"* sizes=${sizeAll.zip(sizeCwfs)}")
       val largestAsterism = ggsLst.map(_.guideGroup.grp.toManualGroup.targetMap.keySet.intersection(GemsStrategy.canopusProbes).size).fold(0)(math.max)
       println(s"* Largest asterism=$largestAsterism")
