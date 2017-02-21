@@ -3,15 +3,15 @@ package edu.gemini.ags.impl
 import edu.gemini.ags.api.{AgsAnalysis, AgsGuideQuality, AgsStrategy}
 import edu.gemini.ags.api.AgsStrategy.Estimate
 import edu.gemini.ags.conf.ProbeLimitsTable
-import edu.gemini.ags.gems.{GemsCatalogSearchCriterion, GemsCatalogSearchKey, CatalogSearchCriterion}
+import edu.gemini.ags.gems.{CatalogSearchCriterion, GemsCatalogSearchCriterion, GemsCatalogSearchKey}
 import edu.gemini.catalog.api._
 import edu.gemini.catalog.votable.TestVoTableBackend
-import edu.gemini.shared.util.immutable.{Some => JSome, None => JNone }
+import edu.gemini.shared.util.immutable.{None => JNone, Some => JSome}
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.core.AngleSyntax._
 import edu.gemini.pot.ModelConverters._
 import edu.gemini.spModel.gemini.gems.Canopus.Wfs
-import edu.gemini.spModel.gemini.gems.{Gems, Canopus}
+import edu.gemini.spModel.gemini.gems.{Canopus, Gems}
 import edu.gemini.spModel.gemini.gsaoi.{Gsaoi, GsaoiOdgw}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.gems.{GemsGuideStarType, GemsTipTiltMode}
@@ -23,11 +23,11 @@ import edu.gemini.spModel.target.obsComp.PwfsGuideProbe
 import edu.gemini.spModel.telescope.IssPort
 import org.specs2.mutable.Specification
 import AlmostEqual.AlmostEqualOps
+import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.{CloudCover, ImageQuality, SkyBackground, WaterVapor}
 
 import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
-
 import scalaz._
 import Scalaz._
 
@@ -132,6 +132,122 @@ class GemsStrategySpec extends Specification {
       val estimate = gemsStrategy.estimate(ctx, ProbeLimitsTable.loadOrThrow())(implicitly)
       val result = Await.result(estimate, 20.seconds).probability
       math.abs(result - 2.0 / 3.0) should beLessThan(1e-4)
+    }
+    "find an asterism of size 1" in {
+      val ra = Angle.fromHMS(0, 0, 9.392).getOrElse(Angle.zero)
+      val dec = Angle.zero - Angle.fromDMS(0, 0, 7.76).getOrElse(Angle.zero)
+      val target = new SPTarget(ra.toDegrees, dec.toDegrees)
+      val env = TargetEnvironment.create(target)
+      val inst = new Gsaoi <| {_.setPosAngle(90.0)} <| {_.setIssPort(IssPort.UP_LOOKING)} <| {_.setFilter(Gsaoi.Filter.H)}
+      val conditions = new SPSiteQuality.Conditions(CloudCover.PERCENT_50, ImageQuality.PERCENT_85, SkyBackground.ANY, WaterVapor.ANY)
+      val ctx = ObsContext.create(env, inst, new JSome(Site.GS), conditions, null, new Gems, JNone.instance())
+      val tipTiltMode = GemsTipTiltMode.canopus
+
+      val posAngles = Set(ctx.getPositionAngle, Angle.zero, Angle.fromDegrees(90), Angle.fromDegrees(180), Angle.fromDegrees(270))
+
+      val gemsStrategy = TestGemsStrategy("/gems_rel2941.xml")
+      val selection = Await.result(gemsStrategy.select(ctx, ProbeLimitsTable.loadOrThrow())(implicitly), 2.minutes)
+      selection.map(_.posAngle) should beSome(Angle.fromDegrees(90))
+      val assignments = ~selection.map(_.assignments)
+      assignments should be size 1
+
+      assignments.exists(_.guideProbe == Canopus.Wfs.cwfs3) should beTrue
+      val cwfs3 = assignments.find(_.guideProbe == Canopus.Wfs.cwfs3).map(_.guideStar)
+
+      // Check coordinates
+      cwfs3.map(_.name) should beSome("450-000011")
+      val cwfs3x = Coordinates(
+        RightAscension.fromAngle(Angle.fromHMS(0, 0, 11.370).getOrElse(Angle.zero)),
+        Declination.fromAngle(Angle.zero - Angle.fromDMS(0, 0, 24.18).getOrElse(Angle.zero)).getOrElse(Declination.zero)
+      )
+      cwfs3.map(_.coordinates ~= cwfs3x) should beSome(true)
+
+      // Analyze as a whole
+      val newCtx = selection.map(_.applyTo(ctx)).getOrElse(ctx)
+      val analysis = gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow())
+      analysis.collect {
+        case AgsAnalysis.Usable(Canopus.Wfs.cwfs3, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq, _) if st.some == cwfs3 => Canopus.Wfs.cwfs3
+      } should beEqualTo(List(Canopus.Wfs.cwfs3))
+
+      // Analyze per probe
+      cwfs3.map { s =>
+        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), Canopus.Wfs.cwfs3, s).contains(AgsAnalysis.Usable(Canopus.Wfs.cwfs3, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq, RBandsList))
+      } should beSome(true)
+
+      // Test estimate: 1-star asterism grants 1/3 chance of success.
+      val estimate = gemsStrategy.estimate(ctx, ProbeLimitsTable.loadOrThrow())(implicitly)
+      val result = Await.result(estimate, 20.seconds).probability
+      math.abs(result - 1.0 / 3.0) should beLessThan(1e-4)
+    }
+    "find an asterism of size 3" in {
+      val ra = Angle.fromHMS(0, 0, 7.808).getOrElse(Angle.zero)
+      val dec = Angle.zero - Angle.fromDMS(0, 3, 16.13).getOrElse(Angle.zero)
+      val target = new SPTarget(ra.toDegrees, dec.toDegrees)
+      val env = TargetEnvironment.create(target)
+      val inst = new Gsaoi <| {_.setPosAngle(90.0)} <| {_.setIssPort(IssPort.UP_LOOKING)}
+      val ctx = ObsContext.create(env, inst, new JSome(Site.GS), SPSiteQuality.Conditions.BEST, null, new Gems, JNone.instance())
+      val tipTiltMode = GemsTipTiltMode.canopus
+
+      val posAngles = Set(ctx.getPositionAngle, Angle.zero, Angle.fromDegrees(90), Angle.fromDegrees(180), Angle.fromDegrees(270))
+
+      val gemsStrategy = TestGemsStrategy("/gems_rel2941_2.xml")
+      val selection = Await.result(gemsStrategy.select(ctx, ProbeLimitsTable.loadOrThrow())(implicitly), 2.minutes)
+      selection.map(_.posAngle) should beSome(Angle.fromDegrees(90))
+      val assignments = ~selection.map(_.assignments)
+      assignments should be size 3
+
+      assignments.exists(_.guideProbe == Canopus.Wfs.cwfs1) should beTrue
+      val cwfs1 = assignments.find(_.guideProbe == Canopus.Wfs.cwfs1).map(_.guideStar)
+      assignments.exists(_.guideProbe == Canopus.Wfs.cwfs2) should beTrue
+      val cwfs2 = assignments.find(_.guideProbe == Canopus.Wfs.cwfs2).map(_.guideStar)
+      assignments.exists(_.guideProbe == Canopus.Wfs.cwfs3) should beTrue
+      val cwfs3 = assignments.find(_.guideProbe == Canopus.Wfs.cwfs3).map(_.guideStar)
+
+      // Check coordinates
+      cwfs1.map(_.name) should beSome("450-000005")
+      val cwfs1x = Coordinates(
+        RightAscension.fromAngle(Angle.fromHMS(0, 0, 6.159).getOrElse(Angle.zero)),
+        Declination.fromAngle(Angle.zero - Angle.fromDMS(0, 2, 47.04).getOrElse(Angle.zero)).getOrElse(Declination.zero)
+      )
+      cwfs1.map(_.coordinates ~= cwfs1x) should beSome(true)
+
+      cwfs2.map(_.name) should beSome("450-000010")
+      val cwfs2x = Coordinates(
+        RightAscension.fromAngle(Angle.fromHMS(0, 0, 9.519).getOrElse(Angle.zero)),
+        Declination.fromAngle(Angle.zero - Angle.fromDMS(0, 3, 52.62).getOrElse(Angle.zero)).getOrElse(Declination.zero)
+      )
+      cwfs2.map(_.coordinates ~= cwfs2x) should beSome(true)
+
+      cwfs3.map(_.name) should beSome("450-000009")
+      val cwfs3x = Coordinates(
+        RightAscension.fromAngle(Angle.fromHMS(0, 0, 8.983).getOrElse(Angle.zero)),
+        Declination.fromAngle(Angle.zero - Angle.fromDMS(0, 3, 53.32).getOrElse(Angle.zero)).getOrElse(Declination.zero)
+      )
+      cwfs3.map(_.coordinates ~= cwfs3x) should beSome(true)
+
+      // Analyze as a whole
+      val newCtx = selection.map(_.applyTo(ctx)).getOrElse(ctx)
+      val analysis = gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow())
+      analysis.collect {
+        case AgsAnalysis.Usable(Canopus.Wfs.cwfs1, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq, _) if st.some == cwfs1 => Canopus.Wfs.cwfs1
+        case AgsAnalysis.Usable(Canopus.Wfs.cwfs2, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq, _) if st.some == cwfs2 => Canopus.Wfs.cwfs2
+        case AgsAnalysis.Usable(Canopus.Wfs.cwfs3, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq, _) if st.some == cwfs3 => Canopus.Wfs.cwfs3
+      } should beEqualTo(List(Canopus.Wfs.cwfs1, Canopus.Wfs.cwfs2, Canopus.Wfs.cwfs3))
+
+      // Analyze per probe
+      cwfs1.map { s =>
+        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), Canopus.Wfs.cwfs1, s).contains(AgsAnalysis.Usable(Canopus.Wfs.cwfs1, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq, RBandsList))
+      } should beSome(true)
+      cwfs2.map { s =>
+        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), Canopus.Wfs.cwfs2, s).contains(AgsAnalysis.Usable(Canopus.Wfs.cwfs2, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq, RBandsList))
+      } should beSome(true)
+      cwfs3.map { s =>
+        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), Canopus.Wfs.cwfs3, s).contains(AgsAnalysis.Usable(Canopus.Wfs.cwfs3, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq, RBandsList))
+      } should beSome(true)
+
+      // Test estimate: 1-star asterism grants 1/3 chance of success.
+      val estimate = gemsStrategy.estimate(ctx, ProbeLimitsTable.loadOrThrow())(implicitly)
+      Await.result(estimate, 20.seconds) should beEqualTo(Estimate.GuaranteedSuccess)
     }
     "support search/select and analyze on SN-1987A" in {
       val ra = Angle.fromHMS(5, 35, 28.020).getOrElse(Angle.zero)

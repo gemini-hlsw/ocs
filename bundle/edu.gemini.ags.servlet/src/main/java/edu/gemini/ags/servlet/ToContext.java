@@ -7,10 +7,13 @@ import edu.gemini.shared.util.immutable.Option;
 
 import edu.gemini.shared.util.immutable.Some;
 import edu.gemini.spModel.core.*;
+import edu.gemini.spModel.data.AbstractDataObject;
 import edu.gemini.spModel.gemini.altair.AltairParams;
 import edu.gemini.spModel.gemini.altair.InstAltair;
+import edu.gemini.spModel.gemini.gems.Gems;
 import edu.gemini.spModel.gemini.gmos.InstGmosNorth;
 import edu.gemini.spModel.gemini.gnirs.InstGNIRS;
+import edu.gemini.spModel.gemini.gsaoi.Gsaoi;
 import edu.gemini.spModel.gemini.inst.InstRegistry;
 import edu.gemini.spModel.gemini.michelle.InstMichelle;
 import edu.gemini.spModel.gemini.michelle.MichelleParams;
@@ -183,13 +186,17 @@ public enum ToContext {
             ((PosAngleConstraintAware) inst).setPosAngleConstraint(pac);
         } // otherwise pac is ignored!
 
+        // --- instrument configurable with GeMS?
+        AbstractDataObject aoComp = null;
+        if (inst instanceof Gsaoi) {
+            aoComp = getGeMS(req);
+        }
         // --- instrument configurable with Altair?
-        InstAltair altair = null;
-        if (inst instanceof InstGNIRS ||
-            inst instanceof InstNIRI ||
-            inst instanceof InstNIFS ||
-            inst instanceof InstGmosNorth) {
-            altair = getAltair(req);
+        else if (inst instanceof InstGNIRS ||
+                 inst instanceof InstNIRI ||
+                 inst instanceof InstNIFS ||
+                 inst instanceof InstGmosNorth) {
+            aoComp = getAltair(req);
         } // otherwise altair is ignored
 
         // --- instrument is NIRI?
@@ -210,7 +217,12 @@ public enum ToContext {
 
         final TargetObsComp toc = new TargetObsComp();
         toc.setTargetEnvironment(env);
-        return ObsContext.create(env, inst, site, conds, Collections.emptySet(), altair, new Some<>(sb));
+        return ObsContext.create(env, inst, site, conds, Collections.emptySet(), aoComp, new Some<>(sb));
+    }
+
+    private Gems getGeMS(final HttpServletRequest req) throws RequestException {
+        final Gems gems = new Gems();
+        return gems;
     }
 
     private InstAltair getAltair(HttpServletRequest req) throws RequestException {

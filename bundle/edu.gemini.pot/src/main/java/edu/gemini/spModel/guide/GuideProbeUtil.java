@@ -85,7 +85,6 @@ public enum GuideProbeUtil {
                 anti.addAll(((GuideProbeConsumer) dataObj).getConsumedGuideProbes());
             }
         }
-
         res.removeAll(anti);
 
         return res;

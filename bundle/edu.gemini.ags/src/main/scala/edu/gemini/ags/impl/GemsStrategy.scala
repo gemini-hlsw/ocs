@@ -4,7 +4,6 @@ import edu.gemini.spModel.guide.OrderGuideGroup
 import edu.gemini.ags.api.{AgsAnalysis, AgsMagnitude, AgsStrategy}
 import edu.gemini.ags.api.AgsStrategy.{Assignment, Estimate, Selection}
 import edu.gemini.ags.gems._
-import edu.gemini.ags.gems.mascot.Strehl
 import edu.gemini.catalog.api._
 import edu.gemini.catalog.votable._
 import edu.gemini.pot.sp.SPComponentType
@@ -14,7 +13,7 @@ import edu.gemini.spModel.ags.AgsStrategyKey.GemsKey
 import edu.gemini.spModel.gemini.flamingos2.{Flamingos2, Flamingos2OiwfsGuideProbe}
 import edu.gemini.spModel.gemini.gems.{Canopus, GemsInstrument}
 import edu.gemini.spModel.gemini.gsaoi.{Gsaoi, GsaoiOdgw}
-import edu.gemini.spModel.gems.{GemsGuideProbeGroup, GemsGuideStarType, GemsTipTiltMode}
+import edu.gemini.spModel.gems.{GemsGuideProbeGroup, GemsTipTiltMode}
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable._
 
@@ -41,52 +40,6 @@ trait GemsStrategy extends AgsStrategy {
   // to pick them out somehow.
   private val CanopusTipTiltId = 0
   private val OdgwFlexureId    = 1
-
-  // Catalog results with search keys to avoid having to recompute search key info on the fly.
-  private case class CatalogResultWithKey(query: CatalogQuery, catalogResult: CatalogQueryResult, searchKey: GemsCatalogSearchKey)
-
-  // Query the catalog for each constraint and compile a list of results with the necessary
-  // information for GeMS.
-  private def catalogResult(ctx: ObsContext, mt: MagnitudeTable)(ec: ExecutionContext): Future[List[CatalogResultWithKey]] = {
-    // Maps for IDs to types needed by GeMS.
-    def GuideStarTypeMap = Map[Int, GemsGuideStarType](
-      CanopusTipTiltId -> GemsGuideStarType.tiptilt,
-      OdgwFlexureId    -> GemsGuideStarType.flexure
-    )
-
-    // Maps from IDs to guide probe groups.
-    def GuideProbeGroupMap = Map[Int, GemsGuideProbeGroup](
-      CanopusTipTiltId -> Canopus.Wfs.Group.instance,
-      OdgwFlexureId    -> GsaoiOdgw.Group.instance
-    )
-
-    VoTableClient.catalogs(catalogQueries(ctx, mt), backend)(ec).flatMap {
-      case result if result.exists(_.result.containsError) => Future.failed(CatalogException(result.flatMap(_.result.problems)))
-      case result                                          => Future.successful {
-        result.flatMap { qr =>
-            val id = qr.query.id
-            id.map(x => CatalogResultWithKey(qr.query, qr.result, GemsCatalogSearchKey(GuideStarTypeMap(x), GuideProbeGroupMap(x))))
-        }
-      }
-    }
-  }
-
-  // Convert from catalog results to GeMS-specific results.
-  private def toGemsCatalogSearchResults(ctx: ObsContext, futureAgsCatalogResults: Future[List[CatalogResultWithKey]])(ec: ExecutionContext): Future[List[GemsCatalogSearchResults]] = {
-    val anglesToTry = (0 until 360 by 45).map(Angle.fromDegrees(_))
-
-    futureAgsCatalogResults.map { agsCatalogResults =>
-        for {
-          result                                                    <- agsCatalogResults
-          angle                                                     <- anglesToTry
-        } yield {
-          val ConeSearchCatalogQuery(_, _, radiusConstraint, mc, _) = result.query
-          val catalogSearchCriterion     = CatalogSearchCriterion("ags", radiusConstraint, mc.head, None, angle.some)
-          val gemsCatalogSearchCriterion = new GemsCatalogSearchCriterion(result.searchKey, catalogSearchCriterion)
-          new GemsCatalogSearchResults(gemsCatalogSearchCriterion, result.catalogResult.targets.rows)
-        }
-    }
-  }
 
   override def magnitudes(ctx: ObsContext, mt: MagnitudeTable): List[(GuideProbe, MagnitudeCalc)] = {
     val cans = Canopus.Wfs.values().map { cwfs => mt(ctx, cwfs).map(cwfs -> _) }.toList.flatten
@@ -137,20 +90,20 @@ trait GemsStrategy extends AgsStrategy {
     search(GemsTipTiltMode.canopus, ctx, posAngles, None)(ec).map(simplifiedResult)
   }
 
-  override def estimate(ctx: ObsContext, mt: MagnitudeTable)(ec: ExecutionContext): Future[Estimate] = {
-    // Get the query results and convert them to GeMS-specific ones.
-    val results = toGemsCatalogSearchResults(ctx, catalogResult(ctx, mt)(ec))(ec)
-
+  def estimate(ctx: ObsContext, mt: MagnitudeTable)(ec: ExecutionContext): Future[Estimate] = {
     // Create a set of the angles to try.
-    val anglesToTry = (0 until 360 by 45).map(Angle.fromDegrees(_)).toSet
+    val anglesToTry = (0 until 360 by 90).map(Angle.fromDegrees(_)).toSet
 
-    // Iterate over 45 degree position angles if no 3-star asterism is found at PA = 0.
+    // Get the query results and convert them to GeMS-specific ones.
+    val results = search(GemsTipTiltMode.canopus, ctx, anglesToTry, None)(ec)
+
+    // Iterate over 90 degree position angles if no 3-star asterism is found at PA = 0.
     val gemsCatalogResults = results.map(result => GemsResultsAnalyzer.analyzeGoodEnough(ctx, anglesToTry, result, _.stars.size < 3))
 
     // We only want Canopus targets, so filter to those and then determine if the asterisms are big enough.
     gemsCatalogResults.map { ggsLst =>
-      val largestAsterism = ggsLst.map(_.guideGroup.grp.toManualGroup.targetMap.keySet.intersection(GemsStrategy.canopusProbes).size).max
-      Estimate(largestAsterism / 3.0)
+      val largestAsterism = ggsLst.map(_.guideGroup.grp.toManualGroup.targetMap.keySet.intersection(GemsStrategy.canopusProbes).size).fold(0)(math.max)
+      AgsStrategy.Estimate.toEstimate(largestAsterism / 3.0)
     }
   }
 
