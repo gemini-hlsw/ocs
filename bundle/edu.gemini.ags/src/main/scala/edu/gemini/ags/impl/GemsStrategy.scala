@@ -90,7 +90,7 @@ trait GemsStrategy extends AgsStrategy {
     search(GemsTipTiltMode.canopus, ctx, posAngles, None)(ec).map(simplifiedResult)
   }
 
-  def estimate(ctx: ObsContext, mt: MagnitudeTable)(ec: ExecutionContext): Future[Estimate] = {
+  override def estimate(ctx: ObsContext, mt: MagnitudeTable)(ec: ExecutionContext): Future[Estimate] = {
     // Create a set of the angles to try.
     val anglesToTry = (0 until 360 by 90).map(Angle.fromDegrees(_)).toSet
 
