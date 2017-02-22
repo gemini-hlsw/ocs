@@ -54,7 +54,7 @@ class ObservationEditor private (obs:Observation, canEdit:Boolean) extends StdMo
     }), gw=2)
     addSpacer()
     addLabeledRow(new RightLabel("Integration Time"), IntegrationTime, Units)
-    addLabeledRow(new RightLabel("Program Time"), ProgramTime, ProgramTimeUnits)
+    addLabeledRow(new RightLabel("Overhead Time"), OverheadTime, OverheadTimeUnits)
     addLabeledRow(new RightLabel("Night Basecal Time"), PartTime, PartTimeUnits)
     addLabeledRow(new RightLabel("Total Time"), TotalTime, TotalTimeUnits)
     preferredSize = (500, preferredSize.height) // force width
@@ -90,15 +90,17 @@ class ObservationEditor private (obs:Observation, canEdit:Boolean) extends StdMo
   class CalculatedTimeAmountField extends NumberField(None, allowEmpty = false, format = NumberField.TimeFormatter) {
     enabled = false
 
-    def update(t: TimeAmount): Unit =
-      value = (Units.selection.item match {
-        case TimeUnit.HR    => t.toHours
+    def update(t: TimeAmount): Unit = {
+      val newValue = (Units.selection.item match {
+        case TimeUnit.HR => t.toHours
         case TimeUnit.NIGHT => t.toNights
       }).value
+      value = (newValue > 0) ? newValue | 0
+    }
   }
 
-  object ProgramTime extends CalculatedTimeAmountField
-  object ProgramTimeUnits extends UnitsLabel
+  object OverheadTime extends CalculatedTimeAmountField
+  object OverheadTimeUnits extends UnitsLabel
 
   object PartTime extends CalculatedTimeAmountField
   object PartTimeUnits extends UnitsLabel
@@ -107,9 +109,12 @@ class ObservationEditor private (obs:Observation, canEdit:Boolean) extends StdMo
   object TotalTimeUnits extends UnitsLabel
 
   def updateTimeLabels(): Unit = {
-    val intTime = TimeAmount(\/.fromTryCatchNonFatal(IntegrationTime.text.toDouble).getOrElse(0.0), Units.selection.item)
+    val intTime = {
+      val value = \/.fromTryCatchNonFatal(IntegrationTime.text.toDouble).getOrElse(0.0)
+      TimeAmount((value > 0) ? value | 0, Units.selection.item)
+    }
     val obsTimes = calculator.map(_.calculate(intTime))
-    ProgramTime.update(obsTimes.foldMap(_.progTime))
+    OverheadTime.update(obsTimes.foldMap(_.progTime |-| intTime))
     PartTime.update(obsTimes.foldMap(_.partTime))
     TotalTime.update(obsTimes.foldMap(_.totalTime))
   }
@@ -119,7 +124,7 @@ class ObservationEditor private (obs:Observation, canEdit:Boolean) extends StdMo
 
   def updateUnitsLabels(): Unit = {
     val t = Units.selection.item.value()
-    ProgramTimeUnits.update(t)
+    OverheadTimeUnits.update(t)
     PartTimeUnits.update(t)
     TotalTimeUnits.update(t)
   }

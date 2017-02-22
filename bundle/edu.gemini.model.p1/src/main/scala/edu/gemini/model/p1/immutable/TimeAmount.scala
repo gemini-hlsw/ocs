@@ -47,11 +47,17 @@ case class TimeAmount(value: Double, units: TimeUnit) {
   def toHours  = if (units == TimeUnit.HR) this else TimeAmount(hours, TimeUnit.HR)
   def toNights = if (units == TimeUnit.NIGHT) this else TimeAmount(nights, TimeUnit.HR)
 
-  def |+|(that: TimeAmount): TimeAmount =
-    if (units == that.units)
-      TimeAmount(value + that.value, units)
-    else
-      TimeAmount(hours + that.hours, TimeUnit.HR)
+  // Time sum.
+  def |+|(that: TimeAmount): TimeAmount = {
+    val (sum, unit) = (units == that.units) ? (value + that.value, units) | (hours + that.hours, TimeUnit.HR)
+    TimeAmount(sum, unit)
+  }
+
+  // Time difference: can never be less than zero.
+  def |-|(that: TimeAmount): TimeAmount = {
+    val (diff, unit) = (units == that.units) ? (value - that.value, units) | (hours - that.hours, TimeUnit.HR)
+    TimeAmount((diff > 0) ? diff | 0, unit)
+  }
 
   /**
    * Formats a time amount to the given precision (which is treated as 0 if
