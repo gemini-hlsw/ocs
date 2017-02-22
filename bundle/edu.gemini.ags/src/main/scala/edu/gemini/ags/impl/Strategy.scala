@@ -123,5 +123,4 @@ object Strategy {
 
   def validStrategies(ctx: ObsContext): List[AgsStrategy] =
     InstMap.get(ctx.getInstrument.getType).map(_.apply(ctx)).toList.flatten.filter(guidersAvailable(ctx)).filter(siteAvailability(ctx))
-
 }
