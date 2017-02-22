@@ -237,7 +237,7 @@ object REL_2232_Test extends TemplateSpec("NIFS_BP.xml") with SpecificationLike 
       </blueprints>
       <observations>
         <observation band="Band 1/2" enabled="true" target="target-1" condition="condition-0" blueprint="blueprint-0">
-          <time units="hr">1.0</time>
+          <progTime units="hr">1.0</progTime>
           <meta ck="">
             <guiding>
               <percentage>100</percentage>

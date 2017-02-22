@@ -121,7 +121,7 @@ Prov. de Buenos Aires</address>
     </blueprints>
     <observations>
         <observation blueprint="blueprint-0" condition="condition-0" target="target-0" band="Band 1/2">
-            <time units="hr">3.6</time>
+            <progTime units="hr">3.6</progTime>
             <meta ck="">
                 <guiding>
                     <percentage>69</percentage>

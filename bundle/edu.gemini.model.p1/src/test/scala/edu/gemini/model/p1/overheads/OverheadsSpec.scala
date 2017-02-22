@@ -42,72 +42,94 @@ object OverheadsSpec {
   // These are taken from the python script in REL-2985.
   // Values in blueprints don't generally matter with exception of GMOS and NIRI.
   // We just need blueprints for the lookups.
-  val instMap = HashMap[(String,String), (() => BlueprintBase, ObservationTimes)](
-    ("gmos", "ifu") -> (
+  val instMap = HashMap(
+    (("gmos", "ifu"), (
       () => GmosSBlueprintIfu(GmosSDisperser.B600, GmosSFilter.None, GmosSFpuIfu.values.apply(0)),
-      obsTimes(2.44, 0.24)),
-    ("gmos", "longns") -> (
+      obsTimes(2.44, 0.24))
+      ),
+    (("gmos", "longns"), (
       () => GmosSBlueprintLongslitNs(GmosSDisperser.B600, GmosSFilter.None, GmosSFpuNs.values.apply(0)),
-      obsTimes(2.69, 0.27)),
-    ("gmos", "mos") -> (
+      obsTimes(2.69, 0.27))
+      ),
+    (("gmos", "mos"), (
       () => GmosSBlueprintMos(GmosSDisperser.B600, GmosSFilter.None, GmosSMOSFpu.values.apply(0), false, false),
-      obsTimes(2.35, 0.23)),
-    ("gmos", "long") -> (
+      obsTimes(2.35, 0.23))
+      ),
+    (("gmos", "long"), (
       () => GmosSBlueprintLongslit(GmosSDisperser.B600, GmosSFilter.None, GmosSFpu.values.apply(0)),
-      obsTimes(2.29, 0.23)),
-    ("gmos", "ifuns") -> (
+      obsTimes(2.29, 0.23))
+      ),
+    (("gmos", "ifuns"), (
       () => GmosSBlueprintIfuNs(GmosSDisperser.B600, GmosSFilter.None, GmosSFpuIfuNs.values.apply(0)),
-      obsTimes(2.83, 0.28)),
-    ("gmos", "imaging") -> (
+      obsTimes(2.83, 0.28))
+      ),
+    (("gmos", "imaging"), (
       () => GmosSBlueprintImaging(Nil),
-      obsTimes(2.13, 0.00)),
-    ("gmos", "mosns") -> (
+      obsTimes(2.13, 0.00))
+      ),
+    (("gmos", "mosns"), (
       () => GmosSBlueprintMos(GmosSDisperser.B600, GmosSFilter.None, GmosSMOSFpu.values.apply(0), true, false),
-      obsTimes(2.76, 0.28)),
-    ("phoenix", "long") -> (
+      obsTimes(2.76, 0.28))
+      ),
+    (("phoenix", "long"), (
       () => PhoenixBlueprint(Site.GS, PhoenixFocalPlaneUnit.values.apply(0), PhoenixFilter.values.apply(0)),
-      obsTimes(2.40, 0.60)),
-    ("visitor", "any") -> (
+      obsTimes(2.40, 0.60))
+      ),
+    (("visitor", "any"), (
       () => VisitorBlueprint(Site.GS, ""),
-      obsTimes(2.20, 0.00)),
-    ("f2", "mos") -> (
+      obsTimes(2.20, 0.00))
+      ),
+    (("f2", "mos"), (
       () => Flamingos2BlueprintMos(Flamingos2Disperser.R1200JH, Nil, false),
-      obsTimes(3.18, 0.80)),
-    ("f2", "imaging") -> (
+      obsTimes(3.18, 0.80))
+      ),
+    (("f2", "imaging"), (
       () => Flamingos2BlueprintImaging(Nil),
-      obsTimes(2.99, 0.30)),
-    ("f2", "long") -> (
+      obsTimes(2.99, 0.30))
+      ),
+    (("f2", "long"), (
       () => Flamingos2BlueprintLongslit(Flamingos2Disperser.R1200JH, Nil, Flamingos2Fpu.values.apply(0)),
-      obsTimes(2.85, 0.71)),
-    ("gsaoi", "imaging") -> (
+      obsTimes(2.85, 0.71))
+      ),
+    (("gsaoi", "imaging"), (
       () => GsaoiBlueprint(Nil),
-      obsTimes(4.62, 0.00)),
-    ("nifs", "ifu") -> (
+      obsTimes(4.62, 0.00))
+      ),
+    (("nifs", "ifu"), (
       () => NifsBlueprint(NifsDisperser.Z),
-      obsTimes(2.36, 0.59)),
-    ("texes", "long") -> (
+      obsTimes(2.36, 0.59))
+      ),
+    (("texes", "long"), (
       () => TexesBlueprint(Site.GS, TexesDisperser.values.apply(0)),
-      obsTimes(2.40, 0.00)),
-    ("gpi", "ifu") -> (
+      obsTimes(2.40, 0.00))
+      ),
+    (("gpi", "ifu"), (
       () => GpiBlueprint(GpiObservingMode.HDirect, GpiDisperser.values.apply(0)),
-      obsTimes(2.60, 0.13)),
-    ("dssi", "ifu") -> (
+      obsTimes(2.60, 0.13))
+      ),
+    (("dssi", "ifu"), (
       () => DssiBlueprint(Site.GS),
-      obsTimes(1.88, 0.00)),
-    ("gnirs", "imaging") -> (
+      obsTimes(1.88, 0.00))
+      ),
+    (("gnirs", "imaging"), (
       () => GnirsBlueprintImaging(AltairNone, GnirsPixelScale.PS_005, GnirsFilter.values.apply(0)),
-      obsTimes(2.34, 0.23)),
-    ("gnirs", "long") -> (
+      obsTimes(2.34, 0.23))
+      ),
+    (("gnirs", "long"), (
       () => GnirsBlueprintSpectroscopy(AltairNone, GnirsPixelScale.PS_005, GnirsDisperser.D_10, GnirsCrossDisperser.LXD, GnirsFpu.values.apply(0), GnirsCentralWavelength.values.apply(0)),
-      obsTimes(2.34, 0.58)),
-    ("niri", "imagingao") -> (
+      obsTimes(2.34, 0.58))
+      ),
+    (("niri", "imagingao"), (
       () => NiriBlueprint(AltairNGS(false), NiriCamera.F6, Nil),
-      obsTimes(2.34, 0.23)),
-    ("niri", "imaging") -> (
+      obsTimes(2.34, 0.23))
+      ),
+    (("niri", "imaging"), (
       () => NiriBlueprint(AltairNone, NiriCamera.F6, Nil),
-      obsTimes(2.21, 0.22)),
-    ("graces", "spec") -> (
+      obsTimes(2.21, 0.22))
+      ),
+    (("graces", "spec"), (
       () => GracesBlueprint(GracesFiberMode.values.apply(0), GracesReadMode.values.apply(0)),
       obsTimes(1.93, 0.00))
+      )
   )
 }
