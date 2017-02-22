@@ -131,7 +131,23 @@ case class LastStepConverter(semester: Semester) extends SemesterConverter {
  * This converter will upgrade to 2017B
  */
 case object SemesterConverter2017ATo2017B extends SemesterConverter {
-  override val transformers = Nil
+  val timeToProgTime: TransformFunction = {
+    case o @ <observation>{ns @ _*}</observation> if (o \\ "time").nonEmpty =>
+
+      // The time field from previous versions is being instead used to represent program time, and the time field
+      // will now be modified to represent total time, i.e. progTime + partTime (partmer ca;ibraation time).
+      object TimeToProgTime extends BasicTransformer {
+        override def transform(n: xml.Node): xml.NodeSeq = n match {
+          case t @ <time>{ts @ _*}</time> => <progTime units={t.attribute("units")}>{ts}</progTime>
+          case elem: xml.Elem             => elem.copy(child=elem.child.flatMap(transform))
+          case _                          => n
+        }
+      }
+      StepResult("Former observation time parameter mapped to program time",
+        // Too many attributes.
+        <observation band={o.attribute("band")} enabled={o.attribute("enabled")} target={o.attribute("target")} condition={o.attribute("condition")} blueprint={o.attribute("blueprint")}>{TimeToProgTime.transform(ns)}</observation>).successNel
+  }
+  override val transformers = List(timeToProgTime)
 }
 
 /**

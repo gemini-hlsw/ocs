@@ -146,7 +146,7 @@ Campus do Vale
     </blueprints>
     <observations>
         <observation band="Band 1/2" enabled="true" target="target-1" condition="condition-0" blueprint="blueprint-0">
-            <time units="hr">2.5</time>
+            <progTime units="hr">2.5</progTime>
             <meta ck="">
                 <guiding>
                     <percentage>42</percentage>
@@ -157,7 +157,7 @@ Campus do Vale
             </meta>
         </observation>
         <observation band="Band 1/2" enabled="true" target="target-2" condition="condition-0" blueprint="blueprint-0">
-            <time units="hr">2.5</time>
+            <progTime units="hr">2.5</progTime>
             <meta ck="">
                 <guiding>
                     <percentage>42</percentage>
@@ -168,7 +168,7 @@ Campus do Vale
             </meta>
         </observation>
         <observation band="Band 3" enabled="true" target="target-0" condition="condition-1" blueprint="blueprint-1">
-            <time units="hr">5.0</time>
+            <progTime units="hr">5.0</progTime>
             <meta ck="">
                 <guiding>
                     <percentage>36</percentage>
@@ -179,7 +179,7 @@ Campus do Vale
             </meta>
         </observation>
         <observation band="Band 3" enabled="true" target="target-3" condition="condition-1" blueprint="blueprint-1">
-            <time units="hr">5.0</time>
+            <progTime units="hr">5.0</progTime>
             <meta ck="">
                 <guiding>
                     <percentage>28</percentage>

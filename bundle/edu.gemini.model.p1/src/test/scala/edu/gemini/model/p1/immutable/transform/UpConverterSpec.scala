@@ -243,13 +243,14 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have length 6
+          changes must have length 7
           changes must contain(s"Updated schema version to ${Proposal.currentSchemaVersion}")
           changes must contain(s"Updated semester to ${Semester.current.display}")
           changes must contain("Please use the PIT from semester 2012B to view the unmodified proposal")
           changes must contain("Band3 Option is missing, set as false")
           changes must contain("Affiliate override flag is missing")
           changes must contain("NGO acceptance from the United Kingdom has been removed")
+          changes must contain("Former observation time parameter mapped to program time")
 
           // Sanity check
           ProposalIo.read(result.toString())
@@ -267,13 +268,14 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have length 6
+          changes must have length 7
           changes must contain(s"Updated schema version to ${Proposal.currentSchemaVersion}")
           changes must contain(s"Updated semester to ${Semester.current.display}")
           changes must contain("Please use the PIT from semester 2012B to view the unmodified proposal")
           changes must contain("Band3 Option is missing, set as false")
           changes must contain("Affiliate override flag is missing")
           changes must contain("NGO acceptance from the United Kingdom has been removed")
+          changes must contain("Former observation time parameter mapped to program time")
 
           // Sanity check
           ProposalIo.read(result.toString())
@@ -292,7 +294,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have length 7
+          changes must have length 8
           changes must contain(s"Updated schema version to ${Proposal.currentSchemaVersion}")
           changes must contain(s"Updated semester to ${Semester.current.display}")
           changes must contain("Please use the PIT from semester 2012B to view the unmodified proposal")
@@ -300,6 +302,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
           changes must contain("Affiliate override flag is missing")
           changes must contain("NGO acceptance from the United Kingdom has been removed")
           changes must contain("The United Kingdom was marked as ITAC NGO authority and has been removed")
+          changes must contain("Former observation time parameter mapped to program time")
 
           // Sanity check
           ProposalIo.read(result.toString())
@@ -663,11 +666,12 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have length 6
+          changes must have length 7
           changes must contain(s"Updated schema version to ${Proposal.currentSchemaVersion}")
           changes must contain(s"Updated semester to ${Semester.current.display}")
           changes must contain("Please use the PIT from semester 2014B to view the unmodified proposal")
           changes must contain("Gemini Staff is no longer a valid partner and this time request has been removed")
+          changes must contain("Former observation time parameter mapped to program time")
 
           // Sanity check
           ProposalIo.read(result.toString())
@@ -715,6 +719,26 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
           changes must have length 5
           result \\ "gpi" must \\("observingMode") \>~ "H.direct"
           result \\ "gpi" must \\("name") \> "GPI H direct Prism"
+      }
+    }
+    "proposal with observation time attribute should be transformed to progTime attribute, REL-2985" in {
+      val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_with_observation_time.xml")))
+
+      val converted = UpConverter.convert(xml)
+      converted must beSuccessful.like {
+        case StepResult(changes, result) =>
+          result \\ "observation" must \\("progTime")
+          result \\ "observation" must not \\ "time"
+      }
+    }
+    "proposal with request time attribute must be maintained as time attribute, REL-2985" in {
+      val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_with_observation_time.xml")))
+
+      val converted = UpConverter.convert(xml)
+      converted must beSuccessful.like {
+        case StepResult(changes, result) =>
+          result \\ "request" must \\("time")
+          result \\ "request" must not \\ "progTime"
       }
     }
   }

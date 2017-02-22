@@ -17,9 +17,15 @@
     <xsd:complexType name="Observation">
 
         <xsd:sequence>
-            <xsd:element name="time"  type="TimeAmount"/>
-            <xsd:element name="guide" type="GuideGroup"          minOccurs="0"/>
-            <xsd:element name="meta"  type="ObservationMetaData" minOccurs="0"/>
+            <xsd:element name="intTime"  type="TimeAmount"/>
+            <xsd:element name="progTime" type="TimeAmount"/>
+            <xsd:element name="partTime" type="TimeAmount"/>
+
+            <!-- This "time" represents the total time required by an observation, including overheads. -->
+            <!-- In previous semesters, it was analagous to progTime. -->
+            <xsd:element name="time"     type="TimeAmount"/>
+            <xsd:element name="guide"    type="GuideGroup"          minOccurs="0"/>
+            <xsd:element name="meta"     type="ObservationMetaData" minOccurs="0"/>
         </xsd:sequence>
 
         <xsd:attribute name="band"      type="Band"/>

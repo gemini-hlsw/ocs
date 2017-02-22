@@ -162,7 +162,7 @@ Miyagi 980-0845, Japan</address>
     </blueprints>
     <observations>
         <observation blueprint="blueprint-0" condition="condition-0" target="target-0" enabled="true" band="Band 1/2">
-            <time units="hr">8.0</time>
+            <progTime units="hr">8.0</progTime>
             <meta ck="">
                 <guiding>
                     <percentage>100</percentage>

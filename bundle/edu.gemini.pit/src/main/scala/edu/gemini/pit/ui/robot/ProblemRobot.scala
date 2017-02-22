@@ -457,7 +457,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
     }
 
     private lazy val missingObsDetailsCheck =
-      p.observations.filter(_.time.isEmpty) match {
+      p.observations.filter(_.intTime.isEmpty) match {
         case Nil => None
         case h :: Nil => Some(new Problem(Severity.Error, "One observation has no observation time.", "Observations", indicateObservation(h)))
         case h :: tail => Some(new Problem(Severity.Error, s"${1 + tail.length} observations have no observation times.", "Observations", indicateObservation(h)))
@@ -498,8 +498,8 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       )
 
     private lazy val badVisibility = for {
-      o @ Observation(Some(_), Some(_), Some(t), Some(_), _) <- p.observations
-      v                                                      <- if (p.proposalClass.isSpecial) TargetVisibilityCalc.getOnDec(p.semester, o) else TargetVisibilityCalc.get(p.semester, o)
+      o @ Observation(Some(_), Some(_), Some(t), Some(_), _, _) <- p.observations
+      v                                                         <- if (p.proposalClass.isSpecial) TargetVisibilityCalc.getOnDec(p.semester, o) else TargetVisibilityCalc.get(p.semester, o)
       if v == TargetVisibility.Bad
     } yield new Problem(Severity.Error,
         visibilityMessage("Target is inaccessible at %s during %s. Consider an alternative.", p.semester, o),
@@ -507,8 +507,8 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
         indicateObservation(o))
 
     private lazy val iffyVisibility = for {
-      o @ Observation(Some(_), Some(_), Some(_), Some(_), _) <- p.observations
-      v                                                      <- if (p.proposalClass.isSpecial) TargetVisibilityCalc.getOnDec(p.semester, o) else TargetVisibilityCalc.get(p.semester, o)
+      o @ Observation(Some(_), Some(_), Some(_), Some(_), _, _) <- p.observations
+      v                                                         <- if (p.proposalClass.isSpecial) TargetVisibilityCalc.getOnDec(p.semester, o) else TargetVisibilityCalc.get(p.semester, o)
       if v == TargetVisibility.Limited
     } yield new Problem(Severity.Warning,
         visibilityMessage("Target has limited visibility at %s during %s.", p.semester, o),
@@ -644,8 +644,9 @@ import TimeProblems._
 
 object TimeProblems {
   // Are two time amounts close enough to be considered the same?
+  // Times are all rounded to two decimal places.
   def sameTime(t1: TimeAmount, t2: TimeAmount): Boolean =
-    (t1.hours - t2.hours).abs < 0.001
+    (t1.hours - t2.hours).abs < 0.01
 
   // The goal here is to not show too much precision and yet not say two
   // times are different and print out two amounts that look the same.
@@ -682,7 +683,7 @@ case class TimeProblems(p: Proposal, s: ShellAdvisor) {
   lazy val requested = p.proposalClass.requestedTime
   def obsTimeSum(b: Band) = TimeAmount.sum(for {
     o <- p.observations if o.band == b
-    t <- o.time
+    t <- o.totalTime
   } yield t)
   lazy val obs = obsTimeSum(Band.BAND_1_2)
   lazy val obsB3 = obsTimeSum(Band.BAND_3)

@@ -15,12 +15,18 @@ object NumberField {
     df.setGroupingUsed(false)
     df
   }
+
+  object TimeFormatter extends DecimalFormat {
+    setMaximumFractionDigits(2)
+    setMinimumFractionDigits(2)
+    setMinimumIntegerDigits(1)
+    setGroupingUsed(false)
+  }
 }
 
 class NumberField(d: Option[Double], allowEmpty: Boolean, format: java.text.Format = NumberField.df) extends FormattedTextField(format) with SelectOnFocus {
   d.orElse(Some(0)).foreach { d =>
-    import NumberField.df
-    text = df.format(d)
+    text = format.format(d)
     commitEdit()
   }
 
@@ -30,6 +36,9 @@ class NumberField(d: Option[Double], allowEmpty: Boolean, format: java.text.Form
   var valid = true
 
   def valid(d:Double):Boolean = true
+
+  def value: Option[Double] = Option(peer.getValue).map(_.asInstanceOf[Double])
+  def value_=(v: Double): Unit = peer.setValue(v)
 
   override def enabled_=(b:Boolean) {
     super.enabled = b

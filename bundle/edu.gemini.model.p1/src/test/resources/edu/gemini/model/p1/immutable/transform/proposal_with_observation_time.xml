@@ -111,7 +111,7 @@ Prov. de Buenos Aires</address>
             <ifu id="blueprint-0">
                 <name>GMOS-N IFU R831 OG515 (&gt; 520 nm) IFU 1 slit</name>
                 <altair>
-                    <lgs oiwfs="true"/>
+                    <none></none>
                 </altair>
                 <filter>OG515 (&gt; 520 nm)</filter>
                 <disperser>R831</disperser>
@@ -121,7 +121,7 @@ Prov. de Buenos Aires</address>
     </blueprints>
     <observations>
         <observation blueprint="blueprint-0" condition="condition-0" target="target-0" band="Band 1/2">
-            <progTime units="hr">3.6</progTime>
+            <time units="hr">3.6</time>
             <meta ck="">
                 <guiding>
                     <percentage>69</percentage>
@@ -143,7 +143,6 @@ Prov. de Buenos Aires</address>
                     <award units="hr">3.600000000000000088817841970012523233890533447265625</award>
                     <rollover>false</rollover>
                 </accept>
-                <ngoauthority>cl</ngoauthority>
                 <comment>ITAC Comment
 
 Gemini Comment

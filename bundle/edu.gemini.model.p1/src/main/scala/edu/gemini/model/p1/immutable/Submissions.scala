@@ -27,7 +27,7 @@ sealed trait Submission {
 }
 
 object Submission {
-  def sumTimes(subs: Traversable[Submission], f: Submission=>TimeAmount): TimeAmount =
+  def sumTimes(subs: Traversable[Submission], f: Submission => TimeAmount): TimeAmount =
     TimeAmount.sum(subs.map(f))
 }
 

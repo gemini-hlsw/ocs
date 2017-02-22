@@ -1297,10 +1297,13 @@
                     </fo:table-cell>
                     <fo:table-cell border="0.5pt solid black">
                         <fo:block font-weight="bold">
-                            Total Time
+                            Total
                         </fo:block>
-                        <fo:block font-style="italic">
-                            (including overheads)
+                        <fo:block font-weight="bold">
+                            Program
+                        </fo:block>
+                        <fo:block font-weight="bold">
+                            Partner
                         </fo:block>
                     </fo:table-cell>
                 </fo:table-row>
@@ -1339,7 +1342,13 @@
                         </fo:table-cell>
                         <fo:table-cell border="0.5pt solid black">
                             <fo:block text-align="center">
-                                <xsl:value-of select="format-number(time, '0.0')"/>&#160;<xsl:value-of select="time/@units"/>
+                                <xsl:value-of select="format-number(totalTime, '0.0')"/>&#160;<xsl:value-of select="totalTime/@units"/>
+                            </fo:block>
+                            <fo:block text-align="center">
+                                <xsl:value-of select="format-number(progTime, '0.0')"/>&#160;<xsl:value-of select="progTime/@units"/>
+                            </fo:block>
+                            <fo:block text-align="center">
+                                <xsl:value-of select="format-number(partTime, '0.0')"/>&#160;<xsl:value-of select="partTime/@units"/>
                             </fo:block>
                         </fo:table-cell>
                     </fo:table-row>

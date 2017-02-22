@@ -8,6 +8,7 @@ import edu.gemini.spModel.pio.PioFactory;
 import java.io.Serializable;
 import java.util.*;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  * The original Phase 1 blueprints with their grouped observations.
@@ -23,8 +24,8 @@ public final class Phase1Folder implements Serializable {
     public final List<Phase1Group> groups;
 
     public Phase1Folder(Map<String, SpBlueprint> blueprintMap, List<Phase1Group> groups) {
-        this.blueprintMap = Collections.unmodifiableMap(new HashMap<String, SpBlueprint>(blueprintMap));
-        this.groups       = Collections.unmodifiableList(new ArrayList<Phase1Group>(groups));
+        this.blueprintMap = Collections.unmodifiableMap(new HashMap<>(blueprintMap));
+        this.groups       = Collections.unmodifiableList(new ArrayList<>(groups));
     }
 
     @Override
@@ -57,15 +58,13 @@ public final class Phase1Folder implements Serializable {
         }
 
         // Add all pigs
-        for (Phase1Group pig : groups) {
-            ps.addParamSet(pig.getParamSet(factory));
-        }
+        groups.forEach(pig -> ps.addParamSet(pig.getParamSet(factory)));
 
         return ps;
     }
 
     public static Phase1Folder fromParamSet(ParamSet paramSet) {
-        final Map<String, SpBlueprint> blueprintMap = new HashMap<String, SpBlueprint>();
+        final Map<String, SpBlueprint> blueprintMap = new HashMap<>();
 
         final List<ParamSet> bpEntries = paramSet.getParamSets(BLUEPRINT_ENTRY_PARAM_SET);
         for (ParamSet bpEntry : bpEntries) {
@@ -85,11 +84,10 @@ public final class Phase1Folder implements Serializable {
             blueprintMap.put(id, SpBlueprintFactory.fromParamSet(psList.get(0)));
         }
 
-        final List<Phase1Group> pigs = new ArrayList<Phase1Group>();
-        for (ParamSet pigPs : paramSet.getParamSets(Phase1Group.PARAM_SET_NAME)) {
-            pigs.add(Phase1Group.fromParamSet(pigPs));
-        }
-
+        final List<Phase1Group> pigs = paramSet.getParamSets(Phase1Group.PARAM_SET_NAME)
+                .stream()
+                .map(Phase1Group::fromParamSet)
+                .collect(Collectors.toList());
         return new Phase1Folder(blueprintMap, pigs);
     }
 

@@ -2,24 +2,25 @@ package edu.gemini.pit.ui.editor
 
 
 import edu.gemini.model.p1.immutable._
-
 import edu.gemini.pit.ui.util.SharedIcons._
 import edu.gemini.pit.ui.util._
-
 import java.awt.Color
 import javax.swing.Icon
 
+import edu.gemini.model.p1.overheads.Overheads
 import edu.gemini.shared.gui.textComponent.NumberField
 
 import scala.swing._
-import event.ValueChanged
+import event.{SelectionChanged, ValueChanged}
 import scala.swing.Swing._
+import scalaz._
+import Scalaz._
+
 
 object ObservationEditor {
 
   def open(c:Option[Observation], editable:Boolean, parent:UIElement) =
-    new ObservationEditor(c.getOrElse(Observation.empty.copy(time = Some(TimeAmount.empty))), editable).open(parent)
-
+    new ObservationEditor(c.getOrElse(Observation.empty.copy(intTime = Some(TimeAmount.empty))), editable).open(parent)
 }
 
 /**
@@ -29,59 +30,120 @@ class ObservationEditor private (obs:Observation, canEdit:Boolean) extends StdMo
 
   // Editor component
   object Editor extends GridBagPanel with Rows {
-    addRow(new Label("Conditions"), new OptionLabel(obs.condition, ICON_CONDS))
-    addRow(new Label("Resources"), new OptionLabel(obs.blueprint, ICON_DEVICE))
+    private class RightLabel(t: String) extends Label(t) {
+      horizontalAlignment = Alignment.Right
+    }
+
+    private type Named = {
+      def name: String
+    }
+
+    private class OptionLabel(a:Option[Named], icon0:Icon) extends Label() {
+      horizontalAlignment = Alignment.Left
+      icon = icon0
+      text = a.map(_.name).getOrElse("none")
+      if (a.isEmpty)
+        foreground = Color.GRAY
+    }
+
+    addRow(new Label("Conditions"), new OptionLabel(obs.condition, ICON_CONDS), gw=2)
+    addRow(new Label("Resources"), new OptionLabel(obs.blueprint, ICON_DEVICE), gw=2)
     addRow(new Label("Target"), new OptionLabel(obs.target, obs.target match {
       case Some(_:NonSiderealTarget) => ICON_NONSIDEREAL
       case _                         => ICON_SIDEREAL
-    }))
+    }), gw=2)
     addSpacer()
-    addRow(new Label("Time"), new BorderPanel {
-      border = null
-      add(Time, BorderPanel.Position.Center)
-      add(Units, BorderPanel.Position.East)
-    })
-    preferredSize = (400, preferredSize.height) // force width
+    addLabeledRow(new RightLabel("Integration Time"), IntegrationTime, Units)
+    addLabeledRow(new RightLabel("Overhead Time"), OverheadTime, OverheadTimeUnits)
+    addLabeledRow(new RightLabel("Night Basecal Time"), PartTime, PartTimeUnits)
+    addLabeledRow(new RightLabel("Total Time"), TotalTime, TotalTimeUnits)
+    preferredSize = (500, preferredSize.height) // force width
   }
 
   // Editable
   Contents.Footer.OkButton.enabled = canEdit
 
   // Validation
-  override def editorValid = Time.valid
-  Time.reactions += {
+  override def editorValid = IntegrationTime.valid
+  IntegrationTime.reactions += {
     case ValueChanged(_) => validateEditor()
   }
 
-  type Named = {
-    def name:String
-  }
+  // Time calculator
+  val calculator = obs.blueprint.flatMap(Overheads)
 
-  class OptionLabel(a:Option[Named], icon0:Icon) extends Label() {
-    horizontalAlignment = Alignment.Left
-    icon = icon0
-    text = a.map(_.name).getOrElse("none")
-    if (a.isEmpty)
-      foreground = Color.GRAY
-  }
-
-  object Time extends NumberField(obs.time.map(_.value).orElse(Some(1.0)), allowEmpty = false) {
+  object IntegrationTime extends NumberField(obs.intTime.map(_.value).orElse(Some(1.0)), allowEmpty = false, format = NumberField.TimeFormatter) {
     enabled = canEdit
     override def valid(d:Double) = d > 0
   }
 
   object Units extends ComboBox(TimeUnit.values.toList) with ValueRenderer[TimeUnit] {
     enabled = canEdit
-    selection.item = obs.time.getOrElse(TimeAmount.empty).units
+    selection.item = obs.intTime.getOrElse(TimeAmount.empty).units
   }
+
+  class UnitsLabel extends Label {
+    def update(t: String): Unit =
+      text = t
+  }
+
+  class CalculatedTimeAmountField extends NumberField(None, allowEmpty = false, format = NumberField.TimeFormatter) {
+    enabled = false
+
+    def update(t: TimeAmount): Unit = {
+      val newValue = (Units.selection.item match {
+        case TimeUnit.HR => t.toHours
+        case TimeUnit.NIGHT => t.toNights
+      }).value
+      value = (newValue > 0) ? newValue | 0
+    }
+  }
+
+  object OverheadTime extends CalculatedTimeAmountField
+  object OverheadTimeUnits extends UnitsLabel
+
+  object PartTime extends CalculatedTimeAmountField
+  object PartTimeUnits extends UnitsLabel
+
+  object TotalTime extends CalculatedTimeAmountField
+  object TotalTimeUnits extends UnitsLabel
+
+  def updateTimeLabels(): Unit = {
+    val intTime = {
+      val value = \/.fromTryCatchNonFatal(IntegrationTime.text.toDouble).getOrElse(0.0)
+      TimeAmount((value > 0) ? value | 0, Units.selection.item)
+    }
+    val obsTimes = calculator.map(_.calculate(intTime))
+    OverheadTime.update(obsTimes.foldMap(_.progTime |-| intTime))
+    PartTime.update(obsTimes.foldMap(_.partTime))
+    TotalTime.update(obsTimes.foldMap(_.totalTime))
+  }
+  IntegrationTime.reactions += {
+    case ValueChanged(_) => updateTimeLabels()
+  }
+
+  def updateUnitsLabels(): Unit = {
+    val t = Units.selection.item.value()
+    OverheadTimeUnits.update(t)
+    PartTimeUnits.update(t)
+    TotalTimeUnits.update(t)
+  }
+  Units.selection.reactions += {
+    case SelectionChanged(_) =>
+      // A units change requires the labels to change and will change the calculated time amounts, so must update both.
+      updateUnitsLabels()
+      updateTimeLabels()
+  }
+
+  // Initialize the dependent UI components.
+  updateTimeLabels()
+  updateUnitsLabels()
 
   // Construct our editor
   def editor = Editor
 
   // Construct a new value
   def value = obs.copy(
-    time = Some(TimeAmount(Time.text.toDouble, Units.selection.item)),
+    intTime = Some(TimeAmount(IntegrationTime.text.toDouble, Units.selection.item)),
     meta = None)
-
 }
-
