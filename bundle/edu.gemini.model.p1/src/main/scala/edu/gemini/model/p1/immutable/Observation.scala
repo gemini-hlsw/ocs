@@ -34,9 +34,11 @@ object Observation {
   val empty = new Observation(None, None, None, None, M.Band.BAND_1_2)
 
   // Convenience method to extract the IntOrProgTime from the mutable observation.
-  def mTimeDisjunction(m: M.Observation): Option[Observation.IntOrProgTime] =
-    Option(m.getIntTime).map(TimeAmount(_).left[TimeAmount]).orElse(Option(m.getProgTime).map(TimeAmount(_).right[TimeAmount]))
-
+  def mTimeDisjunction(m: M.Observation): Option[Observation.IntOrProgTime] = {
+    def toTimeDisj(t: M.TimeAmount, f: TimeAmount => Observation.IntOrProgTime) =
+      Option(t).map(x => f(TimeAmount(x)))
+    toTimeDisj(m.getIntTime, _.left[TimeAmount]).orElse(toTimeDisj(m.getProgTime, _.right[TimeAmount]))
+  }
 }
 
 // REL-2985: It is unfortunate that we have to pass progTime here, but it is necessary for the migration to 2017B,

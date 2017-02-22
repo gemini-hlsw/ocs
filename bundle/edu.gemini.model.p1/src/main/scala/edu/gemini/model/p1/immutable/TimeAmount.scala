@@ -16,7 +16,7 @@ object TimeAmount {
   // with the difference that we try to keep the time unit from changing if they
   // are all the same.
   def sum(times: Traversable[TimeAmount]): TimeAmount =
-    if (times.isEmpty) empty else (times.head/:times.tail)(_ |+| _)
+    times.foldLeft(empty)(_ |+| _)
 
   implicit val monoid = Monoid.instance[TimeAmount](_ |+| _, empty)
 }
@@ -49,14 +49,14 @@ case class TimeAmount(value: Double, units: TimeUnit) {
 
   // Time sum.
   def |+|(that: TimeAmount): TimeAmount = {
-    val (sum, unit) = (units == that.units) ? (value + that.value, units) | (hours + that.hours, TimeUnit.HR)
+    val (sum, unit) = if (units == that.units) (value + that.value, units) else (hours + that.hours, TimeUnit.HR)
     TimeAmount(sum, unit)
   }
 
   // Time difference: can never be less than zero.
   def |-|(that: TimeAmount): TimeAmount = {
-    val (diff, unit) = (units == that.units) ? (value - that.value, units) | (hours - that.hours, TimeUnit.HR)
-    TimeAmount((diff > 0) ? diff | 0, unit)
+    val (diff, unit) = if (units == that.units) (value - that.value, units) else (hours - that.hours, TimeUnit.HR)
+    TimeAmount(math.max(diff, 0), unit)
   }
 
   /**
