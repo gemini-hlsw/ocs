@@ -51,7 +51,7 @@ class GemsStrategySpec extends Specification {
       val ctx = ObsContext.create(env, inst, new JSome(Site.GS), SPSiteQuality.Conditions.BEST, null, new Gems, JNone.instance())
 
       val estimate = TestGemsStrategy("/gemsstrategyquery.xml").estimate(ctx, ProbeLimitsTable.loadOrThrow())(implicitly)
-      Await.result(estimate, 20.seconds) should beEqualTo(Estimate.GuaranteedSuccess)
+      Await.result(estimate, 1.minute) should beEqualTo(Estimate.GuaranteedSuccess)
     }
     "support search" in {
       val ra = Angle.fromHMS(3, 19, 48.2341).getOrElse(Angle.zero)
@@ -65,7 +65,7 @@ class GemsStrategySpec extends Specification {
 
       val posAngles = Set.empty[Angle]
 
-      val results = Await.result(TestGemsStrategy("/gemsstrategyquery.xml").search(tipTiltMode, ctx, posAngles, scala.None)(implicitly), 20.seconds)
+      val results = Await.result(TestGemsStrategy("/gemsstrategyquery.xml").search(tipTiltMode, ctx, posAngles, scala.None)(implicitly), 1.minute)
       results should be size 2
 
       results.head.criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, GsaoiOdgw.Group.instance), CatalogSearchCriterion("On-detector Guide Window tiptilt", RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), MagnitudeConstraints(SingleBand(MagnitudeBand.H), FaintnessConstraint(14.5), scala.Option(SaturationConstraint(7.3))), scala.Option(Offset(0.0014984027777700248.degrees[OffsetP], 0.0014984027777700248.degrees[OffsetQ])), scala.None)))
@@ -88,7 +88,7 @@ class GemsStrategySpec extends Specification {
       testSearchOnNominal("/gems_pal1.xml", ctx, tipTiltMode, posAngles, 2, 2)
 
       val gemsStrategy = TestGemsStrategy("/gems_pal1.xml")
-      val selection = Await.result(gemsStrategy.select(ctx, ProbeLimitsTable.loadOrThrow())(implicitly), 2.minutes)
+      val selection = Await.result(gemsStrategy.select(ctx, ProbeLimitsTable.loadOrThrow())(implicitly), 5.minutes)
       selection.map(_.posAngle) should beSome(Angle.zero)
       val assignments = ~selection.map(_.assignments)
       assignments should be size 2
@@ -130,7 +130,7 @@ class GemsStrategySpec extends Specification {
 
       // Test estimate: 2-star asterism grants 2/3 chance of success.
       val estimate = gemsStrategy.estimate(ctx, ProbeLimitsTable.loadOrThrow())(implicitly)
-      val result = Await.result(estimate, 20.seconds).probability
+      val result = Await.result(estimate, 1.minute).probability
       math.abs(result - 2.0 / 3.0) should beLessThan(1e-4)
     }
     "find an asterism of size 1" in {
@@ -146,7 +146,7 @@ class GemsStrategySpec extends Specification {
       val posAngles = Set(ctx.getPositionAngle, Angle.zero, Angle.fromDegrees(90), Angle.fromDegrees(180), Angle.fromDegrees(270))
 
       val gemsStrategy = TestGemsStrategy("/gems_rel2941.xml")
-      val selection = Await.result(gemsStrategy.select(ctx, ProbeLimitsTable.loadOrThrow())(implicitly), 2.minutes)
+      val selection = Await.result(gemsStrategy.select(ctx, ProbeLimitsTable.loadOrThrow())(implicitly), 5.minutes)
       selection.map(_.posAngle) should beSome(Angle.fromDegrees(90))
       val assignments = ~selection.map(_.assignments)
       assignments should be size 1
@@ -176,7 +176,7 @@ class GemsStrategySpec extends Specification {
 
       // Test estimate: 1-star asterism grants 1/3 chance of success.
       val estimate = gemsStrategy.estimate(ctx, ProbeLimitsTable.loadOrThrow())(implicitly)
-      val result = Await.result(estimate, 20.seconds).probability
+      val result = Await.result(estimate, 1.minute).probability
       math.abs(result - 1.0 / 3.0) should beLessThan(1e-4)
     }
     "find an asterism of size 3" in {
@@ -191,7 +191,7 @@ class GemsStrategySpec extends Specification {
       val posAngles = Set(ctx.getPositionAngle, Angle.zero, Angle.fromDegrees(90), Angle.fromDegrees(180), Angle.fromDegrees(270))
 
       val gemsStrategy = TestGemsStrategy("/gems_rel2941_2.xml")
-      val selection = Await.result(gemsStrategy.select(ctx, ProbeLimitsTable.loadOrThrow())(implicitly), 2.minutes)
+      val selection = Await.result(gemsStrategy.select(ctx, ProbeLimitsTable.loadOrThrow())(implicitly), 5.minutes)
       selection.map(_.posAngle) should beSome(Angle.fromDegrees(90))
       val assignments = ~selection.map(_.assignments)
       assignments should be size 3
@@ -247,7 +247,7 @@ class GemsStrategySpec extends Specification {
 
       // Test estimate: 3-star asterism grants guaranteed success.
       val estimate = gemsStrategy.estimate(ctx, ProbeLimitsTable.loadOrThrow())(implicitly)
-      Await.result(estimate, 20.seconds) should beEqualTo(Estimate.GuaranteedSuccess)
+      Await.result(estimate, 1.minute) should beEqualTo(Estimate.GuaranteedSuccess)
     }
     "support search/select and analyze on SN-1987A" in {
       val ra = Angle.fromHMS(5, 35, 28.020).getOrElse(Angle.zero)
@@ -264,7 +264,7 @@ class GemsStrategySpec extends Specification {
       testSearchOnStandardConditions("/gems_sn1987A.xml", ctx, tipTiltMode, posAngles, 9, 9)
 
       val gemsStrategy = TestGemsStrategy("/gems_sn1987A.xml")
-      val selection = Await.result(gemsStrategy.select(ctx, ProbeLimitsTable.loadOrThrow())(implicitly), 2.minutes)
+      val selection = Await.result(gemsStrategy.select(ctx, ProbeLimitsTable.loadOrThrow())(implicitly), 5.minutes)
       selection.map(_.posAngle) should beSome(Angle.zero)
       val assignments = ~selection.map(_.assignments)
       assignments should be size 3
@@ -316,7 +316,7 @@ class GemsStrategySpec extends Specification {
 
       // Test estimate
       val estimate = gemsStrategy.estimate(ctx, ProbeLimitsTable.loadOrThrow())(implicitly)
-      Await.result(estimate, 20.seconds) should beEqualTo(Estimate.GuaranteedSuccess)
+      Await.result(estimate, 1.minute) should beEqualTo(Estimate.GuaranteedSuccess)
     }
     "support search/select and analyze on SN-1987A part 2" in {
       val ra = Angle.fromHMS(5, 35, 28.020).getOrElse(Angle.zero)
@@ -333,7 +333,7 @@ class GemsStrategySpec extends Specification {
       testSearchOnBestConditions("/gems_sn1987A.xml", ctx, tipTiltMode, posAngles, 12, 9)
 
       val gemsStrategy = TestGemsStrategy("/gems_sn1987A.xml")
-      val selection = Await.result(gemsStrategy.select(ctx, ProbeLimitsTable.loadOrThrow())(implicitly), 2.minutes)
+      val selection = Await.result(gemsStrategy.select(ctx, ProbeLimitsTable.loadOrThrow())(implicitly), 5.minutes)
       selection.map(_.posAngle) should beSome(Angle.zero)
       val assignments = ~selection.map(_.assignments)
       assignments should be size 3
@@ -373,7 +373,7 @@ class GemsStrategySpec extends Specification {
 
       // Test estimate
       val estimate = gemsStrategy.estimate(ctx, ProbeLimitsTable.loadOrThrow())(implicitly)
-      Await.result(estimate, 20.seconds) should beEqualTo(Estimate.GuaranteedSuccess)
+      Await.result(estimate, 1.minute) should beEqualTo(Estimate.GuaranteedSuccess)
     }
     "support search/select and analyze on TYC 8345-1155-1" in {
       val ra = Angle.fromHMS(17, 25, 27.529).getOrElse(Angle.zero)
@@ -390,7 +390,7 @@ class GemsStrategySpec extends Specification {
       testSearchOnStandardConditions("/gems_TYC_8345_1155_1.xml", ctx, tipTiltMode, posAngles, 25, 28)
 
       val gemsStrategy = TestGemsStrategy("/gems_TYC_8345_1155_1.xml")
-      val selection = Await.result(gemsStrategy.select(ctx, ProbeLimitsTable.loadOrThrow())(implicitly), 2.minutes)
+      val selection = Await.result(gemsStrategy.select(ctx, ProbeLimitsTable.loadOrThrow())(implicitly), 5.minutes)
       selection.map(_.posAngle) should beSome(Angle.zero)
       val assignments = ~selection.map(_.assignments)
       assignments should be size 3
@@ -439,7 +439,7 @@ class GemsStrategySpec extends Specification {
 
       // Test estimate
       val estimate = gemsStrategy.estimate(ctx, ProbeLimitsTable.loadOrThrow())(implicitly)
-      Await.result(estimate, 20.seconds) should beEqualTo(Estimate.GuaranteedSuccess)
+      Await.result(estimate, 1.minute) should beEqualTo(Estimate.GuaranteedSuccess)
     }
     "support search/select and analyze on M6" in {
       val ra = Angle.fromHMS(17, 40, 20.0).getOrElse(Angle.zero)
@@ -456,7 +456,7 @@ class GemsStrategySpec extends Specification {
       testSearchOnStandardConditions("/gems_m6.xml", ctx, tipTiltMode, posAngles, 5, 7)
 
       val gemsStrategy = TestGemsStrategy("/gems_m6.xml")
-      val selection = Await.result(gemsStrategy.select(ctx, ProbeLimitsTable.loadOrThrow())(implicitly), 2.minutes)
+      val selection = Await.result(gemsStrategy.select(ctx, ProbeLimitsTable.loadOrThrow())(implicitly), 5.minutes)
       selection.map(_.posAngle) should beSome(Angle.fromDegrees(90))
       val assignments = ~selection.map(_.assignments)
       assignments should be size 3
@@ -506,7 +506,7 @@ class GemsStrategySpec extends Specification {
 
       // Test estimate
       val estimate = gemsStrategy.estimate(ctx, ProbeLimitsTable.loadOrThrow())(implicitly)
-      Await.result(estimate, 20.seconds) should beEqualTo(Estimate.GuaranteedSuccess)
+      Await.result(estimate, 1.minute) should beEqualTo(Estimate.GuaranteedSuccess)
     }
     "support search/select and analyze on BPM 37093" in {
       val ra = Angle.fromHMS(12, 38, 49.820).getOrElse(Angle.zero)
@@ -523,7 +523,7 @@ class GemsStrategySpec extends Specification {
       testSearchOnStandardConditions("/gems_bpm_37093.xml", ctx, tipTiltMode, posAngles, 4, 5)
 
       val gemsStrategy = TestGemsStrategy("/gems_bpm_37093.xml")
-      val selection = Await.result(gemsStrategy.select(ctx, ProbeLimitsTable.loadOrThrow())(implicitly), 2.minutes)
+      val selection = Await.result(gemsStrategy.select(ctx, ProbeLimitsTable.loadOrThrow())(implicitly), 5.minutes)
       selection.map(_.posAngle) should beSome(Angle.zero)
       val assignments = ~selection.map(_.assignments)
       assignments should be size 3
@@ -562,7 +562,7 @@ class GemsStrategySpec extends Specification {
 
       // Test estimate
       val estimate = gemsStrategy.estimate(ctx, ProbeLimitsTable.loadOrThrow())(implicitly)
-      Await.result(estimate, 20.seconds) should beEqualTo(Estimate.GuaranteedSuccess)
+      Await.result(estimate, 1.minute) should beEqualTo(Estimate.GuaranteedSuccess)
     }
     "support search/select and analyze on BPM 37093 part 2" in {
       val ra = Angle.fromHMS(12, 38, 49.820).getOrElse(Angle.zero)
@@ -579,7 +579,7 @@ class GemsStrategySpec extends Specification {
       testSearchOnBestConditions("/gems_bpm_37093.xml", ctx, tipTiltMode, posAngles, 5, 5)
 
       val gemsStrategy = TestGemsStrategy("/gems_bpm_37093.xml")
-      val selection = Await.result(gemsStrategy.select(ctx, ProbeLimitsTable.loadOrThrow())(implicitly), 2.minutes)
+      val selection = Await.result(gemsStrategy.select(ctx, ProbeLimitsTable.loadOrThrow())(implicitly), 5.minutes)
       selection.map(_.posAngle) should beSome(Angle.zero)
       val assignments = ~selection.map(_.assignments)
       assignments should be size 3
@@ -618,12 +618,12 @@ class GemsStrategySpec extends Specification {
 
       // Test estimate
       val estimate = gemsStrategy.estimate(ctx, ProbeLimitsTable.loadOrThrow())(implicitly)
-      Await.result(estimate, 20.seconds) should beEqualTo(Estimate.GuaranteedSuccess)
+      Await.result(estimate, 1.minute) should beEqualTo(Estimate.GuaranteedSuccess)
     }
   }
 
   def testSearchOnStandardConditions(file: String, ctx: ObsContext, tipTiltMode: GemsTipTiltMode, posAngles: Set[Angle], expectedTipTiltResultsCount: Int, expectedFlexureResultsCount: Int): Unit = {
-    val results = Await.result(TestGemsStrategy(file).search(tipTiltMode, ctx, posAngles, scala.None)(implicitly), 20.seconds)
+    val results = Await.result(TestGemsStrategy(file).search(tipTiltMode, ctx, posAngles, scala.None)(implicitly), 1.minute)
     results should be size 2
 
     results.head.criterion.key should beEqualTo(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, Wfs.Group.instance))
@@ -635,7 +635,7 @@ class GemsStrategySpec extends Specification {
   }
 
   def testSearchOnNominal(file: String, ctx: ObsContext, tipTiltMode: GemsTipTiltMode, posAngles: Set[Angle], expectedTipTiltResultsCount: Int, expectedFlexureResultsCount: Int): Unit = {
-    val results = Await.result(TestGemsStrategy(file).search(tipTiltMode, ctx, posAngles, scala.None)(implicitly), 20.seconds)
+    val results = Await.result(TestGemsStrategy(file).search(tipTiltMode, ctx, posAngles, scala.None)(implicitly), 1.minute)
     results should be size 2
 
     results.head.criterion.key should beEqualTo(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, Wfs.Group.instance))
@@ -647,7 +647,7 @@ class GemsStrategySpec extends Specification {
   }
 
   def testSearchOnBestConditions(file: String, ctx: ObsContext, tipTiltMode: GemsTipTiltMode, posAngles: Set[Angle], expectedTipTiltResultsCount: Int, expectedFlexureResultsCount: Int): Unit = {
-    val results = Await.result(TestGemsStrategy(file).search(tipTiltMode, ctx, posAngles, scala.None)(implicitly), 20.seconds)
+    val results = Await.result(TestGemsStrategy(file).search(tipTiltMode, ctx, posAngles, scala.None)(implicitly), 1.minute)
     results should be size 2
 
     results.head.criterion.key should beEqualTo(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, Wfs.Group.instance))
