@@ -4,25 +4,20 @@ import edu.gemini.model.p1.immutable._
 
 import scalaz._
 import Scalaz._
-
 import squants.time._
+
+import scala.annotation.tailrec
 
 // This is not the ideal package for this to live in, but to avoid circular bundle references, we put it here.
 sealed trait Overheads {
-  def partnerOverheadFraction: Double
-  def acquisitionOverhead: Time
-  def typicalExpTime: Option[Time]
-  def otherOverheadFraction: Double
+  def partnerOverheadFraction: Double // fpart
+  def acquisitionOverhead: Time       // acqover
+  def otherOverheadFraction: Double   // fother
 
   def calculate(intTime: TimeAmount): ObservationTimes = {
-    // Calculate everything in hours, as per REL-2985 formulae.
-    val progTimeHrs  = {
-      val intTimeHrs = intTime.toHours.value
-      val overheadTimeHrs = (1 + otherOverheadFraction) * intTimeHrs
-      numAcqs(overheadTimeHrs) * acquisitionOverhead.toHours + overheadTimeHrs
-    }
-    val partTimeHrs  = progTimeHrs * partnerOverheadFraction
-
+    val intTimeHrs  = intTime.toHours.value
+    val progTimeHrs = calcProgTime(intTimeHrs)
+    val partTimeHrs = progTimeHrs * partnerOverheadFraction
     ObservationTimes(TimeAmount(progTimeHrs, TimeUnit.HR), TimeAmount(partTimeHrs, TimeUnit.HR))
   }
 
@@ -30,14 +25,32 @@ sealed trait Overheads {
   // thus intTime - the value that is user modifiable - must be calculated from this.
   def intTimeFromProgTime(progTime: TimeAmount): TimeAmount = {
     val progTimeHrs = progTime.toHours.value
-    val intTimeHrs  = (progTimeHrs - numAcqs(progTimeHrs) * acquisitionOverhead.toHours)/(1 + otherOverheadFraction)
+    val numAcqs     = numAcqsFromProgTimeInHrs(progTimeHrs)
+    val intTimeHrs  = (progTimeHrs - numAcqs * acquisitionOverhead.toHours)/(1 + otherOverheadFraction)
     TimeAmount(intTimeHrs, TimeUnit.HR)
   }
 
-  private def numAcqs(timeHrs: Double): Double = {
-    val visTimeHrs = Overheads.visTime.toHours
-    ((timeHrs / visTimeHrs).toInt + ((timeHrs % visTimeHrs > 0) ? 1 | 0)).toDouble
+  // Iterative method for calculating the program time in hours iteratively through the number of acquisitions.
+  private def calcProgTime(intTime: Double): Double = {
+    val overheadTimeHrs = intTime * (1 + otherOverheadFraction)
+
+    @tailrec
+    def calcProgTimeIter(numAcqsOld: Int, numAcqsNew: Int, progTime: Double, iteration: Int): Double = {
+      // If the number of acquisitions is stable or we have
+      if (numAcqsOld == numAcqsNew || iteration > 10)
+        progTime
+      else {
+        val progTimeNew = numAcqsNew * acquisitionOverhead.toHours + overheadTimeHrs
+        calcProgTimeIter(numAcqsNew, numAcqsFromProgTimeInHrs(progTimeNew), progTimeNew, iteration + 1)
+      }
+    }
+
+    calcProgTimeIter(0, numAcqsFromProgTimeInHrs(overheadTimeHrs), 0.0, 0)
   }
+
+  // Calculate the number of acquisitions from program time in hours.
+  private def numAcqsFromProgTimeInHrs(progTime: Double): Int =
+    (progTime / Overheads.visTimeHrs).toInt + ((progTime % Overheads.visTimeHrs > 0) ? 1 | 0)
 }
 
 // Due to the large number of possible blueprint bases and how each one requires different configuration params
@@ -46,57 +59,45 @@ sealed trait Overheads {
 object Overheads extends (BlueprintBase => Option[Overheads]) {
   // t_vis as per REL-2985.
   // visTime is in hours already: if this changes, this calculation should change to ensure no loss of data.
-  lazy val visTime = Hours(2)
+  lazy val visTime    = Hours(2)
+  lazy val visTimeHrs = Overheads.visTime.toHours
 
-  private class SimpleOverheads(override val partnerOverheadFraction: Double,
-                                override val acquisitionOverhead: Time,
-                                override val typicalExpTime: Option[Time],
-                                override val otherOverheadFraction: Double) extends Overheads
-
-  // Simplified way to create SimpleOverheads with standard fields.
-  // Times must be given in minutes.
-  private object SimpleOverheads {
-    def apply(partnerOverheadFraction: Double,
-              acquisitionOverhead: Long,
-              typicalExpTime: Long,
-              otherOverheadFraction: Double) =
-      new SimpleOverheads(
-        partnerOverheadFraction,
-        Minutes(acquisitionOverhead),
-        Minutes(typicalExpTime).some,
-        otherOverheadFraction)
+  private case class SimpleOverheads(override val partnerOverheadFraction: Double,
+                                     acquisitionOverheadMins: Long,
+                                     override val otherOverheadFraction: Double) extends Overheads {
+    override val acquisitionOverhead = Minutes(acquisitionOverheadMins)
   }
 
   // GMOS overheads are the same between sites.
-  private lazy val GmosImagingOverheads    = SimpleOverheads(0.00,  6,  300, 0.137).some
-  private lazy val GmosLongslitOverheads   = SimpleOverheads(0.10, 16, 1200, 0.034).some
-  private lazy val GmosLongslitNsOverheads = SimpleOverheads(0.10, 16,  960, 0.271).some
-  private lazy val GmosMosOverheads        = SimpleOverheads(0.10, 18, 1200, 0.028).some
-  private lazy val GmosMosNsOverheads      = SimpleOverheads(0.10, 18,  960, 0.271).some
-  private lazy val GmosIfuOverheads        = SimpleOverheads(0.10, 18, 1200, 0.083).some
-  private lazy val GmosIfuNsOverheads      = SimpleOverheads(0.10, 18,  960, 0.311).some
+  private lazy val GmosImagingOverheads    = SimpleOverheads(0.00,  6, 0.137).some
+  private lazy val GmosLongslitOverheads   = SimpleOverheads(0.10, 16, 0.034).some
+  private lazy val GmosLongslitNsOverheads = SimpleOverheads(0.10, 16, 0.271).some
+  private lazy val GmosMosOverheads        = SimpleOverheads(0.10, 18, 0.028).some
+  private lazy val GmosMosNsOverheads      = SimpleOverheads(0.10, 18, 0.271).some
+  private lazy val GmosIfuOverheads        = SimpleOverheads(0.10, 18, 0.083).some
+  private lazy val GmosIfuNsOverheads      = SimpleOverheads(0.10, 18, 0.311).some
 
   def apply(b: BlueprintBase): Option[Overheads] = b match {
-    case _: Flamingos2BlueprintImaging  => SimpleOverheads(0.10, 15,   60, 0.467).some
-    case _: Flamingos2BlueprintLongslit => SimpleOverheads(0.25, 20,  120, 0.283).some
-    case _: Flamingos2BlueprintMos      => SimpleOverheads(0.25, 30,  120, 0.283).some
+    case _: Flamingos2BlueprintImaging  => SimpleOverheads(0.10, 15, 0.467).some
+    case _: Flamingos2BlueprintLongslit => SimpleOverheads(0.25, 20, 0.283).some
+    case _: Flamingos2BlueprintMos      => SimpleOverheads(0.25, 30, 0.283).some
 
-    case _: GnirsBlueprintImaging       => SimpleOverheads(0.10, 10,   60, 0.183).some
-    case _: GnirsBlueprintSpectroscopy  => SimpleOverheads(0.25, 15,  300, 0.080).some
+    case _: GnirsBlueprintImaging       => SimpleOverheads(0.10, 10, 0.183).some
+    case _: GnirsBlueprintSpectroscopy  => SimpleOverheads(0.25, 15, 0.080).some
 
-    case _: NifsBlueprint               => SimpleOverheads(0.25, 11,  600, 0.175).some
-    case _: GsaoiBlueprint              => SimpleOverheads(0.00, 30,   60, 0.833).some
-    case _: GracesBlueprint             => SimpleOverheads(0.00, 10, 1200, 0.036).some
-    case _: GpiBlueprint                => SimpleOverheads(0.05, 10,   60, 0.333).some
-    case _: PhoenixBlueprint            => SimpleOverheads(0.25, 20, 1200, 0.021).some
-    case _: TexesBlueprint              => SimpleOverheads(0.00, 20,  900, 0.022).some
+    case _: NifsBlueprint               => SimpleOverheads(0.25, 11, 0.175).some
+    case _: GsaoiBlueprint              => SimpleOverheads(0.00, 30, 0.833).some
+    case _: GracesBlueprint             => SimpleOverheads(0.00, 10, 0.036).some
+    case _: GpiBlueprint                => SimpleOverheads(0.05, 10, 0.333).some
+    case _: PhoenixBlueprint            => SimpleOverheads(0.25, 20, 0.021).some
+    case _: TexesBlueprint              => SimpleOverheads(0.00, 20, 0.022).some
 
-    case _: DssiBlueprint               => new SimpleOverheads(0.00, Minutes(10), None, 0.010).some
-    case _: VisitorBlueprint            => new SimpleOverheads(0.00, Minutes(10), None, 0.100).some
+    case _: DssiBlueprint               => new SimpleOverheads(0.00, 10, 0.010).some
+    case _: VisitorBlueprint            => new SimpleOverheads(0.00, 10, 0.100).some
 
 
     // NIRI relies on whether or not AO is being used.
-    case nbp: NiriBlueprint             => SimpleOverheads(0.10, nbp.altair.ao.toBoolean ? 10 | 6, 60, 0.183).some
+    case nbp: NiriBlueprint             => SimpleOverheads(0.10, nbp.altair.ao.toBoolean ? 10 | 6, 0.183).some
 
 
     // GMOS is independent of site unless N&S is being used.
