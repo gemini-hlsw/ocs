@@ -1,5 +1,20 @@
 Gemini Phase I Schema Changes
 
+# Version 2017.2.1 - 2017B
+##########################
+
+* Formerly, the time field in Observation referred to program time.
+  As per REL-2985, we are now dividing time into multiple categories to make the breakdown of where time is being
+  used clear, and the user must now enter integration time.
+  This has resulted in a number of new fields in Observation, namely intTime, progTime, partTime, and time, where
+  progTime and partTime are now functions of intTime as per the new Overheads class, and time is the sum of these
+  and represents total time. This upconversion is slightly complicated: old proposals have their former time field
+  migrated to progTime, and this is used to reverse-calculate intTime in the Observation class if intTime does not
+  exist.
+* Texes is not available this semester.
+* Two new filters available for F2: 'K-blue (2.06 um)' and 'K-red (2.31 um)'.
+* Altair LGS is disabled for this semester due to the GN laser not working.
+
 # Version 2017.1.1 - 2017A
 ##########################
 
