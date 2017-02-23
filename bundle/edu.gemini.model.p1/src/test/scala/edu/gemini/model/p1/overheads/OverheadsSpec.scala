@@ -120,7 +120,7 @@ object OverheadsSpec {
       obsTimes(2.34, 0.58))
       ),
     (("niri", "imagingngs"), (
-      () => NiriBlueprint(AltairLGS(false), NiriCamera.F6, Nil),
+      () => NiriBlueprint(AltairNGS(false), NiriCamera.F6, Nil),
       obsTimes(2.36, 0.24))
       ),
     (("niri", "imaging"), (
