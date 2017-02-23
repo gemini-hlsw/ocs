@@ -69,7 +69,7 @@ object Overheads extends (BlueprintBase => Option[Overheads]) {
   }
 
   // GMOS overheads are the same between sites.
-  private lazy val GmosImagingOverheads    = SimpleOverheads(0.00,  6, 0.137).some
+  private lazy val GmosImagingOverheads    = SimpleOverheads(0.00,  6, 0.144).some
   private lazy val GmosLongslitOverheads   = SimpleOverheads(0.10, 16, 0.034).some
   private lazy val GmosLongslitNsOverheads = SimpleOverheads(0.10, 16, 0.271).some
   private lazy val GmosMosOverheads        = SimpleOverheads(0.10, 18, 0.028).some
@@ -78,15 +78,15 @@ object Overheads extends (BlueprintBase => Option[Overheads]) {
   private lazy val GmosIfuNsOverheads      = SimpleOverheads(0.10, 18, 0.311).some
 
   def apply(b: BlueprintBase): Option[Overheads] = b match {
-    case _: Flamingos2BlueprintImaging  => SimpleOverheads(0.10, 15, 0.467).some
+    case _: Flamingos2BlueprintImaging  => SimpleOverheads(0.10,  6, 0.490).some
     case _: Flamingos2BlueprintLongslit => SimpleOverheads(0.25, 20, 0.283).some
     case _: Flamingos2BlueprintMos      => SimpleOverheads(0.25, 30, 0.283).some
 
-    case _: GnirsBlueprintImaging       => SimpleOverheads(0.10, 10, 0.183).some
+    case _: GnirsBlueprintImaging       => SimpleOverheads(0.10, 10, 0.193).some
     case _: GnirsBlueprintSpectroscopy  => SimpleOverheads(0.25, 15, 0.080).some
 
     case _: NifsBlueprint               => SimpleOverheads(0.25, 11, 0.175).some
-    case _: GsaoiBlueprint              => SimpleOverheads(0.00, 30, 0.833).some
+    case _: GsaoiBlueprint              => SimpleOverheads(0.00, 30, 0.875).some
     case _: GracesBlueprint             => SimpleOverheads(0.00, 10, 0.036).some
     case _: GpiBlueprint                => SimpleOverheads(0.05, 10, 0.333).some
     case _: PhoenixBlueprint            => SimpleOverheads(0.25, 20, 0.021).some
@@ -97,7 +97,7 @@ object Overheads extends (BlueprintBase => Option[Overheads]) {
 
 
     // NIRI relies on whether or not AO is being used.
-    case nbp: NiriBlueprint             => SimpleOverheads(0.10, nbp.altair.ao.toBoolean ? 10 | 6, 0.183).some
+    case nbp: NiriBlueprint             => SimpleOverheads(0.10, nbp.altair.ao.toBoolean ? 10 | 6, 0.193).some
 
 
     // GMOS is independent of site unless N&S is being used.
