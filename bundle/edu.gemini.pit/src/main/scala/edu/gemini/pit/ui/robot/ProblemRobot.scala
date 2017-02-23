@@ -223,7 +223,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
     // TODO: Remove this if the laser is repaired.
     private lazy val altairLgsCheck = for {
       o <- p.observations
-      b <- o.blueprint if bpIsLgs(b)
+      b <- o.blueprint if bpIsLgs(b) && !bpIsGemsLgs(b)
     } yield new Problem(Severity.Error, "Altair Laser Guidestar is currently not offered.", "Observations", s.inObsListView(o.band, _.Fixes.fixBlueprint(b)))
 
     def aoPerspectiveIsLgs(ao: AoPerspective): Boolean = ao match {
