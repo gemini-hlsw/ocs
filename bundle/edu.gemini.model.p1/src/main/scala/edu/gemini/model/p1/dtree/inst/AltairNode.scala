@@ -16,6 +16,7 @@ trait AltairNode {
       //List(AltairNone, AltairLGS(pwfs1 = false, aowfs = true), AltairLGS(pwfs1 = true), AltairLGS(pwfs1 = false, oiwfs = true), AltairNGS(fieldLens = false), AltairNGS(fieldLens = true))
       List(AltairNone, AltairNGS(fieldLens = false), AltairNGS(fieldLens = true))
     } else {
+      //List(AltairNone, AltairLGS(pwfs1 = false), AltairLGS(pwfs1 = true), AltairNGS(fieldLens = false), AltairNGS(fieldLens = true))
       List(AltairNone, AltairNGS(fieldLens = false), AltairNGS(fieldLens = true))
     }
 }
