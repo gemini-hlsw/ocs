@@ -88,7 +88,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
           TimeProblems.partnerZeroTimeRequest(p, s) ++
           TacProblems(p, s).all ++
           List(incompleteInvestigator, missingObsElementCheck, cfCheck, emptyTargetCheck,
-            emptyEphemerisCheck, singlePointEphemerisCheck, initialEphemerisCheck, finalEphemerisCheck,
+            emptyEphemerisCheck, singlePointEphemerisCheck, initialEphemerisCheck, finalEphemerisCheck, altairLgsCheck,
             badGuiding, cwfsCorrectionsIssue, badVisibility, iffyVisibility, minTimeCheck, wrongSite, band3Orphan2, gpiCheck, lgsIQ70Check, lgsGemsIQ85Check,
             lgsCC50Check, texesCCCheck, texesWVCheck, gmosWVCheck, gmosR600Check, band3IQ, band3LGS, band3RapidToO, sbIrObservation).flatten
       ps.sorted
@@ -219,6 +219,12 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       }
     } yield new Problem(Severity.Warning, msg, "Targets", s.inTargetsView(_.edit(t)))
 
+    // REL-3079: No Altair LGS offered in 2017B.
+    // TODO: Remove this if the laser is repaired.
+    private lazy val altairLgsCheck = for {
+      o <- p.observations
+      b <- o.blueprint if bpIsLgs(b)
+    } yield new Problem(Severity.Error, "Altair Laser Guidestar is currently not offered.", "Observations", s.inObsListView(o.band, _.Fixes.fixBlueprint(b)))
 
     def aoPerspectiveIsLgs(ao: AoPerspective): Boolean = ao match {
       case AoLgs => true

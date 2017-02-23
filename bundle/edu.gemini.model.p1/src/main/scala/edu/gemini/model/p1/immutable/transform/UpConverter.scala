@@ -131,6 +131,12 @@ case class LastStepConverter(semester: Semester) extends SemesterConverter {
  * This converter will upgrade to 2017B
  */
 case object SemesterConverter2017ATo2017B extends SemesterConverter {
+  // TODO: REL-3079 remove this when the GN laser is repaired.
+  val altairLgsNotAvailable: TransformFunction = {
+    case a @ <altair>{ns @ _*}</altair> if (a \\ "lgs").nonEmpty =>
+      StepResult(s"Altair Laser Guidestar is currently not offered", a).successNel
+  }
+
   val timeToProgTime: TransformFunction = {
     case o @ <observation>{ns @ _*}</observation> if (o \\ "time").nonEmpty =>
 
@@ -147,7 +153,7 @@ case object SemesterConverter2017ATo2017B extends SemesterConverter {
         // Too many attributes.
         <observation band={o.attribute("band")} enabled={o.attribute("enabled")} target={o.attribute("target")} condition={o.attribute("condition")} blueprint={o.attribute("blueprint")}>{TimeToProgTime.transform(ns)}</observation>).successNel
   }
-  override val transformers = List(timeToProgTime)
+  override val transformers = List(altairLgsNotAvailable, timeToProgTime)
 }
 
 /**
