@@ -1,6 +1,6 @@
 Gemini Phase I Schema Changes
 
-# Version 2017.2.1 - 20a7B
+# Version 2017.2.1 - 2017B
 ##########################
 
 * Formerly, the time field in Observation referred to program time.
