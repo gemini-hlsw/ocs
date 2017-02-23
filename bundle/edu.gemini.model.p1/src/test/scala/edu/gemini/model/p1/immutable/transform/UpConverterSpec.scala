@@ -243,7 +243,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have length 7
+          changes must have length 8
           changes must contain(s"Updated schema version to ${Proposal.currentSchemaVersion}")
           changes must contain(s"Updated semester to ${Semester.current.display}")
           changes must contain("Please use the PIT from semester 2012B to view the unmodified proposal")
@@ -268,7 +268,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have length 7
+          changes must have length 8
           changes must contain(s"Updated schema version to ${Proposal.currentSchemaVersion}")
           changes must contain(s"Updated semester to ${Semester.current.display}")
           changes must contain("Please use the PIT from semester 2012B to view the unmodified proposal")
@@ -294,7 +294,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have length 8
+          changes must have length 9
           changes must contain(s"Updated schema version to ${Proposal.currentSchemaVersion}")
           changes must contain(s"Updated semester to ${Semester.current.display}")
           changes must contain("Please use the PIT from semester 2012B to view the unmodified proposal")
@@ -530,7 +530,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have length 6
+          changes must have length 7
           changes must contain("GNIRS observation doesn't have a central wavelength range, assigning to '< 2.5um'")
           // Check that the centralWavelength node is added
           result must \\("centralWavelength") \> "< 2.5um"
@@ -703,7 +703,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have length 5
+          changes must have length 6
           result \\ "niri" must \\("filter") \> "HeI (1.083 um)"
           result \\ "niri" must not(\\("filter") \> "J-continuum (1.122 um)")
           result \\ "niri" must not(\\("filter") \> "Jcont (1.065 um)")
