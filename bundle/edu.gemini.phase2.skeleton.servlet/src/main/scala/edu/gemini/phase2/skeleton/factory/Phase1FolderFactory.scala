@@ -34,7 +34,7 @@ object Phase1FolderFactory {
         blueprintE  <- extractBlueprintEntry(o).right
         target      <- extractTarget(site, o, time).right
         siteQuality <- extractSiteQuality(o).right
-        timeValue   <- extractIntTime(o).right
+        timeValue   <- extractProgTime(o).right
       } yield Folder(site, namer,
                 bMap + blueprintE,
                 ObsQuad(blueprintE._1, target, siteQuality, timeValue) :: oList)
@@ -58,9 +58,9 @@ object Phase1FolderFactory {
         s2 <- SpSiteQualityFactory.create(s1).right
       } yield s2
 
-    private def extractIntTime(o: Observation): Either[String, TimeValue] =
+    private def extractProgTime(o: Observation): Either[String, TimeValue] =
       for {
-        time <- o.intTime.toRight("Observation missing integration time").right
+        time <- o.progTime.toRight("Observation missing program time").right
       } yield new TimeValue(time.toHours.hours, TimeValue.Units.hours)
 
 

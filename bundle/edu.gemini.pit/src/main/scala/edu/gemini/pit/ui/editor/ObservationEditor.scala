@@ -20,7 +20,7 @@ import Scalaz._
 object ObservationEditor {
 
   def open(c:Option[Observation], editable:Boolean, parent:UIElement) =
-    new ObservationEditor(c.getOrElse(Observation.empty.copy(intTime = Some(TimeAmount.empty))), editable).open(parent)
+    new ObservationEditor(c.getOrElse(Observation.empty.copy(progTime = Some(TimeAmount.empty))), editable).open(parent)
 }
 
 /**
@@ -53,8 +53,7 @@ class ObservationEditor private (obs:Observation, canEdit:Boolean) extends StdMo
       case _                         => ICON_SIDEREAL
     }), gw=2)
     addSpacer()
-    addLabeledRow(new RightLabel("Integration Time"), IntegrationTime, Units)
-    addLabeledRow(new RightLabel("Overhead Time"), OverheadTime, OverheadTimeUnits)
+    addLabeledRow(new RightLabel("Program Time"), ProgramTime, Units)
     addLabeledRow(new RightLabel("Night Basecal Time"), PartTime, PartTimeUnits)
     addLabeledRow(new RightLabel("Total Time"), TotalTime, TotalTimeUnits)
     preferredSize = (500, preferredSize.height) // force width
@@ -64,22 +63,22 @@ class ObservationEditor private (obs:Observation, canEdit:Boolean) extends StdMo
   Contents.Footer.OkButton.enabled = canEdit
 
   // Validation
-  override def editorValid = IntegrationTime.valid
-  IntegrationTime.reactions += {
+  override def editorValid = ProgramTime.valid
+  ProgramTime.reactions += {
     case ValueChanged(_) => validateEditor()
   }
 
   // Time calculator
   val calculator = obs.blueprint.flatMap(Overheads)
 
-  object IntegrationTime extends NumberField(obs.intTime.map(_.value).orElse(Some(1.0)), allowEmpty = false, format = NumberField.TimeFormatter) {
+  object ProgramTime extends NumberField(obs.progTime.map(_.value).orElse(Some(1.0)), allowEmpty = false, format = NumberField.TimeFormatter) {
     enabled = canEdit
     override def valid(d:Double) = d > 0
   }
 
   object Units extends ComboBox(TimeUnit.values.toList) with ValueRenderer[TimeUnit] {
     enabled = canEdit
-    selection.item = obs.intTime.getOrElse(TimeAmount.empty).units
+    selection.item = obs.progTime.getOrElse(TimeAmount.empty).units
   }
 
   class UnitsLabel extends Label {
@@ -99,9 +98,6 @@ class ObservationEditor private (obs:Observation, canEdit:Boolean) extends StdMo
     }
   }
 
-  object OverheadTime extends CalculatedTimeAmountField
-  object OverheadTimeUnits extends UnitsLabel
-
   object PartTime extends CalculatedTimeAmountField
   object PartTimeUnits extends UnitsLabel
 
@@ -109,22 +105,20 @@ class ObservationEditor private (obs:Observation, canEdit:Boolean) extends StdMo
   object TotalTimeUnits extends UnitsLabel
 
   def updateTimeLabels(): Unit = {
-    val intTime = {
-      val value = \/.fromTryCatchNonFatal(IntegrationTime.text.toDouble).getOrElse(0.0)
+    val progTime = {
+      val value = \/.fromTryCatchNonFatal(ProgramTime.text.toDouble).getOrElse(0.0)
       TimeAmount((value > 0) ? value | 0, Units.selection.item)
     }
-    val obsTimes = calculator.map(_.calculate(intTime))
-    OverheadTime.update(obsTimes.foldMap(_.progTime |-| intTime))
+    val obsTimes = calculator.map(_.calculate(progTime))
     PartTime.update(obsTimes.foldMap(_.partTime))
     TotalTime.update(obsTimes.foldMap(_.totalTime))
   }
-  IntegrationTime.reactions += {
+  ProgramTime.reactions += {
     case ValueChanged(_) => updateTimeLabels()
   }
 
   def updateUnitsLabels(): Unit = {
     val t = Units.selection.item.value()
-    OverheadTimeUnits.update(t)
     PartTimeUnits.update(t)
     TotalTimeUnits.update(t)
   }
@@ -144,6 +138,6 @@ class ObservationEditor private (obs:Observation, canEdit:Boolean) extends StdMo
 
   // Construct a new value
   def value = obs.copy(
-    intTime = Some(TimeAmount(IntegrationTime.text.toDouble, Units.selection.item)),
+    progTime = Some(TimeAmount(ProgramTime.text.toDouble, Units.selection.item)),
     meta = None)
 }

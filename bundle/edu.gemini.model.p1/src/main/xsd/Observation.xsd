@@ -17,7 +17,6 @@
     <xsd:complexType name="Observation">
 
         <xsd:sequence>
-            <xsd:element name="intTime"  type="TimeAmount"/>
             <xsd:element name="progTime" type="TimeAmount"/>
             <xsd:element name="partTime" type="TimeAmount"/>
 

@@ -1,25 +1,25 @@
 package edu.gemini.model.p1.overheads
 
 import edu.gemini.model.p1.immutable._
-import org.specs2.mutable.Specification
 
 import scala.collection.immutable.HashMap
 
-class OverheadsSpec extends Specification {
-  "Overheads" should {
-    "calculate all times properly in both directions" in {
-      forall(OverheadsSpec.instMap) { case ((_, _), (blueprint, expected)) =>
-        val overheads = Overheads(blueprint())
-        val results = for (o <- Overheads(blueprint())) yield {
-          val calculated = o.calculate(OverheadsSpec.intTime)
-          val intTime    = o.intTimeFromProgTime(calculated.progTime)
-          (calculated, intTime)
-        }
-        results shouldNotEqual None and(OverheadsSpec.almostEqual(results.get._1, expected) shouldEqual true) and(OverheadsSpec.almostEqual(results.get._2, OverheadsSpec.intTime) shouldEqual true)
-      }
-    }
-  }
-}
+// None of this is applicable anymore in light of the change from REL-2985 to REL-2926.
+//class OverheadsSpec extends org.specs2.mutable.Specification {
+//  "Overheads" should {
+//    "calculate all times properly in both directions" in {
+//      forall(OverheadsSpec.instMap) { case ((_, _), (blueprint, expected)) =>
+//        val overheads = Overheads(blueprint())
+//        val results = for (o <- Overheads(blueprint())) yield {
+//          val calculated = o.calculate(OverheadsSpec.intTime)
+//          val intTime    = o.intTimeFromProgTime(calculated.progTime)
+//          (calculated, intTime)
+//        }
+//        results shouldNotEqual None and(OverheadsSpec.almostEqual(results.get._1, expected) shouldEqual true) and(OverheadsSpec.almostEqual(results.get._2, OverheadsSpec.intTime) shouldEqual true)
+//      }
+//    }
+//  }
+//}
 
 object OverheadsSpec {
   private val precision = 0.01

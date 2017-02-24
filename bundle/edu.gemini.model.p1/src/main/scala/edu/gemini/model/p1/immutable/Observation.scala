@@ -6,39 +6,25 @@ import edu.gemini.model.p1.{mutable => M}
 import scalaz._
 import Scalaz._
 
-// TODO: Broken test scripts to fix
-// TODO: ProposalSpec
-// TODO: ItacSpec
-// TODO: TemplateSpec
-// TODO: REL_2232_Test
 object Observation {
-  type IntOrProgTime = TimeAmount \/ TimeAmount
-
   // Some lenses.
   val blueprint:Lens[Observation, Option[BlueprintBase]] = Lens.lensu((a, b) => a.copy(blueprint = b), _.blueprint)
   val condition:Lens[Observation, Option[Condition]] = Lens.lensu((a, b) => a.copy(condition = b), _.condition)
   val target:Lens[Observation, Option[Target]] = Lens.lensu((a, b) => a.copy(target = b), _.target)
   val meta:Lens[Observation, Option[ObservationMeta]] = Lens.lensu((a, b) => a.copy(meta = b), _.meta)
-  val intTime:Lens[Observation, Option[TimeAmount]] = Lens.lensu((a, b) => a.copy(intTime = b), _.intTime)
+  val progTime:Lens[Observation, Option[TimeAmount]] = Lens.lensu((a, b) => a.copy(progTime = b), _.progTime)
 
   def apply(blueprint:Option[BlueprintBase],
             condition:Option[Condition],
             target:Option[Target],
             band:Band,
-            time:Option[IntOrProgTime]) = new Observation(blueprint, condition, target, time, band)
+            progTime:Option[TimeAmount]) = new Observation(blueprint, condition, target, progTime, band)
 
   def apply(m:M.Observation) = new Observation(m)
 
-  def unapply(o:Observation) = Some((o.blueprint, o.condition, o.target, o.intTime, o.calculatedTimes, o.band))
+  def unapply(o:Observation) = Some((o.blueprint, o.condition, o.target, o.calculatedTimes, o.band))
 
   val empty = new Observation(None, None, None, None, M.Band.BAND_1_2)
-
-  // Convenience method to extract the IntOrProgTime from the mutable observation.
-  def mTimeDisjunction(m: M.Observation): Option[Observation.IntOrProgTime] = {
-    def toTimeDisj(t: M.TimeAmount, f: TimeAmount => Observation.IntOrProgTime) =
-      Option(t).map(x => f(TimeAmount(x)))
-    toTimeDisj(m.getIntTime, _.left[TimeAmount]).orElse(toTimeDisj(m.getProgTime, _.right[TimeAmount]))
-  }
 }
 
 // REL-2985: It is unfortunate that we have to pass progTime here, but it is necessary for the migration to 2017B,
@@ -47,7 +33,7 @@ object Observation {
 class Observation private (val blueprint:Option[BlueprintBase],
                            val condition:Option[Condition],
                            val realTarget:Option[Target],
-                           private val timeParam:Option[Observation.IntOrProgTime],
+                           val progTime:Option[TimeAmount],
                            val band:Band,
                            val meta:Option[ObservationMeta] = None,
                            val enabled:Boolean = true) {
@@ -62,43 +48,32 @@ class Observation private (val blueprint:Option[BlueprintBase],
     case None => realTarget
   }
 
-  // REL-2985 requires special handling of the times.
-  // 2017A and earlier: intTimeParam will be None, and calculatedTimesParam will be defined with progTime.
-  // If a blueprint exists - which it should - we can calculate the intTime from the progTime and then the rest
-  // of the observation times from the intTime.
-  val intTime: Option[TimeAmount] = timeParam.map {
-    case -\/(intTimeParam)  => intTimeParam
-    case \/-(progTimeParam) => (for {
-      b <- blueprint
-      c <- Overheads(b)
-    } yield c.intTimeFromProgTime(progTimeParam)) | TimeAmount.empty
-  }
-
-  // 2017B and later: if the blueprint and the intTime are defined, recalculate the calculatedTimes.
+  // 2017B and later: if the blueprint and the progTime are defined, calculate and populate the ObservationTimes.
   val calculatedTimes: Option[ObservationTimes] =  for {
     b <- blueprint
     c <- Overheads(b)
-    t <- intTime
+    t <- progTime
   } yield c.calculate(t)
 
-  def progTime:  Option[TimeAmount] = calculatedTimes.map(_.progTime)
+  // It would be nice if progTime could just be extracted from calculatedTimes, but if the blueprint doesn't exist,
+  // then this will return None instead of the supplied value.
   def partTime:  Option[TimeAmount] = calculatedTimes.map(_.partTime)
   def totalTime: Option[TimeAmount] = calculatedTimes.map(_.totalTime)
 
   def copy(blueprint:Option[BlueprintBase] = blueprint,
            condition:Option[Condition] = condition,
            target:Option[Target] = target,
-           intTime:Option[TimeAmount] = intTime,
+           progTime:Option[TimeAmount] = progTime,
            band:Band = band,
            meta:Option[ObservationMeta] = None, // metadata resets to None on copy, by default
            enabled:Boolean = enabled) =
-    new Observation(blueprint, condition, target, intTime.map(_.left), band, meta, enabled)
+    new Observation(blueprint, condition, target, progTime, band, meta, enabled)
 
   def this(m:M.Observation) = this (
       Option(m.getBlueprint).map(BlueprintBase(_)),
       Option(m.getCondition).map(Condition(_)),
       Option(m.getTarget).map(Target(_)),
-      Observation.mTimeDisjunction(m),
+      Option(m.getProgTime).map(TimeAmount(_)),
       Option(m.getBand).getOrElse(M.Band.BAND_1_2),
       Option(m.getMeta).map(ObservationMeta(_)),
       m.isEnabled
@@ -109,7 +84,6 @@ class Observation private (val blueprint:Option[BlueprintBase],
     m.setBlueprint(blueprint.map(_.mutable(n)).orNull)
     m.setCondition(condition.map(_.mutable(n)).orNull)
     m.setTarget(target.map(_.mutable(n)).orNull)
-    m.setIntTime(intTime.map(_.mutable).orNull)
     m.setProgTime(progTime.map(_.mutable).orNull)
     m.setPartTime(partTime.map(_.mutable).orNull)
     m.setTime(totalTime.map(_.mutable).orNull)
@@ -119,29 +93,28 @@ class Observation private (val blueprint:Option[BlueprintBase],
     m
   }
 
-  def isEmpty = blueprint.isEmpty && condition.isEmpty && target.isEmpty && intTime.isEmpty
+  def isEmpty = blueprint.isEmpty && condition.isEmpty && target.isEmpty && calculatedTimes.isEmpty
 
   override def equals(a:Any) = a match {
     case o:Observation => kernel == o.kernel
     case _             => false
   }
 
-  private lazy val kernel = (blueprint, condition, target, intTime, band, meta)
+  private lazy val kernel = (blueprint, condition, target, progTime, band, meta)
 
   override lazy val hashCode = kernel.hashCode()
 
   def isPartialObservationOf(o:Observation) =
-    intTime.isEmpty  && // If I have time defined, I might be incomplete but I'm not partial
+    calculatedTimes.isEmpty  && // If I have time defined, I might be incomplete but I'm not partial
     (band == o.band) && // must be the same band
-    (blueprint.isEmpty || target.isEmpty || condition.isEmpty || intTime.isEmpty) && // Must have *some* empty component
+    (blueprint.isEmpty || target.isEmpty || condition.isEmpty || calculatedTimes.isEmpty) && // Must have *some* empty component
     isPartial(blueprint, o.blueprint) &&
     isPartial(target, o.target) &&
     isPartial(condition, o.condition) &&
-    isPartial(intTime, o.intTime)
+    isPartial(calculatedTimes, o.calculatedTimes)
 
   private def isPartial[A](a:Option[A], b:Option[A]) = a.isEmpty || a == b
 
   override def toString =
-    "Observation(%s, %s, %s, %s, %s)".format(blueprint, condition, target, intTime, band)
-
+    "Observation(%s, %s, %s, %s, %s)".format(blueprint, condition, target, totalTime, band)
 }

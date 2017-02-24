@@ -463,7 +463,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
     }
 
     private lazy val missingObsDetailsCheck =
-      p.observations.filter(_.intTime.isEmpty) match {
+      p.observations.filter(_.calculatedTimes.isEmpty) match {
         case Nil => None
         case h :: Nil => Some(new Problem(Severity.Error, "One observation has no observation time.", "Observations", indicateObservation(h)))
         case h :: tail => Some(new Problem(Severity.Error, s"${1 + tail.length} observations have no observation times.", "Observations", indicateObservation(h)))
@@ -504,8 +504,8 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       )
 
     private lazy val badVisibility = for {
-      o @ Observation(Some(_), Some(_), Some(t), Some(_), _, _) <- p.observations
-      v                                                         <- if (p.proposalClass.isSpecial) TargetVisibilityCalc.getOnDec(p.semester, o) else TargetVisibilityCalc.get(p.semester, o)
+      o @ Observation(Some(_), Some(_), Some(t), _, _) <- p.observations
+      v                                                <- if (p.proposalClass.isSpecial) TargetVisibilityCalc.getOnDec(p.semester, o) else TargetVisibilityCalc.get(p.semester, o)
       if v == TargetVisibility.Bad
     } yield new Problem(Severity.Error,
         visibilityMessage("Target is inaccessible at %s during %s. Consider an alternative.", p.semester, o),
@@ -513,8 +513,8 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
         indicateObservation(o))
 
     private lazy val iffyVisibility = for {
-      o @ Observation(Some(_), Some(_), Some(_), Some(_), _, _) <- p.observations
-      v                                                         <- if (p.proposalClass.isSpecial) TargetVisibilityCalc.getOnDec(p.semester, o) else TargetVisibilityCalc.get(p.semester, o)
+      o @ Observation(Some(_), Some(_), Some(_), _, _) <- p.observations
+      v                                                <- if (p.proposalClass.isSpecial) TargetVisibilityCalc.getOnDec(p.semester, o) else TargetVisibilityCalc.get(p.semester, o)
       if v == TargetVisibility.Limited
     } yield new Problem(Severity.Warning,
         visibilityMessage("Target has limited visibility at %s during %s.", p.semester, o),
