@@ -22,7 +22,7 @@ object Observation {
 
   def apply(m:M.Observation) = new Observation(m)
 
-  def unapply(o:Observation) = Some((o.blueprint, o.condition, o.target, o.calculatedTimes, o.band))
+  def unapply(o:Observation) = Some((o.blueprint, o.condition, o.target, o.progTime, o.band))
 
   val empty = new Observation(None, None, None, None, M.Band.BAND_1_2)
 }
@@ -105,7 +105,7 @@ class Observation private (val blueprint:Option[BlueprintBase],
   override lazy val hashCode = kernel.hashCode()
 
   def isPartialObservationOf(o:Observation) =
-    calculatedTimes.isEmpty  && // If I have time defined, I might be incomplete but I'm not partial
+    progTime.isEmpty  && // If I have time defined, I might be incomplete but I'm not partial
     (band == o.band) && // must be the same band
     (blueprint.isEmpty || target.isEmpty || condition.isEmpty || calculatedTimes.isEmpty) && // Must have *some* empty component
     isPartial(blueprint, o.blueprint) &&
