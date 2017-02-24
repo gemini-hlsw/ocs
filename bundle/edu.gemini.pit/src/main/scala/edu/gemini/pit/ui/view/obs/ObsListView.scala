@@ -236,7 +236,7 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band, queueLookup: Target => U
       viewer.onSelectionChanged {s =>
         enabled = canEdit && ~(for (m <- model) yield {
             ~s.map {
-              case ObsElem(o)    => o.intTime.isDefined
+              case ObsElem(o)    => o.calculatedTimes.isDefined
               case g:ObsGroup[_] => m.childrenOf(g).nonEmpty
             }
           })
@@ -403,9 +403,9 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band, queueLookup: Target => U
 
     override def foreground(e:ObsListElem) = {
       case Item => e match {
-        case ObsElem(o) if o.intTime.isEmpty => Color.LIGHT_GRAY
-        case g:ObsGroup[_] if g.isEmpty      => Color.LIGHT_GRAY
-        case _                               => Color.BLACK
+        case ObsElem(o) if o.calculatedTimes.isEmpty => Color.LIGHT_GRAY
+        case g:ObsGroup[_] if g.isEmpty              => Color.LIGHT_GRAY
+        case _                                       => Color.BLACK
       }
     }
 
@@ -425,7 +425,7 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band, queueLookup: Target => U
         b <- o.blueprint if !b.site.isExchange
         t <- o.target
         _ <- t.coords(s.midPoint)
-        _ <- o.intTime
+        _ <- o.calculatedTimes
       } yield true)
 
     override def alignment(e:ObsListElem) = {
@@ -455,7 +455,7 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band, queueLookup: Target => U
     def icon(e:ObsListElem) = {
       case Item    => e match {
         case g:ObsGroup[_] => g.icon
-        case ObsElem(o)    => if (o.intTime.isEmpty) obsDisIcon else ICON_CLOCK
+        case ObsElem(o)    => if (o.calculatedTimes.isEmpty) obsDisIcon else ICON_CLOCK
       }
       case Guiding => presentation(e, guiding, _.icon)
       case Vis     => semPresentation(e, visibility, _.icon)
@@ -464,9 +464,9 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band, queueLookup: Target => U
 
     def text(e:ObsListElem) = {
       case Item    => e match {
-        case ObsElem(o) if o.intTime.isDefined => "Observation"
-        case ObsElem(o)                        => empty("observation time")
-        case e:ObsGroup[_] if e.isEmpty        => e.grouping match {
+        case ObsElem(o) if o.calculatedTimes.isDefined => "Observation"
+        case ObsElem(o)                                => empty("observation time")
+        case e:ObsGroup[_] if e.isEmpty                => e.grouping match {
           case ObsListGrouping.Target    => empty("target")
           case ObsListGrouping.Blueprint => empty("resource configuration")
           case ObsListGrouping.Condition => empty("observing conditions")

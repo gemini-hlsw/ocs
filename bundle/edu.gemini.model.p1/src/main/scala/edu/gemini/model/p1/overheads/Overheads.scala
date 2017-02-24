@@ -9,58 +9,70 @@ import squants.time._
 import scala.annotation.tailrec
 
 // This is not the ideal package for this to live in, but to avoid circular bundle references, we put it here.
+// Much of this is rendered obsolete due to the change from REL-2985 to REL-2926, but I am leaving it here in case
+// it is needed in the future by ITC and also because of time constraints.
 sealed trait Overheads {
+  // REL-2985 -> REL-2926: acquisitionOverhead and otherOverheadFraction are no longer used.
   def partnerOverheadFraction: Double // fpart
   def acquisitionOverhead: Time       // acqover
   def otherOverheadFraction: Double   // fother
 
-  def calculate(intTime: TimeAmount): ObservationTimes = {
-    val intTimeHrs  = intTime.toHours.value
-    val progTimeHrs = calcProgTime(intTimeHrs)
+  // Everything was, per REL-2985, formerly a
+//  def calculateFromIntTime(intTime: TimeAmount): ObservationTimes = {
+//    val intTimeHrs  = intTime.toHours.value
+//    val progTimeHrs = calcProgTime(intTimeHrs)
+//    val partTimeHrs = progTimeHrs * partnerOverheadFraction
+//    ObservationTimes(TimeAmount(progTimeHrs, TimeUnit.HR), TimeAmount(partTimeHrs, TimeUnit.HR))
+//  }
+
+  def calculate(progTime: TimeAmount): ObservationTimes = {
+    val progTimeHrs = progTime.toHours.value
     val partTimeHrs = progTimeHrs * partnerOverheadFraction
     ObservationTimes(TimeAmount(progTimeHrs, TimeUnit.HR), TimeAmount(partTimeHrs, TimeUnit.HR))
   }
 
-  // This is needed for 2017A to 2017B migration, as time in former proposals will be migrated to progTime, and
-  // thus intTime - the value that is user modifiable - must be calculated from this.
-  def intTimeFromProgTime(progTime: TimeAmount): TimeAmount = {
-    val progTimeHrs = progTime.toHours.value
-    val numAcqs     = numAcqsFromProgTimeInHrs(progTimeHrs)
-    val intTimeHrs  = (progTimeHrs - numAcqs * acquisitionOverhead.toHours)/(1 + otherOverheadFraction)
-    TimeAmount(intTimeHrs, TimeUnit.HR)
-  }
+  // This was needed for 2017A to 2017B migration as per REL-2985, as time in former proposals will be migrated to
+  // progTime, and previously, all times were based on intTime which was calculated from progTime.
+  // This has been reversed and we are no longer using integration time in the PIT as per REL-2926, making this
+  // obsolete and unused.
+//  def intTimeFromProgTime(progTime: TimeAmount): TimeAmount = {
+//    val progTimeHrs = progTime.toHours.value
+//    val numAcqs     = numAcqsFromProgTimeInHrs(progTimeHrs)
+//    val intTimeHrs  = (progTimeHrs - numAcqs * acquisitionOverhead.toHours)/(1 + otherOverheadFraction)
+//    TimeAmount(intTimeHrs, TimeUnit.HR)
+//  }
 
   // Iterative method for calculating the program time in hours iteratively through the number of acquisitions.
-  private def calcProgTime(intTime: Double): Double = {
-    val overheadTimeHrs = intTime * (1 + otherOverheadFraction)
-
-    @tailrec
-    def calcProgTimeIter(numAcqsOld: Int, numAcqsNew: Int, progTime: Double, iteration: Int): Double = {
-      // If the number of acquisitions is stable or we have
-      if (numAcqsOld == numAcqsNew || iteration > 10)
-        progTime
-      else {
-        val progTimeNew = numAcqsNew * acquisitionOverhead.toHours + overheadTimeHrs
-        calcProgTimeIter(numAcqsNew, numAcqsFromProgTimeInHrs(progTimeNew), progTimeNew, iteration + 1)
-      }
-    }
-
-    calcProgTimeIter(0, numAcqsFromProgTimeInHrs(overheadTimeHrs), 0.0, 0)
-  }
-
-  // Calculate the number of acquisitions from program time in hours.
-  private def numAcqsFromProgTimeInHrs(progTime: Double): Int =
-    (progTime / Overheads.visTimeHrs).toInt + ((progTime % Overheads.visTimeHrs > 0) ? 1 | 0)
+  // No longer used in transition from REL-2985 to REL-2926.
+//  private def calcProgTime(intTime: Double): Double = {
+//    val overheadTimeHrs = intTime * (1 + otherOverheadFraction)
+//
+//    @tailrec
+//    def calcProgTimeIter(numAcqsOld: Int, numAcqsNew: Int, progTime: Double, iteration: Int): Double = {
+//      // If the number of acquisitions is stable or we have
+//      if (numAcqsOld == numAcqsNew || iteration > 10)
+//        progTime
+//      else {
+//        val progTimeNew = numAcqsNew * acquisitionOverhead.toHours + overheadTimeHrs
+//        calcProgTimeIter(numAcqsNew, numAcqsFromProgTimeInHrs(progTimeNew), progTimeNew, iteration + 1)
+//      }
+//    }
+//
+//    calcProgTimeIter(0, numAcqsFromProgTimeInHrs(overheadTimeHrs), 0.0, 0)
+//  }
+//
+//  // Calculate the number of acquisitions from program time in hours.
+//  private def numAcqsFromProgTimeInHrs(progTime: Double): Int =
+//    (progTime / Overheads.visTimeHrs).toInt + ((progTime % Overheads.visTimeHrs > 0) ? 1 | 0)
 }
 
 // Due to the large number of possible blueprint bases and how each one requires different configuration params
 // to determine the overheads, it seems infeasible to read this information from a file, so for now it is hard-coded
 // and will require changing here if these values change.
 object Overheads extends (BlueprintBase => Option[Overheads]) {
-  // t_vis as per REL-2985.
-  // visTime is in hours already: if this changes, this calculation should change to ensure no loss of data.
-  lazy val visTime    = Hours(2)
-  lazy val visTimeHrs = Overheads.visTime.toHours
+  // t_vis as per REL-2985. No longer needed by switch to REL-2926.
+//  lazy val visTime    = Hours(2)
+//  lazy val visTimeHrs = Overheads.visTime.toHours
 
   private case class SimpleOverheads(override val partnerOverheadFraction: Double,
                                      acquisitionOverheadMins: Long,

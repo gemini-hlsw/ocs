@@ -1342,7 +1342,7 @@
                         </fo:table-cell>
                         <fo:table-cell border="0.5pt solid black">
                             <fo:block text-align="center">
-                                <xsl:value-of select="format-number(totalTime, '0.0')"/>&#160;<xsl:value-of select="totalTime/@units"/>
+                                <xsl:value-of select="format-number(time, '0.0')"/>&#160;<xsl:value-of select="time/@units"/>
                             </fo:block>
                             <fo:block text-align="center">
                                 <xsl:value-of select="format-number(progTime, '0.0')"/>&#160;<xsl:value-of select="progTime/@units"/>

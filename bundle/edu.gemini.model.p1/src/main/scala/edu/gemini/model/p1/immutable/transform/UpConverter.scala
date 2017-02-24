@@ -141,7 +141,7 @@ case object SemesterConverter2017ATo2017B extends SemesterConverter {
     case o @ <observation>{ns @ _*}</observation> if (o \\ "time").nonEmpty =>
 
       // The time field from previous versions is being instead used to represent program time, and the time field
-      // will now be modified to represent total time, i.e. progTime + partTime (partmer ca;ibraation time).
+      // will now be modified to represent total time, i.e. progTime + partTime (partner calibration time).
       object TimeToProgTime extends BasicTransformer {
         override def transform(n: xml.Node): xml.NodeSeq = n match {
           case t @ <time>{ts @ _*}</time> => <progTime units={t.attribute("units")}>{ts}</progTime>
