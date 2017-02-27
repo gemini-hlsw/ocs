@@ -97,7 +97,7 @@ object Overheads extends (BlueprintBase => Option[Overheads]) {
     case _: GnirsBlueprintImaging       => SimpleOverheads(0.10, 10, 0.193).some
     case _: GnirsBlueprintSpectroscopy  => SimpleOverheads(0.25, 15, 0.080).some
 
-    case _: NifsBlueprint               => SimpleOverheads(0.25, 11, 0.175).some
+    case _: NifsBlueprintBase           => SimpleOverheads(0.25, 11, 0.175).some
     case _: GsaoiBlueprint              => SimpleOverheads(0.00, 30, 0.875).some
     case _: GracesBlueprint             => SimpleOverheads(0.00, 10, 0.036).some
     case _: GpiBlueprint                => SimpleOverheads(0.05, 10, 0.333).some
