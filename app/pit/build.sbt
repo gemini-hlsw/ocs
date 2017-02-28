@@ -39,7 +39,7 @@ def common(pv: Version) = AppConfig(
     "org.osgi.framework.startlevel.beginning" -> "100",
     "org.osgi.framework.bootdelegation"       -> "*",
     "edu.gemini.pit.test"                     -> "true",
-    "edu.gemini.ags.host"                     -> "gnodb.gemini.edu",
+    "edu.gemini.ags.host"                     -> "gnauxodb.gemini.edu",
     "edu.gemini.ags.port"                     -> "8443"
   ),
   // log = Some("%a/log/qpt.%u.%g.log"),
