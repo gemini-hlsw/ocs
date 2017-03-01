@@ -381,7 +381,6 @@
 
                 <td>Focal plane unit: </td>
                 <td><select name="instrumentFPMask" size="1">
-
                 <option selected="selected" value="FPU_NONE">
                 none</option>
                 <option value="IFU_2">
@@ -393,7 +392,6 @@
                 <option value="LONGSLIT_2">
                 0.5 arcsec slit(let)</option>
                 <option value="LONGSLIT_3">
-
                 0.75 arcsec slit(let)</option>
                 <option value="LONGSLIT_4">
                 1.0 arcsec slit(let)</option>
@@ -401,26 +399,23 @@
                 1.5 arcsec slit(let)</option>
                 <option value="LONGSLIT_6">
                 2.0 arcsec slit(let)</option>
-
                 <option value="LONGSLIT_7">
                 5.0 arcsec slit(let)</option>
                 </select></td>
             </tr>
             <tr>
                 <td colspan="4" height="50" valign="bottom"><b>Detector properties:</b><i><span>(</span><a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10273#detector','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false"><span>more info</span></a><span>)</span></i></td>
-
             </tr>
             <tr>
                 <td colspan="4">CCD type:
-                    <input value="E2V" name="DetectorManufacturer" type="radio" /> EEV legacy array
                     <input value="HAMAMATSU" name="DetectorManufacturer" checked="checked" type="radio" /> Hamamatsu array
+                    <input value="E2V" name="DetectorManufacturer" type="radio" /> EEV legacy array
                 </td>
             </tr>
             <tr>
                 <td colspan="4">Detector binning (spatial direction): <input value="1" name="spatBinning" checked="checked" type="radio" /> 1 (no binning), <input value="2" name="spatBinning" type="radio" /> 2 or <input value="4" name="spatBinning" type="radio" /> 4 pixels</td>
             </tr>
             <tr>
-
                 <td colspan="4">Detector binning (spectral direction): <input value="1" name="specBinning" checked="checked" type="radio" /> 1 (no binning), <input value="2" name="specBinning" type="radio" /> 2 or <input value="4" name="specBinning" type="radio" /> 4 pixels</td>
             </tr>
             <tr>
@@ -429,6 +424,8 @@
                     Amp read mode: <select name="AmpReadMode" size="1"><option value="SLOW">Slow</option><option value="FAST">Fast</option></select>
                 </td>
             </tr>
+
+            <!-- Hide detector-specific values
             <tr>
                 <td colspan="4">Read noise of 4.1 e- per binned pixel</td>
             </tr>
@@ -436,10 +433,11 @@
             <tr>
                 <td colspan="4">Dark current of 0.7 e-/hr per unbinned pixel</td>
             </tr>
+            -->
+
             <!-- Telescope definition-->
             <tr>
                 <td colspan="4" height="50" valign="bottom"><b>Telescope configuration:</b><i><span>(<a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10271','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false">more info</a>)</span></i></td>
-
             </tr>
             <tr>
                 <td colspan="4">Mirror coating: <input value="ALUMINIUM" name="Coating" type="radio" /> aluminium  <input value="SILVER" name="Coating" checked="checked" type="radio" /> silver </td>
@@ -450,7 +448,6 @@
             </tr>
             <tr>
                 <td colspan="4">Wavefront sensor for tip-tilt compensation: <input value="PWFS" name="Type" type="radio" /> PWFS  <input value="OIWFS" name="Type" checked="checked" type="radio" /> OIWFS </td>
-
             </tr>
             <tr>
                 <td colspan="4">
