@@ -56,7 +56,7 @@
         <to>pit.ca@gemini.edu</to>
     </type>
 
-    <type name="cfht">
+    <type name="cfh">
         <dir>/home/software/proposals/cfh/proposals/2017B</dir>
         <to>pit.cfh@gemini.edu</to>
     </type>
