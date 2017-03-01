@@ -56,6 +56,11 @@
         <to>pit.ca@gemini.edu</to>
     </type>
 
+    <type name="cfht">
+        <dir>/home/software/proposals/cfh/proposals/2017B</dir>
+        <to>pit.cfh@gemini.edu</to>
+    </type>
+
     <type name="cl">
         <dir>/home/software/proposals/cl/proposals/2017B</dir>
         <to>pit.cl@gemini.edu</to>
@@ -127,6 +132,10 @@
         <translation>
             <from>cl</from>
             <to>CL</to>
+        </translation>
+        <translation>
+            <from>cfh</from>
+            <to>CFHT</to>
         </translation>
         <translation>
             <from>kr</from>
