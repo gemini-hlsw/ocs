@@ -16,9 +16,9 @@ import java.util.List;
 public final class Flamingos2 extends Instrument implements SpectroscopyInstrument {
 
     // values are taken from instrument's web documentation
-    private static final double AmpGain        = 4.44;
-    private static final double WellDepth      = 155400;
-    private static final double LinearityLimit = 98000;
+    private static final double AmpGain        =   4.44; // electrons / ADU
+    private static final double WellDepth      = 155400; // electrons = 35000 ADU
+    private static final double LinearityLimit =  97680; // electrons = 22000 ADU
 
     private static final String FILENAME = "flamingos2" + getSuffix();
     public static final String INSTR_DIR = "flamingos2";
