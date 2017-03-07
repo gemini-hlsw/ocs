@@ -80,6 +80,9 @@ object Overheads extends (BlueprintBase => Option[Overheads]) {
     override val acquisitionOverhead = Minutes(acquisitionOverheadMins)
   }
 
+  // Empty overheads for instruments from exchange partners, e.g. Keck and Subaru.
+  private lazy val EmptyOverheads          = SimpleOverheads(0.00,  0, 0.000).some
+
   // GMOS overheads are the same between sites.
   private lazy val GmosImagingOverheads    = SimpleOverheads(0.00,  6, 0.144).some
   private lazy val GmosLongslitOverheads   = SimpleOverheads(0.10, 16, 0.034).some
@@ -125,6 +128,9 @@ object Overheads extends (BlueprintBase => Option[Overheads]) {
     case gmosbp: GmosNBlueprintMos => gmosbp.nodAndShuffle ? GmosMosNsOverheads | GmosMosOverheads
     case gmosbp: GmosSBlueprintMos => gmosbp.nodAndShuffle ? GmosMosNsOverheads | GmosMosOverheads
 
+    // Keck and Subaru instruments have no overheads associated with them.
+    case _: KeckBlueprint   => EmptyOverheads
+    case _: SubaruBlueprint => EmptyOverheads
 
     // Any other configuration is unsupported.
     case _ => None

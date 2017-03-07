@@ -23,8 +23,10 @@ import scala.collection.immutable.HashMap
 
 object OverheadsSpec {
   private val precision = 0.01
+
   def almostEqual(t1: TimeAmount, t2: TimeAmount): Boolean =
     (t1.toHours.value - t2.toHours.value).abs < precision
+
   def almostEqual(times1: ObservationTimes, times2: ObservationTimes): Boolean =
     almostEqual(times1.progTime, times2.progTime) && almostEqual(times1.partTime, times2.partTime)
 
@@ -130,6 +132,14 @@ object OverheadsSpec {
     (("graces", "spec"), (
       () => GracesBlueprint(GracesFiberMode.values.apply(0), GracesReadMode.values.apply(0)),
       obsTimes(1.93, 0.00))
+      ),
+    (("keck", "all"), (
+      () => KeckBlueprint(KeckInstrument.values.apply(0)),
+      obsTimes(1.70, 0.00))
+      ),
+    (("subaru", "all"), (
+      () => SubaruBlueprint(SubaruInstrument.values.apply(0), None),
+      obsTimes(1.70, 0.00))
       )
   )
 }
