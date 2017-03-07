@@ -39,7 +39,7 @@
                 <xsl:text>;&#160;</xsl:text>
             </xsl:if>
             <xsl:value-of select="$meta/gsa"/>
-            <xsl:text>&#160; duplicate datasets in the GSA</xsl:text>
+            <xsl:text>&#160; duplicate datasets in the Gemini Observatory Archive</xsl:text>
         </xsl:if>
     </xsl:template>
 
@@ -74,7 +74,7 @@
                 <xsl:when test="$gsa-problems = 1"><xsl:text> observation</xsl:text></xsl:when>
                 <xsl:otherwise><xsl:text> observations</xsl:text></xsl:otherwise>
             </xsl:choose>
-            <xsl:text> with duplicate datasets in the GSA</xsl:text>
+            <xsl:text> with duplicate datasets in the Gemini Observatory Archive</xsl:text>
         </xsl:if>
         <xsl:text>.</xsl:text>
     </xsl:template>
