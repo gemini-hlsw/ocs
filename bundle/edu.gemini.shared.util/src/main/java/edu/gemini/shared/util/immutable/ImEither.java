@@ -1,120 +1,47 @@
 package edu.gemini.shared.util.immutable;
 
 import java.io.Serializable;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.Optional;
 
-/**
- * Simulates a Scalaz \/[S,T], and thus is similarly right-biased.
- */
-public final class ImEither<L,R> implements Serializable {
-    private final Option<L> left;
-    private final Option<R> right;
+public interface ImEither<L,R> extends Serializable {
+    ImEither<R,L> swap();
 
-    public static <L,R> ImEither<L,R> left(final L left) {
-        return new ImEither<>(new Some<>(left), None.instance());
-    }
+    // Right biased qualifiers / operations.
+    <T> T foldRight(final T zero,
+                    final Function<? super R, ? extends T> rightFunc);
+    boolean exists(final Predicate<? super R> rightFunc);
+    boolean forAll(final Predicate<? super R> rightFunc);
+    void forEach(final Consumer<? super R> rightFunc);
+    <R2> ImEither<L,R2> map(final Function<? super R, ? extends R2> rightFunc);
+    <R2> ImEither<L,R2> flatMap(final Function<? super R, ? extends ImEither<L,R2>> rightFunc);
+    boolean isRight();
+    Optional<R> toOptional();
 
-    public static <L,R> ImEither<L,R> right(final R right) {
-        return new ImEither<>(None.instance(), new Some<>(right));
-    }
+    // Left biased qualifiers / operations.
+    <T> T foldLeft(final T zero,
+                   final Function<? super L, ? extends T> leftFunc);
+    boolean existsLeft(final Predicate<? super L> leftFunc);
+    boolean forAllLeft(final Predicate<? super L> leftFunc);
+    void forEachLeft(final Consumer<? super L> leftFunc);
+    <L2> ImEither<L2,R> mapLeft(final Function<? super L, ? extends L2> leftFunc);
+    <L2> ImEither<L2,R> flatMapLeft(final Function<? super L, ? extends ImEither<L2,R>> rightFunc);
+    boolean isLeft();
+    Optional<L> toOptionalLeft();
 
-    /**
-     * Returns the left value or the right value depending upon which one is
-     * defined.
-     */
-    public static <T> T merge(ImEither<T, T> e) {
-        return e.getLeft().orElse(e.getRight()).getValue();
-    }
+    // Operations on both values.
+    <T> T biFold(final Function<? super L, ? extends T> leftFunc,
+                 final Function<? super R, ? extends T> rightFunc);
 
-    // TODO: an ImEither(None, None) wouldn't make any sense.  Reimplement
-    // TODO: with an ImEither interface and Left and Right implementations.
+    void biForEach(final Consumer<? super L> leftFunc,
+                   final Consumer<? super R> rightFunc);
 
-    private ImEither(final Option<L> left, final Option<R> right) {
-        this.left  = left;
-        this.right = right;
-    }
+    <L2,R2> ImEither<L2,R2> biMap(final Function<? super L, ? extends L2> leftFunc,
+                                  final Function<? super R, ? extends R2> rightFunc);
 
-    /**
-     * Folds
-     */
-    public <T> T fold(final Function1<? super L, ? extends T> leftFunc,
-                      final Function1<? super R, ? extends T> rightFunc) {
-
-        return left.map(leftFunc).getOrElse(() -> right.map(rightFunc).getValue());
-    }
-
-    public <T> T foldRight(final T zero, final Function2<? super R, ? super T, ? extends T> rightFunc) {
-        final Option<T> result = right.map(r -> rightFunc.apply(r, zero));
-        return result.getOrElse(zero);
-    }
-
-    /**
-     * Existential qualifiers
-     */
-    public boolean exists(final PredicateOp<? super R> rightPred) {
-        return right.exists(rightPred);
-    }
-
-    public boolean forall(final PredicateOp<? super R> rightPred) {
-        return right.forall(rightPred);
-    }
-
-    /**
-     * foreach
-     */
-    public void foreach(final ApplyOp<? super R> rightConsumer) {
-        right.foreach(rightConsumer);
-    }
-
-    public void biForeach(final ApplyOp<? super L> leftConsumer,
-                          final ApplyOp<? super R> rightConsumer) {
-        left.foreach(leftConsumer);
-        right.foreach(rightConsumer);
-    }
-
-    /**
-     * Maps
-     */
-    public <S,T> ImEither<S,T> biMap(final Function1<? super L, ? extends S> leftMap,
-                                     final Function1<? super R, ? extends T> rightMap) {
-        return new ImEither<>(left.map(leftMap), right.map(rightMap));
-    }
-
-    public <T> ImEither<T,R> leftMap(final Function1<? super L, ? extends T> leftFunc) {
-        return new ImEither<>(left.map(leftFunc), right);
-    }
-
-    public <T> ImEither<L,T> map(final Function1<? super R, ? extends T> rightFunc) {
-        return new ImEither<>(left, right.map(rightFunc));
-    }
-
-    public <T> ImEither<L,T> flatMap(final Function1<? super R, ImEither<L, T>> rightFunc) {
-        return left.isDefined() ? ImEither.<L,T>left(left.getValue()) : rightFunc.apply(right.getValue());
-    }
-
-    /**
-     * Accessors and other assorted functions
-     */
-    public Option<L> getLeft() {
-        return left;
-    }
-
-    public Option<R> getRight() {
-        return right;
-    }
-
-    public boolean isLeft() {
-        return left.isDefined();
-    }
-
-    public boolean isRight() {
-        return right.isDefined();
-    }
-
-    public ImEither<R,L> swap() {
-        return new ImEither<>(right, left);
-    }
-
-    public Option<R> toOption() {
-        return right;
+    static <T> T merge(final ImEither<T,T> e) {
+        return e.biFold(l -> l, r -> r);
     }
 }
