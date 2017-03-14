@@ -1,9 +1,3 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: EdCompSiteQuality.java 47001 2012-07-26 19:40:02Z swalker $
-//
 package jsky.app.ot.gemini.editor;
 
 import edu.gemini.pot.sp.ISPObsComponent;
@@ -22,10 +16,12 @@ public final class EdCompSiteQuality extends OtItemEditor<ISPObsComponent, SPSit
     private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
     private final SiteQualityPanel panel = new SiteQualityPanel(this);
 
+    @Override
     public JPanel getWindow() {
         return panel;
     }
 
+    @Override
     public void init() {
         pcs.firePropertyChange(PROP_SITE_QUALITY, null, getDataObject());
     }
@@ -38,7 +34,8 @@ public final class EdCompSiteQuality extends OtItemEditor<ISPObsComponent, SPSit
         pcs.removePropertyChangeListener(listener);
     }
 
-    @Override protected void updateEnabledState(boolean enabled) {
+    @Override
+    protected void updateEnabledState(boolean enabled) {
         super.updateEnabledState(enabled);
         panel.updateEnabledState(enabled);
     }

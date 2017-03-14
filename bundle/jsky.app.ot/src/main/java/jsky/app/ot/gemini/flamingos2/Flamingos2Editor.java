@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package jsky.app.ot.gemini.flamingos2;
 
 import com.jgoodies.forms.factories.DefaultComponentFactory;

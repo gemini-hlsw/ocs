@@ -63,7 +63,7 @@ public final class SpTypeUtil {
         boolean isDisplayable = DisplayableSpType.class.isAssignableFrom(c);
         boolean isDescribable = DescribableSpType.class.isAssignableFrom(c);
 
-        List<String> resList = new ArrayList<String>(constants.length);
+        List<String> resList = new ArrayList<>(constants.length);
         for (T val : constants) {
             if (isObsoletable && ((ObsoletableSpType) val).isObsolete()) {
                 continue;

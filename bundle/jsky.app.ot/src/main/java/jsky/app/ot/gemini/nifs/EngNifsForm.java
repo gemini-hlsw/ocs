@@ -84,7 +84,7 @@ public class EngNifsForm extends JPanel {
 	// JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
 	// Generated using JFormDesigner non-commercial license
 	private JLabel label1;
-	DropDownListBoxWidget engReadMode;
+	DropDownListBoxWidget<String> engReadMode;
 	private JLabel label3;
 	NumberBoxWidget numberOfSamples;
 	private JLabel label4;

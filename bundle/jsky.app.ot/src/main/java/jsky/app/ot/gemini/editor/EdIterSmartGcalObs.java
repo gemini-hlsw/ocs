@@ -22,7 +22,6 @@ import javax.swing.*;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Set;
@@ -145,7 +144,7 @@ public final class EdIterSmartGcalObs extends OtItemEditor<ISPSeqComponent, SeqR
 
 
     @SuppressWarnings("unchecked")
-    private SeqRepeatFlatObs createFlatObsFromConfig(Config c, int observeCnt) {
+    private SeqRepeatFlatObs createFlatObsFromConfig(final Config c, final int observeCnt) {
         final SeqRepeatFlatObs newDataObject = new SeqRepeatFlatObs();
         final Set<CalUnitParams.Lamp> lamps = (Set<CalUnitParams.Lamp>) c.getItemValue(new ItemKey("calibration:lamp"));
         newDataObject.setDiffuser((CalUnitParams.Diffuser) c.getItemValue(new ItemKey("calibration:diffuser")));
@@ -159,9 +158,10 @@ public final class EdIterSmartGcalObs extends OtItemEditor<ISPSeqComponent, SeqR
         return newDataObject;
     }
 
-    private boolean compareConfig(Config c1, Config c2, String parentName) {
+    private boolean compareConfig(final Config c1, final Config c2, final String parentName) {
         for (ItemKey key : c1.getKeys()) {
-            if (!key.getParent().getName().equals(parentName)) {
+            final ItemKey parent = key.getParent();
+            if (parent == null || !parent.getName().equals(parentName)) {
                 continue;
             }
             // Read mode for GNIRS can be changed inside of a series of calibration images that belong
@@ -186,72 +186,68 @@ public final class EdIterSmartGcalObs extends OtItemEditor<ISPSeqComponent, SeqR
      */
     public EdIterSmartGcalObs() {
         ui.obsClass.addActionListener(obsClassActionListener);
-        final ActionListener convertToManualActionListener = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent evt) {
-                try {
-                    // get sequence ...
-                    final ISPObservation obs = getContextObservation();
-                    ConfigSequence seq = ConfigBridge.extractSequence(obs, null, ConfigValMapInstances.IDENTITY_MAP, false);
-                    seq = seq.filter(new MetaDataConfig.NodeKeySequencePredicate(getNode().getNodeKey()));
+        final ActionListener convertToManualActionListener = e -> {
+            try {
+                // get sequence ...
+                final ISPObservation obs = getContextObservation();
+                final ConfigSequence seq = ConfigBridge.extractSequence(obs, null, ConfigValMapInstances.IDENTITY_MAP, false)
+                        .filter(new MetaDataConfig.NodeKeySequencePredicate(getNode().getNodeKey()));
 
-                    // get some general information about current node, parent etc
-                    final ISPNode smartNode = getNode();
-                    final ISPSeqComponent parent = (ISPSeqComponent) smartNode.getParent();
-                    int position = parent.getChildren().indexOf(smartNode);
+                // get some general information about current node, parent etc
+                final ISPNode smartNode = getNode();
+                final ISPSeqComponent parent = (ISPSeqComponent) smartNode.getParent();
+                int position = parent.getChildren().indexOf(smartNode);
 
-                    // check if user really wants to do that
-                    final int result = JOptionPane.showConfirmDialog(
-                            null,
-                            "Replace this automatically configured calibration with a manually configurable calibration.\nThis cannot be undone!",
-                            "Configure Manually",
-                            JOptionPane.YES_NO_OPTION);
-                    if (result == JOptionPane.NO_OPTION) {
-                        return;
-                    }
-
-                    // UX-637: if no calibrations are available replace smart node with a default manual flat/arc
-                    if (seq.isEmpty() || (Boolean) seq.getStep(0).getItemValue(new ItemKey("smartgcal:maperror"))) {
-                        final ISPSeqComponent child = SPDB.get().getFactory().createSeqComponent(parent.getProgram(), SeqRepeatFlatObs.SP_TYPE, null);
-                        child.setDataObject(new SeqRepeatFlatObs());
-                        parent.addSeqComponent(position, child);
-                        SPTreeEditUtil.removeNode(smartNode);
-                        return;
-                    }
-
-                    // translate sequence of calibrations into corresponding manual nodes
-                    // (one dumb calibration for each step in smart calibration)
-                    // check for iterator, if this is repeated, then we need only the flats/arcs of the first iteration
-                    int lastStep = seq.size();
-                    if (parent.getDataObject() instanceof SeqRepeat) {
-                        lastStep /= ((ISPSeqObject) parent.getDataObject()).getStepCount();
-                    }
-                    final SPComponentType type = SeqRepeatFlatObs.SP_TYPE;
-                    int observeCnt = 1;
-                    for (int i = 0; i < lastStep; i++) {
-                        if (i == lastStep - 1 || !compareConfig(seq.getStep(i), seq.getStep(i + 1), "calibration")) {
-                            final SeqRepeatFlatObs newDataObject = createFlatObsFromConfig(seq.getStep(i), observeCnt);
-                            final ISPSeqComponent child = SPDB.get().getFactory().createSeqComponent(parent.getProgram(), type, null);
-                            child.setDataObject(newDataObject);
-                            parent.addSeqComponent(position++, child);
-                            observeCnt = 1;
-
-                            // if we are in an instrument iterator (instrument config changes) we only take
-                            // the first one into account!
-                            if (i < lastStep - 1 && !compareConfig(seq.getStep(i), seq.getStep(i + 1), "instrument")) {
-                                break;
-                            }
-                        } else {
-                            observeCnt++;
-                        }
-                    }
-
-                    // remove the original smart node
-                    SPTreeEditUtil.removeNode(smartNode);
-
-                } catch (Exception e) {
-                    LOG.log(Level.WARNING, "could not convert from smart to manual calibrations", e);
+                // check if user really wants to do that
+                if (JOptionPane.showConfirmDialog(
+                        null,
+                        "Replace this automatically configured calibration with a manually configurable calibration.\nThis cannot be undone!",
+                        "Configure Manually",
+                        JOptionPane.YES_NO_OPTION) == JOptionPane.NO_OPTION) {
+                    return;
                 }
+
+                // UX-637: if no calibrations are available replace smart node with a default manual flat/arc
+                if (seq.isEmpty() || (boolean) seq.getStep(0).getItemValue(new ItemKey("smartgcal:maperror"))) {
+                    final ISPSeqComponent child = SPDB.get().getFactory().createSeqComponent(parent.getProgram(), SeqRepeatFlatObs.SP_TYPE, null);
+                    child.setDataObject(new SeqRepeatFlatObs());
+                    parent.addSeqComponent(position, child);
+                    SPTreeEditUtil.removeNode(smartNode);
+                    return;
+                }
+
+                // translate sequence of calibrations into corresponding manual nodes
+                // (one dumb calibration for each step in smart calibration)
+                // check for iterator, if this is repeated, then we need only the flats/arcs of the first iteration
+                int lastStep = seq.size();
+                if (parent.getDataObject() instanceof SeqRepeat) {
+                    lastStep /= ((ISPSeqObject) parent.getDataObject()).getStepCount();
+                }
+                final SPComponentType type = SeqRepeatFlatObs.SP_TYPE;
+                int observeCnt = 1;
+                for (int i = 0; i < lastStep; i++) {
+                    if (i == lastStep - 1 || !compareConfig(seq.getStep(i), seq.getStep(i + 1), "calibration")) {
+                        final SeqRepeatFlatObs newDataObject = createFlatObsFromConfig(seq.getStep(i), observeCnt);
+                        final ISPSeqComponent child = SPDB.get().getFactory().createSeqComponent(parent.getProgram(), type, null);
+                        child.setDataObject(newDataObject);
+                        parent.addSeqComponent(position++, child);
+                        observeCnt = 1;
+
+                        // if we are in an instrument iterator (instrument config changes) we only take
+                        // the first one into account!
+                        if (i < lastStep - 1 && !compareConfig(seq.getStep(i), seq.getStep(i + 1), "instrument")) {
+                            break;
+                        }
+                    } else {
+                        observeCnt++;
+                    }
+                }
+
+                // remove the original smart node
+                SPTreeEditUtil.removeNode(smartNode);
+
+            } catch (final Exception ex) {
+                LOG.log(Level.WARNING, "could not convert from smart to manual calibrations", ex);
             }
         };
         ui.convertToManual.addActionListener(convertToManualActionListener);
@@ -260,10 +256,12 @@ public final class EdIterSmartGcalObs extends OtItemEditor<ISPSeqComponent, SeqR
     /**
      * Return the window containing the editor
      */
+    @Override
     public JPanel getWindow() {
         return ui;
     }
 
+    @Override
     public void init() {
         ui.seq.init(this);
         ui.obsClass.removeActionListener(obsClassActionListener);
