@@ -9,29 +9,45 @@ import java.util.Optional;
 public interface ImEither<L,R> extends Serializable {
     ImEither<R,L> swap();
 
-    // Right biased qualifiers / operations.
+    // === Right biased qualifiers / operations ===
     <T> T foldRight(final T zero,
                     final Function<? super R, ? extends T> rightFunc);
+
     boolean exists(final Predicate<? super R> rightFunc);
+
     boolean forAll(final Predicate<? super R> rightFunc);
+
     void forEach(final Consumer<? super R> rightFunc);
+
     <R2> ImEither<L,R2> map(final Function<? super R, ? extends R2> rightFunc);
+
     <R2> ImEither<L,R2> flatMap(final Function<? super R, ? extends ImEither<L,R2>> rightFunc);
+
     boolean isRight();
+
     Optional<R> toOptional();
 
-    // Left biased qualifiers / operations.
+
+    // === Left biased qualifiers / operations ===
     <T> T foldLeft(final T zero,
                    final Function<? super L, ? extends T> leftFunc);
+
     boolean existsLeft(final Predicate<? super L> leftFunc);
+
     boolean forAllLeft(final Predicate<? super L> leftFunc);
+
     void forEachLeft(final Consumer<? super L> leftFunc);
+
     <L2> ImEither<L2,R> mapLeft(final Function<? super L, ? extends L2> leftFunc);
+
     <L2> ImEither<L2,R> flatMapLeft(final Function<? super L, ? extends ImEither<L2,R>> rightFunc);
+
     boolean isLeft();
+
     Optional<L> toOptionalLeft();
 
-    // Operations on both values.
+
+    // === Operations on both values ===
     <T> T biFold(final Function<? super L, ? extends T> leftFunc,
                  final Function<? super R, ? extends T> rightFunc);
 
