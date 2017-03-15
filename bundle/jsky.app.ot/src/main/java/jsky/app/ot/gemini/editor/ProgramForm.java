@@ -8,14 +8,7 @@ import jsky.util.gui.TextBoxWidget;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-/*
- * Created by JFormDesigner on Mon Jun 06 22:30:36 CEST 2005
- */
 
-
-/**
- * @author User #1
- */
 public class ProgramForm extends JPanel {
     public ProgramForm() {
         initComponents();
@@ -380,5 +373,4 @@ public class ProgramForm extends JPanel {
     public JTable attachmentTable;
     JTable historyTable;
     public JTabbedPane tabbedPane;
-    // JFormDesigner - End of variables declaration  //GEN-END:variables
 }

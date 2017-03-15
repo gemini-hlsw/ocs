@@ -4,6 +4,7 @@ import edu.gemini.pot.client.SPDB;
 import edu.gemini.pot.sp.*;
 import edu.gemini.pot.spdb.IDBDatabaseService;
 import edu.gemini.shared.gui.text.AbstractDocumentListener;
+import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.skycalc.ObservingNight;
 import edu.gemini.shared.util.TimeValue;
 import edu.gemini.shared.util.immutable.None;
@@ -41,8 +42,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeListener;
 import java.text.DateFormat;
-import java.text.Format;
-import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.logging.Level;
@@ -52,7 +51,7 @@ import java.util.logging.Logger;
  * This is the editor for the Observation item.
  */
 public final class EdObservation2 extends OtItemEditor<ISPObservation, SPObservation>
-        implements jsky.util.gui.TextBoxWidgetWatcher, ActionListener {
+        implements ActionListener {
 
     private static final Logger LOGGER = Logger.getLogger(Logger.class.getName());
 
@@ -109,16 +108,15 @@ public final class EdObservation2 extends OtItemEditor<ISPObservation, SPObserva
     private static final class ExecStatusComboBoxRenderer extends BasicComboBoxRenderer implements ListCellRenderer {
         private Option<ObsExecStatus> autoStatus = None.instance();
 
-        void setAutoStatus(ObsExecStatus status) {
-            if (status == null) {
-                autoStatus = None.instance();
-            } else {
-                autoStatus = new Some<>(status);
-            }
+        void setAutoStatus(final ObsExecStatus status) {
+            autoStatus = ImOption.apply(status);
         }
 
         @SuppressWarnings({"unchecked", "rawtypes"})
-        public Component getListCellRendererComponent(JList jList, Object value, int index, boolean isSelected, boolean hasFocus) {
+        @Override
+        public Component getListCellRendererComponent(final JList jList, final Object value, final int index,
+                                                      final boolean isSelected, final boolean hasFocus) {
+
             final String text;
             if (value instanceof Some) {
                 text = ((Some<ObsExecStatus>) value).getValue().displayValue();
@@ -135,26 +133,22 @@ public final class EdObservation2 extends OtItemEditor<ISPObservation, SPObserva
         private final JComboBox<Option<ObsExecStatus>> combo;
         private final ExecStatusComboBoxRenderer renderer = new ExecStatusComboBoxRenderer();
 
-        ExecOverrideEditor(JPanel pan) {
+        ExecOverrideEditor(final JPanel pan) {
             pan.setLayout(new GridBagLayout());
             pan.add(new JLabel("Exec Status"), new GridBagConstraints() {{
                 gridx=0; insets=new Insets(0,10,0,5);
             }});
 
-            combo = new JComboBox<Option<ObsExecStatus>>() {{
-                setModel(new ExecStatusComboBoxModel());
-                addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        final SPObservation obs = getDataObject();
-                        final Option<ObsExecStatus> s = (Option<ObsExecStatus>) combo.getSelectedItem();
-                        if (obs != null) {
-                            obs.setExecStatusOverride(s);
-                            ExecOverrideEditor.this.update();
-                        }
-                    }
-                });
-            }};
+            combo = new JComboBox<>();
+            combo.setModel(new ExecStatusComboBoxModel());
+            combo.addActionListener(e -> {
+                final SPObservation obs = getDataObject();
+                final Option<ObsExecStatus> s = (Option<ObsExecStatus>) combo.getSelectedItem();
+                if (obs != null) {
+                    obs.setExecStatusOverride(s);
+                    ExecOverrideEditor.this.update();
+                }
+            });
             combo.setRenderer(renderer);
 
             // Tried hard to make the combo box resize based upon the options
@@ -174,16 +168,9 @@ public final class EdObservation2 extends OtItemEditor<ISPObservation, SPObserva
             final boolean isStaff = OTOptions.isStaff(getProgram().getProgramID());
             final SPObservation obs = getDataObject();
             combo.setSelectedItem(obs.getExecStatusOverride());
-            if (isStaff && obs.getPhase2Status() == ObsPhase2Status.PHASE_2_COMPLETE) {
-                combo.setEnabled(true);
-            } else {
-                combo.setEnabled(false);
-            }
-            if (obs.getPhase2Status() == ObsPhase2Status.PHASE_2_COMPLETE) {
-                renderer.setAutoStatus(ObservationStatus.execStatusFor(getNode()));
-            } else {
-                renderer.setAutoStatus(null);
-            }
+            combo.setEnabled(isStaff && obs.getPhase2Status() == ObsPhase2Status.PHASE_2_COMPLETE);
+            renderer.setAutoStatus((obs.getPhase2Status() == ObsPhase2Status.PHASE_2_COMPLETE) ?
+                    ObservationStatus.execStatusFor(getNode()) : null);
             combo.repaint();
         }
     }
@@ -195,11 +182,16 @@ public final class EdObservation2 extends OtItemEditor<ISPObservation, SPObserva
      */
     public EdObservation2() {
 
-        _editorPanel.obsTitle.addWatcher(this);
+        _editorPanel.obsTitle.addWatcher(new TextBoxWidgetWatcher() {
+            @Override
+            public void textBoxKeyPress(final TextBoxWidget tbwe) {
+                getDataObject().setTitle(_editorPanel.obsTitle.getText().trim());
+            }
+        });
 
         _editorPanel.libraryIdTextField.getDocument().addDocumentListener(new AbstractDocumentListener() {
             @Override
-            public void textChanged(DocumentEvent docEvent, String newText) {
+            public void textChanged(final DocumentEvent docEvent, final String newText) {
                 final SPObservation obs = getDataObject();
                 if (obs != null) obs.setLibraryId(newText.trim());
             }
@@ -207,16 +199,6 @@ public final class EdObservation2 extends OtItemEditor<ISPObservation, SPObserva
 
 
         _editorPanel.reapplyButton.setAction(_reapplyAction);
-
-        ButtonGroup grp = new ButtonGroup();
-        grp.add(_editorPanel.priorityHigh);
-        grp.add(_editorPanel.priorityMedium);
-        grp.add(_editorPanel.priorityLow);
-
-        grp = new ButtonGroup();
-        grp.add(_editorPanel.rapidTooButton);
-        grp.add(_editorPanel.standardTooButton);
-        grp.add(_editorPanel.noTooButton); // invisible button to make button group work
 
         //Add the cards to the ToOCardPanel, so we can select the appropriate one
         //based on the program type
@@ -243,15 +225,9 @@ public final class EdObservation2 extends OtItemEditor<ISPObservation, SPObserva
         _editorPanel.standardTooButton.addActionListener(this);
 
         // keep this time correction label up to date
-        _editorPanel.timeCorrectionOp.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                if (_editorPanel.timeCorrectionOp.getValue().equals("Subtract")) {
-                    _editorPanel.correctionToFromLabel.setText("from");
-                } else {
-                    _editorPanel.correctionToFromLabel.setText("to");
-                }
-            }
-        });
+        _editorPanel.timeCorrectionOp.addActionListener(e ->
+                _editorPanel.correctionToFromLabel.setText(_editorPanel.timeCorrectionOp.getValue().equals("Subtract") ? "from" : "to")
+        );
 
         _editorPanel.timeCorrectionUnits.setChoices(new String[]{
                 // don't include nights
@@ -293,6 +269,7 @@ public final class EdObservation2 extends OtItemEditor<ISPObservation, SPObserva
     /**
      * Return the window containing the editor
      */
+    @Override
     public JPanel getWindow() {
         return _editorPanel;
     }
@@ -306,7 +283,8 @@ public final class EdObservation2 extends OtItemEditor<ISPObservation, SPObserva
     /**
      * Set the data object corresponding to this editor.
      */
-    @Override public void init() {
+    @Override
+    public void init() {
         getNode().addCompositeChangeListener(_statusListener);
 
         //update the ToO UI based on the ToO status of the program.
@@ -340,7 +318,7 @@ public final class EdObservation2 extends OtItemEditor<ISPObservation, SPObserva
             ISPNode node = null;
             try {
                 node = getViewer().getTree().getSelectedNode();
-            } catch (NullPointerException ex) {
+            } catch (final NullPointerException ex) {
             }
             if (obs == node) { // we're still looking at the same node
                 _updateTotalPlannedTime();
@@ -354,12 +332,14 @@ public final class EdObservation2 extends OtItemEditor<ISPObservation, SPObserva
 
     }
 
-    @Override public void cleanup() {
+    @Override
+    public void cleanup() {
         getNode().removeCompositeChangeListener(_statusListener);
     }
 
     private final Action _reapplyAction = new AbstractAction("Reapply...") {
-        public void actionPerformed(ActionEvent evt) {
+        @Override
+        public void actionPerformed(final ActionEvent evt) {
             try {
                 ReapplicationDialog.open(_editorPanel, getProgram(), getNode());
             } catch (Exception e) {
@@ -405,7 +385,7 @@ public final class EdObservation2 extends OtItemEditor<ISPObservation, SPObserva
 
             }
 
-        } catch (SPNodeNotLocalException e) {
+        } catch (final SPNodeNotLocalException e) {
             DialogUtil.error(e);
         }
 
@@ -415,14 +395,9 @@ public final class EdObservation2 extends OtItemEditor<ISPObservation, SPObserva
         try {
             final SPViewer vg = getViewer();
             final TitledBorder b = vg.getTitledBorder();
-            if (isInsideTemplate()) {
-                b.setTitle("Template Observation");
-                vg.paintImmediately(vg.getBounds());
-            } else {
-                b.setTitle("Observation");
-                vg.paintImmediately(vg.getBounds());
-            }
-        } catch (Exception e) {
+            b.setTitle(isInsideTemplate() ? "Template Observation" : "Observation");
+            vg.paintImmediately(vg.getBounds());
+        } catch (final Exception e) {
             // We don't need to email this exception.  I believe this can
             // happen when the editor is switched by the user clicking on
             // another node before the background task that calls this method
@@ -435,15 +410,14 @@ public final class EdObservation2 extends OtItemEditor<ISPObservation, SPObserva
     private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
 
     // update the total used time display
-    private void _updateTotalUsedTime(boolean localCorrections) {
+    private void _updateTotalUsedTime(final boolean localCorrections) {
         final ISPObservation obs = getNode();
         final Vector<Vector<String>> tableRows = new Vector<>();
         final DateFormat dateFmt = new SimpleDateFormat("yyyy-MM-dd");
         dateFmt.setTimeZone(UTC);
 
         // Add a row for each item
-        final Collection<NightObsTimes> c = NightObsTimesService.getObservingNightTimes(obs);
-        for (NightObsTimes t : c) {
+        NightObsTimesService.getObservingNightTimes(obs).forEach(t -> {
             final ObservingNight night = t.getNight();
             final ObsTimes times = t.getTimes();
             final ObsTimeCharges charges = times.getTimeCharges();
@@ -459,7 +433,7 @@ public final class EdObservation2 extends OtItemEditor<ISPObservation, SPObserva
             row.add(TimeAmountFormatter.getHMSFormat(charges.getTime(ChargeClass.NONCHARGED)));
             row.add(TimeAmountFormatter.getHMSFormat(times.getTotalTime()));
             tableRows.add(row);
-        }
+        });
 
         // Add a row for the total corrections, if present
         final long programCorrections = getDataObject().getTotalObsTimeCorrection(ChargeClass.PROGRAM);
@@ -489,14 +463,13 @@ public final class EdObservation2 extends OtItemEditor<ISPObservation, SPObserva
         // Display the rows in the table
         final DefaultTableModel model = new DefaultTableModel(tableRows, _timeSummaryTableHead) {
             // disable cell editing
-            public boolean isCellEditable(int row, int column) {
+            public boolean isCellEditable(final int row, final int column) {
                 return false;
             }
 
             // right justify (it doesn't matter that the values are not Integer...)
-            public Class<?> getColumnClass(int col) {
-                if (col > 0) return Integer.class;
-                return String.class;
+            public Class<?> getColumnClass(final int col) {
+                return (col > 0) ? Integer.class : String.class;
             }
         };
         _editorPanel.timeSummaryTable.setModel(model);
@@ -510,21 +483,20 @@ public final class EdObservation2 extends OtItemEditor<ISPObservation, SPObserva
     }
 
     // Return the ObsTimes instance to use, based on the argument
-    private ObsTimes _getObsTimes(boolean localCorrections) {
+    private ObsTimes _getObsTimes(final boolean localCorrections) {
         final ISPObservation obs = getNode();
-        ObsTimes obsTimes;
+        final ObsTimes obsTimes;
         if (!localCorrections) {
             obsTimes = ObsTimesService.getCorrectedObsTimes(obs);
         } else {
             // Get raw obs times.
-            obsTimes = ObsTimesService.getRawObsTimes(obs);
+            final ObsTimes rawObsTimes = ObsTimesService.getRawObsTimes(obs);
 
             // Apply local corrections.
             final ObsTimeCharges corrections = getDataObject().sumObsTimeCorrections();
-            final ObsTimeCharges raw = obsTimes.getTimeCharges();
+            final ObsTimeCharges raw = rawObsTimes.getTimeCharges();
 
-            final long totalTime = obsTimes.getTotalTime();
-            obsTimes = new ObsTimes(totalTime, raw.addTimeCharges(corrections));
+            obsTimes = new ObsTimes(rawObsTimes.getTotalTime(), raw.addTimeCharges(corrections));
         }
         return obsTimes;
     }
@@ -554,12 +526,7 @@ public final class EdObservation2 extends OtItemEditor<ISPObservation, SPObserva
     // update the observation class
     private void _updateObsClass() {
         try {
-            final ObsClass obsClass = ObsClassService.lookupObsClass(getNode());
-            if (obsClass == null) {
-                _editorPanel.obsClass.setText("");
-            } else {
-                _editorPanel.obsClass.setText(obsClass.displayValue());
-            }
+            _editorPanel.obsClass.setText(ImOption.apply(ObsClassService.lookupObsClass(getNode())).map(ObsClass::displayValue).getOrElse(""));
         } catch (Exception e) {
             DialogUtil.error(e);
             _editorPanel.obsClass.setText("");
@@ -573,13 +540,9 @@ public final class EdObservation2 extends OtItemEditor<ISPObservation, SPObserva
         final scala.Option<DataflowStatus> dispo = DatasetDispositionService.lookupDatasetDisposition(getNode());
         final DatasetQaStateSums sums = DatasetQaStateSumsService.sumDatasetQaStates(getNode());
 
-        final ObsQaState obsQaState;
-        if (getDataObject().isOverrideQaState()) {
-            obsQaState = getDataObject().getOverriddenObsQaState();
-        } else {
-            obsQaState = ObsQaState.computeDefault(sums);
-        }
-        final boolean override = getDataObject().isOverrideQaState();
+        final SPObservation obs = getDataObject();
+        final boolean override = obs.isOverrideQaState();
+        final ObsQaState obsQaState = override ? obs.getOverriddenObsQaState() : ObsQaState.computeDefault(sums);
 
         // Format the dataset disposition ("dataflow step").
         final String statusString = (dispo.isEmpty()) ? "No Data" : dispo.get().description();
@@ -649,13 +612,16 @@ public final class EdObservation2 extends OtItemEditor<ISPObservation, SPObserva
 
     // Show the priority
     private void _showPriority() {
-        final SPObservation.Priority pri = getDataObject().getPriority();
-        if (pri == SPObservation.Priority.HIGH) {
-            _editorPanel.priorityHigh.setSelected(true);
-        } else if (pri == SPObservation.Priority.MEDIUM) {
-            _editorPanel.priorityMedium.setSelected(true);
-        } else {
-            _editorPanel.priorityLow.setSelected(true);
+        switch (getDataObject().getPriority()) {
+            case HIGH:
+                _editorPanel.priorityHigh.setSelected(true);
+                break;
+            case MEDIUM:
+                _editorPanel.priorityMedium.setSelected(true);
+                break;
+            case LOW:
+                _editorPanel.priorityLow.setSelected(true);
+                break;
         }
 
         switch (Too.get(getNode())) {
@@ -673,19 +639,14 @@ public final class EdObservation2 extends OtItemEditor<ISPObservation, SPObserva
 
     // Show the obs id
     private void _showObsId() {
-        final SPObservationID spObsID = getNode().getObservationID();
-        final String id = (spObsID == null) ? "" : spObsID.stringValue();
+        final String id = ImOption.apply(getNode().getObservationID()).map(SPObservationID::stringValue).getOrElse("");
         _editorPanel.obsId.setText(id);
     }
 
     // Show the title
     private void _showTitle() {
-        final String title = getDataObject().getTitle();
-        if (title != null) {
-            _editorPanel.obsTitle.setText(title);
-        } else {
-            _editorPanel.obsTitle.setText("");
-        }
+        final String title = ImOption.apply(getDataObject().getTitle()).getOrElse("");
+        _editorPanel.obsTitle.setText(title);
     }
 
 
@@ -708,7 +669,7 @@ public final class EdObservation2 extends OtItemEditor<ISPObservation, SPObserva
         }
 
         final DefaultTableModel model = new DefaultTableModel(tableRows, _correctionTableHead) {
-            public boolean isCellEditable(int row, int column) {
+            @Override public boolean isCellEditable(int row, int column) {
                 return false;
             }
         };
@@ -728,6 +689,7 @@ public final class EdObservation2 extends OtItemEditor<ISPObservation, SPObserva
      * The default implementation just enables or disables all components in
      * the editor window. Here we update the status items, which may remain enabled.
      */
+    @Override
     protected void updateEnabledState(boolean enabled) {
         super.updateEnabledState(enabled);
 
@@ -815,29 +777,10 @@ public final class EdObservation2 extends OtItemEditor<ISPObservation, SPObserva
     }
 
     /**
-     * Watch changes to the title text box.
-     *
-     * @see TextBoxWidgetWatcher
-     */
-    public void textBoxKeyPress(TextBoxWidget tbwe) {
-        if (tbwe == _editorPanel.obsTitle) {
-            getDataObject().setTitle(_editorPanel.obsTitle.getText().trim());
-        }
-    }
-
-    /**
-     * Text box action, ignore.
-     *
-     * @see jsky.util.gui.TextBoxWidgetWatcher
-     */
-    public void textBoxAction(TextBoxWidget tbwe) {
-    }
-
-
-    /**
      * Handle standard action events.
      */
-    public void actionPerformed(ActionEvent evt) {
+    @Override
+    public void actionPerformed(final ActionEvent evt) {
         if (_ignoreEvents) {
             return;
         }
@@ -953,7 +896,7 @@ public final class EdObservation2 extends OtItemEditor<ISPObservation, SPObserva
         return isInsideTemplate(getNode());
     }
 
-    private static boolean isInsideTemplate(ISPNode node) {
+    private static boolean isInsideTemplate(final ISPNode node) {
         return (node != null) && ((node instanceof ISPTemplateFolder) || isInsideTemplate(node.getParent()));
     }
 }

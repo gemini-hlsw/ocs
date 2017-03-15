@@ -15,7 +15,6 @@ import jsky.util.gui.DialogUtil;
 import jsky.util.gui.TextBoxWidget;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemListener;
 import java.util.ArrayList;
@@ -33,16 +32,6 @@ public final class EdIterFlatObs extends OtItemEditor<ISPSeqComponent, SeqRepeat
 
     // If true, ignore action events
     private boolean ignoreActions = false;
-
-    // lamp choices
-    private final JRadioButton[] _lampButtons = new JRadioButton[]{
-        _w.lamp1, _w.lamp2, _w.lamp3
-    };
-
-    // arc lamp choices (exclusive of lamp: see OT-360)
-    private final JCheckBox[] _arcButtons = new JCheckBox[]{
-        _w.arc1, _w.arc2, _w.arc3, _w.arc4
-    };
 
     private static final String LAMP_PROPERTY = "Lamp";
 
@@ -66,33 +55,26 @@ public final class EdIterFlatObs extends OtItemEditor<ISPSeqComponent, SeqRepeat
             }
         });
 
-        final ButtonGroup group = new ButtonGroup();
         final List<Lamp> flatLamps = Lamp.flatLamps();
-        for (int i = 0; i < _lampButtons.length; i++) {
+        for (int i = 0; i < _w.lamps.length; i++) {
             final Lamp l = flatLamps.get(i);
-            _lampButtons[i].putClientProperty(LAMP_PROPERTY, l);
-            _lampButtons[i].setText(l.displayValue());
-            group.add(_lampButtons[i]);
-            _lampButtons[i].addActionListener(lampListener);
+            _w.lamps[i].putClientProperty(LAMP_PROPERTY, l);
+            _w.lamps[i].setText(l.displayValue());
+            _w.lamps[i].addActionListener(lampListener);
         }
         final List<Lamp> arcLamps = Lamp.arcLamps();
-        for (int i = 0; i < _arcButtons.length; i++) {
+        for (int i = 0; i < _w.arcs.length; i++) {
             final Lamp l = arcLamps.get(i);
-            _arcButtons[i].putClientProperty(LAMP_PROPERTY, l);
-            _arcButtons[i].setText(l.displayValue());
-            _arcButtons[i].addItemListener(arcListener);
+            _w.arcs[i].putClientProperty(LAMP_PROPERTY, l);
+            _w.arcs[i].setText(l.displayValue());
+            _w.arcs[i].addItemListener(arcListener);
         }
 
         _w.shutter.setChoices(Shutter.values());
 
         // Set up the filter editor.
-        SpTypeUIUtil.initListBox(_w.filter, Filter.class, new ActionListener() {
-            public void actionPerformed(ActionEvent actionEvent) {
-                final Filter f = (Filter) _w.filter.getSelectedItem();
-                getDataObject().setFilter(f);
-            }
-        });
-
+        SpTypeUIUtil.initListBox(_w.filter, Filter.class,
+                e -> getDataObject().setFilter((Filter) _w.filter.getSelectedItem()));
 
         _w.diffuser.setChoices(Diffuser.values());
         _w.obsClass.setChoices(ObsClass.values());
@@ -117,16 +99,19 @@ public final class EdIterFlatObs extends OtItemEditor<ISPSeqComponent, SeqRepeat
     /**
      * Return the window containing the editor
      */
+    @Override
     public JPanel getWindow() {
         return _w;
     }
 
-    @Override public void init() {
+    @Override
+    public void init() {
         _update();
         sped.init();
     }
 
-    @Override public void cleanup() {
+    @Override
+    public void cleanup() {
         sped.cleanup();
     }
 
@@ -157,13 +142,13 @@ public final class EdIterFlatObs extends OtItemEditor<ISPSeqComponent, SeqRepeat
     // update the lamp display to reflect the data object
     private void _showLamps() {
         final Set<Lamp> lamps = getDataObject().getLamps();
-        for (JCheckBox b : _arcButtons) {
+        for (JCheckBox b : _w.arcs) {
             final Lamp l = (Lamp) b.getClientProperty(LAMP_PROPERTY);
             b.removeItemListener(arcListener);
             b.setSelected(lamps.contains(l));
             b.addItemListener(arcListener);
         }
-        for (JRadioButton b : _lampButtons) {
+        for (JRadioButton b : _w.lamps) {
             final Lamp l = (Lamp) b.getClientProperty(LAMP_PROPERTY);
             b.removeActionListener(lampListener);
             b.setSelected(lamps.contains(l));
@@ -174,18 +159,13 @@ public final class EdIterFlatObs extends OtItemEditor<ISPSeqComponent, SeqRepeat
     /**
      * Watch changes to text box widgets.
      */
+    @Override
     public void textBoxKeyPress(TextBoxWidget tbwe) {
         if (tbwe == _w.exposureTime) {
             getDataObject().setExposureTime(tbwe.getDoubleValue(1.));
         } else if (tbwe == _w.coadds) {
             getDataObject().setCoaddsCount(tbwe.getIntegerValue(1));
         }
-    }
-
-    /**
-     * Text box action.
-     */
-    public void textBoxAction(TextBoxWidget tbwe) {
     }
 
     private boolean isIrGreyBody() {
@@ -199,7 +179,7 @@ public final class EdIterFlatObs extends OtItemEditor<ISPSeqComponent, SeqRepeat
     private void _updateEnabledStates() {
         // disable lamp radiobuttons if an arc was selected
         final boolean isLamp = !getDataObject().isArc();
-        for (JRadioButton _lampButton : _lampButtons) {
+        for (final JRadioButton _lampButton : _w.lamps) {
             _lampButton.setEnabled(isLamp);
         }
 
@@ -212,8 +192,8 @@ public final class EdIterFlatObs extends OtItemEditor<ISPSeqComponent, SeqRepeat
         if (ignoreActions) {
             return;
         }
-        for (int i = 0; i < _lampButtons.length; i++) {
-            if (_lampButtons[i].isSelected()) {
+        for (int i = 0; i < _w.lamps.length; i++) {
+            if (_w.lamps[i].isSelected()) {
                 final Lamp lamp = Lamp.flatLamps().get(i);
                 getDataObject().setLamp(lamp);
                 getDataObject().setDiffuser(lamp == Lamp.QUARTZ ? Diffuser.VISIBLE : Diffuser.IR);  // See OT-426
@@ -224,7 +204,6 @@ public final class EdIterFlatObs extends OtItemEditor<ISPSeqComponent, SeqRepeat
                 } else {
                     getDataObject().setShutter(Shutter.CLOSED);
                 }
-//                getDataObject().setObsClass(ObsClass.PARTNER_CAL); // see OT-411
                 getDataObject().setObsClass(getDataObject().getDefaultObsClass());
                 _update();
                 break;
@@ -238,10 +217,10 @@ public final class EdIterFlatObs extends OtItemEditor<ISPSeqComponent, SeqRepeat
         if (ignoreActions) {
             return;
         }
-        final ArrayList<Lamp> arcs = new ArrayList<>(_arcButtons.length);
+        final ArrayList<Lamp> arcs = new ArrayList<>(_w.arcs.length);
         boolean foundCuAR = false;  // See OT-426
-        for (int i = 0; i < _arcButtons.length; i++) {
-            if (_arcButtons[i].isSelected()) {
+        for (int i = 0; i < _w.arcs.length; i++) {
+            if (_w.arcs[i].isSelected()) {
             	final Lamp lamp = Lamp.arcLamps().get(i);
                 arcs.add(lamp);
                 foundCuAR |= lamp == Lamp.CUAR_ARC;  // See OT-426
@@ -250,7 +229,6 @@ public final class EdIterFlatObs extends OtItemEditor<ISPSeqComponent, SeqRepeat
         if (arcs.size() != 0) {
             getDataObject().setLamps(arcs);
             getDataObject().setShutter(Shutter.CLOSED);
-//            getDataObject().setObsClass(ObsClass.PROG_CAL); // see OT-411
             getDataObject().setObsClass(getDataObject().getDefaultObsClass());
             getDataObject().setDiffuser(foundCuAR ? Diffuser.VISIBLE : Diffuser.IR); // See OT-426
         } else {

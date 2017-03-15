@@ -1,17 +1,11 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: EdCompInstEngTReCS.java 7423 2006-11-15 20:39:11Z anunez $
-//
-
 package jsky.app.ot.gemini.trecs;
 
+import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.spModel.data.YesNoType;
 import edu.gemini.spModel.gemini.trecs.InstEngTReCS;
 import edu.gemini.spModel.gemini.trecs.TReCSParams.*;
+import jsky.app.ot.editor.OtItemEditor;
 import jsky.app.ot.editor.type.SpTypeUIUtil;
-import jsky.app.ot.gemini.editor.EdCompInstEngBase;
 
 import javax.swing.JPanel;
 import java.awt.event.ActionEvent;
@@ -21,7 +15,7 @@ import java.awt.event.ActionListener;
 /**
  * This is the editor for the TReCS instrument component.
  */
-public final class EdCompInstEngTReCS extends EdCompInstEngBase<InstEngTReCS>
+public final class EdCompInstEngTReCS extends OtItemEditor<ISPObsComponent, InstEngTReCS>
         implements ActionListener {
 
     // The GUI layout panel
@@ -47,11 +41,13 @@ public final class EdCompInstEngTReCS extends EdCompInstEngBase<InstEngTReCS>
 
 
     /** Return the window containing the editor */
+    @Override
     public JPanel getWindow() {
         return _w;
     }
 
     /** Set the data object corresponding to this editor. */
+    @Override
     public void init() {
         _w.sectorWheelComboBox.getModel().setSelectedItem(getDataObject().getSectorWheel());
         _w.lyotWheelComboBox.getModel().setSelectedItem(getDataObject().getLyotWheel());
@@ -66,6 +62,7 @@ public final class EdCompInstEngTReCS extends EdCompInstEngBase<InstEngTReCS>
     /**
      * Called when an item in a ComboBox is selected
      */
+    @Override
     public void actionPerformed(ActionEvent actionEvent) {
         final Object w = actionEvent.getSource();
         if (w == _w.sectorWheelComboBox) {

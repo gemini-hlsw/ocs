@@ -11,6 +11,8 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 
 /**
@@ -37,7 +39,8 @@ public abstract class EdCompInstBase<T extends SPInstObsComp> extends OtItemEdit
         }
     }
 
-    @Override protected void init() {
+    @Override
+    protected void init() {
         if (getDataObject() != null) {
             getDataObject().addPropertyChangeListener(this);
 
@@ -79,6 +82,7 @@ public abstract class EdCompInstBase<T extends SPInstObsComp> extends OtItemEdit
     /**
      * A key was pressed in the given TextBoxWidget.
      */
+    @Override
     public void textBoxKeyPress(final TextBoxWidget tbwe) {
         if (getDataObject() != null) {
             _ignoreChanges = true;
@@ -87,7 +91,7 @@ public abstract class EdCompInstBase<T extends SPInstObsComp> extends OtItemEdit
                     final double defaultPositionAngle = 0.0;
                     getDataObject().setPosAngleDegrees(tbwe.getDoubleValue(defaultPositionAngle));
                 } else if (tbwe == getExposureTimeTextBox()) {
-                    final double expTime    = tbwe.getDoubleValue(getDefaultExposureTime());
+                    final double expTime = tbwe.getDoubleValue(getDefaultExposureTime());
                     getDataObject().setExposureTime(expTime);
                 } else if (tbwe == getCoaddsTextBox()) {
                     final int defaultCoadds = 1;
@@ -99,34 +103,37 @@ public abstract class EdCompInstBase<T extends SPInstObsComp> extends OtItemEdit
         }
     }
 
-    // Copy the data model pos angle value to the pos angle text field.
-    private void updatePosAngle(final boolean ignoreFocus) {
+    // Generic method to copy a data object value to a text field, possibly contingent on some check.
+    private void updateField(final TextBoxWidget tbwe,
+                             final Supplier<Boolean> additionalCheck,
+                             final Function<T,String> newValueExtractor) {
         if (!_ignoreChanges) {
-            // Ignore model changes to the pos angle if the pos angle text box has the focus.
-            // This is to avoid changing the text box value when BAGS selects an auto group at +180.
-            final TextBoxWidget posAngleTextBox = getPosAngleTextBox();
-            if (posAngleTextBox != null && getDataObject() != null && (ignoreFocus || !posAngleTextBox.hasFocus())) {
-                final String newAngle = getDataObject().getPosAngleDegreesStr();
-                if (!newAngle.equals(posAngleTextBox.getText())) {
-                    posAngleTextBox.setText(newAngle);
+            final T dObj = getDataObject();
+            if (tbwe != null && dObj != null && additionalCheck.get()) {
+                final String newValue = newValueExtractor.apply(dObj);
+                if (!newValue.equals(tbwe.getText())) {
+                    tbwe.setText(newValue);
                 }
             }
         }
+    }
+    private void updateField(final TextBoxWidget tbwe,
+                             final Function<T,String> newValueExtractor) {
+        updateField(tbwe, () -> true, newValueExtractor);
+    }
+
+    // Copy the data model pos angle value to the pos angle text field.
+    private void updatePosAngle(final boolean ignoreFocus) {
+        final TextBoxWidget posAngleTextBox = getPosAngleTextBox();
+        updateField(posAngleTextBox, () -> ignoreFocus || !posAngleTextBox.hasFocus(), T::getPosAngleDegreesStr);
     }
 
     // Copy the data model exposure time value to the exposure time text field.
     private void updateExpTime() {
-        if (!_ignoreChanges) {
-            final TextBoxWidget expTimeTextBox = getExposureTimeTextBox();
-            if (expTimeTextBox != null && getDataObject() != null) {
-                final String newExpTime = getDataObject().getExposureTimeAsString();
-                if (!newExpTime.equals(expTimeTextBox.getText())) {
-                    expTimeTextBox.setText(newExpTime);
-                }
-            }
-        }
+        updateField(getExposureTimeTextBox(), T::getExposureTimeAsString);
     }
 
+    @Override
     public void propertyChange(final PropertyChangeEvent evt) {
         updatePosAngle(false);
         updateExpTime();

@@ -104,6 +104,7 @@ public final class EdProgram extends OtItemEditor<ISPProgram, SPProgram> impleme
     /**
      * Return the window containing the editor
      */
+    @Override
     public JPanel getWindow() {
         return _w;
     }
@@ -112,6 +113,7 @@ public final class EdProgram extends OtItemEditor<ISPProgram, SPProgram> impleme
      * Return the data object corresponding to this editor
      * Set the data object corresponding to this editor.
      */
+    @Override
     public void init() {
 
         adjustStaffOnlyFields(OTOptions.isStaff(getProgram().getProgramID()));
@@ -313,7 +315,8 @@ public final class EdProgram extends OtItemEditor<ISPProgram, SPProgram> impleme
      *
      * @see TextBoxWidgetWatcher
      */
-    public void textBoxKeyPress(TextBoxWidget tbwe) {
+    @Override
+    public void textBoxKeyPress(final TextBoxWidget tbwe) {
         final String s = tbwe.getText().trim();
 
         if (tbwe == _w.titleBox) {
