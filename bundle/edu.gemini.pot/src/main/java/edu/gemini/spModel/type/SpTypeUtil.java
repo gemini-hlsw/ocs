@@ -1,7 +1,3 @@
-//
-// $Id: SpTypeUtil.java 38751 2011-11-16 19:37:18Z swalker $
-//
-
 package edu.gemini.spModel.type;
 
 import java.util.*;
@@ -138,24 +134,11 @@ public final class SpTypeUtil {
         if (val != null) return val;
 
         if (logFailure) {
-            Level level = Level.WARNING;
-    //        if ("".equals(name)) level = Level.FINE;
-            LOG.log(level, "Could not convert '" + name + "' in class " +
-                           c.getName() + " to an enum value.  Return: " + def);
+            LOG.warning("Could not convert '" + name + "' in class " +
+                    c.getName() + " to an enum value.  Return: " + def);
         }
         return def;
     }
-
-//    public static <T extends Enum<T>> T valueOf(Class<T> c, String name, T def) {
-//        T res = null;
-//        try {
-//            res = Enum.valueOf(c, name);
-//        } catch (Exception ex) {
-//            LOG.warning("Could not find '" + name + "' in class: " +
-//                    c.getName() + ", returning: " + def);
-//        }
-//        return (res == null) ? def : res;
-//    }
 
     public static <T extends Enum<T>> T valueOf(Class<T> c, int ordinal, T def) {
         T[] constants = c.getEnumConstants();
@@ -173,7 +156,7 @@ public final class SpTypeUtil {
             throw new IllegalArgumentException("Class " + c + " is not an Enum type.");
         }
 
-        List<T> res = new ArrayList<T>(Arrays.asList(members));
+        List<T> res = new ArrayList<>(Arrays.asList(members));
         if (ObsoletableSpType.class.isAssignableFrom(c)) {
             for (Iterator<T> it=res.iterator(); it.hasNext(); ) {
                 if (((ObsoletableSpType) it.next()).isObsolete()) it.remove();
