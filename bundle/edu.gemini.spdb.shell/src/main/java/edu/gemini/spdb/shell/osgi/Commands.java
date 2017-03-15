@@ -7,6 +7,8 @@ import edu.gemini.pot.spdb.IDBDatabaseService;
 import edu.gemini.pot.spdb.IDBQueryFunctor;
 import edu.gemini.pot.spdb.IDBQueryRunner;
 import edu.gemini.shared.util.immutable.ImEither;
+import edu.gemini.shared.util.immutable.Left;
+import edu.gemini.shared.util.immutable.Right;
 import edu.gemini.spModel.core.SPBadIDException;
 import edu.gemini.spModel.core.SPProgramID;
 import edu.gemini.spModel.io.SpImportService;
@@ -109,16 +111,16 @@ class Commands {
             try {
                 pids.add(SPProgramID.toProgramID(id));
             } catch (SPBadIDException e) {
-                return ImEither.left("Could not parse '" + id + "' as a program ID.");
+                return new Left<>("Could not parse '" + id + "' as a program ID.");
             }
         }
-        return ImEither.right(pids);
+        return new Right<>(pids);
     }
 
     public String exportXml(final File path, final String... progIdStrings) {
         if (!path.isDirectory()) return ("Not a directory: " + path);
 
-        return parsePids(progIdStrings).fold(err -> err, pids -> {
+        return parsePids(progIdStrings).biFold(err -> err, pids -> {
             try {
                 new ExportXmlCommand(db(), path, user).exportXML(pids);
             } catch (RuntimeException e) {
@@ -132,7 +134,7 @@ class Commands {
     public String exportOcs3(final File path, final String... progIdStrings) {
         if (!path.isDirectory()) return String.format("Not a directory: %s", path);
 
-        return parsePids(progIdStrings).fold(err -> err, pids -> {
+        return parsePids(progIdStrings).biFold(err -> err, pids -> {
             try {
                 new ExportOcs3Command(db(), path, user).exportOcs3(pids);
             } catch (RuntimeException e) {
@@ -182,17 +184,17 @@ class Commands {
         try {
             pid = SPProgramID.toProgramID(programId);
         } catch (SPBadIDException ex) {
-            return ImEither.left(String.format("%s: illegal program id", programId));
+            return new Left<>(String.format("%s: illegal program id", programId));
         }
 
         final ISPProgram p = db.lookupProgramByID(pid);
-        return (p == null) ? ImEither.left(String.format("%s: not in db", programId)) : ImEither.right(p);
+        return (p == null) ? new Left<>(String.format("%s: not in db", programId)) : new Right<>(p);
     }
 
     public String rmprog(String programId) {
         final ImEither<String, ISPProgram> e = prog(programId);
-        e.foreach(p -> db().remove(p));
-        return e.fold(s -> s, p -> "");
+        e.forEach(p -> db().remove(p));
+        return e.biFold(s -> s, p -> "");
     }
 
     public String rmprog(String[] programIds) {
@@ -217,8 +219,8 @@ class Commands {
         final scala.Option<PurgeOption>   po = PurgeOption$.MODULE$.fromDisplayValue(purgeOption);
 
         return ImEither.merge(e.flatMap(p -> po.isDefined() ?
-            ImEither.<String, String>right(EphemerisPurgeCommand.apply(p, po.get())) :
-            ImEither.<String, String>left("Usage: purgeEphemeris programId " + PurgeOption$.MODULE$.usageString())
+            new Right<>(EphemerisPurgeCommand.apply(p, po.get())) :
+            new Left<>("Usage: purgeEphemeris programId " + PurgeOption$.MODULE$.usageString())
         ));
     }
 }

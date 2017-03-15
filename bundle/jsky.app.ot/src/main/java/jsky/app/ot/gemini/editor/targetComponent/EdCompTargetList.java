@@ -46,7 +46,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     private final TelescopeForm _w;
 
     // The current selection. This will not be defined until after init is run.
-    private ImEither<SPTarget, IndexedGuideGroup> _curSelection;
+    private Option<ImEither<SPTarget, IndexedGuideGroup>> _curSelection;
 
     // A collection of the JMenuItems that allow the addition of guide stars.
     private final Map<GuideProbe,Component> _guideStarAdders = new HashMap<>();
@@ -104,6 +104,8 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
         _agsPub.subscribe((obs, oldOptions, newOptions) -> updateGuiding());
 
+        _curSelection = None.instance();
+
         BagsManager.addBagsStateListener((key, oldStatus, newStatus) -> {
             if (Optional.ofNullable(getContextObservation()).map(co -> key.equals(co.getNodeKey())).orElse(false)) {
                 updateTargetFeedback();
@@ -157,11 +159,11 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
      * Simplifications for dealing with the Either representing selection.
      */
     private Option<SPTarget> selectedTarget() {
-        return _curSelection.swap().toOption();
+        return _curSelection.flatMap(t -> ImOption.fromOptional(t.toOptionalLeft()));
     }
 
     private Option<IndexedGuideGroup> selectedGroup() {
-        return _curSelection.toOption();
+        return _curSelection.flatMap(g -> ImOption.fromOptional(g.toOptional()));
     }
 
     /**
@@ -223,14 +225,16 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
      * Auxiliary method to set the selection to the specified target.
      */
     private void setSelectionToTarget(final SPTarget t) {
-        _curSelection = ImEither.left(t);
+        //_curSelection = ImOption.apply(t).map(Left<SPTarget,IndexedGuideGroup>::new);
+        _curSelection = ImOption.apply(t).map(Left::new);
     }
 
     /**
      * Auxiliary method to set the selection to the specified group.
      */
     private void setSelectionToGroup(final IndexedGuideGroup igg) {
-        _curSelection = ImEither.right(igg);
+        //_curSelection = ImOption.apply(igg).map(g -> new Right<>(igg));
+        _curSelection = ImOption.apply(igg).map(Right::new);
     }
 
     /**
@@ -781,14 +785,14 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     // Updates the enabled state of the primary guide target button when the target environment changes.
     private final PropertyChangeListener primaryButtonUpdater = new PropertyChangeListener() {
         @Override public void propertyChange(final PropertyChangeEvent evt) {
-            final boolean enabled = _curSelection.fold(
+            final boolean enabled = _curSelection.map(c -> c.biFold(
                     t -> {
                         final TargetEnvironment env = getDataObject().getTargetEnvironment();
                         final ImList<GuideProbeTargets> gtList = env.getPrimaryGuideGroup().getAllContaining(t);
                         return gtList.nonEmpty() && !selectionIsAutoTarget();
                     },
                     igg -> true
-            );
+            )).getOrElse(false);
             _w.primaryButton.setEnabled(enabled && OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation()));
         }
     };
@@ -925,8 +929,8 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         }
         @Override public void actionPerformed(final ActionEvent e) {
             // As long as something is selected, we can paste it.
-            _curSelection.foreach(ignored -> pasteSelectedPosition(getNode(), getDataObject()));
-            _curSelection.swap().foreach(ignored -> pasteSelectedPosition(getNode(), getDataObject()));
+            _curSelection.forEach(c -> c.forEach(ignored -> pasteSelectedPosition(getNode(), getDataObject())));
+            _curSelection.forEach(c -> c.forEachLeft(ignored -> pasteSelectedPosition(getNode(), getDataObject())));
         }
     };
 
@@ -956,7 +960,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             }
         }
 
-        private ImEither<TargetDetails,GuideGroup> contents;
+        private Option<ImEither<TargetDetails,GuideGroup>> contents = None.instance();
 
         static Option<TargetClipboard> copy(final TargetEnvironment env, final ISPObsComponent obsComponent) {
             if (obsComponent == null) return None.instance();
@@ -966,11 +970,11 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
 
         TargetClipboard(final SPTarget target) {
-            contents = ImEither.left(new TargetDetails(target));
+            contents = new Some<>(new Left<>(new TargetDetails(target)));
         }
 
         TargetClipboard(final GuideGroup group) {
-            contents = ImEither.right(group);
+            contents = new Some<>(new Right<>(group));
         }
 
         // Groups in their entirety should be copied, pasted, and duplicated by the existing
@@ -980,14 +984,14 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         void paste(final ISPObsComponent obsComponent, final TargetObsComp dataObject) {
             if ((obsComponent == null) || (dataObject == null)) return;
 
-            contents.swap().foreach(targetDetails -> {
+            contents.forEach(c -> c.forEachLeft(targetDetails -> {
                 final Option<SPTarget> tOpt = TargetSelection.getTargetForNode(dataObject.getTargetEnvironment(), obsComponent);
                 tOpt.foreach(t -> {
                     t.setTarget(targetDetails.getTarget());
                     t.setMagnitudes(targetDetails.getMag());
                 });
-            });
-            contents.foreach(group -> {
+            }));
+            contents.forEach(c -> c.forEach(group -> {
                 final Option<IndexedGuideGroup> gpOpt = TargetSelection.getIndexedGuideGroupForNode(dataObject.getTargetEnvironment(), obsComponent);
                 gpOpt.foreach(igg -> {
                     final int idx                    = igg.index();
@@ -999,7 +1003,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                     options.zipWithIndex().foreach(tup -> list.add(tup._2() == idx ? newGroup : tup._1()));
                     dataObject.setTargetEnvironment(env.setGuideEnvironment(ge.setOptions(DefaultImList.create(list))));
                 });
-            });
+            }));
         }
     }
 }

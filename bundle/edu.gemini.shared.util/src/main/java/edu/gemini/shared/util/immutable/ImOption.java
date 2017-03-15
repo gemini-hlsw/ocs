@@ -1,5 +1,7 @@
 package edu.gemini.shared.util.immutable;
 
+import java.util.Optional;
+
 public class ImOption {
     public static <T> Option<T> apply(final T value) {
         if (value == null) {
@@ -15,5 +17,9 @@ public class ImOption {
 
     public static <T> Option<T> fromScalaOpt(final scala.Option<T> scalaOpt) {
         return scalaOpt.isDefined() ? new Some<>(scalaOpt.get()) : None.instance();
+    }
+
+    public static <T> Option<T> fromOptional(final Optional<T> optional) {
+        return optional.isPresent() ? new Some<>(optional.get()) : None.instance();
     }
 }

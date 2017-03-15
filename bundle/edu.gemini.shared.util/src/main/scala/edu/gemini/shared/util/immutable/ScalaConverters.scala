@@ -1,5 +1,6 @@
 package edu.gemini.shared.util.immutable
 
+import java.util.function.{Function => JFunction}
 import scala.collection.JavaConverters._
 import scalaz.{\/-, -\/, \/}
 
@@ -29,6 +30,11 @@ object ScalaConverters {
   implicit class ScalaFunction1Ops[T,R](val f: T => R) {
     def asGeminiFunction1: Function1[T,R] =
       new Function1[T,R] {
+        def apply(t: T): R = f(t)
+      }
+
+    def asJavaFunction1: JFunction[T,R] =
+      new JFunction[T,R] {
         def apply(t: T): R = f(t)
       }
   }
@@ -63,18 +69,18 @@ object ScalaConverters {
 
   implicit class ScalaEitherOps[L,R](val e: scala.Either[L,R]) extends AnyVal {
     def asImEither: ImEither[L,R] =
-      e.fold(ImEither.left[L,R], ImEither.right[L,R])
+      e.fold(new Left[L,R](_), new Right[L,R](_))
   }
 
   implicit class ScalazDisjunctionOps[L,R](val e: \/[L,R]) extends AnyVal {
     def asImEither: ImEither[L,R] =
-      e.fold(ImEither.left[L,R], ImEither.right[L,R])
+      e.fold(new Left[L,R](_), new Right[L,R](_))
   }
 
   implicit class ImEitherOps[L,R](val e: ImEither[L,R]) extends AnyVal {
     def asScalaEither: scala.Either[L, R] =
-      e.fold(((l: L) => Left(l)).asGeminiFunction1, ((r: R) => Right(r)).asGeminiFunction1)
+      e.biFold(((l: L) => scala.Left[L,R](l)).asJavaFunction1, ((r: R) => scala.Right[L,R](r)).asJavaFunction1)
     def asScalazDisjunction: \/[L,R] =
-      e.fold(((l: L) => -\/(l)).asGeminiFunction1, ((r: R) => \/-(r)).asGeminiFunction1)
+      e.biFold(((l: L) => -\/(l)).asJavaFunction1, ((r: R) => \/-(r)).asJavaFunction1)
   }
 }
