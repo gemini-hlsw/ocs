@@ -84,7 +84,7 @@ class ImplicitPolicy private (db: IDBDatabaseService, ps: Set[Principal]) {
 
   /** Retrieve the NGO user principal(s) associated with the specified program, if any. */
   def ngoUserPrincipals(id: SPProgramID): List[Principal] =
-    ~spProg(id).map(_.getNGOContactEmail).map(userPrincipalsForEmails)
+    ~spProg(id).map(_.getPrimaryContactEmail).map(userPrincipalsForEmails)
 
   /** Retrieve the Staff user principal(s) associated with the specified program, if any. */
   def staffUserPrincipals(id: SPProgramID): List[Principal] =

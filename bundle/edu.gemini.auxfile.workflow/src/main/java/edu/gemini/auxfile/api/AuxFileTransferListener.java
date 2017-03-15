@@ -1,7 +1,3 @@
-//
-// $Id: AuxFileTransferListener.java 381 2006-06-06 14:00:01Z shane $
-//
-
 package edu.gemini.auxfile.api;
 
 import java.util.EventListener;

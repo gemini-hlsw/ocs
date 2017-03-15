@@ -123,7 +123,7 @@ public final class EdProgram extends OtItemEditor<ISPProgram, SPProgram> impleme
 
         // misc
         _w.secondaryContactBox.setText(getDataObject().getContactPerson());
-        _w.principalContactBox.setText(getDataObject().getNGOContactEmail());
+        _w.principalContactBox.setText(getDataObject().getPrimaryContactEmail());
 
         final TooType tooType = getDataObject().getTooType();
         final String typeStr = tooType.getDisplayValue();
@@ -338,7 +338,7 @@ public final class EdProgram extends OtItemEditor<ISPProgram, SPProgram> impleme
             getDataObject().setPIInfo(new SPProgram.PIInfo(piInfo.getFirstName(),
                     piInfo.getLastName(), piInfo.getEmail(), s, piInfo.getAffiliate()));
         } else if (tbwe == _w.principalContactBox) {
-            getDataObject().setNGOContactEmail(s);
+            getDataObject().setPrimaryContactEmail(s);
         }
     }
 }

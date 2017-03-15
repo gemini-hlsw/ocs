@@ -145,7 +145,7 @@ class LchQueryFunctor(queryType: LchQueryFunctor.QueryType,
         setSemester(prog.scienceSemester.orNull)
         setTitle(spProg.getTitle)
         setContactScientistEmail(spProg.getContactPerson)
-        setNgoEmail(spProg.getNGOContactEmail)
+        setNgoEmail(spProg.getPrimaryContactEmail)
         setNotifyPi(spProg.getNotifyPi.displayValue)
         setRollover(prog.rolloverStatus.displayValue)
 

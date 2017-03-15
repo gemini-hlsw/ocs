@@ -1,6 +1,3 @@
-//
-// $Id: TigraTableRow.java 47188 2012-08-02 18:34:00Z swalker $
-//
 package edu.gemini.dbTools.tigratable;
 
 import edu.gemini.pot.sp.*;
@@ -8,7 +5,6 @@ import edu.gemini.sp.vcs2.VcsService;
 import edu.gemini.spModel.core.SPProgramID;
 import edu.gemini.spModel.gemini.obscomp.SPProgram;
 import edu.gemini.spModel.obs.ObservationStatus;
-import edu.gemini.spModel.obs.SPObservation;
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
@@ -64,7 +60,7 @@ public class TigraTableRow implements Serializable {
             }
 
             // NGO Contacts
-            String[] emailAddrs = _getEmails(progDataObject.getNGOContactEmail());
+            String[] emailAddrs = _getEmails(progDataObject.getPrimaryContactEmail());
             ttr._setNgoEmails(emailAddrs);
             ttr._setNgoContacts(_getContacts(emailAddrs));
 
@@ -103,8 +99,8 @@ public class TigraTableRow implements Serializable {
     private static String[] _getEmails(final String emailAddrsStr) {
         if (emailAddrsStr == null) return EMPTY_STRING_ARRAY;
 
-        final String[] splitEmailAddrs = emailAddrsStr.split("[,; ]"); // some ""
-        final List<String> emailList = new ArrayList<String>();
+        final String[] splitEmailAddrs = emailAddrsStr.split("[,; ]");
+        final List<String> emailList = new ArrayList<>();
         for (final String emailAddr : splitEmailAddrs) {
             final int at = emailAddr.indexOf('@');
             if (at == -1) continue; // some entries will be empty, some are just names
@@ -125,7 +121,7 @@ public class TigraTableRow implements Serializable {
      * username id portion (striping off the @domain part of the address).
      */
     private static String[] _getContacts(final String[] emailAddrs) {
-        final List<String> resList = new ArrayList<String>(emailAddrs.length);
+        final List<String> resList = new ArrayList<>(emailAddrs.length);
 
         for (final String emailAddr : emailAddrs) {
             final int at = emailAddr.trim().indexOf('@');
@@ -141,23 +137,14 @@ public class TigraTableRow implements Serializable {
     /**
      * Gets the observation status for the given observation, if there is one.
      */
-    private static ObservationStatus _getObsStatus(final ISPObservation obs)
-             {
-
-        final SPObservation obsDataObject;
-        obsDataObject = (SPObservation) obs.getDataObject();
-        if (obsDataObject == null) return null;
-
-        final ObservationStatus obsStatus;
-        obsStatus = ObservationStatus.computeFor(obs);
-        return obsStatus;
+    private static ObservationStatus _getObsStatus(final ISPObservation obs) {
+        return obs.getDataObject() == null ? null : ObservationStatus.computeFor(obs);
     }
 
     /**
      * Determines the instrument in use by the given observation.
      */
-    private static void _addInstruments(final TigraTableRow row, final ISPObservation obs)
-             {
+    private static void _addInstruments(final TigraTableRow row, final ISPObservation obs) {
         final List<ISPObsComponent> obsComps = obs.getObsComponents();
         if (obsComps == null) return;
 
@@ -173,7 +160,7 @@ public class TigraTableRow implements Serializable {
     private SPProgramID _progId;
 
     private String _piName;
-    private final List<String> _instruments = new ArrayList<String>();
+    private final List<String> _instruments = new ArrayList<>();
 
     private String[] _ngoContacts;
     private String[] _ngoEmails;
@@ -181,7 +168,7 @@ public class TigraTableRow implements Serializable {
 
     private Date _lastSync;
 
-    private final Map<ObservationStatus, Integer> _obsCounts = new TreeMap<ObservationStatus, Integer>(new ObservationStatusComparator());
+    private final Map<ObservationStatus, Integer> _obsCounts = new TreeMap<>(new ObservationStatusComparator());
     private int _total;
 
     private TigraTableRow() {
