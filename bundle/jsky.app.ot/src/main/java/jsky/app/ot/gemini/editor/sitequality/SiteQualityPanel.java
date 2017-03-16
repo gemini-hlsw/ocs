@@ -1,4 +1,4 @@
-package jsky.app.ot.gemini.editor;
+package jsky.app.ot.gemini.editor.sitequality;
 
 import edu.gemini.shared.gui.ButtonFlattener;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
@@ -19,9 +19,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
-public
-@SuppressWarnings("serial")
-final class SiteQualityPanel extends JPanel {
+public final class SiteQualityPanel extends JPanel {
 
     private final EdCompSiteQuality owner;
     private JFormattedTextField elevMin, elevMax;
@@ -183,6 +181,20 @@ final class SiteQualityPanel extends JPanel {
                     ButtonFlattener.flatten(this);
 				}});
 
+                add(new JButton(Resources.getIcon("eclipse/download.gif")) {{
+                    setToolTipText("Import timing windows from text file");
+                    setFocusable(false);
+                    addActionListener(e -> {
+                        final TimingWindowImporter importer = new TimingWindowImporter(SiteQualityPanel.this);
+                        final List<TimingWindow> tws = importer.promptImport();
+                        final int newIndex = table.getModel().getRowCount();
+                        owner.getDataObject().addTimingWindows(tws);
+                        if (newIndex < table.getModel().getRowCount())
+                            table.changeSelection(newIndex, 0, false, false);
+                    });
+                    ButtonFlattener.flatten(this);
+                }});
+
                 add(new JButton(Resources.getIcon("eclipse/remove.gif")) {{
                     setToolTipText("Remove timing window");
                     setEnabled(false);
@@ -250,6 +262,32 @@ final class SiteQualityPanel extends JPanel {
         elevMin.setEnabled(e);
         elevMax.setEnabled(e);
     }
+
+	private class GBC extends GridBagConstraints {
+		GBC(int gridx, int gridy) {
+			this.gridx = gridx;
+			this.gridy = gridy;
+			insets = new Insets(0, 3, 1, 3);
+			fill = HORIZONTAL;
+			anchor = EAST;
+		}
+
+		GBC(int gridx, int gridy, Insets insets) {
+			this(gridx, gridy, 1, 1, insets);
+		}
+
+		GBC(int gridx, int gridy, int xspan, int yspan, Insets insets) {
+			this(gridx, gridy);
+			this.gridwidth = xspan;
+			this.gridheight = yspan;
+			Insets prev = this.insets;
+			this.insets = new Insets(
+					prev.top + insets.top,
+					prev.left + insets.left,
+					prev.bottom + insets.bottom,
+					prev.right + insets.right);
+		}
+	}
 }
 
 
@@ -359,32 +397,7 @@ class TimingWindowTableModel extends DefaultTableModel implements PropertyChange
 
 
 
-@SuppressWarnings("serial")
-class GBC extends GridBagConstraints {
-	{
-		fill = HORIZONTAL;
-		anchor = EAST;
-	}
-	public GBC(int gridx, int gridy) {
-		this.gridx = gridx;
-		this.gridy = gridy;
-		insets = new Insets(0, 3, 1, 3);
-	}
-	public GBC(int gridx, int gridy, Insets insets) {
-		this(gridx, gridy, 1, 1, insets);
-	}
-	public GBC(int gridx, int gridy, int xspan, int yspan, Insets insets) {
-		this(gridx, gridy);
-		this.gridwidth = xspan;
-		this.gridheight = yspan;
-		Insets prev = this.insets;
-		this.insets = new Insets(
-			prev.top + insets.top,
-			prev.left + insets.left,
-			prev.bottom + insets.bottom,
-			prev.right + insets.right);
-	}
-}
+
 
 
 

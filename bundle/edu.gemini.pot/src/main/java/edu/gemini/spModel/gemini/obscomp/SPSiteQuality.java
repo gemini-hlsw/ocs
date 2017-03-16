@@ -18,6 +18,8 @@ import edu.gemini.spModel.type.SpTypeUtil;
 import java.beans.PropertyDescriptor;
 import java.io.Serializable;
 import java.util.*;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * Site Quality observation component.
@@ -666,24 +668,30 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
         return Collections.unmodifiableList(_timingWindows);
     }
 
-    public void setTimingWindows(List<TimingWindow> windows) {
-        List<TimingWindow> prev = Collections.unmodifiableList(new ArrayList<>(_timingWindows));
-        _timingWindows.clear();
-        _timingWindows.addAll(windows);
-        firePropertyChange(TIMING_WINDOWS_PROP.getName(), prev, getTimingWindows());
-    }
-
-    public void addTimingWindow(TimingWindow tw) {
-        List<TimingWindow> prev = Collections.unmodifiableList(new ArrayList<>(_timingWindows));
-        _timingWindows.add(tw);
-        firePropertyChange(TIMING_WINDOWS_PROP.getName(), prev, getTimingWindows());
-    }
-
-    public void removeTimingWindow(TimingWindow tw) {
-        List<TimingWindow> prev = Collections.unmodifiableList(new ArrayList<>(_timingWindows));
-        if (_timingWindows.remove(tw)) {
+    // Common method to make changes to the timing window list and then fire a property change if appropriate.
+    private void changeTimingWindows(final Supplier<Boolean> changer) {
+        final List<TimingWindow> prev = Collections.unmodifiableList(new ArrayList<>(_timingWindows));
+        if (changer.get())
             firePropertyChange(TIMING_WINDOWS_PROP.getName(), prev, getTimingWindows());
-        }
+    }
+
+    public void setTimingWindows(final List<TimingWindow> tws) {
+        changeTimingWindows(() -> {
+            _timingWindows.clear();
+            return _timingWindows.addAll(tws);
+        });
+    }
+
+    public void addTimingWindows(final List<TimingWindow> tws) {
+        changeTimingWindows(() -> _timingWindows.addAll(tws));
+    }
+
+    public void addTimingWindow(final TimingWindow tw) {
+        changeTimingWindows(() -> _timingWindows.add(tw));
+    }
+
+    public void removeTimingWindow(final TimingWindow tw) {
+        changeTimingWindows(() -> _timingWindows.remove(tw));
     }
 
     /*

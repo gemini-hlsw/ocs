@@ -3,9 +3,9 @@ package edu.gemini.pit.ui.action
 import java.awt.event.InputEvent
 import java.awt.event.KeyEvent
 
-import edu.gemini.pit.ui.util.Chooser
 import edu.gemini.ui.workspace.scala.RichShell
 import edu.gemini.pit.model.Model
+import edu.gemini.shared.gui.Chooser
 
 class SaveAsAction(shell: RichShell[Model]) extends ShellAction(shell, "Save As...", Some(KeyEvent.VK_S), InputEvent.SHIFT_DOWN_MASK) {
 

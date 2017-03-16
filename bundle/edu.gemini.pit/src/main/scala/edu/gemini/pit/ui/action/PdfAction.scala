@@ -3,10 +3,12 @@ package edu.gemini.pit.ui.action
 import edu.gemini.model.p1.immutable.ProposalIo
 import edu.gemini.model.p1.pdf.P1PDF
 import edu.gemini.pit.model.{AppPreferences, Model}
-import edu.gemini.pit.ui.util.{ValueRenderer, Rows, StdModalEditor, Chooser}
+import edu.gemini.pit.ui.util.{Rows, StdModalEditor, ValueRenderer}
 import edu.gemini.ui.workspace.scala.RichShell
-
 import java.util.prefs.Preferences.userNodeForPackage
+
+import edu.gemini.shared.gui.Chooser
+
 import scala.swing._
 
 object PdfAction {

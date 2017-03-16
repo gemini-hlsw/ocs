@@ -1,15 +1,20 @@
 package edu.gemini.pit.ui.action
 
 import java.awt.event.KeyEvent
+
 import edu.gemini.ui.workspace.scala.RichShell
-import edu.gemini.pit.ui.util.{ConversionResultDialog, Chooser}
+import edu.gemini.pit.ui.util.ConversionResultDialog
 import javax.xml.bind.UnmarshalException
 import javax.swing.JOptionPane
-import edu.gemini.pit.model.{ModelConversion, Model}
+
+import edu.gemini.pit.model.{Model, ModelConversion}
 import java.io.File
+
 import scalaz._
 import edu.gemini.model.p1.immutable.Semester
-import swing.{UIElement, Component, Dialog}
+import edu.gemini.shared.gui.Chooser
+
+import swing.{Component, Dialog, UIElement}
 
 class OpenAction(shell: RichShell[Model], handler: ((Model, Option[File]) => Unit)) extends ShellAction(shell, "Open", Some(KeyEvent.VK_O)) {
 

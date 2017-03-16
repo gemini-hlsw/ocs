@@ -1,19 +1,24 @@
 package edu.gemini.pit.ui.editor
 
 import edu.gemini.model.p1.immutable._
+
 import swing.BorderPanel.Position._
 import javax.swing.BorderFactory.createEmptyBorder
 import java.io.File
+
 import TargetImporter._
 import edu.gemini.model.p1.targetio.api._
 import edu.gemini.model.p1.targetio.impl._
 import edu.gemini.pit.ui.util.gface.SimpleListViewer
+
 import scalaz.Lens
 import swing._
 import event.ButtonClicked
 import edu.gemini.pit.ui.util._
 import java.awt.CardLayout
 import javax.swing.JOptionPane
+
+import edu.gemini.shared.gui.Chooser
 
 object TargetImporter {
 

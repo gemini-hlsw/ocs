@@ -1,15 +1,11 @@
-package edu.gemini.pit.ui.util
+package edu.gemini.shared.gui
 
 import java.io.File
 import java.util.prefs.Preferences.userNodeForPackage
-
-import javax.swing.JFileChooser.APPROVE_OPTION
-import javax.swing.JOptionPane.WARNING_MESSAGE
-import javax.swing.JOptionPane.YES_NO_OPTION
-import javax.swing.JOptionPane.YES_OPTION
-import javax.swing.JOptionPane.showConfirmDialog
-import javax.swing.filechooser.FileFilter
 import javax.swing.JFileChooser
+import javax.swing.JFileChooser.APPROVE_OPTION
+import javax.swing.JOptionPane.{WARNING_MESSAGE, YES_NO_OPTION, YES_OPTION, showConfirmDialog}
+import javax.swing.filechooser.FileFilter
 
 /**
  * A file chooser that remembers (persistently) the last location used. This value is remembered on a per-class
