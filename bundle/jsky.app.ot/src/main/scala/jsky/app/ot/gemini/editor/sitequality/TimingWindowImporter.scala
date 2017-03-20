@@ -1,6 +1,7 @@
 package jsky.app.ot.gemini.editor.sitequality
 
-import java.awt.Component
+import java.awt.event.{ActionEvent, ActionListener}
+import java.awt.{BorderLayout, Component, Dialog, FlowLayout}
 import java.io.File
 import java.text.ParsePosition
 import java.time.{Instant, ZoneId}
@@ -8,18 +9,20 @@ import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAccessor
 import java.util.Collections
 import java.util.logging.Logger
+import javax.swing._
 
 import edu.gemini.shared.gui.Chooser
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.TimingWindow
 
 import scala.collection.JavaConverters._
 import scala.util.parsing.combinator.RegexParsers
-
 import scalaz._
 import Scalaz._
 
 
 // Prompt the user for a file and then parse it and return a list of TimingWindows.
+// Since the calling class is Java and uses Java components, to get the modality right, we have to use Java Swing / AWT.
+// If we try to wrap the AWT component in a Scala Swing component, we are globally modal, which is not what we want.
 class TimingWindowImporter(owner: Component) {
   import TimingWindowParser._
 
@@ -27,44 +30,52 @@ class TimingWindowImporter(owner: Component) {
 
   def promptImport(): java.util.List[TimingWindow] = {
     val fileChooser = new Chooser[TimingWindowImporter]("importer", owner)
-    fileChooser.chooseOpen("Timing Windows (.tw)", "tw").fold(Collections.emptyList[TimingWindow]())(f => parseTimingWindows(f).asJava)
+    fileChooser.chooseOpen("Timing Windows (.tw)", "tw").
+      fold(Collections.emptyList[TimingWindow]())(f => parseTimingWindowsFromFile(f).asJava)
   }
 
-  private def parseTimingWindows(twf: File): List[TimingWindow] = {
-    def logParseResult[_](input: String, pr: ParseResult[_]): Unit = pr match {
-      case Success(result, _) => log.info   (s"TimingWindow parse success: '$input'")
-      case _                  => log.warning(s"TimingWindow parse fail:    '$input'")
+  private def parseTimingWindowsFromFile(twf: File): List[TimingWindow] = {
+    val results = parseTimingWindows(scala.io.Source.fromFile(twf).getLines.toList, log.some)
+
+    val failures = results.failures
+    if (failures.nonEmpty)
+      new ParseFailureDialog(failures).setVisible(true)
+    results.successes
+  }
+
+  // Irritating again: must use JDialog.
+  private class ParseFailureDialog(failures: List[TimingWindowParseFailure])
+    extends JDialog(JOptionPane.getFrameForComponent(owner), "Timing Window Parsing Errors", Dialog.ModalityType.APPLICATION_MODAL) {
+    dlg =>
+    add(new JLabel("The following timing window entries could not be parsed:"), BorderLayout.NORTH)
+
+    val parseFailureTable = {
+      val rows = failures.map {
+        case TimingWindowParseFailure(idx, input) => Array[AnyRef](new Integer(idx), input)
+      }.toArray
+      val cols = Array[AnyRef]("Row #", "Input")
+      new JTable(rows, cols) {
+        setRowSelectionAllowed(false)
+        setColumnSelectionAllowed(false)
+        setAutoResizeMode(JTable.AUTO_RESIZE_OFF)
+        getColumnModel.getColumn(0).setPreferredWidth(50)
+        getColumnModel.getColumn(1).setPreferredWidth(400)
+      }
     }
+    add(new JScrollPane(parseFailureTable), BorderLayout.CENTER)
 
-    // Read in the file, trim lines, convert all whitespace to single characters (this is necessary as per the commment
-    // in the temporalParser method in the companion object), determine line numbers, filter out comments (#) and empty
-    // lines, and then attempt to parse the rest.
-    val results = for {
-      l <- scala.io.Source.fromFile(twf).getLines.map(_.trim.replaceAll("""\s+""", " ")).zipWithIndex
-      (input, idx) = l
-      if !input.isEmpty && !input.startsWith("#")
-    } yield {
-      val result = parse(timingWindowParser, input)
-      logParseResult(input, result)
-      (idx, input, result)
-    }
+    val okButton = new JButton("OK")
+    val buttonPanel = new JPanel(new FlowLayout)
+    buttonPanel.add(okButton)
+    add(buttonPanel, BorderLayout.SOUTH)
 
-    // Partition the results into successes and failures.
-    // successes: we want just the list of timing windows.
-    // failures:  we want the line numbers and input strings.
-    val (successes, failures) = results.partition {
-      case (_, _, Success(_, _)) => true
-      case _                     => false
-    }.bimap(
-      _.map { case (_, _, Success(tw, _)) => tw },
-      _.map { case (idx, input, _) => (idx, input) }
-    )
+    okButton.addActionListener(new ActionListener() {
+      override def actionPerformed(evt: ActionEvent): Unit = {
+        dlg.setVisible(false)
+      }
+    })
 
-    // If there are failures, display in a dialog.
-    // TODO: display errors.
-
-    // Return the successes.
-    successes.toList
+    pack()
   }
 }
 
@@ -79,7 +90,7 @@ object TimingWindowParser extends RegexParsers {
 
   // A general parser to parse a temporal accessor from a DateTimeFormatter.
   // NOTE: DateTimeFormatter spacing is RIGID and must be adhered to exactly.
-  def temporalParser(df: DateTimeFormatter, failMsg: String): Parser[TemporalAccessor] = new Parser[TemporalAccessor] {
+  private def temporalParser(df: DateTimeFormatter, failMsg: String): Parser[TemporalAccessor] = new Parser[TemporalAccessor] {
     override def apply(in: Input): ParseResult[TemporalAccessor] = {
       val source = in.source
       val offset = in.offset
@@ -116,9 +127,48 @@ object TimingWindowParser extends RegexParsers {
   // -1  = infinite repetitions.
   //  0  = no repetitions.
   // x>0 = x repetitions.
-  private def repetitionsParser: Parser[Int] = """(-1)|0|([1-9]\d*)\s*""".r ^^ { _.toInt }
+  private def repetitionsParser: Parser[Int] = """(-1)|0|([1-9]\d*)""".r ^^ { _.toInt }
 
-  def timingWindowParser: Parser[TimingWindow] = dateParser ~ (whitespace ~> hhmmParser) ~ ((whitespace ~> repetitionsParser)?) ~ ((whitespace ~> hhmmssParser)?) <~ (whitespace?) <~ """$""".r ^^ {
-    case b ~ d ~ r ~ p => new TimingWindow(b, d, r.getOrElse(0), p.getOrElse(0))
+  def timingWindowParser: Parser[TimingWindow] = dateParser ~ ((whitespace ~> hhmmParser)?) ~ ((whitespace ~> repetitionsParser)?) ~ ((whitespace ~> hhmmssParser)?) <~ (whitespace?) <~ "$".r ^^ {
+    case b ~ d ~ r ~ p => new TimingWindow(b, d.getOrElse(-1), r.getOrElse(0), p.getOrElse(0))
+  }
+
+  // Timing window parsing results.
+  final case class TimingWindowParseFailure(idx: Int, input: String)
+  final case class TimingWindowResults(successes: List[TimingWindow], failures: List[TimingWindowParseFailure])
+
+  // Method to actually parse the timing windows in a list.
+  // Placed here to facilitate access in test cases.
+  def parseTimingWindows(twfLines: List[String], logger: Option[Logger] = None): TimingWindowResults = {
+    // Read in the file, trim lines, convert all whitespace to single characters (this is necessary as per the commment
+    // in the temporalParser method in the companion object), determine line numbers, filter out comments (#) and empty
+    // lines, and then attempt to parse the rest.
+    val results = for {
+      l <- twfLines.map(s => """\s+""".r.replaceAllIn(s.trim, " ")).zipWithIndex
+      (input, idx) = l
+      if !input.isEmpty && !input.startsWith("#")
+    } yield {
+      val result = parse(timingWindowParser, input)
+
+      logger.foreach { log => result match {
+        case Success(_, _) => log.info   (s"TimingWindow parse success: '$input'")
+        case _             => log.warning(s"TimingWindow parse fail:    '$input'")
+      }}
+
+      (idx, input, result)
+    }
+
+    // Partition the results into successes and failures.
+    // successes: we want just the list of timing windows.
+    // failures:  we want the line numbers and input strings.
+    val (successes, failures) = results.partition {
+      case (_, _, Success(_, _)) => true
+      case _ => false
+    }.bimap(
+      _.map { case (_, _, Success(tw, _)) => tw },
+      _.map { case (idx, input, _) => TimingWindowParseFailure(idx, input) }
+    )
+
+    TimingWindowResults(successes, failures)
   }
 }
