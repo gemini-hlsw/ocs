@@ -164,13 +164,15 @@ public final class SiteQualityPanel extends JPanel {
 				weighty = 50;
 			}});
 
+            final Frame sqpFrame = (Frame) SwingUtilities.getWindowAncestor(this);
+
             add(new Box(BoxLayout.LINE_AXIS) {{
 				add(new JButton(Resources.getIcon("eclipse/add.gif")) {{
                     setToolTipText("Add new timing window");
                     setFocusable(false);
                     addActionListener(e -> {
 						TimingWindow tw = new TimingWindow();
-						TimingWindowDialog twd = new TimingWindowDialog((Frame) SwingUtilities.getWindowAncestor(SiteQualityPanel.this));
+						TimingWindowDialog twd = new TimingWindowDialog(sqpFrame);
 						tw = twd.showEdit(tw);
 						if (tw != null) {
 							owner.getDataObject().addTimingWindow(tw);
@@ -186,11 +188,15 @@ public final class SiteQualityPanel extends JPanel {
                     setFocusable(false);
                     addActionListener(e -> {
                         final TimingWindowImporter importer = new TimingWindowImporter(SiteQualityPanel.this);
-                        final List<TimingWindow> tws = importer.promptImport();
+						final TimingWindowParser.TimingWindowParseResults results = importer.promptImport();
+
                         final int newIndex = table.getModel().getRowCount();
-                        owner.getDataObject().addTimingWindows(tws);
+                        owner.getDataObject().addTimingWindows(results.successesAsJava());
                         if (newIndex < table.getModel().getRowCount())
                             table.changeSelection(newIndex, 0, false, false);
+
+                        if (results.failures().nonEmpty())
+                            new ParseFailureDialog(sqpFrame, results.failures()).setVisible(true);
                     });
                     ButtonFlattener.flatten(this);
                 }});

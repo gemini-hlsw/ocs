@@ -1,18 +1,18 @@
 package jsky.app.ot.gemini.editor.sitequality
 
 import java.awt.event.{ActionEvent, ActionListener}
-import java.awt.{BorderLayout, Component, Dialog, FlowLayout}
+import java.awt.{Component, BorderLayout, FlowLayout, Frame}
 import java.io.File
 import java.text.ParsePosition
 import java.time.{Instant, ZoneId}
 import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAccessor
-import java.util.Collections
 import java.util.logging.Logger
 import javax.swing._
 
 import edu.gemini.shared.gui.Chooser
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.TimingWindow
+import jsky.app.ot.gemini.editor.sitequality.TimingWindowParser.TimingWindowParseFailure
 
 import scala.collection.JavaConverters._
 import scala.util.parsing.combinator.RegexParsers
@@ -28,57 +28,51 @@ class TimingWindowImporter(owner: Component) {
 
   private val log = Logger.getLogger(classOf[TimingWindowImporter].getName)
 
-  def promptImport(): java.util.List[TimingWindow] = {
-    val fileChooser = new Chooser[TimingWindowImporter]("importer", owner)
-    fileChooser.chooseOpen("Timing Windows (.tw)", "tw").
-      fold(Collections.emptyList[TimingWindow]())(f => parseTimingWindowsFromFile(f).asJava)
-  }
+  def promptImport(): TimingWindowParseResults =
+    new Chooser[TimingWindowImporter]("importer", owner).chooseOpen("Timing Windows (.tw)", "tw").
+      fold(TimingWindowParseResults.empty)(parseTimingWindowsFromFile)
 
-  private def parseTimingWindowsFromFile(twf: File): List[TimingWindow] = {
-    val results = parseTimingWindows(scala.io.Source.fromFile(twf).getLines.toList, log.some)
-
-    val failures = results.failures
-    if (failures.nonEmpty)
-      new ParseFailureDialog(failures).setVisible(true)
-    results.successes
-  }
-
-  // Irritating again: must use JDialog.
-  private class ParseFailureDialog(failures: List[TimingWindowParseFailure])
-    extends JDialog(JOptionPane.getFrameForComponent(owner), "Timing Window Parsing Errors", Dialog.ModalityType.APPLICATION_MODAL) {
-    dlg =>
-    add(new JLabel("The following timing window entries could not be parsed:"), BorderLayout.NORTH)
-
-    val parseFailureTable = {
-      val rows = failures.map {
-        case TimingWindowParseFailure(idx, input) => Array[AnyRef](new Integer(idx), input)
-      }.toArray
-      val cols = Array[AnyRef]("Row #", "Input")
-      new JTable(rows, cols) {
-        setRowSelectionAllowed(false)
-        setColumnSelectionAllowed(false)
-        setAutoResizeMode(JTable.AUTO_RESIZE_OFF)
-        getColumnModel.getColumn(0).setPreferredWidth(50)
-        getColumnModel.getColumn(1).setPreferredWidth(400)
-      }
-    }
-    add(new JScrollPane(parseFailureTable), BorderLayout.CENTER)
-
-    val okButton = new JButton("OK")
-    val buttonPanel = new JPanel(new FlowLayout)
-    buttonPanel.add(okButton)
-    add(buttonPanel, BorderLayout.SOUTH)
-
-    okButton.addActionListener(new ActionListener() {
-      override def actionPerformed(evt: ActionEvent): Unit = {
-        dlg.setVisible(false)
-      }
-    })
-
-    pack()
-  }
+  private def parseTimingWindowsFromFile(twf: File): TimingWindowParseResults =
+    parseTimingWindows(scala.io.Source.fromFile(twf).getLines.toList, log.some)
 }
 
+// Irritating again: must use JDialog.
+class ParseFailureDialog(owner: Frame, failures: List[TimingWindowParseFailure])
+  extends JDialog(owner, "Timing Window Parsing Errors", true) {
+  dlg =>
+  add(new JLabel("The following timing window entries could not be parsed:"), BorderLayout.NORTH)
+
+  val parseFailureTable = {
+    val rows = failures.map {
+      case TimingWindowParseFailure(idx, input) => Array[AnyRef](new Integer(idx), input)
+    }.toArray
+    val cols = Array[AnyRef]("Row #", "Input")
+    new JTable(rows, cols) {
+      setRowSelectionAllowed(false)
+      setColumnSelectionAllowed(false)
+      setAutoResizeMode(JTable.AUTO_RESIZE_OFF)
+      getColumnModel.getColumn(0).setPreferredWidth(50)
+      getColumnModel.getColumn(1).setPreferredWidth(400)
+    }
+  }
+  add(new JScrollPane(parseFailureTable), BorderLayout.CENTER)
+
+  val okButton = new JButton("OK")
+  val buttonPanel = new JPanel(new FlowLayout)
+  buttonPanel.add(okButton)
+  add(buttonPanel, BorderLayout.SOUTH)
+
+  okButton.addActionListener(new ActionListener() {
+    override def actionPerformed(evt: ActionEvent): Unit = {
+      dlg.setVisible(false)
+    }
+  })
+
+  setLocationRelativeTo(getOwner)
+  pack()
+}
+
+// Parser for TimingWindows.
 object TimingWindowParser extends RegexParsers {
   // Whitespace is important, so do not skip it!
   override val skipWhitespace = false
@@ -135,11 +129,17 @@ object TimingWindowParser extends RegexParsers {
 
   // Timing window parsing results.
   final case class TimingWindowParseFailure(idx: Int, input: String)
-  final case class TimingWindowResults(successes: List[TimingWindow], failures: List[TimingWindowParseFailure])
+  final case class TimingWindowParseResults(successes: List[TimingWindow], failures: List[TimingWindowParseFailure]) {
+    def successesAsJava: java.util.List[TimingWindow] = successes.asJava
+    def failuresAsJava:  java.util.List[TimingWindowParseFailure] = failures.asJava
+  }
+  object TimingWindowParseResults {
+    lazy val empty = TimingWindowParseResults(Nil, Nil)
+  }
 
   // Method to actually parse the timing windows in a list.
   // Placed here to facilitate access in test cases.
-  def parseTimingWindows(twfLines: List[String], logger: Option[Logger] = None): TimingWindowResults = {
+  def parseTimingWindows(twfLines: List[String], logger: Option[Logger] = None): TimingWindowParseResults = {
     // Read in the file, trim lines, convert all whitespace to single characters (this is necessary as per the commment
     // in the temporalParser method in the companion object), determine line numbers, filter out comments (#) and empty
     // lines, and then attempt to parse the rest.
@@ -169,6 +169,6 @@ object TimingWindowParser extends RegexParsers {
       _.map { case (idx, input, _) => TimingWindowParseFailure(idx, input) }
     )
 
-    TimingWindowResults(successes, failures)
+    TimingWindowParseResults(successes, failures)
   }
 }
