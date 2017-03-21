@@ -291,23 +291,23 @@ def sraaphorst(version: Version) = AppConfig(
      "-XX:MaxPermSize=196M",
      "-Dedu.gemini.site=south",
      "-Dcron.*.edu.gemini.dbTools.html.ftpHost=localhost",
-     "-Dcron.*.edu.gemini.dbTools.html.ftpDestDir=/Users/sraaphor/.spdb/sftp",
+     "-Dcron.*.edu.gemini.dbTools.html.ftpDestDir=/Users/sraaphorst/.spdb/sftp",
      "-Dcron.archive.edu.gemini.dbTools.html.ftpHost=localhost",
-     "-Dcron.archive.edu.gemini.dbTools.html.ftpDestDir=/Users/sraaphor/cron",
+     "-Dcron.archive.edu.gemini.dbTools.html.ftpDestDir=/Users/sraaphorst/cron",
      "-Dcron.reports.edu.gemini.spdb.reports.public.host=localhost",
-     "-Dcron.reports.edu.gemini.spdb.reports.public.remotedir=/Users/sraaphor/cron"
+     "-Dcron.reports.edu.gemini.spdb.reports.public.remotedir=/Users/sraaphorst/cron"
   ),
   props = Map(
     "edu.gemini.smartgcal.host"            -> "localhost",
-    "edu.gemini.spdb.dir"                  -> "/Users/sraaphor/.spdb/",
-    "edu.gemini.auxfile.root"              -> "/Users/sraaphor/.auxfile",
+    "edu.gemini.spdb.dir"                  -> "/Users/sraaphorst/.spdb/",
+    "edu.gemini.auxfile.root"              -> "/Users/sraaphorst/.auxfile",
     "edu.gemini.util.trpc.name"            -> "Sebastian's ODB (Test)",
     "edu.gemini.auxfile.fits.dest"         -> "/gemsoft/var/data/ictd/test/GS@SEMESTER@/@PROG_ID@",
     "edu.gemini.auxfile.other.dest"        -> "/gemsoft/var/data/finder/GSqueue/Finders-Test/@SEMESTER@/@PROG_ID@",
     "edu.gemini.auxfile.fits.host"         -> "gsconfig.gemini.edu",
     "edu.gemini.dataman.gsa.summit.host"   -> "cpofits-lv1new.cl.gemini.edu",
-    "edu.gemini.dbTools.archive.directory" -> "/Users/sraaphor/tmp/archiver",
-    "osgi.shell.telnet.ip"                 -> "172.16.77.56"
+    "edu.gemini.dbTools.archive.directory" -> "/Users/sraaphorst/tmp/archiver",
+    "osgi.shell.telnet.ip"                 -> "172.16.77.244"
   )
 ) extending List(with_gogo(version), sraaphorst_credentials(version))
 
