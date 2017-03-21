@@ -850,7 +850,7 @@ public class GmosCommonType {
         E2V("E2V", E2V_NORTH_PIXEL_SIZE, E2V_SOUTH_PIXEL_SIZE, E2V_SHUFFLE_OFFSET, 6144, 4608, 4),
         HAMAMATSU("HAMAMATSU", HAMAMATSU_PIXEL_SIZE, HAMAMATSU_PIXEL_SIZE, HAMAMATSU_SHUFFLE_OFFSET, 6144, 4224, 5);
 
-        public static final DetectorManufacturer DEFAULT = E2V;
+        public static final DetectorManufacturer DEFAULT = HAMAMATSU;
         public static final ItemKey KEY = new ItemKey(INSTRUMENT_KEY, "detectorManufacturer");
 
         private final String _displayValue;

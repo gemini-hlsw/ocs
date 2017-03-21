@@ -74,7 +74,6 @@ public class InstGmosSouth extends
         setFilter(GmosSouthType.FilterSouth.DEFAULT);
         setFPUnit(GmosSouthType.FPUnitSouth.DEFAULT);
         setStageMode(GmosSouthType.StageModeSouth.FOLLOW_XYZ);
-        setDetectorManufacturer(GmosCommonType.DetectorManufacturer.HAMAMATSU);
     }
 
     public Map<String, PropertyDescriptor> getProperties() {
