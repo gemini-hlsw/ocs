@@ -1,7 +1,7 @@
 package jsky.app.ot.gemini.editor.sitequality
 
 import java.awt.event.{ActionEvent, ActionListener}
-import java.awt.{Component, BorderLayout, FlowLayout, Frame}
+import java.awt.{BorderLayout, Component, Dimension, FlowLayout, Frame}
 import java.io.File
 import java.text.ParsePosition
 import java.time.{Instant, ZoneId}
@@ -37,38 +37,53 @@ class TimingWindowImporter(owner: Component) {
 }
 
 // Irritating again: must use JDialog.
-class ParseFailureDialog(owner: Frame, failures: List[TimingWindowParseFailure])
-  extends JDialog(owner, "Timing Window Parsing Errors", true) {
-  dlg =>
-  add(new JLabel("The following timing window entries could not be parsed:"), BorderLayout.NORTH)
+class ParseFailureDialog(owner: Frame, failures: List[TimingWindowParseFailure]) extends JDialog(owner, "Timing Window Parsing Errors", true) { dlg =>
+  // Error label.
+  add(new JLabel("The following timing window entries could not be parsed:") {
+    setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10))
+  }, BorderLayout.NORTH)
 
-  val parseFailureTable = {
-    val rows = failures.map {
-      case TimingWindowParseFailure(idx, input) => Array[AnyRef](new Integer(idx), input)
-    }.toArray
-    val cols = Array[AnyRef]("Row #", "Input")
-    new JTable(rows, cols) {
-      setRowSelectionAllowed(false)
-      setColumnSelectionAllowed(false)
-      setAutoResizeMode(JTable.AUTO_RESIZE_OFF)
-      getColumnModel.getColumn(0).setPreferredWidth(50)
-      getColumnModel.getColumn(1).setPreferredWidth(400)
+  // Table of lines that could not be parsed.
+  add(new JPanel(new FlowLayout()) {
+    setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10))
+
+    val parseFailureTable = {
+      val rows = failures.map {
+        // Add 1 to start labeling with row 1 instead of row 0.
+        case TimingWindowParseFailure(idx, input) => Array[AnyRef](new Integer(idx + 1), input)
+      }.toArray
+      val cols = Array[AnyRef]("Row #", "Input")
+
+      new JTable(rows, cols) {
+        setRowSelectionAllowed(false)
+        setColumnSelectionAllowed(false)
+
+        val tc = getColumnModel.getColumn(0)
+        tc.setMinWidth(50)
+        tc.setMaxWidth(50)
+        tc.setPreferredWidth(50)
+      }
     }
-  }
-  add(new JScrollPane(parseFailureTable), BorderLayout.CENTER)
 
-  val okButton = new JButton("OK")
-  val buttonPanel = new JPanel(new FlowLayout)
-  buttonPanel.add(okButton)
-  add(buttonPanel, BorderLayout.SOUTH)
+    val scrollPane = new JScrollPane(parseFailureTable, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER)
+    scrollPane.setPreferredSize(new Dimension(500, 116))
+    add(scrollPane)
+  }, BorderLayout.CENTER)
 
-  okButton.addActionListener(new ActionListener() {
-    override def actionPerformed(evt: ActionEvent): Unit = {
-      dlg.setVisible(false)
-    }
-  })
+  // OK button to dismiss dialog.
+  add(new JPanel(new FlowLayout()) {
+    val okButton = new JButton("OK")
+    add(okButton)
 
+    okButton.addActionListener(new ActionListener() {
+      override def actionPerformed(evt: ActionEvent): Unit =
+        dlg.setVisible(false)
+    })
+  }, BorderLayout.SOUTH)
+
+  // Display.
   setLocationRelativeTo(getOwner)
+  setResizable(false)
   pack()
 }
 
@@ -140,7 +155,7 @@ object TimingWindowParser extends RegexParsers {
   // Method to actually parse the timing windows in a list.
   // Placed here to facilitate access in test cases.
   def parseTimingWindows(twfLines: List[String], logger: Option[Logger] = None): TimingWindowParseResults = {
-    // Read in the file, trim lines, convert all whitespace to single characters (this is necessary as per the commment
+    // Read in the file, trim lines, convert all whitespace to single characters (this is necessary as per the comment
     // in the temporalParser method in the companion object), determine line numbers, filter out comments (#) and empty
     // lines, and then attempt to parse the rest.
     val results = for {
