@@ -19,7 +19,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
-public final class SiteQualityPanel extends JPanel {
+final class SiteQualityPanel extends JPanel {
 
     private final EdCompSiteQuality owner;
     private JFormattedTextField elevMin, elevMax;
@@ -170,16 +170,12 @@ public final class SiteQualityPanel extends JPanel {
 				add(new JButton(Resources.getIcon("eclipse/add.gif")) {{
                     setToolTipText("Add new timing window");
                     setFocusable(false);
-                    addActionListener(e -> {
-						TimingWindow tw = new TimingWindow();
-						TimingWindowDialog twd = new TimingWindowDialog(sqpFrame);
-						tw = twd.showEdit(tw);
-						if (tw != null) {
+                    addActionListener(e ->
+						new TimingWindowDialog(sqpFrame).openNew().foreach(tw -> {
 							owner.getDataObject().addTimingWindow(tw);
 							int index = table.getModel().getRowCount() - 1;
-							table.changeSelection(index, 0, false, false); // magic
-						}
-					});
+							table.changeSelection(index, 0, false, false);
+						}));
                     ButtonFlattener.flatten(this);
 				}});
 
@@ -208,19 +204,19 @@ public final class SiteQualityPanel extends JPanel {
 					table.getSelectionModel().addListSelectionListener(e -> setEnabled(table.getSelectedRowCount() > 0));
 
 					addActionListener(e -> {
-						int firstRow = table.getSelectedRow();
-						int[] rows = table.getSelectedRows();
-						SPSiteQuality sq = owner.getDataObject();
-						List<TimingWindow> all = sq.getTimingWindows();
-						List<TimingWindow> accum = new ArrayList<>();
-						for (int row : rows) {
-							accum.add(all.get(row));
-						}
-						for (TimingWindow tw: accum)
-							sq.removeTimingWindow(tw);
+						final SPSiteQuality sq = owner.getDataObject();
 
-						if (firstRow >= table.getRowCount()) firstRow = table.getRowCount() - 1;
-						if (firstRow >= 0) table.changeSelection(firstRow, 0, false, false);
+						final int oldFirstRow = table.getSelectedRow();
+						final int[] selectedIndices = table.getSelectedRows();
+						final List<TimingWindow> selected = new ArrayList<>();
+						final List<TimingWindow> all = sq.getTimingWindows();
+						for (final int idx : selectedIndices) {
+							selected.add(all.get(idx));
+						}
+						selected.forEach(sq::removeTimingWindow);
+
+						final int newFirstRow = (oldFirstRow < table.getRowCount()) ? oldFirstRow : table.getRowCount() - 1;
+						if (newFirstRow >= 0) table.changeSelection(newFirstRow, 0, false, false);
 					});
                     ButtonFlattener.flatten(this);
 				}});
@@ -231,29 +227,21 @@ public final class SiteQualityPanel extends JPanel {
                     setFocusable(false);
                     table.getSelectionModel().addListSelectionListener(e -> setEnabled(table.getSelectedRowCount() == 1));
                     addActionListener(e -> {
-						int firstRow = table.getSelectedRow();
-						SPSiteQuality sq = owner.getDataObject();
-						List<TimingWindow> all = sq.getTimingWindows();
-						TimingWindow prev = all.get(firstRow);
-						TimingWindowDialog twd = new TimingWindowDialog((Frame) SwingUtilities.getWindowAncestor(SiteQualityPanel.this));
-						TimingWindow next = twd.showEdit(prev);
-						if (next != null) {
+						final int firstRow = table.getSelectedRow();
+						final TimingWindow prev = owner.getDataObject().getTimingWindows().get(firstRow);
+						new TimingWindowDialog(sqpFrame).openEdit(prev).foreach(tw -> {
 							owner.getDataObject().removeTimingWindow(prev);
-							owner.getDataObject().addTimingWindow(next);
-							int index = table.getModel().getRowCount() - 1;
-							table.changeSelection(index, 0, false, false); // magic
-						}
+							owner.getDataObject().addTimingWindow(tw);
+							table.changeSelection(table.getModel().getRowCount() - 1, 0, false, false);
+						});
                     });
                     ButtonFlattener.flatten(this);
                 }});
             }}, new GBC(0, 9, 2, 1, new Insets(5 , 0, 0, 0)));
-
-
 		}});
-
 	}
 
-	String getElevationWarning(SPSiteQuality sq) {
+	private String getElevationWarning(SPSiteQuality sq) {
 		ElevationConstraintType ect = sq.getElevationConstraintType();
 		if (ect == ElevationConstraintType.NONE) return null;
 		if (sq.getElevationConstraintMin() < ect.getMin()) return "The minimum allowed value is " + ect.getMin() + ".";
@@ -297,13 +285,8 @@ public final class SiteQualityPanel extends JPanel {
 }
 
 
-
-
-
-@SuppressWarnings("serial")
 class TimingWindowTableModel extends DefaultTableModel implements PropertyChangeListener {
-
-	enum Cols {
+	private enum Cols {
 		Window, Duration, Repeats, Period
 	}
 
@@ -318,7 +301,7 @@ class TimingWindowTableModel extends DefaultTableModel implements PropertyChange
 
 	private SPSiteQuality sq;
 
-	public void setSiteQuality(SPSiteQuality siteQuality) {
+	void setSiteQuality(SPSiteQuality siteQuality) {
 		if (sq != null) sq.removePropertyChangeListener(this);
 		sq = siteQuality;
 		if (sq != null) sq.addPropertyChangeListener(this);
@@ -396,7 +379,6 @@ class TimingWindowTableModel extends DefaultTableModel implements PropertyChange
 		long time = tw.getStart();
         return dateFormat.format(new Date(time));
 	}
-
 }
 
 

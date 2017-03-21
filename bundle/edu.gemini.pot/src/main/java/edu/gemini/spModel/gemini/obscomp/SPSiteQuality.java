@@ -121,7 +121,7 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
 
     }
 
-    static class TimingWindowList extends LinkedList<TimingWindow> {
+    private static class TimingWindowList extends LinkedList<TimingWindow> {
 
         private static final long serialVersionUID = 2L;
         private static final String NAME = "timing-window-list";
