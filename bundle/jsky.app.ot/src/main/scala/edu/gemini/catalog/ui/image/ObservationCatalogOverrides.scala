@@ -90,7 +90,7 @@ object ObservationCatalogOverrides {
   /**
     * Store the overridden catalog for a given node
     */
-  def storeOverride(key: SPNodeKey, c: ImageCatalog, wv: Wavelength): Task[Unit] = {
+  def storeOverride(key: SPNodeKey, c: ImageCatalog, wv: Option[Wavelength]): Task[Unit] = {
     def writeOverrides(overridesFile: Path, overrides: Overrides) = Task.delay {
       this.synchronized {
         \/.fromTryCatchNonFatal {
@@ -101,7 +101,7 @@ object ObservationCatalogOverrides {
 
     // Updates the overrides file, removing the existing entries if needed
     def newOverrides(overrides: Overrides): Overrides =
-      if (ImageCatalog.catalogForWavelength(wv.some) =/= c) {
+      if (ImageCatalog.catalogForWavelength(wv) =/= c) {
         overrides.copy(overrides = CatalogOverride(key, c) :: overrides.overrides.filter(_.key != key))
       } else {
         overrides.copy(overrides = overrides.overrides.filter(_.key != key))
