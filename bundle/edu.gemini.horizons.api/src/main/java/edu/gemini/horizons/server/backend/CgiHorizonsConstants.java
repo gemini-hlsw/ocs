@@ -1,12 +1,11 @@
 package edu.gemini.horizons.server.backend;
 
-//$Id: CgiHorizonsConstants.java 895 2007-07-24 20:18:09Z anunez $
 /**
  * Define a set of constants to be used to talk to the CGI
  * offered by the JPL Horizons service
  */
 public final class CgiHorizonsConstants {
-    public static final String HORIZONS_PROTOCOL = "http://";
+    public static final String HORIZONS_PROTOCOL = "https://";
     public static final String HORIZONS_SERVER = "ssd.jpl.nasa.gov";
     public static final String HORIZONS_CGI = "horizons_batch.cgi";
     public static final String HORIZONS_URL = HORIZONS_PROTOCOL + HORIZONS_SERVER + "/" + HORIZONS_CGI;
