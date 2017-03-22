@@ -182,8 +182,7 @@ object TimingWindowParser extends RegexParsers {
     // in the temporalParser method in the companion object), determine line numbers, filter out comments (#) and empty
     // lines, and then attempt to parse the rest.
     val results = for {
-      l <- twfLines.map(s => """\s+""".r.replaceAllIn(s.trim, " ")).zipWithIndex
-      (input, idx) = l
+      (input, idx) <- twfLines.map(s => """\s+""".r.replaceAllIn(s.trim, " ")).zipWithIndex
       if !input.isEmpty && !input.startsWith("#")
     } yield {
       val result = parse(timingWindowParser, input)
