@@ -28,7 +28,9 @@ class TimingWindowImporter(owner: Component) {
 
   private val log = Logger.getLogger(classOf[TimingWindowImporter].getName)
 
-  def promptImport(): TimingWindowParseResults =
+  // Open the import dialog and perform the import.
+  // Errors can be displayed in the TimingWindowParseFailureDialog.
+  def openImport(): TimingWindowParseResults =
     new Chooser[TimingWindowImporter]("importer", owner).chooseOpen("Timing Windows (.tw)", "tw").
       fold(TimingWindowParseResults.empty)(parseTimingWindowsFromFile)
 
@@ -36,8 +38,10 @@ class TimingWindowImporter(owner: Component) {
     parseTimingWindows(scala.io.Source.fromFile(twf).getLines.toList, log.some)
 }
 
-// Irritating again: must use JDialog.
-class ParseFailureDialog(owner: Frame, failures: List[TimingWindowParseFailure]) extends JDialog(owner, "Timing Window Parsing Errors", true) { dlg =>
+
+// Irritating again: must use Java Swing for correct dialog modality from calling Java code.
+class TimingWindowParseFailureDialog(owner: Frame, failures: List[TimingWindowParseFailure]) extends JDialog(owner, "Timing Window Parsing Errors", true) {
+  dlg =>
   // Error label.
   add(new JLabel("The following timing window entries could not be parsed:") {
     setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10))
@@ -81,11 +85,11 @@ class ParseFailureDialog(owner: Frame, failures: List[TimingWindowParseFailure])
     })
   }, BorderLayout.SOUTH)
 
-  // Display.
   setLocationRelativeTo(getOwner)
   setResizable(false)
   pack()
 }
+
 
 // Parser for TimingWindows.
 object TimingWindowParser extends RegexParsers {
@@ -116,12 +120,21 @@ object TimingWindowParser extends RegexParsers {
   // Formerly, in SimpleDateFormat, parsing would allow for arbitrary whitespace when a whitespace character was in the format.
   // This is not the case with DateTimeFormatter parsing, so we must pre-process strings to change all whitespace sequences
   // into single spaces.
+  private[sitequality] val dateTimeFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.of("UTC"))
   private def dateParser: Parser[Long] =
     temporalParser(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.of("UTC")), "Failed to parse date") ^^ { case ta => Instant.from(ta).toEpochMilli }
 
   // Convert hhhh:mm:ss as a duration to a Long in ms.
   private def hhmmssToLong(hh: Int, mm: Int, ss: Int = 0): Long =
     1000 * (60 * (60 * hh + mm) + ss)
+
+  // Convenience method for spec testing.
+  private[sitequality] def hhmmssStringToLong(hhmmss: String): Long =
+    hhmmss.split(':').toList.map(_.toInt) match {
+      case hh :: mm :: Nil       => hhmmssToLong(hh, mm)
+      case hh :: mm :: ss :: Nil => hhmmssToLong(hh, mm, ss)
+      case _                     => -1L
+    }
 
   // Parse an hhhh:mm:ss duration / period and return the result in ms.
   private def hhmmssParser: Parser[Long] = (arbitraryDigits <~ ":") ~ (twoDigits <~ ":") ~ twoDigits ^^ {
@@ -138,8 +151,18 @@ object TimingWindowParser extends RegexParsers {
   // x>0 = x repetitions.
   private def repetitionsParser: Parser[Int] = """(-1)|0|([1-9]\d*)""".r ^^ { _.toInt }
 
-  def timingWindowParser: Parser[TimingWindow] = dateParser ~ ((whitespace ~> hhmmParser)?) ~ ((whitespace ~> repetitionsParser)?) ~ ((whitespace ~> hhmmssParser)?) <~ (whitespace?) <~ "$".r ^^ {
-    case b ~ d ~ r ~ p => new TimingWindow(b, d.getOrElse(-1), r.getOrElse(0), p.getOrElse(0))
+  // Format:
+  // Begin (UTC)       Duration  Repetitions  Period
+  // yyyy-MM-dd hh:mm  hh:mm     ####         hhh:mm:ss
+  //
+  // NOTES:
+  // 1. Duration:    00:00 indicates remaining open forever.
+  // 2. Repetitions: Optional. Default is -1, i.e. repeat forever, and 0 indicates never repeat.
+  //                 Ignored if Duration is forever.
+  // 3. Period:      Optional. Default is 00:00:00.
+  //                 Ignored if Duration is forever and Repetitions is not present, ignored, or set to never repeat (0).
+  def timingWindowParser: Parser[TimingWindow] = dateParser ~ (whitespace ~> hhmmParser) ~ ((whitespace ~> repetitionsParser)?) ~ ((whitespace ~> hhmmssParser)?) <~ (whitespace?) <~ "$".r ^^ {
+    case b ~ d ~ r ~ p => new TimingWindow(b, (d == 0) ? -1L | d, r.getOrElse(0), p.getOrElse(0))
   }
 
   // Timing window parsing results.
@@ -175,7 +198,7 @@ object TimingWindowParser extends RegexParsers {
 
     // Partition the results into successes and failures.
     // successes: we want just the list of timing windows.
-    // failures:  we want the line numbers and input strings.
+    // failures:  we want the line numbers and input strings that failed.
     val (successes, failures) = results.partition {
       case (_, _, Success(_, _)) => true
       case _ => false

@@ -184,7 +184,7 @@ final class SiteQualityPanel extends JPanel {
                     setFocusable(false);
                     addActionListener(e -> {
                         final TimingWindowImporter importer = new TimingWindowImporter(SiteQualityPanel.this);
-						final TimingWindowParser.TimingWindowParseResults results = importer.promptImport();
+						final TimingWindowParser.TimingWindowParseResults results = importer.openImport();
 
                         final int newIndex = table.getModel().getRowCount();
                         owner.getDataObject().addTimingWindows(results.successesAsJava());
@@ -192,7 +192,7 @@ final class SiteQualityPanel extends JPanel {
                             table.changeSelection(newIndex, 0, false, false);
 
                         if (results.failures().nonEmpty())
-                            new ParseFailureDialog(sqpFrame, results.failures()).setVisible(true);
+                            new TimingWindowParseFailureDialog(sqpFrame, results.failures()).setVisible(true);
                     });
                     ButtonFlattener.flatten(this);
                 }});

@@ -14,11 +14,11 @@ import edu.gemini.spModel.type.DisplayableSpType;
 import edu.gemini.spModel.type.ObsoletableSpType;
 import edu.gemini.spModel.type.SequenceableSpType;
 import edu.gemini.spModel.type.SpTypeUtil;
+import jdk.nashorn.internal.runtime.Timing;
 
 import java.beans.PropertyDescriptor;
 import java.io.Serializable;
 import java.util.*;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -62,7 +62,7 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
         private final long start, duration, period;
         private final int repeat;
 
-        public TimingWindow(long start, long duration, int repeat, long period) {
+        public TimingWindow(final long start, final long duration, final int repeat, final long period) {
             this.start = start;
             this.duration = duration;
             this.repeat = repeat;
@@ -74,7 +74,7 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
             this(System.currentTimeMillis(), 24 * MS_PER_HOUR, 0, 0);
         }
 
-        TimingWindow(ParamSet params) {
+        TimingWindow(final ParamSet params) {
             this(Pio.getLongValue(params, START_PROP, 0),
                  Pio.getLongValue(params, DURATION_PROP, 0),
                  Pio.getIntValue(params, REPEAT_PROP, 0),
@@ -97,8 +97,8 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
             return start;
         }
 
-        ParamSet getParamSet(PioFactory factory) {
-            ParamSet params = factory.createParamSet(NAME);
+        ParamSet getParamSet(final PioFactory factory) {
+            final ParamSet params = factory.createParamSet(NAME);
             Pio.addLongParam(factory, params, START_PROP, start);
             Pio.addLongParam(factory, params, DURATION_PROP, duration);
             Pio.addIntParam(factory, params, REPEAT_PROP, repeat);
@@ -114,11 +114,21 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
         public TimingWindow clone() {
             try {
                 return (TimingWindow) super.clone();
-            } catch (CloneNotSupportedException e) {
+            } catch (final CloneNotSupportedException e) {
                 throw new Error("This was supposed to be impossible.");
             }
         }
 
+        @Override
+        public boolean equals(final Object other) {
+            if (other == null || !(other instanceof TimingWindow))
+                return false;
+            final TimingWindow tw = (TimingWindow) other;
+            return  start == tw.start &&
+                    duration == tw.duration &&
+                    period == tw.period &&
+                    repeat == tw.repeat;
+        }
     }
 
     private static class TimingWindowList extends LinkedList<TimingWindow> {
@@ -126,34 +136,30 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
         private static final long serialVersionUID = 2L;
         private static final String NAME = "timing-window-list";
 
-        ParamSet getParamSet(PioFactory factory) {
-            ParamSet params = factory.createParamSet(NAME);
-            for (TimingWindow tw: this)
-                params.addParamSet(tw.getParamSet(factory));
+        ParamSet getParamSet(final PioFactory factory) {
+            final ParamSet params = factory.createParamSet(NAME);
+            forEach(tw -> params.addParamSet(tw.getParamSet(factory)));
             return params;
         }
 
-        void setParamSet(ParamSet params) {
+        void setParamSet(final ParamSet params) {
             clear();
             if (params != null) {
-                for (ParamSet ps: params.getParamSets())
-                    add(new TimingWindow(ps));
+                params.getParamSets().forEach(ps -> add(new TimingWindow(ps)));
             }
         }
 
         @Override
         public TimingWindowList clone() {
-            TimingWindowList ret = new TimingWindowList();
-            for (TimingWindow tw: this)
-                ret.add(tw.clone());
+            final TimingWindowList ret = new TimingWindowList();
+            forEach(tw -> ret.add(tw.clone()));
             return ret;
         }
-
     }
 
     @Override
     public SPSiteQuality clone() {
-        SPSiteQuality ret = (SPSiteQuality) super.clone();
+        final SPSiteQuality ret = (SPSiteQuality) super.clone();
         ret._timingWindows = _timingWindows.clone();
         return ret;
     }
@@ -162,7 +168,7 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
         byte getPercentage();
     }
 
-    private static <T extends PercentageContainer> Option<T> read(String strVal, T[] values) {
+    private static <T extends PercentageContainer> Option<T> read(final String strVal, final T[] values) {
         if (strVal.length() < 3) return None.instance();
 
         String tail = strVal.substring(2);
@@ -175,7 +181,7 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
             return None.instance();
         }
 
-        for (T val : values) {
+        for (final T val : values) {
             if (val.getPercentage() == perc) return new Some<>(val);
         }
         return None.instance();
