@@ -125,12 +125,12 @@ final class ImageCatalogPanel(imageDisplay: CatalogImageDisplay) {
     }
   }
 
-  private def requestImage(catalog: ImageCatalog) = {
+  private def requestImage(catalog: ImageCatalog) =
     // Read the current key and wavelength on the tpe
     for {
         tpe <- TpeContext.fromTpeManager
         key <- tpe.obsKey
-        wv  <- ObsWavelengthExtractor.extractObsWavelength(tpe)
+        wv  =   ObsWavelengthExtractor.extractObsWavelength(tpe)
       } {
         // Update the image and store the override
         val actions =
@@ -140,7 +140,6 @@ final class ImageCatalogPanel(imageDisplay: CatalogImageDisplay) {
           } yield ()
         actions.unsafePerformSync
       }
-  }
 
   private def updateSelection(catalog: ImageCatalog): Unit =
     catalogRows.find(_.feedback.catalog === catalog).foreach { _.button.selected = true }

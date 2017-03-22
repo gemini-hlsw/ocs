@@ -33,10 +33,9 @@ object ObsWavelengthExtractor {
   private def extractObsWavelength(ctx: InstrumentContext, obs: ISPObservation): Option[Wavelength] = {
     // Extract a double value from a string in the configuration
     def extractDoubleFromString(c: ConfigSequence, key: ItemKey): Throwable \/ Double =
-      for {
-        s <- extractAs[String](c, key)
-        d <- \/.fromTryCatchNonFatal(s.toDouble)
-      } yield d
+      extractAs[String](c, key).flatMap(s => \/.fromTryCatchNonFatal(s.toDouble))
+        .orElse(extractAs[java.lang.Double](c, key).map(_.doubleValue()))
+        .orElse(extractAs[Double](c, key))
 
     // Helper method that enforces that whatever we get from the config
     // for the given key is not null and matches the type we expect.
