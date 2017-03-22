@@ -14,7 +14,6 @@ import edu.gemini.spModel.type.DisplayableSpType;
 import edu.gemini.spModel.type.ObsoletableSpType;
 import edu.gemini.spModel.type.SequenceableSpType;
 import edu.gemini.spModel.type.SpTypeUtil;
-import jdk.nashorn.internal.runtime.Timing;
 
 import java.beans.PropertyDescriptor;
 import java.io.Serializable;
