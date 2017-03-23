@@ -61,8 +61,14 @@ class Horizons private (/*host: String, port: Int,*/ site: Site, start: Date, en
             val options = for {
               row <- table.getResults.asScala.map(_.asScala.toSeq)
               map = Map(header.zip(row): _*)
-              id <- map.get("ID#")
-              name <- map.get("Name")
+
+              // The first column can be named either ID# or Record #, depending on the object type.
+              id <- map.get("ID#").orElse(map.get("Record #"))
+
+              name <- (for {
+                epoch <- map.get("Epoch-yr")
+                name  <- map.get("Name")
+              } yield s"$name epoch:$epoch").orElse(map.get("Name"))
             } yield new Choice(cat, name, id)
 
             f(if (options.isEmpty) NotFound(id) else Success(Nil, options.toList))
