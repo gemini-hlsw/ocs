@@ -52,7 +52,7 @@ class TimingWindowDialog extends JDialog {
     private boolean cancelled;
 
 
-    TimingWindowDialog(final Frame owner) throws HeadlessException {
+    TimingWindowDialog(final Frame owner) {
         super(owner, "Edit Timing Window", true);
         setResizable(false);
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
