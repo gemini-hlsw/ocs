@@ -294,21 +294,21 @@ class TimingWindowTableModel extends DefaultTableModel implements PropertyChange
 	private static final long MS_PER_MINUTE = MS_PER_SECOND * 60;
 	private static final long MS_PER_HOUR = MS_PER_MINUTE * 60;
 
-    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
-    static {
-    	dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-    }
+    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z") {{
+    	setTimeZone(TimeZone.getTimeZone("UTC"));
+    }};
 
 	private SPSiteQuality sq;
 
-	void setSiteQuality(SPSiteQuality siteQuality) {
+	void setSiteQuality(final SPSiteQuality siteQuality) {
 		if (sq != null) sq.removePropertyChangeListener(this);
 		sq = siteQuality;
 		if (sq != null) sq.addPropertyChangeListener(this);
 		fireTableDataChanged();
 	}
 
-	public void propertyChange(PropertyChangeEvent evt) {
+	@Override
+	public void propertyChange(final PropertyChangeEvent evt) {
 		fireTableDataChanged();
 	}
 
@@ -328,29 +328,29 @@ class TimingWindowTableModel extends DefaultTableModel implements PropertyChange
 	}
 
 	@Override
-	public Object getValueAt(int row, int column) {
+	public Object getValueAt(final int row, final int column) {
 		try {
-			TimingWindow tw = sq.getTimingWindows().get(row);
+			final TimingWindow tw = sq.getTimingWindows().get(row);
 			switch (Cols.values()[column]) {
-			case Window: return formatWindow(tw);
-			case Duration: return formatDuration(tw);
-			case Repeats: return formatRepeat(tw);
-			case Period: return formatPeriod(tw);
+				case Window: return formatWindow(tw);
+				case Duration: return formatDuration(tw);
+				case Repeats: return formatRepeat(tw);
+				case Period: return formatPeriod(tw);
 			}
 			return null;
-		} catch (IndexOutOfBoundsException ioobe) {
+		} catch (final IndexOutOfBoundsException ioobe) {
 			// can happen in rare race conditions. not a problem.
 			return null;
 		}
 	}
 
 	@Override
-	public boolean isCellEditable(int row, int column) {
+	public boolean isCellEditable(final int row, final int column) {
 		return false;
 	}
 
-	private static String formatDuration(TimingWindow tw) {
-		long ms = tw.getDuration();
+	private static String formatDuration(final TimingWindow tw) {
+		final long ms = tw.getDuration();
 		if (ms == TimingWindow.WINDOW_REMAINS_OPEN_FOREVER) return "forever";
 		return String.format("%02d:%02d", ms / MS_PER_HOUR, (ms % MS_PER_HOUR) / MS_PER_MINUTE);
 	}
@@ -365,18 +365,18 @@ class TimingWindowTableModel extends DefaultTableModel implements PropertyChange
 		return String.format("%02d:%02d:%02d", hh, mm, ss);
 	}
 
-	private static String formatRepeat(TimingWindow tw) {
+	private static String formatRepeat(final TimingWindow tw) {
 		if (tw.getDuration() == TimingWindow.WINDOW_REMAINS_OPEN_FOREVER) return null;
 		switch (tw.getRepeat()) {
-		case -1: return "forever";
-		case 0: return "never";
-		case 1: return "1 time";
-		default: return tw.getRepeat() + " times";
+			case -1: return "forever";
+			case 0: return "never";
+			case 1: return "1 time";
+			default: return tw.getRepeat() + " times";
 		}
 	}
 
-	private static String formatWindow(TimingWindow tw) {
-		long time = tw.getStart();
+	private static String formatWindow(final TimingWindow tw) {
+		final long time = tw.getStart();
         return dateFormat.format(new Date(time));
 	}
 }
