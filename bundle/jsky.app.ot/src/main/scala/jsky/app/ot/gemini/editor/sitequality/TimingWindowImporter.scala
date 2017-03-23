@@ -56,7 +56,7 @@ class TimingWindowParseFailureDialog(owner: Frame, failures: List[TimingWindowPa
         // Add 1 to start labeling with row 1 instead of row 0.
         case TimingWindowParseFailure(idx, input) => Array[AnyRef](new Integer(idx + 1), input)
       }.toArray
-      val cols = Array[AnyRef]("Row #", "Input")
+      val cols = Array[AnyRef]("Line#", "Input")
 
       new JTable(rows, cols) {
         setRowSelectionAllowed(false)
@@ -97,9 +97,10 @@ object TimingWindowParser extends RegexParsers {
   override val skipWhitespace = false
 
   // Simple parsers.
+  // timeDigits must be a valid mm or ss field containing two digits.
   private def whitespace: Parser[String] = """\s+""".r
   private def arbitraryDigits: Parser[Int] = """\d+""".r ^^ { _.toInt }
-  private def twoDigits: Parser[Int] = """\d{2}""".r ^^ { _.toInt }
+  private def timeDigits: Parser[Int] = """[0-5]\d""".r ^^ { _.toInt }
 
   // A general parser to parse a temporal accessor from a DateTimeFormatter.
   // NOTE: DateTimeFormatter spacing is RIGID and must be adhered to exactly.
@@ -137,11 +138,11 @@ object TimingWindowParser extends RegexParsers {
     }
 
   // Parse an hhhh:mm:ss duration / period and return the result in ms.
-  private def hhmmssParser: Parser[Long] = (arbitraryDigits <~ ":") ~ (twoDigits <~ ":") ~ twoDigits ^^ {
+  private def hhmmssParser: Parser[Long] = (arbitraryDigits <~ ":") ~ (timeDigits <~ ":") ~ timeDigits ^^ {
     case hh ~ mm ~ ss => hhmmssToLong(hh, mm, ss)
   }
 
-  private def hhmmParser: Parser[Long] = (arbitraryDigits <~ ":") ~ twoDigits ^^ {
+  private def hhmmParser: Parser[Long] = (arbitraryDigits <~ ":") ~ timeDigits ^^ {
     case hh ~ mm => hhmmssToLong(hh, mm)
   }
 
@@ -182,7 +183,8 @@ object TimingWindowParser extends RegexParsers {
     // in the temporalParser method in the companion object), determine line numbers, filter out comments (#) and empty
     // lines, and then attempt to parse the rest.
     val results = for {
-      (input, idx) <- twfLines.map(s => """\s+""".r.replaceAllIn(s.trim, " ")).zipWithIndex
+      (line, idx) <- twfLines.zipWithIndex
+      input = """\s+""".r.replaceAllIn(line.trim, " ")
       if !input.isEmpty && !input.startsWith("#")
     } yield {
       val result = parse(timingWindowParser, input)
@@ -192,7 +194,7 @@ object TimingWindowParser extends RegexParsers {
         case _             => log.warning(s"TimingWindow parse fail:    '$input'")
       }}
 
-      (idx, input, result)
+      (idx, line, result)
     }
 
     // Partition the results into successes and failures.
