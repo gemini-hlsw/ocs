@@ -378,20 +378,3 @@ class TimingWindowTableModel extends DefaultTableModel implements PropertyChange
         return dateFormat.format(Instant.ofEpochMilli(tw.getStart()));
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
