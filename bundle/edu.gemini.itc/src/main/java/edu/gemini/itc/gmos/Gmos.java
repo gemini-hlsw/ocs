@@ -293,7 +293,7 @@ public abstract class Gmos extends Instrument implements BinningProvider, Spectr
 
             if (isIfu2() && gp.ccdType() == GmosCommonType.DetectorManufacturer.HAMAMATSU) {
                 throw new RuntimeException("The GMOS ITC does not yet support IFU-2 with the Hamamatsu CCDs.\n" +
-                "Please use the ITC in 1-slit mode to estimate sensitivity and see the GMOS IFU web pages for a discussion of spectral overlap.");
+                "Please use the ITC in 1-slit mode to estimate sensitivity, and see the GMOS IFU web pages for a discussion of spectral overlap.");
             }
 
         }
