@@ -6,7 +6,7 @@ package edu.gemini.horizons.server.backend;
  * offered by the JPL Horizons service
  */
 public final class CgiHorizonsConstants {
-    public static final String HORIZONS_PROTOCOL = "http://";
+    public static final String HORIZONS_PROTOCOL = "https://";
     public static final String HORIZONS_SERVER = "ssd.jpl.nasa.gov";
     public static final String HORIZONS_CGI = "horizons_batch.cgi";
     public static final String HORIZONS_URL = HORIZONS_PROTOCOL + HORIZONS_SERVER + "/" + HORIZONS_CGI;
