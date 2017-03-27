@@ -7,11 +7,14 @@ import jsky.app.ot.gemini.obscat.OTBrowserPresetsPersistence
 import jsky.app.ot.vcs.VcsOtClient
 import jsky.app.ot.viewer.plugin.PluginRegistry
 
-import scalaz._, Scalaz._
+import scalaz._
+import Scalaz._
 import edu.gemini.pot.spdb.DBLocalDatabase
 import edu.gemini.util.trpc.auth.TrpcKeyChain
 import edu.gemini.util.security.auth.keychain.Action._
 import java.io.File
+import java.security.{Provider, Security}
+import java.util.logging.{Level, Logger}
 
 import edu.gemini.catalog.image.ImageCacheWatcher
 import edu.gemini.sp.vcs.reg.impl.VcsRegistrarImpl
