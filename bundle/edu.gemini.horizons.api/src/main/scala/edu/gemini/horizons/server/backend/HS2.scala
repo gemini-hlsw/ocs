@@ -25,6 +25,8 @@ import scalaz.effect.{IO, Resource}
 
 // work-in-progress; this will get a better name and will probably move elsewhere
 object HorizonsService2 {
+  private val LOG = Logger.getLogger(this.getName)
+
   // Lets any remote endpoint be connectable
   private val hostnameVerifier: HostnameVerifier = new HostnameVerifier {
      def verify(s: String, sslSession: SSLSession) = true
@@ -354,7 +356,7 @@ object HorizonsService2 {
       }
     }
 
-  implicit def GetMethodResource: Resource[ResponseStream] =
+  implicit def ResponseStreamResource: Resource[ResponseStream] =
     new Resource[ResponseStream] {
       def close(m: ResponseStream): IO[Unit] =
         IO(m.in.close)
@@ -369,6 +371,7 @@ object HorizonsService2 {
     HorizonsService2.synchronized {
       val queryParams = params.map { case (k, v) => s"$k=${URLEncoder.encode(v, ConnectionCharset.default.displayName())}" }.mkString("&")
       val url: URL = new URL(s"$baseURL?$queryParams")
+      LOG.info(s"Horizons request $url")
       val conn = url.openConnection().asInstanceOf[HttpsURLConnection]
       conn.setHostnameVerifier(hostnameVerifier)
       conn.setSSLSocketFactory(GemSslSocketFactory.get)
