@@ -44,11 +44,13 @@ object HorizonsService2 {
     }
 
     def get(conn: URLConnection): Charset =
-      Option(conn.getContentType).getOrElse("").replace(" ", "").split(';').find {
-        _.startsWith("charset=")
-      }.map {
-        _.substring("charset=".length)
-      }.map(Charset.forName).getOrElse(default)
+      Option(conn.getContentType).flatMap { charset =>
+        val sets = for {
+          cs <- charset.replace(" ", "").split(';').toList
+          if cs.startsWith("charset=")
+        } yield Charset.forName(cs.substring("charset=".length))
+        sets.headOption
+      }.getOrElse(default)
   }
 
   case class ResponseStream(in: InputStream, charset: Charset)
@@ -363,7 +365,7 @@ object HorizonsService2 {
         IO(m.in.close)
     }
 
-  private def readRemote(baseURL: String, params: Map[String, String]): ResponseStream = {
+  private def unsafeReadRemote(baseURL: String, params: Map[String, String]): ResponseStream = {
     // This must be globally synchronized because HORIZONS only allows one request at a time
     // from a given IP address (or so it seems). An open question is whether or not it's a
     // problem that the lifetime of the GetMethod extends out of this block; it is possible
@@ -386,9 +388,9 @@ object HorizonsService2 {
   // provided function.
   private def horizonsRequest[A](params: Map[String, String])(f: ResponseStream => IO[A]): HS2[A] =
     EitherT {
-      IO(readRemote(CgiHorizonsConstants.HORIZONS_URL, params)).flatMap(f).catchSomeLeft {
-        case ex: HorizonsException => ex.printStackTrace();HorizonsError(ex).some
-        case ex: IOException       => ex.printStackTrace();HorizonsError(HorizonsException.create(ex)).some
+      IO(unsafeReadRemote(CgiHorizonsConstants.HORIZONS_URL, params)).flatMap(f).catchSomeLeft {
+        case ex: HorizonsException => HorizonsError(ex).some
+        case ex: IOException       => HorizonsError(HorizonsException.create(ex)).some
       }
     }
 
