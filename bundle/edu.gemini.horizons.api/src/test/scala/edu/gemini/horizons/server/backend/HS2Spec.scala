@@ -27,11 +27,11 @@ object HS2Spec extends Specification with ScalaCheck {
     }
 
     "handle multiple results" in {
-      runSearch(Search.Comet("hu")).map(_.take(5)) must_== \/-(List(      
-        Row(HD.Comet("67P"), "Churyumov-Gerasimenko"), 
-        Row(HD.Comet("106P"), "Schuster"), 
-        Row(HD.Comet("130P"), "McNaught-Hughes"), 
-        Row(HD.Comet("178P"), "Hug-Bell"), 
+      runSearch(Search.Comet("hu")).map(_.take(5)) must_== \/-(List(
+        Row(HD.Comet("67P"), "Churyumov-Gerasimenko"),
+        Row(HD.Comet("106P"), "Schuster"),
+        Row(HD.Comet("130P"), "McNaught-Hughes"),
+        Row(HD.Comet("178P"), "Hug-Bell"),
         Row(HD.Comet("C/1880 Y1"), "Pechule")
       ))
     }
@@ -40,13 +40,13 @@ object HS2Spec extends Specification with ScalaCheck {
       runSearch(Search.Comet("hubble")) must_== \/-(List(
         Row(HD.Comet("C/1937 P1"), "Hubble")
       ))
-    }   
+    }
 
     "handle single result (Format 2) 1P/Halley pattern" in {
       runSearch(Search.Comet("halley")) must_== \/-(List(
         Row(HD.Comet("1P"), "Halley")
       ))
-    }   
+    }
 
   }
 
@@ -70,13 +70,13 @@ object HS2Spec extends Specification with ScalaCheck {
       runSearch(Search.Asteroid("sedna")) must_== \/-(List(
         Row(HD.AsteroidNewStyle("2003 VB12"), "Sedna")
       ))
-    }   
+    }
 
     "handle single result (Format 2) 29 Amphitrite" in {
       runSearch(Search.Asteroid("amphitrite")) must_== \/-(List(
         Row(HD.AsteroidOldStyle(29), "Amphitrite")
       ))
-    }   
+    }
 
     "handle single result (Format 3) (2016 GB222)" in {
       runSearch(Search.Asteroid("2016 GB222")) must_== \/-(List(
@@ -124,7 +124,7 @@ object HS2Spec extends Specification with ScalaCheck {
       runSearch(Search.MajorBody("europa")) must_== \/-(List(
         Row(HD.MajorBody(502), "Europa")
       ))
-    }   
+    }
 
   }
 
