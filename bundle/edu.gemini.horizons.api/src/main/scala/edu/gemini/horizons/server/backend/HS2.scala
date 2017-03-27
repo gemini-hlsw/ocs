@@ -19,20 +19,22 @@ import edu.gemini.util.ssl.GemSslSocketFactory
 import scala.collection.JavaConverters._
 import scala.io.Source
 import scala.util.matching.Regex
+import scala.concurrent.duration._
+
 import scalaz.Scalaz._
 import scalaz._
 import scalaz.effect.{IO, Resource}
 
 // work-in-progress; this will get a better name and will probably move elsewhere
 object HorizonsService2 {
-  private val LOG = Logger.getLogger(this.getName)
+  private val LOG = Logger.getLogger("HorizonsService2")
 
   // Lets any remote endpoint be connectable
   private val hostnameVerifier: HostnameVerifier = new HostnameVerifier {
      def verify(s: String, sslSession: SSLSession) = true
   }
 
-  private val timeout = 3 * 60000  // 1 min ?
+  private val timeout = 1.minute.toMillis.toInt
 
   private object ConnectionCharset {
     val default = Charset.forName("UTF-8")
@@ -111,7 +113,6 @@ object HorizonsService2 {
 
     // And finally
     horizonsRequestLines(queryParams) >>= parseLines
-
   }
 
   /** Convenience method; looks up ephemeris for the current semester. */
