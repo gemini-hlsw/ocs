@@ -424,7 +424,7 @@ def odbtest(version: Version) = AppConfig(
   props = Map(
     "edu.gemini.auxfile.root"                    -> "/home/software/ugemini/auxfile",
     "edu.gemini.dbTools.archive.directory"       -> "/home/software/ugemini/spdb/spdb.archive",
-    "edu.gemini.dbTools.tcs.ephemeris.directory" -> "/gemsoft/var/ephemerides",
+    "edu.gemini.dbTools.tcs.ephemeris.directory" -> "/home/software/ugemini/ephemerides",
     "edu.gemini.smartgcal.svnRootUrl"            -> "http://source.gemini.edu/gcal/branches/development/calibrations",
     "edu.gemini.spdb.dir"                        -> "/home/software/ugemini/spdb/spdb.active",
     "edu.gemini.util.trpc.name"                  -> "Gemini ODB (Test)"
@@ -516,14 +516,15 @@ def gnagsodb(version: Version) = AppConfig(
     "-Xmx2G"
   ),
   props = Map(
-    "edu.gemini.auxfile.fits.dest"         -> "/gemsoft/var/data/ictd/GN@SEMESTER@/@PROG_ID@",
-    "edu.gemini.auxfile.fits.host"         -> "gnconfig.gemini.edu",
-    "edu.gemini.auxfile.other.dest"        -> "/gemsoft/var/data/finder/GNqueue/Finders/@SEMESTER@/@PROG_ID@",
-    "edu.gemini.auxfile.root"              -> "/home/software/.auxfile",
-    "edu.gemini.dataman.gsa.summit.host"   -> "fits.hi.gemini.edu",
-    "edu.gemini.oodb.mail.smtpHost"        -> "smtp.hi.gemini.edu",
-    "edu.gemini.util.trpc.name"            -> "Gemini North AGS ODB",
-    "osgi.shell.telnet.ip"                 -> "10.1.46.11"
+    "edu.gemini.dbTools.tcs.ephemeris.directory" -> "/home/software/.ephemerides",
+    "edu.gemini.auxfile.fits.dest"               -> "/gemsoft/var/data/ictd/GN@SEMESTER@/@PROG_ID@",
+    "edu.gemini.auxfile.fits.host"               -> "gnconfig.gemini.edu",
+    "edu.gemini.auxfile.other.dest"              -> "/gemsoft/var/data/finder/GNqueue/Finders/@SEMESTER@/@PROG_ID@",
+    "edu.gemini.auxfile.root"                    -> "/home/software/.auxfile",
+    "edu.gemini.dataman.gsa.summit.host"         -> "fits.hi.gemini.edu",
+    "edu.gemini.oodb.mail.smtpHost"              -> "smtp.hi.gemini.edu",
+    "edu.gemini.util.trpc.name"                  -> "Gemini North AGS ODB",
+    "osgi.shell.telnet.ip"                       -> "10.1.46.11"
   )
 ) extending List(odbproduction(version), gnodb_credentials(version))
 
@@ -573,6 +574,4 @@ def gsodb(version: Version) = AppConfig(
   bundles = List(
     BundleSpec(50, "edu.gemini.smartgcal.servlet", version)
   )
-) extending List(odbproduction(version), gsodbtest_credentials(version))
-
-
+) extending List(odbproduction(version), gsodb_credentials(version))
