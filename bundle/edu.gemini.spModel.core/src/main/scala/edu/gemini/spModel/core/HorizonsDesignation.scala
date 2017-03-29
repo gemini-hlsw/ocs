@@ -4,7 +4,7 @@ package edu.gemini.spModel.core
 import scalaz._, Scalaz._
 
 /**
- * Unique Horizons designation, which should allow for reproduceable ephemeris queries <b>if</b> the
+ * Unique Horizons designation, which should allow for reproducible ephemeris queries <b>if</b> the
  * values passed to the constructors are extracted correctly from search results. See `horizons.md`
  * in the bundle source for more information.
  */

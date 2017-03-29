@@ -5,7 +5,6 @@ import edu.gemini.spModel.core.Site;
 import java.io.Serializable;
 import java.util.Date;
 
-//$Id: HorizonsQuery.java 649 2006-12-03 22:42:30Z anunez $
 /**
  * A description of a query to be executed in the Horizons service. A query is
  * executed in a {@link edu.gemini.horizons.api.IQueryExecutor}
@@ -38,30 +37,10 @@ public final class HorizonsQuery implements Serializable {
      */
     private StepUnits _stepUnits = StepUnits.TIME_MINUTES;
 
-
-    /**
-     * Defines the object Type. The object type can
-     * be used to narrow the query in the database.
-     */
-    public static enum ObjectType {
-        /**
-         * A comet
-         */
-        COMET,
-        /**
-         * A minor body, usually an asteroid
-         */
-        MINOR_BODY,
-        /**
-         * A Major body like a planet or the Moon
-         */
-        MAJOR_BODY
-    }
-
     /**
      * Defines the step unit, which may be time or space.
      */
-    public static enum StepUnits {
+    public enum StepUnits {
 
     	TIME_MINUTES(1, Integer.MAX_VALUE, "m"),
     	SPACE_ARCSECONDS(60, 3600, "VAR")
@@ -77,7 +56,7 @@ public final class HorizonsQuery implements Serializable {
     	// associated suffix for horizons queries
     	public final String suffix;
 
-		private StepUnits(int minValue, int maxValue, String suffix) {
+		StepUnits(int minValue, int maxValue, String suffix) {
 			this.minValue = minValue;
 			this.maxValue = maxValue;
 			this.suffix = suffix;
@@ -89,11 +68,6 @@ public final class HorizonsQuery implements Serializable {
      * Site configuration
      */
     private Site _site = Site.GN;
-
-    /**
-     * The object type to look.
-     */
-    private ObjectType _type;
 
 
     /**
@@ -120,25 +94,6 @@ public final class HorizonsQuery implements Serializable {
      */
     public void setObjectId(String object) {
         _objectId = object;
-    }
-
-    /**
-     * Specify the object type the client is intending to retrieve information for
-     * @param type The type of the object. <code>null</code> means any kind of
-     * object
-     */
-    public void setObjectType(ObjectType type) {
-        _type = type;
-    }
-
-    /**
-     * Retrieves the object type this query was configured with. The object type
-     * can be used to narrow the results of a given query
-     * @return the object type used in this query. If the query didn't specify any
-     * kind of type, then <code>null</code> will be retrieved.
-     */
-    public ObjectType getObjectType() {
-        return _type;
     }
 
     /**
