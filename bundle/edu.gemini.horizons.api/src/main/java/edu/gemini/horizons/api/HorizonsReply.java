@@ -3,9 +3,6 @@ package edu.gemini.horizons.api;
 import java.io.Serializable;
 import java.util.Vector;
 import java.util.List;
-//$Id: HorizonsReply.java 630 2006-11-28 19:32:20Z anunez $
-
-import edu.gemini.horizons.api.HorizonsQuery.ObjectType;
 
 /**
  * Representation of an answer from the Horizons Service. Clients usually will need to
@@ -14,10 +11,28 @@ import edu.gemini.horizons.api.HorizonsQuery.ObjectType;
  */
 public final class HorizonsReply implements Serializable {
     /**
+     * Defines the object Type.
+     */
+    public enum ObjectType {
+        /**
+         * A comet
+         */
+        COMET,
+        /**
+         * A minor body, usually an asteroid
+         */
+        MINOR_BODY,
+        /**
+         * A Major body like a planet or the Moon
+         */
+        MAJOR_BODY
+    }
+
+    /**
      * Definition of the different types of answers that could be returned by a query to
      * the Horizons service
      */
-    public static enum ReplyType {
+    public enum ReplyType {
         /**
          * A single answer from a comet
          */
@@ -56,11 +71,11 @@ public final class HorizonsReply implements Serializable {
 
         private final ObjectType objectType;
 
-        private ReplyType() {
+        ReplyType() {
         	this(null);
         }
 
-        private ReplyType(ObjectType objectType) {
+        ReplyType(ObjectType objectType) {
 			this.objectType = objectType;
 		}
 
@@ -134,7 +149,7 @@ public final class HorizonsReply implements Serializable {
      */
     public List<EphemerisEntry> getEphemeris() {
         if (_ephemeris == null) {
-            _ephemeris = new Vector<EphemerisEntry>();
+            _ephemeris = new Vector<>();
         }
         return _ephemeris;
     }
@@ -250,12 +265,12 @@ public final class HorizonsReply implements Serializable {
 	}
 
 	public String toString() {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         buffer.append("\n***\nReply Type: ").append(getReplyType()).append('\n');
 
         if (hasObjectIdAndType()) {
-        	buffer.append("Object ID: " + getObjectId() + "\n");
-        	buffer.append("Object Type: " + _type.objectType() + "\n");
+        	buffer.append("Object ID: ").append(getObjectId())
+                    .append("\nObject Type: ").append(_type.objectType()).append("\n");
         }
 
         if (hasOrbitalElements()) {

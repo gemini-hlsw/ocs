@@ -1,29 +1,59 @@
 package edu.gemini.horizons.server.backend
 
-import edu.gemini.spModel.core.HorizonsDesignation.{MajorBody, AsteroidOldStyle, AsteroidNewStyle, Comet}
-
-import java.util.logging.{Level, Logger}
-
-import edu.gemini.spModel.core._
-import org.apache.commons.httpclient.HttpClient
-import org.apache.commons.httpclient.HttpException
-import org.apache.commons.httpclient.NameValuePair
-import org.apache.commons.httpclient.methods.GetMethod
-import edu.gemini.horizons.api._
-import java.io.IOException
-import CgiHorizonsConstants._
+import java.io.{IOException, InputStream}
+import java.net.{URL, URLConnection, URLEncoder}
+import java.nio.charset.Charset
 import java.time.ZoneOffset.UTC
 import java.time.format.DateTimeFormatter
-import java.util.{Calendar, Date}
 import java.util.Locale.US
+import java.util.logging.{Level, Logger}
+import java.util.{Calendar, Date}
+import javax.net.ssl.{HostnameVerifier, HttpsURLConnection, SSLSession}
+
+import edu.gemini.horizons.api._
+import edu.gemini.horizons.server.backend.CgiHorizonsConstants._
+import edu.gemini.spModel.core.HorizonsDesignation.{AsteroidNewStyle, AsteroidOldStyle, Comet, MajorBody}
+import edu.gemini.spModel.core._
+import edu.gemini.util.ssl.GemSslSocketFactory
 
 import scala.collection.JavaConverters._
-import scala.util.matching.Regex
 import scala.io.Source
-import scalaz._, Scalaz._, scalaz.effect.{ IO, Resource }
+import scala.util.matching.Regex
+import scala.concurrent.duration._
+
+import scalaz.Scalaz._
+import scalaz._
+import scalaz.effect.{IO, Resource}
 
 // work-in-progress; this will get a better name and will probably move elsewhere
 object HorizonsService2 {
+  private val LOG = Logger.getLogger("HorizonsService2")
+
+  // Lets any remote endpoint be connectable
+  private val hostnameVerifier: HostnameVerifier = new HostnameVerifier {
+    def verify(s: String, sslSession: SSLSession) = true
+  }
+
+  private val timeout = 1.minute.toMillis.toInt
+
+  private object ConnectionCharset {
+    val default = Charset.forName("UTF-8")
+
+    def set(conn: URLConnection) {
+      conn.setRequestProperty("Accept-Charset", default.displayName())
+    }
+
+    def get(conn: URLConnection): Charset =
+      Option(conn.getContentType).flatMap { charset =>
+        val sets = for {
+          cs <- charset.replace(" ", "").split(';').toList
+          if cs.startsWith("charset=")
+        } yield Charset.forName(cs.substring("charset=".length))
+        sets.headOption
+      }.getOrElse(default)
+  }
+
+  case class ResponseStream(in: InputStream, charset: Charset)
 
   /** The type of programs that talk to HORIZONS */
   type HS2[A] = EitherT[IO, HS2Error, A]
@@ -85,7 +115,6 @@ object HorizonsService2 {
 
     // And finally
     horizonsRequestLines(queryParams) >>= parseLines
-
   }
 
   /** Convenience method; looks up ephemeris for the current semester. */
@@ -105,23 +134,23 @@ object HorizonsService2 {
   }
 
   /**
-   * Look up the ephemeris for the given target when viewed from the given site, requesting `elems`
-   * total elements spread uniformly over the over the given time period. The computed ephemeris may
-   * contain slightly more or fewer entries than requested due to rounding, or many fewer for very
-   * short timespans (no more than one entry will be returned per minute).
-   */
+    * Look up the ephemeris for the given target when viewed from the given site, requesting `elems`
+    * total elements spread uniformly over the over the given time period. The computed ephemeris may
+    * contain slightly more or fewer entries than requested due to rounding, or many fewer for very
+    * short timespans (no more than one entry will be returned per minute).
+    */
   def lookupEphemeris(target: HorizonsDesignation, site: Site, start: Date, stop: Date, elems: Int): HS2[Ephemeris] =
     lookupEphemerisE(target, site, start, stop, elems)(_.coords).map(Ephemeris(site, _))
 
   /** Date formatter used for formatting the Horizons start/stop time parameters. */
-  val DateFormat = DateTimeFormatter.ofPattern("yyyy-MMM-dd HH:mm:ss", US).withZone(UTC)
+  private val DateFormat = DateTimeFormatter.ofPattern("yyyy-MMM-dd HH:mm:ss", US).withZone(UTC)
 
   /**
-   * Look up the ephemeris for the given target when viewed from the given site, requesting `elems`
-   * total elements spread uniformly over the over the given time period. The computed ephemeris may
-   * contain slightly more or fewer entries than requested due to rounding, or many fewer for very
-   * short timespans (no more than one entry will be returned per minute).
-   */
+    * Look up the ephemeris for the given target when viewed from the given site, requesting `elems`
+    * total elements spread uniformly over the over the given time period. The computed ephemeris may
+    * contain slightly more or fewer entries than requested due to rounding, or many fewer for very
+    * short timespans (no more than one entry will be returned per minute).
+    */
   def lookupEphemerisE[E](target: HorizonsDesignation, site: Site, start: Date, stop: Date, elems: Int)(ef: EphemerisEntry => Option[E]): HS2[Long ==>> E] = {
 
     def formatDate(date: Date): String =
@@ -163,14 +192,14 @@ object HorizonsService2 {
       )
 
     val replyType = target match {
-      case Comet(des)            => HorizonsReply.ReplyType.COMET
-      case AsteroidNewStyle(des) => HorizonsReply.ReplyType.MINOR_OBJECT
-      case AsteroidOldStyle(num) => HorizonsReply.ReplyType.MINOR_OBJECT
-      case MajorBody(num)        => HorizonsReply.ReplyType.MAJOR_PLANET
+      case Comet(_)            => HorizonsReply.ReplyType.COMET
+      case AsteroidNewStyle(_) => HorizonsReply.ReplyType.MINOR_OBJECT
+      case AsteroidOldStyle(_) => HorizonsReply.ReplyType.MINOR_OBJECT
+      case MajorBody(_)        => HorizonsReply.ReplyType.MAJOR_PLANET
     }
 
-    def buildEphemeris(m: GetMethod): IO[Long ==>> E]  =
-      IO(CgiReplyBuilder.readEphemeris(m.getResponseBodyAsStream, replyType, m.getRequestCharSet)).map(toEphemeris)
+    def buildEphemeris(m: ResponseStream): IO[Long ==>> E]  =
+      IO(CgiReplyBuilder.readEphemeris(m.in, replyType, m.charset.displayName())).map(toEphemeris)
 
     // And finally
     horizonsRequest(queryParams)(buildEphemeris).ensure(EphemerisEmpty)(_.size > 0)
@@ -188,7 +217,7 @@ object HorizonsService2 {
   // the function constructed by `f`, if any (otherwise it is assumed that there were not enough
   // columns found). Returns a list of values or an error message.
   private def parseMany[A](header: String, tail: List[String], headerPattern: Regex)(f: Offsets => Option[String => A] ): String \/ List[A] =
-    (headerPattern.findFirstMatchIn(header) \/> ("Header pattern not found: " + headerPattern)) *>
+  (headerPattern.findFirstMatchIn(header) \/> ("Header pattern not found: " + headerPattern)) *>
     (tail.dropWhile(s => !s.trim.startsWith("---")) match {
       case Nil                => Nil.right // no column headers means no results!
       case colHeaders :: rows =>           // we have a header row with data rows following
@@ -241,10 +270,10 @@ object HorizonsService2 {
 
           // First one that works!
           case0 orElse
-          case1 orElse
-          case2 orElse "Could not parse the header line as a comet".left
+            case1 orElse
+            case2 orElse "Could not parse the header line as a comet".left
 
-       case Search.Asteroid(_) =>
+        case Search.Asteroid(_) =>
 
           // Common case is that we have many results, or none.
           lazy val case0 =
@@ -280,13 +309,18 @@ object HorizonsService2 {
               List(Row(HorizonsDesignation.AsteroidNewStyle(m.group(1)) : HorizonsDesignation.Asteroid, m.group(1)))
             } \/> "Could not match '(2016 GB222)' header pattern."
 
+          // Single result with form: JPL/HORIZONS        418993 (2009 MS9)            2016-Sep-07 18:23:54
+          lazy val case4 =
+            """  +\d+\s+\((.+?)\)  """.r.findFirstMatchIn(header).map { m =>
+              List(Row(HorizonsDesignation.AsteroidNewStyle(m.group(1)) : HorizonsDesignation.Asteroid, m.group(1)))
+            } \/> "Could not match '418993 (2009 MS9)' header pattern."
 
           // First one that works!
           case0 orElse
-          case1 orElse
-          case2 orElse
-          case3 orElse "Could not parse the header line as an asteroid".left
-
+            case1 orElse
+            case2 orElse
+            case3 orElse
+            case4 orElse "Could not parse the header line as an asteroid".left
 
         case Search.MajorBody(_) =>
 
@@ -310,53 +344,54 @@ object HorizonsService2 {
 
           // First one that works, otherwise Nil because it falls through to small-body search
           case0 orElse
-          case1 orElse Nil.right
+            case1 orElse Nil.right
 
       }
-  }
+    }
 
   // Construct a program thet performs a HORIZONS request and yields the response as lines of text.
   private def horizonsRequestLines(params: Map[String, String]): HS2[List[String]] =
     horizonsRequest(params) { method =>
       IO {
-        val s = Source.fromInputStream(method.getResponseBodyAsStream, method.getRequestCharSet)
+        val s = Source.fromInputStream(method.in, method.charset.displayName())
         try     s.getLines.toList
         finally s.close()
       }
     }
 
-  implicit def GetMethodResource: Resource[GetMethod] =
-    new Resource[GetMethod] {
-      def close(m: GetMethod): IO[Unit] =
-        IO(m.releaseConnection)
+  implicit def ResponseStreamResource: Resource[ResponseStream] =
+    new Resource[ResponseStream] {
+      def close(m: ResponseStream): IO[Unit] =
+        IO(m.in.close)
     }
 
-  // Construct a program thet performs a HORIZONS request and transforms the respons with the
+  private def unsafeReadRemote(baseURL: String, params: Map[String, String]): ResponseStream = {
+    // This must be globally synchronized because HORIZONS only allows one request at a time
+    // from a given IP address (or so it seems). An open question is whether or not it's a
+    // problem that the lifetime of the GetMethod extends out of this block; it is possible
+    // that `f` will be streaming data back after the monitor has been released. So far this
+    // is not a problem in testing but it's worth keeping an eye on. Failure will be obvious.
+    HorizonsService2.synchronized {
+      val queryParams = params.map { case (k, v) => s"$k=${URLEncoder.encode(v, ConnectionCharset.default.displayName())}" }.mkString("&")
+      val url: URL = new URL(s"$baseURL?$queryParams")
+      LOG.info(s"Horizons request $url")
+      val conn = url.openConnection().asInstanceOf[HttpsURLConnection]
+      conn.setHostnameVerifier(hostnameVerifier)
+      conn.setSSLSocketFactory(GemSslSocketFactory.get)
+      conn.setReadTimeout(timeout)
+      ConnectionCharset.set(conn)
+      ResponseStream(conn.getInputStream, ConnectionCharset.get(conn))
+    }
+  }
+
+  // Construct a program that performs a HORIZONS request and transforms the responses with the
   // provided function.
-  private def horizonsRequest[A](params: Map[String, String])(f: GetMethod => IO[A]): HS2[A] =
-    EitherT {
-      IO(new GetMethod(CgiHorizonsConstants.HORIZONS_URL)).using { (method: GetMethod) =>
-        IO {
-
-          // This must be globally synchronized because HORIZONS only allows one request at a time
-          // from a given IP address (or so it seems). An open question is whether or not it's a
-          // problem that the lifetime of the GetMethod extends out of this block; it is possible
-          // that `f` will be streaming data back after the monitor has been released. So far this
-          // is not a problem in testing but it's worth keeping an eye on. Failure will be obvious.
-          HorizonsService2.synchronized {
-            method.setQueryString(params.map { case (k, v) => new NameValuePair(k, v) } .toArray)
-            (new HttpClient).executeMethod(method)
-            method
-          }
-
-        } .flatMap(f).catchSomeLeft {
-          case ex: HorizonsException => HorizonsError(ex).some
-          case ex: HttpException     => HorizonsError(HorizonsException.create(ex)).some
-          case ex: IOException       => HorizonsError(HorizonsException.create(ex)).some
-        }
-      }
+  private def horizonsRequest[A](params: Map[String, String])(f: ResponseStream => IO[A]): HS2[A] =
+  EitherT {
+    IO(unsafeReadRemote(CgiHorizonsConstants.HORIZONS_URL, params)).flatMap(f).catchSomeLeft {
+      case ex: HorizonsException => HorizonsError(ex).some
+      case ex: IOException       => HorizonsError(HorizonsException.create(ex)).some
     }
+  }
 
 }
-
-
