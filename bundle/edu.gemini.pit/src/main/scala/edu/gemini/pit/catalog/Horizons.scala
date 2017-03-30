@@ -21,20 +21,17 @@ object Horizons {
     def days = hours * 24
   }
 
-//  lazy val Host = "128.171.88.221"
-//  lazy val Port = 8443
-
-  def apply(sem: I.Semester) = new Horizons(/*Host, Port,*/ Site.GN, new Date(sem.firstDay - 1.days), new Date(sem.lastDay + 1.days))
+  def apply(sem: I.Semester) = new Horizons(Site.GN, new Date(sem.firstDay - 1.days), new Date(sem.lastDay + 1.days))
 
 }
 
-class Horizons private (/*host: String, port: Int,*/ site: Site, start: Date, end: Date) extends Catalog { cat =>
+class Horizons private (site: Site, start: Date, end: Date) extends Catalog { cat =>
 
   def find(id: String)(callback: Result => Unit): Unit = {
     actor {
 
       val f = callback.safe
-      val qe: IQueryExecutor = CgiQueryExecutor.instance //new HorizonsClient(host, port)
+      val qe: IQueryExecutor = CgiQueryExecutor.instance
 
       val hq = new HorizonsQuery(site)
       hq.setStartDate(start)
@@ -90,11 +87,6 @@ class Horizons private (/*host: String, port: Int,*/ site: Site, start: Date, en
 
         } catch {
 
-          // Sucky-sucky; we can't get at the underlying IOException
-//          case x: XmlRpcException if x.getMessage.endsWith("No route to host") || x.getMessage.endsWith("Connection refused") =>
-//            Log.warning("%s(%s)".format(x.getClass.getSimpleName, x.getMessage))
-//            f(Offline)
-
           case e: IOException =>
             Log.warning("%s(%s)".format(e.getClass.getSimpleName, e.getMessage))
             f(Offline)
@@ -102,7 +94,6 @@ class Horizons private (/*host: String, port: Int,*/ site: Site, start: Date, en
           case t: Throwable =>
             Log.log(Level.WARNING, "Unexpected trouble looking up %s on Horizons.".format(id), t)
             f(Error(t))
-
         }
       }
 
