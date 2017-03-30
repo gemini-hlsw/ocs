@@ -8,7 +8,8 @@ version := pitVersion.value.toOsgiVersion
 
 unmanagedJars in Compile ++= Seq(
   new File(baseDirectory.value, "../../lib/bundle/osgi.core-4.3.1.jar"),
-  new File(baseDirectory.value, "../../lib/bundle/org-apache-xmlrpc_2.10-3.0.0.jar"))
+  new File(baseDirectory.value, "../../lib/bundle/org-apache-xmlrpc_2.10-3.0.0.jar"),
+  new File(baseDirectory.value, "../../lib/bundle/org-apache-commons-httpclient_2.10-2.0.0.jar"))
 
 libraryDependencies ++= Seq(
   "org.scalaz"     %% "scalaz-core"       % ScalaZVersion,
