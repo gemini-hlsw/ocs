@@ -3,9 +3,6 @@ package edu.gemini.horizons.api;
 import java.io.Serializable;
 import java.util.Vector;
 import java.util.List;
-//$Id: HorizonsReply.java 630 2006-11-28 19:32:20Z anunez $
-
-import edu.gemini.horizons.api.HorizonsQuery.ObjectType;
 
 /**
  * Representation of an answer from the Horizons Service. Clients usually will need to
@@ -14,10 +11,28 @@ import edu.gemini.horizons.api.HorizonsQuery.ObjectType;
  */
 public final class HorizonsReply implements Serializable {
     /**
+     * Defines the object Type.
+     */
+    public enum ObjectType {
+        /**
+         * A comet
+         */
+        COMET,
+        /**
+         * A minor body, usually an asteroid
+         */
+        MINOR_BODY,
+        /**
+         * A Major body like a planet or the Moon
+         */
+        MAJOR_BODY
+    }
+
+    /**
      * Definition of the different types of answers that could be returned by a query to
      * the Horizons service
      */
-    public static enum ReplyType {
+    public enum ReplyType {
         /**
          * A single answer from a comet
          */
@@ -56,22 +71,22 @@ public final class HorizonsReply implements Serializable {
 
         private final ObjectType objectType;
 
-        private ReplyType() {
-        	this(null);
+        ReplyType() {
+            this(null);
         }
 
-        private ReplyType(ObjectType objectType) {
-			this.objectType = objectType;
-		}
+        ReplyType(ObjectType objectType) {
+            this.objectType = objectType;
+        }
 
-		/**
+        /**
          * Returns this ReplyType's corresponding ObjectType, in case we want to use this reply
          * to populate a new query. This value will be null if there is no corresponding object
          * type.
          * @return an ObjectType, or null
          */
         public ObjectType objectType() {
-        	return objectType;
+            return objectType;
         }
 
     }
@@ -134,7 +149,7 @@ public final class HorizonsReply implements Serializable {
      */
     public List<EphemerisEntry> getEphemeris() {
         if (_ephemeris == null) {
-            _ephemeris = new Vector<EphemerisEntry>();
+            _ephemeris = new Vector<>();
         }
         return _ephemeris;
     }
@@ -223,39 +238,39 @@ public final class HorizonsReply implements Serializable {
      * @return object's ID number, or null if not available
      */
     public Long getObjectId() {
-		return _objectId;
-	}
+        return _objectId;
+    }
 
     /**
      * Sets the object's unique id.
      * @param objectId the new object Id, or null
      */
-	public void setObjectId(Long objectId) {
-		_objectId = objectId;
-	}
+    public void setObjectId(Long objectId) {
+        _objectId = objectId;
+    }
 
-	/**
-	 * Returns the object type, or null if the not applicable.
-	 */
-	public ObjectType getObjectType() {
-		return _type.objectType;
-	}
+    /**
+     * Returns the object type, or null if the not applicable.
+     */
+    public ObjectType getObjectType() {
+        return _type.objectType;
+    }
 
-	/**
-	 * Returns true if the object ID is available and the reply type has a corresponding object type.
-	 * @return true if the ID and type are available.
-	 */
-	public boolean hasObjectIdAndType() {
-		return _objectId != null && _type.objectType != null;
-	}
+    /**
+     * Returns true if the object ID is available and the reply type has a corresponding object type.
+     * @return true if the ID and type are available.
+     */
+    public boolean hasObjectIdAndType() {
+        return _objectId != null && _type.objectType != null;
+    }
 
-	public String toString() {
-        StringBuffer buffer = new StringBuffer();
+    public String toString() {
+        StringBuilder buffer = new StringBuilder();
         buffer.append("\n***\nReply Type: ").append(getReplyType()).append('\n');
 
         if (hasObjectIdAndType()) {
-        	buffer.append("Object ID: " + getObjectId() + "\n");
-        	buffer.append("Object Type: " + _type.objectType() + "\n");
+            buffer.append("Object ID: ").append(getObjectId())
+                    .append("\nObject Type: ").append(_type.objectType()).append("\n");
         }
 
         if (hasOrbitalElements()) {
@@ -298,11 +313,11 @@ public final class HorizonsReply implements Serializable {
         }
 
         if (hasObjectIdAndType()) {
-        	if (!that.hasObjectIdAndType()) return false;
-        	if (!getObjectId().equals(that.getObjectId())) return false;
-        	if (!getObjectType().equals(that.getObjectType())) return false;
+            if (!that.hasObjectIdAndType()) return false;
+            if (!getObjectId().equals(that.getObjectId())) return false;
+            if (!getObjectType().equals(that.getObjectType())) return false;
         } else {
-        	if (that.hasObjectIdAndType()) return false;
+            if (that.hasObjectIdAndType()) return false;
         }
 
         return true;
@@ -327,8 +342,8 @@ public final class HorizonsReply implements Serializable {
         }
 
         if (hasObjectIdAndType()) {
-        	hash = 31 * hash + getObjectId().hashCode();
-        	hash = 31 * hash + getObjectType().hashCode(); // not really necessary
+            hash = 31 * hash + getObjectId().hashCode();
+            hash = 31 * hash + getObjectType().hashCode(); // not really necessary
         }
 
         return hash;
