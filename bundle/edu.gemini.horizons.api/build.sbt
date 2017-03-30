@@ -4,12 +4,6 @@ import OcsKeys._
 
 name := "edu.gemini.horizons.api"
 
-// version set in ThisBuild
-
-unmanagedJars in Compile ++= Seq(
-  new File(baseDirectory.value, "../../lib/bundle/org-apache-commons-httpclient_2.10-2.0.0.jar")
-)
-
 libraryDependencies ++= Seq(
   "org.scalaz" %% "scalaz-core" % ScalaZVersion,
   "org.scalaz" %% "scalaz-effect" % ScalaZVersion)
