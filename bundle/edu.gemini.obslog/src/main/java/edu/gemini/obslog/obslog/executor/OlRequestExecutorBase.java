@@ -94,7 +94,7 @@ public abstract class OlRequestExecutorBase implements Serializable {
 
     protected List<SPObservationID> _getObservationIDs() {
         if (_observationIDs == null) {
-            _observationIDs = new ArrayList<SPObservationID>();
+            _observationIDs = new ArrayList<>();
         }
         return _observationIDs;
     }

@@ -1,7 +1,3 @@
-/**
- * $Id: YesNoType.java 38242 2011-10-26 12:55:06Z abrighton $
- */
-
 package edu.gemini.spModel.data;
 
 import edu.gemini.spModel.type.DisplayableSpType;
@@ -29,7 +25,7 @@ public enum YesNoType implements DisplayableSpType, LoggableSpType, Sequenceable
 
     private String _displayValue;
 
-    private YesNoType(String name) {
+    YesNoType(String name) {
         _displayValue = name;
     }
 

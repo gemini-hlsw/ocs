@@ -5,15 +5,12 @@ import edu.gemini.obslog.core.OlSegmentType;
 import edu.gemini.obslog.obslog.ConfigMap;
 import edu.gemini.obslog.obslog.InstrumentLogSegment;
 import edu.gemini.obslog.obslog.OlLogOptions;
+import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams;
 
 import java.util.List;
 import java.util.logging.Logger;
 
-//
-// Gemini Observatory/AURA
-// $Id: GNIRSLogSegment.java,v 1.8 2006/06/12 05:06:59 gillies Exp $
-//
 
 public class GNIRSLogSegment extends InstrumentLogSegment {
     public static final Logger LOG = Logger.getLogger(GNIRSLogSegment.class.getName());
@@ -22,8 +19,6 @@ public class GNIRSLogSegment extends InstrumentLogSegment {
     public static final OlSegmentType SEG_TYPE = new OlSegmentType(NARROW_TYPE);
 
     private static final String SEGMENT_CAPTION = "GNIRS Observing Log";
-
-    private String EMPTY_STRING = "";
 
     private static final String WAVELENGTH_KEY = "wavelength";
     private static final String TYPE_KEY = "type";
@@ -43,28 +38,26 @@ public class GNIRSLogSegment extends InstrumentLogSegment {
         super(SEG_TYPE, logItems, obsLogOptions);
     }
 
-    private void _decorateFilter(ConfigMap map) {
+    private void _decorateFilter(final ConfigMap map) {
         if (map == null) return;
 
         // Note that filterValue can return null here if there is no filter in the sequence.  Then this code needs
         // to divine it from other values based upon SeqExec details
         String filterValue = map.sget(FILTER_KEY);
 
-        String typeValue = map.sget(TYPE_KEY);
-        if (typeValue == null) typeValue = EMPTY_STRING;
-
         // This should work if filterValue == null - the check is added to keep
         // oldValueOf from complaining
         if (filterValue != null) {
-            GNIRSParams.Filter f = GNIRSParams.Filter.getFilter(filterValue, null);
+            final GNIRSParams.Filter f = GNIRSParams.Filter.getFilter(filterValue, null);
             if (f != null) {
+                final String typeValue = ImOption.apply(map.sget(TYPE_KEY)).getOrElse("");
                 map.put(FILTER_KEY, !typeValue.equals("DARK") ? f.logValue() : "DARK");
                 return;
             }
         }
 
         // Not sure if the above is right, if we make it here, we are divining the filter
-        String crossValue = map.sget(CROSSDISPERSED_KEY);
+        final String crossValue = map.sget(CROSSDISPERSED_KEY);
         if (crossValue.equals("Yes")) {
             filterValue = "XD";
         } else {
@@ -90,7 +83,7 @@ public class GNIRSLogSegment extends InstrumentLogSegment {
                 filterValue = "?";
             }
         }
-        // Finall set the filter value for the not DARK and not in sequence section
+        // Finally, set the filter value for the not DARK and not in sequence section
         map.put(FILTER_KEY, filterValue);
     }
 

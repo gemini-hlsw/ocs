@@ -50,7 +50,7 @@ public class FetchObservationAction extends OlBaseAction {
             return ERROR;
         }
 
-        List<SPObservationID> obsIDs = new ArrayList<SPObservationID>(1);
+        List<SPObservationID> obsIDs = new ArrayList<>(1);
         obsIDs.add(obsID);
         try {
             OlConfiguration obsLogConfig = getObsLogConfiguration();

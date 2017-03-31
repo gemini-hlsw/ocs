@@ -1,8 +1,3 @@
-//
-// Gemini Observatory/AURA
-// $Id: OlPOTLocalPersistenceManager.java,v 1.3 2005/12/11 15:54:15 gillies Exp $
-//
-
 package edu.gemini.obslog.database.pot;
 
 import edu.gemini.obslog.database.OlPersistenceException;

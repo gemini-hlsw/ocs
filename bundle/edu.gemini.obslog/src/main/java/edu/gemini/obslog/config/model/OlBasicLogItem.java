@@ -3,10 +3,6 @@ package edu.gemini.obslog.config.model;
 import java.io.Serializable;
 import java.util.logging.Logger;
 
-//
-// Gemini Observatory/AURA
-// $Id: OlBasicLogItem.java,v 1.3 2005/02/22 19:21:42 gillies Exp $
-//
 
 public class OlBasicLogItem implements OlLogItem, Serializable {
     public static final Logger LOG = Logger.getLogger(OlBasicLogItem.class.getName());

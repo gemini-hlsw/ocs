@@ -10,11 +10,6 @@ import java.util.logging.Level;
 
 import java.util.List;
 
-//
-// Gemini Observatory/AURA
-// $Id: InstrumentSegmentBuilder.java,v 1.1 2005/12/11 15:54:15 gillies Exp $
-//
-
 public class InstrumentSegmentBuilder {
     private static final Logger LOG = Logger.getLogger(InstrumentSegmentBuilder.class.getName());
 
