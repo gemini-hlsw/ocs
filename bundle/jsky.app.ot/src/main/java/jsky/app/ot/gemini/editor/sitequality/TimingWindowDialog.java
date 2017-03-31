@@ -23,12 +23,6 @@ class TimingWindowDialog extends JDialog {
         "and will be interpreted in UTC. Window duration and repeat period are specified in " +
         "hours and minutes.";
 
-    private static final SimpleDateFormat UTC   = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss") {{
-        setTimeZone(TimeZone.getTimeZone("UTC"));
-    }};
-    private static final NumberFormat     TIMES = new DecimalFormat("######");
-
-
     private final JFormattedTextField window;
     private final JFormattedTextField duration;
     private final JFormattedTextField period;
@@ -59,6 +53,8 @@ class TimingWindowDialog extends JDialog {
         cancelled = true;
 
         // Initialize components.
+        final SimpleDateFormat UTC = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        UTC.setTimeZone(TimeZone.getTimeZone("UTC"));
         window = new JFormattedTextField(UTC);
         window.setValue(new Date());
 
@@ -69,7 +65,7 @@ class TimingWindowDialog extends JDialog {
         period.setColumns(8);
         period.setValue(MS_PER_HOUR * 48);
 
-        times = new JFormattedTextField(TIMES);
+        times = new JFormattedTextField(new DecimalFormat("######"));
         times.setColumns(5);
         times.setValue(1000);
 
