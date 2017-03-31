@@ -39,29 +39,24 @@ public abstract class AbstractTimeAccountingSummaryReport extends BundleVelocity
 	protected abstract String getDateValue(IRow row);
 	
 	public List<File> execute(IQuery query, Map<IDBDatabaseService, List<IRow>> results, File parentDir) throws IOException {
-		List<File> files = new ArrayList<File>();
-		for (Map.Entry<IDBDatabaseService, List<IRow>> e: results.entrySet()) {
+		final List<File> files = new ArrayList<>();
+		for (final Map.Entry<IDBDatabaseService, List<IRow>> e: results.entrySet()) {
 
-			String abbrev = DatabaseNameManager.getInstance().getSiteAbbreviation(e.getKey());
-			String siteName = DatabaseNameManager.getInstance().getSiteName(e.getKey());
+			final String abbrev = DatabaseNameManager.getInstance().getSiteAbbreviation(e.getKey());
+			final String siteName = DatabaseNameManager.getInstance().getSiteName(e.getKey());
 			
 			// Need to break it down by calendar semester.
-			Map<String, List<IRow>> semesterRows = new TreeMap<String, List<IRow>>();
-			for (IRow row: e.getValue()) {
-				
-				String sem = ReportUtils.semester(getDateValue(row));
-				List<IRow> rows = semesterRows.get(sem);
-				if (rows == null) {
-					rows = new ArrayList<IRow>();
-					semesterRows.put(sem, rows);
-				}
+			Map<String, List<IRow>> semesterRows = new TreeMap<>();
+			for (final IRow row: e.getValue()) {
+				final String sem = ReportUtils.semester(getDateValue(row));
+				final List<IRow> rows = semesterRows.computeIfAbsent(sem, s -> new ArrayList<>());
 				rows.add(row);
 			}
 			
 			// Now write a file per semester
-			for (Entry<String, List<IRow>> entry: semesterRows.entrySet()) {
+			for (final Entry<String, List<IRow>> entry: semesterRows.entrySet()) {
 
-				Map<String, Object> vc = new TreeMap<String, Object>();
+				final Map<String, Object> vc = new TreeMap<>();
 				vc.put("results", entry.getValue());
 				vc.put("query", query);
 				vc.put("abbrev", abbrev);
@@ -72,7 +67,7 @@ public abstract class AbstractTimeAccountingSummaryReport extends BundleVelocity
 				vc.put("escaper", new HtmlEscaper());
 				vc.put("semester", entry.getKey());
 				
-				File out = new File(parentDir, "tas_" + abbrev + "_" + entry.getKey() + "." + getFileExtension());
+				final File out = new File(parentDir, "tas_" + abbrev + "_" + entry.getKey() + "." + getFileExtension());
 				merge(out, getResourcePath(getTemplateName()), vc);
 				files.add(out);
 			

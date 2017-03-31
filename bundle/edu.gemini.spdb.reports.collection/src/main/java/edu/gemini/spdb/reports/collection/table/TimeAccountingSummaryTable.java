@@ -27,7 +27,6 @@ import edu.gemini.spModel.timeacct.TimeAcctCategory;
 import edu.gemini.spdb.reports.IColumn;
 import edu.gemini.spdb.reports.util.AbstractTable;
 
-@SuppressWarnings("unchecked")
 public class TimeAccountingSummaryTable extends AbstractTable {
 
 	@SuppressWarnings("unused")
@@ -37,7 +36,7 @@ public class TimeAccountingSummaryTable extends AbstractTable {
 	private static final String DESC = "Nightly time charges by observation.";
 	private static final String CAPTION = "Time Account Summary";
 
-	public static enum Columns implements IColumn {
+	public enum Columns implements IColumn {
 
 		DATE("UTC Date", "%s"),
 		PROGRAM_ID("Program ID", "%s"),
@@ -75,7 +74,7 @@ public class TimeAccountingSummaryTable extends AbstractTable {
 	}
 
 	public List<Map<IColumn, Object>> getRows(Object domainObject) {
-		List<Map<IColumn, Object>> rows = new ArrayList<Map<IColumn, Object>>();
+		List<Map<IColumn, Object>> rows = new ArrayList<>();
 
 //		try {
 
@@ -124,10 +123,10 @@ public class TimeAccountingSummaryTable extends AbstractTable {
 
 				// This observation may have been executed in several visits,
 				// and more than one instrument ...
-				final Map<ObservingNight, Set<ObsVisit>> nightVisits = new HashMap<ObservingNight, Set<ObsVisit>>();
+				final Map<ObservingNight, Set<ObsVisit>> nightVisits = new HashMap<>();
 
 				// Map each observing night to the set of instruments used on that night.
-				final Map<ObservingNight, Set<SPComponentType>> nightInstruments = new HashMap<ObservingNight, Set<SPComponentType>>();
+				final Map<ObservingNight, Set<SPComponentType>> nightInstruments = new HashMap<>();
 
 				// Find the ObsRecord. If there is none, there is no time to
 				// charge. Continue with the next observation.
@@ -147,20 +146,12 @@ public class TimeAccountingSummaryTable extends AbstractTable {
 				ISPObsComponent instrument = SPTreeUtil.findInstrument(obsShell);
 
 				// Collect visits and instruments per night.
-				for (ObsVisit visit: log.getVisits()) {
+				for (final ObsVisit visit: log.getVisits()) {
 
 					// Determine night and initialize map entries if needed.
-					ObservingNight night = new ObservingNight(site, visit.getEndTime());
-					Set<ObsVisit> visits = nightVisits.get(night);
-					if (visits == null) {
-						visits = new HashSet<ObsVisit>();
-						nightVisits.put(night, visits);
-					}
-					Set<SPComponentType> instruments = nightInstruments.get(night);
-					if (instruments == null) {
-						instruments = new HashSet<SPComponentType>();
-						nightInstruments.put(night, instruments);
-					}
+					final ObservingNight night = new ObservingNight(site, visit.getEndTime());
+                    final Set<ObsVisit> visits = nightVisits.computeIfAbsent(night, n -> new HashSet<>());
+					final Set<SPComponentType> instruments = nightInstruments.computeIfAbsent(night, n -> new HashSet<>());
 
 					// Collect information for this visit.
 					visits.add(visit);
@@ -272,7 +263,7 @@ public class TimeAccountingSummaryTable extends AbstractTable {
 	}
 
 	private Map<IColumn, Object> createRow() {
-		return new HashMap<IColumn, Object>();
+		return new HashMap<>();
 	}
 
 
