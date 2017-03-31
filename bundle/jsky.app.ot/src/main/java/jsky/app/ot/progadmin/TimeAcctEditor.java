@@ -66,7 +66,7 @@ final class TimeAcctEditor implements ProgramTypeListener {
             final String hoursStr = field.getText();
             try {
                 hoursMap.put(cat, Double.parseDouble(hoursStr));
-            } catch (Exception ex) {
+            } catch (final Exception ex) {
                 // ignore
             }
         }
@@ -90,9 +90,8 @@ final class TimeAcctEditor implements ProgramTypeListener {
 
         double hours = 0;
         try {
-            hours = Double.parseDouble(text);
-            if (hours < 0) hours = 0;
-        } catch (NumberFormatException nfex) {
+            hours = Math.max(Double.parseDouble(text), 0);
+        } catch (final NumberFormatException nfex) {
             // If the value can't be parsed as a double, then try the
             // HH:MM:SS format
             try {

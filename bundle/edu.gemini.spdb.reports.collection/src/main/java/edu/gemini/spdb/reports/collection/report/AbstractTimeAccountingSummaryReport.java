@@ -28,7 +28,7 @@ public abstract class AbstractTimeAccountingSummaryReport extends BundleVelocity
 		new SimpleSort(Columns.PROGRAM_ID, ISort.Order.ASC),
 	};
 
-	public void configureQuery(IQuery q) {
+	public void configureQuery(final IQuery q) {
 		q.setOutputColumns(getOutputColumns());
 		q.setGroups(getGroups());
 		q.setSorts(SORTS);
@@ -38,7 +38,7 @@ public abstract class AbstractTimeAccountingSummaryReport extends BundleVelocity
 	protected abstract IColumn[] getOutputColumns();
 	protected abstract String getDateValue(IRow row);
 	
-	public List<File> execute(IQuery query, Map<IDBDatabaseService, List<IRow>> results, File parentDir) throws IOException {
+	public List<File> execute(final IQuery query, final Map<IDBDatabaseService, List<IRow>> results, final File parentDir) throws IOException {
 		final List<File> files = new ArrayList<>();
 		for (final Map.Entry<IDBDatabaseService, List<IRow>> e: results.entrySet()) {
 
@@ -46,7 +46,7 @@ public abstract class AbstractTimeAccountingSummaryReport extends BundleVelocity
 			final String siteName = DatabaseNameManager.getInstance().getSiteName(e.getKey());
 			
 			// Need to break it down by calendar semester.
-			Map<String, List<IRow>> semesterRows = new TreeMap<>();
+			final Map<String, List<IRow>> semesterRows = new TreeMap<>();
 			for (final IRow row: e.getValue()) {
 				final String sem = ReportUtils.semester(getDateValue(row));
 				final List<IRow> rows = semesterRows.computeIfAbsent(sem, s -> new ArrayList<>());
@@ -70,9 +70,7 @@ public abstract class AbstractTimeAccountingSummaryReport extends BundleVelocity
 				final File out = new File(parentDir, "tas_" + abbrev + "_" + entry.getKey() + "." + getFileExtension());
 				merge(out, getResourcePath(getTemplateName()), vc);
 				files.add(out);
-			
 			}
-			
 		}		
 		return files;
 	}

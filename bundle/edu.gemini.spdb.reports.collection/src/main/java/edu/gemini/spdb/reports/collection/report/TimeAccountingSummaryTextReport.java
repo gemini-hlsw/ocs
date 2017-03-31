@@ -8,8 +8,7 @@ import edu.gemini.spdb.reports.collection.table.TimeAccountingSummaryTable.Colum
 public class TimeAccountingSummaryTextReport extends
 		AbstractTimeAccountingSummaryReport {
 	
-	private static final ISort[] GROUPS = new ISort[] {
-	};
+	private static final ISort[] GROUPS = new ISort[]{};
 
 	private static final IColumn[] COLUMNS = new IColumn[] {
 		Columns.DATE,
@@ -43,7 +42,7 @@ public class TimeAccountingSummaryTextReport extends
 	}
 
 	@Override
-	protected String getDateValue(IRow row) {
+	protected String getDateValue(final IRow row) {
 		return (String) row.getValue(0);
 	}
 
