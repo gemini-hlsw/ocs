@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package jsky.app.ot.progadmin;
 
 import edu.gemini.shared.util.TimeValue;
@@ -19,46 +15,43 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-/**
- *
- */
 final class TimeAcctEditor implements ProgramTypeListener {
     // Used to format values as strings
-    private static NumberFormat nf = NumberFormat.getInstance(Locale.US);
+    private final static NumberFormat nf = NumberFormat.getInstance(Locale.US);
     static {
         nf.setMinimumIntegerDigits(1);
         nf.setMaximumFractionDigits(1);
     }
 
-    private TimeAcctUI ui;
+    private final TimeAcctUI ui;
 
-    public TimeAcctEditor(TimeAcctUI ui, ProgramTypeModel pkm) {
+    public TimeAcctEditor(final TimeAcctUI ui, final ProgramTypeModel pkm) {
         this.ui = ui;
 
-        for (TimeAcctCategory cat : TimeAcctCategory.values()) {
-            JTextField field = ui.getHoursField(cat);
+        for (final TimeAcctCategory cat : TimeAcctCategory.values()) {
+            final JTextField field = ui.getHoursField(cat);
             field.getDocument().addDocumentListener(new DocumentListener() {
-                public void insertUpdate(DocumentEvent event) {
+                @Override public void insertUpdate(final DocumentEvent event) {
                     update();
                 }
 
-                public void removeUpdate(DocumentEvent event) {
+                @Override public void removeUpdate(final DocumentEvent event) {
                     update();
                 }
 
-                public void changedUpdate(DocumentEvent event) {
+                @Override public void changedUpdate(final DocumentEvent event) {
                     update();
                 }
 
                 private void update() {
-                    TimeAcctAllocation alloc = getAllocation();
+                    final TimeAcctAllocation alloc = getAllocation();
                     showTotalTime(alloc);
                     showPercentTime(alloc);
                 }
             });
         }
 
-        boolean enable = enableMinimumTime(pkm.getProgramType());
+        final boolean enable = enableMinimumTime(pkm.getProgramType());
         if (!enable) ui.getMinimumTimeField().setText("");
         ui.getMinimumTimeField().setEnabled(enable);
 
@@ -67,10 +60,10 @@ final class TimeAcctEditor implements ProgramTypeListener {
 
     public TimeAcctAllocation getAllocation() {
 
-        Map<TimeAcctCategory, Double> hoursMap = new HashMap<TimeAcctCategory, Double>();
-        for (TimeAcctCategory cat : TimeAcctCategory.values()) {
-            JTextField field = ui.getHoursField(cat);
-            String hoursStr = field.getText();
+        final Map<TimeAcctCategory, Double> hoursMap = new HashMap<>();
+        for (final TimeAcctCategory cat : TimeAcctCategory.values()) {
+            final JTextField field = ui.getHoursField(cat);
+            final String hoursStr = field.getText();
             try {
                 hoursMap.put(cat, Double.parseDouble(hoursStr));
             } catch (Exception ex) {
@@ -80,7 +73,7 @@ final class TimeAcctEditor implements ProgramTypeListener {
         return new TimeAcctAllocation(hoursMap);
     }
 
-    private void showTotalTime(TimeAcctAllocation alloc) {
+    private void showTotalTime(final TimeAcctAllocation alloc) {
         // Show the total time awarded without trailing 0s
         String hoursStr = String.format("%.2f", alloc.getTotalTime());
         if (hoursStr.endsWith(".00")) {
@@ -92,7 +85,7 @@ final class TimeAcctEditor implements ProgramTypeListener {
     }
 
     private TimeValue getMinimumTime() {
-        String text = ui.getMinimumTimeField().getText();
+        final String text = ui.getMinimumTimeField().getText();
         if ((text == null) || "".equals(text.trim())) return TimeValue.ZERO_HOURS;
 
         double hours = 0;
@@ -112,33 +105,31 @@ final class TimeAcctEditor implements ProgramTypeListener {
         return new TimeValue(hours, TimeValue.Units.hours);
     }
 
-    private void showPercentTime(TimeAcctAllocation alloc) {
-        for (TimeAcctCategory cat : TimeAcctCategory.values()) {
-            JLabel lab = ui.getPercentLabel(cat);
-            double percent = alloc.getPercentage(cat);
+    private void showPercentTime(final TimeAcctAllocation alloc) {
+        for (final TimeAcctCategory cat : TimeAcctCategory.values()) {
+            final JLabel lab = ui.getPercentLabel(cat);
+            final double percent = alloc.getPercentage(cat);
             lab.setText(String.format("%.0f%%", percent));
         }
     }
 
-    public void setModel(TimeAcctModel model) {
+    public void setModel(final TimeAcctModel model) {
         TimeValue minTime = model.getMinimumTime();
 
         if ((minTime == null) || (minTime.getMilliseconds() == 0)) {
             ui.getMinimumTimeField().setText("");
         } else {
             minTime = minTime.convertTo(TimeValue.Units.hours);
-//            ui.getMinimumTimeField().setText(String.valueOf(minTime.getTimeAmount()));
             ui.getMinimumTimeField().setText(nf.format(minTime.getTimeAmount())); // REL-434
         }
 
-        TimeAcctAllocation alloc = model.getAllocation();
+        final TimeAcctAllocation alloc = model.getAllocation();
         showTotalTime(alloc);
 
         // Show the time for each category.
-        for (TimeAcctCategory cat : TimeAcctCategory.values()) {
-            JTextField field = ui.getHoursField(cat);
-            double hours = alloc.getHours(cat);
-//            field.setText(String.valueOf(hours));
+        for (final TimeAcctCategory cat : TimeAcctCategory.values()) {
+            final JTextField field = ui.getHoursField(cat);
+            final double hours = alloc.getHours(cat);
             field.setText(nf.format(hours)); // REL-434
         }
 
@@ -150,12 +141,14 @@ final class TimeAcctEditor implements ProgramTypeListener {
         return new TimeAcctModel(getAllocation(), getMinimumTime());
     }
 
-    public void programTypeChanged(ProgramTypeEvent event) {
-        JTextField minTimeField = ui.getMinimumTimeField();
+    public void programTypeChanged(final ProgramTypeEvent event) {
+        final JTextField minTimeField = ui.getMinimumTimeField();
 
-        Color bg = Color.white;
-        boolean enable = enableMinimumTime(event.getNewType());
-        if (!enable) {
+        final boolean enable = enableMinimumTime(event.getNewType());
+        final Color bg;
+        if (enable) {
+            bg = Color.white;
+        } else {
             minTimeField.setText("");
             bg = new Color(225, 225, 225);
         }
@@ -163,7 +156,7 @@ final class TimeAcctEditor implements ProgramTypeListener {
         minTimeField.setBackground(bg);
     }
 
-    private static boolean enableMinimumTime(ProgramTypeInfo pk) {
+    private static boolean enableMinimumTime(final ProgramTypeInfo pk) {
         if (pk.getMode() != SPProgram.ProgramMode.QUEUE) return false;
         return pk.getQueueBand() == 3;
     }

@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package jsky.app.ot.progadmin;
 
 import edu.gemini.spModel.timeacct.TimeAcctCategory;
@@ -15,10 +11,10 @@ import java.awt.*;
  * User interface widgets for time accounting;
  */
 final class TimeAcctUI extends JPanel {
-    private JLabel timeAwardedLabel;
-    private JTextField minTimeField;
-    private Map<TimeAcctCategory, JTextField> hoursFieldMap;
-    private Map<TimeAcctCategory, JLabel> percentLabelMap;
+    private final JLabel timeAwardedLabel;
+    private final JTextField minTimeField;
+    private final Map<TimeAcctCategory, JTextField> hoursFieldMap;
+    private final Map<TimeAcctCategory, JLabel> percentLabelMap;
 
     public TimeAcctUI() {
         super(new BorderLayout());
@@ -27,15 +23,15 @@ final class TimeAcctUI extends JPanel {
         minTimeField     = new JTextField();
         minTimeField.setColumns(5);
 
-        hoursFieldMap = new HashMap<TimeAcctCategory, JTextField>();
-        percentLabelMap = new HashMap<TimeAcctCategory, JLabel>();
-        for (TimeAcctCategory cat : TimeAcctCategory.values()) {
-            JTextField tf = new JTextField();
+        hoursFieldMap = new HashMap<>();
+        percentLabelMap = new HashMap<>();
+        for (final TimeAcctCategory cat : TimeAcctCategory.values()) {
+            final JTextField tf = new JTextField();
             tf.setColumns(5);
             tf.setToolTipText("Enter the number of hours to charge to " + cat.getDisplayName());
             hoursFieldMap.put(cat, tf);
 
-            JLabel lab = new JLabel();
+            final JLabel lab = new JLabel();
             lab.setHorizontalAlignment(JLabel.TRAILING);
             lab.setPreferredSize(new Dimension(lab.getFontMetrics(lab.getFont()).stringWidth("100%"),
                     lab.getFontMetrics(lab.getFont()).getHeight()));
@@ -47,13 +43,13 @@ final class TimeAcctUI extends JPanel {
     }
 
     private JComponent getTimeAwardedPanel() {
-        JPanel pan = new JPanel(new GridBagLayout());
+        final JPanel pan = new JPanel(new GridBagLayout());
 
-        Insets inEmpty = new Insets(0, 0, 0, 0);
-        Insets inLeft  = new Insets(0, 5, 0, 0);
-        Insets inRight = new Insets(0, 0, 0, 5);
+        final Insets inEmpty = new Insets(0, 0, 0, 0);
+        final Insets inLeft  = new Insets(0, 5, 0, 0);
+        final Insets inRight = new Insets(0, 0, 0, 5);
 
-        GridBagConstraints gbc = new GridBagConstraints();
+        final GridBagConstraints gbc = new GridBagConstraints();
 
         gbc.gridx  = 0;
         gbc.insets = inRight;
@@ -94,22 +90,20 @@ final class TimeAcctUI extends JPanel {
     }
 
     private JPanel getRatiosPanel() {
-        JPanel pan = new JPanel(new GridBagLayout());
+        final JPanel pan = new JPanel(new GridBagLayout());
 
-        GridBagConstraints gbc = new GridBagConstraints();
+        final GridBagConstraints gbc = new GridBagConstraints();
 
-        TimeAcctCategory[] catA = TimeAcctCategory.values();
+        final TimeAcctCategory[] catA = TimeAcctCategory.values();
 
-        int div = catA.length/2 + catA.length%2;
+        final int div = catA.length/2 + catA.length%2;
         for (int i=0; i<catA.length; ++i) {
-            TimeAcctCategory cat = catA[i];
+            final TimeAcctCategory cat = catA[i];
 
             int row = i % div;
             int col = (i / div) * 3;
 
-            String labText;
-            labText = String.format("%s (%s)", cat.name(), cat.getDisplayName());
-            JLabel lab = new JLabel(labText);
+            final JLabel lab = new JLabel(String.format("%s (%s)", cat.name(), cat.getDisplayName()));
 
             gbc.anchor    = GridBagConstraints.EAST;
             gbc.gridx     = col;
@@ -141,11 +135,11 @@ final class TimeAcctUI extends JPanel {
         return minTimeField;
     }
 
-    public JTextField getHoursField(TimeAcctCategory cat) {
+    public JTextField getHoursField(final TimeAcctCategory cat) {
         return hoursFieldMap.get(cat);
     }
 
-    public JLabel getPercentLabel(TimeAcctCategory cat) {
+    public JLabel getPercentLabel(final TimeAcctCategory cat) {
         return percentLabelMap.get(cat);
     }
 }
