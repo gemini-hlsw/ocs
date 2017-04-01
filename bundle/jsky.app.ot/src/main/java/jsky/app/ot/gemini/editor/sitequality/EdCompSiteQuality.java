@@ -1,4 +1,4 @@
-package jsky.app.ot.gemini.editor;
+package jsky.app.ot.gemini.editor.sitequality;
 
 import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;

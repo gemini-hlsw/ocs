@@ -105,7 +105,7 @@
             type="siteQuality"
             imageKey="component.gif"
             shortDescription="This component describes the conditions under which this observation can be observed."
-            uiClassName="jsky.app.ot.gemini.editor.EdCompSiteQuality"/>
+            uiClassName="jsky.app.ot.gemini.editor.sitequality.EdCompSiteQuality"/>
 
     <UIInfo
             dataObject="edu.gemini.spModel.target.obsComp.TargetObsComp"

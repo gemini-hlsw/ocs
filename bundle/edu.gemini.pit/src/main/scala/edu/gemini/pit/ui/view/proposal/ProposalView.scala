@@ -20,7 +20,7 @@ import Scalaz._
 import edu.gemini.pit.ui.util.gface.SimpleListViewer
 import java.net.URI
 
-import edu.gemini.shared.gui.Browser
+import edu.gemini.shared.gui.{Browser, Chooser}
 
 class ProposalView(advisor:ShellAdvisor) extends BorderPanel with BoundView[Proposal] {panel =>
   implicit val boolMonoid = Monoid.instance[Boolean](_ || _,  false)

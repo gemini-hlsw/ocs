@@ -1,15 +1,16 @@
 package edu.gemini.pit.ui.editor
 
-import edu.gemini.model.p1.immutable.{SiderealTarget, NonSiderealTarget, Target}
-import edu.gemini.model.p1.targetio.impl.{SiderealWriter, NonSiderealWriter}
+import edu.gemini.model.p1.immutable.{NonSiderealTarget, SiderealTarget, Target}
+import edu.gemini.model.p1.targetio.impl.{NonSiderealWriter, SiderealWriter}
 import edu.gemini.model.p1.targetio.api.FileType
-import edu.gemini.pit.ui.util.{Chooser, ValueRenderer, Rows, StdModalEditor}
-
+import edu.gemini.pit.ui.util.{Rows, StdModalEditor, ValueRenderer}
 import java.io.File
 import java.util.prefs.Preferences._
 
 import swing._
 import javax.swing.JOptionPane
+
+import edu.gemini.shared.gui.Chooser
 
 
 object TargetExporter {
