@@ -176,7 +176,8 @@ public class GNIRSLogSegment extends InstrumentLogSegment {
 
         String prism;
         String crossValue = map.sget(CROSSDISPERSED_KEY);
-        if (crossValue.equals("Yes")) {
+        LOG.info("*** crossValue=" + crossValue);
+        if (crossValue.equalsIgnoreCase("Yes")) {
             prism = (ps == GNIRSParams.PixelScale.PS_015) ? "SXD" : "LXD";
         } else {
             // Not cross dispersed
