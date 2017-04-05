@@ -1,31 +1,23 @@
 package edu.gemini.obslog.obslog;
 
 import java.util.logging.Logger;
-import java.util.logging.Level;
-
 import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
 
-//
-// Gemini Observatory/AURA
-// $Id: ConfigMap.java,v 1.1 2005/12/11 15:54:15 gillies Exp $
-//
+import scala.Option;
 
 public class ConfigMap extends HashMap<String,Object> {
     private static final Logger LOG = Logger.getLogger(ConfigMap.class.getName());
 
-    // Display the contents of the map for diag purposes
+    // Display the contents of the map for diagnostic purposes
     public void dump() {
-        Set<Map.Entry<String,Object>> keys = entrySet();
-
-        for (Map.Entry<String,Object> e : keys) {
-            LOG.log(Level.INFO, e.getKey() + ':' + e.getValue());
-        }
+        forEach((k,v) -> LOG.info(k + ':' + v));
     }
 
-    public String sget(String key) {
+    public String sget(final String key) {
         return (String)get(key);
     }
 
+    public Option<String> sgetOpt(final String key) {
+        return Option.apply((String)get(key));
+    }
 }

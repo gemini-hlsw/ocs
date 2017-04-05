@@ -23,8 +23,6 @@ public class VisitorInstrumentLogSegment extends InstrumentLogSegment {
 
     private static final String SEGMENT_CAPTION = "Visitor Instrument 2 Observing Log";
 
-    private String EMPTY_STRING = "";
-
     private static final String NAME_KEY         = "name";
     private static final String EXPOSURETIME_KEY = "exposureTime";
 
