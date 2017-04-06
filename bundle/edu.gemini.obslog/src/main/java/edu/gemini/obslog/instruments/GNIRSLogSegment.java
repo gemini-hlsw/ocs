@@ -10,10 +10,6 @@ import edu.gemini.spModel.gemini.gnirs.GNIRSParams;
 import java.util.List;
 import java.util.logging.Logger;
 
-//
-// Gemini Observatory/AURA
-// $Id: GNIRSLogSegment.java,v 1.8 2006/06/12 05:06:59 gillies Exp $
-//
 
 public class GNIRSLogSegment extends InstrumentLogSegment {
     public static final Logger LOG = Logger.getLogger(GNIRSLogSegment.class.getName());
@@ -23,7 +19,7 @@ public class GNIRSLogSegment extends InstrumentLogSegment {
 
     private static final String SEGMENT_CAPTION = "GNIRS Observing Log";
 
-    private String EMPTY_STRING = "";
+    private static final String EMPTY_STRING = "";
 
     private static final String WAVELENGTH_KEY = "wavelength";
     private static final String TYPE_KEY = "type";
@@ -65,9 +61,7 @@ public class GNIRSLogSegment extends InstrumentLogSegment {
 
         // Not sure if the above is right, if we make it here, we are divining the filter
         String crossValue = map.sget(CROSSDISPERSED_KEY);
-        if (crossValue.equals("Yes")) {
-            filterValue = "XD";
-        } else {
+        if (crossValue.equalsIgnoreCase("no")) {
             // Cross dispersed = "no'
             String lambdaValue = map.sget(WAVELENGTH_KEY);
             if (lambdaValue == null) return;
@@ -89,7 +83,10 @@ public class GNIRSLogSegment extends InstrumentLogSegment {
             } catch (NumberFormatException ex) {
                 filterValue = "?";
             }
+        } else {
+            filterValue = "XD";
         }
+
         // Finall set the filter value for the not DARK and not in sequence section
         map.put(FILTER_KEY, filterValue);
     }
@@ -183,11 +180,11 @@ public class GNIRSLogSegment extends InstrumentLogSegment {
 
         String prism;
         String crossValue = map.sget(CROSSDISPERSED_KEY);
-        if (crossValue.equals("Yes")) {
-            prism = (ps == GNIRSParams.PixelScale.PS_015) ? "SXD" : "LXD";
-        } else {
-            // Not cross dispersed
+        if (crossValue.equalsIgnoreCase("No")) {
             prism = "MIR";
+        } else {
+            // Cross dispersed
+            prism = (ps == GNIRSParams.PixelScale.PS_015) ? "SXD" : "LXD";
         }
 
         map.put(CAMERA_KEY, camera + '/' + prism);
