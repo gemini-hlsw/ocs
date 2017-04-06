@@ -3,22 +3,13 @@ package jsky.app.ot.gemini.nifs;
 import java.awt.*;
 import javax.swing.*;
 import jsky.util.gui.*;
-/*
- * Created by JFormDesigner on Wed Nov 02 14:49:38 CET 2005
- */
 
-
-/**
- * @author User #1
- */
 public class NifsForm extends JPanel {
 	public NifsForm() {
 		initComponents();
 	}
 
 	private void initComponents() {
-		// JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
-		// Generated using JFormDesigner non-commercial license
 		JLabel expTimeLabel = new JLabel();
 		exposureTime = new NumberBoxWidget();
 		JLabel disperserLabel = new JLabel();

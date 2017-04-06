@@ -1,9 +1,3 @@
-// Copyright 2001 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-//
-// $Id: PosMapOffsetEntry.java 45596 2012-05-29 21:50:05Z swalker $
-//
-
 package jsky.app.ot.gemini.tpe;
 
 import edu.gemini.spModel.guide.GuideProbe;

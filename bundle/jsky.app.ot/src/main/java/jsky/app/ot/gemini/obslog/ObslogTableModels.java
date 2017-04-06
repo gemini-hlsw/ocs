@@ -18,7 +18,6 @@ import java.util.List;
  * Table models used by the Obslog GUI.
  *
  * @author rnorris
- * @version $Id: ObslogTableModels.java 46728 2012-07-12 16:39:26Z rnorris $
  */
 public interface ObslogTableModels {
 

@@ -6,9 +6,6 @@ import jsky.util.gui.SingleSelectComboBox;
 
 import javax.swing.*;
 import java.awt.*;
-/*
- * Created by JFormDesigner on Wed Nov 02 15:19:48 CET 2005
- */
 
 
 public class NiriForm extends JPanel {

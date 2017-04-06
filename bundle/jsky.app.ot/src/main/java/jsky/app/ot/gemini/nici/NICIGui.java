@@ -1,10 +1,8 @@
 package jsky.app.ot.gemini.nici;
+
 import java.awt.*;
 import javax.swing.*;
 
-/**
- * $Id: NICIGui.java 6968 2006-04-24 14:38:48Z anunez $
- */
 public class NICIGui extends JPanel {
 	public NICIGui(JPanel pan1, JPanel pan2) {
         panel1 = pan1;

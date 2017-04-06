@@ -1,11 +1,4 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: GsaoiDetectorArrayFeature.java 46768 2012-07-16 18:58:53Z rnorris $
-//
 package jsky.app.ot.gemini.gsaoi;
-
 
 import edu.gemini.spModel.gemini.gsaoi.GsaoiDetectorArray;
 import static edu.gemini.spModel.gemini.gsaoi.GsaoiDetectorArray.Quadrant;
@@ -20,8 +13,6 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
-
-
 
 /**
  * Draws the Science Area, the detector or slit.

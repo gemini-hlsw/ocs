@@ -1,9 +1,3 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: AbstractOffsetPosListEditor.java 47000 2012-07-26 19:15:10Z swalker $
-//
 package jsky.app.ot.gemini.editor.offset;
 
 import edu.gemini.pot.sp.ISPObservation;

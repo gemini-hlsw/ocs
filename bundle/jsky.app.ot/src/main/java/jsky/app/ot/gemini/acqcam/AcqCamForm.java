@@ -3,23 +3,13 @@ package jsky.app.ot.gemini.acqcam;
 import java.awt.*;
 import javax.swing.*;
 import jsky.util.gui.*;
-/*
- * Created by JFormDesigner on Wed Nov 02 15:50:16 CET 2005
- */
 
-
-
-/**
- * @author User #1
- */
 public class AcqCamForm extends JPanel {
 	public AcqCamForm() {
 		initComponents();
 	}
 
 	private void initComponents() {
-		// JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
-		// Generated using JFormDesigner non-commercial license
 		cassRotatorLabel = new JLabel();
 		cassRotatorFollowingButton = new JRadioButton();
 		cassRotatorFixedButton = new JRadioButton();

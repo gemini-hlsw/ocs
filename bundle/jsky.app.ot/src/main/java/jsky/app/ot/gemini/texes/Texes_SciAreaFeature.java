@@ -7,10 +7,4 @@ import jsky.app.ot.gemini.inst.SciAreaFeatureBase;
  */
 public class Texes_SciAreaFeature extends SciAreaFeatureBase {
 
-
-    /**
-     * Construct the feature with its name and description.
-     */
-    public Texes_SciAreaFeature() {
-    }
 }

@@ -1,9 +1,3 @@
-// Copyright 1997-2001 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: SciAreaFeature.java 21635 2009-08-24 01:08:24Z swalker $
-//
 package jsky.app.ot.gemini.inst;
 
 import edu.gemini.shared.util.immutable.None;
@@ -43,7 +37,6 @@ import jsky.app.ot.util.PropertyWatcher;
 
 import java.awt.*;
 import java.awt.geom.Point2D;
-
 
 /**
  * Draws the science area.

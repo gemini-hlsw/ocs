@@ -1,8 +1,3 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-//
 package jsky.app.ot.gemini.altair;
 
 import edu.gemini.pot.sp.ISPObsComponent;

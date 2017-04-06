@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package jsky.app.ot.gemini.gsaoi;
 
 import edu.gemini.skycalc.Offset;

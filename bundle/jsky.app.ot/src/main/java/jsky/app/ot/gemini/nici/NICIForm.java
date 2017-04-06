@@ -1,4 +1,5 @@
 package jsky.app.ot.gemini.nici;
+
 import javax.swing.border.*;
 import com.jgoodies.forms.factories.*;
 import com.jgoodies.forms.factories.Borders;
@@ -9,11 +10,6 @@ import jsky.util.gui.NumberBoxWidget;
 
 import javax.swing.*;
 import java.awt.*;
-/*
- * Created by JFormDesigner on Thu May 04 14:51:21 CLT 2006
- */
-
-
 
 /**
  * $Id: NICIForm.java 19597 2009-05-04 15:36:57Z swalker $
@@ -24,7 +20,6 @@ public class NICIForm extends JPanel {
 	}
 
 	private void initComponents() {
-		// JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
 		JLabel label2 = new JLabel();
 		JLabel label3 = new JLabel();
 		JLabel label4 = new JLabel();

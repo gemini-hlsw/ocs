@@ -9,6 +9,7 @@ import edu.gemini.spModel.target.SPTarget;
  * An interface for editors for the various portions of an
  * {@link SPTarget}.
  */
+@FunctionalInterface
 public interface TelescopePosEditor {
 
     /**

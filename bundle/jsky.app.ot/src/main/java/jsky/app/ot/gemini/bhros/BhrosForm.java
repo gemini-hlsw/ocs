@@ -20,12 +20,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.MessageFormat;
 
-/**
- * GUI for bHROS editor component.
- * @author rnorris
- * $Id: BhrosGUI.java 8331 2007-12-05 19:16:40Z anunez $
- */
-class BhrosGUI extends JPanel {
+class BhrosForm extends JPanel {
 
 	// These controls need to be available to the editor component due to
 	// superclass requirements. They are manipulated by the framework.
@@ -52,7 +47,7 @@ class BhrosGUI extends JPanel {
 	// then string them together somewhere else. Control is localized and nothing leaks
 	// out of the scope where it's used. And the shape of the code mirrors the shape of
 	// the component tree that it builds. This is my current theory, anyway.
-	public BhrosGUI(final EdCompInstBHROS edComp) {
+	public BhrosForm(final EdCompInstBHROS edComp) {
 		this.edComp = edComp;
 
 		// Trivial subclass for our specific local use.

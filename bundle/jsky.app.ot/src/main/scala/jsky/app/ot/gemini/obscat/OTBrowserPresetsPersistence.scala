@@ -1,7 +1,5 @@
 package jsky.app.ot.gemini.obscat
 
-import jsky.app.ot.gemini.obscat.OTBrowserPresetChoice.SavedPreset
-
 import java.io._
 import java.util.logging.{Level, Logger}
 

@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package jsky.app.ot.gemini.nici;
 
 import edu.gemini.spModel.gemini.nici.NiciOffsetPos;
@@ -11,9 +7,6 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
 
-/**
- *
- */
 public class NiciOffsetPosTableModel extends AbstractOffsetPosTableModel<NiciOffsetPos> {
     public static final String PQ_FORMAT = "%.4f";
 

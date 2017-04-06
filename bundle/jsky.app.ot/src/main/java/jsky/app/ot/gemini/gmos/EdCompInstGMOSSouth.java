@@ -1,11 +1,4 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: EdCompInstGMOSSouth.java 38172 2011-10-21 19:02:11Z anunez $
-//
 package jsky.app.ot.gemini.gmos;
-
 
 import edu.gemini.spModel.gemini.gmos.*;
 import edu.gemini.spModel.gemini.gmos.GmosCommonType.Disperser;
@@ -15,7 +8,6 @@ import edu.gemini.spModel.gemini.gmos.GmosSouthType.FilterSouth;
 import edu.gemini.spModel.type.SpTypeUtil;
 
 import java.util.regex.Pattern;
-
 
 /**
  * This is the editor for the GMOS South instrument component.

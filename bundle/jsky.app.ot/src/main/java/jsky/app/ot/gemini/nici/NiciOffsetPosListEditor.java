@@ -1,9 +1,3 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: NiciOffsetPosListEditor.java 8576 2008-05-18 22:28:28Z swalker $
-//
 package jsky.app.ot.gemini.nici;
 
 import edu.gemini.spModel.gemini.nici.NiciOffsetPos;

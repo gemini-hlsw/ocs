@@ -1,27 +1,18 @@
 package jsky.app.ot.gemini.trecs;
+
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.*;
 import edu.gemini.spModel.gemini.trecs.TReCSParams;
 import jsky.util.gui.NumberBoxWidget;
 
 import javax.swing.*;
-/*
- * Created by JFormDesigner on Wed May 04 14:50:57 CEST 2005
- */
 
-
-
-/**
- * @author Allan Brighton
- */
 public class TReCSForm extends JPanel {
     public TReCSForm() {
         initComponents();
     }
 
     private void initComponents() {
-        // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
-        // Generated using JFormDesigner non-commercial license
         disperserLabel = new JLabel();
         disperserComboBox = new JComboBox<>();
         centralWavelengthLabel = new JLabel();
