@@ -1,9 +1,3 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: TpeAcqCameraFeature.java 21629 2009-08-21 20:27:31Z swalker $
-//
 package jsky.app.ot.gemini.acqcam;
 
 import jsky.app.ot.tpe.TpeImageFeature;

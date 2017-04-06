@@ -1,9 +1,3 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: NIFS_OIWFS_Feature.java 46768 2012-07-16 18:58:53Z rnorris $
-//
 package jsky.app.ot.gemini.nifs;
 
 import diva.util.java2d.Polygon2D;

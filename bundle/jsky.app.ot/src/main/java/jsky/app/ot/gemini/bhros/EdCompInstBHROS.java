@@ -17,7 +17,7 @@ public final class EdCompInstBHROS extends EdCompInstBase<InstBHROS> {
 
 	// GUI needs to know when the data object changes, so we support change listeners for this.
 	private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
-	private final BhrosGUI gui = new BhrosGUI(this);
+	private final BhrosForm gui = new BhrosForm(this);
 
 	public JPanel getWindow() {
 		return gui;

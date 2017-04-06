@@ -7,20 +7,13 @@ import jsky.util.gui.NumberBoxWidget;
 
 import javax.swing.*;
 import java.awt.*;
-/*
- * Created by JFormDesigner on Thu May 04 14:51:25 CLT 2006
- */
 
-/**
- * $Id: NICIFormEng.java 18846 2009-03-20 14:06:01Z swalker $
- */
 public class NICIFormEng extends JPanel {
 	public NICIFormEng() {
 		initComponents();
 	}
 
 	private void initComponents() {
-		// JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
 		JLabel label1 = new JLabel();
 		JLabel label3 = new JLabel();
 		focsCB = new JComboBox();

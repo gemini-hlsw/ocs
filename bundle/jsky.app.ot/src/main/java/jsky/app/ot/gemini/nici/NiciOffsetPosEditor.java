@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package jsky.app.ot.gemini.nici;
 
 import edu.gemini.shared.gui.text.AbstractDocumentListener;

@@ -4,23 +4,13 @@ import javax.swing.*;
 import com.jgoodies.forms.factories.*;
 import com.jgoodies.forms.layout.*;
 import jsky.util.gui.*;
-/*
- * Created by JFormDesigner on Thu Aug 11 17:07:04 CEST 2005
- */
 
-
-
-/**
- * @author User #1
- */
 public class EngNifsForm extends JPanel {
 	public EngNifsForm() {
 		initComponents();
 	}
 
 	private void initComponents() {
-		// JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
-		// Generated using JFormDesigner non-commercial license
 		label1 = new JLabel();
 		engReadMode = new DropDownListBoxWidget();
 		label3 = new JLabel();

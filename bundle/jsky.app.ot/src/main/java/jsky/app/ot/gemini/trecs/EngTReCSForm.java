@@ -1,25 +1,16 @@
 package jsky.app.ot.gemini.trecs;
+
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.*;
 
 import javax.swing.*;
-/*
- * Created by JFormDesigner on Wed May 04 13:05:15 CEST 2005
- */
 
-
-
-/**
- * @author Allan Brighton
- */
 public class EngTReCSForm extends JPanel {
 	public EngTReCSForm() {
 		initComponents();
 	}
 
 	private void initComponents() {
-		// JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
-		// Generated using JFormDesigner non-commercial license
 		JLabel sectorWheelLabel = new JLabel();
 		sectorWheelComboBox = new JComboBox();
 		JLabel lyotWheelLabel = new JLabel();

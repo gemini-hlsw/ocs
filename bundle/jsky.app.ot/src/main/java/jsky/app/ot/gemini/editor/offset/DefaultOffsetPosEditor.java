@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package jsky.app.ot.gemini.editor.offset;
 
 import edu.gemini.shared.util.immutable.MapOp;

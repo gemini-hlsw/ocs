@@ -1,11 +1,5 @@
-// Copyright 1997-2002
-// Association for Universities for Research in Astronomy, Inc.,
-//
-// $Id: EdIterGPOL.java 7085 2006-05-29 20:33:03Z shane $
-//
 package jsky.app.ot.gemini.gpol;
 
-import edu.gemini.spModel.data.ISPDataObject;
 import edu.gemini.spModel.data.config.DefaultParameter;
 import edu.gemini.spModel.data.config.IConfigProvider;
 import edu.gemini.spModel.data.config.ISysConfig;

@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package jsky.app.ot.gemini.gems;
 
 import edu.gemini.pot.sp.ISPObsComponent;

@@ -1,9 +1,3 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: EdCompInstNIFS.java 7413 2006-11-15 14:17:27Z anunez $
-//
 package jsky.app.ot.gemini.nifs;
 
 import edu.gemini.pot.sp.ISPNode;

@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package jsky.app.ot.gemini.editor.offset;
 
 import jsky.util.gui.Resources;

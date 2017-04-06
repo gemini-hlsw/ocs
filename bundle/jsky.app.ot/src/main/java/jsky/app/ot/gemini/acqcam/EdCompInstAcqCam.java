@@ -1,9 +1,3 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: EdCompInstAcqCam.java 7038 2006-05-17 14:24:43Z gillies $
-//
 package jsky.app.ot.gemini.acqcam;
 
 import edu.gemini.spModel.gemini.acqcam.AcqCamParams.*;

@@ -10,31 +10,17 @@ import jsky.util.gui.SingleSelectComboBox;
 
 import javax.swing.*;
 import java.awt.*;
-/*
- * Created by JFormDesigner on Wed Nov 02 15:38:18 CET 2005
- */
 
-
-
-/**
- * @author User #1
- */
 public class GnirsForm extends JPanel {
 	public GnirsForm() {
 		initComponents();
 	}
 
 	private void initComponents() {
-		// JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
-		// Generated using JFormDesigner non-commercial license
 		DefaultComponentFactory compFactory = DefaultComponentFactory.getInstance();
 		JPanel top1 = new JPanel();
 		JLabel pixelScaleLabel = new JLabel();
 		JLabel slitWidthLabel = new JLabel();
-//		JLabel filterLabel = new JLabel();
-//		filter = new SingleSelectComboBox();
-//		JLabel acqMirrorLabel = new JLabel();
-// 		acqMirror = new SingleSelectComboBox();
 		pixelScale = new SingleSelectComboBox();
 		JLabel disperserLabel = new JLabel();
 		disperser = new SingleSelectComboBox();

@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package jsky.app.ot.gemini.nici;
 
 import jsky.app.ot.gemini.editor.offset.AbstractOffsetPosTableEditor;

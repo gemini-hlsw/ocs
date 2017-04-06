@@ -7,10 +7,4 @@ import jsky.app.ot.gemini.inst.SciAreaFeatureBase;
  */
 public class NICI_SciAreaFeature extends SciAreaFeatureBase {
 
-    /**
-     * Construct the feature
-     */
-    public NICI_SciAreaFeature() {
-    }
-
 }

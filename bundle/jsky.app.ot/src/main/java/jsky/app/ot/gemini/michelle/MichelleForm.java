@@ -5,22 +5,13 @@ import jsky.util.gui.TextBoxWidget;
 
 import javax.swing.*;
 import java.awt.*;
-/*
- * Created by JFormDesigner on Wed Nov 02 16:06:30 CET 2005
- */
 
-
-
-/**
- * @author User #1
- */
 public class MichelleForm extends JPanel {
 	public MichelleForm() {
 		initComponents();
 	}
 
 	private void initComponents() {
-		// JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
 		JPanel top1 = new JPanel();
 		filterLabel = new JLabel();
 		totalOnSourceTimeLabel = new JLabel();

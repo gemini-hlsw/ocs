@@ -1,9 +1,3 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: CanopusFeature.java 36086 2011-07-13 13:15:28Z abrighton $
-//
 package jsky.app.ot.gemini.gems;
 
 import edu.gemini.shared.util.immutable.Option;
