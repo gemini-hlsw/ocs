@@ -111,4 +111,27 @@ final class RichNode(val node: ISPNode) extends AnyVal {
   }
 
   def forall(p: ISPNode => Boolean): Boolean = !exists(!p(_))
+
+  /** Gets a DFS-ordered program node Zipper focused at this node, filtered by
+    * the given filter. If the focus node doesn't pass the filter, the next
+    * closest node to the right is selecting, wrapping around if necessary.
+    */
+  def zipper(filter: ISPNode => Boolean): Option[Zipper[ISPNode]] = {
+    def go(root: ISPNode): Option[Zipper[ISPNode]] = {
+      val (l,r) = root.toStream.span(_.getNodeKey =/= node.getNodeKey)
+      val lʹ    = l.filter(filter)
+      val rʹ    = r.filter(filter)
+
+      (lʹ, rʹ) match {
+        case (_, h #:: t) => Some(Zipper(lʹ.reverse, h, t ))
+        case (h #:: t, _) => Some(Zipper(Stream.empty,  h, t))
+        case _            => None
+      }
+    }
+
+    for {
+      p <- Option(node.getProgram)
+      z <- go(p)
+    } yield z
+  }
 }
