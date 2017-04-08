@@ -35,7 +35,7 @@ class SearchPanel(statusFilter: StatusFilter, tree: SPTree) extends GridBagPanel
         t     <- Option(v.getTree)
         n     <- Option(t.getCurrentNode)
         p     <- Option(n.getProgram)
-        (l, r) = n.getProgram.toStream.span(_.getNodeKey =/= n.getNodeKey)
+        (l, r) = p.toStream.span(_.getNodeKey =/= n.getNodeKey)
         m      = matcher(s)
         f     <- r.drop(1).find(m) orElse l.find(m) orElse r.headOption.filter(m)
       } yield f
