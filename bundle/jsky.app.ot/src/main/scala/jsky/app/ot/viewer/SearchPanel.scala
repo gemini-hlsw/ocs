@@ -18,54 +18,44 @@ import Scalaz._
 
 /** Defines a label and text box to use for searching for program nodes.
   */
-class SearchPanel(statusFiler: StatusFilter, tree: SPTree) extends GridBagPanel {
+class SearchPanel(statusFilter: StatusFilter, tree: SPTree) extends GridBagPanel {
   import SearchPanel._
 
   private var viewer = Option.empty[SPViewer]
-  private var zip    = Option.empty[Zipper[ISPNode]]
-
-  private def resetZipper: Unit = {
-    zip = None
-  }
 
   def searchString: Option[String] =
     Option(textBox.text).filterNot(_.isEmpty)
 
-  def searchNumber: Option[Int] =
-    for {
-      s <- searchString
-      i <- \/.fromTryCatchNonFatal(s.toInt).toOption
-    } yield i
-
   object nextAction extends Action("Next") {
 
-    def matcher(s: String): ISPNode => Boolean =
-      searchNumber.fold(titleMatcher(s)) { obsNumberMatcher }
-
-    def initZipper: Option[Zipper[ISPNode]] =
-      for {
-        v <- viewer
-        s <- searchString
-        t <- Option(v.getTree)
-        n <- Option(t.getCurrentNode)
-        z <- n.zipper(matcher(s))
-      } yield (z.focus.getNodeKey === n.getNodeKey) ? z.nextC | z
-
     def apply: Unit = {
-      // If we have a zipper setup, move the focus to the next item.  Otherwise
-      // initialize the zipper.
-      zip = zip.map(_.nextC) orElse initZipper
-      zip match {
-        case None    =>
-          val msg = searchNumber.map(n => s"Sorry, there is no observation $n in this program.") orElse
-                      searchString.map(s => s"Sorry, no node titles contain the text: $s.")
+      val focus = for {
+        v     <- viewer
+        s     <- searchString
+        t     <- Option(v.getTree)
+        n     <- Option(t.getCurrentNode)
+        p     <- Option(n.getProgram)
+        (l, r) = n.getProgram.toStream.span(_.getNodeKey =/= n.getNodeKey)
+        m      = matcher(s)
+        f     <- r.drop(1).find(m) orElse l.find(m) orElse r.headOption.filter(m)
+      } yield f
 
-          msg.foreach { m =>
+      focus match {
+        case None    =>
+          searchString.foreach { s =>
+            val m = s"""Sorry, no matching nodes for search string "$s"."""
             JOptionPane.showMessageDialog(SearchPanel.this.peer, m, "No Results", JOptionPane.WARNING_MESSAGE)
           }
-        case Some(z) =>
-          // statusFilter.setStatusEnabled()  TODO: is this necessary?
-          ViewerManager.open(z.focus)
+
+        case Some(n) =>
+          // The original "ObsSearchPanel" did this so that any matches in
+          // filtered out nodes will be displayed.  Of course it also clobbers
+          // whatever filters you had setup regardless of whether there are any
+          // matches. Perhaps a better approach would be to skip filtered out
+          // observations but I'll just keep the original behavior for now.
+          statusFilter.setStatusEnabled()
+
+          ViewerManager.open(n)
       }
     }
   }
@@ -79,21 +69,7 @@ class SearchPanel(statusFiler: StatusFilter, tree: SPTree) extends GridBagPanel 
 
   object textBox extends TextField {
     action  = nextAction
-    tooltip = "Show program node.  Enter observation number or search text and hit <Enter>"
-
-    // When anything changes in the text field, reset the zipper.
-    peer.getDocument.addDocumentListener(new DocumentListener() {
-      override def insertUpdate(e: DocumentEvent): Unit  = resetZipper
-      override def removeUpdate(e: DocumentEvent): Unit  = resetZipper
-      override def changedUpdate(e: DocumentEvent): Unit = resetZipper
-    })
-
-    // If we move away to edit anything, reset the zipper.
-    reactions += {
-      case FocusLost(_, _, false) => resetZipper
-    }
-
-    listenTo(this)
+    tooltip = "Show program node.  Enter observation number or search text and press <Enter>."
   }
 
   layout(textBox) = new Constraints() {
@@ -108,9 +84,10 @@ class SearchPanel(statusFiler: StatusFilter, tree: SPTree) extends GridBagPanel 
 }
 
 object SearchPanel {
-  // A search for a number is assumed to be an observation number.  If you
-  // want to search all nodes for one with a title including the number you
-  // can include it in quotes.
+  // A search for a number is assumed to be an observation number.  If you want
+  // to search all nodes for one with a title containing the number you can
+  // include it in quotes.
+  private val ObsNumber    = """(\d+)""".r
   private val QuotedString = """"([^"]*)"""".r
 
   private def dataObjectMatcher(f: ISPDataObject => Boolean): ISPNode => Boolean =
@@ -121,11 +98,7 @@ object SearchPanel {
       }
 
   private def titleMatcher(text: String): ISPNode => Boolean = {
-    val textʹ = text.toLowerCase.trim match {
-      case QuotedString(s) => s
-      case s               => s
-    }
-
+    val textʹ = text.toLowerCase.trim
     dataObjectMatcher { obj =>
       Option(obj.getTitle).map(_.toLowerCase).exists(_.contains(textʹ))
     }
@@ -137,4 +110,11 @@ object SearchPanel {
         case o: ISPObservation => o.getObservationNumber === num
         case _                 => false
       }
+
+  private def matcher(s: String): ISPNode => Boolean =
+    s match {
+      case ObsNumber(n)     => obsNumberMatcher(n.toInt)
+      case QuotedString(sʹ) => titleMatcher(sʹ)
+      case _                => titleMatcher(s)
+    }
 }
