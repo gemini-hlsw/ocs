@@ -91,30 +91,22 @@ object SearchPanel {
   private val QuotedString = """"([^"]*)"""".r
 
   private def dataObjectMatcher(f: ISPDataObject => Boolean): ISPNode => Boolean =
-    (n: ISPNode) =>
-      n.getDataObject match {
-        case d: ISPDataObject => f(d)
-        case _                => false
-      }
+    n => Option(n.getDataObject).exists(f)
 
-  private def titleMatcher(text: String): ISPNode => Boolean = {
-    val textʹ = text.toLowerCase.trim
+  private def titleMatcher(text: String)(op: String => String): ISPNode => Boolean =
     dataObjectMatcher { obj =>
-      Option(obj.getTitle).map(_.toLowerCase).exists(_.contains(textʹ))
+      Option(obj.getTitle).map(op).exists(_.contains(text))
     }
-  }
 
-  private def obsNumberMatcher(num: Int): ISPNode => Boolean =
-    (n: ISPNode) =>
-      n match {
-        case o: ISPObservation => o.getObservationNumber === num
-        case _                 => false
-      }
+  private def obsNumberMatcher(num: Int): ISPNode => Boolean = {
+    case o: ISPObservation => o.getObservationNumber === num
+    case _                 => false
+  }
 
   private def matcher(s: String): ISPNode => Boolean =
     s match {
       case ObsNumber(n)     => obsNumberMatcher(n.toInt)
-      case QuotedString(sʹ) => titleMatcher(sʹ)
-      case _                => titleMatcher(s)
+      case QuotedString(sʹ) => titleMatcher(sʹ)(identity)
+      case _                => titleMatcher(s.trim.toLowerCase)(_.toLowerCase)
     }
 }
