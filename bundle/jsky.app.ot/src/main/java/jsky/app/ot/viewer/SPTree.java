@@ -190,7 +190,7 @@ public final class SPTree extends JPanel {
     private final ObsStatusPanel _obsStatusPanel;
 
     // Used to search for observations by id or title
-    private final ObsSearchPanel _searchBox;
+    private final SearchPanel _searchBox;
 
     // The root science program node being displayed
     private ISPProgram _root;
@@ -267,8 +267,8 @@ public final class SPTree extends JPanel {
         _scrollPane = new JScrollPane(_tree);
         add(_scrollPane, BorderLayout.CENTER);
 
-        _searchBox = new ObsSearchPanel(_obsStatusPanel, this);
-        add(_searchBox, BorderLayout.SOUTH);
+        _searchBox = new SearchPanel(_obsStatusPanel, this);
+        add(_searchBox.peer(), BorderLayout.SOUTH);
 
         // Add a drop target to the FileTree
         new SPTreeDropTarget(this);
