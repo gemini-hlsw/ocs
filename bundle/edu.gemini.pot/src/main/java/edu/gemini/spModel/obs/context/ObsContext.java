@@ -17,6 +17,7 @@ import edu.gemini.spModel.obs.SPObservation;
 import edu.gemini.spModel.obs.SchedulingBlock;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.target.SPTarget;
+import edu.gemini.spModel.target.env.Asterism;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.target.offset.OffsetPosBase;
@@ -266,10 +267,10 @@ public final class ObsContext {
 
     public Option<Coordinates> getBaseCoordinates() {
         final Option<Long> when = getSchedulingBlockStart();
-        SPTarget target = targets.getBase();
+        Asterism asterism = targets.getAsterism();
         return
-            target.getRaDegrees(when).flatMap(raDeg ->
-            target.getDecDegrees(when).map(decDeg ->
+            asterism.getRaDegrees(when).flatMap(raDeg ->
+            asterism.getDecDegrees(when).map(decDeg ->
                 new Coordinates(raDeg, decDeg)
             ));
     }

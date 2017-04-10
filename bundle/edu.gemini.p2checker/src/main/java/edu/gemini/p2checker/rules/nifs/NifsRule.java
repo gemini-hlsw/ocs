@@ -18,6 +18,7 @@ import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obsclass.ObsClass;
 import edu.gemini.spModel.obscomp.InstConstants;
 import edu.gemini.spModel.target.SPTarget;
+import edu.gemini.spModel.target.env.Asterism;
 import edu.gemini.spModel.target.env.GuideProbeTargets;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 
@@ -184,17 +185,17 @@ public final class NifsRule implements IRule {
         P2Problems prob = new P2Problems();
         public IP2Problems check(ObservationElements elements)  {
             for (ObsContext ctx : elements.getObsContext()) {
-                final SPTarget baseTarget       = ctx.getTargets().getBase();
+                final Asterism asterism       = ctx.getTargets().getAsterism();
                 final Option<SPTarget> oiTarget = getOITarget(ctx);
                 final Option<SPTarget> aoTarget = getAOTarget(ctx);
 
-                if (baseTarget == null || oiTarget.isEmpty() || aoTarget.isEmpty()) return null;
+                if (asterism == null || oiTarget.isEmpty() || aoTarget.isEmpty()) return null;
                 //now, let's compare coordinates. If they are the same, raise an error
 
                 final Option<Long> when = elements.getSchedulingBlockStart();
 
-                baseTarget.getRaHours(when).foreach(baseC1 ->
-                baseTarget.getDecDegrees(when).foreach(baseC2 ->
+                asterism.getRaHours(when).foreach(baseC1 ->
+                asterism.getDecDegrees(when).foreach(baseC2 ->
 
                 oiTarget.getValue().getRaHours(when).foreach(oiC1 ->
                 oiTarget.getValue().getDecDegrees(when).foreach(oiC2 ->
