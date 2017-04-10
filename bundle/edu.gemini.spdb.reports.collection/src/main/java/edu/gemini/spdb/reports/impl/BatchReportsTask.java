@@ -59,7 +59,7 @@ public class BatchReportsTask implements CronJob {
 
                 // Run it once for each database we know about, collecting results.
                 final IDBDatabaseService db = SPDB.get();
-                final Map<IDBDatabaseService, List<IRow>> results = new HashMap<IDBDatabaseService, List<IRow>>();
+                final Map<IDBDatabaseService, List<IRow>> results = new HashMap<>();
                 if (db != null) {
                     // Run the query, collecting the reports.
                     final ClassLoader loader = Thread.currentThread().getContextClassLoader();

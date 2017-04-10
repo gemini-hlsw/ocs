@@ -19,7 +19,7 @@ public class ReportManager implements Iterable<ReportManager.ReportRegistration>
 
 	private static final ReportManager INSTANCE = new ReportManager();
 	
-	private final Map<String, ReportRegistration> map = new TreeMap<String, ReportRegistration>();
+	private final Map<String, ReportRegistration> map = new TreeMap<>();
 	
 	private ReportManager() {
 		// no public creation
