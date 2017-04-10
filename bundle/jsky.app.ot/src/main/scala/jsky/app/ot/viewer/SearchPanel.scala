@@ -93,10 +93,12 @@ object SearchPanel {
   private def dataObjectMatcher(f: ISPDataObject => Boolean): ISPNode => Boolean =
     n => Option(n.getDataObject).exists(f)
 
-  private def titleMatcher(text: String)(op: String => String): ISPNode => Boolean =
+  private def titleMatcher(text: String)(op: String => String): ISPNode => Boolean = {
+    val textʹ = op(text)
     dataObjectMatcher { obj =>
-      Option(obj.getTitle).map(op).exists(_.contains(text))
+      Option(obj.getTitle).map(op).exists(_.contains(textʹ))
     }
+  }
 
   private def obsNumberMatcher(num: Int): ISPNode => Boolean = {
     case o: ISPObservation => o.getObservationNumber === num
@@ -107,6 +109,6 @@ object SearchPanel {
     s match {
       case ObsNumber(n)     => obsNumberMatcher(n.toInt)
       case QuotedString(sʹ) => titleMatcher(sʹ)(identity)
-      case _                => titleMatcher(s.toLowerCase)(_.toLowerCase)
+      case _                => titleMatcher(s)(_.toLowerCase)
     }
 }
