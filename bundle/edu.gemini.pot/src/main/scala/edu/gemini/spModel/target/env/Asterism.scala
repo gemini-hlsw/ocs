@@ -61,3 +61,14 @@ trait Asterism {
   def getSkycalcCoordinates(time: GOLong): GOption[SCoordinates] =
     gcoords(time)(cs => new SCoordinates(cs.ra.toDegrees, cs.dec.toDegrees))
 }
+
+object Asterism {
+
+  /** Construct a single-target Asterism by wrapping the given SPTarget. */
+  def single(t: SPTarget): Asterism =
+    new Asterism {
+      val targets = NonEmptyList(t)
+      override def basePosition(time: Instant) = t.getCoordinates(Option(time.toEpochMilli))
+    }
+
+}

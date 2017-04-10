@@ -84,6 +84,14 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
     }
 
     /**
+     * Gets the asterism in this environment. This method will never return <code>null</code>
+     * because the environment always has to contain an asterism.
+     */
+    public Asterism getAsterism() {
+      return Asterism$.MODULE$.single(base);
+    }
+
+    /**
      * Gets the collection of {@link GuideGroup}s in this target environment.
      *
      * @return the {@link GuideEnvironment} in this target environment
