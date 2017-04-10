@@ -33,18 +33,30 @@ public class CalibrationProviderImpl implements CalibrationProvider, ActionListe
 
     @Override
     public List<Calibration> getCalibrations(CalibrationKey key) {
-        ConfigurationKey configKey = key.getConfig();
+        final ConfigurationKey configKey = key.getConfig();
+        final List<Calibration> cals;
         if (key instanceof CalibrationKeyImpl.WithWavelength) {
-            Double wavelength = ((CalibrationKeyImpl.WithWavelength) key).getWavelength();
-            return getCalibrations(
-                    configKey.getInstrumentName(),
-                    configKey,
-                    wavelength);
+            final Double wavelength = ((CalibrationKeyImpl.WithWavelength) key).getWavelength();
+            cals = getCalibrations(configKey.getInstrumentName(), configKey, wavelength);
         } else {
-            return getCalibrations(
-                    configKey.getInstrumentName(),
-                    key.getConfig());
+            cals = getCalibrations(configKey.getInstrumentName(), key.getConfig());
         }
+
+        // Partition the calibrations into flats and arcs.
+        final List<Calibration> flats = new ArrayList<>();
+        final List<Calibration> arcs  = new ArrayList<>();
+        cals.forEach( cal -> {
+            if (cal.isFlat()) {
+                flats.add(cal);
+            } else {
+                arcs.add(cal);
+            }
+        });
+
+        // Return the flats before the arcs.
+        final List<Calibration> result = new ArrayList<>(flats);
+        result.addAll(arcs);
+        return result;
     }
 
     @Override
