@@ -24,7 +24,7 @@ class SearchPanel(statusFilter: StatusFilter, tree: SPTree) extends GridBagPanel
   private var viewer = Option.empty[SPViewer]
 
   def searchString: Option[String] =
-    Option(textBox.text).filterNot(_.isEmpty)
+    Option(textBox.text).map(_.trim).filterNot(_.isEmpty)
 
   object nextAction extends Action("Next") {
 
@@ -107,6 +107,6 @@ object SearchPanel {
     s match {
       case ObsNumber(n)     => obsNumberMatcher(n.toInt)
       case QuotedString(sʹ) => titleMatcher(sʹ)(identity)
-      case _                => titleMatcher(s.trim.toLowerCase)(_.toLowerCase)
+      case _                => titleMatcher(s.toLowerCase)(_.toLowerCase)
     }
 }
