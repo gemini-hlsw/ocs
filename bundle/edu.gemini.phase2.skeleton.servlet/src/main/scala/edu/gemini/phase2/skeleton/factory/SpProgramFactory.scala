@@ -37,6 +37,7 @@ object SpProgramFactory {
   )
 
   private val EXC_TIME_ACCT = Map(
+    CFHT   -> TimeAcctCategory.CFH,
     SUBARU -> TimeAcctCategory.JP,
     KECK   -> TimeAcctCategory.XCHK
   )

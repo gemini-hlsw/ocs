@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package edu.gemini.spModel.timeacct;
 
 import edu.gemini.spModel.pio.ParamSet;
@@ -24,7 +20,7 @@ public final class TimeAcctPio {
     private TimeAcctPio() {
     }
 
-    public static ParamSet getParamSet(PioFactory factory, TimeAcctAllocation allocation) {
+    public static ParamSet getParamSet(final PioFactory factory, final TimeAcctAllocation allocation) {
         ParamSet pset = factory.createParamSet(TIME_ACCT_PARAM_SET);
 
         for (TimeAcctCategory cat : allocation.getCategories()) {

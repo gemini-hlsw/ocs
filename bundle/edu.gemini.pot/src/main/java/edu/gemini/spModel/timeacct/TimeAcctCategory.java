@@ -1,10 +1,5 @@
-//
-// $
-//
-
 package edu.gemini.spModel.timeacct;
 
-import java.util.Comparator;
 import java.io.Serializable;
 
 /**
@@ -18,6 +13,7 @@ public enum TimeAcctCategory implements Serializable {
         AU("Australia"),
         BR("Brazil"),
         CA("Canada"),
+        CFH("CFHT Exchange"),
         CL("Chile"),
         KR("Republic of Korea"),
         DD("Director's Time"),
@@ -33,19 +29,9 @@ public enum TimeAcctCategory implements Serializable {
         XCHK("Keck Exchange"),
         ;
 
-    /**
-     * A comparator based on display name followed by code.
-     */
-    public static final Comparator<TimeAcctCategory> DISPLAY_NAME_COMPARATOR =
-            new Comparator<TimeAcctCategory>() {
-                public int compare(TimeAcctCategory c1, TimeAcctCategory c2) {
-                    return c1.displayName.compareTo(c2.displayName);
-                }
-            };
+    private final String displayName;
 
-    private String displayName;
-
-    private TimeAcctCategory(String displayName) {
+    TimeAcctCategory(String displayName) {
         if (displayName == null) throw new NullPointerException();
         this.displayName = displayName;
     }
