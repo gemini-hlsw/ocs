@@ -98,7 +98,7 @@ public class ProviderTest {
                         GmosCommonType.Order.ONE,
                         GmosCommonType.AmpGain.LOW
                 );
-        
+
         // ===== test wavelength 500
         List<Calibration> calibrations =
                 provider.getCalibrations(new CalibrationKeyImpl.WithWavelength(key, 500.0));
@@ -106,18 +106,18 @@ public class ProviderTest {
         Assert.assertEquals(2, calibrations.size());
         //  check number 1
         Assert.assertEquals(CalUnitParams.Shutter.CLOSED,       calibrations.get(0).getShutter());
-        Assert.assertEquals(CalUnitParams.Filter.NONE,         calibrations.get(0).getFilter());
+        Assert.assertEquals(CalUnitParams.Filter.ND_30,         calibrations.get(0).getFilter());
         Assert.assertEquals(CalUnitParams.Diffuser.VISIBLE,     calibrations.get(0).getDiffuser());
-        Assert.assertEquals(30,                                 calibrations.get(0).getExposureTime(), 0.01);
+        Assert.assertEquals(12,                                 calibrations.get(0).getExposureTime(), 0.01);
         Assert.assertEquals(new Integer(1),                     calibrations.get(0).getCoadds());
-        Assert.assertTrue(calibrations.get(0).isArc());
+        Assert.assertTrue(calibrations.get(0).isFlat());
         //  check number 2
         Assert.assertEquals(CalUnitParams.Shutter.CLOSED,       calibrations.get(1).getShutter());
-        Assert.assertEquals(CalUnitParams.Filter.ND_30,         calibrations.get(1).getFilter());
+        Assert.assertEquals(CalUnitParams.Filter.NONE,          calibrations.get(1).getFilter());
         Assert.assertEquals(CalUnitParams.Diffuser.VISIBLE,     calibrations.get(1).getDiffuser());
-        Assert.assertEquals(12,                                 calibrations.get(1).getExposureTime(), 0.01);
+        Assert.assertEquals(30,                                 calibrations.get(1).getExposureTime(), 0.01);
         Assert.assertEquals(new Integer(1),                     calibrations.get(1).getCoadds());
-        Assert.assertTrue(calibrations.get(1).isFlat());
+        Assert.assertTrue(calibrations.get(1).isArc());
      }
 
 }
