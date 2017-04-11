@@ -8,6 +8,7 @@ import edu.gemini.spModel.core.Magnitude;
 import edu.gemini.spModel.core.MagnitudeBand;
 import edu.gemini.spModel.gemini.gpi.Gpi;
 import edu.gemini.spModel.target.SPTarget;
+import edu.gemini.spModel.target.env.Asterism;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 
 import java.util.*;
@@ -162,9 +163,9 @@ public class GpiRule implements IRule {
 
                 P2Problems problems = new P2Problems();
                 TargetEnvironment env = obsComp.getTargetEnvironment();
-                SPTarget base = env.getBase();
-                scala.Option<Magnitude> imag = base.getMagnitude(MagnitudeBand.I$.MODULE$);
-                scala.Option<Magnitude> hmag = base.getMagnitude(MagnitudeBand.H$.MODULE$);
+                Asterism asterism = env.getAsterism();
+                scala.Option<Magnitude> imag = asterism.ifSingleJava().getMagnitude(MagnitudeBand.I$.MODULE$);
+                scala.Option<Magnitude> hmag = asterism.ifSingleJava().getMagnitude(MagnitudeBand.H$.MODULE$);
                 // OT-74
                 if (imag.isEmpty()) {
                     problems.addError(PREFIX + "MAG_BAND_MESSAGE", MAG_BAND_MESSAGE + "I-band.", elements.getTargetObsComponentNode().getValue());
@@ -179,7 +180,7 @@ public class GpiRule implements IRule {
                     if (!inst.getObservingMode().isEmpty()) {
                         Gpi.ObservingMode obsMode = inst.getObservingMode().getValue();
                         MagnitudeBand band = inst.getFilter().getBand(); // OT-102: obsMode could be NONSTANDARD
-                        scala.Option<Magnitude> mag = base.getMagnitude(band);
+                        scala.Option<Magnitude> mag = asterism.ifSingleJava().getMagnitude(band);
                         if (mag.isEmpty()) {
                             // OT-99
                             problems.addError(PREFIX + "MAG_BAND_MESSAGE", MAG_BAND_MESSAGE + band + "-band",

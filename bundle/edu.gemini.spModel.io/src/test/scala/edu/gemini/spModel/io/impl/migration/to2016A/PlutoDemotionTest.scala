@@ -23,8 +23,8 @@ class PlutoDemotionTest extends MigrationTest {
       .find(_.getType == SPComponentType.TELESCOPE_TARGETENV).get
       .getDataObject.asInstanceOf[TargetObsComp]
       .getTargetEnvironment
-      .getBase.getTarget match {
-          case NonSiderealTarget("Pluto", e, None, Nil, None, None) =>
+      .getAsterism.ifSingle.getBase.map(_.getTarget) match {
+          case Some(NonSiderealTarget("Pluto", e, None, Nil, None, None)) =>
             e.toList match {
               case List((t, c)) =>
 
@@ -34,7 +34,7 @@ class PlutoDemotionTest extends MigrationTest {
 
               case e => Assert.fail("Expected 1-element ephemeris, found " + e)
             }
-          case t => Assert.fail("Expected Pluto, found " + t)
+          case t => Assert.fail("Expected Some(Pluto), found " + t)
         }
 
 }

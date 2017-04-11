@@ -771,7 +771,7 @@ public final class Obs implements Serializable, Comparable<Obs> {
      */
     public boolean isSidereal() {
         assert targetEnvironment != null;
-        return targetEnvironment.getBase().isSidereal();
+        return targetEnvironment.getAsterism().isSidereal();
     }
 
     /**
@@ -780,7 +780,7 @@ public final class Obs implements Serializable, Comparable<Obs> {
      */
     public boolean isNonSidereal() {
         assert targetEnvironment != null;
-        return targetEnvironment.getBase().isNonSidereal();
+        return targetEnvironment.getAsterism().isNonSidereal();
     }
 
     public Object getConstraintsString() {
