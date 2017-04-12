@@ -7,10 +7,11 @@ import edu.gemini.dbTools.mail.OdbMailConfig;
 
 final class BadAddressProgram extends TestProgramBase {
 
-    private OdbMailConfig mailConfig;
+    private final OdbMailConfig config;
 
-    BadAddressProgram() {
+    BadAddressProgram(OdbMailConfig mailConfig) {
         super("GS-2003B-EMAIL-001");
+        config = mailConfig;
     }
 
     // No pi address
@@ -29,6 +30,6 @@ final class BadAddressProgram extends TestProgramBase {
     }
 
     protected OdbMailConfig getMailConfig() {
-        throw new Error("Not implemented, sorry."); // TODO
+        return config;
     }
 }

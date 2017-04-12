@@ -16,15 +16,17 @@ import java.util.logging.Logger;
 public final class OdbStateAgent {
 
     private final OdbStateIO stateIO;
+    private final IDBDatabaseService odb;
 
-    public OdbStateAgent(final Logger log, final OdbStateConfig config) {
+    public OdbStateAgent(final Logger log, final OdbStateConfig config, final IDBDatabaseService odb) {
         log.info("State file is " + config.stateFile.getAbsolutePath());
         this.stateIO = new OdbStateIO(log, config.stateFile);
+        this.odb     = odb;
     }
 
     // For each program key, get a reference to the corresponding program and then fetch its state.
     private static SortedMap<SPProgramID, ProgramState> getCurrentState(final Logger log, final IDBDatabaseService db, Set<Principal> user) {
-        final SortedMap<SPProgramID, ProgramState> m = new TreeMap<SPProgramID, ProgramState>();
+        final SortedMap<SPProgramID, ProgramState> m = new TreeMap<>();
         final List<ProgramListFunctor.ProgramRef> refs = ProgramListFunctor.getProgramRefs(db, user);
         for (final ProgramListFunctor.ProgramRef ref : refs) {
             if (ref.getId().toString().matches("G[NS]-\\d\\d\\d\\d[AB]-.*")) {
@@ -41,12 +43,12 @@ public final class OdbStateAgent {
     }
 
     public void updateState(final Logger log, Set<Principal> user) throws IOException {
-        writeState(getCurrentState(log, SPDB.get(), user));
+        writeState(getCurrentState(log, odb, user));
     }
 
     @SuppressWarnings("UnusedParameters")
     public static void run(final File tempDir, final Logger log, final Map<String, String> env, Set<Principal> user) throws IOException {
-        new OdbStateAgent(log, new OdbStateConfig(tempDir)).updateState(log, user);
+        new OdbStateAgent(log, new OdbStateConfig(tempDir), SPDB.get()).updateState(log, user);
     }
 
 }

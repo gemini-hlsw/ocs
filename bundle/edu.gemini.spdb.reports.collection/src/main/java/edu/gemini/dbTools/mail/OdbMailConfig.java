@@ -25,19 +25,16 @@ public class OdbMailConfig extends Props {
     private static final String SMTP_PROPERTY = "SITE_SMTP_SERVER";
     private static final String SENDER_ADDR_PROPERTY = "ODB_MAIL_SENDER_ADDR";
     private static final String SENDER_NAME_PROPERTY = "ODB_MAIL_SENDER_NAME";
-//    private static final String WARNING_RECIPIENTS_PROPERTY = "ODB_WARNING_RECIPIENTS";
     private static final String DEFAULT_SENDER_ADDR = "noreply@gemini.edu";
     private static final String DEFAULT_SENDER_NAME = "Gemini ODB";
 
     private final String smtpHost;
     public final InternetAddress sender;
-//    public final String warningRecipients;
     public final File stateFile;
 
     public OdbMailConfig(final File tempDir, final Map<String, String> env) throws UnsupportedEncodingException {
         super(env);
         smtpHost = getString(SMTP_PROPERTY);
-//        warningRecipients = getString(WARNING_RECIPIENTS_PROPERTY);
         sender = new InternetAddress();
         sender.setAddress(getString(SENDER_ADDR_PROPERTY, DEFAULT_SENDER_ADDR));
         sender.setPersonal(getString(SENDER_NAME_PROPERTY, DEFAULT_SENDER_NAME));
