@@ -20,7 +20,7 @@ final class Ephemeris(val site: Site, val compressedData: Deflated[List[(Long, F
 
     // Decompress if needed
     if (_data == null) {
-      logger.info("Inflating compressed ephemeris.")
+      logger.finest("Inflating compressed ephemeris.")
       _data = ==>>.fromList(compressedData.inflate.map { case (t, r, d) =>
         t -> Coordinates.fromDegrees(r, d).getOrElse(sys.error(s"corrupted ephemeris data: $t $r $d"))
       })
@@ -30,7 +30,7 @@ final class Ephemeris(val site: Site, val compressedData: Deflated[List[(Long, F
     if (_task != null) _task.cancel()
     _task = new TimerTask {
       def run(): Unit = {
-        logger.info("Discarding inflated ephemeris.")
+        logger.finest("Discarding inflated ephemeris.")
         Ephemeris.this.synchronized(_data = null)
       }
     }
