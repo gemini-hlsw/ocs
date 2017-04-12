@@ -9,6 +9,8 @@ import edu.gemini.spModel.gemini.calunit.smartgcal.{Calibration, CalibrationProv
 import edu.gemini.spModel.obslog.ObsExecLog
 import edu.gemini.spModel.test.SpModelTestBase
 
+import java.util.concurrent.locks.ReentrantLock
+
 
 abstract class GcalExecTest extends SpModelTestBase {
   val progId = SPProgramID.toProgramID("GS-3000A-Q-1")
@@ -29,6 +31,30 @@ abstract class GcalExecTest extends SpModelTestBase {
     ObsExecLog.updateObsLog(getOdb, getObs.getObservationID, new GSome(label(step)), new GSome(evt(step)))
   }
 
-  def setupGcal(cs: Calibration*): Unit =
+  def setupGcal(cs: Calibration*): Unit = {
+    if (!GcalExecTest.lock.isHeldByCurrentThread) {
+      sys.error("Execute GCAL test cases inside of a locking block")
+    }
     CalibrationProviderHolder.setProvider(new TestCalibrationProvider(cs.toList))
+  }
+
+  // Test cases have to be serialized across all tests that use smart gcal.
+  // The issue is with the CalibrationProviderHolder which maintains a shared
+  // mutable reference that gets clobbered when multiple test cases are
+  // running.
+  
+  def locking(testCase: => Unit): Unit = {
+    import GcalExecTest.lock
+
+    lock.lock
+    try {
+      testCase
+    } finally {
+      lock.unlock
+    }
+  }
+}
+
+object GcalExecTest {
+  private val lock = new ReentrantLock
 }
