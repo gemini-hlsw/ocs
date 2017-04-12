@@ -23,7 +23,7 @@ trait Asterism {
     * will be a computation that finds the coordinate minimizing the maximum
     * distance to any target in the asterism.
     */
-  def basePosition(time: Instant): Option[Coordinates] =
+  def basePosition(time: Option[Instant]): Option[Coordinates] =
     ???  // we should supply the "smallest-circle" implementation here
 
   /** An Asterism is considered sidereal if and only if all targets are sidereal. */
@@ -49,10 +49,7 @@ trait Asterism {
   type GODouble = GOption[java.lang.Double]
 
   private def gcoords[A](time: GOLong)(f: Coordinates => A): GOption[A] =
-    (for {
-      t <- time.asScalaOpt
-      c <- basePosition(Instant.ofEpochMilli(t))
-    } yield f(c)).asGeminiOpt
+    basePosition(time.asScalaOpt.map(Instant.ofEpochMilli(_))).map(f).asGeminiOpt
 
   def getRaHours(time: GOLong): GODouble =
     gcoords(time)(_.ra.toHours)
@@ -111,7 +108,7 @@ object Asterism {
 
   final case class Single(t: SPTarget) extends Asterism {
     val targets = NonEmptyList(t)
-    override def basePosition(time: Instant) = t.getCoordinates(Option(time.toEpochMilli))
+    override def basePosition(time: Option[Instant]) = t.getCoordinates(time.map(_.toEpochMilli))
   }
 
   /** Construct a single-target Asterism by wrapping the given SPTarget. */
