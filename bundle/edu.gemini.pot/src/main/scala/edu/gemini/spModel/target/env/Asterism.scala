@@ -34,6 +34,10 @@ trait Asterism {
   def isNonSidereal: Boolean =
     targets.any(_.isNonSidereal)
 
+  /** An Asterism's name is the concatenation of it's target's names. */
+  def getName: String =
+    targets.map(_.getName).intercalate(", ")
+
   //
   // "Base position" convenience methods already in use extensively throughout
   // the codebase.  Defined in terms of the base position, these are methods

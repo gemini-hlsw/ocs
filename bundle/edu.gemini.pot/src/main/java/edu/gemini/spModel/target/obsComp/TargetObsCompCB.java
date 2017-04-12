@@ -50,7 +50,7 @@ public class TargetObsCompCB extends AbstractObsComponentCB {
 
         // Patch for a problem in 2009B.1.1.1.  The "telescope:Base:name" param
         // was missing, which caused the FITS OBJECT keyword to be incorrect.
-        String baseName = env.getBase().getName();
+        String baseName = env.getAsterism().getName();
         if ((baseName != null) && !"".equals(baseName)) {
             DefaultConfigParameter cp = DefaultConfigParameter.getInstance("Base");
             ISysConfig sc = (ISysConfig) cp.getValue();
