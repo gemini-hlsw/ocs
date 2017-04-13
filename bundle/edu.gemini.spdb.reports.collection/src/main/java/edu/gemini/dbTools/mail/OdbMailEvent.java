@@ -64,6 +64,8 @@ public abstract class OdbMailEvent implements Serializable, Comparable<OdbMailEv
 
         void down_Phase2();
 
+        void onHold();
+
         void observed();
 
         void up_ForActivation();
@@ -84,6 +86,13 @@ public abstract class OdbMailEvent implements Serializable, Comparable<OdbMailEv
             new OdbMailEvent(Direction.DOWN, ObservationStatus.PHASE2) {
                 public void doAction(final OdbMailEvent.Action action) {
                     action.down_Phase2();
+                }
+            };
+
+    private static final OdbMailEvent ON_HOLD =
+            new OdbMailEvent(Direction.ANY, ObservationStatus.ON_HOLD) {
+                public void doAction(final OdbMailEvent.Action action) {
+                    action.onHold();
                 }
             };
 
@@ -119,6 +128,7 @@ public abstract class OdbMailEvent implements Serializable, Comparable<OdbMailEv
         DOWN_FOR_REVIEW,
         DOWN_PHASE2,
         OBSERVED,
+        ON_HOLD,
         UP_FOR_ACTIVATION,
         UP_FOR_REVIEW,
         UP_READY,

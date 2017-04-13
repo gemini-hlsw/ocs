@@ -11,12 +11,11 @@ import javax.mail.MessagingException;
 import java.util.List;
 import java.util.ArrayList;
 
-class TestMailSender implements MailSender {
-    private final List<Message> _msgList = new ArrayList<Message>();
+final class TestMailSender implements MailSender {
+    private final List<Message> _msgList = new ArrayList<>();
 
     public void send(final Message msg) throws MessagingException {
         _msgList.add(msg);
-//        MailUtil.logMessage(Level.WARN, msg);
     }
 
     public void clearMessages() {

@@ -7,37 +7,37 @@ import edu.gemini.dbTools.mail.OdbMailAgent;
 import edu.gemini.dbTools.mail.OdbMailConfig;
 import edu.gemini.dbTools.odbState.OdbStateAgent;
 import edu.gemini.dbTools.odbState.OdbStateConfig;
+import edu.gemini.pot.sp.ISPFactory;
+import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.pot.sp.ISPProgram;
 import edu.gemini.pot.sp.SPObservationID;
-import edu.gemini.pot.sp.ISPObservation;
-import edu.gemini.pot.sp.ISPFactory;
+import edu.gemini.pot.spdb.DBLocalDatabase;
 import edu.gemini.pot.spdb.IDBDatabaseService;
+import edu.gemini.spModel.obs.ObsPhase2Status;
 import edu.gemini.spModel.obs.ObservationStatus;
-import edu.gemini.util.security.principal.StaffPrincipal;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import static org.junit.Assert.*;
-
-import java.io.File;
-import java.security.Principal;
-import java.util.Collections;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Set;
-import java.util.logging.Logger;
-
 import edu.gemini.spModel.obs.SPObservation;
+import edu.gemini.spModel.too.Too;
+import edu.gemini.spModel.too.TooType;
+import edu.gemini.util.security.principal.StaffPrincipal;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import javax.mail.Message;
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.security.Principal;
+import java.util.*;
+import java.util.logging.Logger;
 
-@Ignore
-public class OdbMailCase {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+public final class OdbMailCase {
     private static final Logger LOG = Logger.getLogger(OdbMailCase.class.getName());
 
-//    public OdbMailCase(final String name) {
-//        super(name);
-//    }
+    private Path _tempDirectory;
 
     private TestMailSender _testMailSender;
     private TestProgram _testProgram;
@@ -49,7 +49,10 @@ public class OdbMailCase {
     private SPObservation _obsObj1;
     private ISPObservation _obs2;
     private SPObservation _obsObj2;
+    private ISPObservation _obs3;
+    private SPObservation _obsObj3;
 
+    private IDBDatabaseService odb;
     private OdbMailConfig mailConfig = null;
     private OdbStateConfig stateConfig = null;
     private OdbStateAgent stateAgent = null;
@@ -58,13 +61,16 @@ public class OdbMailCase {
     private final Set<Principal> user = Collections.<Principal>singleton(StaffPrincipal.Gemini());
 
     @Before
-    protected void setUp() throws Exception {
-        if (true)
-            throw new Error("ok, you need to initialize mailConfig somehow");
+    public void setUp() throws Exception {
+        _tempDirectory = Files.createTempDirectory("OdbMailTest");
+        final Map<String, String> props = new HashMap<>();
+        props.put("SITE_SMTP_SERVER", "notused");
+        mailConfig  = new OdbMailConfig(_tempDirectory.toFile(), props);
 
-        stateConfig = new OdbStateConfig(new File(System.getProperty("java.io.tmpdir")));
-        mailAgent = new OdbMailAgent(mailConfig, stateConfig);
-        stateAgent = new OdbStateAgent(LOG, stateConfig);
+        odb         = DBLocalDatabase.createTransient();
+        stateConfig = new OdbStateConfig(_tempDirectory.toFile());
+        mailAgent   = new OdbMailAgent(mailConfig, stateConfig);
+        stateAgent  = new OdbStateAgent(LOG, stateConfig, odb);
 
         // Erase the state files, if they exist.
         File stateFile = mailConfig.stateFile;
@@ -76,10 +82,10 @@ public class OdbMailCase {
         _testMailSender = new TestMailSender();
         OdbMailAgent.setMailSender(_testMailSender);
 
-        final IDBDatabaseService db = OdbMailTest.getDatabase();
-        _testProgram = new TestProgram();
-        _prog = _testProgram.create(db);
-        _fact = db.getFactory();
+        _testProgram = new TestProgram(mailConfig);
+        _prog = _testProgram.create(odb);
+        _fact = odb.getFactory();
+        odb.put(_prog);
 
         // Run it once to create the initial state.
         stateAgent.updateState(LOG, user);
@@ -106,10 +112,15 @@ public class OdbMailCase {
         assertEquals(ObservationStatus.FOR_ACTIVATION,
                 ObservationStatus.computeFor(_obs2));
 
-        final ISPObservation _obs3 = (ISPObservation) obsList.get(3);
-//        final SPObservation _obsObj3 = (SPObservation) _obs3.getDataObject();
+        _obs3 = (ISPObservation) obsList.get(3);
+        _obsObj3 = (SPObservation) _obs3.getDataObject();
         assertEquals(ObservationStatus.READY,
                 ObservationStatus.computeFor(_obs3));
+    }
+
+    @After
+    public void tearDown() {
+        odb.getDBAdmin().shutdown();
     }
 
     //
@@ -118,7 +129,7 @@ public class OdbMailCase {
     @Test public void testOneAdvancing() throws Exception {
         // The same list of observation ids will apply each time.
         final SPObservationID obsId = _obs0.getObservationID();
-        final List<SPObservationID> idList = new ArrayList<SPObservationID>();
+        final List<SPObservationID> idList = new ArrayList<>();
         idList.add(obsId);
 
         final ObservationStatus[] statusA = {
@@ -159,7 +170,7 @@ public class OdbMailCase {
     @Test public void testOneRetreating() throws Exception {
         // The same list of observation ids will apply each time.
         final SPObservationID obsId = _obs2.getObservationID();
-        final List<SPObservationID> idList = new ArrayList<SPObservationID>();
+        final List<SPObservationID> idList = new ArrayList<>();
         idList.add(obsId);
 
         final ObservationStatus[] statusA = {
@@ -193,11 +204,58 @@ public class OdbMailCase {
     }
 
     //
+    // Tests moving to ON_HOLD for a non-Too program which should do nothing.
+    //
+    @Test public void testNotTooOnHold() throws Exception {
+        // Move the first observation to ON_HOLD.
+        _obsObj0.setPhase2Status(ObsPhase2Status.ON_HOLD);
+        _obs0.setDataObject(_obsObj0);
+
+        // Run the email agent.
+        stateAgent.updateState(LOG, user);
+        mailAgent.executeOnce(LOG);
+
+        // Check that no message was generated.
+        assertEquals("onHold, non Too", 0, _testMailSender.getMessageCount());
+    }
+
+    //
+    // Tests moving to ON_HOLD for a ToO program.
+    //
+    @Test public void testTooOnHold() throws Exception {
+        // Modify the program to be a ToO program.
+        Too.set(_prog, TooType.standard);
+
+        // Move the first observation up to ON_HOLD.
+        _obsObj0.setPhase2Status(ObsPhase2Status.ON_HOLD);
+        _obs0.setDataObject(_obsObj0);
+
+        // Move the last observation down to ON_HOLD.
+        _obsObj3.setPhase2Status(ObsPhase2Status.ON_HOLD);
+        _obs3.setDataObject(_obsObj3);
+
+        // Run the email agent.
+        stateAgent.updateState(LOG, user);
+        mailAgent.executeOnce(LOG);
+
+        // Check that a message was generated.
+        assertEquals("onHold, Too", 1, _testMailSender.getMessageCount());
+
+        final List<SPObservationID> idList = Arrays.asList(
+            _obs0.getObservationID(),
+            _obs3.getObservationID()
+        );
+        final Message msg = _testProgram.createAny_On_Hold(idList);
+        assertTrue("onHold, Too", _testMailSender.matchMessage(msg));
+    }
+
+
+    //
     // Tests having more than one observation in an email.
     //
     @Test public void testMultipleObsOneMail() throws Exception {
         Message msg;
-        final List<SPObservationID> idList = new ArrayList<SPObservationID>();
+        final List<SPObservationID> idList = new ArrayList<>();
 
         // Move obs0 to FOR_REVIEW
         idList.add(_obs0.getObservationID());
@@ -250,7 +308,7 @@ public class OdbMailCase {
     //
     @Test public void testObsInGroup() throws Exception {
         Message msg;
-        final List<SPObservationID> idList = new ArrayList<SPObservationID>();
+        final List<SPObservationID> idList = new ArrayList<>();
 
         _obsObj0.setGroup("xyz");
         _obsObj1.setGroup("xyz");
@@ -292,8 +350,8 @@ public class OdbMailCase {
     // Tests more than one email generated by a program.
     //
     @Test public void testMultipleMailsOneProgram() throws Exception {
-        final List<SPObservationID> idList0 = new ArrayList<SPObservationID>();
-        final List<SPObservationID> idList1 = new ArrayList<SPObservationID>();
+        final List<SPObservationID> idList0 = new ArrayList<>();
+        final List<SPObservationID> idList1 = new ArrayList<>();
 
         // Move obs0 to FOR_REVIEW.
         idList0.add(_obs0.getObservationID());
@@ -319,7 +377,7 @@ public class OdbMailCase {
     // Tests "skipping" an observation status.
     //
     @Test public void testSkippingStatus() throws Exception {
-        final List<SPObservationID> idList = new ArrayList<SPObservationID>();
+        final List<SPObservationID> idList = new ArrayList<>();
         idList.add(_obs0.getObservationID());
 
         // Move obs0 from PhaseII to FOR_ACTIVATION (skipping FOR_REVIEW)
@@ -361,7 +419,7 @@ public class OdbMailCase {
         stateAgent.updateState(LOG, user);
         mailAgent.executeOnce(LOG);
 
-        final List<SPObservationID> idList = new ArrayList<SPObservationID>();
+        final List<SPObservationID> idList = new ArrayList<>();
         idList.add(newObs.getObservationID());
         final Message msg = _testProgram.createUp_Ready(idList);
         assertTrue(_testMailSender.matchMessage(msg));
@@ -370,24 +428,11 @@ public class OdbMailCase {
     }
 
     //
-    // Tests moving to "observed" status.
-    //
-    @Test public void testObservedStatus() throws Exception {
-        // Not yet fully implemented.  Want to make sure that nothing bad happens.
-        _obsObj0.setPhase2Status(ObservationStatus.OBSERVED.phase2());
-        _obs0.setDataObject(_obsObj0);
-        stateAgent.updateState(LOG, user);
-        mailAgent.executeOnce(LOG);
-
-        assertEquals(0, _testMailSender.getMessageCount());
-    }
-
-    //
     // Tests moving to some arbitrary non-email associated state.
     //
     @Test public void testOtherStatus() throws Exception {
         // Not yet fully implemented.  Want to make sure that nothing bad happens.
-        _obsObj0.setPhase2Status(ObservationStatus.ONGOING.phase2());
+        _obsObj0.setPhase2Status(ObsPhase2Status.INACTIVE);
         _obs0.setDataObject(_obsObj0);
         stateAgent.updateState(LOG, user);
         mailAgent.executeOnce(LOG);
@@ -399,13 +444,14 @@ public class OdbMailCase {
     // Test events involving a program with bad email addresses.
     //
     @Test public void testBadAddresses() throws Exception {
-        final IDBDatabaseService db = OdbMailTest.getDatabase();
-        final BadAddressProgram bap = new BadAddressProgram();
+        final BadAddressProgram bap = new BadAddressProgram(mailConfig);
 
-        final ISPProgram prog = bap.create(db);
+        final ISPProgram prog = bap.create(odb);
         final List obsList = prog.getAllObservations();
         final ISPObservation obs0 = (ISPObservation) obsList.get(0);
         final SPObservation obsObj0 = (SPObservation) obs0.getDataObject();
+
+        odb.put(prog);
 
         // Run it once to create the initial state.
         stateAgent.updateState(LOG, user);
@@ -414,9 +460,8 @@ public class OdbMailCase {
         // Make sure that the mail sender is empty.
         assertEquals(0, _testMailSender.getMessageCount());
 
-        final List<SPObservationID> idList = new ArrayList<SPObservationID>();
+        final List<SPObservationID> idList = new ArrayList<>();
         idList.add(obs0.getObservationID());
-        Message msg;
 
         // Move the status of obs0 to FOR_REVIEW.
         obsObj0.setPhase2Status(ObservationStatus.FOR_REVIEW.phase2());
@@ -427,7 +472,7 @@ public class OdbMailCase {
         // One email should be sent even though the NGO address is bad,
         // since the gemini contact address is used in this case.
         assertEquals(1, _testMailSender.getMessageCount());
-        msg = bap.createUp_ForReview(idList);
+        Message msg = bap.createUp_ForReview(idList);
         assertTrue(_testMailSender.matchMessage(msg));
         _testMailSender.clearMessages();
 
@@ -437,8 +482,9 @@ public class OdbMailCase {
         stateAgent.updateState(LOG, user);
         mailAgent.executeOnce(LOG);
 
-        // No email should be send because the PI address is missing.
-        assertEquals(0, _testMailSender.getMessageCount());
+        // Only one email should be sent because only just one is valid, one
+        // of the gemini contact emails.
+        assertEquals(1, _testMailSender.getMessageCount());
 
         // Move the status of obs0 back to FOR_ACTIVATION
         obsObj0.setPhase2Status(ObservationStatus.FOR_ACTIVATION.phase2());
@@ -446,8 +492,9 @@ public class OdbMailCase {
         stateAgent.updateState(LOG, user);
         mailAgent.executeOnce(LOG);
 
-        // One email should be send because there is one valid gemini address.
-        assertEquals(1, _testMailSender.getMessageCount());
+        // One (more) email should have been sent because there is one valid
+        // gemini address.
+        assertEquals(2, _testMailSender.getMessageCount());
 
         msg = bap.createUp_ForActivation(idList);
         assertTrue(_testMailSender.matchMessage(msg));
@@ -455,13 +502,14 @@ public class OdbMailCase {
 
 
         // Finally move back to FOR_REVIEW.  In this case, since the NGO address
-        // is bad and there is no PI, no email should be sent.
+        // is bad and there is no PI, no email should be sent for those but
+        // we still have the one valid gemini address.
         obsObj0.setPhase2Status(ObservationStatus.FOR_REVIEW.phase2());
         obs0.setDataObject(obsObj0);
         stateAgent.updateState(LOG, user);
         mailAgent.executeOnce(LOG);
 
         // One email should be send because there is one valid gemini address.
-        assertEquals(0, _testMailSender.getMessageCount());
+        assertEquals(1, _testMailSender.getMessageCount());
     }
 }

@@ -29,8 +29,6 @@ import java.util.Properties;
  * Base class for test programs used in testing the email sending agent.
  */
 abstract class TestProgramBase {
-    //private static final Logger LOG = LogUtil.getLogger(TestProgramBase.class);
-
     private final SPProgramID _progId;
 
     TestProgramBase(final String progId) {
@@ -41,12 +39,6 @@ abstract class TestProgramBase {
         }
     }
 
-// --Commented out by Inspection START (8/12/13 3:05 PM):
-//    SPProgramID getProgramID() {
-//        return _progId;
-//    }
-// --Commented out by Inspection STOP (8/12/13 3:05 PM)
-
     protected abstract String getPiAddressesStr();
 
     protected abstract String getNgoAddressesStr();
@@ -54,8 +46,6 @@ abstract class TestProgramBase {
     protected abstract String getGeminiAddressesStr();
 
     protected abstract OdbMailConfig getMailConfig();
-
-
 
     Address[] getPiAddresses() {
         final String adrsStr = getPiAddressesStr();
@@ -86,7 +76,6 @@ abstract class TestProgramBase {
         // Now create it from scratch.
         final ISPFactory fact = db.getFactory();
         prog = fact.createProgram(null, _progId);
-//        final SPNodeKey key = prog.getProgramKey();
 
         // Set the email addresses.
         final SPProgram progObj = (SPProgram) prog.getDataObject();
@@ -125,10 +114,17 @@ abstract class TestProgramBase {
         return prog;
     }
 
+    private static Address[] concat(Address[] a, Address[] b) {
+        final Address[] res = new Address[a.length + b.length];
+        System.arraycopy(a, 0, res, 0,        a.length);
+        System.arraycopy(b, 0, res, a.length, b.length);
+        return res;
+    }
+
     Message createDown_ForReview(final List obsList) throws Exception {
         final String subject = PrepareMessageAction.getSubject_Down_ForReview(_progId);
         Address[] toAddresses = getNgoAddresses();
-        Address[] ccAddresses = getPiAddresses();
+        Address[] ccAddresses = concat(getGeminiAddresses(), getPiAddresses());
         if (toAddresses.length == 0) {
             toAddresses = ccAddresses;
             ccAddresses = MailUtil.EMPTY_ADDRESS_ARRAY;
@@ -141,7 +137,7 @@ abstract class TestProgramBase {
     Message createDown_Phase2(final List obsList) throws Exception {
         final String subject = PrepareMessageAction.getSubject_Down_Phase2(_progId);
         final Address[] toAddresses = getPiAddresses();
-        final Address[] ccAddresses = getGeminiAddresses();
+        final Address[] ccAddresses = concat(getGeminiAddresses(), getNgoAddresses());
 
         return createTestMessage(OdbMailTemplate.DOWN_PHASE2,
                                  toAddresses, ccAddresses, subject, obsList);
@@ -150,7 +146,7 @@ abstract class TestProgramBase {
     Message createUp_ForActivation(final List obsList) throws Exception {
         final String subject = PrepareMessageAction.getSubject_Up_ForActivation(_progId);
         final Address[] toAddresses = getGeminiAddresses();
-        final Address[] ccAddresses = getPiAddresses();
+        final Address[] ccAddresses = concat(getPiAddresses(), getNgoAddresses());
 
         return createTestMessage(OdbMailTemplate.UP_FOR_ACTIVATION,
                                  toAddresses, ccAddresses, subject, obsList);
@@ -159,7 +155,7 @@ abstract class TestProgramBase {
     Message createUp_ForReview(final List obsList) throws Exception {
         final String subject = PrepareMessageAction.getSubject_Up_ForReview(_progId);
         Address[] toAddresses = getNgoAddresses();
-        Address[] ccAddresses = getGeminiAddresses();
+        Address[] ccAddresses = concat(getGeminiAddresses(), getPiAddresses());
         if (toAddresses.length == 0) {
             toAddresses = ccAddresses;
             ccAddresses = MailUtil.EMPTY_ADDRESS_ARRAY;
@@ -169,10 +165,19 @@ abstract class TestProgramBase {
                                  toAddresses, ccAddresses, subject, obsList);
     }
 
+    Message createAny_On_Hold(final List obsList) throws Exception {
+        final String subject = PrepareMessageAction.getSubject_On_Hold(_progId);
+        final Address[] toAddresses = getPiAddresses();
+        final Address[] ccAddresses = concat(getGeminiAddresses(), getNgoAddresses());
+
+        return createTestMessage(OdbMailTemplate.ON_HOLD,
+                                 toAddresses, ccAddresses, subject, obsList);
+    }
+
     Message createUp_Ready(final List obsList) throws Exception {
         final String subject = PrepareMessageAction.getSubject_Up_Ready(_progId);
         final Address[] toAddresses = getPiAddresses();
-        final Address[] ccAddresses = getNgoAddresses();
+        final Address[] ccAddresses = concat(getGeminiAddresses(), getNgoAddresses());
 
         return createTestMessage(OdbMailTemplate.UP_READY,
                                  toAddresses, ccAddresses, subject, obsList);

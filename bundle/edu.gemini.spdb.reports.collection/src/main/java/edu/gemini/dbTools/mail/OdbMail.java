@@ -9,6 +9,7 @@ import edu.gemini.dbTools.odbState.ProgramState;
 import edu.gemini.pot.sp.SPObservationID;
 import edu.gemini.spModel.core.SPProgramID;
 import edu.gemini.spModel.obs.ObservationStatus;
+import edu.gemini.spModel.too.TooType;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -94,6 +95,9 @@ public class OdbMail {
             // an email event associated with this change.
             final OdbMailEvent event = OdbMailEvent.lookup(oldStatus, newStatus);
             if (event == null) continue;  // nobody cares about this change
+
+            // Filter out "On Hold" messages unless this is a ToO observation.
+            if ((newStatus == ObservationStatus.ON_HOLD) && (newObs.getTooType() == TooType.none)) continue;
 
             // Finally, we know that we have to send an email for this
             // observation.  Record that fact.

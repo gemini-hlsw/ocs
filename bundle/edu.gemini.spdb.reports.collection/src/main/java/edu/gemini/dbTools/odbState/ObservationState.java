@@ -8,6 +8,8 @@ import edu.gemini.pot.sp.SPObservationID;
 import edu.gemini.spModel.core.SPBadIDException;
 import edu.gemini.spModel.obs.ObservationStatus;
 import edu.gemini.spModel.obsrecord.ObsExecRecord;
+import edu.gemini.spModel.too.Too;
+import edu.gemini.spModel.too.TooType;
 import edu.gemini.spModel.util.SPTreeUtil;
 import org.dom4j.DocumentFactory;
 import org.dom4j.Element;
@@ -18,38 +20,38 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
-public class ObservationState implements Serializable {
-    static final long serialVersionUID = 1;
+public final class ObservationState implements Serializable {
+    private static final long serialVersionUID = 2;
 
     public static final String XML_OBS_ELEMENT = "obs";
-    private static final String XML_OBS_END_ELEMENT = "obsEnd";
-    private static final String XML_OBS_UTC_ELEMENT = "utc";
-    private static final String XML_OBS_NIGHT_ELEMENT = "night";
+
+    private static final String XML_OBS_ID_ATTR            = "id";
+    private static final String XML_OBS_STATUS_ATTR        = "status";
+    private static final String XML_TOO_TYPE_ATTR          = "too";
+
+    private static final String XML_OBS_END_ELEMENT        = "obsEnd";
+    private static final String XML_OBS_UTC_ELEMENT        = "utc";
+    private static final String XML_OBS_NIGHT_ELEMENT      = "night";
     private static final String XML_OBS_TOTAL_TIME_ELEMENT = "totalTime";
 
-    private static final String XML_OBS_ID_ATTR = "id";
-    private static final String XML_OBS_STATUS_ATTR = "status";
-
-    private static final DateFormat FORMAT = new SimpleDateFormat("MMM yyyy");
-
-    private SPObservationID _obsId;
+    private final SPObservationID   _obsId;
     private final ObservationStatus _status;
+    private final TooType           _too;
 
-    private long _obsEnd;
-    private long _totalTime;
+    private long   _obsEnd;
+    private long   _totalTime;
     private String _night;
 
     public ObservationState(final ISPObservation obs)  {
-        _obsId = obs.getObservationID();
-
-//        SPObservation dataObj = (SPObservation) obs.getDataObject();
+        _obsId  = obs.getObservationID();
         _status = ObservationStatus.computeFor(obs);
+        _too    = Too.get(obs);
 
         final ObsExecRecord obsRec = SPTreeUtil.getObsRecord(obs);
         if (obsRec != null) {
             _totalTime = obsRec.getTotalTime();
             _obsEnd    = obsRec.getLastEventTime();
-            _night = _getNight(_obsEnd);
+            _night     = _getNight(_obsEnd);
         }
     }
 
@@ -72,6 +74,10 @@ public class ObservationState implements Serializable {
         if (_status == null) {
             throw new XmlException("Unknown status id " + statusStr);
         }
+
+        // Get the TooType, defaulting to none.
+        final String s = obs.attributeValue(XML_TOO_TYPE_ATTR);
+        _too = (s == null) ? TooType.none : TooType.getTooType(s);
 
         // Process the "obsEnd" element.
         final Element obsEnd = obs.element(XML_OBS_END_ELEMENT);
@@ -108,6 +114,7 @@ public class ObservationState implements Serializable {
         final Element obs = fact.createElement(XML_OBS_ELEMENT);
         obs.addAttribute(XML_OBS_ID_ATTR, _obsId.toString());
         obs.addAttribute(XML_OBS_STATUS_ATTR, _status.name());
+        obs.addAttribute(XML_TOO_TYPE_ATTR, _too.name());
 
         if (_obsEnd > 0) {
             final Element obsEnd = obs.addElement(XML_OBS_END_ELEMENT);
@@ -132,31 +139,9 @@ public class ObservationState implements Serializable {
         return _status;
     }
 
-// --Commented out by Inspection START (9/3/13 10:55 AM):
-//    public long getObsEnd() {
-//        return _obsEnd;
-//    }
-// --Commented out by Inspection STOP (9/3/13 10:55 AM)
-
-// --Commented out by Inspection START (8/12/13 3:05 PM):
-//    public long getTotalTime() {
-//        return _totalTime;
-//    }
-// --Commented out by Inspection STOP (8/12/13 3:05 PM)
-
-// --Commented out by Inspection START (9/3/13 10:55 AM):
-//    public String getNight() {
-//        return _night;
-//    }
-// --Commented out by Inspection STOP (9/3/13 10:55 AM)
-
-
-// --Commented out by Inspection START (9/3/13 10:55 AM):
-//    public final boolean hasBeenObserved() {
-//        if (ObservationStatus.OBSERVED == _status) return true;
-//        return ObservationStatus.OBSERVED.isLessThan(_status);
-//    }
-// --Commented out by Inspection STOP (9/3/13 10:55 AM)
+    public TooType getTooType() {
+        return _too;
+    }
 
     /**
      * Gets a formated string that indicates the night during which the
@@ -192,37 +177,10 @@ public class ObservationState implements Serializable {
 
         final StringBuilder buf = new StringBuilder();
         buf.append(startDay).append("/").append(endDay).append(" ");
-        buf.append(FORMAT.format(endCal.getTime()));
+
+        final DateFormat f = new SimpleDateFormat("MMM yyyy");
+        buf.append(f.format(endCal.getTime()));
 
         return buf.toString();
     }
-
-    /*
-    public int compareTo(Object o) {
-        ObservationState that = (ObservationState) o;
-
-        int res = _obsId.compareTo(that._obsId);
-        if (res != 0) return res;
-
-        if (_status.isLessThan(that._status)) return -1;
-        return (_status.isGreaterThan(that._status)) ? 1 : 0;
-    }
-
-    public boolean equals(Object other) {
-        if (other == null) return false;
-        if (getClass() != other.getClass()) return false;
-
-        ObservationState that = (ObservationState) other;
-        if (!_obsId.equals(that._obsId)) return false;
-        if (!_status.equals(that._status)) return false;
-        return true;
-    }
-
-    public int hashCode() {
-        int res = _obsId.hashCode();
-        res = res*37 + _status.hashCode();
-        return res;
-    }
-    */
-
 }
