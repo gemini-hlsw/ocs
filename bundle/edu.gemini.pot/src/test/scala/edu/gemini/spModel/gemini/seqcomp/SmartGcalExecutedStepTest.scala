@@ -25,59 +25,66 @@ class SmartGcalExecutedStepTest extends GcalExecTest {
   val cal = CalImpl(Set(Lamp.arcLamps().get(0)), Shutter.OPEN, Filter.ND_10, Diffuser.IR, 1, 1.0, 1, arc = true)
 
   @Test def testNoExecutedSteps() {
-    setupGcal(cal)
-    val cs = ConfigBridge.extractSequence(getObs, null, IDENTITY_MAP)
+    locking {
+      setupGcal(cal)
 
-    assertEquals(1, cs.getAllSteps.size)
+      val cs = ConfigBridge.extractSequence(getObs, null, IDENTITY_MAP)
 
-    val step = cs.getStep(0)
-    assertEquals(cal.shutter,  step.getItemValue(shutterItem))
-    assertEquals(cal.diffuser, step.getItemValue(diffuserItem))
+      assertEquals(1, cs.getAllSteps.size)
+
+      val step = cs.getStep(0)
+      assertEquals(cal.shutter, step.getItemValue(shutterItem))
+      assertEquals(cal.diffuser, step.getItemValue(diffuserItem))
+    }
   }
 
   @Test def testExecutedStepDoesNotChange() {
-    // Execute the first step with shutter OPEN
-    setupGcal(cal)
-    exec(1)
+    locking {
+      // Execute the first step with shutter OPEN
+      setupGcal(cal)
+      exec(1)
 
-    // Change the calibration mapping to shutter CLOSED
-    setupGcal(cal.copy(shutter = Shutter.CLOSED))
+      // Change the calibration mapping to shutter CLOSED
+      setupGcal(cal.copy(shutter = Shutter.CLOSED))
 
-    // Generate the sequence.
-    val cs = ConfigBridge.extractSequence(getObs, null, IDENTITY_MAP)
+      // Generate the sequence.
+      val cs = ConfigBridge.extractSequence(getObs, null, IDENTITY_MAP)
 
-    assertEquals(1, cs.getAllSteps.size)
+      assertEquals(1, cs.getAllSteps.size)
 
-    val step = cs.getStep(0)
+      val step = cs.getStep(0)
 
-    // Still Open because it was that way when we recorded the step executed
-    assertEquals(Shutter.OPEN, step.getItemValue(shutterItem))
+      // Still Open because it was that way when we recorded the step executed
+      assertEquals(Shutter.OPEN, step.getItemValue(shutterItem))
+    }
   }
 
   @Test def testUnexecutedStepAfterMappingChange() {
-    // Add another smart cal to the sequence so that we have two
-    addSeqComponent(getObs.getSeqComponent, SeqRepeatSmartGcalObs.Arc.SP_TYPE)
+    locking {
+      // Add another smart cal to the sequence so that we have two
+      addSeqComponent(getObs.getSeqComponent, SeqRepeatSmartGcalObs.Arc.SP_TYPE)
 
-    // Execute the first step with shutter OPEN
-    setupGcal(cal)
-    exec(1)
+      // Execute the first step with shutter OPEN
+      setupGcal(cal)
+      exec(1)
 
-    // Change the calibration mapping to shutter CLOSED
-    setupGcal(cal.copy(shutter = Shutter.CLOSED))
+      // Change the calibration mapping to shutter CLOSED
+      setupGcal(cal.copy(shutter = Shutter.CLOSED))
 
-    // Generate the sequence.
-    val cs = ConfigBridge.extractSequence(getObs, null, IDENTITY_MAP)
+      // Generate the sequence.
+      val cs = ConfigBridge.extractSequence(getObs, null, IDENTITY_MAP)
 
-    assertEquals(2, cs.getAllSteps.size)
+      assertEquals(2, cs.getAllSteps.size)
 
-    val step0 = cs.getStep(0)
-    val step1 = cs.getStep(1)
+      val step0 = cs.getStep(0)
+      val step1 = cs.getStep(1)
 
-    // Still Open because it was that way when we recorded the step executed
-    assertEquals(Shutter.OPEN, step0.getItemValue(shutterItem))
+      // Still Open because it was that way when we recorded the step executed
+      assertEquals(Shutter.OPEN, step0.getItemValue(shutterItem))
 
-    // Closed in the unexecuted step.
-    assertEquals(Shutter.CLOSED, step1.getItemValue(shutterItem))
+      // Closed in the unexecuted step.
+      assertEquals(Shutter.CLOSED, step1.getItemValue(shutterItem))
+    }
   }
 
 }

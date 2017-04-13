@@ -27,53 +27,57 @@ final class BaselineReorderTest extends GcalExecTest {
   val arc  = CalImpl(Set(Lamp.AR_ARC),            Shutter.CLOSED, Filter.NIR,   Diffuser.IR, 1, 15.0, 1, arc = true )
 
   @Test def testOrderChange(): Unit = {
+    locking {
 
-    // Originally, arcs came before flats.
-    setupGcal(arc, flat)
-    exec(1)
-    exec(2)
+      // Originally, arcs came before flats.
+      setupGcal(arc, flat)
+      exec(1)
+      exec(2)
 
-    // Now flats come before arcs
-    setupGcal(flat, arc)
+      // Now flats come before arcs
+      setupGcal(flat, arc)
 
-    // Generate the sequence.
-    val cs = ConfigBridge.extractSequence(getObs, null, IDENTITY_MAP)
+      // Generate the sequence.
+      val cs = ConfigBridge.extractSequence(getObs, null, IDENTITY_MAP)
 
-    assertEquals(4, cs.getAllSteps.size)
+      assertEquals(4, cs.getAllSteps.size)
 
-    // Even though flats come before arcs, the first two steps are already
-    // executed so they don't flip to flat, arc.
-    val actual   = cs.getItemValueAtEachStep(observeTypeItem)
-    val expected = List("ARC", "FLAT", "FLAT", "ARC")  // yes, Strings
+      // Even though flats come before arcs, the first two steps are already
+      // executed so they don't flip to flat, arc.
+      val actual   = cs.getItemValueAtEachStep(observeTypeItem)
+      val expected = List("ARC", "FLAT", "FLAT", "ARC") // yes, Strings
 
-    actual.zip(expected).foreach { case (a,e) => assertEquals(a, e) }
+      actual.zip(expected).foreach { case (a, e) => assertEquals(a, e) }
+    }
   }
 
   @Test def testPartialExecution(): Unit = {
 
-    // Originally, arcs came before flats.  Do just one of the two baseline
-    // calibration steps.
-    setupGcal(arc, flat)
-    exec(1)
+    locking {
+      // Originally, arcs came before flats.  Do just one of the two baseline
+      // calibration steps.
+      setupGcal(arc, flat)
+      exec(1)
 
-    // Now flats come before arcs
-    setupGcal(flat, arc)
+      // Now flats come before arcs
+      setupGcal(flat, arc)
 
-    // Generate the sequence.
-    val cs = ConfigBridge.extractSequence(getObs, null, IDENTITY_MAP)
+      // Generate the sequence.
+      val cs = ConfigBridge.extractSequence(getObs, null, IDENTITY_MAP)
 
-    assertEquals(4, cs.getAllSteps.size)
+      assertEquals(4, cs.getAllSteps.size)
 
-    // Even though flats come before arcs, the first step was already
-    // executed so it doesn't flip to "FLAT".  The second step is not executed
-    // though so unfortunately it will be a second ARC.  I don't think there
-    // is a way around this.  I also don't think this is a big deal since we
-    // won't have any partially executed baseline calibrations that we intend
-    // to come back to and finish anyway.
+      // Even though flats come before arcs, the first step was already
+      // executed so it doesn't flip to "FLAT".  The second step is not executed
+      // though so unfortunately it will be a second ARC.  I don't think there
+      // is a way around this.  I also don't think this is a big deal since we
+      // won't have any partially executed baseline calibrations that we intend
+      // to come back to and finish anyway.
 
-    val actual   = cs.getItemValueAtEachStep(observeTypeItem)
-    val expected = List("ARC", "ARC", "FLAT", "ARC")  // yes, Strings
+      val actual   = cs.getItemValueAtEachStep(observeTypeItem)
+      val expected = List("ARC", "ARC", "FLAT", "ARC") // yes, Strings
 
-    actual.zip(expected).foreach { case (a,e) => assertEquals(a, e) }
+      actual.zip(expected).foreach { case (a, e) => assertEquals(a, e) }
+    }
   }
 }
