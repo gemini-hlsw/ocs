@@ -16,6 +16,8 @@ import edu.gemini.pot.spdb.IDBDatabaseService;
 import edu.gemini.spModel.obs.ObsPhase2Status;
 import edu.gemini.spModel.obs.ObservationStatus;
 import edu.gemini.spModel.obs.SPObservation;
+import edu.gemini.spModel.too.Too;
+import edu.gemini.spModel.too.TooType;
 import edu.gemini.util.security.principal.StaffPrincipal;
 import org.junit.After;
 import org.junit.Before;
@@ -47,6 +49,8 @@ public final class OdbMailCase {
     private SPObservation _obsObj1;
     private ISPObservation _obs2;
     private SPObservation _obsObj2;
+    private ISPObservation _obs3;
+    private SPObservation _obsObj3;
 
     private IDBDatabaseService odb;
     private OdbMailConfig mailConfig = null;
@@ -108,7 +112,8 @@ public final class OdbMailCase {
         assertEquals(ObservationStatus.FOR_ACTIVATION,
                 ObservationStatus.computeFor(_obs2));
 
-        final ISPObservation _obs3 = (ISPObservation) obsList.get(3);
+        _obs3 = (ISPObservation) obsList.get(3);
+        _obsObj3 = (SPObservation) _obs3.getDataObject();
         assertEquals(ObservationStatus.READY,
                 ObservationStatus.computeFor(_obs3));
     }
@@ -197,6 +202,53 @@ public final class OdbMailCase {
             _testMailSender.clearMessages();
         }
     }
+
+    //
+    // Tests moving to ON_HOLD for a non-Too program which should do nothing.
+    //
+    @Test public void testNotTooOnHold() throws Exception {
+        // Move the first observation to ON_HOLD.
+        _obsObj0.setPhase2Status(ObsPhase2Status.ON_HOLD);
+        _obs0.setDataObject(_obsObj0);
+
+        // Run the email agent.
+        stateAgent.updateState(LOG, user);
+        mailAgent.executeOnce(LOG);
+
+        // Check that no message was generated.
+        assertEquals("onHold, non Too", 0, _testMailSender.getMessageCount());
+    }
+
+    //
+    // Tests moving to ON_HOLD for a ToO program.
+    //
+    @Test public void testTooOnHold() throws Exception {
+        // Modify the program to be a ToO program.
+        Too.set(_prog, TooType.standard);
+
+        // Move the first observation up to ON_HOLD.
+        _obsObj0.setPhase2Status(ObsPhase2Status.ON_HOLD);
+        _obs0.setDataObject(_obsObj0);
+
+        // Move the last observation down to ON_HOLD.
+        _obsObj3.setPhase2Status(ObsPhase2Status.ON_HOLD);
+        _obs3.setDataObject(_obsObj3);
+
+        // Run the email agent.
+        stateAgent.updateState(LOG, user);
+        mailAgent.executeOnce(LOG);
+
+        // Check that a message was generated.
+        assertEquals("onHold, Too", 1, _testMailSender.getMessageCount());
+
+        final List<SPObservationID> idList = Arrays.asList(
+            _obs0.getObservationID(),
+            _obs3.getObservationID()
+        );
+        final Message msg = _testProgram.createAny_On_Hold(idList);
+        assertTrue("onHold, Too", _testMailSender.matchMessage(msg));
+    }
+
 
     //
     // Tests having more than one observation in an email.

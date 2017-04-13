@@ -17,7 +17,7 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class PrepareMessageAction implements OdbMailEvent.Action {
+public final class PrepareMessageAction implements OdbMailEvent.Action {
 
     public static String getSubject_Down_ForReview(final SPProgramID progId) {
         final StringBuilder buf = new StringBuilder(progId.toString());
@@ -29,6 +29,10 @@ public class PrepareMessageAction implements OdbMailEvent.Action {
         final StringBuilder buf = new StringBuilder(progId.toString());
         buf.append(" Observation(s) Reset to \"Phase II\"");
         return buf.toString();
+    }
+
+    public static String getSubject_On_Hold(final SPProgramID progId) {
+        return progId.toString() + " Observation(s) Set to \"On Hold\"";
     }
 
     public static String getSubject_Up_ForActivation(final SPProgramID progId) {
@@ -164,6 +168,18 @@ public class PrepareMessageAction implements OdbMailEvent.Action {
             pia.getContactAddresses(),
             pia.getNgoAddresses(),
             getSubject_Down_Phase2(_mail.getProgramId())
+        );
+    }
+
+    public void onHold() {
+        final ProgramInternetAddresses pia = _mail.getInternetAddresses();
+
+        go(
+            OdbMailTemplate.ON_HOLD,
+            pia.getPiAddresses(),
+            pia.getContactAddresses(),
+            pia.getNgoAddresses(),
+            getSubject_On_Hold(_mail.getProgramId())
         );
     }
 

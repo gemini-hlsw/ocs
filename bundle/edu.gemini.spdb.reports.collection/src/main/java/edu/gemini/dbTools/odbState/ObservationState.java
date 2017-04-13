@@ -8,6 +8,8 @@ import edu.gemini.pot.sp.SPObservationID;
 import edu.gemini.spModel.core.SPBadIDException;
 import edu.gemini.spModel.obs.ObservationStatus;
 import edu.gemini.spModel.obsrecord.ObsExecRecord;
+import edu.gemini.spModel.too.Too;
+import edu.gemini.spModel.too.TooType;
 import edu.gemini.spModel.util.SPTreeUtil;
 import org.dom4j.DocumentFactory;
 import org.dom4j.Element;
@@ -19,20 +21,22 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 
 public final class ObservationState implements Serializable {
-    private static final long serialVersionUID = 1;
+    private static final long serialVersionUID = 2;
 
     public static final String XML_OBS_ELEMENT = "obs";
 
     private static final String XML_OBS_ID_ATTR            = "id";
     private static final String XML_OBS_STATUS_ATTR        = "status";
+    private static final String XML_TOO_TYPE_ATTR          = "too";
 
     private static final String XML_OBS_END_ELEMENT        = "obsEnd";
     private static final String XML_OBS_UTC_ELEMENT        = "utc";
     private static final String XML_OBS_NIGHT_ELEMENT      = "night";
     private static final String XML_OBS_TOTAL_TIME_ELEMENT = "totalTime";
 
-    private SPObservationID         _obsId;
+    private final SPObservationID   _obsId;
     private final ObservationStatus _status;
+    private final TooType           _too;
 
     private long   _obsEnd;
     private long   _totalTime;
@@ -41,6 +45,7 @@ public final class ObservationState implements Serializable {
     public ObservationState(final ISPObservation obs)  {
         _obsId  = obs.getObservationID();
         _status = ObservationStatus.computeFor(obs);
+        _too    = Too.get(obs);
 
         final ObsExecRecord obsRec = SPTreeUtil.getObsRecord(obs);
         if (obsRec != null) {
@@ -69,6 +74,10 @@ public final class ObservationState implements Serializable {
         if (_status == null) {
             throw new XmlException("Unknown status id " + statusStr);
         }
+
+        // Get the TooType, defaulting to none.
+        final String s = obs.attributeValue(XML_TOO_TYPE_ATTR);
+        _too = (s == null) ? TooType.none : TooType.getTooType(s);
 
         // Process the "obsEnd" element.
         final Element obsEnd = obs.element(XML_OBS_END_ELEMENT);
@@ -105,6 +114,7 @@ public final class ObservationState implements Serializable {
         final Element obs = fact.createElement(XML_OBS_ELEMENT);
         obs.addAttribute(XML_OBS_ID_ATTR, _obsId.toString());
         obs.addAttribute(XML_OBS_STATUS_ATTR, _status.name());
+        obs.addAttribute(XML_TOO_TYPE_ATTR, _too.name());
 
         if (_obsEnd > 0) {
             final Element obsEnd = obs.addElement(XML_OBS_END_ELEMENT);
@@ -127,6 +137,10 @@ public final class ObservationState implements Serializable {
 
     public ObservationStatus getStatus() {
         return _status;
+    }
+
+    public TooType getTooType() {
+        return _too;
     }
 
     /**

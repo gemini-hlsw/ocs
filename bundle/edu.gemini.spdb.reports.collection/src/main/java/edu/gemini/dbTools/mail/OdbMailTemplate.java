@@ -17,16 +17,13 @@ public class OdbMailTemplate {
 
     public static final MailTemplate DOWN_FOR_REVIEW;
     public static final MailTemplate DOWN_PHASE2;
-    // --Commented out by Inspection (8/12/13 3:38 PM):private static final MailTemplate OBSERVED;
+    public static final MailTemplate ON_HOLD;
     public static final MailTemplate UP_FOR_ACTIVATION;
     public static final MailTemplate UP_FOR_REVIEW;
     public static final MailTemplate UP_READY;
 
-    // --Commented out by Inspection (8/12/13 3:38 PM):private static final MailTemplate CANT_FIND_DATABASE;
-
-    public static final String PROG_ID_VAR = "PROG_ID";
+    public static final String PROG_ID_VAR     = "PROG_ID";
     public static final String OBS_ID_LIST_VAR = "OBS_ID_LIST";
-    // --Commented out by Inspection (8/12/13 3:38 PM):public static final String DATE_VAR = "DATE";
 
     static {
         String tmplTxt;
@@ -37,8 +34,8 @@ public class OdbMailTemplate {
         tmplTxt = readTemplate("Down_Phase2.txt");
         DOWN_PHASE2 = new MailTemplate(tmplTxt);
 
-//        tmplTxt = readTemplate("Observed.txt");
-//        OBSERVED = new MailTemplate(tmplTxt);
+        tmplTxt = readTemplate("OnHold.txt");
+        ON_HOLD = new MailTemplate(tmplTxt);
 
         tmplTxt = readTemplate("Up_ForActivation.txt");
         UP_FOR_ACTIVATION = new MailTemplate(tmplTxt);
@@ -48,9 +45,6 @@ public class OdbMailTemplate {
 
         tmplTxt = readTemplate("Up_Ready.txt");
         UP_READY = new MailTemplate(tmplTxt);
-
-//        tmplTxt = readTemplate("CantFindDatabase.txt");
-//        CANT_FIND_DATABASE = new MailTemplate(tmplTxt);
     }
 
     private static String readTemplate(final String name) {

@@ -165,6 +165,15 @@ abstract class TestProgramBase {
                                  toAddresses, ccAddresses, subject, obsList);
     }
 
+    Message createAny_On_Hold(final List obsList) throws Exception {
+        final String subject = PrepareMessageAction.getSubject_On_Hold(_progId);
+        final Address[] toAddresses = getPiAddresses();
+        final Address[] ccAddresses = concat(getGeminiAddresses(), getNgoAddresses());
+
+        return createTestMessage(OdbMailTemplate.ON_HOLD,
+                                 toAddresses, ccAddresses, subject, obsList);
+    }
+
     Message createUp_Ready(final List obsList) throws Exception {
         final String subject = PrepareMessageAction.getSubject_Up_Ready(_progId);
         final Address[] toAddresses = getPiAddresses();

@@ -1,0 +1,4 @@
+In Gemini Science Program @PROG_ID@ the following Target of Opportunity observation@S_OR_EMPTY@
+@WAS_WERE@ marked "On Hold":
+
+@OBS_ID_LIST@
