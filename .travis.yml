@@ -29,4 +29,4 @@ before_script:
   - if [ $TRAVIS_SECURE_ENV_VARS == false ]; then
       cp $TRAVIS_BUILD_DIR/project/OcsCredentials.scala.template $TRAVIS_BUILD_DIR/project/OcsCredentials.scala;
     fi
-script: sbt $TRAVIS_SCALA_VERSION test:compile test
+script: travis_wait 40 sbt -q $TRAVIS_SCALA_VERSION test:compile test
