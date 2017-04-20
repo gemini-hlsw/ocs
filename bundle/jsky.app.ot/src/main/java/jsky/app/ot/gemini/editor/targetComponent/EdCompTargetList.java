@@ -445,6 +445,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         final NumberFormat numberFormatter = NumberFormat.getInstance(Locale.US);
         numberFormatter.setMaximumFractionDigits(2);
         numberFormatter.setMaximumIntegerDigits(3);
+        System.out.println("*** EdCompTargetList.init");
         _w.schedulingBlock.init(this, site, numberFormatter, () -> {
             final TargetObsComp toc      = getDataObject();
             final TargetEnvironment env1 = toc.getTargetEnvironment();

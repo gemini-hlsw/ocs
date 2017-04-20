@@ -28,12 +28,12 @@ import edu.gemini.spModel.obs.plannedtime.PlannedTime.Category;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.StepCalculator;
 import edu.gemini.spModel.obscomp.InstConfigInfo;
 import edu.gemini.spModel.obscomp.InstConstants;
-import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.Pio;
 import edu.gemini.spModel.pio.PioFactory;
 import edu.gemini.spModel.pio.PioNodeParent;
 import edu.gemini.spModel.seqcomp.SeqConfigNames;
+import edu.gemini.spModel.telescope.FixedPositionAngleInstrument;
 import edu.gemini.spModel.telescope.IssPort;
 import edu.gemini.spModel.telescope.IssPortProvider;
 
@@ -66,7 +66,7 @@ import static edu.gemini.spModel.gemini.nici.NICIParams.*;
 // value associated with the not active CR mode.  When the CR mode is switched,
 // we also swap the not-active angle and the base class "pos angle".  Grim.
 //
-public final class InstNICI extends SPInstObsComp implements PropertyProvider, GuideProbeProvider, IssPortProvider, StepCalculator {
+public final class InstNICI extends FixedPositionAngleInstrument implements PropertyProvider, GuideProbeProvider, IssPortProvider, StepCalculator {
     private static final Logger LOG = Logger.getLogger(InstNICI.class.getName());
 
     private static final long serialVersionUID = 2L;
