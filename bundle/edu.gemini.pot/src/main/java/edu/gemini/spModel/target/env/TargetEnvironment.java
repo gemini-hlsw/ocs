@@ -83,6 +83,10 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
         return base;
     }
 
+    public Asterism getAsterism() {
+      return Asterism$.MODULE$.single(getBase()); // TODO
+    }
+
     /**
      * Gets the collection of {@link GuideGroup}s in this target environment.
      *
