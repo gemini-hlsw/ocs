@@ -1,31 +1,45 @@
 package edu.gemini.spModel.target.env
 
-import edu.gemini.spModel.core.Coordinates
+import edu.gemini.spModel.core.{Coordinates, SiderealTarget, Target}
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.shared.util.immutable.{Option => GOption}
 import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.skycalc.{Coordinates => SCoordinates}
-
-
 import java.time.Instant
 
-import scalaz.NonEmptyList
+import scalaz._
+import Scalaz._
 
 /** Collection of stars that make up the science target(s) for an observation,
   * along with any configuration details unique to the instrument in use.
   */
 trait Asterism {
 
-  /** All targets that comprise the asterism.  There must be at least one target.
-    */
-  def targets: NonEmptyList[SPTarget]
+  // invariant: allSpTargets.length == targets.fold(_ => 1, _ => 2)
 
-  /** Slew coordinates and AGS calculation base position.  By default this
-    * will be a computation that finds the coordinate minimizing the maximum
-    * distance to any target in the asterism.
+  /** All SPTargets that comprise the asterism. */
+  def allSpTargets: NonEmptyList[SPTarget]
+
+  /** All Targets that comprise the asterism. */
+  def allTargets: NonEmptyList[Target] =
+    targets.fold(NonEmptyList(_), p => NonEmptyList(p._1, p._2))
+
+  /** An asterism is a single generic target, or a pair of sidereal targets. These are currently the
+    * only possibilities.
+    * TODO: should we Church encode this instead?
     */
-  def basePosition(time: Option[Instant]): Option[Coordinates] =
-    ???  // we should supply the "smallest-circle" implementation here
+  def targets: Target \/ (SiderealTarget, SiderealTarget)
+
+  /** Slew coordinates and AGS calculation base position. */
+  def basePosition(time: Option[Instant]): Option[Coordinates]
+
+  /** True iff all targets are sidereal. */
+  def isSidereal: Boolean =
+    allSpTargets.all(_.isSidereal)
+
+  /** True iff at least one target is non-sidereal. */
+  def isNonSidereal: Boolean =
+    allSpTargets.any(_.isNonSidereal)
 
   //
   // "Base position" convenience methods already in use extensively throughout
@@ -62,7 +76,8 @@ trait Asterism {
 object Asterism {
 
   final case class Single(t: SPTarget) extends Asterism {
-    val targets = NonEmptyList(t)
+    override val allSpTargets = NonEmptyList(t)
+    override val targets = t.getTarget.left
     override def basePosition(time: Option[Instant]) = t.getCoordinates(time.map(_.toEpochMilli))
   }
 
