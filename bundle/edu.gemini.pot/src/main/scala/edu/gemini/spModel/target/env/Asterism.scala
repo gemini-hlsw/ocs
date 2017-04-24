@@ -33,6 +33,9 @@ trait Asterism {
   /** Slew coordinates and AGS calculation base position. */
   def basePosition(time: Option[Instant]): Option[Coordinates]
 
+  /** Return a display name for this asterism. */
+  def name: String
+
   /** True iff all targets are sidereal. */
   def isSidereal: Boolean =
     allSpTargets.all(_.isSidereal)
@@ -75,10 +78,12 @@ trait Asterism {
 
 object Asterism {
 
+  // N.B. most members must be defs because `t` is mutable.
   final case class Single(t: SPTarget) extends Asterism {
     override val allSpTargets = NonEmptyList(t)
-    override val targets = t.getTarget.left
+    override def targets = t.getTarget.left
     override def basePosition(time: Option[Instant]) = t.getCoordinates(time.map(_.toEpochMilli))
+    override def name = t.getName
   }
 
   /** Construct a single-target Asterism by wrapping the given SPTarget. */
