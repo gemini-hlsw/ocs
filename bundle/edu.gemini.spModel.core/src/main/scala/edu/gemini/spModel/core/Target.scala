@@ -13,6 +13,10 @@ sealed trait Target extends Product with Serializable {
   /** Coordinates (if known) for this target at the specified UNIX time. */
   def coords(time: Long): Option[Coordinates]
 
+  /** Coordinates (if known) for this target at the specified UNIX time, if any. */
+  def coords(time: Option[Long]): Option[Coordinates] =
+    time.flatMap(coords) orElse fold(_ => None, s => Some(s.coordinates), _ => None)
+
   /** Alternative to pattern-matching. */
   def fold[A](too: TooTarget         => A,
               sid: SiderealTarget    => A,
@@ -93,6 +97,13 @@ trait TargetLenses {
       PLens.nil.run,
       PLens.nil.run,
       pRunTarget(NonSiderealTarget.ephemeris.partial)
+    ))
+
+  val redshift: Target @?> Option[Redshift] =
+    PLens(_.fold(
+      PLens.nil.run,
+      pRunTarget(SiderealTarget.redshift.partial),
+      PLens.nil.run
     ))
 
 }
