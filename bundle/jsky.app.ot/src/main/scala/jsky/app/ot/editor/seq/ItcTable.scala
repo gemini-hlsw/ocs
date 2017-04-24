@@ -132,7 +132,8 @@ trait ItcTable extends Table with TableColumnsAdjuster {
       targetEnv <- parameters.targetEnvironment
       analysis  <- parameters.analysisMethod
       probe     <- extractGuideProbe()
-      src       <- extractSource(targetEnv.getBase, uc)
+      t         <- parameters.selectedTarget
+      src       <- extractSource(t, uc)
       tele      <- ConfigExtractor.extractTelescope(port, probe, targetEnv, uc.config)
       ins       <- ConfigExtractor.extractInstrumentDetails(instrument, probe, targetEnv, when, uc.config, cond)
       srcFrac   <- extractSourceFraction(uc, instrument)
@@ -191,7 +192,7 @@ trait ItcTable extends Table with TableColumnsAdjuster {
     o.flatten.fold("Could not identify ags strategy or guide probe type".left[GuideProbe])(_.right)
   }
 
-  private def extractSource(target: SPTarget, c: ItcUniqueConfig): String \/ SourceDefinition =
+  private def extractSource(target: Target, c: ItcUniqueConfig): String \/ SourceDefinition =
     for {
       (mag, band, system) <- extractSourceMagnitude(target, c.config)
       srcProfile          <- parameters.spatialProfile
@@ -199,14 +200,15 @@ trait ItcTable extends Table with TableColumnsAdjuster {
       srcRedshift         <- parameters.redshift
     } yield SourceDefinition(srcProfile, srcDistribution, mag, system, band, srcRedshift)
 
-  private def extractSourceMagnitude(target: SPTarget, c: Config): String \/ (Double, MagnitudeBand, BrightnessUnit) = {
+  private def extractSourceMagnitude(target: Target, c: Config): String \/ (Double, MagnitudeBand, BrightnessUnit) = {
 
     def closestBand(bands: List[Magnitude], wl: Wavelength) =
       // note, at this point we've filtered out all bands without a wavelength
       bands.minBy(m => Math.abs(m.band.center.toNanometers - wl.toNanometers))
 
     def mags(wl: Wavelength): String \/ Magnitude = {
-      val bands = target.getMagnitudes.
+      val bands = Target.magnitudes.get(target).
+        orZero.
         filterNot(_.band == MagnitudeBand.UC).        // ignore UC magnitudes
         filterNot(_.band == MagnitudeBand.AP)         // ignore AP magnitudes
       if (bands.isEmpty) "No standard magnitudes for target defined; ITC does not support UC and AP magnitudes.".left[Magnitude]
