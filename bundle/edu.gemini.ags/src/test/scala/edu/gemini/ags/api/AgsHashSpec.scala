@@ -112,14 +112,14 @@ class AgsHashSpec extends Specification with ScalaCheck with edu.gemini.spModel.
     "differ if RA changes" in
       forAll { (ctx0: ObsContext, ra: Angle) =>
         val env0  = ctx0.getTargets
-        val base0 = env0.getBase
-        val base1 = base0.clone() <| (_.setRaDegrees(ra.toDegrees))
-        val env1  = env0.setBasePosition(base1)
+        val ast0  = env0.getAsterism
+        val ast1  = ast0.copyWithClonedTargets <| (_.allSpTargets.foreach(_.setRaDegrees(ra.toDegrees))) // update all targets?
+        val env1  = env0.setAsterism(ast1)
         val ctx1  = ctx0.withTargets(env1)
 
         val time  = Option(new java.lang.Long(now.toEpochMilli)).asGeminiOpt
-        val ra0   = base0.getRaDegrees(time).getValue
-        val ra1   = base1.getRaDegrees(time).getValue
+        val ra0   = ast0.allSpTargets.map(_.getRaDegrees(time))
+        val ra1   = ast1.allSpTargets.map(_.getRaDegrees(time))
 
         (ra0 == ra1) == hashSame(ctx0, ctx1)
       }
@@ -127,14 +127,14 @@ class AgsHashSpec extends Specification with ScalaCheck with edu.gemini.spModel.
     "differ if Dec changes" in
       forAll { (ctx0: ObsContext, dec: Declination) =>
         val env0  = ctx0.getTargets
-        val base0 = env0.getBase
-        val base1 = base0.clone() <| (_.setDecDegrees(dec.toDegrees))
-        val env1  = env0.setBasePosition(base1)
+        val ast0  = env0.getAsterism
+        val ast1  = ast0.copyWithClonedTargets <| (_.allSpTargets.foreach(_.setDecDegrees(dec.toDegrees))) // update all targets?
+        val env1  = env0.setAsterism(ast1)
         val ctx1  = ctx0.withTargets(env1)
 
         val time  = Option(new java.lang.Long(now.toEpochMilli)).asGeminiOpt
-        val dec0  = base0.getDecDegrees(time).getValue
-        val dec1  = base1.getDecDegrees(time).getValue
+        val dec0  = ast0.allSpTargets.map(_.getDecDegrees(time))
+        val dec1  = ast1.allSpTargets.map(_.getDecDegrees(time))
 
         (dec0 == dec1) == hashSame(ctx0, ctx1)
       }
