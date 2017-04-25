@@ -2,7 +2,7 @@ package edu.gemini.spModel.target.env
 
 import edu.gemini.spModel.core.{Coordinates, SiderealTarget, Target}
 import edu.gemini.spModel.target.SPTarget
-import edu.gemini.shared.util.immutable.{Option => GOption}
+import edu.gemini.shared.util.immutable.{ImList, Option => GOption}
 import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.skycalc.{Coordinates => SCoordinates}
 import java.time.Instant
@@ -19,6 +19,10 @@ trait Asterism {
 
   /** All SPTargets that comprise the asterism. */
   def allSpTargets: NonEmptyList[SPTarget]
+
+  /** All SPTargets that comprise the asterism, as a Gemini ImList. */
+  def allSpTargetsJava: ImList[SPTarget] =
+    allSpTargets.list.toList.asImList
 
   /** All Targets that comprise the asterism. */
   def allTargets: NonEmptyList[Target] =
@@ -75,6 +79,9 @@ trait Asterism {
   def getSkycalcCoordinates(time: GOLong): GOption[SCoordinates] =
     gcoords(time)(cs => new SCoordinates(cs.ra.toDegrees, cs.dec.toDegrees))
 
+  /** Construct a copy of this Asterism with cloned SPTargets (necessary because they are mutable). */
+  def copyWithClonedTargets: Asterism
+
 }
 
 object Asterism {
@@ -85,6 +92,7 @@ object Asterism {
     override def targets = t.getTarget.left
     override def basePosition(time: Option[Instant]) = t.getCoordinates(time.map(_.toEpochMilli))
     override def name = t.getName
+    override def copyWithClonedTargets() = Single(t.clone)
   }
 
   /** Construct a single-target Asterism by wrapping the given SPTarget. */
