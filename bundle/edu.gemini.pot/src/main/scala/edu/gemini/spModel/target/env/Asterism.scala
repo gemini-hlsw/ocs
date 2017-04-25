@@ -74,6 +74,7 @@ trait Asterism {
 
   def getSkycalcCoordinates(time: GOLong): GOption[SCoordinates] =
     gcoords(time)(cs => new SCoordinates(cs.ra.toDegrees, cs.dec.toDegrees))
+
 }
 
 object Asterism {
