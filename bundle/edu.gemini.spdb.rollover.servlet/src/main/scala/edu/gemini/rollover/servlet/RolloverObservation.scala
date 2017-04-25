@@ -12,16 +12,18 @@ import scala.annotation.tailrec
 import scala.collection.JavaConverters._
 import edu.gemini.skycalc.Angle
 
+import scalaz._, Scalaz._
+
 object RolloverObservation {
   def toRollover(obs: ISPObservation): Option[RolloverObservation] =
     for {
       id   <- Option(obs.getObservationID)
       prog <- program(obs)
       p    <- partner(prog)
-      t    <- target(obs)
+      ts   <- targets(obs)
       c    <- conditions(obs)
-      ms    <- time(obs)
-    } yield RolloverObservation(id, p, t, c, ms)
+      ms   <- time(obs)
+    } yield RolloverObservation(id, p, ts, c, ms)
 
   private def findByType(obs: ISPObservation, compType: SPComponentType): Option[ISPObsComponent] =
     for {
@@ -42,13 +44,13 @@ object RolloverObservation {
       aff     <- Option(dataObj.getPIAffiliate)
     } yield aff.displayValue
 
-  private def target(o: ISPObservation): Option[RolloverTarget] =
-    for {
-      targetComp <- findByType(o, TargetObsComp.SP_TYPE)
-      dataObj    <- Option(targetComp.getDataObject.asInstanceOf[TargetObsComp])
-      targetEnv  <- Option(dataObj.getTargetEnvironment)
-      science    <- Option(targetEnv.getBase)
-      name       <- Option(science.getName)
+  private def targets(o: ISPObservation): Option[NonEmptyList[RolloverTarget]] =
+    (for {
+      targetComp <- findByType(o, TargetObsComp.SP_TYPE).toList
+      dataObj    <- Option(targetComp.getDataObject.asInstanceOf[TargetObsComp]).toList
+      targetEnv  <- Option(dataObj.getTargetEnvironment).toList
+      science    <- targetEnv.getAsterism.allSpTargets.list.toList
+      name       <- Option(science.getName).toList
     } yield {
 
       // Amazingly this is easier in Java
@@ -67,7 +69,7 @@ object RolloverObservation {
 
       RolloverTarget(name, coords)
 
-    }
+    }).toNel
 
   private def conditions(o: ISPObservation): Option[RolloverConditions] =
     for {
@@ -93,4 +95,4 @@ object RolloverObservation {
 case class Coords(ra: Angle, dec: Angle)
 case class RolloverTarget(name: String, coords: Option[Coords])
 case class RolloverConditions(cc: CloudCover, iq: ImageQuality, sb: SkyBackground, wv: WaterVapor)
-case class RolloverObservation(id: SPObservationID, partner: String, target: RolloverTarget, conds: RolloverConditions, remainingTime: Long)
+case class RolloverObservation(id: SPObservationID, partner: String, targets: NonEmptyList[RolloverTarget], conds: RolloverConditions, remainingTime: Long)
