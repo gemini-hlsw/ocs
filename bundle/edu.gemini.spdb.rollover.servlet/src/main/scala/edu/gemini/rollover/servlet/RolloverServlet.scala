@@ -55,10 +55,12 @@ final class RolloverServlet(site: Site, odb: IDBDatabaseService, user: java.util
     <obs>
       <id>{ ro.id.toString }</id>
       <partner>{ ro.partner }</partner>
-      <target>
-        <ra>{ ro.target.coords.map(_.ra).getOrElse(0.0) }</ra>
-        <dec>{ ro.target.coords.map(_.dec).getOrElse(0.0) }</dec>
-      </target>
+      {ro.targets.map { t =>
+        <target>
+          <ra>{  t.coords.map(_.ra).getOrElse(0.0) }</ra>
+          <dec>{ t.coords.map(_.dec).getOrElse(0.0) }</dec>
+        </target>
+      }}
       <conditions>
         <cc>{ ro.conds.cc.getPercentage }</cc>
         <iq>{ ro.conds.iq.getPercentage }</iq>
