@@ -22,6 +22,11 @@ sealed trait Target extends Product with Serializable {
               sid: SiderealTarget    => A,
               non: NonSiderealTarget => A): A
 
+  // Some predicates, useful in crappy parts of the codebase
+  def isToo:         Boolean = fold(_ => true,  _ => false, _ => false)
+  def isSidereal:    Boolean = fold(_ => false, _ => true,  _ => false)
+  def isNonSidereal: Boolean = fold(_ => false, _ => false, _ => true)
+
 }
 
 object Target extends TargetLenses
