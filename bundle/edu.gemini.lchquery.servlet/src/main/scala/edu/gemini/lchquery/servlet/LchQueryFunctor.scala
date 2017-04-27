@@ -81,7 +81,7 @@ class LchQueryFunctor(queryType: LchQueryFunctor.QueryType,
             n <- target.getNonSiderealTarget
             h <- n.horizonsDesignation
           } {
-            setHorizonsObjectId(h.des)
+            setHorizonsObjectId(h.queryString)
           }
         })
       } else if (target.isSidereal) {
