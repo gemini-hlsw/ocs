@@ -77,6 +77,12 @@ class LchQueryFunctor(queryType: LchQueryFunctor.QueryType,
         Some(new NonSidereal() {
           setName(target.getName)
           setType(targetType.orNull)
+          for {
+            n <- target.getNonSiderealTarget
+            h <- n.horizonsDesignation
+          } {
+            setHorizonsObjectId(h.des)
+          }
         })
       } else if (target.isSidereal) {
         target.getSkycalcCoordinates(None.asGeminiOpt).asScalaOpt.map { coords =>
