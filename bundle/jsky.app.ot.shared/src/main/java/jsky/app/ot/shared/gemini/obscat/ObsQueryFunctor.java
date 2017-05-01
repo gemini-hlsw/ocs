@@ -27,6 +27,7 @@ import edu.gemini.spModel.pio.Pio;
 import edu.gemini.spModel.pio.PioFactory;
 import edu.gemini.spModel.pio.xml.PioXmlFactory;
 import edu.gemini.spModel.target.SPTarget;
+import edu.gemini.spModel.target.env.Asterism;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.time.ChargeClass;
 import edu.gemini.spModel.time.ObsTimeCharges;
@@ -439,10 +440,7 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor {
             final TargetObsComp targetEnv = (TargetObsComp) targetEnvNode.getDataObject();
             if (targetEnv == null)
                 return null;
-            final SPTarget target = targetEnv.getBase();
-            if (target == null)
-                return null;
-            return target.getName();
+            return targetEnv.getAsterism().name();
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -524,11 +522,11 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor {
         if (targetObsComp == null)
             return false;
         final TargetObsComp targetEnv = (TargetObsComp) targetObsComp.getDataObject();
-        final SPTarget tp = targetEnv.getBase();
+        final Asterism asterism = targetEnv.getAsterism();
 
         final Option<Long> when = ((SPObservation) o.getDataObject()).getSchedulingBlockStart();
-        final Option<Double> raOp  = tp.getRaDegrees(when).map(x -> x / 15.);
-        final Option<Double> decOp = tp.getDecDegrees(when);
+        final Option<Double> raOp  = asterism.getRaDegrees(when).map(x -> x / 15.);
+        final Option<Double> decOp = asterism.getDecDegrees(when);
 
         final double ra0  = (minRA != null)  ? new HMS(minRA, true).getVal() :   0.;
         final double ra1  = (maxRA != null)  ? new HMS(maxRA, true).getVal() :  24.;
@@ -620,10 +618,10 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor {
         final ISPObsComponent targetObsComp = SPTreeUtil.findObsComponent(o, TargetObsComp.SP_TYPE);
         if (targetObsComp != null) {
             final TargetObsComp targetEnv = (TargetObsComp) targetObsComp.getDataObject();
-            final SPTarget tp = targetEnv.getBase();
+            final Asterism asterism = targetEnv.getAsterism();
             final Option<Long> when = obs.getSchedulingBlockStart();
-            ra = tp.getRaDegrees(when).getOrNull();
-            dec = tp.getDecDegrees(when).getOrNull();
+            ra = asterism.getRaDegrees(when).getOrNull();
+            dec = asterism.getDecDegrees(when).getOrNull();
         }
 
         // Figure out the planned time for all observations.

@@ -26,7 +26,7 @@ class UnitsAdditionTest extends MigrationTest {
     val targetComp = obs.getObsComponents.asScala.find(_.getType == SPComponentType.TELESCOPE_TARGETENV).get
     val toc        = targetComp.getDataObject.asInstanceOf[TargetObsComp]
 
-    toc.getBase.getSpectralDistribution match {
+    toc.getAsterism.allSpTargets.head.getSpectralDistribution match {
       // Check that units have been properly added during migration;
       // without migration we wouldn't get the right values here
       case Some(EmissionLine(_, width, flux, continuum)) =>

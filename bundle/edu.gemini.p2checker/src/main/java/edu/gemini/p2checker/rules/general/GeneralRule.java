@@ -30,6 +30,7 @@ import edu.gemini.spModel.obsclass.ObsClass;
 import edu.gemini.spModel.obscomp.InstConstants;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.target.SPTarget;
+import edu.gemini.spModel.target.env.Asterism;
 import edu.gemini.spModel.target.env.GuideGroup;
 import edu.gemini.spModel.target.env.GuideProbeTargets;
 import edu.gemini.spModel.target.env.TargetEnvironment;
@@ -310,17 +311,14 @@ public class GeneralRule implements IRule {
             if (elements.getTargetObsComp().isEmpty()) return null; // can't perform this check without a target environment
 
             final P2Problems problems = new P2Problems();
-            final SPTarget scienceTarget = elements.getTargetObsComp().getValue().getBase();
 
             if (!hasScienceObserves(elements.getSequence())) return null; //if there are not observes, ignore this check (SCT-260)
 
-            if (scienceTarget == null) { //really unlikely
-                problems.addError(PREFIX+"NO_SCIENCE_TARGET_MSG", NO_SCIENCE_TARGET_MSG, elements.getTargetObsComponentNode().getValue());
-            } else {
-                if ("".equals(scienceTarget.getName().trim())) {
-                    problems.addError(PREFIX+"EMPTY_TARGET_NAME_MSG", EMPTY_TARGET_NAME_MSG, elements.getTargetObsComponentNode().getValue());
-                }
+            final Asterism asterism = elements.getTargetObsComp().getValue().getAsterism();
+            if ("".equals(asterism.name().trim())) {
+                problems.addError(PREFIX+"EMPTY_TARGET_NAME_MSG", EMPTY_TARGET_NAME_MSG, elements.getTargetObsComponentNode().getValue());
             }
+
             return problems;
 
         }
@@ -347,25 +345,18 @@ public class GeneralRule implements IRule {
         public IP2Problems check(final ObservationElements elements)  {
             if (elements.getTargetObsComp().isEmpty()) return null; // can't perform this check without a target environment
 
-            final SPTarget baseTarget = elements.getTargetObsComp().getValue().getBase();
-            if (baseTarget != null) {
-                final Target t = baseTarget.getTarget();
-                if (t instanceof SiderealTarget) {
-                    final SiderealTarget hms = (SiderealTarget) t;
-                    final scala.Option<ProperMotion> opm = hms.properMotion();
-                    if (opm.isDefined()) {
-                        final ProperMotion pm = opm.get();
+            final scala.Option<ProperMotion> opm = elements.getTargetObsComp().getValue().getAsterism().basePositionProperMotion();
+            if (opm.isDefined()) {
+                final ProperMotion pm = opm.get();
 
-                        final double pm_ra = pm.deltaRA().velocity();
-                        final double pm_dec = pm.deltaDec().velocity();
-                        final double total = pm_ra * pm_ra + pm_dec * pm_dec;
+                final double pm_ra = pm.deltaRA().velocity();
+                final double pm_dec = pm.deltaDec().velocity();
+                final double total = pm_ra * pm_ra + pm_dec * pm_dec;
 
-                        if (total > MAX_PM * MAX_PM) { //to avoid sqrt call
-                            final P2Problems problems = new P2Problems();
-                            problems.addWarning(PREFIX + "TARGET_PM_RULE", MESSAGE, elements.getTargetObsComponentNode().getValue());
-                            return problems;
-                        }
-                    }
+                if (total > MAX_PM * MAX_PM) { //to avoid sqrt call
+                    final P2Problems problems = new P2Problems();
+                    problems.addWarning(PREFIX + "TARGET_PM_RULE", MESSAGE, elements.getTargetObsComponentNode().getValue());
+                    return problems;
                 }
             }
             return null;
@@ -574,7 +565,8 @@ public class GeneralRule implements IRule {
             if (targetEnv != null) {
                 final ObsClass obsClass = ObsClassService.lookupObsClass(elements.getObservationNode());
                 if (obsClass == ObsClass.SCIENCE) {
-                    final SPTarget target = targetEnv.getBase();
+                    // TODO: this needs to handle multiple targets
+                    final SPTarget target = targetEnv.getAsterism().allSpTargets().head();
                     if (target.isSidereal())
                         return target;
                 }
