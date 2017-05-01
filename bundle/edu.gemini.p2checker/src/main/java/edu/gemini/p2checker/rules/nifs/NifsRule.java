@@ -184,7 +184,11 @@ public final class NifsRule implements IRule {
         P2Problems prob = new P2Problems();
         public IP2Problems check(ObservationElements elements)  {
             for (ObsContext ctx : elements.getObsContext()) {
-                final SPTarget baseTarget       = ctx.getTargets().getBase();
+
+              // We only consider the first sciencer target because a multi-target asterism is
+              // a configuration error that will raise a further P2 warning.
+              SPTarget baseTarget = ctx.getTargets().getAsterism().allSpTargets().head();
+
                 final Option<SPTarget> oiTarget = getOITarget(ctx);
                 final Option<SPTarget> aoTarget = getAOTarget(ctx);
 

@@ -102,7 +102,7 @@ object Asterism {
 
   // N.B. most members must be defs because `t` is mutable.
   final case class Single(t: SPTarget) extends Asterism {
-    override val allSpTargets = NonEmptyList(t)
+    override def allSpTargets = NonEmptyList(t) // def because Nel isn't serializable
     override def targets = t.getTarget.left
     override def basePosition(time: Option[Instant]) = t.getCoordinates(time.map(_.toEpochMilli))
     override def name = t.getName
