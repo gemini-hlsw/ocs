@@ -36,7 +36,8 @@ ocsAppManifest := {
               gnodbtest(v),
             odbproduction(v),
               gsodb(v),
-              gnodb(v)
+              gnodb(v),
+	      gnagsodb(v)
     )
   )
 }
@@ -290,23 +291,23 @@ def sraaphorst(version: Version) = AppConfig(
      "-XX:MaxPermSize=196M",
      "-Dedu.gemini.site=south",
      "-Dcron.*.edu.gemini.dbTools.html.ftpHost=localhost",
-     "-Dcron.*.edu.gemini.dbTools.html.ftpDestDir=/Users/sraaphor/.spdb/sftp",
+     "-Dcron.*.edu.gemini.dbTools.html.ftpDestDir=/Users/sraaphorst/.spdb/sftp",
      "-Dcron.archive.edu.gemini.dbTools.html.ftpHost=localhost",
-     "-Dcron.archive.edu.gemini.dbTools.html.ftpDestDir=/Users/sraaphor/cron",
+     "-Dcron.archive.edu.gemini.dbTools.html.ftpDestDir=/Users/sraaphorst/cron",
      "-Dcron.reports.edu.gemini.spdb.reports.public.host=localhost",
-     "-Dcron.reports.edu.gemini.spdb.reports.public.remotedir=/Users/sraaphor/cron"
+     "-Dcron.reports.edu.gemini.spdb.reports.public.remotedir=/Users/sraaphorst/cron"
   ),
   props = Map(
     "edu.gemini.smartgcal.host"            -> "localhost",
-    "edu.gemini.spdb.dir"                  -> "/Users/sraaphor/.spdb/",
-    "edu.gemini.auxfile.root"              -> "/Users/sraaphor/.auxfile",
+    "edu.gemini.spdb.dir"                  -> "/Users/sraaphorst/.spdb/",
+    "edu.gemini.auxfile.root"              -> "/Users/sraaphorst/.auxfile",
     "edu.gemini.util.trpc.name"            -> "Sebastian's ODB (Test)",
     "edu.gemini.auxfile.fits.dest"         -> "/gemsoft/var/data/ictd/test/GS@SEMESTER@/@PROG_ID@",
     "edu.gemini.auxfile.other.dest"        -> "/gemsoft/var/data/finder/GSqueue/Finders-Test/@SEMESTER@/@PROG_ID@",
     "edu.gemini.auxfile.fits.host"         -> "gsconfig.gemini.edu",
     "edu.gemini.dataman.gsa.summit.host"   -> "cpofits-lv1new.cl.gemini.edu",
-    "edu.gemini.dbTools.archive.directory" -> "/Users/sraaphor/tmp/archiver",
-    "osgi.shell.telnet.ip"                 -> "172.16.77.56"
+    "edu.gemini.dbTools.archive.directory" -> "/Users/sraaphorst/tmp/archiver",
+    "osgi.shell.telnet.ip"                 -> "172.16.77.244"
   )
 ) extending List(with_gogo(version), sraaphorst_credentials(version))
 
@@ -423,7 +424,7 @@ def odbtest(version: Version) = AppConfig(
   props = Map(
     "edu.gemini.auxfile.root"                    -> "/home/software/ugemini/auxfile",
     "edu.gemini.dbTools.archive.directory"       -> "/home/software/ugemini/spdb/spdb.archive",
-    "edu.gemini.dbTools.tcs.ephemeris.directory" -> "/gemsoft/var/ephemerides",
+    "edu.gemini.dbTools.tcs.ephemeris.directory" -> "/home/software/ugemini/ephemerides",
     "edu.gemini.smartgcal.svnRootUrl"            -> "http://source.gemini.edu/gcal/branches/development/calibrations",
     "edu.gemini.spdb.dir"                        -> "/home/software/ugemini/spdb/spdb.active",
     "edu.gemini.util.trpc.name"                  -> "Gemini ODB (Test)"
@@ -502,6 +503,31 @@ def gnodb(version: Version) = AppConfig(
   )
 ) extending List(odbproduction(version), gnodb_credentials(version))
 
+// GN AGS ODB: hbfauxodb-lv1 / gnauxodb
+def gnagsodb(version: Version) = AppConfig(
+  id = "gnagsodb",
+  distribution = List(Linux64),
+  vmargs = List(
+    "-Dcom.cosylab.epics.caj.CAJContext.addr_list=10.2.2.255",
+    "-Dedu.gemini.site=north",
+    "-Dcron.archive.edu.gemini.dbTools.html.ftpHost=gsagn.hi.gemini.edu",
+    "-Dcron.odbMail.SITE_SMTP_SERVER=smtp.hi.gemini.edu",
+    "-Xms2G",
+    "-Xmx2G"
+  ),
+  props = Map(
+    "edu.gemini.dbTools.tcs.ephemeris.directory" -> "/home/software/.ephemerides",
+    "edu.gemini.auxfile.fits.dest"               -> "/gemsoft/var/data/ictd/GN@SEMESTER@/@PROG_ID@",
+    "edu.gemini.auxfile.fits.host"               -> "gnconfig.gemini.edu",
+    "edu.gemini.auxfile.other.dest"              -> "/gemsoft/var/data/finder/GNqueue/Finders/@SEMESTER@/@PROG_ID@",
+    "edu.gemini.auxfile.root"                    -> "/home/software/.auxfile",
+    "edu.gemini.dataman.gsa.summit.host"         -> "fits.hi.gemini.edu",
+    "edu.gemini.oodb.mail.smtpHost"              -> "smtp.hi.gemini.edu",
+    "edu.gemini.util.trpc.name"                  -> "Gemini North AGS ODB",
+    "osgi.shell.telnet.ip"                       -> "10.1.46.11"
+  )
+) extending List(odbproduction(version), gnodb_credentials(version))
+
 // GSODBTEST
 def gsodbtest(version: Version) = AppConfig(
   id = "gsodbtest",
@@ -548,6 +574,4 @@ def gsodb(version: Version) = AppConfig(
   bundles = List(
     BundleSpec(50, "edu.gemini.smartgcal.servlet", version)
   )
-) extending List(odbproduction(version), gsodbtest_credentials(version))
-
-
+) extending List(odbproduction(version), gsodb_credentials(version))
