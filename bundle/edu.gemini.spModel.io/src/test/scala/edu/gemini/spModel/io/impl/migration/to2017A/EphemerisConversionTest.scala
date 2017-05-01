@@ -24,7 +24,7 @@ class EphemerisConversionTest extends Specification with MigrationTest{
     "Convert non-sidereal ephemeris data to compressed ephemeris data" in withTestProgram2("vesta.xml") { p =>
       (for {
         oc <- p.getObservations.get(0).findObsComponentByType(SPComponentType.TELESCOPE_TARGETENV)
-        ns <- oc.getDataObject.asInstanceOf[TargetObsComp].getTargetEnvironment.getBase.getNonSiderealTarget
+        ns <- oc.getDataObject.asInstanceOf[TargetObsComp].getTargetEnvironment.getAsterism.getNonSiderealTarget
       } yield ns.ephemeris).get ~= expected
     }
   }

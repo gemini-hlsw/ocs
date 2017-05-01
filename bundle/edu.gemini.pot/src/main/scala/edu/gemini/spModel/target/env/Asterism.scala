@@ -56,6 +56,12 @@ trait Asterism {
       case _                                     => None
     }
 
+  def getNonSiderealTarget: Option[NonSiderealTarget] =
+    targets match {
+      case -\/(t: NonSiderealTarget) => Some(t)
+      case _                         => None
+    }
+
   //
   // "Base position" convenience methods already in use extensively throughout
   // the codebase.  Defined in terms of the base position, these are methods
