@@ -291,7 +291,7 @@ public final class AltairRule implements IRule {
         if (altairTargets.isDefined()) {
             final Option<SPTarget> primaryAltairTarget = altairTargets.getValue().getPrimary();
             if (primaryAltairTarget.isDefined()) {
-                final Option<Coordinates> science = targets.getBase().getSkycalcCoordinates(when);
+                final Option<Coordinates> science = targets.getAsterism().getSkycalcCoordinates(when);
                 final Option<Coordinates> altair  = primaryAltairTarget.getValue().getSkycalcCoordinates(when);
                 return !science.equals(altair);
             }
