@@ -55,7 +55,8 @@ public class TpeBasePosFeature extends TpePositionFeature {
 
         final TargetObsComp obsComp = getTargetObsComp();
         if (obsComp != null) {
-            final PosMapEntry<SPTarget> pme = pm.getPositionMapEntry(obsComp.getBase());
+            // TODO: handle multiple targets
+            final PosMapEntry<SPTarget> pme = pm.getPositionMapEntry(obsComp.getAsterism().allSpTargets().head());
             if ((pme != null) && (positionIsClose(pme, x, y)) && getContext().targets().shell().isDefined()) {
                 TargetSelection.setTargetForNode(getContext().targets().envOrNull(), getContext().targets().shell().get(), pme.taggedPos);
                 return pme.taggedPos;

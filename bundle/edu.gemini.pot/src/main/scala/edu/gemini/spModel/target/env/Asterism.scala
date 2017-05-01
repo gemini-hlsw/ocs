@@ -1,6 +1,6 @@
 package edu.gemini.spModel.target.env
 
-import edu.gemini.spModel.core.{Coordinates, NonSiderealTarget, SiderealTarget, Target}
+import edu.gemini.spModel.core.{Coordinates, NonSiderealTarget, ProperMotion, SiderealTarget, Target}
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.shared.util.immutable.{ImList, Option => GOption}
 import edu.gemini.shared.util.immutable.ScalaConverters._
@@ -36,6 +36,9 @@ trait Asterism {
 
   /** Slew coordinates and AGS calculation base position. */
   def basePosition(time: Option[Instant]): Option[Coordinates]
+
+  /** Proper motion of the base position. */
+  def basePositionProperMotion: Option[ProperMotion]
 
   /** Return a display name for this asterism. */
   def name: String
@@ -98,6 +101,7 @@ object Asterism {
     override def basePosition(time: Option[Instant]) = t.getCoordinates(time.map(_.toEpochMilli))
     override def name = t.getName
     override def copyWithClonedTargets() = Single(t.clone)
+    override def basePositionProperMotion = Target.pm.get(t.getTarget)
   }
 
   /** Construct a single-target Asterism by wrapping the given SPTarget. */

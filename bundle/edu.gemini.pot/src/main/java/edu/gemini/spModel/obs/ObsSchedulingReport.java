@@ -13,6 +13,7 @@ import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 import edu.gemini.spModel.obs.plannedtime.PlannedTimeSummaryService;
 import edu.gemini.spModel.obs.plannedtime.PlannedTimeSummary;
+import edu.gemini.spModel.target.env.Asterism;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.too.Too;
@@ -128,12 +129,11 @@ public final class ObsSchedulingReport implements Serializable {
 
     private static WorldCoords getCoordinates(ISPObsComponent obsComp, Option<Long> when)  {
         TargetObsComp env = (TargetObsComp) obsComp.getDataObject();
-        SPTarget target = env.getBase();
-        if (target == null) return null;
+        Asterism asterism = env.getAsterism();
 
         return
-            target.getRaDegrees(when).flatMap(ra ->
-            target.getDecDegrees(when).map(dec ->
+            asterism.getRaDegrees(when).flatMap(ra ->
+            asterism.getDecDegrees(when).map(dec ->
                 new WorldCoords(ra, dec))).getOrNull();
         }
 
