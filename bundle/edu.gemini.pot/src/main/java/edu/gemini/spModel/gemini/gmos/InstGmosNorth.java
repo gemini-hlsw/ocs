@@ -272,15 +272,15 @@ public class InstGmosNorth extends
         } else if (detectorManufacturer == GmosCommonType.DetectorManufacturer.HAMAMATSU) {
             if (readMode == GmosCommonType.AmpReadMode.FAST) {
                 if (gain == GmosCommonType.AmpGain.HIGH) {
-                    return 5.0;
+                    return 5.11;
                 } else if (gain == GmosCommonType.AmpGain.LOW) {
-                    return 2.5;
+                    return 1.96;
                 }
             } else if (readMode == GmosCommonType.AmpReadMode.SLOW) {
                 if (gain == GmosCommonType.AmpGain.HIGH) {
                     return 4.4;
                 } else if (gain == GmosCommonType.AmpGain.LOW) {
-                    return 2.2;
+                    return 1.63;
                 }
             }
         }
@@ -323,15 +323,15 @@ public class InstGmosNorth extends
         } else if (detectorManufacturer == GmosCommonType.DetectorManufacturer.HAMAMATSU) {
             if (readMode == GmosCommonType.AmpReadMode.FAST) {
                 if (gain == GmosCommonType.AmpGain.HIGH) {
-                    return 7.4;
+                    return 8.69;
                 } else if (gain == GmosCommonType.AmpGain.LOW) {
-                    return 4.9;
+                    return 6.27;
                 }
             } else if (readMode == GmosCommonType.AmpReadMode.SLOW) {
                 if (gain == GmosCommonType.AmpGain.HIGH) {
                     return 4.8;
                 } else if (gain == GmosCommonType.AmpGain.LOW) {
-                    return 3.4;
+                    return 4.14;
                 }
             }
         }

@@ -1,9 +1,3 @@
-/* Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- * See the file LICENSE for complete details.
- *
- * $Id: InstGMOSCase.java 37930 2011-10-07 23:17:24Z lobrien $
- */
 package edu.gemini.spModel.gemini.gmos.test;
 
 import edu.gemini.spModel.gemini.gmos.*;
@@ -70,15 +64,15 @@ public final class InstGMOSCase {
         //Gemini North Specs
         _t1.setAmpReadMode(GmosCommonType.AmpReadMode.SLOW);
         _t1.setGainChoice(GmosCommonType.AmpGain.LOW);
-        assertEquals(2.2, _t1.getMeanGain(), _ERROR);
+        assertEquals(1.63, _t1.getMeanGain(), _ERROR);
 
         _t1.setAmpReadMode(GmosCommonType.AmpReadMode.FAST);
         _t1.setGainChoice(GmosCommonType.AmpGain.LOW);
-        assertEquals(2.5, _t1.getMeanGain(), _ERROR);
+        assertEquals(1.96, _t1.getMeanGain(), _ERROR);
 
         _t1.setAmpReadMode(GmosCommonType.AmpReadMode.FAST);
         _t1.setGainChoice(GmosCommonType.AmpGain.HIGH);
-        assertEquals(5.0, _t1.getMeanGain(), _ERROR);
+        assertEquals(5.11, _t1.getMeanGain(), _ERROR);
 
 
         //Gemini South Specs
@@ -104,15 +98,15 @@ public final class InstGMOSCase {
         //Gemini North Specs
         _t1.setAmpReadMode(GmosCommonType.AmpReadMode.SLOW);
         _t1.setGainChoice(GmosCommonType.AmpGain.LOW);
-        assertEquals(3.4, _t1.getMeanReadNoise(), _ERROR);
+        assertEquals(4.14, _t1.getMeanReadNoise(), _ERROR);
 
         _t1.setAmpReadMode(GmosCommonType.AmpReadMode.FAST);
         _t1.setGainChoice(GmosCommonType.AmpGain.LOW);
-        assertEquals(4.9, _t1.getMeanReadNoise(), _ERROR);
+        assertEquals(6.27, _t1.getMeanReadNoise(), _ERROR);
 
         _t1.setAmpReadMode(GmosCommonType.AmpReadMode.FAST);
         _t1.setGainChoice(GmosCommonType.AmpGain.HIGH);
-        assertEquals(7.4, _t1.getMeanReadNoise(), _ERROR);
+        assertEquals(8.69, _t1.getMeanReadNoise(), _ERROR);
 
         //Gemini South Specs
         _t2.setAmpReadMode(GmosCommonType.AmpReadMode.SLOW);
