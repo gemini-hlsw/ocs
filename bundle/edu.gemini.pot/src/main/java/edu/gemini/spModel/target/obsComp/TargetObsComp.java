@@ -88,7 +88,7 @@ public final class TargetObsComp extends AbstractDataObject implements GuideProb
     }
 
     /**
-     * Get the target environment (never null).
+     * Get the asterism (never null).
      */
     public Asterism getAsterism() {
       return getTargetEnvironment().getAsterism();
