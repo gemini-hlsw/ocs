@@ -11,6 +11,7 @@ import edu.gemini.spModel.obs.context.ObsContext
 
 import scala.concurrent.{ExecutionContext, Future}
 
+/** This strategy is for instruments that guide on the science target. */
 case class ScienceTargetStrategy(key: AgsStrategyKey, guideProbe: ValidatableGuideProbe, override val probeBands: BandsList) extends AgsStrategy {
 
   // Since the science target is the used as the guide star, success is always guaranteed.
@@ -33,8 +34,11 @@ case class ScienceTargetStrategy(key: AgsStrategyKey, guideProbe: ValidatableGui
     Future.successful(List((guideProbe, toSiderealTargets(ctx))))
 
   override def select(ctx: ObsContext, mt: MagnitudeTable)(ec: ExecutionContext): Future[Option[AgsStrategy.Selection]] = {
-    // The science target is the guide star, but must be converted from SPTarget to SkyObject.
-    val siderealTargets = toSiderealTargets(ctx)
+    // As of 17B there are no instruments that use this strategy with a multi-target asterism (which
+    // could result in mutiple assignments below) so we use only the first sidereal target we find.
+    // In practice this is fine. A multi-target asterism in this context is a configuration error
+    // that will result in a stern warning.
+    val siderealTargets = toSiderealTargets(ctx).take(1)
     val assignments     = siderealTargets.map(AgsStrategy.Assignment(guideProbe, _))
     val posAngle        = ctx.getPositionAngle
     val selection       = AgsStrategy.Selection(posAngle, assignments)
