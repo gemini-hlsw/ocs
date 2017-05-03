@@ -12,18 +12,16 @@ import scala.annotation.tailrec
 import scala.collection.JavaConverters._
 import edu.gemini.skycalc.Angle
 
-import scalaz._, Scalaz._
-
 object RolloverObservation {
   def toRollover(obs: ISPObservation): Option[RolloverObservation] =
     for {
       id   <- Option(obs.getObservationID)
       prog <- program(obs)
       p    <- partner(prog)
-      ts   <- targets(obs)
+      t    <- basePosition(obs)
       c    <- conditions(obs)
       ms   <- time(obs)
-    } yield RolloverObservation(id, p, ts, c, ms)
+    } yield RolloverObservation(id, p, t, c, ms)
 
   private def findByType(obs: ISPObservation, compType: SPComponentType): Option[ISPObsComponent] =
     for {
@@ -44,13 +42,13 @@ object RolloverObservation {
       aff     <- Option(dataObj.getPIAffiliate)
     } yield aff.displayValue
 
-  private def targets(o: ISPObservation): Option[NonEmptyList[RolloverTarget]] =
-    (for {
-      targetComp <- findByType(o, TargetObsComp.SP_TYPE).toList
-      dataObj    <- Option(targetComp.getDataObject.asInstanceOf[TargetObsComp]).toList
-      targetEnv  <- Option(dataObj.getTargetEnvironment).toList
-      science    <- targetEnv.getAsterism.allSpTargets.list.toList
-      name       <- Option(science.getName).toList
+  private def basePosition(o: ISPObservation): Option[RolloverBasePosition] =
+    for {
+      targetComp <- findByType(o, TargetObsComp.SP_TYPE)
+      dataObj    <- Option(targetComp.getDataObject.asInstanceOf[TargetObsComp])
+      targetEnv  <- Option(dataObj.getTargetEnvironment)
+      asterism   <- Option(targetEnv.getAsterism)
+      name       <- Option(asterism.name)
     } yield {
 
       // Amazingly this is easier in Java
@@ -63,13 +61,13 @@ object RolloverObservation {
 
       // Coordinates may or may not be known
       val coords = for {
-        ra  <- science.getRaDegrees(when).asScalaOpt
-        dec <- science.getDecDegrees(when).asScalaOpt
+        ra  <- asterism.getRaDegrees(when).asScalaOpt
+        dec <- asterism.getDecDegrees(when).asScalaOpt
       } yield Coords(new Angle(ra, Angle.Unit.DEGREES), new Angle(dec, Angle.Unit.DEGREES))
 
-      RolloverTarget(name, coords)
+      RolloverBasePosition(name, coords)
 
-    }).toNel
+    }
 
   private def conditions(o: ISPObservation): Option[RolloverConditions] =
     for {
@@ -93,6 +91,6 @@ object RolloverObservation {
 }
 
 case class Coords(ra: Angle, dec: Angle)
-case class RolloverTarget(name: String, coords: Option[Coords])
+case class RolloverBasePosition(name: String, coords: Option[Coords])
 case class RolloverConditions(cc: CloudCover, iq: ImageQuality, sb: SkyBackground, wv: WaterVapor)
-case class RolloverObservation(id: SPObservationID, partner: String, targets: NonEmptyList[RolloverTarget], conds: RolloverConditions, remainingTime: Long)
+case class RolloverObservation(id: SPObservationID, partner: String, target: RolloverBasePosition, conds: RolloverConditions, remainingTime: Long)
