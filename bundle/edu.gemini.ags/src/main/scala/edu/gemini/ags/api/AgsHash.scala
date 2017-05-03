@@ -56,7 +56,7 @@ object AgsHash {
       c.cc.## +=: c.iq.## +=: c.sb.## +=: buf
     }
 
-    // Base Position
+    // Asterism
     Option(ctx.getTargets).foreach { t =>
       val time = Some(new java.lang.Long(when)).asGeminiOpt
       val asterism = t.getAsterism
@@ -64,10 +64,12 @@ object AgsHash {
       def toData(coord: GemOption[java.lang.Double]): Int =
         coord.asScalaOpt.map(_.doubleValue).##
 
-      val ra  = toData(asterism.getRaDegrees(time))
-      val dec = toData(asterism.getDecDegrees(time))
+      asterism.allSpTargets.map { sp =>
+        val ra  = toData(sp.getRaDegrees(time))
+        val dec = toData(sp.getDecDegrees(time))
+        ra +=: dec +=: buf
+      }
 
-      ra +=: dec +=: buf
     }
 
     // Offset Positions, which are returned in a Set.  Order is not important
