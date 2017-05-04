@@ -310,7 +310,7 @@ public abstract class Gmos extends Instrument implements BinningProvider, Spectr
                         throw new RuntimeException("Central wavelength must be between 300 nm and 1000 nm.");
                     break;
                 default:
-                    throw new Error("invalid site");
+                    throw new RuntimeException("invalid site");
             }
 
         }
