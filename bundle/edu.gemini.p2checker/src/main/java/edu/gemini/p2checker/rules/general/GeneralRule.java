@@ -151,7 +151,6 @@ public class GeneralRule implements IRule {
             final TargetEnvironment env = elements.getTargetObsComp().getValue().getTargetEnvironment();
 
             final P2Problems problems = new P2Problems();
-            final SPTarget baseTarget = env.getBase();
 
             final boolean hasAltairComp = elements.hasAltair();
             boolean isLgs = false;
@@ -215,28 +214,30 @@ public class GeneralRule implements IRule {
                         errorSet.add(String.format(WFS_EMPTY_NAME_TEMPLATE, guider.getKey()));
                     }
 
-                    // If a WFS has the same name as the base position, make sure the have the same
+                    // If a WFS has the same name as a science position, make sure the have the same
                     // type (i.e., tag) and position; or, if they have the same tag and position,
                     // make sure they have the same name.
-                    final Target t1 = baseTarget.getTarget();
-                    final Target t2 = target.getTarget();
+                    for (final SPTarget base : env.getAsterism().allSpTargetsJava()) {
+                      final Target t1 = base.getTarget();
+                      final Target t2 = target.getTarget();
 
-                    final boolean sameName = t1.name().equals(t2.name());
-                    final boolean sameTag  = t1.getClass().getName().equals(t2.getClass().getName());
+                      final boolean sameName = t1.name().equals(t2.name());
+                      final boolean sameTag  = t1.getClass().getName().equals(t2.getClass().getName());
 
-                    if (sameName) {
-                        if (sameTag) {
-                            if (!helper.samePosition(t1, t2)) {
-                                // same name and tag, but positions don't match
-                                errorSet.add(COORD_CLASH_MESSAGE);
-                            }
-                        } else {
-                            // same name but different tags
-                            errorSet.add(TAG_CLASH_MESSAGE);
-                        }
-                    } else if (sameTag && helper.samePosition(t1, t2)) {
-                        // same tag and position, but different name
-                        errorSet.add(NAME_CLASH_MESSAGE);
+                      if (sameName) {
+                          if (sameTag) {
+                              if (!helper.samePosition(t1, t2)) {
+                                  // same name and tag, but positions don't match
+                                  errorSet.add(COORD_CLASH_MESSAGE);
+                              }
+                          } else {
+                              // same name but different tags
+                              errorSet.add(TAG_CLASH_MESSAGE);
+                          }
+                      } else if (sameTag && helper.samePosition(t1, t2)) {
+                          // same tag and position, but different name
+                          errorSet.add(NAME_CLASH_MESSAGE);
+                      }
                     }
 
                 }
