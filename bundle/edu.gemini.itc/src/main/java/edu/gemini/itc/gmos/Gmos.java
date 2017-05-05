@@ -296,6 +296,23 @@ public abstract class Gmos extends Instrument implements BinningProvider, Spectr
                 "Please use the ITC in 1-slit mode to estimate sensitivity, and see the GMOS IFU web pages for a discussion of spectral overlap.");
             }
 
+            // central wavelength, site dependent
+            double _centralWavelength = getCentralWavelength();
+            switch (gp.site()) {
+                // User-input central wavelength for GN
+                case GN:
+                    if (_centralWavelength < 360 || _centralWavelength > 1000)
+                        throw new RuntimeException("Central wavelength must be between 360 nm and 1000 nm.");
+                    break;
+                // User-input central wavelength for GS
+                case GS:
+                    if (_centralWavelength < 300 || _centralWavelength > 1000)
+                        throw new RuntimeException("Central wavelength must be between 300 nm and 1000 nm.");
+                    break;
+                default:
+                    throw new RuntimeException("invalid site");
+            }
+
         }
 
         if (odp.calculationMethod() instanceof Imaging) {
