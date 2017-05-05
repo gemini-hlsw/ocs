@@ -4,7 +4,6 @@ import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.PioFactory;
-import edu.gemini.spModel.pio.xml.PioXmlUtil;
 import edu.gemini.spModel.target.SPTarget;
 
 import java.io.Serializable;
@@ -189,11 +188,6 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
         return user;
     }
 
-    // Creates a list of all the targets in this environment
-    private ImList<SPTarget> initAllTargets() {
-        return asterism.allSpTargetsJava().append(guide.getTargets()).append(user);
-    }
-
     @Override
     public boolean containsTarget(SPTarget target) {
         return getTargets().contains(target);
@@ -218,7 +212,7 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
 
         // Doesn't exist yet/anymore so initialize it.
         if (res == null) {
-            res = initAllTargets();
+            res = asterism.allSpTargetsJava().append(guide.getTargets()).append(user);
             allTargets = new SoftReference<>(res);
         }
         return res;
@@ -236,15 +230,6 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
      */
     public Iterator<SPTarget> iterator() {
         return getTargets().iterator();
-    }
-
-    /**
-     * Returns <code>true</code> if the given target is the base position in
-     * this environment.
-     */
-    @Deprecated
-    public boolean isBasePosition(SPTarget target) {
-        return target == getBase();
     }
 
     /**
