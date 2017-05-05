@@ -1,11 +1,15 @@
 package edu.gemini.spModel.target.env
 
 import edu.gemini.spModel.core.{Coordinates, NonSiderealTarget, ProperMotion, SiderealTarget, Target}
-import edu.gemini.spModel.target.SPTarget
+import edu.gemini.spModel.target.{SPTarget, TargetParamSetCodecs}
 import edu.gemini.shared.util.immutable.{ImList, Option => GOption}
 import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.skycalc.{Coordinates => SCoordinates}
 import java.time.Instant
+
+import edu.gemini.spModel.pio.{ParamSet, Pio}
+import edu.gemini.spModel.pio.codec.{MissingKey, ParamSetCodec, PioError}
+import edu.gemini.spModel.pio.xml.{PioXmlFactory, PioXmlUtil}
 
 import scalaz._
 import Scalaz._
@@ -110,7 +114,44 @@ object Asterism {
     override def basePositionProperMotion = Target.pm.get(t.getTarget)
   }
 
+  object Single {
+    import TargetParamSetCodecs._
+
+    /** Construct a new "empty" Single with an "empty" target. */
+    def empty = apply(new SPTarget(SiderealTarget.empty))
+
+    // Lenses
+    val spTarget: Single @> SPTarget = Lens.lensu((a, b) => a.copy(t = b), _.t)
+    val target:   Single @> Target   = spTarget.xmapB(_.getTarget)(new SPTarget(_))
+
+    // We can't just .xmap the Target codec because Target is a tagged union and so is Asterism,
+    // so we end up with two union tags if we do this. So we push the target paramset down a level.
+    implicit val SingleParamSetCodec: ParamSetCodec[Single] =
+      ParamSetCodec.initial(empty).withParamSet("target", target)
+
+  }
+
   /** Construct a single-target Asterism by wrapping the given SPTarget. */
-  def single(t: SPTarget): Asterism = Single(t)
+  def single(t: SPTarget): Asterism =
+    Single(t)
+
+  /** PIO codec for asterisms. */
+  implicit val AsterismParamSetCodec: ParamSetCodec[Asterism] =
+    // TODO:ASTERISM: add ghost here
+    new ParamSetCodec[Asterism] {
+      val pf = new PioXmlFactory
+      def encode(key: String, a: Asterism): ParamSet = {
+        val (tag, ps) = a match {
+          case a: Single    => ("single", Single.SingleParamSetCodec.encode(key, a))
+        }
+        Pio.addParam(pf, ps, "tag", tag)
+        ps
+      }
+      def decode(ps: ParamSet): PioError \/ Asterism =
+        (Option(ps.getParam("tag")).map(_.getValue) \/> MissingKey("tag")) flatMap {
+          case "single"  => Single.SingleParamSetCodec.decode(ps)
+        }
+    }
+
 
 }

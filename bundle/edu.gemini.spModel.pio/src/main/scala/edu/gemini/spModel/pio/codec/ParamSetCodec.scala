@@ -15,6 +15,12 @@ trait ParamSetCodec[A] { outer =>
   def unsafeDecode(ps: ParamSet): A =
     outer.decode(ps).fold(e => throw new PioParseException(e.toString), a => a)
 
+  def xmap[B](f: A => B, g: B => A): ParamSetCodec[B] =
+    new ParamSetCodec[B] {
+      def encode(key: String, b: B) = outer.encode(key, g(b))
+      def decode(ps: ParamSet)  = outer.decode(ps).map(f)
+    }
+
   def withParam[B](key: String, lens: A @> B)(implicit pc: ParamCodec[B]): ParamSetCodec[A] =
     new ParamSetCodec[A] {
       def encode(key0: String, a: A): ParamSet = {
@@ -111,6 +117,12 @@ object ParamSetCodec {
     new ParamSetCodec[A] {
       def encode(key: String, a: A): ParamSet = pf.createParamSet(key)
       def decode(ps: ParamSet): PioError \/ A = empty.right
+    }
+
+  implicit val InvariantParamSetCodec: InvariantFunctor[ParamSetCodec] =
+    new InvariantFunctor[ParamSetCodec] {
+      def xmap[A, B](ma: ParamSetCodec[A], f: (A) => B, g: (B) => A): ParamSetCodec[B] =
+        ma.xmap(f, g)
     }
 
 }

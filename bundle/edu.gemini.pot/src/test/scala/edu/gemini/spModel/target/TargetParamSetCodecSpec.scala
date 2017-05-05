@@ -21,7 +21,7 @@ import AlmostEqual.AlmostEqualOps
 object TargetParamSetCodecsSpec extends Specification with ScalaCheck with Arbitraries {
   import TargetParamSetCodecs._
 
-  def close[A: ParamSetCodec: Arbitrary: AlmostEqual](implicit mf: Manifest[A]) = 
+  def close[A: ParamSetCodec: Arbitrary: AlmostEqual](implicit mf: Manifest[A]) =
     mf.runtimeClass.getName ! forAll { (key: String, value: A) =>
       val c = ParamSetCodec[A]
       c.decode(c.encode(key, value)).map(_ ~= value) must_== \/-(true)
