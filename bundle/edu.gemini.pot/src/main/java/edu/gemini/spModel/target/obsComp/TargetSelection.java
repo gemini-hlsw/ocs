@@ -92,7 +92,8 @@ public final class TargetSelection {
             int idx = 0;
             final List<Selection> res = new ArrayList<>();
 
-            res.add(new NormalTargetSelection(idx++, env.getBase()));
+            // TODO:ASTERISM: How do we handle multiples? For now just select the first target.
+            res.add(new NormalTargetSelection(idx++, env.getAsterism().allSpTargets().head()));
             for (final GuideGroup g : env.getGroups()) {
                 res.add(new GuideGroupSelection(idx++, g));
                 for (final SPTarget t : g.getTargets()) {
