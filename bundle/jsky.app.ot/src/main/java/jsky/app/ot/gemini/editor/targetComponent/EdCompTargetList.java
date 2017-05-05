@@ -171,7 +171,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
      */
     private boolean selectionIsBasePosition() {
         final TargetEnvironment env = getDataObject().getTargetEnvironment();
-        return selectedTarget().exists(env::isBasePosition);
+        return selectedTarget().exists((target) -> target == env.getBase());
     }
 
     /**

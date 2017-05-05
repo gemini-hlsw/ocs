@@ -190,7 +190,7 @@ public final class TpePositionMap extends PosMap<SPTarget, SPTarget> {
             // Is this position visible?
             SPTarget tp = pme.taggedPos;
 
-            if (env.isBasePosition(tp)) {
+          if (tp == env.getBase()) {
                 if (_findBase) {
                     return pme;
                 } else {
