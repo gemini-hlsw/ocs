@@ -147,4 +147,11 @@ trait Arbitraries extends edu.gemini.spModel.core.Arbitraries {
         u <- boundedListOf[SPTarget](3)
       } yield TargetEnvironment.create(b, g, u.asImList)
     }
+
+  implicit val arbSingleAsterism: Arbitrary[Asterism.Single] =
+    Arbitrary(arbitrary[SPTarget].map(Asterism.Single(_)))
+
+  implicit val arbAsterism: Arbitrary[Asterism] =
+    Arbitrary(arbitrary[Asterism.Single]) // TODO:ASTERISM: add GHOST
+
 }

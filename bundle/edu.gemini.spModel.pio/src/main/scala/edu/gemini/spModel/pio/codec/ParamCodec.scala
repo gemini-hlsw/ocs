@@ -68,6 +68,12 @@ object ParamCodec {
       }          
     }
 
+  implicit val InvariantParamCodec: InvariantFunctor[ParamCodec] =
+    new InvariantFunctor[ParamCodec] {
+      def xmap[A, B](ma: ParamCodec[A], f: (A) => B, g: (B) => A): ParamCodec[B] =
+        ma.xmap(f, g)
+    }
+
 }
 
 

@@ -16,22 +16,22 @@ object To2017B extends Migration {
   val version = Version.`match`("2017B-1")
 
   val conversions: List[Document => Unit] =
-    List(updateTimeAccounting)
+    List(targetToAsterism)
 
   val fact = new PioXmlFactory
 
-  // Changes the old implicit program award in hours to an explicit program
-  // award in milliseconds and adds explicit partner award of 0.
-  private def updateTimeAccounting(d: Document): Unit =
-    for {
-      cont <- d.containers.find(_.getKind == SpIOTags.PROGRAM)
-      dobj <- cont.dataObject
-      tact <- dobj.paramSet("timeAcct")
-      aloc <- tact.paramSets("timeAcctAlloc")
-      hrs  <- aloc.double("hours")
-    } {
-      aloc.removeChild("hours")
-      Pio.addLongParam(fact, aloc, "program", (hrs * 3600000).round)
-      Pio.addLongParam(fact, aloc, "partner", 0)
+  // Convert base positions to single-target asterisms
+  private def targetToAsterism(d: Document): Unit = {
+
+    // SPTarget paramset to Asterism paramSet
+    def convertToAsterism(ps: ParamSet): ParamSet =
+      Asterism.single(SPTargetPio.fromParamSet(ps)).encode("asterism")
+
+    envAndBases(d).foreach { case (obs, base) =>
+      obs.removeChild(base)
+      obs.addParamSet(convertToAsterism(base))
     }
+
+  }
+
 }

@@ -4,6 +4,7 @@ import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.PioFactory;
+import edu.gemini.spModel.pio.xml.PioXmlUtil;
 import edu.gemini.spModel.target.SPTarget;
 
 import java.io.Serializable;
@@ -58,7 +59,7 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
         return new TargetEnvironment(new Asterism.Single(base), guide, user);
     }
 
-    private final Asterism asterism;
+  private final Asterism asterism;
     private final GuideEnvironment guide;
     private final ImList<SPTarget> user;
 
@@ -332,10 +333,10 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
     public ParamSet getParamSet(PioFactory factory) {
         ParamSet paramSet = factory.createParamSet(PARAM_SET_NAME);
 
-        // Add the base position first.
-        ParamSet basePset = getBase().getParamSet(factory);
-        basePset.setName("base");
-        paramSet.addParamSet(basePset);
+        // Add the asterism.
+        paramSet.addParamSet(
+          Asterism$.MODULE$.AsterismParamSetCodec().encode("asterism", getAsterism())
+        );
 
         // Add each guider list
         paramSet.addParamSet(guide.getParamSet(factory));
@@ -371,11 +372,10 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
 
 
     public static TargetEnvironment fromParamSet(ParamSet parent) {
-        // Get the base position
-        ParamSet basePset = parent.getParamSet("base");
-        if (basePset == null) return null;
 
-        SPTarget base = SPTarget.fromParamSet(basePset);
+        // Get the asterism
+        ParamSet astPset = parent.getParamSet("asterism");
+        Asterism asterism = Asterism$.MODULE$.AsterismParamSetCodec().unsafeDecode(astPset);
 
         GuideEnvironment guide = parseGuideEnvironment(parent);
 
@@ -388,7 +388,7 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
             }
         }
 
-        return create(base, guide, DefaultImList.create(userTargets));
+        return new TargetEnvironment(asterism, guide, DefaultImList.create(userTargets));
     }
 
     public String mkString(String prefix, String sep, String suffix) {
