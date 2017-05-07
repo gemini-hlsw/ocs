@@ -144,7 +144,7 @@ object LchQueryParam {
 
     def partnerList: List[PartnerInfo] = {
       val taa = toSPProg.getTimeAcctAllocation
-      taa.getCategories.asScala.toList.map(c => PartnerInfo(c.getDisplayName, taa.getHours(c)))
+      taa.getCategories.asScala.toList.map(c => PartnerInfo(c.getDisplayName, taa.getAward(c).getTotalHours()))
     }
 
     def tooStatus: TooType =
@@ -164,7 +164,7 @@ object LchQueryParam {
 
     // Allocated time in ms.
     def allocatedTime: Long =
-      (toSPProg.getTimeAcctAllocation.getTotalTime * 60 * 60 * 1000).toLong
+      toSPProg.getTimeAcctAllocation.getSum().getTotalAward().toMillis();
 
     // Remaining time in ms.
     def remainingTime: Long =
