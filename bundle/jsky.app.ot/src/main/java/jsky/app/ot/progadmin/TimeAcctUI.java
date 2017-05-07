@@ -128,11 +128,26 @@ final class TimeAcctUI extends JPanel {
 
         final TimeAcctCategory[] catA = TimeAcctCategory.values();
 
+        // Column Headers
+        gbc.anchor    = GridBagConstraints.WEST;
+        gbc.gridy     = 0;
+        gbc.insets    = new Insets(10, 0, 0, 5);
+
+        gbc.gridx     = 1;
+        pan.add(new JLabel("Program"), gbc);
+        gbc.gridx     = 2;
+        pan.add(new JLabel("Partner"), gbc);
+        gbc.gridx     = 5;
+        pan.add(new JLabel("Program"), gbc);
+        gbc.gridx     = 6;
+        pan.add(new JLabel("Partner"), gbc);
+
+        // Time Accountig Allocation
         final int div = catA.length/2 + catA.length%2;
         for (int i=0; i<catA.length; ++i) {
             final TimeAcctCategory cat = catA[i];
 
-            int row = i % div;
+            int row = 1 + i % div;
             int col = (i / div) * 4;
 
             final JLabel lab = new JLabel(String.format("%s (%s)", cat.name(), cat.getDisplayName()));
