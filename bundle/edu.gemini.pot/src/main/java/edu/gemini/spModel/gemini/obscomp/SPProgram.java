@@ -45,7 +45,7 @@ public class SPProgram extends AbstractDataObject implements ISPStaffOnlyFieldPr
     // for serialization
     private static final long serialVersionUID = 4L;
 
-    public static final String VERSION = "2017A-1";
+    public static final String VERSION = "2017B-1";
 
     /** This property records the program queue/classical state. */
     public static final String PROGRAM_MODE_PROP = "programMode";
