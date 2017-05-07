@@ -104,7 +104,7 @@ public class TimeAccountingSummaryTable extends AbstractTable {
         // If none, then we cannot report for this program.
         final SPProgram progDataObj = (SPProgram) programShell.getDataObject();
         final TimeAcctAllocation alloc = progDataObj.getTimeAcctAllocation();
-        if ((alloc == null) || (alloc.getTotalTime() == 0)) {
+        if ((alloc == null) || (alloc.getSum().isZero())) {
             LOGGER.fine("No time accounting information for " + id);
             return Collections.emptyList();
         }
