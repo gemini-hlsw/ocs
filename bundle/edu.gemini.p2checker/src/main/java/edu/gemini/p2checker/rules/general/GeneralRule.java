@@ -566,7 +566,7 @@ public class GeneralRule implements IRule {
             if (targetEnv != null) {
                 final ObsClass obsClass = ObsClassService.lookupObsClass(elements.getObservationNode());
                 if (obsClass == ObsClass.SCIENCE) {
-                    // TODO: this needs to handle multiple targets
+                    // TODO:ASTERISM: this needs to handle multiple targets … also why only sidereal?
                     final SPTarget target = targetEnv.getAsterism().allSpTargets().head();
                     if (target.isSidereal())
                         return target;

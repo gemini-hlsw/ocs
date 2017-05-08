@@ -75,9 +75,10 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
         this.user     = user;
     }
 
+    /** Returns an arbitrary target from the asterism. This method will be removed for 18A. */
     @Deprecated
-    public SPTarget getBase() {
-      return ((Asterism.Single) asterism).t();
+    public SPTarget getArbitraryTargetFromAsterism() {
+      return getAsterism().allSpTargets().head();
     }
 
     /**

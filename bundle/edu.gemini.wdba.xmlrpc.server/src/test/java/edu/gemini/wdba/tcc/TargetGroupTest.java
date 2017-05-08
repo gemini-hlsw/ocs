@@ -423,9 +423,9 @@ public final class TargetGroupTest extends TestBase {
         Element baseGroupElement = getGroupElement(TccNames.BASE, groupElements);
         assertNotNull(baseGroupElement);
         ImList<SPTarget> targets = env.getUserTargets();
-        targets = targets.cons(env.getBase());
+        targets = targets.cons(env.getArbitraryTargetFromAsterism());
 
-        String baseName = nameMap.getTargetName(env.getBase());
+        String baseName = nameMap.getTargetName(env.getArbitraryTargetFromAsterism());
         validateGroup(baseGroupElement, TccNames.BASE, baseName, targets);
 
         // Check each guide group.

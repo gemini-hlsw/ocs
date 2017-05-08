@@ -190,7 +190,7 @@ public final class TpePositionMap extends PosMap<SPTarget, SPTarget> {
             // Is this position visible?
             SPTarget tp = pme.taggedPos;
 
-          if (tp == env.getBase()) {
+          if (tp == env.getArbitraryTargetFromAsterism()) {
                 if (_findBase) {
                     return pme;
                 } else {
