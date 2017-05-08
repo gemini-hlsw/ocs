@@ -51,7 +51,7 @@ public final class EdProgram extends OtItemEditor<ISPProgram, SPProgram> impleme
         _w = new ProgramForm();
         _edAux = new AuxFileEditor(_w);
 
-        _w.secondaryContactBox.setForeground(Color.black);
+        _w.contactBox.setForeground(Color.black);
 
         _w.titleBox.     addWatcher(this);
         _w.firstNameBox. addWatcher(this);
@@ -122,7 +122,7 @@ public final class EdProgram extends OtItemEditor<ISPProgram, SPProgram> impleme
         _showPiInfo();
 
         // misc
-        _w.secondaryContactBox.setText(getDataObject().getContactPerson());
+        _w.contactBox.setText(getDataObject().getContactPerson());
         _w.principalContactBox.setText(getDataObject().getPrimaryContactEmail());
 
         final TooType tooType = getDataObject().getTooType();
@@ -306,7 +306,7 @@ public final class EdProgram extends OtItemEditor<ISPProgram, SPProgram> impleme
         _w.emailBox.setEnabled(OTOptions.isStaff(getProgram().getProgramID()));
         _w.phoneBox.setEnabled(enabled);
         _w.affiliationBox.setEnabled(enabled);
-        _w.secondaryContactBox.setEnabled(OTOptions.isStaff(getProgram().getProgramID()));
+        _w.contactBox.setEnabled(OTOptions.isStaff(getProgram().getProgramID()));
         _w.principalContactBox.setEnabled(OTOptions.isStaff(getProgram().getProgramID()) || OTOptions.isNGO(getProgram().getProgramID()));
     }
 

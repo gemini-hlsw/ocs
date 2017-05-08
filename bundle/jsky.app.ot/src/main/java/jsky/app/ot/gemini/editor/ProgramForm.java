@@ -140,9 +140,9 @@ public class ProgramForm extends JPanel {
         add(principalContactLabel, cc.xy(1, 17));
         add(principalContactBox, cc.xywh(3, 17, 9, 1));
 
-        add(new JLabel("Secondary Contact Email"), cc.xy(1, 19));
-        secondaryContactBox = new JLabel();
-        add(secondaryContactBox, cc.xywh(3, 19, 9, 1));
+        add(new JLabel("Contact Sci. Email"), cc.xy(1, 19));
+        contactBox = new JLabel();
+        add(contactBox, cc.xywh(3, 19, 9, 1));
 
         // --- Observing Time ---
         add(compFactory.createSeparator("Observing Time"), cc.xywh(1, 21, 11, 1));
@@ -239,7 +239,7 @@ public class ProgramForm extends JPanel {
     final TextBoxWidget phoneBox;
     final TextBoxWidget emailBox;
     final TextBoxWidget principalContactBox;
-    final JLabel secondaryContactBox;
+    final JLabel contactBox;
     final JLabel plannedLabel;
     final JLabel usedLabel;
     final JLabel totalPlannedExecTimeLabel;
