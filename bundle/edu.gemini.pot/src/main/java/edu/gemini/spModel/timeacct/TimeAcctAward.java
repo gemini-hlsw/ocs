@@ -11,6 +11,8 @@ import java.util.Objects;
 public final class TimeAcctAward implements Serializable {
     public static final TimeAcctAward ZERO = new TimeAcctAward(Duration.ZERO, Duration.ZERO);
 
+    private static final long MS_PER_HOUR = Duration.ofHours(1).toMillis();
+
     private final Duration programAward;
     private final Duration partnerAward;
 
@@ -46,7 +48,7 @@ public final class TimeAcctAward implements Serializable {
     // Convenience method to provide total award converted to hours.
     public double getTotalHours() {
         final long ms = getTotalAward().toMillis();
-        return ((double) ms) / 3600000.0;
+        return ((double) ms) / MS_PER_HOUR;
     }
 
     public TimeAcctAward plus(TimeAcctAward that) {
