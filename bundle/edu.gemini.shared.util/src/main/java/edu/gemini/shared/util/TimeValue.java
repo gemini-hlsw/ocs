@@ -112,7 +112,7 @@ public final class TimeValue implements Cloneable, Comparable<TimeValue>, Serial
     /**
      * Constructs with the given number of milliseconds and units.
      */
-    public TimeValue(long milliseconds, Units timeUnits) {
+    private TimeValue(long milliseconds, Units timeUnits) {
         _milliseconds = milliseconds;
         _units        = timeUnits;
     }

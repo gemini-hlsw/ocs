@@ -863,7 +863,7 @@ public class SPProgram extends AbstractDataObject implements ISPStaffOnlyFieldPr
      */
     public TimeValue getAwardedTime() {
         if (_timeAllocation == null) return new TimeValue(0, TimeValue.Units.hours);
-        return new TimeValue(_timeAllocation.getSum().getTotalAward().toMillis(), TimeValue.Units.hours);
+        return TimeValue.millisecondsToTimeValue(_timeAllocation.getSum().getTotalAward().toMillis(), TimeValue.Units.hours);
     }
 
     public TimeAcctAllocation getTimeAcctAllocation() {
@@ -1006,7 +1006,7 @@ public class SPProgram extends AbstractDataObject implements ISPStaffOnlyFieldPr
             // Write the awarded time (for GSA only -- will be ignored on
             // import)
             final double hrs = _timeAllocation.getSum().getTotalHours();
-            Pio.addParam(factory, paramSet, AWARDED_TIME_PROP, String.valueOf(hrs), "hours");
+            Pio.addParam(factory, paramSet, AWARDED_TIME_PROP, Double.toString(hrs), "hours");
         }
         if ((_minTimeValue != null) && (_minTimeValue.getTimeAmount() > 0)) {
             Pio.addParam(factory, paramSet, MINIMUM_TIME_PROP,

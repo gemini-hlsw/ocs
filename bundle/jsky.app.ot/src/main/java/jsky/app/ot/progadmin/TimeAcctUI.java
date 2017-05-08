@@ -142,7 +142,7 @@ final class TimeAcctUI extends JPanel {
         gbc.gridx     = 6;
         pan.add(new JLabel("Partner"), gbc);
 
-        // Time Accountig Allocation
+        // Time Accounting Allocation
         final int div = catA.length/2 + catA.length%2;
         for (int i=0; i<catA.length; ++i) {
             final TimeAcctCategory cat = catA[i];

@@ -27,6 +27,8 @@ import Scalaz._
  */
 object SpProgramFactory {
 
+  private val MsPerHour = Duration.ofHours(1).toMillis
+
   private val NGO_TIME_ACCT = Map(
     AR -> TimeAcctCategory.AR,
     AU -> TimeAcctCategory.AU,
@@ -202,7 +204,7 @@ object SpProgramFactory {
           val jmap = ratios.map { case (cat, rat) =>
             // REL-2928 TODO: handle splitting program and partner award.  Here
             // we just keep everything as the program award for now.
-            val ms    = ((hrs * rat) * 3600000).round // ms for this category
+            val ms    = ((hrs * rat) * MsPerHour).round // ms for this category
             val award = new TimeAcctAward(Duration.ofMillis(ms), Duration.ZERO)
             (cat, award)
           }.toMap.asJava
