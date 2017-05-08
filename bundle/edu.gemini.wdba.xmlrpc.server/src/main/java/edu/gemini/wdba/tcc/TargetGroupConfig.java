@@ -7,12 +7,10 @@ package edu.gemini.wdba.tcc;
 import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.shared.util.immutable.Option;
-import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.GuideProbeTargets;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,8 +21,8 @@ public final class TargetGroupConfig extends ParamSet {
     public static final String TYPE_VALUE="targetgroup";
 
     public static TargetGroupConfig createBaseGroup(final TargetEnvironment env) {
-        final ImList<SPTarget> targets = env.getUserTargets().cons(env.getBase());
-        return new TargetGroupConfig(TccNames.BASE, targets, ImOption.apply(env.getBase()));
+        final ImList<SPTarget> targets = env.getUserTargets().cons(env.getArbitraryTargetFromAsterism());
+        return new TargetGroupConfig(TccNames.BASE, targets, ImOption.apply(env.getArbitraryTargetFromAsterism()));
     }
 
     public static TargetGroupConfig createGuideGroup(final GuideProbeTargets gt) {

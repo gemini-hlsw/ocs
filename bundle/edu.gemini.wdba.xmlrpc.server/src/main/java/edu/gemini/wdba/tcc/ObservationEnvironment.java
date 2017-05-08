@@ -126,7 +126,7 @@ public final class ObservationEnvironment {
     }
 
     public String getBasePositionName() {
-        return _targetEnv.getBase().getName();
+        return _targetEnv.getArbitraryTargetFromAsterism().getName();
     }
 
     public boolean isNorth() {

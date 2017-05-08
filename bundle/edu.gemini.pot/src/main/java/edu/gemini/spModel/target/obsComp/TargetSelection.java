@@ -8,7 +8,6 @@ import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.GuideGroup;
 import edu.gemini.spModel.target.env.IndexedGuideGroup;
-import edu.gemini.spModel.target.env.IndexedGuideGroup$;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 
 import java.beans.PropertyChangeListener;
@@ -92,8 +91,8 @@ public final class TargetSelection {
             int idx = 0;
             final List<Selection> res = new ArrayList<>();
 
-            // TODO:ASTERISM: How do we handle multiples? For now just select the first target.
-            res.add(new NormalTargetSelection(idx++, env.getAsterism().allSpTargets().head()));
+            // TODO:ASTERISM: How do we handle multiples? For now just select the a random target.
+            res.add(new NormalTargetSelection(idx++, env.getArbitraryTargetFromAsterism()));
             for (final GuideGroup g : env.getGroups()) {
                 res.add(new GuideGroupSelection(idx++, g));
                 for (final SPTarget t : g.getTargets()) {

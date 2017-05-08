@@ -382,7 +382,7 @@ public class TpeGuidePosFeature extends TpePositionFeature
 
         // Get the base position.  If not found, give up.
         final TpePositionMap pm = TpePositionMap.getMap(_iw);
-        final Point2D.Double base = pm.getLocationFromTag(env.getBase());
+        final Point2D.Double base = pm.getLocationFromTag(env.getArbitraryTargetFromAsterism());
         if (base == null) return;
 
         // Set up for drawing.

@@ -73,7 +73,7 @@ public class TpeBasePosFeature extends TpePositionFeature {
         final TargetEnvironment env = getTargetEnvironment();
         if (env == null) return;
 
-        final Point2D.Double base = pm.getLocationFromTag(env.getBase());
+        final Point2D.Double base = pm.getLocationFromTag(env.getArbitraryTargetFromAsterism());
         if (base == null) return;
 
         final int r = MARKER_SIZE;
@@ -93,7 +93,7 @@ public class TpeBasePosFeature extends TpePositionFeature {
         if (env == null) return None.instance();
 
         final TpePositionMap pm = TpePositionMap.getMap(_iw);
-        final PosMapEntry<SPTarget> pme = pm.getPositionMapEntry(env.getBase());
+        final PosMapEntry<SPTarget> pme = pm.getPositionMapEntry(env.getArbitraryTargetFromAsterism());
         if (pme != null && positionIsClose(pme, tme.xWidget, tme.yWidget)) {
             _dragObject = pme;
             return new Some<>(pme.taggedPos);
