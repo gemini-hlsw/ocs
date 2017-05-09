@@ -47,11 +47,11 @@ sealed trait ItcPanel extends GridBagPanel {
   def display: Component
   def visibleFor(t: SPComponentType): Boolean
 
-  /** TODO: we need to display a list of asterism members and let the user select one. For now we
+  /** TODO:ASTERISM: we need to display a list of asterism members and let the user select one. For now we
     * just select the first target in the asterism.
     */
   def selectedTarget: Option[Target] =
-    Option(owner.getContextTargetEnv).map(_.getAsterism.allTargets.head)
+    Option(owner.getContextTargetEnv).map(_.getArbitraryTargetFromAsterism.getTarget)
 
   private val conditionsPanel        = new ConditionsPanel(owner)
   private val aperturePanel          = new AnalysisApertureMethodPanel(owner)
@@ -313,4 +313,3 @@ private class ItcChartsPanel(table: ItcSpectroscopyTable) extends GridBagPanel {
   }
 
 }
-

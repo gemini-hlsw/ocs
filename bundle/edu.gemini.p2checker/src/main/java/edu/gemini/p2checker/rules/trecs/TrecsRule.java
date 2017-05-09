@@ -330,7 +330,7 @@ public class TrecsRule implements IRule {
 
               // We only consider the first science target because a multi-target asterism is
               // a configuration error that will raise a further P2 warning.
-              SPTarget baseTarget = env.getArbitraryTargetFromAsterism();
+              SPTarget baseTarget = env.getAsterism().allSpTargets().head();
 
               for (GuideProbeTargets guideTargets : env.getPrimaryGuideGroup()) {
                     for (SPTarget target : guideTargets) {

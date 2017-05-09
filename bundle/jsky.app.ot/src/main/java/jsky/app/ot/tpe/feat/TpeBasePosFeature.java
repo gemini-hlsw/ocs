@@ -55,8 +55,8 @@ public class TpeBasePosFeature extends TpePositionFeature {
 
         final TargetObsComp obsComp = getTargetObsComp();
         if (obsComp != null) {
-            // TODO: handle multiple targets
-            final PosMapEntry<SPTarget> pme = pm.getPositionMapEntry(obsComp.getAsterism().allSpTargets().head());
+            // TODO:ASTERISM: handle multiple targets
+            final PosMapEntry<SPTarget> pme = pm.getPositionMapEntry(obsComp.getArbitraryTargetFromAsterism());
             if ((pme != null) && (positionIsClose(pme, x, y)) && getContext().targets().shell().isDefined()) {
                 TargetSelection.setTargetForNode(getContext().targets().envOrNull(), getContext().targets().shell().get(), pme.taggedPos);
                 return pme.taggedPos;
@@ -123,4 +123,3 @@ public class TpeBasePosFeature extends TpePositionFeature {
         return true;
     }
 }
-

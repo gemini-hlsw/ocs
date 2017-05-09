@@ -77,8 +77,8 @@ final class TargetContext(obs: Option[ISPObservation]) extends TpeSubContext[ISP
 
   def envOrDefault: TargetEnvironment = env.getOrElse(TargetEnvironment.create(baseOrDefault))
 
-  // TODO: deal with multi-target asterisms
-  def base: Option[SPTarget] = env.map(_.getAsterism.allSpTargets.head)
+  // TODO:ASTERISM: deal with multi-target asterisms
+  def base: Option[SPTarget] = env.map(_.getArbitraryTargetFromAsterism)
 
   def baseOrNull: SPTarget = base.orNull
 
