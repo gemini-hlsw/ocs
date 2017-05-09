@@ -1,4 +1,4 @@
-package edu.gemini.spModel.io.impl.migration.to2017B
+package edu.gemini.spModel.io.impl.migration.to2018A
 
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.spModel.core.{Coordinates, Ephemeris}
@@ -18,9 +18,9 @@ import edu.gemini.spModel.target.env.Asterism
 import scalaz._
 import Scalaz._
 
-object To2017B extends Migration {
+object To2018A extends Migration {
 
-  val version = Version.`match`("2017B-1")
+  val version = Version.`match`("2018A-1")
 
   val conversions: List[Document => Unit] =
     List(targetToAsterism)

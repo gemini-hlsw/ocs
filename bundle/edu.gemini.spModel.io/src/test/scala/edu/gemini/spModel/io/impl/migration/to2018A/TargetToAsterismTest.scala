@@ -1,4 +1,4 @@
-package edu.gemini.spModel.io.impl.migration.to2017B
+package edu.gemini.spModel.io.impl.migration.to2018A
 
 import edu.gemini.spModel.target.env.Asterism
 import edu.gemini.spModel.core._
