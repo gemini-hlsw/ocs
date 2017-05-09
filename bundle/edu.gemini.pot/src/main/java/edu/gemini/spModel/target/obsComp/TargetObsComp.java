@@ -94,6 +94,10 @@ public final class TargetObsComp extends AbstractDataObject implements GuideProb
       return getTargetEnvironment().getAsterism();
     }
 
+    @Deprecated SPTarget getArbitraryTargetFromAsterism() {
+      return getTargetEnvironment.getArbitraryTargetFromAsterism();
+    }
+
     /**
      * Set the TargetEnvironment.
      */
