@@ -1,19 +1,13 @@
-package edu.gemini.spModel.io.impl.migration.to2017B
+package edu.gemini.spModel.io.impl.migration.to2018A
 
 import edu.gemini.spModel.io.PioSyntax._
 import edu.gemini.spModel.io.impl.SpIOTags
 import edu.gemini.spModel.io.impl.migration.Migration
 import edu.gemini.spModel.pio.xml.PioXmlFactory
 
-import edu.gemini.spModel.pio.{Pio, Document, Version}
+object To2018A extends Migration {
 
-import scalaz._, Scalaz._
-
-/** 2017B Migration.
- */
-object To2017B extends Migration {
-
-  val version = Version.`match`("2017B-1")
+  val version = Version.`match`("2018A-1")
 
   val conversions: List[Document => Unit] =
     List(targetToAsterism)
