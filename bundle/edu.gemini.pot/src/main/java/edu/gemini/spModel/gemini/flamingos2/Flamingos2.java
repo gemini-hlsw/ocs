@@ -125,7 +125,7 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
     /**
      * Filters
      */
-    public enum Filter implements DisplayableSpType, SequenceableSpType, LoggableSpType {
+    public enum Filter implements DisplayableSpType, SequenceableSpType, LoggableSpType, ObsoletableSpType {
 
         OPEN("Open", "Open", new Some<>(1.6)),
         Y("Y (1.02 um)", "Y", new Some<>(1.02)),
@@ -140,7 +140,11 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         K_RED("K-red (2.31 um)", "K-red", new Some<>(2.31)),
         JH("JH (spectroscopic)", "JH", new Some<>(1.39)),
         HK("HK (spectroscopic)", "HK", new Some<>(1.871)),
-        DARK("Dark", "Dark", None.DOUBLE);
+        DARK("Dark", "Dark", None.DOUBLE) {
+            @Override public boolean isObsolete() {
+                return true;
+            }
+        };
 
         /** The default Filter value **/
         public static final Filter DEFAULT = OPEN;

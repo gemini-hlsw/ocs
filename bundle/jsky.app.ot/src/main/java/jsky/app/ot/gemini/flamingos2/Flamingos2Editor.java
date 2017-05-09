@@ -438,7 +438,11 @@ public class Flamingos2Editor extends ComponentEditor<ISPObsComponent, Flamingos
 
         ++row;
 
-        filterCtrl = ComboPropertyCtrl.enumInstance(Flamingos2.FILTER_PROP);
+        // REL-3031: changed so that obsolete items are respected.
+        // filterCtrl = ComboPropertyCtrl.enumInstance(Flamingos2.FILTER_PROP);
+        filterCtrl = new ComboPropertyCtrl(
+                Flamingos2.FILTER_PROP,
+                SpTypeUtil.getSelectableItems((Class<Flamingos2.Filter>) Flamingos2.FILTER_PROP.getPropertyType()).toArray());
         addCtrl(pan, leftLabelCol, row, filterCtrl);
 
         // Position Angle
