@@ -36,7 +36,6 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
      *
      * @param base the science or main target for the observation
      */
-    @Deprecated
     public static TargetEnvironment create(SPTarget base) {
         return create(new Asterism.Single(base));
     }
