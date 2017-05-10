@@ -600,13 +600,13 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
             _ctx.instrument().get().removePropertyChangeListener(this);
         }
 
-        if (_ctx.targets().base().isDefined()) {
-            _ctx.targets().base().get().deleteWatcher(this);
+        if (_ctx.targets().asterism().isDefined()) {
+            _ctx.targets().asterism().get().allSpTargetsJava().foreach(a -> a.deleteWatcher(this));
         }
 
         _ctx = ctx;
 
-        if (_ctx.targets().base().isEmpty()) {
+        if (_ctx.targets().asterism().isEmpty()) {
             // There is no target to view, but we need to update the image
             // widgets with new WCS info.
             clear();
@@ -623,10 +623,11 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
             setPosAngle(_ctx.instrument().get().getPosAngleDegrees());
         }
 
-        if (_ctx.targets().base().isDefined()) {
-            final SPTarget base = _ctx.targets().base().get();
-            base.addWatcher(this);
-            basePosUpdate(base);
+        if (_ctx.targets().asterism().isDefined()) {
+            for (final SPTarget base: _ctx.targets().asterism().get().allSpTargetsJava()) {
+              base.addWatcher(this);
+              basePosUpdate(base); // oops, this happens N times. now what?
+            }
         }
 
         repaint();

@@ -11,6 +11,7 @@ import edu.gemini.spModel.gemini.seqcomp.SeqRepeatOffset;
 import edu.gemini.spModel.guide.GuideProbeAvailabilityVolatileDataObject;
 import edu.gemini.spModel.obs.SPObservation;
 import edu.gemini.spModel.target.SPTarget;
+import edu.gemini.spModel.target.env.Asterism;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.target.obsComp.TargetSelection;
 import edu.gemini.spModel.target.offset.OffsetPosSelection;
@@ -226,12 +227,12 @@ public final class TelescopePosEditor implements TpeMouseObserver {
     private void loadImage() {
         final double ra;
         final double dec;
-        SPTarget tp = _ctx.targets().baseOrNull();
-        if (tp != null) {
+        Asterism asterism = _ctx.targets().asterismOrNull();
+        if (asterism != null) {
             // Get the RA and Dec from the pos list.
             final Option<Long> when = _ctx.schedulingBlockStartJava();
-            ra = tp.getRaDegrees(when).getOrElse(0.0);
-            dec = tp.getDecDegrees(when).getOrElse(0.0);
+            ra  = asterism.getRaDegrees (when).getOrElse(0.0);
+            dec = asterism.getDecDegrees(when).getOrElse(0.0);
         } else {
             ra  = 0.0;
             dec = 0.0;
@@ -281,7 +282,7 @@ public final class TelescopePosEditor implements TpeMouseObserver {
         if (_ctx.isEmpty()) {
             _iw.clear();
         } else {
-            if (_ctx.targets().base().isEmpty()) {
+            if (_ctx.targets().asterism().isEmpty()) {
                 _iw.clear();
             } else {
                 loadImage();
@@ -313,9 +314,8 @@ public final class TelescopePosEditor implements TpeMouseObserver {
      * @throws CatalogException if a Catalog Problem is found
      */
     void getSkyImage(final TpeContext ctx) throws IOException, CatalogException {
-        final SPTarget _baseTarget = ctx.targets().baseOrNull();
-        if (_baseTarget == null) return;
-        BackgroundImageLoader.loadImageOnTheTpe(ctx);
+        if (ctx.targets().isDefined())
+          BackgroundImageLoader.loadImageOnTheTpe(ctx);
     }
 
     /**

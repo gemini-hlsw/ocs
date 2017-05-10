@@ -180,9 +180,9 @@ object BackgroundImageLoader {
   private def requestedImage(tpe: TpeContext): Option[TargetImageRequest] =
     for {
       ctx    <- tpe.obsContext
-      base   <- tpe.targets.base
-      when   = ctx.getSchedulingBlockStart.asScalaOpt | Instant.now.toEpochMilli
-      coords <- base.getTarget.coords(when)
+      ast    <- tpe.targets.asterism
+      when   = ctx.getSchedulingBlockStart.asScalaOpt.map(ms => Instant.ofEpochMilli(ms.toLong))
+      coords <- ast.basePosition(when orElse Some(Instant.now))
       key    <- tpe.obsKey
       site   = Option(ObserverPreferences.fetch.observingSite())
     } yield TargetImageRequest(key, coords, ObsWavelengthExtractor.extractObsWavelength(tpe), site)
