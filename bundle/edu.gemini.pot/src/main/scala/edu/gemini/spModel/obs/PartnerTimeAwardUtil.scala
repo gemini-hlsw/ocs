@@ -24,20 +24,24 @@ import scala.collection.JavaConverters._
   * pre-2017B program in the queue this code can be deleted.
   */
 object PartnerTimeAwardUtil {
-  private val Log = Logger.getLogger(PartnerTimeAwardUtil.getClass.getName)
 
   /** Sets the partner time award to the executed partner time amount in the
     * given program.
     */
-  def setPartnerAwardToExecuted(prog: ISPProgram): Unit = {
+  def setPartnerAwardToExecuted(prog: ISPProgram, log: Logger): Unit = {
 
     // Distributes amt over all the map keys as close to the given ratios as
     // possible, but ensuring that the sum of all the values is amt.
     def distribute[A](amt: Long, ratios: Map[A, Double]): Map[A, Long] = {
-      val proportions = ratios.map { case (a, r) =>
-        val f = amt * r
-        (a, f.floor.toLong, f - f.floor)
-      }.toList
+
+      // For each entry in the ratios map, compute (the floor of) the proportion
+      // of amt to assign along with any fractional part left over.  We'll use
+      // the fractional part later to decide which values to round up.
+      val proportions: List[(A, Long, Double)] =
+        ratios.map { case (a, r) =>
+          val f = amt * r
+          (a, f.floor.toLong, f - f.floor)
+        }.toList
 
       val sum    = proportions.map(_._2).sum
       val error  = (amt - sum).toInt // how many values need to be incremented
@@ -59,8 +63,6 @@ object PartnerTimeAwardUtil {
     // Distributes the given executed partner time amount over the partner
     // award according to its awarded program time ratio.
     def updatePartnerAward(executedPartnerTime: Long): Unit = {
-      Log.info(s"Updating awarded partner time for ${prog.getProgramID} to ${Duration.ofMillis(executedPartnerTime)}")
-
       // We need to use the executedPartnerTime as the partner award.  To do so,
       // we should distribute that time amount across the various partners
       // supporting the program. We will use the same proportion as the awarded
@@ -89,9 +91,16 @@ object PartnerTimeAwardUtil {
     // Update only if there is awarded program time (otherwise we're looking at
     // an engineering or calibration program or something) and if the executed
     // partner time differs from the awarded partner time.
-    if (awardedProgramTime != 0) {
+    if (awardedProgramTime == 0) {
+      log.fine(s"Skipping ${prog.getProgramID} because it has no awarded time.")
+    } else {
       val exec = ObsTimesService.getCorrectedObsTimes(prog).getTimeCharges.getTime(PARTNER)
-      if (exec != awardedPartnerTime) updatePartnerAward(exec)
+      if (exec == awardedPartnerTime) {
+        log.fine(s"Skipping ${prog.getProgramID} because it is already up-to-date.")
+      } else {
+        log.info(s"Updating awarded partner time for ${prog.getProgramID} to ${Duration.ofMillis(exec)}")
+        updatePartnerAward(exec)
+      }
     }
   }
 }

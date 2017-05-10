@@ -20,7 +20,7 @@ object PartnerTimeAwardCron {
     val odb    = ctx.getService(odbRef)
 
     logger.log(Level.INFO, "Start PartnerTimeAwardCron")
-    PartnerTimeAwardFunctor.query(odb, user)
+    PartnerTimeAwardFunctor.query(odb, user, logger)
     logger.log(Level.INFO, "End PartnerTimeAwardCrong")
   }
 }

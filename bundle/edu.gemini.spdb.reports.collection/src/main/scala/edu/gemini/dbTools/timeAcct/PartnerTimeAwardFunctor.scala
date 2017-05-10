@@ -8,6 +8,7 @@ import edu.gemini.spModel.rich.core._
 
 import java.security.Principal
 import java.util.{Set => JSet}
+import java.util.logging.Logger
 
 
 /** A functor that will set the partner time award to the amount of executed
@@ -15,8 +16,8 @@ import java.util.{Set => JSet}
   * pre-2017B programs, this code can be removed.
   */
 object PartnerTimeAwardFunctor {
-  def query(db: IDBDatabaseService, users: JSet[Principal]): Unit =
-    db.getQueryRunner(users).queryPrograms(new PartnerTimeAwardFunctor)
+  def query(db: IDBDatabaseService, users: JSet[Principal], logger: Logger): Unit =
+    db.getQueryRunner(users).queryPrograms(new PartnerTimeAwardFunctor(logger))
 
   val sem2017B = new Semester(2017, Semester.Half.B)
 
@@ -27,13 +28,13 @@ object PartnerTimeAwardFunctor {
     Option(p.getProgramID).flatMap(pid => ProgramId.parse(pid.stringValue).semester).exists(_ < sem2017B)
 }
 
-private class PartnerTimeAwardFunctor extends DBAbstractQueryFunctor {
+private class PartnerTimeAwardFunctor(logger: Logger) extends DBAbstractQueryFunctor {
 
   import PartnerTimeAwardFunctor._
 
   override def execute(db: IDBDatabaseService, node: ISPNode, principals: JSet[Principal]): Unit =
     node match {
-      case p: ISPProgram if isPre2017B(p) => PartnerTimeAwardUtil.setPartnerAwardToExecuted(p)
+      case p: ISPProgram if isPre2017B(p) => PartnerTimeAwardUtil.setPartnerAwardToExecuted(p, logger)
       case _                              => // do nothing
     }
 }
