@@ -55,12 +55,13 @@ public class TpeBasePosFeature extends TpePositionFeature {
 
         final TargetObsComp obsComp = getTargetObsComp();
         if (obsComp != null) {
-            // TODO:ASTERISM: handle multiple targets
-            final PosMapEntry<SPTarget> pme = pm.getPositionMapEntry(obsComp.getArbitraryTargetFromAsterism());
-            if ((pme != null) && (positionIsClose(pme, x, y)) && getContext().targets().shell().isDefined()) {
-                TargetSelection.setTargetForNode(getContext().targets().envOrNull(), getContext().targets().shell().get(), pme.taggedPos);
-                return pme.taggedPos;
-            }
+            for (final SPTarget spt: obsComp.getAsterism().allSpTargetsJava()) {
+              final PosMapEntry<SPTarget> pme = pm.getPositionMapEntry(spt);
+              if ((pme != null) && (positionIsClose(pme, x, y)) && getContext().targets().shell().isDefined()) {
+                  TargetSelection.setTargetForNode(getContext().targets().envOrNull(), getContext().targets().shell().get(), pme.taggedPos);
+                  return pme.taggedPos;
+              }
+          }
         }
         return null;
     }
@@ -73,17 +74,19 @@ public class TpeBasePosFeature extends TpePositionFeature {
         final TargetEnvironment env = getTargetEnvironment();
         if (env == null) return;
 
-        final Point2D.Double base = pm.getLocationFromTag(env.getArbitraryTargetFromAsterism());
-        if (base == null) return;
+        for (final SPTarget spt: env.getAsterism().allSpTargetsJava()) {
+          final Point2D.Double base = pm.getLocationFromTag(spt);
+          if (base == null) continue;
 
-        final int r = MARKER_SIZE;
-        final int d = 2 * r;
+          final int r = MARKER_SIZE;
+          final int d = 2 * r;
 
-        // Draw crosshairs
-        g.setColor(Color.yellow);
-        g.drawOval((int) (base.x - r), (int) (base.y - r), d, d);
-        g.drawLine((int) base.x, (int) (base.y - r), (int) base.x, (int) (base.y + r));
-        g.drawLine((int) (base.x - r), (int) base.y, (int) (base.x + r), (int) base.y);
+          // Draw crosshairs
+          g.setColor(Color.yellow);
+          g.drawOval((int) (base.x - r), (int) (base.y - r), d, d);
+          g.drawLine((int) base.x, (int) (base.y - r), (int) base.x, (int) (base.y + r));
+          g.drawLine((int) (base.x - r), (int) base.y, (int) (base.x + r), (int) base.y);
+        }
     }
 
     /**
@@ -93,10 +96,13 @@ public class TpeBasePosFeature extends TpePositionFeature {
         if (env == null) return None.instance();
 
         final TpePositionMap pm = TpePositionMap.getMap(_iw);
-        final PosMapEntry<SPTarget> pme = pm.getPositionMapEntry(env.getArbitraryTargetFromAsterism());
-        if (pme != null && positionIsClose(pme, tme.xWidget, tme.yWidget)) {
-            _dragObject = pme;
-            return new Some<>(pme.taggedPos);
+        // find any asterism member close to the drag target
+        for (final SPTarget spt: env.getAsterism().allSpTargetsJava()) {
+          final PosMapEntry<SPTarget> pme = pm.getPositionMapEntry(spt);
+          if (pme != null && positionIsClose(pme, tme.xWidget, tme.yWidget)) {
+              _dragObject = pme;
+              return new Some<>(pme.taggedPos);
+          }
         }
 
         return None.instance();
