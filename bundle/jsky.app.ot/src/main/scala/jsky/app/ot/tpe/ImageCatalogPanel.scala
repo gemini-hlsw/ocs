@@ -169,9 +169,9 @@ final class ImageCatalogPanel(imageDisplay: CatalogImageDisplay) {
     val catalogButtonsUpdate = for {
         tpe    <- tpeContext
         ctx    <- tpe.obsContext
-        base   <- tpe.targets.base
-        when   = ctx.getSchedulingBlockStart.asScalaOpt | Instant.now.toEpochMilli
-        coords <- base.getTarget.coords(when)
+        ast    <- tpe.targets.asterism
+        when   = ctx.getSchedulingBlockStart.asScalaOpt.map(a => Instant.ofEpochMilli(a.toLong))
+        coords <- ast.basePosition(when orElse Some(Instant.now))
        } yield KnownImagesSets.cataloguesInUse(coords).map(showAsLoading)
 
     catalogButtonsUpdate.sequenceU
