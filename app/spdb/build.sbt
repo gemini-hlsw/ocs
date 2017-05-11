@@ -79,7 +79,7 @@ def common(version: Version) = AppConfig(
     "edu.gemini.services.telescope.schedule.url.north" -> "https://www.google.com/calendar/embed?src=m882dsr2asoddjcte5250lvn6c%40group.calendar.google.com",
     "edu.gemini.services.telescope.schedule.id.south"  -> "aiv4b2forl2gaovsu8na39vs5s@group.calendar.google.com",
     "edu.gemini.services.telescope.schedule.url.south" -> "https://www.google.com/calendar/embed?src=aiv4b2forl2gaovsu8na39vs5s%40group.calendar.google.com",
-    "edu.gemini.smartgcal.host"                        -> "gsodbtest2",
+    "edu.gemini.smartgcal.host"                        -> "gsodbtest",
     "edu.gemini.smartgcal.svnRootUrl"                  -> "http://source.gemini.edu/gcal/branches/development/calibrations",
     "edu.gemini.smartgcal.updateInterval"              -> "7200",
     "edu.gemini.spdb.mode"                             -> "local",
@@ -424,7 +424,7 @@ def odbtest(version: Version) = AppConfig(
   props = Map(
     "edu.gemini.auxfile.root"                    -> "/home/software/ugemini/auxfile",
     "edu.gemini.dbTools.archive.directory"       -> "/home/software/ugemini/spdb/spdb.archive",
-    "edu.gemini.dbTools.tcs.ephemeris.directory" -> "/gemsoft/var/ephemerides",
+    "edu.gemini.dbTools.tcs.ephemeris.directory" -> "/home/software/ugemini/ephemerides",
     "edu.gemini.smartgcal.svnRootUrl"            -> "http://source.gemini.edu/gcal/branches/development/calibrations",
     "edu.gemini.spdb.dir"                        -> "/home/software/ugemini/spdb/spdb.active",
     "edu.gemini.util.trpc.name"                  -> "Gemini ODB (Test)"
@@ -475,7 +475,7 @@ def gnodbtest(version: Version) = AppConfig(
     "edu.gemini.dataman.gsa.summit.host" -> "mkofits-lv1new.hi.gemini.edu",
     "edu.gemini.oodb.mail.smtpHost"      -> "smtp.hi.gemini.edu",
     "edu.gemini.util.trpc.name"          -> "Gemini North ODB (Test)",
-    "osgi.shell.telnet.ip"               -> "10.1.5.83"
+    "osgi.shell.telnet.ip"               -> "10.1.5.36"
   )
 ) extending List(odbtest(version), gnodbtest_credentials(version))
 
@@ -541,10 +541,10 @@ def gsodbtest(version: Version) = AppConfig(
     "edu.gemini.auxfile.fits.dest"       -> "/gemsoft/var/data/ictd/test/GS@SEMESTER@/@PROG_ID@",
     "edu.gemini.auxfile.fits.host"       -> "gsconfig.gemini.edu",
     "edu.gemini.auxfile.other.dest"      -> "/gemsoft/var/data/finder/GSqueue/Finders-Test/@SEMESTER@/@PROG_ID@",
-    "edu.gemini.dataman.gsa.summit.host" -> "cpofits-lv1new.cl.gemini.edu",
+    "edu.gemini.dataman.gsa.summit.host" -> "cpofits-lv1.cl.gemini.edu",
     "edu.gemini.oodb.mail.smtpHost"      -> "smtp.cl.gemini.edu",
     "edu.gemini.util.trpc.name"          -> "Gemini South ODB (Test)",
-    "osgi.shell.telnet.ip"               -> "172.17.55.81"
+    "osgi.shell.telnet.ip"               -> "172.17.55.77"
   )
 ) extending List(odbtest(version), gsodbtest_credentials(version))
 
@@ -573,6 +573,6 @@ def gsodb(version: Version) = AppConfig(
   bundles = List(
     BundleSpec(50, "edu.gemini.smartgcal.servlet", version)
   )
-) extending List(odbproduction(version), gsodbtest_credentials(version))
+) extending List(odbproduction(version), gsodb_credentials(version))
 
 
