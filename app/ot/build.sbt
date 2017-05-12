@@ -78,8 +78,8 @@ def common(version: Version) = AppConfig(
 def with_test_dbs(version: Version) = AppConfig(
   id = "with-test-dbs",
   props = Map(
-    "edu.gemini.util.trpc.peer.GN" -> "gnodbtest2.gemini.edu:8443:Gemini North ODB (Test)",
-    "edu.gemini.util.trpc.peer.GS" -> "gsodbtest2.gemini.edu:8443:Gemini South ODB (Test)"
+    "edu.gemini.util.trpc.peer.GN" -> "gnodbtest.gemini.edu:8443:Gemini North ODB (Test)",
+    "edu.gemini.util.trpc.peer.GS" -> "gsodbtest.gemini.edu:8443:Gemini South ODB (Test)"
   )
 ) extending List(common(version))
 
@@ -161,7 +161,7 @@ def windows_test(version: Version) = AppConfig(
   props = Map(
     "felix.security.defaultpolicy" -> "true"
   ),
-  icon = Some(file("app/ot/dist/Windows/OT.ico")) // TODO
+  icon = Some(file("app/ot/dist/Windows/OT.ico"))
 ) extending List(with_test_dbs(version))
 
 // WINDOWS
