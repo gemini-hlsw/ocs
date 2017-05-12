@@ -104,6 +104,10 @@ trait Asterism {
 
 object Asterism {
 
+  /** Construct a single-target Asterism with a [new] default "zero" SPTarget. */
+  def zero: Asterism =
+    Single(new SPTarget)
+
   // N.B. most members must be defs because `t` is mutable.
   final case class Single(t: SPTarget) extends Asterism {
     override def allSpTargets = NonEmptyList(t) // def because Nel isn't serializable

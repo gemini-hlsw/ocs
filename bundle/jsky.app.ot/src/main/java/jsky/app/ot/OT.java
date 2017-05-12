@@ -26,6 +26,7 @@ import jsky.app.ot.modelconfig.GemsConfig;
 import jsky.app.ot.modelconfig.ModelConfig;
 import jsky.app.ot.too.TooPoll;
 import jsky.app.ot.tpe.TelescopePosEditor;
+import jsky.app.ot.tpe.feat.TpeAsterismFeature;
 import jsky.app.ot.userprefs.observer.ObservingPeer;
 import jsky.app.ot.userprefs.observer.ObservingSite;
 import jsky.util.gui.Resources;
@@ -199,7 +200,7 @@ public final class OT {
         // Note that the order of the buttons in the position editor toolbar
         // will correspond to the order in which the features are registered.
         final Class<?>[] features = new Class<?>[]{
-                jsky.app.ot.tpe.feat.TpeBasePosFeature.class,
+                TpeAsterismFeature.class,
                 jsky.app.ot.tpe.feat.TpeEphemerisFeature.class,
                 jsky.app.ot.tpe.feat.TpeGuidePosFeature.class,
                 jsky.app.ot.tpe.feat.TpeTargetPosFeature.class,
