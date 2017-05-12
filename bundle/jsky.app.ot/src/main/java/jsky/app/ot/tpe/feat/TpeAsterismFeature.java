@@ -12,13 +12,11 @@ import jsky.app.ot.tpe.*;
 import java.awt.*;
 import java.awt.geom.Point2D;
 
-public class TpeBasePosFeature extends TpePositionFeature {
+// TODO:ASTERISM: Draw base position … right now we only draw the targets
+public class TpeAsterismFeature extends TpePositionFeature {
 
-    /**
-     * Construct the feature with its name and description.
-     */
-    public TpeBasePosFeature() {
-        super("Base", "Show the location of the base position.");
+    public TpeAsterismFeature() {
+        super("Asterism", "Show the science target asterism.");
     }
 
     public void reinit(TpeImageWidget iw, TpeImageInfo tii) {
@@ -26,19 +24,17 @@ public class TpeBasePosFeature extends TpePositionFeature {
 
         // Tell the position map that the base position is visible.
         TpePositionMap pm = TpePositionMap.getMap(iw);
-        pm.setFindBase(true);
+        pm.setFindAsterism(true);
     }
 
     public void unloaded() {
         // Tell the position map that the base position is no longer visible.
         TpePositionMap pm = TpePositionMap.getExistingMap();
-        if (pm != null) pm.setFindBase(false);
+        if (pm != null) pm.setFindAsterism(false);
 
         super.unloaded();
     }
 
-    /**
-     */
     public boolean erase(final TpeMouseEvent tme) {
         // You can't erase the base position
         return false;
@@ -66,8 +62,6 @@ public class TpeBasePosFeature extends TpePositionFeature {
         return null;
     }
 
-    /**
-     */
     public void draw(final Graphics g, final TpeImageInfo tii) {
         final TpePositionMap pm = TpePositionMap.getMap(_iw);
 

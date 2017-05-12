@@ -80,6 +80,8 @@ final class TargetContext(obs: Option[ISPObservation]) extends TpeSubContext[ISP
 
   def asterismOrNull: Asterism = asterism.orNull // can't call this from Java, so we provide it
 
+  def asterismOrZero: Asterism = asterism.getOrElse(Asterism.single(new SPTarget()))
+
   def selected: Option[SPTarget] = for {
     s <- shell
     e <- env
