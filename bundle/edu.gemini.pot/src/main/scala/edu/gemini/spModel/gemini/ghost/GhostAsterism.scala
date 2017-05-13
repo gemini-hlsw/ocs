@@ -1,8 +1,11 @@
 package edu.gemini.spModel.gemini.ghost
 
 import edu.gemini.spModel.core.{Coordinates, Magnitude, MagnitudeBand, MagnitudeSystem, Offset}
+import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.CloudCover
+import CloudCover.{PERCENT_70 => CC70, PERCENT_80 => CC80, PERCENT_90 => CC90, ANY => CCAny}
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.env.Asterism
+
 
 import java.time.{Duration, Instant}
 
@@ -79,13 +82,30 @@ object GhostAsterism {
     private def guideFiberState(t: GhostTarget, cutoff: Magnitude): GuideFiberState =
       t.explicitGuideFiberState | defaultGuideFiberState(t, cutoff)
 
-    /** Computes the GuideFiberState for the given target in standard resolution mode. */
-    def standardResGuideFiberState(t: GhostTarget): GuideFiberState =
-      guideFiberState(t, StandardResCutoff)
+    // Adjusts a star magnitude based on cloud cover.  The more cloud cover,
+    // brighter the target magnitude required.  These are the same rules used
+    // by AGS but they are buried in edu.gemini.catalog.api where we can't get
+    // to them.  TODO: extract the adjustments from there into SPSiteQuality so
+    // that they can be shared?
+    private def adjustedMagnitude(m: Magnitude, cc: CloudCover): Magnitude =
+      cc match {
+        case CC70         => m.add(-0.3)
+        case CC80         => m.add(-1.0)
+        case CC90 | CCAny => m.add(-3.0)
+        case _            => m
+      }
 
-    /** Computes the GuideFiberState for the given target in high resolution mode. */
-    def highResGuideFiberState(t: GhostTarget): GuideFiberState =
-      guideFiberState(t, HighResCutoff)
+    /** Computes the GuideFiberState for the given target and cloud cover in
+      * standard resolution mode.
+      */
+    def standardResGuideFiberState(t: GhostTarget, cc: CloudCover): GuideFiberState =
+      guideFiberState(t, adjustedMagnitude(StandardResCutoff, cc))
+
+    /** Computes the GuideFiberState for the given target and cloud cover in
+      * high resolution mode.
+      */
+    def highResGuideFiberState(t: GhostTarget, cc: CloudCover): GuideFiberState =
+      guideFiberState(t, adjustedMagnitude(HighResCutoff, cc))
   }
 
 
@@ -201,11 +221,11 @@ object GhostAsterism {
         case Faint | VeryFaint => YBinning.Four
       }
 
-    def ifu1GuideFiberState: GuideFiberState =
-      GhostTarget.standardResGuideFiberState(ifu1)
+    def ifu1GuideFiberState(cc: CloudCover): GuideFiberState =
+      GhostTarget.standardResGuideFiberState(ifu1, cc)
 
-    def ifu2GuideFiberState: GuideFiberState =
-      GhostTarget.standardResGuideFiberState(ifu2)
+    def ifu2GuideFiberState(cc: CloudCover): GuideFiberState =
+      GhostTarget.standardResGuideFiberState(ifu2, cc)
   }
 
 
@@ -254,8 +274,8 @@ object GhostAsterism {
       * object. For the IFU observing a sky position, GuideFiberState is always
       * disabled.
       */
-    def guideFiberState: GuideFiberState =
-      GhostTarget.standardResGuideFiberState(target)
+    def guideFiberState(cc: CloudCover): GuideFiberState =
+      GhostTarget.standardResGuideFiberState(target, cc)
 
     // Calculate the diametrically opposed position, assuming we know where
     // the target is.
@@ -381,7 +401,7 @@ object GhostAsterism {
     /** Deterimines the guide fiber state for the HRIFU1.  Typically this will
       * be enabled since the target is bright but may be explicitly turned off.
       */
-    def guideFiberState: GuideFiberState =
-      GhostTarget.highResGuideFiberState(target)
+    def guideFiberState(cc: CloudCover): GuideFiberState =
+      GhostTarget.highResGuideFiberState(target, cc)
   }
 }
