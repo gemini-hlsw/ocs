@@ -156,11 +156,16 @@ object GhostAsterism {
 
   /** GHOST two-target standard resolution asterism type.  In this mode, two
     * targets are observed simultaneously with both IFUs at standard resolution.
+    *
+    * The base position for the asterism defaults to the midway point between
+    * the two targets, but may be explicitly specified if necessary to reach a
+    * particular PWFS2 guide star.
     */
   final case class TwoTarget(
                      bin:  StandardResBinning,
                      ifu1: GhostTarget,
-                     ifu2: GhostTarget) extends GhostAsterism {
+                     ifu2: GhostTarget,
+                     base: Option[Coordinates]) extends GhostAsterism {
 
     /** Defines the targets in this asterism to be the two science targets. */
     override def targets: NonEmptyList[SPTarget] =
@@ -169,11 +174,17 @@ object GhostAsterism {
     /** Calculates the coordinates exactly halfway along the great circle
       * connecting the two targets.
       */
-    override def basePosition(when: Instant): Option[Coordinates] =
+    def defaultBasePosition(when: Instant): Option[Coordinates] =
       for {
         c1 <- ifu1.coordinates(Some(when))
         c2 <- ifu2.coordinates(Some(when))
       } yield c1.interpolate(c2, 0.5)
+
+    /** Obtains the base position, which defaults to the half-way point between
+      * the two targets but may be explicitly specified instead.
+      */
+    override def basePosition(when: Instant): Option[Coordinates] =
+      base orElse defaultBasePosition(when)
 
     import StandardResBinning._
 
