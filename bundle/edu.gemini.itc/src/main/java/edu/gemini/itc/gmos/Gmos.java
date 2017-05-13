@@ -311,7 +311,11 @@ public abstract class Gmos extends Instrument implements BinningProvider, Spectr
                     break;
                 default:
 <<<<<<< HEAD
+<<<<<<< HEAD
                     throw new Error("invalid site");
+=======
+                    throw new RuntimeException("invalid site");
+>>>>>>> 557d01e3e908652775a3d9493d00809078d22cc3
 =======
                     throw new RuntimeException("invalid site");
 >>>>>>> 557d01e3e908652775a3d9493d00809078d22cc3
