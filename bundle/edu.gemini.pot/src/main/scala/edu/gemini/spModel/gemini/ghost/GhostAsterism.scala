@@ -40,7 +40,8 @@ object GhostAsterism {
 
     val All = NonEmptyList(enabled, disabled)
 
-    implicit val EqualOiwfsState = Equal.equalA[OiwfsState]
+    implicit val EqualOiwfsState: Equal[OiwfsState] =
+      Equal.equalA[OiwfsState]
   }
 
 
@@ -102,7 +103,8 @@ object GhostAsterism {
 
     val All = NonEmptyList(one, two)
 
-    implicit val EqualXBinning = Equal.equalA[XBinning]
+    implicit val OrderXBinning: Order[XBinning] =
+      Order.orderBy(_.intValue)
   }
 
 
@@ -125,7 +127,8 @@ object GhostAsterism {
 
     val All = NonEmptyList(one, two, four, eight)
 
-    implicit val EqualYBinning = Equal.equalA[YBinning]
+    implicit val OrderYBinning: Order[YBinning] =
+      Order.orderBy(_.intValue)
   }
 
 
@@ -147,7 +150,8 @@ object GhostAsterism {
 
     val All = NonEmptyList(bright, faint, veryFaint)
 
-    implicit val EqualStandardResBinning = Equal.equalA[StandardResBinning]
+    implicit val EqualStandardResBinning: Equal[StandardResBinning] =
+      Equal.equalA[StandardResBinning]
   }
 
   /** GHOST two-target standard resolution asterism type.  In this mode, two
@@ -270,7 +274,8 @@ object GhostAsterism {
 
     val All = NonEmptyList(bright, faint)
 
-    implicit val EqualHighResBinning = Equal.equalA[HighResBinning]
+    implicit val EqualHighResBinning: Equal[HighResBinning] =
+      Equal.equalA[HighResBinning]
   }
 
 
@@ -287,7 +292,8 @@ object GhostAsterism {
 
     val All = NonEmptyList(on, off)
 
-    implicit val EqualFiberAgitatorState = Equal.equalA[FiberAgitatorState]
+    implicit val EqualFiberAgitatorState: Equal[FiberAgitatorState] =
+      Equal.equalA[FiberAgitatorState]
   }
 
   /** The high resolution asterism comes in two flavors, normal high resolution
