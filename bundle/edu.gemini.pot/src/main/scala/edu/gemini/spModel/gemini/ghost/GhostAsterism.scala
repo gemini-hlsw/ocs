@@ -26,22 +26,22 @@ object GhostAsterism {
   /** The GHOST guide fibers can be enabled or disabled for each science target.
     * Typically they are enabled for bright targets (< B mag 18 for standard
     * resolution, < B mag 17 for high resolution) but disabled for faint targets.
-    * OIWFS state can also be explicitly disabled, say, in a crowded field where
-    * OIWFS is less effective.
+    * Guide state can also be explicitly disabled, say, in a crowded field where
+    * guide fibers are less effective.
     */
-  sealed trait OiwfsState extends Product with Serializable
+  sealed trait GuideFiberState extends Product with Serializable
 
-  object OiwfsState {
-    case object Enabled  extends OiwfsState
-    case object Disabled extends OiwfsState
+  object GuideFiberState {
+    case object Enabled  extends GuideFiberState
+    case object Disabled extends GuideFiberState
 
-    val enabled: OiwfsState  = Enabled
-    val disabled: OiwfsState = Disabled
+    val enabled: GuideFiberState  = Enabled
+    val disabled: GuideFiberState = Disabled
 
     val All = NonEmptyList(enabled, disabled)
 
-    implicit val EqualOiwfsState: Equal[OiwfsState] =
-      Equal.equalA[OiwfsState]
+    implicit val EqualGuideFiberState: Equal[GuideFiberState] =
+      Equal.equalA[GuideFiberState]
   }
 
 
@@ -52,7 +52,8 @@ object GhostAsterism {
     * There is a default guiding state based on magnitude, but this can be
     * explicitly overridden.
     */
-  final case class GhostTarget(target: SPTarget, explicitOiwfsState: Option[OiwfsState]) {
+  final case class GhostTarget(target: SPTarget,
+                               explicitGuideFiberState: Option[GuideFiberState]) {
 
     def coordinates(when: Option[Instant]): Option[Coordinates] =
       target.getCoordinates(when.map(_.toEpochMilli))
@@ -60,31 +61,31 @@ object GhostAsterism {
 
   object GhostTarget {
 
-    /** The magnitude at which OIWFS state is disabled by default at standard
+    /** The magnitude at which guide state is disabled by default at standard
       * resolution.
       */
     val StandardResCutoff: Magnitude =
       Magnitude(18.0, MagnitudeBand.B, None, MagnitudeSystem.Vega)
 
-    /** The magnitude at which OIWFS state is disabled by default at high
+    /** The magnitude at which guide state is disabled by default at high
       * resolution.
       */
     val HighResCutoff: Magnitude =
       Magnitude(17.0, MagnitudeBand.B, None, MagnitudeSystem.Vega)
 
-    private def defaultOiwfsState(t: GhostTarget, cutoff: Magnitude): OiwfsState =
-      t.target.getMagnitude(MagnitudeBand.B).forall(_.value < cutoff.value) ? OiwfsState.enabled | OiwfsState.disabled
+    private def defaultGuideFiberState(t: GhostTarget, cutoff: Magnitude): GuideFiberState =
+      t.target.getMagnitude(MagnitudeBand.B).forall(_.value < cutoff.value) ? GuideFiberState.enabled | GuideFiberState.disabled
 
-    private def oiwfsState(t: GhostTarget, cutoff: Magnitude): OiwfsState =
-      t.explicitOiwfsState | defaultOiwfsState(t, cutoff)
+    private def guideFiberState(t: GhostTarget, cutoff: Magnitude): GuideFiberState =
+      t.explicitGuideFiberState | defaultGuideFiberState(t, cutoff)
 
-    /** Computes the OiwfsState for the given target in standard resolution mode. */
-    def standardResOiwfsState(t: GhostTarget): OiwfsState =
-      oiwfsState(t, StandardResCutoff)
+    /** Computes the GuideFiberState for the given target in standard resolution mode. */
+    def standardResGuideFiberState(t: GhostTarget): GuideFiberState =
+      guideFiberState(t, StandardResCutoff)
 
-    /** Computes the OiwfsState for the given target in high resolution mode. */
-    def highResOiwfsState(t: GhostTarget): OiwfsState =
-      oiwfsState(t, HighResCutoff)
+    /** Computes the GuideFiberState for the given target in high resolution mode. */
+    def highResGuideFiberState(t: GhostTarget): GuideFiberState =
+      guideFiberState(t, HighResCutoff)
   }
 
 
@@ -200,11 +201,11 @@ object GhostAsterism {
         case Faint | VeryFaint => YBinning.Four
       }
 
-    def ifu1OiwfsState: OiwfsState =
-      GhostTarget.standardResOiwfsState(ifu1)
+    def ifu1GuideFiberState: GuideFiberState =
+      GhostTarget.standardResGuideFiberState(ifu1)
 
-    def ifu2OiwfsState: OiwfsState =
-      GhostTarget.standardResOiwfsState(ifu2)
+    def ifu2GuideFiberState: GuideFiberState =
+      GhostTarget.standardResGuideFiberState(ifu2)
   }
 
 
@@ -249,11 +250,12 @@ object GhostAsterism {
         case Faint | VeryFaint => YBinning.Eight
       }
 
-    /** Deterimines the OIWFS state for the IFU observing the science object.
-      * For the IFU observing a sky position, OiwfsState is always disabled.
+    /** Deterimines the guide fiber state for the IFU observing the science
+      * object. For the IFU observing a sky position, GuideFiberState is always
+      * disabled.
       */
-    def oiwfsState: OiwfsState =
-      GhostTarget.standardResOiwfsState(target)
+    def guideFiberState: GuideFiberState =
+      GhostTarget.standardResGuideFiberState(target)
 
     // Calculate the diametrically opposed position, assuming we know where
     // the target is.
@@ -376,10 +378,10 @@ object GhostAsterism {
     override def yBinning: YBinning =
       mode.yBinning
 
-    /** Deterimines the OIWFS state for the HRIFU1.  Typically this will be
-      * enabled since the target is bright but may be explicitly turned off.
+    /** Deterimines the guide fiber state for the HRIFU1.  Typically this will
+      * be enabled since the target is bright but may be explicitly turned off.
       */
-    def oiwfsState: OiwfsState =
-      GhostTarget.highResOiwfsState(target)
+    def guideFiberState: GuideFiberState =
+      GhostTarget.highResGuideFiberState(target)
   }
 }
