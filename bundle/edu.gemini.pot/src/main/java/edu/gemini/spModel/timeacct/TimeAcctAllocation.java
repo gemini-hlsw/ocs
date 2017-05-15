@@ -3,7 +3,9 @@ package edu.gemini.spModel.timeacct;
 import java.io.Serializable;
 import java.io.ObjectInputStream;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.*;
+import java.util.function.Function;
 
 /**
  * A collection of time allocations for the various
@@ -56,17 +58,17 @@ public final class TimeAcctAllocation implements Serializable {
         return (res == null) ? TimeAcctAward.ZERO : res;
     }
 
-    private double ratio(TimeAcctAward award) {
-        if (sum.isZero()) return 0;
-        return ((double) award.getTotalAward().toMillis()) / ((double) sum.getTotalAward().toMillis());
+    private double ratio(Function<TimeAcctAward, Duration> toDuration, TimeAcctAward award) {
+        if (toDuration.apply(sum).isZero()) return 0;
+        return ((double) toDuration.apply(award).toMillis()) / ((double) toDuration.apply(sum).toMillis());
     }
 
     /**
      * Gets the percentage of the total time allocation that is associated with
      * the given category.
      */
-    public double getPercentage(final TimeAcctCategory category) {
-        return ratio(getAward(category)) * 100;
+    public double getPercentage(final TimeAcctCategory category, Function<TimeAcctAward, Duration> toDuration) {
+        return ratio(toDuration, getAward(category)) * 100;
     }
 
     /**
@@ -82,13 +84,17 @@ public final class TimeAcctAllocation implements Serializable {
      * should be associated with it.  For example, if half of the time spent
      * on a program should be attributed to the US, then the US category will
      * be 0.5.
+     *
+     * @param toDuration function that converts an award to a Duration; with
+     *                   this the caller can get total time ratios or just
+     *                   program or partner time ratios
      */
-    public SortedMap<TimeAcctCategory, Double> getRatios() {
+    public SortedMap<TimeAcctCategory, Double> getRatios(final Function<TimeAcctAward, Duration> toDuration) {
         final SortedMap<TimeAcctCategory, Double> res = new TreeMap<>();
         if (sum.isZero()) return res;
 
         for (final Map.Entry<TimeAcctCategory, TimeAcctAward> me : allocMap.entrySet()) {
-            res.put(me.getKey(), ratio(me.getValue()));
+            res.put(me.getKey(), ratio(toDuration, me.getValue()));
         }
 
         return res;

@@ -33,22 +33,36 @@ public final class TimeAcctAward implements Serializable {
         this.partnerAward = partnerAward;
     }
 
+    private static double toHours(Duration d) {
+        return ((double) d.toMillis()) / MS_PER_HOUR;
+    }
+
     public Duration getProgramAward() {
         return programAward;
+    }
+
+    /** Convenience method to provide program award converted to hours. */
+    public double getProgramHours() {
+        return toHours(getProgramAward());
     }
 
     public Duration getPartnerAward() {
         return partnerAward;
     }
 
+    /** Convenience method to provide partner award converted to hours. */
+    public double getPartnerHours() {
+        return toHours(getPartnerAward());
+    }
+
+
     public Duration getTotalAward() {
         return programAward.plus(partnerAward);
     }
 
-    // Convenience method to provide total award converted to hours.
+    /** Convenience method to provide total award converted to hours. */
     public double getTotalHours() {
-        final long ms = getTotalAward().toMillis();
-        return ((double) ms) / MS_PER_HOUR;
+        return toHours(getTotalAward());
     }
 
     public TimeAcctAward plus(TimeAcctAward that) {

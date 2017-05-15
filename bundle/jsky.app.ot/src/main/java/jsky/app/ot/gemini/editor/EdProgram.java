@@ -262,7 +262,7 @@ public final class EdProgram extends OtItemEditor<ISPProgram, SPProgram> impleme
 
         // Allocated time (awarded time in hours).
         try {
-            final double awardedTime = getDataObject().getAwardedTime().getTimeAmount();
+            final double awardedTime = getDataObject().getAwardedProgramTime().getTimeAmount();
             setTimeLabel(awardedTime, _w.allocatedTime);
         } catch (final Exception e) {
             DialogUtil.error(e);

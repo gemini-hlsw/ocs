@@ -119,7 +119,7 @@ final class TimeAcctEditor implements ProgramTypeListener {
     private void showPercentTime(final TimeAcctAllocation alloc) {
         for (final TimeAcctCategory cat : TimeAcctCategory.values()) {
             final JLabel lab = ui.getPercentLabel(cat);
-            final double percent = alloc.getPercentage(cat);
+            final double percent = alloc.getPercentage(cat, TimeAcctAward::getTotalAward);
             lab.setText(String.format("%.0f%%", percent));
         }
     }

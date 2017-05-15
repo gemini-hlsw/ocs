@@ -2,7 +2,6 @@ package edu.gemini.spdb.reports.collection.table;
 
 import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.pot.sp.ISPProgram;
-import edu.gemini.spModel.core.ProgramType;
 import edu.gemini.spModel.core.SPProgramID;
 import edu.gemini.shared.util.TimeValue;
 import edu.gemini.spModel.gemini.obscomp.SPProgram;
@@ -109,7 +108,7 @@ public class QueueProgramStatusInternalTable extends AbstractTable {
             }
 
             // Allocated time
-            TimeValue allocatedTV = prog.getAwardedTime();
+            TimeValue allocatedTV = prog.getAwardedProgramTime();
             if (allocatedTV == null) {
                 LOGGER.fine("Program " + id + " has null allocatedTime. Skipping.");
                 return  Collections.emptyList();
