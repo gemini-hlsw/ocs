@@ -66,7 +66,7 @@ object SpProgramFactory {
     prog.setThesis(isThesis(proposal))
 
     prog.setPIInfo(piInfo(proposal))
-    hostNgoEmail(proposal) foreach { e => prog.setNGOContactEmail(e) }
+    hostNgoEmail(proposal) foreach { e => prog.setPrimaryContactEmail(e) }
 
     // Note: not a typo -- "contact person" is an email
     gemEmail(proposal) foreach { e => prog.setContactPerson(e) }

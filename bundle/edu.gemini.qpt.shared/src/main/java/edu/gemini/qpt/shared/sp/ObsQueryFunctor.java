@@ -48,7 +48,6 @@ import edu.gemini.spModel.core.ProgramType;
 import edu.gemini.spModel.seqcomp.SeqConfigComp;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
-import edu.gemini.spModel.telescope.PosAngleConstraint;
 import edu.gemini.spModel.telescope.PosAngleConstraintAware;
 import edu.gemini.spModel.time.ChargeClass;
 import edu.gemini.spModel.time.ObsTimeCharges;
@@ -292,7 +291,7 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor implements Iterable<
                     band3MinimumTime == -1 ? null : band3MinimumTime,
                     band3RemainingTime == 0 ? null : band3RemainingTime,
                     program.getPILastName(),
-                    program.getNGOContactEmail(),
+                    program.getPrimaryContactEmail(),
                     program.getContactPerson());
             List<Group> groupList = new ArrayList<>();
             List<Note> noteList = new ArrayList<>();

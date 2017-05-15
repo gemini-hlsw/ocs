@@ -83,7 +83,7 @@ abstract class TestProgramBase {
         piInfo = new SPProgram.PIInfo("Joe", "Astronomer",
                                       getPiAddressesStr(), "666", Affiliate.UNITED_STATES);
         progObj.setPIInfo(piInfo);
-        progObj.setNGOContactEmail(getNgoAddressesStr());
+        progObj.setPrimaryContactEmail(getNgoAddressesStr());
         progObj.setContactPerson(getGeminiAddressesStr());
 
         prog.setDataObject(progObj);

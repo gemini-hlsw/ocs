@@ -51,7 +51,7 @@ public final class ProgramBuilder {
             prog = odb.getFactory().createProgram(null, progId);
 
             SPProgram dataObj = (SPProgram) prog.getDataObject();
-            if (ngoEmails != null) dataObj.setNGOContactEmail(ngoEmails);
+            if (ngoEmails != null) dataObj.setPrimaryContactEmail(ngoEmails);
             if (csEmails != null) dataObj.setContactPerson(csEmails);
             if (piEmails != null) {
                 dataObj.setPIInfo(new SPProgram.PIInfo("Biff", "Henderson", piEmails, "123 456-7890", null));
