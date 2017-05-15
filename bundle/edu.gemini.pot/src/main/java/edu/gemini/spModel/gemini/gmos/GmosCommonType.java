@@ -104,9 +104,8 @@ public class GmosCommonType {
         TWELVE("Twelve", DetectorManufacturer.HAMAMATSU),
         ;
 
-        public final static AmpCount DEFAULT = AmpCount.SIX;
-        public final static AmpCount DEFAULT_NORTH = AmpCount.SIX;
-        public final static AmpCount DEFAULT_SOUTH = AmpCount.TWELVE;
+        // Hamamatsu detectors use twelve amps, so make this the default.
+        public final static AmpCount DEFAULT = AmpCount.TWELVE;
         public final static ItemKey KEY = new ItemKey(INSTRUMENT_KEY, "ampCount");
 
         private final String _displayValue;
