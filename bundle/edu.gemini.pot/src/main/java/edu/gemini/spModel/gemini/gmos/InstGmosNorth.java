@@ -80,7 +80,6 @@ public class InstGmosNorth extends
         setFilter(GmosNorthType.FilterNorth.DEFAULT);
         setFPUnit(GmosNorthType.FPUnitNorth.DEFAULT);
         setStageMode(GmosNorthType.StageModeNorth.DEFAULT);
-        setAmpCount(GmosCommonType.AmpCount.DEFAULT_NORTH);
     }
 
     public Map<String, PropertyDescriptor> getProperties() {
