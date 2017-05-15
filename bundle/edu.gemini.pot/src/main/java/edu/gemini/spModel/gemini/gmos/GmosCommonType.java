@@ -105,7 +105,7 @@ public class GmosCommonType {
         ;
 
         public final static AmpCount DEFAULT = AmpCount.SIX;
-        public final static AmpCount DEFAULT_NORTH = AmpCount.SIX;
+        public final static AmpCount DEFAULT_NORTH = AmpCount.TWELVE;
         public final static AmpCount DEFAULT_SOUTH = AmpCount.TWELVE;
         public final static ItemKey KEY = new ItemKey(INSTRUMENT_KEY, "ampCount");
 
