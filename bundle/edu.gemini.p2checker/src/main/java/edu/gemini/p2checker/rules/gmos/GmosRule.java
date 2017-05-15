@@ -1403,10 +1403,10 @@ public final class GmosRule implements IRule {
 // BG50: 44.2 minutes
 // BG80: 44.2 minutes
 // BGAny: 44.2 minutes
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Y_G0323, SkyBackground.PERCENT_20), 44.2 * 60);
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Y_G0323, SkyBackground.PERCENT_50), 44.2 * 60);
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Y_G0323, SkyBackground.PERCENT_80), 44.2 * 60);
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Y_G0323, SkyBackground.ANY), 44.2 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Y_G0323, SkyBackground.PERCENT_20), 2 * 44.2 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Y_G0323, SkyBackground.PERCENT_50), 2 * 44.2 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Y_G0323, SkyBackground.PERCENT_80), 2 * 44.2 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Y_G0323, SkyBackground.ANY), 2 * 44.2 * 60);
 
 // HAMAMATSU GMOS-S
 // Unlike above, these are saturation times and thus we do not multiply by 2.
