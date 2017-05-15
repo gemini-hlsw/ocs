@@ -968,13 +968,6 @@ public class SPProgram extends AbstractDataObject implements ISPStaffOnlyFieldPr
             }
         }
 
-//        TimeValue awardedTime = getAwardedTime();
-//        if (awardedTime != null) {
-//            Pio.addParam(factory, paramSet, AWARDED_TIME_PROP,
-//                    String.valueOf(awardedTime.getTimeAmount()),
-//                    awardedTime.getTimeUnits().name());
-//        }
-
         // Write the time accounting information.
         if (_timeAllocation != null) {
             ParamSet timeAcctPset;

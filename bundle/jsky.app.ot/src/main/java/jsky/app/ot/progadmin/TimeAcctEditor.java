@@ -23,10 +23,6 @@ final class TimeAcctEditor implements ProgramTypeListener {
     // Used to format values as strings
     private final static DecimalFormat nf = new DecimalFormat("0.#");
 
-    private static double toHours(Duration d) {
-        return ((double) d.toMillis()) / MS_PER_HOUR;
-    }
-
     private static Duration toDuration(double hours) {
         return Duration.ofMillis(Math.round(hours * MS_PER_HOUR));
     }
@@ -91,9 +87,9 @@ final class TimeAcctEditor implements ProgramTypeListener {
 
     private void showTotalTime(final TimeAcctAllocation alloc) {
         final TimeAcctAward a = alloc.getSum();
-        ui.getTotalAwardLabel()  .setText(nf.format(toHours(a.getTotalAward())));
-        ui.getProgramAwardLabel().setText(nf.format(toHours(a.getProgramAward())));
-        ui.getPartnerAwardLabel().setText(nf.format(toHours(a.getPartnerAward())));
+        ui.getTotalAwardLabel()  .setText(nf.format(a.getTotalHours()));
+        ui.getProgramAwardLabel().setText(nf.format(a.getProgramHours()));
+        ui.getPartnerAwardLabel().setText(nf.format(a.getPartnerHours()));
     }
 
     private TimeValue getMinimumTime() {
@@ -139,10 +135,10 @@ final class TimeAcctEditor implements ProgramTypeListener {
 
         // Show the time for each category.
         for (final TimeAcctCategory cat : TimeAcctCategory.values()) {
-            final double progHours = toHours(alloc.getAward(cat).getProgramAward());
+            final double progHours = alloc.getAward(cat).getProgramHours();
             ui.getProgramAwardField(cat).setText(nf.format(progHours)); // REL-434
 
-            final double partHours = toHours(alloc.getAward(cat).getPartnerAward());
+            final double partHours = alloc.getAward(cat).getPartnerHours();
             ui.getPartnerAwardField(cat).setText(nf.format(partHours)); // REL-434
         }
 
