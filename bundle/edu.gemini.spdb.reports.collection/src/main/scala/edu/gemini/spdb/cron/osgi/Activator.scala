@@ -1,6 +1,7 @@
 package edu.gemini.spdb.cron.osgi
 
 import edu.gemini.dbTools.ephemeris.{EphemerisPurgeCron, TcsEphemerisCron}
+import edu.gemini.dbTools.timeAcct.PartnerTimeAwardCron
 import org.osgi.framework.{BundleContext, BundleActivator}
 import org.osgi.util.tracker.ServiceTracker
 import edu.gemini.util.osgi.Tracker._
@@ -31,16 +32,18 @@ class Activator extends BundleActivator {
 
   // See each service's entry point for an example invocation via curl
   def services(c: BundleContext): Map[String, Job] =
-     Map("monitor"        -> OdbMonitor.monitor,
-         "execHours"      -> ExecHourFunctor.run,
-         "tigraTable"     -> new TigraTableCreator(c).run,
-         "semesterStatus" -> semesterStatus.Driver.run,
-         "odbState"       -> OdbStateAgent.run,
-         "odbMail"        -> OdbMailAgent.run,
-         "weather"        -> new WeatherUpdater(c).run,
-         "archive"        -> Archiver.run(c),
-         "ephemeris"      -> TcsEphemerisCron.run(c),
-         "ephemerisPurge" -> EphemerisPurgeCron.run(c))
+     Map("monitor"            -> OdbMonitor.monitor,
+         "execHours"          -> ExecHourFunctor.run,
+         "tigraTable"         -> new TigraTableCreator(c).run,
+         "semesterStatus"     -> semesterStatus.Driver.run,
+         "odbState"           -> OdbStateAgent.run,
+         "odbMail"            -> OdbMailAgent.run,
+         "weather"            -> new WeatherUpdater(c).run,
+         "archive"            -> Archiver.run(c),
+         "ephemeris"          -> TcsEphemerisCron.run(c),
+         "ephemerisPurge"     -> EphemerisPurgeCron.run(c),
+         "pre17BPartnerAward" -> PartnerTimeAwardCron.run(c)
+     )
 
   var tracker: ServiceTracker[HttpService, HttpService] = null
 

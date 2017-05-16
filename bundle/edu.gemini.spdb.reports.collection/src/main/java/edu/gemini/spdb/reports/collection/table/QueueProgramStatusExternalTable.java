@@ -172,7 +172,7 @@ public final class QueueProgramStatusExternalTable extends AbstractTable {
     private String getPartners(final TimeAcctAllocation timeAcctAllocation) {
         final StringBuilder builder = new StringBuilder();
         for (TimeAcctCategory cat : timeAcctAllocation.getCategories()) {
-            if (timeAcctAllocation.getHours(cat) > 0.0) {
+            if (!timeAcctAllocation.getAward(cat).isZero()) {
                 if (builder.length() > 0) {
                     builder.append("/");
                 }

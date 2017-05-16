@@ -45,7 +45,7 @@ public class SPProgram extends AbstractDataObject implements ISPStaffOnlyFieldPr
     // for serialization
     private static final long serialVersionUID = 4L;
 
-    public static final String VERSION = "2017A-1";
+    public static final String VERSION = "2017B-1";
 
     /** This property records the program queue/classical state. */
     public static final String PROGRAM_MODE_PROP = "programMode";
@@ -841,7 +841,7 @@ public class SPProgram extends AbstractDataObject implements ISPStaffOnlyFieldPr
      */
     public TimeValue getAwardedTime() {
         if (_timeAllocation == null) return new TimeValue(0, TimeValue.Units.hours);
-        return new TimeValue(_timeAllocation.getTotalTime(), TimeValue.Units.hours);
+        return TimeValue.millisecondsToTimeValue(_timeAllocation.getSum().getTotalAward().toMillis(), TimeValue.Units.hours);
     }
 
     public TimeAcctAllocation getTimeAcctAllocation() {
@@ -983,8 +983,8 @@ public class SPProgram extends AbstractDataObject implements ISPStaffOnlyFieldPr
 
             // Write the awarded time (for GSA only -- will be ignored on
             // import)
-            Pio.addParam(factory, paramSet, AWARDED_TIME_PROP,
-                    String.valueOf(_timeAllocation.getTotalTime()), "hours");
+            final double hrs = _timeAllocation.getSum().getTotalHours();
+            Pio.addParam(factory, paramSet, AWARDED_TIME_PROP, Double.toString(hrs), "hours");
         }
         if ((_minTimeValue != null) && (_minTimeValue.getTimeAmount() > 0)) {
             Pio.addParam(factory, paramSet, MINIMUM_TIME_PROP,

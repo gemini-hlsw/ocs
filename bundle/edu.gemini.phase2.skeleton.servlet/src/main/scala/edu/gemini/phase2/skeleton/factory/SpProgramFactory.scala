@@ -1,5 +1,6 @@
 package edu.gemini.phase2.skeleton.factory
 
+import edu.gemini.spModel.core.Affiliate
 import edu.gemini.spModel.gemini.obscomp.SPProgram.ProgramMode._
 import edu.gemini.spModel.too.TooType
 import edu.gemini.model.p1.immutable._
@@ -12,18 +13,21 @@ import edu.gemini.spModel.gemini.obscomp.SPProgram
 import edu.gemini.spModel.gemini.obscomp.SPProgram.{PIInfo, ProgramMode}
 import edu.gemini.shared.util.TimeValue
 
-import edu.gemini.spModel.timeacct.{TimeAcctAllocation, TimeAcctCategory}
+import edu.gemini.spModel.timeacct.{TimeAcctAllocation, TimeAcctAward, TimeAcctCategory}
 import edu.gemini.spModel.gemini.phase1.{GsaPhase1Data => Gsa}
+
+import java.time.Duration
 
 import scala.collection.JavaConverters._
 import scalaz._
 import Scalaz._
-import edu.gemini.spModel.core.Affiliate
 
 /**
  * Factory for creating an SPProgram from a Phase 1 Proposal document.
  */
 object SpProgramFactory {
+
+  private val MsPerHour = Duration.ofHours(1).toMillis
 
   private val NGO_TIME_ACCT = Map(
     AR -> TimeAcctCategory.AR,
@@ -197,8 +201,14 @@ object SpProgramFactory {
       timeAccountingRatios(proposal) match {
         case Nil    => None
         case ratios =>
-          val jmap  = ratios.toMap.mapValues(d => new java.lang.Double(d)).asJava
-          Some(new TimeAcctAllocation(hrs, jmap))
+          val jmap = ratios.map { case (cat, rat) =>
+            // REL-2928 TODO: handle splitting program and partner award.  Here
+            // we just keep everything as the program award for now.
+            val ms    = ((hrs * rat) * MsPerHour).round // ms for this category
+            val award = new TimeAcctAward(Duration.ofMillis(ms), Duration.ZERO)
+            (cat, award)
+          }.toMap.asJava
+          Some(new TimeAcctAllocation(jmap))
       }
     }
 

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE document PUBLIC "-//Gemini Observatory//DTD for Storage of P1 and P2 Documents//EN" "http://ftp.gemini.edu/Support/xml/dtds/SpXML2.dtd">
+
+<document>
+  <container kind="program" type="Program" version="2017A-1" subtype="basic" key="f80b3ded-5725-4f2b-8b22-a94ac83eca3c" name="">
+    <paramset name="Science Program" kind="dataObj">
+      <param name="programMode" value="QUEUE"/>
+      <param name="tooType" value="none"/>
+      <param name="programStatus" value="PHASE2"/>
+      <param name="nextObsId" value="1"/>
+      <paramset name="piInfo">
+        <param name="firstName" value=""/>
+        <param name="lastName" value=""/>
+        <param name="email" value=""/>
+        <param name="phone" value=""/>
+      </paramset>
+      <param name="queueBand" value="1"/>
+      <paramset name="timeAcct">
+        <paramset name="timeAcctAlloc">
+          <param name="category" value="AR"/>
+          <param name="hours" value="2.5"/>
+        </paramset>
+        <paramset name="timeAcctAlloc">
+          <param name="category" value="BR"/>
+          <param name="hours" value="1.0"/>
+        </paramset>
+        <paramset name="timeAcctAlloc">
+          <param name="category" value="CL"/>
+          <param name="hours" value="1.5"/>
+        </paramset>
+      </paramset>
+      <param name="awardedTime" value="5.0" units="hours"/>
+      <param name="fetched" value="true"/>
+      <param name="completed" value="false"/>
+      <param name="notifyPi" value="YES"/>
+    </paramset>
+  </container>
+  <container kind="versions" type="versions" version="1.0">
+    <paramset name="node">
+      <param name="key" value="f80b3ded-5725-4f2b-8b22-a94ac83eca3c"/>
+      <param name="68aa451f-9a32-42b4-861c-3b1c66b56acd" value="1"/>
+    </paramset>
+  </container>
+</document>
