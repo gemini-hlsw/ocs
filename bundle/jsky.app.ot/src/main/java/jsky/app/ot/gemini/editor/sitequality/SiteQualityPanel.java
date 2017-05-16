@@ -179,7 +179,7 @@ final class SiteQualityPanel extends JPanel {
                     ButtonFlattener.flatten(this);
                 }});
 
-                add(new JButton(Resources.getIcon("eclipse/download.gif")) {{
+                add(new JButton(Resources.getIcon("eclipse/openbrwsr.gif")) {{
                     setToolTipText("Import timing windows from text file");
                     setFocusable(false);
                     addActionListener(e -> {

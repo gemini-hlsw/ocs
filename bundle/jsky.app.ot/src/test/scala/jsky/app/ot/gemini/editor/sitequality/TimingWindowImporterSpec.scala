@@ -63,6 +63,12 @@ object TimingWindowImporterSpec extends Specification with ScalaCheck {
       val (successes, _, results) = runParsing(t1Tup.right, t2Tup.right, t3Tup.right)
       (results.successes.length must_=== 3) and (results.successes.forall(_.getDuration == TimingWindow.WINDOW_REMAINS_OPEN_FOREVER) must beTrue)
     }
+
+    "not overflow for large times" in {
+      val t1Tup = ("2017-05-05", "00:00:00", "720:00", noInt, noString)
+      val (successes, _, results) = runParsing(t1Tup.right)
+      (results.successes.length must_=== 1) and (results.successes.forall(_.getDuration > 0) must beTrue)
+    }
   }
 
   // To avoid repeated type specifiers.
