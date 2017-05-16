@@ -156,11 +156,11 @@ public class ProgramForm extends JPanel {
                             FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
                             new ColumnSpec(ColumnSpec.CENTER, Sizes.dluX(36), FormSpec.NO_GROW),
                             new ColumnSpec(ColumnSpec.LEFT, Sizes.dluX(15), FormSpec.NO_GROW),
-                            new ColumnSpec(ColumnSpec.CENTER, Sizes.dluX(36), FormSpec.NO_GROW),
+                            new ColumnSpec(ColumnSpec.CENTER, Sizes.dluX(56), FormSpec.NO_GROW),
                             FormFactory.UNRELATED_GAP_COLSPEC,
                             FormFactory.DEFAULT_COLSPEC,
                             new ColumnSpec(ColumnSpec.LEFT, Sizes.DLUX11, FormSpec.NO_GROW),
-                            new ColumnSpec(ColumnSpec.CENTER, Sizes.dluX(36), FormSpec.NO_GROW)
+                            new ColumnSpec(ColumnSpec.CENTER, Sizes.dluX(58), FormSpec.NO_GROW)
                     },
                     new RowSpec[]{
                             FormFactory.DEFAULT_ROWSPEC,
@@ -199,9 +199,9 @@ public class ProgramForm extends JPanel {
         partnerTime.setToolTipText("Total time charged to the Gemini partner");
         timePanel.add(partnerTime, cc.xy(7, 5));
 
-        timePanel.add(new JLabel("Allocated"), cc.xy(9, 3));
+        timePanel.add(new JLabel("Allocated Program"), cc.xy(9, 3));
         allocatedTime = new JLabel("00:00:00");
-        allocatedTime.setToolTipText("The total time allocated for the observation, in hours:minutes:seconds");
+        allocatedTime.setToolTipText("The total program time allocated, in hours:minutes:seconds");
         timePanel.add(allocatedTime, cc.xy(9, 5));
 
         minimumTimeLabel = new JLabel("Minimum");
@@ -210,9 +210,9 @@ public class ProgramForm extends JPanel {
         minimumTime.setToolTipText("The minimal success time, in hours:minutes:seconds");
         timePanel.add(minimumTime, cc.xy(11, 5));
 
-        timePanel.add(new JLabel("Remaining"), cc.xy(13, 3));
+        timePanel.add(new JLabel("Remaining Program"), cc.xy(13, 3));
         remainingTime = new JLabel("00:00:00");
-        remainingTime.setToolTipText("Remaining Time (total of Allocated Time minus the sum of the Program Time fields in the observations)");
+        remainingTime.setToolTipText("Remaining Program Time (total of Allocated Program Time minus the sum of the Program Time fields in the observations)");
         timePanel.add(remainingTime, cc.xy(13, 5));
 
         add(timePanel, cc.xywh(1, 23, 11, 1));
