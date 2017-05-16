@@ -266,6 +266,7 @@ object ConfigExtractor {
         fieldLens <- extract[FieldLens]     (c, AoFieldLensKey)
         wfsMode   <- extract[GuideStarType] (c, AoGuideStarTypeKey)
       } yield {
+        // TODO:ASTERISM: may be wrong, see https://github.com/gemini-hlsw/ocs/pull/1222/files#r115356730
         val separation = distance(targetEnv.getAsterism, guideStar.getTarget, when)
         Some(AltairParameters(separation, magnitude, fieldLens, wfsMode))
       }
