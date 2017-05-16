@@ -127,7 +127,7 @@ object TimingWindowParser extends RegexParsers {
 
   // Convert hhhh:mm:ss as a duration to a Long in ms.
   private def hhmmssToLong(hh: Int, mm: Int, ss: Int = 0): Long =
-    1000 * (60 * (60 * hh + mm) + ss)
+    1000 * (60 * (60 * hh.toLong + mm.toLong) + ss.toLong)
 
   // Convenience method for spec testing.
   private[sitequality] def hhmmssStringToLong(hhmmss: String): Long =
