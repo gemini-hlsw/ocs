@@ -67,7 +67,8 @@ trait TestSupport extends ProgramTestSupport {
       f(p).foreach { obs =>
         val tc  = SPTreeUtil.findTargetEnvNode(obs)
         val toc = tc.getDataObject.asInstanceOf[TargetObsComp]
-        toc.getBase.setTarget(SiderealTarget.empty)
+        // TODO:ASTERISM: handle multi-target asterisms
+        toc.getAsterism.allSpTargets.head.setTarget(SiderealTarget.empty)
         tc.setDataObject(toc)
       }
     }

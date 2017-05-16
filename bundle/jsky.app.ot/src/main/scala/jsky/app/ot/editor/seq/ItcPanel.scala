@@ -6,8 +6,9 @@ import javax.swing._
 import com.jgoodies.forms.factories.DefaultComponentFactory
 import edu.gemini.itc.shared._
 import edu.gemini.pot.sp.SPComponentType
+import edu.gemini.spModel.core.Target
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
-import edu.gemini.spModel.gemini.gmos.{InstGmosSouth, InstGmosNorth}
+import edu.gemini.spModel.gemini.gmos.{InstGmosNorth, InstGmosSouth}
 import edu.gemini.spModel.gemini.gnirs.InstGNIRS
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi
 import edu.gemini.spModel.gemini.nifs.InstNIFS
@@ -22,7 +23,6 @@ import scala.swing.ScrollPane.BarPolicy._
 import scala.swing._
 import scala.swing.event._
 import scala.util.{Failure, Success}
-
 import scalaz._
 
 object ItcPanel {
@@ -46,6 +46,12 @@ sealed trait ItcPanel extends GridBagPanel {
   def table: ItcTable
   def display: Component
   def visibleFor(t: SPComponentType): Boolean
+
+  /** TODO:ASTERISM: we need to display a list of asterism members and let the user select one. For now we
+    * just select the first target in the asterism.
+    */
+  def selectedTarget: Option[Target] =
+    Option(owner.getContextTargetEnv).map(_.getArbitraryTargetFromAsterism.getTarget)
 
   private val conditionsPanel        = new ConditionsPanel(owner)
   private val aperturePanel          = new AnalysisApertureMethodPanel(owner)
@@ -307,4 +313,3 @@ private class ItcChartsPanel(table: ItcSpectroscopyTable) extends GridBagPanel {
   }
 
 }
-

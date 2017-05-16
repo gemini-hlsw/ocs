@@ -159,8 +159,8 @@ object ObservationInfo {
 
   def apply(ctx: ObsContext, mt: MagnitudeTable):ObservationInfo = ObservationInfo(
     ctx.some,
-    Option(ctx.getTargets.getBase).map(_.getName),
-    Option(ctx.getTargets.getBase).flatMap(_.getSkycalcCoordinates(ctx.getSchedulingBlockStart).asScalaOpt).map(_.toNewModel),
+    Option(ctx.getTargets.getAsterism).map(_.name),
+    Option(ctx.getTargets.getAsterism).flatMap(_.getSkycalcCoordinates(ctx.getSchedulingBlockStart).asScalaOpt).map(_.toNewModel),
     Option(ctx.getInstrument.getType),
     AgsRegistrar.currentStrategy(ctx).map(toSupportedStrategy(ctx, _, mt)),
     expandAltairModes(ctx).flatMap(c => AgsRegistrar.validStrategies(c).map(toSupportedStrategy(c, _, mt))).sorted,

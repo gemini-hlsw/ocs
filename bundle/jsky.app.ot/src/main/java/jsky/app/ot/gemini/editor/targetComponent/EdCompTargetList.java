@@ -171,7 +171,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
      */
     private boolean selectionIsBasePosition() {
         final TargetEnvironment env = getDataObject().getTargetEnvironment();
-        return selectedTarget().exists(env::isBasePosition);
+        return selectedTarget().exists((target) -> target == env.getArbitraryTargetFromAsterism());
     }
 
     /**
@@ -398,7 +398,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 return true;
             }).getOrElse(false);
             if (!(targetSet || groupSet)) {
-                setSelectionToTarget(env.getBase());
+                setSelectionToTarget(env.getArbitraryTargetFromAsterism());
             }
         }
 
@@ -504,7 +504,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     private void updateTargetFeedback(final TargetEnvironment env) {
         final Option<ObsContext> ctx = getObsContext(env);
         final ISPObsComponent node   = getContextTargetObsComp();
-        final SPTarget target        = TargetSelection.getTargetForNode(env, node).getOrElse(env.getBase());
+        final SPTarget target        = TargetSelection.getTargetForNode(env, node).getOrElse(env.getArbitraryTargetFromAsterism());
         _w.detailEditor.targetFeedbackEditor().edit(ctx, target, node);
     }
 
@@ -1027,7 +1027,7 @@ enum BasePositionType implements PositionType {
         if (isMember(env, target)) return;
         env = env.removeTarget(target);
 
-        final SPTarget base = env.getBase();
+        final SPTarget base = env.getArbitraryTargetFromAsterism();
 
         final GuideEnvironment genv = env.getGuideEnvironment();
         final ImList<SPTarget> user = env.getUserTargets().append(base);
@@ -1037,7 +1037,7 @@ enum BasePositionType implements PositionType {
     }
 
     @Override public boolean isMember(final TargetEnvironment env, final SPTarget target) {
-        return (env.getBase() == target);
+        return (env.getArbitraryTargetFromAsterism() == target);
     }
 
     @Override public String toString() {

@@ -4,6 +4,7 @@ import java.io.{StringReader, StringWriter}
 
 import edu.gemini.pot.sp.{ISPObservation, ISPProgram, ISPTemplateFolder, ISPTemplateGroup, SPComponentType}
 import edu.gemini.shared.util.immutable.{None => JNone}
+import edu.gemini.spModel.core.SiderealTarget
 import edu.gemini.spModel.io.impl.migration.MigrationTest
 import edu.gemini.spModel.io.impl.{PioSpXmlParser, PioSpXmlWriter}
 import edu.gemini.spModel.obscomp.SPNote
@@ -13,6 +14,8 @@ import org.junit.Assert._
 import org.junit.Test
 
 import scala.collection.JavaConverters._
+import scalaz._
+import Scalaz._
 
 // a rudimentary test to make sure it doesn't blow up
 
@@ -86,7 +89,7 @@ class TargetConversionTest extends MigrationTest {
     // unsafe extravaganza!
     val targetComp = obs.getObsComponents.asScala.find(_.getType == SPComponentType.TELESCOPE_TARGETENV).get
     val toc        = targetComp.getDataObject.asInstanceOf[TargetObsComp]
-    val rigel      = toc.getBase.getSiderealTarget.get
+    val rigel      = toc.getAsterism.targets match { case -\/(t: SiderealTarget) => t ; case _ => sys.error("unpossible") }
 
     val when  = JNone.instance[java.lang.Long]
 

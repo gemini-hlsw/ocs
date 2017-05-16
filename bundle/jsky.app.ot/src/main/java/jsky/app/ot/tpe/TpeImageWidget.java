@@ -9,6 +9,7 @@ import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.target.*;
+import edu.gemini.spModel.target.env.Asterism;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.target.offset.OffsetPosBase;
@@ -600,13 +601,13 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
             _ctx.instrument().get().removePropertyChangeListener(this);
         }
 
-        if (_ctx.targets().base().isDefined()) {
-            _ctx.targets().base().get().deleteWatcher(this);
+        if (_ctx.targets().asterism().isDefined()) {
+            _ctx.targets().asterism().get().allSpTargetsJava().foreach(a -> a.deleteWatcher(this));
         }
 
         _ctx = ctx;
 
-        if (_ctx.targets().base().isEmpty()) {
+        if (_ctx.targets().asterism().isEmpty()) {
             // There is no target to view, but we need to update the image
             // widgets with new WCS info.
             clear();
@@ -623,11 +624,12 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
             setPosAngle(_ctx.instrument().get().getPosAngleDegrees());
         }
 
-        if (_ctx.targets().base().isDefined()) {
-            final SPTarget base = _ctx.targets().base().get();
-            base.addWatcher(this);
-            basePosUpdate(base);
+        if (_ctx.targets().asterism().isDefined()) {
+            for (final SPTarget base: _ctx.targets().asterism().get().allSpTargetsJava()) {
+              base.addWatcher(this);
+            }
         }
+        resetBaseFromAsterism(); // ok even if asterism is undefined (goes to 0,0 in this case)
 
         repaint();
     }
@@ -776,17 +778,16 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
     }
 
     @Override
-    public void telescopePosUpdate(final WatchablePos tp) {
-        basePosUpdate((SPTarget) tp);
+    public void telescopePosUpdate(final WatchablePos unused) {
+      resetBaseFromAsterism();
     }
 
-    /**
-     * The Base position has been updated.
-     */
-    private void basePosUpdate(final SPTarget target) {
+    /** Reset our base position from the context asterism if any (zenith otherwise) and repaint. */
+    private void resetBaseFromAsterism() {
+        final Asterism asterism = _ctx.targets().asterismOrZero();
         final Option<Long> when = _ctx.schedulingBlockStartJava();
-        final double x = target.getRaDegrees(when).getOrElse(0.0);
-        final double y = target.getDecDegrees(when).getOrElse(0.0);
+        final double x = asterism.getRaDegrees(when).getOrElse(0.0);
+        final double y = asterism.getDecDegrees(when).getOrElse(0.0);
         WorldCoords pos = new WorldCoords(x, y, 2000.);
         setBasePos(pos);
         repaint();

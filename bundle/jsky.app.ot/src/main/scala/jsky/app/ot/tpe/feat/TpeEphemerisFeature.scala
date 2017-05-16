@@ -23,7 +23,7 @@ class TpeEphemerisFeature extends TpeImageFeature("Ephemeris", "Show interpolate
 
   override val getCategory = TpeImageFeatureCategory.target
   override val isEnabledByDefault = true
-  override def isEnabled(ctx: TpeContext) = ctx.targets.base.exists(_.getNonSiderealTarget.isDefined)
+  override def isEnabled(ctx: TpeContext) = ctx.targets.asterism.exists(_.isNonSidereal)
 
   def toScreenCoordinates(c: Coordinates): Option[Point] =
     scala.util.Try {
@@ -46,7 +46,7 @@ class TpeEphemerisFeature extends TpeImageFeature("Ephemeris", "Show interpolate
   }
 
   def getEphemeris: Ephemeris =
-    getContext.targets.base
+    getContext.targets.asterism
       .flatMap(_.getNonSiderealTarget)
       .fold(Ephemeris.empty)(_.ephemeris)
 

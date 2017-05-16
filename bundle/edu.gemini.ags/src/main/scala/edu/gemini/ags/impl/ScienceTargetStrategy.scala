@@ -11,11 +11,12 @@ import edu.gemini.spModel.obs.context.ObsContext
 
 import scala.concurrent.{ExecutionContext, Future}
 
+/** This strategy is for instruments that guide on the science target. */
 case class ScienceTargetStrategy(key: AgsStrategyKey, guideProbe: ValidatableGuideProbe, override val probeBands: BandsList) extends AgsStrategy {
 
   // Since the science target is the used as the guide star, success is always guaranteed.
   override def estimate(ctx: ObsContext, mt: MagnitudeTable)(ec: ExecutionContext): Future[AgsStrategy.Estimate] =
-    Future.successful(AgsStrategy.Estimate.GuaranteedSuccess)
+  Future.successful(AgsStrategy.Estimate.GuaranteedSuccess)
 
   override def analyze(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SiderealTarget): Option[AgsAnalysis] =
     AgsAnalysis.analysis(ctx, mt, guideProbe, guideStar, probeBands)
@@ -23,17 +24,24 @@ case class ScienceTargetStrategy(key: AgsStrategyKey, guideProbe: ValidatableGui
   override def analyze(ctx: ObsContext, mt: MagnitudeTable): List[AgsAnalysis] =
     AgsAnalysis.analysis(ctx, mt, guideProbe, probeBands).toList
 
-  override def candidates(ctx: ObsContext, mt: MagnitudeTable)(ec: ExecutionContext): Future[List[(GuideProbe, List[SiderealTarget])]] = {
-    val so = ctx.getTargets.getBase.toSiderealTarget(ctx.getSchedulingBlockStart)
-    Future.successful(List((guideProbe, List(so))))
+  private def toSiderealTargets(ctx: ObsContext): List[SiderealTarget] = {
+    val when = ctx.getSchedulingBlockStart
+    val ts   = ctx.getTargets.getAsterism.allSpTargets.map(_.toSiderealTarget(when))
+    ts.list.toList
   }
 
+  override def candidates(ctx: ObsContext, mt: MagnitudeTable)(ec: ExecutionContext): Future[List[(GuideProbe, List[SiderealTarget])]] =
+    Future.successful(List((guideProbe, toSiderealTargets(ctx))))
+
   override def select(ctx: ObsContext, mt: MagnitudeTable)(ec: ExecutionContext): Future[Option[AgsStrategy.Selection]] = {
-    // The science target is the guide star, but must be converted from SPTarget to SkyObject.
-    val siderealTarget = ctx.getTargets.getBase.toSiderealTarget(ctx.getSchedulingBlockStart)
-    val posAngle       = ctx.getPositionAngle
-    val assignment     = AgsStrategy.Assignment(guideProbe, siderealTarget)
-    val selection      = AgsStrategy.Selection(posAngle, List(assignment))
+    // As of 17B there are no instruments that use this strategy with a multi-target asterism (which
+    // could result in mutiple assignments below) so we use only the first sidereal target we find.
+    // In practice this is fine. A multi-target asterism in this context is a configuration error
+    // that will result in a stern warning.
+    val siderealTargets = toSiderealTargets(ctx).take(1)
+    val assignments     = siderealTargets.map(AgsStrategy.Assignment(guideProbe, _))
+    val posAngle        = ctx.getPositionAngle
+    val selection       = AgsStrategy.Selection(posAngle, assignments)
     Future.successful(Some(selection))
   }
 

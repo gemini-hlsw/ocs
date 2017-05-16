@@ -23,7 +23,7 @@ public final class ReadableNodeName {
 
         private String formatTarget(ISPObsComponent oc) {
             final TargetObsComp toc = (TargetObsComp) oc.getDataObject();
-            return String.format("Target Environment '%s'", toc.getBase().getName());
+            return String.format("Target Environment '%s'", toc.getAsterism().name());
         }
 
         private String formatInstrument(ISPObsComponent oc) {

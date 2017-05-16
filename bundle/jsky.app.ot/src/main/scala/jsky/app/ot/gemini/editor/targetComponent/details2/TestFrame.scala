@@ -39,7 +39,7 @@ object TestFrame extends App {
     setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE)
   }
 
-  tdp.edit(ctx, ctx.getValue.getTargets.getBase, toc)
+  tdp.edit(ctx, ctx.getValue.getTargets.getArbitraryTargetFromAsterism, toc)
   top.pack()
   top.setVisible(true)
 

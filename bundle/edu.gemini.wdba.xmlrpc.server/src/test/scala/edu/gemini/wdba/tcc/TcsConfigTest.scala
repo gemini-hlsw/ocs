@@ -15,7 +15,7 @@ final class TcsConfigTest extends TestBase {
     val oc  = SPTreeUtil.findTargetEnvNode(obs)
     val toc = oc.getDataObject.asInstanceOf[TargetObsComp]
     val env = toc.getTargetEnvironment
-    env.getBase.setTarget(target)
+    env.getArbitraryTargetFromAsterism.setTarget(target)
 
     oc.setDataObject(toc)
   }

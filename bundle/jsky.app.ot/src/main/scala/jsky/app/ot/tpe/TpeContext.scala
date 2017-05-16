@@ -1,11 +1,10 @@
 package jsky.app.ot.tpe
 
 import edu.gemini.pot.sp._
-
 import edu.gemini.shared.util.immutable.{None => JNone, Option => JOption}
 import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.spModel.core.Site
-import edu.gemini.spModel.data.{ISPDataObject, IOffsetPosListProvider}
+import edu.gemini.spModel.data.{IOffsetPosListProvider, ISPDataObject}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.Conditions
 import edu.gemini.spModel.gemini.gems.Gems
@@ -13,15 +12,15 @@ import edu.gemini.spModel.gemini.altair.InstAltair
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.obscomp.SPInstObsComp
 import edu.gemini.spModel.rich.pot.sp._
-import edu.gemini.spModel.target.env.TargetEnvironment
-import edu.gemini.spModel.target.obsComp.{TargetSelection, TargetObsComp}
-import edu.gemini.spModel.target.offset.{OffsetPosSelection, OffsetPosBase, OffsetUtil, OffsetPosList}
+import edu.gemini.spModel.target.env.{Asterism, TargetEnvironment}
+import edu.gemini.spModel.target.obsComp.{TargetObsComp, TargetSelection}
+import edu.gemini.spModel.target.offset.{OffsetPosBase, OffsetPosList, OffsetPosSelection, OffsetUtil}
 import edu.gemini.spModel.target.SPTarget
-import edu.gemini.spModel.telescope.{IssPortProvider, IssPort}
+import edu.gemini.spModel.telescope.{IssPort, IssPortProvider}
 import edu.gemini.spModel.util.SPTreeUtil
 
 import scala.collection.JavaConverters._
-import edu.gemini.spModel.obs.{SchedulingBlock, SPObservation}
+import edu.gemini.spModel.obs.{SPObservation, SchedulingBlock}
 import edu.gemini.skycalc.Offset
 
 object TpeContext {
@@ -75,13 +74,13 @@ final class TargetContext(obs: Option[ISPObservation]) extends TpeSubContext[ISP
 
   def envOrNull: TargetEnvironment = env.orNull
 
-  def envOrDefault: TargetEnvironment = env.getOrElse(TargetEnvironment.create(baseOrDefault))
+  def envOrDefault: TargetEnvironment = env.getOrElse(TargetEnvironment.create(new SPTarget));
 
-  def base: Option[SPTarget] = env.map(_.getBase)
+  def asterism: Option[Asterism] = env.map(_.getAsterism)
 
-  def baseOrNull: SPTarget = base.orNull
+  def asterismOrNull: Asterism = asterism.orNull // can't call this from Java, so we provide it
 
-  def baseOrDefault: SPTarget = base.getOrElse(new SPTarget)
+  def asterismOrZero: Asterism = asterism.getOrElse(Asterism.single(new SPTarget()))
 
   def selected: Option[SPTarget] = for {
     s <- shell

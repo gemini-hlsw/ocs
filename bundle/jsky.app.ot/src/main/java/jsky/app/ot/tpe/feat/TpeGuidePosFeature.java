@@ -380,11 +380,6 @@ public class TpeGuidePosFeature extends TpePositionFeature
         if (obsComp == null) return;
         final TargetEnvironment env = obsComp.getTargetEnvironment();
 
-        // Get the base position.  If not found, give up.
-        final TpePositionMap pm = TpePositionMap.getMap(_iw);
-        final Point2D.Double base = pm.getLocationFromTag(env.getBase());
-        if (base == null) return;
-
         // Set up for drawing.
         final int size = MARKER_SIZE * 2;
         final Map<TextAttribute, Object> attrMap = new HashMap<>();
@@ -421,7 +416,7 @@ public class TpeGuidePosFeature extends TpePositionFeature
                                 String.format("%s (%d)", tagBase, index++);
 
                 // Find the position map entry for this star, if present.
-                final PosMapEntry<SPTarget> pme = pm.getPositionMapEntry(target);
+                final PosMapEntry<SPTarget> pme = TpePositionMap.getMap(_iw).getPositionMapEntry(target);
                 if (pme == null) continue;
                 final Point2D.Double p = pme.screenPos;
                 if (p == null) continue;

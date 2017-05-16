@@ -162,7 +162,11 @@ public class GpiRule implements IRule {
 
                 P2Problems problems = new P2Problems();
                 TargetEnvironment env = obsComp.getTargetEnvironment();
-                SPTarget base = env.getBase();
+
+                // We only consider the first science target because a multi-target asterism is
+                // a configuration error that will raise a further P2 warning.
+                SPTarget base = env.getAsterism().allSpTargets().head();
+
                 scala.Option<Magnitude> imag = base.getMagnitude(MagnitudeBand.I$.MODULE$);
                 scala.Option<Magnitude> hmag = base.getMagnitude(MagnitudeBand.H$.MODULE$);
                 // OT-74

@@ -26,7 +26,7 @@ public final class TpePositionMap extends PosMap<SPTarget, SPTarget> {
 
     private TargetObsComp obsComp;
 
-    private boolean _findBase = false;
+    private boolean _findAsterism = false;
     private boolean _findUserTargets = false;
     private boolean _findGuideStars = false;
 
@@ -119,20 +119,9 @@ public final class TpePositionMap extends PosMap<SPTarget, SPTarget> {
         handlePosListReset();
     }
 
-    /**
-     * Turn on/off the ability to find the base position with a call to
-     * <tt>locate</tt>.
-     */
-    public void setFindBase(boolean find) {
-        _findBase = find;
-    }
-
-    /**
-     * Return true if the ability to find the base position with a call to
-     * <tt>locate</tt> is turned on.
-     */
-    public boolean isFindBase() {
-        return _findBase;
+    /** Turn on/off the ability to find asterism elements with a call to <tt>locate</tt>. */
+    public void setFindAsterism(boolean find) {
+        _findAsterism = find;
     }
 
     /**
@@ -142,15 +131,6 @@ public final class TpePositionMap extends PosMap<SPTarget, SPTarget> {
     public void setFindGuideStars(boolean find) {
         _findGuideStars = find;
     }
-
-    /**
-     * Return true if the ability to find a guide star with a call to
-     * <tt>locate</tt> is turned on.
-     */
-    public boolean isFindGuideStars() {
-        return _findGuideStars;
-    }
-
 
     /**
      * Turn on/off the ability to find a user position with a call to
@@ -190,8 +170,8 @@ public final class TpePositionMap extends PosMap<SPTarget, SPTarget> {
             // Is this position visible?
             SPTarget tp = pme.taggedPos;
 
-            if (env.isBasePosition(tp)) {
-                if (_findBase) {
+            if (env.getAsterism().allSpTargetsJava().contains(tp)) {
+                if (_findAsterism) {
                     return pme;
                 } else {
                     continue;

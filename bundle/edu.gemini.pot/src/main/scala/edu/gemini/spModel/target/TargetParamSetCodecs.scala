@@ -138,6 +138,9 @@ object TargetParamSetCodecs {
       }
     }
 
+  implicit val SPTargetParamSetCodec: ParamSetCodec[SPTarget] =
+    TargetParamSetCodec.xmap(new SPTarget(_), _.getTarget)
+
 }
 
 

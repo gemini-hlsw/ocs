@@ -18,6 +18,7 @@ import edu.gemini.spModel.obs.SPObservation;
 import edu.gemini.spModel.obs.TimingWindowSolver;
 import edu.gemini.spModel.obs.plannedtime.PlannedTimeSummaryService;
 import edu.gemini.spModel.target.SPTarget;
+import edu.gemini.spModel.target.env.Asterism;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.time.TimeAmountFormatter;
@@ -63,15 +64,15 @@ public class ObsTargetDesc extends TargetDesc {
         TargetEnvironment targetEnv = _findTargetEnv(obs);
         if (targetEnv == null) return null;
 
-        SPTarget basePos = targetEnv.getBase();
+        Asterism asterism = targetEnv.getAsterism();
 
         Function<Option<Long>, Option<WorldCoords>> pos = op ->
-            basePos.getRaDegrees(op).flatMap(x ->
-            basePos.getDecDegrees(op).map(y ->
+            asterism.getRaDegrees(op).flatMap(x ->
+            asterism.getDecDegrees(op).map(y ->
                 new WorldCoords(x, y, 2000.)
             ));
 
-                 String targetName = basePos.getName();
+                 String targetName = asterism.name();
 
         String obsId = "";
         SPObservationID spObsId = obs.getObservationID();
