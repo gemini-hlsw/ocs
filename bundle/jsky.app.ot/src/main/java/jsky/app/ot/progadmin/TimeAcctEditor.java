@@ -3,6 +3,7 @@ package jsky.app.ot.progadmin;
 import edu.gemini.shared.util.TimeValue;
 import edu.gemini.spModel.gemini.obscomp.SPProgram;
 import edu.gemini.spModel.timeacct.TimeAcctAllocation;
+import edu.gemini.spModel.timeacct.TimeAcctAward;
 import edu.gemini.spModel.timeacct.TimeAcctCategory;
 import jsky.coords.HMS;
 
@@ -10,45 +11,59 @@ import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
-import java.text.NumberFormat;
+import java.text.DecimalFormat;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
 final class TimeAcctEditor implements ProgramTypeListener {
+    private static final long MS_PER_HOUR = Duration.ofHours(1).toMillis();
+
     // Used to format values as strings
-    private final static NumberFormat nf = NumberFormat.getInstance(Locale.US);
-    static {
-        nf.setMinimumIntegerDigits(1);
-        nf.setMaximumFractionDigits(1);
+    private final static DecimalFormat nf = new DecimalFormat("0.#");
+
+    private static Duration toDuration(double hours) {
+        return Duration.ofMillis(Math.round(hours * MS_PER_HOUR));
     }
 
+    private static final Duration parseDuration(JTextField field) {
+        try {
+            return toDuration(Double.parseDouble(field.getText()));
+        } catch (NumberFormatException ex) {
+            return Duration.ZERO;
+        }
+    }
+
+
     private final TimeAcctUI ui;
+
+    private final DocumentListener hoursListener = new DocumentListener() {
+        @Override public void insertUpdate(final DocumentEvent event) {
+            update();
+        }
+
+        @Override public void removeUpdate(final DocumentEvent event) {
+            update();
+        }
+
+        @Override public void changedUpdate(final DocumentEvent event) {
+            update();
+        }
+
+        private void update() {
+            final TimeAcctAllocation alloc = getAllocation();
+            showTotalTime(alloc);
+            showPercentTime(alloc);
+        }
+    };
 
     public TimeAcctEditor(final TimeAcctUI ui, final ProgramTypeModel pkm) {
         this.ui = ui;
 
         for (final TimeAcctCategory cat : TimeAcctCategory.values()) {
-            final JTextField field = ui.getHoursField(cat);
-            field.getDocument().addDocumentListener(new DocumentListener() {
-                @Override public void insertUpdate(final DocumentEvent event) {
-                    update();
-                }
-
-                @Override public void removeUpdate(final DocumentEvent event) {
-                    update();
-                }
-
-                @Override public void changedUpdate(final DocumentEvent event) {
-                    update();
-                }
-
-                private void update() {
-                    final TimeAcctAllocation alloc = getAllocation();
-                    showTotalTime(alloc);
-                    showPercentTime(alloc);
-                }
-            });
+            ui.getProgramAwardField(cat).getDocument().addDocumentListener(hoursListener);
+            ui.getPartnerAwardField(cat).getDocument().addDocumentListener(hoursListener);
         }
 
         final boolean enable = enableMinimumTime(pkm.getProgramType());
@@ -60,28 +75,21 @@ final class TimeAcctEditor implements ProgramTypeListener {
 
     public TimeAcctAllocation getAllocation() {
 
-        final Map<TimeAcctCategory, Double> hoursMap = new HashMap<>();
+        final Map<TimeAcctCategory, TimeAcctAward> allocMap = new HashMap<>();
         for (final TimeAcctCategory cat : TimeAcctCategory.values()) {
-            final JTextField field = ui.getHoursField(cat);
-            final String hoursStr = field.getText();
-            try {
-                hoursMap.put(cat, Double.parseDouble(hoursStr));
-            } catch (final Exception ex) {
-                // ignore
-            }
+            final Duration  progAward = parseDuration(ui.getProgramAwardField(cat));
+            final Duration  partAward = parseDuration(ui.getPartnerAwardField(cat));
+            final TimeAcctAward award = new TimeAcctAward(progAward, partAward);
+            allocMap.put(cat, award);
         }
-        return new TimeAcctAllocation(hoursMap);
+        return new TimeAcctAllocation(allocMap);
     }
 
     private void showTotalTime(final TimeAcctAllocation alloc) {
-        // Show the total time awarded without trailing 0s
-        String hoursStr = String.format("%.2f", alloc.getTotalTime());
-        if (hoursStr.endsWith(".00")) {
-            hoursStr = hoursStr.substring(0, hoursStr.length() - 3);
-        } else if (hoursStr.endsWith("0")) {
-            hoursStr = hoursStr.substring(0, hoursStr.length() - 1);
-        }
-        ui.getTimeAwardedLabel().setText(hoursStr);
+        final TimeAcctAward a = alloc.getSum();
+        ui.getTotalAwardLabel()  .setText(nf.format(a.getTotalHours()));
+        ui.getProgramAwardLabel().setText(nf.format(a.getProgramHours()));
+        ui.getPartnerAwardLabel().setText(nf.format(a.getPartnerHours()));
     }
 
     private TimeValue getMinimumTime() {
@@ -107,7 +115,7 @@ final class TimeAcctEditor implements ProgramTypeListener {
     private void showPercentTime(final TimeAcctAllocation alloc) {
         for (final TimeAcctCategory cat : TimeAcctCategory.values()) {
             final JLabel lab = ui.getPercentLabel(cat);
-            final double percent = alloc.getPercentage(cat);
+            final double percent = alloc.getPercentage(cat, TimeAcctAward::getTotalAward);
             lab.setText(String.format("%.0f%%", percent));
         }
     }
@@ -127,9 +135,11 @@ final class TimeAcctEditor implements ProgramTypeListener {
 
         // Show the time for each category.
         for (final TimeAcctCategory cat : TimeAcctCategory.values()) {
-            final JTextField field = ui.getHoursField(cat);
-            final double hours = alloc.getHours(cat);
-            field.setText(nf.format(hours)); // REL-434
+            final double progHours = alloc.getAward(cat).getProgramHours();
+            ui.getProgramAwardField(cat).setText(nf.format(progHours)); // REL-434
+
+            final double partHours = alloc.getAward(cat).getPartnerHours();
+            ui.getPartnerAwardField(cat).setText(nf.format(partHours)); // REL-434
         }
 
         // Show the percentage for each category.

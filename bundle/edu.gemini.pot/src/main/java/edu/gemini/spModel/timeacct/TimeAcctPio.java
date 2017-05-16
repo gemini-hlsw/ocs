@@ -5,6 +5,7 @@ import edu.gemini.spModel.pio.PioFactory;
 import edu.gemini.spModel.pio.Pio;
 import edu.gemini.spModel.pio.PioParseException;
 
+import java.time.Duration;
 import java.util.*;
 
 /**
@@ -15,22 +16,24 @@ public final class TimeAcctPio {
 
     private static final String ALLOC_PARAM_SET = "timeAcctAlloc";
     private static final String CATEGORY_PARAM  = "category";
-    private static final String HOURS_PARAM = "hours";
+    private static final String PROGRAM_PARAM   = "program";
+    private static final String PARTNER_PARAM   = "partner";
 
     private TimeAcctPio() {
     }
 
     public static ParamSet getParamSet(final PioFactory factory, final TimeAcctAllocation allocation) {
-        ParamSet pset = factory.createParamSet(TIME_ACCT_PARAM_SET);
+        final ParamSet pset = factory.createParamSet(TIME_ACCT_PARAM_SET);
 
         for (TimeAcctCategory cat : allocation.getCategories()) {
-            Double hours = allocation.getHours(cat);
-            if (hours == 0) continue;
-            
-            ParamSet ratioParamSet = factory.createParamSet(ALLOC_PARAM_SET);
-            Pio.addParam(factory, ratioParamSet, CATEGORY_PARAM, cat.name());
-            Pio.addDoubleParam(factory, ratioParamSet, HOURS_PARAM, hours);
-            pset.addParamSet(ratioParamSet);
+            final TimeAcctAward award = allocation.getAward(cat);
+            if (award.isZero()) continue;
+
+            final ParamSet allocParamSet = factory.createParamSet(ALLOC_PARAM_SET);
+            Pio.addParam(    factory, allocParamSet, CATEGORY_PARAM, cat.name());
+            Pio.addLongParam(factory, allocParamSet, PROGRAM_PARAM,  award.getProgramAward().toMillis());
+            Pio.addLongParam(factory, allocParamSet, PARTNER_PARAM,  award.getPartnerAward().toMillis());
+            pset.addParamSet(allocParamSet);
         }
 
         return pset;
@@ -38,26 +41,28 @@ public final class TimeAcctPio {
 
     public static TimeAcctAllocation getTimeAcctAllocation(ParamSet pset) throws PioParseException {
 
-        List<ParamSet> lst = pset.getParamSets(ALLOC_PARAM_SET);
+        final List<ParamSet> lst = pset.getParamSets(ALLOC_PARAM_SET);
         if (lst == null) return TimeAcctAllocation.EMPTY;
 
-        Map<TimeAcctCategory, Double> allocMap = new HashMap<TimeAcctCategory, Double>();
-        for (ParamSet timeAcctRatioPset : lst) {
-            TimeAcctCategory cat = getCategory(timeAcctRatioPset);
-            Double hours = getHours(timeAcctRatioPset);
-            allocMap.put(cat, hours);
+        final  Map<TimeAcctCategory, TimeAcctAward> allocMap = new HashMap<>();
+        for (ParamSet awardPset : lst) {
+            final TimeAcctCategory cat = getCategory(awardPset);
+            final Duration     program = getDuration(awardPset, PROGRAM_PARAM);
+            final Duration     partner = getDuration(awardPset, PARTNER_PARAM);
+            final TimeAcctAward  award = new TimeAcctAward(program, partner);
+            allocMap.put(cat, award);
         }
 
         return new TimeAcctAllocation(allocMap);
     }
 
     private static TimeAcctCategory getCategory(ParamSet pset) throws PioParseException {
-        String name = Pio.getValue(pset, CATEGORY_PARAM, null);
+        final String name = Pio.getValue(pset, CATEGORY_PARAM, null);
         if (name == null) {
             throw new PioParseException("missing '" + CATEGORY_PARAM + "'");
         }
 
-        TimeAcctCategory cat;
+        final TimeAcctCategory cat;
         try {
             cat = TimeAcctCategory.valueOf(name);
         } catch (Exception ex) {
@@ -66,11 +71,11 @@ public final class TimeAcctPio {
         return cat;
     }
 
-    public static double getHours(ParamSet pset) throws PioParseException {
-        double hours = Pio.getDoubleValue(pset, HOURS_PARAM, -1.0);
-        if (hours < 0) {
-            throw new PioParseException("missing or illegal time accounting hours: " + hours);
+    public static Duration getDuration(ParamSet pset, String paramName) throws PioParseException {
+        final long ms = Pio.getLongValue(pset, paramName, -1l);
+        if (ms < 0) {
+            throw new PioParseException("missing or illegal " + paramName + " time: " + ms);
         }
-        return hours;
+        return Duration.ofMillis(ms);
     }
 }

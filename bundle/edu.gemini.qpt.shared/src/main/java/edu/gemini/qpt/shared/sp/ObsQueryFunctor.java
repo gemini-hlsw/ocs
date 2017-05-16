@@ -263,7 +263,7 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor implements Iterable<
                 usedTime = otc.getTime(ChargeClass.PROGRAM);
 
                 // Get the remaining program time.
-                TimeValue awardedTime = program.getAwardedTime();
+                TimeValue awardedTime = program.getAwardedProgramTime();
                 remainingTime = awardedTime == null ? 0 : awardedTime.getMilliseconds() - usedTime;
                 if (awardedTime == null) {
                     LOGGER.warning("Program " + id + " has null awarded time.");

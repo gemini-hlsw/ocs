@@ -431,7 +431,7 @@ public class GeneralRule implements IRule {
                     if (t == 0.0) {
                         probs.addError(PREFIX+"BAND3TIME_RULE_ZERO_MESSAGE", ZERO_MESSAGE, elements.getProgramNode()); // REL-337
                     }
-                    if (t > elements.getProgram().getAwardedTime().getTimeAmount()) {
+                    if (t > elements.getProgram().getAwardedProgramTime().getTimeAmount()) {
                         probs.addError(PREFIX+"BAND3TIME_RULE_ALLOC_MESSAGE", ALLOC_MESSAGE, elements.getProgramNode()); // REL-336
                     }
                     if (probs.getProblemCount() != 0) {
