@@ -1351,17 +1351,17 @@ public final class GmosRule implements IRule {
 // ==================
 // HAMAMATSU GMOS-N: REL-3057
 // Times here are updated exposure times that give 50% full well.
-// We multiply by 2 to get the saturation value in all cases but g-band, which were defined before this REL task.
+// We multiply by 2 to get the saturation times in all cases as per this REL task.
 
-// GMOS-N g-band (Hamamatsu Blue CCD) 1x1 binning (unbinned) - old times, do not multiply by 2.
-// BG20: 4.35 hours (longer than the maximum exposure time due to cosmic rays)
-// BG50: 1.83 hours (longer than the maximum exposure time due to cosmic rays)
-// BG80: 32.5 minutes
-// BGAny: 4.5 minutes
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.g_G0301, SkyBackground.PERCENT_20), 4.35 * 60 * 60);
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.g_G0301, SkyBackground.PERCENT_50), 1.83 * 60 * 60);
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.g_G0301, SkyBackground.PERCENT_80), 32.5 * 60);
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.g_G0301, SkyBackground.ANY), 4.5 * 60);
+// GMOS-N g-band (Hamamatsu Blue CCD) 1x1 binning (unbinned)
+// BG20: 3.38 hours
+// BG50: 1.39 hours
+// BG80: 25 minutes
+// BGAny: 3.5 minutes
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.g_G0301, SkyBackground.PERCENT_20), 2 * 3.38 * 60 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.g_G0301, SkyBackground.PERCENT_50), 2 * 1.39 * 60 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.g_G0301, SkyBackground.PERCENT_80), 2 * 25.0 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.g_G0301, SkyBackground.ANY), 2 * 3.5 * 60);
 // GMOS-N r-band (Hamamatsu Red CCD) 1x1 binning (unbinned)
 // BG20: 1.61 hours
 // BG50: 53.3 minutes
