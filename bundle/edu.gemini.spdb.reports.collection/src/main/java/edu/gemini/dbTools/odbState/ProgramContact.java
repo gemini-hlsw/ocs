@@ -1,6 +1,3 @@
-//
-// $Id: ProgramContact.java 46768 2012-07-16 18:58:53Z rnorris $
-//
 package edu.gemini.dbTools.odbState;
 
 import edu.gemini.pot.sp.ISPProgram;
@@ -43,7 +40,7 @@ public class ProgramContact implements Serializable {
 
         final String piAddrs;
         piAddrs = piInfo.getEmail();
-        final String ngoAddrs = obj.getNGOContactEmail();
+        final String ngoAddrs = obj.getPrimaryContactEmail();
         final String gemContactAddrs = obj.getContactPerson();
 
         _emailAddresses = new ProgramEmailAddresses(piAddrs, ngoAddrs, gemContactAddrs);

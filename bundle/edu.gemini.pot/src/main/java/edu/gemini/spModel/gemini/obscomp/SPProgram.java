@@ -45,7 +45,7 @@ public class SPProgram extends AbstractDataObject implements ISPStaffOnlyFieldPr
     // for serialization
     private static final long serialVersionUID = 4L;
 
-    public static final String VERSION = "2017A-1";
+    public static final String VERSION = "2017B-1";
 
     /** This property records the program queue/classical state. */
     public static final String PROGRAM_MODE_PROP = "programMode";
@@ -68,8 +68,8 @@ public class SPProgram extends AbstractDataObject implements ISPStaffOnlyFieldPr
 
     public static final String NGO_CONTACT_EMAIL_PROP = "ngoEmail";
 
-    /** The default value for the NGO contact email **/
-    public static final String DEFAULT_NGO_CONTACT_EMAIL = EMPTY_STRING;
+    /** The default value for the primary contact email **/
+    public static final String DEFAULT_PRIMARY_CONTACT_EMAIL = EMPTY_STRING;
 
     /** The default final active date */
     public static final Date DEFAULT_FINAL_ACTIVE_DATE = CalendarUtil.newDate(Calendar.JANUARY, 1, 2005);
@@ -119,17 +119,12 @@ public class SPProgram extends AbstractDataObject implements ISPStaffOnlyFieldPr
 
     public static final String GSA_PROP = "gsa";
 
-    public static final String IGNORED_PROBLEMS_PROP = "ignoredProblems";
-
     public static final String TOO_TYPE_PROP = "tooType";
-
-    /** The default value for the ignored problems List */
-    public static final List<String> DEFAULT_IGORED_PROBLEMS = null;
 
     /**
      * Program status values.
      */
-    public static enum ProgramStatus implements DisplayableSpType, DescribableSpType {
+    public enum ProgramStatus implements DisplayableSpType, DescribableSpType {
         NEW("New", "Created by New"),
         PHASE1("Phase 1", "Initialized from Phase 1"),
         PHASE2("Phase 2", "In Phase 2 preparation"),
@@ -143,7 +138,8 @@ public class SPProgram extends AbstractDataObject implements ISPStaffOnlyFieldPr
 
         private String _name;
         private String _desc;
-        private ProgramStatus(String name, String description) {
+
+        ProgramStatus(String name, String description) {
             _name = name;
             _desc = description;
         }
@@ -172,13 +168,10 @@ public class SPProgram extends AbstractDataObject implements ISPStaffOnlyFieldPr
         }
     }
 
-    /** An array holding the String names of the ProgramStatus **/
-//    public static String[] PROGRAMSTATUS = {ProgramStatus.NEW.name(), ProgramStatus.PHASE1.name(), ProgramStatus.PHASE2.name(), ProgramStatus.STARTED.name(), ProgramStatus.COMPLETED.name(), ProgramStatus.SENT.name(), };
-
     /**
      * Program execution models
      */
-    public static enum ProgramMode implements DisplayableSpType {
+    public enum ProgramMode implements DisplayableSpType {
         QUEUE("Queue"),
         CLASSICAL("Classical"),
         ;
@@ -188,7 +181,7 @@ public class SPProgram extends AbstractDataObject implements ISPStaffOnlyFieldPr
 
         private String _displayValue;
 
-        private ProgramMode(String name) {
+        ProgramMode(String name) {
             _displayValue = name;
         }
 
@@ -346,7 +339,7 @@ public class SPProgram extends AbstractDataObject implements ISPStaffOnlyFieldPr
     /**
      * Values (yes/no), to indicate if it is a active program
      */
-    public static enum Active implements DisplayableSpType {
+    public enum Active implements DisplayableSpType {
 
         NO("No") {
             public String getObfuscatedValue() {
@@ -363,7 +356,7 @@ public class SPProgram extends AbstractDataObject implements ISPStaffOnlyFieldPr
 
         private String _displayValue;
 
-        private Active(String name) {
+        Active(String name) {
             _displayValue = name;
         }
 
@@ -414,7 +407,7 @@ public class SPProgram extends AbstractDataObject implements ISPStaffOnlyFieldPr
     private String _contactPerson = DEFAULT_CONTACT_PERSON;
 
     /** The internal value **/
-    private String _ngoContactEmail = DEFAULT_NGO_CONTACT_EMAIL;
+    private String _primaryContactEmail = DEFAULT_PRIMARY_CONTACT_EMAIL;
 
     // The internal value
     private String _queueBand = DEFAULT_QUEUE_BAND;
@@ -438,7 +431,6 @@ public class SPProgram extends AbstractDataObject implements ISPStaffOnlyFieldPr
     private boolean _completed = false;
 
     // Indicates if the PI should be notified when the observation is done
-//    private YesNoType _notifyPi = YesNoType.NO; // REL-209
     private YesNoType _notifyPi = YesNoType.YES; // REL-1150
 
     // indicates the final date that the program is active in the database.
@@ -448,9 +440,6 @@ public class SPProgram extends AbstractDataObject implements ISPStaffOnlyFieldPr
 
     private GsaAspect _gsa;
     private GsaPhase1Data _gsaPhase1Data;
-
-    // UX-1520
-//    private List<String> _ignoredProblems = DEFAULT_IGORED_PROBLEMS;
 
     // SW: prior to 2012B, this was extracted from the old Phase 1 document
     private TooType _too = TooType.none;
@@ -477,26 +466,17 @@ public class SPProgram extends AbstractDataObject implements ISPStaffOnlyFieldPr
             prog._piInfo = (PIInfo)_piInfo.clone();
         }
 
-        // UX-1520
-//        if (_ignoredProblems != null) {
-//            prog._ignoredProblems = new ArrayList(_ignoredProblems);
-//        }
-
         return prog;
     }
 
     @Override public boolean staffOnlyFieldsEqual(ISPDataObject to) {
         final SPProgram that = (SPProgram) to;
 
-//        final String thisPiEmail  = (_piInfo == null) ? null : _piInfo._email;
-//        final String thatPiEmail  = (that._piInfo == null) ? null : that._piInfo._email;
         final Affiliate thisPiAff = (_piInfo == null) ? null : _piInfo._affiliate;
         final Affiliate thatPiAff = (that._piInfo == null) ? null : that._piInfo._affiliate;
 
-        return //ObjectUtil.equals(thisPiEmail, thatPiEmail) &&
-               thisPiAff == thatPiAff &&
+        return thisPiAff == thatPiAff &&
                ObjectUtil.equals(_contactPerson, that._contactPerson) &&
-//               ObjectUtil.equals(_ngoContactEmail, that._ngoContactEmail) &&
                _rollover == that._rollover &&
                _isThesis == that._isThesis &&
                _isLibrary == that._isLibrary &&
@@ -525,11 +505,9 @@ public class SPProgram extends AbstractDataObject implements ISPStaffOnlyFieldPr
         // A PI can't edit his email or his affiliate
         if (_piInfo == null) _piInfo = that._piInfo;
         if (that._piInfo != null) {
-//            _piInfo._email     = that._piInfo._email;
             _piInfo._affiliate = that._piInfo._affiliate;
         }
         _contactPerson   = that._contactPerson;
-//        _ngoContactEmail = that._ngoContactEmail;
 
         _rollover        = that._rollover;
         _isThesis        = that._isThesis;
@@ -795,19 +773,19 @@ public class SPProgram extends AbstractDataObject implements ISPStaffOnlyFieldPr
     }
 
     /**
-     * Returns the email for the NGO contact scientist for this proposal.
+     * Returns the email for the primary contact scientist for this proposal.
      */
-    public String getNGOContactEmail() {
-        return _ngoContactEmail;
+    public String getPrimaryContactEmail() {
+        return _primaryContactEmail;
     }
 
     /**
-     * Sets the value for the NGO contact email person for this proposal.
+     * Sets the value for the primary contact email person for this proposal.
      */
-    public void setNGOContactEmail(String newValue) {
-        String oldValue = _ngoContactEmail;
+    public void setPrimaryContactEmail(String newValue) {
+        String oldValue = _primaryContactEmail;
         if (!oldValue.equals(newValue)) {
-            _ngoContactEmail = newValue;
+            _primaryContactEmail = newValue;
             firePropertyChange(NGO_CONTACT_EMAIL_PROP, oldValue, newValue);
         }
     }
@@ -861,9 +839,9 @@ public class SPProgram extends AbstractDataObject implements ISPStaffOnlyFieldPr
      * @return String version of the awarded time, else the default
      * value.
      */
-    public TimeValue getAwardedTime() {
+    public TimeValue getAwardedProgramTime() {
         if (_timeAllocation == null) return new TimeValue(0, TimeValue.Units.hours);
-        return new TimeValue(_timeAllocation.getTotalTime(), TimeValue.Units.hours);
+        return TimeValue.millisecondsToTimeValue(_timeAllocation.getSum().getProgramAward().toMillis(), TimeValue.Units.hours);
     }
 
     public TimeAcctAllocation getTimeAcctAllocation() {
@@ -954,8 +932,8 @@ public class SPProgram extends AbstractDataObject implements ISPStaffOnlyFieldPr
             Pio.addParam(factory, paramSet, CONTACT_PERSON_PROP, contactPerson);
         }
 
-        String ngoContactEmail = getNGOContactEmail();
-        if (!ngoContactEmail.equals(DEFAULT_NGO_CONTACT_EMAIL)) {
+        String ngoContactEmail = getPrimaryContactEmail();
+        if (!ngoContactEmail.equals(DEFAULT_PRIMARY_CONTACT_EMAIL)) {
             Pio.addParam(factory, paramSet, NGO_CONTACT_EMAIL_PROP, ngoContactEmail);
         }
 
@@ -990,13 +968,6 @@ public class SPProgram extends AbstractDataObject implements ISPStaffOnlyFieldPr
             }
         }
 
-//        TimeValue awardedTime = getAwardedTime();
-//        if (awardedTime != null) {
-//            Pio.addParam(factory, paramSet, AWARDED_TIME_PROP,
-//                    String.valueOf(awardedTime.getTimeAmount()),
-//                    awardedTime.getTimeUnits().name());
-//        }
-
         // Write the time accounting information.
         if (_timeAllocation != null) {
             ParamSet timeAcctPset;
@@ -1005,8 +976,8 @@ public class SPProgram extends AbstractDataObject implements ISPStaffOnlyFieldPr
 
             // Write the awarded time (for GSA only -- will be ignored on
             // import)
-            Pio.addParam(factory, paramSet, AWARDED_TIME_PROP,
-                    String.valueOf(_timeAllocation.getTotalTime()), "hours");
+            final double hrs = _timeAllocation.getSum().getProgramHours();
+            Pio.addParam(factory, paramSet, AWARDED_TIME_PROP, Double.toString(hrs), "hours");
         }
         if ((_minTimeValue != null) && (_minTimeValue.getTimeAmount() > 0)) {
             Pio.addParam(factory, paramSet, MINIMUM_TIME_PROP,
@@ -1078,7 +1049,7 @@ public class SPProgram extends AbstractDataObject implements ISPStaffOnlyFieldPr
             v = Pio.getValue(paramSet, NGO_CONTACT_EMAIL_PROP_OLD); // for backward compat
         }
         if (v != null) {
-            setNGOContactEmail(v);
+            setPrimaryContactEmail(v);
         }
         v = Pio.getValue(paramSet, QUEUE_BAND_PROP);
         if (v != null) {

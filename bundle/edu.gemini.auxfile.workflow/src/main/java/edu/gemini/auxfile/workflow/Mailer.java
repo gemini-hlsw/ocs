@@ -1,7 +1,3 @@
-//
-// $Id: Mailer.java 893 2007-07-19 19:43:20Z swalker $
-//
-
 package edu.gemini.auxfile.workflow;
 
 import edu.gemini.auxfile.copier.AuxFileType;
@@ -19,23 +15,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
 
-/**
- *
- */
 public class Mailer {
-
-    private static final MailTransport DEFAULT_TRANSPORT = new MailTransport() {
-        public void send(Message message) throws MessagingException {
-            Transport.send(message);
-        }
-    };
-
     private MailConfig _config;
     private MailTransport _transport;
     private IDBDatabaseService _odb;
 
     public Mailer(MailConfig config, IDBDatabaseService odb) {
-        this(config, odb, DEFAULT_TRANSPORT);
+        this(config, odb, Transport::send);
     }
 
     public Mailer(MailConfig config, IDBDatabaseService odb, MailTransport transport) {
@@ -141,7 +127,7 @@ public class Mailer {
 		msg.setText(buf.toString());
 
 		// Send the mail.
-		Transport.send(msg);
+		_transport.send(msg);
 	}
 
 

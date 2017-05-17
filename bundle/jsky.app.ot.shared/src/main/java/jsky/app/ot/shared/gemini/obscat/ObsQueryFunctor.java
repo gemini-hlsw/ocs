@@ -175,7 +175,7 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor {
                 } else if (name.equals(ObsCatalogInfo.EMAIL)) {
                     // check against all three emails
                     final boolean b1 = a_sc.isTrueFor(piInfo.getEmail());
-                    final boolean b2 = a_sc.isTrueFor(spProg.getNGOContactEmail());
+                    final boolean b2 = a_sc.isTrueFor(spProg.getPrimaryContactEmail());
                     final boolean b3 = a_sc.isTrueFor(spProg.getContactPerson());
                     if (!(b1 || b2 || b3)) {
                         return false;

@@ -61,7 +61,7 @@ public final class TooEmailTest extends SpModelTestBase {
         SPProgram prog = (SPProgram) getProgram().getDataObject();
         prog.setTitle(PROG_NAME);
         prog.setContactPerson(GEMINI_EMAIL);
-        prog.setNGOContactEmail(cat(NGO_EMAILS));
+        prog.setPrimaryContactEmail(cat(NGO_EMAILS));
         SPProgram.PIInfo piInfo = new SPProgram.PIInfo("Biff", "Henderson", PI_EMAIL, "999", null);
         prog.setPIInfo(piInfo);
         getProgram().setDataObject(prog);

@@ -83,7 +83,7 @@ public class ExecHoursTable extends AbstractTable {
 
 			row.put(Columns.PROGRAM_ID, prog.getProgramID());
 			try {
-				row.put(Columns.ALLOCATED_HRS, program.getAwardedTime().getMilliseconds() / MS_PER_HOUR);
+				row.put(Columns.ALLOCATED_HRS, program.getAwardedProgramTime().getMilliseconds() / MS_PER_HOUR);
 			} catch (NullPointerException npe) {
 				LOGGER.warning("Program " + prog.getProgramID() + " has null awarded time.");
 				row.put(Columns.ALLOCATED_HRS, 0f);

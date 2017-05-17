@@ -127,7 +127,11 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
      */
     public enum Filter implements DisplayableSpType, SequenceableSpType, LoggableSpType, ObsoletableSpType {
 
-        OPEN("Open", "Open", new Some<>(1.6)),
+        OPEN("Open", "Open", new Some<>(1.6)) {
+            @Override public boolean isObsolete() {
+                return true;
+            }
+        },
         Y("Y (1.02 um)", "Y", new Some<>(1.02)),
         F1056("F1056 (1.056 um)", "F1056", new Some<>(1.056)),
         F1063("F1063 (1.063 um)", "F1063", new Some<>(1.063)),
@@ -147,7 +151,7 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         };
 
         /** The default Filter value **/
-        public static final Filter DEFAULT = OPEN;
+        public static final Filter DEFAULT = H;
         public static final ItemKey KEY = new ItemKey(INSTRUMENT_KEY, "filter");
 
         private final String _displayName;

@@ -106,7 +106,7 @@ public final class QueueProgramStatusExternalTable extends AbstractTable {
             }
 
             // Allocated time
-            final TimeValue allocatedTV = prog.getAwardedTime();
+            final TimeValue allocatedTV = prog.getAwardedProgramTime();
             if (allocatedTV == null) {
                 LOGGER.fine("Program " + id + " has null allocatedTime. Skipping.");
                 return Collections.emptyList();
@@ -128,7 +128,7 @@ public final class QueueProgramStatusExternalTable extends AbstractTable {
             row.put(Columns.PARTNERS, getPartners(prog.getTimeAcctAllocation()));
             row.put(Columns.TITLE, prog.getTitle());
             row.put(Columns.INST_MODE, ReportUtils.getScienceInstruments(progShell));
-            row.put(Columns.HOURS_ALLOC, prog.getAwardedTime().getMilliseconds() / MS_PER_HOUR);
+            row.put(Columns.HOURS_ALLOC, prog.getAwardedProgramTime().getMilliseconds() / MS_PER_HOUR);
             row.put(Columns.STATUS, ReportUtils.getExecutionStatus(progShell, prog, false));
             row.put(Columns.DATES, getDates(progShell));
             row.put(Columns.COMP, completion);
@@ -172,7 +172,7 @@ public final class QueueProgramStatusExternalTable extends AbstractTable {
     private String getPartners(final TimeAcctAllocation timeAcctAllocation) {
         final StringBuilder builder = new StringBuilder();
         for (TimeAcctCategory cat : timeAcctAllocation.getCategories()) {
-            if (timeAcctAllocation.getHours(cat) > 0.0) {
+            if (!timeAcctAllocation.getAward(cat).getProgramAward().isZero()) {
                 if (builder.length() > 0) {
                     builder.append("/");
                 }

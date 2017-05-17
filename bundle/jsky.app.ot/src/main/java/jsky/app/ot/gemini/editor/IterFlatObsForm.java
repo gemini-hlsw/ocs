@@ -104,12 +104,9 @@ public class IterFlatObsForm extends JPanel {
         arcs = new JCheckBox[4];
         for (int i=0; i < 4; ++i) {
             arcs[i] = new JCheckBox();
-            if (i != 3)
-                arcPanel.add(arcs[i], cc.xy(i*2 + 1, 1));
-            else {
+            if (i == 3)
                 arcs[i].setHorizontalAlignment(SwingConstants.LEADING);
-                arcPanel.add(arcs[i]);
-            }
+            arcPanel.add(arcs[i], cc.xy(i*2 + 1, 1));
         }
 
         add(arcPanel, cc.xywh(5, 9, 5, 1));

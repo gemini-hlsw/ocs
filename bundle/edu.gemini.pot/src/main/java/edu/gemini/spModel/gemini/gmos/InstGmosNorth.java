@@ -44,7 +44,7 @@ public class InstGmosNorth extends
     public static final PropertyDescriptor FILTER_PROP;
     public static final PropertyDescriptor FPUNIT_PROP;
 
-    private static final Map<String, PropertyDescriptor> PRIVATE_PROP_MAP = new TreeMap<String, PropertyDescriptor>();
+    private static final Map<String, PropertyDescriptor> PRIVATE_PROP_MAP = new TreeMap<>();
     public static final Map<String, PropertyDescriptor> PROPERTY_MAP = Collections.unmodifiableMap(PRIVATE_PROP_MAP);
 
     private static PropertyDescriptor initProp(final String propName, final String getMethod, String setMethod) {
@@ -80,7 +80,6 @@ public class InstGmosNorth extends
         setFilter(GmosNorthType.FilterNorth.DEFAULT);
         setFPUnit(GmosNorthType.FPUnitNorth.DEFAULT);
         setStageMode(GmosNorthType.StageModeNorth.DEFAULT);
-        setAmpCount(GmosCommonType.AmpCount.DEFAULT_NORTH);
     }
 
     public Map<String, PropertyDescriptor> getProperties() {

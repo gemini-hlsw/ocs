@@ -3,7 +3,9 @@ package edu.gemini.spModel.timeacct;
 import java.io.Serializable;
 import java.io.ObjectInputStream;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.*;
+import java.util.function.Function;
 
 /**
  * A collection of time allocations for the various
@@ -13,12 +15,13 @@ public final class TimeAcctAllocation implements Serializable {
 
     public static final TimeAcctAllocation EMPTY = new TimeAcctAllocation();
 
-    private final Map<TimeAcctCategory, Double> allocMap;
+    private final Map<TimeAcctCategory, TimeAcctAward> allocMap;
 
-    private transient double totalTime;
+    private final TimeAcctAward sum;
 
     private TimeAcctAllocation() {
         allocMap = Collections.emptyMap();
+        sum      = TimeAcctAward.ZERO;
     }
 
     /**
@@ -28,83 +31,44 @@ public final class TimeAcctAllocation implements Serializable {
      * @param allocationMap hours for all relevant categories; hours must be
      * greater than or equal to 0
      */
-    public TimeAcctAllocation(final Map<TimeAcctCategory, Double> allocationMap) {
-        final Map<TimeAcctCategory, Double> tmpAllocMap = new TreeMap<>(allocationMap);
+    public TimeAcctAllocation(final Map<TimeAcctCategory, TimeAcctAward> allocationMap) {
+        final Map<TimeAcctCategory, TimeAcctAward> tmpAllocMap = new TreeMap<>(allocationMap);
 
-        for (final Map.Entry<TimeAcctCategory, Double> me : tmpAllocMap.entrySet()) {
-            final Double d = me.getValue();
-            if (d == null) {
+        TimeAcctAward tmp = TimeAcctAward.ZERO;
+
+        for (final Map.Entry<TimeAcctCategory, TimeAcctAward> me : tmpAllocMap.entrySet()) {
+            final TimeAcctAward a = me.getValue();
+            if (a == null) {
                 throw new IllegalArgumentException(
-                        String.format("null time accounting allocation for category %s", me.getKey().name())
+                        String.format("null time accounting award for category %s", me.getKey().name())
                 );
             }
-            if (d < 0.0) {
-                throw new IllegalArgumentException(
-                        String.format("negative time accounting allocation (%f) for category %s", d, me.getKey().name())
-                );
-            }
-            totalTime += d;
+            tmp = tmp.plus(a);
         }
+
+        sum      = tmp;
         allocMap = Collections.unmodifiableMap(tmpAllocMap);
     }
-
-    /**
-     * Computes a TimeAcctAllocation from a total time and a ratio for each
-     * category.  The total time is divided among the categories according to
-     * the portion indicated in the ratioMap.
-     *
-     * @param totalHours total amount of time distributed across all categories
-     * @param ratioMap fraction of time to allocate to each of the time
-     * accounting categories; the sum of the values of the ratio map should
-     * equal 1 (ignorning rounding errors in floating point math)
-     *
-     * @throws IllegalArgumentException if sum of fractions in
-     * <code>ratioMap</code> does not equal 1
-     */
-    public TimeAcctAllocation(final double totalHours, final Map<TimeAcctCategory, Double> ratioMap) {
-        final Map<TimeAcctCategory, Double> tmpAllocMap = new TreeMap<>();
-
-        if (ratioMap.size() == 0) {
-            // not clear how to award time, so the total time and allocation
-            // map will be empty
-            allocMap = Collections.emptyMap();
-            return;
-        }
-
-        // Award a proportional amount of time to each category.
-        for (final Map.Entry<TimeAcctCategory, Double> me : ratioMap.entrySet()) {
-            final double hours = totalHours * me.getValue();
-            tmpAllocMap.put(me.getKey(), hours);
-            totalTime += hours;
-        }
-
-        // Make sure that the totalTime we computed matches the totalHours
-        // provided this method.  In other words, verify that the ratioMap
-        // was what we expected it to be, fractions adding up to 1.0.
-        if (Math.abs(totalHours - totalTime) > 1e-5) {
-            throw new IllegalArgumentException("ratioMap not valid");
-        }
-
-        allocMap = Collections.unmodifiableMap(tmpAllocMap);
-    }
-
 
     /**
      * Gets the number of hours associated with the given category.
      */
-    public double getHours(final TimeAcctCategory category) {
-        final Double res = allocMap.get(category);
-        return (res == null) ? 0 : res;
+    public TimeAcctAward getAward(final TimeAcctCategory category) {
+        final TimeAcctAward res = allocMap.get(category);
+        return (res == null) ? TimeAcctAward.ZERO : res;
+    }
+
+    private double ratio(Function<TimeAcctAward, Duration> toDuration, TimeAcctAward award) {
+        if (toDuration.apply(sum).isZero()) return 0;
+        return ((double) toDuration.apply(award).toMillis()) / ((double) toDuration.apply(sum).toMillis());
     }
 
     /**
      * Gets the percentage of the total time allocation that is associated with
      * the given category.
      */
-    public double getPercentage(final TimeAcctCategory category) {
-        if (totalTime == 0) return 0;
-        final double hours = getHours(category);
-        return hours/totalTime * 100;
+    public double getPercentage(final TimeAcctCategory category, Function<TimeAcctAward, Duration> toDuration) {
+        return ratio(toDuration, getAward(category)) * 100;
     }
 
     /**
@@ -120,17 +84,17 @@ public final class TimeAcctAllocation implements Serializable {
      * should be associated with it.  For example, if half of the time spent
      * on a program should be attributed to the US, then the US category will
      * be 0.5.
+     *
+     * @param toDuration function that converts an award to a Duration; with
+     *                   this the caller can get total time ratios or just
+     *                   program or partner time ratios
      */
-    public SortedMap<TimeAcctCategory, Double> getRatios() {
+    public SortedMap<TimeAcctCategory, Double> getRatios(final Function<TimeAcctAward, Duration> toDuration) {
         final SortedMap<TimeAcctCategory, Double> res = new TreeMap<>();
-        if (totalTime == 0) return res;
+        if (sum.isZero()) return res;
 
-        for (final Map.Entry<TimeAcctCategory, Double> me : allocMap.entrySet()) {
-            final double time  = me.getValue();
-            if (time == 0) continue;
-
-            final double ratio = time / totalTime;
-            res.put(me.getKey(), ratio);
+        for (final Map.Entry<TimeAcctCategory, TimeAcctAward> me : allocMap.entrySet()) {
+            res.put(me.getKey(), ratio(toDuration, me.getValue()));
         }
 
         return res;
@@ -139,22 +103,14 @@ public final class TimeAcctAllocation implements Serializable {
     /**
      * Gets the total time allocated to all the categories combined.
      */
-    public double getTotalTime() {
-        return totalTime;
-    }
-
-    private void readObject(final ObjectInputStream in) throws IOException, ClassNotFoundException {
-        in.defaultReadObject();
-        totalTime = 0;
-        for (final Double d : allocMap.values()) {
-            totalTime += d;
-        }
+    public TimeAcctAward getSum() {
+        return sum;
     }
 
     public String toString() {
         final StringBuilder buf = new StringBuilder();
 
-        for (final Map.Entry<TimeAcctCategory, Double> me : allocMap.entrySet()) {
+        for (final Map.Entry<TimeAcctCategory, TimeAcctAward> me : allocMap.entrySet()) {
             if (buf.length() > 0) {
                 buf.append(", ");
             }
@@ -165,21 +121,15 @@ public final class TimeAcctAllocation implements Serializable {
     }
 
     @Override
-    public boolean equals(final Object o) {
+    public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
         final TimeAcctAllocation that = (TimeAcctAllocation) o;
-
-        if (Double.compare(that.totalTime, totalTime) != 0) return false;
-        if (!allocMap.equals(that.allocMap)) return false;
-
-        return true;
+        return Objects.equals(allocMap, that.allocMap);
     }
 
     @Override
     public int hashCode() {
-        final long temp = Double.doubleToLongBits(totalTime);
-        return 31 * allocMap.hashCode() + (int) (temp ^ (temp >>> 32));
+        return Objects.hash(allocMap);
     }
 }

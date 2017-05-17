@@ -126,7 +126,7 @@ object TimingWindowParser extends RegexParsers {
     temporalParser(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.of("UTC")), "Failed to parse date") ^^ { case ta => Instant.from(ta).toEpochMilli }
 
   // Convert hhhh:mm:ss as a duration to a Long in ms.
-  private def hhmmssToLong(hh: Int, mm: Int, ss: Int = 0): Long =
+  private def hhmmssToLong(hh: Long, mm: Long, ss: Long = 0): Long =
     1000 * (60 * (60 * hh + mm) + ss)
 
   // Convenience method for spec testing.

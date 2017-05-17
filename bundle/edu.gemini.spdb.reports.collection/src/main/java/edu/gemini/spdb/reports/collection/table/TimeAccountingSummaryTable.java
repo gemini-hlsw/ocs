@@ -24,6 +24,7 @@ import edu.gemini.spModel.time.ObsTimeCharges;
 import edu.gemini.spModel.time.ObsTimeCorrection;
 import edu.gemini.spModel.util.SPTreeUtil;
 import edu.gemini.spModel.timeacct.TimeAcctAllocation;
+import edu.gemini.spModel.timeacct.TimeAcctAward;
 import edu.gemini.spModel.timeacct.TimeAcctCategory;
 import edu.gemini.spdb.reports.IColumn;
 import edu.gemini.spdb.reports.util.AbstractTable;
@@ -104,11 +105,11 @@ public class TimeAccountingSummaryTable extends AbstractTable {
         // If none, then we cannot report for this program.
         final SPProgram progDataObj = (SPProgram) programShell.getDataObject();
         final TimeAcctAllocation alloc = progDataObj.getTimeAcctAllocation();
-        if ((alloc == null) || (alloc.getTotalTime() == 0)) {
+        if ((alloc == null) || (alloc.getSum().getProgramAward().isZero())) {
             LOGGER.fine("No time accounting information for " + id);
             return Collections.emptyList();
         }
-        final SortedMap<TimeAcctCategory, Double> ratios = alloc.getRatios();
+        final SortedMap<TimeAcctCategory, Double> ratios = alloc.getRatios(TimeAcctAward::getProgramAward);
         if (ratios.size() == 0) {
             LOGGER.fine("No time accounting category for " + id);
             return Collections.emptyList();

@@ -257,7 +257,7 @@ public class TooEmail {
         InternetAddress[] addrs = _lookupAddresses(too, DestinationType.cc);
 
         // First add in the NGOs.
-        String ngoEmail = prog.getNGOContactEmail();
+        String ngoEmail = prog.getPrimaryContactEmail();
         if (ngoEmail != null) {
             addrs = _merge(addrs, MailUtil.parseAddresses(ngoEmail));
         }

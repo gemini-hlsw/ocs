@@ -1348,65 +1348,68 @@ public final class GmosRule implements IRule {
 
     static {
 
-        // ==================
-        //HAMAMATSU GMOS-N
+// ==================
+// HAMAMATSU GMOS-N: REL-3057
+// Times here are updated exposure times that give 50% full well.
+// We multiply by 2 to get the saturation times in all cases as per this REL task.
 
 // GMOS-N g-band (Hamamatsu Blue CCD) 1x1 binning (unbinned)
-// BG20: 4.35 hours (longer than the maximum exposure time due to cosmic rays)
-// BG50: 1.83 hours (longer than the maximum exposure time due to cosmic rays)
-// BG80: 32.5 minutes
-// BGAny: 4.5 minutes
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.g_G0301, SkyBackground.PERCENT_20), 4.35 * 60 * 60);
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.g_G0301, SkyBackground.PERCENT_50), 1.83 * 60 * 60);
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.g_G0301, SkyBackground.PERCENT_80), 32.5 * 60);
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.g_G0301, SkyBackground.ANY), 4.5 * 60);
-// GMOS-N r-band (Hamamatsu Red CCD) 1x1 binning (unbinned)
-// BG20: 1.83 hours (longer than the maximum exposure time due to cosmic rays)
-// BG50: 1.02 hours (longer than the maximum exposure time due to cosmic rays)
+// BG20: 3.38 hours
+// BG50: 1.39 hours
 // BG80: 25 minutes
-// BGAny: 4.3 minutes
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.r_G0303, SkyBackground.PERCENT_20), 1.83 * 60 * 60);
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.r_G0303, SkyBackground.PERCENT_50), 1.02 * 60 * 60);
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.r_G0303, SkyBackground.PERCENT_80), 25.0 * 60);
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.r_G0303, SkyBackground.ANY), 4.3 * 60);
+// BGAny: 3.5 minutes
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.g_G0301, SkyBackground.PERCENT_20), 2 * 3.38 * 60 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.g_G0301, SkyBackground.PERCENT_50), 2 * 1.39 * 60 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.g_G0301, SkyBackground.PERCENT_80), 2 * 25.0 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.g_G0301, SkyBackground.ANY), 2 * 3.5 * 60);
+// GMOS-N r-band (Hamamatsu Red CCD) 1x1 binning (unbinned)
+// BG20: 1.61 hours
+// BG50: 53.3 minutes
+// BG80: 21.7 minutes
+// BGAny: 3.8 minutes
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.r_G0303, SkyBackground.PERCENT_20), 2 * 1.61 * 60 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.r_G0303, SkyBackground.PERCENT_50), 2 * 53.3 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.r_G0303, SkyBackground.PERCENT_80), 2 * 21.7 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.r_G0303, SkyBackground.ANY), 2 * 3.8 * 60);
 // GMOS-N i-band (Hamamatsu Red CCD) 1x1 binning (unbinned)
-// BG20: 1.05 hours (longer than the maximum exposure time due to cosmic rays)
-// BG50: 41 minutes (may end up being longer than the maximum exposure time due to cosmic rays)
-// BG80: 22.3 minutes
-// BGAny: 5.5 minutes
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.i_G0302, SkyBackground.PERCENT_20), 1.05 * 60 * 60);
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.i_G0302, SkyBackground.PERCENT_50), 41.0 * 60);
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.i_G0302, SkyBackground.PERCENT_80), 22.3 * 60);
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.i_G0302, SkyBackground.ANY), 5.5 * 60);
+// BG20: 53.5 minutes
+// BG50: 35 minutes
+// BG80: 19.2 minutes
+// BGAny: 4.7 minutes
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.i_G0302, SkyBackground.PERCENT_20), 2 * 53.3 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.i_G0302, SkyBackground.PERCENT_50), 2 * 35.0 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.i_G0302, SkyBackground.PERCENT_80), 2 * 19.2 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.i_G0302, SkyBackground.ANY), 2 * 4.7 * 60);
 // GMOS-N z-band (Hamamatsu Red CCD) 1x1 binning (unbinned)
-// BG20: 12.3 minutes
-// BG50: 12 minutes
-// BG80: 11.5 minutes
-// BGAny: 8.7 minutes
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.z_G0304, SkyBackground.PERCENT_20), 12.3 * 60);
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.z_G0304, SkyBackground.PERCENT_50), 12.0 * 60);
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.z_G0304, SkyBackground.PERCENT_80), 11.5 * 60);
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.z_G0304, SkyBackground.ANY), 8.7 * 60);
+// BG20: 10.7 minutes
+// BG50: 10.3 minutes
+// BG80: 10.0 minutes
+// BGAny: 7.5 minutes
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.z_G0304, SkyBackground.PERCENT_20), 2 * 10.7 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.z_G0304, SkyBackground.PERCENT_50), 2 * 10.3 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.z_G0304, SkyBackground.PERCENT_80), 2 * 10.0 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.z_G0304, SkyBackground.ANY), 2 * 7.5 * 60);
 // GMOS-N Z-band (Hamamatsu Red CCD) 1x1 binning (unbinned)
-// BG20: 35 minutes (may end up being longer than the maximum exposure time due to cosmic rays)
-// BG50: 31.1 minutes (may end up being longer than the maximum exposure time due to cosmic rays)
-// BG80: 25.8 minutes
-// BGAny: 13.3 minutes
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Z_G0322, SkyBackground.PERCENT_20), 35.0 * 60);
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Z_G0322, SkyBackground.PERCENT_50), 31.1 * 60);
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Z_G0322, SkyBackground.PERCENT_80), 25.8 * 60);
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Z_G0322, SkyBackground.ANY), 13.3 * 60);
+// BG20: 30 minutes
+// BG50: 26.7 minutes
+// BG80: 22.2 minutes
+// BGAny: 11.5 minutes
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Z_G0322, SkyBackground.PERCENT_20), 2 * 30.0 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Z_G0322, SkyBackground.PERCENT_50), 2 * 26.7 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Z_G0322, SkyBackground.PERCENT_80), 2 * 22.2 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Z_G0322, SkyBackground.ANY), 2 * 11.5 * 60);
 // GMOS-N Y-band (Hamamatsu Red CCD) 1x1 binning (unbinned)
-// BG20: 52.6 minutes (may end up being longer than the maximum exposure time due to cosmic rays)
-// BG50: 52.7 minutes (clearly there is something not quite right with the ITC...)
-// BG80: 52.8 minutes (clearly there is something not quite right with the ITC...)
-// BGAny: 52.8 minutes (I suggest we call all of these 53 minutes, we already know there is an approximation with the ITC because it has no dependence of background counts on sky background in the nearIR)
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Y_G0323, SkyBackground.PERCENT_20), 52.6 * 60);
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Y_G0323, SkyBackground.PERCENT_50), 52.7 * 60);
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Y_G0323, SkyBackground.PERCENT_80), 52.8 * 60);
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Y_G0323, SkyBackground.ANY), 52.8 * 60);
+// BG20: 44.2 minutes
+// BG50: 44.2 minutes
+// BG80: 44.2 minutes
+// BGAny: 44.2 minutes
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Y_G0323, SkyBackground.PERCENT_20), 2 * 44.2 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Y_G0323, SkyBackground.PERCENT_50), 2 * 44.2 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Y_G0323, SkyBackground.PERCENT_80), 2 * 44.2 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Y_G0323, SkyBackground.ANY), 2 * 44.2 * 60);
 
-        //HAMAMATSU GMOS-S
+// HAMAMATSU GMOS-S
+// Unlike above, these are saturation times and thus we do not multiply by 2.
 
 // GMOS-S g-band (Hamamatsu Blue CCD) 1x1 binning (unbinned)
 // BG20: 4.35 hours (longer than the maximum exposure time due to cosmic rays)

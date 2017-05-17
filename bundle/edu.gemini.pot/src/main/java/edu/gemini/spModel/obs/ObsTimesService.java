@@ -112,7 +112,7 @@ public final class ObsTimesService {
      */
     public static long getRemainingProgramTime(final ISPProgram prog) {
         final long awarded = ImOption.apply(prog.getDataObject()).
-                map(dataObj -> ((SPProgram)dataObj).getAwardedTime()).
+                map(dataObj -> ((SPProgram)dataObj).getAwardedProgramTime()).
                 getOrElse(TimeValue.ZERO_HOURS).
                 getMilliseconds();
         final long progTime = getCorrectedObsTimes(prog).getTimeCharges().getTime(ChargeClass.PROGRAM);

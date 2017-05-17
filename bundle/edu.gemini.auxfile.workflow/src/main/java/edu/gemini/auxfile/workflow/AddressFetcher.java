@@ -81,7 +81,7 @@ public final class AddressFetcher {
 
 
         // add NGO
-        res.put(Role.NGO, Collections.unmodifiableList(parseAddresses(dataObj.getNGOContactEmail(), progId)));
+        res.put(Role.NGO, Collections.unmodifiableList(parseAddresses(dataObj.getPrimaryContactEmail(), progId)));
 
         // add contact scientist
         res.put(Role.CS, Collections.unmodifiableList(parseAddresses(dataObj.getContactPerson(), progId)));

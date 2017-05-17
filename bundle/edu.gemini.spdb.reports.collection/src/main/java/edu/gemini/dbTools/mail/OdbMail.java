@@ -1,6 +1,3 @@
-//
-// $Id: OdbMail.java 7519 2007-01-03 14:09:53Z shane $
-//
 package edu.gemini.dbTools.mail;
 
 import edu.gemini.dbTools.odbState.ObservationState;
@@ -72,23 +69,20 @@ public class OdbMail {
         final SortedMap<SPObservationID, ObservationState> oldObsMap = oldProg.getObservations();
         final SortedMap<SPObservationID, ObservationState> newObsMap = newProg.getObservations();
 
-        final Map<OdbMailEvent, List<SPObservationID>> eventMap = new HashMap<OdbMailEvent, List<SPObservationID>>();  // key is OdbMailEvent
+        final Map<OdbMailEvent, List<SPObservationID>> eventMap = new HashMap<>();  // key is OdbMailEvent
         for (final Object o : newObsMap.values()) {
             final ObservationState newObs = (ObservationState) o;
 
             // Get the last known status of the observation.  If not
             // previously known, then assume it was Phase2.
 
-            ObservationStatus oldStatus;
-            oldStatus = ObservationStatus.PHASE2;
+            ObservationStatus oldStatus = ObservationStatus.PHASE2;
             final SPObservationID obsId = newObs.getObservationId();
-            final ObservationState oldObs;
-            oldObs = oldObsMap.get(obsId);
+            final ObservationState oldObs = oldObsMap.get(obsId);
             if (oldObs != null) oldStatus = oldObs.getStatus();
 
             // Okay, compare the status values.
-            final ObservationStatus newStatus;
-            newStatus = newObs.getStatus();
+            final ObservationStatus newStatus = newObs.getStatus();
             if (newStatus.equals(oldStatus)) continue; // nothing changed
 
             // Okay, they have different status values.  See if there is
@@ -103,7 +97,7 @@ public class OdbMail {
             // observation.  Record that fact.
             List<SPObservationID> obsIdList = eventMap.get(event);
             if (obsIdList == null) {
-                obsIdList = new ArrayList<SPObservationID>();
+                obsIdList = new ArrayList<>();
                 eventMap.put(event, obsIdList);
             }
             obsIdList.add(obsId);
