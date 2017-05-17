@@ -7,12 +7,12 @@ import edu.gemini.spModel.gemini.altair.InstAltair
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
 import edu.gemini.spModel.gemini.gmos.{InstGmosNorth, InstGmosSouth}
 import edu.gemini.spModel.obs.context.ObsContext
-
 import java.time.Instant
+
+import edu.gemini.spModel.target.SPTarget
 
 import scala.collection.mutable.ListBuffer
 import scala.util.hashing.{MurmurHash3 => M3}
-
 import scala.collection.JavaConverters._
 
 /** Computes an `Int` hash value that corresponds to the set of inputs to the
@@ -56,18 +56,17 @@ object AgsHash {
       c.cc.## +=: c.iq.## +=: c.sb.## +=: buf
     }
 
-    // Base Position
-    Option(ctx.getTargets).foreach { t =>
+    // Asterism
+    Option(ctx.getTargets).foreach { env =>
       val time = Some(new java.lang.Long(when)).asGeminiOpt
-      val base = t.getBase
-
-      def toData(coord: GemOption[java.lang.Double]): Int =
-        coord.asScalaOpt.map(_.doubleValue).##
-
-      val ra  = toData(base.getRaDegrees(time))
-      val dec = toData(base.getDecDegrees(time))
-
-      ra +=: dec +=: buf
+      def hashTarget(t: SPTarget): Unit = {
+        def toData(coord: GemOption[java.lang.Double]): Int =
+          coord.asScalaOpt.map(_.doubleValue).##
+        val ra  = toData(t.getRaDegrees(time))
+        val dec = toData(t.getDecDegrees(time))
+        ra +=: dec +=: buf
+      }
+      env.getAsterism.targets.foreach(hashTarget)
     }
 
     // Offset Positions, which are returned in a Set.  Order is not important

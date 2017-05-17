@@ -47,7 +47,7 @@ object RolloverObservation {
       targetComp <- findByType(o, TargetObsComp.SP_TYPE)
       dataObj    <- Option(targetComp.getDataObject.asInstanceOf[TargetObsComp])
       targetEnv  <- Option(dataObj.getTargetEnvironment)
-      science    <- Option(targetEnv.getBase)
+      science    <- Option(targetEnv.getAsterism)
       name       <- Option(science.getName)
     } yield {
 

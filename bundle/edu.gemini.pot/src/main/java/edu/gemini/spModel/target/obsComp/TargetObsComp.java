@@ -10,6 +10,7 @@ import edu.gemini.spModel.pio.PioFactory;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.TelescopePosWatcher;
 import edu.gemini.spModel.target.WatchablePos;
+import edu.gemini.spModel.target.env.Asterism;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 
 import java.io.IOException;
@@ -74,14 +75,10 @@ public final class TargetObsComp extends AbstractDataObject implements GuideProb
     public String getTitle() {
         // Always compute the name; the UI disallows changes.
         final TargetEnvironment env = getTargetEnvironment();
-        final SPTarget tp = env.getBase();
-        if (tp != null) {
-            final String initName  = tp.getName();
-            final String finalName = initName == null || initName.trim().isEmpty() ? "<Untitled>" : initName;
-            return helper.targetTag(tp.getTarget()) + ": " + finalName;
-        } else {
-            return super.getTitle();
-        }
+        final Asterism a = env.getAsterism();
+        final String initName  = a.getName();
+        final String finalName = initName == null || initName.trim().isEmpty() ? "<Untitled>" : initName;
+        return helper.targetTag(a) + ": " + finalName;
     }
 
     /**

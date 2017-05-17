@@ -12,6 +12,7 @@ import edu.gemini.spModel.gemini.trecs.TReCSParams.Filter;
 import edu.gemini.spModel.gemini.trecs.TReCSParams.Mask;
 import edu.gemini.spModel.gemini.trecs.TReCSParams.WindowWheel;
 import edu.gemini.spModel.target.SPTarget;
+import edu.gemini.spModel.target.env.Asterism;
 import edu.gemini.spModel.target.env.GuideProbeTargets;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.PwfsGuideProbe;
@@ -327,8 +328,8 @@ public class TrecsRule implements IRule {
             for (TargetObsComp targetObsComp : elements.getTargetObsComp()) {
 
                 TargetEnvironment env = targetObsComp.getTargetEnvironment();
-                SPTarget baseTarget = env.getBase();
-                if (baseTarget == null) return null;
+                Asterism asterism = env.getAsterism();
+                if (asterism == null) return null;
 
 
                 for (GuideProbeTargets guideTargets : env.getPrimaryGuideGroup()) {
@@ -337,7 +338,7 @@ public class TrecsRule implements IRule {
                         // Calculate the distance to the base position in arcmin
                         final Option<Long> when = elements.getSchedulingBlock().map(b -> b.start());
 
-                        Option<WorldCoords> oBasePos = _getWorldCoords(baseTarget, when);
+                        Option<WorldCoords> oBasePos = _getWorldCoords(asterism, when);
                         Option<WorldCoords> oPos = _getWorldCoords(target, when);
 
                         oBasePos.foreach(basePos ->
@@ -366,6 +367,14 @@ public class TrecsRule implements IRule {
                    tp.getDecDegrees(time).map(dec ->
                      new WorldCoords(ra, dec, 2000.)));
         }
+
+        // Return the world coordinates for the given astrism
+        private Option<WorldCoords> _getWorldCoords(Asterism tp, Option<Long> time) {
+          return tp.getRaDegrees(time).flatMap( ra ->
+                  tp.getDecDegrees(time).map(dec ->
+                          new WorldCoords(ra, dec, 2000.)));
+        }
+
     };
 
 
