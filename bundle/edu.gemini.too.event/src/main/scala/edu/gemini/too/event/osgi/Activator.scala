@@ -30,7 +30,6 @@ class Activator extends BundleActivator {
 
           // Our TOO service, registered locally as a TooPublisher
           val service = new TooService(odb, site)
-          odb.registerTrigger(TooCondition, service)
           odb.addProgramEventListener(service)
           val props1 = new java.util.Hashtable[String,String]
           val reg1 = ctx.registerService(classOf[TooPublisher].getName, service, props1)
@@ -45,7 +44,6 @@ class Activator extends BundleActivator {
           // Cleanup
           () => {
             odb.removeProgramEventListener(service)
-            odb.unregisterTrigger(TooCondition, service)
             reg1.unregister()
             reg2.unregister()
           }
