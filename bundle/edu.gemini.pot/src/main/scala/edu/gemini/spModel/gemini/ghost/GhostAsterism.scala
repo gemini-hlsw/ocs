@@ -15,12 +15,7 @@ import Scalaz._
 /** Base trait for the three GHOST asterism types: two target, beam switching,
   * and high resolution.
   */
-sealed trait GhostAsterism extends Asterism {
-  import GhostAsterism.{XBinning, YBinning}
-
-  def xBinning: XBinning
-  def yBinning: YBinning
-}
+sealed trait GhostAsterism extends Asterism
 
 /** GHOST asterism model.
   */
@@ -48,14 +43,16 @@ object GhostAsterism {
   }
 
 
-  /** GHOST targets are associated with a guiding state (enabled or disabled),
-    * referring to whether the dedicated guide fibers surrounding the science
-    * target should be used.
+  /** GHOST targets are associated with a desired x/y binning and a guiding
+    * state (enabled or disabled), referring to whether the dedicated guide
+    * fibers surrounding the science target should be used.
     *
     * There is a default guiding state based on magnitude, but this can be
     * explicitly overridden.
     */
   final case class GhostTarget(target: SPTarget,
+                               xBinning: XBinning,
+                               yBinning: YBinning,
                                explicitGuideFiberState: Option[GuideFiberState]) {
 
     def coordinates(when: Option[Instant]): Option[Coordinates] =
@@ -141,9 +138,9 @@ object GhostAsterism {
     case object Four  extends YBinning(4)
     case object Eight extends YBinning(8)
 
-    val one: YBinning   = One
-    val two: YBinning   = Two
-    val four: YBinning  = Four
+    val one:   YBinning = One
+    val two:   YBinning = Two
+    val four:  YBinning = Four
     val eight: YBinning = Eight
 
     val All = NonEmptyList(one, two, four, eight)
@@ -153,28 +150,6 @@ object GhostAsterism {
   }
 
 
-  /** Binning options for standard resolution.  The exact detector binning
-    * values differ depending on whether in two-target or object+sky mode.
-    * (TODO: can these be set automatically in terms of target magnitude? The
-    *  ConOps doc lists faint and very faint both as starting at mag 18.)
-    */
-  sealed trait StandardResBinning extends Product with Serializable
-
-  object StandardResBinning {
-    case object Bright    extends StandardResBinning
-    case object Faint     extends StandardResBinning
-    case object VeryFaint extends StandardResBinning
-
-    val bright: StandardResBinning    = Bright
-    val faint: StandardResBinning     = Faint
-    val veryFaint: StandardResBinning = VeryFaint
-
-    val All = NonEmptyList(bright, faint, veryFaint)
-
-    implicit val EqualStandardResBinning: Equal[StandardResBinning] =
-      Equal.equalA[StandardResBinning]
-  }
-
   /** GHOST two-target standard resolution asterism type.  In this mode, two
     * targets are observed simultaneously with both IFUs at standard resolution.
     *
@@ -183,7 +158,6 @@ object GhostAsterism {
     * particular PWFS2 guide star.
     */
   final case class TwoTarget(
-                     bin:  StandardResBinning,
                      ifu1: GhostTarget,
                      ifu2: GhostTarget,
                      base: Option[Coordinates]) extends GhostAsterism {
@@ -207,20 +181,6 @@ object GhostAsterism {
     override def basePosition(when: Instant): Option[Coordinates] =
       base orElse defaultBasePosition(when)
 
-    import StandardResBinning._
-
-    override def xBinning: XBinning =
-      bin match {
-        case Bright | Faint    => XBinning.One
-        case VeryFaint         => XBinning.Two
-      }
-
-    override def yBinning: YBinning =
-      bin match {
-        case Bright            => YBinning.Two
-        case Faint | VeryFaint => YBinning.Four
-      }
-
     def ifu1GuideFiberState(cc: CloudCover): GuideFiberState =
       GhostTarget.standardResGuideFiberState(ifu1, cc)
 
@@ -243,7 +203,6 @@ object GhostAsterism {
     * necessary.
     */
   final case class BeamSwitching(
-                     bin:          StandardResBinning,
                      target:       GhostTarget,
                      sky1:         Coordinates,
                      explicitSky2: Option[Coordinates]) extends GhostAsterism {
@@ -255,20 +214,6 @@ object GhostAsterism {
     /** Defines the base position to be the same as the target position. */
     override def basePosition(when: Instant): Option[Coordinates] =
       target.coordinates(Some(when))
-
-    import StandardResBinning._
-
-    override def xBinning: XBinning =
-      bin match {
-        case Bright | Faint    => XBinning.One
-        case VeryFaint         => XBinning.Two
-      }
-
-    override def yBinning: YBinning =
-      bin match {
-        case Bright            => YBinning.Two
-        case Faint | VeryFaint => YBinning.Eight
-      }
 
     /** Deterimines the guide fiber state for the IFU observing the science
       * object. For the IFU observing a sky position, GuideFiberState is always
@@ -294,24 +239,6 @@ object GhostAsterism {
   }
 
 
-  /** Binning options for high resolution.
-    */
-  sealed trait HighResBinning extends Product with Serializable
-
-  object HighResBinning {
-    case object Bright extends HighResBinning
-    case object Faint  extends HighResBinning
-
-    val bright: HighResBinning = Bright
-    val faint: HighResBinning  = Faint
-
-    val All = NonEmptyList(bright, faint)
-
-    implicit val EqualHighResBinning: Equal[HighResBinning] =
-      Equal.equalA[HighResBinning]
-  }
-
-
   /** Fiber agitator state.
     */
   sealed trait FiberAgitatorState extends Product with Serializable
@@ -330,37 +257,16 @@ object GhostAsterism {
   }
 
   /** The high resolution asterism comes in two flavors, normal high resolution
-    * mode and precision radial velocity (PRV) mode.  Normal high resolution
-    * mode can use bright or faint detector binning, but PRV is always bright.
-    * PRV can be set up with fiber agitation while normal high resolution mode
-    * cannot.
+    * mode and precision radial velocity (PRV) mode.
     */
-  sealed trait HighResMode extends Product with Serializable {
-    import HighResMode._
-    import HighResBinning._
-
-    def xBinning: XBinning =
-      XBinning.One
-
-    def yBinning: YBinning =
-      this match {
-        case Normal(bin) =>
-          bin match {
-            case Bright => YBinning.One
-            case Faint  => YBinning.Eight
-          }
-
-        case Prv(_, _)   =>
-          YBinning.One
-      }
-  }
+  sealed trait HighResMode extends Product with Serializable
 
   object HighResMode {
 
     /** Normal high res mode can use bright or faint binning options. (Prv is
       * always bright).
       */
-    final case class Normal(bin: HighResBinning) extends HighResMode
+    case object Normal extends HighResMode
 
     /** Prv can be set up with a fiber agitator. The simultaneous calibration
       * lamp can default to an appropriate value for the target magnitude, or
@@ -391,12 +297,6 @@ object GhostAsterism {
     /** Defines the base position to be the same as the target position. */
     override def basePosition(when: Instant): Option[Coordinates] =
       target.coordinates(Some(when))
-
-    override def xBinning: XBinning =
-      mode.xBinning
-
-    override def yBinning: YBinning =
-      mode.yBinning
 
     /** Deterimines the guide fiber state for the HRIFU1.  Typically this will
       * be enabled since the target is bright but may be explicitly turned off.
