@@ -198,19 +198,17 @@ object SpProgramFactory {
 
   def timeAcctAllocation(proposal: Proposal): Option[TimeAcctAllocation] =
     awardedHours(proposal).filter(_ > 0.0) flatMap { hrs =>
-      timeAccountingRatios(proposal) match {
-        case Nil    => None
-        case ratios =>
-          val progTime = hoursFromObservations(proposal, _.progTime)
-          val partTime = hoursFromObservations(proposal, _.partTime)
-          require((hrs - (progTime |+| partTime).hours).abs < 1e-1,
-            "Awarded time must be equal to the sum of program time and partner calibration time")
+      val progTime = hoursFromObservations(proposal, _.progTime)
+      val partTime = hoursFromObservations(proposal, _.partTime)
 
+      timeAccountingRatios(proposal) match {
+        case Nil => None
+        case ratios =>
           val jmap = ratios.map { case (cat, rat) =>
-            def duration(v: TimeAmount): Duration =
+            def durationRatio(v: TimeAmount): Duration =
               Duration.ofMillis(((v.hours * rat) * MsPerHour).round)
 
-            val award = new TimeAcctAward(duration(progTime), duration(partTime))
+            val award = new TimeAcctAward(durationRatio(progTime), durationRatio(partTime))
             (cat, award)
           }.toMap.asJava
           Some(new TimeAcctAllocation(jmap))
