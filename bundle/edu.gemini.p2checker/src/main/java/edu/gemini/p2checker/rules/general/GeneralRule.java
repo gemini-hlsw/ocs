@@ -347,23 +347,24 @@ public class GeneralRule implements IRule {
         public IP2Problems check(final ObservationElements elements)  {
             if (elements.getTargetObsComp().isEmpty()) return null; // can't perform this check without a target environment
 
-            final scala.Option<ProperMotion> opm = elements.getTargetObsComp().getValue().getAsterism().basePositionProperMotion();
-            if (opm.isDefined()) {
-                final ProperMotion pm = opm.get();
+            final P2Problems problems = new P2Problems();
+            for (SPTarget spt: elements.getTargetObsComp().getValue().getAsterism().allSpTargetsJava()) {
+              final scala.Option<ProperMotion> opm = spt.getProperMotion();
+              if (opm.isDefined()) {
+                  final ProperMotion pm = opm.get();
 
-                final double pm_ra = pm.deltaRA().velocity();
-                final double pm_dec = pm.deltaDec().velocity();
-                final double total = pm_ra * pm_ra + pm_dec * pm_dec;
+                  final double pm_ra = pm.deltaRA().velocity();
+                  final double pm_dec = pm.deltaDec().velocity();
+                  final double total = pm_ra * pm_ra + pm_dec * pm_dec;
 
-                if (total > MAX_PM * MAX_PM) { //to avoid sqrt call
-                    final P2Problems problems = new P2Problems();
-                    problems.addWarning(PREFIX + "TARGET_PM_RULE", MESSAGE, elements.getTargetObsComponentNode().getValue());
-                    return problems;
-                }
+                  if (total > MAX_PM * MAX_PM) { //to avoid sqrt call
+                      problems.addWarning(PREFIX + "TARGET_PM_RULE", MESSAGE, elements.getTargetObsComponentNode().getValue());
+                  }
+              }
             }
-            return null;
-        }
-    };
+            return problems;
+          }
+      };
 
     // targets are equal only if positions are defined and within _getMinDistance
     private static boolean _areTargetsEquals(final SPTarget p1Target, final SPTarget target, final ObservationElements elems) {

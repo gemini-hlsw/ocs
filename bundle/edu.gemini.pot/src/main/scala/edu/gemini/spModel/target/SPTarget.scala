@@ -199,4 +199,7 @@ final class SPTarget(private var target: Target) extends WatchablePos {
   def getMagnitudeBandsJava: java.util.Set[MagnitudeBand] =
     new java.util.HashSet(getMagnitudeBands.asJavaCollection)
 
+  def getProperMotion: Option[ProperMotion] =
+    Target.pm.get(target)
+
 }
