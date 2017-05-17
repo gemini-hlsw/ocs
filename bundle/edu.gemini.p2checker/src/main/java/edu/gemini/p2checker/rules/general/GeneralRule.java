@@ -315,9 +315,10 @@ public class GeneralRule implements IRule {
 
             if (!hasScienceObserves(elements.getSequence())) return null; //if there are not observes, ignore this check (SCT-260)
 
-            final Asterism asterism = elements.getTargetObsComp().getValue().getAsterism();
-            if ("".equals(asterism.name().trim())) {
-                problems.addError(PREFIX+"EMPTY_TARGET_NAME_MSG", EMPTY_TARGET_NAME_MSG, elements.getTargetObsComponentNode().getValue());
+            for (SPTarget t: elements.getTargetObsComp().getValue().getAsterism().allSpTargetsJava()) {
+              if ("".equals(t.getName().trim())) {
+                  problems.addError(PREFIX+"EMPTY_TARGET_NAME_MSG", EMPTY_TARGET_NAME_MSG, elements.getTargetObsComponentNode().getValue());
+              }
             }
 
             return problems;
