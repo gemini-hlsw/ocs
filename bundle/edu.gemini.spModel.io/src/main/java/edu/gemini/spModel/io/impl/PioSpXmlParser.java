@@ -21,6 +21,7 @@ import edu.gemini.spModel.io.impl.migration.to2016A.To2016A;
 import edu.gemini.spModel.io.impl.migration.to2016B.To2016B;
 import edu.gemini.spModel.io.impl.migration.to2016B.To2016B2;
 import edu.gemini.spModel.io.impl.migration.to2017A.To2017A;
+import edu.gemini.spModel.io.impl.migration.to2017B.To2017B;
 import edu.gemini.spModel.io.impl.migration.to2018A.To2018A;
 import edu.gemini.spModel.io.impl.migration.toPalote.Grillo2Palote;
 import edu.gemini.spModel.obs.SPObservation;
@@ -231,6 +232,9 @@ public final class PioSpXmlParser {
 
         // Update pre-2017A programs
         To2017A.updateProgram(doc);
+
+        // Update pre-2017A programs
+        To2017B.updateProgram(doc);
 
         // Update pre-2018A programs
         To2018A.updateProgram(doc);
