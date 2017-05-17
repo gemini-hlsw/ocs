@@ -232,7 +232,7 @@ public final class PioSpXmlParser {
         // Update pre-2017A programs
         To2017A.updateProgram(doc);
 
-        // Update pre-2017B programs
+        // Update pre-2018A programs
         To2018A.updateProgram(doc);
 
         // We will special case the Phase 1 container.
@@ -565,4 +565,3 @@ public final class PioSpXmlParser {
         return groupNode;
     }
 }
-
