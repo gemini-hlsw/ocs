@@ -138,9 +138,9 @@ public class ProgramForm extends JPanel {
         add(emailBox, cc.xywh(3, 15, 9, 1));
 
         principalSupportBox = new TextBoxWidget();
-        final JLabel principalContactLabel = new JLabel("Principal Support Email");
-        principalContactLabel.setLabelFor(principalSupportBox);
-        add(principalContactLabel, cc.xy(1, 17));
+        final JLabel principalSupportLabel = new JLabel("Principal Support Email");
+        principalSupportLabel.setLabelFor(principalSupportBox);
+        add(principalSupportLabel, cc.xy(1, 17));
         add(principalSupportBox, cc.xywh(3, 17, 9, 1));
 
         add(new JLabel("Additional Support Email"), cc.xy(1, 19));
