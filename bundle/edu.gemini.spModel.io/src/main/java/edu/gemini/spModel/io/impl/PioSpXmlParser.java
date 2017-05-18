@@ -233,7 +233,7 @@ public final class PioSpXmlParser {
         // Update pre-2017A programs
         To2017A.updateProgram(doc);
 
-        // Update pre-2017A programs
+        // Update pre-2017B programs
         To2017B.updateProgram(doc);
 
         // Update pre-2018A programs
