@@ -37,11 +37,21 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
      * @param base the science or main target for the observation
      */
     public static TargetEnvironment create(SPTarget base) {
-        ImList<SPTarget> user = ImCollections.emptyList();
-        return new TargetEnvironment(new Asterism.Single(base), GuideEnvironment$.MODULE$.Initial(), user);
+        return create(new Asterism.Single(base));
     }
 
-    /**
+  /**
+   * Creates a TargetEnvironment with a single-target asterism but no other
+   * associated stars.
+   *
+   * @param asterism the asterism for the observation
+   */
+    public static TargetEnvironment create(Asterism asterism) {
+      ImList<SPTarget> user = ImCollections.emptyList();
+      return new TargetEnvironment(asterism, GuideEnvironment$.MODULE$.Initial(), user);
+    }
+
+  /**
      * Creates a new TargetEnvironment with the given single-target asterism, guide
      * stars, and user targets. No references to the guide or user targets are
      * maintained, though it will share the references to the {@link SPTarget}s
@@ -58,7 +68,7 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
         return new TargetEnvironment(new Asterism.Single(base), guide, user);
     }
 
-  private final Asterism asterism;
+    private final Asterism asterism;
     private final GuideEnvironment guide;
     private final ImList<SPTarget> user;
 
