@@ -5,9 +5,12 @@ import edu.gemini.qv.plugin.filter.core.Filter
 import edu.gemini.qv.plugin.{ReferenceDateChanged, QvContext}
 import edu.gemini.qv.plugin.util.ConstraintsCache.ConstraintCalculationEnd
 import edu.gemini.qv.plugin.util.{SolutionProvider, NonSiderealCache}
+
 import scala.collection.JavaConversions._
 import scala.swing.event.Event
 import scala.swing.{Swing, Publisher}
+
+import scalaz._, Scalaz._
 
 /** The observations data changed. */
 object DataChanged extends Event
@@ -181,7 +184,15 @@ case class PositionProvider(ctx: QvContext, base: ObservationProvider) extends O
     _observations = base.observations.map(o => {
       if (NonSiderealCache.isHorizonsTarget(o)) {
         val pos = NonSiderealCache.get(ctx.site, ctx.referenceDate, o)
-        val newTarget = o.getTargetEnvironment.getBase.clone()
+
+        // The check above ensures that this is a nonsidereal observation, which means it must have
+        // a single-target asterism. If this is not the case it means the model has changed.
+        val newTarget = o
+          .getTargetEnvironment
+          .getAsterism
+          .getNonSiderealSpTarget
+          .getOrElse(sys.error("The asterism is not a single nonsidereal target."))
+
         newTarget.setRaDecDegrees(pos.getRaDeg, pos.getDecDeg)
         new Obs(
           o.getProg,

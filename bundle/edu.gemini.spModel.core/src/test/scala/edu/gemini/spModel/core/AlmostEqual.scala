@@ -16,6 +16,8 @@ trait AlmostEqual[A] { outer =>
 
 object AlmostEqual {
 
+  def apply[A](implicit ev: AlmostEqual[A]): ev.type = ev
+
   def by[A, B](f: B => A)(implicit ev: AlmostEqual[A]): AlmostEqual[B] =
     ev.contramap(f)
 

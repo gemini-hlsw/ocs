@@ -327,11 +327,12 @@ public class TrecsRule implements IRule {
             for (TargetObsComp targetObsComp : elements.getTargetObsComp()) {
 
                 TargetEnvironment env = targetObsComp.getTargetEnvironment();
-                SPTarget baseTarget = env.getBase();
-                if (baseTarget == null) return null;
 
+              // We only consider the first science target because a multi-target asterism is
+              // a configuration error that will raise a further P2 warning.
+              SPTarget baseTarget = env.getAsterism().allSpTargets().head();
 
-                for (GuideProbeTargets guideTargets : env.getPrimaryGuideGroup()) {
+              for (GuideProbeTargets guideTargets : env.getPrimaryGuideGroup()) {
                     for (SPTarget target : guideTargets) {
 
                         // Calculate the distance to the base position in arcmin

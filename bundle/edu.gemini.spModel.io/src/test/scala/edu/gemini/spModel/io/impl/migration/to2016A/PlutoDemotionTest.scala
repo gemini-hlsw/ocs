@@ -23,7 +23,7 @@ class PlutoDemotionTest extends MigrationTest {
       .find(_.getType == SPComponentType.TELESCOPE_TARGETENV).get
       .getDataObject.asInstanceOf[TargetObsComp]
       .getTargetEnvironment
-      .getBase.getTarget match {
+      .getAsterism.allTargets.head match {
           case NonSiderealTarget("Pluto", e, None, Nil, None, None) =>
             e.toList match {
               case List((t, c)) =>

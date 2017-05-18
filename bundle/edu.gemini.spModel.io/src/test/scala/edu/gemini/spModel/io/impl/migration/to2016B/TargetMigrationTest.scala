@@ -21,7 +21,7 @@ class TargetMigrationTest extends Specification with MigrationTest {
       for {
         isp <- p.allObservations.find(_.title == title)
         x   <- isp.findObsComponentByType(SPComponentType.TELESCOPE_TARGETENV)
-        spt <- x.dataObject.map(_.asInstanceOf[TargetObsComp].getBase)
+        spt <- x.dataObject.map(_.asInstanceOf[TargetObsComp].getAsterism.allSpTargets.head)
       } yield spt.getTarget // <| println
 
   }

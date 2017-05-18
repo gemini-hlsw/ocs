@@ -13,6 +13,8 @@ import edu.gemini.spModel.pio.Pio;
 import edu.gemini.spModel.pio.PioFactory;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.SPTargetPio;
+import edu.gemini.spModel.target.env.Asterism;
+import edu.gemini.spModel.target.env.Asterism$;
 
 /**
  * Data object representing template parameters.
@@ -75,6 +77,10 @@ public final class TemplateParameters extends AbstractDataObject {
     public SPTarget getTarget() {
         checkRef(target);
         return target.clone();
+    }
+
+    public Asterism getAsterism() {
+      return new Asterism.Single(getTarget());
     }
 
     public TemplateParameters copy(SPTarget target) {

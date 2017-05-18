@@ -9,6 +9,7 @@ import edu.gemini.spModel.gems.GemsGuideProbeGroup;
 import edu.gemini.spModel.guide.*;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.target.SPTarget;
+import edu.gemini.spModel.target.env.Asterism;
 import edu.gemini.spModel.target.env.GuideProbeTargets;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.telescope.IssPort;
@@ -329,13 +330,13 @@ public enum Canopus {
         Option<SPTarget> spTargetOpt = getPrimaryCwfs3(ctx);
         if (spTargetOpt.isEmpty()) return None.instance();
 
-        SPTarget base   = ctx.getTargets().getBase();
-        SPTarget target = spTargetOpt.getValue();
+        Asterism asterism = ctx.getTargets().getAsterism();
+        SPTarget target   = spTargetOpt.getValue();
 
         final Option<Long> when = ctx.getSchedulingBlockStart();
 
         return
-            base.getSkycalcCoordinates(when).flatMap(bc ->
+            asterism.getSkycalcCoordinates(when).flatMap(bc ->
             target.getSkycalcCoordinates(when).map(tc -> {
                 CoordinateDiff diff = new CoordinateDiff(bc, tc);
                 Offset o = diff.getOffset();

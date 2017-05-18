@@ -403,7 +403,7 @@ public final class Obs implements Serializable, Comparable<Obs> {
     }
 
     public String getTargetName() {
-        return (targetEnvironment != null ? targetEnvironment.getBase().getName() : "");
+        return (targetEnvironment != null ? targetEnvironment.getAsterism().name() : "");
     }
 
     public String getWavefrontSensors() {
@@ -575,11 +575,11 @@ public final class Obs implements Serializable, Comparable<Obs> {
     }
 
 	public double getRa() {
-        return (targetEnvironment != null ? targetEnvironment.getBase().getRaDegrees(schedulingBlock.map(SchedulingBlock::start)).getOrElse(0.0) : 0.0);
+        return (targetEnvironment != null ? targetEnvironment.getAsterism().getRaDegrees(schedulingBlock.map(SchedulingBlock::start)).getOrElse(0.0) : 0.0);
 	}
 
 	public double getDec() {
-        return (targetEnvironment != null ? targetEnvironment.getBase().getDecDegrees(schedulingBlock.map(SchedulingBlock::start)).getOrElse(0.0) : 0.0);
+        return (targetEnvironment != null ? targetEnvironment.getAsterism().getDecDegrees(schedulingBlock.map(SchedulingBlock::start)).getOrElse(0.0) : 0.0);
 	}
 
     public Conds getConditions() {
@@ -771,7 +771,7 @@ public final class Obs implements Serializable, Comparable<Obs> {
      */
     public boolean isSidereal() {
         assert targetEnvironment != null;
-        return targetEnvironment.getBase().isSidereal();
+        return targetEnvironment.getAsterism().isSidereal();
     }
 
     /**
@@ -780,7 +780,7 @@ public final class Obs implements Serializable, Comparable<Obs> {
      */
     public boolean isNonSidereal() {
         assert targetEnvironment != null;
-        return targetEnvironment.getBase().isNonSidereal();
+        return targetEnvironment.getAsterism().isNonSidereal();
     }
 
     public Object getConstraintsString() {

@@ -10,6 +10,7 @@ import edu.gemini.spModel.pio.PioFactory;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.TelescopePosWatcher;
 import edu.gemini.spModel.target.WatchablePos;
+import edu.gemini.spModel.target.env.Asterism;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 
 import java.io.IOException;
@@ -73,22 +74,29 @@ public final class TargetObsComp extends AbstractDataObject implements GuideProb
 
     public String getTitle() {
         // Always compute the name; the UI disallows changes.
-        final TargetEnvironment env = getTargetEnvironment();
-        final SPTarget tp = env.getBase();
-        if (tp != null) {
-            final String initName  = tp.getName();
-            final String finalName = initName == null || initName.trim().isEmpty() ? "<Untitled>" : initName;
-            return helper.targetTag(tp.getTarget()) + ": " + finalName;
-        } else {
-            return super.getTitle();
-        }
+        final Asterism asterism = getAsterism();
+        final String initName  = asterism.name();
+        final String finalName = initName == null || initName.trim().isEmpty() ? "<Untitled>" : initName;
+        return helper.targetTag(asterism) + ": " + finalName;
     }
 
     /**
-     * Get the target environment.
+     * Get the target environment (never null).
      */
     public TargetEnvironment getTargetEnvironment() {
         return targetEnv;
+    }
+
+    /**
+     * Get the asterism (never null).
+     */
+    public Asterism getAsterism() {
+      return getTargetEnvironment().getAsterism();
+    }
+
+    @Deprecated
+    public SPTarget getArbitraryTargetFromAsterism() {
+      return getTargetEnvironment().getArbitraryTargetFromAsterism();
     }
 
     /**
@@ -113,13 +121,6 @@ public final class TargetObsComp extends AbstractDataObject implements GuideProb
 
     private void watchTargets() {
         targetEnv.getTargets().foreach(target -> target.addWatcher(prop));
-    }
-
-    /**
-     * Convenience method to access the base position.
-     */
-    public SPTarget getBase() {
-        return targetEnv.getBase();
     }
 
     /**

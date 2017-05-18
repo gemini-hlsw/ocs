@@ -21,6 +21,7 @@ import edu.gemini.spModel.obs.SPObservation;
 import edu.gemini.spModel.obsclass.ObsClass;
 import edu.gemini.spModel.obscomp.ProgramNote;
 import edu.gemini.spModel.target.SPTarget;
+import edu.gemini.spModel.target.env.Asterism;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.template.TemplateParameters;
 import edu.gemini.spModel.time.ChargeClass;
@@ -376,9 +377,9 @@ public class ReportUtils {
 
             // Figure out the RA of the base position
             final TargetObsComp targetEnv = (TargetObsComp) targetEnvComp.getDataObject();
-            final SPTarget target = targetEnv.getBase();
+            final Asterism asterism = targetEnv.getAsterism();
             final Option<Long> when = ((SPObservation) obsShell.getDataObject()).getSchedulingBlockStart();
-            final Option<Integer> raHours = getRaHours(target, when);
+            final Option<Integer> raHours = getRaHours(asterism, when);
             raHours.forEach(h -> hourSet.add(h));
         }
         return hourSet;
@@ -391,7 +392,7 @@ public class ReportUtils {
         TemplateParameters.foreach(folder, new ApplyOp<TemplateParameters>() {
             @Override
             public void apply(final TemplateParameters tp) {
-                final Option<Integer> raHours = getRaHours(tp.getTarget(), None.instance());
+                final Option<Integer> raHours = getRaHours(tp.getAsterism(), None.instance());
                 raHours.foreach(h -> hourSet.add(h));
             }
         });
@@ -409,7 +410,7 @@ public class ReportUtils {
     }
 
     /** Gets the ra hours value - if the target is not null, has RA/DEC coordinates and is not a "dummy" target. */
-    private static Option<Integer> getRaHours(final SPTarget target, Option<Long> when) {
+    private static Option<Integer> getRaHours(final Asterism target, Option<Long> when) {
         if (target == null) {
             return None.instance();
         }

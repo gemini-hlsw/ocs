@@ -4,6 +4,7 @@ import edu.gemini.pot.sp._
 import edu.gemini.spModel.core.Site
 import edu.gemini.spModel.obs.{ObservationStatus, SPObservation}
 import edu.gemini.spModel.obscomp.SPInstObsComp
+import edu.gemini.spModel.target.obsComp.TargetObsComp
 
 import scala.collection.JavaConverters._
 import scalaz.\/
@@ -26,6 +27,9 @@ class RichObservation(obs: ISPObservation) {
       o <- spObservation
       l <- Option(o.getLibraryId)
     } yield l
+
+  def findTargetObsComp: Option[TargetObsComp] =
+    findObsComponentByType(TargetObsComp.SP_TYPE).map(_.getDataObject.asInstanceOf[TargetObsComp])
 
   def findObsComponentByType(t: SPComponentType): Option[ISPObsComponent] =
     findObsComponent(_.getType == t)
