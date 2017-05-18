@@ -10,7 +10,7 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
 /**
- * NOTE: program labels are no longer compatible with data objects because of REL-2942.
+ * NOTE: component names / labels are no longer congruent with data object member names because of REL-2942.
  */
 public class ProgramForm extends JPanel {
     public ProgramForm() {

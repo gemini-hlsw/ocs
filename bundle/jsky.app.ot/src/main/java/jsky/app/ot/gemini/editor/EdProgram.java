@@ -31,7 +31,7 @@ import java.util.logging.Logger;
 
 /**
  * This is the editor for the Science Program component.
- * NOTE: program labels are no longer compatible with data objects because of REL-2942.
+ * NOTE: component names / labels are no longer congruent with data object member names because of REL-2942.
  */
 public final class EdProgram extends OtItemEditor<ISPProgram, SPProgram> implements TextBoxWidgetWatcher {
     private static final Logger LOGGER = Logger.getLogger(EdProgram.class.getName());
