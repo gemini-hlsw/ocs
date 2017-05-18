@@ -31,6 +31,7 @@ import java.util.logging.Logger;
 
 /**
  * This is the editor for the Science Program component.
+ * NOTE: component names / labels are no longer congruent with data object member names because of REL-2942.
  */
 public final class EdProgram extends OtItemEditor<ISPProgram, SPProgram> implements TextBoxWidgetWatcher {
     private static final Logger LOGGER = Logger.getLogger(EdProgram.class.getName());
@@ -51,14 +52,14 @@ public final class EdProgram extends OtItemEditor<ISPProgram, SPProgram> impleme
         _w = new ProgramForm();
         _edAux = new AuxFileEditor(_w);
 
-        _w.contactBox.setForeground(Color.black);
+        _w.additionalSupportBox.setForeground(Color.black);
 
-        _w.titleBox.     addWatcher(this);
-        _w.firstNameBox. addWatcher(this);
-        _w.lastNameBox.  addWatcher(this);
-        _w.emailBox.     addWatcher(this);
-        _w.phoneBox.     addWatcher(this);
-        _w.principalContactBox.addWatcher(this);
+        _w.titleBox.           addWatcher(this);
+        _w.firstNameBox.       addWatcher(this);
+        _w.lastNameBox.        addWatcher(this);
+        _w.emailBox.           addWatcher(this);
+        _w.phoneBox.           addWatcher(this);
+        _w.principalSupportBox.addWatcher(this);
 
         // add menu choices
         _w.affiliationBox.setForeground(Color.black);
@@ -122,8 +123,8 @@ public final class EdProgram extends OtItemEditor<ISPProgram, SPProgram> impleme
         _showPiInfo();
 
         // misc
-        _w.contactBox.setText(getDataObject().getContactPerson());
-        _w.principalContactBox.setText(getDataObject().getPrimaryContactEmail());
+        _w.additionalSupportBox.setText(getDataObject().getContactPerson());
+        _w.principalSupportBox.setText(getDataObject().getPrimaryContactEmail());
 
         final TooType tooType = getDataObject().getTooType();
         final String typeStr = tooType.getDisplayValue();
@@ -306,8 +307,10 @@ public final class EdProgram extends OtItemEditor<ISPProgram, SPProgram> impleme
         _w.emailBox.setEnabled(OTOptions.isStaff(getProgram().getProgramID()));
         _w.phoneBox.setEnabled(enabled);
         _w.affiliationBox.setEnabled(enabled);
-        _w.contactBox.setEnabled(OTOptions.isStaff(getProgram().getProgramID()));
-        _w.principalContactBox.setEnabled(OTOptions.isStaff(getProgram().getProgramID()) || OTOptions.isNGO(getProgram().getProgramID()));
+        _w.additionalSupportBox.setEnabled(OTOptions.isStaff(getProgram().getProgramID()));
+
+        // This confusion is due to the fact that this widget used to be for NGO support, and has now been relabeled.
+        _w.principalSupportBox.setEnabled(OTOptions.isStaff(getProgram().getProgramID()) || OTOptions.isNGO(getProgram().getProgramID()));
     }
 
     /**
@@ -337,7 +340,7 @@ public final class EdProgram extends OtItemEditor<ISPProgram, SPProgram> impleme
             final SPProgram.PIInfo piInfo = getDataObject().getPIInfo();
             getDataObject().setPIInfo(new SPProgram.PIInfo(piInfo.getFirstName(),
                     piInfo.getLastName(), piInfo.getEmail(), s, piInfo.getAffiliate()));
-        } else if (tbwe == _w.principalContactBox) {
+        } else if (tbwe == _w.principalSupportBox) {
             getDataObject().setPrimaryContactEmail(s);
         }
     }
