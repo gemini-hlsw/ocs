@@ -9,6 +9,9 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
+/**
+ * NOTE: program labels are no longer compatible with data objects because of REL-2942.
+ */
 public class ProgramForm extends JPanel {
     public ProgramForm() {
         final DefaultComponentFactory compFactory = DefaultComponentFactory.getInstance();
@@ -128,21 +131,21 @@ public class ProgramForm extends JPanel {
         add(phoneLabel, cc.xywh(7, 13, 1, 1, CellConstraints.RIGHT, CellConstraints.DEFAULT));
         add(phoneBox, cc.xywh(9, 13, 3, 1));
 
-        final JLabel emailLabel = new JLabel("PI / PC Email");
+        final JLabel emailLabel = new JLabel("Investigator Email");
         emailBox = new TextBoxWidget();
         emailLabel.setLabelFor(emailBox);
         add(emailLabel, cc.xy(1, 15));
         add(emailBox, cc.xywh(3, 15, 9, 1));
 
-        principalContactBox = new TextBoxWidget();
-        final JLabel principalContactLabel = new JLabel("Principal Contact Email");
-        principalContactLabel.setLabelFor(principalContactBox);
+        principalSupportBox = new TextBoxWidget();
+        final JLabel principalContactLabel = new JLabel("Principal Support Email");
+        principalContactLabel.setLabelFor(principalSupportBox);
         add(principalContactLabel, cc.xy(1, 17));
-        add(principalContactBox, cc.xywh(3, 17, 9, 1));
+        add(principalSupportBox, cc.xywh(3, 17, 9, 1));
 
-        add(new JLabel("Contact Sci. Email"), cc.xy(1, 19));
-        contactBox = new JLabel();
-        add(contactBox, cc.xywh(3, 19, 9, 1));
+        add(new JLabel("Additional Support Email"), cc.xy(1, 19));
+        additionalSupportBox = new JLabel();
+        add(additionalSupportBox, cc.xywh(3, 19, 9, 1));
 
         // --- Observing Time ---
         add(compFactory.createSeparator("Observing Time"), cc.xywh(1, 21, 11, 1));
@@ -238,8 +241,8 @@ public class ProgramForm extends JPanel {
     final JLabel affiliationBox;
     final TextBoxWidget phoneBox;
     final TextBoxWidget emailBox;
-    final TextBoxWidget principalContactBox;
-    final JLabel contactBox;
+    final TextBoxWidget principalSupportBox;
+    final JLabel additionalSupportBox;
     final JLabel plannedLabel;
     final JLabel usedLabel;
     final JLabel totalPlannedExecTimeLabel;
