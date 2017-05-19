@@ -1,6 +1,6 @@
 package edu.gemini.spModel.gemini.ghost
 
-import edu.gemini.spModel.core.{Coordinates, Magnitude, MagnitudeBand, MagnitudeSystem, Offset}
+import edu.gemini.spModel.core._
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.CloudCover
 import CloudCover.{PERCENT_70 => CC70, PERCENT_80 => CC80, PERCENT_90 => CC90, ANY => CCAny}
 import edu.gemini.spModel.target.SPTarget
@@ -50,13 +50,16 @@ object GhostAsterism {
     * There is a default guiding state based on magnitude, but this can be
     * explicitly overridden.
     */
-  final case class GhostTarget(target: SPTarget,
+  final case class GhostTarget(spTarget: SPTarget,
                                xBinning: XBinning,
                                yBinning: YBinning,
                                explicitGuideFiberState: Option[GuideFiberState]) {
 
     def coordinates(when: Option[Instant]): Option[Coordinates] =
-      target.getCoordinates(when.map(_.toEpochMilli))
+      spTarget.getCoordinates(when.map(_.toEpochMilli))
+
+    def copyWithClonedTarget: GhostTarget =
+      copy(spTarget = spTarget.clone)
   }
 
   object GhostTarget {
@@ -74,7 +77,7 @@ object GhostAsterism {
       Magnitude(17.0, MagnitudeBand.B, None, MagnitudeSystem.Vega)
 
     private def defaultGuideFiberState(t: GhostTarget, cutoff: Magnitude): GuideFiberState =
-      t.target.getMagnitude(MagnitudeBand.B).forall(_.value < cutoff.value) ? GuideFiberState.enabled | GuideFiberState.disabled
+      t.spTarget.getMagnitude(MagnitudeBand.B).forall(_.value < cutoff.value) ? GuideFiberState.enabled | GuideFiberState.disabled
 
     private def guideFiberState(t: GhostTarget, cutoff: Magnitude): GuideFiberState =
       t.explicitGuideFiberState | defaultGuideFiberState(t, cutoff)
@@ -157,35 +160,56 @@ object GhostAsterism {
     * the two targets, but may be explicitly specified if necessary to reach a
     * particular PWFS2 guide star.
     */
-  final case class TwoTarget(
+  final case class DualTarget(
                      ifu1: GhostTarget,
                      ifu2: GhostTarget,
                      base: Option[Coordinates]) extends GhostAsterism {
 
+    override def allSpTargets: NonEmptyList[SPTarget] =
+      NonEmptyList(ifu1.spTarget, ifu2.spTarget)
+
     /** Defines the targets in this asterism to be the two science targets. */
-    override def targets: NonEmptyList[SPTarget] =
-      NonEmptyList(ifu1.target, ifu2.target)
+    override def targets: Target \/ (Target, Target) =
+      (ifu1.spTarget.getTarget, ifu2.spTarget.getTarget).right
 
     /** Calculates the coordinates exactly halfway along the great circle
       * connecting the two targets.
       */
-    def defaultBasePosition(when: Instant): Option[Coordinates] =
+    def defaultBasePosition(when: Option[Instant]): Option[Coordinates] =
       for {
-        c1 <- ifu1.coordinates(Some(when))
-        c2 <- ifu2.coordinates(Some(when))
+        c1 <- ifu1.coordinates(when)
+        c2 <- ifu2.coordinates(when)
       } yield c1.interpolate(c2, 0.5)
 
     /** Obtains the base position, which defaults to the half-way point between
       * the two targets but may be explicitly specified instead.
       */
-    override def basePosition(when: Instant): Option[Coordinates] =
+    override def basePosition(when: Option[Instant]): Option[Coordinates] =
       base orElse defaultBasePosition(when)
+
+    override def basePositionProperMotion: Option[ProperMotion] = {
+      val pm1 = Target.pm.get(ifu1.spTarget.getTarget)
+      val pm2 = Target.pm.get(ifu2.spTarget.getTarget)
+
+      // TODO: First, is this correct?  Second, what to do if the epoch doesn't
+      // match?
+      val dra  = pm1.map(_.deltaRA)  |+| pm2.map(_.deltaRA)
+      val ddec = pm1.map(_.deltaDec) |+| pm2.map(_.deltaDec)
+
+      for {
+        r <- dra
+        d <- ddec
+      } yield (ProperMotion(r, d))  // TODO: epoch
+    }
 
     def ifu1GuideFiberState(cc: CloudCover): GuideFiberState =
       GhostTarget.standardResGuideFiberState(ifu1, cc)
 
     def ifu2GuideFiberState(cc: CloudCover): GuideFiberState =
       GhostTarget.standardResGuideFiberState(ifu2, cc)
+
+    override def copyWithClonedTargets: Asterism =
+      DualTarget(ifu1.copyWithClonedTarget, ifu2.copyWithClonedTarget, base)
   }
 
 
@@ -203,28 +227,34 @@ object GhostAsterism {
     * necessary.
     */
   final case class BeamSwitching(
-                     target:       GhostTarget,
+                     ghostTarget:  GhostTarget,
                      sky1:         Coordinates,
                      explicitSky2: Option[Coordinates]) extends GhostAsterism {
 
+    override def allSpTargets: NonEmptyList[SPTarget] =
+      NonEmptyList(ghostTarget.spTarget)
+
     /** Defines the target list to be the single standard resolution target. */
-    override def targets: NonEmptyList[SPTarget] =
-      NonEmptyList(target.target)
+    override def targets: Target \/ (Target, Target) =
+      ghostTarget.spTarget.getTarget.left
 
     /** Defines the base position to be the same as the target position. */
-    override def basePosition(when: Instant): Option[Coordinates] =
-      target.coordinates(Some(when))
+    override def basePosition(when: Option[Instant]): Option[Coordinates] =
+      ghostTarget.coordinates(when)
+
+    override def basePositionProperMotion: Option[ProperMotion] =
+      Target.pm.get(ghostTarget.spTarget.getTarget)
 
     /** Deterimines the guide fiber state for the IFU observing the science
       * object. For the IFU observing a sky position, GuideFiberState is always
       * disabled.
       */
     def guideFiberState(cc: CloudCover): GuideFiberState =
-      GhostTarget.standardResGuideFiberState(target, cc)
+      GhostTarget.standardResGuideFiberState(ghostTarget, cc)
 
     // Calculate the diametrically opposed position, assuming we know where
     // the target is.
-    private def defaultSky2(when: Instant): Option[Coordinates] =
+    private def defaultSky2(when: Option[Instant]): Option[Coordinates] =
       basePosition(when).map { bc =>
         val off = Coordinates.difference(bc, sky1).offset * -1
         bc.offset(off.p.toAngle, off.q.toAngle)
@@ -234,8 +264,11 @@ object GhostAsterism {
       * assuming it is explicitly provided or else we know where the science
       * target is at the given time.
       */
-    def sky2(when: Instant): Option[Coordinates] =
+    def sky2(when: Option[Instant]): Option[Coordinates] =
       explicitSky2 orElse defaultSky2(when)
+
+    override def copyWithClonedTargets: Asterism =
+      copy(ghostTarget = ghostTarget.copyWithClonedTarget)
   }
 
 
@@ -286,22 +319,32 @@ object GhostAsterism {
     * but can be explicitly turned off.
     */
   final case class HighRes(
-                     mode:   HighResMode,
-                     target: GhostTarget,
-                     sky:    Coordinates) extends GhostAsterism {
+                     mode:        HighResMode,
+                     ghostTarget: GhostTarget,
+                     sky:         Coordinates) extends GhostAsterism {
+
+    override def allSpTargets: NonEmptyList[SPTarget] =
+      NonEmptyList(ghostTarget.spTarget)
+
 
     /** Defines the target list to be the single high resolution target. */
-    override def targets: NonEmptyList[SPTarget] =
-      NonEmptyList(target.target)
+    override def targets: Target \/ (Target, Target) =
+      ghostTarget.spTarget.getTarget.left
 
     /** Defines the base position to be the same as the target position. */
-    override def basePosition(when: Instant): Option[Coordinates] =
-      target.coordinates(Some(when))
+    override def basePosition(when: Option[Instant]): Option[Coordinates] =
+      ghostTarget.coordinates(when)
+
+    override def basePositionProperMotion: Option[ProperMotion] =
+      Target.pm.get(ghostTarget.spTarget.getTarget)
 
     /** Deterimines the guide fiber state for the HRIFU1.  Typically this will
       * be enabled since the target is bright but may be explicitly turned off.
       */
     def guideFiberState(cc: CloudCover): GuideFiberState =
-      GhostTarget.highResGuideFiberState(target, cc)
+      GhostTarget.highResGuideFiberState(ghostTarget, cc)
+
+    override def copyWithClonedTargets: Asterism =
+      copy(ghostTarget = ghostTarget.copyWithClonedTarget)
   }
 }
