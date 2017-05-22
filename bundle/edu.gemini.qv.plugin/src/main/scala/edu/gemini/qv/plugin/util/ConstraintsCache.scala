@@ -1,5 +1,7 @@
 package edu.gemini.qv.plugin.util
 
+import java.time.Instant
+
 import ConstraintsCache._
 import edu.gemini.qpt.shared.sp.{Conds, Obs}
 import edu.gemini.qv.plugin.data.FoldedTargetsProvider
@@ -8,13 +10,13 @@ import edu.gemini.qv.plugin.util.ConstraintsCache.ConstraintCalculationProgress
 import edu.gemini.qv.plugin.util.ConstraintsCache.ConstraintCalculationStart
 import edu.gemini.qv.plugin.util.SolutionProvider.{ConstraintType, ValueType}
 import edu.gemini.skycalc.TimeUtils
-import edu.gemini.spModel.core.{Site, Peer}
+import edu.gemini.spModel.core.{Coordinates, Peer, Site}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.TimingWindow
 import edu.gemini.util.skycalc.calc._
 import edu.gemini.util.skycalc.constraint._
-import edu.gemini.util.skycalc.{SiderealTarget, SkycalcTarget, Night}
-import jsky.coords.WorldCoords
+import edu.gemini.util.skycalc.Night
+
 import scala.collection.concurrent
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent._
@@ -133,7 +135,8 @@ class ConstraintsCache(allNights: Seq[Night]) extends Publisher {
     // do calculations for each "folded" obs, i.e. for each position
     // this can be done in parallel!
     foldedObs.par.foreach(obs => {                                   // work on observation groups in parallel!
-      val target = targetFor(nights, peer, obs)
+
+      val target = (t: Long) => obs.getTargetEnvironment.getAsterism.basePosition(Some(Instant.ofEpochMilli(t))).getOrElse(Coordinates.zero)
       calculatePosSemester(nights, target, obs, foldedMap(obs))
 
       // update progress, we've calculated all constraints for obs.size observations for all nights in the semester
@@ -150,7 +153,7 @@ class ConstraintsCache(allNights: Seq[Night]) extends Publisher {
   }
 
 
-  private def calculatePosSemester(nights: Seq[Night], target: SkycalcTarget, foldedObs: Obs, obs: Set[Obs]): Unit = {
+  private def calculatePosSemester(nights: Seq[Night], target: Long => Coordinates, foldedObs: Obs, obs: Set[Obs]): Unit = {
 
     // calculate all constraints on a per-night basis and then concatenate the results
     val cc = nights.map(n => calculatePosNight(n, target, foldedObs))
@@ -175,7 +178,7 @@ class ConstraintsCache(allNights: Seq[Night]) extends Publisher {
 
   }
 
-  private def calculatePosNight(night: Night, target: SkycalcTarget, o: Obs): (Solution, Solution, Solution, Double, Double) = {
+  private def calculatePosNight(night: Night, target: Long => Coordinates, o: Obs): (Solution, Solution, Solution, Double, Double) = {
 
     import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.ElevationConstraintType._
 
@@ -221,9 +224,9 @@ class ConstraintsCache(allNights: Seq[Night]) extends Publisher {
     else if (o.getLGS) 40                           // lower limit for Altair + LGS: 40 deg
     else 30                                         // lower limit for everything else: 30 deg
 
-  private def targetFor(nights: Seq[Night], peer: Peer, obs: Obs): SkycalcTarget =
-    if (NonSiderealCache.isHorizonsTarget(obs)) NonSiderealCache.get(peer, nights, obs)
-    else SiderealTarget(new WorldCoords(obs.getRa, obs.getDec))
+//  private def targetFor(nights: Seq[Night], peer: Peer, obs: Obs): SkycalcTarget =
+//    if (NonSiderealCache.isHorizonsTarget(obs)) NonSiderealCache.get(peer, nights, obs)
+//    else SiderealTarget(new WorldCoords(obs.getRa, obs.getDec))
 
 }
 

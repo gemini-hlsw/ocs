@@ -7,6 +7,8 @@ import edu.gemini.spModel.io.impl.migration.MigrationTest
 import edu.gemini.spModel.target.obsComp.TargetObsComp
 import org.specs2.mutable.Specification
 import edu.gemini.spModel.rich.pot.sp._
+import edu.gemini.spModel.core.NonSiderealTarget
+import edu.gemini.spModel.target.env.Asterism
 
 import scalaz._, Scalaz._
 
@@ -19,6 +21,14 @@ class EphemerisConversionTest extends Specification with MigrationTest{
     entry(1477921200000l, 124.40285291666669, 19.050720555555586),
     entry(1488313080000l, 112.37534291666668, 26.111878888888896)
   )))
+
+  implicit class AsterismOps(a: Asterism) {
+    def getNonSiderealTarget: Option[NonSiderealTarget] =
+      a.allTargets match {
+        case NonEmptyList(t: NonSiderealTarget, INil()) => Some(t)
+        case nel => None
+      }
+  }
 
   "2017A Ephemeris Migration" should {
     "Convert non-sidereal ephemeris data to compressed ephemeris data" in withTestProgram2("vesta.xml") { p =>

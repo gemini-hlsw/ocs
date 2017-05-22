@@ -29,14 +29,7 @@ trait Asterism {
     allSpTargets.list.toList.asImList
 
   /** All Targets that comprise the asterism. */
-  def allTargets: NonEmptyList[Target] =
-    targets.fold(NonEmptyList(_), p => NonEmptyList(p._1, p._2))
-
-  /** An asterism is a single generic target, or a pair of sidereal targets. These are currently the
-    * only possibilities.
-    * TODO: should we Church encode this instead?
-    */
-  def targets: Target \/ (SiderealTarget, SiderealTarget)
+  def allTargets: NonEmptyList[Target]
 
   /** Slew coordinates and AGS calculation base position. */
   def basePosition(time: Option[Instant]): Option[Coordinates]
@@ -47,24 +40,8 @@ trait Asterism {
   /** Return a display name for this asterism. */
   def name: String
 
-  def isSidereal:    Boolean = targets.fold(_.isSidereal,    _ => true)
-  def isNonSidereal: Boolean = targets.fold(_.isNonSidereal, _ => false)
-  def isToo:         Boolean = targets.fold(_.isToo,         _ => false)
-
-  /** Gets the one and only non-sidereal SPTarget, if any. If the model changes some day to permit
-    * more than one we can break this API to find code that relies on this invariant.
-    */
-  def getNonSiderealSpTarget: Option[SPTarget] =
-    this match {
-      case Asterism.Single(t) if t.isNonSidereal => Some(t)
-      case _                                     => None
-    }
-
-  def getNonSiderealTarget: Option[NonSiderealTarget] =
-    targets match {
-      case -\/(t: NonSiderealTarget) => Some(t)
-      case _                         => None
-    }
+  def hasNonSidereal: Boolean = allTargets.any(_.isNonSidereal)
+  def hasToo:         Boolean = allTargets.any(_.isToo)
 
   //
   // "Base position" convenience methods already in use extensively throughout
@@ -111,7 +88,7 @@ object Asterism {
   // N.B. most members must be defs because `t` is mutable.
   final case class Single(t: SPTarget) extends Asterism {
     override def allSpTargets = NonEmptyList(t) // def because Nel isn't serializable
-    override def targets = t.getTarget.left
+    override def allTargets = NonEmptyList(t.getTarget)
     override def basePosition(time: Option[Instant]) = t.getCoordinates(time.map(_.toEpochMilli))
     override def name = t.getName
     override def copyWithClonedTargets() = Single(t.clone)

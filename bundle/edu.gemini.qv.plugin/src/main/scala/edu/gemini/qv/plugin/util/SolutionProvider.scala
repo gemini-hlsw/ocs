@@ -157,20 +157,20 @@ sealed class SolutionProvider(site: Site) extends Publisher {
 
 
   private def checkHorizonsNames(observations: Set[Obs]): Unit = {
-    val withoutHorizonsName =
-      observations.
-        filter(o => o.isNonSidereal && NonSiderealCache.horizonsNameFor(o).isEmpty).
-        map(_.getObsId)
-    if (withoutHorizonsName.nonEmpty) {
-      val os = withoutHorizonsName.mkString(", ")
-      val (plural, have, be) = if (withoutHorizonsName.size > 1) ("s", "have", "are") else ("", "has", "is")
-      QvGui.showWarning(
-        "Missing Horizons Lookup Name" + plural,
-        s"""Non-sidereal observation$plural $os $have no name for Horizons lookups defined yet.
-           |Please use the OT to do a first Horizons lookup to set the name$plural.
-           |For now the single already defined position$plural $be used as the target position$plural.""".stripMargin
-      )
-    }
+//    val withoutHorizonsName =
+//      observations.
+//        filter(o => o.isNonSidereal && NonSiderealCache.horizonsNameFor(o).isEmpty).
+//        map(_.getObsId)
+//    if (withoutHorizonsName.nonEmpty) {
+//      val os = withoutHorizonsName.mkString(", ")
+//      val (plural, have, be) = if (withoutHorizonsName.size > 1) ("s", "have", "are") else ("", "has", "is")
+//      QvGui.showWarning(
+//        "Missing Horizons Lookup Name" + plural,
+//        s"""Non-sidereal observation$plural $os $have no name for Horizons lookups defined yet.
+//           |Please use the OT to do a first Horizons lookup to set the name$plural.
+//           |For now the single already defined position$plural $be used as the target position$plural.""".stripMargin
+//      )
+//    }
   }
 
 }

@@ -87,8 +87,8 @@ object ObservationTableModel {
     ),
     Column[String](
       "NonSid",
-      "Non sidereal target?",
-      o => asString(o.isNonSidereal),
+      "Has Non sidereal target?",
+      o => asString(o.hasNonSidereal),
       visibleAtStart = false
     ),
 

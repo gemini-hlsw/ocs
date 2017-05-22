@@ -766,21 +766,12 @@ public final class Obs implements Serializable, Comparable<Obs> {
     }
 
     /**
-     * Returns true if the science target is sidereal.
-     * Call this only if you know there is a target environment.
-     */
-    public boolean isSidereal() {
-        assert targetEnvironment != null;
-        return targetEnvironment.getAsterism().isSidereal();
-    }
-
-    /**
      * Returns true if the science target is non-sidereal.
      * Call this only if you know there is a target environment.
      */
-    public boolean isNonSidereal() {
+    public boolean hasNonSidereal() {
         assert targetEnvironment != null;
-        return targetEnvironment.getAsterism().isNonSidereal();
+        return targetEnvironment.getAsterism().hasNonSidereal();
     }
 
     public Object getConstraintsString() {

@@ -1,9 +1,9 @@
 package edu.gemini.util.skycalc.calc
 
-import edu.gemini.spModel.core.Site
-import edu.gemini.skycalc.{TimeUtils, ImprovedSkyCalc}
-import edu.gemini.util.skycalc.SkycalcTarget
+import edu.gemini.spModel.core.{Coordinates, Site}
+import edu.gemini.skycalc.{ImprovedSkyCalc, TimeUtils}
 import java.util.Date
+
 import edu.gemini.util.skycalc.calc.TargetCalculator.Fields
 
 /**
@@ -21,7 +21,7 @@ trait TargetCalculator extends Calculator {
   require(site == Site.GN || site == Site.GS)
 
   val site: Site
-  val target: SkycalcTarget
+  val targetLocation: Long => Coordinates
 
   val values: Vector[Vector[Double]] = calculate()
 
@@ -75,7 +75,7 @@ trait TargetCalculator extends Calculator {
         val normalizedAngle = {
           if (angle < 0) {
             val normalizingFactor = {
-              val dec = target.positionAt(t).getDecDeg
+              val dec = targetLocation(t).dec.toDegrees
               if (dec - site.latitude < -10) 0
               else if (dec - site.latitude < 10) 180
               else 360
@@ -125,7 +125,7 @@ trait TargetCalculator extends Calculator {
     // fill temporary data structure with calculated values
     for (ix <- 0 to samples-1) {
       val t = times(ix)
-      skycalc.calculate(target.positionAt(t), new Date(t), true)
+      skycalc.calculate(targetLocation(t), new Date(t), true)
       values(Elevation.id)(ix) = skycalc.getAltitude
       values(Azimuth.id)(ix) = skycalc.getAzimuth
       values(Airmass.id)(ix) = skycalc.getAirmass
@@ -150,11 +150,11 @@ trait TargetCalculator extends Calculator {
   }
 }
 
-case class IntervalTargetCalculator(site: Site, target: SkycalcTarget, defined: Interval, rate: Long) extends FixedRateCalculator with LinearInterpolatingCalculator with TargetCalculator
+case class IntervalTargetCalculator(site: Site, targetLocation: Long => Coordinates, defined: Interval, rate: Long) extends FixedRateCalculator with LinearInterpolatingCalculator with TargetCalculator
 
-case class SampleTargetCalculator(site: Site, target: SkycalcTarget, times: Vector[Long]) extends IrregularIntervalCalculator with LinearInterpolatingCalculator with TargetCalculator
+case class SampleTargetCalculator(site: Site, targetLocation: Long => Coordinates, times: Vector[Long]) extends IrregularIntervalCalculator with LinearInterpolatingCalculator with TargetCalculator
 
-case class SingleValueTargetCalculator(site: Site, target: SkycalcTarget, time: Long) extends SingleValueCalculator with TargetCalculator
+case class SingleValueTargetCalculator(site: Site, targetLocation: Long => Coordinates, time: Long) extends SingleValueCalculator with TargetCalculator
 
 object TargetCalculator {
 
@@ -164,14 +164,14 @@ object TargetCalculator {
     val Elevation, Azimuth, Airmass, LunarDistance, ParallacticAngle, HourAngle, SkyBrightness = Value
   }
 
-  def apply(site: Site, target: SkycalcTarget, defined: Interval, rate: Long = TimeUtils.seconds(30)) = {
-    new IntervalTargetCalculator(site, target, defined, rate)
+  def apply(site: Site, targetLocation: Long => Coordinates, defined: Interval, rate: Long = TimeUtils.seconds(30)) = {
+    new IntervalTargetCalculator(site, targetLocation, defined, rate)
   }
-  def apply(site: Site, target: SkycalcTarget, time: Long): TargetCalculator = {
-    new SingleValueTargetCalculator(site, target, time)
+  def apply(site: Site, targetLocation: Long => Coordinates, time: Long): TargetCalculator = {
+    new SingleValueTargetCalculator(site, targetLocation, time)
   }
-  def apply(site: Site, target: SkycalcTarget, times: Vector[Long]): TargetCalculator = {
-    new SampleTargetCalculator(site, target, times)
+  def apply(site: Site, targetLocation: Long => Coordinates, times: Vector[Long]): TargetCalculator = {
+    new SampleTargetCalculator(site, targetLocation, times)
   }
 }
 

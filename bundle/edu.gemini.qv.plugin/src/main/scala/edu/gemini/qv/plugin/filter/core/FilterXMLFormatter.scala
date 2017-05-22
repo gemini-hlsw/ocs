@@ -57,7 +57,7 @@ object FilterXMLFormatter {
       case RA(min, max)  => <rafilter>{makeRangeNode(min, max)}</rafilter>
       case Dec(min, max) => <decfilter>{makeRangeNode(min, max)}</decfilter>
 
-      case IsNonSidereal(value) => <isnonsidereal><boolvalue>{toBoolean(value)}</boolvalue></isnonsidereal>
+      case HasNonSidereal(value) => <isnonsidereal><boolvalue>{toBoolean(value)}</boolvalue></isnonsidereal>
       case IsActive(value) => <isactive><boolvalue>{toBoolean(value)}</boolvalue></isactive>
       case IsCompleted(value) => <iscompleted><boolvalue>{toBoolean(value)}</boolvalue></iscompleted>
       case IsRollover(value) => <rolloverfilter><boolvalue>{toBoolean(value)}</boolvalue></rolloverfilter>

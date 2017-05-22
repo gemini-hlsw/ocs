@@ -338,9 +338,9 @@ object Filter {
     def getter = _.getPreImaging.getOrElse(false)
   }
   /** Checks if the observation's science target is non-sidereal. */
-  case class IsNonSidereal(value: Option[Boolean] = None) extends BooleanFilter {
+  case class HasNonSidereal(value: Option[Boolean] = None) extends BooleanFilter {
     def label = "Non Sidereal"
-    def getter = _.isNonSidereal
+    def getter = _.hasNonSidereal
   }
 
   /** Checks if this observation has a dummy target, i.e. ra == 0 and dec == 0.

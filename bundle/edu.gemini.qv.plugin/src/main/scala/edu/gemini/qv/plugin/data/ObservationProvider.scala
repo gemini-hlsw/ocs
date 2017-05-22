@@ -1,16 +1,19 @@
 package edu.gemini.qv.plugin.data
 
-import edu.gemini.qpt.shared.sp.{Prog, Obs}
+import edu.gemini.qpt.shared.sp.{Obs, Prog}
 import edu.gemini.qv.plugin.filter.core.Filter
-import edu.gemini.qv.plugin.{ReferenceDateChanged, QvContext}
+import edu.gemini.qv.plugin.{QvContext, ReferenceDateChanged}
 import edu.gemini.qv.plugin.util.ConstraintsCache.ConstraintCalculationEnd
-import edu.gemini.qv.plugin.util.{SolutionProvider, NonSiderealCache}
+import edu.gemini.qv.plugin.util.{SolutionProvider}
+import edu.gemini.spModel.core.NonSiderealTarget
+import edu.gemini.spModel.target.SPTarget
+import edu.gemini.spModel.target.env.Asterism
 
 import scala.collection.JavaConversions._
 import scala.swing.event.Event
-import scala.swing.{Swing, Publisher}
-
-import scalaz._, Scalaz._
+import scala.swing.{Publisher, Swing}
+import scalaz._
+import Scalaz._
 
 /** The observations data changed. */
 object DataChanged extends Event
@@ -180,50 +183,64 @@ case class PositionProvider(ctx: QvContext, base: ObservationProvider) extends O
   // initial first update on construction
   updatePos()
 
-  private def updatePos(): Unit = {
-    _observations = base.observations.map(o => {
-      if (NonSiderealCache.isHorizonsTarget(o)) {
-        val pos = NonSiderealCache.get(ctx.site, ctx.referenceDate, o)
-
-        // The check above ensures that this is a nonsidereal observation, which means it must have
-        // a single-target asterism. If this is not the case it means the model has changed.
-        val newTarget = o
-          .getTargetEnvironment
-          .getAsterism
-          .getNonSiderealSpTarget
-          .getOrElse(sys.error("The asterism is not a single nonsidereal target."))
-
-        newTarget.setRaDecDegrees(pos.getRaDeg, pos.getDecDeg)
-        new Obs(
-          o.getProg,
-          o.getGroup,
-          o.getObsNumber,
-          o.getObsId,
-          o.getTitle,
-          o.getPriority,
-          o.getTooPriority,
-          o.getObsStatus,
-          o.getObsClass,
-          o.getTargetEnvironment.setBasePosition(newTarget),
-          o.getInstruments.map(o => o.getSpType),
-          o.getOptions,
-          o.getCustomMask,
-          o.getCentralWavelength,
-          o.getSteps,
-          o.getPiPlannedTime,
-          o.getExecPlannedTime,
-          o.getElapsedTime,
-          o.getSiteQuality,
-          o.getLGS,
-          o.getAO,
-          o.usesMeanParallacticAngle,
-          o.getAgsAnalysis,
-          o.getSchedulingBlock
-        )
+  implicit class AsterismOps(a: Asterism) {
+    // Attempt to return the one and only non-sidereal SPTarget
+    def getNonSiderealSpTarget: Option[SPTarget] =
+      a.allSpTargets match {
+        case NonEmptyList(spt, INil()) =>
+          spt.getTarget match {
+            case _: NonSiderealTarget => Some(spt)
+            case _ => None
+          }
+        case nel => None
       }
-      else o
-    })
   }
+
+  private def updatePos(): Unit = {
+//    _observations = base.observations.map(o => {
+//      if (NonSiderealCache.isHorizonsTarget(o)) {
+//        val pos = NonSiderealCache.get(ctx.referenceDate, o)
+//
+//        // The check above ensures that this is a nonsidereal observation, which means it must have
+//        // a single-target asterism. If this is not the case it means the model has changed.
+//        val newTarget = o
+//          .getTargetEnvironment
+//          .getAsterism
+//          .getNonSiderealSpTarget
+//          .getOrElse(sys.error("The asterism is not a single nonsidereal target."))
+//
+//        newTarget.setRaDecDegrees(pos.getRaDeg, pos.getDecDeg)
+//        new Obs(
+//          o.getProg,
+//          o.getGroup,
+//          o.getObsNumber,
+//          o.getObsId,
+//          o.getTitle,
+//          o.getPriority,
+//          o.getTooPriority,
+//          o.getObsStatus,
+//          o.getObsClass,
+//          o.getTargetEnvironment.setBasePosition(newTarget),
+//          o.getInstruments.map(o => o.getSpType),
+//          o.getOptions,
+//          o.getCustomMask,
+//          o.getCentralWavelength,
+//          o.getSteps,
+//          o.getPiPlannedTime,
+//          o.getExecPlannedTime,
+//          o.getElapsedTime,
+//          o.getSiteQuality,
+//          o.getLGS,
+//          o.getAO,
+//          o.usesMeanParallacticAngle,
+//          o.getAgsAnalysis,
+//          o.getSchedulingBlock
+//        )
+//      }
+//      else o
+//    })
+  }
+
 }
 
 /**

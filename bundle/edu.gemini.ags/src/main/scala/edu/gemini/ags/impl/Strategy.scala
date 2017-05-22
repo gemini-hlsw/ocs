@@ -16,6 +16,8 @@ import edu.gemini.spModel.target.obsComp.PwfsGuideProbe
 
 import scala.Function.const
 
+import scalaz.syntax.foldable._
+
 // Used to implement AgsRegistrar
 object Strategy {
   import SingleProbeStrategyParams._
@@ -66,12 +68,12 @@ object Strategy {
       case Site.GN => List(Pwfs2North, Pwfs1North)
       case Site.GS => List(Pwfs2South, Pwfs1South)
     }
-    if (isSidereal(ctx)) oiStrategy :: pwfs
-    else                 pwfs :+ oiStrategy
+    if (allSidereal(ctx)) oiStrategy :: pwfs
+    else                  pwfs :+ oiStrategy
   }
 
-  def isSidereal(ctx: ObsContext): Boolean =
-    ctx.getTargets.getAsterism.isSidereal
+  private def allSidereal(ctx: ObsContext): Boolean =
+    ctx.getTargets.getAsterism.allTargets.all(_.isSidereal)
 
   val InstMap = Map[SPComponentType, ObsContext => List[AgsStrategy]](
     SPComponentType.INSTRUMENT_ACQCAM     -> const(List(Pwfs1North, Pwfs2North, Pwfs1South, Pwfs2South)),

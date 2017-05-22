@@ -23,7 +23,7 @@ class MainFilter(ctx: QvContext, init: Set[Filter]) extends PagedFilter(ctx, ini
     ProgContact(),
     RA(),
     Dec(),
-    IsNonSidereal(),
+    HasNonSidereal(),
     IsActive(),
     IsCompleted(),
     IsRollover(),

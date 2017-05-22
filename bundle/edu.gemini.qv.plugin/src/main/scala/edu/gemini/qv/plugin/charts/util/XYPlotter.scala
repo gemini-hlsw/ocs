@@ -3,19 +3,23 @@ package edu.gemini.qv.plugin.charts.util
 import edu.gemini.qpt.shared.sp.Obs
 import edu.gemini.qv.plugin.QvContext
 import edu.gemini.qv.plugin.selector.OptionsSelector._
-import edu.gemini.qv.plugin.selector.{OptionsSelector, ConstraintsSelector}
+import edu.gemini.qv.plugin.selector.{ConstraintsSelector, OptionsSelector}
 import edu.gemini.qv.plugin.util.ConstraintsCache.{MaxElevation, MinElevation}
-import edu.gemini.qv.plugin.util.{SemesterData, NonSiderealCache, SolutionProvider}
+import edu.gemini.qv.plugin.util.{SemesterData, SolutionProvider}
 import edu.gemini.skycalc.TimeUtils
-import edu.gemini.spModel.core.Site
-import edu.gemini.util.skycalc.calc.{TargetCalculator, Interval, Solution}
-import edu.gemini.util.skycalc.{SkycalcTarget, SiderealTarget, Night}
-import java.awt.{Stroke, Color}
+import edu.gemini.spModel.core.{Coordinates, Site}
+import edu.gemini.util.skycalc.calc.{Interval, Solution, TargetCalculator}
+import edu.gemini.util.skycalc.Night
+import java.awt.{Color, Stroke}
+import java.time.Instant
 import java.util.UUID
+
+import edu.gemini.spModel.target.env.Asterism
 import org.jfree.chart.axis.ValueAxis
 import org.jfree.chart.plot.XYPlot
-import org.jfree.chart.renderer.xy.{XYSplineRenderer, XYLineAndShapeRenderer}
+import org.jfree.chart.renderer.xy.{XYLineAndShapeRenderer, XYSplineRenderer}
 import org.jfree.data.xy.{XYSeries, XYSeriesCollection}
+
 import scala.collection._
 
 
@@ -35,13 +39,8 @@ class XYPlotter(ctx: QvContext, nights: Seq[Night], constraints: ConstraintsSele
 
   def plotCurves(obs: Seq[Obs], options: Set[ChartOption], inRenderer: XYLineAndShapeRenderer, outRenderer: XYLineAndShapeRenderer): Unit = {
 
-
-    def targetFor(o: Obs): SkycalcTarget =
-      if (NonSiderealCache.isHorizonsTarget(o)) NonSiderealCache.get(nights, o)
-      else SiderealTarget(o.getRa, o.getDec)
-
     def targetCalcFor(o: Obs): TargetCalculator =
-      XYPlotter.getCalculator(ctx.site, targetFor(o), overSampling)
+      XYPlotter.getCalculator(ctx.site, o.getTargetEnvironment.getAsterism, overSampling)
 
     val tcs = obs.map(o => o -> targetCalcFor(o)).toMap
 
@@ -237,22 +236,22 @@ object XYPlotter {
 
 
   // Target Calc cache!!
-  case class CalcKey(site: Site, target: SkycalcTarget, sampling: Vector[Long])
+  case class CalcKey(site: Site, asterism: Asterism, sampling: Vector[Long])
   case class TimedKey(t: Long, key: CalcKey) extends Ordered[TimedKey] {
     def compare(that: TimedKey): Int = (this.t - that.t).toInt
   }
   private val calcCache = concurrent.TrieMap[CalcKey, TargetCalculator]()
   private val calcAge = mutable.SortedSet[TimedKey]()
 
-  def getCalculator(site: Site, target: SkycalcTarget, sampling: Vector[Long]): TargetCalculator = {
-    val key = CalcKey(site, target, sampling)
+  def getCalculator(site: Site, asterism: Asterism, sampling: Vector[Long]): TargetCalculator = {
+    val key = CalcKey(site, asterism, sampling)
     calcCache.getOrElseUpdate(key, {
       if (calcCache.size >= 500) {
         val oldest = calcAge.head
         calcAge.remove(oldest)
         calcCache.remove(oldest.key)
       }
-      val tc = TargetCalculator(site, target, sampling)
+      val tc = TargetCalculator(site, (t: Long) => asterism.basePosition(Some(Instant.ofEpochMilli(t))).getOrElse(Coordinates.zero), sampling)
       val ts = System.currentTimeMillis()
       calcAge.add(new TimedKey(ts, key))
       calcCache.put(key, tc)

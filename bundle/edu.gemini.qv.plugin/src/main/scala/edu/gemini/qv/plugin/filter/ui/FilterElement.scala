@@ -342,7 +342,7 @@ object FilterElement {
       case HasTimingConstraints(_)    => HasTimingConstraints(selection)
       case HasElevationConstraints(_) => HasElevationConstraints(selection)
       case HasPreImaging(_)           => HasPreImaging(selection)
-      case IsNonSidereal(_)           => IsNonSidereal(selection)
+      case HasNonSidereal(_)          => HasNonSidereal(selection)
       case HasDummyTarget(_)          => HasDummyTarget(selection)
     }
 
