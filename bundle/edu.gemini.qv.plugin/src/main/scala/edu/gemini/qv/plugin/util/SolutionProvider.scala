@@ -68,10 +68,6 @@ sealed class SolutionProvider(site: Site) extends Publisher {
 
   /** Reloads and recalculates all constraints in the background. */
   def update(ctx: QvContext, newObservations: Set[Obs], oldObservations: Set[Obs]): Future[Unit] = {
-    // check if horizons IDs are all known, show a warning if not
-    checkHorizonsNames(newObservations)
-
-    // do the actual update
     scheduleCache.update(ctx.peer, range)
     constraintsCache.update(ctx.peer, nights, newObservations)
   }
@@ -154,24 +150,6 @@ sealed class SolutionProvider(site: Site) extends Publisher {
     if (o.getLGS && n.site == Site.GS) TimeUtils.minutes(60)  // minimal science time for GeMS (LGS + site = GS): 60 minutes
     else if (o.getLGS) TimeUtils.minutes(30)                  // minimal science time for Altair + LGS: 30 minutes
     else TimeUtils.minutes(30)                                // minimal science time for everything else: 30 minutes
-
-
-  private def checkHorizonsNames(observations: Set[Obs]): Unit = {
-//    val withoutHorizonsName =
-//      observations.
-//        filter(o => o.isNonSidereal && NonSiderealCache.horizonsNameFor(o).isEmpty).
-//        map(_.getObsId)
-//    if (withoutHorizonsName.nonEmpty) {
-//      val os = withoutHorizonsName.mkString(", ")
-//      val (plural, have, be) = if (withoutHorizonsName.size > 1) ("s", "have", "are") else ("", "has", "is")
-//      QvGui.showWarning(
-//        "Missing Horizons Lookup Name" + plural,
-//        s"""Non-sidereal observation$plural $os $have no name for Horizons lookups defined yet.
-//           |Please use the OT to do a first Horizons lookup to set the name$plural.
-//           |For now the single already defined position$plural $be used as the target position$plural.""".stripMargin
-//      )
-//    }
-  }
 
 }
 
