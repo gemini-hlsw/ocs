@@ -191,15 +191,12 @@ object GhostAsterism {
       val pm1 = Target.pm.get(ifu1.spTarget.getTarget)
       val pm2 = Target.pm.get(ifu2.spTarget.getTarget)
 
-      // TODO: First, is this correct?  Second, what to do if the epoch doesn't
-      // match?
-      val dra  = pm1.map(_.deltaRA)  |+| pm2.map(_.deltaRA)
-      val ddec = pm1.map(_.deltaDec) |+| pm2.map(_.deltaDec)
-
+      // TODO: handle the proper motion epoch, somehow.  Perhaps epoch doesn't
+      // belong in PM anyway.
       for {
-        r <- dra
-        d <- ddec
-      } yield (ProperMotion(r, d))  // TODO: epoch
+        dra  <- pm1.map(_.deltaRA)  |+| pm2.map(_.deltaRA)
+        ddec <- pm1.map(_.deltaDec) |+| pm2.map(_.deltaDec)
+      } yield ProperMotion(dra, ddec)
     }
 
     def ifu1GuideFiberState(cc: CloudCover): GuideFiberState =
