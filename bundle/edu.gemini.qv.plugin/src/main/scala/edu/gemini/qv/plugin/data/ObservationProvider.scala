@@ -169,19 +169,10 @@ case class PositionProvider(ctx: QvContext, base: ObservationProvider) extends O
   deafTo(this)
   listenTo(ctx, base, SolutionProvider(ctx))
   reactions += {
-    case DataChanged =>
-      updatePos()
-      publish(DataChanged)
-    case ReferenceDateChanged =>
-      updatePos()
-      publish(DataChanged)
-    case ConstraintCalculationEnd(_, _) =>
-      updatePos()
-      publish(DataChanged)
+    case DataChanged                    => publish(DataChanged)
+    case ReferenceDateChanged           => publish(DataChanged)
+    case ConstraintCalculationEnd(_, _) => publish(DataChanged)
   }
-
-  // initial first update on construction
-  updatePos()
 
   implicit class AsterismOps(a: Asterism) {
     // Attempt to return the one and only non-sidereal SPTarget
@@ -194,51 +185,6 @@ case class PositionProvider(ctx: QvContext, base: ObservationProvider) extends O
           }
         case nel => None
       }
-  }
-
-  private def updatePos(): Unit = {
-//    _observations = base.observations.map(o => {
-//      if (NonSiderealCache.isHorizonsTarget(o)) {
-//        val pos = NonSiderealCache.get(ctx.referenceDate, o)
-//
-//        // The check above ensures that this is a nonsidereal observation, which means it must have
-//        // a single-target asterism. If this is not the case it means the model has changed.
-//        val newTarget = o
-//          .getTargetEnvironment
-//          .getAsterism
-//          .getNonSiderealSpTarget
-//          .getOrElse(sys.error("The asterism is not a single nonsidereal target."))
-//
-//        newTarget.setRaDecDegrees(pos.getRaDeg, pos.getDecDeg)
-//        new Obs(
-//          o.getProg,
-//          o.getGroup,
-//          o.getObsNumber,
-//          o.getObsId,
-//          o.getTitle,
-//          o.getPriority,
-//          o.getTooPriority,
-//          o.getObsStatus,
-//          o.getObsClass,
-//          o.getTargetEnvironment.setBasePosition(newTarget),
-//          o.getInstruments.map(o => o.getSpType),
-//          o.getOptions,
-//          o.getCustomMask,
-//          o.getCentralWavelength,
-//          o.getSteps,
-//          o.getPiPlannedTime,
-//          o.getExecPlannedTime,
-//          o.getElapsedTime,
-//          o.getSiteQuality,
-//          o.getLGS,
-//          o.getAO,
-//          o.usesMeanParallacticAngle,
-//          o.getAgsAnalysis,
-//          o.getSchedulingBlock
-//        )
-//      }
-//      else o
-//    })
   }
 
 }
