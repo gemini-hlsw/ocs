@@ -575,7 +575,8 @@ public final class Obs implements Serializable, Comparable<Obs> {
     }
 
 	public double getRa() {
-        return (targetEnvironment != null ? targetEnvironment.getAsterism().getRaDegrees(schedulingBlock.map(SchedulingBlock::start)).getOrElse(0.0) : 0.0);
+	    throw new RuntimeException("getRa was called!");
+//        return (targetEnvironment != null ? targetEnvironment.getAsterism().getRaDegrees(schedulingBlock.map(SchedulingBlock::start)).getOrElse(0.0) : 0.0);
 	}
 
 	public double getDec() {
@@ -619,7 +620,7 @@ public final class Obs implements Serializable, Comparable<Obs> {
      * Often we need to treat those values separately, e.g. when running statistics, we don't want those values
      * to contribute to the counts in an RA [0..1) bin for example.
      */
-    public boolean hasDummyTarget() { return getRa() == 0.0 && getDec() == 0.0; }
+    public boolean hasDummyTarget() { return false; } //getRa() == 0.0 && getDec() == 0.0; }
 
     public Boolean getAO() {
         return ao;

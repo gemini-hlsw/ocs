@@ -80,9 +80,9 @@ case class QvContext(peer: Peer, dataSource: DataSource, source: ObservationProv
 
   // ===
   // Folded providers
-  def foldedMap = FoldedTargetsProvider.observationsMap(dataSource.observations)
+  def foldedMap = FoldedTargetsProvider.observationsMap(dataSource.observations, this)
   def selectedFoldedObs = foldedMap.map({case (f, obs) => if (!obs.intersect(selected).isEmpty) Some(f) else None}).flatten.toSet
-  def foldedFilters = FoldedTargetsProvider.filter(dataSource.observations)
+  def foldedFilters = FoldedTargetsProvider.filter(dataSource.observations, this)
 
 
   // ===

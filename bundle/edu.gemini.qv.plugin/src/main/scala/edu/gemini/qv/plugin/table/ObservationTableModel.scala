@@ -1,14 +1,14 @@
-package edu.gemini.qv.plugin.table
+package edu.gemini.qv.plugin
+package table
 
 import java.util.{Comparator, TimeZone}
 import javax.swing.table.{AbstractTableModel, TableRowSorter}
 
 import edu.gemini.qpt.shared.sp.{Band, Obs}
-import edu.gemini.qv.plugin.QvContext
 import edu.gemini.qv.plugin.util.SolutionProvider
 import edu.gemini.skycalc.TimeUtils
 import edu.gemini.spModel.`type`.{DisplayableSpType, LoggableSpType}
-import edu.gemini.spModel.core.{Affiliate, Angle}
+import edu.gemini.spModel.core.{Affiliate, Angle, Coordinates}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.{ElevationConstraintType, TimingWindow}
 import jsky.coords.DMS
 
@@ -43,12 +43,12 @@ object ObservationTableModel {
     Column[RaValue](
       "RA",
       "Right ascension of science target",
-      o => RaValue(o.getRa)
+      o => RaValue(o.raDeg(ctx))
     ),
     Column[DecValue](
       "Dec",
       "Declination of science target",
-      o => DecValue(o.getDec)
+      o => DecValue(o.decDeg(ctx))
     ),
     Column[String](
       "Instrument",

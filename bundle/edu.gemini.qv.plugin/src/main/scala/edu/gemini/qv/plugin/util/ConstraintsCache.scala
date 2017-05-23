@@ -4,6 +4,7 @@ import java.time.Instant
 
 import ConstraintsCache._
 import edu.gemini.qpt.shared.sp.{Conds, Obs}
+import edu.gemini.qv.plugin.QvContext
 import edu.gemini.qv.plugin.data.FoldedTargetsProvider
 import edu.gemini.qv.plugin.util.ConstraintsCache.ConstraintCalculationEnd
 import edu.gemini.qv.plugin.util.ConstraintsCache.ConstraintCalculationProgress
@@ -114,11 +115,11 @@ class ConstraintsCache(allNights: Seq[Night]) extends Publisher {
   }
 
 
-  def update(peer: Peer, nights: Seq[Night], observations: Set[Obs]): Future[Unit] = Future {
+  def update(ctx: QvContext, nights: Seq[Night], observations: Set[Obs]): Future[Unit] = Future {
     require(nights.nonEmpty)
 
     val constraints = Set(AboveHorizon, SkyBrightness, TimingWindows, Elevation)
-    val foldedMap = FoldedTargetsProvider.observationsMap(observations)
+    val foldedMap = FoldedTargetsProvider.observationsMap(observations, ctx)
     val foldedObs = foldedMap.keys
 
     onEDT(constraints.foreach(c => {
@@ -223,10 +224,6 @@ class ConstraintsCache(allNights: Seq[Night]) extends Publisher {
     if (o.getLGS && n.site == Site.GS) 45           // lower limit for GeMS (LGS + site = GS): 45 deg
     else if (o.getLGS) 40                           // lower limit for Altair + LGS: 40 deg
     else 30                                         // lower limit for everything else: 30 deg
-
-//  private def targetFor(nights: Seq[Night], peer: Peer, obs: Obs): SkycalcTarget =
-//    if (NonSiderealCache.isHorizonsTarget(obs)) NonSiderealCache.get(peer, nights, obs)
-//    else SiderealTarget(new WorldCoords(obs.getRa, obs.getDec))
 
 }
 

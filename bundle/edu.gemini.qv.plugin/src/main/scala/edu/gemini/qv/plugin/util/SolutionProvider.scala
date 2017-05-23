@@ -69,7 +69,7 @@ sealed class SolutionProvider(site: Site) extends Publisher {
   /** Reloads and recalculates all constraints in the background. */
   def update(ctx: QvContext, newObservations: Set[Obs], oldObservations: Set[Obs]): Future[Unit] = {
     scheduleCache.update(ctx.peer, range)
-    constraintsCache.update(ctx.peer, nights, newObservations)
+    constraintsCache.update(ctx, nights, newObservations)
   }
 
   def values(nights: Seq[Night], valueType: ValueType, obs: Obs): Seq[Double] =

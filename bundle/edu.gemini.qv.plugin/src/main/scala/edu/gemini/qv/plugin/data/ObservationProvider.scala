@@ -1,19 +1,15 @@
-package edu.gemini.qv.plugin.data
+package edu.gemini.qv.plugin
+package data
 
 import edu.gemini.qpt.shared.sp.{Obs, Prog}
 import edu.gemini.qv.plugin.filter.core.Filter
 import edu.gemini.qv.plugin.{QvContext, ReferenceDateChanged}
 import edu.gemini.qv.plugin.util.ConstraintsCache.ConstraintCalculationEnd
 import edu.gemini.qv.plugin.util.{SolutionProvider}
-import edu.gemini.spModel.core.NonSiderealTarget
-import edu.gemini.spModel.target.SPTarget
-import edu.gemini.spModel.target.env.Asterism
 
 import scala.collection.JavaConversions._
 import scala.swing.event.Event
 import scala.swing.{Publisher, Swing}
-import scalaz._
-import Scalaz._
 
 /** The observations data changed. */
 object DataChanged extends Event
@@ -64,8 +60,8 @@ case class SelectionProvider(base: ObservationProvider) extends FilteringObserva
 
 object FoldedTargetsProvider {
 
-  def filter(base: Set[Obs]): Set[Filter] = {
-    base.groupBy(foldedObsKey).map({ case (key, groupedObs) => {
+  def filter(base: Set[Obs], ctx: QvContext): Set[Filter] = {
+    base.groupBy(foldedObsKey(_, ctx)).map({ case (key, groupedObs) => {
       val headObs = groupedObs.head
       val prog = headObs.getProg
       Filter.ObservationSet(groupedObs + foldedObs(groupedObs), foldedId(prog, groupedObs))
@@ -73,14 +69,14 @@ object FoldedTargetsProvider {
 
   }
 
-  def observations(base: Set[Obs]): Set[Obs] = {
-    base.groupBy(foldedObsKey).map({ case (key, groupedObs) => {
+  def observations(base: Set[Obs], ctx: QvContext): Set[Obs] = {
+    base.groupBy(foldedObsKey(_, ctx)).map({ case (key, groupedObs) => {
       foldedObs(groupedObs)
     }}).toSet
   }
 
-  def observationsMap(base: Set[Obs]): Map[Obs, Set[Obs]] = {
-    base.groupBy(foldedObsKey).map({ case (key, groupedObs) => {
+  def observationsMap(base: Set[Obs], ctx: QvContext): Map[Obs, Set[Obs]] = {
+    base.groupBy(foldedObsKey(_, ctx)).map({ case (key, groupedObs) => {
       foldedObs(groupedObs) -> groupedObs
     }})
   }
@@ -129,12 +125,12 @@ object FoldedTargetsProvider {
    * constraints in the visibility charts. This are all observations with identical sky brightness, elevation and
    * time window constraints.
    */
-  private def foldedObsKey(o: Obs) = {
+  private def foldedObsKey(o: Obs, ctx: QvContext) = {
     val sq = o.getSiteQuality
     (
       o.getProg,
-      o.getRa,
-      o.getDec,
+      o.raDeg(ctx),
+      o.decDeg(ctx),
       o.getInstruments.headOption,
       sq.getSkyBackground,
       sq.getElevationConstraintType,
@@ -155,90 +151,24 @@ object FoldedTargetsProvider {
 }
 
 /**
- * Observation provider which overrides the RA/Dec coordinates of all non-sidereal observations with
- * their position at the currently selected reference time.
+ * Observation provider which updates when reference time changes.
  * @param ctx
  * @param base
  */
 case class PositionProvider(ctx: QvContext, base: ObservationProvider) extends ObservationProvider {
 
-  private var _observations: Set[Obs] = Set()
-
-  override def observations = _observations
+  override def observations =
+    base.observations
 
   deafTo(this)
   listenTo(ctx, base, SolutionProvider(ctx))
   reactions += {
     case DataChanged =>
-      updatePos()
       publish(DataChanged)
     case ReferenceDateChanged =>
-      updatePos()
       publish(DataChanged)
     case ConstraintCalculationEnd(_, _) =>
-      updatePos()
       publish(DataChanged)
-  }
-
-  // initial first update on construction
-  updatePos()
-
-  implicit class AsterismOps(a: Asterism) {
-    // Attempt to return the one and only non-sidereal SPTarget
-    def getNonSiderealSpTarget: Option[SPTarget] =
-      a.allSpTargets match {
-        case NonEmptyList(spt, INil()) =>
-          spt.getTarget match {
-            case _: NonSiderealTarget => Some(spt)
-            case _ => None
-          }
-        case nel => None
-      }
-  }
-
-  private def updatePos(): Unit = {
-//    _observations = base.observations.map(o => {
-//      if (NonSiderealCache.isHorizonsTarget(o)) {
-//        val pos = NonSiderealCache.get(ctx.referenceDate, o)
-//
-//        // The check above ensures that this is a nonsidereal observation, which means it must have
-//        // a single-target asterism. If this is not the case it means the model has changed.
-//        val newTarget = o
-//          .getTargetEnvironment
-//          .getAsterism
-//          .getNonSiderealSpTarget
-//          .getOrElse(sys.error("The asterism is not a single nonsidereal target."))
-//
-//        newTarget.setRaDecDegrees(pos.getRaDeg, pos.getDecDeg)
-//        new Obs(
-//          o.getProg,
-//          o.getGroup,
-//          o.getObsNumber,
-//          o.getObsId,
-//          o.getTitle,
-//          o.getPriority,
-//          o.getTooPriority,
-//          o.getObsStatus,
-//          o.getObsClass,
-//          o.getTargetEnvironment.setBasePosition(newTarget),
-//          o.getInstruments.map(o => o.getSpType),
-//          o.getOptions,
-//          o.getCustomMask,
-//          o.getCentralWavelength,
-//          o.getSteps,
-//          o.getPiPlannedTime,
-//          o.getExecPlannedTime,
-//          o.getElapsedTime,
-//          o.getSiteQuality,
-//          o.getLGS,
-//          o.getAO,
-//          o.usesMeanParallacticAngle,
-//          o.getAgsAnalysis,
-//          o.getSchedulingBlock
-//        )
-//      }
-//      else o
-//    })
   }
 
 }
