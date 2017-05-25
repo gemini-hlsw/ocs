@@ -70,13 +70,13 @@ object SpProgramFactory {
     prog.setThesis(isThesis(proposal))
 
     prog.setPIInfo(piInfo(proposal))
-    hostNgoEmail(proposal) foreach { e => prog.setPrimaryContactEmail(e) }
+    hostNgoEmail(proposal) foreach prog.setPrimaryContactEmail
 
     // Note: not a typo -- "contact person" is an email
     gemEmail(proposal) foreach { e => prog.setContactPerson(e) }
 
-    minBand3Time(proposal) foreach { tv => prog.setMinimumTime(tv) }
-    timeAcctAllocation(proposal) foreach { alloc => prog.setTimeAcctAllocation(alloc) }
+    minBand3Time(proposal) foreach prog.setMinimumTime
+    timeAcctAllocation(proposal) foreach prog.setTimeAcctAllocation
 
     prog.setGsaPhase1Data(gsaPhase1Data(proposal))
     prog
@@ -186,14 +186,14 @@ object SpProgramFactory {
 
   def minBand3Time(proposal: Proposal): Option[TimeValue] =
     proposal.proposalClass match {
-      case q: QueueProposalClass => q.band3request map { r => toTimeValue(r.minTime) }
+      case q: QueueProposalClass => q.band3request map { r => toTimeValue(r.minTime, proposal.programTimeRatio) }
       case _                     => None
     }
 
-  private def toTimeValue(ta: TimeAmount): TimeValue =
+  private def toTimeValue(ta: TimeAmount, ratio: Double = 1.0): TimeValue =
     ta.units match {
-      case TimeUnit.NIGHT => new TimeValue(ta.value, TimeValue.Units.nights)
-      case _              => new TimeValue(ta.toHours.value, TimeValue.Units.hours)
+      case TimeUnit.NIGHT => new TimeValue(ta.value * ratio, TimeValue.Units.nights)
+      case _              => new TimeValue(ta.toHours.value * ratio, TimeValue.Units.hours)
     }
 
   def timeAcctAllocation(proposal: Proposal): Option[TimeAcctAllocation] =

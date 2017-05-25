@@ -115,6 +115,16 @@ case class Proposal(meta:Meta,
 
   def resetObservationMeta:Proposal = copy(observations = observations.map(_.copy(meta = None)))
 
+  // Calculate the program time as a ratio of total time.
+  def programTimeRatio: Double = {
+    def timeSum(extract: Observation => Option[TimeAmount]): TimeAmount =
+      TimeAmount.sum(observations.map(extract).flatten)
+    val progTime  = timeSum(_.progTime)
+    val partTime  = timeSum(_.partTime)
+    val totalTime = progTime |+| partTime
+    totalTime.isEmpty ? 1.0 | (progTime.hours / totalTime.hours)
+  }
+
   private def this(m:M.Proposal) = this(
     Meta(m.getMeta),
     Semester(m.getSemester),
