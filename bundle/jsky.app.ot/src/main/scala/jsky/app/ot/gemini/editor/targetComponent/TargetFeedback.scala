@@ -145,7 +145,7 @@ object TargetGuidingFeedback {
   // star, show information particular to the guide star itself.
   def targetAnalysis(ctx: ObsContext, mt: MagnitudeTable, target: SPTarget): List[Row] = {
     val env = ctx.getTargets
-    if (target == env.getBase) baseAnalysis(ctx, mt)
+    if (target == env.getArbitraryTargetFromAsterism) baseAnalysis(ctx, mt)
     else guideProbe(env, target).fold(List.empty[AnalysisRow]) { vgp =>
       guideStarAnalysis(ctx, mt, vgp, target).toList
     }

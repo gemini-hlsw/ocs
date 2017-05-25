@@ -12,14 +12,14 @@ import java.util.*;
 
 /**
  * Gets the collection of targets associated with an observation.  The target
- * enviornment houses the base position of the observation, which is the
- * science target itself, the collection of guide stars organized by
+ * enviornment houses the asterism of the observation, which contains the
+ * science targets themselves, the collection of guide stars organized by
  * {@link GuideProbe} and grouped, and a list of optional "user" targets.
  *
  * <p>User targets are used for blind offseting in the TCC (better support for
  * which is needed here).
  *
- * <p>A TargetEnvironment always has a base position, but may or may not have
+ * <p>A TargetEnvironment always has an asterism, but may or may not have
  * guide stars and user targets.
  *
  * <p>A TargetEnvironment is immutable, but the {@link SPTarget}s it contains
@@ -31,18 +31,28 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
     public static final String USER_NAME = "User";
 
     /**
-     * Creates a TargetEnvironment with a base position but no other
+     * Creates a TargetEnvironment with a single-target asterism but no other
      * associated stars.
      *
      * @param base the science or main target for the observation
      */
     public static TargetEnvironment create(SPTarget base) {
-        ImList<SPTarget> user = ImCollections.emptyList();
-        return create(base, GuideEnvironment$.MODULE$.Initial(), user);
+        return create(new Asterism.Single(base));
     }
 
-    /**
-     * Creates a new TargetEnvironment with the given base position, guide
+  /**
+   * Creates a TargetEnvironment with a single-target asterism but no other
+   * associated stars.
+   *
+   * @param asterism the asterism for the observation
+   */
+    public static TargetEnvironment create(Asterism asterism) {
+      ImList<SPTarget> user = ImCollections.emptyList();
+      return new TargetEnvironment(asterism, GuideEnvironment$.MODULE$.Initial(), user);
+    }
+
+  /**
+     * Creates a new TargetEnvironment with the given single-target asterism, guide
      * stars, and user targets. No references to the guide or user targets are
      * maintained, though it will share the references to the {@link SPTarget}s
      * themselves.
@@ -53,11 +63,12 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
      *
      * @param user list of user targets
      */
+    @Deprecated
     public static TargetEnvironment create(SPTarget base, GuideEnvironment guide, ImList<SPTarget> user) {
-        return new TargetEnvironment(base, guide, user);
+        return new TargetEnvironment(new Asterism.Single(base), guide, user);
     }
 
-    private final SPTarget base;
+    private final Asterism asterism;
     private final GuideEnvironment guide;
     private final ImList<SPTarget> user;
 
@@ -65,22 +76,28 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
     // SoftReference, this cache may disappear when memory is tight
     private transient SoftReference<ImList<SPTarget>> allTargets;
 
-    private TargetEnvironment(SPTarget base, GuideEnvironment guide, ImList<SPTarget> user) {
-        if (base == null) throw new IllegalArgumentException("base = null");
-        if (guide == null) throw new IllegalArgumentException("guide = null");
-        if (user == null) throw new IllegalArgumentException("user targets = null");
-        this.base  = base;
-        this.guide = guide;
-        this.user  = user;
+    private TargetEnvironment(Asterism asterism, GuideEnvironment guide, ImList<SPTarget> user) {
+        if (asterism == null) throw new IllegalArgumentException("asterism = null");
+        if (guide    == null) throw new IllegalArgumentException("guide = null");
+        if (user     == null) throw new IllegalArgumentException("user targets = null");
+        this.asterism = asterism;
+        this.guide    = guide;
+        this.user     = user;
+    }
+
+    /** Returns an arbitrary target from the asterism. This method will be removed for 18A. */
+    @Deprecated
+    public SPTarget getArbitraryTargetFromAsterism() {
+      return getAsterism().allSpTargets().head();
     }
 
     /**
-     * Gets the main, or science target in this environment.  This method
+     * Gets the asterism, or science targets in this environment.  This method
      * will never return <code>null</code> because the environment always has
-     * to contain a base position.
+     * to contain an asterism.
      */
-    public SPTarget getBase() {
-        return base;
+    public Asterism getAsterism() {
+      return asterism;
     }
 
     /**
@@ -182,11 +199,6 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
         return user;
     }
 
-    // Creates a list of all the targets in this environment
-    private ImList<SPTarget> initAllTargets() {
-        return DefaultImList.create(base).append(guide.getTargets()).append(user);
-    }
-
     @Override
     public boolean containsTarget(SPTarget target) {
         return getTargets().contains(target);
@@ -211,7 +223,7 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
 
         // Doesn't exist yet/anymore so initialize it.
         if (res == null) {
-            res = initAllTargets();
+            res = asterism.allSpTargetsJava().append(guide.getTargets()).append(user);
             allTargets = new SoftReference<>(res);
         }
         return res;
@@ -229,14 +241,6 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
      */
     public Iterator<SPTarget> iterator() {
         return getTargets().iterator();
-    }
-
-    /**
-     * Returns <code>true</code> if the given target is the base position in
-     * this environment.
-     */
-    public boolean isBasePosition(SPTarget target) {
-        return target == base;
     }
 
     /**
@@ -262,10 +266,10 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
      */
     @Override
     public TargetEnvironment cloneTargets() {
-        final SPTarget clonedBase = base.clone();
+        final Asterism clonedAsterism = asterism.copyWithClonedTargets();
         final GuideEnvironment clonedGuide = guide.cloneTargets();
         final ImList<SPTarget> clonedUser = user.map(SPTarget::clone);
-        return new TargetEnvironment(clonedBase, clonedGuide, clonedUser);
+        return new TargetEnvironment(clonedAsterism, clonedGuide, clonedUser);
     }
 
     /**
@@ -286,19 +290,28 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
     }
 
     /**
-     * Creates an identical TargetEnvironment but with the given base position
-     * in the place of this environment's base.
+     * Creates an identical TargetEnvironment but with a single-target asterism
+     * in the place of this environment's asterism.
      */
+    @Deprecated
     public TargetEnvironment setBasePosition(SPTarget target) {
-        return new TargetEnvironment(target, guide, user);
+        return setAsterism(new Asterism.Single(target));
     }
 
     /**
+     * Creates an identical TargetEnvironment but with the given asterism
+     * in the place of this environment's asterism.
+     */
+    public TargetEnvironment setAsterism(Asterism asterism) {
+      return new TargetEnvironment(asterism, guide, user);
+    }
+
+  /**
      * Creates an identical TargetEnvironment but with the given
      * GuideEnvironment.
      */
     public TargetEnvironment setGuideEnvironment(GuideEnvironment genv) {
-        return new TargetEnvironment(base, genv, user);
+        return new TargetEnvironment(asterism, genv, user);
     }
 
     /**
@@ -307,7 +320,7 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
      */
     public TargetEnvironment setUserTargets(ImList<SPTarget> userTargets) {
         if (userTargets == this.user) return this;
-        return new TargetEnvironment(base, guide, userTargets);
+        return new TargetEnvironment(asterism, guide, userTargets);
     }
 
 
@@ -316,10 +329,10 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
     public ParamSet getParamSet(PioFactory factory) {
         ParamSet paramSet = factory.createParamSet(PARAM_SET_NAME);
 
-        // Add the base position first.
-        ParamSet basePset = getBase().getParamSet(factory);
-        basePset.setName("base");
-        paramSet.addParamSet(basePset);
+        // Add the asterism.
+        paramSet.addParamSet(
+          Asterism$.MODULE$.AsterismParamSetCodec().encode("asterism", getAsterism())
+        );
 
         // Add each guider list
         paramSet.addParamSet(guide.getParamSet(factory));
@@ -355,11 +368,10 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
 
 
     public static TargetEnvironment fromParamSet(ParamSet parent) {
-        // Get the base position
-        ParamSet basePset = parent.getParamSet("base");
-        if (basePset == null) return null;
 
-        SPTarget base = SPTarget.fromParamSet(basePset);
+        // Get the asterism
+        ParamSet astPset = parent.getParamSet("asterism");
+        Asterism asterism = Asterism$.MODULE$.AsterismParamSetCodec().unsafeDecode(astPset);
 
         GuideEnvironment guide = parseGuideEnvironment(parent);
 
@@ -372,12 +384,12 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
             }
         }
 
-        return create(base, guide, DefaultImList.create(userTargets));
+        return new TargetEnvironment(asterism, guide, DefaultImList.create(userTargets));
     }
 
     public String mkString(String prefix, String sep, String suffix) {
         StringBuilder buf = new StringBuilder();
-        buf.append("base=").append(base);
+        buf.append("asterism=").append(asterism);
 
         buf.append(sep).append("guide:primary=").append(guide.getPrimaryIndex());
         buf.append(sep).append("guide:auto=").append(guide.guideEnv().auto());

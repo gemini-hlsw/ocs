@@ -18,9 +18,9 @@ object RolloverObservation {
       id   <- Option(obs.getObservationID)
       prog <- program(obs)
       p    <- partner(prog)
-      t    <- target(obs)
+      t    <- basePosition(obs)
       c    <- conditions(obs)
-      ms    <- time(obs)
+      ms   <- time(obs)
     } yield RolloverObservation(id, p, t, c, ms)
 
   private def findByType(obs: ISPObservation, compType: SPComponentType): Option[ISPObsComponent] =
@@ -42,13 +42,13 @@ object RolloverObservation {
       aff     <- Option(dataObj.getPIAffiliate)
     } yield aff.displayValue
 
-  private def target(o: ISPObservation): Option[RolloverTarget] =
+  private def basePosition(o: ISPObservation): Option[RolloverBasePosition] =
     for {
       targetComp <- findByType(o, TargetObsComp.SP_TYPE)
       dataObj    <- Option(targetComp.getDataObject.asInstanceOf[TargetObsComp])
       targetEnv  <- Option(dataObj.getTargetEnvironment)
-      science    <- Option(targetEnv.getBase)
-      name       <- Option(science.getName)
+      asterism   <- Option(targetEnv.getAsterism)
+      name       <- Option(asterism.name)
     } yield {
 
       // Amazingly this is easier in Java
@@ -61,11 +61,11 @@ object RolloverObservation {
 
       // Coordinates may or may not be known
       val coords = for {
-        ra  <- science.getRaDegrees(when).asScalaOpt
-        dec <- science.getDecDegrees(when).asScalaOpt
+        ra  <- asterism.getRaDegrees(when).asScalaOpt
+        dec <- asterism.getDecDegrees(when).asScalaOpt
       } yield Coords(new Angle(ra, Angle.Unit.DEGREES), new Angle(dec, Angle.Unit.DEGREES))
 
-      RolloverTarget(name, coords)
+      RolloverBasePosition(name, coords)
 
     }
 
@@ -91,6 +91,6 @@ object RolloverObservation {
 }
 
 case class Coords(ra: Angle, dec: Angle)
-case class RolloverTarget(name: String, coords: Option[Coords])
+case class RolloverBasePosition(name: String, coords: Option[Coords])
 case class RolloverConditions(cc: CloudCover, iq: ImageQuality, sb: SkyBackground, wv: WaterVapor)
-case class RolloverObservation(id: SPObservationID, partner: String, target: RolloverTarget, conds: RolloverConditions, remainingTime: Long)
+case class RolloverObservation(id: SPObservationID, partner: String, target: RolloverBasePosition, conds: RolloverConditions, remainingTime: Long)

@@ -198,14 +198,17 @@ object SpProgramFactory {
 
   def timeAcctAllocation(proposal: Proposal): Option[TimeAcctAllocation] =
     awardedHours(proposal).filter(_ > 0.0) flatMap { hrs =>
+      val progTime = hoursFromObservations(proposal, _.progTime)
+      val partTime = hoursFromObservations(proposal, _.partTime)
+
       timeAccountingRatios(proposal) match {
-        case Nil    => None
+        case Nil => None
         case ratios =>
           val jmap = ratios.map { case (cat, rat) =>
-            // REL-2928 TODO: handle splitting program and partner award.  Here
-            // we just keep everything as the program award for now.
-            val ms    = ((hrs * rat) * MsPerHour).round // ms for this category
-            val award = new TimeAcctAward(Duration.ofMillis(ms), Duration.ZERO)
+            def durationRatio(v: TimeAmount): Duration =
+              Duration.ofMillis(((v.hours * rat) * MsPerHour).round)
+
+            val award = new TimeAcctAward(durationRatio(progTime), durationRatio(partTime))
             (cat, award)
           }.toMap.asJava
           Some(new TimeAcctAllocation(jmap))
@@ -214,6 +217,9 @@ object SpProgramFactory {
 
   def awardedHours(proposal: Proposal): Option[Double] =
     itacAcceptance(proposal) map { a => a.award.toHours.value }
+
+  private def hoursFromObservations(proposal: Proposal, sf: Observation => Option[TimeAmount]): TimeAmount =
+    proposal.observations.foldLeft(TimeAmount.empty)(_ |+| sf(_).getOrElse(TimeAmount.empty))
 
   def timeAccountingRatios(proposal: Proposal): List[(TimeAcctCategory, Double)] =
     proposal.proposalClass match {

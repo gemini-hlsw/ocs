@@ -283,7 +283,7 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
             final List<Row> tmpRows = new ArrayList<>();
 
             // Add the base position first.
-            final SPTarget base = env.getBase();
+            final SPTarget base = env.getArbitraryTargetFromAsterism();
             final Option<Long> when = ctxOpt.flatMap(ObsContext::getSchedulingBlockStart);
             final Option<Coordinates> baseCoords = getCoordinates(base, when);
             tmpRows.add(new BaseTargetRow(base, when));
@@ -373,7 +373,7 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
         // Given a guide group and its index amongst the set of all groups, create a GroupRow (and all children
         // target subrows) representing it.
         private GroupRow createGroupRow(final Option<ObsContext> ctxOpt, final int groupIdx, final GuideGroup group) {
-            final SPTarget base                  = env.getBase();
+            final SPTarget base                  = env.getArbitraryTargetFromAsterism();
             final Option<Long> when              = ctxOpt.flatMap(ObsContext::getSchedulingBlockStart);
             final Option<Coordinates> baseCoords = getCoordinates(base, when);
             final GuideEnvironment ge            = env.getGuideEnvironment();
@@ -1099,7 +1099,7 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
      * Select the base position, updating the TargetSelection's target, and set the relevant row in the table.
      */
     private void selectBasePos() {
-        selectTarget(_env.getBase());
+        selectTarget(_env.getArbitraryTargetFromAsterism());
     }
 
 

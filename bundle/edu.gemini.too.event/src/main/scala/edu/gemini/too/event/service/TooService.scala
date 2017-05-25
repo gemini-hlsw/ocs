@@ -4,8 +4,9 @@ import edu.gemini.pot.sp._
 import edu.gemini.pot.spdb.{ProgramEvent, ProgramEventListener, IDBTriggerAction, IDBDatabaseService}
 import edu.gemini.spModel.core.Site
 import edu.gemini.spModel.gemini.obscomp.SPProgram
-import edu.gemini.spModel.obs.{ObservationStatus, ObsSchedulingReport}
+import edu.gemini.spModel.obs.{ObsClassService, ObservationStatus, ObsSchedulingReport}
 import ObservationStatus.{READY, ON_HOLD}
+import edu.gemini.spModel.obsclass.ObsClass.SCIENCE
 import edu.gemini.spModel.too.{Too, TooType}
 import edu.gemini.too.event.api.{TooEvent, TooService => TooServiceApi, TooPublisher, TooTimestamp}
 import edu.gemini.util.security.permission.ProgramPermission
@@ -113,7 +114,13 @@ class TooService(db: IDBDatabaseService, val site: Site, val eventRetentionTime:
       val transitionTrigger = oldOnHold & newReady
       val creationTrigger   = newReady.filterNot(allOldKeys.contains)
 
-      trigger(obsList(newProg, transitionTrigger ++ creationTrigger))
+      val newlyReadyObsList = obsList(newProg, transitionTrigger ++ creationTrigger)
+      val triggerObsList    = newlyReadyObsList.filter { o =>
+        // REL-566: ignore anything but science observations.
+        ObsClassService.lookupObsClass(o) == SCIENCE
+      }
+
+      trigger(triggerObsList)
     }
   }
 

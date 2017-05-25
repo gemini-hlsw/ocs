@@ -1,5 +1,7 @@
 package edu.gemini.itc.shared
 
+import java.time.Instant
+
 import edu.gemini.pot.ModelConverters._
 import edu.gemini.pot.sp.SPComponentType._
 import edu.gemini.spModel.config2.{Config, ItemKey}
@@ -17,7 +19,7 @@ import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.spModel.obscomp.SPInstObsComp
 import edu.gemini.spModel.rich.shared.immutable.asScalaOpt
 import edu.gemini.spModel.target.SPTarget
-import edu.gemini.spModel.target.env.{GuideProbeTargets, TargetEnvironment}
+import edu.gemini.spModel.target.env.{Asterism, GuideProbeTargets, TargetEnvironment}
 import edu.gemini.spModel.telescope.IssPort
 import edu.gemini.spModel.core.WavelengthConversions._
 import edu.gemini.shared.util.immutable.{Option => GOption}
@@ -264,7 +266,8 @@ object ConfigExtractor {
         fieldLens <- extract[FieldLens]     (c, AoFieldLensKey)
         wfsMode   <- extract[GuideStarType] (c, AoGuideStarTypeKey)
       } yield {
-        val separation = distance(targetEnv.getBase, guideStar, when)
+        // TODO:ASTERISM: may be wrong, see https://github.com/gemini-hlsw/ocs/pull/1222#discussion_r115356730
+        val separation = distance(targetEnv.getAsterism, guideStar.getTarget, when)
         Some(AltairParameters(separation, magnitude, fieldLens, wfsMode))
       }
     } else {
@@ -326,9 +329,9 @@ object ConfigExtractor {
   }
 
   // Calculate distance between two coordinates in arc seconds
-  private def distance(t0: SPTarget, t1: SPTarget, when: GOption[java.lang.Long]) = {
-    val c0 = t0.toSiderealTarget(when).coordinates
-    val c1 = t1.toSiderealTarget(when).coordinates
+  private def distance(a: Asterism, t1: Target, when: GOption[java.lang.Long]) = {
+    val c0 = a.basePosition(when.asScalaOpt.map(Instant.ofEpochSecond(_))).getOrElse(Coordinates.zero)
+    val c1 = t1.coords(when.asScalaOpt.map(_.toLong)) getOrElse Coordinates.zero
     Coordinates.difference(c0, c1).distance.toArcsecs
   }
 

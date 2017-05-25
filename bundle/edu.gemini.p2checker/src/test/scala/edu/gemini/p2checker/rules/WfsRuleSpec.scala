@@ -34,8 +34,8 @@ class WfsRuleSpec extends Specification {
 
     // Rename base to "Foo" and add a guidestar that's mod(base.clone())
     t.setTargetEnvironment {
-      val te  = t.getTargetEnvironment <| (_.getBase.setName("Foo"))
-      val g   = te.getBase.clone() <| (g => g.setTarget(mod(g.getTarget.asInstanceOf[SiderealTarget])))
+      val te  = t.getTargetEnvironment <| (_.getAsterism.allSpTargets.head.setName("Foo"))
+      val g   = te.getAsterism.allSpTargets.head.clone() <| (g => g.setTarget(mod(g.getTarget.asInstanceOf[SiderealTarget])))
       val p   = GmosOiwfsGuideProbe.instance
       val gpt = GuideProbeTargets.create(p, g)
       val gg  = te.getPrimaryGuideGroup.setAll(List(gpt).asImList)

@@ -31,7 +31,7 @@ object ObsTargetCalculatorService {
       _.getDataObject
         .asInstanceOf[TargetObsComp]
         .getTargetEnvironment
-        .getBase
+        .getAsterism
         .getSkycalcCoordinates(block.map(_.start : java.lang.Long).asGeminiOpt).asScalaOpt
     }
 

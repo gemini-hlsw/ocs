@@ -97,7 +97,7 @@ public class TccFieldConfig extends ParamSet {
 
     private void addBaseGroup(TargetEnvironment env) throws WdbaGlueException {
         // Add the target itself.
-        SPTarget base = env.getBase();
+        SPTarget base = env.getArbitraryTargetFromAsterism();
         if (isEmpty(base.getName())) {
             base.setName(TccNames.BASE);
         }
