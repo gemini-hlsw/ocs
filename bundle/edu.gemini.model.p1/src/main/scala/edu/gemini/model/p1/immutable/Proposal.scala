@@ -119,10 +119,10 @@ case class Proposal(meta:Meta,
   private def timeSum(extract: Observation => Option[TimeAmount]): TimeAmount =
     TimeAmount.sum(observations.map(extract).flatten)
 
-  lazy val programTime: TimeAmount = timeSum(_.progTime)
-  lazy val partnerTime: TimeAmount = timeSum(_.partTime)
+  val programTime: TimeAmount = timeSum(_.progTime)
+  val partnerTime: TimeAmount = timeSum(_.partTime)
 
-  lazy val programTimeRatio: Double = {
+  val programTimeRatio: Double = {
     val totalTime = programTime |+| partnerTime
     totalTime.isEmpty ? 1.0 | (programTime.hours / totalTime.hours)
   }
