@@ -22,7 +22,7 @@ public class DBNightlyPlanInfo implements Serializable, Comparable<DBNightlyPlan
     // last modified timestamp
     private long _timestamp;
 
-    private static SimpleDateFormat _formatter = new SimpleDateFormat("MM/dd/yy HH:hh:ss");
+    private static SimpleDateFormat _formatter = new SimpleDateFormat("yyyy-MMM-dd HH:hh:ss");
 
     private String _lastModified;
 

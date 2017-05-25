@@ -183,7 +183,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       msg = s"""Ephemeris for target "$n" contains only one point; please specify at least two."""
     } yield new Problem(Severity.Warning, msg, "Targets", s.inTargetsView(_.edit(t)))
 
-    lazy val utc = new SimpleDateFormat("dd-MMM-yyyy") {
+    lazy val utc = new SimpleDateFormat("yyyy-MMM-dd") {
       setTimeZone(TimeZone.getTimeZone("UTC"))
     }
 

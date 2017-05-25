@@ -190,7 +190,7 @@ object TpeEphemerisFeature {
   }
 
   val formatDate: Long => String = {
-    val df = new SimpleDateFormat("dd-MMM HH:mm")
+    val df = new SimpleDateFormat("yyyy-MMM-dd HH:mm")
     df.setTimeZone(TimeZone.getTimeZone("UTC"))
     t => df.synchronized(df.format(new Date(t)))
   }

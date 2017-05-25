@@ -401,7 +401,7 @@ class TargetEditor private (semester:Semester, target:Target, canEdit:Boolean) e
       // Controller
       object Controller extends ListTableController[EphemerisElement, Column] {
         val utc = {
-          val df = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss")
+          val df = new SimpleDateFormat("yyyy-MMM-dd HH:mm:ss")
           df.setTimeZone(TimeZone.getTimeZone("UTC"))
           df
         }

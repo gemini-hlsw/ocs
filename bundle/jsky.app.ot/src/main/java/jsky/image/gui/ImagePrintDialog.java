@@ -56,7 +56,7 @@ public class ImagePrintDialog implements Printable, ActionListener {
     private boolean _newPrint;
     private double _printOffsetX;
     private double _printOffsetY;
-    private final SimpleDateFormat _dateFormatter = new SimpleDateFormat("MM/dd/yy HH:mm:ss");
+    private final SimpleDateFormat _dateFormatter = new SimpleDateFormat("yyyy-MMM-dd HH:mm:ss");
 
 
     /**

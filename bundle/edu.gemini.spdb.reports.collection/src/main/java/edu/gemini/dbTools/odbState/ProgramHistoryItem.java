@@ -21,7 +21,7 @@ public final class ProgramHistoryItem implements Comparable<ProgramHistoryItem>,
     private static final ProgramHistoryItem[] EMPTY_ARRAY = {};
 
     private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
-    private static final DateFormat DATE_FORMAT = new SimpleDateFormat("MMM d, yyyy");
+    private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MMM-dd");
     private static final DateFormat TIME_FORMAT = new SimpleDateFormat("hh:mm:ss a");
 
     static {

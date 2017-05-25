@@ -11,7 +11,7 @@ public class SummaryUtils {
      * given the current UTC time in ms.
      */
     public static String formatUTCDateTime(long time) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yy HH:mm:ss");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MMM-dd HH:mm:ss");
         return _doFormatUTC(dateFormat, time);
     }
 

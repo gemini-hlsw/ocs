@@ -324,7 +324,7 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
     } {
       // Scheduling block date and time
       val dateTimeStr = {
-        val df = new SimpleDateFormat("MM/dd/yy HH:mm:ss z")
+        val df = new SimpleDateFormat("yyyy-MMM-dd HH:mm:ss z")
         df.setTimeZone(TimeZonePreference.get)
         df.format(new Date(sb.start))
       }

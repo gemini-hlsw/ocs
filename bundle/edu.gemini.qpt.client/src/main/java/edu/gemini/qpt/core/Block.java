@@ -17,7 +17,7 @@ import java.util.Date;
  */
 public final class Block implements Comparable<Block>, IntervalType<Block>, PioSerializable {
 
-    private static final DateFormat FORMAT = new SimpleDateFormat("dd-MMM HH:mm");
+    private static final DateFormat FORMAT = new SimpleDateFormat("yyyy-MMM-dd HH:mm");
     private static final String PROP_START = "start";
     private static final String PROP_END = "end";
 

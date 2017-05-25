@@ -27,7 +27,7 @@ object AuxFileEditor {
       lab.text = size.toString
   })
 
-  private val Format = new SimpleDateFormat("MM/dd/yy HH:mm:ss") {
+  private val Format = new SimpleDateFormat("yyyy-MMM-dd HH:mm:ss") {
     setTimeZone(TimeZone.getTimeZone("UTC"))
   }
 

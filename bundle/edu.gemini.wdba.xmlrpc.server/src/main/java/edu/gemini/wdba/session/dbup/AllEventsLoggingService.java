@@ -23,7 +23,7 @@ import java.util.logging.Level;
 public class AllEventsLoggingService extends AbstractSessionEventConsumer implements ISessionEventListener {
 
     private static final Logger LOG = Logger.getLogger(AllEventsLoggingService.class.getName());
-    private  final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("MM/dd/yy HH:mm:ss");
+    private  final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MMM-dd HH:mm:ss");
 
     private UpdateAction _action = new UpdateAction();
 
