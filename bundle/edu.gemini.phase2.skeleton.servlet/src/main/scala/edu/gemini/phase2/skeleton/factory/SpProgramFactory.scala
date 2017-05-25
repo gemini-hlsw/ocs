@@ -198,8 +198,8 @@ object SpProgramFactory {
 
   def timeAcctAllocation(proposal: Proposal): Option[TimeAcctAllocation] =
     awardedHours(proposal).filter(_ > 0.0) flatMap { hrs =>
-      val progTime = hoursFromObservations(proposal, _.progTime)
-      val partTime = hoursFromObservations(proposal, _.partTime)
+      val progTime = proposal.programTimeHours
+      val partTime = proposal.partnerTimeHours
 
       timeAccountingRatios(proposal) match {
         case Nil => None
@@ -217,9 +217,6 @@ object SpProgramFactory {
 
   def awardedHours(proposal: Proposal): Option[Double] =
     itacAcceptance(proposal) map { a => a.award.toHours.value }
-
-  private def hoursFromObservations(proposal: Proposal, sf: Observation => Option[TimeAmount]): TimeAmount =
-    proposal.observations.foldLeft(TimeAmount.empty)(_ |+| sf(_).getOrElse(TimeAmount.empty))
 
   def timeAccountingRatios(proposal: Proposal): List[(TimeAcctCategory, Double)] =
     proposal.proposalClass match {
