@@ -1,10 +1,8 @@
-
 # Telescope Reflectivity with 3 silver mirrors
 # Columns are (1) wavelength in nm and (2) reflectivity 0-1
 # Source: https://www.gemini.edu/sciops/instruments/optics/Gemini_Optics_Reflectivity_Data.xlsx
 # Data taken from GN sample from August 2013
 # Update 17/05/2017 by A. Shugart at GS
-
 
 200	    4.54975E-05
 200.5	4.95988E-05
