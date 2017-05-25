@@ -197,16 +197,17 @@ object SpProgramFactory {
     }
 
   def timeAcctAllocation(proposal: Proposal): Option[TimeAcctAllocation] =
-    // We ignore the awarded hours here and work instead with the program time and partner time.
-    awardedHours(proposal).filter(_ > 0.0) flatMap { _ =>
+    awardedHours(proposal).filter(_ > 0.0) flatMap { hrs =>
       timeAccountingRatios(proposal) match {
         case Nil => None
         case ratios =>
-          val jmap = ratios.map { case (cat, rat) =>
-            def durationRatio(v: TimeAmount): Duration =
-              Duration.ofMillis(((v.hours * rat) * MsPerHour).round)
+          val jmap = ratios.map { case (cat, partnerShare) =>
+            def durationRatio(ratio: Double): Duration =
+              Duration.ofMillis((hrs * ratio * partnerShare * MsPerHour).round)
 
-            val award = new TimeAcctAward(durationRatio(proposal.programTime), durationRatio(proposal.partnerTime))
+            val progRatio = proposal.programTimeRatio
+            val award     = new TimeAcctAward(durationRatio(progRatio), durationRatio(1.0 - progRatio))
+
             (cat, award)
           }.toMap.asJava
           Some(new TimeAcctAllocation(jmap))
