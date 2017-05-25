@@ -70,13 +70,13 @@ object SpProgramFactory {
     prog.setThesis(isThesis(proposal))
 
     prog.setPIInfo(piInfo(proposal))
-    hostNgoEmail(proposal) foreach prog.setPrimaryContactEmail
+    hostNgoEmail(proposal).foreach(prog.setPrimaryContactEmail)
 
     // Note: not a typo -- "contact person" is an email
-    gemEmail(proposal) foreach { e => prog.setContactPerson(e) }
+    gemEmail(proposal).foreach(prog.setContactPerson)
 
-    minBand3Time(proposal) foreach prog.setMinimumTime
-    timeAcctAllocation(proposal) foreach prog.setTimeAcctAllocation
+    minBand3Time(proposal).foreach(prog.setMinimumTime)
+    timeAcctAllocation(proposal).foreach(prog.setTimeAcctAllocation)
 
     prog.setGsaPhase1Data(gsaPhase1Data(proposal))
     prog
@@ -152,12 +152,12 @@ object SpProgramFactory {
     } yield a
 
   private def timeAward(ngo: NgoSubmission): Option[TimeAmount] =
-    acceptance(ngo) map { a => a.recommended }
+    acceptance(ngo).map(_.recommended)
 
   def affiliate(proposal: Proposal): Option[Affiliate] =
     proposal.proposalClass match {
       case _: LargeProgramClass => Some(Affiliate.GEMINI_STAFF)
-      case _                    => hostSubmission(proposal) flatMap { s => affiliate(s.partner) }
+      case _                    => hostSubmission(proposal).flatMap(s => affiliate(s.partner))
     }
 
   def hostNgoEmail(p: Proposal): Option[String] =
@@ -179,14 +179,14 @@ object SpProgramFactory {
     itacAcceptance(proposal).exists(_.rollover)
 
   def isThesis(proposal: Proposal): Boolean =
-    proposal.investigators.all exists { i => i.status == GRAD_THESIS }
+    proposal.investigators.all.exists(_.status == GRAD_THESIS)
 
   def gemEmail(proposal: Proposal): Option[String] =
     itacAcceptance(proposal).flatMap(_.contact)
 
   def minBand3Time(proposal: Proposal): Option[TimeValue] =
     proposal.proposalClass match {
-      case q: QueueProposalClass => q.band3request map { r => toTimeValue(r.minTime, proposal.programTimeRatio) }
+      case q: QueueProposalClass => q.band3request.map(r => toTimeValue(r.minTime, proposal.programTimeRatio))
       case _                     => None
     }
 
@@ -197,10 +197,8 @@ object SpProgramFactory {
     }
 
   def timeAcctAllocation(proposal: Proposal): Option[TimeAcctAllocation] =
-    awardedHours(proposal).filter(_ > 0.0) flatMap { hrs =>
-      val progTime = proposal.programTimeHours
-      val partTime = proposal.partnerTimeHours
-
+    // We ignore the awarded hours here and work instead with the program time and partner time.
+    awardedHours(proposal).filter(_ > 0.0) flatMap { _ =>
       timeAccountingRatios(proposal) match {
         case Nil => None
         case ratios =>
@@ -208,7 +206,7 @@ object SpProgramFactory {
             def durationRatio(v: TimeAmount): Duration =
               Duration.ofMillis(((v.hours * rat) * MsPerHour).round)
 
-            val award = new TimeAcctAward(durationRatio(progTime), durationRatio(partTime))
+            val award = new TimeAcctAward(durationRatio(proposal.programTime), durationRatio(proposal.partnerTime))
             (cat, award)
           }.toMap.asJava
           Some(new TimeAcctAllocation(jmap))
@@ -216,7 +214,7 @@ object SpProgramFactory {
     }
 
   def awardedHours(proposal: Proposal): Option[Double] =
-    itacAcceptance(proposal) map { a => a.award.toHours.value }
+    itacAcceptance(proposal).map(_.award.toHours.value)
 
   def timeAccountingRatios(proposal: Proposal): List[(TimeAcctCategory, Double)] =
     proposal.proposalClass match {
@@ -247,9 +245,9 @@ object SpProgramFactory {
     val total  = catHrs.unzip._2.sum
 
     if (total == 0.0) {
-      catHrs map { case (cat, _) => (cat, 1.0 / catHrs.length)}
+      catHrs.map{ case (cat, _) => (cat, 1.0 / catHrs.length)}
     } else {
-      catHrs map { case (cat, hrs) => (cat, hrs / total)}
+      catHrs.map{ case (cat, hrs) => (cat, hrs / total)}
     }
   }
 
@@ -261,10 +259,10 @@ object SpProgramFactory {
     } yield (cat, acc.recommended.hours)
 
   private def excRatio(exc: ExchangeSubmission): Option[(TimeAcctCategory, Double)] =
-    EXC_TIME_ACCT.get(exc.partner) map { cat => (cat, 1.0) }
+    EXC_TIME_ACCT.get(exc.partner).map{ cat => (cat, 1.0) }
 
   private def spcRatio(spc: SpecialSubmission): Option[(TimeAcctCategory, Double)] =
-    SPC_TIME_ACCT.get(spc.specialType) map { cat => (cat, 1.0) }
+    SPC_TIME_ACCT.get(spc.specialType).map{ cat => (cat, 1.0) }
 
   def gsaPhase1Data(proposal: Proposal): Gsa = {
     val abstrakt = new Gsa.Abstract(proposal.abstrakt)
