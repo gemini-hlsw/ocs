@@ -92,7 +92,6 @@ object Phase1FolderFactory {
   def create(site: core.Site, proposal: Proposal): Either[String, Phase1Folder] = {
     val empty: Either[String, Folder] = Right(Folder.empty(site))
 
-    val b       = extractBand(proposal)
     val time    = proposal.semester.midPoint
     val obs     = enabledObs(proposal)
     val efolder = (empty/:obs) { (e, obs) =>
