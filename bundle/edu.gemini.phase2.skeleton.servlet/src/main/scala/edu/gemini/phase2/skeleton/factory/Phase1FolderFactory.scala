@@ -93,12 +93,9 @@ object Phase1FolderFactory {
     val empty: Either[String, Folder] = Right(Folder.empty(site))
 
     val time    = proposal.semester.midPoint
-    val obs     = enabledObs(proposal)
-    val efolder = (empty/:obs) { (e, obs) =>
-      e.right flatMap { _.add(obs, time) }
-    }
-
-    efolder.right map { _.toPhase1Folder }
+    val obs     = proposal.usableObservations
+    val efolder = obs.foldLeft(empty){ (e, obs) => e.right.flatMap( _.add(obs, time)) }
+    efolder.right.map(_.toPhase1Folder)
   }
 }
 

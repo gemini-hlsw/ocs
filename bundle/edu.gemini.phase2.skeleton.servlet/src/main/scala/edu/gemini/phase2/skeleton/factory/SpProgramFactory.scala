@@ -186,7 +186,7 @@ object SpProgramFactory {
 
   def minBand3Time(proposal: Proposal): Option[TimeValue] =
     proposal.proposalClass match {
-      case q: QueueProposalClass => q.band3request.map(r => toTimeValue(r.minTime, programTimeRatio(proposal)))
+      case q: QueueProposalClass => q.band3request.map(r => toTimeValue(r.minTime, proposal.programTimeRatio))
       case _                     => None
     }
 
@@ -205,7 +205,7 @@ object SpProgramFactory {
             def durationRatio(ratio: Double): Duration =
               Duration.ofMillis((hrs * ratio * partnerShare * MsPerHour).round)
 
-            val progRatio = programTimeRatio(proposal)
+            val progRatio = proposal.programTimeRatio
             val award     = new TimeAcctAward(durationRatio(progRatio), durationRatio(1.0 - progRatio))
 
             (cat, award)
