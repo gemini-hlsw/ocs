@@ -89,23 +89,13 @@ object Phase1FolderFactory {
   }
 
 
-  // If there is an itac acceptance, then use its band assignment.  Otherwise
-  // just figure we will use the "normal" band 1/2 observations.
-  private def band(proposal: Proposal): Band =
-    (for {
-      itac   <- proposal.proposalClass.itac
-      accept <- itac.decision.right.toOption
-    } yield accept.band).getOrElse(1) match {
-      case 3 => Band.BAND_3
-      case _ => Band.BAND_1_2
-    }
-
   def create(site: core.Site, proposal: Proposal): Either[String, Phase1Folder] = {
     val empty: Either[String, Folder] = Right(Folder.empty(site))
 
-    val b       = band(proposal)
+    val b       = extractBand(proposal)
     val time    = proposal.semester.midPoint
-    val efolder = (empty/:proposal.observations.filter(obs => obs.band == b && obs.enabled)) { (e, obs) =>
+    val obs     = enabledObs(proposal)
+    val efolder = (empty/:obs) { (e, obs) =>
       e.right flatMap { _.add(obs, time) }
     }
 
