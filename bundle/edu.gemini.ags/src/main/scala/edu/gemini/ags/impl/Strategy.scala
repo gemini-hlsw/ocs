@@ -73,7 +73,7 @@ object Strategy {
   }
 
   private def allSidereal(ctx: ObsContext): Boolean =
-    ctx.getTargets.getAsterism.allTargets.all(_.isSidereal)
+    ctx.getTargets.getAsterism.allSidereal
 
   val InstMap = Map[SPComponentType, ObsContext => List[AgsStrategy]](
     SPComponentType.INSTRUMENT_ACQCAM     -> const(List(Pwfs1North, Pwfs2North, Pwfs1South, Pwfs2South)),

@@ -40,7 +40,13 @@ trait Asterism {
   /** Return a display name for this asterism. */
   def name: String
 
+  /** True if all targets in the asterism are sidereal. */
+  def allSidereal:    Boolean = allTargets.all(_.isSidereal)
+
+  /** True if this asterism contains at least one non-sidereal target. */
   def hasNonSidereal: Boolean = allTargets.any(_.isNonSidereal)
+
+  /** True if this asterism contains at least one TOO target. */
   def hasToo:         Boolean = allTargets.any(_.isToo)
 
   //

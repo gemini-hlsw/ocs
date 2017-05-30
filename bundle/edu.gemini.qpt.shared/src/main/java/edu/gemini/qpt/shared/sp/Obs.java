@@ -9,6 +9,9 @@ import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.shared.util.immutable.Some;
+import edu.gemini.spModel.core.Coordinates;
+import edu.gemini.spModel.core.SiderealTarget;
+import edu.gemini.spModel.core.Target;
 import edu.gemini.spModel.data.PreImagingType;
 import edu.gemini.spModel.gemini.altair.AltairAowfsGuider;
 import edu.gemini.spModel.gemini.altair.AltairParams.GuideStarType;
@@ -41,6 +44,7 @@ import edu.gemini.spModel.obs.SPObservation.Priority;
 import edu.gemini.spModel.obs.SchedulingBlock;
 import edu.gemini.spModel.obs.plannedtime.PlannedStepSummary;
 import edu.gemini.spModel.obsclass.ObsClass;
+import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.PwfsGuideProbe;
 import edu.gemini.spModel.too.TooType;
@@ -575,8 +579,7 @@ public final class Obs implements Serializable, Comparable<Obs> {
     }
 
 	public double getRa() {
-	    throw new RuntimeException("getRa was called!");
-//        return (targetEnvironment != null ? targetEnvironment.getAsterism().getRaDegrees(schedulingBlock.map(SchedulingBlock::start)).getOrElse(0.0) : 0.0);
+        return (targetEnvironment != null ? targetEnvironment.getAsterism().getRaDegrees(schedulingBlock.map(SchedulingBlock::start)).getOrElse(0.0) : 0.0);
 	}
 
 	public double getDec() {
@@ -616,11 +619,24 @@ public final class Obs implements Serializable, Comparable<Obs> {
     }
 
     /**
-     * For ToOs and occasionally for other (yet unknown) targets the coordinates are set to 0/0.
-     * Often we need to treat those values separately, e.g. when running statistics, we don't want those values
-     * to contribute to the counts in an RA [0..1) bin for example.
+     * True if the asterism contains a TOO target, or contains a sidereal target with coordinates
+     * at (0, 0). This means the coordinates are undefined and shouldn't participate in QV. Note
+     * that a non-sidereal target without an ephemeris element at the scheduling block start *is*
+     * defined, but is unknown (this case should result in a warning to the user).
      */
-    public boolean hasDummyTarget() { return false; } //getRa() == 0.0 && getDec() == 0.0; }
+    public boolean hasDummyTarget() {
+      for (final SPTarget spt: getTargetEnvironment ().getAsterism().allSpTargetsJava()) {
+        final Target t = spt.getTarget();
+        if (t.isToo()) return true;
+        if (t.isSidereal()) {
+          final SiderealTarget st = (SiderealTarget) t;
+          if (st.coordinates().equals(Coordinates.zero()))
+            return true;
+        }
+      }
+      return false;
+    }
+
 
     public Boolean getAO() {
         return ao;
