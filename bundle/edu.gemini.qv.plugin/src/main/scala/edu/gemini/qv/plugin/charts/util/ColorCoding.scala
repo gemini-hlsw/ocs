@@ -2,14 +2,17 @@ package edu.gemini.qv.plugin.charts.util
 
 import edu.gemini.qpt.shared.sp.Obs
 import edu.gemini.qv.plugin.filter.core.{EmptyFilter, Filter}
-import java.awt.{Paint, Color, Stroke}
+import java.awt.{Color, Paint, Stroke}
+
+import edu.gemini.qv.plugin.QvContext
 import org.jfree.chart.labels.StandardXYToolTipGenerator
-import org.jfree.chart.renderer.category.{StandardBarPainter, GanttRenderer}
-import org.jfree.chart.renderer.xy.{XYSplineRenderer, XYLineAndShapeRenderer}
+import org.jfree.chart.renderer.category.{GanttRenderer, StandardBarPainter}
+import org.jfree.chart.renderer.xy.{XYLineAndShapeRenderer, XYSplineRenderer}
 import org.jfree.chart.{LegendItem, LegendItemCollection}
-import org.jfree.data.gantt.{TaskSeries, TaskSeriesCollection, Task}
+import org.jfree.data.gantt.{Task, TaskSeries, TaskSeriesCollection}
 import org.jfree.data.time.SimpleTimePeriod
 import org.jfree.data.xy.XYDataset
+
 import scala.swing.Color
 
 /**
@@ -59,17 +62,17 @@ case class ColorCoding(codes: Set[ColorCode])  {
 
   import ColorCoding._
 
-  def color(o: Obs): Color = code(o).color
+  def color(o: Obs, ctx: QvContext): Color = code(o, ctx).color
 
-  def color(obs: Set[Obs]): Color = code(obs).color
+  def color(obs: Set[Obs], ctx: QvContext): Color = code(obs, ctx).color
 
   def code(group: Filter): ColorCode = {
     val matching = codes.find(c => c.filter == group)
     matching.getOrElse(OtherCode)
   }
 
-  def code(o: Obs): ColorCode = {
-    val matching = codes.filter(cc => cc.filter.predicate(o))
+  def code(o: Obs, ctx: QvContext): ColorCode = {
+    val matching = codes.filter(cc => cc.filter.predicate(o, ctx))
     matching.size match {
       case 0 => OtherCode
       case 1 => matching.head
@@ -77,8 +80,8 @@ case class ColorCoding(codes: Set[ColorCode])  {
     }
   }
 
-  def code(obs: Set[Obs]): ColorCode = {
-    val codes = obs.map(code)
+  def code(obs: Set[Obs], ctx: QvContext): ColorCode = {
+    val codes = obs.map(code(_, ctx))
     codes.size match {
       case 0 => OtherCode
       case 1 => codes.head
@@ -89,16 +92,16 @@ case class ColorCoding(codes: Set[ColorCode])  {
   // == helpers for creating custom renderer based on given configuration
 
   /** Gets a spline renderer with colors according to the given color coding. */
-  def splineRenderer(obs: Seq[Obs], stroke: Stroke): XYLineAndShapeRenderer = renderer(new XYSplineRenderer(), obs, stroke)
+  def splineRenderer(ctx: QvContext, obs: Seq[Obs], stroke: Stroke): XYLineAndShapeRenderer = renderer(ctx, new XYSplineRenderer(), obs, stroke)
 
   /** Gets a line renderer with colors according to the given color coding. */
-  def lineRenderer(obs: Seq[Obs], stroke: Stroke, color: Option[Color] = None): XYLineAndShapeRenderer = renderer(new XYLineAndShapeRenderer(), obs, stroke, color)
+  def lineRenderer(ctx: QvContext, obs: Seq[Obs], stroke: Stroke, color: Option[Color] = None): XYLineAndShapeRenderer = renderer(ctx, new XYLineAndShapeRenderer(), obs, stroke, color)
 
   /** Inits a renderer for the given sequence of observations. Note that the sequence is relevant! */
-  private def renderer(renderer: XYLineAndShapeRenderer, obs: Seq[Obs], stroke: Stroke, colorOverride: Option[Color] = None): XYLineAndShapeRenderer = {
+  private def renderer(ctx: QvContext, renderer: XYLineAndShapeRenderer, obs: Seq[Obs], stroke: Stroke, colorOverride: Option[Color] = None): XYLineAndShapeRenderer = {
     renderer.setBaseShapesVisible(false)
     obs.zipWithIndex.map({case (o, ix) => {
-      renderer.setSeriesPaint(ix, colorOverride.getOrElse(color(o)))
+      renderer.setSeriesPaint(ix, colorOverride.getOrElse(color(o, ctx)))
       renderer.setSeriesStroke(ix, stroke)
       renderer.setSeriesToolTipGenerator(ix, new StandardXYToolTipGenerator() {
         override def generateToolTip(dataset: XYDataset, series: Int, item: Int): String = {
@@ -116,8 +119,8 @@ case class ColorCoding(codes: Set[ColorCode])  {
    * @param observations
    * @return
    */
-  def legend(observations: Set[Obs]): LegendItemCollection = {
-    val obsCodes = observations.map(code)
+  def legend(ctx: QvContext, observations: Set[Obs]): LegendItemCollection = {
+    val obsCodes = observations.map(code(_, ctx))
     legendForCodes(obsCodes)
   }
 
@@ -127,8 +130,8 @@ case class ColorCoding(codes: Set[ColorCode])  {
    * @param groups
    * @return
    */
-  def legend(observations: Set[Obs], groups: Set[Filter]): LegendItemCollection = {
-    val obsCodes = groups.map(f => observations.filter(f.predicate)).map(code) // group observations and get color code for those groups
+  def legend(ctx: QvContext, observations: Set[Obs], groups: Set[Filter]): LegendItemCollection = {
+    val obsCodes = groups.map(f => observations.filter(f.predicate(_, ctx))).map(code(_, ctx)) // group observations and get color code for those groups
     legendForCodes(obsCodes)
   }
 

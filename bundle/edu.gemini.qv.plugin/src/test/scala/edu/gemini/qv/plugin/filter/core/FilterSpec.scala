@@ -1,6 +1,8 @@
 package edu.gemini.qv.plugin.filter.core
 
 import edu.gemini.qpt.shared.util.ObsBuilder
+import edu.gemini.qv.plugin.QvContext
+import edu.gemini.qv.plugin.data.{DataSource, ObservationProvider}
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.gemini.gmos.GmosNorthType.DisperserNorth
 import edu.gemini.spModel.gemini.gmos.InstGmosNorth
@@ -16,6 +18,9 @@ import scalaz.Scalaz._
  */
 class FilterSpec extends Specification with ScalaCheck with Arbitraries {
 
+  // An empty context for testing.
+  val ctx = QvContext(new Peer("", 0, Site.GN), DataSource.empty(Site.GN), ObservationProvider.empty)
+
   "Configuration filter" should {
 
     "filter GN dispersers" ! {
@@ -24,7 +29,7 @@ class FilterSpec extends Specification with ScalaCheck with Arbitraries {
       forAll (dispersers, dispersers) { (obsDisp, filtDisp) =>
         val o = ObsBuilder(instrument = Array(InstGmosNorth.SP_TYPE), options = obsDisp.toSet).apply
         val f = Filter.GmosN.Dispersers(filtDisp.toSet)
-        f.predicate(o) == obsDisp.intersect(filtDisp).nonEmpty
+        f.predicate(o, ctx) == obsDisp.intersect(filtDisp).nonEmpty
       }
     }
   }
@@ -37,7 +42,7 @@ class FilterSpec extends Specification with ScalaCheck with Arbitraries {
         (minRa <= maxRa) ==> Prop {
           val o = ObsBuilder().setCoordinates(coordinatesFromRa(ra)).apply
           val f = Filter.RA(minRa, maxRa)
-          f.predicate(o) == (minRa <= ra && ra < maxRa)
+          f.predicate(o, ctx) == (minRa <= ra && ra < maxRa)
         }
       }
     }
@@ -49,7 +54,7 @@ class FilterSpec extends Specification with ScalaCheck with Arbitraries {
           val o = ObsBuilder().setCoordinates(coordinatesFromRa(ra)).apply
           val f = Filter.RA(minRa, maxRa)
           // e.g [18..5] turns into [0..5] || [18..]
-          f.predicate(o) == ((RightAscension.zero <= ra && ra < maxRa) || minRa <= ra)
+          f.predicate(o, ctx) == ((RightAscension.zero <= ra && ra < maxRa) || minRa <= ra)
         }
       }
     }

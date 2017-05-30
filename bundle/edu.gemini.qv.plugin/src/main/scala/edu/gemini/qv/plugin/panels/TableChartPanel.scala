@@ -61,7 +61,7 @@ class TableChartPanel(ctx: QvContext) extends GridBagPanel {
 
   private def categorizedData = {
     val obsSource = if (ctx.subselectionOrigin == TableChartType) ctx.mainFilterProvider else ctx.tableFilterProvider
-    new CategorizedXYObservations(editor.xAxis.groups, editor.yAxis.groups, obsSource.observations)
+    new CategorizedXYObservations(ctx, editor.xAxis.groups, editor.yAxis.groups, obsSource.observations)
   }
 
 }

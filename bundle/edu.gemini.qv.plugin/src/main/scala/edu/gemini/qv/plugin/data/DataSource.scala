@@ -53,3 +53,14 @@ trait DataSource extends ObservationProvider {
   def refresh: Future[Set[Obs]]
 
 }
+
+object DataSource {
+
+  /** An empty data source. */
+  def empty(s: Site): DataSource =
+    new DataSource {
+      def refresh() = Future.successful(Set.empty)
+      def site = s
+    }
+
+}

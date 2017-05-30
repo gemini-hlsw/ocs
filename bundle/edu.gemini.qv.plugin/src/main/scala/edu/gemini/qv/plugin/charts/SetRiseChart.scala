@@ -21,7 +21,7 @@ import scala.Some
 
 /**
  */
-class SetRiseChart(ctx: QvContext, val nights: Seq[Night], val observations: Set[Obs], activeFilters: Set[Filter], inactiveFilters: Set[Filter], timeControl: TimeRangeSelector, val constraints: ConstraintsSelector, val details: OptionsSelector) extends VisibilityXYChart {
+class SetRiseChart(val ctx: QvContext, val nights: Seq[Night], val observations: Set[Obs], activeFilters: Set[Filter], inactiveFilters: Set[Filter], timeControl: TimeRangeSelector, val constraints: ConstraintsSelector, val details: OptionsSelector) extends VisibilityXYChart {
 
   val site = ctx.site
 
@@ -42,8 +42,8 @@ class SetRiseChart(ctx: QvContext, val nights: Seq[Night], val observations: Set
     plotter.plotFunction(mainAxis, renderer1, new NightlyFunction(nights, twiStartHour))
     plotter.plotFunction(mainAxis, renderer1, new NightlyFunction(nights, twiEndHour))
 
-    val riseInRenderer = colorCoding.lineRenderer(orderedObs, SolidThickStroke)
-    val riseOutRenderer = colorCoding.lineRenderer(orderedObs, SolidThinStroke, Some(Color.gray))
+    val riseInRenderer = colorCoding.lineRenderer(ctx, orderedObs, SolidThickStroke)
+    val riseOutRenderer = colorCoding.lineRenderer(ctx, orderedObs, SolidThinStroke, Some(Color.gray))
     val funcs = orderedObs.map(o => {
       val s =
         if (constraints.selected.contains(Elevation)) SolutionProvider(ctx).solution(nights, Set[ConstraintType](Elevation), o)
@@ -57,9 +57,9 @@ class SetRiseChart(ctx: QvContext, val nights: Seq[Night], val observations: Set
     plotSetRiseDetails(plotter)
 
     // add general functions and details
-    val selectedObs = observations.filter(o => activeFilters.exists(f => f.predicate(o)))
-    val curvesInRenderer = colorCoding.lineRenderer(orderedObs, DashedThinStroke)
-    val curvesOutRenderer = colorCoding.lineRenderer(orderedObs, DashedThinStroke, Some(Color.gray))
+    val selectedObs = observations.filter(o => activeFilters.exists(f => f.predicate(o, ctx)))
+    val curvesInRenderer = colorCoding.lineRenderer(ctx, orderedObs, DashedThinStroke)
+    val curvesOutRenderer = colorCoding.lineRenderer(ctx, orderedObs, DashedThinStroke, Some(Color.gray))
     plotter.plotCurves(selectedObs.toSeq, details.selected, curvesInRenderer, curvesOutRenderer)
     plotter.plotOptions(selectedObs.toSeq, details.selected, curvesInRenderer, curvesOutRenderer)
 

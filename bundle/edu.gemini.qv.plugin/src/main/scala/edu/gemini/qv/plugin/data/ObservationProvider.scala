@@ -16,7 +16,7 @@ object DataChanged extends Event
 object ForceRepaint extends Event
 case class FilterChanged(source: ObservationProvider, added: Set[Obs], removed: Set[Obs]) extends Event
 
-trait FilteringObservationProvider extends ObservationProvider {
+abstract class FilteringObservationProvider(ctx: QvContext) extends ObservationProvider {
 
   def base: ObservationProvider
   def emptyFilterSelection: Set[Obs]
@@ -45,16 +45,16 @@ trait FilteringObservationProvider extends ObservationProvider {
   }
 
   protected def update(): Unit = {
-    _filtered = _filter.map(f => base.observations.filter(f.predicate)).getOrElse(emptyFilterSelection)
+    _filtered = _filter.map(f => base.observations.filter(f.predicate(_, ctx))).getOrElse(emptyFilterSelection)
   }
 
 }
 
-case class FilterProvider(base: ObservationProvider) extends FilteringObservationProvider {
+case class FilterProvider(ctx: QvContext, base: ObservationProvider) extends FilteringObservationProvider(ctx) {
   def emptyFilterSelection = base.observations
 }
 
-case class SelectionProvider(base: ObservationProvider) extends FilteringObservationProvider {
+case class SelectionProvider(ctx: QvContext, base: ObservationProvider) extends FilteringObservationProvider(ctx) {
   def emptyFilterSelection = Set()
 }
 
@@ -213,5 +213,13 @@ trait ObservationProvider extends Publisher {
   def presentValuesWithCount[A](collector: Obs => Set[A]): Map[A, Int] = {
     observations.toSeq.map(collector(_).toSeq).flatten.groupBy(v => v).map(s => (s._1, s._2.size))
   }
+
+}
+
+object ObservationProvider {
+
+  val empty: ObservationProvider =
+    new ObservationProvider {
+    }
 
 }

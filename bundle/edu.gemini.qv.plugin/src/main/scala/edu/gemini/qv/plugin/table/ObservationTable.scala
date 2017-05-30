@@ -235,7 +235,7 @@ class ObservationTable(ctx: QvContext) extends GridBagPanel {
       peer.getSelectionModel.setValueIsAdjusting(true)
       selected.foreach (f => {
         dataModel.observations.zipWithIndex.foreach({ case (o, ix) =>
-          if (f.predicate(o)) {
+          if (f.predicate(o, ctx)) {
             val j = modelToViewRow(ix)
             peer.getSelectionModel.addSelectionInterval(j, j)
           }
@@ -252,7 +252,7 @@ class ObservationTable(ctx: QvContext) extends GridBagPanel {
     }
 
     private def newWindowFromTable(): MenuItem = new MenuItem(Action("Open new window with observations from table..."){
-      val obs = FilterProvider(ctx.source)
+      val obs = FilterProvider(ctx, ctx.source)
       obs.filter = (ctx.mainFilter, ctx.tableFilter) match {
         case (None, None) => None
         case (Some(f), None) => Some(f)
@@ -263,7 +263,7 @@ class ObservationTable(ctx: QvContext) extends GridBagPanel {
     })
 
     private def newWindowFromSelection(): MenuItem = new MenuItem(Action("Open new window with selected observations..."){
-      val obs = FilterProvider(ctx.source)
+      val obs = FilterProvider(ctx, ctx.source)
       obs.filter = ctx.selectionFilter
       // open a new qv tool with its own context (i.e. it can have its own ref date, time range etc)
       QvTool(QvContext(ctx.peer, ctx.dataSource, obs))

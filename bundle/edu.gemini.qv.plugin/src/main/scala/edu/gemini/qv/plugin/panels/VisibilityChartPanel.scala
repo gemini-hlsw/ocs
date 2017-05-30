@@ -104,8 +104,8 @@ trait VisibilityChartPanel extends GridBagPanel {
       case ConstraintsChanged => updateIfVisible()
       case ObservationSelected(o) =>
         // activate/deactivate selected groups based on an observation the user clicked on
-        val a = activeGroups.find(_.predicate(o))
-        val i = inactiveGroups.find(_.predicate(o))
+        val a = activeGroups.find(_.predicate(o, ctx))
+        val i = inactiveGroups.find(_.predicate(o, ctx))
         a.foreach { g => activeGroups -= g; inactiveGroups += g }
         i.foreach { g => activeGroups += g; inactiveGroups -= g }
         updateIfVisible()
@@ -119,7 +119,7 @@ trait VisibilityChartPanel extends GridBagPanel {
 
   protected def doSelect(o: Obs) = {
     // activate/deactivate selected groups based on an observation the user clicked on
-    val i = inactiveGroups.find(_.predicate(o))
+    val i = inactiveGroups.find(_.predicate(o, ctx))
     i.foreach { g => activeGroups += g; inactiveGroups -= g }
   }
 

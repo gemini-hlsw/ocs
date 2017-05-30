@@ -1,25 +1,27 @@
 package edu.gemini.qv.plugin.charts
 
-import edu.gemini.qv.plugin.charts.util.{ColorCodedTask, QvChartFactory, ColorCoding}
+import edu.gemini.qv.plugin.charts.util.{ColorCodedTask, ColorCoding, QvChartFactory}
 import edu.gemini.qv.plugin.data.CategorizedYData
 import edu.gemini.qv.plugin.filter.core.Filter
 import edu.gemini.qv.plugin.selector.OptionsSelector.IgnoreDaytime
-import edu.gemini.qv.plugin.selector.{OptionsSelector, ConstraintsSelector}
+import edu.gemini.qv.plugin.selector.{ConstraintsSelector, OptionsSelector}
 import edu.gemini.qv.plugin.util._
 import edu.gemini.spModel.core.Site
 import edu.gemini.util.skycalc.Night
 import edu.gemini.util.skycalc.calc.Solution
 import java.util.TimeZone
+
+import edu.gemini.qv.plugin.QvContext
 import org.jfree.chart.JFreeChart
 import org.jfree.chart.axis.DateAxis
-import org.jfree.data.gantt.{TaskSeriesCollection, TaskSeries}
+import org.jfree.data.gantt.{TaskSeries, TaskSeriesCollection}
 
 
 /**
  * Bar charts are essentially one form of visibility plots which show when an observation (or a group of observations)
  * is observable (visible) taking all restrictions into account like elevation limits, timing windows etc.
  */
-case class BarChart(site: Site, categorizedData: CategorizedYData, nights: Seq[Night], timeZone: TimeZone, constraints: ConstraintsSelector, details: OptionsSelector, colorCodingAxis: edu.gemini.qv.plugin.chart.Axis, first: Int, max: Int) extends VisibilityCategoryChart {
+case class BarChart(ctx: QvContext, site: Site, categorizedData: CategorizedYData, nights: Seq[Night], timeZone: TimeZone, constraints: ConstraintsSelector, details: OptionsSelector, colorCodingAxis: edu.gemini.qv.plugin.chart.Axis, first: Int, max: Int) extends VisibilityCategoryChart {
 
   def createChart: JFreeChart = {
 
@@ -35,7 +37,7 @@ case class BarChart(site: Site, categorizedData: CategorizedYData, nights: Seq[N
 
     addDetails(plot, categorizedData.observations)
 
-    val legend = colorCoding.legend(categorizedData.observations, categorizedData.activeYGroups.toSet)
+    val legend = colorCoding.legend(ctx, categorizedData.observations, categorizedData.activeYGroups.toSet)
     plot.setFixedLegendItems(legend)
 
     chart
@@ -46,7 +48,7 @@ case class BarChart(site: Site, categorizedData: CategorizedYData, nights: Seq[N
     val nonEmptyCategories = categorizedData.activeYGroups.filter(categorizedData.observationsFor(_).size > 0)
     visibleCategories(nonEmptyCategories).foreach(yFilter => {
       val obs = categorizedData.observationsFor(yFilter)
-      val colorCode = colorCoding.color(obs)
+      val colorCode = colorCoding.color(obs, ctx)
       val solution = if (nights.isEmpty) Solution() else SolutionProvider(site).solution(nights, constraints.selected, obs)
       val visibility = if (daysOnly) solution.allDay(site.timezone) else solution
       val earliest = solution.earliest.getOrElse(0L)
