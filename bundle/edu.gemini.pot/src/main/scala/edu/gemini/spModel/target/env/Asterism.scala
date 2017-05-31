@@ -29,14 +29,7 @@ trait Asterism {
     allSpTargets.list.toList.asImList
 
   /** All Targets that comprise the asterism. */
-  def allTargets: NonEmptyList[Target] =
-    targets.fold(NonEmptyList(_), p => NonEmptyList(p._1, p._2))
-
-  /** An asterism is a single generic target, or a pair of sidereal targets. These are currently the
-    * only possibilities.
-    * TODO: should we Church encode this instead?
-    */
-  def targets: Target \/ (Target, Target)
+  def allTargets: NonEmptyList[Target]
 
   /** Slew coordinates and AGS calculation base position. */
   def basePosition(time: Option[Instant]): Option[Coordinates]
@@ -102,7 +95,6 @@ object Asterism {
   // N.B. most members must be defs because `t` is mutable.
   final case class Single(t: SPTarget) extends Asterism {
     override def allSpTargets = NonEmptyList(t) // def because Nel isn't serializable
-    override def targets = t.getTarget.left
     override def allTargets = NonEmptyList(t.getTarget)
     override def basePosition(time: Option[Instant]) = t.getCoordinates(time.map(_.toEpochMilli))
     override def copyWithClonedTargets() = Single(t.clone)

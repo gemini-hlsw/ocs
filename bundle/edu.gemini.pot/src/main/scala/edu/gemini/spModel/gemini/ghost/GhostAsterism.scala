@@ -15,7 +15,12 @@ import Scalaz._
 /** Base trait for the three GHOST asterism types: two target, beam switching,
   * and high resolution.
   */
-sealed trait GhostAsterism extends Asterism
+sealed trait GhostAsterism extends Asterism {
+
+  /** All Targets that comprise the asterism. */
+  override def allTargets: NonEmptyList[Target] =
+    allSpTargets.map(_.getTarget)
+}
 
 /** GHOST asterism model.
   */
@@ -168,10 +173,6 @@ object GhostAsterism {
     override def allSpTargets: NonEmptyList[SPTarget] =
       NonEmptyList(ifu1.spTarget, ifu2.spTarget)
 
-    /** Defines the targets in this asterism to be the two science targets. */
-    override def targets: Target \/ (Target, Target) =
-      (ifu1.spTarget.getTarget, ifu2.spTarget.getTarget).right
-
     /** Calculates the coordinates exactly halfway along the great circle
       * connecting the two targets.
       */
@@ -230,10 +231,6 @@ object GhostAsterism {
 
     override def allSpTargets: NonEmptyList[SPTarget] =
       NonEmptyList(ghostTarget.spTarget)
-
-    /** Defines the target list to be the single standard resolution target. */
-    override def targets: Target \/ (Target, Target) =
-      ghostTarget.spTarget.getTarget.left
 
     /** Defines the base position to be the same as the target position. */
     override def basePosition(when: Option[Instant]): Option[Coordinates] =
@@ -322,11 +319,6 @@ object GhostAsterism {
 
     override def allSpTargets: NonEmptyList[SPTarget] =
       NonEmptyList(ghostTarget.spTarget)
-
-
-    /** Defines the target list to be the single high resolution target. */
-    override def targets: Target \/ (Target, Target) =
-      ghostTarget.spTarget.getTarget.left
 
     /** Defines the base position to be the same as the target position. */
     override def basePosition(when: Option[Instant]): Option[Coordinates] =
