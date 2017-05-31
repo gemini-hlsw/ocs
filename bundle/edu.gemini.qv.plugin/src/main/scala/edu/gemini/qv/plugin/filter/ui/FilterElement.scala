@@ -6,6 +6,9 @@ import edu.gemini.qv.plugin.filter.core._
 import edu.gemini.qv.plugin.ui.QvGui
 import java.awt.{Color, Font}
 import javax.swing.BorderFactory
+
+import edu.gemini.qv.plugin.QvContext
+
 import scala.Some
 import scala.swing.GridBagPanel.Fill._
 import scala.swing.GridBagPanel.Anchor._
@@ -86,7 +89,7 @@ object FilterElement {
    * @param init the filter to start with
    * @tparam A
    */
-  class Options[A](data: ObservationProvider, init: EnumFilter[A], var showAvailableOnly: Boolean = true, val showCounts: Boolean = true) extends GridBagPanel with FilterUI {
+  class Options[A](ctx: QvContext, data: ObservationProvider, init: EnumFilter[A], var showAvailableOnly: Boolean = true, val showCounts: Boolean = true) extends GridBagPanel with FilterUI {
     border = BorderFactory.createEmptyBorder(2, 2, 2, 2) // add some space at top and bottom
     var selection: Set[A] = init.selection.toSet
     private val buttons = init.sortedValues.map(button)
@@ -142,7 +145,7 @@ object FilterElement {
       }
 
       def updateAvailability() {
-        val available = data.presentValuesWithCount(init.collector)
+        val available = data.presentValuesWithCount(init.collector(_, ctx))
         val present = available.contains(value)
         text = if (present && showCounts) s"$label   (${available(value)})" else label
         visible = present || !showAvailableOnly
@@ -342,7 +345,7 @@ object FilterElement {
       case HasTimingConstraints(_)    => HasTimingConstraints(selection)
       case HasElevationConstraints(_) => HasElevationConstraints(selection)
       case HasPreImaging(_)           => HasPreImaging(selection)
-      case IsNonSidereal(_)           => IsNonSidereal(selection)
+      case HasNonSidereal(_)          => HasNonSidereal(selection)
       case HasDummyTarget(_)          => HasDummyTarget(selection)
     }
 

@@ -99,7 +99,7 @@ object FilterXMLParser {
       case <rafilter>{range}</rafilter>  => for { (low, high) <- parseRangeNode[Double](range) } yield Filter.RA(low, high)
       case <decfilter>{range}</decfilter> => for { (low, high) <- parseRangeNode[Double](range) } yield Filter.Dec(low, high)
 
-      case <isnonsidereal><boolvalue>{value}</boolvalue></isnonsidereal> => Try(Filter.IsNonSidereal(fromBoolean(value.text)))
+      case <isnonsidereal><boolvalue>{value}</boolvalue></isnonsidereal> => Try(Filter.HasNonSidereal(fromBoolean(value.text)))
       case <isactive><boolvalue>{value}</boolvalue></isactive> => Try(Filter.IsActive(fromBoolean(value.text)))
       case <iscompleted><boolvalue>{value}</boolvalue></iscompleted> => Try(Filter.IsCompleted(fromBoolean(value.text)))
       case <rolloverfilter><boolvalue>{value}</boolvalue></rolloverfilter> => Try(Filter.IsRollover(fromBoolean(value.text)))

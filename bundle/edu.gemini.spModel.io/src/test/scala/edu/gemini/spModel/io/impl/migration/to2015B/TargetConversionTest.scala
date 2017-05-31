@@ -89,7 +89,10 @@ class TargetConversionTest extends MigrationTest {
     // unsafe extravaganza!
     val targetComp = obs.getObsComponents.asScala.find(_.getType == SPComponentType.TELESCOPE_TARGETENV).get
     val toc        = targetComp.getDataObject.asInstanceOf[TargetObsComp]
-    val rigel      = toc.getAsterism.targets match { case -\/(t: SiderealTarget) => t ; case _ => sys.error("unpossible") }
+    val rigel      = toc.getAsterism.allTargets match {
+      case NonEmptyList(t: SiderealTarget, INil()) => t
+      case _ => sys.error("unpossible")
+    }
 
     val when  = JNone.instance[java.lang.Long]
 

@@ -4,13 +4,14 @@ import edu.gemini.qpt.shared.sp.Obs
 import edu.gemini.qv.plugin.data._
 import edu.gemini.qv.plugin.filter.core.Filter
 import edu.gemini.qv.plugin.QvContext.{ChartType, HistogramChartType}
-import edu.gemini.qv.plugin.selector.TimeRangeSelector.{Year, RangeType}
+import edu.gemini.qv.plugin.selector.TimeRangeSelector.{RangeType, Year}
 import edu.gemini.qv.plugin.util.SolutionProvider.ConstraintType
-import edu.gemini.qv.plugin.util.{LstTimeZone, SolutionProvider, ConstraintsCache, ScheduleCache}
+import edu.gemini.qv.plugin.util.{ConstraintsCache, LstTimeZone, ScheduleCache, SolutionProvider}
 import edu.gemini.skycalc.TimeUtils
-import edu.gemini.spModel.core.Peer
+import edu.gemini.spModel.core.{Peer, Site}
 import edu.gemini.util.skycalc.Night
 import java.util.TimeZone
+
 import scala.swing.Publisher
 import scala.swing.event.Event
 
@@ -45,11 +46,11 @@ case class QvContext(peer: Peer, dataSource: DataSource, source: ObservationProv
   def timezone = site.timezone()
 
   // ===== Data providers / filters used in this context ====
-  private val _nonSidProvider = new PositionProvider(this, source)
-  private val _mainFilter = FilterProvider(_nonSidProvider)
-  private val _tableFilter = FilterProvider(_mainFilter)
-  private val _selection = SelectionProvider(_tableFilter)
-  
+  private lazy val _nonSidProvider = new PositionProvider(this, source)
+  private lazy val _mainFilter = FilterProvider(this, _nonSidProvider)
+  private lazy val _tableFilter = FilterProvider(this, _mainFilter)
+  private lazy val _selection = SelectionProvider(this, _tableFilter)
+
   def mainFilterProvider = _mainFilter
   def mainFilter_=(f: Filter) = _mainFilter.filter = Some(f)
   def mainFilter_=(f: Option[Filter]) = _mainFilter.filter = f
@@ -80,9 +81,9 @@ case class QvContext(peer: Peer, dataSource: DataSource, source: ObservationProv
 
   // ===
   // Folded providers
-  def foldedMap = FoldedTargetsProvider.observationsMap(dataSource.observations)
+  def foldedMap = FoldedTargetsProvider.observationsMap(dataSource.observations, this)
   def selectedFoldedObs = foldedMap.map({case (f, obs) => if (!obs.intersect(selected).isEmpty) Some(f) else None}).flatten.toSet
-  def foldedFilters = FoldedTargetsProvider.filter(dataSource.observations)
+  def foldedFilters = FoldedTargetsProvider.filter(dataSource.observations, this)
 
 
   // ===

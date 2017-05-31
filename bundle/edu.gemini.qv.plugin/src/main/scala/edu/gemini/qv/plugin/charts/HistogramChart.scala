@@ -22,7 +22,7 @@ import org.jfree.data.category.DefaultCategoryDataset
 
 object HistogramChart {
   def apply(ctx: QvContext, xAxis: Axis, yAxis: Axis, calculation: Calculation, data: FilterProvider, range: Interval, details: OptionsSelector) = {
-    val categorizedData = CategorizedXYValues(xAxis.groups, yAxis.groups, data.observations, calculation.value)
+    val categorizedData = CategorizedXYValues(ctx, xAxis.groups, yAxis.groups, data.observations, calculation.value)
     new HistogramChart(ctx, xAxis, yAxis, calculation, categorizedData, data, range, details)
   }
 }
@@ -58,7 +58,7 @@ class HistogramChart(ctx: QvContext, xAxis: Axis, yAxis: Axis, calculation: Calc
 
     // replace default legend with a custom one
     val colorCoding = ColorCoding(yAxis.groups.toSet)
-    val legend = colorCoding.legend(categorizedData.observations)
+    val legend = colorCoding.legend(ctx, categorizedData.observations)
     plot.setFixedLegendItems(legend)
 
     // -- do some renderer magic

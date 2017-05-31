@@ -1,7 +1,7 @@
 package edu.gemini.qv.plugin.charts
 
 import edu.gemini.qpt.shared.sp.{Conds, Obs}
-import edu.gemini.qv.plugin.charts.util.{XYPlotter, ColorCoding, XYAxes}
+import edu.gemini.qv.plugin.charts.util.{ColorCoding, XYAxes, XYPlotter}
 import edu.gemini.qv.plugin.selector.OptionsSelector._
 import edu.gemini.qv.plugin.selector.{ConstraintsSelector, OptionsSelector}
 import edu.gemini.qv.plugin.ui.QvGui
@@ -13,16 +13,18 @@ import edu.gemini.spModel.core.Site
 import edu.gemini.util.skycalc._
 import edu.gemini.util.skycalc.calc._
 import java.awt.image.BufferedImage
-import java.awt.{GradientPaint, Paint, BasicStroke, Color}
+import java.awt.{BasicStroke, Color, GradientPaint, Paint}
 import java.text.SimpleDateFormat
 import java.util.TimeZone
 import javax.swing.JPanel
+
+import edu.gemini.qv.plugin.QvContext
 import org.jfree.chart.LegendItem
-import org.jfree.chart.annotations.{XYTextAnnotation, XYImageAnnotation, XYAnnotation}
+import org.jfree.chart.annotations.{XYAnnotation, XYImageAnnotation, XYTextAnnotation}
 import org.jfree.chart.axis._
 import org.jfree.chart.plot._
 import org.jfree.data.xy.{XYSeries, XYSeriesCollection}
-import org.jfree.ui.{RectangleInsets, TextAnchor, RectangleAnchor, Layer}
+import org.jfree.ui.{Layer, RectangleAnchor, RectangleInsets, TextAnchor}
 
 trait VisibilityXYChart extends VisibilityChart with XYAxes {
 
@@ -110,6 +112,8 @@ trait VisibilityCategoryChart extends VisibilityChart {
 /**
  */
 trait VisibilityChart {
+
+  val ctx: QvContext
 
   val SolidThickStroke = new BasicStroke(5)
   val SolidVeryThickStroke = new BasicStroke(8)
@@ -272,7 +276,7 @@ trait VisibilityChart {
   }
 
   protected def addLegend(plot: Plot, selectedObs: Set[Obs], colorCoding: ColorCoding): Unit = {
-    val coll = colorCoding.legend(selectedObs)
+    val coll = colorCoding.legend(ctx, selectedObs)
     if (details.isSelected(MoonElevation) || details.isSelected(MoonHours) ||  details.isSelected(MoonSetRise)) {
       coll.add(new LegendItem("Moon", QvGui.MoonColor))
     }

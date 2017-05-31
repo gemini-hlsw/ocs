@@ -68,7 +68,7 @@ abstract class PagedFilter(ctx: QvContext, init: Set[Filter], showAvailableOnly:
       ("Conditions", conditionElements)
     )
 
-    optTree = new OptionsTree(ctx.source, configFilters, showAvailableOnly, showCounts)
+    optTree = new OptionsTree(ctx, ctx.source, configFilters, showAvailableOnly, showCounts)
     val optTreePane = new ScrollPane { contents = optTree }
 
     filters = panes.map({case (name, elements) =>
@@ -110,7 +110,7 @@ abstract class PagedFilter(ctx: QvContext, init: Set[Filter], showAvailableOnly:
     case f: RemainingTimeFilter => new RemainingTime(f)
     case f: SimpleRangeFilter => new Range(f)
     case f: BooleanFilter => new Booleans(f)
-    case f: EnumFilter[_] => new Options(data, f, showAvailableOnly, showCounts)
+    case f: EnumFilter[_] => new Options(ctx, data, f, showAvailableOnly, showCounts)
   }
 
   // helper to replace default with init filters, lookup done with label of filter

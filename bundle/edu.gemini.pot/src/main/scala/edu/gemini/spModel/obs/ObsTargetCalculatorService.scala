@@ -1,16 +1,18 @@
 package edu.gemini.spModel.obs
 
-import edu.gemini.pot.sp.{SPComponentType, ISPObservation}
+import java.time.Instant
+
+import edu.gemini.pot.sp.{ISPObservation, SPComponentType}
 import edu.gemini.spModel.core.Site
 import edu.gemini.spModel.obs.plannedtime.PlannedTimeCalculator
 import edu.gemini.spModel.rich.pot.sp.obsWrapper
 import edu.gemini.spModel.rich.shared.immutable._
 import edu.gemini.spModel.target.obsComp.TargetObsComp
-import edu.gemini.util.skycalc.SiderealTarget
 import edu.gemini.util.skycalc.calc.{Interval, TargetCalculator}
+import edu.gemini.spModel.core.Coordinates
+import edu.gemini.skycalc.TimeUtils
+import edu.gemini.spModel.target.env.Asterism
 
-import jsky.coords.WorldCoords
-import edu.gemini.skycalc.{TimeUtils, Coordinates}
 import scala.collection.JavaConverters._
 
 object ObsTargetCalculatorService {
@@ -27,16 +29,14 @@ object ObsTargetCalculatorService {
 
     // Now, based on the SchedulingBlock determine if a TargetCalc should be created.
     // Get the TargetEnvironment if it exists, and from there, extract the RA and Dec.
-    def coords = obs.findObsComponentByType(SPComponentType.TELESCOPE_TARGETENV).flatMap {
+    def coords = obs.findObsComponentByType(SPComponentType.TELESCOPE_TARGETENV).map {
       _.getDataObject
         .asInstanceOf[TargetObsComp]
         .getTargetEnvironment
         .getAsterism
-        .getSkycalcCoordinates(block.map(_.start : java.lang.Long).asGeminiOpt).asScalaOpt
     }
 
-    def calc(s: Site, b: SchedulingBlock, c: Coordinates): TargetCalculator = {
-      val st = SiderealTarget(new WorldCoords(c.getRaDeg, c.getDecDeg))
+    def calc(s: Site, b: SchedulingBlock, a: Asterism): TargetCalculator = {
 
       // Andy says:
       // duration is equivalent to science time, if specific explicitly
@@ -50,10 +50,11 @@ object ObsTargetCalculatorService {
       // If the duration is going to be smaller than the default step size of 30 seconds used by the
       // target calc, we will have divide by 0 issues, so take this into account.
       val stepSize = if (duration >= TimeUtils.seconds(30)) TimeUtils.seconds(30) else duration
+      val coords   = (t: Long) => a.basePosition(Some(Instant.ofEpochMilli(t))).getOrElse(Coordinates.zero)
       if (end > b.start) {
-        TargetCalculator(s, st, Interval(b.start, end), stepSize)
+        TargetCalculator(s, coords, Interval(b.start, end), stepSize)
       } else {
-        TargetCalculator(s, st, b.start)
+        TargetCalculator(s, coords, b.start)
       }
     }
 

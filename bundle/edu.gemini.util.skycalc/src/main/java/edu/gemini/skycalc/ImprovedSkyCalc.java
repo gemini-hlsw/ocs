@@ -1,6 +1,6 @@
 package edu.gemini.skycalc;
 
-import edu.gemini.spModel.core.Site;
+import edu.gemini.spModel.core.*;
 import jsky.coords.WorldCoords;
 
 import static java.lang.Math.cos;
@@ -42,6 +42,10 @@ public final class ImprovedSkyCalc extends ImprovedSkyCalcMethods {
         hoursLongitude = -site.longitude/15.;
         degreesLatitude = site.latitude;
         siteAltitude = site.altitude;
+    }
+
+    public void calculate(final edu.gemini.spModel.core.Coordinates coords, final Date date, final boolean calculateMoon) {
+      calculate(new WorldCoords(coords.ra().toDegrees(), coords.dec().toDegrees()), date, calculateMoon);
     }
 
     public void calculate(final WorldCoords obj, final Date date, final boolean calculateMoon) {

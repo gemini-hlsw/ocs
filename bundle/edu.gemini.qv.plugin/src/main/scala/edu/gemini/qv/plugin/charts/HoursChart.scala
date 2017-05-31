@@ -36,7 +36,7 @@ case class HoursChart(ctx: QvContext, nights: Seq[Night], observations: Set[Obs]
     initDateAxis(plot.getDomainAxis.asInstanceOf[DateAxis], nights, timeControl.selectedZone)
 
     val orderedObs = observations.toSeq
-    val selectedObs = observations.filter(o => activeFilters.exists(f => f.predicate(o))).toSeq
+    val selectedObs = observations.filter(o => activeFilters.exists(f => f.predicate(o, ctx))).toSeq
     val colorCoding = ColorCoding(activeFilters, inactiveFilters)
 
     val plotter = new XYPlotter(ctx, nights, constraints, details, plot)
@@ -44,8 +44,8 @@ case class HoursChart(ctx: QvContext, nights: Seq[Night], observations: Set[Obs]
     // main curve: hours between nautical twilights (science time)
     val renderer1 = XYPlotter.lineRenderer(Color.gray, new BasicStroke(6))
     plotter.plotFunction(MainHourAxis, renderer1, new NightlyFunction(nights, n => TimeUtils.asHours(n.scienceTime.duration)))
-    val riseInRenderer = colorCoding.lineRenderer(orderedObs, SolidThickStroke)
-    val riseOutRenderer = colorCoding.lineRenderer(orderedObs, SolidThinStroke, Some(Color.gray))
+    val riseInRenderer = colorCoding.lineRenderer(ctx, orderedObs, SolidThickStroke)
+    val riseOutRenderer = colorCoding.lineRenderer(ctx, orderedObs, SolidThinStroke, Some(Color.gray))
     val funcs = orderedObs.map(o => {
       val s = SolutionProvider(ctx).solution(nights, constraints.selected, Set(o))
       o -> new NightlyOptionalFunction(nights, site, hours(o, s))
@@ -57,8 +57,8 @@ case class HoursChart(ctx: QvContext, nights: Seq[Night], observations: Set[Obs]
     plotHoursDetails(plotter)
 
     // additional curves as currently selected by user
-    val curvesInRenderer = colorCoding.lineRenderer(observations.toSeq, DashedThinStroke)
-    val curvesOutRenderer = colorCoding.lineRenderer(observations.toSeq, DashedThinStroke, Some(Color.gray))
+    val curvesInRenderer = colorCoding.lineRenderer(ctx, observations.toSeq, DashedThinStroke)
+    val curvesOutRenderer = colorCoding.lineRenderer(ctx, observations.toSeq, DashedThinStroke, Some(Color.gray))
     plotter.plotCurves(selectedObs, details.selected, curvesInRenderer, curvesOutRenderer)
     plotter.plotOptions(selectedObs, details.selected, curvesInRenderer, curvesOutRenderer)
 

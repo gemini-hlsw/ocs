@@ -28,7 +28,7 @@ case class ElevationChart(ctx: QvContext, nights: Seq[Night], observations: Set[
     initDateAxis(plot.getDomainAxis.asInstanceOf[DateAxis], nights, timeControl.selectedZone)
 
     // order is relevant, make sure we use same order everywhere
-    val selectedActive = observations.filter(o => activeFilters.exists(f => f.predicate(o)))
+    val selectedActive = observations.filter(o => activeFilters.exists(f => f.predicate(o, ctx)))
     val orderedActive = selectedActive.toSeq
     val colorCoding = ColorCoding(activeFilters, inactiveFilters)
 
@@ -40,12 +40,12 @@ case class ElevationChart(ctx: QvContext, nights: Seq[Night], observations: Set[
         if (nights.size > 8) MainMidNightElevationAxis else MainElevationAxis
     plot.setRangeAxis(mainAxis)
     val plotter = new XYPlotter(ctx, nights, constraints, details, plot)
-    val elevInRenderer = colorCoding.lineRenderer(observations.toSeq, SolidThickStroke)
-    val elevOutRenderer = colorCoding.lineRenderer(observations.toSeq, SolidThinStroke, Some(Color.gray))
+    val elevInRenderer = colorCoding.lineRenderer(ctx, observations.toSeq, SolidThickStroke)
+    val elevOutRenderer = colorCoding.lineRenderer(ctx, observations.toSeq, SolidThinStroke, Some(Color.gray))
     plotter.plotCurves(observations.toSeq, Set(ElevationCurve), elevInRenderer, elevOutRenderer)
 
-    val curvesInRenderer = colorCoding.lineRenderer(observations.toSeq, DashedThinStroke)
-    val curvesOutRenderer = colorCoding.lineRenderer(observations.toSeq, DashedThinStroke, Some(Color.gray))
+    val curvesInRenderer = colorCoding.lineRenderer(ctx, observations.toSeq, DashedThinStroke)
+    val curvesOutRenderer = colorCoding.lineRenderer(ctx, observations.toSeq, DashedThinStroke, Some(Color.gray))
     plotter.plotCurves(orderedActive, details.curves, curvesInRenderer, curvesOutRenderer)
     plotter.plotOptions(orderedActive, details.selected, curvesInRenderer, curvesOutRenderer)
 

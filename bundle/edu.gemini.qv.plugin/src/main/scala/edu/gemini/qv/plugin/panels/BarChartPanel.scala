@@ -56,10 +56,10 @@ case class BarChartPanel(ctx: QvContext) extends VisibilityChartPanel {
     }
 
     val obsSource = if (ctx.subselectionOrigin == BarChartType) ctx.observations else ctx.filtered
-    val newData = new CategorizedYObservations(groups, obsSource)
+    val newData = new CategorizedYObservations(ctx, groups, obsSource)
     updateScrollbar(newData)
     val nights = SemesterData.nights(ctx.site, timeControl.start, timeControl.end)
-    chartPanel.updateChart(new BarChart(ctx.site, newData, nights, timeControl.selectedZone, constraints, details, editor.colorCoding, chartScroll.value, chartScroll.visibleAmount).createChart)
+    chartPanel.updateChart(new BarChart(ctx, ctx.site, newData, nights, timeControl.selectedZone, constraints, details, editor.colorCoding, chartScroll.value, chartScroll.visibleAmount).createChart)
 
     Log.fine(s"updated visible elevation chart in ${System.currentTimeMillis() - time}ms")
   }

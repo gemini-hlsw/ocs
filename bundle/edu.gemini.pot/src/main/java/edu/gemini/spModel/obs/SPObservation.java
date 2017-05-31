@@ -450,7 +450,7 @@ public class SPObservation extends AbstractDataObject implements ISPStaffOnlyFie
             return false;
         } else {
             final TargetObsComp toc = (TargetObsComp) targetComp.getDataObject();
-            return !toc.getAsterism().isToo();
+            return !toc.getAsterism().hasToo();
         }
     }
 

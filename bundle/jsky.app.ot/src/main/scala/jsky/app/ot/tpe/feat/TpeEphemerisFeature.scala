@@ -14,6 +14,7 @@ import edu.gemini.spModel.obs.plannedtime.PlannedTimeCalculator
 import edu.gemini.shared.util.immutable.ScalaConverters._
 import jsky.app.ot.tpe.{TpeContext, TpeImageFeature, TpeImageFeatureCategory, TpeImageInfo}
 import jsky.coords.CoordinateConverter.{ WORLD, SCREEN }
+import edu.gemini.spModel.target.env.Asterism
 
 import scala.collection.JavaConverters._
 import scalaz._, Scalaz._
@@ -23,7 +24,7 @@ class TpeEphemerisFeature extends TpeImageFeature("Ephemeris", "Show interpolate
 
   override val getCategory = TpeImageFeatureCategory.target
   override val isEnabledByDefault = true
-  override def isEnabled(ctx: TpeContext) = ctx.targets.asterism.exists(_.isNonSidereal)
+  override def isEnabled(ctx: TpeContext) = ctx.targets.asterism.exists(_.hasNonSidereal)
 
   def toScreenCoordinates(c: Coordinates): Option[Point] =
     scala.util.Try {
@@ -45,10 +46,11 @@ class TpeEphemerisFeature extends TpeImageFeature("Ephemeris", "Show interpolate
     lastSe.isEmpty ? prevSes | lastSe :: prevSes
   }
 
-  def getEphemeris: Ephemeris =
-    getContext.targets.asterism
-      .flatMap(_.getNonSiderealTarget)
-      .fold(Ephemeris.empty)(_.ephemeris)
+  def getEphemerides: List[Ephemeris] =
+    getContext.targets.asterism.toList
+      .flatMap(_.allTargets.toList.collect {
+        case t : NonSiderealTarget => t.ephemeris
+      })
 
   def getGuideEphemerides: List[Ephemeris] =
     for {
@@ -60,7 +62,7 @@ class TpeEphemerisFeature extends TpeImageFeature("Ephemeris", "Show interpolate
     } yield nst.ephemeris
 
   def getScreenEphemeris: List[ScreenEphemeris] =
-    toScreenEphemeris(getEphemeris)
+    getEphemerides.flatMap(toScreenEphemeris)
 
   def obsTime: Option[Long] =
     getContext.schedulingBlock.flatMap(_.duration.toOption) orElse
@@ -76,7 +78,7 @@ class TpeEphemerisFeature extends TpeImageFeature("Ephemeris", "Show interpolate
   def draw(g: Graphics, tii: TpeImageInfo): Unit = {
     val g2d = g.asInstanceOf[Graphics2D]
     getGuideEphemerides.foreach(draw2D(g2d, _, Color.GRAY))
-    draw2D(g2d, getEphemeris, Color.RED)
+    getEphemerides.foreach(draw2D(g2d, _, Color.RED))
   }
 
   def draw2D(g: Graphics2D, e: Ephemeris, color: Color): Unit = {

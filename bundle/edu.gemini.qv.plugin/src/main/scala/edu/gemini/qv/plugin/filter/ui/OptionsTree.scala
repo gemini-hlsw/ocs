@@ -1,11 +1,15 @@
 package edu.gemini.qv.plugin.filter.ui
 
 import scala.swing.Component
-import javax.swing.{tree, JComponent, ImageIcon, JTree}
+import javax.swing.{ImageIcon, JComponent, JTree, tree}
 import javax.swing.tree._
-import java.awt.event.{MouseEvent, MouseAdapter}
+import java.awt.event.{MouseAdapter, MouseEvent}
+
+import edu.gemini.qv.plugin.QvContext
+
 import collection.JavaConverters._
-import edu.gemini.qv.plugin.filter.core.{ConfigurationFilter, Filter, OptionsFilter, EmptyFilter}
+import edu.gemini.qv.plugin.filter.core.{ConfigurationFilter, EmptyFilter, Filter, OptionsFilter}
+
 import scala.Some
 import edu.gemini.qv.plugin.data.{DataChanged, ObservationProvider}
 
@@ -15,7 +19,7 @@ import edu.gemini.qv.plugin.data.{DataChanged, ObservationProvider}
  * Most of the code here is stolen/adapted from QPT. There is currently no scala swing Tree wrapper, therefore
  * this implementation is based on the java swing JTree.
  */
-class OptionsTree(data: ObservationProvider, filters: Set[ConfigurationFilter[_]], showAvailableOnly: Boolean = true, showCounts: Boolean = true) extends Component {
+class OptionsTree(ctx: QvContext, data: ObservationProvider, filters: Set[ConfigurationFilter[_]], showAvailableOnly: Boolean = true, showCounts: Boolean = true) extends Component {
 
   private val IconIndeterminate = new ImageIcon(getClass.getResource("img/check_indefinite.gif"))
   private val IconSelected = new ImageIcon(getClass.getResource("img/check_selected.gif"))
@@ -69,7 +73,7 @@ class OptionsTree(data: ObservationProvider, filters: Set[ConfigurationFilter[_]
 
   private def createNodes() {
     // get available instruments, remove all filters for not-available instruments
-    val presentInstruments = data.presentValues(Filter.Instruments().collector)
+    val presentInstruments = data.presentValues(Filter.Instruments().collector(_, ctx))
     val availableFilters = filters.filter(f => presentInstruments.contains(f.instrument))
 
     // group all filters by their instrument, then create a node per instrument and nodes for all groups
@@ -186,7 +190,7 @@ class OptionsTree(data: ObservationProvider, filters: Set[ConfigurationFilter[_]
   /** Group node that represents a group of options, e.g. filters, masks etc. */
   private class GroupNode[T](val label: String, f: OptionsFilter[T]) extends Node(label, false) with FilterNode {
     // check which values are actually available
-    val presentOptions = data.presentValuesWithCount(f.collector)
+    val presentOptions = data.presentValuesWithCount(f.collector(_, ctx))
 
     // filter available options (if show available only) and add those options..
     setAllowsChildren(true)

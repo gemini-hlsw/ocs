@@ -1,19 +1,20 @@
 package edu.gemini.qv.plugin.data
 
 import edu.gemini.qpt.shared.sp.Obs
+import edu.gemini.qv.plugin.QvContext
 import edu.gemini.qv.plugin.filter.core.{EmptyFilter, Filter}
 
 /** Observations categorized along one axis. */
-case class CategorizedObservations(categories: Seq[Filter], observations: Set[Obs]) extends CategorizedData
+case class CategorizedObservations(ctx: QvContext, categories: Seq[Filter], observations: Set[Obs]) extends CategorizedData(ctx)
 
 /** Observations categorized along one axis. */
-case class CategorizedYObservations(yCategories: Seq[Filter], observations: Set[Obs]) extends CategorizedYData
+case class CategorizedYObservations(ctx: QvContext, yCategories: Seq[Filter], observations: Set[Obs]) extends CategorizedYData(ctx)
 
 /** Categorized data. */
-case class CategorizedXYObservations(xCategories: Seq[Filter], yCategories: Seq[Filter], observations: Set[Obs]) extends CategorizedXYData
+case class CategorizedXYObservations(ctx: QvContext, xCategories: Seq[Filter], yCategories: Seq[Filter], observations: Set[Obs]) extends CategorizedXYData(ctx)
 
 /** Categorized observations including a calculated value for each group of observations. */
-case class CategorizedXYValues(xCategories: Seq[Filter], yCategories: Seq[Filter], observations: Set[Obs], calculation: Set[Obs] => Double) extends CategorizedXYData {
+case class CategorizedXYValues(ctx: QvContext, xCategories: Seq[Filter], yCategories: Seq[Filter], observations: Set[Obs], calculation: Set[Obs] => Double) extends CategorizedXYData(ctx) {
 
   /**
    * The result of the calculation for all observations grouped by the groups along the x and y axis.
@@ -50,7 +51,7 @@ case class CategorizedXYValues(xCategories: Seq[Filter], yCategories: Seq[Filter
 
 }
 
-trait CategorizedData {
+abstract class CategorizedData(ctx: QvContext) {
 
   private val Other: Filter = EmptyFilter("Other")
   private val Ambiguous: Filter = EmptyFilter("Ambiguous")
@@ -80,7 +81,7 @@ trait CategorizedData {
   }
 
   private def findGroup(categories: Seq[Filter], o: Obs): Filter = {
-    val matchingGroups = categories.filter(_.predicate(o))
+    val matchingGroups = categories.filter(_.predicate(o, ctx))
     matchingGroups.size match {
       case 0 => Other                   // no group covers this observation
       case 1 => matchingGroups.head     // exactly one group covers this observation
@@ -90,7 +91,7 @@ trait CategorizedData {
 
 }
 
-trait CategorizedYData extends CategorizedData {
+abstract class CategorizedYData(ctx: QvContext) extends CategorizedData(ctx: QvContext) {
 
   val categories = yCategories
   val yCategories: Seq[Filter]
@@ -109,7 +110,7 @@ trait CategorizedYData extends CategorizedData {
  * All observations are sorted into their corresponding groups and the value of the calculation function
  * is calculated for each of those sets.
  */
-trait CategorizedXYData extends CategorizedYData {
+abstract class CategorizedXYData(ctx: QvContext) extends CategorizedYData(ctx: QvContext) {
 
   val xCategories: Seq[Filter]
 

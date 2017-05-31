@@ -189,7 +189,11 @@ def rnorris(version: Version) = AppConfig(
     "edu.gemini.auxfile.root"                    -> "/Users/rnorris/.auxfile",
     "edu.gemini.dataman.gsa.summit.host"         -> "mkofits-lv1new.hi.gemini.edu",
     "edu.gemini.spdb.dir"                        -> "/Users/rnorris/.spdb/",
-    "edu.gemini.util.trpc.name"                  -> "Rob's ODB (Test)"
+    "edu.gemini.util.trpc.name"                  -> "Rob's ODB (Test)",
+    "edu.gemini.services.telescope.schedule.id.north"  -> "00h6i49qldh5qrteote4nfhldo@group.calendar.google.com",
+    "edu.gemini.services.telescope.schedule.id.south"  -> "c4br8ehtv4i8741jfe4ef5saq8@group.calendar.google.com",
+    "edu.gemini.services.telescope.schedule.url.north" -> "https://www.google.com/calendar/embed?src=00h6i49qldh5qrteote4nfhldo%40group.calendar.google.com",
+    "edu.gemini.services.telescope.schedule.url.south" -> "https://www.google.com/calendar/embed?src=c4br8ehtv4i8741jfe4ef5saq8%40group.calendar.google.com"
   )
 ) extending List(with_gogo(version), rnorris_credentials(version))
 
@@ -574,5 +578,3 @@ def gsodb(version: Version) = AppConfig(
     BundleSpec(50, "edu.gemini.smartgcal.servlet", version)
   )
 ) extending List(odbproduction(version), gsodb_credentials(version))
-
-
