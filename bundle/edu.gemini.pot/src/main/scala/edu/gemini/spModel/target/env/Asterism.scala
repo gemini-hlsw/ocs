@@ -38,7 +38,8 @@ trait Asterism {
   def basePositionProperMotion: Option[ProperMotion]
 
   /** Return a display name for this asterism. */
-  def name: String
+  def name: String =
+    allTargets.map(_.name).intercalate(", ")
 
   /** True if all targets in the asterism are sidereal. */
   def allSidereal:    Boolean = allTargets.all(_.isSidereal)
@@ -96,7 +97,6 @@ object Asterism {
     override def allSpTargets = NonEmptyList(t) // def because Nel isn't serializable
     override def allTargets = NonEmptyList(t.getTarget)
     override def basePosition(time: Option[Instant]) = t.getCoordinates(time.map(_.toEpochMilli))
-    override def name = t.getName
     override def copyWithClonedTargets() = Single(t.clone)
     override def basePositionProperMotion = Target.pm.get(t.getTarget)
   }
