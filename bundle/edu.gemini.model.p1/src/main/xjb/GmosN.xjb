@@ -23,7 +23,7 @@
                 <jxb:typesafeEnumMember name="R400_G5305"/>
             </jxb:bindings>
             <jxb:bindings node="./xsd:enumeration[@value='R150']">
-                <jxb:typesafeEnumMember name="R150_G5306"/>
+                <jxb:typesafeEnumMember name="R150_G5308"/>
             </jxb:bindings>
         </jxb:bindings>
 

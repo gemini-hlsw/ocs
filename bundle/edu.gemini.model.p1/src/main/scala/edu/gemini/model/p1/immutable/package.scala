@@ -108,7 +108,7 @@ package object immutable {
     val B600  = M.GmosNDisperser.B600_G5307
     val R600  = M.GmosNDisperser.R600_G5304
     val R400  = M.GmosNDisperser.R400_G5305
-    val R150  = M.GmosNDisperser.R150_G5306
+    val R150  = M.GmosNDisperser.R150_G5308
   }
 
   type GmosNFilter = M.GmosNFilter
@@ -256,7 +256,7 @@ package object immutable {
     val HStar   = M.GpiObservingMode.H_STAR
     val HLiwa   = M.GpiObservingMode.H_LIWA
     val HDirect = M.GpiObservingMode.DIRECT_H_BAND
-    
+
     def isCoronographMode(mode: GpiObservingMode):Boolean = mode.value.startsWith("Coronograph")
     def isDirectMode(mode: GpiObservingMode):Boolean = mode.value.endsWith("direct")
     def scienceBand(mode: GpiObservingMode):Option[String] = {
