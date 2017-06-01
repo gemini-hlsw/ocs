@@ -51,6 +51,7 @@ def common(version: Version) = AppConfig(
     "-Dcom.sun.management.jmxremote.port=2407",
     "-Dcom.sun.management.jmxremote.ssl=false",
     "-Djava.awt.headless=true",
+    "-Djava.net.preferIPv4Stack=true",
     "-Dnetworkaddress.cache.ttl=60",
     "-Duser.language=en",
     "-Duser.country=US"
@@ -413,6 +414,7 @@ def astephens(version: Version) = AppConfig(
 def odbtest(version: Version) = AppConfig(
   id = "odbtest",
   vmargs = List(
+    "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005",
     "-d64",
     "-Dcron.*.edu.gemini.dbTools.html.ftpDestDir=/gemsoft/var/data/www/public/reports/obsStatus/test",
     "-Dcron.*.edu.gemini.dbTools.html.ftpHost=gnconfig.gemini.edu",
@@ -470,7 +472,8 @@ def gnodbtest(version: Version) = AppConfig(
     "-Dcom.cosylab.epics.caj.CAJContext.addr_list=10.2.2.255",
     "-Dedu.gemini.site=north",
     "-Dcron.archive.edu.gemini.dbTools.html.ftpHost=gsagn.hi.gemini.edu",
-    "-Dcron.odbMail.SITE_SMTP_SERVER=smtp.hi.gemini.edu"
+    "-Dcron.odbMail.SITE_SMTP_SERVER=smtp.hi.gemini.edu",
+    "-Djava.rmi.server.hostname=gnodbtest"
   ),
   props = Map(
     "edu.gemini.auxfile.fits.dest"       -> "/gemsoft/var/data/ictd/test/GN@SEMESTER@/@PROG_ID@",
@@ -491,7 +494,8 @@ def gnodb(version: Version) = AppConfig(
     "-Dcom.cosylab.epics.caj.CAJContext.addr_list=10.2.2.255",
     "-Dedu.gemini.site=north",
     "-Dcron.archive.edu.gemini.dbTools.html.ftpHost=gsagn.hi.gemini.edu",
-    "-Dcron.odbMail.SITE_SMTP_SERVER=smtp.hi.gemini.edu"
+    "-Dcron.odbMail.SITE_SMTP_SERVER=smtp.hi.gemini.edu",
+    "-Djava.rmi.server.hostname=gnodb"
   ),
   props = Map(
     "edu.gemini.auxfile.fits.dest"         -> "/gemsoft/var/data/ictd/GN@SEMESTER@/@PROG_ID@",
@@ -516,6 +520,7 @@ def gnagsodb(version: Version) = AppConfig(
     "-Dedu.gemini.site=north",
     "-Dcron.archive.edu.gemini.dbTools.html.ftpHost=gsagn.hi.gemini.edu",
     "-Dcron.odbMail.SITE_SMTP_SERVER=smtp.hi.gemini.edu",
+    "-Djava.rmi.server.hostname=gnauxodb",
     "-Xms2G",
     "-Xmx2G"
   ),
@@ -539,7 +544,8 @@ def gsodbtest(version: Version) = AppConfig(
     "-Dcom.cosylab.epics.caj.CAJContext.addr_list=172.17.2.255",
     "-Dedu.gemini.site=south",
     "-Dcron.archive.edu.gemini.dbTools.html.ftpHost=gsags.cl.gemini.edu",
-    "-Dcron.odbMail.SITE_SMTP_SERVER=smtp.cl.gemini.edu"
+    "-Dcron.odbMail.SITE_SMTP_SERVER=smtp.cl.gemini.edu",
+    "-Djava.rmi.server.hostname=gsodbtest"
   ),
   props = Map(
     "edu.gemini.auxfile.fits.dest"       -> "/gemsoft/var/data/ictd/test/GS@SEMESTER@/@PROG_ID@",
@@ -560,7 +566,8 @@ def gsodb(version: Version) = AppConfig(
     "-Dcom.cosylab.epics.caj.CAJContext.addr_list=172.17.2.255",
     "-Dedu.gemini.site=south",
     "-Dcron.archive.edu.gemini.dbTools.html.ftpHost=gsags.cl.gemini.edu",
-    "-Dcron.odbMail.SITE_SMTP_SERVER=smtp.cl.gemini.edu"
+    "-Dcron.odbMail.SITE_SMTP_SERVER=smtp.cl.gemini.edu",
+    "-Djava.rmi.server.hostname=gsodb"
   ),
   props = Map(
     "edu.gemini.auxfile.fits.dest"         -> "/gemsoft/var/data/ictd/GS@SEMESTER@/@PROG_ID@",
