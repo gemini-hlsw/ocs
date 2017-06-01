@@ -77,7 +77,9 @@ public class GmosNorthType {
         B600_G5307("B600_G5307", "B600", 600),
         R600_G5304("R600_G5304", "R600", 600),
         R400_G5305("R400_G5305", "R400", 400),
-        R150_G5306("R150_G5306", "R150", 150),
+        R150_G5306("R150_G5306", "R150", 150) {
+            @Override public boolean isObsolete() { return true; }
+        },
         R150_G5308("R150_G5308", "R150", 150),
         ;
 
