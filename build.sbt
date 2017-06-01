@@ -11,18 +11,18 @@ pitVersion in ThisBuild := OcsVersion("2017B", false, 2, 1, 0)
 // Bundles by default use the ocsVersion; this is overridden in bundles used only by the PIT
 version in ThisBuild := ocsVersion.value.toOsgiVersion
 
-scalaVersion in ThisBuild := "2.11.8"
+scalaVersion in ThisBuild := "2.11.11"
 
 updateOptions := updateOptions.value.withCachedResolution(true)
 
 // Note that this is not a standard setting; it's used for building IDEA modules.
 javaVersion in ThisBuild := {
-  val expected = "1.8" 
+  val expected = "1.8"
   val actual   = sys.props("java.version")
   if (!actual.startsWith(expected))
     println(s"""
       |***
-      |***                   INCORRECT JAVA RUNTIME VERSION 
+      |***                   INCORRECT JAVA RUNTIME VERSION
       |***
       |***  The build expects version $expected, but you are running $actual.
       |***  Change the VM you're using to run sbt to avoid confusion and strange behavior.
@@ -46,8 +46,8 @@ scalacOptions in ThisBuild ++= Seq(
   "-Xlint:-stars-align",
   "-Yno-adapted-args"
   // "-Ywarn-dead-code"        // N.B. doesn't work well with bottom
-  // "-Ywarn-numeric-widen",   
-  // "-Ywarn-value-discard"   
+  // "-Ywarn-numeric-widen",
+  // "-Ywarn-value-discard"
 )
 
 javacOptions in ThisBuild ++= Seq(
@@ -56,17 +56,17 @@ javacOptions in ThisBuild ++= Seq(
   "-Xlint:all,-serial,-path,-deprecation,-unchecked,-fallthrough" // TOOD: turn all on except maybe -serial and -path
 )
 
-val specs2Version = "3.7"
+val specs2Version = "3.8.9"
 
 // Use managed dependencies for tests; everyone gets JUnit, ScalaCheck, and Specs2
 libraryDependencies in ThisBuild ++= Seq(
   "junit"           % "junit"                % "4.11"        % "test",
   "com.novocode"    % "junit-interface"      % "0.9"         % "test",
-  "org.scalacheck" %% "scalacheck"           % "1.12.5"      % "test",
+  "org.scalacheck" %% "scalacheck"           % "1.12.6"      % "test",
   "org.specs2"     %% "specs2-core"          % specs2Version % "test",
   "org.specs2"     %% "specs2-scalacheck"    % specs2Version % "test",
   "org.specs2"     %% "specs2-matcher-extra" % specs2Version % "test",
-  "org.scalatest"  %% "scalatest"            % "3.0.0-M15"   % "test"
+  "org.scalatest"  %% "scalatest"            % "3.0.1"       % "test"
 )
 
 // Required for specs2

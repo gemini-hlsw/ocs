@@ -44,19 +44,19 @@ class ImageSearchQuerySpec extends FlatSpec with Matchers with PropertyChecks wi
       forAll { (t: TestCase) =>
         val c1 = t.c.copy(ra = t.c.ra.offset(t.delta))
         ImageSearchQuery(t.catalog, t.c, t.size, None).isNearby(ImageSearchQuery(t.catalog, c1, t.size, None)) shouldBe true
-      }(implicitly[PropertyCheckConfiguration], testCase(Angle.zero, ImageSearchQuery.maxDistance), implicitly[Shrink[TestCase]], implicitly[CheckerAsserting[Assertion]])
+      }(implicitly[PropertyCheckConfiguration], testCase(Angle.zero, ImageSearchQuery.maxDistance), implicitly[Shrink[TestCase]], implicitly[CheckerAsserting[Assertion]], implicitly, implicitly)
     }
     it should "be nearby close coordinates in dec" in {
       forAll { (t: TestCase) =>
         val c1 = t.c.copy(dec = t.c.dec.offset(t.delta)._1)
         ImageSearchQuery(t.catalog, t.c, t.size, None).isNearby(ImageSearchQuery(t.catalog, c1, t.size, None)) shouldBe true
-      }(implicitly[PropertyCheckConfiguration], testCase(Angle.zero, ImageSearchQuery.maxDistance), implicitly[Shrink[TestCase]], implicitly[CheckerAsserting[Assertion]])
+      }(implicitly[PropertyCheckConfiguration], testCase(Angle.zero, ImageSearchQuery.maxDistance), implicitly[Shrink[TestCase]], implicitly[CheckerAsserting[Assertion]], implicitly, implicitly)
     }
     it should "be symmetric" in {
       forAll { (t: TestCase) =>
         val c1 = t.c.copy(dec = t.c.dec.offset(t.delta)._1)
         ImageSearchQuery(t.catalog, t.c, t.size, None).isNearby(ImageSearchQuery(t.catalog, c1, t.size, None)) shouldBe ImageSearchQuery(t.catalog, c1, t.size, None).isNearby(ImageSearchQuery(t.catalog, t.c, t.size, None))
-      }(implicitly[PropertyCheckConfiguration], testCase(Angle.zero, Angle.fromDegrees(359.99)), implicitly[Shrink[TestCase]], implicitly[CheckerAsserting[Assertion]])
+      }(implicitly[PropertyCheckConfiguration], testCase(Angle.zero, Angle.fromDegrees(359.99)), implicitly[Shrink[TestCase]], implicitly[CheckerAsserting[Assertion]], implicitly, implicitly)
     }
     it should "work near zero" in {
       // Special case when the diff is very close to zero but negative

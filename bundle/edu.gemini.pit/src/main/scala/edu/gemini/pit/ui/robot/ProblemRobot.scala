@@ -19,7 +19,7 @@ import edu.gemini.pit.model.{AppPreferences, Model}
 import edu.gemini.pit.catalog.NotFound
 import edu.gemini.pit.catalog.Error
 
-import scalaz._
+import scalaz.{ Band => _, _ }
 import Scalaz._
 
 object ProblemRobot {
@@ -343,7 +343,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       case f: FastTurnaroundProgramClass => f.tooOption.some
       case _                             => None
     }
-    
+
     private val band3RapidToO = for {
       o  <- p.observations
       to <- proposalToO(p.proposalClass)

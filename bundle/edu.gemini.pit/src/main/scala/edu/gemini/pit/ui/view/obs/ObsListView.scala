@@ -10,7 +10,7 @@ import javax.swing.TransferHandler._
 
 import scala.swing._
 import scalaz.Scalaz._
-import scalaz._
+import scalaz.{ Band => _, _ }
 import javax.swing.{Action => _, _}
 
 import edu.gemini.gsa.client.api.GsaParams
