@@ -13,6 +13,8 @@ import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.telescope.PosAngleConstraint._
 import edu.gemini.shared.util.immutable.ScalaConverters._
 
+import java.util.logging.Logger
+
 import scala.collection.JavaConverters._
 import scala.concurrent._
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -26,6 +28,8 @@ import Scalaz._
  */
 case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyParams, backend: VoTableBackend = ConeSearchBackend) extends AgsStrategy {
   import SingleProbeStrategy._
+
+  private val LOGGER = Logger.getLogger(classOf[SingleProbeStrategy].getName)
 
   override def magnitudes(ctx: ObsContext, mt: MagnitudeTable): List[(GuideProbe, AgsMagnitude.MagnitudeCalc)] =
     params.magnitudeCalc(withCorrectedSite(ctx), mt).toList.map(params.guideProbe -> _)
@@ -82,9 +86,8 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
 
   protected [ags] def select(ctx: ObsContext, mt: MagnitudeTable, candidates: List[SiderealTarget]): Option[AgsStrategy.Selection] = {
 
-    // Temporary for Andy's tests.
     def feedback(feedback: => String): Unit =
-      println(s"AGS $feedback")
+      LOGGER.info(s"AGS $feedback")
 
     def selectMinVigetting(vprobe: VProbe, allValid: List[(ObsContext, List[SiderealTarget])]): Option[AgsStrategy.Selection] = {
 

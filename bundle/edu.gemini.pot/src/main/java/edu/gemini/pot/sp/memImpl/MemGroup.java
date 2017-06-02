@@ -5,12 +5,14 @@ import edu.gemini.pot.sp.*;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.ListIterator;
+import java.util.logging.Logger;
 
 /**
  * This class provides an in-memory, non-persistent implementation of the
  * ISPGroup remote interface.
  */
 public final class MemGroup extends MemAbstractContainer implements ISPGroup {
+    private static final Logger LOG = Logger.getLogger(MemGroup.class.getName());
     private final MemProgram _program;
 
     // The list of observation components
@@ -143,7 +145,7 @@ public final class MemGroup extends MemAbstractContainer implements ISPGroup {
         try {
             int index = _compList.indexOf(node);
             if (index == -1) {
-                System.out.println("Component was not located and can't be removed.");
+                LOG.warning("Component was not located and can't be removed.");
                 return;
             }
             List<ISPObsComponent> oldCopy = new ArrayList<>(_compList);
@@ -276,4 +278,3 @@ public final class MemGroup extends MemAbstractContainer implements ISPGroup {
 
     @Override public MemProgram getProgram() { return _program; }
 }
-

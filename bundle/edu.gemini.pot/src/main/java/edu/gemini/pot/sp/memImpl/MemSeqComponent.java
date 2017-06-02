@@ -6,12 +6,14 @@ import edu.gemini.pot.sp.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.logging.Logger;
 
 /**
  * This class implements an in-memory, non-persistent
  * <code>ISPSeqComponent</code> object.
  */
 public final class MemSeqComponent extends MemAbstractContainer implements ISPSeqComponent {
+    private static final Logger LOG = Logger.getLogger(MemSeqComponent.class.getName());
 
     private final MemProgram _program;
     private final SPComponentType _type;
@@ -128,7 +130,7 @@ public final class MemSeqComponent extends MemAbstractContainer implements ISPSe
         try {
             int index = _compList.indexOf(node);
             if (index == -1) {
-                //System.out.println("Component was not located and can't be removed.");
+                LOG.warning("Component was not located and can't be removed.");
                 return;
             }
             List<ISPSeqComponent> oldCopy = new ArrayList<>(_compList);
@@ -191,4 +193,3 @@ public final class MemSeqComponent extends MemAbstractContainer implements ISPSe
 
     @Override public MemProgram getProgram() { return _program; }
 }
-

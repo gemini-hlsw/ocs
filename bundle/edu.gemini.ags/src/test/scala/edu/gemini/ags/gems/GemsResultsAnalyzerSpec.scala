@@ -27,6 +27,8 @@ import edu.gemini.spModel.target.env.TargetEnvironment
 import edu.gemini.spModel.telescope.IssPort
 import jsky.coords.WorldCoords
 
+import java.util.logging.Logger
+
 import scala.concurrent.duration._
 
 import org.specs2.mutable.SpecificationLike
@@ -41,6 +43,9 @@ import Scalaz._
  * See OT-27
  */
 class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with TargetsHelper {
+
+  private val LOGGER = Logger.getLogger(classOf[GemsResultsAnalyzerSpec].getName)
+
   class TestGemsVoTableCatalog(file: String) extends GemsVoTableCatalog {
     override val backend = TestVoTableBackend(file)
   }
@@ -60,12 +65,12 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
       results should have size expectedResults
 
       results.zipWithIndex.foreach { case (r, i) =>
-        System.out.println("Result #" + i)
-        System.out.println(" Criteria:" + r.criterion)
-        System.out.println(" Results size:" + r.results.size)
+        LOGGER.info("Result #" + i)
+        LOGGER.info(" Criteria:" + r.criterion)
+        LOGGER.info(" Results size:" + r.results.size)
       }
 
-      System.out.println("gems results: size = " + gemsGuideStars.size)
+      LOGGER.info("gems results: size = " + gemsGuideStars.size)
       gemsGuideStars should have size 247
 
       val result = gemsGuideStars.head
@@ -121,12 +126,12 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
       results should have size expectedResults
 
       results.zipWithIndex.foreach { case (r, i) =>
-        System.out.println("Result #" + i)
-        System.out.println(" Criteria:" + r.criterion)
-        System.out.println(" Results size:" + r.results.size)
+        LOGGER.info("Result #" + i)
+        LOGGER.info(" Criteria:" + r.criterion)
+        LOGGER.info(" Results size:" + r.results.size)
       }
 
-      System.out.println("gems results: size = " + gemsGuideStars.size)
+      LOGGER.info("gems results: size = " + gemsGuideStars.size)
       gemsGuideStars should have size 135
 
       val result = gemsGuideStars.head
@@ -182,12 +187,12 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
       results should have size expectedResults
 
       results.zipWithIndex.foreach { case (r, i) =>
-        System.out.println("Result #" + i)
-        System.out.println(" Criteria:" + r.criterion)
-        System.out.println(" Results size:" + r.results.size)
+        LOGGER.info("Result #" + i)
+        LOGGER.info(" Criteria:" + r.criterion)
+        LOGGER.info(" Results size:" + r.results.size)
       }
 
-      System.out.println("gems results: size = " + gemsGuideStars.size)
+      LOGGER.info("gems results: size = " + gemsGuideStars.size)
       gemsGuideStars should have size 98
 
       val result = gemsGuideStars.head
@@ -243,12 +248,12 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
       results should have size expectedResults
 
       results.zipWithIndex.foreach { case (r, i) =>
-        System.out.println("Result #" + i)
-        System.out.println(" Criteria:" + r.criterion)
-        System.out.println(" Results size:" + r.results.size)
+        LOGGER.info("Result #" + i)
+        LOGGER.info(" Criteria:" + r.criterion)
+        LOGGER.info(" Results size:" + r.results.size)
       }
 
-      System.out.println("gems results: size = " + gemsGuideStars.size)
+      LOGGER.info("gems results: size = " + gemsGuideStars.size)
       gemsGuideStars should have size 54
 
       val result = gemsGuideStars.head
@@ -360,6 +365,6 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
   def progress(s: Strehl, count: Int, total: Int, usable: Boolean): Boolean = true
 
   def setProgressTitle(s: String) {
-    System.out.println(s)
+    LOGGER.info(s)
   }
 }

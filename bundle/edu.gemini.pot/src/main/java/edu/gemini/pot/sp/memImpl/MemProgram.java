@@ -6,12 +6,14 @@ import edu.gemini.shared.util.VersionVector;
 import edu.gemini.spModel.core.SPProgramID;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * This class provides an in-memory, non-persistent implementation of the
  * ISPProgram remote interface.
  */
 public final class MemProgram extends MemAbstractContainer implements ISPProgram {
+  private static final Logger LOG = Logger.getLogger(MemProgram.class.getName());
 
     /**
      * Creates a new empty program with the given key and program id.
@@ -242,7 +244,7 @@ public final class MemProgram extends MemAbstractContainer implements ISPProgram
         try {
             int index = _compList.indexOf(node);
             if (index == -1) {
-                System.out.println("Component was not located and can't be removed.");
+                LOG.warning("Component was not located and can't be removed.");
                 return;
             }
             List<ISPObsComponent> oldCopy = new ArrayList<>(_compList);
@@ -479,4 +481,3 @@ public final class MemProgram extends MemAbstractContainer implements ISPProgram
 
     @Override public MemProgram getProgram() { return this; }
 }
-

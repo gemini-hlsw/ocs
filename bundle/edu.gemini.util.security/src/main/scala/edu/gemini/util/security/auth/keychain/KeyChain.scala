@@ -180,7 +180,6 @@ abstract class KeyChain(kCell: KeyChain.KCell, pCell: KeyChain.PCell, lCell: Key
       l <- kernel.map(_.selection.map(_._2.get._1)) ||| Action(None)
       s <- Action(subject.getPrincipals <| (_.clear))
       _ <- l.traverseU(p => Action(s.add(p)))
-      _ <- IO.putStrLn("---\n" + subject).liftIO[Action]
       _ <- notifyListeners
     } yield ()
 
@@ -298,7 +297,6 @@ abstract class PersistentKeyChain(
     for {
       _ <- super.commit(k)
       _ <- kCell.get >>= (s => o.put(s).liftIO[Action])
-      _ <- IO.putStrLn("Committed keychain.").liftIO[Action]
     } yield ()
 
 }
@@ -458,6 +456,3 @@ object KeyChain {
     } yield ()
 
 }
-
-
-
