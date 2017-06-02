@@ -6,13 +6,13 @@ import edu.gemini.model.p1.immutable._
 import edu.gemini.pit.ui.editor.Institutions
 import edu.gemini.pit.util.PDF
 import edu.gemini.pit.catalog._
-import java.util.TimeZone
 
 import edu.gemini.spModel.core.MagnitudeBand
 import view.obs.ObsListGrouping
 import edu.gemini.model.p1.visibility.TargetVisibilityCalc
 import edu.gemini.pit.ui.view.tac.TacView
-import java.text.SimpleDateFormat
+import java.time.{Instant, ZoneId}
+import java.time.format.DateTimeFormatter
 import java.io.File
 
 import edu.gemini.pit.model.{AppPreferences, Model}
@@ -183,9 +183,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       msg = s"""Ephemeris for target "$n" contains only one point; please specify at least two."""
     } yield new Problem(Severity.Warning, msg, "Targets", s.inTargetsView(_.edit(t)))
 
-    lazy val utc = new SimpleDateFormat("yyyy-MMM-dd") {
-      setTimeZone(TimeZone.getTimeZone("UTC"))
-    }
+    lazy val dateFormat = DateTimeFormatter.ofPattern("yyyy-MMM-dd").withZone(ZoneId.of("UTC"))
 
     private lazy val initialEphemerisCheck = for {
       t @ NonSiderealTarget(_, n, e, _) <- p.targets
@@ -196,10 +194,10 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       diff = dsMin - p.semester.firstDay
       if diff >= 1.days
       msg = if (diff < 2.days)
-        s"""Ephemeris for target "$n" is undefined for ${utc.format(p.semester.firstDay)} UTC."""
+        s"""Ephemeris for target "$n" is undefined for ${dateFormat.format(Instant.ofEpochMilli(p.semester.firstDay))} UTC."""
       else {
         val lastDay = (dsMin < p.semester.lastDay + 1.days) ? (dsMin - 1.days) | p.semester.lastDay
-        s"""Ephemeris for target "$n" is undefined between ${utc.format(p.semester.firstDay)} and ${utc.format(lastDay)} UTC."""
+        s"""Ephemeris for target "$n" is undefined between ${dateFormat.format(Instant.ofEpochMilli(p.semester.firstDay))} and ${dateFormat.format(Instant.ofEpochMilli(lastDay))} UTC."""
       }
     } yield new Problem(Severity.Warning, msg, "Targets", s.inTargetsView(_.edit(t)))
 
@@ -212,10 +210,10 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       diff = p.semester.lastDay - dsMax
       if diff >= 1.days
       msg = if (diff == 1.days)
-        s"""Ephemeris for target "$n" is undefined for ${utc.format(p.semester.lastDay)} UTC."""
+        s"""Ephemeris for target "$n" is undefined for ${dateFormat.format(Instant.ofEpochMilli(p.semester.lastDay))} UTC."""
       else {
         val firstDay = (dsMax > p.semester.firstDay) ? (dsMax + 1.days) | p.semester.firstDay
-        s"""Ephemeris for target "$n" is undefined between ${utc.format(firstDay)} and ${utc.format(p.semester.lastDay)} UTC."""
+        s"""Ephemeris for target "$n" is undefined between ${dateFormat.format(Instant.ofEpochMilli(firstDay))} and ${dateFormat.format(Instant.ofEpochMilli(p.semester.lastDay))} UTC."""
       }
     } yield new Problem(Severity.Warning, msg, "Targets", s.inTargetsView(_.edit(t)))
 

@@ -4,8 +4,9 @@ import edu.gemini.auxfile.api.AuxFile
 import edu.gemini.spModel.core.SPProgramID
 import jsky.app.ot.gemini.editor.ProgramForm
 import jsky.app.ot.vcs.VcsOtClient
-import java.text.SimpleDateFormat
-import java.util.{Collections, Date, TimeZone}
+import java.time.{Instant, ZoneId}
+import java.time.format.DateTimeFormatter
+import java.util.{Collections, Date}
 
 import jsky.util.gui.Resources
 
@@ -27,13 +28,11 @@ object AuxFileEditor {
       lab.text = size.toString
   })
 
-  private val Format = new SimpleDateFormat("yyyy-MMM-dd HH:mm:ss") {
-    setTimeZone(TimeZone.getTimeZone("UTC"))
-  }
+  private val DateFormat = DateTimeFormatter.ofPattern("yyyy-MMM-dd HH:mm:ss").withZone(ZoneId.of("UTC"))
 
   private val DateCellRenderer = new LabelCellRenderer[Date]((lab, date) => {
     lab.horizontalAlignment = Alignment.Center
-    lab.text = Format.format(date)
+    lab.text = DateFormat.format(date.toInstant)
   })
 
   private val CheckIcon = Resources.getIcon("eclipse/check.gif")

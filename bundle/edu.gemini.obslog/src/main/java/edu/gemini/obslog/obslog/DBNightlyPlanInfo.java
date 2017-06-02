@@ -1,8 +1,8 @@
 package edu.gemini.obslog.obslog;
 
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 
 //
 // Gemini Observatory/AURA
@@ -22,7 +22,7 @@ public class DBNightlyPlanInfo implements Serializable, Comparable<DBNightlyPlan
     // last modified timestamp
     private long _timestamp;
 
-    private static SimpleDateFormat _formatter = new SimpleDateFormat("yyyy-MMM-dd HH:hh:ss");
+    private static DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MMM-dd HH:hh:ss");
 
     private String _lastModified;
 
@@ -37,7 +37,7 @@ public class DBNightlyPlanInfo implements Serializable, Comparable<DBNightlyPlan
         _title = title;
         _planID = planID;
         _timestamp = timestamp;
-        _lastModified = _formatter.format(new Date(timestamp));
+        _lastModified = dateFormat.format(Instant.ofEpochMilli(_timestamp));
     }
 
     public String getTitle() {

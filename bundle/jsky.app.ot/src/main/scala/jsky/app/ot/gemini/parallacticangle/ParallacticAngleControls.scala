@@ -2,9 +2,10 @@ package jsky.app.ot.gemini.parallacticangle
 
 import java.awt.{Color, Insets}
 import java.beans.{PropertyChangeEvent, PropertyChangeListener}
-import java.text.{Format, SimpleDateFormat}
-import java.util.Date
+import java.text.Format
 import java.util.logging.Logger
+import java.time.{Instant, ZoneId}
+import java.time.format.DateTimeFormatter
 import javax.swing.BorderFactory
 import javax.swing.border.EtchedBorder
 
@@ -323,11 +324,10 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
       fmt <- formatter
     } {
       // Scheduling block date and time
-      val dateTimeStr = {
-        val df = new SimpleDateFormat("yyyy-MMM-dd HH:mm:ss z")
-        df.setTimeZone(TimeZonePreference.get)
-        df.format(new Date(sb.start))
-      }
+      val dateTimeStr = DateTimeFormatter
+        .ofPattern("yyyy-MMM-dd HH:mm:ss z")
+        .withZone(ZoneId.of(TimeZonePreference.get.getID))
+        .format(Instant.ofEpochMilli(sb.start))
 
       // Scheduling block duration, in minutes
       val durStr = sb.duration.toOption.map(_ / 60000.0).foldMap(n => f", $n%2.1f min")

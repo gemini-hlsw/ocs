@@ -11,9 +11,9 @@ import edu.gemini.wdba.session.ISessionEventListener;
 import edu.gemini.wdba.session.ISessionEventProducer;
 import edu.gemini.wdba.glue.api.WdbaGlueException;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.TimeZone;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
@@ -23,7 +23,7 @@ import java.util.logging.Level;
 public class AllEventsLoggingService extends AbstractSessionEventConsumer implements ISessionEventListener {
 
     private static final Logger LOG = Logger.getLogger(AllEventsLoggingService.class.getName());
-    private  final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MMM-dd HH:mm:ss");
+    private  final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MMM-dd HH:mm:ss").withZone(ZoneId.of("UTC"));
 
     private UpdateAction _action = new UpdateAction();
 
@@ -34,9 +34,7 @@ public class AllEventsLoggingService extends AbstractSessionEventConsumer implem
     }
 
     private String _doFormatUTCTime(long time) {
-        Date date = new Date(time);
-        DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
-        return DATE_FORMAT.format(date);
+        return DATE_FORMAT.format(Instant.ofEpochMilli(time));
     }
 
     private void _logReasonEvent(StartIdleEvent sevt) {

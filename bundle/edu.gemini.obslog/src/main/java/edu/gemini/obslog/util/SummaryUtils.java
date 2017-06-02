@@ -1,29 +1,28 @@
 package edu.gemini.obslog.util;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.TimeZone;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
 public class SummaryUtils {
 
     /**
-     * Return a string with the UTC time in the format /mm/dd/yy hh:mm:ss,
+     * Return a string with the UTC time in the format yyyy-MMM-dd HH:mm:ss,
      * given the current UTC time in ms.
      */
     public static String formatUTCDateTime(long time) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MMM-dd HH:mm:ss");
-        return _doFormatUTC(dateFormat, time);
+        DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MMM-dd HH:mm:ss")
+                .withZone(ZoneId.of("UTC"));
+        return dateFormat.format(Instant.ofEpochMilli(time));
     }
 
+    /**
+     * Return a string with the UTC time in the format HH:mm:ss,
+     * given the current UTC time in ms.
+     */
     public static String formatUTCTime(long time) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
-        return _doFormatUTC(dateFormat, time);
+        DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("HH:mm:ss")
+                .withZone(ZoneId.of("UTC"));
+        return dateFormat.format(Instant.ofEpochMilli(time));
     }
-
-    private static String _doFormatUTC(SimpleDateFormat dateFormat, long time) {
-        Date date = new Date(time);
-        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-        return dateFormat.format(date);
-    }
-
 }
