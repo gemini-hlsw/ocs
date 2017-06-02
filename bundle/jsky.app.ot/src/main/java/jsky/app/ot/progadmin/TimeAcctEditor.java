@@ -18,10 +18,7 @@ import java.util.Map;
 
 final class TimeAcctEditor implements ProgramTypeListener {
     private static final long MS_PER_HOUR = Duration.ofHours(1).toMillis();
-
-    // Used to format values as strings
-    private final static DecimalFormat nf_dec = new DecimalFormat("0.00");
-    private final static DecimalFormat nf_decOpt = new DecimalFormat("0.##");
+    private static final DecimalFormat nf = new DecimalFormat("0.##");
 
     private static Duration toDuration(double hours) {
         return Duration.ofMillis(Math.round(hours * MS_PER_HOUR));
@@ -87,9 +84,9 @@ final class TimeAcctEditor implements ProgramTypeListener {
 
     private void showTotalTime(final TimeAcctAllocation alloc) {
         final TimeAcctAward a = alloc.getSum();
-        ui.getTotalAwardLabel()  .setText(nf_dec.format(a.getTotalHours()));
-        ui.getProgramAwardLabel().setText(nf_dec.format(a.getProgramHours()));
-        ui.getPartnerAwardLabel().setText(nf_dec.format(a.getPartnerHours()));
+        ui.getTotalAwardLabel()  .setText(nf.format(a.getTotalHours()));
+        ui.getProgramAwardLabel().setText(nf.format(a.getProgramHours()));
+        ui.getPartnerAwardLabel().setText(nf.format(a.getPartnerHours()));
     }
 
     private TimeValue getMinimumTime() {
@@ -127,7 +124,7 @@ final class TimeAcctEditor implements ProgramTypeListener {
             ui.getMinimumTimeField().setText("");
         } else {
             minTime = minTime.convertTo(TimeValue.Units.hours);
-            ui.getMinimumTimeField().setText(nf_dec.format(minTime.getTimeAmount())); // REL-434
+            ui.getMinimumTimeField().setText(nf.format(minTime.getTimeAmount())); // REL-434
         }
 
         final TimeAcctAllocation alloc = model.getAllocation();
@@ -136,10 +133,10 @@ final class TimeAcctEditor implements ProgramTypeListener {
         // Show the time for each category.
         for (final TimeAcctCategory cat : TimeAcctCategory.values()) {
             final double progHours = alloc.getAward(cat).getProgramHours();
-            ui.getProgramAwardField(cat).setText(nf_decOpt.format(progHours)); // REL-434
+            ui.getProgramAwardField(cat).setText(nf.format(progHours)); // REL-434
 
             final double partHours = alloc.getAward(cat).getPartnerHours();
-            ui.getPartnerAwardField(cat).setText(nf_decOpt.format(partHours)); // REL-434
+            ui.getPartnerAwardField(cat).setText(nf.format(partHours)); // REL-434
         }
 
         // Show the percentage for each category.
