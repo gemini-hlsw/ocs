@@ -1,7 +1,7 @@
 
 // Dependencies for the build itself.
 
-val ScalaZVersion = "7.2.2"
+val ScalaZVersion = "7.2.13"
 
 libraryDependencies ++= Seq(
   "org.ow2.asm" % "asm" % "4.0",

@@ -11,7 +11,7 @@ libraryDependencies ++= Seq(
   "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4",
   "org.scalaz" %% "scalaz-core" % ScalaZVersion,
   "org.scalaz" %% "scalaz-effect" % ScalaZVersion,
-  "com.squants"  %% "squants"  % "0.6.2"
+  "com.squants"  %% "squants"  % "0.6.3"
   )
 
 osgiSettings
@@ -27,7 +27,7 @@ OsgiKeys.dynamicImportPackage := Seq("")
 OsgiKeys.exportPackage := Seq(
   "edu.gemini.spModel.core",
   "edu.gemini.spModel.core.osgi")
-        
+
 sourceGenerators in Compile += Def.task {
   val ocsVer = ocsVersion.value
   val outDir = (sourceManaged in Compile).value / "edu" / "gemini" / "spModel" / "core"
@@ -41,11 +41,10 @@ initialCommands := "import edu.gemini.spModel.core._, scalaz._, Scalaz._"
 
 scalacOptions in (Compile, doc) ++= Seq(
   "-groups",
-  "-sourcepath", (baseDirectory in LocalRootProject).value.getAbsolutePath, 
-  "-doc-source-url", "https://github.com/gemini-hlws/ocs/master€{FILE_PATH}.scala" 
+  "-sourcepath", (baseDirectory in LocalRootProject).value.getAbsolutePath,
+  "-doc-source-url", "https://github.com/gemini-hlws/ocs/master€{FILE_PATH}.scala"
 )
 
 publishArtifact in (ThisBuild, packageSrc) := true
 
 publishMavenStyle in ThisBuild := true
-

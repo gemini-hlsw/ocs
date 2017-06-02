@@ -1,6 +1,6 @@
 package edu.gemini.spModel.core
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import scalaz.Equal
 
 /** Unit that can represent an integrated brightness or a uniform surface brightness per area. */
@@ -49,7 +49,7 @@ object MagnitudeSystem {
     Equal.equalA
 
   // ===== LEGACY JAVA SUPPORT =====
-  val allForOTAsJava = new java.util.Vector[MagnitudeSystem](allForOT)
+  val allForOTAsJava = new java.util.Vector[MagnitudeSystem](allForOT.asJava)
   val Default = default // default is a reserved key word in Java!
 
 }
@@ -68,4 +68,3 @@ object SurfaceBrightness {
     Equal.equalA
 
 }
-

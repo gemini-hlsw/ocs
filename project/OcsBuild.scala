@@ -2,14 +2,14 @@
 import sbt._
 import Keys._
 
-object OcsBuild extends Build 
+object OcsBuild extends Build
   with OcsBundle      // bundle project definitions
   with OcsBundleSettings // bundle project definitions
   with OcsApp         // application project definitions
   with OcsAppSettings // settings for app projects
   with OcsKey         // ocs-provided keys
 {
-  val ScalaZVersion = "7.2.2"
+  val ScalaZVersion = "7.2.13"
 
   override lazy val settings = super.settings ++
     Seq(

@@ -1,7 +1,7 @@
 package edu.gemini.pit.ui.view.obs
 
 import edu.gemini.model.p1.immutable._
-import scalaz._
+import scalaz.{ Band => _, _ }
 import Scalaz._
 
 import scala.language.existentials
@@ -22,7 +22,7 @@ case class ObsListModel(all:List[Observation], band:Band, gs:(ObsListGrouping[_]
    * should be indented.
    */
   lazy val elems = {
-    
+
     // Sort the observations, turn them into ObsElems, and expand the list
     val es = visible.sortBy(_.toString).map(ObsElem(_))
     expand(es)
@@ -144,7 +144,7 @@ case class ObsListModel(all:List[Observation], band:Band, gs:(ObsListGrouping[_]
     (this /: source._2.map((source._1, _)))(_.pasteOne(_, target))
   }
 
-  
+
   // When you paste, the target might be valid, invalid, or missing altogether. These are all legal.
   def pasteOne(source:(ObsListModel, ObsListElem), target:Option[ObsGroup[_]]):ObsListModel = {
 
@@ -158,7 +158,7 @@ case class ObsListModel(all:List[Observation], band:Band, gs:(ObsListGrouping[_]
     def clear(o:Observation) = (o.copy() /: toClear)((o, g) => g.clear(o))
 
     val os = os0.map(clear)
-    
+
     target match {
       case None                  => this ++ os.map(_.copy(band = band))
       case Some(t) if !droppable => this ++ os.map(_.copy(band = band))
