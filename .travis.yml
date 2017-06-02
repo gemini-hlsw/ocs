@@ -41,6 +41,7 @@ before_script:
 script:
   - sudo chmod +x /usr/local/bin/sbt
   - sbt -q -J-Djava.util.logging.config.file=logging.properties -J-Dedu.gemini.ocs.build.ping ++$TRAVIS_SCALA_VERSION test:compile test
+  - sbt -q -J-Djava.util.logging.config.file=logging.properties -J-Dedu.gemini.ocs.build.ping ++2.12.2 bundle_edu_gemini_spModel_core/test
 
 cache:
   directories:
