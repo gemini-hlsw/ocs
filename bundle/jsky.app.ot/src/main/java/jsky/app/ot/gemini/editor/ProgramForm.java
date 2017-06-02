@@ -161,8 +161,8 @@ public class ProgramForm extends JPanel {
                             new ColumnSpec(ColumnSpec.LEFT, Sizes.dluX(15), FormSpec.NO_GROW),
                             new ColumnSpec(ColumnSpec.CENTER, Sizes.dluX(56), FormSpec.NO_GROW),
                             FormFactory.UNRELATED_GAP_COLSPEC,
-                            FormFactory.DEFAULT_COLSPEC,
-                            new ColumnSpec(ColumnSpec.LEFT, Sizes.DLUX11, FormSpec.NO_GROW),
+                            new ColumnSpec(ColumnSpec.CENTER, Sizes.dluX(56), FormSpec.NO_GROW),
+                            new ColumnSpec(ColumnSpec.LEFT, Sizes.dluX(15), FormSpec.NO_GROW),
                             new ColumnSpec(ColumnSpec.CENTER, Sizes.dluX(58), FormSpec.NO_GROW)
                     },
                     new RowSpec[]{
@@ -207,7 +207,7 @@ public class ProgramForm extends JPanel {
         allocatedTime.setToolTipText("The total program time allocated, in hours:minutes:seconds");
         timePanel.add(allocatedTime, cc.xy(9, 5));
 
-        minimumTimeLabel = new JLabel("Minimum");
+        minimumTimeLabel = new JLabel("Min Program");
         timePanel.add(minimumTimeLabel, cc.xy(11, 3));
         minimumTime = new JLabel("00:00:00");
         minimumTime.setToolTipText("The minimal success time, in hours:minutes:seconds");
