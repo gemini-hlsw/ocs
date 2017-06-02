@@ -28,12 +28,20 @@ public class HMS implements Serializable {
     /** set to 1 or -1 */
     private byte sign = 1;
 
-    /** Used to format values as strings. */
-    private static NumberFormat nf = NumberFormat.getInstance(Locale.US);
+    /** Used to format values as strings with decimal places. */
+    private static NumberFormat nf_frac = NumberFormat.getInstance(Locale.US);
 
     static {
-        nf.setMinimumIntegerDigits(2);
-        nf.setMaximumFractionDigits(3);
+        nf_frac.setMinimumIntegerDigits(2);
+        nf_frac.setMaximumFractionDigits(3);
+    }
+
+    /** Used to format values as strings with no fractional part. */
+    private static NumberFormat nf_noFrac = NumberFormat.getInstance(Locale.US);
+
+    static {
+        nf_noFrac.setMinimumIntegerDigits(2);
+        nf_noFrac.setMaximumFractionDigits(0);
     }
 
     /** On the handling of -0: from the javadoc for Double.equals():
@@ -166,21 +174,7 @@ public class HMS implements Serializable {
      * The seconds are formatted with 3 digits of precision.
      */
     public String toString() {
-        String secs = nf.format(sec);
-
-        // sign
-        String signStr;
-        if (sign == -1)
-            signStr = "-";
-        else
-            signStr = "";
-
-        return signStr
-                + nf.format(hours)
-                + ":"
-                + nf.format(min)
-                + ":"
-                + secs;
+        return toString(true);
     }
 
     /**
@@ -188,20 +182,16 @@ public class HMS implements Serializable {
      * or if showSeconds is false, hh:mm.
      */
     public String toString(boolean showSeconds) {
-        if (showSeconds)
-            return toString();
+        return toString(showSeconds, true);
+    }
 
-        // sign
-        String signStr;
-        if (sign == -1)
-            signStr = "-";
-        else
-            signStr = "";
-
-        return signStr
-                + nf.format(hours)
+    public String toString(boolean showSeconds, boolean showFractionalSeconds) {
+        final NumberFormat nf = showFractionalSeconds ? nf_frac : nf_noFrac;
+        return (sign == -1 ? "-1" : "")
+                + nf_noFrac.format(hours)
                 + ":"
-                + nf.format(min);
+                + nf_noFrac.format(min)
+                + (showSeconds ? (":" + nf.format(sec)) : "");
     }
 
     /** Return true if this object has been initialized with a valid value */
@@ -242,50 +232,5 @@ public class HMS implements Serializable {
     @Override
     public int hashCode() {
     	return (int) val;
-    }
-
-    /**
-     * Test cases
-     */
-    public static void main(String[] args) {
-
-        HMS h = new HMS(3, 19, 48.23);
-        System.out.println("HMS(3, 19, 48.23) == " + h + " == " + h.getVal());
-
-        if (!(h.equals(new HMS(h.getVal()))))
-            System.out.println("Equality test failed: " + h + " != " + new HMS(h.getVal()));
-
-        h = new HMS(41, 30, 42.2);
-        System.out.println("41 30 42.2 = " + h + " = " + h.getVal() + " = " + new HMS(h.getVal()));
-
-        h = new HMS(-41, 30, 2.2);
-        System.out.println("-41 30 2.2 = " + h + " = " + h.getVal() + " = " + new HMS(h.getVal()));
-
-        h = new HMS("-41 30 42.2");
-        System.out.println("-41 30 42.2 = " + h + " = " + h.getVal() + " = " + new HMS(h.getVal()));
-
-        h = new HMS("1:01:02.34567");
-        System.out.println("1:01:02.34567 = " + h + " = " + h.getVal() + " = " + new HMS(h.getVal()));
-
-        h = new HMS("1:01:02.34567");
-        System.out.println("1:01:02.34567 = " + h + " = " + h.getVal() + " = " + new HMS(h.getVal()));
-
-        h = new HMS(-0., 15, 33.3333);
-        System.out.println("-0 15 33.3333 = " + h + " = " + h.getVal() + " = " + new HMS(h.getVal()));
-
-        h = new HMS(-0.0001);
-        System.out.println("-0.0001 = " + h + " = " + h.getVal() + " = " + new HMS(h.getVal()));
-
-        h = new HMS(121.39583332 / 15.);
-        System.out.println("121.39583332/15. = " + h + " = " + h.getVal() + " = " + new HMS(h.getVal()));
-
-        h = new HMS(121.09583332 / 15.);
-        System.out.println("121.09583332/15. = " + h + " = " + h.getVal() + " = " + new HMS(h.getVal()));
-
-        h = new HMS(-121.39583332 / 15.);
-        System.out.println("-121.39583332/15. = " + h + " = " + h.getVal() + " = " + new HMS(h.getVal()));
-
-        h = new HMS(-121.09583332 / 15.);
-        System.out.println("-121.09583332/15. = " + h + " = " + h.getVal() + " = " + new HMS(h.getVal()));
     }
 }

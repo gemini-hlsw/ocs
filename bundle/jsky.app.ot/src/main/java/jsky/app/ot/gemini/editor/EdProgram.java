@@ -244,7 +244,9 @@ public final class EdProgram extends OtItemEditor<ISPProgram, SPProgram> impleme
         timeLabel.setText(timeStr);
     }
     private static void setTimeLabel(final double time, final JLabel timeLabel) {
-        final String timeStr = time == 0d ? ZERO_TIME_STRING : new HMS(time).toString();
+        final String timeStr = time == 0d ?
+                ZERO_TIME_STRING :
+                new HMS(time).toString(true, false);
         timeLabel.setText(timeStr);
     }
 
