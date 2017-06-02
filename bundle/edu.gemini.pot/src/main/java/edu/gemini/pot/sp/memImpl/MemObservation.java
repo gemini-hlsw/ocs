@@ -252,7 +252,7 @@ public final class MemObservation extends MemAbstractContainer implements ISPObs
         try {
             int index = _compList.indexOf(node);
             if (index == -1) {
-                System.out.println("Component was not located and can't be removed.");
+                LOG.warning("Component was not located and can't be removed.");
                 return;
             }
             List<ISPObsComponent> oldCopy = new ArrayList<>(_compList);
@@ -362,4 +362,3 @@ public final class MemObservation extends MemAbstractContainer implements ISPObs
     }
 
 }
-

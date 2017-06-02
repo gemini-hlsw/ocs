@@ -32,4 +32,4 @@ before_script:
     fi
 script:
   - sudo chmod +x /usr/local/bin/sbt
-  - sbt ++$TRAVIS_SCALA_VERSION test:compile test
+  - sbt -q -J-Djava.util.logging.config.file=logging.properties ++$TRAVIS_SCALA_VERSION test:compile test

@@ -7,6 +7,7 @@ import edu.gemini.spModel.inst.FeatureGeometry.approximateArea
 import edu.gemini.spModel.obs.context.ObsContext
 
 import java.awt.geom.Area
+import java.util.logging.Logger
 
 import scala.annotation.tailrec
 import scala.collection.JavaConverters._
@@ -15,6 +16,9 @@ import scalaz._
 import Scalaz._
 
 sealed trait VignettingCalculator {
+
+  private val LOGGER = Logger.getLogger(classOf[VignettingCalculator].getName)
+
   /** Calculates the percentage of the science area that is obscured by the
     * probe arm when tracking the given guide star candidate.  The return value
     * is therefore always [0, 1] where 0 is no vignetting and 1 is completely
@@ -60,7 +64,7 @@ sealed trait VignettingCalculator {
           val vignetting = calc(f(a))
           if (curMin.forall(_._2 > vignetting)) {
             curMin.foreach { case (t,d) =>
-              println(f"AGS rejecting ${formatCoordinates(f(t))}. Vignettes ${d*100}%.2f%%.")
+              LOGGER.info(f"AGS rejecting ${formatCoordinates(f(t))}. Vignettes ${d*100}%.2f%%.")
             }
             val newMin = Some((a, vignetting))
             if (vignetting == 0.0) newMin else go(as, newMin)
