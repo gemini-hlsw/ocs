@@ -126,7 +126,7 @@ class RPMDistHandler(jre: Option[String]) extends DistHandler {
     // Note that this will not work for '-test' releases, as rpmbuild does not accept '-' characters in versions.
     log.info("Opening ssh channel.")
     val ssh = session.openChannel("exec").asInstanceOf[ChannelExec]
-    val cmd = s"cd $rpmBuildDir && rpmbuild -bb $destSpecFile"
+    val cmd = s"rm -rf /home/software/.rpmmacros && cd $rpmBuildDir && rpmbuild -bb $destSpecFile"
     ssh.setCommand(cmd)
 
     log.info("Executing remote rpmbuild.")
