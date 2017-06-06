@@ -191,7 +191,8 @@ object TpeEphemerisFeature {
   }
 
   val formatDate: Long => String = {
-    val dateFormat = DateTimeFormatter.ofPattern("yyyy-MMM-dd HH:mm").withZone(ZoneId.of("UTC"))
+    // This needs to be shorter than usual in order to fit in the TPE display
+    val dateFormat = DateTimeFormatter.ofPattern("MMM-dd HH:mm").withZone(ZoneId.of("UTC"))
     t => dateFormat.format(Instant.ofEpochMilli(t))
   }
 
