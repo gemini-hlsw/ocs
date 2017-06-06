@@ -7,9 +7,8 @@ import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.Pio;
 import edu.gemini.spModel.pio.PioFactory;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 
 /**
  * Represents a scheduling block, normally an observing night.
@@ -17,12 +16,12 @@ import java.util.Date;
  */
 public final class Block implements Comparable<Block>, IntervalType<Block>, PioSerializable {
 
-    private static final DateFormat FORMAT = new SimpleDateFormat("dd-MMM HH:mm");
+    private static final DateTimeFormatter FORMAT = DateTimeFormatter.ofPattern("yyyy-MMM-dd HH:mm");
     private static final String PROP_START = "start";
     private static final String PROP_END = "end";
 
     private final Interval interval;
-	
+
 	public Block(final Long low, final Long high) {
 	    interval = new Interval(low, high);
 	}
@@ -30,7 +29,7 @@ public final class Block implements Comparable<Block>, IntervalType<Block>, PioS
     public Block(final Interval interval) {
         this.interval = interval;
     }
-		
+
 	public Block(final ParamSet params) {
 		interval = new Interval(params);
 	}
@@ -69,11 +68,11 @@ public final class Block implements Comparable<Block>, IntervalType<Block>, PioS
 
     @Override
     public Block create(final long start, final long end) { return new Block(start, end); }
-	
+
 	public String getName() {
-		return FORMAT.format(new Date(getStart()));
+		return FORMAT.format(Instant.ofEpochMilli(getStart()));
 	}
-	
+
 	@Override
 	public String toString() {
 		return "Block " + getName();

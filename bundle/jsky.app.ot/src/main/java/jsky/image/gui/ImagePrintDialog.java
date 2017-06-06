@@ -9,8 +9,8 @@ import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.print.*;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 
 import javax.print.PrintService;
 import javax.print.PrintServiceLookup;
@@ -56,7 +56,7 @@ public class ImagePrintDialog implements Printable, ActionListener {
     private boolean _newPrint;
     private double _printOffsetX;
     private double _printOffsetY;
-    private final SimpleDateFormat _dateFormatter = new SimpleDateFormat("MM/dd/yy HH:mm:ss");
+    private final DateTimeFormatter _dateFormatter = DateTimeFormatter.ofPattern("yyyy-MMM-dd HH:mm:ss");
 
 
     /**
@@ -239,7 +239,7 @@ public class ImagePrintDialog implements Printable, ActionListener {
         g2d.drawString(footer,
                 (float) _printOffsetX,
                 (float) (((canvasHeight + height) * scale) + pf.getImageableY()));
-        footer = _dateFormatter.format(new Date());
+        footer = _dateFormatter.format(Instant.now());
         width = metrics.stringWidth(footer) + 6;
         g2d.drawString(footer,
                 (float) (_printOffsetX + ((canvasWidth - width) * scale) - 15),

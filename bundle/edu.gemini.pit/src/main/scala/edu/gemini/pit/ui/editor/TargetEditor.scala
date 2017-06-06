@@ -33,8 +33,9 @@ import edu.gemini.pit.ui.util.ToolButton
 import swing._
 import scala.swing.event.{ButtonClicked, ValueChanged, SelectionChanged}
 import javax.swing.{Icon, BorderFactory, ListSelectionModel}
-import java.util.{TimeZone, Date}
-import java.text.{SimpleDateFormat, DecimalFormat}
+import java.text.{DecimalFormat}
+import java.time.{Instant, ZoneId}
+import java.time.format.DateTimeFormatter
 
 import scalaz._
 import Scalaz._
@@ -400,11 +401,7 @@ class TargetEditor private (semester:Semester, target:Target, canEdit:Boolean) e
 
       // Controller
       object Controller extends ListTableController[EphemerisElement, Column] {
-        val utc = {
-          val df = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss")
-          df.setTimeZone(TimeZone.getTimeZone("UTC"))
-          df
-        }
+        val dateFormat = DateTimeFormatter.ofPattern("yyyy-MMM-dd HH:mm:ss").withZone(ZoneId.of("UTC"));
 
         val magFormat = new DecimalFormat("##0.000")
 
@@ -421,7 +418,7 @@ class TargetEditor private (semester:Semester, target:Target, canEdit:Boolean) e
         def getSubElement(e:EphemerisElement, c:Column) = c match {
           case RA  => raFormat.toString(e.coords.ra)
           case Dec => decFormat.toString(e.coords.dec)
-          case UTC => utc.format(new Date(e.validAt))
+          case UTC => dateFormat.format(Instant.ofEpochMilli(e.validAt))
           case Mag => e.magnitude.map(magFormat.format).orNull
         }
       }

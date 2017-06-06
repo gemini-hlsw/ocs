@@ -28,7 +28,7 @@ public class ObsAdapter implements Adapter<Obs> {
 		addObsProperties(variant, target, table);
 	}
 
-	static SimpleDateFormat TW_DF = new SimpleDateFormat("d-MMM-yy H:mm");
+	static SimpleDateFormat TW_DF = new SimpleDateFormat("yyyy-MMM-dd HH:mm");
 	static {
 		TW_DF.setTimeZone(TimeZone.getTimeZone("UTC"));
 	}

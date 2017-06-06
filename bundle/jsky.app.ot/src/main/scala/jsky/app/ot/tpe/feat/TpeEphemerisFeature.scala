@@ -5,7 +5,8 @@ import java.awt.geom.{Line2D, GeneralPath}
 import java.awt.geom.Point2D.{ Double => Point }
 import java.awt.{ Graphics2D, Color, Graphics}
 import java.awt.RenderingHints._
-import java.text.SimpleDateFormat
+import java.time.{Instant, ZoneId}
+import java.time.format.DateTimeFormatter
 import java.util.{ Date, TimeZone }
 
 import edu.gemini.pot.sp.ISPObservation
@@ -190,9 +191,9 @@ object TpeEphemerisFeature {
   }
 
   val formatDate: Long => String = {
-    val df = new SimpleDateFormat("dd-MMM HH:mm")
-    df.setTimeZone(TimeZone.getTimeZone("UTC"))
-    t => df.synchronized(df.format(new Date(t)))
+    // This needs to be shorter than usual in order to fit in the TPE display
+    val dateFormat = DateTimeFormatter.ofPattern("MMM-dd HH:mm").withZone(ZoneId.of("UTC"))
+    t => dateFormat.format(Instant.ofEpochMilli(t))
   }
 
   implicit class ListOfPoint2DOps(ps: List[Point]) {

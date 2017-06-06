@@ -17,12 +17,12 @@ import java.util.TimeZone;
 public class DateUtil {
 
     /**
-     * Return a string with the UTC time in the format /mm/dd/yy hh:mm:ss,
+     * Return a string with the UTC time in the format yyyy-MMM-dd hh:mm:ss,
      * given the current UTC time in ms.
      */
     public static String formatUTC(long time) {
         Date date = new Date(time);
-        SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yy HH:mm:ss");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MMM-dd HH:mm:ss");
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         return dateFormat.format(date);
     }

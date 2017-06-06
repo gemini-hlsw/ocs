@@ -22,8 +22,8 @@ object EdProgramHelper {
   case class ColumnInfo(name: String, prefWidth: Int, minWidth: Int, maxWidth: Int)
 
   val columnInfos = Array(
-    ColumnInfo("Start", 130, 130, 140),
-    ColumnInfo("End", 130, 130, 140),
+    ColumnInfo("Start", 160, 160, 180),
+    ColumnInfo("End", 160, 160, 180),
     //    ColumnInfo("F", 50, 50, 100),
     ColumnInfo("Syncs", 60, 60, 60),
     ColumnInfo("Keys Used", 600, 100, 10000)

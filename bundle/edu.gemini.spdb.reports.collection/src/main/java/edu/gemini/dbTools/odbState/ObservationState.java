@@ -15,10 +15,10 @@ import org.dom4j.DocumentFactory;
 import org.dom4j.Element;
 
 import java.io.Serializable;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
 public final class ObservationState implements Serializable {
     private static final long serialVersionUID = 2;
