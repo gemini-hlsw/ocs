@@ -81,15 +81,17 @@ public class TigraTableCreator {
             }
 
             // Create the output file.
-            log.info("writing temp file to " + out.getAbsolutePath());
-            final ServiceReference<VcsService> ref = ctx.getServiceReference(VcsService.class);
-            final VcsService vcs = (ref == null) ? null : ctx.getService(ref);
-            final List<TigraTable> tables = TigraTableFunctor.getTigraTables(SPDB.get(), vcs, user);
-            _writeTables(tables, out);
+            log.info("Writing TigraTable data to " + out.getAbsolutePath());
+            final List<TigraTable> tables = TigraTableData.getOrNull(ctx, user);
+            if (tables == null) {
+                log.severe("Could not find a VcsService. TigraTable data not updated.");
+            } else {
+                _writeTables(tables, out);
 
-            // FTP the results.
-            final FtpProps props = new FtpProps(env);
-            FtpUtil$.MODULE$.sendFile(log, out, props);
+                // FTP the results.
+                final FtpProps props = new FtpProps(env);
+                FtpUtil$.MODULE$.sendFile(log, out, props);
+            }
 
         } else {
             log.warning("Cannot proceed. No current site.");
