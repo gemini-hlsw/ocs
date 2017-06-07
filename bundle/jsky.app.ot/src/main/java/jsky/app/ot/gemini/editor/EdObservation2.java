@@ -545,7 +545,7 @@ public final class EdObservation2 extends OtItemEditor<ISPObservation, SPObserva
         final ObsQaState obsQaState = override ? obs.getOverriddenObsQaState() : ObsQaState.computeDefault(sums);
 
         // Format the dataset disposition ("dataflow step").
-        final String statusString = (dispo.isEmpty()) ? "No Data" : dispo.get().description();
+        final String statusString = (dispo == null || dispo.isEmpty()) ? "No Data" : dispo.get().description();
 
         // Format the summary of dataset information.
         String sumsStr = "(No Data)";
