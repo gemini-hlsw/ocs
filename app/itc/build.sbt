@@ -20,8 +20,10 @@ ocsAppManifest := {
         with_gogo(v),
           itc(v),
           with_remote_gogo(v),
-            itctest(v),
-            itcproduction(v)
+            itctest_32(v),
+            itctest_32(v),
+            itcproduction_64(v),
+            itcproduction_64(v)
     )
   )
 }
@@ -37,15 +39,16 @@ def common(version: Version) = AppConfig(
     "-Djava.awt.headless=true",
     "-Dnetworkaddress.cache.ttl=60",
     "-Duser.language=en",
-    "-Duser.country=US"
+    "-Duser.country=US",
+    "-Xmx1024M"
   ),
   props = Map(
+    "org.osgi.service.http.port"                 -> "9080",
     "edu.gemini.spdb.mode"                       -> "local",
     "edu.gemini.util.security.auth.startServer"  -> "true",
     "org.osgi.framework.bootdelegation"          -> "*",
     "org.osgi.framework.startlevel.beginning"    -> "99",
     "org.osgi.framework.storage.clean"           -> "onFirstInit",
-    "org.osgi.service.http.port"                 -> "8442",
     "org.osgi.service.http.secure.enabled"       -> "false" // testing only, don't turn on secure port
   ),
   log = Some("log/itc.%u.%g.log"),
@@ -103,35 +106,30 @@ def itc(version: Version) = AppConfig(
     "-XX:MaxPermSize=196M",
     "-Dedu.gemini.site=north"
   ),
-  props = Map(
-  )
+  props = Map.empty
 ) extending List(with_gogo(version))
 
 // ITC test
-def itctest(version: Version) = AppConfig(
-  id = "itctest",
-  distribution = List(Linux32),
-  vmargs = List(
-    "-Xmx1024M",
-    "-XX:MaxPermSize=196M"
-  ),
-  props = Map(
-    "org.osgi.service.http.port" -> "9080",
-    "osgi.shell.telnet.ip"       -> "172.16.55.80"
-  )
+def itctest_32(version: Version) = AppConfig(
+  id = "itctest32",
+  distribution = List(Linux32)
 ) extending List(with_remote_gogo(version))
 
 // ITC production
-def itcproduction(version: Version) = AppConfig(
-  id = "itcproduction",
-  distribution = List(Linux32),
-  vmargs = List(
-    "-Xmx1024M",
-    "-XX:MaxPermSize=196M"
-  ),
-  props = Map(
-    "org.osgi.service.http.port" -> "9080",
-    "osgi.shell.telnet.ip"       -> "172.16.5.80"
-  )
+def itcproduction_32(version: Version) = AppConfig(
+  id = "itcproduction32",
+  distribution = List(Linux32)
+) extending List(with_remote_gogo(version))
+
+// ITC test
+def itctest_64(version: Version) = AppConfig(
+  id = "itctest64",
+  distribution = List(Linux64)
+) extending List(with_remote_gogo(version))
+
+// ITC production
+def itcproduction_64(version: Version) = AppConfig(
+  id = "itcproduction64",
+  distribution = List(Linux64)
 ) extending List(with_remote_gogo(version))
 
