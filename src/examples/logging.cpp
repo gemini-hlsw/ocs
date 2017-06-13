@@ -7,6 +7,7 @@
 
 
 #include <iostream>
+#include <stdlib.h>
 #include <signal.h>
 
 #include <decaf/util/concurrent/CountDownLatch.h>
@@ -15,7 +16,6 @@
 #include <giapi/GiapiErrorHandler.h>
 #include <giapi/ServicesUtil.h>
 #include <giapi/GiapiUtil.h>
-
 
 using namespace giapi;
 

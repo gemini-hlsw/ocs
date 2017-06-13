@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <signal.h>
+#include <stdlib.h>
 
 #include <decaf/util/concurrent/CountDownLatch.h>
 
@@ -11,10 +12,7 @@
 #include <giapi/DataUtil.h>
 #include <giapi/GiapiUtil.h>
 
-
 using namespace giapi;
-
-
 
 void terminate(int signal) {
 	std::cout << "Exiting... " << std::endl;

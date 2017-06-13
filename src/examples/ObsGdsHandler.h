@@ -2,6 +2,8 @@
 #define OBSGDSHANDLER_H_
 
 #include <iostream>
+#include <stdio.h>
+#include <stdlib.h>
 #include <giapi/giapi.h>
 #include <giapi/SequenceCommandHandler.h>
 #include <decaf/lang/Thread.h>
@@ -159,7 +161,7 @@ class ObsGdsHandler: public giapi::SequenceCommandHandler {
                 //this thread is processing.
                 delete thread;
             }
-            //spawn new thread that will sleep a bit and then send the observation events to GDS and 
+            //spawn new thread that will sleep a bit and then send the observation events to GDS and
             // completion info to the GMP
             worker->setId(id);
             worker->setConfig(config);

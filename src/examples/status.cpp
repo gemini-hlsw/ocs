@@ -3,6 +3,7 @@
  */
 
 #include <iostream>
+#include <stdlib.h>
 #include <signal.h>
 #include <sys/time.h>
 
@@ -14,8 +15,6 @@
 #include <src/util/TimeUtil.h>
 
 using namespace giapi;
-
-
 
 void terminate(int signal) {
 	std::cout << "Exiting... " << std::endl;
@@ -41,7 +40,7 @@ int main(int argc, char **argv) {
 		StatusUtil::createStatusItem("gpi:status1", type::INT);
 
 		StatusUtil::createStatusItem("gpi:status2", type::INT);
-	
+
         timer.startTimer();
 		for (int i = 0; i < nReps; i++) {
 			StatusUtil::setValueAsInt("gpi:status1", i);

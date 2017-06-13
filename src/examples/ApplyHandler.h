@@ -2,6 +2,7 @@
 #define APPLYHANDLER_H_
 
 #include <iostream>
+#include <stdio.h>
 #include <giapi/giapi.h>
 #include <giapi/SequenceCommandHandler.h>
 #include <decaf/lang/Thread.h>

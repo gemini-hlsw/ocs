@@ -1,112 +1,120 @@
 31 July 2008 AN
 
 Building the GIAPI C++ Language Glue requires some work since it depends
-on third party products that must be fetched and installed. I expect the build 
-method to improve in the future though. 
+on third party products that must be fetched and installed. I expect the build
+method to improve in the future though.
 
 1. Required tools
 
 The library was compiled for Linux using the following tools:
 
-*   g++ (GCC) 4.1.2 20080704 (Red Hat 4.1.2-48)	
+*   g++ (GCC) 4.1.2 20080704 (Red Hat 4.1.2-48)
 *	GNU Make 3.81
 *	GNU ld version 2.17.50.0.6-2.el5 20061020
 *	RedHat Enterprise Linux 5 Server, Linux kernel 2.6.18-194.26.1.el5, 64-bit
 
-The library must be compiled with GCC version 4.0 or above. 
+The library must be compiled with GCC version 4.0 or above.
 
 2. Set up the environment.
 
 When building, you need to set up the following variables in the config.mk
 file (located in the 'conf' directory):
 
-INSTALL_DIR The directory where you want to have the library and headers 
-            installed to. 
+INSTALL_DIR The directory where you want to have the library and headers
+            installed to.
 
-EXTERNAL_LIB The directory that contains the dependencies required to build 
-             the GIAPI C++ Language Glue. 
+EXTERNAL_LIB The directory that contains the dependencies required to build
+             the GIAPI C++ Language Glue.
 
 SYSTEM_INCLUDE_DIR The directory where standard libraries are located.
                     Usually /usr/lib
 
 The config.mk contains values for these three variables. Please adjust them
-to your needs. 
+to your needs.
 
 3. Install dependencies
 
 The following are the libraries that need to be compiled and installed in the
 system before building the GIAPI C++:
 
-* APR and APR Util: These libraries are required to compile  Active MQ CPP CMS,
+* APR and APR Util: These libraries are required to compile Active MQ CPP CMS,
   log4cxx and the GIAPI (see next dependencies).
-  You need the development libraries as well, so you can compile the other 
-  dependencies of the GIAPI. You can get them from the APR site at 
-  http://apr.apache.org/. 
+  You need the development libraries as well, so you can compile the other
+  dependencies of the GIAPI. You can get them from the APR site at
+  http://apr.apache.org/.
 
-  To build the GIAPI, the APR headers need to be available. 
+  To build the GIAPI, the APR headers need to be available.
   The APR_INCLUDE variable defined in the common.mk file is used to find these
-  headers. 
-  On my system they were installed on EXTERNAL_LIB/apr/include/apr-1 
+  headers.
+  On my system they were installed on EXTERNAL_LIB/apr/include/apr-1
 
 * Active MQ CPP CMS. Obtained from http://activemq.apache.org/cms/download.html
-  This library needs to be available in the EXTERNAL_LIB/activemq directory 
-  In my development environment, I declare EXTERNAL_LIB/activemq as a symlink 
-  to the place I define to install active mq using the 'configure --prefix' 
+  This library needs to be available in the EXTERNAL_LIB/activemq directory
+  In my development environment, I declare EXTERNAL_LIB/activemq as a symlink
+  to the place I define to install active mq using the 'configure --prefix'
   command
-  
+  You may want to disable ssl support as GIAPI doesn't require it. That avoids the
+  need to instal openssl
+
 * Apache Log4cxx version 0.10.0. Obtained from
   http://logging.apache.org/log4cxx/
   This library needs to be available in the EXTERNAL_LIB/log4cxx directory
-  Same as with active mq,  I declare EXTERNAL_LIB/log4cxx as a symlink 
-  to the place I define to install log4cxx using the 'configure --prefix' 
+  Same as with active mq,  I declare EXTERNAL_LIB/log4cxx as a symlink
+  to the place I define to install log4cxx using the 'configure --prefix'
   command
-  
-* CPP Unit 1.12.1. Can be obtained from http://cppunit.sourceforge.net/cppunit-wiki
+
+* CPP Unit 1.12.1. Can be obtained from http://cppunit.sourceforge.net/cppunit-wii
   This library needs to be installed in the EXTERNAL_LIB/cppunit directory
-  Same as with everything else,  I declare EXTERNAL_LIB/cppunit as a symlink 
-  to the place I define to install cppunit using the 'configure --prefix' 
+  Same as with everything else,  I declare EXTERNAL_LIB/cppunit as a symlink
+  to the place I define to install cppunit using the 'configure --prefix'
   command. CPP Unit 1.12.0 available as an RPM package from EPEL repositories
   can also be used.
 
+* libCurl 7.21.6 Can be obtained from https://curl.haxx.se/download.html
+  This library needs to be installed in the EXTERNAL_LIB/libcurl directory
+  Same as with everything else, I declare EXTERNAL_LIB/libcurl as a symlink
+  to the place I define to install libcur.
+
 * cURLpp 0.7.3 Can be obtained from http://curlpp.org/
   This library needs to be installed in the EXTERNAL_LIB/curlpp directory
-  Same as with everything else, I declare EXTERNAL_LIB/curlpp as a symlink 
-  to the place I define to install cppunit using the 'configure --prefix --without-boost' 
+  Same as with everything else, I declare EXTERNAL_LIB/curlpp as a symlink
+  to the place I define to install cppunit using the 'configure --prefix --without-boost'
   command.
-   
+
+
 4. Building the library
 
 Once the external libraries are installed and the config.mk has been updated
 with the right directory names, the system can be built just by typing:
 
   make
- 
-in the top level directory of the source tree. 
+
+in the top level directory of the source tree.
 
 If everything goes well, the system should build the libraries. To run the
-the unit tests provided you have to have a GMP Broker up and running. Please 
+the unit tests provided you have to have a GMP Broker up and running. Please
 refer to the GMP documentation for instructions about how to do this. Once
 the GMP is running, type
-  
-  make tests   
 
-to run the unit tests for the GIAPI library. 
+  make tests
 
-To install the library into the directory declared in the config.mk file, 
+to run the unit tests for the GIAPI library.
+
+To install the library into the directory declared in the config.mk file,
 just type:
 
   make install
 
-That will put the library and header files in the INSTALL_DIR directory. 
+That will put the library and header files in the INSTALL_DIR directory.
 Headers will be in INSTALL_DIR/include and the library will be in INSTALL_DIR/lib
 
 5. Linking with the library
 
-In order for an executable to find the required libraries to link with during 
-run time, the system must be configured so that the libraries can be found. 
+In order for an executable to find the required libraries to link with during
+run time, the system must be configured so that the libraries can be found.
 Methods available: (Do at least one of the following)
 
-   a) Add library directories to be included during dynamic linking to the file 
+   a) Add library directories to be included during dynamic linking to the file
       /etc/ld.so.conf
 
       Sample: /etc/ld.so.conf
@@ -118,7 +126,7 @@ Methods available: (Do at least one of the following)
           /usr/lib/mysql
           /opt/lib
 
-      Add the INSTALL_DIR/lib library path to this file and then execute the 
+      Add the INSTALL_DIR/lib library path to this file and then execute the
       command (as root) ldconfig to configure the linker run-time bindings.
       See man page for command ldconfig.
 
@@ -133,10 +141,10 @@ Methods available: (Do at least one of the following)
       OR
 
    c) Specify the environment variable LD_LIBRARY_PATH to point to the directory
-      paths containing the shared object library. This will specify to the run 
-      time loader that the library paths will be used during execution to 
+      paths containing the shared object library. This will specify to the run
+      time loader that the library paths will be used during execution to
       resolve dependencies.
 
-      This instructs the run time loader to look in the path described by the 
-      environment variable LD_LIBRARY_PATH, to resolve shared libraries. 
-      
+      This instructs the run time loader to look in the path described by the
+      environment variable LD_LIBRARY_PATH, to resolve shared libraries.
+
