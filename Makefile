@@ -8,11 +8,11 @@
 
 #Version and minor version
 V := 0
-MV := 15
+MV := 16
 
 LIBRARY_NAME := libgiapi-glue-cc
 
-ifeq ($(shell uname | grep -c "Darwin"),1) 
+ifeq ($(shell uname | grep -c "Darwin"),1)
 	LIBRARY_NAME_LN := $(LIBRARY_NAME).dylib
 	LIBRARY_NAME := $(LIBRARY_NAME).$(V).$(MV).dylib
 else
@@ -34,7 +34,7 @@ LIBS := -llog4cxx -lactivemq-cpp -lapr-1
 SUBDIRS :=  test
 
 # All Target
-all: libgiapi-glue-cc 
+all: libgiapi-glue-cc
 
 # Test target
 test: libgiapi-glue-cc
@@ -48,7 +48,7 @@ test: libgiapi-glue-cc
 install: libgiapi-glue-cc install-shared-lib install-headers
 
 # Tool invocations
-libgiapi-glue-cc: $(OBJS) 
+libgiapi-glue-cc: $(OBJS)
 	@echo 'Building on $(UNAME)'
 	@echo 'Building target: $@'
 	@echo 'Invoking: $(OS) C++ Linker'
@@ -58,8 +58,8 @@ libgiapi-glue-cc: $(OBJS)
 	-$(RM) $(LIBRARY_NAME_LN)
 	$(LN) $(LIBRARY_NAME) $(LIBRARY_NAME_LN)
 	@echo ' '
-	
-	
+
+
 clean:
 	-$(RM) $(OBJS) $(CPP_DEPS) $(LIBRARIES) $(LIBRARY_NAME) $(LIBRARY_NAME_LN)
 	-@echo ' '
@@ -68,9 +68,9 @@ clean:
           echo "Making $@ in $$subdir ..."; \
           ( cd $$subdir && $(MAKE) $@ ) || exit 1; \
         done
-	
-	
-#Make include directory	
+
+
+#Make include directory
 make-include-dir:
 	@ if [ ! -d $(GIAPI_INCLUDE_DIR) ] ; then \
 		echo "Creating: $(GIAPI_INCLUDE_DIR)"; \
@@ -107,15 +107,15 @@ install-shared-lib: libgiapi-glue-cc make-lib-dir
 	-$(RM) $(GIAPI_LIB_DIR)/$(LIBRARY_NAME_LN)
 	cd $(GIAPI_LIB_DIR); \
     $(LN) $(LIBRARY_NAME) $(LIBRARY_NAME_LN)
-    
+
 
 #Get the public headers in GIAPI
 GIAPI_PUBLIC_HEADERS = $(wildcard giapi/*.h)
 
 #Construct a list with the full name of the public headers
-INC_TARGETS= $(GIAPI_PUBLIC_HEADERS:giapi/%.h=$(GIAPI_INCLUDE_DIR)/%.h)	
+INC_TARGETS= $(GIAPI_PUBLIC_HEADERS:giapi/%.h=$(GIAPI_INCLUDE_DIR)/%.h)
 
-install-headers: make-include-dir $(INC_TARGETS) 
+install-headers: make-include-dir $(INC_TARGETS)
 
 dist: install make-dist-dir make-tmp-dist-dir
 	@ echo "Preparing distribution package... please wait."
@@ -128,8 +128,8 @@ dist: install make-dist-dir make-tmp-dist-dir
 	@ tar -C /tmp -zcf $(DISTRIBUTION_DIR)/$(DIST_PACKAGE_NAME)-${V}.${MV}.tgz $(DIST_PACKAGE_NAME)
 	@ $(RM) $(TMP_DIST_DIR)
 	@ echo "Distribution package generated at $(DISTRIBUTION_DIR)/$(DIST_PACKAGE_NAME)-${V}.${MV}.tgz"
-	 
-#Rule to copy the public headers. 
+
+#Rule to copy the public headers.
 $(GIAPI_INCLUDE_DIR)/%h : giapi/%h
 	@ echo "Installing include file: $<"
 	@ $(CP) $< $@
