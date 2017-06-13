@@ -14,14 +14,14 @@ LN := ln -s
 
 CP := cp -f
 
-CPDIR := cp -r 
+CPDIR := cp -r
 
 MAKE := make
 
 MOVE := mv
 
 #Common definition depending on the operating system
-ifeq ($(shell uname | grep -c "Darwin"),1) 
+ifeq ($(shell uname | grep -c "Darwin"),1)
 	OS := MacOS X
 	MKLIB = $(CXX) -dynamiclib
 else
@@ -74,6 +74,6 @@ TMP_DIST_DIR := /tmp/$(DIST_PACKAGE_NAME)
 %.o: %.cpp
 	@echo 'Building file: $<'
 	@echo 'Invoking $(OS) C++ Compiler'
-	$(CXX) $(INC_DIRS) -g -O0 -Wall -fPIC -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o"$@" "$<"
+	$(CXX) $(INC_DIRS) -g -O0 -Wall -fPIC -c -Wno-deprecated -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o"$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '

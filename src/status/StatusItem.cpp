@@ -27,6 +27,12 @@ StatusItem::StatusItem(const std::string &name, const type::Type type) :
 	case type::INT:
 		_value = 0;
 		break;
+	case type::BYTE:
+		_value = (unsigned char)0;
+		break;
+	case type::SHORT:
+		_value = (unsigned short)0;
+		break;
 	case type::STRING:
 		_value = std::string(" ");
 		break;

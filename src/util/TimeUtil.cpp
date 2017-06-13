@@ -7,7 +7,7 @@ namespace giapi {
     namespace util {
 
         TimeUtil::TimeUtil():
-            running(false), 
+            running(false),
             done(false){}
         TimeUtil::~TimeUtil(){}
 
@@ -38,6 +38,7 @@ namespace giapi {
                 case SEC:
                     return seconds;
             }
+            throw new std::logic_error("Unknown units");
         }
         unsigned long long TimeUtil::getElapsedUSecs()throw(std::logic_error){
             return getElapsedTime(USEC);
