@@ -2,6 +2,7 @@
 #define GENERICHANDLER_H_
 
 #include <iostream>
+#include <stdlib.h>
 #include <giapi/giapi.h>
 #include <giapi/SequenceCommandHandler.h>
 #include <decaf/lang/Thread.h>

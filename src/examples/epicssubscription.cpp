@@ -12,6 +12,7 @@
 #include "EpicsHandlerDemo.h"
 
 #include <signal.h>
+#include <stdlib.h>
 #include <giapi/GiapiErrorHandler.h>
 
 using namespace giapi;

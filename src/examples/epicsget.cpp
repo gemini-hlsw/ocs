@@ -13,6 +13,7 @@
 
 #include <signal.h>
 #include <giapi/GiapiErrorHandler.h>
+#include <stdlib.h>
 
 using namespace giapi;
 
