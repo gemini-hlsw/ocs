@@ -32,29 +32,30 @@ SYSTEM_INCLUDE_DIR The directory where standard libraries are located.
 The config.mk contains values for these three variables. Please adjust them
 to your needs.
 
-3. Install dependencies
+3. Build dependencies
 
 The following are the libraries that need to be compiled and installed in the
 system before building the GIAPI C++:
 
+(Note that dependencies suitable for CentOS 7 are included in the external directory)
+
 * APR and APR Util: These libraries are required to compile Active MQ CPP CMS,
   log4cxx and the GIAPI (see next dependencies).
-  You need the development libraries as well, so you can compile the other
-  dependencies of the GIAPI. You can get them from the APR site at
-  http://apr.apache.org/.
+  See the instructions at apr-1.3.12/README.md and apr-util-1.3.10/README.md
 
   To build the GIAPI, the APR headers need to be available.
   The APR_INCLUDE variable defined in the common.mk file is used to find these
   headers.
   On my system they were installed on EXTERNAL_LIB/apr/include/apr-1
 
-* Active MQ CPP CMS. Obtained from http://activemq.apache.org/cms/download.html
+* Active MQ CPP CMS.
   This library needs to be available in the EXTERNAL_LIB/activemq directory
   In my development environment, I declare EXTERNAL_LIB/activemq as a symlink
   to the place I define to install active mq using the 'configure --prefix'
   command
   You may want to disable ssl support as GIAPI doesn't require it. That avoids the
   need to instal openssl
+  See the instructions at activemq-cpp-library-3.4.1/README.md
 
 * Apache Log4cxx version 0.10.0. Obtained from
   http://logging.apache.org/log4cxx/
@@ -62,25 +63,27 @@ system before building the GIAPI C++:
   Same as with active mq,  I declare EXTERNAL_LIB/log4cxx as a symlink
   to the place I define to install log4cxx using the 'configure --prefix'
   command
+  See the instructions at apache-log4cxx-0.10.0/README.md
 
-* CPP Unit 1.12.1. Can be obtained from http://cppunit.sourceforge.net/cppunit-wii
+* CPP Unit 1.12.1.
   This library needs to be installed in the EXTERNAL_LIB/cppunit directory
   Same as with everything else,  I declare EXTERNAL_LIB/cppunit as a symlink
   to the place I define to install cppunit using the 'configure --prefix'
-  command. CPP Unit 1.12.0 available as an RPM package from EPEL repositories
-  can also be used.
+  command.
+  See the instructions at cppunit-1.12.1/README.md
 
-* libCurl 7.21.6 Can be obtained from https://curl.haxx.se/download.html
+* libCurl 7.21.6
   This library needs to be installed in the EXTERNAL_LIB/libcurl directory
   Same as with everything else, I declare EXTERNAL_LIB/libcurl as a symlink
   to the place I define to install libcur.
+  See instructions at curl-7.21.6/README.md
 
-* cURLpp 0.7.3 Can be obtained from http://curlpp.org/
+* cURLpp 0.7.3
   This library needs to be installed in the EXTERNAL_LIB/curlpp directory
   Same as with everything else, I declare EXTERNAL_LIB/curlpp as a symlink
   to the place I define to install cppunit using the 'configure --prefix --without-boost'
   command.
-
+  See instructions at curlpp-0.7.3/README.md
 
 4. Building the library
 
