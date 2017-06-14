@@ -1,0 +1,17 @@
+*.lo
+lib/
+Makefile
+.deps/
+*.spec
+config.log
+config.status
+curl-config
+include/curl/stamp-h3
+libcurl.pc
+libtool
+packages/EPM/curl.list
+src/.libs/
+src/curl
+src/curl_config.h
+src/stamp-h2
+tests/configurehelp.pm
