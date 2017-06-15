@@ -27,6 +27,9 @@ package object core {
   implicit def SPProgramIdToRichProgramId(id: SPProgramID): RichSpProgramId =
     new RichSpProgramId(id)
 
+  implicit val OrderSPProgramID: Order[SPProgramID] =
+    Order.fromScalaOrdering(scala.math.Ordering.ordered[SPProgramID])
+
   /** Operations for maps of types that we can interpolate.  We use these for Ephemerides. */
   implicit class MoreMapOps[K, V](m: K ==>> V)(implicit O: Order[K], I: Interpolate[K,V]) {
 
