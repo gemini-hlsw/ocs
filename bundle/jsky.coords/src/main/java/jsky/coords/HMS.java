@@ -187,7 +187,7 @@ public class HMS implements Serializable {
 
     public String toString(boolean showSeconds, boolean showFractionalSeconds) {
         final NumberFormat nf = showFractionalSeconds ? nf_frac : nf_noFrac;
-        return (sign == -1 ? "-1" : "")
+        return (sign == -1 ? "-" : "")
                 + nf_noFrac.format(hours)
                 + ":"
                 + nf_noFrac.format(min)
