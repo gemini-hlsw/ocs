@@ -6,6 +6,7 @@ package edu.gemini.dbTools.tigratable;
 import edu.gemini.dbTools.html.FtpProps;
 import edu.gemini.dbTools.html.FtpUtil$;
 import edu.gemini.pot.client.SPDB;
+import edu.gemini.sp.vcs.log.VcsLog;
 import edu.gemini.sp.vcs2.VcsService;
 import edu.gemini.spModel.core.Site;
 import org.osgi.framework.BundleContext;
@@ -81,11 +82,13 @@ public class TigraTableCreator {
             }
 
             // Create the output file.
-            log.info("Writing TigraTable data to " + out.getAbsolutePath());
-            final List<TigraTable> tables = TigraTableData.getOrNull(ctx, user);
-            if (tables == null) {
-                log.severe("Could not find a VcsService. TigraTable data not updated.");
+            final ServiceReference<VcsLog> ref = ctx.getServiceReference(VcsLog.class);
+            if (ref == null) {
+                log.severe("Could not find a VcsLog. TigraTable data not updated.");
             } else {
+                log.info("Writing TigraTable data to " + out.getAbsolutePath());
+                final VcsLog           vcsLog = ctx.getService(ref);
+                final List<TigraTable> tables = TigraTableFunctor.getTigraTables(SPDB.get(), vcsLog, user);
                 _writeTables(tables, out);
 
                 // FTP the results.

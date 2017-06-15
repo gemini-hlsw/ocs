@@ -6,6 +6,8 @@ import javax.security.auth.Subject
 import collection.JavaConverters._
 import java.io.File
 
+import scalaz.==>>
+
 trait VcsLog {
 
   /** Log an event to the database.
@@ -42,13 +44,14 @@ trait VcsLog {
       case p: GeminiPrincipal => p
     }.toSet
 
+  def selectLastSyncTimestamps(): SPProgramID ==>> Map[GeminiPrincipal, Long]
 }
 
 object VcsLog {
   import scalaz.effect.IO
 
   def apply(dir: File): IO[VcsLog] = {
-    import impl.PersistentVcsLog2._ 
+    import impl.PersistentVcsLog2._
     import doobie.imports._
     import java.sql.Timestamp
 
@@ -57,7 +60,7 @@ object VcsLog {
       _ <- IO(require(dir.mkdirs() || dir.isDirectory, s"Not a valid directory: $p"))
       xa = DriverManagerTransactor[IO]("org.h2.Driver", s"jdbc:h2:$p;DB_CLOSE_ON_EXIT=FALSE;TRACE_LEVEL_FILE=4", "", "")
       x <- checkSchema(p).transact(xa)
-    } yield new VcsLog {     
+    } yield new VcsLog {
 
       def archive(f: File): Unit =
         doArchive(f).transact(xa).unsafePerformIO
@@ -67,7 +70,10 @@ object VcsLog {
 
       def selectByProgram(pid: SPProgramID, offset: Int, size: Int): (List[VcsEventSet], Boolean) =
         doSelectByProgram(pid, offset, size).transact(xa).unsafePerformIO
-    
+
+      override def selectLastSyncTimestamps(): SPProgramID ==>> Map[GeminiPrincipal, Long] =
+        doSelectLastSyncTimestamps().transact(xa).unsafePerformIO
+
     }
   }
 

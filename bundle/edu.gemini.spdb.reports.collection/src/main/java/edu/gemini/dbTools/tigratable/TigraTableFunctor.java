@@ -8,7 +8,7 @@ import edu.gemini.pot.sp.ISPNode;
 import edu.gemini.pot.spdb.DBAbstractQueryFunctor;
 import edu.gemini.pot.spdb.IDBDatabaseService;
 import edu.gemini.pot.spdb.IDBQueryRunner;
-import edu.gemini.sp.vcs2.VcsService;
+import edu.gemini.sp.vcs.log.VcsLog;
 import edu.gemini.spModel.core.*;
 
 import java.security.Principal;
@@ -32,11 +32,11 @@ class TigraTableFunctor extends DBAbstractQueryFunctor {
     }
 
     // semester string (e.g., GN_2004A) -> TigraTable
-    private final VcsService vcs;
-    private final Map<Semester, TigraTable> _tigraTableMap = new TreeMap<Semester, TigraTable>();
+    private final SyncTimestamp syncTimestamp;
+    private final Map<Semester, TigraTable> _tigraTableMap = new TreeMap<>();
 
-    TigraTableFunctor(VcsService vcs) {
-        this.vcs = vcs;
+    TigraTableFunctor(SyncTimestamp st) {
+        this.syncTimestamp = st;
     }
 
     /**
@@ -78,13 +78,14 @@ class TigraTableFunctor extends DBAbstractQueryFunctor {
         final ProgramType ptype = pid.ptype().get();
         if (TYPE_SET.contains(ptype)) {
             final TigraTable tt = getTigraTable(semesterKey);
-            tt.addRow(TigraTableRow.create(prog, vcs));
+            tt.addRow(TigraTableRow.create(prog, syncTimestamp));
         }
     }
 
-    public static List<TigraTable> getTigraTables(final IDBDatabaseService db, final VcsService vcs, final Set<Principal> user) {
-        final TigraTableFunctor funct = new TigraTableFunctor(vcs);
-        final IDBQueryRunner qr = db.getQueryRunner(user);
+    public static List<TigraTable> getTigraTables(final IDBDatabaseService db, final VcsLog vcs, final Set<Principal> user) {
+        final SyncTimestamp     st    = new SyncTimestamp(vcs);
+        final TigraTableFunctor funct = new TigraTableFunctor(st);
+        final IDBQueryRunner    qr    = db.getQueryRunner(user);
         return qr.queryPrograms(funct).getTigraTables();
     }
 }

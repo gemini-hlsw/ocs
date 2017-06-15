@@ -178,6 +178,9 @@ object MockVcsLog extends VcsLog {
 
   override def selectByProgram(pid: SPProgramID, offset: Int, size: Int): (List[VcsEventSet], Boolean) =
     (Nil, false)
+
+  override def selectLastSyncTimestamps(): SPProgramID ==>> Map[GeminiPrincipal, Long] =
+    ==>>.empty
 }
 
 
