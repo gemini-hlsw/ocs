@@ -1,8 +1,14 @@
-Release Notes - Gemini Instrument Application Programmer Interface 
+Release Notes - Gemini Instrument Application Programmer Interface
+
+Version Release 16 : Performance improvements
+** Improvements
+    * [REL-3176] - Run under CentOS 7
+
 
 Version Release 15 : Performance improvements
 ** Improvements
     * [REL-2276] - Memory limit reached on the GMP
+
 
 Version Release 14 : New Epics Service Interface
 ** New Feature
@@ -16,7 +22,7 @@ Version Release 13.1: New Epics Service Interface
 
 Version Release 13: Upgrade to ActiveMQ 3.4.0
 
-** Improvements 
+** Improvements
     * [GIAPI-670] - Upgrade version of ActiveMQ CMS
 
 
@@ -30,7 +36,7 @@ Version Release 11: Added configuration file to allow C++ client code
 to locate the GMP server in a remote location
 
 
-Version Release 10: Implementation of the postAncillaryFileEvent, 
+Version Release 10: Implementation of the postAncillaryFileEvent,
 postIntermediateFileEvent and systemLog methods. Several improvements
 to performance and fault tolerance. March 15, 2010
 
@@ -50,14 +56,14 @@ C library now is documented in doxygen (in a separate module). December 23, 2009
     * [GIAPI-59] - Add getTCSContext to Logging GMP
     * [GIAPI-22] - Provide simulated getTCSContext testing capability in GMP
 
-** Improvements 
-    * [GIAPI-58] - Added simulation mode to PCS Updater     
+** Improvements
+    * [GIAPI-58] - Added simulation mode to PCS Updater
 
 
-    
+
 Version Release 8: Implementation of postPCSUpdate method to offload corrections
 to the Primary Control System. Added C library (in a separate package) to interface
-with the secondary . September 30, 2009 
+with the secondary . September 30, 2009
 
 ** New Features
     * [GIAPI-58] - Add postPCSUpdate to Logging GMP
@@ -66,26 +72,26 @@ with the secondary . September 30, 2009
 
 ** Improvement
     * [GIAPI-113] - Improved handling multiple responses for the APPLY sequence command
-                    in the GMP. Added test cases to verify fixes. 
+                    in the GMP. Added test cases to verify fixes.
 
 
-Version Release 7: Added Observation event support and reboot testing 
-                   functionality. July 21, 2009 
+Version Release 7: Added Observation event support and reboot testing
+                   functionality. July 21, 2009
 
 ** New Features
     * [GIAPI-19] - Add support for Reboot testing
     * [GIAPI-61] - Add postObservationEvent to Logging GMP
     * [GIAPI-69] - End to End Support and Testing of reboot Sequence Command
-    * [GIAPI-95] - Enable postObservationEvent support within Gemini 
+    * [GIAPI-95] - Enable postObservationEvent support within Gemini
                    infrastructure
 
 * Improvements
-    * [GIAPI-112] - Allow "fast" handler to complete successfully, even if they 
+    * [GIAPI-112] - Allow "fast" handler to complete successfully, even if they
                     send complete information before a response has been sent
-                    to the invoker client. 
+                    to the invoker client.
 
 
-Version Release 6: Support to get EPICS information via simulated channels. 
+Version Release 6: Support to get EPICS information via simulated channels.
 Add fault tolerance mechanisms to GIAPI. April 09, 2009
 
 ** New Features
@@ -107,24 +113,24 @@ Version Release 5: Support for Status publishing and Properties. February 04, 20
   * [GIAPI-81] - Add infrastructure support for status posting and private receiving of status
 
 
-Version Release 4: Add support for the apply sequence command. GIAPI released 
+Version Release 4: Add support for the apply sequence command. GIAPI released
                    conforming the Gemini RPM framework
                    24 October, 2008
-  
+
   * [GIAPI-80] - Add support for Apply Sequence command to full GMP
   * [GIAPI-20] - Add support for Apply Sequence command testing
-  * [GIAPI-99] - Add exceptions to C++ Language glue  
+  * [GIAPI-99] - Add exceptions to C++ Language glue
 
 
-Version Release 3: Provides functionality to test init sequence command from 
-                   end to end. GIAPI released in 64-bits binary format. 
+Version Release 3: Provides functionality to test init sequence command from
+                   end to end. GIAPI released in 64-bits binary format.
                    01 September, 2008
 
   * [GIAPI-16] - Add initial GMP Testing framework
   * [GIAPI-18] - Add support for Sequence Command other than Apply and Reboot
   * [GIAPI-65] - Add Sequence Command methods to Full GMP
   * [GIAPI-70] - End to End support and testing of init Sequence Command
-  
+
 
 Version Release 2: GIAPI First Gemini Master Process and basic infrastructure
                    for sequence commands. July 25, 2008
@@ -134,14 +140,14 @@ Version Release 2: GIAPI First Gemini Master Process and basic infrastructure
   * [GIAPI-17] - Add logging support for commands from Gemini
   * [GIAPI-54] - Add sequence commands methods to Logging GMP
   * [GIAPI-82] - Sequence Command Handler support
- 
-Version Release 1: GIAPI Logging C++. February 29, 2008 
+
+Version Release 1: GIAPI Logging C++. February 29, 2008
 
   * [GIAPI-23] - Add postStatus to Logging C++ Language Glue
   * [GIAPI-24] - Add alarm support to Logging C++ Language Glue
   * [GIAPI-25] - Add health support to Logging C++ Language Glue
   * [GIAPI-28] - Add sequence command methods to Logging C++ Language Glue
-  * [GIAPI-29] - Add subscribeEPICStatus/unsubscribeEPICSStatus to Logging C++ 
+  * [GIAPI-29] - Add subscribeEPICStatus/unsubscribeEPICSStatus to Logging C++
                  Language Glue
   * [GIAPI-30] - Add postPCSUpdate to Logging C++ Language Glue
   * [GIAPI-31] - Add getTCSContext to Logging C++ Language Glue

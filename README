@@ -2,24 +2,24 @@
 
 This is the GIAPI C++ Language glue library.
 
-The GIAPI C++ Language glue API  is one of the Language binding options used by 
-instrument code to integrate with Gemini.  The C++ API is implemented as a 
-shared library in C++. The API sits between the instrument code and the 
+The GIAPI C++ Language glue API  is one of the Language binding options used by
+instrument code to integrate with Gemini.  The C++ API is implemented as a
+shared library in C++. The API sits between the instrument code and the
 Gemini Master Process (GMP).
 
-The GIAPI C++ API library is included with any process that the builder creates 
-that must communicate with Gemini. Which processes in the instrument must link 
-with and use the C++ API is an instrument design decision. 
+The GIAPI C++ API library is included with any process that the builder creates
+that must communicate with Gemini. Which processes in the instrument must link
+with and use the C++ API is an instrument design decision.
 
-The communication protocol between the C++ API and the GMP is encapsulated 
+The communication protocol between the C++ API and the GMP is encapsulated
 within the GIAPI implementation.
 
-Details about the usage of the API can be found in the Gemini Observatory 
+Details about the usage of the API can be found in the Gemini Observatory
 ICD50 - GIAPI C++ Language Glue API
 
-The GIAPI C++ API was compiled with GCC version 4.1 on RedHat Enterprise 
-Linux 5 Server for 64 bits. The following are tools used to build the 
-GIAPI C++ API: 
+The GIAPI C++ API was compiled with GCC version 4.1 on RedHat Enterprise
+Linux 5 Server for 64 bits. The following are tools used to build the
+GIAPI C++ API:
 *   g++ (GCC) 4.1.2 20080704 (Red Hat 4.1.2-46)
 *   GNU Make 3.81
 *   GNU ld version 2.17.50.0.6-12.el5 20061020
@@ -28,24 +28,30 @@ GIAPI C++ API:
 The headers to access the GIAPI C++ interface are in the include directory. The
 library shared object is in the lib directory of the binary distribution. In
 addition, the GIAPI is distributed also as RPM packages. Following the Gemini
-RPM framework, in that case headers are under /gemsoft/include and the 
+RPM framework, in that case headers are under /gemsoft/include and the
 shared object library is installed at /gemsoft/lib
 
 At this point in the development of GIAPI, the external libraries required
 to use the library are
 
-* Apache Active MQ CMS (C++ Messaging system) version 3.4.0 
+* Apache Active MQ CMS (C++ Messaging system) version 3.4.1
   (from http://activemq.apache.org/cms)
   Note: For OSX it is recommended to use version 3.1.3
 * Apache Log4cxx version 0.10.0.
   (from http://logging.apache.org/log4cxx)
-* Apache Portable Runtime Library version 1.3.9 (APR and APR-util)
+* Apache Portable Runtime Library version 1.3.12 (APR and APR-util)
   (from http://apr.apache.org)
-  
-Compiled versions of these libraries are available in the distribution 
-package of the GIAPI (under the 'lib' directory) or as RPM packages 
-following the Gemini RPM framework 
+* cppunit version 1.12.1
+  (from https://sourceforge.net/projects/cppunit/)
+* libCurl version 7.21.6
+  (from https://curl.haxx.se/libcurl)
+* curlpp version 0.7.3
+  (from http://www.curlpp.org)
 
-Good luck, 
+Compiled versions of these libraries are available in the distribution
+package of the GIAPI (under the 'lib' directory) or as RPM packages
+following the Gemini RPM framework
+
+Good luck,
 
 --arturo
