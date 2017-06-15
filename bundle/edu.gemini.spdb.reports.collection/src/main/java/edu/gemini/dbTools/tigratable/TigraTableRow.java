@@ -46,7 +46,7 @@ public class TigraTableRow implements Serializable {
      *
      * @return newly created TigraTableRow
      */
-    public static TigraTableRow create(final ISPProgram prog, final VcsService vcs)  {
+    public static TigraTableRow create(final ISPProgram prog, final SyncTimestamp st)  {
         final TigraTableRow ttr = new TigraTableRow();
         ttr._setProgramId(prog.getProgramID());
 
@@ -69,7 +69,7 @@ public class TigraTableRow implements Serializable {
             ttr._setGeminiContacts(_getContacts(emailAddrs));
         }
 
-        ttr._lastSync = SyncTimestamp.lookupDateOrNull(prog, vcs);
+        ttr._lastSync = st.lookupDateOrNull(prog);
 
         // Count up the observations and add their instrument
         final List<ISPObservation> obsList = prog.getAllObservations();
