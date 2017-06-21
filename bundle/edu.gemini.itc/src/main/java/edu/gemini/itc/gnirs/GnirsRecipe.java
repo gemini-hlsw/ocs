@@ -53,12 +53,12 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
     }
 
     private void validateInputParameters() {
-            if (_gnirsParameters.altair().isDefined()) {
+          /*  if (_gnirsParameters.altair().isDefined()) {
                 if (_obsDetailParameters.calculationMethod() instanceof Spectroscopy) {
                     throw new IllegalArgumentException(
                             "Altair with Spectroscopy mode is not currently supported by the ITC.");
                 }
-            }
+            } */
 
         // some general validations
         Validation.validate(instrument, _obsDetailParameters, _sdParameters);
@@ -220,8 +220,8 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
 
             specS2N.setSourceSpectrum(sed);
             specS2N.setBackgroundSpectrum(sky);
-            if (haloThroughput.nonEmpty()) {
-                specS2N.setHaloSpectrum(sed, haloThroughput.get(), IQcalc.getImageQuality());
+            if (altair.isDefined()) {
+                specS2N.setHaloSpectrum(halo.get(), haloThroughput.get(), IQcalc.getImageQuality());
             }
             sed.accept(specS2N);
 
