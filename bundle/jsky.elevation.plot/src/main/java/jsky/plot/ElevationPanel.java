@@ -431,10 +431,10 @@ public class ElevationPanel extends JPanel implements PrintableWithDialog, Savea
         // mark the ranges of twilight and darkness
         xyPlot.clearDomainMarkers();
         xyPlot.clearRangeMarkers();
+        addDomainMarker(xyPlot, new Date(_model.getSunSet()),
+                new Date(_model.getSunRise()), TWILIGHT_ALPHA, Color.gray);
         addDomainMarker(xyPlot, new Date(_model.getNauticalTwilightStart()),
-                new Date(_model.getNauticalTwilightEnd()), TWILIGHT_ALPHA, Color.gray);
-        addDomainMarker(xyPlot, new Date(_model.getAstronomicalTwilightStart()),
-                new Date(_model.getAstronomicalTwilightEnd()), DARKNESS_ALPHA, Color.black);
+                new Date(_model.getNauticalTwilightEnd()), DARKNESS_ALPHA, Color.black);
 
         xyPlot.addRangeMarker(new ValueMarker(ElevationPlotModel.getObsThreshold()));
 
