@@ -13,7 +13,7 @@ unmanagedJars in Compile ++= Seq(
 
 libraryDependencies ++= Seq(
   "org.scalaz"     %% "scalaz-concurrent" % ScalaZVersion,
-  "org.scala-lang" %  "scala-compiler"    % "2.11.7"
+  "org.scala-lang" %  "scala-compiler"    % scalaVersion.value
 )
 
 osgiSettings
@@ -35,5 +35,5 @@ OsgiKeys.privatePackage := Seq(
 OsgiKeys.exportPackage := Seq(
   "edu.gemini.qpt.ui.html")
 
-OsgiKeys.additionalHeaders += 
+OsgiKeys.additionalHeaders +=
   ("Import-Package" -> "!javax.mail.util,edu.gemini.spModel.gemini.altair,edu.gemini.spModel.target.obsComp,*")
