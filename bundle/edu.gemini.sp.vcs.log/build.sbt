@@ -14,8 +14,8 @@ libraryDependencies ++= Seq(
   "org.scalaz"     %% "scalaz-core"       % ScalaZVersion,
   "org.scalaz"     %% "scalaz-effect"     % ScalaZVersion,
   "org.scalaz"     %% "scalaz-concurrent" % ScalaZVersion,
-  "org.tpolecat"   %% "doobie-core"       % "0.3.0-M1",
-  "com.chuusai"    %% "shapeless"         % "2.3.0",
+  "org.tpolecat"   %% "doobie-core"       % "0.4.1",
+  "com.chuusai"    %% "shapeless"         % "2.3.2",
   "org.scala-lang" %  "scala-compiler"    % scalaVersion.value)
 
 osgiSettings

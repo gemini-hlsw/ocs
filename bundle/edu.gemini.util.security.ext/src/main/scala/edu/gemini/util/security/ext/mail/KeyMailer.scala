@@ -1,6 +1,7 @@
-package edu.gemini.util.security.auth.keychain
+package edu.gemini.util.security.ext.mail
 
 import edu.gemini.spModel.core.Site
+import edu.gemini.util.security.auth.keychain._
 import java.io.File
 import java.security.Principal
 import scalaz._
@@ -15,7 +16,7 @@ import scala.util.{ Success, Failure }
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
-abstract class KeyMailer private (site: Site, smtpHost: String) {
+abstract class KeyMailerImpl(site: Site, smtpHost: String) extends KeyMailer {
 
   /** Email a password to a user. */
   def notifyPassword(u: UserPrincipal, pass: String): IO[Unit] = IO {
@@ -56,13 +57,12 @@ abstract class KeyMailer private (site: Site, smtpHost: String) {
 
 }
 
-
 object KeyMailer {
 
   val Log = Logger.getLogger(getClass.getName)
 
   def apply(site: Site, smtpHost: String): KeyMailer =
-    new KeyMailer(site, smtpHost) {
+    new KeyMailerImpl(site, smtpHost) {
       def send(msg: MimeMessage): IO[Unit] =
         IO {
           // OCSADV-85: use a future here; it can block for a long time if the mail server is down
@@ -76,7 +76,7 @@ object KeyMailer {
 
   /** Constructs a KeyMailer that prints mails to the console rather than actually sending them. */
   def forTesting(site: Site): KeyMailer =
-    new KeyMailer(site, "bogus.mail.host") {
+    new KeyMailerImpl(site, "bogus.mail.host") {
 
       def send(msg: MimeMessage): IO[Unit] =
         for {

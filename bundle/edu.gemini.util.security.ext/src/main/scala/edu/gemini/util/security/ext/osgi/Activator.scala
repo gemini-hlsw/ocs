@@ -1,4 +1,4 @@
-package edu.gemini.util.security.osgi
+package edu.gemini.util.security.ext.osgi
 
 import org.osgi.framework.{BundleContext, BundleActivator}
 import java.security.{Principal, Policy}
@@ -16,6 +16,7 @@ import edu.gemini.util.osgi.ExternalStorage.getExternalDataFile
 import edu.gemini.pot.sp.ISPProgram
 import edu.gemini.util.security.principal.StaffPrincipal
 import edu.gemini.util.security.auth.ProgIdHash
+import edu.gemini.util.security.ext.mail._
 
 class Activator extends BundleActivator {
 

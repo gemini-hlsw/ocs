@@ -1,4 +1,4 @@
-package edu.gemini.util.security.osgi
+package edu.gemini.util.security.ext.osgi
 
 import edu.gemini.util.security.auth.keychain.KeyServer
 import edu.gemini.util.security.auth.keychain.Action._

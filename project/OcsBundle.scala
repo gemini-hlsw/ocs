@@ -468,14 +468,14 @@ trait OcsBundle {
       bundle_edu_gemini_pot,
       bundle_edu_gemini_shared_util,
       bundle_edu_gemini_spModel_core,
-      bundle_edu_gemini_spModel_pio,
-      bundle_edu_gemini_util_javax_mail,
-      bundle_edu_gemini_util_osgi
+      bundle_edu_gemini_spModel_pio
     )
 
   lazy val bundle_edu_gemini_util_security_ext =
     project.in(file("bundle/edu.gemini.util.security.ext")).dependsOn(
-      bundle_edu_gemini_util_security
+      bundle_edu_gemini_util_security,
+      bundle_edu_gemini_util_javax_mail,
+      bundle_edu_gemini_util_osgi
     )
 
   lazy val bundle_edu_gemini_util_skycalc =
