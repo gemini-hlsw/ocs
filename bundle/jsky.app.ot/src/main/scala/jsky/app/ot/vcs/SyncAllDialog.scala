@@ -13,7 +13,7 @@ import edu.gemini.spModel.core.{Peer, SPProgramID}
 import edu.gemini.spModel.rich.pot.spdb._
 import edu.gemini.util.security.auth.keychain.Action._
 import edu.gemini.util.security.auth.keychain.KeyChain
-import edu.gemini.util.security.auth.ui.CloseOnEsc
+import edu.gemini.util.security.ext.auth.ui.CloseOnEsc
 import jsky.app.ot.OT
 import jsky.app.ot.shared.vcs.VersionMapFunctor.VmUpdate
 import jsky.app.ot.userprefs.general.GeneralPreferences

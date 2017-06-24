@@ -11,7 +11,6 @@ unmanagedJars in Compile ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "org.scala-lang.modules" %% "scala-swing" % "2.0.0-M2",
   "org.scalaz"             %% "scalaz-core" % ScalaZVersion,
   "org.scalaz"             %% "scalaz-effect" % ScalaZVersion,
   "org.scalaz"             %% "scalaz-concurrent" % ScalaZVersion,
@@ -24,8 +23,6 @@ osgiSettings
 
 ocsBundleSettings
 
-OsgiKeys.bundleActivator := Some("edu.gemini.util.security.osgi.Activator")
-
 OsgiKeys.bundleSymbolicName := name.value
 
 OsgiKeys.dynamicImportPackage := Seq("*")
@@ -34,7 +31,6 @@ OsgiKeys.exportPackage := Seq(
   "edu.gemini.util.security.permission",
   "edu.gemini.util.security.principal",
   "edu.gemini.util.security.auth",
-  "edu.gemini.util.security.auth.ui",
   "edu.gemini.util.security.policy",
   "edu.gemini.util.security.auth.keychain")
 

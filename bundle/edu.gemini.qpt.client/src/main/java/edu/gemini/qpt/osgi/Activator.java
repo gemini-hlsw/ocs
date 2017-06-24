@@ -15,7 +15,7 @@ import edu.gemini.qpt.core.util.LttsServicesClient;
 import edu.gemini.qpt.ui.action.PublishAction;
 import edu.gemini.spModel.core.Version;
 import edu.gemini.util.security.auth.keychain.KeyChain;
-import edu.gemini.util.security.auth.ui.PasswordDialog;
+import edu.gemini.util.security.ext.auth.ui.PasswordDialog;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;

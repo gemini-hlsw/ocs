@@ -5,7 +5,7 @@ import java.security.{Principal, Policy}
 import edu.gemini.util.osgi.Tracker._
 import org.osgi.util.tracker.ServiceTracker
 import edu.gemini.pot.spdb.{ProgramEvent, ProgramEventListener, IDBDatabaseService}
-import edu.gemini.util.security.auth.ui.AuthDialog
+import edu.gemini.util.security.ext.auth.ui.AuthDialog
 import java.io.File
 import edu.gemini.spModel.core.{Site, Version, OcsVersionUtil}
 import scala.Some
@@ -80,7 +80,7 @@ class Activator extends BundleActivator {
   }
 
   // Construct a mailer. If there's no SMTP server in the config, we'll just use a test mailer.
-  def keyMailer(ctx: BundleContext): KeyMailer = 
+  def keyMailer(ctx: BundleContext): KeyMailer =
     (Option(ctx.getProperty(SMTP_PROP)), Option(Site.currentSiteOrNull)) match {
       case (Some(host), Some(site)) =>
         Log.info(s"KeyServer using $host ad $site for mailing passwords.")
@@ -118,7 +118,7 @@ class Activator extends BundleActivator {
 
     def programReplaced(evt: ProgramEvent[ISPProgram]): Unit = ()
     def programRemoved(evt: ProgramEvent[ISPProgram]): Unit = ()
-  
+
   }
 
 }

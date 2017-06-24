@@ -13,6 +13,10 @@ unmanagedJars in Compile ++= Seq(
   new File(baseDirectory.value, "../../lib/bundle/org-jfree_2.10-1.0.14.jar")
 )
 
+libraryDependencies ++= Seq(
+  "org.scala-lang.modules" %% "scala-swing" % "2.0.0-M2"
+  )
+
 osgiSettings
 
 ocsBundleSettings

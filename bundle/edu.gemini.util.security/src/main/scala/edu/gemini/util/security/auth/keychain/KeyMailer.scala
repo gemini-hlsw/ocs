@@ -43,7 +43,8 @@ abstract class KeyMailer private (site: Site, smtpHost: String) {
           |Please speak with your Gemini or NGO contact if you have questions about key retrieval.
           |""".stripMargin
 
-    new MimeMessage(Session.getInstance(props, null)) <|
+    val session = Session.getInstance(props, null)
+    new MimeMessage(session) <|
       (_.setFrom(sender)) <|
       (_.addRecipient(Message.RecipientType.TO, recipient)) <|
       (_.setSubject(s"Your ${site.displayName} password.")) <|
@@ -77,7 +78,7 @@ object KeyMailer {
   def forTesting(site: Site): KeyMailer =
     new KeyMailer(site, "bogus.mail.host") {
 
-      def send(msg: MimeMessage): IO[Unit] = 
+      def send(msg: MimeMessage): IO[Unit] =
         for {
           _ <- putStrLn("")
           _ <- log(s"From: ${msg.getFrom.mkString(", ")}")
@@ -85,7 +86,7 @@ object KeyMailer {
           _ <- log(s"Subject: ${msg.getSubject}")
           _ <- log("")
           _ <- msg.getContent.toString.lines.toList.traverseU(log)
-        } yield () 
+        } yield ()
 
       def log(msg: String): IO[Unit] =
         putStrLn(s"TestMailer: $msg")

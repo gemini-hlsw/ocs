@@ -1,4 +1,4 @@
-package edu.gemini.util.security.auth.ui
+package edu.gemini.util.security.ext.auth.ui
 
 import edu.gemini.util.security.auth.keychain.KeyChain
 import edu.gemini.util.security.auth.keychain.KeyException

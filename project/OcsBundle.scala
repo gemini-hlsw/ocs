@@ -192,6 +192,7 @@ trait OcsBundle {
       bundle_edu_gemini_spModel_pio,
       bundle_edu_gemini_ui_workspace,
       bundle_edu_gemini_util_security,
+      bundle_edu_gemini_util_security_ext,
       bundle_edu_gemini_util_ssh,
       bundle_jsky_coords,
       bundle_jsky_util
@@ -472,6 +473,11 @@ trait OcsBundle {
       bundle_edu_gemini_util_osgi
     )
 
+  lazy val bundle_edu_gemini_util_security_ext =
+    project.in(file("bundle/edu.gemini.util.security.ext")).dependsOn(
+      bundle_edu_gemini_util_security
+    )
+
   lazy val bundle_edu_gemini_util_skycalc =
     project.in(file("bundle/edu.gemini.util.skycalc")).dependsOn(
       bundle_edu_gemini_shared_util,
@@ -560,6 +566,7 @@ trait OcsBundle {
       bundle_edu_gemini_util_javax_mail,
       bundle_edu_gemini_util_osgi,
       bundle_edu_gemini_util_security,
+      bundle_edu_gemini_util_security_ext,
       bundle_edu_gemini_util_skycalc,
       bundle_edu_gemini_util_ssl,
       bundle_edu_gemini_util_ssl_apache,
