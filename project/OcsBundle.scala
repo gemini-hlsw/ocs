@@ -420,7 +420,7 @@ trait OcsBundle {
       bundle_edu_gemini_spModel_core,
       bundle_edu_gemini_spModel_io,
       bundle_edu_gemini_spModel_pio,
-      bundle_edu_gemini_util_security
+      bundle_edu_gemini_util_security_ext
     )
 
   lazy val bundle_edu_gemini_too_event =
