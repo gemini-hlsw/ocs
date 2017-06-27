@@ -14,7 +14,7 @@ libraryDependencies ++= Seq(
   "org.scalaz"             %% "scalaz-core" % ScalaZVersion,
   "org.scalaz"             %% "scalaz-effect" % ScalaZVersion,
   "org.scalaz"             %% "scalaz-concurrent" % ScalaZVersion,
-  "org.tpolecat"           %% "doobie-core" % "0.4.1",
+  "org.tpolecat"           %% "doobie-core" % "0.3.0a",
   "org.scala-lang"         %  "scala-reflect" % scalaVersion.value,
   "org.scala-lang"         %  "scala-compiler" % scalaVersion.value
   )
