@@ -57,7 +57,7 @@ public class ElevationPanel extends JPanel implements PrintableWithDialog, Savea
     private static final float DARKNESS_ALPHA = 0.1F;
 
     // Alpha value used to draw twilight area on graph
-    private static final float TWILIGHT_ALPHA = 0.05F;
+    private static final float TWILIGHT_ALPHA = 0.2F;
 
     // This is a required parameter, but we don't want to see the outline
     private static final Stroke DARKNESS_STROKE = new BasicStroke(0.0F);
@@ -78,6 +78,9 @@ public class ElevationPanel extends JPanel implements PrintableWithDialog, Savea
     private static final Color CONSTRAINT_COLOR = new Color(0.0F, 1.0F, 0.0F, 0.5F);
 
     private static final Paint TIMING_WINDOW_PAINT;
+
+    // Color used for daylight
+    private static final Color DAY_COLOR = new Color(0xEE, 0xEE, 0xFF);
 
     static {
         final BufferedImage bi = new BufferedImage(4, 4,  BufferedImage.TYPE_4BYTE_ABGR);
@@ -438,7 +441,7 @@ public class ElevationPanel extends JPanel implements PrintableWithDialog, Savea
 
         xyPlot.addRangeMarker(new ValueMarker(ElevationPlotModel.getObsThreshold()));
 
-        plotCons(xyPlot, _elevationConstraintsMarkerVisible, 2, _model::getConstraintsDataset,   CONSTRAINT_COLOR);
+        plotCons(xyPlot, _elevationConstraintsMarkerVisible,2, _model::getConstraintsDataset, CONSTRAINT_COLOR);
         plotCons(xyPlot, _timingWindowsMarkerVisible, 3, _model::getTimingWindowsDataset, TIMING_WINDOW_PAINT);
     }
 
@@ -519,6 +522,7 @@ public class ElevationPanel extends JPanel implements PrintableWithDialog, Savea
 
         // add a secondary Y axis for airmass or parallactic angle
         _valueAxis2 = new NumberAxis(valueAxisLabel2);
+        plot.setBackgroundPaint(DAY_COLOR);
         plot.setRangeAxis(1, _valueAxis2);
         plot.mapDatasetToRangeAxis(1, 1);
 
