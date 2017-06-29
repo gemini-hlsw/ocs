@@ -1,4 +1,4 @@
-package edu.gemini.util.security.auth.ui
+package edu.gemini.util.security.ext.auth.ui
 
 import swing.{TextArea, Label, BorderPanel}
 import javax.swing.{Icon, BorderFactory, ImageIcon}

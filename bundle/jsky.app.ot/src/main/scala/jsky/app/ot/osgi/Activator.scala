@@ -9,7 +9,7 @@ import edu.gemini.util.osgi.Tracker._
 import edu.gemini.util.osgi.ExternalStorage
 import edu.gemini.util.security.auth.keychain.KeyChain
 import edu.gemini.util.security.auth.keychain.Action._
-import edu.gemini.util.security.auth.ui.PasswordDialog
+import edu.gemini.util.security.ext.auth.ui.PasswordDialog
 import jsky.app.ot.OT
 import jsky.app.ot.gemini.obscat.OTBrowserPresetsPersistence
 import jsky.app.ot.plugin.{OtActionPlugin, OtViewerService}

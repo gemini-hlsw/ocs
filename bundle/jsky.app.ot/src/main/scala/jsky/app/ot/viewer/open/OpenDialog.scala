@@ -13,7 +13,7 @@ import edu.gemini.spModel.core.{Peer, SPProgramID}
 import edu.gemini.spModel.util.DBProgramInfo
 import edu.gemini.util.security.auth.keychain.Action._
 import edu.gemini.util.security.auth.keychain.{Key, KeyChain, Action => KAction}
-import edu.gemini.util.security.auth.ui.{AuthDialog, CloseOnEsc, Instructions}
+import edu.gemini.util.security.ext.auth.ui.{AuthDialog, CloseOnEsc, Instructions}
 import jsky.app.ot.OT
 import jsky.app.ot.vcs.VcsOtClient
 import jsky.app.ot.viewer.DBProgramChooserFilter

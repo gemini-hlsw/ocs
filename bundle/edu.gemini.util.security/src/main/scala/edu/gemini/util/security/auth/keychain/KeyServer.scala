@@ -5,11 +5,13 @@ import java.io.File
 import scalaz._
 import Scalaz._
 import scalaz.effect.IO
-import javax.mail._
-import javax.mail.internet._
 import java.security.KeyPair
 import edu.gemini.util.security.principal._
 import edu.gemini.util.security.auth.DSA
+
+trait KeyMailer {
+  def notifyPassword(u: UserPrincipal, pass: String): IO[Unit]
+}
 
 class KeyServer private (keyPair: KeyPair, mailer: KeyMailer, db: KeyDatabase) { ks =>
 

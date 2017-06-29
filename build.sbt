@@ -40,7 +40,7 @@ scalacOptions in ThisBuild ++= Seq(
   "-language:implicitConversions",
   "-language:reflectiveCalls", // TODO: turn this off
   "-language:postfixOps",      // TODO: turn this off
-  "-target:jvm-1.7",
+  "-target:jvm-1.8",
   "-unchecked",
   // "-Xfatal-warnings",
   "-Xlint:-stars-align",

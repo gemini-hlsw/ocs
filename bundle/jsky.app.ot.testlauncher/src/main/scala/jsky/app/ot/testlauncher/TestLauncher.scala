@@ -12,6 +12,7 @@ import Scalaz._
 import edu.gemini.pot.spdb.DBLocalDatabase
 import edu.gemini.util.trpc.auth.TrpcKeyChain
 import edu.gemini.util.security.auth.keychain.Action._
+import edu.gemini.util.security.ext.auth.ui.{AuthDialog, PasswordDialog}
 import java.io.File
 import java.security.{Provider, Security}
 import java.util.logging.{Level, Logger}
@@ -24,7 +25,6 @@ import jsky.app.ot.OT
 import jsky.app.ot.viewer.ViewerService
 import jsky.app.ot.visitlog.ShowVisitLogAction
 import edu.gemini.spModel.core._
-import edu.gemini.util.security.auth.ui.{AuthDialog, PasswordDialog}
 
 object TestLauncher extends App {
 

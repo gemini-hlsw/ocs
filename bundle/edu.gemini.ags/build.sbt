@@ -18,7 +18,7 @@ unmanagedJars in Compile ++= Seq(
 
 libraryDependencies ++= Seq(
   "org.apache.commons" %  "commons-math3" % "3.2" % "test",
-  "com.chuusai"        %% "shapeless"     % "2.2.5")
+  "com.chuusai"        %% "shapeless"     % "2.3.2")
 
 
 osgiSettings

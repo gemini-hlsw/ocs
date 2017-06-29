@@ -9,7 +9,7 @@ import edu.gemini.spModel.core.{Peer, Site, Version}
 import edu.gemini.ui.workspace.impl.Workspace
 import edu.gemini.util.trpc.auth.TrpcKeyChain
 import edu.gemini.util.security.auth.keychain.Action._
-import edu.gemini.util.security.auth.ui.AuthDialog
+import edu.gemini.util.security.ext.auth.ui.AuthDialog
 
 /** Standalone launcher for running QPT inside an IDE. */
 object QptTestLauncher {

@@ -5,8 +5,8 @@ import edu.gemini.qpt.ui.util.Platform;
 import edu.gemini.ui.gface.GSelection;
 import edu.gemini.ui.workspace.IShell;
 import edu.gemini.util.security.auth.keychain.KeyChain;
-import edu.gemini.util.security.auth.ui.AuthDialog;
-import edu.gemini.util.security.auth.ui.AuthDialog$;
+import edu.gemini.util.security.ext.auth.ui.AuthDialog;
+import edu.gemini.util.security.ext.auth.ui.AuthDialog$;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -34,7 +34,7 @@ public class ManageKeysAction extends AbstractAction {
 		this.shell = shell;
         this.authClient = authClient;
 	}
-	
+
 	/**
 	 * Save the current schedule if it needs it, then set the model to null.
 	 */

@@ -1,6 +1,6 @@
 package jsky.app.ot.viewer.action;
 
-import edu.gemini.util.security.auth.ui.AuthDialog;
+import edu.gemini.util.security.ext.auth.ui.AuthDialog;
 import jsky.app.ot.OT;
 import jsky.app.ot.viewer.SPViewer;
 import jsky.util.gui.DialogUtil;

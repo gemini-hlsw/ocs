@@ -11,23 +11,17 @@ unmanagedJars in Compile ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "org.scala-lang.modules" %% "scala-swing" % "2.0.0-M2",
-  "org.scalaz.stream"      %% "scalaz-stream" % "0.8a" intransitive(),
   "org.scalaz"             %% "scalaz-core" % ScalaZVersion,
   "org.scalaz"             %% "scalaz-effect" % ScalaZVersion,
   "org.scalaz"             %% "scalaz-concurrent" % ScalaZVersion,
-  "org.tpolecat"           %% "doobie-core" % "0.3.0-M1",
-  "com.chuusai"            %% "shapeless" % "2.3.0",
-  "org.scodec"             %% "scodec-bits" % "1.0.9",
-  "org.scala-lang"         %  "scala-reflect" % "2.11.7",
-  "org.scala-lang"         %  "scala-compiler" % "2.11.7"
+  "org.tpolecat"           %% "doobie-core" % "0.3.0a",
+  "org.scala-lang"         %  "scala-reflect" % scalaVersion.value,
+  "org.scala-lang"         %  "scala-compiler" % scalaVersion.value
   )
 
 osgiSettings
 
 ocsBundleSettings
-
-OsgiKeys.bundleActivator := Some("edu.gemini.util.security.osgi.Activator")
 
 OsgiKeys.bundleSymbolicName := name.value
 
@@ -37,7 +31,6 @@ OsgiKeys.exportPackage := Seq(
   "edu.gemini.util.security.permission",
   "edu.gemini.util.security.principal",
   "edu.gemini.util.security.auth",
-  "edu.gemini.util.security.auth.ui",
   "edu.gemini.util.security.policy",
   "edu.gemini.util.security.auth.keychain")
 
