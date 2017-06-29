@@ -1,16 +1,22 @@
 package edu.gemini.seqexec.odb
 
-import edu.gemini.pot.sp.SPObservationID
-import edu.gemini.seqexec.odb.SeqFailure.SeqException
+import edu.gemini.pot.sp.{ISPObservation, SPObservationID}
+import edu.gemini.pot.spdb.DBLocalDatabase
+import edu.gemini.seqexec.odb.SeqFailure.{MissingObservation, SeqException}
 
+import edu.gemini.spModel.config.ConfigBridge
+import edu.gemini.spModel.config.map.ConfigValMapInstances.IDENTITY_MAP
 import edu.gemini.spModel.config2.ConfigSequence
 import edu.gemini.spModel.core.Peer
+import edu.gemini.spModel.io.SpImportService
 
-import java.io.{BufferedReader, InputStreamReader}
+import java.io.{BufferedReader, InputStreamReader, StringReader}
 import java.net.{HttpURLConnection, URL}
 import java.net.HttpURLConnection.{HTTP_NOT_FOUND, HTTP_OK}
 import java.time.Duration
 import java.util.stream.Collectors
+
+import scala.collection.JavaConverters._
 
 import scalaz._
 import Scalaz._
@@ -48,7 +54,7 @@ object SeqExecService {
     }
 
   private def read(conn: HttpURLConnection, oid: SPObservationID): TrySeq[String] =
-    try {
+    trySeq {
       conn.getResponseCode match {
         case HTTP_OK        =>
           closing(new BufferedReader(new InputStreamReader(conn.getInputStream))) {
@@ -56,20 +62,41 @@ object SeqExecService {
           }
 
         case HTTP_NOT_FOUND =>
-          SeqFailure.MissingObservation(oid).left
+          MissingObservation(oid).left
 
         case x              =>
           val msg = s"Unexpected response code: $x${Option(conn.getResponseMessage).map(m => s": $m").orZero}"
-          SeqFailure.SeqException(new RuntimeException(msg)).left
+          SeqException(new RuntimeException(msg)).left
       }
-    } catch {
-      case ex: Exception => SeqFailure.SeqException(ex).left
     }
 
+  private def parse(xml: String): TrySeq[ISPObservation] =
+    trySeq {
+      val db = DBLocalDatabase.createTransient
+      try {
+        val is = new SpImportService(db)
+        is.importProgramXml(new StringReader(xml)) match {
+          case scala.util.Success(p) => p.getAllObservations.asScala.head.right
+          case scala.util.Failure(e) => SeqException(e).left
+        }
+      } finally {
+        db.getDBAdmin.shutdown
+      }
+    }
+
+  private def extractSequence(obs: ISPObservation): TrySeq[ConfigSequence] =
+    catchingAll {
+      ConfigBridge.extractSequence(obs, null, IDENTITY_MAP, true)
+    }
 
   def client(peer: Peer): SeqExecService = new SeqExecService {
-    override def sequence(oid: SPObservationID): TrySeq[ConfigSequence] = {
-      ???
-    }
+    override def sequence(oid: SPObservationID): TrySeq[ConfigSequence] =
+      for {
+        u <- url(peer, oid)
+        c <- open(u)
+        x <- read(c, oid)
+        o <- parse(x)
+        s <- extractSequence(o)
+      } yield s
   }
 }
