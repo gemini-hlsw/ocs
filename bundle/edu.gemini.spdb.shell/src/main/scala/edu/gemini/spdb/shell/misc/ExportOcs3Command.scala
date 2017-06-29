@@ -3,7 +3,7 @@ package edu.gemini.spdb.shell.misc
 import edu.gemini.pot.sp.ISPProgram
 import edu.gemini.pot.spdb.IDBDatabaseService
 import edu.gemini.spModel.core.SPProgramID
-import edu.gemini.spModel.io.ocs3.Ocs3ExportFunctor
+import edu.gemini.spModel.io.ocs3.{ExportFormat, Ocs3ExportFunctor}
 import edu.gemini.spModel.util.{DBProgramInfo, DBProgramListFunctor}
 
 import java.nio.file.{Paths, Files}
@@ -62,7 +62,7 @@ final class ExportOcs3Command(db: IDBDatabaseService, dir: File, user: java.util
     val f = new File(dir, s"$n.xml")
 
     for {
-      fun <- Export { db.getQueryRunner(user).execute(new Ocs3ExportFunctor, p) }
+      fun <- Export { db.getQueryRunner(user).execute(new Ocs3ExportFunctor(ExportFormat.Ocs3), p) }
       _   <- Option(fun.getException).fold(Export.unit) { ex => Export.error(s"missing xml for $n", Some(ex)) }
       x   <- Export.fromOption(s"xml not returned by ODB for $n")(fun.result)
       _   <- Export { Files.write(f.toPath, x.getBytes(UTF_8)) }

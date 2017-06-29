@@ -30,7 +30,7 @@ import Ocs3ExportFunctor._
   * PIO.  The goal is to simplify reading the document in OCS3 since it does
   * not include any OCS2 classes or their dependencies.
   */
-final class Ocs3ExportFunctor extends DBAbstractFunctor {
+final class Ocs3ExportFunctor(format: ExportFormat) extends DBAbstractFunctor {
 
   val fact = new PioXmlFactory
 
@@ -39,6 +39,16 @@ final class Ocs3ExportFunctor extends DBAbstractFunctor {
   override def execute(db: IDBDatabaseService, n: ISPNode, ps: Set[Principal]): Unit = {
     val doc = PioDocumentBuilder.instance.toDocument(n)
 
+    format match {
+      case ExportFormat.Ocs3 => mutateToOcs3(doc, n)
+      case ExportFormat.Pio  => // do nothing
+    }
+
+    // Write just the "program" or "observation" element.
+    result = PioXmlUtil.toElement(doc).elementList.headOption.map(_.xmlString)
+  }
+
+  private def mutateToOcs3(doc: Document, n: ISPNode): Unit = {
     def mapObs(obsList: Traversable[ISPObservation]): Map[SPNodeKey, ISPObservation] =
       obsList.map(o => o.getNodeKey -> o).toMap
 
@@ -100,9 +110,6 @@ final class Ocs3ExportFunctor extends DBAbstractFunctor {
         xml.addAttribute("type", sub)
       }
     }
-
-    // Write just the "program" or "observation" element.
-    result = PioXmlUtil.toElement(doc).elementList.headOption.map(_.xmlString)
   }
 }
 
