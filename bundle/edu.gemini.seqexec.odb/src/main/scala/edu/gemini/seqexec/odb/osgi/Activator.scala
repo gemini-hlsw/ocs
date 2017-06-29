@@ -10,21 +10,14 @@ import edu.gemini.util.osgi.Tracker._
 import org.osgi.util.tracker.ServiceTracker
 
 
-object Activator {
-  val PublishTrpc = "trpc"
-}
-
 class Activator extends BundleActivator {
   private var tracker: Option[ServiceTracker[_,_]] = None
 
   override def start(ctx: BundleContext): Unit = {
-    import Activator._
-
     tracker = Some(track[IDBDatabaseService, ServiceRegistration[_]](ctx) { (odb) =>
       val seqServer = new SeqExecServer(odb)
 
       val props = new util.Hashtable[String, Object]()
-      props.put(PublishTrpc, "true")
       ctx.registerService(classOf[SeqExecService], seqServer, props)
     } { _.unregister() })
 
