@@ -25,11 +25,16 @@ import Scalaz._
 import Ocs3ExportFunctor._
 
 /** An ODB "functor" that obtains an XML string representation of a program,
-  * group, or observation that is suitable for ingestion into OCS3.  In
-  * particular, it replaces the sequence hierarchy with the sequence XMl as
-  * exported by the WDBA and renames the containers exported by ordinary
-  * PIO.  The goal is to simplify reading the document in OCS3 since it does
-  * not include any OCS2 classes or their dependencies.
+  * group, or observation that is suitable for ingestion into OCS3. It supports
+  * two export formats:
+  *
+  * 1) If the Ocs3 format is selected, it replaces the sequence hierarchy with
+  * the sequence XML as exported by the WDBA and renames the containers exported
+  * by ordinary PIO.  The goal is to simplify reading the document in OCS3 since
+  * it does not include any OCS2 classes or their dependencies.
+  *
+  * 2) An additional "Pio" format is also available for a client that wishes to
+  * work with PIO to import the program, group, or observation into a local ODB.
   */
 final class Ocs3ExportFunctor(format: ExportFormat) extends DBAbstractFunctor {
 
@@ -46,6 +51,8 @@ final class Ocs3ExportFunctor(format: ExportFormat) extends DBAbstractFunctor {
     }
   }
 
+  // Mutates the given Document to a format more amenable to parsing without
+  // ocs library support.
   private def mutateToOcs3(doc: Document, n: ISPNode): Option[String] = {
     def mapObs(obsList: Traversable[ISPObservation]): Map[SPNodeKey, ISPObservation] =
       obsList.map(o => o.getNodeKey -> o).toMap
@@ -114,7 +121,7 @@ final class Ocs3ExportFunctor(format: ExportFormat) extends DBAbstractFunctor {
   }
 
   // Wraps the XML for the node inside of a program so that it can be imported
-  // easily by the client.
+  // easily by the client using the ocs spModel.io library.
   private def wrapWithProg(doc: Document, n: ISPNode): Option[String] = {
     n match {
       case _: ISPProgram => // do nothing

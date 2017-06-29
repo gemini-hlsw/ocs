@@ -22,7 +22,19 @@ import Scalaz._
 import Ocs3ExportServlet._
 
 /** A program export servlet that provides program XML in a format that is
-  * more easily ingested into the ocs3 model.
+  * more easily ingested into the ocs3 model.  Two export formats are supported
+  *
+  * For example, to fetch an observation in "Ocs3" (default) format
+  *
+  *   http://hostname:8442/ocs3/fetch/OBSERVATION_ID
+  *
+  * This format is more easily ingested into the new database schema since it
+  * contains an expanded sequence instead of the iterator hierarchy.
+  *
+  * To fetch an observation (wrapped in a program container) for import using
+  * existing OCS spModel.io libraries
+  *
+  *   http://hostname:8442/ocs3/fetch/pio/OBSERVATION_ID
   */
 final class Ocs3ExportServlet(db: IDBDatabaseService) extends HttpServlet {
 
