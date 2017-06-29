@@ -89,14 +89,20 @@ object SeqExecService {
       ConfigBridge.extractSequence(obs, null, IDENTITY_MAP, true)
     }
 
-  def client(peer: Peer): SeqExecService = new SeqExecService {
-    override def sequence(oid: SPObservationID): TrySeq[ConfigSequence] =
-      for {
-        u <- url(peer, oid)
-        c <- open(u)
-        x <- read(c, oid)
-        o <- parse(x)
-        s <- extractSequence(o)
-      } yield s
-  }
+  /** Constructs a SeqExecService that works with a servlet running in the ODB.
+    * When a sequence is requested, it contacts the servlet and requests the
+    * observation XML (wrapped in a program shell suitable for importing). The
+    * XML is then parsed and the sequence is extracted.
+    */
+  def client(peer: Peer): SeqExecService =
+    new SeqExecService {
+      override def sequence(oid: SPObservationID): TrySeq[ConfigSequence] =
+        for {
+          u <- url(peer, oid)
+          c <- open(u)
+          x <- read(c, oid)
+          o <- parse(x)
+          s <- extractSequence(o)
+        } yield s
+    }
 }
