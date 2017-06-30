@@ -240,8 +240,8 @@ trait OcsBundle {
       bundle_edu_gemini_pot,
       bundle_edu_gemini_shared_util,
       bundle_edu_gemini_spModel_core,
+      bundle_edu_gemini_spModel_io,
       bundle_edu_gemini_spModel_pio,
-      bundle_edu_gemini_util_trpc,
       bundle_jsky_coords,
       bundle_jsky_util
     )

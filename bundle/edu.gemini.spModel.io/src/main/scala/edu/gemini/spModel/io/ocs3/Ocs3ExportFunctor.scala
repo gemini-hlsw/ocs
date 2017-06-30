@@ -3,6 +3,7 @@ package edu.gemini.spModel.io.ocs3
 import edu.gemini.pot.sp._
 import edu.gemini.pot.sp.SPComponentType.{ITERATOR_BASE, OBSERVATION_BASIC}
 import edu.gemini.pot.spdb.{DBAbstractFunctor, IDBDatabaseService}
+import edu.gemini.spModel.gemini.obscomp.SPProgram
 import edu.gemini.spModel.io.{PioDocumentBuilder, SequenceOutputService}
 import edu.gemini.spModel.io.PioSyntax._
 import edu.gemini.spModel.pio.{Document, Container, Pio}
@@ -24,13 +25,18 @@ import Scalaz._
 import Ocs3ExportFunctor._
 
 /** An ODB "functor" that obtains an XML string representation of a program,
-  * group, or observation that is suitable for ingestion into OCS3.  In
-  * particular, it replaces the sequence hierarchy with the sequence XMl as
-  * exported by the WDBA and renames the containers exported by ordinary
-  * PIO.  The goal is to simplify reading the document in OCS3 since it does
-  * not include any OCS2 classes or their dependencies.
+  * group, or observation that is suitable for ingestion into OCS3. It supports
+  * two export formats:
+  *
+  * 1) If the Ocs3 format is selected, it replaces the sequence hierarchy with
+  * the sequence XML as exported by the WDBA and renames the containers exported
+  * by ordinary PIO.  The goal is to simplify reading the document in OCS3 since
+  * it does not include any OCS2 classes or their dependencies.
+  *
+  * 2) An additional "Pio" format is also available for a client that wishes to
+  * work with PIO to import the program, group, or observation into a local ODB.
   */
-final class Ocs3ExportFunctor extends DBAbstractFunctor {
+final class Ocs3ExportFunctor(format: ExportFormat) extends DBAbstractFunctor {
 
   val fact = new PioXmlFactory
 
@@ -39,6 +45,15 @@ final class Ocs3ExportFunctor extends DBAbstractFunctor {
   override def execute(db: IDBDatabaseService, n: ISPNode, ps: Set[Principal]): Unit = {
     val doc = PioDocumentBuilder.instance.toDocument(n)
 
+    result = format match {
+      case ExportFormat.Ocs3 => mutateToOcs3(doc, n)
+      case ExportFormat.Pio  => wrapWithProg(doc, n)
+    }
+  }
+
+  // Mutates the given Document to a format more amenable to parsing without
+  // ocs library support.
+  private def mutateToOcs3(doc: Document, n: ISPNode): Option[String] = {
     def mapObs(obsList: Traversable[ISPObservation]): Map[SPNodeKey, ISPObservation] =
       obsList.map(o => o.getNodeKey -> o).toMap
 
@@ -102,7 +117,39 @@ final class Ocs3ExportFunctor extends DBAbstractFunctor {
     }
 
     // Write just the "program" or "observation" element.
-    result = PioXmlUtil.toElement(doc).elementList.headOption.map(_.xmlString)
+    PioXmlUtil.toElement(doc).elementList.headOption.map(_.xmlString)
+  }
+
+  // Wraps the XML for the node inside of a program so that it can be imported
+  // easily by the client using the ocs spModel.io library.
+  private def wrapWithProg(doc: Document, n: ISPNode): Option[String] = {
+    n match {
+      case _: ISPProgram => // do nothing
+      case _             =>
+        val f  = new PioXmlFactory
+        val p  = n.getProgram
+
+        // Make the program container
+        val c  = f.createContainer("program", "Program", SPProgram.VERSION)
+        c.setSubtype("basic")
+        c.setKey(p.getNodeKey.toString)
+        c.setName(p.getProgramID.stringValue)
+
+        // Add the data object
+        c.addParamSet(p.getDataObject.getParamSet(f))
+
+        // Remove children from the document.
+        val children = doc.getContainers.asInstanceOf[java.util.List[Container]].asScala
+        children.foreach(doc.removeChild)
+
+        // Add them to the program container.
+        children.foreach(c.addContainer)
+
+        // Add the program container to the document.
+        doc.addContainer(c)
+    }
+
+    Some(PioXmlUtil.toElement(doc).xmlString)
   }
 }
 

@@ -13,7 +13,7 @@ osgiSettings
 
 ocsBundleSettings
 
-OsgiKeys.bundleActivator := Some("edu.gemini.seqexec.odb.osgi.Activator")
+OsgiKeys.bundleActivator := None
 
 OsgiKeys.bundleSymbolicName := name.value
 

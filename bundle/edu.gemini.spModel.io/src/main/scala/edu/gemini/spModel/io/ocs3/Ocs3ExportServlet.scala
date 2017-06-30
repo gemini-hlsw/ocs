@@ -22,16 +22,28 @@ import Scalaz._
 import Ocs3ExportServlet._
 
 /** A program export servlet that provides program XML in a format that is
-  * more easily ingested into the ocs3 model.
+  * more easily ingested into the ocs3 model.  Two export formats are supported
+  *
+  * For example, to fetch an observation in "Ocs3" (default) format
+  *
+  *   http://hostname:8442/ocs3/fetch/OBSERVATION_ID
+  *
+  * This format is more easily ingested into the new database schema since it
+  * contains an expanded sequence instead of the iterator hierarchy.
+  *
+  * To fetch an observation (wrapped in a program container) for import using
+  * existing OCS spModel.io libraries
+  *
+  *   http://hostname:8442/ocs3/fetch/pio/OBSERVATION_ID
   */
 final class Ocs3ExportServlet(db: IDBDatabaseService) extends HttpServlet {
 
   private def doCommand(cmd: Command): Result[String] =
     cmd match {
-      case FetchXml(id) =>
+      case FetchXml(id, format) =>
         for {
           n  <- fetchNode(id)
-          x  <- fetchXml(n, id)
+          x  <- fetchXml(n, id, format)
         } yield x
 
       case ListObs(id)  =>
@@ -61,9 +73,9 @@ final class Ocs3ExportServlet(db: IDBDatabaseService) extends HttpServlet {
   }
 
   // Convert the program or observation into an XML String.
-  private def fetchXml(n: ISPNode, id: String): Result[String] =
+  private def fetchXml(n: ISPNode, id: String, format: ExportFormat): Result[String] =
     \/.fromTryCatchNonFatal {
-      db.getQueryRunner(java.util.Collections.emptySet[Principal]).execute(new Ocs3ExportFunctor, n)
+      db.getQueryRunner(java.util.Collections.emptySet[Principal]).execute(new Ocs3ExportFunctor(format), n)
     }.leftMap { t => Error.exportError(id, Some(t))           }
      .flatMap { f => f.result \/> Error.exportError(id, None) }
 
@@ -153,17 +165,18 @@ object Ocs3ExportServlet {
 
   sealed trait Command extends Product with Serializable
 
-  final case class FetchXml(id: String) extends Command
-  case object ListProgs                 extends Command
-  final case class ListObs(pid: String) extends Command
+  final case class FetchXml(id: String, format: ExportFormat) extends Command
+  case object ListProgs                                       extends Command
+  final case class ListObs(pid: String)                       extends Command
 
   // Determines the command encoded in the request.
   private def parseRequest(req: HttpServletRequest): Result[Command] =
     req.getRequestURI.split('/').drop(2).toList match {
-      case "fetch" :: id :: Nil => FetchXml(id).right
-      case "list"  :: id :: Nil => ListObs(id).right
-      case "list"  :: Nil       => ListProgs.right
-      case x                    => Error.badRequest(x.mkString("/")).left
+      case "fetch"          :: id :: Nil => FetchXml(id, ExportFormat.Ocs3).right
+      case "fetch" :: "pio" :: id :: Nil => FetchXml(id, ExportFormat.Pio ).right
+      case "list"           :: id :: Nil => ListObs(id).right
+      case "list"                 :: Nil => ListProgs.right
+      case x                             => Error.badRequest(x.mkString("/")).left
     }
 
 }
