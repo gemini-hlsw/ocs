@@ -210,10 +210,10 @@ public class ObservationPanel extends JPanel implements PrintableWithDialog, Sav
 
             // mark the ranges of twilight and darkness
             plot.clearRangeMarkers();
+            _addDarknessMarker(plot, new Date(_model.getSunSet()),
+                    new Date(_model.getSunRise()), TWILIGHT_ALPHA, Color.gray);
             _addDarknessMarker(plot, new Date(_model.getNauticalTwilightStart()),
-                    new Date(_model.getNauticalTwilightEnd()), TWILIGHT_ALPHA, Color.gray);
-            _addDarknessMarker(plot, new Date(_model.getAstronomicalTwilightStart()),
-                    new Date(_model.getAstronomicalTwilightEnd()), DARKNESS_ALPHA, Color.black);
+                    new Date(_model.getNauticalTwilightEnd()), DARKNESS_ALPHA, Color.black);
 
             // Make sure labels are readable, use scrollbar if needed
             int numTargets = dataset.getColumnCount();

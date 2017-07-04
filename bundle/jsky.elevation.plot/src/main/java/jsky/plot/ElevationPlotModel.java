@@ -590,6 +590,15 @@ public class ElevationPlotModel {
         return cal.getTime();
     }
 
+    /** Return sunrise time in the selected time zone */
+    public Long getSunRise() {
+        return _sunRiseSet.sunrise;
+    }
+
+    /** Return sunset in the selected time zone */
+    public Long getSunSet() {
+        return _sunRiseSet.sunset;
+    }
     /** Return the start time of nautical twilight in the selected time zone */
     public Long getNauticalTwilightStart() {
         return _sunRiseSet.nauticalTwilightStart;
