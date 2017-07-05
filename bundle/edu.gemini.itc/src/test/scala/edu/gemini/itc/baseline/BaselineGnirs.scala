@@ -59,7 +59,68 @@ object BaselineGnirs {
       SlitWidth.SW_8,
       None,
       WellDepth.SHALLOW,
-      Fixture.NoAltair)
+      Fixture.NoAltair),
+
+  new GnirsParameters(
+    PixelScale.PS_005,
+    None,
+    Some(Disperser.D_32),
+    ReadMode.BRIGHT,
+    CrossDispersed.NO,
+    2.4.microns,
+    SlitWidth.SW_7,
+    None,
+    WellDepth.DEEP,
+    Fixture.AltairNgs),
+
+  new GnirsParameters(
+    PixelScale.PS_005,
+    None,
+    Some(Disperser.D_111),
+    ReadMode.VERY_FAINT,
+    CrossDispersed.LXD,
+    1.4.microns,
+    SlitWidth.SW_1,
+    None,
+    WellDepth.SHALLOW,
+    Fixture.AltairLgs),
+
+
+  new GnirsParameters(
+    PixelScale.PS_015,
+    None,
+    Some(Disperser.D_111),
+    ReadMode.FAINT,
+    CrossDispersed.NO,
+    1.8.microns,
+    SlitWidth.SW_3,
+    None,
+    WellDepth.SHALLOW,
+    Fixture.AltairNgsFL),
+
+  new GnirsParameters(
+    PixelScale.PS_015,
+    None,
+    Some(Disperser.D_32),
+    ReadMode.VERY_BRIGHT,
+    CrossDispersed.NO,
+    2.9.microns,
+    SlitWidth.SW_5,
+    None,
+    WellDepth.SHALLOW,
+    Fixture.AltairNgs),
+
+  new GnirsParameters(
+    PixelScale.PS_015,
+    None,
+    Some(Disperser.D_111),
+    ReadMode.FAINT,
+    CrossDispersed.SXD,
+    2.0.microns,
+    SlitWidth.SW_5,
+    None,
+    WellDepth.DEEP,
+    Fixture.AltairLgs)
 
   ))
 

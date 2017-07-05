@@ -165,7 +165,7 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
                     haloOrder[i] = (VisitableSampledSpectrum) halo.get().clone();
                     haloOrder[i].accept(instrument.getGratingOrderNTransmission(order));
                     haloOrder[i].trim(trimStart, trimEnd);
-                    specS2N.setHaloSpectrum(haloOrder[i], haloThroughput.get(), IQcalc.getImageQuality()); // ??????????
+                    specS2N.setHaloSpectrum(haloOrder[i], haloThroughput.get(), IQcalc.getImageQuality());
                 }
 
                 skyOrder[i] = (VisitableSampledSpectrum) sky.clone();
