@@ -49,7 +49,6 @@ class PiEditor(pi: PrincipalInvestigator, editable:Boolean) extends StdModalEdit
 
   // Validation (optional for now)
   private val validatingControls = Seq(FirstName, LastName, Email, Institution.Name)
-//  override def editorValid = validatingControls.forall(_.valid)
   validatingControls foreach {
     _.reactions += {
       case ValueChanged(_) => validateEditor()
@@ -86,7 +85,6 @@ class PiEditor(pi: PrincipalInvestigator, editable:Boolean) extends StdModalEdit
     }
 
     object Address extends TextArea(ia.address, 6, 30) with SelectOnFocus {
-//      border = null // ?
       peer.addKeyListener(new KeyAdapter {
         override def keyPressed(e:KeyEvent) {
           if (e.getKeyCode == KeyEvent.VK_TAB) {
