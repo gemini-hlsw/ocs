@@ -11,7 +11,7 @@ import XMLConverter._
 
 class UpConverterSpec extends Specification with SemesterProperties with XmlMatchers {
   "The UpConverter" should {
-    "change the version but not the semester from a 2014.1.1 proposal to the 2015.1.1 Release" in {
+    "change the version but not the semester from a 2014.1.1 proposal to the current Release" in {
       val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_ver_2014.1.1.xml")))
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
@@ -40,7 +40,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
               i.visitor must beFalse
           }
 
-          proposal.semester must beEqualTo(Semester(2017, SemesterOption.B))
+          proposal.semester must beEqualTo(Semester(2018, SemesterOption.A))
       }
 
       UpConverter.upConvert(xml) must beSuccessful.like {
