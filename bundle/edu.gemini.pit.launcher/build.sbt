@@ -6,7 +6,7 @@ name := "edu.gemini.pit.launcher"
 
 version := pitVersion.value.toOsgiVersion
 
-osgiSettings 
+osgiSettings
 
 ocsBundleSettings
 
@@ -17,3 +17,5 @@ OsgiKeys.bundleSymbolicName := name.value
 OsgiKeys.dynamicImportPackage := Seq("")
 
 OsgiKeys.exportPackage := Seq()
+
+fork in run := true
