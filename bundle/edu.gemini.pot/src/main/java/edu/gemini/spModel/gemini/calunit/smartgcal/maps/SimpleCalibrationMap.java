@@ -1,11 +1,13 @@
 package edu.gemini.spModel.gemini.calunit.smartgcal.maps;
 
-
+import edu.gemini.shared.util.immutable.DefaultImList;
+import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.spModel.gemini.calunit.smartgcal.Calibration;
 import edu.gemini.spModel.gemini.calunit.smartgcal.ConfigurationKey;
 import edu.gemini.spModel.gemini.calunit.smartgcal.Version;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 /**
  */
@@ -41,4 +43,15 @@ public abstract class SimpleCalibrationMap extends BaseCalibrationMap {
         return calibrations;
     }
 
+    /**
+     * Export the calibration map to a list of String suitable for writing to a
+     * configuration file.
+     */
+    @Override
+    public Stream<ImList<String>> export() {
+        return map.entrySet().stream().flatMap(me -> {
+            final ImList<String> key = me.getKey().export();
+            return me.getValue().stream().map(cal -> key.append(cal.export()));
+        });
+    }
 }

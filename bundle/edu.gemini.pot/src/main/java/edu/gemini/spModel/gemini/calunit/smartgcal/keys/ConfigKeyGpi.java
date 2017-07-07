@@ -1,6 +1,8 @@
 package edu.gemini.spModel.gemini.calunit.smartgcal.keys;
 
 
+import edu.gemini.shared.util.immutable.DefaultImList;
+import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.spModel.gemini.calunit.smartgcal.ConfigurationKey;
 import edu.gemini.spModel.gemini.gpi.Gpi;
 
@@ -64,5 +66,13 @@ public class ConfigKeyGpi implements ConfigurationKey {
     @Override
     public String getInstrumentName() {
         return Gpi.SP_TYPE.readableStr;
+    }
+
+
+    @Override
+    public ImList<String> export() {
+        return DefaultImList.create(
+                mode.sequenceValue(),
+                disperser.sequenceValue());
     }
 }

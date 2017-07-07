@@ -7,6 +7,10 @@
 //
 package edu.gemini.spModel.gemini.calunit.smartgcal.keys;
 
+import edu.gemini.shared.util.immutable.ImCollections;
+import edu.gemini.shared.util.immutable.ImList;
+import edu.gemini.shared.util.immutable.ImOption;
+import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.gemini.calunit.smartgcal.Calibration;
 
 import java.io.Serializable;
@@ -15,30 +19,17 @@ import java.util.*;
 /**
  * Wavelength range sets store a set of non-overlapping ranges and a list of calibrations for each of these
  * ranges. Before adding a range it is verified that it does not overlap with any of the already existing
- * ranges in order to avoid disambiguities.
+ * ranges in order to avoid ambiguities.
  */
-public class WavelengthRangeSet implements Serializable {
-
-    /**
-     * Internal object for linking a wavelength range to a list of calibrations.
-     */
-    private final class RangeCalibrationTuple {
-        private final WavelengthRange range;
-        private final List<Calibration> calibrations;
-        public RangeCalibrationTuple(WavelengthRange range) {
-            this.range = range;
-            this.calibrations = new ArrayList<Calibration>();
-        }
-    }
+public final class WavelengthRangeSet implements Serializable {
 
     // set of range/calibration pairs
-    private final List<RangeCalibrationTuple> ranges;
+    private final Map<WavelengthRange, ImList<Calibration>> rangeMap = new HashMap<>();
 
     /**
      * Constructs a new empty wavelength range set.
      */
     public WavelengthRangeSet() {
-        ranges = new ArrayList<RangeCalibrationTuple>();
     }
 
     /**
@@ -50,17 +41,15 @@ public class WavelengthRangeSet implements Serializable {
      * @param c
      */
     public void add(WavelengthRange range, Calibration c) {
-        RangeCalibrationTuple existing = findTuple(range);
-        if (existing == null) {
-            for (RangeCalibrationTuple t : ranges) {
-                if (range.getMin() < t.range.getMax() && range.getMax() >= t.range.getMin()) {
-                    throw new IllegalArgumentException("range " +  range + " overlaps with " + t.range);
+        if (!rangeMap.containsKey(range)) {
+            rangeMap.keySet().forEach(r -> {
+                if (range.overlaps(r)) {
+                    throw new IllegalArgumentException("range " + range + " overlaps with " + r);
                 }
-            }
-            existing = new RangeCalibrationTuple(range);
-            ranges.add(existing);
+            });
         }
-        existing.calibrations.add(c);
+
+        rangeMap.compute(range, (r, l) -> (l == null) ? ImCollections.singletonList(c) : l.append(c));
     }
 
      /**
@@ -68,13 +57,8 @@ public class WavelengthRangeSet implements Serializable {
      * @param value
      * @return
      */
-    public WavelengthRange findRange(double value) {
-        RangeCalibrationTuple t = findTuple(value);
-        if (t != null) {
-            return t.range;
-        } else {
-            return null;
-        }
+    public Option<WavelengthRange> findRange(double value) {
+        return lookup(value).map(t -> t.getKey());
     }
 
     /**
@@ -83,26 +67,7 @@ public class WavelengthRangeSet implements Serializable {
      * @return
      */
     public List<Calibration> findCalibrations(double value) {
-        RangeCalibrationTuple t = findTuple(value);
-        if (t != null) {
-            return t.calibrations;
-        } else {
-            return new ArrayList<Calibration>();
-        }
-    }
-
-    /**
-     * Finds a range calibration pair for a range.
-     * @param r
-     * @return
-     */
-    private RangeCalibrationTuple findTuple(WavelengthRange r) {
-        for (RangeCalibrationTuple t : ranges) {
-            if (t.range.equals(r)) {
-                return t;
-            }
-        }
-        return null;
+        return lookup(value).map(t -> t.getValue().toList()).getOrElse(Collections.<Calibration>emptyList());
     }
 
     /**
@@ -110,13 +75,15 @@ public class WavelengthRangeSet implements Serializable {
      * @param value
      * @return
      */
-    private RangeCalibrationTuple findTuple(double value) {
-        for (RangeCalibrationTuple t : ranges) {
-            if (value >= t.range.getMin() && value < t.range.getMax()) {
-                return t;
-            }
+    private Option<Map.Entry<WavelengthRange, ImList<Calibration>>> lookup(double value) {
+        // There seems to be no find method so ...
+        for (Map.Entry<WavelengthRange, ImList<Calibration>> me : rangeMap.entrySet()) {
+            if (me.getKey().contains(value)) return ImOption.apply(me);
         }
-        return null;
+        return ImOption.apply(null);
     }
 
+    public Map<WavelengthRange, ImList<Calibration>> getRangeMap() {
+        return Collections.unmodifiableMap(rangeMap);
+    }
 }

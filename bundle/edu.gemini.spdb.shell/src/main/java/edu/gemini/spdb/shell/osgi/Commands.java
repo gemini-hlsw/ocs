@@ -2,16 +2,22 @@ package edu.gemini.spdb.shell.osgi;
 
 import edu.gemini.pot.sp.ISPNode;
 import edu.gemini.pot.sp.ISPProgram;
+import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.pot.spdb.DBAbstractQueryFunctor;
 import edu.gemini.pot.spdb.IDBDatabaseService;
 import edu.gemini.pot.spdb.IDBQueryFunctor;
 import edu.gemini.pot.spdb.IDBQueryRunner;
 import edu.gemini.shared.util.immutable.ImEither;
+import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.shared.util.immutable.Left;
 import edu.gemini.shared.util.immutable.Right;
 import edu.gemini.spModel.core.SPBadIDException;
 import edu.gemini.spModel.core.SPProgramID;
 import edu.gemini.spModel.io.SpImportService;
+import edu.gemini.spModel.gemini.calunit.smartgcal.Calibration;
+import edu.gemini.spModel.gemini.calunit.smartgcal.CalibrationProvider;
+import edu.gemini.spModel.gemini.calunit.smartgcal.CalibrationProviderHolder;
+import edu.gemini.spModel.gemini.inst.InstRegistry;
 import edu.gemini.spdb.shell.misc.EphemerisPurgeCommand;
 import static edu.gemini.spdb.shell.misc.EphemerisPurgeCommand.*;
 import edu.gemini.spdb.shell.misc.ExportXmlCommand;
@@ -21,11 +27,18 @@ import edu.gemini.spdb.shell.misc.LsProgs;
 import org.osgi.util.tracker.ServiceTracker;
 
 import java.io.File;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import static java.nio.file.StandardOpenOption.*;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 class Commands {
 
@@ -143,6 +156,56 @@ class Commands {
             }
             return "Done.";
         });
+    }
+
+    /**
+     * Exports smart gcal data files in a format that is amenable to parsing
+     * without special cases.
+     *
+     * @param dir directory into which the files will be written or updated
+     *
+     * @return nothing of importance
+     *
+     * @throws IOException
+     */
+    public String exportSmartGcal(final File dir) throws IOException {
+        if (!dir.isDirectory()) return String.format("Not a directory: %s", dir);
+
+        final Path dirPath = dir.toPath();
+        final Charset utf8 = Charset.forName("UTF-8");
+
+        final CalibrationProvider cp = CalibrationProviderHolder.getProvider();
+        for (SPComponentType i : InstRegistry.instance.types()) {
+            for (Calibration.Type ct : Calibration.Type.values()) {
+                final Stream<ImList<String>> config = cp.export(ct, i.readableStr);
+                final String               fileName = String.format("%s_%s.csv", i.readableStr, ct.name());
+
+                System.out.print(String.format("Writing %-30s ... ", fileName));
+
+                final Path p = dirPath.resolve(fileName);
+                try (final BufferedWriter w = Files.newBufferedWriter(p, utf8, CREATE, TRUNCATE_EXISTING, WRITE)) {
+                    config.map(l -> l.mkString("", ",", "\n")).forEach(s -> {
+                        try {
+                            w.write(s);
+                        } catch (IOException ex) {
+                            throw new RuntimeException(ex);
+                        }
+                    });
+                }
+
+                // We don't know whether the Stream is empty in time to avoid
+                // creating the file. (There is no Stream.isEmpty().)  If we
+                // created an empty file, delete it.
+                if (Files.size(p) == 0) {
+                    System.out.println("skipped.");
+                    Files.delete(p);
+                } else {
+                    System.out.println("done.");
+                }
+            }
+        }
+
+        return "Done";
     }
 
     // export xml files

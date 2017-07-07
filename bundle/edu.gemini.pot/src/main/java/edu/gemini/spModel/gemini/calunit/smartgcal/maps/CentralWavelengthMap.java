@@ -1,6 +1,8 @@
 package edu.gemini.spModel.gemini.calunit.smartgcal.maps;
 
 
+import edu.gemini.shared.util.immutable.DefaultImList;
+import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.spModel.gemini.calunit.smartgcal.Calibration;
 import edu.gemini.spModel.gemini.calunit.smartgcal.ConfigurationKey;
 import edu.gemini.spModel.gemini.calunit.smartgcal.Version;
@@ -8,6 +10,7 @@ import edu.gemini.spModel.gemini.calunit.smartgcal.keys.WavelengthRange;
 import edu.gemini.spModel.gemini.calunit.smartgcal.keys.WavelengthRangeSet;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 /**
  * A specialised calibration map that allows to store different lists of calibrations for disjoint wavelength
@@ -17,8 +20,8 @@ import java.util.*;
 public abstract class CentralWavelengthMap extends BaseCalibrationMap {
 
     public static final String WAVELENGTH_RANGE_NAME = "Central Wavelength";
-    
-    private Map<ConfigurationKey, WavelengthRangeSet> rangesMap;
+
+    protected final Map<ConfigurationKey, WavelengthRangeSet> rangesMap;
 
     public CentralWavelengthMap(Version version) {
         this(version, 200);
@@ -80,5 +83,31 @@ public abstract class CentralWavelengthMap extends BaseCalibrationMap {
         }
         // if we have calibrations for this key get the ones for the given wavelength from the set
         return rangeSet.findCalibrations(wavelength);
+    }
+
+    private static String exportWavelength(double wl) {
+        return Long.toString(Math.round(wl * 1000));
+    }
+
+    /**
+     * Export the calibration map to a list of String suitable for writing to a
+     * configuration file.
+     */
+    @Override
+    public Stream<ImList<String>> export() {
+        return rangesMap.entrySet().stream().flatMap(me0 -> {
+            final ImList<String>   calKey = me0.getKey().export();
+            final WavelengthRangeSet rset = me0.getValue();
+
+            return rset.getRangeMap().entrySet().stream().flatMap(me1 -> {
+                final WavelengthRange          wr = me1.getKey();
+                final ImList<Calibration> calList = me1.getValue();
+                final ImList<String>       prefix =
+                        calKey.append(exportWavelength(wr.getMin()))
+                              .append(exportWavelength(wr.getMax()));
+
+                return calList.stream().map(cal -> prefix.append(cal.export()));
+            });
+        });
     }
 }

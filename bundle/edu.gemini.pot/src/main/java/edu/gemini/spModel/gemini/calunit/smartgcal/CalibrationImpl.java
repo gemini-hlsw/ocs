@@ -6,6 +6,8 @@
 
 package edu.gemini.spModel.gemini.calunit.smartgcal;
 
+import edu.gemini.shared.util.immutable.DefaultImList;
+import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.spModel.gemini.calunit.CalUnitParams;
 import edu.gemini.spModel.type.SpTypeUtil;
 
@@ -311,5 +313,18 @@ public final class CalibrationImpl implements Calibration {
         if (this.isArc != other.isArc) return false;
         return this.basecals.equals(other.basecals);
 
+    }
+
+    @Override
+    public ImList<String> export() {
+        return DefaultImList.create(
+                Integer.toString(observe),
+                filter.sequenceValue(),
+                diffuser.sequenceValue(),
+                DefaultImList.create(lamps).map(l -> l.sequenceValue()).mkString("", ";", ""),
+                shutter.sequenceValue(),
+                Long.toString(Math.round(exposureTime * 1000)),
+                Integer.toString(coadds),
+                DefaultImList.create(basecals).map(b -> b.name()).mkString("", ";", ""));
     }
 }

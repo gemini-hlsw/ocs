@@ -95,6 +95,15 @@ public final class WavelengthRange implements Serializable {
      */
     public double getMax() { return this.max; }
 
+    public boolean overlaps(final WavelengthRange that) {
+        return min < that.max && max >= that.min;
+    }
+
+    public boolean contains(double val) {
+        return val >= min && val < max;
+    }
+
+
     @Override
     public String toString() { return "[" + min + "," + max + ")"; }
 

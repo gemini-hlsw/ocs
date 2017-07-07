@@ -7,6 +7,7 @@
 
 package edu.gemini.spModel.gemini.calunit.smartgcal;
 
+import edu.gemini.shared.util.immutable.ImList;
 
 import java.io.Serializable;
 
@@ -16,4 +17,5 @@ public interface ConfigurationKey extends Serializable {
 
     public interface Values extends Serializable {}
 
+    public ImList<String> export();
 }

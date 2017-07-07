@@ -6,6 +6,8 @@
 
 package edu.gemini.spModel.smartgcal;
 
+import edu.gemini.shared.util.immutable.ImCollections;
+import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.spModel.gemini.calunit.CalUnitParams;
 import edu.gemini.spModel.gemini.calunit.smartgcal.Calibration;
 import edu.gemini.spModel.gemini.calunit.smartgcal.CalibrationMap;
@@ -17,6 +19,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 public class CalibrationMapReaderTest {
 
@@ -178,6 +181,9 @@ public class CalibrationMapReaderTest {
         public Version getVersion() {
             return new Version(1, new Date());
         }
+
+        @Override
+        public Stream<ImList<String>> export() { return Stream.empty(); }
     }
 
     public static class FakeCalibration implements Calibration {
@@ -241,6 +247,9 @@ public class CalibrationMapReaderTest {
         public Integer getCoadds() {
             return null;
         }
+
+        @Override
+        public ImList<String> export() { return ImCollections.emptyList(); }
     }
 
     public static class FakeKey implements ConfigurationKey {
@@ -273,6 +282,9 @@ public class CalibrationMapReaderTest {
         public String getInstrumentName() {
             return "FAKE";
         }
+
+        @Override
+        public ImList<String> export() { return ImCollections.emptyList(); }
     }
 
 }

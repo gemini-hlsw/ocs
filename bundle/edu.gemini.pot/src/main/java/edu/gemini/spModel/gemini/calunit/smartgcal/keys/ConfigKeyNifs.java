@@ -1,6 +1,8 @@
 package edu.gemini.spModel.gemini.calunit.smartgcal.keys;
 
 
+import edu.gemini.shared.util.immutable.DefaultImList;
+import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.spModel.gemini.calunit.smartgcal.ConfigurationKey;
 import edu.gemini.spModel.gemini.nifs.InstNIFS;
 import edu.gemini.spModel.gemini.nifs.NIFSParams;
@@ -77,5 +79,14 @@ public class ConfigKeyNifs implements ConfigurationKey {
     @Override
     public String getInstrumentName() {
         return InstNIFS.SP_TYPE.readableStr;
+    }
+
+
+    @Override
+    public ImList<String> export() {
+        return DefaultImList.create(
+                disperser.sequenceValue(),
+                filter.sequenceValue(),
+                mask.sequenceValue());
     }
 }

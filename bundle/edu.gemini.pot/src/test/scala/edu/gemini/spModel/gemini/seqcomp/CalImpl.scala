@@ -1,5 +1,6 @@
 package edu.gemini.spModel.gemini.seqcomp
 
+import edu.gemini.shared.util.immutable.{ImCollections, ImList}
 import edu.gemini.spModel.gemini.calunit.CalUnitParams.{Diffuser, Filter, Shutter, Lamp}
 import edu.gemini.spModel.gemini.calunit.smartgcal.Calibration
 
@@ -28,4 +29,6 @@ final case class CalImpl(lamps: Set[Lamp],
   def getObserve: JInteger          = observe
   def getExposureTime: JDouble      = exposureTime
   def getCoadds: JInteger           = coadds
+
+  def export: ImList[String]        = ImCollections.emptyList[String]
 }

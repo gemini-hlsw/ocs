@@ -7,8 +7,11 @@
 
 package edu.gemini.spModel.gemini.calunit.smartgcal;
 
+import edu.gemini.shared.util.immutable.ImList;
+
 import java.io.Serializable;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * A calibration provider allows to lookup the calibrations that are related to a given instrument configuration
@@ -36,6 +39,11 @@ public interface CalibrationProvider extends Serializable {
      * @return
      */
     Version getVersion(Calibration.Type type, String instrument);
+
+    /**
+     * Exports the calibration information in a format suitable for writing.
+     */
+    Stream<ImList<String>> export(Calibration.Type type, String instrument);
 
     /**
      * Gets version information for all calibration tables.
