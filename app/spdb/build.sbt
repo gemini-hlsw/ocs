@@ -250,12 +250,12 @@ def dnavarro(version: Version) = AppConfig(
     "edu.gemini.auxfile.fits.dest"               -> "/gemsoft/var/data/ictd/test/GS@SEMESTER@/@PROG_ID@",
     "edu.gemini.auxfile.fits.host"               -> "gsconfig.gemini.edu",
     "edu.gemini.auxfile.other.dest"              -> "/gemsoft/var/data/finder/GSqueue/Finders-Test/@SEMESTER@/@PROG_ID@",
-    "edu.gemini.auxfile.root"                    -> "/Users/dnavarro/.auxfile",
+    "edu.gemini.auxfile.root"                    -> "/Users/jnavarro/.auxfile",
     "edu.gemini.dataman.gsa.summit.host"         -> "cpofits-lv1new.cl.gemini.edu",
-    "edu.gemini.dbTools.tcs.ephemeris.directory" -> "/Users/osmirnov/.ephemeris",
+    "edu.gemini.dbTools.tcs.ephemeris.directory" -> "/Users/jnavarro/.ephemeris",
     "edu.gemini.services.server.start"           -> "false",
     "edu.gemini.smartgcal.host"                  -> "localhost",
-    "edu.gemini.spdb.dir"                        -> "/Users/dnavarro/.spdb/",
+    "edu.gemini.spdb.dir"                        -> "/Users/jnavarro/.spdb/",
     "edu.gemini.util.trpc.name"                  -> "Dannys's ODB (Test)"
   )
 ) extending List(with_gogo(version), dnavarro_credentials(version))
