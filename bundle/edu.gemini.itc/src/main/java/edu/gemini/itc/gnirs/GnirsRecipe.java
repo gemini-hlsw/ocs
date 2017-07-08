@@ -53,16 +53,8 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
     }
 
     private void validateInputParameters() {
-            if (_gnirsParameters.altair().isDefined()) {
-                if (_obsDetailParameters.calculationMethod() instanceof Spectroscopy) {
-                    throw new IllegalArgumentException(
-                            "Altair with Spectroscopy mode is not currently supported by the ITC.");
-                }
-            }
-
         // some general validations
         Validation.validate(instrument, _obsDetailParameters, _sdParameters);
-
     }
 
     public ItcImagingResult serviceResult(final ImagingResult r) {
@@ -165,7 +157,7 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
                     haloOrder[i] = (VisitableSampledSpectrum) halo.get().clone();
                     haloOrder[i].accept(instrument.getGratingOrderNTransmission(order));
                     haloOrder[i].trim(trimStart, trimEnd);
-                    specS2N.setHaloSpectrum(haloOrder[i], haloThroughput.get(), IQcalc.getImageQuality()); // ??????????
+                    specS2N.setHaloSpectrum(haloOrder[i], haloThroughput.get(), IQcalc.getImageQuality());
                 }
 
                 skyOrder[i] = (VisitableSampledSpectrum) sky.clone();
@@ -220,8 +212,8 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
 
             specS2N.setSourceSpectrum(sed);
             specS2N.setBackgroundSpectrum(sky);
-            if (haloThroughput.nonEmpty()) {
-                specS2N.setHaloSpectrum(sed, haloThroughput.get(), IQcalc.getImageQuality());
+            if (altair.isDefined() && halo.isDefined() && haloThroughput.isDefined()) {
+                specS2N.setHaloSpectrum(halo.get(), haloThroughput.get(), IQcalc.getImageQuality());
             }
             sed.accept(specS2N);
 
