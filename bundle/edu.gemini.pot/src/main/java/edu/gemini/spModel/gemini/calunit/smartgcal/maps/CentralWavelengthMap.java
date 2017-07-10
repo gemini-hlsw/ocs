@@ -86,7 +86,9 @@ public abstract class CentralWavelengthMap extends BaseCalibrationMap {
     }
 
     private static String exportWavelength(double wl) {
-        return Long.toString(Math.round(wl * 1000));
+        // Wavelength stored as a double is problematic.  In some instruments
+        // these are um and in others nm.  Parsing has to be instrument specific.
+        return (wl == Double.MAX_VALUE) ? "MAX" : Long.toString(Math.round(wl * 1000));
     }
 
     /**
