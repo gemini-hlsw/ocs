@@ -17,8 +17,8 @@ package object immutable {
 
     // Trim lines, join adjacent lines if non-empty
     def unwrapLines: String = s.lines.map(_.trim).dropWhile(_.isEmpty).map {
-      case s0 if s0.isEmpty => "\n"
-      case s0               => s0 + " "
+      case "" => "\n"
+      case s0 => s"$s0 "
     }.mkString
 
     def trimLines: String = s.lines.map(_.trim).dropWhile(_.isEmpty).mkString("\n")
