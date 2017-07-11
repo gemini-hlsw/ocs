@@ -21,8 +21,8 @@ object Flamingos2 {
   private def filtersFor(d: Option[Flamingos2Disperser]): List[Flamingos2Filter] = d match {
     case Some(R1200HK) => List(JH, HK)
     case Some(R1200JH) => List(JH)
-    case Some(R3000)   => List(J_LOW, J, H, K_LONG, K_SHORT, K_BLUE, K_RED)
-    case _             => List(Y, J_LOW, J, H, K_LONG, K_SHORT, K_BLUE, K_RED)
+    case Some(R3000)   => List(J, H, K_LONG, K_SHORT, K_BLUE, K_RED)
+    case _             => List(J, H, K_LONG, K_SHORT, K_BLUE, K_RED)
   }
 
   private def defaultFilterFor(d: Flamingos2Disperser): Option[Flamingos2Filter] = d match {

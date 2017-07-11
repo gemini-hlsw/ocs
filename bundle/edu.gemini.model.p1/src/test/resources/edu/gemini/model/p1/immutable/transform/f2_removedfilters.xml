@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<proposal schemaVersion="2017.2.1">
+    <meta band3optionChosen="false" overrideAffiliate="false"/>
+    <semester year="2017" half="B"/>
+    <title></title>
+    <abstract></abstract>
+    <scheduling></scheduling>
+    <keywords/>
+    <investigators>
+        <pi id="investigator-0">
+            <firstName>Principal</firstName>
+            <lastName>Investigator</lastName>
+            <status>PhD</status>
+            <email></email>
+            <address>
+                <institution></institution>
+                <address></address>
+                <country></country>
+            </address>
+        </pi>
+    </investigators>
+    <targets/>
+    <conditions/>
+    <blueprints>
+        <flamingos2>
+            <mos id="blueprint-0">
+                <name>Flamingos2 MOS R3K J-lo (1.122 um)</name>
+                <visitor>false</visitor>
+                <filter>J-lo (1.122 um)</filter>
+                <disperser>R3K</disperser>
+                <preimaging>false</preimaging>
+            </mos>
+        </flamingos2>
+        <flamingos2>
+            <imaging id="blueprint-1">
+                <name>Flamingos2 Imaging J-lo (1.122 um)</name>
+                <visitor>false</visitor>
+                <filter>J-lo (1.122 um)</filter>
+            </imaging>
+        </flamingos2>
+        <flamingos2>
+            <imaging id="blueprint-2">
+                <name>Flamingos2 Imaging Y (1.020 um)</name>
+                <visitor>false</visitor>
+                <filter>Y (1.020 um)</filter>
+            </imaging>
+        </flamingos2>
+    </blueprints>
+    <observations>
+        <observation band="Band 1/2" enabled="true" blueprint="blueprint-0"/>
+        <observation band="Band 1/2" enabled="true" blueprint="blueprint-1"/>
+        <observation band="Band 1/2" enabled="true" blueprint="blueprint-2"/>
+    </observations>
+    <proposalClass>
+        <queue tooOption="None"/>
+    </proposalClass>
+</proposal>

@@ -555,14 +555,18 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       }
     }
     "proposal with F2 R3K+Y longslit must use the filter Y, REL-1282" in {
-      val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_with_f2_R3K+Y_longslit.xml")))
+      skipped {
+        val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_with_f2_R3K+Y_longslit.xml")))
 
-      testF2R3KYConversion(xml)
+        testF2R3KYConversion(xml)
+      }
     }
     "proposal with F2 R3K+Y MOS must use the filter Y, REL-1282" in {
-      val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_with_f2_R3K+Y_mos.xml")))
+      skipped {
+        val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_with_f2_R3K+Y_mos.xml")))
 
-      testF2R3KYConversion(xml)
+        testF2R3KYConversion(xml)
+      }
     }
     "proposal with F2 K-long filter must use the new name, REL-2565" in {
       val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_with_f2_old_longslit.xml")))
@@ -739,6 +743,19 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
         case StepResult(changes, result) =>
           result \\ "request" must \\("time")
           result \\ "request" must not \\ "progTime"
+      }
+    }
+    "F2 proposal with Y or J-lo fiters should remove them, REL-3193" in {
+      val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("f2_removedfilters.xml")))
+
+      val converted = UpConverter.convert(xml)
+      converted must beSuccessful.like {
+        case StepResult(changes, result) =>
+          changes must have length 4
+          result \\ "flamingos2" must not(\\("filter") \> "J-lo (1.122 um)")
+          result \\ "flamingos2" must not(\\("filter") \> "Y (1.020 um)")
+          result \\ "flamingos2" must not(\\("name") \>~ ".*Y (1.020 um).*")
+          result \\ "flamingos2" must not(\\("name") \>~ ".*J-lo (1.122 um).*")
       }
     }
   }

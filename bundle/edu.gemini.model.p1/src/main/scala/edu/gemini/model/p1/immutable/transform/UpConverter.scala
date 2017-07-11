@@ -134,7 +134,23 @@ case class LastStepConverter(semester: Semester) extends SemesterConverter {
  * This converter will upgrade to 2018A
  */
 case object SemesterConverter2017BTo2018A extends SemesterConverter {
-  override val transformers = Nil
+  val jLoFilter = "J-lo (1.122 um)"
+  val yFilter = "Y (1.020 um)"
+
+  val removeF2YJloFilters: TransformFunction = {
+    case p @ <flamingos2>{ns @ _*}</flamingos2> if (ns \ "filter").map(_.text).exists(f => f === jLoFilter || f === yFilter) =>
+      object yjLoFilterTransformer extends BasicTransformer {
+        override def transform(n: xml.Node): xml.NodeSeq = n match {
+          case <name>{name}</name>                                   => <name>{name.text.replaceAll(jLoFilter, "").replaceAll(yFilter, "")}</name>
+          case <filter>{filter}</filter> if filter.text == jLoFilter => xml.NodeSeq.Empty
+          case <filter>{filter}</filter> if filter.text == yFilter   => xml.NodeSeq.Empty
+          case elem: xml.Elem                                        => elem.copy(child = elem.child.flatMap(transform))
+          case _                                                     => n
+        }
+      }
+      StepResult(s"The unavailable Flamingos2 filters $jLoFilter and $yFilter have been removed from the proposal.", <flamingos2>{yjLoFilterTransformer.transform(ns)}</flamingos2>).successNel
+  }
+  override val transformers = List(removeF2YJloFilters)
 }
 
 /**
