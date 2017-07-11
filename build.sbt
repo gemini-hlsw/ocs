@@ -15,6 +15,8 @@ scalaVersion in ThisBuild := "2.11.11"
 
 updateOptions := updateOptions.value.withCachedResolution(true)
 
+cancelable in Global := true
+
 // Note that this is not a standard setting; it's used for building IDEA modules.
 javaVersion in ThisBuild := {
   val expected = "1.8"

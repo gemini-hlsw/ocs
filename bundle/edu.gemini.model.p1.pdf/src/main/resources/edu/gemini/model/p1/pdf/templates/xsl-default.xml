@@ -424,15 +424,17 @@
                                     </fo:block>
                                 </fo:table-cell>
                                 <fo:table-cell>
-                                    <fo:block>
-                                        <xsl:value-of
-                                                select="investigators/pi/phone"/>
-                                        <xsl:text>&#160;</xsl:text>
-                                        <xsl:text>/</xsl:text>
-                                        <xsl:text>&#160;</xsl:text>
-                                        <xsl:value-of
-                                                select="investigators/pi/email"/>
-                                    </fo:block>
+                                    <fo:block-container overflow="hidden">
+                                      <fo:block>
+                                          <xsl:value-of
+                                                  select="investigators/pi/phone"/>
+                                          <xsl:text>&#160;</xsl:text>
+                                          <xsl:text>/</xsl:text>
+                                          <xsl:text>&#160;</xsl:text>
+                                          <xsl:value-of
+                                                  select="investigators/pi/email"/>
+                                      </fo:block>
+                                    </fo:block-container>
                                 </fo:table-cell>
                             </fo:table-row>
 
