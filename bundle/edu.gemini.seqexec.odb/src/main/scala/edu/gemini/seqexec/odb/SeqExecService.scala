@@ -8,9 +8,7 @@ import edu.gemini.spModel.config.ConfigBridge
 import edu.gemini.spModel.config.map.ConfigValMapInstances.IDENTITY_MAP
 import edu.gemini.spModel.config2.ConfigSequence
 import edu.gemini.spModel.core.Peer
-import edu.gemini.spModel.gemini.calunit.smartgcal.CalibrationProvider
 import edu.gemini.spModel.io.SpImportService
-import edu.gemini.spModel.seqcomp.SeqRepeatCbOptions
 import java.io.{BufferedReader, InputStreamReader, StringReader}
 import java.net.{HttpURLConnection, URL}
 import java.net.HttpURLConnection.{HTTP_NOT_FOUND, HTTP_OK}
@@ -85,11 +83,9 @@ object SeqExecService {
       }
     }
 
-  private def extractSequence(obs: ISPObservation, smartGcal: CalibrationProvider): TrySeq[ConfigSequence] =
+  private def extractSequence(obs: ISPObservation): TrySeq[ConfigSequence] =
     catchingAll {
-      val options = new java.util.HashMap[String, Object]
-      SeqRepeatCbOptions.setCalibrationProvider(options, smartGcal)
-      ConfigBridge.extractSequence(obs, options, IDENTITY_MAP, true)
+      ConfigBridge.extractSequence(obs, null, IDENTITY_MAP, true)
     }
 
   /** Constructs a SeqExecService that works with a servlet running in the ODB.
@@ -97,7 +93,7 @@ object SeqExecService {
     * observation XML (wrapped in a program shell suitable for importing). The
     * XML is then parsed and the sequence is extracted.
     */
-  def client(peer: Peer, smartGcal: CalibrationProvider): SeqExecService =
+  def client(peer: Peer): SeqExecService =
     new SeqExecService {
       override def sequence(oid: SPObservationID): TrySeq[ConfigSequence] =
         for {
@@ -105,7 +101,7 @@ object SeqExecService {
           c <- open(u)
           x <- read(c, oid)
           o <- parse(x)
-          s <- extractSequence(o, smartGcal)
+          s <- extractSequence(o)
         } yield s
     }
 }
