@@ -9,7 +9,6 @@ import edu.gemini.spModel.config.map.ConfigValMapInstances.IDENTITY_MAP
 import edu.gemini.spModel.config2.ConfigSequence
 import edu.gemini.spModel.core.Peer
 import edu.gemini.spModel.io.SpImportService
-
 import java.io.{BufferedReader, InputStreamReader, StringReader}
 import java.net.{HttpURLConnection, URL}
 import java.net.HttpURLConnection.{HTTP_NOT_FOUND, HTTP_OK}

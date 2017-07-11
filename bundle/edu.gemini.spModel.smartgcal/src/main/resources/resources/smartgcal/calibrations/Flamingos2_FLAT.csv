@@ -1,1 +1,89 @@
-0,2013/04/30 00:00:00 HST# F2_FLAT.csv#,,,,,,,,,,,,#,2013 Apr 30,,,,,,,,,,,#,,,,,,,,,,,,#,Recommended GCAL configurations and Exp. Times for F2 calibrations:,,,,,,,,,,,#,IR lamp,,,,,,,,,,,#,,,,,,,,,,,,#,Note the following:,,,,,,,,,,,#,,,,,,,,,,,,#,"All Flats are taken with GCALlamp=IR grey body-high, GCALdiffuser=IR",,,,,,,,,,,#,The choice of filter within F2 is considered because they sort orders,,,,,,,,,,,#,"The Read Mode is Bright Object, Readout mode Science",,,,,,,,,,,#,,,,,,,,,,,,#,,,,,,,,,,,,#,,,,,,,,,,,,#  Instrument Configuration from OT,,,,,,,GCAL configuration from OT,,,,,Disperser,Filter,Focal Plane Unit,,/=>/,,Calibration Observe,Calibration Filter,Calibration Diffuser,Calibration Lamps,Calibration Shutter,Calibration Exposure Time,Calibration Coadds,Calibration Basecal#,,,,,,,,,,,,None,Y (1.02 um),Imaging (none),,,,6,ND4.0,IR,IR grey body - high,Open,20,1,DayNone,Y (1.02 um),Imaging (none),,,,6,ND4.0,IR,IR grey body - high,Closed,20,1,DayNone,J-low (1.15 um),Imaging (none),,,,6,ND4.0,IR,IR grey body - high,Open,3,1,DayNone,J-low (1.15 um),Imaging (none),,,,6,ND4.0,IR,IR grey body - high,Closed,3,1,DayNone,J (1.25 um),Imaging (none),,,,6,ND4-5,IR,IR grey body - high,Open,60,1,DayNone,J (1.25 um),Imaging (none),,,,6,ND4-5,IR,IR grey body - high,Closed,60,1,DayNone,H (1.65 um),Imaging (none),,,,6,ND4-5,IR,IR grey body - high,Open,3,1,DayNone,H (1.65 um),Imaging (none),,,,6,ND4-5,IR,IR grey body - high,Closed,3,1,DayNone,K-short (2.15 um),Imaging (none),,,,6,ND2.0,IR,IR grey body - high,Closed,6,1,DayNone,JH (spectroscopic),Imaging (none),,,,6,ND4-5,IR,IR grey body - high,Open,2,1,DayNone,JH (spectroscopic),Imaging (none),,,,6,ND4-5,IR,IR grey body - high,Closed,2,1,DayNone,HK (spectroscopic),Imaging (none),,,,6,ND2.0,IR,IR grey body - high,Closed,2,1,Day#,,,,,,,,,,,,#,,,,,,,,,,,,R=1200 (J + H) grism,JH (spectroscopic),1-pix longslit,,,,1,ND2.0,IR,IR grey body - high,Open,15,1,DayR=1200 (J + H) grism,JH (spectroscopic),2-pix longslit,,,,1,ND2.0,IR,IR grey body - high,Open,8,1,DayR=1200 (J + H) grism,JH (spectroscopic),3-pix longslit,,,,1,ND2.0,IR,IR grey body - high,Open,5,1,DayR=1200 (J + H) grism,JH (spectroscopic),4-pix longslit,,,,1,ND2.0,IR,IR grey body - high,Open,4,1,DayR=1200 (J + H) grism,JH (spectroscopic),6-pix longslit,,,,1,ND2.0,IR,IR grey body - high,Open,3,1,DayR=1200 (J + H) grism,JH (spectroscopic),8-pix longslit,,,,1,ND4-5,IR,IR grey body - high,Open,2,1,Day#,,,,,,,,,,,,R=1200 (H + K) grism,HK (spectroscopic),1-pix longslit,,,,1,ND2.0,IR,IR grey body - high,Open,8,1,DayR=1200 (H + K) grism,HK (spectroscopic),2-pix longslit,,,,1,ND2.0,IR,IR grey body - high,Open,4,1,DayR=1200 (H + K) grism,HK (spectroscopic),3-pix longslit,,,,1,ND2.0,IR,IR grey body - high,Open,3,1,DayR=1200 (H + K) grism,HK (spectroscopic),4-pix longslit,,,,1,ND4-5,IR,IR grey body - high,Open,80,1,DayR=1200 (H + K) grism,HK (spectroscopic),6-pix longslit,,,,1,ND4-5,IR,IR grey body - high,Open,50,1,DayR=1200 (H + K) grism,HK (spectroscopic),8-pix longslit,,,,1,ND4-5,IR,IR grey body - high,Open,40,1,Day#,,,,,,,,,,,,R=3000 (J or H or K) grism,J-low (1.15 um),1-pix longslit,,,,1,ND2.0,IR,IR grey body - high,Open,30,1,DayR=3000 (J or H or K) grism,J-low (1.15 um),2-pix longslit,,,,1,ND2.0,IR,IR grey body - high,Open,16,1,DayR=3000 (J or H or K) grism,J-low (1.15 um),3-pix longslit,,,,1,ND2.0,IR,IR grey body - high,Open,10,1,DayR=3000 (J or H or K) grism,J-low (1.15 um),4-pix longslit,,,,1,ND2.0,IR,IR grey body - high,Open,8,1,DayR=3000 (J or H or K) grism,J-low (1.15 um),6-pix longslit,,,,1,ND2.0,IR,IR grey body - high,Open,6,1,DayR=3000 (J or H or K) grism,J-low (1.15 um),8-pix longslit,,,,1,ND4-5,IR,IR grey body - high,Open,4,1,Day#,,,,,,,,,,,,R=3000 (J or H or K) grism,J (1.25 um),1-pix longslit,,,,1,ND2.0,IR,IR grey body - high,Open,30,1,DayR=3000 (J or H or K) grism,J (1.25 um),2-pix longslit,,,,1,ND2.0,IR,IR grey body - high,Open,16,1,DayR=3000 (J or H or K) grism,J (1.25 um),3-pix longslit,,,,1,ND2.0,IR,IR grey body - high,Open,10,1,DayR=3000 (J or H or K) grism,J (1.25 um),4-pix longslit,,,,1,ND2.0,IR,IR grey body - high,Open,8,1,DayR=3000 (J or H or K) grism,J (1.25 um),6-pix longslit,,,,1,ND2.0,IR,IR grey body - high,Open,6,1,DayR=3000 (J or H or K) grism,J (1.25 um),8-pix longslit,,,,1,ND4-5,IR,IR grey body - high,Open,4,1,Day#,,,,,,,,,,,,R=3000 (J or H or K) grism,H (1.65 um),1-pix longslit,,,,1,ND2.0,IR,IR grey body - high,Open,16,1,DayR=3000 (J or H or K) grism,H (1.65 um),2-pix longslit,,,,1,ND2.0,IR,IR grey body - high,Open,8,1,DayR=3000 (J or H or K) grism,H (1.65 um),3-pix longslit,,,,1,ND2.0,IR,IR grey body - high,Open,6,1,DayR=3000 (J or H or K) grism,H (1.65 um),4-pix longslit,,,,1,ND4-5,IR,IR grey body - high,Open,160,1,DayR=3000 (J or H or K) grism,H (1.65 um),6-pix longslit,,,,1,ND4-5,IR,IR grey body - high,Open,100,1,DayR=3000 (J or H or K) grism,H (1.65 um),8-pix longslit,,,,1,ND4-5,IR,IR grey body - high,Open,80,1,Day#,,,,,,,,,,,,R=3000 (J or H or K) grism,K-short (2.15 um),1-pix longslit,,,,1,ND2.0,IR,IR grey body - high,Open,16,1,DayR=3000 (J or H or K) grism,K-short (2.15 um),2-pix longslit,,,,1,ND2.0,IR,IR grey body - high,Open,8,1,DayR=3000 (J or H or K) grism,K-short (2.15 um),3-pix longslit,,,,1,ND2.0,IR,IR grey body - high,Open,6,1,DayR=3000 (J or H or K) grism,K-short (2.15 um),4-pix longslit,,,,1,ND4-5,IR,IR grey body - high,Open,160,1,DayR=3000 (J or H or K) grism,K-short (2.15 um),6-pix longslit,,,,1,ND4-5,IR,IR grey body - high,Open,100,1,DayR=3000 (J or H or K) grism,K-short (2.15 um),8-pix longslit,,,,1,ND4-5,IR,IR grey body - high,Open,80,1,Day#,,,,,,,,,,,,
+363,2016/04/03 13:13:50 HST
+# F2_FLAT.csv,,,,,,,,,,,,,
+#,,,,,,,,,,,,,
+#,2016 Feb 10,,,,,,,,,,,,
+#,,,,,,,,,,,,,
+#,Recommended GCAL configurations and Exp. Times for F2 calibrations:,,,,,,,,,,,,
+#,IR lamp,,,,,,,,,,,,
+#,,,,,,,,,,,,,
+#,Note the following:,,,,,,,,,,,,
+#,,,,,,,,,,,,,
+#,"All Flats are taken with GCALlamp=IR grey body-high, GCALdiffuser=IR",,,,,,,,,,,,
+#,The choice of filter within F2 is considered because they sort orders,,,,,,,,,,,,
+#,"The Read Mode is Bright Object, Readout mode Science",,,,,,,,,,,,
+#, Added the 'R=3000 grism  + Y filter. Also made edits based on M. Schirmer checks done in July 2013. 082113,,,,,,,,,,,,
+#,,,,,,,,,,,,,
+#,,,,,,,,,,,,,
+#  Instrument Configuration from OT,,,,,,,GCAL configuration from OT,,,,,,
+Disperser,Filter,Focal Plane Unit,,/=>/,,Calibration Observe,Calibration Filter,Calibration Diffuser,Calibration Lamps,Calibration Shutter,Calibration Exposure Time,Calibration Coadds,Calibration Basecal
+#,,,,,,,,,,,,,
+None,Y (1.02 um),Imaging (none),,,,6,ND4.0,IR,IR grey body - high,Open,20,1,Day
+None,Y (1.02 um),Imaging (none),,,,6,ND4.0,IR,IR grey body - high,Closed,20,1,Day
+None,J-low (1.15 um),Imaging (none),,,,6,ND4.0,IR,IR grey body - high,Open,4,1,Day
+None,J-low (1.15 um),Imaging (none),,,,6,ND4.0,IR,IR grey body - high,Closed,4,1,Day
+None,J (1.25 um),Imaging (none),,,,6,ND4-5,IR,IR grey body - high,Open,60,1,Day
+None,J (1.25 um),Imaging (none),,,,6,ND4-5,IR,IR grey body - high,Closed,60,1,Day
+None,H (1.65 um),Imaging (none),,,,6,ND4-5,IR,IR grey body - high,Open,3,1,Day
+None,H (1.65 um),Imaging (none),,,,6,ND4-5,IR,IR grey body - high,Closed,3,1,Day
+None,K-short (2.15 um),Imaging (none),,,,6,ND2.0,IR,IR grey body - high,Closed,3,1,Day
+None,JH (spectroscopic),Imaging (none),,,,6,ND4-5,IR,IR grey body - high,Open,2,1,Day
+None,JH (spectroscopic),Imaging (none),,,,6,ND4-5,IR,IR grey body - high,Closed,2,1,Day
+None,HK (spectroscopic),Imaging (none),,,,6,ND2.0,IR,IR grey body - high,Closed,2,1,Day
+#,,,,,,,,,,,,,
+#,,,,,,,,,,,,,
+R=1200 (J + H) grism,JH (spectroscopic),1-pix longslit,,,,1,ND2.0,IR,IR grey body - high,Open,20,1,Night
+R=1200 (J + H) grism,JH (spectroscopic),2-pix longslit,,,,1,ND2.0,IR,IR grey body - high,Open,8,1,Night
+R=1200 (J + H) grism,JH (spectroscopic),3-pix longslit,,,,1,ND2.0,IR,IR grey body - high,Open,5,1,Night
+R=1200 (J + H) grism,JH (spectroscopic),4-pix longslit,,,,1,ND2.0,IR,IR grey body - high,Open,4,1,Night
+R=1200 (J + H) grism,JH (spectroscopic),6-pix longslit,,,,1,ND2.0,IR,IR grey body - high,Open,3,1,Night
+R=1200 (J + H) grism,JH (spectroscopic),8-pix longslit,,,,1,ND2.0,IR,IR grey body - high,Open,3,1,Night
+#,,,,,,,,,,,,,
+R=1200 (H + K) grism,HK (spectroscopic),1-pix longslit,,,,1,ND2.0,IR,IR grey body - high,Open,10,1,Night
+R=1200 (H + K) grism,HK (spectroscopic),2-pix longslit,,,,1,ND2.0,IR,IR grey body - high,Open,4,1,Night
+R=1200 (H + K) grism,HK (spectroscopic),3-pix longslit,,,,1,ND2.0,IR,IR grey body - high,Open,3,1,Night
+R=1200 (H + K) grism,HK (spectroscopic),4-pix longslit,,,,1,ND4-5,IR,IR grey body - high,Open,80,1,Night
+R=1200 (H + K) grism,HK (spectroscopic),6-pix longslit,,,,1,ND4-5,IR,IR grey body - high,Open,60,1,Night
+R=1200 (H + K) grism,HK (spectroscopic),8-pix longslit,,,,1,ND4-5,IR,IR grey body - high,Open,40,1,Night
+#,,,,,,,,,,,,,
+R=3000 (J or H or K) grism,J-low (1.15 um),1-pix longslit,,,,1,none,IR,IR grey body - high,Open,50,1,Night
+R=3000 (J or H or K) grism,J-low (1.15 um),2-pix longslit,,,,1,none,IR,IR grey body - high,Open,25,1,Night
+R=3000 (J or H or K) grism,J-low (1.15 um),3-pix longslit,,,,1,none,IR,IR grey body - high,Open,15,1,Night
+R=3000 (J or H or K) grism,J-low (1.15 um),4-pix longslit,,,,1,none,IR,IR grey body - high,Open,12,1,Night
+R=3000 (J or H or K) grism,J-low (1.15 um),6-pix longslit,,,,1,none,IR,IR grey body - high,Open,8,1,Night
+R=3000 (J or H or K) grism,J-low (1.15 um),8-pix longslit,,,,1,none,IR,IR grey body - high,Open,6,1,Night
+#,,,,,,,,,,,,,
+R=3000 (J or H or K) grism,J (1.25 um),1-pix longslit,,,,1,none,IR,IR grey body - high,Open,10,1,Night
+R=3000 (J or H or K) grism,J (1.25 um),2-pix longslit,,,,1,none,IR,IR grey body - high,Open,5,1,Night
+R=3000 (J or H or K) grism,J (1.25 um),3-pix longslit,,,,1,ND1.0,IR,IR grey body - high,Open,25,1,Night
+R=3000 (J or H or K) grism,J (1.25 um),4-pix longslit,,,,1,ND1.0,IR,IR grey body - high,Open,20,1,Night
+R=3000 (J or H or K) grism,J (1.25 um),6-pix longslit,,,,1,ND1.0,IR,IR grey body - high,Open,12,1,Night
+R=3000 (J or H or K) grism,J (1.25 um),8-pix longslit,,,,1,ND1.0,IR,IR grey body - high,Open,10,1,Night
+#,,,,,,,,,,,,,
+R=3000 (J or H or K) grism,H (1.65 um),1-pix longslit,,,,1,ND1.0,IR,IR grey body - high,Open,6,1,Night
+R=3000 (J or H or K) grism,H (1.65 um),2-pix longslit,,,,1,ND2.0,IR,IR grey body - high,Open,50,1,Night
+R=3000 (J or H or K) grism,H (1.65 um),3-pix longslit,,,,1,ND2.0,IR,IR grey body - high,Open,40,1,Night
+R=3000 (J or H or K) grism,H (1.65 um),4-pix longslit,,,,1,ND2.0,IR,IR grey body - high,Open,25,1,Night
+R=3000 (J or H or K) grism,H (1.65 um),6-pix longslit,,,,1,ND2.0,IR,IR grey body - high,Open,20,1,Night
+R=3000 (J or H or K) grism,H (1.65 um),8-pix longslit,,,,1,ND2.0,IR,IR grey body - high,Open,15,1,Night
+#,,,,,,,,,,,,,
+R=3000 (J or H or K) grism,K-short (2.15 um),1-pix longslit,,,,1,ND2.0,IR,IR grey body - high,Open,32,1,Night
+R=3000 (J or H or K) grism,K-short (2.15 um),2-pix longslit,,,,1,ND2.0,IR,IR grey body - high,Open,16,1,Night
+R=3000 (J or H or K) grism,K-short (2.15 um),3-pix longslit,,,,1,ND2.0,IR,IR grey body - high,Open,12,1,Night
+R=3000 (J or H or K) grism,K-short (2.15 um),4-pix longslit,,,,1,ND2.0,IR,IR grey body - high,Open,9,1,Night
+R=3000 (J or H or K) grism,K-short (2.15 um),6-pix longslit,,,,1,ND2.0,IR,IR grey body - high,Open,6,1,Night
+R=3000 (J or H or K) grism,K-short (2.15 um),8-pix longslit,,,,1,ND2.0,IR,IR grey body - high,Open,4,1,Night
+#,,,,,,,,,,,,,
+R=3000 (J or H or K) grism,Y (1.02 um),1-pix longslit,,,,1,none,IR,IR grey body - high,Open,80,1,Night
+R=3000 (J or H or K) grism,Y (1.02 um),2-pix longslit,,,,1,none,IR,IR grey body - high,Open,50,1,Night
+R=3000 (J or H or K) grism,Y (1.02 um),3-pix longslit,,,,1,none,IR,IR grey body - high,Open,30,1,Night
+R=3000 (J or H or K) grism,Y (1.02 um),4-pix longslit,,,,1,none,IR,IR grey body - high,Open,20,1,Night
+R=3000 (J or H or K) grism,Y (1.02 um),6-pix longslit,,,,1,none,IR,IR grey body - high,Open,15,1,Night
+R=3000 (J or H or K) grism,Y (1.02 um),8-pix longslit,,,,1,none,IR,IR grey body - high,Open,12,1,Night
+#,,,,,,,,,,,,,
+R=3000 (J or H or K) grism,K-long (2.20 um),1-pix longslit,,,,1,ND2.0,IR,IR grey body - high,Open,32,1,Night
+R=3000 (J or H or K) grism,K-long (2.20 um),2-pix longslit,,,,1,ND2.0,IR,IR grey body - high,Open,16,1,Night
+R=3000 (J or H or K) grism,K-long (2.20 um),3-pix longslit,,,,1,ND2.0,IR,IR grey body - high,Open,12,1,Night
+R=3000 (J or H or K) grism,K-long (2.20 um),4-pix longslit,,,,1,ND2.0,IR,IR grey body - high,Open,9,1,Night
+R=3000 (J or H or K) grism,K-long (2.20 um),6-pix longslit,,,,1,ND2.0,IR,IR grey body - high,Open,6,1,Night
+R=3000 (J or H or K) grism,K-long (2.20 um),8-pix longslit,,,,1,ND2.0,IR,IR grey body - high,Open,4,1,Night
+#,,,,,,,,,,,,,

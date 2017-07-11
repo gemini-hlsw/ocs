@@ -1,1 +1,68 @@
-0,2013/04/30 00:00:00 HST# F2_ARC.csv#,,,,,,,,,,,,#,2013 Apr 30,,,,,,,,,,,#,,,,,,,,,,,,#,Recommended GCAL configurations and Exp. Times for F2 calibrations:,,,,,,,,,,,#,"Spectroscopic Arcs:  JH1200, HK1200, R3000",,,,,,,,,,,#,,,,,,,,,,,,#,Note the following:,,,,,,,,,,,#,,,,,,,,,,,,#,"All Arcs are taken with GCALlamp=Ar, GCALfilter=NIR balance, GCALdiffuser=IR",,,,,,,,,,,#,The choice of filter within F2 is considered because they sort orders,,,,,,,,,,,#,"The Read Mode is Bright Object, Readout mode Science",,,,,,,,,,,#,,,,,,,,,,,,#,,,,,,,,,,,,#,,,,,,,,,,,,#  Instrument Configuration from OT,,,,,,GCAL configuration from OT,,,,,,Disperser,Filter,Focal Plane Unit,,/=>/,,Calibration Observe,Calibration Filter,Calibration Diffuser,Calibration Lamps,Calibration Shutter,Calibration Exposure Time,Calibration Coadds,Calibration Basecal#,,,,,,,,,,,,R=1200 (J + H) grism,JH (spectroscopic),1-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,30,1,NightR=1200 (J + H) grism,JH (spectroscopic),2-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,30,1,NightR=1200 (J + H) grism,JH (spectroscopic),3-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,15,1,NightR=1200 (J + H) grism,JH (spectroscopic),4-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,15,1,NightR=1200 (J + H) grism,JH (spectroscopic),6-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,8,1,NightR=1200 (J + H) grism,JH (spectroscopic),8-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,8,1,Night#,,,,,,,,,,,,R=1200 (H + K) grism,HK (spectroscopic),1-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,90,1,NightR=1200 (H + K) grism,HK (spectroscopic),2-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,90,1,NightR=1200 (H + K) grism,HK (spectroscopic),3-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,90,1,NightR=1200 (H + K) grism,HK (spectroscopic),4-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,40,1,NightR=1200 (H + K) grism,HK (spectroscopic),6-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,40,1,NightR=1200 (H + K) grism,HK (spectroscopic),8-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,40,1,Night#,,,,,,,,,,,,R=3000 (J or H or K) grism,J-low (1.15 um),1-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,60,1,NightR=3000 (J or H or K) grism,J-low (1.15 um),2-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,60,1,NightR=3000 (J or H or K) grism,J-low (1.15 um),3-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,30,1,NightR=3000 (J or H or K) grism,J-low (1.15 um),4-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,30,1,NightR=3000 (J or H or K) grism,J-low (1.15 um),6-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,15,1,NightR=3000 (J or H or K) grism,J-low (1.15 um),8-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,15,1,Night#,,,,,,,,,,,,R=3000 (J or H or K) grism,J (1.25 um),1-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,60,1,NightR=3000 (J or H or K) grism,J (1.25 um),2-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,60,1,NightR=3000 (J or H or K) grism,J (1.25 um),3-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,30,1,NightR=3000 (J or H or K) grism,J (1.25 um),4-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,30,1,NightR=3000 (J or H or K) grism,J (1.25 um),6-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,15,1,NightR=3000 (J or H or K) grism,J (1.25 um),8-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,15,1,Night#,,,,,,,,,,,,R=3000 (J or H or K) grism,H (1.65 um),1-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,180,1,NightR=3000 (J or H or K) grism,H (1.65 um),2-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,180,1,NightR=3000 (J or H or K) grism,H (1.65 um),3-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,180,1,NightR=3000 (J or H or K) grism,H (1.65 um),4-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,80,1,NightR=3000 (J or H or K) grism,H (1.65 um),6-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,80,1,NightR=3000 (J or H or K) grism,H (1.65 um),8-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,80,1,Night#,,,,,,,,,,,,R=3000 (J or H or K) grism,K-short (2.15 um),1-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,180,1,NightR=3000 (J or H or K) grism,K-short (2.15 um),2-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,180,1,NightR=3000 (J or H or K) grism,K-short (2.15 um),3-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,180,1,NightR=3000 (J or H or K) grism,K-short (2.15 um),4-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,80,1,NightR=3000 (J or H or K) grism,K-short (2.15 um),6-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,80,1,NightR=3000 (J or H or K) grism,K-short (2.15 um),8-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,80,1,Night#,,,,,,,,,,,,
+361,2016/02/10 11:50:08 HST
+# F2_ARC.csv,,,,,,,,,,,,,
+#,,,,,,,,,,,,,
+#,2016 Feb 10,,,,,,,,,,,,
+#,,,,,,,,,,,,,
+#,Recommended GCAL configurations and Exp. Times for F2 calibrations:,,,,,,,,,,,,
+#,"Spectroscopic Arcs:  JH1200, HK1200, R3000",,,,,,,,,,,,
+#,,,,,,,,,,,,,
+#,Note the following:,,,,,,,,,,,,
+#,,,,,,,,,,,,,
+#,"All Arcs are taken with GCALlamp=Ar, GCALfilter=NIR balance, GCALdiffuser=IR",,,,,,,,,,,,
+#,The choice of filter within F2 is considered because they sort orders,,,,,,,,,,,,
+#,"The Read Mode is Bright Object, Readout mode Science",,,,,,,,,,,,
+#,,,,,,,,,,,,,
+#,,,,,,,,,,,,,
+#,,,,,,,,,,,,,
+#  Instrument Configuration from OT,,,,,,GCAL configuration from OT,,,,,,,
+Disperser,Filter,Focal Plane Unit,,/=>/,,Calibration Observe,Calibration Filter,Calibration Diffuser,Calibration Lamps,Calibration Shutter,Calibration Exposure Time,Calibration Coadds,Calibration Basecal
+#,,,,,,,,,,,,,
+R=1200 (J + H) grism,JH (spectroscopic),1-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,30,1,Night
+R=1200 (J + H) grism,JH (spectroscopic),2-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,30,1,Night
+R=1200 (J + H) grism,JH (spectroscopic),3-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,15,1,Night
+R=1200 (J + H) grism,JH (spectroscopic),4-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,15,1,Night
+R=1200 (J + H) grism,JH (spectroscopic),6-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,8,1,Night
+R=1200 (J + H) grism,JH (spectroscopic),8-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,8,1,Night
+#,,,,,,,,,,,,,
+R=1200 (H + K) grism,HK (spectroscopic),1-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,90,1,Night
+R=1200 (H + K) grism,HK (spectroscopic),2-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,90,1,Night
+R=1200 (H + K) grism,HK (spectroscopic),3-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,90,1,Night
+R=1200 (H + K) grism,HK (spectroscopic),4-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,40,1,Night
+R=1200 (H + K) grism,HK (spectroscopic),6-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,40,1,Night
+R=1200 (H + K) grism,HK (spectroscopic),8-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,40,1,Night
+#,,,,,,,,,,,,,
+R=3000 (J or H or K) grism,J-low (1.15 um),1-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,60,1,Night
+R=3000 (J or H or K) grism,J-low (1.15 um),2-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,60,1,Night
+R=3000 (J or H or K) grism,J-low (1.15 um),3-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,30,1,Night
+R=3000 (J or H or K) grism,J-low (1.15 um),4-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,30,1,Night
+R=3000 (J or H or K) grism,J-low (1.15 um),6-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,15,1,Night
+R=3000 (J or H or K) grism,J-low (1.15 um),8-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,15,1,Night
+#,,,,,,,,,,,,,
+R=3000 (J or H or K) grism,J (1.25 um),1-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,60,1,Night
+R=3000 (J or H or K) grism,J (1.25 um),2-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,60,1,Night
+R=3000 (J or H or K) grism,J (1.25 um),3-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,30,1,Night
+R=3000 (J or H or K) grism,J (1.25 um),4-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,30,1,Night
+R=3000 (J or H or K) grism,J (1.25 um),6-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,15,1,Night
+R=3000 (J or H or K) grism,J (1.25 um),8-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,15,1,Night
+#,,,,,,,,,,,,,
+R=3000 (J or H or K) grism,H (1.65 um),1-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,180,1,Night
+R=3000 (J or H or K) grism,H (1.65 um),2-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,180,1,Night
+R=3000 (J or H or K) grism,H (1.65 um),3-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,180,1,Night
+R=3000 (J or H or K) grism,H (1.65 um),4-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,80,1,Night
+R=3000 (J or H or K) grism,H (1.65 um),6-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,80,1,Night
+R=3000 (J or H or K) grism,H (1.65 um),8-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,80,1,Night
+#,,,,,,,,,,,,,
+R=3000 (J or H or K) grism,K-short (2.15 um),1-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,180,1,Night
+R=3000 (J or H or K) grism,K-short (2.15 um),2-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,180,1,Night
+R=3000 (J or H or K) grism,K-short (2.15 um),3-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,180,1,Night
+R=3000 (J or H or K) grism,K-short (2.15 um),4-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,80,1,Night
+R=3000 (J or H or K) grism,K-short (2.15 um),6-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,80,1,Night
+R=3000 (J or H or K) grism,K-short (2.15 um),8-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,80,1,Night
+#,,,,,,,,,,,,,
+R=3000 (J or H or K) grism,K-long (2.20 um),1-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,180,1,Night
+R=3000 (J or H or K) grism,K-long (2.20 um),2-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,180,1,Night
+R=3000 (J or H or K) grism,K-long (2.20 um),3-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,180,1,Night
+R=3000 (J or H or K) grism,K-long (2.20 um),4-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,80,1,Night
+R=3000 (J or H or K) grism,K-long (2.20 um),6-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,80,1,Night
+R=3000 (J or H or K) grism,K-long (2.20 um),8-pix longslit,,,,1,NIR balance,IR,Ar arc,Closed,80,1,Night
+#,,,,,,,,,,,,,

@@ -1,13 +1,33 @@
-149,2011/11/28 00:16:04 HST
-#,NIRI_Flat.csv,,,,,,,,,,,,
-#,,,,,,,,,,,,,
-#,2011 Oct 23,GG: initial import,,,,,,,,,,,
-#,2011 Nov 08,GG: add SAME to beam splitter,,,,,,,,,,,
-#,2011 Nov 16,AS: sort according to camera & filter,,,,,,,,,,,
-#,2011 Nov 17,AS: fix quartz lamp off flats,,,,,,,,,,,
-#,,,,,,,,,,,,,
+359,2015/09/15 12:51:07 HST
+# NIRI_Flat.csv
+#
+# 2011 Oct 23, GG: initial import
+# 2011 Nov 08, GG: add SAME to beam splitter
+# 2011 Nov 16, AS: sort according to camera & filter
+# 2011 Nov 17, AS: fix quartz lamp off flats
+# 2012 Jul 13, AS: increase f/32 J-band exptime from 3.5s to 4s
+# 2013 Jul 11, AS: add f/14 Kcont 2.272
+# 2013 Sep 02, AS: add f/32 Kcont 2.272
+# 2014 Apr 02, AS:
+#    f/6 Y increased from 6.0s to 7.0s
+#    f/6 J increased from 1.2s to 1.4s
+#    f/6 H increased from 35s to 42s
+#    f/32 J increased from 4s to 5.2s
+#    f/32 Jcon(1207) increased from 4.2s to 5.0s
+#    f/32 H2v=1-0S1 increased from 4.0s to 5.0s
+#    f/32 Kcon(209) increased from 3.5s to 5.0s
+# 2014 Aug 29, AS:
+#    f/6  CO 2-0 (bh) increased from 1.5s to 1.8s
+#    f/14 H2(2-1) increased from 1.0s to 1.1s
+#    f/14 CO(2-0) added with ND4 and 1.1s
+#    f/32 H2(2-1) increased from 2.5s to 3.5s
+#    f/32 CO(2-0) added with ND3 and 3.8s
+#    Remove hydrocarbon entries
+# 2014 Nov 26, AS: add f/14 J-continuum (1.122 um)
+# 2014 Nov 26, AS: increase f/14 Y from 28s to 32s
+#
 Disperser,Filter,Focal Plane Mask,Camera,Beam Splitter,,Calibration Observe,Calibration Filter,Calibration Diffuser,Calibration Lamps,Calibration Shutter,Calibration Exposure Time,Calibration Coadds,Calibration Basecal
-#,,,,,,,,,,,,,
+#
 none,[FeII] ,imaging,f/6 ,$f/6|same.*,,10,ND2.0 ,IR ,IR grey body - high ,Closed,7,1,Day
 none,[FeII] ,imaging,f/6 ,$f/6|same.*,,10,ND2.0 ,IR ,IR grey body - high ,Open,7,1,Day
 #none,Br(alpha),imaging,f/6 ,$f/6|same.*,,10,N/A,N/A,N/A,Closed,N/A,1,Day
@@ -22,10 +42,10 @@ none,CH4(long) ,imaging,f/6 ,$f/6|same.*,,10,ND2.0 ,IR ,IR grey body - high ,Clo
 none,CH4(long) ,imaging,f/6 ,$f/6|same.*,,10,ND2.0 ,IR ,IR grey body - high ,Open,1.2,1,Day
 none,CH4(short),imaging,f/6 ,$f/6|same.*,,10,ND2.0 ,IR ,IR grey body - high ,Closed,2,1,Day
 none,CH4(short),imaging,f/6 ,$f/6|same.*,,10,ND2.0 ,IR ,IR grey body - high ,Open,2,1,Day
-none,CO 2-0 (bh) ,imaging,f/6 ,$f/6|same.*,,10,ND2.0 ,IR ,IR grey body - high ,Closed,1.5,1,Day
-none,CO 2-0 (bh) ,imaging,f/6 ,$f/6|same.*,,10,ND2.0 ,IR ,IR grey body - high ,Open,1.5,1,Day
-none,H ,imaging,f/6 ,$f/6|same.*,,10,ND4-5 ,IR ,IR grey body - high ,Closed,35,1,Day
-none,H ,imaging,f/6 ,$f/6|same.*,,10,ND4-5 ,IR ,IR grey body - high ,Open,35,1,Day
+none, CO 2-0 (bh), imaging, f/6, $f/6|same.*, , 10, ND2.0, IR, IR grey body - high, Closed, 1.8, 1, Day
+none, CO 2-0 (bh), imaging, f/6, $f/6|same.*, , 10, ND2.0, IR, IR grey body - high, Open,   1.8, 1, Day
+none,H ,imaging,f/6 ,$f/6|same.*,,10,ND4-5 ,IR ,IR grey body - high ,Closed, 42, 1,Day
+none,H ,imaging,f/6 ,$f/6|same.*,,10,ND4-5 ,IR ,IR grey body - high ,Open,   42, 1,Day
 none,H-continuum(1.57) ,imaging,f/6 ,$f/6|same.*,,10,ND3.0 ,IR ,IR grey body - high ,Closed,1.9,1,Day
 none,H-continuum(1.57) ,imaging,f/6 ,$f/6|same.*,,10,ND3.0 ,IR ,IR grey body - high ,Open,1.9,1,Day
 none,H2 1-0 S(1) ,imaging,f/6 ,$f/6|same.*,,10,ND2.0 ,IR ,IR grey body - high ,Closed,1.7,1,Day
@@ -40,10 +60,10 @@ none,HeI ,imaging,f/6 ,$f/6|same.*,,10,none ,IR ,IR grey body - high ,Closed,16,
 none,HeI ,imaging,f/6 ,$f/6|same.*,,10,none ,IR ,IR grey body - high ,Open,16,1,Day
 none,HeI (2p2s) ,imaging,f/6 ,$f/6|same.*,,10,ND2.0 ,IR ,IR grey body - high ,Closed,2,1,Day
 none,HeI (2p2s) ,imaging,f/6 ,$f/6|same.*,,10,ND2.0 ,IR ,IR grey body - high ,Open,2,1,Day
-none,hydrocarbon ,imaging,f/6 ,$f/6|same.*,,10,ND2.0 ,IR ,IR grey body - high ,Closed,0.8,1,Day
-none,hydrocarbon ,imaging,f/6 ,$f/6|same.*,,10,ND2.0 ,IR ,IR grey body - high ,Open,0.8,1,Day
-none,J ,imaging,f/6 ,$f/6|same.*,,10,ND1.0 ,IR ,IR grey body - high ,Closed,1.2,1,Day
-none,J ,imaging,f/6 ,$f/6|same.*,,10,ND1.0 ,IR ,IR grey body - high ,Open,1.2,1,Day
+#none,hydrocarbon ,imaging,f/6 ,$f/6|same.*,,10,ND2.0 ,IR ,IR grey body - high ,Closed,0.8,1,Day
+#none,hydrocarbon ,imaging,f/6 ,$f/6|same.*,,10,ND2.0 ,IR ,IR grey body - high ,Open,0.8,1,Day
+none,J ,imaging,f/6 ,$f/6|same.*,,10,ND1.0 ,IR ,IR grey body - high ,Closed,1.4, 1,Day
+none,J ,imaging,f/6 ,$f/6|same.*,,10,ND1.0 ,IR ,IR grey body - high ,Open,  1.4, 1,Day
 none,J-continuum (1.065 um) ,imaging,f/6,$f/6|same.*,,10,none ,IR ,IR grey body - high ,Open,30,1,Day
 none,J-continuum (1.065 um) ,imaging,f/6 ,$f/6|same.*,,10,none ,IR ,IR grey body - high ,Closed,30,1,Day
 none,J-continuum (1.122 um) ,imaging,f/6 ,$f/6|same.*,,10,none ,IR ,IR grey body - high ,Closed,12,1,Day
@@ -62,9 +82,9 @@ none,K(short) ,imaging,f/6 ,$f/6|same.*,,10,ND4-5 ,IR ,IR grey body - high ,Clos
 none,K(short) ,imaging,f/6 ,$f/6|same.*,,10,ND4-5 ,IR ,IR grey body - high ,Open,5.5,1,Day
 none,Pa(beta),imaging,f/6 ,$f/6|same.*,,10,none ,IR ,IR grey body - high ,Closed,0.8,1,Day
 none,Pa(beta),imaging,f/6 ,$f/6|same.*,,10,none ,IR ,IR grey body - high ,Open,0.8,1,Day
-none,Y ,imaging,f/6 ,$f/6|same.*,,10,none ,IR ,IR grey body - high ,Closed,6,1,Day
-none,Y,imaging ,f/6 ,$f/6|same.*,,10,none ,IR ,IR grey body - high ,Open,6,1,Day
-#,,,,,,,,,,,,,
+none, Y, imaging, f/6, $f/6|same.*,, 10, none, IR, IR grey body - high, Closed, 7.0, 1, Day
+none, Y, imaging, f/6, $f/6|same.*,, 10, none, IR, IR grey body - high, Open,   7.0, 1, Day
+#
 none,[FeII] ,imaging,f/14 ,$f/6|same.*,,10,ND3.0 ,IR ,IR grey body - high ,Closed,5.5,1,Day
 none,[FeII] ,imaging,f/14 ,$f/6|same.*,,10,ND3.0 ,IR ,IR grey body - high ,Open,5.5,1,Day
 #none,Br(alpha),imaging,f/14 ,$f/6|same.*,,10,N/A,N/A,N/A,Closed,N/A,1,Day
@@ -79,16 +99,16 @@ none,CH4(long) ,imaging,f/14 ,$f/6|same.*,,10,ND4.0 ,IR ,IR grey body - high ,Cl
 none,CH4(long) ,imaging,f/14 ,$f/6|same.*,,10,ND4.0 ,IR ,IR grey body - high ,Open,1.8,1,Day
 none,CH4(short),imaging,f/14 ,$f/6|same.*,,10,ND4.0 ,IR ,IR grey body - high ,Closed,3,1,Day
 none,CH4(short),imaging,f/14 ,$f/6|same.*,,10,ND4.0 ,IR ,IR grey body - high ,Open,3,1,Day
-#none,CO 2-0 (bh) ,imaging,f/14 ,$f/6|same.*,,10,unknown,unknown,unknown,Closed,unknown,1,Day
-#none,CO 2-0 (bh) ,imaging,f/14 ,$f/6|same.*,,10,unknown,unknown,unknown,Open,unknown,1,Day
+none, CO 2-0 (bh), imaging, f/14, $f/6|same.*, , 10, ND4.0, IR, IR grey body - high, Closed, 1.1, 1, Day
+none, CO 2-0 (bh), imaging, f/14, $f/6|same.*, , 10, ND4.0, IR, IR grey body - high, Open,   1.1, 1, Day
 none,H ,imaging,f/14 ,$f/6|same.*,,10,ND2.0 ,IR ,IR grey body - high ,Closed,3,1,Day
 none,H ,imaging,f/14 ,$f/6|same.*,,10,ND2.0 ,IR ,IR grey body - high ,Open,3,1,Day
 none,H-continuum(1.57) ,imaging,f/14 ,$f/6|same.*,,10,ND1.0 ,IR ,IR grey body - high ,Closed,3.5,1,Day
 none,H-continuum(1.57) ,imaging,f/14 ,$f/6|same.*,,10,ND1.0 ,IR ,IR grey body - high ,Open,3.5,1,Day
 none,H2 1-0 S(1) ,imaging,f/14 ,$f/6|same.*,,10,ND4.0 ,IR ,IR grey body - high ,Closed,1.5,1,Day
 none,H2 1-0 S(1) ,imaging,f/14 ,$f/6|same.*,,10,ND4.0 ,IR ,IR grey body - high ,Open,1.5,1,Day
-none,H2 2-1 S(1) ,imaging,f/14 ,$f/6|same.*,,10,ND4.0 ,IR ,IR grey body - high ,Closed,1,1,Day
-none,H2 2-1 S(1) ,imaging,f/14 ,$f/6|same.*,,10,ND4.0 ,IR ,IR grey body - high ,Open,1,1,Day
+none, H2 2-1 S(1), imaging, f/14, $f/6|same.*, , 10, ND4.0, IR, IR grey body - high, Closed, 1.1, 1, Day
+none, H2 2-1 S(1), imaging, f/14, $f/6|same.*, , 10, ND4.0, IR, IR grey body - high, Open,   1.1, 1, Day
 none,H2O ice (2.045) ,imaging,f/14 ,$f/6|same.*,,10,ND2.0 ,IR ,IR grey body - high ,Closed,1.6,1,Day
 none,H2O ice (2.045) ,imaging,f/14 ,$f/6|same.*,,10,ND2.0 ,IR ,IR grey body - high ,Open,1.6,1,Day
 none,H2O ice (3.050) ,imaging,f/14 ,$f/6|same.*,,10,ND2.0 ,IR ,IR grey body - high ,Closed,3.5,1,Day
@@ -97,27 +117,31 @@ none,HeI ,imaging,f/14 ,$f/6|same.*,,10,ND4.0,IR ,Quartz Halogen,Closed,3.5,1,Da
 none,HeI ,imaging,f/14 ,$f/6|same.*,,10,ND4.0,IR ,Quartz Halogen,Open,3.5,1,Day
 none,HeI (2p2s) ,imaging,f/14 ,$f/6|same.*,,10,ND2.0 ,IR ,IR grey body - high ,Closed,12,1,Day
 none,HeI (2p2s) ,imaging,f/14 ,$f/6|same.*,,10,ND2.0 ,IR ,IR grey body - high ,Open,12,1,Day
-none,hydrocarbon ,imaging,f/14 ,$f/6|same.*,,10,ND2.0 ,IR ,IR grey body - high ,Closed,4.2,1,Day
-none,hydrocarbon ,imaging,f/14 ,$f/6|same.*,,10,ND2.0 ,IR ,IR grey body - high ,Open,4.2,1,Day
+#none,hydrocarbon ,imaging,f/14 ,$f/6|same.*,,10,ND2.0 ,IR ,IR grey body - high ,Closed,4.2,1,Day
+#none,hydrocarbon ,imaging,f/14 ,$f/6|same.*,,10,ND2.0 ,IR ,IR grey body - high ,Open,4.2,1,Day
 none,J ,imaging,f/14 ,$f/6|same.*,,10,ND1.0 ,IR ,IR grey body - high ,Closed,8,1,Day
 none,J ,imaging,f/14 ,$f/6|same.*,,10,ND1.0 ,IR ,IR grey body - high ,Open,8,1,Day
 #none,J-continuum (1.065 um) ,imaging,f/14 ,$f/6|same.*,,10,unknown,unknown,unknown,Closed,unknown,1,Day
 #none,J-continuum (1.065 um) ,imaging,f/14 ,$f/6|same.*,,10,unknown,unknown,unknown,Open,unknown,1,Day
+none, J-continuum (1.122 um), imaging, f/14, $f/6|same.*,, 10, ND2.0, IR, IR grey body - high, Closed, 2.1, 1, Day
+none, J-continuum (1.122 um), imaging, f/14, $f/6|same.*,, 10, ND2.0, IR, Quartz Halogen,      Open,   2.1, 1, Day
 none,J-continuum(1.207) ,imaging,f/14 ,$f/6|same.*,,10,none ,IR ,IR grey body - high ,Closed,5,1,Day
 none,J-continuum(1.207) ,imaging,f/14 ,$f/6|same.*,,10,none ,IR ,IR grey body - high ,Open,5,1,Day
 none,K ,imaging,f/14 ,$f/6|same.*,,10,ND4-5 ,IR ,IR grey body - high ,Closed,27,1,Day
 none,K ,imaging,f/14 ,$f/6|same.*,,10,ND4-5 ,IR ,IR grey body - high ,Open,27,1,Day
 none,K-continuum(2.09) ,imaging,f/14 ,$f/6|same.*,,10,ND4.0 ,IR ,IR grey body - high ,Closed,1.8,1,Day
 none,K-continuum(2.09) ,imaging,f/14 ,$f/6|same.*,,10,ND4.0 ,IR ,IR grey body - high ,Open,1.8,1,Day
+none,K-continuum(2.27),imaging,f/14,$f/6|same.*,,10,NIR Balance,IR,IR grey body - high,Closed,3.4,1,Day
+none,K-continuum(2.27),imaging,f/14,$f/6|same.*,,10,NIR Balance,IR,IR grey body - high,Open,3.4,1,Day
 none,K(prime) ,imaging,f/14 ,$f/6|same.*,,10,ND4-5 ,IR ,IR grey body - high ,Closed,35,1,Day
 none,K(prime) ,imaging,f/14 ,$f/6|same.*,,10,ND4-5 ,IR ,IR grey body - high ,Open,35,1,Day
 none,K(short) ,imaging,f/14 ,$f/6|same.*,,10,ND4-5 ,IR ,IR grey body - high ,Closed,35,1,Day
 none,K(short) ,imaging,f/14 ,$f/6|same.*,,10,ND4-5 ,IR ,IR grey body - high ,Open,35,1,Day
 none,Pa(beta),imaging,f/14 ,$f/6|same.*,,10,none ,IR ,IR grey body - high ,Closed,6,1,Day
 none,Pa(beta),imaging,f/14 ,$f/6|same.*,,10,none ,IR ,IR grey body - high ,Open,6,1,Day
-none,Y ,imaging,f/14 ,$f/6|same.*,,10,none ,IR ,IR grey body - high ,Closed,28,1,Day
-none,Y ,imaging,f/14 ,$f/6|same.*,,10,none ,IR ,IR grey body - high ,Open,28,1,Day
-#,,,,,,,,,,,,,
+none, Y, imaging, f/14, $f/6|same.*,, 10, none, IR, IR grey body - high, Closed, 32, 1, Day
+none, Y, imaging, f/14, $f/6|same.*,, 10, none, IR, IR grey body - high, Open,   32, 1, Day
+#
 none,[FeII] ,imaging,f/32 ,$f/6|same.*,,10,none ,IR ,IR grey body - high ,Closed,3,1,Day
 none,[FeII] ,imaging,f/32 ,$f/6|same.*,,10,none ,IR ,IR grey body - high ,Open,3,1,Day
 #none,Br(alpha),imaging,f/32 ,$f/6|same.*,,10,N/A,N/A,N/A,Closed,N/A,1,Day
@@ -132,16 +156,16 @@ none,CH4(long) ,imaging,f/32 ,$f/6|same.*,,10,ND1.0 ,IR ,IR grey body - high ,Cl
 none,CH4(long) ,imaging,f/32 ,$f/6|same.*,,10,ND1.0 ,IR ,IR grey body - high ,Open,2.2,1,Day
 none,CH4(short),imaging,f/32 ,$f/6|same.*,,10,ND1.0 ,IR ,IR grey body - high ,Closed,3.4,1,Day
 none,CH4(short),imaging,f/32 ,$f/6|same.*,,10,ND1.0 ,IR ,IR grey body - high ,Open,3.4,1,Day
-#none,CO 2-0 (bh) ,imaging,f/32 ,$f/6|same.*,,10,unknown,unknown,unknown,Closed,unknown,1,Day
-#none,CO 2-0 (bh) ,imaging,f/32 ,$f/6|same.*,,10,unknown,unknown,unknown,Open,unknown,1,Day
+none,CO 2-0 (bh), imaging, f/32, $f/6|same.*, , 10, ND3.0, IR, IR grey body - high, Closed, 3.8, 1, Day
+none,CO 2-0 (bh), imaging, f/32, $f/6|same.*, , 10, ND3.0, IR, IR grey body - high, Open,   3.8, 1, Day
 none,H ,imaging,f/32 ,$f/6|same.*,,10,ND3.0 ,IR ,IR grey body - high ,Closed,2.2,1,Day
 none,H ,imaging,f/32 ,$f/6|same.*,,10,ND3.0 ,IR ,IR grey body - high ,Open,2.2,1,Day
 none,H-continuum(1.57) ,imaging,f/32 ,$f/6|same.*,,10,none ,IR ,IR grey body - high ,Closed,5.4,1,Day
 none,H-continuum(1.57) ,imaging,f/32 ,$f/6|same.*,,10,none ,IR ,IR grey body - high ,Open,5.4,1,Day
-none,H2 1-0 S(1) ,imaging,f/32 ,$f/6|same.*,,10,ND3.0 ,IR ,IR grey body - high ,Closed,4,1,Day
-none,H2 1-0 S(1) ,imaging,f/32 ,$f/6|same.*,,10,ND3.0 ,IR ,IR grey body - high ,Open,4,1,Day
-none,H2 2-1 S(1) ,imaging,f/32 ,$f/6|same.*,,10,ND3.0 ,IR ,IR grey body - high ,Closed,2.5,1,Day
-none,H2 2-1 S(1) ,imaging,f/32 ,$f/6|same.*,,10,ND3.0 ,IR ,IR grey body - high ,Open,2.5,1,Day
+none,H2 1-0 S(1) ,imaging,f/32 ,$f/6|same.*,,10,ND3.0 ,IR ,IR grey body - high ,Closed, 5.0, 1,Day
+none,H2 1-0 S(1) ,imaging,f/32 ,$f/6|same.*,,10,ND3.0 ,IR ,IR grey body - high ,Open,   5.0, 1,Day
+none, H2 2-1 S(1), imaging, f/32, $f/6|same.*, , 10, ND3.0, IR, IR grey body - high, Closed, 3.5, 1, Day
+none, H2 2-1 S(1), imaging, f/32, $f/6|same.*, , 10, ND3.0, IR, IR grey body - high, Open,   3.5, 1, Day
 none,H2O ice (2.045) ,imaging,f/32 ,$f/6|same.*,,10,NIR Balance ,IR ,IR grey body - high ,Closed,3,1,Day
 none,H2O ice (2.045) ,imaging,f/32 ,$f/6|same.*,,10,NIR Balance ,IR ,IR grey body - high ,Open,3,1,Day
 none,H2O ice (3.050) ,imaging,f/32 ,$f/6|same.*,,10,GMOS Balance,IR ,IR grey body - high ,Closed,1.5,1,Day
@@ -150,20 +174,22 @@ none,HeI ,imaging,f/32 ,$f/6|same.*,,10,ND2.0 ,IR ,IR grey body - high ,Closed,7
 none,HeI ,imaging,f/32 ,$f/6|same.*,,10,ND2.0 ,IR ,Quartz Halogen,Open,7.5,1,Day
 none,HeI (2p2s) ,imaging,f/32 ,$f/6|same.*,,10,ND1.0 ,IR ,IR grey body - high ,Closed,2.3,1,Day
 none,HeI (2p2s) ,imaging,f/32 ,$f/6|same.*,,10,ND1.0 ,IR ,IR grey body - high ,Open,2.3,1,Day
-none,hydrocarbon ,imaging,f/32 ,$f/6|same.*,,10,GMOS Balance,IR ,IR grey body - high ,Closed,4.2,1,Day
-none,hydrocarbon ,imaging,f/32 ,$f/6|same.*,,10,GMOS Balance,IR ,IR grey body - high ,Open,4.2,1,Day
-none,J ,imaging,f/32 ,$f/6|same.*,,10,none ,IR ,IR grey body - high ,Closed,3.5,1,Day
-none,J ,imaging,f/32 ,$f/6|same.*,,10,none ,IR ,IR grey body - high ,Open,3.5,1,Day
+#none,hydrocarbon ,imaging,f/32 ,$f/6|same.*,,10,GMOS Balance,IR ,IR grey body - high ,Closed,4.2,1,Day
+#none,hydrocarbon ,imaging,f/32 ,$f/6|same.*,,10,GMOS Balance,IR ,IR grey body - high ,Open,4.2,1,Day
+none, J, imaging, f/32, $f/6|same.*,, 10, none, IR, IR grey body - high, Closed, 5.2, 1, Day
+none, J, imaging, f/32, $f/6|same.*,, 10, none, IR, IR grey body - high, Open,   5.2, 1, Day
 #none,J-continuum (1.065 um) ,imaging,f/32 ,$f/6|same.*,,10,unknown,unknown,unknown,Closed,unknown,1,Day
 #none,J-continuum (1.065 um) ,imaging,f/32 ,$f/6|same.*,,10,unknown,unknown,unknown,Open,unknown,1,Day
 none,J-continuum (1.122 um) ,imaging,f/32 ,$f/6|same.*,,10,ND2.0 ,IR ,IR grey body - high ,Closed,9,1,Day
 none,J-continuum (1.122 um) ,imaging,f/32 ,$f/6|same.*,,10,ND2.0 ,IR ,Quartz Halogen,Open,9,1,Day
-none,J-continuum(1.207) ,imaging,f/32 ,$f/6|same.*,,10,ND2.0 ,IR ,IR grey body - high ,Closed,4.2,1,Day
-none,J-continuum(1.207) ,imaging,f/32 ,$f/6|same.*,,10,ND2.0 ,IR ,Quartz Halogen,Open,4.2,1,Day
+none,J-continuum(1.207) ,imaging,f/32 ,$f/6|same.*,,10,ND2.0 ,IR ,IR grey body - high ,Closed, 5.0, 1,Day
+none,J-continuum(1.207) ,imaging,f/32 ,$f/6|same.*,,10,ND2.0 ,IR ,Quartz Halogen, Open,        5.0, 1,Day
 none,K ,imaging,f/32 ,$f/6|same.*,,10,ND2.0 ,IR ,IR grey body - high ,Closed,4,1,Day
 none,K ,imaging,f/32 ,$f/6|same.*,,10,ND2.0 ,IR ,IR grey body - high ,Open,4,1,Day
-none,K-continuum(2.09) ,imaging,f/32 ,$f/6|same.*,,10,ND3.0 ,IR ,IR grey body - high ,Closed,3.5,1,Day
-none,K-continuum(2.09) ,imaging,f/32 ,$f/6|same.*,,10,ND3.0 ,IR ,IR grey body - high ,Open,3.5,1,Day
+none,K-continuum(2.09) ,imaging,f/32 ,$f/6|same.*,,10,ND3.0 ,IR ,IR grey body - high ,Closed, 5.0, 1,Day
+none,K-continuum(2.09) ,imaging,f/32 ,$f/6|same.*,,10,ND3.0 ,IR ,IR grey body - high ,Open,   5.0, 1,Day
+none,K-continuum(2.27),imaging,f/32,$f/6|same.*,,10,ND3.0,IR,IR grey body - high,Closed,3.0,1,Day
+none,K-continuum(2.27),imaging,f/32,$f/6|same.*,,10,ND3.0,IR,IR grey body - high,Open,3.0,1,Day
 none,K(prime) ,imaging,f/32 ,$f/6|same.*,,10,ND2.0 ,IR ,IR grey body - high ,Closed,3.6,1,Day
 none,K(prime) ,imaging,f/32 ,$f/6|same.*,,10,ND2.0 ,IR ,IR grey body - high ,Open,3.6,1,Day
 none,K(short) ,imaging,f/32 ,$f/6|same.*,,10,ND2.0 ,IR ,IR grey body - high ,Closed,4,1,Day

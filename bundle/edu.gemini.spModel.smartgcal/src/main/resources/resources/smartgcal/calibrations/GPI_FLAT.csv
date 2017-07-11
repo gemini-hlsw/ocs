@@ -1,38 +1,4 @@
-1,2013/10/04 12:00:00 HST
+273,2013/11/06 09:03:23 HST
 #,GPI Flat Calibrations,,,,,,,,,
 ,,,,,,,,,,
 Mode,Disperser,,Calibration Lamps,Calibration Shutter,Calibration Filter,Calibration Diffuser,Calibration Observe,Calibration Exposure Time,Calibration Coadds,Calibration Basecal
-Coronograph Y-band,Prism,,IR grey body - high,Open,ND4-5,IR,1,1.5,1,Night
-Coronograph J-band,Prism,,IR grey body - high,Open,ND4-5,IR,1,1.5,1,Night
-Coronograph H-band,Prism,,IR grey body - high,Open,ND4-5,IR,1,1.5,1,Night
-Coronograph K1-band,Prism,,IR grey body - high,Open,ND4-5,IR,1,1.5,1,Night
-Coronograph K2-band,Prism,,IR grey body - high,Open,ND4-5,IR,1,1.5,1,Night
-H_LIWA,Prism,,IR grey body - high,Open,ND4-5,IR,1,1.5,1,Night
-H_star,Prism,,IR grey body - high,Open,ND4-5,IR,1,1.5,1,Night
-Non Redundant Mask Y,Prism,,IR grey body - high,Open,ND4-5,IR,1,1.5,1,Night
-Non Redundant Mask J,Prism,,IR grey body - high,Open,ND4-5,IR,1,1.5,1,Night
-Non Redundant Mask H,Prism,,IR grey body - high,Open,ND4-5,IR,1,1.5,1,Night
-Non Redundant Mask K1,Prism,,IR grey body - high,Open,ND4-5,IR,1,1.5,1,Night
-Non Redundant Mask K2,Prism,,IR grey body - high,Open,ND4-5,IR,1,1.5,1,Night
-Y direct,Prism,,IR grey body - high,Open,ND4-5,IR,1,1.5,1,Night
-J direct,Prism,,IR grey body - high,Open,ND4-5,IR,1,1.5,1,Night
-H direct,Prism,,IR grey body - high,Open,ND4-5,IR,1,1.5,1,Night
-K1 direct,Prism,,IR grey body - high,Open,ND4-5,IR,1,1.5,1,Night
-K2 direct,Prism,,IR grey body - high,Open,ND4-5,IR,1,1.5,1,Night
-Coronograph Y-band,Wollaston,,IR grey body - high,Open,ND4-5,IR,1,1.5,1,Night
-Coronograph J-band,Wollaston,,IR grey body - high,Open,ND4-5,IR,1,1.5,1,Night
-Coronograph H-band,Wollaston,,IR grey body - high,Open,ND4-5,IR,1,1.5,1,Night
-Coronograph K1-band,Wollaston,,IR grey body - high,Open,ND4-5,IR,1,1.5,1,Night
-Coronograph K2-band,Wollaston,,IR grey body - high,Open,ND4-5,IR,1,1.5,1,Night
-H_LIWA,Wollaston,,IR grey body - high,Open,ND4-5,IR,1,1.5,1,Night
-H_star,Wollaston,,IR grey body - high,Open,ND4-5,IR,1,1.5,1,Night
-Non Redundant Mask Y,Wollaston,,IR grey body - high,Open,ND4-5,IR,1,1.5,1,Night
-Non Redundant Mask J,Wollaston,,IR grey body - high,Open,ND4-5,IR,1,1.5,1,Night
-Non Redundant Mask H,Wollaston,,IR grey body - high,Open,ND4-5,IR,1,1.5,1,Night
-Non Redundant Mask K1,Wollaston,,IR grey body - high,Open,ND4-5,IR,1,1.5,1,Night
-Non Redundant Mask K2,Wollaston,,IR grey body - high,Open,ND4-5,IR,1,1.5,1,Night
-Y direct,Wollaston,,IR grey body - high,Open,ND4-5,IR,1,1.5,1,Night
-J direct,Wollaston,,IR grey body - high,Open,ND4-5,IR,1,1.5,1,Night
-H direct,Wollaston,,IR grey body - high,Open,ND4-5,IR,1,1.5,1,Night
-K1 direct,Wollaston,,IR grey body - high,Open,ND4-5,IR,1,1.5,1,Night
-K2 direct,Wollaston,,IR grey body - high,Open,ND4-5,IR,1,1.5,1,Night
