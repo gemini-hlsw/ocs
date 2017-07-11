@@ -106,9 +106,9 @@ public class ProviderTest {
         Assert.assertEquals(2, calibrations.size());
         //  check number 1
         Assert.assertEquals(CalUnitParams.Shutter.CLOSED,       calibrations.get(0).getShutter());
-        Assert.assertEquals(CalUnitParams.Filter.ND_30,         calibrations.get(0).getFilter());
+        Assert.assertEquals(CalUnitParams.Filter.ND_20,         calibrations.get(0).getFilter());
         Assert.assertEquals(CalUnitParams.Diffuser.VISIBLE,     calibrations.get(0).getDiffuser());
-        Assert.assertEquals(12,                                 calibrations.get(0).getExposureTime(), 0.01);
+        Assert.assertEquals(4,                                  calibrations.get(0).getExposureTime(), 0.01);
         Assert.assertEquals(new Integer(1),                     calibrations.get(0).getCoadds());
         Assert.assertTrue(calibrations.get(0).isFlat());
         //  check number 2
