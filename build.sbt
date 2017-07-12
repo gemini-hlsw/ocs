@@ -4,7 +4,7 @@ name := "ocs"
 
 organization in Global := "edu.gemini.ocs"
 
-ocsVersion in ThisBuild := OcsVersion("2017B", false, 1, 1, 2)
+ocsVersion in ThisBuild := OcsVersion("2017B", false, 1, 1, 3)
 
 pitVersion in ThisBuild := OcsVersion("2017B", false, 2, 1, 0)
 
@@ -17,12 +17,12 @@ updateOptions := updateOptions.value.withCachedResolution(true)
 
 // Note that this is not a standard setting; it's used for building IDEA modules.
 javaVersion in ThisBuild := {
-  val expected = "1.8" 
+  val expected = "1.8"
   val actual   = sys.props("java.version")
   if (!actual.startsWith(expected))
     println(s"""
       |***
-      |***                   INCORRECT JAVA RUNTIME VERSION 
+      |***                   INCORRECT JAVA RUNTIME VERSION
       |***
       |***  The build expects version $expected, but you are running $actual.
       |***  Change the VM you're using to run sbt to avoid confusion and strange behavior.
@@ -46,8 +46,8 @@ scalacOptions in ThisBuild ++= Seq(
   "-Xlint:-stars-align",
   "-Yno-adapted-args"
   // "-Ywarn-dead-code"        // N.B. doesn't work well with bottom
-  // "-Ywarn-numeric-widen",   
-  // "-Ywarn-value-discard"   
+  // "-Ywarn-numeric-widen",
+  // "-Ywarn-value-discard"
 )
 
 javacOptions in ThisBuild ++= Seq(
