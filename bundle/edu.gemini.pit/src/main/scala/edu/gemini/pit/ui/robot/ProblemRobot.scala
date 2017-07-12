@@ -526,20 +526,22 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
           case Left(ss)  => ss
           case Right(ss) => List(ss)
         }
-        case e: ExchangeProposalClass      => e.subs
-        case s: SpecialProposalClass       => List(s.sub)
-        case l: LargeProgramClass          => List(l.sub)
-        case f: FastTurnaroundProgramClass => List(f.sub)
+        case e: ExchangeProposalClass       => e.subs
+        case s: SpecialProposalClass        => List(s.sub)
+        case l: LargeProgramClass           => List(l.sub)
+        case i: SubaruIntensiveProgramClass => List(i.sub)
+        case f: FastTurnaroundProgramClass  => List(f.sub)
       }
 
       subs.filter(sub => sub.request.time.hours < sub.request.minTime.hours).map {
         sub =>
           val kind = sub match {
-            case n: NgoSubmission            => Partners.name(n.partner)
-            case e: ExchangeSubmission       => Partners.name(e.partner)
-            case s: SpecialSubmission        => s.specialType.value
-            case l: LargeProgramSubmission   => "large program"
-            case f: FastTurnaroundSubmission => "fast-turnaround"
+            case n: NgoSubmission                    => Partners.name(n.partner)
+            case e: ExchangeSubmission               => Partners.name(e.partner)
+            case s: SpecialSubmission                => s.specialType.value
+            case l: LargeProgramSubmission           => "large program"
+            case i: SubaruIntensiveProgramSubmission => "Subaru intensive program"
+            case f: FastTurnaroundSubmission         => "fast-turnaround"
           }
           new Problem(Severity.Error, s"Requested time for $kind is less than minimum requested time.", TimeProblems.SCHEDULING_SECTION,
             s.inPartnersView(_.editSubmissionTime(sub)))

@@ -39,11 +39,12 @@ class SubmitView(ph: ProblemRobot, newShellHandler: (Model,Option[File]) => Unit
   // Pull an error message out, if any
   def sr(sub:Submission):Option[SubmitResult] = {
     val sd = sub match {
-      case n:NgoSubmission            => SubmitDestination.Ngo(n.partner)
-      case e:ExchangeSubmission       => SubmitDestination.Exchange(e.partner)
-      case s:SpecialSubmission        => SubmitDestination.Special(s.specialType)
-      case l:LargeProgramSubmission   => SubmitDestination.LargeProgram
-      case f:FastTurnaroundSubmission => SubmitDestination.FastTurnaroundProgram
+      case n: NgoSubmission               => SubmitDestination.Ngo(n.partner)
+      case e: ExchangeSubmission          => SubmitDestination.Exchange(e.partner)
+      case s: SpecialSubmission           => SubmitDestination.Special(s.specialType)
+      case l: LargeProgramSubmission      => SubmitDestination.LargeProgram
+      case i: SubaruIntensiveProgramClass => SubmitDestination.LargeProgram
+      case f: FastTurnaroundSubmission    => SubmitDestination.FastTurnaroundProgram
     }
     dsrs.get(sd)
   }
@@ -51,12 +52,13 @@ class SubmitView(ph: ProblemRobot, newShellHandler: (Model,Option[File]) => Unit
   // Read-only lenses for SubmitStatus and List[Submit]
   val statusLens:Lens[ProposalClass, SubmitStatus] = Lens.lensu((a, b) => sys.error("Lens is read-only."), a => SubmitStatus.forProposal(a, ph.state))
   val subsLens:Lens[ProposalClass, List[Submission]] = Lens.lensu((a, b) => sys.error("Lens is read-only."), {
-    case q:QueueProposalClass         => q.subs.left.getOrElse(q.subs.right.toOption.toList)
-    case c:ClassicalProposalClass     => c.subs.left.getOrElse(c.subs.right.toOption.toList)
-    case e:ExchangeProposalClass      => e.subs
-    case s:SpecialProposalClass       => List(s.sub)
-    case l:LargeProgramClass          => List(l.sub)
-    case f:FastTurnaroundProgramClass => List(f.sub)
+    case q: QueueProposalClass          => q.subs.left.getOrElse(q.subs.right.toOption.toList)
+    case c: ClassicalProposalClass      => c.subs.left.getOrElse(c.subs.right.toOption.toList)
+    case e: ExchangeProposalClass       => e.subs
+    case s: SpecialProposalClass        => List(s.sub)
+    case l: LargeProgramClass           => List(l.sub)
+    case i: SubaruIntensiveProgramClass => List(i.sub)
+    case f: FastTurnaroundProgramClass  => List(f.sub)
   })
 
   // When the list of problems change, just rebind everything
@@ -207,11 +209,12 @@ class SubmitView(ph: ProblemRobot, newShellHandler: (Model,Option[File]) => Unit
 
     def text(s:Submission) = {
       case Partner   => s match {
-        case n:NgoSubmission            => Partners.name.get(n.partner).orNull
-        case e:ExchangeSubmission       => Partners.name.get(e.partner).orNull
-        case _:SpecialSubmission        => "Gemini Observatory"
-        case _:LargeProgramSubmission   => "Large Program"
-        case _:FastTurnaroundSubmission => "Fast Turnaround"
+        case n: NgoSubmission               => Partners.name.get(n.partner).orNull
+        case e: ExchangeSubmission          => Partners.name.get(e.partner).orNull
+        case _: SpecialSubmission           => "Gemini Observatory"
+        case _: LargeProgramSubmission      => "Large Program"
+        case _: SubaruIntensiveProgramClass => "Subaru Intensive Program"
+        case _: FastTurnaroundSubmission    => "Fast Turnaround"
       }
       case Reference => s.response.map(_.receipt.id).orNull
       case Contact   => s.response.flatMap(_.receipt.contact).orNull
@@ -248,11 +251,12 @@ class SubmitView(ph: ProblemRobot, newShellHandler: (Model,Option[File]) => Unit
 
     def icon(s:Submission) = {
       case Partner => s match {
-        case n:NgoSubmission            => PartnersFlags.flag.get(n.partner).orNull
-        case e:ExchangeSubmission       => PartnersFlags.flag.get(e.partner).orNull
-        case _:SpecialSubmission        => PartnersFlags.flag.get(LargeProgramPartner).orNull
-        case _:LargeProgramSubmission   => PartnersFlags.flag.get(LargeProgramPartner).orNull
-        case _:FastTurnaroundSubmission => PartnersFlags.flag.get(LargeProgramPartner).orNull
+        case n: NgoSubmission                    => PartnersFlags.flag.get(n.partner).orNull
+        case e: ExchangeSubmission               => PartnersFlags.flag.get(e.partner).orNull
+        case _: SpecialSubmission                => PartnersFlags.flag.get(LargeProgramPartner).orNull
+        case _: LargeProgramSubmission           => PartnersFlags.flag.get(LargeProgramPartner).orNull
+        case _: SubaruIntensiveProgramSubmission => PartnersFlags.flag.get(LargeProgramPartner).orNull
+        case _: FastTurnaroundSubmission         => PartnersFlags.flag.get(LargeProgramPartner).orNull
       }
       case Status  => sr(s) match {
         case Some(SubmitResult.Success(_, _, _, _)) => SharedIcons.BULLET_GREEN
