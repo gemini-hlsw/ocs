@@ -73,11 +73,4 @@ public final class GmosNorth extends Gmos {
         return InstGmosNorth.getMeanGain(gp.ampGain(), gp.ampReadMode(), gp.ccdType());
     }
 
-    @Override public List<WarningRule> warnings() {
-        return new ArrayList<WarningRule>() {{
-            add(new SaturationLimitRule(WellDepth * getSpatialBinning() * getSpectralBinning(), 0.95));
-            add(new AdLimitRule(getADSaturation(), 0.95));
-        }};
-    }
-
 }
