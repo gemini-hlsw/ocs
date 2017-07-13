@@ -15,9 +15,8 @@ import java.util.List;
  */
 public final class GmosNorth extends Gmos {
 
-    // value taken from instrument's web documentation
-    private static final double WellDepth = 105000;
-
+    // Average 12 amp. full well depth for GMOS-N Hamamatsu CCD
+    private static final double WellDepth = 125000;
     /**
      * Related files will start with this prefix
      */
