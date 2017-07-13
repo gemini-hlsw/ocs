@@ -299,6 +299,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
       case _: QueueProposalClass         => true
       case _: LargeProgramClass          => true
       case _: FastTurnaroundProgramClass => true
+      case SubaruIntensiveProgramClass(_, _, _, ExchangeTelescope.GEMINI, _, _) => true
     }
 
     // TOO option combo box
@@ -309,26 +310,30 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
       override def refresh(m: Option[ProposalClass]) {
         enabled = canEdit
         m.foreach {
-          case q: QueueProposalClass         =>
+          case q: QueueProposalClass          =>
             selection.item = q.tooOption
             visible = true
-          case l: LargeProgramClass          =>
+          case l: LargeProgramClass           =>
             selection.item = l.tooOption
             visible = true
-          case f: FastTurnaroundProgramClass =>
+          case f: FastTurnaroundProgramClass  =>
             selection.item = f.tooOption
             visible = true
-          case _                             =>
+          case SubaruIntensiveProgramClass(_, _, _, ExchangeTelescope.GEMINI, tooOption, _) => 
+            selection.item = tooOption.getOrElse(ToOChoice.None)
+            visible = true
+          case _                              =>
             visible = false
         }
       }
 
       selection.reactions += {
         case SelectionChanged(_) => model match {
-          case Some(q: QueueProposalClass)         => model = Some(QueueProposalClass.tooOption.set(q, selection.item))
-          case Some(l: LargeProgramClass)          => model = Some(LargeProgramClass.tooOption.set(l, selection.item))
-          case Some(f: FastTurnaroundProgramClass) => model = Some(FastTurnaroundProgramClass.tooOption.set(f, selection.item))
-          case _                                   => // shouldn't happen
+          case Some(q: QueueProposalClass)          => model = Some(QueueProposalClass.tooOption.set(q, selection.item))
+          case Some(l: LargeProgramClass)           => model = Some(LargeProgramClass.tooOption.set(l, selection.item))
+          case Some(f: FastTurnaroundProgramClass)  => model = Some(FastTurnaroundProgramClass.tooOption.set(f, selection.item))
+          case Some(s: SubaruIntensiveProgramClass) => model = Some(SubaruIntensiveProgramClass.tooOption.set(s, Some(selection.item)))
+          case _                                    => // shouldn't happen
         }
       }
 

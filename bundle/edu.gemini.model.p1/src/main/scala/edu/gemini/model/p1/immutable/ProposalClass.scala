@@ -305,6 +305,7 @@ case class SubaruIntensiveProgramClass(itac  :Option[Itac],
                             comment  : Option[String],
                             key      : Option[UUID],
                             telescope: ExchangeTelescope,
+                            tooOption: Option[ToOChoice],
                             sub      : SubaruIntensiveProgramSubmission) extends ProposalClass {
 
   def mutable: M.SubaruIntensiveProgramClass = {
@@ -314,6 +315,7 @@ case class SubaruIntensiveProgramClass(itac  :Option[Itac],
     m.setKey(key.map(_.toString).orNull)
     m.setSubmission(sub.mutable)
     m.setTelescope(telescope)
+    m.setTooOption(tooOption.orNull)
     m
   }
 
@@ -332,6 +334,7 @@ case class SubaruIntensiveProgramClass(itac  :Option[Itac],
 object SubaruIntensiveProgramClass {
 
   // Lens
+  val tooOption: Lens[SubaruIntensiveProgramClass, Option[ToOChoice]] = Lens.lensu((a, b) => a.copy(tooOption = b), _.tooOption)
   val sub: Lens[SubaruIntensiveProgramClass, SubaruIntensiveProgramSubmission] = Lens.lensu((a, b) => a.copy(sub = b), _.sub)
 
   def apply(m:M.SubaruIntensiveProgramClass): SubaruIntensiveProgramClass = apply(
@@ -339,9 +342,10 @@ object SubaruIntensiveProgramClass {
     Option(m.getComment),
     Option(m.getKey).map(UUID.fromString),
     m.getTelescope,
+    Option(m.getTooOption),
     SubaruIntensiveProgramSubmission(m.getSubmission))
 
-  def empty = apply(None, None, None, ExchangeTelescope.SUBARU, SubaruIntensiveProgramSubmission.empty)
+  def empty = apply(None, None, None, ExchangeTelescope.SUBARU, None, SubaruIntensiveProgramSubmission.empty)
 
 }
 
