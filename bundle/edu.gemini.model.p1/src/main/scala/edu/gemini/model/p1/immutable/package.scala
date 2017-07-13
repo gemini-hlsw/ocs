@@ -77,6 +77,12 @@ package object immutable {
     val SYSTEM_VERIFICATION = M.SpecialProposalType.SYSTEM_VERIFICATION
   }
 
+  type ExchangeTelescope = M.ExchangeTelescope
+  object ExchangeTelescope extends EnumObject[M.ExchangeTelescope] {
+    final val SUBARU = M.ExchangeTelescope.SUBARU
+    final val GEMINI = M.ExchangeTelescope.GEMINI
+  }
+
   type Flamingos2Filter = mutable.Flamingos2Filter
   object Flamingos2Filter extends EnumObject[mutable.Flamingos2Filter] {
     val Y       = mutable.Flamingos2Filter.Y

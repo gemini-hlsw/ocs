@@ -141,7 +141,8 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
       specialLabel, special,
       specialTimeLabel, specialTime,
       partnerTypeLabel, partnerType,
-      siteLabel, siteCombo
+      siteLabel, siteCombo,
+      telescopeLabel, telescopeCombo
     )
 
     // The proposal class row is always visible
@@ -149,6 +150,9 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
 
     // Site selection, for exchange observing
     addRow(siteLabel, siteCombo)
+
+    // Telescope selection for large exchange programs
+    addRow(telescopeLabel, telescopeCombo)
 
     // Visible only in Queue mode
     addRow(band3Label, band3)
@@ -191,10 +195,10 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
       override def refresh(m: Option[ProposalClass]) {
         enabled = canEdit
         m.foreach {
-          case e: ExchangeProposalClass =>
+          case e: ExchangeProposalClass       =>
             selection.item = e.partner
             visible = true
-          case _                        =>
+          case _                              =>
             visible = false
         }
       }
@@ -202,6 +206,39 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
       def text(p: ExchangePartner) = Partners.name(p)
     }
 
+    // Telescope label
+    lazy val telescopeLabel = dvLabel("Observatory:") {
+      case e: SubaruIntensiveProgramClass => true
+    }
+
+    // Site combo
+    object telescopeCombo extends ComboBox(ExchangeTelescope.values) with Bound[Proposal, ProposalClass] with TextRenderer[ExchangeTelescope] {
+
+      val lens = Proposal.proposalClass
+
+      selection.reactions += {
+        case SelectionChanged(_) => model match {
+          case Some(e: SubaruIntensiveProgramClass) => model = Some(e.copy(telescope = selection.item))
+          case _                                    => // shouldn't happen
+        }
+      }
+
+      override def refresh(m: Option[ProposalClass]) {
+        enabled = canEdit
+        m.foreach {
+          case e: SubaruIntensiveProgramClass =>
+            selection.item = e.telescope
+            visible = true
+          case _                              =>
+            visible = false
+        }
+      }
+
+      def text(p: ExchangeTelescope) = p match {
+        case ExchangeTelescope.GEMINI => "Gemini"
+        case ExchangeTelescope.SUBARU => "Subaru"
+      }
+    }
 
     // The proposal class combo is always visible
     object proposalClass extends ComboBox(ProposalClassSelection.values.toSeq) with Bound[Proposal, ProposalClass] {

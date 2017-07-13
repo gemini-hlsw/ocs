@@ -302,9 +302,10 @@ object LargeProgramClass {
 }
 
 case class SubaruIntensiveProgramClass(itac  :Option[Itac],
-                            comment:Option[String],
-                            key    :Option[UUID],
-                            sub    :SubaruIntensiveProgramSubmission) extends ProposalClass {
+                            comment  : Option[String],
+                            key      : Option[UUID],
+                            telescope: ExchangeTelescope,
+                            sub      : SubaruIntensiveProgramSubmission) extends ProposalClass {
 
   def mutable: M.SubaruIntensiveProgramClass = {
     val m = Factory.createSubaruIntensiveProgramClass
@@ -312,6 +313,7 @@ case class SubaruIntensiveProgramClass(itac  :Option[Itac],
     m.setComment(comment.orNull)
     m.setKey(key.map(_.toString).orNull)
     m.setSubmission(sub.mutable)
+    m.setTelescope(telescope)
     m
   }
 
@@ -321,7 +323,7 @@ case class SubaruIntensiveProgramClass(itac  :Option[Itac],
   def minRequestedTime: TimeAmount = sub.request.minTime
   def totalLPTime: Option[TimeAmount] = sub.request.totalLPTime
 
-  def classLabel = "Large Program"
+  def classLabel = "Subaru Intensive Program"
 
   override val isSpecial = false
 
@@ -336,9 +338,10 @@ object SubaruIntensiveProgramClass {
     Option(m.getItac).map(Itac(_)),
     Option(m.getComment),
     Option(m.getKey).map(UUID.fromString),
+    m.getTelescope,
     SubaruIntensiveProgramSubmission(m.getSubmission))
 
-  def empty = apply(None, None, None, SubaruIntensiveProgramSubmission.empty)
+  def empty = apply(None, None, None, ExchangeTelescope.SUBARU, SubaruIntensiveProgramSubmission.empty)
 
 }
 
