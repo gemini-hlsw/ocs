@@ -319,7 +319,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
           case f: FastTurnaroundProgramClass  =>
             selection.item = f.tooOption
             visible = true
-          case SubaruIntensiveProgramClass(_, _, _, ExchangeTelescope.GEMINI, tooOption, _) => 
+          case SubaruIntensiveProgramClass(_, _, _, ExchangeTelescope.GEMINI, tooOption, _) =>
             selection.item = tooOption.getOrElse(ToOChoice.None)
             visible = true
           case _                              =>
@@ -976,11 +976,11 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
           case ClassicalProposalClass(_, _, _, Right(e), _) if e.partner == ExchangePartner.KECK   => ExchangeKeck
           case ClassicalProposalClass(_, _, _, Right(e), _) if e.partner == ExchangePartner.SUBARU => ExchangeSubaru
           case ClassicalProposalClass(_, _, _, Right(e), _) if e.partner == ExchangePartner.CFHT   => ExchangeCFHT
-          case _:ExchangeProposalClass                                                             => GeminiPartner
-          case _:SpecialProposalClass                                                              => GeminiPartner
-          case _:LargeProgramClass                                                                 => GeminiPartner
-          case _:SubaruIntensiveProgramClass                                                       => ExchangeSubaru
-          case _:FastTurnaroundProgramClass                                                        => GeminiPartner
+          case _: ExchangeProposalClass                                                             => GeminiPartner
+          case _: SpecialProposalClass                                                              => GeminiPartner
+          case _: LargeProgramClass                                                                 => GeminiPartner
+          case _: SubaruIntensiveProgramClass                                                       => ExchangeSubaru
+          case _: FastTurnaroundProgramClass                                                        => GeminiPartner
         }.getOrElse(PartnerType.GeminiPartner)
 
       }
@@ -1037,10 +1037,11 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
     override def refresh(m:Option[Proposal]) {
       super.refresh(m) // important
       visible = ~m.map(_.proposalClass).map {
-        case _:SpecialProposalClass       => false
-        case _:LargeProgramClass          => false
-        case _:FastTurnaroundProgramClass => false
-        case _                            => true
+        case _: SpecialProposalClass        => false
+        case _: LargeProgramClass           => false
+        case _: FastTurnaroundProgramClass  => false
+        case _: SubaruIntensiveProgramClass => false
+        case _                              => true
       }
     }
 
