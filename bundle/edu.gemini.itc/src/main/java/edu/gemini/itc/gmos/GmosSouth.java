@@ -15,8 +15,8 @@ import java.util.List;
  */
 public final class GmosSouth extends Gmos {
 
-    // value taken from instrument's web documentation
-    private static final double WellDepth = 106000;
+    // Average full well depth for the three GMOS-S Hamamatsu CCDs
+    private static final double WellDepth = 119000;
 
 
     /**
@@ -65,13 +65,4 @@ public final class GmosSouth extends Gmos {
     @Override public double gain() {
         return InstGmosSouth.getMeanGain(gp.ampGain(), gp.ampReadMode(), gp.ccdType());
     }
-
-    @Override public List<WarningRule> warnings() {
-        return new ArrayList<WarningRule>() {{
-            add(new SaturationLimitRule(WellDepth * getSpatialBinning() * getSpectralBinning(), 0.95));
-            add(new AdLimitRule(getADSaturation(), 0.95));
-        }};
-    }
-
-
 }

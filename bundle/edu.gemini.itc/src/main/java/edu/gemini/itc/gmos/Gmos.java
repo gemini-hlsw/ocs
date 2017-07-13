@@ -50,6 +50,8 @@ public abstract class Gmos extends Instrument implements BinningProvider, Spectr
 
     private int _detectorCcdIndex = 0; // 0, 1, or 2 when there are multiple CCDs in the detector
 
+    private GmosSaturLimitRule gmosSaturLimitWarning;  // GMOS-specific saturation limit warning
+
     public Gmos(final GmosParameters gp, final ObservationDetails odp, final String FILENAME, final int detectorCcdIndex) {
         super(gp.site(), Bands.VISIBLE, INSTR_DIR, FILENAME);
 
@@ -140,6 +142,7 @@ public abstract class Gmos extends Instrument implements BinningProvider, Spectr
 
         addComponent(_detector);
 
+        gmosSaturLimitWarning = new GmosSaturLimitRule(getADSaturation(), wellDepth(), getSpatialBinning(), getSpectralBinning(), gain(), 0.95);
 
         // validate the current configuration
         validate();
@@ -259,6 +262,10 @@ public abstract class Gmos extends Instrument implements BinningProvider, Spectr
         return _dtv;
     }
 
+    public GmosSaturLimitRule getGmosSaturLimitWarning() {
+        return gmosSaturLimitWarning;
+    }
+
     public abstract boolean isIfu2();
     protected abstract Gmos[] createCcdArray();
     protected abstract String getPrefix();
@@ -369,6 +376,12 @@ public abstract class Gmos extends Instrument implements BinningProvider, Spectr
                         "The effective slit width of the IFU fibers is 0.31 arcsec, " +
                         "and binning by four yields fewer than 1 pixel per resolution element for all gratings. "));
             }
+        }};
+    }
+
+    @Override public List<WarningRule> warnings() {
+        return new ArrayList<WarningRule>() {{
+            add(gmosSaturLimitWarning);
         }};
     }
 

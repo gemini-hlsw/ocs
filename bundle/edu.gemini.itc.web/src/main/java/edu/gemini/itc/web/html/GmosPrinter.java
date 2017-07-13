@@ -4,6 +4,7 @@ import edu.gemini.itc.base.ImagingResult;
 import edu.gemini.itc.base.SpectroscopyResult;
 import edu.gemini.itc.gmos.Gmos;
 import edu.gemini.itc.gmos.GmosRecipe;
+import edu.gemini.itc.gmos.GmosSaturLimitRule;
 import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.gemini.gmos.GmosNorthType;
 import edu.gemini.spModel.gemini.gmos.GmosSouthType;
@@ -69,7 +70,7 @@ public final class GmosPrinter extends PrinterBase {
             }
             final int ccdIndex = instrument.getDetectorCcdIndex();
             if (s.ccd(ccdIndex).isDefined()) {
-                _printPeakPixelInfo(s.ccd(ccdIndex));
+                _printPeakPixelInfo(s.ccd(ccdIndex), instrument.getGmosSaturLimitWarning());
                 _printWarnings(s.ccd(ccdIndex).get().warnings());
             }
         }
@@ -127,7 +128,7 @@ public final class GmosPrinter extends PrinterBase {
             final int ccdIndex = ccd.getDetectorCcdIndex();
             _println(CalculatablePrinter.getTextResult(results[ccdIndex].is2nCalc(), results[ccdIndex].observation()));
             if (s.ccd(ccdIndex).isDefined()) {
-                _printPeakPixelInfo(s.ccd(ccdIndex));
+                _printPeakPixelInfo(s.ccd(ccdIndex), instrument.getGmosSaturLimitWarning());
                 _printWarnings(s.ccd(ccdIndex).get().warnings());
             }
         }
@@ -196,4 +197,11 @@ public final class GmosPrinter extends PrinterBase {
         return s;
     }
 
+    protected void _printPeakPixelInfo(final scala.Option<ItcCcd> ccd, final GmosSaturLimitRule gmosLimit) {
+        if (ccd.isDefined()) {
+            _println(
+                    String.format("The peak pixel signal + background is %.0f e- (%d ADU). This is %.0f%% of the saturation limit of %.0f e-.",
+                            ccd.get().peakPixelFlux(), ccd.get().adu(), gmosLimit.percentOfLimit(ccd.get().peakPixelFlux()), gmosLimit.limit()));
+        }
+    }
 }
