@@ -28,6 +28,7 @@ class OpenAction(shell: RichShell[Model], handler: ((Model, Option[File]) => Uni
           case Some(Model.empty) => shell.close()
           case _                 => // nop
         }
+
       case Success(model @ Model(_, ModelConversion(true, _, _))) =>
         // Show dialog box with changes summary
         val cd = new ConversionResultDialog(model)
@@ -36,10 +37,11 @@ class OpenAction(shell: RichShell[Model], handler: ((Model, Option[File]) => Uni
 
         handler(model, of)
         shell.model match {
-          case None => shell.close()
+          case None              => shell.close()
           case Some(Model.empty) => shell.close()
           case _                 => // nop
         }
+
       case Failure(e) => println(e)
         e match {
         case Right(x) => alert(x.toString()) // TODO: make this better
