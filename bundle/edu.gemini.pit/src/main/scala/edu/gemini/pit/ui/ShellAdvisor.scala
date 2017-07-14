@@ -107,7 +107,7 @@ class ShellAdvisor(
       startModel.proposal.copy(meta = startModel.proposal.meta.copy(attachment = attachment))
     }
     val attachment = startModel.proposal.meta.attachment
-    val fixedModel =  startModel.copy(proposal = updatedAttachment(PDF.relocatedPdf(file, attachment)))
+    val fixedModel = startModel.copy(proposal = updatedAttachment(PDF.relocatedPdf(file, attachment)))
 
     shell.init(Some(fixedModel), file, wasRolled)
 
@@ -154,6 +154,7 @@ class ShellAdvisor(
           val i = n.lastIndexOf('.')
           if (i > 0) n.subSequence(0, i) else n
       } getOrElse "Untitled"
+
       val mod = if (shell.isModified && !Platform.IS_MAC) "[*]" else ""
       val tac = if (AppPreferences.current.mode == AppPreferences.PITMode.TAC) " - TAC" else ""
       val test = if (AppMode.isTest) " - TEST" else ""
