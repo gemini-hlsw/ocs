@@ -522,7 +522,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
     private lazy val minTimeCheck = {
 
       val subs:List[Submission] = p.proposalClass match {
-        case n: GeminiNormalProposalClass => n.subs match {
+        case n: GeminiNormalProposalClass   => n.subs match {
           case Left(ss)  => ss
           case Right(ss) => List(ss)
         }
@@ -557,8 +557,8 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
     private lazy val band3Orphan2 = for {
       o <- p.observations
       if o.band == Band.BAND_3 && (p.proposalClass match {
-        case q: QueueProposalClass         if q.band3request.isDefined => false
-        case _ => true
+        case q: QueueProposalClass if q.band3request.isDefined => false
+        case _                                                 => true
       })
     } yield {
       new Problem(Severity.Error,

@@ -889,7 +889,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
 
         def ftRequest = for {
             l @ FastTurnaroundProgramClass(_, _, _, sub, _, _, _, _, _) <- model
-            req                                                <- SubmissionRequestEditor.open(sub.request, None, Nil, None, button)
+            req                                                         <- SubmissionRequestEditor.open(sub.request, None, Nil, None, button)
           } yield Some(ft.set(l, req._1))
 
         // Our action
@@ -911,10 +911,10 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
         // On refresh, set our text
         override def refresh(m:Option[ProposalClass]) {
           text = ~m.map {
-            case s:SpecialProposalClass       => formatLabel(s.sub.request)
-            case f:FastTurnaroundProgramClass => formatLabel(f.sub.request)
-            case l:LargeProgramClass          => formatLabel(l.sub.request)
-            case _                            => ""
+            case s: SpecialProposalClass       => formatLabel(s.sub.request)
+            case f: FastTurnaroundProgramClass => formatLabel(f.sub.request)
+            case l: LargeProgramClass          => formatLabel(l.sub.request)
+            case _                             => ""
           }
         }
 
@@ -962,7 +962,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
           case ClassicalProposalClass(_, _, _, Right(e), _) if e.partner == ExchangePartner.KECK   => localKeck = e
           case ClassicalProposalClass(_, _, _, Right(e), _) if e.partner == ExchangePartner.SUBARU => localSubaru = e
           case ClassicalProposalClass(_, _, _, Right(e), _) if e.partner == ExchangePartner.CFHT   => localCFHT= e
-          case e:ExchangeProposalClass                                                             => localGemini = e.subs
+          case e: ExchangeProposalClass                                                            => localGemini = e.subs
           case _                                                                                   => // ignore
         }
 
@@ -976,11 +976,11 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
           case ClassicalProposalClass(_, _, _, Right(e), _) if e.partner == ExchangePartner.KECK   => ExchangeKeck
           case ClassicalProposalClass(_, _, _, Right(e), _) if e.partner == ExchangePartner.SUBARU => ExchangeSubaru
           case ClassicalProposalClass(_, _, _, Right(e), _) if e.partner == ExchangePartner.CFHT   => ExchangeCFHT
-          case _: ExchangeProposalClass                                                             => GeminiPartner
-          case _: SpecialProposalClass                                                              => GeminiPartner
-          case _: LargeProgramClass                                                                 => GeminiPartner
-          case _: SubaruIntensiveProgramClass                                                       => ExchangeSubaru
-          case _: FastTurnaroundProgramClass                                                        => GeminiPartner
+          case _: ExchangeProposalClass                                                            => GeminiPartner
+          case _: SpecialProposalClass                                                             => GeminiPartner
+          case _: LargeProgramClass                                                                => GeminiPartner
+          case _: SubaruIntensiveProgramClass                                                      => ExchangeSubaru
+          case _: FastTurnaroundProgramClass                                                       => GeminiPartner
         }.getOrElse(PartnerType.GeminiPartner)
 
       }
@@ -1093,22 +1093,22 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
           // We are removing an NGO partner. This can happen only for some proposal classes. Exchange partners can
           // never be removed because there's always exactly one of them.
           (s.partner, p.proposalClass) match {
-            case (n:NgoPartner, q:QueueProposalClass)          => q.copy(subs = Left(remove(n, ~q.subs.left.toOption)))
-            case (n:NgoPartner, c:ClassicalProposalClass)      => c.copy(subs = Left(remove(n, ~c.subs.left.toOption)))
-            case (n:NgoPartner, e:ExchangeProposalClass)       => e.copy(subs = remove(n, e.subs))
-            case _                                             => p.proposalClass // shouldn't happen
+            case (n: NgoPartner, q: QueueProposalClass)          => q.copy(subs = Left(remove(n, ~q.subs.left.toOption)))
+            case (n: NgoPartner, c: ClassicalProposalClass)      => c.copy(subs = Left(remove(n, ~c.subs.left.toOption)))
+            case (n: NgoPartner, e: ExchangeProposalClass)       => e.copy(subs = remove(n, e.subs))
+            case _                                               => p.proposalClass // shouldn't happen
           }
 
         } else {
 
           // We are replacing an arbitrary submission
           (s.partner, p.proposalClass) match {
-            case (e:ExchangePartner, q:QueueProposalClass)     => q.copy(subs = Right(ExchangeSubmission(r, None, e, i.ref)))
-            case (n:NgoPartner, q:QueueProposalClass)          => q.copy(subs = Left(replace(n, i.ref, r, ~q.subs.left.toOption)))
-            case (e:ExchangePartner, c:ClassicalProposalClass) => c.copy(subs = Right(ExchangeSubmission(r, None, e, i.ref)))
-            case (n:NgoPartner, c:ClassicalProposalClass)      => c.copy(subs = Left(replace(n, i.ref, r, ~c.subs.left.toOption)))
-            case (n:NgoPartner, e:ExchangeProposalClass)       => e.copy(subs = replace(n, i.ref, r, e.subs))
-            case _                                             => p.proposalClass // shouldn't happen
+            case (e: ExchangePartner, q: QueueProposalClass)     => q.copy(subs = Right(ExchangeSubmission(r, None, e, i.ref)))
+            case (n: NgoPartner, q: QueueProposalClass)          => q.copy(subs = Left(replace(n, i.ref, r, ~q.subs.left.toOption)))
+            case (e: ExchangePartner, c: ClassicalProposalClass) => c.copy(subs = Right(ExchangeSubmission(r, None, e, i.ref)))
+            case (n: NgoPartner, c: ClassicalProposalClass)      => c.copy(subs = Left(replace(n, i.ref, r, ~c.subs.left.toOption)))
+            case (n: NgoPartner, e: ExchangeProposalClass)       => e.copy(subs = replace(n, i.ref, r, e.subs))
+            case _                                               => p.proposalClass // shouldn't happen
           }
         }
 
@@ -1129,11 +1129,11 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
       case QueueProposalClass(_, _, _, Right(exch), _, _)  => List(Real(exch))
       case ClassicalProposalClass(_, _, _, Left(ngos), _)  => all(ngos)
       case ClassicalProposalClass(_, _, _, Right(exch), _) => List(Real(exch))
-      case e:ExchangeProposalClass                         => all(e.subs)
-      case _:SpecialProposalClass                          => Nil
-      case _:LargeProgramClass                             => Nil
-      case _:SubaruIntensiveProgramClass                   => Nil
-      case _:FastTurnaroundProgramClass                    => Nil
+      case e: ExchangeProposalClass                        => all(e.subs)
+      case _: SpecialProposalClass                         => Nil
+      case _: LargeProgramClass                            => Nil
+      case _: SubaruIntensiveProgramClass                  => Nil
+      case _: FastTurnaroundProgramClass                   => Nil
     }
 
     def all(ngos:List[NgoSubmission]):List[PSWrapper] = {
