@@ -28,11 +28,12 @@ object Submit {
       println(ProposalIo.writeToString(propResult.proposal))
       propResult.results foreach { destResult =>
         destResult.destination match {
-          case Ngo(ngo)              => println("*** NGO: " + ngo.name)
-          case Exchange(exc)         => println("*** Exchange: " + exc.name)
-          case Special(tipe)         => println("*** Special: " + tipe.name)
-          case LargeProgram          => println("*** LargeProgram")
-          case FastTurnaroundProgram => println("*** LargeProgram")
+          case Ngo(ngo)               => println("*** NGO: " + ngo.name)
+          case Exchange(exc)          => println("*** Exchange: " + exc.name)
+          case Special(tipe)          => println("*** Special: " + tipe.name)
+          case LargeProgram           => println("*** LargeProgram")
+          case FastTurnaroundProgram  => println("*** LargeProgram")
+          case SubaruIntensiveProgram => println("*** SubaruProgram")
         }
         destResult.result match {
           case Success(ref, time, contact, msg) =>

@@ -93,6 +93,15 @@
     </xsd:complexType>
 
     <!--
+      A submission to Subaru Intensive program. It has no partners.
+    -->
+    <xsd:complexType name="SubaruIntensiveProgramSubmission">
+        <xsd:complexContent>
+            <xsd:extension base="Submission"/>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <!--
       A Fast turnaround submission. It has no partners.
     -->
     <xsd:complexType name="FastTurnaroundSubmission">

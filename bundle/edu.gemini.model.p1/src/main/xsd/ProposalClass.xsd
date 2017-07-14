@@ -17,6 +17,7 @@
             <xsd:element name="special"         type="SpecialProposalClass"/>
             <xsd:element name="exchange"        type="ExchangeProposalClass"/>
             <xsd:element name="large"           type="LargeProgramClass"/>
+            <xsd:element name="sip"             type="SubaruIntensiveProgramClass"/>
             <xsd:element name="fastTurnaround"  type="FastTurnaroundProgramClass"/>
         </xsd:choice>
     </xsd:complexType>
@@ -124,6 +125,20 @@
                     <xsd:element name="submission" type="LargeProgramSubmission"/>
                 </xsd:sequence>
                 <xsd:attribute name="tooOption" type="TooOption" use="required"/>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <!--
+        Subaru Intensive Program
+    -->
+    <xsd:complexType name="SubaruIntensiveProgramClass">
+        <xsd:complexContent>
+            <xsd:extension base="ProposalClass">
+                <xsd:sequence>
+                    <xsd:element name="submission" type="SubaruIntensiveProgramSubmission"/>
+                </xsd:sequence>
+                <xsd:attribute name="tooOption" type="TooOption" use="optional"/>
             </xsd:extension>
         </xsd:complexContent>
     </xsd:complexType>

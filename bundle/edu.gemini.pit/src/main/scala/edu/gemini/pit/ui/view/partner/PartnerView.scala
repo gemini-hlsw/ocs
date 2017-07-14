@@ -38,17 +38,19 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
   var localExchange = ExchangeProposalClass.empty
   var localSpecial = SpecialProposalClass.empty
   var localLarge = LargeProgramClass.empty
+  var localSip = SubaruIntensiveProgramClass.empty
   var localFast = FastTurnaroundProgramClass.empty
 
   // We update our local state whenever we refresh.
   override def refresh(m:Option[Proposal]) {
     m.map(_.proposalClass).foreach {
-      case q:QueueProposalClass         => localQueue = q
-      case c:ClassicalProposalClass     => localClassical = c
-      case e:ExchangeProposalClass      => localExchange = e
-      case s:SpecialProposalClass       => localSpecial = s
-      case l:LargeProgramClass          => localLarge = l
-      case f:FastTurnaroundProgramClass => localFast = f
+      case q: QueueProposalClass          => localQueue = q
+      case c: ClassicalProposalClass      => localClassical = c
+      case e: ExchangeProposalClass       => localExchange = e
+      case s: SpecialProposalClass        => localSpecial = s
+      case l: LargeProgramClass           => localLarge = l
+      case i: SubaruIntensiveProgramClass => localSip = i
+      case f: FastTurnaroundProgramClass  => localFast = f
     }
   }
 
@@ -59,6 +61,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
     val Queue     = Value("Queue Observing at Gemini")
     val Classical = Value("Classical Observing at Gemini")
     val Exchange  = Value("Exchange Observing at Keck/Subaru")
+    val SIP       = Value("Subaru Intensive Program")
     val Special   = Value("Other Proposal Types")
   }
 
@@ -102,13 +105,13 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
       val (reqTime, minTime) = m.map(_.proposalClass).map(r => (r.requestedTime.hours, r.minRequestedTime.hours)) | ((0.0, 0.0))
 
       val b3 = m.flatMap(_.proposalClass match {
-        case q:QueueProposalClass => q.band3request.map(r => (r.time.hours, r.minTime.hours))
-        case _                    => None
+        case q: QueueProposalClass => q.band3request.map(r => (r.time.hours, r.minTime.hours))
+        case _                     => None
       })
 
       text = b3.map {
         case (reqTimeB3, minTimeB3) =>
-            f"Total request: $reqTime%3.2f hr ($minTime%3.2f hr min) | Band 3 request: $reqTimeB3%3.2f hr ($minTimeB3%3.2f hr min)"
+          f"Total request: $reqTime%3.2f hr ($minTime%3.2f hr min) | Band 3 request: $reqTimeB3%3.2f hr ($minTimeB3%3.2f hr min)"
       }.getOrElse {
         ~m.map(_.proposalClass match {
           case l:LargeProgramClass  =>
@@ -188,17 +191,16 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
       override def refresh(m: Option[ProposalClass]) {
         enabled = canEdit
         m.foreach {
-          case e: ExchangeProposalClass =>
+          case e: ExchangeProposalClass       =>
             selection.item = e.partner
             visible = true
-          case _                        =>
+          case _                              =>
             visible = false
         }
       }
 
       def text(p: ExchangePartner) = Partners.name(p)
     }
-
 
     // The proposal class combo is always visible
     object proposalClass extends ComboBox(ProposalClassSelection.values.toSeq) with Bound[Proposal, ProposalClass] {
@@ -218,7 +220,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
             // {Q,C} => E when Q/C is NGO
             case g: GeminiNormalProposalClass if selection.item == Exchange => g.subs match {
               case Left(ns) => localExchange = localExchange.copy(subs = ns)
-              case _ => // nop
+              case _        => // nop
             }
 
             // E => {Q,C} when Q/C is NGO
@@ -234,6 +236,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
             case Exchange  => model = Some(localExchange)
             case Special   => model = Some(localSpecial)
             case Large     => model = Some(localLarge)
+            case SIP       => model = Some(localSip)
             case Fast      => model = Some(localFast)
           }
 
@@ -242,21 +245,23 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
       override def refresh(m: Option[ProposalClass]) {
         enabled = canEdit
         selection.item = m.map {
-          case _: QueueProposalClass         => Queue
-          case _: ClassicalProposalClass     => Classical
-          case _: ExchangeProposalClass      => Exchange
-          case _: SpecialProposalClass       => Special
-          case _: LargeProgramClass          => Large
-          case _: FastTurnaroundProgramClass => Fast
+          case _: QueueProposalClass          => Queue
+          case _: ClassicalProposalClass      => Classical
+          case _: ExchangeProposalClass       => Exchange
+          case _: SpecialProposalClass        => Special
+          case _: LargeProgramClass           => Large
+          case _: SubaruIntensiveProgramClass => SIP
+          case _: FastTurnaroundProgramClass  => Fast
         }.getOrElse(Queue)
       }
     }
 
     // TOO label and combo box
     lazy val tooLabel = dvLabel("ToO Activation:") {
-      case _: QueueProposalClass         => true
-      case _: LargeProgramClass          => true
-      case _: FastTurnaroundProgramClass => true
+      case _: QueueProposalClass          => true
+      case _: LargeProgramClass           => true
+      case _: FastTurnaroundProgramClass  => true
+      case _: SubaruIntensiveProgramClass => true
     }
 
     // TOO option combo box
@@ -267,26 +272,30 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
       override def refresh(m: Option[ProposalClass]) {
         enabled = canEdit
         m.foreach {
-          case q: QueueProposalClass         =>
+          case q: QueueProposalClass          =>
             selection.item = q.tooOption
             visible = true
-          case l: LargeProgramClass          =>
+          case l: LargeProgramClass           =>
             selection.item = l.tooOption
             visible = true
-          case f: FastTurnaroundProgramClass =>
+          case f: FastTurnaroundProgramClass  =>
             selection.item = f.tooOption
             visible = true
-          case _                             =>
+          case s: SubaruIntensiveProgramClass =>
+            selection.item = s.tooOption
+            visible = true
+          case _                              =>
             visible = false
         }
       }
 
       selection.reactions += {
         case SelectionChanged(_) => model match {
-          case Some(q: QueueProposalClass)         => model = Some(QueueProposalClass.tooOption.set(q, selection.item))
-          case Some(l: LargeProgramClass)          => model = Some(LargeProgramClass.tooOption.set(l, selection.item))
-          case Some(f: FastTurnaroundProgramClass) => model = Some(FastTurnaroundProgramClass.tooOption.set(f, selection.item))
-          case _                                   => // shouldn't happen
+          case Some(q: QueueProposalClass)          => model = Some(QueueProposalClass.tooOption.set(q, selection.item))
+          case Some(l: LargeProgramClass)           => model = Some(LargeProgramClass.tooOption.set(l, selection.item))
+          case Some(f: FastTurnaroundProgramClass)  => model = Some(FastTurnaroundProgramClass.tooOption.set(f, selection.item))
+          case Some(s: SubaruIntensiveProgramClass) => model = Some(SubaruIntensiveProgramClass.tooOption.set(s, selection.item))
+          case _                                    => // shouldn't happen
         }
       }
 
@@ -403,12 +412,12 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
         }
 
         def queueEditor = for {
-          q@QueueProposalClass(_, _, _, _, Some(r), _) <- model
+          q @ QueueProposalClass(_, _, _, _, Some(r), _) <- model
           (r, _, _) <- SubmissionRequestEditor.open(r, None, Nil, None, button)
         } yield QueueProposalClass.band3request.set(q, Some(r))
 
         def ftEditor = for {
-          ft@FastTurnaroundProgramClass(_, _, _, _, Some(r), _, _, _, _) <- model
+          ft @ FastTurnaroundProgramClass(_, _, _, _, Some(r), _, _, _, _) <- model
           (r, _, _) <- SubmissionRequestEditor.open(r, None, Nil, None, button)
         } yield FastTurnaroundProgramClass.band3request.set(ft, Some(r))
 
@@ -790,9 +799,10 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
 
     // Special time label
     lazy val specialTimeLabel = dvLabel("Time:") {
-      case _:SpecialProposalClass       => true
-      case _:LargeProgramClass          => true
-      case _:FastTurnaroundProgramClass => true
+      case _: SpecialProposalClass        => true
+      case _: LargeProgramClass           => true
+      case _: FastTurnaroundProgramClass  => true
+      case _: SubaruIntensiveProgramClass => true
     }
 
     // Special time control set
@@ -811,10 +821,11 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
       override def refresh(m:Option[ProposalClass]) {
         edit.enabled = canEdit
         visible = ~m.map {
-          case _:SpecialProposalClass       => true
-          case _:LargeProgramClass          => true
-          case _:FastTurnaroundProgramClass => true
-          case _                            => false
+          case _: SpecialProposalClass        => true
+          case _: LargeProgramClass           => true
+          case _: FastTurnaroundProgramClass  => true
+          case _: SubaruIntensiveProgramClass => true
+          case _                              => false
         }
       }
 
@@ -826,6 +837,9 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
 
         // A lens to allow us to set the request
         val lp = LargeProgramClass.sub andThen LargeProgramSubmission.request
+
+        // A lens to allow us to set the request
+        val sip = SubaruIntensiveProgramClass.sub andThen SubaruIntensiveProgramSubmission.request
 
         // A lens to allow us to set the request
         val ft = FastTurnaroundProgramClass.sub andThen FastTurnaroundSubmission.request
@@ -840,14 +854,19 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
             req                                    <- LargeSubmissionRequestEditor.open(sub.request, button)
           } yield Some(lp.set(l, req))
 
+        def sipRequest = for {
+            l @ SubaruIntensiveProgramClass(_, _, _, _, sub) <- model
+            req                                              <- LargeSubmissionRequestEditor.open(sub.request, button)
+          } yield Some(sip.set(l, req))
+
         def ftRequest = for {
             l @ FastTurnaroundProgramClass(_, _, _, sub, _, _, _, _, _) <- model
-            req                                                <- SubmissionRequestEditor.open(sub.request, None, Nil, None, button)
+            req                                                         <- SubmissionRequestEditor.open(sub.request, None, Nil, None, button)
           } yield Some(ft.set(l, req._1))
 
         // Our action
         action = Action("") {
-          model = spRequest.orElse(lpRequest).orElse(ftRequest).getOrElse(model)
+          model = spRequest.orElse(lpRequest).orElse(ftRequest).orElse(sipRequest).getOrElse(model)
         }
 
         icon = SharedIcons.ICON_CLOCK
@@ -864,10 +883,11 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
         // On refresh, set our text
         override def refresh(m:Option[ProposalClass]) {
           text = ~m.map {
-            case s:SpecialProposalClass       => formatLabel(s.sub.request)
-            case f:FastTurnaroundProgramClass => formatLabel(f.sub.request)
-            case l:LargeProgramClass          => formatLabel(l.sub.request)
-            case _                            => ""
+            case s: SpecialProposalClass        => formatLabel(s.sub.request)
+            case f: FastTurnaroundProgramClass  => formatLabel(f.sub.request)
+            case l: LargeProgramClass           => formatLabel(l.sub.request)
+            case s: SubaruIntensiveProgramClass => formatLabel(s.sub.request)
+            case _                              => ""
           }
         }
 
@@ -879,8 +899,8 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
 
     // Request type label
     lazy val partnerTypeLabel = dvLabel("Request Type:") {
-      case _:QueueProposalClass     => true
-      case _:ClassicalProposalClass => true
+      case _: QueueProposalClass     => true
+      case _: ClassicalProposalClass => true
     }
 
     // Request type selector. This one is kind of complicated
@@ -915,7 +935,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
           case ClassicalProposalClass(_, _, _, Right(e), _) if e.partner == ExchangePartner.KECK   => localKeck = e
           case ClassicalProposalClass(_, _, _, Right(e), _) if e.partner == ExchangePartner.SUBARU => localSubaru = e
           case ClassicalProposalClass(_, _, _, Right(e), _) if e.partner == ExchangePartner.CFHT   => localCFHT= e
-          case e:ExchangeProposalClass                                                             => localGemini = e.subs
+          case e: ExchangeProposalClass                                                            => localGemini = e.subs
           case _                                                                                   => // ignore
         }
 
@@ -929,10 +949,11 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
           case ClassicalProposalClass(_, _, _, Right(e), _) if e.partner == ExchangePartner.KECK   => ExchangeKeck
           case ClassicalProposalClass(_, _, _, Right(e), _) if e.partner == ExchangePartner.SUBARU => ExchangeSubaru
           case ClassicalProposalClass(_, _, _, Right(e), _) if e.partner == ExchangePartner.CFHT   => ExchangeCFHT
-          case _:ExchangeProposalClass                                                             => GeminiPartner
-          case _:SpecialProposalClass                                                              => GeminiPartner
-          case _:LargeProgramClass                                                                 => GeminiPartner
-          case _:FastTurnaroundProgramClass                                                        => GeminiPartner
+          case _: ExchangeProposalClass                                                            => GeminiPartner
+          case _: SpecialProposalClass                                                             => GeminiPartner
+          case _: LargeProgramClass                                                                => GeminiPartner
+          case _: SubaruIntensiveProgramClass                                                      => ExchangeSubaru
+          case _: FastTurnaroundProgramClass                                                       => GeminiPartner
         }.getOrElse(PartnerType.GeminiPartner)
 
       }
@@ -989,10 +1010,11 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
     override def refresh(m:Option[Proposal]) {
       super.refresh(m) // important
       visible = ~m.map(_.proposalClass).map {
-        case _:SpecialProposalClass       => false
-        case _:LargeProgramClass          => false
-        case _:FastTurnaroundProgramClass => false
-        case _                            => true
+        case _: SpecialProposalClass        => false
+        case _: LargeProgramClass           => false
+        case _: FastTurnaroundProgramClass  => false
+        case _: SubaruIntensiveProgramClass => false
+        case _                              => true
       }
     }
 
@@ -1044,22 +1066,22 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
           // We are removing an NGO partner. This can happen only for some proposal classes. Exchange partners can
           // never be removed because there's always exactly one of them.
           (s.partner, p.proposalClass) match {
-            case (n:NgoPartner, q:QueueProposalClass)          => q.copy(subs = Left(remove(n, ~q.subs.left.toOption)))
-            case (n:NgoPartner, c:ClassicalProposalClass)      => c.copy(subs = Left(remove(n, ~c.subs.left.toOption)))
-            case (n:NgoPartner, e:ExchangeProposalClass)       => e.copy(subs = remove(n, e.subs))
-            case _                                             => p.proposalClass // shouldn't happen
+            case (n: NgoPartner, q: QueueProposalClass)          => q.copy(subs = Left(remove(n, ~q.subs.left.toOption)))
+            case (n: NgoPartner, c: ClassicalProposalClass)      => c.copy(subs = Left(remove(n, ~c.subs.left.toOption)))
+            case (n: NgoPartner, e: ExchangeProposalClass)       => e.copy(subs = remove(n, e.subs))
+            case _                                               => p.proposalClass // shouldn't happen
           }
 
         } else {
 
           // We are replacing an arbitrary submission
           (s.partner, p.proposalClass) match {
-            case (e:ExchangePartner, q:QueueProposalClass)     => q.copy(subs = Right(ExchangeSubmission(r, None, e, i.ref)))
-            case (n:NgoPartner, q:QueueProposalClass)          => q.copy(subs = Left(replace(n, i.ref, r, ~q.subs.left.toOption)))
-            case (e:ExchangePartner, c:ClassicalProposalClass) => c.copy(subs = Right(ExchangeSubmission(r, None, e, i.ref)))
-            case (n:NgoPartner, c:ClassicalProposalClass)      => c.copy(subs = Left(replace(n, i.ref, r, ~c.subs.left.toOption)))
-            case (n:NgoPartner, e:ExchangeProposalClass)       => e.copy(subs = replace(n, i.ref, r, e.subs))
-            case _                                             => p.proposalClass // shouldn't happen
+            case (e: ExchangePartner, q: QueueProposalClass)     => q.copy(subs = Right(ExchangeSubmission(r, None, e, i.ref)))
+            case (n: NgoPartner, q: QueueProposalClass)          => q.copy(subs = Left(replace(n, i.ref, r, ~q.subs.left.toOption)))
+            case (e: ExchangePartner, c: ClassicalProposalClass) => c.copy(subs = Right(ExchangeSubmission(r, None, e, i.ref)))
+            case (n: NgoPartner, c: ClassicalProposalClass)      => c.copy(subs = Left(replace(n, i.ref, r, ~c.subs.left.toOption)))
+            case (n: NgoPartner, e: ExchangeProposalClass)       => e.copy(subs = replace(n, i.ref, r, e.subs))
+            case _                                               => p.proposalClass // shouldn't happen
           }
         }
 
@@ -1080,10 +1102,11 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
       case QueueProposalClass(_, _, _, Right(exch), _, _)  => List(Real(exch))
       case ClassicalProposalClass(_, _, _, Left(ngos), _)  => all(ngos)
       case ClassicalProposalClass(_, _, _, Right(exch), _) => List(Real(exch))
-      case e:ExchangeProposalClass                         => all(e.subs)
-      case _:SpecialProposalClass                          => Nil
-      case _:LargeProgramClass                             => Nil
-      case _:FastTurnaroundProgramClass                    => Nil
+      case e: ExchangeProposalClass                        => all(e.subs)
+      case _: SpecialProposalClass                         => Nil
+      case _: LargeProgramClass                            => Nil
+      case _: SubaruIntensiveProgramClass                  => Nil
+      case _: FastTurnaroundProgramClass                   => Nil
     }
 
     def all(ngos:List[NgoSubmission]):List[PSWrapper] = {
@@ -1111,10 +1134,11 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
   /** Opens the editor for the given submission. */
   def editSubmissionTime(sub: Submission) {
     sub match {
-      case _: SpecialSubmission        => header.specialTime.edit.doClick()
-      case _: LargeProgramSubmission   => header.specialTime.edit.doClick()
-      case _: FastTurnaroundSubmission => header.specialTime.edit.doClick()
-      case ps: PartnerSubmission[_,_]  => list.edit(ps)
+      case _: SpecialSubmission                 => header.specialTime.edit.doClick()
+      case _: LargeProgramSubmission            => header.specialTime.edit.doClick()
+      case _: SubaruIntensiveProgramSubmission  => header.specialTime.edit.doClick()
+      case _: FastTurnaroundSubmission          => header.specialTime.edit.doClick()
+      case ps: PartnerSubmission[_,_]           => list.edit(ps)
     }
   }
 

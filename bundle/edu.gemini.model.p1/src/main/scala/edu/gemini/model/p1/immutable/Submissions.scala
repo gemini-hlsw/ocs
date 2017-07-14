@@ -138,6 +138,33 @@ case class LargeProgramSubmission(request:SubmissionRequest,
   def reset:LargeProgramSubmission = copy(response = None)
 }
 
+object SubaruIntensiveProgramSubmission {
+  // lenses
+  val request: Lens[SubaruIntensiveProgramSubmission, SubmissionRequest] = Lens.lensu((a, b) => a.copy(request = b), _.request)
+  val response: Lens[SubaruIntensiveProgramSubmission, Option[SubmissionResponse]] = Lens.lensu((a, b) => a.copy(response = b), _.response)
+
+  def apply(m: M.SubaruIntensiveProgramSubmission): SubaruIntensiveProgramSubmission = apply(
+    SubmissionRequest(m.getRequest),
+    Option(m.getResponse).map(SubmissionResponse(_))
+  )
+
+  val empty = apply(SubmissionRequest.empty, None)
+
+}
+
+case class SubaruIntensiveProgramSubmission(request: SubmissionRequest,
+                             response: Option[SubmissionResponse]) extends Submission {
+
+  def mutable: M.SubaruIntensiveProgramSubmission = {
+    val m = Factory.createSubaruIntensiveProgramSubmission
+    m.setRequest(request.mutable)
+    m.setResponse(response.map(_.mutable).orNull)
+    m
+  }
+
+  def reset: SubaruIntensiveProgramSubmission = copy(response = None)
+}
+
 object LargeProgramSubmission {
   // lenses
   val request:Lens[LargeProgramSubmission, SubmissionRequest] = Lens.lensu((a, b) => a.copy(request = b), _.request)
@@ -215,7 +242,7 @@ object SubmissionResponse {
 
   val decision:Lens[SubmissionResponse, Option[SubmissionDecision]] = Lens.lensu((a, b) => a.copy(decision = b), _.decision)
   val comment:Lens[SubmissionResponse, Option[String]] = Lens.lensu((a, b) => a.copy(comment = b), _.comment)
-  
+
   /** Reads the SubmissionAccept, if any, but writes only a SubmissionAccept; writing None is a no-op */
   val acceptDecision:Lens[SubmissionResponse, Option[SubmissionAccept]] = Lens.lensu((r, b) => b match {
       case Some(a) => r.copy(decision = Some(SubmissionDecision(Right(a))))
@@ -282,11 +309,11 @@ case class SubmissionReceipt(id:String, timestamp:Long, contact: Option[String])
 }
 
 object SubmissionAccept {
-  
+
   lazy val empty = apply("", 0.0, TimeAmount.empty, TimeAmount.empty, false)
-  
+
   val email:Lens[SubmissionAccept, String] = Lens.lensu((a, b) => a.copy(email = b), _.email)
-  
+
   def apply(m:M.SubmissionAccept):SubmissionAccept = SubmissionAccept(
     m.getEmail,
     m.getRanking.doubleValue,

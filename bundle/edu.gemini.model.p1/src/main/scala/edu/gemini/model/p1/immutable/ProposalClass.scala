@@ -18,7 +18,8 @@ object ProposalClass {
     val e = Option(m.getExchange).map(ExchangeProposalClass(_))
     val l = Option(m.getLarge).map(LargeProgramClass(_))
     val f = Option(m.getFastTurnaround).map(FastTurnaroundProgramClass(_))
-    q.orElse(c).orElse(s).orElse(e).orElse(l).orElse(f).get
+    val i = Option(m.getSip).map(SubaruIntensiveProgramClass(_))
+    q.orElse(c).orElse(s).orElse(e).orElse(l).orElse(f).orElse(i).get
   }
 
   val empty = QueueProposalClass.empty
@@ -28,12 +29,13 @@ object ProposalClass {
   def mutable(p:Proposal, n:Namer):M.ProposalClassChoice = {
     val m = Factory.createProposalClassChoice
     p.proposalClass match {
-      case q:QueueProposalClass         => m.setQueue(q.mutable(p, n))
-      case c:ClassicalProposalClass     => m.setClassical(c.mutable(p, n))
-      case s:SpecialProposalClass       => m.setSpecial(s.mutable)
-      case e:ExchangeProposalClass      => m.setExchange(e.mutable(p, n))
-      case l:LargeProgramClass          => m.setLarge(l.mutable)
-      case l:FastTurnaroundProgramClass => m.setFastTurnaround(l.mutable(n))
+      case q: QueueProposalClass          => m.setQueue(q.mutable(p, n))
+      case c: ClassicalProposalClass      => m.setClassical(c.mutable(p, n))
+      case s: SpecialProposalClass        => m.setSpecial(s.mutable)
+      case e: ExchangeProposalClass       => m.setExchange(e.mutable(p, n))
+      case l: LargeProgramClass           => m.setLarge(l.mutable)
+      case i: SubaruIntensiveProgramClass => m.setSip(i.mutable)
+      case l: FastTurnaroundProgramClass  => m.setFastTurnaround(l.mutable(n))
     }
     m
   }
@@ -296,6 +298,51 @@ object LargeProgramClass {
     m.getTooOption)
 
   def empty = apply(None, None, None, LargeProgramSubmission.empty, ToOChoice.None)
+
+}
+
+case class SubaruIntensiveProgramClass(itac  :Option[Itac],
+                            comment  : Option[String],
+                            key      : Option[UUID],
+                            tooOption: ToOChoice,
+                            sub      : SubaruIntensiveProgramSubmission) extends ProposalClass {
+
+  def mutable: M.SubaruIntensiveProgramClass = {
+    val m = Factory.createSubaruIntensiveProgramClass
+    m.setItac(itac.map(_.mutable).orNull)
+    m.setComment(comment.orNull)
+    m.setKey(key.map(_.toString).orNull)
+    m.setSubmission(sub.mutable)
+    m.setTooOption(tooOption)
+    m
+  }
+
+  def reset = copy(key = None, sub = sub.reset)
+
+  def requestedTime: TimeAmount    = sub.request.time
+  def minRequestedTime: TimeAmount = sub.request.minTime
+  def totalLPTime: Option[TimeAmount] = sub.request.totalLPTime
+
+  def classLabel = "Subaru Intensive Program"
+
+  override val isSpecial = false
+
+}
+
+object SubaruIntensiveProgramClass {
+
+  // Lens
+  val tooOption: Lens[SubaruIntensiveProgramClass, ToOChoice] = Lens.lensu((a, b) => a.copy(tooOption = b), _.tooOption)
+  val sub: Lens[SubaruIntensiveProgramClass, SubaruIntensiveProgramSubmission] = Lens.lensu((a, b) => a.copy(sub = b), _.sub)
+
+  def apply(m:M.SubaruIntensiveProgramClass): SubaruIntensiveProgramClass = apply(
+    Option(m.getItac).map(Itac(_)),
+    Option(m.getComment),
+    Option(m.getKey).map(UUID.fromString),
+    m.getTooOption,
+    SubaruIntensiveProgramSubmission(m.getSubmission))
+
+  def empty = apply(None, None, None, ToOChoice.None, SubaruIntensiveProgramSubmission.empty)
 
 }
 

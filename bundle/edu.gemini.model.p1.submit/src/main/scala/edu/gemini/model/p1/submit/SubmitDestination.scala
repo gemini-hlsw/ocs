@@ -22,5 +22,8 @@ object SubmitDestination {
   case object FastTurnaroundProgram extends SubmitDestination {
     override val destinationName = "Fast Turnaround"
   }
+  case object SubaruIntensiveProgram extends SubmitDestination {
+    override val destinationName = "Subaru Intensive"
+  }
 }
 

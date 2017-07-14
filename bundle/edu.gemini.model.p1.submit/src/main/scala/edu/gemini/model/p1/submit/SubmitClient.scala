@@ -20,7 +20,7 @@ object SubmitClient {
  * the result contains the partner reference number that was assigned by the
  * backend service.
  */
-class SubmitClient(name:String,  url: Map[SubmitDestination, String]) {
+class SubmitClient(name:String, url: Map[SubmitDestination, String]) {
   private val LOG = Logger.getLogger(getClass.getName)
 
   /**
@@ -52,6 +52,7 @@ class SubmitClient(name:String,  url: Map[SubmitDestination, String]) {
 
   private def syncSubmit(proposal: Proposal, sc: SubContainer): Future[ProposalSubmitResult] = {
     logValidation(proposal)
+
     val futs    = sc.pendingDestinations map { d => FutureSubmission(d, url(d), proposal) }
     val results = futs.map(_.result)
     Future.sequence(results).map(r => ProposalSubmitResult((sc/:r)(_+_).update(proposal), r))

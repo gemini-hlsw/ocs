@@ -522,24 +522,26 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
     private lazy val minTimeCheck = {
 
       val subs:List[Submission] = p.proposalClass match {
-        case n: GeminiNormalProposalClass => n.subs match {
+        case n: GeminiNormalProposalClass   => n.subs match {
           case Left(ss)  => ss
           case Right(ss) => List(ss)
         }
-        case e: ExchangeProposalClass      => e.subs
-        case s: SpecialProposalClass       => List(s.sub)
-        case l: LargeProgramClass          => List(l.sub)
-        case f: FastTurnaroundProgramClass => List(f.sub)
+        case e: ExchangeProposalClass       => e.subs
+        case s: SpecialProposalClass        => List(s.sub)
+        case l: LargeProgramClass           => List(l.sub)
+        case i: SubaruIntensiveProgramClass => List(i.sub)
+        case f: FastTurnaroundProgramClass  => List(f.sub)
       }
 
       subs.filter(sub => sub.request.time.hours < sub.request.minTime.hours).map {
         sub =>
           val kind = sub match {
-            case n: NgoSubmission            => Partners.name(n.partner)
-            case e: ExchangeSubmission       => Partners.name(e.partner)
-            case s: SpecialSubmission        => s.specialType.value
-            case l: LargeProgramSubmission   => "large program"
-            case f: FastTurnaroundSubmission => "fast-turnaround"
+            case n: NgoSubmission                    => Partners.name(n.partner)
+            case e: ExchangeSubmission               => Partners.name(e.partner)
+            case s: SpecialSubmission                => s.specialType.value
+            case l: LargeProgramSubmission           => "large program"
+            case i: SubaruIntensiveProgramSubmission => "Subaru intensive program"
+            case f: FastTurnaroundSubmission         => "fast-turnaround"
           }
           new Problem(Severity.Error, s"Requested time for $kind is less than minimum requested time.", TimeProblems.SCHEDULING_SECTION,
             s.inPartnersView(_.editSubmissionTime(sub)))
@@ -555,8 +557,8 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
     private lazy val band3Orphan2 = for {
       o <- p.observations
       if o.band == Band.BAND_3 && (p.proposalClass match {
-        case q: QueueProposalClass         if q.band3request.isDefined => false
-        case _ => true
+        case q: QueueProposalClass if q.band3request.isDefined => false
+        case _                                                 => true
       })
     } yield {
       new Problem(Severity.Error,
@@ -590,13 +592,16 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       b <- o.blueprint if (p.proposalClass match {
       case e: ExchangeProposalClass if e.partner == ExchangePartner.KECK   => b.site != Site.Keck
       case e: ExchangeProposalClass if e.partner == ExchangePartner.SUBARU => b.site != Site.Subaru
+      case s: SubaruIntensiveProgramClass                                  => b.site != Site.Subaru
       case _                                                               => b.site != Site.GN && b.site != Site.GS
     })
     } yield {
       val host = p.proposalClass match {
-        case e: ExchangeProposalClass if e.partner == ExchangePartner.KECK   => Site.Keck.name
-        case e: ExchangeProposalClass if e.partner == ExchangePartner.SUBARU => Site.Subaru.name
-        case _                                                               => "Gemini"
+        case e: ExchangeProposalClass if e.partner == ExchangePartner.KECK    => Site.Keck.name
+        case e: ExchangeProposalClass if e.partner == ExchangePartner.SUBARU  => Site.Subaru.name
+        case e: ExchangeProposalClass if e.partner == ExchangePartner.SUBARU  => Site.Subaru.name
+        case e: SubaruIntensiveProgramClass                                   => Site.Subaru.name
+        case _                                                                => "Gemini"
       }
       new Problem(Severity.Error, s"Scheduling request is for $host but resource resides at ${b.site.name}.", "Observations", {
         s.showPartnersView()

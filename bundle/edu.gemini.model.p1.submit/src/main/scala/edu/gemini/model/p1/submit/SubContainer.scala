@@ -26,12 +26,13 @@ object SubContainer {
   def apply(p: Proposal): SubContainer = apply(p.proposalClass)
 
   def apply(pc: ProposalClass): SubContainer = pc match {
-    case q: QueueProposalClass         => GeminiSubContainer(q)
-    case c: ClassicalProposalClass     => GeminiSubContainer(c)
-    case s: SpecialProposalClass       => SpecialSubContainer(s)
-    case e: ExchangeProposalClass      => ExchangeSubContainer(e)
-    case l: LargeProgramClass          => LPSubContainer(l)
-    case f: FastTurnaroundProgramClass => FTSubContainer(f)
+    case q: QueueProposalClass          => GeminiSubContainer(q)
+    case c: ClassicalProposalClass      => GeminiSubContainer(c)
+    case s: SpecialProposalClass        => SpecialSubContainer(s)
+    case e: ExchangeProposalClass       => ExchangeSubContainer(e)
+    case l: LargeProgramClass           => LPSubContainer(l)
+    case i: SubaruIntensiveProgramClass => SIPSubContainer(i)
+    case f: FastTurnaroundProgramClass  => FTSubContainer(f)
   }
 
   // this has side effects unfortunately
@@ -123,9 +124,30 @@ object SubContainer {
 
     def +(res: DestinationSubmitResult): SubContainer =
       res.destination match {
-        case LargeProgram=>
+        case LargeProgram =>
           LPSubContainer(subResponse.set(pc, toResponse(res)))
-        case _ => this
+        case _            => this
+      }
+  }
+
+  object SIPSubContainer {
+    lazy val subResponse: Lens[SubaruIntensiveProgramClass, Option[SubmissionResponse]] = SubaruIntensiveProgramClass.sub andThen SubaruIntensiveProgramSubmission.response
+  }
+
+  case class SIPSubContainer(pc: SubaruIntensiveProgramClass) extends SubContainer {
+    def reset      = SIPSubContainer(pc.copy(key = None, sub = pc.sub.reset))
+    def withNewKey = SIPSubContainer(pc.copy(key = newKey))
+
+    def pendingDestinations: List[SubmitDestination] =
+      if (pc.sub.response.isEmpty) List(SubaruIntensiveProgram) else Nil
+
+    import SIPSubContainer.subResponse
+
+    def +(res: DestinationSubmitResult): SubContainer =
+      res.destination match {
+        case SubaruIntensiveProgram =>
+          SIPSubContainer(subResponse.set(pc, toResponse(res)))
+        case _                      => this
       }
   }
 
