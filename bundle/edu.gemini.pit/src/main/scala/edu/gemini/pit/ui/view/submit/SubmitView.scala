@@ -37,14 +37,14 @@ class SubmitView(ph: ProblemRobot, newShellHandler: (Model,Option[File]) => Unit
   }
 
   // Pull an error message out, if any
-  def sr(sub:Submission):Option[SubmitResult] = {
+  def sr(sub:Submission): Option[SubmitResult] = {
     val sd = sub match {
-      case n: NgoSubmission               => SubmitDestination.Ngo(n.partner)
-      case e: ExchangeSubmission          => SubmitDestination.Exchange(e.partner)
-      case s: SpecialSubmission           => SubmitDestination.Special(s.specialType)
-      case l: LargeProgramSubmission      => SubmitDestination.LargeProgram
-      case i: SubaruIntensiveProgramClass => SubmitDestination.LargeProgram
-      case f: FastTurnaroundSubmission    => SubmitDestination.FastTurnaroundProgram
+      case n: NgoSubmission                    => SubmitDestination.Ngo(n.partner)
+      case e: ExchangeSubmission               => SubmitDestination.Exchange(e.partner)
+      case s: SpecialSubmission                => SubmitDestination.Special(s.specialType)
+      case l: LargeProgramSubmission           => SubmitDestination.LargeProgram
+      case i: SubaruIntensiveProgramSubmission => SubmitDestination.SubaruIntensiveProgram
+      case f: FastTurnaroundSubmission         => SubmitDestination.FastTurnaroundProgram
     }
     dsrs.get(sd)
   }
@@ -209,12 +209,12 @@ class SubmitView(ph: ProblemRobot, newShellHandler: (Model,Option[File]) => Unit
 
     def text(s:Submission) = {
       case Partner   => s match {
-        case n: NgoSubmission               => Partners.name.get(n.partner).orNull
-        case e: ExchangeSubmission          => Partners.name.get(e.partner).orNull
-        case _: SpecialSubmission           => "Gemini Observatory"
-        case _: LargeProgramSubmission      => "Large Program"
-        case _: SubaruIntensiveProgramClass => "Subaru Intensive Program"
-        case _: FastTurnaroundSubmission    => "Fast Turnaround"
+        case n: NgoSubmission                    => Partners.name.get(n.partner).orNull
+        case e: ExchangeSubmission               => Partners.name.get(e.partner).orNull
+        case _: SpecialSubmission                => "Gemini Observatory"
+        case _: LargeProgramSubmission           => "Large Program"
+        case _: SubaruIntensiveProgramSubmission => "Subaru Intensive Program"
+        case _: FastTurnaroundSubmission         => "Fast Turnaround"
       }
       case Reference => s.response.map(_.receipt.id).orNull
       case Contact   => s.response.flatMap(_.receipt.contact).orNull

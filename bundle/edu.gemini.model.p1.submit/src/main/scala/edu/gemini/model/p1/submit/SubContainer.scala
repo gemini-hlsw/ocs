@@ -124,9 +124,9 @@ object SubContainer {
 
     def +(res: DestinationSubmitResult): SubContainer =
       res.destination match {
-        case LargeProgram=>
+        case LargeProgram =>
           LPSubContainer(subResponse.set(pc, toResponse(res)))
-        case _ => this
+        case _            => this
       }
   }
 
@@ -139,15 +139,15 @@ object SubContainer {
     def withNewKey = SIPSubContainer(pc.copy(key = newKey))
 
     def pendingDestinations: List[SubmitDestination] =
-      if (pc.sub.response.isEmpty) List(LargeProgram) else Nil
+      if (pc.sub.response.isEmpty) List(SubaruIntensiveProgram) else Nil
 
     import SIPSubContainer.subResponse
 
     def +(res: DestinationSubmitResult): SubContainer =
       res.destination match {
-        case LargeProgram =>
+        case SubaruIntensiveProgram =>
           SIPSubContainer(subResponse.set(pc, toResponse(res)))
-        case _ => this
+        case _                      => this
       }
   }
 

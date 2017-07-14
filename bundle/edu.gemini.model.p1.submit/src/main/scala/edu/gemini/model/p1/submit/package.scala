@@ -18,7 +18,7 @@ package object submit {
     NgoPartner.values.map(p => Ngo(p) -> url(p.name)).toMap ++
     ExchangePartner.values.map(p => Exchange(p) -> url(p.name)).toMap ++
     specialProposalsTestUrls ++
-    Map(LargeProgram -> url("large_program"), FastTurnaroundProgram -> url("fast_turnaround"))
+    Map(LargeProgram -> url("large_program"), FastTurnaroundProgram -> url("fast_turnaround"), SubaruIntensiveProgram -> url("subaru_intensive_program"))
   }
 
   val productionSubmissionUrls: Map[SubmitDestination, String] = submissionUrls(s"$phase1ServerUrl/production")

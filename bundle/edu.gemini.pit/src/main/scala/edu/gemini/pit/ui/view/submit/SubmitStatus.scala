@@ -13,22 +13,23 @@ object SubmitStatus {
 
   def forProposal(p:ProposalClass, ps:List[Problem]):SubmitStatus = p match {
     case _ if ps.map(_.severity).exists(s => s == Severity.Error || s == Severity.Todo)  => Incomplete
-    case _ if p.key.isEmpty                                             => Ready
-    case q:QueueProposalClass                                           => q.subs match {
+    case _ if p.key.isEmpty                                                              => Ready
+    case q: QueueProposalClass                                                           => q.subs match {
       case Left(ss) if ss.forall(_.response.isDefined) => Success
       case Right(s) if s.response.isDefined            => Success
       case _                                           => Partial
     }
-    case c:ClassicalProposalClass                                       => c.subs match {
+    case c: ClassicalProposalClass                                                       => c.subs match {
       case Left(ss) if ss.forall(_.response.isDefined) => Success
       case Right(s) if s.response.isDefined            => Success
       case _                                           => Partial
     }
-    case e:ExchangeProposalClass if e.subs.forall(_.response.isDefined) => Success
-    case s:SpecialProposalClass if s.sub.response.isDefined             => Success
-    case l:LargeProgramClass if l.sub.response.isDefined                => Success
-    case f:FastTurnaroundProgramClass if f.sub.response.isDefined       => Success
-    case _                                                              => Partial
+    case e: ExchangeProposalClass if e.subs.forall(_.response.isDefined)                 => Success
+    case s: SpecialProposalClass if s.sub.response.isDefined                             => Success
+    case l: LargeProgramClass if l.sub.response.isDefined                                => Success
+    case f: FastTurnaroundProgramClass if f.sub.response.isDefined                       => Success
+    case s: SubaruIntensiveProgramClass if s.sub.response.isDefined                      => Success
+    case _                                                                               => Partial
   }
 
   def destinationName(destination: Option[SubmitDestination]) = destination.map(d => d.destinationName).getOrElse("Unknown")
