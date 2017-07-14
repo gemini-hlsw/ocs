@@ -30,12 +30,16 @@ object BlueprintEditor {
 
   def open(p:Proposal, bp:Option[BlueprintBase], editable:Boolean, parent:UIElement):Option[BlueprintBase] = {
     val initialState = bp.flatMap(b => emptyState(b.site, p.semester).recover(b)).getOrElse(emptyState(p.proposalClass match {
-      case e:ExchangeProposalClass => e.partner match {
+      case e: ExchangeProposalClass       => e.partner match {
         case ExchangePartner.KECK   => Site.Keck
         case ExchangePartner.SUBARU => Site.Subaru
         case ExchangePartner.CFHT   => Site.CFHT // Shouldn't happen
       }
-      case _ => Site.GN // or GS; same thing
+      case s: SubaruIntensiveProgramClass => s.telescope match {
+        case ExchangeTelescope.SUBARU => Site.Subaru
+        case ExchangeTelescope.GEMINI => Site.GN
+      }
+      case _                              => Site.GN // or GS; same thing
     }, p.semester))
     new BlueprintEditor(initialState, editable).open(parent)
   }
