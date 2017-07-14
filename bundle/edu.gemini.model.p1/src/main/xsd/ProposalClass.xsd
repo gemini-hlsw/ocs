@@ -136,7 +136,6 @@
         <xsd:complexContent>
             <xsd:extension base="ProposalClass">
                 <xsd:sequence>
-                    <xsd:element name="telescope" type="ExchangeTelescope"/>
                     <xsd:element name="submission" type="SubaruIntensiveProgramSubmission"/>
                 </xsd:sequence>
                 <xsd:attribute name="tooOption" type="TooOption" use="optional"/>

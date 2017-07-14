@@ -141,8 +141,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
       specialLabel, special,
       specialTimeLabel, specialTime,
       partnerTypeLabel, partnerType,
-      siteLabel, siteCombo,
-      telescopeLabel, telescopeCombo
+      siteLabel, siteCombo
     )
 
     // The proposal class row is always visible
@@ -150,9 +149,6 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
 
     // Site selection, for exchange observing
     addRow(siteLabel, siteCombo)
-
-    // Telescope selection for large exchange programs
-    addRow(telescopeLabel, telescopeCombo)
 
     // Visible only in Queue mode
     addRow(band3Label, band3)
@@ -204,40 +200,6 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
       }
 
       def text(p: ExchangePartner) = Partners.name(p)
-    }
-
-    // Telescope label
-    lazy val telescopeLabel = dvLabel("Observatory:") {
-      case e: SubaruIntensiveProgramClass => true
-    }
-
-    // Site combo
-    object telescopeCombo extends ComboBox(ExchangeTelescope.values) with Bound[Proposal, ProposalClass] with TextRenderer[ExchangeTelescope] {
-
-      val lens = Proposal.proposalClass
-
-      selection.reactions += {
-        case SelectionChanged(_) => model match {
-          case Some(e: SubaruIntensiveProgramClass) => model = Some(e.copy(telescope = selection.item))
-          case _                                    => // shouldn't happen
-        }
-      }
-
-      override def refresh(m: Option[ProposalClass]) {
-        enabled = canEdit
-        m.foreach {
-          case e: SubaruIntensiveProgramClass =>
-            selection.item = e.telescope
-            visible = true
-          case _                              =>
-            visible = false
-        }
-      }
-
-      def text(p: ExchangeTelescope) = p match {
-        case ExchangeTelescope.GEMINI => "Gemini"
-        case ExchangeTelescope.SUBARU => "Subaru"
-      }
     }
 
     // The proposal class combo is always visible
@@ -296,10 +258,10 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
 
     // TOO label and combo box
     lazy val tooLabel = dvLabel("ToO Activation:") {
-      case _: QueueProposalClass         => true
-      case _: LargeProgramClass          => true
-      case _: FastTurnaroundProgramClass => true
-      case SubaruIntensiveProgramClass(_, _, _, ExchangeTelescope.GEMINI, _, _) => true
+      case _: QueueProposalClass          => true
+      case _: LargeProgramClass           => true
+      case _: FastTurnaroundProgramClass  => true
+      case _: SubaruIntensiveProgramClass => true
     }
 
     // TOO option combo box
@@ -319,8 +281,8 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
           case f: FastTurnaroundProgramClass  =>
             selection.item = f.tooOption
             visible = true
-          case SubaruIntensiveProgramClass(_, _, _, ExchangeTelescope.GEMINI, tooOption, _) =>
-            selection.item = tooOption.getOrElse(ToOChoice.None)
+          case s: SubaruIntensiveProgramClass =>
+            selection.item = s.tooOption
             visible = true
           case _                              =>
             visible = false
@@ -332,7 +294,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
           case Some(q: QueueProposalClass)          => model = Some(QueueProposalClass.tooOption.set(q, selection.item))
           case Some(l: LargeProgramClass)           => model = Some(LargeProgramClass.tooOption.set(l, selection.item))
           case Some(f: FastTurnaroundProgramClass)  => model = Some(FastTurnaroundProgramClass.tooOption.set(f, selection.item))
-          case Some(s: SubaruIntensiveProgramClass) => model = Some(SubaruIntensiveProgramClass.tooOption.set(s, Some(selection.item)))
+          case Some(s: SubaruIntensiveProgramClass) => model = Some(SubaruIntensiveProgramClass.tooOption.set(s, selection.item))
           case _                                    => // shouldn't happen
         }
       }
@@ -893,8 +855,8 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
           } yield Some(lp.set(l, req))
 
         def sipRequest = for {
-            l @ SubaruIntensiveProgramClass(_, _, _, _, _, sub) <- model
-            req                                    <- LargeSubmissionRequestEditor.open(sub.request, button)
+            l @ SubaruIntensiveProgramClass(_, _, _, _, sub) <- model
+            req                                              <- LargeSubmissionRequestEditor.open(sub.request, button)
           } yield Some(sip.set(l, req))
 
         def ftRequest = for {

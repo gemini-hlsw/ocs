@@ -214,16 +214,6 @@
     </xsd:simpleType>
 
     <!--
-      Large Program Exchange Telescopes
-    -->
-    <xsd:simpleType name="ExchangeTelescope">
-        <xsd:restriction base="xsd:token">
-            <xsd:enumeration value="subaru"/>
-            <xsd:enumeration value="gemini"/>
-        </xsd:restriction>
-    </xsd:simpleType>
-
-    <!--
       A proposal is one of normal Phase 1 science, demo science, director's
       discretionary time, poor weather, or system verification.
     -->

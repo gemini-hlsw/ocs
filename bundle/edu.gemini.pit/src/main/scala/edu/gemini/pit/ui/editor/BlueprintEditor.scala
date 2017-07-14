@@ -35,10 +35,7 @@ object BlueprintEditor {
         case ExchangePartner.SUBARU => Site.Subaru
         case ExchangePartner.CFHT   => Site.CFHT // Shouldn't happen
       }
-      case s: SubaruIntensiveProgramClass => s.telescope match {
-        case ExchangeTelescope.SUBARU => Site.Subaru
-        case ExchangeTelescope.GEMINI => Site.GN
-      }
+      case s: SubaruIntensiveProgramClass => Site.Subaru
       case _                              => Site.GN // or GS; same thing
     }, p.semester))
     new BlueprintEditor(initialState, editable).open(parent)
