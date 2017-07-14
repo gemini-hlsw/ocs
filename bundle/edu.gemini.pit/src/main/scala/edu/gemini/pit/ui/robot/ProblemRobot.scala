@@ -590,15 +590,19 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
     private lazy val wrongSite = for {
       o <- p.observations
       b <- o.blueprint if (p.proposalClass match {
-      case e: ExchangeProposalClass if e.partner == ExchangePartner.KECK   => b.site != Site.Keck
-      case e: ExchangeProposalClass if e.partner == ExchangePartner.SUBARU => b.site != Site.Subaru
-      case _                                                               => b.site != Site.GN && b.site != Site.GS
+      case e: ExchangeProposalClass if e.partner == ExchangePartner.KECK             => b.site != Site.Keck
+      case e: ExchangeProposalClass if e.partner == ExchangePartner.SUBARU           => b.site != Site.Subaru
+      case s: SubaruIntensiveProgramClass if s.telescope == ExchangeTelescope.SUBARU => b.site != Site.Subaru
+      case s: SubaruIntensiveProgramClass if s.telescope == ExchangeTelescope.GEMINI => b.site != Site.GN
+      case _                                                                         => b.site != Site.GN && b.site != Site.GS
     })
     } yield {
       val host = p.proposalClass match {
-        case e: ExchangeProposalClass if e.partner == ExchangePartner.KECK   => Site.Keck.name
-        case e: ExchangeProposalClass if e.partner == ExchangePartner.SUBARU => Site.Subaru.name
-        case _                                                               => "Gemini"
+        case e: ExchangeProposalClass if e.partner == ExchangePartner.KECK             => Site.Keck.name
+        case e: ExchangeProposalClass if e.partner == ExchangePartner.SUBARU           => Site.Subaru.name
+        case e: ExchangeProposalClass if e.partner == ExchangePartner.SUBARU           => Site.Subaru.name
+        case e: SubaruIntensiveProgramClass if e.telescope == ExchangeTelescope.SUBARU => Site.Subaru.name
+        case _                                                                         => "Gemini"
       }
       new Problem(Severity.Error, s"Scheduling request is for $host but resource resides at ${b.site.name}.", "Observations", {
         s.showPartnersView()
