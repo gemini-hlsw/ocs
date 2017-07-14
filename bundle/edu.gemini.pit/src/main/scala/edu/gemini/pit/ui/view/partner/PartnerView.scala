@@ -450,12 +450,12 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
         }
 
         def queueEditor = for {
-          q@QueueProposalClass(_, _, _, _, Some(r), _) <- model
+          q @ QueueProposalClass(_, _, _, _, Some(r), _) <- model
           (r, _, _) <- SubmissionRequestEditor.open(r, None, Nil, None, button)
         } yield QueueProposalClass.band3request.set(q, Some(r))
 
         def ftEditor = for {
-          ft@FastTurnaroundProgramClass(_, _, _, _, Some(r), _, _, _, _) <- model
+          ft @ FastTurnaroundProgramClass(_, _, _, _, Some(r), _, _, _, _) <- model
           (r, _, _) <- SubmissionRequestEditor.open(r, None, Nil, None, button)
         } yield FastTurnaroundProgramClass.band3request.set(ft, Some(r))
 
@@ -837,9 +837,10 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
 
     // Special time label
     lazy val specialTimeLabel = dvLabel("Time:") {
-      case _:SpecialProposalClass       => true
-      case _:LargeProgramClass          => true
-      case _:FastTurnaroundProgramClass => true
+      case _: SpecialProposalClass        => true
+      case _: LargeProgramClass           => true
+      case _: FastTurnaroundProgramClass  => true
+      case _: SubaruIntensiveProgramClass => true
     }
 
     // Special time control set
@@ -858,10 +859,11 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
       override def refresh(m:Option[ProposalClass]) {
         edit.enabled = canEdit
         visible = ~m.map {
-          case _:SpecialProposalClass       => true
-          case _:LargeProgramClass          => true
-          case _:FastTurnaroundProgramClass => true
-          case _                            => false
+          case _: SpecialProposalClass        => true
+          case _: LargeProgramClass           => true
+          case _: FastTurnaroundProgramClass  => true
+          case _: SubaruIntensiveProgramClass => true
+          case _                              => false
         }
       }
 
@@ -873,6 +875,9 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
 
         // A lens to allow us to set the request
         val lp = LargeProgramClass.sub andThen LargeProgramSubmission.request
+
+        // A lens to allow us to set the request
+        val sip = SubaruIntensiveProgramClass.sub andThen SubaruIntensiveProgramSubmission.request
 
         // A lens to allow us to set the request
         val ft = FastTurnaroundProgramClass.sub andThen FastTurnaroundSubmission.request
@@ -887,6 +892,11 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
             req                                    <- LargeSubmissionRequestEditor.open(sub.request, button)
           } yield Some(lp.set(l, req))
 
+        def sipRequest = for {
+            l @ SubaruIntensiveProgramClass(_, _, _, _, _, sub) <- model
+            req                                    <- LargeSubmissionRequestEditor.open(sub.request, button)
+          } yield Some(sip.set(l, req))
+
         def ftRequest = for {
             l @ FastTurnaroundProgramClass(_, _, _, sub, _, _, _, _, _) <- model
             req                                                         <- SubmissionRequestEditor.open(sub.request, None, Nil, None, button)
@@ -894,7 +904,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
 
         // Our action
         action = Action("") {
-          model = spRequest.orElse(lpRequest).orElse(ftRequest).getOrElse(model)
+          model = spRequest.orElse(lpRequest).orElse(ftRequest).orElse(sipRequest).getOrElse(model)
         }
 
         icon = SharedIcons.ICON_CLOCK
@@ -911,10 +921,11 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
         // On refresh, set our text
         override def refresh(m:Option[ProposalClass]) {
           text = ~m.map {
-            case s: SpecialProposalClass       => formatLabel(s.sub.request)
-            case f: FastTurnaroundProgramClass => formatLabel(f.sub.request)
-            case l: LargeProgramClass          => formatLabel(l.sub.request)
-            case _                             => ""
+            case s: SpecialProposalClass        => formatLabel(s.sub.request)
+            case f: FastTurnaroundProgramClass  => formatLabel(f.sub.request)
+            case l: LargeProgramClass           => formatLabel(l.sub.request)
+            case s: SubaruIntensiveProgramClass => formatLabel(s.sub.request)
+            case _                              => ""
           }
         }
 
@@ -926,8 +937,8 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
 
     // Request type label
     lazy val partnerTypeLabel = dvLabel("Request Type:") {
-      case _:QueueProposalClass     => true
-      case _:ClassicalProposalClass => true
+      case _: QueueProposalClass     => true
+      case _: ClassicalProposalClass => true
     }
 
     // Request type selector. This one is kind of complicated
