@@ -13,7 +13,7 @@ libraryDependencies ++= Seq(
 
 osgiSettings
 
-ocsBundleSettings 
+ocsBundleSettings
 
 OsgiKeys.bundleSymbolicName := name.value
 
@@ -22,4 +22,4 @@ OsgiKeys.dynamicImportPackage := Seq("")
 OsgiKeys.exportPackage := Seq(
   "edu.gemini.model.p1.pdf")
 
-        
+fork in run := true

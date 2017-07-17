@@ -13,37 +13,62 @@ import io.Source
  */
 object P1PDF {
 
-  object DEFAULT extends Template(
-    "Gemini Default", "templates/xsl-default.xml",  PDF.Letter,
-    Map("partner"->"gs", "pageLayout" -> "default-us-letter", "title" -> "GEMINI OBSERVATORY"))
+  sealed trait InvestigatorsListOption
 
-  object AU extends Template(
-    "Australian NGO", "templates/xsl-default.xml",  PDF.Letter,
-    Map("partner"->"au", "pageLayout" -> "default-us-letter", "title" -> "GEMINI OBSERVATORY"))
+  object InvestigatorsListOption {
+    case object DefaultList extends InvestigatorsListOption
+    case object AtTheEndList extends InvestigatorsListOption
+    case object NoList extends InvestigatorsListOption
+  }
 
-  object CL extends Template(
-    "Chilean NGO", "templates/xsl-default.xml",  PDF.Letter,
-    Map("partner"->"cl", "pageLayout" -> "default-us-letter", "title" -> "PROPUESTA CONICYT-Gemini"))
-
-  object NOAO extends Template(
-    "NOAO",   "templates/xsl-NOAO.xml",    PDF.Letter,
-    Map("partner"->"us"))
-
-  case class Template(name: String, location: String, pageSize: PDF.PageSize, parameters: Map[String, String]) {
+  sealed case class Template(name: String, location: String, pageSize: PDF.PageSize, investigatorsList: InvestigatorsListOption, parameters: Map[String, String]) {
     def value(): String = name
   }
 
+  object GeminiDefault extends Template(
+    "Gemini Default", "templates/xsl-default.xml", PDF.Letter, InvestigatorsListOption.DefaultList,
+    Map("partner"->"gs", "pageLayout" -> "default-us-letter", "title" -> "GEMINI OBSERVATORY"))
+
+  object GeminiDefaultNoIL extends Template(
+    "Gemini Default", "templates/xsl-default.xml", PDF.Letter, InvestigatorsListOption.NoList,
+    Map("partner"->"gs", "pageLayout" -> "default-us-letter", "title" -> "GEMINI OBSERVATORY"))
+
+  object GeminiDefaultListAtTheEnd extends Template(
+    "Gemini Default", "templates/xsl-default.xml", PDF.Letter, InvestigatorsListOption.AtTheEndList,
+    Map("partner"->"gs", "pageLayout" -> "default-us-letter", "title" -> "GEMINI OBSERVATORY"))
+
+  object AU extends Template(
+    "Australian NGO", "templates/xsl-default.xml", PDF.Letter, InvestigatorsListOption.AtTheEndList,
+    Map("partner"->"au", "pageLayout" -> "default-us-letter", "title" -> "GEMINI OBSERVATORY"))
+
+  object CL extends Template(
+    "Chilean NGO", "templates/xsl-default.xml",    PDF.Letter, InvestigatorsListOption.AtTheEndList,
+    Map("partner"->"cl", "pageLayout" -> "default-us-letter", "title" -> "PROPUESTA CONICYT-Gemini"))
+
+  object NOAO extends Template(
+    "NOAO",   "templates/xsl-NOAO.xml",            PDF.Letter, InvestigatorsListOption.AtTheEndList,
+    Map("partner"->"us"))
+
+  object NOAONoIL extends Template(
+    "NOAO",   "templates/xsl-NOAO.xml",            PDF.Letter, InvestigatorsListOption.NoList,
+    Map("partner"->"us"))
+
   /** Gets a list with all templates that are currently available. */
-  def templates = List(DEFAULT, AU, CL, NOAO)
+  def templates = List(GeminiDefault, GeminiDefaultNoIL, GeminiDefaultListAtTheEnd, AU, CL, NOAO, NOAONoIL)
 
   def templatesMap = Map(
-    "ar" -> DEFAULT,
-    "au" -> AU,
-    "br" -> DEFAULT,
-    "ca" -> DEFAULT,
-    "cl" -> CL,
-    "gs" -> DEFAULT,
-    "us" -> NOAO)
+    "ar"     -> GeminiDefault,
+    "au"     -> AU,
+    "br"     -> GeminiDefault,
+    "ca"     -> GeminiDefaultListAtTheEnd,
+    "cl"     -> CL,
+    "kr"     -> GeminiDefault,
+    "uh"     -> GeminiDefault,
+    "gs"     -> GeminiDefault,
+    "gsiend" -> GeminiDefaultListAtTheEnd,
+    "gsnoi"  -> GeminiDefaultNoIL,
+    "us"     -> NOAO,
+    "usnoi"  -> NOAONoIL)
 
   /**
    * Creates a pdf from a given xml file and template and writes the resulting pdf file to the output folder.
