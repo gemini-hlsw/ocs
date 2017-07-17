@@ -13,16 +13,26 @@ import io.Source
  */
 object P1PDF {
 
-  sealed trait InvestigatorsListOption
-
-  object InvestigatorsListOption {
-    case object DefaultList extends InvestigatorsListOption
-    case object AtTheEndList extends InvestigatorsListOption
-    case object NoList extends InvestigatorsListOption
+  sealed trait InvestigatorsListOption {
+    def params: Map[String, String]
   }
 
-  sealed case class Template(name: String, location: String, pageSize: PDF.PageSize, investigatorsList: InvestigatorsListOption, parameters: Map[String, String]) {
+  object InvestigatorsListOption {
+    val InvestigatorsListParam = "investigatorsList"
+    case object DefaultList extends InvestigatorsListOption {
+      val params = Map(InvestigatorsListParam -> "default")
+    }
+    case object AtTheEndList extends InvestigatorsListOption {
+      val params = Map(InvestigatorsListParam -> "atTheEnd")
+    }
+    case object NoList extends InvestigatorsListOption {
+      val params = Map(InvestigatorsListParam -> "no")
+    }
+  }
+
+  sealed case class Template(name: String, location: String, pageSize: PDF.PageSize, investigatorsList: InvestigatorsListOption, params: Map[String, String]) {
     def value(): String = name
+    val parameters: Map[String, String] = params ++ investigatorsList.params
   }
 
   object GeminiDefault extends Template(
@@ -102,9 +112,21 @@ object P1PDF {
       val pdf = new PDF(Some(P1PdfUriResolver))
       if (attachment.isFile) {
         val intermediateOutputFile = new File(parentFilePath + File.separator + "_" + out.getName)
-        pdf.transformXslFo(xmlSource, xslSource, intermediateOutputFile, template.parameters)
-        pdf.merge(List(intermediateOutputFile, attachment), out, template.pageSize)
+        val intermediateILFile = new File(parentFilePath + File.separator + "_" + out.getName + "_il")
+        pdf.transformXslFo(xmlSource, xslSource, intermediateOutputFile, template.parameters + ("onlyLI" -> "no"))
+        val filesToMerge = template.investigatorsList match {
+          case InvestigatorsListOption.AtTheEndList =>
+            val xmlSource = new StreamSource(new StringReader(xml.toString()))
+            val xslStream = getClass.getResourceAsStream(template.location)
+            val xslSource = new StreamSource(xslStream)
+            pdf.transformXslFo(xmlSource, xslSource, intermediateILFile, template.parameters + ("onlyLI" -> "yes"))
+            List(intermediateOutputFile, attachment, intermediateILFile)
+          case _                                   =>
+            List(intermediateOutputFile, attachment)
+        }
+        pdf.merge(filesToMerge, out, template.pageSize)
         intermediateOutputFile.delete()
+        intermediateILFile.delete()
       } else {
         pdf.transformXslFo(xmlSource, xslSource, out, template.parameters)
       }
@@ -137,7 +159,7 @@ object P1PDF {
     val home = System.getProperty("user.home")
     val in = new File(s"$home/pitsource.xml")
     val out = new File(s"$home/pittarget.pdf")
-    createFromFile(in, DEFAULT, out)
+    createFromFile(in, GeminiDefault, out)
 
     val ok = Runtime.getRuntime.exec(Array("open", out.getAbsolutePath)).waitFor
     println("Exec returned " + ok)

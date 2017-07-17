@@ -511,6 +511,7 @@
                         </fo:inline>
                     </fo:block>
                     <!-- END scheduling -->
+
                     <!--  BEGIN TAC Information Details -->
                     <xsl:if test="count(proposalClass/*/ngo/response/*) &gt; 0">
                         <fo:block space-before="8pt">

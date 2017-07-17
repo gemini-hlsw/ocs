@@ -25,8 +25,24 @@
                 <fo:region-body margin-top="1.5cm" margin-bottom="0.65cm"/>
                 <fo:region-before extent="1cm"/>
             </fo:simple-page-master>
+
         </fo:layout-master-set>
     </us-letter>
+
+    <us-letter-noil>
+        <fo:layout-master-set>
+            <fo:simple-page-master master-name="investigators"
+                                   page-height="11.0in"
+                                   page-width="8.5in"
+                                   margin-top="0.75cm"
+                                   margin-bottom="0.65cm"
+                                   margin-left="2.5cm"
+                                   margin-right="2.5cm">
+                <fo:region-body margin-top="1.5cm" margin-bottom="0.65cm"/>
+                <fo:region-before extent="1cm"/>
+            </fo:simple-page-master>
+        </fo:layout-master-set>
+    </us-letter-noil>
 
     <a4>
         <fo:layout-master-set>
@@ -53,5 +69,20 @@
             </fo:simple-page-master>
         </fo:layout-master-set>
     </a4>
+
+    <a4-noil>
+        <fo:layout-master-set>
+            <fo:simple-page-master master-name="investigators"
+                                   page-height="297mm"
+                                   page-width="210mm"
+                                   margin-top="0.75cm"
+                                   margin-bottom="0.65cm"
+                                   margin-left="2.5cm"
+                                   margin-right="2.5cm">
+                <fo:region-body margin-top="1.5cm" margin-bottom="0.65cm"/>
+                <fo:region-before extent="1cm"/>
+            </fo:simple-page-master>
+        </fo:layout-master-set>
+    </a4-noil>
 
 </xsl:stylesheet>
