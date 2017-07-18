@@ -258,6 +258,20 @@ class P1TemplatesSpec extends Specification with XmlMatchers {
       // Band 3 GS
       proposalXml must (\\("block") \>~ """1.0 hr\s*""")
     }
+    "includes the principal investigator, REL-3151" in {
+      val result = transformProposal("proposal_no_too.xml")
+      val proposalXml = XML.loadString(result)
+
+      // Show the principal
+      proposalXml must (\\("block") \ "inline" \>~ "Principal Investigator:")
+    }
+    "includes the principal at the end, REL-3151" in {
+      val result = transformProposal("proposal_no_too.xml", P1PDF.GeminiDefaultListAtTheEnd)
+      val proposalXml = XML.loadString(result)
+
+      // Show the principal
+      proposalXml must (\\("block") \ "inline" \>~ "Principal Investigator:")
+    }
 
   }
 
@@ -384,7 +398,16 @@ class P1TemplatesSpec extends Specification with XmlMatchers {
 
       // Show the semester
       proposalXml must (\\("block") \>~ "AU-2013B-.*")
+    }
+  }
 
+  "The P1 Without investigators template" should {
+    "includes the program id with a sensible default, REL-3151" in {
+      val result = transformProposal("proposal_no_too.xml", P1PDF.GeminiDefaultNoInvestigatorsList)
+      val proposalXml = XML.loadString(result)
+
+      // Should not display the principal
+      proposalXml must not (\\("block") \ "inline" \>~ "Principal Investigator:")
     }
   }
 
