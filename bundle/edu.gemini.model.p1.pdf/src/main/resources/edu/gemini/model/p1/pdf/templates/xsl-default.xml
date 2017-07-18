@@ -379,12 +379,14 @@
                                 </fo:table-body>
                             </fo:table>
 
-                            <fo:block text-align="center" space-after="8pt">
-                                <fo:leader leader-length="100%"
-                                           leader-pattern="rule"
-                                           alignment-baseline="middle"
-                                           rule-thickness="0.5pt" color="black"/>
-                            </fo:block>
+                            <xsl:if test="$investigatorsList != 'default'">
+                              <fo:block text-align="center" space-after="8pt">
+                                  <fo:leader leader-length="100%"
+                                             leader-pattern="rule"
+                                             alignment-baseline="middle"
+                                             rule-thickness="0.5pt" color="black"/>
+                              </fo:block>
+                            </xsl:if>
 
                             <!-- BEGIN Proposal Info -->
                             <xsl:if test="$investigatorsList='default'">
@@ -1135,6 +1137,12 @@
                                font-size="11pt">
 
                           <fo:block space-after="8pt"/>
+                          <fo:block text-align="center" space-after="8pt">
+                              <fo:leader leader-length="100%"
+                                         leader-pattern="rule"
+                                         alignment-baseline="middle"
+                                         rule-thickness="0.5pt" color="black"/>
+                          </fo:block>
                           <xsl:call-template name="investigators-list">
                           </xsl:call-template>
 
@@ -1154,13 +1162,7 @@
 
     <!-- Displays the list of the investigators -->
     <xsl:template name="investigators-list">
-        <fo:block text-align="center" space-after="8pt">
-            <fo:leader leader-length="100%"
-                       leader-pattern="rule"
-                       alignment-baseline="middle"
-                       rule-thickness="0.5pt" color="black"/>
-        </fo:block>
-        
+
         <fo:table table-layout="fixed" space-after="10pt">
             <fo:table-column column-width="34%"/>
             <fo:table-column column-width="66%"/>
