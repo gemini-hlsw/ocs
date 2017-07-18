@@ -85,11 +85,19 @@ public abstract class CentralWavelengthMap extends BaseCalibrationMap {
         return rangeSet.findCalibrations(wavelength);
     }
 
-    private static String exportWavelength(double wl) {
+    private String exportWavelength(double wl) {
         // Wavelength stored as a double is problematic.  In some instruments
-        // these are um and in others nm.  Parsing has to be instrument specific.
-        return (wl == Double.MAX_VALUE) ? "MAX" : Long.toString(Math.round(wl * 1000));
+        // these are um and in others nm. We will ask each type of
+        // CentralWavelengthMap to convert its double value to integral
+        // angstroms.
+        return (wl == Double.MAX_VALUE) ? "MAX" : Integer.toString(toAngstroms(wl));
     }
+
+    /**
+     * Convert the given wavelength value in double to an integral angstroms for
+     * export.
+     */
+    protected abstract int toAngstroms(double wl);
 
     /**
      * Export the calibration map to a list of String suitable for writing to a

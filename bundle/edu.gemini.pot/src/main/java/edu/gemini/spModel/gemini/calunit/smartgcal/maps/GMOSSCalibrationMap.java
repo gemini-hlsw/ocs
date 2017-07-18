@@ -22,7 +22,7 @@ import java.util.Set;
  * lookups fast and simple. As of April 2012 the GMOS-N and GMOS-S tables have each between 20000 and 40000
  * entries resulting in about 50MB of memory consumption (see UX-1426 for more information).
  */
-public class GMOSSCalibrationMap extends CentralWavelengthMap {
+public final class GMOSSCalibrationMap extends CentralWavelengthMap {
 
     public GMOSSCalibrationMap(Version version) {
         // make gmos-s maps big enough for all entries that it will have to store
@@ -74,4 +74,10 @@ public class GMOSSCalibrationMap extends CentralWavelengthMap {
         // return the set of keys we just came up with
         return keys;
     }
+
+    // GMOS-S central wavelength is stored as nm.
+    protected int toAngstroms(double wl) {
+        return (int) Math.round(wl * 10);
+    }
+
 }

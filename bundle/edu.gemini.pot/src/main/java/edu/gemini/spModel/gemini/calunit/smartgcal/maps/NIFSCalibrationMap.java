@@ -11,7 +11,7 @@ import java.util.Set;
 
 /**
  */
-public class NIFSCalibrationMap extends CentralWavelengthMap {
+public final class NIFSCalibrationMap extends CentralWavelengthMap {
 
     public NIFSCalibrationMap(Version version) {
         super(version);
@@ -47,5 +47,10 @@ public class NIFSCalibrationMap extends CentralWavelengthMap {
 
         // return the set of keys we just came up with
         return keys;
+    }
+
+    // NIFS central wavelength is stored as um.
+    protected int toAngstroms(double wl) {
+        return (int) Math.round(wl * 10000);
     }
 }
