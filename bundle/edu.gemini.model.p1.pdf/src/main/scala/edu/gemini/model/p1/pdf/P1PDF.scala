@@ -40,11 +40,11 @@ object P1PDF {
     Map("partner"->"gs", "pageLayout" -> "default-us-letter", "title" -> "GEMINI OBSERVATORY"))
 
   object GeminiDefaultNoInvestigatorsList extends Template(
-    "Gemini Default", "templates/xsl-default.xml", PDF.Letter, InvestigatorsListOption.NoList,
+    "Gemini No CoIs", "templates/xsl-default.xml", PDF.Letter, InvestigatorsListOption.NoList,
     Map("partner"->"gs", "pageLayout" -> "default-us-letter", "title" -> "GEMINI OBSERVATORY"))
 
   object GeminiDefaultListAtTheEnd extends Template(
-    "Gemini Default", "templates/xsl-default.xml", PDF.Letter, InvestigatorsListOption.AtTheEndList,
+    "Gemini CoIs at End", "templates/xsl-default.xml", PDF.Letter, InvestigatorsListOption.AtTheEndList,
     Map("partner"->"gs", "pageLayout" -> "default-us-letter", "title" -> "GEMINI OBSERVATORY"))
 
   object AU extends Template(
@@ -60,7 +60,7 @@ object P1PDF {
     Map("partner"->"us"))
 
   object NOAONoInvestigatorsList extends Template(
-    "NOAO",   "templates/xsl-NOAO.xml",            PDF.Letter, InvestigatorsListOption.NoList,
+    "NOAO No CoIs",   "templates/xsl-NOAO.xml",            PDF.Letter, InvestigatorsListOption.NoList,
     Map("partner"->"us"))
 
   /** Gets a list with all templates that are currently available. */
