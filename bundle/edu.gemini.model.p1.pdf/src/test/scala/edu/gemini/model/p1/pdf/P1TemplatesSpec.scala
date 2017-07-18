@@ -5,7 +5,7 @@ import org.specs2.mutable.Specification
 import javax.xml.transform.stream.{StreamResult, StreamSource}
 import java.io.StringWriter
 import javax.xml.transform.TransformerFactory
-import edu.gemini.model.p1.pdf.P1PDF.{Template, P1PdfUriResolver}
+import edu.gemini.model.p1.pdf.P1PDF.{InvestigatorsListOption, Template, P1PdfUriResolver}
 import scala.xml.XML
 
 class P1TemplatesSpec extends Specification with XmlMatchers {
@@ -379,7 +379,7 @@ class P1TemplatesSpec extends Specification with XmlMatchers {
 
   "The P1 AU Template" should {
     "includes the program id with a sensible default, REL-813" in {
-      val result = transformProposal("proposal_au_no_submission.xml", P1PDF.AU)
+      val result = transformProposal("proposal_au_no_submission.xml", P1PDF.AU.copy(investigatorsList = InvestigatorsListOption.DefaultList))
       val proposalXml = XML.loadString(result)
 
       // Show the semester
@@ -388,7 +388,7 @@ class P1TemplatesSpec extends Specification with XmlMatchers {
     }
   }
 
-  def transformProposal(proposal: String, template: Template = P1PDF.DEFAULT) = {
+  def transformProposal(proposal: String, template: Template = P1PDF.GeminiDefault) = {
     val xslStream = getClass.getResourceAsStream(template.location)
 
     val xslSource = new StreamSource(xslStream)
