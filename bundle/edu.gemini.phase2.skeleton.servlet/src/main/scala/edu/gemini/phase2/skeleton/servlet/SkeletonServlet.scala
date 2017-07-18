@@ -144,7 +144,7 @@ final class SkeletonServlet(odb: IDBDatabaseService, templateFactory: TemplateFa
   private def readItacGeminiId(p: Proposal): Option[StandardProgramId] =
     for {
       i <- p.proposalClass.itac
-      s <- i.decision.right.map(_.programId).right.toOption
+      s <- i.decision.flatMap(_.right.map(_.programId).right.toOption)
       p <- ProgramId.parseStandardId(s)
     } yield p
 

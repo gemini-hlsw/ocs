@@ -94,7 +94,7 @@ object Phase1FolderFactory {
   private def band(proposal: Proposal): Band =
     (for {
       itac   <- proposal.proposalClass.itac
-      accept <- itac.decision.right.toOption
+      accept <- itac.decision.flatMap(_.right.toOption)
     } yield accept.band).getOrElse(1) match {
       case 3 => Band.BAND_3
       case _ => Band.BAND_1_2
