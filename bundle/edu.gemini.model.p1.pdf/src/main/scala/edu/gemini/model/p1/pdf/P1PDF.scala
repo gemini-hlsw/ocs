@@ -57,11 +57,11 @@ object P1PDF {
 
   object NOAO extends Template(
     "NOAO",   "templates/xsl-NOAO.xml",            PDF.Letter, InvestigatorsListOption.AtTheEndList,
-    Map("partner"->"us"))
+    Map("partner"->"us", "pageLayout" -> "default-us-letter"))
 
   object NOAONoInvestigatorsList extends Template(
     "NOAO No CoIs",   "templates/xsl-NOAO.xml",            PDF.Letter, InvestigatorsListOption.NoList,
-    Map("partner"->"us"))
+    Map("partner"->"us", "pageLayout" -> "default-us-letter"))
 
   /** Gets a list with all templates that are currently available. */
   def templates = List(GeminiDefault, GeminiDefaultNoInvestigatorsList, GeminiDefaultListAtTheEnd, AU, CL, NOAO, NOAONoInvestigatorsList)
@@ -168,7 +168,7 @@ object P1PDF {
     val home = System.getProperty("user.home")
     val in = new File(s"$home/pitsource.xml")
     val out = new File(s"$home/pittarget.pdf")
-    createFromFile(in, AU, out)
+    createFromFile(in, NOAONoInvestigatorsList, out)
 
     val ok = Runtime.getRuntime.exec(Array("open", out.getAbsolutePath)).waitFor
     println("Exec returned " + ok)

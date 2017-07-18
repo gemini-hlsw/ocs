@@ -12,6 +12,8 @@
     <!-- parameters -->
     <xsl:param name="pageSize"/>
     <xsl:param name="partner"/>
+    <xsl:param name="pageLayout"/>
+    <xsl:param name="investigatorsList"/>
 
     <!-- Global variables -->
     <xsl:variable name="obs-name">NOAO</xsl:variable>
@@ -47,726 +49,987 @@
         </xsl:variable>
 
         <fo:root>
-            <fo:layout-master-set>
+            <!-- setup paper layout -->
+            <xsl:choose>
+                <xsl:when test="$pageLayout='default-us-letter' and $investigatorsList='atTheEnd'">
+                    <xsl:copy-of select="document('templates/snippets/layout.xml')/xsl:stylesheet/noao-letter-noil/fo:layout-master-set"/>
+                </xsl:when>
+                <xsl:when test="$pageLayout='default-us-letter'">
+                    <xsl:copy-of select="document('templates/snippets/layout.xml')/xsl:stylesheet/noao-letter/fo:layout-master-set"/>
+                </xsl:when>
+            </xsl:choose>
 
-                <!-- The first page is different from the
-             the following pages. -->
-                <fo:simple-page-master master-name="first"
-                                       page-height="11in"
-                                       page-width="8.5in"
-                                       margin-top="0.5cm"
-                                       margin-bottom="1.5cm"
-                                       margin-left="1cm"
-                                       margin-right="1cm">
-                    <fo:region-body margin-top="5cm" margin-bottom="1cm"/>
-                    <fo:region-before extent="4cm"/>
-                </fo:simple-page-master>
+            <xsl:choose>
+                <xsl:when test="$investigatorsList = 'no'">
+                  <xsl:call-template name="intro">
+                      <xsl:with-param name="proposal-id" select="$proposal-id"/>
+                      <xsl:with-param name="prop-type" select="$prop-type"/>
+                      <xsl:with-param name="this-partner-submission" select="$this-partner-submission"/>
+                  </xsl:call-template>
+                  <xsl:call-template name="science">
+                      <xsl:with-param name="proposal-id" select="$proposal-id"/>
+                      <xsl:with-param name="prop-type" select="$prop-type"/>
+                      <xsl:with-param name="this-partner-submission" select="$this-partner-submission"/>
+                  </xsl:call-template>
+                </xsl:when>
+                <xsl:when test="$investigatorsList = 'default'">
+                  <xsl:call-template name="intro">
+                      <xsl:with-param name="proposal-id" select="$proposal-id"/>
+                      <xsl:with-param name="prop-type" select="$prop-type"/>
+                      <xsl:with-param name="this-partner-submission" select="$this-partner-submission"/>
+                  </xsl:call-template>
+                  <xsl:call-template name="investigators-list">
+                      <xsl:with-param name="proposal-id" select="$proposal-id"/>
+                      <xsl:with-param name="section" select="1"/>
+                  </xsl:call-template>
+                  <xsl:call-template name="science">
+                      <xsl:with-param name="proposal-id" select="$proposal-id"/>
+                      <xsl:with-param name="prop-type" select="$prop-type"/>
+                      <xsl:with-param name="this-partner-submission" select="$this-partner-submission"/>
+                  </xsl:call-template>
+                </xsl:when>
+                <xsl:when test="$investigatorsList = 'atTheEnd'">
+                    <xsl:call-template name="investigators-list">
+                        <xsl:with-param name="proposal-id" select="$proposal-id"/>
+                        <xsl:with-param name="section" select="3"/>
+                    </xsl:call-template>
+                </xsl:when>
+            </xsl:choose>
 
-                <fo:simple-page-master master-name="rest"
-                                       page-height="11in"
-                                       page-width="8.5in"
-                                       margin-top="1.0cm"
-                                       margin-bottom="0.8cm"
-                                       margin-left="1cm"
-                                       margin-right="1cm">
-                    <fo:region-body margin-top="1.5cm" />
-                    <fo:region-before extent="1cm"/>
-                </fo:simple-page-master>
+        </fo:root>
+    </xsl:template>
 
-            </fo:layout-master-set>
+    <xsl:template name="intro">
+        <xsl:param name="proposal-id"/>
+        <xsl:param name="prop-type"/>
+        <xsl:param name="this-partner-submission"/>
+        <!-- BEGIN first page -->
+        <fo:page-sequence master-reference="first" force-page-count="no-force">
 
-            <!-- BEGIN first page -->
-            <fo:page-sequence master-reference="first" force-page-count="no-force">
+            <!-- BEGIN first page header -->
+            <fo:static-content
+                    flow-name="xsl-region-before"
+                    font-family="Times"
+                    font-size="12pt">
 
-                <!-- BEGIN first page header -->
-                <fo:static-content
-                        flow-name="xsl-region-before"
-                        font-family="Times"
-                        font-size="12pt">
+                <fo:table table-layout="fixed" space-after="2cm">
+                    <fo:table-column column-width="11.5cm"/>
+                    <fo:table-column column-width="4.5cm"/>
+                    <fo:table-body>
+                        <fo:table-row>
+                            <fo:table-cell><fo:block/></fo:table-cell>
+                            <fo:table-cell border="0.5pt solid black" text-align="center">
+                                <fo:block font-weight="bold" font-size="16pt">
+                                    <xsl:value-of select="$proposal-id"/>
+                                </fo:block>
+                            </fo:table-cell>
+                        </fo:table-row>
+                    </fo:table-body>
+                </fo:table>
 
-                    <fo:table table-layout="fixed" space-after="2cm">
-                        <fo:table-column column-width="11.5cm"/>
-                        <fo:table-column column-width="4.5cm"/>
-                        <fo:table-body>
-                            <fo:table-row>
-                                <fo:table-cell><fo:block/></fo:table-cell>
-                                <fo:table-cell border="0.5pt solid black" text-align="center">
-                                    <fo:block font-weight="bold" font-size="16pt">
-                                        <xsl:value-of select="$proposal-id"/>
+                <fo:table table-layout="fixed">
+                    <fo:table-column column-width="6.5cm"/>
+                    <fo:table-column column-width="4cm"/>
+                    <fo:table-column column-width="2cm"/>
+                    <fo:table-column column-width="3.5cm"/>
+                    <fo:table-body>
+                        <fo:table-row>
+                            <fo:table-cell>
+                                <fo:block font-size="14pt" font-weight="bold">
+                                    <xsl:value-of select="$obs-name"/> Observing Proposal
+                                </fo:block>
+                            </fo:table-cell>
+                            <fo:table-cell>
+                                <fo:block font-style="italic">
+                                    <xsl:value-of select="$prop-type"/>
+                                </fo:block>
+                            </fo:table-cell>
+                            <fo:table-cell>
+                                <fo:block font-weight="bold">Panel:</fo:block>
+                            </fo:table-cell>
+                            <fo:table-cell>
+                                <fo:block>
+                                    <xsl:if test="not(@tacCategory)">
+                                        Galactic
+                                    </xsl:if>
+                                    <xsl:value-of select="@tacCategory"/>
+                                </fo:block>
+                            </fo:table-cell>
+                        </fo:table-row>
+                        <fo:table-row>
+                            <fo:table-cell>
+                                    <xsl:variable name="timestamp" select="$this-partner-submission/receipt/timestamp"/>
+                                    <fo:block>Date Received:
+                                        <xsl:value-of select="substring($timestamp, 0, 11)"/>
                                     </fo:block>
-                                </fo:table-cell>
-                            </fo:table-row>
-                        </fo:table-body>
-                    </fo:table>
+                            </fo:table-cell>
+                            <fo:table-cell>
+                                <fo:block font-style="italic" text-align="center">
+                                    <xsl:if test="count(investigators/*[status='Grad Thesis']) > 0">
+                                        Thesis
+                                    </xsl:if>
+                                </fo:block>
+                            </fo:table-cell>
+                            <fo:table-cell>
+                                <fo:block></fo:block>
+                            </fo:table-cell>
+                            <fo:table-cell>
+                                <fo:block></fo:block>
+                            </fo:table-cell>
+                        </fo:table-row>
+                    </fo:table-body>
+                </fo:table>
 
-                    <fo:table table-layout="fixed">
-                        <fo:table-column column-width="6.5cm"/>
-                        <fo:table-column column-width="4cm"/>
-                        <fo:table-column column-width="2cm"/>
-                        <fo:table-column column-width="3.5cm"/>
-                        <fo:table-body>
-                            <fo:table-row>
-                                <fo:table-cell>
-                                    <fo:block font-size="14pt" font-weight="bold">
-                                        <xsl:value-of select="$obs-name"/> Observing Proposal
-                                    </fo:block>
-                                </fo:table-cell>
-                                <fo:table-cell>
-                                    <fo:block font-style="italic">
-                                        <xsl:value-of select="$prop-type"/>
-                                    </fo:block>
-                                </fo:table-cell>
-                                <fo:table-cell>
-                                    <fo:block font-weight="bold">Panel:</fo:block>
-                                </fo:table-cell>
-                                <fo:table-cell>
-                                    <fo:block>
-                                        <xsl:if test="not(@tacCategory)">
-                                            Galactic
-                                        </xsl:if>
-                                        <xsl:value-of select="@tacCategory"/>
-                                    </fo:block>
-                                </fo:table-cell>
-                            </fo:table-row>
-                            <fo:table-row>
-                                <fo:table-cell>
-                                        <xsl:variable name="timestamp" select="$this-partner-submission/receipt/timestamp"/>
-                                        <fo:block>Date Received:
-                                            <xsl:value-of select="substring($timestamp, 0, 11)"/>
-                                        </fo:block>
-                                </fo:table-cell>
-                                <fo:table-cell>
-                                    <fo:block font-style="italic" text-align="center">
-                                        <xsl:if test="count(investigators/*[status='Grad Thesis']) > 0">
-                                            Thesis
-                                        </xsl:if>
-                                    </fo:block>
-                                </fo:table-cell>
-                                <fo:table-cell>
-                                    <fo:block></fo:block>
-                                </fo:table-cell>
-                                <fo:table-cell>
-                                    <fo:block></fo:block>
-                                </fo:table-cell>
-                            </fo:table-row>
-                        </fo:table-body>
-                    </fo:table>
+            </fo:static-content>
+            <!-- END first page header -->
 
-                </fo:static-content>
-                <!-- END first page header -->
+            <!-- BEGIN first page body -->
+            <!-- The main body is called "xsl-region-body". -->
+            <fo:flow flow-name="xsl-region-body"
+                     font-family="Times"
+                     font-size="12pt">
 
-                <!-- BEGIN first page body -->
-                <!-- The main body is called "xsl-region-body". -->
-                <fo:flow flow-name="xsl-region-body"
-                         font-family="Times"
-                         font-size="12pt">
+                <!-- BEGIN title -->
+                <fo:block font-weight="bold" font-size="18pt">
+                    <xsl:value-of select="title"/>
+                </fo:block>
+                <!-- END title -->
 
-                    <!-- BEGIN title -->
-                    <fo:block font-weight="bold" font-size="18pt">
-                        <xsl:value-of select="title"/>
+                <!-- BEGIN abstract -->
+                <fo:block space-before="10pt" space-after="12pt"
+                          text-align-last="start">
+                    <fo:inline font-weight="bold">
+                        Abstract of Scientific Justification
+                    </fo:inline>
+                    <fo:inline font-style="italic">
+                        (will be made publicly available for accepted proposals):
+                    </fo:inline>
+                    <fo:block white-space-collapse="false">
+                        <xsl:value-of select="normalize-space(abstract)" />
                     </fo:block>
-                    <!-- END title -->
+                </fo:block>
+                <!-- END abstract -->
 
-                    <!-- BEGIN abstract -->
-                    <fo:block space-before="10pt" space-after="12pt"
-                              text-align-last="start">
-                        <fo:inline font-weight="bold">
-                            Abstract of Scientific Justification
-                        </fo:inline>
-                        <fo:inline font-style="italic">
-                            (will be made publicly available for accepted proposals):
-                        </fo:inline>
-                        <fo:block white-space-collapse="false">
-                            <xsl:value-of select="normalize-space(abstract)" />
-                        </fo:block>
-                    </fo:block>
-                    <!-- END abstract -->
+                <!-- BEGIN keywords -->
+                <fo:block space-after="12pt">
+                    <fo:inline font-weight="bold">
+                        Keywords:
+                    </fo:inline>
+                    <xsl:for-each select="keywords/keyword">
+                        <xsl:value-of select="."/>
+                        <xsl:if test="position()!=last()">
+                            <xsl:text>, </xsl:text>
+                        </xsl:if>
+                    </xsl:for-each>
+                </fo:block>
+                <!-- END keywords -->
 
-                    <!-- BEGIN keywords -->
-                    <fo:block space-after="12pt">
-                        <fo:inline font-weight="bold">
-                            Keywords:
-                        </fo:inline>
-                        <xsl:for-each select="keywords/keyword">
-                            <xsl:value-of select="."/>
-                            <xsl:if test="position()!=last()">
-                                <xsl:text>, </xsl:text>
-                            </xsl:if>
-                        </xsl:for-each>
-                    </fo:block>
-                    <!-- END keywords -->
+                <!-- BEGIN time request -->
+                <fo:block space-after="12pt">
+                    <fo:inline font-weight="bold">
+                        Request from this partner:
+                    </fo:inline>
+                    <xsl:value-of select="format-number(proposalClass/*/ngo[partner=$this-partner]/request/time, '0.0')"/><xsl:text>&#160;</xsl:text>
+                    <xsl:value-of select="proposalClass/*/ngo[partner=$this-partner]/request/time/@units"/>
+                    / <xsl:value-of select="format-number(proposalClass/*/ngo[partner=$this-partner]/request/minTime, '0.0')"/><xsl:text>&#160;</xsl:text>
+                    <xsl:value-of select="proposalClass/*/ngo[partner=$this-partner]/request/minTime/@units"/> minimum
+                </fo:block>
+                <!-- END time request -->
 
-                    <!-- BEGIN time request -->
-                    <fo:block space-after="12pt">
-                        <fo:inline font-weight="bold">
-                            Request from this partner:
-                        </fo:inline>
-                        <xsl:value-of select="format-number(proposalClass/*/ngo[partner=$this-partner]/request/time, '0.0')"/><xsl:text>&#160;</xsl:text>
-                        <xsl:value-of select="proposalClass/*/ngo[partner=$this-partner]/request/time/@units"/>
-                        / <xsl:value-of select="format-number(proposalClass/*/ngo[partner=$this-partner]/request/minTime, '0.0')"/><xsl:text>&#160;</xsl:text>
-                        <xsl:value-of select="proposalClass/*/ngo[partner=$this-partner]/request/minTime/@units"/> minimum
-                    </fo:block>
-                    <!-- END time request -->
+                <!-- observing mode -->
+                <xsl:variable name="obs-mode">
+                    <xsl:choose>
+                        <xsl:when test="proposalClass/fastTurnaround">Fast Turnaround</xsl:when>
+                        <xsl:otherwise><xsl:value-of select="name(proposalClass/*)"/></xsl:otherwise>
+                    </xsl:choose>
+                </xsl:variable>
 
-                    <!-- observing mode -->
-                    <xsl:variable name="obs-mode">
-                        <xsl:choose>
-                            <xsl:when test="proposalClass/fastTurnaround">Fast Turnaround</xsl:when>
-                            <xsl:otherwise><xsl:value-of select="name(proposalClass/*)"/></xsl:otherwise>
-                        </xsl:choose>
-                    </xsl:variable>
-
-                    <!-- BEGIN observation time summary table -->
-                    <fo:table table-layout="fixed" space-before="12pt" space-after="12pt">
-                        <fo:table-column column-width="5cm"/>
-                        <fo:table-column column-width="5cm"/>
-                        <fo:table-column column-width="5cm"/>
-                        <fo:table-body>
-                            <fo:table-row>
-                                <fo:table-cell number-columns-spanned="3"
-                                               font-weight="bold"
-                                               text-align="center">
-                                    <fo:block>
-                                        Total Time of Observations
-                                    </fo:block>
-                                </fo:table-cell>
-                            </fo:table-row>
-                            <fo:table-row text-align="center">
-                                <fo:table-cell>
-                                    <fo:block>Band</fo:block>
-                                </fo:table-cell>
-                                <fo:table-cell>
-                                    <fo:block>GN</fo:block>
-                                </fo:table-cell>
-                                <fo:table-cell>
-                                    <fo:block>GS</fo:block>
-                                </fo:table-cell>
-                            </fo:table-row>
-                            <fo:table-row text-align="center">
-                                <fo:table-cell border-right-style="double"
-                                               border-left-style="solid"
-                                               border-top-style="solid"
-                                               border-bottom-style="solid"
-                                               border-color="black" border-width="0.5pt">
-                                    <fo:block text-align="center">
-                                        Band 1/2
-                                    </fo:block>
-                                </fo:table-cell>
-                                <fo:table-cell border-right-style="double"
-                                               border-left-style="solid"
-                                               border-top-style="solid"
-                                               border-bottom-style="solid"
-                                               border-color="black" border-width="0.5pt">
-                                    <fo:block>
-                                        <fo:block>
-                                            <xsl:call-template name="get-total-observation-time-per-site">
-                                                <xsl:with-param name="site" select="'North'"/>
-                                                <xsl:with-param name="band" select="'Band 1/2'"/>
-                                            </xsl:call-template> hr
-                                        </fo:block>
-                                    </fo:block>
-                                </fo:table-cell>
-                                <fo:table-cell border-right-style="double"
-                                               border-left-style="solid"
-                                               border-top-style="solid"
-                                               border-bottom-style="solid"
-                                               border-color="black" border-width="0.5pt">
-                                    <fo:block>
-                                        <xsl:call-template name="get-total-observation-time-per-site">
-                                            <xsl:with-param name="site" select="'South'"/>
-                                            <xsl:with-param name="band" select="'Band 1/2'"/>
-                                        </xsl:call-template> hr
-                                    </fo:block>
-                                </fo:table-cell>
-                            </fo:table-row>
-                            <fo:table-row text-align="center">
-                                <fo:table-cell border-right-style="double"
-                                               border-left-style="solid"
-                                               border-top-style="solid"
-                                               border-bottom-style="solid"
-                                               border-color="black" border-width="0.5pt">
-                                    <fo:block text-align="center">
-                                        Band 3
-                                    </fo:block>
-                                </fo:table-cell>
-                                <fo:table-cell border-right-style="double"
-                                               border-left-style="solid"
-                                               border-top-style="solid"
-                                               border-bottom-style="solid"
-                                               border-color="black" border-width="0.5pt">
+                <!-- BEGIN observation time summary table -->
+                <fo:table table-layout="fixed" space-before="12pt" space-after="12pt">
+                    <fo:table-column column-width="5cm"/>
+                    <fo:table-column column-width="5cm"/>
+                    <fo:table-column column-width="5cm"/>
+                    <fo:table-body>
+                        <fo:table-row>
+                            <fo:table-cell number-columns-spanned="3"
+                                           font-weight="bold"
+                                           text-align="center">
+                                <fo:block>
+                                    Total Time of Observations
+                                </fo:block>
+                            </fo:table-cell>
+                        </fo:table-row>
+                        <fo:table-row text-align="center">
+                            <fo:table-cell>
+                                <fo:block>Band</fo:block>
+                            </fo:table-cell>
+                            <fo:table-cell>
+                                <fo:block>GN</fo:block>
+                            </fo:table-cell>
+                            <fo:table-cell>
+                                <fo:block>GS</fo:block>
+                            </fo:table-cell>
+                        </fo:table-row>
+                        <fo:table-row text-align="center">
+                            <fo:table-cell border-right-style="double"
+                                           border-left-style="solid"
+                                           border-top-style="solid"
+                                           border-bottom-style="solid"
+                                           border-color="black" border-width="0.5pt">
+                                <fo:block text-align="center">
+                                    Band 1/2
+                                </fo:block>
+                            </fo:table-cell>
+                            <fo:table-cell border-right-style="double"
+                                           border-left-style="solid"
+                                           border-top-style="solid"
+                                           border-bottom-style="solid"
+                                           border-color="black" border-width="0.5pt">
+                                <fo:block>
                                     <fo:block>
                                         <xsl:call-template name="get-total-observation-time-per-site">
                                             <xsl:with-param name="site" select="'North'"/>
-                                            <xsl:with-param name="band" select="'Band 3'"/>
+                                            <xsl:with-param name="band" select="'Band 1/2'"/>
                                         </xsl:call-template> hr
                                     </fo:block>
-                                </fo:table-cell>
-                                <fo:table-cell border-right-style="double"
-                                               border-left-style="solid"
-                                               border-top-style="solid"
-                                               border-bottom-style="solid"
-                                               border-color="black" border-width="0.5pt">
-                                    <fo:block>
-                                        <xsl:call-template name="get-total-observation-time-per-site">
-                                            <xsl:with-param name="site" select="'South'"/>
-                                            <xsl:with-param name="band" select="'Band 3'"/>
-                                        </xsl:call-template> hr
-                                    </fo:block>
-                                </fo:table-cell>
-                            </fo:table-row>
+                                </fo:block>
+                            </fo:table-cell>
+                            <fo:table-cell border-right-style="double"
+                                           border-left-style="solid"
+                                           border-top-style="solid"
+                                           border-bottom-style="solid"
+                                           border-color="black" border-width="0.5pt">
+                                <fo:block>
+                                    <xsl:call-template name="get-total-observation-time-per-site">
+                                        <xsl:with-param name="site" select="'South'"/>
+                                        <xsl:with-param name="band" select="'Band 1/2'"/>
+                                    </xsl:call-template> hr
+                                </fo:block>
+                            </fo:table-cell>
+                        </fo:table-row>
+                        <fo:table-row text-align="center">
+                            <fo:table-cell border-right-style="double"
+                                           border-left-style="solid"
+                                           border-top-style="solid"
+                                           border-bottom-style="solid"
+                                           border-color="black" border-width="0.5pt">
+                                <fo:block text-align="center">
+                                    Band 3
+                                </fo:block>
+                            </fo:table-cell>
+                            <fo:table-cell border-right-style="double"
+                                           border-left-style="solid"
+                                           border-top-style="solid"
+                                           border-bottom-style="solid"
+                                           border-color="black" border-width="0.5pt">
+                                <fo:block>
+                                    <xsl:call-template name="get-total-observation-time-per-site">
+                                        <xsl:with-param name="site" select="'North'"/>
+                                        <xsl:with-param name="band" select="'Band 3'"/>
+                                    </xsl:call-template> hr
+                                </fo:block>
+                            </fo:table-cell>
+                            <fo:table-cell border-right-style="double"
+                                           border-left-style="solid"
+                                           border-top-style="solid"
+                                           border-bottom-style="solid"
+                                           border-color="black" border-width="0.5pt">
+                                <fo:block>
+                                    <xsl:call-template name="get-total-observation-time-per-site">
+                                        <xsl:with-param name="site" select="'South'"/>
+                                        <xsl:with-param name="band" select="'Band 3'"/>
+                                    </xsl:call-template> hr
+                                </fo:block>
+                            </fo:table-cell>
+                        </fo:table-row>
 
-                        </fo:table-body>
-                    </fo:table>
-                    <!-- END time summary table requests -->
+                    </fo:table-body>
+                </fo:table>
+                <!-- END time summary table requests -->
 
-                    <!-- BEGIN observation requests -->
-                    <fo:table table-layout="fixed" space-before="12pt" space-after="12pt">
-                        <fo:table-column column-width="1cm"/>
-                        <fo:table-column column-width="3cm"/>
-                        <fo:table-column column-width="8cm"/>
-                        <fo:table-column column-width="3cm"/>
-                        <fo:table-body>
-                            <fo:table-row>
-                                <fo:table-cell number-columns-spanned="4"
-                                               font-weight="bold"
-                                               text-align="center">
-                                    <fo:block>
-                                        Summary of<xsl:text>&#160;</xsl:text>
-                                        <xsl:value-of select="$obs-mode"/>
-                                        observations<xsl:text>&#160;</xsl:text>
-                                        <xsl:variable name="too-value"><xsl:value-of select="proposalClass/*/@tooOption"/></xsl:variable>
-                                        <xsl:choose>
-                                            <xsl:when test="$too-value='rapid'">(ToO: rapid response)</xsl:when>
-                                            <xsl:when test="$too-value='standard'">(ToO: standard)</xsl:when>
-                                        </xsl:choose>
-                                    </fo:block>
-                                </fo:table-cell>
-                            </fo:table-row>
-                            <fo:table-row text-align="center">
-                                <fo:table-cell>
-                                    <fo:block>Res.</fo:block>
-                                </fo:table-cell>
-                                <fo:table-cell>
-                                    <fo:block>Telescope</fo:block>
-                                </fo:table-cell>
-                                <fo:table-cell>
-                                    <fo:block>Instrument</fo:block>
-                                </fo:table-cell>
-                                <fo:table-cell>
-                                    <fo:block>Exp. Time (hrs.)</fo:block>
-                                </fo:table-cell>
-                            </fo:table-row>
+                <!-- BEGIN observation requests -->
+                <fo:table table-layout="fixed" space-before="12pt" space-after="12pt">
+                    <fo:table-column column-width="1cm"/>
+                    <fo:table-column column-width="3cm"/>
+                    <fo:table-column column-width="8cm"/>
+                    <fo:table-column column-width="3cm"/>
+                    <fo:table-body>
+                        <fo:table-row>
+                            <fo:table-cell number-columns-spanned="4"
+                                           font-weight="bold"
+                                           text-align="center">
+                                <fo:block>
+                                    Summary of<xsl:text>&#160;</xsl:text>
+                                    <xsl:value-of select="$obs-mode"/>
+                                    observations<xsl:text>&#160;</xsl:text>
+                                    <xsl:variable name="too-value"><xsl:value-of select="proposalClass/*/@tooOption"/></xsl:variable>
+                                    <xsl:choose>
+                                        <xsl:when test="$too-value='rapid'">(ToO: rapid response)</xsl:when>
+                                        <xsl:when test="$too-value='standard'">(ToO: standard)</xsl:when>
+                                    </xsl:choose>
+                                </fo:block>
+                            </fo:table-cell>
+                        </fo:table-row>
+                        <fo:table-row text-align="center">
+                            <fo:table-cell>
+                                <fo:block>Res.</fo:block>
+                            </fo:table-cell>
+                            <fo:table-cell>
+                                <fo:block>Telescope</fo:block>
+                            </fo:table-cell>
+                            <fo:table-cell>
+                                <fo:block>Instrument</fo:block>
+                            </fo:table-cell>
+                            <fo:table-cell>
+                                <fo:block>Exp. Time (hrs.)</fo:block>
+                            </fo:table-cell>
+                        </fo:table-row>
 
-                            <xsl:for-each select="/proposal/blueprints/*">
-                                <!-- As per REL-664 band 3 observations should not be included -->
-                                <xsl:variable name="blueprintId" select="*/@id"/>
-                                <xsl:if test="/proposal/observations/observation[@band!='Band 3' and @blueprint=$blueprintId] != ''">
-                                    <!-- Variable used to get around the fact that position() follows the outer loop -->
-                                    <xsl:variable name="obsCount" select="count(.)"/>
-                                    <fo:table-row>
-                                        <!-- resource number -->
-                                        <fo:table-cell border-right-style="double"
-                                                       border-left-style="solid"
-                                                       border-top-style="solid"
-                                                       border-bottom-style="solid"
-                                                       border-color="black" border-width="0.5pt">
-                                            <fo:block text-align="center">
-                                                <xsl:value-of select="position() - $obsCount"/>
-                                            </fo:block>
-                                        </fo:table-cell>
+                        <xsl:for-each select="/proposal/blueprints/*">
+                            <!-- As per REL-664 band 3 observations should not be included -->
+                            <xsl:variable name="blueprintId" select="*/@id"/>
+                            <xsl:if test="/proposal/observations/observation[@band!='Band 3' and @blueprint=$blueprintId] != ''">
+                                <!-- Variable used to get around the fact that position() follows the outer loop -->
+                                <xsl:variable name="obsCount" select="count(.)"/>
+                                <fo:table-row>
+                                    <!-- resource number -->
+                                    <fo:table-cell border-right-style="double"
+                                                   border-left-style="solid"
+                                                   border-top-style="solid"
+                                                   border-bottom-style="solid"
+                                                   border-color="black" border-width="0.5pt">
+                                        <fo:block text-align="center">
+                                            <xsl:value-of select="position() - $obsCount"/>
+                                        </fo:block>
+                                    </fo:table-cell>
 
-                                        <!-- resource telescope -->
-                                        <fo:table-cell border-right-style="double"
-                                                       border-left-style="solid"
-                                                       border-top-style="solid"
-                                                       border-bottom-style="solid"
-                                                       border-color="black" border-width="0.5pt">
-                                            <fo:block text-align="center">
-                                                <xsl:choose>
-                                                    <xsl:when test="name(.) = 'visitor'">
-                                                        <xsl:value-of select="./visitor/site"/>
-                                                    </xsl:when>
-                                                    <xsl:otherwise>
-                                                        <xsl:call-template name="get-inst-telescope-name">
-                                                            <xsl:with-param name="inst" select="name(.)"/>
-                                                            <xsl:with-param name="site" select=".//site"/>
-                                                        </xsl:call-template>
-                                                    </xsl:otherwise>
-                                                </xsl:choose>
-                                            </fo:block>
-                                        </fo:table-cell>
+                                    <!-- resource telescope -->
+                                    <fo:table-cell border-right-style="double"
+                                                   border-left-style="solid"
+                                                   border-top-style="solid"
+                                                   border-bottom-style="solid"
+                                                   border-color="black" border-width="0.5pt">
+                                        <fo:block text-align="center">
+                                            <xsl:choose>
+                                                <xsl:when test="name(.) = 'visitor'">
+                                                    <xsl:value-of select="./visitor/site"/>
+                                                </xsl:when>
+                                                <xsl:otherwise>
+                                                    <xsl:call-template name="get-inst-telescope-name">
+                                                        <xsl:with-param name="inst" select="name(.)"/>
+                                                        <xsl:with-param name="site" select=".//site"/>
+                                                    </xsl:call-template>
+                                                </xsl:otherwise>
+                                            </xsl:choose>
+                                        </fo:block>
+                                    </fo:table-cell>
 
-                                        <!-- resource name -->
-                                        <fo:table-cell border-right-style="double"
-                                                       border-left-style="solid"
-                                                       border-top-style="solid"
-                                                       border-bottom-style="solid"
-                                                       border-color="black" border-width="0.5pt">
-                                            <fo:block>
-                                                <xsl:value-of select=".//name"/>
-                                                <!--xsl:call-template name="get-inst-name">
-                                                    <xsl:with-param name="inst" select="name(.)"/>
-                                                </xsl:call-template-->
-                                            </fo:block>
-                                        </fo:table-cell>
+                                    <!-- resource name -->
+                                    <fo:table-cell border-right-style="double"
+                                                   border-left-style="solid"
+                                                   border-top-style="solid"
+                                                   border-bottom-style="solid"
+                                                   border-color="black" border-width="0.5pt">
+                                        <fo:block>
+                                            <xsl:value-of select=".//name"/>
+                                            <!--xsl:call-template name="get-inst-name">
+                                                <xsl:with-param name="inst" select="name(.)"/>
+                                            </xsl:call-template-->
+                                        </fo:block>
+                                    </fo:table-cell>
 
-                                        <!-- requested time -->
-                                        <fo:table-cell border-right-style="double"
-                                                       border-left-style="solid"
-                                                       border-top-style="solid"
-                                                       border-bottom-style="solid"
-                                                       border-color="black" border-width="0.5pt">
-                                            <fo:block text-align="center">
-                                                <xsl:call-template name="get-total-instrument-observation-time">
-                                                    <xsl:with-param name="instrument" select="."/>
-                                                </xsl:call-template>
-                                            </fo:block>
-                                        </fo:table-cell>
-                                    </fo:table-row>
-                                </xsl:if>
+                                    <!-- requested time -->
+                                    <fo:table-cell border-right-style="double"
+                                                   border-left-style="solid"
+                                                   border-top-style="solid"
+                                                   border-bottom-style="solid"
+                                                   border-color="black" border-width="0.5pt">
+                                        <fo:block text-align="center">
+                                            <xsl:call-template name="get-total-instrument-observation-time">
+                                                <xsl:with-param name="instrument" select="."/>
+                                            </xsl:call-template>
+                                        </fo:block>
+                                    </fo:table-cell>
+                                </fo:table-row>
+                            </xsl:if>
 
-                            </xsl:for-each>
+                        </xsl:for-each>
 
-                            <fo:table-row>
-                                <fo:table-cell number-columns-spanned="3">
-                                    <fo:block text-align="right">
-                                        <fo:inline font-weight="bold">
-                                            Total of exposure times in Observation Details:
-                                        </fo:inline>
-                                    </fo:block>
-                                </fo:table-cell>
-                                <fo:table-cell>
-                                    <fo:block text-align="center">
-                                        <xsl:variable name="totalObsTime"><xsl:call-template name="get-total-observation-time"/></xsl:variable>
-                                        <xsl:value-of select="format-number($totalObsTime, '#.#')"/>
-                                    </fo:block>
-                                </fo:table-cell>
-                            </fo:table-row>
-                        </fo:table-body>
-                    </fo:table>
-                    <!-- END observation requests -->
+                        <fo:table-row>
+                            <fo:table-cell number-columns-spanned="3">
+                                <fo:block text-align="right">
+                                    <fo:inline font-weight="bold">
+                                        Total of exposure times in Observation Details:
+                                    </fo:inline>
+                                </fo:block>
+                            </fo:table-cell>
+                            <fo:table-cell>
+                                <fo:block text-align="center">
+                                    <xsl:variable name="totalObsTime"><xsl:call-template name="get-total-observation-time"/></xsl:variable>
+                                    <xsl:value-of select="format-number($totalObsTime, '#.#')"/>
+                                </fo:block>
+                            </fo:table-cell>
+                        </fo:table-row>
+                    </fo:table-body>
+                </fo:table>
+                <!-- END observation requests -->
 
-                    <!-- multi-partner information -->
-                    <xsl:if test="count(proposalClass/*/ngo) > 1">
-                        <fo:block>
-                            <fo:inline font-weight="bold">
-                                Multiple Partner Proposal:&#160;
-                            </fo:inline>
-                            <xsl:for-each select="proposalClass/*/ngo">
-                                <xsl:call-template name="get-partner-name"><xsl:with-param name="partner" select="partner"/></xsl:call-template>
-                                <xsl:text>&#160;</xsl:text>
-                                (<xsl:value-of select="format-number(request/time, '0.0')"/>
-                                <xsl:text>&#160;</xsl:text>
-                                <xsl:value-of  select="request/time/@units"/>
-                                /
-                                <xsl:value-of select="format-number(request/minTime, '0.0')"/>
-                                <xsl:text>&#160;</xsl:text>
-                                <xsl:value-of select="request/minTime/@units"/>),
-                            </xsl:for-each>
-                           Total (<xsl:call-template name="get-ngo-total-requested-time"/>
-                            <xsl:text>&#160;hr</xsl:text>
-                            /
-                            <xsl:call-template name="get-ngo-total-min-requested-time"/>
-                            <xsl:text>&#160;hr)</xsl:text>
-                        </fo:block>
-                    </xsl:if>
-                    <!-- END multi-partner information -->
-
-                    <!-- band 3 information-->
-                    <xsl:if test="count(observations/observation[@band = 'Band 3']) > 0">
-                        <fo:block>
-                            <fo:inline font-weight="bold">
-                                Band 3:&#160;
-                            </fo:inline>
-                            Proposal can be used in Band 3 (
-                            <xsl:value-of select="format-number(/proposal/proposalClass/*/band3request/time, '0.0')"/>&#160;
-                            <xsl:value-of select="/proposal/proposalClass/*/band3request/time/@units"/>
-                            /
-                            <xsl:value-of select="format-number(/proposal/proposalClass/*/band3request/minTime, '0.0')"/>&#160;
-                            <xsl:value-of select="/proposal/proposalClass/*/band3request/minTime/@units"/>)
-                        </fo:block>
-                    </xsl:if>
-                    <!-- END band 3 information-->
-
-                    <!-- BEGIN problems -->
-                    <xsl:variable name="guiding-problems"    select="count(/proposal/observations/observation/meta/guiding[evaluation!='Success'])"/>
-                    <xsl:variable name="visibility-problems" select="count(/proposal/observations/observation/meta[visibility!='Good'])"/>
-                    <xsl:variable name="gsa-problems"        select="count(/proposal/observations/observation/meta[gsa>0])"/>
-                    <xsl:if test="$guiding-problems + $visibility-problems + $gsa-problems > 0">
-                        <fo:block>
-                            <fo:inline font-weight="bold">
-                                Potential Problems:&#160;
-                            </fo:inline>
-                            <xsl:call-template name="get-obs-problems-summary"/>
-                        </fo:block>
-                    </xsl:if>
-                    <!-- END problems -->
-
-                    <!-- BEGIN scheduling -->
-                    <fo:block linefeed-treatment="preserve">
+                <!-- multi-partner information -->
+                <xsl:if test="count(proposalClass/*/ngo) > 1">
+                    <fo:block>
                         <fo:inline font-weight="bold">
-                            Scheduling Constraints: </fo:inline>
-                        <fo:inline>
-                            <xsl:value-of select="scheduling"/>
+                            Multiple Partner Proposal:&#160;
+                        </fo:inline>
+                        <xsl:for-each select="proposalClass/*/ngo">
+                            <xsl:call-template name="get-partner-name"><xsl:with-param name="partner" select="partner"/></xsl:call-template>
+                            <xsl:text>&#160;</xsl:text>
+                            (<xsl:value-of select="format-number(request/time, '0.0')"/>
+                            <xsl:text>&#160;</xsl:text>
+                            <xsl:value-of  select="request/time/@units"/>
+                            /
+                            <xsl:value-of select="format-number(request/minTime, '0.0')"/>
+                            <xsl:text>&#160;</xsl:text>
+                            <xsl:value-of select="request/minTime/@units"/>),
+                        </xsl:for-each>
+                       Total (<xsl:call-template name="get-ngo-total-requested-time"/>
+                        <xsl:text>&#160;hr</xsl:text>
+                        /
+                        <xsl:call-template name="get-ngo-total-min-requested-time"/>
+                        <xsl:text>&#160;hr)</xsl:text>
+                    </fo:block>
+                </xsl:if>
+                <!-- END multi-partner information -->
+
+                <!-- band 3 information-->
+                <xsl:if test="count(observations/observation[@band = 'Band 3']) > 0">
+                    <fo:block>
+                        <fo:inline font-weight="bold">
+                            Band 3:&#160;
+                        </fo:inline>
+                        Proposal can be used in Band 3 (
+                        <xsl:value-of select="format-number(/proposal/proposalClass/*/band3request/time, '0.0')"/>&#160;
+                        <xsl:value-of select="/proposal/proposalClass/*/band3request/time/@units"/>
+                        /
+                        <xsl:value-of select="format-number(/proposal/proposalClass/*/band3request/minTime, '0.0')"/>&#160;
+                        <xsl:value-of select="/proposal/proposalClass/*/band3request/minTime/@units"/>)
+                    </fo:block>
+                </xsl:if>
+                <!-- END band 3 information-->
+
+                <!-- BEGIN problems -->
+                <xsl:variable name="guiding-problems"    select="count(/proposal/observations/observation/meta/guiding[evaluation!='Success'])"/>
+                <xsl:variable name="visibility-problems" select="count(/proposal/observations/observation/meta[visibility!='Good'])"/>
+                <xsl:variable name="gsa-problems"        select="count(/proposal/observations/observation/meta[gsa>0])"/>
+                <xsl:if test="$guiding-problems + $visibility-problems + $gsa-problems > 0">
+                    <fo:block>
+                        <fo:inline font-weight="bold">
+                            Potential Problems:&#160;
+                        </fo:inline>
+                        <xsl:call-template name="get-obs-problems-summary"/>
+                    </fo:block>
+                </xsl:if>
+                <!-- END problems -->
+
+                <!-- BEGIN scheduling -->
+                <fo:block linefeed-treatment="preserve">
+                    <fo:inline font-weight="bold">
+                        Scheduling Constraints: </fo:inline>
+                    <fo:inline>
+                        <xsl:value-of select="scheduling"/>
+                    </fo:inline>
+                </fo:block>
+                <!-- END scheduling -->
+
+                <!--  BEGIN TAC Information Details -->
+                <xsl:if test="count(proposalClass/*/ngo/response/*) &gt; 0">
+                    <fo:block space-before="8pt">
+                        <fo:inline font-weight="bold">
+                            TAC information
+                        </fo:inline>
+                        <fo:inline font-style="italic">
+                            (multiple entries for joint proposals)
                         </fo:inline>
                     </fo:block>
-                    <!-- END scheduling -->
 
-                    <!--  BEGIN TAC Information Details -->
-                    <xsl:if test="count(proposalClass/*/ngo/response/*) &gt; 0">
-                        <fo:block space-before="8pt">
-                            <fo:inline font-weight="bold">
-                                TAC information
-                            </fo:inline>
-                            <fo:inline font-style="italic">
-                                (multiple entries for joint proposals)
-                            </fo:inline>
-                        </fo:block>
+                    <fo:table table-layout="fixed" space-before="6pt" space-after="12pt">
+                        <fo:table-column column-width="15.0%"/>
+                        <fo:table-column column-width="15.0%"/>
+                        <fo:table-column column-width="15.0%"/>
+                        <fo:table-column column-width="15.0%"/>
+                        <fo:table-column column-width="15.0%"/>
+                        <fo:table-column column-width="25.0%"/>
+                        <fo:table-body>
+                            <fo:table-row>
+                                <fo:table-cell>
+                                    <fo:block>Partner</fo:block>
+                                </fo:table-cell>
+                                <fo:table-cell>
+                                    <fo:block>Partner Ranking Decision</fo:block>
+                                </fo:table-cell>
+                                <fo:table-cell>
+                                    <fo:block>Partner Ranking</fo:block>
+                                </fo:table-cell>
+                                <fo:table-cell text-align="center">
+                                    <fo:block>Recommended Time</fo:block>
+                                </fo:table-cell>
+                                <fo:table-cell text-align="center">
+                                    <fo:block>Poor Weather</fo:block>
+                                </fo:table-cell>
+                                <fo:table-cell text-align="center">
+                                    <fo:block>NGO Support Email</fo:block>
+                                </fo:table-cell>
+                            </fo:table-row>
+
+                            <fo:table-row>
+                                <fo:table-cell number-columns-spanned="5">
+                                    <fo:block/>
+                                </fo:table-cell>
+                            </fo:table-row>
+
+                            <xsl:for-each select="proposalClass/*/ngo/response">
+                                <fo:table-row>
+                                    <fo:table-cell border-right-style="double"
+                                                   border-left-style="solid"
+                                                   border-top-style="solid"
+                                                   border-bottom-style="solid"
+                                                   border-color="black" border-width="0.5pt">
+                                        <fo:block>
+                                            <xsl:call-template name="get-partner-name">
+                                                <xsl:with-param name="partner">
+                                                    <xsl:value-of select="../partner"/>
+                                                </xsl:with-param>
+                                            </xsl:call-template>
+                                        </fo:block>
+                                    </fo:table-cell>
+                                    <fo:table-cell border-right-style="double"
+                                                   border-left-style="solid"
+                                                   border-top-style="solid"
+                                                   border-bottom-style="solid"
+                                                   border-color="black" border-width="0.5pt">
+                                        <fo:block>
+                                            <xsl:choose>
+                                              <xsl:when test="accept">Accepted</xsl:when>
+                                              <xsl:when test="reject">Rejected</xsl:when>
+                                            </xsl:choose>
+                                        </fo:block>
+                                    </fo:table-cell>
+                                    <fo:table-cell border-right-style="double"
+                                                   border-left-style="solid"
+                                                   border-top-style="solid"
+                                                   border-bottom-style="solid"
+                                                   border-color="black" border-width="0.5pt">
+                                        <fo:block>
+                                            <xsl:value-of select="accept/ranking"/>
+                                        </fo:block>
+                                    </fo:table-cell>
+                                    <fo:table-cell border-right-style="double"
+                                                   border-left-style="solid"
+                                                   border-top-style="solid"
+                                                   border-bottom-style="solid"
+                                                   border-color="black" border-width="0.5pt">
+                                        <fo:block>
+                                            <xsl:value-of select="accept/recommend"/>
+                                            <xsl:text>&#160;</xsl:text>
+                                            <xsl:value-of select="accept/recommend/@units"/>
+                                            <xsl:text>&#160;(</xsl:text>
+                                            <xsl:value-of select="accept/minRecommend"/>
+                                            <xsl:text>&#160;</xsl:text>
+                                            <xsl:value-of select="accept/minRecommend/@units"/>
+                                            <xsl:text>)</xsl:text>
+                                        </fo:block>
+                                    </fo:table-cell>
+                                    <fo:table-cell border-right-style="double"
+                                                   border-left-style="solid"
+                                                   border-top-style="solid"
+                                                   border-bottom-style="solid"
+                                                   border-color="black" border-width="0.5pt">
+                                        <fo:block>
+                                            <xsl:choose>
+                                              <xsl:when test="accept/poorWeather='true'">Yes</xsl:when>
+                                              <xsl:otherwise>No</xsl:otherwise>
+                                            </xsl:choose>
+                                        </fo:block>
+                                    </fo:table-cell>
+                                    <fo:table-cell border-right-style="double"
+                                                   border-left-style="solid"
+                                                   border-top-style="solid"
+                                                   border-bottom-style="solid"
+                                                   border-color="black" border-width="0.5pt">
+                                        <fo:block>
+                                            <xsl:value-of select="accept/email"/>
+                                        </fo:block>
+                                    </fo:table-cell>
+                                </fo:table-row>
+                                <fo:table-row>
+                                    <fo:table-cell text-align="center" number-columns-spanned="6"
+                                                   border-right-style="double"
+                                                   border-left-style="solid"
+                                                   border-top-style="solid"
+                                                   border-bottom-style="solid"
+                                                   border-color="black" border-width="0.5pt">
+                                        <fo:block font-weight="bold">Comments</fo:block>
+                                    </fo:table-cell>
+                                </fo:table-row>
+                                <fo:table-row>
+                                    <fo:table-cell number-columns-spanned="6" border-right-style="double"
+                                                   border-left-style="solid"
+                                                   border-top-style="solid"
+                                                   border-bottom-style="solid"
+                                                   border-color="black" border-width="0.5pt">
+                                        <fo:block>
+                                            <xsl:value-of select="comment"/>
+                                        </fo:block>
+                                    </fo:table-cell>
+                                </fo:table-row>
+                            </xsl:for-each>
+
+                            <fo:table-row>
+                                <fo:table-cell number-columns-spanned="6">
+                                    <fo:block/>
+                                </fo:table-cell>
+                            </fo:table-row>
+
+                        </fo:table-body>
+                    </fo:table>
+                </xsl:if>
+                <!--  END TAC Information Details -->
+
+                <!-- BEGIN ITAC Information -->
+                <xsl:if test="count(proposalClass/*/itac/comment) > 0">
+                    <fo:block space-before="8pt" space-after="12pt">
+                        <fo:inline font-weight="bold">ITAC Information:&#160;</fo:inline>
+                        <xsl:for-each select="proposalClass/*/itac/comment">
+                            <xsl:choose>
+                                <xsl:when test="contains(., 'ITAC Comment') and contains(., 'Gemini Comment')">
+                                    <fo:block>
+                                        <fo:block>
+                                            <fo:inline font-weight="bold">ITAC Comment</fo:inline>
+                                            <xsl:value-of select="substring-after(substring-before(., 'Gemini Comment'), 'ITAC Comment')"/>
+                                        </fo:block>
+                                        <fo:block>
+                                            <fo:inline font-weight="bold">Gemini Comment</fo:inline>
+                                            <xsl:value-of select="substring-after(., 'Gemini Comment')"/>
+                                        </fo:block>
+                                    </fo:block>
+                                </xsl:when>
+                                <xsl:otherwise>
+                                    <fo:block>
+                                        <xsl:value-of select="."/>
+                                    </fo:block>
+                                </xsl:otherwise>
+                            </xsl:choose>
+                        </xsl:for-each>
+                    </fo:block>
+                </xsl:if>
+                <!-- END ITAC Information -->
+
+            </fo:flow>
+            <!-- END first page body -->
+
+        </fo:page-sequence>
+        <!-- END first page -->
+    </xsl:template>
+
+    <xsl:template name="science">
+        <xsl:param name="proposal-id">
+        </xsl:param>
+        <xsl:param name="prop-type">
+        </xsl:param>
+        <xsl:param name="this-partner-submission">
+        </xsl:param>
+
+        <!-- BEGIN science justification -->
+        <fo:page-sequence master-reference="rest">
+
+            <!-- BEGIN header -->
+            <fo:static-content
+                    flow-name="xsl-region-before"
+                    font-family="Times"
+                    font-size="10pt">
+                <fo:table table-layout="fixed">
+                    <fo:table-column column-width="8cm"/>
+                    <fo:table-column column-width="3cm"/>
+                    <fo:table-column column-width="5cm"/>
+                    <fo:table-body>
+                        <fo:table-row>
+                            <fo:table-cell>
+                                <fo:block font-style="italic">
+                                    <xsl:variable name="receiptDate" select="/proposal/proposalClass/ngo[partner=$this-partner]/receipt/timestamp"/>
+                                    <fo:inline><xsl:value-of select="$obs-name"/> Proposal, received <xsl:value-of select="substring($receiptDate, 0, 11)"/></fo:inline>
+                                </fo:block>
+                            </fo:table-cell>
+                            <fo:table-cell>
+                                <fo:block font-style="italic">
+                                    Section 1 Page <fo:page-number/>
+                                </fo:block>
+                            </fo:table-cell>
+                            <fo:table-cell border="0.5pt solid black" text-align="center">
+                                <fo:block font-weight="bold" font-size="12pt">
+                                    <xsl:value-of select="$proposal-id"/>
+                                </fo:block>
+                            </fo:table-cell>
+                        </fo:table-row>
+                    </fo:table-body>
+                </fo:table>
+            </fo:static-content>
+            <!-- END header -->
+
+            <!-- BEGIN body -->
+            <fo:flow flow-name="xsl-region-body"
+                     font-family="Times"
+                     font-size="12pt">
+
+                <!-- Band 1/2 Observation Details -->
+                <xsl:call-template name="observation-details-table">
+                    <xsl:with-param name="title">Observation Details (Band 1/2)</xsl:with-param>
+                    <xsl:with-param name="nodes" select="/proposal/observations/observation[count(@band)=0 or @band!='Band 3']"/>
+                </xsl:call-template>
+
+                <fo:block space-before="10pt" space-after="10pt"/>
+
+                <!-- Band 3 Observation Details -->
+                <xsl:if test="count(observations/observation[@band = 'Band 3']) > 0">
+                    <xsl:call-template name="observation-details-table">
+                        <xsl:with-param name="title">Observation Details (Band 3)</xsl:with-param>
+                        <xsl:with-param name="nodes" select="/proposal/observations/observation[@band='Band 3']"/>
+                    </xsl:call-template>
+                </xsl:if>
+
+                <fo:block space-before="10pt" space-after="10pt"/>
+
+                <!-- (N)Tac comments -->
+                <xsl:if test="/proposal/proposalClass/*/ngo/accept">
+                    <fo:block keep-together.within-page="always">
+                        <xsl:call-template name="styled-section-header">
+                            <xsl:with-param name="section-name">
+                                <xsl:value-of select="'Comments'"/>
+                            </xsl:with-param>
+                            <xsl:with-param name="column1-width">
+                                3cm
+                            </xsl:with-param>
+                            <xsl:with-param name="space-after">
+                                10pt
+                            </xsl:with-param>
+                            <xsl:with-param name="start-new-page">
+                                <xsl:value-of select="true"/>
+                            </xsl:with-param>
+                        </xsl:call-template>
 
                         <fo:table table-layout="fixed" space-before="6pt" space-after="12pt">
-                            <fo:table-column column-width="15.0%"/>
-                            <fo:table-column column-width="15.0%"/>
-                            <fo:table-column column-width="15.0%"/>
-                            <fo:table-column column-width="15.0%"/>
-                            <fo:table-column column-width="15.0%"/>
-                            <fo:table-column column-width="25.0%"/>
+                            <fo:table-column column-width="4cm"/>
+                            <fo:table-column column-width="12cm"/>
                             <fo:table-body>
-                                <fo:table-row>
-                                    <fo:table-cell>
-                                        <fo:block>Partner</fo:block>
-                                    </fo:table-cell>
-                                    <fo:table-cell>
-                                        <fo:block>Partner Ranking Decision</fo:block>
-                                    </fo:table-cell>
-                                    <fo:table-cell>
-                                        <fo:block>Partner Ranking</fo:block>
-                                    </fo:table-cell>
-                                    <fo:table-cell text-align="center">
-                                        <fo:block>Recommended Time</fo:block>
-                                    </fo:table-cell>
-                                    <fo:table-cell text-align="center">
-                                        <fo:block>Poor Weather</fo:block>
-                                    </fo:table-cell>
-                                    <fo:table-cell text-align="center">
-                                        <fo:block>NGO Support Email</fo:block>
-                                    </fo:table-cell>
-                                </fo:table-row>
-
-                                <fo:table-row>
-                                    <fo:table-cell number-columns-spanned="5">
-                                        <fo:block/>
-                                    </fo:table-cell>
-                                </fo:table-row>
-
-                                <xsl:for-each select="proposalClass/*/ngo/response">
+                                <!-- NGOs -->
+                                <xsl:for-each select="/proposal/proposalClass/*/ngo">
                                     <fo:table-row>
-                                        <fo:table-cell border-right-style="double"
-                                                       border-left-style="solid"
-                                                       border-top-style="solid"
-                                                       border-bottom-style="solid"
-                                                       border-color="black" border-width="0.5pt">
+                                        <fo:table-cell>
                                             <fo:block>
                                                 <xsl:call-template name="get-partner-name">
                                                     <xsl:with-param name="partner">
-                                                        <xsl:value-of select="../partner"/>
+                                                        <xsl:value-of select="partner"/>
                                                     </xsl:with-param>
                                                 </xsl:call-template>
                                             </fo:block>
                                         </fo:table-cell>
-                                        <fo:table-cell border-right-style="double"
-                                                       border-left-style="solid"
-                                                       border-top-style="solid"
-                                                       border-bottom-style="solid"
-                                                       border-color="black" border-width="0.5pt">
-                                            <fo:block>
-                                                <xsl:choose>
-                                                  <xsl:when test="accept">Accepted</xsl:when>
-                                                  <xsl:when test="reject">Rejected</xsl:when>
-                                                </xsl:choose>
-                                            </fo:block>
-                                        </fo:table-cell>
-                                        <fo:table-cell border-right-style="double"
-                                                       border-left-style="solid"
-                                                       border-top-style="solid"
-                                                       border-bottom-style="solid"
-                                                       border-color="black" border-width="0.5pt">
-                                            <fo:block>
-                                                <xsl:value-of select="accept/ranking"/>
-                                            </fo:block>
-                                        </fo:table-cell>
-                                        <fo:table-cell border-right-style="double"
-                                                       border-left-style="solid"
-                                                       border-top-style="solid"
-                                                       border-bottom-style="solid"
-                                                       border-color="black" border-width="0.5pt">
-                                            <fo:block>
-                                                <xsl:value-of select="accept/recommend"/>
-                                                <xsl:text>&#160;</xsl:text>
-                                                <xsl:value-of select="accept/recommend/@units"/>
-                                                <xsl:text>&#160;(</xsl:text>
-                                                <xsl:value-of select="accept/minRecommend"/>
-                                                <xsl:text>&#160;</xsl:text>
-                                                <xsl:value-of select="accept/minRecommend/@units"/>
-                                                <xsl:text>)</xsl:text>
-                                            </fo:block>
-                                        </fo:table-cell>
-                                        <fo:table-cell border-right-style="double"
-                                                       border-left-style="solid"
-                                                       border-top-style="solid"
-                                                       border-bottom-style="solid"
-                                                       border-color="black" border-width="0.5pt">
-                                            <fo:block>
-                                                <xsl:choose>
-                                                  <xsl:when test="accept/poorWeather='true'">Yes</xsl:when>
-                                                  <xsl:otherwise>No</xsl:otherwise>
-                                                </xsl:choose>
-                                            </fo:block>
-                                        </fo:table-cell>
-                                        <fo:table-cell border-right-style="double"
-                                                       border-left-style="solid"
-                                                       border-top-style="solid"
-                                                       border-bottom-style="solid"
-                                                       border-color="black" border-width="0.5pt">
-                                            <fo:block>
-                                                <xsl:value-of select="accept/email"/>
-                                            </fo:block>
-                                        </fo:table-cell>
-                                    </fo:table-row>
-                                    <fo:table-row>
-                                        <fo:table-cell text-align="center" number-columns-spanned="6"
-                                                       border-right-style="double"
-                                                       border-left-style="solid"
-                                                       border-top-style="solid"
-                                                       border-bottom-style="solid"
-                                                       border-color="black" border-width="0.5pt">
-                                            <fo:block font-weight="bold">Comments</fo:block>
-                                        </fo:table-cell>
-                                    </fo:table-row>
-                                    <fo:table-row>
-                                        <fo:table-cell number-columns-spanned="6" border-right-style="double"
-                                                       border-left-style="solid"
-                                                       border-top-style="solid"
-                                                       border-bottom-style="solid"
-                                                       border-color="black" border-width="0.5pt">
-                                            <fo:block>
-                                                <xsl:value-of select="comment"/>
-                                            </fo:block>
+                                        <fo:table-cell>
+                                            <fo:block><xsl:value-of select="comment"/></fo:block>
                                         </fo:table-cell>
                                     </fo:table-row>
                                 </xsl:for-each>
-
-                                <fo:table-row>
-                                    <fo:table-cell number-columns-spanned="6">
-                                        <fo:block/>
-                                    </fo:table-cell>
-                                </fo:table-row>
-
                             </fo:table-body>
                         </fo:table>
-                    </xsl:if>
-                    <!--  END TAC Information Details -->
+                    </fo:block>
+                </xsl:if>
 
-                    <!-- BEGIN ITAC Information -->
-                    <xsl:if test="count(proposalClass/*/itac/comment) > 0">
-                        <fo:block space-before="8pt" space-after="12pt">
-                            <fo:inline font-weight="bold">ITAC Information:&#160;</fo:inline>
-                            <xsl:for-each select="proposalClass/*/itac/comment">
-                                <xsl:choose>
-                                    <xsl:when test="contains(., 'ITAC Comment') and contains(., 'Gemini Comment')">
-                                        <fo:block>
-                                            <fo:block>
-                                                <fo:inline font-weight="bold">ITAC Comment</fo:inline>
-                                                <xsl:value-of select="substring-after(substring-before(., 'Gemini Comment'), 'ITAC Comment')"/>
-                                            </fo:block>
-                                            <fo:block>
-                                                <fo:inline font-weight="bold">Gemini Comment</fo:inline>
-                                                <xsl:value-of select="substring-after(., 'Gemini Comment')"/>
-                                            </fo:block>
-                                        </fo:block>
-                                    </xsl:when>
-                                    <xsl:otherwise>
-                                        <fo:block>
-                                            <xsl:value-of select="."/>
-                                        </fo:block>
-                                    </xsl:otherwise>
-                                </xsl:choose>
-                            </xsl:for-each>
-                        </fo:block>
-                    </xsl:if>
-                    <!-- END ITAC Information -->
+            </fo:flow>
+            <!-- END body -->
 
-                </fo:flow>
-                <!-- END first page body -->
+        </fo:page-sequence>
+        <!-- END rest -->
+    </xsl:template>
 
-            </fo:page-sequence>
-            <!-- END first page -->
+    <xsl:template name="investigators-list">
+        <xsl:param name="proposal-id"/>
+        <xsl:param name="section"/>
 
             <!-- BEGIN investigator information -->
-            <fo:page-sequence master-reference="rest">
+            <fo:page-sequence master-reference="investigators">
+            <!-- BEGIN header -->
+            <fo:static-content
+                    flow-name="xsl-region-before"
+                    font-family="Times"
+                    font-size="10pt">
+                <fo:table table-layout="fixed">
+                    <fo:table-column column-width="8cm"/>
+                    <fo:table-column column-width="3cm"/>
+                    <fo:table-column column-width="5cm"/>
+                    <fo:table-body>
+                        <fo:table-row>
+                            <fo:table-cell>
+                                <fo:block font-style="italic">
+                                    <xsl:variable name="receiptDate" select="/proposal/proposalClass/ngo[partner=$this-partner]/receipt/timestamp"/>
+                                    <fo:inline><xsl:value-of select="$obs-name"/> Proposal, received <xsl:value-of select="substring($receiptDate, 0, 11)"/></fo:inline>
+                                </fo:block>
+                            </fo:table-cell>
+                            <fo:table-cell>
+                                <fo:block font-style="italic">
+                                    Section <xsl:value-of select="$section"/> Page <fo:page-number/>
+                                </fo:block>
+                            </fo:table-cell>
+                            <fo:table-cell border="0.5pt solid black" text-align="center">
+                                <fo:block font-weight="bold" font-size="12pt">
+                                    <xsl:value-of select="$proposal-id"/>
+                                </fo:block>
+                            </fo:table-cell>
+                        </fo:table-row>
+                    </fo:table-body>
+                </fo:table>
+            </fo:static-content>
+            <!-- END header -->
 
-                <!-- BEGIN header -->
-                <fo:static-content
-                        flow-name="xsl-region-before"
-                        font-family="Times"
-                        font-size="10pt">
-                    <fo:table table-layout="fixed">
+            <!-- BEGIN second page body -->
+            <!-- The main body is called "xsl-region-body". -->
+            <fo:flow flow-name="xsl-region-body"
+                     font-family="Times"
+                     font-size="12pt">
+
+                <!-- BEGIN title -->
+                <fo:block font-weight="bold" font-size="18pt">
+                    Investigator Information
+                </fo:block>
+                <!-- END title -->
+
+                <!-- BEGIN partner lead scientist -->
+                <xsl:if test="count(proposalClass/*/ngo) > 1">
+                    <fo:block space-before="12pt">
+                        <fo:inline font-weight="bold">
+                            <xsl:call-template name="get-partner-name"><xsl:with-param name="partner" select="$this-partner"/></xsl:call-template>
+                            <xsl:text>&#160;</xsl:text>Lead Scientist:<xsl:text>&#160;</xsl:text>
+                        </fo:inline>
+                        <xsl:variable name="investigatorRef" select="/proposal/proposalClass/*/ngo[partner=$this-partner]/request/@lead"/>
+                        <xsl:variable name="investigator" select="/proposal/investigators/*[@id=$investigatorRef]"/>
+                        <xsl:value-of select="$investigator/firstName"/><xsl:text>&#160;</xsl:text>
+                        <xsl:value-of select="$investigator/lastName"/>
+                    </fo:block>
+                </xsl:if>
+                <!-- END partner lead scientist -->
+
+                <!-- BEGIN PI -->
+                <fo:table table-layout="fixed" space-before="12pt"
+                          space-after="8pt">
+                    <fo:table-column column-width="6cm"/>
+                    <fo:table-column column-width="2cm"/>
+                    <fo:table-column column-width="8cm"/>
+                    <fo:table-body>
+                        <fo:table-row>
+                            <fo:table-cell>
+                                <fo:block>
+                                    <fo:inline font-weight="bold">PI:</fo:inline>
+                                    <xsl:text>&#160;</xsl:text><xsl:text>&#160;</xsl:text>
+                                    <xsl:value-of select="investigators/pi/firstName"/>
+                                    <xsl:text>&#160;</xsl:text>
+                                    <xsl:value-of select="investigators/pi/lastName"/>
+                                </fo:block>
+                            </fo:table-cell>
+                            <fo:table-cell>
+                                <fo:block>
+                                    <fo:inline font-weight="bold">Status:</fo:inline>
+                                    <xsl:text>&#160;</xsl:text><xsl:text>&#160;</xsl:text>
+                                    <xsl:variable name="status" select="investigators/pi/status"/>
+                                    <xsl:if test="$status = 'Grad Thesis'">T</xsl:if>
+                                    <xsl:if test="$status = 'PhD'">P</xsl:if>
+                                    <xsl:if test="$status = 'Grad No Thesis'">G</xsl:if>
+                                    <xsl:if test="$status = 'Other'">O</xsl:if>
+                                </fo:block>
+                            </fo:table-cell>
+                            <fo:table-cell>
+                                <fo:block>
+                                    <fo:inline font-weight="bold">Affil:</fo:inline>
+                                    <xsl:text>&#160;</xsl:text><xsl:text>&#160;</xsl:text>
+                                    <xsl:value-of select="investigators/pi/address/institution"/>
+                                </fo:block>
+                            </fo:table-cell>
+                        </fo:table-row>
+                        <fo:table-row>
+                            <fo:table-cell number-columns-spanned="3">
+                                <fo:block>
+                                    <xsl:value-of select="investigators/pi/address/address"/>&#160;
+                                    <xsl:value-of select="investigators/pi/address/country"/>
+                                </fo:block>
+                            </fo:table-cell>
+                        </fo:table-row>
+                        <fo:table-row>
+                            <fo:table-cell number-columns-spanned="2">
+                                <fo:block>
+                                    Email:<xsl:text>&#160;</xsl:text>
+                                    <xsl:value-of select="investigators/pi/email"/>
+                                </fo:block>
+                            </fo:table-cell>
+                            <fo:table-cell>
+                                <fo:block>
+                                    Phone:<xsl:text>&#160;</xsl:text>
+                                    <xsl:value-of select="investigators/pi/phone"/>
+                                </fo:block>
+                            </fo:table-cell>
+                        </fo:table-row>
+                    </fo:table-body>
+                </fo:table>
+                <!-- END PI -->
+
+                <!-- This is how you create a horizontal rule. -->
+                <fo:block text-align="center" space-after="8pt">
+                    <fo:leader leader-length="11.5cm"
+                               leader-pattern="rule"
+                               alignment-baseline="middle"
+                               rule-thickness="0.5pt" color="black"/>
+                </fo:block>
+
+                <!-- BEGIN CIs -->
+                <xsl:if test="count(investigators/coi) > 0">
+                    <fo:table table-layout="fixed" space-after="10pt">
+                        <fo:table-column column-width="6cm"/>
+                        <fo:table-column column-width="2cm"/>
                         <fo:table-column column-width="8cm"/>
-                        <fo:table-column column-width="3cm"/>
-                        <fo:table-column column-width="5cm"/>
                         <fo:table-body>
-                            <fo:table-row>
-                                <fo:table-cell>
-                                    <fo:block font-style="italic">
-                                        <xsl:variable name="receiptDate" select="/proposal/proposalClass/ngo[partner=$this-partner]/receipt/timestamp"/>
-                                        <fo:inline><xsl:value-of select="$obs-name"/> Proposal, received <xsl:value-of select="substring($receiptDate, 0, 11)"/></fo:inline>
-                                    </fo:block>
-                                </fo:table-cell>
-                                <fo:table-cell>
-                                    <fo:block font-style="italic">
-                                        Section 1 Page <fo:page-number/>
-                                    </fo:block>
-                                </fo:table-cell>
-                                <fo:table-cell border="0.5pt solid black" text-align="center">
-                                    <fo:block font-weight="bold" font-size="12pt">
-                                        <xsl:value-of select="$proposal-id"/>
-                                    </fo:block>
-                                </fo:table-cell>
-                            </fo:table-row>
+                            <xsl:for-each select="investigators/coi">
+                                <fo:table-row>
+                                    <fo:table-cell>
+                                        <fo:block>
+                                            <fo:inline font-weight="bold">CoI:</fo:inline>
+                                            <xsl:text>&#160;</xsl:text>
+                                            <xsl:value-of select="firstName"/>
+                                            <xsl:text>&#160;</xsl:text>
+                                            <xsl:value-of select="lastName"/>
+                                        </fo:block>
+                                    </fo:table-cell>
+                                    <fo:table-cell>
+                                        <fo:block>
+                                            <fo:inline font-weight="bold">Status:</fo:inline>
+                                            <xsl:text>&#160;</xsl:text><xsl:text>&#160;</xsl:text>
+                                            <xsl:variable name="status" select="status"/>
+                                            <xsl:if test="$status = 'Grad Thesis'">T</xsl:if>
+                                            <xsl:if test="$status = 'PhD'">P</xsl:if>
+                                            <xsl:if test="$status = 'Grad No Thesis'">G</xsl:if>
+                                            <xsl:if test="$status = 'Other'">O</xsl:if>
+                                        </fo:block>
+                                    </fo:table-cell>
+                                    <fo:table-cell>
+                                        <fo:block>
+                                            <fo:inline font-weight="bold">Affil.:</fo:inline>
+                                            <xsl:text>&#160;</xsl:text>
+                                            <xsl:value-of select="institution"/>
+                                        </fo:block>
+                                    </fo:table-cell>
+                                </fo:table-row>
+                            </xsl:for-each>
                         </fo:table-body>
                     </fo:table>
-                </fo:static-content>
-                <!-- END header -->
+                </xsl:if>
+                <!-- END CIs -->
 
-                <!-- BEGIN second page body -->
-                <!-- The main body is called "xsl-region-body". -->
-                <fo:flow flow-name="xsl-region-body"
-                         font-family="Times"
-                         font-size="12pt">
-
-                    <!-- BEGIN title -->
-                    <fo:block font-weight="bold" font-size="18pt">
-                        Investigator Information
-                    </fo:block>
-                    <!-- END title -->
-
-                    <!-- BEGIN partner lead scientist -->
-                    <xsl:if test="count(proposalClass/*/ngo) > 1">
-                        <fo:block space-before="12pt">
-                            <fo:inline font-weight="bold">
-                                <xsl:call-template name="get-partner-name"><xsl:with-param name="partner" select="$this-partner"/></xsl:call-template>
-                                <xsl:text>&#160;</xsl:text>Lead Scientist:<xsl:text>&#160;</xsl:text>
-                            </fo:inline>
-                            <xsl:variable name="investigatorRef" select="/proposal/proposalClass/*/ngo[partner=$this-partner]/request/@lead"/>
-                            <xsl:variable name="investigator" select="/proposal/investigators/*[@id=$investigatorRef]"/>
-                            <xsl:value-of select="$investigator/firstName"/><xsl:text>&#160;</xsl:text>
-                            <xsl:value-of select="$investigator/lastName"/>
-                        </fo:block>
-                    </xsl:if>
-                    <!-- END partner lead scientist -->
-
-                    <!-- BEGIN PI -->
-                    <fo:table table-layout="fixed" space-before="12pt"
-                              space-after="8pt">
+                <!-- BEGIN Reviewer -->
+                <xsl:for-each select="proposalClass/fastTurnaround[@reviewer]">
+                    <fo:table table-layout="fixed" space-after="0pt">
                         <fo:table-column column-width="6cm"/>
                         <fo:table-column column-width="2cm"/>
                         <fo:table-column column-width="8cm"/>
@@ -774,270 +1037,47 @@
                             <fo:table-row>
                                 <fo:table-cell>
                                     <fo:block>
-                                        <fo:inline font-weight="bold">PI:</fo:inline>
-                                        <xsl:text>&#160;</xsl:text><xsl:text>&#160;</xsl:text>
-                                        <xsl:value-of select="investigators/pi/firstName"/>
+                                        <fo:inline font-weight="bold">Reviewer:</fo:inline>
                                         <xsl:text>&#160;</xsl:text>
-                                        <xsl:value-of select="investigators/pi/lastName"/>
-                                    </fo:block>
-                                </fo:table-cell>
-                                <fo:table-cell>
-                                    <fo:block>
-                                        <fo:inline font-weight="bold">Status:</fo:inline>
-                                        <xsl:text>&#160;</xsl:text><xsl:text>&#160;</xsl:text>
-                                        <xsl:variable name="status" select="investigators/pi/status"/>
-                                        <xsl:if test="$status = 'Grad Thesis'">T</xsl:if>
-                                        <xsl:if test="$status = 'PhD'">P</xsl:if>
-                                        <xsl:if test="$status = 'Grad No Thesis'">G</xsl:if>
-                                        <xsl:if test="$status = 'Other'">O</xsl:if>
-                                    </fo:block>
-                                </fo:table-cell>
-                                <fo:table-cell>
-                                    <fo:block>
-                                        <fo:inline font-weight="bold">Affil:</fo:inline>
-                                        <xsl:text>&#160;</xsl:text><xsl:text>&#160;</xsl:text>
-                                        <xsl:value-of select="investigators/pi/address/institution"/>
-                                    </fo:block>
-                                </fo:table-cell>
-                            </fo:table-row>
-                            <fo:table-row>
-                                <fo:table-cell number-columns-spanned="3">
-                                    <fo:block>
-                                        <xsl:value-of select="investigators/pi/address/address"/>&#160;
-                                        <xsl:value-of select="investigators/pi/address/country"/>
-                                    </fo:block>
-                                </fo:table-cell>
-                            </fo:table-row>
-                            <fo:table-row>
-                                <fo:table-cell number-columns-spanned="2">
-                                    <fo:block>
-                                        Email:<xsl:text>&#160;</xsl:text>
-                                        <xsl:value-of select="investigators/pi/email"/>
-                                    </fo:block>
-                                </fo:table-cell>
-                                <fo:table-cell>
-                                    <fo:block>
-                                        Phone:<xsl:text>&#160;</xsl:text>
-                                        <xsl:value-of select="investigators/pi/phone"/>
+                                        <xsl:call-template name="investigator-name">
+                                            <xsl:with-param name="id" select="@reviewer"/>
+                                        </xsl:call-template>
                                     </fo:block>
                                 </fo:table-cell>
                             </fo:table-row>
                         </fo:table-body>
                     </fo:table>
-                    <!-- END PI -->
+                </xsl:for-each>
+                <!-- END Reviewer -->
 
-                    <!-- This is how you create a horizontal rule. -->
-                    <fo:block text-align="center" space-after="8pt">
-                        <fo:leader leader-length="11.5cm"
-                                   leader-pattern="rule"
-                                   alignment-baseline="middle"
-                                   rule-thickness="0.5pt" color="black"/>
-                    </fo:block>
-
-                    <!-- BEGIN CIs -->
-                    <xsl:if test="count(investigators/coi) > 0">
-                        <fo:table table-layout="fixed" space-after="10pt">
-                            <fo:table-column column-width="6cm"/>
-                            <fo:table-column column-width="2cm"/>
-                            <fo:table-column column-width="8cm"/>
-                            <fo:table-body>
-                                <xsl:for-each select="investigators/coi">
-                                    <fo:table-row>
-                                        <fo:table-cell>
-                                            <fo:block>
-                                                <fo:inline font-weight="bold">CoI:</fo:inline>
-                                                <xsl:text>&#160;</xsl:text>
-                                                <xsl:value-of select="firstName"/>
-                                                <xsl:text>&#160;</xsl:text>
-                                                <xsl:value-of select="lastName"/>
-                                            </fo:block>
-                                        </fo:table-cell>
-                                        <fo:table-cell>
-                                            <fo:block>
-                                                <fo:inline font-weight="bold">Status:</fo:inline>
-                                                <xsl:text>&#160;</xsl:text><xsl:text>&#160;</xsl:text>
-                                                <xsl:variable name="status" select="status"/>
-                                                <xsl:if test="$status = 'Grad Thesis'">T</xsl:if>
-                                                <xsl:if test="$status = 'PhD'">P</xsl:if>
-                                                <xsl:if test="$status = 'Grad No Thesis'">G</xsl:if>
-                                                <xsl:if test="$status = 'Other'">O</xsl:if>
-                                            </fo:block>
-                                        </fo:table-cell>
-                                        <fo:table-cell>
-                                            <fo:block>
-                                                <fo:inline font-weight="bold">Affil.:</fo:inline>
-                                                <xsl:text>&#160;</xsl:text>
-                                                <xsl:value-of select="institution"/>
-                                            </fo:block>
-                                        </fo:table-cell>
-                                    </fo:table-row>
-                                </xsl:for-each>
-                            </fo:table-body>
-                        </fo:table>
-                    </xsl:if>
-                    <!-- END CIs -->
-
-                    <!-- BEGIN Reviewer -->
-                    <xsl:for-each select="proposalClass/fastTurnaround[@reviewer]">
-                        <fo:table table-layout="fixed" space-after="0pt">
-                            <fo:table-column column-width="6cm"/>
-                            <fo:table-column column-width="2cm"/>
-                            <fo:table-column column-width="8cm"/>
-                            <fo:table-body>
-                                <fo:table-row>
-                                    <fo:table-cell>
-                                        <fo:block>
-                                            <fo:inline font-weight="bold">Reviewer:</fo:inline>
-                                            <xsl:text>&#160;</xsl:text>
-                                            <xsl:call-template name="investigator-name">
-                                                <xsl:with-param name="id" select="@reviewer"/>
-                                            </xsl:call-template>
-                                        </fo:block>
-                                    </fo:table-cell>
-                                </fo:table-row>
-                            </fo:table-body>
-                        </fo:table>
-                    </xsl:for-each>
-                    <!-- END Reviewer -->
-
-                    <!-- BEGIN Mentor -->
-                    <xsl:for-each select="proposalClass/fastTurnaround[@mentor]">
-                        <fo:table table-layout="fixed" space-after="10pt">
-                            <fo:table-column column-width="6cm"/>
-                            <fo:table-column column-width="2cm"/>
-                            <fo:table-column column-width="8cm"/>
-                            <fo:table-body>
-                                <fo:table-row>
-                                    <fo:table-cell>
-                                        <fo:block>
-                                            <fo:inline font-weight="bold">Mentor:</fo:inline>
-                                            <xsl:text>&#160;</xsl:text>
-                                            <xsl:call-template name="investigator-name">
-                                                <xsl:with-param name="id" select="@mentor"/>
-                                            </xsl:call-template>
-                                        </fo:block>
-                                    </fo:table-cell>
-                                </fo:table-row>
-                            </fo:table-body>
-                        </fo:table>
-                    </xsl:for-each>
-                    <!-- END Mentor -->
-
-                </fo:flow>
-                <!-- END second page body -->
-            </fo:page-sequence>
-            <!-- END investgator information -->
-
-            <!-- BEGIN science justification -->
-            <fo:page-sequence master-reference="rest">
-
-                <!-- BEGIN header -->
-                <fo:static-content
-                        flow-name="xsl-region-before"
-                        font-family="Times"
-                        font-size="10pt">
-                    <fo:table table-layout="fixed">
+                <!-- BEGIN Mentor -->
+                <xsl:for-each select="proposalClass/fastTurnaround[@mentor]">
+                    <fo:table table-layout="fixed" space-after="10pt">
+                        <fo:table-column column-width="6cm"/>
+                        <fo:table-column column-width="2cm"/>
                         <fo:table-column column-width="8cm"/>
-                        <fo:table-column column-width="3cm"/>
-                        <fo:table-column column-width="5cm"/>
                         <fo:table-body>
                             <fo:table-row>
                                 <fo:table-cell>
-                                    <fo:block font-style="italic">
-                                        <xsl:variable name="receiptDate" select="/proposal/proposalClass/ngo[partner=$this-partner]/receipt/timestamp"/>
-                                        <fo:inline><xsl:value-of select="$obs-name"/> Proposal, received <xsl:value-of select="substring($receiptDate, 0, 11)"/></fo:inline>
-                                    </fo:block>
-                                </fo:table-cell>
-                                <fo:table-cell>
-                                    <fo:block font-style="italic">
-                                        Section 1 Page <fo:page-number/>
-                                    </fo:block>
-                                </fo:table-cell>
-                                <fo:table-cell border="0.5pt solid black" text-align="center">
-                                    <fo:block font-weight="bold" font-size="12pt">
-                                        <xsl:value-of select="$proposal-id"/>
+                                    <fo:block>
+                                        <fo:inline font-weight="bold">Mentor:</fo:inline>
+                                        <xsl:text>&#160;</xsl:text>
+                                        <xsl:call-template name="investigator-name">
+                                            <xsl:with-param name="id" select="@mentor"/>
+                                        </xsl:call-template>
                                     </fo:block>
                                 </fo:table-cell>
                             </fo:table-row>
                         </fo:table-body>
                     </fo:table>
-                </fo:static-content>
-                <!-- END header -->
+                </xsl:for-each>
+                <!-- END Mentor -->
 
-                <!-- BEGIN body -->
-                <fo:flow flow-name="xsl-region-body"
-                         font-family="Times"
-                         font-size="12pt">
+            </fo:flow>
+        <!-- END investgator information -->
+                  </fo:page-sequence>
+                  <!-- END second page body -->
 
-                    <!-- Band 1/2 Observation Details -->
-                    <xsl:call-template name="observation-details-table">
-                        <xsl:with-param name="title">Observation Details (Band 1/2)</xsl:with-param>
-                        <xsl:with-param name="nodes" select="/proposal/observations/observation[count(@band)=0 or @band!='Band 3']"/>
-                    </xsl:call-template>
-
-                    <fo:block space-before="10pt" space-after="10pt"/>
-
-                    <!-- Band 3 Observation Details -->
-                    <xsl:if test="count(observations/observation[@band = 'Band 3']) > 0">
-                        <xsl:call-template name="observation-details-table">
-                            <xsl:with-param name="title">Observation Details (Band 3)</xsl:with-param>
-                            <xsl:with-param name="nodes" select="/proposal/observations/observation[@band='Band 3']"/>
-                        </xsl:call-template>
-                    </xsl:if>
-
-                    <fo:block space-before="10pt" space-after="10pt"/>
-
-                    <!-- (N)Tac comments -->
-                    <xsl:if test="/proposal/proposalClass/*/ngo/accept">
-                        <fo:block keep-together.within-page="always">
-                            <xsl:call-template name="styled-section-header">
-                                <xsl:with-param name="section-name">
-                                    <xsl:value-of select="'Comments'"/>
-                                </xsl:with-param>
-                                <xsl:with-param name="column1-width">
-                                    3cm
-                                </xsl:with-param>
-                                <xsl:with-param name="space-after">
-                                    10pt
-                                </xsl:with-param>
-                                <xsl:with-param name="start-new-page">
-                                    <xsl:value-of select="true"/>
-                                </xsl:with-param>
-                            </xsl:call-template>
-
-                            <fo:table table-layout="fixed" space-before="6pt" space-after="12pt">
-                                <fo:table-column column-width="4cm"/>
-                                <fo:table-column column-width="12cm"/>
-                                <fo:table-body>
-                                    <!-- NGOs -->
-                                    <xsl:for-each select="/proposal/proposalClass/*/ngo">
-                                        <fo:table-row>
-                                            <fo:table-cell>
-                                                <fo:block>
-                                                    <xsl:call-template name="get-partner-name">
-                                                        <xsl:with-param name="partner">
-                                                            <xsl:value-of select="partner"/>
-                                                        </xsl:with-param>
-                                                    </xsl:call-template>
-                                                </fo:block>
-                                            </fo:table-cell>
-                                            <fo:table-cell>
-                                                <fo:block><xsl:value-of select="comment"/></fo:block>
-                                            </fo:table-cell>
-                                        </fo:table-row>
-                                    </xsl:for-each>
-                                </fo:table-body>
-                            </fo:table>
-                        </fo:block>
-                    </xsl:if>
-
-                </fo:flow>
-                <!-- END body -->
-
-            </fo:page-sequence>
-            <!-- END rest -->
-
-        </fo:root>
     </xsl:template>
 
     <!-- Creates a section heading and description text -->
@@ -1236,46 +1276,46 @@
                         </fo:table-cell>
                     </fo:table-row>
 
-                    <!-- guide stars -->
-                    <xsl:for-each select="guide/guideStar">
-                        <xsl:variable name="guide-star-target-id" select="@target"/>
-                        <xsl:variable name="guide-star-target" select="/proposal/targets/*[@id=$guide-star-target-id]"/>
+                        <!-- guide stars -->
+                        <xsl:for-each select="guide/guideStar">
+                            <xsl:variable name="guide-star-target-id" select="@target"/>
+                            <xsl:variable name="guide-star-target" select="/proposal/targets/*[@id=$guide-star-target-id]"/>
 
-                        <fo:table-row>
-                            <fo:table-cell>
-                                <fo:block font-style="italic" text-align="center">
-                                    <xsl:value-of select="$guide-star-target/name"/>&#160;
-                                    (<xsl:value-of select="guider"/>)
-                                </fo:block>
-                            </fo:table-cell>
-                            <fo:table-cell>
-                                <fo:block>
-                                    <xsl:call-template name="target-ra-to-hms">
-                                        <xsl:with-param name="target" select="$guide-star-target"/>
-                                    </xsl:call-template>
-                                </fo:block>
-                            </fo:table-cell>
-                            <fo:table-cell>
-                                <fo:block>
-                                    <xsl:call-template name="target-dec-to-dms">
-                                        <xsl:with-param name="target" select="$guide-star-target"/>
-                                    </xsl:call-template>
-                                </fo:block>
-                            </fo:table-cell>
-                            <fo:table-cell>
-                                <fo:block>
-                                    <xsl:call-template name="get-magnitudes">
-                                        <xsl:with-param name="magnitudes" select="$guide-star-target/magnitudes"/>
-                                    </xsl:call-template>
-                                </fo:block>
-                            </fo:table-cell>
-                            <fo:table-cell>
-                                <fo:block/>
-                            </fo:table-cell>
-                        </fo:table-row>
-`
-                    </xsl:for-each>
-                    <!-- end guide star -->
+                            <fo:table-row>
+                                <fo:table-cell>
+                                    <fo:block font-style="italic" text-align="center">
+                                        <xsl:value-of select="$guide-star-target/name"/>&#160;
+                                        (<xsl:value-of select="guider"/>)
+                                    </fo:block>
+                                </fo:table-cell>
+                                <fo:table-cell>
+                                    <fo:block>
+                                        <xsl:call-template name="target-ra-to-hms">
+                                            <xsl:with-param name="target" select="$guide-star-target"/>
+                                        </xsl:call-template>
+                                    </fo:block>
+                                </fo:table-cell>
+                                <fo:table-cell>
+                                    <fo:block>
+                                        <xsl:call-template name="target-dec-to-dms">
+                                            <xsl:with-param name="target" select="$guide-star-target"/>
+                                        </xsl:call-template>
+                                    </fo:block>
+                                </fo:table-cell>
+                                <fo:table-cell>
+                                    <fo:block>
+                                        <xsl:call-template name="get-magnitudes">
+                                            <xsl:with-param name="magnitudes" select="$guide-star-target/magnitudes"/>
+                                        </xsl:call-template>
+                                    </fo:block>
+                                </fo:table-cell>
+                                <fo:table-cell>
+                                    <fo:block/>
+                                </fo:table-cell>
+                            </fo:table-row>
+
+                        </xsl:for-each>
+                        <!-- end guide star -->
 
                     <!-- guide star info, conditions and resources -->
                     <fo:table-row>
@@ -1361,28 +1401,6 @@
                 <!-- end observation -->
 
                 <!-- non-sidereal targets -->
-<!--
-                <xsl:if test="count(/proposal/targets/nonsidereal) > 0">
-                    <fo:table-row>
-                        <fo:table-cell number-columns-spanned="5"
-                                       border-bottom-color="black"
-                                       border-bottom-style="solid"
-                                       border-bottom-width="0.1pt">
-                            <fo:block margin-left="1cm">
-                                Non-sidereal targets:<xsl:text>&#160;</xsl:text>
-                                <xsl:for-each select="/proposal/targets/nonsidereal">
-                                    <xsl:value-of select="name"/><xsl:text>&#160;</xsl:text>
-                                    (valid at
-                                    <xsl:for-each select="ephemeris">
-                                        <xsl:value-of select="validAt"/>
-                                        <xsl:if test="position() != last()">, </xsl:if>
-                                    </xsl:for-each>)
-                                </xsl:for-each>
-                            </fo:block>
-                        </fo:table-cell>
-                    </fo:table-row>
-                </xsl:if>
--->
             </fo:table-body>
         </fo:table>
 

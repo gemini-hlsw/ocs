@@ -44,6 +44,49 @@
         </fo:layout-master-set>
     </us-letter-noil>
 
+    <noao-letter>
+        <fo:layout-master-set>
+              <!-- The first page is different from the
+           the following pages. -->
+              <fo:simple-page-master master-name="first"
+                                     page-height="11in"
+                                     page-width="8.5in"
+                                     margin-top="0.5cm"
+                                     margin-bottom="1.5cm"
+                                     margin-left="1cm"
+                                     margin-right="1cm">
+                  <fo:region-body margin-top="5cm" margin-bottom="1cm"/>
+                  <fo:region-before extent="4cm"/>
+              </fo:simple-page-master>
+
+              <fo:simple-page-master master-name="rest"
+                                     page-height="11in"
+                                     page-width="8.5in"
+                                     margin-top="1.0cm"
+                                     margin-bottom="0.8cm"
+                                     margin-left="1cm"
+                                     margin-right="1cm">
+                  <fo:region-body margin-top="1.5cm" />
+                  <fo:region-before extent="1cm"/>
+              </fo:simple-page-master>
+        </fo:layout-master-set>
+    </noao-letter>
+
+    <noao-letter-noil>
+        <fo:layout-master-set>
+            <fo:simple-page-master master-name="investigators"
+                                   page-height="11in"
+                                   page-width="8.5in"
+                                   margin-top="1.0cm"
+                                   margin-bottom="0.8cm"
+                                   margin-left="1cm"
+                                   margin-right="1cm">
+                <fo:region-body margin-top="1.5cm" />
+                <fo:region-before extent="1cm"/>
+            </fo:simple-page-master>
+        </fo:layout-master-set>
+    </noao-letter-noil>
+
     <a4>
         <fo:layout-master-set>
             <fo:simple-page-master master-name="first"
