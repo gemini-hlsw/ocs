@@ -104,7 +104,7 @@ class P1MonitorConfig(ctx: BundleContext) {
     case "au" => P1PDF.AU
     case "cl" => P1PDF.CL
     case "us" => P1PDF.NOAO
-    case _    => P1PDF.DEFAULT
+    case _    => P1PDF.GeminiDefault
   }
 
   def getDirectories: Traversable[MonitoredDirectory] = map.values
