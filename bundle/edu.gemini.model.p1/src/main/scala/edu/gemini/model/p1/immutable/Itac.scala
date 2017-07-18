@@ -5,19 +5,20 @@ import edu.gemini.model.p1.{mutable => M}
 object Itac {
   def apply(m: M.Itac): Itac =
     Itac(
-      (Option(m.getAccept) map { ma => ItacAccept(ma) }).toRight(ItacReject),
+      (Option(m.getAccept) map { ma => Right(ItacAccept(ma)) }).orElse(Option(m.getReject).map(_ => Left[ItacReject, ItacAccept](ItacReject))),
       Option(m.getNgoauthority),
       Option(m.getComment)
     )
 }
 
 // Placeholder for now...
-case class Itac(decision: Either[ItacReject, ItacAccept], ngoAuthority: Option[NgoPartner], comment: Option[String]) {
+case class Itac(decision: Option[Either[ItacReject, ItacAccept]], ngoAuthority: Option[NgoPartner], comment: Option[String]) {
   def mutable = {
     val m = Factory.createItac
     decision match {
-      case Left(_)  => m.setReject(ItacReject.mutable)
-      case Right(a) => m.setAccept(a.mutable)
+      case Some(Left(_))  => m.setReject(ItacReject.mutable)
+      case Some(Right(a)) => m.setAccept(a.mutable)
+      case _              =>
     }
     comment foreach { m.setComment _ }
     ngoAuthority foreach { m.setNgoauthority _ }

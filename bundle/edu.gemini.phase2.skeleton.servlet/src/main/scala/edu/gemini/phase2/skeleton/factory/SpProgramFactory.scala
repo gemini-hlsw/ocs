@@ -105,7 +105,7 @@ object SpProgramFactory {
       b <- band(i)
     } yield b
 
-  private def band(itac: Itac): Option[Int] = itac.decision.right.map(_.band).right.toOption
+  private def band(itac: Itac): Option[Int] = itac.decision.flatMap(_.right.map(_.band).right.toOption)
 
   def too(proposal: Proposal): TooType =
     proposal.proposalClass match {
@@ -172,7 +172,7 @@ object SpProgramFactory {
   private def itacAcceptance(proposal: Proposal): Option[ItacAccept] =
     for {
       i <- proposal.proposalClass.itac
-      a <- i.decision.right.toOption
+      a <- i.decision.flatMap(_.right.toOption)
     } yield a
 
   def isRollover(proposal: Proposal): Boolean =
@@ -223,16 +223,17 @@ object SpProgramFactory {
 
   def timeAccountingRatios(proposal: Proposal): List[(TimeAcctCategory, Double)] =
     proposal.proposalClass match {
-      case n: GeminiNormalProposalClass  =>
+      case n: GeminiNormalProposalClass   =>
         n.subs match {
           case Left(ngos) => ngoRatios(ngos)
           case Right(exc) => excRatio(exc).toList
         }
-      case _: LargeProgramClass          => List((TimeAcctCategory.LP, 1.0))
-      case e: ExchangeProposalClass      => ngoRatios(e.subs)
+      case _: LargeProgramClass           => List((TimeAcctCategory.LP, 1.0))
+      case _: SubaruIntensiveProgramClass => Nil
+      case e: ExchangeProposalClass       => ngoRatios(e.subs)
         // TBD This part of the code won't be triggered because FT doesn't go through itac (See awardedHours function)
         // But we'll leave it here for the future
-      case f: FastTurnaroundProgramClass =>
+      case f: FastTurnaroundProgramClass  =>
         // In principle there are no proposals submitted without a PA but check just in case
         ~f.partnerAffiliation.collect {
           case -\/(ngo) =>
@@ -242,7 +243,7 @@ object SpProgramFactory {
             val s = ExchangeSubmission(f.sub.request, f.sub.response, exc, InvestigatorRef(proposal.investigators.pi))
             excRatio(s).toList
         }
-      case s: SpecialProposalClass       => spcRatio(s.sub).toList
+      case s: SpecialProposalClass        => spcRatio(s.sub).toList
     }
 
   private def ngoRatios(subs: List[NgoSubmission]): List[(TimeAcctCategory, Double)] = {
