@@ -23,8 +23,8 @@ public class P1PdfMaker {
         // create list of valid partner/country names
         partnerNames = new StringBuffer();
         int i = 0;
-        for (String key : templatesMap.keySet()) {
-            partnerNames.append(key);
+        for (scala.Tuple2<String, P1PDF.Template> key : JavaConversions.seqAsJavaList(P1PDF.templatesList())) {
+            partnerNames.append(key._1());
             if (i++ < templatesMap.size() - 1) {
                 partnerNames.append(", ");
             }
@@ -79,7 +79,7 @@ public class P1PdfMaker {
             }
             return options;
         }
-        
+
         private static String stylesheet(CommandLine commandLine) {
             return commandLine.getOptionValue(stylesheet.option.getOpt());
         }
@@ -148,7 +148,7 @@ public class P1PdfMaker {
             printHelp();
         }
     }
-    
+
     private static P1PDF.Template template(CommandLine line) throws ParseException {
         String partner = Opt.stylesheet(line);
         if (!templatesMap.containsKey(partner)) {
@@ -156,7 +156,7 @@ public class P1PdfMaker {
         }
         return templatesMap.get(partner);
     }
-    
+
     private static File outputFolder(CommandLine line) throws ParseException {
         File pdf =  Opt.pdfdest(line);
         if (!pdf.exists()) {
@@ -170,7 +170,7 @@ public class P1PdfMaker {
         }
         return pdf;
     }
-    
+
     private static List<File> filesToProcess(CommandLine line) throws ParseException {
         List<File> xmls = new ArrayList<>();
         File xml = Opt.xmlsource(line);
@@ -186,7 +186,7 @@ public class P1PdfMaker {
         }
         return xmls;
     }
-    
+
     private static List<File> getXmlFiles(File xmlsource, boolean recursive) {
         List<File> files = new ArrayList<>();
         if (xmlsource.isFile()) {

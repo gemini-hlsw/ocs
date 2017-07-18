@@ -66,7 +66,9 @@ object P1PDF {
   /** Gets a list with all templates that are currently available. */
   def templates = List(GeminiDefault, GeminiDefaultNoInvestigatorsList, GeminiDefaultListAtTheEnd, AU, CL, NOAO, NOAONoInvestigatorsList)
 
-  def templatesMap = Map(
+  def templatesMap = templatesList.toMap
+
+  def templatesList = List(
     "ar"     -> GeminiDefault,
     "au"     -> AU,
     "br"     -> GeminiDefault,

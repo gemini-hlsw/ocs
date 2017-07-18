@@ -21,3 +21,5 @@ OsgiKeys.dynamicImportPackage := Seq("")
 
 OsgiKeys.exportPackage := Seq(
   )
+
+fork in run := true
