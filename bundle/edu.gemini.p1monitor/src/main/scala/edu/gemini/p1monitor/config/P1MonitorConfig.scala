@@ -94,7 +94,7 @@ class P1MonitorConfig(ctx: BundleContext) {
         val cc = (elementContent(_type, CC_TAG) ++ global_cc).map(new InternetAddress(_))
         val bcc = (elementContent(_type, BCC_TAG) ++ global_bcc).map(new InternetAddress(_))
         val template = (elementContent(_type, TEMPLATE_TAG) ++ global_bcc).headOption.map(toTemplate)
-        (name, MonitoredDirectory(name, rootDir.head, username, group, to, cc, bcc, template.getOrElse(P1PDF.DEFAULT)))
+        (name, MonitoredDirectory(name, rootDir.head, username, group, to, cc, bcc, template.getOrElse(P1PDF.GeminiDefault)))
       }
     }
 
