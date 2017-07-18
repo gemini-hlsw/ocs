@@ -104,6 +104,7 @@ class P1MonitorConfig(ctx: BundleContext) {
     case "au" => P1PDF.AU
     case "cl" => P1PDF.CL
     case "us" => P1PDF.NOAO
+    case "ca" => P1PDF.GeminiDefaultListAtTheEnd
     case _    => P1PDF.GeminiDefault
   }
 
