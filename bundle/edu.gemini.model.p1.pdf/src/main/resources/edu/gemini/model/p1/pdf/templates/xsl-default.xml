@@ -358,6 +358,34 @@
                                            rule-thickness="0.5pt" color="black"/>
                             </fo:block>
 
+                            <fo:table table-layout="fixed" space-after="10pt">
+                                <fo:table-column column-width="34%"/>
+                                <fo:table-column column-width="66%"/>
+                                <fo:table-body>
+
+                                    <fo:table-row>
+                                        <fo:table-cell>
+                                            <fo:block>
+                                                <fo:inline font-weight="bold">Title:</fo:inline>
+                                            </fo:block>
+                                        </fo:table-cell>
+                                        <fo:table-cell>
+                                            <fo:block font-weight="bold">
+                                                <xsl:value-of select="title"/>
+                                            </fo:block>
+                                        </fo:table-cell>
+                                    </fo:table-row>
+
+                                </fo:table-body>
+                            </fo:table>
+
+                            <fo:block text-align="center" space-after="8pt">
+                                <fo:leader leader-length="100%"
+                                           leader-pattern="rule"
+                                           alignment-baseline="middle"
+                                           rule-thickness="0.5pt" color="black"/>
+                            </fo:block>
+
                             <!-- BEGIN Proposal Info -->
                             <xsl:if test="$investigatorsList='default'">
                               <xsl:call-template name="investigators-list">
@@ -1126,23 +1154,17 @@
 
     <!-- Displays the list of the investigators -->
     <xsl:template name="investigators-list">
+        <fo:block text-align="center" space-after="8pt">
+            <fo:leader leader-length="100%"
+                       leader-pattern="rule"
+                       alignment-baseline="middle"
+                       rule-thickness="0.5pt" color="black"/>
+        </fo:block>
+        
         <fo:table table-layout="fixed" space-after="10pt">
             <fo:table-column column-width="34%"/>
             <fo:table-column column-width="66%"/>
             <fo:table-body>
-
-                <fo:table-row>
-                    <fo:table-cell>
-                        <fo:block>
-                            <fo:inline font-weight="bold">Title:</fo:inline>
-                        </fo:block>
-                    </fo:table-cell>
-                    <fo:table-cell>
-                        <fo:block font-weight="bold">
-                            <xsl:value-of select="title"/>
-                        </fo:block>
-                    </fo:table-cell>
-                </fo:table-row>
 
                 <fo:table-row>
                     <fo:table-cell>
