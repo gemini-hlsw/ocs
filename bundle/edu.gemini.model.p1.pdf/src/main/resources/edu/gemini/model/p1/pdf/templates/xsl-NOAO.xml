@@ -852,8 +852,8 @@
         <xsl:param name="proposal-id"/>
         <xsl:param name="section"/>
 
-            <!-- BEGIN investigator information -->
-            <fo:page-sequence master-reference="investigators">
+        <!-- BEGIN investigator information -->
+        <fo:page-sequence master-reference="investigators">
             <!-- BEGIN header -->
             <fo:static-content
                     flow-name="xsl-region-before"
@@ -1075,8 +1075,8 @@
 
             </fo:flow>
         <!-- END investgator information -->
-                  </fo:page-sequence>
-                  <!-- END second page body -->
+        </fo:page-sequence>
+        <!-- END second page body -->
 
     </xsl:template>
 
