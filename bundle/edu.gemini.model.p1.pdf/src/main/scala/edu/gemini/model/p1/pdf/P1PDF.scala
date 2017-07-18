@@ -14,32 +14,32 @@ import io.Source
 object P1PDF {
 
   sealed trait InvestigatorsListOption {
-    def params: Map[String, String]
+    def param: String
   }
 
   object InvestigatorsListOption {
     val InvestigatorsListParam = "investigatorsList"
     case object DefaultList extends InvestigatorsListOption {
-      val params = Map(InvestigatorsListParam -> "default")
+      val param = "default"
     }
     case object AtTheEndList extends InvestigatorsListOption {
-      val params = Map(InvestigatorsListParam -> "atTheEnd")
+      val param = "atTheEnd"
     }
     case object NoList extends InvestigatorsListOption {
-      val params = Map(InvestigatorsListParam -> "no")
+      val param = "no"
     }
   }
 
   sealed case class Template(name: String, location: String, pageSize: PDF.PageSize, investigatorsList: InvestigatorsListOption, params: Map[String, String]) {
     def value(): String = name
-    val parameters: Map[String, String] = params ++ investigatorsList.params
+    val parameters: Map[String, String] = params + (InvestigatorsListOption.InvestigatorsListParam -> investigatorsList.param)
   }
 
   object GeminiDefault extends Template(
     "Gemini Default", "templates/xsl-default.xml", PDF.Letter, InvestigatorsListOption.DefaultList,
     Map("partner"->"gs", "pageLayout" -> "default-us-letter", "title" -> "GEMINI OBSERVATORY"))
 
-  object GeminiDefaultNoIL extends Template(
+  object GeminiDefaultNoInvestigatorsList extends Template(
     "Gemini Default", "templates/xsl-default.xml", PDF.Letter, InvestigatorsListOption.NoList,
     Map("partner"->"gs", "pageLayout" -> "default-us-letter", "title" -> "GEMINI OBSERVATORY"))
 
@@ -59,12 +59,12 @@ object P1PDF {
     "NOAO",   "templates/xsl-NOAO.xml",            PDF.Letter, InvestigatorsListOption.AtTheEndList,
     Map("partner"->"us"))
 
-  object NOAONoIL extends Template(
+  object NOAONoInvestigatorsList extends Template(
     "NOAO",   "templates/xsl-NOAO.xml",            PDF.Letter, InvestigatorsListOption.NoList,
     Map("partner"->"us"))
 
   /** Gets a list with all templates that are currently available. */
-  def templates = List(GeminiDefault, GeminiDefaultNoIL, GeminiDefaultListAtTheEnd, AU, CL, NOAO, NOAONoIL)
+  def templates = List(GeminiDefault, GeminiDefaultNoInvestigatorsList, GeminiDefaultListAtTheEnd, AU, CL, NOAO, NOAONoInvestigatorsList)
 
   def templatesMap = Map(
     "ar"     -> GeminiDefault,
@@ -76,16 +76,16 @@ object P1PDF {
     "uh"     -> GeminiDefault,
     "gs"     -> GeminiDefault,
     "gsiend" -> GeminiDefaultListAtTheEnd,
-    "gsnoi"  -> GeminiDefaultNoIL,
+    "gsnoi"  -> GeminiDefaultNoInvestigatorsList,
     "us"     -> NOAO,
-    "usnoi"  -> NOAONoIL)
+    "usnoi"  -> NOAONoInvestigatorsList)
 
   /**
    * Creates a pdf from a given xml file and template and writes the resulting pdf file to the output folder.
    * This method also merges the attached pdf file to the end of the resulting pdf.
    */
   def createFromFile (xmlFile: File, template: Template, pdfFile: File) {
-    Try(createFromNode (XML.loadFile(xmlFile), template, pdfFile, Option(xmlFile.getParentFile))).getOrElse(createFromNode (XML.loadString(Source.fromFile(xmlFile, "latin1").mkString), template, pdfFile, Option(xmlFile.getParentFile)))
+    Try(createFromNode(XML.loadFile(xmlFile), template, pdfFile, Option(xmlFile.getParentFile))).getOrElse(createFromNode(XML.loadString(Source.fromFile(xmlFile, "latin1").mkString), template, pdfFile, Option(xmlFile.getParentFile)))
   }
 
   /**
@@ -102,37 +102,46 @@ object P1PDF {
 
 
   def createFromNode(xml: Node, attachment: File, template: Template, out: File, workingDir: Option[File]) {
-    val xslStream = getClass.getResourceAsStream(template.location)
+    val pdf = new PDF(Some(P1PdfUriResolver))
 
-    try {
-      val parentFilePath = Option(out.getParentFile).getOrElse("")
-      val xslSource = new StreamSource(xslStream)
-      val xmlSource = new StreamSource(new StringReader(xml.toString()))
-
-      val pdf = new PDF(Some(P1PdfUriResolver))
-      if (attachment.isFile) {
-        val intermediateOutputFile = new File(parentFilePath + File.separator + "_" + out.getName)
-        val intermediateILFile = new File(parentFilePath + File.separator + "_" + out.getName + "_il")
-        pdf.transformXslFo(xmlSource, xslSource, intermediateOutputFile, template.parameters + ("onlyLI" -> "no"))
-        val filesToMerge = template.investigatorsList match {
-          case InvestigatorsListOption.AtTheEndList =>
-            val xmlSource = new StreamSource(new StringReader(xml.toString()))
-            val xslStream = getClass.getResourceAsStream(template.location)
-            val xslSource = new StreamSource(xslStream)
-            pdf.transformXslFo(xmlSource, xslSource, intermediateILFile, template.parameters + ("onlyLI" -> "yes"))
-            List(intermediateOutputFile, attachment, intermediateILFile)
-          case _                                   =>
-            List(intermediateOutputFile, attachment)
+    def using[A, B](resource: => A)(cleanup: A => Unit)(code: A => B): Option[B] = {
+      try {
+        val r = resource
+        try { Some(code(r)) }
+        finally {
+            cleanup(r)
         }
-        pdf.merge(filesToMerge, out, template.pageSize)
-        intermediateOutputFile.delete()
-        intermediateILFile.delete()
-      } else {
-        pdf.transformXslFo(xmlSource, xslSource, out, template.parameters)
+      } catch {
+        case e: Exception => None
       }
-    } finally {
-      xslStream.close()
     }
+
+    def runTransformation(destination: File, template: Template): Option[File] = {
+      using(getClass.getResourceAsStream(template.location))(_.close) { xslStream =>
+        val xmlSource = new StreamSource(new StringReader(xml.toString()))
+        val xslSource = new StreamSource(xslStream)
+        pdf.transformXslFo(xmlSource, xslSource, destination, template.parameters)
+        destination
+      }
+    }
+
+    val parentFilePath = Option(out.getParentFile).getOrElse("")
+    val intermediateOutputFile = new File(parentFilePath + File.separator + "_" + out.getName)
+    val intermediateILFile = new File(parentFilePath + File.separator + "_" + out.getName + "_il")
+
+    val maybeAttachment = if (attachment.isFile) Some(attachment) else None
+    val filesToMerge = template.investigatorsList match {
+      case InvestigatorsListOption.AtTheEndList =>
+        val main = runTransformation(intermediateOutputFile, template.copy(investigatorsList = InvestigatorsListOption.NoList))
+        val investigatorsList = runTransformation(intermediateILFile, template)
+        List(main, maybeAttachment, investigatorsList).flatten
+      case _                                   =>
+        val main = runTransformation(intermediateOutputFile, template)
+        List(main, maybeAttachment).flatten
+    }
+    pdf.merge(filesToMerge, out, template.pageSize)
+    intermediateOutputFile.delete()
+    intermediateILFile.delete()
   }
 
 
@@ -159,7 +168,7 @@ object P1PDF {
     val home = System.getProperty("user.home")
     val in = new File(s"$home/pitsource.xml")
     val out = new File(s"$home/pittarget.pdf")
-    createFromFile(in, GeminiDefault, out)
+    createFromFile(in, GeminiDefaultNoInvestigatorsList, out)
 
     val ok = Runtime.getRuntime.exec(Array("open", out.getAbsolutePath)).waitFor
     println("Exec returned " + ok)

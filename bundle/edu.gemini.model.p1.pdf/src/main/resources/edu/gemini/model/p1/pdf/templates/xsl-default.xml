@@ -30,23 +30,22 @@
     <xsl:param name="partner"/>
     <xsl:param name="title"/>
     <xsl:param name="investigatorsList"/>
-    <xsl:param name="onlyLI"/>
 
     <xsl:template match="proposal">
         <fo:root>
             <!-- setup paper layout -->
             <xsl:choose>
-                <xsl:when test="$pageLayout='default-us-letter' and $onlyLI='no'">
-                    <xsl:copy-of select="document('templates/snippets/layout.xml')/xsl:stylesheet/us-letter/fo:layout-master-set"/>
-                </xsl:when>
-                <xsl:when test="$pageLayout='default-us-letter' and $onlyLI='yes'">
+                <xsl:when test="$pageLayout='default-us-letter' and $investigatorsList='atTheEnd'">
                     <xsl:copy-of select="document('templates/snippets/layout.xml')/xsl:stylesheet/us-letter-noil/fo:layout-master-set"/>
                 </xsl:when>
-                <xsl:when test="$pageLayout='default-a4' and $onlyLI='no'">
-                    <xsl:copy-of select="document('templates/snippets/layout.xml')/xsl:stylesheet/a4/fo:layout-master-set"/>
+                <xsl:when test="$pageLayout='default-us-letter'">
+                    <xsl:copy-of select="document('templates/snippets/layout.xml')/xsl:stylesheet/us-letter/fo:layout-master-set"/>
                 </xsl:when>
-                <xsl:when test="$pageLayout='default-a4' and $onlyLI='yes'">
+                <xsl:when test="$pageLayout='default-a4' and $investigatorsList='atTheEnd'">
                     <xsl:copy-of select="document('templates/snippets/layout.xml')/xsl:stylesheet/a4-noil/fo:layout-master-set"/>
+                </xsl:when>
+                <xsl:when test="$pageLayout='default-a4'">
+                    <xsl:copy-of select="document('templates/snippets/layout.xml')/xsl:stylesheet/a4/fo:layout-master-set"/>
                 </xsl:when>
             </xsl:choose>
 
@@ -147,7 +146,7 @@
             </xsl:variable>
 
             <xsl:choose>
-                <xsl:when test="$onlyLI = 'no'">
+                <xsl:when test="$investigatorsList != 'atTheEnd'">
                     <!-- BEGIN first page -->
                     <fo:page-sequence master-reference="first">
 
@@ -1100,7 +1099,7 @@
                     <!-- END rest -->
                 </xsl:when>
 
-                <xsl:when test="$onlyLI = 'yes'">
+                <xsl:when test="$investigatorsList = 'atTheEnd'">
                   <!-- Only the investigators list -->
                   <fo:page-sequence master-reference="investigators">
                       <fo:flow flow-name="xsl-region-body"
