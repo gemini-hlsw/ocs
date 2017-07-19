@@ -42,7 +42,7 @@ class PdfAction(shell: RichShell[Model]) extends ShellAction(shell, "Export as P
   object TemplatePref {
     def current: TemplatePref = {
       val ap = AppPreferences.current
-      val tmpl = ap.pdf.getOrElse(P1PDF.DEFAULT)
+      val tmpl = ap.pdf.getOrElse(P1PDF.GeminiDefault)
       TemplatePref(tmpl, ask)
     }
 

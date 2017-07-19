@@ -75,7 +75,7 @@ class P1MonitorDirMonitor(cfg: P1MonitorConfig) extends DirListener {
             val r:Option[ProposalFileGroup] = try {
               val summaryFile = new File(f.getAbsolutePath.substring(0, f.getAbsolutePath.length - 4) + "_summary.pdf")
               // Find the template to use
-              val template = cfg.map.find(_._2.dir == f.getParentFile.getAbsoluteFile).map(_._2.template).getOrElse(P1PDF.DEFAULT)
+              val template = cfg.map.find(_._2.dir == f.getParentFile.getAbsoluteFile).map(_._2.template).getOrElse(P1PDF.GeminiDefault)
               P1PDF.createFromFile(f, template, summaryFile)
               LOG.info(s"Build summary report of $f at $summaryFile with template $template")
               Some(new ProposalFileGroup(Some(f), newPDFile, Some(summaryFile)))

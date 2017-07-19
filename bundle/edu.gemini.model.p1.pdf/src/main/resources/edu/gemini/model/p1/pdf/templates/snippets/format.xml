@@ -104,7 +104,6 @@
         </xsl:call-template>
     </xsl:template>
 
-
     <xsl:template name="get-total-instrument-observation-time-calc">
         <xsl:param name="blueprintList"/>
         <xsl:choose>
@@ -190,7 +189,7 @@
                         <xsl:when test="$inst = 'visitor'">
                             <xsl:value-of select="/proposal/blueprints/*/*[@id=$bp]/../*/site"/>
                         </xsl:when>
-                        
+
                         <xsl:otherwise>
                             <xsl:call-template name="get-inst-telescope-name">
                                 <xsl:with-param name="inst" select="$inst"/>

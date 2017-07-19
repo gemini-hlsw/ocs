@@ -17,9 +17,6 @@ done
 APP_HOME=`dirname "$PRG"`
 _CWD=`pwd`
 cd ${APP_HOME}
-#APP_HOME=`pwd`
-#cd ${_CWD}
-
 
 usage() {
     echo "p1pdfmaker [-r] [-p output_dir] SETTINGS"
