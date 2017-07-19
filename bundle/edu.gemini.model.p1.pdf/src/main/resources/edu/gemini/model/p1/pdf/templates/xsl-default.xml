@@ -64,6 +64,8 @@
                     <xsl:when test="proposalClass/large">Large Program</xsl:when>
                     <xsl:when test="proposalClass/fastTurnaround[@tooOption != 'None']">Fast Turnaround&#160;+&#160;<xsl:value-of select="proposalClass/fastTurnaround/@tooOption"/>&#160;ToO</xsl:when>
                     <xsl:when test="proposalClass/fastTurnaround">Fast Turnaround</xsl:when>
+                    <xsl:when test="proposalClass/sip[@tooOption != 'None']">Subaru Intensive Program&#160;+&#160;<xsl:value-of select="proposalclass/sip/@toooption"/>&#160;ToO</xsl:when>
+                    <xsl:when test="proposalClass/sip">Subaru Intensive Program</xsl:when>
                     <xsl:otherwise><xsl:value-of select="name(proposalClass/*)"/></xsl:otherwise>
                 </xsl:choose>
             </xsl:variable>

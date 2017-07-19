@@ -240,6 +240,7 @@
                 <xsl:variable name="obs-mode">
                     <xsl:choose>
                         <xsl:when test="proposalClass/fastTurnaround">Fast Turnaround</xsl:when>
+                        <xsl:when test="proposalClass/sip">Subaru Intensive Program</xsl:when>
                         <xsl:otherwise><xsl:value-of select="name(proposalClass/*)"/></xsl:otherwise>
                     </xsl:choose>
                 </xsl:variable>
