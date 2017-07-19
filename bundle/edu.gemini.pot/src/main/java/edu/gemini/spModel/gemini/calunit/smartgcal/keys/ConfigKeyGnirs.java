@@ -1,6 +1,8 @@
 package edu.gemini.spModel.gemini.calunit.smartgcal.keys;
 
 
+import edu.gemini.shared.util.immutable.DefaultImList;
+import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.spModel.gemini.calunit.smartgcal.ConfigurationKey;
 import edu.gemini.spModel.gemini.calunit.smartgcal.CalibrationProvider;
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams;
@@ -100,4 +102,17 @@ public class ConfigKeyGnirs implements ConfigurationKey {
     public String getInstrumentName() {
         return InstGNIRS.SP_TYPE.readableStr;
     }
+
+
+    @Override
+    public ImList<String> export() {
+        return DefaultImList.create(
+                mode.name(),
+                pixelScale.sequenceValue(),
+                disperser.sequenceValue(),
+                crossDispersed.sequenceValue(),
+                slitWidth.sequenceValue(),
+                wellDepth.sequenceValue());
+    }
+
 }

@@ -1,5 +1,7 @@
 package edu.gemini.spModel.gemini.calunit.smartgcal.keys;
 
+import edu.gemini.shared.util.immutable.DefaultImList;
+import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.spModel.gemini.calunit.smartgcal.ConfigurationKey;
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2;
 
@@ -70,5 +72,14 @@ public class ConfigKeyFlamingos2 implements ConfigurationKey {
     @Override
     public String getInstrumentName() {
         return Flamingos2.SP_TYPE.readableStr;
+    }
+
+    @Override
+    public ImList<String> export() {
+        return DefaultImList.create(
+                disperser.sequenceValue(),
+                filter.sequenceValue(),
+                fpUnit.sequenceValue()
+        );
     }
 }

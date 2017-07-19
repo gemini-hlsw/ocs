@@ -60,15 +60,15 @@ public class CalibrationKeyTest {
             rangeSet.add(range, null);
         }
 
-        Assert.assertEquals(ranges[0], rangeSet.findRange(10.0d));
-        Assert.assertEquals(ranges[0], rangeSet.findRange(15.0d));
-        Assert.assertEquals(ranges[1], rangeSet.findRange(20.0d));
-        Assert.assertEquals(ranges[2], rangeSet.findRange(37.5d));
+        Assert.assertEquals(ranges[0], rangeSet.findRange(10.0d).getValue());
+        Assert.assertEquals(ranges[0], rangeSet.findRange(15.0d).getValue());
+        Assert.assertEquals(ranges[1], rangeSet.findRange(20.0d).getValue());
+        Assert.assertEquals(ranges[2], rangeSet.findRange(37.5d).getValue());
 
-        Assert.assertNull(rangeSet.findRange(0.0d));
-        Assert.assertNull(rangeSet.findRange(40.0d));
-        Assert.assertNull(rangeSet.findRange(42.0d));
-        Assert.assertNull(rangeSet.findRange(60.0d));
+        Assert.assertTrue(rangeSet.findRange(0.0d).isEmpty());
+        Assert.assertTrue(rangeSet.findRange(40.0d).isEmpty());
+        Assert.assertTrue(rangeSet.findRange(42.0d).isEmpty());
+        Assert.assertTrue(rangeSet.findRange(60.0d).isEmpty());
     }
 
     @Test

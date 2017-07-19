@@ -2,6 +2,7 @@ package edu.gemini.shared.util.immutable;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.stream.Stream;
 
 /**
  * Utility methods for working with immutable collections.
@@ -206,6 +207,11 @@ public class ImCollections {
         @Override
         public <U> U foldRight(final U start, final Function2<? super Object, U, U> op) {
             return start;
+        }
+
+        @Override
+        public Stream<Object> stream() {
+            return Stream.empty();
         }
 
         @Override

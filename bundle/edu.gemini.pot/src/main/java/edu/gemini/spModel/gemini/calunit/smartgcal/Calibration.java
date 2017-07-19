@@ -7,6 +7,7 @@
 
 package edu.gemini.spModel.gemini.calunit.smartgcal;
 
+import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.spModel.gemini.calunit.calibration.CalibrationStep;
 
 public interface Calibration extends CalibrationStep {
@@ -18,4 +19,10 @@ public interface Calibration extends CalibrationStep {
 
     /** Repeat count. */
     Integer getObserve();
+
+    /**
+     * Export the Calibration configuration to a list of String suitable for
+     * writing to a configuration file.
+     */
+    ImList<String> export();
 }

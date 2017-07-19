@@ -1,12 +1,15 @@
 package edu.gemini.spModel.gemini.calunit.smartgcal.maps;
 
 
+import edu.gemini.shared.util.immutable.ImCollections;
+import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.spModel.gemini.calunit.smartgcal.*;
 import edu.gemini.spModel.type.DisplayableSpType;
 
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
+import java.util.stream.Stream;
 
 /**
  * Abstract base class for all calibration maps.
@@ -86,4 +89,8 @@ public abstract class BaseCalibrationMap implements CalibrationMap {
         return CalibrationImpl.Values.values();
     }
 
+    @Override
+    public Stream<ImList<String>> export() {
+        return Stream.empty();
+    }
 }

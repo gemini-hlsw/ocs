@@ -2,11 +2,16 @@ package edu.gemini.shared.util.immutable;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * An immutable list interface.
  */
 public interface ImList<T> extends Iterable<T> {
+
+    /** Creates a Stream from the list.
+      */
+    Stream<T> stream();
 
     /**
      * Creates a new ImList that has the same contents as this one, except it

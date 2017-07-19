@@ -12,7 +12,7 @@ import java.util.Set;
 
 /**
  */
-public class GNIRSCalibrationMap extends CentralWavelengthMap {
+public final class GNIRSCalibrationMap extends CentralWavelengthMap {
 
     public GNIRSCalibrationMap(Version version) {
         super(version);
@@ -59,4 +59,10 @@ public class GNIRSCalibrationMap extends CentralWavelengthMap {
         // return the set of keys we just came up with
         return keys;
     }
+
+    // GNIRS central wavelength is stored as um.
+    protected int toAngstroms(double wl) {
+        return (int) Math.round(wl * 10000);
+    }
+
 }

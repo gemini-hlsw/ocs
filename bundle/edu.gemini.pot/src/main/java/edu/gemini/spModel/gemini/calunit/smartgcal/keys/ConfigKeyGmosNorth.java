@@ -1,5 +1,7 @@
 package edu.gemini.spModel.gemini.calunit.smartgcal.keys;
 
+import edu.gemini.shared.util.immutable.DefaultImList;
+import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.spModel.gemini.gmos.GmosCommonType;
 import edu.gemini.spModel.gemini.gmos.GmosNorthType;
 import edu.gemini.spModel.gemini.gmos.InstGmosNorth;
@@ -64,5 +66,17 @@ public class ConfigKeyGmosNorth extends ConfigKeyGmos {
     @Override
     public String getInstrumentName() {
         return InstGmosNorth.SP_TYPE.readableStr;
+    }
+
+    @Override
+    public ImList<String> export() {
+        return DefaultImList.create(
+                disperser.sequenceValue(),
+                filter.sequenceValue(),
+                focalPlaneUnit.sequenceValue(),
+                xBin.sequenceValue(),
+                yBin.sequenceValue(),
+                order.sequenceValue(),
+                gain.sequenceValue());
     }
 }

@@ -1,5 +1,7 @@
 package edu.gemini.spModel.smartgcal.provider;
 
+import edu.gemini.shared.util.immutable.ImCollections;
+import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.spModel.gemini.calunit.smartgcal.*;
 import edu.gemini.spModel.gemini.calunit.smartgcal.keys.CalibrationKeyImpl;
 import edu.gemini.spModel.smartgcal.CalibrationMapFactory;
@@ -13,6 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 /**
  * This class will be used to create a singleton to provide access to the smart calibration information
@@ -62,6 +65,12 @@ public class CalibrationProviderImpl implements CalibrationProvider, ActionListe
     @Override
     public Version getVersion(Calibration.Type type, String instrument) {
         return getMap(type, instrument).getVersion();
+    }
+
+    @Override
+    public Stream<ImList<String>> export(Calibration.Type type, String instrument) {
+        final CalibrationMap m = getMap(type, instrument);
+        return (m == null) ? Stream.empty() : m.export();
     }
 
     @Override

@@ -2,6 +2,8 @@ package edu.gemini.shared.util.immutable;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * Default implementation of the {@link ImList} interface.  This implementation
@@ -336,6 +338,12 @@ public final class DefaultImList<T> implements ImList<T>, Serializable {
         }
         return cur;
     }
+
+    @Override
+    public Stream<T> stream() {
+        return StreamSupport.stream(spliterator(), false);
+    }
+
 
     /**
      * Calls {@link #mkString(String, String, String)} with the arguments

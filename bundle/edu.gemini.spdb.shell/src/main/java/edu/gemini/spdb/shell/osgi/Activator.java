@@ -34,6 +34,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer<IDBD
                 "importXml",
                 "exportXml",
                 "exportOcs3",
+                "exportSmartGcal",
                 "du",
                 "purge",
                 "migrateAltair",

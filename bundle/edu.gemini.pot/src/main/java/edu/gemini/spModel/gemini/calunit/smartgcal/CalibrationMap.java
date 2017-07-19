@@ -1,9 +1,11 @@
 package edu.gemini.spModel.gemini.calunit.smartgcal;
 
+import edu.gemini.shared.util.immutable.ImList;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+import java.util.stream.Stream;
 
 /**
  * Base interface for all calibration maps.
@@ -42,4 +44,9 @@ public interface CalibrationMap extends Serializable {
 
     Version getVersion();
 
+    /**
+     * Export the calibration map to a list of String suitable for writing to a
+     * configuration file.
+     */
+    Stream<ImList<String>> export();
 }
