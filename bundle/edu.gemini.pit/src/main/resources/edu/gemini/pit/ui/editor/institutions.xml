@@ -1714,6 +1714,15 @@
         </contact>
     </site>
     <site>
+        <institution>Las Cumbres Observatory</institution>
+        <address>6740 Cortona Drive, Suite 102</address>
+        <address>Goleta, CA  93117</address>
+        <country>USA</country>
+        <contact>
+            <phone>+1 805 880 1600</phone>
+        </contact>
+    </site>
+    <site>
         <institution>University of Alabama</institution>
         <address>Department of Physics and Astronomy</address>
         <address>206 Gallalee Hall</address>
