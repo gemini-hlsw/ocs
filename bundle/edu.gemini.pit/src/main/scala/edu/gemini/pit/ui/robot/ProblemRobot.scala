@@ -540,7 +540,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
             case e: ExchangeSubmission               => Partners.name(e.partner)
             case s: SpecialSubmission                => s.specialType.value
             case l: LargeProgramSubmission           => "large program"
-            case i: SubaruIntensiveProgramSubmission => "Subaru intensive program"
+            case i: SubaruIntensiveProgramSubmission => "intensive program observing at Subaru"
             case f: FastTurnaroundSubmission         => "fast-turnaround"
           }
           new Problem(Severity.Error, s"Requested time for $kind is less than minimum requested time.", TimeProblems.SCHEDULING_SECTION,
