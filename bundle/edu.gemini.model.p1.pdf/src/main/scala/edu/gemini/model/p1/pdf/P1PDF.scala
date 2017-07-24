@@ -52,7 +52,7 @@ object P1PDF {
     Map("partner"->"au", "pageLayout" -> "default-us-letter", "title" -> "GEMINI OBSERVATORY"))
 
   object CL extends Template(
-    "Chilean NGO", "templates/xsl-default.xml",    PDF.Letter, InvestigatorsListOption.AtTheEndList,
+    "Chilean NGO", "templates/xsl-default.xml",    PDF.Letter, InvestigatorsListOption.DefaultList,
     Map("partner"->"cl", "pageLayout" -> "default-us-letter", "title" -> "PROPUESTA CONICYT-Gemini"))
 
   object NOAO extends Template(
