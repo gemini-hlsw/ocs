@@ -102,6 +102,7 @@ class P1MonitorMailer(cfg: P1MonitorConfig) {
     val string = propClass match {
       case pc: SpecialProposalClass                         => pc.sub.response.map(_.receipt.id).mkString(" ")
       case ft: FastTurnaroundProgramClass                   => ft.sub.response.map(_.receipt.id).mkString(" ")
+      case sip: SubaruIntensiveProgramClass                 => sip.sub.response.map(_.receipt.id).mkString(" ")
       case lp: LargeProgramClass                            => lp.sub.response.map(_.receipt.id).mkString(" ")
       case t @ QueueProposalClass(_, _, _, Right(p), _, _)  => t.subs.right.get.response.map(_.receipt.id).mkString(" ")
       case t @ ClassicalProposalClass(_, _, _, Right(p), _) => t.subs.right.get.response.map(_.receipt.id).mkString(" ")
@@ -114,6 +115,7 @@ class P1MonitorMailer(cfg: P1MonitorConfig) {
   private def getTypeString(propClass: ProposalClass): String = propClass match {
       case pc: SpecialProposalClass                                  => pc.sub.specialType.value()
       case _:  FastTurnaroundProgramClass                            => "Fast Turnaround"
+      case _:  SubaruIntensiveProgramClass                           => "Intensive Observing Program at Subaru"
       case _:  LargeProgramClass                                     => "Large Program"
       case QueueProposalClass(_, _, _, Right(_), _, _)               => "Exchange"
       case _:  QueueProposalClass                                    => "Queue"
@@ -125,6 +127,7 @@ class P1MonitorMailer(cfg: P1MonitorConfig) {
 
   private def getTypeName(dir: String, propClass: ProposalClass): String = propClass match {
       case ft: FastTurnaroundProgramClass                            => "FT"
+      case _:  SubaruIntensiveProgramClass                           => "SIP"
       case pc: SpecialProposalClass                                  => pc.sub.specialType
       case lp: LargeProgramClass                                     => "LP"
       case q:  GeminiNormalProposalClass                             => dir.toUpperCase
