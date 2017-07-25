@@ -213,7 +213,7 @@ class SubmitView(ph: ProblemRobot, newShellHandler: (Model,Option[File]) => Unit
         case e: ExchangeSubmission               => Partners.name.get(e.partner).orNull
         case _: SpecialSubmission                => "Gemini Observatory"
         case _: LargeProgramSubmission           => "Large Program"
-        case _: SubaruIntensiveProgramSubmission => "Subaru Intensive Program"
+        case _: SubaruIntensiveProgramSubmission => "Intensive Observing Program at Subaru"
         case _: FastTurnaroundSubmission         => "Fast Turnaround"
       }
       case Reference => s.response.map(_.receipt.id).orNull
