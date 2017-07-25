@@ -1,0 +1,167 @@
+<conf>
+    <smtp>smtp.hi.gemini.edu</smtp>
+
+    <bcc>swalker@gemini.edu</bcc>
+    <bcc>cquiroz@gemini.edu</bcc>
+    <bcc>sraaphorst@gemini.edu</bcc>
+
+    <type name="FastTurnaround">
+        <dir>/home/software/test_proposals/fast_turnaround/proposals/2018A</dir>
+        <to>pitft@gemini.edu</to>
+    </type>
+
+    <type name="DirectorTime">
+        <dir>/home/software/test_proposals/directors_time/proposals/2018A</dir>
+        <to>pitdd@gemini.edu</to>
+    </type>
+
+    <type name="PoorWeather">
+        <dir>/home/software/test_proposals/poor_weather/proposals/2018A</dir>
+        <to>pitpw@gemini.edu</to>
+    </type>
+
+    <type name="DemoScience">
+        <dir>/home/software/test_proposals/demo_science/proposals/2018A</dir>
+        <to>pitds@gemini.edu</to>
+    </type>
+
+    <type name="SystemVerification">
+        <dir>/home/software/test_proposals/system_verification/proposals/2018A</dir>
+        <to>pitsv@gemini.edu</to>
+    </type>
+
+    <type name="LargeProgram">
+        <dir>/home/software/test_proposals/large_program/proposals/2018A</dir>
+        <to>pitlp@gemini.edu</to>
+    </type>
+
+    <type name="SIP">
+        <dir>/home/software/test_proposals/subaru_intensive_program/proposals/2018A</dir>
+        <to>cquiroz@gemini.edu</to>
+    </type>
+
+    <type name="ar">
+        <dir>/home/software/test_proposals/ar/proposals/2018A</dir>
+        <to>pit.ar@gemini.edu</to>
+    </type>
+
+    <type name="au">
+        <dir>/home/software/test_proposals/au/proposals/2018A</dir>
+        <to>pit.au@gemini.edu</to>
+        <template>au</template>
+    </type>
+
+    <type name="br">
+        <dir>/home/software/test_proposals/br/proposals/2018A</dir>
+        <to>pit.br@gemini.edu</to>
+    </type>
+
+    <type name="ca">
+        <dir>/home/software/test_proposals/ca/proposals/2018A</dir>
+        <to>pit.ca@gemini.edu</to>
+    </type>
+
+    <type name="cfh">
+        <dir>/home/software/test_proposals/cfh/proposals/2018A</dir>
+        <to>pit.cfh@gemini.edu</to>
+    </type>
+
+    <type name="cl">
+        <dir>/home/software/test_proposals/cl/proposals/2018A</dir>
+        <to>pit.cl@gemini.edu</to>
+        <template>cl</template>
+    </type>
+
+    <type name="kr">
+        <dir>/home/software/test_proposals/kr/proposals/2018A</dir>
+        <to>pit.kr@gemini.edu</to>
+    </type>
+
+    <type name="uh">
+        <dir>/home/software/test_proposals/uh/proposals/2018A</dir>
+        <to>pit.uh@gemini.edu</to>
+    </type>
+
+    <type name="us">
+        <dir>/home/software/test_proposals/us/proposals/2018A</dir>
+        <to>pit.us@gemini.edu</to>
+        <template>us</template>
+    </type>
+
+    <type name="subaru">
+        <dir>/home/software/test_proposals/subaru/proposals/2018A</dir>
+        <to>pit.subaru@gemini.edu</to>
+    </type>
+
+    <filetranslation>
+        <translation>
+            <from>ft</from>
+            <to>FT</to>
+        </translation>
+        <translation>
+            <from>System Verification</from>
+            <to>SV</to>
+        </translation>
+        <translation>
+            <from>Poor Weather</from>
+            <to>PW</to>
+        </translation>
+        <translation>
+            <from>Directors Time</from>
+            <to>DT</to>
+        </translation>
+        <translation>
+            <from>Demo Science</from>
+            <to>DS</to>
+        </translation>
+        <translation>
+            <from>lp</from>
+            <to>LP</to>
+        </translation>
+        <translation>
+            <from>ar</from>
+            <to>AR</to>
+        </translation>
+        <translation>
+            <from>au</from>
+            <to>AU</to>
+        </translation>
+        <translation>
+            <from>br</from>
+            <to>BR</to>
+        </translation>
+        <translation>
+            <from>ca</from>
+            <to>CA</to>
+        </translation>
+        <translation>
+            <from>cl</from>
+            <to>CL</to>
+        </translation>
+        <translation>
+            <from>cfh</from>
+            <to>CFHT</to>
+        </translation>
+        <translation>
+            <from>kr</from>
+            <to>KR</to>
+        </translation>
+        <translation>
+            <from>sip</from>
+            <to>SIP</to>
+        </translation>
+        <translation>
+            <from>us</from>
+            <to>US</to>
+        </translation>
+        <translation>
+            <from>uh</from>
+            <to>UH</to>
+        </translation>
+        <translation>
+            <from>subaru</from>
+            <to>SUBARU</to>
+        </translation>
+    </filetranslation>
+
+</conf>
