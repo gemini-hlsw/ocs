@@ -7,18 +7,18 @@ import scalaz.{-\/, Equal, \/, \/-}
 object Partners {
 
   val name = Map[Any, String](
-    NgoPartner.AR -> "Argentina",
-    NgoPartner.AU -> "Australia",
-    NgoPartner.BR -> "Brazil",
-    NgoPartner.CA -> "Canada",
-    NgoPartner.CL -> "Chile",
-    NgoPartner.KR -> "Republic of Korea",
-    NgoPartner.US -> "United States",
-    NgoPartner.UH -> "University of Hawaii",
-    ExchangePartner.CFHT -> Site.CFHT.name,
-    ExchangePartner.KECK -> Site.Keck.name,
+    NgoPartner.AR          -> "Argentina",
+    NgoPartner.AU          -> "Australia",
+    NgoPartner.BR          -> "Brazil",
+    NgoPartner.CA          -> "Canada",
+    NgoPartner.CL          -> "Chile",
+    NgoPartner.KR          -> "Republic of Korea",
+    NgoPartner.US          -> "United States",
+    NgoPartner.UH          -> "University of Hawaii",
+    ExchangePartner.CFH    -> Site.CFH.name,
+    ExchangePartner.KECK   -> Site.Keck.name,
     ExchangePartner.SUBARU -> Site.Subaru.name,
-    LargeProgramPartner -> "Large Program"
+    LargeProgramPartner    -> "Large Program"
   )
 
   // REL-2248 Contains a list of partners that are not allowed on joint proposals

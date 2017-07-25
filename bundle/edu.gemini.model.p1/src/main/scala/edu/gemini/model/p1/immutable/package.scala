@@ -63,7 +63,7 @@ package object immutable {
   object ExchangePartner extends EnumObject[M.ExchangePartner] {
     final val KECK   = M.ExchangePartner.KECK
     final val SUBARU = M.ExchangePartner.SUBARU
-    final val CFHT   = M.ExchangePartner.CFHT
+    final val CFH    = M.ExchangePartner.CFH
   }
 
   // Singleton used to represent a Large Program "Partner"

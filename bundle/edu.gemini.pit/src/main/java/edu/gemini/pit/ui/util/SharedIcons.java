@@ -43,7 +43,7 @@ public interface SharedIcons {
     Icon FLAG_AU = new SharedIcon("au.png");
     Icon FLAG_BR = new SharedIcon("br.png");
     Icon FLAG_CA = new SharedIcon("ca.png");
-    Icon FLAG_CFHT = new SharedIcon("cfht.png");
+    Icon FLAG_CFH = new SharedIcon("cfht.png");
     Icon FLAG_CL = new SharedIcon("cl.png");
     Icon FLAG_KR = new SharedIcon("kr.png");
     Icon FLAG_GEMINI = new SharedIcon("gemini.png");
