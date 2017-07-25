@@ -150,7 +150,12 @@ case object SemesterConverter2017BTo2018A extends SemesterConverter {
       }
       StepResult(s"The unavailable Flamingos2 filters $jLoFilter and $yFilter have been removed from the proposal.", <flamingos2>{yjLoFilterTransformer.transform(ns)}</flamingos2>).successNel
   }
-  override val transformers = List(removeF2YJloFilters)
+
+  val renameCFH: TransformFunction = {
+    case p @ <partner>cfht</partner> =>
+      StepResult("Renamed CFHT partner to CFH", <partner>cfh</partner>).successNel
+  }
+  override val transformers = List(removeF2YJloFilters, renameCFH)
 }
 
 /**
