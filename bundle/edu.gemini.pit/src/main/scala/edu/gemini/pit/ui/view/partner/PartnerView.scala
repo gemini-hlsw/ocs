@@ -61,7 +61,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
     val Queue     = Value("Queue Observing at Gemini")
     val Classical = Value("Classical Observing at Gemini")
     val Exchange  = Value("Exchange Observing at Keck/Subaru")
-    val SIP       = Value("Intensive Observing Program at Subaru")
+    val SIP       = Value("Intensive Program Observing at Subaru")
     val Special   = Value("Other Proposal Types")
   }
 
