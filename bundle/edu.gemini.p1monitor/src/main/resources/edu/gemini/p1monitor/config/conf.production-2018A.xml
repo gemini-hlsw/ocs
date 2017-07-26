@@ -37,7 +37,7 @@
 
     <type name="SIP">
         <dir>/home/software/test_proposals/subaru_intensive_program/proposals/2018A</dir>
-        <to>cquiroz@gemini.edu</to>
+        <to>pitlp@gemini.edu</to>
     </type>
 
     <type name="ar">
@@ -140,7 +140,7 @@
         </translation>
         <translation>
             <from>cfh</from>
-            <to>CFHT</to>
+            <to>CFH</to>
         </translation>
         <translation>
             <from>kr</from>
