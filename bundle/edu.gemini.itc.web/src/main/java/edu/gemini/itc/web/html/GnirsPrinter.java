@@ -192,7 +192,10 @@ public final class GnirsPrinter extends PrinterBase {
         s += "\n";
 
         if (p.observation().calculationMethod() instanceof Spectroscopy) {
-            s += String.format("<L1> Central Wavelength: %.1f nm\n", instrument.getCentralWavelength());
+            if (instrument.XDisp_IsUsed())
+                s += String.format("<L1> Central Wavelength: %.1f nm\n", instrument.getCentralWavelengthXD());
+            else
+                s += String.format("<L1> Central Wavelength: %.1f nm\n", instrument.getCentralWavelength());
             s += "Pixel Size in Spatial Direction: " + instrument.getPixelSize() + " arcsec\n";
             if (instrument.XDisp_IsUsed()) {
                 s += String.format("Pixel Size in Spectral Direction(Order 3): %.3f nm\n", instrument.getGratingDispersion() / 3);

@@ -132,22 +132,46 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
                 _obsDetailParameters);
 
         if (instrument.XDisp_IsUsed()) {
-
-            final double trimCenter;
-            if (instrument.getGrating().equals(GNIRSParams.Disperser.D_111)) {
-                trimCenter = _gnirsParameters.centralWavelength().toNanometers();
-            } else {
-                trimCenter = 2200.0;
-            }
-
             final VisitableSampledSpectrum[] sedOrder = new VisitableSampledSpectrum[ORDERS];
             final VisitableSampledSpectrum[] haloOrder = new VisitableSampledSpectrum[ORDERS];
             final VisitableSampledSpectrum[] skyOrder = new VisitableSampledSpectrum[ORDERS];
-            for (int i = 0; i < ORDERS; i++) {
-                final int order = i + 3;
-                final double d         = instrument.getGratingDispersion() / order * Gnirs.DETECTOR_PIXELS / 2;
-                final double trimStart = trimCenter * 3 / order - d;
-                final double trimEnd   = trimCenter * 3 / order + d;
+
+            /**
+             * The orders here are calculated now the same way it's done for the OT in InstGNIRS.java.
+             * I couldn't reuse the calculation methods from there, since they are coupled to the OT interface.
+             * Still order calculations probably should be generalized.
+             */
+            final double centralWavelength = _gnirsParameters.centralWavelength().toMicrons();
+
+            final double[] centralWavelengthArray = new double[GNIRSParams.Order.NUM_ORDERS];
+            {
+                GNIRSParams.Order o = GNIRSParams.Order.getOrder(centralWavelength, null);
+                if (o == null)
+                    throw new IllegalArgumentException("The order for this wavelength cannot be found");
+
+                double d = o.getOrder() * centralWavelength;
+                for (int i = 1; i <= GNIRSParams.Order.NUM_ORDERS; i++) {
+                    centralWavelengthArray[i - 1] = d / i;
+                }
+            }
+
+            final GNIRSParams.PixelScale pixelScale = instrument.getPixelScale();
+            final GNIRSParams.Disperser disperser = instrument.getGrating();
+
+            final int n = GNIRSParams.Order.values().length;
+
+            for (int j = 0; j < n; j++) {
+                GNIRSParams.Order o = GNIRSParams.Order.getOrderByIndex(j);
+
+                if (o == GNIRSParams.Order.ONE || o == GNIRSParams.Order.TWO || o == GNIRSParams.Order.XD) {
+                    continue; // skip orders 1, 2, and XD
+                }
+                final int order = o.getOrder(); // order number
+                final int i = order - 3;
+
+                final double wavelength = centralWavelengthArray[order - 1];
+                final double trimStart = o.getStartWavelength(wavelength, disperser, pixelScale) * 1000; // in nm
+                final double trimEnd = o.getEndWavelength(wavelength, disperser, pixelScale) * 1000;
 
                 sedOrder[i] = (VisitableSampledSpectrum) sed.clone();
                 sedOrder[i].accept(instrument.getGratingOrderNTransmission(order));
