@@ -43,7 +43,7 @@ object BaselineGnirs {
       Some(Disperser.D_32),
       ReadMode.FAINT,
       CrossDispersed.LXD,
-      2.6.microns,
+      2.3.microns,
       SlitWidth.SW_6,
       None,
       WellDepth.SHALLOW,

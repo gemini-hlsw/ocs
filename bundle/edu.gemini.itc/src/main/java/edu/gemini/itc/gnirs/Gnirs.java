@@ -6,6 +6,7 @@ import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams;
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams.Disperser;
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams.SlitWidth;
+import edu.gemini.spModel.gemini.gnirs.GNIRSParams.PixelScale;
 import scala.Option;
 
 import java.util.ArrayList;
@@ -127,10 +128,14 @@ public final class Gnirs extends Instrument implements SpectroscopyInstrument {
         _centralWavelength = correctedCentralWavelength(); // correct central wavelength if cross dispersion is used
         _XDisp = isXDispUsed();
 
-        if ((_centralWavelength < 1030 || _centralWavelength > 6000) && _mode instanceof Spectroscopy) {
-            throw new RuntimeException("Central wavelength must be between 1.03um and 6.0um.");
+        if (_mode instanceof Spectroscopy) {
+            if ((_XDisp) && (getCentralWavelengthXD() < 780 || getCentralWavelengthXD() > 2500))
+                throw new RuntimeException("Central wavelength for the XD mode must be between " +
+                        "0.78um and 2.5um.");
+            else if (!(_XDisp) && (_centralWavelength < 1030 || _centralWavelength > 6000))
+                throw new RuntimeException("Central wavelength for the long slit mode must be between" +
+                        " 1.03um and 6.0um.");
         }
-
 
         if (gp.altair().isDefined()) {
             if ((gp.altair().get().guideStarSeparation() < 0 || gp.altair().get().guideStarSeparation() > 25))
@@ -261,6 +266,8 @@ public final class Gnirs extends Instrument implements SpectroscopyInstrument {
         return params.pixelScale().getValue();
     }
 
+    public PixelScale getPixelScale() {return params.pixelScale();}
+
     public double getSpectralPixelWidth() {
             if (isLongCamera()) {
                 return _gratingOptics.getPixelWidth() / 3.0;
@@ -357,6 +364,8 @@ public final class Gnirs extends Instrument implements SpectroscopyInstrument {
     public double getCentralWavelength() {
         return _centralWavelength;
     }
+
+    public double getCentralWavelengthXD() { return params.centralWavelength().toMicrons()*1000; } // user-supplied central wvl for XD in nm
 
     public TransmissionElement getGratingOrderNTransmission(int order) {
         return GnirsGratingsTransmission.getOrderNTransmission(getGrating(), order);
