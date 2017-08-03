@@ -101,10 +101,13 @@ class P1MonitorConfig(ctx: BundleContext) {
   }
 
   private def toTemplate(s: String): P1PDF.Template = s match {
-    case "au" => P1PDF.AU
-    case "cl" => P1PDF.CL
-    case "us" => P1PDF.NOAO
-    case _    => P1PDF.GeminiDefaultListAtTheEnd
+    case "ar" | "br" | "kr" | "uh" => P1PDF.GeminiDefault
+    case "cfh" | "subaru" | "keck" => P1PDF.GeminiDefault
+    case "au"                      => P1PDF.AU
+    case "cl"                      => P1PDF.CL
+    case "us"                      => P1PDF.NOAO
+    case "ca"                      => P1PDF.GeminiDefaultListAtTheEnd
+    case _                         => P1PDF.GeminiDefaultListAtTheEnd
   }
 
   def getDirectories: Traversable[MonitoredDirectory] = map.values
