@@ -694,11 +694,12 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have length 6
+          changes must have length 7
           result \\ "graces" must \\("fiberMode") \> "2 fibers (target+sky, R~40k)"
           result \\ "graces" must \\("name") \> "Graces 2 fibers (target+sky, R~40k)"
           result \\ "graces" must \\("fiberMode") \> "1 fiber (target only, R~67.5k)"
           result \\ "graces" must \\("name") \> "Graces 1 fiber (target only, R~67.5k)"
+          result \\ "graces" must \\("readMode") \> "Fast (Gain=1.6e/ADU, Read noise=4.7e)"
       }
     }
     "proposal with NIRI blueprints should remove unavailable filters, REL-2390" in {

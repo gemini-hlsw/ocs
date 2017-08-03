@@ -333,7 +333,7 @@ case object SemesterConverter2015BTo2016A extends SemesterConverter {
 case object SemesterConverter2015ATo2015B extends SemesterConverter {
   val gracesReadModeTransformer: TransformFunction = {
     case p @ <graces>{ns @ _*}</graces> if (p \\ "readMode").isEmpty =>
-      StepResult(s"Graces missing Read mode assigned to Fast.", <graces>ns: _*<readMode>Fast (Gain=1.6e/ADU, Read noise=4.7e)</readMode></graces>).successNel
+      StepResult(s"Graces missing Read mode assigned to Fast.", <graces>{ns}<readMode>Fast (Gain=1.6e/ADU, Read noise=4.7e)</readMode></graces>).successNel
   }
 
   val gracesFiberTransformer: TransformFunction = {
