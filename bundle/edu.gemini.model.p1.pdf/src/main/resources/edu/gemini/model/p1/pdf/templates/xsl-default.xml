@@ -1322,8 +1322,8 @@
 
         <fo:table table-layout="fixed" space-before="6pt" space-after="12pt" font-size="10pt">
             <fo:table-column column-width="50%"/>
-            <fo:table-column column-width="25%"/>
-            <fo:table-column column-width="25%"/>
+            <fo:table-column column-width="15%"/>
+            <fo:table-column column-width="35%"/>
             <fo:table-body>
                 <fo:table-row>
                     <fo:table-cell background-color="{$hdrColor}">
@@ -1360,7 +1360,13 @@
                         <fo:table-cell border-bottom-style="solid"
                                        border-color="black" border-width="0.25pt">
                             <fo:block>
-                                <xsl:value-of select="status"/>
+                                <xsl:if test="status = 'Grad Thesis'">
+                                    <fo:inline font-weight="bold">&#160;(thesis)</fo:inline>
+                                </xsl:if>
+                                <xsl:if test="status != 'Grad Thesis'">
+                                    <fo:inline font-weight="bold">&#160;(thesis)</fo:inline>
+                                    <xsl:value-of select="status"/>
+                                </xsl:if>
                             </fo:block>
                         </fo:table-cell>
 
@@ -1376,7 +1382,7 @@
             </fo:table-body>
         </fo:table>
     </xsl:template>
-    
+
     <!-- Creates a table with observation detail information -->
     <xsl:template name="observation-details-table">
         <xsl:param name="nodes"/>
