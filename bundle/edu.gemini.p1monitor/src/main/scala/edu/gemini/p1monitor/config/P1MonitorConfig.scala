@@ -93,7 +93,7 @@ class P1MonitorConfig(ctx: BundleContext) {
         val to = (elementContent(_type, TO_TAG) ++ global_to).map(new InternetAddress(_))
         val cc = (elementContent(_type, CC_TAG) ++ global_cc).map(new InternetAddress(_))
         val bcc = (elementContent(_type, BCC_TAG) ++ global_bcc).map(new InternetAddress(_))
-        val template = (elementContent(_type, TEMPLATE_TAG) ++ global_bcc).headOption.map(toTemplate)
+        val template = elementContent(_type, TEMPLATE_TAG).headOption.orElse(Some(name)).map(toTemplate)
         (name, MonitoredDirectory(name, rootDir.head, username, group, to, cc, bcc, template.getOrElse(P1PDF.GeminiDefault)))
       }
     }
@@ -101,10 +101,13 @@ class P1MonitorConfig(ctx: BundleContext) {
   }
 
   private def toTemplate(s: String): P1PDF.Template = s match {
-    case "au" => P1PDF.AU
-    case "cl" => P1PDF.CL
-    case "us" => P1PDF.NOAO
-    case _    => P1PDF.GeminiDefaultListAtTheEnd
+    case "ar" | "br" | "kr" | "uh" => P1PDF.GeminiDefault
+    case "cfh" | "subaru" | "keck" => P1PDF.GeminiDefault
+    case "au"                      => P1PDF.AU
+    case "cl"                      => P1PDF.CL
+    case "us"                      => P1PDF.NOAO
+    case "ca"                      => P1PDF.GeminiDefaultListAtTheEnd
+    case _                         => P1PDF.GeminiDefaultListAtTheEnd
   }
 
   def getDirectories: Traversable[MonitoredDirectory] = map.values

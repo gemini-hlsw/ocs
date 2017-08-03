@@ -1145,7 +1145,7 @@
                                          alignment-baseline="middle"
                                          rule-thickness="0.5pt" color="black"/>
                           </fo:block>
-                          <xsl:call-template name="investigators-list">
+                          <xsl:call-template name="investigators-list-no-bias">
                           </xsl:call-template>
 
                           <fo:block text-align="center" space-after="6pt">
@@ -1304,6 +1304,76 @@
                                 <xsl:call-template name="investigator-name">
                                     <xsl:with-param name="id" select="@mentor"/>
                                 </xsl:call-template>
+                            </fo:block>
+                        </fo:table-cell>
+                    </fo:table-row>
+                </xsl:for-each>
+            </fo:table-body>
+        </fo:table>
+    </xsl:template>
+
+    <!-- Displays the list of the investigators in no bias mode-->
+    <xsl:template name="investigators-list-no-bias">
+        <fo:block space-before="8pt">
+            <fo:inline font-weight="bold">
+                Investigator Information
+            </fo:inline>
+        </fo:block>
+
+        <fo:table table-layout="fixed" space-before="6pt" space-after="12pt" font-size="10pt">
+            <fo:table-column column-width="50%"/>
+            <fo:table-column column-width="15%"/>
+            <fo:table-column column-width="35%"/>
+            <fo:table-body>
+                <fo:table-row>
+                    <fo:table-cell background-color="{$hdrColor}">
+                        <fo:block text-align="center" font-weight="bold">Investigator</fo:block>
+                    </fo:table-cell>
+                    <fo:table-cell background-color="{$hdrColor}"
+                                   border-left-style="solid" border-color="black" border-width="0.5pt">
+                        <fo:block text-align="center" font-weight="bold">Status</fo:block>
+                    </fo:table-cell>
+                    <fo:table-cell background-color="{$hdrColor}"
+                                   border-left-style="solid" border-color="black" border-width="0.5pt">
+                        <fo:block text-align="center" font-weight="bold">Affiliation</fo:block>
+                    </fo:table-cell>
+                </fo:table-row>
+
+                <fo:table-row>
+                    <fo:table-cell number-columns-spanned="3" border-bottom-style="solid"
+                                   border-color="black" border-width="0.25pt">
+                        <fo:block>
+                        </fo:block>
+                    </fo:table-cell>
+                </fo:table-row>
+
+                <xsl:for-each select="investigators/pi | investigators/coi">
+                    <xsl:sort select="lastName"/>
+                    <fo:table-row>
+                        <fo:table-cell border-bottom-style="solid"
+                                       border-color="black" border-width="0.25pt">
+                            <fo:block>
+                                <xsl:value-of select="substring(firstName, 1, 1)"/>.&#160;<xsl:value-of select="lastName"/>
+                            </fo:block>
+                        </fo:table-cell>
+
+                        <fo:table-cell border-bottom-style="solid"
+                                       border-color="black" border-width="0.25pt">
+                            <fo:block>
+                                <xsl:if test="status = 'Grad Thesis'">
+                                    <fo:inline font-weight="bold">&#160;(thesis)</fo:inline>
+                                </xsl:if>
+                                <xsl:if test="status != 'Grad Thesis'">
+                                    <xsl:value-of select="status"/>
+                                </xsl:if>
+                            </fo:block>
+                        </fo:table-cell>
+
+                        <fo:table-cell border-bottom-style="solid"
+                                       border-color="black" border-width="0.25pt">
+                            <fo:block>
+                                <xsl:value-of select="address/institution"/>
+                                <xsl:value-of select="institution"/>
                             </fo:block>
                         </fo:table-cell>
                     </fo:table-row>

@@ -270,7 +270,7 @@ class P1TemplatesSpec extends Specification with XmlMatchers {
       val proposalXml = XML.loadString(result)
 
       // Show the principal
-      proposalXml must (\\("block") \ "inline" \>~ "Principal Investigator:")
+      proposalXml must (\\("block") \>~ """P..Investigator""")
     }
 
   }
