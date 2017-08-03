@@ -331,6 +331,11 @@ case object SemesterConverter2015BTo2016A extends SemesterConverter {
  * This converter will upgrade to 2015B
  */
 case object SemesterConverter2015ATo2015B extends SemesterConverter {
+  val gracesReadModeTransformer: TransformFunction = {
+    case p @ <graces>{ns @ _*}</graces> if (p \\ "readMode").isEmpty =>
+      StepResult(s"Graces missing Read mode assigned to Fast.", <graces>ns: _*<readMode>Fast (Gain=1.6e/ADU, Read noise=4.7e)</readMode></graces>).successNel
+  }
+
   val gracesFiberTransformer: TransformFunction = {
     case p @ <graces>{ns @ _*}</graces> if (p \\ "fiberMode").nonEmpty =>
       val fiberMode = (p \\ "fiberMode").text
@@ -353,7 +358,7 @@ case object SemesterConverter2015ATo2015B extends SemesterConverter {
       StepResult(s"Graces Fiber mode $fiberMode updated to ${transformFiberMode(fiberMode)}.", <graces>{GracesFiberMode.transform(ns)}</graces>).successNel
   }
 
-  val transformers = List(gracesFiberTransformer)
+  val transformers = List(gracesFiberTransformer, gracesReadModeTransformer)
 }
 
 /**
