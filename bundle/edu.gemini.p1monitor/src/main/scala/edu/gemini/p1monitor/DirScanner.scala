@@ -65,21 +65,29 @@ class DirScanner(dir: MonitoredDirectory) {
     var deletedFiles: List[File] = Nil
     var newFiles: List[File] = Nil
 
-    dir.dir.listFiles().foreach {
-      file => {
-        files.get(file.getName) foreach {
-          //if file is updated more recently than info we had, add to updatedFiles
-          case f: FileRecord if f.lastUpdated < file.lastModified() =>
-            files += ((file.getName, new FileRecord(file, file.lastModified()))) //update our copy
-            updatedFiles = updatedFiles :+ file
-          case _ =>
+    Option(dir.dir.listFiles()) match {
+      case Some(list) =>
+        list.foreach {
+          file => {
+            files.get(file.getName).foreach {
+              //if file is updated more recently than info we had, add to updatedFiles
+              case f: FileRecord if f.lastUpdated < file.lastModified() =>
+                files += ((file.getName, new FileRecord(file, file.lastModified()))) //update our copy
+                updatedFiles = updatedFiles :+ file
+              case _ =>
+            }
+            //if file wasn't stored, add it to newFiled
+            if (files.get(file.getName).isEmpty) {
+              files += ((file.getName, new FileRecord(file, file.lastModified()))) //update our copy
+              newFiles = newFiles :+ file
+            }
+          }
         }
-        //if file wasn't stored, add it to newFiled
-        if (files.get(file.getName).isEmpty) {
-          files += ((file.getName, new FileRecord(file, file.lastModified()))) //update our copy
-          newFiles = newFiles :+ file
-        }
-      }
+      case None       =>
+        // This may happen if e.g. the permissions of the monitored dirs aren't correct
+        // we'll consider this a fatal error
+        LOG.severe(s"Cannot read directory ${dir.dir}")
+        sys.exit(1)
     }
     val removed = files.keySet -- (dir.dir.listFiles() map {
       f => f.getName
