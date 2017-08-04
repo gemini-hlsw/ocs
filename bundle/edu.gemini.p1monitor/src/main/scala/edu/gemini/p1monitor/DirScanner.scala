@@ -19,7 +19,7 @@ class DirScanner(dir: MonitoredDirectory) {
   val timer = new Timer
 
   def startMonitoring(listener: DirListener) {
-    Try(fullScan(listener))
+    fullScan(listener)
     timer.schedule(new TimerTask {
       override def run(): Unit = {
         update(listener)
@@ -35,14 +35,22 @@ class DirScanner(dir: MonitoredDirectory) {
     createDirIfNeeded()
     LOG.info(s"Run a full scan on directory ${dir.dir}")
     files.clear()
-    dir.dir.listFiles() foreach {
-      file => {
-        files += ((file.getName, new FileRecord(file, file.lastModified())))
-      }
+    Option(dir.dir.listFiles()) match {
+      case Some(list) =>
+        list.foreach {
+          file => {
+            files += ((file.getName, new FileRecord(file, file.lastModified())))
+          }
+        }
+      case None =>
+        // This may happen if e.g. the permissions of the monitored dirs aren't correct
+        // we'll consider this a fatal error
+        LOG.severe(s"Cannot read directory ${dir.dir}")
+        sys.exit(1)
     }
   }
 
-  private def executeAction(cmd: Seq[String], errorMsg: => String) {
+  private def executeAction(cmd: Seq[String], errorMsg: => String): Unit = {
     Some(cmd.mkString(" ").!).filter(_ != 0).foreach(_ => LOG.warning(errorMsg))
   }
 
