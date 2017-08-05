@@ -19,7 +19,7 @@ class DirScanner(dir: MonitoredDirectory) {
   val timer = new Timer
 
   def startMonitoring(listener: DirListener) {
-    Try(fullScan(listener))
+    fullScan(listener)
     timer.schedule(new TimerTask {
       override def run(): Unit = {
         update(listener)
@@ -35,14 +35,22 @@ class DirScanner(dir: MonitoredDirectory) {
     createDirIfNeeded()
     LOG.info(s"Run a full scan on directory ${dir.dir}")
     files.clear()
-    dir.dir.listFiles() foreach {
-      file => {
-        files += ((file.getName, new FileRecord(file, file.lastModified())))
-      }
+    Option(dir.dir.listFiles()) match {
+      case Some(list) =>
+        list.foreach {
+          file => {
+            files += ((file.getName, new FileRecord(file, file.lastModified())))
+          }
+        }
+      case None =>
+        // This may happen if e.g. the permissions of the monitored dirs aren't correct
+        // we'll consider this a fatal error
+        LOG.severe(s"Cannot read directory ${dir.dir}")
+        sys.exit(1)
     }
   }
 
-  private def executeAction(cmd: Seq[String], errorMsg: => String) {
+  private def executeAction(cmd: Seq[String], errorMsg: => String): Unit = {
     Some(cmd.mkString(" ").!).filter(_ != 0).foreach(_ => LOG.warning(errorMsg))
   }
 
@@ -65,21 +73,29 @@ class DirScanner(dir: MonitoredDirectory) {
     var deletedFiles: List[File] = Nil
     var newFiles: List[File] = Nil
 
-    dir.dir.listFiles().foreach {
-      file => {
-        files.get(file.getName) foreach {
-          //if file is updated more recently than info we had, add to updatedFiles
-          case f: FileRecord if f.lastUpdated < file.lastModified() =>
-            files += ((file.getName, new FileRecord(file, file.lastModified()))) //update our copy
-            updatedFiles = updatedFiles :+ file
-          case _ =>
+    Option(dir.dir.listFiles()) match {
+      case Some(list) =>
+        list.foreach {
+          file => {
+            files.get(file.getName).foreach {
+              //if file is updated more recently than info we had, add to updatedFiles
+              case f: FileRecord if f.lastUpdated < file.lastModified() =>
+                files += ((file.getName, new FileRecord(file, file.lastModified()))) //update our copy
+                updatedFiles = updatedFiles :+ file
+              case _ =>
+            }
+            //if file wasn't stored, add it to newFiled
+            if (files.get(file.getName).isEmpty) {
+              files += ((file.getName, new FileRecord(file, file.lastModified()))) //update our copy
+              newFiles = newFiles :+ file
+            }
+          }
         }
-        //if file wasn't stored, add it to newFiled
-        if (files.get(file.getName).isEmpty) {
-          files += ((file.getName, new FileRecord(file, file.lastModified()))) //update our copy
-          newFiles = newFiles :+ file
-        }
-      }
+      case None       =>
+        // This may happen if e.g. the permissions of the monitored dirs aren't correct
+        // we'll consider this a fatal error
+        LOG.severe(s"Cannot read directory ${dir.dir}")
+        sys.exit(1)
     }
     val removed = files.keySet -- (dir.dir.listFiles() map {
       f => f.getName
