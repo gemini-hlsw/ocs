@@ -463,18 +463,14 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
           result must \\("Dssi") \\ "name" \> "DSSI Gemini North"
       }
     }
-    "proposal with phoenix blueprints must have a site, REL-2463" in {
+    "proposal with phoenix blueprints must have them removed, REL-3233" in {
       val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_with_phoenix_no_site.xml")))
 
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
           changes must have length 5
-          changes must contain("Phoenix proposal has been assigned to Gemini South.")
-          // The phoenix blueprint must remain and include a site
-          result must \\("Phoenix", "id")
-          result must \\("Phoenix") \\ "site" \> "Gemini South"
-          result must \\("Phoenix") \\ "name" \> "Phoenix Gemini South 0.17 arcsec slit H6073"
+          changes must contain("The original proposal contained Phoenix observations. The instrument is not available and those resources have been removed.")
       }
     }
     "proposal with texes blueprints must have a site, REL-2463" in {

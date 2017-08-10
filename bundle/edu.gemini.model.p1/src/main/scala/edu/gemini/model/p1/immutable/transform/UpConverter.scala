@@ -155,7 +155,10 @@ case object SemesterConverter2017BTo2018A extends SemesterConverter {
     case p @ <partner>cfht</partner> =>
       StepResult("Renamed CFHT partner to CFH", <partner>cfh</partner>).successNel
   }
-  override val transformers = List(removeF2YJloFilters, renameCFH)
+
+  val phoenixRemoved = removeBlueprint("phoenix", "Phoenix")
+
+  override val transformers = List(removeF2YJloFilters, renameCFH, phoenixRemoved)
 }
 
 /**
