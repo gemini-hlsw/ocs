@@ -40,8 +40,8 @@ enum CandidateObsAttribute {
 	}), 
 	
 	RA(new Comparator<Obs>() {
-		public int compare(Obs o1, Obs o2) {
-			return (int) (100 * o1.getRa() - 100 * o2.getRa());
+		public int compare(Long when, Obs o1, Obs o2) {
+			return (int) (100 * o1.getRa(when) - 100 * o2.getRa(when));
 		}
 	}), 
 	

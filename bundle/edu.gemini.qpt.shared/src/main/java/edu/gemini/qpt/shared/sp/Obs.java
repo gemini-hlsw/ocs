@@ -578,12 +578,12 @@ public final class Obs implements Serializable, Comparable<Obs> {
         return obsNumber;
     }
 
-	public double getRa(Option<Long> when) {
-        return (targetEnvironment != null ? targetEnvironment.getAsterism().getRaDegrees(when).getOrElse(0.0) : 0.0);
+	public double getRa(Long when) {
+        return (targetEnvironment != null ? targetEnvironment.getAsterism().getRaDegrees(new Some<>(when)).getOrElse(0.0) : 0.0);
 	}
 
-	public double getDec(Option<Long> when) {
-        return (targetEnvironment != null ? targetEnvironment.getAsterism().getDecDegrees(when).getOrElse(0.0) : 0.0);
+	public double getDec(Long when) {
+        return (targetEnvironment != null ? targetEnvironment.getAsterism().getDecDegrees(new Some<>(when)).getOrElse(0.0) : 0.0);
 	}
 
     public Conds getConditions() {
@@ -684,7 +684,7 @@ public final class Obs implements Serializable, Comparable<Obs> {
         return prog;
     }
 
-    public WorldCoords getCoords(Option<Long> when) {
+    public WorldCoords getCoords(Long when) {
         if (coords == null) coords = new WorldCoords(getRa(when), getDec(when));
         return coords;
     }

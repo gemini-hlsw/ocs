@@ -703,7 +703,7 @@ public final class Variant extends BaseMutableBean implements PioSerializable, C
 			// can not be scheduled at all tonight.
 			Union<Interval> darkUnion = darkUnionCache.get(obs);
 			if (darkUnion == null) {
-				WorldCoords coords = obs.getCoords();
+				WorldCoords coords = obs.getCoords(getSchedule().getMiddlePoint());
 				final double brightest = obs.getConditions().getBrightestMagnitude();
 				SkyBackgroundSolver sbs = new SkyBackgroundSolver(site, coords, brightest);
 				darkUnion = sbs.solve(owner.getStart(), owner.getEnd());

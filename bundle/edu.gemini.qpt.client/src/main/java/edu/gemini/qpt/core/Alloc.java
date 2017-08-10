@@ -174,7 +174,7 @@ public final class Alloc implements Comparable<Alloc>, Commentable, PioSerializa
 		if (circV == null) {
 
 			// Calculate visit circumstances, which includes setup time.
-			WorldCoords coords = new WorldCoords(getObs().getRa(), getObs().getDec());
+			WorldCoords coords = getObs().getCoords(variant.getSchedule().getMiddlePoint());
 			int size = Math.max(1, (int) (interval.getLength() / QUANTUM));
 			circV = new TreeMap<Circumstance, Double[]>();
 			for (Circumstance c: Circumstance.values()) {

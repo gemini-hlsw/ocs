@@ -287,7 +287,7 @@ public class ScheduleDocument {
     }
 
     public RiseTransitSet getRTS(Alloc alloc) {
-        return new RiseTransitSet(schedule.getSite(), alloc.getObs().getCoords(), alloc.getStart());
+        return new RiseTransitSet(schedule.getSite(), alloc.getObs().getCoords(alloc.getVariant().getSchedule().getMiddlePoint()), alloc.getStart());
     }
 
     public String getSteps(Alloc a) {
