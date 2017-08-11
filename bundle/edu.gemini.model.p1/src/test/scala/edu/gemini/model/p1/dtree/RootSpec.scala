@@ -12,10 +12,8 @@ class RootSpec extends Specification {
       root.choices must contain(Instrument.Gsaoi)
     }
     "Texes has been removed in 2017B" in {
-      skipped {
-        val root = new Root(Semester(2017, B))
-        root.choices must not contain Instrument.Texes
-      }
+      val root = new Root(Semester(2018, A))
+      root.choices must contain (Instrument.Texes)
     }
     "include Speckles" in {
       val root = new Root(Semester(2016, A))
@@ -34,8 +32,8 @@ class RootSpec extends Specification {
       root.choices must contain(Instrument.Graces)
     }
     "includes Phoenix" in {
-      val root = new Root(Semester(2016, A))
-      root.choices must contain(Instrument.Phoenix)
+      val root = new Root(Semester(2018, A))
+      root.choices must not contain(Instrument.Phoenix)
     }
     "Michelle has been removed in 2016A" in {
       val root = new Root(Semester(2016, A))
