@@ -201,8 +201,13 @@ public final class Interval implements Comparable<Interval>, IntervalType<Interv
 	}
 
 	/**
-	 * Returns the length of this Interval, as <code>end - start</code>.
+	 * Returns the middle point for this Interval.
 	 */
+	public long getMiddlePoint() { return (start + end) / 2; }
+
+		/**
+         * Returns the length of this Interval, as <code>end - start</code>.
+         */
 	public long getLength() {
 		return end - start;
 	}

@@ -146,6 +146,7 @@ public final class Alloc implements Comparable<Alloc>, Commentable, PioSerializa
 
     public Interval getInterval() { return interval; }
     public long getStart() { return interval.getStart(); }
+    public long getMiddlePoint() { return interval.getMiddlePoint(); }
     public long getEnd() { return interval.getEnd(); }
     public long getLength() { return interval.getLength(); }
     public boolean abuts(Alloc a) { return a != null && interval.abuts(a.interval); }
@@ -174,7 +175,7 @@ public final class Alloc implements Comparable<Alloc>, Commentable, PioSerializa
 		if (circV == null) {
 
 			// Calculate visit circumstances, which includes setup time.
-			WorldCoords coords = getObs().getCoords(variant.getSchedule().getMiddlePoint());
+			WorldCoords coords = getObs().getCoords(getMiddlePoint());
 			int size = Math.max(1, (int) (interval.getLength() / QUANTUM));
 			circV = new TreeMap<Circumstance, Double[]>();
 			for (Circumstance c: Circumstance.values()) {
