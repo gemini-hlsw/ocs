@@ -1,6 +1,7 @@
 package edu.gemini.qpt.ui.html;
 
 import java.util.Date;
+import java.util.function.Function;
 
 import edu.gemini.spModel.core.Site;
 import jsky.coords.WorldCoords;
@@ -20,12 +21,12 @@ import edu.gemini.qpt.shared.util.TimeUtils;
 public class RiseTransitSet {
 
 	private final ImprovedSkyCalc calc;
-	private final WorldCoords coords;
+	private final Function<Long, WorldCoords> coords;
 	private final Long rise, transit, set;
 	
 	private static final long MARGIN = TimeUtils.MS_PER_MINUTE / 4; // 15 sec
 	
-	public RiseTransitSet(Site site, WorldCoords coords, long start) {
+	public RiseTransitSet(Site site, Function<Long, WorldCoords> coords, long start) {
 		this.coords = coords;
 		this.calc = new ImprovedSkyCalc(site);
 		
@@ -69,7 +70,7 @@ public class RiseTransitSet {
 	}
 	
 	private double airmass(long time) {
-		calc.calculate(coords, new Date(time), false);
+		calc.calculate(coords.apply(time), new Date(time), false);
 		double ret = calc.getAirmass();
 		// WACK: skycalc returns 0 for targets below the horizon		
 		return (ret < 1.0) ? Double.MAX_VALUE : ret;
