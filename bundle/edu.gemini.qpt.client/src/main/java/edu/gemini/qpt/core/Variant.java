@@ -22,6 +22,7 @@ import jsky.coords.WorldCoords;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.function.Function;
 import java.util.logging.Logger;
 
 
@@ -703,7 +704,7 @@ public final class Variant extends BaseMutableBean implements PioSerializable, C
 			// can not be scheduled at all tonight.
 			Union<Interval> darkUnion = darkUnionCache.get(obs);
 			if (darkUnion == null) {
-				WorldCoords coords = obs.getCoords(getSchedule().getMiddlePoint());
+				Function<Long, WorldCoords> coords = obs::getCoords;
 				final double brightest = obs.getConditions().getBrightestMagnitude();
 				SkyBackgroundSolver sbs = new SkyBackgroundSolver(site, coords, brightest);
 				darkUnion = sbs.solve(owner.getStart(), owner.getEnd());
