@@ -28,8 +28,6 @@ import edu.gemini.lch.services.model.Observation;
 import edu.gemini.lch.services.model.ObservationTarget;
 import edu.gemini.lch.services.model.ShutteringWindow;
 import edu.gemini.qpt.core.util.LttsServicesClient;
-import edu.gemini.shared.util.immutable.Option;
-import edu.gemini.shared.util.immutable.Some;
 import edu.gemini.skycalc.MoonCalc;
 import edu.gemini.spModel.core.Site;
 import jsky.coords.WorldCoords;
@@ -857,11 +855,3 @@ public final class Visualizer extends VisualizerBase implements VisualizerConsta
 
 
 }
-
-
-
-
-
-
-
-
