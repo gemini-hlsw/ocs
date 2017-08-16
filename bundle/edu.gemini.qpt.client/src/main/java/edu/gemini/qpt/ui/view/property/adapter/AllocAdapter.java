@@ -12,7 +12,6 @@ import edu.gemini.qpt.shared.sp.Obs;
 import edu.gemini.qpt.shared.util.TimeUtils;
 import edu.gemini.qpt.ui.view.property.PropertyTable;
 import edu.gemini.qpt.ui.view.property.PropertyTable.Adapter;
-import jsky.coords.WorldCoords;
 
 public class AllocAdapter implements Adapter<Alloc> {
 
@@ -29,7 +28,7 @@ public class AllocAdapter implements Adapter<Alloc> {
 		table.put(PROP_HOUR_ANGLE, minMaxMeanHHMMSS(target, Alloc.Circumstance.HOUR_ANGLE, false));
 		table.put(PROP_PARALLACTIC_ANGLE, minMaxMeanParallacticAngle(target, "\u00B0", false));
 		table.put(PROP_LUNAR_RANGE, minMaxMean(target, Alloc.Circumstance.LUNAR_DISTANCE, "\u00B0", false));
-		table.put(PROP_COORDINATES, obs.getCoords(target.getMiddlePoint()));
+		table.put(PROP_COORDINATES, obs.getRaString(target.getMiddlePoint()) + " " + obs.getDecString(target.getMiddlePoint()));
 
 		if (variant != null) {
 			DateFormat df = new SimpleDateFormat("HH:mm");
