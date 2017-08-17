@@ -72,15 +72,15 @@ public final class Visualizer extends VisualizerBase implements VisualizerConsta
 	// the start/end times that are part of the CachedShape struct. See below.
 	private final Object cacheLock = new Object(); // common sync object
 	private CachedShape cachedMoonCurve, cachedSunCurve;
-	private final Map<WorldCoords, CachedShape> openElevationCurveCache = new HashMap<WorldCoords, CachedShape>();
-	private final Map<WorldCoords, CachedShape> fullElevationCurveCache = new HashMap<WorldCoords, CachedShape>();
-	private final Map<WorldCoords, CachedShape> closedElevationCurveCache = new HashMap<WorldCoords, CachedShape>();
-	private final Map<WorldCoords, CachedShape> skyBackgroundCurveCache = new HashMap<WorldCoords, CachedShape>();
+	private final Map<String, CachedShape> openElevationCurveCache = new HashMap<String, CachedShape>();
+	private final Map<String, CachedShape> fullElevationCurveCache = new HashMap<String, CachedShape>();
+	private final Map<String, CachedShape> closedElevationCurveCache = new HashMap<String, CachedShape>();
+	private final Map<String, CachedShape> skyBackgroundCurveCache = new HashMap<String, CachedShape>();
 
 	// Should the visualizer pay attention to QC-only warnings?
 	private final boolean qcOnly;
 
-	// Shuold the timezone be fixed?
+	// Should the timezone be fixed?
 	private final TimePreference timePreference;
 
 	public Visualizer() {
@@ -176,7 +176,8 @@ public final class Visualizer extends VisualizerBase implements VisualizerConsta
 			for (Alloc a: allocs) {
 				if (selection.contains(a)) continue;
 				Function<Long, WorldCoords> coords = a.getObs()::getCoords;
-				g2d.draw(getElevationCurve(coords, minTime, maxTime, false, fullElevationCurveCache));
+				String obsId = a.getObs().getObsId();
+				g2d.draw(getElevationCurve(coords, minTime, maxTime, false, obsId, fullElevationCurveCache));
 			}
 
 			// Moon Phase
@@ -202,6 +203,7 @@ public final class Visualizer extends VisualizerBase implements VisualizerConsta
 			// Area under curve segment (all allocs and drag)
 			for (Alloc a: allocs) {
                 Function<Long, WorldCoords> coords = a.getObs()::getCoords;
+                String obsId = a.getObs().getObsId();
 				Color c = getColor(a);
 				g2d.setColor(getColor(a));
 
@@ -224,13 +226,14 @@ public final class Visualizer extends VisualizerBase implements VisualizerConsta
 					g2d.setPaint(tp);
 				}
 
-				g2d.fill(getElevationCurve(coords, a.getStart(), a.getEnd(), true, closedElevationCurveCache));
+				g2d.fill(getElevationCurve(coords, a.getStart(), a.getEnd(), true, obsId, closedElevationCurveCache));
 			}
 			if (dragObject != null) {
 				g2d.setColor(DRAG_COLOR);
 				for (Alloc a: dragObject) {
                     Function<Long, WorldCoords> coords = a.getObs()::getCoords;
-					g2d.fill(getElevationCurve(coords, a.getStart() + dragDelta, a.getEnd() + dragDelta, true, closedElevationCurveCache));
+                    String obsId = a.getObs().getObsId();
+					g2d.fill(getElevationCurve(coords, a.getStart() + dragDelta, a.getEnd() + dragDelta, true, obsId, closedElevationCurveCache));
 				}
 			}
 
@@ -242,7 +245,8 @@ public final class Visualizer extends VisualizerBase implements VisualizerConsta
 			g2d.setStroke(SOLID_STROKE_LIGHT);
 			for (Alloc a: allocs) {
                 Function<Long, WorldCoords> coords = a.getObs()::getCoords;
-				g2d.draw(getElevationCurve(coords, a.getStart(), a.getEnd(), false, openElevationCurveCache));
+                String obsId = a.getObs().getObsId();
+				g2d.draw(getElevationCurve(coords, a.getStart(), a.getEnd(), false, obsId, openElevationCurveCache));
 			}
 
 			// Boundary bars (unselected allocs)
@@ -257,17 +261,21 @@ public final class Visualizer extends VisualizerBase implements VisualizerConsta
 			// SB curve (only if dragging or selected or preview)
 			if (dragObject.size() == 1 || selection.size() == 1 || preview != null) {
 				paintSkyBrightnessLines(g2d);
+				String obsId;
 				Function <Long, WorldCoords> coords;
 				if (!dragObject.isEmpty()) {
+					obsId = dragObject.first().getObs().getObsId();
 					coords = dragObject.first().getObs()::getCoords;
 				} else if (!selection.isEmpty()) {
+					obsId = selection.first().getObs().getObsId();
 					coords = selection.first().getObs()::getCoords;
 				} else {
+					obsId = preview.getObsId();
 					coords = preview::getCoords;
 				}
 				g2d.setColor(SB_COLOR);
 				g2d.setStroke(SB_STROKE);
-				g2d.draw(getSkyBackgroundCurve(coords, minTime, maxTime));
+				g2d.draw(getSkyBackgroundCurve(coords, minTime, maxTime, obsId));
 			}
 
 			// Setup lines (selection allocs)
@@ -325,7 +333,9 @@ public final class Visualizer extends VisualizerBase implements VisualizerConsta
 			g2d.setColor(Color.DARK_GRAY);
 			g2d.setStroke(SOLID_STROKE);
 			for (Alloc a: selection) {
-				g2d.draw(getElevationCurve(a.getObs()::getCoords, minTime, maxTime, false, fullElevationCurveCache));
+				Function<Long, WorldCoords> coords = a.getObs()::getCoords;
+				String obsId = a.getObs().getObsId();
+				g2d.draw(getElevationCurve(coords, minTime, maxTime, false, obsId, fullElevationCurveCache));
 				Line2D left = new Line2D.Double(a.getStart(), 0, a.getStart(), MAX_DEG);
 				Line2D right = new Line2D.Double(a.getEnd(), 0, a.getEnd(), MAX_DEG);
 				g2d.draw(timeAlt2XY.createTransformedShape(left));
@@ -333,18 +343,20 @@ public final class Visualizer extends VisualizerBase implements VisualizerConsta
 			}
 			if (preview != null) {
                 Function<Long, WorldCoords> coords = preview::getCoords;
-				g2d.draw(getElevationCurve(coords, minTime, maxTime, false, fullElevationCurveCache));
+				String obsId = preview.getObsId();
+				g2d.draw(getElevationCurve(coords, minTime, maxTime, false, obsId, fullElevationCurveCache));
 			}
 
 			if (dragObject != null) {
 				for (Alloc a: dragObject) {
+					String obsId = a.getObs().getObsId();
 					long dragStartTime = a.getStart() + dragDelta;
 					long dragEndTime = a.getEnd() + dragDelta;
 					Line2D left = new Line2D.Double(dragStartTime, 0, dragStartTime, MAX_DEG);
 					Line2D right = new Line2D.Double(dragEndTime, 0, dragEndTime, MAX_DEG);
 					g2d.draw(timeAlt2XY.createTransformedShape(left));
 					g2d.draw(timeAlt2XY.createTransformedShape(right));
-					g2d.draw(getElevationCurve(a.getObs()::getCoords, minTime, maxTime, false, fullElevationCurveCache));
+					g2d.draw(getElevationCurve(a.getObs()::getCoords, minTime, maxTime, false, obsId, fullElevationCurveCache));
 				}
 			}
 
@@ -681,13 +693,13 @@ public final class Visualizer extends VisualizerBase implements VisualizerConsta
 	 * optionally as a closed shape corresponding to the area under the curve. These shapes
 	 * are cached.
 	 */
-	private Shape getElevationCurve(Function<Long, WorldCoords> coords, long start, long end, boolean close, Map<WorldCoords, CachedShape> cache) {
+	private Shape getElevationCurve(Function<Long, WorldCoords> coords, long start, long end, boolean close, String obsId, Map<String, CachedShape> cache) {
 		synchronized (cacheLock) {
 
 			// Return the cached shape, if any.
-//			CachedShape cs = cache.get(coords);
-//			if (cs != null && cs.matches(start, end))
-//				return cs.shape;
+			CachedShape cs = cache.get(obsId);
+			if (cs != null && cs.matches(start, end))
+				return cs.shape;
 
 			// Otherwise build the shape.
 			ImprovedSkyCalc calc = new ImprovedSkyCalc(model.getSchedule().getSite());
@@ -709,22 +721,22 @@ public final class Visualizer extends VisualizerBase implements VisualizerConsta
 			}
 
 			// Cache and return it.
-  			CachedShape cs = new CachedShape(timeAlt2XY.createTransformedShape(path), start, end);
-//			cache.put(coords, cs);
+  			cs = new CachedShape(timeAlt2XY.createTransformedShape(path), start, end);
+			cache.put(obsId, cs);
 			return cs.shape;
 
 		}
 	}
 
 
-	private Shape getSkyBackgroundCurve(Function<Long, WorldCoords> coords, long start, long end) {
+	private Shape getSkyBackgroundCurve(Function<Long, WorldCoords> coords, long start, long end, String obsId) {
 		synchronized (cacheLock) {
 
 			// Return the cached shape, if any.
-//			Map<WorldCoords, CachedShape> cache = skyBackgroundCurveCache;
-//			CachedShape cs = cache.get(coords);
-//			if (cs != null && cs.matches(start, end))
-//				return cs.shape;
+			Map<String, CachedShape> cache = skyBackgroundCurveCache;
+			CachedShape cs = cache.get(obsId);
+			if (cs != null && cs.matches(start, end))
+				return cs.shape;
 
 			// Otherwise build the shape.
 			ImprovedSkyCalc calc = new ImprovedSkyCalc(model.getSchedule().getSite());
@@ -749,8 +761,8 @@ public final class Visualizer extends VisualizerBase implements VisualizerConsta
 				path.lineTo(end, calc.getTotalSkyBrightness().floatValue());
 
 			// Cache and return it.
-			CachedShape cs = new CachedShape(timeSB2XY.createTransformedShape(path), start, end);
-			// cache.put(coords, cs);
+			cs = new CachedShape(timeSB2XY.createTransformedShape(path), start, end);
+			cache.put(obsId, cs);
 			return cs.shape;
 
 		}
@@ -839,7 +851,8 @@ public final class Visualizer extends VisualizerBase implements VisualizerConsta
 	private static class CachedShape {
 
 		final Shape shape;
-		final long start, end;
+		final long start;
+		final long end;
 
 		CachedShape(Shape shape, long start, long end) {
 			this.shape = shape;
@@ -852,6 +865,5 @@ public final class Visualizer extends VisualizerBase implements VisualizerConsta
 		}
 
 	}
-
 
 }
