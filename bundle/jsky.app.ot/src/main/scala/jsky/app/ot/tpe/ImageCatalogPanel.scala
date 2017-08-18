@@ -16,7 +16,8 @@ import jsky.app.ot.userprefs.images.ImageCatalogPreferencesPanel
 import jsky.util.gui.Resources
 
 import scala.swing.event.{ButtonClicked, MouseClicked}
-import scala.swing.{Button, Component, Dialog, Label, RadioButton, Swing}
+import scala.swing.{BorderPanel, BoxPanel, Button, Component, Dialog, GridPanel, Label, Orientation, RadioButton, Swing}
+import scala.swing.BorderPanel.Position.{Center, North, West}
 import scalaz.concurrent.Task
 
 object ImageCatalogPanel {
@@ -57,7 +58,7 @@ final class ImageCatalogPanel(imageDisplay: CatalogImageDisplay) {
     }
 
     def markIdle(): Unit = {
-      icon = null
+      icon = Resources.getIcon("eclipse/blank.gif")
       tooltip = ""
       deafTo(mouse.clicks)
     }
@@ -111,19 +112,28 @@ final class ImageCatalogPanel(imageDisplay: CatalogImageDisplay) {
     }
   }
 
-  lazy val panel: Component = new MigPanel(LC().fill().insets(0.px).gridGap(0.px, 0.px)) {
-    add(new Label("Image Catalog:"), CC())
-    add(toolsButton, CC().alignX(RightAlign))
-    catalogRows.foreach { row =>
-      add(row.button, CC().newline())
-      add(row.feedback, CC().alignX(RightAlign))
-      buttonGroup.add(row.button.peer)
-      row.button.reactions += {
-        case ButtonClicked(_) =>
-          requestImage(row.feedback.catalog)
-        }
+  private def row(l: Component, r: Component): Component =
+    new BoxPanel(Orientation.Horizontal) {
+      contents ++= List(l, Swing.HGlue, r)
     }
-  }
+
+  lazy val panel: Component =
+    new BorderPanel() {
+      add(row(new Label("Image Catalog"), toolsButton), North)
+      add(Swing.HStrut(5), West)
+      add(
+        new GridPanel(0, 2) {
+          contents ++= catalogRows.map { r => row(r.button, r.feedback) }
+          catalogRows.foreach { r =>
+            buttonGroup.add(r.button.peer)
+            r.button.reactions += {
+              case ButtonClicked(_) => requestImage(r.feedback.catalog)
+            }
+          }
+        },
+        Center
+      )
+    }
 
   private def requestImage(catalog: ImageCatalog) =
     // Read the current key and wavelength on the tpe
