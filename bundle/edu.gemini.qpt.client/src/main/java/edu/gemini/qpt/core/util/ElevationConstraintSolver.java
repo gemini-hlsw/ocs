@@ -1,6 +1,7 @@
 package edu.gemini.qpt.core.util;
 
 import java.util.Date;
+import java.util.function.Function;
 import java.util.logging.Logger;
 
 import edu.gemini.qpt.shared.util.TimeUtils;
@@ -14,10 +15,10 @@ public abstract class ElevationConstraintSolver extends Solver {
 	private static final Logger LOGGER = Logger.getLogger(ElevationConstraintSolver.class.getName());
 	
 	protected final ImprovedSkyCalc calc;
-	protected final WorldCoords coords;
+	protected final Function<Long, WorldCoords> coords;
 	protected final double min, max;
 	
-	protected ElevationConstraintSolver(Site site, WorldCoords coords, double min, double max) {
+	protected ElevationConstraintSolver(Site site, Function<Long, WorldCoords> coords, double min, double max) {
 		super(TimeUtils.MS_PER_HOUR / 4, TimeUtils.MS_PER_MINUTE);
 		this.coords = coords;
 		this.calc = new ImprovedSkyCalc(site);
@@ -25,9 +26,9 @@ public abstract class ElevationConstraintSolver extends Solver {
 		this.min = min;
 	}
 
-	public static ElevationConstraintSolver forObs(Site site, Obs obs) {		
+	public static ElevationConstraintSolver forObs(Site site, Obs obs) {
 		switch (obs.getElevationConstraintType()) {
-		case AIRMASS:    return new AirmassSolver(site, obs);			
+		case AIRMASS:    return new AirmassSolver(site, obs);
 		case HOUR_ANGLE: return new HourAngleSolver(site, obs);
 		case NONE:       return new AirmassSolver(site, obs, 1.0, 2.0);
 		default:
@@ -38,16 +39,16 @@ public abstract class ElevationConstraintSolver extends Solver {
 	static class AirmassSolver extends ElevationConstraintSolver {
 
 		protected AirmassSolver(Site site, Obs obs) {
-			super(site, obs.getCoords(), obs.getElevationConstraintMin(), obs.getElevationConstraintMax());
+			super(site, obs::getCoords, obs.getElevationConstraintMin(), obs.getElevationConstraintMax());
 		}
 
 		protected AirmassSolver(Site site, Obs obs, double min, double max) {
-			super(site, obs.getCoords(), min, max);
+			super(site, obs::getCoords, min, max);
 		}
 
 		@Override
 		protected boolean f(long t) {
-			calc.calculate(coords, new Date(t), false);
+			calc.calculate(coords.apply(t), new Date(t), false);
 			double airmass = calc.getAirmass();
 			return (min <= airmass) && (airmass <= max);
 		}
@@ -57,12 +58,12 @@ public abstract class ElevationConstraintSolver extends Solver {
 	static class HourAngleSolver extends ElevationConstraintSolver {
 		
 		protected HourAngleSolver(Site site, Obs obs) {
-			super(site, obs.getCoords(), obs.getElevationConstraintMin(), obs.getElevationConstraintMax());
+			super(site, obs::getCoords, obs.getElevationConstraintMin(), obs.getElevationConstraintMax());
 		}
 
 		@Override
 		protected boolean f(long t) {
-			calc.calculate(coords, new Date(t), false);
+			calc.calculate(coords.apply(t), new Date(t), false);
 			double ha = calc.getHourAngle();
 			return (min <= ha) && (ha <= max);
 		}
@@ -70,4 +71,3 @@ public abstract class ElevationConstraintSolver extends Solver {
 	}
 
 }
-

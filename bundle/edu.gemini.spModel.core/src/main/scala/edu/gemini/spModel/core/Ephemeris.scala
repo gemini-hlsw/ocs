@@ -40,7 +40,7 @@ final class Ephemeris(val site: Site, val compressedData: Deflated[List[(Long, F
     _data
 
   }
-    
+
   /** Perform an exact or interpolated lookup. */
   def iLookup(k: Long): Option[Coordinates] =
     data.iLookup(k)

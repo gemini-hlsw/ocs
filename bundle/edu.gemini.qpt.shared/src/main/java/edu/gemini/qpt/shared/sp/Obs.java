@@ -578,13 +578,20 @@ public final class Obs implements Serializable, Comparable<Obs> {
         return obsNumber;
     }
 
-	public double getRa() {
-        return (targetEnvironment != null ? targetEnvironment.getAsterism().getRaDegrees(schedulingBlock.map(SchedulingBlock::start)).getOrElse(0.0) : 0.0);
+	public double getRa(Long when) {
+        return (targetEnvironment != null ? targetEnvironment.getAsterism().getRaDegrees(new Some<>(when)).getOrElse(0.0) : 0.0);
 	}
 
-	public double getDec() {
-        return (targetEnvironment != null ? targetEnvironment.getAsterism().getDecDegrees(schedulingBlock.map(SchedulingBlock::start)).getOrElse(0.0) : 0.0);
+    public String getRaString(Long when) {
+        return (targetEnvironment != null ? targetEnvironment.getAsterism().getRaString(new Some<>(when)).getOrElse("0.0") : "0.0");
+    }
+	public double getDec(Long when) {
+        return (targetEnvironment != null ? targetEnvironment.getAsterism().getDecDegrees(new Some<>(when)).getOrElse(0.0) : 0.0);
 	}
+
+    public String getDecString(Long when) {
+        return (targetEnvironment != null ? targetEnvironment.getAsterism().getDecString(new Some<>(when)).getOrElse("0.0") : "0.0");
+    }
 
     public Conds getConditions() {
         return conditions;
@@ -684,8 +691,8 @@ public final class Obs implements Serializable, Comparable<Obs> {
         return prog;
     }
 
-    public WorldCoords getCoords() {
-        if (coords == null) coords = new WorldCoords(getRa(), getDec());
+    public WorldCoords getCoords(Long when) {
+        if (coords == null) coords = new WorldCoords(getRa(when), getDec(when));
         return coords;
     }
 

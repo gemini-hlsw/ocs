@@ -37,7 +37,6 @@ public class ObsAdapter implements Adapter<Obs> {
 		table.put(PROP_TITLE, target.getTitle());
 		table.put(PROP_INSTRUMENT, target.getInstrumentStringWithConfig());
 		table.put(PROP_CONSTRAINTS, target.getConstraintsString());
-		table.put(PROP_COORDINATES, target.getCoords());
 		table.put(PROP_WFS, target.getWavefrontSensors());
 		if (variant != null) {
             Set<Alloc> allocs = variant.getAllocs(target);

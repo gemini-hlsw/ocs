@@ -56,7 +56,7 @@ public class SetupListener extends MarkerModelListener<Variant> {
 		return 
 			pred != null &&
 			pred.getObs().getInstrumentString().equals(succ.getObs().getInstrumentString()) &&
-			pred.getObs().getCoords().equals(succ.getObs().getCoords());
+			pred.getObs().getCoords(pred.getEnd()).equals(succ.getObs().getCoords((pred.getEnd())));
 	}
 
 	@Override

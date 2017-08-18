@@ -607,6 +607,8 @@ public final class Schedule extends BaseMutableBean implements PioSerializable, 
         return getEnd() - getStart();
     }
 
+    public long getMiddlePoint() { return (getStart() + getEnd()) / 2; }
+
     public String getName() {
         StringBuilder sb = new StringBuilder();
         if (getFile() != null) {

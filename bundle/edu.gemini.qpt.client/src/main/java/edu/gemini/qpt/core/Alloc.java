@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeMap;
+import java.util.function.Function;
 import java.util.logging.Logger;
 
 import edu.gemini.qpt.core.util.LttsServicesClient;
@@ -146,6 +147,7 @@ public final class Alloc implements Comparable<Alloc>, Commentable, PioSerializa
 
     public Interval getInterval() { return interval; }
     public long getStart() { return interval.getStart(); }
+    public long getMiddlePoint() { return interval.getMiddlePoint(); }
     public long getEnd() { return interval.getEnd(); }
     public long getLength() { return interval.getLength(); }
     public boolean abuts(Alloc a) { return a != null && interval.abuts(a.interval); }
@@ -174,7 +176,7 @@ public final class Alloc implements Comparable<Alloc>, Commentable, PioSerializa
 		if (circV == null) {
 
 			// Calculate visit circumstances, which includes setup time.
-			WorldCoords coords = new WorldCoords(getObs().getRa(), getObs().getDec());
+			Function<Long, WorldCoords> coords = getObs()::getCoords;
 			int size = Math.max(1, (int) (interval.getLength() / QUANTUM));
 			circV = new TreeMap<Circumstance, Double[]>();
 			for (Circumstance c: Circumstance.values()) {
@@ -184,7 +186,7 @@ public final class Alloc implements Comparable<Alloc>, Commentable, PioSerializa
 			ImprovedSkyCalc calc = new ImprovedSkyCalc(variant.getSchedule().getSite());
 			for (int i = 0; i < size; i++) {
 				long t = interval.getStart() + QUANTUM * i;
-				calc.calculate(coords,new Date(t), true);
+				calc.calculate(coords.apply(t), new Date(t), true);
 				for (Circumstance c: Circumstance.values()) {
 					Double[] vals = circV.get(c);
 					switch (c) {

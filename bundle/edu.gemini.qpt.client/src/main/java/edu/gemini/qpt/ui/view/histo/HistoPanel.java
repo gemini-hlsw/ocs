@@ -62,11 +62,11 @@ public class HistoPanel extends JPanel {
 			int[] blocked = new int[STACKS];
 			int[] unblocked = new int[STACKS];
 			for (Obs obs: variant.getSchedule().getMiniModel().getAllObservations()) {
-				int i = ((int) obs.getRa()) / DEGREES_PER_STACK;
+				int i = ((int) obs.getRa(variant.getSchedule().getMiddlePoint())) / DEGREES_PER_STACK;
 				if (variant.getFlags(obs).contains(Variant.Flag.BLOCKED)) ++blocked[i]; else ++unblocked[i];
 			}
 			for (Alloc a: variant.getAllocs()) {
-				int i = ((int) a.getObs().getRa()) / DEGREES_PER_STACK;
+				int i = ((int) a.getObs().getRa(a.getMiddlePoint())) / DEGREES_PER_STACK;
 				int[] array = scheduled;
 				if (a.getSeverity() != null) {
 					switch (a.getSeverity()) {

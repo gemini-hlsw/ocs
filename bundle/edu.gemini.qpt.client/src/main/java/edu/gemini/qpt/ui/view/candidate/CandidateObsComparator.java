@@ -34,7 +34,7 @@ public class CandidateObsComparator extends MouseAdapter implements GComparator<
 			return direction * ((ret != 0) ? ret : -o1.compareTo(o2));
 		}
 		
-		return direction * attr.getComparator().compare(o1, o2);
+		return direction * attr.getComparator(variant.getSchedule().getMiddlePoint()).compare(o1, o2);
 	}
 
 

@@ -20,7 +20,7 @@ public class CandidateObsController implements GTableController<Schedule, Obs, C
 		case Inst: return obs.getInstrumentString();
 		case Observation: return obs;
 		case P: return obs.getPriority();
-		case RA: return obs.getRa();
+		case RA: return obs.getRa(viewer.getModel().getMiddlePoint());
 		case SB: return obs.getProg().getBand();
 		case Target: return obs.getTargetName();
 
