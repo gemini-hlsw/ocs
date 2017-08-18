@@ -3,13 +3,15 @@ package jsky.app.ot.tpe;
 import edu.gemini.catalog.image.ImageCatalog;
 import edu.gemini.catalog.ui.tpe.CatalogImageDisplay;
 import edu.gemini.pot.sp.ISPObservation;
+import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.shared.util.immutable.Option;
 import jsky.app.ot.ags.AgsSelectorControl;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
+import java.util.ArrayList;
 
 /**
  * Contains toggle buttons for selecting the current mode
@@ -21,6 +23,69 @@ import java.awt.event.ComponentListener;
  * @author Allan Brighton */
 final class TpeToolBar extends JPanel {
 
+    /**
+     * The ButtonPanel houses a related group of toggle buttons, checkboxes,
+     * radio buttons, etc. that appear in the TPE toolbar.
+     */
+    private static final class ButtonPanel extends JPanel {
+        final JPanel                    contents = new JPanel(new GridLayout(0, 2));
+        final java.util.List<JComponent> btnList = new ArrayList<>();
+
+        ButtonPanel(String label) {
+            super(new GridBagLayout());
+
+            add(new JLabel(label), new GridBagConstraints() {{
+                gridx = 0;
+                gridy = 0;
+                anchor = WEST;
+                fill = HORIZONTAL;
+                weightx = 1.0;
+                insets = new Insets(0, 0, 3, 0);
+            }});
+
+            add(contents, new GridBagConstraints() {{
+                gridx   = 0;
+                gridy   = 1;
+                fill    = BOTH;
+                weightx = 1.0;
+                weighty = 1.0;
+                insets  = new Insets(0, 5, 0, 0);
+            }});
+        }
+
+        private void rejigger() {
+            final JComponent[] cs = btnList.stream().filter(Component::isVisible).toArray(JComponent[]::new);
+            final int size        = cs.length;
+            final int half        = size / 2 + size % 2;
+
+            setVisible(size > 0);
+            contents.removeAll();
+
+            // We want the buttons to be arranged in two columns like a news
+            // paper, where you read to the end of one column and then pick up
+            // at the top of the next column.  Unfortunately GridLayout works
+            // the other way: left, right, left, right, ...
+            for (int i=0; i<half; ++i) {
+                contents.add(cs[i]);
+                final int j = i + half;
+                if (j < size) contents.add(cs[j]);
+            }
+
+            contents.revalidate();
+            contents.repaint();
+        }
+
+        void addButton(JToggleButton btn) {
+            btnList.add(btn);
+            rejigger();
+
+            btn.addComponentListener(new ComponentAdapter() {
+                public void componentShown(ComponentEvent e)  { rejigger(); }
+                public void componentHidden(ComponentEvent e) { rejigger(); }
+            });
+        }
+    }
+
     private final ImageCatalogPanel _imageCatalogPanel;
 
     private static GridBagConstraints gbc(final int y) {
@@ -30,16 +95,16 @@ final class TpeToolBar extends JPanel {
     }
 
     // The Tools panel
-    private final JPanel _modePanel;
+    private final ButtonPanel _modePanel;
 
     // The Create panel
-    private final JPanel _createPanel;
+    private final ButtonPanel _createPanel;
 
     // Shared button group between mode and create panel
     private final ButtonGroup _buttonGroup = new ButtonGroup();
 
     // The View panel
-    private final JPanel[] _viewPanel = new JPanel[TpeImageFeatureCategory.values().length];
+    private final ButtonPanel[] _viewPanel = new ButtonPanel[TpeImageFeatureCategory.values().length];
 
     // The ags guider selection panel
     private final AgsSelectorControl _guiderSelector = new AgsStrategyPanel();
@@ -50,23 +115,23 @@ final class TpeToolBar extends JPanel {
     TpeToolBar(CatalogImageDisplay display) {
         super(new GridBagLayout());
 
-        setBorder(BorderFactory.createEmptyBorder(10, 5, 10, 5));
+        setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 5));
 
-        _modePanel = new JPanel(new GridBagLayout());
+        _modePanel = new ButtonPanel("Tools");
         add(_modePanel, new GridBagConstraints() {{
             gridx = 0; gridy = 0; anchor = NORTH; fill = HORIZONTAL; weightx = 1;
-            insets = new Insets(0, 5, 0, 0);
+            insets = new Insets(0, 0, 0, 0);
         }});
 
-        _createPanel = new JPanel(new GridBagLayout());
+        _createPanel = new ButtonPanel("Create");
         add(_createPanel, new GridBagConstraints() {{
             gridx = 0; gridy = 1; anchor = NORTH; fill = HORIZONTAL; weightx = 1;
-            insets = new Insets(5, 5, 0, 0);
+            insets = new Insets(5, 0, 0, 0);
         }});
 
         int i=0;
         for (TpeImageFeatureCategory cat : TpeImageFeatureCategory.values()) {
-            _viewPanel[i] = new JPanel(new GridBagLayout());
+            _viewPanel[i] = new ButtonPanel(cat.displayName());
 
             GridBagConstraints gbc = new GridBagConstraints() {{
                 gridx = 0; anchor = NORTH; fill = HORIZONTAL;
@@ -74,20 +139,18 @@ final class TpeToolBar extends JPanel {
             }};
             gbc.gridy = 2 + i;
 
-            add(wrapPanel(cat.displayName(), _viewPanel[i]), gbc);
+            add(_viewPanel[i], gbc);
             ++i;
         }
 
         final int yPos = 2 + i;
-        final JPanel wrappedGuiderSelector = wrapPanel("", _guiderSelector.getUi());
-        add(wrappedGuiderSelector, new GridBagConstraints() {{
+        add(_guiderSelector.getUi(), new GridBagConstraints() {{
             gridx = 0; gridy = yPos; anchor = NORTH; fill = HORIZONTAL;
             insets = new Insets(10, 0, 0, 0);
         }});
         final int catalogYPos = yPos + i;
         _imageCatalogPanel = new ImageCatalogPanel(display);
-        final JPanel wrappedCatalogSelector = wrapPanel("", _imageCatalogPanel.panel().peer());
-        add(wrappedCatalogSelector, new GridBagConstraints() {{
+        add(_imageCatalogPanel.panel().peer(), new GridBagConstraints() {{
             gridx = 0; gridy = catalogYPos; anchor = NORTH; fill = HORIZONTAL;
             insets = new Insets(10, 0, 0, 0);
         }});
@@ -101,97 +164,27 @@ final class TpeToolBar extends JPanel {
 
     }
 
-    private JPanel wrapPanel(String label, JComponent panel) {
-        final JPanel res = new JPanel(new GridBagLayout());
-
-        final JLabel lab = new JLabel(label);
-        res.add(lab, new GridBagConstraints() {{
-            gridx = 0; gridy = 0; anchor = WEST; fill = HORIZONTAL; weightx = 1;
-            insets = new Insets(0, 0, 3, 0);
-        }});
-        res.add(panel, new GridBagConstraints() {{
-            gridx = 0; gridy = 1; fill = BOTH; weightx = 1;
-            insets = new Insets(0, 5, 0, 0);
-        }});
-
-        return res;
+    void addModeButton(JToggleButton btn) {
+        _buttonGroup.add(btn);
+        _modePanel.addButton(btn);
     }
 
-    private void add(Component comp, JPanel pan) {
-        pan.add(comp, gbc(pan.getComponentCount()));
-    }
-
-    private void hide(Container pan) {
-        for (Component comp : pan.getComponents()) {
-            comp.setVisible(false);
-        }
-    }
-
-    void addModeButton(JToggleButton button) {
-        _buttonGroup.add(button);
-        add(button, _modePanel);
-    }
-
-    void addCreateButton(JToggleButton button) {
-        _buttonGroup.add(button);
-        add(button, _createPanel);
+    void addCreateButton(JToggleButton btn) {
+        _buttonGroup.add(btn);
+        _createPanel.addButton(btn);
     }
 
     void hideCreateButtons() {
-        hide(_createPanel);
+        _createPanel.setVisible(false);
     }
 
-    static Component createKeyPanel(Component key) {
-        final JPanel pan = new JPanel(new GridBagLayout());
-
-        final Dimension d = new Dimension(16, 16);
-        JPanel spacer = new JPanel() {{
-            setPreferredSize(d); setMinimumSize(d); setMaximumSize(d);
-        }};
-        pan.add(spacer, new GridBagConstraints() {{
-            gridx=0; gridy=0; weightx=0; weighty=0; fill=NONE; anchor=WEST;
-        }});
-        pan.add(key, new GridBagConstraints() {{
-            gridx=1; gridy=0; weightx=1.0; weighty=0; fill=HORIZONTAL; anchor=WEST;
-        }});
-        return pan;
-    }
-
-    void addViewItem(Component comp, TpeImageFeatureCategory cat) {
-        final JPanel viewPanel = _viewPanel[cat.ordinal()];
-        add(comp, viewPanel);
-
-        // Watch the component for visibility updates.  When changed, check
-        // the other components in the panel.  If they are all hidden, hide
-        // the entire parent that contains the label.  If some are visible,
-        // show the entire panel that contains the label.
-        comp.addComponentListener(new ComponentListener() {
-            public void componentResized(ComponentEvent e) {}
-            public void componentMoved(ComponentEvent e) {}
-
-            public void componentShown(ComponentEvent e) {
-                refreshViewPanelVisibility();
-            }
-
-            public void componentHidden(ComponentEvent e) {
-                refreshViewPanelVisibility();
-            }
-
-            private boolean someVisible(JPanel pan) {
-                for (Component comp : pan.getComponents()) {
-                    if (comp.isVisible()) return true;
-                }
-                return false;
-            }
-
-            private void refreshViewPanelVisibility() {
-                viewPanel.getParent().setVisible(someVisible(viewPanel));
-            }
-        });
+    void addViewItem(JToggleButton btn, TpeImageFeatureCategory cat) {
+        final ButtonPanel viewPanel = _viewPanel[cat.ordinal()];
+        viewPanel.addButton(btn);
     }
 
     void hideViewButtons() {
-        for (JPanel pan : _viewPanel) hide(pan);
+        for (JPanel pan : _viewPanel) pan.setVisible(false);
     }
 
     AgsSelectorControl getGuiderSelector() {

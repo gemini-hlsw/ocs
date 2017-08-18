@@ -24,12 +24,10 @@ final class TpeFeatureManager {
     private static class TpeFeatureData {
         final TpeImageFeature feature;  // The image feature itself
         final JToggleButton button;     // The button used to toggle it
-        final Option<Component> key;    // Key used to explain the feature
 
-        public TpeFeatureData(TpeImageFeature feature, JToggleButton button, Option<Component> key) {
+        public TpeFeatureData(TpeImageFeature feature, JToggleButton button) {
             this.feature = feature;
             this.button = button;
-            this.key = key;
         }
     }
 
@@ -90,17 +88,9 @@ final class TpeFeatureManager {
             Preferences.set(prefName, selected);
         });
 
-        final Option<Component> keyPanel = tif.getKey().isEmpty() ? None.instance() :
-                                             new Some<>(TpeToolBar.createKeyPanel(tif.getKey().getValue()));
-
-        _featureMap.put(name, new TpeFeatureData(tif, btn, keyPanel));
+        _featureMap.put(name, new TpeFeatureData(tif, btn));
 
         _tpeToolBar.addViewItem(btn, tif.getCategory());
-        if (keyPanel.isDefined()) {
-            final Component comp = keyPanel.getValue();
-            comp.setVisible(false);
-            _tpeToolBar.addViewItem(comp, tif.getCategory());
-        }
     }
 
     public void updateAvailableOptions(final Collection<TpeImageFeature> feats, final TpeContext ctx) {
@@ -157,9 +147,6 @@ final class TpeFeatureManager {
         TpeFeatureData tfd = _featureMap.get(tif.getName());
         if (available != tfd.button.isVisible()) {
             tfd.button.setVisible(available);
-            if (!tfd.key.isEmpty()) {
-                tfd.key.getValue().setVisible(available);
-            }
         }
     }
 }
