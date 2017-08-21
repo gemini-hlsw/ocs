@@ -582,16 +582,9 @@ public final class Obs implements Serializable, Comparable<Obs> {
         return (targetEnvironment != null ? targetEnvironment.getAsterism().getRaDegrees(new Some<>(when)).getOrElse(0.0) : 0.0);
 	}
 
-    public String getRaString(Long when) {
-        return (targetEnvironment != null ? targetEnvironment.getAsterism().getRaString(new Some<>(when)).getOrElse("0.0") : "0.0");
-    }
 	public double getDec(Long when) {
         return (targetEnvironment != null ? targetEnvironment.getAsterism().getDecDegrees(new Some<>(when)).getOrElse(0.0) : 0.0);
 	}
-
-    public String getDecString(Long when) {
-        return (targetEnvironment != null ? targetEnvironment.getAsterism().getDecString(new Some<>(when)).getOrElse("0.0") : "0.0");
-    }
 
     public Conds getConditions() {
         return conditions;
@@ -692,8 +685,7 @@ public final class Obs implements Serializable, Comparable<Obs> {
     }
 
     public WorldCoords getCoords(Long when) {
-        if (coords == null) coords = new WorldCoords(getRa(when), getDec(when));
-        return coords;
+        return new WorldCoords(getRa(when), getDec(when));
     }
 
     public String getInstrumentString() {
