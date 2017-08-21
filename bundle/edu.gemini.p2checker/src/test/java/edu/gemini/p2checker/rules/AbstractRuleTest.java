@@ -235,7 +235,7 @@ public class AbstractRuleTest {
                         )
                 )
         );
-        TargetEnvironment env = TargetEnvironment.create(sptarget, guide, ImCollections.<SPTarget>emptyList());
+        final TargetEnvironment env = TargetEnvironment.create(sptarget, guide, ImCollections.<UserTarget>emptyList());
 
         target.setTargetEnvironment(env);
         ISPObsComponent targetObsComp = createObsComp(target);
@@ -267,7 +267,7 @@ public class AbstractRuleTest {
                         )
                 )
         );
-        TargetEnvironment env = TargetEnvironment.create(sptarget, guide, ImCollections.<SPTarget>emptyList());
+        final TargetEnvironment env = TargetEnvironment.create(sptarget, guide, ImCollections.<UserTarget>emptyList());
 
         target.setTargetEnvironment(env);
         ISPObsComponent targetObsComp = createObsComp(target);

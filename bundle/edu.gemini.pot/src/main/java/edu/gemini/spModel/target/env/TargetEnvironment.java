@@ -2,9 +2,12 @@ package edu.gemini.spModel.target.env;
 
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.guide.GuideProbe;
+import edu.gemini.spModel.pio.Param;
 import edu.gemini.spModel.pio.ParamSet;
+import edu.gemini.spModel.pio.Pio;
 import edu.gemini.spModel.pio.PioFactory;
 import edu.gemini.spModel.target.SPTarget;
+import edu.gemini.spModel.target.SPTargetPio;
 
 import java.io.Serializable;
 import java.lang.ref.SoftReference;
@@ -47,7 +50,7 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
    * @param asterism the asterism for the observation
    */
     public static TargetEnvironment create(Asterism asterism) {
-      ImList<SPTarget> user = ImCollections.emptyList();
+      ImList<UserTarget> user = ImCollections.emptyList();
       return new TargetEnvironment(asterism, GuideEnvironment$.MODULE$.Initial(), user);
     }
 
@@ -64,19 +67,19 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
      * @param user list of user targets
      */
     @Deprecated
-    public static TargetEnvironment create(SPTarget base, GuideEnvironment guide, ImList<SPTarget> user) {
+    public static TargetEnvironment create(SPTarget base, GuideEnvironment guide, ImList<UserTarget> user) {
         return new TargetEnvironment(new Asterism.Single(base), guide, user);
     }
 
     private final Asterism asterism;
     private final GuideEnvironment guide;
-    private final ImList<SPTarget> user;
+    private final ImList<UserTarget> user;
 
     // Cached list of all the targets in this environment.  As a
     // SoftReference, this cache may disappear when memory is tight
     private transient SoftReference<ImList<SPTarget>> allTargets;
 
-    private TargetEnvironment(Asterism asterism, GuideEnvironment guide, ImList<SPTarget> user) {
+    private TargetEnvironment(Asterism asterism, GuideEnvironment guide, ImList<UserTarget> user) {
         if (asterism == null) throw new IllegalArgumentException("asterism = null");
         if (guide    == null) throw new IllegalArgumentException("guide = null");
         if (user     == null) throw new IllegalArgumentException("user targets = null");
@@ -195,7 +198,7 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
      *
      * @return user targets in the environment or an empty list if none
      */
-    public ImList<SPTarget> getUserTargets() {
+    public ImList<UserTarget> getUserTargets() {
         return user;
     }
 
@@ -223,7 +226,7 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
 
         // Doesn't exist yet/anymore so initialize it.
         if (res == null) {
-            res = asterism.allSpTargetsJava().append(guide.getTargets()).append(user);
+            res = asterism.allSpTargetsJava().append(guide.getTargets()).append(user.map(u -> u.target));
             allTargets = new SoftReference<>(res);
         }
         return res;
@@ -248,7 +251,7 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
      * environment.
      */
     public boolean isUserPosition(SPTarget target) {
-        return user.contains(target);
+        return user.find(p -> p.target.equals(target)).isDefined();
     }
 
     /**
@@ -268,7 +271,7 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
     public TargetEnvironment cloneTargets() {
         final Asterism clonedAsterism = asterism.copyWithClonedTargets();
         final GuideEnvironment clonedGuide = guide.cloneTargets();
-        final ImList<SPTarget> clonedUser = user.map(SPTarget::clone);
+        final ImList<UserTarget> clonedUser = user.map(UserTarget::cloneTarget);
         return new TargetEnvironment(clonedAsterism, clonedGuide, clonedUser);
     }
 
@@ -278,7 +281,7 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
      */
     @Override
     public TargetEnvironment removeTarget(SPTarget target) {
-        return setGuideEnvironment(guide.removeTarget(target)).setUserTargets(user.remove(target));
+        return setGuideEnvironment(guide.removeTarget(target)).setUserTargets(user.remove(p -> p.target.equals(target)));
     }
 
     public TargetEnvironment removeGroup(int groupIndex) {
@@ -318,7 +321,7 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
      * Creates an identical TargetEnvironment but with the given user target
      * list.
      */
-    public TargetEnvironment setUserTargets(ImList<SPTarget> userTargets) {
+    public TargetEnvironment setUserTargets(ImList<UserTarget> userTargets) {
         if (userTargets == this.user) return this;
         return new TargetEnvironment(asterism, guide, userTargets);
     }
@@ -339,11 +342,15 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
 
         // Add the user targets.
         if (user.size() > 0) {
-            ParamSet userPset = factory.createParamSet("userTargets");
-            for (SPTarget target : user) {
-                userPset.addParamSet(target.getParamSet(factory));
+            ParamSet userPsets = factory.createParamSet("userTargets");
+
+            for (UserTarget u : user) {
+                ParamSet ps = factory.createParamSet("userTarget");
+                Pio.addParam(factory, ps, "type", u.type.name());
+                ps.addParamSet(u.target.getParamSet(factory));
+                userPsets.addParamSet(ps);
             }
-            paramSet.addParamSet(userPset);
+            paramSet.addParamSet(userPsets);
         }
 
         return paramSet;
@@ -376,11 +383,13 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
         GuideEnvironment guide = parseGuideEnvironment(parent);
 
         // Get the user targets.
-        List<SPTarget> userTargets = new ArrayList<>();
-        ParamSet userPset = parent.getParamSet("userTargets");
+        final List<UserTarget> userTargets = new ArrayList<>();
+        final ParamSet userPset = parent.getParamSet("userTargets");
         if (userPset != null) {
             for (ParamSet ps : userPset.getParamSets()) {
-                userTargets.add(SPTarget.fromParamSet(ps));
+                final Option<UserTarget.Type> targetType = UserTarget.Type.fromString(Pio.getValue(ps, "type"));
+                final ParamSet tps = ps.getParamSet(SPTargetPio.PARAM_SET_NAME);
+                targetType.foreach(t -> userTargets.add(new UserTarget(t, SPTarget.fromParamSet(tps))));
             }
         }
 

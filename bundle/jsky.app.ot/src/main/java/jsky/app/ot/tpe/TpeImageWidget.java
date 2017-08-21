@@ -11,6 +11,7 @@ import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.target.*;
 import edu.gemini.spModel.target.env.Asterism;
 import edu.gemini.spModel.target.env.TargetEnvironment;
+import edu.gemini.spModel.target.env.UserTarget;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.target.offset.OffsetPosBase;
 import edu.gemini.spModel.telescope.PosAngleConstraint;
@@ -1046,8 +1047,9 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
                 if (stats.getRow().size() > 0 && stats.getRow().elementAt(0) != null) {
                     newTarget.setName(stats.getRow().elementAt(0).toString());
                 }
-                TargetEnvironment te = obsComp.getTargetEnvironment().setUserTargets(obsComp.getTargetEnvironment().getUserTargets().append(newTarget));
-                obsComp.setTargetEnvironment(te);
+                final UserTarget         newUserTarget  = new UserTarget(UserTarget.Type.other, newTarget);
+                final ImList<UserTarget> newUserTargets = obsComp.getTargetEnvironment().getUserTargets().append(newUserTarget);
+                obsComp.setTargetEnvironment(obsComp.getTargetEnvironment().setUserTargets(newUserTargets));
                 getContext().targets().commit();
             }
         } else {

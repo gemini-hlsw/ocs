@@ -83,7 +83,7 @@ public final class TargetGroupTest extends TestBase {
     @Test public void testUnamedBaseAndUser() throws Exception {
         final SPTarget base = new SPTarget(); base.setName("");
         final SPTarget user = new SPTarget(); user.setName("");
-        final ImList<SPTarget> userTargets = ImCollections.singletonList(user);
+        final ImList<UserTarget> userTargets = ImCollections.singletonList(new UserTarget(UserTarget.Type.other, user));
 
         nameMap.putTargetName(base, TccNames.BASE);
         nameMap.putTargetName(user, "User (1)");
@@ -95,7 +95,7 @@ public final class TargetGroupTest extends TestBase {
         final GuideProbeTargets gt = GuideProbeTargets.create(PwfsGuideProbe.pwfs2, targetList);
 
         final ImList<GuideProbeTargets> gtCollection = DefaultImList.create(gt);
-        final ImList<SPTarget> userTargets = ImCollections.emptyList();
+        final ImList<UserTarget> userTargets = ImCollections.emptyList();
 
         final TargetEnvironment env = TargetEnvironment.create(base).setAllPrimaryGuideProbeTargets(gtCollection).setUserTargets(userTargets);
         testTargetEnvironment(env);
@@ -148,7 +148,7 @@ public final class TargetGroupTest extends TestBase {
         nameMap.putGuiderName(GmosOiwfsGuideProbe.instance, "OIWFS");
 
         final ImList<GuideProbeTargets> gtCollection = DefaultImList.create(gt);
-        final ImList<SPTarget> userTargets = ImCollections.emptyList();
+        final ImList<UserTarget>         userTargets = ImCollections.emptyList();
 
         final TargetEnvironment env = TargetEnvironment.create(base).setAllPrimaryGuideProbeTargets(gtCollection).setUserTargets(userTargets);
         testTargetEnvironment(env);
@@ -422,7 +422,7 @@ public final class TargetGroupTest extends TestBase {
         // Check the base element.
         Element baseGroupElement = getGroupElement(TccNames.BASE, groupElements);
         assertNotNull(baseGroupElement);
-        ImList<SPTarget> targets = env.getUserTargets();
+        ImList<SPTarget> targets = env.getUserTargets().map(u -> u.target);
         targets = targets.cons(env.getArbitraryTargetFromAsterism());
 
         String baseName = nameMap.getTargetName(env.getArbitraryTargetFromAsterism());

@@ -14,6 +14,7 @@ import edu.gemini.spModel.target.env.GuideEnvironment;
 import edu.gemini.spModel.target.env.GuideGroup;
 import edu.gemini.spModel.target.env.GuideProbeTargets;
 import edu.gemini.spModel.target.env.TargetEnvironment;
+import edu.gemini.spModel.target.env.UserTarget;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.target.env.OptionsListImpl;
 import org.dom4j.Document;
@@ -51,7 +52,7 @@ public final class GuideGroupTest extends TestBase {
 
     private TargetEnvironment create(final GuideProbe... probes) {
         final ImList<GuideProbeTargets> gtCollection = createGuideTargetsList(probes);
-        final ImList<SPTarget> userTargets = ImCollections.emptyList();
+        final ImList<UserTarget>         userTargets = ImCollections.emptyList();
         return TargetEnvironment.create(base).setAllPrimaryGuideProbeTargets(gtCollection).setUserTargets(userTargets);
     }
 

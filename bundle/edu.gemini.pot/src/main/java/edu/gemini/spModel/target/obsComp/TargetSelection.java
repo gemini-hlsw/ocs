@@ -9,6 +9,7 @@ import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.GuideGroup;
 import edu.gemini.spModel.target.env.IndexedGuideGroup;
 import edu.gemini.spModel.target.env.TargetEnvironment;
+import edu.gemini.spModel.target.env.UserTarget;
 
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
@@ -99,8 +100,8 @@ public final class TargetSelection {
                     res.add(new GuideStarSelection(idx++, g, t));
                 }
             }
-            for (final SPTarget t : env.getUserTargets()) {
-                res.add(new NormalTargetSelection(idx++, t));
+            for (final UserTarget t : env.getUserTargets()) {
+                res.add(new NormalTargetSelection(idx++, t.target));
             }
             return DefaultImList.create(res);
         }
