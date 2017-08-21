@@ -54,6 +54,9 @@
                 <xsl:when test="$pageLayout='default-us-letter' and $investigatorsList='atTheEnd'">
                     <xsl:copy-of select="document('templates/snippets/layout.xml')/xsl:stylesheet/noao-letter-noil/fo:layout-master-set"/>
                 </xsl:when>
+                <xsl:when test="$pageLayout='default-us-letter' and $investigatorsList='default'">
+                    <xsl:copy-of select="document('templates/snippets/layout.xml')/xsl:stylesheet/noao-letter-default/fo:layout-master-set"/>
+                </xsl:when>
                 <xsl:when test="$pageLayout='default-us-letter'">
                     <xsl:copy-of select="document('templates/snippets/layout.xml')/xsl:stylesheet/noao-letter/fo:layout-master-set"/>
                 </xsl:when>
