@@ -52,19 +52,23 @@ object P1PDF {
     Map("partner"->"au", "pageLayout" -> "default-us-letter", "title" -> "GEMINI OBSERVATORY"))
 
   object CL extends Template(
-    "Chilean NGO", "templates/xsl-default.xml",    PDF.Letter, InvestigatorsListOption.DefaultList,
+    "Chilean NGO", "templates/xsl-default.xml", PDF.Letter, InvestigatorsListOption.DefaultList,
     Map("partner"->"cl", "pageLayout" -> "default-us-letter", "title" -> "PROPUESTA CONICYT-Gemini"))
 
   object NOAO extends Template(
-    "NOAO",   "templates/xsl-NOAO.xml",            PDF.Letter, InvestigatorsListOption.AtTheEndList,
+    "NOAO",   "templates/xsl-NOAO.xml", PDF.Letter, InvestigatorsListOption.DefaultList,
+    Map("partner"->"us", "pageLayout" -> "default-us-letter"))
+
+  object NOAOListAtTheEnd extends Template(
+    "NOAO CoIs at End",   "templates/xsl-NOAO.xml", PDF.Letter, InvestigatorsListOption.AtTheEndList,
     Map("partner"->"us", "pageLayout" -> "default-us-letter"))
 
   object NOAONoInvestigatorsList extends Template(
-    "NOAO No CoIs",   "templates/xsl-NOAO.xml",            PDF.Letter, InvestigatorsListOption.NoList,
+    "NOAO No CoIs",   "templates/xsl-NOAO.xml", PDF.Letter, InvestigatorsListOption.NoList,
     Map("partner"->"us", "pageLayout" -> "default-us-letter"))
 
   /** Gets a list with all templates that are currently available. */
-  def templates = List(GeminiDefault, GeminiDefaultNoInvestigatorsList, GeminiDefaultListAtTheEnd, AU, CL, NOAO, NOAONoInvestigatorsList)
+  def templates = List(GeminiDefault, GeminiDefaultNoInvestigatorsList, GeminiDefaultListAtTheEnd, AU, CL, NOAO, NOAOListAtTheEnd, NOAONoInvestigatorsList)
 
   def templatesMap = templatesList.toMap
 
@@ -80,6 +84,7 @@ object P1PDF {
     "gsiend" -> GeminiDefaultListAtTheEnd,
     "gsnoi"  -> GeminiDefaultNoInvestigatorsList,
     "us"     -> NOAO,
+    "usend"  -> NOAOListAtTheEnd,
     "usnoi"  -> NOAONoInvestigatorsList)
 
   /**
@@ -170,7 +175,7 @@ object P1PDF {
     val home = System.getProperty("user.home")
     val in = new File(s"$home/pitsource.xml")
     val out = new File(s"$home/pittarget.pdf")
-    createFromFile(in, GeminiDefaultListAtTheEnd, out)
+    createFromFile(in, NOAONoInvestigatorsList, out)
 
     val ok = Runtime.getRuntime.exec(Array("open", out.getAbsolutePath)).waitFor
     println("Exec returned " + ok)
