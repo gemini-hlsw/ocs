@@ -1134,13 +1134,22 @@ final class UserPositionType implements PositionType {
     @Override public void morphTarget(final TargetObsComp obsComp, final SPTarget target) {
         TargetEnvironment env = obsComp.getTargetEnvironment();
         if (isMember(env, target)) return;
-        env = env.removeTarget(target);
 
-        obsComp.setTargetEnvironment(
-            env.setUserTargets(
-                env.getUserTargets().append(new UserTarget(userTargetType, target))
-            )
-        );
+        final UserTarget ut = new UserTarget(userTargetType, target);
+
+        final TargetEnvironment newEnv;
+        if (env.isUserPosition(target)) {
+            // It's a user target that we're morphing so we'll do it in place so
+            // that we don't rearrange the order of the user targets.
+            final ImList<UserTarget> us = env.getUserTargets();
+            final int i = us.indexWhere(u -> u.target.equals(target));
+            newEnv = (i < 0) ? env : env.setUserTargets(us.updated(i, ut));
+        } else {
+            // Otherwise, we'll remove and append.
+            newEnv = env.removeTarget(target).setUserTargets(env.getUserTargets().append(ut));
+        }
+        obsComp.setTargetEnvironment(newEnv);
+
     }
 
     @Override public boolean isMember(final TargetEnvironment env, final SPTarget target) {

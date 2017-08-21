@@ -304,6 +304,12 @@ public class ImListTest extends TestCase {
         }
     };
 
+    public void testIndexWhere() {
+        assertEquals(-1, create(1, 3, 5, 7).indexWhere(even));
+        assertEquals(0,  create(0, 1, 2, 3).indexWhere(even));
+        assertEquals(3,  create(1, 3, 5, 6).indexWhere(even));
+    }
+
     public void testFind() {
         assertEquals(None.INSTANCE, create(1, 3, 5, 7).find(even));
         assertEquals(new Some<Integer>(0), create(0, 1, 2).find(even));

@@ -159,6 +159,14 @@ public final class DefaultImList<T> implements ImList<T>, Serializable {
     }
 
     @Override
+    public int indexWhere(Function1<? super T, Boolean> p) {
+        for (int i=0; i<backingList.size(); ++i) {
+            if (p.apply(backingList.get(i))) return i;
+        }
+        return -1;
+    }
+
+    @Override
     public boolean isEmpty() {
         return backingList.isEmpty();
     }
