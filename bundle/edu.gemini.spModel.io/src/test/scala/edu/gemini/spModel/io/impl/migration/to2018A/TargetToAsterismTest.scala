@@ -21,7 +21,7 @@ class TargetToAsterismTest extends Specification with MigrationTest {
        .getOrElse(sys.error(s"Couldn't find asterism for observation named '$obsName'."))
   }
 
-  "2017B Asterism Migration" should {
+  "2018A Asterism Migration" should {
 
     "Convert sidereal targets." in withTestProgram2("asterism.xml") {
       _.findAsterism("sidereal") must beLike {

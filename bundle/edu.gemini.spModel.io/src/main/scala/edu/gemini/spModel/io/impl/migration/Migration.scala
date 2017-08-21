@@ -64,6 +64,13 @@ trait Migration {
       ps  <- env.allParamSets if ps.getName == ParamSetBase
     } yield (obs.getParamSet(ParamSetObservation), ps)
 
+  protected def targetEnvs(d: Document): List[ParamSet] =
+    for {
+      obs <- d.findContainers(SPComponentType.OBSERVATION_BASIC)
+      cnt <- obs.findContainers(SPComponentType.TELESCOPE_TARGETENV)
+      env <- cnt.allParamSets if env.getName == ParamSetTargetEnv
+    } yield env
+
   /** (target env paramset, target paramset) paramset pairs **/
   protected def envAndBases(d: Document): List[(ParamSet, ParamSet)] =
     for {
