@@ -692,8 +692,7 @@ public final class Obs implements Serializable, Comparable<Obs> {
     }
 
     public WorldCoords getCoords(Long when) {
-        if (coords == null) coords = new WorldCoords(getRa(when), getDec(when));
-        return coords;
+        return new WorldCoords(getRa(when), getDec(when));
     }
 
     public String getInstrumentString() {
