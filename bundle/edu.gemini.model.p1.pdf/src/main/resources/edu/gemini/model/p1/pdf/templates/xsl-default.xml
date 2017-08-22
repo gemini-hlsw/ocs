@@ -30,6 +30,7 @@
     <xsl:param name="partner"/>
     <xsl:param name="title"/>
     <xsl:param name="investigatorsList"/>
+    <xsl:param name="partnerLeadDisplay"/>
 
     <xsl:template match="proposal">
         <fo:root>
@@ -484,11 +485,22 @@
                                                     </xsl:call-template>
                                                 </fo:block>
                                             </fo:table-cell>
-                                            <fo:table-cell>
-                                                <fo:block>
-                                                    <xsl:value-of select="/proposal/investigators/*[@id = $leadSciRef]/lastName"/>
-                                                </fo:block>
-                                            </fo:table-cell>
+                                            <xsl:choose>
+                                                <xsl:when test="$partnerLeadDisplay='default'">
+                                                    <fo:table-cell>
+                                                        <fo:block>
+                                                            <xsl:value-of select="/proposal/investigators/*[@id = $leadSciRef]/lastName"/>
+                                                        </fo:block>
+                                                    </fo:table-cell>
+                                                </xsl:when>
+                                                <xsl:otherwise>
+                                                    <fo:table-cell>
+                                                        <fo:block>
+                                                            -
+                                                        </fo:block>
+                                                    </fo:table-cell>
+                                                </xsl:otherwise>
+                                            </xsl:choose>
                                             <fo:table-cell>
                                                 <fo:block>
                                                     <xsl:value-of select="format-number(request/time, '0.0')"/>

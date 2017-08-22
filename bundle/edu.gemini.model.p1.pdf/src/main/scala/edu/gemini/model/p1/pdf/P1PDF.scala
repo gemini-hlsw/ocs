@@ -13,6 +13,20 @@ import io.Source
  */
 object P1PDF {
 
+  sealed trait PartnerLeadDisplayOption {
+    def param: String
+  }
+
+  object PartnerLeadDisplayOption {
+    val PartnerLeadParam = "partnerLeadDisplay"
+    case object DefaultDisplay extends PartnerLeadDisplayOption {
+      val param = "default"
+    }
+    case object NoDisplay extends PartnerLeadDisplayOption {
+      val param = "no"
+    }
+  }
+
   sealed trait InvestigatorsListOption {
     def param: String
   }
@@ -30,41 +44,41 @@ object P1PDF {
     }
   }
 
-  sealed case class Template(name: String, location: String, pageSize: PDF.PageSize, investigatorsList: InvestigatorsListOption, params: Map[String, String]) {
+  sealed case class Template(name: String, location: String, pageSize: PDF.PageSize, investigatorsList: InvestigatorsListOption, partnerLead: PartnerLeadDisplayOption, params: Map[String, String]) {
     def value(): String = name
-    val parameters: Map[String, String] = params + (InvestigatorsListOption.InvestigatorsListParam -> investigatorsList.param)
+    val parameters: Map[String, String] = params + (InvestigatorsListOption.InvestigatorsListParam -> investigatorsList.param) + (PartnerLeadDisplayOption.PartnerLeadParam -> partnerLead.param)
   }
 
   object GeminiDefault extends Template(
-    "Gemini Default", "templates/xsl-default.xml", PDF.Letter, InvestigatorsListOption.DefaultList,
+    "Gemini Default", "templates/xsl-default.xml", PDF.Letter, InvestigatorsListOption.DefaultList, PartnerLeadDisplayOption.DefaultDisplay,
     Map("partner"->"gs", "pageLayout" -> "default-us-letter", "title" -> "GEMINI OBSERVATORY"))
 
   object GeminiDefaultNoInvestigatorsList extends Template(
-    "Gemini No CoIs", "templates/xsl-default.xml", PDF.Letter, InvestigatorsListOption.NoList,
+    "Gemini No CoIs", "templates/xsl-default.xml", PDF.Letter, InvestigatorsListOption.NoList, PartnerLeadDisplayOption.NoDisplay,
     Map("partner"->"gs", "pageLayout" -> "default-us-letter", "title" -> "GEMINI OBSERVATORY"))
 
   object GeminiDefaultListAtTheEnd extends Template(
-    "Gemini CoIs at End", "templates/xsl-default.xml", PDF.Letter, InvestigatorsListOption.AtTheEndList,
+    "Gemini CoIs at End", "templates/xsl-default.xml", PDF.Letter, InvestigatorsListOption.AtTheEndList, PartnerLeadDisplayOption.NoDisplay,
     Map("partner"->"gs", "pageLayout" -> "default-us-letter", "title" -> "GEMINI OBSERVATORY"))
 
   object AU extends Template(
-    "Australian NGO", "templates/xsl-default.xml", PDF.Letter, InvestigatorsListOption.AtTheEndList,
+    "Australian NGO", "templates/xsl-default.xml", PDF.Letter, InvestigatorsListOption.AtTheEndList, PartnerLeadDisplayOption.NoDisplay,
     Map("partner"->"au", "pageLayout" -> "default-us-letter", "title" -> "GEMINI OBSERVATORY"))
 
   object CL extends Template(
-    "Chilean NGO", "templates/xsl-default.xml", PDF.Letter, InvestigatorsListOption.DefaultList,
+    "Chilean NGO", "templates/xsl-default.xml", PDF.Letter, InvestigatorsListOption.DefaultList, PartnerLeadDisplayOption.DefaultDisplay,
     Map("partner"->"cl", "pageLayout" -> "default-us-letter", "title" -> "PROPUESTA CONICYT-Gemini"))
 
   object NOAO extends Template(
-    "NOAO",   "templates/xsl-NOAO.xml", PDF.Letter, InvestigatorsListOption.DefaultList,
+    "NOAO",   "templates/xsl-NOAO.xml", PDF.Letter, InvestigatorsListOption.DefaultList, PartnerLeadDisplayOption.DefaultDisplay,
     Map("partner"->"us", "pageLayout" -> "default-us-letter"))
 
   object NOAOListAtTheEnd extends Template(
-    "NOAO CoIs at End",   "templates/xsl-NOAO.xml", PDF.Letter, InvestigatorsListOption.AtTheEndList,
+    "NOAO CoIs at End",   "templates/xsl-NOAO.xml", PDF.Letter, InvestigatorsListOption.AtTheEndList, PartnerLeadDisplayOption.DefaultDisplay,
     Map("partner"->"us", "pageLayout" -> "default-us-letter"))
 
   object NOAONoInvestigatorsList extends Template(
-    "NOAO No CoIs",   "templates/xsl-NOAO.xml", PDF.Letter, InvestigatorsListOption.NoList,
+    "NOAO No CoIs",   "templates/xsl-NOAO.xml", PDF.Letter, InvestigatorsListOption.NoList, PartnerLeadDisplayOption.DefaultDisplay,
     Map("partner"->"us", "pageLayout" -> "default-us-letter"))
 
   /** Gets a list with all templates that are currently available. */
@@ -175,7 +189,7 @@ object P1PDF {
     val home = System.getProperty("user.home")
     val in = new File(s"$home/pitsource.xml")
     val out = new File(s"$home/pittarget.pdf")
-    createFromFile(in, NOAONoInvestigatorsList, out)
+    createFromFile(in, GeminiDefault, out)
 
     val ok = Runtime.getRuntime.exec(Array("open", out.getAbsolutePath)).waitFor
     println("Exec returned " + ok)
