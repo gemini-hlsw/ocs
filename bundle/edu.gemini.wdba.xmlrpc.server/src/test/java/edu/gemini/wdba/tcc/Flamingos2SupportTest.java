@@ -11,6 +11,7 @@ import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.GuideProbeTargets;
 import edu.gemini.spModel.target.env.TargetEnvironment;
+import edu.gemini.spModel.target.env.UserTarget;
 import edu.gemini.spModel.target.obsComp.PwfsGuideProbe;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.telescope.IssPort;
@@ -45,7 +46,7 @@ public final class Flamingos2SupportTest extends InstrumentSupportTestBase<Flami
 
     private TargetEnvironment create(final GuideProbe... probes) {
         final ImList<GuideProbeTargets> gtCollection = createGuideTargetsList(probes);
-        final ImList<SPTarget> userTargets = ImCollections.emptyList();
+        final ImList<UserTarget>         userTargets = ImCollections.emptyList();
         return TargetEnvironment.create(base).setAllPrimaryGuideProbeTargets(gtCollection).setUserTargets(userTargets);
     }
 

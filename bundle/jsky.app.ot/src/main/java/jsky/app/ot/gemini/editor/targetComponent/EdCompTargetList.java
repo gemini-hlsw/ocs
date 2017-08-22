@@ -218,14 +218,13 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
      */
     private boolean selectionIsUserTarget() {
         final TargetEnvironment env = getDataObject().getTargetEnvironment();
-        return selectedTarget().exists(t -> env.getUserTargets().contains(t));
+        return selectedTarget().exists(t -> env.isUserPosition(t));
     }
 
     /**
      * Auxiliary method to set the selection to the specified target.
      */
     private void setSelectionToTarget(final SPTarget t) {
-        //_curSelection = ImOption.apply(t).map(Left<SPTarget,IndexedGuideGroup>::new);
         _curSelection = ImOption.apply(t).map(Left::new);
     }
 
@@ -423,9 +422,11 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 updateGuideStarAdders();
             }
 
-            _w.newMenu.add(new JMenuItem("User") {{
-                addActionListener(new AddUserTargetAction(newTOC, _w.positionTable));
-            }});
+            for (UserTarget.Type t : UserTarget.Type.values()) {
+                _w.newMenu.add(new JMenuItem(t.displayName) {{
+                    addActionListener(new AddUserTargetAction(t, newTOC, _w.positionTable));
+                }});
+            }
 
             if (inst.hasGuideProbes()) {
                 _w.newMenu.addSeparator();
@@ -539,13 +540,15 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
         // Make a list of PositionTypes that are legal in the current observation context.
         int index = 0;
-        final PositionType[] ptA = new PositionType[2 + guiders.size()];
+        final PositionType[] ptA = new PositionType[1 + guiders.size() + UserTarget.Type.values().length];
         ptA[index++] = BasePositionType.instance;
         for (GuideProbe guider : guidersList) {
             final boolean guiderNotIllegal = !guider.equals(illegal);
             ptA[index++] = new GuidePositionType(guider, guiderNotIllegal, _w.positionTable);
         }
-        ptA[index] = UserPositionType.instance;
+        for (UserTarget.Type t : UserTarget.Type.values()) {
+            ptA[index++] = new UserPositionType(t);
+        }
 
         _w.tag.removeActionListener(_tagListener);
         _w.tag.setModel(new DefaultComboBoxModel<>(ptA));
@@ -629,14 +632,18 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     }
 
     private static class AddUserTargetAction extends AddAction {
-        AddUserTargetAction(final TargetObsComp obsComp, final TelescopePosTableWidget positionTable) {
+        private final UserTarget.Type userTargetType;
+
+        AddUserTargetAction(final UserTarget.Type utt, final TargetObsComp obsComp, final TelescopePosTableWidget positionTable) {
             super(obsComp, positionTable);
+            userTargetType = utt;
         }
 
         @Override public void actionPerformed(final ActionEvent actionEvent) {
             final TargetEnvironment env = obsComp.getTargetEnvironment();
             final SPTarget target = new SPTarget();
-            final TargetEnvironment newEnv = env.setUserTargets(env.getUserTargets().append(target));
+            final UserTarget   ut = new UserTarget(userTargetType, target);
+            final TargetEnvironment newEnv = env.setUserTargets(env.getUserTargets().append(ut));
             obsComp.setTargetEnvironment(newEnv);
             positionTable.selectTarget(target);
         }
@@ -886,9 +893,18 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                     groups.add(group);
                 }
 
-                final TargetEnvironment newEnv = duplicated ?
-                        env.setGuideEnvironment(env.getGuideEnvironment().setOptions(DefaultImList.create(groups))) :
-                        env.setUserTargets(env.getUserTargets().append(newTarget));
+                final TargetEnvironment newEnv;
+
+                if (duplicated) {
+                    newEnv = env.setGuideEnvironment(env.getGuideEnvironment().setOptions(DefaultImList.create(groups)));
+                } else {
+                    // Wasn't a guide star so check which user target needs to
+                    // be copied.
+                    final ImList<UserTarget> us = env.getUserTargets();
+                    newEnv = us.find(u -> u.target.equals(target)).map(u ->
+                        env.setUserTargets(us.append(new UserTarget(u.type, newTarget)))
+                    ).getOrElse(env);
+                }
                 dataObject.setTargetEnvironment(newEnv);
             });
         } else {
@@ -1029,8 +1045,8 @@ enum BasePositionType implements PositionType {
 
         final SPTarget base = env.getArbitraryTargetFromAsterism();
 
-        final GuideEnvironment genv = env.getGuideEnvironment();
-        final ImList<SPTarget> user = env.getUserTargets().append(base);
+        final GuideEnvironment   genv = env.getGuideEnvironment();
+        final ImList<UserTarget> user = env.getUserTargets().append(new UserTarget(UserTarget.Type.other, base));
 
         final TargetEnvironment newEnv = TargetEnvironment.create(target, genv, user);
         obsComp.setTargetEnvironment(newEnv);
@@ -1045,7 +1061,7 @@ enum BasePositionType implements PositionType {
     }
 }
 
-class GuidePositionType implements PositionType {
+final class GuidePositionType implements PositionType {
     private final GuideProbe guider;
     private final boolean available;
     private final TelescopePosTableWidget positionTable;
@@ -1104,8 +1120,12 @@ class GuidePositionType implements PositionType {
     }
 }
 
-enum UserPositionType implements PositionType {
-    instance;
+final class UserPositionType implements PositionType {
+    final UserTarget.Type userTargetType;
+
+    UserPositionType(UserTarget.Type t) {
+        this.userTargetType = t;
+    }
 
     @Override public boolean isAvailable() {
         return true;
@@ -1114,17 +1134,29 @@ enum UserPositionType implements PositionType {
     @Override public void morphTarget(final TargetObsComp obsComp, final SPTarget target) {
         TargetEnvironment env = obsComp.getTargetEnvironment();
         if (isMember(env, target)) return;
-        env = env.removeTarget(target);
 
-        final TargetEnvironment newEnv = env.setUserTargets(env.getUserTargets().append(target));
+        final UserTarget ut = new UserTarget(userTargetType, target);
+
+        final TargetEnvironment newEnv;
+        if (env.isUserPosition(target)) {
+            // It's a user target that we're morphing so we'll do it in place so
+            // that we don't rearrange the order of the user targets.
+            final ImList<UserTarget> us = env.getUserTargets();
+            final int i = us.indexWhere(u -> u.target.equals(target));
+            newEnv = (i < 0) ? env : env.setUserTargets(us.updated(i, ut));
+        } else {
+            // Otherwise, we'll remove and append.
+            newEnv = env.removeTarget(target).setUserTargets(env.getUserTargets().append(ut));
+        }
         obsComp.setTargetEnvironment(newEnv);
+
     }
 
     @Override public boolean isMember(final TargetEnvironment env, final SPTarget target) {
-        return env.getUserTargets().contains(target);
+        return env.getUserTargets().find(u -> u.type == userTargetType && u.target.equals(target)).isDefined();
     }
 
     @Override public String toString() {
-        return TargetEnvironment.USER_NAME;
+        return userTargetType.displayName;
     }
 }

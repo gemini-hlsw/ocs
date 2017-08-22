@@ -7,6 +7,7 @@ import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.GuideProbeTargets;
 import edu.gemini.spModel.target.env.TargetEnvironment;
+import edu.gemini.spModel.target.env.UserTarget;
 import edu.gemini.spModel.target.obsComp.PwfsGuideProbe;
 
 import java.util.*;
@@ -33,7 +34,7 @@ enum SPTargetPosListParser {
         TargetEnvironment toTargetEnv() {
             if (base == null) base = new SPTarget();
             final ImList<GuideProbeTargets> glst = DefaultImList.create(guideMap.values());
-            final ImList<SPTarget> ulst = DefaultImList.create(userTargets);
+            final ImList<UserTarget>        ulst = DefaultImList.create(userTargets).map(t -> new UserTarget(UserTarget.Type.other, t));
             return TargetEnvironment.create(base).setAllPrimaryGuideProbeTargets(glst).setUserTargets(ulst);
         }
     }

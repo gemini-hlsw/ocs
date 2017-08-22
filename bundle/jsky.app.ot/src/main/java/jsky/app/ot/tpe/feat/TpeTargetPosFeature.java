@@ -7,6 +7,7 @@ import edu.gemini.shared.util.immutable.Some;
 import edu.gemini.spModel.core.SiderealTarget;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.TargetEnvironment;
+import edu.gemini.spModel.target.env.UserTarget;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.target.obsComp.TargetSelection;
 import jsky.app.ot.tpe.*;
@@ -26,11 +27,59 @@ public class TpeTargetPosFeature extends TpePositionFeature
         _props.registerBooleanProperty(PROP_SHOW_TAGS, true);
     }
 
+    private final class UserCreateableItem implements TpeCreatableItem {
+        private final UserTarget.Type userTargetType;
+
+        UserCreateableItem(UserTarget.Type t) {
+            this.userTargetType = t;
+        }
+
+        public String getLabel() {
+            return userTargetType.displayName;
+        }
+
+        public Type getType() {
+            return Type.userTarget;
+        }
+
+        public boolean isEnabled(TpeContext ctx) {
+            return ctx.targets().isDefined();
+        }
+
+        public void create(TpeMouseEvent tme, TpeImageInfo tii) {
+            final TargetObsComp obsComp = getTargetObsComp();
+            if (obsComp == null) return;
+
+            final Option<SiderealTarget> targetOpt = tme.target;
+            final SPTarget userPos = targetOpt.map(SPTarget::new).getOrElse(() -> {
+                final double ra  = tme.pos.ra().toDegrees();
+                final double dec = tme.pos.dec().toDegrees();
+                // No SkyObject info is present so we use the old way of creating
+                // a target from a mouse event using only the coordinates.
+                return new SPTarget(ra, dec);
+            });
+
+            final TargetEnvironment env = obsComp.getTargetEnvironment();
+            final UserTarget          u = new UserTarget(userTargetType, userPos);
+            final ImList<UserTarget> us = env.getUserTargets().append(u);
+            obsComp.setTargetEnvironment(env.setUserTargets(us));
+            _iw.getContext().targets().commit();
+        }
+    }
+
+
+    private final TpeCreatableItem[] createableItems = new TpeCreatableItem[UserTarget.Type.values().length];
+
     /**
      * Construct the feature with its name and description.
      */
     public TpeTargetPosFeature() {
         super("Target", "Show the locations of target positions.");
+
+        final UserTarget.Type[] ts = UserTarget.Type.values();
+        for (int i=0; i<ts.length; ++i) {
+            createableItems[i] = new UserCreateableItem(ts[i]);
+        }
     }
 
 
@@ -85,40 +134,6 @@ public class TpeTargetPosFeature extends TpePositionFeature
         return _props.getBoolean(PROP_SHOW_TAGS, true);
     }
 
-    private final TpeCreatableItem[] createableItems = new TpeCreatableItem[] {
-        new TpeCreatableItem() {
-            public String getLabel() {
-                return "Target";
-            }
-
-            public Type getType() {
-                return Type.userTarget;
-            }
-
-            public boolean isEnabled(TpeContext ctx) {
-                return ctx.targets().isDefined();
-            }
-
-            public void create(TpeMouseEvent tme, TpeImageInfo tii) {
-                final TargetObsComp obsComp = getTargetObsComp();
-                if (obsComp == null) return;
-
-                final Option<SiderealTarget> targetOpt = tme.target;
-                SPTarget userPos = targetOpt.map(SPTarget::new).getOrElse(() -> {
-                    final double ra  = tme.pos.ra().toDegrees();
-                    final double dec = tme.pos.dec().toDegrees();
-                    // No SkyObject info is present so we use the old way of creating
-                    // a target from a mouse event using only the coordinates.
-                    return new SPTarget(ra, dec);
-                });
-
-                final TargetEnvironment env = obsComp.getTargetEnvironment();
-                final ImList<SPTarget> userList = env.getUserTargets().append(userPos);
-                obsComp.setTargetEnvironment(env.setUserTargets(userList));
-                _iw.getContext().targets().commit();
-            }
-        }
-    };
 
     /**
      */
@@ -140,11 +155,11 @@ public class TpeTargetPosFeature extends TpePositionFeature
             final SPTarget tp = pme.taggedPos;
 
             final TargetEnvironment env = obsComp.getTargetEnvironment();
-            if (!env.getUserTargets().contains(tp)) continue;
+            if (!env.isUserPosition(tp)) continue;
 
             if (positionIsClose(pme, tme.xWidget, tme.yWidget)) {
-                ImList<SPTarget> userList = env.getUserTargets().remove(tp);
-                obsComp.setTargetEnvironment(env.setUserTargets(userList));
+                ImList<UserTarget> us = env.getUserTargets().remove(t -> t.target.equals(tp));
+                obsComp.setTargetEnvironment(env.setUserTargets(us));
                 _iw.getContext().targets().commit();
                 return true;
             }
@@ -164,7 +179,7 @@ public class TpeTargetPosFeature extends TpePositionFeature
         if (tp == null) return null;
 
         final TargetEnvironment env = obsComp.getTargetEnvironment();
-        if (!env.getUserTargets().contains(tp)) return null;
+        if (!env.isUserPosition(tp)) return null;
 
         TargetSelection.setTargetForNode(env, getContext().targets().shell().get(), tp);
         return tp;
@@ -186,11 +201,11 @@ public class TpeTargetPosFeature extends TpePositionFeature
         if (drawTags) g.setFont(FONT);
 
         int index = 1;
-        for (SPTarget target : env.getUserTargets()) {
-            final PosMapEntry<SPTarget> pme = pm.getPositionMapEntry(target);
+        for (UserTarget u : env.getUserTargets()) {
+            final PosMapEntry<SPTarget> pme = pm.getPositionMapEntry(u.target);
             if (pme == null) continue;
 
-            final String tag = String.format("User (%d)", index++);
+            final String tag = String.format("%s (%d)", u.type.displayName, index++);
 
             final Point2D.Double p = pme.screenPos;
             if (p == null) continue;

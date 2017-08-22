@@ -21,7 +21,7 @@ public final class TargetGroupConfig extends ParamSet {
     public static final String TYPE_VALUE="targetgroup";
 
     public static TargetGroupConfig createBaseGroup(final TargetEnvironment env) {
-        final ImList<SPTarget> targets = env.getUserTargets().cons(env.getArbitraryTargetFromAsterism());
+        final ImList<SPTarget> targets = env.getUserTargets().map(u -> u.target).cons(env.getArbitraryTargetFromAsterism());
         return new TargetGroupConfig(TccNames.BASE, targets, ImOption.apply(env.getArbitraryTargetFromAsterism()));
     }
 

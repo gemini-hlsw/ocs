@@ -30,35 +30,44 @@ public final class AgsStrategyPanel extends AgsSelectorControl {
 
     public void setAgsOptions(final AgsContext opts) {
         // clear current strategies from gui
-        pan.remove(label);
+        pan.removeAll();
         for (JRadioButton button : buttons) {
-            pan.remove(button);
             buttonGroup.remove(button);
         }
         buttons.clear();
 
         if (opts.nonEmpty()) {
-            pan.add(label);
+            pan.add(createRow(0, label));
 
             final boolean usingDefault = opts.usingDefault();
+
+            final int indent = 5;
 
             if (opts.defaultStrategy.isDefined()) {
                 final JRadioButton button = mkButton(opts.defaultStrategy.getValue(), true);
                 buttons.add(button);
-                pan.add(button);
+                pan.add(createRow(indent, button));
                 button.setSelected(usingDefault);
             }
 
             for (final AgsStrategy s : opts.validStrategies) {
                 final JRadioButton button = mkButton(s, false);
                 buttons.add(button);
-                pan.add(button);
+                pan.add(createRow(indent, button));
                 button.setSelected(!usingDefault && opts.strategyOverride.exists(sel -> sel == s));
             }
         }
 
         pan.revalidate();
         pan.repaint();
+    }
+
+    private static Box createRow(int indent, JComponent cmp) {
+        final Box b = Box.createHorizontalBox();
+        b.add(Box.createHorizontalStrut(indent));
+        b.add(cmp);
+        b.add(Box.createHorizontalGlue());
+        return b;
     }
 
     private JRadioButton mkButton(final AgsStrategy s, final boolean isDefault) {

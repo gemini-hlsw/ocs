@@ -206,9 +206,9 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
         }
 
         static final class UserTargetRow extends NonBaseTargetRow {
-            UserTargetRow(final int index, final SPTarget target, final Option<Coordinates> baseCoords,
+            UserTargetRow(final int index, final UserTarget u, final Option<Coordinates> baseCoords,
                           final Option<Long> when) {
-                super(true, String.format("%s (%d)", TargetEnvironment.USER_NAME, index), target, baseCoords, when);
+                super(true, String.format("%s (%d)", u.type.displayName, index), u.target, baseCoords, when);
             }
 
             @Override public boolean movable() { return false; }
@@ -302,9 +302,9 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
 
             // Add the user positions.
             env.getUserTargets().zipWithIndex().foreach(tup -> {
-                final SPTarget target = tup._1();
-                final int index = tup._2() + 1;
-                tmpRows.add(new UserTargetRow(index, target, baseCoords, when));
+                final UserTarget t = tup._1();
+                final int    index = tup._2() + 1;
+                tmpRows.add(new UserTargetRow(index, t, baseCoords, when));
             });
 
             return tmpRows;

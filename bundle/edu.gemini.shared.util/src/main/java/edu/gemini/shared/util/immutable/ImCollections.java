@@ -98,6 +98,11 @@ public class ImCollections {
         }
 
         @Override
+        public int indexWhere(final Function1<? super Object, Boolean> p) {
+            return -1;
+        }
+
+        @Override
         public boolean isEmpty() {
             return true;
         }

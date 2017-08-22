@@ -172,6 +172,15 @@ public interface ImList<T> extends Iterable<T> {
     int indexOf(T o);
 
     /**
+     * Returns the index of the first occurrence which satisfies the predicate.
+     *
+     * @param p the predicate to test the elements against
+     *
+     * @return index of the first matching element, if any; -1 otherwise
+     */
+    int indexWhere(Function1<? super T, Boolean> p);
+
+    /**
      * Returns <code>true</code> if this list contains no elements.
      *
      * @return <code>true</code> if this list contains no elements

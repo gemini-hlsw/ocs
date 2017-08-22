@@ -58,7 +58,7 @@ public final class GuideConfigTest extends TestBase {
 
     private TargetEnvironment create(GuideProbe... probes) {
         final ImList<GuideProbeTargets> gtCollection = createGuideTargetsList(probes);
-        final ImList<SPTarget> userTargets = ImCollections.emptyList();
+        final ImList<UserTarget>         userTargets = ImCollections.emptyList();
         return TargetEnvironment.create(base).setAllPrimaryGuideProbeTargets(gtCollection).setUserTargets(userTargets);
     }
 

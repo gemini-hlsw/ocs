@@ -5,6 +5,7 @@ import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.GuideProbeTargets;
 import edu.gemini.spModel.target.env.TargetEnvironment;
+import edu.gemini.spModel.target.env.UserTarget;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.wdba.glue.api.WdbaGlueException;
 import edu.gemini.spModel.target.env.GuideGroup;
@@ -105,12 +106,13 @@ public class TccFieldConfig extends ParamSet {
 
         // Add the user targets.
         int pos = 1;
-        for (SPTarget user : env.getUserTargets()) {
-            if (isEmpty(user.getName())) {
-                user.setName(TargetConfig.formatName("User", pos));
+        for (UserTarget user : env.getUserTargets()) {
+            final SPTarget t = user.target;
+            if (isEmpty(t.getName())) {
+                t.setName(TargetConfig.formatName("User", pos));
             }
             ++pos;
-            add(new TargetConfig(user));
+            add(new TargetConfig(t));
         }
 
         // Add the "group" for the base position.
