@@ -52,12 +52,12 @@ class TargetEnvironmentListener extends MarkerModelListener[Variant] {
 
       // Check for blind offsetting. This is when user targets are supplied.
       if (targetEnvironment.getUserTargets.size() > 0) {
-        markerManager.addMarker(false, this, Marker.Severity.Warning, "Observation may use blind offsetting.", variant, a)
+        markerManager.addMarker(false, this, Marker.Severity.Notice, "Observation may use blind offsetting.", variant, a)
       }
 
       // Check for non-sidereal targets.
       if (targetEnvironment.getAsterism.hasNonSidereal) {
-        markerManager.addMarker(false, this, Marker.Severity.Warning, "Observation has a non-sidereal target.", variant, a)
+        markerManager.addMarker(false, this, Marker.Severity.Notice, "Observation has a non-sidereal target.", variant, a)
       }
 
       // We now check for the GuideEnvironment cases that should generate warnings. These are:

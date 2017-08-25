@@ -18,7 +18,7 @@ class ParallacticAngleListener extends MarkerModelListener[Variant] {
     // Iterate over the observations in the variant and determine if they should generate markers.
     val parAngleAllocs = variant.getAllocs.asScala.filter{ _.getObs.usesMeanParallacticAngle() }
     for (a : Alloc <- parAngleAllocs) {
-      markerManager.addMarker(false, this, Marker.Severity.Warning, "Observation uses mean parallactic angle.", variant, a)
+      markerManager.addMarker(false, this, Marker.Severity.Notice, "Observation uses mean parallactic angle.", variant, a)
     }
   }
 
