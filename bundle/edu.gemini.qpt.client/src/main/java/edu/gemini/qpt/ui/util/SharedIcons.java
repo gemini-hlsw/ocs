@@ -40,8 +40,8 @@ public interface SharedIcons {
 	Icon ICON_ACQ = new SharedOffsetIcon("annotation_obj.gif", 0, 1);
 	Icon ICON_VARIANT = new SharedIcon("package_obj.gif");
 	Icon ICON_ERROR = new SharedIcon("error_tsk.gif");
-	Icon ICON_WARN = new SharedIcon("warn_tsk.gif");
-	Icon ICON_NOTICE = new SharedIcon("info_tsk.gif");
+	Icon ICON_WARN = new SharedIcon("warn_tsk_red.gif");
+	Icon ICON_NOTICE = new SharedIcon("warn_tsk_blue.gif");
 	Icon ICON_INFO = new SharedIcon("info_tsk.gif");
 
 	Icon PROGRAM_CLOSED = new SharedIcon("cprj_obj.gif");
