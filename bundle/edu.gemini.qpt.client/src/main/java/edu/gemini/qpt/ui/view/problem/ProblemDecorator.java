@@ -24,8 +24,9 @@ public class ProblemDecorator implements GSubElementDecorator<Schedule, Marker, 
 		case Severity:
 			switch ((Severity) value) {
 			case Error: label.setIcon(ICON_ERROR); break;
-			case Info: label.setIcon(ICON_INFO); break;
 			case Warning: label.setIcon(ICON_WARN); break;
+			case Notice: label.setIcon(ICON_NOTICE); break;
+			case Info: label.setIcon(ICON_INFO); break;
 			}
 			break;
 		default: label.setIcon(null);

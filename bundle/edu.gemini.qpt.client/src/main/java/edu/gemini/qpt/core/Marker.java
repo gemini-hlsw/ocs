@@ -7,7 +7,7 @@ package edu.gemini.qpt.core;
 public class Marker implements Comparable<Marker> {
 
 	public enum Severity {
-		Error, Warning, Info
+		Error, Warning, Notice, Info
 	}
 	
 	private final Object owner;
