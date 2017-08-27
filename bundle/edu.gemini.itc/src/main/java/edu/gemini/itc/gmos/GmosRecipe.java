@@ -374,7 +374,6 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
             for (int i = 0 ; i < numberOfSlits; i++) {
                 if (getPeakPixelCount(i) > maxPeak)
                     maxPeak = getPeakPixelCount(i);
-                System.out.println("maxPeak "+getPeakPixelCount(i));
             }
 
             return maxPeak;
@@ -678,7 +677,6 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
     private static List<SpcSeriesData> signalPixelChartSeries(final GmosSpecS2N result, final int start, final int end, final DetectorsTransmissionVisitor tv, final String ccdName) {
         // This type of chart is currently only used for IFU-2. It transforms the signal from
         // wavelength space to pixel space and displays it as a chart including gaps between CCDs.
-        System.out.println(ccdName);
 
         // For IFU-2 with Hamamatsu we don't show CCDs in different colors, hence need to disable extra legend items
         final boolean visibleLegend = ccdName.equals(" BB(B)");

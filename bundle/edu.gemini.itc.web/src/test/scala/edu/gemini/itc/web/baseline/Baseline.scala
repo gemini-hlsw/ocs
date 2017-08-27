@@ -35,13 +35,14 @@ case class Output(string: String) {
   def hashAllDatFiles(s: String): Long =
     DatFilesWithSeries.
       findAllMatchIn(s).
-      map(m => hashDatFile(m.group(4), Optional.of(m.group(3).toInt), m.group(2).toInt, m.group(1))).
+      map(m => hashDatFile(m.group(4), Optional.of(java.util.Arrays.asList(m.group(3).toInt)), m.group(2).toInt, m.group(1))).
       foldLeft(17L)((acc, s) => 37L*acc + s.hashCode)
 
-  def hashDatFile(id: String, seriesIndex: java.util.Optional[Integer], chartIndex: Int, filename: String): Int = {
+  def hashDatFile(id: String, seriesIndex: java.util.Optional[java.util.List[Integer]], chartIndex: Int, filename: String): Int = {
     val file = FilesServlet.toFile(id, filename, chartIndex, seriesIndex)
     file.split('\n').drop(1).foldLeft(17)((acc, s) => 37*acc + s.hashCode)
   }
+
 
 }
 
