@@ -6,6 +6,7 @@ import org.jfree.chart.axis.AxisLocation;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
+//import org.jfree.chart.renderer.category.CategoryItemRenderer;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
@@ -114,7 +115,7 @@ public final class ITCChart {
 
         // additional axes as needed
         for (int i = 0; i < s.axes().size(); i++) {
-            final ChartAxis  a = s.axes().apply(i);
+            final ChartAxis a = s.axes().apply(i);
             final NumberAxis axis = new NumberAxis(a.label());
             if (a.range().isDefined()) {
                 // TODO: additional axes MUST have a range, while for x and y axis it is optional
@@ -126,7 +127,7 @@ public final class ITCChart {
 
         // add all the data
         for (final SpcSeriesData d : JavaConversions.seqAsJavaList(s.series())) {
-            addArray(d.data(), d.title(), d.color());
+            addArray(d.data(), d.title(), d.color(), d.displayInLegend());
         }
     }
 
@@ -138,7 +139,7 @@ public final class ITCChart {
         return chart.createBufferedImage(width, height);
     }
 
-    private void addArray(final double data[][], final String seriesName, final Option<Color> color) {
+    private void addArray(final double data[][], final String seriesName, final Option<Color> color, boolean inLegend) {
         final XYSeries newSeries = new XYSeries(seriesName);
         for (int i = 0; i < data[0].length; i++) {
             if (data[0][i] > 0)   ///!!!!keeps negative x values from being added to a chart!!!!
@@ -150,10 +151,11 @@ public final class ITCChart {
         final XYItemRenderer renderer = chart.getXYPlot().getRenderer();
         renderer.setSeriesPaint(ix, color.isDefined() ? color.get() : colorByIndex(ix));
         renderer.setSeriesStroke(ix, new BasicStroke(2));
+        if (!inLegend)
+            renderer.setSeriesVisibleInLegend(ix, false);
     }
 
     private void setDomainMinMax(final double lower, final double upper) {
         chart.getXYPlot().getDomainAxis().setRange(lower, upper);
     }
-
 }

@@ -29,7 +29,7 @@ public abstract class Gmos extends Instrument implements BinningProvider, Spectr
 
     // Instrument reads its configuration from here.
     private static final double AD_SATURATION = 65535;
-    private static final int DETECTOR_PIXELS = 6218;
+    public static final int E2V_DETECTOR_PIXELS = 6218; // same for both sites
 
     // Used as a desperate solution when multiple detectors need to be handled differently (See REL-478).
     // For EEV holds the one instance one the Gmos instrument, for Hamamatsu, contains 3 one Gmos instance for
@@ -72,7 +72,6 @@ public abstract class Gmos extends Instrument implements BinningProvider, Spectr
         FixedOptics _fixedOptics = new FixedOptics(getDirectory() + "/", getPrefix());
         addComponent(_fixedOptics);
 
-
         //Choose correct CCD QE curve
         switch (gp.ccdType()) {
             // E2V, site dependent
@@ -81,25 +80,23 @@ public abstract class Gmos extends Instrument implements BinningProvider, Spectr
                     // E2V for GN: gmos_n_E2V4290DDmulti3.dat      => EEV DD array
                     case GN:
                         _detector = new Detector(getDirectory() + "/", getPrefix(), "E2V4290DDmulti3", "EEV DD array");
-                        _detector.setDetectorPixels(DETECTOR_PIXELS);
-                        if (detectorCcdIndex == 0) _instruments = new Gmos[]{this};
                         break;
                     // E2V for GS: gmos_n_cdd_red.dat              => EEV legacy
                     case GS:
                         _detector = new Detector(getDirectory() + "/", getPrefix(), "ccd_red", "EEV legacy array");
-                        _detector.setDetectorPixels(DETECTOR_PIXELS);
-                        if (detectorCcdIndex == 0) _instruments = new Gmos[]{this};
                         break;
                     default:
                         throw new Error("invalid site");
                 }
+                _detector.setDetectorPixels(detectorPixels());
+                if (detectorCcdIndex == 0) _instruments = new Gmos[]{this};
                 break;
             // Hamamatsu, both sites: gmos_n_CCD-{R,G,B}.dat        =>  Hamamatsu (R,G,B)
             case HAMAMATSU:
                 String fileName = getCcdFiles()[detectorCcdIndex];
                 String name = getCcdNames()[detectorCcdIndex];
                 _detector = new Detector(getDirectory() + "/", getPrefix(), fileName, "Hamamatsu array", name);
-                _detector.setDetectorPixels(DETECTOR_PIXELS);
+                _detector.setDetectorPixels(detectorPixels());
                 if (detectorCcdIndex == 0)
                     _instruments = createCcdArray();
                 break;
@@ -135,7 +132,16 @@ public abstract class Gmos extends Instrument implements BinningProvider, Spectr
             // we only need the detector transmission visitor for the spectroscopy case (i.e. if there is a grating)
             if (detectorCcdIndex == 0) {
                 final double nmppx = _gratingOptics.dispersion();
-                _dtv = new DetectorsTransmissionVisitor(gp, nmppx, getDirectory() + "/" + getPrefix() + "ccdpix" + Instrument.getSuffix());
+                switch (gp.ccdType()) {
+                    case E2V:
+                        _dtv = new DetectorsTransmissionVisitor(gp, nmppx, getDirectory() + "/" + getPrefix() + "ccdpix" + Instrument.getSuffix());
+                        break;
+                    case HAMAMATSU:
+                        _dtv = new DetectorsTransmissionVisitor(gp, nmppx, getDirectory() + "/" + getPrefix() + "ccdpix_hamamatsu" + Instrument.getSuffix());
+                        break;
+                    default:
+                        throw new Error("invalid ccd type");
+                }
             }
         }
 
@@ -148,6 +154,8 @@ public abstract class Gmos extends Instrument implements BinningProvider, Spectr
         validate();
 
     }
+
+    abstract public int detectorPixels();
 
     /** {@inheritDoc} */
     public double getSlitWidth() {
@@ -257,6 +265,22 @@ public abstract class Gmos extends Instrument implements BinningProvider, Spectr
         return gp.centralWavelength().toNanometers();
     }
 
+    public double getObservingStart(double shift) {
+        if (shift != 0) {
+            return _gratingOptics.getStart(shift);
+        } else {
+            return getObservingStart();
+        }
+    }
+
+    public double getObservingEnd(double shift) {
+        if (shift != 0) {
+            return _gratingOptics.getEnd(shift);
+        } else {
+            return getObservingEnd();
+        }
+    }
+
     //Abstract class for Detector Pixel Transmission  (i.e.  Create Detector gaps)
     public DetectorsTransmissionVisitor getDetectorTransmision() {
         return _dtv;
@@ -296,11 +320,6 @@ public abstract class Gmos extends Instrument implements BinningProvider, Spectr
 
                 if (gp.customSlitWidth().get().equals(GmosCommonType.CustomSlitWidth.OTHER))
                     throw new RuntimeException("Slit width for the custom mask is not known.");
-            }
-
-            if (isIfu2() && gp.ccdType() == GmosCommonType.DetectorManufacturer.HAMAMATSU) {
-                throw new RuntimeException("The GMOS ITC does not yet support IFU-2 with the Hamamatsu CCDs.\n" +
-                "Please use the ITC in 1-slit mode to estimate sensitivity, and see the GMOS IFU web pages for a discussion of spectral overlap.");
             }
 
             // central wavelength, site dependent
@@ -364,7 +383,6 @@ public abstract class Gmos extends Instrument implements BinningProvider, Spectr
         return new ArrayList<ItcWarning>() {{
             // How to display gaps in proper location for IFU-2 case? Currently we don't display them at all
             // in the wavelength charts. They are displayed in the pixel space chart for IFU-2 only.
-            if (isIfu2()) add(new ItcWarning("Chip gaps are not shown in wavelength charts in IFU-2 mode. "));
             if ((gp.fpMask().isIFU() || isIfu2()) && gp.spatialBinning() != 1) {
                 add (new ItcWarning("Spatial binning is strongly discouraged with IFU observations." +
                         " This is because the GMOS fiber traces on the detector blend together if" +

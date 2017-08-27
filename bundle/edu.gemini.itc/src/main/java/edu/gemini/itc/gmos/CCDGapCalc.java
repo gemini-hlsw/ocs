@@ -1,5 +1,7 @@
 package edu.gemini.itc.gmos;
 
+import edu.gemini.spModel.gemini.gmos.GmosCommonType;
+
 /**
  * This is crazy stuff based off the IRAF script gfoneshift.cl, which takes the central wavelength
  * and the lpmm and outputs the shift I use in the GMOS IFU-2 calculations. This could/should probably
@@ -8,13 +10,22 @@ package edu.gemini.itc.gmos;
 public class CCDGapCalc {
 
     /** Calculates the shift in unbinned pixels for the given wavelength for IFU-2. */
-    public static double calcIfu2Shift(double cwavlen, double lpmm) {
+    public static double calcIfu2Shift(double cwavlen, double lpmm, GmosCommonType.DetectorManufacturer ccdType) {
 
-        // TODO: Some of the values here (e.g. plate scale) are different for Hamamatsu and E2V CCDs.
-        // TODO: We currently only support E2V CCDs for the GMOS IFU-2 case, so we are using the E2V values here.
-        final double scale  = 0.073;      // plate scale in arcsecs per pixel (E2V only!)
+        final double scale;               // plate scale in arcsecs per pixel
         final double asecmm = 1.611444;   // Arcsecs per mm
         final double sepmm  = 175.;       // Physical separation between IFU-2 slits, in mm.
+
+        switch (ccdType) {
+            case E2V:
+                scale = 0.0727;
+                break;
+            case HAMAMATSU:
+                scale = 0.080778;
+                break;
+            default:
+                throw new Error("invalid ccd type");
+        }
 
         double greq = (cwavlen*lpmm)/1.e6;
 

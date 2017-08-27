@@ -94,6 +94,23 @@ final case class SpcSeriesData(dataType: SpcDataType, title: String, data: Array
   def y(i: Int): Double      = yValues(i)
   def xValues: Array[Double] = data(0)
   def yValues: Array[Double] = data(1)
+
+  var displayInLegend = true
+
+  def withLegendVisibility(visibility: Boolean): SpcSeriesData = {
+    val ssdCopy = this.copy()
+    ssdCopy.displayInLegend = visibility
+    ssdCopy
+  }
+}
+
+/** Companion object for SpcSeriesData, used to instantiate specialized cases */
+object SpcSeriesData {
+  /** returns a new instance of SpcSeriesData, setting the displayInLegend attribute */
+  def withVisibility(visibility: Boolean, dataType: SpcDataType, title: String, data: Array[Array[Double]], color: Option[Color] = None): SpcSeriesData = {
+    val ssd = new SpcSeriesData(dataType, title, data, color)
+    ssd.withLegendVisibility(visibility)
+  }
 }
 
 final case class ChartAxisRange(start: Double, end: Double)

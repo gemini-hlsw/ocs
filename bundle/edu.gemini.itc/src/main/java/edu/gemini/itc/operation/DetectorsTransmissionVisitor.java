@@ -3,6 +3,7 @@ package edu.gemini.itc.operation;
 import edu.gemini.itc.base.*;
 import edu.gemini.itc.gmos.CCDGapCalc;
 import edu.gemini.itc.shared.GmosParameters;
+import edu.gemini.spModel.gemini.gmos.GmosCommonType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,6 +22,8 @@ public class DetectorsTransmissionVisitor implements SampledSpectrumVisitor {
     private final int rulingDensity; // [lines/mm]
     private VisitableSampledSpectrum detectorsTransmissionValues;
     private List<Integer> detectorCcdIndexes;
+    private final GmosCommonType.DetectorManufacturer ccdType;
+    private final int gapSizePix;
 
     public DetectorsTransmissionVisitor(final GmosParameters p, final double nmppx, final String filename) {
         this.spectralBinning    = p.spectralBinning();
@@ -28,6 +31,28 @@ public class DetectorsTransmissionVisitor implements SampledSpectrumVisitor {
         this.nmppx              = nmppx;
         this.rulingDensity      = p.grating().rulingDensity();
         final double[][] data   = DatFile.arrays().apply(filename);
+        this.ccdType = p.ccdType();
+
+        switch (p.ccdType()) {
+            case E2V:
+                this.gapSizePix = 37;
+                break;
+            case HAMAMATSU:
+                switch (p.site()) {
+                    case GN:
+                        this.gapSizePix = 67;
+                        break;
+                    case GS:
+                        this.gapSizePix = 61;
+                        break;
+                    default:
+                        throw new Error("invalid site");
+                }
+                break;
+            default:
+                throw new Error("invalid ccd type");
+        }
+
         initialize(data);
     }
 
@@ -109,25 +134,25 @@ public class DetectorsTransmissionVisitor implements SampledSpectrumVisitor {
 
     // Full size of GMOS array:
     public double fullArrayPix() {
-        return (3*2048.0 + 2*37.0)/spectralBinning; // 6218 for spectral binning = 1;
+        return (3*2048.0 + 2*gapSizePix)/spectralBinning; //
     }
     // GMOS gap locations:
     private double gap1a() {
-        return 2048.0/spectralBinning;                                     // 2048.0 for spectral binning = 1;
+        return 2048.0/spectralBinning;
     }
     private double gap1b() {
-        return gap1a() + 37.0/spectralBinning;                             // 2086.0 for spectral binning = 1;
+        return gap1a() + gapSizePix/spectralBinning;
     }
     private double gap2a() {
-        return (2*2048.0 + 37.0)/spectralBinning;                          // 4133.0 for spectral binning = 1;
+        return (2*2048.0 + gapSizePix)/spectralBinning;
     }
     private double gap2b() {
-        return gap2a() + 37.0/spectralBinning;                             // 4171.0 for spectral binning = 1;
+        return gap2a() + gapSizePix/spectralBinning;
     }
 
     /** Calculates the shift for the given IFU-2 configuration in nm. */
     public double ifu2shift() {
-        return 0.5 * nmppx * CCDGapCalc.calcIfu2Shift(centralWavelength, rulingDensity) / spectralBinning;
+        return 0.5 * nmppx * CCDGapCalc.calcIfu2Shift(centralWavelength, rulingDensity, ccdType) / spectralBinning;
     }
 
     /** The start of the "red" area in wavelength space. */
@@ -150,7 +175,7 @@ public class DetectorsTransmissionVisitor implements SampledSpectrumVisitor {
         return centralWavelength + (nmppx * (fullArrayPix() / 2)) + ifu2shift();    // in nm
     }
 
-    /** Transforms the given nm value from wavelength space to pixel space. */
+    /** Transforms the given nm value from wavelength space to pixel space, considering specified wvl. shift. */
     private double toPixelSpace(double data, double shift) {
         return (fullArrayPix()/2)-(data-centralWavelength+shift)/nmppx;
     }

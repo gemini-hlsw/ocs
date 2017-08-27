@@ -23,4 +23,14 @@ public final class GmosGratingOptics extends GratingOptics {
         return detector.toString().contains("EEV") ? "eev_gratings" : "gratings";
     }
 
+    // IFU-2 case
+    public double getStart(double shift) {
+        return centralWavelength - (data.apply(gratingName).dispersion() * detectorPixels / 2) + shift;
+    }
+
+    // IFU-2 case
+    public double getEnd(double shift) {
+        return centralWavelength + (data.apply(gratingName).dispersion() * detectorPixels / 2) + shift;
+    }
+
 }

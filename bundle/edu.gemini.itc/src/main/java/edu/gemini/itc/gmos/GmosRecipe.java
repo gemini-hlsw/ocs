@@ -52,6 +52,7 @@ import scala.collection.JavaConversions;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.IntStream;
 
 /**
  * This class performs the calculations for Gmos used for imaging.
@@ -88,9 +89,10 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
 
     public ItcSpectroscopyResult serviceResult(final SpectroscopyResult[] r) {
         final List<List<SpcChartData>> groups = new ArrayList<>();
-        // The array specS2N represents the different IFUs, for each one we produce a separate set of charts.
+        // The array specS2Narr represents the different IFUs, for each one we produce a separate set of charts.
         // For completeness: The result array holds the results for the different CCDs. For each CCD
-        // the specS2N array holds the single result or the different IFU results. This should be made more obvious.
+        // the specS2Narr array holds the single result or the different IFU results. This should be made more obvious.
+        // In case of IFU-2 each element of specS2Narr holds the results for both slits.
         for (int i = 0; i < r[0].specS2N().length; i++) {
             final List<SpcChartData> charts = new ArrayList<>();
             charts.add(createSignalChart(r, i));
@@ -134,13 +136,20 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
     // TODO: bring mainInstrument and instrument together
     private SpectroscopyResult calculateSpectroscopy(final Gmos mainInstrument, final Gmos instrument, final int detectorCount) {
 
-        final SpecS2NSlitVisitor[] specS2N;
+        SpecS2NSlitVisitor specS2N;
+        final SpecS2N[] specS2Narr;
 
-        final SEDFactory.SourceResult src = SEDFactory.calculate(instrument, _sdParameters, _obsConditionParameters, _telescope);
         final int ccdIndex = instrument.getDetectorCcdIndex();
         final DetectorsTransmissionVisitor tv = mainInstrument.getDetectorTransmision();
         final int firstCcdIndex = tv.getDetectorCcdStartIndex(ccdIndex);
         final int lastCcdIndex = tv.getDetectorCcdEndIndex(ccdIndex, detectorCount);
+        final int numberOfSlits = instrument.isIfu2() ? 2 : 1;
+
+        final SEDFactory.SourceResult[] src = new SEDFactory.SourceResult[numberOfSlits];
+
+        for (int i = 0; i < numberOfSlits; i++) {
+            src[i] = SEDFactory.calculate(instrument, _sdParameters, _obsConditionParameters, _telescope);
+        }
 
         // Start of morphology section of ITC
 
@@ -185,7 +194,8 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
             } else {
                 ifusToShow = sf_list.size();
             }
-            specS2N = new SpecS2NSlitVisitor[ifusToShow];
+
+            specS2Narr = new SpecS2N[ifusToShow];
 
             // process all IFU elements
             double totalspsf = 0;
@@ -196,44 +206,70 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
                 }
             }
 
+            double shift = 0;
+
             for (int i = 0; i < ifusToShow; i++) {
+                GmosSpecS2N s2n = new GmosSpecS2N(numberOfSlits);
+
                 double spsf;
-                if (instrument.isIfuUsed() &&  _obsDetailParameters.analysisMethod() instanceof IfuSum) {
+                if (_obsDetailParameters.analysisMethod() instanceof IfuSum) {
                     spsf = totalspsf;
                 } else {
                     spsf = sf_list.get(i);
                 }
+
                 final Slit ifuSlit = Slit$.MODULE$.apply(instrument.getSlitWidth(), slitLength, instrument.getPixelSize());
-                specS2N[i] = new SpecS2NSlitVisitor(
-                        ifuSlit,
-                        instrument.disperser.get(),
-                        new SlitThroughput(spsf, spsf),
-                        instrument.getSpectralPixelWidth(),
-                        instrument.getObservingStart(),
-                        instrument.getObservingEnd(),
-                        im_qual,
-                        read_noise,
-                        dark_current * instrument.getSpatialBinning() * instrument.getSpectralBinning(),
-                        _obsDetailParameters);
 
-                specS2N[i].setCcdPixelRange(firstCcdIndex, lastCcdIndex);
-                specS2N[i].setSourceSpectrum(src.sed);
-                specS2N[i].setBackgroundSpectrum(src.sky);
+                for (int j = 0; j < numberOfSlits; j++) {
+                    if (instrument.isIfu2()) {
+                        if (j == 0) {
+                            shift = tv.ifu2shift(); // blue slit
+                        } else {
+                            shift = -tv.ifu2shift(); // red slit
+                        }
+                    }
 
-                src.sed.accept(specS2N[i]);
+                    specS2N = new SpecS2NSlitVisitor(
+                            ifuSlit,
+                            instrument.disperser.get(),
+                            new SlitThroughput(spsf, spsf),
+                            instrument.getSpectralPixelWidth(),
+                            instrument.getObservingStart(shift),
+                            instrument.getObservingEnd(shift),
+                            im_qual,
+                            read_noise,
+                            dark_current * instrument.getSpatialBinning() * instrument.getSpectralBinning(),
+                            _obsDetailParameters);
 
+                    specS2N.setCcdPixelRange(firstCcdIndex, lastCcdIndex);
+
+                    specS2N.setSourceSpectrum(src[j].sed);
+                    specS2N.setBackgroundSpectrum(src[j].sky);
+
+                    src[j].sed.accept(specS2N);
+
+                    VisitableSampledSpectrum signalIFUSpec      = (VisitableSampledSpectrum) specS2N.getSignalSpectrum().clone();
+                    VisitableSampledSpectrum backGroundIFUSpec  = (VisitableSampledSpectrum) specS2N.getBackgroundSpectrum().clone();
+                    VisitableSampledSpectrum expS2NIFUSpec      = (VisitableSampledSpectrum) specS2N.getExpS2NSpectrum().clone();
+                    VisitableSampledSpectrum finalS2NIFUSpec    = (VisitableSampledSpectrum) specS2N.getFinalS2NSpectrum().clone();
+
+                    s2n.setSlitS2N(j, signalIFUSpec, backGroundIFUSpec, expS2NIFUSpec, finalS2NIFUSpec);
+                }
+
+                specS2Narr[i] = s2n;
             }
 
-            return new SpectroscopyResult(p, instrument, IQcalc, specS2N, slit, sf_list.get(0), Option.empty());
+            return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, sf_list.get(0), Option.empty());
 
-        // ==== SLIT
+            // ==== SLIT
         } else {
 
             final Slit slit = Slit$.MODULE$.apply(_sdParameters, _obsDetailParameters, instrument, instrument.getSlitWidth(), IQcalc.getImageQuality());
             final SlitThroughput throughput = new SlitThroughput(_sdParameters, slit, IQcalc.getImageQuality());
+            GmosSpecS2N s2n = new GmosSpecS2N(numberOfSlits);
 
-            specS2N = new SpecS2NSlitVisitor[1];
-            specS2N[0] = new SpecS2NSlitVisitor(
+            specS2Narr = new SpecS2N[1];
+            specS2N = new SpecS2NSlitVisitor(
                     slit,
                     instrument.disperser.get(),
                     throughput,
@@ -246,16 +282,128 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
                     _obsDetailParameters);
 
 
-            specS2N[0].setCcdPixelRange(firstCcdIndex, lastCcdIndex);
-            specS2N[0].setSourceSpectrum(src.sed);
-            specS2N[0].setBackgroundSpectrum(src.sky);
+            specS2N.setCcdPixelRange(firstCcdIndex, lastCcdIndex);
+            specS2N.setSourceSpectrum(src[0].sed);
+            specS2N.setBackgroundSpectrum(src[0].sky);
 
-            src.sed.accept(specS2N[0]);
+            src[0].sed.accept(specS2N);
 
-            return new SpectroscopyResult(p, instrument, IQcalc, specS2N, slit, throughput.throughput(), Option.empty());
+            VisitableSampledSpectrum signalIFUSpec      = (VisitableSampledSpectrum) specS2N.getSignalSpectrum().clone();
+            VisitableSampledSpectrum backGroundIFUSpec  = (VisitableSampledSpectrum) specS2N.getBackgroundSpectrum().clone();
+            VisitableSampledSpectrum expS2NIFUSpec      = (VisitableSampledSpectrum) specS2N.getExpS2NSpectrum().clone();
+            VisitableSampledSpectrum finalS2NIFUSpec    = (VisitableSampledSpectrum) specS2N.getFinalS2NSpectrum().clone();
+
+            s2n.setSlitS2N(0, signalIFUSpec, backGroundIFUSpec, expS2NIFUSpec, finalS2NIFUSpec);
+
+            specS2Narr[0] = s2n;
+
+            return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), Option.empty());
         }
 
     }
+
+
+    // SpecS2N implementation to hold results for IFU mode calculations.
+    // It contains a set of values per each slit.
+    class GmosSpecS2N implements SpecS2N {
+
+        private final VisitableSampledSpectrum[] signal;
+        private final VisitableSampledSpectrum[] background;
+        private final VisitableSampledSpectrum[] exps2n;
+        private final VisitableSampledSpectrum[] fins2n;
+        private final int numberOfSlits;
+
+        public GmosSpecS2N(int numberOfSlits) {
+            this.numberOfSlits = numberOfSlits;
+            signal = new VisitableSampledSpectrum[numberOfSlits];
+            background = new VisitableSampledSpectrum[numberOfSlits];
+            exps2n = new VisitableSampledSpectrum[numberOfSlits];
+            fins2n = new VisitableSampledSpectrum[numberOfSlits];
+        }
+
+        public void setSlitS2N(
+                int slitIndex,
+                final VisitableSampledSpectrum signal,
+                final VisitableSampledSpectrum background,
+                final VisitableSampledSpectrum exps2n,
+                final VisitableSampledSpectrum fins2n) {
+            this.signal[slitIndex]       = signal;
+            this.background[slitIndex]   = background;
+            this.exps2n[slitIndex]       = exps2n;
+            this.fins2n[slitIndex]       = fins2n;
+        }
+
+        public int getNumberOfSlits() { return numberOfSlits; }
+
+        public VisitableSampledSpectrum getSignalSpectrum(int slit) {
+            return signal[slit];
+        }
+
+        public VisitableSampledSpectrum getBackgroundSpectrum(int slit) {
+            return background[slit];
+        }
+
+        public VisitableSampledSpectrum getExpS2NSpectrum(int slit) {
+            return exps2n[slit];
+        }
+
+        public VisitableSampledSpectrum getFinalS2NSpectrum(int slit) {
+            return fins2n[slit];
+        }
+
+        public double getPeakPixelCount(int slit) {
+            final double[] sig = getSignalSpectrum(slit).getValues();
+            final double[] bck = getBackgroundSpectrum(slit).getValues();
+
+            if (getSignalSpectrum(slit).getStart() != getBackgroundSpectrum(slit).getStart()) throw new Error();
+            if (getSignalSpectrum(slit).getEnd()   != getBackgroundSpectrum(slit).getEnd())   throw new Error();
+            if (sig.length != bck.length)                                             throw new Error();
+
+            // Calculate the peak pixel
+            double peak = IntStream.range(0, sig.length).mapToDouble(i -> bck[i]*bck[i] + sig[i]).max().getAsDouble();
+            Log.fine("Peak = " + peak);
+
+            return peak;
+        }
+
+        // Max peak pixel count across all the CCD and spectra
+        @Override
+        public double getPeakPixelCount() {
+            double maxPeak = 0;
+
+            for (int i = 0 ; i < numberOfSlits; i++) {
+                if (getPeakPixelCount(i) > maxPeak)
+                    maxPeak = getPeakPixelCount(i);
+                System.out.println("maxPeak "+getPeakPixelCount(i));
+            }
+
+            return maxPeak;
+        }
+
+        /*
+         * We need to implement these methods to comply with the SpecS2N
+         * interface, but they make no sense, and will not be used, but just
+         * in case, we'll throw an exception if someone tries to used them!
+         */
+        @Override public VisitableSampledSpectrum getSignalSpectrum() {
+            throw new java.lang.UnsupportedOperationException();
+        }
+
+        @Override public VisitableSampledSpectrum getBackgroundSpectrum() {
+            throw new java.lang.UnsupportedOperationException();
+        }
+
+        @Override public VisitableSampledSpectrum getExpS2NSpectrum() {
+            throw new java.lang.UnsupportedOperationException();
+        }
+
+        @Override public VisitableSampledSpectrum getFinalS2NSpectrum() {
+            throw new java.lang.UnsupportedOperationException();
+        }
+
+    }
+
+
 
     private ImagingResult calculateImagingDo(final Gmos instrument) {
 
@@ -326,7 +474,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
             final int first      = tv.getDetectorCcdStartIndex(ccdIndex);
             final int last       = tv.getDetectorCcdEndIndex(ccdIndex, ccdArray.length);
             final SpectroscopyResult result = results[ccdIndex];
-            data.addAll(sigChartSeries(mainInstrument, ccdIndex, result.specS2N()[i], first, last, tv, ccdName));
+            data.addAll(sigChartSeries(mainInstrument, ccdIndex, (GmosSpecS2N)result.specS2N()[i], first, last, tv, ccdName));
         }
 
         final scala.collection.immutable.List<SpcSeriesData> scalaData = JavaConversions.asScalaBuffer(data).toList();
@@ -360,7 +508,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
             final int first      = tv.getDetectorCcdStartIndex(ccdIndex);
             final int last       = tv.getDetectorCcdEndIndex(ccdIndex, ccdArray.length);
             final SpectroscopyResult result = results[ccdIndex];
-            data.addAll(s2nChartSeries(mainInstrument, ccdIndex, result.specS2N()[i], first, last, tv, ccdName));
+            data.addAll(s2nChartSeries(mainInstrument, ccdIndex, (GmosSpecS2N)result.specS2N()[i], first, last, tv, ccdName));
         }
 
         final scala.collection.immutable.List<SpcSeriesData> scalaData = JavaConversions.asScalaBuffer(data).toList();
@@ -382,8 +530,8 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         final ChartAxis xAxis = new ChartAxis("Pixels", true, new Some<>(new ChartAxisRange(0, tv.fullArrayPix())));
         final ChartAxis yAxis = ChartAxis.apply("e- per exposure per spectral pixel");
 
-        axes.add(new ChartAxis("Wavelength (nm) (Red)",  false, new Some<>(new ChartAxisRange(tv.ifu2RedStart(),  tv.ifu2RedEnd()))));
-        axes.add(new ChartAxis("Wavelength (nm) (Blue)", false, new Some<>(new ChartAxisRange(tv.ifu2BlueStart(), tv.ifu2BlueEnd()))));
+        axes.add(new ChartAxis("Wavelength (nm) (Red slit)",  false, new Some<>(new ChartAxisRange(tv.ifu2RedStart(),  tv.ifu2RedEnd()))));
+        axes.add(new ChartAxis("Wavelength (nm) (Blue slit)", false, new Some<>(new ChartAxisRange(tv.ifu2BlueStart(), tv.ifu2BlueEnd()))));
 
         final List<SpcSeriesData> data = new ArrayList<>();
 
@@ -393,7 +541,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
             final int first      = tv.getDetectorCcdStartIndex(ccdIndex);
             final int last       = tv.getDetectorCcdEndIndex(ccdIndex, ccdArray.length);
             final SpectroscopyResult result = results[ccdIndex];
-            data.addAll(signalPixelChartSeries(result.specS2N()[i], first, last, tv, ccdName));
+            data.addAll(signalPixelChartSeries((GmosSpecS2N)result.specS2N()[i], first, last, tv, ccdName));
         }
 
         final scala.collection.immutable.List<SpcSeriesData> scalaData = JavaConversions.asScalaBuffer(data).toList();
@@ -402,92 +550,167 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
     }
 
     /** Creates all data series for the signal in wavelength space chart. */
-    private static List<SpcSeriesData> sigChartSeries(final Gmos mainInstrument, final int ccdIndex, final SpecS2N result, final int start, final int end, final DetectorsTransmissionVisitor tv, final String ccdName) {
-        final String sigTitle = "Signal" + ccdName;
-        final String bkgTitle = "SQRT(Background)" + ccdName;
-
-        final VisitableSampledSpectrum sig = ((VisitableSampledSpectrum) result.getSignalSpectrum().clone());
-        final VisitableSampledSpectrum bkg = ((VisitableSampledSpectrum) result.getBackgroundSpectrum().clone());
-
-        // For the IFU-2 case (or IFU in general?) it is difficult to show the gaps at the
-        // right positions so for now we don't show them at all in the wavelength charts.
-        if (!mainInstrument.isIfu2()) {
-            // Note: Accept() does its magic in-place and will destroy the original values!
-            sig.accept(tv);
-            bkg.accept(tv);
-        }
-
-        final double[][] signalWithGaps = sig.getData(start, end);
-        final double[][] backgrWithGaps = bkg.getData(start, end);
-
-        // ===== fix gap borders to avoid signal/s2n spikes
-        if (mainInstrument.getDetectorCcdInstruments().length > 1) {
-            fixGapBorders(signalWithGaps);
-            fixGapBorders(backgrWithGaps);
-        }
-        // =====
+    private static List<SpcSeriesData> sigChartSeries(final Gmos mainInstrument, final int ccdIndex, final GmosSpecS2N result, final int start, final int end, final DetectorsTransmissionVisitor tv, final String ccdName) {
+        String sigTitle;
+        String bkgTitle;
+        Color colorSig;
+        Color colorBkg;
+        // The suffix is a hack to overcome the requirement for titles of series to be unique when depricating
+        // extra legend items with IFU-2 with Hamamatsu
+        String suffix = ccdName;
 
         final List<SpcSeriesData> series = new ArrayList<>();
-        series.add(new SpcSeriesData(SignalData.instance(),     sigTitle, signalWithGaps, new Some<>(ccdDarkColor(ccdIndex))));
-        series.add(new SpcSeriesData(BackgroundData.instance(), bkgTitle, backgrWithGaps, new Some<>(ccdLightColor(ccdIndex))));
+        // for IFU-2 with Hamamatsu we don't show CCDs in different colors, hence need to disable extra legend items
+        final boolean disableLegend = ccdIndex != 0 && mainInstrument.isIfu2();
 
+        for (int i = 0; i < result.numberOfSlits; i++) {
+            if (ccdIndex == 0 && mainInstrument.isIfu2()) { suffix = ""; }
+
+            if (result.numberOfSlits == 1) {
+                sigTitle = "Signal " + suffix;
+                bkgTitle = "SQRT(Background) " + suffix;
+            } else {
+                if (i == 0) {
+                    sigTitle = "Signal from blue slit " + suffix;
+                    bkgTitle = "SQRT(Background) from blue slit " + suffix;
+                } else {
+                    sigTitle = "Signal from red slit " + suffix;
+                    bkgTitle = "SQRT(Background) from red slit " + suffix;
+                }
+            }
+
+            final VisitableSampledSpectrum sig = ((VisitableSampledSpectrum) result.getSignalSpectrum(i).clone());
+            final VisitableSampledSpectrum bkg = ((VisitableSampledSpectrum) result.getBackgroundSpectrum(i).clone());
+
+            sig.accept(tv);
+            bkg.accept(tv);
+
+
+            final double[][] signalWithGaps = sig.getData(start, end);
+            final double[][] backgrWithGaps = bkg.getData(start, end);
+
+            // ===== fix gap borders to avoid signal/s2n spikes
+            if (mainInstrument.getDetectorCcdInstruments().length > 1) {
+                fixGapBorders(signalWithGaps);
+                fixGapBorders(backgrWithGaps);
+            }
+            // =====
+
+            if (result.getNumberOfSlits() == 1) {
+                colorSig = ccdDarkColor(ccdIndex);
+                colorBkg = ccdLightColor(ccdIndex);
+            } else if (i == 0) {
+                colorSig = ITCChart.DarkBlue;
+                colorBkg = ITCChart.LightBlue;
+            } else {
+                colorSig = ITCChart.DarkRed;
+                colorBkg = ITCChart.LightRed;
+            }
+
+            series.add(SpcSeriesData.withVisibility(!disableLegend, SignalData.instance(), sigTitle, signalWithGaps, new Some<>(colorSig)));
+            series.add(SpcSeriesData.withVisibility(!disableLegend, BackgroundData.instance(), bkgTitle, backgrWithGaps, new Some<>(colorBkg)));
+        }
         return series;
     }
 
     /** Creates all data series for the signal to noise in wavelength space chart. */
-    private static List<SpcSeriesData> s2nChartSeries(final Gmos mainInstrument, final int ccdIndex, final SpecS2N result, final int start, final int end, final DetectorsTransmissionVisitor tv, final String ccdName) {
-        final String s2nTitle = "Single Exp S/N" + ccdName;
-        final String finTitle = "Final S/N" + ccdName;
-
-        // For the IFU-2 case (or IFU in general?) it is difficult to show the gaps at the
-        // right positions so for now we don't show them at all in the wavelength charts.
-        if (!mainInstrument.isIfu2()) {
-            // Note: Accept() does its magic in-place and will destroy the original values!
-            result.getExpS2NSpectrum().accept(tv);
-            result.getFinalS2NSpectrum().accept(tv);
-        }
-
-        final double[][] s2n = result.getExpS2NSpectrum().getData(start, end);
-        final double[][] fin = result.getFinalS2NSpectrum().getData(start, end);
-
-        // ===== fix gap borders to avoid signal/s2n spikes
-        if (mainInstrument.getDetectorCcdInstruments().length > 1) {
-            fixGapBorders(s2n);
-            fixGapBorders(fin);
-        }
-        // =====
+    private static List<SpcSeriesData> s2nChartSeries(final Gmos mainInstrument, final int ccdIndex, final GmosSpecS2N result, final int start, final int end, final DetectorsTransmissionVisitor tv, final String ccdName) {
+        String s2nTitle;
+        String finTitle;
+        Color colorS2N;
+        Color colorFin;
+        // The suffix is a hack to overcome the requirement for titles of series to be unique when depricating
+        // extra legend items with IFU-2 with Hamamatsu
+        String suffix = ccdName;
 
         final List<SpcSeriesData> series = new ArrayList<>();
-        series.add(new SpcSeriesData(SingleS2NData.instance(), s2nTitle, s2n,   new Some<>(ccdDarkColor(ccdIndex))));
-        series.add(new SpcSeriesData(FinalS2NData.instance(),  finTitle, fin,   new Some<>(ccdLightColor(ccdIndex))));
+        // for IFU-2 with Hamamatsu we don't show CCDs in different colors, hence need to disable extra legend items
+        final boolean disableLegend = ccdIndex != 0 && mainInstrument.isIfu2();
 
+        for (int i = 0; i < result.numberOfSlits; i++) {
+            if (ccdIndex ==0 && mainInstrument.isIfu2()) { suffix = ""; }
+
+            if (result.numberOfSlits == 1) {
+                s2nTitle = "Single Exp S/N " + suffix;
+                finTitle = "Final S/N " + suffix;
+            } else {
+                if (i == 0) {
+                    s2nTitle = "Single Exp S/N for blue slit " + suffix;
+                    finTitle = "Final S/N for blue slit " + suffix;
+                } else {
+                    s2nTitle = "Single Exp S/N for red slit " + suffix;
+                    finTitle = "Final S/N for red slit " + suffix;
+                }
+            }
+
+            result.getExpS2NSpectrum(i).accept(tv);
+            result.getFinalS2NSpectrum(i).accept(tv);
+
+
+            final double[][] s2n = result.getExpS2NSpectrum(i).getData(start, end);
+            final double[][] fin = result.getFinalS2NSpectrum(i).getData(start, end);
+
+            // ===== fix gap borders to avoid signal/s2n spikes
+            if (mainInstrument.getDetectorCcdInstruments().length > 1) {
+                fixGapBorders(s2n);
+                fixGapBorders(fin);
+            }
+            // =====
+
+            if (result.getNumberOfSlits() == 1) {
+                colorS2N = ccdDarkColor(ccdIndex);
+                colorFin = ccdLightColor(ccdIndex);
+            } else if (i == 0) {
+                colorS2N = ITCChart.DarkBlue;
+                colorFin = ITCChart.LightBlue;
+            } else {
+                colorS2N = ITCChart.DarkRed;
+                colorFin = ITCChart.LightRed;
+            }
+
+            series.add(SpcSeriesData.withVisibility(!disableLegend, SingleS2NData.instance(), s2nTitle, s2n, new Some<>(colorS2N)));
+            series.add(SpcSeriesData.withVisibility(!disableLegend, FinalS2NData.instance(), finTitle, fin, new Some<>(colorFin)));
+        }
         return series;
     }
 
     /** Creates all data series for the signal in pixel space chart. */
-    private static List<SpcSeriesData> signalPixelChartSeries(final SpecS2N result, final int start, final int end, final DetectorsTransmissionVisitor tv, final String ccdName) {
+    private static List<SpcSeriesData> signalPixelChartSeries(final GmosSpecS2N result, final int start, final int end, final DetectorsTransmissionVisitor tv, final String ccdName) {
         // This type of chart is currently only used for IFU-2. It transforms the signal from
         // wavelength space to pixel space and displays it as a chart including gaps between CCDs.
+        System.out.println(ccdName);
+
+        // For IFU-2 with Hamamatsu we don't show CCDs in different colors, hence need to disable extra legend items
+        final boolean visibleLegend = ccdName.equals(" BB(B)");
+        // The suffix is a hack to overcome the requirement for titles of series to be unique when depricating
+        // extra legend items with IFU-2 with Hamamatsu
+        String suffix = ccdName;
+        if (visibleLegend) { suffix = ""; }
 
         // those values are still original, no gaps added, do transformation to pixel space first
-        final VisitableSampledSpectrum red = ((VisitableSampledSpectrum) result.getSignalSpectrum().clone());
-        final VisitableSampledSpectrum blu = ((VisitableSampledSpectrum) result.getSignalSpectrum().clone());
+        final VisitableSampledSpectrum red = ((VisitableSampledSpectrum) result.getSignalSpectrum(1).clone());
+        final VisitableSampledSpectrum blue = ((VisitableSampledSpectrum) result.getSignalSpectrum(0).clone());
 
-        final VisitableSampledSpectrum redBkg = ((VisitableSampledSpectrum) result.getBackgroundSpectrum().clone());
-        final VisitableSampledSpectrum bluBkg = ((VisitableSampledSpectrum) result.getBackgroundSpectrum().clone());
+        final VisitableSampledSpectrum redBkg = ((VisitableSampledSpectrum) result.getBackgroundSpectrum(1).clone());
+        final VisitableSampledSpectrum blueBkg = ((VisitableSampledSpectrum) result.getBackgroundSpectrum(0).clone());
 
         // to pixel transform also adds gaps (i.e. sets values to zero..)
         final double shift = tv.ifu2shift();
-        final double shiftedRed[][]     = tv.toPixelSpace(red.getData(start, end),     shift);
-        final double shiftedBlue[][]    = tv.toPixelSpace(blu.getData(start, end),    -shift);
-        final double shiftedRedBkg[][]  = tv.toPixelSpace(redBkg.getData(start, end),  shift);
-        final double shiftedBlueBkg[][] = tv.toPixelSpace(bluBkg.getData(start, end), -shift);
+        final double pixelPlotRed[][]     = tv.toPixelSpace(red.getData(start, end), shift);
+        final double pixelPlotBlue[][]    = tv.toPixelSpace(blue.getData(start, end), -shift);
+        final double pixelPlotRedBkg[][]  = tv.toPixelSpace(redBkg.getData(start, end), shift);
+        final double pixelPlotBlueBkg[][] = tv.toPixelSpace(blueBkg.getData(start, end), -shift);
+
+        fixGapBorders(pixelPlotRed);
+        fixGapBorders(pixelPlotBlue);
+        fixGapBorders(pixelPlotRedBkg);
+        fixGapBorders(pixelPlotBlueBkg);
 
         final List<SpcSeriesData> series = new ArrayList<>();
-        series.add(new SpcSeriesData(SignalData.instance(),     "Red Signal"            + ccdName, shiftedRed,     new Some<>(ITCChart.DarkRed)));
-        series.add(new SpcSeriesData(SignalData.instance(),     "Blue Signal"           + ccdName, shiftedBlue,    new Some<>(ITCChart.DarkBlue)));
-        series.add(new SpcSeriesData(BackgroundData.instance(), "SQRT(Red Background)"  + ccdName, shiftedRedBkg,  new Some<>(ITCChart.LightRed)));
-        series.add(new SpcSeriesData(BackgroundData.instance(), "SQRT(Blue Background)" + ccdName, shiftedBlueBkg, new Some<>(ITCChart.LightBlue)));
+        series.add(SpcSeriesData.withVisibility(visibleLegend, SignalData.instance(),     "Signal from blue slit" + suffix,              pixelPlotBlue,    new Some<>(ITCChart.DarkBlue)));
+        series.add(SpcSeriesData.withVisibility(visibleLegend, BackgroundData.instance(), "SQRT(Background) from blue slit" + suffix,    pixelPlotBlueBkg, new Some<>(ITCChart.LightBlue)));
+        series.add(SpcSeriesData.withVisibility(visibleLegend, SignalData.instance(),     "Signal from red slit" + suffix,               pixelPlotRed,     new Some<>(ITCChart.DarkRed)));
+        series.add(SpcSeriesData.withVisibility(visibleLegend, BackgroundData.instance(), "SQRT(Background) from red slit" + suffix,     pixelPlotRedBkg,  new Some<>(ITCChart.LightRed)));
 
         return series;
     }
