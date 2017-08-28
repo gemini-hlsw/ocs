@@ -88,7 +88,7 @@ class TargetEnvironmentListener extends MarkerModelListener[Variant] {
         // Case 3: add warnings for each guide probe with multiple options
         guideProbeTargetCounts.foreach {
           case (guideProbe, count) =>
-            if (count > 1) markerManager.addMarker(false, this, Marker.Severity.Warning, s"Multiple ${guideProbe.getKey} options.", variant, a)
+            if (count > 1) markerManager.addMarker(false, this, Marker.Severity.Notice, s"Multiple ${guideProbe.getKey} options.", variant, a)
         }
 
         // Case 2: multiple guiders in use (which is okay for Gems)
