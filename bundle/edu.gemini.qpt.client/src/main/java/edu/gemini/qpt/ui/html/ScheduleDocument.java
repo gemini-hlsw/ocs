@@ -252,6 +252,8 @@ public class ScheduleDocument {
             switch (sev) {
                 case Error:
                     return "red";
+                case Notice:
+                    return "blue";
                 case Warning:
                     return "orange";
                 case Info:
