@@ -99,7 +99,6 @@ trait OcsApp { this: OcsBundle =>
     bundle_edu_gemini_phase2_skeleton_servlet,
     bundle_edu_gemini_pot,
     bundle_edu_gemini_qpt_client,
-    bundle_edu_gemini_qpt_server,
     bundle_edu_gemini_qpt_shared,
     bundle_edu_gemini_qv_plugin,
     bundle_edu_gemini_seqexec_odb,

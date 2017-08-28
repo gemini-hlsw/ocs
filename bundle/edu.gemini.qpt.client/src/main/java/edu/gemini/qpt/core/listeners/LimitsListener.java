@@ -42,7 +42,7 @@ public class LimitsListener extends MarkerModelListener<Variant> {
 			Group g = a.getObs().getGroup();
 			if (g != null && g.getType() == GroupType.TYPE_SCHEDULING && a.getGroupIndex() == -1 && g.getObservations().size() > 1 /* QPT-226 */)
 				mm.addMarker(false, this, Severity.Warning, "Observation is part of a scheduling group, but no other members appear in plan.", v, a);
-			
+
 			// Below horizon!
 			if (a.getMin(Circumstance.AIRMASS, true) == 0.0) {
 				mm.addMarker(false, this, Severity.Error, "Target is below horizon.", v, a);
@@ -54,8 +54,8 @@ public class LimitsListener extends MarkerModelListener<Variant> {
 				mm.addMarker(false, this, Severity.Error, String.format("Tracking: target reaches %1.2f\u00B0.", absoluteMinElevation), v, a);
 			} else if (absoluteMinElevation < 20.0) {
 				mm.addMarker(false, this, Severity.Warning, String.format("Tracking: target reaches %1.2f\u00B0.", absoluteMinElevation), v, a);
-			}			
-			
+			}
+
 			// Upper tracking limit
 			final Double maxElevation = a.getMax(Circumstance.ELEVATION, true);
 			if (maxElevation > 88.0) {
@@ -189,25 +189,25 @@ public class LimitsListener extends MarkerModelListener<Variant> {
 				case CONFIG_UNAVAILABLE:
 					mm.addMarker(false, this, Severity.Error, "Required instrument configuration is unavailable.", v, a);
 					break;
-					
+
 				case INSTRUMENT_UNAVAILABLE:
 					mm.addMarker(false, this, Severity.Error, "Required instrument is unavailable.", v, a);
 					break;
 
-				case CC_UQUAL:					
+				case CC_UQUAL:
 					mm.addMarker(false, this, Severity.Error, "Variant CC is under-qualified for this observation.", v, a);
 					break;
 
-				case WV_UQUAL:					
+				case WV_UQUAL:
 					mm.addMarker(false, this, Severity.Error, "Variant WV is under-qualified for this observation.", v, a);
 					break;
 
-				case IQ_UQUAL:					
+				case IQ_UQUAL:
 					mm.addMarker(false, this, Severity.Error, "Variant IQ is under-qualified for this observation.", v, a);
 					break;
 
 				case INACTIVE:
-					mm.addMarker(false, this, Severity.Warning, "Science program is inactive.", v, a);
+					mm.addMarker(false, this, Severity.Error, "Science program is inactive.", v, a);
 					break;
 
 				case OVER_QUALIFIED:

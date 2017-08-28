@@ -198,9 +198,6 @@ trait OcsBundle {
       bundle_jsky_util
     )
 
-  lazy val bundle_edu_gemini_qpt_server =
-    project.in(file("bundle/edu.gemini.qpt.server"))
-
   lazy val bundle_edu_gemini_qpt_shared =
     project.in(file("bundle/edu.gemini.qpt.shared")).dependsOn(
       bundle_edu_gemini_ags,
