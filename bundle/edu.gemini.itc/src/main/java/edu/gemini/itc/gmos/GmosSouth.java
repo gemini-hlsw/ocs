@@ -1,23 +1,22 @@
 package edu.gemini.itc.gmos;
 
-import edu.gemini.itc.base.SaturationLimitRule;
-import edu.gemini.itc.base.WarningRule;
 import edu.gemini.itc.shared.GmosParameters;
 import edu.gemini.itc.shared.ObservationDetails;
 import edu.gemini.spModel.gemini.gmos.InstGmosSouth;
 import edu.gemini.spModel.gemini.gmos.GmosSouthType;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Gmos specification class
  */
 public final class GmosSouth extends Gmos {
 
-    // Average full well depth for the three GMOS-S Hamamatsu CCDs
-    private static final double WellDepth = 119000;
+    // value taken from instrument's web documentation
+    private static final double WellDepth = 106000;
 
+    // GMOS-S Hamamatsu (value supplied by the instrument scientist)
+    private static final double HAMAMATSU_WELL_DEPTH = 150000;
+
+    private static final int HAMAMATSU_DETECTOR_PIXELS = 6266;
 
     /**
      * /** Related files will start with this prefix
@@ -58,8 +57,27 @@ public final class GmosSouth extends Gmos {
         return DETECTOR_CCD_NAMES;
     }
 
-    @Override public double wellDepth() {
-        return WellDepth;
+    @Override
+    public double wellDepth() {
+        switch (gp.ccdType()) {
+            case E2V:
+                return WellDepth;
+            case HAMAMATSU:
+                return HAMAMATSU_WELL_DEPTH;
+            default:
+                throw new Error("invalid ccd type");
+        }
+    }
+
+    public int detectorPixels() {
+        switch (gp.ccdType()) {
+            case E2V:
+                return E2V_DETECTOR_PIXELS;
+            case HAMAMATSU:
+                return HAMAMATSU_DETECTOR_PIXELS;
+            default:
+                throw new Error("invalid ccd type");
+        }
     }
 
     @Override public double gain() {

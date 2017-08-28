@@ -10,7 +10,7 @@ import edu.gemini.spModel.gemini.gmos.GmosNorthType;
 import edu.gemini.spModel.gemini.gmos.GmosSouthType;
 
 import java.io.PrintWriter;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Helper class for printing GMOS calculation results to an output stream.
@@ -20,6 +20,12 @@ public final class GmosPrinter extends PrinterBase {
     private final GmosRecipe recipe;
     private final PlottingDetails pdp;
     private final boolean isImaging;
+
+    // Indices for chart series
+    // Note: sigIndicesXXX works both for signal and S2N, bkIndicesXXX works for background and final S2N
+    final List<Integer> indicesIfu2B = Arrays.asList(0, 2, 4);
+    final List<Integer> indicesIfu2R = Arrays.asList(1, 3, 5);
+
 
     public GmosPrinter(final ItcParameters p, final GmosParameters instr, final PlottingDetails pdp, final PrintWriter out) {
         super(out);
@@ -64,15 +70,24 @@ public final class GmosPrinter extends PrinterBase {
 
         _printRequestedIntegrationTime(result);
 
+        scala.Option<ItcCcd> ccdWithMaxPeak = scala.Option.empty();
+        Optional<Gmos> instrumentWithMaxPeak = Optional.empty();
+        // Printing one peak pixel value, maximum across all CCDs and spectra
         for (final Gmos instrument : ccdArray) {
-            if (ccdArray.length > 1) {
-                printCcdTitle(instrument);
-            }
             final int ccdIndex = instrument.getDetectorCcdIndex();
             if (s.ccd(ccdIndex).isDefined()) {
-                _printPeakPixelInfo(s.ccd(ccdIndex), instrument.getGmosSaturLimitWarning());
-                _printWarnings(s.ccd(ccdIndex).get().warnings());
+                if ((int)s.ccd(ccdIndex).get().peakPixelFlux() == s.maxPeakPixelFlux()) {
+                    ccdWithMaxPeak = s.ccd(ccdIndex);
+                    instrumentWithMaxPeak = Optional.of(instrument);
+                }
             }
+        }
+
+        if (ccdWithMaxPeak.isDefined()) {
+            if (instrumentWithMaxPeak.isPresent()) {
+                _printPeakPixelInfo(ccdWithMaxPeak, instrumentWithMaxPeak.get().getGmosSaturLimitWarning());
+            }
+            _printWarnings(ccdWithMaxPeak.get().warnings());
         }
 
         _print("<HR align=left SIZE=3>");
@@ -82,15 +97,36 @@ public final class GmosPrinter extends PrinterBase {
         // For the non IFU case specS2N will have only one entry.
         for (int i = 0; i < result.specS2N().length; i++) {
             _println("<p style=\"page-break-inside: never\">");
-            _printFileLinkAllSeries(id, SignalData.instance(),     i);
-            _printFileLinkAllSeries(id, BackgroundData.instance(), i);
-            _printFileLinkAllSeries(id, SingleS2NData.instance(),  i);
-            _printFileLinkAllSeries(id, FinalS2NData.instance(),  i);
             if (mainInstrument.isIfu2()) {
-                _printFileLink(id, PixSigData.instance(), i, 0, " (red)");
-                _printFileLink(id, PixSigData.instance(), i, 1, " (blue)");
-                _printFileLink(id, PixBackData.instance(), i, 0, " (red)");
-                _printFileLink(id, PixBackData.instance(), i, 1, " (blue)");
+                List<Integer> indicesIfu2R = new ArrayList<>();
+                List<Integer> indicesIfu2B = new ArrayList<>();
+                final int numberOfSeries = 2; // of each type
+
+                for (int n = 0; n < ccdArray.length; n++) {
+                    // Indices for chart series
+                    // Note: sigIndicesXXX works both for signal and S2N, bkIndicesXXX works for background and final S2N
+                    indicesIfu2B.add(n * numberOfSeries);
+                    indicesIfu2R.add(n * numberOfSeries + 1);
+                }
+                _printFileLink(id, SignalData.instance(),     i, indicesIfu2R, " (red slit)");
+                _printFileLink(id, SignalData.instance(),     i, indicesIfu2B, " (blue slit)");
+                _printFileLink(id, BackgroundData.instance(), i, indicesIfu2R, " (red slit)");
+                _printFileLink(id, BackgroundData.instance(), i, indicesIfu2B, " (blue slit)");
+                _printFileLink(id, SingleS2NData.instance(),  i, indicesIfu2R, " (red slit)");
+                _printFileLink(id, SingleS2NData.instance(),  i, indicesIfu2B, " (blue slit)");
+                _printFileLink(id, FinalS2NData.instance(),   i, indicesIfu2R, " (red slit)");
+                _printFileLink(id, FinalS2NData.instance(),   i, indicesIfu2B, " (blue slit)");
+                _printFileLink(id, PixSigData.instance(),     i, indicesIfu2R, " (red slit)");
+                _printFileLink(id, PixSigData.instance(),     i, indicesIfu2B, " (blue slit)");
+                _printFileLink(id, PixBackData.instance(),    i, indicesIfu2R, " (red slit)");
+                _printFileLink(id, PixBackData.instance(),    i, indicesIfu2B, " (blue slit)");
+
+            }
+            else {
+                _printFileLinkAllSeries(id, SignalData.instance(),     i);
+                _printFileLinkAllSeries(id, BackgroundData.instance(), i);
+                _printFileLinkAllSeries(id, SingleS2NData.instance(),  i);
+                _printFileLinkAllSeries(id, FinalS2NData.instance(),   i);
             }
             _printImageLink(id, SignalChart.instance(), i, pdp);
             _println("");

@@ -9,6 +9,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -75,7 +77,7 @@ public final class FilesServlet extends HttpServlet {
             final String type     = request.getParameter(ParamType);
             final String id       = request.getParameter(ParamId);
             final int chartIndex  = Integer.parseInt(request.getParameter(ParamChartIndex));
-            final Optional<Integer> seriesIndex = Optional.ofNullable(request.getParameter(ParamSeriesIndex)).map(Integer::parseInt);
+            final Optional<List<Integer>> seriesIndex = Optional.ofNullable(request.getParameterValues(ParamSeriesIndex)).map(i -> Stream.of(i).map(Integer::parseInt).collect(Collectors.toList()));
 
             switch (type) {
 
@@ -134,7 +136,7 @@ public final class FilesServlet extends HttpServlet {
     }
 
     // this is public because we use it for testing
-    public static String toFile(final String id, final String filename, final int chartIndex, final Optional<Integer> seriesIndex) {
+    public static String toFile(final String id, final String filename, final int chartIndex, final Optional<List<Integer>> seriesIndex) {
         final ItcSpectroscopyResult result = result(id);
         final String file;
         switch (filename) {
@@ -149,18 +151,29 @@ public final class FilesServlet extends HttpServlet {
         return "# ITC Data: " + Calendar.getInstance().getTime() + "\n \n" + file;
     }
 
-    private static String toFile(final List<SpcSeriesData> dataSeries, final Optional<Integer> seriesIndex) {
+    private static String toFile(final List<SpcSeriesData> dataSeries, final Optional<List<Integer>> seriesIndex) {
         return seriesIndex.
-                map(dataSeries::get).
-                map(FilesServlet::toFile).
+                map(si -> toFiles(dataSeries, si)).
                 orElse(toFiles(dataSeries));
     }
 
     private static String toFiles(final List<SpcSeriesData> dataSeries) {
+        List<Integer> indices = new ArrayList<>();
+
+        for (int i = 0; i < dataSeries.size(); i++) {
+            indices.add(i);
+        }
+
+        return toFiles(dataSeries, indices);
+    }
+
+    private static String toFiles(final List<SpcSeriesData> dataSeries, final List<Integer> indices) {
         final StringBuilder sb = new StringBuilder();
-        dataSeries.stream().
-                map(FilesServlet::toFile).
-                forEach(sb::append);
+
+        for (int i: indices) {
+            sb.append(toFile(dataSeries.get(i)));
+        }
+
         return sb.toString();
     }
 
@@ -171,5 +184,4 @@ public final class FilesServlet extends HttpServlet {
         }
         return sb.toString();
     }
-
 }
