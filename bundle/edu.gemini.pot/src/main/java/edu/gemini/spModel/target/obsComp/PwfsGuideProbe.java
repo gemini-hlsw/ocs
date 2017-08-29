@@ -19,7 +19,6 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.GeneralPath;
 import java.util.Set;
 
-
 /**
  * The Peripheral guide probes.
  */
@@ -284,21 +283,25 @@ public enum PwfsGuideProbe implements ValidatableGuideProbe, OffsetValidatingGui
         return GuideProbeUtil.instance.validate(coords, this, ctx);
     }
 
-    public Option<BoundaryPosition> checkBoundaries(SPTarget guideStar, ObsContext ctx){
+    public Option<PwfsProbeRangeArea> checkBoundaries(SPTarget guideStar, ObsContext ctx){
         return guideStar
             .getSkycalcCoordinates(ctx.getSchedulingBlockStart())
             .flatMap(cs -> checkBoundaries(cs, ctx));
     }
 
     /**
-     * Returns BoundaryPosition.outside, if the coordinates are outside the outer limit,
-     * inside, if inside the inner limit and innerBoundary if between the inner and outer limits
-     * (which is where the PWFS should normally be).
+     * Returns:
+     *
+     * - BoundaryCheck.outOfRange if outside the limit.
+     *
+     * - BoundaryCheck.vignetting if it obscures the science area.
+     *
+     * - BoundaryCheck.inRange if inside the limit.
      *
      * @param coords the coordinates
      * @param ctx the context
      */
-    public Option<BoundaryPosition> checkBoundaries(final Coordinates coords, final ObsContext ctx) {
+    public Option<PwfsProbeRangeArea> checkBoundaries(final Coordinates coords, final ObsContext ctx) {
         return ctx.getBaseCoordinates().map(baseCoordinates -> {
             final Angle positionAngle = ctx.getPositionAngleJava();
             final Set<Offset> sciencePositions = ctx.getSciencePositions();
@@ -306,19 +309,29 @@ public enum PwfsGuideProbe implements ValidatableGuideProbe, OffsetValidatingGui
             // check positions against corrected outer patrol field bounds
             return getCorrectedPatrolField(ctx).map(pf -> {
                 final BoundaryPosition bp = pf.checkBoundaries(coords, baseCoordinates, positionAngle, sciencePositions);
-                if ((bp != BoundaryPosition.inside) && (bp != BoundaryPosition.innerBoundary)) {
-                    return BoundaryPosition.outside;
+                final PwfsProbeRangeArea result;
+                switch (bp) {
+                    case inside:
+                        result = PwfsProbeRangeArea.inRange;
+                        break;
+                    case innerBoundary:
+                        // Check if any of the guide stars are inside the inner bounds (opposite logic needed, union instead of intersection)
+                        final double minLimit = getVignettingClearance(ctx).toArcsecs().getMagnitude();
+                        final Ellipse2D e = new Ellipse2D.Double(-minLimit, -minLimit, minLimit * 2.0, minLimit * 2.0);
+                        final PatrolField p = getCorrectedPatrolField(new PatrolField(e, e, e), ctx);
+                        if (p.anyInside(coords, baseCoordinates, positionAngle, sciencePositions)) {
+                            result = PwfsProbeRangeArea.vignetting;
+                        } else {
+                            result = PwfsProbeRangeArea.inRange;
+                        }
+                        break;
+                    // outside and outerBoundary
+                    default:
+                        result = PwfsProbeRangeArea.outOfRange;
+                        break;
                 }
-
-                // Check if any of the guide stars are inside the inner bounds (opposite logic needed, union instead of intersection)
-                final double minLimit = getVignettingClearance(ctx).toArcsecs().getMagnitude();
-                final Ellipse2D e = new Ellipse2D.Double(-minLimit, -minLimit, minLimit * 2.0, minLimit * 2.0);
-                final PatrolField p = getCorrectedPatrolField(new PatrolField(e, e, e), ctx);
-                if (p.anyInside(coords, baseCoordinates, positionAngle, sciencePositions)) {
-                    return BoundaryPosition.inside;
-                }
-                return BoundaryPosition.innerBoundary;
-            }).getOrElse(BoundaryPosition.outside);
+                return result;
+            }).getOrElse(PwfsProbeRangeArea.outOfRange);
         });
     }
 

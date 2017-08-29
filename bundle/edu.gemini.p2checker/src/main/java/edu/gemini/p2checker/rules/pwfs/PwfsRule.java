@@ -45,14 +45,13 @@ public class PwfsRule implements IRule {
                 try {
                     pwfs.checkBoundaries(primary, ctx).foreach(bs -> {
                         switch (bs) {
-                            case inside:
+                            case vignetting:
                                 problems.addWarning(PREFIX + "WARN", "The " + pwfs.getKey() + WARN, targetNode);
                                 break;
-                            case innerBoundary:
+                            case inRange:
                                 // OK, this is where it should be: between inner and outer limits
                                 break;
-                            case outerBoundary:
-                            case outside:
+                            case outOfRange:
                                 problems.addError(PREFIX + "ERROR", "The " + pwfs.getKey() + ERROR, targetNode);
                                 break;
                         }
