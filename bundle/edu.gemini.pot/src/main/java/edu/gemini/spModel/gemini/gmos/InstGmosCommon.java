@@ -26,6 +26,7 @@ import edu.gemini.spModel.inst.ScienceAreaGeometry;
 import edu.gemini.spModel.inst.VignettableScienceAreaInstrument;
 import edu.gemini.spModel.obs.plannedtime.CommonStepCalculator;
 import edu.gemini.spModel.obs.plannedtime.ExposureCalculator;
+import edu.gemini.spModel.obs.plannedtime.PlannedTime;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.CategorizedTime;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.CategorizedTimeGroup;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.Category;
@@ -1280,6 +1281,17 @@ public abstract class InstGmosCommon<
     private static final CategorizedTime DHS_WRITE = CategorizedTime.fromSeconds(Category.DHS_WRITE, 10.0);
 
     public CategorizedTimeGroup calc(Config cur, Option<Config> prev) {
+        final ItemKey FPU_KEY = new ItemKey("instrument:fpu");
+        final double FPU_OVERHEAD = 60.0;
+
+        final ItemKey FILTER_KEY = new ItemKey("instrument:filter");
+        final double FILTER_OVERHEAD = 20.0;
+
+        final ItemKey DISPERSER_KEY = new ItemKey("instrument:disperser");
+        final double DISPERSER_OVERHEAD = 90.0;
+
+        final Collection<CategorizedTime> times = new ArrayList<>();
+
         double exposureTime = ExposureCalculator.instance.exposureTimeSec(cur);
 
         if (_useNS && isNodAndShuffleableObsType(cur)) {
@@ -1291,12 +1303,24 @@ public abstract class InstGmosCommon<
             int numSteps = getPosList().size();
             exposureTime = (exposureTime * numSteps * _numNSCycles) + (_numNSCycles * nOverhead);
         }
-        CategorizedTime exposure = CategorizedTime.fromSeconds(Category.EXPOSURE, exposureTime);
+        times.add(CategorizedTime.fromSeconds(Category.EXPOSURE, exposureTime));
+
+        if (PlannedTime.isUpdated(cur, prev, FPU_KEY)) {
+            times.add(CategorizedTime.fromSeconds(Category.CONFIG_CHANGE, FPU_OVERHEAD, "FPU"));
+        }
+        if (PlannedTime.isUpdated(cur, prev, FILTER_KEY)) {
+            times.add(CategorizedTime.fromSeconds(Category.CONFIG_CHANGE, FILTER_OVERHEAD, "Filter"));
+        }
+        if (PlannedTime.isUpdated(cur, prev, DISPERSER_KEY)) {
+            times.add(CategorizedTime.fromSeconds(Category.CONFIG_CHANGE, DISPERSER_OVERHEAD, "Disperser"));
+        }
 
         double readoutTime = GmosReadoutTime.getReadoutOverhead(cur, getCustomROIs());
-        CategorizedTime readout = CategorizedTime.fromSeconds(Category.READOUT, readoutTime);
+        times.add(CategorizedTime.fromSeconds(Category.READOUT, readoutTime));
 
-        return CommonStepCalculator.instance.calc(cur, prev).addAll(exposure, readout, DHS_WRITE);
+        times.add(DHS_WRITE);
+
+        return CommonStepCalculator.instance.calc(cur, prev).addAll(times);
     }
 
     public void updateConfig(IConfig config) {
