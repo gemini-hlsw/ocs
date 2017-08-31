@@ -73,6 +73,7 @@ class DirScanner(dir: MonitoredDirectory) {
     var deletedFiles: List[File] = Nil
     var newFiles: List[File] = Nil
 
+    createDirIfNeeded()
     Option(dir.dir.listFiles()) match {
       case Some(list) =>
         list.foreach {
