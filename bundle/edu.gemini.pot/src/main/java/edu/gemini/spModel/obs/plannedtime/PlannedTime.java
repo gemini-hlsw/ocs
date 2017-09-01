@@ -222,30 +222,10 @@ public final class PlannedTime implements Serializable {
             return times.hashCode();
         }
 
-        public Pair<Map<Category, CategorizedTime>, Map<Category, ImList<CategorizedTime>>> maxTimes() {
-            Map<Category, CategorizedTime> max = new TreeMap<>();
-            Map<Category, ImList<CategorizedTime>> losers = new TreeMap<>();
-
-            for (CategorizedTime ct : times) {
-                CategorizedTime cur = max.get(ct.category);
-
-                ImList<CategorizedTime> currLosers = losers.get(ct.category);
-                if (currLosers == null) {
-                    losers.put(ct.category, ImCollections.emptyList());
-                }
-
-                if (cur == null) {
-                    max.put(ct.category, ct);
-                } else if (cur.compareTo(ct) < 0) {
-                    max.put(ct.category, ct);
-                    losers.put(ct.category, currLosers.append(cur));
-                }
-                else {
-                    losers.put(ct.category, currLosers.append(ct));
-                }
-            }
-            return new Pair(max, losers);
+        public HashMap<Category, ImList<CategorizedTime>> groupTimes() {
+            return DefaultImList.create(times).groupBy(t -> t.category);
         }
+
         public long totalTime() {
             if (times.size() == 0) return 0;
 

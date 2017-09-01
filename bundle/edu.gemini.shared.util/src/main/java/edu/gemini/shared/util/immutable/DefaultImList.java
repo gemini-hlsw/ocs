@@ -352,12 +352,9 @@ public final class DefaultImList<T> implements ImList<T>, Serializable {
         HashMap<K, ImList<T>> m = new HashMap<>();
         for (final T elem : backingList) {
             final K key = f.apply(elem);
-            final ImList<T> val = m.get(key);
-            if (val == null) {
-                m.put(key, create(elem));
-            } else {
-                m.put(key, val.append(elem));
-            }
+            m.put(key, ImOption.apply(m.get(key)).map(
+                    lst -> lst.append(elem)
+            ).getOrElse(() -> create(elem)));
         }
         return m;
     }

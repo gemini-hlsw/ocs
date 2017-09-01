@@ -15,6 +15,7 @@ import jsky.timeline.DefaultTimeLineNode;
 
 import java.awt.*;
 import java.awt.event.MouseEvent;
+import java.util.Comparator;
 import java.util.Map;
 
 import static jsky.app.ot.editor.seq.Keys.DATALABEL_KEY;
@@ -93,13 +94,13 @@ public class ObserveTimeLineNode extends DefaultTimeLineNode {
 
             buf.append("<table><tr><th colspan=\"2\">Event</th><th colspan=\"2\">Sec</th></tr>");
             Step s = plannedTime.steps.get(step);
-            Map<Category, CategorizedTime> m = s.times.maxTimes()._1();
-            Map<Category, ImList<CategorizedTime>> losers = s.times.maxTimes()._2();
+            Map<Category, ImList<CategorizedTime>> m = s.times.groupTimes();
             for (Category c : Category.values()) {
-                CategorizedTime ct = m.get(c);
-                if (ct == null) continue;
+                ImList<CategorizedTime> cts = m.get(c);
+                if (cts == null) continue;
+                CategorizedTime ct = cts.max(Comparator.naturalOrder());
                 buf.append("<tr>");
-                buf.append("<td colspan=\"3\">").append(formatCategory(ct)).append("</td>");
+                buf.append("<td colspan=\"3\">").append(c.display).append("</td>");
 
                 String secStr = formatSec(ct.time);
                 buf.append("<td align=\"right\"> ").append(secStr).append("</td>");
@@ -115,8 +116,10 @@ public class ObserveTimeLineNode extends DefaultTimeLineNode {
                     buf.append("<td></td>");
                     buf.append("</tr>");
 
-                    ImList<CategorizedTime> lcts = losers.get(c);
-                    for (CategorizedTime lct : lcts) {
+                    ImList<CategorizedTime> lcts = m.get(c);
+                    if (lcts == null) continue;
+                    ImList<CategorizedTime> lctst = lcts.sort(Comparator.reverseOrder()).tail();
+                    for (CategorizedTime lct : lctst) {
                         if (lct == null) continue;
                         buf.append("<tr>");
                         buf.append("<td></td>");

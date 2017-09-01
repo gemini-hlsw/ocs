@@ -4,8 +4,6 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Stream;
 
-import static java.util.Collections.emptyMap;
-
 /**
  * Utility methods for working with immutable collections.
  */
