@@ -1,6 +1,7 @@
 package edu.gemini.shared.util.immutable;
 
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -429,4 +430,19 @@ public interface ImList<T> extends Iterable<T> {
      * @return the result of combining the elements with the seed value
      */
     <U> U foldRight(U start, Function2<? super T, U, U> op);
+
+    /**
+     * Partitions the elements of this list according to the discriminator function.
+     *
+     * @param f the discriminator function.
+     *
+     * @param <K> the type of the keys returned by the discriminator function.
+     *
+     * @return A HashMap from keys to lists where the following invariant holds:
+     *
+     *         {{{
+     *           (xs groupBy f)(k) = xs filter (x => f(x) == k)
+     *         }}}
+     */
+    <K> HashMap<K, ImList<T>> groupBy(Function1<? super T, K> f);
 }

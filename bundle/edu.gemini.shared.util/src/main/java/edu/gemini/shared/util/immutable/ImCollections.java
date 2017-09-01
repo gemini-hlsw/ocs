@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Stream;
 
+import static java.util.Collections.emptyMap;
+
 /**
  * Utility methods for working with immutable collections.
  */
@@ -212,6 +214,11 @@ public class ImCollections {
         @Override
         public <U> U foldRight(final U start, final Function2<? super Object, U, U> op) {
             return start;
+        }
+
+        @Override
+        public <K> HashMap<K, ImList<Object>> groupBy(final Function1<? super Object, K> f) {
+            return new HashMap<>();
         }
 
         @Override
