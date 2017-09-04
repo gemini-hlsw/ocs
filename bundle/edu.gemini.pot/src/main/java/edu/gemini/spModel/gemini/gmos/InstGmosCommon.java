@@ -26,6 +26,7 @@ import edu.gemini.spModel.inst.ScienceAreaGeometry;
 import edu.gemini.spModel.inst.VignettableScienceAreaInstrument;
 import edu.gemini.spModel.obs.plannedtime.CommonStepCalculator;
 import edu.gemini.spModel.obs.plannedtime.ExposureCalculator;
+import edu.gemini.spModel.obs.plannedtime.PlannedTime;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.CategorizedTime;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.CategorizedTimeGroup;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.Category;
@@ -1280,6 +1281,8 @@ public abstract class InstGmosCommon<
     private static final CategorizedTime DHS_WRITE = CategorizedTime.fromSeconds(Category.DHS_WRITE, 10.0);
 
     public CategorizedTimeGroup calc(Config cur, Option<Config> prev) {
+        final Collection<CategorizedTime> times = new ArrayList<>();
+
         double exposureTime = ExposureCalculator.instance.exposureTimeSec(cur);
 
         if (_useNS && isNodAndShuffleableObsType(cur)) {
@@ -1291,12 +1294,30 @@ public abstract class InstGmosCommon<
             int numSteps = getPosList().size();
             exposureTime = (exposureTime * numSteps * _numNSCycles) + (_numNSCycles * nOverhead);
         }
-        CategorizedTime exposure = CategorizedTime.fromSeconds(Category.EXPOSURE, exposureTime);
+        times.add(CategorizedTime.fromSeconds(Category.EXPOSURE, exposureTime));
+
+        if (PlannedTime.isUpdated(cur, prev, GmosCommonType.FPUnit.KEY)) {
+            times.add(CategorizedTime.fromSeconds(
+                    Category.CONFIG_CHANGE, GmosCommonType.FPUnit.CHANGE_OVERHEAD, "FPU")
+            );
+        }
+        if (PlannedTime.isUpdated(cur, prev, GmosCommonType.Filter.KEY)) {
+            times.add(CategorizedTime.fromSeconds(
+                    Category.CONFIG_CHANGE, GmosCommonType.Filter.CHANGE_OVERHEAD, "Filter")
+            );
+        }
+        if (PlannedTime.isUpdated(cur, prev, GmosCommonType.Disperser.KEY)) {
+            times.add(CategorizedTime.fromSeconds(
+                    Category.CONFIG_CHANGE, GmosCommonType.Disperser.CHANGE_OVERHEAD, "Disperser")
+            );
+        }
 
         double readoutTime = GmosReadoutTime.getReadoutOverhead(cur, getCustomROIs());
-        CategorizedTime readout = CategorizedTime.fromSeconds(Category.READOUT, readoutTime);
+        times.add(CategorizedTime.fromSeconds(Category.READOUT, readoutTime));
 
-        return CommonStepCalculator.instance.calc(cur, prev).addAll(exposure, readout, DHS_WRITE);
+        times.add(DHS_WRITE);
+
+        return CommonStepCalculator.instance.calc(cur, prev).addAll(times);
     }
 
     public void updateConfig(IConfig config) {

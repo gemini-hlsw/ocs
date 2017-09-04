@@ -6,6 +6,7 @@
 //
 package jsky.app.ot.editor.seq;
 
+import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.*;
 import jsky.app.ot.util.OtColor;
@@ -14,6 +15,7 @@ import jsky.timeline.DefaultTimeLineNode;
 
 import java.awt.*;
 import java.awt.event.MouseEvent;
+import java.util.Comparator;
 import java.util.Map;
 
 import static jsky.app.ot.editor.seq.Keys.DATALABEL_KEY;
@@ -90,20 +92,47 @@ public class ObserveTimeLineNode extends DefaultTimeLineNode {
         } else {
             buf.append("<p align=\"center\"><b>").append(SequenceTabUtil.shortDatasetLabel(plannedTime.sequence.getStep(step))).append("</b></p>");
 
-            buf.append("<table><tr><th>Event</th><th>Sec</th></tr>");
+            buf.append("<table><tr><th colspan=\"2\">Event</th><th colspan=\"2\">Sec</th></tr>");
             Step s = plannedTime.steps.get(step);
-            Map<Category, CategorizedTime> m = s.times.maxTimes();
+            Map<Category, ImList<CategorizedTime>> m = s.times.groupTimes();
             for (Category c : Category.values()) {
-                CategorizedTime ct = m.get(c);
-                if (ct == null) continue;
+                ImList<CategorizedTime> cts = m.get(c);
+                if (cts == null) continue;
+                CategorizedTime ct = cts.max(Comparator.naturalOrder());
                 buf.append("<tr>");
-                buf.append("<td>").append(formatCategory(ct)).append("</td>");
+                buf.append("<td colspan=\"3\">").append(c.display).append("</td>");
 
                 String secStr = formatSec(ct.time);
                 buf.append("<td align=\"right\"> ").append(secStr).append("</td>");
                 buf.append("</tr>");
+
+                // Only Config changes have separate actions running in parallel.
+                if (ct.category == Category.CONFIG_CHANGE) {
+                    buf.append("<tr>");
+                    buf.append("<td></td>");
+                    buf.append("<td>").append(formatCategory(ct)).append("</td>");
+
+                    buf.append("<td align=\"right\"> ").append(secStr).append("</td>");
+                    buf.append("<td></td>");
+                    buf.append("</tr>");
+
+                    ImList<CategorizedTime> lcts = m.get(c);
+                    if (lcts == null) continue;
+                    ImList<CategorizedTime> lctst = lcts.sort(Comparator.reverseOrder()).tail();
+                    for (CategorizedTime lct : lctst) {
+                        if (lct == null) continue;
+                        buf.append("<tr>");
+                        buf.append("<td></td>");
+                        buf.append("<td>").append(formatCategory(lct)).append("</td>");
+
+                        String secLosStr = formatSec(lct.time);
+                        buf.append("<td align=\"right\"> ").append(secLosStr).append("</td>");
+                        buf.append("<td></td>");
+                        buf.append("</tr>");
+                    }
+                }
             }
-            buf.append("<tr><td><b>Total</b></td><td align=\"right\"><b>").append(formatSec(s.totalTime())).append("</b></td></tr>");
+            buf.append("<tr><td colspan=\"3\"><strong>Total</strong></td><td align=\"right\"><strong>").append(formatSec(s.totalTime())).append("</strong></td></tr>");
             buf.append("</table>");
         }
         buf.append("</body></html>");

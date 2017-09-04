@@ -215,6 +215,11 @@ public class ImCollections {
         }
 
         @Override
+        public <K> HashMap<K, ImList<Object>> groupBy(final Function1<? super Object, K> f) {
+            return new HashMap<>();
+        }
+
+        @Override
         public Stream<Object> stream() {
             return Stream.empty();
         }

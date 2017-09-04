@@ -6,10 +6,7 @@ package edu.gemini.shared.util.immutable;
 
 import junit.framework.TestCase;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Comparator;
+import java.util.*;
 
 /**
  * Test code for immutable lists.
@@ -470,5 +467,26 @@ public class ImListTest extends TestCase {
         assertEquals("cba", create('a', 'b', 'c').foldRight("", op));
         //noinspection unchecked
         assertEquals("", ImCollections.EMPTY_LIST.foldRight("", op));
+    }
+
+    public void testGroupBy() {
+        Function1<Character, Integer> f = new Function1<Character, Integer>() {
+            @Override public Integer apply(Character c) {
+                if (c == 'a') { return 1; }
+                else if (c == 'b') { return 2; }
+                else if (c == 'c') { return 3; }
+                else { return 4; }
+            }
+        };
+
+        HashMap<Integer, ImList<Character>> em = new HashMap<>();
+
+        em.put(1, create('a'));
+        em.put(2, create('b', 'b'));
+        em.put(3, create('c', 'c', 'c'));
+        em.put(4, create('e', 'd'));
+
+        assertEquals(em, create('c', 'a', 'b', 'e', 'b', 'c', 'c', 'd').groupBy(f));
+        assertEquals(new HashMap<>(), ImCollections.EMPTY_LIST.groupBy(f));
     }
 }

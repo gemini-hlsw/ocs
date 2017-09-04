@@ -26,7 +26,7 @@ public enum GcalStepCalculator implements StepCalculator {
     private static final CategorizedTime gcalConfigTime(ItemKey key) {
         String name   = key.getName();
         String detail = Character.toUpperCase(name.charAt(0)) + name.substring(1);
-        return CategorizedTime.apply(Category.CONFIG_CHANGE, CONFIG_CHANGE_TIME, detail);
+        return CategorizedTime.apply(Category.CONFIG_CHANGE, CONFIG_CHANGE_TIME, "GCAL " + detail);
     }
 
     private static CategorizedTime scienceFoldMove(Option<Config> prev, boolean isCalStep) {

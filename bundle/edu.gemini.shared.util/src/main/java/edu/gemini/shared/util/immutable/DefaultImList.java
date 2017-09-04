@@ -348,6 +348,18 @@ public final class DefaultImList<T> implements ImList<T>, Serializable {
     }
 
     @Override
+    public <K> HashMap<K, ImList<T>> groupBy(Function1<? super T, K> f) {
+        HashMap<K, ImList<T>> m = new HashMap<>();
+        for (final T elem : backingList) {
+            final K key = f.apply(elem);
+            m.put(key, ImOption.apply(m.get(key)).map(
+                    lst -> lst.append(elem)
+            ).getOrElse(() -> create(elem)));
+        }
+        return m;
+    }
+
+    @Override
     public Stream<T> stream() {
         return StreamSupport.stream(spliterator(), false);
     }
@@ -391,4 +403,5 @@ public final class DefaultImList<T> implements ImList<T>, Serializable {
         }
         return res;
     }
+
 }

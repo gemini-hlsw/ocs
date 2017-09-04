@@ -1,7 +1,6 @@
 package edu.gemini.spModel.obs.plannedtime;
 
-import edu.gemini.shared.util.immutable.Option;
-import edu.gemini.shared.util.immutable.PredicateOp;
+import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.config2.Config;
 import edu.gemini.spModel.config2.ConfigSequence;
 import edu.gemini.spModel.config2.ItemKey;
@@ -223,15 +222,8 @@ public final class PlannedTime implements Serializable {
             return times.hashCode();
         }
 
-        public Map<Category, CategorizedTime> maxTimes() {
-            Map<Category, CategorizedTime> max = new TreeMap<>();
-            for (CategorizedTime ct : times) {
-                CategorizedTime cur = max.get(ct.category);
-                if ((cur == null) || (cur.compareTo(ct) < 0)) {
-                    max.put(ct.category, ct);
-                }
-            }
-            return max;
+        public HashMap<Category, ImList<CategorizedTime>> groupTimes() {
+            return DefaultImList.create(times).groupBy(t -> t.category);
         }
 
         public long totalTime() {

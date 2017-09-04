@@ -26,6 +26,11 @@ public class GmosCommonType {
     }
 
     public interface Disperser extends DisplayableSpType, LoggableSpType, SequenceableSpType {
+
+        public static final ItemKey KEY = new ItemKey(INSTRUMENT_KEY, "disperser");
+
+        public static final double CHANGE_OVERHEAD = 90.0;
+
         boolean isMirror();
         // The dispersers "ruling density" in lines/mm.
         int rulingDensity();
@@ -38,6 +43,11 @@ public class GmosCommonType {
     }
 
     public interface Filter extends DisplayableSpType, LoggableSpType, SequenceableSpType {
+
+        public static final ItemKey KEY = new ItemKey(INSTRUMENT_KEY, "filter");
+
+        public static final double CHANGE_OVERHEAD = 20.0;
+
         boolean isNone();
         String getWavelength();
     }
@@ -49,9 +59,14 @@ public class GmosCommonType {
     }
 
     public interface FPUnit extends DisplayableSpType, LoggableSpType, SequenceableSpType {
+
         // IFU visualisation in TPE
         // The offset from the base position in arcsec
         double IFU_FOV_OFFSET = 30.;
+
+        public static final ItemKey KEY = new ItemKey(INSTRUMENT_KEY, "fpu");
+
+        public static final double CHANGE_OVERHEAD = 60.0;
 
         // The offsets (from the base pos) and dimensions of the IFU FOV (in arcsec)
         Rectangle2D.Double[] IFU_FOV = new Rectangle2D.Double[]{
