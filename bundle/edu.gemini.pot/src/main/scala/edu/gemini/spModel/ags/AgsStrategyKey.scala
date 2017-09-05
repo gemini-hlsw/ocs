@@ -69,6 +69,10 @@ object AgsStrategyKey {
     val id = "GS_PWFS2"
   }
 
+  case object OffKey extends AgsStrategyKey {
+    val id = "Off"
+  }
+
   val All = List(
     AltairAowfsKey,
     Flamingos2OiwfsKey,
