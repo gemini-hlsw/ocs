@@ -37,4 +37,5 @@ case object OffStrategy extends AgsStrategy {
   override val guideProbes: List[GuideProbe] = Nil
 
   override val probeBands = NoBands
+
 }

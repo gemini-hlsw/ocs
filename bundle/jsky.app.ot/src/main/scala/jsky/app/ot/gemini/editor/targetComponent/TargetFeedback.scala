@@ -209,7 +209,7 @@ object BagsFeedback {
     case RunningEditedState(_) => RunningStateRow
     case FailureState(_,why)   => FailureStateRow(why)
     case IdleState(_,_) if ctx.exists(c =>
-      AgsRegistrar.currentStrategy(c).exists(_ != OffStrategy) &&
+      AgsRegistrar.currentStrategy(c).exists(_.key.id =/= OffStrategy.key.id) &&
         c.getTargets.getGuideEnvironment.guideEnv.auto === AutomaticGroup.Initial) => NoStarsRow
     case _                     => EmptyRow
   }
