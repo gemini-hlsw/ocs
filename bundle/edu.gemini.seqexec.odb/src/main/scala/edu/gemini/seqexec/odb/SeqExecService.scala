@@ -3,7 +3,6 @@ package edu.gemini.seqexec.odb
 import edu.gemini.pot.sp.{ISPObservation, SPObservationID}
 import edu.gemini.pot.spdb.DBLocalDatabase
 import edu.gemini.seqexec.odb.SeqFailure.{MissingObservation, SeqException}
-
 import edu.gemini.spModel.config.ConfigBridge
 import edu.gemini.spModel.config.map.ConfigValMapInstances.IDENTITY_MAP
 import edu.gemini.spModel.config2.ConfigSequence
@@ -15,10 +14,13 @@ import java.net.HttpURLConnection.{HTTP_NOT_FOUND, HTTP_OK}
 import java.time.Duration
 import java.util.stream.Collectors
 
-import scala.collection.JavaConverters._
+import edu.gemini.spModel.obs.SPObservation
 
+import scala.collection.JavaConverters._
 import scalaz._
 import Scalaz._
+
+case class SeqexecSequence(title: String, config: ConfigSequence)
 
 /**
  * Sequence Executor Service API.
@@ -27,7 +29,7 @@ trait SeqExecService {
 
   /** Fetches the sequence associated with the given observation id, if it
     * exists. */
-  def sequence(oid: SPObservationID): TrySeq[ConfigSequence]
+  def sequence(oid: SPObservationID): TrySeq[SeqexecSequence]
 }
 
 object SeqExecService {
@@ -83,6 +85,13 @@ object SeqExecService {
       }
     }
 
+  private def extractName(obs: ISPObservation): TrySeq[String] = trySeq {
+    obs.getDataObject match {
+      case o: SPObservation => o.getTitle.right
+      case _                => SeqException(new RuntimeException("Cannot read the obs title")).left
+    }
+  }
+
   private def extractSequence(obs: ISPObservation): TrySeq[ConfigSequence] =
     catchingAll {
       ConfigBridge.extractSequence(obs, null, IDENTITY_MAP, true)
@@ -95,13 +104,14 @@ object SeqExecService {
     */
   def client(peer: Peer): SeqExecService =
     new SeqExecService {
-      override def sequence(oid: SPObservationID): TrySeq[ConfigSequence] =
+      override def sequence(oid: SPObservationID): TrySeq[SeqexecSequence] =
         for {
           u <- url(peer, oid)
           c <- open(u)
           x <- read(c, oid)
           o <- parse(x)
           s <- extractSequence(o)
-        } yield s
+          n <- extractName(o)
+        } yield SeqexecSequence(n, s)
     }
 }
