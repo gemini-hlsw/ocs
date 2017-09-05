@@ -1,5 +1,8 @@
 package edu.gemini.spModel.type;
 
+import edu.gemini.shared.util.immutable.ImOption;
+import edu.gemini.shared.util.immutable.Option;
+
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -105,6 +108,19 @@ public final class SpTypeUtil {
             LOG.fine("Could not find '" + name + "' in class: " + c.getName());
         }
         return res;
+    }
+
+    /**
+     * Converts an enum tag to an enum value using <code>Enum.valueOf()</code>,
+     * wrapping the result in an <code>Option</code> where failure produces a
+     * <code>None</code> rather than an exception.
+     *
+     * @param c class of the enum type
+     * @param tag tag of the enum value
+     * @param <T> enumeration type
+     */
+    public static <T extends Enum<T>> Option<T> optionValueOf(Class<T> c, String tag) {
+        return ImOption.apply(noExceptionValueOf(c, tag));
     }
 
     /**
