@@ -36,6 +36,10 @@ case class SingleBand(band: MagnitudeBand) extends BandsList {
   val bands = List(band)
 }
 
+case object NoBands extends BandsList {
+  val bands = Nil
+}
+
 object BandsList {
   implicit val equals = Equal.equal[BandsList]((a, b) => a.bands === b.bands)
 

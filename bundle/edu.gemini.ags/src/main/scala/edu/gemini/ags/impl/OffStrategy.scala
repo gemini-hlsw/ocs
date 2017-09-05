@@ -4,7 +4,7 @@ import edu.gemini.ags.api._
 import edu.gemini.ags.api.AgsMagnitude._
 import edu.gemini.catalog.api.CatalogQuery
 import edu.gemini.spModel.ags.AgsStrategyKey
-import edu.gemini.spModel.core.{SiderealTarget, RBandsList}
+import edu.gemini.spModel.core.{NoBands, SiderealTarget}
 import edu.gemini.spModel.guide.{GuideProbe, ValidatableGuideProbe}
 import edu.gemini.spModel.obs.context.ObsContext
 
@@ -30,11 +30,11 @@ case object OffStrategy extends AgsStrategy {
 
   override def candidates(ctx: ObsContext, mt: MagnitudeTable)(ec: ExecutionContext): Future[List[(GuideProbe, List[SiderealTarget])]] = Nil.pure[Future]
 
-  override def estimate(ctx: ObsContext, mt: MagnitudeTable)(ec: ExecutionContext): Future[AgsStrategy.Estimate] = AgsStrategy.Estimate(1.0).pure[Future]
+  override def estimate(ctx: ObsContext, mt: MagnitudeTable)(ec: ExecutionContext): Future[AgsStrategy.Estimate] = AgsStrategy.Estimate.CompleteFailure.pure[Future]
 
   override def select(ctx: ObsContext, mt: MagnitudeTable)(ec: ExecutionContext): Future[Option[AgsStrategy.Selection]] = None.pure[Future]
 
   override val guideProbes: List[GuideProbe] = Nil
 
-  override val probeBands = RBandsList
+  override val probeBands = NoBands
 }
