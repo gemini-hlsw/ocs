@@ -199,6 +199,7 @@ object BagsFeedback {
   case object PendingStateRow extends BagsStateRow(BANANA.some, "Waiting for automatic guide star lookup to run...", spinnerIcon)
   case object RunningStateRow extends BagsStateRow(BANANA.some, "Automatic guide star lookup is running...", spinnerIcon)
   case class  FailureStateRow(why: String) extends BagsStateRow(LIGHT_SALMON.some, s"Automatic guide star lookup failed: $why", errorIcon)
+  case object AgsOffRow       extends BagsStateRow(BANANA.some, "Auto guide star search disabled.", warningIcon)
   case object EmptyRow        extends BagsStateRow(None, " ", None) // Nonempty string to make label have required height.
 
   import BagsState._
@@ -208,9 +209,9 @@ object BagsFeedback {
     case RunningState(_,_,_)   => RunningStateRow
     case RunningEditedState(_) => RunningStateRow
     case FailureState(_,why)   => FailureStateRow(why)
-    case IdleState(_,_) if ctx.exists(c =>
-      AgsRegistrar.currentStrategy(c).exists(_.key.id =/= OffStrategy.key.id) &&
-        c.getTargets.getGuideEnvironment.guideEnv.auto === AutomaticGroup.Initial) => NoStarsRow
+    case IdleState(_,_) if ctx.exists(_.getTargets.getGuideEnvironment.guideEnv.auto === AutomaticGroup.Initial) =>
+      if (ctx.exists(AgsRegistrar.currentStrategy(_).exists(_.key.id === OffStrategy.key.id))) AgsOffRow
+      else NoStarsRow
     case _                     => EmptyRow
   }
 }
