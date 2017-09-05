@@ -525,12 +525,8 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         public String sequenceValue() { return name(); }
         public String toString() { return displayValue; }
 
-        public static WindowCover valueOf(String name, WindowCover nvalue) {
-            return SpTypeUtil.oldValueOf(WindowCover.class, name, nvalue);
-        }
-
-        public static Option<WindowCover> valueOf(String name, Option<WindowCover> nvalue) {
-            return nvalue.map(def -> valueOf(name, def));
+        public static Option<WindowCover> valueOf(String tag, Option<WindowCover> def) {
+            return SpTypeUtil.optionValueOf(WindowCover.class, tag).orElse(def);
         }
     }
 
@@ -552,10 +548,6 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         public static Decker valueOf(String name, Decker nvalue) {
             return SpTypeUtil.oldValueOf(Decker.class, name, nvalue);
         }
-
-        public static Option<Decker> valueOf(String name, Option<Decker> nvalue) {
-            return nvalue.map(def -> valueOf(name, def));
-        }
     }
 
     public enum ReadoutMode implements StandardSpType {
@@ -572,12 +564,8 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         public String sequenceValue() { return name(); }
         public String toString() { return displayValue; }
 
-        public static ReadoutMode valueOf(String name, ReadoutMode nvalue) {
-            return SpTypeUtil.oldValueOf(ReadoutMode.class, name, nvalue);
-        }
-
-        public static Option<ReadoutMode> valueOf(String name, Option<ReadoutMode> nvalue) {
-            return nvalue.map(def -> valueOf(name, def));
+        public static Option<ReadoutMode> valueOf(String tag, Option<ReadoutMode> def) {
+            return SpTypeUtil.optionValueOf(ReadoutMode.class, tag).orElse(def);
         }
     }
 
@@ -609,12 +597,8 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         public String toString() { return displayValue(); }
         public int getCount() { return reads; }
 
-        public static Reads valueOf(String name, Reads nvalue) {
-            return SpTypeUtil.oldValueOf(Reads.class, name, nvalue);
-        }
-
-        public static Option<Reads> valueOf(String name, Option<Reads> nvalue) {
-            return nvalue.map(def -> valueOf(name, def));
+        public static Option<Reads> valueOf(String tag, Option<Reads> def) {
+            return SpTypeUtil.optionValueOf(Reads.class, tag).orElse(def);
         }
     }
 

@@ -40,12 +40,8 @@ public final class MichelleParams {
             return displayValue;
         }
 
-        public static ChopMode valueOf(String name, ChopMode nvalue) {
-            return SpTypeUtil.oldValueOf(ChopMode.class, name, nvalue);
-        }
-
-        public static Option<ChopMode> valueOf(String name, Option<ChopMode> nvalue) {
-            return nvalue.map(def -> valueOf(name, def));
+        public static Option<ChopMode> valueOf(String tag, Option<ChopMode> def) {
+            return SpTypeUtil.optionValueOf(ChopMode.class, tag).orElse(def);
         }
     }
 
@@ -74,12 +70,8 @@ public final class MichelleParams {
             return displayValue;
         }
 
-        public static ChopWaveform valueOf(String name, ChopWaveform nvalue) {
-            return SpTypeUtil.oldValueOf(ChopWaveform.class, name, nvalue);
-        }
-
-        public static Option<ChopWaveform> valueOf(String name, Option<ChopWaveform> nvalue) {
-            return nvalue.map(def -> valueOf(name, def));
+        public static Option<ChopWaveform> valueOf(String tag, Option<ChopWaveform> def) {
+            return SpTypeUtil.optionValueOf(ChopWaveform.class, tag).orElse(def);
         }
     }
 
@@ -107,12 +99,8 @@ public final class MichelleParams {
             return displayValue;
         }
 
-        public static DisperserOrder valueOf(String name, DisperserOrder nvalue) {
-            return SpTypeUtil.oldValueOf(DisperserOrder.class, name, nvalue);
-        }
-
-        public static Option<DisperserOrder> valueOf(String name, Option<DisperserOrder> nvalue) {
-            return nvalue.map(def -> valueOf(name, def));
+        public static Option<DisperserOrder> valueOf(String tag, Option<DisperserOrder> def) {
+            return SpTypeUtil.optionValueOf(DisperserOrder.class, tag).orElse(def);
         }
     }
 
@@ -269,12 +257,8 @@ public final class MichelleParams {
         public String displayValue() { return displayValue; }
         public String toString() { return displayValue; }
 
-        public static Position valueOf(String name, Position nvalue) {
-            return SpTypeUtil.oldValueOf(Position.class, name, nvalue);
-        }
-
-        public static Option<Position> valueOf(String name, Option<Position> nvalue) {
-            return nvalue.map(def -> valueOf(name, def));
+        public static Option<Position> valueOf(String tag, Option<Position> def) {
+            return SpTypeUtil.optionValueOf(Position.class, tag).orElse(def);
         }
     }
 
@@ -328,12 +312,8 @@ public final class MichelleParams {
             return displayValue;
         }
 
-        public static EngMask valueOf(String name, EngMask nvalue) {
-            return SpTypeUtil.oldValueOf(EngMask.class, name, nvalue);
-        }
-
-        public static Option<EngMask> valueOf(String name, Option<EngMask> nvalue) {
-            return nvalue.map(def -> valueOf(name, def));
+        public static Option<EngMask> valueOf(String tag, Option<EngMask> def) {
+            return SpTypeUtil.optionValueOf(EngMask.class, tag).orElse(def);
         }
     }
 
@@ -491,12 +471,8 @@ public final class MichelleParams {
             return displayValue;
         }
 
-        public static FilterWheelA valueOf(String name, FilterWheelA nvalue) {
-            return SpTypeUtil.oldValueOf(FilterWheelA.class, name, nvalue);
-        }
-
-        public static Option<FilterWheelA> valueOf(String name, Option<FilterWheelA> nvalue) {
-            return nvalue.map(def -> valueOf(name, def));
+        public static Option<FilterWheelA> valueOf(String tag, Option<FilterWheelA> def) {
+            return SpTypeUtil.optionValueOf(FilterWheelA.class, tag).orElse(def);
         }
     }
 
@@ -542,12 +518,8 @@ public final class MichelleParams {
             return displayValue;
         }
 
-        public static FilterWheelB valueOf(String name, FilterWheelB nvalue) {
-            return SpTypeUtil.oldValueOf(FilterWheelB.class, name, nvalue);
-        }
-
-        public static Option<FilterWheelB> valueOf(String name, Option<FilterWheelB> nvalue) {
-            return nvalue.map(def -> valueOf(name, def));
+        public static Option<FilterWheelB> valueOf(String tag, Option<FilterWheelB> def) {
+            return SpTypeUtil.optionValueOf(FilterWheelB.class, tag).orElse(def);
         }
     }
 
