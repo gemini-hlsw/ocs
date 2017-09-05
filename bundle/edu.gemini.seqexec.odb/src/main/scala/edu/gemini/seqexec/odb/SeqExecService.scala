@@ -11,16 +11,19 @@ import edu.gemini.spModel.io.SpImportService
 import java.io.{BufferedReader, InputStreamReader, StringReader}
 import java.net.{HttpURLConnection, URL}
 import java.net.HttpURLConnection.{HTTP_NOT_FOUND, HTTP_OK}
-import java.time.Duration
+import java.time.{Duration, Instant}
 import java.util.stream.Collectors
 
 import edu.gemini.spModel.obs.SPObservation
+import edu.gemini.spModel.obslog.ObsLog
 
 import scala.collection.JavaConverters._
+import scala.collection.breakOut
 import scalaz._
 import Scalaz._
 
-case class SeqexecSequence(title: String, config: ConfigSequence)
+case class ExecutedDataset(timestamp: Instant, filename: String)
+case class SeqexecSequence(title: String, datasets: Map[Int, ExecutedDataset], config: ConfigSequence)
 
 /**
  * Sequence Executor Service API.
@@ -97,6 +100,15 @@ object SeqExecService {
       ConfigBridge.extractSequence(obs, null, IDENTITY_MAP, true)
     }
 
+  private def extractExecutedDatsets(obs: ISPObservation): TrySeq[Map[Int, ExecutedDataset]] =
+    catchingAll {
+      Option(ObsLog.getIfExists(obs)) match {
+        case Some(obsLog) => obsLog.getAllDatasetRecords.asScala.map(_.exec.dataset).map { d =>
+          d.getIndex -> ExecutedDataset(Instant.ofEpochMilli(d.getTimestamp), d.getDhsFilename)
+        }(breakOut)
+      }
+    }
+
   /** Constructs a SeqExecService that works with a servlet running in the ODB.
     * When a sequence is requested, it contacts the servlet and requests the
     * observation XML (wrapped in a program shell suitable for importing). The
@@ -112,6 +124,7 @@ object SeqExecService {
           o <- parse(x)
           s <- extractSequence(o)
           n <- extractName(o)
-        } yield SeqexecSequence(n, s)
+          e <- extractExecutedDatsets(o)
+        } yield SeqexecSequence(n, e, s)
     }
 }
