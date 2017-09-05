@@ -89,10 +89,7 @@ object SeqExecService {
     }
 
   private def extractName(obs: ISPObservation): TrySeq[String] = trySeq {
-    obs.getDataObject match {
-      case o: SPObservation => o.getTitle.right
-      case _                => SeqException(new RuntimeException("Cannot read the obs title")).left
-    }
+    obs.getDataObject.getTitle.right
   }
 
   private def extractSequence(obs: ISPObservation): TrySeq[ConfigSequence] =
