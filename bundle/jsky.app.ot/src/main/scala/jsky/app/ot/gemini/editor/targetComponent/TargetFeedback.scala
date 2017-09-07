@@ -8,8 +8,8 @@ import edu.gemini.ags.api.AgsAnalysis.{NoGuideStarForGroup, NoGuideStarForProbe}
 import edu.gemini.ags.api.{AgsAnalysis, AgsRegistrar}
 import edu.gemini.ags.api.AgsGuideQuality.{DeliversRequestedIq, IqDegradation, PossibleIqDegradation, PossiblyUnusable, Unusable}
 import edu.gemini.ags.api.AgsMagnitude.{MagnitudeCalc, MagnitudeTable}
-import edu.gemini.ags.impl.OffStrategy
 import edu.gemini.pot.ModelConverters._
+import edu.gemini.spModel.ags.AgsStrategyKey
 import edu.gemini.spModel.core.BandsList
 import edu.gemini.spModel.guide.{GuideSpeed, ValidatableGuideProbe}
 import edu.gemini.spModel.guide.GuideSpeed._
@@ -210,7 +210,7 @@ object BagsFeedback {
     case RunningEditedState(_) => RunningStateRow
     case FailureState(_,why)   => FailureStateRow(why)
     case IdleState(_,_) if ctx.exists(_.getTargets.getGuideEnvironment.guideEnv.auto === AutomaticGroup.Initial) =>
-      if (ctx.exists(AgsRegistrar.currentStrategy(_).exists(_.key.id === OffStrategy.key.id))) AgsOffRow
+      if (ctx.exists(AgsRegistrar.currentStrategy(_).exists(_.key.id === AgsStrategyKey.OffKey.id))) AgsOffRow
       else NoStarsRow
     case _                     => EmptyRow
   }

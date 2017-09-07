@@ -86,7 +86,8 @@ object AgsStrategyKey {
     Pwfs1NorthKey,
     Pwfs2NorthKey,
     Pwfs1SouthKey,
-    Pwfs2SouthKey
+    Pwfs2SouthKey,
+    OffKey
   )
 
   val AllMap = All.map(k => k.id -> k).toMap
