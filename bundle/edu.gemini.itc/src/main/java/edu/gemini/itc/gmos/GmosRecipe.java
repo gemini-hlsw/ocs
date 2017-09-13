@@ -570,11 +570,11 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
                 bkgTitle = "SQRT(Background) " + suffix;
             } else {
                 if (i == 0) {
-                    sigTitle = "Signal from blue slit " + suffix;
-                    bkgTitle = "SQRT(Background) from blue slit " + suffix;
+                    sigTitle = "Blue Slit Signal " + suffix;
+                    bkgTitle = "SQRT(Blue Slit Background) " + suffix;
                 } else {
-                    sigTitle = "Signal from red slit " + suffix;
-                    bkgTitle = "SQRT(Background) from red slit " + suffix;
+                    sigTitle = "Red Slit Signal " + suffix;
+                    bkgTitle = "SQRT(Red Slit Background) " + suffix;
                 }
             }
 
@@ -634,11 +634,11 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
                 finTitle = "Final S/N " + suffix;
             } else {
                 if (i == 0) {
-                    s2nTitle = "Single Exp S/N for blue slit " + suffix;
-                    finTitle = "Final S/N for blue slit " + suffix;
+                    s2nTitle = "Blue Slit Single Exp S/N " + suffix;
+                    finTitle = "Blue Slit Final S/N " + suffix;
                 } else {
-                    s2nTitle = "Single Exp S/N for red slit " + suffix;
-                    finTitle = "Final S/N for red slit " + suffix;
+                    s2nTitle = "Red Slit Single Exp S/N " + suffix;
+                    finTitle = "Red Slit Final S/N " + suffix;
                 }
             }
 
@@ -679,7 +679,8 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         // wavelength space to pixel space and displays it as a chart including gaps between CCDs.
 
         // For IFU-2 with Hamamatsu we don't show CCDs in different colors, hence need to disable extra legend items
-        final boolean visibleLegend = ccdName.equals(" BB(B)");
+        final boolean visibleLegend = (ccdName.equals("") || ccdName.equals(" BB(B)") || ccdName.equals(" BB"));
+        
         // The suffix is a hack to overcome the requirement for titles of series to be unique when depricating
         // extra legend items with IFU-2 with Hamamatsu
         String suffix = ccdName;
@@ -705,10 +706,10 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         fixGapBorders(pixelPlotBlueBkg);
 
         final List<SpcSeriesData> series = new ArrayList<>();
-        series.add(SpcSeriesData.withVisibility(visibleLegend, SignalData.instance(),     "Signal from blue slit" + suffix,              pixelPlotBlue,    new Some<>(ITCChart.DarkBlue)));
-        series.add(SpcSeriesData.withVisibility(visibleLegend, BackgroundData.instance(), "SQRT(Background) from blue slit" + suffix,    pixelPlotBlueBkg, new Some<>(ITCChart.LightBlue)));
-        series.add(SpcSeriesData.withVisibility(visibleLegend, SignalData.instance(),     "Signal from red slit" + suffix,               pixelPlotRed,     new Some<>(ITCChart.DarkRed)));
-        series.add(SpcSeriesData.withVisibility(visibleLegend, BackgroundData.instance(), "SQRT(Background) from red slit" + suffix,     pixelPlotRedBkg,  new Some<>(ITCChart.LightRed)));
+        series.add(SpcSeriesData.withVisibility(visibleLegend, SignalData.instance(),     "Blue Slit Signal" + suffix,              pixelPlotBlue,    new Some<>(ITCChart.DarkBlue)));
+        series.add(SpcSeriesData.withVisibility(visibleLegend, BackgroundData.instance(), "SQRT(Blue Slit Background)" + suffix,    pixelPlotBlueBkg, new Some<>(ITCChart.LightBlue)));
+        series.add(SpcSeriesData.withVisibility(visibleLegend, SignalData.instance(),     "Red Slit Signal" + suffix,               pixelPlotRed,     new Some<>(ITCChart.DarkRed)));
+        series.add(SpcSeriesData.withVisibility(visibleLegend, BackgroundData.instance(), "SQRT(Red Slit Background)" + suffix,     pixelPlotRedBkg,  new Some<>(ITCChart.LightRed)));
 
         return series;
     }

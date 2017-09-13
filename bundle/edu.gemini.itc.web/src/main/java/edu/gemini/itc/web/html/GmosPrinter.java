@@ -21,12 +21,6 @@ public final class GmosPrinter extends PrinterBase {
     private final PlottingDetails pdp;
     private final boolean isImaging;
 
-    // Indices for chart series
-    // Note: sigIndicesXXX works both for signal and S2N, bkIndicesXXX works for background and final S2N
-    final List<Integer> indicesIfu2B = Arrays.asList(0, 2, 4);
-    final List<Integer> indicesIfu2R = Arrays.asList(1, 3, 5);
-
-
     public GmosPrinter(final ItcParameters p, final GmosParameters instr, final PlottingDetails pdp, final PrintWriter out) {
         super(out);
         this.recipe         = new GmosRecipe(p, instr);
@@ -69,6 +63,7 @@ public final class GmosPrinter extends PrinterBase {
         _println("");
 
         _printRequestedIntegrationTime(result);
+        _println("");
 
         scala.Option<ItcCcd> ccdWithMaxPeak = scala.Option.empty();
         Optional<Gmos> instrumentWithMaxPeak = Optional.empty();
