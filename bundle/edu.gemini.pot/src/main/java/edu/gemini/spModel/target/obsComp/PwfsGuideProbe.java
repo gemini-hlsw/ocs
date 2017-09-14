@@ -6,6 +6,8 @@ import edu.gemini.skycalc.Coordinates;
 import edu.gemini.skycalc.Offset;
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
+import edu.gemini.spModel.core.BandsList;
+import edu.gemini.spModel.core.RBandsList;
 import edu.gemini.spModel.gemini.gmos.GmosCommonType;
 import edu.gemini.spModel.gemini.gmos.InstGmosCommon;
 import edu.gemini.spModel.guide.*;
@@ -367,4 +369,7 @@ public enum PwfsGuideProbe implements ValidatableGuideProbe, OffsetValidatingGui
     public PatrolField getPatrolField() {
         return patrolField;
     }
+
+    @Override
+    public BandsList getBands() { return RBandsList.instance(); }
 }

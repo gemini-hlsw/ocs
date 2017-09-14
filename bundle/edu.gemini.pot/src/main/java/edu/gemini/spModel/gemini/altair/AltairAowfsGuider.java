@@ -4,6 +4,8 @@ import edu.gemini.shared.util.immutable.*;
 import edu.gemini.skycalc.Angle;
 import edu.gemini.skycalc.Coordinates;
 import edu.gemini.skycalc.Offset;
+import edu.gemini.spModel.core.BandsList;
+import edu.gemini.spModel.core.RBandsList;
 import edu.gemini.spModel.gemini.nifs.InstNIFS;
 import edu.gemini.spModel.guide.*;
 import edu.gemini.spModel.obs.context.ObsContext;
@@ -141,4 +143,7 @@ public enum AltairAowfsGuider implements OffsetValidatingGuideProbe, Validatable
             }
         });
     }
+
+    @Override
+    public BandsList getBands() { return RBandsList.instance(); }
 }

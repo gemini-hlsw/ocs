@@ -7,6 +7,9 @@ package edu.gemini.spModel.gemini.nifs;
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.skycalc.Angle;
 import edu.gemini.skycalc.Offset;
+import edu.gemini.spModel.core.BandsList;
+import edu.gemini.spModel.core.MagnitudeBand;
+import edu.gemini.spModel.core.SingleBand;
 import edu.gemini.spModel.data.AbstractDataObject;
 import edu.gemini.spModel.gemini.altair.InstAltair;
 import static edu.gemini.spModel.gemini.altair.AltairParams.FieldLens.IN;
@@ -81,4 +84,7 @@ public enum NifsOiwfsGuideProbe implements ValidatableGuideProbe, OffsetValidati
     public GuideStarValidation validate(SPTarget guideStar, ObsContext ctx) {
         return GuideProbeUtil.instance.validate(guideStar, this, ctx);
     }
+
+    @Override
+    public BandsList getBands() { return SingleBand.apply(MagnitudeBand.K$.MODULE$); }
 }

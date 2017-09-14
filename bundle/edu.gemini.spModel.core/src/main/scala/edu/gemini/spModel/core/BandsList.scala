@@ -37,7 +37,10 @@ case class SingleBand(band: MagnitudeBand) extends BandsList {
 }
 
 case object NoBands extends BandsList {
+  val instance = this
+
   val bands = Nil
+
 }
 
 object BandsList {

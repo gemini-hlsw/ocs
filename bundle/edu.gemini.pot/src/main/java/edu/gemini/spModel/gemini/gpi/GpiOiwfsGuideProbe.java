@@ -1,6 +1,8 @@
 package edu.gemini.spModel.gemini.gpi;
 
 import edu.gemini.shared.util.immutable.*;
+import edu.gemini.spModel.core.BandsList;
+import edu.gemini.spModel.core.NoBands;
 import edu.gemini.spModel.guide.*;
 import edu.gemini.spModel.obs.context.ObsContext;
 
@@ -53,4 +55,7 @@ public enum GpiOiwfsGuideProbe implements GuideProbe {
             return None.instance();
         }
     }
+
+    @Override
+    public BandsList getBands() { return NoBands.instance(); }
 }
