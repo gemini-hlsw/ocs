@@ -1,7 +1,6 @@
 In Gemini Science Program @PROG_ID@ the following observation@S_OR_EMPTY@
-@WAS_WERE@ checked by Gemini staff but @HAS_HAVE@ problems:
+@WAS_WERE@ checked but @HAS_HAVE@ problems:
 
 @OBS_ID_LIST@
 
-The Gemini Contact Scientist will contact you shortly to resolve
-these issues.
+You will be contacted shortly about resolving these issues.
