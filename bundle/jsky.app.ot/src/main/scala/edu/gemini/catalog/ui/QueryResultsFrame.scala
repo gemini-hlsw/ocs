@@ -710,6 +710,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
         case RBandsList       => List(bandComboBox(rRepresentative)) // TODO Should we represent the R-Family as a separate entry on the combo box?
         case NiciBandsList    => List(bandComboBox(rRepresentative), bandComboBox(MagnitudeBand.V))
         case SingleBand(band) => List(bandComboBox(band))
+        case NoBands          => Nil
       }
     }
 
