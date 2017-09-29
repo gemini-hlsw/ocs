@@ -42,9 +42,9 @@ object HS2Spec extends Specification with ScalaCheck {
       ))
     }
 
-    "handle single result (Format 2) 1P/Halley pattern" in {
-      runSearch(Search.Comet("halley")) must_== \/-(List(
-        Row(HD.Comet("1P"), "Halley")
+    "handle single result (Format 2) 81P/Wild 2 pattern" in {
+      runSearch(Search.Comet("81P")) must_== \/-(List(
+        Row(HD.Comet("81P"), "Wild 2")
       ))
     }
 
