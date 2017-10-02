@@ -4,8 +4,10 @@ import edu.gemini.ags.api.AgsStrategy;
 import edu.gemini.shared.util.immutable.*;
 import jsky.app.ot.ags.AgsContext;
 import jsky.app.ot.ags.AgsSelectorControl;
+import jsky.util.gui.Resources;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Vector;
@@ -54,6 +56,20 @@ public final class AgsStrategyCombo extends AgsSelectorControl implements Action
         }
     }
 
+    private final DefaultListCellRenderer comboRenderer = new DefaultListCellRenderer() {
+        private final Icon warningIcon = Resources.getIcon("eclipse/alert.gif");
+        @Override public Component getListCellRendererComponent(final JList list, final Object value, final int index,
+                                                                final boolean isSelected, final boolean cellHasFocus) {
+            final JLabel lab = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+            final ComboEntry ce = (ComboEntry) value;
+            if (ce.name == "Off") {
+                lab.setFont(lab.getFont().deriveFont(Font.ITALIC));
+                lab.setIcon(warningIcon);
+            }
+            return lab;
+        }
+    };
+
     public void setAgsOptions(final AgsContext opts) {
         combo.removeActionListener(this);
         combo.removeAllItems();
@@ -74,6 +90,7 @@ public final class AgsStrategyCombo extends AgsSelectorControl implements Action
         sel.foreach(model::setSelectedItem);
 
         combo.setModel(model);
+        combo.setRenderer(comboRenderer);
         combo.addActionListener(this);
     }
 }
