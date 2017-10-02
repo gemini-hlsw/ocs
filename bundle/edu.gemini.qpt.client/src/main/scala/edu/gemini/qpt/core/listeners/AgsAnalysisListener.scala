@@ -30,7 +30,7 @@ class AgsAnalysisListener extends MarkerModelListener[Variant] {
       for {
         a <- alloc.getObs.getAgsAnalysis.asScala
         if (a match {
-          case AgsAnalysis.NoGuideStarForGroup(group, _) => !ignoredProbeGroups.contains(group)
+          case AgsAnalysis.NoGuideStarForGroup(group) => !ignoredProbeGroups.contains(group)
           case _ => true
         })
         s <- severity(a)

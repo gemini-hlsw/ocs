@@ -476,8 +476,7 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
                                     ctx,
                                     magTable,
                                     vgp,
-                                    ModelConverters.toSideralTarget(guideStar, ctx.getSchedulingBlockStart()),
-                                    vgp.getBands()
+                                    ModelConverters.toSideralTarget(guideStar, ctx.getSchedulingBlockStart())
                             )
                     ).asGeminiOpt();
                     return agsAnalysis.map(AgsAnalysis::quality);

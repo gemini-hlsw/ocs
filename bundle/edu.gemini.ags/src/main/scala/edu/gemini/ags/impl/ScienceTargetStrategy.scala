@@ -19,10 +19,10 @@ case class ScienceTargetStrategy(key: AgsStrategyKey, guideProbe: ValidatableGui
   Future.successful(AgsStrategy.Estimate.GuaranteedSuccess)
 
   override def analyze(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SiderealTarget): Option[AgsAnalysis] =
-    AgsAnalysis.analysis(ctx, mt, guideProbe, guideStar, probeBands)
+    AgsAnalysis.analysis(ctx, mt, guideProbe, guideStar)
 
   override def analyze(ctx: ObsContext, mt: MagnitudeTable): List[AgsAnalysis] =
-    AgsAnalysis.analysis(ctx, mt, guideProbe, probeBands).toList
+    AgsAnalysis.analysis(ctx, mt, guideProbe).toList
 
   private def toSiderealTargets(ctx: ObsContext): List[SiderealTarget] = {
     val when = ctx.getSchedulingBlockStart

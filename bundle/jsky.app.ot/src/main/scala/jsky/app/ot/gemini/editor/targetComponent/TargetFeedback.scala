@@ -157,16 +157,16 @@ object TargetGuidingFeedback {
   def baseAnalysis(ctx: ObsContext, mt: MagnitudeTable): List[AnalysisRow] =
     AgsRegistrar.currentStrategy(ctx).fold(List.empty[AnalysisRow]) { s =>
       s.analyze(ctx, mt).filter {
-        case NoGuideStarForGroup(_, _) => true
-        case NoGuideStarForProbe(_, _) => true
+        case NoGuideStarForGroup(_) => true
+        case NoGuideStarForProbe(_) => true
         case _                         => false
       }.map { a => AnalysisRow(a, None, includeProbeName = true) }
     }
 
   // GuidingFeedback.Row related to the given guide star itself.
   def guideStarAnalysis(ctx: ObsContext, mt: MagnitudeTable, gp: ValidatableGuideProbe, target: SPTarget): Option[AnalysisRow] =
-    AgsAnalysis.analysis(ctx, mt, gp, target.toSiderealTarget(ctx.getSchedulingBlockStart), gp.getBands()).map { a =>
-      val plo = mt(ctx, gp).flatMap(ProbeLimits(a.probeBands, ctx, _))
+    AgsAnalysis.analysis(ctx, mt, gp, target.toSiderealTarget(ctx.getSchedulingBlockStart)).map { a =>
+      val plo = mt(ctx, gp).flatMap(ProbeLimits(gp.getBands(), ctx, _))
       AnalysisRow(a, plo, includeProbeName = false)
     }
 }
