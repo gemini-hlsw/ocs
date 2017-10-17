@@ -1,8 +1,10 @@
 package jsky.app.ot.gemini.editor.targetComponent;
 
+import edu.gemini.ags.api.AgsRegistrar;
 import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.pot.sp.SPNodeKey;
 import edu.gemini.shared.util.immutable.*;
+import edu.gemini.spModel.ags.*;
 import edu.gemini.spModel.core.Magnitude;
 import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.core.Target;
@@ -248,7 +250,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         final boolean isGuideStar   = selectionIsGuideTarget();
 
         // We allow the primary button to be set for auto targets as it will flag the auto group as primary.
-        _w.removeButton.setEnabled (editable && notBase && notAutoTarget);
+        _w.removeButton.setEnabled (editable && notBase);
         _w.primaryButton.setEnabled(editable && isGuideStar);
         _w.pasteButton.setEnabled(editable && notAutoTarget);
         _w.duplicateButton.setEnabled(editable && notAutoTarget);
@@ -821,7 +823,11 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             if (selectionIsBasePosition()) {
                 DialogUtil.error("You can't remove the base position.");
             } else if (selectionIsAutoTarget()) {
-                DialogUtil.error("You can't remove automatic guide stars.");
+                AgsStrategyUtil.setSelection(
+                        getContextObservation(),
+                        ImOption.fromScalaOpt(AgsRegistrar.lookup(AgsStrategyKey.OffKey$.MODULE$))
+                );
+                return new Some<>(envOld.removeTarget(t));
             } else {
                 return new Some<>(envOld.removeTarget(t));
             }
