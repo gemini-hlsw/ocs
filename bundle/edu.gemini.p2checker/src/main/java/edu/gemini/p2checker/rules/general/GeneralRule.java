@@ -1,5 +1,6 @@
 package edu.gemini.p2checker.rules.general;
 
+import edu.gemini.ags.api.AgsRegistrar;
 import edu.gemini.p2checker.api.IP2Problems;
 import edu.gemini.p2checker.api.IRule;
 import edu.gemini.p2checker.api.ObservationElements;
@@ -7,11 +8,11 @@ import edu.gemini.p2checker.api.P2Problems;
 import edu.gemini.pot.sp.*;
 import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.shared.util.immutable.Option;
+import edu.gemini.spModel.ags.AgsStrategyKey;
 import edu.gemini.spModel.config2.Config;
 import edu.gemini.spModel.config2.ConfigSequence;
 import edu.gemini.spModel.config2.ItemKey;
 import edu.gemini.spModel.core.ProperMotion;
-import edu.gemini.spModel.core.SiderealTarget;
 import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.core.Target;
 import edu.gemini.spModel.gemini.altair.AltairAowfsGuider;
@@ -30,7 +31,6 @@ import edu.gemini.spModel.obsclass.ObsClass;
 import edu.gemini.spModel.obscomp.InstConstants;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.target.SPTarget;
-import edu.gemini.spModel.target.env.Asterism;
 import edu.gemini.spModel.target.env.GuideGroup;
 import edu.gemini.spModel.target.env.GuideProbeTargets;
 import edu.gemini.spModel.target.env.TargetEnvironment;
@@ -588,6 +588,32 @@ public class GeneralRule implements IRule {
 
     };
 
+    /**
+     * Rule to indicate AGS is off.
+     */
+    private static IRule AGS_OFF_RULE = new IRule() {
+
+        private static final String AGS_OFF_MSG = "Auto guide star search disabled.";
+
+        public IP2Problems check(final ObservationElements elements)  {
+            if (elements.getTargetObsComp().isEmpty()) return null; // can't perform this check without a target environment
+
+            final P2Problems problems = new P2Problems();
+
+            if (!hasScienceObserves(elements.getSequence())) return null; //if there are not observes, ignore this check (SCT-260)
+
+            final Boolean isOff = elements.getObsContext().flatMap(
+                    ctxt -> AgsRegistrar.currentStrategyForJava(ctxt)
+            ).exists(st -> st.key().equals(AgsStrategyKey.OffKey$.MODULE$));
+
+                if (isOff) {
+                    problems.addWarning(PREFIX+"AGS_OFF_MSG", AGS_OFF_MSG, elements.getTargetObsComponentNode().getValue());
+                }
+
+            return problems;
+
+        }
+    };
 
     /**
      * Register all the general rules
@@ -602,6 +628,7 @@ public class GeneralRule implements IRule {
         GENERAL_RULES.add(BAND3TIME_RULE);
         GENERAL_RULES.add(NO_DAYTIME_CALS_AT_NIGHT_RULE);
         GENERAL_RULES.add(TEMPLATE_RULE);
+        GENERAL_RULES.add(AGS_OFF_RULE);
     }
 
 }
