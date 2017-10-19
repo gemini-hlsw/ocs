@@ -5,6 +5,8 @@ import edu.gemini.skycalc.Angle;
 import edu.gemini.skycalc.Offset;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.shared.util.immutable.Some;
+import edu.gemini.spModel.core.BandsList;
+import edu.gemini.spModel.core.RBandsList;
 import edu.gemini.spModel.gems.GemsGuideProbeGroup;
 import edu.gemini.spModel.guide.*;
 import edu.gemini.spModel.obs.SchedulingBlock;
@@ -176,4 +178,7 @@ public enum Flamingos2OiwfsGuideProbe implements GuideProbe, ValidatableGuidePro
                 F2OiwfsProbeArm$.MODULE$,
                 F2ScienceAreaGeometry$.MODULE$);
     }
+
+    @Override
+    public BandsList getBands() { return RBandsList.instance(); }
 }

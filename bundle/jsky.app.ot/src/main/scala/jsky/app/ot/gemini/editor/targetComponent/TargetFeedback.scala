@@ -9,6 +9,7 @@ import edu.gemini.ags.api.{AgsAnalysis, AgsRegistrar}
 import edu.gemini.ags.api.AgsGuideQuality.{DeliversRequestedIq, IqDegradation, PossibleIqDegradation, PossiblyUnusable, Unusable}
 import edu.gemini.ags.api.AgsMagnitude.{MagnitudeCalc, MagnitudeTable}
 import edu.gemini.pot.ModelConverters._
+import edu.gemini.spModel.ags.AgsStrategyKey
 import edu.gemini.spModel.core.BandsList
 import edu.gemini.spModel.guide.{GuideSpeed, ValidatableGuideProbe}
 import edu.gemini.spModel.guide.GuideSpeed._
@@ -156,18 +157,18 @@ object TargetGuidingFeedback {
   def baseAnalysis(ctx: ObsContext, mt: MagnitudeTable): List[AnalysisRow] =
     AgsRegistrar.currentStrategy(ctx).fold(List.empty[AnalysisRow]) { s =>
       s.analyze(ctx, mt).filter {
-        case NoGuideStarForGroup(_, _) => true
-        case NoGuideStarForProbe(_, _) => true
+        case NoGuideStarForGroup(_) => true
+        case NoGuideStarForProbe(_) => true
         case _                         => false
       }.map { a => AnalysisRow(a, None, includeProbeName = true) }
     }
 
   // GuidingFeedback.Row related to the given guide star itself.
   def guideStarAnalysis(ctx: ObsContext, mt: MagnitudeTable, gp: ValidatableGuideProbe, target: SPTarget): Option[AnalysisRow] =
-    AgsRegistrar.currentStrategy(ctx).flatMap(_.analyze(ctx, mt, gp, target.toSiderealTarget(ctx.getSchedulingBlockStart)).map { a =>
-      val plo = mt(ctx, gp).flatMap(ProbeLimits(a.probeBands, ctx, _))
+    AgsAnalysis.analysis(ctx, mt, gp, target.toSiderealTarget(ctx.getSchedulingBlockStart)).map { a =>
+      val plo = mt(ctx, gp).flatMap(ProbeLimits(gp.getBands(), ctx, _))
       AnalysisRow(a, plo, includeProbeName = false)
-    })
+    }
 }
 
 
@@ -198,6 +199,7 @@ object BagsFeedback {
   case object PendingStateRow extends BagsStateRow(BANANA.some, "Waiting for automatic guide star lookup to run...", spinnerIcon)
   case object RunningStateRow extends BagsStateRow(BANANA.some, "Automatic guide star lookup is running...", spinnerIcon)
   case class  FailureStateRow(why: String) extends BagsStateRow(LIGHT_SALMON.some, s"Automatic guide star lookup failed: $why", errorIcon)
+  case object AgsOffRow       extends BagsStateRow(BANANA.some, "Auto guide star search disabled.", warningIcon)
   case object EmptyRow        extends BagsStateRow(None, " ", None) // Nonempty string to make label have required height.
 
   import BagsState._
@@ -207,7 +209,9 @@ object BagsFeedback {
     case RunningState(_,_,_)   => RunningStateRow
     case RunningEditedState(_) => RunningStateRow
     case FailureState(_,why)   => FailureStateRow(why)
-    case IdleState(_,_) if ctx.exists(_.getTargets.getGuideEnvironment.guideEnv.auto === AutomaticGroup.Initial) => NoStarsRow
+    case IdleState(_,_) if ctx.exists(_.getTargets.getGuideEnvironment.guideEnv.auto === AutomaticGroup.Initial) =>
+      if (ctx.exists(AgsRegistrar.currentStrategy(_).exists(_.key.id === AgsStrategyKey.OffKey.id))) AgsOffRow
+      else NoStarsRow
     case _                     => EmptyRow
   }
 }

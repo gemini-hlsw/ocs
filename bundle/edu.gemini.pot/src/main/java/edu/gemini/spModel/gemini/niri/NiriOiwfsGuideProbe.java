@@ -7,6 +7,9 @@ package edu.gemini.spModel.gemini.niri;
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.shared.util.immutable.Some;
+import edu.gemini.spModel.core.BandsList;
+import edu.gemini.spModel.core.MagnitudeBand;
+import edu.gemini.spModel.core.SingleBand;
 import edu.gemini.spModel.guide.*;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.target.SPTarget;
@@ -63,4 +66,6 @@ public enum NiriOiwfsGuideProbe implements ValidatableGuideProbe {
     public GuideStarValidation validate(SPTarget guideStar, ObsContext ctx) {
         return GuideProbeUtil.instance.validate(guideStar, this, ctx);
     }
+
+    public BandsList getBands() { return SingleBand.apply(MagnitudeBand.K$.MODULE$); }
 }

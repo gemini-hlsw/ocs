@@ -69,6 +69,10 @@ object AgsStrategyKey {
     val id = "GS_PWFS2"
   }
 
+  case object OffKey extends AgsStrategyKey {
+    val id = "Off"
+  }
+
   val All = List(
     AltairAowfsKey,
     Flamingos2OiwfsKey,
@@ -82,7 +86,8 @@ object AgsStrategyKey {
     Pwfs1NorthKey,
     Pwfs2NorthKey,
     Pwfs1SouthKey,
-    Pwfs2SouthKey
+    Pwfs2SouthKey,
+    OffKey
   )
 
   val AllMap = All.map(k => k.id -> k).toMap

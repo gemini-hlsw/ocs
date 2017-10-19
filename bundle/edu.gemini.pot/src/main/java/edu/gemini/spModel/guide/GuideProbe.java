@@ -8,6 +8,7 @@ import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.shared.util.immutable.PredicateOp;
 import edu.gemini.shared.util.immutable.Some;
+import edu.gemini.spModel.core.BandsList;
 import edu.gemini.spModel.obs.context.ObsContext;
 
 import java.io.Serializable;
@@ -114,8 +115,14 @@ public interface GuideProbe {
     PatrolField getPatrolField();
 
     /**
-     * Gets a represenation of the patrol field which is flipped and offset according to instrument
+     * Gets a representation of the patrol field which is flipped and offset according to instrument
      * specifics (e.g. IFU offsets for GMOS and the port the instrument is currently mounted on).
      */
     Option<PatrolField> getCorrectedPatrolField(ObsContext ctx);
+
+    /**
+     * Indicates the bands that will be used for a given probe.
+     *
+     */
+    BandsList getBands();
 }

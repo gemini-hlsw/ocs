@@ -35,10 +35,10 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
     params.magnitudeCalc(withCorrectedSite(ctx), mt).toList.map(params.guideProbe -> _)
 
   override def analyze(ctx: ObsContext, mt: MagnitudeTable): List[AgsAnalysis] =
-    AgsAnalysis.analysis(withCorrectedSite(ctx), mt, params.guideProbe, probeBands).toList
+    AgsAnalysis.analysis(withCorrectedSite(ctx), mt, params.guideProbe).toList
 
   override def analyze(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SiderealTarget): Option[AgsAnalysis] =
-    AgsAnalysis.analysis(withCorrectedSite(ctx), mt, guideProbe, guideStar, probeBands)
+    AgsAnalysis.analysis(withCorrectedSite(ctx), mt, guideProbe, guideStar)
 
   override def catalogQueries(ctx: ObsContext, mt: MagnitudeTable): List[CatalogQuery] =
     params.catalogQueries(withCorrectedSite(ctx), mt).toList
@@ -95,7 +95,7 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
       val analyzed = allValid.map { case (ctx0, targets) =>
         val analyzedTargets = for {
           target    <- targets
-          analysis  <- AgsAnalysis.analysis(ctx0, mt, vprobe, target, params.probeBands)
+          analysis  <- AgsAnalysis.analysis(ctx0, mt, vprobe, target)
           magnitude <- params.referenceMagnitude(target)
         } yield (target, magnitude, analysis.quality)
         (ctx0, analyzedTargets)

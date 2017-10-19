@@ -37,6 +37,7 @@ object Strategy {
   val Pwfs1South      = SingleProbeStrategy(Pwfs1SouthKey,      PwfsParams(Site.GS, PwfsGuideProbe.pwfs1))
   val Pwfs2South      = SingleProbeStrategy(Pwfs2SouthKey,      PwfsParams(Site.GS, PwfsGuideProbe.pwfs2))
   val NiciOiwfs       = ScienceTargetStrategy(NiciOiwfsKey,     NiciOiwfsGuideProbe.instance, NiciBandsList)
+  val Off             = OffStrategy
 
   val All = List(
     AltairAowfs,
@@ -51,7 +52,8 @@ object Strategy {
     Pwfs1North,
     Pwfs2North,
     Pwfs1South,
-    Pwfs2South
+    Pwfs2South,
+    Off
   )
 
   private val KeyMap: Map[AgsStrategyKey, AgsStrategy] = All.map(s => s.key -> s).toMap
@@ -124,5 +126,7 @@ object Strategy {
     }
 
   def validStrategies(ctx: ObsContext): List[AgsStrategy] =
-    InstMap.get(ctx.getInstrument.getType).map(_.apply(ctx)).toList.flatten.filter(guidersAvailable(ctx)).filter(siteAvailability(ctx))
+    InstMap.get(ctx.getInstrument.getType).map(
+      _.apply(ctx)
+    ).toList.flatten.filter(guidersAvailable(ctx)).filter(siteAvailability(ctx)) :+ OffStrategy
 }

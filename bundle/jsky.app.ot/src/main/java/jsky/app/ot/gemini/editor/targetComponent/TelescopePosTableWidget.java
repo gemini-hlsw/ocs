@@ -4,6 +4,7 @@ import edu.gemini.ags.api.*;
 import edu.gemini.pot.ModelConverters;
 import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.shared.util.immutable.*;
+import edu.gemini.shared.util.immutable.ScalaConverters;
 import edu.gemini.spModel.core.Angle;
 import edu.gemini.spModel.core.Coordinates;
 import edu.gemini.spModel.core.Magnitude;
@@ -21,6 +22,7 @@ import edu.gemini.spModel.target.offset.OffsetPosBase;
 import edu.gemini.spModel.target.offset.OffsetPosList;
 import edu.gemini.spModel.target.offset.OffsetUtil;
 import edu.gemini.spModel.util.SPTreeUtil;
+
 import jsky.app.ot.OT;
 import jsky.app.ot.OTOptions;
 import jsky.util.gui.Resources;
@@ -469,11 +471,16 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
                     final ObsContext ctx = tup._1();
                     final AgsMagnitude.MagnitudeTable magTable = tup._2();
                     final ValidatableGuideProbe vgp = (ValidatableGuideProbe) guideProbe;
-                    return AgsRegistrar.instance().currentStrategyForJava(ctx).map(strategy -> {
-                        final Option<AgsAnalysis> agsAnalysis = strategy.analyzeForJava(ctx, magTable, vgp,
-                                ModelConverters.toSideralTarget(guideStar, ctx.getSchedulingBlockStart()));
-                        return agsAnalysis.map(AgsAnalysis::quality);
-                    }).getOrElse(None.instance());
+                    final Option<AgsAnalysis> agsAnalysis = new ScalaConverters.ScalaOptionOps<>(
+                            AgsAnalysis$.MODULE$.analysis(
+                                    ctx,
+                                    magTable,
+                                    vgp,
+                                    ModelConverters.toSideralTarget(guideStar, ctx.getSchedulingBlockStart())
+                            )
+                    ).asGeminiOpt();
+                    return agsAnalysis.map(AgsAnalysis::quality);
+
                 } else {
                     return None.instance();
                 }

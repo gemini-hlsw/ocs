@@ -48,22 +48,22 @@ trait GemsStrategy extends AgsStrategy {
   }
 
   override def analyze(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SiderealTarget): Option[AgsAnalysis] =
-    AgsAnalysis.analysis(ctx, mt, guideProbe, guideStar, probeBands(guideProbe))
+    AgsAnalysis.analysis(ctx, mt, guideProbe, guideStar)
 
   override def analyze(ctx: ObsContext, mt: MagnitudeTable): List[AgsAnalysis] = {
     import AgsAnalysis._
 
     def mapGroup(grp: GuideProbeGroup): List[AgsAnalysis] = {
       def hasGuideStarForProbe(a: AgsAnalysis): Boolean = a match {
-        case NoGuideStarForProbe(_, _) => false
-        case _                         => true
+        case NoGuideStarForProbe(_) => false
+        case _                      => true
       }
 
-      val probeAnalysis = grp.getMembers.asScala.toList.flatMap { p => analysis(ctx, mt, p, probeBands(p)) }
+      val probeAnalysis = grp.getMembers.asScala.toList.flatMap { p => analysis(ctx, mt, p) }
       probeAnalysis.filter(hasGuideStarForProbe) match {
         case Nil =>
           // Pick the first guide probe as representative, since we are called with either Canopus or GsaoiOdwg
-          ~grp.getMembers.asScala.headOption.map {gp => List(NoGuideStarForGroup(grp, probeBands(gp)))}
+          ~grp.getMembers.asScala.headOption.map {gp => List(NoGuideStarForGroup(grp))}
         case lst => lst
       }
     }
