@@ -22,6 +22,7 @@ public enum TimeAcctCategory implements Serializable {
         GT("Guaranteed Time"),
         JP("Subaru"),
         LP("Large Program"),
+        LTP("Limited-term Participant"),
         SV("System Verification"),
         UH("University of Hawaii"),
         UK("United Kingdom"),
