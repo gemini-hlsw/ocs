@@ -141,7 +141,7 @@ case class Niri(blueprint:SpNiriBlueprint) extends NiriBase {
     NBF_PAGAMMA     -> Exposure((120.0, 1), (120.0, 1), (120.0, 1)),
     J_CONTINUUM_122 -> Exposure((120.0, 1), (120.0, 1), (120.0, 1)),
     NBF_H           -> Exposure((120.0, 1), (120.0, 1), (120.0, 1)),
-    BBF_J           -> Exposure((60.0, 1), (60.0, 1), (60.0, 1)),
+    BBF_J           -> Exposure((30.0, 1), (60.0, 1), (60.0, 1)),
     NBF_PABETA      -> Exposure((60.0, 1), (60.0, 1), (60.0, 1)),
     NBF_HCONT       -> Exposure((60.0, 1), (60.0, 1), (60.0, 1)),
     NBF_CH4SHORT    -> Exposure((20.0, 3), (60.0, 1), (60.0, 1)),
