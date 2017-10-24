@@ -135,37 +135,37 @@ case class Niri(blueprint:SpNiriBlueprint) extends NiriBase {
   forObs(sci: _*)(setExposuresAndCoadds(expMap))
 
   lazy val expMap:Map[Filter, Exposure] = Map(
-    BBF_Y -> Exposure((60.0, 1), (60.0, 1), (60.0, 1)),
+    BBF_Y           -> Exposure((60.0, 1), (60.0, 1), (60.0, 1)),
     J_CONTINUUM_106 -> Exposure((120.0, 1), (120.0, 1), (120.0, 1)),
-    NBF_HEI -> Exposure((120.0, 1), (120.0, 1), (120.0, 1)),
-    NBF_PAGAMMA -> Exposure((120.0, 1), (120.0, 1), (120.0, 1)),
+    NBF_HEI         -> Exposure((120.0, 1), (120.0, 1), (120.0, 1)),
+    NBF_PAGAMMA     -> Exposure((120.0, 1), (120.0, 1), (120.0, 1)),
     J_CONTINUUM_122 -> Exposure((120.0, 1), (120.0, 1), (120.0, 1)),
-    NBF_H -> Exposure((120.0, 1), (120.0, 1), (120.0, 1)),
-    BBF_J -> Exposure((60.0, 1), (60.0, 1), (60.0, 1)),
-    NBF_PABETA -> Exposure((60.0, 1), (60.0, 1), (60.0, 1)),
-    NBF_HCONT -> Exposure((60.0, 1), (60.0, 1), (60.0, 1)),
-    NBF_CH4SHORT -> Exposure((20.0, 3), (60.0, 1), (60.0, 1)),
-    NBF_FEII -> Exposure((60.0, 1), (60.0, 1), (60.0, 1)),
-    BBF_H -> Exposure((15.0, 4), (60.0, 1), (60.0, 1)),
-    NBF_CH4LONG -> Exposure((20.0, 3), (60.0, 1), (60.0, 1)), // updated
-    NBF_H2O_2045 -> Exposure((30.0, 2), (60.0, 1), (60.0, 1)),
-    NBF_HE12P2S -> Exposure((60.0, 1), (60.0, 1), (60.0, 1)),
-    NBF_KCONT1 -> Exposure((60.0, 1), (60.0, 1), (60.0, 1)),
-    BBF_KPRIME -> Exposure((30.0, 2), (60.0, 1), (60.0, 1)),
-    NBF_H210 -> Exposure((60.0, 1), (60.0, 1), (60.0, 1)),
-    BBF_KSHORT -> Exposure((30.0, 2), (60.0, 1), (60.0, 1)),
-    NBF_BRGAMMA -> Exposure((60.0, 1), (60.0, 1), (60.0, 1)),
-    BBF_K -> Exposure((30.0, 2), (60.0, 1), (60.0, 1)),
-    NBF_H221 -> Exposure((60.0, 1), (60.0, 1), (60.0, 1)),
-    NBF_KCONT2 -> Exposure((60.0, 1), (60.0, 1), (60.0, 1)),
-    NBF_CH4ICE -> Exposure((60.0, 1), (60.0, 1), (60.0, 1)),
-    NBF_CO20 -> Exposure((60.0, 1), (60.0, 1), (60.0, 1)),
-    NBF_H2O -> Exposure((1.0, 30), (5.0, 6), (30.0, 1)),
-    NBF_HC -> Exposure((1.0, 30), (7.0, 4), (30.0, 1)),
-    BBF_LPRIME -> Exposure((-1.0, -1), (0.2, 150), (1, 30)), // updated
-    NBF_BRACONT -> Exposure((0.3, 100), (2.0, 15), (10.0, 3)),
-    NBF_BRA -> Exposure((0.15, 200), (1.0, 30), (5.0, 6)),
-    BBF_MPRIME -> Exposure((-1.0, -1), (0.06, 500), (0.4, 75))
+    NBF_H           -> Exposure((120.0, 1), (120.0, 1), (120.0, 1)),
+    BBF_J           -> Exposure((30.0, 1), (60.0, 1), (60.0, 1)),
+    NBF_PABETA      -> Exposure((60.0, 1), (60.0, 1), (60.0, 1)),
+    NBF_HCONT       -> Exposure((60.0, 1), (60.0, 1), (60.0, 1)),
+    NBF_CH4SHORT    -> Exposure((20.0, 3), (60.0, 1), (60.0, 1)),
+    NBF_FEII        -> Exposure((60.0, 1), (60.0, 1), (60.0, 1)),
+    BBF_H           -> Exposure((15.0, 4), (60.0, 1), (60.0, 1)),
+    NBF_CH4LONG     -> Exposure((20.0, 3), (60.0, 1), (60.0, 1)), // updated
+    NBF_H2O_2045    -> Exposure((30.0, 2), (60.0, 1), (60.0, 1)),
+    NBF_HE12P2S     -> Exposure((60.0, 1), (60.0, 1), (60.0, 1)),
+    NBF_KCONT1      -> Exposure((60.0, 1), (60.0, 1), (60.0, 1)),
+    BBF_KPRIME      -> Exposure((30.0, 2), (60.0, 1), (60.0, 1)),
+    NBF_H210        -> Exposure((60.0, 1), (60.0, 1), (60.0, 1)),
+    BBF_KSHORT      -> Exposure((30.0, 2), (60.0, 1), (60.0, 1)),
+    NBF_BRGAMMA     -> Exposure((60.0, 1), (60.0, 1), (60.0, 1)),
+    BBF_K           -> Exposure((30.0, 2), (60.0, 1), (60.0, 1)),
+    NBF_H221        -> Exposure((60.0, 1), (60.0, 1), (60.0, 1)),
+    NBF_KCONT2      -> Exposure((60.0, 1), (60.0, 1), (60.0, 1)),
+    NBF_CH4ICE      -> Exposure((60.0, 1), (60.0, 1), (60.0, 1)),
+    NBF_CO20        -> Exposure((60.0, 1), (60.0, 1), (60.0, 1)),
+    NBF_H2O         -> Exposure((1.0, 30), (5.0, 6), (30.0, 1)),
+    NBF_HC          -> Exposure((1.0, 30), (7.0, 4), (30.0, 1)),
+    BBF_LPRIME      -> Exposure((-1.0, -1), (0.2, 150), (1, 30)), // updated
+    NBF_BRACONT     -> Exposure((0.3, 100), (2.0, 15), (10.0, 3)),
+    NBF_BRA         -> Exposure((0.15, 200), (1.0, 30), (5.0, 6)),
+    BBF_MPRIME      -> Exposure((-1.0, -1), (0.06, 500), (0.4, 75))
   )
 
   // # Dark exposures
