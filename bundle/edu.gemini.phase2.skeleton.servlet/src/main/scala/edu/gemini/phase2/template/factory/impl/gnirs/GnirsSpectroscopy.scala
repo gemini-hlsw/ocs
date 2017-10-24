@@ -43,6 +43,7 @@ case class GnirsSpectroscopy(blueprint:SpGnirsBlueprintSpectroscopy, exampleTarg
   //
   // INCLUDE {5}, {6}, {12}-{14} in a target-specific Scheduling Group
   //         FOR spec observations: {12}, {6}, {14}
+  //             SET CONDITIONS FROM PI
   //             SET PIXEL SCALE FROM PI
   //             SET FPU from PI
   //             SET DISPERSER FROM PI
@@ -53,7 +54,8 @@ case class GnirsSpectroscopy(blueprint:SpGnirsBlueprintSpectroscopy, exampleTarg
   // #           SET FILTER (== central wavelength) FROM PI #12B not possible to be set automatically.
   // #           IF FILTER FROM PI == L or M (central wavelength > 2.5um) SET Well depth == Deep
 
-  include(5, 6, 12, 13, 14) in TargetGroup
+  include(5, 6, 12, 13, 14, 23) in TargetGroup
+
   forObs(12, 6, 14)(
     setPixelScale(pixelScale),
     setFPU(fpu),
@@ -67,50 +69,54 @@ case class GnirsSpectroscopy(blueprint:SpGnirsBlueprintSpectroscopy, exampleTarg
     ))
 
   // # Change Offsets for non-cross-dispersed spec observations
-  // IF CROSS-DISPERSED == no
-  //         SET Q-OFFSET to -3, 3, 3, -3 respectively IN ITERATOR CALLED 'ABBA offset pattern' for {12}
+  // IF CROSS-DISPERSED == no AND PI Central Wavelength < 2.5um
+  //         SET Q-OFFSET to -1, 5, 5, -1 respectively IN ITERATOR CALLED 'ABBA offset pattern' for {12}
   //         SET Q-OFFSET to -5, 1, 1, -5 respectively IN ITERATOR CALLED 'ABBA offset pattern' for {6}, {14}
 
-  if (crossDisperser == CrossDispersed.NO) {
+  if ((crossDisperser == CrossDispersed.NO) && !wavelengthGe2_5) {
     forObs(12)(
       mutateOffsets.withTitle("ABBA offset sequence")(
-        setQ(-3, 3, 3, -3)))
+        setQ(-1, 5, 5, -1)))
     forObs(6, 14)(
       mutateOffsets.withTitle("ABBA offset sequence")(
         setQ(-5, 1, 1, -5)))
   }
 
   // IF PI Central Wavelength > 2.5um:
-  //    SET Well depth == Deep
+  //    SET Well depth == Deep for {5}-{14},{22}
   //    SET Q-OFFSET to -3, 3, 3, -3 respectively IN ITERATOR CALLED 'ABBA offset pattern' for {6},{12},{14} # Science & Tellurics
   if (wavelengthGe2_5) {
-    forObs(5, 6, 12, 13, 14)(setWellDepth(DEEP))
+
+    include(7, 8, 9, 10, 11, 22) in TargetGroup
+
+    forObs(5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 22)(setWellDepth(DEEP))
     forObs(6,12,14)(
       mutateOffsets.withTitle("ABBA offset sequence")(setQ(-3, 3, 3, -3))
     )
   }
 
-  // #ACQ for science to target Scheduling Group
-  // IF TARGET H-MAGNITUDE < 7 INCLUDE {22}
-  // IF 7 <= TARGET H-MAGNITUDE < 11.5 INCLUDE {7}
-  // IF 11.5 <= TARGET H-MAGNITUDE < 16 INCLUDE {8}
-  // IF 16 <= TARGET H-MAGNITUDE < 20 INCLUDE {9}, {11}      #Faint target and Faint extended target
-  // IF TARGET H-MAGNITUDE >= 20 INCLUDE {10}        #Blind offset target
-  // ELSE INCLUDE {7} - {11}, {22}   # No H-magnitude provided for target, so put all of them
+  // # ACQ for science to target Scheduling Group
+  // IF TARGET H-MAGNITUDE < 7 INCLUDE {22}                   # ND filter
+  // IF 7 <= TARGET H-MAGNITUDE < 11.5 INCLUDE {7}            # very bright
+  // IF 11.5 <= TARGET H-MAGNITUDE < 16 INCLUDE {8}           # bright
+  // IF 16 <= TARGET H-MAGNITUDE < 20 INCLUDE {9}, {11}, {23} # faint, faint extended & re-acquisition
+  // IF TARGET H-MAGNITUDE >= 20 INCLUDE {10}, {23}           # blind offset & re-acquisition
+  // ELSE INCLUDE {7} - {11}, {22}, {23}                      # no H-magnitude provided so put them all
 
   val otherAcq = exampleTarget.flatMap(t => t.getMagnitude(H)).map(_.value) match {
     case Some(h) =>
       if (h < 7) Seq(22)
       else if (h < 11.5) Seq(7)
       else if (h < 16.0) Seq(8)
-      else if (h < 20.0) Seq(9, 11)
-      else Seq(10)
-    case None => (7 to 11) ++ Seq(22)
+      else if (h < 20.0) Seq(9, 11, 23)
+      else Seq(10, 23)
+    case None => (7 to 11) ++ Seq(22, 23)
   }
   include(otherAcq:_*) in TargetGroup
 
   // #In ALL ACQ
-  //         IN acquisition observations: {5}, {7} - {11}, {22}, {13}
+  //        IN acquisition observations: {5}, {7} - {11}, {13}, {23}
+  //           SET CONDITIONS FROM PI
   //           SET PIXEL SCALE FROM PI
   //           SET DISPERSER FROM PI
   //           SET CROSS-DISPERSED FROM PI
@@ -131,7 +137,7 @@ case class GnirsSpectroscopy(blueprint:SpGnirsBlueprintSpectroscopy, exampleTarg
   // #           SET FILTER (== central wavelength) FROM PI #12B not possible to be set automatically.
   // #           IF FILTER FROM PI == L or M (central wavelength > 2.5um) SET Well depth == Deep
 
-  val acq = Seq(5) ++ otherAcq ++ Seq(13)
+  val acq = Seq(5) ++ otherAcq ++ Seq(13, 23)
 
   forObs(acq:_*)(
 
@@ -146,7 +152,7 @@ case class GnirsSpectroscopy(blueprint:SpGnirsBlueprintSpectroscopy, exampleTarg
     }),
 
     ifTrue(pixelScale == PS_005)(
-      mutateSeq.withTitle("GNIRS: Slit image")(
+      mutateSeq.withTitleIfExists("GNIRS: Slit image")(
         mapSteps(_ + (EXPOSURE_TIME_PROP -> 15.0))),
       ifTrue(xd == SXD || xd == LXD)(
         mutateSeq(

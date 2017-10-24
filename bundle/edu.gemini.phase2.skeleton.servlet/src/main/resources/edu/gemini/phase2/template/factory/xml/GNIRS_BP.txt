@@ -2,6 +2,8 @@ Instrument : GNIRS
 Blueprints : GNIRS_BP.xml
 Version : 2012 August 10, Marie L-B and Bryan M
 Version : 2013 October 10, AStephens, set well depth and offsets for >2.5 microns and central wavelength for imaging
+Version : 2014 December 11, BMiller, specific setting conditions from PI (change to add science conditions to tellurics)
+Version : 2017-Oct-10, astephens, change long-slit science offsets from +/-3 to -1/+5 and add re-acquisition observation
 
 Observations identified by LibraryIDs indicated with {}.
 
@@ -29,7 +31,6 @@ INCLUDE  {16}, {17}, {18} - {21} (in this order) in a Target Group
                 H2 (2.122um) => H2: 2.12um
                 PAH (3.295) => PAH: 3.3um
             IF FILTER == PAH SET Well Depth = Deep
-            SET Central Wavelength according to FILTER in all GNIRS iterators
 
 
 **** IF INSTRUMENT MODE == SPECTROSCOPY ****
@@ -46,6 +47,7 @@ INCLUDE  {16}, {17}, {18} - {21} (in this order) in a Target Group
 
 INCLUDE {5}, {6}, {12}-{14} in a target-specific Scheduling Group
         FOR spec observations: {12}, {6}, {14}
+            SET CONDITIONS FROM PI
             SET PIXEL SCALE FROM PI
             SET FPU from PI
             SET DISPERSER FROM PI
@@ -54,24 +56,25 @@ INCLUDE {5}, {6}, {12}-{14} in a target-specific Scheduling Group
             SET DISPERSER FROM PI
 
 # Change Offsets for non-cross-dispersed spec observations
-IF CROSS-DISPERSED == no
-        SET Q-OFFSET to -3, 3, 3, -3 respectively IN ITERATOR CALLED 'ABBA offset pattern' for {12}      # Science
+IF CROSS-DISPERSED == no AND PI Central Wavelength < 2.5um
+        SET Q-OFFSET to -1, 5, 5, -1 respectively IN ITERATOR CALLED 'ABBA offset pattern' for {12}      # Science
         SET Q-OFFSET to -5, 1, 1, -5 respectively IN ITERATOR CALLED 'ABBA offset pattern' for {6}, {14} # Tellurics
 
-IF PI Central Wavelength > 2.5um:
-    SET Well depth == Deep
+IF PI Central Wavelength > 2.5um
+    SET Well depth == Deep for {5}-{14},{22}
     SET Q-OFFSET to -3, 3, 3, -3 respectively IN ITERATOR CALLED 'ABBA offset pattern' for {6},{12},{14} # Science & Tellurics
 
 # ACQ for science to target Scheduling Group
-IF TARGET H-MAGNITUDE < 7 INCLUDE {22}
-IF 7 <= TARGET H-MAGNITUDE < 11.5 INCLUDE {7}
-IF 11.5 <= TARGET H-MAGNITUDE < 16 INCLUDE {8}
-IF 16 <= TARGET H-MAGNITUDE < 20 INCLUDE {9}, {11}      #Faint target and Faint extended target
-IF TARGET H-MAGNITUDE >= 20 INCLUDE {10}        #Blind offset target
-ELSE INCLUDE {7} - {11}, {22}   # No H-magnitude provided for target, so put all of them
+IF TARGET H-MAGNITUDE < 7 INCLUDE {22}                   # ND filter
+IF 7 <= TARGET H-MAGNITUDE < 11.5 INCLUDE {7}            # very bright
+IF 11.5 <= TARGET H-MAGNITUDE < 16 INCLUDE {8}           # bright
+IF 16 <= TARGET H-MAGNITUDE < 20 INCLUDE {9}, {11}, {23} # faint, faint extended & re-acquisition
+IF TARGET H-MAGNITUDE >= 20 INCLUDE {10}, {23}           # blind offset & re-acquisition
+ELSE INCLUDE {7} - {11}, {22}, {23}                      # no H-magnitude provided so put them all
 
 # In ALL ACQ
-        IN acquisition observations: {5}, {7} - {11}, {13}
+        IN acquisition observations: {5}, {7} - {11}, {13}, {23}
+          SET CONDITIONS FROM PI
           SET PIXEL SCALE FROM PI
           SET DISPERSER FROM PI
           SET CROSS-DISPERSED FROM PI
@@ -88,6 +91,7 @@ ELSE INCLUDE {7} - {11}, {22}   # No H-magnitude provided for target, so put all
                         EXCEPT WHERE FPU == acquisition
                 IF CROSS-DISPERSED == NO IN ITERATORS SET DECKER = short camera long slit \
                         EXCEPT WHERE FPU == acquisition
+
 
 # AO Mode
 # In NGS mode target and standards use the same Altair guide mode.
