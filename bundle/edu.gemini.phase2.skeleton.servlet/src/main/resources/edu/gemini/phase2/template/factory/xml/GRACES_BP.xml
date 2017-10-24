@@ -2,7 +2,7 @@
 <!DOCTYPE document PUBLIC "-//Gemini Observatory//DTD for Storage of P1 and P2 Documents//EN" "http://ftp.gemini.edu/Support/xml/dtds/SpXML2.dtd">
 
 <document>
-  <container kind="program" type="Program" version="2015B-1" subtype="basic" key="e9123279-cbbd-49d2-a609-188cc0c208d0" name="GRACES-BP">
+  <container kind="program" type="Program" version="2017B-1" subtype="basic" key="e9123279-cbbd-49d2-a609-188cc0c208d0" name="GRACES-BP">
     <paramset name="Science Program" kind="dataObj">
       <param name="title" value="GRACES PHASE I/II MAPPING BPS"/>
       <param name="programMode" value="QUEUE"/>
@@ -27,7 +27,8 @@
       <paramset name="Note" kind="dataObj">
         <param name="title" value="How to prepare your program"/>
         <param name="NoteText">
-          <value>
+          <value>DO NOT EDIT ANYTHING OTHER THAN LISTED BELOW
+
 Acquisition:
  1. In the "GMOS-N" component, write the exposure time for your science and set the Position Angle (PA).
  2. Go to "GMOS-N: Set Exp. Time, Filter and Ctrl Wvl". It is under "Sequence" -&gt; "GMOS-N: GRACES Acquisition" -&gt; "Offset".
@@ -41,13 +42,17 @@ Science:
  7. In the component "Observe", set the number of frames you want to observe.
 
 Other:
- 8. If you want a ThAr spectrum to be observed during the night together with your science spectrum, please add a "GMOS-N: ThAr" component (see the EXAMPLES).
-     Make sure to use the ThAr component that corresponds to your choice of spectral mode.
- 9. Please fill the GRACES set-up note.
+ 8. If you want a ThAr spectrum to be observed during the night together with your science spectrum, please add a "GMOS-N: ThAr" component. See also the EXAMPLESin the GRACES Library:  Go to OT File-&gt; Open -&gt; Select the check box 'Libs' -&gt; Select and open the program "GN-GRACES-library"). 
+ Make sure to use the ThAr component that corresponds to your choice of spectral mode.
+
+ 9. Please fill out the GRACES set-up note.
 
 DO NOT EDIT ANYTHING ELSE
 
-ANC - 3 Sept 2015.</value>
+More information can be found at 
+http://www.gemini.edu/sciops/instruments/graces/observation-preparation/graces-ot-details-0
+
+KC - 16 Oct 2017.</value>
         </param>
       </paramset>
     </container>
@@ -84,15 +89,11 @@ Central wavelength: XXXXA / XXXnm
             <param name="exposureTime" value="600.0"/>
             <param name="posAngle" value="0"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="adc" value="NONE"/>
-            <param name="ampCount" value="SIX"/>
+            <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
             <param name="ampReadMode" value="FAST"/>
-            <param name="detectorManufacturer" value="E2V"/>
+            <param name="detectorManufacturer" value="HAMAMATSU"/>
             <param name="disperser" value="MIRROR"/>
             <param name="fpuMode" value="BUILTIN"/>
             <param name="fpu" value="IFU_2"/>
@@ -107,7 +108,7 @@ Central wavelength: XXXXA / XXXnm
             <paramset name="customROIs">
               <paramset name="ROI0">
                 <param name="Xmin" value="2172"/>
-                <param name="Ymin" value="1754"/>
+                <param name="Ymin" value="1570"/>
                 <param name="Xrange" value="1800"/>
                 <param name="Yrange" value="1100"/>
               </paramset>
@@ -243,15 +244,11 @@ Central wavelength: XXXXA / XXXnm
             <param name="exposureTime" value="60.0"/>
             <param name="posAngle" value="0"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="adc" value="NONE"/>
-            <param name="ampCount" value="SIX"/>
+            <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
             <param name="ampReadMode" value="FAST"/>
-            <param name="detectorManufacturer" value="E2V"/>
+            <param name="detectorManufacturer" value="HAMAMATSU"/>
             <param name="disperser" value="MIRROR"/>
             <param name="fpuMode" value="BUILTIN"/>
             <param name="fpu" value="IFU_2"/>
@@ -266,7 +263,7 @@ Central wavelength: XXXXA / XXXnm
             <paramset name="customROIs">
               <paramset name="ROI0">
                 <param name="Xmin" value="2172"/>
-                <param name="Ymin" value="1754"/>
+                <param name="Ymin" value="1570"/>
                 <param name="Xrange" value="1800"/>
                 <param name="Yrange" value="1100"/>
               </paramset>
@@ -381,15 +378,11 @@ Central wavelength: XXXXA / XXXnm
             <param name="exposureTime" value="600.0"/>
             <param name="posAngle" value="0"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="adc" value="NONE"/>
-            <param name="ampCount" value="SIX"/>
+            <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="HIGH"/>
             <param name="ampReadMode" value="SLOW"/>
-            <param name="detectorManufacturer" value="E2V"/>
+            <param name="detectorManufacturer" value="HAMAMATSU"/>
             <param name="disperser" value="MIRROR"/>
             <param name="fpuMode" value="BUILTIN"/>
             <param name="fpu" value="IFU_2"/>
@@ -404,7 +397,7 @@ Central wavelength: XXXXA / XXXnm
             <paramset name="customROIs">
               <paramset name="ROI0">
                 <param name="Xmin" value="2172"/>
-                <param name="Ymin" value="1754"/>
+                <param name="Ymin" value="1570"/>
                 <param name="Xrange" value="1800"/>
                 <param name="Yrange" value="1100"/>
               </paramset>
@@ -540,15 +533,11 @@ Central wavelength: XXXXA / XXXnm
             <param name="exposureTime" value="60.0"/>
             <param name="posAngle" value="0"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="adc" value="NONE"/>
-            <param name="ampCount" value="SIX"/>
+            <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="HIGH"/>
             <param name="ampReadMode" value="SLOW"/>
-            <param name="detectorManufacturer" value="E2V"/>
+            <param name="detectorManufacturer" value="HAMAMATSU"/>
             <param name="disperser" value="MIRROR"/>
             <param name="fpuMode" value="BUILTIN"/>
             <param name="fpu" value="IFU_2"/>
@@ -563,7 +552,7 @@ Central wavelength: XXXXA / XXXnm
             <paramset name="customROIs">
               <paramset name="ROI0">
                 <param name="Xmin" value="2172"/>
-                <param name="Ymin" value="1754"/>
+                <param name="Ymin" value="1570"/>
                 <param name="Xrange" value="1800"/>
                 <param name="Yrange" value="1100"/>
               </paramset>
@@ -678,19 +667,15 @@ Central wavelength: XXXXA / XXXnm
             <param name="exposureTime" value="600.0"/>
             <param name="posAngle" value="0"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="adc" value="NONE"/>
-            <param name="ampCount" value="SIX"/>
+            <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
             <param name="ampReadMode" value="FAST"/>
-            <param name="detectorManufacturer" value="E2V"/>
+            <param name="detectorManufacturer" value="HAMAMATSU"/>
             <param name="disperser" value="MIRROR"/>
             <param name="fpuMode" value="BUILTIN"/>
             <param name="fpu" value="IFU_2"/>
-            <param name="filter" value="NONE"/>
+            <param name="filter" value="HeIIC_G0321"/>
             <param name="ccdXBinning" value="ONE"/>
             <param name="ccdYBinning" value="ONE"/>
             <param name="issPort" value="SIDE_LOOKING"/>
@@ -701,7 +686,7 @@ Central wavelength: XXXXA / XXXnm
             <paramset name="customROIs">
               <paramset name="ROI0">
                 <param name="Xmin" value="2172"/>
-                <param name="Ymin" value="1754"/>
+                <param name="Ymin" value="1570"/>
                 <param name="Xrange" value="1800"/>
                 <param name="Yrange" value="1100"/>
               </paramset>
@@ -837,19 +822,15 @@ Central wavelength: XXXXA / XXXnm
             <param name="exposureTime" value="60.0"/>
             <param name="posAngle" value="0"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="adc" value="NONE"/>
-            <param name="ampCount" value="SIX"/>
+            <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
             <param name="ampReadMode" value="FAST"/>
-            <param name="detectorManufacturer" value="E2V"/>
+            <param name="detectorManufacturer" value="HAMAMATSU"/>
             <param name="disperser" value="MIRROR"/>
             <param name="fpuMode" value="BUILTIN"/>
             <param name="fpu" value="IFU_2"/>
-            <param name="filter" value="NONE"/>
+            <param name="filter" value="HeIIC_G0321"/>
             <param name="ccdXBinning" value="ONE"/>
             <param name="ccdYBinning" value="ONE"/>
             <param name="issPort" value="SIDE_LOOKING"/>
@@ -860,7 +841,7 @@ Central wavelength: XXXXA / XXXnm
             <paramset name="customROIs">
               <paramset name="ROI0">
                 <param name="Xmin" value="2172"/>
-                <param name="Ymin" value="1754"/>
+                <param name="Ymin" value="1570"/>
                 <param name="Xrange" value="1800"/>
                 <param name="Yrange" value="1100"/>
               </paramset>
@@ -975,19 +956,15 @@ Central wavelength: XXXXA / XXXnm
             <param name="exposureTime" value="600.0"/>
             <param name="posAngle" value="0"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="adc" value="NONE"/>
-            <param name="ampCount" value="SIX"/>
+            <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="HIGH"/>
             <param name="ampReadMode" value="SLOW"/>
-            <param name="detectorManufacturer" value="E2V"/>
+            <param name="detectorManufacturer" value="HAMAMATSU"/>
             <param name="disperser" value="MIRROR"/>
             <param name="fpuMode" value="BUILTIN"/>
             <param name="fpu" value="IFU_2"/>
-            <param name="filter" value="NONE"/>
+            <param name="filter" value="HeIIC_G0321"/>
             <param name="ccdXBinning" value="ONE"/>
             <param name="ccdYBinning" value="ONE"/>
             <param name="issPort" value="SIDE_LOOKING"/>
@@ -998,7 +975,7 @@ Central wavelength: XXXXA / XXXnm
             <paramset name="customROIs">
               <paramset name="ROI0">
                 <param name="Xmin" value="2172"/>
-                <param name="Ymin" value="1754"/>
+                <param name="Ymin" value="1570"/>
                 <param name="Xrange" value="1800"/>
                 <param name="Yrange" value="1100"/>
               </paramset>
@@ -1134,19 +1111,15 @@ Central wavelength: XXXXA / XXXnm
             <param name="exposureTime" value="60.0"/>
             <param name="posAngle" value="0"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="adc" value="NONE"/>
-            <param name="ampCount" value="SIX"/>
+            <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="HIGH"/>
             <param name="ampReadMode" value="SLOW"/>
-            <param name="detectorManufacturer" value="E2V"/>
+            <param name="detectorManufacturer" value="HAMAMATSU"/>
             <param name="disperser" value="MIRROR"/>
             <param name="fpuMode" value="BUILTIN"/>
             <param name="fpu" value="IFU_2"/>
-            <param name="filter" value="NONE"/>
+            <param name="filter" value="HeIIC_G0321"/>
             <param name="ccdXBinning" value="ONE"/>
             <param name="ccdYBinning" value="ONE"/>
             <param name="issPort" value="SIDE_LOOKING"/>
@@ -1157,7 +1130,7 @@ Central wavelength: XXXXA / XXXnm
             <paramset name="customROIs">
               <paramset name="ROI0">
                 <param name="Xmin" value="2172"/>
-                <param name="Ymin" value="1754"/>
+                <param name="Ymin" value="1570"/>
                 <param name="Xrange" value="1800"/>
                 <param name="Yrange" value="1100"/>
               </paramset>
@@ -1270,6 +1243,8 @@ Central wavelength: XXXXA / XXXnm
     <paramset name="node">
       <param name="key" value="3671b44b-0c1e-49c3-bca7-633253675edc"/>
       <param name="2acf86f3-b398-4aaf-b1dc-39c55f96ace2" value="1"/>
+      <param name="2a6b86df-ffd0-400e-8835-648c171a30b8" value="1"/>
+      <param name="5b2cdd1b-8a4b-4a40-8c39-212123e16e65" value="7"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="e80793f6-9cac-42ab-97c8-62065441b165"/>
@@ -1409,6 +1384,7 @@ Central wavelength: XXXXA / XXXnm
     <paramset name="node">
       <param name="key" value="f0480adf-2dd2-4af3-98e8-9a0a07a0157f"/>
       <param name="2acf86f3-b398-4aaf-b1dc-39c55f96ace2" value="1"/>
+      <param name="5b2cdd1b-8a4b-4a40-8c39-212123e16e65" value="7"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="29be24eb-a110-45f6-a676-f532fa58629b"/>
@@ -1485,6 +1461,7 @@ Central wavelength: XXXXA / XXXnm
     <paramset name="node">
       <param name="key" value="6ceea4de-438a-4abc-bb5d-97e931692122"/>
       <param name="2acf86f3-b398-4aaf-b1dc-39c55f96ace2" value="1"/>
+      <param name="5b2cdd1b-8a4b-4a40-8c39-212123e16e65" value="7"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="0f68373b-4279-4c3d-845c-58e7a1eef17f"/>
@@ -1513,6 +1490,8 @@ Central wavelength: XXXXA / XXXnm
     <paramset name="node">
       <param name="key" value="a0951eb3-9ca2-4aa9-845e-4c2e8a05c68d"/>
       <param name="2acf86f3-b398-4aaf-b1dc-39c55f96ace2" value="1"/>
+      <param name="2a6b86df-ffd0-400e-8835-648c171a30b8" value="1"/>
+      <param name="5b2cdd1b-8a4b-4a40-8c39-212123e16e65" value="7"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="331a8777-a0fa-489e-8852-065c3ac7ae03"/>
@@ -1617,6 +1596,8 @@ Central wavelength: XXXXA / XXXnm
     <paramset name="node">
       <param name="key" value="8855e675-4bf4-4081-9f3d-46242143d7d0"/>
       <param name="2acf86f3-b398-4aaf-b1dc-39c55f96ace2" value="1"/>
+      <param name="2a6b86df-ffd0-400e-8835-648c171a30b8" value="1"/>
+      <param name="5b2cdd1b-8a4b-4a40-8c39-212123e16e65" value="7"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="b2036c3b-aa3f-43a4-bf78-b80da5ed5e80"/>
@@ -1645,6 +1626,8 @@ Central wavelength: XXXXA / XXXnm
     <paramset name="node">
       <param name="key" value="cd7ca95b-48d0-4356-b496-141cd71ae75c"/>
       <param name="2acf86f3-b398-4aaf-b1dc-39c55f96ace2" value="1"/>
+      <param name="2a6b86df-ffd0-400e-8835-648c171a30b8" value="1"/>
+      <param name="5b2cdd1b-8a4b-4a40-8c39-212123e16e65" value="7"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="869882b8-fc11-4ff6-ad15-ebf40098af44"/>
@@ -1681,6 +1664,7 @@ Central wavelength: XXXXA / XXXnm
     <paramset name="node">
       <param name="key" value="cfc83649-2708-44ee-af64-6f62ce41aa85"/>
       <param name="2acf86f3-b398-4aaf-b1dc-39c55f96ace2" value="1"/>
+      <param name="5b2cdd1b-8a4b-4a40-8c39-212123e16e65" value="7"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="11bf5580-b010-42bf-94ee-8a5ccefa26e6"/>
@@ -1709,6 +1693,7 @@ Central wavelength: XXXXA / XXXnm
     <paramset name="node">
       <param name="key" value="60983b55-6500-423a-849e-4f03387c483d"/>
       <param name="2acf86f3-b398-4aaf-b1dc-39c55f96ace2" value="1"/>
+      <param name="5b2cdd1b-8a4b-4a40-8c39-212123e16e65" value="7"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="e893dd8a-7ff1-4296-a3a0-a5c6bde0f6a9"/>
@@ -1725,6 +1710,7 @@ Central wavelength: XXXXA / XXXnm
     <paramset name="node">
       <param name="key" value="160566f7-eb0d-4e8a-b6dc-6fc2a53115e7"/>
       <param name="ee939b46-90bf-4ff5-bf1f-f58d3f8b1faa" value="1"/>
+      <param name="5b2cdd1b-8a4b-4a40-8c39-212123e16e65" value="272"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="5c0ccef2-c88a-4cee-b57e-35df213bb00c"/>
