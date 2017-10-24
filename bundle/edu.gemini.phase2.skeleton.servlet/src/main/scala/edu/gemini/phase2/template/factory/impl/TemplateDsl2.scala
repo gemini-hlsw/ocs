@@ -116,6 +116,9 @@ trait TemplateDsl2[I <: SPInstObsComp] { gi:GroupInitializer[_] =>
       _ <- mod(f)(c).right
     } yield ()
 
+    def withTitleIfExists(title: String)(f: SequenceMutator) = (o: ISPObservation) =>
+      comps(o).find(dataObj(_).getTitle == title).fold(Right(()): Maybe[Unit])(mod(f)(_))
+
     def apply(f:SequenceMutator) = (o:ISPObservation) => comps(o).mapM_(mod(f))
 
   }

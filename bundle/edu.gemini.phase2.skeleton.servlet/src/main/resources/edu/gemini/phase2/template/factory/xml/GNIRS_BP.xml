@@ -2,7 +2,7 @@
 <!DOCTYPE document PUBLIC "-//Gemini Observatory//DTD for Storage of P1 and P2 Documents//EN" "http://ftp.gemini.edu/Support/xml/dtds/SpXML2.dtd">
 
 <document>
-  <container kind="program" type="Program" version="2016A-1" subtype="basic" key="da89e5f9-49f6-4b31-a85a-62b4d7e84990" name="GNIRS-BP">
+  <container kind="program" type="Program" version="2017B-1" subtype="basic" key="da89e5f9-49f6-4b31-a85a-62b4d7e84990" name="GNIRS-BP">
     <paramset name="Science Program" kind="dataObj">
       <param name="title" value="GNIRS PHASE I/II MAPPING BPS"/>
       <param name="programMode" value="QUEUE"/>
@@ -10,10 +10,10 @@
       <param name="programStatus" value="PHASE2"/>
       <param name="nextObsId" value="1"/>
       <paramset name="piInfo">
-        <param name="firstName" value="Percy"/>
-        <param name="lastName" value="Gomez"/>
+        <param name="firstName" value=""/>
+        <param name="lastName" value=""/>
         <param name="email" value=""/>
-        <param name="phone" value="974-2505"/>
+        <param name="phone" value=""/>
         <param name="affiliate" value="GEMINI_STAFF"/>
       </paramset>
       <param name="contactPerson" value="rmason@gemini.edu, mbusserolle@gemini.edu"/>
@@ -27,7 +27,7 @@
     </paramset>
     <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="409c710a-5c4d-49c1-a7e4-950ae0eb22af" name="Note">
       <paramset name="Note" kind="dataObj">
-        <param name="title" value="Next libID = 23"/>
+        <param name="title" value="Next libID = 24"/>
         <param name="NoteText" value=""/>
       </paramset>
     </container>
@@ -57,15 +57,11 @@ The semicircular portion of the field is below the rectangle. The template scien
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
         </paramset>
-        <container kind="obsComp" type="Instrument" version="2014A-1" subtype="GNIRS" key="a951d873-7a05-4b6f-969e-ed484d8564ea" name="GNIRS">
+        <container kind="obsComp" type="Instrument" version="2017A-1" subtype="GNIRS" key="a951d873-7a05-4b6f-969e-ed484d8564ea" name="GNIRS">
           <paramset name="GNIRS" kind="dataObj">
             <param name="exposureTime" value="3.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="3"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="pixelScale" value="PS_015"/>
             <param name="disperser" value="D_32"/>
             <param name="slitWidth" value="ACQUISITION"/>
@@ -79,6 +75,7 @@ The semicircular portion of the field is below the rectangle. The template scien
             <param name="decker" value="ACQUISITION"/>
             <param name="filter" value="J"/>
             <param name="posAngleConstraint" value="FIXED"/>
+            <param name="overrideAcqObsWavelength" value="true"/>
             <param name="issPort" value="SIDE_LOOKING"/>
           </paramset>
         </container>
@@ -187,15 +184,11 @@ The semicircular portion of the field is below the rectangle. The template scien
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
         </paramset>
-        <container kind="obsComp" type="Instrument" version="2014A-1" subtype="GNIRS" key="e13ed8dd-e0c3-4678-97db-24f5128ca9ab" name="GNIRS">
+        <container kind="obsComp" type="Instrument" version="2017A-1" subtype="GNIRS" key="e13ed8dd-e0c3-4678-97db-24f5128ca9ab" name="GNIRS">
           <paramset name="GNIRS" kind="dataObj">
             <param name="exposureTime" value="1.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="10"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="pixelScale" value="PS_015"/>
             <param name="disperser" value="D_32"/>
             <param name="slitWidth" value="ACQUISITION"/>
@@ -209,6 +202,7 @@ The semicircular portion of the field is below the rectangle. The template scien
             <param name="decker" value="ACQUISITION"/>
             <param name="filter" value="J"/>
             <param name="posAngleConstraint" value="FIXED"/>
+            <param name="overrideAcqObsWavelength" value="true"/>
             <param name="issPort" value="SIDE_LOOKING"/>
           </paramset>
         </container>
@@ -297,15 +291,11 @@ The semicircular portion of the field is below the rectangle. The template scien
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
         </paramset>
-        <container kind="obsComp" type="Instrument" version="2014A-1" subtype="GNIRS" key="f39e584a-cf26-46ec-8251-db7fa554de5d" name="GNIRS">
+        <container kind="obsComp" type="Instrument" version="2017A-1" subtype="GNIRS" key="f39e584a-cf26-46ec-8251-db7fa554de5d" name="GNIRS">
           <paramset name="GNIRS" kind="dataObj">
             <param name="exposureTime" value="12.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="2"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="pixelScale" value="PS_015"/>
             <param name="disperser" value="D_32"/>
             <param name="slitWidth" value="ACQUISITION"/>
@@ -319,6 +309,7 @@ The semicircular portion of the field is below the rectangle. The template scien
             <param name="decker" value="ACQUISITION"/>
             <param name="filter" value="J"/>
             <param name="posAngleConstraint" value="FIXED"/>
+            <param name="overrideAcqObsWavelength" value="true"/>
             <param name="issPort" value="SIDE_LOOKING"/>
           </paramset>
         </container>
@@ -404,15 +395,11 @@ The semicircular portion of the field is below the rectangle. The template scien
             </param>
           </paramset>
         </container>
-        <container kind="obsComp" type="Instrument" version="2014A-1" subtype="GNIRS" key="da7158e1-cc49-421c-921b-63344e97ca96" name="GNIRS">
+        <container kind="obsComp" type="Instrument" version="2017A-1" subtype="GNIRS" key="da7158e1-cc49-421c-921b-63344e97ca96" name="GNIRS">
           <paramset name="GNIRS" kind="dataObj">
             <param name="exposureTime" value="30.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="2"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="pixelScale" value="PS_015"/>
             <param name="disperser" value="D_32"/>
             <param name="slitWidth" value="ACQUISITION"/>
@@ -426,6 +413,7 @@ The semicircular portion of the field is below the rectangle. The template scien
             <param name="decker" value="ACQUISITION"/>
             <param name="filter" value="J"/>
             <param name="posAngleConstraint" value="FIXED"/>
+            <param name="overrideAcqObsWavelength" value="true"/>
             <param name="issPort" value="SIDE_LOOKING"/>
           </paramset>
         </container>
@@ -535,15 +523,11 @@ The semicircular portion of the field is below the rectangle. The template scien
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
         </paramset>
-        <container kind="obsComp" type="Instrument" version="2014A-1" subtype="GNIRS" key="4f4ffc89-a97c-4213-814f-7cbc80b9c065" name="GNIRS">
+        <container kind="obsComp" type="Instrument" version="2017A-1" subtype="GNIRS" key="4f4ffc89-a97c-4213-814f-7cbc80b9c065" name="GNIRS">
           <paramset name="GNIRS" kind="dataObj">
             <param name="exposureTime" value="3.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="3"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="pixelScale" value="PS_015"/>
             <param name="disperser" value="D_32"/>
             <param name="slitWidth" value="ACQUISITION"/>
@@ -557,6 +541,7 @@ The semicircular portion of the field is below the rectangle. The template scien
             <param name="decker" value="ACQUISITION"/>
             <param name="filter" value="J"/>
             <param name="posAngleConstraint" value="FIXED"/>
+            <param name="overrideAcqObsWavelength" value="true"/>
             <param name="issPort" value="SIDE_LOOKING"/>
           </paramset>
         </container>
@@ -665,15 +650,11 @@ The semicircular portion of the field is below the rectangle. The template scien
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
         </paramset>
-        <container kind="obsComp" type="Instrument" version="2014A-1" subtype="GNIRS" key="81f7d9f9-5ac8-4122-ada3-cfcb44d48738" name="GNIRS">
+        <container kind="obsComp" type="Instrument" version="2017A-1" subtype="GNIRS" key="81f7d9f9-5ac8-4122-ada3-cfcb44d48738" name="GNIRS">
           <paramset name="GNIRS" kind="dataObj">
             <param name="exposureTime" value="1.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="10"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="pixelScale" value="PS_015"/>
             <param name="disperser" value="D_32"/>
             <param name="slitWidth" value="ACQUISITION"/>
@@ -687,6 +668,7 @@ The semicircular portion of the field is below the rectangle. The template scien
             <param name="decker" value="ACQUISITION"/>
             <param name="filter" value="J"/>
             <param name="posAngleConstraint" value="FIXED"/>
+            <param name="overrideAcqObsWavelength" value="true"/>
             <param name="issPort" value="SIDE_LOOKING"/>
           </paramset>
         </container>
@@ -774,7 +756,7 @@ The semicircular portion of the field is below the rectangle. The template scien
       </paramset>
       <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="f5bd6ca2-dfeb-4fc0-9ad7-0963bdd03133" name="Note">
         <paramset name="Note" kind="dataObj">
-          <param name="title" value="FUNDAMENTAL NOTE: ACQ Strategies and Exposure Times "/>
+          <param name="title" value="ACQ Strategies and Exposure Times "/>
           <param name="NoteText">
             <value>EVERY GNIRS OBSERVATION MUST HAVE AN ASSOCIATED ACQUISITION OBSERVATION, defined by the PI during the phase II process. The acquisition process is described on this web page: www.gemini.edu/sciops/instruments/gnirs/spectroscopy/acquisition.
 
@@ -869,16 +851,12 @@ Because of the large wavelength coverage of the XD modes, differential refractio
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
         </paramset>
-        <container kind="obsComp" type="Instrument" version="2014A-1" subtype="GNIRS" key="1cccbf9f-ec92-4935-8248-bdcdb70fb1e1" name="GNIRS">
+        <container kind="obsComp" type="Instrument" version="2017A-1" subtype="GNIRS" key="1cccbf9f-ec92-4935-8248-bdcdb70fb1e1" name="GNIRS">
           <paramset name="GNIRS" kind="dataObj">
             <param name="title" value="GNIRS"/>
             <param name="exposureTime" value="3.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="pixelScale" value="PS_015"/>
             <param name="disperser" value="D_32"/>
             <param name="slitWidth" value="SW_4"/>
@@ -892,6 +870,7 @@ Because of the large wavelength coverage of the XD modes, differential refractio
             <param name="decker" value="SHORT_CAM_X_DISP"/>
             <param name="filter" value="ORDER_4"/>
             <param name="posAngleConstraint" value="FIXED"/>
+            <param name="overrideAcqObsWavelength" value="true"/>
             <param name="issPort" value="SIDE_LOOKING"/>
           </paramset>
         </container>
@@ -1021,15 +1000,11 @@ Because of the large wavelength coverage of the XD modes, differential refractio
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
         </paramset>
-        <container kind="obsComp" type="Instrument" version="2014A-1" subtype="GNIRS" key="3ea00bc4-7182-4c96-a305-62be56e68968" name="GNIRS">
+        <container kind="obsComp" type="Instrument" version="2017A-1" subtype="GNIRS" key="3ea00bc4-7182-4c96-a305-62be56e68968" name="GNIRS">
           <paramset name="GNIRS" kind="dataObj">
             <param name="exposureTime" value="10.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="pixelScale" value="PS_015"/>
             <param name="disperser" value="D_32"/>
             <param name="slitWidth" value="SW_4"/>
@@ -1043,6 +1018,7 @@ Because of the large wavelength coverage of the XD modes, differential refractio
             <param name="decker" value="ACQUISITION"/>
             <param name="filter" value="ORDER_5"/>
             <param name="posAngleConstraint" value="FIXED"/>
+            <param name="overrideAcqObsWavelength" value="true"/>
             <param name="issPort" value="SIDE_LOOKING"/>
           </paramset>
         </container>
@@ -1118,16 +1094,12 @@ Because of the large wavelength coverage of the XD modes, differential refractio
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
         </paramset>
-        <container kind="obsComp" type="Instrument" version="2014A-1" subtype="GNIRS" key="aef023cf-cd4c-4853-918c-c4845cff8f98" name="GNIRS">
+        <container kind="obsComp" type="Instrument" version="2017A-1" subtype="GNIRS" key="aef023cf-cd4c-4853-918c-c4845cff8f98" name="GNIRS">
           <paramset name="GNIRS" kind="dataObj">
             <param name="title" value="GNIRS"/>
             <param name="exposureTime" value="3.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="pixelScale" value="PS_015"/>
             <param name="disperser" value="D_111"/>
             <param name="slitWidth" value="SW_4"/>
@@ -1141,6 +1113,7 @@ Because of the large wavelength coverage of the XD modes, differential refractio
             <param name="decker" value="SHORT_CAM_LONG_SLIT"/>
             <param name="filter" value="ORDER_4"/>
             <param name="posAngleConstraint" value="FIXED"/>
+            <param name="overrideAcqObsWavelength" value="true"/>
             <param name="issPort" value="SIDE_LOOKING"/>
           </paramset>
         </container>
@@ -1271,16 +1244,12 @@ Because of the large wavelength coverage of the XD modes, differential refractio
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
         </paramset>
-        <container kind="obsComp" type="Instrument" version="2014A-1" subtype="GNIRS" key="5f605ffc-018d-4e23-8f50-18ebb58b8a4a" name="GNIRS">
+        <container kind="obsComp" type="Instrument" version="2017A-1" subtype="GNIRS" key="5f605ffc-018d-4e23-8f50-18ebb58b8a4a" name="GNIRS">
           <paramset name="GNIRS" kind="dataObj">
             <param name="title" value="GNIRS"/>
             <param name="exposureTime" value="3.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="pixelScale" value="PS_015"/>
             <param name="disperser" value="D_111"/>
             <param name="slitWidth" value="SW_4"/>
@@ -1294,6 +1263,7 @@ Because of the large wavelength coverage of the XD modes, differential refractio
             <param name="decker" value="SHORT_CAM_LONG_SLIT"/>
             <param name="filter" value="ORDER_4"/>
             <param name="posAngleConstraint" value="FIXED"/>
+            <param name="overrideAcqObsWavelength" value="true"/>
             <param name="issPort" value="SIDE_LOOKING"/>
           </paramset>
         </container>
@@ -1423,16 +1393,12 @@ Because of the large wavelength coverage of the XD modes, differential refractio
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
         </paramset>
-        <container kind="obsComp" type="Instrument" version="2014A-1" subtype="GNIRS" key="217d0d42-12a1-4530-9e03-b6ebeadeb667" name="GNIRS">
+        <container kind="obsComp" type="Instrument" version="2017A-1" subtype="GNIRS" key="217d0d42-12a1-4530-9e03-b6ebeadeb667" name="GNIRS">
           <paramset name="GNIRS" kind="dataObj">
             <param name="title" value="GNIRS"/>
             <param name="exposureTime" value="3.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="pixelScale" value="PS_015"/>
             <param name="disperser" value="D_111"/>
             <param name="slitWidth" value="SW_4"/>
@@ -1446,6 +1412,7 @@ Because of the large wavelength coverage of the XD modes, differential refractio
             <param name="decker" value="SHORT_CAM_LONG_SLIT"/>
             <param name="filter" value="ORDER_4"/>
             <param name="posAngleConstraint" value="FIXED"/>
+            <param name="overrideAcqObsWavelength" value="true"/>
             <param name="issPort" value="SIDE_LOOKING"/>
           </paramset>
         </container>
@@ -1567,16 +1534,12 @@ Because of the large wavelength coverage of the XD modes, differential refractio
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
         </paramset>
-        <container kind="obsComp" type="Instrument" version="2014A-1" subtype="GNIRS" key="ec7386b0-ad5c-4689-8341-ff0d4ab42785" name="GNIRS">
+        <container kind="obsComp" type="Instrument" version="2017A-1" subtype="GNIRS" key="ec7386b0-ad5c-4689-8341-ff0d4ab42785" name="GNIRS">
           <paramset name="GNIRS" kind="dataObj">
             <param name="title" value="GNIRS"/>
             <param name="exposureTime" value="3.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="pixelScale" value="PS_015"/>
             <param name="disperser" value="D_111"/>
             <param name="slitWidth" value="SW_4"/>
@@ -1590,6 +1553,7 @@ Because of the large wavelength coverage of the XD modes, differential refractio
             <param name="decker" value="SHORT_CAM_LONG_SLIT"/>
             <param name="filter" value="ORDER_4"/>
             <param name="posAngleConstraint" value="FIXED"/>
+            <param name="overrideAcqObsWavelength" value="true"/>
             <param name="issPort" value="SIDE_LOOKING"/>
           </paramset>
         </container>
@@ -1747,16 +1711,12 @@ Because of the large wavelength coverage of the XD modes, differential refractio
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
         </paramset>
-        <container kind="obsComp" type="Instrument" version="2014A-1" subtype="GNIRS" key="f98c5901-8b9b-421a-8cc8-d188d0028c37" name="GNIRS">
+        <container kind="obsComp" type="Instrument" version="2017A-1" subtype="GNIRS" key="f98c5901-8b9b-421a-8cc8-d188d0028c37" name="GNIRS">
           <paramset name="GNIRS" kind="dataObj">
             <param name="title" value="GNIRS"/>
             <param name="exposureTime" value="3.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="pixelScale" value="PS_015"/>
             <param name="disperser" value="D_111"/>
             <param name="slitWidth" value="SW_4"/>
@@ -1770,6 +1730,7 @@ Because of the large wavelength coverage of the XD modes, differential refractio
             <param name="decker" value="SHORT_CAM_LONG_SLIT"/>
             <param name="filter" value="ORDER_4"/>
             <param name="posAngleConstraint" value="FIXED"/>
+            <param name="overrideAcqObsWavelength" value="true"/>
             <param name="issPort" value="SIDE_LOOKING"/>
           </paramset>
         </container>
@@ -1910,16 +1871,12 @@ In this example the reference star is H=12.9 mag, so the rest of the acquisition
             <param name="NoteText" value="This template might be used for placing a long slit along the long axis of a galaxy or across a large planet."/>
           </paramset>
         </container>
-        <container kind="obsComp" type="Instrument" version="2014A-1" subtype="GNIRS" key="64a8de9f-63f0-4385-bf85-177c0551a29b" name="GNIRS">
+        <container kind="obsComp" type="Instrument" version="2017A-1" subtype="GNIRS" key="64a8de9f-63f0-4385-bf85-177c0551a29b" name="GNIRS">
           <paramset name="GNIRS" kind="dataObj">
             <param name="title" value="GNIRS"/>
             <param name="exposureTime" value="3.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="pixelScale" value="PS_015"/>
             <param name="disperser" value="D_111"/>
             <param name="slitWidth" value="SW_5"/>
@@ -1933,6 +1890,7 @@ In this example the reference star is H=12.9 mag, so the rest of the acquisition
             <param name="decker" value="SHORT_CAM_LONG_SLIT"/>
             <param name="filter" value="ORDER_4"/>
             <param name="posAngleConstraint" value="FIXED"/>
+            <param name="overrideAcqObsWavelength" value="true"/>
             <param name="issPort" value="SIDE_LOOKING"/>
           </paramset>
         </container>
@@ -2080,6 +2038,116 @@ In this example the reference star is H=12.9 mag, so the rest of the acquisition
           </container>
         </container>
       </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="fe47f96f-2878-4392-beba-2d1be327ed75" name="GNIRS-BP-20">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="Re-Acquisition (observations &gt; 1 hr)"/>
+          <param name="libraryId" value="23"/>
+          <param name="priority" value="MEDIUM"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Instrument" version="2017A-1" subtype="GNIRS" key="aa333b9d-9b33-4300-b84e-6b271267c0cc" name="GNIRS">
+          <paramset name="GNIRS" kind="dataObj">
+            <param name="title" value="GNIRS"/>
+            <param name="exposureTime" value="3.0"/>
+            <param name="posAngle" value="90"/>
+            <param name="coadds" value="6"/>
+            <param name="pixelScale" value="PS_015"/>
+            <param name="disperser" value="D_111"/>
+            <param name="slitWidth" value="SW_4"/>
+            <param name="crossDispersed" value="NO"/>
+            <param name="wollastonPrism" value="NO"/>
+            <param name="readMode" value="BRIGHT"/>
+            <param name="wellDepth" value="SHALLOW"/>
+            <param name="centralWavelength" value="1.65"/>
+            <param name="acquisitionMirror" value="IN"/>
+            <param name="camera" value="SHORT_BLUE"/>
+            <param name="decker" value="SHORT_CAM_LONG_SLIT"/>
+            <param name="filter" value="ORDER_4"/>
+            <param name="posAngleConstraint" value="FIXED"/>
+            <param name="overrideAcqObsWavelength" value="true"/>
+            <param name="issPort" value="SIDE_LOOKING"/>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="b2ab6d9d-dda0-4fda-9095-ff2c3771cccb" name="Note">
+          <paramset name="Note" kind="dataObj">
+            <param name="title" value="Description"/>
+            <param name="NoteText">
+              <value>
+Include this observation for observations longer than 1 hour.
+Update the exposure time to match the acquisition observation.
+</value>
+            </param>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="9238253a-dfcd-4a20-ab9d-7d354b6bbfcd" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="9b51641f-eb73-4f9d-9243-f2023d3211e7" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="9188f845-587b-47d9-ad36-a14a88756b1a" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Iterator" version="2010B-2" subtype="GNIRS" key="77de6862-21bf-4609-9653-6752774b13c0" name="GNIRS Sequence">
+            <paramset name="GNIRS Sequence" kind="dataObj">
+              <param name="title" value="GNIRS: Images through slit"/>
+              <param name="acquisitionMirror" value="IN"/>
+              <param name="coadds" value="6"/>
+              <param name="decker" value="SHORT_CAM_LONG_SLIT"/>
+              <param name="exposureTime" value="3.0"/>
+              <param name="filter" value="ORDER_4"/>
+              <param name="readMode" value="BRIGHT"/>
+              <param name="slitWidth" value="SW_4"/>
+            </paramset>
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="cd218f6e-8b61-418e-9db9-72319a000a90" name="Offset">
+              <paramset name="Offset" kind="dataObj">
+                <param name="title" value="sky"/>
+                <paramset name="offsets">
+                  <paramset name="Offset0" sequence="0">
+                    <param name="p" value="10.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                </paramset>
+              </paramset>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="d2094be3-2ea6-40a6-8301-e1b42f172203" name="Observe">
+                <paramset name="Observe" kind="dataObj">
+                  <param name="repeatCount" value="1"/>
+                  <param name="class" value="ACQ"/>
+                </paramset>
+              </container>
+            </container>
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="a0ea3a32-fc1b-4fb0-928d-61bd3eb1cf63" name="Offset">
+              <paramset name="Offset" kind="dataObj">
+                <param name="title" value="src"/>
+                <paramset name="offsets">
+                  <paramset name="Offset0" sequence="0">
+                    <param name="p" value="0.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                </paramset>
+              </paramset>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="76bdaf0b-2e9a-4a62-a2dd-8f2ff48404e3" name="Observe">
+                <paramset name="Observe" kind="dataObj">
+                  <param name="repeatCount" value="3"/>
+                  <param name="class" value="ACQ"/>
+                </paramset>
+              </container>
+            </container>
+          </container>
+        </container>
+      </container>
       <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="48aa0b37-70ed-4aac-be06-9b96ec5fc65c" name="GNIRS-BP-19">
         <paramset name="Observation" kind="dataObj">
           <param name="title" value="Obs: Science target"/>
@@ -2090,15 +2158,11 @@ In this example the reference star is H=12.9 mag, so the rest of the acquisition
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
         </paramset>
-        <container kind="obsComp" type="Instrument" version="2014A-1" subtype="GNIRS" key="b76cba48-91f3-4911-9d0c-1c4b84c43e99" name="GNIRS">
+        <container kind="obsComp" type="Instrument" version="2017A-1" subtype="GNIRS" key="b76cba48-91f3-4911-9d0c-1c4b84c43e99" name="GNIRS">
           <paramset name="GNIRS" kind="dataObj">
             <param name="exposureTime" value="300.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="pixelScale" value="PS_015"/>
             <param name="disperser" value="D_32"/>
             <param name="slitWidth" value="SW_4"/>
@@ -2112,6 +2176,7 @@ In this example the reference star is H=12.9 mag, so the rest of the acquisition
             <param name="decker" value="ACQUISITION"/>
             <param name="filter" value="ORDER_5"/>
             <param name="posAngleConstraint" value="FIXED"/>
+            <param name="overrideAcqObsWavelength" value="true"/>
             <param name="issPort" value="SIDE_LOOKING"/>
           </paramset>
         </container>
@@ -2206,16 +2271,12 @@ In this example the reference star is H=12.9 mag, so the rest of the acquisition
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
         </paramset>
-        <container kind="obsComp" type="Instrument" version="2014A-1" subtype="GNIRS" key="d4c0383f-7b1c-4c3d-83d8-634dd99bceb1" name="GNIRS">
+        <container kind="obsComp" type="Instrument" version="2017A-1" subtype="GNIRS" key="d4c0383f-7b1c-4c3d-83d8-634dd99bceb1" name="GNIRS">
           <paramset name="GNIRS" kind="dataObj">
             <param name="title" value="GNIRS"/>
             <param name="exposureTime" value="3.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="pixelScale" value="PS_015"/>
             <param name="disperser" value="D_32"/>
             <param name="slitWidth" value="SW_4"/>
@@ -2229,6 +2290,7 @@ In this example the reference star is H=12.9 mag, so the rest of the acquisition
             <param name="decker" value="SHORT_CAM_X_DISP"/>
             <param name="filter" value="ORDER_4"/>
             <param name="posAngleConstraint" value="FIXED"/>
+            <param name="overrideAcqObsWavelength" value="true"/>
             <param name="issPort" value="SIDE_LOOKING"/>
           </paramset>
         </container>
@@ -2358,15 +2420,11 @@ In this example the reference star is H=12.9 mag, so the rest of the acquisition
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
         </paramset>
-        <container kind="obsComp" type="Instrument" version="2014A-1" subtype="GNIRS" key="4cc4a115-dac6-49ca-b2e8-45ac910cb2f2" name="GNIRS">
+        <container kind="obsComp" type="Instrument" version="2017A-1" subtype="GNIRS" key="4cc4a115-dac6-49ca-b2e8-45ac910cb2f2" name="GNIRS">
           <paramset name="GNIRS" kind="dataObj">
             <param name="exposureTime" value="10.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="pixelScale" value="PS_015"/>
             <param name="disperser" value="D_32"/>
             <param name="slitWidth" value="SW_4"/>
@@ -2380,6 +2438,7 @@ In this example the reference star is H=12.9 mag, so the rest of the acquisition
             <param name="decker" value="ACQUISITION"/>
             <param name="filter" value="ORDER_5"/>
             <param name="posAngleConstraint" value="FIXED"/>
+            <param name="overrideAcqObsWavelength" value="true"/>
             <param name="issPort" value="SIDE_LOOKING"/>
           </paramset>
         </container>
@@ -2471,29 +2530,31 @@ In this example the reference star is H=12.9 mag, so the rest of the acquisition
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
               <paramset name="base">
-                <param name="name" value="Pinhole"/>
-                <param name="system" value="J2000"/>
-                <param name="epoch" value="2000.0" units="years"/>
-                <param name="c1" value="00:00:00.000"/>
-                <param name="c2" value="00:00:00.00"/>
-                <param name="pm1" value="0.0" units="milli-arcsecs/year"/>
-                <param name="pm2" value="0.0" units="milli-arcsecs/year"/>
-                <param name="parallax" value="0.0" units="arcsecs"/>
-                <param name="z" value="0.0"/>
+                <paramset name="target">
+                  <param name="name" value="Pinhole"/>
+                  <param name="redshift" value="0.0"/>
+                  <param name="parallax" value="0.0"/>
+                  <paramset name="coordinates">
+                    <param name="ra" value="0.0"/>
+                    <param name="dec" value="0.0"/>
+                  </paramset>
+                  <param name="tag" value="sidereal"/>
+                </paramset>
               </paramset>
-              <paramset name="guideEnv"/>
+              <paramset name="guideEnv">
+                <param name="primary" value="0"/>
+                <paramset name="guideGroup">
+                  <param name="tag" value="AutoDisabledTag"/>
+                </paramset>
+              </paramset>
             </paramset>
           </paramset>
         </container>
-        <container kind="obsComp" type="Instrument" version="2014A-1" subtype="GNIRS" key="69579d96-bb97-4b8e-9075-8f743891ceca" name="GNIRS">
+        <container kind="obsComp" type="Instrument" version="2017A-1" subtype="GNIRS" key="69579d96-bb97-4b8e-9075-8f743891ceca" name="GNIRS">
           <paramset name="GNIRS" kind="dataObj">
             <param name="exposureTime" value="5.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="20"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="pixelScale" value="PS_015"/>
             <param name="disperser" value="D_32"/>
             <param name="slitWidth" value="PINHOLE_3"/>
@@ -2507,6 +2568,7 @@ In this example the reference star is H=12.9 mag, so the rest of the acquisition
             <param name="decker" value="ACQUISITION"/>
             <param name="filter" value="ORDER_5"/>
             <param name="posAngleConstraint" value="FIXED"/>
+            <param name="overrideAcqObsWavelength" value="true"/>
             <param name="issPort" value="SIDE_LOOKING"/>
           </paramset>
         </container>
@@ -2587,12 +2649,20 @@ REM 20110126</value>
       <param name="008f7231-3a2a-4577-987b-ed4bbd753bf6" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="76bdaf0b-2e9a-4a62-a2dd-8f2ff48404e3"/>
+      <param name="c720bb94-d12b-4dd1-ac41-b8e55e2ea093" value="2"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="ccbfc2c8-812b-49bc-9af7-9c04eb3ea9f2"/>
       <param name="008f7231-3a2a-4577-987b-ed4bbd753bf6" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="4e2327a7-015a-4ffc-9d5e-ec21070270a0"/>
       <param name="008f7231-3a2a-4577-987b-ed4bbd753bf6" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="9b51641f-eb73-4f9d-9243-f2023d3211e7"/>
+      <param name="c720bb94-d12b-4dd1-ac41-b8e55e2ea093" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="5bf1616e-e12e-472b-99a0-c53bcb3e9698"/>
@@ -2623,6 +2693,10 @@ REM 20110126</value>
       <param name="008f7231-3a2a-4577-987b-ed4bbd753bf6" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="9238253a-dfcd-4a20-ab9d-7d354b6bbfcd"/>
+      <param name="c720bb94-d12b-4dd1-ac41-b8e55e2ea093" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="0f599844-7394-4803-bf5c-572d2b9c153b"/>
       <param name="008f7231-3a2a-4577-987b-ed4bbd753bf6" value="1"/>
     </paramset>
@@ -2634,6 +2708,14 @@ REM 20110126</value>
     <paramset name="node">
       <param name="key" value="db62afde-1990-45b1-bdba-ffcdcfbb28d6"/>
       <param name="008f7231-3a2a-4577-987b-ed4bbd753bf6" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="c5eda83a-fe71-4853-8d83-00c0c2685101"/>
+      <param name="c720bb94-d12b-4dd1-ac41-b8e55e2ea093" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="b18d2b2f-6206-4dfa-81a8-6fc2efb63ec5"/>
+      <param name="c720bb94-d12b-4dd1-ac41-b8e55e2ea093" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="47e3e359-e6f0-4186-b0d0-66cd6034df82"/>
@@ -2765,6 +2847,10 @@ REM 20110126</value>
       <param name="008f7231-3a2a-4577-987b-ed4bbd753bf6" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="6937143f-8629-4feb-b5b3-484f097ad8c3"/>
+      <param name="c720bb94-d12b-4dd1-ac41-b8e55e2ea093" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="15847670-7653-4725-8a3f-f8f5d625591b"/>
       <param name="008f7231-3a2a-4577-987b-ed4bbd753bf6" value="1"/>
     </paramset>
@@ -2787,6 +2873,10 @@ REM 20110126</value>
     <paramset name="node">
       <param name="key" value="75f6a7d5-af2b-4865-9c1d-a0e082ecd76c"/>
       <param name="008f7231-3a2a-4577-987b-ed4bbd753bf6" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="cd218f6e-8b61-418e-9db9-72319a000a90"/>
+      <param name="c720bb94-d12b-4dd1-ac41-b8e55e2ea093" value="7"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="03c815ba-3525-471b-a631-4bc6af5e13e4"/>
@@ -2817,6 +2907,10 @@ REM 20110126</value>
       <param name="008f7231-3a2a-4577-987b-ed4bbd753bf6" value="2"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="1fac4e09-7508-4576-8359-5a2729088ab3"/>
+      <param name="c720bb94-d12b-4dd1-ac41-b8e55e2ea093" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="b5248422-440b-4c92-af1d-1476f757d9d7"/>
       <param name="008f7231-3a2a-4577-987b-ed4bbd753bf6" value="1"/>
       <param name="17e34f93-c4c4-4655-ad18-8bc27628d969" value="2"/>
@@ -2830,6 +2924,10 @@ REM 20110126</value>
       <param name="008f7231-3a2a-4577-987b-ed4bbd753bf6" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="d2094be3-2ea6-40a6-8301-e1b42f172203"/>
+      <param name="c720bb94-d12b-4dd1-ac41-b8e55e2ea093" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="95aa4cea-55e7-4b83-920c-c3a908d2c786"/>
       <param name="008f7231-3a2a-4577-987b-ed4bbd753bf6" value="1"/>
     </paramset>
@@ -2840,6 +2938,10 @@ REM 20110126</value>
     <paramset name="node">
       <param name="key" value="54a9506f-5298-40d5-8dae-6a4c694d94d3"/>
       <param name="008f7231-3a2a-4577-987b-ed4bbd753bf6" value="3"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="77de6862-21bf-4609-9653-6752774b13c0"/>
+      <param name="c720bb94-d12b-4dd1-ac41-b8e55e2ea093" value="23"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="96430bf0-8ffb-456f-98f9-18977f64766d"/>
@@ -2876,6 +2978,10 @@ REM 20110126</value>
     <paramset name="node">
       <param name="key" value="67add907-5682-4936-93b0-35159d8d6f8b"/>
       <param name="008f7231-3a2a-4577-987b-ed4bbd753bf6" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="5f5936ad-c2b6-4272-86a3-050c6ca67fd9"/>
+      <param name="c720bb94-d12b-4dd1-ac41-b8e55e2ea093" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="1ffe45fe-d36a-4b7e-a45a-72d0a68d5cbd"/>
@@ -2930,12 +3036,20 @@ REM 20110126</value>
       <param name="008f7231-3a2a-4577-987b-ed4bbd753bf6" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="4e321dc5-c7ee-4f29-96a1-d8f076056019"/>
+      <param name="c720bb94-d12b-4dd1-ac41-b8e55e2ea093" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="6f7bc131-278c-4471-9625-672e3aaf89e6"/>
       <param name="008f7231-3a2a-4577-987b-ed4bbd753bf6" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="56b4fecc-222e-403c-95a9-48742a153ff2"/>
       <param name="008f7231-3a2a-4577-987b-ed4bbd753bf6" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="a0ea3a32-fc1b-4fb0-928d-61bd3eb1cf63"/>
+      <param name="c720bb94-d12b-4dd1-ac41-b8e55e2ea093" value="6"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="7961a590-0a4a-4460-9e77-e1d45c30e8f9"/>
@@ -2952,6 +3066,10 @@ REM 20110126</value>
     <paramset name="node">
       <param name="key" value="b76cba48-91f3-4911-9d0c-1c4b84c43e99"/>
       <param name="1cfc686a-2e5d-4b19-9b27-33888ebc8d21" value="5"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="f361689a-b158-4b51-a2a8-f12faff441aa"/>
+      <param name="c720bb94-d12b-4dd1-ac41-b8e55e2ea093" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="a9ddbbca-1c0a-4104-877e-cedfc4b58e39"/>
@@ -3037,6 +3155,10 @@ REM 20110126</value>
     <paramset name="node">
       <param name="key" value="e80dbf6d-da21-48b1-94f1-d13a6e3cd4c2"/>
       <param name="008f7231-3a2a-4577-987b-ed4bbd753bf6" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="9188f845-587b-47d9-ad36-a14a88756b1a"/>
+      <param name="c720bb94-d12b-4dd1-ac41-b8e55e2ea093" value="3"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="c360eb52-170a-4dce-8459-c9727ed7067e"/>
@@ -3353,6 +3475,10 @@ REM 20110126</value>
       <param name="008f7231-3a2a-4577-987b-ed4bbd753bf6" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="b2ab6d9d-dda0-4fda-9095-ff2c3771cccb"/>
+      <param name="c720bb94-d12b-4dd1-ac41-b8e55e2ea093" value="332"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="40adad59-676f-45b2-8c92-41d62bcbcd25"/>
       <param name="008f7231-3a2a-4577-987b-ed4bbd753bf6" value="1"/>
     </paramset>
@@ -3365,6 +3491,10 @@ REM 20110126</value>
       <param name="008f7231-3a2a-4577-987b-ed4bbd753bf6" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="e614c14f-6486-483d-b693-ed59f3e602e7"/>
+      <param name="c720bb94-d12b-4dd1-ac41-b8e55e2ea093" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="8e72ee7d-ee12-4df6-abe7-610db3195965"/>
       <param name="008f7231-3a2a-4577-987b-ed4bbd753bf6" value="1"/>
     </paramset>
@@ -3375,6 +3505,10 @@ REM 20110126</value>
     <paramset name="node">
       <param name="key" value="7162ab6f-936d-4896-9d25-4b0a2757a769"/>
       <param name="008f7231-3a2a-4577-987b-ed4bbd753bf6" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="aa333b9d-9b33-4300-b84e-6b271267c0cc"/>
+      <param name="c720bb94-d12b-4dd1-ac41-b8e55e2ea093" value="3"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="f9521167-4fd0-469a-8aa4-0941cc87fcc0"/>
@@ -3391,10 +3525,15 @@ REM 20110126</value>
     <paramset name="node">
       <param name="key" value="409c710a-5c4d-49c1-a7e4-950ae0eb22af"/>
       <param name="008f7231-3a2a-4577-987b-ed4bbd753bf6" value="1"/>
+      <param name="c720bb94-d12b-4dd1-ac41-b8e55e2ea093" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="7e906270-5528-470d-b2b1-9c739c55241d"/>
       <param name="008f7231-3a2a-4577-987b-ed4bbd753bf6" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="fe47f96f-2878-4392-beba-2d1be327ed75"/>
+      <param name="c720bb94-d12b-4dd1-ac41-b8e55e2ea093" value="85"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="1fe798fd-92c1-4a7e-987b-55304ea11ac5"/>
@@ -3408,6 +3547,7 @@ REM 20110126</value>
       <param name="key" value="da89e5f9-49f6-4b31-a85a-62b4d7e84990"/>
       <param name="008f7231-3a2a-4577-987b-ed4bbd753bf6" value="5"/>
       <param name="972846b6-16aa-434e-b5a3-8a16e46ffdb8" value="7"/>
+      <param name="c720bb94-d12b-4dd1-ac41-b8e55e2ea093" value="3"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="cdfab6b7-b3bf-44f9-bc2d-68a1687920dc"/>
@@ -3462,6 +3602,7 @@ REM 20110126</value>
       <param name="008f7231-3a2a-4577-987b-ed4bbd753bf6" value="1"/>
       <param name="17e34f93-c4c4-4655-ad18-8bc27628d969" value="4"/>
       <param name="1cfc686a-2e5d-4b19-9b27-33888ebc8d21" value="5"/>
+      <param name="c720bb94-d12b-4dd1-ac41-b8e55e2ea093" value="5"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="40354954-9038-451d-a839-cacca32b246b"/>
@@ -3551,6 +3692,7 @@ REM 20110126</value>
       <param name="key" value="f5bd6ca2-dfeb-4fc0-9ad7-0963bdd03133"/>
       <param name="008f7231-3a2a-4577-987b-ed4bbd753bf6" value="1"/>
       <param name="17e34f93-c4c4-4655-ad18-8bc27628d969" value="252"/>
+      <param name="c720bb94-d12b-4dd1-ac41-b8e55e2ea093" value="18"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="fa8faa0c-24aa-4f13-aefd-017748674fa2"/>
