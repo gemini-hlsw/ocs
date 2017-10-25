@@ -188,12 +188,9 @@ final class SiteQualityPanel extends JPanel {
                         final TimingWindowImporter importer = new TimingWindowImporter(SiteQualityPanel.this);
                         final TimingWindowParser.TimingWindowParseResults results = importer.openImport();
 
-                        final int selectedViewIndex = table.getSelectedRow();
-                        final int selectedModelIndex = selectedViewIndex == -1 ? -1 : table.convertRowIndexToModel(selectedViewIndex);
-                        owner.getDataObject().addTimingWindows(results.successesAsJava());
-                        if (selectedModelIndex > 0) {
-                            final int newViewIndex = table.convertRowIndexToModel(selectedModelIndex);
-                            table.changeSelection(newViewIndex, 0, false, false);
+                        if (results.successes().nonEmpty()) {
+                            table.clearSelection();
+                            owner.getDataObject().addTimingWindows(results.successesAsJava());
                         }
 
                         if (results.failures().nonEmpty())
