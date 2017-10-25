@@ -17,6 +17,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 final class SiteQualityPanel extends JPanel {
@@ -155,6 +156,7 @@ final class SiteQualityPanel extends JPanel {
             final JTable table = new JTable(model) {{
                 getColumnModel().getColumn(0).setMinWidth(175);
                 owner.addPropertyChangeListener(e -> model.setSiteQuality(owner.getDataObject()));
+                setAutoCreateRowSorter(true);
             }};
 
             add(new JLabel("Timing Windows"), new GBC(0, 7));
@@ -173,8 +175,8 @@ final class SiteQualityPanel extends JPanel {
                     addActionListener(e ->
                         new TimingWindowDialog(sqpFrame).openNew().foreach(tw -> {
                             owner.getDataObject().addTimingWindow(tw);
-                            int index = table.getModel().getRowCount() - 1;
-                            table.changeSelection(index, 0, false, false);
+                            int newViewIndex = table.convertRowIndexToView(table.getModel().getRowCount() - 1);
+                            table.changeSelection(newViewIndex, 0, false, false);
                         }));
                     ButtonFlattener.flatten(this);
                 }});
@@ -186,10 +188,13 @@ final class SiteQualityPanel extends JPanel {
                         final TimingWindowImporter importer = new TimingWindowImporter(SiteQualityPanel.this);
                         final TimingWindowParser.TimingWindowParseResults results = importer.openImport();
 
-                        final int newIndex = table.getModel().getRowCount();
+                        final int selectedViewIndex = table.getSelectedRow();
+                        final int selectedModelIndex = selectedViewIndex == -1 ? -1 : table.convertRowIndexToModel(selectedViewIndex);
                         owner.getDataObject().addTimingWindows(results.successesAsJava());
-                        if (newIndex < table.getModel().getRowCount())
-                            table.changeSelection(newIndex, 0, false, false);
+                        if (selectedModelIndex > 0) {
+                            final int newViewIndex = table.convertRowIndexToModel(selectedModelIndex);
+                            table.changeSelection(newViewIndex, 0, false, false);
+                        }
 
                         if (results.failures().nonEmpty())
                             new TimingWindowParseFailureDialog(sqpFrame, results.failures()).setVisible(true);
@@ -206,17 +211,15 @@ final class SiteQualityPanel extends JPanel {
                     addActionListener(e -> {
                         final SPSiteQuality sq = owner.getDataObject();
 
-                        final int oldFirstRow = table.getSelectedRow();
+                        //final int oldFirstRow = table.getSelectedRow();
                         final int[] selectedIndices = table.getSelectedRows();
                         final List<TimingWindow> selected = new ArrayList<>();
                         final List<TimingWindow> all = sq.getTimingWindows();
                         for (final int idx : selectedIndices) {
-                            selected.add(all.get(idx));
+                            selected.add(all.get(table.convertRowIndexToModel(idx)));
                         }
+                        table.clearSelection();
                         selected.forEach(sq::removeTimingWindow);
-
-                        final int newFirstRow = (oldFirstRow < table.getRowCount()) ? oldFirstRow : table.getRowCount() - 1;
-                        if (newFirstRow >= 0) table.changeSelection(newFirstRow, 0, false, false);
                     });
                     ButtonFlattener.flatten(this);
                 }});
@@ -227,12 +230,16 @@ final class SiteQualityPanel extends JPanel {
                     setFocusable(false);
                     table.getSelectionModel().addListSelectionListener(e -> setEnabled(table.getSelectedRowCount() == 1));
                     addActionListener(e -> {
-                        final int firstRow = table.getSelectedRow();
-                        final TimingWindow prev = owner.getDataObject().getTimingWindows().get(firstRow);
+                        final int viewRow  = table.getSelectedRow();
+                        final int modelRow = table.convertRowIndexToModel(viewRow);
+                        final TimingWindow prev = owner.getDataObject().getTimingWindows().get(modelRow);
                         new TimingWindowDialog(sqpFrame).openEdit(prev).foreach(tw -> {
                             owner.getDataObject().removeTimingWindow(prev);
                             owner.getDataObject().addTimingWindow(tw);
-                            table.changeSelection(table.getModel().getRowCount() - 1, 0, false, false);
+
+                            // The new selection is now the last row in the model.
+                            final int newViewRow = table.convertRowIndexToView(table.getRowCount()-1);
+                            table.changeSelection(newViewRow, 0, false, false);
                         });
                     });
                     ButtonFlattener.flatten(this);
