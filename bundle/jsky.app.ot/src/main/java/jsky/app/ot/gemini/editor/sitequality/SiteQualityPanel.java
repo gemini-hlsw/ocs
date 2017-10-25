@@ -208,7 +208,6 @@ final class SiteQualityPanel extends JPanel {
                     addActionListener(e -> {
                         final SPSiteQuality sq = owner.getDataObject();
 
-                        //final int oldFirstRow = table.getSelectedRow();
                         final int[] selectedIndices = table.getSelectedRows();
                         final List<TimingWindow> selected = new ArrayList<>();
                         final List<TimingWindow> all = sq.getTimingWindows();
