@@ -1,7 +1,7 @@
 In Gemini Science Program @PROG_ID@ the following observation@S_OR_EMPTY@
-@WAS_WERE@ checked by National Office staff but @HAS_HAVE@ problems:
+@WAS_WERE@ checked by Principal Support staff but @HAS_HAVE@ problems:
 
 @OBS_ID_LIST@
 
-The National Office support staff will contact you shortly to
+The Principal Support staff will contact you shortly to
 resolve these issues.
