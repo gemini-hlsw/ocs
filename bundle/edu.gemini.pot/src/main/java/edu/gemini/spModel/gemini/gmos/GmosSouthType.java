@@ -177,6 +177,8 @@ public class GmosSouthType {
         HeII_G0340("HeII_G0340", "HeII", "0.468"),
         HeIIC_G0341("HeIIC_G0341", "HeIIC", "0.478"),
         Lya395_G0342("Lya395_G0342", "Lya395", "0.3955"),
+        OVI_G0347_20000055("OVI_G0347", "OVI", "0.6835"),
+        OVIC_G0348_20000056("OVIC_G0348", "OVIC", "0.678"),
         ;
 
         public static final FilterSouth DEFAULT = NONE;
