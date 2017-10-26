@@ -42,7 +42,7 @@ public final class HtmlPrinter {
         sb.append(String.format("<LI> Airmass: %.2f", ocp.airmass()));
         sb.append("<BR>");
 
-        sb.append(String.format("Frequency of occurrence of these conditions: %.2f%%<BR>",
+        sb.append(String.format("<b>Likelihood of execution:</b> %.2f%%<BR>",
                 (ocp.iq().getPercentage()/100.0) *
                 (ocp.cc().getPercentage()/100.0) *
                 (ocp.wv().getPercentage()/100.0) *
