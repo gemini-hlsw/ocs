@@ -24,7 +24,6 @@
 		<tbody>
 			<tr>
 				<td colspan="3"><b>Spatial profile and brightness:</b><i><span>(<a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10257','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no');return false">more info</a>)</span></i><br />
-
 				<i>Choose one of point, extended or user-defined source profile and the brightness in any
 				filter/wavelength </i></td>
 			</tr>
@@ -41,7 +40,6 @@
                         <option value="ERGS_FREQUENCY">erg/s/cm²/Hz</option>
                     </select> (e.g. 19.3 mag or 2e-17 W/m²/µm)
                 </td>
-
 			</tr>
 			<tr>
 				<td valign="top"></td>
@@ -50,7 +48,6 @@
 			</tr>
 			<tr>
 				<td> </td>
-
 				<td><img src="/spacer.gif" height="1" width="40" style="opacity:0.0"/><input name="Profile" value="GAUSSIAN" type="radio" /></td>
 				<td>Gaussian profile with full width half maximum (including seeing) of <input name="gaussFwhm" size="5" value="1.0" type="text" /> arcsec and spatially integrated brightness of <input name="gaussSourceNorm" size="8" value="20" type="text" />
                     <select name="gaussSourceUnits" size="1">
@@ -346,7 +343,6 @@
 				<td><input name="instrumentCentralWavelength" size="5" value=" " type="text" /> nm</td>
 			</tr>
 			<tr>
-
 				<td>Filter:</td>
 				<td>
 					<select name="instrumentFilter" size="1">
@@ -361,18 +357,20 @@
 						<option value="GG455_G0305">GG455</option>
 						<option value="OG515_G0306">OG515</option>
 						<option value="RG610_G0307">RG610</option>
-						<option value="HeII_G0320">HeII (468 nm)</option>
-						<option value="HeIIC_G0321">HeIIC (478 nm)</option>
 						<option value="g_G0301_GG455_G0305">g_G0301 + GG455_G0305 (506 nm)</option>
 						<option value="g_G0301_OG515_G0306">g_G0301 + OG515_G0306 (536 nm)</option>
 						<option value="r_G0303_RG610_G0307">r_G0303 + RG610_G0307 (657 nm)</option>
 						<option value="i_G0302_CaT_G0309">i_G0302 + CaT_G0309 (815 nm)</option>
 						<option value="z_G0304_CaT_G0309">z_G0304 + CaT_G0309 (890 nm)</option>
-						<option value="OIII_G0318">OIII (499 nm)</option>
-						<option value="OIIIC_G0319">OIIIC (514 nm)</option>
+						<option value="HeII_G0320">HeII (468 nm)</option>
+						<option value="HeIIC_G0321">HeIIC (478 nm)</option>
+						<option value="OIII_G0318">[OIII] (499 nm)</option>
+						<option value="OIIIC_G0319">[OIII]C (514 nm)</option>
 						<option value="Ha_G0310">Ha (657 nm)</option>
 						<option value="HaC_G0311">HaC (662 nm)</option>
-						<option value="SII_G0317">SII (672 nm)</option>
+						<option value="SII_G0317">[SII] (672 nm)</option>
+						<option value="OVI_G0345">OVI (683 nm)</option>
+						<option value="OVIC_G0346">OVIC (678 nm)</option>
 						<option value="CaT_G0309">CaT (860nm)</option>
 						<option value="DS920_G0312">DS920 (920nm)</option>
 					</select>
