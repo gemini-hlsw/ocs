@@ -155,9 +155,10 @@ public final class Visualizer extends VisualizerBase implements VisualizerConsta
 			// Elevation lines (unselected)
 			g2d.setColor(Color.GRAY);
 			g2d.setStroke(DOTTED_STROKE_LIGHT);
-			allocs.stream().filter(a -> !selection.contains(a)).forEach(a ->
-			    g2d.draw(getElevationCurve(a.getObs()::getCoords, minTime, maxTime, false, a.getObs().getObsId(), fullElevationCurveCache))
-            );
+			allocs.stream().filter(a -> !selection.contains(a)).forEach(a -> {
+			    final Obs obs = a.getObs();
+                g2d.draw(getElevationCurve(obs::getCoords, minTime, maxTime, false, obs.getObsId(), fullElevationCurveCache));
+			});
 
 			// Moon Phase
             paintMoonPhase(g2d);
@@ -295,7 +296,7 @@ public final class Visualizer extends VisualizerBase implements VisualizerConsta
 
 			if (dragObject != null) {
 			    dragObject.forEach(a -> {
-			        final Obs obs = a .getObs();
+			        final Obs obs = a.getObs();
                     final long dragStartTime = a.getStart() + dragDelta;
                     final long dragEndTime = a.getEnd() + dragDelta;
                     final Line2D left = new Line2D.Double(dragStartTime, 0, dragStartTime, MAX_DEG);
