@@ -36,10 +36,10 @@ public interface VisualizerConstants {
     Paint SHUTTERING_WFS_WINDOW_COLOR = new GradientPaint(0, 2.5F, SHUTTERING_WINDOW_COLOR, 0, 5, SHUTTERING_WINDOW_GRADIENT_COLOR, true);
 
     long  MIN_SHUTTER_WINDOW_MS = 1 * TimeUtils.MS_PER_MINUTE;
-    Color DAY_COLOR = new Color(0xEE, 0xEE, 0xFF);
+    Color DAY_COLOR = Color.WHITE;
     Color COLOR_ELEVATION_LINE = Color.BLACK;
-    Color MOON_COLOR = new Color(255, 255, 255, 128);
-    Color SUN_COLOR = new Color(255, 255, 128, 128);
+    Color MOON_COLOR = new Color(240, 240, 240, 128);
+    Color SUN_COLOR = new Color(212, 212, 96, 128);
     Color LABEL_COLOR = Color.BLACK;
     Color SB_COLOR = new Color(0xD0EDFF);
 

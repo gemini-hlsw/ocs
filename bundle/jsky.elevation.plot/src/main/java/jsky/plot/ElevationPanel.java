@@ -79,9 +79,6 @@ public class ElevationPanel extends JPanel implements PrintableWithDialog, Savea
 
     private static final Paint TIMING_WINDOW_PAINT;
 
-    // Color used for daylight
-    private static final Color DAY_COLOR = new Color(0xEE, 0xEE, 0xFF);
-
     static {
         final BufferedImage bi = new BufferedImage(4, 4,  BufferedImage.TYPE_4BYTE_ABGR);
         final int rgb = new Color(164, 160, 203).getRGB();
@@ -522,7 +519,6 @@ public class ElevationPanel extends JPanel implements PrintableWithDialog, Savea
 
         // add a secondary Y axis for airmass or parallactic angle
         _valueAxis2 = new NumberAxis(valueAxisLabel2);
-        plot.setBackgroundPaint(DAY_COLOR);
         plot.setRangeAxis(1, _valueAxis2);
         plot.mapDatasetToRangeAxis(1, 1);
 
