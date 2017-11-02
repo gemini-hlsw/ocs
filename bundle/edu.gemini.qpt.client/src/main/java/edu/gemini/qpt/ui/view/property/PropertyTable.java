@@ -34,6 +34,8 @@ public class PropertyTable extends LinkedHashMap<String, Object> {
         String PROP_TYPE = "Type/ID";
         String PROP_SUBTYPE = "Subtype";
         String PROP_TITLE = "Title";
+        String PROP_SUNSET = "Sunset";
+        String PROP_SUNRISE = "Sunrise";
         String PROP_REMAINING_PROGRAM_TIME = "Rem. Program Time";
         String PROP_FLAGS = "Flags";
         String PROP_COORDINATES = "Coordinates";
@@ -76,6 +78,8 @@ public class PropertyTable extends LinkedHashMap<String, Object> {
         put(Adapter.PROP_TYPE, null);
         put(Adapter.PROP_SUBTYPE, null);
         put(Adapter.PROP_TITLE, null);
+        put(Adapter.PROP_SUNSET, null);
+        put(Adapter.PROP_SUNRISE, null);
         put(Adapter.PROP_REMAINING_PROGRAM_TIME, null);
         put(Adapter.PROP_FLAGS, null);
         put(Adapter.PROP_COORDINATES, null);
