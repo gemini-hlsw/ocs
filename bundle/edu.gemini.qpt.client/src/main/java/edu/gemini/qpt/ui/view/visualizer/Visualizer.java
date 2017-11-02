@@ -1,11 +1,6 @@
 package edu.gemini.qpt.ui.view.visualizer;
 
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Shape;
-import java.awt.TexturePaint;
+import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.geom.AffineTransform;
@@ -14,20 +9,20 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TimeZone;
+import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.StreamSupport;
 
 import edu.gemini.lch.services.model.Observation;
-import edu.gemini.lch.services.model.ObservationTarget;
-import edu.gemini.lch.services.model.ShutteringWindow;
 import edu.gemini.qpt.core.util.LttsServicesClient;
+import edu.gemini.shared.util.immutable.ImOption;
+import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.skycalc.MoonCalc;
 import edu.gemini.spModel.core.Site;
 import jsky.coords.WorldCoords;
@@ -72,10 +67,10 @@ public final class Visualizer extends VisualizerBase implements VisualizerConsta
 	// the start/end times that are part of the CachedShape struct. See below.
 	private final Object cacheLock = new Object(); // common sync object
 	private CachedShape cachedMoonCurve, cachedSunCurve;
-	private final Map<String, CachedShape> openElevationCurveCache = new HashMap<String, CachedShape>();
-	private final Map<String, CachedShape> fullElevationCurveCache = new HashMap<String, CachedShape>();
-	private final Map<String, CachedShape> closedElevationCurveCache = new HashMap<String, CachedShape>();
-	private final Map<String, CachedShape> skyBackgroundCurveCache = new HashMap<String, CachedShape>();
+	private final Map<String, CachedShape> openElevationCurveCache = new HashMap<>();
+	private final Map<String, CachedShape> fullElevationCurveCache = new HashMap<>();
+	private final Map<String, CachedShape> closedElevationCurveCache = new HashMap<>();
+	private final Map<String, CachedShape> skyBackgroundCurveCache = new HashMap<>();
 
 	// Should the visualizer pay attention to QC-only warnings?
 	private final boolean qcOnly;
@@ -105,12 +100,7 @@ public final class Visualizer extends VisualizerBase implements VisualizerConsta
 
 		});
 
-		TimePreference.BOX.addPropertyChangeListener(new PropertyChangeListener(){
-			public void propertyChange(PropertyChangeEvent evt) {
-				repaint();
-			}
-		});
-
+		TimePreference.BOX.addPropertyChangeListener(evt -> repaint());
 	}
 
 	private void clearShapeCaches() {
@@ -126,23 +116,22 @@ public final class Visualizer extends VisualizerBase implements VisualizerConsta
 
 
 	@Override
-	public void setModel(Variant newModel) {
+	public void setModel(final Variant newModel) {
 		super.setModel(newModel);
 		clearShapeCaches();
 		repaint();
 	}
 
 	@Override
-	public void paint(Graphics g) {
+	public void paint(final Graphics g) {
 
 		// Preview only if the pref is set. Ugh.
-		Obs preview = null;
-		if (BooleanViewPreference.SHOW_IN_VISUALIZER.get() && selection.isEmpty() && dragObject.isEmpty()) {
-			preview = this.preview;
-		}
+        final Obs preview = (BooleanViewPreference.SHOW_IN_VISUALIZER.get() && selection.isEmpty() && dragObject.isEmpty())
+                        ? this.preview
+                        : null;
 
-		// Normally ignoring repaint only applies to system-generted events, but we want this
-		// behavior even with explict calls to repaint(). This is mostly in response to QPT-185
+		// Normally ignoring repaint only applies to system-generated events, but we want this
+		// behavior even with explicit calls to repaint(). This is mostly in response to QPT-185
 		// which requires this behavior to avoid flickering when starting an alloc drag.
 		if (getIgnoreRepaint())
 			return;
@@ -154,18 +143,17 @@ public final class Visualizer extends VisualizerBase implements VisualizerConsta
 		// Only paint if there is a model and current variant. Otherwise it's just a blank
 		// background. As always, we draw back-to-front.
 		if (model != null) {
-
 			// Some collections
-			SortedSet<Block> blocks = model.getSchedule().getBlocks();
-			SortedSet<Alloc> allocs = model.getAllocs();
+			final SortedSet<Block> blocks = model.getSchedule().getBlocks();
+			final SortedSet<Alloc> allocs = model.getAllocs();
 
 			// Set up for pretty rendering.
-			Graphics2D g2d = (Graphics2D) g;
+			final Graphics2D g2d = (Graphics2D) g;
 			g2d.setRenderingHints(RENDERING_HINTS);
 
 			// Background stuff: night, blocks, sun, moon, elevation lines
 			paintNight(g2d);
-			for (Block b: blocks) paintBlock(g2d, b);
+			blocks.forEach(b -> paintBlock(g2d, b));
  			paintSun(g2d);
 			paintMoon(g2d);
 			paintElevationLines(g2d);
@@ -173,46 +161,39 @@ public final class Visualizer extends VisualizerBase implements VisualizerConsta
 			// Elevation lines (unselected)
 			g2d.setColor(Color.GRAY);
 			g2d.setStroke(DOTTED_STROKE_LIGHT);
-			for (Alloc a: allocs) {
-				if (selection.contains(a)) continue;
-				Function<Long, WorldCoords> coords = a.getObs()::getCoords;
-				String obsId = a.getObs().getObsId();
-				g2d.draw(getElevationCurve(coords, minTime, maxTime, false, obsId, fullElevationCurveCache));
-			}
+			allocs.stream().filter(a -> !selection.contains(a)).forEach(a ->
+			    g2d.draw(getElevationCurve(a.getObs()::getCoords, minTime, maxTime, false, a.getObs().getObsId(), fullElevationCurveCache))
+            );
 
 			// Moon Phase
 			{
-				long when = (maxTime + minTime) / 2;
-				ImprovedSkyCalc calc = new ImprovedSkyCalc(model.getSchedule().getSite());
+				final long when = (maxTime + minTime) / 2;
+				final ImprovedSkyCalc calc = new ImprovedSkyCalc(model.getSchedule().getSite());
 				calc.calculate(new WorldCoords(0, 0), new Date(when), true);
-				int p = MoonCalc.approximatePeriod(System.currentTimeMillis());
-				long full = MoonCalc.getMoonTime(p, MoonCalc.Phase.FULL);
-				MoonLabel label = new MoonLabel(16, calc.getLunarIlluminatedFraction(), System.currentTimeMillis() < full);
+
+				final int p = MoonCalc.approximatePeriod(System.currentTimeMillis());
+				final long full = MoonCalc.getMoonTime(p, MoonCalc.Phase.FULL);
+				final MoonLabel label = new MoonLabel(16, calc.getLunarIlluminatedFraction(), System.currentTimeMillis() < full);
 				label.setSize(label.getPreferredSize());
 
-				AffineTransform t = g2d.getTransform();
-
+				final AffineTransform t = g2d.getTransform();
 				g2d.translate(getWidth() - label.getSize().width - 20, 20);
-
 				label.paint(g);
-
 				g2d.setTransform(t);
-
 			}
 
 			// Area under curve segment (all allocs and drag)
-			for (Alloc a: allocs) {
-                Function<Long, WorldCoords> coords = a.getObs()::getCoords;
-                String obsId = a.getObs().getObsId();
-				Color c = getColor(a);
-				g2d.setColor(getColor(a));
+			allocs.forEach(a -> {
+			    final Obs obs = a.getObs();
+				final Color c = getColor(a);
+				g2d.setColor(c);
 
 				// Paint cals in a striped pattern
-				if (a.getObs().getObsClass().isCalibration()) {
+				if (obs.getObsClass().isCalibration()) {
 					// TODO: cache this up
-					BufferedImage bi = new BufferedImage(4, 4,  BufferedImage.TYPE_4BYTE_ABGR);
+					final BufferedImage bi = new BufferedImage(4, 4,  BufferedImage.TYPE_4BYTE_ABGR);
 
-					int rgb = c.getRGB();
+					final int rgb = c.getRGB();
 					bi.setRGB(2, 0, rgb);
 					bi.setRGB(3, 0, rgb);
 					bi.setRGB(1, 1, rgb);
@@ -222,19 +203,19 @@ public final class Visualizer extends VisualizerBase implements VisualizerConsta
 					bi.setRGB(0, 3, rgb);
 					bi.setRGB(3, 3, rgb);
 
-					TexturePaint tp = new TexturePaint(bi, new Rectangle2D.Double(0, 0, bi.getWidth(), bi.getHeight()));
+					final TexturePaint tp = new TexturePaint(bi, new Rectangle2D.Double(0, 0, bi.getWidth(), bi.getHeight()));
 					g2d.setPaint(tp);
 				}
 
-				g2d.fill(getElevationCurve(coords, a.getStart(), a.getEnd(), true, obsId, closedElevationCurveCache));
-			}
+				g2d.fill(getElevationCurve(obs::getCoords, a.getStart(), a.getEnd(), true, obs.getObsId(), closedElevationCurveCache));
+			});
+
 			if (dragObject != null) {
 				g2d.setColor(DRAG_COLOR);
-				for (Alloc a: dragObject) {
-                    Function<Long, WorldCoords> coords = a.getObs()::getCoords;
-                    String obsId = a.getObs().getObsId();
-					g2d.fill(getElevationCurve(coords, a.getStart() + dragDelta, a.getEnd() + dragDelta, true, obsId, closedElevationCurveCache));
-				}
+				dragObject.forEach(a -> {
+				    final Obs obs = a.getObs();
+                    g2d.fill(getElevationCurve(obs::getCoords, a.getStart() + dragDelta, a.getEnd() + dragDelta, true, obs.getObsId(), closedElevationCurveCache));
+                });
 			}
 
 			// Group bars
@@ -243,26 +224,25 @@ public final class Visualizer extends VisualizerBase implements VisualizerConsta
 			// Curve segment outline (all allocs)
 			g2d.setColor(Color.GRAY);
 			g2d.setStroke(SOLID_STROKE_LIGHT);
-			for (Alloc a: allocs) {
-                Function<Long, WorldCoords> coords = a.getObs()::getCoords;
-                String obsId = a.getObs().getObsId();
-				g2d.draw(getElevationCurve(coords, a.getStart(), a.getEnd(), false, obsId, openElevationCurveCache));
-			}
+			allocs.forEach(a -> {
+			    final Obs obs = a.getObs();
+                g2d.draw(getElevationCurve(obs::getCoords, a.getStart(), a.getEnd(), false, obs.getObsId(), openElevationCurveCache));
+            });
 
 			// Boundary bars (unselected allocs)
-			for (Alloc a: allocs) {
-				if (selection.contains(a)) continue;
-				Line2D left = new Line2D.Double(a.getStart(), 0, a.getStart(), MAX_DEG);
-				Line2D right = new Line2D.Double(a.getEnd(), 0, a.getEnd(), MAX_DEG);
-				g2d.draw(timeAlt2XY.createTransformedShape(left));
-				g2d.draw(timeAlt2XY.createTransformedShape(right));
-			}
+            allocs.stream().filter(a -> !selection.contains(a)).forEach(a -> {
+                final Line2D left = new Line2D.Double(a.getStart(), 0, a.getStart(), MAX_DEG);
+                final Line2D right = new Line2D.Double(a.getEnd(), 0, a.getEnd(), MAX_DEG);
+                g2d.draw(timeAlt2XY.createTransformedShape(left));
+                g2d.draw(timeAlt2XY.createTransformedShape(right));
+            });
 
 			// SB curve (only if dragging or selected or preview)
 			if (dragObject.size() == 1 || selection.size() == 1 || preview != null) {
 				paintSkyBrightnessLines(g2d);
-				String obsId;
-				Function <Long, WorldCoords> coords;
+				final String obsId;
+				final Function <Long, WorldCoords> coords;
+
 				if (!dragObject.isEmpty()) {
 					obsId = dragObject.first().getObs().getObsId();
 					coords = dragObject.first().getObs()::getCoords;
@@ -273,107 +253,92 @@ public final class Visualizer extends VisualizerBase implements VisualizerConsta
 					obsId = preview.getObsId();
 					coords = preview::getCoords;
 				}
+
 				g2d.setColor(SB_COLOR);
 				g2d.setStroke(SB_STROKE);
 				g2d.draw(getSkyBackgroundCurve(coords, minTime, maxTime, obsId));
 			}
 
 			// Setup lines (selection allocs)
-			for (Alloc a: allocs) {
-				if (selection.contains(a)) {
-					g2d.setColor(Color.BLACK);
-					g2d.setStroke(DOTTED_STROKE_LIGHT);
-					if (a.getSetupType() != Alloc.SetupType.NONE) {
-						long setupEnd = a.getStart() + a.getSetupTime();
-						ImprovedSkyCalc calc = new ImprovedSkyCalc(model.getSchedule().getSite());
-						calc.calculate(a.getObs().getCoords(setupEnd), new Date(setupEnd), false);
-						Line2D setup = new Line2D.Double(setupEnd, 0, setupEnd, calc.getAltitude());
-						g2d.draw(timeAlt2XY.createTransformedShape(setup));
-					}
-				}
-			}
+            g2d.setColor(Color.BLACK);
+            g2d.setStroke(DOTTED_STROKE_LIGHT);
+            allocs.stream().filter(a -> selection.contains(a) && a.getSetupType() != Alloc.SetupType.NONE).forEach(a -> {
+                final long setupEnd = a.getStart() + a.getSetupTime();
+                final ImprovedSkyCalc calc = new ImprovedSkyCalc(model.getSchedule().getSite());
+                calc.calculate(a.getObs().getCoords(setupEnd), new Date(setupEnd), false);
+                final Line2D setup = new Line2D.Double(setupEnd, 0, setupEnd, calc.getAltitude());
+                g2d.draw(timeAlt2XY.createTransformedShape(setup));
+            });
 
 			// Timing blocks
+            final int twrgb = new Color(0x00, 0x00, 0x80, 0xAA).getRGB();
 			if (dragObject != null || selection.size() == 1) {
+                StreamSupport.stream(dragObject.spliterator(), false)
+                        .map(Alloc::getObs)
+                        .filter(o -> !(o.getTimingWindows().isEmpty() && LttsServicesClient.getInstance().getObservation(o) == null))
+                        .forEach(o ->
+                                new TimingWindowSolver(o, false).solve(minTime, maxTime).forEach(i -> {
+                                    // TODO: cache this up
+                                    final BufferedImage bi = new BufferedImage(4, 4,  BufferedImage.TYPE_4BYTE_ABGR);
+                                    bi.setRGB(0, 0, twrgb);
+                                    bi.setRGB(2, 0, twrgb);
+                                    bi.setRGB(3, 1, twrgb);
+                                    bi.setRGB(0, 2, twrgb);
+                                    bi.setRGB(2, 2, twrgb);
+                                    bi.setRGB(1, 3, twrgb);
 
-				for (Alloc a: dragObject) {
-					Obs obs = a.getObs();
-					if (obs.getTimingWindows().size() > 0
-                            || LttsServicesClient.getInstance().getObservation(obs) != null) {
-						TimingWindowSolver tws = new TimingWindowSolver(obs, false);
-						for (Interval i: tws.solve(minTime, maxTime)) {
-							Shape rect = new Rectangle2D.Double(i.getStart(), MIN_DEG, i.getLength(), MAX_DEG - MIN_DEG);
-							rect = timeAlt2XY.createTransformedShape(rect);
+                                    final TexturePaint tp = new TexturePaint(bi, new Rectangle2D.Double(0, 0, bi.getWidth(), bi.getHeight()));
+                                    g2d.setPaint(tp);
 
-
-							// TODO: cache this up
-							BufferedImage bi = new BufferedImage(4, 4,  BufferedImage.TYPE_4BYTE_ABGR);
-
-							int rgb = new Color(0x00, 0x00, 0x80, 0xAA).getRGB();
-							bi.setRGB(0, 0, rgb);
-							bi.setRGB(2, 0, rgb);
-							bi.setRGB(3, 1, rgb);
-							bi.setRGB(0, 2, rgb);
-							bi.setRGB(2, 2, rgb);
-							bi.setRGB(1, 3, rgb);
-
-							TexturePaint tp = new TexturePaint(bi, new Rectangle2D.Double(0, 0, bi.getWidth(), bi.getHeight()));
-							g2d.setPaint(tp);
-
-
-							g2d.fill(rect);
-						}
-					}
-
-				}
-
+                                    final Shape rect = timeAlt2XY.createTransformedShape(new Rectangle2D.Double(i.getStart(), MIN_DEG, i.getLength(), MAX_DEG - MIN_DEG));
+                                    g2d.fill(rect);
+                                })
+                        );
 			}
 
 			// Elevation lines and boundary bars (selected and drag)
 			g2d.setColor(Color.DARK_GRAY);
 			g2d.setStroke(SOLID_STROKE);
-			for (Alloc a: selection) {
-				Function<Long, WorldCoords> coords = a.getObs()::getCoords;
-				String obsId = a.getObs().getObsId();
-				g2d.draw(getElevationCurve(coords, minTime, maxTime, false, obsId, fullElevationCurveCache));
-				Line2D left = new Line2D.Double(a.getStart(), 0, a.getStart(), MAX_DEG);
-				Line2D right = new Line2D.Double(a.getEnd(), 0, a.getEnd(), MAX_DEG);
-				g2d.draw(timeAlt2XY.createTransformedShape(left));
-				g2d.draw(timeAlt2XY.createTransformedShape(right));
-			}
+			selection.forEach(a -> {
+			    final Obs obs = a.getObs();
+                g2d.draw(getElevationCurve(obs::getCoords, minTime, maxTime, false, obs.getObsId(), fullElevationCurveCache));
+
+                final Line2D left = new Line2D.Double(a.getStart(), 0, a.getStart(), MAX_DEG);
+                final Line2D right = new Line2D.Double(a.getEnd(), 0, a.getEnd(), MAX_DEG);
+                g2d.draw(timeAlt2XY.createTransformedShape(left));
+                g2d.draw(timeAlt2XY.createTransformedShape(right));
+            });
+
 			if (preview != null) {
-                Function<Long, WorldCoords> coords = preview::getCoords;
-				String obsId = preview.getObsId();
-				g2d.draw(getElevationCurve(coords, minTime, maxTime, false, obsId, fullElevationCurveCache));
+				g2d.draw(getElevationCurve(preview::getCoords, minTime, maxTime, false, preview.getObsId(), fullElevationCurveCache));
 			}
 
 			if (dragObject != null) {
-				for (Alloc a: dragObject) {
-					String obsId = a.getObs().getObsId();
-					long dragStartTime = a.getStart() + dragDelta;
-					long dragEndTime = a.getEnd() + dragDelta;
-					Line2D left = new Line2D.Double(dragStartTime, 0, dragStartTime, MAX_DEG);
-					Line2D right = new Line2D.Double(dragEndTime, 0, dragEndTime, MAX_DEG);
-					g2d.draw(timeAlt2XY.createTransformedShape(left));
-					g2d.draw(timeAlt2XY.createTransformedShape(right));
-					g2d.draw(getElevationCurve(a.getObs()::getCoords, minTime, maxTime, false, obsId, fullElevationCurveCache));
-				}
+			    dragObject.forEach(a -> {
+			        final Obs obs = a .getObs();
+                    final long dragStartTime = a.getStart() + dragDelta;
+                    final long dragEndTime = a.getEnd() + dragDelta;
+                    final Line2D left = new Line2D.Double(dragStartTime, 0, dragStartTime, MAX_DEG);
+                    final Line2D right = new Line2D.Double(dragEndTime, 0, dragEndTime, MAX_DEG);
+                    g2d.draw(timeAlt2XY.createTransformedShape(left));
+                    g2d.draw(timeAlt2XY.createTransformedShape(right));
+                    g2d.draw(getElevationCurve(obs::getCoords, minTime, maxTime, false, obs.getObsId(), fullElevationCurveCache));
+                });
 			}
 
-			// Labels (all allocs)
-			for (Alloc a: allocs) {
-				double end = a.getEnd();
-				double start = a.getStart();
-				Graphics2DAttributes g2da = new Graphics2DAttributes(g2d);
-				Point2D pos = new Point2D.Double((end + start) / 2f , 10f);
+			allocs.forEach(a -> {
+				final double end = a.getEnd();
+				final double start = a.getStart();
+				final Graphics2DAttributes g2da = new Graphics2DAttributes(g2d);
+				final Point2D pos = new Point2D.Double((end + start) / 2f , 10f);
 				timeAlt2XY.transform(pos, pos);
-				float nudge = LABEL_FONT.getSize() / 2f;
+				final float nudge = LABEL_FONT.getSize() / 2f;
 				g2d.setFont(LABEL_FONT);
 				g2d.setColor(Color.BLACK);
 				g2d.transform(AffineTransform.getRotateInstance(- Math.PI * 0.5, pos.getX(), pos.getY()));
 				g2d.drawString(a.getObs().toString(), (float) pos.getX(), (float) pos.getY() + nudge);
 				g2da.restore();
-			}
+			});
 
 			paintTimeTicks(g2d);
 
@@ -385,32 +350,25 @@ public final class Visualizer extends VisualizerBase implements VisualizerConsta
             // LCH-186: When moving an observation only show windows for this one observation.
             if (dragObject != null && !dragObject.isEmpty()) {
                 // Treat drag object the same as a selected object
-                for (Alloc a : dragObject) {
-                    paintShutteringWindows(g2d, a, true);
-                }
+                dragObject.forEach(a -> paintShutteringWindows(g2d, a, true));
             } else {
-                for (Alloc a: allocs) {
-                    paintShutteringWindows(g2d, a, selection.contains(a));
-                }
+                dragObject.forEach(a -> paintShutteringWindows(g2d, a, selection.contains(a)));
             }
         }
 	}
 
 
-	private void paintElevationLines(Graphics2D g2d) {
-		Graphics2DAttributes g2da = new Graphics2DAttributes(g2d);
+	private void paintElevationLines(final Graphics2D g2d) {
+		final Graphics2DAttributes g2da = new Graphics2DAttributes(g2d);
 		g2d.setColor(COLOR_ELEVATION_LINE);
 
 		switch (ElevationPreference.BOX.get()) {
 		case AIRMASS:
-
 			// Draw airmass lines every so often from 0 - 90 deg. The one at 30 is special
 			// because it represents airmass 2.0 (more or less), so we use a different style.
-			for (int elevation = 10 * ((int) MIN_DEG / 10); elevation < MAX_DEG; elevation += 10) {
-
+			for (long elevation = MIN_DEG; elevation < MAX_DEG; elevation += 10) {
 				// Create and draw the line.
-				Shape line = new Line2D.Double(0, elevation, getSize().getWidth(), elevation);
-				line = alt2Y.createTransformedShape(line);
+				final Shape line = alt2Y.createTransformedShape(new Line2D.Double(0, elevation, getSize().getWidth(), elevation));
 				g2d.setStroke(elevation == 30 ? SOLID_STROKE_LIGHT : DOTTED_STROKE_LIGHT);
 				g2d.draw(line);
 
@@ -419,26 +377,21 @@ public final class Visualizer extends VisualizerBase implements VisualizerConsta
 					g2d.setFont(LABEL_FONT);
 					g2d.setColor(LABEL_COLOR);
 
-					double airmass = ImprovedSkyCalc.getAirmass(elevation);
-					if (Math.abs(2.00 - airmass) < 0.01) airmass = 2.00; // cheat here, so we show 2.00 instead of 1.99
-
-					String label = String.format(" %1.2f", airmass);
+                    // Cheat here, so we show 2.00 instead of 1.99.
+					final double airmass = ImprovedSkyCalc.getAirmass(elevation);
+					final double displayedAirmass = Math.abs(2.00 - airmass) < 0.01 ? 2.00 : airmass;
+					final String label = String.format(" %1.2f", displayedAirmass);
 					g2d.drawString(label, 0, line.getBounds().y + LABEL_FONT.getSize2D() / 2);
 				}
-
 			}
 			break;
 
-
 		case ELEVATION:
-
 			// Draw elevation lines every so often from 0 - 90 deg. The one at 30 is special
 			// because it represents airmass 2.0 (more or less), so we use a different style.
-			for (int elevation = 10 * ((int) MIN_DEG / 10); elevation < MAX_DEG; elevation += 10) {
-
+			for (long elevation = MIN_DEG; elevation < MAX_DEG; elevation += 10) {
 				// Create and draw the line.
-				Shape line = new Line2D.Double(0, elevation, getSize().getWidth(), elevation);
-				line = alt2Y.createTransformedShape(line);
+				final Shape line = alt2Y.createTransformedShape(new Line2D.Double(0, elevation, getSize().getWidth(), elevation));
 				g2d.setStroke(elevation == 30 ? SOLID_STROKE_LIGHT : DOTTED_STROKE_LIGHT);
 				g2d.draw(line);
 
@@ -448,27 +401,23 @@ public final class Visualizer extends VisualizerBase implements VisualizerConsta
 					g2d.setColor(LABEL_COLOR);
 					g2d.drawString(" " + elevation + "\u00B0", 0, line.getBounds().y + LABEL_FONT.getSize2D() / 2);
 				}
-
 			}
 			break;
-
 		}
-
 
 		g2da.restore();
 	}
 
 
-	private void paintSkyBrightnessLines(Graphics2D g2d) {
-		Graphics2DAttributes g2da = new Graphics2DAttributes(g2d);
+	private void paintSkyBrightnessLines(final Graphics2D g2d) {
+		final Graphics2DAttributes g2da = new Graphics2DAttributes(g2d);
 		g2d.setStroke(DOTTED_STROKE);
-		byte[] percentages = { 20, 50, 80 };
-		for (byte pct: percentages) {
-			double sb = Conds.getBrightestMagnitude(pct);
+        byte[] percentages = { 20, 50, 80 };
+        for (final byte pct: percentages) {
+            final double sb = Conds.getBrightestMagnitude(pct);
 
 			// Create and draw the line.
-			Shape line = new Line2D.Double(0, sb, getSize().getWidth(), sb);
-			line = sb2Y.createTransformedShape(line);
+			final Shape line = sb2Y.createTransformedShape(new Line2D.Double(0, sb, getSize().getWidth(), sb));
 			g2d.setColor(SB_COLOR);
 			g2d.draw(line);
 
@@ -481,103 +430,82 @@ public final class Visualizer extends VisualizerBase implements VisualizerConsta
 		g2da.restore();
 	}
 
-	private void paintMoon(Graphics2D g2d) {
-		Graphics2DAttributes g2da = new Graphics2DAttributes(g2d);
+	private void renderCurve(final Graphics2D g2d, final Consumer<Shape> renderFunc, final Option<Stroke> stroke, final Option<Color> color, final Shape curve) {
+        final Graphics2DAttributes g2da = new Graphics2DAttributes(g2d);
+        stroke.forEach(g2d::setStroke);
+        color.forEach(g2d::setColor);
+        renderFunc.accept(curve);
+        g2da.restore();
+    }
 
-		// Just the moon curve.
-		g2d.setStroke(MOON_STROKE);
-		g2d.setColor(MOON_COLOR);
-		Shape curve = getMoonCurve(minTime, maxTime);
-		g2d.draw(curve);
+    private void paintCurve(final Graphics2D g2d, final Stroke stroke, final Color color, final Shape curve) {
+	    renderCurve(g2d, g2d::draw, ImOption.apply(stroke), ImOption.apply(color), curve);
+    }
 
-		g2da.restore();
+    private void fillCurve(final Graphics2D g2d, final Color color, final Shape curve) {
+        renderCurve(g2d, g2d::fill, ImOption.empty(), ImOption.apply(color), curve);
+    }
+
+	private void paintMoon(final Graphics2D g2d) {
+	    paintCurve(g2d, MOON_STROKE, MOON_COLOR, getMoonCurve(minTime, maxTime));
 	}
 
 
-	private void paintSun(Graphics2D g2d) {
-		Graphics2DAttributes g2da = new Graphics2DAttributes(g2d);
-
-		// Just the sun curve.
-		g2d.setStroke(SUN_STROKE);
-		g2d.setColor(SUN_COLOR);
-		Shape curve = getSunCurve(minTime, maxTime);
-		g2d.draw(curve);
-
-		g2da.restore();
+	private void paintSun(final Graphics2D g2d) {
+        paintCurve(g2d, SUN_STROKE, SUN_COLOR, getSunCurve(minTime, maxTime));
 	}
 
-	private void paintNight(Graphics2D g2d) {
-
-		Site site = model.getSchedule().getSite();
-
-		TwilightBoundType tbt = LocalSunriseSunset.forSite(site);
-		TwilightBoundedNight night = new TwilightBoundedNight(tbt, model.getSchedule().getStart(), site);
-
-		Graphics2DAttributes g2da = new Graphics2DAttributes(g2d);
+	private void paintNight(final Graphics2D g2d) {
+		final Site site = model.getSchedule().getSite();
+		final TwilightBoundType tbt = LocalSunriseSunset.forSite(site);
+		final TwilightBoundedNight night = new TwilightBoundedNight(tbt, model.getSchedule().getStart(), site);
 
 		// Night is just a colored rectangle.
-		Rectangle2D.Double rect = new Rectangle2D.Double(night.getStartTime(), 0, night.getTotalTime(), getSize().getHeight());
-		Shape rect2 = time2X.createTransformedShape(rect);
-		g2d.setColor(NIGHT_COLOR);
-		g2d.fill(rect2);
-
-		g2da.restore();
-
-
+		final Shape rect = time2X.createTransformedShape(new Rectangle2D.Double(night.getStartTime(), 0, night.getTotalTime(), getSize().getHeight()));
+        fillCurve(g2d, NIGHT_COLOR, rect);
 	}
 
-	private void paintBlock(Graphics2D g2d, Block b) {
-		Graphics2DAttributes g2da = new Graphics2DAttributes(g2d);
-
+	private void paintBlock(final Graphics2D g2d, final Block b) {
 		// Blocks are just colored rectangles.
-		Rectangle2D.Double rect = new Rectangle2D.Double(b.getStart(), 0, b.getLength(), getSize().getHeight());
-		Shape rect2 = time2X.createTransformedShape(rect);
-		g2d.setColor(BLOCK_COLOR);
-		g2d.fill(rect2);
-
-		g2da.restore();
+		final Shape rect = time2X.createTransformedShape(new Rectangle2D.Double(b.getStart(), 0, b.getLength(), getSize().getHeight()));
+		fillCurve(g2d, BLOCK_COLOR, rect);
 	}
 
-    private void paintShutteringWindows(Graphics2D g2d, Alloc a, boolean selected) {
-        Obs obs = a.getObs();
+    private void paintShutteringWindows(final Graphics2D g2d, final Alloc a, final boolean selected) {
+        final Obs obs = a.getObs();
         if (!obs.getLGS()) return; // only display for LGC observations
-        Observation observation = LttsServicesClient.getInstance().getObservation(obs);
+        final Observation observation = LttsServicesClient.getInstance().getObservation(obs);
         if (observation == null) return;
 
-   		Graphics2DAttributes g2da = new Graphics2DAttributes(g2d);
-        for (ObservationTarget observationTarget : observation.getTargetsSortedByType()) {
+   		final Graphics2DAttributes g2da = new Graphics2DAttributes(g2d);
+   		observation.getTargetsSortedByType().forEach(observationTarget -> {
             if (observationTarget.isScience()) {
                 g2d.setPaint(selected ? SELECTED_SHUTTERING_WINDOW_COLOR : SHUTTERING_WINDOW_COLOR);
             } else {
                 g2d.setPaint(selected ? SELECTED_WFS_SHUTTERING_WINDOW_COLOR : SHUTTERING_WFS_WINDOW_COLOR);
             }
-            for (ShutteringWindow shutteringWindow : observationTarget.getLaserTarget().getShutteringWindows()) {
-                if (!selected) {
-                    if (!a.overlaps(new Interval(shutteringWindow.getStart().getTime(),
-                            shutteringWindow.getEnd().getTime()), Interval.Overlap.EITHER)) {
-                        continue; // for non selected obs: only display shutters that occur during the observation
-                    }
-                }
-                long start = shutteringWindow.getStart().getTime(), end = shutteringWindow.getEnd().getTime();
-                Rectangle2D.Double rect = new Rectangle2D.Double(start, 0, Math.max(end - start, MIN_SHUTTER_WINDOW_MS),
-                        getSize().getHeight());
-                Shape rect2 = time2X.createTransformedShape(rect);
-                g2d.fill(rect2);
-            }
-        }
+
+            observationTarget.getLaserTarget().getShutteringWindows().stream()
+                    .filter(shutteringWindow -> selected || a.overlaps(new Interval(shutteringWindow.getStart().getTime(), shutteringWindow.getEnd().getTime()), Interval.Overlap.EITHER))
+                    .forEach(shutteringWindow -> {
+                        final long start = shutteringWindow.getStart().getTime(), end = shutteringWindow.getEnd().getTime();
+                        final Shape rect = time2X.createTransformedShape(new Rectangle2D.Double(start, 0, Math.max(end - start, MIN_SHUTTER_WINDOW_MS), getSize().getHeight()));
+                        g2d.fill(rect);
+                    });
+        });
+
    		g2da.restore();
     }
 
-	private void paintTimeTicks(Graphics2D g2d) {
-		Graphics2DAttributes g2da = new Graphics2DAttributes(g2d);
+	private void paintTimeTicks(final Graphics2D g2d) {
+		final Graphics2DAttributes g2da = new Graphics2DAttributes(g2d);
 
 		// Ok, we want to paint a tick at each hour between twilights. Start with
 		// the min time and then push it forward to the next hour, then one hour more.
-		Calendar cal = Calendar.getInstance();
-		TimePreference tp = timePreference != null ? timePreference : TimePreference.BOX.get();
+		final Calendar cal = Calendar.getInstance();
+		final TimePreference tp = timePreference != null ? timePreference : TimePreference.BOX.get();
 
 		switch (tp) {
-
 		case LOCAL:
 			cal.setTimeZone(model.getSchedule().getSite().timezone());
 			break;
@@ -586,16 +514,14 @@ public final class Visualizer extends VisualizerBase implements VisualizerConsta
 		case UNIVERSAL:
 			cal.setTimeZone(TimeZone.getTimeZone("UTC"));
 			break;
-
 		}
 
 
-		long minTime = this.minTime + PADDING;
-		ImprovedSkyCalc calc = new ImprovedSkyCalc(model.getSchedule().getSite());
+		final long minTime = this.minTime + PADDING;
+		final ImprovedSkyCalc calc = new ImprovedSkyCalc(model.getSchedule().getSite());
 
-		long nudge;
+		final long nudge;
 		switch (tp) {
-
 		case LOCAL:
 		case UNIVERSAL:
 			nudge = TimeUtils.MS_PER_HOUR - minTime % TimeUtils.MS_PER_HOUR;
@@ -608,22 +534,18 @@ public final class Visualizer extends VisualizerBase implements VisualizerConsta
 
 		default:
 			throw new Error("Impossible.");
-
 		}
 
 
-		long start = (minTime + nudge); // + TimeUtils.MS_PER_HOUR;
+		final long start = (minTime + nudge); // + TimeUtils.MS_PER_HOUR;
 		for (long time = start; time < maxTime - PADDING; time += TimeUtils.MS_PER_HOUR) {
-
-			// The tick mark
-			Shape tick = new Line2D.Double(time, MIN_DEG, time, MIN_DEG + 10); // tick y values in elevation degrees
-			tick = timeAlt2XY.createTransformedShape(tick);
+			// The tick mark: tick y values in elevation degrees
+			final Shape tick = timeAlt2XY.createTransformedShape(new Line2D.Double(time, MIN_DEG, time, MIN_DEG + 10));
 			g2d.setColor(Color.GRAY);
 			g2d.draw(tick);
 
-			long normalOrSiderealTime;
+			final long normalOrSiderealTime;
 			switch (tp) {
-
 			case LOCAL:
 			case UNIVERSAL:
 				normalOrSiderealTime = time;
@@ -635,55 +557,53 @@ public final class Visualizer extends VisualizerBase implements VisualizerConsta
 
 			default:
 				throw new Error("Impossible.");
-
 			}
 
 
 			// And the label
 			cal.setTimeInMillis(normalOrSiderealTime);
-			String hour = String.format("%02d", cal.get(Calendar.HOUR_OF_DAY));
+			final String hour = String.format("%02d", cal.get(Calendar.HOUR_OF_DAY));
 			g2d.setFont(LABEL_FONT);
 			g2d.setColor(LABEL_COLOR);
 			g2d.drawString(hour, tick.getBounds().x - 5 /* HACK: do this correctly */, getHeight() - 7);
 
 			// If we're at the very beginning, draw the timezone
 			if (time == start) {
-				String tz;
+				final String tz;
 				switch (tp) {
 				case LOCAL:
-					TimeZone timeZone = model.getSchedule().getSite().timezone();
-					boolean daylight = timeZone.inDaylightTime(new Date(minTime));
+					final TimeZone timeZone = model.getSchedule().getSite().timezone();
+					final boolean daylight = timeZone.inDaylightTime(new Date(minTime));
 					tz = timeZone.getDisplayName(daylight, TimeZone.SHORT);
 					break;
-				case SIDEREAL: tz = "LST"; break;
+				case SIDEREAL:  tz = "LST"; break;
 				case UNIVERSAL: tz = "UTC"; break;
 				default:
 					throw new Error("Impossible.");
 				}
 				g2d.drawString(tz, tick.getBounds().x - 35, getHeight() - 7);
 			}
-
 		}
 
 		g2da.restore();
-
 	}
 
-	private void paintGroupBars(Graphics2D g2d) {
-		Graphics2DAttributes g2da = new Graphics2DAttributes(g2d);
+	private void paintGroupBars(final Graphics2D g2d) {
+		final Graphics2DAttributes g2da = new Graphics2DAttributes(g2d);
 		g2d.setStroke(SOLID_STROKE_LIGHT);
 
-		for (Alloc a: model.getAllocs()) {
-			int i = a.getGroupIndex();
-			if (i != -1) {
-				Rectangle2D r2d = new Rectangle2D.Double(a.getStart(), 0, a.getLength(), 7);
-				g2d.setColor(i == -1 ? Color.WHITE : ColorWheel.get(i));
-				g2d.fill(time2X.createTransformedShape(r2d));
-				Line2D l2d = new Line2D.Double(a.getStart(), 7, a.getEnd(), 7);
-				g2d.setColor(Color.GRAY);
-				g2d.draw(time2X.createTransformedShape(l2d));
-			}
-		}
+		model.getAllocs().forEach(a -> {
+		    final int i = a.getGroupIndex();
+		    if (i != -1) {
+                final Shape rect = time2X.createTransformedShape(new Rectangle2D.Double(a.getStart(), 0, a.getLength(), 7));
+                g2d.setColor(ColorWheel.get(i));
+                g2d.fill(rect);
+
+                final Shape line = time2X.createTransformedShape(new Line2D.Double(a.getStart(), 7, a.getEnd(), 7));
+                g2d.setColor(Color.GRAY);
+                g2d.draw(line);
+            }
+        });
 
 		g2da.restore();
 	}
@@ -693,17 +613,18 @@ public final class Visualizer extends VisualizerBase implements VisualizerConsta
 	 * optionally as a closed shape corresponding to the area under the curve. These shapes
 	 * are cached.
 	 */
-	private Shape getElevationCurve(Function<Long, WorldCoords> coords, long start, long end, boolean close, String obsId, Map<String, CachedShape> cache) {
+	private Shape getElevationCurve(final Function<Long, WorldCoords> coords, final long start, final long end,
+                                    final boolean close, final String obsId, final Map<String, CachedShape> cache) {
 		synchronized (cacheLock) {
 
 			// Return the cached shape, if any.
-			CachedShape cs = cache.get(obsId);
+			final CachedShape cs = cache.get(obsId);
 			if (cs != null && cs.matches(start, end))
 				return cs.shape;
 
 			// Otherwise build the shape.
-			ImprovedSkyCalc calc = new ImprovedSkyCalc(model.getSchedule().getSite());
-			GeneralPath path = new GeneralPath();
+			final ImprovedSkyCalc calc = new ImprovedSkyCalc(model.getSchedule().getSite());
+			final GeneralPath path = new GeneralPath();
 			if (close) path.moveTo(start, 0);
 			for  (long t = start; t < end; t += INTEGRATION_STEP) {
 				calc.calculate(coords.apply(t), new Date(t), false);
@@ -721,28 +642,27 @@ public final class Visualizer extends VisualizerBase implements VisualizerConsta
 			}
 
 			// Cache and return it.
-  			cs = new CachedShape(timeAlt2XY.createTransformedShape(path), start, end);
-			cache.put(obsId, cs);
-			return cs.shape;
-
+  			final CachedShape csNew = new CachedShape(timeAlt2XY.createTransformedShape(path), start, end);
+			cache.put(obsId, csNew);
+			return csNew.shape;
 		}
 	}
 
 
-	private Shape getSkyBackgroundCurve(Function<Long, WorldCoords> coords, long start, long end, String obsId) {
+	private Shape getSkyBackgroundCurve(final Function<Long, WorldCoords> coords, final long start, final long end, final String obsId) {
 		synchronized (cacheLock) {
 
 			// Return the cached shape, if any.
-			Map<String, CachedShape> cache = skyBackgroundCurveCache;
-			CachedShape cs = cache.get(obsId);
+			final Map<String, CachedShape> cache = skyBackgroundCurveCache;
+			final CachedShape cs = cache.get(obsId);
 			if (cs != null && cs.matches(start, end))
 				return cs.shape;
 
 			// Otherwise build the shape.
-			ImprovedSkyCalc calc = new ImprovedSkyCalc(model.getSchedule().getSite());
-			GeneralPath path = new GeneralPath();
+			final ImprovedSkyCalc calc = new ImprovedSkyCalc(model.getSchedule().getSite());
+			final GeneralPath path = new GeneralPath();
 			boolean hop = true;
-			for  (long t = start; t < end; t += INTEGRATION_STEP) {
+			for (long t = start; t < end; t += INTEGRATION_STEP) {
 				calc.calculate(coords.apply(t), new Date(t), true);
 				if (calc.getAltitude() > 0) {
 					if (hop) {
@@ -753,7 +673,6 @@ public final class Visualizer extends VisualizerBase implements VisualizerConsta
 					}
 				} else {
 					hop = true;
-					continue;
 				}
 			}
 			calc.calculate(coords.apply(end), new Date(end), true);
@@ -761,14 +680,14 @@ public final class Visualizer extends VisualizerBase implements VisualizerConsta
 				path.lineTo(end, calc.getTotalSkyBrightness().floatValue());
 
 			// Cache and return it.
-			cs = new CachedShape(timeSB2XY.createTransformedShape(path), start, end);
-			cache.put(obsId, cs);
-			return cs.shape;
+			final CachedShape csNew = new CachedShape(timeSB2XY.createTransformedShape(path), start, end);
+			cache.put(obsId, csNew);
+			return csNew.shape;
 
 		}
 	}
 
-	private Shape getMoonCurve(long start, long end) {
+	private Shape getMoonCurve(final long start, final long end) {
 		synchronized (cacheLock) {
 
 			// Try to use the cached version if we can.
@@ -776,9 +695,9 @@ public final class Visualizer extends VisualizerBase implements VisualizerConsta
 				return cachedMoonCurve.shape;
 
 			// Cache lookup failed, oh well. Calculate the moon's path.
-			ImprovedSkyCalc calc = new ImprovedSkyCalc(model.getSchedule().getSite());
-			GeneralPath path = new GeneralPath();
-			WorldCoords coords = new WorldCoords(0, 0);
+			final ImprovedSkyCalc calc = new ImprovedSkyCalc(model.getSchedule().getSite());
+			final GeneralPath path = new GeneralPath();
+			final WorldCoords coords = new WorldCoords(0, 0);
 
 			for (long t = start; t < end; t += TimeUtils.MS_PER_MINUTE / 2) {
 				calc.calculate(coords, new Date(t), true);
@@ -795,11 +714,10 @@ public final class Visualizer extends VisualizerBase implements VisualizerConsta
 			// Done. Cache our result and return it.
 			cachedMoonCurve = new CachedShape(timeAlt2XY.createTransformedShape(path), start, end);
 			return cachedMoonCurve.shape;
-
 		}
 	}
 
-	private Shape getSunCurve(long start, long end) {
+	private Shape getSunCurve(final long start, final long end) {
 		synchronized (cacheLock) {
 
 			// Try to use the cached version if we can.
@@ -807,8 +725,8 @@ public final class Visualizer extends VisualizerBase implements VisualizerConsta
 				return cachedSunCurve.shape;
 
 			// Cache lookup failed, oh well. Calculate the sun path.
-			ImprovedSkyCalc calc = new ImprovedSkyCalc(model.getSchedule().getSite());
-			GeneralPath path = new GeneralPath();
+			final ImprovedSkyCalc calc = new ImprovedSkyCalc(model.getSchedule().getSite());
+			final GeneralPath path = new GeneralPath();
 			for (long t = start; t < end; t += TimeUtils.MS_PER_MINUTE / 2) {
 				calc.calculate(new WorldCoords(), new Date(t), true);
 				float alt = (float) calc.getSunAltitude();
@@ -824,19 +742,23 @@ public final class Visualizer extends VisualizerBase implements VisualizerConsta
 			// Done. Cache our result and return it.
 			cachedSunCurve = new CachedShape(timeAlt2XY.createTransformedShape(path), start, end);
 			return cachedSunCurve.shape;
-
 		}
 	}
 
-	private Color getColor(Alloc a) {
+	private Color getColor(final Alloc a) {
 		Color c = ALLOC_COLOR;
-		Severity s = a.getSeverity(qcOnly);
+		final Severity s = a.getSeverity(qcOnly);
 		if (s != null) {
 			switch (s) {
-			case Error: c = ALLOC_COLOR_ERR; break;
-			case Warning: c = ALLOC_COLOR_WARN; break;
+			    case Error:
+			        c = ALLOC_COLOR_ERR;
+			        break;
+			    case Warning:
+			        c = ALLOC_COLOR_WARN;
+			        break;
 			}
 		}
+
 		if (selection.contains(a)) {
 			// TODO: cache
 			c = new Color(c.getRed(), c.getGreen(), c.getBlue(), 224);
@@ -854,7 +776,7 @@ public final class Visualizer extends VisualizerBase implements VisualizerConsta
 		final long start;
 		final long end;
 
-		CachedShape(Shape shape, long start, long end) {
+		CachedShape(final Shape shape, final long start, final long end) {
 			this.shape = shape;
 			this.start = start;
 			this.end = end;
@@ -863,7 +785,5 @@ public final class Visualizer extends VisualizerBase implements VisualizerConsta
 		boolean matches(long start, long end) {
 			return start == this.start && end == this.end;
 		}
-
 	}
-
 }
