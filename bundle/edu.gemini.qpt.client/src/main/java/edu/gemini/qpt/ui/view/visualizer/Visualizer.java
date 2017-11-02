@@ -55,11 +55,7 @@ import edu.gemini.skycalc.TwilightBoundedNight;
 @SuppressWarnings("serial")
 public final class Visualizer extends VisualizerBase implements VisualizerConstants {
 
-
-	private final Font LABEL_FONT; // not static because we derive it at runtime.
-	{
-		LABEL_FONT = getFont(); // .deriveFont(getFont().getSize2D() - 2.0f);
-	}
+	private final Font LABEL_FONT = getFont(); // not static because we derive it at runtime.
 
 	// Constructing the various curved shapes is pretty math-intensive, so we do a little
 	// bit of caching. The moon curve, boundary bars, and open/closed elevation curves are
@@ -82,7 +78,7 @@ public final class Visualizer extends VisualizerBase implements VisualizerConsta
 		this(true, null);
 	}
 
-	public Visualizer(boolean qcOnly, TimePreference timePreference) {
+	public Visualizer(final boolean qcOnly, final TimePreference timePreference) {
 		this.qcOnly = qcOnly;
 		this.timePreference = timePreference;
 
@@ -91,13 +87,11 @@ public final class Visualizer extends VisualizerBase implements VisualizerConsta
 
 		// When the control is resized, clear all the shape caches because they're invalid.
 		addComponentListener(new ComponentAdapter() {
-
 			@Override
-			public void componentResized(ComponentEvent e) {
+			public void componentResized(final ComponentEvent e) {
 				clearShapeCaches();
 				repaint();
 			}
-
 		});
 
 		TimePreference.BOX.addPropertyChangeListener(evt -> repaint());
@@ -166,21 +160,7 @@ public final class Visualizer extends VisualizerBase implements VisualizerConsta
             );
 
 			// Moon Phase
-			{
-				final long when = (maxTime + minTime) / 2;
-				final ImprovedSkyCalc calc = new ImprovedSkyCalc(model.getSchedule().getSite());
-				calc.calculate(new WorldCoords(0, 0), new Date(when), true);
-
-				final int p = MoonCalc.approximatePeriod(System.currentTimeMillis());
-				final long full = MoonCalc.getMoonTime(p, MoonCalc.Phase.FULL);
-				final MoonLabel label = new MoonLabel(16, calc.getLunarIlluminatedFraction(), System.currentTimeMillis() < full);
-				label.setSize(label.getPreferredSize());
-
-				final AffineTransform t = g2d.getTransform();
-				g2d.translate(getWidth() - label.getSize().width - 20, 20);
-				label.paint(g);
-				g2d.setTransform(t);
-			}
+            paintMoonPhase(g2d);
 
 			// Area under curve segment (all allocs and drag)
 			allocs.forEach(a -> {
@@ -271,7 +251,7 @@ public final class Visualizer extends VisualizerBase implements VisualizerConsta
             });
 
 			// Timing blocks
-            final int twrgb = new Color(0x00, 0x00, 0x80, 0xAA).getRGB();
+            final int twrgb = TIMING_WINDOW_COLOR.getRGB();
 			if (dragObject != null || selection.size() == 1) {
                 StreamSupport.stream(dragObject.spliterator(), false)
                         .map(Alloc::getObs)
@@ -357,6 +337,21 @@ public final class Visualizer extends VisualizerBase implements VisualizerConsta
         }
 	}
 
+	private void paintMoonPhase(final Graphics2D g2d) {
+            final long when = (maxTime + minTime) / 2;
+            final ImprovedSkyCalc calc = new ImprovedSkyCalc(model.getSchedule().getSite());
+            calc.calculate(new WorldCoords(0, 0), new Date(when), true);
+
+            final int p = MoonCalc.approximatePeriod(System.currentTimeMillis());
+            final long full = MoonCalc.getMoonTime(p, MoonCalc.Phase.FULL);
+            final MoonLabel label = new MoonLabel(16, calc.getLunarIlluminatedFraction(), System.currentTimeMillis() < full);
+            label.setSize(label.getPreferredSize());
+
+            final AffineTransform t = g2d.getTransform();
+            g2d.translate(getWidth() - label.getSize().width - 20, 20);
+            label.paint(g2d);
+            g2d.setTransform(t);
+    }
 
 	private void paintElevationLines(final Graphics2D g2d) {
 		final Graphics2DAttributes g2da = new Graphics2DAttributes(g2d);
@@ -771,7 +766,6 @@ public final class Visualizer extends VisualizerBase implements VisualizerConsta
 	 * represents.
 	 */
 	private static class CachedShape {
-
 		final Shape shape;
 		final long start;
 		final long end;

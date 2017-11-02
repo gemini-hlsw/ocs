@@ -47,7 +47,7 @@ abstract class VisualizerBase extends JPanel {
 	protected Obs preview;
 
 	@Override
-	public void paint(Graphics g) {
+	public void paint(final Graphics g) {
 		super.paint(g);
 		if (model != null) {
 
