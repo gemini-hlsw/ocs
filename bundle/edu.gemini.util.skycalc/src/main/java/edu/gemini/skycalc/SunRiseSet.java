@@ -43,21 +43,21 @@ public class SunRiseSet {
 
         Calendar cal = Calendar.getInstance(site.timezone());
         cal.setTimeInMillis(timestamp);
-        int dayOfYear = cal.get(Calendar.DAY_OF_YEAR); // want tonight and tomorrow morning
 
-        // convert the longitude to hour value and calculate an approximate time
-        double lngHour = site.longitude / 15.;
+        TwilightBoundedNight official     = new TwilightBoundedNight(TwilightBoundType.OFFICIAL, timestamp, site);
+        TwilightBoundedNight civil        = new TwilightBoundedNight(TwilightBoundType.CIVIL, timestamp, site);
+        TwilightBoundedNight nautical     = new TwilightBoundedNight(TwilightBoundType.NAUTICAL, timestamp, site);
+        TwilightBoundedNight astronomical = new TwilightBoundedNight(TwilightBoundType.ASTRONOMICAL, timestamp, site);
 
         // calculate the times for nautical and astronomical
-        final double lat = site.latitude;
-        this.sunset                    = _calcTime(false, 90. + 50. / 60., dayOfYear, lngHour, lat);
-        this.sunrise                   = _calcTime(true, 90. + 50. / 60., dayOfYear, lngHour, lat);
-        this.civilTwilightStart        = _calcTime(false, 96., dayOfYear, lngHour, lat);
-        this.civilTwilightEnd          = _calcTime(true, 96., dayOfYear, lngHour, lat);
-        this.nauticalTwilightStart     = _calcTime(false, 102., dayOfYear, lngHour, lat);
-        this.nauticalTwilightEnd       = _calcTime(true, 102., dayOfYear, lngHour, lat);
-        this.astronomicalTwilightStart = _calcTime(false, 108., dayOfYear, lngHour, lat);
-        this.astronomicalTwilightEnd   = _calcTime(true, 108., dayOfYear, lngHour, lat);
+        this.sunset                    = official.getStartTime();
+        this.sunrise                   = official.getEndTime();
+        this.civilTwilightStart        = civil.getStartTime();
+        this.civilTwilightEnd          = civil.getEndTime();
+        this.nauticalTwilightStart     = nautical.getStartTime();
+        this.nauticalTwilightEnd       = nautical.getEndTime();
+        this.astronomicalTwilightStart = astronomical.getStartTime();
+        this.astronomicalTwilightEnd   = astronomical.getEndTime();
     }
 
     // Shortcut for math functions in degrees

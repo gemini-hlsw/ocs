@@ -129,7 +129,7 @@ public final class TwilightBoundedNight implements Night {
      *
      * @param time time of interest, which is only used to obtain the day;
      * midnight and 11:59:59 PM work will both yield the same result--a Night
-     * configured for the night begining on the date contained in
+     * configured for the night beginning on the date contained in
      * <code>time</code> in the timezone specified in <code>desc</code>
      *
      * @param site site of interest (where the
