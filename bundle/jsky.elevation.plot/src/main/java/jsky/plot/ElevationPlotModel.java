@@ -139,9 +139,9 @@ public class ElevationPlotModel {
     public String getTitle() {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy MMM d HH:mm");
         return _site.mountain + ": Night of "
-                + dateFormat.format(_sunRiseSet.sunset)
+                + dateFormat.format(_sunRiseSet.nauticalTwilightStart)
                 + " ---> "
-                + dateFormat.format(_sunRiseSet.sunrise);
+                + dateFormat.format(_sunRiseSet.nauticalTwilightEnd);
     }
 
 
