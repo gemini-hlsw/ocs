@@ -5,6 +5,8 @@ import edu.gemini.spModel.core.EmissionLine;
 import edu.gemini.spModel.core.GaussianSource;
 import edu.gemini.spModel.core.SpatialProfile;
 
+
+
 /**
  * This is a collection of validation methods that originally were implemented repeatedly for the different
  * instruments and were rehomed here in a central location. It is questionable if this is the best place for all
@@ -76,7 +78,7 @@ public final class Validation {
             }
 
             final EmissionLine eLine = (EmissionLine) source.distribution();
-            final double maxWidth = ITCConstants.C / (eLine.wavelength().toNanometers() / resolution);
+            final double maxWidth = ITCConstants.C / (eLine.wavelength().toNanometers() / resolution) * (1.0 + source.redshift().z());
 
             if (eLine.width().toKilometersPerSecond() < maxWidth) {
                 throw new IllegalArgumentException(

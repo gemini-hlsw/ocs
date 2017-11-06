@@ -26,7 +26,7 @@ object HtmlUtil {
       s" ${sd.norm} ${sd.units.displayValue} ${l.sedSpectrum} in the ${sd.normBand.name} band."
 
     case u: UserDefined =>
-      s" a user defined spectrum with the name: ${u.name}"
+      s" ${sd.norm} ${sd.units.displayValue} user defined spectrum in the ${sd.normBand.name} band with the name: ${u.name}"
 
     case PowerLaw(index) =>
       s" Power Law Spectrum, with an index of $index and ${sd.norm} mag in the ${sd.normBand.name} band."

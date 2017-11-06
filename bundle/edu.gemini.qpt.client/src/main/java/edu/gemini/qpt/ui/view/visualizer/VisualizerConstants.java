@@ -36,7 +36,8 @@ public interface VisualizerConstants {
     long  MIN_SHUTTER_WINDOW_MS = TimeUtils.MS_PER_MINUTE;
     Color DAY_COLOR = Color.WHITE;
     Color COLOR_ELEVATION_LINE = Color.BLACK;
-    Color MOON_COLOR = new Color(240, 240, 240, 128);//new Color(96, 96, 96, 128);
+    Color MOON_COLOR = new Color(240, 240, 240, 128);
+  
     Color SUN_COLOR = new Color(212, 212, 96, 128);
     Color LABEL_COLOR = Color.BLACK;
     Color SB_COLOR = new Color(0xD0EDFF);
