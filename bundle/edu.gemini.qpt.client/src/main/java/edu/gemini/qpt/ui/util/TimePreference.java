@@ -1,13 +1,10 @@
 package edu.gemini.qpt.ui.util;
 
 public enum TimePreference {
-
 	LOCAL,
 	UNIVERSAL,
-	SIDEREAL
-	
+	SIDEREAL,
 	;
 	
-	public static EnumBox<TimePreference> BOX = new EnumBox<TimePreference>(LOCAL);
-	
+	public static EnumBox<TimePreference> BOX = new EnumBox<>(LOCAL);
 }
