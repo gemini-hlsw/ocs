@@ -1,5 +1,3 @@
 The following Gemini observation@S_OR_EMPTY@ @WAS_WERE@ reset to Phase 2:
 
 @OBS_ID_LIST@
-
-You will be contacted shortly about resolving these issues.
