@@ -1,5 +1,4 @@
-In Gemini Science Program @PROG_ID@ the following observation@S_OR_EMPTY@
-@WAS_WERE@ checked but @HAS_HAVE@ problems:
+The following Gemini observation@S_OR_EMPTY@ @WAS_WERE@ reset to "For Review":
 
 @OBS_ID_LIST@
 
