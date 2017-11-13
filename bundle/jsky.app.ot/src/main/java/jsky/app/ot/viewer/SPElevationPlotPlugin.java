@@ -259,7 +259,7 @@ public class SPElevationPlotPlugin implements ChangeListener, Storeable {
                 paintMap.put(queueBand, color);
                 lic.add(new LegendItem(queueBand, color));
                 for (int i = 1; i < 5; i++) {
-                    color = _COLORS[colorIndex++];
+                    color = _COLORS[colorIndex++ % _COLORS.length];
                     queueBand = "Band " + i;
                     paintMap.put(queueBand, color);
                     lic.add(new LegendItem(queueBand, color));
@@ -276,7 +276,7 @@ public class SPElevationPlotPlugin implements ChangeListener, Storeable {
                     else
                         queueBand = "Band " + queueBand;
                     if ((colors[i] = paintMap.get(queueBand)) == null) {
-                        color = _COLORS[colorIndex++];
+                        color = _COLORS[colorIndex++ % _COLORS.length];
                         paintMap.put(queueBand, color);
                         colors[i] = color;
                         lic.add(new LegendItem(queueBand, color));
@@ -287,7 +287,7 @@ public class SPElevationPlotPlugin implements ChangeListener, Storeable {
             case _COLOR_CODE_PRIORITY:
                 // get the order of items right
                 for (SPObservation.Priority pr: _PRIORITIES) {
-                    final Paint c = _COLORS[colorIndex++];
+                    final Paint c = _COLORS[colorIndex++ % _COLORS.length];
                     paintMap.put(pr.displayValue(), c);
                     String label = pr.displayValue() + " Priority";
                     lic.add(new LegendItem(label, c));
@@ -297,7 +297,7 @@ public class SPElevationPlotPlugin implements ChangeListener, Storeable {
                     final SPObservation spObs = (SPObservation) _selectedObservations[i].getDataObject();
                     final SPObservation.Priority prio = spObs.getPriority();
                     if ((colors[i] = paintMap.get(prio.displayValue())) == null) {
-                        final Paint c = _COLORS[colorIndex++];
+                        final Paint c = _COLORS[colorIndex++ % _COLORS.length];
                         paintMap.put(prio.displayValue(), c);
                         colors[i] = c;
                         String label = prio.displayValue() + " Priority";
