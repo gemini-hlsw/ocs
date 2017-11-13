@@ -602,7 +602,6 @@ public class ElevationPanel extends JPanel implements PrintableWithDialog, Savea
 
     private XYTextAnnotation createAnnotation(final String s, final double pos) {
         final XYTextAnnotation a = new XYTextAnnotation(s, pos, 60.0f);
-        //a.setFont(new Font("Sans Serif", Font.BOLD, 10));
         a.setFont(a.getFont().deriveFont(12.0f));
         a.setRotationAnchor(TextAnchor.BASELINE_CENTER);
         a.setTextAnchor(TextAnchor.BASELINE_CENTER);
