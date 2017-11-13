@@ -1,7 +1,3 @@
-In Gemini Science Program @PROG_ID@ the following observation@S_OR_EMPTY@
-@WAS_WERE@ checked by Principal Support staff but @HAS_HAVE@ problems:
+The following Gemini observation@S_OR_EMPTY@ @WAS_WERE@ reset to Phase 2:
 
 @OBS_ID_LIST@
-
-The Principal Support staff will contact you shortly to
-resolve these issues.
