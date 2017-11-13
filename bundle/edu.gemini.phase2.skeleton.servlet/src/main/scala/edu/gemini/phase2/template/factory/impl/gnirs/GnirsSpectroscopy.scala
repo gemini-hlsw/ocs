@@ -82,19 +82,6 @@ case class GnirsSpectroscopy(blueprint:SpGnirsBlueprintSpectroscopy, exampleTarg
         setQ(-5, 1, 1, -5)))
   }
 
-  // IF PI Central Wavelength > 2.5um:
-  //    SET Well depth == Deep for {5}-{14},{22}
-  //    SET Q-OFFSET to -3, 3, 3, -3 respectively IN ITERATOR CALLED 'ABBA offset pattern' for {6},{12},{14} # Science & Tellurics
-  if (wavelengthGe2_5) {
-
-    include(7, 8, 9, 10, 11, 22) in TargetGroup
-
-    forObs(5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 22)(setWellDepth(DEEP))
-    forObs(6,12,14)(
-      mutateOffsets.withTitle("ABBA offset sequence")(setQ(-3, 3, 3, -3))
-    )
-  }
-
   // # ACQ for science to target Scheduling Group
   // IF TARGET H-MAGNITUDE < 7 INCLUDE {22}                   # ND filter
   // IF 7 <= TARGET H-MAGNITUDE < 11.5 INCLUDE {7}            # very bright
@@ -113,6 +100,21 @@ case class GnirsSpectroscopy(blueprint:SpGnirsBlueprintSpectroscopy, exampleTarg
     case None => (7 to 11) ++ Seq(22, 23)
   }
   include(otherAcq:_*) in TargetGroup
+
+  // IF PI Central Wavelength > 2.5um:
+  //    SET Well depth == Deep for {5}-{14},{22}
+  //    SET Q-OFFSET to -3, 3, 3, -3 respectively IN ITERATOR CALLED 'ABBA offset pattern' for {6},{12},{14} # Science & Tellurics
+  if (wavelengthGe2_5) {
+
+    // Update well depth, but only for specific obs if they are already included.
+    val included = curIncludes(TargetGroup).toSet
+    val all      = Set(5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 22)
+    forObs((all & included).toSeq: _*)(setWellDepth(DEEP))
+
+    forObs(6,12,14)(
+      mutateOffsets.withTitle("ABBA offset sequence")(setQ(-3, 3, 3, -3))
+    )
+  }
 
   // #In ALL ACQ
   //        IN acquisition observations: {5}, {7} - {11}, {13}, {23}

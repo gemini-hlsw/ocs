@@ -37,6 +37,9 @@ trait TemplateDsl2[I <: SPInstObsComp] { gi:GroupInitializer[_] =>
   private var includes:Map[ObsLocation, Seq[Int]] = Map.empty
   private var noteIncludes:Map[NoteLocation, Seq[String]] = Map.empty
 
+  def curIncludes(loc: ObsLocation): Seq[Int] =
+    includes.getOrElse(loc, Seq.empty)
+
   def notes = noteIncludes.values.toList.flatten
   def baselineFolder = includes.get(BaseCal).getOrElse(Nil)
   def targetGroup = includes.get(TargetGroup).getOrElse(Nil)
