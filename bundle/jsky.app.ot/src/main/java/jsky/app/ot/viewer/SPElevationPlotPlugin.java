@@ -1,10 +1,3 @@
-/*
- * Copyright 2003 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: SPElevationPlotPlugin.java 46768 2012-07-16 18:58:53Z rnorris $
- */
-
 package jsky.app.ot.viewer;
 
 import edu.gemini.pot.client.SPDB;
@@ -67,16 +60,11 @@ public class SPElevationPlotPlugin implements ChangeListener, Storeable {
         _COLOR_CODE_PRIORITY, _COLOR_CODE_NONE
     };
 
-    // Observation priorities displayed
-//    private static final String[] _PRIORITIES = {
-//        "High Priority", "Medium Priority", "Low Priority"
-//    };
 
     private static final SPObservation.Priority[] _PRIORITIES = new SPObservation.Priority[]{
             SPObservation.Priority.HIGH,
             SPObservation.Priority.MEDIUM,
             SPObservation.Priority.LOW,
-//          SPObservation.Priority.TOO,
     };
 
 
@@ -96,7 +84,7 @@ public class SPElevationPlotPlugin implements ChangeListener, Storeable {
     private ElevationPanel _elevationPanel;
 
     // Used to select a radio button menu item, given the label
-    private Hashtable _buttonMap = new Hashtable();
+    private Hashtable<String, JRadioButtonMenuItem> _buttonMap = new Hashtable<>();
 
 
     // private constructor
@@ -124,6 +112,7 @@ public class SPElevationPlotPlugin implements ChangeListener, Storeable {
     }
 
     /** Called when the ElevationPlot frame is first created */
+    @Override
     public void stateChanged(ChangeEvent e) {
         if (_elevationPanel == null) {
             _elevationPanel = ElevationPlotManager.get().getElevationPanel();
@@ -146,12 +135,10 @@ public class SPElevationPlotPlugin implements ChangeListener, Storeable {
         JRadioButtonMenuItem[] b = new JRadioButtonMenuItem[_LABEL_OPTIONS.length];
         ButtonGroup group = new ButtonGroup();
 
-        ItemListener itemListener = new ItemListener() {
-            public void itemStateChanged(ItemEvent e) {
-                JRadioButtonMenuItem rb = (JRadioButtonMenuItem) e.getSource();
-                if (rb.isSelected()) {
-                    _setLabelTrajectory(rb.getText());
-                }
+        final ItemListener itemListener = e -> {
+            final JRadioButtonMenuItem rb = (JRadioButtonMenuItem) e.getSource();
+            if (rb.isSelected()) {
+                _setLabelTrajectory(rb.getText());
             }
         };
 
@@ -199,12 +186,10 @@ public class SPElevationPlotPlugin implements ChangeListener, Storeable {
         JRadioButtonMenuItem[] b = new JRadioButtonMenuItem[_COLOR_CODE_OPTIONS.length];
         ButtonGroup group = new ButtonGroup();
 
-        ItemListener itemListener = new ItemListener() {
-            public void itemStateChanged(ItemEvent e) {
-                JRadioButtonMenuItem rb = (JRadioButtonMenuItem) e.getSource();
-                if (rb.isSelected()) {
-                    _setColorCode(rb.getText());
-                }
+        final ItemListener itemListener = e -> {
+            JRadioButtonMenuItem rb = (JRadioButtonMenuItem) e.getSource();
+            if (rb.isSelected()) {
+                _setColorCode(rb.getText());
             }
         };
 
@@ -234,98 +219,103 @@ public class SPElevationPlotPlugin implements ChangeListener, Storeable {
 
     /**  Return a custom LegendItemCollection based on the current settings  and set the item colors to match */
     public LegendItemCollection getLegendItems() {
-        return _getLegendItems();
-    }
-
-    // Return a custom LegendItemCollection based on the current settings and set the item colors to match
-    private LegendItemCollection _getLegendItems()  {
         int colorIndex = 0;
         Paint[] colors = new Paint[_selectedObservations.length];
-        TreeMap paintMap = new TreeMap();
+        final TreeMap<String,Paint> paintMap = new TreeMap<>();
         LegendItemCollection lic = new LegendItemCollection();
 
-        if (_colorCodeTrajectories.equals(_COLOR_CODE_OBS)) {
-            for (int i = 0; i < _selectedObservations.length; i++) {
-                String obsId = _selectedObservations[i].getObservationIDAsString("unknown");
-                if ((colors[i] = (Paint) paintMap.get(obsId)) == null) {
-                    Paint color = _COLORS[colorIndex++ % _COLORS.length];
-                    paintMap.put(obsId, color);
-                    colors[i] = color;
-                    lic.add(new LegendItem(obsId, color));
-                }
-            }
-        } else if (_colorCodeTrajectories.equals(_COLOR_CODE_PROG)) {
-            for (int i = 0; i < _selectedObservations.length; i++) {
-                SPProgramID spProgId = _selectedObservations[i].getProgramID();
-                if (spProgId != null) {
-                    String progId = spProgId.stringValue();
-                    if ((colors[i] = (Paint) paintMap.get(progId)) == null) {
+        switch (_colorCodeTrajectories) {
+            case _COLOR_CODE_OBS:
+                for (int i = 0; i < _selectedObservations.length; i++) {
+                    String obsId = _selectedObservations[i].getObservationIDAsString("unknown");
+                    if ((colors[i] = paintMap.get(obsId)) == null) {
                         Paint color = _COLORS[colorIndex++ % _COLORS.length];
-                        paintMap.put(progId, color);
+                        paintMap.put(obsId, color);
                         colors[i] = color;
-                        lic.add(new LegendItem(progId, color));
+                        lic.add(new LegendItem(obsId, color));
                     }
                 }
-            }
-        } else if (_colorCodeTrajectories.equals(_COLOR_CODE_BAND)) {
-            // get the order of items right
-            Paint color = Color.black;
-            String queueBand = "Default Band";
-            paintMap.put(queueBand, color);
-            lic.add(new LegendItem(queueBand, color));
-            for (int i = 1; i < 5; i++) {
-                color = _COLORS[colorIndex++];
-                queueBand = "Band " + i;
+                break;
+
+            case _COLOR_CODE_PROG:
+                for (int i = 0; i < _selectedObservations.length; i++) {
+                    SPProgramID spProgId = _selectedObservations[i].getProgramID();
+                    if (spProgId != null) {
+                        String progId = spProgId.stringValue();
+                        if ((colors[i] = paintMap.get(progId)) == null) {
+                            Paint color = _COLORS[colorIndex++ % _COLORS.length];
+                            paintMap.put(progId, color);
+                            colors[i] = color;
+                            lic.add(new LegendItem(progId, color));
+                        }
+                    }
+                }
+                break;
+
+            case _COLOR_CODE_BAND:
+                // get the order of items right
+                Paint color = Color.black;
+                String queueBand = "Default Band";
                 paintMap.put(queueBand, color);
                 lic.add(new LegendItem(queueBand, color));
-            }
-            IDBDatabaseService db = SPDB.get();
-            for (int i = 0; i < _selectedObservations.length; i++) {
-                SPNodeKey progKey = _selectedObservations[i].getProgramKey();
-                ISPProgram prog = db.lookupProgram(progKey);
-                // LORD OF DESTRUCTION: DataObjectManager get without set
-                SPProgram spProg = (SPProgram) prog.getDataObject();
-                queueBand = spProg.getQueueBand();
-                if (queueBand == null || queueBand.length() == 0)
-                    queueBand = "Default Band";
-                else
-                    queueBand = "Band " + queueBand;
-                if ((colors[i] = (Paint) paintMap.get(queueBand)) == null) {
+                for (int i = 1; i < 5; i++) {
                     color = _COLORS[colorIndex++];
+                    queueBand = "Band " + i;
                     paintMap.put(queueBand, color);
-                    colors[i] = color;
                     lic.add(new LegendItem(queueBand, color));
                 }
-            }
-        } else if (_colorCodeTrajectories.equals(_COLOR_CODE_PRIORITY)) {
-            // get the order of items right
-            Paint color;
-            for (SPObservation.Priority pr: _PRIORITIES) {
-                color = _COLORS[colorIndex++];
-                paintMap.put(pr, color);
-                String label = pr.displayValue() + " Priority";
-                lic.add(new LegendItem(label, color));
-            }
-            for (int i = 0; i < _selectedObservations.length; i++) {
-                // LORD OF DESTRUCTION: DataObjectManager get without set
-                final SPObservation spObs = (SPObservation) _selectedObservations[i].getDataObject();
-                final SPObservation.Priority prio = spObs.getPriority();
-                if ((colors[i] = (Paint) paintMap.get(prio)) == null) {
-                    color = _COLORS[colorIndex++];
-                    paintMap.put(prio, color);
-                    colors[i] = color;
-                    String label = prio.displayValue() + " Priority";
-                    lic.add(new LegendItem(label, color));
+                IDBDatabaseService db = SPDB.get();
+                for (int i = 0; i < _selectedObservations.length; i++) {
+                    SPNodeKey progKey = _selectedObservations[i].getProgramKey();
+                    ISPProgram prog = db.lookupProgram(progKey);
+                    // LORD OF DESTRUCTION: DataObjectManager get without set
+                    SPProgram spProg = (SPProgram) prog.getDataObject();
+                    queueBand = spProg.getQueueBand();
+                    if (queueBand == null || queueBand.length() == 0)
+                        queueBand = "Default Band";
+                    else
+                        queueBand = "Band " + queueBand;
+                    if ((colors[i] = paintMap.get(queueBand)) == null) {
+                        color = _COLORS[colorIndex++];
+                        paintMap.put(queueBand, color);
+                        colors[i] = color;
+                        lic.add(new LegendItem(queueBand, color));
+                    }
                 }
-            }
-        } else if (_colorCodeTrajectories.equals(_COLOR_CODE_NONE)) {
-            for (int i = 0; i < _selectedObservations.length; i++) {
-                colors[i] = Color.black;
-            }
-        } else {
-            // shouldn't ever get here
-            _elevationPanel.setItemColors(null);
-            return null;
+                break;
+
+            case _COLOR_CODE_PRIORITY:
+                // get the order of items right
+                for (SPObservation.Priority pr: _PRIORITIES) {
+                    final Paint c = _COLORS[colorIndex++];
+                    paintMap.put(pr.displayValue(), c);
+                    String label = pr.displayValue() + " Priority";
+                    lic.add(new LegendItem(label, c));
+                }
+                for (int i = 0; i < _selectedObservations.length; i++) {
+                    // LORD OF DESTRUCTION: DataObjectManager get without set
+                    final SPObservation spObs = (SPObservation) _selectedObservations[i].getDataObject();
+                    final SPObservation.Priority prio = spObs.getPriority();
+                    if ((colors[i] = paintMap.get(prio.displayValue())) == null) {
+                        final Paint c = _COLORS[colorIndex++];
+                        paintMap.put(prio.displayValue(), c);
+                        colors[i] = c;
+                        String label = prio.displayValue() + " Priority";
+                        lic.add(new LegendItem(label, c));
+                    }
+                }
+                break;
+
+            case _COLOR_CODE_NONE:
+                for (int i = 0; i < _selectedObservations.length; i++) {
+                    colors[i] = Color.black;
+                }
+                break;
+
+            default:
+                // shouldn't ever get here
+                _elevationPanel.setItemColors(null);
+                return null;
         }
 
         _elevationPanel.setItemColors(colors);
@@ -350,6 +340,7 @@ public class SPElevationPlotPlugin implements ChangeListener, Storeable {
     // -- Implement the Storeable interface -- */
 
     /** Store the current settings in a serializable object and return the object. */
+    @Override
     public Object storeSettings() {
         ElevationPlotPanel plotPanel = ElevationPlotManager.get();
         if (plotPanel != null) {
@@ -363,17 +354,18 @@ public class SPElevationPlotPlugin implements ChangeListener, Storeable {
     }
 
     /** Restore the settings previously stored. */
+    @Override
     public boolean restoreSettings(Object obj) {
         if (!(obj instanceof PlotSettings))
             return false;
 
         PlotSettings ps = (PlotSettings) obj;
 
-        AbstractButton b = (AbstractButton) _buttonMap.get(ps.labelTrajectory);
+        AbstractButton b = _buttonMap.get(ps.labelTrajectory);
         if (b != null && !b.isSelected())
             b.setSelected(true);
 
-        b = (AbstractButton) _buttonMap.get(ps.colorCodeTrajectories);
+        b = _buttonMap.get(ps.colorCodeTrajectories);
         if (b != null && !b.isSelected())
             b.setSelected(true);
 

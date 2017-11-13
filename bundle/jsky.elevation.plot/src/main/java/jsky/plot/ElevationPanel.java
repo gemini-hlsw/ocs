@@ -6,6 +6,7 @@ import jsky.util.SaveableWithDialog;
 import jsky.util.gui.DialogUtil;
 import jsky.util.gui.PrintUtil;
 import org.jfree.chart.*;
+import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.axis.ValueAxis;
@@ -18,7 +19,9 @@ import org.jfree.chart.title.TextTitle;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
 import org.jfree.data.xy.XYDataset;
+import org.jfree.ui.Layer;
 import org.jfree.ui.RectangleEdge;
+import org.jfree.ui.TextAnchor;
 
 import javax.print.attribute.standard.OrientationRequested;
 import javax.swing.*;
@@ -26,24 +29,20 @@ import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.print.PrinterException;
-import java.text.DecimalFormat;
-import java.text.FieldPosition;
-import java.text.NumberFormat;
-import java.text.SimpleDateFormat;
+import java.text.*;
 import java.util.Date;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.function.Supplier;
 
+import static java.lang.Math.PI;
+
 /**
  * A panel for displaying an elevation plot for given target positions.
- *
- * @version $Revision: 42349 $
- * @author Allan Brighton
  */
 public class ElevationPanel extends JPanel implements PrintableWithDialog, SaveableWithDialog {
 
-    // Used to access internationalized strings (see i18n/gui*.proprties)
+    // Used to access internationalized strings (see i18n/gui*.properties)
     private static final I18N _I18N = I18N.getInstance(ElevationPanel.class);
 
     // Displays the elevation plot
@@ -127,33 +126,30 @@ public class ElevationPanel extends JPanel implements PrintableWithDialog, Savea
     // Options for secondary Y axis
     public static final String Y2_AXIS_AIRMASS = _I18N.getString("Airmass");
     public static final String Y2_AXIS_PA = _I18N.getString("ParallacticAngle");
-//    public static final String[] Y2_AXIS_OPTIONS = {
-//        Y2_AXIS_AIRMASS, Y2_AXIS_PA
-//    };
     private String _y2AxisLabel = Y2_AXIS_AIRMASS;
 
-    // Used to display the degrees values in the prinary axis in the range 0..90
-    private static NumberFormat _yAxisNumberFormat = new DecimalFormat() {
-            public StringBuffer format(double number, StringBuffer result,
-                                       FieldPosition fieldPosition) {
-                if (number > 90.) {
-                    return result; // used to leave blank space for labels above 90 deg mark
-                }
-                return super.format(number, result, fieldPosition);
+    // Used to display the degrees values in the primary axis in the range 0..90
+    private static final NumberFormat _yAxisNumberFormat = new DecimalFormat() {
+        @Override
+        public StringBuffer format(double number, StringBuffer result, FieldPosition fieldPosition) {
+            if (number > 90.) {
+                return result; // used to leave blank space for labels above 90 deg mark
             }
-        };
+            return super.format(number, result, fieldPosition);
+        }
+    };
 
     // Used to display the airmass values in the secondary axis (instead of elevation in deg)
     private static NumberFormat _y2AxisAirmassNumberFormat = new DecimalFormat() {
-            public StringBuffer format(double number, StringBuffer result,
-                                       FieldPosition fieldPosition) {
-                if (number > 90. || number < 5.) {
-                    return result; // ignore huge results near horizon (<5)
-                }
-                double d = ElevationPlotUtil.getAirmass(number);
-                return super.format(d, result, fieldPosition);
+        @Override
+        public StringBuffer format(double number, StringBuffer result, FieldPosition fieldPosition) {
+            if (number > 90. || number < 5.) {
+                return result; // ignore huge results near horizon (<5)
             }
-        };
+            double d = ElevationPlotUtil.getAirmass(number);
+            return super.format(d, result, fieldPosition);
+        }
+    };
 
     // Used to display the PA values in the secondary axis (instead of airmass)
     private static NumberFormat _y2AxisPaNumberFormat = new DecimalFormat();
@@ -168,10 +164,11 @@ public class ElevationPanel extends JPanel implements PrintableWithDialog, Savea
     }
 
     // Graph item renderer for elevation plot
-    private StandardXYItemRenderer _elevationItemRenderer =
+    private final StandardXYItemRenderer _elevationItemRenderer =
             new StandardXYItemRenderer(StandardXYItemRenderer.LINES) {
 
                 // add labels to the graph lines
+                @Override
                 public XYItemRendererState initialise(Graphics2D g2, Rectangle2D dataArea, XYPlot plot,
                                                       XYDataset dataset, PlotRenderingInfo info) {
                     XYItemRendererState result = super.initialise(g2, dataArea, plot, dataset, info);
@@ -191,33 +188,16 @@ public class ElevationPanel extends JPanel implements PrintableWithDialog, Savea
                                     dataArea, RectangleEdge.LEFT);
                             x += 3; // padding
                             y -= 3;
-                            g2.rotate(-Math.PI / 2, x, y);
+                            g2.rotate(-PI / 2, x, y);
                             g2.drawString(label, (int) x, (int) y);
-                            g2.rotate(Math.PI / 2, x, y);
+                            g2.rotate(PI / 2, x, y);
                         }
                     }
                     return result;
                 }
 
-//                // Draw the twilight/darkness markers
-//                public void drawDomainMarker(Graphics2D g2, XYPlot plot, ValueAxis domainAxis, Marker marker, Rectangle2D dataArea) {
-//                    IntervalMarker m = (IntervalMarker) marker;
-//                    double x1 = domainAxis.valueToJava2D(m.getStartValue(),
-//                            dataArea, RectangleEdge.BOTTOM);
-//                    double x2 = domainAxis.valueToJava2D(m.getEndValue(),
-//                            dataArea, RectangleEdge.BOTTOM);
-//                    Rectangle2D rect = new Rectangle2D.Double(x1, dataArea.getMinY(), x2 - x1, dataArea.getHeight());
-//                    g2.setPaint(m.getOutlinePaint());
-//                    double alpha = m.getAlpha();
-//                    if (alpha == TWILIGHT_ALPHA)
-//                        g2.setComposite(TWILIGHT_COMPOSITE);
-//                    else if (alpha == DARKNESS_ALPHA)
-//                        g2.setComposite(DARKNESS_COMPOSITE);
-//                    g2.fill(rect);
-//                    g2.setPaintMode();
-//                }
-
                 // Override to provide custom colors, matching the custom legend
+                @Override
                 public Paint getSeriesPaint(int series) {
                     if (_itemColors != null && _itemColors.length > series)
                         return _itemColors[series];
@@ -225,6 +205,7 @@ public class ElevationPanel extends JPanel implements PrintableWithDialog, Savea
                 }
 
                 // Overridden to hide the item if needed
+                @Override
                 public void drawItem(Graphics2D g2,
                                      XYItemRendererState state,
                                      Rectangle2D dataArea,
@@ -255,10 +236,11 @@ public class ElevationPanel extends JPanel implements PrintableWithDialog, Savea
             };
 
     // Item renderer for parallactic angle plot
-    private StandardXYItemRenderer _paItemRenderer =
+    private final StandardXYItemRenderer _paItemRenderer =
             new StandardXYItemRenderer(StandardXYItemRenderer.LINES) {
 
                 // Override to provide custom colors, matching the custom legend
+                @Override
                 public Paint getSeriesPaint(int series) {
                     if (_itemColors != null && _itemColors.length > series)
                         return _itemColors[series];
@@ -266,16 +248,18 @@ public class ElevationPanel extends JPanel implements PrintableWithDialog, Savea
                 }
 
                 // Override to provide custom colors, matching the custom legend
+                @Override
                 public Stroke getSeriesStroke(int series) {
                     return DASHED_LINE_STROKE;
                 }
             };
 
     // Item renderer for airmass plot
-    private StandardXYItemRenderer _hiddenItemRenderer =
+    private final StandardXYItemRenderer _hiddenItemRenderer =
             new StandardXYItemRenderer(StandardXYItemRenderer.LINES) {
                 // don't want to draw any items for the airmass, just change the
                 // secondary Y axis display (see _y2AxisAirmassNumberFormat)
+                @Override
                 public void drawItem(Graphics2D g2,
                                      XYItemRendererState state,
                                      Rectangle2D dataArea,
@@ -391,14 +375,6 @@ public class ElevationPanel extends JPanel implements PrintableWithDialog, Savea
         _update();
     }
 
-//    /**
-//     * Return the label of the secondary Y axis.
-//     */
-//    public String getY2AxisLabel() {
-//        return _y2AxisLabel;
-//    }
-//
-
     /** Update the GUI to reflect what is in the model */
     private void _update() {
         if (_model == null) {
@@ -431,10 +407,15 @@ public class ElevationPanel extends JPanel implements PrintableWithDialog, Savea
         // mark the ranges of twilight and darkness
         xyPlot.clearDomainMarkers();
         xyPlot.clearRangeMarkers();
-        addDomainMarker(xyPlot, new Date(_model.getSunSet()),
-                new Date(_model.getSunRise()), TWILIGHT_ALPHA, Color.gray);
-        addDomainMarker(xyPlot, new Date(_model.getNauticalTwilightStart()),
-                new Date(_model.getNauticalTwilightEnd()), DARKNESS_ALPHA, Color.black);
+        xyPlot.clearAnnotations();
+        addDomainMarker(xyPlot,
+                new Date(_model.getSunSet()), "Sunset",
+                new Date(_model.getSunRise()), "Sunrise",
+                TWILIGHT_ALPHA, Color.gray);
+        addDomainMarker(xyPlot,
+                new Date(_model.getNauticalTwilightStart()), "Evening 12° Twilight",
+                new Date(_model.getNauticalTwilightEnd()), "Morning 12° Twilight",
+                DARKNESS_ALPHA, Color.black);
 
         xyPlot.addRangeMarker(new ValueMarker(ElevationPlotModel.getObsThreshold()));
 
@@ -446,7 +427,8 @@ public class ElevationPanel extends JPanel implements PrintableWithDialog, Savea
         if (visible && _altitudePlotVisible) {
             xyPlot.setDataset(index, dataset.get());
             xyPlot.setRenderer(index, new XYStepAreaRenderer() {
-                @Override public Paint getSeriesPaint(int series) { return p; }
+                @Override
+                public Paint getSeriesPaint(int series) { return p; }
             });
         } else {
             xyPlot.setDataset(index, null);
@@ -461,6 +443,7 @@ public class ElevationPanel extends JPanel implements PrintableWithDialog, Savea
 
         // Override date format to handle LST dates
         SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm") {
+            @Override
             public StringBuffer format(Date date, StringBuffer toAppendTo, FieldPosition pos) {
                 if (_model.getTimeZoneId().equals(ElevationPlotModel.LST)) {
                     date = _model.getLst(date);
@@ -510,6 +493,7 @@ public class ElevationPanel extends JPanel implements PrintableWithDialog, Savea
         valueAxis.setNumberFormatOverride(_yAxisNumberFormat);
         XYPlot plot = new XYPlot(dataset, timeAxis, valueAxis, _elevationItemRenderer) {
             // use a custom legend
+            @Override
             public LegendItemCollection getLegendItems() {
                 if (_legendItems == null)
                     return super.getLegendItems();
@@ -588,28 +572,48 @@ public class ElevationPanel extends JPanel implements PrintableWithDialog, Savea
 
 
     // Add a marker to the given plot, showing the area of darkness
-    private void addDomainMarker(XYPlot xyPlot, Date startDate, Date endDate, float alpha, Color color) {
+    private void addDomainMarker(final XYPlot xyPlot,
+                                 final Date startDate, final String startDateName,
+                                 final Date endDate,   final String endDateName,
+                                 float alpha, Color color) {
+        final DateFormat df = ((DateAxis)xyPlot.getDomainAxis()).getDateFormatOverride();
         double start = startDate.getTime();
         double end = endDate.getTime();
 
         if (start < end) {
             IntervalMarker m = new IntervalMarker(start, end, color, DARKNESS_STROKE,
                     color, DARKNESS_STROKE, alpha);
-            xyPlot.addDomainMarker(m);
+            xyPlot.addDomainMarker(m, Layer.BACKGROUND);
+            xyPlot.addAnnotation(createAnnotation(String.format("%s: %s", startDateName, df.format(startDate)), start));
+            xyPlot.addAnnotation(createAnnotation(String.format("%s: %s", endDateName, df.format(endDate)), end));
         } else {
             double first = _model.getDateForHour(0.).getTime();
             double last = _model.getDateForHour(24.).getTime();
             IntervalMarker m1 = new IntervalMarker(start, last, color, DARKNESS_STROKE,
                     color, DARKNESS_STROKE, alpha);
-            xyPlot.addDomainMarker(m1);
+            xyPlot.addDomainMarker(m1, Layer.BACKGROUND);
+            xyPlot.addAnnotation(createAnnotation(String.format("%s: %s", startDateName, df.format(startDate)), start));
             IntervalMarker m2 = new IntervalMarker(first, end, color, DARKNESS_STROKE,
                     color, DARKNESS_STROKE, alpha);
-            xyPlot.addDomainMarker(m2);
+            xyPlot.addDomainMarker(m2, Layer.BACKGROUND);
+            xyPlot.addAnnotation(createAnnotation(String.format("%s: %s", endDateName, df.format(endDate)), first));
         }
+    }
+
+    private XYTextAnnotation createAnnotation(final String s, final double pos) {
+        final XYTextAnnotation a = new XYTextAnnotation(s, pos, 60.0f);
+        //a.setFont(new Font("Sans Serif", Font.BOLD, 10));
+        a.setFont(a.getFont().deriveFont(12.0f));
+        a.setRotationAnchor(TextAnchor.BASELINE_CENTER);
+        a.setTextAnchor(TextAnchor.BASELINE_CENTER);
+        a.setRotationAngle(-PI / 2);
+        a.setPaint(Color.black);
+        return a;
     }
 
 
     /** Display a dialog for printing the graph */
+    @Override
     public void print() throws PrinterException {
         PrintUtil printUtil = new PrintUtil(_chartPanel);
         printUtil.setUseBgThread(false); // otherwise get ConcurrentModificationException
@@ -620,6 +624,7 @@ public class ElevationPanel extends JPanel implements PrintableWithDialog, Savea
     /**
      * Display a dialog for saving the graph in PNG format
      */
+    @Override
     public void saveAs() {
         try {
             _chartPanel.doSaveAs();
@@ -640,5 +645,3 @@ public class ElevationPanel extends JPanel implements PrintableWithDialog, Savea
         }
     }
 }
-
-
