@@ -132,7 +132,7 @@ public class ElevationPanel extends JPanel implements PrintableWithDialog, Savea
     private static final NumberFormat _yAxisNumberFormat = new DecimalFormat() {
         @Override
         public StringBuffer format(double number, StringBuffer result, FieldPosition fieldPosition) {
-            if (number > 90.) {
+            if (number > 90.0) {
                 return result; // used to leave blank space for labels above 90 deg mark
             }
             return super.format(number, result, fieldPosition);
@@ -143,7 +143,7 @@ public class ElevationPanel extends JPanel implements PrintableWithDialog, Savea
     private static NumberFormat _y2AxisAirmassNumberFormat = new DecimalFormat() {
         @Override
         public StringBuffer format(double number, StringBuffer result, FieldPosition fieldPosition) {
-            if (number > 90. || number < 5.) {
+            if (number > 90.0 || number < 5.0) {
                 return result; // ignore huge results near horizon (<5)
             }
             double d = ElevationPlotUtil.getAirmass(number);
@@ -306,19 +306,19 @@ public class ElevationPanel extends JPanel implements PrintableWithDialog, Savea
             ValueAxis yAxis = xyPlot.getRangeAxis();
             ValueAxis yAxis2 = xyPlot.getRangeAxis(1);
             if (_showTrajectoryLabels) {
-                yAxis.setRange(0., 114.); // max 90 deg, but leave space for labels
+                yAxis.setRange(0.0, 114.0); // max 90 deg, but leave space for labels
                 if (_y2AxisLabel.equals(Y2_AXIS_AIRMASS)) {
-                    yAxis2.setRange(0., 114.);
+                    yAxis2.setRange(0.0, 114.0);
                 } else {
-                    yAxis2.setRange(-180., 180.);
+                    yAxis2.setRange(-180.0, 180.0);
                 }
             }
             else {
-                yAxis.setRange(0., 90.);
+                yAxis.setRange(0.0, 90.0);
                 if (_y2AxisLabel.equals(Y2_AXIS_AIRMASS)) {
-                    yAxis2.setRange(0., 90.);
+                    yAxis2.setRange(0.0, 90.0);
                 } else {
-                    yAxis2.setRange(-180., 180.);
+                    yAxis2.setRange(-180.0, 180.0);
                 }
             }
         }
@@ -587,8 +587,8 @@ public class ElevationPanel extends JPanel implements PrintableWithDialog, Savea
             xyPlot.addAnnotation(createAnnotation(String.format("%s: %s", startDateName, df.format(startDate)), start));
             xyPlot.addAnnotation(createAnnotation(String.format("%s: %s", endDateName, df.format(endDate)), end));
         } else {
-            double first = _model.getDateForHour(0.).getTime();
-            double last = _model.getDateForHour(24.).getTime();
+            double first = _model.getDateForHour(0.0).getTime();
+            double last = _model.getDateForHour(24.0).getTime();
             IntervalMarker m1 = new IntervalMarker(start, last, color, DARKNESS_STROKE,
                     color, DARKNESS_STROKE, alpha);
             xyPlot.addDomainMarker(m1, Layer.BACKGROUND);
