@@ -47,7 +47,7 @@ public final class TargetConfig extends ParamSet {
         return String.format("%s (%d)", tag, position);
     }
 
-    public TargetConfig(final SPTarget spt) throws WdbaGlueException {
+    public TargetConfig(final SPTarget spt, final String tag) throws WdbaGlueException {
         super(spt.getName());
         final Target t = spt.getTarget();
 
@@ -61,7 +61,7 @@ public final class TargetConfig extends ParamSet {
         // Parameters
         putParameter(TccNames.OBJNAME,    t.name());
         putParameter(TccNames.BRIGHTNESS, "");
-        putParameter(TccNames.TAG,        "");
+        putParameter(TccNames.TAG,        tag);
         putParameter(TccNames.SYSTEM,     "J2000");
         putParameter(TccNames.C1,         cs.ra().toAngle().formatHMS());
         putParameter(TccNames.C2,         cs.dec().formatDMS());
