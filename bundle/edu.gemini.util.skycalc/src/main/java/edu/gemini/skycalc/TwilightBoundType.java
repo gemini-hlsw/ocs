@@ -15,8 +15,12 @@ public final class TwilightBoundType implements Comparable<TwilightBoundType>, S
 
     private static final long serialVersionUID = 1;
 
+    // Horizon geometric correction from p. 24 of the Skycalc manual: sqrt(2 * elevation / Re) (radians)
+    static double Re = 6378140; // Radius of the Earth (meters)
+    static double SiteElevation = 4213; // Mauna Kea elevation (meters)
+
     public static final TwilightBoundType OFFICIAL =
-            new TwilightBoundType("Official", 50.0/60.0);
+            new TwilightBoundType("Official", 50.0/60.0 + Math.sqrt(2.0 * SiteElevation / Re) * 180./Math.PI);
 
     public static final TwilightBoundType CIVIL =
             new TwilightBoundType("Civil", 6.0);
