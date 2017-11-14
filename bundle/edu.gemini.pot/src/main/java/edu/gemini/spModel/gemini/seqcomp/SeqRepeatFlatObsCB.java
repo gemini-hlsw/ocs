@@ -4,6 +4,7 @@ import edu.gemini.pot.sp.ISPSeqComponent;
 import edu.gemini.spModel.config.AbstractSeqComponentCB;
 import edu.gemini.spModel.config2.Config;
 import edu.gemini.spModel.data.config.*;
+import edu.gemini.spModel.dataflow.GsaSequenceEditor;
 import edu.gemini.spModel.gemini.calunit.calibration.CalConfigBuilderUtil;
 import edu.gemini.spModel.gemini.calunit.calibration.CalConfigFactory;
 import edu.gemini.spModel.gemini.calunit.calibration.MutableIndexedCalibrationStep;
@@ -77,6 +78,9 @@ public class SeqRepeatFlatObsCB extends AbstractSeqComponentCB {
         // Now write the configuration for this manual cal into the sequence.
         Config c = CalConfigFactory.complete(mics);
         CalConfigBuilderUtil.updateIConfig(c, config, prevFull);
+
+        final SeqRepeatFlatObs f = (SeqRepeatFlatObs) getDataObject();
+        GsaSequenceEditor.instance.addProprietaryPeriod(config, getSeqComponent().getProgram(), f.getObsClass());
 
         if (SeqRepeatCbOptions.getAddObsCount(_options)) {
             ISysConfig obs = getObsSysConfig(config);
