@@ -83,4 +83,13 @@ class ProprietaryTest extends InstrumentSequenceTestBase[Flamingos2, SeqConfigFl
       val gsa = GsaAspect.getDefaultAspect(pt)
       doTest(SPProgramID.toProgramID(pid), PUBLIC, gsa.getProprietaryMonths)
     }
+
+  @Test def testPrivateOverrides(): Unit = {
+    getProgram.update { _.setGsaAspect(new GsaAspect(true, 42, PRIVATE)) }
+    getObserveSeqComp.dataObject = getObserveSeqDataObject <| (_.setObsClass(ObsClass.DAY_CAL))
+
+    // Even though the daycal isn't charged, the private header flag makes it
+    // keep the proprietary period instead of the default of 0 months.
+    doTest(PRIVATE, 42)
+  }
 }

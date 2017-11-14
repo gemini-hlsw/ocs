@@ -25,7 +25,7 @@ public enum GsaSequenceEditor {
     }
 
     public void addProprietaryPeriod(IConfig c, GsaAspect gsa, ObsClass obsClass) {
-        final int m = obsClass.shouldChargeProgram() ? gsa.getProprietaryMonths() : 0;
+        final int m = (obsClass.shouldChargeProgram() || gsa.isHeaderPrivate()) ? gsa.getProprietaryMonths() : 0;
         c.putParameter(OBSERVE_CONFIG_NAME, DefaultParameter.getInstance(PROPRIETARY_MONTHS, m));
     }
 
