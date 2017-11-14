@@ -115,7 +115,7 @@ object TcsEphemerisCron {
 
     val boundsTypeS = Option(ctx.getProperty(NightProp))
     val boundType   = boundsTypeS.fold(Option.empty[TwilightBoundType]) { s =>
-      TwilightBoundType.ALL.asScala.find(_.getName.equalsIgnoreCase(s))
+      TwilightBoundType.values().find(_.getName.equalsIgnoreCase(s))
     }
 
     val night = boundType.fold(allDay) { b =>
