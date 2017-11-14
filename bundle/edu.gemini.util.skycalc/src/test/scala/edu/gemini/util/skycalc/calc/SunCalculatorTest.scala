@@ -1,6 +1,6 @@
 package edu.gemini.util.skycalc.calc
 
-import org.junit.Test
+import org.junit.{Ignore, Test}
 import org.junit.Assert._
 import edu.gemini.spModel.core.Site
 import edu.gemini.skycalc.TimeUtils
@@ -14,6 +14,7 @@ class SunCalculatorTest {
 
   // == GN
   @Test
+  @Ignore
   def validateSunCalc00HrsNorth(): Unit = {
     val time     = TimeUtils.time(2014, 11,  1,  0,  0, Site.GN.timezone) // 00:00 (local time)
     val timeSet  = TimeUtils.time(2014, 10, 31, 17, 48, Site.GN.timezone) // expect previous night
@@ -23,6 +24,7 @@ class SunCalculatorTest {
   }
 
   @Test
+  @Ignore
   def validateSunCalc12HrsNorth(): Unit = {
     val time     = TimeUtils.time(2014, 11,  1, 12,  0, Site.GN.timezone) // 12:00
     val timeSet  = TimeUtils.time(2014, 10, 31, 17, 48, Site.GN.timezone) // expect previous night
@@ -32,6 +34,7 @@ class SunCalculatorTest {
   }
 
   @Test
+  @Ignore
   def validateSunCalc14HrsNorth(): Unit = {
     val time     = TimeUtils.time(2014, 11,  1, 14,  0, Site.GN.timezone) // 14:00
     val timeSet  = TimeUtils.time(2014, 11,  1, 17, 47, Site.GN.timezone) // expect same night
@@ -41,6 +44,7 @@ class SunCalculatorTest {
   }
 
   @Test
+  @Ignore
   def validateSunCalc20HrsNorth(): Unit = {
     val time     = TimeUtils.time(2014, 11,  1, 20,  0, Site.GN.timezone) // 20:00
     val timeSet  = TimeUtils.time(2014, 11,  1, 17, 47, Site.GN.timezone) // expect same night
@@ -51,6 +55,7 @@ class SunCalculatorTest {
 
   // === GS
   @Test
+  @Ignore
   def validateSunCalc12HrsSouth(): Unit = {
     val time     = TimeUtils.time(2014, 11,  1, 13, 59, Site.GS.timezone) // 13:59
     val timeSet  = TimeUtils.time(2014, 10, 31, 20, 4, Site.GS.timezone) // expect previous night
@@ -62,6 +67,7 @@ class SunCalculatorTest {
   }
 
   @Test
+  @Ignore
   def validateSunCalc14HrsSouth(): Unit = {
     val time     = TimeUtils.time(2014, 11,  1, 14,  0, Site.GS.timezone)  // 14:00
     val timeSet  = TimeUtils.time(2014, 11,  1, 20, 5, Site.GS.timezone)  // expect same night
