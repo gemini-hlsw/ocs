@@ -25,7 +25,9 @@ import java.awt.event.ItemListener;
 import java.io.Serializable;
 
 import java.util.Hashtable;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -214,18 +216,20 @@ public class SPElevationPlotPlugin implements ChangeListener, Storeable {
     // 1. Executing an optional preprocessing function (to precalculate some colors and create some default legend items); and
     // 2. Executing an extractor for each selected observation, which produces an optional ID. If the ID is defined, create
     //    a new legend item for it.
+    // We also ensure that IDs for LegendItems are unique so that we don't, for example, end up with multiple entries for
+    // "Band 4" if observations are labeled by band, or repeated priorities if observations are labeled by priority.
     private LegendItemCollection createLegendItemsPreOpt(final Option<Function<TreeMap<String, Paint>, LegendItemCollection>> pref,
                                                          final Function<ISPObservation, Option<String>> extractor) {
         final Paint[] colors = new Paint[_selectedObservations.length];
         final TreeMap<String,Paint> paintMap = new TreeMap<>();
-        final TreeMap<String,LegendItem> licTree = new TreeMap<>();
+        final Set<String> licIds = new TreeSet<>();
         final LegendItemCollection lic = new LegendItemCollection();
 
         // Perform the preprocessing function, if it exists.
         pref.foreach(f -> lic.addAll(f.apply(paintMap)));
         for (int i=0 ; i < lic.getItemCount(); ++i) {
             final LegendItem li = lic.get(i);
-            licTree.put(li.getLabel(), li);
+            licIds.add(li.getLabel());
         }
 
         // Iterate over the selected observations.
@@ -235,10 +239,10 @@ public class SPElevationPlotPlugin implements ChangeListener, Storeable {
             final Paint p = idOpt.map(id -> paintMap.computeIfAbsent(id, s -> ColorManager.instance.nextColor())).getOrElse(Color.BLACK);
             colors[obsIdx] = p;
             idOpt.foreach(id -> {
-                if (!licTree.keySet().contains(id)) {
+                if (!licIds.contains(id)) {
                     final LegendItem li = new LegendItem(id, p);
                     lic.add(li);
-                    licTree.put(id, li);
+                    licIds.add(id);
                 }
             });
         }
@@ -308,7 +312,7 @@ public class SPElevationPlotPlugin implements ChangeListener, Storeable {
                 break;
 
             case _COLOR_CODE_NONE:
-                // Special case.
+                // Special case: no legend, and all lines are drawn in black.
                 lic = new LegendItemCollection();
                 final Paint[] colors = new Paint[_selectedObservations.length];
                 java.util.Arrays.fill(colors, Color.BLACK);
