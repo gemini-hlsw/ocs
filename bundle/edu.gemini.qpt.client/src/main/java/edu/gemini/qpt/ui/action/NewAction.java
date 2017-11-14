@@ -19,7 +19,6 @@ import edu.gemini.qpt.core.Block;
 import edu.gemini.qpt.core.Schedule;
 import edu.gemini.qpt.core.ScheduleIO;
 import edu.gemini.qpt.shared.sp.MiniModel;
-import edu.gemini.qpt.core.util.LocalSunriseSunset;
 import edu.gemini.qpt.core.util.LttsServicesClient;
 import edu.gemini.qpt.ui.util.AbstractAsyncAction;
 import edu.gemini.qpt.ui.util.CalendarPanel;
@@ -29,6 +28,7 @@ import edu.gemini.qpt.ui.util.DefaultSite;
 import edu.gemini.qpt.ui.util.Platform;
 import edu.gemini.qpt.ui.util.ProgressDialog;
 import edu.gemini.qpt.ui.util.ProgressModel;
+import edu.gemini.skycalc.TwilightBoundType;
 import edu.gemini.skycalc.TwilightBoundedNight;
 import edu.gemini.spModel.core.Peer;
 import edu.gemini.spModel.core.Site;
@@ -209,7 +209,7 @@ public class NewAction extends AbstractAsyncAction {
 
     // Returns the dates for the beginning and end of the night at the site
     private TwilightBoundedNight getTwilightBoundedNight(Site site, long startDate) {
-        return new TwilightBoundedNight(LocalSunriseSunset.forSite(site), startDate, site);
+        return new TwilightBoundedNight(TwilightBoundType.OFFICIAL, startDate, site);
     }
 }
 

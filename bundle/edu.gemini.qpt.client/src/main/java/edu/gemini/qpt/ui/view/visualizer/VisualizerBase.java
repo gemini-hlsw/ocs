@@ -17,7 +17,6 @@ import edu.gemini.qpt.core.Block;
 import edu.gemini.qpt.core.Schedule;
 import edu.gemini.qpt.core.Variant;
 import edu.gemini.qpt.shared.sp.Obs;
-import edu.gemini.qpt.core.util.LocalSunriseSunset;
 import edu.gemini.qpt.shared.util.TimeUtils;
 import edu.gemini.skycalc.TwilightBoundType;
 import edu.gemini.skycalc.TwilightBoundedNight;
@@ -216,8 +215,7 @@ abstract class VisualizerBase extends JPanel {
 				// BUG: this should be done whenever the Blocks collection changes.
 				final Schedule schedule = newModel.getSchedule();
 				final Site site = schedule.getSite();
-				TwilightBoundType tbt = LocalSunriseSunset.forSite(site);
-				TwilightBoundedNight tbn = new TwilightBoundedNight(tbt, schedule.getStart(), site);
+				TwilightBoundedNight tbn = new TwilightBoundedNight(TwilightBoundType.OFFICIAL, schedule.getStart(), site);
 				minTime = Math.min(schedule.getStart(), tbn.getStartTime()) - PADDING;
 				maxTime = Math.max(schedule.getEnd(), tbn.getEndTime()) + PADDING;
 

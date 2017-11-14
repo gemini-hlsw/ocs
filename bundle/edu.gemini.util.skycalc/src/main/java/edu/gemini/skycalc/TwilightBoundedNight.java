@@ -150,7 +150,24 @@ public final class TwilightBoundedNight implements Night {
 
         // Get sunset.
         final JulianDate jdmid = new JulianDate(c.getTimeInMillis());
-        _calcTimes(type.getHorizonAngle(), jdmid, site);
+
+        // Sunrise/set take altitude into account whereas the twilights don't.
+        //
+        // "The various twilights (6,12,18) describe how bright the sky is, and this does not depend on the altitude of
+        // the observer, however, the time of sunrise and sunset does.  For example, consider Hilo and Maunakea.  The
+        // sky brightness above them is the same, while the time when they see the sun dip below the horizon is not"
+        // -- Andrew Stephens 2017-11-14
+
+        if (type == TwilightBoundType.OFFICIAL) {
+            // Horizon geometric correction from p. 24 of the Skycalc manual: sqrt(2 * elevation / Re) (radians)
+           final double angle = type.getHorizonAngle() +
+                   Math.sqrt(2.0 * site.altitude / ImprovedSkyCalcMethods.EQUAT_RAD) *
+                           ImprovedSkyCalcMethods.DEG_IN_RADIAN;
+            _calcTimes(angle, jdmid, site);
+        } else {
+            _calcTimes(type.getHorizonAngle(), jdmid, site);
+        }
+
     }
 
     private void _calcTimes(double angle, JulianDate jdmid, Site desc) {

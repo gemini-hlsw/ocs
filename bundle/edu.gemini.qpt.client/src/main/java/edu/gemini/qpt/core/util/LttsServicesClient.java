@@ -9,6 +9,7 @@ import edu.gemini.qpt.core.listeners.LimitsListener;
 import edu.gemini.qpt.shared.sp.Obs;
 import edu.gemini.qpt.shared.util.StructuredProgramID;
 import edu.gemini.qpt.shared.util.TimeUtils;
+import edu.gemini.skycalc.TwilightBoundType;
 import edu.gemini.skycalc.TwilightBoundedNight;
 import edu.gemini.spModel.core.Peer;
 import edu.gemini.spModel.core.Site;
@@ -288,7 +289,7 @@ public class LttsServicesClient {
      * @return
      */
     private static long getStartOfNight(Site site, long time) {
-        return new TwilightBoundedNight(LocalSunriseSunset.forSite(site), time, site).getStartTime();
+        return new TwilightBoundedNight(TwilightBoundType.OFFICIAL, time, site).getStartTime();
     }
 
 }
