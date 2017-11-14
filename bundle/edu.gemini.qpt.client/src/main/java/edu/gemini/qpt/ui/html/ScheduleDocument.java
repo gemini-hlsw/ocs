@@ -34,7 +34,6 @@ import edu.gemini.qpt.core.Alloc.Grouping;
 import edu.gemini.qpt.core.Marker.Severity;
 import edu.gemini.qpt.core.util.ImprovedSkyCalc;
 import edu.gemini.qpt.core.util.Interval;
-import edu.gemini.qpt.core.util.LocalSunriseSunset;
 import edu.gemini.qpt.shared.util.TimeUtils;
 import edu.gemini.qpt.ui.util.CancelledException;
 import edu.gemini.qpt.ui.util.ColorWheel;
@@ -350,8 +349,7 @@ public class ScheduleDocument {
         ret.add(new SimpleEvent(cal.getTimeInMillis(), message));
 
         // Get sun[rise|set] info.
-        final TwilightBoundType sunset = LocalSunriseSunset.forSite(schedule.getSite()); // new TwilightBoundType("", 0.83 + horiz);
-        TwilightBoundedNight local = new TwilightBoundedNight(sunset, schedule.getStart(), schedule.getSite());
+        TwilightBoundedNight local = new TwilightBoundedNight(TwilightBoundType.OFFICIAL, schedule.getStart(), schedule.getSite());
         Interval sunBoundedNight = new Interval(local.getStartTime(), local.getEndTime());
 
         // Find moon info

@@ -39,7 +39,6 @@ import edu.gemini.qpt.shared.sp.Conds;
 import edu.gemini.qpt.shared.sp.Obs;
 import edu.gemini.qpt.core.util.ImprovedSkyCalc;
 import edu.gemini.qpt.core.util.Interval;
-import edu.gemini.qpt.core.util.LocalSunriseSunset;
 import edu.gemini.qpt.shared.util.TimeUtils;
 import edu.gemini.qpt.core.util.TimingWindowSolver;
 import edu.gemini.qpt.ui.util.BooleanViewPreference;
@@ -510,8 +509,7 @@ public final class Visualizer extends VisualizerBase implements VisualizerConsta
 
 		Site site = model.getSchedule().getSite();
 
-		TwilightBoundType tbt = LocalSunriseSunset.forSite(site);
-		TwilightBoundedNight night = new TwilightBoundedNight(tbt, model.getSchedule().getStart(), site);
+		TwilightBoundedNight night = new TwilightBoundedNight(TwilightBoundType.OFFICIAL, model.getSchedule().getStart(), site);
 
 		Graphics2DAttributes g2da = new Graphics2DAttributes(g2d);
 
