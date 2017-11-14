@@ -25,9 +25,6 @@ import java.util.*;
 /**
  * A model class for plotting elevation vs local sidereal time for a given list of target
  * positions. This class can be used to display the graph using JFreeChart.
- *
- * @version $Revision: 42349 $
- * @author Allan Brighton
  */
 public class ElevationPlotModel {
 
@@ -47,9 +44,6 @@ public class ElevationPlotModel {
 
     // The name and location of the observatory site
     private Site _site;
-
-    // Offset in hours (0..24) from UT midnight to noon at the telescope site
-//    private double _siteOffset;
 
     // The starting date for the plot
     private Date _startDate;
@@ -97,7 +91,7 @@ public class ElevationPlotModel {
     private ElevationPlotTableModel[] _tableModels;
 
     // Threshold in degrees above the horizon where targets are considered observable
-    private static double _obsThreshold = 30.;
+    private static double _obsThreshold = 30.0;
 
     // Utility class responsible for elevation calculations
     private ElevationPlotUtil _plotUtil;
@@ -172,8 +166,8 @@ public class ElevationPlotModel {
         // Determine the min and max elevations for each target
         for (int i = 0; i < _targets.length; i++) {
             double[] el = _yData[i];          // elevation at each sample
-            _maxElevation[i] = -99.;
-            _maxElevationTime[i] = 0.;
+            _maxElevation[i] = -99.0;
+            _maxElevationTime[i] = 0.0;
             for (int j = 0; j < numSteps; j++) {
                 if (el[j] > _maxElevation[i]) {
                     _maxElevation[i] = el[j];
