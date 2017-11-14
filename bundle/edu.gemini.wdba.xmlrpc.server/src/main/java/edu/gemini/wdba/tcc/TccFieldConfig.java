@@ -102,7 +102,7 @@ public class TccFieldConfig extends ParamSet {
         if (isEmpty(base.getName())) {
             base.setName(TccNames.BASE);
         }
-        add(new TargetConfig(base));
+        add(new TargetConfig(base, TccNames.BASE));
 
         // Add the user targets.
         int pos = 1;
@@ -112,7 +112,7 @@ public class TccFieldConfig extends ParamSet {
                 t.setName(TargetConfig.formatName("User", pos));
             }
             ++pos;
-            add(new TargetConfig(t));
+            add(new TargetConfig(t, user.type.displayName));
         }
 
         // Add the "group" for the base position.
@@ -135,7 +135,7 @@ public class TccFieldConfig extends ParamSet {
             if (isEmpty(target.getName())) {
                 target.setName(TargetConfig.formatName(tag, pos));
             }
-            add(new TargetConfig(target));
+            add(new TargetConfig(target, tag));
             ++pos;
         }
 
