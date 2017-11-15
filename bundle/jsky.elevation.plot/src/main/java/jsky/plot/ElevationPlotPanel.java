@@ -10,9 +10,6 @@ import jsky.plot.util.gui.DateChooserDialog;
 import jsky.util.gui.DialogUtil;
 import jsky.util.gui.SwingUtil;
 import jsky.util.gui.GridBagUtil;
-import org.jfree.chart.JFreeChart;
-import org.jfree.chart.title.LegendTitle;
-import org.jfree.ui.RectangleInsets;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
