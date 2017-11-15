@@ -290,7 +290,7 @@ public class SPElevationPlotPlugin implements ChangeListener, Storeable {
                             final SPProgramID id1 = o1.getProgramID();
                             final SPProgramID id2 = o2.getProgramID();
                             if (id1 == null) return (id2 == null) ? 0 : 1;
-                            return -1;
+                            return (id2 == null) ? -1 : id1.compareTo(id2);
                         },
                         obs -> ImOption.apply(obs.getProgramID()).map(SPProgramID::stringValue)
                 );
