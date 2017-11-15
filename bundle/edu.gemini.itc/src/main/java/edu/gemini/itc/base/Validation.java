@@ -78,7 +78,7 @@ public final class Validation {
             }
 
             final EmissionLine eLine = (EmissionLine) source.distribution();
-            final double maxWidth = ITCConstants.C / (eLine.wavelength().toNanometers() / resolution) * (1.0 + source.redshift().z());
+            final double maxWidth = ITCConstants.C / (eLine.wavelength().toNanometers() * (1.0 + source.redshift().z() / resolution));
 
             if (eLine.width().toKilometersPerSecond() < maxWidth) {
                 throw new IllegalArgumentException(
