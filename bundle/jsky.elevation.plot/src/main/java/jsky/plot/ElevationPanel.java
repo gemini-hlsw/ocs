@@ -21,6 +21,7 @@ import org.jfree.data.time.TimeSeriesCollection;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.ui.Layer;
 import org.jfree.ui.RectangleEdge;
+import org.jfree.ui.RectangleInsets;
 import org.jfree.ui.TextAnchor;
 
 import javax.print.attribute.standard.OrientationRequested;
@@ -40,7 +41,7 @@ import static java.lang.Math.PI;
 /**
  * A panel for displaying an elevation plot for given target positions.
  */
-public class ElevationPanel extends JPanel implements PrintableWithDialog, SaveableWithDialog {
+public class ElevationPanel extends JPanel implements LegendTitleUser, PrintableWithDialog, SaveableWithDialog {
 
     // Used to access internationalized strings (see i18n/gui*.properties)
     private static final I18N _I18N = I18N.getInstance(ElevationPanel.class);
@@ -508,7 +509,7 @@ public class ElevationPanel extends JPanel implements PrintableWithDialog, Savea
 
         JFreeChart chart = new JFreeChart(title, JFreeChart.DEFAULT_TITLE_FONT, plot, false);
         if (_showLegend) {
-            chart.addSubtitle(new LegendTitle(chart.getPlot()));
+            useLegendTitle(chart);
         }
 
         return chart;

@@ -39,9 +39,9 @@ import java.text.SimpleDateFormat;
  * @version $Revision: 42349 $
  * @author Allan Brighton
  */
-public class ObservationPanel extends JPanel implements PrintableWithDialog, SaveableWithDialog {
+public class ObservationPanel extends JPanel implements LegendTitleUser, PrintableWithDialog, SaveableWithDialog {
 
-    // Used to access internationalized strings (see i18n/gui*.proprties)
+    // Used to access internationalized strings (see i18n/gui*.properties)
     private static final I18N _I18N = I18N.getInstance(ObservationPanel.class);
 
     // Tabbed pane containing the charts for the different categories
@@ -335,7 +335,7 @@ public class ObservationPanel extends JPanel implements PrintableWithDialog, Sav
         plot.setOrientation(PlotOrientation.HORIZONTAL);
         JFreeChart chart = new JFreeChart(title, JFreeChart.DEFAULT_TITLE_FONT, plot, false);
         if (_showLegend) {
-            chart.addSubtitle(new LegendTitle(chart.getPlot()));
+            useLegendTitle(chart);
         }
 
         return chart;
