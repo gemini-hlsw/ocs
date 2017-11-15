@@ -158,16 +158,15 @@ public final class TwilightBoundedNight implements Night {
         // sky brightness above them is the same, while the time when they see the sun dip below the horizon is not"
         // -- Andrew Stephens 2017-11-14
 
-        if (type == TwilightBoundType.OFFICIAL) {
-            // Horizon geometric correction from p. 24 of the Skycalc manual: sqrt(2 * elevation / Re) (radians)
-           final double angle = type.getHorizonAngle() +
-                   Math.sqrt(2.0 * site.altitude / ImprovedSkyCalcMethods.EQUAT_RAD) *
-                           ImprovedSkyCalcMethods.DEG_IN_RADIAN;
-            _calcTimes(angle, jdmid, site);
-        } else {
-            _calcTimes(type.getHorizonAngle(), jdmid, site);
+        final double angle;
+        switch (type) {
+            case OFFICIAL:
+                // Horizon geometric correction from p. 24 of the Skycalc manual: sqrt(2 * elevation / Re) (radians)
+                angle = type.getHorizonAngle() + Math.sqrt(2.0 * site.altitude / ImprovedSkyCalcMethods.EQUAT_RAD) *
+                        ImprovedSkyCalcMethods.DEG_IN_RADIAN; break;
+            default: angle = type.getHorizonAngle(); break;
         }
-
+        _calcTimes(angle, jdmid, site);
     }
 
     private void _calcTimes(double angle, JulianDate jdmid, Site desc) {
