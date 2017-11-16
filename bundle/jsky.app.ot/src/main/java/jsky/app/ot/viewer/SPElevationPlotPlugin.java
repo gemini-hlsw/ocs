@@ -289,12 +289,7 @@ public class SPElevationPlotPlugin implements ChangeListener, Storeable {
 
             case _COLOR_CODE_PROG:
                 lic = createLegendItemsOpt(
-                        (o1,o2) -> {
-                            final SPProgramID id1 = o1.getProgramID();
-                            final SPProgramID id2 = o2.getProgramID();
-                            if (id1 == null) return (id2 == null) ? 0 : 1;
-                            return (id2 == null) ? -1 : id1.compareTo(id2);
-                        },
+                        Comparator.nullsFirst(Comparator.comparing(ISPObservation::getProgramID)),
                         obs -> ImOption.apply(obs.getProgramID()).map(SPProgramID::stringValue)
                 );
                 break;
@@ -328,12 +323,8 @@ public class SPElevationPlotPlugin implements ChangeListener, Storeable {
                         plic.add(new LegendItem(prioStr, p));
                     }
                     return plic;
-                }, (o1, o2) -> {
-                            final SPObservation.Priority p1 = ((SPObservation) o1.getDataObject()).getPriority();
-                            final SPObservation.Priority p2 = ((SPObservation) o2.getDataObject()).getPriority();
-                            return p1.compareTo(p2);
-                        },
-                    obs -> String.format("%s Priority", ((SPObservation) obs.getDataObject()).getPriority().displayValue())
+                }, Comparator.comparing(obs -> ((SPObservation) obs.getDataObject()).getPriority()),
+                   obs -> String.format("%s Priority", ((SPObservation) obs.getDataObject()).getPriority().displayValue())
                 );
                 break;
 
