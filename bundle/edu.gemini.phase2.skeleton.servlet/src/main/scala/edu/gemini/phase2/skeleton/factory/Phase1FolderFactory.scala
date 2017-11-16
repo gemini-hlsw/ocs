@@ -125,11 +125,12 @@ trait Partitioner {
 object GnirsSpectroscopyPartitioner extends Partitioner {
   import edu.gemini.spModel.core.MagnitudeBand.H
   def bucket(t:SPTarget):Int = t.getMagnitude(H).map(_.value).map { H =>
-    if (H < 11.5) 1
-    else if (H < 16) 2
-    else if (H < 20) 3
-    else 4
-  }.getOrElse(5)
+         if (H <  7.0) 1
+    else if (H < 11.5) 2
+    else if (H < 16.0) 3
+    else if (H < 20.0) 4
+    else 5
+  }.getOrElse(6)
 }
 
 // TARGET BRIGHTNESS = TB

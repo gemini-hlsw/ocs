@@ -54,7 +54,7 @@ case class GnirsSpectroscopy(blueprint:SpGnirsBlueprintSpectroscopy, exampleTarg
   // #           SET FILTER (== central wavelength) FROM PI #12B not possible to be set automatically.
   // #           IF FILTER FROM PI == L or M (central wavelength > 2.5um) SET Well depth == Deep
 
-  include(5, 6, 12, 13, 14, 23) in TargetGroup
+  include(5, 6, 12, 13, 14) in TargetGroup
 
   forObs(12, 6, 14)(
     setPixelScale(pixelScale),
@@ -139,7 +139,7 @@ case class GnirsSpectroscopy(blueprint:SpGnirsBlueprintSpectroscopy, exampleTarg
   // #           SET FILTER (== central wavelength) FROM PI #12B not possible to be set automatically.
   // #           IF FILTER FROM PI == L or M (central wavelength > 2.5um) SET Well depth == Deep
 
-  val acq = Seq(5) ++ otherAcq ++ Seq(13, 23)
+  val acq = Seq(5) ++ otherAcq ++ Seq(13)
 
   forObs(acq:_*)(
 
