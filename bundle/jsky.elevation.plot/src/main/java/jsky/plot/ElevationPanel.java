@@ -583,9 +583,7 @@ public class ElevationPanel extends JPanel implements LegendTitleUser, Printable
 
         final double startRounded = startDate.getTime();
         final double endRounded   = endDate.getTime();
-        final SimpleDateFormat sdf = new SimpleDateFormat("hh:mm:ss.SS");
-        System.out.println(String.format("\n\n%s start: %s, startRounded: %s", startDateName, sdf.format(startDate), sdf.format(startDateRounded)));
-        System.out.println(String.format("%s  end: %s,   endRounded: %s\n\n", endDateName, sdf.format(endDate), sdf.format(endDateRounded)));
+
         if (startRounded < endRounded) {
             final IntervalMarker m = new IntervalMarker(startRounded, endRounded, color, DARKNESS_STROKE,
                     color, DARKNESS_STROKE, alpha);
