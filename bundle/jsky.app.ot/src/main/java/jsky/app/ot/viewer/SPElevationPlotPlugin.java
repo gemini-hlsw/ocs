@@ -2,10 +2,7 @@ package jsky.app.ot.viewer;
 
 import edu.gemini.pot.client.SPDB;
 import edu.gemini.pot.sp.*;
-import edu.gemini.shared.util.immutable.ImOption;
-import edu.gemini.shared.util.immutable.None;
-import edu.gemini.shared.util.immutable.Option;
-import edu.gemini.shared.util.immutable.Some;
+import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.core.SPProgramID;
 import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.gemini.obscomp.SPProgram;
@@ -232,10 +229,16 @@ public class SPElevationPlotPlugin implements ChangeListener, Storeable {
         }
 
         // Iterate over the selected observations.
-        final List<ISPObservation> obsList = Arrays.asList(_selectedObservations);
-        obsList.sort(comparator);
-        for (int obsIdx = 0; obsIdx < obsList.size(); ++obsIdx) {
-            final ISPObservation obs = obsList.get(obsIdx);
+        // Sort first to bring sanity to the legend items, but maintain index so we can assign to colors array properly.
+        final List<Pair<ISPObservation,Integer>> obsList = new ArrayList<>();
+        for (int obsIdx=0; obsIdx < _selectedObservations.length; ++obsIdx) {
+            obsList.add(new Pair<>(_selectedObservations[obsIdx], obsIdx));
+        }
+        obsList.sort((p1,p2) -> comparator.compare(p1._1(), p2._1()));
+
+        for (final Pair<ISPObservation,Integer> pair: obsList) {
+            final ISPObservation obs = pair._1();
+            final int obsIdx = pair._2();
             final Option<String> idOpt = extractor.apply(obs);
             final Paint p = idOpt.map(id -> paintMap.computeIfAbsent(id, s -> ColorManager.instance.nextColor())).getOrElse(Color.BLACK);
             colors[obsIdx] = p;
