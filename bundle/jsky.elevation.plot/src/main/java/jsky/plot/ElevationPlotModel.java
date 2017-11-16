@@ -418,8 +418,8 @@ public class ElevationPlotModel {
                 endAlt   = ImprovedSkyCalcMethods.getAltitude(elMin);
                 break;
             case HOUR_ANGLE:
-                startAlt = altit(target, _startDate, elMin, _site.latitude).getOrElse(startAlt);
-                endAlt   = altit(target, _endDate,   elMax, _site.latitude).getOrElse(endAlt);
+                startAlt = altit(target, _startDate, elMin, _site.latitude).getOrElse(0.0);
+                endAlt   = altit(target, _endDate,   elMax, _site.latitude).getOrElse(0.0);
                 break;
             case NONE:
                 startAlt = 0.0;
