@@ -58,7 +58,10 @@ public class ElevationPlotModel {
     private Date[][] _xDate;
 
     // Used to format the dates in the table
-    private SimpleDateFormat _dateFormat = new SimpleDateFormat("HH:mm:ss");
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("HH:mm:ss");
+
+    // Used to format titles.
+    private static final SimpleDateFormat TITLE_FORMAT = new SimpleDateFormat("yyyy MMM d");
 
     // the Y values are elevation (angle between 0 and 90 degrees)
     private double[][] _yData;
@@ -131,11 +134,10 @@ public class ElevationPlotModel {
 
     /** Return a title based on the site and the date */
     public String getTitle() {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy MMM d HH:mm");
         return _site.mountain + ": Night of "
-                + dateFormat.format(_sunRiseSet.nauticalTwilightStart)
+                + TITLE_FORMAT.format(_sunRiseSet.nauticalTwilightStart)
                 + " ---> "
-                + dateFormat.format(_sunRiseSet.nauticalTwilightEnd);
+                + TITLE_FORMAT.format(_sunRiseSet.nauticalTwilightEnd);
     }
 
 
@@ -235,7 +237,7 @@ public class ElevationPlotModel {
         if (! _timeZoneId.equals(LST) && ! _timeZoneId.equals(UT)) {
             _timeZone = _site.timezone();
         }
-        _dateFormat.setTimeZone(_timeZone);
+        DATE_FORMAT.setTimeZone(_timeZone);
     }
 
 
@@ -744,7 +746,7 @@ public class ElevationPlotModel {
                     if (_timeZoneId.equals(LST)) {
                          date = _plotUtil.getLst(date);
                     }
-                    return _dateFormat.format(date);
+                    return DATE_FORMAT.format(date);
                 case 1:
                     return _yData[_targetIndex][rowIndex];
                 case 2:

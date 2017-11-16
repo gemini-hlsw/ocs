@@ -1,9 +1,3 @@
-// Copyright 2003
-// Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-//
-// $Id: ElevationPlotPanel.java 40560 2012-01-09 14:27:46Z swalker $
-
 package jsky.plot;
 
 import edu.gemini.spModel.core.Site;
@@ -31,13 +25,10 @@ import javax.swing.event.ChangeListener;
 
 /**
  * A panel for displaying an elevation plot for given target positions.
- *
- * @version $Revision: 40560 $
- * @author Allan Brighton
  */
 public class ElevationPlotPanel extends JPanel implements ChangeListener {
 
-    // Used to access internationalized strings (see i18n/gui*.proprties)
+    // Used to access internationalized strings (see i18n/gui*.properties)
     private static final I18N _I18N = I18N.getInstance(ElevationPlotPanel.class);
 
     // Available time zone ids

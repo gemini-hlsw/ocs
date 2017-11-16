@@ -2,10 +2,7 @@ package jsky.app.ot.viewer;
 
 import edu.gemini.pot.client.SPDB;
 import edu.gemini.pot.sp.*;
-import edu.gemini.shared.util.immutable.ImOption;
-import edu.gemini.shared.util.immutable.None;
-import edu.gemini.shared.util.immutable.Option;
-import edu.gemini.shared.util.immutable.Some;
+import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.core.SPProgramID;
 import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.gemini.obscomp.SPProgram;
@@ -24,10 +21,8 @@ import java.awt.*;
 import java.awt.event.ItemListener;
 import java.io.Serializable;
 
-import java.util.Hashtable;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
+import java.util.*;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -219,6 +214,7 @@ public class SPElevationPlotPlugin implements ChangeListener, Storeable {
     // We also ensure that IDs for LegendItems are unique so that we don't, for example, end up with multiple entries for
     // "Band 4" if observations are labeled by band, or repeated priorities if observations are labeled by priority.
     private LegendItemCollection createLegendItemsPreOpt(final Option<Function<TreeMap<String, Paint>, LegendItemCollection>> pref,
+                                                         final Comparator<ISPObservation> comparator,
                                                          final Function<ISPObservation, Option<String>> extractor) {
         final Paint[] colors = new Paint[_selectedObservations.length];
         final TreeMap<String,Paint> paintMap = new TreeMap<>();
@@ -233,8 +229,16 @@ public class SPElevationPlotPlugin implements ChangeListener, Storeable {
         }
 
         // Iterate over the selected observations.
-        for (int obsIdx = 0; obsIdx < _selectedObservations.length; ++obsIdx) {
-            final ISPObservation obs = _selectedObservations[obsIdx];
+        // Sort first to bring sanity to the legend items, but maintain index so we can assign to colors array properly.
+        final List<Pair<ISPObservation,Integer>> obsList = new ArrayList<>();
+        for (int obsIdx=0; obsIdx < _selectedObservations.length; ++obsIdx) {
+            obsList.add(new Pair<>(_selectedObservations[obsIdx], obsIdx));
+        }
+        obsList.sort((p1,p2) -> comparator.compare(p1._1(), p2._1()));
+
+        for (final Pair<ISPObservation,Integer> pair: obsList) {
+            final ISPObservation obs = pair._1();
+            final int obsIdx = pair._2();
             final Option<String> idOpt = extractor.apply(obs);
             final Paint p = idOpt.map(id -> paintMap.computeIfAbsent(id, s -> ColorManager.instance.nextColor())).getOrElse(Color.BLACK);
             colors[obsIdx] = p;
@@ -253,16 +257,19 @@ public class SPElevationPlotPlugin implements ChangeListener, Storeable {
 
     // Convenience methods to call createLegendItemsPreOpt without preprocessing / without options.
     private LegendItemCollection createLegendItemsPre(final Function<TreeMap<String, Paint>, LegendItemCollection> pref,
+                                                      final Comparator<ISPObservation> comparator,
                                                       final Function<ISPObservation, String> extractor) {
-        return createLegendItemsPreOpt(new Some<>(pref), obs -> new Some<>(extractor.apply(obs)));
+        return createLegendItemsPreOpt(new Some<>(pref), comparator, obs -> new Some<>(extractor.apply(obs)));
     }
 
-    private LegendItemCollection createLegendItemsOpt(final Function<ISPObservation, Option<String>> extractor) {
-        return createLegendItemsPreOpt(None.instance(), extractor);
+    private LegendItemCollection createLegendItemsOpt(final Comparator<ISPObservation> comparator,
+                                                      final Function<ISPObservation, Option<String>> extractor) {
+        return createLegendItemsPreOpt(None.instance(), comparator, extractor);
     }
 
-    private LegendItemCollection createLegendItems(final Function<ISPObservation, String> extractor) {
-        return createLegendItemsPreOpt(None.instance(), obs -> new Some<>(extractor.apply(obs)));
+    private LegendItemCollection createLegendItems(final Comparator<ISPObservation> comparator,
+                                                   final Function<ISPObservation, String> extractor) {
+        return createLegendItemsPreOpt(None.instance(), comparator, obs -> new Some<>(extractor.apply(obs)));
     }
 
     // Get all the legend items.
@@ -274,14 +281,21 @@ public class SPElevationPlotPlugin implements ChangeListener, Storeable {
         final LegendItemCollection lic;
         switch (_colorCodeTrajectories) {
             case _COLOR_CODE_OBS:
-                lic = createLegendItems(obs -> obs.getObservationIDAsString("unknown"));
+                lic = createLegendItems(
+                        Comparator.comparing(ISPObservation::getObservationID),
+                        obs -> obs.getObservationIDAsString("unknown")
+                );
                 break;
 
             case _COLOR_CODE_PROG:
-                lic = createLegendItemsOpt(obs -> ImOption.apply(obs.getProgramID()).map(SPProgramID::stringValue));
+                lic = createLegendItemsOpt(
+                        Comparator.nullsFirst(Comparator.comparing(ISPObservation::getProgramID)),
+                        obs -> ImOption.apply(obs.getProgramID()).map(SPProgramID::stringValue)
+                );
                 break;
 
             case _COLOR_CODE_BAND:
+                // Order not really important, as bands will all be precreated and sorted, so use whatever as a comparator.
                 lic = createLegendItemsPre(tm -> {
                     final LegendItemCollection plic = new LegendItemCollection();
                     for (int i=0; i < 5; ++i) {
@@ -291,7 +305,8 @@ public class SPElevationPlotPlugin implements ChangeListener, Storeable {
                         plic.add(new LegendItem(band, p));
                     }
                     return plic;
-                  }, obs -> {
+                  }, Comparator.comparing(ISPObservation::getObservationID),
+                  obs -> {
                     final SPProgram prog = (SPProgram) SPDB.get().lookupProgram(obs.getProgramKey()).getDataObject();
                     final String bandStr = prog.getQueueBand();
                     return (bandStr == null || bandStr.isEmpty()) ? "Default Band" : String.format("Band %s", bandStr);
@@ -308,7 +323,9 @@ public class SPElevationPlotPlugin implements ChangeListener, Storeable {
                         plic.add(new LegendItem(prioStr, p));
                     }
                     return plic;
-                }, obs -> String.format("%s Priority", ((SPObservation) obs.getDataObject()).getPriority().displayValue()));
+                }, Comparator.comparing(obs -> ((SPObservation) obs.getDataObject()).getPriority()),
+                   obs -> String.format("%s Priority", ((SPObservation) obs.getDataObject()).getPriority().displayValue())
+                );
                 break;
 
             case _COLOR_CODE_NONE:
