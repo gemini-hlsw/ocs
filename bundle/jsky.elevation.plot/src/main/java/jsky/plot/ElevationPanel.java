@@ -1,5 +1,6 @@
 package jsky.plot;
 
+import jsky.util.DateUtil;
 import jsky.util.I18N;
 import jsky.util.PrintableWithDialog;
 import jsky.util.SaveableWithDialog;
@@ -570,33 +571,38 @@ public class ElevationPanel extends JPanel implements LegendTitleUser, Printable
         _itemColors = colors;
     }
 
-
-    // Add a marker to the given plot, showing the area of darkness
+    // Add a marker to the given plot, showing the area of darkness.
+    // We round dates to the nearest minute.
     private void addDomainMarker(final XYPlot xyPlot,
                                  final Date startDate, final String startDateName,
                                  final Date endDate,   final String endDateName,
                                  float alpha, Color color) {
         final DateFormat df = ((DateAxis)xyPlot.getDomainAxis()).getDateFormatOverride();
-        double start = startDate.getTime();
-        double end = endDate.getTime();
+        final Date startDateRounded = DateUtil.roundToNearestMinute(startDate, _model.getTimeZone());
+        final Date endDateRounded   = DateUtil.roundToNearestMinute(endDate,   _model.getTimeZone());
 
-        if (start < end) {
-            IntervalMarker m = new IntervalMarker(start, end, color, DARKNESS_STROKE,
+        final double startRounded = startDate.getTime();
+        final double endRounded   = endDate.getTime();
+        final SimpleDateFormat sdf = new SimpleDateFormat("hh:mm:ss.SS");
+        System.out.println(String.format("\n\n%s start: %s, startRounded: %s", startDateName, sdf.format(startDate), sdf.format(startDateRounded)));
+        System.out.println(String.format("%s  end: %s,   endRounded: %s\n\n", endDateName, sdf.format(endDate), sdf.format(endDateRounded)));
+        if (startRounded < endRounded) {
+            final IntervalMarker m = new IntervalMarker(startRounded, endRounded, color, DARKNESS_STROKE,
                     color, DARKNESS_STROKE, alpha);
             xyPlot.addDomainMarker(m, Layer.BACKGROUND);
-            xyPlot.addAnnotation(createAnnotation(String.format("%s: %s", startDateName, df.format(startDate)), start));
-            xyPlot.addAnnotation(createAnnotation(String.format("%s: %s", endDateName, df.format(endDate)), end));
+            xyPlot.addAnnotation(createAnnotation(String.format("%s: %s", startDateName, df.format(startDateRounded)), startRounded));
+            xyPlot.addAnnotation(createAnnotation(String.format("%s: %s", endDateName, df.format(endDateRounded)), endRounded));
         } else {
-            double first = _model.getDateForHour(0.0).getTime();
-            double last = _model.getDateForHour(24.0).getTime();
-            IntervalMarker m1 = new IntervalMarker(start, last, color, DARKNESS_STROKE,
+            final double first = _model.getDateForHour(0.0).getTime();
+            final double last = _model.getDateForHour(24.0).getTime();
+            final IntervalMarker m1 = new IntervalMarker(startRounded, last, color, DARKNESS_STROKE,
                     color, DARKNESS_STROKE, alpha);
             xyPlot.addDomainMarker(m1, Layer.BACKGROUND);
-            xyPlot.addAnnotation(createAnnotation(String.format("%s: %s", startDateName, df.format(startDate)), start));
-            IntervalMarker m2 = new IntervalMarker(first, end, color, DARKNESS_STROKE,
+            xyPlot.addAnnotation(createAnnotation(String.format("%s: %s", startDateName, df.format(startDateRounded)), startRounded));
+            final IntervalMarker m2 = new IntervalMarker(first, endRounded, color, DARKNESS_STROKE,
                     color, DARKNESS_STROKE, alpha);
             xyPlot.addDomainMarker(m2, Layer.BACKGROUND);
-            xyPlot.addAnnotation(createAnnotation(String.format("%s: %s", endDateName, df.format(endDate)), first));
+            xyPlot.addAnnotation(createAnnotation(String.format("%s: %s", endDateName, df.format(endDateRounded)), endRounded));
         }
     }
 
