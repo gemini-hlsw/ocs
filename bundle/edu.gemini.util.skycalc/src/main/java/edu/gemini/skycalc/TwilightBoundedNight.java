@@ -1,7 +1,3 @@
-//
-// $Id: TwilightBoundedNight.java 21291 2009-07-29 16:23:21Z swalker $
-//
-
 package edu.gemini.skycalc;
 
 import edu.gemini.spModel.core.Site;
@@ -9,7 +5,6 @@ import java.util.logging.Logger;
 import java.util.logging.Level;
 
 import java.util.Calendar;
-import java.util.Date;
 
 /**
  * The start and end of a particular night, bounded by twilight as defined by
@@ -252,23 +247,5 @@ public final class TwilightBoundedNight implements Night {
 
     public TwilightBoundedNight next() {
         return TwilightBoundedNight.forObservingNight(_type, getObservingNight().next());
-    }
-
-    public static void main(String[] args) {
-
-        Calendar cal = Calendar.getInstance();
-
-        TwilightBoundedNight today;
-        today = new TwilightBoundedNight(TwilightBoundType.NAUTICAL, cal.getTimeInMillis(), Site.GS);
-
-        cal.add(Calendar.DAY_OF_YEAR, -1);
-
-        TwilightBoundedNight yesterday;
-        yesterday = new TwilightBoundedNight(TwilightBoundType.NAUTICAL, cal.getTimeInMillis(), Site.GS);
-
-        System.out.println("yesterday: " + (new Date(yesterday.getStartTime())) + " --> " +
-                                           (new Date(yesterday.getEndTime())));
-        System.out.println("today....: " + (new Date(today.getStartTime())) + " --> " +
-                                           (new Date(today.getEndTime())));
     }
 }
