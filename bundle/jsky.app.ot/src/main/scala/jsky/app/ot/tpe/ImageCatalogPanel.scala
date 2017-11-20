@@ -114,7 +114,7 @@ final class ImageCatalogPanel(imageDisplay: CatalogImageDisplay) {
 
   private def row(l: Component, r: Component): Component =
     new BoxPanel(Orientation.Horizontal) {
-      contents ++= List(l, Swing.HGlue, r)
+      contents ++= List(l, Swing.HGlue, r, Swing.HStrut(5))
     }
 
   lazy val panel: Component =
