@@ -1,0 +1,256 @@
+#!/bin/bash
+# 
+# This script manages the startup / shutdown of the ODB.
+
+# RETVALS:
+# 0. Expected.
+# 1. Usage displayed.
+# 2. Could not start.
+# 3. Could not stop.
+# 4. Status: not running.
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+# psjava access.
+export PATH=$PATH:/home/software/bin
+
+# System variables.
+SERVER=`hostname`
+PORT=8224
+
+
+# Display usage information.
+usage ()
+{
+    echo $"Usage: $0 {start|stop|status|restart}" 1>&2
+    RETVAL=1
+}
+
+# Sleep for 10 seconds, and display a . after each two second interval.
+sleep_dots ()
+{
+    for i in `seq 1 5`; do
+	printf " ."
+	sleep 2
+    done
+}
+
+# Find the latest version of the ODB.
+# If one is found:
+# 1. SPDB_DIR is set to the path of the spdb directory.
+# 2. SPDB_VERSION is set to the version string (e.g. 1.2.3).
+# 4. SPDB_EXEC is set to the path to the binary.
+determine_spdb_directory ()
+{
+    local SPDB_DIRS=($(ls -d /home/software/spdb*))
+    unset SPDB_DIR
+    unset SPDB_LOCKFILE
+    unset SPDB_VERSION_STR
+    SPDB_SEMESTER=0000A
+    SPDB_VERSION=(0 0 0)
+    
+    for CURR_DIR in "${SPDB_DIRS[@]}"
+    do
+	# Extract the version so that we can find the most recent.
+	# We don't use sort on the ls output for this because it will compare by string
+	# instead of by number, and we want to avoid things like 1.10.1 being less than 1.2.1.
+	CURR_SEMESTER=`echo $CURR_DIR | sed "s/^.*spdb_\([^-.]*\).*$/\1/"`
+	if [[ "$CURR_SEMESTER" < "$SPDB_SEMESTER" ]]; then
+	    continue
+	fi
+	CURR_VERSION_STR=`echo $CURR_DIR | sed "s/^[^.]*\.\([^_]*\).*$/\1/"`
+	if [[ -z "$CURR_VERSION_STR" ]]; then
+	    continue
+	fi
+	
+	CURR_VERSION=(${CURR_VERSION_STR//./ })
+	if [[ -z "${CURR_VERSION[@]}" ]]; then
+	    continue
+	fi
+	if [[ "${#CURR_VERSION[@]}" -ne 3 ]]; then
+	    continue
+	fi
+	
+	# Now compare versions. If the new version number is no greater than the previous, disregard.
+	if [[ "$CURR_SEMESTER" == "$SPDB_SEMESTER" ]]; then
+	    if [[ "${SPDB_VERSION[0]}" -gt "${CURR_VERSION[0]}" ]]; then
+		continue
+	    elif [[ "${SPDB_VERSION[0]}" -eq "${CURR_VERSION[0]}" ]]; then
+		if [[ "${SPDB_VERSION[1]}" -gt "${CURR_VERSION[1]}" ]]; then
+		    continue
+		elif [[ "${SPDB_VERSION[1]}" -eq "${CURR_VERSION[1]}" ]]; then
+		    if [[ "${SPDB_VERSION[2]}" -gt "${CURR_VERSION[2]}" ]]; then
+			continue
+		    fi
+		fi
+	    fi
+	fi
+	
+	# We have encountered a newer version.
+	SPDB_SEMESTER=$CURR_SEMESTER
+	SPDB_VERSION_STR=$CURR_VERSION_STR
+	SPDB_VERSION=(${CURR_VERSION[@]})
+	SPDB_DIR=$CURR_DIR
+    done
+
+    if [[ -z "$SPDB_DIR" ]]; then
+	echo "Could not find most recent ODB installation. Aborting."
+	return 1
+    fi
+
+    # Set the SPDB executable and the lockfile.
+    SPDB_EXEC=`ls ${SPDB_DIR}/spdb* 2>/dev/null`
+    SPDB_LOCKFILE=`ls /home/software/.ocs15/spdb_${SPDB_SEMESTER}*${SPDB_VERSION_STR}*/lockfile 2>/dev/null`
+    return 0
+}
+
+
+# If there is already a running SPDB:
+# 1. Determine its PID and set SPDB_PID to it.
+# 2. Determine the version (e.g. 2018A-test.1.6.1) and set SPDB_VER to it.
+# Returns 0 if running, and nonzero (1) otherwise.
+find_running_spdb ()
+{
+    SPDB_PID=`psjava | awk '{ printf $2; }'`
+    SPDB_VER=`psjava | sed "s/^.*\(spdb_[^_]*\).*/\1/"`
+    if [[ -n "$SPDB_PID" ]]; then
+	return 0
+    else
+	return 1
+    fi
+}
+
+
+# Start strategy:
+# 1. If running already, report and do nothing.
+# 2. Otherwise, check for a lockfile for the most recent version. If a lockfile exists, remove it and report.
+# 3. Start the latest ODB.
+# 4. Attempt to set the frameworklevel to 100. If this succeeds, then consider the start a success.
+# 5. Otherwise, report failure.
+# Returns 0 if a new ODB instance was able to start, and nonzero (2) otherwise.
+start ()
+{
+    # Assume failure until we successfully start.
+    RETVAL=2
+    
+    # If the SPDB is already running, this should not happen.
+    find_running_spdb
+    if [[ $? -eq 0 ]]; then
+	echo "ODB is already running: version ${SPDB_VER} as PID ${SPDB_PID}"
+    else
+	# Find the most recent version.
+	determine_spdb_directory
+	if [[ $? -eq 0 ]]; then
+	    # Check for existing lockfile.
+	    if [[ -n "$SPDB_LOCKFILE" ]]; then
+		echo "ODB lockfile found at $SPDB_LOCKFILE. Attempting to remove."
+		rm -f "${SPDB_LOCKFILE}"
+	    fi
+
+	    # Attempt to start.
+	    printf "Starting ODB ${SPDB_VERSION_STR}"
+	    "${SPDB_EXEC}" 2>&1 > "${SPDB_DIR}/sysout.txt" &
+	    sleep_dots
+	    printf "\n"
+
+	    # Try to set the frameworklevel to 100.
+	    # This will also determine if the ODB started.
+	    echo "frameworklevel 100" | ncat "$SERVER" "$PORT" > /dev/null
+	    if [[ $? -eq 0 ]]; then
+		echo "ODB frameworklevel successfully set to 100."
+		echo "NOTE: It will take several minutes for the program database to load."
+		RETVAL=0
+	    else
+		echo "ODB failed to start properly."
+	    fi
+	else
+	    echo "Could not find a version of the ODB."
+	fi
+    fi
+
+    return $RETVAL
+}
+
+# Attempts to stop a running ODB.
+# 1. Check to see if there is an ODB running. If not, assume successful state.
+# 2. Use ncat to send a "stop 0" message to the running ODB.
+# 3. Check to see if there is an ODB running. If not, assume success.
+# 4. Send a SIGHUP to the ODB PID.
+# 5. Check to see if there is an ODB running. If not, assume success. Otherwise, report failure.
+# Returns 0 if no ODB is running by the end of this function, and nonzero (3) otherwise.
+stop ()
+{
+    # Assume success until all attempts fail.
+    RETVAL=0
+    
+    # Try to find the PID of a currently running ODB.
+    find_running_spdb
+    if [[ $? -ne 0 ]]; then
+	echo "ODB is not currently running."
+    else
+	# Use ncat to send a message to stop.
+	printf "Stopping ODB version ${SPDB_VER}"
+	echo "stop 0" | ncat "$SERVER" "$PORT" > /dev/null
+	sleep_dots
+	printf "\n"
+
+	# See if there is still a running SPDB
+	find_running_spdb
+	if [[ $? -ne 0 ]]; then
+	    echo "ODB stopped successfully."
+	else
+	    printf "ODB did not respond to stop message. Sending SIGHUP to PID: ${SPDB_PID}"
+	    kill -HUP "$SPDB_PID" > /dev/null
+	    sleep_dots
+	    printf "\n"
+	    
+	    # Check one last time for running SPDB.
+	    find_running_spdb
+	    if [[ $? -ne 0 ]]; then
+		echo "ODB stopped successfully."
+	    else
+		echo "ODB is still running and is unresponsive: version ${SPDB_VER} as PID ${SPDB_PID}."
+		RETVAL=3
+	    fi
+	    
+	fi
+    fi
+    
+    return $RETVAL
+}
+
+# Check the status of the ODB.
+# 1. Check to see if an ODB is running. If so, print the version and PID.
+# 2. If not, report that no ODB is running.
+# Returns 0 if an ODB is running, and nonzero (4) otherwise.
+status ()
+{
+    find_running_spdb
+    if [[ $? -eq 0 ]]; then
+	echo "ODB is running: version ${SPDB_VER} as PID ${SPDB_PID}."
+	RETVAL=0
+    else
+	echo "ODB is not currently running."
+	RETVAL=4
+    fi
+    return $RETVAL
+}
+
+# Stop / start the ODB.
+restart ()
+{
+    stop
+    start
+}
+
+
+case "$1" in
+    stop) stop ;;
+    status) status ;;
+    start) start ;;
+    restart) restart ;;
+    *) usage ;;
+esac
+
+exit $RETVAL

@@ -183,8 +183,7 @@ def rnorris(version: Version) = AppConfig(
     "-Dcron.reports.edu.gemini.spdb.reports.public.host=gnconfig.gemini.edu",
     "-Dcron.reports.edu.gemini.spdb.reports.public.remotedir=/gemsoft/var/data/www/public/reports/test",
     "-Dedu.gemini.site=south",
-    "-Xmx1024M",
-    "-XX:MaxPermSize=196M"
+    "-Xmx1024M"
   ),
   props = Map(
     "edu.gemini.auxfile.fits.host"               -> "gsconfig.gemini.edu",
@@ -205,7 +204,6 @@ def swalker(version: Version) = AppConfig(
   distribution = List(TestDistro),
   vmargs = List(
     "-Xmx1024M",
-    "-XX:MaxPermSize=196M",
     "-Dcom.cosylab.epics.caj.CAJContext.addr_list=172.17.2.255",
     "-Dedu.gemini.site=south",
     "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005",
@@ -236,7 +234,6 @@ def dnavarro(version: Version) = AppConfig(
   distribution = List(TestDistro),
   vmargs = List(
     "-Xmx1024M",
-    "-XX:MaxPermSize=196M",
     "-Dcom.cosylab.epics.caj.CAJContext.addr_list=172.17.2.255",
     "-Dedu.gemini.site=south",
     "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005",
@@ -267,7 +264,6 @@ def fnussber(version: Version) = AppConfig(
   distribution = List(TestDistro),
   vmargs = List(
     "-Xmx2000M",
-    "-XX:MaxPermSize=196M",
     "-Dedu.gemini.site=north",
     "-Dcron.*.edu.gemini.dbTools.html.ftpHost=localhost",
     "-Dcron.*.edu.gemini.dbTools.html.ftpDestDir=/Users/fnussberg/.spdb/sftp",
@@ -294,7 +290,6 @@ def sraaphorst(version: Version) = AppConfig(
   distribution = List(TestDistro),
    vmargs = List(
      "-Xmx1024M",
-     "-XX:MaxPermSize=196M",
      "-Dedu.gemini.site=south",
      "-Dcron.*.edu.gemini.dbTools.html.ftpHost=localhost",
      "-Dcron.*.edu.gemini.dbTools.html.ftpDestDir=/Users/sraaphorst/.spdb/sftp",
@@ -323,7 +318,6 @@ def cquiroz(version: Version) = AppConfig(
   distribution = List(TestDistro),
   vmargs = List(
     "-Xmx1024M",
-    "-XX:MaxPermSize=196M",
     "-Dedu.gemini.site=south"
   ),
   props = Map(
@@ -345,7 +339,6 @@ def jluhrs(version: Version) = AppConfig(
   distribution = List(TestDistro),
   vmargs = List(
     "-Xmx1024M",
-    "-XX:MaxPermSize=196M",
     "-Dedu.gemini.site=south"
   ),
   props = Map(
@@ -365,7 +358,6 @@ def anunez(version: Version) = AppConfig(
   distribution = List(TestDistro),
   vmargs = List(
     "-Xmx1024M",
-    "-XX:MaxPermSize=196M",
     "-Dcom.cosylab.epics.caj.CAJContext.addr_list=172.17.2.255",
     "-Dedu.gemini.site=south",
     "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005"
@@ -388,7 +380,6 @@ def astephens(version: Version) = AppConfig(
   distribution = List(TestDistro),
   vmargs = List(
     "-Xmx2048M",
-    "-XX:MaxPermSize=196M",
     "-Dedu.gemini.site=north",
     "-Djava.util.logging.config.file=/home/astephens/ocs/logging.properties",
     "-Dcron.*.edu.gemini.dbTools.html.ftpHost=localhost",
@@ -417,7 +408,6 @@ def osmirnova(version: Version) = AppConfig(
   distribution = List(TestDistro),
   vmargs = List(
     "-Xmx2000M",
-    "-XX:MaxPermSize=196M",
     "-Dedu.gemini.site=north",
     "-Dcron.*.edu.gemini.dbTools.html.ftpHost=localhost",
     "-Dcron.*.edu.gemini.dbTools.html.ftpDestDir=/Users/osmirnov/.spdb/sftp",
@@ -452,8 +442,7 @@ def odbtest(version: Version) = AppConfig(
     "-Dcron.reports.edu.gemini.spdb.reports.public.remotedir=/gemsoft/var/data/www/public/reports/test",
     "-Xms6G",
     "-Xmx14G",
-    "-XX:+UseConcMarkSweepGC",
-    "-XX:MaxPermSize=512M"
+    "-XX:+UseConcMarkSweepGC"
   ),
   props = Map(
     "edu.gemini.auxfile.root"                    -> "/home/software/ugemini/auxfile",
@@ -478,8 +467,7 @@ def odbproduction(version: Version) = AppConfig(
     "-Dcron.reports.edu.gemini.spdb.reports.public.remotedir=/gemsoft/var/data/www/public/reports",
     "-Xms6G",
     "-Xmx14G",
-    "-XX:+UseConcMarkSweepGC",
-    "-XX:MaxPermSize=512M"
+    "-XX:+UseConcMarkSweepGC"
   ),
   props = Map(
     "edu.gemini.dbTools.tcs.ephemeris.directory"       -> "/gemsoft/var/ephemerides",
