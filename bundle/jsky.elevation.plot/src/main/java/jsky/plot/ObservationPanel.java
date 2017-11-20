@@ -94,17 +94,6 @@ public class ObservationPanel extends JPanel implements LegendTitleUser, Printab
     // Controls the visibility of the graph legend
     private boolean _showLegend = true;
 
-//    // This is used for the tooltips on the bars
-//    private IntervalCategoryToolTipGenerator _tooltipGenerator = new IntervalCategoryToolTipGenerator() {
-//            public String generateToolTip(CategoryDataset data, int series, int category) {
-//                TargetDesc[] targets = _model.getTargets();
-//                if (category < targets.length) {
-//                    return targets[category].getDescription();
-//                }
-//                return "";
-//            }
-//        };
-
     // Use a custom chart renderer that uses the priority to determine the bar color
     // and marks the dark time as a darker grey area
     private GanttRenderer _renderer = new GanttRenderer() {
