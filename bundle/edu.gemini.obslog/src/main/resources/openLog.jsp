@@ -38,7 +38,7 @@
                 </a>
             </display:column>
 
-            <display:column title="Last Modified" property="lastmodified" sortable="true"/>
+            <display:column title="Last Modified (UTC)" property="lastmodified" sortable="true"/>
 
         </display:table>
 
