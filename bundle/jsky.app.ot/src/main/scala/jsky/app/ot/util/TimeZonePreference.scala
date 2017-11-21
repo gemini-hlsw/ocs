@@ -17,5 +17,5 @@ object TimeZonePreference {
 
   def getZoneId: ZoneId = get.toZoneId
 
-  def setZoneId(zi: ZoneId): Unit = pref.put("TimeZone", TimeZone.getTimeZone(zi).getID)
+  def setZoneId(zi: ZoneId): Unit = set(TimeZone.getTimeZone(zi))
 }

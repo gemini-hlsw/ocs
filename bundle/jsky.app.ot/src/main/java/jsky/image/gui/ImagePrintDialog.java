@@ -10,6 +10,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.print.*;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
 import javax.print.PrintService;
@@ -58,7 +59,7 @@ public class ImagePrintDialog implements Printable, ActionListener {
     private double _printOffsetX;
     private double _printOffsetY;
     private final DateTimeFormatter _dateFormatter = DateTimeFormatter.ofPattern("yyyy-MMM-dd HH:mm:ss")
-            .withZone(TimeZonePreference.getZoneId());
+            .withZone(ZoneId.systemDefault());
 
 
     /**

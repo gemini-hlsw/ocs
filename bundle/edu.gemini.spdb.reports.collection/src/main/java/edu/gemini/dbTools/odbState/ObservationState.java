@@ -173,7 +173,8 @@ public final class ObservationState implements Serializable {
         final StringBuilder buf = new StringBuilder();
         buf.append(startDay).append("/").append(endDay).append(" ");
 
-        final DateTimeFormatter f = DateTimeFormatter.ofPattern("MMM yyyy").withZone(ZoneId.of("UTC"));
+        // Do not need to explicitly set a ZoneId since we are only accessing MMM and yyyy.
+        final DateTimeFormatter f = DateTimeFormatter.ofPattern("MMM yyyy");
         buf.append(f.format(end));
 
         return buf.toString();
