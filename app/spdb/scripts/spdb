@@ -112,8 +112,8 @@ determine_spdb_directory ()
 # Returns 0 if running, and nonzero (1) otherwise.
 find_running_spdb ()
 {
-    SPDB_PID=`psjava | awk '{ printf $2; }'`
-    SPDB_VER=`psjava | sed "s/^.*\(spdb_[^_]*\).*/\1/"`
+    SPDB_PID=`psjava | grep spdb | awk '{ printf $2; }'`
+    SPDB_VER=`psjava | grep spdb | sed "s/^.*\(spdb_[^_]*\).*/\1/"`
     if [[ -n "$SPDB_PID" ]]; then
 	return 0
     else
