@@ -169,7 +169,7 @@ start ()
 		COMMAND="frameworklevel 100"
 		MSG="ODB frameworklevel successfully set to 100."
 	    else
-		COMMAND='echo "echo"'
+		COMMAND="echo"
 		MSG="Test ODB successfully started."
 	    fi
 	    
