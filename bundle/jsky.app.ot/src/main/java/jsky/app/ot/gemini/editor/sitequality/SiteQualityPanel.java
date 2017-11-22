@@ -4,6 +4,7 @@ import edu.gemini.shared.gui.ButtonFlattener;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.*;
 import jsky.app.ot.editor.type.SpTypeUIUtil;
+import jsky.util.DateUtil;
 import jsky.util.gui.Resources;
 
 import javax.swing.*;
@@ -159,7 +160,7 @@ final class SiteQualityPanel extends JPanel {
                 getColumnModel().getColumn(0).setMinWidth(175);
                 owner.addPropertyChangeListener(e -> model.setSiteQuality(owner.getDataObject()));
                 setRowSorter(new TableRowSorter<TimingWindowTableModel>(model) {{
-                    setComparator(0, TimingWindowTableModel.START_DATE_COMPARATOR);
+                    setComparator(0, DateUtil.createComparator(DateUtil.TIMING_WINDOW_START));
                 }});
             }};
 
@@ -301,10 +302,6 @@ class TimingWindowTableModel extends DefaultTableModel implements PropertyChange
     private static final long MS_PER_MINUTE = MS_PER_SECOND * 60;
     private static final long MS_PER_HOUR = MS_PER_MINUTE * 60;
 
-    private static final DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MMM-dd HH:mm:ss z")
-            .withZone(ZoneId.of("UTC"));
-    public static final Comparator<String> START_DATE_COMPARATOR = Comparator.comparingLong(s -> ZonedDateTime.parse(s, dateFormat).toEpochSecond());
-
     private SPSiteQuality sq;
 
     void setSiteQuality(final SPSiteQuality siteQuality) {
@@ -384,6 +381,6 @@ class TimingWindowTableModel extends DefaultTableModel implements PropertyChange
     }
 
     private static String formatWindow(final TimingWindow tw) {
-        return dateFormat.format(Instant.ofEpochMilli(tw.getStart()));
+        return DateUtil.TIMING_WINDOW_START.format(Instant.ofEpochMilli(tw.getStart()));
     }
 }

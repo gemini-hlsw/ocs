@@ -1,7 +1,11 @@
 package jsky.util;
 
 import java.text.SimpleDateFormat;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -12,6 +16,14 @@ import java.util.TimeZone;
 public final class DateUtil {
     // Static access only.
     private DateUtil() {
+    }
+
+    // Used for timing window formatting.
+    public static DateTimeFormatter TIMING_WINDOW_START = DateTimeFormatter.ofPattern("yyyy-MMM-dd HH:mm:ss z").withZone(ZoneId.of("UTC"));
+
+    // Create a Comparator<String> from a DateTimeFormatter.
+    public static Comparator<String> createComparator(final DateTimeFormatter df) {
+        return Comparator.comparingLong(s -> ZonedDateTime.parse(s, df).toEpochSecond());
     }
 
     /**

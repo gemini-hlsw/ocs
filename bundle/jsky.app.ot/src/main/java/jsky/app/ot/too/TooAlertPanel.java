@@ -17,7 +17,7 @@ import java.util.TimeZone;
  */
 public final class TooAlertPanel extends JPanel {
     private static final String TIME_ONLY_PATTERN = "HH:mm:ss";
-    private static final String TIME_DATE_PATTERN = "YYYY-MMM-dd HH:mm:ss";
+    private static final String TIME_DATE_PATTERN = "yyyy-MMM-dd HH:mm:ss";
     private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
 
     private static String formatTimeOnly(long time) {
