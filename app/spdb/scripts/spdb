@@ -41,12 +41,14 @@ sleep_dots ()
 # 1. SPDB_DIR is set to the path of the spdb directory.
 # 2. SPDB_VERSION is set to the version string (e.g. 1.2.3).
 # 4. SPDB_EXEC is set to the path to the binary.
+# 5. SPDB_TEST indicates whether the ODB is a test release (1) or production release (0).
 determine_spdb_directory ()
 {
     local SPDB_DIRS=($(ls -d /home/software/spdb*))
     unset SPDB_DIR
     unset SPDB_LOCKFILE
     unset SPDB_VERSION_STR
+    unset SPDB_TEST
     SPDB_SEMESTER=0000A
     SPDB_VERSION=(0 0 0)
     
@@ -59,6 +61,12 @@ determine_spdb_directory ()
 	if [[ "$CURR_SEMESTER" < "$SPDB_SEMESTER" ]]; then
 	    continue
 	fi
+
+	# Determine if this is a test version or not.
+	echo "$CURR_DIR" | grep -v test
+	CURR_TEST=$?
+
+	# Extract the version string.
 	CURR_VERSION_STR=`echo $CURR_DIR | sed "s/^[^.]*\.\([^_]*\).*$/\1/"`
 	if [[ -z "$CURR_VERSION_STR" ]]; then
 	    continue
@@ -89,6 +97,7 @@ determine_spdb_directory ()
 	
 	# We have encountered a newer version.
 	SPDB_SEMESTER=$CURR_SEMESTER
+	SPDB_TEST=$CURR_TEST
 	SPDB_VERSION_STR=$CURR_VERSION_STR
 	SPDB_VERSION=(${CURR_VERSION[@]})
 	SPDB_DIR=$CURR_DIR
@@ -154,11 +163,19 @@ start ()
 	    sleep_dots
 	    printf "\n"
 
-	    # Try to set the frameworklevel to 100.
+	    # If this is a production release, try to set the frameworklevel to 100.
 	    # This will also determine if the ODB started.
-	    echo "frameworklevel 100" | ncat "$SERVER" "$PORT" > /dev/null
+	    if [[ "$SPDB_TEST" -eq 0 ]]; then
+		COMMAND="frameworklevel 100"
+		MSG="ODB frameworklevel successfully set to 100."
+	    else
+		COMMAND='echo "echo"'
+		MSG="Test ODB successfully started."
+	    fi
+	    
+	    echo "$COMMAND" | ncat "$SERVER" "$PORT" > /dev/null
 	    if [[ $? -eq 0 ]]; then
-		echo "ODB frameworklevel successfully set to 100."
+		echo $MSG
 		echo "NOTE: It will take several minutes for the program database to load."
 		RETVAL=0
 	    else
