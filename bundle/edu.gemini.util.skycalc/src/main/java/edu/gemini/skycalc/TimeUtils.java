@@ -1,6 +1,5 @@
 package edu.gemini.skycalc;
 
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -267,5 +266,4 @@ public class TimeUtils {
     public static String print(Long time, TimeZone timeZone) {
         return print(time, timeZone, "yyyy-MM-dd HH:mm:ss");
     }
-
 }

@@ -33,6 +33,7 @@ import jsky.util.DateUtil;
 
 import java.io.File;
 import java.io.Serializable;
+import java.time.Instant;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -618,7 +619,7 @@ public final class Schedule extends BaseMutableBean implements PioSerializable, 
         sb.append(getSite().displayName);
         if (!isEmpty()) {
             sb.append(" - ");
-            sb.append(DateUtil.formatUTCyyyymmdd(getEnd()));
+            sb.append(DateUtil.YYYY_MM_DD_UTC_Formatter().format(Instant.ofEpochMilli(getEnd())));
         }
         return sb.toString();
     }

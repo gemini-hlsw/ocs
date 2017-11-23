@@ -578,8 +578,8 @@ public class ElevationPanel extends JPanel implements LegendTitleUser, Printable
                                  final Date endDate,   final String endDateName,
                                  float alpha, Color color) {
         final DateFormat df = ((DateAxis)xyPlot.getDomainAxis()).getDateFormatOverride();
-        final Date startDateRounded = DateUtil.roundToNearestMinute(startDate, _model.getTimeZone());
-        final Date endDateRounded   = DateUtil.roundToNearestMinute(endDate,   _model.getTimeZone());
+        final Date startDateRounded = DateUtil.nearestMinute(startDate, _model.getTimeZone());
+        final Date endDateRounded   = DateUtil.nearestMinute(endDate,   _model.getTimeZone());
 
         final double startRounded = startDate.getTime();
         final double endRounded   = endDate.getTime();
