@@ -1,7 +1,3 @@
-//
-// $Id$
-//
-
 package jsky.app.ot.too;
 
 import edu.gemini.skycalc.TwilightBoundedNight;
@@ -12,17 +8,16 @@ import edu.gemini.spModel.obs.ObsSchedulingReport;
 
 import javax.swing.*;
 import java.awt.*;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.TimeZone;
-import java.util.Date;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 
 /**
  * A panel that displays a TOO alert according to the spec in SCT-233.
  */
 public final class TooAlertPanel extends JPanel {
     private static final String TIME_ONLY_PATTERN = "HH:mm:ss";
-    private static final String TIME_DATE_PATTERN = "yyyy/MM/dd HH:mm:ss";
+    private static final String TIME_DATE_PATTERN = "yyyy-MMM-dd HH:mm:ss";
     private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
 
     private static String formatTimeOnly(long time) {
@@ -34,9 +29,8 @@ public final class TooAlertPanel extends JPanel {
     }
 
     private static String format(long time, TimeZone zone, String pattern) {
-        DateFormat f = new SimpleDateFormat(pattern);
-        f.setTimeZone(zone);
-        return f.format(new Date(time));
+        final DateTimeFormatter f = DateTimeFormatter.ofPattern(pattern).withZone(zone.toZoneId());
+        return f.format(Instant.ofEpochMilli(time));
     }
 
     public TooAlertPanel(ObsSchedulingReport report) {

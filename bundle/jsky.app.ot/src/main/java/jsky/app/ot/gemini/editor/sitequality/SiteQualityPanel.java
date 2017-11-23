@@ -4,10 +4,12 @@ import edu.gemini.shared.gui.ButtonFlattener;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.*;
 import jsky.app.ot.editor.type.SpTypeUIUtil;
+import jsky.util.DateUtil;
 import jsky.util.gui.Resources;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableRowSorter;
 import javax.swing.text.DefaultFormatter;
 import java.awt.*;
 import java.beans.PropertyChangeEvent;
@@ -15,8 +17,10 @@ import java.beans.PropertyChangeListener;
 import java.text.NumberFormat;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 final class SiteQualityPanel extends JPanel {
@@ -155,7 +159,9 @@ final class SiteQualityPanel extends JPanel {
             final JTable table = new JTable(model) {{
                 getColumnModel().getColumn(0).setMinWidth(175);
                 owner.addPropertyChangeListener(e -> model.setSiteQuality(owner.getDataObject()));
-                setAutoCreateRowSorter(true);
+                setRowSorter(new TableRowSorter<TimingWindowTableModel>(model) {{
+                    setComparator(0, DateUtil.createComparator(DateUtil.TIMING_WINDOW_START));
+                }});
             }};
 
             add(new JLabel("Timing Windows"), new GBC(0, 7));
@@ -296,8 +302,6 @@ class TimingWindowTableModel extends DefaultTableModel implements PropertyChange
     private static final long MS_PER_MINUTE = MS_PER_SECOND * 60;
     private static final long MS_PER_HOUR = MS_PER_MINUTE * 60;
 
-    private static final DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss z").withZone(ZoneId.of("UTC"));
-
     private SPSiteQuality sq;
 
     void setSiteQuality(final SPSiteQuality siteQuality) {
@@ -377,6 +381,6 @@ class TimingWindowTableModel extends DefaultTableModel implements PropertyChange
     }
 
     private static String formatWindow(final TimingWindow tw) {
-        return dateFormat.format(Instant.ofEpochMilli(tw.getStart()));
+        return DateUtil.TIMING_WINDOW_START.format(Instant.ofEpochMilli(tw.getStart()));
     }
 }

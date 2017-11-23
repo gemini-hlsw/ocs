@@ -1,6 +1,3 @@
-//
-// $Id: ObservationState.java 46768 2012-07-16 18:58:53Z rnorris $
-//
 package edu.gemini.dbTools.odbState;
 
 import edu.gemini.pot.sp.ISPObservation;
@@ -15,10 +12,12 @@ import org.dom4j.DocumentFactory;
 import org.dom4j.Element;
 
 import java.io.Serializable;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoField;
+import java.time.temporal.ChronoUnit;
 
 public final class ObservationState implements Serializable {
     private static final long serialVersionUID = 2;
@@ -144,42 +143,39 @@ public final class ObservationState implements Serializable {
     }
 
     /**
-     * Gets a formated string that indicates the night during which the
+     * Gets a formatted string that indicates the night during which the
      * observation took place.
      * @param time utc time of the last observation event message
      * @return formatted string indicating the night during which the
      * observation took place.
      */
     private static String _getNight(final long time) {
-        final Calendar cal = GregorianCalendar.getInstance();
-        cal.setTimeInMillis(time);
+        // Determine when, in the local time zone, the time started:
+        // If the time is before noon, then the night started on the previous day.
+        // If the time is after noon, then the night ends on the next day.
+        // Note: AM is 0, PM is 1 by documentation for ChronoField.
+        final LocalDateTime dt = LocalDateTime.ofInstant(Instant.ofEpochMilli(time), ZoneId.systemDefault());
+        final int ampm = dt.get(ChronoField.AMPM_OF_DAY);
 
-        // The calendar is in the local time zone.  If the time is before
-        // noon, then the night started on the previous day.  If the time
-        // is after noon, then the night ends on the next day.
-        final int ampm = cal.get(Calendar.AM_PM);
-
-        final Calendar endCal;
-
-        final int startDay;
-        final int endDay;
-        if (ampm == Calendar.AM) {
-            endCal = (Calendar) cal.clone();
-            endDay = cal.get(Calendar.DAY_OF_MONTH);
-            cal.add(Calendar.DAY_OF_MONTH, -1);
-            startDay = cal.get(Calendar.DAY_OF_MONTH);
+        final LocalDateTime start;
+        final LocalDateTime end;
+        if (ampm == 0) {
+            start = dt.minus(1, ChronoUnit.DAYS);
+            end   = dt;
         } else {
-            startDay = cal.get(Calendar.DAY_OF_MONTH);
-            cal.add(Calendar.DAY_OF_MONTH, 1);
-            endCal = cal;
-            endDay = cal.get(Calendar.DAY_OF_MONTH);
+            start = dt;
+            end   = dt.plus(1, ChronoUnit.DAYS);
         }
+
+        final int startDay = start.get(ChronoField.DAY_OF_MONTH);
+        final int endDay   = end.get(ChronoField.DAY_OF_MONTH);
 
         final StringBuilder buf = new StringBuilder();
         buf.append(startDay).append("/").append(endDay).append(" ");
 
-        final DateFormat f = new SimpleDateFormat("MMM yyyy");
-        buf.append(f.format(endCal.getTime()));
+        // Do not need to explicitly set a ZoneId since we are only accessing MMM and yyyy.
+        final DateTimeFormatter f = DateTimeFormatter.ofPattern("MMM yyyy");
+        buf.append(f.format(end));
 
         return buf.toString();
     }

@@ -2,12 +2,8 @@ package edu.gemini.obslog.obslog;
 
 import java.io.Serializable;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-
-//
-// Gemini Observatory/AURA
-// $Id: DBNightlyPlanInfo.java,v 1.2 2005/04/19 19:52:28 gillies Exp $
-//
 
 public class DBNightlyPlanInfo implements Serializable, Comparable<DBNightlyPlanInfo> {
 
@@ -22,7 +18,8 @@ public class DBNightlyPlanInfo implements Serializable, Comparable<DBNightlyPlan
     // last modified timestamp
     private long _timestamp;
 
-    private static DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MMM-dd HH:hh:ss");
+    private static DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MMM-dd HH:mm:ss")
+            .withZone(ZoneId.of("UTC"));
 
     private String _lastModified;
 

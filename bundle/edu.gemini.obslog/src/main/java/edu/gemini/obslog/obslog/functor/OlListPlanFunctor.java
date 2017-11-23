@@ -13,10 +13,6 @@ import java.util.*;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
-//
-// Gemini Observatory/AURA
-// $Id: OlListPlanFunctor.java,v 1.2 2006/10/17 21:37:11 shane Exp $
-//
 
 public class OlListPlanFunctor extends DBAbstractQueryFunctor implements IDBParallelFunctor {
 
@@ -25,7 +21,7 @@ public class OlListPlanFunctor extends DBAbstractQueryFunctor implements IDBPara
 
     List<DBNightlyPlanInfo> getPlans() {
         if (_result == null) {
-            _result = new ArrayList<DBNightlyPlanInfo>();
+            _result = new ArrayList<>();
         }
         return _result;
     }

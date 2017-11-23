@@ -8,6 +8,7 @@ import edu.gemini.spModel.pio.Pio;
 import edu.gemini.spModel.pio.PioFactory;
 
 import java.time.Instant;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
 /**
@@ -16,7 +17,8 @@ import java.time.format.DateTimeFormatter;
  */
 public final class Block implements Comparable<Block>, IntervalType<Block>, PioSerializable {
 
-    private static final DateTimeFormatter FORMAT = DateTimeFormatter.ofPattern("yyyy-MMM-dd HH:mm");
+    private static final DateTimeFormatter FORMAT = DateTimeFormatter.ofPattern("yyyy-MMM-dd HH:mm")
+            .withZone(ZoneId.of("UTC"));
     private static final String PROP_START = "start";
     private static final String PROP_END = "end";
 

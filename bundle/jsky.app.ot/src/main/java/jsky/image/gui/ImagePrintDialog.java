@@ -10,6 +10,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.print.*;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
 import javax.print.PrintService;
@@ -17,6 +18,7 @@ import javax.print.PrintServiceLookup;
 import javax.print.attribute.HashPrintRequestAttributeSet;
 import javax.swing.JComponent;
 
+import jsky.app.ot.util.TimeZonePreference;
 import jsky.coords.WorldCoordinateConverter;
 import jsky.coords.WorldCoords;
 import jsky.util.I18N;
@@ -32,7 +34,7 @@ import jsky.util.gui.ProgressPanel;
  */
 public class ImagePrintDialog implements Printable, ActionListener {
 
-    // Used to access internationalized strings (see i18n/gui*.proprties)
+    // Used to access internationalized strings (see i18n/gui*.properties)
     private static final I18N _I18N = I18N.getInstance(ImagePrintDialog.class);
 
     // Base name of file used to store printer settings (under ~/.jsky)
@@ -56,7 +58,8 @@ public class ImagePrintDialog implements Printable, ActionListener {
     private boolean _newPrint;
     private double _printOffsetX;
     private double _printOffsetY;
-    private final DateTimeFormatter _dateFormatter = DateTimeFormatter.ofPattern("yyyy-MMM-dd HH:mm:ss");
+    private final DateTimeFormatter _dateFormatter = DateTimeFormatter.ofPattern("yyyy-MMM-dd HH:mm:ss")
+            .withZone(ZoneId.systemDefault());
 
 
     /**
