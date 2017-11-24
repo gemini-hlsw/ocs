@@ -135,9 +135,9 @@ public class ElevationPlotModel {
     /** Return a title based on the site and the date */
     public String getTitle() {
         return _site.mountain + ": Night of "
-                + TITLE_FORMAT.format(_sunRiseSet.nauticalTwilightStart)
+                + TITLE_FORMAT.format(_startDate)
                 + " ⟶ "
-                + TITLE_FORMAT.format(_sunRiseSet.nauticalTwilightEnd);
+                + TITLE_FORMAT.format(_endDate);
     }
 
 
