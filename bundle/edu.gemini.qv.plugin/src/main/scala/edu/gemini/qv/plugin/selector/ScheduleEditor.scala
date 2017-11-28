@@ -1,20 +1,25 @@
 package edu.gemini.qv.plugin.selector
 
+import java.time.Instant
+
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.qv.plugin.{QvContext, QvTool}
 import edu.gemini.qv.plugin.ui.QvGui.Instructions
-import edu.gemini.qv.plugin.ui.{QvGui, CalendarDialog}
+import edu.gemini.qv.plugin.ui.{CalendarDialog, QvGui}
 import edu.gemini.qv.plugin.util.ScheduleCache._
-import edu.gemini.qv.plugin.util.{SolutionProvider, ScheduleCache}
+import edu.gemini.qv.plugin.util.{ScheduleCache, SolutionProvider}
 import edu.gemini.services.client.TelescopeSchedule.Constraint
 import edu.gemini.services.client._
 import edu.gemini.shared.gui.monthview.DateSelectionMode
-import edu.gemini.skycalc.TimeUtils
 import edu.gemini.spModel.core.ProgramId
 import edu.gemini.spModel.gemini.inst.InstRegistry
 import edu.gemini.util.skycalc.calc.Interval
 import javax.swing.BorderFactory
+
+import edu.gemini.shared.util.DateTimeUtils
+
 import scala.collection.JavaConversions._
+import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.swing.GridBagPanel.Anchor._
 import scala.swing.GridBagPanel.Fill._
@@ -196,9 +201,11 @@ class ScheduleEditor(ctx: QvContext, scheduleCache: ScheduleCache) extends Dialo
 
   def constraintsPanel(constraints: Seq[Constraint]) = new GridBagPanel {
     constraints.zipWithIndex.foreach({case (i, y) =>
-      val s = TimeUtils.print(i.start, ctx.site.timezone())
-      val e = TimeUtils.print(i.end, ctx.site.timezone())
-      val l = new TextArea(s"${s} - ${e}")
+      val z = ctx.site.timezone.toZoneId
+      val formatter = DateTimeUtils.YYYY_MMM_DD_HHMMSS_Formatter.withZone(z)
+      val s = formatter.format(Instant.ofEpochMilli(i.start))
+      val e = formatter.format(Instant.ofEpochMilli(i.end))
+      val l = new TextArea(s"$s - $e")
       val del = new Button( new Action("") {
         icon = QvGui.DelIcon
         def apply() = delConstraint(i)
@@ -245,8 +252,8 @@ class ScheduleEditor(ctx: QvContext, scheduleCache: ScheduleCache) extends Dialo
       start <- cd.startDate
       end <- cd.endDate
     } yield {
-      val s = start + TimeUtils.hours(14)
-      val e = end + TimeUtils.hours(14) + TimeUtils.days(2)
+      val s = start + 14.hours.toMillis
+      val e = end   + 14.hours.toMillis + 2.days.toMillis
       addConstraint(createConstraint(Interval(s, e)))
     }
   }

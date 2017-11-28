@@ -1,11 +1,12 @@
 package edu.gemini.qv.plugin
 package filter.core
 
+import java.time.Instant
+
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.qpt.shared.sp.{Band, Obs, Prog}
 import edu.gemini.qv.plugin.QvStore.NamedElement
 import edu.gemini.qv.plugin.util.SolutionProvider
-import edu.gemini.skycalc.TimeUtils
 import edu.gemini.spModel.core.Semester.Half
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
@@ -27,7 +28,10 @@ import edu.gemini.spModel.too.TooType
 import edu.gemini.spModel.`type`.DisplayableSpType
 import java.util.TimeZone
 
+import edu.gemini.shared.util.DateTimeUtils
+
 import scala.collection.JavaConversions._
+import scala.concurrent.duration._
 import edu.gemini.spModel.gemini.gmos.GmosCommonType.DetectorManufacturer
 
 
@@ -243,7 +247,7 @@ object Filter {
   // =======================  *** Set time filter ***
   case class SetTime(ctx: QvContext, min: Double = 0, max: Double = 15) extends SimpleRangeFilter {
     def label = "Set Time Hrs"
-    def getter = (o: Obs, ctx: QvContext) => TimeUtils.asHours(SolutionProvider(ctx).remainingHours(ctx, o).getOrElse(min.toLong))
+    def getter = (o: Obs, ctx: QvContext) => SolutionProvider(ctx).remainingHours(ctx, o).getOrElse(min.toLong).toDouble / DateTimeUtils.MillisecondsPerHour
     def lowest = 0
     def highest = Double.MaxValue
     override def desc = "Filter for targets with number of hours before the target sets tonight in the range min ≤ hours < max."
@@ -277,7 +281,7 @@ object Filter {
   /** Filters on the number of hours this observation is still observable. */
   case class RemainingHours(ctx: QvContext, min: Double = 0, max: Double = 24, enabled: Boolean = false, thisSemester: Boolean = true, nextSemester: Boolean = false) extends RemainingTimeFilter {
     def label = "Rem. Hours"
-    def getter = (o: Obs, ctx: QvContext) => TimeUtils.asHours(SolutionProvider(ctx).remainingTime(ctx, o, thisSemester, nextSemester))
+    def getter = (o: Obs, ctx: QvContext) => SolutionProvider(ctx).remainingTime(ctx, o, thisSemester, nextSemester).toDouble / DateTimeUtils.MillisecondsPerHour
     override def desc = "Show only observations which are observable for a number of hours in the range min ≤ hours < max."
   }
 
@@ -389,7 +393,7 @@ object Filter {
 
   // =======================  Enumeration Filters =======================
 
-  private val year = TimeUtils.year(TimeUtils.calendar(System.currentTimeMillis, TimeZone.getDefault)) - 8
+  private val year = Instant.now.atZone(DateTimeUtils.DefaultZone).getYear - 8
   private val yearRange = Range(year, year + 10)
   private val semesters: Set[Semester] = yearRange.flatMap(year => Set(new Semester(year, Half.A), new Semester(year, Half.B))).toSet
   object Semester extends EnumFilterFactory[Semester](

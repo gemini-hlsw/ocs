@@ -2,17 +2,20 @@ package edu.gemini.qv.plugin.charts
 
 import edu.gemini.qv.plugin.chart.Chart._
 import edu.gemini.qv.plugin.chart._
-import edu.gemini.qv.plugin.charts.util.{QvChartFactory, ColorCoding}
+import edu.gemini.qv.plugin.charts.util.{ColorCoding, QvChartFactory}
 import edu.gemini.qv.plugin.data.{CategorizedXYValues, FilterProvider}
 import edu.gemini.qv.plugin.filter.core.Filter
 import edu.gemini.qv.plugin.filter.core.Filter.{HasDummyTarget, RA}
 import edu.gemini.qv.plugin.QvContext
 import edu.gemini.qv.plugin.selector.OptionsSelector
-import edu.gemini.qv.plugin.selector.OptionsSelector.{DarkHours, AvailableHours, RaAsLst, EmptyCategories}
+import edu.gemini.qv.plugin.selector.OptionsSelector.{AvailableHours, DarkHours, EmptyCategories, RaAsLst}
 import edu.gemini.qv.plugin.util.SemesterData
-import edu.gemini.skycalc.TimeUtils
 import edu.gemini.util.skycalc.calc.Interval
 import java.awt.Color
+import java.time.Instant
+import java.time.format.DateTimeFormatter
+
+import edu.gemini.shared.util.DateTimeUtils
 import org.jfree.chart.JFreeChart
 import org.jfree.chart.axis.CategoryLabelPositions
 import org.jfree.chart.plot.DatasetRenderingOrder
@@ -66,11 +69,11 @@ class HistogramChart(ctx: QvContext, xAxis: Axis, yAxis: Axis, calculation: Calc
 
     // try to use the same color for each group even if some groups are added/removed
     // (use the indices of the visible groups in the seq of all groups on the y-axis)
-    visibleYGroups.zipWithIndex.foreach({case (f, ix) => {
+    visibleYGroups.zipWithIndex.foreach({case (f, ix) =>
       val code = colorCoding.code(f)
       renderer.setSeriesPaint(ix, code.color)
       renderer.setSeriesOutlinePaint(ix, Color.darkGray)
-    }})
+    })
 
     chart
   }
@@ -83,13 +86,13 @@ class HistogramChart(ctx: QvContext, xAxis: Axis, yAxis: Axis, calculation: Calc
     val values: Seq[(Filter, Filter, Double)] = for {
       xGroup <- visibleXGroups
       yGroup <- visibleYGroups
-    } yield ((xGroup, yGroup, categorizedData.data.getOrElse(xGroup, empty).getOrElse(yGroup, 0.toDouble)))
+    } yield (xGroup, yGroup, categorizedData.data.getOrElse(xGroup, empty).getOrElse(yGroup, 0.toDouble))
 
     // add values in correct order
     values.foreach({v => data.addValue(
       v._3,
-      new ChartItem(yName(v._2), v._2),
-      new ChartItem(xName(v._1), v._1))}
+      ChartItem(yName(v._2), v._2),
+      ChartItem(xName(v._1), v._1))}
     )
 
     data
@@ -109,10 +112,11 @@ class HistogramChart(ctx: QvContext, xAxis: Axis, yAxis: Axis, calculation: Calc
     if (details.isSelected(EmptyCategories)) categorizedData.yCategories
     else categorizedData.activeYGroups
 
+  private val MMMddFormatter = DateTimeFormatter.ofPattern("MMM/dd").withZone(ctx.site.timezone.toZoneId)
   private def xName(f: Filter) = f match {
     case f: RA if details.isSelected(RaAsLst) =>
       val optLst = SemesterData.lst(ctx.site, range, f)
-      optLst.map(TimeUtils.print(_, ctx.site.timezone(), "MMM/dd")).getOrElse(f.name)
+      optLst.map(l => MMMddFormatter.format(Instant.ofEpochMilli(l))).getOrElse(f.name)
     case _ =>
       f.name
   }
@@ -126,27 +130,27 @@ class HistogramChart(ctx: QvContext, xAxis: Axis, yAxis: Axis, calculation: Calc
 
   private def scienceTimeDataSet = {
     val d = new DefaultCategoryDataset
-    categorizedData.xCategories.map(group => group match {
+    categorizedData.xCategories.foreach {
       case ra: RA =>
-        val seconds = SemesterData.scienceTime(ctx.site, range, ra) / 1000
-        d.addValue(seconds.toDouble/3600.0, "Available", ChartItem(xName(group), group))
+        val seconds = SemesterData.scienceTime(ctx.site, range, ra) / DateTimeUtils.MillisecondsPerSecond
+        d.addValue(seconds.toDouble / DateTimeUtils.SecondsPerHour, "Available", ChartItem(xName(ra), ra))
 
-      case _ =>
-        d.addValue(null, "Available", ChartItem(xName(group), group))
-    })
+      case other =>
+        d.addValue(null, "Available", ChartItem(xName(other), other))
+    }
     d
   }
 
   private def darkTimeDataSet = {
     val d = new DefaultCategoryDataset
-    categorizedData.xCategories.map(group => group match {
+    categorizedData.xCategories.foreach {
       case ra: RA =>
-        val seconds = SemesterData.darkTime(ctx.site, range, ra) / 1000
-        d.addValue(seconds.toDouble/3600.0, "Dark", ChartItem(xName(group), group))
+        val seconds = SemesterData.darkTime(ctx.site, range, ra) / DateTimeUtils.MillisecondsPerSecond
+        d.addValue(seconds.toDouble/DateTimeUtils.SecondsPerHour, "Dark", ChartItem(xName(ra), ra))
 
-      case _ =>
-        d.addValue(null, "Dark", ChartItem(xName(group), group))
-    })
+      case other =>
+        d.addValue(null, "Dark", ChartItem(xName(other), other))
+    }
     d
   }
 

@@ -1,10 +1,13 @@
 package edu.gemini.util.skycalc.calc
 
 import edu.gemini.spModel.core.{Coordinates, Site}
-import edu.gemini.skycalc.{ImprovedSkyCalc, TimeUtils}
+import edu.gemini.skycalc.ImprovedSkyCalc
 import java.util.Date
 
 import edu.gemini.util.skycalc.calc.TargetCalculator.Fields
+
+import scala.concurrent.duration._
+
 
 /**
  * Target calculator that allows to calculate different attributes of a target for a given interval at a given sampling
@@ -164,7 +167,7 @@ object TargetCalculator {
     val Elevation, Azimuth, Airmass, LunarDistance, ParallacticAngle, HourAngle, SkyBrightness = Value
   }
 
-  def apply(site: Site, targetLocation: Long => Coordinates, defined: Interval, rate: Long = TimeUtils.seconds(30)) = {
+  def apply(site: Site, targetLocation: Long => Coordinates, defined: Interval, rate: Long = 30.seconds.toMillis) = {
     new IntervalTargetCalculator(site, targetLocation, defined, rate)
   }
   def apply(site: Site, targetLocation: Long => Coordinates, time: Long): TargetCalculator = {

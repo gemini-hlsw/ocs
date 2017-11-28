@@ -1,7 +1,8 @@
 package edu.gemini.util.skycalc.calc
 
-import edu.gemini.skycalc.TimeUtils
 import java.util.TimeZone
+
+import edu.gemini.shared.util.DateTimeUtils
 
 /**
  * Representation of an interval between two points in time, including the start time and excluding the end time
@@ -57,10 +58,10 @@ case class Interval(start: Long, end: Long) extends Ordered[Interval] {
   }
 
   /** Gets duration of interval as hours. */
-  def asHours: Double = duration.toDouble / TimeUtils.hours(1)
+  def asHours: Double = duration.toDouble / DateTimeUtils.MillisecondsPerHour
 
   /** Gets duration of interval as days. */
-  def asDays: Double = duration.toDouble / TimeUtils.days(1)
+  def asDays: Double = duration.toDouble / DateTimeUtils.MillisecondsPerDay
 }
 
 object Interval {
@@ -143,8 +144,8 @@ object Interval {
     // blow intervals up to cover 24hrs (or multiples thereof); days start/end at 14hrs local time
     def blowUp(interval: Interval): Interval =
       Interval(
-        TimeUtils.startOfDay(interval.start, localTime),
-        TimeUtils.endOfDay(interval.end, localTime)
+        DateTimeUtils.startOfDayInMs(interval.start, localTime.toZoneId),
+        DateTimeUtils.endOfDayInMs  (interval.end,   localTime.toZoneId)
       )
 
     // note that a single interval can stretch several days (e.g. for time windows)

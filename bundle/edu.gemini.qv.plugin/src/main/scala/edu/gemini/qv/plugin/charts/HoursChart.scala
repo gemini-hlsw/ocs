@@ -6,17 +6,21 @@ import edu.gemini.qv.plugin.charts.util._
 import edu.gemini.qv.plugin.filter.core.Filter
 import edu.gemini.qv.plugin.QvContext
 import edu.gemini.qv.plugin.selector.OptionsSelector.MoonHours
-import edu.gemini.qv.plugin.selector.{TimeRangeSelector, ConstraintsSelector, OptionsSelector}
+import edu.gemini.qv.plugin.selector.{ConstraintsSelector, OptionsSelector, TimeRangeSelector}
 import edu.gemini.qv.plugin.ui.QvGui
 import edu.gemini.qv.plugin.util.SolutionProvider
-import edu.gemini.skycalc.TimeUtils
 import edu.gemini.util.skycalc.Night
 import edu.gemini.util.skycalc.calc.Solution
 import java.awt.{BasicStroke, Color}
+
+import edu.gemini.shared.util.DateTimeUtils
 import org.jfree.chart._
 import org.jfree.chart.axis.DateAxis
 import org.jfree.chart.plot.XYPlot
-import scala.Some
+
+import scala.concurrent.duration._
+import scalaz._
+import Scalaz._
 
 /**
  * Bar charts are essentially one form of visibility plots which show when an observation (or a group of observations)
@@ -43,7 +47,7 @@ case class HoursChart(ctx: QvContext, nights: Seq[Night], observations: Set[Obs]
 
     // main curve: hours between nautical twilights (science time)
     val renderer1 = XYPlotter.lineRenderer(Color.gray, new BasicStroke(6))
-    plotter.plotFunction(MainHourAxis, renderer1, new NightlyFunction(nights, n => TimeUtils.asHours(n.scienceTime.duration)))
+    plotter.plotFunction(MainHourAxis, renderer1, new NightlyFunction(nights, n => n.scienceTime.duration.milliseconds.toHours))
     val riseInRenderer = colorCoding.lineRenderer(ctx, orderedObs, SolidThickStroke)
     val riseOutRenderer = colorCoding.lineRenderer(ctx, orderedObs, SolidThinStroke, Some(Color.gray))
     val funcs = orderedObs.map(o => {
@@ -79,14 +83,9 @@ case class HoursChart(ctx: QvContext, nights: Seq[Night], observations: Set[Obs]
       case _ => // Ignore
     }
 
-  private def moonHours(n: Night): Option[Double] = {
-    val dur = n.moonAboveHorizon.restrictTo(n.scienceTime).duration // moon hours during science time
-    Some(TimeUtils.asHours(dur))
-  }
+  private def moonHours(n: Night): Option[Double] =
+    (n.moonAboveHorizon.restrictTo(n.scienceTime).duration.toDouble / DateTimeUtils.MillisecondsPerHour).some // moon hours during science time
 
-  private def hours(o: Obs, s: Solution)(n: Night): Option[Double] = {
-    val hrs = TimeUtils.asHours(s.restrictTo(n.interval).duration)
-    Some(hrs)
-  }
-
+  private def hours(o: Obs, s: Solution)(n: Night): Option[Double] =
+    (s.restrictTo(n.interval).duration.toDouble / DateTimeUtils.MillisecondsPerHour).some
 }

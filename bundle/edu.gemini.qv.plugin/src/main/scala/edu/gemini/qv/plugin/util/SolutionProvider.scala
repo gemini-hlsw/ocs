@@ -4,16 +4,16 @@ import java.net.URI
 
 import edu.gemini.qpt.shared.sp.Obs
 import edu.gemini.qv.plugin.QvContext
-import edu.gemini.qv.plugin.ui.QvGui
 import edu.gemini.qv.plugin.util.ConstraintsCache._
 import edu.gemini.qv.plugin.util.ScheduleCache.ScheduleEvent
 import edu.gemini.qv.plugin.util.SolutionProvider.{ConstraintType, ValueType}
 import edu.gemini.services.client.TelescopeSchedule
-import edu.gemini.skycalc.TimeUtils
+import edu.gemini.shared.util.DateTimeUtils
 import edu.gemini.spModel.core.{Peer, Site}
 import edu.gemini.util.skycalc.Night
 import edu.gemini.util.skycalc.calc._
 
+import scala.concurrent.duration._
 import scala.concurrent.Future
 import scala.swing.Publisher
 
@@ -41,8 +41,8 @@ sealed class SolutionProvider(site: Site) extends Publisher {
   // ====================================================================
   // the default start of our range is today and it goes on for a year
   val range: Interval = {
-    val start = TimeUtils.startOfDay(System.currentTimeMillis(), site.timezone)
-    val end = TimeUtils.endOfDay(start + TimeUtils.days(364), site.timezone)
+    val start = DateTimeUtils.startOfDayInMs(System.currentTimeMillis(), site.timezone.toZoneId)
+    val end = DateTimeUtils.endOfDayInMs(start + 364.days.toMillis, site.timezone.toZoneId)
     // update semester data accordingly
     SemesterData.update(site, Interval(start, end))
     Interval(start, end)
@@ -92,7 +92,7 @@ sealed class SolutionProvider(site: Site) extends Publisher {
     if (nights.nonEmpty) {
       solution(nights, ctx.selectedConstraints, obs).intervals.
         filter(i => i.end > now).
-        map(i => TimeUtils.startOfDay(i.start, ctx.site.timezone())).
+        map(i => DateTimeUtils.startOfDayInMs(i.start, ctx.site.timezone.toZoneId)).
         toSet.size
     } else 0
   }
@@ -147,9 +147,9 @@ sealed class SolutionProvider(site: Site) extends Publisher {
 
   // Note: See note for minElevationFor()
   private def minDurationFor(n: Night, o: Obs) =
-    if (o.getLGS && n.site == Site.GS) TimeUtils.minutes(60)  // minimal science time for GeMS (LGS + site = GS): 60 minutes
-    else if (o.getLGS) TimeUtils.minutes(30)                  // minimal science time for Altair + LGS: 30 minutes
-    else TimeUtils.minutes(30)                                // minimal science time for everything else: 30 minutes
+    if (o.getLGS && n.site == Site.GS) 60.minutes.toMillis    // minimal science time for GeMS (LGS + site = GS): 60 minutes
+    else if (o.getLGS) 30.minutes.toMillis                    // minimal science time for Altair + LGS: 30 minutes
+    else 30.minutes.toMillis                                  // minimal science time for everything else: 30 minutes
 
 }
 

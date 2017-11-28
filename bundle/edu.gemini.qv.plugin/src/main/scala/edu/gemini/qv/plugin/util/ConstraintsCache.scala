@@ -10,8 +10,7 @@ import edu.gemini.qv.plugin.util.ConstraintsCache.ConstraintCalculationEnd
 import edu.gemini.qv.plugin.util.ConstraintsCache.ConstraintCalculationProgress
 import edu.gemini.qv.plugin.util.ConstraintsCache.ConstraintCalculationStart
 import edu.gemini.qv.plugin.util.SolutionProvider.{ConstraintType, ValueType}
-import edu.gemini.skycalc.TimeUtils
-import edu.gemini.spModel.core.{Coordinates, Peer, Site}
+import edu.gemini.spModel.core.{Coordinates, Site}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.TimingWindow
 import edu.gemini.util.skycalc.calc._
@@ -21,6 +20,7 @@ import edu.gemini.util.skycalc.Night
 import scala.collection.concurrent
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent._
+import scala.concurrent.duration._
 import scala.swing.Swing._
 import scala.swing.event.Event
 import scala.swing.{Publisher, Swing}
@@ -185,25 +185,25 @@ class ConstraintsCache(allNights: Seq[Night]) extends Publisher {
 
     // restrict all calculations to time between nautical twilights (science time)
     val bounds = night.scienceTime
-    val tc = TargetCalculator(night.site, target, bounds, TimeUtils.minutes(10))
+    val tc = TargetCalculator(night.site, target, bounds, 10.minutes.toMillis)
 
     // return a tuple with all values of interest
     (
       // calculate and return the three constraints for AboveHorizon, SkyBrightness and Elevation
       {
-        ElevationConstraint(0, Double.MaxValue, TimeUtils.minutes(3)).solve(bounds, tc)
+        ElevationConstraint(0, Double.MaxValue, 3.minutes.toMillis).solve(bounds, tc)
       },
       {
         val minSb = Conds.getBrightestMagnitude(o.getConditions.getSB)
-        SkyBrightnessConstraint(minSb, Double.MaxValue, TimeUtils.minutes(3)).solve(bounds, tc)
+        SkyBrightnessConstraint(minSb, Double.MaxValue, 3.minutes.toMillis).solve(bounds, tc)
       },
       {
         val min = o.getElevationConstraintMin
         val max = o.getElevationConstraintMax
         o.getElevationConstraintType match {
-          case NONE       => ElevationConstraint(minElevationFor(night, o), Double.MaxValue, TimeUtils.minutes(3)).solve(bounds, tc)
-          case HOUR_ANGLE => HourAngleConstraint(min, max, TimeUtils.minutes(3)).solve(bounds, tc)
-          case AIRMASS    => AirmassConstraint(min, max, TimeUtils.minutes(3)).solve(bounds, tc)
+          case NONE       => ElevationConstraint(minElevationFor(night, o), Double.MaxValue, 3.minutes.toMillis).solve(bounds, tc)
+          case HOUR_ANGLE => HourAngleConstraint(min, max, 3.minutes.toMillis).solve(bounds, tc)
+          case AIRMASS    => AirmassConstraint(min, max, 3.minutes.toMillis).solve(bounds, tc)
         }
       },
 

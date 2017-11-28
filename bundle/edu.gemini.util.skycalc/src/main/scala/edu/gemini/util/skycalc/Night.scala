@@ -1,11 +1,16 @@
 package edu.gemini.util.skycalc
 
-import edu.gemini.skycalc.{ImprovedSkyCalc, TimeUtils}
+import java.time.Instant
+import java.util.Date
+
+import edu.gemini.skycalc.ImprovedSkyCalc
 import edu.gemini.spModel.core.Site
 import edu.gemini.util.skycalc.Night._
-import edu.gemini.util.skycalc.calc.{Solution, MoonCalculator, Interval, SunCalculator}
+import edu.gemini.util.skycalc.calc.{Interval, MoonCalculator, Solution, SunCalculator}
 import edu.gemini.util.skycalc.constraint.MoonElevationConstraint
-import java.util.{Calendar, GregorianCalendar, Date}
+import edu.gemini.shared.util.DateTimeUtils
+
+import scala.concurrent.duration._
 
 //
 // SW: I would like to refactor this class but it is used heavily in QV, which
@@ -49,8 +54,8 @@ case class Night(site: Site, date: Long, bound: Bound = SunsetSunrise) {
     case AstronomicalTwilight => Interval(astroTwilightStart, astroTwilightEnd)
   }
 
-  val dayStart: Long = TimeUtils.startOfDay(date, site.timezone())
-  val dayEnd: Long = TimeUtils.endOfDay(date, site.timezone())
+  val dayStart: Long = DateTimeUtils.startOfDayInMs(date, site.timezone.toZoneId)
+  val dayEnd: Long   = DateTimeUtils.endOfDayInMs(date, site.timezone.toZoneId)
 
   /** Sunset, start of the night. */
   val sunset: Long = sunCalc.set
@@ -127,7 +132,7 @@ case class Night(site: Site, date: Long, bound: Bound = SunsetSunrise) {
 
   /** Solution with interval moon is above horizon for this night. */
   lazy val moonAboveHorizon: Solution =
-    MoonElevationConstraint(0, Double.MaxValue, TimeUtils.minutes(3)).solve(interval, moonCalculator)
+    MoonElevationConstraint(0, Double.MaxValue, 3.minutes.toMillis).solve(interval, moonCalculator)
 
   /** Local sidereal time at the middle of the night (ie. halfway between sunset and sunrise). */
   lazy val lstMiddleNightTime: Long = {
@@ -137,12 +142,11 @@ case class Night(site: Site, date: Long, bound: Bound = SunsetSunrise) {
 
   /** Local sidereal time as a fraction of 24hrs at the middle of the night (ie. halfway between sunset and sunrise). */
   lazy val lst: Double = {
-    val cal = new GregorianCalendar(site.timezone)
-    cal.setTimeInMillis(lstMiddleNightTime)
-    val hrs = cal.get(Calendar.HOUR_OF_DAY)
-    val min = cal.get(Calendar.MINUTE)
-    val sec = cal.get(Calendar.SECOND)
-    hrs.toDouble + min.toDouble / 60.0 + sec.toDouble / 3600.0
+    val zdt = Instant.ofEpochMilli(lstMiddleNightTime).atZone(site.timezone.toZoneId)
+    val hrs = zdt.getHour
+    val min = zdt.getMinute
+    val sec = zdt.getSecond
+    hrs.toDouble + min.toDouble / DateTimeUtils.MinutesPerHour + sec.toDouble / DateTimeUtils.SecondsPerHour
   }
 
   /** A moon calculator for this night. See {@link MoonCalculator} for details. */

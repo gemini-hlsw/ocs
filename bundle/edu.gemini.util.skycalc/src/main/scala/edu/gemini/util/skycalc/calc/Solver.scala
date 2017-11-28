@@ -1,7 +1,8 @@
 package edu.gemini.util.skycalc.calc
 
-import edu.gemini.skycalc.TimeUtils
 import edu.gemini.util.skycalc.constraint.Constraint
+
+import scala.concurrent.duration._
 
 /**
  * Representation of an algorithm that finds all intervals between a start and end point in time for which a given
@@ -17,7 +18,7 @@ trait Solver[A] {
  * for complex functions which can have an arbitrary amount of separate intervals for which the constraint
  * meats its criteria (e.g. Sky Background).
  */
-case class DefaultSolver[A](step: Long = TimeUtils.seconds(30)) extends Solver[A] {
+case class DefaultSolver[A](step: Long = 30.seconds.toMillis) extends Solver[A] {
   require(step > 0)
 
   def solve(constraint: Constraint[A], interval: Interval, param: A): Solution = {
@@ -44,7 +45,7 @@ case class DefaultSolver[A](step: Long = TimeUtils.seconds(30)) extends Solver[A
  * Finds a solution for a constraint on a parabolic curve that crosses that constraint
  * at most twice during the given interval. This is true for all basic elevation constraints for a single night.
  */
-case class ParabolaSolver[A](tolerance: Long = TimeUtils.seconds(30)) extends Solver[A] {
+case class ParabolaSolver[A](tolerance: Long = 30.seconds.toMillis) extends Solver[A] {
   require(tolerance > 0)
 
   def solve(constraint: Constraint[A], interval: Interval, param: A): Solution = {

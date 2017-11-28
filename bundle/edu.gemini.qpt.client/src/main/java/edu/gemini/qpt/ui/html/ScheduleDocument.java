@@ -11,7 +11,6 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TimeZone;
@@ -24,6 +23,7 @@ import edu.gemini.lch.services.model.*;
 import edu.gemini.qpt.core.listeners.LimitsListener;
 import edu.gemini.qpt.shared.sp.Obs;
 import edu.gemini.qpt.core.util.LttsServicesClient;
+import edu.gemini.shared.util.DateTimeUtils;
 import edu.gemini.shared.util.StringUtil;
 import jsky.coords.WorldCoords;
 import edu.gemini.qpt.core.Alloc;
@@ -152,7 +152,7 @@ public class ScheduleDocument {
      */
     // LCH-1324
     private List<String> getNonScienceTargetsWithDifferentClearance(Observation observation, ClearanceWindow clearance) {
-        List<String> names = new ArrayList<String>();
+        List<String> names = new ArrayList<>();
         LaserTarget scienceLaserTarget = observation.getScienceTarget().getLaserTarget();
         for (ObservationTarget t : observation.getTargetsSortedByType()) {
             // only look at observation targets with a laser target different from the science target
@@ -175,10 +175,10 @@ public class ScheduleDocument {
         String fmt = "HH:mm:ss";
         LaserTarget scienceTarget = observation.getScienceTarget().getLaserTarget();
         for (Visibility.Interval visibility : scienceTarget.getVisibility().getAboveLaserLimit()) {
-            long vStart = visibility.getStart().getTime() / 1000; // get rid of milliseconds
-            long vEnd   = visibility.getEnd().getTime() / 1000;
-            long cStart = clearance.getStart().getTime() / 1000;
-            long cEnd   = clearance.getEnd().getTime() / 1000;
+            long vStart = visibility.getStart().getTime() / DateTimeUtils.MillisecondsPerSecond(); // get rid of milliseconds
+            long vEnd   = visibility.getEnd().getTime() / DateTimeUtils.MillisecondsPerSecond();
+            long cStart = clearance.getStart().getTime() / DateTimeUtils.MillisecondsPerSecond();
+            long cEnd   = clearance.getEnd().getTime() / DateTimeUtils.MillisecondsPerSecond();
             // check if target rises above laser limit during this clearance window
             if (vStart > cStart && vStart < cEnd) {
                 return "(rises above " + LimitsListener.MIN_ELEVATION_ERROR_LIMIT + "&deg; at "
@@ -268,11 +268,7 @@ public class ScheduleDocument {
 
     public SortedSet<Marker> getMarkers(Alloc a) {
         SortedSet<Marker> ret = a.getMarkers();
-        for (Iterator<Marker> it = ret.iterator(); it.hasNext(); ) {
-            Marker marker = it.next();
-            if (marker.isQcOnly() && !showQcMarkers)
-                it.remove();
-        }
+        ret.removeIf(m -> m.isQcOnly() && !showQcMarkers);
         return ret;
     }
 
@@ -301,7 +297,7 @@ public class ScheduleDocument {
 
     public SortedSet<Object> getEvents(Variant v) {
 
-        SortedSet<Object> ret = new TreeSet<Object>(new Comparator<Object>() {
+        SortedSet<Object> ret = new TreeSet<>(new Comparator<Object>() {
 
             public int compare(Object o1, Object o2) {
                 long t1 = time(o1), t2 = time(o2);
@@ -444,16 +440,6 @@ public class ScheduleDocument {
         return getDateRangeString(new Date(start), new Date(end));
     }
 
-//	public static void main(String[] args) {
-//		ScheduleDocument doc = new ScheduleDocument(null, null, null, null);
-//		long start = System.currentTimeMillis();
-//		long end = start + 1;
-//		for (int i = 1; i < 30; i++) {
-//			System.out.println(doc.getDateRangeString(start, end));
-//			end += TimeUtils.MS_PER_DAY * 7;
-//		}
-//	}
-
     public String getStyle(Object o) {
 
         if (o instanceof Alloc) {
@@ -475,7 +461,7 @@ public class ScheduleDocument {
 
 
     public SortedSet<String> getUniqueConfigs(Variant v) {
-        SortedSet<String> ret = new TreeSet<String>();
+        SortedSet<String> ret = new TreeSet<>();
         for (Alloc a : v.getAllocs())
             ret.add(a.getObs().getInstrumentStringWithConfig().replace("\u03BB", "&lambda;"));
         return ret;

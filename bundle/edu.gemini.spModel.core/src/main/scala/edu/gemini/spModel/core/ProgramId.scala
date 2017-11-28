@@ -1,6 +1,8 @@
 package edu.gemini.spModel.core
 
-import java.util.{GregorianCalendar, Calendar}
+import java.time.ZonedDateTime
+import java.time.temporal.ChronoUnit
+
 import scala.util.Try
 
 sealed trait ProgramId {
@@ -52,12 +54,10 @@ object ProgramId {
     def site: Option[Site]         = Some(siteVal)
 
     val (start, end) = {
-      val cal = new GregorianCalendar(siteVal.timezone())
-      cal.set(year, month-1, day, Semester.SWITCH_OVER_HOUR, 0, 0) // 0-based month in Calendar
-      cal.set(Calendar.MILLISECOND, 0)
-      val e = cal.getTimeInMillis
-      cal.add(Calendar.DAY_OF_MONTH, -1) // starts afternoon of previous day
-      (cal.getTimeInMillis, e)
+      val zdt = ZonedDateTime.of(year, month, day, Semester.SWITCH_OVER_HOUR, 0, 0, 0, siteVal.timezone.toZoneId).truncatedTo(ChronoUnit.SECONDS)
+      val e = zdt.toInstant.toEpochMilli
+      val s = zdt.minus(1, ChronoUnit.DAYS).toInstant.toEpochMilli
+      (s, e)
     }
 
     def includes(t: Long): Boolean = start <= t && t < end

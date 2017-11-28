@@ -1,9 +1,11 @@
 package edu.gemini.util.skycalc.calc
 
+import edu.gemini.shared.util.DateTimeUtils
 import edu.gemini.spModel.core.Site
 import org.junit.Test
 import org.junit.Assert._
-import edu.gemini.skycalc.TimeUtils
+
+import scala.concurrent.duration._
 
 /**
  * Compare some random values with results from http://catserver.ing.iac.es/staralt/index.php
@@ -14,7 +16,7 @@ class MoonCalculatorTest {
 
   @Test
   def calculatesMoon(): Unit = {
-    val t = TimeUtils.time(2014, 3, 14, 20, 0, Site.GN.timezone)
+    val t = DateTimeUtils.timeInMs(2014, 3, 14, 20, 0, 0, Site.GN.timezone.toZoneId)
     val moon = MoonCalculator(Site.GN, t)
 
     // check definition interval
@@ -28,8 +30,8 @@ class MoonCalculatorTest {
 
   @Test
   def calculatesMoonInterval(): Unit = {
-    val t = TimeUtils.time(2014, 3, 14, 20, 0, Site.GN.timezone)
-    val interval = Interval(t, t + TimeUtils.hours(4))
+    val t = DateTimeUtils.timeInMs(2014, 3, 14, 20, 0, 0, Site.GN.timezone.toZoneId)
+    val interval = Interval(t, t + 4.hours.toMillis)
     val moon = MoonCalculator(Site.GN, interval)
 
     // check definition interval
@@ -46,9 +48,9 @@ class MoonCalculatorTest {
 
   @Test
   def calculatesMoonPhases(): Unit = {
-    val t = TimeUtils.time(2014, 2, 1, 14, 0, Site.GN.timezone)
-    val interval = Interval(t, t + TimeUtils.weeks(9))
-    val moon = MoonCalculator(Site.GN, interval, TimeUtils.days(1))
+    val t = DateTimeUtils.timeInMs(2014, 2, 1, 14, 0, 0, Site.GN.timezone.toZoneId)
+    val interval = Interval(t, t + 63.days.toMillis)
+    val moon = MoonCalculator(Site.GN, interval, 1.day.toMillis)
 
     // quantitative test: there should be two occurrences of each phase in the given 9 weeks period
     assertEquals(2, moon.newMoons.size)
@@ -57,10 +59,10 @@ class MoonCalculatorTest {
     assertEquals(2, moon.lastQuarterMoons.size)
 
     // check date of full moons
-    val full1 = TimeUtils.time(2014, 2, 14, 6, 26, Site.GN.timezone)
-    val full2 = TimeUtils.time(2014, 3, 15, 19, 11, Site.GN.timezone)
-    assertEquals(full1, moon.fullMoons(0), TimeUtils.hours(1))
-    assertEquals(full2, moon.fullMoons(1), TimeUtils.hours(1))
+    val full1 = DateTimeUtils.timeInMs(2014, 2, 14, 6, 26, 0, Site.GN.timezone.toZoneId)
+    val full2 = DateTimeUtils.timeInMs(2014, 3, 15, 19, 11, 0, Site.GN.timezone.toZoneId)
+    assertEquals(full1, moon.fullMoons(0), DateTimeUtils.MillisecondsPerHour)
+    assertEquals(full2, moon.fullMoons(1), DateTimeUtils.MillisecondsPerHour)
 
     // check that illumination corresponds to full moon phase
     assertEquals(1.0, moon.illuminatedFractionAt(full1), 0.1)  // expect high illumination

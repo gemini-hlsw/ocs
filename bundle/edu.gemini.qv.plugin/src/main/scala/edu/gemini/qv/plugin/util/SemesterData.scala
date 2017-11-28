@@ -1,11 +1,11 @@
 package edu.gemini.qv.plugin.util
 
 import edu.gemini.qv.plugin.filter.core.Filter.RA
-import edu.gemini.skycalc.TimeUtils
 import edu.gemini.spModel.core.Semester
 import edu.gemini.spModel.core.Site
 import edu.gemini.util.skycalc.Night
 import edu.gemini.util.skycalc.calc.Interval
+
 import scala.annotation.tailrec
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
@@ -34,7 +34,7 @@ case class SemesterData(site: Site, semester: Semester) {
 
   private def createNights(site: Site, cur: Long, end: Long): Seq[Night] =
     if (cur == end || cur > end) Seq()
-    else Seq(new Night(site, cur)) ++: createNights(site, cur + TimeUtils.days(1), end)
+    else Seq(new Night(site, cur)) ++: createNights(site, cur + 1.day.toMillis, end)
 
 }
 
@@ -59,7 +59,7 @@ object SemesterData {
     val nights = nightsForRa(site, range, ra)
     val duration = nights.
       map(_.darkScienceTime).                 // get dark science time for every night
-      filter(_ >= TimeUtils.minutes(30)).     // only register if there are more than 30 minutes available
+      filter(_ >= 30.minutes.toMillis).       // only register if there are more than 30 minutes available
       sum                                     // (anything less is too short for running an observation)
     (duration/nights.size * 365.0/(24.0/(ra.max - ra.min))).toInt
   }
@@ -111,7 +111,7 @@ object SemesterData {
 
   def current(site: Site, currentTime: Long = System.currentTimeMillis()): SemesterData = semesters(site, currentTime, currentTime).head
 
-  def next(site: Site): SemesterData = semesters(site, System.currentTimeMillis(), System.currentTimeMillis() + TimeUtils.days(185))(1)
+  def next(site: Site): SemesterData = semesters(site, System.currentTimeMillis(), System.currentTimeMillis() + 185.days.toMillis)(1)
 
   /**
    * The actual cache.
@@ -138,7 +138,7 @@ object SemesterData {
      * the semester data available we can't do much anyways, so we can just as well throw a TimeoutException).
      */
     def get(site: Site, semester: Semester): SemesterData =  {
-      Await.result(semestersMap((site, semester)), 90 seconds)
+      Await.result(semestersMap((site, semester)), 90.seconds)
     }
 
     /**

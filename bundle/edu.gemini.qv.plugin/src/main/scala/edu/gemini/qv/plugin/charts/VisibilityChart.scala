@@ -7,7 +7,6 @@ import edu.gemini.qv.plugin.selector.{ConstraintsSelector, OptionsSelector}
 import edu.gemini.qv.plugin.ui.QvGui
 import edu.gemini.qv.plugin.util.ScheduleCache._
 import edu.gemini.qv.plugin.util.SolutionProvider
-import edu.gemini.skycalc.TimeUtils
 import edu.gemini.spModel.core.ProgramType.Classical
 import edu.gemini.spModel.core.Site
 import edu.gemini.util.skycalc._
@@ -15,6 +14,8 @@ import edu.gemini.util.skycalc.calc._
 import java.awt.image.BufferedImage
 import java.awt.{BasicStroke, Color, GradientPaint, Paint}
 import java.text.SimpleDateFormat
+import java.time.format.DateTimeFormatter
+import java.time.{Instant, ZonedDateTime}
 import java.util.TimeZone
 import javax.swing.JPanel
 
@@ -25,6 +26,9 @@ import org.jfree.chart.axis._
 import org.jfree.chart.plot._
 import org.jfree.data.xy.{XYSeries, XYSeriesCollection}
 import org.jfree.ui.{Layer, RectangleAnchor, RectangleInsets, TextAnchor}
+
+import scala.concurrent.duration._
+
 
 trait VisibilityXYChart extends VisibilityChart with XYAxes {
 
@@ -126,8 +130,8 @@ trait VisibilityChart {
   val details: OptionsSelector
   val constraints: ConstraintsSelector
 
-  val start: Long = nights.headOption.map(_.sunset).getOrElse(System.currentTimeMillis() - TimeUtils.hours(12))
-  val end: Long = nights.lastOption.map(_.sunrise).getOrElse(System.currentTimeMillis() + TimeUtils.hours(12))
+  val start: Long = nights.headOption.map(_.sunset).getOrElse(System.currentTimeMillis() - 12.hours.toMillis)
+  val end: Long = nights.lastOption.map(_.sunrise).getOrElse(System.currentTimeMillis() + 12.hours.toMillis)
   val duration: Interval = Interval(start, end)
 
   /** Initialise the tick marks on the date axis the way we want them. */
@@ -235,24 +239,24 @@ trait VisibilityChart {
     }
 
     val interval = Interval(start, end)
-    TimeUtils.asDays(interval.duration) match {
+    interval.duration.milliseconds.toDays match {
       case d if d <= 1 => {
         val moonCalc = MoonCalculator(site, (end + start)/2)
         val illumination = moonCalc.illuminatedFraction
         val waxing = moonCalc.phaseAngle > 180
-        val moonIconx = moonIcon(end - TimeUtils.minutes(20), illumination, waxing)
-        val moonLabel = new XYTextAnnotation(f"${illumination*100}%3.0f%%", moonIconx.getX + TimeUtils.minutes(12), yPos)
+        val moonIconx = moonIcon(end - 20.minutes.toMillis, illumination, waxing)
+        val moonLabel = new XYTextAnnotation(f"${illumination*100}%3.0f%%", moonIconx.getX + 12.minutes.toMillis, yPos)
         Seq(moonIconx, moonLabel)
       }
       case d if d <= 15 => {
-        val phases = Interval(start - TimeUtils.days(15), end)
+        val phases = Interval(start - 15.days.toMillis, end)
         MoonCalculator.newMoons(site, phases).map(t => moonIcon(t, 0, waxing=false)) ++
         MoonCalculator.fullMoons(site, phases).map(t => moonIcon(t, 1, waxing=false)) ++
         MoonCalculator.firstQuarterMoons(site, phases).map(t => moonIcon(t, 0.5, waxing=true)) ++
         MoonCalculator.lastQuarterMoons(site, phases).map(t => moonIcon(t, 0.5, waxing=false))
       }
       case _ => {
-        val phases = Interval(start - TimeUtils.days(15), end)
+        val phases = Interval(start - 15.days.toMillis, end)
         MoonCalculator.newMoons(site, phases).map(t => moonIcon(t, 0, waxing=false)) ++
         MoonCalculator.fullMoons(site, phases).map(t => moonIcon(t, 1, waxing=false))
       }
@@ -260,17 +264,22 @@ trait VisibilityChart {
   }
 
   protected def title(label: String): String = {
-    val zone = site.timezone
-    val s = TimeUtils.calendar(start, zone)
-    val e = TimeUtils.calendar(end, zone)
-    val equalY = TimeUtils.year(s) == TimeUtils.year(e)
-    val equalM = TimeUtils.month(s) == TimeUtils.month(e)
-    val equalD = TimeUtils.day(s) == TimeUtils.day(e)
+    val zone = site.timezone.toZoneId
+
+    val MMMddyyyyFormatter = DateTimeFormatter.ofPattern("MMM dd yyyy").withZone(zone)
+    val MMMddFormatter     = DateTimeFormatter.ofPattern("MMM dd")     .withZone(zone)
+    val ddyyyyFormatter    = DateTimeFormatter.ofPattern("dd yyyy")    .withZone(zone)
+
+    val s = ZonedDateTime.ofInstant(Instant.ofEpochMilli(start), zone)
+    val e = ZonedDateTime.ofInstant(Instant.ofEpochMilli(end),   zone)
+    val equalY = s.getYear       == e.getYear
+    val equalM = s.getMonth      == e.getMonth
+    val equalD = s.getDayOfMonth == e.getDayOfMonth
     val dates = (equalY, equalM, equalD) match {
-      case (true,  true,  true ) => TimeUtils.print(s, "MMM dd yyyy")
-      case (true,  true,  false) => TimeUtils.print(s, "MMM dd - ") + TimeUtils.print(e, "dd yyyy")
-      case (true,  false, _    ) => TimeUtils.print(s, "MMM dd - ") + TimeUtils.print(e, "MMM dd yyyy")
-      case (false, _,     _    ) => TimeUtils.print(s, "MMM dd yyyy - ") + TimeUtils.print(e, "MMM dd yyyy")
+      case (true,  true,  true ) => MMMddyyyyFormatter.format(s)
+      case (true,  true,  false) => MMMddFormatter.format(s) + " - " + ddyyyyFormatter.format(e)
+      case (true,  false, _    ) => MMMddFormatter.format(s) + " - " + MMMddyyyyFormatter.format(e)
+      case (false, _,     _    ) => MMMddyyyyFormatter.format(s) + " - " + MMMddyyyyFormatter.format(e)
     }
     s"$label $dates"
   }

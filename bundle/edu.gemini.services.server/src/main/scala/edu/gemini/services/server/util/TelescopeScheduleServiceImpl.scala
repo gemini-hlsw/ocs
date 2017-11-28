@@ -7,7 +7,7 @@ import edu.gemini.services.client.Calendar.{AllDayEvent, Entry}
 import edu.gemini.services.client.TelescopeSchedule.{LaserConstraint, LaserSchedule, ShutdownSchedule, _}
 import edu.gemini.services.client._
 import edu.gemini.services.server.telescope.LttsService
-import edu.gemini.skycalc.TimeUtils
+import edu.gemini.shared.util.DateTimeUtils
 import edu.gemini.spModel.core.ProgramId
 import edu.gemini.spModel.gemini.inst.InstRegistry
 import edu.gemini.util.skycalc.calc.Interval
@@ -54,14 +54,14 @@ class TelescopeScheduleServiceImpl(calendarService: CalendarService, lttsService
   def getScheduleUrl: URI = calendarUrl
 
   def addConstraint(constraint: Constraint): Unit = {
-    val s = constraint.start - TimeUtils.hours(TimeUtils.START_OF_DAY_HR)
-    val e = constraint.end - TimeUtils.hours(TimeUtils.START_OF_DAY_HR)
+    val s = constraint.start - DateTimeUtils.StartOfDayHourInMs
+    val e = constraint.end - DateTimeUtils.StartOfDayHourInMs
     calendar.addEvent(Calendar.AllDayEvent(labelFor(constraint), Interval(s, e)))
   }
 
   def deleteConstraint(constraint: Constraint): Unit = {
-    val s = constraint.start - TimeUtils.hours(TimeUtils.START_OF_DAY_HR)
-    val e = constraint.end - TimeUtils.hours(TimeUtils.START_OF_DAY_HR)
+    val s = constraint.start - DateTimeUtils.StartOfDayHourInMs
+    val e = constraint.end - DateTimeUtils.StartOfDayHourInMs
     calendar.deleteEvent(Calendar.AllDayEvent(labelFor(constraint), Interval(s, e)))
   }
 
@@ -108,8 +108,8 @@ class TelescopeScheduleServiceImpl(calendarService: CalendarService, lttsService
 
   private def transformAllDayEvents(e: Entry): Entry = e match {
     case AllDayEvent(summary, interval) =>
-      val start = interval.start + TimeUtils.hours(TimeUtils.START_OF_DAY_HR)
-      val end   = interval.end + TimeUtils.hours(TimeUtils.START_OF_DAY_HR)
+      val start = interval.start + DateTimeUtils.StartOfDayHourInMs
+      val end   = interval.end + DateTimeUtils.StartOfDayHourInMs
       AllDayEvent(summary, Interval(start, end))
     case e => e
   }

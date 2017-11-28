@@ -1,22 +1,24 @@
 package edu.gemini.qv.plugin.table.renderer
 
 import edu.gemini.pot.sp.SPComponentType
-import edu.gemini.qpt.shared.sp.{Band, Prog, Obs}
+import edu.gemini.qpt.shared.sp.{Band, Obs, Prog}
 import edu.gemini.qv.plugin.ui.QvGui
-import edu.gemini.skycalc.TimeUtils
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
-import edu.gemini.spModel.gemini.gmos.{GmosSouthType, GmosNorthType}
+import edu.gemini.spModel.gemini.gmos.{GmosNorthType, GmosSouthType}
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams
 import edu.gemini.spModel.gemini.michelle.MichelleParams
 import edu.gemini.spModel.gemini.nici.NICIParams
 import edu.gemini.spModel.gemini.niri.Niri
-import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.{SkyBackground, ElevationConstraintType, WaterVapor}
+import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.{ElevationConstraintType, SkyBackground, WaterVapor}
 import edu.gemini.spModel.gemini.trecs.TReCSParams
 import edu.gemini.spModel.`type`.DisplayableSpType
 import java.awt.Color
 import java.util.UUID
 import javax.swing.JTextPane
 import javax.swing.text.{MutableAttributeSet, StyleConstants}
+
+import edu.gemini.shared.util.DateTimeUtils
+
 import scala.collection.JavaConversions._
 import scala.swing.{Component, TextArea}
 
@@ -110,7 +112,7 @@ object EncodedObservationsRenderer extends CellRenderer {
     }
 
     /** Encoded the observations planned time. */
-    private def encTime(o: Obs): String = TimeUtils.msToHHMM(o.getRemainingTime)
+    private def encTime(o: Obs): String = DateTimeUtils.msToHHMM(o.getRemainingTime)
 
     /**
      * Encodes an instrument configuration.

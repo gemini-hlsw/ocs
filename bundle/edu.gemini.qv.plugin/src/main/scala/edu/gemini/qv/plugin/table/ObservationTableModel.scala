@@ -1,14 +1,15 @@
 package edu.gemini.qv.plugin
 package table
 
-import java.util.{Comparator, TimeZone}
+import java.time.Instant
+import java.util.Comparator
 import javax.swing.table.{AbstractTableModel, TableRowSorter}
 
 import edu.gemini.qpt.shared.sp.{Band, Obs}
 import edu.gemini.qv.plugin.util.SolutionProvider
-import edu.gemini.skycalc.TimeUtils
+import edu.gemini.shared.util.DateTimeUtils
 import edu.gemini.spModel.`type`.{DisplayableSpType, LoggableSpType}
-import edu.gemini.spModel.core.{Affiliate, Angle, Coordinates}
+import edu.gemini.spModel.core.{Affiliate, Angle}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.{ElevationConstraintType, TimingWindow}
 import jsky.coords.DMS
 
@@ -314,15 +315,15 @@ object ObservationTableModel {
 
   /** Convert timing windows into human readable string. */
   private def timingWindowsAsString(o: Obs): String = {
-    def formatTime(t: Long): String = TimeUtils.print(t, TimeZone.getTimeZone("UTC"), "yyyy-MM-dd HH:mm")
+    def formatTime(t: Long): String = DateTimeUtils.YYYY_MMM_DD_HHMM_Formatter.format(Instant.ofEpochMilli(t))
     def twToString(tw: TimingWindow): String = {
       formatTime(tw.getStart) + {
         if (tw.getDuration == TimingWindow.WINDOW_REMAINS_OPEN_FOREVER) " and remains open forever"
-        else s" + ${TimeUtils.msToHHMM(tw.getDuration)}" + {
+        else s" + ${DateTimeUtils.msToHHMM(tw.getDuration)}" + {
           tw.getRepeat match {
             case TimingWindow.REPEAT_NEVER   => ""
-            case TimingWindow.REPEAT_FOREVER => s" every ${TimeUtils.msToHHMM(tw.getPeriod)} forever"
-            case _                           => s" every ${TimeUtils.msToHHMM(tw.getPeriod)} x ${tw.getRepeat}"
+            case TimingWindow.REPEAT_FOREVER => s" every ${DateTimeUtils.msToHHMM(tw.getPeriod)} forever"
+            case _                           => s" every ${DateTimeUtils.msToHHMM(tw.getPeriod)} x ${tw.getRepeat}"
           }
         }
       }}
@@ -336,9 +337,10 @@ object ObservationTableModel {
     o.getElevationConstraintType match {
       case ElevationConstraintType.AIRMASS    => o.getElevationConstraintMin + " \u2264 airmass \u2264 " + o.getElevationConstraintMax
       case ElevationConstraintType.HOUR_ANGLE =>
-        val min = TimeUtils.MS_PER_HOUR * o.getElevationConstraintMin
-        val max = TimeUtils.MS_PER_HOUR * o.getElevationConstraintMax
-        TimeUtils.msToHHMMSS(min.toLong) + " \u2264 ha \u2264 " + TimeUtils.msToHHMMSS(max.toLong)
+        // getElevationConstraint methods return hours as double, so we can't use TimeValue.HOURS to convert.
+        val min = DateTimeUtils.MillisecondsPerHour * o.getElevationConstraintMin
+        val max = DateTimeUtils.MillisecondsPerHour * o.getElevationConstraintMax
+        DateTimeUtils.msToHHMMSS(min.toLong) + " \u2264 ha \u2264 " + DateTimeUtils.msToHHMMSS(max.toLong)
       case _                                  => ""
     }
   }
@@ -383,7 +385,7 @@ object ObservationTableModel {
   }
   case class TimeValue(t: Long) extends Comparable[TimeValue] {
     def compareTo(other: TimeValue): Int = math.signum(t - other.t).toInt
-    val prettyString: String = TimeUtils.msToHHMMSS(t)
+    val prettyString: String = DateTimeUtils.msToHHMMSS(t)
   }
 
 }

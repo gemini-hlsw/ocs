@@ -610,7 +610,7 @@ public final class Visualizer extends VisualizerBase implements VisualizerConsta
 		}
 
 
-		long start = (minTime + nudge); // + TimeUtils.MS_PER_HOUR;
+		long start = (minTime + nudge);
 		for (long time = start; time < maxTime - PADDING; time += TimeUtils.MS_PER_HOUR) {
 
 			// The tick mark

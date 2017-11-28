@@ -4,20 +4,23 @@ import edu.gemini.qpt.shared.sp.Obs
 import edu.gemini.qv.plugin.charts.util._
 import edu.gemini.qv.plugin.filter.core.Filter
 import edu.gemini.qv.plugin.QvContext
-import edu.gemini.qv.plugin.selector.OptionsSelector.{ShowRiseTimeOption, MoonSetRise}
-import edu.gemini.qv.plugin.selector.{TimeRangeSelector, OptionsSelector, ConstraintsSelector}
+import edu.gemini.qv.plugin.selector.OptionsSelector.{MoonSetRise, ShowRiseTimeOption}
+import edu.gemini.qv.plugin.selector.{ConstraintsSelector, OptionsSelector, TimeRangeSelector}
 import edu.gemini.qv.plugin.ui.QvGui
-import edu.gemini.qv.plugin.util.ConstraintsCache.{Elevation, AboveHorizon}
+import edu.gemini.qv.plugin.util.ConstraintsCache.{AboveHorizon, Elevation}
 import edu.gemini.qv.plugin.util.SolutionProvider
 import edu.gemini.qv.plugin.util.SolutionProvider.ConstraintType
-import edu.gemini.skycalc.TimeUtils
 import edu.gemini.util.skycalc.Night
 import edu.gemini.util.skycalc.calc.Solution
 import java.awt.{BasicStroke, Color}
+import java.time.temporal.ChronoField
+import java.time.Instant
+
 import org.jfree.chart.JFreeChart
 import org.jfree.chart.axis.DateAxis
 import org.jfree.chart.plot.XYPlot
-import scala.Some
+
+import scala.concurrent.duration._
 
 /**
  */
@@ -101,9 +104,7 @@ class SetRiseChart(val ctx: QvContext, val nights: Seq[Night], val observations:
     else n.moonSet.map(s => hourOfNight(boundByTwilight(n, s)))
 
   private def hourOfNight(t: Long): Double = {
-    val hourOfDay = TimeUtils.asHours(TimeUtils.millisecondOfDay(t, site.timezone()))
+    val hourOfDay = Instant.ofEpochMilli(t).atZone(site.timezone.toZoneId).get(ChronoField.MILLI_OF_DAY).milliseconds.toHours
     if (hourOfDay < 14) hourOfDay + 24 else hourOfDay // map morning hours onto the same day as hours 24,25,26 etc
   }
-
-
 }

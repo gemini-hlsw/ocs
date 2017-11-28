@@ -1,11 +1,10 @@
 package jsky.app.ot.gemini.editor.sitequality;
 
 import edu.gemini.shared.gui.ButtonFlattener;
-import edu.gemini.skycalc.TimeUtils;
+import edu.gemini.shared.util.DateTimeUtils;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.*;
 import jsky.app.ot.editor.type.SpTypeUIUtil;
-import jsky.util.DateUtil;
 import jsky.util.gui.Resources;
 
 import javax.swing.*;
@@ -313,7 +312,7 @@ final class TimingWindowTable extends JTable {
         public Component getTableCellRendererComponent(final JTable table, final Object value, final boolean isSelected,
                                                        final boolean hasFocus, final int row, final int column) {
             final JLabel label = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-            final String text = DateUtil.YYYY_MMM_DD_HHMMSS_Z_UTC_Formatter().format((Instant) value);
+            final String text = DateTimeUtils.YYYY_MMM_DD_HHMMSS_Z_Formatter().format((Instant) value);
             label.setText(text);
             return label;
         }
@@ -388,14 +387,14 @@ final class TimingWindowTable extends JTable {
         private String formatDuration(final TimingWindow tw) {
             final long ms = tw.getDuration();
             if (ms == TimingWindow.WINDOW_REMAINS_OPEN_FOREVER) return "forever";
-            return TimeUtils.msToHHMM(ms);
+            return DateTimeUtils.msToHHMM(ms);
         }
 
         private String formatPeriod(final TimingWindow tw) {
             final long duration = tw.getDuration();
             if (duration == TimingWindow.WINDOW_REMAINS_OPEN_FOREVER) return null;
             if (tw.getRepeat() == TimingWindow.REPEAT_NEVER) return null;
-            return TimeUtils.msToHHMMSS(duration);
+            return DateTimeUtils.msToHHMMSS(duration);
         }
 
         private String formatRepeat(final TimingWindow tw) {
