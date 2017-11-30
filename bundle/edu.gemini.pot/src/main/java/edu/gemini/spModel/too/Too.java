@@ -50,30 +50,12 @@ public final class Too {
     /**
      * Sets the ToO type of the program and all of its observations to match.
      */
-    public static boolean set(ISPProgram prog, TooType newType) {
+    public static void set(ISPProgram prog, TooType newType) {
         // REL-538 Move TooType to SPProgram
-        SPProgram spProgram = (SPProgram) prog.getDataObject();
-        spProgram.setTooType(newType);
-        prog.setDataObject(spProgram);
-
-        updateObservations(prog);
-
-        ISPTemplateFolder f = prog.getTemplateFolder();
-        if (f != null) {
-            for (ISPTemplateGroup grp : f.getTemplateGroups()) {
-                updateObservations(grp);
-            }
-        }
-        return true;
-    }
-
-    private static void updateObservations(ISPObservationContainer c) {
-        for (ISPObservation obs : c.getAllObservations()) {
-            final SPObservation dataObj = (SPObservation) obs.getDataObject();
-            if (dataObj.isOverrideRapidToo()) {
-                dataObj.setOverrideRapidToo(false);
-                obs.setDataObject(dataObj);
-            }
+        final SPProgram spProgram = (SPProgram) prog.getDataObject();
+        if (newType != spProgram.getTooType()) {
+            spProgram.setTooType(newType);
+            prog.setDataObject(spProgram);
         }
     }
 }
