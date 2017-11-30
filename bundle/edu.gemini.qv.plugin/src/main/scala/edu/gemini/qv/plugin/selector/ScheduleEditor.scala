@@ -252,8 +252,8 @@ class ScheduleEditor(ctx: QvContext, scheduleCache: ScheduleCache) extends Dialo
       start <- cd.startDate
       end <- cd.endDate
     } yield {
-      val s = start + 14.hours.toMillis
-      val e = end   + 14.hours.toMillis + 2.days.toMillis
+      val s = start + DateTimeUtils.StartOfDayHour.hours.toMillis
+      val e = end   + DateTimeUtils.StartOfDayHour.hours.toMillis + 2.days.toMillis
       addConstraint(createConstraint(Interval(s, e)))
     }
   }

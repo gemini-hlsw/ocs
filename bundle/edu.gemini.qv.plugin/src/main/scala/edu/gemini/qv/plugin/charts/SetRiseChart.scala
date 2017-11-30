@@ -16,6 +16,7 @@ import java.awt.{BasicStroke, Color}
 import java.time.temporal.ChronoField
 import java.time.Instant
 
+import edu.gemini.shared.util.DateTimeUtils
 import org.jfree.chart.JFreeChart
 import org.jfree.chart.axis.DateAxis
 import org.jfree.chart.plot.XYPlot
@@ -105,6 +106,6 @@ class SetRiseChart(val ctx: QvContext, val nights: Seq[Night], val observations:
 
   private def hourOfNight(t: Long): Double = {
     val hourOfDay = Instant.ofEpochMilli(t).atZone(site.timezone.toZoneId).get(ChronoField.MILLI_OF_DAY).milliseconds.toHours
-    if (hourOfDay < 14) hourOfDay + 24 else hourOfDay // map morning hours onto the same day as hours 24,25,26 etc
+    if (hourOfDay < DateTimeUtils.StartOfDayHour) hourOfDay + 24 else hourOfDay // map morning hours onto the same day as hours 24,25,26 etc
   }
 }

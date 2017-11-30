@@ -39,8 +39,8 @@ object DateTimeUtils {
   def nearestMinute(dt: ZonedDateTime): ZonedDateTime = dt.plus(30, ChronoUnit.SECONDS).truncatedTo(ChronoUnit.MINUTES)
 
   def startOfDayInMs(ms: Long, zone: ZoneId): Long = {
-    val zdt = Instant.ofEpochMilli(ms - 14.hours.toMillis).atZone(zone)
-    zdt.withHour(14).truncatedTo(ChronoUnit.HOURS).toInstant.toEpochMilli
+    val zdt = Instant.ofEpochMilli(ms - StartOfDayHour.hours.toMillis).atZone(zone)
+    zdt.withHour(StartOfDayHour).truncatedTo(ChronoUnit.HOURS).toInstant.toEpochMilli
   }
 
   def endOfDayInMs(ms: Long, zone: ZoneId): Long = {

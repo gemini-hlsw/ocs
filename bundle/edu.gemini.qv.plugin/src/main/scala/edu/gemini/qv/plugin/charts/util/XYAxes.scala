@@ -1,7 +1,8 @@
 package edu.gemini.qv.plugin.charts.util
 
 import edu.gemini.qv.plugin.selector.OptionsSelector._
-import org.jfree.chart.axis.{Axis, ValueAxis, NumberAxis, NumberTickUnit}
+import edu.gemini.shared.util.DateTimeUtils
+import org.jfree.chart.axis.{Axis, NumberAxis, NumberTickUnit, ValueAxis}
 import org.jfree.chart.plot.XYPlot
 
 /**
@@ -15,7 +16,7 @@ trait XYAxes {
   // the main or primary axes, one of them is going to be shown to the left of the plot
   object MainHourAxis extends NumberAxis("Hours Between Nautical Twilights") {
     setAutoRange(false)
-    setRange(0, 14)
+    setRange(0, DateTimeUtils.StartOfDayHour)
   }
   object MainRiseTimeAxis extends NumberAxis("Rise Time Between Nautical Twilights") {
     setAutoRange(false)

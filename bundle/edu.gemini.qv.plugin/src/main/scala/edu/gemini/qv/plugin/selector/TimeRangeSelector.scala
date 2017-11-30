@@ -171,10 +171,10 @@ class TimeRangeSelector(ctx: QvContext, semesters: Seq[Semester]) extends GridBa
         cd.setLocationRelativeTo(calendarButton)
         cd.visible = true
         cd.startDate.foreach {
-          time => ctx.customStart = DateTimeUtils.startOfDayInMs(time + 14.hours.toMillis, ctx.timezone.toZoneId)
+          time => ctx.customStart = DateTimeUtils.startOfDayInMs(time + DateTimeUtils.StartOfDayHour.hours.toMillis, ctx.timezone.toZoneId)
         }
         cd.endDate.foreach {
-          time => ctx.customEnd = DateTimeUtils.endOfDayInMs(time + 14.hours.toMillis, ctx.timezone.toZoneId)
+          time => ctx.customEnd = DateTimeUtils.endOfDayInMs(time + DateTimeUtils.StartOfDayHour.hours.toMillis, ctx.timezone.toZoneId)
         }
         // force update
         cd.startDate.foreach {
