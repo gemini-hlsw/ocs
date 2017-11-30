@@ -38,17 +38,16 @@ object DateTimeUtils {
   def nearestMinute(date: Date, zone: TimeZone): Date = Date.from(nearestMinute(ZonedDateTime.ofInstant(date.toInstant, zone.toZoneId)).toInstant)
   def nearestMinute(dt: ZonedDateTime): ZonedDateTime = dt.plus(30, ChronoUnit.SECONDS).truncatedTo(ChronoUnit.MINUTES)
 
-  def startOfDayInMs(ms: Long, zone: ZoneId): Long =
-    startOfDay(Instant.ofEpochMilli(ms).atZone(zone)).toInstant.toEpochMilli
+  def startOfDayInMs(ms: Long, zone: ZoneId): Long = {
+    val zdt = Instant.ofEpochMilli(ms - 14.hours.toMillis).atZone(zone)
+    zdt.withHour(14).truncatedTo(ChronoUnit.HOURS).toInstant.toEpochMilli
+  }
 
-  def startOfDay(dt: ZonedDateTime): ZonedDateTime =
-    dt.truncatedTo(ChronoUnit.DAYS)
-
-  def endOfDayInMs(ms: Long, zone: ZoneId): Long =
-    endOfDay(Instant.ofEpochMilli(ms).atZone(zone)).toInstant.toEpochMilli
-
-  def endOfDay(dt: ZonedDateTime): ZonedDateTime =
-    dt.plus(1, ChronoUnit.DAYS).truncatedTo(ChronoUnit.DAYS)
+  def endOfDayInMs(ms: Long, zone: ZoneId): Long = {
+    val start = startOfDayInMs(ms, zone)
+    val zdt = Instant.ofEpochMilli(start).atZone(zone)
+    zdt.plus(1, ChronoUnit.DAYS).toInstant.toEpochMilli
+  }
 
   def timeInMs(year: Int, month: Int, dayOfMonth: Int, hours: Int, minutes: Int, seconds: Int, zone: ZoneId): Long =
     ZonedDateTime.of(year, month, dayOfMonth, hours, minutes, seconds, 0, zone).toInstant.toEpochMilli

@@ -1,6 +1,6 @@
 package edu.gemini.qv.plugin.util
 
-import java.time.{Instant, LocalDateTime, LocalDate, Month, ZoneId}
+import java.time.{LocalDateTime, LocalDate, Month, ZoneId}
 
 import edu.gemini.spModel.core.{Semester, Site}
 import edu.gemini.util.skycalc.calc.Interval
