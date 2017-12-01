@@ -11,8 +11,8 @@ import scalaz._
 import Scalaz._
 
 object DateTimeUtils {
-  val UTC: ZoneId         = ZoneId.of("UTC")
-  val DefaultZone: ZoneId = ZoneId.systemDefault()
+  val UTC: ZoneId               = ZoneId.of("UTC")
+  val SystemDefaultZone: ZoneId = ZoneId.systemDefault()
 
   // Standard UTC formatters.
   val YYYY_MMM_DD_Formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MMM-dd").withZone(UTC)
@@ -22,8 +22,8 @@ object DateTimeUtils {
   val HHMMSS_Formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss").withZone(UTC)
 
   // Standard non-UTC formatters.
-  val YYYY_MMM_DD_DZ_Formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MMM-dd").withZone(DefaultZone)
-  val YYYY_MMM_DD_HHMMSS_DZ_Formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MMM-dd HH:mm:ss").withZone(DefaultZone)
+  val YYYY_MMM_DD_SDZ_Formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MMM-dd").withZone(SystemDefaultZone)
+  val YYYY_MMM_DD_HHMMSS_SDZ_Formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MMM-dd HH:mm:ss").withZone(SystemDefaultZone)
 
   // Nonstandard formatters.
   val YYYYMMDD_Formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd").withZone(UTC)

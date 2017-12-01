@@ -1,10 +1,10 @@
 package edu.gemini.spModel.obs;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import edu.gemini.skycalc.Solver;
-import edu.gemini.shared.util.DateTimeUtils;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.TimingWindow;
 
 public class TimingWindowSolver extends Solver {
@@ -16,7 +16,7 @@ public class TimingWindowSolver extends Solver {
 	private final boolean value;
 
 	public TimingWindowSolver(List<TimingWindow> windows, boolean value) {
-		super(DateTimeUtils.MillisecondsPerHour() / 4, DateTimeUtils.MillisecondsPerMinute());
+		super(TimeUnit.HOURS.toMillis(1) / 4, TimeUnit.MINUTES.toMillis(1));
 		this.windows = windows;
 		this.value   = value;
 	}

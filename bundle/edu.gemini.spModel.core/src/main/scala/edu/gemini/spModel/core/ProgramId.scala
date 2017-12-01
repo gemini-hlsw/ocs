@@ -3,6 +3,8 @@ package edu.gemini.spModel.core
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 
+import edu.gemini.shared.util.DateTimeUtils
+
 import scala.util.Try
 
 sealed trait ProgramId {
@@ -54,7 +56,7 @@ object ProgramId {
     def site: Option[Site]         = Some(siteVal)
 
     val (start, end) = {
-      val zdt = ZonedDateTime.of(year, month, day, Semester.SWITCH_OVER_HOUR, 0, 0, 0, siteVal.timezone.toZoneId).truncatedTo(ChronoUnit.SECONDS)
+      val zdt = ZonedDateTime.of(year, month, day, DateTimeUtils.StartOfDayHour, 0, 0, 0, siteVal.timezone.toZoneId).truncatedTo(ChronoUnit.SECONDS)
       val e = zdt.toInstant.toEpochMilli
       val s = zdt.minus(1, ChronoUnit.DAYS).toInstant.toEpochMilli
       (s, e)

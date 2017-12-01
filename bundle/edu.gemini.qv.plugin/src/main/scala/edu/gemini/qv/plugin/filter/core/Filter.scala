@@ -393,7 +393,7 @@ object Filter {
 
   // =======================  Enumeration Filters =======================
 
-  private val year = Instant.now.atZone(DateTimeUtils.DefaultZone).getYear - 8
+  private val year = Instant.now.atZone(DateTimeUtils.SystemDefaultZone).getYear - 8
   private val yearRange = Range(year, year + 10)
   private val semesters: Set[Semester] = yearRange.flatMap(year => Set(new Semester(year, Half.A), new Semester(year, Half.B))).toSet
   object Semester extends EnumFilterFactory[Semester](

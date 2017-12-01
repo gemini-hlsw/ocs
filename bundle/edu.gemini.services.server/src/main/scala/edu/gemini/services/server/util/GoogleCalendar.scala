@@ -56,7 +56,7 @@ class GoogleCalendar(service: GoogleCalendarService, calendar: GoogleModelCalend
   }
 
   private def deleteAllDayEvent(summary: String, interval: Interval): Unit = {
-    val sdf = DateTimeUtils.YYYY_MMM_DD_DZ_Formatter
+    val sdf = DateTimeUtils.YYYY_MMM_DD_SDZ_Formatter
     val s = sdf.format(Instant.ofEpochMilli(interval.start))
     val e = sdf.format(Instant.ofEpochMilli(interval.end))
     val events = getEvents(Some(summary.replace("-", " ")), interval)
@@ -74,7 +74,7 @@ class GoogleCalendar(service: GoogleCalendarService, calendar: GoogleModelCalend
   }
 
   private def addAllDayEvent(constraint: String, interval: Interval): Unit = {
-    val sdf = DateTimeUtils.YYYY_MMM_DD_DZ_Formatter
+    val sdf = DateTimeUtils.YYYY_MMM_DD_SDZ_Formatter
     val s = sdf.format(Instant.ofEpochMilli(interval.start))
     val e = sdf.format(Instant.ofEpochMilli(interval.end - DateTimeUtils.StartOfDayHourInMs))
     val event = new GoogleEvent().
