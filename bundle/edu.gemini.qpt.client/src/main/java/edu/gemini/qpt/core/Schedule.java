@@ -7,8 +7,6 @@ import edu.gemini.qpt.shared.sp.Conds;
 import edu.gemini.qpt.shared.sp.Inst;
 import edu.gemini.qpt.shared.sp.MiniModel;
 import edu.gemini.qpt.shared.util.PioSerializable;
-import edu.gemini.qpt.shared.util.TimeUtils;
-import edu.gemini.shared.util.DateTimeUtils;
 import edu.gemini.shared.util.UTCDateTimeFormatters;
 import edu.gemini.skycalc.TwilightBoundType;
 import edu.gemini.skycalc.TwilightBoundedNight;
@@ -36,10 +34,9 @@ import java.io.File;
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import static edu.gemini.qpt.shared.util.TimeUtils.MS_PER_DAY;
 
 /**
  * Top-level model object representing a queue plan.
@@ -479,7 +476,7 @@ public final class Schedule extends BaseMutableBean implements PioSerializable, 
     }
 
     public void addObservingNights(long start, long end) {
-        for (long i = start; i <= end; i += MS_PER_DAY) {
+        for (long i = start; i <= end; i += TimeUnit.DAYS.toMillis(1)) {
             TwilightBoundedNight night = new TwilightBoundedNight(TYPE, i, miniModel.getSite());
             addBlock(night.getStartTime(), night.getEndTime());
         }
@@ -488,7 +485,7 @@ public final class Schedule extends BaseMutableBean implements PioSerializable, 
     public void addObservingNights(int count) {
         if (count < 1) throw new IllegalArgumentException("You must add at least one night.");
         long now = System.currentTimeMillis();
-        addObservingNights(now, now + (count - 1) * TimeUtils.MS_PER_DAY);
+        addObservingNights(now, now + (count - 1) * TimeUnit.DAYS.toMillis(1));
     }
 
     public SortedSet<Block> getBlocks() {

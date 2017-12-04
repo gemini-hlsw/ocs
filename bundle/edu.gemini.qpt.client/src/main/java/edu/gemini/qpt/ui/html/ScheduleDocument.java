@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeSet;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
@@ -34,7 +35,6 @@ import edu.gemini.qpt.core.Alloc.Grouping;
 import edu.gemini.qpt.core.Marker.Severity;
 import edu.gemini.qpt.core.util.ImprovedSkyCalc;
 import edu.gemini.qpt.core.util.Interval;
-import edu.gemini.qpt.shared.util.TimeUtils;
 import edu.gemini.qpt.ui.util.CancelledException;
 import edu.gemini.qpt.ui.util.ColorWheel;
 import edu.gemini.qpt.ui.util.ProgressModel;
@@ -102,7 +102,7 @@ public class ScheduleDocument {
                 long start = clearance.getStart().getTime();
                 long end = clearance.getEnd().getTime();
                 Interval interval = new Interval(start, end);
-                String length = TimeUtils.msToHHMMSS(end - start);
+                String length = DateTimeUtils.msToHMMSS(end - start);
                 boolean overlaps = (start < a.getEnd() && end > a.getStart());
                 StringBuffer sb = new StringBuffer();
 
@@ -174,11 +174,12 @@ public class ScheduleDocument {
     private String getLaserLimits(Observation observation, ClearanceWindow clearance) {
         String fmt = "HH:mm:ss";
         LaserTarget scienceTarget = observation.getScienceTarget().getLaserTarget();
+        final long msPerSecs = TimeUnit.SECONDS.toMillis(1);
         for (Visibility.Interval visibility : scienceTarget.getVisibility().getAboveLaserLimit()) {
-            long vStart = visibility.getStart().getTime() / DateTimeUtils.MillisecondsPerSecond(); // get rid of milliseconds
-            long vEnd   = visibility.getEnd().getTime() / DateTimeUtils.MillisecondsPerSecond();
-            long cStart = clearance.getStart().getTime() / DateTimeUtils.MillisecondsPerSecond();
-            long cEnd   = clearance.getEnd().getTime() / DateTimeUtils.MillisecondsPerSecond();
+            long vStart = visibility.getStart().getTime() / msPerSecs; // get rid of milliseconds
+            long vEnd   = visibility.getEnd().getTime() / msPerSecs;
+            long cStart = clearance.getStart().getTime() / msPerSecs;
+            long cEnd   = clearance.getEnd().getTime() / msPerSecs;
             // check if target rises above laser limit during this clearance window
             if (vStart > cStart && vStart < cEnd) {
                 return "(rises above " + LimitsListener.MIN_ELEVATION_ERROR_LIMIT + "&deg; at "
@@ -243,7 +244,7 @@ public class ScheduleDocument {
     }
 
     public String formatHHMMSS(long ms) {
-        return TimeUtils.msToHHMM(ms);
+        return DateTimeUtils.msToHHMM(ms);
     }
 
     public String getColor(Severity sev) {

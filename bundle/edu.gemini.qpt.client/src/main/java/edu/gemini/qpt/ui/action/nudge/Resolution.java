@@ -1,6 +1,6 @@
 package edu.gemini.qpt.ui.action.nudge;
 
-import edu.gemini.qpt.shared.util.TimeUtils;
+import edu.gemini.shared.util.DateTimeUtils;
 
 class Resolution {
 
@@ -23,7 +23,7 @@ class Resolution {
 	private static int index = 8;
 
 	static synchronized String caption() {
-		return "Nudge Size " +  TimeUtils.msToHHMMSS(intervals[index]);
+		return "Nudge Size " +  DateTimeUtils.msToHMMSS(intervals[index]);
 	}
 
 	static synchronized void lower() {

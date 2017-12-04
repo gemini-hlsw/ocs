@@ -38,7 +38,10 @@ object DateTimeUtils {
   def timeInMs(year: Int, month: Int, dayOfMonth: Int, hours: Int, minutes: Int, seconds: Int, zone: ZoneId): Long =
     ZonedDateTime.of(year, month, dayOfMonth, hours, minutes, seconds, 0, zone).toInstant.toEpochMilli
 
+
   // Java time API doesn't support formatters for Duration, so we have to roll our own.
+
+  // Hours zero-padded to two decimal places.
   def msToHHMM(span: Long): String = {
     val neg = span < 0
     val d   = Math.abs(span).milliseconds
@@ -47,14 +50,36 @@ object DateTimeUtils {
     f"${neg ? "-" | ""}%s$hh%02d:$mm%02d"
   }
 
-  def msToHHMMSS(span: Long): String = {
+  def msToHMM(span: Long): String = {
+    val neg = span < 0
+    val d   = Math.abs(span).milliseconds
+    val hh  = d.toHours
+    val mm  = d.toMinutes % MinutesPerHour
+    f"${neg ? "-" | ""}%s$hh:$mm%02d"
+  }
+
+  def msToHMMSS(span: Long): String = {
     val neg = span < 0
     val d   = Math.abs(span).milliseconds
     val hh  = d.toHours
     val mm  = d.toMinutes % MinutesPerHour
     val ss  = d.toSeconds % SecondsPerMinute
-    f"${neg ? "-" | ""}%s$hh%02d:$mm%02d:$ss%02d"
+    f"${neg ? "-" | ""}%s$hh:$mm%02d:$ss%02d"
   }
+
+  def msToMSS(span: Long): String = {
+    val neg = span < 0
+    val d   = Math.abs(span).milliseconds
+    val mm  = d.toMinutes
+    val ss  = d.toSeconds % SecondsPerHour
+    f"${neg ? "-" | ""}%s$mm:$ss%02d"
+  }
+
+  def hoursToHMM(hours: Double): String =
+    msToHMM((hours * MillisecondsPerHour).toLong)
+
+  def hoursToHMMSS(hours: Double): String =
+    msToHMMSS((hours * MillisecondsPerHour).toLong)
 
   // Some useful constants.
   val StartOfDayHour:        Int  = 14

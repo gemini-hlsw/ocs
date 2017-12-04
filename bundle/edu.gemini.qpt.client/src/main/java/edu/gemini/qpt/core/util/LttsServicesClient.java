@@ -8,7 +8,7 @@ import edu.gemini.qpt.core.Alloc;
 import edu.gemini.qpt.core.listeners.LimitsListener;
 import edu.gemini.qpt.shared.sp.Obs;
 import edu.gemini.qpt.shared.util.StructuredProgramID;
-import edu.gemini.qpt.shared.util.TimeUtils;
+import edu.gemini.shared.util.DateTimeUtils;
 import edu.gemini.skycalc.TwilightBoundType;
 import edu.gemini.skycalc.TwilightBoundedNight;
 import edu.gemini.spModel.core.Peer;
@@ -21,6 +21,7 @@ import javax.ws.rs.core.MediaType;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 /**
@@ -202,7 +203,7 @@ public class LttsServicesClient {
         if (count != 0) {
             String s = (count > 1) ? "s" : "";
             double percent = 100. * overlapTime / totalTime;
-            String timeStr = TimeUtils.msToHHMMSS(overlapTime);
+            String timeStr = DateTimeUtils.msToHMMSS(overlapTime);
             return String.format("LGS Observation overlaps with %d "
                     + "shuttering window%s with a total duration of %s "
                     + "(%2.1f%% of total observation time).",
@@ -238,7 +239,7 @@ public class LttsServicesClient {
                     set.add(interval); // do this here in case the added time overlaps yet another window!
                     // Assuming partial overlap is the same as complete overlap, since you always have to stop for the complete shutter.
                     // See LCH-153: Simple formula just adds 3 minutes + overlap time (for each overlap)
-                    overlapTime += interval.getLength() + 3 * TimeUtils.MS_PER_MINUTE;
+                    overlapTime += interval.getLength() + TimeUnit.MINUTES.toMillis(3);
                 }
             }
         }

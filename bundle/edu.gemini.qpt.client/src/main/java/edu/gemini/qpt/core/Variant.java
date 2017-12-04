@@ -9,7 +9,6 @@ import edu.gemini.qpt.core.util.Variants.MissingPredecessorException;
 import edu.gemini.qpt.core.util.Variants.OrderingException;
 import edu.gemini.qpt.shared.sp.*;
 import edu.gemini.qpt.shared.util.PioSerializable;
-import edu.gemini.qpt.shared.util.TimeUtils;
 import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.obs.SPObservation.Priority;
 import edu.gemini.spModel.obs.plannedtime.PlannedStepSummary;
@@ -22,6 +21,7 @@ import jsky.coords.WorldCoords;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.logging.Logger;
 
@@ -731,7 +731,7 @@ public final class Variant extends BaseMutableBean implements PioSerializable, C
 				theoreticallySchedulable = false;
 			} else {
 				long set = visibleUnion.getIntervals().last().getEnd();
-				if (set - owner.getStart() < 3 * TimeUtils.MS_PER_HOUR)
+				if (set - owner.getStart() < TimeUnit.HOURS.toMillis(3))
 					flags.add(Flag.SETS_EARLY);
 			}
 

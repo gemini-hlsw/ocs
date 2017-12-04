@@ -34,8 +34,6 @@ case class Interval(start: Long, end: Long) extends Ordered[Interval] {
 
   /** Adds an interval to this interval. This operation is only defined if the two intervals overlap
     * or abut each, i.e. in all cases where adding the two intervals results in one single interval.
-    * @param other
-    * @return
     */
   def plus(other: Interval): Interval = {
     require(overlaps(other) || abuts(other))
@@ -136,9 +134,6 @@ object Interval {
    * Takes a sequence of intervals and transforms it into a sequence of full days (i.e. 14:00 first day to 14:00
    * on the next day) that covers all given intervals. Abutting full days are combined so that the resulting
    * sequence contains the minimal number of intervals needed to cover the original sequence.
-   * @param intervals
-   * @param localTime
-   * @return
    */
   def allDay(intervals: Seq[Interval], localTime: TimeZone): Seq[Interval] = {
     // blow intervals up to cover 24hrs (or multiples thereof); days start/end at 14hrs local time

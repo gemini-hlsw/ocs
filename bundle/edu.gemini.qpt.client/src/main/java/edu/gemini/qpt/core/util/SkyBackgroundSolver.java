@@ -1,9 +1,9 @@
 package edu.gemini.qpt.core.util;
 
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
-import edu.gemini.qpt.shared.util.TimeUtils;
 import edu.gemini.spModel.core.Site;
 import jsky.coords.WorldCoords;
 
@@ -20,7 +20,7 @@ public class SkyBackgroundSolver extends Solver {
 	 * @param mag
 	 */
 	public SkyBackgroundSolver(Site site, Function<Long, WorldCoords> coords, double mag) {
-		super(TimeUtils.MS_PER_HOUR / 4, TimeUtils.MS_PER_MINUTE);
+        super(TimeUnit.MINUTES.toMillis(15), TimeUnit.MINUTES.toMillis(1));
 		this.coords = coords;
 		this.calc = new ImprovedSkyCalc(site);
 		this.mag = mag;

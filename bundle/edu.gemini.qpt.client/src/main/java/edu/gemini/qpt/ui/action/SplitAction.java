@@ -5,6 +5,7 @@ import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -14,7 +15,6 @@ import javax.swing.KeyStroke;
 
 import edu.gemini.qpt.core.Alloc;
 import edu.gemini.qpt.core.Variant;
-import edu.gemini.qpt.shared.util.TimeUtils;
 import edu.gemini.qpt.core.util.Variants.EditException;
 import edu.gemini.qpt.ui.util.Platform;
 import edu.gemini.spModel.obs.plannedtime.PlannedStepSummary;
@@ -25,7 +25,7 @@ import edu.gemini.ui.workspace.IShell;
 public class SplitAction extends AbstractAction implements PropertyChangeListener {
 
 	private static final Logger LOGGER = Logger.getLogger(SplitAction.class.getName());
-	private static final long OPTIMAL_SIZE = 90 * TimeUtils.MS_PER_MINUTE;
+	private static final long OPTIMAL_SIZE = TimeUnit.MINUTES.toMillis(90);
 
 	private final IShell shell;
 	private Alloc alloc;

@@ -6,7 +6,7 @@ import edu.gemini.qpt.core.Alloc;
 import edu.gemini.qpt.core.Variant;
 import edu.gemini.qpt.core.Marker.Severity;
 import edu.gemini.qpt.core.util.MarkerManager;
-import edu.gemini.qpt.shared.util.TimeUtils;
+import edu.gemini.shared.util.DateTimeUtils;
 
 /**
  * Generates Alloc markers for Allocs that overlap.
@@ -31,10 +31,10 @@ public class SetupListener extends MarkerModelListener<Variant> {
                         mm.addMarker(true, this, Severity.Info, "Acquisition overhead removed for this visit.", v, a);
                         break;
                     case FULL:
-                        mm.addMarker(true, this, Severity.Info, String.format("It may be possible to skip the setup (%s minutes) for this visit.", TimeUtils.msToMMSS(a.getSetupTime())), v, a);
+                        mm.addMarker(true, this, Severity.Info, String.format("It may be possible to skip the setup (%s minutes) for this visit.", DateTimeUtils.msToMSS(a.getSetupTime())), v, a);
                         break;
                     case REACQUISITION:
-                        mm.addMarker(true, this, Severity.Info, String.format("Using the re-acquisition overhead (%s minutes) for this visit.", TimeUtils.msToMMSS(a.getSetupTime())), v, a);
+                        mm.addMarker(true, this, Severity.Info, String.format("Using the re-acquisition overhead (%s minutes) for this visit.", DateTimeUtils.msToMSS(a.getSetupTime())), v, a);
                         break;
                 }
 

@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 import edu.gemini.lch.services.model.Observation;
@@ -39,7 +40,6 @@ import edu.gemini.qpt.shared.sp.Conds;
 import edu.gemini.qpt.shared.sp.Obs;
 import edu.gemini.qpt.core.util.ImprovedSkyCalc;
 import edu.gemini.qpt.core.util.Interval;
-import edu.gemini.qpt.shared.util.TimeUtils;
 import edu.gemini.qpt.core.util.TimingWindowSolver;
 import edu.gemini.qpt.ui.util.BooleanViewPreference;
 import edu.gemini.qpt.ui.util.ColorWheel;
@@ -596,12 +596,12 @@ public final class Visualizer extends VisualizerBase implements VisualizerConsta
 
 		case LOCAL:
 		case UNIVERSAL:
-			nudge = TimeUtils.MS_PER_HOUR - minTime % TimeUtils.MS_PER_HOUR;
+			nudge = TimeUnit.HOURS.toMillis(1) - minTime % TimeUnit.HOURS.toMillis(1);
 			break;
 
 		case SIDEREAL:
 			long siderealMinTime = calc.getLst(new Date(minTime)).getTime();
-			nudge = TimeUtils.MS_PER_HOUR - siderealMinTime % TimeUtils.MS_PER_HOUR;
+			nudge = TimeUnit.HOURS.toMillis(1) - siderealMinTime % TimeUnit.HOURS.toMillis(1);
 			break;
 
 		default:
@@ -611,7 +611,7 @@ public final class Visualizer extends VisualizerBase implements VisualizerConsta
 
 
 		long start = (minTime + nudge);
-		for (long time = start; time < maxTime - PADDING; time += TimeUtils.MS_PER_HOUR) {
+		for (long time = start; time < maxTime - PADDING; time += TimeUnit.HOURS.toMillis(1)) {
 
 			// The tick mark
 			Shape tick = new Line2D.Double(time, MIN_DEG, time, MIN_DEG + 10); // tick y values in elevation degrees
@@ -778,7 +778,7 @@ public final class Visualizer extends VisualizerBase implements VisualizerConsta
 			GeneralPath path = new GeneralPath();
 			WorldCoords coords = new WorldCoords(0, 0);
 
-			for (long t = start; t < end; t += TimeUtils.MS_PER_MINUTE / 2) {
+			for (long t = start; t < end; t += TimeUnit.MINUTES.toMillis(2)) {
 				calc.calculate(coords, new Date(t), true);
 				float alt = (float) calc.getLunarElevation();
 				if (t == start) {
@@ -807,7 +807,7 @@ public final class Visualizer extends VisualizerBase implements VisualizerConsta
 			// Cache lookup failed, oh well. Calculate the sun path.
 			ImprovedSkyCalc calc = new ImprovedSkyCalc(model.getSchedule().getSite());
 			GeneralPath path = new GeneralPath();
-			for (long t = start; t < end; t += TimeUtils.MS_PER_MINUTE / 2) {
+			for (long t = start; t < end; t += TimeUnit.MINUTES.toMillis(2)) {
 				calc.calculate(new WorldCoords(), new Date(t), true);
 				float alt = (float) calc.getSunAltitude();
 				if (t == start) {

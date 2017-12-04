@@ -4,7 +4,7 @@ import edu.gemini.ags.api.AgsAnalysis;
 import edu.gemini.pot.sp.SPComponentBroadType;
 import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.pot.sp.SPObservationID;
-import edu.gemini.qpt.shared.util.TimeUtils;
+import edu.gemini.shared.util.DateTimeUtils;
 import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
@@ -795,9 +795,9 @@ public final class Obs implements Serializable, Comparable<Obs> {
         case AIRMASS:
             return getConditions() + " / " + getElevationConstraintMin() + " \u2264 airmass \u2264 " + getElevationConstraintMax();
         case HOUR_ANGLE:
-            long min = (long) (TimeUtils.MS_PER_HOUR * getElevationConstraintMin());
-            long max = (long) (TimeUtils.MS_PER_HOUR * getElevationConstraintMax());
-            return getConditions() + " / " + TimeUtils.msToHHMMSS(min) + " \u2264 ha \u2264 " + TimeUtils.msToHHMMSS(max);
+            long min = (long) (DateTimeUtils.MillisecondsPerHour() * getElevationConstraintMin());
+            long max = (long) (DateTimeUtils.MillisecondsPerHour() * getElevationConstraintMax());
+            return getConditions() + " / " + DateTimeUtils.msToHMMSS(min) + " \u2264 ha \u2264 " + DateTimeUtils.msToHMMSS(max);
         default:
             return getConditions();
         }

@@ -7,9 +7,7 @@ import java.util.SortedSet;
 
 import edu.gemini.qpt.core.Alloc;
 import edu.gemini.qpt.core.Variant;
-import edu.gemini.qpt.core.util.Interval;
-import edu.gemini.qpt.core.util.LttsServicesClient;
-import edu.gemini.qpt.shared.util.TimeUtils;
+import edu.gemini.shared.util.DateTimeUtils;
 import edu.gemini.ui.gface.GTableController;
 import edu.gemini.ui.gface.GViewer;
 
@@ -26,7 +24,7 @@ public class VisitController implements GTableController<Variant, Alloc, VisitAt
 //			Group g = a.getObs().getGroup();
 //			return g != null && g.getType() == GroupType.TYPE_SCHEDULING ? "\u00B7" : "";
 		case Start: return new Date(a.getStart());
-		case Dur: return TimeUtils.msToHHMM(a.getLength());
+		case Dur: return DateTimeUtils.msToHHMM(a.getLength());
 		case BG: return a.getSkyBrightnessBin(false);
 		case Observation: return a.getObs();
 		case Steps: return (a.getFirstStep() + 1) + "-" + (a.getLastStep() + 1);

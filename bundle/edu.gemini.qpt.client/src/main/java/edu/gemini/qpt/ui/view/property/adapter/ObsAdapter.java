@@ -11,9 +11,9 @@ import edu.gemini.qpt.core.Alloc;
 import edu.gemini.qpt.core.Variant;
 import edu.gemini.qpt.shared.sp.Obs;
 import edu.gemini.qpt.core.util.LttsServicesClient;
-import edu.gemini.qpt.shared.util.TimeUtils;
 import edu.gemini.qpt.ui.view.property.PropertyTable;
 import edu.gemini.qpt.ui.view.property.PropertyTable.Adapter;
+import edu.gemini.shared.util.DateTimeUtils;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.TimingWindow;
 import edu.gemini.spModel.obs.plannedtime.PlannedStepSummary;
 import edu.gemini.spModel.obscomp.InstConstants;
@@ -46,7 +46,7 @@ public class ObsAdapter implements Adapter<Obs> {
 
 			table.put(PROP_FLAGS, variant.getFlags(target));
         }
-		table.put(PROP_REMAINING_PROGRAM_TIME, TimeUtils.msToHHMMSS(target.getProg().getRemainingProgramTime()));
+		table.put(PROP_REMAINING_PROGRAM_TIME, DateTimeUtils.msToHMMSS(target.getProg().getRemainingProgramTime()));
 
 		if (target.getTimingWindows().isEmpty()) {
 			table.put(PROP_TIMING, "\u00ABnone\u00BB");
@@ -60,10 +60,10 @@ public class ObsAdapter implements Adapter<Obs> {
 					sb.append("and remains open forever");
 				} else {
 					sb.append("+ ");
-					sb.append(TimeUtils.msToHMM(tw.getDuration()));
+					sb.append(DateTimeUtils.msToHMM(tw.getDuration()));
 					if (tw.getRepeat() != TimingWindow.REPEAT_NEVER) {
 						sb.append(" every ");
-						sb.append(TimeUtils.msToHMM(tw.getPeriod()));
+						sb.append(DateTimeUtils.msToHMM(tw.getPeriod()));
 						if (tw.getRepeat() == TimingWindow.REPEAT_FOREVER) {
 							sb.append(" forever");
 						} else {
@@ -91,7 +91,7 @@ public class ObsAdapter implements Adapter<Obs> {
                     sb.append(TW_DF.format(end));
                     sb.append(" UTC ");
                     sb.append(" (+");
-                    sb.append(TimeUtils.msToHMM(duration));
+                    sb.append(DateTimeUtils.msToHMM(duration));
                     sb.append(")");
                 }
                 table.put(PROP_LASER_TIMING, sb);
@@ -110,8 +110,8 @@ public class ObsAdapter implements Adapter<Obs> {
 		StringBuilder builder = new StringBuilder();
 		switch (setupType) {
             case NONE: builder.append("No"); break;
-            case FULL: builder.append(TimeUtils.msToMMSS(steps.getSetupTime())); break;
-            case REACQUISITION: builder.append(TimeUtils.msToMMSS(steps.getReacquisitionTime())); break;
+            case FULL: builder.append(DateTimeUtils.msToMSS(steps.getSetupTime())); break;
+            case REACQUISITION: builder.append(DateTimeUtils.msToMSS(steps.getReacquisitionTime())); break;
 		}
 		builder.append(" setup");
 		int repeatCount = 0;
@@ -145,7 +145,7 @@ public class ObsAdapter implements Adapter<Obs> {
         }
 
         append(builder, prevLength, repeatCount, prevType);
-		builder.append(" = ").append(TimeUtils.msToHHMMSS(total));
+		builder.append(" = ").append(DateTimeUtils.msToHMMSS(total));
 		builder.append(" in ").append(readySteps);
 		builder.append(readySteps == 1 ? " step" : " steps");
 		builder.append(readySteps == 1 ? " (" + (firstStep + 1) + ")" : " (" + (firstStep + 1) + "-" + (lastStep + 1) + ")");
@@ -172,7 +172,7 @@ public class ObsAdapter implements Adapter<Obs> {
 				builder.append(repeatCount);
 				builder.append(" x ");
 			}
-			builder.append(TimeUtils.msToMMSS(length));
+			builder.append(DateTimeUtils.msToMSS(length));
 			if (type != null)
 				builder.append(" ").append(type).append(" ");
 		}

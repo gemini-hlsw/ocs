@@ -1,6 +1,7 @@
 package edu.gemini.qpt.core.listeners;
 
 import java.beans.PropertyChangeEvent;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import edu.gemini.qpt.core.Alloc;
@@ -10,9 +11,9 @@ import edu.gemini.qpt.core.Marker.Severity;
 import edu.gemini.qpt.core.util.ApproximateAngle;
 import edu.gemini.qpt.core.util.Interval;
 import edu.gemini.qpt.core.util.MarkerManager;
-import edu.gemini.qpt.shared.util.TimeUtils;
 import edu.gemini.qpt.core.util.Union;
 import edu.gemini.qpt.ui.util.AzimuthSolver;
+import edu.gemini.shared.util.DateTimeUtils;
 
 /**
  * Generates Alloc markers if the alloc reaches elevation or airmass limits.
@@ -40,8 +41,8 @@ public class AzimuthListener extends MarkerModelListener<Variant> {
 				if (!windyBits.isEmpty()) {
 					long timePointedIntoWind = 0; // ms
 					for (Interval i: windyBits) timePointedIntoWind += i.getLength();
-					if (timePointedIntoWind > TimeUtils.MS_PER_SECOND) {
-						String msg = "Telescope will be pointed into the wind for " + TimeUtils.msToHHMMSS(timePointedIntoWind) + ".";
+					if (timePointedIntoWind > TimeUnit.SECONDS.toMillis(1)) {
+						String msg = "Telescope will be pointed into the wind for " + DateTimeUtils.msToHMMSS(timePointedIntoWind) + ".";
 						markerManager.addMarker(false, this, Severity.Warning, msg, variant, a);
 					}
 				}

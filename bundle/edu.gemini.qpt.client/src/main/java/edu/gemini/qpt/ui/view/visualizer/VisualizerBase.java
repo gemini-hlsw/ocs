@@ -7,6 +7,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -17,7 +18,6 @@ import edu.gemini.qpt.core.Block;
 import edu.gemini.qpt.core.Schedule;
 import edu.gemini.qpt.core.Variant;
 import edu.gemini.qpt.shared.sp.Obs;
-import edu.gemini.qpt.shared.util.TimeUtils;
 import edu.gemini.skycalc.TwilightBoundType;
 import edu.gemini.skycalc.TwilightBoundedNight;
 import edu.gemini.spModel.core.Site;
@@ -31,7 +31,7 @@ abstract class VisualizerBase extends JPanel {
 
 	private static final Logger LOGGER = Logger.getLogger(VisualizerBase.class.getName());
 
-	protected static final long PADDING = 45 * TimeUtils.MS_PER_MINUTE;
+	protected static final long PADDING = TimeUnit.MINUTES.toMillis(45);
 	protected static final int SNAP_PIXELS = 5;
 	protected static final Image DRAG_IMAGE = new BufferedImage(1, 1, BufferedImage.TYPE_4BYTE_ABGR);
 

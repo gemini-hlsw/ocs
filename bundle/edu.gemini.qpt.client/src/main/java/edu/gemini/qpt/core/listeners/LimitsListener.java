@@ -1,10 +1,8 @@
 package edu.gemini.qpt.core.listeners;
 
 import java.beans.PropertyChangeEvent;
-import java.util.List;
 import java.util.logging.Logger;
 
-import edu.gemini.lch.services.model.ShutteringWindow;
 import edu.gemini.qpt.core.Alloc;
 import edu.gemini.qpt.core.Variant;
 import edu.gemini.qpt.core.Alloc.Circumstance;
@@ -13,7 +11,7 @@ import edu.gemini.qpt.core.Variant.Flag;
 import edu.gemini.qpt.shared.sp.Group;
 import edu.gemini.qpt.core.util.LttsServicesClient;
 import edu.gemini.qpt.core.util.MarkerManager;
-import edu.gemini.qpt.shared.util.TimeUtils;
+import edu.gemini.shared.util.DateTimeUtils;
 import edu.gemini.spModel.obscomp.SPGroup.GroupType;
 
 /**
@@ -149,13 +147,13 @@ public class LimitsListener extends MarkerModelListener<Variant> {
 				double maxDelta = Math.abs(haLimitMax - maxHA);
 				
 				if (minHA < haLimitMin) {
-					mm.addMarker(false, this, Severity.Error, String.format("Hour angle constraint violated (%s < %s).", TimeUtils.hoursToHHMMSS(minHA), TimeUtils.hoursToHHMMSS(haLimitMin)), v, a);
+					mm.addMarker(false, this, Severity.Error, String.format("Hour angle constraint violated (%s < %s).", DateTimeUtils.hoursToHMMSS(minHA), DateTimeUtils.hoursToHMMSS(haLimitMin)), v, a);
 				} else if (minDelta < 1. / 15.) {
 					mm.addMarker(false, this, Severity.Warning, "Target comes within 1\u00B0 of lower HA constraint.", v, a);
 				}
 
 				if (maxHA > haLimitMax) {
-					mm.addMarker(false, this, Severity.Error, String.format("Hour angle constraint violated (%s > %s).", TimeUtils.hoursToHHMMSS(maxHA), TimeUtils.hoursToHHMMSS(haLimitMax)), v, a);
+					mm.addMarker(false, this, Severity.Error, String.format("Hour angle constraint violated (%s > %s).", DateTimeUtils.hoursToHMMSS(maxHA), DateTimeUtils.hoursToHMMSS(haLimitMax)), v, a);
 				} else if (maxDelta < 1. / 15.) {
 					mm.addMarker(false, this, Severity.Warning, "Target comes within 1\u00B0 of upper HA constraint.", v, a);
 				}

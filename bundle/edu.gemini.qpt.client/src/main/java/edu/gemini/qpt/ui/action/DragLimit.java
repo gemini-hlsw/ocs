@@ -1,13 +1,15 @@
 package edu.gemini.qpt.ui.action;
 
-import edu.gemini.qpt.shared.util.TimeUtils;
+import edu.gemini.shared.util.DateTimeUtils;
+
+import java.util.concurrent.TimeUnit;
 
 public class DragLimit {
 
 	private static int limit = 10; // hours, by default
 
 	public static synchronized String caption() {
-		return "Drag Limit " + TimeUtils.msToHHMMSS(value());
+		return "Drag Limit " + DateTimeUtils.msToHMMSS(value());
 	}
 
 	public static synchronized void lower() {
@@ -20,7 +22,7 @@ public class DragLimit {
 	}
 	
 	public static synchronized long value() {
-		return TimeUtils.MS_PER_HOUR * limit;
+		return TimeUnit.HOURS.toMillis(limit);
 	}
 	
 }

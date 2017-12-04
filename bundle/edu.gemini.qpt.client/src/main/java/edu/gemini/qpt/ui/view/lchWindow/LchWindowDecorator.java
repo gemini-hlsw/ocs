@@ -2,8 +2,8 @@ package edu.gemini.qpt.ui.view.lchWindow;
 
 import edu.gemini.qpt.core.Schedule;
 import edu.gemini.qpt.core.util.ImprovedSkyCalc;
-import edu.gemini.qpt.shared.util.TimeUtils;
 import edu.gemini.qpt.ui.util.TimePreference;
+import edu.gemini.shared.util.DateTimeUtils;
 import edu.gemini.ui.gface.GSubElementDecorator;
 import edu.gemini.ui.gface.GViewer;
 
@@ -45,7 +45,7 @@ public class LchWindowDecorator implements GSubElementDecorator<Schedule, LchWin
                 }
                 break;
             case Length:
-                label.setText(TimeUtils.msToHHMMSS(e.time)); // a length of time in "HH:mm:ss"
+                label.setText(DateTimeUtils.msToHMMSS(e.time)); // a length of time in "HH:mm:ss"
                 break;
             case Type:
                 label.setText(e.targetType);

@@ -340,7 +340,7 @@ object ObservationTableModel {
         // getElevationConstraint methods return hours as double, so we can't use TimeValue.HOURS to convert.
         val min = DateTimeUtils.MillisecondsPerHour * o.getElevationConstraintMin
         val max = DateTimeUtils.MillisecondsPerHour * o.getElevationConstraintMax
-        DateTimeUtils.msToHHMMSS(min.toLong) + " \u2264 ha \u2264 " + DateTimeUtils.msToHHMMSS(max.toLong)
+        DateTimeUtils.msToHMMSS(min.toLong) + " \u2264 ha \u2264 " + DateTimeUtils.msToHMMSS(max.toLong)
       case _                                  => ""
     }
   }
@@ -385,7 +385,7 @@ object ObservationTableModel {
   }
   case class TimeValue(t: Long) extends Comparable[TimeValue] {
     def compareTo(other: TimeValue): Int = math.signum(t - other.t).toInt
-    val prettyString: String = DateTimeUtils.msToHHMMSS(t)
+    val prettyString: String = DateTimeUtils.msToHMMSS(t)
   }
 
 }

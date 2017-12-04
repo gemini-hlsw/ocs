@@ -395,7 +395,7 @@ final class TimingWindowTable extends JTable {
             final long duration = tw.getDuration();
             if (duration == TimingWindow.WINDOW_REMAINS_OPEN_FOREVER) return null;
             if (tw.getRepeat() == TimingWindow.REPEAT_NEVER) return null;
-            return DateTimeUtils.msToHHMMSS(duration);
+            return UTCDateTimeFormatters.YYYY_MMM_DD_HHMMSS_Z().format(Instant.ofEpochMilli(tw.getStart()));
         }
 
         private String formatRepeat(final TimingWindow tw) {

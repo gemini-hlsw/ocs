@@ -13,8 +13,8 @@ import edu.gemini.qpt.core.Schedule;
 import edu.gemini.qpt.core.Variant;
 import edu.gemini.qpt.core.Variant.Flag;
 import edu.gemini.qpt.shared.sp.Obs;
-import edu.gemini.qpt.shared.util.TimeUtils;
 import edu.gemini.qpt.ui.util.CandidateDecorator;
+import edu.gemini.shared.util.DateTimeUtils;
 import edu.gemini.skycalc.HHMMSS;
 import edu.gemini.ui.gface.GSubElementDecorator;
 import edu.gemini.ui.gface.GViewer;
@@ -28,11 +28,6 @@ public class CandidateObsDecorator implements GSubElementDecorator<Schedule, Obs
 	private Variant variant;
 
 	public void decorate(JLabel label, Obs obs, CandidateObsAttribute subElement, Object value) {
-
-//		if (obs == null || subElement == null || value == null) {
-//			LOGGER.warning("obs == " + obs + ", subElement == " + subElement + ", value == " + value);
-////			return;
-//		}
 
 		// Alignment (and value, in the case of Score)
 		switch (subElement) {
@@ -66,7 +61,7 @@ public class CandidateObsDecorator implements GSubElementDecorator<Schedule, Obs
 
 		case Dur:
 
-			label.setText(TimeUtils.msToHHMMSS((Long) value));
+			label.setText(DateTimeUtils.msToHMMSS((Long) value));
 			break;
 
 		}
