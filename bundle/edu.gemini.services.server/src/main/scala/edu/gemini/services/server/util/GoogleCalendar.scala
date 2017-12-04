@@ -1,14 +1,14 @@
 package edu.gemini.services.server.util
 
 import java.text.ParseException
-import java.time.{Instant, ZonedDateTime}
+import java.time.ZonedDateTime
 import java.util.{Date, TimeZone}
 
 import com.google.api.client.util.DateTime
 import com.google.api.services.calendar.model.{EventDateTime, Calendar => GoogleModelCalendar, Event => GoogleEvent}
 import edu.gemini.services.client.Calendar
 import edu.gemini.services.client.Calendar.{AllDayEvent, Entry, Event}
-import edu.gemini.shared.util.DateTimeUtils
+import edu.gemini.shared.util.{DateTimeFormatters, DateTimeUtils}
 import edu.gemini.spModel.core.Site
 import edu.gemini.util.skycalc.calc.Interval
 
@@ -39,7 +39,7 @@ class GoogleCalendarService(val site: Site) extends edu.gemini.services.client.C
  * @param service
  * @param calendar
  */
-class GoogleCalendar(service: GoogleCalendarService, calendar: GoogleModelCalendar) extends Calendar {
+class GoogleCalendar(service: GoogleCalendarService, calendar: GoogleModelCalendar) extends Calendar with DateFormatting {
 
   def events(range: Interval, query: Option[String] = None): Seq[Entry]  = {
     getCalendarEvents(getEvents(query, range))
@@ -56,9 +56,7 @@ class GoogleCalendar(service: GoogleCalendarService, calendar: GoogleModelCalend
   }
 
   private def deleteAllDayEvent(summary: String, interval: Interval): Unit = {
-    val sdf = DateTimeUtils.YYYY_MMM_DD_SDZ_Formatter
-    val s = sdf.format(Instant.ofEpochMilli(interval.start))
-    val e = sdf.format(Instant.ofEpochMilli(interval.end))
+    val (s,e) = formatStartEndDate(interval.start, interval.end)
     val events = getEvents(Some(summary.replace("-", " ")), interval)
     events.filter(_.getSummary == summary).foreach(ev => {
       if (ev.getStart.getDate.toStringRfc3339 == s && ev.getEnd.getDate.toStringRfc3339 == e)
@@ -74,9 +72,7 @@ class GoogleCalendar(service: GoogleCalendarService, calendar: GoogleModelCalend
   }
 
   private def addAllDayEvent(constraint: String, interval: Interval): Unit = {
-    val sdf = DateTimeUtils.YYYY_MMM_DD_SDZ_Formatter
-    val s = sdf.format(Instant.ofEpochMilli(interval.start))
-    val e = sdf.format(Instant.ofEpochMilli(interval.end - DateTimeUtils.StartOfDayHourInMs))
+    val (s,e) = formatStartEndDate(interval.start, interval.end - DateTimeUtils.StartOfDayHourInMs)
     val event = new GoogleEvent().
       setSummary(constraint).
       setStart(new EventDateTime().setDate(new DateTime(s))).
@@ -144,7 +140,7 @@ class GoogleCalendar(service: GoogleCalendarService, calendar: GoogleModelCalend
 
   private def startOfDay(dateString: String, timeZone: TimeZone): Long = {
     try {
-      val f = DateTimeUtils.YYYY_MMM_DD_Formatter.withZone(timeZone.toZoneId)
+      val f = DateTimeFormatters(timeZone.toZoneId).YYYY_MMM_DD
       ZonedDateTime.parse(dateString, f).toInstant.toEpochMilli
     } catch {
       case t: ParseException => throw new IllegalArgumentException("invalid time format, expected yyyy-MM-dd, received " + dateString, t)

@@ -2,17 +2,15 @@ package jsky.app.ot.gemini.editor
 
 import java.time.Instant
 
-import edu.gemini.shared.util.DateTimeUtils
+import edu.gemini.shared.util.{DateTimeUtils, UTCDateTimeFormatters}
 import edu.gemini.sp.vcs2.VcsAction._
 import edu.gemini.sp.vcs.log._
 import edu.gemini.sp.vcs.reg.VcsRegistrar
 import edu.gemini.sp.vcs2.VcsFailure
 import edu.gemini.sp.vcs2.VcsFailure.VcsException
 import jsky.app.ot.vcs.VcsOtClient
-
 import java.util.logging.{Level, Logger}
 import javax.swing.table.{DefaultTableModel, TableColumn}
-
 
 import scala.swing.Swing
 import scalaz.{-\/, \/-}
@@ -38,8 +36,8 @@ object EdProgramHelper {
 
   implicit class ToRowOps(es: VcsEventSet) {
     def toRow: Array[Object] = Array[Object](
-      DateTimeUtils.YYYY_MMM_DD_HHMMSS_Formatter.format(Instant.ofEpochMilli(es.timestamps._1)),
-      DateTimeUtils.YYYY_MMM_DD_HHMMSS_Formatter.format(Instant.ofEpochMilli(es.timestamps._2)),
+      UTCDateTimeFormatters.YYYY_MMM_DD_HHMMSS.format(Instant.ofEpochMilli(es.timestamps._1)),
+      UTCDateTimeFormatters.YYYY_MMM_DD_HHMMSS.format(Instant.ofEpochMilli(es.timestamps._2)),
     //    { val a = es.ops.get(OpFetch).getOrElse(0); a : Integer }, // yes, the tempvar is needed
     {
       val a = es.ops.getOrElse(OpStore, 0); a: Integer

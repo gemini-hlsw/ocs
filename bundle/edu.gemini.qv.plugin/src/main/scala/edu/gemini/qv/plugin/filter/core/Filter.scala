@@ -247,7 +247,8 @@ object Filter {
   // =======================  *** Set time filter ***
   case class SetTime(ctx: QvContext, min: Double = 0, max: Double = 15) extends SimpleRangeFilter {
     def label = "Set Time Hrs"
-    def getter = (o: Obs, ctx: QvContext) => SolutionProvider(ctx).remainingHours(ctx, o).getOrElse(min.toLong).toDouble / DateTimeUtils.MillisecondsPerHour
+    def getter:(Obs, QvContext) => Double =
+      (o: Obs, ctx: QvContext) => SolutionProvider(ctx).remainingHours(ctx, o).getOrElse(min.toLong).toDouble / DateTimeUtils.MillisecondsPerHour
     def lowest = 0
     def highest = Double.MaxValue
     override def desc = "Filter for targets with number of hours before the target sets tonight in the range min ≤ hours < max."

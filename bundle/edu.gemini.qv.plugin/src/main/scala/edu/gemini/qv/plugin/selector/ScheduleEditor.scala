@@ -16,7 +16,7 @@ import edu.gemini.spModel.gemini.inst.InstRegistry
 import edu.gemini.util.skycalc.calc.Interval
 import javax.swing.BorderFactory
 
-import edu.gemini.shared.util.DateTimeUtils
+import edu.gemini.shared.util.{DateTimeFormatters, DateTimeUtils}
 
 import scala.collection.JavaConversions._
 import scala.concurrent.duration._
@@ -201,8 +201,7 @@ class ScheduleEditor(ctx: QvContext, scheduleCache: ScheduleCache) extends Dialo
 
   def constraintsPanel(constraints: Seq[Constraint]) = new GridBagPanel {
     constraints.zipWithIndex.foreach({case (i, y) =>
-      val z = ctx.site.timezone.toZoneId
-      val formatter = DateTimeUtils.YYYY_MMM_DD_HHMMSS_Formatter.withZone(z)
+      val formatter = DateTimeFormatters(ctx.site.timezone).YYYY_MMM_DD_HHMMSS
       val s = formatter.format(Instant.ofEpochMilli(i.start))
       val e = formatter.format(Instant.ofEpochMilli(i.end))
       val l = new TextArea(s"$s - $e")

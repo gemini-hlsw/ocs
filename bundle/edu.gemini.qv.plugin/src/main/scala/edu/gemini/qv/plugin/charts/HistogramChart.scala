@@ -69,11 +69,11 @@ class HistogramChart(ctx: QvContext, xAxis: Axis, yAxis: Axis, calculation: Calc
 
     // try to use the same color for each group even if some groups are added/removed
     // (use the indices of the visible groups in the seq of all groups on the y-axis)
-    visibleYGroups.zipWithIndex.foreach({case (f, ix) =>
+    visibleYGroups.zipWithIndex.foreach { case (f, ix) =>
       val code = colorCoding.code(f)
       renderer.setSeriesPaint(ix, code.color)
       renderer.setSeriesOutlinePaint(ix, Color.darkGray)
-    })
+    }
 
     chart
   }

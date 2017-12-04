@@ -9,6 +9,7 @@ import edu.gemini.qpt.shared.sp.MiniModel;
 import edu.gemini.qpt.shared.util.PioSerializable;
 import edu.gemini.qpt.shared.util.TimeUtils;
 import edu.gemini.shared.util.DateTimeUtils;
+import edu.gemini.shared.util.UTCDateTimeFormatters;
 import edu.gemini.skycalc.TwilightBoundType;
 import edu.gemini.skycalc.TwilightBoundedNight;
 import edu.gemini.spModel.core.Site;
@@ -619,7 +620,7 @@ public final class Schedule extends BaseMutableBean implements PioSerializable, 
         sb.append(getSite().displayName);
         if (!isEmpty()) {
             sb.append(" - ");
-            sb.append(DateTimeUtils.YYYYMMDD_Formatter().format(Instant.ofEpochMilli(getEnd())));
+            sb.append(UTCDateTimeFormatters.YYYYMMDD().format(Instant.ofEpochMilli(getEnd())));
         }
         return sb.toString();
     }

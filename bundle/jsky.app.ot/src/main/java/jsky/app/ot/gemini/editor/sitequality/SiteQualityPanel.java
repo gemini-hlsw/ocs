@@ -2,6 +2,7 @@ package jsky.app.ot.gemini.editor.sitequality;
 
 import edu.gemini.shared.gui.ButtonFlattener;
 import edu.gemini.shared.util.DateTimeUtils;
+import edu.gemini.shared.util.UTCDateTimeFormatters;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.*;
 import jsky.app.ot.editor.type.SpTypeUIUtil;
@@ -312,7 +313,7 @@ final class TimingWindowTable extends JTable {
         public Component getTableCellRendererComponent(final JTable table, final Object value, final boolean isSelected,
                                                        final boolean hasFocus, final int row, final int column) {
             final JLabel label = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-            final String text = DateTimeUtils.YYYY_MMM_DD_HHMMSS_Z_Formatter().format((Instant) value);
+            final String text = UTCDateTimeFormatters.YYYY_MMM_DD_HHMMSS_Z().format((Instant) value);
             label.setText(text);
             return label;
         }

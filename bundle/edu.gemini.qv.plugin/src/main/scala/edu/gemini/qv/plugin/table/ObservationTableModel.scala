@@ -7,7 +7,7 @@ import javax.swing.table.{AbstractTableModel, TableRowSorter}
 
 import edu.gemini.qpt.shared.sp.{Band, Obs}
 import edu.gemini.qv.plugin.util.SolutionProvider
-import edu.gemini.shared.util.DateTimeUtils
+import edu.gemini.shared.util.{DateTimeUtils, UTCDateTimeFormatters}
 import edu.gemini.spModel.`type`.{DisplayableSpType, LoggableSpType}
 import edu.gemini.spModel.core.{Affiliate, Angle}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.{ElevationConstraintType, TimingWindow}
@@ -315,7 +315,7 @@ object ObservationTableModel {
 
   /** Convert timing windows into human readable string. */
   private def timingWindowsAsString(o: Obs): String = {
-    def formatTime(t: Long): String = DateTimeUtils.YYYY_MMM_DD_HHMM_Formatter.format(Instant.ofEpochMilli(t))
+    def formatTime(t: Long): String = UTCDateTimeFormatters.YYYY_MMM_DD_HHMM.format(Instant.ofEpochMilli(t))
     def twToString(tw: TimingWindow): String = {
       formatTime(tw.getStart) + {
         if (tw.getDuration == TimingWindow.WINDOW_REMAINS_OPEN_FOREVER) " and remains open forever"

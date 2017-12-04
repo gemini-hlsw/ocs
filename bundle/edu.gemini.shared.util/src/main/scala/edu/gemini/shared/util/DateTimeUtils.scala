@@ -14,20 +14,6 @@ object DateTimeUtils {
   val UTC: ZoneId               = ZoneId.of("UTC")
   val SystemDefaultZone: ZoneId = ZoneId.systemDefault()
 
-  // Standard UTC formatters.
-  val YYYY_MMM_DD_Formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MMM-dd").withZone(UTC)
-  val YYYY_MMM_DD_HHMM_Formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MMM-dd HH:mm").withZone(UTC)
-  val YYYY_MMM_DD_HHMMSS_Formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MMM-dd HH:mm:ss").withZone(UTC)
-  val YYYY_MMM_DD_HHMMSS_Z_Formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MMM-dd HH:mm:ss z").withZone(UTC)
-  val HHMMSS_Formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss").withZone(UTC)
-
-  // Standard non-UTC formatters.
-  val YYYY_MMM_DD_SDZ_Formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MMM-dd").withZone(SystemDefaultZone)
-  val YYYY_MMM_DD_HHMMSS_SDZ_Formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MMM-dd HH:mm:ss").withZone(SystemDefaultZone)
-
-  // Nonstandard formatters.
-  val YYYYMMDD_Formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd").withZone(UTC)
-
   // Create a Comparator<String> from a given DateTimeFormatter.
   def createComparator(df: DateTimeFormatter): Comparator[String] = Comparator.comparingLong(new ToLongFunction[String] {
     override def applyAsLong(s: String): Long = ZonedDateTime.parse(s, df).toInstant.toEpochMilli
@@ -82,5 +68,28 @@ object DateTimeUtils {
   val MillisecondsPerHour:   Long = 1.hour.toMillis
   val MillisecondsPerDay:    Long = 1.day.toMillis
 
-  def DateTimeUtilsJava = DateTimeUtils
+  def DateTimeUtilsJava: DateTimeUtils.type = DateTimeUtils
+}
+
+case class DateTimeFormatters(zone: ZoneId) {
+  val YYYY_MMM_DD: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MMM-dd").withZone(zone)
+  val YYYY_MMM_DD_HHMM: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MMM-dd HH:mm").withZone(zone)
+  val YYYY_MMM_DD_HHMMSS: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MMM-dd HH:mm:ss").withZone(zone)
+  val YYYY_MMM_DD_HHMMSS_Z: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MMM-dd HH:mm:ss z").withZone(zone)
+  val HHMMSS: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss").withZone(zone)
+
+  // Nonstandard formatters.
+  val YYYYMMDD: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd").withZone(zone)
+
+  def DateTimeFormattersJava: DateTimeFormatters.type = DateTimeFormatters
+}
+object DateTimeFormatters {
+  def apply(zone: TimeZone): DateTimeFormatters = DateTimeFormatters(zone.toZoneId)
+}
+
+object UTCDateTimeFormatters extends DateTimeFormatters(DateTimeUtils.UTC) {
+  def UTCDateTimeFormattersJava: UTCDateTimeFormatters.type = UTCDateTimeFormatters
+}
+object SystemDefaultDateTimeFormatters extends DateTimeFormatters(DateTimeUtils.SystemDefaultZone) {
+  def SystemDefaultDateTimeFormattersJava: SystemDefaultDateTimeFormatters.type = SystemDefaultDateTimeFormatters
 }
