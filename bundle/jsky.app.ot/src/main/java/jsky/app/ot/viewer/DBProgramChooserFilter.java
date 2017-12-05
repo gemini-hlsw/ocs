@@ -32,13 +32,14 @@ public final class DBProgramChooserFilter implements IDBProgramChooserFilter {
     private static final SpidMatcher QUEUE     = new SpidMatcher.TypeMatcher(ProgramType.Queue$.MODULE$);
     private static final SpidMatcher CAL       = new SpidMatcher.TypeMatcher(ProgramType.Calibration$.MODULE$);
     private static final SpidMatcher LIB       = new SpidMatcher.Or(
-                                                   new SpidMatcher.Pattern("^G[NS]-LIB.*"),
-                                                   new SpidMatcher.Pattern("^G[NS]-.*-library")
-                                                 );
+            new SpidMatcher.Pattern("^G[NS]-LIB.*"),
+            new SpidMatcher.Pattern("^G[NS]-.*-library")
+    );
     private static final SpidMatcher ENG       = new SpidMatcher.TypeMatcher(ProgramType.Engineering$.MODULE$);
     private static final SpidMatcher OTHER     = new SpidMatcher.Not(
-                                                   new SpidMatcher.Or(CLASSICAL, LP, FT, QUEUE, CAL, LIB, ENG)
-                                                 );
+            new SpidMatcher.Or(CLASSICAL, LP, FT, QUEUE, CAL, LIB, ENG)
+    );
+
 
     // Construct a check box with a tooltip
     private static JCheckBox mkCheckBox(final String caption, final String tip) {
@@ -209,7 +210,7 @@ public final class DBProgramChooserFilter implements IDBProgramChooserFilter {
      */
     private SpidMatcher getMatcher(final IDBDatabaseService odb) {
         final SpidMatcher locationMatcher =
-            remote.isSelected() ? SpidMatcher.TRUE : new SpidMatcher.LocalMatcher(odb);
+                remote.isSelected() ? SpidMatcher.TRUE : new SpidMatcher.LocalMatcher(odb);
 
         SpidMatcher idMatcher = SpidMatcher.FALSE;
         if (classical.isSelected()) {
@@ -238,7 +239,7 @@ public final class DBProgramChooserFilter implements IDBProgramChooserFilter {
         }
 
         final SpidMatcher semMatcher =
-            new SpidMatcher.SemesterMatcher(getSemesterSelection());
+                new SpidMatcher.SemesterMatcher(getSemesterSelection());
 
         return new SpidMatcher.And(locationMatcher, idMatcher, semMatcher);
     }
