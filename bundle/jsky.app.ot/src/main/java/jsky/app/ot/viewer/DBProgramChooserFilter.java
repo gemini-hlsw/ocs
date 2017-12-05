@@ -1,3 +1,9 @@
+// Copyright 2003 Association for Universities for Research in Astronomy, Inc.,
+// Observatory Control System, Gemini Telescopes Project.
+//
+// $Id: DBProgramChooserFilter.java 8331 2007-12-05 19:16:40Z anunez $
+//
+
 package jsky.app.ot.viewer;
 
 import edu.gemini.pot.spdb.IDBDatabaseService;
@@ -9,6 +15,7 @@ import jsky.util.gui.GridBagUtil;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.ParseException;
 import java.util.*;
@@ -32,14 +39,13 @@ public final class DBProgramChooserFilter implements IDBProgramChooserFilter {
     private static final SpidMatcher QUEUE     = new SpidMatcher.TypeMatcher(ProgramType.Queue$.MODULE$);
     private static final SpidMatcher CAL       = new SpidMatcher.TypeMatcher(ProgramType.Calibration$.MODULE$);
     private static final SpidMatcher LIB       = new SpidMatcher.Or(
-            new SpidMatcher.Pattern("^G[NS]-LIB.*"),
-            new SpidMatcher.Pattern("^G[NS]-.*-library")
-    );
+                                                   new SpidMatcher.Pattern("^G[NS]-LIB.*"),
+                                                   new SpidMatcher.Pattern("^G[NS]-.*-library")
+                                                 );
     private static final SpidMatcher ENG       = new SpidMatcher.TypeMatcher(ProgramType.Engineering$.MODULE$);
     private static final SpidMatcher OTHER     = new SpidMatcher.Not(
-            new SpidMatcher.Or(CLASSICAL, LP, FT, QUEUE, CAL, LIB, ENG)
-    );
-
+                                                   new SpidMatcher.Or(CLASSICAL, LP, FT, QUEUE, CAL, LIB, ENG)
+                                                 );
 
     // Construct a check box with a tooltip
     private static JCheckBox mkCheckBox(final String caption, final String tip) {
@@ -76,11 +82,15 @@ public final class DBProgramChooserFilter implements IDBProgramChooserFilter {
     private final JLabel total = new JLabel();
     private final JPanel panel = new JPanel();
 
-    private final Collection<ActionListener> listeners = new ArrayList<>();
+    private final Collection<ActionListener> listeners = new ArrayList<ActionListener>();
 
     public DBProgramChooserFilter(Mode mode) {
 
-        listeners.add(e -> storeSemesterSelectionPreference(getSemesterSelection()));
+        listeners.add(new ActionListener() {
+            @Override public void actionPerformed(ActionEvent e) {
+                storeSemesterSelectionPreference(getSemesterSelection());
+            }
+        });
         restoreSettings();
 
         final JLabel totalProgLabel = new JLabel("Total:");
@@ -121,18 +131,20 @@ public final class DBProgramChooserFilter implements IDBProgramChooserFilter {
     @SuppressWarnings("unchecked")
     private Option<Semester> getSemesterSelection() {
         final Option<Semester> sem = (Option<Semester>) semestersCombo.getSelectedItem();
-        return sem == null ? None.instance() : sem;
+        return sem == null ? None.<Semester>instance() : sem;
     }
 
     private static Option<Semester> loadSemesterSelectionPreference() {
         final String key = PREF_KEY + ".semester";
-        return ImOption.apply(Preferences.get(key)).flatMap(s -> {
+        return ImOption.apply(Preferences.get(key)).flatMap(new MapOp<String, Option<Semester>>() {
+            @Override public Option<Semester> apply(String s) {
                 try {
-                    return new Some<>(Semester.parse(s));
+                    return new Some<Semester>(Semester.parse(s));
                 } catch (ParseException ex) {
                     return None.instance();
                 }
-            });
+            }
+        });
     }
 
     private void storeSemesterSelectionPreference(Option<Semester> sem) {
@@ -143,16 +155,16 @@ public final class DBProgramChooserFilter implements IDBProgramChooserFilter {
     // Update the contents of the semestersCombo combobox to include all of the semestersCombo
     // in the progIds in the given list of DBProgramInfo objects
     private <A> void updateSemesters(Iterable<A> as, MapOp<A, scala.Option<ProgramId>> getProgramId) {
-        final Set<Semester> semesters = new TreeSet<>();
+        final Set<Semester> semesters = new TreeSet<Semester>();
         for (A a : as) {
             final scala.Option<ProgramId> pid = getProgramId.apply(a);
-            final scala.Option<Semester> sem  = pid.isEmpty() ? scala.Option.empty() : pid.get().semester();
+            final scala.Option<Semester> sem  = pid.isEmpty() ? scala.Option.<Semester>empty() : pid.get().semester();
             if (sem.isDefined()) semesters.add(sem.get());
         }
 
-        final List<Option<Semester>> optSemesters = new ArrayList<>();
-        for (Semester s : semesters) optSemesters.add(new Some<>(s));
-        optSemesters.add(None.instance());
+        final List<Option<Semester>> optSemesters = new ArrayList<Option<Semester>>();
+        for (Semester s : semesters) optSemesters.add(new Some<Semester>(s));
+        optSemesters.add(None.<Semester>instance());
         Collections.reverse(optSemesters);
 
         @SuppressWarnings("unchecked") final Option<Semester> sel0 = (Option<Semester>) semestersCombo.getSelectedItem();
@@ -161,7 +173,7 @@ public final class DBProgramChooserFilter implements IDBProgramChooserFilter {
         _setComboBoxListenersEnabled(false);
         semestersCombo.setModel(new DefaultComboBoxModel(optSemesters.toArray()));
         if (optSemesters.contains(sel)) semestersCombo.setSelectedItem(sel);
-        else semestersCombo.setSelectedItem(None.instance());
+        else semestersCombo.setSelectedItem(None.<Semester>instance());
         _setComboBoxListenersEnabled(true);
     }
 
@@ -171,13 +183,17 @@ public final class DBProgramChooserFilter implements IDBProgramChooserFilter {
         for (final JCheckBox c : checks) {
             final String pref = PREF_KEY + "." + c.getName();
             c.setSelected(Preferences.get(pref, def));
-            c.addActionListener(e -> Preferences.set(pref, Boolean.toString(c.isSelected())));
+            c.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    Preferences.set(pref, Boolean.toString(c.isSelected()));
+                }
+            });
         }
     }
 
     private void restoreSettings() {
-        restoreSettings(Arrays.asList(remote, classical, lp, fastTurn, queue, other), true);
-        restoreSettings(Arrays.asList(cal, engineering, libs),         false);
+        restoreSettings(Arrays.asList(remote, classical, lp, fastTurn, queue), true);
+        restoreSettings(Arrays.asList(cal, engineering, other, libs),         false);
     }
 
     // Filters the input list with some glorious UI updating side-effects.
@@ -185,7 +201,7 @@ public final class DBProgramChooserFilter implements IDBProgramChooserFilter {
         updateSemesters(as, getProgId);
 
         final SpidMatcher matcher = getMatcher(odb);
-        final List<A> result = new ArrayList<>();
+        final List<A> result = new ArrayList<A>();
         for (A a : as) {
             if (matcher.matches(getProgId.apply(a))) result.add(a);
         }
@@ -198,19 +214,21 @@ public final class DBProgramChooserFilter implements IDBProgramChooserFilter {
      * Return a filtered version of the given list of DBProgramInfo objects
      */
     public List<DBProgramInfo> filter(final IDBDatabaseService odb, List<DBProgramInfo> infoList) {
-        return filter(odb, infoList, dbProgramInfo -> {
+        return filter(odb, infoList, new MapOp<DBProgramInfo, scala.Option<ProgramId>>() {
+            @Override public scala.Option<ProgramId> apply(DBProgramInfo dbProgramInfo) {
                 final SPProgramID pid = dbProgramInfo.programID;
                 final String pidStr   = (pid == null) ? null : pid.stringValue();
-                return (pidStr == null) ? scala.Option.empty() : new scala.Some<>(ProgramId$.MODULE$.parse(pidStr));
-            });
+                return (pidStr == null) ? scala.Option.<ProgramId>empty() : new scala.Some<ProgramId>(ProgramId$.MODULE$.parse(pidStr));
+            }
+        });
     }
 
     /**
      * Returns the current matcher, based on what's selected in the GUI doodad.
      */
-    private SpidMatcher getMatcher(final IDBDatabaseService odb) {
+    public SpidMatcher getMatcher(final IDBDatabaseService odb) {
         final SpidMatcher locationMatcher =
-                remote.isSelected() ? SpidMatcher.TRUE : new SpidMatcher.LocalMatcher(odb);
+            remote.isSelected() ? SpidMatcher.TRUE : new SpidMatcher.LocalMatcher(odb);
 
         SpidMatcher idMatcher = SpidMatcher.FALSE;
         if (classical.isSelected()) {
@@ -239,7 +257,7 @@ public final class DBProgramChooserFilter implements IDBProgramChooserFilter {
         }
 
         final SpidMatcher semMatcher =
-                new SpidMatcher.SemesterMatcher(getSemesterSelection());
+            new SpidMatcher.SemesterMatcher(getSemesterSelection());
 
         return new SpidMatcher.And(locationMatcher, idMatcher, semMatcher);
     }
