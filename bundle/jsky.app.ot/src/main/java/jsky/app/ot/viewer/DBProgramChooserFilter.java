@@ -200,7 +200,7 @@ public final class DBProgramChooserFilter implements IDBProgramChooserFilter {
         return filter(odb, infoList, dbProgramInfo -> {
                 final SPProgramID pid = dbProgramInfo.programID;
                 final String pidStr   = (pid == null) ? null : pid.stringValue();
-                return (pidStr == null) ? scala.Option.<ProgramId>empty() : new scala.Some<>(ProgramId$.MODULE$.parse(pidStr));
+                return (pidStr == null) ? scala.Option.empty() : new scala.Some<>(ProgramId$.MODULE$.parse(pidStr));
             });
     }
 
