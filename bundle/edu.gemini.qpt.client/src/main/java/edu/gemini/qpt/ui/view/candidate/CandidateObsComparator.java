@@ -11,7 +11,6 @@ import javax.swing.table.JTableHeader;
 import edu.gemini.qpt.core.Schedule;
 import edu.gemini.qpt.core.Variant;
 import edu.gemini.qpt.shared.sp.Obs;
-import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.ui.gface.GComparator;
 import edu.gemini.ui.gface.GTableViewer;
 import edu.gemini.ui.gface.GViewer;
