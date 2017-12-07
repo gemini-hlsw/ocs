@@ -34,7 +34,7 @@ public class CandidateObsComparator extends MouseAdapter implements GComparator<
 			return direction * ((ret != 0) ? ret : -o1.compareTo(o2));
 		}
 
-		// If we don't have a variant, then we don't have a middle point.
+        // If we don't have a variant, then we don't have a middle point.
         // This will happen when we've just deleted a variant, for example.
         // In this case, consider all Obs equal since we will have nothing to compare.
         if (variant == null)
