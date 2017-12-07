@@ -159,7 +159,7 @@ start ()
 
 	    # Attempt to start.
 	    printf "Starting ODB ${SPDB_VERSION_STR}"
-	    "${SPDB_EXEC}" 2>&1 > "${SPDB_DIR}/sysout.txt" &
+	    /sbin/runuser software -s /bin/bash -c "nohup ${SPDB_EXEC} 2>&1 > ${SPDB_DIR}/sysout.txt &"
 	    sleep_dots
 	    printf "\n"
 
