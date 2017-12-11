@@ -20,9 +20,6 @@ public class VisitController implements GTableController<Variant, Alloc, VisitAt
 	
 	public Object getSubElement(Alloc a, VisitAttribute subElement) {
 		switch (subElement) {
-//		case Group:
-//			Group g = a.getObs().getGroup();
-//			return g != null && g.getType() == GroupType.TYPE_SCHEDULING ? "\u00B7" : "";
 		case Start: return new Date(a.getStart());
 		case Dur: return DateTimeUtils.msToHHMM(a.getLength());
 		case BG: return a.getSkyBrightnessBin(false);

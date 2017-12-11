@@ -8,6 +8,6 @@ public enum TimePreference {
 	
 	;
 	
-	public static EnumBox<TimePreference> BOX = new EnumBox<TimePreference>(LOCAL);
+	public static EnumBox<TimePreference> BOX = new EnumBox<>(LOCAL);
 	
 }

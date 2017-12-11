@@ -37,7 +37,7 @@ public class LchWindowViewAdvisor implements IViewAdvisor, PropertyChangeListene
 	public LchWindowViewAdvisor(LchWindowType windowType) {
         this.windowType = windowType;
         controller = new LchWindowController(windowType);
-        tableViewer = new GTableViewer<Schedule, LchWindow, LchWindowAttribute>(controller);
+        tableViewer = new GTableViewer<>(controller);
         scroll = Factory.createStrippedScrollPane(tableViewer.getTable());
 
 //		// Set up the viewer
