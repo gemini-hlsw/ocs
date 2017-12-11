@@ -268,8 +268,9 @@ public class ScheduleDocument {
     }
 
     public SortedSet<Marker> getMarkers(Alloc a) {
-        SortedSet<Marker> ret = a.getMarkers();
-        ret.removeIf(m -> m.isQcOnly() && !showQcMarkers);
+        final SortedSet<Marker> ret = a.getMarkers();
+        if (!showQcMarkers)
+            ret.removeIf(Marker::isQcOnly);
         return ret;
     }
 
