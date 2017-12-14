@@ -97,6 +97,7 @@ object DateTimeUtils {
 }
 
 case class DateTimeFormatters(zone: ZoneId) {
+  val YYYY_MM_DD: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd").withZone(zone)
   val YYYY_MMM_DD: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MMM-dd").withZone(zone)
   val YYYY_MMM_DD_HHMM: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MMM-dd HH:mm").withZone(zone)
   val YYYY_MMM_DD_HHMMSS: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MMM-dd HH:mm:ss").withZone(zone)

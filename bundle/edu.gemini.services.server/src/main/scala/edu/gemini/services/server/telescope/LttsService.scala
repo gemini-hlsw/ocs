@@ -3,10 +3,10 @@ package edu.gemini.services.server.telescope
 import edu.gemini.spModel.core.Site
 import edu.gemini.util.skycalc.calc.Interval
 import java.io.InputStreamReader
-import java.time.ZonedDateTime
+import java.time.{Instant, ZonedDateTime}
 import java.time.format.DateTimeFormatter
 
-import edu.gemini.services.server.util.DateFormatting
+import edu.gemini.shared.util.DateTimeFormatters
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.impl.client.DefaultHttpClient
 
@@ -15,10 +15,12 @@ import scala.concurrent.Future
 import scala.xml.XML
 
 
-class LttsService(site: Site) extends DateFormatting {
+class LttsService(site: Site) {
 
   def getNights(range: Interval): Future[Seq[Interval]] =  Future {
-    val (s,e) = formatStartEndDate(range.start, range.end)
+    val df = DateTimeFormatters(site.timezone).YYYYMMDD
+    val s  = df.format(Instant.ofEpochMilli(range.start))
+    val e  = df.format(Instant.ofEpochMilli(range.end))
 
     val client = new DefaultHttpClient()
     val request = new HttpGet(s"http://$lttsHost:8080/ltts/services/nights?from=$s&to=$e")

@@ -1,14 +1,14 @@
 package edu.gemini.services.server.util
 
 import java.text.ParseException
-import java.time.ZonedDateTime
+import java.time.{Instant, ZonedDateTime}
 import java.util.{Date, TimeZone}
 
 import com.google.api.client.util.DateTime
 import com.google.api.services.calendar.model.{EventDateTime, Calendar => GoogleModelCalendar, Event => GoogleEvent}
 import edu.gemini.services.client.Calendar
 import edu.gemini.services.client.Calendar.{AllDayEvent, Entry, Event}
-import edu.gemini.shared.util.{DateTimeFormatters, DateTimeUtils}
+import edu.gemini.shared.util.{DateTimeFormatters, DateTimeUtils, UTCDateTimeFormatters}
 import edu.gemini.spModel.core.Site
 import edu.gemini.util.skycalc.calc.Interval
 
@@ -39,7 +39,8 @@ class GoogleCalendarService(val site: Site) extends edu.gemini.services.client.C
  * @param service
  * @param calendar
  */
-class GoogleCalendar(service: GoogleCalendarService, calendar: GoogleModelCalendar) extends Calendar with DateFormatting {
+class GoogleCalendar(service: GoogleCalendarService, calendar: GoogleModelCalendar) extends Calendar {
+  import GoogleCalendar._
 
   def events(range: Interval, query: Option[String] = None): Seq[Entry]  = {
     getCalendarEvents(getEvents(query, range))
@@ -140,11 +141,18 @@ class GoogleCalendar(service: GoogleCalendarService, calendar: GoogleModelCalend
 
   private def startOfDay(dateString: String, timeZone: TimeZone): Long = {
     try {
-      val f = DateTimeFormatters(timeZone.toZoneId).YYYY_MMM_DD
+      val f = DateTimeFormatters(timeZone.toZoneId).YYYY_MM_DD
       ZonedDateTime.parse(dateString, f).toInstant.toEpochMilli
     } catch {
       case t: ParseException => throw new IllegalArgumentException("invalid time format, expected yyyy-MM-dd, received " + dateString, t)
     }
   }
 
+}
+
+object GoogleCalendar {
+  def formatStartEndDate(start: Long, end: Long): (String, String) = {
+    val df = UTCDateTimeFormatters.YYYY_MM_DD
+    (df.format(Instant.ofEpochMilli(start)), df.format(Instant.ofEpochMilli(end)))
+  }
 }
