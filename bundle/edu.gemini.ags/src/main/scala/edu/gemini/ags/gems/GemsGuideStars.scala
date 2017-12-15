@@ -1,7 +1,7 @@
 package edu.gemini.ags.gems
 
 import edu.gemini.spModel.core.{RBandsList, Angle}
-import edu.gemini.spModel.gemini.gems.Canopus
+import edu.gemini.spModel.gemini.gems.CanopusWfs
 import edu.gemini.spModel.gemini.gsaoi.GsaoiOdgw
 import edu.gemini.spModel.gems.GemsGuideProbeGroup
 import edu.gemini.spModel.target.env.GuideGroup
@@ -108,9 +108,9 @@ case class GemsGuideStars(pa: Angle, tiptiltGroup: GemsGuideProbeGroup, strehl: 
 
   // Returns true if cwfs3 is the brightest star in the Caanopus asterism
   private def cwfs3IsBrightest: Boolean = {
-    val cwfs1 = getRLikeMag(guideGroup.get(Canopus.Wfs.cwfs1).asScalaOpt)
-    val cwfs2 = getRLikeMag(guideGroup.get(Canopus.Wfs.cwfs2).asScalaOpt)
-    val cwfs3 = getRLikeMag(guideGroup.get(Canopus.Wfs.cwfs3).asScalaOpt)
+    val cwfs1 = getRLikeMag(guideGroup.get(CanopusWfs.cwfs1).asScalaOpt)
+    val cwfs2 = getRLikeMag(guideGroup.get(CanopusWfs.cwfs2).asScalaOpt)
+    val cwfs3 = getRLikeMag(guideGroup.get(CanopusWfs.cwfs3).asScalaOpt)
     cwfs3 < cwfs2 && cwfs3 < cwfs1
   }
 

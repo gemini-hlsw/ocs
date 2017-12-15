@@ -3,8 +3,7 @@ package jsky.app.ot.gemini.gems;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.shared.util.immutable.Some;
 import edu.gemini.shared.util.immutable.None;
-import edu.gemini.spModel.gemini.gems.Canopus;
-import edu.gemini.spModel.obs.context.ObsContext;
+import edu.gemini.spModel.gemini.gems.CanopusWfs;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.target.WatchablePos;
 import edu.gemini.spModel.target.env.TargetEnvironmentDiff;
@@ -47,18 +46,18 @@ public final class CanopusFeature extends TpeImageFeature implements PropertyWat
         _iw.repaint();
     }
 
-    private PropertyChangeListener selListener = evt -> _redraw();
+    private final PropertyChangeListener selListener = evt -> _redraw();
 
     /**
      * Reinitialize (recalculate the positions and redraw).
      */
     @Override
-    public void reinit(TpeImageWidget iw, TpeImageInfo tii) {
+    public void reinit(final TpeImageWidget iw, final TpeImageInfo tii) {
         _stopMonitorOffsetSelections(selListener);
 
         super.reinit(iw, tii);
 
-        SPInstObsComp inst = _iw.getInstObsComp();
+        final SPInstObsComp inst = _iw.getInstObsComp();
         if (inst == null) return;
 
         // arrange to be notified if telescope positions are added, removed, or selected
@@ -67,8 +66,8 @@ public final class CanopusFeature extends TpeImageFeature implements PropertyWat
         // Monitor the selections of offset positions, since that affects the positions drawn
         _monitorOffsetSelections(selListener);
 
-        Point2D.Double base = tii.getBaseScreenPos();
-        double ppa = tii.getPixelsPerArcsec();
+        final Point2D.Double base = tii.getBaseScreenPos();
+        final double ppa = tii.getPixelsPerArcsec();
 
         trans = new AffineTransform();
         trans.translate(base.x, base.y);
@@ -80,19 +79,19 @@ public final class CanopusFeature extends TpeImageFeature implements PropertyWat
     /**
      * Implements the TelescopePosWatcher interface.
      */
-    public void telescopePosLocationUpdate(WatchablePos tp) {
+    public void telescopePosLocationUpdate(final WatchablePos tp) {
         _redraw();
     }
 
     /**
      * Implements the TelescopePosWatcher interface.
      */
-    public void telescopePosGenericUpdate(WatchablePos tp) {
+    public void telescopePosGenericUpdate(final WatchablePos tp) {
         _redraw();
     }
 
     @Override
-    protected void handleTargetEnvironmentUpdate(TargetEnvironmentDiff diff) {
+    protected void handleTargetEnvironmentUpdate(final TargetEnvironmentDiff diff) {
         _redraw();
     }
 
@@ -104,38 +103,33 @@ public final class CanopusFeature extends TpeImageFeature implements PropertyWat
     }
 
     // If _flipRA is -1, flip the RA axis of the area
-    private Area flipArea(Area a) {
-        if (_flipRA == -1) {
-            a = a.createTransformedArea(AffineTransform.getScaleInstance(_flipRA, 1.0));
-        }
-        return a;
+    private Area flipArea(final Area a) {
+        return _flipRA == -1 ? a.createTransformedArea(AffineTransform.getScaleInstance(_flipRA, 1.0)) : a;
     }
 
     /**
      * Draw the feature.
      */
     @Override
-    public void draw(Graphics g, TpeImageInfo tii) {
+    public void draw(final Graphics g, final TpeImageInfo tii) {
         if (!isEnabled(_iw.getContext())) return;
         if (trans == null) return;
 
-        Graphics2D g2d = (Graphics2D) g;
-        Color c = g2d.getColor();
+        _iw.getObsContext().foreach(ctx -> {
+            final Graphics2D g2d = (Graphics2D) g;
+            final Color c = g2d.getColor();
 
-        Option<ObsContext> ctxOpt = _iw.getObsContext();
-        if (ctxOpt.isEmpty()) return;
-        ObsContext ctx = ctxOpt.getValue();
+            // Draw the AO window itself.  A circle.
+            final Area a = CanopusWfs.probeRange(ctx);
+            isEmpty = a.isEmpty();
+            if (isEmpty) return;
 
-        // Draw the AO window itself.  A circle.
-        Area a = Canopus.Wfs.cwfs3.probeRange(ctx);
-        isEmpty = a.isEmpty();
-        if (isEmpty) return;
+            final Shape s = trans.createTransformedShape(flipArea(a));
+            g2d.setColor(AO_FOV_COLOR);
+            g2d.draw(s);
 
-        Shape s = trans.createTransformedShape(flipArea(a));
-        g2d.setColor(AO_FOV_COLOR);
-        g2d.draw(s);
-
-        g2d.setColor(c);
+            g2d.setColor(c);
+        });
     }
 
     @Override

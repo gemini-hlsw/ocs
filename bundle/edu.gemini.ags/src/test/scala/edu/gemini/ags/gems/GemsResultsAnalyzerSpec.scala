@@ -12,7 +12,7 @@ import edu.gemini.pot.ModelConverters._
 import edu.gemini.spModel.core.Magnitude
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
-import edu.gemini.spModel.gemini.gems.Canopus
+import edu.gemini.spModel.gemini.gems.CanopusWfs
 import edu.gemini.spModel.gemini.gems.Gems
 import edu.gemini.spModel.gemini.gems.GemsInstrument
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi
@@ -79,17 +79,17 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
       val group = result.guideGroup
       val set = group.getReferencedGuiders
       // Found a star on CWFS1, CWFS2, CWFS3 and ODWG3
-      set.contains(Canopus.Wfs.cwfs1) should beTrue
-      set.contains(Canopus.Wfs.cwfs2) should beTrue
-      set.contains(Canopus.Wfs.cwfs3) should beTrue
+      set.contains(CanopusWfs.cwfs1) should beTrue
+      set.contains(CanopusWfs.cwfs2) should beTrue
+      set.contains(CanopusWfs.cwfs3) should beTrue
       set.contains(GsaoiOdgw.odgw1) should beFalse
       set.contains(GsaoiOdgw.odgw2) should beFalse
       set.contains(GsaoiOdgw.odgw3) should beFalse
       set.contains(GsaoiOdgw.odgw4) should beTrue
 
-      val cwfs1 = group.get(Canopus.Wfs.cwfs1).getValue.getPrimary.getValue
-      val cwfs2 = group.get(Canopus.Wfs.cwfs2).getValue.getPrimary.getValue
-      val cwfs3 = group.get(Canopus.Wfs.cwfs3).getValue.getPrimary.getValue
+      val cwfs1 = group.get(CanopusWfs.cwfs1).getValue.getPrimary.getValue
+      val cwfs2 = group.get(CanopusWfs.cwfs2).getValue.getPrimary.getValue
+      val cwfs3 = group.get(CanopusWfs.cwfs3).getValue.getPrimary.getValue
       val odgw4 = group.get(GsaoiOdgw.odgw4).getValue.getPrimary.getValue
       cwfs1.getName must beEqualTo("208-152095")
       cwfs2.getName must beEqualTo("208-152215")
@@ -140,17 +140,17 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
       val group = result.guideGroup
       val set = group.getReferencedGuiders
       // Found a star on CWFS1, CWFS2, CWFS3 and ODWG2
-      set.contains(Canopus.Wfs.cwfs1) should beTrue
-      set.contains(Canopus.Wfs.cwfs2) should beTrue
-      set.contains(Canopus.Wfs.cwfs3) should beTrue
+      set.contains(CanopusWfs.cwfs1) should beTrue
+      set.contains(CanopusWfs.cwfs2) should beTrue
+      set.contains(CanopusWfs.cwfs3) should beTrue
       set.contains(GsaoiOdgw.odgw1) should beFalse
       set.contains(GsaoiOdgw.odgw2) should beTrue
       set.contains(GsaoiOdgw.odgw3) should beFalse
       set.contains(GsaoiOdgw.odgw4) should beFalse
 
-      val cwfs1 = group.get(Canopus.Wfs.cwfs1).getValue.getPrimary.getValue
-      val cwfs2 = group.get(Canopus.Wfs.cwfs2).getValue.getPrimary.getValue
-      val cwfs3 = group.get(Canopus.Wfs.cwfs3).getValue.getPrimary.getValue
+      val cwfs1 = group.get(CanopusWfs.cwfs1).getValue.getPrimary.getValue
+      val cwfs2 = group.get(CanopusWfs.cwfs2).getValue.getPrimary.getValue
+      val cwfs3 = group.get(CanopusWfs.cwfs3).getValue.getPrimary.getValue
       val odgw2 = group.get(GsaoiOdgw.odgw2)  .getValue.getPrimary.getValue
       cwfs1.getName must beEqualTo("104-014597")
       cwfs2.getName must beEqualTo("104-014608")
@@ -201,17 +201,17 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
       val group = result.guideGroup
       val set = group.getReferencedGuiders
       // Found a star on CWFS1, CWFS2, CWFS3 and ODWG2
-      set.contains(Canopus.Wfs.cwfs1) should beTrue
-      set.contains(Canopus.Wfs.cwfs2) should beTrue
-      set.contains(Canopus.Wfs.cwfs3) should beTrue
+      set.contains(CanopusWfs.cwfs1) should beTrue
+      set.contains(CanopusWfs.cwfs2) should beTrue
+      set.contains(CanopusWfs.cwfs3) should beTrue
       set.contains(GsaoiOdgw.odgw1) should beFalse
       set.contains(GsaoiOdgw.odgw2) should beTrue
       set.contains(GsaoiOdgw.odgw3) should beFalse
       set.contains(GsaoiOdgw.odgw4) should beFalse
 
-      val cwfs1 = group.get(Canopus.Wfs.cwfs1).getValue.getPrimary.getValue
-      val cwfs2 = group.get(Canopus.Wfs.cwfs2).getValue.getPrimary.getValue
-      val cwfs3 = group.get(Canopus.Wfs.cwfs3).getValue.getPrimary.getValue
+      val cwfs1 = group.get(CanopusWfs.cwfs1).getValue.getPrimary.getValue
+      val cwfs2 = group.get(CanopusWfs.cwfs2).getValue.getPrimary.getValue
+      val cwfs3 = group.get(CanopusWfs.cwfs3).getValue.getPrimary.getValue
       val odgw2 = group.get(GsaoiOdgw.odgw2)  .getValue.getPrimary.getValue
       cwfs1.getName must beEqualTo("289-128909")
       cwfs2.getName must beEqualTo("289-128878")
@@ -262,16 +262,16 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
       val group = result.guideGroup
       val set = group.getReferencedGuiders
       // Found a star on CWFS1, CWFS2, CWFS3 and ODWG4
-      set.contains(Canopus.Wfs.cwfs1) should beTrue
-      set.contains(Canopus.Wfs.cwfs2) should beTrue
-      set.contains(Canopus.Wfs.cwfs3) should beTrue
+      set.contains(CanopusWfs.cwfs1) should beTrue
+      set.contains(CanopusWfs.cwfs2) should beTrue
+      set.contains(CanopusWfs.cwfs3) should beTrue
       set.contains(GsaoiOdgw.odgw1) should beFalse
       set.contains(GsaoiOdgw.odgw2) should beFalse
       set.contains(GsaoiOdgw.odgw3) should beFalse
       set.contains(GsaoiOdgw.odgw4) should beTrue
 
-      val cwfs2 = group.get(Canopus.Wfs.cwfs2).getValue.getPrimary.getValue.getSkycalcCoordinates(NoTime).getValue
-      val cwfs3 = group.get(Canopus.Wfs.cwfs3).getValue.getPrimary.getValue.getSkycalcCoordinates(NoTime).getValue
+      val cwfs2 = group.get(CanopusWfs.cwfs2).getValue.getPrimary.getValue.getSkycalcCoordinates(NoTime).getValue
+      val cwfs3 = group.get(CanopusWfs.cwfs3).getValue.getPrimary.getValue.getSkycalcCoordinates(NoTime).getValue
       val odgw4 = group.get(GsaoiOdgw.odgw4)  .getValue.getPrimary.getValue.getSkycalcCoordinates(NoTime).getValue
 
       val cwfs2x = Coordinates.create("12:38:44.500", "-49:47:58.38")

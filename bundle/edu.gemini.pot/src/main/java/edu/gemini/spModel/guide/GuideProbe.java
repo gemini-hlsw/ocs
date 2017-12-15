@@ -5,7 +5,6 @@ import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.shared.util.immutable.PredicateOp;
 import edu.gemini.shared.util.immutable.Some;
 import edu.gemini.spModel.core.BandsList;
-import edu.gemini.spModel.core.RBandsList;
 import edu.gemini.spModel.obs.context.ObsContext;
 
 import java.io.Serializable;

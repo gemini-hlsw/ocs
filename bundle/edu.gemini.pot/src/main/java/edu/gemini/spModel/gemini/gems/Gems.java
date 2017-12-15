@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package edu.gemini.spModel.gemini.gems;
 
 import edu.gemini.pot.sp.SPComponentType;
@@ -240,17 +236,7 @@ public final class Gems extends AbstractDataObject implements PropertyProvider, 
         return sc;
     }
 
-//    public static List getInstConfigInfo() {
-//        List<InstConfigInfo> configInfo = new LinkedList<InstConfigInfo>();
-//
-//        configInfo.add(new InstConfigInfo<Adc>(ADC_PROP));
-//        configInfo.add(new InstConfigInfo<DichroicBeamsplitter>(DICHROIC_BEAMSPLITTER_PROP));
-//        configInfo.add(new InstConfigInfo<AstrometricMode>(ASTROMETRIC_MODE_PROP));
-//
-//        return configInfo;
-//    }
-
-    private static final Collection<GuideProbe> GUIDERS = GuideProbeUtil.instance.createCollection(Canopus.Wfs.values());
+    private static final Collection<GuideProbe> GUIDERS = GuideProbeUtil.instance.createCollection(CanopusWfs.values());
 
     public Collection<GuideProbe> getGuideProbes() {
         return GUIDERS;

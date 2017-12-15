@@ -1,27 +1,27 @@
 package edu.gemini.spModel.gemini.gsaoi
 
+import org.junit.Test
+import org.junit.Assert._
+import java.beans.PropertyDescriptor
+
+import edu.gemini.spModel.core.SiderealTarget
 import edu.gemini.spModel.data.config.{DefaultParameter, IParameter}
+import edu.gemini.spModel.gemini.gems.CanopusWfs
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi._
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi.Filter._
 import edu.gemini.spModel.gemini.seqcomp.SeqRepeatOffset
 import edu.gemini.spModel.guide.DefaultGuideOptions
 import edu.gemini.spModel.guide.DefaultGuideOptions.Value.{off, on}
 import edu.gemini.spModel.obs.plannedtime.{OffsetOverheadCalculator, PlannedTimeCalculator}
+import edu.gemini.skycalc.{Angle, Offset}
+import edu.gemini.spModel.target.env.GuideProbeTargets
+import edu.gemini.spModel.target.SPTarget
+import edu.gemini.spModel.target.obsComp.TargetObsComp
 import edu.gemini.spModel.target.offset.OffsetPos
 import edu.gemini.spModel.test.InstrumentSequenceTestBase
 import edu.gemini.spModel.test.InstrumentSequenceTestBase._
-import org.junit.Test
-import org.junit.Assert._
-import java.beans.PropertyDescriptor
 
 import scala.collection.JavaConverters._
-import edu.gemini.spModel.target.env.GuideProbeTargets
-import edu.gemini.spModel.gemini.gems.Canopus
-import edu.gemini.spModel.target.SPTarget
-import edu.gemini.spModel.target.obsComp.TargetObsComp
-import edu.gemini.skycalc.{Angle, Offset}
-import edu.gemini.spModel.core.SiderealTarget
-
 
 class PlannedTimeTest extends InstrumentSequenceTestBase[Gsaoi, GsaoiSeqConfig] {
   override protected def getObsCompSpType = Gsaoi.SP_TYPE
@@ -37,7 +37,7 @@ class PlannedTimeTest extends InstrumentSequenceTestBase[Gsaoi, GsaoiSeqConfig] 
     val env  = getTargetEnvironment
     val grp  = env.getPrimaryGuideGroup
     val target = new SPTarget(SiderealTarget.empty)
-    val env2 = env.setPrimaryGuideGroup(grp.put(GuideProbeTargets.create(Canopus.Wfs.cwfs3, target)))
+    val env2 = env.setPrimaryGuideGroup(grp.put(GuideProbeTargets.create(CanopusWfs.cwfs3, target)))
 
     val dobj = getTarget.getDataObject.asInstanceOf[TargetObsComp]
     dobj.setTargetEnvironment(env2)
