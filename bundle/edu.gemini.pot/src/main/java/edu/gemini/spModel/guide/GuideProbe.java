@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package edu.gemini.spModel.guide;
 
 import edu.gemini.shared.util.immutable.None;
@@ -9,6 +5,7 @@ import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.shared.util.immutable.PredicateOp;
 import edu.gemini.shared.util.immutable.Some;
 import edu.gemini.spModel.core.BandsList;
+import edu.gemini.spModel.core.RBandsList;
 import edu.gemini.spModel.obs.context.ObsContext;
 
 import java.io.Serializable;
@@ -122,7 +119,9 @@ public interface GuideProbe {
 
     /**
      * Indicates the bands that will be used for a given probe.
-     *
+     * Use R-band by default.
      */
-    BandsList getBands();
+    default BandsList getBands() {
+        return RBandsList.instance();
+    }
 }

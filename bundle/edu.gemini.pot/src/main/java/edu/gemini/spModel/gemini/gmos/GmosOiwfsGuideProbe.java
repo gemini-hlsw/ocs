@@ -6,8 +6,6 @@ import edu.gemini.skycalc.Coordinates;
 import edu.gemini.skycalc.Offset;
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
-import edu.gemini.spModel.core.BandsList;
-import edu.gemini.spModel.core.RBandsList;
 import edu.gemini.spModel.guide.VignettingCalculator;
 import edu.gemini.spModel.guide.*;
 import edu.gemini.spModel.obs.context.ObsContext;
@@ -147,7 +145,4 @@ public enum GmosOiwfsGuideProbe implements ValidatableGuideProbe, OffsetValidati
             return new AffineTransform();
         }
     }
-
-    @Override
-    public BandsList getBands() { return RBandsList.instance(); }
 }

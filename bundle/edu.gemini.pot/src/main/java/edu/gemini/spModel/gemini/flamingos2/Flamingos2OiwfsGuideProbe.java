@@ -5,11 +5,8 @@ import edu.gemini.skycalc.Angle;
 import edu.gemini.skycalc.Offset;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.shared.util.immutable.Some;
-import edu.gemini.spModel.core.BandsList;
-import edu.gemini.spModel.core.RBandsList;
 import edu.gemini.spModel.gems.GemsGuideProbeGroup;
 import edu.gemini.spModel.guide.*;
-import edu.gemini.spModel.obs.SchedulingBlock;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.target.SPTarget;
 
@@ -97,7 +94,7 @@ public enum Flamingos2OiwfsGuideProbe implements GuideProbe, ValidatableGuidePro
     }
 
     public Option<GuideProbeGroup> getGroup() {
-        return new Some<GuideProbeGroup>(Group.instance);
+        return new Some<>(Group.instance);
     }
 
     @Override
@@ -114,7 +111,7 @@ public enum Flamingos2OiwfsGuideProbe implements GuideProbe, ValidatableGuidePro
      * Gets the group of Flamingos guide stars.
      * See OT-21.
      */
-    public static enum Group implements GemsGuideProbeGroup {
+    public enum Group implements GemsGuideProbeGroup {
         instance;
 
         public Angle getRadiusLimits() {
@@ -178,7 +175,4 @@ public enum Flamingos2OiwfsGuideProbe implements GuideProbe, ValidatableGuidePro
                 F2OiwfsProbeArm$.MODULE$,
                 F2ScienceAreaGeometry$.MODULE$);
     }
-
-    @Override
-    public BandsList getBands() { return RBandsList.instance(); }
 }

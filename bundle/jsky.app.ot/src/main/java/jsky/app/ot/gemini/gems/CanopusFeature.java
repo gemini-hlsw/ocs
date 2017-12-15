@@ -271,27 +271,7 @@ public final class CanopusFeature extends TpeImageFeature implements PropertyWat
             g2d.setPaint(p);
         }
 
-        drawProbeArm(g2d, ctx, Canopus.Wfs.cwfs1);
-        drawProbeArm(g2d, ctx, Canopus.Wfs.cwfs2);
-        // cwfs3 probe arm is not displayed
-//        drawProbeArm(g2d, tii, ctx, Canopus.Wfs.cwfs3);
-
         g2d.setColor(c);
-    }
-
-    // draw the probe arm for the given wfs
-    private void drawProbeArm(Graphics2D g2d, ObsContext ctx, Canopus.Wfs wfs) {
-        wfs.probeArm(ctx, true).foreach(a -> {
-            if (a != null) {
-                Shape s = trans.createTransformedShape(flipArea(a));
-                g2d.setColor(AO_FOV_COLOR);
-                g2d.draw(s);
-                Composite c = g2d.getComposite();
-                g2d.setComposite(BLOCKED);
-                g2d.fill(s);
-                g2d.setComposite(c);
-            }
-        });
     }
 
     @Override public boolean isEnabled(TpeContext ctx) {
