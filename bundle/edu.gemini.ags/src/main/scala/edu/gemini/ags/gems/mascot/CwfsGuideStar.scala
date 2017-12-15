@@ -10,6 +10,6 @@ import edu.gemini.skycalc.Coordinates
 class CwfsGuideStar extends GuideStarType {
   def filter(ctx: ObsContext, magLimits: MagLimits, star: Star): Boolean = {
     val coordinates = new Coordinates(star.target.coordinates.ra.toAngle.toDegrees, star.target.coordinates.dec.toDegrees)
-    CanopusWfs.isProbeInRange(coordinates, ctx) && magLimits.filter(star)
+    CanopusWfs.areProbesInRange(coordinates, ctx) && magLimits.filter(star)
   }
 }

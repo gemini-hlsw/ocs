@@ -120,7 +120,7 @@ public enum CanopusWfs implements GuideProbe, ValidatableGuideProbe, OffsetValid
     public GuideStarValidation validate(final SPTarget guideStar, final ObsContext ctx) {
         final Option<Long> when = ctx.getSchedulingBlockStart();
         return guideStar.getSkycalcCoordinates(when).map(coords ->
-                isProbeInRange(coords, ctx) ? GuideStarValidation.VALID : GuideStarValidation.INVALID
+                areProbesInRange(coords, ctx) ? GuideStarValidation.VALID : GuideStarValidation.INVALID
         ).getOrElse(GuideStarValidation.UNDEFINED);
     }
 
@@ -185,7 +185,7 @@ public enum CanopusWfs implements GuideProbe, ValidatableGuideProbe, OffsetValid
     /**
      * Determines if the guide probe can reach the provided coordinates in the given observing context (if any).
      */
-    public static boolean isProbeInRange(Coordinates coords, ObsContext ctx) {
+    public static boolean areProbesInRange(Coordinates coords, ObsContext ctx) {
         return ctx.getBaseCoordinates().map(bcs -> {
             // Calculate the difference between the coordinate and the observation's
             // base position.
