@@ -5,6 +5,8 @@ import edu.gemini.skycalc.Angle;
 import edu.gemini.skycalc.CoordinateDiff;
 import edu.gemini.skycalc.Coordinates;
 import edu.gemini.skycalc.Offset;
+import edu.gemini.spModel.core.BandsList;
+import edu.gemini.spModel.core.RBandsList;
 import edu.gemini.spModel.gems.GemsGuideProbeGroup;
 import edu.gemini.spModel.guide.*;
 import edu.gemini.spModel.obs.context.ObsContext;
@@ -53,6 +55,11 @@ public enum Canopus {
         public Option<PatrolField> getCorrectedPatrolField(final ObsContext ctx) {
             // Not implemented yet: return an empty area.
             return ctx.getAOComponent().filter(ado -> ado instanceof Gems).map(a -> new PatrolField(new Area()));
+        }
+
+        @Override
+        public BandsList getBands() {
+            return RBandsList.instance();
         }
 
         /**

@@ -121,7 +121,5 @@ public interface GuideProbe {
      * Indicates the bands that will be used for a given probe.
      * Use R-band by default.
      */
-    default BandsList getBands() {
-        return RBandsList.instance();
-    }
+    BandsList getBands();
 }

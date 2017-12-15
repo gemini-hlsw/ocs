@@ -3,6 +3,8 @@ package edu.gemini.spModel.gemini.gsaoi;
 import edu.gemini.skycalc.Angle;
 import edu.gemini.skycalc.Coordinates;
 import edu.gemini.shared.util.immutable.*;
+import edu.gemini.spModel.core.BandsList;
+import edu.gemini.spModel.core.RBandsList;
 import edu.gemini.spModel.gems.GemsGuideProbeGroup;
 import edu.gemini.spModel.guide.*;
 import edu.gemini.spModel.obs.context.ObsContext;
@@ -153,5 +155,10 @@ public enum GsaoiOdgw implements ValidatableGuideProbe {
 
     @Override public Option<PatrolField> getCorrectedPatrolField(ObsContext ctx) {
         return (ctx.getInstrument() instanceof Gsaoi) ? new Some<>(patrolField) : None.instance();
+    }
+
+    @Override
+    public BandsList getBands() {
+        return RBandsList.instance();
     }
 }
