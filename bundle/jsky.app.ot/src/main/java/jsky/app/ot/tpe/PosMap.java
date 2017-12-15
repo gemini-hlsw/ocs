@@ -351,7 +351,6 @@ public abstract class PosMap <K, T extends WatchablePos>
             try {
                 pme.screenPos = _iw.taggedPosToScreenCoords(tp);
             } catch (Exception e) {
-                //System.out.println("XXX PosMap.telescopePosLocationUpdate: couldn't get screenPos: " + e);
                 pme.screenPos = null;
             }
 
