@@ -125,47 +125,54 @@ public enum CanopusWfs implements GuideProbe, ValidatableGuideProbe, OffsetValid
     }
 
     /**
-     * Check if the primary guide star is in range from the given offset
-     *
-     * @param ctx    ObsContext to get guide star and base coordinates from.
-     * @param offset to check if the guide star is in range
-     * @return true if guide star is in range from the given offset, false otherwise
+     * Returns an Area representing the probe range. This is used in drawing the probe range.
      */
-    @Override
-    public boolean inRange(final ObsContext ctx, final Offset offset) {
-        return ctx.getTargets().getPrimaryGuideProbeTargets(this)
-                .flatMap(GuideProbeTargets::getPrimary)
-                .flatMap(gs -> gs
-                        .getSkycalcCoordinates(ctx.getSchedulingBlockStart())
-                        .flatMap(gscoords -> ctx.getBaseCoordinates()
-                                .map(base -> {
-                                    final CoordinateDiff diff = new CoordinateDiff(base, gscoords);
-
-                                    // Get offset and switch it to be defined in the same coordinate
-                                    // system as the shape.
-                                    final Offset dis = diff.getOffset();
-                                    final double p = -dis.p().toArcsecs().getMagnitude();
-                                    final double q = -dis.q().toArcsecs().getMagnitude();
-                                    final Set<Offset> offsets = new TreeSet<>();
-                                    offsets.add(offset);
-
-                                    return offsetIntersection(ctx, offsets).contains(p, q);
-                                })))
-                .getOrElse(false);
-    }
-
-
     public static Area probeRange(final ObsContext ctx) {
         return offsetIntersection(ctx, ctx.getSciencePositions());
     }
 
     /**
-     * Gets the intersection of the FOV and the offsets.
-     *
-     * @param offsets positions to include in the intersection
+     * Check if the primary guide star is in range from the given offset
+     */
+    @Override
+    public boolean inRange(final ObsContext ctx, final Offset offset) {
+        return ctx.getTargets().getPrimaryGuideProbeTargets(this)
+                .flatMap(GuideProbeTargets::getPrimary)
+                .flatMap(gs -> gs.getSkycalcCoordinates(ctx.getSchedulingBlockStart())
+                        .map(gscoords -> areProbesInRangeWithOffsets(gscoords, ctx, Collections.singleton(offset)))
+                ).getOrElse(false);
+    }
+
+    /**
+     * Determines if the guide probe can reach the provided coordinates in the given observing context (if any).
+     */
+    public static boolean areProbesInRange(final Coordinates coords, final ObsContext ctx) {
+        return areProbesInRangeWithOffsets(coords, ctx, ctx.getSciencePositions());
+    }
+
+    /**
+     * Helper method to extract the common code from inRange and areProbesInRange.
+     */
+    private static boolean areProbesInRangeWithOffsets(final Coordinates coords, final ObsContext ctx, final Set<Offset> offsets) {
+        return ctx.getBaseCoordinates().map(bcs -> {
+            // Calculate the difference between the coordinate and the observation's base position.
+            final CoordinateDiff diff = new CoordinateDiff(bcs, coords);
+
+            // Get offset and switch it to be defined in the same coordinate system as the shape.
+            final Offset dis = diff.getOffset();
+            final double p = -dis.p().toArcsecs().getMagnitude();
+            final double q = -dis.q().toArcsecs().getMagnitude();
+
+            return offsetIntersection(ctx, offsets).contains(p, q);
+        }).getOrElse(false);
+    }
+
+    /**
+     * Gets the intersection of the FOV and the specified offsets.
      */
     private static Area offsetIntersection(final ObsContext ctx, final Set<Offset> offsets) {
         final double t = ctx.getPositionAngle().toRadians();
+
 
         return offsets.stream().map(pos -> {
             final double p = pos.p().toArcsecs().getMagnitude();
@@ -180,24 +187,5 @@ public enum CanopusWfs implements GuideProbe, ValidatableGuideProbe, OffsetValid
             a1.intersect(a2);
             return a1;
         });
-    }
-
-    /**
-     * Determines if the guide probe can reach the provided coordinates in the given observing context (if any).
-     */
-    public static boolean areProbesInRange(Coordinates coords, ObsContext ctx) {
-        return ctx.getBaseCoordinates().map(bcs -> {
-            // Calculate the difference between the coordinate and the observation's
-            // base position.
-            final CoordinateDiff diff = new CoordinateDiff(bcs, coords);
-
-            // Get offset and switch it to be defined in the same coordinate
-            // system as the shape.
-            final Offset dis = diff.getOffset();
-            double p = -dis.p().toArcsecs().getMagnitude();
-            double q = -dis.q().toArcsecs().getMagnitude();
-
-            return probeRange(ctx).contains(p, q);
-        }).getOrElse(false);
     }
 }
