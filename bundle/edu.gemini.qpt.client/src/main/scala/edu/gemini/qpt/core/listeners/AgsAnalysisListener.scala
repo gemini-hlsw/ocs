@@ -1,14 +1,13 @@
 package edu.gemini.qpt.core.listeners
 
 import edu.gemini.ags.api.AgsGuideQuality._
-
 import java.beans.PropertyChangeEvent
 
 import edu.gemini.ags.api.AgsAnalysis
 import edu.gemini.qpt.core.Marker.Severity
 import edu.gemini.qpt.core.Variant
 import edu.gemini.qpt.core.util.MarkerManager
-import edu.gemini.spModel.gemini.gems.Canopus
+import edu.gemini.spModel.gemini.gems.CanopusWfs
 import edu.gemini.spModel.gemini.gsaoi.GsaoiOdgw
 import edu.gemini.spModel.guide.GuideProbeGroup
 
@@ -45,7 +44,7 @@ class AgsAnalysisListener extends MarkerModelListener[Variant] {
 
 object AgsAnalysisListener {
   // We want to ignore AgsAnalysis problems for ODGW and Canopus.
-  val ignoredProbeGroups: Set[GuideProbeGroup] = Set(GsaoiOdgw.Group.instance, Canopus.Wfs.Group.instance)
+  val ignoredProbeGroups: Set[GuideProbeGroup] = Set(GsaoiOdgw.Group.instance, CanopusWfs.Group.instance)
 
   def severity(a: AgsAnalysis): Option[Severity] =
     a.quality match {

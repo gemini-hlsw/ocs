@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package edu.gemini.spModel.gemini.nici;
 
 import edu.gemini.shared.util.immutable.None;
@@ -60,7 +56,7 @@ public enum NiciOiwfsGuideProbe implements ValidatableGuideProbe {
     }
 
     @Override public Option<PatrolField> getCorrectedPatrolField(ObsContext ctx) {
-        return (ctx.getInstrument() instanceof InstNICI) ? new Some<>(getPatrolField()) : None.<PatrolField>instance();
+        return (ctx.getInstrument() instanceof InstNICI) ? new Some<>(getPatrolField()) : None.instance();
     }
     @Override
     public GuideStarValidation validate(SPTarget guideStar, ObsContext ctx) {

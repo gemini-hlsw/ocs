@@ -124,7 +124,7 @@ public enum GsaoiOdgw implements ValidatableGuideProbe {
     }
 
     public Option<GuideProbeGroup> getGroup() {
-        return new Some<GuideProbeGroup>(Group.instance);
+        return new Some<>(Group.instance);
     }
 
     /**
@@ -154,8 +154,11 @@ public enum GsaoiOdgw implements ValidatableGuideProbe {
     }
 
     @Override public Option<PatrolField> getCorrectedPatrolField(ObsContext ctx) {
-        return (ctx.getInstrument() instanceof Gsaoi) ? new Some<>(patrolField) : None.<PatrolField>instance();
+        return (ctx.getInstrument() instanceof Gsaoi) ? new Some<>(patrolField) : None.instance();
     }
 
-    @Override public BandsList getBands() { return RBandsList.instance(); }
+    @Override
+    public BandsList getBands() {
+        return RBandsList.instance();
+    }
 }

@@ -10,7 +10,7 @@ import edu.gemini.spModel.gemini.altair.InstAltair;
 import edu.gemini.spModel.gemini.bhros.InstBHROS;
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2;
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2OiwfsGuideProbe;
-import edu.gemini.spModel.gemini.gems.Canopus;
+import edu.gemini.spModel.gemini.gems.CanopusWfs;
 import edu.gemini.spModel.gemini.gmos.*;
 import edu.gemini.spModel.gemini.gmos.GmosNorthType.DisperserNorth;
 import edu.gemini.spModel.gemini.gmos.GmosNorthType.FPUnitNorth;
@@ -62,7 +62,7 @@ public enum Inst {
     BHROS(InstBHROS.SP_TYPE, false, false, false),
 
     CANOPUS(SPComponentType.QPT_CANOPUS, // new SPInstComponentType(SPInstComponentType.INST_BROAD_TYPE, "Canopus", "Canopus"),
-            false, true, true, Canopus.Wfs.values(), Canopus.Wfs.values()),
+            false, true, true, CanopusWfs.values(), CanopusWfs.values()),
 
     FLAMINGOS2(Flamingos2.SP_TYPE, false, true, false,
             join(Flamingos2.FPUnit.values(), Flamingos2.Filter.values(), new Enum<?>[]{Flamingos2OiwfsGuideProbe.instance}),
@@ -195,7 +195,7 @@ public enum Inst {
     Inst(SPComponentType spType, boolean north, boolean south, boolean normallyAvailable,
          Enum<?>[] options, Enum<?>[] normallyAvailableOptions) {
         this(spType, north, south, normallyAvailable, options, normallyAvailableOptions, new Enum<?>[0]);
-    };
+    }
 
     Inst(SPComponentType spType, boolean north, boolean south, boolean normallyAvailable,
          Enum<?>[] options, Enum<?>[] normallyAvailableOptions, Enum<?>[] hiddenOptions) {

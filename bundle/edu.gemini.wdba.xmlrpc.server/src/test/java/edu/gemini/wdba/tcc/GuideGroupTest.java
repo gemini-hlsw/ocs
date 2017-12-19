@@ -2,11 +2,10 @@ package edu.gemini.wdba.tcc;
 
 import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.shared.util.immutable.DefaultImList;
-import edu.gemini.shared.util.immutable.ImCollections;
 import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.spModel.ext.ObservationNode;
 import edu.gemini.spModel.ext.TargetNode;
-import edu.gemini.spModel.gemini.gems.Canopus;
+import edu.gemini.spModel.gemini.gems.CanopusWfs;
 import edu.gemini.spModel.gemini.gems.Gems;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.target.SPTarget;
@@ -14,7 +13,6 @@ import edu.gemini.spModel.target.env.GuideEnvironment;
 import edu.gemini.spModel.target.env.GuideGroup;
 import edu.gemini.spModel.target.env.GuideProbeTargets;
 import edu.gemini.spModel.target.env.TargetEnvironment;
-import edu.gemini.spModel.target.env.UserTarget;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.target.env.OptionsListImpl;
 import org.dom4j.Document;
@@ -50,16 +48,10 @@ public final class GuideGroupTest extends TestBase {
         return DefaultImList.create(res);
     }
 
-    private TargetEnvironment create(final GuideProbe... probes) {
-        final ImList<GuideProbeTargets> gtCollection = createGuideTargetsList(probes);
-        final ImList<UserTarget>         userTargets = ImCollections.emptyList();
-        return TargetEnvironment.create(base).setAllPrimaryGuideProbeTargets(gtCollection).setUserTargets(userTargets);
-    }
-
     @Test public void testLoneGroup() throws Exception {
         // Create a target environment that uses Gems canopus wfs.
         final TargetEnvironment env = TargetEnvironment.create(base);
-        final ImList<GuideProbeTargets> gtCollection = createGuideTargetsList(Canopus.Wfs.cwfs1, Canopus.Wfs.cwfs2, Canopus.Wfs.cwfs3);
+        final ImList<GuideProbeTargets> gtCollection = createGuideTargetsList(CanopusWfs.cwfs1, CanopusWfs.cwfs2, CanopusWfs.cwfs3);
         final GuideGroup gg = GuideGroup.create("LoneGroup", gtCollection);
         final TargetEnvironment env2 = env.setPrimaryGuideGroup(gg);
 
@@ -74,10 +66,10 @@ public final class GuideGroupTest extends TestBase {
     @Test public void testNamedGroup() throws Exception {
         // Create a target environment that uses Gems canopus wfs.
         final TargetEnvironment env = TargetEnvironment.create(base);
-        final ImList<GuideProbeTargets> gtCollection = createGuideTargetsList(Canopus.Wfs.cwfs1, Canopus.Wfs.cwfs2, Canopus.Wfs.cwfs3);
+        final ImList<GuideProbeTargets> gtCollection = createGuideTargetsList(CanopusWfs.cwfs1, CanopusWfs.cwfs2, CanopusWfs.cwfs3);
         final GuideGroup gg1 = GuideGroup.create("Group1", gtCollection);
 
-        final ImList<GuideProbeTargets> gtCollection2 = createGuideTargetsList(Canopus.Wfs.cwfs1, Canopus.Wfs.cwfs2, Canopus.Wfs.cwfs3);
+        final ImList<GuideProbeTargets> gtCollection2 = createGuideTargetsList(CanopusWfs.cwfs1, CanopusWfs.cwfs2, CanopusWfs.cwfs3);
         final GuideGroup gg2 = GuideGroup.create("Group2", gtCollection2);
         final TargetEnvironment env2 = env.setGuideEnvironment(GuideEnvironment.create(OptionsListImpl.create(gg1, gg2)));
 

@@ -3,7 +3,7 @@ package edu.gemini.wdba.tcc;
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.ext.ObservationNode;
 import edu.gemini.spModel.ext.TargetNode;
-import edu.gemini.spModel.gemini.gems.Canopus;
+import edu.gemini.spModel.gemini.gems.CanopusWfs;
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi;
 import edu.gemini.spModel.gemini.gsaoi.GsaoiOdgw;
 import edu.gemini.spModel.guide.GuideProbe;
@@ -107,18 +107,18 @@ public final class GsaoiSupportTest extends InstrumentSupportTestBase<Gsaoi> {
     }
 
     @Test public void testDefaultGuideConfig() throws Exception {
-        setTargetEnv(Canopus.Wfs.cwfs1, GsaoiOdgw.odgw1);
+        setTargetEnv(CanopusWfs.cwfs1, GsaoiOdgw.odgw1);
         verify(Gsaoi.OdgwSize.DEFAULT);
     }
 
     @Test public void testExplicitGuideConfig() throws Exception {
-        setTargetEnv(Canopus.Wfs.cwfs1, GsaoiOdgw.odgw1);
+        setTargetEnv(CanopusWfs.cwfs1, GsaoiOdgw.odgw1);
         setOdgw(Gsaoi.OdgwSize.SIZE_8);
         verify(Gsaoi.OdgwSize.SIZE_8);
     }
 
     @Test public void testNoGsaoi() throws Exception {
-        setTargetEnv(Canopus.Wfs.cwfs1);
+        setTargetEnv(CanopusWfs.cwfs1);
         final Option<Gsaoi.OdgwSize> none = None.instance();
         verify(none);
     }

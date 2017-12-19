@@ -149,5 +149,7 @@ public enum GmosOiwfsGuideProbe implements ValidatableGuideProbe, OffsetValidati
     }
 
     @Override
-    public BandsList getBands() { return RBandsList.instance(); }
+    public BandsList getBands() {
+        return RBandsList.instance();
+    }
 }
