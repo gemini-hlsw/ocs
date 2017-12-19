@@ -5,6 +5,7 @@ import edu.gemini.skycalc.Angle;
 import edu.gemini.skycalc.CoordinateDiff;
 import edu.gemini.skycalc.Coordinates;
 import edu.gemini.skycalc.Offset;
+import edu.gemini.spModel.core.Angle$;
 import edu.gemini.spModel.core.BandsList;
 import edu.gemini.spModel.core.RBandsList;
 import edu.gemini.spModel.gems.GemsGuideProbeGroup;
@@ -171,20 +172,21 @@ public enum CanopusWfs implements GuideProbe, ValidatableGuideProbe, OffsetValid
      * Gets the intersection of the FOV and the specified offsets.
      */
     private static Area offsetIntersection(final ObsContext ctx, final Set<Offset> offsets) {
-        final double t = ctx.getPositionAngle().toRadians();
+        final edu.gemini.spModel.core.Angle pa = ctx.getPositionAngle();
 
         return offsets.stream().map(pos -> {
             final double p = pos.p().toArcsecs().getMagnitude();
             final double q = pos.q().toArcsecs().getMagnitude();
 
             final AffineTransform xform = new AffineTransform();
-            if (t != 0.0) xform.rotate(-t);
+            if (!pa.equals(Angle$.MODULE$.zero())) xform.rotate(-pa.toRadians());
             xform.translate(-p, -q);
 
             return patrolField.getArea().createTransformedArea(xform);
         }).reduce((a1, a2) -> {
-            a1.intersect(a2);
-            return a1;
+            final Area result = (Area) a1.clone();
+            result.intersect(a2);
+            return result;
         }).orElse(patrolField.getArea());
     }
 }

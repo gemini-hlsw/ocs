@@ -424,6 +424,8 @@ public final class Gsaoi extends SPInstObsComp
 
     }
 
+    private static final String VERSION = "2011A-1";
+
     public static final SPComponentType SP_TYPE =
             SPComponentType.INSTRUMENT_GSAOI;
 
@@ -499,6 +501,7 @@ public final class Gsaoi extends SPInstObsComp
 
     public Gsaoi() {
         super(SP_TYPE);
+        setVersion(VERSION);
         readMode = filter.readMode();
         setExposureTime(60); // REL-445
     }
