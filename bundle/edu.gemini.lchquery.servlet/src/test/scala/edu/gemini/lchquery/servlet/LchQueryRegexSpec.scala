@@ -13,23 +13,22 @@ import scalaz._
 import Scalaz._
 
 class LchQueryRegexSpec extends Specification with ScalaCheck {
-  import ValueMatcher.ToRegex
   import LchQueryRegexSpec._
 
   "toRegEx and StringUtil.match" should {
     "always match exact strings the same" in {
-      forAll (queryGen) { s => s.matchesRe(s) should beTrue }
+      forAll (queryGen) { s => s.matchesAgree(s) should beTrue }
     }
 
     "always match case insensitively the same" in {
-      forAll (queryGen) { s => s.matchesRe(s.randomizeCase) should beTrue }
+      forAll (queryGen) { s => s.matchesAgree(s.randomizeCase) should beTrue }
     }
 
     "always match everything in an OR list the same" in {
       forAll (Gen.nonEmptyListOf(queryGen)) {
         lst => {
           val expr = lst.mkString("|")
-          lst.forall(s => expr.matchesRe(s.randomizeCase)) should beTrue
+          lst.forall(s => expr.matchesAgree(s.randomizeCase)) should beTrue
         }
       }
     }
@@ -39,7 +38,7 @@ class LchQueryRegexSpec extends Specification with ScalaCheck {
         (pre, prem, mid, postm, post) => {
           val expr = s"$pre$prem?$postm$post"
           val query = s"$prem$mid$postm"
-          expr.matchesRe(query.randomizeCase) should beTrue
+          expr.matchesAgree(query.randomizeCase) should beTrue
         }
       }
     }
@@ -49,7 +48,7 @@ class LchQueryRegexSpec extends Specification with ScalaCheck {
         (pre, prem, mid, postm, post) => {
           val expr = s"$pre$prem*$postm$post"
           val query = s"$prem$mid$postm"
-          expr.matchesRe(query.randomizeCase) should beTrue
+          expr.matchesAgree(query.randomizeCase) should beTrue
         }
       }
     }
@@ -58,7 +57,7 @@ class LchQueryRegexSpec extends Specification with ScalaCheck {
   "toRegEx" should {
     "not match something not in an OR list" in {
       forAll (Gen.nonEmptyListOf(queryGen), queryGen) {
-        (lst, other) => !lst.contains(other) ==> (lst.mkString("|").toRegex.matches(other) should beFalse)
+        (lst, other) => !lst.exists(_.matchesLCH(other)) ==> (lst.mkString("|").matchesLCH(other) should beFalse)
       }
     }
   }
@@ -78,11 +77,14 @@ object LchQueryRegexSpec {
   }
 
   implicit class StringFuncs(val r: String) extends AnyVal {
-    def matches(s: String): Boolean =
+    def matchesSU(s: String): Boolean =
       StringUtil.`match`(r, s)
 
-    def matchesRe(s: String): Boolean =
-      r.toRegex.matches(s) == matches(s)
+    def matchesLCH(s: String): Boolean =
+      r.toRegex.matches(s)
+
+    def matchesAgree(s: String): Boolean =
+      r.matchesLCH(s) == r.matchesSU(s)
 
     def randomizeCase: String = {
       def randomizeCharCase(c: Char): Char =
