@@ -124,7 +124,7 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
       }
 
       LOGGER.info("gems results: size = " + gemsGuideStars.size)
-      gemsGuideStars should have size 144
+      gemsGuideStars should have size 228
 
       val result = gemsGuideStars.head
       result.pa.toDegrees should beCloseTo(0, 0.0001)
@@ -177,7 +177,7 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
       }
 
       LOGGER.info("gems results: size = " + gemsGuideStars.size)
-      gemsGuideStars should have size 100
+      gemsGuideStars should have size 252
 
       val result = gemsGuideStars.head
       result.pa.toDegrees should beCloseTo(90, 0.0001)
@@ -193,13 +193,13 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
       val cwfs1 = group.get(CanopusWfs.cwfs1).getValue.getPrimary.getValue
       val cwfs2 = group.get(CanopusWfs.cwfs2).getValue.getPrimary.getValue
       val cwfs3 = group.get(CanopusWfs.cwfs3).getValue.getPrimary.getValue
-      cwfs1.getName must beEqualTo("289-128909")
-      cwfs2.getName must beEqualTo("289-128878")
-      cwfs3.getName must beEqualTo("289-128908")
+      cwfs1.getName must beEqualTo("289-128879")
+      cwfs2.getName must beEqualTo("289-128909")
+      cwfs3.getName must beEqualTo("289-128894")
 
-      val cwfs1x = Coordinates.create("17:40:21.743", "-32:14:54.04")
-      val cwfs2x = Coordinates.create("17:40:16.855", "-32:15:55.83")
-      val cwfs3x = Coordinates.create("17:40:21.594", "-32:15:50.38")
+      val cwfs1x = Coordinates.create("17:40:16.917", "-32:14:45.44")
+      val cwfs2x = Coordinates.create("17:40:21.743", "-32:14:54.04")
+      val cwfs3x = Coordinates.create("17:40:19.713", "-32:15:56.77")
 
       (Angle.fromDegrees(cwfs1x.getRaDeg)  ~= Angle.fromDegrees(cwfs1.getSkycalcCoordinates(NoTime).getValue.getRaDeg)) should beTrue
       (Angle.fromDegrees(cwfs1x.getDecDeg) ~= Angle.fromDegrees(cwfs1.getSkycalcCoordinates(NoTime).getValue.getDecDeg)) should beTrue
@@ -230,7 +230,7 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
       }
 
       LOGGER.info("gems results: size = " + gemsGuideStars.size)
-      gemsGuideStars should have size 56
+      gemsGuideStars should have size 100
 
       val result = gemsGuideStars.head
       result.pa.toDegrees should beCloseTo(0, 0.0001)
