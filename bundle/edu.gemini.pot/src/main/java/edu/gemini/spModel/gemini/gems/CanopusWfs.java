@@ -173,7 +173,6 @@ public enum CanopusWfs implements GuideProbe, ValidatableGuideProbe, OffsetValid
     private static Area offsetIntersection(final ObsContext ctx, final Set<Offset> offsets) {
         final double t = ctx.getPositionAngle().toRadians();
 
-
         return offsets.stream().map(pos -> {
             final double p = pos.p().toArcsecs().getMagnitude();
             final double q = pos.q().toArcsecs().getMagnitude();
@@ -183,9 +182,9 @@ public enum CanopusWfs implements GuideProbe, ValidatableGuideProbe, OffsetValid
             xform.translate(-p, -q);
 
             return patrolField.getArea().createTransformedArea(xform);
-        }).reduce(patrolField.getArea(), (a1, a2) -> {
+        }).reduce((a1, a2) -> {
             a1.intersect(a2);
             return a1;
-        });
+        }).orElse(patrolField.getArea());
     }
 }
