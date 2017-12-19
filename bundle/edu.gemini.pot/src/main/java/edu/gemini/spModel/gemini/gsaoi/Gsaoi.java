@@ -424,7 +424,7 @@ public final class Gsaoi extends SPInstObsComp
 
     }
 
-    private static final String VERSION = "2011A-1";
+    private static final String VERSION = "2009A-1";
 
     public static final SPComponentType SP_TYPE =
             SPComponentType.INSTRUMENT_GSAOI;
