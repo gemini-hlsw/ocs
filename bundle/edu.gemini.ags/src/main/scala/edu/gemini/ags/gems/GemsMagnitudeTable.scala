@@ -107,11 +107,14 @@ object GemsMagnitudeTable extends MagnitudeTable {
   // Add 0.8 to faintness / brightness limits to get values for the calculator, which assumes:
   //      SB  20, CC 50, IQ 70.
   lazy val CanopusWfsMagnitudeLimitsCalculator = new CanopusWfsCalculator {
+    private val FaintLimit  = 17.8
+    private val BrightLimit = 11.3
+
     override def gemsMagnitudeConstraint(starType: GemsGuideStarType, nirBand: Option[MagnitudeBand]): MagnitudeConstraints =
-      magLimits(RBandsList, 17.8, 11.3)
+      magLimits(RBandsList, FaintLimit, BrightLimit)
 
     override def getNominalMagnitudeConstraints(cwfs: CanopusWfs): MagnitudeConstraints =
-      magLimits(RBandsList, 17.8, 11.3)
+      magLimits(RBandsList, FaintLimit, BrightLimit)
   }
 
   private lazy val Flamingos2OiwfsMagnitudeLimitsCalculator = new LimitsCalculator {
