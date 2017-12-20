@@ -102,11 +102,8 @@ object GemsMagnitudeTable extends MagnitudeTable {
     def getNominalMagnitudeConstraints(cwfs: CanopusWfs): MagnitudeConstraints
   }
 
-  // Values provided by science are at:
-  //      SB Any, CC 70, IQ 70.
-  // Add 0.8 to faintness / brightness limits to get values for the calculator, which assumes:
-  //      SB  20, CC 50, IQ 70.
   lazy val CanopusWfsMagnitudeLimitsCalculator = new CanopusWfsCalculator {
+    // These are +0.8 mag the values provided by science in the NGS2 OT document.
     private val FaintLimit  = 17.8
     private val BrightLimit = 11.3
 
