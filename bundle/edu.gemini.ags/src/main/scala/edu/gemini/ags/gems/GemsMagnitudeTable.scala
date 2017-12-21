@@ -103,11 +103,16 @@ object GemsMagnitudeTable extends MagnitudeTable {
   }
 
   lazy val CanopusWfsMagnitudeLimitsCalculator = new CanopusWfsCalculator {
-    override def gemsMagnitudeConstraint(starType: GemsGuideStarType, nirBand: Option[MagnitudeBand]) =
-      magLimits(RBandsList, 16.3, 8.8)
+    // The values provided by science are assumed to be at SB ANY, CC50, and IQ70.
+    // Since SB ANY results in an adjustment of -0.5 mag, we add 0.5 mag to account for this.
+    private val FaintLimit  = 17.5
+    private val BrightLimit = 11.0
+
+    override def gemsMagnitudeConstraint(starType: GemsGuideStarType, nirBand: Option[MagnitudeBand]): MagnitudeConstraints =
+      magLimits(RBandsList, FaintLimit, BrightLimit)
 
     override def getNominalMagnitudeConstraints(cwfs: CanopusWfs): MagnitudeConstraints =
-      magLimits(RBandsList, 16.3, 8.8)
+      magLimits(RBandsList, FaintLimit, BrightLimit)
   }
 
   private lazy val Flamingos2OiwfsMagnitudeLimitsCalculator = new LimitsCalculator {
