@@ -3,11 +3,16 @@ package jsky.app.ot.gemini.gems;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.shared.util.immutable.Some;
 import edu.gemini.shared.util.immutable.None;
+import edu.gemini.skycalc.CoordinateDiff;
+import edu.gemini.skycalc.Offset;
 import edu.gemini.spModel.gemini.gems.CanopusWfs;
+import edu.gemini.spModel.guide.GuideStarValidation;
+import edu.gemini.spModel.guide.ValidatableGuideProbe;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.target.WatchablePos;
 import edu.gemini.spModel.target.env.TargetEnvironmentDiff;
 import jsky.app.ot.tpe.*;
+import jsky.app.ot.util.OtColor;
 import jsky.app.ot.util.PropertyWatcher;
 
 import java.awt.*;
@@ -28,6 +33,9 @@ public final class CanopusFeature extends TpeImageFeature implements PropertyWat
 
     // Color for AO WFS limit.
     private static final Color AO_FOV_COLOR = Color.RED;
+
+    // Color for windows drawn around CWFS primary guide stars.
+    private static final Color GS_WINDOW_COLOR = Color.YELLOW;
 
     /**
      * Construct the feature with its name and description.
@@ -69,8 +77,7 @@ public final class CanopusFeature extends TpeImageFeature implements PropertyWat
         final Point2D.Double base = tii.getBaseScreenPos();
         final double ppa = tii.getPixelsPerArcsec();
 
-        trans = new AffineTransform();
-        trans.translate(base.x, base.y);
+        trans = AffineTransform.getTranslateInstance(base.x, base.y);
         // The model already used the position angle, so just rotate by the difference between north and up in the image
         trans.rotate(-tii.getTheta());
         trans.scale(ppa, ppa);
@@ -127,6 +134,35 @@ public final class CanopusFeature extends TpeImageFeature implements PropertyWat
             final Shape s = trans.createTransformedShape(flipArea(a));
             g2d.setColor(AO_FOV_COLOR);
             g2d.draw(s);
+
+            // Draw the windows around the primary guide stars.
+            ctx.getBaseCoordinates().forEach(bc ->
+                    CanopusWfs.Group.instance.getMembers().forEach(gp ->
+                            ctx.getTargets().getPrimaryGuideProbeTargets(gp).forEach(gpt ->
+                                    gpt.getPrimary().forEach(t ->
+                                            t.getSkycalcCoordinates(ctx.getSchedulingBlockStart()).forEach(tc -> {
+                                                // Create the transformation for this guide star's window.
+                                                final CoordinateDiff diff = new CoordinateDiff(bc, tc);
+                                                final Offset offset = diff.getOffset();
+                                                final double p = -offset.p().toArcsecs().getMagnitude();
+                                                final double q = -offset.q().toArcsecs().getMagnitude();
+
+                                                final Point2D.Double base = tii.getBaseScreenPos();
+                                                final double ppa = tii.getPixelsPerArcsec();
+
+                                                final AffineTransform tx = AffineTransform.getTranslateInstance(base.x, base.y);
+                                                tx.scale(ppa, ppa);
+                                                tx.translate(p, q);
+                                                tx.rotate(-tii.getCorrectedPosAngleRadians());
+
+                                                final Shape window = tx.createTransformedShape(flipArea(CanopusWfs.getGuideStarWindow()));
+                                                if (((ValidatableGuideProbe) gpt.getGuider()).validate(t, ctx) == GuideStarValidation.VALID)
+                                                    g2d.setColor(GS_WINDOW_COLOR);
+                                                else
+                                                    g2d.setColor(OtColor.makeSlightlyTransparent(GS_WINDOW_COLOR));
+
+                                                g2d.draw(window);
+                                            })))));
 
             g2d.setColor(c);
         });

@@ -14,6 +14,7 @@ import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.GuideProbeTargets;
 
+import java.awt.*;
 import java.awt.geom.*;
 import java.util.*;
 
@@ -30,6 +31,15 @@ public enum CanopusWfs implements GuideProbe, ValidatableGuideProbe, OffsetValid
     static {
         final Ellipse2D AO_PORT = new Ellipse2D.Double(-RADIUS_ARCSEC, -RADIUS_ARCSEC, RADIUS_ARCSEC * 2, RADIUS_ARCSEC * 2);
         patrolField = new PatrolField(AO_PORT);
+    }
+
+    // According to NGS2, guide stars should be centered in 2" or 4" windows. We select 4".
+    private static final double GS_WINDOW_SIZE_ARCSEC = 4.0;
+    private static final Area   GS_WINDOW;
+
+    static {
+        final Shape GS_WINDOW_SHAPE = new Rectangle2D.Double(-GS_WINDOW_SIZE_ARCSEC / 2.0, -GS_WINDOW_SIZE_ARCSEC / 2.0, GS_WINDOW_SIZE_ARCSEC, GS_WINDOW_SIZE_ARCSEC);
+        GS_WINDOW = new Area(GS_WINDOW_SHAPE);
     }
 
     @Override
@@ -115,6 +125,10 @@ public enum CanopusWfs implements GuideProbe, ValidatableGuideProbe, OffsetValid
     @Override
     public Option<PatrolField> getCorrectedPatrolField(final ObsContext ctx) {
         return ctx.getAOComponent().filter(ado -> ado instanceof Gems).map(a -> patrolField);
+    }
+
+    public static Area getGuideStarWindow() {
+        return GS_WINDOW;
     }
 
     @Override
