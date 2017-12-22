@@ -154,7 +154,7 @@ public enum CanopusWfs implements GuideProbe, ValidatableGuideProbe, OffsetValid
     }
 
     public static Area getGuideStarWindow() {
-        return GS_WINDOW;
+        return (Area) GS_WINDOW.clone();
     }
 
     @Override
