@@ -210,14 +210,14 @@ class MascotGuideStarSpec extends Specification {
   "Mascot" should {
     "find best asterism" in {
       val coordinates = Coordinates(RightAscension.fromAngle(Angle.fromHMS(3, 19, 48.2341).getOrElse(Angle.zero)), Declination.fromAngle(Angle.fromDMS(41, 30, 42.078).getOrElse(Angle.zero)).getOrElse(Declination.zero))
-      val base = new SPTarget(coordinates.ra.toAngle.toDegrees, coordinates.dec.toDegrees)
+      val base = new SPTarget(coordinates.ra.toDegrees, coordinates.dec.toDegrees)
       val env = TargetEnvironment.create(base)
       val inst = new Gsaoi()
       inst.setPosAngle(0.0)
       inst.setIssPort(IssPort.SIDE_LOOKING)
       val ctx = ObsContext.create(env, inst, JNone.instance(), SPSiteQuality.Conditions.BEST, null, null, JNone.instance())
 
-      val result = MascotGuideStar.findBestAsterismInQueryResult(loadedTargets, ctx, MascotGuideStar.CWFS, 180.0, 10.0)
+      val result = MascotGuideStar.findBestAsterismInQueryResult(loadedTargets, ctx, CwfsGuideStar, 180.0, 10.0)
 
       val remoteAsterism = for {
         (strehlList, pa, ra, dec) <- result
@@ -234,7 +234,7 @@ class MascotGuideStarSpec extends Specification {
       inst.setIssPort(IssPort.SIDE_LOOKING)
       val ctx = ObsContext.create(env, inst, JNone.instance(), SPSiteQuality.Conditions.BEST, null, null, JNone.instance())
 
-      val result = MascotGuideStar.findBestAsterismInQueryResult(MascotGuideStarSpec.replaceRBands(loadedTargets), ctx, MascotGuideStar.CWFS, 180.0, 10.0)
+      val result = MascotGuideStar.findBestAsterismInQueryResult(MascotGuideStarSpec.replaceRBands(loadedTargets), ctx, CwfsGuideStar, 180.0, 10.0)
 
       val remoteAsterism = for {
         (strehlList, pa, ra, dec) <- result
@@ -255,7 +255,7 @@ class MascotGuideStarSpec extends Specification {
         val ctx = ObsContext.create(env, inst, JNone.instance(), SPSiteQuality.Conditions.BEST, null, null, JNone.instance())
 
         val targets = t.result.targets.rows
-        val result = MascotGuideStar.findBestAsterismInQueryResult(targets, ctx, MascotGuideStar.CWFS, 180.0, 10.0)
+        val result = MascotGuideStar.findBestAsterismInQueryResult(targets, ctx, CwfsGuideStar, 180.0, 10.0)
 
         for {
           (strehlList, pa, ra, dec) <- result
