@@ -67,15 +67,22 @@ public enum CanopusWfs implements GuideProbe, ValidatableGuideProbe, OffsetValid
 
         @Override
         public boolean asterismPreFilter(final ImList<SiderealTarget> targets) {
-            // We only want to consider lists with sidereal targets.
-            final ImList<Double> sortedMags = targets
+            return checkAsterismMagnitude(targets);
+        }
+
+        public boolean checkAsterismMagnitude(final ImList<SiderealTarget> targets) {
+            final ImList<Double> sortedMags = extractRMagnitudes(targets);
+            if (sortedMags.isEmpty() || sortedMags.size() != targets.size())
+                return false;
+            return (sortedMags.size() == 1) || (sortedMags.last() - sortedMags.head() <= MAGNITUDE_DIFFERENCE_LIMIT);
+        }
+
+        public ImList<Double> extractRMagnitudes(final ImList<SiderealTarget> targets) {
+            return targets
                     .map(t -> ImOption.fromScalaOpt(RBandsList.extract(t)))
                     .filter(Option::isDefined)
                     .map(m -> m.getValue().value())
                     .sort(Comparator.naturalOrder());
-            if (sortedMags.isEmpty() || sortedMags.size() != targets.size())
-                return false;
-            return (sortedMags.size() == 1) || (sortedMags.last() - sortedMags.head() <= MAGNITUDE_DIFFERENCE_LIMIT);
         }
     }
 
