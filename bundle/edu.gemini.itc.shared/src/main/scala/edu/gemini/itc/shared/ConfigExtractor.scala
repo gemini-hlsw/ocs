@@ -54,6 +54,7 @@ object ConfigExtractor {
   private val PixelScaleKey       = new ItemKey("instrument:pixelScale")
   private val CrossDispersedKey   = new ItemKey("instrument:crossDispersed")
   private val SlitWidthKey        = new ItemKey("instrument:slitWidth")
+  private val BuiltinROIKey        = new ItemKey("instrument:builtinROI")
 
   private val AoSystemKey         = new ItemKey("adaptive optics:aoSystem")
   private val AoFieldLensKey      = new ItemKey("adaptive optics:fieldLens")
@@ -160,9 +161,10 @@ object ConfigExtractor {
       specBin     <- extract[Binning]       (c, CcdXBinKey)
       spatBin     <- extract[Binning]       (c, CcdYBinKey)
       ccdType     <- extract[DetectorManufacturer](c, CcdManufacturerKey)
+      builtinROI  <- extract[BuiltinROI]    (c, BuiltinROIKey)
       wavelen     <- extractObservingWavelength(c)
     } yield {
-      GmosParameters(filter, grating, wavelen, mask, gain, readMode, customSlit, spatBin.getValue, specBin.getValue, ccdType, site)
+      GmosParameters(filter, grating, wavelen, mask, gain, readMode, customSlit, spatBin.getValue, specBin.getValue, ccdType, builtinROI, site)
     }
 
   }
@@ -237,8 +239,9 @@ object ConfigExtractor {
       readMode    <- extract[ReadMode]      (c, ReadModeKey)
       wellDepth   <- extract[WellDepth]     (c, WellDepthKey)
       mask        <- extract[Mask]          (c, MaskKey)
+      builtinROI  <- extract[BuiltinROI]    (c, BuiltinROIKey)
       altair      <- extractAltair          (targetEnv, probe, when, c)
-    } yield NiriParameters(filter, grism, camera, readMode, wellDepth, mask, altair)
+    } yield NiriParameters(filter, grism, camera, readMode, wellDepth, mask, builtinROI, altair)
   }
 
   private def extractAltair(targetEnv: TargetEnvironment, probe: GuideProbe, when: GOption[java.lang.Long], c: Config): String \/ Option[AltairParameters] = {

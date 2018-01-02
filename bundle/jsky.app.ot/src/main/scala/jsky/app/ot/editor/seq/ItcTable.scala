@@ -262,7 +262,7 @@ class ItcImagingTable(val parameters: ItcParametersProvider) extends ItcTable {
 
     } yield {
       val uniqueConfigs = ItcUniqueConfig.imagingConfigs(seq)
-      val inputs        = uniqueConfigs.map(uc => extractInputs(instrument, parameters.schedulingBlockStart, uc, frac => ImagingS2N(uc.count * uc.coadds.getOrElse(1), uc.singleExposureTime, frac)))
+      val inputs        = uniqueConfigs.map(uc => extractInputs(instrument, parameters.schedulingBlockStart, uc, frac => ImagingS2N(uc.count * uc.coadds.getOrElse(1), uc.coadds, uc.singleExposureTime, frac, 0.0)))
       val results       = uniqueConfigs.zip(inputs).map { case (uc, i) => doServiceCall(peer, i) }
 
       instrument.getType match {
@@ -298,7 +298,7 @@ class ItcSpectroscopyTable(val parameters: ItcParametersProvider) extends ItcTab
 
     } yield {
       val uniqueConfigs = ItcUniqueConfig.spectroscopyConfigs(seq)
-      val inputs        = uniqueConfigs.map(uc => extractInputs(instrument, parameters.schedulingBlockStart, uc, frac => SpectroscopyS2N(uc.count * uc.coadds.getOrElse(1), uc.singleExposureTime, frac)))
+      val inputs        = uniqueConfigs.map(uc => extractInputs(instrument, parameters.schedulingBlockStart, uc, frac => SpectroscopyS2N(uc.count * uc.coadds.getOrElse(1), uc.coadds, uc.singleExposureTime, frac, 0.0)))
       val results       = uniqueConfigs.zip(inputs).map { case (uc, i) => doServiceCall(peer, i) }
 
       instrument.getType match {

@@ -431,6 +431,9 @@
                 <td colspan="4">Detector binning (spectral direction): <input value="1" name="specBinning" checked="checked" type="radio" /> 1 (no binning) <input value="2" name="specBinning" type="radio" /> 2 pixels <input value="4" name="specBinning" type="radio" /> 4 pixels</td>
             </tr>
             <tr>
+                <td colspan="4">Regions of Interest <input value="FULL_FRAME" name="BuiltinROI" checked="checked" type="radio" /> Full Frame Readout <input value="CENTRAL_SPECTRUM" name="BuiltinROI" type="radio" /> Central Spectrum: spectroscopy of central 80" FOV  </td>
+            </tr>
+            <tr>
                 <td colspan="4">
                     Amp gain:
                     <select name="AmpGain" size="1">
@@ -568,6 +571,12 @@
                 <td><input value="intTime" name="calcMethod" type="radio" /></td>
                 <td>Total integration time to achieve a S/N ratio of <input name="sigmaC" size="3" value="5" type="text" /> using an exposure time for each exposure of <input name="expTimeC" size="5" value="900" type="text" /> secs and with a fraction <input name="fracOnSourceC" size="4" value="1.0" type="text" /> of exposures that observe the source </td>
 
+            </tr>
+            <tr>
+                <td colspan="2" height="40" valign="bottom"><b>Telescope offset:</b><i><span>(<a href="#" onclick="window.open('http://www.gemini.edu/sciops/instruments/gnirs/spectroscopy/observing-strategies#offsetting','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false">more info</a>)</span></i></td>
+            </tr>
+            <tr>
+                <td colspan="2">Dither offset size: <input name="offset" size="5" value="5.0" type="text" />  arcsec</td>
             </tr>
             <!-- analysis methods-->
             <tr>

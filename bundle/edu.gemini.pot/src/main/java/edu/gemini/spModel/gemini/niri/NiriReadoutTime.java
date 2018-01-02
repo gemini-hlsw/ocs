@@ -15,7 +15,7 @@ import edu.gemini.shared.util.immutable.None;
 /**
  * Local class used to map NIRI ROI and ReadMode settings to readout times
  */
-final class NiriReadoutTime {
+public final class NiriReadoutTime {
 
     // OT-470:
     // NIRI readout overheads for each fits image updated from the following table:
@@ -50,39 +50,45 @@ final class NiriReadoutTime {
     //
     // This does not include telescope offsetting overheads.
 
+    // Table has been updated according to the 2017B data measurements by Andy S.
+
+    private static final double DHS_WRITE_TIME = 5.07;
+
     private static final NiriReadoutTime[] _readoutTimes = new NiriReadoutTime[]{
-        new NiriReadoutTime(BuiltinROI.FULL_FRAME, ReadMode.IMAG_SPEC_3TO5, 2.78, 0.18),
-        new NiriReadoutTime(BuiltinROI.FULL_FRAME, ReadMode.IMAG_1TO25, 2.78, 0.70),
-        new NiriReadoutTime(BuiltinROI.FULL_FRAME, ReadMode.IMAG_SPEC_NB, 2.78, 11.15),
+        new NiriReadoutTime(BuiltinROI.FULL_FRAME, ReadMode.IMAG_SPEC_3TO5, 0.20),
+        new NiriReadoutTime(BuiltinROI.FULL_FRAME, ReadMode.IMAG_1TO25, 0.71),
+        new NiriReadoutTime(BuiltinROI.FULL_FRAME, ReadMode.IMAG_SPEC_NB, 11.16),
 
-        new NiriReadoutTime(BuiltinROI.CENTRAL_768, ReadMode.IMAG_SPEC_3TO5, 2.50, 0.12),
-        new NiriReadoutTime(BuiltinROI.CENTRAL_768, ReadMode.IMAG_1TO25, 2.50, 0.41),
-        new NiriReadoutTime(BuiltinROI.CENTRAL_768, ReadMode.IMAG_SPEC_NB, 2.50, 6.49),
+        new NiriReadoutTime(BuiltinROI.CENTRAL_768, ReadMode.IMAG_SPEC_3TO5, 0.11),
+        new NiriReadoutTime(BuiltinROI.CENTRAL_768, ReadMode.IMAG_1TO25, 0.41),
+        new NiriReadoutTime(BuiltinROI.CENTRAL_768, ReadMode.IMAG_SPEC_NB, 6.48),
 
-        new NiriReadoutTime(BuiltinROI.CENTRAL_512, ReadMode.IMAG_SPEC_3TO5, 2.38, 0.07),
-        new NiriReadoutTime(BuiltinROI.CENTRAL_512, ReadMode.IMAG_1TO25, 2.38, 0.20),
-        new NiriReadoutTime(BuiltinROI.CENTRAL_512, ReadMode.IMAG_SPEC_NB, 2.38, 2.9),
+        new NiriReadoutTime(BuiltinROI.CENTRAL_512, ReadMode.IMAG_SPEC_3TO5, 0.056),
+        new NiriReadoutTime(BuiltinROI.CENTRAL_512, ReadMode.IMAG_1TO25, 0.21),
+        new NiriReadoutTime(BuiltinROI.CENTRAL_512, ReadMode.IMAG_SPEC_NB, 3.10),
 
-        new NiriReadoutTime(BuiltinROI.CENTRAL_256, ReadMode.IMAG_SPEC_3TO5, 2.96, 0.03),
-        new NiriReadoutTime(BuiltinROI.CENTRAL_256, ReadMode.IMAG_1TO25, 2.96, 0.07),
-        new NiriReadoutTime(BuiltinROI.CENTRAL_256, ReadMode.IMAG_SPEC_NB, 2.96, 0.8),
+        new NiriReadoutTime(BuiltinROI.CENTRAL_256, ReadMode.IMAG_SPEC_3TO5, 0.044),
+        new NiriReadoutTime(BuiltinROI.CENTRAL_256, ReadMode.IMAG_1TO25, 0.078),
+        new NiriReadoutTime(BuiltinROI.CENTRAL_256, ReadMode.IMAG_SPEC_NB, 0.98),
 
-        new NiriReadoutTime(BuiltinROI.SPEC_1024_512, ReadMode.IMAG_SPEC_3TO5, 2.5, 0.1),
-        new NiriReadoutTime(BuiltinROI.SPEC_1024_512, ReadMode.IMAG_1TO25, 2.5, 0.4),
-        new NiriReadoutTime(BuiltinROI.SPEC_1024_512, ReadMode.IMAG_SPEC_NB, 2.5, 5.6),
+        new NiriReadoutTime(BuiltinROI.SPEC_1024_512, ReadMode.IMAG_SPEC_3TO5, 0.1),
+        new NiriReadoutTime(BuiltinROI.SPEC_1024_512, ReadMode.IMAG_1TO25, 0.4),
+        new NiriReadoutTime(BuiltinROI.SPEC_1024_512, ReadMode.IMAG_SPEC_NB, 5.6),
     };
 
     private final BuiltinROI _roi;
     private final ReadMode _readMode;
-    public final double dhsWrite;
     private final double _n; // multiply this by coadds and add to overhead
 
     private NiriReadoutTime(Niri.BuiltinROI builtinROI, Niri.ReadMode readMode,
-                            double dhsWrite, double n) {
+                            double n) {
         _roi          = builtinROI;
         _readMode     = readMode;
-        this.dhsWrite = dhsWrite;
         _n            = n;
+    }
+
+    public static double getDhsWriteTime () {
+        return DHS_WRITE_TIME;
     }
 
     public double getReadout(int coadds) {

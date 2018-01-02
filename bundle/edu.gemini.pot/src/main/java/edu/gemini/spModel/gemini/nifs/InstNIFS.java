@@ -6,6 +6,7 @@ import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.skycalc.Angle;
+import edu.gemini.spModel.ao.AOConstants;
 import edu.gemini.spModel.config.ConfigPostProcessor;
 import edu.gemini.spModel.config.injector.ConfigInjector;
 import edu.gemini.spModel.config.injector.obswavelength.ObsWavelengthCalc3;
@@ -34,6 +35,7 @@ import edu.gemini.spModel.obs.plannedtime.PlannedTime.CategorizedTime;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.CategorizedTimeGroup;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.Category;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.StepCalculator;
+import edu.gemini.spModel.obs.plannedtime.PlannedTime.ItcOverheadProvider;
 import edu.gemini.spModel.obscomp.InstConfigInfo;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.pio.ParamSet;
@@ -48,7 +50,7 @@ import java.util.*;
 /**
  * The NIFS instrument.
  */
-public final class InstNIFS extends SPInstObsComp implements PropertyProvider, GuideProbeProvider, StepCalculator, CalibrationKeyProvider, ConfigPostProcessor {
+public final class InstNIFS extends SPInstObsComp implements PropertyProvider, GuideProbeProvider, StepCalculator, CalibrationKeyProvider, ConfigPostProcessor, ItcOverheadProvider {
 
     // for serialization
     private static final long serialVersionUID = 3L;
@@ -188,10 +190,25 @@ public final class InstNIFS extends SPInstObsComp implements PropertyProvider, G
         return NifsSetupTimeService.getSetupTimeSec(obs);
     }
 
+    public double getSetupTime(Config[] conf) {
+        String aoSystem = (String) conf[0].getItemValue(AOConstants.AO_SYSTEM_KEY);
+        String guideStarType = (String) conf[0].getItemValue(AOConstants.AO_GUIDE_STAR_TYPE_KEY);
+        if (conf[0].containsItem(AOConstants.AO_SYSTEM_KEY) && aoSystem.equals("Altair") &&
+                guideStarType.equals("LGS")) {
+                return NifsSetupTimeService.BASE_LGS_SETUP_TIME_SEC;
+        } else {
+            return NifsSetupTimeService.BASE_SETUP_TIME_SEC;
+        }
+    }
+
+    public double getReacquisitionTime () {
+        return 6 * 60;
+    }
+
     /**
-     * Return the dimensions of the science area.
-     * @return an array giving the size of the detector in arcsec
-     */
+         * Return the dimensions of the science area.
+         * @return an array giving the size of the detector in arcsec
+         */
     public double[] getScienceArea() {
         return new double[] {Mask.SIZE, Mask.SIZE};
     }

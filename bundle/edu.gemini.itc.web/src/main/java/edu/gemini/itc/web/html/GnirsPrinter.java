@@ -3,12 +3,16 @@ package edu.gemini.itc.web.html;
 import edu.gemini.itc.altair.Altair;
 import edu.gemini.itc.base.AOSystem;
 import edu.gemini.itc.base.ImagingResult;
+import edu.gemini.itc.base.Result;
 import edu.gemini.itc.base.SpectroscopyResult;
 import edu.gemini.itc.gnirs.Gnirs;
 import edu.gemini.itc.gnirs.GnirsRecipe;
 import edu.gemini.itc.shared.*;
+import edu.gemini.spModel.config2.Config;
+import edu.gemini.spModel.gemini.gnirs.*;
+import edu.gemini.spModel.obs.plannedtime.PlannedTime;
+import edu.gemini.spModel.obs.plannedtime.PlannedTimeCalculator;
 import scala.Option;
-// import scalaz.Alpha;
 
 import java.io.PrintWriter;
 import java.util.UUID;
@@ -22,13 +26,20 @@ public final class GnirsPrinter extends PrinterBase {
     private final PlottingDetails pdp;
     private final GnirsRecipe recipe;
     private final boolean isImaging;
+    private final ItcParameters p;
+
+    private double readoutTimePerCoadd;
+    private int step;
+    private PlannedTime pta;
+    private Config[] config;
 
     public GnirsPrinter(final ItcParameters p, final GnirsParameters instr, final PlottingDetails pdp, final PrintWriter out) {
         super(out);
-        this.instr     = instr;
+        this.instr      = instr;
         this.recipe     = new GnirsRecipe(p, instr);
-        this.isImaging = p.observation().calculationMethod() instanceof Imaging;
+        this.isImaging  = p.observation().calculationMethod() instanceof Imaging;
         this.pdp        = pdp;
+        this.p          = p;
     }
 
     public void writeOutput() {
@@ -70,6 +81,9 @@ public final class GnirsPrinter extends PrinterBase {
 
         _printPeakPixelInfo(s.ccd(0));
         _printWarnings(s.warnings());
+
+        getOverheadTableParams(result, result.observation());
+        _println(_printOverheadTable(p, config[step], readoutTimePerCoadd, pta, step));
 
         _print("<HR align=left SIZE=3>");
 
@@ -156,6 +170,9 @@ public final class GnirsPrinter extends PrinterBase {
         _printPeakPixelInfo(s.ccd(0));
         _printWarnings(s.warnings());
 
+        getOverheadTableParams(result, result.observation());
+        _println(_printOverheadTable(p, config[step], readoutTimePerCoadd, pta, step));
+
         printConfiguration(result.parameters(), instrument, result.aoSystem());
 
     }
@@ -213,4 +230,23 @@ public final class GnirsPrinter extends PrinterBase {
         return s;
     }
 
+    public void getOverheadTableParams(Result result, ObservationDetails obs) {
+        int numberExposures = 1;
+        final CalculationMethod calcMethod = obs.calculationMethod();
+
+        if (calcMethod instanceof ImagingInt) {
+            numberExposures = (int)(((ImagingResult) result).is2nCalc().numberSourceExposures() * obs.sourceFraction());
+        } else if (calcMethod instanceof ImagingS2N) {
+            numberExposures = ((ImagingS2N) calcMethod).exposures();
+        } else if (calcMethod instanceof SpectroscopyS2N) {
+            numberExposures = ((SpectroscopyS2N) calcMethod).exposures();
+        }
+
+        ConfigCreator cc    = new ConfigCreator(p);
+        config              = cc.createGnirsConfig(instr, numberExposures);
+        pta                 = PlannedTimeCalculator.instance.calc(config, new InstGNIRS());
+        readoutTimePerCoadd = GnirsReadoutTime.getReadoutOverheadPerCoadd(instr.readMode());
+
+        if (numberExposures < 2) step = 0; else step = 1;
+    }
 }

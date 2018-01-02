@@ -7,8 +7,11 @@ import edu.gemini.itc.base.SpectroscopyResult;
 import edu.gemini.itc.shared.*;
 import edu.gemini.itc.web.servlets.FilesServlet;
 import edu.gemini.itc.web.servlets.ServerInfo;
+import edu.gemini.spModel.config2.Config;
 import edu.gemini.spModel.core.PointSource$;
 import edu.gemini.spModel.core.UniformSource$;
+import edu.gemini.spModel.obs.plannedtime.PlannedTime;
+import edu.gemini.spModel.time.TimeAmountFormatter;
 import scala.collection.JavaConversions;
 
 import java.io.PrintWriter;
@@ -177,7 +180,7 @@ public abstract class PrinterBase {
     protected void _printRequestedIntegrationTime(final SpectroscopyResult result, final int correction) {
         if (result.observation().calculationMethod() instanceof S2NMethod) {
             final double numExposures = ((S2NMethod) result.observation().calculationMethod()).exposures();
-            final double exposureTime = result.observation().calculationMethod().exposureTime() * correction;
+            final double exposureTime = result.observation().calculationMethod().exposureTime() * correction * result.observation().calculationMethod().coaddsOrElse(1);
             _printRequestedIntegrationTime(result, exposureTime, numExposures);
         } else {
             throw new Error("Unsupported analysis method");
@@ -224,6 +227,78 @@ public abstract class PrinterBase {
         else if (type == PixSigData.instance())         return "Pixel ASCII signal spectrum";
         else if (type == PixBackData.instance())        return "Pixel ASCII SQRT(background) spectrum";
         else    throw new Error();
+    }
+
+    public String _printOverheadTable(ItcParameters p, Config config, double readoutTimePerCoadd, PlannedTime pta, int step) {
+        PlannedTime.Step s = pta.steps.get(step);
+        Config conf = config;
+        Map<PlannedTime.Category, PlannedTime.CategorizedTime> m = s.times.maxTimes();
+        String setupStr = "";
+        String reacqStr = "";
+        String secStr;
+        int numAcq = pta.numAcq();
+        int numReacq = 0;
+        long totalTime = pta.totalTimeWithMultipleAcq(conf);
+
+        if (p.observation().calculationMethod() instanceof Spectroscopy) {
+            numReacq = pta.numReacq(conf);
+            totalTime = pta.totalTimeWithMultipleAcqReacq(conf);
+        }
+
+        StringBuilder buf = new StringBuilder("<html><body>");
+
+        buf.append("<table><tr><th>Observation Overheads</th></tr>");
+        buf.append("<tr>");
+        buf.append("<td>").append("Setup ").append("</td>");
+
+        if (numAcq == 1) {
+            setupStr = String.format("%.1f s", pta.setup.time / 1000.0);
+        } else if (numAcq > 1) {
+            setupStr = String.format("%d visits x %.1f s", numAcq, pta.setup.time / 1000.0);
+        }
+
+        buf.append("<td align=\"right\"> ").append(setupStr).append("</td>");
+        buf.append("</tr>");
+
+        reacqStr = String.format("%d x %.1f s", numReacq, pta.setup.reacquisitionTime / 1000.0);
+
+        if (numReacq > 0) {
+            buf.append("<tr>");
+            buf.append("<td>").append("Re-centering ").append("</td>");
+            buf.append("<td align=\"right\"> ").append(reacqStr).append("</td>");
+            buf.append("</tr>");
+        }
+
+        for (PlannedTime.Category c : PlannedTime.Category.values()) {
+            PlannedTime.CategorizedTime ct = m.get(c);
+            if (ct == null) continue;
+            int numOfExposures = pta.steps.size();
+            int numOfOffsets = numOfExposures - 1;
+            int coadds = p.observation().calculationMethod().coaddsOrElse(1);
+            String category = (ct.detail == null) ? ct.category.display : ct.detail;
+
+            buf.append("<tr>");
+            buf.append("<td>").append(category).append("</td>");
+
+            if (category.equals("Exposure") && (coadds !=1 )) {
+                secStr = String.format("%d exp x (%d coadds x %.1f s)", numOfExposures, coadds, ct.time/1000.0/coadds);
+            } else if ((category.equals("Readout") && (coadds!=1) && (readoutTimePerCoadd != 0) )) {
+                secStr = String.format("%d exp x (%d coadds x %.1f s)", numOfExposures, coadds, readoutTimePerCoadd, ct.time/1000.0);
+            } else if (category.equals("Telescope Offset")) {
+                if (p.observation().calculationMethod() instanceof Spectroscopy) { numOfOffsets = numOfExposures/2; }
+                secStr = String.format("%d x %.1f s", numOfOffsets, ct.time / 1000.0);
+            } else {
+                secStr = String.format("%d exp x %.1f s", numOfExposures, ct.time/1000.0);
+            }
+
+            buf.append("<td align=\"right\"> ").append(secStr).append("</td>");
+            buf.append("</tr>");
+        }
+        buf.append("<tr><td><b>Total time</b></td><td align=\"right\"><b>").append(String.format("%s", TimeAmountFormatter.getDescriptiveFormat(totalTime))).append("</b></td></tr>");
+        buf.append("</table>");
+
+        buf.append("</body></html>");
+        return buf.toString();
     }
 
 }

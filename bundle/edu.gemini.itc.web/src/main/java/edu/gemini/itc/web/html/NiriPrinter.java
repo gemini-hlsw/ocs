@@ -1,15 +1,18 @@
 package edu.gemini.itc.web.html;
 
 import edu.gemini.itc.altair.Altair;
-import edu.gemini.itc.base.AOSystem;
-import edu.gemini.itc.base.ImagingResult;
-import edu.gemini.itc.base.SpectroscopyResult;
-import edu.gemini.itc.base.TransmissionElement;
+import edu.gemini.itc.base.*;
 import edu.gemini.itc.niri.Niri;
 import edu.gemini.itc.niri.NiriRecipe;
 import edu.gemini.itc.shared.*;
+import edu.gemini.spModel.config2.Config;
+import edu.gemini.spModel.gemini.niri.InstNIRI;
+import edu.gemini.spModel.gemini.niri.NiriReadoutTime;
 import edu.gemini.spModel.gemini.niri.Niri.Mask;
+import edu.gemini.spModel.obs.plannedtime.PlannedTime;
+import edu.gemini.spModel.obs.plannedtime.PlannedTimeCalculator;
 import scala.Option;
+
 
 import java.io.PrintWriter;
 import java.util.UUID;
@@ -23,7 +26,12 @@ public final class NiriPrinter extends PrinterBase {
     private final PlottingDetails pdp;
     private final NiriRecipe recipe;
     private final boolean isImaging;
+    private final ItcParameters p;
 
+    private double readoutTimePerCoadd;
+    private int step;
+    private PlannedTime pta;
+    private Config[] config;
     /**
      * Constructs a NiriRecipe given the parameters. Useful for testing.
      */
@@ -33,6 +41,7 @@ public final class NiriPrinter extends PrinterBase {
         this.recipe    = new NiriRecipe(p, instr);
         this.isImaging = p.observation().calculationMethod() instanceof Imaging;
         this.pdp       = pdp;
+        this.p          = p;
     }
 
     public void writeOutput() {
@@ -116,6 +125,9 @@ public final class NiriPrinter extends PrinterBase {
         _printPeakPixelInfo(s.ccd(0));
         _printWarnings(s.warnings());
 
+        getOverheadTableParams(result, result.observation());
+        _println(_printOverheadTable(p, config[step], readoutTimePerCoadd, pta, step));
+
         printConfiguration(result.parameters(), instrument, result.aoSystem());
 
     }
@@ -153,5 +165,24 @@ public final class NiriPrinter extends PrinterBase {
         return s;
     }
 
+    public void getOverheadTableParams(Result result, ObservationDetails obs) {
+        int numberExposures = 1;
+        final CalculationMethod calcMethod = obs.calculationMethod();
 
+        if (calcMethod instanceof ImagingInt) {
+            numberExposures = (int)(((ImagingResult) result).is2nCalc().numberSourceExposures() * obs.sourceFraction());
+        } else if (calcMethod instanceof ImagingS2N) {
+            numberExposures = ((ImagingS2N) calcMethod).exposures();
+        } else if (calcMethod instanceof SpectroscopyS2N) {
+            numberExposures = ((SpectroscopyS2N) calcMethod).exposures();
+        }
+
+        ConfigCreator cc    = new ConfigCreator(p);
+        config              = cc.createNiriConfig(instr, numberExposures);
+        pta                 = PlannedTimeCalculator.instance.calc(config, new InstNIRI());
+        NiriReadoutTime nrt = NiriReadoutTime.lookup(instr.builtinROI(), instr.readMode()).getValue();
+        readoutTimePerCoadd = nrt.getReadout(1);
+
+        if (numberExposures < 2) step = 0; else step = 1;
+    }
 }

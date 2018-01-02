@@ -42,6 +42,7 @@ final case class GmosParameters(
                      spatialBinning:    Int,
                      spectralBinning:   Int,
                      ccdType:           GmosCommonType.DetectorManufacturer,
+                     builtinROI:        GmosCommonType.BuiltinROI,
                      site:              Site) extends InstrumentDetails
 
 final case class GnirsParameters(
@@ -82,6 +83,7 @@ final case class NiriParameters(
                      readMode:          Niri.ReadMode,
                      wellDepth:         Niri.WellDepth,
                      mask:              Niri.Mask,
+                     builtinROI:        Niri.BuiltinROI,
                      altair:            Option[AltairParameters]) extends InstrumentDetails
 
 final case class TRecsParameters(

@@ -71,4 +71,7 @@ public class InstConstants {
     public static final String FREEZE = "freeze";
 
     public static final String SCI_BAND = "sciBand";
+
+    public static final ItemKey INST_INSTRUMENT_KEY = new ItemKey(INSTRUMENT_KEY, INSTRUMENT_NAME_PROP);
+
 }

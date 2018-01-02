@@ -29,6 +29,7 @@ public abstract class ImagingS2NCalculation implements ImagingS2NCalculatable {
     protected double read_noise;
     protected double pixel_size;
     protected double exposure_time;
+    protected int coadds;
 
     protected double secondary_integral = 0;
     protected double secondary_source_fraction = 0;
@@ -90,7 +91,7 @@ public abstract class ImagingS2NCalculation implements ImagingS2NCalculatable {
     }
 
     public double singleSNRatio() {
-        return signal / noise;
+        return Math.sqrt(coadds) * signal / noise;
     }
 
 

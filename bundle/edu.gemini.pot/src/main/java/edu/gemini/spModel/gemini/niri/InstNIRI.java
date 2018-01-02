@@ -6,6 +6,7 @@ import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.skycalc.Angle;
+import edu.gemini.spModel.ao.AOConstants;
 import edu.gemini.spModel.config.ConfigPostProcessor;
 import edu.gemini.spModel.config.injector.ConfigInjector;
 import edu.gemini.spModel.config.injector.obswavelength.ObsWavelengthCalc2;
@@ -38,6 +39,7 @@ import edu.gemini.spModel.obs.plannedtime.PlannedTime;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.CategorizedTime;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.CategorizedTimeGroup;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.Category;
+import edu.gemini.spModel.obs.plannedtime.PlannedTime.ItcOverheadProvider;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.StepCalculator;
 import edu.gemini.spModel.obscomp.InstConfigInfo;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
@@ -55,7 +57,7 @@ import static edu.gemini.spModel.seqcomp.SeqConfigNames.INSTRUMENT_KEY;
 /**
  * The NIRI instrument.
  */
-public final class InstNIRI extends SPInstObsComp implements PropertyProvider, GuideProbeProvider, StepCalculator, CalibrationKeyProvider, ConfigPostProcessor {
+public final class InstNIRI extends SPInstObsComp implements PropertyProvider, GuideProbeProvider, StepCalculator, CalibrationKeyProvider, ConfigPostProcessor, ItcOverheadProvider {
 
     // for serialization
     private static final long serialVersionUID = 2L;
@@ -88,6 +90,7 @@ public final class InstNIRI extends SPInstObsComp implements PropertyProvider, G
     public static final PropertyDescriptor FOCUS_PROP;
     public static final PropertyDescriptor MASK_PROP;
     public static final PropertyDescriptor POS_ANGLE_PROP;
+    public static final ItemKey DISPERSER_KEY = new ItemKey(INSTRUMENT_KEY, "disperser");
     public static final PropertyDescriptor READ_MODE_PROP;
     public static final PropertyDescriptor BUILTIN_ROI_PROP;
     public static final PropertyDescriptor WELL_DEPTH_PROP;
@@ -215,6 +218,10 @@ public final class InstNIRI extends SPInstObsComp implements PropertyProvider, G
         return 30.0;
     }
 
+    public double getReacquisitionTime () {
+        return 0.0;
+    } // considering it zero, as currently NIRI is imaging-only
+
     private static final Map<SetupTimeKey, Double> SETUP_TIME = new HashMap<>();
 
     static {
@@ -263,13 +270,43 @@ public final class InstNIRI extends SPInstObsComp implements PropertyProvider, G
         return (altair == null) ? getSetupTime(mode) : getSetupTime(mode, altair.getMode());
     }
 
+    public double getSetupTime(Config[] conf) {
+        String aoSystem = (String) conf[0].getItemValue(AOConstants.AO_SYSTEM_KEY);
+        String guideStarType = (String) conf[0].getItemValue(AOConstants.AO_GUIDE_STAR_TYPE_KEY);
+        String disperser = (String) conf[0].getItemValue(DISPERSER_KEY);
+
+        Mode mode;
+        AltairParams.Mode altairMode = null;
+        if (disperser.equals("none"))  {
+            mode = Mode.imaging;
+        } else {
+            mode = Mode.spectroscopy;
+        }
+
+        if (conf[0].containsItem(AOConstants.AO_SYSTEM_KEY) && aoSystem.equals("Altair")) {
+            if (guideStarType.equals("LGS")) {
+                altairMode = AltairParams.Mode.LGS;
+            } else if (guideStarType.equals("NGS")) {
+                altairMode = AltairParams.Mode.NGS;
+            }
+        }
+
+        if (!conf[0].containsItem(AOConstants.AO_SYSTEM_KEY))  {
+            return getSetupTime(mode);
+        } else {
+            return getSetupTime(mode, altairMode);
+        }
+    }
+
     @Override
     public CategorizedTimeGroup calc(final Config cur, final Option<Config> prev) {
         final Collection<CategorizedTime> times = new ArrayList<>();
 
-        // Add filter change overhead if necessary.
-        if (PlannedTime.isUpdated(cur, prev, Filter.KEY)) {
-            times.add(CategorizedTime.fromSeconds(Category.CONFIG_CHANGE, getFilterChangeOverheadSec(), "Filter"));
+        // Add filter change overhead if necessary
+        if (cur.containsItem(Filter.KEY)) {
+            if (PlannedTime.isUpdated(cur, prev, Filter.KEY)) {
+                times.add(CategorizedTime.fromSeconds(Category.CONFIG_CHANGE, getFilterChangeOverheadSec(), "Filter"));
+            }
         }
 
         // Add readout time.
@@ -279,14 +316,19 @@ public final class InstNIRI extends SPInstObsComp implements PropertyProvider, G
 
         final Option<NiriReadoutTime> nrt = NiriReadoutTime.lookup(roi, readMode);
         nrt.foreach(niriReadoutTime -> {
-            times.add(CategorizedTime.fromSeconds(Category.DHS_WRITE, niriReadoutTime.dhsWrite));
+            times.add(CategorizedTime.fromSeconds(Category.DHS_WRITE, niriReadoutTime.getDhsWriteTime()));
             times.add(CategorizedTime.fromSeconds(Category.READOUT, niriReadoutTime.getReadout(coadds)));
         });
 
         // Add exposure time
         final double exp = ExposureCalculator.instance.exposureTimeSec(cur);
         final int fast = (Integer) cur.getItemValue(FAST_MODE_KEY);
-        final double secs = fast * exp * coadds;
+        final double secs;
+        if (fast != 0) {
+            secs = fast * exp * coadds;
+        } else {
+            secs = exp * coadds;
+        }
         times.add(CategorizedTime.fromSeconds(Category.EXPOSURE, secs));
 
         return CommonStepCalculator.instance.calc(cur, prev).addAll(times);

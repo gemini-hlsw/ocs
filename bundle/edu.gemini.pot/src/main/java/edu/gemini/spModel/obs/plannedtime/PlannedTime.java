@@ -46,6 +46,12 @@ public final class PlannedTime implements Serializable {
         CategorizedTimeGroup calc(Config stepConfig, Option<Config> prevStepConfig);
     }
 
+    public interface ItcOverheadProvider {
+        double getSetupTime(Config[] conf);
+        double getReacquisitionTime();
+        CategorizedTimeGroup calc(Config stepConfig, Option<Config> prevStepConfig);
+    }
+
     private static long toMillsec(double sec) {
         return Math.round(1000.0 * sec);
     }
@@ -329,6 +335,10 @@ public final class PlannedTime implements Serializable {
             return true;
         }
 
+        private Step(CategorizedTimeGroup times) {
+            this(times, ChargeClass.PROGRAM, false, "OBJECT");
+        }
+
         @Override public int hashCode() {
             int result = times.hashCode();
             result = 31 * result + chargeClass.hashCode();
@@ -348,6 +358,11 @@ public final class PlannedTime implements Serializable {
         public static Step apply(CategorizedTimeGroup times, ChargeClass chargeClass, boolean executed, String obsType) {
             return new Step(times, chargeClass, executed, obsType);
         }
+
+        public static Step apply(CategorizedTimeGroup times) {
+            return new Step(times);
+        }
+
     }
 
     public final Setup setup;
@@ -403,5 +418,60 @@ public final class PlannedTime implements Serializable {
     public static PlannedTime apply(Setup setup, List<Step> steps, ConfigSequence sequence) {
         steps = Collections.unmodifiableList(new ArrayList<>(steps));
         return new PlannedTime(setup, steps, sequence);
+    }
+
+    /**
+     * The following methods are for use in the ITC.
+     *
+     */
+
+    // total science time (without setup)
+    public long scienceTime() {
+        long scienceTime = 0;
+        for (Step step : steps) scienceTime += step.totalTime();
+        return scienceTime / 1000;
+    }
+
+    // number of acquisitions, considering one acquisition per every two hours of science
+    public int numAcq() {
+        int numAcq = 1;
+        long scienceTime = scienceTime();
+        if ((scienceTime > 7200) && (scienceTime % 7200 == 0)) {
+            numAcq = (int) (scienceTime / 7200);
+        } else if ((scienceTime > 7200) && (scienceTime % 7200 != 0)) {
+            numAcq = (int) (scienceTime / 7200) + 1;
+        }
+        return numAcq;
+    }
+
+    // number of re-acquisitions (re-centering on the slit) for spectroscopic observations
+    // using PWFS2, considering one re-acquisition per every hour of science
+    public int numReacq(Config config) {
+        int numReacq = 0;
+        long scienceTime = scienceTime();
+        ItemKey guideWithPWFS2 = new ItemKey("telescope:guideWithPWFS2");
+        if (config.containsItem(guideWithPWFS2) &&
+                config.getItemValue(guideWithPWFS2).equals("guide")) {
+            if ((scienceTime > 3600) && ((scienceTime + 3600) % 7200 == 0)) {
+                numReacq = ((int)((3600 + scienceTime) / 7200)) - 1;
+            } else if ((scienceTime > 3600) && ((scienceTime + 3600) % 7200 != 0)) {
+                numReacq = (int)((scienceTime + 3600) / 7200);
+            }
+        }
+        return numReacq;
+    }
+
+    // total time with multiple acquisitions and re-acquisitions (case of spectroscopy with PWFS2)
+    public long totalTimeWithMultipleAcqReacq(Config config) {
+        long totalTimeWithReacq = setup.time * numAcq() + setup.reacquisitionTime * numReacq(config);
+        for (Step step : steps) totalTimeWithReacq += step.totalTime();
+        return totalTimeWithReacq;
+    }
+
+    // total time with multiple acquisitions (general case)
+    public long totalTimeWithMultipleAcq(Config config) {
+        long totalTimeWithReacq = setup.time * numAcq();
+        for (Step step : steps) totalTimeWithReacq += step.totalTime();
+        return totalTimeWithReacq;
     }
 }

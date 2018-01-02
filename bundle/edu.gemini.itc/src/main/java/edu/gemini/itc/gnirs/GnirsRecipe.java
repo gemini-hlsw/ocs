@@ -253,7 +253,7 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
     private static SpcChartData createGnirsSignalChart(final SpectroscopyResult result) {
         final String title = "Signal and SQRT(Background) in one pixel";
         final String xAxis = "Wavelength (nm)";
-        final String yAxis = "e- per exposure per spectral pixel";
+        final String yAxis = "e- per coadd per spectral pixel";
         final List<SpcSeriesData> data = new ArrayList<>();
         for (int i = 0; i < GnirsRecipe.ORDERS; i++) {
             data.add(new SpcSeriesData(SignalData.instance(),     "Signal Order "           + (i + 3), result.specS2N()[i].getSignalSpectrum().getData(),     new Some<>(ITCChart.colorByIndex(2*i    ))));
@@ -265,7 +265,7 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
     private static SpcChartData createGnirsS2NChart(final SpectroscopyResult result) {
         final String title = "Final S/N";
         final String xAxis = "Wavelength (nm)";
-        final String yAxis = "Signal / Noise per spectral pixel";
+        final String yAxis = "Signal / Noise per frame per spectral pixel";
         final List<SpcSeriesData> data = new ArrayList<>();
         for (int i = 0; i < GnirsRecipe.ORDERS; i++) {
            data.add(new SpcSeriesData(FinalS2NData.instance(),   "Final S/N Order "        + (i + 3), result.specS2N()[i].getFinalS2NSpectrum().getData(),     new Some<>(ITCChart.colorByIndex(2*i))));

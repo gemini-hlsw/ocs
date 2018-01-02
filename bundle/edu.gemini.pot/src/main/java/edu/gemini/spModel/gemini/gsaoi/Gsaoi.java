@@ -39,6 +39,7 @@ import edu.gemini.spModel.obs.plannedtime.PlannedTime.CategorizedTime;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.CategorizedTimeGroup;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.Category;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.StepCalculator;
+import edu.gemini.spModel.obs.plannedtime.PlannedTime.ItcOverheadProvider;
 import edu.gemini.spModel.obscomp.InstConfigInfo;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.pio.ParamSet;
@@ -64,7 +65,7 @@ import static edu.gemini.spModel.seqcomp.SeqConfigNames.INSTRUMENT_KEY;
  * This class defines the GS AOI instrument.
  */
 public final class Gsaoi extends SPInstObsComp
-   implements PropertyProvider, GuideProbeProvider, IssPortProvider, StepCalculator, PosAngleConstraintAware {
+   implements PropertyProvider, GuideProbeProvider, IssPortProvider, StepCalculator, PosAngleConstraintAware, ItcOverheadProvider {
 //    From REL-439:
 //    ----
 //    OT changes:
@@ -660,6 +661,10 @@ public final class Gsaoi extends SPInstObsComp
         return MCAO_SETUP_TIME * 60;//MCAO setup time: 30m
     }
 
+    public double getSetupTime(Config[] conf) {
+        return MCAO_SETUP_TIME * 60;//MCAO setup time: 30m
+    }
+
     /**
      * Time needed to re-setup the instrument before the Observation following a previous full setup.
      *
@@ -667,6 +672,10 @@ public final class Gsaoi extends SPInstObsComp
      * @return time in seconds
      */
     public double getReacquisitionTime(ISPObservation obs) {
+        return GSAOI_REACQUISITION_TIME * 60; // 10 mins as defined in REL-1346
+    }
+
+    public double getReacquisitionTime() {
         return GSAOI_REACQUISITION_TIME * 60; // 10 mins as defined in REL-1346
     }
 
@@ -742,8 +751,10 @@ public final class Gsaoi extends SPInstObsComp
     @Override public CategorizedTimeGroup calc(Config cur, Option<Config> prev) {
         // Add wheel move overhead
         Collection<CategorizedTime> times = new ArrayList<>();
-        if (PlannedTime.isUpdated(cur, prev, Filter.KEY, UtilityWheel.KEY)) {
-            times.add(getWheelMoveOverhead());
+        if (cur.containsItem(Filter.KEY)) {
+            if (PlannedTime.isUpdated(cur, prev, Filter.KEY, UtilityWheel.KEY)) {
+                times.add(getWheelMoveOverhead());
+            }
         }
 
         // Add exposure time

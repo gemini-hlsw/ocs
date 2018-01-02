@@ -1,13 +1,16 @@
 package edu.gemini.itc.web.html;
 
 import edu.gemini.itc.base.ImagingResult;
+import edu.gemini.itc.base.Result;
 import edu.gemini.itc.base.SpectroscopyResult;
 import edu.gemini.itc.gmos.Gmos;
 import edu.gemini.itc.gmos.GmosRecipe;
 import edu.gemini.itc.gmos.GmosSaturLimitRule;
 import edu.gemini.itc.shared.*;
-import edu.gemini.spModel.gemini.gmos.GmosNorthType;
-import edu.gemini.spModel.gemini.gmos.GmosSouthType;
+import edu.gemini.spModel.config2.Config;
+import edu.gemini.spModel.gemini.gmos.*;
+import edu.gemini.spModel.obs.plannedtime.PlannedTime;
+import edu.gemini.spModel.obs.plannedtime.PlannedTimeCalculator;
 
 import java.io.PrintWriter;
 import java.util.*;
@@ -20,12 +23,20 @@ public final class GmosPrinter extends PrinterBase {
     private final GmosRecipe recipe;
     private final PlottingDetails pdp;
     private final boolean isImaging;
+    private final ItcParameters p;
+    private final GmosParameters instr;
+
+    private int step;
+    private PlannedTime pta;
+    private Config[] config;
 
     public GmosPrinter(final ItcParameters p, final GmosParameters instr, final PlottingDetails pdp, final PrintWriter out) {
         super(out);
         this.recipe         = new GmosRecipe(p, instr);
         this.pdp            = pdp;
         this.isImaging      = p.observation().calculationMethod() instanceof Imaging;
+        this.p              = p;
+        this.instr          = instr;
     }
 
     /**
@@ -84,6 +95,9 @@ public final class GmosPrinter extends PrinterBase {
             }
             _printWarnings(ccdWithMaxPeak.get().warnings());
         }
+
+        getOverheadTableParams(result, result.observation());
+        _println(_printOverheadTable(p, config[step], 0, pta, step));
 
         _print("<HR align=left SIZE=3>");
 
@@ -164,6 +178,9 @@ public final class GmosPrinter extends PrinterBase {
             }
         }
 
+        getOverheadTableParams(results[0], results[0].observation());
+        _println(_printOverheadTable(p, config[step], 0, pta, step));
+
         printConfiguration(results[0].parameters(), instrument);
     }
 
@@ -234,5 +251,30 @@ public final class GmosPrinter extends PrinterBase {
                     String.format("The peak pixel signal + background is %.0f e- (%d ADU). This is %.0f%% of the saturation limit of %.0f e-.",
                             ccd.get().peakPixelFlux(), ccd.get().adu(), gmosLimit.percentOfLimit(ccd.get().peakPixelFlux()), gmosLimit.limit()));
         }
+    }
+
+    public void getOverheadTableParams(Result result, ObservationDetails obs) {
+        int numberExposures = 1;
+        final CalculationMethod calcMethod = obs.calculationMethod();
+
+        if (calcMethod instanceof ImagingInt) {
+            numberExposures = (int)(((ImagingResult) result).is2nCalc().numberSourceExposures() * obs.sourceFraction());
+        } else if (calcMethod instanceof ImagingS2N) {
+            numberExposures = ((ImagingS2N) calcMethod).exposures();
+        } else if (calcMethod instanceof SpectroscopyS2N) {
+            numberExposures = ((SpectroscopyS2N) calcMethod).exposures();
+        }
+
+        ConfigCreator cc    = new ConfigCreator(p);
+        config              = cc.createGmosConfig(instr, numberExposures);
+        if (instr.site().displayName.equals("Gemini North")) {
+            pta = PlannedTimeCalculator.instance.calc(config, new InstGmosNorth());
+        } else if (instr.site().displayName.equals("Gemini South")) {
+            pta = PlannedTimeCalculator.instance.calc(config, new InstGmosSouth());
+        } else {
+            throw new Error("invalid site");
+        }
+
+        if (numberExposures < 2) step = 0; else step = 1;
     }
 }
