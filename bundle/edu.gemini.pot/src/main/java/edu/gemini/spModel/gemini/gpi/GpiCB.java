@@ -74,7 +74,7 @@ public class GpiCB extends AbstractObsComponentCB {
                     final ImList<Magnitude> magnitudes = base.getMagnitudesJava();
                     MAG_PROPERTIES.forEach((band, propName) ->
                         magnitudes.find(m -> m.band().equals(band)).
-                                foreach(mag -> config.putParameter(systemName, DefaultParameter.getInstance(propName, mag))));
+                                foreach(mag -> config.putParameter(systemName, DefaultParameter.getInstance(propName, mag.value()))));
                 });
             }
         }
