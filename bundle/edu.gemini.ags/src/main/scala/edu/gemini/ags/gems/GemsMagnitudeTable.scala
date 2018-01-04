@@ -105,6 +105,7 @@ object GemsMagnitudeTable extends MagnitudeTable {
   lazy val CanopusWfsMagnitudeLimitsCalculator = new CanopusWfsCalculator {
     // The values provided by science are assumed to be at SB ANY, CC50, and IQ70.
     // Since SB ANY results in an adjustment of -0.5 mag, we add 0.5 mag to account for this.
+    // Note that the adjustments for conditions are done in the api file of edu.gemini.catalog.
     private val FaintLimit  = 17.5
     private val BrightLimit = 11.0
 
