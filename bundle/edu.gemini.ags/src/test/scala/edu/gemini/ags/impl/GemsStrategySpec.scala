@@ -676,7 +676,6 @@ class GemsStrategySpec extends Specification {
       val newCtx = selection.map(_.applyTo(ctx)).getOrElse(ctx)
       // Analyze all the probes at once
       val analysis = gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow())
-      println(analysis)
       gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow()).collect {
         case AgsAnalysis.Usable(CanopusWfs.cwfs1, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq) if st.some == cwfs1 => CanopusWfs.cwfs1
         case AgsAnalysis.Usable(CanopusWfs.cwfs2, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq) if st.some == cwfs2 => CanopusWfs.cwfs2
