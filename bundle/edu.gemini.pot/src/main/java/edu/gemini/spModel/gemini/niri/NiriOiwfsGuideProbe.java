@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package edu.gemini.spModel.gemini.niri;
 
 import edu.gemini.shared.util.immutable.None;
@@ -59,7 +55,7 @@ public enum NiriOiwfsGuideProbe implements ValidatableGuideProbe {
 
     @Override
     public Option<PatrolField> getCorrectedPatrolField(ObsContext ctx) {
-        return (ctx.getInstrument() instanceof InstNIRI) ? new Some<>(patrolField) : None.<PatrolField>instance();
+        return (ctx.getInstrument() instanceof InstNIRI) ? new Some<>(patrolField) : None.instance();
     }
 
     @Override

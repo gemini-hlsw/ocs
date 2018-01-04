@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package edu.gemini.spModel.guide;
 
 import edu.gemini.shared.util.immutable.None;
@@ -122,7 +118,6 @@ public interface GuideProbe {
 
     /**
      * Indicates the bands that will be used for a given probe.
-     *
      */
     BandsList getBands();
 }

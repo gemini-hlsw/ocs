@@ -5,7 +5,7 @@ import java.util.logging.Logger
 import edu.gemini.ags.gems.mascot.{MascotCat, MascotProgress, Strehl}
 import edu.gemini.catalog.api.MagnitudeConstraints
 import edu.gemini.spModel.core._
-import edu.gemini.spModel.gemini.gems.Canopus
+import edu.gemini.spModel.gemini.gems.CanopusWfs
 import edu.gemini.spModel.gemini.gsaoi.{GsaoiOdgw, Gsaoi}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.gems.GemsGuideProbeGroup
@@ -215,7 +215,7 @@ object GemsResultsAnalyzer {
     // addTipTiltGuideProbeTargets(tiptiltTargetList, Nil, obsContext)._2
     //
     // Remove everything below replacing it with the above line.  Get rid of
-    // "tiptiltGroup" since it is always Canopus.Wfs.group.instance.  Git rid
+    // "tiptiltGroup" since it is always CanopusWfs.group.instance.  Git rid
     // of flexureGroup, flexureStars  Propagate changes ...
     val tipTiltGuideProbeTargets = addTipTiltGuideProbeTargets(tiptiltTargetList, Nil, obsContext)
 
@@ -300,8 +300,8 @@ object GemsResultsAnalyzer {
 
     // Special case:
     // If the tip tilt asterism is assigned to the GSAOI ODGW group, then the flexure star must be assigned to CWFS3.
-    if (isFlexure && ("ODGW" == tiptiltGroup.getKey) && Canopus.Wfs.cwfs3.validate(toSPTarget(target), ctx) == GuideStarValidation.VALID) {
-      Canopus.Wfs.cwfs3.some
+    if (isFlexure && ("ODGW" == tiptiltGroup.getKey) && CanopusWfs.cwfs3.validate(toSPTarget(target), ctx) == GuideStarValidation.VALID) {
+      CanopusWfs.cwfs3.some
     } else {
       val members = if (reverseOrder) group.getMembers.asScala.toList.reverse else group.getMembers.asScala.toList
       members.find(isValidGuideProbe)
@@ -311,10 +311,10 @@ object GemsResultsAnalyzer {
   // Returns true if the given target is valid for the given guide probe
   private def validate(ctx: ObsContext, target: SiderealTarget, guideProbe: GuideProbe): Boolean =
     guideProbe match {
-      case wfs: Canopus.Wfs          =>
+      case cwfs: CanopusWfs          =>
         // Additional check for mag range (for cwfs1 and cwfs2, since different than cwfs3 and group range)
         val canopusWfsCalculator = GemsMagnitudeTable.CanopusWfsMagnitudeLimitsCalculator
-        wfs.validate(toSPTarget(target), ctx) == GuideStarValidation.VALID && containsMagnitudeInLimits(target, canopusWfsCalculator.getNominalMagnitudeConstraints(wfs))
+        cwfs.validate(toSPTarget(target), ctx) == GuideStarValidation.VALID && containsMagnitudeInLimits(target, canopusWfsCalculator.getNominalMagnitudeConstraints(cwfs))
       case vp: ValidatableGuideProbe =>
         vp.validate(toSPTarget(target), ctx) == GuideStarValidation.VALID
       case _                         =>
@@ -325,7 +325,7 @@ object GemsResultsAnalyzer {
   // If assignCwfs3ToBrightest is true, the brightest star in the asterism (in tiptiltTargetList) is assigned to cwfs3,
   // otherwise the second brightest (OT-27).
   private def checkCwfs3Rule(guideProbe: GuideProbe, target: SiderealTarget, tiptiltTargetList: List[SiderealTarget], assignCwfs3ToBrightest: Boolean): Boolean = {
-    val isCwfs3 = guideProbe == Canopus.Wfs.cwfs3
+    val isCwfs3 = guideProbe == CanopusWfs.cwfs3
     // sort, put brightest stars first
     val targets = sortTargetsByBrightness(tiptiltTargetList)
     targets match {

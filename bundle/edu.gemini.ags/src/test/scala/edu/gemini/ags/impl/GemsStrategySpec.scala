@@ -10,8 +10,7 @@ import edu.gemini.shared.util.immutable.{None => JNone, Some => JSome}
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.core.AngleSyntax._
 import edu.gemini.pot.ModelConverters._
-import edu.gemini.spModel.gemini.gems.Canopus.Wfs
-import edu.gemini.spModel.gemini.gems.{Canopus, Gems}
+import edu.gemini.spModel.gemini.gems.{CanopusWfs, Gems}
 import edu.gemini.spModel.gemini.gsaoi.{Gsaoi, GsaoiOdgw}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.gems.{GemsGuideStarType, GemsTipTiltMode}
@@ -45,7 +44,7 @@ class GemsStrategySpec extends Specification {
       val env = TargetEnvironment.create(target)
       val inst = new Gsaoi <| {_.setPosAngle(0.0)} <| {_.setIssPort(IssPort.UP_LOOKING)}
       val gsaoi = GsaoiOdgw.values().toList
-      val canopus = Canopus.Wfs.values().toList
+      val canopus = CanopusWfs.values().toList
       val pwfs1 = List(PwfsGuideProbe.pwfs1)
 
       val ctx = ObsContext.create(env, inst, new JSome(Site.GS), SPSiteQuality.Conditions.BEST, null, new Gems, JNone.instance())
@@ -69,7 +68,7 @@ class GemsStrategySpec extends Specification {
       results should be size 2
 
       results.head.criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, GsaoiOdgw.Group.instance), CatalogSearchCriterion("On-detector Guide Window tiptilt", RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), MagnitudeConstraints(SingleBand(MagnitudeBand.H), FaintnessConstraint(14.5), scala.Option(SaturationConstraint(7.3))), scala.Option(Offset(0.0014984027777700248.degrees[OffsetP], 0.0014984027777700248.degrees[OffsetQ])), scala.None)))
-      results(1).criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.flexure, Wfs.Group.instance), CatalogSearchCriterion("Canopus Wave Front Sensor flexure", RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), MagnitudeConstraints(RBandsList, FaintnessConstraint(15.8), scala.Option(SaturationConstraint(8.3))), scala.Option(Offset(0.0014984027777700248.degrees[OffsetP], 0.0014984027777700248.degrees[OffsetQ])), scala.None)))
+      results(1).criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.flexure, CanopusWfs.Group.instance), CatalogSearchCriterion("Canopus Wave Front Sensor flexure", RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), MagnitudeConstraints(RBandsList, FaintnessConstraint(15.8), scala.Option(SaturationConstraint(8.3))), scala.Option(Offset(0.0014984027777700248.degrees[OffsetP], 0.0014984027777700248.degrees[OffsetQ])), scala.None)))
       results.head.results should be size 5
       results(1).results should be size 4
     }
@@ -93,10 +92,10 @@ class GemsStrategySpec extends Specification {
       val assignments = ~selection.map(_.assignments)
       assignments should be size 2
 
-      assignments.exists(_.guideProbe == Canopus.Wfs.cwfs2) should beTrue
-      val cwfs2 = assignments.find(_.guideProbe == Canopus.Wfs.cwfs2).map(_.guideStar)
-      assignments.exists(_.guideProbe == Canopus.Wfs.cwfs3) should beTrue
-      val cwfs3 = assignments.find(_.guideProbe == Canopus.Wfs.cwfs3).map(_.guideStar)
+      assignments.exists(_.guideProbe == CanopusWfs.cwfs2) should beTrue
+      val cwfs2 = assignments.find(_.guideProbe == CanopusWfs.cwfs2).map(_.guideStar)
+      assignments.exists(_.guideProbe == CanopusWfs.cwfs3) should beTrue
+      val cwfs3 = assignments.find(_.guideProbe == CanopusWfs.cwfs3).map(_.guideStar)
 
       // Check coordinates
       cwfs2.map(_.name) should beSome("848-004584")
@@ -116,16 +115,16 @@ class GemsStrategySpec extends Specification {
       val newCtx = selection.map(_.applyTo(ctx)).getOrElse(ctx)
       val analysis = gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow())
       analysis.collect {
-        case AgsAnalysis.Usable(Canopus.Wfs.cwfs2, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq) if st.some == cwfs2 => Canopus.Wfs.cwfs2
-        case AgsAnalysis.Usable(Canopus.Wfs.cwfs3, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq) if st.some == cwfs3 => Canopus.Wfs.cwfs3
-      } should beEqualTo(List(Canopus.Wfs.cwfs2, Canopus.Wfs.cwfs3))
+        case AgsAnalysis.Usable(CanopusWfs.cwfs2, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq) if st.some == cwfs2 => CanopusWfs.cwfs2
+        case AgsAnalysis.Usable(CanopusWfs.cwfs3, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq) if st.some == cwfs3 => CanopusWfs.cwfs3
+      } should beEqualTo(List(CanopusWfs.cwfs2, CanopusWfs.cwfs3))
 
       // Analyze per probe
       cwfs2.map { s =>
-        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), Canopus.Wfs.cwfs2, s).contains(AgsAnalysis.Usable(Canopus.Wfs.cwfs2, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq))
+        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), CanopusWfs.cwfs2, s).contains(AgsAnalysis.Usable(CanopusWfs.cwfs2, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq))
       } should beSome(true)
       cwfs3.map { s =>
-        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), Canopus.Wfs.cwfs3, s).contains(AgsAnalysis.Usable(Canopus.Wfs.cwfs3, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq))
+        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), CanopusWfs.cwfs3, s).contains(AgsAnalysis.Usable(CanopusWfs.cwfs3, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq))
       } should beSome(true)
 
       // Test estimate: 2-star asterism grants 2/3 chance of success.
@@ -151,8 +150,8 @@ class GemsStrategySpec extends Specification {
       val assignments = ~selection.map(_.assignments)
       assignments should be size 1
 
-      assignments.exists(_.guideProbe == Canopus.Wfs.cwfs3) should beTrue
-      val cwfs3 = assignments.find(_.guideProbe == Canopus.Wfs.cwfs3).map(_.guideStar)
+      assignments.exists(_.guideProbe == CanopusWfs.cwfs3) should beTrue
+      val cwfs3 = assignments.find(_.guideProbe == CanopusWfs.cwfs3).map(_.guideStar)
 
       // Check coordinates
       cwfs3.map(_.name) should beSome("450-000011")
@@ -166,12 +165,12 @@ class GemsStrategySpec extends Specification {
       val newCtx = selection.map(_.applyTo(ctx)).getOrElse(ctx)
       val analysis = gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow())
       analysis.collect {
-        case AgsAnalysis.Usable(Canopus.Wfs.cwfs3, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq) if st.some == cwfs3 => Canopus.Wfs.cwfs3
-      } should beEqualTo(List(Canopus.Wfs.cwfs3))
+        case AgsAnalysis.Usable(CanopusWfs.cwfs3, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq) if st.some == cwfs3 => CanopusWfs.cwfs3
+      } should beEqualTo(List(CanopusWfs.cwfs3))
 
       // Analyze per probe
       cwfs3.map { s =>
-        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), Canopus.Wfs.cwfs3, s).contains(AgsAnalysis.Usable(Canopus.Wfs.cwfs3, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq))
+        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), CanopusWfs.cwfs3, s).contains(AgsAnalysis.Usable(CanopusWfs.cwfs3, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq))
       } should beSome(true)
 
       // Test estimate: 1-star asterism grants 1/3 chance of success.
@@ -196,12 +195,12 @@ class GemsStrategySpec extends Specification {
       val assignments = ~selection.map(_.assignments)
       assignments should be size 3
 
-      assignments.exists(_.guideProbe == Canopus.Wfs.cwfs1) should beTrue
-      val cwfs1 = assignments.find(_.guideProbe == Canopus.Wfs.cwfs1).map(_.guideStar)
-      assignments.exists(_.guideProbe == Canopus.Wfs.cwfs2) should beTrue
-      val cwfs2 = assignments.find(_.guideProbe == Canopus.Wfs.cwfs2).map(_.guideStar)
-      assignments.exists(_.guideProbe == Canopus.Wfs.cwfs3) should beTrue
-      val cwfs3 = assignments.find(_.guideProbe == Canopus.Wfs.cwfs3).map(_.guideStar)
+      assignments.exists(_.guideProbe == CanopusWfs.cwfs1) should beTrue
+      val cwfs1 = assignments.find(_.guideProbe == CanopusWfs.cwfs1).map(_.guideStar)
+      assignments.exists(_.guideProbe == CanopusWfs.cwfs2) should beTrue
+      val cwfs2 = assignments.find(_.guideProbe == CanopusWfs.cwfs2).map(_.guideStar)
+      assignments.exists(_.guideProbe == CanopusWfs.cwfs3) should beTrue
+      val cwfs3 = assignments.find(_.guideProbe == CanopusWfs.cwfs3).map(_.guideStar)
 
       // Check coordinates
       cwfs1.map(_.name) should beSome("450-000005")
@@ -229,20 +228,20 @@ class GemsStrategySpec extends Specification {
       val newCtx = selection.map(_.applyTo(ctx)).getOrElse(ctx)
       val analysis = gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow())
       analysis.collect {
-        case AgsAnalysis.Usable(Canopus.Wfs.cwfs1, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq) if st.some == cwfs1 => Canopus.Wfs.cwfs1
-        case AgsAnalysis.Usable(Canopus.Wfs.cwfs2, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq) if st.some == cwfs2 => Canopus.Wfs.cwfs2
-        case AgsAnalysis.Usable(Canopus.Wfs.cwfs3, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq) if st.some == cwfs3 => Canopus.Wfs.cwfs3
-      } should beEqualTo(List(Canopus.Wfs.cwfs1, Canopus.Wfs.cwfs2, Canopus.Wfs.cwfs3))
+        case AgsAnalysis.Usable(CanopusWfs.cwfs1, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq) if st.some == cwfs1 => CanopusWfs.cwfs1
+        case AgsAnalysis.Usable(CanopusWfs.cwfs2, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq) if st.some == cwfs2 => CanopusWfs.cwfs2
+        case AgsAnalysis.Usable(CanopusWfs.cwfs3, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq) if st.some == cwfs3 => CanopusWfs.cwfs3
+      } should beEqualTo(List(CanopusWfs.cwfs1, CanopusWfs.cwfs2, CanopusWfs.cwfs3))
 
       // Analyze per probe
       cwfs1.map { s =>
-        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), Canopus.Wfs.cwfs1, s).contains(AgsAnalysis.Usable(Canopus.Wfs.cwfs1, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq))
+        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), CanopusWfs.cwfs1, s).contains(AgsAnalysis.Usable(CanopusWfs.cwfs1, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq))
       } should beSome(true)
       cwfs2.map { s =>
-        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), Canopus.Wfs.cwfs2, s).contains(AgsAnalysis.Usable(Canopus.Wfs.cwfs2, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq))
+        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), CanopusWfs.cwfs2, s).contains(AgsAnalysis.Usable(CanopusWfs.cwfs2, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq))
       } should beSome(true)
       cwfs3.map { s =>
-        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), Canopus.Wfs.cwfs3, s).contains(AgsAnalysis.Usable(Canopus.Wfs.cwfs3, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq))
+        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), CanopusWfs.cwfs3, s).contains(AgsAnalysis.Usable(CanopusWfs.cwfs3, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq))
       } should beSome(true)
 
       // Test estimate: 3-star asterism grants guaranteed success.
@@ -269,12 +268,12 @@ class GemsStrategySpec extends Specification {
       val assignments = ~selection.map(_.assignments)
       assignments should be size 3
 
-      assignments.exists(_.guideProbe == Canopus.Wfs.cwfs1) should beTrue
-      val cwfs1 = assignments.find(_.guideProbe == Canopus.Wfs.cwfs1).map(_.guideStar)
-      assignments.exists(_.guideProbe == Canopus.Wfs.cwfs2) should beTrue
-      val cwfs2 = assignments.find(_.guideProbe == Canopus.Wfs.cwfs2).map(_.guideStar)
-      assignments.exists(_.guideProbe == Canopus.Wfs.cwfs3) should beTrue
-      val cwfs3 = assignments.find(_.guideProbe == Canopus.Wfs.cwfs3).map(_.guideStar)
+      assignments.exists(_.guideProbe == CanopusWfs.cwfs1) should beTrue
+      val cwfs1 = assignments.find(_.guideProbe == CanopusWfs.cwfs1).map(_.guideStar)
+      assignments.exists(_.guideProbe == CanopusWfs.cwfs2) should beTrue
+      val cwfs2 = assignments.find(_.guideProbe == CanopusWfs.cwfs2).map(_.guideStar)
+      assignments.exists(_.guideProbe == CanopusWfs.cwfs3) should beTrue
+      val cwfs3 = assignments.find(_.guideProbe == CanopusWfs.cwfs3).map(_.guideStar)
 
       // Check coordinates
       cwfs1.map(_.name) should beSome("104-014597")
@@ -298,20 +297,20 @@ class GemsStrategySpec extends Specification {
       val newCtx = selection.map(_.applyTo(ctx)).getOrElse(ctx)
       val analysis = gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow())
       analysis.collect {
-        case AgsAnalysis.Usable(Canopus.Wfs.cwfs1, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq) if st.some == cwfs1 => Canopus.Wfs.cwfs1
-        case AgsAnalysis.Usable(Canopus.Wfs.cwfs2, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq) if st.some == cwfs2 => Canopus.Wfs.cwfs2
-        case AgsAnalysis.Usable(Canopus.Wfs.cwfs3, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq) if st.some == cwfs3 => Canopus.Wfs.cwfs3
-      } should beEqualTo(List(Canopus.Wfs.cwfs1, Canopus.Wfs.cwfs2, Canopus.Wfs.cwfs3))
+        case AgsAnalysis.Usable(CanopusWfs.cwfs1, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq) if st.some == cwfs1 => CanopusWfs.cwfs1
+        case AgsAnalysis.Usable(CanopusWfs.cwfs2, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq) if st.some == cwfs2 => CanopusWfs.cwfs2
+        case AgsAnalysis.Usable(CanopusWfs.cwfs3, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq) if st.some == cwfs3 => CanopusWfs.cwfs3
+      } should beEqualTo(List(CanopusWfs.cwfs1, CanopusWfs.cwfs2, CanopusWfs.cwfs3))
 
       // Analyze per probe
       cwfs1.map { s =>
-        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), Canopus.Wfs.cwfs1, s).contains(AgsAnalysis.Usable(Canopus.Wfs.cwfs1, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq))
+        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), CanopusWfs.cwfs1, s).contains(AgsAnalysis.Usable(CanopusWfs.cwfs1, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq))
       } should beSome(true)
       cwfs2.map { s =>
-        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), Canopus.Wfs.cwfs2, s).contains(AgsAnalysis.Usable(Canopus.Wfs.cwfs2, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq))
+        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), CanopusWfs.cwfs2, s).contains(AgsAnalysis.Usable(CanopusWfs.cwfs2, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq))
       } should beSome(true)
       cwfs3.map { s =>
-        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), Canopus.Wfs.cwfs3, s).contains(AgsAnalysis.Usable(Canopus.Wfs.cwfs3, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq))
+        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), CanopusWfs.cwfs3, s).contains(AgsAnalysis.Usable(CanopusWfs.cwfs3, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq))
       } should beSome(true)
 
       // Test estimate
@@ -338,9 +337,9 @@ class GemsStrategySpec extends Specification {
       val assignments = ~selection.map(_.assignments)
       assignments should be size 3
 
-      val cwfs1 = assignments.find(_.guideProbe == Canopus.Wfs.cwfs1).map(_.guideStar)
-      val cwfs2 = assignments.find(_.guideProbe == Canopus.Wfs.cwfs2).map(_.guideStar)
-      val cwfs3 = assignments.find(_.guideProbe == Canopus.Wfs.cwfs3).map(_.guideStar)
+      val cwfs1 = assignments.find(_.guideProbe == CanopusWfs.cwfs1).map(_.guideStar)
+      val cwfs2 = assignments.find(_.guideProbe == CanopusWfs.cwfs2).map(_.guideStar)
+      val cwfs3 = assignments.find(_.guideProbe == CanopusWfs.cwfs3).map(_.guideStar)
       cwfs1.map(_.name) should beSome("104-014597")
       cwfs2.map(_.name) should beSome("104-014608")
       cwfs3.map(_.name) should beSome("104-014547")
@@ -356,19 +355,19 @@ class GemsStrategySpec extends Specification {
       // Analyze as a whole
       val analysis = gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow())
       analysis.collect {
-        case AgsAnalysis.Usable(Canopus.Wfs.cwfs1, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq) if st.some == cwfs1 => Canopus.Wfs.cwfs1
-        case AgsAnalysis.Usable(Canopus.Wfs.cwfs2, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq) if st.some == cwfs2 => Canopus.Wfs.cwfs2
-        case AgsAnalysis.Usable(Canopus.Wfs.cwfs3, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq) if st.some == cwfs3 => Canopus.Wfs.cwfs3
-      } should beEqualTo(List(Canopus.Wfs.cwfs1, Canopus.Wfs.cwfs2, Canopus.Wfs.cwfs3))
+        case AgsAnalysis.Usable(CanopusWfs.cwfs1, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq) if st.some == cwfs1 => CanopusWfs.cwfs1
+        case AgsAnalysis.Usable(CanopusWfs.cwfs2, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq) if st.some == cwfs2 => CanopusWfs.cwfs2
+        case AgsAnalysis.Usable(CanopusWfs.cwfs3, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq) if st.some == cwfs3 => CanopusWfs.cwfs3
+      } should beEqualTo(List(CanopusWfs.cwfs1, CanopusWfs.cwfs2, CanopusWfs.cwfs3))
       // Analyze per probe
       cwfs1.map { s =>
-        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), Canopus.Wfs.cwfs1, s).contains(AgsAnalysis.Usable(Canopus.Wfs.cwfs1, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq))
+        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), CanopusWfs.cwfs1, s).contains(AgsAnalysis.Usable(CanopusWfs.cwfs1, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq))
       } should beSome(true)
       cwfs2.map { s =>
-        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), Canopus.Wfs.cwfs2, s).contains(AgsAnalysis.Usable(Canopus.Wfs.cwfs2, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq))
+        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), CanopusWfs.cwfs2, s).contains(AgsAnalysis.Usable(CanopusWfs.cwfs2, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq))
       } should beSome(true)
       cwfs3.map { s =>
-        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), Canopus.Wfs.cwfs3, s).contains(AgsAnalysis.Usable(Canopus.Wfs.cwfs3, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq))
+        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), CanopusWfs.cwfs3, s).contains(AgsAnalysis.Usable(CanopusWfs.cwfs3, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq))
       } should beSome(true)
 
       // Test estimate
@@ -395,12 +394,12 @@ class GemsStrategySpec extends Specification {
       val assignments = ~selection.map(_.assignments)
       assignments should be size 3
 
-      assignments.exists(_.guideProbe == Canopus.Wfs.cwfs1) should beTrue
-      val cwfs1 = assignments.find(_.guideProbe == Canopus.Wfs.cwfs1).map(_.guideStar)
-      assignments.exists(_.guideProbe == Canopus.Wfs.cwfs2) should beTrue
-      val cwfs2 = assignments.find(_.guideProbe == Canopus.Wfs.cwfs2).map(_.guideStar)
-      assignments.exists(_.guideProbe == Canopus.Wfs.cwfs3) should beTrue
-      val cwfs3 = assignments.find(_.guideProbe == Canopus.Wfs.cwfs3).map(_.guideStar)
+      assignments.exists(_.guideProbe == CanopusWfs.cwfs1) should beTrue
+      val cwfs1 = assignments.find(_.guideProbe == CanopusWfs.cwfs1).map(_.guideStar)
+      assignments.exists(_.guideProbe == CanopusWfs.cwfs2) should beTrue
+      val cwfs2 = assignments.find(_.guideProbe == CanopusWfs.cwfs2).map(_.guideStar)
+      assignments.exists(_.guideProbe == CanopusWfs.cwfs3) should beTrue
+      val cwfs3 = assignments.find(_.guideProbe == CanopusWfs.cwfs3).map(_.guideStar)
       cwfs1.map(_.name) should beSome("208-152095")
       cwfs2.map(_.name) should beSome("208-152215")
       cwfs3.map(_.name) should beSome("208-152039")
@@ -422,19 +421,19 @@ class GemsStrategySpec extends Specification {
       val newCtx = selection.map(_.applyTo(ctx)).getOrElse(ctx)
       val analysis = gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow())
       analysis.collect {
-        case AgsAnalysis.Usable(Canopus.Wfs.cwfs1, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq) if st.some == cwfs1 => Canopus.Wfs.cwfs1
-        case AgsAnalysis.Usable(Canopus.Wfs.cwfs2, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq) if st.some == cwfs2 => Canopus.Wfs.cwfs2
-        case AgsAnalysis.Usable(Canopus.Wfs.cwfs3, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq) if st.some == cwfs3 => Canopus.Wfs.cwfs3
-      } should beEqualTo(List(Canopus.Wfs.cwfs1, Canopus.Wfs.cwfs2, Canopus.Wfs.cwfs3))
+        case AgsAnalysis.Usable(CanopusWfs.cwfs1, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq) if st.some == cwfs1 => CanopusWfs.cwfs1
+        case AgsAnalysis.Usable(CanopusWfs.cwfs2, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq) if st.some == cwfs2 => CanopusWfs.cwfs2
+        case AgsAnalysis.Usable(CanopusWfs.cwfs3, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq) if st.some == cwfs3 => CanopusWfs.cwfs3
+      } should beEqualTo(List(CanopusWfs.cwfs1, CanopusWfs.cwfs2, CanopusWfs.cwfs3))
       // Analyze per probe
       cwfs1.map { s =>
-        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), Canopus.Wfs.cwfs1, s).contains(AgsAnalysis.Usable(Canopus.Wfs.cwfs1, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq))
+        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), CanopusWfs.cwfs1, s).contains(AgsAnalysis.Usable(CanopusWfs.cwfs1, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq))
       } should beSome(true)
       cwfs2.map { s =>
-        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), Canopus.Wfs.cwfs2, s).contains(AgsAnalysis.Usable(Canopus.Wfs.cwfs2, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq))
+        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), CanopusWfs.cwfs2, s).contains(AgsAnalysis.Usable(CanopusWfs.cwfs2, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq))
       } should beSome(true)
       cwfs3.map { s =>
-        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), Canopus.Wfs.cwfs3, s).contains(AgsAnalysis.Usable(Canopus.Wfs.cwfs3, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq))
+        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), CanopusWfs.cwfs3, s).contains(AgsAnalysis.Usable(CanopusWfs.cwfs3, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq))
       } should beSome(true)
 
       // Test estimate
@@ -461,12 +460,12 @@ class GemsStrategySpec extends Specification {
       val assignments = ~selection.map(_.assignments)
       assignments should be size 3
 
-      assignments.exists(_.guideProbe == Canopus.Wfs.cwfs1) should beTrue
-      val cwfs1 = assignments.find(_.guideProbe == Canopus.Wfs.cwfs1).map(_.guideStar)
-      assignments.exists(_.guideProbe == Canopus.Wfs.cwfs2) should beTrue
-      val cwfs2 = assignments.find(_.guideProbe == Canopus.Wfs.cwfs2).map(_.guideStar)
-      assignments.exists(_.guideProbe == Canopus.Wfs.cwfs3) should beTrue
-      val cwfs3 = assignments.find(_.guideProbe == Canopus.Wfs.cwfs3).map(_.guideStar)
+      assignments.exists(_.guideProbe == CanopusWfs.cwfs1) should beTrue
+      val cwfs1 = assignments.find(_.guideProbe == CanopusWfs.cwfs1).map(_.guideStar)
+      assignments.exists(_.guideProbe == CanopusWfs.cwfs2) should beTrue
+      val cwfs2 = assignments.find(_.guideProbe == CanopusWfs.cwfs2).map(_.guideStar)
+      assignments.exists(_.guideProbe == CanopusWfs.cwfs3) should beTrue
+      val cwfs3 = assignments.find(_.guideProbe == CanopusWfs.cwfs3).map(_.guideStar)
       cwfs1.map(_.name) should beSome("289-128909")
       cwfs2.map(_.name) should beSome("289-128878")
       cwfs3.map(_.name) should beSome("289-128908")
@@ -488,20 +487,20 @@ class GemsStrategySpec extends Specification {
       val newCtx = selection.map(_.applyTo(ctx)).getOrElse(ctx)
       val analysis = gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow())
       analysis.collect {
-        case AgsAnalysis.Usable(Canopus.Wfs.cwfs1, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq) if st.some == cwfs1 => Canopus.Wfs.cwfs1
-        case AgsAnalysis.Usable(Canopus.Wfs.cwfs2, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq) if st.some == cwfs2 => Canopus.Wfs.cwfs2
-        case AgsAnalysis.NotReachable(Canopus.Wfs.cwfs3, st) if st.some == cwfs3                                                 => Canopus.Wfs.cwfs3
-      } should beEqualTo(List(Canopus.Wfs.cwfs1, Canopus.Wfs.cwfs2, Canopus.Wfs.cwfs3))
+        case AgsAnalysis.Usable(CanopusWfs.cwfs1, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq) if st.some == cwfs1 => CanopusWfs.cwfs1
+        case AgsAnalysis.Usable(CanopusWfs.cwfs2, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq) if st.some == cwfs2 => CanopusWfs.cwfs2
+        case AgsAnalysis.Usable(CanopusWfs.cwfs3, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq) if st.some == cwfs3 => CanopusWfs.cwfs3
+      } should beEqualTo(List(CanopusWfs.cwfs1, CanopusWfs.cwfs2, CanopusWfs.cwfs3))
 
       // Analyze per probe
       cwfs1.map { s =>
-        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), Canopus.Wfs.cwfs1, s).contains(AgsAnalysis.Usable(Canopus.Wfs.cwfs1, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq))
+        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), CanopusWfs.cwfs1, s).contains(AgsAnalysis.Usable(CanopusWfs.cwfs1, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq))
       } should beSome(true)
       cwfs2.map { s =>
-        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), Canopus.Wfs.cwfs2, s).contains(AgsAnalysis.Usable(Canopus.Wfs.cwfs2, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq))
+        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), CanopusWfs.cwfs2, s).contains(AgsAnalysis.Usable(CanopusWfs.cwfs2, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq))
       } should beSome(true)
       cwfs3.map { s =>
-        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), Canopus.Wfs.cwfs3, s).contains(AgsAnalysis.NotReachable(Canopus.Wfs.cwfs3, s))
+        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), CanopusWfs.cwfs3, s).contains(AgsAnalysis.Usable(CanopusWfs.cwfs3, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq))
       } should beSome(true)
 
       // Test estimate
@@ -528,9 +527,9 @@ class GemsStrategySpec extends Specification {
       val assignments = ~selection.map(_.assignments)
       assignments should be size 3
 
-      val cwfs1 = assignments.find(_.guideProbe == Canopus.Wfs.cwfs1).map(_.guideStar)
-      val cwfs2 = assignments.find(_.guideProbe == Canopus.Wfs.cwfs2).map(_.guideStar)
-      val cwfs3 = assignments.find(_.guideProbe == Canopus.Wfs.cwfs3).map(_.guideStar)
+      val cwfs1 = assignments.find(_.guideProbe == CanopusWfs.cwfs1).map(_.guideStar)
+      val cwfs2 = assignments.find(_.guideProbe == CanopusWfs.cwfs2).map(_.guideStar)
+      val cwfs3 = assignments.find(_.guideProbe == CanopusWfs.cwfs3).map(_.guideStar)
       cwfs1.map(_.name) should beSome("202-067216")
       cwfs2.map(_.name) should beSome("202-067200")
       cwfs3.map(_.name) should beSome("201-071218")
@@ -545,19 +544,19 @@ class GemsStrategySpec extends Specification {
       val newCtx = selection.map(_.applyTo(ctx)).getOrElse(ctx)
       // Analyze all the probes at once
       gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow()).collect {
-        case AgsAnalysis.Usable(Canopus.Wfs.cwfs1, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq) if st.some == cwfs1 => Canopus.Wfs.cwfs1
-        case AgsAnalysis.Usable(Canopus.Wfs.cwfs2, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq) if st.some == cwfs2 => Canopus.Wfs.cwfs2
-        case AgsAnalysis.Usable(Canopus.Wfs.cwfs3, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq) if st.some == cwfs3 => Canopus.Wfs.cwfs3
-      } should beEqualTo(List(Canopus.Wfs.cwfs1, Canopus.Wfs.cwfs2, Canopus.Wfs.cwfs3))
+        case AgsAnalysis.Usable(CanopusWfs.cwfs1, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq) if st.some == cwfs1 => CanopusWfs.cwfs1
+        case AgsAnalysis.Usable(CanopusWfs.cwfs2, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq) if st.some == cwfs2 => CanopusWfs.cwfs2
+        case AgsAnalysis.Usable(CanopusWfs.cwfs3, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq) if st.some == cwfs3 => CanopusWfs.cwfs3
+      } should beEqualTo(List(CanopusWfs.cwfs1, CanopusWfs.cwfs2, CanopusWfs.cwfs3))
       // Analyze per probe
       cwfs1.map { s =>
-        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), Canopus.Wfs.cwfs1, s).contains(AgsAnalysis.Usable(Canopus.Wfs.cwfs1, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq))
+        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), CanopusWfs.cwfs1, s).contains(AgsAnalysis.Usable(CanopusWfs.cwfs1, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq))
       } should beSome(true)
       cwfs2.map { s =>
-        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), Canopus.Wfs.cwfs2, s).contains(AgsAnalysis.Usable(Canopus.Wfs.cwfs2, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq))
+        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), CanopusWfs.cwfs2, s).contains(AgsAnalysis.Usable(CanopusWfs.cwfs2, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq))
       } should beSome(true)
       cwfs3.map { s =>
-        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), Canopus.Wfs.cwfs3, s).contains(AgsAnalysis.Usable(Canopus.Wfs.cwfs3, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq))
+        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), CanopusWfs.cwfs3, s).contains(AgsAnalysis.Usable(CanopusWfs.cwfs3, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq))
       } should beSome(true)
 
       // Test estimate
@@ -584,9 +583,9 @@ class GemsStrategySpec extends Specification {
       val assignments = ~selection.map(_.assignments)
       assignments should be size 3
 
-      val cwfs1 = assignments.find(_.guideProbe == Canopus.Wfs.cwfs1).map(_.guideStar)
-      val cwfs2 = assignments.find(_.guideProbe == Canopus.Wfs.cwfs2).map(_.guideStar)
-      val cwfs3 = assignments.find(_.guideProbe == Canopus.Wfs.cwfs3).map(_.guideStar)
+      val cwfs1 = assignments.find(_.guideProbe == CanopusWfs.cwfs1).map(_.guideStar)
+      val cwfs2 = assignments.find(_.guideProbe == CanopusWfs.cwfs2).map(_.guideStar)
+      val cwfs3 = assignments.find(_.guideProbe == CanopusWfs.cwfs3).map(_.guideStar)
       cwfs1.map(_.name) should beSome("202-067216")
       cwfs2.map(_.name) should beSome("202-067200")
       cwfs3.map(_.name) should beSome("201-071218")
@@ -601,19 +600,19 @@ class GemsStrategySpec extends Specification {
       val newCtx = selection.map(_.applyTo(ctx)).getOrElse(ctx)
       // Analyze all the probes at once
       gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow()).collect {
-        case AgsAnalysis.Usable(Canopus.Wfs.cwfs1, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq) if st.some == cwfs1 => Canopus.Wfs.cwfs1
-        case AgsAnalysis.Usable(Canopus.Wfs.cwfs2, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq) if st.some == cwfs2 => Canopus.Wfs.cwfs2
-        case AgsAnalysis.Usable(Canopus.Wfs.cwfs3, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq) if st.some == cwfs3 => Canopus.Wfs.cwfs3
-      } should beEqualTo(List(Canopus.Wfs.cwfs1, Canopus.Wfs.cwfs2, Canopus.Wfs.cwfs3))
+        case AgsAnalysis.Usable(CanopusWfs.cwfs1, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq) if st.some == cwfs1 => CanopusWfs.cwfs1
+        case AgsAnalysis.Usable(CanopusWfs.cwfs2, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq) if st.some == cwfs2 => CanopusWfs.cwfs2
+        case AgsAnalysis.Usable(CanopusWfs.cwfs3, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq) if st.some == cwfs3 => CanopusWfs.cwfs3
+      } should beEqualTo(List(CanopusWfs.cwfs1, CanopusWfs.cwfs2, CanopusWfs.cwfs3))
       // Analyze per probe
       cwfs1.map { s =>
-        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), Canopus.Wfs.cwfs1, s).contains(AgsAnalysis.Usable(Canopus.Wfs.cwfs1, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq))
+        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), CanopusWfs.cwfs1, s).contains(AgsAnalysis.Usable(CanopusWfs.cwfs1, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq))
       } should beSome(true)
       cwfs2.map { s =>
-        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), Canopus.Wfs.cwfs2, s).contains(AgsAnalysis.Usable(Canopus.Wfs.cwfs2, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq))
+        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), CanopusWfs.cwfs2, s).contains(AgsAnalysis.Usable(CanopusWfs.cwfs2, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq))
       } should beSome(true)
       cwfs3.map { s =>
-        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), Canopus.Wfs.cwfs3, s).contains(AgsAnalysis.Usable(Canopus.Wfs.cwfs3, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq))
+        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), CanopusWfs.cwfs3, s).contains(AgsAnalysis.Usable(CanopusWfs.cwfs3, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq))
       } should beSome(true)
 
       // Test estimate
@@ -626,8 +625,8 @@ class GemsStrategySpec extends Specification {
     val results = Await.result(TestGemsStrategy(file).search(tipTiltMode, ctx, posAngles, scala.None)(implicitly), 1.minute)
     results should be size 2
 
-    results.head.criterion.key should beEqualTo(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, Wfs.Group.instance))
-    results.head.criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, Wfs.Group.instance), CatalogSearchCriterion("Canopus Wave Front Sensor tiptilt", RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), MagnitudeConstraints(RBandsList, FaintnessConstraint(15.8), scala.Option(SaturationConstraint(8.3))), scala.Option(Offset(0.0014984027777700248.degrees[OffsetP], 0.0014984027777700248.degrees[OffsetQ])), scala.Some(Angle.zero))))
+    results.head.criterion.key should beEqualTo(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, CanopusWfs.Group.instance))
+    results.head.criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, CanopusWfs.Group.instance), CatalogSearchCriterion("Canopus Wave Front Sensor tiptilt", RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), MagnitudeConstraints(RBandsList, FaintnessConstraint(15.8), scala.Option(SaturationConstraint(8.3))), scala.Option(Offset(0.0014984027777700248.degrees[OffsetP], 0.0014984027777700248.degrees[OffsetQ])), scala.Some(Angle.zero))))
     results(1).criterion.key should beEqualTo(GemsCatalogSearchKey(GemsGuideStarType.flexure, GsaoiOdgw.Group.instance))
     results(1).criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.flexure, GsaoiOdgw.Group.instance), CatalogSearchCriterion("On-detector Guide Window flexure", RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), MagnitudeConstraints(SingleBand(MagnitudeBand.H), FaintnessConstraint(17.0), scala.Option(SaturationConstraint(8.0))), scala.Option(Offset(0.0014984027777700248.degrees[OffsetP], 0.0014984027777700248.degrees[OffsetQ])), scala.Some(Angle.zero))))
     results.head.results should be size expectedTipTiltResultsCount
@@ -638,8 +637,8 @@ class GemsStrategySpec extends Specification {
     val results = Await.result(TestGemsStrategy(file).search(tipTiltMode, ctx, posAngles, scala.None)(implicitly), 1.minute)
     results should be size 2
 
-    results.head.criterion.key should beEqualTo(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, Wfs.Group.instance))
-    results.head.criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, Wfs.Group.instance), CatalogSearchCriterion("Canopus Wave Front Sensor tiptilt", RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), MagnitudeConstraints(RBandsList, FaintnessConstraint(16.3), scala.Option(SaturationConstraint(8.8))), scala.Option(Offset(0.0014984027777700248.degrees[OffsetP], 0.0014984027777700248.degrees[OffsetQ])), scala.Some(Angle.zero))))
+    results.head.criterion.key should beEqualTo(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, CanopusWfs.Group.instance))
+    results.head.criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, CanopusWfs.Group.instance), CatalogSearchCriterion("Canopus Wave Front Sensor tiptilt", RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), MagnitudeConstraints(RBandsList, FaintnessConstraint(16.3), scala.Option(SaturationConstraint(8.8))), scala.Option(Offset(0.0014984027777700248.degrees[OffsetP], 0.0014984027777700248.degrees[OffsetQ])), scala.Some(Angle.zero))))
     results(1).criterion.key should beEqualTo(GemsCatalogSearchKey(GemsGuideStarType.flexure, GsaoiOdgw.Group.instance))
     results(1).criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.flexure, GsaoiOdgw.Group.instance), CatalogSearchCriterion("On-detector Guide Window flexure", RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), MagnitudeConstraints(SingleBand(MagnitudeBand.H), FaintnessConstraint(17.0), scala.Option(SaturationConstraint(8.0))), scala.Option(Offset(0.0014984027777700248.degrees[OffsetP], 0.0014984027777700248.degrees[OffsetQ])), scala.Some(Angle.zero))))
     results.head.results should be size expectedTipTiltResultsCount
@@ -650,8 +649,8 @@ class GemsStrategySpec extends Specification {
     val results = Await.result(TestGemsStrategy(file).search(tipTiltMode, ctx, posAngles, scala.None)(implicitly), 1.minute)
     results should be size 2
 
-    results.head.criterion.key should beEqualTo(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, Wfs.Group.instance))
-    results.head.criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, Wfs.Group.instance), CatalogSearchCriterion("Canopus Wave Front Sensor tiptilt", RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), MagnitudeConstraints(RBandsList, FaintnessConstraint(16.8), scala.Option(SaturationConstraint(9.3))), scala.Option(Offset(0.0014984027777700248.degrees[OffsetP], 0.0014984027777700248.degrees[OffsetQ])), scala.Some(Angle.zero))))
+    results.head.criterion.key should beEqualTo(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, CanopusWfs.Group.instance))
+    results.head.criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, CanopusWfs.Group.instance), CatalogSearchCriterion("Canopus Wave Front Sensor tiptilt", RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), MagnitudeConstraints(RBandsList, FaintnessConstraint(16.8), scala.Option(SaturationConstraint(9.3))), scala.Option(Offset(0.0014984027777700248.degrees[OffsetP], 0.0014984027777700248.degrees[OffsetQ])), scala.Some(Angle.zero))))
     results(1).criterion.key should beEqualTo(GemsCatalogSearchKey(GemsGuideStarType.flexure, GsaoiOdgw.Group.instance))
     results(1).criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.flexure, GsaoiOdgw.Group.instance), CatalogSearchCriterion("On-detector Guide Window flexure", RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), MagnitudeConstraints(SingleBand(MagnitudeBand.H), FaintnessConstraint(17.0), scala.Option(SaturationConstraint(8.0))), scala.Option(Offset(0.0014984027777700248.degrees[OffsetP], 0.0014984027777700248.degrees[OffsetQ])), scala.Some(Angle.zero))))
     results.head.results should be size expectedTipTiltResultsCount

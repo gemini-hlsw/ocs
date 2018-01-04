@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package edu.gemini.spModel.gemini.nifs;
 
 import edu.gemini.shared.util.immutable.*;
@@ -10,7 +6,6 @@ import edu.gemini.skycalc.Offset;
 import edu.gemini.spModel.core.BandsList;
 import edu.gemini.spModel.core.MagnitudeBand;
 import edu.gemini.spModel.core.SingleBand;
-import edu.gemini.spModel.data.AbstractDataObject;
 import edu.gemini.spModel.gemini.altair.InstAltair;
 import static edu.gemini.spModel.gemini.altair.AltairParams.FieldLens.IN;
 import edu.gemini.spModel.guide.*;

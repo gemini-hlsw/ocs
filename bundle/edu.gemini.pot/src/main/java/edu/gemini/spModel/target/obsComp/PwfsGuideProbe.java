@@ -371,5 +371,7 @@ public enum PwfsGuideProbe implements ValidatableGuideProbe, OffsetValidatingGui
     }
 
     @Override
-    public BandsList getBands() { return RBandsList.instance(); }
+    public BandsList getBands() {
+        return RBandsList.instance();
+    }
 }

@@ -19,7 +19,7 @@ import edu.gemini.spModel.data.config.ISysConfig;
 import edu.gemini.spModel.data.config.StringParameter;
 import edu.gemini.spModel.data.property.PropertyProvider;
 import edu.gemini.spModel.data.property.PropertySupport;
-import edu.gemini.spModel.gemini.gems.Canopus;
+import edu.gemini.spModel.gemini.gems.CanopusWfs;
 import edu.gemini.spModel.guide.GuideOption;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.guide.GuideProbeProvider;
@@ -424,7 +424,7 @@ public final class Gsaoi extends SPInstObsComp
 
     }
 
-    private static final String VERSION = "2011A-1";
+    private static final String VERSION = "2009A-1";
 
     public static final SPComponentType SP_TYPE =
             SPComponentType.INSTRUMENT_GSAOI;
@@ -501,6 +501,7 @@ public final class Gsaoi extends SPInstObsComp
 
     public Gsaoi() {
         super(SP_TYPE);
+        setVersion(VERSION);
         readMode = filter.readMode();
         setExposureTime(60); // REL-445
     }
@@ -684,10 +685,10 @@ public final class Gsaoi extends SPInstObsComp
     }
 
     private static boolean isGuided(Config c) {
-        for (GsaoiOdgw odgw : GsaoiOdgw.values()) {
+        for (final GsaoiOdgw odgw : GsaoiOdgw.values()) {
             if (isActive(c, odgw.getSequenceProp())) return true;
         }
-        for (Canopus.Wfs wfs : Canopus.Wfs.values()) {
+        for (final CanopusWfs wfs : CanopusWfs.values()) {
             if (isActive(c, wfs.getSequenceProp())) return true;
         }
         return false;

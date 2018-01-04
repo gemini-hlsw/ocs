@@ -1,7 +1,7 @@
 <guiders>
     <probe>edu.gemini.spModel.gemini.altair.AltairAowfsGuider</probe>
     <probe>edu.gemini.spModel.gemini.flamingos2.Flamingos2OiwfsGuideProbe</probe>
-    <probe>edu.gemini.spModel.gemini.gems.Canopus$Wfs</probe>
+    <probe>edu.gemini.spModel.gemini.gems.CanopusWfs</probe>
     <probe>edu.gemini.spModel.gemini.gmos.GmosOiwfsGuideProbe</probe>
     <probe>edu.gemini.spModel.gemini.gnirs.GnirsOiwfsGuideProbe</probe>
     <probe>edu.gemini.spModel.gemini.gnirs.GnirsOiwfsGuideProbe</probe>
