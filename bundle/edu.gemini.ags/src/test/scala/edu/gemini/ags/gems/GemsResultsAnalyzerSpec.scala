@@ -71,7 +71,7 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
       }
 
       LOGGER.info("gems results: size = " + gemsGuideStars.size)
-      gemsGuideStars should have size 252
+      gemsGuideStars should have size 228
 
       val result = gemsGuideStars.head
       result.pa.toDegrees should beCloseTo(0, 0.0001)
@@ -124,7 +124,7 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
       }
 
       LOGGER.info("gems results: size = " + gemsGuideStars.size)
-      gemsGuideStars should have size 228
+      gemsGuideStars should have size 208
 
       val result = gemsGuideStars.head
       result.pa.toDegrees should beCloseTo(0, 0.0001)
