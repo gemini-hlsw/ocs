@@ -35,7 +35,7 @@ public final class CanopusFeature extends TpeImageFeature implements PropertyWat
     private static final Color AO_FOV_COLOR = Color.RED;
 
     // Color for windows drawn around CWFS primary guide stars.
-    private static final Color GS_WINDOW_COLOR = Color.YELLOW;
+    private static final Color GS_WINDOW_COLOR = Color.MAGENTA;
 
     /**
      * Construct the feature with its name and description.
