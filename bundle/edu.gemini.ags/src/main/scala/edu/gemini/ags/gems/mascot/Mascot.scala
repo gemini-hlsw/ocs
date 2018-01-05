@@ -4,12 +4,11 @@ import java.util.logging.Logger
 
 import edu.gemini.ags.gems.mascot.util.AllPairsAndTriples
 import edu.gemini.ags.gems.mascot.util.YUtils._
+
 import MascotUtils._
 import MascotConf._
 import breeze.linalg._
-import edu.gemini.shared.util.immutable.ScalaConverters._
-import edu.gemini.spModel.core.{BandsList, MagnitudeBand, RBandsList, SiderealTarget}
-import edu.gemini.spModel.target.SPTarget
+import edu.gemini.spModel.core.{BandsList, MagnitudeBand}
 
 import scala.annotation.tailrec
 import scalaz._
@@ -25,10 +24,7 @@ object Mascot {
   type ProgressFunction = (Strehl, Int, Int) => Boolean
 
   // Default star filter
-  val defaultFilter = (_: Star) => true
-
-  // Default pre-asterism filter
-  val defaultAsterismPreFilter = (_: List[SiderealTarget]) => true
+  val defaultFilter = (s: Star) => true
 
   // Default progress callback, called for each asterism as it is calculated
   val defaultProgress:ProgressFunction = (s: Strehl, count: Int, total: Int) => {
@@ -81,29 +77,23 @@ object Mascot {
    * Finds the best asterisms for the given list of stars.
    * @param starList unfiltered list of stars from a catalog query
    * @param factor multiply strehl min, max and average by this value (depends on instrument filter: See REL-426)
-   * @param progress a function(strehl, count, total) called for each asterism as it is calculated
    * @param filter a filter function that returns false if the Star should be excluded
-   * @param asterismPreFilter a filter function that returns false if a candidate asterism should be excluded
+   * @param progress a function(strehl, count, total) called for each asterism as it is calculated
    * @return a tuple: (list of stars actually used, list of asterisms found)
    */
   def findBestAsterism(starList: List[Star],
                        factor: Double = defaultFactor,
                        progress: ProgressFunction = defaultProgress,
-                       filter: Star => Boolean = defaultFilter,
-                       asterismPreFilter: List[SiderealTarget] => Boolean = defaultAsterismPreFilter)
+                       filter: Star => Boolean = defaultFilter)
   : (List[Star], List[Strehl]) = {
     // sort by selected mag and select
     val sortedStarList = starList.sortWith((s1,s2) => s1.r < s2.r)
     val filteredStarList = selectStarsOnMag(sortedStarList).filter(filter)
-    val ns = filteredStarList.length
 
-    // Create all candidate asterisms, filtering out those that are inadmissible.
-    val sings = filteredStarList.filter(s => asterismPreFilter(List(s.target)))
-    val trips = AllPairsAndTriples.allTrips(filteredStarList).
-      filter { case (s1,os2, os3) => asterismPreFilter(List(s1.target.some, os2.map(_.target), os3.map(_.target)).flatten) }
-    val pairs = AllPairsAndTriples.allPairs(filteredStarList).
-      filter { case (s1, os2) => asterismPreFilter(List(s1.target.some, os2.map(_.target)).flatten) }
-    val total = trips.length + pairs.length + sings.length
+    val ns = filteredStarList.length
+    val trips = AllPairsAndTriples.allTrips(filteredStarList)
+    val pairs = AllPairsAndTriples.allPairs(filteredStarList)
+    val total = trips.length + pairs.length + ns
 
     Log.info(s"Mascot.findBestAsterism: input stars: $ns, total asterisms: $total")
 
@@ -133,7 +123,7 @@ object Mascot {
     def go(): List[Strehl] = {
       val triples = if (ns >= 3) doStars(Nil, 1, trips) else AsterismSearchStage(Nil, 1, continue = true)
       val doubles = if (ns >= 2 && triples.continue) doStars(triples.stars, triples.count, pairs.map(t => (t._1, t._2, None))) else triples
-      val singles = if (ns >= 1 && doubles.continue) doStars(doubles.stars, doubles.count, sings.map(t => (t, None, None))) else doubles
+      val singles = if (ns >= 1 && doubles.continue) doStars(doubles.stars, doubles.count, filteredStarList.map(t => (t, None, None))) else doubles
       singles.stars
     }
 

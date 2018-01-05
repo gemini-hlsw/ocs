@@ -5,7 +5,9 @@ import edu.gemini.skycalc.Angle;
 import edu.gemini.skycalc.CoordinateDiff;
 import edu.gemini.skycalc.Coordinates;
 import edu.gemini.skycalc.Offset;
-import edu.gemini.spModel.core.*;
+import edu.gemini.spModel.core.Angle$;
+import edu.gemini.spModel.core.BandsList;
+import edu.gemini.spModel.core.RBandsList;
 import edu.gemini.spModel.gems.GemsGuideProbeGroup;
 import edu.gemini.spModel.guide.*;
 import edu.gemini.spModel.obs.context.ObsContext;
@@ -14,7 +16,6 @@ import edu.gemini.spModel.target.env.GuideProbeTargets;
 
 import java.awt.geom.*;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Canopus WFS guide probes.
@@ -37,52 +38,25 @@ public enum CanopusWfs implements GuideProbe, ValidatableGuideProbe, OffsetValid
     }
 
     /**
-     * Gets the group of Canopus guide probes and their properties.
+     * Gets the group of Canopus guide stars.
      */
     public enum Group implements GemsGuideProbeGroup {
         instance;
 
-        @Override
         public Angle getRadiusLimits() {
             return new Angle(1, Angle.Unit.ARCMINS);
         }
 
-        @Override
         public String getKey() {
             return "CWFS";
         }
 
-        @Override
         public String getDisplayName() {
             return "Canopus Wave Front Sensor";
         }
 
-        @Override
         public Collection<ValidatableGuideProbe> getMembers() {
             return Arrays.asList(CanopusWfs.values());
-        }
-
-        // Stars selected for CWFS must be at most mag 3 apart.
-        public static final double MAGNITUDE_DIFFERENCE_LIMIT = 3.0;
-
-        @Override
-        public boolean asterismPreFilter(final ImList<SiderealTarget> targets) {
-            return checkAsterismMagnitude(targets);
-        }
-
-        public boolean checkAsterismMagnitude(final ImList<SiderealTarget> targets) {
-            final ImList<Double> sortedMags = extractRMagnitudes(targets);
-            if (sortedMags.isEmpty() || sortedMags.size() != targets.size())
-                return false;
-            return (sortedMags.size() == 1) || (sortedMags.last() - sortedMags.head() <= MAGNITUDE_DIFFERENCE_LIMIT);
-        }
-
-        public ImList<Double> extractRMagnitudes(final ImList<SiderealTarget> targets) {
-            return targets
-                    .map(t -> ImOption.fromScalaOpt(RBandsList.extract(t)))
-                    .filter(Option::isDefined)
-                    .map(m -> m.getValue().value())
-                    .sort(Comparator.naturalOrder());
         }
     }
 

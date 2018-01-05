@@ -1,6 +1,5 @@
 package edu.gemini.ags.gems.mascot
 
-import edu.gemini.spModel.gems.GemsGuideProbeGroup
 import edu.gemini.spModel.obs.context.ObsContext
 
 /**
@@ -14,8 +13,5 @@ trait GuideStarType {
    * @param star describes the star's position and magnitudes
    */
   def filter(ctx: ObsContext, magLimits: MagLimits, star: Star): Boolean
-
-  // Get the group of guiders associated with this guide star type.
-  def guideGroup: GemsGuideProbeGroup
 }
 

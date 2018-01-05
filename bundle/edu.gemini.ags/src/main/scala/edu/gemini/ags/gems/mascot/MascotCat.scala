@@ -7,8 +7,6 @@ import edu.gemini.spModel.core.BandsList
 import edu.gemini.spModel.core.SiderealTarget
 import java.util.concurrent.CancellationException
 
-import edu.gemini.spModel.target.SPTarget
-
 /**
  *
  */
@@ -51,11 +49,10 @@ object MascotCat {
                        centerRA: Double, centerDec: Double,
                        factor: Double = Mascot.defaultFactor,
                        progress: ProgressFunction = defaultProgress,
-                       filter: Star => Boolean = Mascot.defaultFilter,
-                       asterismPreFilter: List[SiderealTarget] => Boolean = Mascot.defaultAsterismPreFilter)
+                       filter: Star => Boolean = Mascot.defaultFilter)
   : (List[Star], List[Strehl]) = {
     val starList = list.map(Star.makeStar(_, centerRA, centerDec))
-    Mascot.findBestAsterism(starList, factor, progress, filter, asterismPreFilter)
+    Mascot.findBestAsterism(starList, factor, progress, filter)
   }
 
   case class StrehlResults(starList: List[Star], strehlList: List[Strehl])
@@ -73,8 +70,7 @@ object MascotCat {
   def findBestAsterismInTargetsList(javaList: List[SiderealTarget],
                                     centerRA: Double, centerDec: Double,
                                     band: BandsList, factor: Double,
-                                    mascotProgress: Option[MascotProgress],
-                                    asterismPreFilter: List[SiderealTarget] => Boolean): StrehlResults = {
+                                    mascotProgress: Option[MascotProgress]): StrehlResults = {
     val progress:ProgressFunction = (s: Strehl, count: Int, total: Int) => {
       defaultProgress(s, count, total)
       mascotProgress.foreach { p =>
@@ -85,7 +81,7 @@ object MascotCat {
       true
     }
 
-    val (starList, strehlList) = findBestAsterism(javaList, centerRA, centerDec, factor, progress, Mascot.defaultFilter, asterismPreFilter)
+    val (starList, strehlList) = findBestAsterism(javaList, centerRA, centerDec, factor, progress, Mascot.defaultFilter)
     StrehlResults(starList, strehlList)
   }
 
@@ -102,14 +98,13 @@ object MascotCat {
   def findBestAsterismInTargetsList(javaList: List[SiderealTarget],
                                     centerRA: Double, centerDec: Double,
                                     band: BandsList, factor: Double,
-                                    shouldContinue: Strehl => Boolean,
-                                    asterismPreFilter: List[SiderealTarget] => Boolean): StrehlResults = {
+                                    shouldContinue: Strehl => Boolean): StrehlResults = {
     val progress:ProgressFunction = (s: Strehl, count: Int, total: Int) => {
       defaultProgress(s, count, total)
       shouldContinue(s)
     }
 
-    val (starList, strehlList) = findBestAsterism(javaList, centerRA, centerDec, factor, progress, Mascot.defaultFilter, asterismPreFilter)
+    val (starList, strehlList) = findBestAsterism(javaList, centerRA, centerDec, factor, progress, Mascot.defaultFilter)
     StrehlResults(starList, strehlList)
   }
 

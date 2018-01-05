@@ -61,12 +61,10 @@ object GemsResultsAnalyzer {
     obsContext.getBaseCoordinates.asScalaOpt.map(_.toNewModel).map { base =>
       // gemsGuideStars needs to be mutable to support updates from inside mascot
       val gemsGuideStars = TiptiltFlexurePair.pairs(catalogSearch.asScala.toList).foldLeft(List.empty[GemsGuideStars]) { (gemsGuideStars, pair) =>
-        // tiptiltGroup and flexureGroup are each one of CanopusWfs.Group and GsaoiOdgw.group.
         val tiptiltGroup = pair.tiptiltResults.criterion.key.group
         val flexureGroup = pair.flexureResults.criterion.key.group
         val tiptiltTargetsList = filter(obsContext, pair.tiptiltResults.results, tiptiltGroup, posAngles.asScala.toSet)
         val flexureTargetsList = filter(obsContext, pair.flexureResults.results, flexureGroup, posAngles.asScala.toSet)
-        val tiptiltGroupPreAsterismFilter: (List[SiderealTarget] => Boolean) = lst => tiptiltGroup.asterismPreFilter(lst.asImList)
 
         if (tiptiltTargetsList.nonEmpty && flexureTargetsList.nonEmpty) {
           // tell the UI to update
@@ -75,7 +73,7 @@ object GemsResultsAnalyzer {
           }
           val band = bandpass(tiptiltGroup, obsContext.getInstrument)
           val factor = strehlFactor(new Some[ObsContext](obsContext))
-          val asterisms = MascotCat.findBestAsterismInTargetsList(tiptiltTargetsList, base.ra.toAngle.toDegrees, base.dec.toDegrees, band, factor, mascotProgress, tiptiltGroupPreAsterismFilter)
+          val asterisms = MascotCat.findBestAsterismInTargetsList(tiptiltTargetsList, base.ra.toAngle.toDegrees, base.dec.toDegrees, band, factor, mascotProgress)
           val analyzedStars = asterisms.strehlList.map(analyzeAtAngles(obsContext, posAngles.asScala.toSet, _, flexureTargetsList, flexureGroup, tiptiltGroup))
           gemsGuideStars ::: analyzedStars.flatten
         } else {
@@ -109,7 +107,6 @@ object GemsResultsAnalyzer {
           val flexureGroup = pair.flexureResults.criterion.key.group
           val tiptiltTargetsList = filter(obsContext, pair.tiptiltResults.results, tiptiltGroup, posAngles)
           val flexureTargetsList = filter(obsContext, pair.flexureResults.results, flexureGroup, posAngles)
-          val tiptiltGroupPreAsterismFilter = (lst: List[SiderealTarget]) => tiptiltGroup.asterismPreFilter(lst.asImList)
 
           if (tiptiltTargetsList.nonEmpty && flexureTargetsList.nonEmpty) {
             // Find asterisms with Mascot
@@ -118,7 +115,7 @@ object GemsResultsAnalyzer {
 
             // tiptiltTargetsList should only contain Canopus WFS stars, so asterisms should only consist of these.
             // Thus shouldContinue will only be called for Canopus WFS stars.
-            val asterisms = MascotCat.findBestAsterismInTargetsList(tiptiltTargetsList, base.ra.toAngle.toDegrees, base.dec.toDegrees, band, factor, shouldContinue, tiptiltGroupPreAsterismFilter)
+            val asterisms = MascotCat.findBestAsterismInTargetsList(tiptiltTargetsList, base.ra.toAngle.toDegrees, base.dec.toDegrees, band, factor, shouldContinue)
             val analyzedStars = asterisms.strehlList.map(analyzeAtAngles(obsContext, posAngles, _, flexureTargetsList, flexureGroup, tiptiltGroup))
             stars ::: analyzedStars.flatten
           } else {

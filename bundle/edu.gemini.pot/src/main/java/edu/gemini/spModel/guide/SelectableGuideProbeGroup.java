@@ -1,3 +1,7 @@
+//
+// $
+//
+
 package edu.gemini.spModel.guide;
 
 import edu.gemini.skycalc.Coordinates;
