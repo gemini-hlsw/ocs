@@ -12,10 +12,9 @@ import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.GuideProbeTargets;
 
-import java.awt.*;
 import java.awt.geom.*;
 import java.util.*;
-import java.util.stream.Collectors;
+import java.util.List;
 
 /**
  * Canopus WFS guide probes.
@@ -32,14 +31,10 @@ public enum CanopusWfs implements GuideProbe, ValidatableGuideProbe, OffsetValid
         patrolField = new PatrolField(AO_PORT);
     }
 
-    // According to NGS2, guide stars should be centered in 2" or 4" windows. We select 4".
-    private static final double GS_WINDOW_SIZE_ARCSEC = 4.0;
-    private static final Area   GS_WINDOW;
-
-    static {
-        final Shape GS_WINDOW_SHAPE = new Rectangle2D.Double(-GS_WINDOW_SIZE_ARCSEC / 2.0, -GS_WINDOW_SIZE_ARCSEC / 2.0, GS_WINDOW_SIZE_ARCSEC, GS_WINDOW_SIZE_ARCSEC);
-        GS_WINDOW = new Area(GS_WINDOW_SHAPE);
-    }
+    // According to NGS2, guide stars should be centered in square 4" windows.
+    private static final double      GS_WINDOW_SIZE_ARCSEC = 4.0;
+    private static final Rectangle2D GS_WINDOW_SHAPE       = new Rectangle2D.Double(-GS_WINDOW_SIZE_ARCSEC / 2.0, -GS_WINDOW_SIZE_ARCSEC / 2.0, GS_WINDOW_SIZE_ARCSEC, GS_WINDOW_SIZE_ARCSEC);
+    private static final Area        GS_WINDOW             = new Area(GS_WINDOW_SHAPE);
 
     @Override
     public BandsList getBands() {
@@ -80,14 +75,64 @@ public enum CanopusWfs implements GuideProbe, ValidatableGuideProbe, OffsetValid
             return checkAsterismMagnitude(targets);
         }
 
-        public boolean checkAsterismMagnitude(final ImList<SiderealTarget> targets) {
+        // Ensure that targets are not more than MAGNITUDE_DIFFERENCE_LIMIT apart in magnitude in R.
+        public static boolean checkAsterismMagnitude(final ImList<SiderealTarget> targets) {
             final ImList<Double> sortedMags = extractRMagnitudes(targets);
             if (sortedMags.isEmpty() || sortedMags.size() != targets.size())
                 return false;
             return (sortedMags.size() == 1) || (sortedMags.last() - sortedMags.head() <= MAGNITUDE_DIFFERENCE_LIMIT);
         }
 
-        public ImList<Double> extractRMagnitudes(final ImList<SiderealTarget> targets) {
+        // Guide windows cannot overlap.
+        // As these are square, we need a position angle to determine if they overlap or not.
+        @Override
+        public boolean asterismFilter(final ObsContext ctx, final ImList<SiderealTarget> targets) {
+            return findOverlappingGuideWindows(ctx, targets).isEmpty();
+        }
+
+        // Given an ObsContext (we need a position angle) and a list of targets, find the list of pairs of targets
+        // whose guide windows overlap.
+        public static ImList<Pair<SiderealTarget, SiderealTarget>> findOverlappingGuideWindows(final ObsContext ctx, final ImList<SiderealTarget> targets) {
+            final double posAngle = ctx.getPositionAngle().toRadians();
+
+            // Check each pair of guide windows to make sure they do not overlap.
+            final List<Pair<SiderealTarget, SiderealTarget>> overlappingGuideWindows = new ArrayList<>(3);
+
+            // Must use indices here to avoid double pairs of the form (t1,t2) and (t2,t1).
+            for (int i=0; i < targets.size(); ++i) {
+                final SiderealTarget t1 = targets.get(i);
+                final Area a1 = windowFromCoordinates(posAngle, t1.coordinates());
+                for (int j=i+1; j < targets.size(); ++j) {
+                    final SiderealTarget t2 = targets.get(j);
+                    final Area a2 = windowFromCoordinates(posAngle, t2.coordinates());
+
+                    // To check overlap, take a1 xor a2 and compare to a1 union a2.
+                    // If they are not equal, they overlap.
+                    final Area xorArea = (Area) a1.clone();
+                    xorArea.exclusiveOr(a2);
+
+                    final Area combinedArea = (Area) a1.clone();
+                    combinedArea.add(a2);
+
+                    if (!xorArea.equals(combinedArea))
+                        overlappingGuideWindows.add(new Pair<>(t1, t2));
+                }
+            }
+
+            return DefaultImList.create(overlappingGuideWindows);
+        }
+
+        // Convenience method to create a transformed guide window from a position angle and a set of coordinates.
+        private static Area windowFromCoordinates(final double posAngle, final edu.gemini.spModel.core.Coordinates c) {
+            final AffineTransform trans = AffineTransform.getTranslateInstance(
+                    c.ra().toAngle().toArcsecs(),
+                    c.dec().toAngle().toArcsecs());
+            trans.rotate(-posAngle);
+            return new Area(trans.createTransformedShape(GS_WINDOW_SHAPE));
+        }
+
+        // Convenience method to extract the R magnitudes from a list of targets.
+        public static ImList<Double> extractRMagnitudes(final ImList<SiderealTarget> targets) {
             return targets
                     .map(t -> ImOption.fromScalaOpt(RBandsList.extract(t)))
                     .filter(Option::isDefined)
@@ -196,6 +241,8 @@ public enum CanopusWfs implements GuideProbe, ValidatableGuideProbe, OffsetValid
      */
     private static boolean areProbesInRangeWithOffsets(final Coordinates coords, final ObsContext ctx, final Set<Offset> offsets) {
         return ctx.getBaseCoordinates().map(bcs -> {
+            final Area offsetInt = offsetIntersection(ctx, offsets);
+
             // Calculate the difference between the coordinate and the observation's base position.
             final CoordinateDiff diff = new CoordinateDiff(bcs, coords);
 
@@ -204,7 +251,15 @@ public enum CanopusWfs implements GuideProbe, ValidatableGuideProbe, OffsetValid
             final double p = -dis.p().toArcsecs().getMagnitude();
             final double q = -dis.q().toArcsecs().getMagnitude();
 
-            return offsetIntersection(ctx, offsets).contains(p, q);
+            // We need the window around the coordinates to be fully in the Canopus patrol field.
+            // Calculate the patrol field + the window, and ensure it is the same as the patrol field.
+            final AffineTransform trans = AffineTransform.getTranslateInstance(p, q);
+            trans.rotate(-ctx.getPositionAngle().toRadians());
+
+            final Area offsetIntWithWindow = (Area) offsetInt.clone();
+            offsetIntWithWindow.add(new Area(trans.createTransformedShape(GS_WINDOW_SHAPE)));
+
+            return offsetInt.equals(offsetIntWithWindow);
         }).getOrElse(false);
     }
 
