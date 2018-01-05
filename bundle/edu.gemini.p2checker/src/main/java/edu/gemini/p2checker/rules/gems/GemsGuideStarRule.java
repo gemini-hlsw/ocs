@@ -107,7 +107,6 @@ public final class GemsGuideStarRule implements IRule {
 
             // Extract the CWFS targets and count them.
             GuideGroup primaryGuideGroup = env.getPrimaryGuideGroup();
-            //final List<SiderealTarget> cwfsTargets = new ArrayList<>();
             final Map<SiderealTarget,CanopusWfs> cwfsTargets = new HashMap<>();
             int cwfs = 0;
             for (final CanopusWfs canwfs : CanopusWfs.values()) {
