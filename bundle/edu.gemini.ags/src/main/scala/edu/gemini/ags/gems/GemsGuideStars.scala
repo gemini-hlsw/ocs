@@ -106,7 +106,7 @@ case class GemsGuideStars(pa: Angle, tiptiltGroup: GemsGuideProbeGroup, strehl: 
     }
   }
 
-  // Returns true if cwfs3 is the brightest star in the Caanopus asterism
+  // Returns true if cwfs3 is the brightest star in the Canopus asterism
   private def cwfs3IsBrightest: Boolean = {
     val cwfs1 = getRLikeMag(guideGroup.get(CanopusWfs.cwfs1).asScalaOpt)
     val cwfs2 = getRLikeMag(guideGroup.get(CanopusWfs.cwfs2).asScalaOpt)

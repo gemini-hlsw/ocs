@@ -8,20 +8,16 @@ import edu.gemini.spModel.core.SiderealTarget
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.pot.ModelConverters._
 import edu.gemini.shared.util.immutable.ScalaConverters._
+import edu.gemini.spModel.target.SPTarget
 
-import scalaz._, Scalaz._
+import scalaz._
+import Scalaz._
 
 /**
  * Provides methods to find the best ODGW or CWFS guide stars using the Mascot Strehl algorithm
  */
 object MascotGuideStar {
   val Log = Logger.getLogger(MascotGuideStar.getClass.getSimpleName)
-
-  /**Type for CWFS guide stars */
-  val CWFS = new CwfsGuideStar
-
-  /**Type for ODGW guide stars */
-  val ODGW = new OdgwGuideStar
 
   // default magnitude limits
   val defaultMagLimits = MagLimits()
@@ -57,19 +53,20 @@ object MascotGuideStar {
                                     progress: ProgressFunction = Mascot.defaultProgress)
   : List[(List[Strehl], Double, Double, Double)] =
     ctx.getBaseCoordinates.asScalaOpt.foldMap { base =>
-    val center = base.toNewModel
-    val simple = posAngleTolerance == 0.0 && basePosTolerance == 0.0
-    val guideStarFilter = guideStarType.filter(ctx, magLimits, _: Star)
-    // If no tolerances were given, we can do more filtering up front
-    val filter = if (simple) guideStarFilter else magLimits.filter _
-    val (_, strehlList) = MascotCat.findBestAsterism(queryResult, center.ra.toAngle.toDegrees, center.dec.toAngle.toDegrees, factor, progress, filter)
-    if (simple) {
-      val basePos = base
-      List((strehlList, ctx.getInstrument.getPosAngleDegrees, basePos.getRaDeg, basePos.getDecDeg))
-    } else {
-      asterismFilter(ctx.getInstrument.getPosAngleDegrees, center, guideStarFilter, posAngleTolerance, basePosTolerance, strehlList)
+      val center = base.toNewModel
+      val simple = posAngleTolerance == 0.0 && basePosTolerance == 0.0
+      val guideStarFilter = guideStarType.filter(ctx, magLimits, _: Star)
+      val asterismPreFilter = (lst: List[SiderealTarget]) => guideStarType.guideGroup.asterismPreFilter(lst.asImList)
+      // If no tolerances were given, we can do more filtering up front
+      val filter = if (simple) guideStarFilter else magLimits.filter _
+      val (_, strehlList) = MascotCat.findBestAsterism(queryResult, center.ra.toAngle.toDegrees, center.dec.toAngle.toDegrees, factor, progress, filter, asterismPreFilter)
+      if (simple) {
+        val basePos = base
+        List((strehlList, ctx.getInstrument.getPosAngleDegrees, basePos.getRaDeg, basePos.getDecDeg))
+      } else {
+        asterismFilter(ctx.getInstrument.getPosAngleDegrees, center, guideStarFilter, posAngleTolerance, basePosTolerance, strehlList)
+      }
     }
-  }
 
 
   /**
