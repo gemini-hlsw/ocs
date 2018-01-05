@@ -7,6 +7,7 @@ import edu.gemini.itc.base.SpectroscopyResult;
 import edu.gemini.itc.shared.*;
 import edu.gemini.itc.web.servlets.FilesServlet;
 import edu.gemini.itc.web.servlets.ServerInfo;
+import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.spModel.config2.Config;
 import edu.gemini.spModel.core.PointSource$;
 import edu.gemini.spModel.core.UniformSource$;
@@ -232,7 +233,7 @@ public abstract class PrinterBase {
     public String _printOverheadTable(ItcParameters p, Config config, double readoutTimePerCoadd, PlannedTime pta, int step) {
         PlannedTime.Step s = pta.steps.get(step);
         Config conf = config;
-        Map<PlannedTime.Category, PlannedTime.CategorizedTime> m = s.times.maxTimes();
+        Map<PlannedTime.Category, ImList<PlannedTime.CategorizedTime>> m = s.times.groupTimes();
         String setupStr = "";
         String reacqStr = "";
         String secStr;
@@ -264,14 +265,15 @@ public abstract class PrinterBase {
 
         if (numReacq > 0) {
             buf.append("<tr>");
-            buf.append("<td>").append("Re-centering ").append("</td>");
+            buf.append("<td>").append("Recentering ").append("</td>");
             buf.append("<td align=\"right\"> ").append(reacqStr).append("</td>");
             buf.append("</tr>");
         }
 
         for (PlannedTime.Category c : PlannedTime.Category.values()) {
-            PlannedTime.CategorizedTime ct = m.get(c);
-            if (ct == null) continue;
+            ImList<PlannedTime.CategorizedTime> cts = m.get(c);
+            if (cts == null) continue;
+            PlannedTime.CategorizedTime ct = cts.max(Comparator.naturalOrder());
             int numOfExposures = pta.steps.size();
             int numOfOffsets = numOfExposures - 1;
             int coadds = p.observation().calculationMethod().coaddsOrElse(1);

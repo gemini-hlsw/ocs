@@ -322,9 +322,10 @@ public final class InstNIRI extends SPInstObsComp implements PropertyProvider, G
 
         // Add exposure time
         final double exp = ExposureCalculator.instance.exposureTimeSec(cur);
-        final int fast = (Integer) cur.getItemValue(FAST_MODE_KEY);
         final double secs;
-        if (fast != 0) {
+
+        if (cur.containsItem(FAST_MODE_KEY)) {
+            final int fast = (Integer) cur.getItemValue(FAST_MODE_KEY);
             secs = fast * exp * coadds;
         } else {
             secs = exp * coadds;

@@ -3,7 +3,7 @@ package edu.gemini.itc.baseline
 import edu.gemini.itc.baseline.util._
 import edu.gemini.itc.shared.{IfuRadial, GmosParameters, IfuSingle}
 import edu.gemini.spModel.core.Site
-import edu.gemini.spModel.gemini.gmos.GmosCommonType.{AmpReadMode, AmpGain, DetectorManufacturer}
+import edu.gemini.spModel.gemini.gmos.GmosCommonType.{AmpReadMode, AmpGain, DetectorManufacturer, BuiltinROI}
 import edu.gemini.spModel.gemini.gmos.GmosNorthType.{DisperserNorth, FPUnitNorth, FilterNorth}
 import edu.gemini.spModel.gemini.gmos.GmosSouthType.{DisperserSouth, FPUnitSouth, FilterSouth}
 import edu.gemini.spModel.core.WavelengthConversions._
@@ -32,6 +32,7 @@ object BaselineGmos {
       1,
       1,
       DetectorManufacturer.E2V,
+      BuiltinROI.FULL_FRAME,
       Site.GN),
     GmosParameters(
       FilterNorth.i_G0302,
@@ -44,6 +45,7 @@ object BaselineGmos {
       2,
       2,
       DetectorManufacturer.HAMAMATSU,
+      BuiltinROI.FULL_FRAME,
       Site.GN),
 
     // GMOS-S
@@ -58,6 +60,7 @@ object BaselineGmos {
       2,
       4,
       DetectorManufacturer.E2V,
+      BuiltinROI.FULL_FRAME,
       Site.GS),
     GmosParameters(
       FilterSouth.g_G0325,
@@ -70,6 +73,7 @@ object BaselineGmos {
       4,
       4,
       DetectorManufacturer.HAMAMATSU,
+      BuiltinROI.FULL_FRAME,
       Site.GS)
 
   ))
@@ -90,6 +94,7 @@ object BaselineGmos {
       1,
       1,
       DetectorManufacturer.E2V,
+      BuiltinROI.CENTRAL_SPECTRUM,
       Site.GN),
 
     // GMOS-S
@@ -104,6 +109,7 @@ object BaselineGmos {
       2,
       4,
       DetectorManufacturer.E2V,
+      BuiltinROI.CENTRAL_SPECTRUM,
       Site.GS)
 
   ))
@@ -124,6 +130,7 @@ object BaselineGmos {
       1,
       1,
       DetectorManufacturer.E2V,
+      BuiltinROI.FULL_FRAME,
       Site.GN),
     GmosParameters(
       FilterNorth.g_G0301,
@@ -136,6 +143,7 @@ object BaselineGmos {
       1,
       2,
       DetectorManufacturer.E2V,
+      BuiltinROI.FULL_FRAME,
       Site.GN),
     GmosParameters(
       FilterNorth.g_G0301,
@@ -148,6 +156,7 @@ object BaselineGmos {
       2,
       2,
       DetectorManufacturer.HAMAMATSU,
+      BuiltinROI.FULL_FRAME,
       Site.GN),
     // GMOS-S
     GmosParameters(
@@ -161,6 +170,7 @@ object BaselineGmos {
       2,
       2,
       DetectorManufacturer.HAMAMATSU,
+      BuiltinROI.FULL_FRAME,
       Site.GN)
   ))
 }

@@ -54,7 +54,13 @@ public final class CalculatablePrinter {
     private static String getTextResult(final ObservationDetails obs, final ImagingPointS2NMethodBCalculation s2n) {
         final StringBuilder sb = new StringBuilder(CalculatablePrinter.getTextResult(s2n));
 
-        sb.append(String.format("Derived number of exposures = %.0f each having %d coadds, of which %.0f", s2n.reqNumberExposures(), obs.calculationMethod().coaddsOrElse(1), s2n.reqNumberExposures() * obs.sourceFraction()));
+        sb.append(String.format("Derived number of exposures = %.0f", s2n.reqNumberExposures()));
+
+        if (obs.calculationMethod().coaddsOrElse(1) > 1) {
+            sb.append(String.format(" each having %d coadds", obs.calculationMethod().coaddsOrElse(1)));
+        }
+
+        sb.append(String.format(", of which %.0f", s2n.reqNumberExposures() * obs.sourceFraction()));
         if (s2n.reqNumberExposures() == 1)
             sb.append(" is on source.\n");
         else
