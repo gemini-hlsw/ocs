@@ -1,6 +1,5 @@
 package edu.gemini.ags.gems.mascot
 
-import edu.gemini.ags.gems.UCAC3Regression
 import edu.gemini.catalog.api.{PPMXL, RadiusConstraint, CatalogQuery}
 import edu.gemini.catalog.votable.{TestVoTableBackend, VoTableClient}
 import edu.gemini.spModel.core._
@@ -13,6 +12,9 @@ import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.shared.util.immutable.{None => JNone}
 import org.specs2.mutable.Specification
 import scala.concurrent.ExecutionContext.Implicits.global
+
+import scalaz._
+import Scalaz._
 
 /**
  * Tests the MascotGuideStar class
@@ -232,7 +234,7 @@ class MascotGuideStarSpec extends Specification {
       inst.setIssPort(IssPort.SIDE_LOOKING)
       val ctx = ObsContext.create(env, inst, JNone.instance(), SPSiteQuality.Conditions.BEST, null, null, JNone.instance())
 
-      val result = MascotGuideStar.findBestAsterismInQueryResult(UCAC3Regression.replaceRBands(loadedTargets), ctx, MascotGuideStar.CWFS, 180.0, 10.0)
+      val result = MascotGuideStar.findBestAsterismInQueryResult(MascotGuideStarSpec.replaceRBands(loadedTargets), ctx, MascotGuideStar.CWFS, 180.0, 10.0)
 
       val remoteAsterism = for {
         (strehlList, pa, ra, dec) <- result
@@ -266,5 +268,36 @@ class MascotGuideStarSpec extends Specification {
 
       Await.result(r, new FiniteDuration(30, scala.concurrent.duration.SECONDS)) must beEqualTo(asterism)
     }
+  }
+}
+
+object MascotGuideStarSpec {
+  // Converts targets with R magnitude to r', R or UC discarding duplicates
+  // It is important to discard duplicates or the same target could be assigned to different bands
+  // breaking the tests
+  private def assignRLikeMagnitudes(targets: List[SiderealTarget]):Map[String, SiderealTarget] =
+  targets.distinct.zipWithIndex.collect {
+    case (t, i) if i % 3 == 0 =>
+      val mags = t.magnitudes.collect {
+        case m if m.band === MagnitudeBand.R => m.copy(band = MagnitudeBand._r)
+        case m                               => m
+      }
+      t.copy(magnitudes = mags)
+    case (t, i) if i % 3 == 1 =>
+      val mags = t.magnitudes.collect {
+        case m if m.band === MagnitudeBand.R => m.copy(band = MagnitudeBand.UC)
+        case m                               => m
+      }
+      t.copy(magnitudes = mags)
+    case (t, _) => t
+  }.map(t => t.name -> t).toMap
+
+  private def translateTargets(targets: List[SiderealTarget], targetsMap: Map[String, SiderealTarget]) = targets.map { t =>
+    targetsMap.getOrElse(t.name, t)
+  }
+
+  // Convert targets from having band R to r', R or UC
+  def replaceRBands(targets: List[SiderealTarget]): List[SiderealTarget] = {
+    translateTargets(targets, assignRLikeMagnitudes(targets))
   }
 }
