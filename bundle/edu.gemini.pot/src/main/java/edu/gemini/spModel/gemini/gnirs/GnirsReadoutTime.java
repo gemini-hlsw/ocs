@@ -12,7 +12,7 @@ import java.util.Map;
  * @author Nicolas A. Barriga
  *         Date: Oct 21, 2010
  *
- *  2017-12-15: Modified according to measurements of 2017B data by Andy S.
+ *  2017-12-15: Modified according to the latest read time measurements.
  */
 public final class GnirsReadoutTime {
     private static final double DHS_WRITE_TIME = 8.5;
@@ -35,7 +35,7 @@ public final class GnirsReadoutTime {
 
     public static double getReadoutOverhead(ReadMode readMode, int coadds) {
         Double overheads= map.get(readMode);
-        return getDhsWriteTime() + overheads * coadds;
+        return overheads * coadds;
     }
 
     public static double getReadoutOverheadPerCoadd(ReadMode readMode) {

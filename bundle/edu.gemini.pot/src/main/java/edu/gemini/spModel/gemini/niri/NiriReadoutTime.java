@@ -14,6 +14,7 @@ import edu.gemini.shared.util.immutable.None;
 
 /**
  * Local class used to map NIRI ROI and ReadMode settings to readout times
+ *
  */
 public final class NiriReadoutTime {
 
@@ -50,7 +51,7 @@ public final class NiriReadoutTime {
     //
     // This does not include telescope offsetting overheads.
 
-    // Table has been updated according to the 2017B data measurements by Andy S.
+    // 2017-12-15: Modified according to the latest read time measurements.
 
     private static final double DHS_WRITE_TIME = 5.07;
 
