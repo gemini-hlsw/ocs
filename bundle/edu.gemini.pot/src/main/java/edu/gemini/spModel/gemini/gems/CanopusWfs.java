@@ -106,15 +106,11 @@ public enum CanopusWfs implements GuideProbe, ValidatableGuideProbe, OffsetValid
                     final SiderealTarget t2 = targets.get(j);
                     final Area a2 = windowFromCoordinates(posAngle, t2.coordinates());
 
-                    // To check overlap, take a1 xor a2 and compare to a1 union a2.
-                    // If they are not equal, they overlap.
-                    final Area xorArea = (Area) a1.clone();
-                    xorArea.exclusiveOr(a2);
-
-                    final Area combinedArea = (Area) a1.clone();
-                    combinedArea.add(a2);
-
-                    if (!xorArea.equals(combinedArea))
+                    // To check overlap, take the intersection of a1 and a2.
+                    // If it is not empty, there is an overlap.
+                    final Area intArea = (Area) a1.clone();
+                    intArea.intersect(a2);
+                    if (!intArea.isEmpty())
                         overlappingGuideWindows.add(new Pair<>(t1, t2));
                 }
             }

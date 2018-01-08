@@ -28,6 +28,7 @@ import edu.gemini.spModel.target.env.TargetEnvironment;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * A rule for checking GeMS guide star positions.
@@ -124,7 +125,18 @@ public final class GemsGuideStarRule implements IRule {
                 final SiderealTarget t2 = p._2();
                 final CanopusWfs c1 = cwfsTargets.get(t1);
                 final CanopusWfs c2 = cwfsTargets.get(t2);
-                problems.addError(PREFIX + "GuideWindowOverlapError", String.format(WindowOverlap, c1.getKey(), c2.getKey()), targetNode);
+
+                // Sort the probe names as they might be out of order since maps can only be sorted on keys.
+                final CanopusWfs sc1;
+                final CanopusWfs sc2;
+                if (c1.getKey().compareTo(c2.getKey()) < 0) {
+                    sc1 = c1;
+                    sc2 = c2;
+                } else {
+                    sc1 = c2;
+                    sc2 = c1;
+                }
+                problems.addError(PREFIX + "GuideWindowOverlapError", String.format(WindowOverlap, sc1.getKey(), sc2.getKey()), targetNode);
             });
 
             // Check for magnitude violations.
