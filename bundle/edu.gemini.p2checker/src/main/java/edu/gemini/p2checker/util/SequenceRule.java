@@ -36,6 +36,7 @@ public class SequenceRule implements IRule {
                 String classStr = (val == null) ? "" : val.getClass().getName();
                 buf.append(ie.getKey()).append(" -> ").append(val).append("\t[").append(classStr).append("]\n");
             }
+//            System.out.println(buf.toString());
             return null;
         }
     };

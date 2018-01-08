@@ -43,6 +43,9 @@ class GemsStrategySpec extends Specification {
       val target = new SPTarget(ra.toDegrees, dec.toDegrees)
       val env = TargetEnvironment.create(target)
       val inst = new Gsaoi <| {_.setPosAngle(0.0)} <| {_.setIssPort(IssPort.UP_LOOKING)}
+      val gsaoi = GsaoiOdgw.values().toList
+      val canopus = CanopusWfs.values().toList
+      val pwfs1 = List(PwfsGuideProbe.pwfs1)
 
       val ctx = ObsContext.create(env, inst, new JSome(Site.GS), SPSiteQuality.Conditions.BEST, null, new Gems, JNone.instance())
 
@@ -56,7 +59,7 @@ class GemsStrategySpec extends Specification {
       val env = TargetEnvironment.create(target)
       val inst = new Gsaoi <| {_.setPosAngle(0.0)} <| {_.setIssPort(IssPort.UP_LOOKING)}
       val conditions = SPSiteQuality.Conditions.NOMINAL.sb(SPSiteQuality.SkyBackground.ANY)
-      val ctx = ObsContext.create(env, inst, new JSome(Site.GS), conditions, null, new Gems, JNone.instance())
+      val ctx = ObsContext.create(env, inst, new JSome(Site.GS), conditions , null, new Gems, JNone.instance())
       val tipTiltMode = GemsTipTiltMode.instrument
 
       val posAngles = Set.empty[Angle]
@@ -610,72 +613,6 @@ class GemsStrategySpec extends Specification {
 
       val newCtx = selection.map(_.applyTo(ctx)).getOrElse(ctx)
       // Analyze all the probes at once
-      gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow()).collect {
-        case AgsAnalysis.Usable(CanopusWfs.cwfs1, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq) if st.some == cwfs1 => CanopusWfs.cwfs1
-        case AgsAnalysis.Usable(CanopusWfs.cwfs2, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq) if st.some == cwfs2 => CanopusWfs.cwfs2
-        case AgsAnalysis.Usable(CanopusWfs.cwfs3, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq) if st.some == cwfs3 => CanopusWfs.cwfs3
-      } should beEqualTo(List(CanopusWfs.cwfs1, CanopusWfs.cwfs2, CanopusWfs.cwfs3))
-      // Analyze per probe
-      cwfs1.map { s =>
-        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), CanopusWfs.cwfs1, s).contains(AgsAnalysis.Usable(CanopusWfs.cwfs1, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq))
-      } should beSome(true)
-      cwfs2.map { s =>
-        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), CanopusWfs.cwfs2, s).contains(AgsAnalysis.Usable(CanopusWfs.cwfs2, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq))
-      } should beSome(true)
-      cwfs3.map { s =>
-        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), CanopusWfs.cwfs3, s).contains(AgsAnalysis.Usable(CanopusWfs.cwfs3, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq))
-      } should beSome(true)
-
-      // Test estimate
-      val estimate = gemsStrategy.estimate(ctx, ProbeLimitsTable.loadOrThrow())(implicitly)
-      Await.result(estimate, 1.minute) should beEqualTo(Estimate.GuaranteedSuccess)
-    }
-
-    // Previously, before the mag 3 difference limit was imposed in guide stars in an asterism due to the NGS2 changes,
-    // MASCOT would have chosen the asterism:
-    // CWFS1: 289-128992, R=11.238
-    // CWFS2: 289-129007, R=14.006
-    // CWFS3: 289-129036, R=14.849
-    // However, this asterism is no longer valid as the maximum mag difference is 14.849 - 11.238 = 3.611 > 3.
-    "select CWFS guide stars being at maximum 3 mag difference for NGS2" in {
-      val ra = Angle.fromHMS(17, 40, 36.788).getOrElse(Angle.zero)
-      val dec = Angle.zero - Angle.fromDMS(32, 17, 45.400).getOrElse(Angle.zero)
-      val target = new SPTarget(ra.toDegrees, dec.toDegrees)
-      val env = TargetEnvironment.create(target)
-      val inst = new Gsaoi <| {_.setPosAngle(0.0)} <| {_.setIssPort(IssPort.UP_LOOKING)}
-      val conditions = SPSiteQuality.Conditions.NOMINAL.sb(SPSiteQuality.SkyBackground.ANY)
-      val ctx = ObsContext.create(env, inst, new JSome(Site.GS), conditions, null, new Gems, JNone.instance())
-      val tipTiltMode = GemsTipTiltMode.canopus
-      val posAngles = Set(ctx.getPositionAngle, Angle.zero, Angle.fromDegrees(90), Angle.fromDegrees(180), Angle.fromDegrees(270))
-
-      // Targets loaded and stored in the ngs2_mag.xml file with the query:
-      // curl -v "http://gncatalog.gemini.edu/cgi-bin/conesearch.py?CATALOG=ucac4&RA=265.153&DEC=-32.296&SR=0.028"
-      testSearchOnStandardConditions("/ngs2_mag.xml", ctx, tipTiltMode, posAngles, 12, 8)
-
-      val gemsStrategy = TestGemsStrategy("/ngs2_mag.xml")
-      val selection = Await.result(gemsStrategy.select(ctx, ProbeLimitsTable.loadOrThrow())(implicitly), 5.minutes)
-
-      selection.map(_.posAngle) should beSome(Angle.zero)
-      val assignments = ~selection.map(_.assignments)
-      assignments should be size 3
-
-      val cwfs1 = assignments.find(_.guideProbe == CanopusWfs.cwfs1).map(_.guideStar)
-      val cwfs2 = assignments.find(_.guideProbe == CanopusWfs.cwfs2).map(_.guideStar)
-      val cwfs3 = assignments.find(_.guideProbe == CanopusWfs.cwfs3).map(_.guideStar)
-      cwfs1.map(_.name) should beSome("289-129027")
-      cwfs2.map(_.name) should beSome("289-128993")
-      cwfs3.map(_.name) should beSome("289-129036")
-
-      val cwfs1x = Coordinates(RightAscension.fromAngle(Angle.fromHMS(17, 40, 38.165).getOrElse(Angle.zero)), Declination.fromAngle(Angle.zero - Angle.fromDMS(32, 17, 31.75).getOrElse(Angle.zero)).getOrElse(Declination.zero))
-      cwfs1.map(_.coordinates ~= cwfs1x) should beSome(true)
-      val cwfs2x = Coordinates(RightAscension.fromAngle(Angle.fromHMS(17, 40, 33.937).getOrElse(Angle.zero)), Declination.fromAngle(Angle.zero - Angle.fromDMS(32, 18, 7.34).getOrElse(Angle.zero)).getOrElse(Declination.zero))
-      cwfs2.map(_.coordinates ~= cwfs2x) should beSome(true)
-      val cwfs3x = Coordinates(RightAscension.fromAngle(Angle.fromHMS(17, 40, 39.243).getOrElse(Angle.zero)), Declination.fromAngle(Angle.zero - Angle.fromDMS(32, 17, 59.04).getOrElse(Angle.zero)).getOrElse(Declination.zero))
-      cwfs3.map(_.coordinates ~= cwfs3x) should beSome(true)
-
-      val newCtx = selection.map(_.applyTo(ctx)).getOrElse(ctx)
-      // Analyze all the probes at once
-      val analysis = gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow())
       gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow()).collect {
         case AgsAnalysis.Usable(CanopusWfs.cwfs1, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq) if st.some == cwfs1 => CanopusWfs.cwfs1
         case AgsAnalysis.Usable(CanopusWfs.cwfs2, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq) if st.some == cwfs2 => CanopusWfs.cwfs2
