@@ -263,18 +263,21 @@ object GemsResultsAnalyzer {
 
   // Returns the given targets list with any objects removed that are not valid in the
   // given position angle.
-  private def filter(obsContext: ObsContext, targetsList: List[SiderealTarget], group: GemsGuideProbeGroup, posAngle: Angle): List[SiderealTarget] =
-    targetsList.filter(isTargetValidInGroup(obsContext, _, group, posAngle))
+  private def filter(obsContext: ObsContext, targetsList: List[SiderealTarget], group: GemsGuideProbeGroup, posAngle: Angle): List[SiderealTarget] = {
+    val ctx = obsContext.withPositionAngle(posAngle)
+    targetsList.filter(isTargetValidInGroup(ctx, _, group))
+  }
 
   // Returns true if all the stars in the given target list are valid for the given group
-  private def areAllTargetsValidInGroup(obsContext: ObsContext, targetList: List[SiderealTarget], group: GemsGuideProbeGroup, posAngle: Angle): Boolean =
-    targetList.forall(isTargetValidInGroup(obsContext, _, group, posAngle))
+  private def areAllTargetsValidInGroup(obsContext: ObsContext, targetList: List[SiderealTarget], group: GemsGuideProbeGroup, posAngle: Angle): Boolean = {
+    val ctx = obsContext.withPositionAngle(posAngle)
+    group.asterismFilter(ctx, targetList.asImList) && targetList.forall(isTargetValidInGroup(ctx, _, group))
+  }
 
   // Returns true if the given target is valid for the given group
-  private def isTargetValidInGroup(obsContext: ObsContext, target: SiderealTarget, group: GemsGuideProbeGroup, posAngle: Angle): Boolean = {
-    val ctx = obsContext.withPositionAngle(posAngle)
+  private def isTargetValidInGroup(obsContext: ObsContext, target: SiderealTarget, group: GemsGuideProbeGroup): Boolean = {
     val st = toSPTarget(target)
-    group.getMembers.asScala.exists(_.validate(st, ctx) == GuideStarValidation.VALID)
+    group.getMembers.asScala.exists(_.validate(st, obsContext) == GuideStarValidation.VALID)
   }
 
   // Returns the first valid guide probe for the given target in the given guide probe group at the given
