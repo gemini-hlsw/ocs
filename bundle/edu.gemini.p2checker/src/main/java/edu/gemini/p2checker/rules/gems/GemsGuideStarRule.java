@@ -28,7 +28,6 @@ import edu.gemini.spModel.target.env.TargetEnvironment;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeMap;
 
 /**
  * A rule for checking GeMS guide star positions.
@@ -141,7 +140,7 @@ public final class GemsGuideStarRule implements IRule {
 
             // Check for magnitude violations.
             final ImList<Double> cwfsMagnitudes = CanopusWfs.Group.extractRMagnitudes(cwfsTargetsImList);
-            if (!cwfsTargets.isEmpty() && !cwfsMagnitudes.isEmpty() && !CanopusWfs.Group.checkAsterismMagnitude(cwfsTargetsImList))
+            if (!cwfsMagnitudes.isEmpty() && !CanopusWfs.Group.checkAsterismMagnitude(cwfsTargetsImList))
                 problems.addError(PREFIX + "MagnitudeDifferenceLimitError", String.format(MagnitudeDifference, CanopusWfs.Group.MAGNITUDE_DIFFERENCE_LIMIT), targetNode);
 
             if (Gsaoi.SP_TYPE.equals(elements.getInstrument().getType())) {
