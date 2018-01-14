@@ -1,6 +1,7 @@
 package edu.gemini.qpt.ui.html;
 
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 import edu.gemini.spModel.core.Site;
@@ -8,7 +9,6 @@ import jsky.coords.WorldCoords;
 import edu.gemini.qpt.core.util.ImprovedSkyCalc;
 import edu.gemini.qpt.core.util.Interval;
 import edu.gemini.qpt.core.util.Solver;
-import edu.gemini.qpt.shared.util.TimeUtils;
 
 /**
  * Value type that calculates the rise, transit, and set times for a given object, given a reference
@@ -24,20 +24,20 @@ public class RiseTransitSet {
 	private final Function<Long, WorldCoords> coords;
 	private final Long rise, transit, set;
 	
-	private static final long MARGIN = TimeUtils.MS_PER_MINUTE / 4; // 15 sec
+	private static final long MARGIN = TimeUnit.SECONDS.toMillis(15);
 	
 	public RiseTransitSet(Site site, Function<Long, WorldCoords> coords, long start) {
 		this.coords = coords;
 		this.calc = new ImprovedSkyCalc(site);
 		
-		Solver solver = new Solver(TimeUtils.MS_PER_HOUR, MARGIN) {
+		Solver solver = new Solver(TimeUnit.HOURS.toMillis(1), MARGIN) {
 			@Override
 			protected boolean f(long t) {
 				return airmass(t) < 2.0;
 			}
 		};
 
-		Interval domain = solver.solve(new Interval(start - TimeUtils.MS_PER_DAY, start + TimeUtils.MS_PER_DAY), start);
+		Interval domain = solver.solve(new Interval(start - TimeUnit.DAYS.toMillis(1), start + TimeUnit.DAYS.toMillis(1)), start);
 
 		if (domain != null) {
 
@@ -54,13 +54,13 @@ public class RiseTransitSet {
 
 			// We can still find the apex and call it transit, though. Do the calculation again
 			// using the horizon instead of airmass 2.
-			solver = new Solver(TimeUtils.MS_PER_HOUR, MARGIN) {
+			solver = new Solver(TimeUnit.HOURS.toMillis(1), MARGIN) {
 				@Override
 				protected boolean f(long t) {
 					return airmass(t) < Double.MAX_VALUE;  // see airmass() below
 				}
 			};
-			domain = solver.solve(new Interval(start - TimeUtils.MS_PER_DAY, start + TimeUtils.MS_PER_DAY), start);
+			domain = solver.solve(new Interval(start - TimeUnit.DAYS.toMillis(1), start + TimeUnit.DAYS.toMillis(1)), start);
 
 			// If there is a solution we can define transit. Otheriwse it's null too.
 			transit = (domain == null) ? null : ((domain.getStart() + domain.getEnd()) / 2);

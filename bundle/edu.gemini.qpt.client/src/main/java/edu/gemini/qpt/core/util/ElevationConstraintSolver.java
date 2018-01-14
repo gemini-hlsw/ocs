@@ -1,10 +1,10 @@
 package edu.gemini.qpt.core.util;
 
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.logging.Logger;
 
-import edu.gemini.qpt.shared.util.TimeUtils;
 import edu.gemini.spModel.core.Site;
 import jsky.coords.WorldCoords;
 import edu.gemini.qpt.shared.sp.Obs;
@@ -19,7 +19,7 @@ public abstract class ElevationConstraintSolver extends Solver {
 	protected final double min, max;
 	
 	protected ElevationConstraintSolver(Site site, Function<Long, WorldCoords> coords, double min, double max) {
-		super(TimeUtils.MS_PER_HOUR / 4, TimeUtils.MS_PER_MINUTE);
+	    super(TimeUnit.MINUTES.toMillis(15), TimeUnit.MINUTES.toMillis(1));
 		this.coords = coords;
 		this.calc = new ImprovedSkyCalc(site);
 		this.max = max;

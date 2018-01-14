@@ -11,11 +11,11 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeSet;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
@@ -24,6 +24,7 @@ import edu.gemini.lch.services.model.*;
 import edu.gemini.qpt.core.listeners.LimitsListener;
 import edu.gemini.qpt.shared.sp.Obs;
 import edu.gemini.qpt.core.util.LttsServicesClient;
+import edu.gemini.shared.util.DateTimeUtils;
 import edu.gemini.shared.util.StringUtil;
 import jsky.coords.WorldCoords;
 import edu.gemini.qpt.core.Alloc;
@@ -34,7 +35,6 @@ import edu.gemini.qpt.core.Alloc.Grouping;
 import edu.gemini.qpt.core.Marker.Severity;
 import edu.gemini.qpt.core.util.ImprovedSkyCalc;
 import edu.gemini.qpt.core.util.Interval;
-import edu.gemini.qpt.shared.util.TimeUtils;
 import edu.gemini.qpt.ui.util.CancelledException;
 import edu.gemini.qpt.ui.util.ColorWheel;
 import edu.gemini.qpt.ui.util.ProgressModel;
@@ -102,7 +102,7 @@ public class ScheduleDocument {
                 long start = clearance.getStart().getTime();
                 long end = clearance.getEnd().getTime();
                 Interval interval = new Interval(start, end);
-                String length = TimeUtils.msToHHMMSS(end - start);
+                String length = DateTimeUtils.msToHMMSS(end - start);
                 boolean overlaps = (start < a.getEnd() && end > a.getStart());
                 StringBuffer sb = new StringBuffer();
 
@@ -152,7 +152,7 @@ public class ScheduleDocument {
      */
     // LCH-1324
     private List<String> getNonScienceTargetsWithDifferentClearance(Observation observation, ClearanceWindow clearance) {
-        List<String> names = new ArrayList<String>();
+        List<String> names = new ArrayList<>();
         LaserTarget scienceLaserTarget = observation.getScienceTarget().getLaserTarget();
         for (ObservationTarget t : observation.getTargetsSortedByType()) {
             // only look at observation targets with a laser target different from the science target
@@ -174,11 +174,12 @@ public class ScheduleDocument {
     private String getLaserLimits(Observation observation, ClearanceWindow clearance) {
         String fmt = "HH:mm:ss";
         LaserTarget scienceTarget = observation.getScienceTarget().getLaserTarget();
+        final long msPerSecs = TimeUnit.SECONDS.toMillis(1);
         for (Visibility.Interval visibility : scienceTarget.getVisibility().getAboveLaserLimit()) {
-            long vStart = visibility.getStart().getTime() / 1000; // get rid of milliseconds
-            long vEnd   = visibility.getEnd().getTime() / 1000;
-            long cStart = clearance.getStart().getTime() / 1000;
-            long cEnd   = clearance.getEnd().getTime() / 1000;
+            long vStart = visibility.getStart().getTime() / msPerSecs; // get rid of milliseconds
+            long vEnd   = visibility.getEnd().getTime() / msPerSecs;
+            long cStart = clearance.getStart().getTime() / msPerSecs;
+            long cEnd   = clearance.getEnd().getTime() / msPerSecs;
             // check if target rises above laser limit during this clearance window
             if (vStart > cStart && vStart < cEnd) {
                 return "(rises above " + LimitsListener.MIN_ELEVATION_ERROR_LIMIT + "&deg; at "
@@ -243,7 +244,7 @@ public class ScheduleDocument {
     }
 
     public String formatHHMMSS(long ms) {
-        return TimeUtils.msToHHMM(ms);
+        return DateTimeUtils.msToHHMM(ms);
     }
 
     public String getColor(Severity sev) {
@@ -267,12 +268,9 @@ public class ScheduleDocument {
     }
 
     public SortedSet<Marker> getMarkers(Alloc a) {
-        SortedSet<Marker> ret = a.getMarkers();
-        for (Iterator<Marker> it = ret.iterator(); it.hasNext(); ) {
-            Marker marker = it.next();
-            if (marker.isQcOnly() && !showQcMarkers)
-                it.remove();
-        }
+        final SortedSet<Marker> ret = a.getMarkers();
+        if (!showQcMarkers)
+            ret.removeIf(Marker::isQcOnly);
         return ret;
     }
 
@@ -301,7 +299,7 @@ public class ScheduleDocument {
 
     public SortedSet<Object> getEvents(Variant v) {
 
-        SortedSet<Object> ret = new TreeSet<Object>(new Comparator<Object>() {
+        SortedSet<Object> ret = new TreeSet<>(new Comparator<Object>() {
 
             public int compare(Object o1, Object o2) {
                 long t1 = time(o1), t2 = time(o2);
@@ -444,16 +442,6 @@ public class ScheduleDocument {
         return getDateRangeString(new Date(start), new Date(end));
     }
 
-//	public static void main(String[] args) {
-//		ScheduleDocument doc = new ScheduleDocument(null, null, null, null);
-//		long start = System.currentTimeMillis();
-//		long end = start + 1;
-//		for (int i = 1; i < 30; i++) {
-//			System.out.println(doc.getDateRangeString(start, end));
-//			end += TimeUtils.MS_PER_DAY * 7;
-//		}
-//	}
-
     public String getStyle(Object o) {
 
         if (o instanceof Alloc) {
@@ -475,7 +463,7 @@ public class ScheduleDocument {
 
 
     public SortedSet<String> getUniqueConfigs(Variant v) {
-        SortedSet<String> ret = new TreeSet<String>();
+        SortedSet<String> ret = new TreeSet<>();
         for (Alloc a : v.getAllocs())
             ret.add(a.getObs().getInstrumentStringWithConfig().replace("\u03BB", "&lambda;"));
         return ret;

@@ -1,26 +1,23 @@
 package jsky.app.ot.gemini.editor.sitequality;
 
 import edu.gemini.shared.gui.ButtonFlattener;
+import edu.gemini.shared.util.DateTimeUtils;
+import edu.gemini.shared.util.UTCDateTimeFormatters;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.*;
 import jsky.app.ot.editor.type.SpTypeUIUtil;
-import jsky.util.DateUtil;
 import jsky.util.gui.Resources;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableRowSorter;
 import javax.swing.text.DefaultFormatter;
 import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.NumberFormat;
 import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 final class SiteQualityPanel extends JPanel {
@@ -155,15 +152,7 @@ final class SiteQualityPanel extends JPanel {
 
             add(warning, new GBC(1, 6, 5, 1, new Insets(0, 0, 5, 0)));
 
-            final TimingWindowTableModel model = new TimingWindowTableModel();
-            final JTable table = new JTable(model) {{
-                getColumnModel().getColumn(0).setMinWidth(175);
-                owner.addPropertyChangeListener(e -> model.setSiteQuality(owner.getDataObject()));
-                setRowSorter(new TableRowSorter<TimingWindowTableModel>(model) {{
-                    setComparator(0, DateUtil.createComparator(DateUtil.TIMING_WINDOW_START));
-                }});
-            }};
-
+            final JTable table = new TimingWindowTable(owner);
             add(new JLabel("Timing Windows"), new GBC(0, 7));
             add(new JScrollPane(table) {{
                 setPreferredSize(new Dimension(500, 116));
@@ -292,95 +281,135 @@ final class SiteQualityPanel extends JPanel {
     }
 }
 
+final class TimingWindowTable extends JTable {
+    public enum Cols {
+        Window(Instant.class),
+        Duration(String.class),
+        Repeats(String.class),
+        Period(String.class),
+        ;
 
-class TimingWindowTableModel extends DefaultTableModel implements PropertyChangeListener {
-    private enum Cols {
-        Window, Duration, Repeats, Period
+        private final Class<?> cls;
+
+        Class<?> getColClass() {
+            return cls;
+        }
+
+        Cols(final Class<?> cls) {
+            this.cls = cls;
+        }
     }
 
-    private static final long MS_PER_SECOND = 1000;
-    private static final long MS_PER_MINUTE = MS_PER_SECOND * 60;
-    private static final long MS_PER_HOUR = MS_PER_MINUTE * 60;
-
-    private SPSiteQuality sq;
-
-    void setSiteQuality(final SPSiteQuality siteQuality) {
-        if (sq != null) sq.removePropertyChangeListener(this);
-        sq = siteQuality;
-        if (sq != null) sq.addPropertyChangeListener(this);
-        fireTableDataChanged();
+    TimingWindowTable(final EdCompSiteQuality owner) {
+        this.setModel(new TimingWindowTableModel());
+        this.setDefaultRenderer(Instant.class, new TimingWindowTableStartRenderer());
+        owner.addPropertyChangeListener(e -> ((TimingWindowTableModel) getModel()).setSiteQuality(owner.getDataObject()));
+        setAutoCreateRowSorter(true);
+        getColumnModel().getColumn(0).setMinWidth(175);
     }
 
-    @Override
-    public void propertyChange(final PropertyChangeEvent evt) {
-        fireTableDataChanged();
+    final class TimingWindowTableStartRenderer extends DefaultTableCellRenderer {
+        @Override
+        public Component getTableCellRendererComponent(final JTable table, final Object value, final boolean isSelected,
+                                                       final boolean hasFocus, final int row, final int column) {
+            final JLabel label = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+            final String text = UTCDateTimeFormatters.YYYY_MMM_DD_HHMMSS_Z().format((Instant) value);
+            label.setText(text);
+            return label;
+        }
     }
 
-    @Override
-    public int getColumnCount() {
-        return Cols.values().length;
-    }
+    final class TimingWindowTableModel extends DefaultTableModel implements PropertyChangeListener {
+        private SPSiteQuality sq;
 
-    @Override
-    public String getColumnName(int column) {
-        return Cols.values()[column].name();
-    }
+        void setSiteQuality(final SPSiteQuality siteQuality) {
+            if (sq != null) sq.removePropertyChangeListener(this);
+            sq = siteQuality;
+            if (sq != null) sq.addPropertyChangeListener(this);
+            fireTableDataChanged();
+        }
 
-    @Override
-    public int getRowCount() {
-        return sq == null ? 0 : sq.getTimingWindows().size();
-    }
+        @Override
+        public void propertyChange(final PropertyChangeEvent evt) {
+            fireTableDataChanged();
+        }
 
-    @Override
-    public Object getValueAt(final int row, final int column) {
-        try {
-            final TimingWindow tw = sq.getTimingWindows().get(row);
-            switch (Cols.values()[column]) {
-                case Window: return formatWindow(tw);
-                case Duration: return formatDuration(tw);
-                case Repeats: return formatRepeat(tw);
-                case Period: return formatPeriod(tw);
+        @Override
+        public Class<?> getColumnClass(int columnIndex)
+        {
+            return Cols.values()[columnIndex].getColClass();
+        }
+
+        @Override
+        public int getColumnCount() {
+            return Cols.values().length;
+        }
+
+        @Override
+        public String getColumnName(int column) {
+            return Cols.values()[column].name();
+        }
+
+        @Override
+        public int getRowCount() {
+            return sq == null ? 0 : sq.getTimingWindows().size();
+        }
+
+        TimingWindow getTimingWindowAtRow(final int row) {
+            return sq.getTimingWindows().get(row);
+        }
+
+        @Override
+        public Object getValueAt(final int row, final int column) {
+            try {
+                final TimingWindow tw = getTimingWindowAtRow(row);
+                switch (Cols.values()[column]) {
+                    case Window:
+                        return Instant.ofEpochMilli(tw.getStart());
+                    case Duration:
+                        return formatDuration(tw);
+                    case Repeats:
+                        return formatRepeat(tw);
+                    case Period:
+                        return formatPeriod(tw);
+                }
+                return null;
+            } catch (final IndexOutOfBoundsException ioobe) {
+                // can happen in rare race conditions. not a problem.
+                return null;
             }
-            return null;
-        } catch (final IndexOutOfBoundsException ioobe) {
-            // can happen in rare race conditions. not a problem.
-            return null;
         }
-    }
 
-    @Override
-    public boolean isCellEditable(final int row, final int column) {
-        return false;
-    }
-
-    private static String formatDuration(final TimingWindow tw) {
-        final long ms = tw.getDuration();
-        if (ms == TimingWindow.WINDOW_REMAINS_OPEN_FOREVER) return "forever";
-        return String.format("%02d:%02d", ms / MS_PER_HOUR, (ms % MS_PER_HOUR) / MS_PER_MINUTE);
-    }
-
-    private static String formatPeriod(final TimingWindow tw) {
-        if (tw.getDuration() == TimingWindow.WINDOW_REMAINS_OPEN_FOREVER) return null;
-        if (tw.getRepeat() == TimingWindow.REPEAT_NEVER) return null;
-        final long ms = tw.getPeriod();
-        final long hh = ms / MS_PER_HOUR;
-        final long mm = (ms % MS_PER_HOUR) / MS_PER_MINUTE;
-        final long ss = (ms % MS_PER_MINUTE) / MS_PER_SECOND;
-        return String.format("%02d:%02d:%02d", hh, mm, ss);
-    }
-
-    private static String formatRepeat(final TimingWindow tw) {
-        if (tw.getDuration() == TimingWindow.WINDOW_REMAINS_OPEN_FOREVER) return null;
-
-        final int repeats = tw.getRepeat();
-        switch (repeats) {
-            case TimingWindow.REPEAT_FOREVER: return "forever";
-            case TimingWindow.REPEAT_NEVER:   return "never";
-            default:                          return String.format("%d time%s", repeats, repeats > 1 ? "s" : "");
+        @Override
+        public boolean isCellEditable(final int row, final int column) {
+            return false;
         }
-    }
 
-    private static String formatWindow(final TimingWindow tw) {
-        return DateUtil.TIMING_WINDOW_START.format(Instant.ofEpochMilli(tw.getStart()));
+        private String formatDuration(final TimingWindow tw) {
+            final long ms = tw.getDuration();
+            if (ms == TimingWindow.WINDOW_REMAINS_OPEN_FOREVER) return "forever";
+            return DateTimeUtils.msToHHMM(ms);
+        }
+
+        private String formatPeriod(final TimingWindow tw) {
+            final long duration = tw.getDuration();
+            if (duration == TimingWindow.WINDOW_REMAINS_OPEN_FOREVER) return null;
+            if (tw.getRepeat() == TimingWindow.REPEAT_NEVER) return null;
+            return UTCDateTimeFormatters.YYYY_MMM_DD_HHMMSS_Z().format(Instant.ofEpochMilli(tw.getStart()));
+        }
+
+        private String formatRepeat(final TimingWindow tw) {
+            if (tw.getDuration() == TimingWindow.WINDOW_REMAINS_OPEN_FOREVER) return null;
+
+            final int repeats = tw.getRepeat();
+            switch (repeats) {
+                case TimingWindow.REPEAT_FOREVER:
+                    return "forever";
+                case TimingWindow.REPEAT_NEVER:
+                    return "never";
+                default:
+                    return String.format("%d time%s", repeats, repeats > 1 ? "s" : "");
+            }
+        }
     }
 }

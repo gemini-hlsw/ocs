@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeMap;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.logging.Logger;
 
@@ -28,7 +29,6 @@ import edu.gemini.spModel.pio.PioFactory;
  * us to change the comment without newing up another Alloc.
  * <p>
  * Instances are constructed via Variant::addAlloc().
- * @see Variant#addAlloc(Obs, Long, Long)
  * @author rnorris
  */
 public final class Alloc implements Comparable<Alloc>, Commentable, PioSerializable {
@@ -60,7 +60,7 @@ public final class Alloc implements Comparable<Alloc>, Commentable, PioSerializa
         FULL
     }
 
-	private static final long QUANTUM = 30 * TimeUtils.MS_PER_SECOND;
+	private static final long QUANTUM = TimeUnit.SECONDS.toMillis(30);
 	private static final long serialVersionUID = 1L;
 
 	// Members

@@ -1,16 +1,16 @@
-//
-// $
-//
-
 package edu.gemini.spModel.core;
 
 import java.io.Serializable;
 import java.text.ParseException;
-import java.util.Calendar;
+import java.time.Instant;
+import java.time.Month;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import edu.gemini.shared.util.DateTimeUtils;
 
 /**
  * An observing semester value object.  Contains a year and a letter, 'A' or
@@ -18,34 +18,31 @@ import java.util.regex.Pattern;
  */
 public final class Semester implements Comparable<Semester>, Serializable {
 
-    /** Hour of the day we switch from one night/date to the next. */
-    public static final int SWITCH_OVER_HOUR = 14;
-
     /**
      * Enumeration of the two semester halves for each year.
      * The first half of the year is the 'A' semester, while
      * the second half of the year is the 'B' semester.
      */
     public enum Half {
-        A(Calendar.FEBRUARY) {
+        A(Month.FEBRUARY) {
             public Half opposite() { return B; }
             public int prev(int year) { return year-1; }
             public int next(int year) { return year;   }
         },
-        B(Calendar.AUGUST) {
+        B(Month.AUGUST) {
             public Half opposite() { return A; }
             public int prev(int year) { return year;   }
             public int next(int year) { return year+1; }
         },
         ;
 
-        private final int startMonth;
+        private final Month startMonth;
 
-        Half(int startMonth) {
+        Half(final Month startMonth) {
             this.startMonth = startMonth;
         }
 
-        public int getStartMonth() { return startMonth; }
+        public Month getStartMonth() { return startMonth; }
 
         public abstract Half opposite();
         public abstract int next(int year);
@@ -53,23 +50,13 @@ public final class Semester implements Comparable<Semester>, Serializable {
 
         /**
          * Gets the Semester Half that corresponds to the given Java
-         * calendar month (which is zero based).
-         *
-         * @param javaCalendarMonth zero-based month
-         * (January = 0, December = 11); use Calendar.JANUARY, etc.
+         * Month (which is one-based).
          *
          * @return Semester half that corresponds to the given month
          */
-        public static Half forMonth(int javaCalendarMonth) {
-            return (javaCalendarMonth >= A.startMonth) &&
-                   (javaCalendarMonth  < B.startMonth) ? A : B;
+        public static Half forMonth(final Month month) {
+            return (month.compareTo(A.startMonth) >= 0 && month.compareTo(B.startMonth) < 0) ? A : B;
         }
-    }
-
-    private static Calendar mkCalendar(Site site) {
-        Calendar cal = new GregorianCalendar(site.timezone());
-        cal.set(Calendar.MILLISECOND, 0);
-        return cal;
     }
 
     private static final Pattern SEMESTER_PATTERN = Pattern.compile("(\\d\\d\\d\\d)-?([AB])");
@@ -127,16 +114,14 @@ public final class Semester implements Comparable<Semester>, Serializable {
     }
 
     public Semester(Site site, long time) {
-        Calendar cal = mkCalendar(site);
-        cal.setTimeInMillis(time);
         // semester starts "early", i.e. at 14:00 (2pm) of "previous" day, add 10hrs to correct for this
         // example: 2009A starts on Jan-31-2009 at 14hrs; adding 10hrs brings us to Feb-1-2009.
-        cal.add(Calendar.HOUR_OF_DAY, 24 - SWITCH_OVER_HOUR);
-        int dateYear = cal.get(Calendar.YEAR);
-        int dateMnth = cal.get(Calendar.MONTH);
+        final ZonedDateTime zdt = Instant.ofEpochMilli(time).atZone(site.timezone().toZoneId()).plus(24 - DateTimeUtils.StartOfDayHour(), ChronoUnit.HOURS);
+        final int dateYear   = zdt.getYear();
+        final Month dateMnth = zdt.getMonth();
 
         // everything up to the start of the A semester belongs to the previous year! (i.e. all dates in January)
-        year = dateMnth >= Half.A.getStartMonth() ? dateYear : dateYear - 1;
+        year = dateMnth.compareTo(Half.A.getStartMonth()) >= 0 ? dateYear : dateYear - 1;
         half = Half.forMonth(dateMnth);
     }
 
@@ -150,17 +135,13 @@ public final class Semester implements Comparable<Semester>, Serializable {
     }
 
     public Date getStartDate(Site site) {
-        Calendar cal = mkCalendar(site);
-        cal.set(year, half.startMonth, 1, SWITCH_OVER_HOUR, 0, 0);
-        cal.add(Calendar.DAY_OF_MONTH, -1);
-        return cal.getTime();
+        final ZonedDateTime zdt = ZonedDateTime.of(year, half.startMonth.getValue(), 1, DateTimeUtils.StartOfDayHour(), 0, 0, 0, site.timezone().toZoneId());
+        return Date.from(zdt.minusDays(1).toInstant());
     }
 
     public Date getEndDate(Site site) {
-        Calendar cal = mkCalendar(site);
-        cal.setTime(getStartDate(site));
-        cal.add(Calendar.MONTH, 6);
-        return cal.getTime();
+        final ZonedDateTime zdt = getStartDate(site).toInstant().atZone(site.timezone().toZoneId());
+        return Date.from(zdt.plusMonths(6).toInstant());
     }
 
     public Semester prev() {

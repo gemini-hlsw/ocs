@@ -1,10 +1,10 @@
 package edu.gemini.qpt.core.util;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import edu.gemini.qpt.shared.sp.Obs;
-import edu.gemini.qpt.shared.util.TimeUtils;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.TimingWindow;
 
 public class TimingWindowSolver extends Solver {
@@ -16,7 +16,7 @@ public class TimingWindowSolver extends Solver {
 	private final boolean value;
 	
 	public TimingWindowSolver(Obs obs, boolean value) {
-		super(TimeUtils.MS_PER_HOUR / 4, TimeUtils.MS_PER_MINUTE);
+        super(TimeUnit.MINUTES.toMillis(15), TimeUnit.MINUTES.toMillis(1));
         this.value = value;
         this.windows = obs.getTimingWindows();
 	}

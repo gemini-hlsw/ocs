@@ -3,7 +3,8 @@ package edu.gemini.util.skycalc.constraint
 import edu.gemini.util.skycalc.calc._
 import edu.gemini.util.skycalc.calc.Interval
 import edu.gemini.util.skycalc.Night
-import edu.gemini.skycalc.TimeUtils
+
+import scala.concurrent.duration._
 
 trait Constraint[A] {
 
@@ -32,7 +33,7 @@ trait Constraint[A] {
  * Implementation for an elevation constraint that uses the pre-calculated data from a
  * {@see edu.gemini.util.skycalc.calc.TargetCalc} object.
  */
-case class ElevationConstraint(min: Double, max: Double, tolerance: Long = TimeUtils.seconds(30)) extends Constraint[TargetCalculator] {
+case class ElevationConstraint(min: Double, max: Double, tolerance: Long = 30.seconds.toMillis) extends Constraint[TargetCalculator] {
   protected val solver = DefaultSolver[TargetCalculator](tolerance)
   def metAt(t: Long, target: TargetCalculator): Boolean = {
     val elevation = target.elevationAt(t)
@@ -40,7 +41,7 @@ case class ElevationConstraint(min: Double, max: Double, tolerance: Long = TimeU
   }
 }
 
-case class MoonElevationConstraint(min: Double, max: Double, tolerance: Long = TimeUtils.seconds(30)) extends Constraint[MoonCalculator] {
+case class MoonElevationConstraint(min: Double, max: Double, tolerance: Long = 30.seconds.toMillis) extends Constraint[MoonCalculator] {
   protected val solver = DefaultSolver[MoonCalculator](tolerance)
   def metAt(t: Long, moon: MoonCalculator): Boolean = {
     val elevation = moon.elevationAt(t)
@@ -48,7 +49,7 @@ case class MoonElevationConstraint(min: Double, max: Double, tolerance: Long = T
   }
 }
 
-case class SkyBrightnessConstraint(min: Double, max: Double, tolerance: Long = TimeUtils.seconds(30)) extends Constraint[TargetCalculator] {
+case class SkyBrightnessConstraint(min: Double, max: Double, tolerance: Long = 30.seconds.toMillis) extends Constraint[TargetCalculator] {
   protected val solver = DefaultSolver[TargetCalculator](tolerance)
   def metAt(t: Long, target: TargetCalculator): Boolean = {
     val skyBrightness = target.skyBrightnessAt(t)
@@ -56,7 +57,7 @@ case class SkyBrightnessConstraint(min: Double, max: Double, tolerance: Long = T
   }
 }
 
-case class AirmassConstraint(min: Double, max: Double, tolerance: Long = TimeUtils.seconds(30)) extends Constraint[TargetCalculator] {
+case class AirmassConstraint(min: Double, max: Double, tolerance: Long = 30.seconds.toMillis) extends Constraint[TargetCalculator] {
   protected val solver = DefaultSolver[TargetCalculator](tolerance)
   def metAt(t: Long, target: TargetCalculator): Boolean = {
     val airmass = target.airmassAt(t)
@@ -65,7 +66,7 @@ case class AirmassConstraint(min: Double, max: Double, tolerance: Long = TimeUti
   }
 }
 
-case class HourAngleConstraint(min: Double, max: Double, tolerance: Long = TimeUtils.seconds(30)) extends Constraint[TargetCalculator] {
+case class HourAngleConstraint(min: Double, max: Double, tolerance: Long = 30.seconds.toMillis) extends Constraint[TargetCalculator] {
   protected val solver = DefaultSolver[TargetCalculator](tolerance)
   def metAt(t: Long, target: TargetCalculator): Boolean = {
     val hourAngle = target.hourAngleAt(t)

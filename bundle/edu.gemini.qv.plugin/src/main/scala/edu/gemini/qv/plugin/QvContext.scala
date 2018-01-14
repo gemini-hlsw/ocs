@@ -7,11 +7,13 @@ import edu.gemini.qv.plugin.QvContext.{ChartType, HistogramChartType}
 import edu.gemini.qv.plugin.selector.TimeRangeSelector.{RangeType, Year}
 import edu.gemini.qv.plugin.util.SolutionProvider.ConstraintType
 import edu.gemini.qv.plugin.util.{ConstraintsCache, LstTimeZone, ScheduleCache, SolutionProvider}
-import edu.gemini.skycalc.TimeUtils
-import edu.gemini.spModel.core.{Peer, Site}
+import edu.gemini.spModel.core.Peer
 import edu.gemini.util.skycalc.Night
 import java.util.TimeZone
 
+import edu.gemini.shared.util.DateTimeUtils
+
+import scala.concurrent.duration._
 import scala.swing.Publisher
 import scala.swing.event.Event
 
@@ -146,9 +148,9 @@ case class QvContext(peer: Peer, dataSource: DataSource, source: ObservationProv
   // === Custom Range
 
   /** Gets start time of current custom time range. */
-  var customStart: Long = TimeUtils.startOfDay(System.currentTimeMillis(), timezone)
+  var customStart: Long = DateTimeUtils.startOfDayInMs(System.currentTimeMillis(), timezone.toZoneId)
   /** Gets end time of current custom time range. */
-  var customEnd: Long = customStart + TimeUtils.days(1)
+  var customEnd: Long = customStart + 1.day.toMillis
 
 
   // === LstTimeZone

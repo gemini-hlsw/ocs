@@ -1,13 +1,16 @@
 package edu.gemini.util.skycalc.calc
 
-import edu.gemini.skycalc.{MoonCalc, TimeUtils, ImprovedSkyCalc}
+import edu.gemini.skycalc.{ImprovedSkyCalc, MoonCalc}
 import java.util.Date
+
 import edu.gemini.spModel.core.Site
 import jsky.coords.WorldCoords
 import edu.gemini.util.skycalc.calc.MoonCalculator.Fields
 import javax.swing.Icon
 import java.awt.geom.Arc2D
-import java.awt.{Color, Graphics2D, Component, Graphics}
+import java.awt.{Color, Component, Graphics, Graphics2D}
+
+import scala.concurrent.duration._
 
 /**
  * Support for a variety of calculations regarding the moon.
@@ -16,7 +19,6 @@ trait MoonCalculator extends Calculator {
   require(site == Site.GN || site == Site.GS)
 
   val site: Site
-
   val values: Vector[Vector[Double]] = calculate()
 
   import Fields._
@@ -95,7 +97,7 @@ object MoonCalculator {
     val Elevation, PhaseAngle, IlluminatedFraction, SkyBrightness = Value
   }
 
-  def apply(site: Site, defined: Interval, rate: Long = TimeUtils.seconds(30)): MoonCalculator = {
+  def apply(site: Site, defined: Interval, rate: Long = 30.seconds.toMillis): MoonCalculator = {
     new IntervalMoonCalculator(site, defined, rate)
   }
   def apply(site: Site, time: Long): MoonCalculator = {

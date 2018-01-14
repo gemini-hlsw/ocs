@@ -7,7 +7,7 @@ import edu.gemini.qpt.shared.sp.Conds;
 import edu.gemini.qpt.shared.sp.Inst;
 import edu.gemini.qpt.shared.sp.MiniModel;
 import edu.gemini.qpt.shared.util.PioSerializable;
-import edu.gemini.qpt.shared.util.TimeUtils;
+import edu.gemini.shared.util.UTCDateTimeFormatters;
 import edu.gemini.skycalc.TwilightBoundType;
 import edu.gemini.skycalc.TwilightBoundedNight;
 import edu.gemini.spModel.core.Site;
@@ -29,15 +29,14 @@ import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.Pio;
 import edu.gemini.spModel.pio.PioFactory;
 import jsky.coords.WorldCoordinates;
-import jsky.util.DateUtil;
 
 import java.io.File;
 import java.io.Serializable;
+import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import static edu.gemini.qpt.shared.util.TimeUtils.MS_PER_DAY;
 
 /**
  * Top-level model object representing a queue plan.
@@ -73,7 +72,7 @@ public final class Schedule extends BaseMutableBean implements PioSerializable, 
     private MixedEnumSet facilities = new MixedEnumSet();
     private MarkerManager markerManager = new MarkerManager();
     private File file;
-    private Map<WorldCoordinates, Union<Interval>> intervalCache = new HashMap<WorldCoordinates, Union<Interval>>();
+    private Map<WorldCoordinates, Union<Interval>> intervalCache = new HashMap<>();
     private MiniModel miniModel;
 
     /**
@@ -331,7 +330,7 @@ public final class Schedule extends BaseMutableBean implements PioSerializable, 
 
     @SuppressWarnings("unchecked")
     public Set<Enum> getFacilities() {
-        return new HashSet<Enum>(facilities);
+        return new HashSet<>(facilities);
     }
 
     ///
@@ -457,7 +456,7 @@ public final class Schedule extends BaseMutableBean implements PioSerializable, 
     ///
 
     public void addBlock(long start, long end) {
-        SortedSet<Block> prev = Collections.unmodifiableSortedSet(new TreeSet<Block>(getBlocks()));
+        SortedSet<Block> prev = Collections.unmodifiableSortedSet(new TreeSet<>(getBlocks()));
         blocks.add(new Block(start, end));
         synchronized (intervalCache) {
             intervalCache.clear();
@@ -467,7 +466,7 @@ public final class Schedule extends BaseMutableBean implements PioSerializable, 
     }
 
     public void removeBlock(long start, long end) {
-        SortedSet<Block> prev = Collections.unmodifiableSortedSet(new TreeSet<Block>(getBlocks()));
+        SortedSet<Block> prev = Collections.unmodifiableSortedSet(new TreeSet<>(getBlocks()));
         blocks.remove(new Block(start, end));
         synchronized (intervalCache) {
             intervalCache.clear();
@@ -477,7 +476,7 @@ public final class Schedule extends BaseMutableBean implements PioSerializable, 
     }
 
     public void addObservingNights(long start, long end) {
-        for (long i = start; i <= end; i += MS_PER_DAY) {
+        for (long i = start; i <= end; i += TimeUnit.DAYS.toMillis(1)) {
             TwilightBoundedNight night = new TwilightBoundedNight(TYPE, i, miniModel.getSite());
             addBlock(night.getStartTime(), night.getEndTime());
         }
@@ -486,7 +485,7 @@ public final class Schedule extends BaseMutableBean implements PioSerializable, 
     public void addObservingNights(int count) {
         if (count < 1) throw new IllegalArgumentException("You must add at least one night.");
         long now = System.currentTimeMillis();
-        addObservingNights(now, now + (count - 1) * TimeUtils.MS_PER_DAY);
+        addObservingNights(now, now + (count - 1) * TimeUnit.DAYS.toMillis(1));
     }
 
     public SortedSet<Block> getBlocks() {
@@ -530,7 +529,7 @@ public final class Schedule extends BaseMutableBean implements PioSerializable, 
     public void addExtraSemester(String semester) {
         if (!miniModel.getAllSemesters().contains(semester))
             throw new NoSuchElementException(semester);
-        SortedSet<String> prev = new TreeSet<String>(extraSemesters);
+        SortedSet<String> prev = new TreeSet<>(extraSemesters);
         if (extraSemesters.add(semester))
             firePropertyChange(PROP_EXTRA_SEMESTERS, prev, getExtraSemesters());
     }
@@ -618,7 +617,7 @@ public final class Schedule extends BaseMutableBean implements PioSerializable, 
         sb.append(getSite().displayName);
         if (!isEmpty()) {
             sb.append(" - ");
-            sb.append(DateUtil.formatUTCyyyymmdd(getEnd()));
+            sb.append(UTCDateTimeFormatters.YYYYMMDD().format(Instant.ofEpochMilli(getEnd())));
         }
         return sb.toString();
     }

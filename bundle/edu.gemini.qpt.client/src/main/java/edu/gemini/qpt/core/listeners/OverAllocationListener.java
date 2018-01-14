@@ -9,7 +9,7 @@ import edu.gemini.qpt.core.Variant;
 import edu.gemini.qpt.core.Marker.Severity;
 import edu.gemini.qpt.shared.sp.Prog;
 import edu.gemini.qpt.core.util.MarkerManager;
-import edu.gemini.qpt.shared.util.TimeUtils;
+import edu.gemini.shared.util.DateTimeUtils;
 
 public class OverAllocationListener extends MarkerModelListener<Variant> {
 
@@ -49,10 +49,10 @@ public class OverAllocationListener extends MarkerModelListener<Variant> {
             case SCIENCE:
                 long used = time.get(p);
                 if (used > p.getRemainingProgramTime()) {
-                    String msg = "Program " + p + " is over-allocated by " + TimeUtils.msToHHMMSS(used - p.getRemainingProgramTime()) + ".";
+                    String msg = "Program " + p + " is over-allocated by " + DateTimeUtils.msToHMMSS(used - p.getRemainingProgramTime()) + ".";
                     mm.addMarker(true, this, Severity.Warning, msg, v, a);
                 } else if (p.getBand3RemainingTime() != null && used > p.getBand3RemainingTime()) {
-                    String msg = "Program " + p + " is allocated " + TimeUtils.msToHHMMSS(used - p.getBand3RemainingTime()) + " past its Band 3 minumum success time.";
+                    String msg = "Program " + p + " is allocated " + DateTimeUtils.msToHMMSS(used - p.getBand3RemainingTime()) + " past its Band 3 minumum success time.";
                     mm.addMarker(true, this, Severity.Warning, msg, v, a);
                 }
             }

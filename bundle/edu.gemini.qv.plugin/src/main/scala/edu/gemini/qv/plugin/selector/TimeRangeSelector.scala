@@ -1,25 +1,28 @@
 package edu.gemini.qv.plugin.selector
 
-import edu.gemini.qv.plugin.{TimeZoneChanged, TimeValueChanged, TimeRangeChanged, QvContext}
+import edu.gemini.qv.plugin.{QvContext, TimeRangeChanged, TimeValueChanged, TimeZoneChanged}
 import edu.gemini.qv.plugin.selector.TimeRangeSelector._
-import edu.gemini.qv.plugin.ui.{QvGui, CalendarDialog}
+import edu.gemini.qv.plugin.ui.{CalendarDialog, QvGui}
 import edu.gemini.shared.gui.monthview.DateSelectionMode
-import edu.gemini.skycalc.TimeUtils
 import edu.gemini.spModel.core.Semester
 import java.awt.event.{AdjustmentEvent, AdjustmentListener}
 import java.util.TimeZone
+
+import edu.gemini.shared.util.DateTimeUtils
+
+import scala.concurrent.duration._
 import scala.swing._
 import scala.swing.event.ButtonClicked
 
 object TimeRangeSelector {
   abstract class RangeType(val duration: Long, val increment: Long)
-  object Day extends RangeType(TimeUtils.days(1), TimeUtils.days(1))
-  object Week extends RangeType(TimeUtils.days(7), TimeUtils.days(1))
-  object Month extends RangeType(TimeUtils.days(30), TimeUtils.days(1))
-  object Quarter extends RangeType(TimeUtils.days(92), TimeUtils.days(30))
-  object HalfYear extends RangeType(TimeUtils.days(183), TimeUtils.days(30))
-  object Year extends RangeType(TimeUtils.days(365), TimeUtils.days(30))
-  object Custom extends RangeType(0, 0)
+  object Day      extends RangeType(1.day.toMillis,     1.day.toMillis)
+  object Week     extends RangeType(7.days.toMillis,    1.day.toMillis)
+  object Month    extends RangeType(30.days.toMillis,   1.day.toMillis)
+  object Quarter  extends RangeType(92.days.toMillis,  30.days.toMillis)
+  object HalfYear extends RangeType(183.days.toMillis, 30.days.toMillis)
+  object Year     extends RangeType(365.days.toMillis, 30.days.toMillis)
+  object Custom   extends RangeType(0,                  0)
 }
 
 class TimeRangeSelector(ctx: QvContext, semesters: Seq[Semester]) extends GridBagPanel {
@@ -61,20 +64,20 @@ class TimeRangeSelector(ctx: QvContext, semesters: Seq[Semester]) extends GridBa
   }
 
   def start = {
-      if (scrollBar.enabled) ctx.range.start + TimeUtils.hours(scrollBar.value)
+      if (scrollBar.enabled) ctx.range.start + scrollBar.value.hours.toMillis
       else if (ctx.rangeType == Custom) ctx.customStart
       else ctx.range.start
   }
 
   def end = {
-      if (scrollBar.enabled) start + TimeUtils.hours(scrollBar.visibleAmount)
+      if (scrollBar.enabled) start + scrollBar.visibleAmount.hours.toMillis
       else if (ctx.rangeType == Custom) ctx.customEnd
       else ctx.range.end
   }
 
   def selectedZone = ctx.selectedTimeZone
   def showSingleDay = ctx.rangeType == Day
-  def daysShowing = (ctx.rangeType.duration / TimeUtils.days(1)).toInt
+  def daysShowing = (ctx.rangeType.duration / DateTimeUtils.MillisecondsPerDay).toInt
 
   class TimeScrollBar extends ScrollBar with AdjustmentListener {
     orientation = Orientation.Horizontal
@@ -88,9 +91,9 @@ class TimeRangeSelector(ctx: QvContext, semesters: Seq[Semester]) extends GridBa
     def updateScrollBar(): Unit = {
 
       // all units in hours!
-      val visibleRange = Math.ceil(TimeUtils.asHours(ctx.rangeType.duration)).toInt
-      val fullRange = Math.ceil(TimeUtils.asHours(ctx.range.duration)).toInt
-      val increment = Math.ceil(TimeUtils.asHours(ctx.rangeType.increment)).toInt
+      val visibleRange = Math.ceil(ctx.rangeType.duration.milliseconds.toHours).toInt
+      val fullRange    = Math.ceil(ctx.range.duration.milliseconds.toHours).toInt
+      val increment    = Math.ceil(ctx.rangeType.increment.milliseconds.toHours).toInt
 
       minimum = 0
       maximum = fullRange
@@ -100,9 +103,9 @@ class TimeRangeSelector(ctx: QvContext, semesters: Seq[Semester]) extends GridBa
         enabled = false
         visibleAmount = fullRange
       } else if (ctx.rangeType == Custom) {
-        val v = Math.max(TimeUtils.asHours(ctx.customStart - ctx.range.start), 0).toInt
+        val v = Math.max((ctx.customStart - ctx.range.start).milliseconds.toHours, 0).toInt
         enabled = false
-        visibleAmount = TimeUtils.asHours(ctx.customEnd - ctx.customStart).toInt
+        visibleAmount = (ctx.customEnd - ctx.customStart).milliseconds.toHours.toInt
         value = v - v % 24
       } else {
         enabled = true
@@ -140,7 +143,7 @@ class TimeRangeSelector(ctx: QvContext, semesters: Seq[Semester]) extends GridBa
     contents ++= buttons
 
     private def updateTimeRange() =
-      buttons.filter(_.range == ctx.rangeType).map(_.selected = true)
+      buttons.filter(_.range == ctx.rangeType).foreach(_.selected = true)
 
   }
 
@@ -163,15 +166,15 @@ class TimeRangeSelector(ctx: QvContext, semesters: Seq[Semester]) extends GridBa
     listenTo(ctx, calendarButton)
     reactions += {
       case ButtonClicked(`calendarButton`) =>
-        val cd = new CalendarDialog("Select Start and End Date for Custom Range", ctx.customStart, ctx.customEnd - TimeUtils.hours(24), DateSelectionMode.Interval)
+        val cd = new CalendarDialog("Select Start and End Date for Custom Range", ctx.customStart, ctx.customEnd - 24.hours.toMillis, DateSelectionMode.Interval)
         cd.pack()
         cd.setLocationRelativeTo(calendarButton)
         cd.visible = true
         cd.startDate.foreach {
-          time => ctx.customStart = TimeUtils.startOfDay(time + TimeUtils.hours(14), ctx.timezone)
+          time => ctx.customStart = DateTimeUtils.startOfDayInMs(time + DateTimeUtils.StartOfDayHour.hours.toMillis, ctx.timezone.toZoneId)
         }
         cd.endDate.foreach {
-          time => ctx.customEnd = TimeUtils.endOfDay(time + TimeUtils.hours(14), ctx.timezone)
+          time => ctx.customEnd = DateTimeUtils.endOfDayInMs(time + DateTimeUtils.StartOfDayHour.hours.toMillis, ctx.timezone.toZoneId)
         }
         // force update
         cd.startDate.foreach {

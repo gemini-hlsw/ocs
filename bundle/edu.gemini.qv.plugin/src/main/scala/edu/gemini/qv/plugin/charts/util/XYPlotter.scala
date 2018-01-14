@@ -6,7 +6,6 @@ import edu.gemini.qv.plugin.selector.OptionsSelector._
 import edu.gemini.qv.plugin.selector.{ConstraintsSelector, OptionsSelector}
 import edu.gemini.qv.plugin.util.ConstraintsCache.{MaxElevation, MinElevation}
 import edu.gemini.qv.plugin.util.{SemesterData, SolutionProvider}
-import edu.gemini.skycalc.TimeUtils
 import edu.gemini.spModel.core.{Coordinates, Site}
 import edu.gemini.util.skycalc.calc.{Interval, Solution, TargetCalculator}
 import edu.gemini.util.skycalc.Night
@@ -21,6 +20,7 @@ import org.jfree.chart.renderer.xy.{XYLineAndShapeRenderer, XYSplineRenderer}
 import org.jfree.data.xy.{XYSeries, XYSeriesCollection}
 
 import scala.collection._
+import scala.concurrent.duration._
 
 
 /**
@@ -208,9 +208,9 @@ class XYPlotter(ctx: QvContext, nights: Seq[Night], constraints: ConstraintsSele
   private def overMidNightTimeSampling: Vector[Long] = {
     require(nights.size > 0)
     val allNights = SemesterData.nights(ctx.site, ctx.range)
-    val times = (allNights.head.middleNightTime - TimeUtils.days(1)) +:
+    val times = (allNights.head.middleNightTime - 1.day.toMillis) +:
       allNights.map(_.middleNightTime) :+
-      (allNights.last.middleNightTime + TimeUtils.days(1))
+      (allNights.last.middleNightTime + 1.day.toMillis)
     times.toVector
   }
 

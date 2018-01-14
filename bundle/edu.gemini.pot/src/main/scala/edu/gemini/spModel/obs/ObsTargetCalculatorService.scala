@@ -10,10 +10,10 @@ import edu.gemini.spModel.rich.shared.immutable._
 import edu.gemini.spModel.target.obsComp.TargetObsComp
 import edu.gemini.util.skycalc.calc.{Interval, TargetCalculator}
 import edu.gemini.spModel.core.Coordinates
-import edu.gemini.skycalc.TimeUtils
 import edu.gemini.spModel.target.env.Asterism
 
 import scala.collection.JavaConverters._
+import scala.concurrent.duration._
 
 object ObsTargetCalculatorService {
   private def create(obs: ISPObservation): Option[TargetCalculator] = {
@@ -49,7 +49,7 @@ object ObsTargetCalculatorService {
 
       // If the duration is going to be smaller than the default step size of 30 seconds used by the
       // target calc, we will have divide by 0 issues, so take this into account.
-      val stepSize = if (duration >= TimeUtils.seconds(30)) TimeUtils.seconds(30) else duration
+      val stepSize = math.min(duration, 30.seconds.toMillis)
       val coords   = (t: Long) => a.basePosition(Some(Instant.ofEpochMilli(t))).getOrElse(Coordinates.zero)
       if (end > b.start) {
         TargetCalculator(s, coords, Interval(b.start, end), stepSize)

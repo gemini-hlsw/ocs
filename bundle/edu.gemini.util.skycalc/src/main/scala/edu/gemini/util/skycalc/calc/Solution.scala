@@ -1,7 +1,8 @@
 package edu.gemini.util.skycalc.calc
 
 import java.util.TimeZone
-import edu.gemini.skycalc.TimeUtils
+
+import edu.gemini.shared.util.DateTimeUtils
 
 /**
  * Representation of a solution for a constraint defined by an arbitrary number of intervals.
@@ -13,7 +14,7 @@ case class Solution(intervals: Seq[Interval]) {
   /** True if the solution (i.e. any of its intervals) contains time t. */
   def contains(t: Long) = intervals.exists(_.contains(t))
 
-  def never: Boolean = intervals.size == 0
+  def never: Boolean = intervals.isEmpty
   def earliest: Option[Long] = intervals.headOption.map(_.start)
   def latest: Option[Long] = intervals.lastOption.map(_.end)
   def duration: Long = intervals.map(_.duration).sum
@@ -59,8 +60,8 @@ case class Solution(intervals: Seq[Interval]) {
     // blow intervals up to cover 24hrs (or multiples thereof); days start/end at 14hrs local time
     def blowUp(interval: Interval): Interval =
       Interval(
-        TimeUtils.startOfDay(interval.start, localTime),
-        TimeUtils.endOfDay(interval.end, localTime)
+        DateTimeUtils.startOfDayInMs(interval.start, localTime.toZoneId),
+        DateTimeUtils.endOfDayInMs  (interval.end,   localTime.toZoneId)
       )
 
     // note that a single interval can stretch several days (e.g. for time windows)
@@ -123,8 +124,8 @@ case class Solution(intervals: Seq[Interval]) {
 
   private def addIntervals(i1: Seq[Interval], i2: Seq[Interval]): Seq[Interval] =
     if (i1.isEmpty && i2.isEmpty) Seq()
-    else if (!i1.isEmpty && i2.isEmpty) i1
-    else if (i1.isEmpty && !i2.isEmpty) i2
+    else if (i1.nonEmpty && i2.isEmpty)  i1
+    else if (i1.isEmpty  && i2.nonEmpty) i2
     else {
       if (i1.last.abuts(i2.head)) (i1.dropRight(1) :+ i1.last.plus(i2.head)) ++ i2.tail
       else i1 ++ i2

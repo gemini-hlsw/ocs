@@ -2,15 +2,13 @@ package edu.gemini.qpt.ui.view.visualizer;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Composite;
 import java.awt.GradientPaint;
 import java.awt.Paint;
 import java.awt.RenderingHints;
 import java.awt.Stroke;
 import java.util.HashMap;
 import java.util.Map;
-
-import edu.gemini.qpt.shared.util.TimeUtils;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Just a place to hang the constants.
@@ -35,7 +33,7 @@ public interface VisualizerConstants {
     Paint SELECTED_WFS_SHUTTERING_WINDOW_COLOR = new GradientPaint(0, 2.5F, SELECTED_SHUTTERING_WINDOW_COLOR, 0, 5, SHUTTERING_WINDOW_GRADIENT_COLOR, true);
     Paint SHUTTERING_WFS_WINDOW_COLOR = new GradientPaint(0, 2.5F, SHUTTERING_WINDOW_COLOR, 0, 5, SHUTTERING_WINDOW_GRADIENT_COLOR, true);
 
-    long  MIN_SHUTTER_WINDOW_MS = 1 * TimeUtils.MS_PER_MINUTE;
+    long  MIN_SHUTTER_WINDOW_MS = TimeUnit.MINUTES.toMillis(1);
     Color DAY_COLOR = Color.WHITE;
     Color COLOR_ELEVATION_LINE = Color.BLACK;
     Color MOON_COLOR = new Color(240, 240, 240, 128);
@@ -67,7 +65,7 @@ public interface VisualizerConstants {
             0);
 
 
-    long INTEGRATION_STEP = 60 * TimeUtils.MS_PER_SECOND;
+    long INTEGRATION_STEP = TimeUnit.SECONDS.toMillis(60);
 
     Map<Object, Object> RENDERING_HINTS = new HashMap<Object, Object>() {{
         put(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);

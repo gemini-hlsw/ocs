@@ -2,9 +2,9 @@ package edu.gemini.qpt.ui.view.property.adapter;
 
 import edu.gemini.qpt.core.Variant;
 import edu.gemini.qpt.shared.sp.Prog;
-import edu.gemini.qpt.shared.util.TimeUtils;
 import edu.gemini.qpt.ui.view.property.PropertyTable;
 import edu.gemini.qpt.ui.view.property.PropertyTable.Adapter;
+import edu.gemini.shared.util.DateTimeUtils;
 
 public class ProgAdapter implements Adapter<Prog> {
 
@@ -13,12 +13,12 @@ public class ProgAdapter implements Adapter<Prog> {
 		table.put(PROP_TITLE, target.getTitle());
 		if (target.getBand3RemainingTime() != null) {
 			table.put(PROP_REMAINING_PROGRAM_TIME, 
-					TimeUtils.msToHHMMSS(target.getRemainingProgramTime()) + 
+					DateTimeUtils.msToHMMSS(target.getRemainingProgramTime()) +
 					" (Band 3 Min. Rem. " +
-					TimeUtils.msToHHMMSS(target.getBand3RemainingTime()) + 
+					DateTimeUtils.msToHMMSS(target.getBand3RemainingTime()) +
 					")");
 		} else {
-			table.put(PROP_REMAINING_PROGRAM_TIME, TimeUtils.msToHHMMSS(target.getRemainingProgramTime()));
+			table.put(PROP_REMAINING_PROGRAM_TIME, DateTimeUtils.msToHMMSS(target.getRemainingProgramTime()));
 		}
 	}
 

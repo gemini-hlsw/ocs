@@ -1,13 +1,13 @@
 package edu.gemini.qpt.ui.html;
 
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 import edu.gemini.spModel.core.Site;
 import jsky.coords.WorldCoords;
 import edu.gemini.qpt.core.util.ImprovedSkyCalc;
 import edu.gemini.qpt.core.util.Interval;
 import edu.gemini.qpt.core.util.Solver;
-import edu.gemini.qpt.shared.util.TimeUtils;
 
 /**
  * Value type that calculates the rise, transit, and set times for the moon.
@@ -19,7 +19,7 @@ public class MoonRiseTransitSet {
 	private final WorldCoords coords = new WorldCoords();
 	private final long rise, transit, set;
 	
-	private static final long MARGIN = TimeUtils.MS_PER_MINUTE / 4; // 15 sec
+	private static final long MARGIN = TimeUnit.SECONDS.toMillis(15);
 	
 	public MoonRiseTransitSet(Site site, long start) {
 
@@ -28,14 +28,14 @@ public class MoonRiseTransitSet {
 		final double elev = site.altitude;
 		final double horiz = -(0.83 + Math.sqrt(2 * elev / 6378140.) * DEG_IN_RADIAN);
 
-		Solver solver = new Solver(TimeUtils.MS_PER_HOUR, MARGIN) {
+		Solver solver = new Solver(TimeUnit.HOURS.toMillis(1), MARGIN) {
 			@Override
 			protected boolean f(long t) {
 				return elevation(t) >= horiz;
 			}
 		};
 		
-		Interval domain = solver.solve(new Interval(start - TimeUtils.MS_PER_DAY, start + TimeUtils.MS_PER_DAY), start);
+		Interval domain = solver.solve(new Interval(start - TimeUnit.DAYS.toMillis(1), start + TimeUnit.DAYS.toMillis(1)), start);
 		
 		rise = domain.getStart();
 		set = domain.getEnd();

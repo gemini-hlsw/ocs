@@ -2,33 +2,33 @@ package edu.gemini.qpt.ui.view.lchWindow;
 
 import edu.gemini.qpt.core.Schedule;
 import edu.gemini.qpt.core.util.ImprovedSkyCalc;
-import edu.gemini.qpt.shared.util.TimeUtils;
 import edu.gemini.qpt.ui.util.TimePreference;
+import edu.gemini.shared.util.DateTimeFormatters;
+import edu.gemini.shared.util.DateTimeUtils;
+import edu.gemini.shared.util.UTCDateTimeFormatters;
 import edu.gemini.ui.gface.GSubElementDecorator;
 import edu.gemini.ui.gface.GViewer;
 
 import javax.swing.JLabel;
 import java.awt.Font;
-import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
-import java.util.TimeZone;
 
 public class LchWindowDecorator implements GSubElementDecorator<Schedule, LchWindow, LchWindowAttribute> {
 
-    private static final SimpleDateFormat TIME_FORMAT = new SimpleDateFormat("HH:mm:ss");
     private Schedule schedule;
 
     public void decorate(JLabel label, LchWindow element, LchWindowAttribute subElement, Object value) {
         if (schedule == null) return;
 
         TimePreference tp = TimePreference.BOX.get();
+        final DateTimeFormatter df;
         switch (tp) {
             case LOCAL:
-                TIME_FORMAT.setTimeZone(schedule.getSite().timezone());
+                df = DateTimeFormatters.apply(schedule.getSite().timezone()).HHMMSS();
                 break;
-            case SIDEREAL:
-            case UNIVERSAL:
-                TIME_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
+            default:
+                df = UTCDateTimeFormatters.HHMMSS();
                 break;
         }
 
@@ -39,13 +39,13 @@ public class LchWindowDecorator implements GSubElementDecorator<Schedule, LchWin
             case End:
                 if (tp == TimePreference.SIDEREAL) {
                     ImprovedSkyCalc calc = new ImprovedSkyCalc(schedule.getSite());
-                    label.setText(TIME_FORMAT.format(calc.getLst(time)));
+                    label.setText(df.format(calc.getLst(time).toInstant()));
                 } else {
-                    label.setText(TIME_FORMAT.format(time));
+                    label.setText(df.format(time.toInstant()));
                 }
                 break;
             case Length:
-                label.setText(TimeUtils.msToHHMMSS(e.time)); // a length of time in "HH:mm:ss"
+                label.setText(DateTimeUtils.msToHMMSS(e.time)); // a length of time in "HH:mm:ss"
                 break;
             case Type:
                 label.setText(e.targetType);

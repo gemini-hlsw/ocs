@@ -3,15 +3,16 @@ package edu.gemini.qpt.ui.view.property.adapter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 import edu.gemini.qpt.core.Alloc;
 import edu.gemini.qpt.core.Variant;
 import edu.gemini.qpt.core.Alloc.Circumstance;
 import edu.gemini.qpt.shared.sp.Conds;
 import edu.gemini.qpt.shared.sp.Obs;
-import edu.gemini.qpt.shared.util.TimeUtils;
 import edu.gemini.qpt.ui.view.property.PropertyTable;
 import edu.gemini.qpt.ui.view.property.PropertyTable.Adapter;
+import edu.gemini.shared.util.DateTimeUtils;
 
 public class AllocAdapter implements Adapter<Alloc> {
 
@@ -43,13 +44,14 @@ public class AllocAdapter implements Adapter<Alloc> {
 	}
 
 	private Object minMaxMeanHHMMSS(Alloc target, Circumstance circ, boolean includeSetup) {
-		long min = (long) (TimeUtils.MS_PER_HOUR * target.getMin(circ, includeSetup));
-		long mean = (long) (TimeUtils.MS_PER_HOUR * target.getMean(circ, includeSetup));
-		long max = (long) (TimeUtils.MS_PER_HOUR * target.getMax(circ, includeSetup));
+	    final long msPerHour = TimeUnit.HOURS.toMillis(1);
+		final long min =  (long) (msPerHour * target.getMin(circ, includeSetup));
+		final long mean = (long) (msPerHour * target.getMean(circ, includeSetup));
+		final long max =  (long) (msPerHour * target.getMax(circ, includeSetup));
 		return 
-			"min: " + TimeUtils.msToHHMMSS(min) + " \u2022 " +
-			"mean: " + TimeUtils.msToHHMMSS(mean) + " \u2022 " +
-			"max: " + TimeUtils.msToHHMMSS(max);
+			"min: "  + DateTimeUtils.msToHMMSS(min)  + " \u2022 " +
+			"mean: " + DateTimeUtils.msToHMMSS(mean) + " \u2022 " +
+			"max: "  + DateTimeUtils.msToHMMSS(max);
 	}
 
 	private String toSequenceString(Alloc alloc) {
@@ -66,16 +68,16 @@ public class AllocAdapter implements Adapter<Alloc> {
 
     private String minMaxMean(Alloc a, Alloc.Circumstance circ, String units, String na, boolean includeSetup) {
 		return 
-			"min: " + doubleOrNA(a.getMin(circ, includeSetup), na) + units + " \u2022 " +
-			"mean: " + doubleOrNA(a.getMean(circ, includeSetup), na) +units + " \u2022 " +
-			"max: " + doubleOrNA(a.getMax(circ, includeSetup), na) + units;
+			"min: "  + doubleOrNA(a.getMin(circ, includeSetup), na)  + units + " \u2022 " +
+			"mean: " + doubleOrNA(a.getMean(circ, includeSetup), na) + units + " \u2022 " +
+			"max: "  + doubleOrNA(a.getMax(circ, includeSetup), na)  + units;
 	}
 
     private String minMaxMeanParallacticAngle(Alloc a, String units, boolean includeSetup) {
         // REL-1441: calculate min, mean and max parallactic angle based on a corrected (continuous) function
-        double min = a.getMinParallacticAngle(includeSetup);
+        double min  = a.getMinParallacticAngle(includeSetup);
         double mean = a.getMeanParallacticAngle(includeSetup);
-        double max = a.getMaxParallacticAngle(includeSetup);
+        double max  = a.getMaxParallacticAngle(includeSetup);
         // correct min, mean and max values so that the majority of them lies inside the desired range (-180,180]
         if (mean > 180. && max > 180.) {
             min = min - 360.;
@@ -87,9 +89,9 @@ public class AllocAdapter implements Adapter<Alloc> {
             mean = mean + 360.;
         }
         return
-            "min: " + doubleOrNA(min, "n/a") + units + " \u2022 " +
-            "mean: " + doubleOrNA(mean, "n/a") +units + " \u2022 " +
-            "max: " + doubleOrNA(max, "n/a") + units;
+            "min: "  + doubleOrNA(min, "n/a")  + units + " \u2022 " +
+            "mean: " + doubleOrNA(mean, "n/a") + units + " \u2022 " +
+            "max: "  + doubleOrNA(max, "n/a")  + units;
     }
 
     private String doubleOrNA(Double d, String na) {

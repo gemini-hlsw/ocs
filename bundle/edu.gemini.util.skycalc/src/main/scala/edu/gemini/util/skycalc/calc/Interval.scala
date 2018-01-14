@@ -1,7 +1,8 @@
 package edu.gemini.util.skycalc.calc
 
-import edu.gemini.skycalc.TimeUtils
 import java.util.TimeZone
+
+import edu.gemini.shared.util.DateTimeUtils
 
 /**
  * Representation of an interval between two points in time, including the start time and excluding the end time
@@ -33,8 +34,6 @@ case class Interval(start: Long, end: Long) extends Ordered[Interval] {
 
   /** Adds an interval to this interval. This operation is only defined if the two intervals overlap
     * or abut each, i.e. in all cases where adding the two intervals results in one single interval.
-    * @param other
-    * @return
     */
   def plus(other: Interval): Interval = {
     require(overlaps(other) || abuts(other))
@@ -57,10 +56,10 @@ case class Interval(start: Long, end: Long) extends Ordered[Interval] {
   }
 
   /** Gets duration of interval as hours. */
-  def asHours: Double = duration.toDouble / TimeUtils.hours(1)
+  def asHours: Double = duration.toDouble / DateTimeUtils.MillisecondsPerHour
 
   /** Gets duration of interval as days. */
-  def asDays: Double = duration.toDouble / TimeUtils.days(1)
+  def asDays: Double = duration.toDouble / DateTimeUtils.MillisecondsPerDay
 }
 
 object Interval {
@@ -135,16 +134,13 @@ object Interval {
    * Takes a sequence of intervals and transforms it into a sequence of full days (i.e. 14:00 first day to 14:00
    * on the next day) that covers all given intervals. Abutting full days are combined so that the resulting
    * sequence contains the minimal number of intervals needed to cover the original sequence.
-   * @param intervals
-   * @param localTime
-   * @return
    */
   def allDay(intervals: Seq[Interval], localTime: TimeZone): Seq[Interval] = {
     // blow intervals up to cover 24hrs (or multiples thereof); days start/end at 14hrs local time
     def blowUp(interval: Interval): Interval =
       Interval(
-        TimeUtils.startOfDay(interval.start, localTime),
-        TimeUtils.endOfDay(interval.end, localTime)
+        DateTimeUtils.startOfDayInMs(interval.start, localTime.toZoneId),
+        DateTimeUtils.endOfDayInMs  (interval.end,   localTime.toZoneId)
       )
 
     // note that a single interval can stretch several days (e.g. for time windows)

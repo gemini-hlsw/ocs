@@ -4,6 +4,7 @@ import edu.gemini.spModel.core.Site;
 import jsky.coords.WorldCoords;
 
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 public abstract class ElevationConstraintSolver extends Solver {
@@ -29,7 +30,7 @@ public abstract class ElevationConstraintSolver extends Solver {
 	protected final double min, max;
 
 	protected ElevationConstraintSolver(Site site, WorldCoords coords, double min, double max) {
-		super(TimeUtils.MS_PER_HOUR / 4, TimeUtils.MS_PER_MINUTE);
+        super(TimeUnit.MINUTES.toMillis(15), TimeUnit.MINUTES.toMillis(1));
 		this.coords = coords;
 		this.calc = new ImprovedSkyCalc(site);
 		this.max = max;

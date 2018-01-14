@@ -18,6 +18,7 @@ import edu.gemini.spModel.type.SpTypeUtil;
 import java.beans.PropertyDescriptor;
 import java.io.Serializable;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 /**
@@ -46,10 +47,6 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
         public static final int REPEAT_FOREVER = -1;
         public static final int REPEAT_NEVER = 0;
 
-        private static final long MS_PER_SECOND = 1000;
-        private static final long MS_PER_MINUTE = MS_PER_SECOND * 60;
-        private static final long MS_PER_HOUR = MS_PER_MINUTE * 60;
-
         private static final String NAME = "timing-window";
 
         private static final String START_PROP = "start";
@@ -70,7 +67,7 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
         }
 
         public TimingWindow() {
-            this(System.currentTimeMillis(), 24 * MS_PER_HOUR, 0, 0);
+            this(System.currentTimeMillis(), TimeUnit.DAYS.toMillis(1), 0, 0);
         }
 
         TimingWindow(final ParamSet params) {
