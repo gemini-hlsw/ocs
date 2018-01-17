@@ -15,7 +15,7 @@ object Instrument {
   case object Niri       extends Instrument(GN, "NIRI")
   case object Dssi       extends Instrument(GN, "DSSI", "DSSI", "DSSI")
   case object Texes      extends Instrument(GN, "Texes", "Texes", "TEXES")
-  case object ʻAlopeke   extends Instrument(GN, "ʻAlopeke")
+  case object Alopeke    extends Instrument(GN, "Alopeke", "ʻAlopeke", "Alopeke")
 
   case object Flamingos2 extends Instrument(GS, "Flamingos2", "Flamingos2", "FLAMINGOS")
   case object GmosSouth  extends Instrument(GS, "GMOSSouth", "GMOS South", "GMOS-S")

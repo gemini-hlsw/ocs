@@ -525,8 +525,8 @@ package object immutable {
   type WavelengthRegime = M.WavelengthRegime
   object WavelengthRegime extends EnumObject[M.WavelengthRegime]
 
-  type ʻAlopekeMode = M.ʻAlopekeMode
-  object ʻAlopekeMode extends EnumObject[M.ʻAlopekeMode]
+  type AlopekeMode = M.AlopekeMode
+  object AlopekeMode extends EnumObject[M.AlopekeMode]
 
 }
 

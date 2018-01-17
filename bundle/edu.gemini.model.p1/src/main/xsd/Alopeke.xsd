@@ -5,32 +5,32 @@
     <xsd:include schemaLocation="Instrument.xsd"/>
     
     <!-- Options for ʻAlopeke Blueprint. -->
-    <xsd:complexType name="ʻAlopekeBlueprintChoice">
+    <xsd:complexType name="AlopekeBlueprintChoice">
         <xsd:sequence>
             <xsd:choice>
-                <xsd:element name="null"     type="ʻAlopekeBlueprintNull"/>
-                <xsd:element name="ʻAlopeke" type="ʻAlopekeBlueprint"/>
+                <xsd:element name="null"     type="AlopekeBlueprintNull"/>
+                <xsd:element name="Alopeke"  type="AlopekeBlueprint"/>
             </xsd:choice>
         </xsd:sequence>
     </xsd:complexType>
     
     <!-- ʻAlopeke null. Empty blueprint, not available in PIT. -->
-    <xsd:complexType name="ʻAlopekeBlueprintNull"/>
+    <xsd:complexType name="AlopekeBlueprintNull"/>
 
     <!--
       ʻAlopeke Blueprint base type.
     -->
-    <xsd:complexType name="ʻAlopekeBlueprint">
+    <xsd:complexType name="AlopekeBlueprint">
         <xsd:complexContent>
             <xsd:extension base="BlueprintBase">
                 <xsd:sequence>
-                    <xsd:element name="mode" type="ʻAlopekeMode"/>
+                    <xsd:element name="mode" type="AlopekeMode"/>
                 </xsd:sequence>
             </xsd:extension>
         </xsd:complexContent>
     </xsd:complexType>
     
-    <xsd:simpleType name="ʻAlopekeMode">
+    <xsd:simpleType name="AlopekeMode">
         <xsd:restriction base="xsd:token">
             <xsd:enumeration value='Speckle (0.0096"/pix, 6.7" FoV)'/>
             <xsd:enumeration value='Wide Field (0.0725"/pix, 60" FoV)'/>

@@ -109,7 +109,7 @@ object Overheads extends (BlueprintBase => Option[Overheads]) {
 
     case _: DssiBlueprint               => SimpleOverheads(0.00, 10, 0.010).some
     case _: VisitorBlueprint            => SimpleOverheads(0.00, 10, 0.100).some
-    case _: ʻAlopekeBlueprint           => SimpleOverheads(0.00,  6, 0.000).some
+    case _: AlopekeBlueprint            => SimpleOverheads(0.00,  6, 0.000).some
 
 
     // NIRI relies on whether or not AO is being used.
