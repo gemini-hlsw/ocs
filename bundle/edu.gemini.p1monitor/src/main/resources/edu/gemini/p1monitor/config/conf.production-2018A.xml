@@ -13,11 +13,13 @@
     <type name="DirectorTime">
         <dir>/home/software/proposals/directors_time/proposals/2018A</dir>
         <to>pitdd@gemini.edu</to>
+        <template>dt</template>
     </type>
 
     <type name="PoorWeather">
         <dir>/home/software/proposals/poor_weather/proposals/2018A</dir>
         <to>pitpw@gemini.edu</to>
+        <template>pw</template>
     </type>
 
     <type name="DemoScience">
