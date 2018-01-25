@@ -97,7 +97,7 @@ public final class GmosPrinter extends PrinterBase {
         }
 
         getOverheadTableParams(result, result.observation());
-        _println(_printOverheadTable(p, config[step], 0, pta, step));
+        _println(_printOverheadTable(p, config[step], pta, step, s));
 
         _print("<HR align=left SIZE=3>");
 
@@ -179,7 +179,7 @@ public final class GmosPrinter extends PrinterBase {
         }
 
         getOverheadTableParams(results[0], results[0].observation());
-        _println(_printOverheadTable(p, config[step], 0, pta, step));
+        _println(_printOverheadTable(p, config[step], pta, step));
 
         printConfiguration(results[0].parameters(), instrument);
     }

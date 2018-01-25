@@ -10,6 +10,7 @@ import edu.gemini.itc.nifs.NifsRecipe;
 import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.config2.Config;
 import edu.gemini.spModel.gemini.nifs.InstNIFS;
+import edu.gemini.spModel.gemini.nifs.NIFSParams;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime;
 import edu.gemini.spModel.obs.plannedtime.PlannedTimeCalculator;
 
@@ -29,6 +30,8 @@ public final class NifsPrinter extends PrinterBase {
     private int step;
     private PlannedTime pta;
     private Config[] config;
+    private double readoutTimePerCoadd;
+
 
     public NifsPrinter(final ItcParameters p, final NifsParameters instr, final PlottingDetails pdp, final PrintWriter out) {
         super(out);
@@ -65,7 +68,7 @@ public final class NifsPrinter extends PrinterBase {
         _printWarnings(s.warnings());
 
         getOverheadTableParams(result, result.observation());
-        _println(_printOverheadTable(p, config[step], 0, pta, step));
+        _println(_printOverheadTable(p, config[step], readoutTimePerCoadd, pta, step, s));
 
         _print("<HR align=left SIZE=3>");
 
@@ -140,6 +143,8 @@ public final class NifsPrinter extends PrinterBase {
         ConfigCreator cc    = new ConfigCreator(p);
         config              = cc.createNifsConfig(instr, numberExposures);
         pta                 = PlannedTimeCalculator.instance.calc(config, new InstNIFS());
+        final NIFSParams.ReadMode readMode = (NIFSParams.ReadMode) config[0].getItemValue(NIFSParams.ReadMode.KEY);
+        readoutTimePerCoadd = readMode.getMinExp() + InstNIFS.COADD_CONSTANT;
 
         if (numberExposures < 2) step = 0; else step = 1;
     }

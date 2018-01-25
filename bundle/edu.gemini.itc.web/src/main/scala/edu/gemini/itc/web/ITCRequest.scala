@@ -198,7 +198,8 @@ object ITCRequest {
     val filter      = r.enumParameter(classOf[Gsaoi.Filter])
     val readMode    = r.enumParameter(classOf[Gsaoi.ReadMode])
     val iq          = obsConditionParameters(r).iq
-    ConfigExtractor.createGsaoiParameters(filter, readMode, iq) match {
+    val largeSkyOffset = r.intParameter("largeSkyOffset")
+    ConfigExtractor.createGsaoiParameters(filter, readMode, iq, largeSkyOffset) match {
       case \/-(p) => p
       case -\/(t) => throw new IllegalArgumentException(t)
     }

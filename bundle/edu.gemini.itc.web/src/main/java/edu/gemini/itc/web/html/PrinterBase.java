@@ -230,10 +230,11 @@ public abstract class PrinterBase {
         else    throw new Error();
     }
 
-    public String _printOverheadTable(ItcParameters p, Config config, double readoutTimePerCoadd, PlannedTime pta, int step) {
+    public String _printOverheadTable(ItcParameters p, Config config, double readoutTimePerCoadd, PlannedTime pta, int step, ItcSpectroscopyResult r) {
         PlannedTime.Step s = pta.steps.get(step);
         Config conf = config;
         Map<PlannedTime.Category, ImList<PlannedTime.CategorizedTime>> m = s.times.groupTimes();
+
         String setupStr = "";
         String reacqStr = "";
         String secStr;
@@ -244,7 +245,21 @@ public abstract class PrinterBase {
         if (p.observation().calculationMethod() instanceof Spectroscopy) {
             numReacq = pta.numReacq(conf);
             totalTime = pta.totalTimeWithMultipleAcqReacq(conf);
+
+            String instrumentName = (String) conf.getItemValue(ConfigCreator.InstInstrumentKey);
+            String fpu = null;
+            if (conf.containsItem(ConfigCreator.FPUKey)) {
+                fpu = conf.getItemValue(ConfigCreator.FPUKey).toString();
+            }
+            if ((instrumentName.contains("GMOS") && fpu.contains("IFU"))
+                    || instrumentName.equals("NIFS")) {
+                if (r.maxSingleSNRatio() > 5) {
+                    numReacq = 0;
+                    totalTime = pta.totalTimeWithMultipleAcq(conf);
+                }
+            }
         }
+
 
         StringBuilder buf = new StringBuilder("<html><body>");
 
@@ -303,4 +318,18 @@ public abstract class PrinterBase {
         return buf.toString();
     }
 
-}
+    // case of instruments with no coadds
+    public String _printOverheadTable(ItcParameters p, Config config, PlannedTime pta, int step, ItcSpectroscopyResult r) {
+        return _printOverheadTable(p, config, 0, pta, step, r);
+        }
+    // case of imaging for all instruments, or spectroscopy for instruments with no IFU
+    public String _printOverheadTable(ItcParameters p, Config config, double readoutTimePerCoadd, PlannedTime pta, int step) {
+        return _printOverheadTable(p, config, readoutTimePerCoadd, pta, step, null);
+    }
+    // both of the above
+    public String _printOverheadTable(ItcParameters p, Config config, PlannedTime pta, int step) {
+        return _printOverheadTable(p, config, 0, pta, step, null);
+    }
+
+
+    }

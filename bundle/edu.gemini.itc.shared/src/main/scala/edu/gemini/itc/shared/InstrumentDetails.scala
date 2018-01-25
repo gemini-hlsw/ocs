@@ -60,6 +60,7 @@ final case class GnirsParameters(
 final case class GsaoiParameters(
                      filter:            Gsaoi.Filter,
                      readMode:          Gsaoi.ReadMode,
+                     largeSkyOffset:    Int,
                      gems:              GemsParameters) extends InstrumentDetails
 
 final case class MichelleParameters(

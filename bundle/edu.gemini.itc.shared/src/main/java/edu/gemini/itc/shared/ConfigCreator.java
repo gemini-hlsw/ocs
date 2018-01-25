@@ -8,6 +8,7 @@ import edu.gemini.spModel.guide.GuideProbe;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -40,8 +41,10 @@ public class ConfigCreator {
     public static final ItemKey AmpCount = new ItemKey("instrument:ampCount");
     public static final ItemKey DetectorManufacturerKey = new ItemKey("instrument:detectorManufacturer");
     public static final ItemKey GuideWithPWFS2Key = new ItemKey("telescope:guideWithPWFS2");
+    public static final ItemKey GuideWithOIWFSKey = new ItemKey("telescope:guideWithOIWFS");
     public static final ItemKey TelescopeQKey = new ItemKey("telescope:q");
     public static final ItemKey TelescopePKey = new ItemKey("telescope:p");
+    public static final ItemKey GuideWithCWFS1 = new ItemKey("telescope:guideWithODGW1");
     public static final ItemKey AOGuideStarTypeKey = new ItemKey("adaptive optics:guideStarType");
     public static final ItemKey AOSystemKey = new ItemKey("adaptive optics:aoSystem");
     public static final ItemKey AOFieldLensKey = new ItemKey("adaptive optics:fieldLens");
@@ -179,23 +182,81 @@ public class ConfigCreator {
         }
         return conf;
     }
-/*
+
     public Config[] createGsaoiConfig(GsaoiParameters gsaoiParams, int numExp) {
         Config[] conf = createCommonConfig(numExp);
+        final double sf = obsDetailParams.calculationMethod().sourceFraction();
+        int stepNum = 1;
+        int numLargeOffsets = gsaoiParams.largeSkyOffset();
 
+        String g = "guide";
+        String p = "park";
+        int numFullAB = numExp / 8;
+        List<String> guideStatusABBA = new ArrayList<>(Arrays.asList(g,g,g,g,p,p,p,p, p,p,p,p,g,g,g,g));
+        List<String> guideStatusList = new ArrayList<>(conf.length);
+
+        // 1. on-source fraction = 1.0, large sky offsets = 0: ABAB dithering, no sky offsets, leave offsets as is. All steps guided.
+        // 2. on-source fraction = 0.5, large sky offsets = 0: obj-sky-sky-obj patterns with ABAB dithering. Sky unguided. Offset to the sky = 120"
+        // 3. on-source fraction = any, large sky offsets = 0:
+        // 4. on-source fraction = any, large sky offsets = n: obj-sky-obj-sky pattern with ABAB dithering.
+        //    Large offset number overrides the source fraction. Offset to the sky = 300"
+        if (numLargeOffsets == 0) {
+            if (sf == 1) {
+                Collections.fill(guideStatusList, "guide");
+            } else if (sf == 0.5) {
+                int shortABLength = (numExp % 8) / 2;
+                for (int i = 0; i < (conf.length / 16 + 1); i++) {
+                    guideStatusList.addAll(guideStatusABBA);
+                }
+                for (int i = 0; i < shortABLength; i++) {
+                    int index = (i + (conf.length / 8) * 8) - 1;
+                    guideStatusList.add(index, "guide");
+                    guideStatusList.add(index + shortABLength, "park");
+                }
+            }
+        } /* else {
+
+            if (numLargeOffsets % 2 != 0) {
+                throw new IllegalArgumentException(
+                    "Number of exposures must be a multiple of requested number of > 5 arcmin sky offsets");
+            } else {
+                int numDitheringPoints = numExp / (numLargeOffsets * 2);
+            }
+        }
+
+        for (int i=1; i < conf.length; i=+4) {
+
+        } */
         for (Config step : conf) {
             step.putItem(ReadModeKey, (gsaoiParams.readMode()));
             step.putItem(InstInstrumentKey, "GSAOI");
+            step.putItem(GuideWithCWFS1, "guide");
 
-            if (nifsParams.altair().isDefined()) {
-                AltairParameters altairParameters = nifsParams.altair().get();
-                step.putItem(AOGuideStarTypeKey, altairParameters.wfsMode().displayValue());
-                step.putItem(AOSystemKey, "Altair");
-            }
+            stepNum = stepNum + 1;
         }
         return conf;
     }
-    */
+
+    public Config[] createF2Config(Flamingos2Parameters f2Params, int numExp) {
+        Config[] conf = createCommonConfig(numExp);
+
+        for (Config step : conf) {
+            step.putItem(ReadModeKey, (f2Params.readMode()));
+            step.putItem(InstInstrumentKey, "Flamingos2");
+            step.putItem(DisperserKey, f2Params.grism());
+            step.putItem(FPUKey, f2Params.mask());
+            if (itcParams.telescope().getWFS().equals(GuideProbe.Type.PWFS)) {
+                step.putItem(GuideWithPWFS2Key, "guide");
+            } else if (itcParams.telescope().getWFS().equals(GuideProbe.Type.OIWFS)) {
+                step.putItem(GuideWithOIWFSKey, "guide");
+
+            }
+        }
+            return conf;
+
+    }
+
+
 
 }
 

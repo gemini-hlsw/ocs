@@ -6,6 +6,7 @@ import edu.gemini.pot.ModelConverters._
 import edu.gemini.pot.sp.SPComponentType._
 import edu.gemini.spModel.config2.{Config, ItemKey}
 import edu.gemini.spModel.core._
+import edu.gemini.spModel.data.YesNoType
 import edu.gemini.spModel.gemini.acqcam.AcqCamParams
 import edu.gemini.spModel.gemini.altair.AltairParams
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
@@ -176,13 +177,14 @@ object ConfigExtractor {
       gsaoi       <- createGsaoiParameters(filter, readMode, cond.iq)
     } yield gsaoi
   }
-  // We need this available outside to calculate the GeMS parameters in ITCRequest.
-  def createGsaoiParameters(filter: Gsaoi.Filter, readMode: Gsaoi.ReadMode, iq: SPSiteQuality.ImageQuality): String \/ GsaoiParameters = {
+  // We need this available outside to calculate the GeMS parameters in ITCRequest
+  def createGsaoiParameters(filter: Gsaoi.Filter, readMode: Gsaoi.ReadMode, iq: SPSiteQuality.ImageQuality) = createGsaoiParameters(filter, readMode, iq, 0)
+
+  def createGsaoiParameters(filter: Gsaoi.Filter, readMode: Gsaoi.ReadMode, iq: SPSiteQuality.ImageQuality, largeSkyOffset: Int): String \/ GsaoiParameters = {
     import Gsaoi._
     import SPSiteQuality._
 
     val error: String \/ GemsParameters = "GSAOI filter with unknown band".left
-
     def closestBand(band: MagnitudeBand) =
       // pick the closest band that's supported by ITC
       List(MagnitudeBand.J, MagnitudeBand.H, MagnitudeBand.K).minBy(b => Math.abs(b.center.toNanometers - band.center.toNanometers))
@@ -211,7 +213,7 @@ object ConfigExtractor {
     for {
       gems        <- extractGems            (filter)
     } yield {
-      GsaoiParameters(filter, readMode, gems)
+      GsaoiParameters(filter, readMode, largeSkyOffset, gems)
     }
   }
 

@@ -1,12 +1,16 @@
 package edu.gemini.itc.web.html;
 
 import edu.gemini.itc.base.ImagingResult;
+import edu.gemini.itc.base.Result;
 import edu.gemini.itc.base.SpectroscopyResult;
 import edu.gemini.itc.base.TransmissionElement;
 import edu.gemini.itc.flamingos2.Flamingos2;
 import edu.gemini.itc.flamingos2.Flamingos2Recipe;
 import edu.gemini.itc.shared.*;
+import edu.gemini.spModel.config2.Config;
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2.FPUnit;
+import edu.gemini.spModel.obs.plannedtime.PlannedTime;
+import edu.gemini.spModel.obs.plannedtime.PlannedTimeCalculator;
 
 import java.io.PrintWriter;
 import java.util.UUID;
@@ -19,12 +23,21 @@ public final class Flamingos2Printer extends PrinterBase {
     private final PlottingDetails pdp;
     private final Flamingos2Recipe recipe;
     private final boolean isImaging;
+    private final ItcParameters p;
+    private final Flamingos2Parameters instr;
+
+    private int step;
+    private PlannedTime pta;
+    private Config[] config;
+
 
     public Flamingos2Printer(final ItcParameters p, final Flamingos2Parameters instr, final PlottingDetails pdp, final PrintWriter out) {
         super(out);
         this.pdp       = pdp;
         this.recipe    = new Flamingos2Recipe(p, instr);
         this.isImaging = p.observation().calculationMethod() instanceof Imaging;
+        this.p          = p;
+        this.instr          = instr;
     }
 
     /**
@@ -64,6 +77,9 @@ public final class Flamingos2Printer extends PrinterBase {
         _printPeakPixelInfo(s.ccd(0));
         _printWarnings(s.warnings());
 
+        getOverheadTableParams(result, result.observation());
+        _println(_printOverheadTable(p, config[step], pta, step));
+
         _print("<HR align=left SIZE=3>");
 
         _println("<p style=\"page-break-inside: never\">");
@@ -101,6 +117,9 @@ public final class Flamingos2Printer extends PrinterBase {
         _printPeakPixelInfo(s.ccd(0));
         _printWarnings(s.warnings());
 
+        getOverheadTableParams(result, result.observation());
+        _println(_printOverheadTable(p, config[step], pta, step));
+
         printConfiguration((Flamingos2) result.instrument(), result.parameters());
     }
 
@@ -129,6 +148,25 @@ public final class Flamingos2Printer extends PrinterBase {
         s += "<BR>Pixel Size: " + instrument.getPixelSize() + "<BR>";
 
         return s;
+    }
+
+    public void getOverheadTableParams(Result result, ObservationDetails obs) {
+        int numberExposures = 1;
+        final CalculationMethod calcMethod = obs.calculationMethod();
+
+        if (calcMethod instanceof ImagingInt) {
+            numberExposures = (int)(((ImagingResult) result).is2nCalc().numberSourceExposures() * obs.sourceFraction());
+        } else if (calcMethod instanceof ImagingS2N) {
+            numberExposures = ((ImagingS2N) calcMethod).exposures();
+        } else if (calcMethod instanceof SpectroscopyS2N) {
+            numberExposures = ((SpectroscopyS2N) calcMethod).exposures();
+        }
+
+        ConfigCreator cc    = new ConfigCreator(p);
+        config              = cc.createF2Config(instr, numberExposures);
+        pta                 = PlannedTimeCalculator.instance.calc(config, new edu.gemini.spModel.gemini.flamingos2.Flamingos2());
+
+        if (numberExposures < 2) step = 0; else step = 1;
     }
 
 
