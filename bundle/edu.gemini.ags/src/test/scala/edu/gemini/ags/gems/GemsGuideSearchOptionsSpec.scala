@@ -64,13 +64,13 @@ class GemsGuideSearchOptionsSpec extends Specification {
       val criteria = options.searchCriteria(ctx, None).asScala
 
       criteria should be size 4
-      criteria.head.key should beEqualTo(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, CanopusWfs.Group.instance))
+      criteria.head.key should beEqualTo(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, Canopus.Wfs.Group.instance))
       criteria.head.criterion.magConstraint should beEqualTo(MagnitudeConstraints(RBandsList, FaintnessConstraint(16.8), Some(SaturationConstraint(9.3))))
       criteria(1).key should beEqualTo(GemsCatalogSearchKey(GemsGuideStarType.flexure, GsaoiOdgw.Group.instance))
       criteria(1).criterion.magConstraint should beEqualTo(MagnitudeConstraints(SingleBand(MagnitudeBand.H), FaintnessConstraint(17.0), Some(SaturationConstraint(8))))
       criteria(2).key should beEqualTo(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, GsaoiOdgw.Group.instance))
       criteria(2).criterion.magConstraint should beEqualTo(MagnitudeConstraints(SingleBand(MagnitudeBand.H), FaintnessConstraint(14.5), Some(SaturationConstraint(7.3))))
-      criteria(3).key should beEqualTo(GemsCatalogSearchKey(GemsGuideStarType.flexure, CanopusWfs.Group.instance))
+      criteria(3).key should beEqualTo(GemsCatalogSearchKey(GemsGuideStarType.flexure, Canopus.Wfs.Group.instance))
       criteria(3).criterion.magConstraint should beEqualTo(MagnitudeConstraints(RBandsList, FaintnessConstraint(16.8), Some(SaturationConstraint(9.3))))
     }
   }
