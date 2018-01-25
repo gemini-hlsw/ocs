@@ -19,7 +19,7 @@ import edu.gemini.spModel.data.config.ISysConfig;
 import edu.gemini.spModel.data.config.StringParameter;
 import edu.gemini.spModel.data.property.PropertyProvider;
 import edu.gemini.spModel.data.property.PropertySupport;
-import edu.gemini.spModel.gemini.gems.CanopusWfs;
+import edu.gemini.spModel.gemini.gems.Canopus;
 import edu.gemini.spModel.guide.GuideOption;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.guide.GuideProbeProvider;
@@ -688,7 +688,7 @@ public final class Gsaoi extends SPInstObsComp
         for (final GsaoiOdgw odgw : GsaoiOdgw.values()) {
             if (isActive(c, odgw.getSequenceProp())) return true;
         }
-        for (final CanopusWfs wfs : CanopusWfs.values()) {
+        for (final Canopus.Wfs wfs : Canopus.Wfs.values()) {
             if (isActive(c, wfs.getSequenceProp())) return true;
         }
         return false;

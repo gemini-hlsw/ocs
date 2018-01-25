@@ -4,7 +4,7 @@ import edu.gemini.ags.api.AgsMagnitude.{MagnitudeCalc, MagnitudeTable}
 import edu.gemini.pot.ModelConverters._
 import edu.gemini.catalog.api._
 import edu.gemini.spModel.core._
-import edu.gemini.spModel.gemini.gems.{CanopusWfs, GemsInstrument}
+import edu.gemini.spModel.gemini.gems.{Canopus, GemsInstrument}
 import edu.gemini.spModel.gemini.gsaoi.{Gsaoi, GsaoiOdgw}
 import edu.gemini.spModel.gems.GemsGuideStarType
 import edu.gemini.spModel.guide.{GuideSpeed, GuideProbe}
@@ -38,7 +38,7 @@ object GemsMagnitudeTable extends MagnitudeTable {
         case (Site.GS, odgw: GsaoiOdgw)  =>
           Some(GsaoiOdgwMagnitudeLimitsCalculator.gemsMagnitudeConstraint(GemsGuideStarType.flexure, MagnitudeBand.H.some))
 
-        case (Site.GS, can: CanopusWfs) =>
+        case (Site.GS, can: Canopus.Wfs) =>
           Some(CanopusWfsMagnitudeLimitsCalculator.gemsMagnitudeConstraint(GemsGuideStarType.tiptilt, MagnitudeBand.R.some))
 
         case _                           =>
@@ -99,14 +99,14 @@ object GemsMagnitudeTable extends MagnitudeTable {
    * be used directly by Mascot, since it cannot be looked up through the GemsInstrumentToMagnitudeLimitsCalculator map.
    */
   trait CanopusWfsCalculator extends LimitsCalculator {
-    def getNominalMagnitudeConstraints(cwfs: CanopusWfs): MagnitudeConstraints
+    def getNominalMagnitudeConstraints(cwfs: Canopus.Wfs): MagnitudeConstraints
   }
 
   lazy val CanopusWfsMagnitudeLimitsCalculator = new CanopusWfsCalculator {
     override def gemsMagnitudeConstraint(starType: GemsGuideStarType, nirBand: Option[MagnitudeBand]) =
       magLimits(RBandsList, 16.3, 8.8)
 
-    override def getNominalMagnitudeConstraints(cwfs: CanopusWfs): MagnitudeConstraints =
+    override def getNominalMagnitudeConstraints(cwfs: Canopus.Wfs): MagnitudeConstraints =
       magLimits(RBandsList, 16.3, 8.8)
   }
 

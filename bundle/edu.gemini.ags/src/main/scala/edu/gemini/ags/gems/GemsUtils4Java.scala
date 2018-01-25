@@ -3,7 +3,7 @@ package edu.gemini.ags.gems
 import edu.gemini.shared.util.immutable.ImList
 import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.spModel.core.{Magnitude, MagnitudeBand, SingleBand, RBandsList, SiderealTarget}
-import edu.gemini.spModel.gemini.gems.CanopusWfs
+import edu.gemini.spModel.gemini.gems.Canopus
 import edu.gemini.spModel.guide.GuideProbe
 import scala.collection.JavaConverters._
 
@@ -31,7 +31,7 @@ object GemsUtils4Java {
   def probeMagnitudeInUse(guideProbe: GuideProbe, referenceBand: MagnitudeBand, mags: ImList[Magnitude]): String = {
     val availableMagnitudes = mags.asScalaList
     // TODO Use GemsMagnitudeTable
-    val bandsList = if (CanopusWfs.Group.instance.getMembers.contains(guideProbe)) {
+    val bandsList = if (Canopus.Wfs.Group.instance.getMembers.contains(guideProbe)) {
         RBandsList
       } else {
         SingleBand(referenceBand)
