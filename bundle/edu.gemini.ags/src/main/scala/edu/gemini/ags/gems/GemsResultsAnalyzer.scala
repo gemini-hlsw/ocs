@@ -5,7 +5,7 @@ import java.util.logging.Logger
 import edu.gemini.ags.gems.mascot.{MascotCat, MascotProgress, Strehl}
 import edu.gemini.catalog.api.MagnitudeConstraints
 import edu.gemini.spModel.core._
-import edu.gemini.spModel.gemini.gems.Canopus
+import edu.gemini.spModel.gemini.gems.CanopusWfs
 import edu.gemini.spModel.gemini.gsaoi.{GsaoiOdgw, Gsaoi}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.gems.GemsGuideProbeGroup
@@ -61,10 +61,12 @@ object GemsResultsAnalyzer {
     obsContext.getBaseCoordinates.asScalaOpt.map(_.toNewModel).map { base =>
       // gemsGuideStars needs to be mutable to support updates from inside mascot
       val gemsGuideStars = TiptiltFlexurePair.pairs(catalogSearch.asScala.toList).foldLeft(List.empty[GemsGuideStars]) { (gemsGuideStars, pair) =>
+        // tiptiltGroup and flexureGroup are each one of CanopusWfs.Group and GsaoiOdgw.group.
         val tiptiltGroup = pair.tiptiltResults.criterion.key.group
         val flexureGroup = pair.flexureResults.criterion.key.group
         val tiptiltTargetsList = filter(obsContext, pair.tiptiltResults.results, tiptiltGroup, posAngles.asScala.toSet)
         val flexureTargetsList = filter(obsContext, pair.flexureResults.results, flexureGroup, posAngles.asScala.toSet)
+        val tiptiltGroupPreAsterismFilter: (List[SiderealTarget] => Boolean) = lst => tiptiltGroup.asterismPreFilter(lst.asImList)
 
         if (tiptiltTargetsList.nonEmpty && flexureTargetsList.nonEmpty) {
           // tell the UI to update
@@ -73,7 +75,7 @@ object GemsResultsAnalyzer {
           }
           val band = bandpass(tiptiltGroup, obsContext.getInstrument)
           val factor = strehlFactor(new Some[ObsContext](obsContext))
-          val asterisms = MascotCat.findBestAsterismInTargetsList(tiptiltTargetsList, base.ra.toAngle.toDegrees, base.dec.toDegrees, band, factor, mascotProgress)
+          val asterisms = MascotCat.findBestAsterismInTargetsList(tiptiltTargetsList, base.ra.toAngle.toDegrees, base.dec.toDegrees, band, factor, mascotProgress, tiptiltGroupPreAsterismFilter)
           val analyzedStars = asterisms.strehlList.map(analyzeAtAngles(obsContext, posAngles.asScala.toSet, _, flexureTargetsList, flexureGroup, tiptiltGroup))
           gemsGuideStars ::: analyzedStars.flatten
         } else {
@@ -107,6 +109,7 @@ object GemsResultsAnalyzer {
           val flexureGroup = pair.flexureResults.criterion.key.group
           val tiptiltTargetsList = filter(obsContext, pair.tiptiltResults.results, tiptiltGroup, posAngles)
           val flexureTargetsList = filter(obsContext, pair.flexureResults.results, flexureGroup, posAngles)
+          val tiptiltGroupPreAsterismFilter = (lst: List[SiderealTarget]) => tiptiltGroup.asterismPreFilter(lst.asImList)
 
           if (tiptiltTargetsList.nonEmpty && flexureTargetsList.nonEmpty) {
             // Find asterisms with Mascot
@@ -115,7 +118,7 @@ object GemsResultsAnalyzer {
 
             // tiptiltTargetsList should only contain Canopus WFS stars, so asterisms should only consist of these.
             // Thus shouldContinue will only be called for Canopus WFS stars.
-            val asterisms = MascotCat.findBestAsterismInTargetsList(tiptiltTargetsList, base.ra.toAngle.toDegrees, base.dec.toDegrees, band, factor, shouldContinue)
+            val asterisms = MascotCat.findBestAsterismInTargetsList(tiptiltTargetsList, base.ra.toAngle.toDegrees, base.dec.toDegrees, band, factor, shouldContinue, tiptiltGroupPreAsterismFilter)
             val analyzedStars = asterisms.strehlList.map(analyzeAtAngles(obsContext, posAngles, _, flexureTargetsList, flexureGroup, tiptiltGroup))
             stars ::: analyzedStars.flatten
           } else {
@@ -260,18 +263,21 @@ object GemsResultsAnalyzer {
 
   // Returns the given targets list with any objects removed that are not valid in the
   // given position angle.
-  private def filter(obsContext: ObsContext, targetsList: List[SiderealTarget], group: GemsGuideProbeGroup, posAngle: Angle): List[SiderealTarget] =
-    targetsList.filter(isTargetValidInGroup(obsContext, _, group, posAngle))
+  private def filter(obsContext: ObsContext, targetsList: List[SiderealTarget], group: GemsGuideProbeGroup, posAngle: Angle): List[SiderealTarget] = {
+    val ctx = obsContext.withPositionAngle(posAngle)
+    targetsList.filter(isTargetValidInGroup(ctx, _, group))
+  }
 
   // Returns true if all the stars in the given target list are valid for the given group
-  private def areAllTargetsValidInGroup(obsContext: ObsContext, targetList: List[SiderealTarget], group: GemsGuideProbeGroup, posAngle: Angle): Boolean =
-    targetList.forall(isTargetValidInGroup(obsContext, _, group, posAngle))
+  private def areAllTargetsValidInGroup(obsContext: ObsContext, targetList: List[SiderealTarget], group: GemsGuideProbeGroup, posAngle: Angle): Boolean = {
+    val ctx = obsContext.withPositionAngle(posAngle)
+    group.asterismFilter(ctx, targetList.asImList) && targetList.forall(isTargetValidInGroup(ctx, _, group))
+  }
 
   // Returns true if the given target is valid for the given group
-  private def isTargetValidInGroup(obsContext: ObsContext, target: SiderealTarget, group: GemsGuideProbeGroup, posAngle: Angle): Boolean = {
-    val ctx = obsContext.withPositionAngle(posAngle)
+  private def isTargetValidInGroup(obsContext: ObsContext, target: SiderealTarget, group: GemsGuideProbeGroup): Boolean = {
     val st = toSPTarget(target)
-    group.getMembers.asScala.exists(_.validate(st, ctx) == GuideStarValidation.VALID)
+    group.getMembers.asScala.exists(_.validate(st, obsContext) == GuideStarValidation.VALID)
   }
 
   // Returns the first valid guide probe for the given target in the given guide probe group at the given
@@ -300,8 +306,8 @@ object GemsResultsAnalyzer {
 
     // Special case:
     // If the tip tilt asterism is assigned to the GSAOI ODGW group, then the flexure star must be assigned to CWFS3.
-    if (isFlexure && ("ODGW" == tiptiltGroup.getKey) && Canopus.Wfs.cwfs3.validate(toSPTarget(target), ctx) == GuideStarValidation.VALID) {
-      Canopus.Wfs.cwfs3.some
+    if (isFlexure && ("ODGW" == tiptiltGroup.getKey) && CanopusWfs.cwfs3.validate(toSPTarget(target), ctx) == GuideStarValidation.VALID) {
+      CanopusWfs.cwfs3.some
     } else {
       val members = if (reverseOrder) group.getMembers.asScala.toList.reverse else group.getMembers.asScala.toList
       members.find(isValidGuideProbe)
@@ -311,10 +317,10 @@ object GemsResultsAnalyzer {
   // Returns true if the given target is valid for the given guide probe
   private def validate(ctx: ObsContext, target: SiderealTarget, guideProbe: GuideProbe): Boolean =
     guideProbe match {
-      case wfs: Canopus.Wfs          =>
+      case cwfs: CanopusWfs          =>
         // Additional check for mag range (for cwfs1 and cwfs2, since different than cwfs3 and group range)
         val canopusWfsCalculator = GemsMagnitudeTable.CanopusWfsMagnitudeLimitsCalculator
-        wfs.validate(toSPTarget(target), ctx) == GuideStarValidation.VALID && containsMagnitudeInLimits(target, canopusWfsCalculator.getNominalMagnitudeConstraints(wfs))
+        cwfs.validate(toSPTarget(target), ctx) == GuideStarValidation.VALID && containsMagnitudeInLimits(target, canopusWfsCalculator.getNominalMagnitudeConstraints(cwfs))
       case vp: ValidatableGuideProbe =>
         vp.validate(toSPTarget(target), ctx) == GuideStarValidation.VALID
       case _                         =>
@@ -325,7 +331,7 @@ object GemsResultsAnalyzer {
   // If assignCwfs3ToBrightest is true, the brightest star in the asterism (in tiptiltTargetList) is assigned to cwfs3,
   // otherwise the second brightest (OT-27).
   private def checkCwfs3Rule(guideProbe: GuideProbe, target: SiderealTarget, tiptiltTargetList: List[SiderealTarget], assignCwfs3ToBrightest: Boolean): Boolean = {
-    val isCwfs3 = guideProbe == Canopus.Wfs.cwfs3
+    val isCwfs3 = guideProbe == CanopusWfs.cwfs3
     // sort, put brightest stars first
     val targets = sortTargetsByBrightness(tiptiltTargetList)
     targets match {

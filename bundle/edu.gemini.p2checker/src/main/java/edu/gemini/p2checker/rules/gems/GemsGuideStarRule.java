@@ -7,10 +7,11 @@ import edu.gemini.p2checker.api.P2Problems;
 import edu.gemini.p2checker.util.PositionOffsetChecker;
 import edu.gemini.pot.sp.ISPProgramNode;
 import edu.gemini.pot.sp.SPComponentType;
-import edu.gemini.shared.util.immutable.Option;
+import edu.gemini.shared.util.immutable.*;
+import edu.gemini.spModel.core.SiderealTarget;
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2;
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2OiwfsGuideProbe;
-import edu.gemini.spModel.gemini.gems.Canopus;
+import edu.gemini.spModel.gemini.gems.CanopusWfs;
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi;
 import edu.gemini.spModel.gemini.gsaoi.GsaoiOdgw;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
@@ -25,14 +26,19 @@ import edu.gemini.spModel.target.env.GuideGroup;
 import edu.gemini.spModel.target.env.GuideProbeTargets;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * A rule for checking GeMS guide star positions.
  */
 public final class GemsGuideStarRule implements IRule {
     private static final String PREFIX = "GemsGuideStarRule_";
-    private static final String ODGW = "The ODGW%d guide star falls out of the range of the detector";
-    private static final String CWFS = "The CWFS%d guide star falls out of the range of the guide probe";
-    private static final String ConfigError = "Configuration not supported. Please select 3 CWFS + 1 ODGW or 1 CWFS + 3 ODGW";
+    private static final String ODGW = "The ODGW%d guide star falls out of the range of the detector.";
+    private static final String CWFS = "The CWFS%d guide star falls out of the range of the guide probe.";
+    private static final String ConfigError = "Configuration not supported. Please select 3 CWFS + 1 ODGW or 1 CWFS + 3 ODGW.";
+    private static final String WindowOverlap = "The guide windows for %s and %s overlap.";
+    private static final String MagnitudeDifference = "CWFS guide star magnitudes must differ by at most %.1f mag in the R band.";
     private static final String TipTilt = "Less than 3 GeMS guide stars of the same origin. Tip-tilt correction will not be optimal.";
     private static final String SlowFocus = "Missing Slow-focus Sensor star. Slow Focus correction will be not be applied.";
 // TODO: REL-2941   private static final String Flexure = "Missing flexure guide star. Flexure will not be compensated.";
@@ -79,7 +85,7 @@ public final class GemsGuideStarRule implements IRule {
 
             // Check the Canopus guide positions.
             if (elements.hasGems()) {
-                for (final Canopus.Wfs canwfs : Canopus.Wfs.values()) {
+                for (final CanopusWfs canwfs : CanopusWfs.values()) {
                     if (!validate(canwfs, ctx)) {
                         addError(problems, PREFIX + "CWFS", CWFS, ctx, canwfs.getIndex(), targetNode);
                     }
@@ -99,15 +105,43 @@ public final class GemsGuideStarRule implements IRule {
                 }
             }
 
+            // Extract the CWFS targets and count them.
             GuideGroup primaryGuideGroup = env.getPrimaryGuideGroup();
-            // get # cwfs
+            final Map<SiderealTarget,CanopusWfs> cwfsTargets = new HashMap<>();
             int cwfs = 0;
-            for (final Canopus.Wfs canwfs : Canopus.Wfs.values()) {
-                Option<GuideProbeTargets> gpt = primaryGuideGroup.get(canwfs);
+            for (final CanopusWfs canwfs : CanopusWfs.values()) {
+                final Option<GuideProbeTargets> gpt = primaryGuideGroup.get(canwfs);
                 if (!gpt.isEmpty() && !gpt.getValue().getPrimary().isEmpty()) {
+                    gpt.getValue().getPrimary().foreach(t -> ImOption.fromScalaOpt(t.getSiderealTarget()).foreach(st -> cwfsTargets.put(st, canwfs)));
                     cwfs++;
                 }
             }
+            final ImList<SiderealTarget> cwfsTargetsImList = DefaultImList.create(cwfsTargets.keySet());
+
+            // Check for overlapping guide windows.
+            CanopusWfs.Group.findOverlappingGuideWindows(ctx, cwfsTargetsImList).foreach(p -> {
+                final SiderealTarget t1 = p._1();
+                final SiderealTarget t2 = p._2();
+                final CanopusWfs c1 = cwfsTargets.get(t1);
+                final CanopusWfs c2 = cwfsTargets.get(t2);
+
+                // Sort the probe names as they might be out of order since maps can only be sorted on keys.
+                final CanopusWfs sc1;
+                final CanopusWfs sc2;
+                if (c1.getKey().compareTo(c2.getKey()) < 0) {
+                    sc1 = c1;
+                    sc2 = c2;
+                } else {
+                    sc1 = c2;
+                    sc2 = c1;
+                }
+                problems.addError(PREFIX + "GuideWindowOverlapError", String.format(WindowOverlap, sc1.getKey(), sc2.getKey()), targetNode);
+            });
+
+            // Check for magnitude violations.
+            final ImList<Double> cwfsMagnitudes = CanopusWfs.Group.extractRMagnitudes(cwfsTargetsImList);
+            if (!cwfsMagnitudes.isEmpty() && !CanopusWfs.Group.checkAsterismMagnitude(cwfsTargetsImList))
+                problems.addError(PREFIX + "MagnitudeDifferenceLimitError", String.format(MagnitudeDifference, CanopusWfs.Group.MAGNITUDE_DIFFERENCE_LIMIT), targetNode);
 
             if (Gsaoi.SP_TYPE.equals(elements.getInstrument().getType())) {
                 // get # odgws

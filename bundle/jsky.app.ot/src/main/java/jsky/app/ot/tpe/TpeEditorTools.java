@@ -1,9 +1,6 @@
 package jsky.app.ot.tpe;
 
 import edu.gemini.pot.sp.ISPNode;
-import edu.gemini.shared.util.immutable.None;
-import edu.gemini.shared.util.immutable.Option;
-import edu.gemini.shared.util.immutable.Some;
 import jsky.app.ot.OT;
 import jsky.app.ot.OTOptions;
 import jsky.util.gui.Resources;
@@ -65,10 +62,9 @@ final class TpeEditorTools {
         _browseButton = new JToggleButton("Browse", Resources.getIcon("browseArrow.gif")) {{
             setToolTipText("Switch to browse mode");
             addActionListener(e -> {
-                _current = this;
-                modeChange(TpeMode.BROWSE, None.instance());
-                _tpe.getImageWidget().setCursor(TpeCursor.browse.get());
-            });
+                    _current = this;
+                    _tpe.getImageWidget().setCursor(TpeCursor.browse.get());
+                });
             setHorizontalAlignment(LEFT);
         }};
         new ButtonState(TpeMode.BROWSE).set(_browseButton);
@@ -78,10 +74,9 @@ final class TpeEditorTools {
         _dragButton = new JToggleButton("Drag", Resources.getIcon("whiteGlove.gif")) {{
             setToolTipText("Switch to drag mode");
             addActionListener(e -> {
-                _current = this;
-                modeChange(TpeMode.DRAG, None.instance());
-                _tpe.getImageWidget().setCursor(TpeCursor.drag.get());
-            });
+                    _current = this;
+                    _tpe.getImageWidget().setCursor(TpeCursor.drag.get());
+                });
             setHorizontalAlignment(LEFT);
         }};
         new ButtonState(TpeMode.DRAG).set(_dragButton);
@@ -91,10 +86,9 @@ final class TpeEditorTools {
         _eraseButton = new JToggleButton("Erase", Resources.getIcon("eclipse/remove.gif")) {{
             setToolTipText("Switch to erase mode");
             addActionListener(e -> {
-                _current = this;
-                modeChange(TpeMode.ERASE, None.instance());
-                _tpe.getImageWidget().setCursor(TpeCursor.erase.get());
-            });
+                    _current = this;
+                    _tpe.getImageWidget().setCursor(TpeCursor.erase.get());
+                });
             setHorizontalAlignment(LEFT);
         }};
         new ButtonState(TpeMode.ERASE).set(_eraseButton);
@@ -108,12 +102,6 @@ final class TpeEditorTools {
             @Override public ISPNode getEditedNode() { return _tpe.getImageWidget().getContext().nodeOrNull(); }
             @Override public void updateEditableState() { updateEnabledStates(); }
         });
-    }
-
-    private void modeChange(final TpeMode mode, final Option<Object> arg) {
-        _tpe.getFeatures().stream()
-                .filter(feat -> feat instanceof TpeModeSensitive)
-                .forEach(feat -> ((TpeModeSensitive)feat).handleModeChange(mode, arg));
     }
 
     private boolean isEnabled() {
@@ -151,8 +139,6 @@ final class TpeEditorTools {
             final ButtonState bs = ButtonState.get(btn);
             _tpe.selectFeature(bs.feature);
             _tpe.getImageWidget().setCursor(TpeCursor.add.get());
-
-            modeChange(TpeMode.CREATE, new Some<>(bs.item));
         });
 
         new ButtonState(TpeMode.CREATE, tif, item).set(btn);

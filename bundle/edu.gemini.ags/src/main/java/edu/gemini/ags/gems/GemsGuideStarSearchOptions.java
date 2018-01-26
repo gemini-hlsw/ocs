@@ -4,10 +4,9 @@ import edu.gemini.catalog.api.CatalogName;
 import edu.gemini.catalog.api.PPMXL$;
 import edu.gemini.catalog.api.UCAC4$;
 import edu.gemini.catalog.api.MagnitudeConstraints;
-import edu.gemini.pot.ModelConverters;
 import edu.gemini.spModel.core.Angle;
 import edu.gemini.spModel.core.MagnitudeBand;
-import edu.gemini.spModel.gemini.gems.Canopus;
+import edu.gemini.spModel.gemini.gems.CanopusWfs;
 import edu.gemini.spModel.gemini.gems.GemsInstrument;
 import edu.gemini.spModel.gems.GemsGuideProbeGroup;
 import edu.gemini.spModel.gems.GemsGuideStarType;
@@ -165,7 +164,7 @@ public class GemsGuideStarSearchOptions {
     private GemsCatalogSearchCriterion canopusCriterion(final ObsContext obsContext, final GemsGuideStarType ggst) {
         final GemsMagnitudeTable.LimitsCalculator calculator = GemsMagnitudeTable.CanopusWfsMagnitudeLimitsCalculator();
         // Ugly hack for
-        return searchCriterion(obsContext, Canopus.Wfs.Group.instance, calculator, ggst, scala.Option.<MagnitudeBand>empty());
+        return searchCriterion(obsContext, CanopusWfs.Group.instance, calculator, ggst, scala.Option.empty());
     }
 
     private GemsCatalogSearchCriterion instrumentCriterion(final ObsContext obsContext, final GemsGuideStarType ggst, final scala.Option<MagnitudeBand> nirBand) {
@@ -174,10 +173,10 @@ public class GemsGuideStarSearchOptions {
     }
 
     private GemsCatalogSearchCriterion searchCriterion(final ObsContext obsContext,
-                                                       final GemsGuideProbeGroup gGroup,
-                                                       final GemsMagnitudeTable.LimitsCalculator calculator,
-                                                       final GemsGuideStarType gType,
-                                                       final scala.Option<MagnitudeBand> nirBand) {
+                                                      final GemsGuideProbeGroup gGroup,
+                                                      final GemsMagnitudeTable.LimitsCalculator calculator,
+                                                      final GemsGuideStarType gType,
+                                                      final scala.Option<MagnitudeBand> nirBand) {
         final String name = String.format("%s %s", gGroup.getDisplayName(), gType.name());
 
         // Adjust the mag limits for the worst conditions (as is done in the ags servlet)

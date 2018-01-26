@@ -4,7 +4,7 @@ import edu.gemini.ags.api.AgsGuideQuality._
 import edu.gemini.ags.api.AgsMagnitude.MagnitudeTable
 import edu.gemini.ags.api.{AgsAnalysis, AgsRegistrar}
 import edu.gemini.p2checker.api.{P2Problems, IP2Problems, Problem, ObservationElements, IRule}
-import edu.gemini.spModel.gemini.gems.Canopus
+import edu.gemini.spModel.gemini.gems.CanopusWfs
 import edu.gemini.spModel.gemini.gsaoi.GsaoiOdgw
 import edu.gemini.spModel.guide.GuideProbeGroup
 import edu.gemini.spModel.obs.SPObservation
@@ -49,7 +49,7 @@ object AgsAnalysisRule {
   val Prefix = "AgsAnalysisRule_"
 
   // We want to ignore AgsAnalysis problems for ODGW and Canopus.
-  val ignoredProbeGroups: Set[GuideProbeGroup] = Set(GsaoiOdgw.Group.instance, Canopus.Wfs.Group.instance)
+  val ignoredProbeGroups: Set[GuideProbeGroup] = Set(GsaoiOdgw.Group.instance, CanopusWfs.Group.instance)
 
   def severity(a: AgsAnalysis): Option[Problem.Type] =
     a.quality match {
