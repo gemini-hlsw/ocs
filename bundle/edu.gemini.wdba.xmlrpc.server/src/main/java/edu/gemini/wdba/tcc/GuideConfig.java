@@ -4,7 +4,7 @@ import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.gemini.altair.AltairAowfsGuider;
 import edu.gemini.spModel.gemini.altair.AltairParams;
 import edu.gemini.spModel.gemini.altair.InstAltair;
-import edu.gemini.spModel.gemini.gems.Canopus;
+import edu.gemini.spModel.gemini.gems.CanopusWfs;
 import edu.gemini.spModel.gemini.gmos.GmosOiwfsGuideProbe;
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi;
 import edu.gemini.spModel.gemini.gsaoi.GsaoiOdgw;
@@ -28,7 +28,7 @@ public final class GuideConfig extends ParamSet {
     );
 
     private static final Set<GuideProbe> CWFS_PROBES = Collections.unmodifiableSet(
-            new HashSet<>(Arrays.asList(Canopus.Wfs.values()))
+            new HashSet<>(Arrays.asList(CanopusWfs.values()))
     );
 
     private final ObservationEnvironment _oe;
