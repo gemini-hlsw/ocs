@@ -7,7 +7,7 @@ import edu.gemini.spModel.ags.AgsStrategyKey
 import edu.gemini.spModel.ags.AgsStrategyKey._
 import edu.gemini.spModel.core.{NiciBandsList, Site}
 import edu.gemini.spModel.gemini.altair.{AltairParams, InstAltair}
-import edu.gemini.spModel.gemini.gems.Canopus
+import edu.gemini.spModel.gemini.gems.CanopusWfs
 import edu.gemini.spModel.gemini.nici.NiciOiwfsGuideProbe
 import edu.gemini.spModel.guide.{GuideProbe, GuideProbeUtil}
 import edu.gemini.spModel.obs.context.ObsContext
@@ -116,7 +116,7 @@ object Strategy {
     s match {
       case SingleProbeStrategy(_, params, _) => isAvailable(params.guideProbe)
       case ScienceTargetStrategy(_, gp, _)   => isAvailable(gp)
-      case GemsStrategy                      => isAvailable(Canopus.Wfs.cwfs3) // any canopus would serve
+      case GemsStrategy                      => isAvailable(CanopusWfs.cwfs3) // any canopus would serve
       case _                                 => false
     }
   }

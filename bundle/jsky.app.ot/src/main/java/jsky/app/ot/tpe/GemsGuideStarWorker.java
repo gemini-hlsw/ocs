@@ -337,7 +337,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
         final Map<String, Boolean> keyMap = new HashMap<>();
         for (final GemsCatalogSearchResults searchResults : results) {
             final String key = searchResults.criterion().key().group().getKey();
-            if (searchResults.results().size() != 0) {
+            if (searchResults.results().nonEmpty()) {
                 keyMap.put(key, true);
             } else if (!keyMap.containsKey(key)) {
                 keyMap.put(key, false);

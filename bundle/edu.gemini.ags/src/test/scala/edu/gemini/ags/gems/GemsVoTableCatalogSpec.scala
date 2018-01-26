@@ -2,7 +2,7 @@ package edu.gemini.ags.gems
 
 import edu.gemini.catalog.api._
 import edu.gemini.catalog.votable.TestVoTableBackend
-import edu.gemini.spModel.gemini.gems.Canopus.Wfs
+import edu.gemini.spModel.gemini.gems.CanopusWfs
 import scala.concurrent.duration._
 import edu.gemini.shared.util.immutable.{None => JNone}
 import edu.gemini.spModel.core._
@@ -49,8 +49,8 @@ class GemsVoTableCatalogSpec extends Specification {
       val results = Await.result(GemsVoTableCatalog(TestVoTableBackend("/gemsvotablecatalogquery.xml", mod)).search(ctx, base, options, scala.None)(implicitly), 30.seconds)
       results should be size 2
 
-      results.head.criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, GsaoiOdgw.Group.instance), CatalogSearchCriterion("On-detector Guide Window tiptilt", RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), MagnitudeConstraints(SingleBand(MagnitudeBand.H), FaintnessConstraint(14.5), Some(SaturationConstraint(7.3))), Some(Offset(0.0014984027777700248.degrees[OffsetP], 0.0014984027777700248.degrees[OffsetQ])), scala.None)))
-      results(1).criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.flexure, Wfs.Group.instance), CatalogSearchCriterion("Canopus Wave Front Sensor flexure", RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), MagnitudeConstraints(RBandsList, FaintnessConstraint(15.5), Some(SaturationConstraint(8.0))), Some(Offset(0.0014984027777700248.degrees[OffsetP], 0.0014984027777700248.degrees[OffsetQ])), scala.None)))
+      results.head.criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, GsaoiOdgw.Group.instance), CatalogSearchCriterion("On-detector Guide Window tiptilt",  RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), MagnitudeConstraints(SingleBand(MagnitudeBand.H), FaintnessConstraint(14.5), Some(SaturationConstraint(7.3))), Some(Offset(0.0014984027777700248.degrees[OffsetP], 0.0014984027777700248.degrees[OffsetQ])), scala.None)))
+      results(1).criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.flexure, CanopusWfs.Group.instance),  CatalogSearchCriterion("Canopus Wave Front Sensor flexure", RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), MagnitudeConstraints(RBandsList, FaintnessConstraint(18.0), Some(SaturationConstraint(11.5))), Some(Offset(0.0014984027777700248.degrees[OffsetP], 0.0014984027777700248.degrees[OffsetQ])), scala.None)))
       results.head.results should be size 5
       results(1).results should be size 5
     }
@@ -95,7 +95,7 @@ class GemsVoTableCatalogSpec extends Specification {
       val results = GemsVoTableCatalog(TestVoTableBackend("/gemsvotablecatalogquery.xml", mod)).optimizeMagnitudeConstraints(options.searchCriteria(ctx, scala.None).asScala.toList)
       results should be size 2
       results.head should beEqualTo(MagnitudeConstraints(SingleBand(MagnitudeBand.H), FaintnessConstraint(14.5), Some(SaturationConstraint(7.3))))
-      results(1) should beEqualTo(MagnitudeConstraints(RBandsList, FaintnessConstraint(15.5), Some(SaturationConstraint(8.0))))
+      results(1) should beEqualTo(MagnitudeConstraints(RBandsList,FaintnessConstraint(18.0),Some(SaturationConstraint(11.5))))
     }
     "preserve the radius constraint for a single item without offsets" in {
       val catalog = GemsVoTableCatalog(TestVoTableBackend(""))

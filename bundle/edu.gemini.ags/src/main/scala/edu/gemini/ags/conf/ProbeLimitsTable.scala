@@ -8,7 +8,7 @@ import edu.gemini.spModel.core.Site.{GN, GS}
 import edu.gemini.spModel.gemini.altair.AltairParams.Mode._
 import edu.gemini.spModel.gemini.altair.{InstAltair, AltairAowfsGuider}
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2OiwfsGuideProbe
-import edu.gemini.spModel.gemini.gems.Canopus
+import edu.gemini.spModel.gemini.gems.CanopusWfs
 import edu.gemini.spModel.gemini.gmos.GmosOiwfsGuideProbe
 import edu.gemini.spModel.gemini.gnirs.GnirsOiwfsGuideProbe
 import edu.gemini.spModel.gemini.gsaoi.GsaoiOdgw
@@ -51,9 +51,9 @@ case class ProbeLimitsTable(tab: CalcMap) extends MagnitudeTable {
     // Deferring GeMS to the old implementation until we understand
     // what is supposed to happen.
     probe match {
-      case _: GsaoiOdgw   => GemsMagnitudeTable(ctx, probe)
-      case _: Canopus.Wfs => GemsMagnitudeTable(ctx, probe)
-      case _              =>
+      case _: GsaoiOdgw  => GemsMagnitudeTable(ctx, probe)
+      case _: CanopusWfs => GemsMagnitudeTable(ctx, probe)
+      case _             =>
         for {
           s  <- ctx.getSite.asScalaOpt
           id <- lookup(s, ctx, probe)

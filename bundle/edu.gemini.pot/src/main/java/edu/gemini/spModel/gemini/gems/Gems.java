@@ -242,7 +242,7 @@ public final class Gems extends AbstractDataObject implements PropertyProvider, 
         return sc;
     }
 
-    private static final Collection<GuideProbe> GUIDERS = GuideProbeUtil.instance.createCollection(Canopus.Wfs.values());
+    private static final Collection<GuideProbe> GUIDERS = GuideProbeUtil.instance.createCollection(CanopusWfs.values());
 
     public Collection<GuideProbe> getGuideProbes() {
         return GUIDERS;

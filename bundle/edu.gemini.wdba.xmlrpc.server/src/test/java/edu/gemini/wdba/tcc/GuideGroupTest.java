@@ -5,7 +5,7 @@ import edu.gemini.shared.util.immutable.DefaultImList;
 import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.spModel.ext.ObservationNode;
 import edu.gemini.spModel.ext.TargetNode;
-import edu.gemini.spModel.gemini.gems.Canopus;
+import edu.gemini.spModel.gemini.gems.CanopusWfs;
 import edu.gemini.spModel.gemini.gems.Gems;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.target.SPTarget;
@@ -51,7 +51,7 @@ public final class GuideGroupTest extends TestBase {
     @Test public void testLoneGroup() throws Exception {
         // Create a target environment that uses Gems canopus wfs.
         final TargetEnvironment env = TargetEnvironment.create(base);
-        final ImList<GuideProbeTargets> gtCollection = createGuideTargetsList(Canopus.Wfs.cwfs1, Canopus.Wfs.cwfs2, Canopus.Wfs.cwfs3);
+        final ImList<GuideProbeTargets> gtCollection = createGuideTargetsList(CanopusWfs.cwfs1, CanopusWfs.cwfs2, CanopusWfs.cwfs3);
         final GuideGroup gg = GuideGroup.create("LoneGroup", gtCollection);
         final TargetEnvironment env2 = env.setPrimaryGuideGroup(gg);
 
@@ -66,10 +66,10 @@ public final class GuideGroupTest extends TestBase {
     @Test public void testNamedGroup() throws Exception {
         // Create a target environment that uses Gems canopus wfs.
         final TargetEnvironment env = TargetEnvironment.create(base);
-        final ImList<GuideProbeTargets> gtCollection = createGuideTargetsList(Canopus.Wfs.cwfs1, Canopus.Wfs.cwfs2, Canopus.Wfs.cwfs3);
+        final ImList<GuideProbeTargets> gtCollection = createGuideTargetsList(CanopusWfs.cwfs1, CanopusWfs.cwfs2, CanopusWfs.cwfs3);
         final GuideGroup gg1 = GuideGroup.create("Group1", gtCollection);
 
-        final ImList<GuideProbeTargets> gtCollection2 = createGuideTargetsList(Canopus.Wfs.cwfs1, Canopus.Wfs.cwfs2, Canopus.Wfs.cwfs3);
+        final ImList<GuideProbeTargets> gtCollection2 = createGuideTargetsList(CanopusWfs.cwfs1, CanopusWfs.cwfs2, CanopusWfs.cwfs3);
         final GuideGroup gg2 = GuideGroup.create("Group2", gtCollection2);
         final TargetEnvironment env2 = env.setGuideEnvironment(GuideEnvironment.create(OptionsListImpl.create(gg1, gg2)));
 
