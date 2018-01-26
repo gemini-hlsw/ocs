@@ -10,7 +10,7 @@ import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2;
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2OiwfsGuideProbe;
-import edu.gemini.spModel.gemini.gems.CanopusWfs;
+import edu.gemini.spModel.gemini.gems.Canopus;
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi;
 import edu.gemini.spModel.gemini.gsaoi.GsaoiOdgw;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
@@ -79,7 +79,7 @@ public final class GemsGuideStarRule implements IRule {
 
             // Check the Canopus guide positions.
             if (elements.hasGems()) {
-                for (final CanopusWfs canwfs : CanopusWfs.values()) {
+                for (final Canopus.Wfs canwfs : Canopus.Wfs.values()) {
                     if (!validate(canwfs, ctx)) {
                         addError(problems, PREFIX + "CWFS", CWFS, ctx, canwfs.getIndex(), targetNode);
                     }
@@ -102,7 +102,7 @@ public final class GemsGuideStarRule implements IRule {
             GuideGroup primaryGuideGroup = env.getPrimaryGuideGroup();
             // get # cwfs
             int cwfs = 0;
-            for (final CanopusWfs canwfs : CanopusWfs.values()) {
+            for (final Canopus.Wfs canwfs : Canopus.Wfs.values()) {
                 Option<GuideProbeTargets> gpt = primaryGuideGroup.get(canwfs);
                 if (!gpt.isEmpty() && !gpt.getValue().getPrimary().isEmpty()) {
                     cwfs++;

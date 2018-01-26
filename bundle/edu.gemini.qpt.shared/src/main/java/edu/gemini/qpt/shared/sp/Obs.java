@@ -18,7 +18,7 @@ import edu.gemini.spModel.gemini.altair.AltairParams.GuideStarType;
 import edu.gemini.spModel.gemini.altair.InstAltair;
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2;
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2OiwfsGuideProbe;
-import edu.gemini.spModel.gemini.gems.CanopusWfs;
+import edu.gemini.spModel.gemini.gems.Canopus;
 import edu.gemini.spModel.gemini.gmos.GmosCommonType;
 import edu.gemini.spModel.gemini.gmos.GmosNorthType;
 import edu.gemini.spModel.gemini.gmos.GmosOiwfsGuideProbe;
@@ -130,7 +130,7 @@ public final class Obs implements Serializable, Comparable<Obs> {
 
                     // REL-293: WFS
                     AltairAowfsGuider.class,
-                    CanopusWfs.class,
+                    Canopus.Wfs.class,
                     GsaoiOdgw.class,
                     PwfsGuideProbe.class,
 

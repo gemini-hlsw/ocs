@@ -5,7 +5,7 @@ import edu.gemini.qpt.core.Marker
 import edu.gemini.qpt.core.Variant
 import edu.gemini.qpt.core.util.MarkerManager
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2OiwfsGuideProbe
-import edu.gemini.spModel.gemini.gems.CanopusWfs
+import edu.gemini.spModel.gemini.gems.Canopus
 import edu.gemini.spModel.gemini.gsaoi.GsaoiOdgw
 import edu.gemini.spModel.gemini.nifs.NifsOiwfsGuideProbe
 import edu.gemini.spModel.guide.GuideProbe
@@ -23,7 +23,7 @@ object TargetEnvironmentListener {
   }
 
   // We use a set of GuideProbes to check for some specific exception cases.
-  private val canopusGuiders: Set[GuideProbe] = CanopusWfs.values().toSet
+  private val canopusGuiders: Set[GuideProbe] = Canopus.Wfs.values().toSet
   private val odgwGuiders: Set[GuideProbe]    = GsaoiOdgw.values().toSet
 
   private val gsaoiGuiders: Set[GuideProbe]  = canopusGuiders ++ odgwGuiders
