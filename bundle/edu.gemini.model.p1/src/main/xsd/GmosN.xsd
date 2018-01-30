@@ -166,9 +166,9 @@
             <xsd:enumeration value="Ha (656 nm)"/>
             <xsd:enumeration value="HaC (662 nm)"/>
             <xsd:enumeration value="SII (672 nm)"/>
-            <xsd:enumeration value="DS920 (920 nm)"/>
             <xsd:enumeration value="OVI (684 nm)"/>
             <xsd:enumeration value="OVIC (678 nm)"/>
+            <xsd:enumeration value="DS920 (920 nm)"/>
             <xsd:enumeration value="User-supplied"/>
         </xsd:restriction>
     </xsd:simpleType>
