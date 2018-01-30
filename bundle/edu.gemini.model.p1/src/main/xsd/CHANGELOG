@@ -1,6 +1,11 @@
 Gemini Phase I Schema Changes
 
-# Version 2018.1.1 - 2018B
+# Version 2018.2.1 - 2018B
+##########################
+
+* Added OVI and OVIC filters for GMOS-N and GMOS-S. (REL-3273)
+
+# Version 2018.1.1 - 2018A
 ##########################
 
 * Hidden filter Y and J-lo for Flamingos2

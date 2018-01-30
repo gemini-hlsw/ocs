@@ -131,6 +131,8 @@ package object immutable {
       HaC_G0311,
       SII_G0317,
       DS920_G0312,
+      OVI_G0345,
+      OVIC_G0346,
       USER_SUPPLIED
     )
     val ALTAIR_IMAGING = List(
@@ -198,6 +200,8 @@ package object immutable {
       Ha_G0336,
       HaC_G0337,
       SII_G0335,
+      OVI_G0347,
+      OVIC_G0348,
       USER_SUPPLIED
     )
   }

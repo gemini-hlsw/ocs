@@ -104,6 +104,12 @@
             <jxb:bindings node="./xsd:enumeration[@value='SII (672 nm)']">
                 <jxb:typesafeEnumMember name="SII_G0335"/>
             </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='OVI (684 nm)']">
+                <jxb:typesafeEnumMember name="OVI_G0347"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='OVIC (678 nm)']">
+                <jxb:typesafeEnumMember name="OVIC_G0348"/>
+            </jxb:bindings>
         </jxb:bindings>
 
         <!-- GmosSFpu => GmosSouthType.FPUnitSouth -->
