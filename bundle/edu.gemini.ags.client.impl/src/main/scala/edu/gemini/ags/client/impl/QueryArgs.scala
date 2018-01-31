@@ -51,6 +51,7 @@ object QueryArgs {
   }).toList
 
   def instId(b: BlueprintBase): Either[String, String] = b match {
+    case g: AlopekeBlueprint    => Right(Instrument.Nifs.id) // REL-3351: treat Alopeke like NIFS until Visitor PWFS is changeable.
     case g: TexesBlueprint      => Right(Instrument.Nifs.id) // REL-1062
     case g: DssiBlueprint       => Right(Instrument.Nifs.id) // REL-1061
     case g: VisitorBlueprint    => Right(Instrument.Niri.id) // REL-1090

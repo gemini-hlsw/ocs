@@ -134,7 +134,7 @@
             <xsd:element name="texes"      type="TexesBlueprintChoice"/>
             <xsd:element name="trecs"      type="TrecsBlueprintChoice"/>
             <xsd:element name="visitor"    type="VisitorBlueprintChoice"/>
-	        <xsd:element name="alopeke"    type="AlopekeBlueprintChoice"/>
+	    <xsd:element name="alopeke"    type="AlopekeBlueprintChoice"/>
         </xsd:choice>
     </xsd:complexType>
 
