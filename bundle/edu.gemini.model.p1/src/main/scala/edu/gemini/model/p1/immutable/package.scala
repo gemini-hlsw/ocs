@@ -130,6 +130,8 @@ package object immutable {
       Ha_G0310,
       HaC_G0311,
       SII_G0317,
+      OVI_G0345,
+      OVIC_G0346,
       DS920_G0312,
       USER_SUPPLIED
     )
@@ -198,6 +200,8 @@ package object immutable {
       Ha_G0336,
       HaC_G0337,
       SII_G0335,
+      OVI_G0347,
+      OVIC_G0348,
       USER_SUPPLIED
     )
   }

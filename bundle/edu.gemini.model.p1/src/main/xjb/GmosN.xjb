@@ -95,6 +95,12 @@
             <jxb:bindings node="./xsd:enumeration[@value='SII (672 nm)']">
                 <jxb:typesafeEnumMember name="SII_G0317"/>
             </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='OVI (684 nm)']">
+                <jxb:typesafeEnumMember name="OVI_G0345"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='OVIC (678 nm)']">
+                <jxb:typesafeEnumMember name="OVIC_G0346"/>
+            </jxb:bindings>
             <jxb:bindings node="./xsd:enumeration[@value='DS920 (920 nm)']">
                 <jxb:typesafeEnumMember name="DS920_G0312"/>
             </jxb:bindings>
