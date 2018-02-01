@@ -87,6 +87,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
           TimeProblems(p, s).all ++
           TimeProblems.partnerZeroTimeRequest(p, s) ++
           TacProblems(p, s).all ++
+          Semester2018BProblems(p, s).all ++
           List(incompleteInvestigator, missingObsElementCheck, cfCheck, emptyTargetCheck,
             emptyEphemerisCheck, singlePointEphemerisCheck, initialEphemerisCheck, finalEphemerisCheck,
             badGuiding, cwfsCorrectionsIssue, badVisibility, iffyVisibility, minTimeCheck, wrongSite, band3Orphan2, gpiCheck, lgsIQ70Check, lgsGemsIQ85Check,
@@ -679,6 +680,35 @@ object TimeProblems {
       probs.right.getOrElse(Nil)
     case _                            => Nil
   }
+}
+
+case class Semester2018BProblems(p: Proposal, s: ShellAdvisor) {
+  // *** 2018B specific issues ***
+  private val semester2018B = Semester(2018, SemesterOption.B)
+
+  private val texesNotOfferedCheck = for {
+    o <- p.observations
+    b <- o.blueprint
+    if b.isInstanceOf[TexesBlueprint]
+    if p.semester == semester2018B
+  } yield new Problem(Severity.Error, "TEXES is not offered for 2018B.", "Observations", s.inObsListView(o.band, _.Fixes.fixBlueprint(b)))
+
+  private val dssiOnlyGS = for {
+    o <- p.observations
+    b <- o.blueprint
+    if b.isInstanceOf[DssiBlueprint]
+    if b.site == Site.GN
+    if p.semester == semester2018B
+  } yield new Problem(Severity.Error, "DSSI is not offered at Gemini North for 2018B.", "Observations", s.inObsListView(o.band, _.Fixes.fixBlueprint(b)))
+
+  private val phoenixOnlyGS = for {
+    o <- p.observations
+    b <- o.blueprint
+    if b.isInstanceOf[PhoenixBlueprint]
+    if b.site == Site.GN
+  } yield new Problem(Severity.Error, "Phoenis is only available at Gemini South for 2018B.", "Observations", s.inObsListView(o.band, _.Fixes.fixBlueprint(b)))
+
+  def all: List[Problem] = List(texesNotOfferedCheck, dssiOnlyGS, phoenixOnlyGS).flatten
 }
 
 case class TimeProblems(p: Proposal, s: ShellAdvisor) {
