@@ -1,0 +1,40 @@
+<!--
+  Schema definition for ʻAlopeke blueprints.
+-->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <xsd:include schemaLocation="Instrument.xsd"/>
+    
+    <!-- Options for ʻAlopeke Blueprint. -->
+    <xsd:complexType name="AlopekeBlueprintChoice">
+        <xsd:sequence>
+            <xsd:choice>
+                <xsd:element name="null"     type="AlopekeBlueprintNull"/>
+                <xsd:element name="Alopeke"  type="AlopekeBlueprint"/>
+            </xsd:choice>
+        </xsd:sequence>
+    </xsd:complexType>
+    
+    <!-- ʻAlopeke null. Empty blueprint, not available in PIT. -->
+    <xsd:complexType name="AlopekeBlueprintNull"/>
+
+    <!--
+      ʻAlopeke Blueprint base type.
+    -->
+    <xsd:complexType name="AlopekeBlueprint">
+        <xsd:complexContent>
+            <xsd:extension base="BlueprintBase">
+                <xsd:sequence>
+                    <xsd:element name="mode" type="AlopekeMode"/>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+    
+    <xsd:simpleType name="AlopekeMode">
+        <xsd:restriction base="xsd:token">
+            <xsd:enumeration value='Speckle (0.0096"/pix, 6.7" FoV)'/>
+            <xsd:enumeration value='Wide Field (0.0725"/pix, 60" FoV)'/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+</xsd:schema>

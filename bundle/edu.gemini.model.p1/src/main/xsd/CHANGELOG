@@ -4,6 +4,7 @@ Gemini Phase I Schema Changes
 ##########################
 
 * Added OVI and OVIC filters for GMOS-N and GMOS-S. (REL-3273)
+* Added new instrument, ʻAlopeke, with two modes, namely Speckle (0.0096"/pix, 6.7" FoV) and Wide Field (0.0725"/pix, 60" FoV). (REL-3351)
 
 # Version 2018.1.1 - 2018A
 ##########################

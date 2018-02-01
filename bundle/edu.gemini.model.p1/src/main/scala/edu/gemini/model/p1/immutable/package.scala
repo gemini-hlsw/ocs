@@ -77,18 +77,18 @@ package object immutable {
     val SYSTEM_VERIFICATION = M.SpecialProposalType.SYSTEM_VERIFICATION
   }
 
-  type Flamingos2Filter = mutable.Flamingos2Filter
-  object Flamingos2Filter extends EnumObject[mutable.Flamingos2Filter] {
-    val Y       = mutable.Flamingos2Filter.Y
-    val J_LOW   = mutable.Flamingos2Filter.J_LOW
-    val J       = mutable.Flamingos2Filter.J
-    val H       = mutable.Flamingos2Filter.H
-    val K_LONG  = mutable.Flamingos2Filter.K_LONG
-    val K_SHORT = mutable.Flamingos2Filter.K_SHORT
-    val K_BLUE  = mutable.Flamingos2Filter.K_BLUE
-    val K_RED   = mutable.Flamingos2Filter.K_RED
-    val JH      = mutable.Flamingos2Filter.JH
-    val HK      = mutable.Flamingos2Filter.HK
+  type Flamingos2Filter = M.Flamingos2Filter
+  object Flamingos2Filter extends EnumObject[M.Flamingos2Filter] {
+    val Y       = M.Flamingos2Filter.Y
+    val J_LOW   = M.Flamingos2Filter.J_LOW
+    val J       = M.Flamingos2Filter.J
+    val H       = M.Flamingos2Filter.H
+    val K_LONG  = M.Flamingos2Filter.K_LONG
+    val K_SHORT = M.Flamingos2Filter.K_SHORT
+    val K_BLUE  = M.Flamingos2Filter.K_BLUE
+    val K_RED   = M.Flamingos2Filter.K_RED
+    val JH      = M.Flamingos2Filter.JH
+    val HK      = M.Flamingos2Filter.HK
   }
 
   type Flamingos2Disperser = M.Flamingos2Disperser
@@ -349,14 +349,14 @@ package object immutable {
     val BBF_BRACONT = M.NiriFilter.NBF_BRACONT
   }
 
-  type PhoenixFocalPlaneUnit = mutable.PhoenixFocalPlaneUnit
-  object PhoenixFocalPlaneUnit extends EnumObject[mutable.PhoenixFocalPlaneUnit]
+  type PhoenixFocalPlaneUnit = M.PhoenixFocalPlaneUnit
+  object PhoenixFocalPlaneUnit extends EnumObject[M.PhoenixFocalPlaneUnit]
 
-  type PhoenixFilter = mutable.PhoenixFilter
-  object PhoenixFilter extends EnumObject[mutable.PhoenixFilter]
+  type PhoenixFilter = M.PhoenixFilter
+  object PhoenixFilter extends EnumObject[M.PhoenixFilter]
 
-  type GsaoiFilter = mutable.GsaoiFilter
-  object GsaoiFilter extends EnumObject[mutable.GsaoiFilter]
+  type GsaoiFilter = M.GsaoiFilter
+  object GsaoiFilter extends EnumObject[M.GsaoiFilter]
 
   type Guider = M.Guider
   object Guider extends EnumObject[M.Guider]
@@ -498,10 +498,10 @@ package object immutable {
     val NIGHT = M.TimeUnit.NIGHT
   }
 
-  type ToOChoice = mutable.TooOption
+  type ToOChoice = M.TooOption
   object ToOChoice extends EnumObject[M.TooOption] {
-    val None  = mutable.TooOption.NONE
-    val Rapid = mutable.TooOption.RAPID
+    val None  = M.TooOption.NONE
+    val Rapid = M.TooOption.RAPID
   }
 
   type TexesDisperser = M.TexesDisperser
@@ -524,6 +524,10 @@ package object immutable {
 
   type WavelengthRegime = M.WavelengthRegime
   object WavelengthRegime extends EnumObject[M.WavelengthRegime]
+
+  type AlopekeMode = M.AlopekeMode
+  object AlopekeMode extends EnumObject[M.AlopekeMode]
+
 }
 
 

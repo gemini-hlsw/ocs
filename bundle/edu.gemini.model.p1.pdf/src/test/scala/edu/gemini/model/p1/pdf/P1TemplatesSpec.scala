@@ -138,6 +138,10 @@ class P1TemplatesSpec extends Specification with XmlMatchers {
       // Check that we use the proper public name of DSSI
       XML.loadString(result) must (\\("table-cell") \ "block" \> "DSSI - Gemini North")
     }
+    "present the correct name when using ʻAlopeke, REL-3351" in {
+      val result = transformProposal("proposal_with_alopeke.xml")
+      XML.loadString(result) must (\\("table-cell") \ "block" \> "ʻAlopeke")
+    }
     "present the correct name when using Visitor GN, REL-1090" in {
       val result = transformProposal("proposal_with_visitor_gn.xml")
       // Check that we use the proper public name of a north visitor
@@ -157,11 +161,6 @@ class P1TemplatesSpec extends Specification with XmlMatchers {
       val result = transformProposal("proposal_with_texes.xml")
       // Check that we use the proper public name of a south visitor
       XML.loadString(result) must (\\("table-cell") \ "block" \> "Texes - Gemini North")
-    }
-    "present DSSI' Site, REL-2463" in {
-      val result = transformProposal("proposal_with_dssi.xml")
-      // Check that we use the proper public name of a south visitor
-      XML.loadString(result) must (\\("table-cell") \ "block" \> "DSSI - Gemini North")
     }
     "show an ITAC information section if the proposal contains a comment, REL-1165" in {
       val result = transformProposal("proposal_with_itac_comment.xml")
