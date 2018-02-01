@@ -265,7 +265,7 @@ case object SemesterConverter2016ATo2016B extends SemesterConverter {
     }
 
   val dssiSite: TransformFunction = {
-    case <dssi>{ns @ _*}</dssi> if (ns \ "site").isEmpty =>
+    case p @ <dssi>{ns @ _*}</dssi> if (p \\ "Dssi" \\ "site").isEmpty =>
       object DssiSiteTransformer extends BasicTransformer {
         override def transform(n: xml.Node): xml.NodeSeq = n match {
           case p @ <Dssi>{q @ _*}</Dssi> => <Dssi id={p.attribute("id")}>{q.map(transform) +: <site>{Site.GS.name}</site>}</Dssi>
