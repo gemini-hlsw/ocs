@@ -138,17 +138,17 @@ case class LastStepConverter(semester: Semester) extends SemesterConverter {
  * This converter will upgrade to 2018B.
  */
 case object SemesterConverter2018ATo2018B extends SemesterConverter {
-  val dssiSite: TransformFunction = {
-    case <dssi>{ns @ _*}</dssi> =>
-      object DssiSiteTransformer extends BasicTransformer {
+  val dssiGNToAlopeke: TransformFunction = {
+    case p @ <dssi>{ns @ _*}</dssi> if (p \\ "Dssi" \\ "site").map(_.text).exists(_.equals(Site.GN.name)) =>
+      object DssiGNAlopekeTransformer extends BasicTransformer {
         override def transform(n: xml.Node): xml.NodeSeq = n match {
-          case p @ <Dssi>{q @ _*}</Dssi> => <Dssi id={p.attribute("id")}>{q.map(transform) +: <site>{Site.GS.name}</site>}</Dssi>
-          case <name>{name}</name>       => <name>DSSI {Site.GS.name}</name>
+          case p @ <Dssi>{q @ _*}</Dssi> => <Alopeke id={p.attribute("id")}>{q.map(transform) +: <mode>{AlopekeMode.SPECKLE.value}</mode>}</Alopeke>
+          case <name>{_}</name>          => <name>{AlopekeBlueprint(AlopekeMode.SPECKLE).name}</name>
           case elem: xml.Elem            => elem.copy(child = elem.child.flatMap(transform))
           case _                         => n
         }
       }
-      StepResult("DSSI proposal has been assigned to Gemini South. Use ʻAlopeke instead for Gemini North.", <dssi>{DssiSiteTransformer.transform(ns)}</dssi>).successNel
+      StepResult("DSSI Gemini North proposal has been migrated to ʻAlopeke instead.", <alopeke>{DssiGNAlopekeTransformer.transform(ns)}</alopeke>).successNel
   }
 
   val phoenixNameRegex = "(Phoenix) (.*)".r
@@ -169,7 +169,7 @@ case object SemesterConverter2018ATo2018B extends SemesterConverter {
       StepResult("Phoenix proposal has been assigned to Gemini South.", <phoenix>{PhoenixSiteTransformer.transform(ns)}</phoenix>).successNel
   }
 
-  override val transformers = List(dssiSite, phoenixSite)
+  override val transformers = List(dssiGNToAlopeke, phoenixSite)
 }
 
 /**
@@ -264,6 +264,19 @@ case object SemesterConverter2016ATo2016B extends SemesterConverter {
         StepResult("The Flamingos2 filter K-long (2.00 um) has been converted to K-long (2.20 um).", <flamingos2>{KLongFilterTransformer.transform(ns)}</flamingos2>).successNel
     }
 
+  val dssiSite: TransformFunction = {
+    case <dssi>{ns @ _*}</dssi> if (ns \ "site").isEmpty =>
+      object DssiSiteTransformer extends BasicTransformer {
+        override def transform(n: xml.Node): xml.NodeSeq = n match {
+          case p @ <Dssi>{q @ _*}</Dssi> => <Dssi id={p.attribute("id")}>{q.map(transform) +: <site>{Site.GS.name}</site>}</Dssi>
+          case <name>{name}</name>       => <name>DSSI {Site.GS.name}</name>
+          case elem: xml.Elem            => elem.copy(child = elem.child.flatMap(transform))
+          case _                         => n
+        }
+      }
+      StepResult("DSSI proposal has been assigned to Gemini South.", <dssi>{DssiSiteTransformer.transform(ns)}</dssi>).successNel
+  }
+
   val texesNameRegex = "(Texes) (.*)".r
   def transformTexesName(name: String) = name match {
     case texesNameRegex(a, b) => s"$a ${Site.GN.name} $b"
@@ -297,7 +310,7 @@ case object SemesterConverter2016ATo2016B extends SemesterConverter {
       }
       StepResult(s"GPI proposal with observing mode ${(p \\ "observingMode").text} has been assigned to the ${GpiObservingMode.HDirect.value} mode.", <gpi>{GpiObsModeTransformer.transform(ns)}</gpi>).successNel
   }
-  override val transformers = List(replaceKLongFilter, texesSite, gpiModes)
+  override val transformers = List(replaceKLongFilter, dssiSite, texesSite, gpiModes)
 }
 
 /**

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<proposal schemaVersion="2013.2.1">
+    <meta band3optionChosen="false"/>
+    <semester year="2013" half="B"/>
+    <title/>
+    <abstract/>
+    <scheduling/>
+    <keywords/>
+    <investigators>
+        <pi id="investigator-0">
+            <firstName>Principal</firstName>
+            <lastName>Investigator</lastName>
+            <status>PhD</status>
+            <email/>
+            <address>
+                <institution/>
+                <address/>
+                <country/>
+            </address>
+        </pi>
+    </investigators>
+    <targets/>
+    <conditions/>
+    <blueprints>
+        <dssi>
+            <Dssi id="blueprint-0">
+                <name>Dssi Gemini North</name>
+                <visitor>true</visitor>
+                <site>Gemini North</site>
+            </Dssi>
+        </dssi>
+    </blueprints>
+    <observations>
+        <observation band="Band 1/2" enabled="true" blueprint="blueprint-0"/>
+    </observations>
+    <proposalClass>
+        <queue tooOption="None"/>
+    </proposalClass>
+</proposal>
