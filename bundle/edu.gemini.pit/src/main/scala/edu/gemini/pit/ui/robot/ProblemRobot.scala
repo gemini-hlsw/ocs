@@ -88,7 +88,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
           TimeProblems.partnerZeroTimeRequest(p, s) ++
           TacProblems(p, s).all ++
           List(incompleteInvestigator, missingObsElementCheck, cfCheck, emptyTargetCheck,
-            emptyEphemerisCheck, singlePointEphemerisCheck, initialEphemerisCheck, finalEphemerisCheck, altairLgsCheck,
+            emptyEphemerisCheck, singlePointEphemerisCheck, initialEphemerisCheck, finalEphemerisCheck,
             badGuiding, cwfsCorrectionsIssue, badVisibility, iffyVisibility, minTimeCheck, wrongSite, band3Orphan2, gpiCheck, lgsIQ70Check, lgsGemsIQ85Check,
             lgsCC50Check, texesCCCheck, texesWVCheck, gmosWVCheck, gmosR600Check, band3IQ, band3LGS, band3RapidToO, sbIrObservation).flatten
       ps.sorted
@@ -203,7 +203,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
 
     private lazy val finalEphemerisCheck = for {
       t @ NonSiderealTarget(_, n, e, _) <- p.targets
-      if !e.isEmpty
+      if e.nonEmpty
       if !s.catalogHandler.state.contains(t)
       ds = e.map(_.validAt) if ds.size > 1
       dsMax = ds.max
@@ -216,13 +216,6 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
         s"""Ephemeris for target "$n" is undefined between ${dateFormat.format(Instant.ofEpochMilli(firstDay))} and ${dateFormat.format(Instant.ofEpochMilli(p.semester.lastDay))} UTC."""
       }
     } yield new Problem(Severity.Warning, msg, "Targets", s.inTargetsView(_.edit(t)))
-
-    // REL-3079: No Altair LGS offered in 2017B.
-    // TODO: Remove this if the laser is repaired.
-    private lazy val altairLgsCheck = for {
-      o <- p.observations
-      b <- o.blueprint if bpIsLgs(b) && !bpIsGemsLgs(b)
-    } yield new Problem(Severity.Error, "Altair Laser Guidestar is currently not offered.", "Observations", s.inObsListView(o.band, _.Fixes.fixBlueprint(b)))
 
     def aoPerspectiveIsLgs(ao: AoPerspective): Boolean = ao match {
       case AoLgs => true
