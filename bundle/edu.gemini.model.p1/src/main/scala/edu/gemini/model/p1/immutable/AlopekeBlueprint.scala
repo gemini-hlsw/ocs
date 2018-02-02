@@ -8,6 +8,7 @@ object AlopekeBlueprint {
 
 case class AlopekeBlueprint(mode: AlopekeMode) extends GeminiBlueprintBase {
   def name: String = s"ʻAlopeke ${mode.value}"
+  override val visitor = true
 
   def this(m: M.AlopekeBlueprint) = this(
     m.getMode
@@ -19,6 +20,7 @@ case class AlopekeBlueprint(mode: AlopekeMode) extends GeminiBlueprintBase {
     val m = Factory.createAlopekeBlueprint
     m.setId(n.nameOf(this))
     m.setName(name)
+    m.setVisitor(visitor)
     m.setMode(mode)
     m
   }
