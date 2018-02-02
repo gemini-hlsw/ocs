@@ -4,6 +4,8 @@ import edu.gemini.model.p1.{mutable => M}
 
 object BlueprintBase {
   def apply(a: M.BlueprintBase): BlueprintBase = a match {
+    // Alopeke
+    case b: M.AlopekeBlueprint              => AlopekeBlueprint(b)
 
     // Flamingos2
     case b: M.Flamingos2BlueprintImaging    => Flamingos2BlueprintImaging(b)
