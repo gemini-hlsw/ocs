@@ -456,21 +456,36 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
           changes must have length 5
-          changes must contain("Dssi proposal has been assigned to Gemini North.")
+          changes must contain("DSSI proposal has been assigned to Gemini South.")
           // The dssi blueprint must remain and include a site
           result must \\("Dssi", "id")
-          result must \\("Dssi") \\ "site" \> "Gemini North"
-          result must \\("Dssi") \\ "name" \> "DSSI Gemini North"
+          result must \\("Dssi") \\ "site" \> "Gemini South"
+          result must \\("Dssi") \\ "name" \> "DSSI Gemini South"
       }
     }
-    "proposal with phoenix blueprints must have them removed, REL-3233" in {
-      val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_with_phoenix_no_site.xml")))
+    "proposal with dssi blueprints at Gemini North must migrate to ʻAlopeke, REL-3349" in {
+      val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_with_dssi_gn.xml")))
 
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
           changes must have length 5
-          changes must contain("The original proposal contained Phoenix observations. The instrument is not available and those resources have been removed.")
+          changes must contain("DSSI Gemini North proposal has been migrated to ʻAlopeke instead.")
+          result must \\("Alopeke", "id")
+          result must \\("Alopeke") \\ "mode" \> AlopekeMode.SPECKLE.value
+          result must \\("Alopeke") \\ "name" \> AlopekeBlueprint(AlopekeMode.SPECKLE).name
+      }
+    }
+    "proposal with phoenix blueprints must have them removed, REL-3233" in {
+      skipped {
+        val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_with_phoenix_no_site.xml")))
+
+        val converted = UpConverter.convert(xml)
+        converted must beSuccessful.like {
+          case StepResult(changes, result) =>
+            changes must have length 5
+            changes must contain("The original proposal contained Phoenix observations. The instrument is not available and those resources have been removed.")
+        }
       }
     }
     "proposal with texes blueprints must have a site, REL-2463" in {

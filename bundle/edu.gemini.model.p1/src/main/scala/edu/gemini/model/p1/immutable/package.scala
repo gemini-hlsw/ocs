@@ -526,7 +526,10 @@ package object immutable {
   object WavelengthRegime extends EnumObject[M.WavelengthRegime]
 
   type AlopekeMode = M.AlopekeMode
-  object AlopekeMode extends EnumObject[M.AlopekeMode]
+  object AlopekeMode extends EnumObject[M.AlopekeMode] {
+    val SPECKLE    = M.AlopekeMode.SPECKLE_0_0096_PIX_6_7_FO_V
+    val WIDE_FIELD = M.AlopekeMode.WIDE_FIELD_0_0725_PIX_60_FO_V
+  }
 
 }
 
