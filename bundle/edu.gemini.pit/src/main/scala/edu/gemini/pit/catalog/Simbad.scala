@@ -11,7 +11,7 @@ import java.util.UUID
 
 object Simbad extends Catalog with App {
 
-  private lazy val hosts = Array("simbad.u-strasbg.fr", "simbak.cfa.harvard.edu")
+  private lazy val hosts = Array("simbad.u-strasbg.fr", "simbad.cfa.harvard.edu")
   private lazy val simbad = hosts.map(apply).reduceLeft(_ || _)
 
   def find(id:String)(callback:Result => Unit) {
