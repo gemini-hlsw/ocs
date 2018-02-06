@@ -566,7 +566,8 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
           changes must contain(SemesterConverter2018ATo2018B.gmosnAltairRemoverMessage)
-          result \\ "altair" must \\("none")
+          (result \\ "gmosN" \\ "altair") must \\("none")
+          (result \\ "gmosN") must \\("name") \> "GMOS-N Imaging z (925 nm)"
       }
 
     }
