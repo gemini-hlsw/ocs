@@ -142,6 +142,21 @@ case class LastStepConverter(semester: Semester) extends SemesterConverter {
  * This converter will upgrade to 2018B.
  */
 case object SemesterConverter2018ATo2018B extends SemesterConverter {
+  // REL-3363: No GMOS-N + Altair offered for 2018B. Remove Altair from component.
+  // The name of the instrument is auto-generated from its properties, so we don't worry about the <name>...</name> tag.
+  lazy val gmosnAltairRemoverMessage = "GMOS-N does not offer Altair in 2018B. Altair component removed."
+  val gmosnAltairRemover: TransformFunction = {
+    case p @ <gmosN>{ns @ _*}</gmosN> if (p \\ "altair" \ "lgs").nonEmpty || (p \\ "altair" \\ "ngs").nonEmpty =>
+      object GmosNAltairRemover extends BasicTransformer {
+        override def transform(n: xml.Node): xml.NodeSeq = n match {
+          case <altair>{_ @ _*}</altair> => <altair><none/></altair>
+          case elem: xml.Elem            => elem.copy(child = elem.child.flatMap(transform))
+          case _                         => n
+        }
+      }
+      StepResult(gmosnAltairRemoverMessage, <gmosN>{GmosNAltairRemover.transform(ns)}</gmosN>).successNel
+  }
+
   lazy val dssiGNToAlopekeMessage: String = "DSSI Gemini North proposal has been migrated to ʻAlopeke instead."
   val dssiGNToAlopeke: TransformFunction = {
     case p @ <dssi>{ns @ _*}</dssi> if (p \\ "Dssi" \\ "site").map(_.text).exists(_.equals(Site.GN.name)) =>
@@ -178,7 +193,7 @@ case object SemesterConverter2018ATo2018B extends SemesterConverter {
 
   val (texesRemover, texesRemoverMessage) = removeBlueprint("texes", "Texes")
 
-  override val transformers = List(dssiGNToAlopeke, phoenixSite, texesRemover)
+  override val transformers = List(gmosnAltairRemover, dssiGNToAlopeke, phoenixSite, texesRemover)
 }
 
 /**

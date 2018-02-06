@@ -18,8 +18,9 @@ case class GmosNBlueprintIfu(
   filter: GmosNFilter,
   fpu: GmosNFpuIfu) extends GmosNBlueprintSpectrosopyBase {
 
-  def name =
-    s"GMOS-N IFU $altair ${disperser.value} ${filter.value} ${fpu.value}"
+  // REL-3363: No GMOS-N + Altair offered for 2018B. Remove from name.
+  // def name = s"GMOS-N IFU $altair ${disperser.value} ${filter.value} ${fpu.value}"
+  def name = s"GMOS-N IFU ${disperser.value} ${filter.value} ${fpu.value}"
 
   def mutable(n:Namer) = {
     val m = Factory.createGmosNBlueprintIfu

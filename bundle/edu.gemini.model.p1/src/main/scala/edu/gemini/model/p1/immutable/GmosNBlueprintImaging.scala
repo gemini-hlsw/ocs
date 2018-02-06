@@ -9,7 +9,9 @@ object GmosNBlueprintImaging {
 
 case class GmosNBlueprintImaging(altair: Altair, filters: List[GmosNFilter]) extends GmosNBlueprintBase {
 
-  lazy val name = s"GMOS-N Imaging $altair ${filters.map(_.value).mkString("+")}"
+  // REL-3363: No GMOS-N + Altair offered for 2018B. Remove from name.
+  // lazy val name = s"GMOS-N Imaging $altair ${filters.map(_.value).mkString("+")}"
+  lazy val name = s"GMOS-N Imaging ${filters.map(_.value).mkString("+")}"
 
   def toChoice(n:Namer) = {
     val c = Factory.createGmosNBlueprintChoice
