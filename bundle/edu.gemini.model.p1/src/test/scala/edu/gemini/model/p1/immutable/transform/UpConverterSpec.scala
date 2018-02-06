@@ -439,14 +439,16 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       }
     }
     "proposal with texes blueprints must be preserved, REL-2308" in {
-      val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_with_texes.xml")))
+      skipped {
+        val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_with_texes.xml")))
 
-      val converted = UpConverter.convert(xml)
-      converted must beSuccessful.like {
-        case StepResult(changes, result) =>
-          changes must have length 6
-          // The texes blueprint must remain
-          result must \\("Texes")
+        val converted = UpConverter.convert(xml)
+        converted must beSuccessful.like {
+          case StepResult(changes, result) =>
+            changes must have length 6
+            // The texes blueprint must remain
+            result must \\("Texes")
+        }
       }
     }
     "proposal with dssi blueprints must have a site, REL-2463" in {
@@ -470,7 +472,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
           changes must have length 5
-          changes must contain("DSSI Gemini North proposal has been migrated to ʻAlopeke instead.")
+          changes must contain(SemesterConverter2018ATo2018B.dssiGNToAlopekeMessage)
           result must \\("Alopeke", "id")
           result must \\("Alopeke") \\ "mode" \> AlopekeMode.SPECKLE.value
           result must \\("Alopeke") \\ "name" \> AlopekeBlueprint(AlopekeMode.SPECKLE).name
@@ -488,18 +490,40 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
         }
       }
     }
-    "proposal with texes blueprints must have a site, REL-2463" in {
-      val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_with_texes_no_site.xml")))
+    "proposals with phoenix blueprints must be assigned to GS, REL-3349" in {
+      val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_with_phoenix_no_site.xml")))
 
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
           changes must have length 5
-          changes must contain("Texes proposal has been assigned to Gemini North.")
-          // The texes blueprint must remain and include a site
-          result must \\("Texes", "id")
-          result must \\("Texes") \\ "site" \> "Gemini North"
-          result must \\("Texes") \\ "name" \> "Texes Gemini North LM_32_echelle"
+          changes must contain(SemesterConverter2018ATo2018B.phoenixSiteMessage)
+      }
+    }
+    "proposal with texes blueprints must have them removed, REL-3349" in {
+      val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_with_texes.xml")))
+
+      val converted = UpConverter.convert(xml)
+      converted must beSuccessful.like {
+        case StepResult(changes, result) =>
+          changes must have length 6
+          changes must contain(SemesterConverter2018ATo2018B.texesRemoverMessage)
+      }
+    }
+    "proposal with texes blueprints must have a site, REL-2463" in {
+      skipped {
+        val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_with_texes_no_site.xml")))
+
+        val converted = UpConverter.convert(xml)
+        converted must beSuccessful.like {
+          case StepResult(changes, result) =>
+            changes must have length 5
+            changes must contain("Texes proposal has been assigned to Gemini North.")
+            // The texes blueprint must remain and include a site
+            result must \\("Texes", "id")
+            result must \\("Texes") \\ "site" \> "Gemini North"
+            result must \\("Texes") \\ "name" \> "Texes Gemini North LM_32_echelle"
+        }
       }
     }
     "proposal with GmosN blueprints that use a 0.25 slit must be converted to a 0.5 slit, REL-1256" in {

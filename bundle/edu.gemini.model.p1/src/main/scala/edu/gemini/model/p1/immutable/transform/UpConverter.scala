@@ -101,13 +101,17 @@ object UpConverter {
 trait SemesterConverter {
   val transformers: List[TransformFunction]
   private def compact(s:StepResult) = StepResult(s.change.distinct, s.node)
-  def convert(node: XMLNode):Result = XMLConverter.transform(node, transformers:_*).map(compact)
+  def convert(node: XMLNode): Result = XMLConverter.transform(node, transformers:_*).map(compact)
 
-  def removeBlueprint(instrument:String, name:String):TransformFunction = {
-    case p @ <blueprints>{ns @ _*}</blueprints> if (p \\ instrument).nonEmpty =>
-      // Remove nodes that match the instrument but preserve the rest
-      val filtered = ns.filter{n => (n \\ instrument).isEmpty}
-      StepResult(s"The original proposal contained $name observations. The instrument is not available and those resources have been removed.", <blueprints>{filtered}</blueprints>).successNel
+  def removeBlueprint(instrument:String, name:String): (TransformFunction, String) = {
+    val msg = s"The original proposal contained $name observations. The instrument is not available and those resources have been removed."
+    val transform: TransformFunction = {
+      case p @ <blueprints>{ns @ _*}</blueprints> if (p \\ instrument).nonEmpty =>
+        // Remove nodes that match the instrument but preserve the rest
+        val filtered = ns.filter{n => (n \\ instrument).isEmpty}
+        StepResult(msg, <blueprints>{filtered}</blueprints>).successNel
+    }
+    (transform, msg)
   }
 }
 
@@ -138,6 +142,7 @@ case class LastStepConverter(semester: Semester) extends SemesterConverter {
  * This converter will upgrade to 2018B.
  */
 case object SemesterConverter2018ATo2018B extends SemesterConverter {
+  lazy val dssiGNToAlopekeMessage: String = "DSSI Gemini North proposal has been migrated to ʻAlopeke instead."
   val dssiGNToAlopeke: TransformFunction = {
     case p @ <dssi>{ns @ _*}</dssi> if (p \\ "Dssi" \\ "site").map(_.text).exists(_.equals(Site.GN.name)) =>
       object DssiGNAlopekeTransformer extends BasicTransformer {
@@ -148,17 +153,19 @@ case object SemesterConverter2018ATo2018B extends SemesterConverter {
           case _                         => n
         }
       }
-      StepResult("DSSI Gemini North proposal has been migrated to ʻAlopeke instead.", <alopeke>{DssiGNAlopekeTransformer.transform(ns)}</alopeke>).successNel
+      StepResult(dssiGNToAlopekeMessage, <alopeke>{DssiGNAlopekeTransformer.transform(ns)}</alopeke>).successNel
   }
 
-  val phoenixNameRegex = "(Phoenix) (.*)".r
-  def transformPhoenixName(name: String) = name match {
-    case phoenixNameRegex(a, b) => s"$a ${Site.GS.name} $b"
-    case _                      => name
-  }
+  lazy val phoenixSiteMessage: String = "Phoenix proposal has been assigned to Gemini South."
   val phoenixSite: TransformFunction = {
     case p @ <phoenix>{ns @ _*}</phoenix> if (p \\ "Phoenix" \\ "site").map(_.text).forall(n => !n.equals(Site.GS.name)) =>
       object PhoenixSiteTransformer extends BasicTransformer {
+        val phoenixNameRegex = "(Phoenix) (.*)".r
+        def transformPhoenixName(name: String) = name match {
+          case phoenixNameRegex(a, b) => s"$a ${Site.GS.name} $b"
+          case _                      => name
+        }
+
         override def transform(n: xml.Node): xml.NodeSeq = n match {
           case p @ <Phoenix>{q @ _*}</Phoenix> => <Phoenix id={p.attribute("id")}>{q.map(transform) +: <site>{Site.GS.name}</site>}</Phoenix>
           case <name>{name}</name>             => <name>{transformPhoenixName(name.text)}</name>
@@ -166,10 +173,10 @@ case object SemesterConverter2018ATo2018B extends SemesterConverter {
           case _                               => n
         }
       }
-      StepResult("Phoenix proposal has been assigned to Gemini South.", <phoenix>{PhoenixSiteTransformer.transform(ns)}</phoenix>).successNel
+      StepResult(phoenixSiteMessage, <phoenix>{PhoenixSiteTransformer.transform(ns)}</phoenix>).successNel
   }
 
-  val texesRemover = removeBlueprint("texes", "Texes")
+  val (texesRemover, texesRemoverMessage) = removeBlueprint("texes", "Texes")
 
   override val transformers = List(dssiGNToAlopeke, phoenixSite, texesRemover)
 }
@@ -442,9 +449,9 @@ case object SemesterConverter2014ATo2014B extends SemesterConverter {
  * Converter from 2013B to 2014A
  */
 case object SemesterConverter2013BTo2014A extends SemesterConverter {
-  val trecsRemoved = removeBlueprint("trecs", "T-ReCS")
-  val michelleRemoved = removeBlueprint("michelle", "Michelle")
-  val niciRemoved = removeBlueprint("nici", "NICI")
+  val (trecsRemoved, _) = removeBlueprint("trecs", "T-ReCS")
+  val (michelleRemoved, _) = removeBlueprint("michelle", "Michelle")
+  val (niciRemoved, _) = removeBlueprint("nici", "NICI")
   val (oldSlit, newSlit) = ("0.25 arcsec slit", "0.5 arcsec slit")
   val updateGmosNSlit: TransformFunction = {
      case p @ <gmosN>{ns @ _*}</gmosN> if (p \ "longslit" \ "fpu").text == oldSlit =>
