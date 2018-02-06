@@ -217,7 +217,7 @@
         <xsl:param name="inst"/>
         <xsl:param name="site"/>
         <xsl:choose>
-            <xsl:when test="$inst = 'alopeke'">ʻAlopeke</xsl:when>
+            <xsl:when test="$inst = 'alopeke'">'Alopeke</xsl:when>
             <xsl:when test="$inst = 'flamingos2'">Flamingos2</xsl:when>
             <xsl:when test="$inst = 'gmosN'">GMOS North</xsl:when>
             <xsl:when test="$inst = 'gmosS'">GMOS South</xsl:when>
