@@ -157,7 +157,7 @@ case object SemesterConverter2018ATo2018B extends SemesterConverter {
     case _                      => name
   }
   val phoenixSite: TransformFunction = {
-    case <phoenix>{ns @ _*}</phoenix> =>
+    case p @ <phoenix>{ns @ _*}</phoenix> if (p \\ "Phoenix" \\ "site").map(_.text).forall(n => !n.equals(Site.GS.name)) =>
       object PhoenixSiteTransformer extends BasicTransformer {
         override def transform(n: xml.Node): xml.NodeSeq = n match {
           case p @ <Phoenix>{q @ _*}</Phoenix> => <Phoenix id={p.attribute("id")}>{q.map(transform) +: <site>{Site.GS.name}</site>}</Phoenix>
@@ -169,7 +169,9 @@ case object SemesterConverter2018ATo2018B extends SemesterConverter {
       StepResult("Phoenix proposal has been assigned to Gemini South.", <phoenix>{PhoenixSiteTransformer.transform(ns)}</phoenix>).successNel
   }
 
-  override val transformers = List(dssiGNToAlopeke, phoenixSite)
+  val texesRemover = removeBlueprint("texes", "Texes")
+
+  override val transformers = List(dssiGNToAlopeke, phoenixSite, texesRemover)
 }
 
 /**
@@ -198,9 +200,7 @@ case object SemesterConverter2017BTo2018A extends SemesterConverter {
       StepResult("Renamed CFHT partner to CFH", <partner>cfh</partner>).successNel
   }
 
-  val phoenixRemoved = removeBlueprint("phoenix", "Phoenix")
-
-  override val transformers = List(removeF2YJloFilters, renameCFH, phoenixRemoved)
+  override val transformers = List(removeF2YJloFilters, renameCFH)
 }
 
 /**
@@ -277,25 +277,6 @@ case object SemesterConverter2016ATo2016B extends SemesterConverter {
       StepResult("DSSI proposal has been assigned to Gemini South.", <dssi>{DssiSiteTransformer.transform(ns)}</dssi>).successNel
   }
 
-  val texesNameRegex = "(Texes) (.*)".r
-  def transformTexesName(name: String) = name match {
-    case texesNameRegex(a, b) => s"$a ${Site.GN.name} $b"
-    case _                      => name
-  }
-
-  val texesSite: TransformFunction = {
-    case <texes>{ns @ _*}</texes> =>
-      object TexesSiteTransformer extends BasicTransformer {
-        override def transform(n: xml.Node): xml.NodeSeq = n match {
-          case p @ <Texes>{q @ _*}</Texes> => <Texes id={p.attribute("id")}>{q.map(transform) +: <site>{Site.GN.name}</site>}</Texes>
-          case <name>{name}</name>         => <name>{transformTexesName(name.text)}</name>
-          case elem: xml.Elem              => elem.copy(child = elem.child.flatMap(transform))
-          case _                           => n
-        }
-      }
-      StepResult("Texes proposal has been assigned to Gemini North.", <texes>{TexesSiteTransformer.transform(ns)}</texes>).successNel
-  }
-
   val removedModes = List(GpiObservingMode.HLiwa, GpiObservingMode.HStar).map(_.value())
 
   val gpiModes: TransformFunction = {
@@ -310,7 +291,7 @@ case object SemesterConverter2016ATo2016B extends SemesterConverter {
       }
       StepResult(s"GPI proposal with observing mode ${(p \\ "observingMode").text} has been assigned to the ${GpiObservingMode.HDirect.value} mode.", <gpi>{GpiObsModeTransformer.transform(ns)}</gpi>).successNel
   }
-  override val transformers = List(replaceKLongFilter, dssiSite, texesSite, gpiModes)
+  override val transformers = List(replaceKLongFilter, dssiSite, gpiModes)
 }
 
 /**

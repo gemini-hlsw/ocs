@@ -691,7 +691,7 @@ case class Semester2018BProblems(p: Proposal, s: ShellAdvisor) {
     b <- o.blueprint
     if b.isInstanceOf[TexesBlueprint]
     if p.semester == semester2018B
-  } yield new Problem(Severity.Error, "TEXES is not offered for 2018B.", "Observations", s.inObsListView(o.band, _.Fixes.fixBlueprint(b)))
+  } yield new Problem(Severity.Error, "Texes is not offered for 2018B.", "Observations", s.inObsListView(o.band, _.Fixes.fixBlueprint(b)))
 
   private val dssiOnlyGS = for {
     o <- p.observations
@@ -706,7 +706,7 @@ case class Semester2018BProblems(p: Proposal, s: ShellAdvisor) {
     b <- o.blueprint
     if b.isInstanceOf[PhoenixBlueprint]
     if b.site == Site.GN
-  } yield new Problem(Severity.Error, "Phoenis is only available at Gemini South for 2018B.", "Observations", s.inObsListView(o.band, _.Fixes.fixBlueprint(b)))
+  } yield new Problem(Severity.Error, "Phoenix is only available at Gemini South for 2018B.", "Observations", s.inObsListView(o.band, _.Fixes.fixBlueprint(b)))
 
   def all: List[Problem] = List(texesNotOfferedCheck, dssiOnlyGS, phoenixOnlyGS).flatten
 }
