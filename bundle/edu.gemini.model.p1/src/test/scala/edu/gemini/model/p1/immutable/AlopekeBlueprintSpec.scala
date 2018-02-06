@@ -13,7 +13,7 @@ class AlopekeBlueprintSpec extends Specification with SemesterProperties with Xm
   // A proposal for Alopeke with speckle mode and visitor set to false.
   private val proposal = ProposalIo.read(new InputStreamReader(getClass.getResourceAsStream("proposal_with_alopeke.xml")))
 
-  "The ʻAlopeke Blueprint" should {
+  "The 'Alopeke Blueprint" should {
     "not use Ao" in {
       ((_: AlopekeBlueprint).ao must beEqualTo(AoNone)).forall(blueprints)
     }

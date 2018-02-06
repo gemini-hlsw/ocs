@@ -7,7 +7,7 @@ object AlopekeBlueprint {
 }
 
 case class AlopekeBlueprint(mode: AlopekeMode) extends GeminiBlueprintBase {
-  def name: String = s"ʻAlopeke ${mode.value}"
+  def name: String = s"'Alopeke ${mode.value}"
   override val visitor = true
 
   def this(m: M.AlopekeBlueprint) = this(

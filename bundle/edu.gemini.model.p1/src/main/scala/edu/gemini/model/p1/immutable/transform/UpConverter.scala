@@ -148,7 +148,7 @@ case object SemesterConverter2018ATo2018B extends SemesterConverter {
           case _                         => n
         }
       }
-      StepResult("DSSI Gemini North proposal has been migrated to ʻAlopeke instead.", <alopeke>{DssiGNAlopekeTransformer.transform(ns)}</alopeke>).successNel
+      StepResult("DSSI Gemini North proposal has been migrated to 'Alopeke instead.", <alopeke>{DssiGNAlopekeTransformer.transform(ns)}</alopeke>).successNel
   }
 
   val phoenixNameRegex = "(Phoenix) (.*)".r
