@@ -526,6 +526,13 @@
         <country>Chile</country>
     </site>
     <site>
+        <institution>Pontificia Universidad Catolica de Valparaiso</institution>
+        <address>Instituto de Fisica, Facultad de Ciencias</address>
+        <address>Casilla 4059</address>
+        <address>Valparaiso</address>
+        <country>Chile</country>
+    </site>
+    <site>
         <institution>Universidad de La Serena</institution>
         <address>Departamento de Fisica</address>
         <address>Facultad de Ciencias</address>
@@ -3339,7 +3346,7 @@
     </site>
     <site>
         <institution>SETI Institute</institution>
-        <address>2035 Landings Drive</address>
+        <address>189 Bernardo Ave, Suite 200</address>
         <address>Mountain View</address>
         <address>CA</address>
         <address>94043</address>
@@ -3420,6 +3427,23 @@
             <fax>61-392148797</fax>
             <email>mbailes@swin.edu.au</email>
         </contact>
+    </site>
+    <site>
+        <institution>Texas A&amp;M University</institution>
+        <address>Department of Physics</address>
+        <address>College Staton</address>
+        <address>TX</address>
+        <address>77843</address>
+        <country>USA</country>
+    </site>
+    <site>
+        <institution>University of Texas at Austin</institution>
+        <address>Department of Astronomy</address>
+        <address>1 University Station C-1400</address>
+        <address>Austin</address>
+        <address>TX</address>
+        <address>78712</address>
+        <country>USA</country>
     </site>
     <site>
         <institution>University of Toledo</institution>
