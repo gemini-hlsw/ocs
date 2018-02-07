@@ -693,6 +693,14 @@ case class Semester2018BProblems(p: Proposal, s: ShellAdvisor) {
     if p.semester == semester2018B
   } yield new Problem(Severity.Error, "Texes is not offered for 2018B.", "Observations", s.inObsListView(o.band, _.Fixes.fixBlueprint(b)))
 
+  private val gmosnAltairNotOfferedCheck = for {
+    o <- p.observations
+    b <- o.blueprint
+    if b.isInstanceOf[GmosNBlueprintBase]
+    if p.semester == semester2018B
+    if b.asInstanceOf[GmosNBlueprintBase].altair != AltairNone
+  } yield new Problem(Severity.Error, "GMOS-N does not offer Altair in 2018B.", "Observations", s.inObsListView(o.band, _.Fixes.fixBlueprint(b)))
+
   private val dssiOnlyGS = for {
     o <- p.observations
     b <- o.blueprint
@@ -708,7 +716,7 @@ case class Semester2018BProblems(p: Proposal, s: ShellAdvisor) {
     if b.site == Site.GN
   } yield new Problem(Severity.Error, "Phoenix is only available at Gemini South for 2018B.", "Observations", s.inObsListView(o.band, _.Fixes.fixBlueprint(b)))
 
-  def all: List[Problem] = List(texesNotOfferedCheck, dssiOnlyGS, phoenixOnlyGS).flatten
+  def all: List[Problem] = List(texesNotOfferedCheck, gmosnAltairNotOfferedCheck, dssiOnlyGS, phoenixOnlyGS).flatten
 }
 
 case class TimeProblems(p: Proposal, s: ShellAdvisor) {

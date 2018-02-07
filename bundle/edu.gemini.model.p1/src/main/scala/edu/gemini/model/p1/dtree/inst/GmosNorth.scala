@@ -10,8 +10,10 @@ object GmosNorth {
 
   import InstrumentMode._
 
+  // REL-3363: No GMOS-N + Altair offered for 2018B. Skip over the AdaptiveOpticsNode and just use AltairNone.
   // Constructor for initial node
-  def apply() = new AdaptiveOpticsNode
+  // def apply() = new AdaptiveOpticsNode
+  def apply() = new SelectMode(AltairNone)
 
   class AdaptiveOpticsNode extends SingleSelectNode[Unit, Altair, Altair](()) with AltairNode {
     override val allGuideStarTypes = true

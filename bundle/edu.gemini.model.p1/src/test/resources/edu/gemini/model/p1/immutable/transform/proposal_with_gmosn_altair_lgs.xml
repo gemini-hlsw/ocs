@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<proposal schemaVersion="2017.1.1">
+    <meta band3optionChosen="false" overrideAffiliate="false"/>
+    <semester year="2017" half="A"/>
+    <title></title>
+    <abstract></abstract>
+    <scheduling></scheduling>
+    <keywords/>
+    <investigators>
+        <pi id="investigator-0">
+            <firstName>Principal</firstName>
+            <lastName>Investigator</lastName>
+            <status>PhD</status>
+            <email></email>
+            <address>
+                <institution></institution>
+                <address></address>
+                <country></country>
+            </address>
+        </pi>
+    </investigators>
+    <targets/>
+    <conditions/>
+    <blueprints>
+        <gmosN>
+            <regime>optical</regime>
+            <imaging id="blueprint-0">
+                <name>GMOS-N Imaging Altair Laser Guidestar w/ OIWFS z (925 nm)</name>
+                <visitor>false</visitor>
+                <altair>
+                    <lgs pwfs1="false" aowfs="false" oiwfs="true"/>
+                </altair>
+                <filter>z (925 nm)</filter>
+            </imaging>
+        </gmosN>
+    </blueprints>
+    <observations>
+        <observation band="Band 1/2" enabled="true" blueprint="blueprint-0"/>
+    </observations>
+    <proposalClass>
+        <queue tooOption="None"/>
+    </proposalClass>
+</proposal>

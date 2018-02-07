@@ -45,7 +45,9 @@ case class GmosNBlueprintMos(
   def name = {
     val ns = if (nodAndShuffle) "MOS N+S" else "MOS"
     val pi = if (preImaging) "+Pre" else ""
-    s"GMOS-N $ns $altair ${fpu.value} ${disperser.value} ${filter.value} $pi"
+    // REL-3363: No GMOS-N + Altair offered for 2018B. Remove from name.
+    // s"GMOS-N $ns $altair ${fpu.value} ${disperser.value} ${filter.value} $pi"
+    s"GMOS-N $ns ${fpu.value} ${disperser.value} ${filter.value} $pi"
   }
 
 }

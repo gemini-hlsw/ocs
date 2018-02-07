@@ -33,6 +33,8 @@ case class GmosNBlueprintLongslitNs(altair: Altair, disperser: GmosNDisperser, f
     m
   }
 
-  def name = s"GMOS-N LongSlit N+S $altair ${disperser.value} ${filter.value} ${fpu.value}"
+  // REL-3363: No GMOS-N + Altair offered for 2018B. Remove from name.
+  // def name = s"GMOS-N LongSlit N+S $altair ${disperser.value} ${filter.value} ${fpu.value}"
+  def name = s"GMOS-N LongSlit N+S ${disperser.value} ${filter.value} ${fpu.value}"
 
 }
