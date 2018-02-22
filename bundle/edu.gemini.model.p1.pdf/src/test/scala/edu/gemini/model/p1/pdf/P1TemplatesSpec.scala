@@ -138,9 +138,9 @@ class P1TemplatesSpec extends Specification with XmlMatchers {
       // Check that we use the proper public name of DSSI
       XML.loadString(result) must (\\("table-cell") \ "block" \> "DSSI - Gemini North")
     }
-    "present the correct name when using ʻAlopeke, REL-3351" in {
+    "present the correct name when using 'Alopeke, REL-3351" in {
       val result = transformProposal("proposal_with_alopeke.xml")
-      XML.loadString(result) must (\\("table-cell") \ "block" \> "ʻAlopeke")
+      XML.loadString(result) must (\\("table-cell") \ "block" \> "'Alopeke")
     }
     "present the correct name when using Visitor GN, REL-1090" in {
       val result = transformProposal("proposal_with_visitor_gn.xml")

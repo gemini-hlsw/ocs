@@ -49,7 +49,7 @@
     <blueprints>
         <alopeke>
             <Alopeke id="blueprint-0">
-                <name>ʻAlopeke Speckle (0.0096"/pix, 6.7" FoV)</name>
+                <name>'Alopeke Speckle (0.0096"/pix, 6.7" FoV)</name>
                 <visitor>false</visitor>
                 <mode>Speckle (0.0096"/pix, 6.7" FoV)</mode>
             </Alopeke>

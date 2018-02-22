@@ -1,10 +1,10 @@
 <!--
-  Schema definition for ʻAlopeke blueprints.
+  Schema definition for 'Alopeke blueprints.
 -->
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
     <xsd:include schemaLocation="Instrument.xsd"/>
     
-    <!-- Options for ʻAlopeke Blueprint. -->
+    <!-- Options for 'Alopeke Blueprint. -->
     <xsd:complexType name="AlopekeBlueprintChoice">
         <xsd:sequence>
             <xsd:choice>
@@ -14,11 +14,11 @@
         </xsd:sequence>
     </xsd:complexType>
     
-    <!-- ʻAlopeke null. Empty blueprint, not available in PIT. -->
+    <!-- 'Alopeke null. Empty blueprint, not available in PIT. -->
     <xsd:complexType name="AlopekeBlueprintNull"/>
 
     <!--
-      ʻAlopeke Blueprint base type.
+      'Alopeke Blueprint base type.
     -->
     <xsd:complexType name="AlopekeBlueprint">
         <xsd:complexContent>

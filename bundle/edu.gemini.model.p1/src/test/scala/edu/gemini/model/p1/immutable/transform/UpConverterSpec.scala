@@ -465,7 +465,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
           result must \\("Dssi") \\ "name" \> "DSSI Gemini South"
       }
     }
-    "proposal with dssi blueprints at Gemini North must migrate to ʻAlopeke, REL-3349" in {
+    "proposal with dssi blueprints at Gemini North must migrate to 'Alopeke, REL-3349" in {
       val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_with_dssi_gn.xml")))
 
       val converted = UpConverter.convert(xml)
