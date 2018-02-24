@@ -28,6 +28,8 @@ import squants.motion.VelocityConversions._
 import squants.radio.IrradianceConversions._
 import squants.radio.SpectralIrradianceConversions._
 
+import scalaz.{-\/, \/-}
+
 /**
  * ITC requests define a generic mechanism to look up values by their parameter names.
  * The different values are either enums, ints or doubles. For enums the simple name of the class is used
@@ -185,8 +187,11 @@ object ITCRequest {
   def gsaoiParameters(r: ITCRequest): GsaoiParameters = {
     val filter      = r.enumParameter(classOf[Gsaoi.Filter])
     val readMode    = r.enumParameter(classOf[Gsaoi.ReadMode])
-    val gems        = gemsParameters(r)
-    GsaoiParameters(filter, readMode, gems)
+    val iq          = obsConditionParameters(r).iq
+    ConfigExtractor.createGsaoiParameters(filter, readMode, iq) match {
+      case \/-(p) => p
+      case -\/(t) => throw new IllegalArgumentException(t)
+    }
   }
 
   def michelleParameters(r: ITCRequest): MichelleParameters = {

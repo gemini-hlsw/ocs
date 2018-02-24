@@ -168,7 +168,14 @@ object ConfigExtractor {
   }
 
   private def extractGsaoi(c: Config, cond: ObservingConditions): String \/ GsaoiParameters = {
-
+    for {
+      filter      <- extract[Gsaoi.Filter]        (c, FilterKey)
+      readMode    <- extract[Gsaoi.ReadMode]      (c, ReadModeKey)
+      gsaoi       <- createGsaoiParameters(filter, readMode, cond.iq)
+    } yield gsaoi
+  }
+  // We need this available outside to calculate the GeMS parameters in ITCRequest.
+  def createGsaoiParameters(filter: Gsaoi.Filter, readMode: Gsaoi.ReadMode, iq: SPSiteQuality.ImageQuality): String \/ GsaoiParameters = {
     import Gsaoi._
     import SPSiteQuality._
 
@@ -184,7 +191,7 @@ object ConfigExtractor {
     // TODO: here we should use the avg Strehl values calculated by the Mascot / AGS algorithms for better results
     def extractGems(filter: Filter): String \/ GemsParameters =
       filter.getCatalogBand.asScalaOpt.fold(error) { band =>
-        (band, cond.iq) match {
+        (band, iq) match {
           case (SingleBand(MagnitudeBand.J), ImageQuality.PERCENT_20) => GemsParameters(0.10, "J").right
           case (SingleBand(MagnitudeBand.J), ImageQuality.PERCENT_70) => GemsParameters(0.05, "J").right
           case (SingleBand(MagnitudeBand.J), ImageQuality.PERCENT_85) => GemsParameters(0.02, "J").right
@@ -200,8 +207,6 @@ object ConfigExtractor {
     }
 
     for {
-      filter      <- extract[Filter]        (c, FilterKey)
-      readMode    <- extract[ReadMode]      (c, ReadModeKey)
       gems        <- extractGems            (filter)
     } yield {
       GsaoiParameters(filter, readMode, gems)
