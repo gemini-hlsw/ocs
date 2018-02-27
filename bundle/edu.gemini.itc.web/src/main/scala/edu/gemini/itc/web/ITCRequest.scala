@@ -255,12 +255,6 @@ object ITCRequest {
     }
   }
 
-  def gemsParameters(r: ITCRequest): GemsParameters = {
-    val avgStrehl  = r.doubleParameter("avgStrehl") / 100.0
-    val strehlBand = r.parameter("strehlBand")
-    GemsParameters(avgStrehl, strehlBand)
-  }
-
   def observationParameters(r: ITCRequest, i: InstrumentDetails): ObservationDetails = {
     val calcMethod = r.parameter("calcMethod")
     val calculationMethod = calcMethod match {
