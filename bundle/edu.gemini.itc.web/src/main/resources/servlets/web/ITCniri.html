@@ -397,12 +397,29 @@
 
 			</tr>
 			<tr>
-				<td colspan="4">Detector bias (i.e. well depth) set for <input value="SHALLOW" name="WellDepth" checked="checked" type="radio" /> low or <input value="DEEP" name="WellDepth" type="radio" />high flux mode (typically &lt;2.5µm and &gt;2.5µm respectively) </td>
+				<td colspan="2">Read mode set for: </td>
 			</tr>
 			<tr>
-				<td colspan="4">Read noise set for <input value="IMAG_SPEC_NB" name="ReadMode" checked="checked" type="radio" /> low noise, <input value="IMAG_1TO25" name="ReadMode" type="radio" />medium noise, or <input value="IMAG_SPEC_3TO5" name="ReadMode" type="radio" />high noise
-				mode (typically narrow band faint object 1-2.5µm imaging/spectroscopy, JHK imaging and bright object 1-2.5µm spectroscopy, and 3-5µm imaging and spectroscopy, respectively) </td>
-
+				<td align="right" ><input value="IMAG_SPEC_NB" name="ReadMode" checked="checked" type="radio" />
+				low noise, typically narrow band faint object 1-2.5µm imaging/spectroscopy </td>
+			</tr>
+			<tr>
+				<td align="right" ><input value="IMAG_1TO25" name="ReadMode" type="radio" />
+				medium noise, JHK imaging and bright object 1-2.5µm spectroscopy </td>
+			</tr>
+			<tr>
+				<td align="right" ><input value="IMAG_SPEC_3TO5" name="ReadMode" type="radio" />
+					high noise, 3-5µm imaging and spectroscopy </td>
+			</tr>
+			<tr>
+				<td colspan="4">Detector bias (i.e. well depth) set for: </td>
+			</tr>
+			<tr>
+				<td align="right" ><input value="SHALLOW" name="WellDepth" checked="checked" type="radio" />
+					low flux mode, typically &lt;2.5µm </td>
+			<tr>
+				<td align="right" ><input value="DEEP" name="WellDepth" type="radio" />
+					high flux mode, &gt;2.5µm </td>
 			</tr>
 			<tr>
 				<td colspan="4">Dark current of 0.25 e-/s </td>
@@ -413,11 +430,11 @@
 
 			</tr>
 			<tr>
-				<td colspan="4" height="21">Mirror coating: <input value="ALUMINIUM" name="Coating" type="radio" /> aluminium  <input value="SILVER" name="Coating" checked="checked" type="radio" /> silver </td>
+				<td colspan="4" height="21">Mirror coating: <input value="SILVER" name="Coating" checked="checked" type="radio" /> silver </td>
 			</tr>
 			<tr>
 				<td colspan="4">Instrument port: <input value="SIDE_LOOKING" name="IssPort" checked="checked" type="radio" />
-				side-looking (3 reflections) </td>
+				Up-looking (2 reflections) </td>
 			</tr>
 			<tr>
 				<td colspan="4">Wavefront sensor for tip-tilt compensation: <input value="PWFS" name="Type" checked="checked" type="radio" /> PWFS  <input value="AOWFS" name="Type" type="radio" />Altair</td>
@@ -566,7 +583,7 @@
 	<center>
 	<p>
 
-	<input value="calculate" type="submit" /> <img src="/spacer.gif" height="1" width="40" style="opacity:0.0"/><input value="reset to defaults" type="reset" />
+	<input value="Calculate" type="submit" /> <img src="/spacer.gif" height="1" width="40" style="opacity:0.0"/><input value="Reset to defaults" type="reset" />
 	</p>
 	</center>
 	</div>
