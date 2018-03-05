@@ -382,7 +382,7 @@
 				<td height="40"> </td>
 			</tr> -->
 			<tr>
-				<td colspan="4"><b>Wavefront sensor: </b><input value="PWFS" name="Type" type="radio" /> PWFS
+				<td colspan="4"> Wavefront sensor for tip-tilt compensation: <input value="PWFS" name="Type" type="radio" /> PWFS
 				<input value="AOWFS" name="Type" checked="checked" type="radio" />Altair</td>
 			</tr>
 			<tr>
@@ -497,23 +497,21 @@
 			<input name="ifuSkyFibres" size="5" value="1" type="hidden">
 
 			<tr>
-				<td><input value="summedIFU" name="analysisMethod" checked="checked" type="radio" /></td>
-				<td>Select multiple IFU elements to be summed : <input name="ifuNumX" size="5" value="2" type="text" /> by  
+				<td><input value="summedIFU" name="analysisMethod" checked="checked" type="radio" />
+				Select multiple IFU elements to be summed : <input name="ifuNumX" size="5" value="2" type="text" /> by
 					<input name="ifuNumY" size="5" value="5" type="text" /> apertures(each one 0.103x0.042 arcsec)
 					<input name="ifuCenterX" size="5" value="0.0" type="hidden" />
 					<input name="ifuCenterY" size="5" value="0.0" type="hidden" />
 				</td>
 			</tr>
 			<tr>
-				<td><input value="singleIFU" name="analysisMethod" type="radio" /></td>
-
-				<td>Select an individual IFU element offset by <input name="ifuOffset" size="5" value="0.0" type="text" /> arcsec from the center</td>
+				<td><input value="singleIFU" name="analysisMethod" type="radio" />
+					Select an individual IFU element offset by <input name="ifuOffset" size="5" value="0.0" type="text" /> arcsec from the center</td>
 			</tr>
 			<tr>
-				<td><input value="radialIFU" name="analysisMethod" type="radio" /></td>
-				<td>Select multiple IFU elements along a radius with offsets of <input name="ifuMinOffset" size="5" value="0.0" type="text" />  to 
+				<td><input value="radialIFU" name="analysisMethod" type="radio" />
+				Select multiple IFU elements along a radius with offsets of <input name="ifuMinOffset" size="5" value="0.0" type="text" />  to
 				<input name="ifuMaxOffset" size="5" value="1.0" type="text" /> arcsec </td>
-
 			</tr>
 			<tr>
 				<td colspan="2" height="50" valign="bottom"><b>Output:</b> </td>

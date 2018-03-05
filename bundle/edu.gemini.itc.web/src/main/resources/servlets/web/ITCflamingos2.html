@@ -298,19 +298,18 @@
 			</tr>
 			
 			<tr>
-				<td colspan="4">Read noise set for 
-			</td>
+				<td colspan="4">Read noise set for: </td>
 			<tr>
-				<td colspan="4" style="padding-left:30">
-				<input value="BRIGHT_OBJECT_SPEC" name="ReadMode" type="radio"/>
-				Bright object: CDS and readnoise = 11.7 e-
-				<br>
-				<input value="MEDIUM_OBJECT_SPEC" name="ReadMode" checked="checked" type="radio"/>
-				Medium object: 4 reads and readnoise = 6.0 e-
-				<br>
-				<input value="FAINT_OBJECT_SPEC" name="ReadMode" type="radio"/>
-				Faint object: 8 reads and readnoise < 5.0 e-
-
+				<td > <input value="BRIGHT_OBJECT_SPEC" name="ReadMode" type="radio"/>
+					Bright object: CDS and readnoise = 11.7 e- </td>
+			</tr>
+			<tr>
+				<td > <input value="MEDIUM_OBJECT_SPEC" name="ReadMode" checked="checked" type="radio"/>
+					Medium object: 4 reads and readnoise = 6.0 e- </td>
+			</tr>
+			<tr>
+				<td > <input value="FAINT_OBJECT_SPEC" name="ReadMode" type="radio"/>
+					Faint object: 8 reads and readnoise < 5.0 e- </td>
 			</tr>
 			<tr>
 				<td colspan="4">Dark current is 0.3 e-/s </td>
@@ -341,7 +340,7 @@
 			<tr>
 				<td colspan="4">Wavefront sensor for tip-tilt compensation: 
 				<input value="PWFS" name="Type" type="radio" /> PWFS
-				<input value="OIWFS" name="Type" checked="checked"  type="radio" /> OIWFS
+				<!--<input value="OIWFS" name="Type" checked="checked"  type="radio" /> OIWFS -->
 			</tr>
 			<!-- Make these as hidden parameters -->
 			<input value="OUT" name="fieldLens" checked="checked" type="hidden" />
