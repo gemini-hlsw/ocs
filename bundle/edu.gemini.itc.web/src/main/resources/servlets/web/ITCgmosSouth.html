@@ -23,7 +23,7 @@
     <table background="https://www.gemini.edu/sciops/instruments/itc/mez-green-bckgrnd.gif" border="0" cellpadding="6" cellspacing="0" height="101" width="100%">
         <tbody>
             <tr>
-                <td colspan="3"><b>Spatial profile and brightness:</b><i><span>(<a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10257','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false">more info</a>)</span></i><br />
+                <td colspan="3"><b>Spatial profile and brightness:</b> <i><span>(<a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10257','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false">more info</a>)</span></i><br />
                 <i>Choose one of point, extended or user-defined source profile and the brightness in any
                 filter/wavelength </i></td>
             </tr>
@@ -101,7 +101,7 @@
             <tr>
                 <td colspan="3">
                 <p align="right">
-                <input value="reset" type="reset" />  <input src="https://www.gemini.edu/sciops/instruments/itc/calcButton.gif" align="absbottom" border="0" height="24" type="image" width="78" />
+                    <input src="https://www.gemini.edu/sciops/instruments/itc/calcButton.gif" align="absbottom" border="0" height="24" type="image" width="78" />
                 </p>
                 </td>
             </tr>
@@ -295,8 +295,7 @@
 
             <tr>
                 <td colspan="3">
-                <p align="right">
-                <input value="reset" type="reset" />  <input src="https://www.gemini.edu/sciops/instruments/itc/calcButton.gif" align="absbottom" border="0" height="24" type="image" width="78" />
+                <p align="right"> <input src="https://www.gemini.edu/sciops/instruments/itc/calcButton.gif" align="absbottom" border="0" height="24" type="image" width="78" />
                 </p>
                 </td>
             </tr>
@@ -315,12 +314,12 @@
         <input name="Site" value="GS" type="hidden" />
         <tbody>
             <tr>
-                <td colspan="4"><b>Instrument optical properties:</b><i><span>(</span><a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10273#optical','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false"><span>more info</span></a><span>)</span></i></td>
+                <td colspan="4"><b>Instrument optical properties:</b> <i><span>(</span><a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10273#optical','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false"><span>more info</span></a><span>)</span></i></td>
             </tr>
 
             <tr>
-                <td>Grating:</td>
-                <td><select name="instrumentDisperser" size="1">
+                <td >Grating:</td>
+                <td ><select name="instrumentDisperser" size="1">
                 <option value="MIRROR" selected="selected">
                 none (imaging)</option>
                 <option value="R150_G5326">
@@ -338,10 +337,10 @@
                 <option value="B1200_G5321">
                 B1200 grating</option>
                 </select></td>
-                <td>Spectrum central wavelength: </td>
-                <td><input name="instrumentCentralWavelength" size="5" value=" " type="text" /> nm</td>
-
+                <td >Spectrum central wavelength: </td>
+                <td ><input name="instrumentCentralWavelength" size="5" value=" " type="text" /> nm</td>
             </tr>
+
             <tr>
                 <td>Filter:</td>
                 <td>
@@ -376,7 +375,6 @@
                         <option value="CaT_G0333">CaT (860 nm)</option>
                     </select>
                 </td>
-
                 <td>Focal plane unit: </td>
                 <td><select name="instrumentFPMask" size="1">
                 <option selected="selected" value="FPU_NONE">
@@ -404,7 +402,7 @@
                 </select></td>
             </tr>
             <tr>
-                <td colspan="4" height="50" valign="bottom"><b>Detector properties:</b><i><span>(</span><a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10273#detector','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false"><span>more info</span></a><span>)</span></i></td>
+                <td colspan="4" height="50" valign="bottom"><b>Detector properties:</b> <i><span>(</span><a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10273#detector','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false"><span>more info</span></a><span>)</span></i></td>
             </tr>
             <tr>
                 <td colspan="4">CCD type:
@@ -413,10 +411,10 @@
                 </td>
             </tr>
             <tr>
-                <td colspan="4">Detector binning (spatial direction): <input value="1" name="spatBinning" checked="checked" type="radio" /> 1 (no binning), <input value="2" name="spatBinning" type="radio" /> 2 or <input value="4" name="spatBinning" type="radio" /> 4 pixels</td>
+                <td colspan="4">Detector binning (spatial direction): <input value="1" name="spatBinning" checked="checked" type="radio" /> 1 (no binning) <input value="2" name="spatBinning" type="radio" /> 2 pixels <input value="4" name="spatBinning" type="radio" /> 4 pixels</td>
             </tr>
             <tr>
-                <td colspan="4">Detector binning (spectral direction): <input value="1" name="specBinning" checked="checked" type="radio" /> 1 (no binning), <input value="2" name="specBinning" type="radio" /> 2 or <input value="4" name="specBinning" type="radio" /> 4 pixels</td>
+                <td colspan="4">Detector binning (spectral direction): <input value="1" name="specBinning" checked="checked" type="radio" /> 1 (no binning) <input value="2" name="specBinning" type="radio" /> 2 pixels <input value="4" name="specBinning" type="radio" /> 4 pixels</td>
             </tr>
             <tr>
                 <td colspan="4">
@@ -437,22 +435,18 @@
 
             <!-- Telescope definition-->
             <tr>
-                <td colspan="4" height="50" valign="bottom"><b>Telescope configuration:</b><i><span>(<a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10271','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false">more info</a>)</span></i></td>
+                <td colspan="4" height="50" valign="bottom"><b>Telescope configuration:</b> <i><span>(<a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10271','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false">more info</a>)</span></i></td>
             </tr>
             <tr>
-                <td colspan="4">Mirror coating: <input value="ALUMINIUM" name="Coating" type="radio" /> aluminium  <input value="SILVER" name="Coating" checked="checked" type="radio" /> silver </td>
+                <td colspan="4">Mirror coating: <input value="SILVER" name="Coating" checked="checked" type="radio" /> silver </td>
             </tr>
             <tr>
                 <td colspan="4">Instrument port: <input value="SIDE_LOOKING" name="IssPort" checked="checked" type="radio" />
                 side-looking (3 reflections) </td>
             </tr>
             <tr>
-                <td colspan="4">Wavefront sensor for tip-tilt compensation: <input value="PWFS" name="Type" type="radio" /> PWFS  <input value="OIWFS" name="Type" checked="checked" type="radio" /> OIWFS </td>
-            </tr>
-            <tr>
                 <td colspan="4">
-                <p align="right">
-                <input value="reset" type="reset" />  <input src="https://www.gemini.edu/sciops/instruments/itc/calcButton.gif" align="absbottom" border="0" height="24" type="image" width="78" />
+                <p align="right"> <input src="https://www.gemini.edu/sciops/instruments/itc/calcButton.gif" align="absbottom" border="0" height="24" type="image" width="78" />
                 </p>
                 </td>
             </tr>
@@ -515,8 +509,7 @@
 
             <tr>
                 <td colspan="6">
-                <p align="right">
-                <input value="reset" type="reset" />  <input src="https://www.gemini.edu/sciops/instruments/itc/calcButton.gif" align="absbottom" border="0" height="24" type="image" width="78" />
+                <p align="right"> <input src="https://www.gemini.edu/sciops/instruments/itc/calcButton.gif" align="absbottom" border="0" height="24" type="image" width="78" />
                 </p>
 
                 </td>
@@ -534,7 +527,7 @@
     <table background="http://www.gemini.edu/sciops/instruments/itc/mez-green-bckgrnd.gif" border="0" cellpadding="6" cellspacing="0" height="70" width="100%">
         <tbody>
             <tr>
-                <td colspan="2" height="50" valign="bottom"><b>Calculation method:</b><i><span>(<a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10256','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false">more info</a>)</span></i><br />
+                <td colspan="2" height="50" valign="bottom"><b>Calculation method:</b> <i><span>(<a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10256','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false">more info</a>)</span></i><br />
                 <i>Select the calculation method (note: second method is not available for spectroscopy)</i></td>
             </tr>
             <tr>
@@ -602,8 +595,7 @@
             </tr>
             <tr>
                 <td colspan="2">
-                <p align="right">
-                <input value="reset" type="reset" />  <input src="https://www.gemini.edu/sciops/instruments/itc/calcButton.gif" align="absbottom" border="0" height="24" type="image" width="78" />
+                <p align="right"> <input src="https://www.gemini.edu/sciops/instruments/itc/calcButton.gif" align="absbottom" border="0" height="24" type="image" width="78" />
                 </p>
                 </td>
             </tr>
@@ -613,7 +605,7 @@
     <div align="center">
     <center>
     <p>
-    <input value="calculate" type="submit" /> <img src="/spacer.gif" height="1" width="40" style="opacity:0.0"/><input value="reset to defaults" type="reset" />
+    <input value="Calculate" type="submit" /> <img src="/spacer.gif" height="1" width="40" style="opacity:0.0"/><input value="Reset to defaults" type="reset" />
     </p>
     </center>
     </div>

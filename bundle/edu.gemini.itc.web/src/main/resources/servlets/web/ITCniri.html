@@ -311,15 +311,15 @@
 
 			</tr>
 			<tr>
-				<td>Camera: </td>
-				<td><select name="Camera" size="1">
+				<td colspan="1">Camera:
+				<select name="Camera" size="1">
 				<option value="F6" selected="selected">f/6</option>
 				<option value="F14">f/14</option>
 				<option value="F32">f/32</option>
 				</select></td>
 
-				<td>Disperser:</td>
-				<td><select name="Disperser" size="1">
+				<td>Disperser:
+				<select name="Disperser" size="1">
 				<option value="NONE">none</option>
 				<option value="J">J grism</option>
 				<option value="H">H grism</option>
@@ -330,9 +330,9 @@
 
 			</tr>
 			<tr>
-				<td>Filter:</td>
+				<td>Filter:
 
-				<td><select name="Filter" size="1">
+				<select name="Filter" size="1">
 				<option value="none" disabled>Broad band...</option>
 
 				<option value="BBF_Y">Y (1.02 µm)</option>
@@ -380,9 +380,8 @@
 				<option value="NBF_BRA">Br-alpha (4.052 µm)</option>
 				</select></td>
 
-				<td>Focal plane mask:</td>
-
-				<td><select name="Mask" size="1">
+				<td>Focal plane mask:
+                <select name="Mask" size="1">
 				<option value="MASK_IMAGING">none</option>
 				<option value="MASK_1">2-pix slit center</option>
 				<option value="MASK_2">4-pix slit center</option>
@@ -397,28 +396,27 @@
 
 			</tr>
 			<tr>
-				<td colspan="2">Read mode set for: </td>
-			</tr>
-			<tr>
-				<td align="right" ><input value="IMAG_SPEC_NB" name="ReadMode" checked="checked" type="radio" />
+				<td colspan="4">Read mode set for: </td>
+                <tr>
+				<td colspan="4" align="left"><input value="IMAG_SPEC_NB" name="ReadMode" checked="checked" type="radio" />
 				low noise, typically narrow band faint object 1-2.5µm imaging/spectroscopy </td>
 			</tr>
 			<tr>
-				<td align="right" ><input value="IMAG_1TO25" name="ReadMode" type="radio" />
+				<td colspan="4" align="left"><input value="IMAG_1TO25" name="ReadMode" type="radio" />
 				medium noise, JHK imaging and bright object 1-2.5µm spectroscopy </td>
 			</tr>
 			<tr>
-				<td align="right" ><input value="IMAG_SPEC_3TO5" name="ReadMode" type="radio" />
+				<td colspan="4" align="left"><input value="IMAG_SPEC_3TO5" name="ReadMode" type="radio" />
 					high noise, 3-5µm imaging and spectroscopy </td>
 			</tr>
 			<tr>
 				<td colspan="4">Detector bias (i.e. well depth) set for: </td>
 			</tr>
 			<tr>
-				<td align="right" ><input value="SHALLOW" name="WellDepth" checked="checked" type="radio" />
+				<td colspan="4" align="left"><input value="SHALLOW" name="WellDepth" checked="checked" type="radio" />
 					low flux mode, typically &lt;2.5µm </td>
 			<tr>
-				<td align="right" ><input value="DEEP" name="WellDepth" type="radio" />
+				<td colspan="4" align="left"><input value="DEEP" name="WellDepth" type="radio" />
 					high flux mode, &gt;2.5µm </td>
 			</tr>
 			<tr>
@@ -444,20 +442,19 @@
 				<td colspan="4" height="50" valign="bottom"><b>Altair properties:</b> <i><span>(</span><a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10269','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false"><span>more info</span></a><span>)</span></i></td>
 			</tr>
 			<tr>
-				<td>AO guide star <br />
-				separation: </td>
-
-				<td><input name="guideSep" size="5" value="0.0" type="text" />  arcsec</td>
+				<td align="left">AO guide star <br />
+				separation:
+                    <input name="guideSep" size="5" value="0.0" type="text" />  arcsec</td>
 				<td>AO guide star brightness <br />
-				(R-band):</td>
-				<td><input name="guideMag" size="5" value="12.0" type="text" /> mag</td>
+				(R-band):
+				<input name="guideMag" size="5" value="12.0" type="text" /> mag</td>
 			</tr>
 			<tr>
 
-				<td>Field Lens: </td>
-				<td><input value="OUT" name="FieldLens" checked="checked" type="radio" /> OUT <input value="IN" name="FieldLens" size="1" type="radio" /> IN(Required for LGS)</td>
-				<td>Altair Mode: </td>
-				<td><input value="NGS" name="GuideStarType" checked="checked" type="radio" /> NGS <input value="LGS" name="GuideStarType" size="1" type="radio" />LGS</td>
+				<td align="left">Field Lens:
+				<input value="OUT" name="FieldLens" checked="checked" type="radio" /> OUT <input value="IN" name="FieldLens" size="1" type="radio" /> IN(Required for LGS)</td>
+				<td>Altair Mode:
+				<input value="NGS" name="GuideStarType" checked="checked" type="radio" /> NGS <input value="LGS" name="GuideStarType" size="1" type="radio" />LGS</td>
 
 			</tr>
 			<tr>

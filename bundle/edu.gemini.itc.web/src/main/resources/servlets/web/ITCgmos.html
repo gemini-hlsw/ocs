@@ -317,10 +317,10 @@
 			<tr>
 				<td colspan="4"><b>Instrument optical properties:</b> <i><span>(</span><a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10273#optical','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no');return false"><span>more info</span></a><span>)</span></i></td>
 			</tr>
-			<tr>
 
-				<td>Grating:</td>
-				<td><select name="instrumentDisperser" size="1">
+			<tr>
+				<td >Grating:</td>
+				<td	><select name="instrumentDisperser" size="1">
 				<option value="MIRROR" selected="selected">
 				none (imaging)</option>
 				<option value="R150_G5306">
@@ -337,12 +337,13 @@
 
 				<option value="B1200_G5301">
 				B1200 grating</option>
-				</select></td>
-				<td>Spectrum central wavelength: </td>
-				<td><input name="instrumentCentralWavelength" size="5" value=" " type="text" /> nm</td>
+				</select> </td>
+				<td >Spectrum central wavelength:</td>
+				<td ><input name="instrumentCentralWavelength" size="5" value=" " type="text" /> nm</td>
 			</tr>
+
 			<tr>
-				<td>Filter:</td>
+				<td>Filter: </td>
 				<td>
 					<select name="instrumentFilter" size="1">
 						<option value="NONE">none</option>
@@ -405,36 +406,21 @@
 				<td colspan="4" height="50" valign="bottom"><b>Detector properties:</b> <i><span>(</span><a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10273#detector','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no');return false"><span>more info</span></a><span>)</span></i></td>
 			</tr>
 			<tr>
-				<td colspan="4">CCD type: </td>
+				<td >CCD type:
+				<input value="HAMAMATSU" name="DetectorManufacturer" type="radio" checked="checked"/> Hamamatsu array
+				<input value="E2V" name="DetectorManufacturer" type="radio" /> EEV DD legacy array </td>
 			</tr>
 			<tr>
-				<td > <input value="HAMAMATSU" name="DetectorManufacturer" type="radio" checked="checked"/> Hamamatsu array </td>
-			</tr>
-			<tr>
-				<td > <input value="E2V" name="DetectorManufacturer" type="radio" /> EEV DD legacy array </td>
-			</tr>
-			<tr>
-                <td colspan="4">Detector binning (spatial direction): </td>
-            <tr>
-                <td > <input value="1" name="spatBinning" checked="checked" type="radio" /> 1 (no binning) </td>
-            </tr>
-            <tr>
-                <td > <input value="2" name="spatBinning" type="radio" /> 2 pixels </td>
-            </tr>
-            <tr>
-                <td > <input value="4" name="spatBinning" type="radio" /> 4 pixels </td>
+                <td >Detector binning (spatial direction):
+            	<input value="1" name="spatBinning" checked="checked" type="radio" /> 1 (no binning)
+            	<input value="2" name="spatBinning" type="radio" /> 2 pixels
+            	<input value="4" name="spatBinning" type="radio" /> 4 pixels </td>
             </tr>
 			<tr>
-                <td colspan="4">Detector binning (spectral direction): </td>
-            </tr>
-            <tr>
-                <td > <input value="1" name="specBinning" checked="checked" type="radio" /> 1 (no binning) </td>
-            </tr>
-            <tr>
-                <td > <input value="2" name="specBinning" type="radio" /> 2 pixels </td>
-            </tr>
-            <tr>
-                <td > <input value="4" name="specBinning" type="radio" /> 4 pixels</td>
+                <td colspan="4">Detector binning (spectral direction):
+					<input value="1" name="specBinning" checked="checked" type="radio" /> 1 (no binning)
+            	<input value="2" name="specBinning" type="radio" /> 2 pixels
+            	<input value="4" name="specBinning" type="radio" /> 4 pixels</td>
 			</tr>
 			<tr>
 				<td colspan="4">
@@ -463,9 +449,6 @@
 			<tr>
 				<td colspan="4">Instrument port: <input value="SIDE_LOOKING" name="IssPort" checked="checked" type="radio" />
 				side-looking (3 reflections) </td>
-			</tr>
-			<tr>
-				<td colspan="4">Wavefront sensor for tip-tilt compensation: <input value="PWFS" name="Type" type="radio" /> PWFS  <!--<input value="OIWFS" name="Type" checked="checked" type="radio" /> OIWFS </td> -->
 			</tr>
 			<tr>
 				<td colspan="4">

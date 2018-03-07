@@ -305,22 +305,19 @@
 			<tr>
 				<td colspan="4" height="21"><b>Instrument optical properties:</b></td>
 			</tr>
-
-			<!---->
 			<tr>
-				<td height="25">Filter:</td>
-				<td><select name="Filter" size="1">
+				<td height="25">Filter:
+				<select name="Filter" size="1">
 					<option value="SAME_AS_DISPERSER">Same as Disperser</option>
 					<option value="ZJ_FILTER">Z-J Filter</option>
 					<option value="JH_FILTER">J-H Filter</option>
 					<option value="HK_FILTER" selected="selected">H-K Filter</option>
 				</select></td>
 			</tr>
-			<!---->
 			<tr>
 
-				<td height="25">Grating:</td>
-				<td height="25"><select name="Disperser" size="1">
+				<td height="25">Grating:
+				<select name="Disperser" size="1">
 				<option value="Z">
 				Z</option>
 				<option value="J">
@@ -335,9 +332,9 @@
 				<option value="K_LONG">
 				K long</option>
 
-				</select></td>
-				<td height="25">Spectrum central wavelength: </td>
-				<td height="25"><input name="instrumentCentralWavelength" size="5" value="2.20" type="text" /> µm</td>
+                </select> </td>
+				<td height="25"> Spectrum central wavelength:
+				<input name="instrumentCentralWavelength" size="5" value="2.20" type="text" /> µm</td>
 			</tr>
 			<!---->
 			<tr>
@@ -345,21 +342,21 @@
 			</tr>
 			<!---->
 			<tr>
-				<td colspan="4" height="20">Read mode and well depth set for:  </td>
+				<td colspan="4" height="20">Read mode: </td>
 
 			</tr>
             <!-- REL-481 Update NIFS read noise estimates -->
 			<tr>
-				<td align="left" height="21"><input value="BRIGHT_OBJECT_SPEC" name="ReadMode" type="radio" />
-				 medium background / bright objects  [shallow well; typically for 1-2.5µm, standard stars, 15.4 e-] </td>
+				<td colspan="4" align="left" height="21"><input value="BRIGHT_OBJECT_SPEC" name="ReadMode" type="radio" />
+				 Medium background for observation of bright objects (typically for 1-2.5µm, standard stars, 15.4 e- read noise) </td>
 			</tr>
 			<tr>
-				<td align="left" height="21"><input value="MEDIUM_OBJECT_SPEC" name="ReadMode" checked="checked" type="radio" />
-					low background / faint objects [shallow well; typically for 1-2.5µm, science targets, 8.1 e-] </td>
+				<td colspan="4" align="left" height="21"><input value="MEDIUM_OBJECT_SPEC" name="ReadMode" checked="checked" type="radio" />
+					Low background for observation of faint objects (typically for 1-2.5µm, science targets, 8.1 e- read noise) </td>
 			</tr>
 			<tr>
-				<td align="left" height="21"><input value="FAINT_OBJECT_SPEC" name="ReadMode" type="radio" />
-				very low background / faintest objects [shallow well; typically for 1-2.5µm v. faint science targets, 4.6 e-] </td>
+				<td colspan="4" align="left" height="21"><input value="FAINT_OBJECT_SPEC" name="ReadMode" type="radio" />
+				Very low background for observation of faintest objects (typically for 1-2.5µm, faint science targets, 4.6 e- read noise) </td>
 			</tr>
 			<tr>
 
@@ -377,10 +374,6 @@
 				<input value="UP_LOOKING" name="IssPort" checked="checked" type="radio" />
 				up-looking port</td>
 			</tr>
-			<!--
-			<tr>
-				<td height="40"> </td>
-			</tr> -->
 			<tr>
 				<td colspan="4"> Wavefront sensor for tip-tilt compensation: <input value="PWFS" name="Type" type="radio" /> PWFS
 				<input value="AOWFS" name="Type" checked="checked" type="radio" />Altair</td>
@@ -391,19 +384,19 @@
 			</tr>
 			<tr>
 				<td>AO guide star <br />
-				separation: </td>
-				<td><input name="guideSep" size="5" value="0.0" type="text" />  arcsec</td>
+				separation:
+				<input name="guideSep" size="5" value="0.0" type="text" />  arcsec</td>
 				<td>AO guide star brightness <br />
 
-				(R-band):</td>
-				<td><input name="guideMag" size="5" value="12.0" type="text" /> mag</td>
+				(R-band):
+				<input name="guideMag" size="5" value="12.0" type="text" /> mag</td>
 			</tr>
 			<tr>
-				<td>Field Lens: </td>
-				<td><input value="OUT" name="FieldLens" checked="checked" type="radio" /> OUT <input value="IN" name="FieldLens" size="1" type="radio" /> IN(Required for LGS)</td>
+				<td>Field Lens:
+				<input value="OUT" name="FieldLens" checked="checked" type="radio" /> OUT <input value="IN" name="FieldLens" size="1" type="radio" /> IN(Required for LGS)</td>
 
-				<td>Altair Mode: </td>
-				<td><input value="NGS" name="GuideStarType" checked="checked" type="radio" /> NGS <input value="LGS" name="GuideStarType" size="1" type="radio" />LGS</td>
+				<td>Altair Mode:
+				<input value="NGS" name="GuideStarType" checked="checked" type="radio" /> NGS <input value="LGS" name="GuideStarType" size="1" type="radio" />LGS</td>
 			</tr>
 			<tr>
 				<td colspan="4" height="26"><input src="https://www.gemini.edu/sciops/instruments/itc/calcButton.gif" align="right" border="0" height="24" type="image" width="78" /></td>

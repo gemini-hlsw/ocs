@@ -105,7 +105,7 @@
 			<tr>
 				<td colspan="3">
 				<p align="right">
-				<input value="reset" type="reset" />  <input src="https://www.gemini.edu/sciops/instruments/itc/calcButton.gif" align="absbottom" border="0" height="24" type="image" width="78" />
+				<input src="https://www.gemini.edu/sciops/instruments/itc/calcButton.gif" align="absbottom" border="0" height="24" type="image" width="78" />
 				</p>
 				</td>
 			</tr>
@@ -299,8 +299,7 @@
 
 			<tr>
 				<td colspan="3">
-				<p align="right">
-				<input value="reset" type="reset" />  <input src="https://www.gemini.edu/sciops/instruments/itc/calcButton.gif" align="absbottom" border="0" height="24" type="image" width="78" />
+				<p align="right"> <input src="https://www.gemini.edu/sciops/instruments/itc/calcButton.gif" align="absbottom" border="0" height="24" type="image" width="78" />
 				</p>
 				</td>
 			</tr>
@@ -318,21 +317,20 @@
 	</p>
 
 	<table background="http://www.gemini.edu/sciops/instruments/itc/mez-green-bckgrnd.gif" border="0" cellpadding="6" cellspacing="0"  width="100%">
-		<tbody>
 			<tr>
 				<td colspan="4" height="21"><b>Instrument optical properties:</b> <i><span>(</span><a href="http://www.gemini.edu/?q=node/10277#optical"><span>more info</span></a><span>)</span></i></td>
 			</tr>
 			<!--start gnirs stuff-->
 			<tr>
 
-				<td height="25">Camera: </td>
-				<td height="25"><select name="PixelScale" size="1">
+				<td height="25">Camera:
+				<select name="PixelScale" size="1">
 				<option value="PS_015" selected="selected"> 0.15 arcsec/pix</option>
 				<option value="PS_005"> 0.05 arcsec/pix</option>
 				</select></td>
 
-				<td height="25">Focal plane mask:</td>
-				<td height="25"><select name="SlitWidth" size="1">
+				<td height="25">Focal plane mask:
+				<select name="SlitWidth" size="1">
 				<option value="SW_1">
 				0.10 arcsec slit</option>
 				<option value="SW_2">
@@ -355,8 +353,8 @@
 				</select></td>
 			</tr>
 			<tr>
-				<td height="25">Grating:</td>
-				<td height="25"><select name="Disperser" size="1">
+				<td height="25">Grating:
+				<select name="Disperser" size="1">
 
 				<option value="D_10"> 10 l/mm</option>
 				<option value="D_32" selected="selected"> 32 l/mm</option>
@@ -364,12 +362,12 @@
 				<option value="imaging"> none</option>
 				</select></td>
 
-				<td height="25">Spectrum central wavelength: </td>
-				<td height="25"><input name="instrumentCentralWavelength" size="5" value=" 2.15" type="text" /> µm</td>
+				<td height="25">Spectrum central wavelength:
+				<input name="instrumentCentralWavelength" size="5" value=" 2.15" type="text" /> µm</td>
 			</tr>
 			<tr>
-				<td height="25">Cross dispersion:</td>
-				<td height="25"><select name="CrossDispersed" size="1">
+				<td height="25">Cross dispersion:
+				<select name="CrossDispersed" size="1">
 				<option value="NO" selected="selected">
 
 				no</option>
@@ -377,8 +375,8 @@
 				yes</option>
 				</select></td>
 
-				<td height="25">Filter: </td>
-				<td height="25"><select name="Filter" size="1">
+				<td height="25">Filter:
+				<select name="Filter" size="1">
 				<option value="spectroscopy">spectroscopy</option>
 				<option value="none" disabled></option>
 				<option value="Y">Y-MK: 1.03 µm</option>
@@ -391,7 +389,6 @@
 				<option value="H2_plus_ND100X">H2 + ND100X</option>
 				</select></td>
 			</tr>
-        </tbody>
 
     </table>
 
@@ -399,41 +396,41 @@
         <tbody>
 			<!--end gnirs stuff-->
 			<tr>
-				<td colspan="2" height="38" valign="bottom"><b>Detector properties:</b> <i><span>(</span><a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10277#detector','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false"><span>more info</span></a><span>)</span></i></td>
+				<td colspan="4" height="38" valign="bottom"><b>Detector properties:</b> <i><span>(</span><a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10277#detector','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false"><span>more info</span></a><span>)</span></i></td>
 			</tr>
 			<tr>
-				<td colspan="2">Read mode set for:  </td>
+				<td colspan="4">Read mode set for:  </td>
 			</tr>
 			<tr>
-				<td align="left"> <input value="VERY_FAINT" name="ReadMode" type="radio" />
+				<td colspan="4" align="left"> <input value="VERY_FAINT" name="ReadMode" type="radio" />
 				very low background, typically for 1-2.5 µm observations of very faint targets</td>
 			</tr>
 			<tr>
-				<td align="left"><input value="FAINT" name="ReadMode" checked="checked" type="radio" />
+				<td colspan="4" align="left"><input value="FAINT" name="ReadMode" checked="checked" type="radio" />
 					low background, typically for 1-2.5 µm observations of faint targets</td>
 			</tr>
 			<tr>
-				<td align="left"><input value="BRIGHT" name="ReadMode" type="radio" />
+				<td colspan="4" align="left"><input value="BRIGHT" name="ReadMode" type="radio" />
 				medium background / bright objects, typically for 1-2.5 µm observations of bright targets/standards</td>
 			</tr>
 			<tr>
-				<td align="left"><input value="VERY_BRIGHT" name="ReadMode" type="radio" />
+				<td colspan="4" align="left"><input value="VERY_BRIGHT" name="ReadMode" type="radio" />
 				high background (i.e. thermal IR), typically for 3-5 µm observations</td>
 			</tr>
 			<tr>
-				<td colspan="2">Well depth set for:  </td>
+				<td colspan="4">Well depth set for:  </td>
 
 			</tr>
 			<tr>
-				<td align="left"><input value="SHALLOW" name="WellDepth" checked="checked" type="radio" />
+				<td colspan="4" align="left"><input value="SHALLOW" name="WellDepth" checked="checked" type="radio" />
 				shallow well; typically for 1-2.5 µm observations, standard stars, faint and very faint science targets</td>
 			</tr>
 			<tr>
-				<td align="left"><input value="DEEP" name="WellDepth" type="radio" />
+				<td colspan="4" align="left"><input value="DEEP" name="WellDepth" type="radio" />
 				deep well; typically for 3-5µm observations</td>
 			</tr>
 			<tr>
-				<td colspan="2" height="21">Dark current of 0.1 e-/s </td>
+				<td colspan="4" height="21">Dark current of 0.1 e-/s </td>
 			</tr>
 		</tbody>
 	</table>
@@ -441,22 +438,21 @@
 		<tbody>
 			<!-- Telescope definition-->
 			<tr>
-				<td colspan="2" height="38" valign="bottom"><b>Telescope configuration:</b> <i><span>(<a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10271','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false">more info</a>)</span></i></td>
+				<td colspan="4" height="38" valign="bottom"><b>Telescope configuration:</b> <i><span>(<a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10271','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false">more info</a>)</span></i></td>
 			</tr>
 			<tr>
-				<td colspan="2" height="21">Mirror coating: <input value="SILVER" name="Coating" checked="checked" type="radio" /> silver </td>
-
+				<td colspan="4" height="21">Mirror coating: <input value="SILVER" name="Coating" checked="checked" type="radio" /> silver </td>
 			</tr>
 			<tr>
-				<td colspan="2" height="21">Instrument port: <input value="SIDE_LOOKING" name="IssPort" checked="checked" type="radio" />
+				<td colspan="4" height="21">Instrument port: <input value="SIDE_LOOKING" name="IssPort" checked="checked" type="radio" />
 				side-looking (3 reflections) </td>
 			</tr>
 			<tr>
 
-				<td colspan="2" height="21">Wavefront sensor for tip-tilt compensation:
-                    <input value="PWFS" name="Type" checked="checked" type="radio" /> PWFS
-                    <input value="OIWFS" name="Type" type="radio" /> OIWFS
-					<input value="AOWFS" name="Type" type="radio" />Altair
+				<td colspan="4" height="21">Wavefront sensor for tip-tilt compensation:
+                    <input value="PWFS" name="Type" checked="checked" type="radio" /> PWFS/OIWFS
+                    <!--<input value="OIWFS" name="Type" type="radio" /> OIWFS -->
+					<input value="AOWFS" name="Type" type="radio" /> Altair
                 </td>
 			</tr>
 
@@ -464,20 +460,18 @@
 				<td colspan="4" height="50" valign="bottom"><b>Altair properties:</b> <i><span>(</span><a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10269','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false"><span>more info</span></a><span>)</span></i></td>
 			</tr>
 			<tr>
-				<td>AO guide star <br />
-					separation: </td>
-
-				<td><input name="guideSep" size="5" value="0.0" type="text" />  arcsec</td>
-				<td>AO guide star brightness <br />
-					(R-band):</td>
-				<td><input name="guideMag" size="5" value="12.0" type="text" /> mag</td>
+				<td align="left">AO guide star <br />
+					separation: <input name="guideSep" size="5" value="0.0" type="text" />  arcsec</td>
+                <td> AO guide star brightness <br />
+					(R-band):
+				<input name="guideMag" size="5" value="12.0" type="text" /> mag</td>
 			</tr>
 			<tr>
 
-				<td>Field Lens: </td>
-				<td><input value="OUT" name="FieldLens" checked="checked" type="radio" /> OUT <input value="IN" name="FieldLens" size="1" type="radio" /> IN(Required for LGS)</td>
-				<td>Altair Mode: </td>
-				<td><input value="NGS" name="GuideStarType" checked="checked" type="radio" /> NGS <input value="LGS" name="GuideStarType" size="1" type="radio" />LGS</td>
+				<td align="left">Field Lens:
+				<input value="OUT" name="FieldLens" checked="checked" type="radio" /> OUT <input value="IN" name="FieldLens" size="1" type="radio" /> IN (Required for LGS)</td>
+				<td>
+                  Altair Mode: <input value="NGS" name="GuideStarType" checked="checked" type="radio" /> NGS <input value="LGS" name="GuideStarType" size="1" type="radio" />LGS </p></td>
 
 			</tr>
 
