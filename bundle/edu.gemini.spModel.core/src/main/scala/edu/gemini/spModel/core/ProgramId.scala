@@ -14,6 +14,21 @@ sealed trait ProgramId {
    * supported by SPProgramID.
    */
   def spOption: Option[SPProgramID]
+
+  /**
+   * Obtains an abbreviated program id name for display purposes.
+   */
+  def shortName: String =
+    this match {
+      case ProgramId.Science(site, semester, ptype, index) =>
+        s"${site.abbreviation.drop(1)}-${semester.toShortString}-${ptype.abbreviation}-$index"
+
+      case ProgramId.Daily(site, ptype, year, month, day) =>
+        f"${site.abbreviation.drop(1)}-${ptype.abbreviation}${year.toString.takeRight(2)}$month%02d$day%02d"
+
+      case ProgramId.Arbitrary(_, _, _, id) =>
+        id
+    }
 }
 
 sealed trait StandardProgramId extends ProgramId {
