@@ -11,6 +11,9 @@ import edu.gemini.qpt.ui.util.BooleanViewPreference;
 
 import static edu.gemini.qpt.ui.util.BooleanViewPreference.*;
 
+import edu.gemini.spModel.core.*;
+import edu.gemini.shared.util.immutable.Option;
+
 public enum ClientExclusion {
 
     NULL("No current variant.", null),
@@ -19,15 +22,15 @@ public enum ClientExclusion {
     HIDDEN_BAND_2("Program is in Band 2.", VIEW_BAND_2),
     HIDDEN_BAND_3("Program is in Band 3.", VIEW_BAND_3),
     HIDDEN_BAND_4("Program is in Band 4.", VIEW_BAND_4),
-    HIDDEN_LP("Program is of type " + StructuredProgramID.Type.LP.getDescription(), VIEW_SP_LP),
-    HIDDEN_C("Program is of type " + StructuredProgramID.Type.C.getDescription(), VIEW_SP_C),
-    HIDDEN_FT("Program is of type " + StructuredProgramID.Type.FT.getDescription(), VIEW_SP_FT),
-    HIDDEN_Q("Program is of type " + StructuredProgramID.Type.Q.getDescription(), VIEW_SP_Q),
-    HIDDEN_SV("Program is of type " + StructuredProgramID.Type.SV.getDescription(), VIEW_SP_SV),
-    HIDDEN_DD("Program is of type " + StructuredProgramID.Type.DD.getDescription(), VIEW_SP_DD),
-    HIDDEN_DS("Program is of type " + StructuredProgramID.Type.DS.getDescription(), VIEW_SP_DS),
-    HIDDEN_ENG("Program is of type " + StructuredProgramID.Type.ENG.getDescription(), VIEW_SP_ENG),
-    HIDDEN_PCAL("Program is of type " + StructuredProgramID.Type.CAL.getDescription(), VIEW_SP_CAL),
+    HIDDEN_LP("Program is of type "   + ProgramType$.MODULE$.LP().name(),  VIEW_SP_LP),
+    HIDDEN_C("Program is of type "    + ProgramType$.MODULE$.C().name(),   VIEW_SP_C),
+    HIDDEN_FT("Program is of type "   + ProgramType$.MODULE$.FT().name(),  VIEW_SP_FT),
+    HIDDEN_Q("Program is of type "    + ProgramType$.MODULE$.Q().name(),   VIEW_SP_Q),
+    HIDDEN_SV("Program is of type "   + ProgramType$.MODULE$.SV().name(),  VIEW_SP_SV),
+    HIDDEN_DD("Program is of type "   + ProgramType$.MODULE$.DD().name(),  VIEW_SP_DD),
+    HIDDEN_DS("Program is of type "   + ProgramType$.MODULE$.DS().name(),  VIEW_SP_DS),
+    HIDDEN_ENG("Program is of type "  + ProgramType$.MODULE$.ENG().name(), VIEW_SP_ENG),
+    HIDDEN_PCAL("Program is of type " + ProgramType$.MODULE$.CAL().name(), VIEW_SP_CAL),
     HIDDEN_INACTIVE_PROGRAMS("Program is inactive.", VIEW_INACTIVE_PROGRAMS),
 
     HIDDEN_NIGHT_CALS("Obs is a nighttime calibration.", VIEW_NIGHTTIME_CALIBRATIONS),
@@ -80,34 +83,39 @@ public enum ClientExclusion {
             }
         }
         // SP Type filtering
-        switch (obs.getProg().getStructuredProgramId().getType()) {
-            case LP:
-                if (!VIEW_SP_LP.get()) return HIDDEN_LP;
-                break;
-            case C:
-                if (!VIEW_SP_C.get()) return HIDDEN_C;
-                break;
-            case FT:
-                if (!VIEW_SP_FT.get()) return HIDDEN_FT;
-                break;
-            case Q:
-                if (!VIEW_SP_Q.get()) return HIDDEN_Q;
-                break;
-            case SV:
-                if (!VIEW_SP_SV.get()) return HIDDEN_SV;
-                break;
-            case DD:
-                if (!VIEW_SP_DD.get()) return HIDDEN_DD;
-                break;
-            case DS:
-                if (!VIEW_SP_DS.get()) return HIDDEN_DS;
-                break;
-            case ENG:
-                if (!VIEW_SP_ENG.get()) return HIDDEN_ENG;
-                break;
-            case CAL:
-                if (!VIEW_SP_CAL.get()) return HIDDEN_PCAL;
-                break;
+
+
+        final Option<ProgramType> t = obs.getProg().getTypeAsJava();
+        if (t.isDefined()) {
+            switch (t.getValue().typeEnum()) {
+                case C:
+                    if (!VIEW_SP_C.get()) return HIDDEN_C;
+                    break;
+                case CAL:
+                    if (!VIEW_SP_CAL.get()) return HIDDEN_PCAL;
+                    break;
+                case DD:
+                    if (!VIEW_SP_DD.get()) return HIDDEN_DD;
+                    break;
+                case DS:
+                    if (!VIEW_SP_DS.get()) return HIDDEN_DS;
+                    break;
+                case ENG:
+                    if (!VIEW_SP_ENG.get()) return HIDDEN_ENG;
+                    break;
+                case FT:
+                    if (!VIEW_SP_FT.get()) return HIDDEN_FT;
+                    break;
+                case LP:
+                    if (!VIEW_SP_LP.get()) return HIDDEN_LP;
+                    break;
+                case Q:
+                    if (!VIEW_SP_Q.get()) return HIDDEN_Q;
+                    break;
+                case SV:
+                    if (!VIEW_SP_SV.get()) return HIDDEN_SV;
+                    break;
+            }
         }
 
         // Obs type filtering

@@ -29,58 +29,58 @@ import edu.gemini.qpt.ui.util.CompositeIcon;
 import edu.gemini.qpt.ui.util.TimePreference;
 import edu.gemini.ui.gface.GSubElementDecorator;
 import edu.gemini.ui.gface.GViewer;
+import edu.gemini.spModel.core.ProgramTypeEnum;
 
 public class VisitDecorator implements GSubElementDecorator<Variant, Alloc, VisitAttribute>, PropertyChangeListener {
 
 	private final DateFormat localDF = new SimpleDateFormat("HH:mm");
 	private final DateFormat universalDF = new SimpleDateFormat("HH:mm");
-	
-	private ImprovedSkyCalc calc;	
+
+	private ImprovedSkyCalc calc;
 	private GViewer<Variant, Alloc> viewer;
 	private JTable table;
-	
+
 	private static final Color SHADOW_COLOR = 	new Color(0xCCCCCC);
 	private final Border NORMAL, NEXT, MIDDLE, FIRST, LAST, SOLO; // initialized at bottom
-	
-	
+
+
 	public VisitDecorator() {
 		universalDF.setTimeZone(TimeZone.getTimeZone("UTC"));
 		TimePreference.BOX.addPropertyChangeListener(this);
 	}
-	
+
 	public void decorate(JLabel label, Alloc alloc, VisitAttribute subElement, Object value) {
-		
+
 		// Text
 		if (subElement == Start) {
 			switch (TimePreference.BOX.get()) {
 			case LOCAL:	 label.setText(localDF.format(value)); break;
 			case UNIVERSAL:label.setText(universalDF.format(value)); break;
-			case SIDEREAL:	
+			case SIDEREAL:
 				label.setText(universalDF.format(calc.getLst((Date) value)));
 				break;
-			
+
 			}
 		}
-		
+
 		// Alignment
 		switch (subElement) {
 		case Group:
-		case Start: 
+		case Start:
 		case BG:
 		case Dur: 	label.setHorizontalAlignment(SwingConstants.CENTER); break;
 		default:	label.setHorizontalAlignment(SwingConstants.LEFT);
 		}
-		
+
 		// Icon
 		if (subElement == Observation) {
 			Obs obs = (Obs) value;
-			
+
 			// First, get the base icon
-            if ( obs.getProg().isEngOrCal()) {
-                switch (obs.getProg().getStructuredProgramId().getType()) {
-                case ENG: label.setIcon(ICON_DAYENG); 	break;
-                case CAL: label.setIcon(ICON_DAYCAL); 	break;
-                }
+            if (obs.getProg().isType(ProgramTypeEnum.ENG)) {
+                label.setIcon(ICON_DAYENG);
+            } else if (obs.getProg().isType(ProgramTypeEnum.CAL)) {
+                label.setIcon(ICON_DAYCAL);
             } else {
                 switch (obs.getObsClass()) {
                 case ACQ:
@@ -92,20 +92,20 @@ public class VisitDecorator implements GSubElementDecorator<Variant, Alloc, Visi
 
                 }
             }
-			
+
 			// Now add decoration as necessary
 			Severity sev = alloc.getSeverity();
 			if (sev != null) {
-				switch (sev) {				
+				switch (sev) {
 				case Error: 	label.setIcon(new CompositeIcon(label.getIcon(), OVL_ERROR)); break;
 				case Warning: 	label.setIcon(new CompositeIcon(label.getIcon(), OVL_WARN));
 				}
 			}
-			
+
 		} else {
-			label.setIcon(null);		
+			label.setIcon(null);
 		}
-		
+
 		// Border and background color
 		final Border border;
 		final Color background;
@@ -121,7 +121,7 @@ public class VisitDecorator implements GSubElementDecorator<Variant, Alloc, Visi
 			default:
 				Alloc next = alloc.getNext();
 				if (next != null && next.getGroupIndex() != index)
-					border = NEXT; 
+					border = NEXT;
 				else
 					border = NORMAL;
 				break;
@@ -136,7 +136,7 @@ public class VisitDecorator implements GSubElementDecorator<Variant, Alloc, Visi
 		}
 		label.setBorder(border);
 		label.setBackground(background);
-			
+
 	}
 
 	public void modelChanged(GViewer<Variant, Alloc> viewer, Variant oldModel, Variant newModel) {
@@ -175,14 +175,14 @@ public class VisitDecorator implements GSubElementDecorator<Variant, Alloc, Visi
 			public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
 				g.setColor(SHADOW_COLOR);
 				g.drawLine(x + width - 1, y, x + width - 1, y + height - 1);  // right
-			}	
+			}
 		};
 
 		FIRST = new CellBorder() {
 			public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
 				g.setColor(SHADOW_COLOR);
 				g.drawLine(x + width - 1, y, x + width - 1, y + height - 1);  // right
-			}	
+			}
 		};
 
 		LAST = new CellBorder() {
@@ -190,7 +190,7 @@ public class VisitDecorator implements GSubElementDecorator<Variant, Alloc, Visi
 				g.setColor(SHADOW_COLOR);
 				g.drawLine(x + width - 1, y, x + width - 1, y + height - 1);  // right
 				g.drawLine(x, y + height - 1, x + width - 1, y + height - 1);  // bottom
-			}	
+			}
 		};
 
 		SOLO = new CellBorder() {
@@ -198,7 +198,7 @@ public class VisitDecorator implements GSubElementDecorator<Variant, Alloc, Visi
 				g.setColor(SHADOW_COLOR);
 				g.drawLine(x + width - 1, y, x + width - 1, y + height - 1);  // right
 				g.drawLine(x, y + height - 1, x + width - 1, y + height - 1);  // bottom
-			}	
+			}
 		};
 
 	}
@@ -215,7 +215,7 @@ abstract class CellBorder implements Border {
 	public boolean isBorderOpaque() {
 		return false;
 	}
-	
+
 }
 
 

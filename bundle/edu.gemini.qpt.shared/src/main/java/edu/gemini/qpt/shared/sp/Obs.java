@@ -804,7 +804,7 @@ public final class Obs implements Serializable, Comparable<Obs> {
     }
 
     public static String createObsId(Prog prog, int obsNumber) {
-        return prog.getStructuredProgramId().getShortName() + " [" + obsNumber + "]";
+        return prog.getStructuredProgramId().shortName() + " [" + obsNumber + "]";
     }
 
     public Option<SchedulingBlock> getSchedulingBlock() {

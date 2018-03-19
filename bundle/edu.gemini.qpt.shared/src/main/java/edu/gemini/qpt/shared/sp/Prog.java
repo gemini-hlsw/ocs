@@ -1,9 +1,9 @@
 package edu.gemini.qpt.shared.sp;
 
 import edu.gemini.spModel.core.*;
-import edu.gemini.qpt.shared.util.StructuredProgramID;
 import edu.gemini.spModel.gemini.obscomp.SPProgram;
-import scala.Option;
+import edu.gemini.shared.util.immutable.ImOption;
+import edu.gemini.shared.util.immutable.Option;
 
 import java.io.Serializable;
 import java.util.*;
@@ -17,7 +17,7 @@ public final class Prog implements Serializable, Comparable<Prog> {
     private static final long serialVersionUID = 1L;
 
     private final SPProgramID programId;
-    private final StructuredProgramID structuredProgramId;
+    private final ProgramId structuredProgramId;
     private final String title;
     private final Affiliate partner;
     private final int band;
@@ -61,7 +61,7 @@ public final class Prog implements Serializable, Comparable<Prog> {
         this.title = program.getTitle();
         this.partner = program.getPIAffiliate();
         this.programId = programId;
-        this.structuredProgramId = new StructuredProgramID(programId);
+        this.structuredProgramId = ProgramId$.MODULE$.parse(programId.stringValue());
         this.completed = program.isCompleted();
         this.active = active;
         this.band = band;
@@ -85,7 +85,7 @@ public final class Prog implements Serializable, Comparable<Prog> {
         this.title = null;
         this.partner = null;
         this.programId = programId;
-        this.structuredProgramId = new StructuredProgramID(programId);
+        this.structuredProgramId = ProgramId$.MODULE$.parse(programId.stringValue());
         this.completed = false;
         this.active = false;
         this.band = 0;
@@ -150,12 +150,28 @@ public final class Prog implements Serializable, Comparable<Prog> {
         return programId;
     }
 
-    public StructuredProgramID getStructuredProgramId() {
+    public ProgramId getStructuredProgramId() {
         return structuredProgramId;
     }
 
-    public Option<ProgramType> getType() {
-        return ProgramId$.MODULE$.parse(programId.stringValue()).ptype();
+    public scala.Option<ProgramType> getType() {
+        return structuredProgramId.ptype();
+    }
+
+    public Option<ProgramType> getTypeAsJava() {
+        return ImOption.fromScalaOpt(getType());
+    }
+
+    public boolean isType(ProgramTypeEnum e) {
+        return getTypeAsJava().exists(t -> t.typeEnum() == e);
+    }
+
+    public scala.Option<Semester> getSemester() {
+        return structuredProgramId.semester();
+    }
+
+    public Option<Semester> getSemesterAsJava() {
+        return ImOption.fromScalaOpt(getSemester());
     }
 
     public String getTitle() {
@@ -228,7 +244,7 @@ public final class Prog implements Serializable, Comparable<Prog> {
 
     @Override
     public String toString() {
-        return structuredProgramId.getShortName();
+        return structuredProgramId.shortName();
     }
 
     @Override
@@ -242,8 +258,7 @@ public final class Prog implements Serializable, Comparable<Prog> {
     }
 
     public boolean isEngOrCal() {
-        return structuredProgramId.getType() == StructuredProgramID.Type.ENG
-                || structuredProgramId.getType() == StructuredProgramID.Type.CAL;
+        return isType(ProgramTypeEnum.ENG) || isType(ProgramTypeEnum.CAL);
     }
 
 }

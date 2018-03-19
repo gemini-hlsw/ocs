@@ -17,9 +17,8 @@ import static edu.gemini.qpt.core.Variant.Flag.SCHEDULED;
 import static edu.gemini.qpt.core.Variant.Flag.TIME_CONSTRAINED;
 import static edu.gemini.qpt.core.Variant.Flag.TIMING_CNS;
 import static edu.gemini.qpt.core.Variant.Flag.WV_UQUAL;
-import static edu.gemini.qpt.shared.util.StructuredProgramID.Type.ENG;
-import static edu.gemini.qpt.shared.util.StructuredProgramID.Type.CAL;
 import static edu.gemini.qpt.ui.util.SharedIcons.*;
+import edu.gemini.spModel.core.*;
 
 import java.awt.Color;
 import java.util.EnumSet;
@@ -93,9 +92,9 @@ public class CandidateDecorator {
             }
         }
 
-        if (obs.getProg().getStructuredProgramId().getType() == ENG) {
+        if (obs.getProg().isType(ProgramTypeEnum.ENG)) {
             icon = isGray ? ICON_DAYCAL_DIS : isDim ? ICON_DAYENG_DIM : ICON_DAYENG;
-        } else if (obs.getProg().getStructuredProgramId().getType() == CAL) {
+        } else if (obs.getProg().isType(ProgramTypeEnum.CAL)) {
             icon = isGray ? ICON_DAYCAL_DIS : isDim ? ICON_DAYCAL_DIM : ICON_DAYCAL;
         }
 
