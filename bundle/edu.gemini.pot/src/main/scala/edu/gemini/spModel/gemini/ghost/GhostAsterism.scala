@@ -6,8 +6,6 @@ import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.env.Asterism
 import java.time.Instant
 
-import edu.gemini.spModel.gemini.ghost.GhostAsterism.GuideFiberState.Disabled
-
 import scalaz._
 import Scalaz._
 
@@ -132,7 +130,7 @@ object GhostAsterism {
       StandardResolution.guideFiberState(targets.ifu1, cc)
 
     def ifu2GuideFiberState(cc: CloudCover): GuideFiberState = {
-      targets.ifu2.map(t => StandardResolution.guideFiberState(t, cc)).getOrElse(Disabled)
+      targets.ifu2.map(t => StandardResolution.guideFiberState(t, cc)).getOrElse(GuideFiberState.Disabled)
     }
 
     override def copyWithClonedTargets: Asterism =
@@ -141,7 +139,7 @@ object GhostAsterism {
 
   object StandardResolution {
     def guideFiberState(e: Either[Coordinates, GhostTarget], cc: CloudCover): GuideFiberState =
-      e.rightMap(t => GhostTarget.standardResGuideFiberState(t, cc)).right.getOrElse(Disabled)
+      e.rightMap(t => GhostTarget.standardResGuideFiberState(t, cc)).right.getOrElse(GuideFiberState.Disabled)
   }
 
   /** GHOST standard resolution asterism types.
