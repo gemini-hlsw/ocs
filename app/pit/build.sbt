@@ -38,7 +38,14 @@ def common(pv: Version) = AppConfig(
     "org.osgi.framework.storage.clean"        -> "onFirstInit",
     "org.osgi.framework.startlevel.beginning" -> "100",
     "org.osgi.framework.bootdelegation"       -> "*",
-    "edu.gemini.pit.test"                     -> "false",
+    
+    // NOTE: changing this flag to false works in certain circumstances
+    // but is entirely unreliable. It is better to simply comment this
+    // line out for PIT production releases.
+    // (I think it seems to work if you quit sbt, change it, restart sbt,
+    // clean, compile, and then build the PIT.)
+    //"edu.gemini.pit.test"                     -> "true",
+    
     "edu.gemini.ags.host"                     -> "gnauxodb.gemini.edu",
     "edu.gemini.ags.port"                     -> "8443"
   ),
