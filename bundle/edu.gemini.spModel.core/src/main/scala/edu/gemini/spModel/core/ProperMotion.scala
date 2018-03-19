@@ -20,4 +20,9 @@ object ProperMotion {
   val deltaDec: ProperMotion @> DeclinationAngularVelocity    = Lens(t => Store(s => t.copy(deltaDec = s), t.deltaDec))
   val epoch:    ProperMotion @> Epoch                         = Lens(t => Store(s => t.copy(epoch = s), t.epoch))
 
+  // Warning: This assumes the same epoch across proper motion.
+  // We use it in GhostAsterism to simplify, where we assume same epoch.
+  implicit val monoid: Monoid[ProperMotion] = Monoid.instance(
+    (pm1,pm2) => ProperMotion(pm1.deltaRA |+| pm2.deltaRA, pm1.deltaDec |+| pm2.deltaDec),
+    zero)
 }
