@@ -3,6 +3,7 @@ package jsky.app.ot.shared.gemini.obscat;
 import edu.gemini.spModel.gemini.acqcam.InstAcqCam;
 import edu.gemini.spModel.gemini.bhros.InstBHROS;
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2;
+import edu.gemini.spModel.gemini.ghost.Ghost;
 import edu.gemini.spModel.gemini.gmos.InstGmosNorth;
 import edu.gemini.spModel.gemini.gmos.InstGmosSouth;
 import edu.gemini.spModel.gemini.gnirs.InstGNIRS;
@@ -314,6 +315,8 @@ public final class ObsCatalogInfo {
             instConfigInfoList = VisitorInstrument.getInstConfigInfo();
         else if (instName.equals(Gpi.SP_TYPE.readableStr))
             instConfigInfoList = Gpi.getInstConfigInfo();
+        else if (instName.equals(Ghost.SP_TYPE().readableStr))
+            instConfigInfoList = Ghost.getInstConfigInfo();
         return instConfigInfoList;
     }
 
