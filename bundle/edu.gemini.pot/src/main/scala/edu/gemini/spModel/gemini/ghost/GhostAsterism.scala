@@ -168,11 +168,14 @@ object GhostAsterism {
       case SkyPlusTarget(s, t) => SkyPlusTarget(s, t.copyWithClonedTarget)
     }
 
+    /** In any single target object mode, the default base position is the same as the
+      * target position. In dual target mode, we interpolate between the two.
+      */
     def defaultBasePosition(when: Option[Instant]): Option[Coordinates] = this match {
       case SingleTarget(t)    => t.coordinates(when)
       case DualTarget(t1,t2)  => interpolateCoords(t1.coordinates(when), t2.coordinates(when))
-      case TargetPlusSky(t,s) => interpolateCoords(t.coordinates(when), Some(s))
-      case SkyPlusTarget(s,t) => interpolateCoords(Some(s), t.coordinates(when))
+      case TargetPlusSky(t,_) => t.coordinates(when)
+      case SkyPlusTarget(_,t) => t.coordinates(when)
     }
   }
 
@@ -182,10 +185,10 @@ object GhostAsterism {
       c2 <- c2Opt
     } yield c1.interpolate(c2, 0.5)
 
-    case class SingleTarget(target: GhostTarget) extends GhostStandardResTargets
-    case class DualTarget(target1: GhostTarget, target2: GhostTarget) extends GhostStandardResTargets
-    case class TargetPlusSky(target: GhostTarget, sky: Coordinates) extends GhostStandardResTargets
-    case class SkyPlusTarget(sky: Coordinates, target: GhostTarget) extends GhostStandardResTargets
+    final case class SingleTarget(target: GhostTarget) extends GhostStandardResTargets
+    final case class DualTarget(target1: GhostTarget, target2: GhostTarget) extends GhostStandardResTargets
+    final case class TargetPlusSky(target: GhostTarget, sky: Coordinates) extends GhostStandardResTargets
+    final case class SkyPlusTarget(sky: Coordinates, target: GhostTarget) extends GhostStandardResTargets
   }
 
 
@@ -199,14 +202,14 @@ object GhostAsterism {
     * guide fibers will be used by default because the target must be bright,
     * but can be explicitly turned off.
     */
-  sealed case class HighResolution(ghostTarget: GhostTarget,
-                                   sky: Coordinates,
-                                   base: Option[Coordinates]) extends GhostAsterism {
+  final case class HighResolution(ghostTarget: GhostTarget,
+                                  sky: Option[Coordinates],
+                                  base: Option[Coordinates]) extends GhostAsterism {
 
     override def allSpTargets: NonEmptyList[SPTarget] =
       NonEmptyList(ghostTarget.spTarget)
 
-    /** Defines the base position to be the same as the target position. */
+    /** Defines the default base position to be the same as the target position. */
     override def basePosition(when: Option[Instant]): Option[Coordinates] =
       base orElse ghostTarget.coordinates(when)
 
