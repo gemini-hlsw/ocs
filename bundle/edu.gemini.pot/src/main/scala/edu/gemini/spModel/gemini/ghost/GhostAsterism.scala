@@ -170,17 +170,17 @@ object GhostAsterism {
 
     def defaultBasePosition(when: Option[Instant]): Option[Coordinates] = this match {
       case SingleTarget(t)    => t.coordinates(when)
-      case DualTarget(t1,t2)  => extrapolateCoords(t1.coordinates(when), t2.coordinates(when))
-      case TargetPlusSky(t,s) => extrapolateCoords(t.coordinates(when), Some(s))
-      case SkyPlusTarget(s,t) => extrapolateCoords(Some(s), t.coordinates(when))
+      case DualTarget(t1,t2)  => interpolateCoords(t1.coordinates(when), t2.coordinates(when))
+      case TargetPlusSky(t,s) => interpolateCoords(t.coordinates(when), Some(s))
+      case SkyPlusTarget(s,t) => interpolateCoords(Some(s), t.coordinates(when))
     }
   }
 
   object GhostStandardResTargets {
-    def extrapolateCoords(c1Opt: Option[Coordinates], c2Opt: Option[Coordinates]): Option[Coordinates] = for {
+    def interpolateCoords(c1Opt: Option[Coordinates], c2Opt: Option[Coordinates]): Option[Coordinates] = for {
       c1 <- c1Opt
       c2 <- c2Opt
-    } yield c1.interpolate(c2, 0.5d)
+    } yield c1.interpolate(c2, 0.5)
 
     case class SingleTarget(target: GhostTarget) extends GhostStandardResTargets
     case class DualTarget(target1: GhostTarget, target2: GhostTarget) extends GhostStandardResTargets
