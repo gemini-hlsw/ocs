@@ -26,7 +26,6 @@ import javax.swing.KeyStroke;
 
 import edu.gemini.ags.api.AgsMagnitude;
 import edu.gemini.qpt.core.Schedule;
-import edu.gemini.qpt.shared.util.StructuredProgramID;
 import edu.gemini.qpt.ui.action.*;
 import edu.gemini.qpt.ui.action.nudge.BackAction;
 import edu.gemini.qpt.ui.action.nudge.ForwardAction;
@@ -46,6 +45,8 @@ import edu.gemini.qpt.ui.view.property.PropertyViewAdvisor;
 import edu.gemini.qpt.ui.view.variant.VariantViewAdvisor;
 import edu.gemini.qpt.ui.view.visit.VisitViewAdvisor;
 import edu.gemini.qpt.ui.view.visualizer.PlotViewAdvisor;
+import edu.gemini.spModel.core.ProgramId;
+import edu.gemini.spModel.core.ProgramType$;
 import edu.gemini.ui.workspace.IActionManager;
 import edu.gemini.ui.workspace.IShell;
 import edu.gemini.ui.workspace.IShellAdvisor;
@@ -234,15 +235,15 @@ public class ShellAdvisor implements IShellAdvisor, PropertyChangeListener {
                 new BooleanPreferenceAction(VIEW_BAND_3, VIEW_ALL, "Science Band 3", KeyEvent.VK_3),
                 new BooleanPreferenceAction(VIEW_BAND_4, VIEW_ALL, "Science Band 4", KeyEvent.VK_4),
                 null,
-                new BooleanPreferenceAction(VIEW_SP_LP, VIEW_ALL, StructuredProgramID.Type.LP.getDescription()),
-                new BooleanPreferenceAction(VIEW_SP_FT, VIEW_ALL, StructuredProgramID.Type.FT.getDescription()),
-                new BooleanPreferenceAction(VIEW_SP_Q, VIEW_ALL, StructuredProgramID.Type.Q.getDescription()),
-                new BooleanPreferenceAction(VIEW_SP_C, VIEW_ALL, StructuredProgramID.Type.C.getDescription()),
-                new BooleanPreferenceAction(VIEW_SP_SV, VIEW_ALL, StructuredProgramID.Type.SV.getDescription()),
-                new BooleanPreferenceAction(VIEW_SP_DD, VIEW_ALL, StructuredProgramID.Type.DD.getDescription()),
-                new BooleanPreferenceAction(VIEW_SP_DS, VIEW_ALL, StructuredProgramID.Type.DS.getDescription()),
-                new BooleanPreferenceAction(VIEW_SP_ENG, VIEW_ALL, StructuredProgramID.Type.ENG.getDescription()),
-                new BooleanPreferenceAction(VIEW_SP_CAL, VIEW_ALL, StructuredProgramID.Type.CAL.getDescription()),
+                new BooleanPreferenceAction(VIEW_SP_LP, VIEW_ALL,  ProgramType$.MODULE$.LP().name()),
+                new BooleanPreferenceAction(VIEW_SP_FT, VIEW_ALL,  ProgramType$.MODULE$.FT().name()),
+                new BooleanPreferenceAction(VIEW_SP_Q, VIEW_ALL,   ProgramType$.MODULE$.Q().name()),
+                new BooleanPreferenceAction(VIEW_SP_C, VIEW_ALL,   ProgramType$.MODULE$.C().name()),
+                new BooleanPreferenceAction(VIEW_SP_SV, VIEW_ALL,  ProgramType$.MODULE$.SV().name()),
+                new BooleanPreferenceAction(VIEW_SP_DD, VIEW_ALL,  ProgramType$.MODULE$.DD().name()),
+                new BooleanPreferenceAction(VIEW_SP_DS, VIEW_ALL,  ProgramType$.MODULE$.DS().name()),
+                new BooleanPreferenceAction(VIEW_SP_ENG, VIEW_ALL, ProgramType$.MODULE$.ENG().name()),
+                new BooleanPreferenceAction(VIEW_SP_CAL, VIEW_ALL, ProgramType$.MODULE$.CAL().name()),
                 null,
                 new BooleanPreferenceAction(SHOW_IN_VISUALIZER, null, "Show in Visualizer", KeyEvent.VK_E),
                 new FindAction(shell, authClient)

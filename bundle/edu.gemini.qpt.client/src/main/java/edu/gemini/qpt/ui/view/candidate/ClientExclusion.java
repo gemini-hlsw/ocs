@@ -6,7 +6,6 @@ import java.util.logging.Logger;
 import edu.gemini.qpt.core.Variant;
 import edu.gemini.qpt.core.Variant.Flag;
 import edu.gemini.qpt.shared.sp.Obs;
-import edu.gemini.qpt.shared.util.StructuredProgramID;
 import edu.gemini.qpt.ui.util.BooleanViewPreference;
 
 import static edu.gemini.qpt.ui.util.BooleanViewPreference.*;
