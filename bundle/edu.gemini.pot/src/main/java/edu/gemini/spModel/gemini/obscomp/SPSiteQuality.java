@@ -4,6 +4,7 @@ import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.shared.util.immutable.Some;
+import edu.gemini.spModel.core.*;
 import edu.gemini.spModel.data.AbstractDataObject;
 import edu.gemini.spModel.data.property.PropertyProvider;
 import edu.gemini.spModel.data.property.PropertySupport;
@@ -187,14 +188,31 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
     }
 
     /**
+     * Magnitude adjusters. Unfortunately, we have to work with both bands
+     * and bands lists.
+     */
+    public interface MagnitudeAdjuster {
+        static BandsList bandToBandList(final MagnitudeBand b) {
+            return BandsList$.MODULE$.bandList(b);
+        }
+
+        default Magnitude adjustMagnitude(final Magnitude m) {
+            return m.add(getAdjustment(bandToBandList(m.band())));
+        }
+
+        // Return the adjustment for a list of bands.
+        double getAdjustment(final BandsList bl);
+    }
+
+    /**
      * Sky Background Options.
      */
-    public enum SkyBackground implements DisplayableSpType, SequenceableSpType, PercentageContainer {
+    public enum SkyBackground implements MagnitudeAdjuster, DisplayableSpType, SequenceableSpType, PercentageContainer {
 
-        PERCENT_20("20%/Darkest", 20, 21.37),
-        PERCENT_50("50%/Dark", 50, 20.78),
-        PERCENT_80("80%/Grey", 80, 19.61),
-        ANY(       "Any/Bright", 100, 0);
+        PERCENT_20("20%/Darkest", 20, 21.37,  0.0),
+        PERCENT_50("50%/Dark",    50, 20.78,  0.0),
+        PERCENT_80("80%/Grey",    80, 19.61, -0.3),
+        ANY(       "Any/Bright", 100, 0.0,   -0.5);
 
         /** The default SkyBackground value **/
         public static SkyBackground DEFAULT = ANY;
@@ -202,12 +220,14 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
         private final String _displayValue;
         private final byte _percentage;
         private final double _maxBrightness; // in vMag, smaller is brighter
+        private final double _magAdjustment;
 
-        SkyBackground(String displayValue, int percentage, double maxBrightness) {
+        SkyBackground(final String displayValue, final int percentage, final double maxBrightness, final double magAdjustment) {
             _percentage = (byte) percentage;
             _displayValue = displayValue;
             _maxBrightness = maxBrightness;
             assert _percentage >= 0 && _percentage <= 100;
+            _magAdjustment = magAdjustment;
         }
 
         public byte getPercentage() {
@@ -247,22 +267,27 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
         public static Option<SkyBackground> read(String s) {
             return SPSiteQuality.read(s, values());
         }
+
+        @Override
+        public double getAdjustment(final BandsList bl) {
+            return bl.equals(RBandsList$.MODULE$) ? _magAdjustment : 0.0;
+        }
     }
 
     /**
      * Cloud Cover Options.
      */
-    public enum CloudCover implements DisplayableSpType, ObsoletableSpType, SequenceableSpType, PercentageContainer {
-        PERCENT_20("20%",        20) {
+    public enum CloudCover implements MagnitudeAdjuster, DisplayableSpType, ObsoletableSpType, SequenceableSpType, PercentageContainer {
+        PERCENT_20("20%",        20,  0.0) {
             @Override public boolean isObsolete() { return true; }
         },
-        PERCENT_50("50%/Clear",  50),
-        PERCENT_70("70%/Cirrus", 70),
-        PERCENT_80("80%/Cloudy", 80),
-        PERCENT_90("90%",        90) {
+        PERCENT_50("50%/Clear",  50,  0.0),
+        PERCENT_70("70%/Cirrus", 70, -0.3),
+        PERCENT_80("80%/Cloudy", 80, -1.0),
+        PERCENT_90("90%",        90, -3.0) {
             @Override public boolean isObsolete() { return true; }
         },
-        ANY(       "Any",       100),
+        ANY(       "Any",       100, -3.0),
         ;
 
 
@@ -271,11 +296,13 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
 
         private final String _displayValue;
         private final byte _percentage;
+        private final double _magAdjustment;
 
-        CloudCover(String displayValue, int percentage) {
+        CloudCover(final String displayValue, final int percentage, final double magAdjustment) {
             _percentage = (byte) percentage;
             _displayValue = displayValue;
             assert _percentage >= 0 && _percentage <= 100;
+            _magAdjustment = magAdjustment;
         }
 
         public byte getPercentage() {
@@ -307,27 +334,34 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
         public static Option<CloudCover> read(String s) {
             return SPSiteQuality.read(s, values());
         }
+
+        @Override
+        public double getAdjustment(final BandsList bl) {
+            return _magAdjustment;
+        }
     }
 
     /**
      * Image Quality Options.
      */
-    public enum ImageQuality implements DisplayableSpType, SequenceableSpType, PercentageContainer {
-        PERCENT_20("20%/Best", 20),
-        PERCENT_70("70%/Good", 70),
-        PERCENT_85("85%/Poor", 85),
-        ANY(       "Any", 100);
+    public enum ImageQuality implements MagnitudeAdjuster, DisplayableSpType, SequenceableSpType, PercentageContainer {
+        PERCENT_20("20%/Best",  20,  0.5),
+        PERCENT_70("70%/Good",  70,  0.0),
+        PERCENT_85("85%/Poor",  85, -0.5),
+        ANY(       "Any",      100, -1.0);
 
         /** The default ImageQuality value **/
         public static ImageQuality DEFAULT = ANY;
 
         private final String _displayValue;
         private final byte _percentage;
+        private final double _magAdjustment;
 
-        ImageQuality(String displayValue, int percentage) {
+        ImageQuality(final String displayValue, final int percentage, final double magAdjustment) {
             _percentage = (byte) percentage;
             _displayValue = displayValue;
             assert _percentage >= 0 && _percentage <= 100;
+            _magAdjustment = magAdjustment;
         }
 
         public byte getPercentage() {
@@ -364,6 +398,12 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
 
         public static Option<ImageQuality> read(String s) {
             return SPSiteQuality.read(s, values());
+        }
+
+
+        @Override
+        public double getAdjustment(final BandsList bl) {
+            return bl.equals(RBandsList$.MODULE$) ? _magAdjustment : 0.0;
         }
     }
 

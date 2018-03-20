@@ -1,7 +1,8 @@
 package edu.gemini.catalog.api
 
 import edu.gemini.spModel.core.SiderealTarget
-import edu.gemini.spModel.core.{BandsList, MagnitudeBand, Magnitude}
+import edu.gemini.spModel.core.{BandsList, Magnitude, MagnitudeBand}
+import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.MagnitudeAdjuster
 
 import scalaz._
 import Scalaz._
@@ -58,6 +59,13 @@ sealed trait MagnitudeFilter {
  */
 trait ConstraintsAdjuster[T] {
   def adjust(t: T, mc: MagnitudeConstraints): MagnitudeConstraints
+}
+
+object ConstraintsAdjuster {
+  def fromMagnitudeAdjuster[M <: MagnitudeAdjuster]: ConstraintsAdjuster[M] = new ConstraintsAdjuster[M] {
+    override def adjust(t: M, mc: MagnitudeConstraints): MagnitudeConstraints =
+      mc.adjust(_ + t.getAdjustment(mc.searchBands))
+  }
 }
 
 /**
