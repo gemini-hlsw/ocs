@@ -4,8 +4,6 @@ import java.beans.PropertyDescriptor
 import java.util.{Collections, List => JList, Map => JMap, Set => JSet}
 
 import edu.gemini.pot.sp.SPComponentType
-import edu.gemini.shared.util.immutable.ImList
-import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.spModel.core.Site
 import edu.gemini.spModel.data.ISPDataObject
 import edu.gemini.spModel.data.config.{DefaultParameter, DefaultSysConfig, ISysConfig, StringParameter}
@@ -13,7 +11,6 @@ import edu.gemini.spModel.data.property.{PropertyProvider, PropertySupport}
 import edu.gemini.spModel.obscomp.{InstConfigInfo, InstConstants, SPInstObsComp}
 import edu.gemini.spModel.pio.{ParamSet, PioFactory}
 import edu.gemini.spModel.seqcomp.SeqConfigNames
-import edu.gemini.spModel.target.env.AsterismType
 
 import scala.collection.immutable.TreeMap
 import scala.collection.JavaConverters._
