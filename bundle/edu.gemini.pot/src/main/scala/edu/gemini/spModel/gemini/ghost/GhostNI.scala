@@ -9,7 +9,7 @@ import edu.gemini.spModel.obscomp.SPInstObsComp
   */
 final class GhostNI extends DefaultInstNodeInitializer {
   override def getType: SPComponentType = {
-    SPComponentType.INSTRUMENT_GHOST
+    Ghost.SP_TYPE
   }
 
   override protected def createConfigBuilder(node: ISPObsComponent): IConfigBuilder = {
