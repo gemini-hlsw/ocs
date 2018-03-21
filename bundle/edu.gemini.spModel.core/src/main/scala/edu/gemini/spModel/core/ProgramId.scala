@@ -3,7 +3,7 @@ package edu.gemini.spModel.core
 import java.util.{GregorianCalendar, Calendar}
 import scala.util.Try
 
-sealed trait ProgramId {
+sealed trait ProgramId extends java.io.Serializable {
   def site: Option[Site]
   def semester: Option[Semester]
   def ptype: Option[ProgramType]
@@ -14,6 +14,21 @@ sealed trait ProgramId {
    * supported by SPProgramID.
    */
   def spOption: Option[SPProgramID]
+
+  /**
+   * Obtains an abbreviated program id name for display purposes.
+   */
+  def shortName: String =
+    this match {
+      case ProgramId.Science(site, semester, ptype, index) =>
+        s"${site.abbreviation.drop(1)}${semester.toShortString}-${ptype.abbreviation}-$index"
+
+      case ProgramId.Daily(site, ptype, year, month, day) =>
+        f"${site.abbreviation.drop(1)}${year.toString.takeRight(2)}$month%02d$day%02d-${ptype.abbreviation}"
+
+      case ProgramId.Arbitrary(_, _, _, id) =>
+        id
+    }
 }
 
 sealed trait StandardProgramId extends ProgramId {
