@@ -402,16 +402,5 @@ public abstract class SPInstObsComp extends AbstractDataObject {
     public void restoreScienceDetails(final SPInstObsComp oldData) {
         setPosAngle(oldData.getPosAngle());
     }
-
-    /**
-     * Return the types of Asterisms supported by the instrument and the default type.
-     */
-    public ImList<AsterismType> getSupportedAsterismTypes() {
-        return DefaultImList.create(AsterismType.Single);
-    }
-
-    public AsterismType getDefaultAsterismType() {
-        return AsterismType.Single;
-    }
 }
 

@@ -55,14 +55,6 @@ final class Ghost extends SPInstObsComp(Ghost.SP_TYPE) with PropertyProvider {
     sc.putParameter(DefaultParameter.getInstance(Ghost.POS_ANGLE_PROP, getPosAngle))
     sc
   }
-
-  override def getSupportedAsterismTypes: ImList[AsterismType] = {
-    List(AsterismType.GhostStandardResolution, AsterismType.GhostHighResolution).asImList
-  }
-
-  override def getDefaultAsterismType: AsterismType = {
-    AsterismType.GhostStandardResolution
-  }
 }
 
 object Ghost {
