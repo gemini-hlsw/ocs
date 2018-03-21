@@ -6,6 +6,8 @@ import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.env.Asterism
 import java.time.Instant
 
+import edu.gemini.spModel.gemini.ghost.GhostAsterism.GhostStandardResTargets.SingleTarget
+
 import scalaz._
 import Scalaz._
 
@@ -224,5 +226,16 @@ object GhostAsterism {
 
     override def copyWithClonedTargets: Asterism =
       copy(ghostTarget = ghostTarget.copyWithClonedTarget)
+  }
+
+  // Convenience create methods for Java since trying to access nested objects and case
+  // classes results cannot be resolved.
+  def createEmptyStandardResolutionAsterism: StandardResolution = {
+    val tgts: SingleTarget = SingleTarget(GhostTarget(new SPTarget(), None))
+    StandardResolution(tgts, None)
+  }
+
+  def createEmptyHighResolutionAsterism: HighResolution = {
+    HighResolution(GhostTarget(new SPTarget(), None), None, None)
   }
 }

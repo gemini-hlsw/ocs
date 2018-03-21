@@ -399,6 +399,5 @@ public abstract class SPInstObsComp extends AbstractDataObject {
     public void restoreScienceDetails(final SPInstObsComp oldData) {
         setPosAngle(oldData.getPosAngle());
     }
-
 }
 

@@ -1,6 +1,6 @@
 package edu.gemini.spModel.target.env
 
-import edu.gemini.spModel.core.{Coordinates, NonSiderealTarget, ProperMotion, SiderealTarget, Target}
+import edu.gemini.spModel.core.{Coordinates, ProperMotion, SiderealTarget, Target}
 import edu.gemini.spModel.target.{SPTarget, TargetParamSetCodecs}
 import edu.gemini.shared.util.immutable.{ImList, Option => GOption}
 import edu.gemini.shared.util.immutable.ScalaConverters._
@@ -9,7 +9,7 @@ import java.time.Instant
 
 import edu.gemini.spModel.pio.{ParamSet, Pio}
 import edu.gemini.spModel.pio.codec.{MissingKey, ParamSetCodec, PioError}
-import edu.gemini.spModel.pio.xml.{PioXmlFactory, PioXmlUtil}
+import edu.gemini.spModel.pio.xml.PioXmlFactory
 
 import scalaz._
 import Scalaz._
@@ -129,16 +129,20 @@ object Asterism {
       val pf = new PioXmlFactory
       def encode(key: String, a: Asterism): ParamSet = {
         val (tag, ps) = a match {
-          case a: Single    => ("single", Single.SingleParamSetCodec.encode(key, a))
+          case a: Single    => (AsterismType.Single.tag, Single.SingleParamSetCodec.encode(key, a))
         }
         Pio.addParam(pf, ps, "tag", tag)
         ps
       }
       def decode(ps: ParamSet): PioError \/ Asterism =
         (Option(ps.getParam("tag")).map(_.getValue) \/> MissingKey("tag")) flatMap {
-          case "single"  => Single.SingleParamSetCodec.decode(ps)
+          case AsterismType.Single.tag  => Single.SingleParamSetCodec.decode(ps)
         }
     }
 
-
+  // Convenience create method for Java since trying to access nested objects and case
+  // classes results cannot be resolved.
+  def createSingleAsterism: Single = {
+    Single(new SPTarget())
+  }
 }
