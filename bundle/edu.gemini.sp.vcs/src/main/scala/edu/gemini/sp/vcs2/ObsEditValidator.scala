@@ -4,6 +4,8 @@ import edu.gemini.shared.util.VersionComparison.{Same, Older, Newer, Conflicting
 import edu.gemini.sp.vcs2.MergeCorrection._
 import edu.gemini.sp.vcs2.ObsEdit.{ObsDelete, ObsUpdate, ObsCreate}
 import edu.gemini.spModel.core.SPProgramID
+import edu.gemini.spModel.gemini.obscomp._
+import edu.gemini.spModel.gemini.obscomp.SPProgram.Active
 import edu.gemini.spModel.gemini.security._
 import edu.gemini.spModel.gemini.security.UserRolePrivileges._
 import edu.gemini.spModel.obs._
@@ -22,7 +24,7 @@ import Scalaz._
 /**
  * Evaluates whether a local observation edit should be considered legal.
  */
-class ObsEditValidator(privs: UserRolePrivileges, too: TooType) {
+class ObsEditValidator(privs: UserRolePrivileges, too: TooType, active: Active) {
   import ObsEditValidator._
 
   def isLegal(edit: ObsEdit): Boolean = {
@@ -35,6 +37,7 @@ class ObsEditValidator(privs: UserRolePrivileges, too: TooType) {
 
       (   privs === PI
        && too =/= TooType.none
+       && active === Active.YES
        && isTooSwitch(local.status)
        && remote.forall(o => isTooSwitch(o.status))
       )
@@ -85,8 +88,8 @@ class ObsEditValidator(privs: UserRolePrivileges, too: TooType) {
 
 object ObsEditValidator {
 
-  def apply(pid: SPProgramID, hasPermission: PermissionCheck, too: TooType): VcsAction[ObsEditValidator] =
-    userRolePrivileges(pid, hasPermission).map(new ObsEditValidator(_, too))
+  def apply(pid: SPProgramID, hasPermission: PermissionCheck, too: TooType, active: Active): VcsAction[ObsEditValidator] =
+    userRolePrivileges(pid, hasPermission).map(new ObsEditValidator(_, too, active))
 
   def userRolePrivileges(pid: SPProgramID, hasPermission: PermissionCheck): VcsAction[UserRolePrivileges] = {
     val somePid = Some(pid)
