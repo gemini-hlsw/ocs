@@ -2,7 +2,6 @@ package edu.gemini.catalog.ui
 
 import javax.swing.JTable
 import javax.swing.table._
-
 import edu.gemini.ags.api.AgsMagnitude.MagnitudeTable
 import edu.gemini.ags.api.{AgsAnalysis, AgsGuideQuality, AgsRegistrar, AgsStrategy}
 import edu.gemini.ags.conf.ProbeLimitsTable
@@ -13,7 +12,7 @@ import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.gemini.altair.{AltairParams, InstAltair}
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
-import edu.gemini.spModel.gemini.gmos.{InstGmosSouth, InstGmosNorth}
+import edu.gemini.spModel.gemini.gmos.{InstGmosNorth, InstGmosSouth}
 import edu.gemini.spModel.gemini.gnirs.{GNIRSConstants, InstGNIRS}
 import edu.gemini.spModel.gemini.gpi.Gpi
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi
@@ -35,10 +34,11 @@ import edu.gemini.spModel.telescope.{PosAngleConstraint, PosAngleConstraintAware
 import edu.gemini.pot.ModelConverters._
 
 import scala.language.existentials
-import scala.swing.{Alignment, Label, Component}
+import scala.swing.{Alignment, Component, Label}
 import scala.collection.JavaConverters._
 import scalaz._
 import Scalaz._
+import edu.gemini.spModel.gemini.ghost.Ghost
 
 /**
  * Locally describe an ags strategy including its limits and the query that would trigger
@@ -85,6 +85,7 @@ case class ObservationInfo(ctx: Option[ObsContext],
   val toContext: Option[ObsContext] = ctx.orElse {
     val inst = instrument.collect {
       case SPComponentType.INSTRUMENT_FLAMINGOS2 => new Flamingos2()
+      case SPComponentType.INSTRUMENT_GHOST      => new Ghost()
       case SPComponentType.INSTRUMENT_GMOS       => new InstGmosNorth()
       case SPComponentType.INSTRUMENT_GMOSSOUTH  => new InstGmosSouth()
       case SPComponentType.INSTRUMENT_GNIRS      => new InstGNIRS()
@@ -125,6 +126,7 @@ object ObservationInfo {
     Flamingos2.INSTRUMENT_NAME_PROP        -> SPComponentType.INSTRUMENT_FLAMINGOS2,
     InstGmosNorth.INSTRUMENT_NAME_PROP     -> SPComponentType.INSTRUMENT_GMOS,
     InstGmosSouth.INSTRUMENT_NAME_PROP     -> SPComponentType.INSTRUMENT_GMOSSOUTH,
+    Ghost.INSTRUMENT_NAME_PROP             -> SPComponentType.INSTRUMENT_GHOST,
     GNIRSConstants.INSTRUMENT_NAME_PROP    -> SPComponentType.INSTRUMENT_GNIRS,
     //Gpi.INSTRUMENT_NAME_PROP               -> SPComponentType.INSTRUMENT_GPI, GPI Doesn't have AGS Strategies defined
     InstMichelle.INSTRUMENT_NAME_PROP      -> SPComponentType.INSTRUMENT_MICHELLE,

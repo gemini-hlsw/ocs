@@ -33,7 +33,7 @@ public class Flamingos2CB extends AbstractObsComponentCB {
     protected void thisReset(Map<String, Object> options) {
         Flamingos2 dataObj = (Flamingos2) getDataObject();
         if (dataObj == null)
-            throw new IllegalArgumentException("The data objectfor Flamingos2 can not be null");
+            throw new IllegalArgumentException("The data object for Flamingos2 can not be null");
         _sysConfig = dataObj.getSysConfig();
     }
 

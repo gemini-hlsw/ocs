@@ -3,7 +3,7 @@ package edu.gemini.spModel.gemini.ghost
 import java.beans.PropertyDescriptor
 import java.util.{Collections, List => JList, Map => JMap, Set => JSet}
 
-import edu.gemini.pot.sp.{ISPObservation, SPComponentType}
+import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.shared.util.immutable.ImList
 import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.spModel.core.Site
@@ -22,7 +22,7 @@ import scala.collection.JavaConverters._
 /** The GHOST instrument SP model.
   * Note that we do not override clone since private variables are immutable.
   */
-class Ghost extends SPInstObsComp(Ghost.SP_TYPE) with PropertyProvider {
+final class Ghost extends SPInstObsComp(Ghost.SP_TYPE) with PropertyProvider {
   override def getSite: JSet[Site] = {
     Site.SET_GS
   }
@@ -63,19 +63,18 @@ class Ghost extends SPInstObsComp(Ghost.SP_TYPE) with PropertyProvider {
   override def getDefaultAsterismType: AsterismType = {
     AsterismType.GhostStandardResolution
   }
-
-  // TODO: Assume we will need to redefine these methods when we have values for them.
-  override def getScienceArea: Array[Double] = ???
-  override def getSetupTime(obs: ISPObservation): Double = ???
 }
 
 object Ghost {
   val SP_TYPE: SPComponentType = SPComponentType.INSTRUMENT_GHOST
 
+  // The name of the Ghost instrument configuration.
+  val INSTRUMENT_NAME_PROP: String = "GHOST"
+
   /** The properties supported by this class.
     */
   private def initProp(propName: String, query: Boolean, iter: Boolean): PropertyDescriptor = {
-    PropertySupport.init(propName, Ghost.getClass, query, iter)
+    PropertySupport.init(propName, classOf[Ghost], query, iter)
   }
 
   private val query_yes = true
