@@ -56,9 +56,9 @@ class ProgramIdTest {
     def shorten(fullName: String): String =
       ProgramId.parse(fullName).shortName
 
-    assertEquals("science pid", "N-18A-Q-2",   shorten("GN-2018A-Q-2"))
-    assertEquals("daily pid",   "S-ENG180102", shorten("GS-ENG20180102"))
-    assertEquals("daily pid",   "S-ENG180319", shorten("GS-ENG20180319"))
+    assertEquals("science pid", "N18A-Q-2",    shorten("GN-2018A-Q-2"))
+    assertEquals("daily pid",   "S180102-ENG", shorten("GS-ENG20180102"))
+    assertEquals("daily pid",   "S180319-CAL", shorten("GS-CAL20180319"))
     assertEquals("arbitrary",   "Andy",        shorten("Andy"))
   }
 }
