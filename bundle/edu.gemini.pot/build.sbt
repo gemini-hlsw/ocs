@@ -75,6 +75,7 @@ OsgiKeys.exportPackage := Seq(
   "edu.gemini.spModel.gemini.flamingos2.blueprint",
   "edu.gemini.spModel.gemini.flamingos2.test",
   "edu.gemini.spModel.gemini.gems",
+  "edu.gemini.spModel.gemini.ghost",
   "edu.gemini.spModel.gemini.gmos",
   "edu.gemini.spModel.gemini.gmos.blueprint",
   "edu.gemini.spModel.gemini.gmos.test",
