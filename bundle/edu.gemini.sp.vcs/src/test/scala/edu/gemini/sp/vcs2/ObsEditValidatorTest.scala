@@ -5,6 +5,7 @@ import edu.gemini.pot.sp.version._
 import edu.gemini.shared.util.VersionComparison
 import edu.gemini.shared.util.VersionComparison._
 import edu.gemini.sp.vcs2.ObsEdit.{ObsDelete, Comparison, ObsUpdate, ObsCreate}
+import edu.gemini.spModel.gemini.obscomp.SPProgram.Active
 import edu.gemini.spModel.gemini.security.UserRolePrivileges
 import edu.gemini.spModel.gemini.security.UserRolePrivileges._
 import edu.gemini.spModel.obs.{SPObservation, ObservationStatus}
@@ -29,8 +30,8 @@ class ObsEditValidatorTest extends FlatSpec with Matchers {
 
 object ObsEditValidatorTest {
 
-  case class TestCase(privs: UserRolePrivileges, too: TooType, edit: ObsEdit) {
-    def isValid: Boolean = new ObsEditValidator(privs, too).isLegal(edit)
+  case class TestCase(privs: UserRolePrivileges, too: TooType, active: Active, edit: ObsEdit) {
+    def isValid: Boolean = new ObsEditValidator(privs, too, active).isLegal(edit)
     def isInvalid: Boolean = !isValid
   }
 
@@ -61,8 +62,7 @@ object ObsEditValidatorTest {
 
   // All possible edit combinations, both valid and invalid.
   val allCombinations: Set[TestCase] =
-    allCreate ++ allDelete ++ allUpdateDeleted ++ allUpdate
-
+    allCreate ++ allDelete ++ allUpdateDeleted ++ allUpdate ++ piTooUpdateNotActive
 
   def mkObs(os: ObservationStatus): ObsEdit.Obs = ObsEdit.Obs(os, ObsTree)
 
@@ -75,9 +75,22 @@ object ObsEditValidatorTest {
       logComp <- NonStaffLogComps
     } yield {
       Set(
-        TestCase(PI, too, ObsCreate(Key, mkObs(stat1))),
-        TestCase(PI, too, ObsUpdate(Key, mkObs(stat1), None, Comparison(obsComp, logComp))),
-        TestCase(PI, too, ObsUpdate(Key, mkObs(stat1), Some(mkObs(stat2)), Comparison(obsComp, logComp)))
+        TestCase(PI, too, Active.YES, ObsCreate(Key, mkObs(stat1))),
+        TestCase(PI, too, Active.YES, ObsUpdate(Key, mkObs(stat1), None, Comparison(obsComp, logComp))),
+        TestCase(PI, too, Active.YES, ObsUpdate(Key, mkObs(stat1), Some(mkObs(stat2)), Comparison(obsComp, logComp)))
+      )
+    }).flatten
+
+  def piTooUpdateNotActive: Set[TestCase] =
+    (for {
+      too     <- Set(TooType.rapid, TooType.standard)
+      stat1   <- Set(ON_HOLD, READY)
+      stat2   <- Set(ON_HOLD, READY)
+    } yield {
+      Set(
+        TestCase(PI, too, Active.NO, ObsCreate(Key, mkObs(stat1))),
+        TestCase(PI, too, Active.NO, ObsUpdate(Key, mkObs(stat1), None, Comparison(Newer, Same))),
+        TestCase(PI, too, Active.NO, ObsUpdate(Key, mkObs(stat1), Some(mkObs(stat2)), Comparison(Newer, Same)))
       )
     }).flatten
 
@@ -87,21 +100,21 @@ object ObsEditValidatorTest {
       stat1   <- Set(PHASE2, FOR_REVIEW, IN_REVIEW, FOR_ACTIVATION)
       obsComp <- AllComps
       logComp <- logComps(urp)
-    } yield TestCase(urp, TooType.none, ObsUpdate(Key, mkObs(stat1), Some(mkObs(ON_HOLD)), Comparison(obsComp, logComp)))
+    } yield TestCase(urp, TooType.none, Active.YES, ObsUpdate(Key, mkObs(stat1), Some(mkObs(ON_HOLD)), Comparison(obsComp, logComp)))
 
   def normalCreate: Set[TestCase] =
     for {
       urp  <- AllUrps
       too  <- AllToo
       stat <- ObsEditValidator.LegalSwitch(urp)
-    } yield TestCase(urp, too, ObsCreate(Key, mkObs(stat)))
+    } yield TestCase(urp, too, Active.YES, ObsCreate(Key, mkObs(stat)))
 
   def normalDelete: Set[TestCase] =
     for {
       urp  <- AllUrps
       too  <- AllToo
       stat <- ObsEditValidator.LegalSwitch(urp)
-    } yield TestCase(urp, too, ObsDelete(Key, mkObs(stat)))
+    } yield TestCase(urp, too, Active.YES, ObsDelete(Key, mkObs(stat)))
 
   def notEditedRemoteDelete: Set[TestCase] =
     for {
@@ -110,7 +123,7 @@ object ObsEditValidatorTest {
       stat    <- AllStat
       obsComp <- Set(Same, Older)
       logComp <- logComps(urp)
-    } yield TestCase(urp, too, ObsUpdate(Key, mkObs(stat), None, Comparison(obsComp, logComp)))
+    } yield TestCase(urp, too, Active.YES, ObsUpdate(Key, mkObs(stat), None, Comparison(obsComp, logComp)))
 
   def notEdited: Set[TestCase] =
     for {
@@ -120,7 +133,7 @@ object ObsEditValidatorTest {
       stat2   <- AllStat
       obsComp <- Set(Same, Older)
       logComp <- logComps(urp)
-    } yield TestCase(urp, too, ObsUpdate(Key, mkObs(stat1), Some(mkObs(stat2)), Comparison(obsComp, logComp)))
+    } yield TestCase(urp, too, Active.YES, ObsUpdate(Key, mkObs(stat1), Some(mkObs(stat2)), Comparison(obsComp, logComp)))
 
   def newerRemoteDelete: Set[TestCase] =
     for {
@@ -128,7 +141,7 @@ object ObsEditValidatorTest {
       too     <- AllToo
       stat    <- ObsEditValidator.LegalSwitch(urp)
       logComp <- logComps(urp)
-    } yield TestCase(urp, too, ObsUpdate(Key, mkObs(stat), None, Comparison(Newer, logComp)))
+    } yield TestCase(urp, too, Active.YES, ObsUpdate(Key, mkObs(stat), None, Comparison(Newer, logComp)))
 
   def newer: Set[TestCase] =
     for {
@@ -137,7 +150,7 @@ object ObsEditValidatorTest {
       stat1   <- ObsEditValidator.LegalSwitch(urp)
       stat2   <- ObsEditValidator.LegalSwitch(urp)
       logComp <- logComps(urp)
-    } yield TestCase(urp, too, ObsUpdate(Key, mkObs(stat1), Some(mkObs(stat2)), Comparison(Newer, logComp)))
+    } yield TestCase(urp, too, Active.YES, ObsUpdate(Key, mkObs(stat1), Some(mkObs(stat2)), Comparison(Newer, logComp)))
 
   def conflictingRemoteDelete: Set[TestCase] =
     for {
@@ -145,7 +158,7 @@ object ObsEditValidatorTest {
       too     <- AllToo
       stat    <- ObsEditValidator.LegalEdit(urp)
       logComp <- logComps(urp)
-    } yield TestCase(urp, too, ObsUpdate(Key, mkObs(stat), None, Comparison(Conflicting, logComp)))
+    } yield TestCase(urp, too, Active.YES, ObsUpdate(Key, mkObs(stat), None, Comparison(Conflicting, logComp)))
 
   def conflicting: Set[TestCase] =
     for {
@@ -153,21 +166,21 @@ object ObsEditValidatorTest {
       too     <- AllToo
       stat    <- ObsEditValidator.LegalEdit(urp)
       logComp <- logComps(urp)
-    } yield TestCase(urp, too, ObsUpdate(Key, mkObs(stat), Some(mkObs(stat)), Comparison(Conflicting, logComp)))
+    } yield TestCase(urp, too, Active.YES, ObsUpdate(Key, mkObs(stat), Some(mkObs(stat)), Comparison(Conflicting, logComp)))
 
   def allCreate: Set[TestCase] =
     for {
       urp  <- AllUrps
       too  <- AllToo
       stat <- AllStat
-    } yield TestCase(urp, too, ObsCreate(Key, mkObs(stat)))
+    } yield TestCase(urp, too, Active.YES, ObsCreate(Key, mkObs(stat)))
 
   def allDelete: Set[TestCase] =
     for {
       urp  <- AllUrps
       too  <- AllToo
       stat <- AllStat
-    } yield TestCase(urp, too, ObsDelete(Key, mkObs(stat)))
+    } yield TestCase(urp, too, Active.YES, ObsDelete(Key, mkObs(stat)))
 
   def allUpdateDeleted: Set[TestCase] =
     for {
@@ -176,7 +189,7 @@ object ObsEditValidatorTest {
       stat    <- AllStat
       obsComp <- AllComps
       logComp <- AllComps
-    } yield TestCase(urp, too, ObsUpdate(Key, mkObs(stat), None, Comparison(obsComp, logComp)))
+    } yield TestCase(urp, too, Active.YES, ObsUpdate(Key, mkObs(stat), None, Comparison(obsComp, logComp)))
 
   def allUpdate: Set[TestCase] =
     for {
@@ -186,5 +199,5 @@ object ObsEditValidatorTest {
       rStat   <- AllStat
       obsComp <- AllComps
       logComp <- AllComps
-    } yield TestCase(urp, too, ObsUpdate(Key, mkObs(lStat), Some(mkObs(rStat)), Comparison(obsComp, logComp)))
+    } yield TestCase(urp, too, Active.YES, ObsUpdate(Key, mkObs(lStat), Some(mkObs(rStat)), Comparison(obsComp, logComp)))
 }

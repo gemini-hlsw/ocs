@@ -6,6 +6,8 @@ import edu.gemini.pot.sp._
 import edu.gemini.sp.vcs2.MergeCorrection._
 import edu.gemini.sp.vcs2.ObsEdit.{Obs, ObsUpdate, ObsDelete, ObsCreate}
 import edu.gemini.spModel.core.SPProgramID
+import edu.gemini.spModel.gemini.obscomp.SPProgram
+import edu.gemini.spModel.gemini.obscomp.SPProgram.Active
 import edu.gemini.spModel.obs.{ObsPhase2Status, SPObservation}
 import edu.gemini.spModel.rich.pot.sp._
 import edu.gemini.spModel.too.{Too, TooType}
@@ -32,6 +34,13 @@ class ObsPermissionCorrection(
   import ObsPermissionCorrection._
 
   def apply(mp: MergePlan, hasPermission: PermissionCheck): VcsAction[MergePlan] = {
+
+    def extractActive: TryVcs[Active] =
+      remoteDiffs.plan.update.rootLabel match {
+        case Modified(_, _, sp: SPProgram, _, _) => TryVcs(sp.getActive)
+        case Unmodified(_)                       => safeActiveStatus(local)
+      }
+
     def invalidEdits(mp: MergePlan, allEdits: List[ObsEdit], validator: ObsEditValidator): List[ObsEdit] = {
       val present = mp.update.keySet
 
@@ -65,7 +74,8 @@ class ObsPermissionCorrection(
       edits     <- ObsEdit.all(local, remoteDiffs).liftVcs
       pid       <- safePid(local).liftVcs
       too       <- safeToo(local).liftVcs
-      validator <- ObsEditValidator(pid, hasPermission, too)
+      active    <- extractActive.liftVcs
+      validator <- ObsEditValidator(pid, hasPermission, too, active)
       invalid    = invalidEdits(mp, edits, validator)
       corrected <- correctAll(mp, invalid).liftVcs
     } yield corrected
@@ -228,4 +238,7 @@ object ObsPermissionCorrection {
 
   private def safeToo(p: ISPProgram): TryVcs[TooType] =
     safeGet(Too.get(p), "Could not determine ToO type.")
+
+  private def safeActiveStatus(p: ISPProgram): TryVcs[Active] =
+    safeGet(p.getDataObject.asInstanceOf[SPProgram].getActive, "Could not determine whether program is active.")
 }
