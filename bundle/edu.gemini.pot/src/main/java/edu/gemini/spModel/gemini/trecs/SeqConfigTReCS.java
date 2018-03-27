@@ -7,11 +7,14 @@
 
 package edu.gemini.spModel.gemini.trecs;
 
+import edu.gemini.pot.sp.ISPNodeInitializer;
+import edu.gemini.pot.sp.ISPSeqComponent;
 import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.spModel.data.property.PropertyProvider;
 import edu.gemini.spModel.data.property.PropertySupport;
 import edu.gemini.spModel.data.property.PropertyFilter;
 import edu.gemini.spModel.data.config.ISysConfig;
+import edu.gemini.spModel.gemini.init.ComponentNodeInitializer;
 import edu.gemini.spModel.seqcomp.SeqConfigNames;
 import edu.gemini.spModel.seqcomp.SeqConfigObsBase;
 
@@ -30,6 +33,9 @@ public class SeqConfigTReCS extends SeqConfigObsBase implements PropertyProvider
      * This iter component's SP type.
      */
     public static final SPComponentType SP_TYPE = SPComponentType.ITERATOR_TRECS;
+
+    public static final ISPNodeInitializer<ISPSeqComponent, SeqConfigTReCS> NI =
+        new ComponentNodeInitializer<>(SP_TYPE, () -> new SeqConfigTReCS(), c -> new SeqConfigTReCSCB(c));
 
     public static final Map<String, PropertyDescriptor> PROPERTY_MAP;
 

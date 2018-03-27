@@ -1,7 +1,10 @@
 package edu.gemini.spModel.target.obsComp;
 
+import edu.gemini.pot.sp.ISPNodeInitializer;
+import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.spModel.data.AbstractDataObject;
+import edu.gemini.spModel.gemini.init.ComponentNodeInitializer;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.guide.GuideProbeProvider;
 import edu.gemini.spModel.guide.GuideProbeUtil;
@@ -29,6 +32,9 @@ public final class TargetObsComp extends AbstractDataObject implements GuideProb
     private static final TargetObsCompHelper helper = new TargetObsCompHelper();
 
     public static final SPComponentType SP_TYPE = SPComponentType.TELESCOPE_TARGETENV;
+
+    public static final ISPNodeInitializer<ISPObsComponent, TargetObsComp> NI =
+        new ComponentNodeInitializer<>(SP_TYPE, () -> new TargetObsComp(), c -> new TargetObsCompCB(c));
 
     private static final String _VERSION =  "2009B-1";
 

@@ -11,6 +11,7 @@ package edu.gemini.spModel.gemini.init;
 import edu.gemini.pot.sp.*;
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.spModel.config.IConfigBuilder;
+import edu.gemini.spModel.data.ISPDataObject;
 import edu.gemini.spModel.gemini.obscomp.GemObservationCB;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 import edu.gemini.spModel.obs.ObsPhase2Status;
@@ -36,7 +37,7 @@ import java.util.logging.Logger;
 /**
  * Initializes <code>{@link ISPObservation}</code> nodes.
  */
-public class ObservationNI implements ISPNodeInitializer {
+public class ObservationNI implements ISPNodeInitializer<ISPObservation, SPObservation> {
     private static final Logger LOG = Logger.getLogger(ObservationNI.class.getName());
 
     /**
@@ -47,26 +48,26 @@ public class ObservationNI implements ISPNodeInitializer {
         }
     };
 
-    /**
-     * Initializes the given <code>node</code>.
-     * Implements <code>{@link ISPNodeInitializer}</code>
-     *
-     * @param factory the factory that may be used to create any required
-     *                science program nodes
-     * @param node    the science program node to be initialized
-     */
-    public void initNode(ISPFactory factory, ISPNode node) {
-        // The data is stored in an SPObservation object set as the
-        // data object of this ObsComponent.
-        final ISPObservation obsNode = (ISPObservation) node;
-        final SPObservation dataObj = new SPObservation();
-        node.setDataObject(dataObj);
+    @Override
+    public SPComponentType getType() {
+        return SPComponentType.OBSERVATION_BASIC;
+    }
+
+    @Override
+    public SPObservation createDataObject() {
+        return new SPObservation();
+    }
+
+    @Override
+    public void initNode(ISPFactory factory, ISPObservation obsNode) {
+
+        obsNode.setDataObject(createDataObject());
 
         // Add the standard subnodes
         addSubnodes(factory, obsNode);
 
         // Set the configuration builder
-        updateNode(node);
+        updateNode(obsNode);
     }
 
     /**
@@ -123,25 +124,18 @@ public class ObservationNI implements ISPNodeInitializer {
         }
     }
 
-    /**
-     * Updates the given <code>node</code>. This should be called on any new
-     * nodes created by making a deep copy of another node, so that the user
-     * objects are updated correctly.
-     *
-     * @param node the science program node to be updated
-     */
-    public void updateNode(ISPNode node) {
+    @Override
+    public void updateNode(ISPObservation obs) {
         // Set the configuration builder
-        ISPObservation obs = (ISPObservation) node;
-        node.putClientData(IConfigBuilder.USER_OBJ_KEY, new GemObservationCB(obs));
-        node.putClientData(InstrumentSequenceSync.USER_OBJ_KEY, InstrumentSequenceSync.instance);
+        obs.putClientData(IConfigBuilder.USER_OBJ_KEY, new GemObservationCB(obs));
+        obs.putClientData(InstrumentSequenceSync.USER_OBJ_KEY, InstrumentSequenceSync.instance);
 
         // Turn off electronic offset sync for now.  The only usage is
         // currently F2 and it has been modified to no longer support its own
         // offset positions.
 //        node.putClientData("ElectronicOffsetSync", ElectronicOffsetSync.instance);
 
-        node.putClientData("IssPortSync", IssPortSync.instance);
+        obs.putClientData("IssPortSync", IssPortSync.instance);
     }
 
     public static void reset(ISPObservation obs, boolean sameProgram) {

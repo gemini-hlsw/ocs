@@ -1,8 +1,6 @@
 package edu.gemini.spModel.gemini.altair;
 
-import edu.gemini.pot.sp.ISPObsComponent;
-import edu.gemini.pot.sp.ISPObservation;
-import edu.gemini.pot.sp.SPComponentType;
+import edu.gemini.pot.sp.*;
 import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.spModel.ao.AOConstants;
 import edu.gemini.spModel.data.AbstractDataObject;
@@ -14,6 +12,7 @@ import edu.gemini.spModel.data.config.StringParameter;
 import edu.gemini.spModel.data.property.PropertyProvider;
 import edu.gemini.spModel.data.property.PropertySupport;
 import edu.gemini.spModel.gemini.altair.AltairParams.*;
+import edu.gemini.spModel.gemini.init.ComponentNodeInitializer;
 import edu.gemini.spModel.guide.*;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.Pio;
@@ -81,6 +80,10 @@ public final class InstAltair extends AbstractDataObject implements PropertyProv
      */
     public static final SPComponentType SP_TYPE =
             SPComponentType.AO_ALTAIR;
+
+    public static final ISPNodeInitializer<ISPObsComponent, InstAltair> NI =
+        new ComponentNodeInitializer<>(SP_TYPE, () -> new InstAltair(), c -> new InstAltairCB(c));
+
 
     /** Constructor */
     public InstAltair() {

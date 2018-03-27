@@ -1,10 +1,12 @@
 package edu.gemini.spModel.config.test;
 
 import edu.gemini.pot.sp.*;
+import edu.gemini.pot.spdb.test.EmptyNodeInitializer;
 import edu.gemini.pot.spdb.DBLocalDatabase;
 import edu.gemini.pot.spdb.IDBDatabaseService;
 import edu.gemini.spModel.config.IConfigBuilder;
 import edu.gemini.spModel.config.ObservationCB;
+import edu.gemini.spModel.data.ISPDataObject;
 import edu.gemini.spModel.data.config.*;
 import static org.junit.Assert.*;
 
@@ -57,14 +59,28 @@ public abstract class CBTestBase {
         return obs;
     }
 
+    private final ISPNodeInitializer<ISPObsComponent, ISPDataObject> UNKNOWN_OC =
+        new EmptyNodeInitializer<>();
+
     protected ISPObsComponent createObsComponent(SPComponentType compType) throws Exception {
         // Create the observation component.
-        return testFactory.createObsComponent(testProg, compType, null);
+        if (compType == SPComponentType.UNKNOWN) {
+            return testFactory.createObsComponent(testProg, compType, UNKNOWN_OC, null);
+        } else {
+            return testFactory.createObsComponent(testProg, compType, null);
+        }
     }
+
+    private final ISPNodeInitializer<ISPSeqComponent, ISPSeqObject> UNKNOWN_SC =
+        new EmptyNodeInitializer<>();
 
     protected ISPSeqComponent createSeqComponent(SPComponentType compType) throws Exception {
         // Create the sequence component.
-        return testFactory.createSeqComponent(testProg, compType, null);
+        if (compType == SPComponentType.UNKNOWN) {
+            return testFactory.createSeqComponent(testProg, compType, UNKNOWN_SC, null);
+        } else {
+            return testFactory.createSeqComponent(testProg, compType, null);
+        }
     }
 
     protected void runApply(IConfigBuilder cb, IConfig expected)  {

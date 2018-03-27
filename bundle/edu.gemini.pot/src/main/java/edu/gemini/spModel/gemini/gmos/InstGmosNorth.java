@@ -1,5 +1,7 @@
 package edu.gemini.spModel.gemini.gmos;
 
+import edu.gemini.pot.sp.ISPNodeInitializer;
+import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.spModel.config.injector.ConfigInjector;
 import edu.gemini.spModel.config.injector.obswavelength.ObsWavelengthCalc3;
@@ -14,6 +16,7 @@ import edu.gemini.spModel.gemini.calunit.smartgcal.keys.CalibrationKeyImpl;
 import edu.gemini.spModel.gemini.calunit.smartgcal.keys.ConfigKeyGmosNorth;
 import edu.gemini.spModel.gemini.gmos.GmosNorthType.DisperserNorth;
 import edu.gemini.spModel.gemini.gmos.GmosNorthType.FilterNorth;
+import edu.gemini.spModel.gemini.init.ComponentNodeInitializer;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.guide.GuideProbeUtil;
 import edu.gemini.spModel.obscomp.InstConfigInfo;
@@ -35,6 +38,9 @@ public class InstGmosNorth extends
     private static final Logger LOG = Logger.getLogger(InstGmosCommon.class.getName());
 
     public static final SPComponentType SP_TYPE = SPComponentType.INSTRUMENT_GMOS;
+
+    public static final ISPNodeInitializer<ISPObsComponent, InstGmosNorth> NI =
+        new ComponentNodeInitializer<>(SP_TYPE, () -> new InstGmosNorth(), c -> new InstGMOSCB(c));
 
     // The name of the GMOS instrument configuration
     public static final String INSTRUMENT_NAME_PROP = "GMOS-N";

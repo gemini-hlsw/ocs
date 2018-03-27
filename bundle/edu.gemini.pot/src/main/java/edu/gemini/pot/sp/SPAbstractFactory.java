@@ -8,6 +8,12 @@
 package edu.gemini.pot.sp;
 
 import edu.gemini.spModel.core.SPProgramID;
+import edu.gemini.spModel.data.ISPDataObject;
+import edu.gemini.spModel.gemini.init.NodeInitializers;
+import edu.gemini.spModel.gemini.obscomp.SPProgram;
+import edu.gemini.spModel.gemini.plan.NightlyRecord;
+import edu.gemini.spModel.obs.SPObservation;
+import edu.gemini.spModel.obscomp.SPGroup;
 
 import java.util.HashMap;
 import java.util.List;
@@ -27,18 +33,6 @@ import java.util.Map;
  * documentation on many of the methods in this class.
  */
 public abstract class SPAbstractFactory implements ISPFactory {
-    protected ISPNodeInitializer _progInit;
-    protected ISPNodeInitializer _nightlyPlanInit;
-    protected ISPNodeInitializer _obsInit;
-    protected ISPNodeInitializer _obsQaLogInit;
-    protected ISPNodeInitializer _obsExecLogInit;
-    protected ISPNodeInitializer _conflictFolderInit;
-    protected ISPNodeInitializer _templateFolderInit;
-    protected ISPNodeInitializer _templateGroupInit;
-    protected ISPNodeInitializer _templateParametersInit;
-    protected ISPNodeInitializer _groupInit;
-    protected Map<SPComponentType, ISPNodeInitializer> _obsCompInitMap;
-    protected Map<SPComponentType, ISPNodeInitializer> _sequenceCompInitMap;
 
     /**
      * Default constructor, explicitly declared since
@@ -49,13 +43,13 @@ public abstract class SPAbstractFactory implements ISPFactory {
     }
 
     public ISPProgram createProgram(SPNodeKey key, SPProgramID progID) {
-        return createProgram(_progInit, key, progID);
+        return createProgram(NodeInitializers.instance.program, key, progID);
     }
 
     /**
      * Creates an <code>ISPProgram</code> using the given initializer.
      */
-    public ISPProgram createProgram(ISPNodeInitializer init, SPNodeKey key, SPProgramID progID) {
+    public ISPProgram createProgram(ISPNodeInitializer<ISPProgram, SPProgram> init, SPNodeKey key, SPProgramID progID) {
         final ISPProgram prog = doCreateProgram(key, progID);
         if (init != null) init.initNode(this, prog);
         return prog;
@@ -69,21 +63,14 @@ public abstract class SPAbstractFactory implements ISPFactory {
      */
     protected abstract ISPProgram doCreateProgram(SPNodeKey key, SPProgramID progID);
 
-    /**
-     * Registers an initializer for program initialization.
-     */
-    public void registerProgramInit(ISPNodeInitializer init) {
-        _progInit = init;
-    }
-
     public ISPNightlyRecord createNightlyRecord(SPNodeKey key, SPProgramID planID) {
-        return createNightlyRecord(_nightlyPlanInit, key, planID);
+        return createNightlyRecord(NodeInitializers.instance.record, key, planID);
     }
 
     /**
      * Creates an <code>ISPNightlyRecord</code> using the given initializer.
      */
-    public ISPNightlyRecord createNightlyRecord(ISPNodeInitializer init, SPNodeKey key, SPProgramID planID) {
+    public ISPNightlyRecord createNightlyRecord(ISPNodeInitializer<ISPNightlyRecord, NightlyRecord> init, SPNodeKey key, SPProgramID planID) {
         final ISPNightlyRecord record = doCreateNightlyPlan(key, planID);
         if (init != null) init.initNode(this, record);
         return record;
@@ -98,42 +85,15 @@ public abstract class SPAbstractFactory implements ISPFactory {
     protected abstract ISPNightlyRecord doCreateNightlyPlan(SPNodeKey key, SPProgramID planID);
 
 
-    /**
-     * Registers an initializer for nightly plan initialization.
-     */
-    public void registerNightlyRecordInit(ISPNodeInitializer init) {
-        _nightlyPlanInit = init;
-    }
-
-    @Override
-    public void registerConflictFolderInit(ISPNodeInitializer init) {
-        _conflictFolderInit = init;
-    }
-
-    @Override
-    public void registerTemplateFolderInit(ISPNodeInitializer init)  {
-        _templateFolderInit = init;
-    }
-
-    @Override
-    public void registerTemplateGroupInit(ISPNodeInitializer init)  {
-        _templateGroupInit = init;
-    }
-
-    @Override
-    public void registerTemplateParametersInit(ISPNodeInitializer init)  {
-        _templateParametersInit = init;
-    }
-
     public ISPObservation createObservation(ISPProgram prog, SPNodeKey key) throws SPException {
-        return createObservation(prog, -1, _obsInit, key);
+        return createObservation(prog, -1, NodeInitializers.instance.obs, key);
     }
     public ISPObservation createObservation(ISPProgram prog, int index, SPNodeKey key) throws SPException {
-        return createObservation(prog, index, _obsInit, key);
+        return createObservation(prog, index, NodeInitializers.instance.obs, key);
     }
 
     // finally, the canonical factory method
-    public ISPObservation createObservation(ISPProgram prog, int index, ISPNodeInitializer init, SPNodeKey key) throws SPException {
+    public ISPObservation createObservation(ISPProgram prog, int index, ISPNodeInitializer<ISPObservation, SPObservation> init, SPNodeKey key) throws SPException {
         final ISPObservation obs = doCreateObservation(prog, index, key);
         if ((obs != null) && (init != null)) init.initNode(this, obs);
         return obs;
@@ -151,25 +111,18 @@ public abstract class SPAbstractFactory implements ISPFactory {
             throws SPException;
 
     /**
-     * Registers an initializer for observation initialization.
-     */
-    public void registerObservationInit(ISPNodeInitializer init) {
-        _obsInit = init;
-    }
-
-    /**
      * Creates an <code>ISPGroup</code> using the given key.
      */
     public ISPGroup createGroup(ISPProgram prog, SPNodeKey key)
             throws SPUnknownIDException {
-        return createGroup(prog, _groupInit, key);
+        return createGroup(prog, NodeInitializers.instance.group, key);
     }
 
     /**
      * Creates an <code>ISPGroup</code> using the given initializer and key.
      */
     public ISPGroup createGroup(ISPProgram prog,
-                                ISPNodeInitializer init,
+                                ISPNodeInitializer<ISPGroup, SPGroup> init,
                                 SPNodeKey key)
             throws SPUnknownIDException {
 
@@ -191,37 +144,32 @@ public abstract class SPAbstractFactory implements ISPFactory {
 
 
     /**
-     * Registers an initializer for group initialization.
-     */
-    public void registerGroupInit(ISPNodeInitializer init) {
-        _groupInit = init;
-    }
-
-    /**
-     * Creates an <code>ISPObsComponent</code> using the registered initializer
-     * for the given type of obs component (if any).
+     * Creates an <code>ISPObsComponent</code> using the default initializer
+     * for the given type of obs component.
      */
     public ISPObsComponent createObsComponent(ISPProgram prog,
                                               SPComponentType type,
                                               SPNodeKey key)
             throws SPUnknownIDException {
-        ISPNodeInitializer init = null;
-        if (_obsCompInitMap != null) {
-            init = _obsCompInitMap.get(type);
-        }
-        return createObsComponent(prog, type, init, key);
+
+        return createObsComponent(prog, type, NodeInitializers.instance.obsComp.get(type), key);
     }
 
     /**
      * Creates an <code>ISPObsComponent</code> using the given initializer.
      */
     public ISPObsComponent createObsComponent(ISPProgram prog,
-                                              SPComponentType type, ISPNodeInitializer init,
+                                              SPComponentType type,
+                                              ISPNodeInitializer<ISPObsComponent, ? extends ISPDataObject> init,
                                               SPNodeKey key)
             throws SPUnknownIDException {
-        ISPObsComponent oc = doCreateObsComponent(prog, type, key);
-        if (init != null) init.initNode(this, oc);
 
+        final ISPObsComponent oc = doCreateObsComponent(prog, type, key);
+        if (init == null) {
+            throw new RuntimeException("Missing initializer for " + type);
+        } else {
+            init.initNode(this, oc);
+        }
         return oc;
     }
 
@@ -238,55 +186,31 @@ public abstract class SPAbstractFactory implements ISPFactory {
             throws SPUnknownIDException;
 
 
-    /**
-     * Registers an initializer for creating observation components of the
-     * given <code>type</code>.
-     */
-    public void registerObsComponentInit(SPComponentType type,
-                                         ISPNodeInitializer init) {
-        if (_obsCompInitMap == null) {
-            _obsCompInitMap = new HashMap<SPComponentType, ISPNodeInitializer>();
-        }
-        _obsCompInitMap.put(type, init);
-    }
-
     public ISPObsQaLog createObsQaLog(ISPProgram prog, SPNodeKey key) throws SPUnknownIDException {
         final ISPObsQaLog log = doCreateObsQaLog(prog, key);
-        if (_obsQaLogInit != null) _obsQaLogInit.initNode(this, log);
+        NodeInitializers.instance.obsQaLog.initNode(this, log);
         return log;
     }
 
     protected abstract ISPObsQaLog doCreateObsQaLog(ISPProgram prog, SPNodeKey key) throws SPUnknownIDException;
 
-    public void registerObsQaLogInit(ISPNodeInitializer init) {
-        _obsQaLogInit = init;
-    }
-
     public ISPObsExecLog createObsExecLog(ISPProgram prog, SPNodeKey key) throws SPUnknownIDException {
         final ISPObsExecLog log = doCreateObsExecLog(prog, key);
-        if (_obsExecLogInit != null) _obsExecLogInit.initNode(this, log);
+        NodeInitializers.instance.obsExecLog.initNode(this, log);
         return log;
     }
 
     protected abstract ISPObsExecLog doCreateObsExecLog(ISPProgram prog, SPNodeKey key) throws SPUnknownIDException;
 
-    public void registerObsExecLogInit(ISPNodeInitializer init) {
-        _obsExecLogInit = init;
-    }
-
     /**
-     * Creates an <code>ISPSeqComponent</code> using the registered initializer
-     * for the given type of sequence component (if any).
+     * Creates an <code>ISPSeqComponent</code> using the default initializer
+     * for the given type of sequence component..
      */
     public ISPSeqComponent createSeqComponent(ISPProgram prog,
                                               SPComponentType type,
                                               SPNodeKey key)
             throws SPUnknownIDException {
-        ISPNodeInitializer init = null;
-        if (_sequenceCompInitMap != null) {
-            init = _sequenceCompInitMap.get(type);
-        }
-        return createSeqComponent(prog, type, init, key);
+        return createSeqComponent(prog, type, NodeInitializers.instance.seqComp.get(type), key);
     }
 
     /**
@@ -294,12 +218,16 @@ public abstract class SPAbstractFactory implements ISPFactory {
      */
     public ISPSeqComponent createSeqComponent(ISPProgram prog,
                                               SPComponentType type,
-                                              ISPNodeInitializer init,
+                                              ISPNodeInitializer<ISPSeqComponent, ? extends ISPSeqObject> init,
                                               SPNodeKey key)
             throws SPUnknownIDException {
-        ISPSeqComponent sc = doCreateSeqComponent(prog, type, key);
-        if (init != null) init.initNode(this, sc);
 
+        final ISPSeqComponent sc = doCreateSeqComponent(prog, type, key);
+        if (init == null) {
+            throw new RuntimeException("Missing initializer for " + type);
+        } else {
+            init.initNode(this, sc);
+        }
         return sc;
     }
 
@@ -314,33 +242,5 @@ public abstract class SPAbstractFactory implements ISPFactory {
                                                             SPNodeKey key)
             throws SPUnknownIDException;
 
-
-    /**
-     * Registers an initializer for creating sequence components of the
-     * given <code>type</code>.
-     */
-    public void registerSeqComponentInit(SPComponentType type,
-                                         ISPNodeInitializer init) {
-        if (_sequenceCompInitMap == null) {
-            _sequenceCompInitMap = new HashMap<SPComponentType, ISPNodeInitializer>();
-        }
-        _sequenceCompInitMap.put(type, init);
-    }
-
-    /**
-     * Returns a List of <code>{@link SPComponentType}</code> objects, one
-     * for each type of obs component that can be created by this factory.
-     * In order to discover the types that can be
-     * created by the factory, a client can use this method.
-     */
-    public abstract List<SPComponentType> getCreatableObsComponents();
-
-    /**
-     * Returns a List of <code>{@link SPComponentType}</code> objects, one
-     * for each type of seq component that can be created by this factory.
-     * In order to discover the types that can be
-     * created by the factory, a client can use this method.
-     */
-    public abstract List<SPComponentType> getCreatableSeqComponents();
 }
 

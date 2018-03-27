@@ -7,7 +7,10 @@
 //
 package edu.gemini.spModel.gemini.seqcomp;
 
+import edu.gemini.pot.sp.ISPNodeInitializer;
+import edu.gemini.pot.sp.ISPSeqComponent;
 import edu.gemini.pot.sp.SPComponentType;
+import edu.gemini.spModel.gemini.init.ComponentNodeInitializer;
 import edu.gemini.spModel.obscomp.InstConstants;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.PioFactory;
@@ -33,6 +36,9 @@ public abstract class SeqRepeatSmartGcalObs extends SeqRepeatCoaddExp
         // Do not remove/rename!
         public static final SPComponentType SP_TYPE =
                 SPComponentType.OBSERVER_BASELINEDAY;
+
+        public static final ISPNodeInitializer<ISPSeqComponent, BaselineDay> NI =
+            new ComponentNodeInitializer<>(SP_TYPE, () -> new BaselineDay(), c -> new SeqRepeatSmartGcalObsCB.BasecalDay(c));
 
         public BaselineDay() {
             super(SP_TYPE);
@@ -61,6 +67,9 @@ public abstract class SeqRepeatSmartGcalObs extends SeqRepeatCoaddExp
         public static final SPComponentType SP_TYPE =
                 SPComponentType.OBSERVER_BASELINENIGHT;
 
+        public static final ISPNodeInitializer<ISPSeqComponent, BaselineNight> NI =
+            new ComponentNodeInitializer<>(SP_TYPE, () -> new BaselineNight(), c -> new SeqRepeatSmartGcalObsCB.BasecalNight(c));
+
         public BaselineNight() {
             super(SP_TYPE);
         }
@@ -88,6 +97,9 @@ public abstract class SeqRepeatSmartGcalObs extends SeqRepeatCoaddExp
         public static final SPComponentType SP_TYPE =
                 SPComponentType.OBSERVER_SMARTFLAT;
 
+        public static final ISPNodeInitializer<ISPSeqComponent, Flat> NI =
+            new ComponentNodeInitializer<>(SP_TYPE, () -> new Flat(), c -> new SeqRepeatSmartGcalObsCB.Flat(c));
+
         public Flat() {
             super(SP_TYPE);
         }
@@ -113,6 +125,9 @@ public abstract class SeqRepeatSmartGcalObs extends SeqRepeatCoaddExp
         // Do not remove/rename!
         public static final SPComponentType SP_TYPE =
                 SPComponentType.OBSERVER_SMARTARC;
+
+        public static final ISPNodeInitializer<ISPSeqComponent, Arc> NI =
+            new ComponentNodeInitializer<>(SP_TYPE, () -> new Arc(), c -> new SeqRepeatSmartGcalObsCB.Arc(c));
 
         public Arc() {
             super(SP_TYPE);

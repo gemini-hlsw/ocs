@@ -4,8 +4,11 @@
 
 package edu.gemini.spModel.obscomp;
 
+import edu.gemini.pot.sp.ISPGroup;
+import edu.gemini.pot.sp.ISPNodeInitializer;
 import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.spModel.data.AbstractDataObject;
+import edu.gemini.spModel.gemini.init.SimpleNodeInitializer;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.Pio;
 import edu.gemini.spModel.pio.PioFactory;
@@ -19,6 +22,9 @@ public class SPGroup extends AbstractDataObject {
      * This obs component's SP type.
      */
     public static final SPComponentType SP_TYPE = SPComponentType.GROUP_GROUP;
+
+    public static final ISPNodeInitializer<ISPGroup, SPGroup> NI =
+            new SimpleNodeInitializer<>(SP_TYPE, () -> new SPGroup("Group"));
 
     // for serialization
     private static final long serialVersionUID = 2L;

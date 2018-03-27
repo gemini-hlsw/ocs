@@ -6,6 +6,8 @@
 //
 package edu.gemini.spModel.gemini.calunit;
 
+import edu.gemini.pot.sp.ISPNodeInitializer;
+import edu.gemini.pot.sp.ISPSeqComponent;
 import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.spModel.data.config.DefaultParameter;
 import edu.gemini.spModel.data.config.DefaultSysConfig;
@@ -14,6 +16,7 @@ import edu.gemini.spModel.gemini.calunit.CalUnitParams.Diffuser;
 import edu.gemini.spModel.gemini.calunit.CalUnitParams.Filter;
 import edu.gemini.spModel.gemini.calunit.CalUnitParams.Lamp;
 import edu.gemini.spModel.gemini.calunit.CalUnitParams.Shutter;
+import edu.gemini.spModel.gemini.init.ComponentNodeInitializer;
 import edu.gemini.spModel.seqcomp.SeqConfigObsBase;
 
 import java.util.Arrays;
@@ -30,27 +33,8 @@ public class SeqConfigCalUnit extends SeqConfigObsBase { // implements PropertyP
      */
     public static final SPComponentType SP_TYPE = SPComponentType.ITERATOR_CALUNIT;
 
-    /*
-    // Properties
-    public static final PropertyDescriptor LAMP_PROP;
-
-    private static final Map<String, PropertyDescriptor> PRIVATE_PROP_MAP = new HashMap<String, PropertyDescriptor>();
-    public static final Map<String, PropertyDescriptor> PROPERTY_MAP = Collections.unmodifiableMap(PRIVATE_PROP_MAP);
-
-    private static class DummyInstCalUnit {
-        public Lamp getLamp() {
-            return null;
-        }
-
-        public void setLamp(Lamp lamp) {
-        }
-    }
-
-    static {
-        LAMP_PROP = PropertySupport.init("lamp", DummyInstCalUnit.class, false, true);
-        PRIVATE_PROP_MAP.put("lamp", LAMP_PROP);
-    }
-    */
+    public static final ISPNodeInitializer<ISPSeqComponent, SeqConfigCalUnit> NI =
+        new ComponentNodeInitializer<>(SP_TYPE, () -> new SeqConfigCalUnit(), c -> new SeqConfigCalUnitCB(c));
 
     /**
      * Default constructor.
@@ -80,9 +64,4 @@ public class SeqConfigCalUnit extends SeqConfigObsBase { // implements PropertyP
         return sc;
     }
 
-    /*
-    public Map<String, PropertyDescriptor> getProperties() {
-        return PROPERTY_MAP;
-    }
-    */
 }

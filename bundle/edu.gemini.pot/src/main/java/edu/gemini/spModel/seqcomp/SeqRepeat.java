@@ -8,11 +8,14 @@
 
 package edu.gemini.spModel.seqcomp;
 
+import edu.gemini.pot.sp.ISPNodeInitializer;
+import edu.gemini.pot.sp.ISPSeqComponent;
 import edu.gemini.pot.sp.ISPSeqObject;
 import edu.gemini.pot.sp.SPComponentType;
 
 import edu.gemini.spModel.data.AbstractDataObject;
 
+import edu.gemini.spModel.gemini.init.ComponentNodeInitializer;
 import edu.gemini.spModel.obscomp.InstConstants;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.PioFactory;
@@ -23,6 +26,9 @@ import edu.gemini.spModel.obsclass.ObsClass;
 public class SeqRepeat extends AbstractDataObject implements ISPSeqObject {
 
     public static final SPComponentType SP_TYPE = SPComponentType.ITERATOR_REPEAT;
+
+    public static final ISPNodeInitializer<ISPSeqComponent, SeqRepeat> NI =
+        new ComponentNodeInitializer<>(SP_TYPE, () -> new SeqRepeat(), c -> new SeqRepeatCB(c));
 
     // for serialization
     private static final long serialVersionUID = 3L;

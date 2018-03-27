@@ -19,6 +19,7 @@ import edu.gemini.spModel.dataset.DatasetLabel;
 import edu.gemini.spModel.event.ObsExecEvent;
 import edu.gemini.spModel.gemini.calunit.calibration.CalConfigFactory;
 import edu.gemini.spModel.gemini.calunit.calibration.CalConfigPio;
+import edu.gemini.spModel.gemini.init.SimpleNodeInitializer;
 import edu.gemini.spModel.obsrecord.ObsExecRecord;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.PioFactory;
@@ -38,6 +39,10 @@ public final class ObsExecLog extends AbstractDataObject implements ISPMergeable
     private static final long serialVersionUID = 3L;
 
     public static final SPComponentType SP_TYPE = SPComponentType.OBS_EXEC_LOG;
+
+    public static final ISPNodeInitializer<ISPObsExecLog, ObsExecLog> NI =
+        new SimpleNodeInitializer<>(SP_TYPE, () -> new ObsExecLog());
+
 
     private ObsExecRecord _obsExecRecord;
 

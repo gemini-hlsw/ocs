@@ -1,9 +1,12 @@
 package edu.gemini.spModel.gemini.phoenix;
 
+import edu.gemini.pot.sp.ISPNodeInitializer;
+import edu.gemini.pot.sp.ISPSeqComponent;
 import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.spModel.data.property.PropertyProvider;
 import edu.gemini.spModel.data.property.PropertySupport;
 import edu.gemini.spModel.data.property.PropertyFilter;
+import edu.gemini.spModel.gemini.init.ComponentNodeInitializer;
 import edu.gemini.spModel.seqcomp.SeqConfigNames;
 import edu.gemini.spModel.seqcomp.SeqConfigObsBase;
 
@@ -23,6 +26,9 @@ public class SeqConfigPhoenix extends SeqConfigObsBase implements PropertyProvid
      */
     public static final SPComponentType SP_TYPE =
             SPComponentType.ITERATOR_PHOENIX;
+
+    public static final ISPNodeInitializer<ISPSeqComponent, SeqConfigPhoenix> NI =
+        new ComponentNodeInitializer<>(SP_TYPE, () -> new SeqConfigPhoenix(), c -> new SeqConfigPhoenixCB(c));
 
     // The system name
     public static final String SYSTEM_NAME = SeqConfigNames.INSTRUMENT_CONFIG_NAME;

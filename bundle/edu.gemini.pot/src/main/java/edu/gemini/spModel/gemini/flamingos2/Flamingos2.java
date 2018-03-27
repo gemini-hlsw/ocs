@@ -1,5 +1,6 @@
 package edu.gemini.spModel.gemini.flamingos2;
 
+import edu.gemini.pot.sp.ISPNodeInitializer;
 import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.pot.sp.SPComponentType;
@@ -23,6 +24,7 @@ import edu.gemini.spModel.gemini.calunit.smartgcal.CalibrationKey;
 import edu.gemini.spModel.gemini.calunit.smartgcal.CalibrationKeyProvider;
 import edu.gemini.spModel.gemini.calunit.smartgcal.keys.CalibrationKeyImpl;
 import edu.gemini.spModel.gemini.calunit.smartgcal.keys.ConfigKeyFlamingos2;
+import edu.gemini.spModel.gemini.init.ComponentNodeInitializer;
 import edu.gemini.spModel.gemini.parallacticangle.ParallacticAngleSupportInst;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.guide.GuideProbeProvider;
@@ -607,6 +609,9 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
      */
     public static final SPComponentType SP_TYPE =
             SPComponentType.INSTRUMENT_FLAMINGOS2;
+
+    public static final ISPNodeInitializer<ISPObsComponent, Flamingos2> NI =
+        new ComponentNodeInitializer<>(SP_TYPE, () -> new Flamingos2(), c -> new Flamingos2CB(c));
 
     private static final Map<String, PropertyDescriptor> PRIVATE_PROP_MAP = new TreeMap<>();
     public  static final Map<String, PropertyDescriptor> PROPERTY_MAP     = Collections.unmodifiableMap(PRIVATE_PROP_MAP);

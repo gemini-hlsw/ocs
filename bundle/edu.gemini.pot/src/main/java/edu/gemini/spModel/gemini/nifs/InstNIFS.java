@@ -1,5 +1,7 @@
 package edu.gemini.spModel.gemini.nifs;
 
+import edu.gemini.pot.sp.ISPNodeInitializer;
+import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.shared.util.immutable.Option;
@@ -21,6 +23,7 @@ import edu.gemini.spModel.gemini.calunit.smartgcal.CalibrationKey;
 import edu.gemini.spModel.gemini.calunit.smartgcal.CalibrationKeyProvider;
 import edu.gemini.spModel.gemini.calunit.smartgcal.keys.CalibrationKeyImpl;
 import edu.gemini.spModel.gemini.calunit.smartgcal.keys.ConfigKeyNifs;
+import edu.gemini.spModel.gemini.init.ComponentNodeInitializer;
 import edu.gemini.spModel.gemini.nifs.NIFSParams.*;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.guide.GuideProbeProvider;
@@ -60,6 +63,9 @@ public final class InstNIFS extends SPInstObsComp implements PropertyProvider, G
 
     public static final SPComponentType SP_TYPE =
             SPComponentType.INSTRUMENT_NIFS;
+
+    public static final ISPNodeInitializer<ISPObsComponent, InstNIFS> NI =
+        new ComponentNodeInitializer<>(SP_TYPE, () -> new InstNIFS(), c -> new InstNIFSCB(c));
 
     private static final Map<String, PropertyDescriptor> PRIVATE_PROP_MAP = new TreeMap<>();
     public static final Map<String, PropertyDescriptor> PROPERTY_MAP = Collections.unmodifiableMap(PRIVATE_PROP_MAP);

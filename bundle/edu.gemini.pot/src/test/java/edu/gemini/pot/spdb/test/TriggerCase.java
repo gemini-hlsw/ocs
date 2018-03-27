@@ -254,7 +254,7 @@ public class TriggerCase extends SpdbBaseTestCase {
             throws Exception {
         ISPObsComponent obsComp;
         obsComp = getDatabase().getFactory().createObsComponent(prog, type,
-                                           EmptyNodeInitializer.INSTANCE, null);
+                                          new EmptyNodeInitializer<ISPObsComponent, ISPDataObject>(), null);
         obsComp.setDataObject(new TriggerDataObject());
         return obsComp;
     }

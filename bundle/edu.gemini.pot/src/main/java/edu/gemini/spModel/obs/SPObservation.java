@@ -145,7 +145,7 @@ public class SPObservation extends AbstractDataObject implements ISPStaffOnlyFie
 
     // The next scheduling block for the observation. Begin with None.
     private Option<SchedulingBlock> _schedulingBlock =
-            new Some(SchedulingBlock.apply(System.currentTimeMillis()));
+            new Some<>(SchedulingBlock.apply(System.currentTimeMillis()));
 
     private Option<AgsStrategyKey> _agsStrategyOverride = None.instance();
 

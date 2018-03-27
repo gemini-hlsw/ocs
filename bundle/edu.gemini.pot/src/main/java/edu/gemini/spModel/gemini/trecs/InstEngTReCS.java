@@ -8,6 +8,8 @@
 
 package edu.gemini.spModel.gemini.trecs;
 
+import edu.gemini.pot.sp.ISPNodeInitializer;
+import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.spModel.data.AbstractDataObject;
 import edu.gemini.spModel.data.ISPDataObject;
@@ -17,6 +19,7 @@ import edu.gemini.spModel.data.property.PropertySupport;
 import edu.gemini.spModel.data.config.DefaultSysConfig;
 import edu.gemini.spModel.data.config.ISysConfig;
 import edu.gemini.spModel.data.config.DefaultParameter;
+import edu.gemini.spModel.gemini.init.ComponentNodeInitializer;
 import edu.gemini.spModel.gemini.trecs.TReCSParams.ApertureWheel;
 import edu.gemini.spModel.gemini.trecs.TReCSParams.LyotWheel;
 import edu.gemini.spModel.gemini.trecs.TReCSParams.PupilImagingWheel;
@@ -48,6 +51,9 @@ public final class InstEngTReCS extends AbstractDataObject implements PropertyPr
 
     public static final SPComponentType SP_TYPE =
             SPComponentType.ENG_ENGTRECS;
+
+    public static final ISPNodeInitializer<ISPObsComponent, InstEngTReCS> NI =
+        new ComponentNodeInitializer<>(SP_TYPE, () -> new InstEngTReCS(), c -> new InstEngTReCSCB(c));
 
     private static final Map<String, PropertyDescriptor> PRIVATE_PROP_MAP = new TreeMap<String, PropertyDescriptor>();
     public static final Map<String, PropertyDescriptor> PROPERTY_MAP = Collections.unmodifiableMap(PRIVATE_PROP_MAP);

@@ -1,17 +1,23 @@
 package edu.gemini.spModel.conflict;
 
-import edu.gemini.pot.sp.Conflict;
-import edu.gemini.pot.sp.ISPFactory;
-import edu.gemini.pot.sp.ISPNodeInitializer;
-import edu.gemini.pot.sp.ISPNode;
+import edu.gemini.pot.sp.*;
 
-public final class ConflictFolderNI implements ISPNodeInitializer {
-    public void initNode(ISPFactory factory, ISPNode node) {
-        ConflictFolder obj = new ConflictFolder();
-        node.setDataObject(obj);
-        node.addConflictNote(new Conflict.ConflictFolder(node.getNodeKey()));
+public enum ConflictFolderNI implements ISPNodeInitializer<ISPConflictFolder, ConflictFolder> {
+    instance;
+
+    @Override
+    public SPComponentType getType() {
+        return SPComponentType.CONFLICT_FOLDER;
     }
 
-    public void updateNode(ISPNode node) {
+    @Override
+    public ConflictFolder createDataObject() {
+        return new ConflictFolder();
+    }
+
+    @Override
+    public void initNode(ISPFactory factory, ISPConflictFolder node) {
+        node.setDataObject(createDataObject());
+        node.addConflictNote(new Conflict.ConflictFolder(node.getNodeKey()));
     }
 }

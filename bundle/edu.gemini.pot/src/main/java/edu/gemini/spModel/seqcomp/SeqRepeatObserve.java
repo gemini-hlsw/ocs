@@ -7,7 +7,10 @@
 //
 package edu.gemini.spModel.seqcomp;
 
+import edu.gemini.pot.sp.ISPNodeInitializer;
+import edu.gemini.pot.sp.ISPSeqComponent;
 import edu.gemini.pot.sp.SPComponentType;
+import edu.gemini.spModel.gemini.init.ComponentNodeInitializer;
 import edu.gemini.spModel.obscomp.InstConstants;
 import edu.gemini.spModel.obsclass.ObsClass;
 
@@ -21,6 +24,9 @@ public class SeqRepeatObserve extends SeqRepeat
      * This iter component's SP type.
      */
     public static final SPComponentType SP_TYPE = SPComponentType.OBSERVER_OBSERVE;
+
+    public static final ISPNodeInitializer<ISPSeqComponent, SeqRepeatObserve> NI =
+        new ComponentNodeInitializer<>(SP_TYPE, () -> new SeqRepeatObserve(), c -> new SeqRepeatObsCB(c));
 
     public static final String OBSERVE_TYPE = InstConstants.SCIENCE_OBSERVE_TYPE;
 

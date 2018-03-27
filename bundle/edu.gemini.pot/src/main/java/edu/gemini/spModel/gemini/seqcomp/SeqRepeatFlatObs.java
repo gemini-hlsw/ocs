@@ -1,9 +1,12 @@
 package edu.gemini.spModel.gemini.seqcomp;
 
+import edu.gemini.pot.sp.ISPNodeInitializer;
+import edu.gemini.pot.sp.ISPSeqComponent;
 import edu.gemini.pot.sp.SPComponentType;
 
 import edu.gemini.spModel.gemini.calunit.CalUnitConstants;
 import edu.gemini.spModel.gemini.calunit.CalUnitParams.*;
+import edu.gemini.spModel.gemini.init.ComponentNodeInitializer;
 import edu.gemini.spModel.obscomp.InstConstants;
 import edu.gemini.spModel.seqcomp.ICoaddExpSeqComponent;
 import edu.gemini.spModel.seqcomp.SeqRepeatCoaddExp;
@@ -24,6 +27,9 @@ public class SeqRepeatFlatObs extends SeqRepeatCoaddExp
     private static final long serialVersionUID = 2L;
 
     public static final SPComponentType SP_TYPE = SPComponentType.OBSERVER_GEMFLAT;
+
+    public static final ISPNodeInitializer<ISPSeqComponent, SeqRepeatFlatObs> NI =
+        new ComponentNodeInitializer<>(SP_TYPE, () -> new SeqRepeatFlatObs(), c -> new SeqRepeatFlatObsCB(c));
 
     public static final String OBSERVE_TYPE = InstConstants.DARK_OBSERVE_TYPE;
 

@@ -1,7 +1,10 @@
 package edu.gemini.spModel.template;
 
 import edu.gemini.pot.sp.SPComponentType;
+import edu.gemini.pot.sp.ISPNodeInitializer;
+import edu.gemini.pot.sp.ISPTemplateGroup;
 import edu.gemini.spModel.data.AbstractDataObject;
+import edu.gemini.spModel.gemini.init.SimpleNodeInitializer;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.Pio;
 import edu.gemini.spModel.pio.PioFactory;
@@ -13,6 +16,9 @@ public final class TemplateGroup extends AbstractDataObject {
 
     public static final String VERSION = "2015A-1";
     public static final SPComponentType SP_TYPE = SPComponentType.TEMPLATE_GROUP;
+
+    public static final ISPNodeInitializer<ISPTemplateGroup, TemplateGroup> NI =
+        new SimpleNodeInitializer<>(SP_TYPE, () -> new TemplateGroup());
 
     // Private PIO parameters
     private static final String PARAM_BLUEPRINT = "blueprint";

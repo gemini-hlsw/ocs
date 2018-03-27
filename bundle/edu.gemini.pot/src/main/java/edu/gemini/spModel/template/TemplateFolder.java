@@ -1,7 +1,10 @@
 package edu.gemini.spModel.template;
 
 import edu.gemini.pot.sp.SPComponentType;
+import edu.gemini.pot.sp.ISPNodeInitializer;
+import edu.gemini.pot.sp.ISPTemplateFolder;
 import edu.gemini.spModel.data.AbstractDataObject;
+import edu.gemini.spModel.gemini.init.SimpleNodeInitializer;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.Pio;
 import edu.gemini.spModel.pio.PioFactory;
@@ -13,6 +16,9 @@ public final class TemplateFolder extends AbstractDataObject {
     public static final String DEFAULT_TITLE = "Templates";
     public static final String VERSION = "2015A-1";
     public static final SPComponentType SP_TYPE = SPComponentType.TEMPLATE_FOLDER;
+
+    public static final ISPNodeInitializer<ISPTemplateFolder, TemplateFolder> NI =
+         new SimpleNodeInitializer<>(SP_TYPE, () -> new TemplateFolder());
 
     public static final String PARAM_MAP_KEY = "templateFolderMapKey";
 

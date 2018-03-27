@@ -1,8 +1,11 @@
 package edu.gemini.spModel.obslog;
 
+import edu.gemini.pot.sp.ISPNodeInitializer;
+import edu.gemini.pot.sp.ISPObsQaLog;
 import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.spModel.data.AbstractDataObject;
 import edu.gemini.spModel.dataset.*;
+import edu.gemini.spModel.gemini.init.SimpleNodeInitializer;
 import edu.gemini.spModel.obsrecord.ObsQaRecord;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.PioFactory;
@@ -17,6 +20,9 @@ import java.util.*;
 public final class ObsQaLog extends AbstractDataObject {
 
     public static final SPComponentType SP_TYPE = SPComponentType.OBS_QA_LOG;
+
+    public static final ISPNodeInitializer<ISPObsQaLog, ObsQaLog> NI =
+        new SimpleNodeInitializer<>(SP_TYPE, () -> new ObsQaLog());
 
     public static final class Event extends EventObject {
         public final DatasetQaRecord oldRec;

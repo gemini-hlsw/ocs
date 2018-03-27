@@ -8,9 +8,12 @@
 
 package edu.gemini.spModel.seqcomp;
 
+import edu.gemini.pot.sp.ISPNodeInitializer;
+import edu.gemini.pot.sp.ISPSeqComponent;
 import edu.gemini.pot.sp.ISPSeqObject;
 import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.spModel.data.AbstractDataObject;
+import edu.gemini.spModel.gemini.init.ComponentNodeInitializer;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.PioFactory;
 
@@ -27,6 +30,9 @@ public final class SeqBase extends AbstractDataObject implements Serializable, I
      */
     public static final SPComponentType SP_TYPE =
             SPComponentType.ITERATOR_BASE;
+
+    public static final ISPNodeInitializer<ISPSeqComponent, SeqBase> NI =
+        new ComponentNodeInitializer<>(SP_TYPE, () -> new SeqBase(), c -> new SeqBaseCB(c));
 
     // for serialization
     private static final long serialVersionUID = 2L;

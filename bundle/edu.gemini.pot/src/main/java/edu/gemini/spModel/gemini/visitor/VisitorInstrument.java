@@ -1,5 +1,7 @@
 package edu.gemini.spModel.gemini.visitor;
 
+import edu.gemini.pot.sp.ISPNodeInitializer;
+import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.shared.util.immutable.Option;
@@ -13,6 +15,7 @@ import edu.gemini.spModel.data.config.ISysConfig;
 import edu.gemini.spModel.data.config.StringParameter;
 import edu.gemini.spModel.data.property.PropertyProvider;
 import edu.gemini.spModel.data.property.PropertySupport;
+import edu.gemini.spModel.gemini.init.ComponentNodeInitializer;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.guide.GuideProbeProvider;
 import edu.gemini.spModel.guide.GuideProbeUtil;
@@ -41,6 +44,9 @@ public class VisitorInstrument extends SPInstObsComp
      */
     public static final SPComponentType SP_TYPE = SPComponentType.INSTRUMENT_VISITOR;
 
+    public static final ISPNodeInitializer<ISPObsComponent, VisitorInstrument> NI =
+        new ComponentNodeInitializer<>(SP_TYPE, () -> new VisitorInstrument(), c -> new VisitorInstrumentCB(c));
+
     //Properties
     public static final PropertyDescriptor NAME_PROP;
     public static final PropertyDescriptor WAVELENGTH_PROP;
@@ -61,7 +67,7 @@ public class VisitorInstrument extends SPInstObsComp
         PRIVATE_PROP_MAP.put(pd.getName(), pd);
         return pd;
     }
-    
+
     // Instrument properties
     private String name = "";
     private double _centralWavelength = DEF_WAVELENGTH;

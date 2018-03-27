@@ -1,32 +1,39 @@
 package edu.gemini.spModel.gemini.plan;
 
 import edu.gemini.pot.sp.ISPCloneable;
+import edu.gemini.pot.sp.ISPNightlyRecord;
+import edu.gemini.pot.sp.ISPNodeInitializer;
 import edu.gemini.spModel.core.SPBadIDException;
 import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.pot.sp.SPObservationID;
 import edu.gemini.spModel.data.AbstractDataObject;
 import edu.gemini.spModel.data.ISPDataObject;
+import edu.gemini.spModel.gemini.init.SimpleNodeInitializer;
 import edu.gemini.spModel.pio.Param;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.Pio;
 import edu.gemini.spModel.pio.PioFactory;
-import java.util.logging.Logger;
-import java.util.logging.Level;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 public class NightlyRecord extends AbstractDataObject implements ISPDataObject, ISPCloneable, Serializable {
 
-    private static final Logger LOG = Logger.getLogger(NightlyRecord.class.getName());
     /**
      * This component's SP type.
      */
     public static final SPComponentType SP_TYPE =
             SPComponentType.PLAN_BASICPLAN;
+
+    public static final ISPNodeInitializer<ISPNightlyRecord, NightlyRecord> NI =
+            new SimpleNodeInitializer<>(SP_TYPE, () -> new NightlyRecord());
+
+    private static final Logger LOG = Logger.getLogger(NightlyRecord.class.getName());
 
     // Attributes used for for paramset and change events
     private static final String OBSERVATION_LIST = "observationList";
