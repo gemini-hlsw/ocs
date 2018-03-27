@@ -1,7 +1,7 @@
 package edu.gemini.spModel.gemini.gpi
 
 
-import edu.gemini.pot.sp.{ISPSeqComponent, SPComponentType, SPNodeKey}
+import edu.gemini.pot.sp.{Instrument, ISPSeqComponent, SPComponentType, SPNodeKey}
 import edu.gemini.pot.spdb.DBLocalDatabase
 import edu.gemini.spModel.config.ConfigBridge
 import edu.gemini.spModel.config.map.ConfigValMapInstances
@@ -31,7 +31,7 @@ object OffsetTest {
     val prog = odb.getFactory.createProgram(new SPNodeKey(), pid)
     odb.put(prog)
 
-    val obs = odb.getFactory.createObservation(prog, null)
+    val obs = odb.getFactory.createObservation(prog, Instrument.none, null)
 
     val gpi = odb.getFactory.createObsComponent(prog, Gpi.SP_TYPE, null)
     obs.addObsComponent(gpi)

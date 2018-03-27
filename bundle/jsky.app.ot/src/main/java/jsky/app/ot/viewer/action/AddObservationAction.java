@@ -6,6 +6,7 @@ import edu.gemini.spModel.data.ISPDataObject;
 import edu.gemini.spModel.obs.SPObservation;
 import edu.gemini.spModel.util.DefaultSchedulingBlock;
 import edu.gemini.spModel.util.SPTreeUtil;
+import edu.gemini.shared.util.immutable.Option;
 import jsky.app.ot.OTOptions;
 import jsky.app.ot.viewer.SPViewer;
 import jsky.util.gui.DialogUtil;
@@ -20,12 +21,14 @@ import java.util.Set;
  */
 public final class AddObservationAction extends AbstractViewerAction implements Comparable<AddObservationAction> {
 
+    private final Option<Instrument> instrument;
     private final SPComponentType componentType;
     private final Set<SPComponentType> requires;
 
     // initialize with the component type
-    public AddObservationAction(SPViewer viewer, SPComponentType type, Set<SPComponentType> requires) {
+    public AddObservationAction(SPViewer viewer, Option<Instrument> inst, SPComponentType type, Set<SPComponentType> requires) {
         super(viewer, (type != null ? type.readableStr : "Empty") + " Observation");
+        this.instrument = inst;
         componentType = type;
         if (requires == null) {
             this.requires = Collections.emptySet();
@@ -45,7 +48,7 @@ public final class AddObservationAction extends AbstractViewerAction implements 
             }
             if (c != null) {
                 ISPProgram prog = c.getProgram();
-                ISPObservation o = viewer.getFactory().createObservation(prog, null);
+                ISPObservation o = viewer.getFactory().createObservation(prog, instrument, null);
                 if (componentType != null && componentType.broadType.equals(SPComponentBroadType.INSTRUMENT)) {
                     o.addObsComponent(viewer.getFactory().createObsComponent(prog, componentType, null));
                     if (requires != null) {

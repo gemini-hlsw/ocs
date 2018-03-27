@@ -1,6 +1,6 @@
 package edu.gemini.sp.vcs2
 
-import edu.gemini.pot.sp.{ISPObservation, SPNodeKey}
+import edu.gemini.pot.sp.{Instrument, ISPObservation, SPNodeKey}
 import edu.gemini.pot.spdb.DBLocalDatabase
 import edu.gemini.sp.vcs2.VcsAction._
 import edu.gemini.spModel.config.IConfigBuilder
@@ -36,14 +36,14 @@ class DuplicateObsNumberTest {
       Assert.assertNotSame("have different lifespan ids", progA.getLifespanId, progB.getLifespanId)
 
       // Create a new observation for progA but don't add it.
-      val obsA1 = fact.createObservation(progA, null)
+      val obsA1 = fact.createObservation(progA, Instrument.none, null)
 
       // Create a second observation for progA and add it.
-      val obsA2 = fact.createObservation(progA, null)
+      val obsA2 = fact.createObservation(progA, Instrument.none, null)
       progA.addObservation(obsA2)
 
       // Create a new observation for progB and add it.
-      val obsB1 = fact.createObservation(progB, null)
+      val obsB1 = fact.createObservation(progB, Instrument.none, null)
       progB.addObservation(obsB1)
 
       // Pull changes from progA into progB, which should renumber B1
@@ -70,7 +70,7 @@ class DuplicateObsNumberTest {
       }
 
       // Create a new observation for progB.  It should get number 4.
-      val obsB4 = fact.createObservation(progB, null)
+      val obsB4 = fact.createObservation(progB, Instrument.none, null)
       progB.addObservation(obsB4)
 
       Assert.assertEquals(4, obsB4.getObservationNumber)

@@ -82,7 +82,8 @@ public class AbstractRuleTest {
         ISPProgram prog = fact.createProgram(PROG_KEY, pid);
         db.put(prog);
 
-        obs = fact.createObservation(prog, null);
+        obs = fact.createObservation(prog,
+                Instrument.none, null);
 
         List<ISPObservation> observations = new ArrayList<ISPObservation>();
         observations.add(obs);

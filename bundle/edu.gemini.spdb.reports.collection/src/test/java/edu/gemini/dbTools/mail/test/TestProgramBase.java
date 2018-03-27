@@ -101,7 +101,7 @@ abstract class TestProgramBase {
         final List<ISPObservation> obsList = new ArrayList<ISPObservation>();
         for (final ObservationStatus status : statusA) {
             for (int j = 0; j < 1; ++j) {
-                final ISPObservation obs = fact.createObservation(prog, null);
+                final ISPObservation obs = fact.createObservation(prog, Instrument.none, null);
                 final SPObservation obsObj = (SPObservation) obs.getDataObject();
                 obsObj.setPhase2Status(status.phase2());
                 obs.setDataObject(obsObj);

@@ -7,6 +7,7 @@ import edu.gemini.dbTools.mail.OdbMailAgent;
 import edu.gemini.dbTools.mail.OdbMailConfig;
 import edu.gemini.dbTools.odbState.OdbStateAgent;
 import edu.gemini.dbTools.odbState.OdbStateConfig;
+import edu.gemini.pot.sp.Instrument;
 import edu.gemini.pot.sp.ISPFactory;
 import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.pot.sp.ISPProgram;
@@ -409,7 +410,7 @@ public final class OdbMailCase {
     @Test public void testNewObservation() throws Exception {
         // Create a new Observation in the ready state.
         final List<ISPObservation> obsList = _prog.getAllObservations();
-        final ISPObservation newObs = _fact.createObservation(_prog, null);
+        final ISPObservation newObs = _fact.createObservation(_prog, Instrument.none, null);
         obsList.add(newObs);
         final SPObservation newObsDataObject = (SPObservation) newObs.getDataObject();
         newObsDataObject.setPhase2Status(ObservationStatus.READY.phase2());

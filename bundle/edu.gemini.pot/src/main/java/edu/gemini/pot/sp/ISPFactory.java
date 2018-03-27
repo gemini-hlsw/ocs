@@ -6,6 +6,7 @@ import edu.gemini.spModel.gemini.obscomp.SPProgram;
 import edu.gemini.spModel.gemini.plan.NightlyRecord;
 import edu.gemini.spModel.obs.SPObservation;
 import edu.gemini.spModel.obscomp.SPGroup;
+import edu.gemini.shared.util.immutable.Option;
 
 import java.util.List;
 
@@ -211,13 +212,16 @@ public interface ISPFactory {
      *
      * @param prog the program with which this observation should be associated
      *
+     * @param inst the instrument to add to this observation, if any.  This will
+     *             be used for instrument-specific observation initialization.
+     *
      * @param key key to use for this node (if <code>null</code> a
      * new key will be assigned)
      *
      * @throws SPUnknownIDException if the given <code>progKey</code> refers
      * to a program that is not known by this factory
      */
-    ISPObservation createObservation(ISPProgram prog, SPNodeKey key) throws SPException;
+    ISPObservation createObservation(ISPProgram prog, Option<Instrument> inst, SPNodeKey key) throws SPException;
 
     /**
      * Creates an ISPObservation using the default initializer for observations.
@@ -225,13 +229,15 @@ public interface ISPFactory {
      * @param prog the program with which this observation should be associated
      * @param index the index of the observation inside of the program
      * (or -1 to automatically generate a new index)
+     * @param inst the instrument to add to this observation, if any.  This will
+     *             be used for instrument-specific observation initialization
      * @param key key to use for this node (if <code>null</code> a
      * new key will be assigned)
      *
      * @throws SPUnknownIDException if the given <code>progKey</code> refers
      * to a program that is not known by this factory
      */
-    ISPObservation createObservation(ISPProgram prog, int index, SPNodeKey key) throws SPException;
+    ISPObservation createObservation(ISPProgram prog, int index, Option<Instrument> inst, SPNodeKey key) throws SPException;
 
     /**
      * Creates an ISPObservation using the provided initializer (overriding

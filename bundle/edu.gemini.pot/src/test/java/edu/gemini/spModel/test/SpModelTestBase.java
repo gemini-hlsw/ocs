@@ -32,7 +32,7 @@ public abstract class SpModelTestBase extends TestCase {
         odb.put(prog);
         progKey = prog.getProgramKey();
 
-        obs = odb.getFactory().createObservation(prog, null);
+        obs = odb.getFactory().createObservation(prog, Instrument.none, null);
         prog.addObservation(obs);
 
         target = getObsComponent(obs, TargetObsComp.SP_TYPE);

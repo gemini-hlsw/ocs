@@ -1,5 +1,6 @@
 package edu.gemini.pot.sp
 
+import edu.gemini.pot.sp.Instrument
 import edu.gemini.pot.sp.SPComponentType._
 import edu.gemini.pot.sp.validator.{Validator, NodeCardinality, NodeType}
 import edu.gemini.spModel.core.ProgramIdGen
@@ -66,7 +67,7 @@ object ProgramGen {
   val genObs: Gen[ProgFun[ISPObservation]] =
     for {
       st  <- oneOf(ObsPhase2Status.values().toSeq)
-      fo  <- genNode(_.createObservation(_, null))
+      fo  <- genNode(_.createObservation(_, Instrument.none, null))
       fi  <- genInstrument
       fns <- genNotes
     } yield { (f: ISPFactory, p: ISPProgram) =>

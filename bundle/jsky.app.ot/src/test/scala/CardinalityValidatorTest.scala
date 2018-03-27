@@ -1,6 +1,6 @@
 import edu.gemini.pot.sp.validator.Validator
 import edu.gemini.pot.spdb.{IDBDatabaseService, DBAbstractQueryFunctor, DBLocalDatabase}
-import edu.gemini.pot.sp.{SPNodeKey, ISPProgram, ISPNode}
+import edu.gemini.pot.sp.{Instrument, SPNodeKey, ISPProgram, ISPNode}
 import edu.gemini.spModel.io.SpImportService
 import edu.gemini.util.security.principal.StaffPrincipal
 import java.io.{StringReader, FilenameFilter, File}
@@ -33,7 +33,7 @@ object CardinalityValidatorTest extends App {
     {
       val p = fact.createProgram(new SPNodeKey(), null)
 
-      val o = fact.createObservation(p, null)
+      val o = fact.createObservation(p, Instrument.none, null)
       p.addObservation(o)
 
       val i = fact.createObsComponent(p, INSTRUMENT_NIFS, null)
@@ -49,7 +49,7 @@ object CardinalityValidatorTest extends App {
     {
       val p = fact.createProgram(new SPNodeKey(), null)
 
-      val o = fact.createObservation(p, null)
+      val o = fact.createObservation(p, Instrument.none, null)
       p.addObservation(o)
 
       val i = fact.createObsComponent(p, INSTRUMENT_NIFS, null)

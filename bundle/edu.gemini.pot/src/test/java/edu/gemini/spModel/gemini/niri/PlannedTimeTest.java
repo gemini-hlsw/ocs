@@ -56,7 +56,7 @@ public final class PlannedTimeTest {
         ISPProgram prog = odb.getFactory().createProgram(new SPNodeKey(), progId);
         odb.put(prog);
 
-        obs = odb.getFactory().createObservation(prog, null);
+        obs = odb.getFactory().createObservation(prog, Instrument.none, null);
 
         List<ISPObsComponent> emptyObsComponents = Collections.emptyList();
         obs.setObsComponents(emptyObsComponents);

@@ -15,6 +15,8 @@ import edu.gemini.spModel.gemini.plan.NightlyRecord;
 import edu.gemini.spModel.obs.SPObservation;
 import edu.gemini.spModel.obscomp.SPGroup;
 
+import edu.gemini.shared.util.immutable.Option;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -85,10 +87,10 @@ public abstract class SPAbstractFactory implements ISPFactory {
     protected abstract ISPNightlyRecord doCreateNightlyPlan(SPNodeKey key, SPProgramID planID);
 
 
-    public ISPObservation createObservation(ISPProgram prog, SPNodeKey key) throws SPException {
+    public ISPObservation createObservation(ISPProgram prog, Option<Instrument> inst, SPNodeKey key) throws SPException {
         return createObservation(prog, -1, NodeInitializers.instance.obs, key);
     }
-    public ISPObservation createObservation(ISPProgram prog, int index, SPNodeKey key) throws SPException {
+    public ISPObservation createObservation(ISPProgram prog, int index, Option<Instrument> inst, SPNodeKey key) throws SPException {
         return createObservation(prog, index, NodeInitializers.instance.obs, key);
     }
 

@@ -50,7 +50,7 @@ public abstract class CBTestBase {
 
     protected ISPObservation createObservation() throws Exception {
         // Create the observation.
-        ISPObservation obs = testFactory.createObservation(testProg, null);
+        ISPObservation obs = testFactory.createObservation(testProg, Instrument.none, null);
 
         // Set the observation parameter builder.
         ObservationCB ocb = new ObservationCB(obs);

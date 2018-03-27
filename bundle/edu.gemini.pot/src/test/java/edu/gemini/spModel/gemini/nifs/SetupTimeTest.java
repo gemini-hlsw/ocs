@@ -201,7 +201,7 @@ public final class SetupTimeTest {
         odb.put(prog);
 
         ctx = new Context();
-        ctx.obs = odb.getFactory().createObservation(prog, null);
+        ctx.obs = odb.getFactory().createObservation(prog, Instrument.none, null);
 
         final List<ISPObsComponent> emptyObsComponents = Collections.emptyList();
         ctx.obs.setObsComponents(emptyObsComponents);

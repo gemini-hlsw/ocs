@@ -49,7 +49,7 @@ class ReapplicationFunctorTest {
     val templateGroup = new MemTemplateGroup(templateProgram, TEMPLATE_GROUP_KEY)
 
     // The template observation with GMOS-N
-    val templateGmosObs = fact.createObservation(templateProgram, TEMPLATE_GMOS_OBS_KEY)
+    val templateGmosObs = fact.createObservation(templateProgram, Instrument.none, TEMPLATE_GMOS_OBS_KEY)
 
     // Add GMOS Observation Template
     val tGmosObscomps = new java.util.ArrayList[ISPObsComponent]
@@ -69,7 +69,7 @@ class ReapplicationFunctorTest {
     templateGroup.addObservation(templateGmosObs)
 
     // Add F2 Observation Template
-    val templatef2Obs = fact.createObservation(templateProgram, TEMPLATE_F2_OBS_KEY)
+    val templatef2Obs = fact.createObservation(templateProgram, Instrument.none, TEMPLATE_F2_OBS_KEY)
 
     val tf2Obscomps = new java.util.ArrayList[ISPObsComponent]
     val tf2 = new Flamingos2
@@ -88,7 +88,7 @@ class ReapplicationFunctorTest {
     templateFolder.addTemplateGroup(templateGroup)
 
     // Build an observation with GMOS
-    val gmosObs = fact.createObservation(templateProgram, GMOS_OBSERVATION_KEY)
+    val gmosObs = fact.createObservation(templateProgram, Instrument.none, GMOS_OBSERVATION_KEY)
 
     val gmosSpObs = new SPObservation
     gmosSpObs.setTitle("Test Observation")
@@ -114,7 +114,7 @@ class ReapplicationFunctorTest {
     gmosObs.setObsComponents(gmosObscomps)
 
     // Build an observation with F2
-    val f2Obs = fact.createObservation(templateProgram, F2_OBSERVATION_KEY)
+    val f2Obs = fact.createObservation(templateProgram, Instrument.none, F2_OBSERVATION_KEY)
 
     val f2SpObs = new SPObservation
     f2SpObs.setTitle("Test Observation")

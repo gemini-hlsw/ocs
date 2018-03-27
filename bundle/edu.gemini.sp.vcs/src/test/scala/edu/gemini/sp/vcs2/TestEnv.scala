@@ -100,7 +100,7 @@ case class TestPeer(odb: IDBDatabaseService, server: VcsServer, service: Princip
   }
 
   def addObservation(to: SPNodeKey = TestEnv.Key): SPNodeKey = {
-    val obs  = odb.getFactory.createObservation(prog, null)
+    val obs  = odb.getFactory.createObservation(prog, Instrument.none, null)
     val cont = prog.findDescendant(_.key == to).get.asInstanceOf[ISPObservationContainer]
     cont.addObservation(obs)
     obs.key
@@ -199,7 +199,7 @@ trait VcsSpecification extends Specification {
         (_.setPIInfo(PiInfo))                  <|
         (_.setContactPerson(StaffEmail))
     }
-    rp.addObservation(remoteOdb.getFactory.createObservation(rp, ObsKey))
+    rp.addObservation(remoteOdb.getFactory.createObservation(rp, Instrument.none, ObsKey))
     remoteOdb.put(rp)
 
     // Copy the test program into the local database

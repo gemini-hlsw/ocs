@@ -52,7 +52,7 @@ public class NodeContextTest {
 
     @Test
     public void testEmptyObs() throws Exception {
-        ISPObservation obs = odb.getFactory().createObservation(prog, null);
+        ISPObservation obs = odb.getFactory().createObservation(prog, Instrument.none, null);
         List<ISPObsComponent> emptyObsComponents = Collections.emptyList();
         obs.setObsComponents(emptyObsComponents);
         prog.addObservation(obs);
@@ -77,7 +77,7 @@ public class NodeContextTest {
         final ISPObsComponent obsComp;
 
         Initializer(ISPFactory factory, ISPProgram prog, SPComponentType type) throws Exception {
-            obs = factory.createObservation(prog, null);
+            obs = factory.createObservation(prog, Instrument.none, null);
 
             obsComp = factory.createObsComponent(prog, type, null);
             obs.addObsComponent(obsComp);
