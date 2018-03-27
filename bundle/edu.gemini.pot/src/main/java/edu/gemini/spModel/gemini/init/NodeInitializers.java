@@ -69,6 +69,7 @@ import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.template.TemplateFolder;
 import edu.gemini.spModel.template.TemplateGroup;
 import edu.gemini.spModel.template.TemplateParameters;
+import edu.gemini.shared.util.immutable.Option;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -91,8 +92,28 @@ public enum NodeInitializers {
     public final ISPNodeInitializer<ISPGroup, SPGroup> group =
             SPGroup.NI;
 
-    public final ISPNodeInitializer<ISPObservation, SPObservation> obs =
-            new ObservationNI();
+    public final ISPNodeInitializer<ISPObservation, SPObservation> obsNoInstrument =
+            ObservationNI.NO_INSTRUMENT;
+
+    private final Map<Instrument, ISPNodeInitializer<ISPObservation, SPObservation>> obsInitMap;
+
+    {
+        // Default values, one for each instrument type.
+        final Map<Instrument, ISPNodeInitializer<ISPObservation, SPObservation>> m =
+                Arrays.asList(Instrument.values()).stream().collect(Collectors.toMap(
+                    Function.identity(),
+                    i -> ObservationNI.forInstrument(i)));
+
+        // Replace default values with more specific initializers as necessary.
+        m.put(Instrument.Gsaoi, Gsaoi.OBSERVATION_NI);
+        // m.put(Instrument.Ghost, Ghost.OBSERVATION_NI);
+
+        obsInitMap = Collections.unmodifiableMap(m);
+    }
+
+    public final ISPNodeInitializer<ISPObservation, SPObservation> obs(Option<Instrument> inst) {
+        return inst.map(i -> obsInitMap.get(i)).getOrElse(obsNoInstrument);
+    }
 
     public final ISPNodeInitializer<ISPObsExecLog, ObsExecLog> obsExecLog =
             ObsExecLog.NI;

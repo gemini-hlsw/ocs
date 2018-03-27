@@ -88,10 +88,10 @@ public abstract class SPAbstractFactory implements ISPFactory {
 
 
     public ISPObservation createObservation(ISPProgram prog, Option<Instrument> inst, SPNodeKey key) throws SPException {
-        return createObservation(prog, -1, NodeInitializers.instance.obs, key);
+        return createObservation(prog, -1, NodeInitializers.instance.obs(inst), key);
     }
     public ISPObservation createObservation(ISPProgram prog, int index, Option<Instrument> inst, SPNodeKey key) throws SPException {
-        return createObservation(prog, index, NodeInitializers.instance.obs, key);
+        return createObservation(prog, index, NodeInitializers.instance.obs(inst), key);
     }
 
     // finally, the canonical factory method

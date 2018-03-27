@@ -30,10 +30,10 @@ public enum Instrument {
     Visitor(INSTRUMENT_VISITOR)
     ;
 
-    public final SPComponentType type;
+    public final SPComponentType componentType;
 
     private Instrument(SPComponentType type) {
-        this.type = type;
+        this.componentType = type;
     }
 
     /**
@@ -55,7 +55,7 @@ public enum Instrument {
     public static Option<Instrument> fromComponentType(SPComponentType type) {
         return ImOption.fromOptional(
                    Arrays.stream(values())
-                      .filter(i -> i.type == type)
+                      .filter(i -> i.componentType == type)
                       .findFirst()
                );
     }

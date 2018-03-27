@@ -11,6 +11,8 @@ import edu.gemini.pot.sp.*;
 import edu.gemini.spModel.core.SPProgramID;
 import edu.gemini.spModel.data.ISPDataObject;
 import edu.gemini.spModel.gemini.init.NodeInitializers;
+import edu.gemini.shared.util.immutable.ImOption;
+import edu.gemini.shared.util.immutable.Option;
 
 import java.util.*;
 
@@ -167,7 +169,16 @@ public final class MemFactory extends SPAbstractFactory {
         }
         MemObservation obs = new MemObservation(mprog, index, this, observation,
                                                 preserveKeys);
-        NodeInitializers.instance.obs.updateNode(obs);
+
+        // Find the node initializer to use.
+        final Option<Instrument> inst = ImOption.fromOptional(
+            observation.getObsComponents().stream()
+                    .filter(c -> c.getType().broadType == SPComponentBroadType.INSTRUMENT)
+                    .flatMap(c -> Instrument.fromComponentType(c.getType()).toStream())
+                    .findFirst()
+        );
+
+        NodeInitializers.instance.obs(inst).updateNode(obs);
         return obs;
     }
 

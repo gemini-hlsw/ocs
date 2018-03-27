@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 /**
  * The Option implementation that represents the lack of a value.
@@ -140,6 +141,11 @@ public final class None<T> implements Option<T>, Serializable {
             public T next() { throw new NoSuchElementException(); }
             public void remove() { throw new UnsupportedOperationException(); }
         };
+    }
+
+    @Override
+    public Stream<T> toStream() {
+        return Stream.empty();
     }
 
     @Override
