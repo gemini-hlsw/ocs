@@ -43,6 +43,10 @@ class RootSpec extends Specification {
       val root = new Root(Semester(2016, A))
       root.choices must not contain Instrument.Trecs
     }
+    "include Alopeke" in {
+      val root = new Root(Semester(2018, B))
+      root.choices must contain (Instrument.Alopeke)
+    }
   }
 
 }
