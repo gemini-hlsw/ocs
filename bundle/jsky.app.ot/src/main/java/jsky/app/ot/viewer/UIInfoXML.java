@@ -173,12 +173,6 @@ public final class UIInfoXML {
                 uiInfo.site(Site.tryParse(attrValue));
             else if (attrName.equals(ON_SITE))
                 uiInfo.onSite(Boolean.valueOf(attrValue));
-            else if (attrName.equals(REQUIRES)) {
-                final StringTokenizer tok = new StringTokenizer(attrValue);
-                while (tok.hasMoreTokens()) {
-                    uiInfo.addRequires(new UIInfo.Id(tok.nextToken()));
-                }
-            }
         }
         return uiInfo.build();
     }

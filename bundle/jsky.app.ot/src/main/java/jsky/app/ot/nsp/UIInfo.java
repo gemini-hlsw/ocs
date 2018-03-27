@@ -94,8 +94,6 @@ public final class UIInfo implements Serializable {
         private String _type = null;
         private String _dataObjectClassName = null;
 
-        private Set<Id> _requires = new HashSet<Id>();
-
         public UIInfoBuilder() {
         }
 
@@ -114,7 +112,6 @@ public final class UIInfo implements Serializable {
             _onSite              = that._onSite;
             _type                = that._type;
             _dataObjectClassName = that._dataObjectClassName;
-            _requires            = new HashSet<Id>(that._requires);
         }
 
         public UIInfoBuilder id(Id id) { _id = id; return this; }
@@ -131,7 +128,6 @@ public final class UIInfo implements Serializable {
         public UIInfoBuilder onSite(boolean onSite) { _onSite = onSite; return this; }
         public UIInfoBuilder type(String type) { _type = type; return this; }
         public UIInfoBuilder dataObjectClassName(String dataObjectClassName) { _dataObjectClassName = dataObjectClassName; return this; }
-        public UIInfoBuilder addRequires(Id id) { _requires.add(id); return this; }
 
         public UIInfo build() { return new UIInfo(this); }
     }
@@ -151,8 +147,6 @@ public final class UIInfo implements Serializable {
     private final String _type;
     private final String _dataObjectClassName;
 
-    private final Set<Id> _requires;
-
     /**
      * Default constructor for <code>{@link UIInfo}</code> object.
      */
@@ -171,7 +165,6 @@ public final class UIInfo implements Serializable {
         _onSite              = builder._onSite;
         _type                = builder._type;
         _dataObjectClassName = builder._dataObjectClassName;
-        _requires = Collections.unmodifiableSet(new HashSet<Id>(builder._requires));
     }
 
     public Id getId() { return _id; }
@@ -252,10 +245,6 @@ public final class UIInfo implements Serializable {
             e.printStackTrace();
             throw new RuntimeException(e.toString());
         }
-    }
-
-    public Set<Id> getRequires() {
-        return _requires;
     }
 
     public String toString() {

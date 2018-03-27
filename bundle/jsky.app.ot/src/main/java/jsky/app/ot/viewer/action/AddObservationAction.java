@@ -12,29 +12,18 @@ import jsky.app.ot.viewer.SPViewer;
 import jsky.util.gui.DialogUtil;
 
 import java.awt.event.ActionEvent;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * Local public static final class used for adding new observation nodes to the SP tree.
  */
 public final class AddObservationAction extends AbstractViewerAction implements Comparable<AddObservationAction> {
 
-    private final Option<Instrument> instrument;
-    private final SPComponentType componentType;
-    private final Set<SPComponentType> requires;
+    public final Option<Instrument> instrument;
 
     // initialize with the component type
-    public AddObservationAction(SPViewer viewer, Option<Instrument> inst, SPComponentType type, Set<SPComponentType> requires) {
-        super(viewer, (type != null ? type.readableStr : "Empty") + " Observation");
+    public AddObservationAction(SPViewer viewer, Option<Instrument> inst) {
+        super(viewer, inst.map(i -> i.componentType.readableStr).getOrElse("Empty") + " Observation");
         this.instrument = inst;
-        componentType = type;
-        if (requires == null) {
-            this.requires = Collections.emptySet();
-        } else {
-            this.requires = Collections.unmodifiableSet(new HashSet<>(requires));
-        }
     }
 
     public void actionPerformed(ActionEvent evt) {
@@ -49,19 +38,11 @@ public final class AddObservationAction extends AbstractViewerAction implements 
             if (c != null) {
                 ISPProgram prog = c.getProgram();
                 ISPObservation o = viewer.getFactory().createObservation(prog, instrument, null);
-                if (componentType != null && componentType.broadType.equals(SPComponentBroadType.INSTRUMENT)) {
-                    o.addObsComponent(viewer.getFactory().createObsComponent(prog, componentType, null));
-                    if (requires != null) {
-                        for (SPComponentType req : requires) {
-                            o.addObsComponent(viewer.getFactory().createObsComponent(prog, req, null));
-                        }
-                    }
 
-                    // Set an instrument specific title
-                    ISPDataObject dataObject = o.getDataObject();
-                    dataObject.setTitle(componentType.readableStr + " Observation");
-                    o.setDataObject(dataObject);
-                }
+                // Set an instrument specific title
+                final ISPDataObject dataObject = o.getDataObject();
+                dataObject.setTitle(String.format("%sObservation", instrument.map(i -> i.componentType.readableStr + " ").getOrElse("")));
+                o.setDataObject(dataObject);
 
                 // Add a default scheduling block.
                 final SPObservation spo = (SPObservation) o.getDataObject();
@@ -75,13 +56,13 @@ public final class AddObservationAction extends AbstractViewerAction implements 
         }
     }
 
-    public SPComponentType getType() {
-        return componentType;
+    private static String instrumentName(Option<Instrument> inst) {
+        return inst.map(i -> i.componentType.readableStr).getOrElse("");
     }
 
     @SuppressWarnings("NullableProblems")
     public int compareTo(AddObservationAction action) {
-        return componentType.readableStr.compareToIgnoreCase(action.componentType.readableStr);
+        return instrumentName(instrument).compareToIgnoreCase(instrumentName(action.instrument));
     }
 
     @Override

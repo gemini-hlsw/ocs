@@ -184,16 +184,11 @@ public final class SPViewerActions {
 
         // Observation Actions - Adding observations of various types
         for (UIInfo uiInfo : UIInfoXML.getByType(UIInfo.TYPE_INSTRUMENT)) {
-            Set<SPComponentType> typeSet = new HashSet<SPComponentType>();
-            for (UIInfo.Id id : uiInfo.getRequires()) {
-                UIInfo req = UIInfoXML.getUIInfo(id);
-                if (req != null) typeSet.add(req.getSPType());
-            }
             final Option<Instrument> inst = Instrument.fromComponentType(uiInfo.getSPType());
-            addObservationActions.add(new AddObservationAction(viewer, inst, uiInfo.getSPType(), typeSet));
+            addObservationActions.add(new AddObservationAction(viewer, inst));
         }
         Collections.sort(addObservationActions);
-        addObservationActions.add(0, new AddObservationAction(viewer, None.instance(), null, null)); // empty obs
+        addObservationActions.add(0, new AddObservationAction(viewer, Instrument.none)); // empty obs
 
         // Observation Actions - General
         setPhase2StatusAction = new Phase2StatusAction(viewer);
