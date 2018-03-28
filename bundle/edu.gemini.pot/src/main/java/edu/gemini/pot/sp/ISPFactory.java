@@ -208,7 +208,8 @@ public interface ISPFactory {
     ISPNightlyRecord renameNightlyRecord(ISPNightlyRecord plan, SPNodeKey key, SPProgramID planID);
 
     /**
-     * Creates an ISPObservation using the default initializer for observations.
+     * Creates an ISPObservation using the default initializer for observations
+     * associated with the given instrument (if provided)..
      *
      * @param prog the program with which this observation should be associated
      *
@@ -224,7 +225,8 @@ public interface ISPFactory {
     ISPObservation createObservation(ISPProgram prog, Option<Instrument> inst, SPNodeKey key) throws SPException;
 
     /**
-     * Creates an ISPObservation using the default initializer for observations.
+     * Creates an ISPObservation using the default initializer for observations
+     * associated with the given instrument (if provided)..
      *
      * @param prog the program with which this observation should be associated
      * @param index the index of the observation inside of the program

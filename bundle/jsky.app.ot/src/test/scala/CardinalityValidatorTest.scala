@@ -33,15 +33,11 @@ object CardinalityValidatorTest extends App {
     {
       val p = fact.createProgram(new SPNodeKey(), null)
 
-      val o = fact.createObservation(p, Instrument.none, null)
+      val o = fact.createObservation(p, Instrument.Nifs.some, null)
       p.addObservation(o)
-
-      val i = fact.createObsComponent(p, INSTRUMENT_NIFS, null)
-      o.addObsComponent(i)
 
       val e = fact.createObsComponent(p, ENG_ENGNIFS, null)
       o.addObsComponent(e)
-
 
       check(p)
     }
@@ -49,11 +45,8 @@ object CardinalityValidatorTest extends App {
     {
       val p = fact.createProgram(new SPNodeKey(), null)
 
-      val o = fact.createObservation(p, Instrument.none, null)
+      val o = fact.createObservation(p, Instrument.Nifs.some, null)
       p.addObservation(o)
-
-      val i = fact.createObsComponent(p, INSTRUMENT_NIFS, null)
-      o.addObsComponent(i)
 
       val e = fact.createObsComponent(p, ENG_ENGNIFS, null)
       o.addObsComponent(e)
