@@ -6,13 +6,3 @@ Observations identified by LibraryIDs indicated with {}.
 
 INCLUDE {1} IN target-specific Scheduling Group
 SET Name from Phase-I
-
-
-
-
-What about Alopeke in OverheadsSpec?
-They are defined in OVerheads, thankfully.
-
-
-JIRA: 3406: Fix AlmostEquals for angles.
-Could be nice to have this in developmem!!!
