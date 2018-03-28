@@ -48,7 +48,7 @@ object AlmostEqual {
   implicit val DoubleAlmostEqual =
     new AlmostEqual[Double] {
       def almostEqual(a: Double, b: Double) =
-        (a - b).abs < 0.00001
+        (a - b).abs <= 1e-5
     }
 
   implicit val AngleAlmostEqual: AlmostEqual[Angle] = new AlmostEqual[Angle] {
