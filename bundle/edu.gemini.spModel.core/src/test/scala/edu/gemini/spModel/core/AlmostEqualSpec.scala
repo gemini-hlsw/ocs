@@ -22,7 +22,7 @@ object AlmostEqualSpec extends Specification with ScalaCheck with Arbitraries wi
 
   "Adding a very large offset to an angle" should {
     "result in an angle considered not equal to the original" ! forAll { (a: Angle) =>
-      !(a ~= (a + largeDiff)) || !(a ~= (a - largeDiff))
+      !(a ~= (a + largeDiff)) && !(a ~= (a - largeDiff))
     }
   }
 }
