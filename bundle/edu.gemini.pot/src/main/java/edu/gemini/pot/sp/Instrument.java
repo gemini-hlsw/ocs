@@ -15,6 +15,7 @@ public enum Instrument {
     AcquisitionCamera(INSTRUMENT_ACQCAM),
     Bhros(INSTRUMENT_BHROS),
     Flamingos2(INSTRUMENT_FLAMINGOS2),
+    // TODO:GHOST
     GmosNorth(INSTRUMENT_GMOS),
     GmosSouth(INSTRUMENT_GMOSSOUTH),
     Gnirs(INSTRUMENT_GNIRS),

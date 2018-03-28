@@ -1,6 +1,5 @@
 package edu.gemini.pot.sp
 
-import edu.gemini.pot.sp.Instrument
 import edu.gemini.pot.sp.SPComponentType._
 import edu.gemini.pot.sp.validator.{Validator, NodeCardinality, NodeType}
 import edu.gemini.spModel.core.ProgramIdGen
@@ -200,7 +199,6 @@ object ProgramGen {
 
   private val validTypes = SPComponentType.values().filterNot { ct =>
     (  ct == SPComponentType.CONFLICT_FOLDER // conflict folders are problematic
-    || ct == SPComponentType.OBSERVER_FLAT   // seems to be an abandoned type now (see OBSERVER_GEMFLAT)?
     )
   }
 
