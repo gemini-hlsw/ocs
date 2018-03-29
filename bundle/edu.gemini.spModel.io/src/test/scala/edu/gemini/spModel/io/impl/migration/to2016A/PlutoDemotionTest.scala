@@ -7,6 +7,8 @@ import edu.gemini.spModel.target.{SPTargetPio, SPTarget}
 import edu.gemini.spModel.target.obsComp.TargetObsComp
 import org.junit.{Assert, Test}
 
+import java.util.Date
+
 import scala.collection.JavaConverters._
 
 class PlutoDemotionTest extends MigrationTest {
@@ -28,7 +30,7 @@ class PlutoDemotionTest extends MigrationTest {
             e.toList match {
               case List((t, c)) =>
 
-                  Assert.assertEquals("ValidAt", "10/28/15 7:39:58 PM UTC", SPTargetPio.formatter.format(t))
+                  Assert.assertEquals("ValidAt", "10/28/15 7:39:58 PM UTC", SPTargetPio.formatDate(new Date(t)))
                   Assert.assertEquals("RA",      "15:41:38.379", c.ra.toAngle.formatHMS)
                   Assert.assertEquals("Dec",     "-15:52:28.70", c.dec.formatDMS)
 
