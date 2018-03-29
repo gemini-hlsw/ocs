@@ -50,16 +50,27 @@ public final class DateUtil {
     }
 
     /**
-     * Algorithm to round a time to the nearest minute: add 30 seconds and then truncate seconds and milliseconds.
+     * Algorithm to round a time to the nearest minute: add 30 seconds and then truncate seconds and milliseconds, in
+     * terms of Date.
      */
     public static Date roundToNearestMinute(final Date date, final TimeZone zone) {
+        return new Date(roundToNearestMinute(date.getTime(), zone));
+    }
+
+    /**
+     * Algorithm to round a time to the nearest minute: add 30 seconds and then truncate seconds and milliseconds, in
+     * terms of long.
+     */
+    public static long roundToNearestMinute(final long date, final TimeZone zone) {
         final Calendar c = Calendar.getInstance(zone);
-        c.setTime(date);
+        c.setTimeInMillis(date);
         c.add(Calendar.SECOND, 30);
         c.set(Calendar.SECOND, 0);
         c.set(Calendar.MILLISECOND, 0);
-        return c.getTime();
+        return c.getTimeInMillis();
     }
+
+
 }
 
 

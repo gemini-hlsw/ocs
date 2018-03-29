@@ -9,13 +9,16 @@ import edu.gemini.skycalc.TwilightBoundedNight;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.TimeZone;
 
 public class VariantAdapter implements Adapter<Variant> {
 
 	public void setProperties(Variant variant, Variant target, PropertyTable table) {
 
+		final TimeZone zone = target.getSchedule().getSite().timezone();
+
 		DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MMM-dd HH:mm")
-				.withZone(target.getSchedule().getSite().timezone().toZoneId());
+				.withZone(zone.toZoneId());
 
 		TwilightBoundedNight night = new TwilightBoundedNight(
 				TwilightBoundType.OFFICIAL,
@@ -31,10 +34,10 @@ public class VariantAdapter implements Adapter<Variant> {
 
 		table.put(PROP_TYPE, "Plan Variant");
 		table.put(PROP_TITLE, target.getName());
-		table.put(PROP_SUNSET, dateFormat.format(Instant.ofEpochMilli(night.getStartTime())));
-		table.put(PROP_DUSK, dateFormat.format(Instant.ofEpochMilli(nautical.getStartTime())));
-		table.put(PROP_DAWN, dateFormat.format(Instant.ofEpochMilli(nautical.getEndTime())));
-		table.put(PROP_SUNRISE, dateFormat.format(Instant.ofEpochMilli(night.getEndTime())));
+		table.put(PROP_SUNSET, dateFormat.format(Instant.ofEpochMilli(night.getStartTimeRounded(zone))));
+		table.put(PROP_DUSK, dateFormat.format(Instant.ofEpochMilli(nautical.getStartTimeRounded(zone))));
+		table.put(PROP_DAWN, dateFormat.format(Instant.ofEpochMilli(nautical.getEndTimeRounded(zone))));
+		table.put(PROP_SUNRISE, dateFormat.format(Instant.ofEpochMilli(night.getEndTimeRounded(zone))));
 		table.put(PROP_CONSTRAINTS, target.getConditions());
 		if (target.getWindConstraint() != null)
 			table.put(PROP_WIND, target.getWindConstraint());
