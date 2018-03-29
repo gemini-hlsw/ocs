@@ -19,9 +19,15 @@ public class SPTargetPio {
 
     private static final String _TARGET = "target";
 
-    public static final DateFormat formatter = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.FULL);
+    // DateFormat is not synchronized so it must be kept private and accessed
+    // through synchronized methods.
+    private static final DateFormat formatter = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.FULL);
     static {
         formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
+    }
+
+    public static synchronized String formatDate(final Date date) {
+        return formatter.format(date);
     }
 
     public static synchronized Date parseDate(final String dateStr) {
