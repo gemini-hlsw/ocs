@@ -33,7 +33,7 @@ public class VisitorEditor extends ComponentEditor<ISPObsComponent, VisitorInstr
         // Name
         PropertyDescriptor instrumentNameProp = VisitorInstrument.NAME_PROP;
         nameCtrl = TextFieldPropertyCtrl.createStringInstance(instrumentNameProp);
-        nameCtrl.setColumns(4);
+        nameCtrl.setColumns(30);
 
         nameCtrl.getTextField().addMouseListener(focusOnCaretPositionListener);
         pan.add(new JLabel(instrumentNameProp.getDisplayName()), propLabelGbc(rightLabelCol, row));
@@ -44,7 +44,7 @@ public class VisitorEditor extends ComponentEditor<ISPObsComponent, VisitorInstr
         // Exposure Time
         PropertyDescriptor exposureTimeProp = VisitorInstrument.EXPOSURE_TIME_PROP;
         expTimeCtrl = TextFieldPropertyCtrl.createDoubleInstance(exposureTimeProp, 1);
-        expTimeCtrl.setColumns(6);
+        expTimeCtrl.setColumns(30);
         expTimeCtrl.getTextField().addMouseListener(focusOnCaretPositionListener);
 
         pan.add(new JLabel("Exp Time"), propLabelGbc(rightLabelCol, row));
@@ -55,7 +55,7 @@ public class VisitorEditor extends ComponentEditor<ISPObsComponent, VisitorInstr
         // Position Angle
         PropertyDescriptor positionAngleProp = VisitorInstrument.POS_ANGLE_PROP;
         posAngleCtrl = TextFieldPropertyCtrl.createDoubleInstance(positionAngleProp, 1);
-        posAngleCtrl.setColumns(4);
+        posAngleCtrl.setColumns(30);
         posAngleCtrl.getTextField().addMouseListener(focusOnCaretPositionListener);
         pan.add(new JLabel(positionAngleProp.getDisplayName()), propLabelGbc(rightLabelCol, row));
         pan.add(posAngleCtrl.getComponent(), propWidgetGbc(rightWidgetCol, row));
@@ -65,7 +65,7 @@ public class VisitorEditor extends ComponentEditor<ISPObsComponent, VisitorInstr
         // Wavelength
         PropertyDescriptor wavelengthAngleProp = VisitorInstrument.WAVELENGTH_PROP;
         wavelengthCtrl = TextFieldPropertyCtrl.createDoubleInstance(wavelengthAngleProp, 1);
-        wavelengthCtrl.setColumns(4);
+        wavelengthCtrl.setColumns(30);
         wavelengthCtrl.getTextField().addMouseListener(focusOnCaretPositionListener);
         pan.add(new JLabel(wavelengthAngleProp.getDisplayName()), propLabelGbc(rightLabelCol, row));
         pan.add(wavelengthCtrl.getComponent(), propWidgetGbc(rightWidgetCol, row));
