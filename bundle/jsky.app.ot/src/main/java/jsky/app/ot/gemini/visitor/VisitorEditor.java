@@ -33,11 +33,11 @@ public class VisitorEditor extends ComponentEditor<ISPObsComponent, VisitorInstr
         // Name
         PropertyDescriptor instrumentNameProp = VisitorInstrument.NAME_PROP;
         nameCtrl = TextFieldPropertyCtrl.createStringInstance(instrumentNameProp);
-        nameCtrl.setColumns(4);
+        nameCtrl.setColumns(30);
 
         nameCtrl.getTextField().addMouseListener(focusOnCaretPositionListener);
         pan.add(new JLabel(instrumentNameProp.getDisplayName()), propLabelGbc(rightLabelCol, row));
-        pan.add(nameCtrl.getComponent(), propWidgetGbc(rightWidgetCol, row));
+        pan.add(nameCtrl.getComponent(), propWidgetGbc(rightWidgetCol, row, 2, 1));
 
         ++row;
 
@@ -65,7 +65,7 @@ public class VisitorEditor extends ComponentEditor<ISPObsComponent, VisitorInstr
         // Wavelength
         PropertyDescriptor wavelengthAngleProp = VisitorInstrument.WAVELENGTH_PROP;
         wavelengthCtrl = TextFieldPropertyCtrl.createDoubleInstance(wavelengthAngleProp, 1);
-        wavelengthCtrl.setColumns(4);
+        wavelengthCtrl.setColumns(6);
         wavelengthCtrl.getTextField().addMouseListener(focusOnCaretPositionListener);
         pan.add(new JLabel(wavelengthAngleProp.getDisplayName()), propLabelGbc(rightLabelCol, row));
         pan.add(wavelengthCtrl.getComponent(), propWidgetGbc(rightWidgetCol, row));

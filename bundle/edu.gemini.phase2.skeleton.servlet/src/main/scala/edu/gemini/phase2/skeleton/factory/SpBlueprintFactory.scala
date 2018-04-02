@@ -71,6 +71,7 @@ object SpBlueprintFactory {
 
       // Visitors blueprints
       case b: VisitorBlueprint              => VisitorHandler(b)
+      case b: AlopekeBlueprint              => VisitorHandler(b)
       case b: DssiBlueprint                 => VisitorHandler(b)
       case b: GracesBlueprint               => Graces(b)
       case _                                => Left("Unexpected blueprint: " + base)
@@ -395,6 +396,7 @@ object SpBlueprintFactory {
 
   object VisitorHandler {
     def apply(b: VisitorBlueprint):Either[String, SpVisitorBlueprint] = Right(new SpVisitorBlueprint(b.customName))
+    def apply(b: AlopekeBlueprint):Either[String, SpVisitorBlueprint] = Right(new SpVisitorBlueprint(b.name))
     def apply(b: DssiBlueprint):Either[String, SpVisitorBlueprint] = Right(new SpVisitorBlueprint("DSSI"))
   }
 
