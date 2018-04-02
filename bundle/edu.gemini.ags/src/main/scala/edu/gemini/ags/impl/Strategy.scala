@@ -84,6 +84,8 @@ object Strategy {
       List(GemsStrategy) ++ oiStategies(ctx, Flamingos2Oiwfs)
     ),
 
+    SPComponentType.INSTRUMENT_GHOST      -> const(List(Pwfs2South, Pwfs1South)),
+
     SPComponentType.INSTRUMENT_GMOS       -> ((ctx: ObsContext) => {
       val ao = ctx.getAOComponent.asScalaOpt
       if (ao.exists(_.isInstanceOf[InstAltair])) {
