@@ -50,6 +50,19 @@ trait Arbitraries {
       } yield Coordinates(ra, dec)
     }
 
+  implicit val angleChooser: Gen.Choose[Angle] = new Choose[Angle] {
+    override def choose(min: Angle, max: Angle): Gen[Angle] =
+      Gen.choose(min.toDegrees, max.toDegrees).map(Angle.fromDegrees)
+  }
+
+  // A way of picking coordinates within an offset distance in arcseconds from a given coordinate.
+  def genCoordsWithinDistance(c: Coordinates, distLower: Angle, distUpper: Angle): Gen[Coordinates] =
+    for {
+      bearing  <- arbitrary[Angle]
+      distance <- choose(distLower, distUpper)
+    } yield c.angularOffset(bearing, distance)
+
+
   implicit val arbMagnitudeBand: Arbitrary[MagnitudeBand] =
     Arbitrary(oneOf(MagnitudeBand.all))
 

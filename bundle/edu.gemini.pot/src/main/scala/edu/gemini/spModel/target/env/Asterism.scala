@@ -1,18 +1,20 @@
 package edu.gemini.spModel.target.env
 
-import edu.gemini.spModel.core.{Coordinates, ProperMotion, SiderealTarget, Target}
-import edu.gemini.spModel.target.{SPTarget, TargetParamSetCodecs}
 import edu.gemini.shared.util.immutable.{ImList, Option => GOption}
 import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.skycalc.{Coordinates => SCoordinates}
-import java.time.Instant
-
+import edu.gemini.spModel.core.{Coordinates, ProperMotion, SiderealTarget, Target}
+import edu.gemini.spModel.gemini.ghost.{GhostAsterism, GhostParamSetCodecs}
+import edu.gemini.spModel.target.{SPTarget, TargetParamSetCodecs}
 import edu.gemini.spModel.pio.{ParamSet, Pio}
-import edu.gemini.spModel.pio.codec.{MissingKey, ParamSetCodec, PioError}
+import edu.gemini.spModel.pio.codec.{MissingKey, ParamSetCodec, PioError, UnknownTag}
 import edu.gemini.spModel.pio.xml.PioXmlFactory
+
+import java.time.Instant
 
 import scalaz._
 import Scalaz._
+
 
 /** Collection of stars that make up the science target(s) for an observation,
   * along with any configuration details unique to the instrument in use.
@@ -84,6 +86,8 @@ trait Asterism {
   /** Construct a copy of this Asterism with cloned SPTargets (necessary because they are mutable). */
   def copyWithClonedTargets: Asterism
 
+  // Get the type of this asterism as an AsterismType.
+  def asterismType: AsterismType
 }
 
 object Asterism {
@@ -99,6 +103,7 @@ object Asterism {
     override def basePosition(time: Option[Instant]) = t.getCoordinates(time.map(_.toEpochMilli))
     override def copyWithClonedTargets() = Single(t.clone)
     override def basePositionProperMotion = Target.pm.get(t.getTarget)
+    override def asterismType: AsterismType = AsterismType.Single
   }
 
   object Single {
@@ -115,7 +120,6 @@ object Asterism {
     // so we end up with two union tags if we do this. So we push the target paramset down a level.
     implicit val SingleParamSetCodec: ParamSetCodec[Single] =
       ParamSetCodec.initial(empty).withParamSet("target", target)
-
   }
 
   /** Construct a single-target Asterism by wrapping the given SPTarget. */
@@ -124,19 +128,23 @@ object Asterism {
 
   /** PIO codec for asterisms. */
   implicit val AsterismParamSetCodec: ParamSetCodec[Asterism] =
-    // TODO:ASTERISM: add ghost here
     new ParamSetCodec[Asterism] {
       val pf = new PioXmlFactory
+
       def encode(key: String, a: Asterism): ParamSet = {
         val (tag, ps) = a match {
-          case a: Single    => (AsterismType.Single.tag, Single.SingleParamSetCodec.encode(key, a))
+          case a: Single         => (AsterismType.Single.tag, Single.SingleParamSetCodec.encode(key, a))
+          case a: GhostAsterism  => ("ghostAsterism",         GhostParamSetCodecs.GhostAsterismParamSetCodec.encode(key, a))
         }
         Pio.addParam(pf, ps, "tag", tag)
         ps
       }
+
       def decode(ps: ParamSet): PioError \/ Asterism =
         (Option(ps.getParam("tag")).map(_.getValue) \/> MissingKey("tag")) flatMap {
-          case AsterismType.Single.tag  => Single.SingleParamSetCodec.decode(ps)
+          case AsterismType.Single.tag => Single.SingleParamSetCodec.decode(ps)
+          case "ghostAsterism"         => GhostParamSetCodecs.GhostAsterismParamSetCodec.decode(ps)
+          case other                   => UnknownTag(other, "Asterism").left
         }
     }
 

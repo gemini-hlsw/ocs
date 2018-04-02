@@ -540,9 +540,9 @@ public final class Schedule extends BaseMutableBean implements PioSerializable, 
             throw new NoSuchElementException(semester);
         for (Variant v: variants) {
             for (Alloc a: v.getAllocs()) {
-                String inUse = a.getObs().getProg().getStructuredProgramId().getSemester();
-                if (semester.equals(inUse))
+                if (a.getObs().getProg().getSemesterAsJava().map(s -> s.toString()).contains(semester)) {
                     throw new IllegalStateException("Can't remove. Plan contains observations from " + semester + ".");
+                }
             }
         }
         SortedSet<String> prev = new TreeSet<String>(extraSemesters);

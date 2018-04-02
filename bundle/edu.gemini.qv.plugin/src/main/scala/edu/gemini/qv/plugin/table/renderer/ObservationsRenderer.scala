@@ -4,6 +4,7 @@ import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.qpt.shared.sp.{Band, Prog, Obs}
 import edu.gemini.qv.plugin.ui.QvGui
 import edu.gemini.skycalc.TimeUtils
+import edu.gemini.spModel.core.ProgramId
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
 import edu.gemini.spModel.gemini.gmos.{GmosSouthType, GmosNorthType}
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams
@@ -86,9 +87,13 @@ object EncodedObservationsRenderer extends CellRenderer {
     /** Encodes the observation id (i.e. program number and obs id) */
     private def encObsId(o: Obs): String = {
       val pid = o.getProg.getStructuredProgramId
-      Option(pid.getSemester).map(_.takeRight(2)).getOrElse("") +
-        pid.getType +
-        pid.getNumber + "-" +
+      pid.semester.map(_.toString.takeRight(2)).getOrElse("") +
+        pid.ptype.map(_.abbreviation).getOrElse("")            +
+        (pid match {
+          case ProgramId.Science(_, _, _, i) => i.toString
+          case _                             => ""
+        })                                                    +
+        "-"                                                   +
         o.getObsNumber
     }
 

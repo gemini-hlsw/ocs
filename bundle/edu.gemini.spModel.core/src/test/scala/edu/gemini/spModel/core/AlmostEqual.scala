@@ -48,10 +48,16 @@ object AlmostEqual {
   implicit val DoubleAlmostEqual =
     new AlmostEqual[Double] {
       def almostEqual(a: Double, b: Double) =
-        (a - b).abs < 0.00001
+        (a - b).abs <= 1e-5
     }
 
-  implicit val AngleAlmostEqual = by((_: Angle).toDegrees)
+  // Simply doing by((_:Angle).toDegrees) doesn't consider 359.999999999 equivalent almost equal to 0.0.
+  implicit val AngleAlmostEqual: AlmostEqual[Angle] = new AlmostEqual[Angle] {
+    override def almostEqual(a: Angle, b: Angle): Boolean = {
+      (a.toDegrees ~= b.toDegrees) || (a.toDegrees + b.toDegrees - 360.0 ~= Angle.zero.toDegrees)
+    }
+  }
+
   implicit val RightAscensionAngularVelocityAlmostEqual = by((_: RightAscensionAngularVelocity).velocity.masPerYear)
   implicit val DeclinationAngularVelocityAlmostEqual = by((_: DeclinationAngularVelocity).velocity.masPerYear)
   implicit val RightAscensionAlmostEqual = by((_: RightAscension).toAngle)

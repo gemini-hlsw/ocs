@@ -761,6 +761,7 @@ public final class EdObservation2 extends OtItemEditor<ISPObservation, SPObserva
             // PI can set it directly to Ready. Otherwise the PI can only set to
             // Phase2 or For Review.
             if (Too.isToo(getNode()) &&
+                    getProgramDataObject().isActive() &&
                     ((current == ObsPhase2Status.ON_HOLD) ||
                      (ObservationStatus.computeFor(getNode()) == ObservationStatus.READY))) {
                 _editorPanel.phase2StatusBox.setEnabledObject(ObsPhase2Status.ON_HOLD, true);

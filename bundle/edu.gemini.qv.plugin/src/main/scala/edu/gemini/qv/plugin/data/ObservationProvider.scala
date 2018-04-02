@@ -142,7 +142,7 @@ object FoldedTargetsProvider {
 
   /** Folded observation id, which shows all observation numbers of all observations in this group. */
   private def foldedId(prog: Prog, obs: Set[Obs]): String =
-    prog.getStructuredProgramId.getShortName +
+    prog.getStructuredProgramId.shortName +
       " [" +
       obs.toSeq.
         sortBy(_.getObsNumber).

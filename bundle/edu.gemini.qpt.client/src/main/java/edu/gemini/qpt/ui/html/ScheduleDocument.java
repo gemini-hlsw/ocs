@@ -327,8 +327,9 @@ public class ScheduleDocument {
 
         // Add nautical twilight info.
         TwilightBoundedNight nautical = new TwilightBoundedNight(TwilightBoundType.NAUTICAL, schedule.getStart(), schedule.getSite());
-        ret.add(new SimpleEvent(nautical.getStartTime(), "Evening 12&deg; Twilight"));
-        ret.add(new SimpleEvent(nautical.getEndTime(), "Morning 12&deg; Twilight"));
+        final TimeZone timezone = utc ? TimeZone.getTimeZone("UTC") : schedule.getSite().timezone();
+        ret.add(new SimpleEvent(nautical.getStartTimeRounded(timezone), "Evening 12&deg; Twilight"));
+        ret.add(new SimpleEvent(nautical.getEndTimeRounded(timezone), "Morning 12&deg; Twilight"));
 
         // Find illuminated fraction
         Calendar cal = Calendar.getInstance();
@@ -350,7 +351,7 @@ public class ScheduleDocument {
 
         // Get sun[rise|set] info.
         TwilightBoundedNight local = new TwilightBoundedNight(TwilightBoundType.OFFICIAL, schedule.getStart(), schedule.getSite());
-        Interval sunBoundedNight = new Interval(local.getStartTime(), local.getEndTime());
+        Interval sunBoundedNight = new Interval(local.getStartTimeRounded(timezone), local.getEndTimeRounded(timezone));
 
         // Find moon info
         MoonRiseTransitSet mrts = new MoonRiseTransitSet(schedule.getSite(), sunBoundedNight.getStart());

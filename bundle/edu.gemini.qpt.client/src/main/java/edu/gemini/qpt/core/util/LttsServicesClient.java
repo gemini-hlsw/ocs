@@ -7,12 +7,10 @@ import edu.gemini.lch.services.model.*;
 import edu.gemini.qpt.core.Alloc;
 import edu.gemini.qpt.core.listeners.LimitsListener;
 import edu.gemini.qpt.shared.sp.Obs;
-import edu.gemini.qpt.shared.util.StructuredProgramID;
 import edu.gemini.qpt.shared.util.TimeUtils;
 import edu.gemini.skycalc.TwilightBoundType;
 import edu.gemini.skycalc.TwilightBoundedNight;
-import edu.gemini.spModel.core.Peer;
-import edu.gemini.spModel.core.Site;
+import edu.gemini.spModel.core.*;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -138,7 +136,7 @@ public class LttsServicesClient {
         if (i == -1) return obsId;
         String progId = obsId.substring(0, i);
         String obsNumber = obsId.substring(i + 1);
-        return new StructuredProgramID(progId).getShortName() + " [" + obsNumber + "]";
+        return ProgramId$.MODULE$.parse(progId).shortName() + " [" + obsNumber + "]";
     }
 
 

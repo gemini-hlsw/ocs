@@ -1,6 +1,9 @@
 package edu.gemini.skycalc;
 
 import edu.gemini.spModel.core.Site;
+import jsky.util.DateUtil;
+
+import java.util.TimeZone;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
@@ -227,6 +230,16 @@ public final class TwilightBoundedNight implements Night {
 
     public long getEndTime() {
         return _end;
+    }
+
+    /** Start time rounded to the nearest minute in the given timezone. */
+    public long getStartTimeRounded(TimeZone zone) {
+        return DateUtil.roundToNearestMinute(_start, zone);
+    }
+
+    /** End time rounded to the nearest minute in the given timezone. */
+    public long getEndTimeRounded(TimeZone zone) {
+        return DateUtil.roundToNearestMinute(_end, zone);
     }
 
     public long getTotalTime() {
