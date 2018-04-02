@@ -167,22 +167,22 @@ trait Arbitraries extends edu.gemini.spModel.core.Arbitraries {
     import GhostAsterism.GhostStandardResTargets._
 
     // This generates a list of n coordinates, wherein the last n-1 are within distance [lower, upper) from the first.
-    def genNCoordsWithinDistance(n: Int, lower: Double, upper: Double): Gen[List[Coordinates]] =
+    def genNCoordsWithinDistance(n: Int, lower: Angle, upper: Angle): Gen[List[Coordinates]] =
       for {
         c  <- arbitrary[Coordinates]
         cs <- listOfN(n-1, genCoordsWithinDistance(c, lower, upper))
       } yield c :: cs
 
     // TODO:GHOST Change these to GHOST constants as we learn more, and move to Ghost, probably.
-    val inRangeDistance: Double =   5.0 // in arcsecs
-    val border:          Double = 100.0 // in arcsecs
-    val borderDelta:     Double =   5.0 // in arcsecs
+    val inRangeDistance: Angle = Angle.fromArcsecs(5.0)
+    val border:          Angle = Angle.fromArcsecs(100.0)
+    val borderDelta:     Angle = Angle.fromArcsecs(5.0)
 
     // The patterns we allow.
     def totallyRandomCoords(n: Int): Gen[List[Coordinates]] =
       Gen.listOfN(n, arbitrary[Coordinates])
     def alwaysInRangeCoords(n: Int): Gen[List[Coordinates]] =
-      genNCoordsWithinDistance(n, 0, inRangeDistance)
+      genNCoordsWithinDistance(n, Angle.zero, inRangeDistance)
     def nearBorderCoords(n: Int): Gen[List[Coordinates]] =
       genNCoordsWithinDistance(n, border - borderDelta, border + borderDelta)
 
