@@ -68,18 +68,23 @@ case class GnirsSpectroscopy(blueprint:SpGnirsBlueprintSpectroscopy, exampleTarg
       })
     ))
 
-  // # Change Offsets for non-cross-dispersed spec observations
-  // IF CROSS-DISPERSED == no AND PI Central Wavelength < 2.5um
-  //         SET Q-OFFSET to -1, 5, 5, -1 respectively IN ITERATOR CALLED 'ABBA offset pattern' for {12}
-  //         SET Q-OFFSET to -5, 1, 1, -5 respectively IN ITERATOR CALLED 'ABBA offset pattern' for {6}, {14}
+  // # Expand offsets for non-cross-dispersed spectroscopic observations
+  // # Short Camera bad-pixel patch at +5.25 < Q < +11.25 -> Use -2,+4 and -4,+2
+  // # Long Camera bad-pixel patch at  +1.75 < Q <  +3.75 -> Use -1,+5 for both sci and std
+  // IF CROSS-DISPERSED == No:
+  //    IF PI Central Wavelength < 2.5um:
+  //       SET Q-OFFSET to -2, 4, 4, -2 respectively IN ITERATOR CALLED 'ABBA offset pattern' for {12}          # Science
+  //       SET Q-OFFSET to -4, 2, 2, -4 respectively IN ITERATOR CALLED 'ABBA offset pattern' for {6}, {14}     # Tellurics
+  //    ELSE:
+  //       SET Q-OFFSET to -1, 5, 5, -1 respectively IN ITERATOR CALLED 'ABBA offset pattern' for {6},{12},{14} # Science & Tellurics
 
-  if ((crossDisperser == CrossDispersed.NO) && !wavelengthGe2_5) {
-    forObs(12)(
-      mutateOffsets.withTitle("ABBA offset sequence")(
-        setQ(-1, 5, 5, -1)))
-    forObs(6, 14)(
-      mutateOffsets.withTitle("ABBA offset sequence")(
-        setQ(-5, 1, 1, -5)))
+  if (crossDisperser == CrossDispersed.NO) {
+    if (wavelengthGe2_5) {
+      forObs(6, 12, 14)(mutateOffsets.withTitle("ABBA offset sequence")(setQ(-1, 5, 5, -1)))
+    } else {
+      forObs(12)(mutateOffsets.withTitle("ABBA offset sequence")(setQ(-2, 4, 4, -2)))
+      forObs(6, 14)(mutateOffsets.withTitle("ABBA offset sequence")(setQ(-4, 2, 2, -4)))
+    }
   }
 
   // # ACQ for science to target Scheduling Group
@@ -103,7 +108,6 @@ case class GnirsSpectroscopy(blueprint:SpGnirsBlueprintSpectroscopy, exampleTarg
 
   // IF PI Central Wavelength > 2.5um:
   //    SET Well depth == Deep for {5}-{14},{22}
-  //    SET Q-OFFSET to -3, 3, 3, -3 respectively IN ITERATOR CALLED 'ABBA offset pattern' for {6},{12},{14} # Science & Tellurics
   if (wavelengthGe2_5) {
 
     // Update well depth, but only for specific obs if they are already included.
@@ -111,9 +115,6 @@ case class GnirsSpectroscopy(blueprint:SpGnirsBlueprintSpectroscopy, exampleTarg
     val all      = Set(5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 22)
     forObs((all & included).toSeq: _*)(setWellDepth(DEEP))
 
-    forObs(6,12,14)(
-      mutateOffsets.withTitle("ABBA offset sequence")(setQ(-3, 3, 3, -3))
-    )
   }
 
   // #In ALL ACQ

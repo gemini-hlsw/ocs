@@ -4,6 +4,7 @@ Version : 2012 August 10, Marie L-B and Bryan M
 Version : 2013 October 10, AStephens, set well depth and offsets for >2.5 microns and central wavelength for imaging
 Version : 2014 December 11, BMiller, specific setting conditions from PI (change to add science conditions to tellurics)
 Version : 2017-Oct-10, astephens, change long-slit science offsets from +/-3 to -1/+5 and add re-acquisition observation
+Version : 2018-Feb-15, astephens, tweak long-slit offsets to avoid bad-pixel patch
 
 Observations identified by LibraryIDs indicated with {}.
 
@@ -19,11 +20,11 @@ INCLUDE  {16}, {17}, {18} - {21} (in this order) in a Target Group
         FOR {16}, {20} (acqs for standards) IF PIXEL SCALE = 0.05 \
           SET EXPOSURE TIME=15.0 in the first GNIRS iterator: Image of keyhole
 
-        FOR ALL OBS in Group :
+        FOR ALL OBS in Group :     
             SET FILTER FROM PI IN ALL GNIRS ITERATORS
                 The GNIRS filters are changing in the 12B OT (see
                 REL-444 in JIRA). Here is the new mapping:
- 		Y (1.03um) => Y-MK: 1.03um
+ 		Y (1.03um) => Y-MK: 1.03um 
                 X (1.10um) => order 6 (X)
                 J (1.25um) => J-MK: 1.25um
                 H (1.65um) => order 4 (H-MK)
@@ -51,18 +52,22 @@ INCLUDE {5}, {6}, {12}-{14} in a target-specific Scheduling Group
             SET PIXEL SCALE FROM PI
             SET FPU from PI
             SET DISPERSER FROM PI
-            SET CROSS-DISPERSED FROM PI
+            SET CROSS-DISPERSED FROM PI 
                 IF CROSS-DISPERSED == SXD OR CROSS-DISPERSED == LXD SET Central Wavelength (FILTER) == Cross-dispersed
-            SET DISPERSER FROM PI
+            SET DISPERSER FROM PI 
 
-# Change Offsets for non-cross-dispersed spec observations
-IF CROSS-DISPERSED == no AND PI Central Wavelength < 2.5um
-        SET Q-OFFSET to -1, 5, 5, -1 respectively IN ITERATOR CALLED 'ABBA offset pattern' for {12}      # Science
-        SET Q-OFFSET to -5, 1, 1, -5 respectively IN ITERATOR CALLED 'ABBA offset pattern' for {6}, {14} # Tellurics
+# Expand offsets for non-cross-dispersed spectroscopic observations
+# Short Camera bad-pixel patch at +5.25 < Q < +11.25 -> Use -2,+4 and -4,+2
+# Long Camera bad-pixel patch at  +1.75 < Q <  +3.75 -> Use -1,+5 for both sci and std
+IF CROSS-DISPERSED == No:
+   IF PI Central Wavelength < 2.5um:
+      SET Q-OFFSET to -2, 4, 4, -2 respectively IN ITERATOR CALLED 'ABBA offset pattern' for {12}          # Science
+      SET Q-OFFSET to -4, 2, 2, -4 respectively IN ITERATOR CALLED 'ABBA offset pattern' for {6}, {14}     # Tellurics
+   ELSE:
+      SET Q-OFFSET to -1, 5, 5, -1 respectively IN ITERATOR CALLED 'ABBA offset pattern' for {6},{12},{14} # Science & Tellurics
 
 IF PI Central Wavelength > 2.5um
     SET Well depth == Deep for {5}-{14},{22}
-    SET Q-OFFSET to -3, 3, 3, -3 respectively IN ITERATOR CALLED 'ABBA offset pattern' for {6},{12},{14} # Science & Tellurics
 
 # ACQ for science to target Scheduling Group
 IF TARGET H-MAGNITUDE < 7 INCLUDE {22}                   # ND filter
@@ -80,8 +85,8 @@ ELSE INCLUDE {7} - {11}, {22}, {23}                      # no H-magnitude provid
           SET CROSS-DISPERSED FROM PI
           SET FPU FROM PI IN STATIC COMPONENT AND ITERATORS \
                 EXCEPT WHERE FPU == acquisition #in 2nd iterator in ACQ.
-          IF PIXEL SCALE == 0.05"/pix :
-                SET IN FIRST ITERATOR CALLED 'GNIRS: Slit Image' Exposure Time = 15
+          IF PIXEL SCALE == 0.05"/pix : 
+                SET IN FIRST ITERATOR CALLED 'GNIRS: Slit Image' Exposure Time = 15 
                 IF CROSS-DISPERSED == LXD OR SXD IN ITERATORS SET DECKER = long camera x-disp \
                         EXCEPT WHERE FPU == acquisition
                 IF CROSS-DISPERSED == None SET DECKER IN ITERATORS = long camera long slit \
@@ -125,3 +130,4 @@ IF DISPERSER == 111 l/mm ADD NOTE "NOTE1: Calibrations for high spectral resolut
 IF CROSS-DISPERSED == SXD OR CROSS-DISPERSED == LXD:
           ADD NOTE "NOTE2: Bad pixels in XD mode" in target Scheduling Group
           ADD NOTE "NOTE3: Differential refraction and XD mode" in target Scheduling Group
+
