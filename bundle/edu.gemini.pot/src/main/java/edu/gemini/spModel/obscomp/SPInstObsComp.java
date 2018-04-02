@@ -400,4 +400,3 @@ public abstract class SPInstObsComp extends AbstractDataObject {
         setPosAngle(oldData.getPosAngle());
     }
 }
-

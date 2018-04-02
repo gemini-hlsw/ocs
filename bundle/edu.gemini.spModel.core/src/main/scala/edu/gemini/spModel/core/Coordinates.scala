@@ -26,6 +26,40 @@ final case class Coordinates(ra: RightAscension, dec: Declination) {
     (c.ra.toAngle - ra.toAngle, c.dec.toAngle - dec.toAngle)
 
   /**
+   * Offset coordinates given angular distance and direction from these coordinates.
+   *
+   * @param bearing angle clockwise from the north
+   * @param distance angular separation
+   *
+   * Source: http://www.movable-type.co.uk/scripts/latlong.html
+   *
+   * @return Coordinates at the given offset.
+   */
+  def angularOffset(bearing: Angle, distance: Angle): Coordinates = {
+    val  δ = distance.toRadians
+    val  θ = bearing.toRadians
+    val φ1 = this.dec.toAngle.toRadians
+    val λ1 = this.ra.toAngle.toRadians
+
+    val φ2 = asin(sin(φ1) * cos(δ) + cos(φ1) * sin(δ) * cos(θ))
+    val λ2 = λ1 + atan2(sin(θ) * sin(δ) * cos(φ1), cos(δ) - sin(φ1) * sin(φ2))
+
+    val ra  = RightAscension.fromAngle(Angle.fromRadians(λ2))
+
+    // Make sure the declination is in range.
+    val dec = {
+      val a0 = Angle.fromRadians(φ2).toDegrees
+      Declination.fromDegrees(a0).orElse {
+        val a1 = if (a0 > 180) 540 - a0
+        else     180 - a0
+        Declination.fromAngle(Angle.fromDegrees(a1))
+      }
+    }.get
+
+    Coordinates(ra, dec)
+  }
+
+  /**
    * Angular distance from `this` to `that`, always a positive angle in [0, 180].
    * Source: http://www.movable-type.co.uk/scripts/latlong.html
    */

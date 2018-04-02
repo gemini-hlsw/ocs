@@ -3,10 +3,8 @@ package edu.gemini.spModel.gemini.ghost
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.CloudCover
 import edu.gemini.spModel.target.SPTarget
-import edu.gemini.spModel.target.env.Asterism
+import edu.gemini.spModel.target.env.{Asterism, AsterismType}
 import java.time.Instant
-
-import edu.gemini.spModel.gemini.ghost.GhostAsterism.GhostStandardResTargets.SingleTarget
 
 import scalaz._
 import Scalaz._
@@ -33,19 +31,25 @@ object GhostAsterism {
     * Guide state can also be explicitly disabled, say, in a crowded field where
     * guide fibers are less effective.
     */
-  sealed trait GuideFiberState extends Product with Serializable
+  sealed abstract class GuideFiberState private (val name: String) extends Product with Serializable
 
   object GuideFiberState {
-    case object Enabled  extends GuideFiberState
-    case object Disabled extends GuideFiberState
+    case object Enabled  extends GuideFiberState("enabled")
+    case object Disabled extends GuideFiberState("disabled")
 
-    val enabled:  GuideFiberState  = Enabled
+    val enabled:  GuideFiberState = Enabled
     val disabled: GuideFiberState = Disabled
 
     val All = NonEmptyList(enabled, disabled)
 
     implicit val EqualGuideFiberState: Equal[GuideFiberState] =
       Equal.equalA[GuideFiberState]
+
+    def fromString(s: String): Option[GuideFiberState]
+      = All.findLeft(_.name == s)
+
+    def unsafeFromString(s: String): GuideFiberState =
+      fromString(s).getOrElse(sys.error(s"Unknown guide fiber state: $s"))
   }
 
 
@@ -66,6 +70,12 @@ object GhostAsterism {
   }
 
   object GhostTarget {
+    val empty: GhostTarget = GhostTarget(new SPTarget, None)
+
+    val target: GhostTarget @> SPTarget =
+      Lens.lensu((a, b) => a.copy(spTarget = b), _.spTarget)
+    val explicitGuideFiberState: GhostTarget @> Option[GuideFiberState] =
+      Lens.lensu((a,b) => a.copy(explicitGuideFiberState = b), _.explicitGuideFiberState)
 
     /** The magnitude at which guide state is disabled by default at standard
       * resolution.
@@ -137,11 +147,20 @@ object GhostAsterism {
 
     override def copyWithClonedTargets: Asterism =
       StandardResolution(targets.cloneTargets, base)
+
+    override def asterismType: AsterismType = AsterismType.GhostStandardResolution
   }
 
   object StandardResolution {
     def guideFiberState(e: Either[Coordinates, GhostTarget], cc: CloudCover): GuideFiberState =
       e.rightMap(t => GhostTarget.standardResGuideFiberState(t, cc)).right.getOrElse(GuideFiberState.Disabled)
+
+    val empty: StandardResolution = StandardResolution(GhostStandardResTargets.emptySingleTarget, None)
+
+    val Targets: StandardResolution @> GhostStandardResTargets =
+      Lens.lensu((a,b) => a.copy(targets = b), _.targets)
+    val Base: StandardResolution @> Option[Coordinates] =
+      Lens.lensu((a,b) => a.copy(base = b), _.base)
   }
 
   /** GHOST standard resolution asterism types.
@@ -191,6 +210,29 @@ object GhostAsterism {
     final case class DualTarget(target1: GhostTarget, target2: GhostTarget) extends GhostStandardResTargets
     final case class TargetPlusSky(target: GhostTarget, sky: Coordinates) extends GhostStandardResTargets
     final case class SkyPlusTarget(sky: Coordinates, target: GhostTarget) extends GhostStandardResTargets
+
+    val emptySingleTarget:  SingleTarget  = SingleTarget(GhostTarget.empty)
+    val emptyDualTarget:    DualTarget    = DualTarget(GhostTarget.empty, GhostTarget.empty)
+    val emptyTargetPlusSky: TargetPlusSky = TargetPlusSky(GhostTarget.empty, Coordinates.zero)
+    val emptySkyPlusTarget: SkyPlusTarget = SkyPlusTarget(Coordinates.zero, GhostTarget.empty)
+
+    val SingleTargetIFU1: SingleTarget @> GhostTarget =
+      Lens.lensu((a,b) => a.copy(target = b), _.target)
+
+    val DualTargetIFU1: DualTarget @> GhostTarget =
+      Lens.lensu((a,b) => a.copy(target1 = b), _.target1)
+    val DualTargetIFU2: DualTarget @> GhostTarget =
+      Lens.lensu((a,b) => a.copy(target2 = b), _.target2)
+
+    val TargetPlusSkyIFU1: TargetPlusSky @> GhostTarget =
+      Lens.lensu((a,b) => a.copy(target = b), _.target)
+    val TargetPlusSkyIFU2: TargetPlusSky @> Coordinates =
+      Lens.lensu((a,b) => a.copy(sky = b), _.sky)
+
+    val SkyPlusTargetIFU1: SkyPlusTarget @> Coordinates =
+      Lens.lensu((a,b) => a.copy(sky = b), _.sky)
+    val SkyPlusTargetIFU2: SkyPlusTarget @> GhostTarget =
+      Lens.lensu((a,b) => a.copy(target = b), _.target)
   }
 
 
@@ -226,16 +268,28 @@ object GhostAsterism {
 
     override def copyWithClonedTargets: Asterism =
       copy(ghostTarget = ghostTarget.copyWithClonedTarget)
+
+    override def asterismType: AsterismType = AsterismType.GhostHighResolution
+  }
+
+  object HighResolution {
+    val empty: HighResolution = HighResolution(GhostTarget.empty, None, None)
+
+    val IFU1: HighResolution @> GhostTarget =
+      Lens.lensu((a,b) => a.copy(ghostTarget = b), _.ghostTarget)
+    val IFU2: HighResolution @> Option[Coordinates] =
+      Lens.lensu((a,b) => a.copy(sky = b), _.sky)
+    val Base: HighResolution @> Option[Coordinates] =
+      Lens.lensu((a,b) => a.copy(base = b), _.base)
   }
 
   // Convenience create methods for Java since trying to access nested objects and case
   // classes results cannot be resolved.
-  def createEmptyStandardResolutionAsterism: StandardResolution = {
-    val tgts: SingleTarget = SingleTarget(GhostTarget(new SPTarget(), None))
-    StandardResolution(tgts, None)
+  def createEmptyStandardResolutionAsterism: Asterism = {
+    StandardResolution.empty.copyWithClonedTargets
   }
 
-  def createEmptyHighResolutionAsterism: HighResolution = {
-    HighResolution(GhostTarget(new SPTarget(), None), None, None)
+  def createEmptyHighResolutionAsterism: Asterism = {
+    HighResolution.empty.copyWithClonedTargets
   }
 }
