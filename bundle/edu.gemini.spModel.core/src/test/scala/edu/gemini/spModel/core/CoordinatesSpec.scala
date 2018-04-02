@@ -55,6 +55,16 @@ object CoordinatesSpec extends Specification with ScalaCheck with Arbitraries wi
 
   }
 
+  "Coordinates Angular Offset" should {
+
+    "result in an angular separation equal to distance, regardless of bearing" !
+      forAll { (c: Coordinates, bearing: Angle, distance: Angle) =>
+        val newCoordinates = c.angularOffset(bearing, distance)
+        (c.angularDistance(newCoordinates) ~= distance) || (newCoordinates.angularDistance(c) + distance ~= Angle.zero)
+      }
+
+  }
+
   "Coordinates Angular Separation" should {
 
     "be in [0, 180]" !

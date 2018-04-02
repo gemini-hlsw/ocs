@@ -50,6 +50,16 @@ trait Arbitraries {
       } yield Coordinates(ra, dec)
     }
 
+  // A way of picking coordinates within an offset distance in arcseconds from a given coordinate.
+  def genCoordsWithinDistance(c: Coordinates, lower: Double, upper: Double): Gen[Coordinates] =
+    for {
+      dRaSgn <- oneOf(-1.0, 1.0)
+      dDecSgn <- oneOf(-1.0, 1.0)
+      dRa <- choose(lower, upper).map(a => Angle.fromArcsecs(dRaSgn * a))
+      dDec <- choose(lower, upper).map(a => Angle.fromArcsecs(dDecSgn * a))
+    } yield c.offset(dRa, dDec)
+
+
   implicit val arbMagnitudeBand: Arbitrary[MagnitudeBand] =
     Arbitrary(oneOf(MagnitudeBand.all))
 

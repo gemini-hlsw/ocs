@@ -51,6 +51,7 @@ object AlmostEqual {
         (a - b).abs <= 1e-5
     }
 
+  // Simply doing by((_:Angle).toDegrees) doesn't consider 359.999999999 equivalent almost equal to 0.0.
   implicit val AngleAlmostEqual: AlmostEqual[Angle] = new AlmostEqual[Angle] {
     override def almostEqual(a: Angle, b: Angle): Boolean = {
       (a.toDegrees ~= b.toDegrees) || (a.toDegrees + b.toDegrees - 360.0 ~= Angle.zero.toDegrees)
