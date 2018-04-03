@@ -4,7 +4,7 @@ import edu.gemini.itc.shared.ConfigExtractor
 import edu.gemini.spModel.config2.{Config, ConfigSequence, ItemKey}
 import edu.gemini.spModel.gemini.acqcam.InstAcqCam
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
-import edu.gemini.spModel.gemini.gmos.{GmosNorthType, GmosSouthType, InstGmosNorth, InstGmosSouth}
+import edu.gemini.spModel.gemini.gmos.{FullExposureTime => GmosExposureTime, GmosNorthType, GmosSouthType, InstGmosNorth, InstGmosSouth}
 import edu.gemini.spModel.gemini.gnirs.{GNIRSParams, GNIRSConstants}
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi
 import edu.gemini.spModel.gemini.michelle.{InstMichelle, MichelleParams}
@@ -37,9 +37,13 @@ case class ItcUniqueConfig(count: Int, labels: String, configs: NonEmptyList[Con
   /** TReCS and Michelle have an optional total time on source. */
   private val totalTime = Option(config.getItemValue(INST_TIME_ON_SRC_KEY)).map(_.asInstanceOf[Double])
 
-  /** Instruments other than TReCS and Michelle have a defined exposure time per image. */
-  private val singleTime = Option(config.getItemValue(INST_EXP_TIME_KEY)).map(_.asInstanceOf[Double])
-
+  /** Instruments other than TReCS and Michelle have a defined exposure time per
+    * image.  In the case of GMOS, this may include nod and shuffle steps so
+    * full exposure time is preferred.
+    */
+  private val singleTime: Option[Double] =
+    if (ItcUniqueConfig.isGmos(config)) Some(GmosExposureTime.asDoubleSecs(config))
+    else Option(config.getItemValue(INST_EXP_TIME_KEY)).map(_.asInstanceOf[Double])
 }
 
 /**
@@ -88,6 +92,18 @@ object ItcUniqueConfig {
     case InstNIRI.INSTRUMENT_NAME_PROP      => c.getItemValue(INST_DISPERSER_KEY).equals(Niri.Disperser.NONE)
     case InstTReCS.INSTRUMENT_NAME_PROP     => c.getItemValue(INST_DISPERSER_KEY).equals(TReCSParams.Disperser.MIRROR)
   }
+
+  private def instrumentName(c: Config): Option[String] =
+    Option(c.getItemValue(INST_INSTRUMENT_KEY)).collect {
+      case s: String => s
+    }
+
+  private def isGmos(c: Config): Boolean =
+    instrumentName(c) match {
+      case Some(InstGmosNorth.INSTRUMENT_NAME_PROP) => true
+      case Some(InstGmosSouth.INSTRUMENT_NAME_PROP) => true
+      case _                                        => false
+    }
 
   // Gets all "unique configs" (i.e. configs that are relevant for ITC) from the given sequence. The predicate
   // defines which steps have to be taken into account, i.e. spectroscopy vs imaging and no calibrations.
