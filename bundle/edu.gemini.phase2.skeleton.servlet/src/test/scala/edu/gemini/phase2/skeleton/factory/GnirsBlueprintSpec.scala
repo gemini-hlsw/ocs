@@ -11,6 +11,26 @@ import org.specs2.ScalaCheck
 import org.specs2.mutable.SpecificationLike
 
 class GnirsBlueprintSpec extends TemplateSpec("GNIRS_BP.xml") with SpecificationLike with ScalaCheck {
+  import GnirsBlueprintSpec._
+
+  // This is just a sanity check to ensure that expansion works and that referenced library
+  // observations exist. It doesn't test the specifics of the blueprint logic.
+
+  "GNIRS Sanity Check" >> {
+
+    "Imaging Blueprint Expansion" ! forAll { (bp: GnirsBlueprintImaging) =>
+      expand(proposal(bp, List(1), MagnitudeBand.H)) { (p, sp) => true }
+    }
+
+    "Imaging Spectroscopy Expansion" ! forAll { (bp: GnirsBlueprintSpectroscopy) =>
+      expand(proposal(bp, List(6.5, 10, 21, 25), MagnitudeBand.H)) { (p, sp) => true }
+    }
+
+  }
+
+}
+
+object GnirsBlueprintSpec {
 
   implicit val ArbitraryAltair: Arbitrary[Altair] =
     Arbitrary(Gen.oneOf(List(
@@ -61,20 +81,5 @@ class GnirsBlueprintSpec extends TemplateSpec("GNIRS_BP.xml") with Specification
         w <- arbitrary[GnirsCentralWavelength]
       } yield GnirsBlueprintSpectroscopy(a, p, d, c, f ,w)
     }
-
-  // This is just a sanity check to ensure that expansion works and that referenced library
-  // observations exist. It doesn't test the specifics of the blueprint logic.
-
-  "GNIRS Sanity Check" >> {
-
-    "Imaging Blueprint Expansion" ! forAll { (bp: GnirsBlueprintImaging) =>
-      expand(proposal(bp, List(1), MagnitudeBand.H)) { (p, sp) => true }
-    }
-
-    "Imaging Spectroscopy Expansion" ! forAll { (bp: GnirsBlueprintSpectroscopy) =>
-      expand(proposal(bp, List(6.5, 10, 21, 25), MagnitudeBand.H)) { (p, sp) => true }
-    }
-
-  }
 
 }

@@ -2,7 +2,7 @@
 <!DOCTYPE document PUBLIC "-//Gemini Observatory//DTD for Storage of P1 and P2 Documents//EN" "http://ftp.gemini.edu/Support/xml/dtds/SpXML2.dtd">
 
 <document>
-  <container kind="program" type="Program" version="2017B-1" subtype="basic" key="da89e5f9-49f6-4b31-a85a-62b4d7e84990" name="GNIRS-BP">
+  <container kind="program" type="Program" version="2018A-1" subtype="basic" key="da89e5f9-49f6-4b31-a85a-62b4d7e84990" name="GNIRS-BP">
     <paramset name="Science Program" kind="dataObj">
       <param name="title" value="GNIRS PHASE I/II MAPPING BPS"/>
       <param name="programMode" value="QUEUE"/>
@@ -758,43 +758,46 @@ The semicircular portion of the field is below the rectangle. The template scien
         <paramset name="Note" kind="dataObj">
           <param name="title" value="ACQ Strategies and Exposure Times "/>
           <param name="NoteText">
-            <value>EVERY GNIRS OBSERVATION MUST HAVE AN ASSOCIATED ACQUISITION OBSERVATION, defined by the PI during the phase II process. The acquisition process is described on this web page: www.gemini.edu/sciops/instruments/gnirs/spectroscopy/acquisition.
+            <value>
+EVERY GNIRS OBSERVATION MUST HAVE AN ASSOCIATED ACQUISITION OBSERVATION defined by the PI during the phase II process.
+The acquisition process is described at: www.gemini.edu/sciops/instruments/gnirs/spectroscopy/acquisition.
+This page also provides tables of suggested exposure times to AVOID SATURATION which will cause severe persistance that will affect subsequent observations.
 
-This page also shows a DETAILED list of suggested exp times to avoid saturation. Please note that saturation causes severe persistance that will affect subsequent exposure.
+Briefly, we distinguish four main types of acquisition method, depending on the brightness of the target (in Vega mags):
 
-Briefly, we distinguish four main types of acquisition method, depending on the brightness of the target:
+1) Very bright objects (H &lt; 11.5):  Narrow-band filter, no sky subtraction (for H &lt; 7, the ND100X filter can be used to avoid saturation, but see the warning about filter shifts here: www.gemini.edu/sciops/instruments/gnirs/spectroscopy/acquisition
 
-1) Very bright objects (H &lt; 11.5): narrowband filter, no sky subtraction (for H &lt; 7, the ND100X filter can be used to avoid saturation, but see the warning about filter shifts on this web page: www.gemini.edu/sciops/instruments/gnirs/spectroscopy/acquisition)
+2) Bright objects (11.5 &lt; H &lt; 16): Broad-band filter, no sky subtraction
 
-2) Bright objects (11.5 &lt; H &lt; 16): broadband filter, no sky subtraction
+3) Faint objects (16 &lt; H &lt;20): Broad-band filter, sky subtraction
 
-3) Faint objects (16 &lt; H &lt;20): broadband filter, sky subtraction
+4) Very faint objects (H &gt; 20): Blind offset from a nearby reference star
 
-4) Very faint objects (H &gt; 20): blind offset from nearby reference star
 
-The OT uses the target brightness from the PIT (if any) to choose the appropriate acquisition observation for each science observation (standard stars are assumed to use the "very bright object" type). Please double-check that this is indeed the most suitable option; for example, the PIT magnitudes for extended objects may be very different from what GNIRS sees. Examples of all acquisition types can be cut-and-pasted from the GNIRS OT library.
+The OT acquisition templates use the target brightness from the PIT (if any) to choose the appropriate acquisition observation for each science observation (standard stars are assumed to use the "very bright object" type). Please double-check that this is indeed the most suitable option; for example, the PIT magnitudes for extended objects may be very different from what GNIRS sees.
 
 The OT templates are generated with the appropriate instrument configuration. The criteria are listed below, in case changes are made by the PI. Target-specific changes may need to be made as follows:
 
-1) in the images of the field, set the exposure time and coadds to for your particular brightness of science target (see www.gemini.edu/sciops/instruments/gnirs/longslit-amp-xd-spectroscopy/acquisition for recommendations).  If your target is extended, double, or in a crowded field, you may need to change the size of the [faint target] sky offset from its default 2". Acquisitions normally use the H or H2 filter, but others are possible; see the above web page.
+1) In the images of the field, set the exposure time and coadds for the brightness of science target (see www.gemini.edu/sciops/instruments/gnirs/spectroscopy/acquisition for recommendations).  If the target is extended, double, or in a crowded field, you may need to change the size or location of the sky offset from its default 2". Acquisitions normally use the H or H2 filter, but others are possible; see the above web page.
 
-2) make sure that blind offset acquisitions contain sky offsets if necessary (as in the "faint target" example)
+2) Make sure that blind offset acquisitions contain sky offsets if necessary (as in the "faint target" example)
 
-3) if applicable, add a note for the observer with any special acquisition instructions. Don't forget to upload a finding chart if necessary.
+3) If applicable, add a note for the observer with any special acquisition instructions. Don't forget to upload a finding chart if necessary.
 
 
 GNIRS configuration:
 
 1) In the GNIRS component:
-   - all fields except the read mode, Texp and coadds should match the spectroscopy observation
+   - all fields except the read mode, exposure time, and coadds should match the spectroscopy observation
    - "deep" well depth should be used for thermal IR acquisitions in the PAH filter
    - all other fields are either set in the "Sequence" or not relevant for acquisition imaging 
 
 2) In the Sequence:
    - in the initial slit image, the FPU and decker should match the spectroscopy configuration. The filter should only be changed if you intend to acquire the target in a filter other than H or H2.
-  - in the final slit image, the FPU and decker should be the same as in the initial slit image, and the exposure time, coadds and sky offset as for the images of the target field
-  - in all steps, the read mode should be appropriate for the exposure time (see www.gemini.edu/sciops/instruments/gnirs/longslit-amp-xd-spectroscopy/acquisition)
-  - if this acquisition is intended to be used for a baseline telluric standard, the observe class should be "Acquisition Calibration"</value>
+  - in the final slit image, the FPU and decker should be the same as in the initial slit image, and the exposure time, coadds, and sky offset as for the images of the target field
+  - in all steps, the read mode should be appropriate for the exposure time (see http://www.gemini.edu/sciops/instruments/gnirs/spectroscopy/acquisition)
+  - if the acquisition is intended to be used for a Telluric standard, the observe class should be "Acquisition Calibration"
+</value>
           </param>
         </paramset>
       </container>
@@ -802,8 +805,9 @@ GNIRS configuration:
         <paramset name="Note" kind="dataObj">
           <param name="title" value="NOTE1: Exp times for Telluric standards"/>
           <param name="NoteText">
-            <value>Please check the exp time for the tellurics standards using the ITC or the following webpage: http://www.gemini.edu/std-star-exposure-times.
-Persistance is very severe with the GNIRS detector. Moreover, persistance only subsides with time (~ 20 minutes) so subsequent observations would be affected. </value>
+            <value>
+Please check the exposure time for the Telluric standards using the ITC (or http://www.gemini.edu/std-star-exposure-times) to AVOID SATURATION.  Persistance is very severe with the GNIRS detector and may last ~20 minutes and impact subsequent observations.
+</value>
           </param>
         </paramset>
       </container>
@@ -826,7 +830,7 @@ Arc spectra are not taken in the L and M bands.
           <param name="title" value="NOTE3: Bad pixels in XD mode"/>
           <param name="NoteText">
             <value>
-The GNIRS detector contains a few small regions of bad pixels (see this web page: www.gemini.edu/sciops/instruments/nirs/N20100812S0080.jpg). The bad pixels lie between the XD orders in the most heavily-used, low-resolution XD modes (0.05"/pix + 10 l/mm; 0.15"/pix + 32 l/mm). However, the exact placement of the orders in the higher-resolution modes depends on the grating central wavelength. If the presence of these bad pixels could affect your science in these modes, please advise your contact scientist as you prepare your phase II program. The CS will be able to take arc spectra that show exactly where the bad pixels will lie, and help you adjust your central wavelength to avoid them.</value>
+The GNIRS detector contains a few small regions of bad pixels (see www.gemini.edu/sciops/instruments/nirs/N20100812S0080.jpg). The bad pixels lie between the XD orders in the most heavily-used, low-resolution XD modes (0.05"/pix + 10 l/mm; 0.15"/pix + 32 l/mm). However, the exact placement of the orders in the higher-resolution modes depends on the grating central wavelength. If the presence of these bad pixels could affect your science in these modes, please advise your contact scientist as you prepare your phase II program. The CS will be able to take arc spectra that show exactly where the bad pixels will lie, and help you adjust your central wavelength to avoid them.</value>
           </param>
         </paramset>
       </container>
@@ -835,8 +839,7 @@ The GNIRS detector contains a few small regions of bad pixels (see this web page
           <param name="title" value="NOTE4: Differential refraction and XD mode"/>
           <param name="NoteText">
             <value>
-Because of the large wavelength coverage of the XD modes, differential refraction can cause light to be lost from the slit in certain circumstances. If you are interested in the whole 0.9 - 2.5 um wavelength range and are using a very narrow slit and/or expect your target to be observed at high airmass, you may wish to consider adding a note to the observer to observe the target at the mean parallactic angle at the time of the observations.
-
+Because of the large wavelength coverage of the XD modes, differential refraction can cause light to be lost from the slit in certain circumstances. If you are interested in the whole 0.9 - 2.5 um wavelength range and are using a very narrow slit and/or expect your target to be observed at high airmass, you may wish to consider observing at the mean parallactic angle: https://www.gemini.edu/sciops/instruments/gnirs/observation-preparation/ot-details
 </value>
           </param>
         </paramset>
@@ -878,7 +881,8 @@ Because of the large wavelength coverage of the XD modes, differential refractio
           <paramset name="Note" kind="dataObj">
             <param name="title" value="Filter selection"/>
             <param name="NoteText">
-              <value>The initial slit image is taken in the H band filter as exposure times in the narrowband H2 filter used to image bright targets are prohibitively long for slit imaging. The images of the target field and of the target through the slit are taken in the H2 filter.</value>
+              <value>
+The initial slit image is taken in the H band filter as exposure times in the narrowband H2 filter used to image bright targets are prohibitively long for slit imaging. The images of the target field and of the target through the slit are taken in the H2 filter.</value>
             </param>
           </paramset>
         </container>
@@ -1121,7 +1125,8 @@ Because of the large wavelength coverage of the XD modes, differential refractio
           <paramset name="Note" kind="dataObj">
             <param name="title" value="Filter selection"/>
             <param name="NoteText">
-              <value>The initial slit image is taken in the H band filter as exposure times in the narrowband H2 filter used to image bright targets are prohibitively long for slit imaging. The images of the target field and of the target through the slit are taken in the H2 filter combined wth the ND100X filter. </value>
+              <value>
+The initial slit image is taken in the H band filter as exposure times in the narrowband H2 filter used to image bright targets are prohibitively long for slit imaging. The images of the target field and of the target through the slit are taken in the H2 filter combined wth the ND100X filter. </value>
             </param>
           </paramset>
         </container>
@@ -1271,7 +1276,8 @@ Because of the large wavelength coverage of the XD modes, differential refractio
           <paramset name="Note" kind="dataObj">
             <param name="title" value="Filter selection"/>
             <param name="NoteText">
-              <value>The initial slit image is taken in the H band filter as exposure times in the narrowband H2 filter used to image bright targets are prohibitively long for slit imaging. The images of the target field and of the target through the slit are taken in the H2 filter. </value>
+              <value>
+The initial slit image is taken in the H band filter as exposure times in the narrowband H2 filter used to image bright targets are prohibitively long for slit imaging. The images of the target field and of the target through the slit are taken in the H2 filter. </value>
             </param>
           </paramset>
         </container>
@@ -1739,11 +1745,11 @@ Because of the large wavelength coverage of the XD modes, differential refractio
             <param name="title" value="Description"/>
             <param name="NoteText">
               <value>
-This observation must contain a "User"  (reference) star which will be placed in the slit, and then the telescope offset to the faint science target. The reference star must be able to use the same guide star as the science target and both must have accurate coordinates. See this web page for more details: 
+This observation must contain a "Blind-offset" (reference) star which will be placed in the slit, and then the telescope will be offset to the faint science target. The reference star must be able to use the same guide star as the science target and both must have accurate coordinates. See this web page for more details: 
 
 www.gemini.edu/sciops/telescopes-and-sites/acquisition-hardware-and-techniques/acquisition-techniques
 
-In this example the reference star is H=12.9 mag, so the rest of the acquisition is set up following the "Bright target" acquisition template. Note that the target component in the associated spectroscopy observation must be the same as that in the acquisition observation (i.e., must include the reference star). See the Blind Offset group in the Complete Examples section of this library for an example.</value>
+Note that the target component in the associated spectroscopy observation must be the same as that in the acquisition observation (i.e., must also include the Blind-offset reference star). See the Blind Offset group in the Complete Examples section of the GNIRS Library for an example.</value>
             </param>
           </paramset>
         </container>
@@ -1868,7 +1874,10 @@ In this example the reference star is H=12.9 mag, so the rest of the acquisition
         <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="97367ff0-8238-45a9-b33b-87e14e804ebe" name="Note">
           <paramset name="Note" kind="dataObj">
             <param name="title" value="Possible uses"/>
-            <param name="NoteText" value="This template might be used for placing a long slit along the long axis of a galaxy or across a large planet."/>
+            <param name="NoteText">
+              <value>
+This template might be used for placing a long slit along the long axis of a galaxy or across a large planet.</value>
+            </param>
           </paramset>
         </container>
         <container kind="obsComp" type="Instrument" version="2017A-1" subtype="GNIRS" key="64a8de9f-63f0-4385-bf85-177c0551a29b" name="GNIRS">
@@ -2076,7 +2085,7 @@ In this example the reference star is H=12.9 mag, so the rest of the acquisition
             <param name="title" value="Description"/>
             <param name="NoteText">
               <value>
-Include this observation for observations longer than 1 hour.
+Include this re-acquisition for observations longer than 1 hour.
 Update the exposure time to match the acquisition observation.
 </value>
             </param>
@@ -2298,7 +2307,8 @@ Update the exposure time to match the acquisition observation.
           <paramset name="Note" kind="dataObj">
             <param name="title" value="Filter selection"/>
             <param name="NoteText">
-              <value>The initial slit image is taken in the H band filter as exposure times in the narrowband H2 filter used to image bright targets are prohibitively long for slit imaging. The images of the target field and of the target through the slit are taken in the H2 filter.</value>
+              <value>
+The initial slit image is taken in the H band filter as exposure times in the narrowband H2 filter used to image bright targets are prohibitively long for slit imaging. The images of the target field and of the target through the slit are taken in the H2 filter.</value>
             </param>
           </paramset>
         </container>
@@ -2529,7 +2539,7 @@ Update the exposure time to match the acquisition observation.
         <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="5b8de81b-075f-4f3e-a99b-6c629952cff5" name="Targets">
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
-              <paramset name="base">
+              <paramset name="asterism">
                 <paramset name="target">
                   <param name="name" value="Pinhole"/>
                   <param name="redshift" value="0.0"/>
@@ -2540,6 +2550,7 @@ Update the exposure time to match the acquisition observation.
                   </paramset>
                   <param name="tag" value="sidereal"/>
                 </paramset>
+                <param name="tag" value="single"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="primary" value="0"/>
@@ -2577,9 +2588,8 @@ Update the exposure time to match the acquisition observation.
             <param name="title" value="Daytime pinhole flats for tracing spectra"/>
             <param name="NoteText">
               <value>
-Pinhole flats are used for tracing the XD spectral orders. As with the flats and arcs embedded in the science observation, the GNIRS configuration of the pinhole flats should match that of the science observation, with the exception that the FPU should be pinhole 0.3 (for the 0.15"/pix camera) or pinhole 0.1 (for the 0.05"/pix camera). Template observations for most GNIRS XD configurations are available in the "CALIBRATION TEMPLATES" section at the bottom of this library, and can be cut-and-pasted into your program.
-
-REM 20110126</value>
+Pinhole flats are used for tracing the XD spectral orders. As with the flats and arcs embedded in the science observation, the GNIRS configuration of the pinhole flats should match that of the science observation, with the exception that the FPU should be pinhole 0.3 for the 0.15"/pix camera or pinhole 0.1 for the 0.05"/pix camera.
+</value>
             </param>
           </paramset>
         </container>
@@ -2623,6 +2633,7 @@ REM 20110126</value>
       <param name="key" value="ff32b9a0-114e-4293-82a1-bc0bb20191b3"/>
       <param name="008f7231-3a2a-4577-987b-ed4bbd753bf6" value="1"/>
       <param name="17e34f93-c4c4-4655-ad18-8bc27628d969" value="3"/>
+      <param name="5431b843-3a5e-48c8-a5b0-c4c4d09628af" value="15"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="01783cd3-8805-440c-8dd9-85eabc6266da"/>
@@ -2635,6 +2646,7 @@ REM 20110126</value>
     <paramset name="node">
       <param name="key" value="6a596619-3d7b-4344-8541-8bb150eca085"/>
       <param name="008f7231-3a2a-4577-987b-ed4bbd753bf6" value="1"/>
+      <param name="5431b843-3a5e-48c8-a5b0-c4c4d09628af" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="45c13d15-5e8e-4c18-be8a-bd3061c26c5e"/>
@@ -2699,11 +2711,13 @@ REM 20110126</value>
     <paramset name="node">
       <param name="key" value="0f599844-7394-4803-bf5c-572d2b9c153b"/>
       <param name="008f7231-3a2a-4577-987b-ed4bbd753bf6" value="1"/>
+      <param name="5431b843-3a5e-48c8-a5b0-c4c4d09628af" value="64"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="f5cb1729-5eb6-4869-99b5-4e6100c4f6f5"/>
       <param name="008f7231-3a2a-4577-987b-ed4bbd753bf6" value="1"/>
       <param name="17e34f93-c4c4-4655-ad18-8bc27628d969" value="3"/>
+      <param name="5431b843-3a5e-48c8-a5b0-c4c4d09628af" value="56"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="db62afde-1990-45b1-bdba-ffcdcfbb28d6"/>
@@ -2853,6 +2867,7 @@ REM 20110126</value>
     <paramset name="node">
       <param name="key" value="15847670-7653-4725-8a3f-f8f5d625591b"/>
       <param name="008f7231-3a2a-4577-987b-ed4bbd753bf6" value="1"/>
+      <param name="5431b843-3a5e-48c8-a5b0-c4c4d09628af" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="9f2555bb-3e50-4960-b55b-6df88414b35e"/>
@@ -3010,6 +3025,7 @@ REM 20110126</value>
     <paramset name="node">
       <param name="key" value="c081d7a1-0bae-42f9-887e-169496cfd7ae"/>
       <param name="008f7231-3a2a-4577-987b-ed4bbd753bf6" value="1"/>
+      <param name="5431b843-3a5e-48c8-a5b0-c4c4d09628af" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="c453c676-2c87-4b0f-92a0-e969ec579623"/>
@@ -3086,6 +3102,7 @@ REM 20110126</value>
     <paramset name="node">
       <param name="key" value="97367ff0-8238-45a9-b33b-87e14e804ebe"/>
       <param name="008f7231-3a2a-4577-987b-ed4bbd753bf6" value="1"/>
+      <param name="5431b843-3a5e-48c8-a5b0-c4c4d09628af" value="3"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="ee877c49-baaa-41d6-998a-574d6c2bca3a"/>
@@ -3235,6 +3252,7 @@ REM 20110126</value>
     <paramset name="node">
       <param name="key" value="a253d39d-7af3-4129-a32b-a12e9ba4339b"/>
       <param name="17e34f93-c4c4-4655-ad18-8bc27628d969" value="416"/>
+      <param name="5431b843-3a5e-48c8-a5b0-c4c4d09628af" value="214"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="23c25148-98b9-4801-b4ad-280edc628c17"/>
@@ -3277,6 +3295,7 @@ REM 20110126</value>
     <paramset name="node">
       <param name="key" value="ae4043f0-d730-4f98-9b4e-e703e8cbd84d"/>
       <param name="008f7231-3a2a-4577-987b-ed4bbd753bf6" value="1"/>
+      <param name="5431b843-3a5e-48c8-a5b0-c4c4d09628af" value="7"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="2ed0f6d8-d9c3-437d-bdf5-0cb2cf44e9f1"/>
@@ -3321,6 +3340,7 @@ REM 20110126</value>
     <paramset name="node">
       <param name="key" value="b4aedd7a-7944-4207-807d-63374f0682ab"/>
       <param name="008f7231-3a2a-4577-987b-ed4bbd753bf6" value="1"/>
+      <param name="5431b843-3a5e-48c8-a5b0-c4c4d09628af" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="3348e43e-79fc-42b6-bdc3-314babb50816"/>
@@ -3477,6 +3497,7 @@ REM 20110126</value>
     <paramset name="node">
       <param name="key" value="b2ab6d9d-dda0-4fda-9095-ff2c3771cccb"/>
       <param name="c720bb94-d12b-4dd1-ac41-b8e55e2ea093" value="332"/>
+      <param name="5431b843-3a5e-48c8-a5b0-c4c4d09628af" value="15"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="40adad59-676f-45b2-8c92-41d62bcbcd25"/>
@@ -3693,6 +3714,7 @@ REM 20110126</value>
       <param name="008f7231-3a2a-4577-987b-ed4bbd753bf6" value="1"/>
       <param name="17e34f93-c4c4-4655-ad18-8bc27628d969" value="252"/>
       <param name="c720bb94-d12b-4dd1-ac41-b8e55e2ea093" value="18"/>
+      <param name="5431b843-3a5e-48c8-a5b0-c4c4d09628af" value="752"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="fa8faa0c-24aa-4f13-aefd-017748674fa2"/>
