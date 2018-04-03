@@ -20,48 +20,32 @@ import Scalaz._
 object FullExposureTime {
 
   private object keys {
-    val StepCount:        ItemKey = new ItemKey(s"$INSTRUMENT_CONFIG_NAME:$NS_STEP_COUNT_PROP_NAME")
-    val CycleCount:       ItemKey = new ItemKey(s"$INSTRUMENT_CONFIG_NAME:${NUM_NS_CYCLES_PROP.getName}")
-    val UseNs:            ItemKey = new ItemKey(s"$INSTRUMENT_CONFIG_NAME:${USE_NS_PROP.getName}")
-    val ExposureTime:     ItemKey = new ItemKey(s"$INSTRUMENT_CONFIG_NAME:$EXPOSURE_TIME_PROP")
-    val ObsType:          ItemKey = OBS_TYPE_ITEM.key
+    val StepCount:    ItemKey = new ItemKey(s"$INSTRUMENT_CONFIG_NAME:$NS_STEP_COUNT_PROP_NAME")
+    val CycleCount:   ItemKey = new ItemKey(s"$INSTRUMENT_CONFIG_NAME:${NUM_NS_CYCLES_PROP.getName}")
+    val UseNs:        ItemKey = new ItemKey(s"$INSTRUMENT_CONFIG_NAME:${USE_NS_PROP.getName}")
+    val ExposureTime: ItemKey = new ItemKey(s"$INSTRUMENT_CONFIG_NAME:$EXPOSURE_TIME_PROP")
+    val ObsType:      ItemKey = OBS_TYPE_ITEM.key
   }
 
   private implicit class ConfigOps(c: Config) {
+    import edu.gemini.spModel.config2.ConfigSyntax._
 
     import keys._
 
-    def value(k: ItemKey): Option[Object] =
-      Option(c.getItemValue(k))
-
     def useNs: Boolean =
-     value(UseNs).map {
-       case b: java.lang.Boolean => b.booleanValue
-       case _                    => false
-     }.getOrElse(false)
+     c.unsafeJavaBoolean(UseNs)
 
     def isNsObsType: Boolean =
-      value(ObsType).map { o =>
-        InstGmosCommon.isNodAndShuffleableObsType(o.toString)
-      }.getOrElse(false)
-
-    def count(k: ItemKey): Int =
-      value(k).map {
-        case i: java.lang.Integer => i.intValue
-        case _                    => 0
-      }.filter(_ >= 0).getOrElse(0)
+      InstGmosCommon.isNodAndShuffleableObsType(c.unsafeExtract[String](ObsType))
 
     def nsStepCount: Int =
-      count(StepCount)
+      c.unsafeJavaInt(StepCount)
 
     def nsCycleCount: Int =
-      count(CycleCount)
+      c.unsafeJavaInt(CycleCount)
 
     def exposureTime: Duration =
-      value(ExposureTime).map {
-        case d: java.lang.Double => Duration.ofMillis((d.doubleValue * 1000.0).round)
-        case _                   => Duration.ofMillis(0)
-      }.filter(_.toMillis >= 0).getOrElse(Duration.ZERO)
+      Duration.ofMillis((c.unsafeJavaDouble(ExposureTime) * 1000.0).round)
 
     def fullExposureTime: Duration =
       exposureTime.multipliedBy(if (useNs && isNsObsType) nsStepCount * nsCycleCount else 1)
