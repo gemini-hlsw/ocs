@@ -17,6 +17,7 @@ import edu.gemini.spModel.gemini.flamingos2.SeqConfigFlamingos2;
 import edu.gemini.spModel.gemini.bhros.InstBHROS;
 import edu.gemini.spModel.gemini.bhros.SeqConfigBHROS;
 import edu.gemini.spModel.gemini.gems.Gems;
+import edu.gemini.spModel.gemini.ghost.Ghost;
 import edu.gemini.spModel.gemini.gmos.InstGmosNorth;
 import edu.gemini.spModel.gemini.gmos.InstGmosSouth;
 import edu.gemini.spModel.gemini.gmos.SeqConfigGmosNorth;
@@ -141,6 +142,7 @@ public enum NodeInitializers {
                 Arrays.asList(
                     Flamingos2.NI,
                     Gems.NI,
+                    Ghost.NI(),
                     Gpi.NI,
                     Gsaoi.NI,
                     InstAcqCam.NI,
