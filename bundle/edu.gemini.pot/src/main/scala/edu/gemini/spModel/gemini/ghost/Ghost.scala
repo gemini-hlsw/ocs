@@ -56,6 +56,8 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
 
 object Ghost {
 
+  // Unfortunately we need a Java "Supplier" and "Function" which makes it
+  // awkward to create the NodeInitializer via ComponentNodeInitializer.
   private val GhostSupplier: java.util.function.Supplier[Ghost] =
     new java.util.function.Supplier[Ghost] {
       def get(): Ghost = new Ghost()
@@ -63,12 +65,11 @@ object Ghost {
 
   private val GhostCbFactory: java.util.function.Function[ISPObsComponent, GhostCB] =
     new java.util.function.Function[ISPObsComponent, GhostCB] {
-      def apply(oc: ISPObsComponent): GhostCB =
-        new GhostCB(oc)
+      def apply(oc: ISPObsComponent): GhostCB = new GhostCB(oc)
     }
 
   val NI: ISPNodeInitializer[ISPObsComponent, Ghost] =
-    new ComponentNodeInitializer(SP_TYPE, GhostSupplier, GhostCbFactory)
+    new ComponentNodeInitializer(SPComponentType.INSTRUMENT_GHOST, GhostSupplier, GhostCbFactory)
 
   // The name of the Ghost instrument configuration.
   val INSTRUMENT_NAME_PROP: String = "GHOST"
