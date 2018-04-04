@@ -315,7 +315,7 @@ public final class ObsCatalogInfo {
             instConfigInfoList = VisitorInstrument.getInstConfigInfo();
         else if (instName.equals(Gpi.SP_TYPE.readableStr))
             instConfigInfoList = Gpi.getInstConfigInfo();
-        else if (instName.equals(Ghost.SP_TYPE().readableStr))
+        else if (instName.equals(Ghost.SP_TYPE.readableStr))
             instConfigInfoList = Ghost.getInstConfigInfo();
         return instConfigInfoList;
     }

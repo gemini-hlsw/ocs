@@ -19,7 +19,7 @@ import scala.collection.JavaConverters._
 /** The GHOST instrument SP model.
   * Note that we do not override clone since private variables are immutable.
   */
-final class Ghost extends SPInstObsComp(Ghost.SP_TYPE) with PropertyProvider {
+final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvider with GhostMixin {
   override def getSite: JSet[Site] = {
     Site.SET_GS
   }
@@ -55,7 +55,7 @@ final class Ghost extends SPInstObsComp(Ghost.SP_TYPE) with PropertyProvider {
 }
 
 object Ghost {
-  val SP_TYPE: SPComponentType = SPComponentType.INSTRUMENT_GHOST
+  //val SP_TYPE: SPComponentType = SPComponentType.INSTRUMENT_GHOST
 
   // The name of the Ghost instrument configuration.
   val INSTRUMENT_NAME_PROP: String = "GHOST"

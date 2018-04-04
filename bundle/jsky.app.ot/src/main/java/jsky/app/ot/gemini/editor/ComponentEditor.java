@@ -72,7 +72,7 @@ public abstract class ComponentEditor<N extends ISPNode, D extends ISPDataObject
 
     // A mouse listener that can be used to properly place the caret in the place the mouse is clicked
     // overriding the default behavior which will put the caret in position 0
-    // This could be blanket enabled by updating the clas TextFieldPropertyCtrl
+    // This could be blanket enabled by updating the class TextFieldPropertyCtrl.
     protected static final MouseListener focusOnCaretPositionListener = new MouseAdapter() {
         public void mousePressed(final MouseEvent e) {
             SwingUtilities.invokeLater(() -> {
