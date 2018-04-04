@@ -99,9 +99,11 @@ def common(version: Version) = AppConfig(
   bundles = List(
     BundleSpec("com.jgoodies.looks",                     Version(2, 4, 1)),
     BundleSpec("com.mchange.c3p0",                       Version(0, 9, 5)),
+    BundleSpec("com.mysql.jdbc",                         Version(5, 1, 46)),
     BundleSpec("edu.gemini.ags",                         version),
     BundleSpec("edu.gemini.ags.servlet",                 version),
     BundleSpec("edu.gemini.dataman.app",                 version),
+    BundleSpec("edu.gemini.ictd",                        version),
     BundleSpec("edu.gemini.itc",                         version),
     BundleSpec("edu.gemini.itc.shared",                  version),
     BundleSpec("edu.gemini.itc.web",                     version),

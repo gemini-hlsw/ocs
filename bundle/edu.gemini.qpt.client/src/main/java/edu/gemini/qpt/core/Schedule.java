@@ -1,17 +1,24 @@
 package edu.gemini.qpt.core;
 
+import edu.gemini.ictd.CustomMaskKey;
 import edu.gemini.qpt.core.listeners.Listeners;
 import edu.gemini.qpt.core.util.*;
 import edu.gemini.qpt.core.util.Variants.EditException;
 import edu.gemini.qpt.shared.sp.Conds;
+import edu.gemini.qpt.shared.sp.Ictd;
 import edu.gemini.qpt.shared.sp.Inst;
 import edu.gemini.qpt.shared.sp.MiniModel;
+import edu.gemini.qpt.shared.util.EnumPio;
 import edu.gemini.qpt.shared.util.PioSerializable;
 import edu.gemini.qpt.shared.util.TimeUtils;
 import edu.gemini.skycalc.TwilightBoundType;
 import edu.gemini.skycalc.TwilightBoundedNight;
+import edu.gemini.shared.util.immutable.ImOption;
+import edu.gemini.shared.util.immutable.Option;
+import edu.gemini.spModel.core.ProgramId;
 import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.data.PreImagingType;
+import edu.gemini.spModel.ictd.Availability;
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2;
 import edu.gemini.spModel.gemini.gmos.GmosCommonType;
 import edu.gemini.spModel.gemini.gmos.GmosNorthType.FilterNorth;
@@ -58,6 +65,7 @@ public final class Schedule extends BaseMutableBean implements PioSerializable, 
     public static final String PROP_FACILITIES = "facilities";
     public static final String PROP_EXTRA_SEMESTERS = "extraSemesters";
     public static final String PROP_MINI_MODEL = "miniModel";
+    public static final String PROP_ICTD = "ictd";
 
     // Constants for internal use (probably will move)
     private static final TwilightBoundType TYPE = TwilightBoundType.NAUTICAL;
@@ -73,20 +81,23 @@ public final class Schedule extends BaseMutableBean implements PioSerializable, 
     private MixedEnumSet facilities = new MixedEnumSet();
     private MarkerManager markerManager = new MarkerManager();
     private File file;
-    private Map<WorldCoordinates, Union<Interval>> intervalCache = new HashMap<WorldCoordinates, Union<Interval>>();
+    private Map<WorldCoordinates, Union<Interval>> intervalCache = new HashMap<>();
     private MiniModel miniModel;
+    private Option<Ictd> ictd;
 
     /**
      * Constructs an empty Schedule.
      * @param model
      */
-    public Schedule(MiniModel model) {
+    public Schedule(MiniModel model, Option<Ictd> ictd) {
         assert model != null;
+        assert ictd != null;
         this.miniModel = model;
+        this.ictd      = ictd;
         this.blocks = new BlockUnion();
         this.variants = new VariantList();
         this.extraSemesters = new StringSet();
-        init(true);
+        init(true, ictd.map(i -> i.featureAvailability));
     }
 
     /**
@@ -179,10 +190,11 @@ public final class Schedule extends BaseMutableBean implements PioSerializable, 
         this.variants = new VariantList(this, params.getParamSet(PROP_VARIANTS));
         this.extraSemesters = getExtraSemesters(params);
         this.comment = Pio.getValue(params, PROP_COMMENT);
-        init(false);
+        this.ictd = ImOption.apply(params.getParamSet(PROP_ICTD)).map(p -> new Ictd(p));
+        init(false, ImOption.empty());
     }
 
-    private void init(boolean isNew) {
+    private void init(boolean isNew, Option<Map<Enum<?>, Availability>> oam) {
         if (isNew) initFacilities();
         if (!variants.isEmpty())
             setCurrentVariant(variants.getFirst());
@@ -191,6 +203,7 @@ public final class Schedule extends BaseMutableBean implements PioSerializable, 
             Listeners.attach(v);
         addHiddenFacilities();
         setDirty(false);
+        oam.foreach(am -> matchFacilitiesToIctd(am));
     }
 
     @Override
@@ -223,6 +236,34 @@ public final class Schedule extends BaseMutableBean implements PioSerializable, 
 
     }
 
+    public Option<Ictd> getIctd() {
+        return ictd;
+    }
+
+    @SuppressWarnings("unchecked")
+    public void setIctd(Option<Ictd> ictd) {
+        final Option<Ictd> prev = this.ictd;
+
+        invalidateAllCaches();
+
+        this.ictd = ictd;
+        doPublicFacilitiesUpdate(() -> ictd.foreach(i -> matchFacilitiesToIctd(i.featureAvailability)));
+
+        firePropertyChange(PROP_ICTD, prev, ictd);
+    }
+
+    /**
+     * Determines the availability of the indicated custom mask.  Note, if there
+     * is no ICTD data, we assume that the mask is available.
+     */
+    public Availability maskAvailability(ProgramId.Science pid, String name) {
+        final CustomMaskKey k = new CustomMaskKey(pid, name);
+
+        // Assume Installed if there is no ICTD data whatsoever.
+        return getIctd().map(i -> i.maskAvailability.getOrDefault(k, Availability.Missing))
+                        .getOrElse(Availability.Installed);
+    }
+
     public void moveAllocs(long offset) {
         try {
             // Move every alloc forward (or back ... :-/)
@@ -253,6 +294,7 @@ public final class Schedule extends BaseMutableBean implements PioSerializable, 
         params.addParamSet(blocks.getParamSet(factory, PROP_BLOCKS));
         params.addParamSet(variants.getParamSet(factory, PROP_VARIANTS));
         params.addParamSet(extraSemesters.getParamSet(factory, PROP_EXTRA_SEMESTERS));
+        ictd.foreach(i -> params.addParamSet(i.getParamSet(factory, PROP_ICTD)));
         Pio.addParam(factory, params, PROP_COMMENT, comment);
         return params;
     }
@@ -286,42 +328,47 @@ public final class Schedule extends BaseMutableBean implements PioSerializable, 
         }
     }
 
+    // Adds/removes facilities based upon the availability data from the ICTD.
+    private synchronized void matchFacilitiesToIctd(Map<Enum<?>, Availability> am) {
+        for (Map.Entry<Enum<?>, Availability> me: am.entrySet()) {
+            if (me.getValue() == Availability.Installed) facilities.add(me.getKey());
+            else facilities.remove(me.getKey());
+        }
+    }
+
     private synchronized void addHiddenFacilities() {
         for (Inst inst : Inst.values()) {
             facilities.addAll(Arrays.asList(inst.getHiddenOptions()));
         }
     }
-    @SuppressWarnings("unchecked")
-    public void addFacility(Enum o) {
-        assert o instanceof Serializable;
+
+    private void doPublicFacilitiesUpdate(Runnable action) {
         Set<Enum> prev = getFacilities();
-        facilities.add(o);
+        action.run();
         firePropertyChange(PROP_FACILITIES, prev, getFacilities());
         setDirty(true);
         for (Variant v: variants)
             v.facilitiesChanged();
+    }
+
+    @SuppressWarnings("unchecked")
+    public void addFacility(Enum o) {
+        assert o instanceof Serializable;
+        doPublicFacilitiesUpdate(() -> facilities.add(o));
     }
 
     @SuppressWarnings("unchecked")
     public void removeFacility(Enum o) {
-        Set<Enum> prev = getFacilities();
-        facilities.remove(o);
-        firePropertyChange(PROP_FACILITIES, prev, getFacilities());
-        setDirty(true);
-        for (Variant v: variants)
-            v.facilitiesChanged();
+        doPublicFacilitiesUpdate(() -> facilities.remove(o));
     }
 
     @SuppressWarnings("unchecked")
     public void setFacilities(Collection<Enum> newFacilities) {
-        Set<Enum> prev = getFacilities();
-        facilities.clear();
-        facilities.addAll(newFacilities);
-        addHiddenFacilities();
-        firePropertyChange(PROP_FACILITIES, prev, getFacilities());
-        setDirty(true);
-        for (Variant v: variants)
-            v.facilitiesChanged();
+        doPublicFacilitiesUpdate(() -> {
+            facilities.clear();
+            facilities.addAll(newFacilities);
+            addHiddenFacilities();
+        });
     }
 
     @SuppressWarnings("unchecked")
@@ -530,7 +577,7 @@ public final class Schedule extends BaseMutableBean implements PioSerializable, 
     public void addExtraSemester(String semester) {
         if (!miniModel.getAllSemesters().contains(semester))
             throw new NoSuchElementException(semester);
-        SortedSet<String> prev = new TreeSet<String>(extraSemesters);
+        SortedSet<String> prev = new TreeSet<>(extraSemesters);
         if (extraSemesters.add(semester))
             firePropertyChange(PROP_EXTRA_SEMESTERS, prev, getExtraSemesters());
     }
@@ -545,7 +592,7 @@ public final class Schedule extends BaseMutableBean implements PioSerializable, 
                 }
             }
         }
-        SortedSet<String> prev = new TreeSet<String>(extraSemesters);
+        SortedSet<String> prev = new TreeSet<>(extraSemesters);
         extraSemesters.remove(semester);
         firePropertyChange(PROP_EXTRA_SEMESTERS, prev, getExtraSemesters());
     }
@@ -737,8 +784,6 @@ class MixedEnumSet extends HashSet<Enum> implements PioSerializable {
     private static final Logger LOGGER = Logger.getLogger(MixedEnumSet.class.getName());
 
     public static final String PROP_MEMBER = "member";
-    public static final String PROP_MEMBER_CLASS = "class";
-    public static final String PROP_MEMBER_NAME = "name";
 
     public MixedEnumSet() {
     }
@@ -746,7 +791,7 @@ class MixedEnumSet extends HashSet<Enum> implements PioSerializable {
     public MixedEnumSet(ParamSet params) {
         if (params != null) {
             for (ParamSet ps: params.getParamSets(PROP_MEMBER)) {
-                Enum e = getEnum(ps);
+                Enum e = EnumPio.getEnum(ps);
                 if (e != null)
                     add(e);
             }
@@ -756,55 +801,8 @@ class MixedEnumSet extends HashSet<Enum> implements PioSerializable {
     public ParamSet getParamSet(PioFactory factory, String name) {
         ParamSet params = factory.createParamSet(name);
         for (Enum e: this)
-            params.addParamSet(getEnumParamSet(factory, PROP_MEMBER, e));
+            params.addParamSet(EnumPio.getEnumParamSet(factory, PROP_MEMBER, e));
         return params;
-    }
-
-    private ParamSet getEnumParamSet(PioFactory factory, String name, Enum e) {
-        ParamSet params = factory.createParamSet(name);
-        Pio.addParam(factory, params, PROP_MEMBER_CLASS, e.getClass().getName());
-        Pio.addParam(factory, params, PROP_MEMBER_NAME, e.name());
-        return params;
-    }
-
-    @SuppressWarnings("unchecked")
-    private Enum getEnum(ParamSet params) {
-        try {
-            String cname = Pio.getValue(params, PROP_MEMBER_CLASS);
-            String ename = Pio.getValue(params, PROP_MEMBER_NAME);
-
-            // For backward-compatability from when the sp package was
-            // called sp101. This was an annoying mistake, sorry.
-            cname = cname.replace("sp101", "sp");
-
-            // Patch for Gmos change
-            if (cname.equals("edu.gemini.spModel.gemini.gmos.GmosNorthType$DetectorManufacturerNorth")
-                    || cname.equals("edu.gemini.spModel.gemini.gmos.GmosSouthType$DetectorManufacturerSouth")) {
-                cname = "edu.gemini.spModel.gemini.gmos.GmosCommonType$DetectorManufacturer";
-            }
-
-            // Patch for package change
-            if (cname.equals("edu.gemini.qpt.core.sp.Inst")) cname = Inst.class.getName();
-
-            // We need to do this for subclassed enum constants like
-            // GMOSNorthType.FilterNorth.u_G0308, which has a runtime type of
-            // GMOSNorthType$FilterNorth$1, which is not actually an enum type.
-            // This is a little puzzling.
-            Class c = Class.forName(cname);
-            while (c != null) {
-                try {
-                    return Enum.valueOf(c, ename);
-                } catch (IllegalArgumentException iae) {
-                    c = c.getSuperclass();
-                }
-            }
-
-            throw new Exception(cname + " doesn't appear to be an enum class, or " + ename + " is a bogus token.");
-
-        } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Trouble deserializing enum type.", e);
-            return null;
-        }
     }
 
 }

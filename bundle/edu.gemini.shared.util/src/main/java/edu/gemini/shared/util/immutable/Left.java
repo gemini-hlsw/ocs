@@ -58,6 +58,11 @@ public final class Left<L,R> implements ImEither<L,R> {
     }
 
     @Override
+    public Option<R> toOption() {
+        return ImOption.empty();
+    }
+
+    @Override
     public <T> T foldLeft(final T zero,
                           final Function<? super L, ? extends T> leftFunc) {
         return leftFunc.apply(value);
@@ -96,6 +101,11 @@ public final class Left<L,R> implements ImEither<L,R> {
     @Override
     public Optional<L> toOptionalLeft() {
         return Optional.of(value);
+    }
+
+    @Override
+    public Option<L> toOptionLeft() {
+        return new Some<>(value);
     }
 
     @Override

@@ -12,12 +12,13 @@ public enum BooleanViewPreference implements PreferenceManager.Key<Boolean> {
 	// Errors (normally off)
 	VIEW_UNDER_QUALIFIED_OBSERVATIONS(false),
 	VIEW_UNAVAILABLE(false),
+	VIEW_MASK_IN_CABINET(false),
 	VIEW_UNSCHEDULABLE(false),
 	VIEW_NOT_DARK_ENOUGH(false),
 	VIEW_LOW_IN_SKY(false),
-	
+
 //	VIEW_BAND_0("Non-Queue Programs", false),
-	VIEW_INACTIVE_PROGRAMS(false),	
+	VIEW_INACTIVE_PROGRAMS(false),
 	VIEW_SCIENCE_OBS(true),
 	VIEW_NIGHTTIME_CALIBRATIONS(false),
 	VIEW_DAYTIME_CALIBRATIONS(false),
@@ -41,19 +42,19 @@ public enum BooleanViewPreference implements PreferenceManager.Key<Boolean> {
 
     VIEW_LGS_ONLY(false),
 	;
-	
+
 	final Boolean defaultValue;
 
 	BooleanViewPreference(boolean defaultValue) {
 		this.defaultValue = defaultValue;
 	}
-		
+
 	public Boolean getDefaultValue() {
 		return defaultValue;
 	}
-	
+
 	public Boolean get() {
 		return PreferenceManager.get(this);
 	}
-	
+
 }

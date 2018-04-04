@@ -69,16 +69,16 @@ def with_test_dbs(version: Version) = AppConfig(
     "edu.gemini.util.trpc.peer.GN" -> "gnodbtest.gemini.edu:8443:Gemini North ODB (Test)",
     "edu.gemini.util.trpc.peer.GS" -> "gsodbtest.gemini.edu:8443:Gemini South ODB (Test)"
   )
-) extending List(common(version))
+) extending List(common(version), with_test_dbs_credentials(version))
 
 // WITH-PRODUCTION-DBS
 def with_production_dbs(version: Version) = AppConfig(
   id = "with-production-dbs",
   props = Map(
-    "edu.gemini.util.trpc.peer.GN" -> "gnodb.gemini.edu:8443:Gemini North ODB (Test)",
-    "edu.gemini.util.trpc.peer.GS" -> "gsodb.gemini.edu:8443:Gemini South ODB (Test)"
+    "edu.gemini.util.trpc.peer.GN" -> "gnodb.gemini.edu:8443:Gemini North ODB",
+    "edu.gemini.util.trpc.peer.GS" -> "gsodb.gemini.edu:8443:Gemini South ODB"
   )
-) extending List(common(version))
+) extending List(common(version), with_production_dbs_credentials(version))
 
 // MAC-TEST
 def mac_test(version: Version) = AppConfig(
@@ -142,6 +142,6 @@ def development(version: Version) = AppConfig(
     BundleSpec(99, "org.apache.felix.gogo.command", Version(0, 12, 0)),
     BundleSpec(99, "org.apache.felix.gogo.shell",   Version(0, 10, 0))
   )
-) extending List(common(version))
+) extending List(common(version), development_credentials(version))
 
 

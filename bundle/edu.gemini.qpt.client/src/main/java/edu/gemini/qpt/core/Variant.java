@@ -10,7 +10,10 @@ import edu.gemini.qpt.core.util.Variants.OrderingException;
 import edu.gemini.qpt.shared.sp.*;
 import edu.gemini.qpt.shared.util.PioSerializable;
 import edu.gemini.qpt.shared.util.TimeUtils;
+import edu.gemini.shared.util.immutable.ImOption;
+import edu.gemini.spModel.core.ProgramId;
 import edu.gemini.spModel.core.Site;
+import edu.gemini.spModel.ictd.Availability;
 import edu.gemini.spModel.obs.SPObservation.Priority;
 import edu.gemini.spModel.obs.plannedtime.PlannedStepSummary;
 import edu.gemini.spModel.obscomp.SPGroup.GroupType;
@@ -48,8 +51,8 @@ public final class Variant extends BaseMutableBean implements PioSerializable, C
 	// Final Members
 	private final AllocSet allocs;
 	private final Schedule owner;
-	private final Map<Obs, EnumSet<Flag>> obsFlags = new HashMap<Obs, EnumSet<Flag>>();
-	private final Map<Alloc, String> allocComments = new HashMap<Alloc, String>();
+	private final Map<Obs, EnumSet<Flag>> obsFlags = new HashMap<>();
+	private final Map<Alloc, String> allocComments = new HashMap<>();
 
 	// Mutable Members
 	private Conds conditions;
@@ -68,7 +71,7 @@ public final class Variant extends BaseMutableBean implements PioSerializable, C
 	private Map<Obs, Union<Interval>> timingUnionCache;
 
 	// The list of all groups encountered in the plan, by first appearance.
-	private List<Group> groups = new ArrayList<Group>();
+	private List<Group> groups = new ArrayList<>();
 	private boolean flagUpdatesEnabled = true;
 
 	/**
@@ -82,6 +85,8 @@ public final class Variant extends BaseMutableBean implements PioSerializable, C
 		OVER_QUALIFIED,
 		INSTRUMENT_UNAVAILABLE,
 		CONFIG_UNAVAILABLE,
+		MASK_IN_CABINET,
+		MASK_UNAVAILABLE,
         LGS_UNAVAILABLE,
 		BLOCKED,
 		ELEVATION_CNS,
@@ -146,7 +151,7 @@ public final class Variant extends BaseMutableBean implements PioSerializable, C
 
 		// These schedule-level caches are shared among all Variants.
 		intrinsicFlagCache = owner.getCache("intrinsicFlagCache");
-		facilitiesFlagCache = owner.getCache("facilitiesFlagCache", Schedule.PROP_FACILITIES);
+		facilitiesFlagCache = owner.getCache("facilitiesFlagCache", Schedule.PROP_FACILITIES, Schedule.PROP_ICTD);
 		visibleUnionCache = owner.getCache("visibleUnionCache", Schedule.PROP_BLOCKS);
 		darkUnionCache = owner.getCache("darkUnionCache", Schedule.PROP_BLOCKS);
 		constrainedUnionCache = owner.getCache("freeUnionCache", Schedule.PROP_BLOCKS);
@@ -556,6 +561,18 @@ public final class Variant extends BaseMutableBean implements PioSerializable, C
 	}
 
 
+	/**
+	 * Checks that the observation requires a custom mask and that the
+	 * corresponding facility checkbox is checked.
+	 */
+	@SuppressWarnings("unchecked")
+	private boolean shouldCheckMaskAvailability(final Obs obs) {
+		boolean check = false;
+		for (Enum<?> e : obs.getOptions()) {
+			check = check || (Inst.isCustomMask(e) && owner.hasFacility(e));
+		}
+		return check;
+	}
 
 	@SuppressWarnings("unchecked")
 	private void updateObsFlags() {
@@ -657,6 +674,25 @@ public final class Variant extends BaseMutableBean implements PioSerializable, C
 						break;
 					}
 				}
+
+				// If the custom mask flag is set and the observation has a
+				// custom mask, check its availability.
+				final EnumSet<Flag> maskFlags = EnumSet.noneOf(Flag.class);
+				ImOption.apply(obs.getCustomMask()).filter(m -> !m.trim().isEmpty() && shouldCheckMaskAvailability(obs)).foreach(m -> {
+					final ProgramId pid = obs.getProg().getStructuredProgramId();
+					if (pid instanceof ProgramId.Science) {
+						final Availability a = owner.maskAvailability((ProgramId.Science) pid, m);
+						if (a == Availability.SummitCabinet) {
+							maskFlags.add(Flag.MASK_IN_CABINET);
+						} else if (a != Availability.Installed) {
+							// TODO: distinguish this case from standard
+							// facilities unavailable with a different Flag?
+							// MASK_UNAVAILABLE?
+							maskFlags.add(Flag.CONFIG_UNAVAILABLE);
+						}
+					}
+				});
+				facilitiesFlags.addAll(maskFlags);
 
 				facilitiesFlagCache.put(obs, facilitiesFlags);
 			}
@@ -917,6 +953,7 @@ public final class Variant extends BaseMutableBean implements PioSerializable, C
 
 	private static final EnumSet<Flag> AUTOMATIC_DEATH_FLAGS = EnumSet.of(
 			Flag.CONFIG_UNAVAILABLE,
+			Flag.MASK_IN_CABINET,
             Flag.LGS_UNAVAILABLE,
 			Flag.INSTRUMENT_UNAVAILABLE,
 			Flag.ELEVATION_CNS,

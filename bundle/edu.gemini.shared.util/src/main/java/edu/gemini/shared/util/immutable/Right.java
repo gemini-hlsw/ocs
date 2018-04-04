@@ -56,6 +56,11 @@ public final class Right<L,R> implements ImEither<L,R>, Serializable {
     }
 
     @Override
+    public Option<R> toOption() {
+        return new Some<>(value);
+    }
+
+    @Override
     public <T> T foldLeft(final T zero,
                           final Function<? super L, ? extends T> leftFunc) {
         return zero;
@@ -97,6 +102,11 @@ public final class Right<L,R> implements ImEither<L,R>, Serializable {
     @Override
     public Optional<L> toOptionalLeft() {
         return Optional.empty();
+    }
+
+    @Override
+    public Option<L> toOptionLeft() {
+        return ImOption.empty();
     }
 
     @Override

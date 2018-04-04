@@ -4,6 +4,7 @@ import static edu.gemini.qpt.core.Variant.Flag.BACKGROUND_CNS;
 import static edu.gemini.qpt.core.Variant.Flag.BLOCKED;
 import static edu.gemini.qpt.core.Variant.Flag.CC_UQUAL;
 import static edu.gemini.qpt.core.Variant.Flag.CONFIG_UNAVAILABLE;
+import static edu.gemini.qpt.core.Variant.Flag.MASK_IN_CABINET;
 import static edu.gemini.qpt.core.Variant.Flag.LGS_UNAVAILABLE;
 import static edu.gemini.qpt.core.Variant.Flag.ELEVATION_CNS;
 import static edu.gemini.qpt.core.Variant.Flag.INACTIVE;
@@ -38,6 +39,7 @@ public class CandidateDecorator {
     private static final EnumSet<Flag> GRAY = EnumSet.of(
             INSTRUMENT_UNAVAILABLE,
             CONFIG_UNAVAILABLE,
+            MASK_IN_CABINET,
             LGS_UNAVAILABLE,
             BLOCKED,
             INACTIVE,
@@ -57,6 +59,7 @@ public class CandidateDecorator {
             CC_UQUAL,
             INSTRUMENT_UNAVAILABLE,
             CONFIG_UNAVAILABLE,
+            MASK_IN_CABINET,
             LGS_UNAVAILABLE,
             ELEVATION_CNS,
             BACKGROUND_CNS,

@@ -13,6 +13,7 @@ ocsAppManifest := {
     BundleSpec((sbt.Keys.name in bundle_edu_gemini_catalog).value, Version.parse((sbt.Keys.version in bundle_edu_gemini_catalog).value)),
     BundleSpec((sbt.Keys.name in bundle_edu_gemini_dataman_app).value, Version.parse((sbt.Keys.version in bundle_edu_gemini_dataman_app).value)),
     BundleSpec((sbt.Keys.name in bundle_edu_gemini_horizons_api).value, Version.parse((sbt.Keys.version in bundle_edu_gemini_horizons_api).value)),
+    BundleSpec((sbt.Keys.name in bundle_edu_gemini_ictd).value, Version.parse((sbt.Keys.version in bundle_edu_gemini_ictd).value)),
     BundleSpec((sbt.Keys.name in bundle_edu_gemini_itc).value, Version.parse((sbt.Keys.version in bundle_edu_gemini_itc).value)),
     BundleSpec((sbt.Keys.name in bundle_edu_gemini_itc_shared).value, Version.parse((sbt.Keys.version in bundle_edu_gemini_itc_shared).value)),
     BundleSpec((sbt.Keys.name in bundle_edu_gemini_itc_web).value, Version.parse((sbt.Keys.version in bundle_edu_gemini_itc_web).value)),

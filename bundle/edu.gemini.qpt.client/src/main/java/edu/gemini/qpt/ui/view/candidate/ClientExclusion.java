@@ -41,6 +41,7 @@ public enum ClientExclusion {
 
     HIDDEN_UNDER_QUALIFIED_OBSERVATIONS("Obs is under-qualified.", VIEW_UNDER_QUALIFIED_OBSERVATIONS),
     HIDDEN_UNAVAILABLE("Inst/Config is unavailable.", VIEW_UNAVAILABLE),
+    HIDDEN_MASK_IN_CABINET("Mask is in cabinet.", VIEW_MASK_IN_CABINET),
     HIDDEN_NON_LGS("Only showing LGS observations.", VIEW_LGS_ONLY),
     HIDDEN_UNSCHEDULABLE("Obs is unschedulable.", VIEW_UNSCHEDULABLE),
     HIDDEN_NOT_DARK_ENOUGH("Sky is not dark enough.", VIEW_NOT_DARK_ENOUGH),
@@ -145,6 +146,8 @@ public enum ClientExclusion {
             return HIDDEN_OVER_QUALIFIED_OBSERVATIONS;
         if (!VIEW_UNAVAILABLE.get() && (flags.contains(Flag.INSTRUMENT_UNAVAILABLE) || flags.contains(Flag.CONFIG_UNAVAILABLE) || flags.contains(Flag.LGS_UNAVAILABLE)))
             return HIDDEN_UNAVAILABLE;
+        if (!VIEW_MASK_IN_CABINET.get() && (flags.contains(Flag.MASK_IN_CABINET)))
+            return HIDDEN_MASK_IN_CABINET;
         if (VIEW_LGS_ONLY.get() && !obs.getLGS() && variant.getLgsConstraint())
             return HIDDEN_NON_LGS;
         if (!VIEW_UNDER_QUALIFIED_OBSERVATIONS.get() && flags.contains(Flag.IQ_UQUAL))

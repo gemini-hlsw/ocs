@@ -177,6 +177,7 @@ public enum Inst {
     private static final Set<Enum<?>> CUSTOM_MASKS = new HashSet<>();
     static {
 
+        CUSTOM_MASKS.add(Flamingos2.FPUnit.CUSTOM_MASK);
         CUSTOM_MASKS.add(FPUnitNorth.CUSTOM_MASK);
         CUSTOM_MASKS.add(FPUnitSouth.CUSTOM_MASK);
 
