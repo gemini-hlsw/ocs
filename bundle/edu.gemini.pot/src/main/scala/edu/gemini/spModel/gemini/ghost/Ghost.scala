@@ -55,8 +55,6 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
 }
 
 object Ghost {
-  //val SP_TYPE: SPComponentType = SPComponentType.INSTRUMENT_GHOST
-
   // The name of the Ghost instrument configuration.
   val INSTRUMENT_NAME_PROP: String = "GHOST"
 
