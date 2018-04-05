@@ -3,6 +3,7 @@ package jsky.app.ot.gemini.editor.targetComponent.details2
 import java.awt.{Color, BorderLayout}
 import javax.swing.{BorderFactory, WindowConstants, JFrame}
 
+import edu.gemini.pot.sp.Instrument
 import edu.gemini.pot.spdb.DBLocalDatabase
 import edu.gemini.spModel.core.SPProgramID
 import edu.gemini.spModel.gemini.gmos.InstGmosSouth
@@ -25,7 +26,7 @@ object TestFrame extends App {
   val fact = odb.getFactory
   val prog = fact.createProgram(null, SPProgramID.toProgramID("GS-2016-B-Q1"))
       prog.setDataObject(new SPProgram <| (_.setTooType(TooType.rapid)))
-  val obs  = fact.createObservation(prog, null) <| prog.addObservation
+  val obs  = fact.createObservation(prog, Instrument.none, null) <| prog.addObservation
   val gmos = fact.createObsComponent(prog, InstGmosSouth.SP_TYPE, null) <| obs.addObsComponent
   val toc  = obs.getObsComponents.asScala.find(_.getType == TargetObsComp.SP_TYPE).get
   val tenv = toc.getDataObject.asInstanceOf[TargetObsComp].getTargetEnvironment

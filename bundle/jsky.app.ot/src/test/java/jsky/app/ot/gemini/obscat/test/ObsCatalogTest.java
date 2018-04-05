@@ -65,7 +65,7 @@ public class ObsCatalogTest {
 
             for(int j = 0; j < NUM_OBS; j++) {
                 int obsIndex = i*NUM_OBS+j;
-                _obs[obsIndex] = f.createObservation(_progs[i], new SPNodeKey());
+                _obs[obsIndex] = f.createObservation(_progs[i], Instrument.none, new SPNodeKey());
                 _progs[i].addObservation(_obs[obsIndex]);
 
             }

@@ -1,10 +1,13 @@
 package jsky.app.ot.viewer;
 
 import edu.gemini.pot.sp.SPComponentType;
+import edu.gemini.pot.sp.Instrument;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 import edu.gemini.spModel.obscomp.SPGroup;
 import edu.gemini.spModel.seqcomp.SeqBase;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
+import edu.gemini.shared.util.immutable.Option;
+import edu.gemini.shared.util.immutable.None;
 import jsky.app.ot.OTOptions;
 import jsky.app.ot.nsp.UIInfo;
 import jsky.app.ot.util.History;
@@ -181,15 +184,11 @@ public final class SPViewerActions {
 
         // Observation Actions - Adding observations of various types
         for (UIInfo uiInfo : UIInfoXML.getByType(UIInfo.TYPE_INSTRUMENT)) {
-            Set<SPComponentType> typeSet = new HashSet<SPComponentType>();
-            for (UIInfo.Id id : uiInfo.getRequires()) {
-                UIInfo req = UIInfoXML.getUIInfo(id);
-                if (req != null) typeSet.add(req.getSPType());
-            }
-            addObservationActions.add(new AddObservationAction(viewer, uiInfo.getSPType(), typeSet));
+            final Option<Instrument> inst = Instrument.fromComponentType(uiInfo.getSPType());
+            addObservationActions.add(new AddObservationAction(viewer, inst));
         }
         Collections.sort(addObservationActions);
-        addObservationActions.add(0, new AddObservationAction(viewer, null, null)); // empty obs
+        addObservationActions.add(0, new AddObservationAction(viewer, Instrument.none)); // empty obs
 
         // Observation Actions - General
         setPhase2StatusAction = new Phase2StatusAction(viewer);

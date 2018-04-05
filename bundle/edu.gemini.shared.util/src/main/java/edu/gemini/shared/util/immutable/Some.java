@@ -3,6 +3,7 @@ package edu.gemini.shared.util.immutable;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 /**
  * The Option implementation that represents the presence of a value.
@@ -118,6 +119,11 @@ public final class Some<T> implements Option<T> {
                 throw new UnsupportedOperationException();
             }
         };
+    }
+
+    @Override
+    public Stream<T> toStream() {
+        return Stream.of(val);
     }
 
     @Override

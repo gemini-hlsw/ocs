@@ -3,7 +3,7 @@ package edu.gemini.p2checker.rules
 import java.util.UUID
 
 import edu.gemini.p2checker.api.{IRule, ObservationElements}
-import edu.gemini.pot.sp.{ISPObservation, SPComponentType}
+import edu.gemini.pot.sp.{Instrument, ISPObservation, SPComponentType}
 import edu.gemini.pot.util.POTUtil
 import edu.gemini.spModel.core.SPProgramID
 import edu.gemini.spModel.data.ISPDataObject
@@ -26,7 +26,7 @@ abstract class RuleSpec extends Specification {
   def setup[I <: ISPDataObject](instrument: SPComponentType, programId: String = "")(mod: I => Unit): ISPObservation = {
     val f = POTUtil.createFactory(UUID.randomUUID())
     val p = f.createProgram(null, SPProgramID.toProgramID(programId))
-    val o = f.createObservation(p, null) <| p.addObservation
+    val o = f.createObservation(p, Instrument.none, null) <| p.addObservation
     val i = f.createObsComponent(p, instrument, null) <| o.addObsComponent
     val e = o.findObsComponentByType(SPComponentType.TELESCOPE_TARGETENV).get
     val t = e.getDataObject.asInstanceOf[TargetObsComp]

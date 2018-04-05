@@ -137,7 +137,6 @@
     <UIInfo
             site="GS"
             dataObject="edu.gemini.spModel.gemini.gsaoi.Gsaoi"
-            requires="Gems"
             name="GSAOI"
             type="instrument"
             imageKey="component.gif"

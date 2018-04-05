@@ -66,7 +66,7 @@ object ProgramGen {
   val genObs: Gen[ProgFun[ISPObservation]] =
     for {
       st  <- oneOf(ObsPhase2Status.values().toSeq)
-      fo  <- genNode(_.createObservation(_, null))
+      fo  <- genNode(_.createObservation(_, Instrument.none, null))
       fi  <- genInstrument
       fns <- genNotes
     } yield { (f: ISPFactory, p: ISPProgram) =>
@@ -199,7 +199,6 @@ object ProgramGen {
 
   private val validTypes = SPComponentType.values().filterNot { ct =>
     (  ct == SPComponentType.CONFLICT_FOLDER // conflict folders are problematic
-    || ct == SPComponentType.OBSERVER_FLAT   // seems to be an abandoned type now (see OBSERVER_GEMFLAT)?
     )
   }
 

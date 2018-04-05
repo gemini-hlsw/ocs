@@ -1,5 +1,9 @@
 package edu.gemini.spModel.gemini.gsaoi;
 
+import edu.gemini.pot.sp.Instrument;
+import edu.gemini.pot.sp.ISPFactory;
+import edu.gemini.pot.sp.ISPNodeInitializer;
+import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.shared.util.immutable.*;
@@ -20,10 +24,13 @@ import edu.gemini.spModel.data.config.StringParameter;
 import edu.gemini.spModel.data.property.PropertyProvider;
 import edu.gemini.spModel.data.property.PropertySupport;
 import edu.gemini.spModel.gemini.gems.Canopus;
+import edu.gemini.spModel.gemini.init.ComponentNodeInitializer;
+import edu.gemini.spModel.gemini.init.ObservationNI;
 import edu.gemini.spModel.guide.GuideOption;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.guide.GuideProbeProvider;
 import edu.gemini.spModel.guide.GuideProbeUtil;
+import edu.gemini.spModel.obs.SPObservation;
 import edu.gemini.spModel.obs.plannedtime.CommonStepCalculator;
 import edu.gemini.spModel.obs.plannedtime.ExposureCalculator;
 import edu.gemini.spModel.obs.plannedtime.OffsetOverheadCalculator;
@@ -428,6 +435,20 @@ public final class Gsaoi extends SPInstObsComp
 
     public static final SPComponentType SP_TYPE =
             SPComponentType.INSTRUMENT_GSAOI;
+
+    public static final ISPNodeInitializer<ISPObsComponent, Gsaoi> NI =
+        new ComponentNodeInitializer<>(SP_TYPE, () -> new Gsaoi(), c -> new GsaoiCB(c));
+
+    public static final ISPNodeInitializer<ISPObservation, SPObservation> OBSERVATION_NI =
+        new ObservationNI(Instrument.Gsaoi.some()) {
+            @Override
+            public void addSubnodes(ISPFactory factory, ISPObservation obsNode) {
+                super.addSubnodes(factory, obsNode);
+
+                // Add GeMS
+                addObsComponent(factory, obsNode, SPComponentType.AO_GEMS);
+            }
+        };
 
     public static final String INSTRUMENT_NAME_PROP = "GSAOI";
 

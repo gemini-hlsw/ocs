@@ -7,9 +7,12 @@
 //
 package edu.gemini.spModel.obscomp;
 
+import edu.gemini.pot.sp.ISPNodeInitializer;
+import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.shared.util.CompressedString;
 import edu.gemini.spModel.data.AbstractDataObject;
+import edu.gemini.spModel.gemini.init.SimpleNodeInitializer;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.Pio;
 import edu.gemini.spModel.pio.PioFactory;
@@ -23,6 +26,9 @@ public class SPNote extends AbstractDataObject {
      * This obs component's SP type.
      */
     public static final SPComponentType SP_TYPE = SPComponentType.INFO_NOTE;
+
+    public static final ISPNodeInitializer<ISPObsComponent, SPNote> NI =
+        new SimpleNodeInitializer<>(SP_TYPE, () -> new SPNote());
 
     // for serialization
     private static final long serialVersionUID = 1L;

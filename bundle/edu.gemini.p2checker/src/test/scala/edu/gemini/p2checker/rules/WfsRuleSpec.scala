@@ -4,7 +4,7 @@ import java.util.UUID
 
 import edu.gemini.p2checker.api.ObservationElements
 import edu.gemini.p2checker.rules.general.GeneralRule
-import edu.gemini.pot.sp.SPComponentType
+import edu.gemini.pot.sp.{Instrument, SPComponentType}
 import edu.gemini.pot.util.POTUtil
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.gemini.gmos.GmosOiwfsGuideProbe
@@ -27,8 +27,7 @@ class WfsRuleSpec extends Specification {
     // Ok just a bunch of setup. Program with one observation, GMOS, default target env.
     val f = POTUtil.createFactory(UUID.randomUUID())
     val p = f.createProgram(null, SPProgramID.toProgramID("GS-2014B-Q-1"))
-    val o = f.createObservation(p, null) <| p.addObservation
-    val i = f.createObsComponent(p, SPComponentType.INSTRUMENT_GMOS, null) <| o.addObsComponent
+    val o = f.createObservation(p, Instrument.GmosNorth.some, null) <| p.addObservation
     val e = o.findObsComponentByType(SPComponentType.TELESCOPE_TARGETENV).get
     val t = e.getDataObject.asInstanceOf[TargetObsComp]
 

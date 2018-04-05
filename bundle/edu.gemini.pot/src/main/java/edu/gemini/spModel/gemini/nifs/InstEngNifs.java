@@ -4,6 +4,8 @@
 
 package edu.gemini.spModel.gemini.nifs;
 
+import edu.gemini.pot.sp.ISPNodeInitializer;
+import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.spModel.data.AbstractDataObject;
 import edu.gemini.spModel.data.ISPDataObject;
@@ -12,6 +14,7 @@ import edu.gemini.spModel.data.property.PropertySupport;
 import edu.gemini.spModel.data.config.DefaultSysConfig;
 import edu.gemini.spModel.data.config.ISysConfig;
 import edu.gemini.spModel.data.config.DefaultParameter;
+import edu.gemini.spModel.gemini.init.ComponentNodeInitializer;
 import edu.gemini.spModel.gemini.nifs.NIFSParams.EngReadMode;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.Pio;
@@ -36,6 +39,9 @@ public final class InstEngNifs extends AbstractDataObject implements PropertyPro
      */
     public static final SPComponentType SP_TYPE =
             SPComponentType.ENG_ENGNIFS;
+
+    public static final ISPNodeInitializer<ISPObsComponent, InstEngNifs> NI =
+        new ComponentNodeInitializer<>(SP_TYPE, () -> new InstEngNifs(), c -> new InstEngNifsCB(c));
 
     private static final Map<String, PropertyDescriptor> PRIVATE_PROP_MAP = new TreeMap<String, PropertyDescriptor>();
     public static final Map<String, PropertyDescriptor> PROPERTY_MAP = Collections.unmodifiableMap(PRIVATE_PROP_MAP);

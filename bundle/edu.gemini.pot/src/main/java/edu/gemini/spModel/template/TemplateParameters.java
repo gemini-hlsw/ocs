@@ -1,5 +1,6 @@
 package edu.gemini.spModel.template;
 
+import edu.gemini.pot.sp.ISPNodeInitializer;
 import edu.gemini.pot.sp.ISPTemplateFolder;
 import edu.gemini.pot.sp.ISPTemplateGroup;
 import edu.gemini.pot.sp.ISPTemplateParameters;
@@ -7,6 +8,7 @@ import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.shared.util.TimeValue;
 import edu.gemini.shared.util.immutable.ApplyOp;
 import edu.gemini.spModel.data.AbstractDataObject;
+import edu.gemini.spModel.gemini.init.SimpleNodeInitializer;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.Pio;
@@ -28,6 +30,9 @@ public final class TemplateParameters extends AbstractDataObject {
     public static final SPComponentType SP_TYPE = SPComponentType.TEMPLATE_PARAMETERS;
     public static final String VERSION = "2015A-1";
     public static final String PARAM_TIME = "time";
+
+    public static final ISPNodeInitializer<ISPTemplateParameters, TemplateParameters> NI =
+        new SimpleNodeInitializer<>(SP_TYPE, () -> new TemplateParameters());
 
     public static TemplateParameters newEmpty() {
         return new TemplateParameters(new SPTarget(), new SPSiteQuality(), TimeValue.ZERO_HOURS);

@@ -1,5 +1,7 @@
 package edu.gemini.spModel.gemini.gmos;
 
+import edu.gemini.pot.sp.ISPNodeInitializer;
+import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.spModel.config.injector.ConfigInjector;
 import edu.gemini.spModel.config.injector.obswavelength.ObsWavelengthCalc3;
@@ -14,6 +16,7 @@ import edu.gemini.spModel.gemini.calunit.smartgcal.keys.CalibrationKeyImpl;
 import edu.gemini.spModel.gemini.calunit.smartgcal.keys.ConfigKeyGmosSouth;
 import edu.gemini.spModel.gemini.gmos.GmosSouthType.DisperserSouth;
 import edu.gemini.spModel.gemini.gmos.GmosSouthType.FilterSouth;
+import edu.gemini.spModel.gemini.init.ComponentNodeInitializer;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.guide.GuideProbeUtil;
 import edu.gemini.spModel.obscomp.InstConfigInfo;
@@ -29,6 +32,9 @@ public class InstGmosSouth extends
                 GmosSouthType.StageModeSouth> implements PropertyProvider, CalibrationKeyProvider {
     public static final SPComponentType SP_TYPE =
             SPComponentType.INSTRUMENT_GMOSSOUTH;
+
+    public static final ISPNodeInitializer<ISPObsComponent, InstGmosSouth> NI =
+        new ComponentNodeInitializer<>(SP_TYPE, () -> new InstGmosSouth(), c -> new InstGMOSCB(c));
 
     public static final String INSTRUMENT_NAME_PROP = "GMOS-S";
 

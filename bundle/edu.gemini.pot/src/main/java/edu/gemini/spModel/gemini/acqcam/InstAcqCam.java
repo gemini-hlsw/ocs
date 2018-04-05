@@ -7,6 +7,8 @@
 //
 package edu.gemini.spModel.gemini.acqcam;
 
+import edu.gemini.pot.sp.ISPNodeInitializer;
+import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.skycalc.Angle;
 import edu.gemini.spModel.core.Site;
@@ -18,6 +20,7 @@ import edu.gemini.spModel.data.config.StringParameter;
 import edu.gemini.spModel.data.property.PropertyProvider;
 import edu.gemini.spModel.data.property.PropertySupport;
 import edu.gemini.spModel.gemini.acqcam.AcqCamParams.*;
+import edu.gemini.spModel.gemini.init.ComponentNodeInitializer;
 import edu.gemini.spModel.obscomp.InstConfigInfo;
 import edu.gemini.spModel.obscomp.InstConstants;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
@@ -41,6 +44,9 @@ public final class InstAcqCam extends SPInstObsComp implements PropertyProvider 
      * This obs component's SP type.
      */
     public static final SPComponentType SP_TYPE = SPComponentType.INSTRUMENT_ACQCAM;
+
+    public static final ISPNodeInitializer<ISPObsComponent, InstAcqCam> NI =
+        new ComponentNodeInitializer<>(SP_TYPE, () -> new InstAcqCam(), c -> new InstAcqCamCB(c));
 
     // Default values
     public static final int DEF_X = 0;

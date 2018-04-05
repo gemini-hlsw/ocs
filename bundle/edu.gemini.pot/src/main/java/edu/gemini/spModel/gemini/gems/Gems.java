@@ -1,5 +1,7 @@
 package edu.gemini.spModel.gemini.gems;
 
+import edu.gemini.pot.sp.ISPNodeInitializer;
+import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.spModel.ao.AOConstants;
 import edu.gemini.spModel.data.AbstractDataObject;
@@ -10,6 +12,7 @@ import edu.gemini.spModel.data.config.ISysConfig;
 import edu.gemini.spModel.data.config.StringParameter;
 import edu.gemini.spModel.data.property.PropertyProvider;
 import edu.gemini.spModel.data.property.PropertySupport;
+import edu.gemini.spModel.gemini.init.ComponentNodeInitializer;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.guide.GuideProbeConsumer;
 import edu.gemini.spModel.guide.GuideProbeProvider;
@@ -126,6 +129,9 @@ public final class Gems extends AbstractDataObject implements PropertyProvider, 
     private static final String VERSION = "2009A-1";
 
     public static final SPComponentType SP_TYPE = SPComponentType.AO_GEMS;
+
+    public static final ISPNodeInitializer<ISPObsComponent, Gems> NI =
+        new ComponentNodeInitializer<>(SP_TYPE, () -> new Gems(), c -> new GemsCB(c));
 
     public static final PropertyDescriptor ADC_PROP;
     public static final PropertyDescriptor DICHROIC_BEAMSPLITTER_PROP;

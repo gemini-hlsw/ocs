@@ -1,5 +1,7 @@
 package edu.gemini.pot.sp;
 
+import edu.gemini.spModel.data.ISPDataObject;
+
 import java.io.Serializable;
 
 /**
@@ -11,7 +13,18 @@ import java.io.Serializable;
  * must be performed, including adding specific user objects, component
  * objects, or child nodes.
  */
-public interface ISPNodeInitializer extends Serializable {
+public interface ISPNodeInitializer<N extends ISPNode, D extends ISPDataObject> extends Serializable {
+
+    /**
+     * Gets the SPComponentType associated with the node.
+     */
+    SPComponentType getType();
+
+    /**
+     * Creates a new data object associated with the component type.
+     */
+    D createDataObject();
+
     /**
      * Initializes the given <code>node</code>.
      *
@@ -20,7 +33,10 @@ public interface ISPNodeInitializer extends Serializable {
      *
      * @param node the science program node to be initialized
      */
-    void initNode(ISPFactory factory, ISPNode node);
+    default void initNode(ISPFactory factory, N node) {
+        node.setDataObject(createDataObject());
+        updateNode(node);
+    }
 
     /**
      * Updates the given <code>node</code>. This should be called on any new
@@ -29,6 +45,9 @@ public interface ISPNodeInitializer extends Serializable {
      *
      * @param node the science program node to be updated
      */
-    void updateNode(ISPNode node);
+    default void updateNode(N node) {
+        // do nothing
+    }
+
 }
 

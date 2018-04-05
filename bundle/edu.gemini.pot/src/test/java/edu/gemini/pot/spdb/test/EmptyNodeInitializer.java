@@ -6,18 +6,23 @@ package edu.gemini.pot.spdb.test;
 import edu.gemini.pot.sp.ISPFactory;
 import edu.gemini.pot.sp.ISPNode;
 import edu.gemini.pot.sp.ISPNodeInitializer;
+import edu.gemini.pot.sp.SPComponentType;
+import edu.gemini.spModel.data.ISPDataObject;
 
 /**
  * A node initializer that does nothing.
  */
-public final class EmptyNodeInitializer implements ISPNodeInitializer {
-    public static final EmptyNodeInitializer INSTANCE = new EmptyNodeInitializer();
+public final class EmptyNodeInitializer<N extends ISPNode, D extends ISPDataObject> implements ISPNodeInitializer<N, D> {
 
-    public void initNode(ISPFactory factory, ISPNode node) {
-        // do nothing
+    public SPComponentType getType() {
+        return null;
     }
 
-    public void updateNode(ISPNode node) {
+    public D createDataObject() {
+        return null;
+    }
+
+    public void initNode(ISPFactory factory, N node) {
         // do nothing
     }
 }

@@ -8,6 +8,8 @@
 
 package edu.gemini.spModel.gemini.trecs;
 
+import edu.gemini.pot.sp.ISPNodeInitializer;
+import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.shared.util.immutable.Option;
@@ -22,6 +24,7 @@ import edu.gemini.spModel.data.config.DefaultSysConfig;
 import edu.gemini.spModel.data.config.ISysConfig;
 import edu.gemini.spModel.data.property.PropertyProvider;
 import edu.gemini.spModel.data.property.PropertySupport;
+import edu.gemini.spModel.gemini.init.ComponentNodeInitializer;
 import edu.gemini.spModel.gemini.trecs.TReCSParams.*;
 import edu.gemini.spModel.obs.plannedtime.CommonStepCalculator;
 import edu.gemini.spModel.obs.plannedtime.ExposureCalculator;
@@ -58,6 +61,9 @@ public final class InstTReCS extends SPInstObsComp implements PropertyProvider, 
      */
     public static final SPComponentType SP_TYPE =
             SPComponentType.INSTRUMENT_TRECS;
+
+    public static final ISPNodeInitializer<ISPObsComponent, InstTReCS> NI =
+        new ComponentNodeInitializer<>(SP_TYPE, () -> new InstTReCS(), c -> new InstTReCSCB(c));
 
     private static final Map<String, PropertyDescriptor> PRIVATE_PROP_MAP = new TreeMap<>();
     public static final Map<String, PropertyDescriptor> PROPERTY_MAP = Collections.unmodifiableMap(PRIVATE_PROP_MAP);

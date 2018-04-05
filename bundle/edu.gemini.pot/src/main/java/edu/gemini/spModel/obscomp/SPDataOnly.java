@@ -1,7 +1,10 @@
 package edu.gemini.spModel.obscomp;
 
 import edu.gemini.pot.sp.SPComponentType;
+import edu.gemini.pot.sp.ISPNodeInitializer;
+import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.spModel.data.AbstractDataObject;
+import edu.gemini.spModel.gemini.init.SimpleNodeInitializer;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.PioFactory;
 
@@ -11,12 +14,15 @@ import java.util.*;
  * The SPDataOnly is defined to be a "hidden" container of generic
  * information, which is not visualized in the OT view.
  */
-public class SPDataOnly extends AbstractDataObject {
+public final class SPDataOnly extends AbstractDataObject {
     /**
      * This obs component's SP type.
      */
     public static final SPComponentType SP_TYPE =
             SPComponentType.DATA_DATAONLY;
+
+    public static final ISPNodeInitializer<ISPObsComponent, SPDataOnly> NI =
+        new SimpleNodeInitializer<>(SP_TYPE, () -> new SPDataOnly());
 
     // for serialization
     private static final long serialVersionUID = 1L;

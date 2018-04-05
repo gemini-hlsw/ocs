@@ -1,6 +1,6 @@
 package edu.gemini.spModel.template
 
-import edu.gemini.pot.sp.{ISPObsComponent, SPComponentType, ISPObservation, SPNodeKey}
+import edu.gemini.pot.sp.{Instrument, ISPObsComponent, SPComponentType, ISPObservation, SPNodeKey}
 import edu.gemini.pot.sp.SPComponentType.{INSTRUMENT_GMOSSOUTH, OBSERVER_OBSERVE, SCHEDULING_CONDITIONS, TELESCOPE_TARGETENV}
 import edu.gemini.shared.util.TimeValue
 import edu.gemini.spModel.data.ISPDataObject
@@ -86,9 +86,7 @@ class InstantiationFunctorTest extends SpModelTestBase {
   }
 
   def newObs(clazz: ObsClass): ISPObservation = {
-    val obsNode     = getFactory.createObservation(getProgram, WithSomeNewKey)
-
-    obsNode.addObsComponent(getFactory.createObsComponent(getProgram, INSTRUMENT_GMOSSOUTH, WithSomeNewKey))
+    val obsNode     = getFactory.createObservation(getProgram, Instrument.GmosSouth.some, WithSomeNewKey)
 
     val filteredChildren = obsNode.getObsComponents.asScala.filter { n =>
       n.getDataObject.getType match {

@@ -1,5 +1,7 @@
 package edu.gemini.spModel.gemini.michelle;
 
+import edu.gemini.pot.sp.ISPNodeInitializer;
+import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.shared.util.immutable.*;
@@ -16,6 +18,7 @@ import edu.gemini.spModel.data.config.ISysConfig;
 import edu.gemini.spModel.data.config.StringParameter;
 import edu.gemini.spModel.data.property.PropertyProvider;
 import edu.gemini.spModel.data.property.PropertySupport;
+import edu.gemini.spModel.gemini.init.ComponentNodeInitializer;
 import edu.gemini.spModel.gemini.michelle.MichelleParams.*;
 import edu.gemini.spModel.obs.plannedtime.CommonStepCalculator;
 import edu.gemini.spModel.obs.plannedtime.ExposureCalculator;
@@ -53,6 +56,8 @@ public final class InstMichelle extends SPInstObsComp implements PropertyProvide
      */
     public static final SPComponentType SP_TYPE = SPComponentType.INSTRUMENT_MICHELLE;
 
+    public static final ISPNodeInitializer<ISPObsComponent, InstMichelle> NI =
+        new ComponentNodeInitializer<>(SP_TYPE, () -> new InstMichelle(), c -> new InstMichelleCB(c));
 
     public static final String INSTRUMENT_NAME_PROP = "Michelle";
     // default values

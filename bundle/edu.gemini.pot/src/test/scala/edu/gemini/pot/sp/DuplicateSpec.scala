@@ -46,7 +46,7 @@ object DuplicateSpec extends ProgramTestSupport {
           } yield (oc, on)
 
         setup.forall { case (obsContainer, obsNum) =>
-          val obs = odb.getFactory.createObservation(p, obsNum, null)
+          val obs = odb.getFactory.createObservation(p, obsNum, Instrument.none, null)
           expectTreeStateException { obsContainer.addObservation(obs) }
         }
       }
@@ -57,7 +57,7 @@ object DuplicateSpec extends ProgramTestSupport {
         randomObsNumber(p).forall { obsNum =>
           val f = odb.getFactory
           val g = f.createGroup(p, null)
-          val o = f.createObservation(p, obsNum, null)
+          val o = f.createObservation(p, obsNum, Instrument.none, null)
           g.addObservation(o)
           expectTreeStateException { p.addGroup(g) }
         }
@@ -70,7 +70,7 @@ object DuplicateSpec extends ProgramTestSupport {
           Option(p.getTemplateFolder).forall { tf =>
             val f = odb.getFactory
             val g = f.createTemplateGroup(p, null)
-            val o = f.createObservation(p, obsNum, null)
+            val o = f.createObservation(p, obsNum, Instrument.none, null)
             g.addObservation(o)
             expectTreeStateException { tf.addTemplateGroup(g) }
           }
@@ -87,7 +87,7 @@ object DuplicateSpec extends ProgramTestSupport {
           } yield (oc, on)
 
         setup.forall { case (obsContainer, obsNum) =>
-          val obs = odb.getFactory.createObservation(p, obsNum, null)
+          val obs = odb.getFactory.createObservation(p, obsNum, Instrument.none, null)
           expectTreeStateException {
             obsContainer.children = obs :: obsContainer.children
           }
@@ -100,7 +100,7 @@ object DuplicateSpec extends ProgramTestSupport {
         randomObsNumber(p).forall { obsNum =>
           val f = odb.getFactory
           val g = f.createGroup(p, null)
-          val o = f.createObservation(p, obsNum, null)
+          val o = f.createObservation(p, obsNum, Instrument.none, null)
           g.addObservation(o)
 
           val gs = p.getGroups
@@ -122,7 +122,7 @@ object DuplicateSpec extends ProgramTestSupport {
         setup.forall { case (templateFolder, obsNum) =>
           val f = odb.getFactory
           val g = f.createTemplateGroup(p, null)
-          val o = f.createObservation(p, obsNum, null)
+          val o = f.createObservation(p, obsNum, Instrument.none, null)
           g.addObservation(o)
 
           val gs = templateFolder.getTemplateGroups
@@ -141,7 +141,7 @@ object DuplicateSpec extends ProgramTestSupport {
           val tgs = Option(p.getTemplateFolder).map(_.getTemplateGroups).getOrElse(new java.util.ArrayList[ISPTemplateGroup]())
 
           val tg  = f.createTemplateGroup(p, null)
-          val o   = f.createObservation(p, obsNum, null)
+          val o   = f.createObservation(p, obsNum, Instrument.none, null)
           tg.addObservation(o)
           tgs.add(tg)
 

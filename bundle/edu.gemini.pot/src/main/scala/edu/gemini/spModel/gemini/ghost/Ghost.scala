@@ -3,15 +3,15 @@ package edu.gemini.spModel.gemini.ghost
 import java.beans.PropertyDescriptor
 import java.util.{Collections, List => JList, Map => JMap, Set => JSet}
 
-import edu.gemini.pot.sp.SPComponentType
+import edu.gemini.pot.sp.{ ISPNodeInitializer, ISPObsComponent, SPComponentType }
 import edu.gemini.spModel.core.Site
 import edu.gemini.spModel.data.ISPDataObject
 import edu.gemini.spModel.data.config.{DefaultParameter, DefaultSysConfig, ISysConfig, StringParameter}
 import edu.gemini.spModel.data.property.{PropertyProvider, PropertySupport}
+import edu.gemini.spModel.gemini.init.ComponentNodeInitializer
 import edu.gemini.spModel.obscomp.{InstConfigInfo, InstConstants, SPInstObsComp}
 import edu.gemini.spModel.pio.{ParamSet, PioFactory}
 import edu.gemini.spModel.seqcomp.SeqConfigNames
-
 import scala.collection.immutable.TreeMap
 import scala.collection.JavaConverters._
 
@@ -55,6 +55,22 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
 }
 
 object Ghost {
+
+  // Unfortunately we need a Java "Supplier" and "Function" which makes it
+  // awkward to create the NodeInitializer via ComponentNodeInitializer.
+  private val GhostSupplier: java.util.function.Supplier[Ghost] =
+    new java.util.function.Supplier[Ghost] {
+      def get(): Ghost = new Ghost()
+    }
+
+  private val GhostCbFactory: java.util.function.Function[ISPObsComponent, GhostCB] =
+    new java.util.function.Function[ISPObsComponent, GhostCB] {
+      def apply(oc: ISPObsComponent): GhostCB = new GhostCB(oc)
+    }
+
+  val NI: ISPNodeInitializer[ISPObsComponent, Ghost] =
+    new ComponentNodeInitializer(SPComponentType.INSTRUMENT_GHOST, GhostSupplier, GhostCbFactory)
+
   // The name of the Ghost instrument configuration.
   val INSTRUMENT_NAME_PROP: String = "GHOST"
 

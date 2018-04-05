@@ -1,8 +1,9 @@
 package edu.gemini.shared.util.immutable;
 
-import java.util.NoSuchElementException;
 import java.io.Serializable;
+import java.util.NoSuchElementException;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 /**
  * A class that represents an optional value of a particular type.  This has
@@ -126,4 +127,10 @@ public interface Option<T> extends Iterable<T>, Serializable {
      * @param <U> result type of the operation
      */
     <U> Option<U> flatMap(Function1<? super T, Option<U>> op);
+
+    /**
+     * Creates a Stream containing the element if Some, or an empty Stream
+     * otherwise.
+     */
+    Stream<T> toStream();
 }

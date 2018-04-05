@@ -1,5 +1,7 @@
 package edu.gemini.spModel.gemini.obscomp;
 
+import edu.gemini.pot.sp.ISPObsComponent;
+import edu.gemini.pot.sp.ISPNodeInitializer;
 import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
@@ -8,6 +10,7 @@ import edu.gemini.spModel.core.*;
 import edu.gemini.spModel.data.AbstractDataObject;
 import edu.gemini.spModel.data.property.PropertyProvider;
 import edu.gemini.spModel.data.property.PropertySupport;
+import edu.gemini.spModel.gemini.init.ComponentNodeInitializer;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.Pio;
 import edu.gemini.spModel.pio.PioFactory;
@@ -30,6 +33,9 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
 
 
     public static final SPComponentType SP_TYPE = SPComponentType.SCHEDULING_CONDITIONS;
+
+    public static final ISPNodeInitializer<ISPObsComponent, SPSiteQuality> NI =
+        new ComponentNodeInitializer<>(SP_TYPE, () -> new SPSiteQuality(), c -> new SPSiteQualityCB(c));
 
     /**
      * SPSiteQuality owns a list of TimingWindow objects specifying when the target is observable.

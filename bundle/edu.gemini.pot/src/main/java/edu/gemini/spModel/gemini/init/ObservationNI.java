@@ -10,7 +10,9 @@ package edu.gemini.spModel.gemini.init;
 
 import edu.gemini.pot.sp.*;
 import edu.gemini.shared.util.immutable.None;
+import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.config.IConfigBuilder;
+import edu.gemini.spModel.data.ISPDataObject;
 import edu.gemini.spModel.gemini.obscomp.GemObservationCB;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 import edu.gemini.spModel.obs.ObsPhase2Status;
@@ -36,70 +38,97 @@ import java.util.logging.Logger;
 /**
  * Initializes <code>{@link ISPObservation}</code> nodes.
  */
-public class ObservationNI implements ISPNodeInitializer {
+public abstract class ObservationNI implements ISPNodeInitializer<ISPObservation, SPObservation> {
     private static final Logger LOG = Logger.getLogger(ObservationNI.class.getName());
 
     /**
-     * A special instance for use when importing programs from XML
+     * A special instance for use when importing programs from XML, or working
+     * with program merge/sync.
      */
-    public static final ObservationNI NO_CHILDREN_INSTANCE = new ObservationNI() {
-        protected void addSubnodes(ISPFactory factory, ISPObservation obsNode) {
-        }
-    };
+    public static final ObservationNI NO_CHILDREN_INSTANCE =
+        new ObservationNI(Instrument.none) {
+            protected void addSubnodes(ISPFactory factory, ISPObservation obsNode) {
+                // do nothing
+            }
+        };
 
     /**
-     * Initializes the given <code>node</code>.
-     * Implements <code>{@link ISPNodeInitializer}</code>
-     *
-     * @param factory the factory that may be used to create any required
-     *                science program nodes
-     * @param node    the science program node to be initialized
+     * A default instance that makes an observation with a site quality, target
+     * environment, and sequence component but no instrument.
      */
-    public void initNode(ISPFactory factory, ISPNode node) {
-        // The data is stored in an SPObservation object set as the
-        // data object of this ObsComponent.
-        final ISPObservation obsNode = (ISPObservation) node;
-        final SPObservation dataObj = new SPObservation();
-        node.setDataObject(dataObj);
+    public static final ObservationNI NO_INSTRUMENT =
+        new ObservationNI(Instrument.none) {
+        };
+
+    /**
+     * An instance that will, in addition to the standard site quality, target
+     * environment and sequence, also adds the corresponding instrument
+     * component.
+     * @param inst instrument to add
+     */
+    public static final ObservationNI forInstrument(Instrument inst) {
+        return new ObservationNI(inst.some()) {
+        };
+    }
+
+
+    private final Option<Instrument> instrument;
+
+    protected ObservationNI(Option<Instrument> instrument) {
+        this.instrument = instrument;
+    }
+
+    @Override
+    public SPComponentType getType() {
+        return SPComponentType.OBSERVATION_BASIC;
+    }
+
+    @Override
+    public SPObservation createDataObject() {
+        return new SPObservation();
+    }
+
+    @Override
+    public void initNode(ISPFactory factory, ISPObservation obsNode) {
+
+        obsNode.setDataObject(createDataObject());
 
         // Add the standard subnodes
         addSubnodes(factory, obsNode);
 
         // Set the configuration builder
-        updateNode(node);
+        updateNode(obsNode);
     }
 
-    /**
-     * Add the standard observation subnodes.
-     */
-    protected void addSubnodes(ISPFactory factory, ISPObservation obsNode) {
-        // All observations come with:
-        // 1. A SiteQuality obscomp
-        // 2. A target list
-        // 3. Obslog
-        // 4. An empty seq component "folder"
-
-        // 1,2. site quality and target
-        ISPObsComponent siteQual;
-        ISPObsComponent targetEnv;
+    protected void addObsComponent(ISPFactory factory, ISPObservation obsNode, SPComponentType type) {
         try {
-            siteQual = factory.createObsComponent(obsNode.getProgram(),
-                    SPSiteQuality.SP_TYPE, null);
-
-            targetEnv = factory.createObsComponent(obsNode.getProgram(),
-                    TargetObsComp.SP_TYPE, null);
-            if (siteQual != null && targetEnv != null) {
-                List<ISPObsComponent> l = new ArrayList<ISPObsComponent>();
-                l.add(siteQual);
-                l.add(targetEnv);
-                obsNode.setObsComponents(l);
-            }
+            final ISPProgram p = obsNode.getProgram();
+            obsNode.addObsComponent(factory.createObsComponent(p, type, null));
         } catch (SPException ex) {
-            // If this fails, log a message.
-            LOG.log(Level.SEVERE, "Failed while initializing observation conditions and target env.", ex);
+            LOG.log(Level.SEVERE, "Failed while initializing obs component: " + type, ex);
+            throw new RuntimeException(ex);
         }
+    }
 
-        // 3. obslog
+    protected void addSiteQuality(ISPFactory factory, ISPObservation obsNode) {
+        addObsComponent(factory, obsNode, SPSiteQuality.SP_TYPE);
+    }
+
+    protected void addTargetEnv(ISPFactory factory, ISPObservation obsNode) {
+        addObsComponent(factory, obsNode, TargetObsComp.SP_TYPE);
+    }
+
+    protected void addInstrument(ISPFactory factory, ISPObservation obsNode) {
+        instrument.foreach(i -> addObsComponent(factory, obsNode, i.componentType));
+    }
+
+    protected void addObsComponents(ISPFactory factory, ISPObservation obsNode) {
+        addSiteQuality(factory, obsNode);
+        addTargetEnv(factory, obsNode);
+        addInstrument(factory, obsNode);
+    }
+
+    protected void addObsLog(ISPFactory factory, ISPObservation obsNode) {
         try {
             obsNode.setObsExecLog(factory.createObsExecLog(obsNode.getProgram(), null));
             obsNode.setObsQaLog(factory.createObsQaLog(obsNode.getProgram(), null));
@@ -107,41 +136,41 @@ public class ObservationNI implements ISPNodeInitializer {
             LOG.log(Level.SEVERE, "Failed while initializing obslog.", ex);
             throw new RuntimeException(ex);
         }
+    }
 
-        // 4. sequence root
-        ISPSeqComponent seqRoot;
+    protected void addSequenceRoot(ISPFactory factory, ISPObservation obsNode) {
         try {
-            seqRoot = factory.createSeqComponent(obsNode.getProgram(),
-                    SeqBase.SP_TYPE, null);
-            if (seqRoot != null) {
-                obsNode.setSeqComponent(seqRoot);
-            }
+            obsNode.setSeqComponent(
+                factory.createSeqComponent(obsNode.getProgram(), SeqBase.SP_TYPE, null)
+            );
         } catch (SPException ex) {
             // If this fails, log a message.
-            LOG.log(Level.SEVERE, "Failed while initializing an observation.");
+            LOG.log(Level.SEVERE, "Failed while initializing an sequence root.", ex);
             throw new RuntimeException(ex);
         }
     }
 
     /**
-     * Updates the given <code>node</code>. This should be called on any new
-     * nodes created by making a deep copy of another node, so that the user
-     * objects are updated correctly.
-     *
-     * @param node the science program node to be updated
+     * Add the standard observation subnodes.
      */
-    public void updateNode(ISPNode node) {
+    protected void addSubnodes(ISPFactory factory, ISPObservation obsNode) {
+        addObsComponents(factory, obsNode);
+        addObsLog(factory, obsNode);
+        addSequenceRoot(factory, obsNode);
+    }
+
+    @Override
+    public void updateNode(ISPObservation obs) {
         // Set the configuration builder
-        ISPObservation obs = (ISPObservation) node;
-        node.putClientData(IConfigBuilder.USER_OBJ_KEY, new GemObservationCB(obs));
-        node.putClientData(InstrumentSequenceSync.USER_OBJ_KEY, InstrumentSequenceSync.instance);
+        obs.putClientData(IConfigBuilder.USER_OBJ_KEY, new GemObservationCB(obs));
+        obs.putClientData(InstrumentSequenceSync.USER_OBJ_KEY, InstrumentSequenceSync.instance);
 
         // Turn off electronic offset sync for now.  The only usage is
         // currently F2 and it has been modified to no longer support its own
         // offset positions.
 //        node.putClientData("ElectronicOffsetSync", ElectronicOffsetSync.instance);
 
-        node.putClientData("IssPortSync", IssPortSync.instance);
+        obs.putClientData("IssPortSync", IssPortSync.instance);
     }
 
     public static void reset(ISPObservation obs, boolean sameProgram) {

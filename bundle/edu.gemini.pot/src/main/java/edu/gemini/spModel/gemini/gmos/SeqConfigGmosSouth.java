@@ -5,10 +5,13 @@
 //
 package edu.gemini.spModel.gemini.gmos;
 
+import edu.gemini.pot.sp.ISPNodeInitializer;
+import edu.gemini.pot.sp.ISPSeqComponent;
 import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.spModel.data.property.PropertyFilter;
 import edu.gemini.spModel.data.property.PropertyProvider;
 import edu.gemini.spModel.data.property.PropertySupport;
+import edu.gemini.spModel.gemini.init.ComponentNodeInitializer;
 import edu.gemini.spModel.seqcomp.SeqConfigNames;
 import edu.gemini.spModel.seqcomp.SeqConfigObsBase;
 
@@ -27,6 +30,9 @@ public class SeqConfigGmosSouth extends SeqConfigObsBase implements PropertyProv
      */
     public static final SPComponentType SP_TYPE =
             SPComponentType.ITERATOR_GMOSSOUTH;
+
+    public static final ISPNodeInitializer<ISPSeqComponent, SeqConfigGmosSouth> NI =
+        new ComponentNodeInitializer<>(SP_TYPE, () -> new SeqConfigGmosSouth(), c -> new SeqConfigGmosSouthCB(c));
 
     // The instrument name
     public static final String SYSTEM_NAME = SeqConfigNames.INSTRUMENT_CONFIG_NAME;

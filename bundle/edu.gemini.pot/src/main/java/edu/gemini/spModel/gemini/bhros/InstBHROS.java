@@ -1,5 +1,7 @@
 package edu.gemini.spModel.gemini.bhros;
 
+import edu.gemini.pot.sp.ISPNodeInitializer;
+import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.spModel.core.Site;
@@ -13,6 +15,7 @@ import edu.gemini.spModel.gemini.bhros.BHROSParams.*;
 import edu.gemini.spModel.gemini.bhros.ech.BRayLib;
 import edu.gemini.spModel.gemini.bhros.ech.Echellogram;
 import edu.gemini.spModel.gemini.bhros.ech.HROSHardwareConstants;
+import edu.gemini.spModel.gemini.init.ComponentNodeInitializer;
 import edu.gemini.spModel.obscomp.InstConfigInfo;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.pio.ParamSet;
@@ -31,6 +34,9 @@ public final class InstBHROS extends SPInstObsComp implements PropertyProvider {
     private static final long serialVersionUID = 1L;
 
     public static final SPComponentType SP_TYPE = SPComponentType.INSTRUMENT_BHROS;
+
+    public static final ISPNodeInitializer<ISPObsComponent, InstBHROS> NI =
+        new ComponentNodeInitializer<>(SP_TYPE, () -> new InstBHROS(), c -> new InstBHROSCB(c));
 
     private static final Map<String, PropertyDescriptor> PRIVATE_PROP_MAP = new TreeMap<>();
     public static final Map<String, PropertyDescriptor> PROPERTY_MAP = Collections.unmodifiableMap(PRIVATE_PROP_MAP);

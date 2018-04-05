@@ -7,6 +7,7 @@ import edu.gemini.spModel.obs.ObservationStatus
 import java.security.Permission
 
 import edu.gemini.pot.sp.Conflict.Moved
+import edu.gemini.pot.sp.Instrument
 import edu.gemini.pot.sp.validator.Validator
 import edu.gemini.pot.sp.version.VersionMap
 import edu.gemini.pot.sp.{DataObjectBlob => DOB, _}
@@ -758,7 +759,7 @@ class MergeTest extends JUnitSuite {
           val allObsNumbers = ulp.getAllObservations.asScala.map(_.getObservationNumber)
           val max = if (allObsNumbers.isEmpty) 0 else allObsNumbers.max
 
-          val newObs = pc.fact.createObservation(ulp, null)
+          val newObs = pc.fact.createObservation(ulp, Instrument.none, null)
           newObs.getObservationNumber > max
         }.unsafePerformSync
       }

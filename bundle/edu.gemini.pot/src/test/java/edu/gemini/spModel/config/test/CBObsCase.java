@@ -111,7 +111,7 @@ public class CBObsCase extends CBTestBase {
 
         // Add a seq component.
         ISysConfig sc = new DefaultSysConfig("seqConfig");
-        List<String> valueList = new LinkedList<String>();
+        List<String> valueList = new LinkedList<>();
         valueList.add("value0");
         valueList.add("value1");
         _putParameterValue(sc, "param0", valueList);
@@ -130,7 +130,7 @@ public class CBObsCase extends CBTestBase {
         IConfig conf1 = new DefaultConfig();
         _putConfigParameterValue(conf1, "seqConfig", "param0", "value1");
 
-        List<IConfig> expectedConfList = new LinkedList<IConfig>();
+        List<IConfig> expectedConfList = new LinkedList<>();
         expectedConfList.add(conf0);
         expectedConfList.add(conf1);
 
@@ -155,7 +155,7 @@ public class CBObsCase extends CBTestBase {
 
         // Add a seq component.
         ISysConfig seqCompConfig = new DefaultSysConfig("seqConfig");
-        List<String> valueList = new LinkedList<String>();
+        List<String> valueList = new LinkedList<>();
         valueList.add("value0");
         valueList.add("value1");
         _putParameterValue(seqCompConfig, "param0", valueList);
@@ -185,7 +185,7 @@ public class CBObsCase extends CBTestBase {
         IConfig conf1 = new DefaultConfig();
         _putConfigParameterValue(conf1, "seqConfig", "param0", "value1");
 
-        List<IConfig> expectedConfList = new LinkedList<IConfig>();
+        List<IConfig> expectedConfList = new LinkedList<>();
         expectedConfList.add(conf0);
         expectedConfList.add(conf1);
 
@@ -212,7 +212,7 @@ public class CBObsCase extends CBTestBase {
 
         // Add a seq component.
         ISysConfig seqCompConfig = new DefaultSysConfig("seqConfig");
-        List<String> valueList = new LinkedList<String>();
+        List<String> valueList = new LinkedList<>();
         valueList.add("value0");
         valueList.add("value1");
         _putParameterValue(seqCompConfig, "param0", valueList);
@@ -247,7 +247,7 @@ public class CBObsCase extends CBTestBase {
         IConfig conf2 = new DefaultConfig();
         _putConfigParameterValue(conf2, "seqConfig", "param1", "nvalue2");
 
-        List<IConfig> expectedConfList = new LinkedList<IConfig>();
+        List<IConfig> expectedConfList = new LinkedList<>();
         expectedConfList.add(conf0);
         expectedConfList.add(conf1);
         expectedConfList.add(conf2);
@@ -276,7 +276,7 @@ public class CBObsCase extends CBTestBase {
 
         // Add a seq component.
         ISysConfig seqCompConfig = new DefaultSysConfig("seqConfig");
-        List<String> valueList = new LinkedList<String>();
+        List<String> valueList = new LinkedList<>();
         valueList.add("value0");
         valueList.add("value1");
         _putParameterValue(seqCompConfig, "param0", valueList);
@@ -314,7 +314,7 @@ public class CBObsCase extends CBTestBase {
         IConfig conf2 = new DefaultConfig();
         _putConfigParameterValue(conf2, "seqConfig", "param1", "nvalue2");
 
-        List<IConfig> expectedConfList = new LinkedList<IConfig>();
+        List<IConfig> expectedConfList = new LinkedList<>();
         expectedConfList.add(conf0);
         expectedConfList.add(conf1);
         expectedConfList.add(conf2);
@@ -342,7 +342,7 @@ public class CBObsCase extends CBTestBase {
 
         // Add a seq component.
         ISysConfig seqCompConfig = new DefaultSysConfig("niri");
-        List<String> valueList = new LinkedList<String>();
+        List<String> valueList = new LinkedList<>();
         valueList.add("green");
         valueList.add("blue");
         _putParameterValue(seqCompConfig, "filter", valueList);
@@ -362,7 +362,7 @@ public class CBObsCase extends CBTestBase {
         IConfig conf1 = new DefaultConfig();
         _putConfigParameterValue(conf1, "niri", "filter", "blue");
 
-        List<IConfig> expectedConfList = new LinkedList<IConfig>();
+        List<IConfig> expectedConfList = new LinkedList<>();
         expectedConfList.add(conf0);
         expectedConfList.add(conf1);
 

@@ -3,7 +3,7 @@ package edu.gemini.p2checker.rules
 import java.util.UUID
 
 import edu.gemini.p2checker.target.NonSiderealTargetRules
-import edu.gemini.pot.sp.{ISPObservation, SPComponentType}
+import edu.gemini.pot.sp.{Instrument, ISPObservation, SPComponentType}
 import edu.gemini.pot.util.POTUtil
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.gemini.gmos.{InstGmosNorth, InstGmosSouth}
@@ -117,7 +117,7 @@ class NonSiderealTargetRulesSpec extends RuleSpec {
   def obs(target: Target, sb: Option[SchedulingBlock], inst: SPComponentType = InstGmosSouth.SP_TYPE): ISPObservation = {
     val f = POTUtil.createFactory(UUID.randomUUID())
     val p = f.createProgram(null, SPProgramID.toProgramID("no-site"))
-    val o = f.createObservation(p, null) <| { on =>
+    val o = f.createObservation(p, Instrument.fromComponentType(inst), null) <| { on =>
       p.addObservation(on)
       on.getDataObject.asInstanceOf[SPObservation] <| { o =>
         o.setSchedulingBlock(sb.asGeminiOpt)
@@ -132,7 +132,6 @@ class NonSiderealTargetRulesSpec extends RuleSpec {
       }
       e.setDataObject(toc)
     }
-    f.createObsComponent(p, inst, null) <| { i => o.addObsComponent(i) }
     o
   }
 

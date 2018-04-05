@@ -5,6 +5,8 @@ import edu.gemini.spModel.obs.SPObservation;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.PioFactory;
 
+import edu.gemini.shared.util.immutable.None;
+
 import java.io.Serializable;
 
 import java.util.ArrayList;
@@ -64,7 +66,7 @@ public final class ObservationShell implements Serializable {
 
     public ISPObservation toSp(ISPFactory factory, ISPProgram prog)  {
         try {
-            ISPObservation sp = factory.createObservation(prog, null);
+            ISPObservation sp = factory.createObservation(prog, None.instance(), null);
 
             // Set the observation's data object, but don't clobber the
             // TooType. Leave it at the default for the program TooType.

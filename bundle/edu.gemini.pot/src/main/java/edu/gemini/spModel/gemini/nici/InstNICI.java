@@ -1,5 +1,7 @@
 package edu.gemini.spModel.gemini.nici;
 
+import edu.gemini.pot.sp.ISPNodeInitializer;
+import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.skycalc.Angle;
@@ -15,6 +17,7 @@ import edu.gemini.spModel.data.config.DefaultSysConfig;
 import edu.gemini.spModel.data.config.ISysConfig;
 import edu.gemini.spModel.data.property.PropertyProvider;
 import edu.gemini.spModel.data.property.PropertySupport;
+import edu.gemini.spModel.gemini.init.ComponentNodeInitializer;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.guide.GuideProbeProvider;
 import edu.gemini.spModel.guide.GuideProbeUtil;
@@ -72,6 +75,9 @@ public final class InstNICI extends SPInstObsComp implements PropertyProvider, G
     private static final long serialVersionUID = 2L;
 
     public static final SPComponentType SP_TYPE = SPComponentType.INSTRUMENT_NICI;
+
+    public static final ISPNodeInitializer<ISPObsComponent, InstNICI> NI =
+        new ComponentNodeInitializer<>(SP_TYPE, () -> new InstNICI(), c -> new InstNICICB(c));
 
     private static final Map<String, PropertyDescriptor> PRIVATE_PROP_MAP = new TreeMap<>();
     public static final Map<String, PropertyDescriptor> PROPERTY_MAP = Collections.unmodifiableMap(PRIVATE_PROP_MAP);

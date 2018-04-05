@@ -4,9 +4,11 @@
 package edu.gemini.pot.spdb.test;
 
 import edu.gemini.pot.sp.ISPProgram;
+import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.pot.sp.SPNodeKey;
 import edu.gemini.pot.spdb.DBLocalDatabase;
 import edu.gemini.pot.spdb.IDBDatabaseService;
+import edu.gemini.spModel.gemini.obscomp.SPProgram;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -43,7 +45,9 @@ public abstract class SpdbBaseTestCase {
 
     public ISPProgram createProgram() throws Exception {
         ISPProgram res = getDatabase().getFactory().createProgram(
-                EmptyNodeInitializer.INSTANCE, new SPNodeKey(), null);
+                new EmptyNodeInitializer<ISPProgram, SPProgram>(),
+                new SPNodeKey(),
+                null);
         recordProgram(res);
         return res;
     }

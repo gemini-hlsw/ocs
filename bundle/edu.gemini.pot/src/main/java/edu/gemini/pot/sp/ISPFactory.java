@@ -1,6 +1,12 @@
 package edu.gemini.pot.sp;
 
 import edu.gemini.spModel.core.SPProgramID;
+import edu.gemini.spModel.data.ISPDataObject;
+import edu.gemini.spModel.gemini.obscomp.SPProgram;
+import edu.gemini.spModel.gemini.plan.NightlyRecord;
+import edu.gemini.spModel.obs.SPObservation;
+import edu.gemini.spModel.obscomp.SPGroup;
+import edu.gemini.shared.util.immutable.Option;
 
 import java.util.List;
 
@@ -17,9 +23,7 @@ public interface ISPFactory {
     String getType();
 
     /**
-     * Creates an ISPProgram using the default initializer for programs
-     * provided one has been registered (see
-     * <code>{@link #registerProgramInit}</code>).
+     * Creates an ISPProgram using the default initializer for programs.
      *
      * @param key key to use for this node (if <code>null</code> a
      * new key will be assigned)
@@ -32,13 +36,12 @@ public interface ISPFactory {
      * the default initializer for programs).
      *
      * @param init the <code>ISPNodeInitializer</code> to use when initializing
-     * the newly created node; will be used instead of any registered
-     * default initializer
+     * the newly created node; will be used instead of any default initializer
      * @param key key to use for this node (if <code>null</code> a
      * new key will be assigned)
      * @param progID the program ID to use
      */
-    ISPProgram createProgram(ISPNodeInitializer init, SPNodeKey key, SPProgramID progID);
+    ISPProgram createProgram(ISPNodeInitializer<ISPProgram, SPProgram> init, SPNodeKey key, SPProgramID progID);
 
     /**
      * Creates an ISPProgram that is a deep copy of the given <code>program</code>.
@@ -64,14 +67,6 @@ public interface ISPFactory {
      */
     ISPProgram copyWithNewKeys(ISPProgram program, SPProgramID newProgID);
 
-    /**
-     * Sets the default initializer to use when creating a new program.
-     *
-     * @param init the <code>ISPNodeInitializer</code> to use when initializing
-     * a newly created program
-     */
-    void registerProgramInit(ISPNodeInitializer init);
-
     ISPConflictFolder createConflictFolder(ISPProgram prog, SPNodeKey key)
         throws SPUnknownIDException;
 
@@ -80,12 +75,9 @@ public interface ISPFactory {
                                                boolean preserveKeys)
         throws SPUnknownIDException;
 
-    void registerConflictFolderInit(ISPNodeInitializer init);
-
     /**
-     * Creates an ISPTemplateFolder using the default initializer for
-     * template folders provided one has been registered (see
-     * <code>{@link #registerTemplateFolderInit}</code>).
+     * Creates an ISPTemplateFolder using the default initializer for template
+     * folders.
      *
      * @param prog the program with which this folder should be associated
      *
@@ -119,17 +111,8 @@ public interface ISPFactory {
         throws SPUnknownIDException;
 
     /**
-     * Sets the default initializer to use when creating a new template folder.
-     *
-     * @param init the <code>ISPNodeInitializer</code> to use when initializing
-     * a newly created folder
-     */
-    void registerTemplateFolderInit(ISPNodeInitializer init);
-
-    /**
-     * Creates an ISPTemplateGroup using the default initializer for
-     * template groups provided one has been registered (see
-     * <code>{@link #registerTemplateGroupInit}</code>).
+     * Creates an ISPTemplateGroup using the default initializer for template
+     * groups.
      *
      * @param prog the program with which this template group should be associated
      *
@@ -141,7 +124,6 @@ public interface ISPFactory {
      */
     ISPTemplateGroup createTemplateGroup(ISPProgram prog, SPNodeKey key)
         throws SPUnknownIDException;
-
 
     /**
      * Creates an ISPTemplateGroup that is a deep copy of the given
@@ -163,18 +145,8 @@ public interface ISPFactory {
         throws SPUnknownIDException;
 
     /**
-     * Sets the default initializer to use when creating a new template group.
-     *
-     * @param init the <code>ISPNodeInitializer</code> to use when initializing
-     * a newly created group
-     */
-    void registerTemplateGroupInit(ISPNodeInitializer init);
-
-
-    /**
      * Creates an ISPTemplateParameters using the default initializer for
-     * template parameterss provided one has been registered (see
-     * <code>{@link #registerTemplateParametersInit}</code>).
+     * template parameters.
      *
      * @param prog the program with which this template parameters should be
      *             associated
@@ -209,16 +181,8 @@ public interface ISPFactory {
             throws SPUnknownIDException;
 
     /**
-     * Sets the default initializer to use when creating a new template parameters.
-     *
-     * @param init the <code>ISPNodeInitializer</code> to use when initializing
-     * a newly created parameters
-     */
-    void registerTemplateParametersInit(ISPNodeInitializer init);
-
-    /**
-     * Creates an ISPNightlyRecord using the default initializer for nightly plans
-     * provided one has been registered (see <code>{@link #registerNightlyRecordInit}</code>).
+     * Creates an ISPNightlyRecord using the default initializer for nightly
+     * plans.
      *
      * @param planID the plan ID to use
      * @param key key to use for this node (if <code>null</code> a
@@ -236,7 +200,7 @@ public interface ISPFactory {
      * @param key key to use for this node (if <code>null</code> a
      * new key will be assigned)
      */
-    ISPNightlyRecord createNightlyRecord(ISPNodeInitializer init, SPNodeKey key, SPProgramID planID);
+    ISPNightlyRecord createNightlyRecord(ISPNodeInitializer<ISPNightlyRecord, NightlyRecord> init, SPNodeKey key, SPProgramID planID);
 
     /**
      * Creates an ISPNightlyRecord that is a deep copy of the given <code>nightly plan</code>.
@@ -244,19 +208,13 @@ public interface ISPFactory {
     ISPNightlyRecord renameNightlyRecord(ISPNightlyRecord plan, SPNodeKey key, SPProgramID planID);
 
     /**
-     * Sets the default initializer to use when creating a new nightly plan.
-     *
-     * @param init the <code>ISPNodeInitializer</code> to use when initializing
-     * a newly created nightly plan
-     */
-    void registerNightlyRecordInit(ISPNodeInitializer init);
-
-    /**
-     * Creates an ISPObservation using the default initializer for
-     * observations provided one has been registered (see
-     * <code>{@link #registerObservationInit}</code>).
+     * Creates an ISPObservation using the default initializer for observations
+     * associated with the given instrument (if provided)..
      *
      * @param prog the program with which this observation should be associated
+     *
+     * @param inst the instrument to add to this observation, if any.  This will
+     *             be used for instrument-specific observation initialization.
      *
      * @param key key to use for this node (if <code>null</code> a
      * new key will be assigned)
@@ -264,23 +222,24 @@ public interface ISPFactory {
      * @throws SPUnknownIDException if the given <code>progKey</code> refers
      * to a program that is not known by this factory
      */
-    ISPObservation createObservation(ISPProgram prog, SPNodeKey key) throws SPException;
+    ISPObservation createObservation(ISPProgram prog, Option<Instrument> inst, SPNodeKey key) throws SPException;
 
     /**
-     * Creates an ISPObservation using the default initializer for
-     * observations provided one has been registered (see
-     * <code>{@link #registerObservationInit}</code>).
+     * Creates an ISPObservation using the default initializer for observations
+     * associated with the given instrument (if provided)..
      *
      * @param prog the program with which this observation should be associated
      * @param index the index of the observation inside of the program
      * (or -1 to automatically generate a new index)
+     * @param inst the instrument to add to this observation, if any.  This will
+     *             be used for instrument-specific observation initialization
      * @param key key to use for this node (if <code>null</code> a
      * new key will be assigned)
      *
      * @throws SPUnknownIDException if the given <code>progKey</code> refers
      * to a program that is not known by this factory
      */
-    ISPObservation createObservation(ISPProgram prog, int index, SPNodeKey key) throws SPException;
+    ISPObservation createObservation(ISPProgram prog, int index, Option<Instrument> inst, SPNodeKey key) throws SPException;
 
     /**
      * Creates an ISPObservation using the provided initializer (overriding
@@ -301,7 +260,7 @@ public interface ISPFactory {
      * @throws SPUnknownIDException if the given <code>progKey</code> refers
      * to a program that is not known by this factory
      */
-    ISPObservation createObservation(ISPProgram prog, int index, ISPNodeInitializer init, SPNodeKey key) throws SPException;
+    ISPObservation createObservation(ISPProgram prog, int index, ISPNodeInitializer<ISPObservation, SPObservation> init, SPNodeKey key) throws SPException;
 
     /**
      * Creates an ISPObservation that is a deep copy of the given
@@ -319,26 +278,15 @@ public interface ISPFactory {
      */
     ISPObservation createObservationCopy(ISPProgram prog, ISPObservation observation, boolean preserveKeys) throws SPException;
 
-    /**
-     * Sets the default initializer to use when creating a new observation.
-     *
-     * @param init the <code>ISPNodeInitializer</code> to use when initializing
-     * a newly created observation
-     */
-    void registerObservationInit(ISPNodeInitializer init);
-
     ISPObsQaLog createObsQaLog(ISPProgram prog, SPNodeKey key) throws SPUnknownIDException;
     ISPObsQaLog createObsQaLogCopy(ISPProgram prog, ISPObsQaLog log, boolean preserveKeys) throws SPUnknownIDException;
-    void registerObsQaLogInit(ISPNodeInitializer init);
 
     ISPObsExecLog createObsExecLog(ISPProgram prog, SPNodeKey key) throws SPUnknownIDException;
     ISPObsExecLog createObsExecLogCopy(ISPProgram prog, ISPObsExecLog log, boolean preserveKeys) throws SPUnknownIDException;
-    void registerObsExecLogInit(ISPNodeInitializer init);
 
     /**
-     * Creates an ISPObsComponent using the default initializer for the
-     * given component <code>type</code>, if one has been registered
-     * (see <code>{@link #registerObsComponentInit}</code>).
+     * Creates an ISPObsComponent using the default initializer for the given
+     * component <code>type</code>.
      *
      * @param prog the program with which this component should be associated
      *
@@ -374,7 +322,8 @@ public interface ISPFactory {
      * to a program that is not known by this factory
      */
     ISPObsComponent createObsComponent(ISPProgram prog, SPComponentType type,
-                                       ISPNodeInitializer init, SPNodeKey key)
+                                       ISPNodeInitializer<ISPObsComponent, ? extends ISPDataObject> init,
+                                       SPNodeKey key)
             throws SPUnknownIDException;
 
     /**
@@ -397,18 +346,8 @@ public interface ISPFactory {
             throws SPUnknownIDException;
 
     /**
-     * Sets the default initializer to use when creating an observation
-     * component of the given <code>type</code>.
-     *
-     * @param init the <code>ISPNodeInitializer</code> to use when initializing
-     * a newly created component
-     */
-    void registerObsComponentInit(SPComponentType type, ISPNodeInitializer init);
-
-    /**
-     * Creates an ISPSeqComponent using the default initializer for the
-     * given component <code>type</code>, if one has been registered
-     * (see <code>{@link #registerSeqComponentInit}</code>).
+     * Creates an ISPSeqComponent using the default initializer for the given
+     * component <code>type</code>.
      *
      * @param prog the program with which this component should be associated
      *
@@ -445,7 +384,7 @@ public interface ISPFactory {
      */
     ISPSeqComponent createSeqComponent(ISPProgram prog,
                                        SPComponentType type,
-                                       ISPNodeInitializer init,
+                                       ISPNodeInitializer<ISPSeqComponent, ? extends ISPSeqObject> init,
                                        SPNodeKey key)
             throws SPUnknownIDException;
 
@@ -468,40 +407,6 @@ public interface ISPFactory {
                                            ISPSeqComponent component,
                                            boolean preserveKeys)
             throws SPUnknownIDException;
-
-    /**
-     * Sets the default initializer to use when creating a sequence
-     * component of the given <code>type</code>.
-     *
-     * @param init the <code>ISPNodeInitializer</code> to use when initializing
-     * a newly created component
-     */
-    void registerSeqComponentInit(SPComponentType type, ISPNodeInitializer init);
-
-    /**
-     * Returns a List of <code>{@link SPComponentType}</code> objects, one
-     * for each type of obs component that can be created by the factory
-     * of this database.
-     * In order to discover the types that can be
-     * created by the factory, a client can use this method.
-     */
-    List<SPComponentType> getCreatableObsComponents();
-
-    /**
-     * Returns a List of <code>{@link SPComponentType}</code> objects, one
-     * for each type of seq component that can be created by this factory.
-     * In order to discover the types that can be
-     * created by the factory, a client can use this method.
-     */
-    List<SPComponentType> getCreatableSeqComponents();
-
-    /**
-     * Sets the default initializer to use when creating a new group.
-     *
-     * @param init the <code>ISPNodeInitializer</code> to use when initializing
-     * a newly created group
-     */
-    void registerGroupInit(ISPNodeInitializer init);
 
     /**
      * Creates an ISPGroup using the provided node key.
@@ -534,8 +439,8 @@ public interface ISPFactory {
      * to a program that is not known by this factory
      */
     ISPGroup createGroup(ISPProgram prog,
-                                ISPNodeInitializer init,
-                                SPNodeKey key)
+                         ISPNodeInitializer<ISPGroup, SPGroup> init,
+                         SPNodeKey key)
             throws SPUnknownIDException;
 
     /**

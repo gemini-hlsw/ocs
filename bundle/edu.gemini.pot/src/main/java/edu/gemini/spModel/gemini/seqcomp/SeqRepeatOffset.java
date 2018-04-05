@@ -8,6 +8,9 @@
 
 package edu.gemini.spModel.gemini.seqcomp;
 
+import edu.gemini.pot.sp.ISPNodeInitializer;
+import edu.gemini.pot.sp.ISPSeqComponent;
+import edu.gemini.spModel.gemini.init.ComponentNodeInitializer;
 import edu.gemini.spModel.target.offset.OffsetPos;
 import edu.gemini.pot.sp.SPComponentType;
 
@@ -26,6 +29,9 @@ public class SeqRepeatOffset extends SeqRepeatOffsetBase<OffsetPos> {
      */
     public static final SPComponentType SP_TYPE =
             SPComponentType.ITERATOR_OFFSET;
+
+    public static final ISPNodeInitializer<ISPSeqComponent, SeqRepeatOffset> NI =
+        new ComponentNodeInitializer<>(SP_TYPE, () -> new SeqRepeatOffset(), c -> new SeqRepeatOffsetCB(c));
 
     private static final String VERSION = "2009B-1";
 

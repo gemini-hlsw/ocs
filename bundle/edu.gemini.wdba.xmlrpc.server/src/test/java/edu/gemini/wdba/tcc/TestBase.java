@@ -61,7 +61,7 @@ public abstract class TestBase /*extends TestCase*/ {
         odb.put(prog);
         progKey = prog.getProgramKey();
 
-        obs = odb.getFactory().createObservation(prog, null);
+        obs = odb.getFactory().createObservation(prog, Instrument.none, null);
         obsId = obs.getObservationID();
         prog.addObservation(obs);
 
