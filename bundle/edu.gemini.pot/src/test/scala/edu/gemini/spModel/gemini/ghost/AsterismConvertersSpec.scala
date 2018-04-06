@@ -20,34 +20,34 @@ import Scalaz._
 object AsterismConvertersSpec extends Specification with ScalaCheck with Arbitraries with Almosts {
 
   "Asterism conversion" should {
-    "Convert back and forth between SingleTarget" in {
+    "Convert SingleTarget to itself losslessly" in {
       forAll(genStandardResAsterismTargetEnvironment) { env =>
         env.getAsterism.asInstanceOf[StandardResolution].targets.isInstanceOf[SingleTarget] ==> {
-          convertBackAndForth(env, GhostSingleTargetConverter, GhostSingleTargetConverter).exists(_ ~= env) should beTrue
+          GhostSingleTargetConverter.convert(env).exists(_ ~= env) should beTrue
         }
       }
     }
 
-    "Convert back and forth between DualTarget" in {
+    "Convert DualTarget to itself losslessly" in {
       forAll(genStandardResAsterismTargetEnvironment) { env =>
         env.getAsterism.asInstanceOf[StandardResolution].targets.isInstanceOf[DualTarget] ==> {
-          convertBackAndForth(env, GhostDualTargetConverter, GhostDualTargetConverter).exists(_ ~= env) should beTrue
+          GhostDualTargetConverter.convert(env).exists(_ ~= env) should beTrue
         }
       }
     }
 
-    "Convert back and forth between TargetPlusSky" in {
+    "Convert TargetPlusSky to itself losslessly" in {
       forAll(genStandardResAsterismTargetEnvironment) { env =>
         env.getAsterism.asInstanceOf[StandardResolution].targets.isInstanceOf[TargetPlusSky] ==> {
-          convertBackAndForth(env, GhostTargetPlusSkyConverter, GhostTargetPlusSkyConverter).exists(_ ~= env) should beTrue
+          GhostTargetPlusSkyConverter.convert(env).exists(_ ~= env) should beTrue
         }
       }
     }
 
-    "Convert back and forth between SkyPlusTarget" in {
+    "Convert SkyPlusTarget to itself losslessly" in {
       forAll(genStandardResAsterismTargetEnvironment) { env =>
         env.getAsterism.asInstanceOf[StandardResolution].targets.isInstanceOf[SkyPlusTarget] ==> {
-          convertBackAndForth(env, GhostSkyPlusTargetConverter, GhostSkyPlusTargetConverter).exists(_ ~= env) should beTrue
+          GhostSkyPlusTargetConverter.convert(env).exists(_ ~= env) should beTrue
         }
       }
     }
@@ -68,9 +68,9 @@ object AsterismConvertersSpec extends Specification with ScalaCheck with Arbitra
       }
     }
 
-    "Convert back and forth between HighResolution" in {
+    "Convert HighResolution to itself losslessly" in {
       forAll(genHighResAsterismTargetEnvironment) { env =>
-        convertBackAndForth(env, GhostHighResolutionConverter, GhostHighResolutionConverter).exists(_ ~= env) should beTrue
+        GhostHighResolutionConverter.convert(env).exists(_ ~= env) should beTrue
       }
     }
 
