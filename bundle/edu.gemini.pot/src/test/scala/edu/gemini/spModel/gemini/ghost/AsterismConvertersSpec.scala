@@ -68,6 +68,22 @@ object AsterismConvertersSpec extends Specification with ScalaCheck with Arbitra
       }
     }
 
+    "Convert between TargetPlusSky and HighResolution losslessly" in {
+      forAll(genStandardResAsterismTargetEnvironment) { env =>
+        env.getAsterism.asInstanceOf[StandardResolution].targets.isInstanceOf[TargetPlusSky] ==> {
+          convertBackAndForth(env, GhostHighResolutionConverter, GhostTargetPlusSkyConverter).exists(_ ~= env) should beTrue
+        }
+      }
+    }
+
+    "Convert between SkyPlusTarget and HighResolution losslessly" in {
+      forAll(genStandardResAsterismTargetEnvironment) { env =>
+        env.getAsterism.asInstanceOf[StandardResolution].targets.isInstanceOf[SkyPlusTarget] ==> {
+          convertBackAndForth(env, GhostHighResolutionConverter, GhostSkyPlusTargetConverter).exists(_ ~= env) should beTrue
+        }
+      }
+    }
+
     "Convert HighResolution to itself losslessly" in {
       forAll(genHighResAsterismTargetEnvironment) { env =>
         GhostHighResolutionConverter.convert(env).exists(_ ~= env) should beTrue
