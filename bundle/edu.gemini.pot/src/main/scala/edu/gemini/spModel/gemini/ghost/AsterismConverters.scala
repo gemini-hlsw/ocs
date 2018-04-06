@@ -24,13 +24,17 @@ object AsterismConverters {
   }
 
   sealed trait GhostAsterismConverter extends AsterismConverter {
-    override def convert(env: TargetEnvironment): Option[TargetEnvironment] = env.getAsterism match {
-        case StandardResolution(SingleTarget(t), b)     => creator(env, t,  None,    None,   b).some
-        case StandardResolution(DualTarget(t1, t2), b)  => creator(env, t1, t2.some, None,   b).some
-        case StandardResolution(TargetPlusSky(t, s), b) => creator(env, t,  None,    s.some, b).some
-        case StandardResolution(SkyPlusTarget(s, t), b) => creator(env, t,  None,    s.some, b).some
-        case HighResolution(t, s, b)                    => creator(env, t,  None,    s,      b).some
-        case _                                          => None
+    override def convert(env: TargetEnvironment): Option[TargetEnvironment] =
+      env.getAsterism match {
+        case ga: GhostAsterism =>
+          ga match {
+            case StandardResolution(SingleTarget(t), b)     => creator(env, t, None, None, b).some
+            case StandardResolution(DualTarget(t1, t2), b)  => creator(env, t1, t2.some, None, b).some
+            case StandardResolution(TargetPlusSky(t, s), b) => creator(env, t, None, s.some, b).some
+            case StandardResolution(SkyPlusTarget(s, t), b) => creator(env, t, None, s.some, b).some
+            case HighResolution(t, s, b)                    => creator(env, t, None, s, b).some
+          }
+        case _                                              => None
       }
 
     /** This is just a method that takes the targets / coordinates common to all GHOST asterism types so that we can
