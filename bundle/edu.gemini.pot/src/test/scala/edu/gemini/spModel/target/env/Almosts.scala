@@ -3,13 +3,14 @@ package edu.gemini.spModel.target.env
 import edu.gemini.shared.util.immutable.{ImOption, Option => GemOption}
 import edu.gemini.spModel.core.{AlmostEqual, Target}
 import edu.gemini.spModel.core.AlmostEqual.{AlmostEqualOps, AlmostEqualOption}
-import edu.gemini.spModel.target.SPTarget
-import scalaz._
-import Scalaz._
 import edu.gemini.spModel.gemini.ghost.GhostAsterism
 import edu.gemini.spModel.gemini.ghost.GhostAsterism.{GhostStandardResTargets, GhostTarget, HighResolution, StandardResolution}
+import edu.gemini.spModel.target.SPTarget
 
 import scala.collection.JavaConverters._
+
+import scalaz._
+import Scalaz._
 
 trait Almosts {
 
