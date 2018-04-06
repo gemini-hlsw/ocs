@@ -2,7 +2,6 @@ package edu.gemini.spModel.target.env;
 
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.guide.GuideProbe;
-import edu.gemini.spModel.pio.Param;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.Pio;
 import edu.gemini.spModel.pio.PioFactory;
@@ -79,7 +78,7 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
     // SoftReference, this cache may disappear when memory is tight
     private transient SoftReference<ImList<SPTarget>> allTargets;
 
-    private TargetEnvironment(Asterism asterism, GuideEnvironment guide, ImList<UserTarget> user) {
+    TargetEnvironment(Asterism asterism, GuideEnvironment guide, ImList<UserTarget> user) {
         if (asterism == null) throw new IllegalArgumentException("asterism = null");
         if (guide    == null) throw new IllegalArgumentException("guide = null");
         if (user     == null) throw new IllegalArgumentException("user targets = null");
@@ -269,10 +268,19 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
      */
     @Override
     public TargetEnvironment cloneTargets() {
-        final Asterism clonedAsterism = asterism.copyWithClonedTargets();
-        final GuideEnvironment clonedGuide = guide.cloneTargets();
-        final ImList<UserTarget> clonedUser = user.map(UserTarget::cloneTarget);
-        return new TargetEnvironment(clonedAsterism, clonedGuide, clonedUser);
+        return createWithClonedTargets(asterism, guide, user);
+    }
+
+    /**
+     * Convenience static method to create a target environment with cloned targets.
+     */
+    public static TargetEnvironment createWithClonedTargets(final Asterism a,
+                                                            final GuideEnvironment guideEnv,
+                                                            final ImList<UserTarget> userTargets) {
+        final Asterism aNew = a.copyWithClonedTargets();
+        final GuideEnvironment guideEnvNew = guideEnv.cloneTargets();
+        final ImList<UserTarget> userTargetsNew = userTargets.map(UserTarget::cloneTarget);
+        return new TargetEnvironment(aNew, guideEnvNew, userTargetsNew);
     }
 
     /**

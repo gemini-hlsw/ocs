@@ -3,17 +3,19 @@ package edu.gemini.spModel.target.env
 import edu.gemini.shared.util.immutable.ImList
 import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.spModel.core.{Angle, Coordinates, Declination, RightAscension, SiderealTarget}
+import edu.gemini.spModel.gemini.ghost.GhostAsterism
+import edu.gemini.spModel.gemini.ghost.GhostAsterism.{GhostTarget, GuideFiberState, StandardResolution}
 import edu.gemini.spModel.guide.{GuideProbe, GuideProbeMap}
 import edu.gemini.spModel.target.SPTarget
+
 import org.scalacheck._
 import org.scalacheck.Gen._
 import org.scalacheck.Arbitrary._
 
 import scala.collection.JavaConverters._
+
 import scalaz._
 import Scalaz._
-import edu.gemini.spModel.gemini.ghost.GhostAsterism
-import edu.gemini.spModel.gemini.ghost.GhostAsterism.{GhostTarget, GuideFiberState}
 
 trait Arbitraries extends edu.gemini.spModel.core.Arbitraries {
 
@@ -148,21 +150,22 @@ trait Arbitraries extends edu.gemini.spModel.core.Arbitraries {
       } yield new UserTarget(u, t)
     }
 
+  // Create generators for TargetEnvironments with specific types of arbitraries.
+  private def createTargetEnvironmentGen[A <: Asterism](arb: Gen[A]): Gen[TargetEnvironment] =
+    for {
+      a <- arb
+      g <- arbitrary[GuideEnvironment]
+      u <- boundedListOf[UserTarget](3)
+    } yield new TargetEnvironment(a, g, u.asImList)
+
   implicit val arbTargetEnvironment: Arbitrary[TargetEnvironment] =
-    Arbitrary {
-      for {
-        b <- arbitrary[SPTarget]
-        g <- arbitrary[GuideEnvironment]
-        u <- boundedListOf[UserTarget](3)
-      } yield TargetEnvironment.create(b, g, u.asImList)
-    }
+    Arbitrary(createTargetEnvironmentGen(arbitrary[Asterism]))
 
   implicit val arbSingleAsterism: Arbitrary[Asterism.Single] =
     Arbitrary(arbitrary[SPTarget].map(Asterism.Single(_)))
 
-
   // Seal off all the generators for the pieces of GhostAsterisms.
-  private object GhostGens {
+  object GhostGens {
     import GhostAsterism._
     import GhostAsterism.GhostStandardResTargets._
 
@@ -309,4 +312,15 @@ trait Arbitraries extends edu.gemini.spModel.core.Arbitraries {
       arbitrary[Asterism.Single],
       arbitrary[GhostAsterism]
     ))
+
+  // Specific target environment types to avoid Scalacheck giving up.
+  // These can't go in GhostGens or we get a stack overflow error.
+  val genStandardResAsterismTargetEnvironment: Gen[TargetEnvironment] =
+    createTargetEnvironmentGen(arbitrary[GhostAsterism.StandardResolution])
+  val genHighResAsterismTargetEnvironment: Gen[TargetEnvironment] =
+    createTargetEnvironmentGen(arbitrary[GhostAsterism.HighResolution])
+  val genGhostAsterismTargetEnvironment: Gen[TargetEnvironment] =
+    createTargetEnvironmentGen(arbitrary[GhostAsterism])
+  val genSingleAsterismTargetEnvironment: Gen[TargetEnvironment] =
+    createTargetEnvironmentGen(arbitrary[Asterism.Single])
 }
