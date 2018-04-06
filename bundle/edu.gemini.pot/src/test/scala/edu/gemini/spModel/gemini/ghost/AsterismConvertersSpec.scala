@@ -4,9 +4,11 @@ import edu.gemini.spModel.core.AlmostEqual._
 import edu.gemini.spModel.gemini.ghost.GhostAsterism.GhostStandardResTargets._
 import edu.gemini.spModel.gemini.ghost.GhostAsterism._
 import edu.gemini.spModel.target.env.{Almosts, Arbitraries, TargetEnvironment}
+
 import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
 import org.scalacheck.Prop._
+
 import scalaz._
 import Scalaz._
 

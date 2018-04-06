@@ -2,17 +2,12 @@ package edu.gemini.spModel.target.env
 
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.core.AlmostEqual.AlmostEqualOps
-import edu.gemini.spModel.core.Target._
 import edu.gemini.spModel.gemini.ghost.GhostAsterism
-import edu.gemini.spModel.gemini.ghost.GhostAsterism._
-import edu.gemini.spModel.gemini.ghost.GhostAsterism.GuideFiberState._
 import edu.gemini.spModel.gemini.ghost.GhostParamSetCodecs._
 import edu.gemini.spModel.pio.codec._
-import edu.gemini.spModel.target.SPTarget
 
-import org.scalacheck.{Arbitrary, Gen, Properties}
+import org.scalacheck.Arbitrary
 import org.scalacheck.Prop.forAll
-import org.scalacheck.Prop._
 import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
 

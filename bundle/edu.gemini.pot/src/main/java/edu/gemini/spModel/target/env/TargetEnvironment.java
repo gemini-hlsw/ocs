@@ -2,7 +2,6 @@ package edu.gemini.spModel.target.env;
 
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.guide.GuideProbe;
-import edu.gemini.spModel.pio.Param;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.Pio;
 import edu.gemini.spModel.pio.PioFactory;

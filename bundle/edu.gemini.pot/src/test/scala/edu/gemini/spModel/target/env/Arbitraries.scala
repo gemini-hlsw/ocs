@@ -7,11 +7,13 @@ import edu.gemini.spModel.gemini.ghost.GhostAsterism
 import edu.gemini.spModel.gemini.ghost.GhostAsterism.{GhostTarget, GuideFiberState, StandardResolution}
 import edu.gemini.spModel.guide.{GuideProbe, GuideProbeMap}
 import edu.gemini.spModel.target.SPTarget
+
 import org.scalacheck._
 import org.scalacheck.Gen._
 import org.scalacheck.Arbitrary._
 
 import scala.collection.JavaConverters._
+
 import scalaz._
 import Scalaz._
 

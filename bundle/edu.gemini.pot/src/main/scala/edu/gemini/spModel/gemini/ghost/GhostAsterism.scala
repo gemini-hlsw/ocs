@@ -4,6 +4,7 @@ import edu.gemini.spModel.core._
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.CloudCover
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.env.{Asterism, AsterismType}
+
 import java.time.Instant
 
 import scalaz._
