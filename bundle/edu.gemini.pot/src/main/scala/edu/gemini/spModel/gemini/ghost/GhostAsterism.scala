@@ -16,6 +16,8 @@ import Scalaz._
   */
 sealed trait GhostAsterism extends Asterism {
 
+  def base: Option[Coordinates]
+
   /** All Targets that comprise the asterism. */
   override def allTargets: NonEmptyList[Target] =
     allSpTargets.map(_.getTarget)
@@ -113,7 +115,7 @@ object GhostAsterism {
     */
   final case class StandardResolution(
                      targets: GhostStandardResTargets,
-                     base: Option[Coordinates]) extends GhostAsterism {
+                     override val base: Option[Coordinates]) extends GhostAsterism {
     import GhostStandardResTargets._
 
     override def allSpTargets: NonEmptyList[SPTarget] = targets match {
@@ -248,7 +250,7 @@ object GhostAsterism {
     */
   final case class HighResolution(ghostTarget: GhostTarget,
                                   sky: Option[Coordinates],
-                                  base: Option[Coordinates]) extends GhostAsterism {
+                                  override val base: Option[Coordinates]) extends GhostAsterism {
 
     override def allSpTargets: NonEmptyList[SPTarget] =
       NonEmptyList(ghostTarget.spTarget)

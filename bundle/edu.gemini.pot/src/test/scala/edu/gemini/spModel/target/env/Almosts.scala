@@ -1,11 +1,15 @@
 package edu.gemini.spModel.target.env
 
-import edu.gemini.shared.util.immutable.{Option => GemOption, ImOption}
-import edu.gemini.spModel.core.AlmostEqual
+import edu.gemini.shared.util.immutable.{ImOption, Option => GemOption}
+import edu.gemini.spModel.core.{AlmostEqual, Target}
 import edu.gemini.spModel.core.AlmostEqual.{AlmostEqualOps, AlmostEqualOption}
 import edu.gemini.spModel.target.SPTarget
+import scalaz._
+import Scalaz._
+import edu.gemini.spModel.gemini.ghost.GhostAsterism
+import edu.gemini.spModel.gemini.ghost.GhostAsterism.{GhostStandardResTargets, GhostTarget, HighResolution, StandardResolution}
 
-import scalaz._, Scalaz._
+import scala.collection.JavaConverters._
 
 trait Almosts {
 
@@ -108,4 +112,88 @@ trait Almosts {
 
   implicit val AlmostEqualGuideEnvironment: AlmostEqual[GuideEnvironment] =
     AlmostEqual.by[GuideEnv, GuideEnvironment](_.guideEnv)
+
+
+  implicit val SPTargetAlmostEqual: AlmostEqual[SPTarget] =
+    AlmostEqual[Target].contramap(_.getTarget)
+
+  implicit val UserTargetAlmostEqual: AlmostEqual[UserTarget] =
+    new AlmostEqual[UserTarget] {
+      override def almostEqual(a: UserTarget, b: UserTarget): Boolean =
+        (a.`type` === b.`type`) && (a.target ~= b.target)
+    }
+
+  implicit val SingleAsterismAlmostEqual: AlmostEqual[Asterism.Single] =
+    AlmostEqual[SPTarget].contramap[Asterism.Single](_.t)
+
+
+  implicit val GhostTargetAlmostEqual: AlmostEqual[GhostTarget] =
+    new AlmostEqual[GhostTarget] {
+      override def almostEqual(a: GhostTarget, b: GhostTarget): Boolean =
+        (a.spTarget ~= b.spTarget) && (a.explicitGuideFiberState === b.explicitGuideFiberState)
+    }
+
+  implicit val GhostStdResSingleTargetAlmostEqual: AlmostEqual[GhostStandardResTargets.SingleTarget] =
+    AlmostEqual[GhostTarget].contramap[GhostStandardResTargets.SingleTarget](_.target)
+
+  implicit val GhostStdResDualTargetAlmostEqual: AlmostEqual[GhostStandardResTargets.DualTarget] =
+    new AlmostEqual[GhostStandardResTargets.DualTarget] {
+      override def almostEqual(a: GhostStandardResTargets.DualTarget, b: GhostStandardResTargets.DualTarget): Boolean =
+        (a.target1 ~= b.target1) && (a.target2 ~= b.target2)
+    }
+
+  implicit val GhostStdResTargetPlusSkyAlmostEqual: AlmostEqual[GhostStandardResTargets.TargetPlusSky] =
+    new AlmostEqual[GhostStandardResTargets.TargetPlusSky] {
+      override def almostEqual(a: GhostStandardResTargets.TargetPlusSky, b: GhostStandardResTargets.TargetPlusSky): Boolean =
+        (a.target ~= b.target) && (a.sky ~= b.sky)
+    }
+  implicit val GhostStdResSkyPlusTargetAlmostEqual: AlmostEqual[GhostStandardResTargets.SkyPlusTarget] =
+    new AlmostEqual[GhostStandardResTargets.SkyPlusTarget] {
+      override def almostEqual(a: GhostStandardResTargets.SkyPlusTarget, b: GhostStandardResTargets.SkyPlusTarget): Boolean =
+        (a.target ~= b.target) && (a.sky ~= b.sky)
+    }
+
+  implicit val GhostAsterismStdResolutionAlmostEqual: AlmostEqual[GhostAsterism.StandardResolution] =
+    new AlmostEqual[GhostAsterism.StandardResolution] {
+      override def almostEqual(a: StandardResolution, b: StandardResolution): Boolean = (a.base ~= b.base) && ((a.targets, b.targets) match {
+        case (at: GhostStandardResTargets.SingleTarget,  bt: GhostStandardResTargets.SingleTarget)  => at ~= bt
+        case (at: GhostStandardResTargets.DualTarget,    bt: GhostStandardResTargets.DualTarget)    => at ~= bt
+        case (at: GhostStandardResTargets.TargetPlusSky, bt: GhostStandardResTargets.TargetPlusSky) => at ~= bt
+        case (at: GhostStandardResTargets.SkyPlusTarget, bt: GhostStandardResTargets.SkyPlusTarget) => at ~= bt
+        case _ => false
+      })
+    }
+
+  implicit val GhostAsterismHighResolutionAlmostEqual: AlmostEqual[GhostAsterism.HighResolution] =
+    new AlmostEqual[GhostAsterism.HighResolution] {
+      override def almostEqual(a: HighResolution, b: HighResolution): Boolean =
+        (a.ghostTarget ~= b.ghostTarget) && (a.sky ~= b.sky) && (a.base ~= b.base)
+    }
+
+  implicit val GhostAsterismAlmostEqual: AlmostEqual[GhostAsterism] =
+    new AlmostEqual[GhostAsterism] {
+      override def almostEqual(a: GhostAsterism, b: GhostAsterism): Boolean = (a,b) match {
+        case (a: GhostAsterism.StandardResolution, b: GhostAsterism.StandardResolution) => a ~= b
+        case (a: GhostAsterism.HighResolution,     b: GhostAsterism.HighResolution)     => a ~= b
+        case _ => false
+      }
+    }
+
+  implicit val AsterismAlmostEqual: AlmostEqual[Asterism] =
+    new AlmostEqual[Asterism] {
+      def almostEqual(a: Asterism, b: Asterism): Boolean =
+        (a, b) match {
+          case (a: Asterism.Single, b: Asterism.Single) => a ~= b
+          case (a: GhostAsterism,   b: GhostAsterism)   => a ~= b
+          case _ => false
+        }
+    }
+
+  implicit val AlmostEqualTargetEnvironment: AlmostEqual[TargetEnvironment] =
+    new AlmostEqual[TargetEnvironment] {
+      override def almostEqual(a: TargetEnvironment, b: TargetEnvironment): Boolean =
+        (a.getAsterism ~= b.getAsterism) &&
+          (a.getGuideEnvironment ~= b.getGuideEnvironment) &&
+          (a.getUserTargets.asScala.toList ~= b.getUserTargets.asScala.toList)
+    }
 }
