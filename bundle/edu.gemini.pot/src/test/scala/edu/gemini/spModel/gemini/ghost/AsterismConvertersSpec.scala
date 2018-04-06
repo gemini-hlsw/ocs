@@ -10,12 +10,12 @@ import org.scalacheck.Prop._
 import scalaz._
 import Scalaz._
 
-class GhostAsterismConvertersSpec extends Specification with ScalaCheck with Arbitraries with Almosts {
+class AsterismConvertersSpec extends Specification with ScalaCheck with Arbitraries with Almosts {
   "Asterism conversion" should {
     "Convert back and forth between SingleTarget" in {
       forAll(genStandardResAsterismTargetEnvironment) { env =>
         env.getAsterism.asInstanceOf[StandardResolution].targets.isInstanceOf[SingleTarget] ==> {
-          val env2Opt = GhostAsterismConvertersSpec.convertBackAndForth(env, GhostAsterismConverters.GhostSingleTargetConverter, GhostAsterismConverters.GhostSingleTargetConverter)
+          val env2Opt = AsterismConvertersSpec.convertBackAndForth(env, AsterismConverters.GhostSingleTargetConverter, AsterismConverters.GhostSingleTargetConverter)
           env2Opt.exists(_ ~= env) should beTrue
         }
       }
@@ -24,7 +24,7 @@ class GhostAsterismConvertersSpec extends Specification with ScalaCheck with Arb
     "Convert back and forth between DualTarget" in {
       forAll(genStandardResAsterismTargetEnvironment) { env =>
         env.getAsterism.asInstanceOf[StandardResolution].targets.isInstanceOf[DualTarget] ==> {
-          val env2Opt = GhostAsterismConvertersSpec.convertBackAndForth(env, GhostAsterismConverters.GhostDualTargetConverter, GhostAsterismConverters.GhostDualTargetConverter)
+          val env2Opt = AsterismConvertersSpec.convertBackAndForth(env, AsterismConverters.GhostDualTargetConverter, AsterismConverters.GhostDualTargetConverter)
           env2Opt.exists(_ ~= env) should beTrue
         }
       }
@@ -33,7 +33,7 @@ class GhostAsterismConvertersSpec extends Specification with ScalaCheck with Arb
     "Convert back and forth between TargetPlusSky" in {
       forAll(genStandardResAsterismTargetEnvironment) { env =>
         env.getAsterism.asInstanceOf[StandardResolution].targets.isInstanceOf[TargetPlusSky] ==> {
-          val env2Opt = GhostAsterismConvertersSpec.convertBackAndForth(env, GhostAsterismConverters.GhostTargetPlusSkyConverter, GhostAsterismConverters.GhostTargetPlusSkyConverter)
+          val env2Opt = AsterismConvertersSpec.convertBackAndForth(env, AsterismConverters.GhostTargetPlusSkyConverter, AsterismConverters.GhostTargetPlusSkyConverter)
           env2Opt.exists(_ ~= env) should beTrue
         }
       }
@@ -42,23 +42,23 @@ class GhostAsterismConvertersSpec extends Specification with ScalaCheck with Arb
     "Convert back and forth between SkyPlusTarget" in {
       forAll(genStandardResAsterismTargetEnvironment) { env =>
         env.getAsterism.asInstanceOf[StandardResolution].targets.isInstanceOf[SkyPlusTarget] ==> {
-          val env2Opt = GhostAsterismConvertersSpec.convertBackAndForth(env, GhostAsterismConverters.GhostSkyPlusTargetConverter, GhostAsterismConverters.GhostSkyPlusTargetConverter)
+          val env2Opt = AsterismConvertersSpec.convertBackAndForth(env, AsterismConverters.GhostSkyPlusTargetConverter, AsterismConverters.GhostSkyPlusTargetConverter)
           env2Opt.exists(_ ~= env) should beTrue
         }
       }
     }
 
-//    "Convert back and forth between HighResolution" in {
-//      forAll(GhostGens.genHighResAsterismTargetEnvironment) { env =>
-//        val env2Opt = AsterismConvertersSpec.convertBackAndForth(env, AsterismConverters.GhostHighResolutionConverter, AsterismConverters.GhostHighResolutionConverter)
-//        env2Opt.exists(_ ~= env) should beTrue
-//      }
-//    }
+    "Convert back and forth between HighResolution" in {
+      forAll(genHighResAsterismTargetEnvironment) { env =>
+        val env2Opt = AsterismConvertersSpec.convertBackAndForth(env, AsterismConverters.GhostHighResolutionConverter, AsterismConverters.GhostHighResolutionConverter)
+        env2Opt.exists(_ ~= env) should beTrue
+      }
+    }
   }
 }
 
-object GhostAsterismConvertersSpec {
-  def convertBackAndForth(env: TargetEnvironment, c1: GhostAsterismConverters.GhostAsterismConverter, c2: GhostAsterismConverters.GhostAsterismConverter): Option[TargetEnvironment] = {
+object AsterismConvertersSpec {
+  def convertBackAndForth(env: TargetEnvironment, c1: AsterismConverters.GhostAsterismConverter, c2: AsterismConverters.GhostAsterismConverter): Option[TargetEnvironment] = {
     c1.convert(env).flatMap(c2.convert) match {
       case \/-(env2) => env2.some
       case -\/(_)    => None

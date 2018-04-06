@@ -11,7 +11,7 @@ import Scalaz._
 /** Allow conversions between target environments containing the different GHOST asterism types.
   * Coordinates are immutable, but SPTargets are mutable, so we must clone them.
   */
-object GhostAsterismConverters {
+object AsterismConverters {
   import GhostAsterism._
   import GhostAsterism.GhostStandardResTargets._
 
@@ -50,8 +50,8 @@ object GhostAsterismConverters {
     override def name: String = "GhostAsterism.DualTarget"
 
     override protected def creator(env: TargetEnvironment, t: GhostTarget, t2: Option[GhostTarget], s: SkyPosition, b: BasePosition): TargetEnvironment = {
-      val asterism    = StandardResolution(DualTarget(t, GhostTarget.empty), b)
-      val userTargets = appendCoords(appendTarget(env.getUserTargets, gT2UT(t2)), s)
+      val asterism    = StandardResolution(DualTarget(t, t2.getOrElse(GhostTarget.empty)), b)
+      val userTargets = appendCoords(env.getUserTargets, s)
       TargetEnvironment.createWithClonedTargets(asterism, env.getGuideEnvironment, userTargets)
     }
   }
