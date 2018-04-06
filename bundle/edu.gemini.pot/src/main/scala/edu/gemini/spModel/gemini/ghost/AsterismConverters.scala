@@ -20,19 +20,22 @@ object AsterismConverters {
 
   sealed trait AsterismConverter {
     def name: String
-    def convert(env: TargetEnvironment): String \/ TargetEnvironment
+    def convert(env: TargetEnvironment): Option[TargetEnvironment]
   }
 
   sealed trait GhostAsterismConverter extends AsterismConverter {
-    override def convert(env: TargetEnvironment): String \/ TargetEnvironment = env.getAsterism match {
-        case StandardResolution(SingleTarget(t), b)     => creator(env, t,  None,    None,   b).right
-        case StandardResolution(DualTarget(t1, t2), b)  => creator(env, t1, t2.some, None,   b).right
-        case StandardResolution(TargetPlusSky(t, s), b) => creator(env, t,  None,    s.some, b).right
-        case StandardResolution(SkyPlusTarget(s, t), b) => creator(env, t,  None,    s.some, b).right
-        case HighResolution(t, s, b)                    => creator(env, t,  None,    s,      b).right
-        case _                                          => s"Could not convert to $name".left
+    override def convert(env: TargetEnvironment): Option[TargetEnvironment] = env.getAsterism match {
+        case StandardResolution(SingleTarget(t), b)     => creator(env, t,  None,    None,   b).some
+        case StandardResolution(DualTarget(t1, t2), b)  => creator(env, t1, t2.some, None,   b).some
+        case StandardResolution(TargetPlusSky(t, s), b) => creator(env, t,  None,    s.some, b).some
+        case StandardResolution(SkyPlusTarget(s, t), b) => creator(env, t,  None,    s.some, b).some
+        case HighResolution(t, s, b)                    => creator(env, t,  None,    s,      b).some
+        case _                                          => None
       }
 
+    /** This is just a method that takes the targets / coordinates common to all GHOST asterism types so that we can
+      * more easily extract parameters from one asterism type and turn it into another without having to have n*n
+      * cases, were n is the number of asterism types. */
     protected def creator(env: TargetEnvironment, t1: GhostTarget, t2: Option[GhostTarget], s: SkyPosition, b: BasePosition): TargetEnvironment
   }
 
@@ -93,7 +96,7 @@ object AsterismConverters {
   private def appendTarget(userTargets: ImList[UserTarget], t: Option[UserTarget]): ImList[UserTarget] =
     t.map(userTargets.append).getOrElse(userTargets)
 
-  /** Convert an SPTarget to an empty UserTarget. */
+  /** Convert an SPTarget to a UserTarget. */
   private def t2UT(t: SPTarget): UserTarget =
     new UserTarget(UserTarget.Type.other, t)
 
@@ -103,6 +106,7 @@ object AsterismConverters {
     t2UT(new SPTarget(t))
   }
 
+  /** Convert a GhostTarget to a UserTarget. */
   private def gT2UT(tOpt: Option[GhostTarget]): Option[UserTarget] =
     tOpt.map(t => t2UT(t.spTarget))
 }

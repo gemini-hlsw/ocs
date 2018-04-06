@@ -319,4 +319,8 @@ trait Arbitraries extends edu.gemini.spModel.core.Arbitraries {
     createTargetEnvironmentGen(arbitrary[GhostAsterism.StandardResolution])
   val genHighResAsterismTargetEnvironment: Gen[TargetEnvironment] =
     createTargetEnvironmentGen(arbitrary[GhostAsterism.HighResolution])
+  val genGhostAsterismTargetEnvironment: Gen[TargetEnvironment] =
+    createTargetEnvironmentGen(arbitrary[GhostAsterism])
+  val genSingleAsterismTargetEnvironment: Gen[TargetEnvironment] =
+    createTargetEnvironmentGen(arbitrary[Asterism.Single])
 }
