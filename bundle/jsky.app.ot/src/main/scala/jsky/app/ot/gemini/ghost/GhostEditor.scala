@@ -1,17 +1,21 @@
 package jsky.app.ot.gemini.ghost
 
 import java.beans.PropertyDescriptor
-
 import javax.swing.JPanel
+
 import edu.gemini.pot.sp.ISPObsComponent
-import edu.gemini.spModel.gemini.ghost.{Ghost, GhostAsterism}
 import edu.gemini.shared.gui.bean.TextFieldPropertyCtrl
-import edu.gemini.spModel.gemini.ghost.GhostAsterism.GhostStandardResTargets
+import edu.gemini.spModel.gemini.ghost.Ghost
+import edu.gemini.spModel.gemini.ghost.GhostAsterism.GhostStandardResTargets._
+import edu.gemini.spModel.gemini.ghost.AsterismConverters._
+import edu.gemini.spModel.gemini.ghost.GhostAsterism.{HighResolution, StandardResolution}
+import edu.gemini.spModel.rich.pot.sp._
 import jsky.app.ot.gemini.editor.ComponentEditor
 
+import scala.collection.immutable.ListMap
 import scala.swing._
 import scala.swing.GridBagPanel.{Anchor, Fill}
-import scala.swing.event.ButtonClicked
+import scala.swing.event.SelectionChanged
 
 
 final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
@@ -19,8 +23,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
   private object ui extends GridBagPanel {
     border = ComponentEditor.PANEL_BORDER
 
-    /** Position angle components.
-      */
+    /** Position angle components. */
     val posAngleProp: PropertyDescriptor = Ghost.POS_ANGLE_PROP
     val posAngleLabel: Label = new Label(posAngleProp.getDisplayName)
     posAngleLabel.horizontalAlignment = Alignment.Right
@@ -32,7 +35,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
 
     val tfComp: Component = Component.wrap(posAngleCtrl.getTextField)
     layout(posAngleLabel) = new Constraints() {
-      anchor = Anchor.NorthWest
+      anchor = Anchor.NorthEast
       insets = new Insets(3, 10, 0, 20)
     }
     layout(tfComp) = new Constraints() {
@@ -56,87 +59,99 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
       fill = Fill.Horizontal
       gridy = 1
       gridwidth = 3
-      insets = new Insets(20, 0, 20, 0)
-    }
-
-    /** Standard vs. high resolution components.
-     */
-    val standardResolution: RadioButton = new RadioButton("Standard Resolution")
-    val highResolution:     RadioButton = new RadioButton("High Resolution")
-    val buttonGroup:        ButtonGroup = new ButtonGroup()
-    buttonGroup.buttons += standardResolution
-    buttonGroup.buttons += highResolution
-
-    layout(standardResolution) = new Constraints() {
-      anchor = Anchor.NorthWest
-      gridwidth = 2
-      gridy = 2
-      insets = new Insets(0, 10, 0, 20)
-    }
-    layout(highResolution) = new Constraints() {
-      anchor = Anchor.NorthWest
-      gridx = 2
-      gridy = 2
+      insets = new Insets(10, 0, 0, 0)
     }
 
     val asterismLabel: Label = new Label("Select configuration:")
     asterismLabel.horizontalAlignment = Alignment.Right
     layout(asterismLabel) = new Constraints() {
       anchor = Anchor.East
-      gridwidth = 2
-      gridy = 3
-      insets = new Insets(22, 10, 0, 20)
+      gridy = 2
+      insets = new Insets(12, 10, 0, 20)
     }
 
-    // TODO: This will change. I'm going to make it call transformation methods between asterism types.
-    // TODO: I still have a little thinking as to how this will be implemented and where these names
-    // TODO: belong, so this is just a "placeholder" for now.
-    val asterismMap: Map[String, () => GhostStandardResTargets] = Map(
-      "Single target" -> (() => GhostStandardResTargets.emptySingleTarget),
-      "Dual target"   -> (() => GhostStandardResTargets.emptyDualTarget),
-      "SRIFU1 target, SRIFU2 sky position" -> (() => GhostStandardResTargets.emptyTargetPlusSky),
-      "SRIFU1 sky position, SRIFU2 target" -> (() => GhostStandardResTargets.emptySkyPlusTarget)
+    /** A map between GHOST asterism names and converters to those types. */
+    val asterismMap: Map[String, GhostAsterismConverter] = ListMap(
+      "Single target" -> GhostSingleTargetConverter,
+      "Dual target" -> GhostDualTargetConverter,
+      "SRIFU1 target, SRIFU2 sky position" -> GhostTargetPlusSkyConverter,
+      "SRIFU1 sky position, SRIFU2 target" -> GhostSkyPlusTargetConverter,
+      "High resolution" -> GhostHighResolutionConverter
     )
 
     val asterismComboBox: ComboBox[String] = new ComboBox[String](asterismMap.keys.toSeq)
     layout(asterismComboBox) = new Constraints() {
       anchor = Anchor.NorthWest
-      gridx = 2
-      gridy = 3
-      insets = new Insets(20, 0, 0, 20)
+      gridx = 1
+      gridwidth = 2
+      gridy = 2
+      insets = new Insets(10, 0, 0, 20)
     }
 
     layout(new Label) = new Constraints() {
       anchor = Anchor.North
-      gridy = 4
+      gridy = 3
       weighty = 1.0
     }
 
-    listenTo(standardResolution, highResolution, asterismComboBox)
+    listenTo(asterismComboBox.selection)
     reactions += {
-      case ButtonClicked(`standardResolution`) =>
-        showStandardResolutionComponents(true)
-      case ButtonClicked(`highResolution`) =>
-        showStandardResolutionComponents(false)
+      case SelectionChanged(`asterismComboBox`) =>
+        val converter = asterismMap(asterismComboBox.selection.item)
+        convertAsterism(converter)
     }
 
-    def initialize(): Unit = {
-      val isHighResolution = Option(getContextTargetEnv).exists(_.getAsterism.isInstanceOf[GhostAsterism.HighResolution])
-      if (isHighResolution)
-        highResolution.doClick()
-      else
-        standardResolution.doClick()
+    /** Convert the asterism to the new type, and set the new target environment. */
+    def convertAsterism(converter: GhostAsterismConverter): Unit = Swing.onEDT {
+      val o = getContextObservation
+      val oc = getContextTargetObsComp
+
+      val newToc = for {
+        toc <- o.findTargetObsComp
+        env <- converter.convert(toc.getTargetEnvironment)
+      } yield {
+        toc.setTargetEnvironment(env)
+        toc
+      }
+
+      newToc match {
+        case Some(toc) =>
+          oc.setDataObject(toc)
+        case None =>
+          Dialog.showMessage(ui, "Could not convert the asterism type.",
+              "Asterism Conversion Error", Dialog.Message.Error)
+      }
     }
 
-    def showStandardResolutionComponents(viewable: Boolean): Unit = {
-      asterismLabel.visible = viewable
-      asterismComboBox.visible = viewable
+    def initialize(): Unit = Swing.onEDT {
+      // Set the combo box to the appropriate asterism type.
+      deafTo(asterismComboBox.selection)
+      ui.asterismComboBox.enabled = true
+      val selectionIdx = getContextObservation.findTargetObsComp.flatMap { env =>
+        env.getAsterism match {
+          case a: StandardResolution =>
+            a.targets match {
+              case SingleTarget(_)     => Some(0)
+              case DualTarget(_, _)    => Some(1)
+              case TargetPlusSky(_, _) => Some(2)
+              case SkyPlusTarget(_, _) => Some(3)
+            }
+          case HighResolution(_, _, _) => Some(4)
+          case _                       =>
+            Dialog.showMessage(ui, "Illegal asterism type for GHOST observation.",
+              "Asterism Error", Dialog.Message.Error)
+            ui.asterismComboBox.enabled = false
+            None
+        }
+      }
+      asterismComboBox.selection.index = selectionIdx.getOrElse(0)
+      listenTo(asterismComboBox.selection)
     }
   }
 
   override def getWindow: JPanel = ui.peer
 
-  override def handlePostDataObjectUpdate(dataObj: Ghost): Unit = {
+  override def handlePostDataObjectUpdate(dataObj: Ghost): Unit = Swing.onEDT {
     ui.posAngleCtrl.setBean(dataObj)
     ui.initialize()
   }

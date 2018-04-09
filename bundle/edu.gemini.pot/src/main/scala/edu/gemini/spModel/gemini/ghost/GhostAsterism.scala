@@ -10,12 +10,14 @@ import java.time.Instant
 import scalaz._
 import Scalaz._
 
-// TODO: Unsure if we should return sky positions in allSpTargets as dummy targets.
+// TODO:GHOST Unsure if we should return sky positions in allSpTargets as dummy targets.
 
 /** Base trait for the three GHOST asterism types: two target, beam switching,
   * and high resolution.
   */
 sealed trait GhostAsterism extends Asterism {
+
+  def name: String
 
   def base: Option[Coordinates]
 
@@ -119,6 +121,8 @@ object GhostAsterism {
                      override val base: Option[Coordinates]) extends GhostAsterism {
     import GhostStandardResTargets._
 
+    override def name: String = targets.name
+
     override def allSpTargets: NonEmptyList[SPTarget] = targets match {
       case SingleTarget(t)    => NonEmptyList(t.spTarget)
       case DualTarget(t1,t2)  => NonEmptyList(t1.spTarget, t2.spTarget)
@@ -171,6 +175,13 @@ object GhostAsterism {
   sealed trait GhostStandardResTargets {
     import GhostStandardResTargets._
 
+    def name: String = this match {
+      case SingleTarget(_)    => "Single target"
+      case DualTarget(_,_)    => "Dual target"
+      case TargetPlusSky(_,_) => "SRIFU1 target, SRIFU2 sky position"
+      case SkyPlusTarget(_,_) => "SRIFU1 sky position, SRIFU2 target"
+    }
+
     def ifu1: Either[Coordinates, GhostTarget] = this match {
       case SingleTarget(t)    => Right(t)
       case DualTarget(t,_)    => Right(t)
@@ -214,6 +225,7 @@ object GhostAsterism {
     final case class TargetPlusSky(target: GhostTarget, sky: Coordinates) extends GhostStandardResTargets
     final case class SkyPlusTarget(sky: Coordinates, target: GhostTarget) extends GhostStandardResTargets
 
+    // Names for each of the above types. We must be able to access statically to create the combo box in the editor.
     val emptySingleTarget:  SingleTarget  = SingleTarget(GhostTarget.empty)
     val emptyDualTarget:    DualTarget    = DualTarget(GhostTarget.empty, GhostTarget.empty)
     val emptyTargetPlusSky: TargetPlusSky = TargetPlusSky(GhostTarget.empty, Coordinates.zero)
@@ -252,6 +264,8 @@ object GhostAsterism {
   final case class HighResolution(ghostTarget: GhostTarget,
                                   sky: Option[Coordinates],
                                   override val base: Option[Coordinates]) extends GhostAsterism {
+
+    override def name: String = "High Resolution"
 
     override def allSpTargets: NonEmptyList[SPTarget] =
       NonEmptyList(ghostTarget.spTarget)

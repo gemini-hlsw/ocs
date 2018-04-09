@@ -3,17 +3,23 @@ package edu.gemini.spModel.gemini.ghost
 import java.beans.PropertyDescriptor
 import java.util.{Collections, List => JList, Map => JMap, Set => JSet}
 
-import edu.gemini.pot.sp.{ ISPNodeInitializer, ISPObsComponent, SPComponentType }
+import edu.gemini.pot.sp._
 import edu.gemini.spModel.core.Site
 import edu.gemini.spModel.data.ISPDataObject
 import edu.gemini.spModel.data.config.{DefaultParameter, DefaultSysConfig, ISysConfig, StringParameter}
 import edu.gemini.spModel.data.property.{PropertyProvider, PropertySupport}
-import edu.gemini.spModel.gemini.init.ComponentNodeInitializer
+import edu.gemini.spModel.gemini.ghost.AsterismConverters.GhostAsterismConverter
+import edu.gemini.spModel.gemini.init.{ComponentNodeInitializer, ObservationNI}
+import edu.gemini.spModel.obs.SPObservation
 import edu.gemini.spModel.obscomp.{InstConfigInfo, InstConstants, SPInstObsComp}
 import edu.gemini.spModel.pio.{ParamSet, PioFactory}
 import edu.gemini.spModel.seqcomp.SeqConfigNames
+import edu.gemini.spModel.target.env.TargetEnvironment
+import edu.gemini.spModel.target.obsComp.TargetObsComp
+
 import scala.collection.immutable.TreeMap
 import scala.collection.JavaConverters._
+import scala.util.{Failure, Success, Try}
 
 
 /** The GHOST instrument SP model.
@@ -52,6 +58,10 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
     sc.putParameter(DefaultParameter.getInstance(Ghost.POS_ANGLE_PROP, getPosAngle))
     sc
   }
+
+  /** Take the current asterism, convert it to the new type, and set the target environment. */
+  def convertAsterism(converter: GhostAsterismConverter): Unit = {
+  }
 }
 
 object Ghost {
@@ -71,11 +81,36 @@ object Ghost {
   val NI: ISPNodeInitializer[ISPObsComponent, Ghost] =
     new ComponentNodeInitializer(SPComponentType.INSTRUMENT_GHOST, GhostSupplier, GhostCbFactory)
 
+  val OBSERVATION_NI: ISPNodeInitializer[ISPObservation, SPObservation] = new ObservationNI(Instrument.Ghost.some()) {
+    override protected def addTargetEnv(factory: ISPFactory, obsNode: ISPObservation): Unit = {
+      Try {
+        val p   = obsNode.getProgram
+        val oc  = factory.createObsComponent(p, TargetObsComp.SP_TYPE, null)
+        val toc = oc.getDataObject.asInstanceOf[TargetObsComp]
+
+        // Create a single target GHOST asterism as the default.
+        val a   = GhostAsterism.createEmptyStandardResolutionAsterism
+        val env = TargetEnvironment.create(a)
+
+        toc.setTargetEnvironment(env)
+        oc.setDataObject(toc)
+        obsNode.addObsComponent(oc)
+      } match {
+        case Success(_)               =>
+          // Do nothing.
+        case Failure(ex: SPException) =>
+          throw new RuntimeException("Unable to create and initialize GHOST target environment")
+        case Failure(_)               =>
+          // This should never happen.
+          throw new RuntimeException("Unknown failure in creating GHOST target environment")
+      }
+    }
+  }
+
   // The name of the Ghost instrument configuration.
   val INSTRUMENT_NAME_PROP: String = "GHOST"
 
-  /** The properties supported by this class.
-    */
+  /** The properties supported by this class. */
   private def initProp(propName: String, query: Boolean, iter: Boolean): PropertyDescriptor = {
     PropertySupport.init(propName, classOf[Ghost], query, iter)
   }
@@ -96,7 +131,6 @@ object Ghost {
     Collections.unmodifiableMap(TreeMap(Properties: _*).asJava)
   }
 
-  /** Currently, the instrument has no queryable configuration parameters.
-    */
-  val getInstConfigInfo: JList[InstConfigInfo] = List.empty.asJava
+  /** Currently, the instrument has no queryable configuration parameters. */
+  val getInstConfigInfo: JList[InstConfigInfo] = List.empty[InstConfigInfo].asJava
 }
