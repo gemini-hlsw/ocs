@@ -19,8 +19,6 @@ import edu.gemini.spModel.obslog.ObsLog
 
 import scala.collection.JavaConverters._
 import scala.collection.breakOut
-import scalaz._
-import Scalaz._
 
 case class ExecutedDataset(timestamp: Instant, filename: String)
 case class SeqexecSequence(title: String, datasets: Map[Int, ExecutedDataset], config: ConfigSequence)
@@ -61,16 +59,16 @@ object SeqExecService {
     trySeq {
       conn.getResponseCode match {
         case HTTP_OK        =>
-          closing(new BufferedReader(new InputStreamReader(conn.getInputStream))) {
-            _.lines.collect(Collectors.joining("\n")).right
+          closing(new BufferedReader(new InputStreamReader(conn.getInputStream))) { r =>
+            Right(r.lines.collect(Collectors.joining("\n")))
           }
 
         case HTTP_NOT_FOUND =>
-          MissingObservation(oid).left
+          Left(MissingObservation(oid))
 
         case x              =>
-          val msg = s"Unexpected response code: $x${Option(conn.getResponseMessage).map(m => s": $m").orZero}"
-          SeqException(new RuntimeException(msg)).left
+          val msg = s"Unexpected response code: $x${Option(conn.getResponseMessage).map(m => s": $m").getOrElse("")}"
+          Left(SeqException(new RuntimeException(msg)))
       }
     }
 
@@ -80,8 +78,8 @@ object SeqExecService {
       try {
         val is = new SpImportService(db)
         is.importProgramXml(new StringReader(xml)) match {
-          case scala.util.Success(p) => p.getAllObservations.asScala.head.right
-          case scala.util.Failure(e) => SeqException(e).left
+          case scala.util.Success(p) => Right(p.getAllObservations.asScala.head)
+          case scala.util.Failure(e) => Left(SeqException(e))
         }
       } finally {
         db.getDBAdmin.shutdown
@@ -89,7 +87,7 @@ object SeqExecService {
     }
 
   private def extractName(obs: ISPObservation): TrySeq[String] = trySeq {
-    obs.getDataObject.getTitle.right
+    Right(obs.getDataObject.getTitle)
   }
 
   private def extractSequence(obs: ISPObservation): TrySeq[ConfigSequence] =
@@ -103,6 +101,7 @@ object SeqExecService {
         case Some(obsLog) => obsLog.getAllDatasetRecords.asScala.map(_.exec.dataset).map { d =>
           d.getIndex -> ExecutedDataset(Instant.ofEpochMilli(d.getTimestamp), d.getDhsFilename)
         }(breakOut)
+        case None         => throw new RuntimeException(s"Observation ${obs.getObservationID} not found")
       }
     }
 
@@ -115,13 +114,13 @@ object SeqExecService {
     new SeqExecService {
       override def sequence(oid: SPObservationID): TrySeq[SeqexecSequence] =
         for {
-          u <- url(peer, oid)
-          c <- open(u)
-          x <- read(c, oid)
-          o <- parse(x)
-          s <- extractSequence(o)
-          n <- extractName(o)
-          e <- extractExecutedDatsets(o)
+          u <- url(peer, oid).right
+          c <- open(u).right
+          x <- read(c, oid).right
+          o <- parse(x).right
+          s <- extractSequence(o).right
+          n <- extractName(o).right
+          e <- extractExecutedDatsets(o).right
         } yield SeqexecSequence(n, e, s)
     }
 }
