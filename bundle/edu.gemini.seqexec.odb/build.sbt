@@ -6,9 +6,6 @@ name := "edu.gemini.seqexec.odb"
 
 // version set in ThisBuild
 
-libraryDependencies ++= Seq(
-  "org.scalaz" %% "scalaz-core" % ScalaZVersion)
-
 osgiSettings
 
 ocsBundleSettings
