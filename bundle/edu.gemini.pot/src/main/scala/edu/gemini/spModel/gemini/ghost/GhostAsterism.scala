@@ -24,8 +24,7 @@ sealed trait GhostAsterism extends Asterism {
     allSpTargets.map(_.getTarget)
 }
 
-/** GHOST asterism model.
-  */
+/** GHOST asterism model. */
 object GhostAsterism {
 
   /** The GHOST guide fibers can be enabled or disabled for each science target.
@@ -151,7 +150,7 @@ object GhostAsterism {
     override def copyWithClonedTargets: Asterism =
       StandardResolution(targets.cloneTargets, base)
 
-    override def asterismType: AsterismType = AsterismType.GhostStandardResolution
+    override def asterismType: AsterismType = targets.asterismType
   }
 
   object StandardResolution {
@@ -166,8 +165,7 @@ object GhostAsterism {
       Lens.lensu((a,b) => a.copy(base = b), _.base)
   }
 
-  /** GHOST standard resolution asterism types.
-    */
+  /** GHOST standard resolution asterism types. */
   sealed trait GhostStandardResTargets {
     import GhostStandardResTargets._
 
@@ -200,6 +198,13 @@ object GhostAsterism {
       case DualTarget(t1,t2)  => interpolateCoords(t1.coordinates(when), t2.coordinates(when))
       case TargetPlusSky(t,_) => t.coordinates(when)
       case SkyPlusTarget(_,t) => t.coordinates(when)
+    }
+
+    def asterismType: AsterismType = this match {
+      case SingleTarget(_)    => AsterismType.GhostStandardResolutionSingleTarget
+      case DualTarget(_,_)    => AsterismType.GhostStandardResolutionDualTarget
+      case TargetPlusSky(_,_) => AsterismType.GhostStandardResolutionTargetPlusSky
+      case SkyPlusTarget(_,_) => AsterismType.GhostStandardResolutionSkyPlusTarget
     }
   }
 
@@ -288,8 +293,20 @@ object GhostAsterism {
 
   // Convenience create methods for Java since trying to access nested objects and case
   // classes results cannot be resolved.
-  def createEmptyStandardResolutionAsterism: Asterism = {
+  def createEmptyStandardResolutionSingleTargetAsterism: Asterism = {
     StandardResolution.empty.copyWithClonedTargets
+  }
+
+  def createEmptyStandardResolutionDualTargetAsterism: Asterism = {
+    StandardResolution(GhostStandardResTargets.emptyDualTarget, None).copyWithClonedTargets
+  }
+
+  def createEmptyStandardResolutionTargetPlusSkyAsterism: Asterism = {
+    StandardResolution(GhostStandardResTargets.emptyTargetPlusSky, None).copyWithClonedTargets
+  }
+
+  def createEmptyStandardResolutionSkyPlusTargetAsterism: Asterism = {
+    StandardResolution(GhostStandardResTargets.emptySkyPlusTarget, None).copyWithClonedTargets
   }
 
   def createEmptyHighResolutionAsterism: Asterism = {

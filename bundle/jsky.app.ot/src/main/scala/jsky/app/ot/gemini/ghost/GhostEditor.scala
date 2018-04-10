@@ -5,15 +5,15 @@ import javax.swing.JPanel
 
 import edu.gemini.pot.sp.ISPObsComponent
 import edu.gemini.shared.gui.bean.TextFieldPropertyCtrl
+import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.spModel.gemini.ghost.Ghost
-import edu.gemini.spModel.gemini.ghost.GhostAsterism.GhostStandardResTargets._
 import edu.gemini.spModel.gemini.ghost.AsterismConverters._
-import edu.gemini.spModel.gemini.ghost.GhostAsterism.{HighResolution, StandardResolution}
 import edu.gemini.spModel.rich.pot.sp._
+import edu.gemini.spModel.target.env.AsterismType
+import edu.gemini.spModel.target.env.AsterismType._
 import edu.gemini.spModel.target.obsComp.TargetObsComp
 import jsky.app.ot.gemini.editor.ComponentEditor
 
-import scala.collection.immutable.ListMap
 import scala.swing._
 import scala.swing.GridBagPanel.{Anchor, Fill}
 import scala.swing.event.SelectionChanged
@@ -71,16 +71,16 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
       insets = new Insets(12, 10, 0, 20)
     }
 
-    /** A map between GHOST asterism names and converters to those types. */
-    val asterismMap: Map[String, GhostAsterismConverter] = ListMap(
-      "Single target" -> GhostSingleTargetConverter,
-      "Dual target" -> GhostDualTargetConverter,
-      "SRIFU1 target, SRIFU2 sky position" -> GhostTargetPlusSkyConverter,
-      "SRIFU1 sky position, SRIFU2 target" -> GhostSkyPlusTargetConverter,
-      "High resolution" -> GhostHighResolutionConverter
+    /** A list of available asterism types. */
+    val asterismList: List[AsterismType] = List(
+      GhostStandardResolutionSingleTarget,
+      GhostStandardResolutionDualTarget,
+      GhostStandardResolutionTargetPlusSky,
+      GhostStandardResolutionSkyPlusTarget,
+      GhostHighResolution
     )
 
-    val asterismComboBox: ComboBox[String] = new ComboBox[String](asterismMap.keys.toSeq)
+    val asterismComboBox: ComboBox[AsterismType] = new ComboBox[AsterismType](asterismList)
     layout(asterismComboBox) = new Constraints() {
       anchor = Anchor.NorthWest
       gridx = 1
@@ -98,12 +98,12 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
     listenTo(asterismComboBox.selection)
     reactions += {
       case SelectionChanged(`asterismComboBox`) =>
-        val converter = asterismMap(asterismComboBox.selection.item)
-        convertAsterism(converter)
+        val converter = asterismComboBox.selection.item.converter.asScalaOpt
+        converter.foreach(convertAsterism)
     }
 
     /** Convert the asterism to the new type, and set the new target environment. */
-    def convertAsterism(converter: GhostAsterismConverter): Unit = Swing.onEDT {
+    def convertAsterism(converter: AsterismConverter): Unit = Swing.onEDT {
       // Disable the combo box, and enable it only if conversion succeeds.
       // If the conversion fails, the combo box will stay disabled and a P2 error will be generated.
       asterismComboBox.enabled = false
@@ -121,26 +121,19 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
 
     def initialize(): Unit = Swing.onEDT {
       // Set the combo box to the appropriate asterism type.
+      // If there is no allowable type, disable it.
       deafTo(asterismComboBox.selection)
-      ui.asterismComboBox.enabled = true
-      val selectionIdx = getContextObservation.findTargetObsComp.flatMap { env =>
-        env.getAsterism match {
-          case a: StandardResolution =>
-            a.targets match {
-              case SingleTarget(_)     => Some(0)
-              case DualTarget(_, _)    => Some(1)
-              case TargetPlusSky(_, _) => Some(2)
-              case SkyPlusTarget(_, _) => Some(3)
-            }
-          case HighResolution(_, _, _) => Some(4)
-          case _                       =>
-            Dialog.showMessage(ui, "Illegal asterism type for GHOST observation.",
-              "Asterism Error", Dialog.Message.Error)
-            ui.asterismComboBox.enabled = false
-            None
-        }
+      ui.asterismComboBox.enabled = false
+
+      // We only allow asterism types in the asterism list populating the combo box.
+      val selection = getContextObservation.findTargetObsComp
+        .map(_.getAsterism.asterismType)
+        .filter(asterismList.contains)
+
+      selection.foreach { at =>
+        ui.asterismComboBox.selection.item = at
+        ui.asterismComboBox.enabled = true
       }
-      asterismComboBox.selection.index = selectionIdx.getOrElse(0)
       listenTo(asterismComboBox.selection)
     }
   }

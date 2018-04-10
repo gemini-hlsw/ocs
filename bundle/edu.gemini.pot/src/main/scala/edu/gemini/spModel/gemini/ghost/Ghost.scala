@@ -84,7 +84,7 @@ object Ghost {
         val toc = oc.getDataObject.asInstanceOf[TargetObsComp]
 
         // Create a single target GHOST asterism as the default.
-        val a   = GhostAsterism.createEmptyStandardResolutionAsterism
+        val a   = GhostAsterism.createEmptyStandardResolutionSingleTargetAsterism
         val env = TargetEnvironment.create(a)
 
         toc.setTargetEnvironment(env)
