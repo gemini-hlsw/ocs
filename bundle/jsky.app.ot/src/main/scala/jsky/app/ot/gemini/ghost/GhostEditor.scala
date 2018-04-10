@@ -10,6 +10,7 @@ import edu.gemini.spModel.gemini.ghost.GhostAsterism.GhostStandardResTargets._
 import edu.gemini.spModel.gemini.ghost.AsterismConverters._
 import edu.gemini.spModel.gemini.ghost.GhostAsterism.{HighResolution, StandardResolution}
 import edu.gemini.spModel.rich.pot.sp._
+import edu.gemini.spModel.target.obsComp.TargetObsComp
 import jsky.app.ot.gemini.editor.ComponentEditor
 
 import scala.collection.immutable.ListMap
@@ -103,23 +104,18 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
 
     /** Convert the asterism to the new type, and set the new target environment. */
     def convertAsterism(converter: GhostAsterismConverter): Unit = Swing.onEDT {
-      val o = getContextObservation
-      val oc = getContextTargetObsComp
+      // Disable the combo box, and enable it only if conversion succeeds.
+      // If the conversion fails, the combo box will stay disabled and a P2 error will be generated.
+      asterismComboBox.enabled = false
 
-      val newToc = for {
-        toc <- o.findTargetObsComp
+      for {
+        oc  <- Option(getContextTargetObsComp)
+        toc <- Option(oc.getDataObject).collect { case t: TargetObsComp => t }
         env <- converter.convert(toc.getTargetEnvironment)
-      } yield {
+      } {
         toc.setTargetEnvironment(env)
-        toc
-      }
-
-      newToc match {
-        case Some(toc) =>
-          oc.setDataObject(toc)
-        case None =>
-          Dialog.showMessage(ui, "Could not convert the asterism type.",
-              "Asterism Conversion Error", Dialog.Message.Error)
+        oc.setDataObject(toc)
+        asterismComboBox.enabled = true
       }
     }
 

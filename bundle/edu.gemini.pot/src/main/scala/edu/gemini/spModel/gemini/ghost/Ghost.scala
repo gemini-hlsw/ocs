@@ -8,7 +8,6 @@ import edu.gemini.spModel.core.Site
 import edu.gemini.spModel.data.ISPDataObject
 import edu.gemini.spModel.data.config.{DefaultParameter, DefaultSysConfig, ISysConfig, StringParameter}
 import edu.gemini.spModel.data.property.{PropertyProvider, PropertySupport}
-import edu.gemini.spModel.gemini.ghost.AsterismConverters.GhostAsterismConverter
 import edu.gemini.spModel.gemini.init.{ComponentNodeInitializer, ObservationNI}
 import edu.gemini.spModel.obs.SPObservation
 import edu.gemini.spModel.obscomp.{InstConfigInfo, InstConstants, SPInstObsComp}
@@ -57,10 +56,6 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
     sc.putParameter(StringParameter.getInstance(ISPDataObject.VERSION_PROP, getVersion))
     sc.putParameter(DefaultParameter.getInstance(Ghost.POS_ANGLE_PROP, getPosAngle))
     sc
-  }
-
-  /** Take the current asterism, convert it to the new type, and set the target environment. */
-  def convertAsterism(converter: GhostAsterismConverter): Unit = {
   }
 }
 
