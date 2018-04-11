@@ -113,22 +113,15 @@ object GhostAsterism {
   /** GHOST standard resolution asterism type.  In this mode, one or two targets (one of which may be
     * a sky position) are observed simultaneously with both IFUs at standard resolution.
     */
-  final case class StandardResolution(targets: GhostStandardResTargets,
-                                      override val base: Option[Coordinates]) extends GhostAsterism {
-    import GhostStandardResTargets._
+  sealed trait StandardResolution extends GhostAsterism {
+    import StandardResolution._
 
-    override def allSpTargets: NonEmptyList[SPTarget] = targets match {
-      case SingleTarget(t)    => NonEmptyList(t.spTarget)
-      case DualTarget(t1,t2)  => NonEmptyList(t1.spTarget, t2.spTarget)
-      case TargetPlusSky(t,_) => NonEmptyList(t.spTarget)
-      case SkyPlusTarget(_,t) => NonEmptyList(t.spTarget)
+    override def allSpTargets: NonEmptyList[SPTarget] = this match {
+      case SingleTarget(t,_)    => NonEmptyList(t.spTarget)
+      case DualTarget(t1,t2,_)  => NonEmptyList(t1.spTarget, t2.spTarget)
+      case TargetPlusSky(t,_,_) => NonEmptyList(t.spTarget)
+      case SkyPlusTarget(_,t,_) => NonEmptyList(t.spTarget)
     }
-
-    /** Calculates the coordinates exactly halfway along the great circle
-      * connecting the two targets.
-      */
-    def defaultBasePosition(when: Option[Instant]): Option[Coordinates] =
-      targets.defaultBasePosition(when)
 
     /** Obtains the base position, which defaults to the half-way point between
       * the two targets but may be explicitly specified instead.
@@ -140,108 +133,97 @@ object GhostAsterism {
       allTargets.map(Target.pm.get).fold
 
     def ifu1GuideFiberState(cc: CloudCover): GuideFiberState =
-      StandardResolution.guideFiberState(targets.ifu1, cc)
+      StandardResolution.guideFiberState(ifu1, cc)
 
     def ifu2GuideFiberState(cc: CloudCover): GuideFiberState = {
-      targets.ifu2.map(t => StandardResolution.guideFiberState(t, cc)).getOrElse(GuideFiberState.Disabled)
+      ifu2.map(t => StandardResolution.guideFiberState(t, cc)).getOrElse(GuideFiberState.Disabled)
     }
-
-    override def copyWithClonedTargets: Asterism =
-      StandardResolution(targets.cloneTargets, base)
-
-    override def asterismType: AsterismType = targets.asterismType
-  }
-
-  object StandardResolution {
-    def guideFiberState(e: Either[Coordinates, GhostTarget], cc: CloudCover): GuideFiberState =
-      e.rightMap(t => GhostTarget.standardResGuideFiberState(t, cc)).right.getOrElse(GuideFiberState.Disabled)
-
-    val empty: StandardResolution = StandardResolution(GhostStandardResTargets.emptySingleTarget, None)
-
-    val Targets: StandardResolution @> GhostStandardResTargets =
-      Lens.lensu((a,b) => a.copy(targets = b), _.targets)
-    val Base: StandardResolution @> Option[Coordinates] =
-      Lens.lensu((a,b) => a.copy(base = b), _.base)
-  }
-
-  /** GHOST standard resolution asterism types. */
-  sealed trait GhostStandardResTargets {
-    import GhostStandardResTargets._
 
     def ifu1: Either[Coordinates, GhostTarget] = this match {
-      case SingleTarget(t)    => Right(t)
-      case DualTarget(t,_)    => Right(t)
-      case TargetPlusSky(t,_) => Right(t)
-      case SkyPlusTarget(s,_) => Left(s)
+      case SingleTarget(t,_)    => Right(t)
+      case DualTarget(t,_,_)    => Right(t)
+      case TargetPlusSky(t,_,_) => Right(t)
+      case SkyPlusTarget(s,_,_) => Left(s)
     }
     def ifu2: Option[Either[Coordinates, GhostTarget]] = this match {
-      case SingleTarget(_)    => None
-      case DualTarget(_,t)    => Some(Right(t))
-      case TargetPlusSky(_,s) => Some(Left(s))
-      case SkyPlusTarget(_,t) => Some(Right(t))
+      case SingleTarget(_,_)    => None
+      case DualTarget(_,t,_)    => Some(Right(t))
+      case TargetPlusSky(_,s,_) => Some(Left(s))
+      case SkyPlusTarget(_,t,_) => Some(Right(t))
     }
 
     // Sky coords are immutable, so we don't need to copy them.
-    def cloneTargets: GhostStandardResTargets = this match {
-      case SingleTarget(t)     => SingleTarget(t.copyWithClonedTarget)
-      case DualTarget(t1, t2)  => DualTarget(t1.copyWithClonedTarget, t2.copyWithClonedTarget)
-      case TargetPlusSky(t, s) => TargetPlusSky(t.copyWithClonedTarget, s)
-      case SkyPlusTarget(s, t) => SkyPlusTarget(s, t.copyWithClonedTarget)
+    override def copyWithClonedTargets: Asterism = this match {
+      case SingleTarget(t,b)    => SingleTarget(t.copyWithClonedTarget,b)
+      case DualTarget(t1,t2,b)  => DualTarget(t1.copyWithClonedTarget, t2.copyWithClonedTarget, b)
+      case TargetPlusSky(t,s,b) => TargetPlusSky(t.copyWithClonedTarget, s, b)
+      case SkyPlusTarget(s,t,b) => SkyPlusTarget(s, t.copyWithClonedTarget, b)
     }
 
     /** In any single target object mode, the default base position is the same as the
       * target position. In dual target mode, we interpolate between the two.
       */
-    def defaultBasePosition(when: Option[Instant]): Option[Coordinates] = this match {
-      case SingleTarget(t)    => t.coordinates(when)
-      case DualTarget(t1,t2)  => interpolateCoords(t1.coordinates(when), t2.coordinates(when))
-      case TargetPlusSky(t,_) => t.coordinates(when)
-      case SkyPlusTarget(_,t) => t.coordinates(when)
+    private def defaultBasePosition(when: Option[Instant]): Option[Coordinates] = this match {
+      case SingleTarget(t,_)    => t.coordinates(when)
+      case DualTarget(t1,t2,_)  => interpolateCoords(t1.coordinates(when), t2.coordinates(when))
+      case TargetPlusSky(t,_,_) => t.coordinates(when)
+      case SkyPlusTarget(_,t,_) => t.coordinates(when)
     }
 
-    def asterismType: AsterismType = this match {
-      case SingleTarget(_)    => AsterismType.GhostStandardResolutionSingleTarget
-      case DualTarget(_,_)    => AsterismType.GhostStandardResolutionDualTarget
-      case TargetPlusSky(_,_) => AsterismType.GhostStandardResolutionTargetPlusSky
-      case SkyPlusTarget(_,_) => AsterismType.GhostStandardResolutionSkyPlusTarget
+    override def asterismType: AsterismType = this match {
+      case SingleTarget(_,_)    => AsterismType.GhostSingleTarget
+      case DualTarget(_,_,_)    => AsterismType.GhostDualTarget
+      case TargetPlusSky(_,_,_) => AsterismType.GhostTargetPlusSky
+      case SkyPlusTarget(_,_,_) => AsterismType.GhostSkyPlusTarget
     }
   }
 
-  object GhostStandardResTargets {
-    def interpolateCoords(c1Opt: Option[Coordinates], c2Opt: Option[Coordinates]): Option[Coordinates] = for {
+  case class SingleTarget(target: GhostTarget, override val base: Option[Coordinates]) extends StandardResolution
+  case class DualTarget(target1: GhostTarget, target2: GhostTarget, override val base: Option[Coordinates]) extends StandardResolution
+  case class TargetPlusSky(target: GhostTarget, sky: Coordinates, override val base: Option[Coordinates]) extends StandardResolution
+  case class SkyPlusTarget(sky: Coordinates, target: GhostTarget, override val base: Option[Coordinates]) extends StandardResolution
+
+  object StandardResolution {
+    def guideFiberState(e: Either[Coordinates, GhostTarget], cc: CloudCover): GuideFiberState =
+      e.rightMap(t => GhostTarget.standardResGuideFiberState(t, cc)).right.getOrElse(GuideFiberState.Disabled)
+
+    private[ghost] def interpolateCoords(c1Opt: Option[Coordinates], c2Opt: Option[Coordinates]): Option[Coordinates] = for {
       c1 <- c1Opt
       c2 <- c2Opt
     } yield c1.interpolate(c2, 0.5)
 
-    final case class SingleTarget(target: GhostTarget) extends GhostStandardResTargets
-    final case class DualTarget(target1: GhostTarget, target2: GhostTarget) extends GhostStandardResTargets
-    final case class TargetPlusSky(target: GhostTarget, sky: Coordinates) extends GhostStandardResTargets
-    final case class SkyPlusTarget(sky: Coordinates, target: GhostTarget) extends GhostStandardResTargets
-
-    val emptySingleTarget:  SingleTarget  = SingleTarget(GhostTarget.empty)
-    val emptyDualTarget:    DualTarget    = DualTarget(GhostTarget.empty, GhostTarget.empty)
-    val emptyTargetPlusSky: TargetPlusSky = TargetPlusSky(GhostTarget.empty, Coordinates.zero)
-    val emptySkyPlusTarget: SkyPlusTarget = SkyPlusTarget(Coordinates.zero, GhostTarget.empty)
+    val emptySingleTarget:  SingleTarget       = SingleTarget(GhostTarget.empty, None)
+    val emptyDualTarget:    DualTarget         = DualTarget(GhostTarget.empty, GhostTarget.empty, None)
+    val emptyTargetPlusSky: TargetPlusSky      = TargetPlusSky(GhostTarget.empty, Coordinates.zero, None)
+    val emptySkyPlusTarget: SkyPlusTarget      = SkyPlusTarget(Coordinates.zero, GhostTarget.empty, None)
+    val empty:              StandardResolution = emptySingleTarget
 
     val SingleTargetIFU1: SingleTarget @> GhostTarget =
       Lens.lensu((a,b) => a.copy(target = b), _.target)
+    val SingleTargetBase: SingleTarget @> Option[Coordinates] =
+      Lens.lensu((a,b) => a.copy(base = b), _.base)
 
     val DualTargetIFU1: DualTarget @> GhostTarget =
       Lens.lensu((a,b) => a.copy(target1 = b), _.target1)
     val DualTargetIFU2: DualTarget @> GhostTarget =
       Lens.lensu((a,b) => a.copy(target2 = b), _.target2)
+    val DualTargetBase: DualTarget @> Option[Coordinates] =
+      Lens.lensu((a,b) => a.copy(base = b), _.base)
 
     val TargetPlusSkyIFU1: TargetPlusSky @> GhostTarget =
       Lens.lensu((a,b) => a.copy(target = b), _.target)
     val TargetPlusSkyIFU2: TargetPlusSky @> Coordinates =
       Lens.lensu((a,b) => a.copy(sky = b), _.sky)
+    val TargetPlusSkyBase: TargetPlusSky @> Option[Coordinates] =
+      Lens.lensu((a,b) => a.copy(base = b), _.base)
 
     val SkyPlusTargetIFU1: SkyPlusTarget @> Coordinates =
       Lens.lensu((a,b) => a.copy(sky = b), _.sky)
     val SkyPlusTargetIFU2: SkyPlusTarget @> GhostTarget =
       Lens.lensu((a,b) => a.copy(target = b), _.target)
+    val SkyPlusTargetBase: SkyPlusTarget @> Option[Coordinates] =
+      Lens.lensu((a,b) => a.copy(base = b), _.base)
   }
-
 
   /** High resolution mode.
     *
@@ -292,20 +274,20 @@ object GhostAsterism {
 
   // Convenience create methods for Java since trying to access nested objects and case
   // classes results cannot be resolved.
-  def createEmptyStandardResolutionSingleTargetAsterism: Asterism = {
-    StandardResolution.empty.copyWithClonedTargets
+  def createEmptySingleTargetAsterism: Asterism = {
+    StandardResolution.emptySingleTarget.copyWithClonedTargets
   }
 
-  def createEmptyStandardResolutionDualTargetAsterism: Asterism = {
-    StandardResolution(GhostStandardResTargets.emptyDualTarget, None).copyWithClonedTargets
+  def createEmptyDualTargetAsterism: Asterism = {
+    StandardResolution.emptyDualTarget.copyWithClonedTargets
   }
 
-  def createEmptyStandardResolutionTargetPlusSkyAsterism: Asterism = {
-    StandardResolution(GhostStandardResTargets.emptyTargetPlusSky, None).copyWithClonedTargets
+  def createEmptyTargetPlusSkyAsterism: Asterism = {
+    StandardResolution.emptyTargetPlusSky.copyWithClonedTargets
   }
 
-  def createEmptyStandardResolutionSkyPlusTargetAsterism: Asterism = {
-    StandardResolution(GhostStandardResTargets.emptySkyPlusTarget, None).copyWithClonedTargets
+  def createEmptySkyPlusTargetAsterism: Asterism = {
+    StandardResolution.emptySkyPlusTarget.copyWithClonedTargets
   }
 
   def createEmptyHighResolutionAsterism: Asterism = {

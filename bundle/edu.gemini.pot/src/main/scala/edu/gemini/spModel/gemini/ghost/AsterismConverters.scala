@@ -13,7 +13,6 @@ import Scalaz._
   */
 object AsterismConverters {
   import GhostAsterism._
-  import GhostAsterism.GhostStandardResTargets._
 
   type BasePosition = Option[Coordinates]
   type SkyPosition  = Option[Coordinates]
@@ -28,11 +27,11 @@ object AsterismConverters {
       env.getAsterism match {
         case ga: GhostAsterism =>
           ga match {
-            case StandardResolution(SingleTarget(t), b)     => creator(env, t, None, None, b).some
-            case StandardResolution(DualTarget(t1, t2), b)  => creator(env, t1, t2.some, None, b).some
-            case StandardResolution(TargetPlusSky(t, s), b) => creator(env, t, None, s.some, b).some
-            case StandardResolution(SkyPlusTarget(s, t), b) => creator(env, t, None, s.some, b).some
-            case HighResolution(t, s, b)                    => creator(env, t, None, s, b).some
+            case SingleTarget(t, b)      => creator(env, t, None, None, b).some
+            case DualTarget(t1, t2, b)   => creator(env, t1, t2.some, None, b).some
+            case TargetPlusSky(t, s, b)  => creator(env, t, None, s.some, b).some
+            case SkyPlusTarget(s, t, b)  => creator(env, t, None, s.some, b).some
+            case HighResolution(t, s, b) => creator(env, t, None, s, b).some
           }
         case _                                              => None
       }
@@ -47,7 +46,7 @@ object AsterismConverters {
     override def name: String = "GhostAsterism.SingleTarget"
 
     override protected def creator(env: TargetEnvironment, t: GhostTarget, t2: Option[GhostTarget], s: SkyPosition, b: BasePosition): TargetEnvironment = {
-      val asterism    = StandardResolution(SingleTarget(t), b)
+      val asterism    = SingleTarget(t, b)
       val userTargets = appendCoords(appendTarget(env.getUserTargets, gT2UT(t2)), s)
       TargetEnvironment.createWithClonedTargets(asterism, env.getGuideEnvironment, userTargets)
     }
@@ -57,7 +56,7 @@ object AsterismConverters {
     override def name: String = "GhostAsterism.DualTarget"
 
     override protected def creator(env: TargetEnvironment, t: GhostTarget, t2: Option[GhostTarget], s: SkyPosition, b: BasePosition): TargetEnvironment = {
-      val asterism    = StandardResolution(DualTarget(t, t2.getOrElse(GhostTarget.empty)), b)
+      val asterism    = DualTarget(t, t2.getOrElse(GhostTarget.empty), b)
       val userTargets = appendCoords(env.getUserTargets, s)
       TargetEnvironment.createWithClonedTargets(asterism, env.getGuideEnvironment, userTargets)
     }
@@ -67,7 +66,7 @@ object AsterismConverters {
     override def name: String = "GhostAsterism.TargetPlusSky"
 
     override protected def creator(env: TargetEnvironment, t: GhostTarget, t2: Option[GhostTarget], s: SkyPosition, b: BasePosition): TargetEnvironment = {
-      val asterism    = StandardResolution(TargetPlusSky(t, s.getOrElse(Coordinates.zero)), b)
+      val asterism    = TargetPlusSky(t, s.getOrElse(Coordinates.zero), b)
       val userTargets = appendTarget(env.getUserTargets, gT2UT(t2))
       TargetEnvironment.createWithClonedTargets(asterism, env.getGuideEnvironment, userTargets)
     }
@@ -77,7 +76,7 @@ object AsterismConverters {
     override def name: String = "GhostAsterism.SkyPlusTarget"
 
     override protected def creator(env: TargetEnvironment, t: GhostTarget, t2: Option[GhostTarget], s: SkyPosition, b: BasePosition): TargetEnvironment = {
-      val asterism    = StandardResolution(SkyPlusTarget(s.getOrElse(Coordinates.zero), t), b)
+      val asterism    = SkyPlusTarget(s.getOrElse(Coordinates.zero), t, b)
       val userTargets = appendTarget(env.getUserTargets, gT2UT(t2))
       TargetEnvironment.createWithClonedTargets(asterism, env.getGuideEnvironment, userTargets)
     }
