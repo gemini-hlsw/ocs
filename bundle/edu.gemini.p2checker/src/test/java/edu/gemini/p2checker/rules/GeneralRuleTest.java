@@ -6,7 +6,6 @@ import edu.gemini.p2checker.rules.general.GeneralRule;
 import edu.gemini.pot.sp.*;
 import edu.gemini.spModel.gemini.altair.AltairParams;
 import org.junit.Test;
-import org.scalacheck.Gen;
 
 import java.util.List;
 
