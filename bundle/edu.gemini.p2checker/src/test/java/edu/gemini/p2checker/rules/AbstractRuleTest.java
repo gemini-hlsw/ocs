@@ -11,6 +11,7 @@ import edu.gemini.spModel.data.AbstractDataObject;
 import edu.gemini.spModel.gemini.altair.AltairAowfsGuider;
 import edu.gemini.spModel.gemini.altair.AltairParams;
 import edu.gemini.spModel.gemini.altair.InstAltair;
+import edu.gemini.spModel.gemini.ghost.Ghost;
 import edu.gemini.spModel.gemini.gmos.InstGmosNorth;
 import edu.gemini.spModel.gemini.gmos.InstGmosSouth;
 import edu.gemini.spModel.gemini.michelle.InstMichelle;
@@ -147,6 +148,13 @@ public class AbstractRuleTest {
 
     protected ISPObsComponent addMichelle() throws SPUnknownIDException, SPTreeStateException, SPNodeNotLocalException {
         final ISPObsComponent obsComp = createObsComp(new InstMichelle());
+        obscomps.add(obsComp);
+        obs.setObsComponents(obscomps);
+        return obsComp;
+    }
+
+    protected ISPObsComponent addGhost() throws SPUnknownIDException, SPTreeStateException, SPNodeNotLocalException {
+        final ISPObsComponent obsComp = createObsComp(new Ghost());
         obscomps.add(obsComp);
         obs.setObsComponents(obscomps);
         return obsComp;

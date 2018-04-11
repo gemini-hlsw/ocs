@@ -31,9 +31,7 @@ import edu.gemini.spModel.obsclass.ObsClass;
 import edu.gemini.spModel.obscomp.InstConstants;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.target.SPTarget;
-import edu.gemini.spModel.target.env.GuideGroup;
-import edu.gemini.spModel.target.env.GuideProbeTargets;
-import edu.gemini.spModel.target.env.TargetEnvironment;
+import edu.gemini.spModel.target.env.*;
 import edu.gemini.spModel.target.obsComp.GuideSequence;
 import edu.gemini.spModel.target.obsComp.PwfsGuideProbe;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
@@ -324,6 +322,28 @@ public class GeneralRule implements IRule {
             return problems;
 
         }
+    };
+
+    /**
+     * Rule for asterism type: the asterism type must match one available for the instrument.
+     */
+    private static IRule ASTERISM_TYPE_RULE = elems -> {
+        final Option<TargetObsComp> tocOpt = elems.getTargetObsComp();
+        if (tocOpt.isEmpty())
+            return null;
+
+        final P2Problems problems = new P2Problems();
+        tocOpt.foreach(toc -> {
+            final SPComponentType instType = elems.getInstrument().getType();
+            final AsterismType    at       = toc.getAsterism().asterismType();
+            final ImList<AsterismType> supportedAsterismTypes = AsterismType.supportedTypesForInstrument(instType);
+            if (!supportedAsterismTypes.contains(at))
+                problems.addError(PREFIX + "ASTERISM_TYPE_RULE",
+                        instType.readableStr + " observation is configured to use an unsupported asterism of type " + at.name + ".",
+                        elems.getTargetObsComponentNode().getValue());
+        });
+
+        return problems;
     };
 
     /**
@@ -620,6 +640,7 @@ public class GeneralRule implements IRule {
      */
     static  {
         GENERAL_RULES.add(SCIENCE_TARGET_RULE);
+        GENERAL_RULES.add(ASTERISM_TYPE_RULE);
         GENERAL_RULES.add(TARGET_PM_RULE);
         GENERAL_RULES.add(WFS_RULE);
         GENERAL_RULES.add(EXTRA_ADVANCED_GUIDERS_RULE);
