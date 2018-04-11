@@ -107,7 +107,7 @@ public enum NodeInitializers {
 
         // Replace default values with more specific initializers as necessary.
         m.put(Instrument.Gsaoi, Gsaoi.OBSERVATION_NI);
-        // TODO:GHOST   m.put(Instrument.Ghost, Ghost.OBSERVATION_NI);
+        m.put(Instrument.Ghost, Ghost.OBSERVATION_NI());
 
         obsInitMap = Collections.unmodifiableMap(m);
     }

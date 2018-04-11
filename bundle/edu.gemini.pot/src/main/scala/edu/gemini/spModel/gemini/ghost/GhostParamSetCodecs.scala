@@ -95,9 +95,10 @@ object GhostParamSetCodecs {
       val pf = new PioXmlFactory
 
       override def encode(key: String, a: GhostAsterism): ParamSet = {
-        val (tag, ps) = a match {
-          case a: StandardResolution => (AsterismType.GhostStandardResolution.tag, StandardResolutionParamSetCodec.encode(key, a))
-          case a: HighResolution     => (AsterismType.GhostHighResolution.tag,     HighResolutionParamSetCodec.encode(key, a))
+        val tag = a.asterismType.tag
+        val ps = a match {
+          case a: StandardResolution => StandardResolutionParamSetCodec.encode(key, a)
+          case a: HighResolution     => HighResolutionParamSetCodec.encode(key, a)
         }
         Pio.addParam(pf, ps, GhostType, tag)
         ps
@@ -105,9 +106,13 @@ object GhostParamSetCodecs {
 
       override def decode(ps: ParamSet): PioError \/ GhostAsterism = {
         Option(ps.getParam(GhostType)).map(_.getValue) \/> MissingKey(GhostType) flatMap {
-          case AsterismType.GhostStandardResolution.tag => StandardResolutionParamSetCodec.decode(ps)
-          case AsterismType.GhostHighResolution.tag     => HighResolutionParamSetCodec.decode(ps)
-          case other                                    => UnknownTag(other, "GhostAsterism").left
+          case
+            AsterismType.GhostStandardResolutionSingleTarget.tag  |
+            AsterismType.GhostStandardResolutionDualTarget.tag    |
+            AsterismType.GhostStandardResolutionTargetPlusSky.tag |
+            AsterismType.GhostStandardResolutionSkyPlusTarget.tag => StandardResolutionParamSetCodec.decode(ps)
+          case AsterismType.GhostHighResolution.tag               => HighResolutionParamSetCodec.decode(ps)
+          case other                                              => UnknownTag(other, "GhostAsterism").left
         }
       }
     }
