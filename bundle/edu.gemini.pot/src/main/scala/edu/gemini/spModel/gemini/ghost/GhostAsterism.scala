@@ -47,8 +47,8 @@ object GhostAsterism {
     implicit val EqualGuideFiberState: Equal[GuideFiberState] =
       Equal.equalA[GuideFiberState]
 
-    def fromString(s: String): Option[GuideFiberState]
-    = All.findLeft(_.name == s)
+    def fromString(s: String): Option[GuideFiberState] =
+      All.findLeft(_.name == s)
 
     def unsafeFromString(s: String): GuideFiberState =
       fromString(s).getOrElse(sys.error(s"Unknown guide fiber state: $s"))
@@ -113,9 +113,8 @@ object GhostAsterism {
   /** GHOST standard resolution asterism type.  In this mode, one or two targets (one of which may be
     * a sky position) are observed simultaneously with both IFUs at standard resolution.
     */
-  final case class StandardResolution(
-                                       targets: GhostStandardResTargets,
-                                       override val base: Option[Coordinates]) extends GhostAsterism {
+  final case class StandardResolution(targets: GhostStandardResTargets,
+                                      override val base: Option[Coordinates]) extends GhostAsterism {
     import GhostStandardResTargets._
 
     override def allSpTargets: NonEmptyList[SPTarget] = targets match {
