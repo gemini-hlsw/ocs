@@ -332,9 +332,13 @@ public class GeneralRule implements IRule {
         if (tocOpt.isEmpty())
             return null;
 
+        final SPInstObsComp inst = elems.getInstrument();
+        if (inst == null)
+            return null;
+
         final P2Problems problems = new P2Problems();
         tocOpt.foreach(toc -> {
-            final SPComponentType instType = elems.getInstrument().getType();
+            final SPComponentType instType = inst.getType();
             final AsterismType    at       = toc.getAsterism().asterismType();
             final ImList<AsterismType> supportedAsterismTypes = AsterismType.supportedTypesForInstrument(instType);
             if (!supportedAsterismTypes.contains(at))
