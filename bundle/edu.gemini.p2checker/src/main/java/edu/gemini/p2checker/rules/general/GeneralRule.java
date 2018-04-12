@@ -338,12 +338,12 @@ public class GeneralRule implements IRule {
 
         final P2Problems problems = new P2Problems();
         tocOpt.foreach(toc -> {
-            final SPComponentType instType = inst.getType();
-            final AsterismType    at       = toc.getAsterism().asterismType();
-            final ImList<AsterismType> supportedAsterismTypes = AsterismType.supportedTypesForInstrument(instType);
+            final Instrument instType = inst.getInstrument();
+            final AsterismType    at  = toc.getAsterism().asterismType();
+            final Set<AsterismType> supportedAsterismTypes = AsterismType.supportedTypesForInstrument(instType);
             if (!supportedAsterismTypes.contains(at))
                 problems.addError(PREFIX + "ASTERISM_TYPE_RULE",
-                        instType.readableStr + " observation is configured to use an unsupported asterism of type " + at.name + ".",
+                        instType.componentType.readableStr + " observation is configured to use an unsupported asterism of type " + at.name + ".",
                         elems.getTargetObsComponentNode().getValue());
         });
 

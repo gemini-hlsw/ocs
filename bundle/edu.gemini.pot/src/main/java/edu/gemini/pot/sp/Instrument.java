@@ -33,7 +33,7 @@ public enum Instrument {
 
     public final SPComponentType componentType;
 
-    private Instrument(SPComponentType type) {
+    Instrument(SPComponentType type) {
         this.componentType = type;
     }
 
