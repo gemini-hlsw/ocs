@@ -11,10 +11,6 @@ import java.util.TreeSet;
 import java.util.function.Supplier;
 
 public enum AsterismType {
-    /**
-     * Note all GHOST standard resolution asterisms have the same tag because we use this to output them to XML
-     * in a category together.
-     */
     Single("single", "Single Target", None.instance(), Asterism$.MODULE$::createSingleAsterism),
 
     GhostSingleTarget("ghostSingleTarget", "Single Target",
