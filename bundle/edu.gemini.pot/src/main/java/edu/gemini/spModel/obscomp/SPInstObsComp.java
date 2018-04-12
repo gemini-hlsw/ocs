@@ -1,6 +1,7 @@
 package edu.gemini.spModel.obscomp;
 
 import edu.gemini.pot.sp.ISPObservation;
+import edu.gemini.pot.sp.Instrument;
 import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.data.AbstractDataObject;
@@ -398,5 +399,14 @@ public abstract class SPInstObsComp extends AbstractDataObject {
      */
     public void restoreScienceDetails(final SPInstObsComp oldData) {
         setPosAngle(oldData.getPosAngle());
+    }
+
+    /**
+     * Get the Instrument associated with this instance.
+     * Will throw an exception if the component type is not an instrument, but this should not happen and would
+     * indicate something serious is wrong with the observation.
+     */
+    public Instrument getInstrument() {
+        return Instrument.fromComponentType(getType()).getValue();
     }
 }

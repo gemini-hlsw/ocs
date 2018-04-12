@@ -1,11 +1,15 @@
 package edu.gemini.spModel.target.env;
 
+import edu.gemini.pot.sp.Instrument;
 import edu.gemini.pot.sp.SPComponentBroadType;
 import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.gemini.ghost.AsterismConverters;
 import edu.gemini.spModel.gemini.ghost.GhostAsterism$;
 
+import java.util.Collections;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.function.Supplier;
 
 public enum AsterismType {
@@ -57,26 +61,18 @@ public enum AsterismType {
 
     // Return the asterism types supported by the different instruments.
     // We need to do this here because we want these statically accessible.
-    // Assume the head of the list is the default for the instrument.
-    public static ImList<AsterismType> supportedTypesForInstrument(final SPComponentType instType) {
-        if (!instType.broadType.equals(SPComponentBroadType.INSTRUMENT))
-            throw new RuntimeException("Can only look up supported asterism types for instruments");
-
+    public static Set<AsterismType> supportedTypesForInstrument(final Instrument instType) {
         switch (instType) {
-            case INSTRUMENT_GHOST:
-                return DefaultImList.create(
-                        GhostStandardResolutionSingleTarget,
-                        GhostStandardResolutionDualTarget,
-                        GhostStandardResolutionTargetPlusSky,
-                        GhostStandardResolutionSkyPlusTarget,
-                        GhostHighResolution);
+            case Ghost:
+                final Set<AsterismType> s = new TreeSet<>();
+                s.add(GhostStandardResolutionSingleTarget);
+                s.add(GhostStandardResolutionDualTarget);
+                s.add(GhostStandardResolutionTargetPlusSky);
+                s.add(GhostStandardResolutionSkyPlusTarget);
+                s.add(GhostHighResolution);
+                return Collections.unmodifiableSet(s);
             default:
-                return DefaultImList.create(Single);
+                return Collections.singleton(Single);
         }
-    }
-
-    // The default asterism type per instrument.
-    public static AsterismType defaultTypeForInstrument(final SPComponentType instType) {
-        return supportedTypesForInstrument(instType).head();
     }
 }

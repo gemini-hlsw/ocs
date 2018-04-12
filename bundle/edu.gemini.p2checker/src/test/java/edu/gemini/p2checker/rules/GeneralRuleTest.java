@@ -100,4 +100,19 @@ public final class GeneralRuleTest extends AbstractRuleTest {
         assertEquals(Problem.Type.ERROR, p.getType());
         assertTrue(p.toString(), p.toString().startsWith(ALTAIR_MESSAGE));
     }
+
+    @Test
+    public void testAsterismType() throws SPUnknownIDException, SPTreeStateException, SPNodeNotLocalException {
+        // This should add GHOST, and then add an asterism of type Single, which is incompatible.
+        addGhost();
+        addTargetObsCompEmpty();
+
+        final ObservationElements elems = new ObservationElements(obs);
+        final GeneralRule rules = new GeneralRule();
+        final List<Problem> problems = rules.check(elems).getProblems();
+        assertEquals(1, problems.size());
+        final Problem p = problems.get(0);
+        assertEquals(Problem.Type.ERROR, p.getType());
+        assertTrue(p.toString(), p.toString().contains("unsupported asterism"));
+    }
 }
