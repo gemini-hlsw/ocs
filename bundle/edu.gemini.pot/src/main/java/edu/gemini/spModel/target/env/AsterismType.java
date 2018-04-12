@@ -70,7 +70,7 @@ public enum AsterismType {
                 s.add(GhostStandardResolutionTargetPlusSky);
                 s.add(GhostStandardResolutionSkyPlusTarget);
                 s.add(GhostHighResolution);
-                return s;
+                return Collections.unmodifiableSet(s);
             default:
                 return Collections.singleton(Single);
         }
