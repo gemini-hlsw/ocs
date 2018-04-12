@@ -25,9 +25,11 @@ object AsterismParamSetCodecSpec extends Specification with ScalaCheck with Arbi
 
   "Asterism ParamSet Codecs" >> {
     close[Asterism.Single]
-    close[GhostAsterism.StandardResolution]
+    close[GhostAsterism.SingleTarget]
+    close[GhostAsterism.DualTarget]
+    close[GhostAsterism.TargetPlusSky]
+    close[GhostAsterism.SkyPlusTarget]
     close[GhostAsterism.HighResolution]
-    close[GhostAsterism]
     close[Asterism]
   }
 }

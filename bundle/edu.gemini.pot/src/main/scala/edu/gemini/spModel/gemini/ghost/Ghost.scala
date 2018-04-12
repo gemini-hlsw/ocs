@@ -84,7 +84,7 @@ object Ghost {
         val toc = oc.getDataObject.asInstanceOf[TargetObsComp]
 
         // Create a single target GHOST asterism as the default.
-        val a   = GhostAsterism.createEmptyStandardResolutionSingleTargetAsterism
+        val a   = GhostAsterism.createEmptySingleTargetAsterism
         val env = TargetEnvironment.create(a)
 
         toc.setTargetEnvironment(env)
@@ -94,7 +94,7 @@ object Ghost {
         case Success(_)               =>
           // Do nothing.
         case Failure(ex: SPException) =>
-          throw new RuntimeException("Unable to create and initialize GHOST target environment")
+          throw new RuntimeException("Unable to create and initialize GHOST target environment", ex)
         case Failure(_)               =>
           // This should never happen.
           throw new RuntimeException("Unknown failure in creating GHOST target environment")

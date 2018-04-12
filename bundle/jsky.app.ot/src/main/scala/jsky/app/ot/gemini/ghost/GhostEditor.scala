@@ -73,10 +73,10 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
 
     /** A list of available asterism types. */
     val asterismList: List[AsterismType] = List(
-      GhostStandardResolutionSingleTarget,
-      GhostStandardResolutionDualTarget,
-      GhostStandardResolutionTargetPlusSky,
-      GhostStandardResolutionSkyPlusTarget,
+      GhostSingleTarget,
+      GhostDualTarget,
+      GhostTargetPlusSky,
+      GhostSkyPlusTarget,
       GhostHighResolution
     )
 

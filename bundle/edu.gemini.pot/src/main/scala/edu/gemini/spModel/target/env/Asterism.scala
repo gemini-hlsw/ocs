@@ -132,9 +132,14 @@ object Asterism {
       val pf = new PioXmlFactory
 
       def encode(key: String, a: Asterism): ParamSet = {
-        val (tag, ps) = a match {
-          case a: Single         => (AsterismType.Single.tag, Single.SingleParamSetCodec.encode(key, a))
-          case a: GhostAsterism  => ("ghostAsterism",         GhostParamSetCodecs.GhostAsterismParamSetCodec.encode(key, a))
+        val tag = a.asterismType.tag
+        val ps = a match {
+          case a: Single                       => Single.SingleParamSetCodec.encode(key, a)
+          case a: GhostAsterism.SingleTarget   => GhostParamSetCodecs.SingleTargetParamSetCodec.encode(key, a)
+          case a: GhostAsterism.DualTarget     => GhostParamSetCodecs.DualTargetParamSetCodec.encode(key, a)
+          case a: GhostAsterism.TargetPlusSky  => GhostParamSetCodecs.TargetPlusSkyParamSetCodec.encode(key, a)
+          case a: GhostAsterism.SkyPlusTarget  => GhostParamSetCodecs.SkyPlusTargetParamSetCodec.encode(key, a)
+          case a: GhostAsterism.HighResolution => GhostParamSetCodecs.HighResolutionParamSetCodec.encode(key, a)
         }
         Pio.addParam(pf, ps, "tag", tag)
         ps
@@ -142,8 +147,12 @@ object Asterism {
 
       def decode(ps: ParamSet): PioError \/ Asterism =
         (Option(ps.getParam("tag")).map(_.getValue) \/> MissingKey("tag")) flatMap {
-          case AsterismType.Single.tag => Single.SingleParamSetCodec.decode(ps)
-          case "ghostAsterism"         => GhostParamSetCodecs.GhostAsterismParamSetCodec.decode(ps)
+          case AsterismType.Single.tag              => Single.SingleParamSetCodec.decode(ps)
+          case AsterismType.GhostSingleTarget.tag   => GhostParamSetCodecs.SingleTargetParamSetCodec.decode(ps)
+          case AsterismType.GhostDualTarget.tag     => GhostParamSetCodecs.DualTargetParamSetCodec.decode(ps)
+          case AsterismType.GhostTargetPlusSky.tag  => GhostParamSetCodecs.TargetPlusSkyParamSetCodec.decode(ps)
+          case AsterismType.GhostSkyPlusTarget.tag  => GhostParamSetCodecs.SkyPlusTargetParamSetCodec.decode(ps)
+          case AsterismType.GhostHighResolution.tag => GhostParamSetCodecs.HighResolutionParamSetCodec.decode(ps)
           case other                   => UnknownTag(other, "Asterism").left
         }
     }

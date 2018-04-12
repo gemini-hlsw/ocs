@@ -1,8 +1,6 @@
 package edu.gemini.spModel.target.env;
 
 import edu.gemini.pot.sp.Instrument;
-import edu.gemini.pot.sp.SPComponentBroadType;
-import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.gemini.ghost.AsterismConverters;
 import edu.gemini.spModel.gemini.ghost.GhostAsterism$;
@@ -19,23 +17,23 @@ public enum AsterismType {
      */
     Single("single", "Single Target", None.instance(), Asterism$.MODULE$::createSingleAsterism),
 
-    GhostStandardResolutionSingleTarget("ghostStandardRes", "Single Target",
+    GhostSingleTarget("ghostSingleTarget", "Single Target",
             new Some<>(AsterismConverters.GhostSingleTargetConverter$.MODULE$),
-            GhostAsterism$.MODULE$::createEmptyStandardResolutionSingleTargetAsterism),
+            GhostAsterism$.MODULE$::createEmptySingleTargetAsterism),
 
-    GhostStandardResolutionDualTarget("ghostStandardRes", "Dual Target",
+    GhostDualTarget("ghostDualTarget", "Dual Target",
             new Some<>(AsterismConverters.GhostDualTargetConverter$.MODULE$),
-            GhostAsterism$.MODULE$::createEmptyStandardResolutionDualTargetAsterism),
+            GhostAsterism$.MODULE$::createEmptyDualTargetAsterism),
 
-    GhostStandardResolutionTargetPlusSky("ghostStandardRes", "SRIFU1 Target, SRIFU2 Sky",
+    GhostTargetPlusSky("ghostTargetPlusSky", "SRIFU1 Target, SRIFU2 Sky",
             new Some<>(AsterismConverters.GhostTargetPlusSkyConverter$.MODULE$),
-            GhostAsterism$.MODULE$::createEmptyStandardResolutionTargetPlusSkyAsterism),
+            GhostAsterism$.MODULE$::createEmptyTargetPlusSkyAsterism),
 
-    GhostStandardResolutionSkyPlusTarget("ghostStandardRes", "SRIFU1 Sky, SRIFU2 Target",
+    GhostSkyPlusTarget("ghostSkyPlusTarget", "SRIFU1 Sky, SRIFU2 Target",
             new Some<>(AsterismConverters.GhostSkyPlusTargetConverter$.MODULE$),
-            GhostAsterism$.MODULE$::createEmptyStandardResolutionSkyPlusTargetAsterism),
+            GhostAsterism$.MODULE$::createEmptySkyPlusTargetAsterism),
 
-    GhostHighResolution("ghostHighRes", "High Resolution",
+    GhostHighResolution("ghostHighResolution", "High Resolution",
             new Some<>(AsterismConverters.GhostHighResolutionConverter$.MODULE$),
             GhostAsterism$.MODULE$::createEmptyHighResolutionAsterism),
     ;
@@ -65,10 +63,10 @@ public enum AsterismType {
         switch (instType) {
             case Ghost:
                 final Set<AsterismType> s = new TreeSet<>();
-                s.add(GhostStandardResolutionSingleTarget);
-                s.add(GhostStandardResolutionDualTarget);
-                s.add(GhostStandardResolutionTargetPlusSky);
-                s.add(GhostStandardResolutionSkyPlusTarget);
+                s.add(GhostSingleTarget);
+                s.add(GhostDualTarget);
+                s.add(GhostTargetPlusSky);
+                s.add(GhostSkyPlusTarget);
                 s.add(GhostHighResolution);
                 return Collections.unmodifiableSet(s);
             default:
