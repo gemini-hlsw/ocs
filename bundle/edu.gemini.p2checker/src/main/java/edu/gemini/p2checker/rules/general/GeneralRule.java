@@ -339,7 +339,7 @@ public class GeneralRule implements IRule {
         final P2Problems problems = new P2Problems();
         tocOpt.foreach(toc -> {
             final Instrument instType = inst.getInstrument();
-            final AsterismType    at  = toc.getAsterism().asterismType();
+            final AsterismType at     = toc.getAsterism().asterismType();
             final Set<AsterismType> supportedAsterismTypes = AsterismType.supportedTypesForInstrument(instType);
             if (!supportedAsterismTypes.contains(at))
                 problems.addError(PREFIX + "ASTERISM_TYPE_RULE",
