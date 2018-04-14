@@ -24,16 +24,11 @@ public class PowerLawSpectrum extends DefaultSampledSpectrum {
         _start /= (1 + z);
         _end /= (1 + z);
 
-        final int n = (int) ((_end - _start) / _sampling + 1);
+        final int n = (int) Math.round((_end - _start) / _sampling + 1);
         double[] fluxArray = new double[n];
-
-
-        int i = 0;
-
-        for (double lam = _start; lam <= _end; lam += _sampling) {
+        for (int i = 0; i < n ; i++) {
+            double lam = _start + i * _sampling;
             fluxArray[i] = _pLawFlux(lam, powerLawIndex);
-            i++;
-
         }
 
         reset(fluxArray, _start, _sampling);
