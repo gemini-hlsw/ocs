@@ -401,7 +401,7 @@
 				<td colspan="4" height="38" valign="bottom"><b>Detector properties:</b> <i><span>(</span><a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10277#detector','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false"><span>more info</span></a><span>)</span></i></td>
 			</tr>
 			<tr>
-				<td colspan="4">Read mode set for:  </td>
+				<td colspan="4">Read mode:</td>
 			</tr>
 			<tr>
 				<td colspan="4" align="left"> <input value="VERY_FAINT" name="ReadMode" type="radio" />
@@ -420,8 +420,7 @@
 				high background (i.e. thermal IR), typically for 3-5 µm observations</td>
 			</tr>
 			<tr>
-				<td colspan="4">Well depth set for:  </td>
-
+				<td colspan="4">Well depth:</td>
 			</tr>
 			<tr>
 				<td colspan="4" align="left"><input value="SHALLOW" name="WellDepth" checked="checked" type="radio" />
@@ -432,7 +431,7 @@
 				deep well; typically for 3-5µm observations</td>
 			</tr>
 			<tr>
-				<td colspan="4" height="21">Dark current of 0.1 e-/s </td>
+				<td colspan="4" height="21">Dark current: &nbsp; 0.1 e-/s</td>
 			</tr>
 		</tbody>
 	</table>
@@ -461,18 +460,19 @@
 				<td colspan="4" height="50" valign="bottom"><b>Altair properties:</b> <i><span>(</span><a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10269','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false"><span>more info</span></a><span>)</span></i></td>
 			</tr>
 			<tr>
-				<td align="left">AO guide star <br />
-					separation: <input name="guideSep" size="5" value="0.0" type="text" />  arcsec</td>
-                <td> AO guide star brightness <br />
-					(R-band):
+				<td align="left">AO guide star separation: <input name="guideSep" size="5" value="0.0" type="text" /> arcsec</td>
+                <td> AO guide star brightness (R-band):
 				<input name="guideMag" size="5" value="12.0" type="text" /> mag</td>
 			</tr>
 			<tr>
 
 				<td align="left">Field Lens:
-				<input value="OUT" name="FieldLens" checked="checked" type="radio" /> OUT <input value="IN" name="FieldLens" size="1" type="radio" /> IN (Required for LGS)</td>
+					<input value="OUT" name="FieldLens" checked="checked" type="radio" /> OUT
+					<input value="IN" name="FieldLens" size="1" type="radio" /> IN (Required for LGS)</td>
 				<td>
-                  Altair Mode: <input value="NGS" name="GuideStarType" checked="checked" type="radio" /> NGS <input value="LGS" name="GuideStarType" size="1" type="radio" />LGS </p></td>
+                  Altair Mode:
+					<input value="NGS" name="GuideStarType" checked="checked" type="radio" /> NGS
+					<input value="LGS" name="GuideStarType" size="1" type="radio" />LGS </td>
 
 			</tr>
 

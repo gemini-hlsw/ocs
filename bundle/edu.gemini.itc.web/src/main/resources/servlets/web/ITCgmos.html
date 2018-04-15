@@ -346,21 +346,19 @@
 				<td>Filter:
 					<select name="instrumentFilter" size="1">
 						<option value="NONE">none</option>
-						<option value="u_G0308">u' (350 nm)</option>
+
+						<option value="none" disabled></option>
+						<option value="none" disabled>Broad Band Filters:</option>
+						<option value="u_G0308">u' (350 nm) (UNAVAILABLE)</option>
 						<option selected="selected" value="g_G0301">g' (475 nm)</option>
 						<option value="r_G0303">r' (630 nm)</option>
 						<option value="i_G0302">i' (780 nm)</option>
 						<option value="z_G0304">z' (950 nm)</option>
 						<option value="Z_G0322">Z (876 nm)</option>
 						<option value="Y_G0323">Y (1010 nm)</option>
-						<option value="GG455_G0305">GG455</option>
-						<option value="OG515_G0306">OG515</option>
-						<option value="RG610_G0307">RG610</option>
-						<option value="g_G0301_GG455_G0305">g_G0301 + GG455_G0305 (506 nm)</option>
-						<option value="g_G0301_OG515_G0306">g_G0301 + OG515_G0306 (536 nm)</option>
-						<option value="r_G0303_RG610_G0307">r_G0303 + RG610_G0307 (657 nm)</option>
-						<option value="i_G0302_CaT_G0309">i_G0302 + CaT_G0309 (815 nm)</option>
-						<option value="z_G0304_CaT_G0309">z_G0304 + CaT_G0309 (890 nm)</option>
+
+						<option value="none" disabled></option>
+						<option value="none" disabled>Narrow Band Filters:</option>
 						<option value="HeII_G0320">HeII (468 nm)</option>
 						<option value="HeIIC_G0321">HeIIC (478 nm)</option>
 						<option value="OIII_G0318">[OIII] (499 nm)</option>
@@ -372,6 +370,21 @@
 						<option value="OVIC_G0346">OVIC (678 nm)</option>
 						<option value="CaT_G0309">CaT (860nm)</option>
 						<option value="DS920_G0312">DS920 (920nm)</option>
+
+						<option value="none" disabled></option>
+						<option value="none" disabled>Spectroscopy Blocking Filters:</option>
+						<option value="GG455_G0305">GG455</option>
+						<option value="OG515_G0306">OG515</option>
+						<option value="RG610_G0307">RG610</option>
+
+						<option value="none" disabled></option>
+						<option value="none" disabled>Filter Combinations:</option>
+						<option value="g_G0301_GG455_G0305">g_G0301 + GG455_G0305 (506 nm)</option>
+						<option value="g_G0301_OG515_G0306">g_G0301 + OG515_G0306 (536 nm)</option>
+						<option value="r_G0303_RG610_G0307">r_G0303 + RG610_G0307 (657 nm)</option>
+						<option value="i_G0302_CaT_G0309">i_G0302 + CaT_G0309 (815 nm)</option>
+						<option value="z_G0304_CaT_G0309">z_G0304 + CaT_G0309 (890 nm)</option>
+
 					</select>
 				</td>
 
@@ -423,8 +436,16 @@
 			</tr>
 			<tr>
 				<td colspan="2">
-					Amp gain:      <select name="AmpGain" size="1"><option value="LOW">Low</option><option value="HIGH">High</option></select>
-					Amp read mode: <select name="AmpReadMode" size="1"><option value="SLOW">Slow</option><option value="FAST">Fast</option></select>
+					Amp gain:
+					<select name="AmpGain" size="1">
+						<option value="LOW">Low</option>
+						<option value="HIGH">High</option>
+					</select> &nbsp; &nbsp;
+					Amp read mode:
+					<select name="AmpReadMode" size="1">
+						<option value="SLOW">Slow</option>
+						<option value="FAST">Fast</option>
+					</select>
 				</td>
 			</tr>
 
