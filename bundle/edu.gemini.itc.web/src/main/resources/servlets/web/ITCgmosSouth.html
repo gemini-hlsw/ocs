@@ -345,9 +345,11 @@
 
             <tr>
                 <td>Filter:
-
                     <select name="instrumentFilter" size="1">
                         <option value="NONE">none</option>
+
+                        <option value="none" disabled></option>
+						<option value="none" disabled>Broad Band Filters:</option>
                         <option value="u_G0332">u' (350 nm)</option>
                         <option selected="selected" value="g_G0325">g' (475 nm)</option>
                         <option value="r_G0326">r' (630 nm)</option>
@@ -355,16 +357,9 @@
                         <option value="z_G0328">z' (950 nm)</option>
                         <option value="Z_G0343">Z (876 nm)</option>
                         <option value="Y_G0344">Y (1010 nm)</option>
-                        <option value="GG455_G0329">GG455 (680 nm)</option>
-                        <option value="OG515_G0330">OG515 (710 nm)</option>
-                        <option value="RG610_G0331">RG610 (750 nm)</option>
-                        <option value="RG780_G0334">RG780 (850 nm)</option>
-                        <option value="g_G0325_GG455_G0329">g_G0325 + GG455_G0329 (506 nm)</option>
-                        <option value="g_G0325_OG515_G0330">g_G0325 + OG515_G0330 (536 nm)</option>
-                        <option value="r_G0326_RG610_G0331">r_G0326 + RG610_G0331 (657 nm)</option>
-                        <option value="i_G0327_RG780_G0334">i_G0327 + RG780_G0334 (819 nm)</option>
-                        <option value="i_G0327_CaT_G0333">i_G0327 + CaT_G0333 (815 nm)</option>
-                        <option value="z_G0328_CaT_G0333">z_G0328 + CaT_G0333 (890nm)</option>
+
+						<option value="none" disabled></option>
+						<option value="none" disabled>Narrow Band Filters:</option>
                         <option value="HeII_G0340">HeII (468 nm)</option>
                         <option value="HeIIC_G0341">HeIIC (478 nm)</option>
                         <option value="OIII_G0338">[OIII] (499 nm)</option>
@@ -375,6 +370,23 @@
                         <option value="OVI_G0347">OVI (683 nm)</option>
                         <option value="OVIC_G0348">OVIC (678 nm)</option>
                         <option value="CaT_G0333">CaT (860 nm)</option>
+
+						<option value="none" disabled></option>
+						<option value="none" disabled>Spectroscopy Blocking Filters:</option>
+                        <option value="GG455_G0329">GG455 (680 nm)</option>
+                        <option value="OG515_G0330">OG515 (710 nm)</option>
+                        <option value="RG610_G0331">RG610 (750 nm)</option>
+                        <option value="RG780_G0334">RG780 (850 nm)</option>
+
+                        <option value="none" disabled></option>
+						<option value="none" disabled>Filter Combinations:</option>
+                        <option value="g_G0325_GG455_G0329">g_G0325 + GG455_G0329 (506 nm)</option>
+                        <option value="g_G0325_OG515_G0330">g_G0325 + OG515_G0330 (536 nm)</option>
+                        <option value="r_G0326_RG610_G0331">r_G0326 + RG610_G0331 (657 nm)</option>
+                        <option value="i_G0327_RG780_G0334">i_G0327 + RG780_G0334 (819 nm)</option>
+                        <option value="i_G0327_CaT_G0333">i_G0327 + CaT_G0333 (815 nm)</option>
+                        <option value="z_G0328_CaT_G0333">z_G0328 + CaT_G0333 (890nm)</option>
+
                     </select>
                 </td>
                 <td>Focal plane unit:
@@ -420,8 +432,16 @@
             </tr>
             <tr>
                 <td colspan="4">
-                    Amp gain:      <select name="AmpGain" size="1"><option value="LOW">Low</option><option value="HIGH">High</option></select>
-                    Amp read mode: <select name="AmpReadMode" size="1"><option value="SLOW">Slow</option><option value="FAST">Fast</option></select>
+                    Amp gain:
+                    <select name="AmpGain" size="1">
+                        <option value="LOW">Low</option>
+                        <option value="HIGH">High</option>
+                    </select> &nbsp; &nbsp;
+                    Amp read mode:
+                    <select name="AmpReadMode" size="1">
+                        <option value="SLOW">Slow</option>
+                        <option value="FAST">Fast</option>
+                    </select>
                 </td>
             </tr>
 

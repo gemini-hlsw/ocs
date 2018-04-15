@@ -332,21 +332,24 @@
                     <tr>
                         <td>Filter:</td>
                             <td colspan="3"><select name="Filter" size="1">
+								<option value="none" disabled>Broad band:</option>
                                 <option value="Z">Z (1.015 µm)</option>
                                 <option value="J">J (1.250 µm)</option>
                                 <option value="H">H (1.650 µm)</option>
                                 <option value="K_PRIME">K(prime) (2.120 µm)</option>
                                 <option value="K_SHORT">K(short) (2.150 µm)</option>
                                 <option value="K">K (2.200 µm)</option>
-                                <option value="J_CONTINUUM">J-continuum(1.207 µm)</option>
-                                <option value="H_CONTINUUM">H-continuum(1.570 µm)</option>
+								<option value="none" disabled></option>
+								<option value="none" disabled>Narrow band:</option>
+                                <option value="J_CONTINUUM">J-continuum (1.207 µm)</option>
+                                <option value="H_CONTINUUM">H-continuum (1.570 µm)</option>
                                 <option value="CH4_SHORT">CH4(short) (1.580 µm)</option>
                                 <option value="CH4_LONG">CH4(long) (1.690 µm)</option>
                                 <option value="K_CONTINUUM1">Ks-continuum (2.093 µm)</option>
                                 <option value="K_CONTINUUM2">Kl-continuum (2.270 µm)</option>
-                                <option value="HEI">HeI(1.083 µm)</option>
-                                <option value="PA_GAMMA">Pa(gamma)(1.094 µm)</option>
-                                <option value="PA_BETA">Pa(beta)(1.282 µm)</option>
+                                <option value="HEI">HeI (1.083 µm)</option>
+                                <option value="PA_GAMMA">Pa(gamma) (1.094 µm)</option>
+                                <option value="PA_BETA">Pa(beta) (1.282 µm)</option>
                                 <option value="FE_II">[FeII] (1.644 µm)</option>
                                 <option value="H20_ICE">H2O ice (2.000 µm)</option>
                                 <option value="HEI_2P2S">HeI (2p2s) (2.058 µm)</option>
@@ -370,20 +373,20 @@
             </tr>
             <tr>
                 <td colspan="4" align="right" height="21"><input value="BRIGHT" name="ReadMode" checked="checked" type="radio" />
-                Bright Objects (Low Noise Read=2, readnoise=28e-) </td>
+                Bright Objects (Low Noise Reads = 2, Read noise = 28e-) </td>
             </tr>
             <tr>
                 <td colspan="4" align="right" height="21"><input value="FAINT" name="ReadMode" type="radio" />
 
-                Faint Objects / Broad band imaging (Low Noise Read=8, readnoise=13e-) </td>
+                Faint Objects / Broad band imaging (Low Noise Reads = 8, Read noise = 13e-) </td>
             </tr>
             <tr>
                 <td colspan="4" align="right" height="21"><input value="VERY_FAINT" name="ReadMode" type="radio" />
-                Very Faint Objects / Narrow Band imaging (Low Noise Read = 16, readnoise=10e-) </td>
+                Very Faint Objects / Narrow Band imaging (Low Noise Reads = 16, Read noise = 10e-) </td>
             </tr>
             
             <tr>
-				<td colspan="4">Dark current of 0.01 e-/s/pix  </td>
+				<td colspan="4">Dark current: &nbsp; 0.01 e-/s/pix  </td>
 			</tr>
 			<!-- Telescope definition-->
 			<tr>
@@ -542,7 +545,6 @@
 	<div align="center">
 	<center>
 	<p>
-
 	<input value="Calculate" type="submit" /> <img src="/spacer.gif" height="1" width="40" style="opacity:0.0"/><input value="Reset to defaults" type="reset" />
 	</p>
 	</center>

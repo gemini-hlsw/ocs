@@ -327,78 +327,83 @@
 				</select></td>
 
 				<td>Disperser:
-				<select name="Disperser" size="1">
-				<option value="NONE">none</option>
-				<option value="J">J grism</option>
-				<option value="H">H grism</option>
-				<option value="K">K grism</option>
-				<option value="L">L grism</option>
-				<option value="M">M grism</option>
-				</select></td>
-
+					<select name="Disperser" size="1">
+						<option value="NONE">none</option>
+						<option value="none" disabled></option>
+						<option value="J">J grism (UNAVAILABLE)</option>
+						<option value="H">H grism (UNAVAILABLE)</option>
+						<option value="K">K grism (UNAVAILABLE)</option>
+						<option value="L">L grism (UNAVAILABLE)</option>
+						<option value="M">M grism (UNAVAILABLE)</option>
+					</select>
+				</td>
 			</tr>
+
 			<tr>
 				<td>Filter:
+					<select name="Filter" size="1">
 
-				<select name="Filter" size="1">
-				<option value="none" disabled>Broad band...</option>
+						<option value="none" disabled>Broad band:</option>
+						<option value="BBF_Y">Y (1.02 µm)</option>
+						<option value="BBF_J">J (1.25 µm)</option>
+						<option value="BBF_H">H (1.65 µm)</option>
+						<option value="BBF_KPRIME">K' (2.12 µm)</option>
+						<option value="BBF_KSHORT">K(short) (2.15 µm)</option>
+						<option value="BBF_K" selected="selected">K (2.20 µm)</option>
+						<option value="BBF_LPRIME">L' (3.78 µm)</option>
+						<option value="BBF_MPRIME">M' (4.68 µm)</option>
 
-				<option value="BBF_Y">Y (1.02 µm)</option>
-				<option value="BBF_J">J (1.25 µm)</option>
-				<option value="BBF_H">H (1.65 µm)</option>
-				<option value="BBF_KPRIME">K' (2.12 µm)</option>
-				<option value="BBF_KSHORT">K(short) (2.15 µm)</option>
-				<option value="BBF_K" selected="selected">K (2.20 µm)</option>
-				<option value="BBF_LPRIME">L' (3.78 µm)</option>
-				<option value="BBF_MPRIME">M' (4.68 µm)</option>
+						<option value="none" disabled></option>
+						<option value="none" disabled>Narrow band:</option>
+						<option value="NBF_HEI">HeI (2p2s triplet) (1.083 µm)</option>
+						<option value="NBF_PAGAMMA">Pa-gamma (1.094 µm)</option>
+						<option value="NBF_H">J-continuum (1.207 µm)</option>
+						<option value="NBF_PABETA">Pa-beta (1.282 µm)</option>
+						<option value="NBF_CH4SHORT">CH4(short) (1.580 µm)</option>
+						<option value="NBF_CH4LONG">CH4(long) (1.690 µm)</option>
+						<option value="NBF_HCONT">H-continuum (1.570 µm)</option>
+						<option value="NBF_FEII">[FeII] (1.644 µm)</option>
+						<option value="NBF_H2O_2045">H20 ice (2.045 µm)</option>
+						<option value="NBF_HE12P2S">HeI (2p2s singlet) (2.059 µm)</option>
+						<option value="NBF_KCONT1">K-continuum (2.090 µm)</option>
+						<option value="NBF_H210">H2 1-0S(1) (2.122 µm)</option>
+						<option value="NBF_BRGAMMA">Br-gamma (2.166 µm)</option>
+						<option value="NBF_H221">H2 2-1S(1) (2.248 µm)</option>
+						<option value="NBF_KCONT2">K-continuum (2.270 µm)</option>
+						<option value="NBF_CH4ICE">CH4 ice (2.275 µm)</option>
+						<option value="NBF_CO20">CO 2-0(bh) (2.294 µm)</option>
+						<option value="NBF_CO31">CO 3-1(bh) (2.323 µm) (UNAVAILABLE)</option>
+						<option value="NBF_H2O">H2O ice (3.050 µm)</option>
+						<option value="NBF_HC">hydrocarbon (3.295 µm)</option>
+						<option value="NBF_BRACONT">Br-alpha continuum (3.990 µm)</option>
+						<option value="NBF_BRA">Br-alpha (4.052 µm)</option>
 
-				<option value="none" disabled></option>
-				<option value="none" disabled>Grism order sorting...</option>
+						<option value="none" disabled></option>
+						<option value="none" disabled>Grism Order Sorting:</option>
+						<option value="BBF_J_ORDER_SORT">J sorting (UNAVAILABLE)</option>
+						<option value="BBF_H_ORDER_SORT">H sorting (UNAVAILABLE)</option>
+						<option value="BBF_K_ORDER_SORT">K sorting (UNAVAILABLE)</option>
+						<option value="BBF_L_ORDER_SORT">L sorting (UNAVAILABLE)</option>
+						<option value="BBF_M_ORDER_SORT">M sorting (UNAVAILABLE)</option>
 
-				<option value="BBF_J_ORDER_SORT">J sorting</option>
-				<option value="BBF_H_ORDER_SORT">H sorting</option>
-				<option value="BBF_K_ORDER_SORT">K sorting</option>
-				<option value="BBF_L_ORDER_SORT">L sorting</option>
-				<option value="BBF_M_ORDER_SORT">M sorting</option>
-
-				<option value="none" disabled></option>
-				<option value="none" disabled>Narrow band...</option>
-
-				<option value="NBF_HEI">HeI (2p2s triplet) (1.083 µm)</option>
-				<option value="NBF_PAGAMMA">Pa-gamma (1.094 µm)</option>
-				<option value="NBF_H">J-continuum (1.207 µm)</option>
-				<option value="NBF_PABETA">Pa-beta (1.282 µm)</option>
-				<option value="NBF_CH4SHORT">CH4(short) (1.580 µm)</option>
-				<option value="NBF_CH4LONG">CH4(long) (1.690 µm)</option>
-				<option value="NBF_HCONT">H-continuum (1.570 µm)</option>
-				<option value="NBF_FEII">[FeII] (1.644 µm)</option>
-				<option value="NBF_H2O_2045">H20 ice (2.045 µm)</option>
-				<option value="NBF_HE12P2S">HeI (2p2s singlet) (2.059 µm)</option>
-				<option value="NBF_KCONT1">K-continuum (2.090 µm)</option>
-				<option value="NBF_H210">H2 1-0S(1) (2.122 µm)</option>
-				<option value="NBF_BRGAMMA">Br-gamma (2.166 µm)</option>
-				<option value="NBF_H221">H2 2-1S(1) (2.248 µm)</option>
-				<option value="NBF_KCONT2">K-continuum (2.270 µm)</option>
-				<option value="NBF_CH4ICE">CH4 ice (2.275 µm)</option>
-				<option value="NBF_CO20">CO 2-0(bh) (2.294 µm)</option>
-				<option value="NBF_CO31">CO 3-1(bh) (2.323 µm)</option>
-				<option value="NBF_H2O">H2O ice (3.050 µm)</option>
-				<option value="NBF_HC">hydrocarbon (3.295 µm)</option>
-				<option value="NBF_BRACONT">Br-alpha continuum (3.990 µm)</option>
-				<option value="NBF_BRA">Br-alpha (4.052 µm)</option>
-				</select></td>
+					</select>
+				</td>
 
 				<td>Focal plane mask:
-                <select name="Mask" size="1">
-				<option value="MASK_IMAGING">none</option>
-				<option value="MASK_1">2-pix slit center</option>
-				<option value="MASK_2">4-pix slit center</option>
-				<option value="MASK_3">6-pix slit center</option>
-				<option value="MASK_4">2-pix slit blue</option>
-				<option value="MASK_5">4-pix slit blue</option>
-				<option value="MASK_6">6-pix slit blue</option>
-				</select></td>
+                	<select name="Mask" size="1">
+						<option value="MASK_IMAGING">none</option>
+						<option value="none" disabled></option>
+						<option value="MASK_1">2-pix slit center (UNAVAILABLE)</option>
+						<option value="MASK_2">4-pix slit center (UNAVAILABLE)</option>
+						<option value="MASK_3">6-pix slit center (UNAVAILABLE)</option>
+						<option value="MASK_4">2-pix slit blue (UNAVAILABLE)</option>
+						<option value="MASK_5">4-pix slit blue (UNAVAILABLE)</option>
+						<option value="MASK_6">6-pix slit blue (UNAVAILABLE)</option>
+					</select>
+				</td>
+
 			</tr>
+
 			<tr>
 				<td colspan="4" height="50" valign="bottom"><b>Detector properties:</b> <i><span>(</span><a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10270#detector','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false"><span>more info</span></a><span>)</span></i></td>
 
@@ -428,7 +433,7 @@
 					high flux mode, typically for wavelengths &gt;2.5µm </td>
 			</tr>
 			<tr>
-				<td colspan="4">Dark current of 0.25 e-/s </td>
+				<td colspan="4">Dark current: &nbsp; 0.25 e-/s </td>
 			</tr>
 			<!-- Telescope definition-->
 			<tr>
@@ -450,19 +455,19 @@
 				<td colspan="4" height="50" valign="bottom"><b>Altair properties:</b> <i><span>(</span><a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10269','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false"><span>more info</span></a><span>)</span></i></td>
 			</tr>
 			<tr>
-				<td align="left">AO guide star <br />
-				separation:
+				<td align="left">AO guide star separation:
                     <input name="guideSep" size="5" value="0.0" type="text" />  arcsec</td>
-				<td>AO guide star brightness <br />
-				(R-band):
+				<td>AO guide star brightness (R-band):
 				<input name="guideMag" size="5" value="12.0" type="text" /> mag</td>
 			</tr>
 			<tr>
 
 				<td align="left">Field Lens:
-				<input value="OUT" name="FieldLens" checked="checked" type="radio" /> OUT <input value="IN" name="FieldLens" size="1" type="radio" /> IN(Required for LGS)</td>
+					<input value="OUT" name="FieldLens" checked="checked" type="radio" /> OUT
+					<input value="IN" name="FieldLens" size="1" type="radio" /> IN (Required for LGS)</td>
 				<td>Altair Mode:
-				<input value="NGS" name="GuideStarType" checked="checked" type="radio" /> NGS <input value="LGS" name="GuideStarType" size="1" type="radio" />LGS</td>
+					<input value="NGS" name="GuideStarType" checked="checked" type="radio" /> NGS
+					<input value="LGS" name="GuideStarType" size="1" type="radio" />LGS</td>
 
 			</tr>
 			<tr>
@@ -599,7 +604,6 @@
 	<div align="center">
 	<center>
 	<p>
-
 	<input value="Calculate" type="submit" /> <img src="/spacer.gif" height="1" width="40" style="opacity:0.0"/><input value="Reset to defaults" type="reset" />
 	</p>
 	</center>
