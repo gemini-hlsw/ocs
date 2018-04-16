@@ -90,6 +90,18 @@ object HS2Spec extends Specification with ScalaCheck {
       ))
     }
 
+    "handle single result (Format 5) 1I/'Oumuamua (A/2017 U1)" in {
+      runSearch(Search.Asteroid("A/2017 U1")) must_== \/-(List(
+        Row(HD.AsteroidNewStyle("A/2017 U1"), "A/2017 U1")
+      ))
+    }
+
+    "handle single result (Format 6) A/2017 U7" in {
+      runSearch(Search.Asteroid("A/2017 U7")) must_== \/-(List(
+        Row(HD.AsteroidNewStyle("A/2017 U7"), "A/2017 U7")
+      ))
+    }
+
   }
 
   "major body search" should {
@@ -142,7 +154,19 @@ object HS2Spec extends Specification with ScalaCheck {
       }
     }
 
-    "return a populated ephemeris for Amphitrite (asteroid, new style)" in {
+    "return a populated ephemeris for 'Oumuamua (asteroid, new style)" in {
+      runLookup(HD.AsteroidNewStyle("A/2017 U1"), 100).map(_.size).toOption.exists { s =>
+        95 <= s && s <= 105
+      }
+    }
+
+    "return a populated ephemeris for A/2017 U7 (asteroid, new style)" in {
+      runLookup(HD.AsteroidNewStyle("A/2017 U7"), 100).map(_.size).toOption.exists { s =>
+        95 <= s && s <= 105
+      }
+    }
+
+    "return a populated ephemeris for Amphitrite (asteroid, old style)" in {
       runLookup(HD.AsteroidOldStyle(29), 100).map(_.size).toOption.exists { s =>
         95 <= s && s <= 105
       }
