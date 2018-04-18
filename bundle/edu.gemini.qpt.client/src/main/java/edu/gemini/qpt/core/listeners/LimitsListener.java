@@ -2,20 +2,26 @@ package edu.gemini.qpt.core.listeners;
 
 import java.beans.PropertyChangeEvent;
 import java.util.*;
-import java.util.function.Predicate;
+import java.util.function.*;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
+import java.util.TimeZone;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import edu.gemini.qpt.core.Alloc;
+import edu.gemini.qpt.core.Marker;
 import edu.gemini.qpt.core.Variant;
 import edu.gemini.qpt.core.Alloc.Circumstance;
 import edu.gemini.qpt.core.Marker.Severity;
 import edu.gemini.qpt.core.Variant.Flag;
+import edu.gemini.qpt.core.util.*;
 import edu.gemini.qpt.shared.sp.Group;
 import edu.gemini.qpt.core.util.LttsServicesClient;
 import edu.gemini.qpt.core.util.MarkerManager;
 import edu.gemini.qpt.shared.sp.Obs;
 import edu.gemini.qpt.shared.util.TimeUtils;
+import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.obscomp.SPGroup.GroupType;
 
 /**
@@ -27,6 +33,17 @@ public class LimitsListener extends MarkerModelListener<Variant> {
 	@SuppressWarnings("unused")
 	private static final Logger LOGGER = Logger.getLogger(LimitsListener.class.getName());
 
+	private static final DateTimeFormatter dateFormat(TimeZone zone) {
+		return DateTimeFormatter.ofPattern("HH:mm").withZone(zone.toZoneId());
+	};
+
+	private static final String formatInterval(TimeZone zone, Interval interval) {
+		final Function<Long, String> f =
+			ms -> dateFormat(zone).format(Instant.ofEpochMilli(ms));
+
+		return String.format("(%s, %s)", f.apply(interval.getStart()), f.apply(interval.getEnd()));
+	}
+
     /**
      * LGS obs have a 40 deg limit by default
      */
@@ -37,6 +54,8 @@ public class LimitsListener extends MarkerModelListener<Variant> {
 		Variant v = (Variant) evt.getSource();
 		MarkerManager mm = v.getSchedule().getMarkerManager();
 		mm.clearMarkers(this, v);
+
+		final TimeZone zone = v.getSchedule().getSite().timezone();
 
 		for (Alloc a: v.getAllocs()) {
 
@@ -67,13 +86,32 @@ public class LimitsListener extends MarkerModelListener<Variant> {
 				mm.addMarker(false, this, Severity.Warning, String.format("Tracking: target reaches %1.2f\u00B0.", maxElevation), v, a);
 			}
 
+			// Function to create markers that report solver intervals.
+			final BiFunction<String, String, Option<Marker>> createSolverMarker =
+					(cacheName, prefix) -> {
+						final Map<Obs, Union<Interval>> c = v.getSchedule().getCache(cacheName);
+						final Union<Interval>          ws = c.getOrDefault(a.getObs(), new Union<>());
+						final ImList<Interval>         is = DefaultImList.create(ws.getIntervals());
+
+						if (is.isEmpty()) {
+							return None.instance();
+						} else {
+							final String m = is.map(i -> formatInterval(zone, i)).mkString(prefix + " ", ", ", ".");
+							return new Some<>(new Marker(false, this, Severity.Notice, m, v, a));
+						}
+					};
+
 			// Timing window
 			int percentVisible = (int) (100 * a.getMean(Circumstance.TIMING_WINDOW_OPEN, false));
 			switch (percentVisible) {
 			case 100: // good!
-				if (a.getObs().getTimingWindows().size() > 0)
+				if (a.getObs().getTimingWindows().size() > 0) {
 					mm.addMarker(true, this, Severity.Info, "Timing constraint is met.", v, a);
-				break;
+
+					// Report timing windows
+					createSolverMarker.apply(Variant.TIMING_UNION_CACHE, "Must be in the timing window").foreach(m -> mm.addMarker(m));
+				}
+                break;
 			case 0:
 				mm.addMarker(false, this, Severity.Error, "Timing constraint is violated for entire scheduled visit.", v, a);
 				break;
@@ -83,12 +121,13 @@ public class LimitsListener extends MarkerModelListener<Variant> {
 
 			}
 
-            // LCH Laser Shutter Warnings
+			// LCH Laser Shutter Warnings
             String msg = LttsServicesClient.getInstance().getShutterWindowWarningMessage(a);
             if (msg != null) {
                 mm.addMarker(false, this, Severity.Warning, msg, v, a);
             }
 
+            // Elevation Constraint
             // Elevation Constraint
 			final Double maxAirmass = a.getMax(Circumstance.AIRMASS, false);
 			final Double minAirmass = a.getMin(Circumstance.AIRMASS, false);
@@ -125,21 +164,28 @@ public class LimitsListener extends MarkerModelListener<Variant> {
 
 			case AIRMASS:
 
-				double airmassLimitMin = a.getObs().getElevationConstraintMin();
-				double airmassLimitMax = a.getObs().getElevationConstraintMax();
+				final double airmassLimitMin = a.getObs().getElevationConstraintMin();
+				final double airmassLimitMax = a.getObs().getElevationConstraintMax();
 
+				Option<Marker> airmassMarker = None.instance();
 				if (maxAirmass > airmassLimitMax) {
-					mm.addMarker(false, this, Severity.Error, String.format("Airmass constraint violated (%1.2f > %1.2f).", maxAirmass, airmassLimitMax), v, a);
+					airmassMarker = new Some<>(new Marker(false, this, Severity.Error, String.format("Airmass constraint violated (%1.2f > %1.2f).", maxAirmass, airmassLimitMax), v, a));
 				} else if (maxAirmass > airmassLimitMax * 0.975) {
-					mm.addMarker(false, this, Severity.Warning, String.format("Observation reaches airmass %1.2f.", maxAirmass), v, a);
+					airmassMarker = new Some<>(new Marker(false, this, Severity.Warning, String.format("Observation reaches airmass %1.2f.", maxAirmass), v, a));
 				}
 				if (airmassLimitMin > 1.0) {
 					if (minAirmass < airmassLimitMin) {
-						mm.addMarker(false, this, Severity.Error, String.format("Airmass constraint violated (%1.2f < %1.2f).", minAirmass, airmassLimitMin), v, a);
+						airmassMarker = new Some<>(new Marker(false, this, Severity.Error, String.format("Airmass constraint violated (%1.2f < %1.2f).", minAirmass, airmassLimitMin), v, a));
 					} else if (maxAirmass < airmassLimitMin * 1.025) {
-						mm.addMarker(false, this, Severity.Warning, String.format("Observation reaches airmass %1.2f.", maxAirmass), v, a);
+						airmassMarker = new Some<>(new Marker(false, this, Severity.Warning, String.format("Observation reaches airmass %1.2f.", maxAirmass), v, a));
 					}
 				}
+
+				airmassMarker.orElse(() -> {
+					final String m = String.format("Must be observed in the airmass range %1.2f - %1.2f", airmassLimitMin, airmassLimitMax);
+					return createSolverMarker.apply(Variant.VISIBLE_UNION_CACHE, m);
+				}).foreach(m -> mm.addMarker(m));
+
 				break;
 
 
@@ -153,20 +199,25 @@ public class LimitsListener extends MarkerModelListener<Variant> {
 				double minDelta = Math.abs(haLimitMin - minHA);
 				double maxDelta = Math.abs(haLimitMax - maxHA);
 
+				Option<Marker> haMarker = None.instance();
 				if (minHA < haLimitMin) {
-					mm.addMarker(false, this, Severity.Error, String.format("Hour angle constraint violated (%s < %s).", TimeUtils.hoursToHHMMSS(minHA), TimeUtils.hoursToHHMMSS(haLimitMin)), v, a);
+					haMarker = new Some<>(new Marker(false, this, Severity.Error, String.format("Hour angle constraint violated (%s < %s).", TimeUtils.hoursToHHMMSS(minHA), TimeUtils.hoursToHHMMSS(haLimitMin)), v, a));
 				} else if (minDelta < 1. / 15.) {
-					mm.addMarker(false, this, Severity.Warning, "Target comes within 1\u00B0 of lower HA constraint.", v, a);
+					haMarker = new Some<>(new Marker(false, this, Severity.Warning, "Target comes within 1\u00B0 of lower HA constraint.", v, a));
 				}
 
 				if (maxHA > haLimitMax) {
-					mm.addMarker(false, this, Severity.Error, String.format("Hour angle constraint violated (%s > %s).", TimeUtils.hoursToHHMMSS(maxHA), TimeUtils.hoursToHHMMSS(haLimitMax)), v, a);
+					haMarker = new Some<>(new Marker(false, this, Severity.Error, String.format("Hour angle constraint violated (%s > %s).", TimeUtils.hoursToHHMMSS(maxHA), TimeUtils.hoursToHHMMSS(haLimitMax)), v, a));
 				} else if (maxDelta < 1. / 15.) {
-					mm.addMarker(false, this, Severity.Warning, "Target comes within 1\u00B0 of upper HA constraint.", v, a);
+					haMarker = new Some<>(new Marker(false, this, Severity.Warning, "Target comes within 1\u00B0 of upper HA constraint.", v, a));
 				}
 
-				break;
+				haMarker.orElse(() -> {
+					final String m = String.format("Must be observed in the hour angle range %1.2f - %1.2f", haLimitMin, haLimitMax);
+					return createSolverMarker.apply(Variant.VISIBLE_UNION_CACHE, m);
+				}).foreach(m -> mm.addMarker(m));
 
+				break;
 			}
 
 			// Lunar proximity warnings
@@ -178,9 +229,14 @@ public class LimitsListener extends MarkerModelListener<Variant> {
 			}
 
 			// Sky brightness warnings
+
 			Double sb = a.getMin(Circumstance.TOTAL_SKY_BRIGHTNESS, false);
-			if (sb != null && !a.getObs().getConditions().containsSkyBrightness(sb))
+
+			if (sb != null && !a.getObs().getConditions().containsSkyBrightness(sb)) {
 				mm.addMarker(false, this, Severity.Error, "Sky brightness constraint violated.", v, a);
+			} else  {
+				createSolverMarker.apply(Variant.DARK_UNION_CACHE, "Background constraints are met between").foreach(m -> mm.addMarker(m));
+			}
 
 
 			// Variant Obs Flags
