@@ -80,7 +80,7 @@ object IctdDatabase {
       c: Configuration,
       s: Site
     ): java.util.Map[Enum[_], Availability] =
-      feature.unsafeSelect(c).javaAvailabilityMap(s)
+      feature.unsafeSelect(c).availabilityMap(s).asJava
 
   }
 }

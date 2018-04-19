@@ -16,10 +16,9 @@ import scala.collection.immutable.TreeMap
 
 import scala.reflect._
 
-import scala.collection.JavaConverters._
-
 import scalaz._
 import Scalaz._
+
 
 /** The collection of instruments tracked by the ICTD database and the
   * availability of their various features.  This class contains availability
@@ -39,24 +38,14 @@ final case class FeatureAvailability(
     * corresponding to filters, etc. across all instruments.
     */
   def availabilityMap(s: Site): AvailabilityMap =
-    all.filter(_.instrument.existsAt(s)).foldLeft(EmptyAvailabilityMap) {
-      _ ++ _.availabilityMap
-    }
+    all.filter(_.instrument.existsAt(s)).foldMap(_.availabilityMap)
 
-  def javaAvailabilityMap(s: Site): java.util.Map[java.lang.Enum[_], Availability] =
-    availabilityMap(s).asJava
 }
 
 object FeatureAvailability {
 
-  type AvailabilityMap = Map[java.lang.Enum[_], Availability]
-
-  val EmptyAvailabilityMap: AvailabilityMap =
-    Map.empty
-
   sealed trait InstrumentAvailability {
     def instrument: Instrument
-
     def availabilityMap: AvailabilityMap
   }
 
@@ -83,7 +72,7 @@ object FeatureAvailability {
       Instrument.Flamingos2
 
     def availabilityMap: AvailabilityMap =
-      filters ++ fpus
+      AvailabilityMap(filters ++ fpus)
 
   }
 
@@ -106,7 +95,7 @@ object FeatureAvailability {
       Instrument.GmosNorth
 
     def availabilityMap: AvailabilityMap =
-      dispersers ++ filters ++ fpus
+      AvailabilityMap(dispersers ++ filters ++ fpus)
 
   }
 
@@ -129,7 +118,7 @@ object FeatureAvailability {
       Instrument.GmosSouth
 
     def availabilityMap: AvailabilityMap =
-      dispersers ++ filters ++ fpus
+      AvailabilityMap(dispersers ++ filters ++ fpus)
 
   }
 
