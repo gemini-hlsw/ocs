@@ -13,11 +13,11 @@ public class ProblemFilter implements GFilter<Schedule, Marker>, PropertyChangeL
 
 	private Variant variant;
 	private GViewer<Schedule, Marker> viewer;
-	
+
 	public boolean accept(Marker element) {
 		if (element != null) {
 			for (Object o: element.getPath())
-				if (o == variant)
+				if ((o == variant) || (o instanceof Schedule))
 					return true;
 		}
 		return false;

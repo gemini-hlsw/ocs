@@ -1,5 +1,6 @@
 package edu.gemini.qpt.ui;
 
+import edu.gemini.qpt.shared.sp.Ictd;
 import static edu.gemini.qpt.ui.util.BooleanToolPreference.TOOL_MAINTAIN_SPACING;
 import static edu.gemini.qpt.ui.util.BooleanToolPreference.TOOL_SNAP;
 import static edu.gemini.qpt.ui.util.BooleanViewPreference.*;
@@ -45,7 +46,6 @@ import edu.gemini.qpt.ui.view.property.PropertyViewAdvisor;
 import edu.gemini.qpt.ui.view.variant.VariantViewAdvisor;
 import edu.gemini.qpt.ui.view.visit.VisitViewAdvisor;
 import edu.gemini.qpt.ui.view.visualizer.PlotViewAdvisor;
-import edu.gemini.spModel.core.ProgramId;
 import edu.gemini.spModel.core.ProgramType$;
 import edu.gemini.ui.workspace.IActionManager;
 import edu.gemini.ui.workspace.IShell;
@@ -132,16 +132,18 @@ public class ShellAdvisor implements IShellAdvisor, PropertyChangeListener {
     }
 
     private final PublishAction.Destination internal, pachon;
+    private final Ictd.SiteConfig ictdConfig;
     private final AgsMagnitude.MagnitudeTable magTable;
 
-    public ShellAdvisor(String name, String version, String rootURL, KeyChain authClient, PublishAction.Destination internal, PublishAction.Destination pachon, AgsMagnitude.MagnitudeTable magTable) {
-        this.title = name + " " + version;
-        this.rootURL = rootURL;
-        this.version = version;
+    public ShellAdvisor(String name, String version, String rootURL, KeyChain authClient, PublishAction.Destination internal, PublishAction.Destination pachon, Ictd.SiteConfig ictdConfig, AgsMagnitude.MagnitudeTable magTable) {
+        this.title      = name + " " + version;
+        this.rootURL    = rootURL;
+        this.version    = version;
         this.authClient = authClient;
-        this.internal = internal;
-        this.pachon = pachon;
-        this.magTable = magTable;
+        this.internal   = internal;
+        this.pachon     = pachon;
+        this.ictdConfig = ictdConfig;
+        this.magTable   = magTable;
     }
 
     @SuppressWarnings("serial")
@@ -167,7 +169,7 @@ public class ShellAdvisor implements IShellAdvisor, PropertyChangeListener {
 
                 Menu.File,
 
-                new NewAction(shell, authClient, magTable),
+                new NewAction(shell, authClient, ictdConfig, magTable),
                 new OpenAction(shell, authClient, magTable),
                 new OpenFromWebAction(shell, authClient, magTable),
                 null,
@@ -204,7 +206,9 @@ public class ShellAdvisor implements IShellAdvisor, PropertyChangeListener {
                 new RemoveSemesterAction(shell, authClient, magTable),
                 null,
                 new RefreshAction(shell, authClient, magTable),
-                new MergeAction(shell, authClient, magTable)
+                new MergeAction(shell, authClient, magTable),
+                null,
+                new IctdAction(shell, authClient, ictdConfig)
 
         );
 
@@ -221,6 +225,7 @@ public class ShellAdvisor implements IShellAdvisor, PropertyChangeListener {
                 null,
                 new BooleanPreferenceAction(VIEW_UNDER_QUALIFIED_OBSERVATIONS, VIEW_ALL, "Under-Qualified"),
                 new BooleanPreferenceAction(VIEW_UNAVAILABLE, VIEW_ALL, "Unavailable Inst/Config"),
+                new BooleanPreferenceAction(VIEW_MASK_IN_CABINET, VIEW_ALL, "Mask In Cabinet"),
                 new BooleanPreferenceAction(VIEW_UNSCHEDULABLE, VIEW_ALL, "Unschedulable"),
                 new BooleanPreferenceAction(VIEW_NOT_DARK_ENOUGH, VIEW_ALL, "Not Dark Enough"),
                 new BooleanPreferenceAction(VIEW_LOW_IN_SKY, VIEW_ALL, "Low in Sky"),

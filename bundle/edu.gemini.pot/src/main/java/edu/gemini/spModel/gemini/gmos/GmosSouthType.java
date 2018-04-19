@@ -1,5 +1,6 @@
 package edu.gemini.spModel.gemini.gmos;
 
+import edu.gemini.spModel.ictd.*;
 import edu.gemini.spModel.type.SpTypeUtil;
 
 /**
@@ -68,14 +69,15 @@ public class GmosSouthType {
     };
 
 
-    public enum DisperserSouth implements GmosCommonType.Disperser {
-        MIRROR("Mirror", "mirror", 0),
-        B1200_G5321("B1200_G5321", "B1200", 1200),
-        R831_G5322("R831_G5322", "R831", 831),
-        B600_G5323("B600_G5323", "B600", 600),
-        R600_G5324("R600_G5324", "R600", 600),
-        R400_G5325("R400_G5325", "R400", 400),
-        R150_G5326("R150_G5326", "R150", 150),
+    public enum DisperserSouth implements GmosCommonType.Disperser, IctdType {
+        // Mirror isn't tracked but is always installed.
+        MIRROR(     "Mirror",     "mirror",    0, Ictd.installed()),
+        B1200_G5321("B1200_G5321", "B1200", 1200, Ictd.track("B1200")),
+        R831_G5322(  "R831_G5322",  "R831",  831, Ictd.track( "R831")),
+        B600_G5323(  "B600_G5323",  "B600",  600, Ictd.track( "B600")),
+        R600_G5324(  "R600_G5324",  "R600",  600, Ictd.track( "R600")),
+        R400_G5325(  "R400_G5325",  "R400",  400, Ictd.track( "R400")),
+        R150_G5326(  "R150_G5326",  "R150",  150, Ictd.track( "R150")),
         ;
 
         /** The default Disperser value **/
@@ -84,11 +86,13 @@ public class GmosSouthType {
         private final String displayValue;
         private final String logValue;
         private final int    rulingDensity;        // [lines/mm]
+        private final IctdTracking ictd;
 
-        DisperserSouth(final String displayValue, final String logValue, final int rulingDensity) {
+        DisperserSouth(final String displayValue, final String logValue, final int rulingDensity, final IctdTracking ictd) {
             this.displayValue  = displayValue;
             this.logValue      = logValue;
             this.rulingDensity = rulingDensity;
+            this.ictd          = ictd;
         }
 
         public String displayValue() {
@@ -97,6 +101,11 @@ public class GmosSouthType {
 
         public String logValue() {
             return logValue;
+        }
+
+        @Override
+        public IctdTracking ictdTracking() {
+            return ictd;
         }
 
         public String sequenceValue() {
@@ -146,51 +155,65 @@ public class GmosSouthType {
         }
     };
 
+    // Individual filters used in multiple enum definitions.
+    private static final IctdTracking Track_HartA = Ictd.track("Hartmann A");
+    private static final IctdTracking Track_HartB = Ictd.track("Hartmann B");
+    private static final IctdTracking Track_g     = Ictd.track("g");
+    private static final IctdTracking Track_r     = Ictd.track("r");
+    private static final IctdTracking Track_i     = Ictd.track("i");
+    private static final IctdTracking Track_z     = Ictd.track("z");
+    private static final IctdTracking Track_GG455 = Ictd.track("GG455");
+    private static final IctdTracking Track_OG515 = Ictd.track("OG515");
+    private static final IctdTracking Track_RG610 = Ictd.track("RG610");
+    private static final IctdTracking Track_RG780 = Ictd.track("RG780");
+    private static final IctdTracking Track_CaT   = Ictd.track("CaT");
 
-    public enum FilterSouth implements GmosCommonType.Filter {
-        NONE("None", "none", "none"),
-        u_G0332("u_G0332", "u", "0.350"),
-        g_G0325("g_G0325", "g", "0.475"),
-        r_G0326("r_G0326", "r", "0.630"),
-        i_G0327("i_G0327", "i", "0.780"),
-        z_G0328("z_G0328", "z", "0.925"),
-        Z_G0343("Z_G0343", "Z", "0.876"),
-        Y_G0344("Y_G0344", "Y", "1.01"),
-        GG455_G0329("GG455_G0329", "GG455", "0.680"),
-        OG515_G0330("OG515_G0330", "OG515", "0.710"),
-        RG610_G0331("RG610_G0331", "RG610", "0.750"),
-        RG780_G0334("RG780_G0334", "RG780", "0.850"),
-        CaT_G0333("CaT_G0333", "CaT", "0.860"),
-        HartmannA_G0337_r_G0326("HartmannA_G0337 + r_G0326", "r+HartA", "0.630"),
-        HartmannB_G0338_r_G0326("HartmannB_G0338 + r_G0326", "r+HartB", "0.630"),
-        g_G0325_GG455_G0329("g_G0325 + GG455_G0329", "g+GG455", "0.506"),
-        g_G0325_OG515_G0330("g_G0325 + OG515_G0330", "g+OG515", "0.536"),
-        r_G0326_RG610_G0331("r_G0326 + RG610_G0331", "r+RG610", "0.657"),
-        i_G0327_RG780_G0334("i_G0327 + RG780_G0334", "i+RG780", "0.819"),
-        i_G0327_CaT_G0333("i_G0327 + CaT_G0333", "i+CaT", "0.815"),
-        z_G0328_CaT_G0333("z_G0328 + CaT_G0333", "z+CaT", "0.890"),
-        Ha_G0336("Ha_G0336", "Ha", "0.656"),
-        SII_G0335("SII_G0335", "SII", "0.672"),
-        HaC_G0337("HaC_G0337", "HaC", "0.662"),
-        OIII_G0338("OIII_G0338", "OIII", "0.499"),
-        OIIIC_G0339("OIIIC_G0339", "OIIIC", "0.514"),
-        HeII_G0340("HeII_G0340", "HeII", "0.468"),
-        HeIIC_G0341("HeIIC_G0341", "HeIIC", "0.478"),
-        Lya395_G0342("Lya395_G0342", "Lya395", "0.3955"),
-        OVI_G0347("OVI_G0347", "OVI", "0.6835"),
-        OVIC_G0348("OVIC_G0348", "OVIC", "0.678"),
+    public enum FilterSouth implements GmosCommonType.Filter, IctdType {
+        NONE("None", "none", "none",                 Ictd.installed()),
+        u_G0332("u_G0332", "u", "0.350",             Ictd.track("u")),
+        g_G0325("g_G0325", "g", "0.475",             Track_g),
+        r_G0326("r_G0326", "r", "0.630",             Track_r),
+        i_G0327("i_G0327", "i", "0.780",             Track_i),
+        z_G0328("z_G0328", "z", "0.925",             Track_z),
+        Z_G0343("Z_G0343", "Z", "0.876",             Ictd.track("Z")),
+        Y_G0344("Y_G0344", "Y", "1.01",              Ictd.track("Y")),
+        GG455_G0329("GG455_G0329", "GG455", "0.680", Track_GG455),
+        OG515_G0330("OG515_G0330", "OG515", "0.710", Track_OG515),
+        RG610_G0331("RG610_G0331", "RG610", "0.750", Track_RG610),
+        RG780_G0334("RG780_G0334", "RG780", "0.850", Track_RG780),
+        CaT_G0333("CaT_G0333", "CaT", "0.860",       Track_CaT),
+        HartmannA_G0337_r_G0326("HartmannA_G0337 + r_G0326", "r+HartA", "0.630", Track_r.plus(Track_HartA)),
+        HartmannB_G0338_r_G0326("HartmannB_G0338 + r_G0326", "r+HartB", "0.630", Track_r.plus(Track_HartB)),
+        g_G0325_GG455_G0329("g_G0325 + GG455_G0329", "g+GG455", "0.506",         Track_g.plus(Track_GG455)),
+        g_G0325_OG515_G0330("g_G0325 + OG515_G0330", "g+OG515", "0.536",         Track_g.plus(Track_OG515)),
+        r_G0326_RG610_G0331("r_G0326 + RG610_G0331", "r+RG610", "0.657",         Track_r.plus(Track_RG610)),
+        i_G0327_RG780_G0334("i_G0327 + RG780_G0334", "i+RG780", "0.819",         Track_i.plus(Track_RG780)),
+        i_G0327_CaT_G0333("i_G0327 + CaT_G0333", "i+CaT", "0.815",               Track_i.plus(Track_CaT)),
+        z_G0328_CaT_G0333("z_G0328 + CaT_G0333", "z+CaT", "0.890",               Track_z.plus(Track_CaT)),
+        Ha_G0336("Ha_G0336", "Ha", "0.656",              Ictd.track("Ha")),
+        SII_G0335("SII_G0335", "SII", "0.672",           Ictd.track("SII")),
+        HaC_G0337("HaC_G0337", "HaC", "0.662",           Ictd.track("HaC")),
+        OIII_G0338("OIII_G0338", "OIII", "0.499",        Ictd.track("OIII")),
+        OIIIC_G0339("OIIIC_G0339", "OIIIC", "0.514",     Ictd.track("OIIIC")),
+        HeII_G0340("HeII_G0340", "HeII", "0.468",        Ictd.track("HeII")),
+        HeIIC_G0341("HeIIC_G0341", "HeIIC", "0.478",     Ictd.track("HeIIC")),
+        Lya395_G0342("Lya395_G0342", "Lya395", "0.3955", Ictd.track("Lya395")),
+        OVI_G0347("OVI_G0347", "OVI", "0.6835",          Ictd.track("OVI")),
+        OVIC_G0348("OVIC_G0348", "OVIC", "0.678",        Ictd.track("OVIC")),
         ;
 
         public static final FilterSouth DEFAULT = NONE;
 
-        private String _displayValue;
-        private String _logValue;
-        private String _wavelength;
+        private final String       _displayValue;
+        private final String       _logValue;
+        private final String       _wavelength;
+        private final IctdTracking _ictd;
 
-        FilterSouth(String displayValue, String logValue, String wavelength) {
+        FilterSouth(String displayValue, String logValue, String wavelength, IctdTracking ictd) {
             _displayValue = displayValue;
             _logValue     = logValue;
             _wavelength   = wavelength;
+            _ictd         = ictd;
         }
 
         public String displayValue() {
@@ -199,6 +222,11 @@ public class GmosSouthType {
 
         public String logValue() {
             return  _logValue;
+        }
+
+        @Override
+        public IctdTracking ictdTracking() {
+            return _ictd;
         }
 
         public String sequenceValue() {
@@ -248,32 +276,32 @@ public class GmosSouthType {
         }
     };
 
-    public enum FPUnitSouth implements GmosCommonType.FPUnit {
-        FPU_NONE("None", "none"),
-        LONGSLIT_1("Longslit 0.25 arcsec", 0.25, "0.25arcsec"),
-        LONGSLIT_2("Longslit 0.50 arcsec", 0.50, "0.5arcsec"),
-        LONGSLIT_3("Longslit 0.75 arcsec", 0.75, "0.75arcsec"),
-        LONGSLIT_4("Longslit 1.00 arcsec", 1.00, "1.0arcsec"),
-        LONGSLIT_5("Longslit 1.50 arcsec", 1.50, "1.5arcsec"),
-        LONGSLIT_6("Longslit 2.00 arcsec", 2.00, "2.0arcsec"),
-        LONGSLIT_7("Longslit 5.00 arcsec", 5.00, "5.0arcsec"),
-        IFU_1("IFU 2 Slits", "IFU-2") {
+    public enum FPUnitSouth implements GmosCommonType.FPUnit, IctdType {
+        FPU_NONE("None", "none",                               Ictd.installed()),
+        LONGSLIT_1("Longslit 0.25 arcsec", 0.25, "0.25arcsec", Ictd.track("0.25arcsec")),
+        LONGSLIT_2("Longslit 0.50 arcsec", 0.50, "0.5arcsec",  Ictd.track("0.5arcsec")),
+        LONGSLIT_3("Longslit 0.75 arcsec", 0.75, "0.75arcsec", Ictd.track("0.75arcsec")),
+        LONGSLIT_4("Longslit 1.00 arcsec", 1.00, "1.0arcsec",  Ictd.track("1.0arcsec")),
+        LONGSLIT_5("Longslit 1.50 arcsec", 1.50, "1.5arcsec",  Ictd.track("1.5arcsec")),
+        LONGSLIT_6("Longslit 2.00 arcsec", 2.00, "2.0arcsec",  Ictd.track("2.0arcsec")),
+        LONGSLIT_7("Longslit 5.00 arcsec", 5.00, "5.0arcsec",  Ictd.track("5.0arcsec")),
+        IFU_1("IFU 2 Slits", "IFU-2",                          Ictd.track("IFU-2")) {
             @Override public boolean isWideSlit() { return true; }
         },
-        IFU_2("IFU Left Slit (blue)", "IFU-B"),
-        IFU_3("IFU Right Slit (red)", "IFU-R"),
-        BHROS("bHROS", "bHROS"),
+        IFU_2("IFU Left Slit (blue)", "IFU-B",                 Ictd.track("IFU-B")),
+        IFU_3("IFU Right Slit (red)", "IFU-R",                 Ictd.track("IFU-R")),
+        BHROS("bHROS", "bHROS",                                Ictd.track("bHROS")),
 
-        IFU_N("IFU N and S 2 Slits", "IFU-NS-2"),
-        IFU_N_B("IFU N and S Left Slit (blue)", "IFU-NS-B"),
-        IFU_N_R("IFU N and S Right Slit (red)", "IFU-NS-R"),
+        IFU_N("IFU N and S 2 Slits", "IFU-NS-2",               Ictd.track("IFU-NS-2")),
+        IFU_N_B("IFU N and S Left Slit (blue)", "IFU-NS-B",    Ictd.track("IFU-NS-B")),
+        IFU_N_R("IFU N and S Right Slit (red)", "IFU-NS-R",    Ictd.track("IFU-NS-R")),
 
-        NS_1("N and S 0.50 arcsec", 0.50, "NS0.5arcsec"),
-        NS_2("N and S 0.75 arcsec", 0.75, "NS0.75arcsec"),
-        NS_3("N and S 1.00 arcsec", 1.00, "NS1.0arcsec"),
-        NS_4("N and S 1.50 arcsec", 1.50, "NS1.5arcsec"),
-        NS_5("N and S 2.00 arcsec", 2.00, "NS2.0arcsec"),
-        CUSTOM_MASK("Custom Mask", "custom"),
+        NS_1("N and S 0.50 arcsec", 0.50, "NS0.5arcsec",       Ictd.track("NS0.5arcsec")),
+        NS_2("N and S 0.75 arcsec", 0.75, "NS0.75arcsec",      Ictd.track("NS0.75arcsec")),
+        NS_3("N and S 1.00 arcsec", 1.00, "NS1.0arcsec",       Ictd.track("NS1.0arcsec")),
+        NS_4("N and S 1.50 arcsec", 1.50, "NS1.5arcsec",       Ictd.track("NS1.5arcsec")),
+        NS_5("N and S 2.00 arcsec", 2.00, "NS2.0arcsec",       Ictd.track("NS2.0arcsec")),
+        CUSTOM_MASK("Custom Mask", "custom",                   Ictd.installed()),
         ;
 
         /** The default FPUnit value **/
@@ -287,17 +315,20 @@ public class GmosSouthType {
         // Slit width in arcsec, if known
         private double _width;
 
+        private final IctdTracking _ictd;
+
 
         // initialize with the name and slit width in arcsec
-        FPUnitSouth(String displayValue, String logValue) {
-            this(displayValue, -1, logValue);
+        FPUnitSouth(String displayValue, String logValue, IctdTracking ictd) {
+            this(displayValue, -1, logValue, ictd);
         }
 
         // initialize with the name and slit width in arcsec
-        FPUnitSouth(String displayValue, double width, String logValue) {
+        FPUnitSouth(String displayValue, double width, String logValue, IctdTracking ictd) {
             _displayValue = displayValue;
-            _width = width;
-            _logValue = logValue;
+            _width        = width;
+            _logValue     = logValue;
+            _ictd         = ictd;
         }
 
         public String displayValue() {
@@ -310,6 +341,11 @@ public class GmosSouthType {
 
         public String logValue() {
             return _logValue;
+        }
+
+        @Override
+        public IctdTracking ictdTracking() {
+            return _ictd;
         }
 
         /** Return the slit width in arcsec, or -1 if not applicable */

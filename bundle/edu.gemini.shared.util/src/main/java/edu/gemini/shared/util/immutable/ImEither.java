@@ -27,6 +27,7 @@ public interface ImEither<L,R> extends Serializable {
 
     Optional<R> toOptional();
 
+    Option<R> toOption();
 
     // === Left biased qualifiers / operations ===
     <T> T foldLeft(final T zero,
@@ -45,6 +46,8 @@ public interface ImEither<L,R> extends Serializable {
     boolean isLeft();
 
     Optional<L> toOptionalLeft();
+
+    Option<L> toOptionLeft();
 
 
     // === Operations on both values ===

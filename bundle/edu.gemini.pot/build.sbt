@@ -126,6 +126,7 @@ OsgiKeys.exportPackage := Seq(
   "edu.gemini.spModel.gemini.visitor.blueprint",
   "edu.gemini.spModel.gems",
   "edu.gemini.spModel.guide",
+  "edu.gemini.spModel.ictd",
   "edu.gemini.spModel.init",
   "edu.gemini.spModel.inst",
   "edu.gemini.spModel.obs",
@@ -162,5 +163,5 @@ OsgiKeys.exportPackage := Seq(
   "edu.gemini.spModel.util.test",
   "edu.gemini.util")
 
-OsgiKeys.additionalHeaders += 
+OsgiKeys.additionalHeaders +=
   ("Import-Package" -> "!org.apache.regexp,!org.apache.xerces.*,*")

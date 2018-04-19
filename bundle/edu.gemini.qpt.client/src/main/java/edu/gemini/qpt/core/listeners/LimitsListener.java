@@ -69,13 +69,13 @@ public class LimitsListener extends MarkerModelListener<Variant> {
 				if (a.getObs().getTimingWindows().size() > 0)
 					mm.addMarker(true, this, Severity.Info, "Timing constraint is met.", v, a);
 				break;
-			case 0: 
+			case 0:
 				mm.addMarker(false, this, Severity.Error, "Timing constraint is violated for entire scheduled visit.", v, a);
 				break;
 			default:
 				mm.addMarker(false, this, Severity.Error, String.format("Timing constraint is violated for %d%% of scheduled visit.", 100 - percentVisible), v, a);
 				break;
-				
+
 			}
 
             // LCH Laser Shutter Warnings
@@ -89,11 +89,11 @@ public class LimitsListener extends MarkerModelListener<Variant> {
 			final Double minAirmass = a.getMin(Circumstance.AIRMASS, false);
 
 			switch (a.getObs().getElevationConstraintType()) {
-			
+
 			case NONE:
 
-				
-				// [QPT-225] 
+
+				// [QPT-225]
 //				if (a.getObs().getOptions().contains(AltairParams.GuideStarType.LGS)) {
                 if (a.getObs().getLGS()) {
 
@@ -105,9 +105,9 @@ public class LimitsListener extends MarkerModelListener<Variant> {
 					} else if (minElevation < MIN_ELEVATION_WARN_LIMIT) {
 						mm.addMarker(false, this, Severity.Warning, String.format("LGS observation reaches elevation %1.2f\u00B0.", minElevation), v, a);
 					}
-					
+
 				} else {
-				
+
 					// Legacy behavior; airmass 2.0 limit
 					if (maxAirmass > 2.0) {
 						mm.addMarker(false, this, Severity.Error, String.format("Observation reaches airmass %1.2f.", maxAirmass), v, a);
@@ -115,14 +115,14 @@ public class LimitsListener extends MarkerModelListener<Variant> {
 						mm.addMarker(false, this, Severity.Warning, String.format("Observation reaches airmass %1.2f.", maxAirmass), v, a);
 					}
 				}
-				
+
 				break;
 
 			case AIRMASS:
-				
+
 				double airmassLimitMin = a.getObs().getElevationConstraintMin();
 				double airmassLimitMax = a.getObs().getElevationConstraintMax();
-				
+
 				if (maxAirmass > airmassLimitMax) {
 					mm.addMarker(false, this, Severity.Error, String.format("Airmass constraint violated (%1.2f > %1.2f).", maxAirmass, airmassLimitMax), v, a);
 				} else if (maxAirmass > airmassLimitMax * 0.975) {
@@ -136,18 +136,18 @@ public class LimitsListener extends MarkerModelListener<Variant> {
 					}
 				}
 				break;
-				
-				
-			case HOUR_ANGLE:				
-				
+
+
+			case HOUR_ANGLE:
+
 				double haLimitMin = a.getObs().getElevationConstraintMin();
 				double haLimitMax = a.getObs().getElevationConstraintMax();
 				double minHA = a.getMin(Circumstance.HOUR_ANGLE, false);
 				double maxHA = a.getMax(Circumstance.HOUR_ANGLE, false);
-				
+
 				double minDelta = Math.abs(haLimitMin - minHA);
 				double maxDelta = Math.abs(haLimitMax - maxHA);
-				
+
 				if (minHA < haLimitMin) {
 					mm.addMarker(false, this, Severity.Error, String.format("Hour angle constraint violated (%s < %s).", TimeUtils.hoursToHHMMSS(minHA), TimeUtils.hoursToHHMMSS(haLimitMin)), v, a);
 				} else if (minDelta < 1. / 15.) {
@@ -161,23 +161,23 @@ public class LimitsListener extends MarkerModelListener<Variant> {
 				}
 
 				break;
-				
+
 			}
-			
+
 			// Lunar proximity warnings
 			double obj_moon = a.getMin(Circumstance.LUNAR_DISTANCE, false);
 			if (obj_moon < 5.) {
-				mm.addMarker(false, this, Severity.Error, String.format("Target approaches within %1.2f\u00B0 of the moon.", obj_moon), v, a);									
+				mm.addMarker(false, this, Severity.Error, String.format("Target approaches within %1.2f\u00B0 of the moon.", obj_moon), v, a);
 			} else if (obj_moon < 15.) {
-				mm.addMarker(false, this, Severity.Warning, String.format("Target approaches within %1.2f\u00B0 of the moon.", obj_moon), v, a);									
+				mm.addMarker(false, this, Severity.Warning, String.format("Target approaches within %1.2f\u00B0 of the moon.", obj_moon), v, a);
 			}
-			
+
 			// Sky brightness warnings
-			Double sb = a.getMin(Circumstance.TOTAL_SKY_BRIGHTNESS, false); 
-			if (sb != null && !a.getObs().getConditions().containsSkyBrightness(sb)) 
+			Double sb = a.getMin(Circumstance.TOTAL_SKY_BRIGHTNESS, false);
+			if (sb != null && !a.getObs().getConditions().containsSkyBrightness(sb))
 				mm.addMarker(false, this, Severity.Error, "Sky brightness constraint violated.", v, a);
 
-			
+
 			// Variant Obs Flags
 			for (Flag flag: v.getFlags(a.getObs())) {
 				switch (flag) {
@@ -188,6 +188,10 @@ public class LimitsListener extends MarkerModelListener<Variant> {
 
 				case CONFIG_UNAVAILABLE:
 					mm.addMarker(false, this, Severity.Error, "Required instrument configuration is unavailable.", v, a);
+					break;
+
+				case MASK_IN_CABINET:
+					mm.addMarker(false, this, Severity.Error, "Required custom mask is in cabinet.", v, a);
 					break;
 
 				case INSTRUMENT_UNAVAILABLE:
@@ -221,16 +225,16 @@ public class LimitsListener extends MarkerModelListener<Variant> {
 					// ...
 					// No markers for these guys.
 					break;
-					
+
 				}
 			}
 		}
-		
+
 	}
-	
+
 	@Override
 	protected MarkerManager getMarkerManager(Variant t) {
 		return t.getSchedule().getMarkerManager();
 	}
-	
+
 }

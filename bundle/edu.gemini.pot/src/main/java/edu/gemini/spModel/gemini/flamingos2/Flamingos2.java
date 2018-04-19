@@ -29,6 +29,7 @@ import edu.gemini.spModel.gemini.parallacticangle.ParallacticAngleSupportInst;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.guide.GuideProbeProvider;
 import edu.gemini.spModel.guide.GuideProbeUtil;
+import edu.gemini.spModel.ictd.*;
 import edu.gemini.spModel.inst.ElectronicOffsetProvider;
 import edu.gemini.spModel.inst.ScienceAreaGeometry;
 import edu.gemini.spModel.inst.VignettableScienceAreaInstrument;
@@ -127,26 +128,26 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
     /**
      * Filters
      */
-    public enum Filter implements DisplayableSpType, SequenceableSpType, LoggableSpType, ObsoletableSpType {
+    public enum Filter implements DisplayableSpType, SequenceableSpType, LoggableSpType, ObsoletableSpType, IctdType {
 
-        OPEN("Open", "Open", new Some<>(1.6)) {
+        OPEN("Open", "Open", new Some<>(1.6),                     Ictd.unavailable()) {
             @Override public boolean isObsolete() {
                 return true;
             }
         },
-        Y("Y (1.02 um)", "Y", new Some<>(1.02)),
-        F1056("F1056 (1.056 um)", "F1056", new Some<>(1.056)),
-        F1063("F1063 (1.063 um)", "F1063", new Some<>(1.063)),
-        J_LOW("J-low (1.15 um)", "J-low", new Some<>(1.15)),
-        J("J (1.25 um)", "J", new Some<>(1.25)),
-        H("H (1.65 um)", "H", new Some<>(1.65)),
-        K_LONG("K-long (2.20 um)", "K-long", new Some<>(2.20)),
-        K_SHORT("K-short (2.15 um)", "K-short", new Some<>(2.15)),
-        K_BLUE("K-blue (2.06 um)", "K-blue", new Some<>(2.06)),
-        K_RED("K-red (2.31 um)", "K-red", new Some<>(2.31)),
-        JH("JH (spectroscopic)", "JH", new Some<>(1.39)),
-        HK("HK (spectroscopic)", "HK", new Some<>(1.871)),
-        DARK("Dark", "Dark", None.DOUBLE) {
+        Y("Y (1.02 um)", "Y", new Some<>(1.02),                   Ictd.track("Y")),
+        F1056("F1056 (1.056 um)", "F1056", new Some<>(1.056),     Ictd.track("F1056")),
+        F1063("F1063 (1.063 um)", "F1063", new Some<>(1.063),     Ictd.track("F1063")),
+        J_LOW("J-low (1.15 um)", "J-low", new Some<>(1.15),       Ictd.track("J-low")),
+        J("J (1.25 um)", "J", new Some<>(1.25),                   Ictd.track("J")),
+        H("H (1.65 um)", "H", new Some<>(1.65),                   Ictd.track("H")),
+        K_LONG("K-long (2.20 um)", "K-long", new Some<>(2.20),    Ictd.track("K-long")),
+        K_SHORT("K-short (2.15 um)", "K-short", new Some<>(2.15), Ictd.track("K-short")),
+        K_BLUE("K-blue (2.06 um)", "K-blue", new Some<>(2.06),    Ictd.track("K-blue")),
+        K_RED("K-red (2.31 um)", "K-red", new Some<>(2.31),       Ictd.track("K-red")),
+        JH("JH (spectroscopic)", "JH", new Some<>(1.39),          Ictd.track("JH")),
+        HK("HK (spectroscopic)", "HK", new Some<>(1.871),         Ictd.track("HK")),
+        DARK("Dark", "Dark", None.DOUBLE,                         Ictd.track("Dark")) {
             @Override public boolean isObsolete() {
                 return true;
             }
@@ -159,11 +160,13 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         private final String _displayName;
         private final String _logValue;
         private final Option<Double> _wavelength;  // in um
+        private final IctdTracking _ictd;
 
-        Filter(String name, String logValue, Option<Double> wavelength) {
+        Filter(String name, String logValue, Option<Double> wavelength, IctdTracking ictd) {
             _displayName = name;
             _logValue    = logValue;
             _wavelength  = wavelength;
+            _ictd        = ictd;
         }
 
         /** Return the filter's effective wavelength, if known, otherwise null **/
@@ -181,6 +184,11 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
 
         public String logValue() {
             return _logValue;
+        }
+
+        @Override
+        public IctdTracking ictdTracking() {
+            return _ictd;
         }
 
         public String toString() {
@@ -292,18 +300,18 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
     /**
      * Focal Plan Unit support.
      */
-    public enum FPUnit implements DisplayableSpType, SequenceableSpType, LoggableSpType {
+    public enum FPUnit implements DisplayableSpType, SequenceableSpType, LoggableSpType, IctdType {
 
-        FPU_NONE("Imaging (none)", "none",                     0, Decker.IMAGING),
-        LONGSLIT_1("1-pix longslit", "longslit_1",             1, Decker.LONG_SLIT),
-        LONGSLIT_2("2-pix longslit", "longslit_2",             2, Decker.LONG_SLIT),
-        LONGSLIT_3("3-pix longslit", "longslit_3",             3, Decker.LONG_SLIT),
-        LONGSLIT_4("4-pix longslit", "longslit_4",             4, Decker.LONG_SLIT),
-        LONGSLIT_6("6-pix longslit", "longslit_6",             6, Decker.LONG_SLIT),
-        LONGSLIT_8("8-pix longslit", "longslit_8",             8, Decker.LONG_SLIT),
-        PINHOLE("2-pix pinhole grid", "pinhole",               0, Decker.IMAGING),
-        SUBPIX_PINHOLE("subpix pinhole grid", "subpixPinhole", 0, Decker.IMAGING),
-        CUSTOM_MASK("Custom Mask", "custom",                   0, Decker.MOS);
+        FPU_NONE("Imaging (none)", "none",                     0, Decker.IMAGING,   Ictd.installed()),
+        LONGSLIT_1("1-pix longslit", "longslit_1",             1, Decker.LONG_SLIT, Ictd.track("1 pix longslit")),
+        LONGSLIT_2("2-pix longslit", "longslit_2",             2, Decker.LONG_SLIT, Ictd.track("2 pix longslit")),
+        LONGSLIT_3("3-pix longslit", "longslit_3",             3, Decker.LONG_SLIT, Ictd.track("3 pix longslit")),
+        LONGSLIT_4("4-pix longslit", "longslit_4",             4, Decker.LONG_SLIT, Ictd.track("4 pix longslit")),
+        LONGSLIT_6("6-pix longslit", "longslit_6",             6, Decker.LONG_SLIT, Ictd.track("6 pix longslit")),
+        LONGSLIT_8("8-pix longslit", "longslit_8",             8, Decker.LONG_SLIT, Ictd.track("8 pix longslit")),
+        PINHOLE("2-pix pinhole grid", "pinhole",               0, Decker.IMAGING,   Ictd.track("2 pix pinhole grid")),
+        SUBPIX_PINHOLE("subpix pinhole grid", "subpixPinhole", 0, Decker.IMAGING,   Ictd.track("Subpix pinhole grid")),
+        CUSTOM_MASK("Custom Mask", "custom",                   0, Decker.MOS,       Ictd.installed());
 
         /** The default FPUnit value **/
         public static final FPUnit DEFAULT = FPU_NONE;
@@ -316,13 +324,15 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
 
         private final int _slitWidth;
         private final Decker _decker;
+        private final IctdTracking _ictd;
 
         // initialize with the name
-        FPUnit(String name, String logValue, int slitWidth, Decker decker) {
+        FPUnit(String name, String logValue, int slitWidth, Decker decker, IctdTracking ictd) {
             _displayValue = name;
             _logValue     = logValue;
             _slitWidth    = slitWidth;
             _decker       = decker;
+            _ictd         = ictd;
         }
 
         /**
@@ -349,6 +359,11 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
 
         public Decker getDecker() {
             return _decker;
+        }
+
+        @Override
+        public IctdTracking ictdTracking() {
+            return _ictd;
         }
 
         public String displayValue() {

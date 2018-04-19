@@ -5,36 +5,47 @@ import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Some;
+import edu.gemini.spModel.core.Site;
+import static edu.gemini.spModel.core.Site.*;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * An enumeration of all instruments, which is a subset of all component types.
  */
 public enum Instrument {
-    AcquisitionCamera(INSTRUMENT_ACQCAM),
+    AcquisitionCamera(INSTRUMENT_ACQCAM, GN, GS),
     Bhros(INSTRUMENT_BHROS),
-    Flamingos2(INSTRUMENT_FLAMINGOS2),
-    Ghost(INSTRUMENT_GHOST),
-    GmosNorth(INSTRUMENT_GMOS),
-    GmosSouth(INSTRUMENT_GMOSSOUTH),
-    Gnirs(INSTRUMENT_GNIRS),
-    Gpi(INSTRUMENT_GPI),
-    Gsaoi(INSTRUMENT_GSAOI),
-    Michelle(INSTRUMENT_MICHELLE),
-    Nici(INSTRUMENT_NICI),
-    Nifs(INSTRUMENT_NIFS),
-    Niri(INSTRUMENT_NIRI),
-    Phoenix(INSTRUMENT_PHOENIX),
+    Flamingos2(INSTRUMENT_FLAMINGOS2, GS),
+    Ghost(INSTRUMENT_GHOST, GS),
+    GmosNorth(INSTRUMENT_GMOS, GN),
+    GmosSouth(INSTRUMENT_GMOSSOUTH, GS),
+    Gnirs(INSTRUMENT_GNIRS, GS),
+    Gpi(INSTRUMENT_GPI, GS),
+    Gsaoi(INSTRUMENT_GSAOI, GS),
+    Michelle(INSTRUMENT_MICHELLE, GN),
+    Nici(INSTRUMENT_NICI, GS),
+    Nifs(INSTRUMENT_NIFS, GN),
+    Niri(INSTRUMENT_NIRI, GN),
+    Phoenix(INSTRUMENT_PHOENIX, GS),
     Texes(INSTRUMENT_TEXES),
     Trecs(INSTRUMENT_TRECS),
-    Visitor(INSTRUMENT_VISITOR)
+    Visitor(INSTRUMENT_VISITOR, GN, GS)
     ;
 
     public final SPComponentType componentType;
+    public final Set<Site> sites;
 
-    Instrument(SPComponentType type) {
+    Instrument(SPComponentType type, Site... sites) {
         this.componentType = type;
+        this.sites         = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(sites)));
+    }
+
+    public boolean existsAt(Site site) {
+        return sites.contains(site);
     }
 
     /**

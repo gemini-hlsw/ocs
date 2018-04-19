@@ -1,7 +1,6 @@
 package edu.gemini.qpt.core.listeners;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import edu.gemini.qpt.core.Schedule;
@@ -14,8 +13,11 @@ import edu.gemini.qpt.core.Variant;
 @SuppressWarnings("unchecked")
 public class Listeners {
 
-	private static final List<MarkerModelListener<Schedule>> SCHEDULE_LISTENERS = Collections.<MarkerModelListener<Schedule>>singletonList(new EmptyScheduleListener());
-		
+	private static final List<MarkerModelListener<Schedule>> SCHEDULE_LISTENERS = Arrays.asList(
+		new EmptyScheduleListener(),
+		new EmptyIctdListener()
+	);
+
 	private static final List<MarkerModelListener<Variant>> VARIANT_LISTENERS = Arrays.asList(
 		new EmptyVariantListener(),
 		new LimitsListener(),
@@ -30,8 +32,8 @@ public class Listeners {
         new AgsAnalysisListener(),
         new PropagationWindowsListener()
 	);
-	
-	
+
+
 	public static void attach(Schedule schedule) {
 		for (ModelListener<Schedule> o: SCHEDULE_LISTENERS)
 			o.subscribe(schedule);

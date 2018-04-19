@@ -10,9 +10,13 @@ import java.util.Hashtable;
 import java.util.logging.Logger;
 
 import edu.gemini.ags.conf.ProbeLimitsTable;
+import edu.gemini.ictd.IctdDatabase;
+
 import edu.gemini.qpt.core.util.LttsServicesClient;
 
 import edu.gemini.qpt.ui.action.PublishAction;
+import edu.gemini.qpt.shared.sp.Ictd;
+
 import edu.gemini.spModel.core.Version;
 import edu.gemini.util.security.auth.keychain.KeyChain;
 import edu.gemini.util.security.ext.auth.ui.PasswordDialog;
@@ -44,6 +48,29 @@ public final class Activator implements BundleActivator {
     private static final String PROP_USER = "edu.gemini.qpt.ui.action.destination.user";
     private ServiceTracker<KeyChain, KeyChain> keyChainServiceTracker = null;
     private final CtrKeyListener ctrKeyListener = new CtrKeyListener();
+
+    private static String getIctdProperty(final String name, final BundleContext ctx) {
+        final String fullName = "edu.gemini.ictd." + name;
+        final String value    = ctx.getProperty(fullName);
+
+        if (value == null) {
+            final String message = "Missing bundle.properties value " + fullName;
+            LOGGER.severe(message);
+            throw new RuntimeException(message);
+        }
+
+        return value;
+    }
+
+    private static Ictd.SiteConfig getIctdSiteConfig(final BundleContext ctx) {
+        final String user     = getIctdProperty("user", ctx);
+        final String password = getIctdProperty("password", ctx);
+
+        return new Ictd.SiteConfig(
+            new IctdDatabase.Configuration(getIctdProperty("gn", ctx), user, password),
+            new IctdDatabase.Configuration(getIctdProperty("gs", ctx), user, password)
+        );
+    }
 
     @SuppressWarnings({ "deprecation", "unchecked" })
     public void start(final BundleContext context) throws Exception {
@@ -91,7 +118,7 @@ public final class Activator implements BundleActivator {
                         PasswordDialog.unlock(ac, null);
                 });
 
-                Activator.this.advisor = new ShellAdvisor("Gemini QPT", Version.current.toString(), root, ac, internal, pachon, ProbeLimitsTable.loadOrThrow());
+                Activator.this.advisor = new ShellAdvisor("Gemini QPT", Version.current.toString(), root, ac, internal, pachon, getIctdSiteConfig(context), ProbeLimitsTable.loadOrThrow());
                 shellRegistration = context.registerService(IShellAdvisor.class.getName(), advisor, new Hashtable<>());
                 return ac;
             }

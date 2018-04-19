@@ -19,7 +19,11 @@ import javax.swing.tree.DefaultTreeModel;
 
 import edu.gemini.qpt.core.Schedule;
 import edu.gemini.qpt.shared.sp.Inst;
+import edu.gemini.qpt.shared.sp.Ictd;
 import edu.gemini.qpt.ui.view.instrument.OutlineNode.TriState;
+import edu.gemini.shared.util.immutable.ImOption;
+import edu.gemini.shared.util.immutable.Option;
+import edu.gemini.spModel.ictd.Availability;
 import edu.gemini.ui.workspace.IShell;
 import edu.gemini.ui.workspace.IViewAdvisor;
 import edu.gemini.ui.workspace.IViewContext;
@@ -30,6 +34,24 @@ public class InstViewAdvisor implements IViewAdvisor, PropertyChangeListener {
     private final JTree tree = ElementFactory.createTree();
     private Schedule model;
     private IViewContext context;
+
+    private final TreeModelListener treeModelListener = new TreeModelListener() {
+        public void treeStructureChanged(TreeModelEvent e) {
+            updateSchedule();
+        }
+
+        public void treeNodesRemoved(TreeModelEvent e) {
+            updateSchedule();
+        }
+
+        public void treeNodesInserted(TreeModelEvent e) {
+            updateSchedule();
+        }
+
+        public void treeNodesChanged(TreeModelEvent e) {
+            updateSchedule();
+        }
+    };
 
     public void open(final IViewContext context) {
         this.context = context;
@@ -43,23 +65,7 @@ public class InstViewAdvisor implements IViewAdvisor, PropertyChangeListener {
         tree.addMouseListener(new OutlineNodeMouseListener());
         tree.setToggleClickCount(Integer.MAX_VALUE); // don't expand on multi-clicks
 
-        tree.getModel().addTreeModelListener(new TreeModelListener() {
-            public void treeStructureChanged(TreeModelEvent e) {
-                updateSchedule();
-            }
-
-            public void treeNodesRemoved(TreeModelEvent e) {
-                updateSchedule();
-            }
-
-            public void treeNodesInserted(TreeModelEvent e) {
-                updateSchedule();
-            }
-
-            public void treeNodesChanged(TreeModelEvent e) {
-                updateSchedule();
-            }
-        });
+        tree.getModel().addTreeModelListener(treeModelListener);
 
         // Scroll pane
         final JScrollPane scroll = new JScrollPane(tree);
@@ -120,6 +126,49 @@ public class InstViewAdvisor implements IViewAdvisor, PropertyChangeListener {
         return root;
     }
 
+    private final PropertyChangeListener ictdListener = new PropertyChangeListener() {
+
+        // Walk through the entire tree.  For each node, try to find the matching
+        // item in the availability map.  If it exists, check or uncheck as
+        // appropriate. If not, ignore it and keep going (we want to preserve
+        // intermediate nodes like "NICI" and "Dispersers).
+        private void updateFromAvailability(final Map<Enum<?>, Availability> m) {
+
+            // Don't trigger events while updating from the availability map.
+            tree.getModel().removeTreeModelListener(treeModelListener);
+
+            try {
+
+                final Enumeration e = ((OutlineNode) tree.getModel().getRoot()).breadthFirstEnumeration();
+                while (e.hasMoreElements()) {
+                    final OutlineNode n = (OutlineNode) e.nextElement();
+                    final Object      o = n.getUserObject();
+                    if (o != null && o instanceof Enum) {
+                        ImOption.apply(m.get((Enum) o)).foreach(a ->
+                            n.setSelected(a == Availability.Installed)
+                        );
+                    }
+                }
+
+            } finally {
+
+                // Restore normal event handling.
+                tree.getModel().addTreeModelListener(treeModelListener);
+
+            }
+        }
+
+        @Override
+        public void propertyChange(PropertyChangeEvent evt) {
+            if (Schedule.PROP_ICTD.equals(evt.getPropertyName())) {
+                // Update from the feature availability map.
+                ((Option<Ictd>) evt.getNewValue()).foreach(ictd ->
+                    updateFromAvailability(ictd.featureAvailability)
+                );
+            }
+        }
+    };
+
     public void propertyChange(PropertyChangeEvent evt) {
         if (IShell.PROP_MODEL.equals(evt.getPropertyName())) {
             synchronized (this) {
@@ -133,9 +182,13 @@ public class InstViewAdvisor implements IViewAdvisor, PropertyChangeListener {
                 // REL-1301: Only rebuild the entire tree when the model has just been instantiated.
                 // Note that if a new plan is created, this will happen as well automatically.
                 // This preserves the tree selections after refreshes.
-                if (model == null)
+                if (model == null) {
                     ((DefaultTreeModel) tree.getModel()).setRoot(getRoot(newModel));
+                } else {
+                    model.removePropertyChangeListener(Schedule.PROP_ICTD, ictdListener);
+                }
                 model = newModel;
+                newModel.addPropertyChangeListener(Schedule.PROP_ICTD, ictdListener);
                 updateSchedule();
             }
         }

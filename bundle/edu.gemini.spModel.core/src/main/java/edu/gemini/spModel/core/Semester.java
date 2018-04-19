@@ -202,6 +202,14 @@ public final class Semester implements Comparable<Semester>, Serializable {
      */
     @Override
     public String toString() {
+        return format();
+    }
+
+    /**
+     * Returns a formatted semester suitable for parsing with
+     * the {@link #parse(String)} method.
+     */
+    public String format() {
         return String.format("%d%s", year, half.name());
     }
 
