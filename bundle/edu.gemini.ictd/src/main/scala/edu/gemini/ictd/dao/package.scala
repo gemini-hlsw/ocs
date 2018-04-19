@@ -1,11 +1,9 @@
-package edu.gemini
+package edu.gemini.ictd
 
-import edu.gemini.pot.sp.Instrument
 import edu.gemini.spModel.ictd.Availability
-
 import shapeless.tag.@@
 
-package object ictd {
+package object dao {
 
   trait CircularTag
   trait FilterTag

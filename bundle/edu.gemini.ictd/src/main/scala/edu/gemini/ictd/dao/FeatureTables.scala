@@ -1,5 +1,6 @@
-package edu.gemini.ictd
+package edu.gemini.ictd.dao
 
+import edu.gemini.ictd._
 import shapeless.tag
 import shapeless.tag.@@
 

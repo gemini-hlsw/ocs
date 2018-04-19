@@ -1,5 +1,6 @@
 package edu.gemini.ictd
 
+import edu.gemini.ictd.dao._
 import edu.gemini.pot.sp.Instrument
 import edu.gemini.pot.sp.Instrument._
 import edu.gemini.spModel.ictd.{ Availability, IctdType }
@@ -62,8 +63,9 @@ object FeatureAvailability {
   /** Creates a FeatureAvailability instance given the collection of every
     * instrument's FeatureTables from the ICTD database.
     */
-  def fromTables(tabs: Map[Instrument, FeatureTables]): FeatureAvailability = {
-    val forInst = tabs.withDefaultValue(FeatureTables.empty)
+  private[ictd] def fromTables(tabs: Map[Instrument, FeatureTables]): FeatureAvailability = {
+    val forInst: Instrument => FeatureTables =
+      tabs.withDefaultValue(FeatureTables.empty)
 
     FeatureAvailability(
       Flamingos2Config.fromTables(forInst(Flamingos2)),
@@ -86,7 +88,7 @@ object FeatureAvailability {
   }
 
   object Flamingos2Config {
-    def fromTables(tabs: FeatureTables): Flamingos2Config =
+    private[ictd] def fromTables(tabs: FeatureTables): Flamingos2Config =
       Flamingos2Config(
         resolve[F2Filter](tabs.filter),
         resolve[F2FPUnit](tabs.longslit ++ tabs.circular)
@@ -109,7 +111,7 @@ object FeatureAvailability {
   }
 
   object GmosNorthConfig {
-    def fromTables(tabs: FeatureTables): GmosNorthConfig =
+    private[ictd] def fromTables(tabs: FeatureTables): GmosNorthConfig =
       GmosNorthConfig(
         resolve[DisperserNorth](tabs.grating),
         resolve[FilterNorth   ](tabs.filter),
@@ -132,7 +134,7 @@ object FeatureAvailability {
   }
 
   object GmosSouthConfig {
-    def fromTables(tabs: FeatureTables): GmosSouthConfig =
+    private[ictd] def fromTables(tabs: FeatureTables): GmosSouthConfig =
       GmosSouthConfig(
         resolve[DisperserSouth](tabs.grating),
         resolve[FilterSouth   ](tabs.filter),

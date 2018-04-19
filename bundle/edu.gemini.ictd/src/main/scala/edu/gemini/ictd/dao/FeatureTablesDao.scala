@@ -54,7 +54,7 @@ object FeatureTablesDao {
     def toAvailabilityTable[T](features: List[Feature @@ T]): AvailabilityTable @@ T =
       tag[T][AvailabilityTable](features.map(f => (f.name, f.location.availability)).toMap)
 
-    def group[T](features: List[Feature @@ T]): Map[Instrument, AvailabilityTable @@ T] =
+    def group[T](features: List[Feature @@ T]): Instrument => AvailabilityTable @@ T =
       features.groupBy(_.instrument)
               .mapValues(toAvailabilityTable)
               .withDefaultValue(tag[T][AvailabilityTable](Map.empty))
