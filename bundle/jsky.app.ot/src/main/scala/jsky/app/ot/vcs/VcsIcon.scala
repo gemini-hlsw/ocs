@@ -23,31 +23,34 @@ object VcsIcon {
   val Update = load("up")
   val Commit = load("ci")
 
-  private val InSyncColor = OtColor.HONEY_DEW.darker
-  private val NoPeerColor = OtColor.SKY.darker
-  private val ErrorColor = OtColor.SALMON
-  private val PendingSyncColor = OtColor.SALMON
-  private val PendingUpdateColor = new Color(255, 175, 0)
+  private val InSyncColor         = OtColor.HONEY_DEW.darker
+  private val NoPeerColor         = OtColor.SKY.darker
+  private val ErrorColor          = OtColor.SALMON
+  private val PendingSyncColor    = OtColor.SALMON
+  private val PendingUpdateColor  = new Color(255, 175, 0)
   private val PendingCheckInColor = PendingUpdateColor
+  private val RevertColor         = OtColor.SALMON
 
   private type Drawing = (Graphics2D, Int, Int) => Unit
 
   private val DownArrow: Drawing = (g2, w, h) => {
     g2.fill(new Polygon(Array(4, w - 4, w / 2), Array(h / 2 - 4, h / 2 - 4, h - 4), 3))
-    //    g2.fill(new Polygon(Array(5, w-5, w/2), Array(h/2, h/2, h-4), 3))
-    //    g2.fill(new Rectangle2D.Double(w/2-2,4,4,8))
   }
 
   private val UpArrow: Drawing = (g2, w, h) => {
     g2.fill(new Polygon(Array(4, w - 4, w / 2), Array(h / 2 + 4, h / 2 + 4, 4), 3))
-    //    g2.fill(new Polygon(Array(5, w-5, w/2), Array(h/2, h/2, 4), 3))
-    //    g2.fill(new Rectangle2D.Double(w/2-2,h/2,4,8))
   }
 
   private val CycleArrow: Drawing = (g2, w, h) => {
     g2.fill(new Polygon(Array(w / 2, w / 2 + 4, w / 2), Array(2, 7, 12), 3))
     g2.setStroke(new BasicStroke(2.0f))
     g2.draw(new Arc2D.Double(6, 6, w - 12, h - 12, 90.0, 270.0, Arc2D.OPEN))
+  }
+
+  private val BackCycleArrow: Drawing = (g2, w, h) => {
+    g2.fill(new Polygon(Array(w / 2, w / 2 - 4, w / 2), Array(2, 7, 12), 3))
+    g2.setStroke(new BasicStroke(2.0f))
+    g2.draw(new Arc2D.Double(6, 6, w - 12, h - 12, 180.0, 270.0, Arc2D.OPEN))
   }
 
   private val Question: Drawing = (g2, w, h) => {
@@ -88,10 +91,11 @@ object VcsIcon {
     new ImageIcon(image)
   }
 
-  val PendingSync = makeIcon(CycleArrow, PendingSyncColor)
-  val PendingUpdate = makeIcon(DownArrow, PendingUpdateColor)
-  val PendingCheckIn = makeIcon(UpArrow, PendingCheckInColor)
-  val UpToDate = makeIcon(CycleArrow, InSyncColor)
-  val NoPeer = makeIcon(Question, NoPeerColor)
-  val BrokenLink = makeIcon(Network, ErrorColor)
+  val PendingSync    = makeIcon(CycleArrow,     PendingSyncColor)
+  val PendingUpdate  = makeIcon(DownArrow,      PendingUpdateColor)
+  val PendingCheckIn = makeIcon(UpArrow,        PendingCheckInColor)
+  val UpToDate       = makeIcon(CycleArrow,     InSyncColor)
+  val NoPeer         = makeIcon(Question,       NoPeerColor)
+  val BrokenLink     = makeIcon(Network,        ErrorColor)
+  val Revert         = makeIcon(BackCycleArrow, RevertColor)
 }
