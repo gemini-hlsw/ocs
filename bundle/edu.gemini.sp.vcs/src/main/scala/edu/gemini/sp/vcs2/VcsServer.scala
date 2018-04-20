@@ -100,6 +100,14 @@ class VcsServer(odb: IDBDatabaseService) { vs =>
     }
   }
 
+  /** Replaces the given program in the database. */
+  def replace(p: ISPProgram): VcsAction[Unit] =
+    (Option(p.getProgramID) \/> MissingId).liftVcs >>= { id =>
+      locked(p.getProgramKey, instance.writeLock, instance.writeUnlock) {
+        putProg(odb.getFactory.copyWithNewLifespanId(p)).liftVcs
+      }
+    }
+
   /** Server implementation of `VcsService`. */
   final class SecureVcsService(user: Set[Principal], vcsLog: VcsLog) extends VcsService {
     def geminiPrincipals: Set[GeminiPrincipal] =

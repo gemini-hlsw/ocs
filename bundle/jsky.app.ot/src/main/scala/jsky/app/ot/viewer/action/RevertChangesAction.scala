@@ -21,7 +21,7 @@ import scala.swing.{ Component, Dialog, Reactor }
 /**
   *
   */
-final class RevertChangesAction(viewer: SPViewer) extends AbstractViewerAction(viewer, "Revert changes", VcsIcon.Revert) with Reactor {
+final class RevertChangesAction(viewer: SPViewer) extends AbstractViewerAction(viewer, "Revert Changes...", VcsIcon.Revert) with Reactor {
   import RevertChangesAction._
 
   putValue(AbstractViewerAction.SHORT_NAME, "Revert")
@@ -62,9 +62,7 @@ final class RevertChangesAction(viewer: SPViewer) extends AbstractViewerAction(v
       peer    <- client.peer(pid)
       if client.reg.allRegistrations.isDefinedAt(pid) && userConfirms(evt)
     } {
-      println("Okay revert")
-      SPDB.get().remove(program)
-      client.checkout(pid, peer, new AtomicBoolean(false)).unsafeRun.fold(fail(pid, peer),success)
+      client.revert(pid, peer, new AtomicBoolean(false)).unsafeRun.fold(fail(pid, peer),success)
     }
   }
 
@@ -73,8 +71,9 @@ final class RevertChangesAction(viewer: SPViewer) extends AbstractViewerAction(v
 object RevertChangesAction {
 
   private val ConfirmationMessage =
-    """Delete all changes since the last sync and restore the program from the
-      |remote Observing Database?
+    """This action will delete all local changes made
+      |since the last sync and restore the program
+      |from the remote database.
       |
       |Continue?
     """.stripMargin
