@@ -67,7 +67,7 @@ object CustomMaskDao {
                m.ProgramNo,
                m.ODF,
                c.Location
-          FROM Mos m
+          FROM MOS m
                LEFT OUTER JOIN Component c
                  ON c.ComponentID = m.ComponentID
          WHERE m.Site = $s
