@@ -18,8 +18,9 @@ import javax.swing.Action._
 import javax.swing.JComponent
 
 import scala.swing.{ Component, Dialog, Reactor }
-/**
-  *
+
+/** An action that fetches the remote version of the program and puts it into
+  * the local database, wiping out any local changes.
   */
 final class RevertChangesAction(viewer: SPViewer) extends AbstractViewerAction(viewer, "Revert Changes...", VcsIcon.Revert) with Reactor {
   import RevertChangesAction._
