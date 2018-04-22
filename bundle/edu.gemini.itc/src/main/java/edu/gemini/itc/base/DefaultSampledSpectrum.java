@@ -9,10 +9,10 @@ package edu.gemini.itc.base;
  * This interface provides functionality for defining and manipulating a
  * SampledSpectrum.
  * Units are not stored for either axis so the client must know from context.
- * The SampledSpectrum plays the rold of Element in a visitor pattern.
+ * The SampledSpectrum plays the role of Element in a visitor pattern.
  * This pattern is used to separate operations from the SampledSpectrum
  * elements.
- * The SampledSpectrum plays the rold of Element in a visitor pattern.
+ * The SampledSpectrum plays the role of Element in a visitor pattern.
  * This pattern is used to separate operations from the elements.
  * Because of this separation, Concrete Elements must offer enough
  * accessors for the separate Concrete Visitor class to perform the
@@ -47,6 +47,13 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
         double xStart = sp.getStart();
         double xEnd = sp.getEnd();
         int numIntervals = (int) ((xEnd - xStart) / xInterval);
+
+        // If the range of the user-supplied SED is too large for the sampling we run out of memory and die without telling the user why.
+        // This will preemptively exit if the array size is larger than (a fairly arbitrary) 40 million (currently dying at 43M).
+        if ( numIntervals > 40000000 ) {
+            throw new IllegalArgumentException(String.format("range is too large (%.1f - %.1f nm).", xStart, xEnd));
+        }
+
         double[] data = new double[numIntervals + 1];
         for (int i = 0; i <= numIntervals; ++i) {
             data[i] = sp.getY(i * xInterval + xStart);

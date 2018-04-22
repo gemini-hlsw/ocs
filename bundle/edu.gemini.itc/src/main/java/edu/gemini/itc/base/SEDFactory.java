@@ -104,7 +104,7 @@ public final class SEDFactory {
             return new DefaultSampledSpectrum(as, wavelengthInterval);
 
         } catch (final Exception e) {
-            throw new Error("Could not parse user SED " + userSED.name() + ": " + e.getMessage());
+            throw new IllegalArgumentException("Could not parse user SED " + userSED.name() + ": " + e.getMessage());
         }
     }
 
@@ -194,7 +194,8 @@ public final class SEDFactory {
         // TODO: what about Nifs and Gnirs (other near-ir instruments)?
         if (instrument instanceof Gsaoi || instrument instanceof Niri || instrument instanceof Flamingos2) {
             if (sed.getStart() > instrument.getObservingStart() || sed.getEnd() < instrument.getObservingEnd()) {
-                throw new IllegalArgumentException("Shifted spectrum lies outside of observed wavelengths");
+                throw new IllegalArgumentException(String.format("Input SED (%.1f - %.1f nm) does not cover range of instrument configuration (%.1f - %.1f nm).",
+                        sed.getStart(), sed.getEnd(), instrument.getObservingStart(), instrument.getObservingEnd()));
             }
         }
 
