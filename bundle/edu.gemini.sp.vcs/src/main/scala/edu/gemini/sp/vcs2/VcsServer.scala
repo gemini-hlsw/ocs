@@ -100,13 +100,22 @@ class VcsServer(odb: IDBDatabaseService) { vs =>
     }
   }
 
-  /** Replaces the given program in the database. */
-  def replace(p: ISPProgram): VcsAction[Unit] =
+  /** Replaces the program in the database in the database with key and id
+    * matching program p with program p.
+    */
+  def replace(p: ISPProgram): VcsAction[Unit] = {
+    def failIfNotExists(id: SPProgramID, key: SPNodeKey): VcsAction[Unit] =
+      Option(odb.lookupProgramByID(id))
+        .filter(_.getProgramKey == key)
+        .as(VcsAction.unit)
+        .getOrElse(VcsAction.fail(NotFound(id)))
+
     (Option(p.getProgramID) \/> MissingId).liftVcs >>= { id =>
       locked(p.getProgramKey, instance.writeLock, instance.writeUnlock) {
-        putProg(odb.getFactory.copyWithNewLifespanId(p)).liftVcs
+        failIfNotExists(id, p.getProgramKey) >> putProg(odb.getFactory.copyWithNewLifespanId(p)).liftVcs
       }
     }
+  }
 
   /** Server implementation of `VcsService`. */
   final class SecureVcsService(user: Set[Principal], vcsLog: VcsLog) extends VcsService {
