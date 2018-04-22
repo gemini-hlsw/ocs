@@ -66,11 +66,13 @@ case class TestPeer(odb: IDBDatabaseService, server: VcsServer, service: Princip
   def progTitle_=(t: String): Unit = set(_.setTitle(t))
 
   // Create a new program but don't add it to the database
-  def newProgram(id: SPProgramID): ISPProgram = {
+  def newProgramWithKey(key: SPNodeKey, id: SPProgramID): ISPProgram = {
     val fact = odb.getFactory
-    val key  = new SPNodeKey()
     fact.createProgram(key, id)
   }
+
+  def newProgram(id: SPProgramID): ISPProgram =
+    newProgramWithKey(new SPNodeKey(), id)
 
   def addProgram(p: ISPProgram): Unit =
     odb.put(p)
@@ -78,6 +80,9 @@ case class TestPeer(odb: IDBDatabaseService, server: VcsServer, service: Princip
   // Create and add a new program to the database
   def addNewProgram(id: SPProgramID): ISPProgram =
     newProgram(id) <| addProgram
+
+  def addNewProgramWithKey(key: SPNodeKey, id: SPProgramID): ISPProgram =
+    newProgramWithKey(key, id) <| addProgram
 
   def delete(child: SPNodeKey): Unit = {
     val p = descendant(child).getParent
