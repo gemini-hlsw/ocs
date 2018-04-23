@@ -110,6 +110,12 @@ object ViewerManager {
   /**
    * Finds an open viewer that isn't displaying any program node, if any.
    */
-  def findEmpty(): Option[SPViewer] =
+  def findEmpty: Option[SPViewer] =
     SPViewer.instances.asScala.find(_.getRoot == null)
+
+  /**
+   * Finds an open viewer that isn't displaying any program node, if any.
+   */
+  def findEmptyOrNull: SPViewer =
+    findEmpty.orNull
 }

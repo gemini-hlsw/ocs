@@ -1,6 +1,8 @@
 package jsky.app.ot.viewer.action;
 
 import edu.gemini.pot.sp.ISPProgram;
+import edu.gemini.shared.util.immutable.ImOption;
+
 import jsky.app.ot.viewer.OpenUtils;
 import jsky.app.ot.viewer.SPViewer;
 import jsky.app.ot.viewer.ViewerManager;
@@ -37,9 +39,12 @@ public class OpenAction extends AbstractViewerAction {
         // Messages are produced by above so just return
         if ((progs == null) || (progs.length == 0)) return;
 
-        // If one prog was selected, open it in the current viewer window, otherwise open each one
-        // in a separate viewer window
-        final SPViewer v = (progs.length > 1) ? null : viewer;
+        // Open them all in the current viewer window, if any.  If not find an
+        // empty viewer to recycle.  If none, make a viewer to house them all.
+        final SPViewer v =
+            ImOption.apply(viewer)
+                    .orElse(ImOption.apply(ViewerManager.findEmptyOrNull()))
+                    .getOrElse(() -> ViewerManager.newViewer());
 
         BusyWin.showBusy();
         for (final ISPProgram prog : progs) {
