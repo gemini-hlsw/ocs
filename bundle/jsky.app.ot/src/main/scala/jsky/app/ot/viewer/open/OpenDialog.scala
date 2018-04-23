@@ -4,6 +4,7 @@ import edu.gemini.pot.client.SPDB
 import edu.gemini.pot.sp.{ISPProgram, SPNodeKey}
 import edu.gemini.pot.spdb.IDBDatabaseService
 import edu.gemini.shared.gui.SizePreference
+import edu.gemini.shared.util.VersionComparison
 import edu.gemini.shared.util.VersionComparison.{Conflicting, Newer}
 import edu.gemini.shared.util.immutable.ApplyOp
 import edu.gemini.sp.vcs.reg.VcsRegistrar
@@ -42,7 +43,7 @@ object OpenDialog {
   lazy val Log = java.util.logging.Logger.getLogger(getClass.getName)
   def currentUser = OT.getKeyChain.subject.getPrincipals.asScala.toSet
 
-  def open(db: IDBDatabaseService, auth: KeyChain, vcs: VcsRegistrar, parent: UIElement): Option[ISPProgram] = {
+  def open(db: IDBDatabaseService, auth: KeyChain, vcs: VcsRegistrar, parent: UIElement): List[ISPProgram] = {
     val d = new OpenDialog(db, auth, vcs)
     try d.open(parent) finally d.dispose()
   }
@@ -87,7 +88,7 @@ class OpenDialog private(db: IDBDatabaseService, auth: KeyChain, vcs: VcsRegistr
   dialog =>
 
   // Entry point
-  def open(parent: UIElement): Option[ISPProgram] = {
+  def open(parent: UIElement): List[ISPProgram] = {
 
     // Register our title updater with the keychain, retaining a token to unregister when the
     // window is closed. We need to do this to allow the dialog to be garbage-collected.
@@ -110,7 +111,7 @@ class OpenDialog private(db: IDBDatabaseService, auth: KeyChain, vcs: VcsRegistr
     override def apply(t: Option[(Peer, Key)]): Unit = Contents.ProgTable.refresh(full = true)
   })
 
-  var selection: Option[ISPProgram] = None
+  var selection: List[ISPProgram] = Nil
   val filter = new DBProgramChooserFilter(DBProgramChooserFilter.Mode.localAndRemote)
 
   // Storage
@@ -157,10 +158,11 @@ class OpenDialog private(db: IDBDatabaseService, auth: KeyChain, vcs: VcsRegistr
     future {
 
       def updateEnabledStatus() {
-        val item = Contents.ProgTable.selectedProg
-        DeleteAction.enabled = item.isDefined
-        OpenAction.enabled = Contents.ProgTable.selectedItem.isDefined // item.isDefined
-        CheckoutAction.enabled = Contents.ProgTable.selectedRemote.isDefined
+        val tab = Contents.ProgTable
+
+        DeleteAction.enabled   = tab.selectedProgs.nonEmpty && tab.selectedRemotes.isEmpty
+        OpenAction.enabled     = tab.selectedItems.nonEmpty
+        CheckoutAction.enabled = tab.selectedProgs.isEmpty && tab.selectedRemotes.nonEmpty
       }
 
       Swing.onEDT {
@@ -181,11 +183,11 @@ class OpenDialog private(db: IDBDatabaseService, auth: KeyChain, vcs: VcsRegistr
     }
 
     lazy val OpenAction = Action("Open") {
-      Contents.ProgTable.selectedRemote.foreach { _ => CheckoutAction()}
-      Contents.ProgTable.selectedProg.foreach { p =>
-        selection = Some(p)
-        dialog.close()
-      }
+      println(s"*** Open: remotes = ${Contents.ProgTable.selectedRemotes.size}, progs = ${Contents.ProgTable.selectedProgs}")
+      if (Contents.ProgTable.selectedRemotes.nonEmpty) CheckoutAction()
+      println(s"    after checkout: remotes = ${Contents.ProgTable.selectedRemotes.size}, progs = ${Contents.ProgTable.selectedProgs}")
+      selection = Contents.ProgTable.selectedProgs
+      if (selection.nonEmpty) dialog.close()
     }
 
     lazy val CancelAction = Action("Cancel") {
@@ -193,6 +195,20 @@ class OpenDialog private(db: IDBDatabaseService, auth: KeyChain, vcs: VcsRegistr
     }
 
     lazy val DeleteAction = Action("Delete") {
+      val ps = Contents. ProgTable.selectedProgs
+
+      if (ps.nonEmpty) {
+        val msg     = s"Delete ${ps.size} programs?"
+        val confirm = Dialog.showConfirmation(dialog.Contents, msg.stripMargin.trim, "Confirm Delete", Dialog.Options.YesNo, Dialog.Message.Warning)
+
+        if (confirm == Dialog.Result.Ok) {
+          ps.foreach(db.remove)
+          Contents.ProgTable.refresh(full = false)
+          updateStorage()
+        }
+      }
+
+      /*
       Contents.ProgTable.selectedProg.foreach { p =>
 
         val (icon, msg) =
@@ -246,31 +262,53 @@ class OpenDialog private(db: IDBDatabaseService, auth: KeyChain, vcs: VcsRegistr
         }
 
       }
+      */
     }
 
     lazy val CheckoutAction = Action("Checkout") {
-      def success(loc: Peer)(p: ISPProgram): Unit = {
-        vcs.register(p.getProgramID, loc)
-        Contents.ProgTable.refresh(full = false)
-        updateStorage()
-      }
+      VcsOtClient.ref.foreach { client =>
 
-      def fail(info: DBProgramInfo, loc: Peer)(f: VcsFailure): Unit = {
-        val msg = VcsFailure.explain(f, info.programID, "checkout", Some(loc))
-        Dialog.showMessage(Contents, msg, "Error", Dialog.Message.Error)
-      }
+        // This seems kind of sketchy but I don't want to traverse here. One
+        // failure shouldn't stop the others.
+        val (failures, successes) =
+          Contents.ProgTable.selectedRemotes.map { case (info, peer) =>
+            client.checkout(info.programID, peer, new AtomicBoolean(false))
+              .unsafeRun
+              .map(p => (p.getProgramID, peer))
+              .leftMap(f => (info, peer, f))
+          }.partition(_.isLeft)
 
-      for {
-        (info, loc) <- Contents.ProgTable.selectedRemote
-        client      <- VcsOtClient.ref
-      } client.checkout(info.programID, loc, new AtomicBoolean(false)).unsafeRun.fold(fail(info,loc), success(loc))
+        // For all successes, if any, register the associatation of pid -> peer.
+        successes.flatMap(_.toOption.toList).foreach { case (pid, peer) =>
+          vcs.register(pid, peer)
+        }
+
+        // If there any successes, update the program table and storage meter.
+        if (successes.nonEmpty) {
+          Contents.ProgTable.refresh(full = false)
+          updateStorage()
+        }
+
+        // Explain the first n failures.  Take n + 1 though so we know if there
+        // were more so we can show "..." to indicate there were more.
+        val n = 5
+        failures.take(n+1).flatMap(_.swap.toOption.toList) match {
+          case Nil => // do nothing
+          case fs  =>
+            val msg = (fs.take(n).map { case (info, peer, failure) =>
+              VcsFailure.explain(failure, info.programID, "checkout", Some(peer))
+            } + (if (fs.size == n+1) "..." else "")).mkString("\n")
+
+            Dialog.showMessage(Contents, msg, "Error", Dialog.Message.Error)
+        }
+      }
     }
 
     def isRemote(p: ISPProgram): Boolean =
       Option(p.getProgramID).exists(vcs.allRegistrations.isDefinedAt)
 
-    def hasPendingChanges(p: ISPProgram): Option[Boolean] =
-      Contents.ProgTable.isModifiedLocally
+//    def hasPendingChanges(p: ISPProgram): Option[Boolean] =
+//      Contents.ProgTable.isModifiedLocally
   }
 
   // Top-level GUI container
@@ -366,19 +404,26 @@ class OpenDialog private(db: IDBDatabaseService, auth: KeyChain, vcs: VcsRegistr
       viewport.setPreferredSize(vSize)
       viewport.setBackground(table.getBackground)
 
+      private def selected[A](f: Int => Option[A]): List[A] =
+        table.selectedModelRows.flatMap(f(_).toList)
+
       // Convenience method to get selected things
-      def selectedItem = model.get(table.selectedModelRow)
+      def selectedItems: List[ProgTableModel.Elem] =
+        selected(model.get)
 
-      def selectedInfo = model.getInfo(table.selectedModelRow)
+      def selectedInfos: List[DBProgramInfo] =
+        selected(model.getInfo)
 
-      def selectedProg = model.getProg(table.selectedModelRow)
+      def selectedProgs: List[ISPProgram] =
+        selected(model.getProg)
 
-      def selectedRemote = model.getRemote(table.selectedModelRow)
+      def selectedRemotes: List[(DBProgramInfo, Peer)] =
+        selected(model.getRemote)
 
-      def isModifiedLocally = model.getStatus(table.selectedModelRow).map {
-        case Newer | Conflicting => true
-        case _                   => false
-      }
+//      def isModifiedLocally = model.getStatus(table.selectedModelRow).map {
+//        case Newer | Conflicting => true
+//        case _                   => false
+//      }
 
       // Update methods
       def refresh(full: Boolean): Unit =
@@ -393,7 +438,7 @@ class OpenDialog private(db: IDBDatabaseService, auth: KeyChain, vcs: VcsRegistr
 
       // Our table
       object table extends JTable(model) {
-        setSelectionMode(ListSelectionModel.SINGLE_SELECTION)
+        setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION)
         setCellSelectionEnabled(false)
         setRowSelectionAllowed(true)
         setShowGrid(false)
@@ -416,30 +461,26 @@ class OpenDialog private(db: IDBDatabaseService, auth: KeyChain, vcs: VcsRegistr
             }
           }
 
-        def selectedModelRow: Int = {
-          val r = getSelectedRow
-          if (r == -1) -1 else convertRowIndexToModel(r)
-        }
+        def selectedModelRows: List[Int] =
+          getSelectedRows.toList.map(convertRowIndexToModel)
 
         // Ok in this hunk we do our best to maintain the selection when the list
         // is updated. We store the last non-empty selection and try to reset it
         // when the list changes, and then we scroll to it.
-        private var sel: Option[SPNodeKey] = None
+        private var sel: List[SPNodeKey] = Nil
         override def valueChanged(lse: ListSelectionEvent): Unit = {
           super.valueChanged(lse)
-          model.get(selectedModelRow).map(_.fold(_.getNodeKey, _.nodeKey)).foreach {
-            n => sel = Some(n)
-          }
+          sel = selectedModelRows.flatMap(model.get(_).toList).map(_.fold(_.getNodeKey, _.nodeKey))
         }
         override def tableChanged(e: TableModelEvent) {
           val copy = sel
           super.tableChanged(e)
           if (copy != null) { // @&^#%&^$% initialization bug
-            copy.flatMap(model.indexOf).foreach { i =>
-              val tr = convertRowIndexToView(i)
-              getSelectionModel.addSelectionInterval(tr, tr)
-              scrollRectToVisible(getCellRect(tr, 0, true))
-            }
+            val sm = getSelectionModel
+            sm.clearSelection
+            val trs = copy.flatMap(model.indexOf(_).toList).map(convertRowIndexToView)
+            trs.foreach { tr => sm.addSelectionInterval(tr, tr) }
+            trs.headOption.foreach { tr => scrollRectToVisible(getCellRect(tr, 0, true)) }
           }
         }
         // End of selection-maintenance hunk

@@ -91,10 +91,10 @@ class ProgTableModel(filter: DBProgramChooserFilter, db: IDBDatabaseService, aut
   def getRowCount: Int =
     elems.get.length
 
-  def status(id:SPProgramID):Option[String] =
-    locals.get.find(_.getProgramID == id).flatMap(status)
+  def statusMessage(id:SPProgramID): Option[String] =
+    locals.get.find(_.getProgramID == id).flatMap(statusMessage)
 
-  def status(p: ISPProgram): Option[String] = for {
+  def statusMessage(p: ISPProgram): Option[String] = for {
     reg <- vcs
     _   <- reg.registration(p.getProgramID)
   } yield statuses.get.get(p.getNodeKey).map {
@@ -116,7 +116,7 @@ class ProgTableModel(filter: DBProgramChooserFilter, db: IDBDatabaseService, aut
         case 0 => p.programID
         case 1 => p.programName
         case 2 => Long.box(p.size)
-        case 3 => status(p.programID).orNull
+        case 3 => statusMessage(p.programID).orNull
       }
     }.orNull
 
