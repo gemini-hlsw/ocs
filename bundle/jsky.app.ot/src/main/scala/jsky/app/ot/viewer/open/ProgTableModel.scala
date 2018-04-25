@@ -82,6 +82,9 @@ class ProgTableModel(filter: DBProgramChooserFilter, db: IDBDatabaseService, aut
   def getStatus(i: Int): Option[VersionComparison] =
     get(i).flatMap(_.left.toOption).flatMap { p => statuses.get().get(p.getNodeKey) }
 
+  def getStatus(k: SPNodeKey): Option[VersionComparison] =
+    statuses.get().get(k)
+
   lazy val getColumnCount: Int =
     cols.length
 
@@ -195,7 +198,7 @@ class ProgTableModel(filter: DBProgramChooserFilter, db: IDBDatabaseService, aut
 
     // Refresh the program list from remote sites
     def refreshRemote(): Unit =
-      auth.peers.unsafeRun.fold(_ => Set(), identity).foreach(updateRemote)
+      selectedPeer.foreach(updateRemote)
 
     // Refresh VCS status for a single program
     def updateVCS(p: ISPProgram): Unit = {

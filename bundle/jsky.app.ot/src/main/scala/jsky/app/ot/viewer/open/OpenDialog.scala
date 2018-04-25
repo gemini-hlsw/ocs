@@ -8,6 +8,7 @@ import edu.gemini.shared.util.VersionComparison
 import edu.gemini.shared.util.VersionComparison.{Conflicting, Newer}
 import edu.gemini.shared.util.immutable.ApplyOp
 import edu.gemini.sp.vcs.reg.VcsRegistrar
+import edu.gemini.sp.vcs2.TryVcs
 import edu.gemini.sp.vcs2.VcsAction._
 import edu.gemini.sp.vcs2.VcsFailure
 import edu.gemini.spModel.core.{Peer, SPProgramID}
@@ -114,18 +115,24 @@ class OpenDialog private(db: IDBDatabaseService, auth: KeyChain, vcs: VcsRegistr
   var selection: List[ISPProgram] = Nil
   val filter = new DBProgramChooserFilter(DBProgramChooserFilter.Mode.localAndRemote)
 
+  val MaxM = 50
+  val MaxK = MaxM * 1000
+
+  def usedBytes: Long =
+    SPDB.get().getDBAdmin.getTotalStorage
+
+  def usedK: Int =
+    (usedBytes / 1000).round.toInt
+
   // Storage
   def updateStorage(): Unit = {
-    val maxM = 50
-    val maxK = maxM * 1000
-    val usedK = (SPDB.get().getDBAdmin.getTotalStorage / 1000).toInt // kbytes
     val usedM = usedK / 1000.0
-    val percent = usedK * 100 / maxK
+    val percent = usedK * 100 / MaxK
     Contents.Footer.storageProgressBar <| { b =>
-      b.min = 0
-      b.max = maxK // kilobytes
+      b.min   = 0
+      b.max   = MaxK // kilobytes
       b.value = usedK
-      b.peer.setString(f"$usedM%1.1fM of $maxM%dM used")
+      b.peer.setString(f"$usedM%1.1fM of $MaxM%dM used")
       b.peer.setStringPainted(true)
       b.foreground = (if (percent < 75) Color.GREEN else if (percent < 90) Color.YELLOW else Color.RED).darker()
     }
@@ -150,6 +157,9 @@ class OpenDialog private(db: IDBDatabaseService, auth: KeyChain, vcs: VcsRegistr
     case e: UIElementResized =>
       SizePreference.setDimension(getClass, Some(this.size))
   }
+
+  def isRemote(p: ISPProgram): Boolean =
+    Option(p.getProgramID).exists(vcs.allRegistrations.isDefinedAt)
 
   // Our actions
   object Actions {
@@ -183,9 +193,7 @@ class OpenDialog private(db: IDBDatabaseService, auth: KeyChain, vcs: VcsRegistr
     }
 
     lazy val OpenAction = Action("Open") {
-      println(s"*** Open: remotes = ${Contents.ProgTable.selectedRemotes.size}, progs = ${Contents.ProgTable.selectedProgs}")
       if (Contents.ProgTable.selectedRemotes.nonEmpty) CheckoutAction()
-      println(s"    after checkout: remotes = ${Contents.ProgTable.selectedRemotes.size}, progs = ${Contents.ProgTable.selectedProgs}")
       selection = Contents.ProgTable.selectedProgs
       if (selection.nonEmpty) dialog.close()
     }
@@ -195,10 +203,53 @@ class OpenDialog private(db: IDBDatabaseService, auth: KeyChain, vcs: VcsRegistr
     }
 
     lazy val DeleteAction = Action("Delete") {
-      val ps = Contents. ProgTable.selectedProgs
+      val ps = Contents.ProgTable.selectedProgs
+
+      def consLocalWarning(count: Int, all: Int, lst: List[String]): List[String] =
+        count match {
+          case 0 =>
+            lst
+          case 1 =>
+            s"""${if (all == 1) "This" else "One"} program exists only in your local database.  If you have not made an XML
+               |backup you will have no way to retrieve this program again.
+             """.stripMargin :: lst
+          case _ =>
+            s"""$count programs exist only in your local database. If you have not made XML
+               |backups you will have no way to retrieve these programs again.
+             """.stripMargin :: lst
+        }
+
+      def consRemoteWarning(count: Int, all: Int, lst: List[String]): List[String] =
+        count match {
+          case 0 =>
+            lst
+          case 1 =>
+            s"""${if (all == 1) "This" else "One"} program is also present in a remote database but contains changes
+                |which will be lost if the program is deleted.  Make sure that you have
+                |synchronized your version of the program if you want to keep those changes
+                |before deleting it.
+             """.stripMargin :: lst
+          case _ =>
+            s"""$count programs, while present in the remote database, have been modified locally.
+               |Any changes will be lost if the programs are deleted. Make sure that you have
+               |synchronized your copies if you want to keep those changes before deleting them.
+             """.stripMargin :: lst
+        }
 
       if (ps.nonEmpty) {
-        val msg     = s"Delete ${ps.size} programs?"
+        val all           = ps.size
+        val localOnly     = ps.count(p => !isRemote(p))
+        val updatedRemote = ps.count(Contents.ProgTable.isModifiedLocally)
+        val icon          = if (localOnly + updatedRemote > 0) Dialog.Message.Warning
+                            else Dialog.Message.Question
+
+        val msg =
+          consLocalWarning(localOnly, all,
+            consRemoteWarning(updatedRemote, all,
+              List(s"Delete ${if (all == 1) "this program" else s"$all programs"} from your local database?")
+            )
+          ).mkString("\n")
+
         val confirm = Dialog.showConfirmation(dialog.Contents, msg.stripMargin.trim, "Confirm Delete", Dialog.Options.YesNo, Dialog.Message.Warning)
 
         if (confirm == Dialog.Result.Ok) {
@@ -207,108 +258,75 @@ class OpenDialog private(db: IDBDatabaseService, auth: KeyChain, vcs: VcsRegistr
           updateStorage()
         }
       }
-
-      /*
-      Contents.ProgTable.selectedProg.foreach { p =>
-
-        val (icon, msg) =
-          if (isRemote(p))
-            hasPendingChanges(p).map { updated =>
-              if (updated)
-                (Dialog.Message.Warning,
-                  """
-                    |This program is also present in a remote database. You can later re-fetch
-                    |if you need to but your copy contains changes which will be lost if the
-                    |program is deleted.  Make sure that you have synchronized your version of
-                    |the program if you want to to keep those changes before deleting it.
-                    |
-                    |Continue?
-                  """)
-              else
-                (Dialog.Message.Question,
-                  """
-                    |This program is also present in a remote database. The local version
-                    |may be deleted to save space and you can re-fetch if you need to.
-                    |
-                    |Continue?
-                  """)
-            }.getOrElse((Dialog.Message.Warning,
-              """
-                |This program is also present in a remote database but may contain changes
-                |that have not been stored.  If so these changes will be lost when the
-                |program is deleted.  Make sure that you have synchronized your version of
-                |the program if you want to keep any changes before deleting it.
-                |
-                |Continue?
-              """.stripMargin))
-          else
-            (Dialog.Message.Warning, """
-              |This program is present only in your local database. If you have not made
-              |an XML export you will have no way to retrieve this program again.
-              |
-              |This operation cannot be undone. Continue?
-            """)
-
-        val confirm = Dialog.showConfirmation(dialog.Contents, msg.stripMargin.trim, "Confirm Delete", Dialog.Options.YesNo, icon)
-
-        if (confirm == Dialog.Result.Ok) {
-          p match {
-            case o: ISPProgram =>
-//              ViewerManager.close(o)
-              db.remove(o)
-          }
-          Contents.ProgTable.refresh(full = false)
-          updateStorage()
-        }
-
-      }
-      */
     }
 
     lazy val CheckoutAction = Action("Checkout") {
-      VcsOtClient.ref.foreach { client =>
 
-        // This seems kind of sketchy but I don't want to traverse here. One
-        // failure shouldn't stop the others.
-        val (failures, successes) =
-          Contents.ProgTable.selectedRemotes.map { case (info, peer) =>
-            client.checkout(info.programID, peer, new AtomicBoolean(false))
-              .unsafeRun
-              .map(p => (p.getProgramID, peer))
-              .leftMap(f => (info, peer, f))
-          }.partition(_.isLeft)
+      type Failure = (DBProgramInfo, Peer, VcsFailure)
+      type Success = (SPProgramID, Peer)
 
+      def handleSuccess(ss: List[Success]): Unit = {
         // For all successes, if any, register the associatation of pid -> peer.
-        successes.flatMap(_.toOption.toList).foreach { case (pid, peer) =>
-          vcs.register(pid, peer)
-        }
+        ss.foreach { case (pid, peer) => vcs.register(pid, peer) }
 
         // If there any successes, update the program table and storage meter.
-        if (successes.nonEmpty) {
+        if (ss.nonEmpty) {
           Contents.ProgTable.refresh(full = false)
           updateStorage()
         }
+      }
 
-        // Explain the first n failures.  Take n + 1 though so we know if there
-        // were more so we can show "..." to indicate there were more.
+      def handleFailure(fs: List[Failure]): Unit = {
+        // Explain the first n failures.  Show "..." if there are more than n
+        // failures.
         val n = 5
-        failures.take(n+1).flatMap(_.swap.toOption.toList) match {
-          case Nil => // do nothing
-          case fs  =>
-            val msg = (fs.take(n).map { case (info, peer, failure) =>
-              VcsFailure.explain(failure, info.programID, "checkout", Some(peer))
-            } + (if (fs.size == n+1) "..." else "")).mkString("\n")
+        if (fs.nonEmpty) {
+          val first10 = fs.take(n).map { case (info, peer, failure) =>
+            VcsFailure.explain(failure, info.programID, "checkout", Some(peer))
+          }
 
-            Dialog.showMessage(Contents, msg, "Error", Dialog.Message.Error)
+          val msg = (if (fs.drop(n).nonEmpty) first10 :+ "..." else first10).mkString("\n")
+
+          Dialog.showMessage(Contents, msg, "Error", Dialog.Message.Error)
         }
+      }
+
+      def doCheckout(client: VcsOtClient, remotes: List[(DBProgramInfo, Peer)]): Unit = {
+        val checkoutResult: Throwable \/ List[Failure \/ Success] =
+          remotes.traverseU { case (info, peer) =>
+            client.checkout(info.programID, peer, new AtomicBoolean(false))
+                  .run
+                  .map(_.bimap((info, peer, _), p => (p.getProgramID, peer)))
+          }.unsafePerformSyncAttempt
+
+        checkoutResult match {
+          case -\/(_)   =>
+            val msg = "There was an error checking out programs from the remote database."
+            Dialog.showMessage(Contents, msg, "Error", Dialog.Message.Error)
+
+          case \/-(lst) =>
+            val (fs, ss) = lst.separate
+            handleSuccess(ss)
+            handleFailure(fs)
+        }
+      }
+
+      VcsOtClient.ref.foreach { client =>
+
+        val remotes = Contents.ProgTable.selectedRemotes
+        val sumBytes = remotes.map(_._1.size).sum
+
+        if (sumBytes + usedBytes >= MaxK * 1000) {
+          val msg =
+            s"""Opening ${if (remotes == 1) "this program" else "these programs"} would exceed the storage limit.  Please delete
+               |some previously obtained programs to make space and try again.
+             """.stripMargin
+          Dialog.showMessage(Contents, msg, "Warning", Dialog.Message.Warning)
+        } else
+          doCheckout(client, remotes)
       }
     }
 
-    def isRemote(p: ISPProgram): Boolean =
-      Option(p.getProgramID).exists(vcs.allRegistrations.isDefinedAt)
-
-//    def hasPendingChanges(p: ISPProgram): Option[Boolean] =
-//      Contents.ProgTable.isModifiedLocally
   }
 
   // Top-level GUI container
@@ -420,10 +438,9 @@ class OpenDialog private(db: IDBDatabaseService, auth: KeyChain, vcs: VcsRegistr
       def selectedRemotes: List[(DBProgramInfo, Peer)] =
         selected(model.getRemote)
 
-//      def isModifiedLocally = model.getStatus(table.selectedModelRow).map {
-//        case Newer | Conflicting => true
-//        case _                   => false
-//      }
+      def isModifiedLocally(p: ISPProgram): Boolean =
+        isRemote(p) &&
+          model.getStatus(p.getProgramKey).forall(s => s === Newer || s === Conflicting)
 
       // Update methods
       def refresh(full: Boolean): Unit =
