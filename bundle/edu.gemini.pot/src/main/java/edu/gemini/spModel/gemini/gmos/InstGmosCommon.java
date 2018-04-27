@@ -107,7 +107,6 @@ public abstract class InstGmosCommon<
 
     public static final PropertyDescriptor ADC_PROP;
     public static final PropertyDescriptor AMP_GAIN_SETTING_PROP;
-//    public static final PropertyDescriptor AMP_GAIN_READ_COMBO_PROP;
 
     public static final PropertyDescriptor BUILTIN_ROI_PROP;
     public static final PropertyDescriptor CUSTOM_ROI_PROP;
@@ -132,6 +131,10 @@ public abstract class InstGmosCommon<
     public static final PropertyDescriptor SHUFFLE_OFFSET_PROP;
     public static final PropertyDescriptor NUM_NS_CYCLES_PROP;
     public static final PropertyDescriptor DETECTOR_ROWS_PROP;
+
+    // This is a derived property whose value is equal to the number of n&s
+    // offset positions.
+    public static final String             NS_STEP_COUNT_PROP_NAME = "nsStepCount";
 
     public static final PropertyDescriptor IS_MOS_PREIMAGING_PROP;
 
@@ -269,18 +272,6 @@ public abstract class InstGmosCommon<
         POS_ANGLE_PROP = initProp("posAngle", query_no, iter_no);
         CUSTOM_SLIT_WIDTH = initProp("customSlitWidth", query_yes, iter_no);
         POS_ANGLE_CONSTRAINT_PROP = initProp("posAngleConstraint", query_no, iter_no);
-
-        /*
-        try {
-            AMP_GAIN_READ_COMBO_PROP = new PropertyDescriptor("gainReadCombo", InstGmosCommon.class);
-            PropertySupport.setQueryable(AMP_GAIN_READ_COMBO_PROP,false);
-            PropertySupport.setIterable(AMP_GAIN_READ_COMBO_PROP,true);
-            AMP_GAIN_READ_COMBO_PROP.setDisplayName("CCD Readout");
-            PRIVATE_PROP_MAP.put(AMP_GAIN_READ_COMBO_PROP.getName(), AMP_GAIN_READ_COMBO_PROP);
-        } catch (IntrospectionException ex) {
-            throw new RuntimeException(ex);
-        }
-        */
     }
 
 
@@ -1645,9 +1636,14 @@ public abstract class InstGmosCommon<
 
         sc.putParameter(DefaultParameter.getInstance(DTAX_OFFSET_PROP.getName(), getDtaXOffset()));
 
+        sc.putParameter(DefaultParameter.getInstance(USE_NS_PROP, useNS()));
+
         if (useNS()) {
             sc.putParameter(DefaultParameter.getInstance(USE_ELECTRONIC_OFFSETTING_PROP.getName(),
                     isUseElectronicOffsetting()));
+
+            sc.putParameter(DefaultParameter.getInstance(NS_STEP_COUNT_PROP_NAME,
+                    getPosList().size()));
 
             sc.putParameter(DefaultParameter.getInstance(NUM_NS_CYCLES_PROP.getName(),
                     getNsNumCycles()));
@@ -1661,8 +1657,6 @@ public abstract class InstGmosCommon<
 
         sc.putParameter(DefaultParameter.getInstance(DETECTOR_MANUFACTURER_PROP_NAME,
                 getDetectorManufacturer()));
-
-//        sc.putParameter(DefaultParameter.getInstance(AMP_GAIN_READ_COMBO_PROP.getName(), getGainReadCombo()));
 
         return sc;
     }
@@ -1911,4 +1905,5 @@ public abstract class InstGmosCommon<
     public ScienceAreaGeometry getVignettableScienceArea() {
         return GmosScienceAreaGeometry$.MODULE$;
     }
+
 }
