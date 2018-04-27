@@ -186,11 +186,11 @@ public final class Schedule extends BaseMutableBean implements PioSerializable, 
         }
 
         // ok, now the data should be up to date and ready to be processed
+        this.ictd = ImOption.apply(params.getParamSet(PROP_ICTD)).map(p -> new Ictd(p));
         this.blocks = getBlockUnion(params);
         this.variants = new VariantList(this, params.getParamSet(PROP_VARIANTS));
         this.extraSemesters = getExtraSemesters(params);
         this.comment = Pio.getValue(params, PROP_COMMENT);
-        this.ictd = ImOption.apply(params.getParamSet(PROP_ICTD)).map(p -> new Ictd(p));
         init(false, ImOption.empty());
     }
 
