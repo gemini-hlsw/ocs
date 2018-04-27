@@ -4,9 +4,11 @@ import edu.gemini.pot.client.SPDB
 import edu.gemini.pot.sp.{ISPProgram, SPNodeKey}
 import edu.gemini.pot.spdb.IDBDatabaseService
 import edu.gemini.shared.gui.SizePreference
+import edu.gemini.shared.util.VersionComparison
 import edu.gemini.shared.util.VersionComparison.{Conflicting, Newer}
 import edu.gemini.shared.util.immutable.ApplyOp
 import edu.gemini.sp.vcs.reg.VcsRegistrar
+import edu.gemini.sp.vcs2.TryVcs
 import edu.gemini.sp.vcs2.VcsAction._
 import edu.gemini.sp.vcs2.VcsFailure
 import edu.gemini.spModel.core.{Peer, SPProgramID}
@@ -42,7 +44,7 @@ object OpenDialog {
   lazy val Log = java.util.logging.Logger.getLogger(getClass.getName)
   def currentUser = OT.getKeyChain.subject.getPrincipals.asScala.toSet
 
-  def open(db: IDBDatabaseService, auth: KeyChain, vcs: VcsRegistrar, parent: UIElement): Option[ISPProgram] = {
+  def open(db: IDBDatabaseService, auth: KeyChain, vcs: VcsRegistrar, parent: UIElement): List[ISPProgram] = {
     val d = new OpenDialog(db, auth, vcs)
     try d.open(parent) finally d.dispose()
   }
@@ -87,7 +89,7 @@ class OpenDialog private(db: IDBDatabaseService, auth: KeyChain, vcs: VcsRegistr
   dialog =>
 
   // Entry point
-  def open(parent: UIElement): Option[ISPProgram] = {
+  def open(parent: UIElement): List[ISPProgram] = {
 
     // Register our title updater with the keychain, retaining a token to unregister when the
     // window is closed. We need to do this to allow the dialog to be garbage-collected.
@@ -110,21 +112,27 @@ class OpenDialog private(db: IDBDatabaseService, auth: KeyChain, vcs: VcsRegistr
     override def apply(t: Option[(Peer, Key)]): Unit = Contents.ProgTable.refresh(full = true)
   })
 
-  var selection: Option[ISPProgram] = None
+  var selection: List[ISPProgram] = Nil
   val filter = new DBProgramChooserFilter(DBProgramChooserFilter.Mode.localAndRemote)
+
+  val MaxM = 50
+  val MaxK = MaxM * 1000
+
+  def usedBytes: Long =
+    SPDB.get().getDBAdmin.getTotalStorage
+
+  def usedK: Int =
+    (usedBytes / 1000).round.toInt
 
   // Storage
   def updateStorage(): Unit = {
-    val maxM = 50
-    val maxK = maxM * 1000
-    val usedK = (SPDB.get().getDBAdmin.getTotalStorage / 1000).toInt // kbytes
     val usedM = usedK / 1000.0
-    val percent = usedK * 100 / maxK
+    val percent = usedK * 100 / MaxK
     Contents.Footer.storageProgressBar <| { b =>
-      b.min = 0
-      b.max = maxK // kilobytes
+      b.min   = 0
+      b.max   = MaxK // kilobytes
       b.value = usedK
-      b.peer.setString(f"$usedM%1.1fM of $maxM%dM used")
+      b.peer.setString(f"$usedM%1.1fM of $MaxM%dM used")
       b.peer.setStringPainted(true)
       b.foreground = (if (percent < 75) Color.GREEN else if (percent < 90) Color.YELLOW else Color.RED).darker()
     }
@@ -150,6 +158,9 @@ class OpenDialog private(db: IDBDatabaseService, auth: KeyChain, vcs: VcsRegistr
       SizePreference.setDimension(getClass, Some(this.size))
   }
 
+  def isRemote(p: ISPProgram): Boolean =
+    Option(p.getProgramID).exists(vcs.allRegistrations.isDefinedAt)
+
   // Our actions
   object Actions {
 
@@ -157,10 +168,11 @@ class OpenDialog private(db: IDBDatabaseService, auth: KeyChain, vcs: VcsRegistr
     future {
 
       def updateEnabledStatus() {
-        val item = Contents.ProgTable.selectedProg
-        DeleteAction.enabled = item.isDefined
-        OpenAction.enabled = Contents.ProgTable.selectedItem.isDefined // item.isDefined
-        CheckoutAction.enabled = Contents.ProgTable.selectedRemote.isDefined
+        val tab = Contents.ProgTable
+
+        DeleteAction.enabled   = tab.selectedProgs.nonEmpty
+        OpenAction.enabled     = tab.selectedItems.nonEmpty
+        CheckoutAction.enabled = tab.selectedRemotes.nonEmpty
       }
 
       Swing.onEDT {
@@ -181,11 +193,9 @@ class OpenDialog private(db: IDBDatabaseService, auth: KeyChain, vcs: VcsRegistr
     }
 
     lazy val OpenAction = Action("Open") {
-      Contents.ProgTable.selectedRemote.foreach { _ => CheckoutAction()}
-      Contents.ProgTable.selectedProg.foreach { p =>
-        selection = Some(p)
-        dialog.close()
-      }
+      if (Contents.ProgTable.selectedRemotes.nonEmpty) CheckoutAction()
+      selection = Contents.ProgTable.selectedProgs
+      if (selection.nonEmpty) dialog.close()
     }
 
     lazy val CancelAction = Action("Cancel") {
@@ -193,84 +203,131 @@ class OpenDialog private(db: IDBDatabaseService, auth: KeyChain, vcs: VcsRegistr
     }
 
     lazy val DeleteAction = Action("Delete") {
-      Contents.ProgTable.selectedProg.foreach { p =>
+      val ps    = Contents.ProgTable.selectedProgs
+      val total = ps.size
 
-        val (icon, msg) =
-          if (isRemote(p))
-            hasPendingChanges(p).map { updated =>
-              if (updated)
-                (Dialog.Message.Warning,
-                  """
-                    |This program is also present in a remote database. You can later re-fetch
-                    |if you need to but your copy contains changes which will be lost if the
-                    |program is deleted.  Make sure that you have synchronized your version of
-                    |the program if you want to to keep those changes before deleting it.
-                    |
-                    |Continue?
-                  """)
-              else
-                (Dialog.Message.Question,
-                  """
-                    |This program is also present in a remote database. The local version
-                    |may be deleted to save space and you can re-fetch if you need to.
-                    |
-                    |Continue?
-                  """)
-            }.getOrElse((Dialog.Message.Warning,
-              """
-                |This program is also present in a remote database but may contain changes
-                |that have not been stored.  If so these changes will be lost when the
-                |program is deleted.  Make sure that you have synchronized your version of
-                |the program if you want to keep any changes before deleting it.
-                |
-                |Continue?
-              """.stripMargin))
-          else
-            (Dialog.Message.Warning, """
-              |This program is present only in your local database. If you have not made
-              |an XML export you will have no way to retrieve this program again.
-              |
-              |This operation cannot be undone. Continue?
-            """)
+      def localWarning(count: Int): String =
+        count match {
+          case 0 =>
+            ""
 
-        val confirm = Dialog.showConfirmation(dialog.Contents, msg.stripMargin.trim, "Confirm Delete", Dialog.Options.YesNo, icon)
+          case 1 =>
+            s"""${if (total === 1) "This" else "One"} program exists only in your local database.  If you have not made an XML
+               |backup you will have no way to retrieve this program again.
+               |
+               |""".stripMargin
+
+          case _ =>
+            s"""$count programs exist only in your local database. If you have not made XML
+               |backups you will have no way to retrieve these programs again.
+               |
+               |""".stripMargin
+        }
+
+      def remoteWarning(count: Int): String =
+        count match {
+          case 0 =>
+            ""
+
+          case 1 =>
+            s"""${if (total === 1) "This" else "One"} program is also present in a remote database but contains changes
+               |which will be lost if the program is deleted.  Make sure that you have
+               |synchronized your version of the program if you want to keep those changes
+               |before deleting it.
+               |
+               |""".stripMargin
+
+          case _ =>
+            s"""$count programs, while present in the remote database, have been modified locally.
+               |Any changes will be lost if the programs are deleted. Make sure that you have
+               |synchronized your copies if you want to keep those changes before deleting them.
+               |
+               |""".stripMargin
+        }
+
+      if (total > 0) {
+        val localOnly     = ps.count(p => !isRemote(p))
+        val updatedRemote = ps.count(Contents.ProgTable.hasPendingChanges)
+        val icon          = if (localOnly + updatedRemote > 0) Dialog.Message.Warning
+                            else Dialog.Message.Question
+
+        val msg = localWarning(localOnly) ++ remoteWarning(updatedRemote) ++
+                    s"Delete ${if (total === 1) "this program" else s"$total programs"} from your local database?"
+
+        val confirm = Dialog.showConfirmation(dialog.Contents, msg, "Confirm Delete", Dialog.Options.YesNo, Dialog.Message.Warning)
 
         if (confirm == Dialog.Result.Ok) {
-          p match {
-            case o: ISPProgram =>
-//              ViewerManager.close(o)
-              db.remove(o)
-          }
+          ps.foreach(db.remove)
           Contents.ProgTable.refresh(full = false)
           updateStorage()
         }
-
       }
     }
 
     lazy val CheckoutAction = Action("Checkout") {
-      def success(loc: Peer)(p: ISPProgram): Unit = {
-        vcs.register(p.getProgramID, loc)
-        Contents.ProgTable.refresh(full = false)
-        updateStorage()
+
+      // For all successes, if any, register the associatation of pid -> peer
+      // and update the program table and storage meter.
+      def handleSuccess(ss: List[(SPProgramID, Peer)]): Unit =
+        if (ss.nonEmpty) {
+          ss.foreach { case (pid, peer) => vcs.register(pid, peer) }
+
+          Contents.ProgTable.refresh(full = false)
+          updateStorage()
+        }
+
+      // Explain the first n failures.  Show "..." if there are more than n failures.
+      def handleFailure(fs: List[String]): Unit =
+        if (fs.nonEmpty) {
+          val N = 5
+          val firstN = fs.take(N)
+          val msg    = (if (fs.drop(N).nonEmpty) firstN :+ "..." else firstN).mkString("\n")
+
+          Dialog.showMessage(Contents, msg, "Error", Dialog.Message.Error)
+        }
+
+      def explainFailure(i: DBProgramInfo, p: Peer, f: VcsFailure): String = {
+        val msg = VcsFailure.explain(f, i.programID, "checkout", Some(p))
+        s"${i.programID.stringValue}: $msg"
       }
 
-      def fail(info: DBProgramInfo, loc: Peer)(f: VcsFailure): Unit = {
-        val msg = VcsFailure.explain(f, info.programID, "checkout", Some(loc))
-        Dialog.showMessage(Contents, msg, "Error", Dialog.Message.Error)
+      def doCheckout(client: VcsOtClient, remotes: List[(DBProgramInfo, Peer)]): Unit = {
+
+        val checkoutResult: Throwable \/ List[String \/ (SPProgramID, Peer)] =
+          remotes.traverseU { case (info, peer) =>
+            client.checkout(info.programID, peer, new AtomicBoolean(false)).run
+                  .map(_.bimap(explainFailure(info, peer, _), p => (p.getProgramID, peer)))
+          }.unsafePerformSyncAttempt
+
+        checkoutResult match {
+          case -\/(_)   =>
+            val msg = "There was an error checking out programs from the remote database."
+            Dialog.showMessage(Contents, msg, "Error", Dialog.Message.Error)
+
+          case \/-(lst) =>
+            val (fs, ss) = lst.separate
+            handleSuccess(ss)
+            handleFailure(fs)
+        }
       }
 
-      for {
-        (info, loc) <- Contents.ProgTable.selectedRemote
-        client      <- VcsOtClient.ref
-      } client.checkout(info.programID, loc, new AtomicBoolean(false)).unsafeRun.fold(fail(info,loc), success(loc))
+      VcsOtClient.ref.foreach { client =>
+
+        val remotes = Contents.ProgTable.selectedRemotes
+        val sumBytes = remotes.map(_._1.size).sum
+
+        if (sumBytes + usedBytes < MaxK * 1000)
+          doCheckout(client, remotes)
+        else {
+          val msg =
+            s"""Adding ${if (remotes.size === 1) "this program" else "these programs"} would exceed the storage limit.  Please delete
+               |some previously obtained programs to make space and try again.
+             """.stripMargin
+          Dialog.showMessage(Contents, msg, "Warning", Dialog.Message.Warning)
+        }
+      }
     }
 
-    def isRemote(p: ISPProgram): Boolean =
-      Option(p.getProgramID).exists(vcs.allRegistrations.isDefinedAt)
-
-    def hasPendingChanges(p: ISPProgram): Option[Boolean] =
-      Contents.ProgTable.isModifiedLocally
   }
 
   // Top-level GUI container
@@ -366,19 +423,25 @@ class OpenDialog private(db: IDBDatabaseService, auth: KeyChain, vcs: VcsRegistr
       viewport.setPreferredSize(vSize)
       viewport.setBackground(table.getBackground)
 
+      private def selected[A](f: Int => Option[A]): List[A] =
+        table.selectedModelRows.flatMap(f(_).toList)
+
       // Convenience method to get selected things
-      def selectedItem = model.get(table.selectedModelRow)
+      def selectedItems: List[ProgTableModel.Elem] =
+        selected(model.get)
 
-      def selectedInfo = model.getInfo(table.selectedModelRow)
+      def selectedInfos: List[DBProgramInfo] =
+        selected(model.getInfo)
 
-      def selectedProg = model.getProg(table.selectedModelRow)
+      def selectedProgs: List[ISPProgram] =
+        selected(model.getProg)
 
-      def selectedRemote = model.getRemote(table.selectedModelRow)
+      def selectedRemotes: List[(DBProgramInfo, Peer)] =
+        selected(model.getRemote)
 
-      def isModifiedLocally = model.getStatus(table.selectedModelRow).map {
-        case Newer | Conflicting => true
-        case _                   => false
-      }
+      def hasPendingChanges(p: ISPProgram): Boolean =
+        isRemote(p) &&
+          model.getStatus(p.getProgramKey).forall(s => s === Newer || s === Conflicting)
 
       // Update methods
       def refresh(full: Boolean): Unit =
@@ -393,7 +456,7 @@ class OpenDialog private(db: IDBDatabaseService, auth: KeyChain, vcs: VcsRegistr
 
       // Our table
       object table extends JTable(model) {
-        setSelectionMode(ListSelectionModel.SINGLE_SELECTION)
+        setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION)
         setCellSelectionEnabled(false)
         setRowSelectionAllowed(true)
         setShowGrid(false)
@@ -416,30 +479,26 @@ class OpenDialog private(db: IDBDatabaseService, auth: KeyChain, vcs: VcsRegistr
             }
           }
 
-        def selectedModelRow: Int = {
-          val r = getSelectedRow
-          if (r == -1) -1 else convertRowIndexToModel(r)
-        }
+        def selectedModelRows: List[Int] =
+          getSelectedRows.toList.map(convertRowIndexToModel)
 
         // Ok in this hunk we do our best to maintain the selection when the list
         // is updated. We store the last non-empty selection and try to reset it
         // when the list changes, and then we scroll to it.
-        private var sel: Option[SPNodeKey] = None
+        private var sel: List[SPNodeKey] = Nil
         override def valueChanged(lse: ListSelectionEvent): Unit = {
           super.valueChanged(lse)
-          model.get(selectedModelRow).map(_.fold(_.getNodeKey, _.nodeKey)).foreach {
-            n => sel = Some(n)
-          }
+          sel = selectedModelRows.flatMap(model.get(_).toList).map(_.fold(_.getNodeKey, _.nodeKey))
         }
         override def tableChanged(e: TableModelEvent) {
           val copy = sel
           super.tableChanged(e)
           if (copy != null) { // @&^#%&^$% initialization bug
-            copy.flatMap(model.indexOf).foreach { i =>
-              val tr = convertRowIndexToView(i)
-              getSelectionModel.addSelectionInterval(tr, tr)
-              scrollRectToVisible(getCellRect(tr, 0, true))
-            }
+            val sm = getSelectionModel
+            sm.clearSelection
+            val trs = copy.flatMap(model.indexOf(_).toList).map(convertRowIndexToView)
+            trs.foreach { tr => sm.addSelectionInterval(tr, tr) }
+            trs.headOption.foreach { tr => scrollRectToVisible(getCellRect(tr, 0, true)) }
           }
         }
         // End of selection-maintenance hunk

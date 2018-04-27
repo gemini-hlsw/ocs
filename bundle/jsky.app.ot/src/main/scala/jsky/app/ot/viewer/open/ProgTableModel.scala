@@ -82,6 +82,9 @@ class ProgTableModel(filter: DBProgramChooserFilter, db: IDBDatabaseService, aut
   def getStatus(i: Int): Option[VersionComparison] =
     get(i).flatMap(_.left.toOption).flatMap { p => statuses.get().get(p.getNodeKey) }
 
+  def getStatus(k: SPNodeKey): Option[VersionComparison] =
+    statuses.get().get(k)
+
   lazy val getColumnCount: Int =
     cols.length
 
@@ -91,10 +94,10 @@ class ProgTableModel(filter: DBProgramChooserFilter, db: IDBDatabaseService, aut
   def getRowCount: Int =
     elems.get.length
 
-  def status(id:SPProgramID):Option[String] =
-    locals.get.find(_.getProgramID == id).flatMap(status)
+  def statusMessage(id:SPProgramID): Option[String] =
+    locals.get.find(_.getProgramID == id).flatMap(statusMessage)
 
-  def status(p: ISPProgram): Option[String] = for {
+  def statusMessage(p: ISPProgram): Option[String] = for {
     reg <- vcs
     _   <- reg.registration(p.getProgramID)
   } yield statuses.get.get(p.getNodeKey).map {
@@ -116,7 +119,7 @@ class ProgTableModel(filter: DBProgramChooserFilter, db: IDBDatabaseService, aut
         case 0 => p.programID
         case 1 => p.programName
         case 2 => Long.box(p.size)
-        case 3 => status(p.programID).orNull
+        case 3 => statusMessage(p.programID).orNull
       }
     }.orNull
 
@@ -195,7 +198,7 @@ class ProgTableModel(filter: DBProgramChooserFilter, db: IDBDatabaseService, aut
 
     // Refresh the program list from remote sites
     def refreshRemote(): Unit =
-      auth.peers.unsafeRun.fold(_ => Set(), identity).foreach(updateRemote)
+      selectedPeer.foreach(updateRemote)
 
     // Refresh VCS status for a single program
     def updateVCS(p: ISPProgram): Unit = {
