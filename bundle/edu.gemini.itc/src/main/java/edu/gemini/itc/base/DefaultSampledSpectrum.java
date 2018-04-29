@@ -75,10 +75,10 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
         xStart /= 1+z;
         xEnd /= 1+z;
 
-        int numIntervals = (int) ((xEnd - xStart) / xInterval);
+        int numIntervals = (int) Math.round((xEnd - xStart) / xInterval + 2); // +2 to allow for truncation
         double[] data = new double[numIntervals + 1];
         for (int i = 0; i <= numIntervals; ++i) {
-           data[i] = sp.getY(i * xInterval + xStart);
+           data[i] = sp.getY(xStart + i * xInterval);
         }
         reset(data, xStart, xInterval);
     }
