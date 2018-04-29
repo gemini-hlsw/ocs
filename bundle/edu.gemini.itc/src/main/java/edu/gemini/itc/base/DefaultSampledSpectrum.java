@@ -24,8 +24,7 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
 
     //Values of start and end points
     private double _xStart, _xEnd;
-
-    private double _xInterval;     //Size of each particluar element
+    private double _xInterval;     //Size of each particular element
 
     /**
      * Construct a DefaultSampledSpectrum.  End x value is determined by
@@ -41,22 +40,45 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
      * ArraySpectrum at specified interval.
      *
      * @param sp        Spectrum to sample
-     * @param xInterval Sampling interval
+     * @param xInterval Sampling interval (nm)
      */
     public DefaultSampledSpectrum(ArraySpectrum sp, double xInterval) {
         double xStart = sp.getStart();
         double xEnd = sp.getEnd();
         int numIntervals = (int) ((xEnd - xStart) / xInterval);
-
-        // If the range of the user-supplied SED is too large for the sampling we run out of memory and die without telling the user why.
-        // This will preemptively exit if the array size is larger than (a fairly arbitrary) 40 million (currently dying at 43M).
-        if ( numIntervals > 40000000 ) {
-            throw new IllegalArgumentException(String.format("range is too large (%.1f - %.1f nm).", xStart, xEnd));
-        }
-
         double[] data = new double[numIntervals + 1];
         for (int i = 0; i <= numIntervals; ++i) {
             data[i] = sp.getY(i * xInterval + xStart);
+        }
+        reset(data, xStart, xInterval);
+    }
+
+    /**
+     * Construct a DefaultSampledSpectrum by sampling the given ArraySpectrum
+     * over the specified wavelength range at the specified interval.
+     *
+     * @param sp        Spectrum to resample
+     * @param xStart    Starting wavelength of instrument configuration (nm)
+     * @param xEnd      Ending wavelength of instrument configuration (nm)
+     * @param xInterval Sampling interval (nm)
+     * @param z         Redshift of target
+     */
+    public DefaultSampledSpectrum(ArraySpectrum sp, double xStart, double xEnd, double xInterval, double z) {
+
+        if ( (1+z) * sp.getStart() > xStart || (1+z) * sp.getEnd() < xEnd ) {
+            throw new IllegalArgumentException(
+                    String.format("Redshifted SED (%.1f - %.1f nm) does not cover range of instrument configuration (%.1f - %.1f nm).",
+                            (1+z)*sp.getStart(), (1+z)*sp.getEnd(), xStart, xEnd));
+        }
+
+        // The SED will be redshifted later so resample over range / (1+z):
+        xStart /= 1+z;
+        xEnd /= 1+z;
+
+        int numIntervals = (int) ((xEnd - xStart) / xInterval);
+        double[] data = new double[numIntervals + 1];
+        for (int i = 0; i <= numIntervals; ++i) {
+           data[i] = sp.getY(i * xInterval + xStart);
         }
         reset(data, xStart, xInterval);
     }
