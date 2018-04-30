@@ -100,8 +100,8 @@ class VcsServer(odb: IDBDatabaseService) { vs =>
     }
   }
 
-  /** Replaces the program in the database whose key and id match program the
-    * given program with program p.
+  /** Replaces the program in the database whose key and id match the given
+    * program.
     */
   def replace(p: ISPProgram): VcsAction[Unit] = {
     def failIfNotExists(id: SPProgramID, key: SPNodeKey): VcsAction[Unit] =
