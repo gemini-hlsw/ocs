@@ -17,13 +17,13 @@ object VmStore extends mutable.Publisher[VmUpdateEvent] {
 
   private var versionMaps = Map.empty[SPProgramID, VersionMap]
 
-  def update(u: VmUpdate): Unit = update(u.pid, u.vm)
+  def update(u: VmUpdate): Unit = update(u.pid, u.vm, force = false)
 
-  def update(kv: (SPProgramID, VersionMap)): Unit = update(kv._1, kv._2)
+  def update(kv: (SPProgramID, VersionMap)): Unit = update(kv._1, kv._2, force = false)
 
-  def update(pid: SPProgramID, newVm: VersionMap): Unit = {
+  def update(pid: SPProgramID, newVm: VersionMap, force: Boolean): Unit = {
     val oldVm = versionMaps.getOrElse(pid, EmptyVersionMap)
-    if (VersionMap.isNewer(newVm, oldVm)) {
+    if (force || VersionMap.isNewer(newVm, oldVm)) {
       versionMaps = versionMaps + (pid -> newVm)
       publish(VmUpdateEvent(pid, Some(newVm)))
     }

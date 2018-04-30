@@ -37,13 +37,21 @@ case class VcsOtClient(vcs: Vcs, reg: VcsRegistrar) {
     for {
       p <- vcs.checkout(id, peer, cancelled)
       _ <- VcsAction(reg.register(id, peer))
-    } yield vmStore(id, p)(_.getVersions)
+      _ <- vmStore(id, p, force = false)(_.getVersions)
+    } yield p
+
+  def revert(id: SPProgramID, peer: Peer, cancelled: AtomicBoolean): VcsAction[ISPProgram] =
+    for {
+      p <- vcs.revert(id, peer, cancelled)
+      _ <- vmStore(id, p, force = true)(_.getVersions)
+    } yield p
 
   def add(id: SPProgramID, peer: Peer): VcsAction[VersionMap] =
     for {
       vm <- vcs.add(id, peer)
       _  <- VcsAction(reg.register(id, peer))
-    } yield vmStore(id, vm)(identity)
+      _  <- vmStore(id, vm, force = false)(identity)
+    } yield vm
 
   private def lookupAndThen[A](id: SPProgramID)(f: (Vcs, Peer) => VcsAction[A]): VcsAction[A] =
     for {
@@ -52,7 +60,10 @@ case class VcsOtClient(vcs: Vcs, reg: VcsRegistrar) {
     } yield a
 
   private def recording[A](id: SPProgramID)(f: (Vcs, Peer) => VcsAction[A])(g: A => VersionMap): VcsAction[A] =
-    lookupAndThen(id)(f).map(vmStore(id, _)(g))
+    for {
+      a <- lookupAndThen(id)(f)
+      _ <- vmStore(id, a, force = false)(g)
+    } yield a
 
   def version(id: SPProgramID): VcsAction[VersionMap] =
     recording(id)(_.version(id, _))(identity)
@@ -67,8 +78,6 @@ case class VcsOtClient(vcs: Vcs, reg: VcsRegistrar) {
     lookupAndThen(id)(_.log(id, _, offset, length))
 
   // Performs the side-effect of updating the map from id to VersionMap.
-  private def vmStore[A](id: SPProgramID, a: A)(f: A => VersionMap): A = {
-    Swing.onEDT { VmStore.update(id, f(a)) }
-    a
-  }
+  private def vmStore[A](id: SPProgramID, a: A, force: Boolean)(f: A => VersionMap): VcsAction[Unit] =
+    VcsAction(Swing.onEDT { VmStore.update(id, f(a), force) })
 }

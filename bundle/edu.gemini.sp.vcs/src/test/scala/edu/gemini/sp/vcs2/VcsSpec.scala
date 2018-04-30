@@ -1,5 +1,6 @@
 package edu.gemini.sp.vcs2
 
+import edu.gemini.pot.sp.SPNodeKey
 import edu.gemini.pot.sp.version.VersionMap
 import edu.gemini.sp.vcs2.ProgramLocationSet.{Both, LocalOnly, Neither, RemoteOnly}
 import edu.gemini.sp.vcs2.VcsAction._
@@ -47,6 +48,37 @@ class VcsSpec extends VcsSpecification {
       // run checkout on the local peer
       env.local.superStaffVcs.checkout(Q2, DummyPeer, cancelled).unsafeRun
       env.local.odb.lookupProgramByID(Q2) must beNull
+    }
+  }
+
+  "revert" should {
+    "fail if the indicated program doesn't exist remotely" in withVcs { env =>
+      env.local.addNewProgram(Q2)
+      notFound(env.local.superStaffVcs.revert(Q2, DummyPeer, notCancelled), Q2)
+    }
+
+    "fail if the indicated program doesn't exist locally" in withVcs { env =>
+      env.remote.addNewProgram(Q2)
+      notFound(env.local.superStaffVcs.revert(Q2, DummyPeer, notCancelled), Q2)
+    }
+
+    "fail if the user doesn't have access to the program" in withVcs { env =>
+      val key = new SPNodeKey()
+      env.local.addNewProgramWithKey(key, Q2)
+      env.remote.addNewProgramWithKey(key, Q2)
+      forbidden(env.local.vcs(ProgramPrincipal(Q1)).revert(Q2, DummyPeer, notCancelled))
+    }
+
+    "revert changes made since the last sync" in withVcs { env =>
+      env.local.progTitle = "to be reverted"
+      env.local.superStaffVcs.revert(Q1, DummyPeer, notCancelled).unsafeRun
+      env.local.progTitle shouldEqual Title
+    }
+
+    "do nothing if cancelled" in withVcs { env =>
+      env.local.progTitle = "to be reverted"
+      env.local.superStaffVcs.revert(Q1, DummyPeer, cancelled).unsafeRun
+      env.local.progTitle shouldEqual "to be reverted"
     }
   }
 

@@ -22,6 +22,7 @@ public final class SPViewerActions {
     // Individual actions
     public final AbstractViewerAction vcsSyncAction;
     public final AbstractViewerAction syncAllAction;
+    public final AbstractViewerAction revertChangesAction;
     public final AbstractViewerAction conflictPrevAction;
     public final AbstractViewerAction conflictNextAction;
     public final AbstractViewerAction resolveConflictsAction;
@@ -65,15 +66,15 @@ public final class SPViewerActions {
     public final AbstractViewerAction purgeEphemerisAction;
 
     // Groups of actions. In some cases these appear in the list above, in other cases not.
-    final List<AbstractViewerAction> templateActions = new ArrayList<AbstractViewerAction>();
-    final List<AbstractViewerAction> addGroupActions = new ArrayList<AbstractViewerAction>();
-    final List<AddObservationAction> addObservationActions = new ArrayList<AddObservationAction>();
-    final List<AddObsCompAction> addNoteActions = new ArrayList<AddObsCompAction>();
-    final List<AddObsCompAction> addInstrumentActions = new ArrayList<AddObsCompAction>();
-    final List<AddObsCompAction> addAOActions = new ArrayList<AddObsCompAction>();
-    final List<AddObsCompAction> addEngineeringActions = new ArrayList<AddObsCompAction>();
-    final List<AddSeqCompAction> addInstrumentIteratorActions = new ArrayList<AddSeqCompAction>();
-    final List<AddSeqCompAction> addGenericSeqCompActions = new ArrayList<AddSeqCompAction>();
+    final List<AbstractViewerAction> templateActions = new ArrayList<>();
+    final List<AbstractViewerAction> addGroupActions = new ArrayList<>();
+    final List<AddObservationAction> addObservationActions = new ArrayList<>();
+    final List<AddObsCompAction> addNoteActions = new ArrayList<>();
+    final List<AddObsCompAction> addInstrumentActions = new ArrayList<>();
+    final List<AddObsCompAction> addAOActions = new ArrayList<>();
+    final List<AddObsCompAction> addEngineeringActions = new ArrayList<>();
+    final List<AddSeqCompAction> addInstrumentIteratorActions = new ArrayList<>();
+    final List<AddSeqCompAction> addGenericSeqCompActions = new ArrayList<>();
 
 
     public SPViewerActions(SPViewer viewer) {
@@ -133,8 +134,9 @@ public final class SPViewerActions {
         resolveConflictsAction = new ResolveConflictsAction(viewer);
 
         // VCS Actions
-        vcsSyncAction = new VcsSyncAction(viewer);
-        syncAllAction = new SyncAllAction(viewer);
+        vcsSyncAction       = new VcsSyncAction(viewer);
+        syncAllAction       = new SyncAllAction(viewer);
+        revertChangesAction = new RevertChangesAction(viewer);
 
         // General Edit Actions
         cutAction = new CutAction(viewer);

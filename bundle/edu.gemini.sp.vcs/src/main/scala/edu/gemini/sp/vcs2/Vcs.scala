@@ -45,6 +45,16 @@ class Vcs(user: VcsAction[Set[Principal]], server: VcsServer, service: Peer => V
       _ <- server.add(p)
     } yield p
 
+  /** Checks-out the indicated program from the remote peer, replacing any local
+    * version of the same program.
+    */
+  def revert(id: SPProgramID, peer: Peer, cancelled: AtomicBoolean): VcsAction[ISPProgram] =
+    for {
+      p <- Client(peer).checkout(id)
+      _ <- checkCancel(cancelled)
+      _ <- server.replace(p)
+    } yield p
+
   /** Adds the given program to the remote peer, copying it into the remote
     * database. */
   def add(id: SPProgramID, peer: Peer): VcsAction[VersionMap] =

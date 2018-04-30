@@ -153,6 +153,45 @@ class VcsServerSpec extends VcsSpecification with NoLanguageFeatures {
     }
   }
 
+  "replace" should {
+    "fail if a program with the given id is missing" in withVcs { env =>
+      val newKey  = new SPNodeKey()
+      val newProg = env.local.odb.getFactory.createProgram(newKey, Q2)
+      val act     = env.local.server.replace(newProg)
+      expect(act) { case -\/(NotFound(_)) => ok("not found") }
+    }
+
+    "fail if the program with matching id doesn't have the same key" in withVcs { env =>
+      val newKey  = new SPNodeKey()
+      val newProg = env.local.odb.getFactory.createProgram(newKey, Q1)
+      val act     = env.local.server.replace(newProg)
+      expect(act) { case -\/(NotFound(_)) => ok("not found") }
+    }
+
+    "fail if the program doesn't have an id" in withVcs { env =>
+      val newKey  = new SPNodeKey()
+      val newProg = env.local.odb.getFactory.createProgram(newKey, null)
+      val act     = env.local.server.add(newProg)
+      expect(act) { case -\/(MissingId) => ok("missing id") }
+    }
+
+    "replace an existing program in the database" in withVcs { env =>
+      val newProg = env.local.odb.getFactory.createProgram(Key, Q1)
+
+      // Update the title
+      val dob     = newProg.getDataObject.asInstanceOf[SPProgram]
+      dob.setTitle("Replacement")
+      newProg.setDataObject(dob)
+
+      // Replace the existing program with this one
+      val act = env.local.server.replace(newProg)
+      act.unsafeRun
+
+      val title = env.local.odb.lookupProgram(newProg.getProgramKey).getDataObject.asInstanceOf[SPProgram].getTitle
+      title shouldEqual "Replacement"
+    }
+  }
+
   "fetchDiffs" should {
     "fetch diffs" in withVcs { env =>
       val vm        = env.local.prog.getVersions
