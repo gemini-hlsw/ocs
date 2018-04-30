@@ -9,8 +9,8 @@ import edu.gemini.shared.util.VersionComparison.{Conflicting, Newer}
 import edu.gemini.shared.util.immutable.ApplyOp
 import edu.gemini.sp.vcs.reg.VcsRegistrar
 import edu.gemini.sp.vcs2.TryVcs
+import edu.gemini.sp.vcs2._
 import edu.gemini.sp.vcs2.VcsAction._
-import edu.gemini.sp.vcs2.VcsFailure
 import edu.gemini.spModel.core.{Peer, SPProgramID}
 import edu.gemini.spModel.util.DBProgramInfo
 import edu.gemini.util.security.auth.keychain.Action._
@@ -170,6 +170,7 @@ class OpenDialog private(db: IDBDatabaseService, auth: KeyChain, vcs: VcsRegistr
       def updateEnabledStatus() {
         val tab = Contents.ProgTable
 
+        RevertAction.enabled   = tab.selectedProgs.filter(tab.hasPendingChanges).nonEmpty
         DeleteAction.enabled   = tab.selectedProgs.nonEmpty
         OpenAction.enabled     = tab.selectedItems.nonEmpty
         CheckoutAction.enabled = tab.selectedRemotes.nonEmpty
@@ -180,6 +181,19 @@ class OpenDialog private(db: IDBDatabaseService, auth: KeyChain, vcs: VcsRegistr
         Contents.ProgTable.onSelectionChange(updateEnabledStatus())
       }
     }
+
+    private def explainFailure(pid: SPProgramID, p: Peer, f: VcsFailure, op: String): String =
+      s"${pid.stringValue}: ${VcsFailure.explain(f, pid, op, Some(p))}"
+
+    // Explain the first n failures.  Show "..." if there are more than n failures.
+    private def handleFailure(fs: List[String]): Unit =
+      if (fs.nonEmpty) {
+        val N = 5
+        val firstN = fs.take(N)
+        val msg    = (if (fs.drop(N).nonEmpty) firstN :+ "..." else firstN).mkString("\n")
+
+        Dialog.showMessage(Contents, msg, "Error", Dialog.Message.Error)
+      }
 
     lazy val ManageKeysAction = Action("Manage Keys...") {
       val detailText = "Database keys allow you to access programs and OT features."
@@ -200,6 +214,55 @@ class OpenDialog private(db: IDBDatabaseService, auth: KeyChain, vcs: VcsRegistr
 
     lazy val CancelAction = Action("Cancel") {
       dialog.close()
+    }
+
+    lazy val RevertAction = Action("Revert") {
+      val ps    = Contents.ProgTable.selectedProgs.filter(Contents.ProgTable.hasPendingChanges)
+      val total = ps.size
+
+      val warning: String =
+        s"""This action will delete all local changes made
+           |since the last sync and restore the program${if (total === 1) "" else "s"}
+           |from the remote database.
+           |
+           |Continue?
+         """.stripMargin
+
+      def doRevert(client: VcsOtClient): Unit = {
+        val ps0 = ps.flatMap { p =>
+          (for {
+            pid  <- Option(p.getProgramID)
+            peer <- client.peer(pid)
+          } yield (pid, peer, p)).toList
+        }
+
+        val result: Throwable \/ List[String \/ Unit] =
+          ps0.traverseU { case (pid, peer, p) =>
+            client.revert(pid, peer, new AtomicBoolean(false)).run
+                  .map(_.bimap(explainFailure(pid, peer, _, "revert"), _ => ()))
+          }.unsafePerformSyncAttempt
+
+        result match {
+          case -\/(_)   =>
+            val msg = "There was an error reverting programs from the remote database."
+            Dialog.showMessage(Contents, msg, "Error", Dialog.Message.Error)
+
+          case \/-(lst) =>
+            val (fs, ss) = lst.separate
+            if (ss.nonEmpty) {
+              Contents.ProgTable.refresh(full = false)
+              updateStorage()
+            }
+            handleFailure(fs)
+        }
+      }
+
+      if (total > 0) {
+        val confirm = Dialog.showConfirmation(dialog.Contents, warning, "Confirm Revert", Dialog.Options.YesNo, Dialog.Message.Warning)
+        if (confirm == Dialog.Result.Ok) {
+          VcsOtClient.ref.foreach(doRevert)
+        }
+      }
     }
 
     lazy val DeleteAction = Action("Delete") {
@@ -276,27 +339,12 @@ class OpenDialog private(db: IDBDatabaseService, auth: KeyChain, vcs: VcsRegistr
           updateStorage()
         }
 
-      // Explain the first n failures.  Show "..." if there are more than n failures.
-      def handleFailure(fs: List[String]): Unit =
-        if (fs.nonEmpty) {
-          val N = 5
-          val firstN = fs.take(N)
-          val msg    = (if (fs.drop(N).nonEmpty) firstN :+ "..." else firstN).mkString("\n")
-
-          Dialog.showMessage(Contents, msg, "Error", Dialog.Message.Error)
-        }
-
-      def explainFailure(i: DBProgramInfo, p: Peer, f: VcsFailure): String = {
-        val msg = VcsFailure.explain(f, i.programID, "checkout", Some(p))
-        s"${i.programID.stringValue}: $msg"
-      }
-
       def doCheckout(client: VcsOtClient, remotes: List[(DBProgramInfo, Peer)]): Unit = {
 
         val checkoutResult: Throwable \/ List[String \/ (SPProgramID, Peer)] =
           remotes.traverseU { case (info, peer) =>
             client.checkout(info.programID, peer, new AtomicBoolean(false)).run
-                  .map(_.bimap(explainFailure(info, peer, _), p => (p.getProgramID, peer)))
+                  .map(_.bimap(explainFailure(info.programID, peer, _, "checkout"), p => (p.getProgramID, peer)))
           }.unsafePerformSyncAttempt
 
         checkoutResult match {
@@ -385,6 +433,7 @@ class OpenDialog private(db: IDBDatabaseService, auth: KeyChain, vcs: VcsRegistr
         border = BorderFactory.createEmptyBorder(10, 0, 0, 0)
         contents += new NonFocusableButton(ManageKeysAction)
         contents += new NonFocusableButton(RefreshAction)
+        contents += new NonFocusableButton(RevertAction)
         contents += new NonFocusableButton(DeleteAction)
       }, BorderPanel.Position.West)
 
