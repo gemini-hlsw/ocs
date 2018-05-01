@@ -9,7 +9,7 @@ import edu.gemini.spModel.core.Redshift;
  */
 public class RedshiftVisitor implements SampledSpectrumVisitor {
     /**
-     * For efficiency, no shift will be performed unless z is
+     * For efficiency, no shift will be performed unless |z| is
      * larger than this value
      */
     public static final double MIN_SHIFT = 0.0001;
@@ -27,7 +27,9 @@ public class RedshiftVisitor implements SampledSpectrumVisitor {
      * Performs the redshift on specified spectrum.
      */
     public void visit(final SampledSpectrum sed) {
-        if (getShift() > MIN_SHIFT) {
+        if (getShift() <= -0.9) {
+            throw new IllegalArgumentException("Redshift must be > -0.9");
+        } else if (Math.abs(getShift()) > MIN_SHIFT) {
             sed.rescaleX(1.0 + getShift());
         }
     }

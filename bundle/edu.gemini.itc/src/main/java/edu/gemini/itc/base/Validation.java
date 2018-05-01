@@ -5,8 +5,6 @@ import edu.gemini.spModel.core.EmissionLine;
 import edu.gemini.spModel.core.GaussianSource;
 import edu.gemini.spModel.core.SpatialProfile;
 
-
-
 /**
  * This is a collection of validation methods that originally were implemented repeatedly for the different
  * instruments and were rehomed here in a central location. It is questionable if this is the best place for all
@@ -19,6 +17,7 @@ public final class Validation {
     public static void validate(final Instrument instrument, final ObservationDetails obs, final SourceDefinition source) {
         checkElineWidth(instrument, source);
         checkGaussianFwhm(source.profile());
+        checkRedshift(source);
 
         if (obs.analysisMethod() instanceof ApertureMethod) {
             checkSkyAperture((ApertureMethod) obs.analysisMethod());
@@ -26,7 +25,12 @@ public final class Validation {
         if (obs.calculationMethod() instanceof S2NMethod) {
             checkSourceFraction(((S2NMethod) obs.calculationMethod()).exposures(), obs.calculationMethod().sourceFraction());
         }
+    }
 
+    private static void checkRedshift(final SourceDefinition source) {
+        if (source.redshift().z() <= -0.9) {
+            throw new IllegalArgumentException("Redshift must be > -0.9");
+        }
     }
 
     private static void checkSkyAperture(final ApertureMethod am) {

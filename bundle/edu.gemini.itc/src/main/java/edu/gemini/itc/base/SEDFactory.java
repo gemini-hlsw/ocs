@@ -98,13 +98,13 @@ public final class SEDFactory {
      *  ...
      * </pre>
      */
-    private static VisitableSampledSpectrum getUserSED(final UserDefinedSpectrum userSED, final double wavelengthInterval) {
+    private static VisitableSampledSpectrum getUserSED(final UserDefinedSpectrum userSED, final double start, final double end, final double wavelengthInterval, final double redshift) {
         try {
             final DefaultArraySpectrum as = DefaultArraySpectrum.fromUserSpectrum(userSED.spectrum());
-            return new DefaultSampledSpectrum(as, wavelengthInterval);
+            return new DefaultSampledSpectrum(as, start, end, wavelengthInterval, redshift);
 
         } catch (final Exception e) {
-            throw new Error("Could not parse user SED " + userSED.name() + ": " + e.getMessage());
+            throw new IllegalArgumentException("Could not parse user SED " + userSED.name() + ": " + e.getMessage());
         }
     }
 
@@ -142,7 +142,11 @@ public final class SEDFactory {
 
         } else if (sdp.distribution() instanceof UserDefinedSpectrum) {
             final UserDefinedSpectrum userDefined = (UserDefinedSpectrum) sdp.distribution();
-            temp = getUserSED(userDefined, instrument.getSampling());
+            temp = getUserSED(userDefined,
+                    instrument.getObservingStart(),
+                    instrument.getObservingEnd(),
+                    instrument.getSampling(),
+                    sdp.redshift().z());
             temp.applyWavelengthCorrection();
             return temp;
 
@@ -175,7 +179,7 @@ public final class SEDFactory {
         //
         // inputs: instrument, SED
         // calculates: redshifted SED
-        // output: redshifteed SED
+        // output: redshifted SED
 
         final VisitableSampledSpectrum sed = SEDFactory.getSED(sdp, instrument);
         final SampledSpectrumVisitor redshift = new RedshiftVisitor(sdp.redshift());
@@ -194,7 +198,8 @@ public final class SEDFactory {
         // TODO: what about Nifs and Gnirs (other near-ir instruments)?
         if (instrument instanceof Gsaoi || instrument instanceof Niri || instrument instanceof Flamingos2) {
             if (sed.getStart() > instrument.getObservingStart() || sed.getEnd() < instrument.getObservingEnd()) {
-                throw new IllegalArgumentException("Shifted spectrum lies outside of observed wavelengths");
+                throw new IllegalArgumentException(String.format("Redshifted SED (%.1f - %.1f nm) does not cover range of instrument configuration (%.1f - %.1f nm).",
+                        sed.getStart(), sed.getEnd(), instrument.getObservingStart(), instrument.getObservingEnd()));
             }
         }
 

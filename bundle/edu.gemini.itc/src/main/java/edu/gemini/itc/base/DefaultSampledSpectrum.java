@@ -9,10 +9,10 @@ package edu.gemini.itc.base;
  * This interface provides functionality for defining and manipulating a
  * SampledSpectrum.
  * Units are not stored for either axis so the client must know from context.
- * The SampledSpectrum plays the rold of Element in a visitor pattern.
+ * The SampledSpectrum plays the role of Element in a visitor pattern.
  * This pattern is used to separate operations from the SampledSpectrum
  * elements.
- * The SampledSpectrum plays the rold of Element in a visitor pattern.
+ * The SampledSpectrum plays the role of Element in a visitor pattern.
  * This pattern is used to separate operations from the elements.
  * Because of this separation, Concrete Elements must offer enough
  * accessors for the separate Concrete Visitor class to perform the
@@ -24,8 +24,7 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
 
     //Values of start and end points
     private double _xStart, _xEnd;
-
-    private double _xInterval;     //Size of each particluar element
+    private double _xInterval;     //Size of each particular element
 
     /**
      * Construct a DefaultSampledSpectrum.  End x value is determined by
@@ -41,7 +40,7 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
      * ArraySpectrum at specified interval.
      *
      * @param sp        Spectrum to sample
-     * @param xInterval Sampling interval
+     * @param xInterval Sampling interval (nm)
      */
     public DefaultSampledSpectrum(ArraySpectrum sp, double xInterval) {
         double xStart = sp.getStart();
@@ -50,6 +49,36 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
         double[] data = new double[numIntervals + 1];
         for (int i = 0; i <= numIntervals; ++i) {
             data[i] = sp.getY(i * xInterval + xStart);
+        }
+        reset(data, xStart, xInterval);
+    }
+
+    /**
+     * Construct a DefaultSampledSpectrum by sampling the given ArraySpectrum
+     * over the specified wavelength range at the specified interval.
+     *
+     * @param sp        Spectrum to resample
+     * @param xStart    Starting wavelength of instrument configuration (nm)
+     * @param xEnd      Ending wavelength of instrument configuration (nm)
+     * @param xInterval Sampling interval (nm)
+     * @param z         Redshift of target
+     */
+    public DefaultSampledSpectrum(ArraySpectrum sp, double xStart, double xEnd, double xInterval, double z) {
+
+        if ( (1+z) * sp.getStart() > xStart || (1+z) * sp.getEnd() < xEnd ) {
+            throw new IllegalArgumentException(
+                    String.format("Redshifted SED (%.1f - %.1f nm) does not cover range of instrument configuration (%.1f - %.1f nm).",
+                            (1+z)*sp.getStart(), (1+z)*sp.getEnd(), xStart, xEnd));
+        }
+
+        // The SED will be redshifted later so resample over range / (1+z):
+        xStart /= 1+z;
+        xEnd /= 1+z;
+
+        int numIntervals = (int) Math.round((xEnd - xStart) / xInterval + 2); // +2 to allow for truncation
+        double[] data = new double[numIntervals + 1];
+        for (int i = 0; i <= numIntervals; ++i) {
+           data[i] = sp.getY(xStart + i * xInterval);
         }
         reset(data, xStart, xInterval);
     }
