@@ -15,6 +15,8 @@ import edu.gemini.spModel.template.TemplateFolder;
 import edu.gemini.spModel.template.TemplateGroup;
 import edu.gemini.spModel.template.TemplateParameters;
 import edu.gemini.spModel.util.ReadableNodeName;
+import edu.gemini.shared.util.immutable.ImOption;
+import edu.gemini.shared.util.immutable.Option;
 import jsky.app.ot.OTOptions;
 import jsky.app.ot.StaffBean;
 import jsky.app.ot.editor.OtItemEditor;
@@ -29,6 +31,7 @@ import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
@@ -39,6 +42,7 @@ import java.awt.datatransfer.Transferable;
 import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Enumeration;
 
@@ -436,6 +440,27 @@ final class EdTemplateParameters extends JPanel {
         }
     };
 
+    // Action to import a target list.
+    private final Action importAction = new AbstractAction("Import", Resources.getIcon("import.gif")) {
+        { putValue(Action.SHORT_DESCRIPTION, "Import targets from a file."); }
+
+        private Option<File> selectFile(Component parent) {
+            // Show a file chooser to select a file.
+            final JFileChooser chooser = new JFileChooser();
+            chooser.setMultiSelectionEnabled(false);
+            final FileNameExtensionFilter filter = new FileNameExtensionFilter(
+              "Target Files", "csv", "fits", "tst", "xml"
+            );
+            chooser.setFileFilter(filter);
+            return ImOption.apply((chooser.showOpenDialog(parent) == JFileChooser.APPROVE_OPTION) ? chooser.getSelectedFile() : null);
+        }
+
+        public void actionPerformed(ActionEvent evt) {
+            final Component c = (evt.getSource() instanceof Component) ? (Component) evt.getSource() : null;
+            selectFile(c).foreach(f -> System.out.println("selected: " + f));
+        }
+    };
+
     // Handle selection updates in the editor for "staff".
     private final ListSelectionListener staffSelectionListener = new ListSelectionListener() {
         @Override public void valueChanged(ListSelectionEvent evt) {
@@ -500,6 +525,9 @@ final class EdTemplateParameters extends JPanel {
             ));
             add(new JPanel(), new GridBagConstraints(
                 3, 0, 1, 1, 1.0, 0.0, CENTER, HORIZONTAL, zero, 0, 0
+            ));
+            add(flatButton(importAction), new GridBagConstraints(
+                4, 0, 1, 1, 0.0, 0.0, CENTER, NONE, zero, 0, 0
             ));
         }};
 
