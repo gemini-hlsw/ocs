@@ -47,10 +47,9 @@ object Phase1FolderFactory {
       } yield bn -> bMap.getOrElse(bn, b2)
 
     private def extractTarget(s: core.Site, o: Observation, time: Long): Either[String, SPTarget] =
-      for {
-        t1 <- o.target.toRight("Observation missing target").right
-        t2 <- P1TargetConverter.toSpTarget(s, t1, time).right
-      } yield t2
+      o.target.toRight("Observation missing target").right.map { t =>
+        P1TargetConverter.toSpTarget(s, t, time)
+      }
 
     private def extractSiteQuality(o: Observation): Either[String, SPSiteQuality] =
       for {

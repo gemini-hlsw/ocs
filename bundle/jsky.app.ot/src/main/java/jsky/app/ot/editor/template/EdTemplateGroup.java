@@ -1,5 +1,4 @@
 package jsky.app.ot.editor.template;
-
 import edu.gemini.model.p1.immutable.Target;
 import edu.gemini.model.p1.targetio.api.DataSourceError;
 import edu.gemini.model.p1.targetio.api.ParseError;
@@ -11,8 +10,13 @@ import edu.gemini.shared.gui.ThinBorder;
 import edu.gemini.shared.gui.text.AbstractDocumentListener;
 import edu.gemini.shared.util.TimeValue;
 import edu.gemini.shared.util.immutable.*;
+import edu.gemini.spModel.core.ProgramId;
+import edu.gemini.spModel.core.ProgramId$;
+import edu.gemini.spModel.core.Semester;
+import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 import edu.gemini.spModel.pio.xml.PioXmlFactory;
+import edu.gemini.spModel.target.P1TargetConverter;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.template.SpBlueprint;
 import edu.gemini.spModel.template.TemplateFolder;
@@ -489,14 +493,43 @@ final class EdTemplateParameters extends JPanel {
             return e;
         }
 
-        private void handleResult(final Component c, final ImEither<String, ImList<Target>> e) {
+        private void addTargets(final Tuple2<Site, Semester> ss, final ImList<Target> targets) {
+            final Site site = ss._1();
+            final long time = ss._2().getMidpointDate(site).getTime();
+            final ImList<SPTarget> sps = targets.map(t -> P1TargetConverter.toSpTarget(site, t, time));
+            System.out.println(sps.map(s -> s.getName()).mkString("", ", ", ""));
+        }
+
+        private void handleResult(final Component c, final Tuple2<Site, Semester> ss, final ImEither<String, ImList<Target>> e) {
             e.forEachLeft(msg -> JOptionPane.showMessageDialog(c, msg, "Error", JOptionPane.ERROR_MESSAGE));
-            e.forEach(lst -> System.out.println(lst.map(t -> t.name()).mkString("", ", ", "")));
+            e.forEach(lst -> addTargets(ss, lst));
+        }
+
+        // Sorry.  All this does is extract the site and semester from the
+        // program id, if possible.
+        private Option<Tuple2<Site, Semester>> siteSemester() {
+            final Option<ProgramId> pid =
+                ImOption.apply(program)
+                    .flatMap(p -> ImOption.apply(p.getProgramID()))
+                    .map(p -> ProgramId$.MODULE$.parse(p.stringValue()));
+
+            final Option<Site>    site = pid.flatMap(p -> ImOption.fromScalaOpt(p.site()));
+            final Option<Semester> sem = pid.flatMap(p -> ImOption.fromScalaOpt(p.semester()));
+
+            return site.flatMap(site0 -> sem.map(sem0 -> new Pair<Site, Semester>(site0, sem0)));
         }
 
         public void actionPerformed(ActionEvent evt) {
+
             final Component c = (evt.getSource() instanceof Component) ? (Component) evt.getSource() : null;
-            selectFile(c).foreach(f -> handleResult(c, readFile(f)));
+
+            // We need the site and semester to convert the targets.
+            final Option<Tuple2<Site, Semester>> ss = siteSemester();
+            if (ss.isEmpty()) {
+                JOptionPane.showMessageDialog(c, "Couldn't determine the site and semester from the program id.", "Error", JOptionPane.ERROR_MESSAGE);
+            } else {
+                selectFile(c).foreach(f -> handleResult(c, ss.getValue(), readFile(f)));
+            }
         }
     };
 

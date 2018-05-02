@@ -156,6 +156,13 @@ public final class Semester implements Comparable<Semester>, Serializable {
         return cal.getTime();
     }
 
+    public Date getMidpointDate(Site site) {
+        final long s = getStartDate(site).getTime();
+        final long e = getEndDate(site).getTime();
+        final long m = s + (e - s)/2;
+        return new Date(m);
+    }
+
     public Date getEndDate(Site site) {
         Calendar cal = mkCalendar(site);
         cal.setTime(getStartDate(site));

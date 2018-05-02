@@ -162,4 +162,17 @@ public class SemesterTest extends TestCase {
         assertEquals(start2010A, s2010A.getStartDate(Site.GN));
         assertEquals(start2010B, s2010A.getEndDate(Site.GN));
     }
+
+    public void testMidpointDate() {
+        final Semester s = new Semester(2018, Semester.Half.A);
+        final long start = s.getStartDate(Site.GN).getTime();
+        final long end   = s.getEndDate(Site.GN).getTime();
+        final long mid   = s.getMidpointDate(Site.GN).getTime();
+
+        final long quarter0 = mid - start;
+        final long quarter1 = end - mid;
+
+        final long diff     = Math.abs(quarter1 - quarter0);
+        assertTrue(diff <= 1);
+    }
 }

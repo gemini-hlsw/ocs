@@ -123,6 +123,24 @@ public class ImListTest extends TestCase {
         assertEquals(empty, empty.initial());
     }
 
+    public void testTake() {
+        final ImList<Integer> lst = create(0, 1, 2);
+        assertEquals(create(0, 1), lst.take(2));
+        assertEquals(empty, lst.take(0));
+        assertEquals(empty, empty.take(10));
+        assertEquals(lst, lst.take(3));
+        assertEquals(lst, lst.take(10));
+    }
+
+    public void testDrop() {
+        final ImList<Integer> lst = create(0, 1, 2);
+        assertEquals(lst.tail(), lst.drop(1));
+        assertEquals(create(2), lst.drop(2));
+        assertEquals(empty, lst.drop(3));
+        assertEquals(empty, lst.drop(10));
+        assertEquals(empty, empty.drop(1));
+    }
+
     public void testContains() {
         ImList<Integer> lst = create(0, 1, 2);
         for (int i=0; i<3; ++i) assertTrue(lst.contains(i));
