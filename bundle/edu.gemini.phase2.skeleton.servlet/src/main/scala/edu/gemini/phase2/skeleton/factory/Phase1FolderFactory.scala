@@ -4,7 +4,7 @@ import edu.gemini.spModel.gemini.graces.blueprint.SpGracesBlueprint
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 
 import scala.collection.JavaConverters._
-import edu.gemini.spModel.target.SPTarget
+import edu.gemini.spModel.target.{ P1TargetConverter, SPTarget }
 import edu.gemini.model.p1.immutable._
 import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.spModel.template._
@@ -49,7 +49,7 @@ object Phase1FolderFactory {
     private def extractTarget(s: core.Site, o: Observation, time: Long): Either[String, SPTarget] =
       for {
         t1 <- o.target.toRight("Observation missing target").right
-        t2 <- SpTargetFactory.create(s, t1, time).right
+        t2 <- P1TargetConverter.toSpTarget(s, t1, time).right
       } yield t2
 
     private def extractSiteQuality(o: Observation): Either[String, SPSiteQuality] =
