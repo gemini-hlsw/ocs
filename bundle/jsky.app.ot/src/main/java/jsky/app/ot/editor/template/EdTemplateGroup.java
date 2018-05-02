@@ -1,5 +1,9 @@
 package jsky.app.ot.editor.template;
 
+import edu.gemini.model.p1.immutable.Target;
+import edu.gemini.model.p1.targetio.api.DataSourceError;
+import edu.gemini.model.p1.targetio.api.ParseError;
+import edu.gemini.model.p1.targetio.impl.AnyTargetReader;
 import edu.gemini.pot.client.SPDB;
 import edu.gemini.pot.sp.*;
 import edu.gemini.shared.gui.ButtonFlattener;
@@ -15,8 +19,6 @@ import edu.gemini.spModel.template.TemplateFolder;
 import edu.gemini.spModel.template.TemplateGroup;
 import edu.gemini.spModel.template.TemplateParameters;
 import edu.gemini.spModel.util.ReadableNodeName;
-import edu.gemini.shared.util.immutable.ImOption;
-import edu.gemini.shared.util.immutable.Option;
 import jsky.app.ot.OTOptions;
 import jsky.app.ot.StaffBean;
 import jsky.app.ot.editor.OtItemEditor;
@@ -455,9 +457,46 @@ final class EdTemplateParameters extends JPanel {
             return ImOption.apply((chooser.showOpenDialog(parent) == JFileChooser.APPROVE_OPTION) ? chooser.getSelectedFile() : null);
         }
 
+        private String formatError(final ParseError pe) {
+            final String name = pe.targetName().isEmpty() ? "" : pe.targetName().get() + ": ";
+            return name + pe.msg();
+        }
+
+        // Reads the file into an ImList<Target> where Target is the Phase1
+        // model target.
+        private ImEither<String, ImList<Target>> readFile(final File f) {
+            final scala.util.Either<DataSourceError, java.util.List<scala.util.Either<ParseError, Target>>> result;
+            result = AnyTargetReader.readFileAsJava(f);
+
+            final ImEither<String, ImList<Target>> e;
+            if (result.isLeft()) {
+                e = new Left<String, ImList<Target>>(result.left().get().msg());
+            } else {
+                final ImList<scala.util.Either<ParseError, Target>> lst;
+                lst = DefaultImList.create(result.right().get());
+
+                final int N = 5;
+                final ImList<String> errors = lst.filter(e0 -> e0.isLeft()).map(e0 -> formatError(e0.left().get())).take(N);
+                if (errors.nonEmpty()) {
+                    final String suffix = (lst.size() <= N) ? "" : "...";
+                    final String msg    = errors.mkString("Problem parsing target(s):\n\t", "\n\t", suffix);
+                    e = new Left<String, ImList<Target>>(msg);
+                } else {
+                    e = new Right<String, ImList<Target>>(lst.map(e0 -> e0.right().get()));
+                }
+            }
+
+            return e;
+        }
+
+        private void handleResult(final Component c, final ImEither<String, ImList<Target>> e) {
+            e.forEachLeft(msg -> JOptionPane.showMessageDialog(c, msg, "Error", JOptionPane.ERROR_MESSAGE));
+            e.forEach(lst -> System.out.println(lst.map(t -> t.name()).mkString("", ", ", "")));
+        }
+
         public void actionPerformed(ActionEvent evt) {
             final Component c = (evt.getSource() instanceof Component) ? (Component) evt.getSource() : null;
-            selectFile(c).foreach(f -> System.out.println("selected: " + f));
+            selectFile(c).foreach(f -> handleResult(c, readFile(f)));
         }
     };
 

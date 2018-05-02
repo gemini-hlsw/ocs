@@ -120,6 +120,23 @@ public interface ImList<T> extends Iterable<T> {
     ImList<T> initial();
 
     /**
+     * Takes up to the first n elements of this list, discarding any additional
+     * elements.
+     *
+     * @return the first n elements, or the entire list of the length is less
+     * than n
+     */
+    ImList<T> take(int n);
+
+    /**
+     * Discards the first n elements, returning any remaining elements.
+     *
+     * @return the remaining elements (if any) after the first n elements have
+     * been discarded
+     */
+    ImList<T> drop(int n);
+
+    /**
      * Determines whether the given element is in this list.
      *
      * @param t the element whose presence is sought

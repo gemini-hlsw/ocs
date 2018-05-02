@@ -134,6 +134,20 @@ public final class DefaultImList<T> implements ImList<T>, Serializable {
     }
 
     @Override
+    public ImList<T> take(int n) {
+        return (backingList.size() <= n)
+            ? this
+            : new DefaultImList<>(backingList.subList(0, n));
+    }
+
+    @Override
+    public ImList<T> drop(int n) {
+        return (backingList.size() <= n)
+            ? ImCollections.emptyList()
+            : new DefaultImList<>(backingList.subList(n, backingList.size()));
+    }
+
+    @Override
     public boolean contains(final T t) {
         return backingList.contains(t);
     }
