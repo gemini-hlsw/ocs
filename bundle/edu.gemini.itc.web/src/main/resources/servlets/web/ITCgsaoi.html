@@ -313,10 +313,13 @@
 	<p>
 	<span style="color: #ff0000"><b>Instrument (GSAOI), telescope, and GeMS configuration</b></span>
 	</p>
-	<table background="http://www.gemini.edu/sciops/instruments/itc/mez-green-bckgrnd.gif" border="0" cellpadding="6" cellspacing="0" width="100%">
+	<table background="https://www.gemini.edu/sciops/instruments/itc/mez-green-bckgrnd.gif" border="0" cellpadding="6" cellspacing="0" width="100%">
 		<tbody>
 			<tr>
-				<td colspan="4"><b>Instrument optical properties:</b> <i><span>(</span><a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10270#optical','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false"><span>more info</span></a><span>)</span></i></td>
+				<td colspan="4"><b>Instrument optical properties:</b>
+					<i>(<a href="#" onclick="window.open('http://www.gemini.edu/?q=node/21054','mywindow',
+					'width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,
+					scrollbars=yes,copyhistory=no,resizable=no'); return false">more info</a>)</i></td>
 			</tr>
 			<tr>
                 <td colspan="4">
@@ -364,12 +367,13 @@
                 </td>
 			</tr>
 			<tr>
-				<td colspan="4" height="50" valign="bottom"><b>Detector properties:</b> <i><span>(</span><a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10270#detector','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false"><span>more info</span></a><span>)</span></i></td>
-
+				<td colspan="4" height="50" valign="bottom"><b>Detector properties:</b>
+					<i>(<a href="#" onclick="window.open('http://www.gemini.edu/?q=node/21054','mywindow',
+					'width=1000,height=700,toolbar=no,location=no,directories=no,status=no,menubar=no,
+					scrollbars=yes,copyhistory=no,resizable=no'); return false">more info</a>)</i></td>
 			</tr>
             <tr>
                 <td colspan="4" height="20">Read mode:  </td>
-
             </tr>
             <tr>
                 <td colspan="4" align="right" height="21"><input value="BRIGHT" name="ReadMode" checked="checked" type="radio" />
@@ -377,7 +381,6 @@
             </tr>
             <tr>
                 <td colspan="4" align="right" height="21"><input value="FAINT" name="ReadMode" type="radio" />
-
                 Faint Objects / Broad band imaging (Low Noise Reads = 8, Read noise = 13e-) </td>
             </tr>
             <tr>
@@ -391,7 +394,6 @@
 			<!-- Telescope definition-->
 			<tr>
 				<td colspan="4" height="50" valign="bottom"><b>Telescope configuration:</b> <i><span>(<a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10271','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false">more info</a>)</span></i></td>
-
 			</tr>
 			<tr>
 				<td colspan="4" height="21">Mirror coating:
@@ -413,8 +415,12 @@
                        </select>
                 </td>
             </tr-->
-
-
+			<tr>
+				<td colspan="4" height="50" valign="bottom">The Strehl ratio is estimated from the selected filter and image quality.
+					<i>(<a href="#" onclick="window.open('http://www.gemini.edu/?q=node/21054','mywindow',
+					'width=1000,height=700,toolbar=no,location=no,directories=no,status=no,menubar=no,
+					scrollbars=yes,copyhistory=no,resizable=no'); return false">more info</a>)</i></td>
+			</tr>
 			<tr>
 				<td colspan="4">
 					<p align="right"> <!--<input src="https://www.gemini.edu/sciops/instruments/itc/calcButton.gif" align="absbottom" border="0" height="24" type="image" width="78" /> -->
@@ -432,7 +438,7 @@
 	<p>
 	<span style="color: #ff0000"><b>Observing condition constraints</b></span>
 	</p>
-	<table background="http://www.gemini.edu/sciops/instruments/itc/mez-green-bckgrnd.gif" border="0" cellpadding="6" cellspacing="0" width="100%">
+	<table background="https://www.gemini.edu/sciops/instruments/itc/mez-green-bckgrnd.gif" border="0" cellpadding="6" cellspacing="0" width="100%">
 		<tbody>
 			<tr>
 				<td colspan="6">Note: you should read the <a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10272','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false">explanatory
@@ -441,10 +447,6 @@
 				available on the <a href="#" onclick="window.open('http://www.gemini.edu/sciops/ObsProcess/obsConstraints/obsConstraintsIndex.html','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false">observing
 				condition constraints</a> pages. </td>
 			</tr>
-            <tr>
-                <td colspan="6"><font color="red">Be sure to update the Average Strehl Ratio when changing the IQ.</font> </td>
-            </tr>
-
             <tr>
                 <td><b>Image quality:</b></td>
                 <td><input name="ImageQuality" value="PERCENT_20" type="radio" /> 20%/Best</td>
@@ -497,7 +499,7 @@
 	<p>
 	<span style="color: #ff0000"><b>Details of observation</b></span>
 	</p>
-	<table background="http://www.gemini.edu/sciops/instruments/itc/mez-green-bckgrnd.gif" border="0" cellpadding="6" cellspacing="0" height="70" width="100%">
+	<table background="https://www.gemini.edu/sciops/instruments/itc/mez-green-bckgrnd.gif" border="0" cellpadding="6" cellspacing="0" height="70" width="100%">
 		<tbody>
 
 			<tr>
