@@ -1,8 +1,4 @@
 package jsky.app.ot.editor.template;
-import edu.gemini.model.p1.immutable.Target;
-import edu.gemini.model.p1.targetio.api.DataSourceError;
-import edu.gemini.model.p1.targetio.api.ParseError;
-import edu.gemini.model.p1.targetio.impl.AnyTargetReader;
 import edu.gemini.pot.client.SPDB;
 import edu.gemini.pot.sp.*;
 import edu.gemini.shared.gui.ButtonFlattener;
@@ -10,13 +6,8 @@ import edu.gemini.shared.gui.ThinBorder;
 import edu.gemini.shared.gui.text.AbstractDocumentListener;
 import edu.gemini.shared.util.TimeValue;
 import edu.gemini.shared.util.immutable.*;
-import edu.gemini.spModel.core.ProgramId;
-import edu.gemini.spModel.core.ProgramId$;
-import edu.gemini.spModel.core.Semester;
-import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 import edu.gemini.spModel.pio.xml.PioXmlFactory;
-import edu.gemini.spModel.target.P1TargetConverter;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.template.SpBlueprint;
 import edu.gemini.spModel.template.TemplateFolder;
@@ -37,7 +28,6 @@ import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
@@ -48,7 +38,6 @@ import java.awt.datatransfer.Transferable;
 import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Enumeration;
 
@@ -451,91 +440,21 @@ final class EdTemplateParameters extends JPanel {
     private final Action importAction = new AbstractAction("Import", Resources.getIcon("import.gif")) {
         { putValue(Action.SHORT_DESCRIPTION, "Import targets from a file."); }
 
-        private Option<File> selectFile(Component parent) {
-            // Show a file chooser to select a file.
-            final JFileChooser chooser = new JFileChooser();
-            chooser.setMultiSelectionEnabled(false);
-            final FileNameExtensionFilter filter = new FileNameExtensionFilter(
-              "Target Files", "csv", "fits", "tst", "xml"
-            );
-            chooser.setFileFilter(filter);
-            return ImOption.apply((chooser.showOpenDialog(parent) == JFileChooser.APPROVE_OPTION) ? chooser.getSelectedFile() : null);
-        }
-
-        private String formatError(final ParseError pe) {
-            final String name = pe.targetName().isEmpty() ? "" : pe.targetName().get() + ": ";
-            return name + pe.msg();
-        }
-
-        // Reads the file into an ImList<Target> where Target is the Phase1
-        // model target.
-        private ImEither<String, ImList<Target>> readFile(final File f) {
-            final scala.util.Either<DataSourceError, java.util.List<scala.util.Either<ParseError, Target>>> result;
-            result = AnyTargetReader.readFileAsJava(f);
-
-            final ImEither<String, ImList<Target>> e;
-            if (result.isLeft()) {
-                e = new Left<String, ImList<Target>>(result.left().get().msg());
-            } else {
-                final ImList<scala.util.Either<ParseError, Target>> lst;
-                lst = DefaultImList.create(result.right().get());
-
-                final int N = 5;
-                final ImList<String> errors = lst.filter(e0 -> e0.isLeft()).map(e0 -> formatError(e0.left().get())).take(N);
-                if (errors.nonEmpty()) {
-                    final String suffix = (lst.size() <= N) ? "" : "...";
-                    final String msg    = errors.mkString("Problem parsing target(s):\n\t", "\n\t", suffix);
-                    e = new Left<String, ImList<Target>>(msg);
-                } else {
-                    e = new Right<String, ImList<Target>>(lst.map(e0 -> e0.right().get()));
-                }
-            }
-
-            return e;
-        }
-
-        private void addTargets(final Tuple2<Site, Semester> ss, final ImList<Target> targets) {
-            final Site site = ss._1();
-            final long time = ss._2().getMidpointDate(site).getTime();
-            final ImList<SPTarget> sps = targets.map(t -> P1TargetConverter.toSpTarget(site, t, time));
-            System.out.println(sps.map(s -> s.getName()).mkString("", ", ", ""));
+        private void addTargets(final ImList<SPTarget> ts) {
             addNewParameters(o -> {
                 final SPSiteQuality sq = o.map(tp -> tp.getSiteQuality()).getOrElse(new SPSiteQuality());
                 final TimeValue     tv = o.map(tp -> tp.getTime()).getOrElse(TimeValue.ZERO_HOURS);
-                return sps.map(sp -> TemplateParameters.newInstance(sp, sq, tv));
+                return ts.map(t -> TemplateParameters.newInstance(t, sq, tv));
             });
         }
 
-        private void handleResult(final Component c, final Tuple2<Site, Semester> ss, final ImEither<String, ImList<Target>> e) {
-            e.forEachLeft(msg -> JOptionPane.showMessageDialog(c, msg, "Error", JOptionPane.ERROR_MESSAGE));
-            e.forEach(lst -> addTargets(ss, lst));
-        }
-
-        // Sorry.  All this does is extract the site and semester from the
-        // program id, if possible.
-        private Option<Tuple2<Site, Semester>> siteSemester() {
-            final Option<ProgramId> pid =
-                ImOption.apply(program)
-                    .flatMap(p -> ImOption.apply(p.getProgramID()))
-                    .map(p -> ProgramId$.MODULE$.parse(p.stringValue()));
-
-            final Option<Site>    site = pid.flatMap(p -> ImOption.fromScalaOpt(p.site()));
-            final Option<Semester> sem = pid.flatMap(p -> ImOption.fromScalaOpt(p.semester()));
-
-            return site.flatMap(site0 -> sem.map(sem0 -> new Pair<Site, Semester>(site0, sem0)));
-        }
-
         public void actionPerformed(ActionEvent evt) {
+            final JComponent c = (evt.getSource() instanceof JComponent) ? (JComponent) evt.getSource() : null;
 
-            final Component c = (evt.getSource() instanceof Component) ? (Component) evt.getSource() : null;
-
-            // We need the site and semester to convert the targets.
-            final Option<Tuple2<Site, Semester>> ss = siteSemester();
-            if (ss.isEmpty()) {
-                JOptionPane.showMessageDialog(c, "Couldn't determine the site and semester from the program id.", "Error", JOptionPane.ERROR_MESSAGE);
-            } else {
-                selectFile(c).foreach(f -> handleResult(c, ss.getValue(), readFile(f)));
-            }
+            TargetImport.promptAndReadAsJava(c, program).biForEach(
+              msg -> JOptionPane.showMessageDialog(c, msg, "Error", JOptionPane.ERROR_MESSAGE),
+              ts  -> addTargets(ts)
+            );
         }
     };
 
