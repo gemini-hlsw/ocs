@@ -349,12 +349,8 @@ final class EdTemplateParameters extends JPanel {
         { putValue(Action.SHORT_DESCRIPTION, "Add a new empty template observation."); }
 
         public void actionPerformed(ActionEvent evt) {
-            addNewParameters(new Function1<Option<TemplateParameters>, TemplateParameters>() {
-                @Override public TemplateParameters apply(Option<TemplateParameters> ignored) {
-                    // Always make a new blank template parameters object.
-                    return TemplateParameters.newEmpty();
-                }
-            });
+            // Always make a new blank template parameters object.
+            addNewParameters(o -> TemplateParameters.newEmpty());
         }
     };
 
@@ -365,15 +361,11 @@ final class EdTemplateParameters extends JPanel {
         public void actionPerformed(ActionEvent evt) {
             // Supply a function that will duplicate the provided prototypical
             // template parameters instance (if any) or make a new one otherwise
-            addNewParameters(new Function1<Option<TemplateParameters>, TemplateParameters>() {
-                @Override public TemplateParameters apply(Option<TemplateParameters> tp) {
-                    return tp.map(new MapOp<TemplateParameters, TemplateParameters>() {
-                        @Override public TemplateParameters apply(TemplateParameters proto) {
-                            return new TemplateParameters(proto.getParamSet(new PioXmlFactory()));
-                        }
-                    }).getOrElse(TemplateParameters.newEmpty());
-                }
-            });
+            addNewParameters(o ->
+                o.map(tp ->
+                    new TemplateParameters(tp.getParamSet(new PioXmlFactory()))
+                ).getOrElse(TemplateParameters.newEmpty())
+            );
         }
     };
 
@@ -389,7 +381,7 @@ final class EdTemplateParameters extends JPanel {
         // prototype.
         final Option<TemplateParameters> proto = (sel.length == 1) ?
                 new Some<TemplateParameters>((TemplateParameters) templateGroup.getTemplateParameters().get(sel[0]).getDataObject()) :
-                None.<TemplateParameters>instance();
+                None.instance();
 
         // Make a new template parameters object with the provided constructor.
         final ISPTemplateParameters newParams;
@@ -397,11 +389,7 @@ final class EdTemplateParameters extends JPanel {
             newParams = SPDB.get().getFactory().createTemplateParameters(program, null);
             newParams.setDataObject(cons.apply(proto));
             templateGroup.addTemplateParameters(where, newParams);
-            SwingUtilities.invokeLater(new Runnable() {
-                @Override public void run() {
-                    paramTable.getSelectionModel().setSelectionInterval(where, where);
-                }
-            });
+            SwingUtilities.invokeLater(() -> paramTable.getSelectionModel().setSelectionInterval(where, where));
         } catch (SPException ex) {
             DialogUtil.error(ex);
         }
