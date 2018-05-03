@@ -22,11 +22,24 @@ import scala.swing.FileChooser.Result.Approve
 
 import scalaz._
 import Scalaz._
+import scalaz.effect.IO
 
 /**
  * Utility for reading a file in Phase 1 target format into a List[SPTarget].
  */
 object TargetImport {
+
+  type ImportAction[A] = EitherT[IO, String, A]
+
+  object ImportAction {
+    def apply[A](a: => A): ImportAction[A] =
+      EitherT(IO(a.right))
+  }
+
+  private implicit class EitherOps[A](e: => String \/ A) {
+    def liftImportAction: ImportAction[A] =
+      EitherT.fromDisjunction[IO](e)
+  }
 
   /** Extracts the site and semester from the program's id, if possible. */
   private def siteAndSemester(program: ISPProgram): String \/ (Site, Semester) =
@@ -39,7 +52,7 @@ object TargetImport {
     } yield (site, sem)) \/> "Couldn't determine the site and semester from the program id."
 
   /** Reads the given file into a List of P1 Target, if possible. */
-  private def readFile(f: File): String \/ List[Target] = {
+  private def readFile(f: File): ImportAction[List[Target]] = {
     def format(pe: ParseError): String =
        s"${pe.targetName.map(_ + ": ").orZero}${pe.msg}"
 
@@ -55,39 +68,43 @@ object TargetImport {
            )
          }
 
-    AnyTargetReader
-      .read(f)
-      .disjunction
-      .bimap(_.msg.left[List[Target]], summarize(_))
-      .merge
+      EitherT(IO(AnyTargetReader
+        .read(f)
+        .disjunction
+        .bimap(_.msg.left[List[Target]], summarize(_))
+        .merge
+      ))
   }
 
-  /** Using the site and semester, converts the list of P1 Target into SPTarget. */
+/** Using the site and semester, converts the list of P1 Target into SPTarget. */
   private def convertTargets(site: Site, semester: Semester, ts: List[Target]): List[SPTarget] =
     ts.map(P1TargetConverter.toSpTarget(site, _, semester.getMidpointDate(site).getTime))
 
   /** Reads the file and converts the contained targets into SPTarget. */
-  private def readAndConvert(f: File, p: ISPProgram): String \/ List[SPTarget] =
+  private def readAndConvert(f: File, p: ISPProgram): ImportAction[List[SPTarget]] =
     for {
-      ss <- siteAndSemester(p)
+      ss <- siteAndSemester(p).liftImportAction
       ts <- readFile(f)
     } yield convertTargets(ss._1, ss._2, ts)
 
   /** Selects the file with a FileChooser. */
-  private def selectFile(c: JComponent): Option[File] = {
+  private def selectFile(c: JComponent): ImportAction[Option[File]] = {
     val chooser = new FileChooser()
     chooser.title                 = "Select Target File"
     chooser.multiSelectionEnabled = false
     chooser.fileFilter            = new FileNameExtensionFilter("Target Files", "csv", "fits", "tst", "xml")
-    chooser.showOpenDialog(Component.wrap(c)) match {
+    ImportAction(chooser.showOpenDialog(Component.wrap(c)) match {
       case Approve => Some(chooser.selectedFile)
       case _       => None
-    }
+    })
   }
 
-  def promptAndRead(c: JComponent, p: ISPProgram): String \/ List[SPTarget] =
-    selectFile(c).fold(List.empty[SPTarget].right[String])(readAndConvert(_, p))
+  def promptAndRead(c: JComponent, p: ISPProgram): ImportAction[List[SPTarget]] =
+    for {
+      of <- selectFile(c)
+      ts <- of.fold(ImportAction(List.empty[SPTarget]))(readAndConvert(_, p))
+    } yield ts
 
   def promptAndReadAsJava(c: JComponent, p: ISPProgram): ImEither[String, ImList[SPTarget]] =
-    promptAndRead(c, p).map(_.asImList).asImEither
+    promptAndRead(c, p).run.unsafePerformIO.map(_.asImList).asImEither
 }
