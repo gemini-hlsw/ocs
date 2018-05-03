@@ -73,12 +73,6 @@ public class ImCollections {
         }
 
         @Override
-        public ImList<Object> take(int n) { return this; }
-
-        @Override
-        public ImList<Object> drop(int n) { return this; }
-
-        @Override
         public boolean contains(final Object o) {
             return false;
         }

@@ -3,9 +3,6 @@ package edu.gemini.model.p1.targetio.api
 import edu.gemini.model.p1.immutable.Target
 import java.io.{InputStream, File}
 
-import scala.collection.JavaConverters._
-import scalaz._, Scalaz._
-
 trait TargetReader[+T <: Target] {
   protected [this] type TargetResult = Either[ParseError, T]
   protected [this] type Result       = Either[DataSourceError, List[TargetResult]]
@@ -13,8 +10,4 @@ trait TargetReader[+T <: Target] {
   def read(file: File): Result
   def read(is: InputStream): Result
   def read(data: String): Result
-
-  def readFileAsJava(file: File): Either[DataSourceError, java.util.List[Either[ParseError, Target]]] =
-    read(file).map(_.widen[Either[ParseError, Target]].asJava)
-
 }
