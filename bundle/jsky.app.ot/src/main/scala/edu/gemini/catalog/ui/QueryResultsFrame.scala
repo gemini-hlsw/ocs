@@ -3,12 +3,12 @@ package edu.gemini.catalog.ui
 import java.awt.Color
 import java.io._
 import java.nio.charset.Charset
+
 import javax.swing.BorderFactory._
 import javax.swing.border.Border
-import javax.swing.{BorderFactory, DefaultComboBoxModel, JOptionPane, UIManager}
-
+import javax.swing._
 import edu.gemini.ags.api.AgsMagnitude.MagnitudeTable
-import edu.gemini.ags.api.{AgsGuideQuality, AgsRegistrar}
+import edu.gemini.ags.api.{AgsGuideQuality, AgsRegistrar, GuideInFOV}
 import edu.gemini.ags.conf.ProbeLimitsTable
 import edu.gemini.catalog.api._
 import edu.gemini.catalog.ui.tpe.CatalogImageDisplay
@@ -40,6 +40,8 @@ import scala.collection.JavaConverters._
 import scala.swing.event._
 import scalaz._
 import Scalaz._
+
+import scala.collection.mutable.ListBuffer
 
 /**
  * Frame to display the Query controls and results

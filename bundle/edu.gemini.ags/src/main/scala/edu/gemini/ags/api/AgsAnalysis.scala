@@ -211,3 +211,19 @@ object AgsAnalysis {
     }
   }
 }
+
+sealed trait GuideInFOV
+case object InsideFOV extends GuideInFOV
+case object OutsideFOV extends GuideInFOV
+
+object GuideInFOV {
+  implicit val order: Order[GuideInFOV] = Order.order {
+    case (InsideFOV, OutsideFOV) => Ordering.GT
+    case (OutsideFOV, InsideFOV) => Ordering.LT
+    case _                       => Ordering.EQ
+  }
+
+  implicit val ordering: scala.Ordering[GuideInFOV] = order.toScalaOrdering
+
+  val All: List[GuideInFOV] = List(InsideFOV, OutsideFOV)
+}

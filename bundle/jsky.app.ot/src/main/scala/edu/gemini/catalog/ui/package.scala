@@ -248,72 +248,83 @@ case class GuidingQualityColumn(info: Option[ObservationInfo], title: String) ex
     PLens.nil.run
   ))
 
-  def ordering = implicitly[scala.math.Ordering[AgsGuideQuality]]
+  def ordering: scala.Ordering[AgsGuideQuality] = implicitly[scala.math.Ordering[AgsGuideQuality]]
 }
 
-case class RAColumn(title: String) extends CatalogNavigatorColumn[RightAscension] {
-  override val lens = Target.coords >=> Coordinates.ra.partial
+case class InFOVColumn(info: Option[ObservationInfo], title: String) extends CatalogNavigatorColumn[GuideInFOV] {
+  val gf: SiderealTarget @?> GuideInFOV = PLens{ t => GuidingQualityColumn.target2FOV(info, t).map(p => Store(_ => sys.error("Not in use"), p)) }
 
-  override def displayValue(t: Any) = Option(t).collect {
+  override val lens: Target @?> GuideInFOV = PLens(_.fold(
+    PLens.nil.run,
+    gf.run _ andThen (_.map(_.map(x => x: Target))),
+    PLens.nil.run
+  ))
+
+  def ordering: scala.Ordering[GuideInFOV] = implicitly[scala.math.Ordering[GuideInFOV]]
+}
+case class RAColumn(title: String) extends CatalogNavigatorColumn[RightAscension] {
+  override val lens: PLensFamily[Target, Target, RA, RA] = Target.coords >=> Coordinates.ra.partial
+
+  override def displayValue(t: Any): Option[String] = Option(t).collect {
     case r: RightAscension => r.toAngle.formatHMS
   }
 
-  def ordering = implicitly[scala.math.Ordering[RightAscension]]
+  def ordering: scala.Ordering[RA] = implicitly[scala.math.Ordering[RightAscension]]
 }
 
 case class DECColumn(title: String) extends CatalogNavigatorColumn[Declination] {
-  override val lens = Target.coords >=> Coordinates.dec.partial
+  override val lens: PLensFamily[Target, Target, Dec, Dec] = Target.coords >=> Coordinates.dec.partial
 
-  override def displayValue(t: Any) = Option(t).collect {
+  override def displayValue(t: Any): Option[String] = Option(t).collect {
     case d: Declination => d.formatDMS
   }
 
-  def ordering = implicitly[scala.math.Ordering[Declination]]
+  def ordering: scala.Ordering[Dec] = implicitly[scala.math.Ordering[Declination]]
 }
 
 case class DistanceColumn(base: Coordinates, title: String) extends CatalogNavigatorColumn[Angle] {
   val distance: Coordinates @> Angle = Lens(c => Store(r => c, Coordinates.difference(base, c).distance))
 
-  override val lens = Target.coords >=> distance.partial
+  override val lens: PLensFamily[Target, Target, Angle, Angle] = Target.coords >=> distance.partial
 
-  override def displayValue(t: Any) = Option(t).collect {
+  override def displayValue(t: Any): Option[String] = Option(t).collect {
     case a: Angle => f"${a.toArcmins}%.2f"
   }
 
-  def ordering = implicitly[scala.math.Ordering[Angle]]
+  def ordering: scala.Ordering[Angle] = implicitly[scala.math.Ordering[Angle]]
 }
 
 case class PMRAColumn(title: String) extends CatalogNavigatorColumn[RightAscensionAngularVelocity] {
-  override val lens = Target.pm >=> ProperMotion.deltaRA.partial
+  override val lens: PLensFamily[Target, Target, RightAscensionAngularVelocity, RightAscensionAngularVelocity] = Target.pm >=> ProperMotion.deltaRA.partial
 
-  override def displayValue(t: Any) = Option(t).collect {
+  override def displayValue(t: Any): Option[String] = Option(t).collect {
     case r: RightAscensionAngularVelocity => f"${r.velocity.masPerYear}%.2f"
   }
 
-  def ordering = implicitly[scala.math.Ordering[RightAscensionAngularVelocity]]
+  def ordering: scala.Ordering[RightAscensionAngularVelocity] = implicitly[scala.math.Ordering[RightAscensionAngularVelocity]]
 }
 
 case class PMDecColumn(title: String) extends CatalogNavigatorColumn[DeclinationAngularVelocity] {
-  override val lens = Target.pm >=> ProperMotion.deltaDec.partial
+  override val lens: PLensFamily[Target, Target, DeclinationAngularVelocity, DeclinationAngularVelocity] = Target.pm >=> ProperMotion.deltaDec.partial
 
-  override def displayValue(t: Any) = Option(t).collect {
+  override def displayValue(t: Any): Option[String] = Option(t).collect {
     case d: DeclinationAngularVelocity => f"${d.velocity.masPerYear}%.2f"
   }
 
-  def ordering = implicitly[scala.math.Ordering[DeclinationAngularVelocity]]
+  def ordering: scala.Ordering[DeclinationAngularVelocity] = implicitly[scala.math.Ordering[DeclinationAngularVelocity]]
 }
 
 case class MagnitudeColumn(band: MagnitudeBand) extends CatalogNavigatorColumn[Magnitude] {
-  override val title = band.name
+  override val title: String = band.name
   // Lens from list of magnitudes to the band's magnitude if present
   val bLens: List[Magnitude] @?> Magnitude = PLens(ml => ml.find(_.band === band).map(m => Store(b => sys.error("read-only lens"), m)))
-  override val lens = Target.magnitudes >=> bLens
+  override val lens: PLensFamily[Target, Target, Magnitude, Magnitude] = Target.magnitudes >=> bLens
 
-  override def displayValue(t: Any) = Option(t).collect {
+  override def displayValue(t: Any): Option[String] = Option(t).collect {
     case m: Magnitude => f"${m.value}%.2f"
   }
 
-  def ordering = implicitly[scala.math.Ordering[Magnitude]]
+  def ordering: scala.Ordering[Magnitude] = implicitly[scala.math.Ordering[Magnitude]]
 }
 
 /**
@@ -323,7 +334,7 @@ case class TargetsModel(info: Option[ObservationInfo], base: Coordinates, radius
   // Required to give limits to the existential type list
   type ColumnsList = List[CatalogNavigatorColumn[A] forSome { type A >: Null <: AnyRef}]
 
-  def baseColumnNames(base: Coordinates): ColumnsList = List(GuidingQuality(info, ""), IdColumn("Id"), RAColumn("RA"), DECColumn("Dec"), DistanceColumn(base, "Dist. [arcmin]"))
+  def baseColumnNames(base: Coordinates): ColumnsList = List(GuidingQualityColumn(info, ""), InFOVColumn(info, "fov"), IdColumn("Id"), RAColumn("RA"), DECColumn("Dec"), DistanceColumn(base, "Dist. [arcmin]"))
   val pmColumns: ColumnsList  = List(PMRAColumn("µ RA"), PMDecColumn("µ Dec"))
   val magColumns: List[MagnitudeColumn] = MagnitudeBand.all.map(MagnitudeColumn)
 
