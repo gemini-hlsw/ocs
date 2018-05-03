@@ -350,7 +350,7 @@ final class EdTemplateParameters extends JPanel {
 
         public void actionPerformed(ActionEvent evt) {
             // Always make a new blank template parameters object.
-            addNewParameters(o -> TemplateParameters.newEmpty());
+            addNewParameters(o -> ImCollections.singletonList(TemplateParameters.newEmpty()));
         }
     };
 
@@ -362,14 +362,16 @@ final class EdTemplateParameters extends JPanel {
             // Supply a function that will duplicate the provided prototypical
             // template parameters instance (if any) or make a new one otherwise
             addNewParameters(o ->
-                o.map(tp ->
-                    new TemplateParameters(tp.getParamSet(new PioXmlFactory()))
-                ).getOrElse(TemplateParameters.newEmpty())
+                ImCollections.singletonList(
+                    o.map(tp ->
+                        new TemplateParameters(tp.getParamSet(new PioXmlFactory()))
+                    ).getOrElse(TemplateParameters.newEmpty())
+                )
             );
         }
     };
 
-    private void addNewParameters(Function1<Option<TemplateParameters>, TemplateParameters> cons) {
+    private void addNewParameters(Function1<Option<TemplateParameters>, ImList<TemplateParameters>> cons) {
         // Where? After the last selected row I suppose (if any) or else
         // at the end.
         final int[] sel = paramTable.getSelectedRows();
@@ -384,15 +386,26 @@ final class EdTemplateParameters extends JPanel {
                 None.instance();
 
         // Make a new template parameters object with the provided constructor.
-        final ISPTemplateParameters newParams;
-        try {
-            newParams = SPDB.get().getFactory().createTemplateParameters(program, null);
-            newParams.setDataObject(cons.apply(proto));
-            templateGroup.addTemplateParameters(where, newParams);
-            SwingUtilities.invokeLater(() -> paramTable.getSelectionModel().setSelectionInterval(where, where));
-        } catch (SPException ex) {
-            DialogUtil.error(ex);
-        }
+        final ImList<TemplateParameters>      dobs = cons.apply(proto);
+        final ImList<ISPTemplateParameters> shells = dobs.map(dob -> {
+            final ISPTemplateParameters shell;
+            try {
+                shell = SPDB.get().getFactory().createTemplateParameters(program, null);
+            } catch (SPException ex) {
+                throw new RuntimeException(ex);
+            }
+            shell.setDataObject(dob);
+            return shell;
+        });
+
+        shells.reverse().foreach(s -> {
+            try {
+                templateGroup.addTemplateParameters(where, s);
+            } catch (SPException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
+        SwingUtilities.invokeLater(() -> paramTable.getSelectionModel().setSelectionInterval(where, where + shells.size() - 1));
     }
 
     // Action to remove a template group parameter triplet.
@@ -486,6 +499,11 @@ final class EdTemplateParameters extends JPanel {
             final long time = ss._2().getMidpointDate(site).getTime();
             final ImList<SPTarget> sps = targets.map(t -> P1TargetConverter.toSpTarget(site, t, time));
             System.out.println(sps.map(s -> s.getName()).mkString("", ", ", ""));
+            addNewParameters(o -> {
+                final SPSiteQuality sq = o.map(tp -> tp.getSiteQuality()).getOrElse(new SPSiteQuality());
+                final TimeValue     tv = o.map(tp -> tp.getTime()).getOrElse(TimeValue.ZERO_HOURS);
+                return sps.map(sp -> TemplateParameters.newInstance(sp, sq, tv));
+            });
         }
 
         private void handleResult(final Component c, final Tuple2<Site, Semester> ss, final ImEither<String, ImList<Target>> e) {
