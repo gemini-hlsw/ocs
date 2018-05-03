@@ -296,6 +296,7 @@ public class BasicTablePlotter
     private void plotRow(final int row, final Vector<Object> rowVec, final double x, final double y,
                            final int cooSys, final TablePlotSymbol symbol) {
         // eval expr to get condition
+
         final boolean cond = symbol.getCond(rowVec);
         if (!cond)
             return;

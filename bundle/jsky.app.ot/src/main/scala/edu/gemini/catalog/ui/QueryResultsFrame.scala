@@ -8,7 +8,7 @@ import javax.swing.BorderFactory._
 import javax.swing.border.Border
 import javax.swing._
 import edu.gemini.ags.api.AgsMagnitude.MagnitudeTable
-import edu.gemini.ags.api.{AgsGuideQuality, AgsRegistrar, GuideInFOV}
+import edu.gemini.ags.api._
 import edu.gemini.ags.conf.ProbeLimitsTable
 import edu.gemini.catalog.api._
 import edu.gemini.catalog.ui.tpe.CatalogImageDisplay
@@ -58,7 +58,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
   }
 
   private object GuidingFeedbackRenderer {
-    val icons = AgsGuideQuality.All.fproduct(GuidingIcon(_, enabled = true)).toMap
+    val icons: Map[AgsGuideQuality, ImageIcon] = AgsGuideQuality.All.fproduct(GuidingIcon(_, enabled = true)).toMap
     val dimensions = new Dimension(GuidingIcon.sideLength + 2, GuidingIcon.sideLength + 2)
   }
 
@@ -71,6 +71,21 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
     }
   }
 
+  private object InFOVRenderer {
+    val inFovIcon: ImageIcon = Resources.getIcon("bullet/bullet_green.png")
+    val outFovIcon: ImageIcon = Resources.getIcon("bullet/bullet_red.png")
+    val icons: Map[GuideInFOV, ImageIcon] = Map(InsideFOV -> inFovIcon, OutsideFOV -> outFovIcon)
+    val dimensions = new Dimension(GuidingIcon.sideLength + 2, GuidingIcon.sideLength + 2)
+  }
+
+  private class InFOVRenderer extends Table.AbstractRenderer[GuideInFOV, Label](new Label) {
+    override def configure(t: Table, sel: Boolean, foc: Boolean, value: GuideInFOV, row: Int, col: Int): Unit = {
+      component.icon = InFOVRenderer.icons.get(value).orNull
+      component.text = ""
+      component.preferredSize = InFOVRenderer.dimensions
+      component.maximumSize = InFOVRenderer.dimensions
+    }
+  }
   private lazy val resultsTable = new Table() with SortableTable with TableColumnsAdjuster {
     selection.elementMode = Table.ElementMode.Row
     listenTo(selection)
@@ -94,6 +109,8 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
       (model, model.getValueAt(viewToModelRow(row), viewToModelColumn(column))) match {
         case (_, q: AgsGuideQuality) =>
           new GuidingFeedbackRenderer().componentFor(this, isSelected, focused, q, row, column)
+        case (_, q: GuideInFOV) =>
+          new InFOVRenderer().componentFor(this, isSelected, focused, q, row, column)
         case (m: TargetsModel, value) =>
           // Delegate rendering to the model
           m.rendererComponent(value, isSelected, focused, row, column, this.peer).getOrElse(super.rendererComponent(isSelected, focused, row, column))
