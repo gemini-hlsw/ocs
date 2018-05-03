@@ -2,13 +2,13 @@ package edu.gemini.catalog.ui
 
 import java.awt.Color
 import java.net.URL
-import javax.swing.event.TableModelListener
 
+import javax.swing.event.TableModelListener
 import edu.gemini.ags.api.AgsGuideQuality._
-import edu.gemini.ags.api.AgsGuideQuality
+import edu.gemini.ags.api.{AgsGuideQuality, GuideInFOV, InsideFOV, OutsideFOV}
 import edu.gemini.catalog.ui.tpe.CatalogImageDisplay
 import edu.gemini.pot.ModelConverters._
-import edu.gemini.spModel.core.{SiderealTarget, MagnitudeBand}
+import edu.gemini.spModel.core.{MagnitudeBand, SiderealTarget}
 import edu.gemini.shared.util.immutable.{Option => JOption}
 import edu.gemini.shared.util.immutable.ScalaConverters._
 import jsky.catalog._
@@ -179,7 +179,7 @@ object adapters {
 
   /** Table Query Result Adapter to let the BasicTablePlotter work */
   case class TableQueryResultAdapter(model: TargetsModel) extends TableQueryResult {
-    val catalog = new CatalogAdapter(model)
+    val catalog = CatalogAdapter(model)
 
     // Table QueryResult methods
     override def getCatalog: Catalog = catalog
@@ -297,7 +297,7 @@ case class TpePlotter(display: CatalogImageDisplay) {
   }
 
   /**
-   * Plot the given table data.
+   * Select items on the image
    */
   def select(model: TargetsModel, selected: Set[Int]): Unit = {
     val qr = TableQueryResultAdapter(model)

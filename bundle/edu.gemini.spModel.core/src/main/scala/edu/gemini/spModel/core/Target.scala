@@ -113,7 +113,6 @@ trait TargetLenses {
 
 }
 
-
 /**
  * Target of opportunity, with no coordinates. Use '''TooTarget.empty''' if no name is given.
  * @param name a human-readable name

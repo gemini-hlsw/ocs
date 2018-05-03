@@ -2,10 +2,10 @@ package jsky.app.ot.gemini.editor.targetComponent
 
 import java.awt.Color
 import java.awt.Color._
-import javax.swing.{BorderFactory, Icon}
 
+import javax.swing.{BorderFactory, Icon}
 import edu.gemini.ags.api.AgsAnalysis.{NoGuideStarForGroup, NoGuideStarForProbe}
-import edu.gemini.ags.api.{AgsAnalysis, AgsRegistrar}
+import edu.gemini.ags.api.{AgsAnalysis, AgsRegistrar, InsideFOV}
 import edu.gemini.ags.api.AgsGuideQuality.{DeliversRequestedIq, IqDegradation, PossibleIqDegradation, PossiblyUnusable, Unusable}
 import edu.gemini.ags.api.AgsMagnitude.{MagnitudeCalc, MagnitudeTable}
 import edu.gemini.pot.ModelConverters._
@@ -26,11 +26,12 @@ import scala.swing.GridBagPanel.Fill
 import scala.swing.{Alignment, GridBagPanel, Label}
 import scalaz._
 import Scalaz._
+import javax.swing.border.Border
 
 
 object TargetFeedback {
   sealed trait Row extends GridBagPanel {
-    protected val labelBorder = BorderFactory.createEmptyBorder(2, 2, 2, 2)
+    protected val labelBorder: Border = BorderFactory.createEmptyBorder(2, 2, 2, 2)
   }
 }
 
@@ -38,7 +39,7 @@ object TargetGuidingFeedback {
   import TargetFeedback.Row
 
   case class AnalysisRow(analysis: AgsAnalysis, probeLimits: Option[ProbeLimits], includeProbeName: Boolean) extends Row {
-    val bg = analysis.quality match {
+    val bg: Color = analysis.quality match {
       case DeliversRequestedIq   => HONEY_DEW
       case PossibleIqDegradation => BANANA
       case IqDegradation         => CANTALOUPE

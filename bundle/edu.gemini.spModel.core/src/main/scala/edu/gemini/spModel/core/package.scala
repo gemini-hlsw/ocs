@@ -19,13 +19,13 @@ package object core {
     }
 
   type RA = RightAscension
-  val  RA = RightAscension
+  val  RA: RightAscension.type = RightAscension
 
   type Dec = Declination
-  val  Dec = Declination
+  val  Dec: Declination.type = Declination
 
   implicit def SPProgramIdToRichProgramId(id: SPProgramID): RichSpProgramId =
-    new RichSpProgramId(id)
+    RichSpProgramId(id)
 
   implicit val OrderSPProgramID: Order[SPProgramID] =
     Order.fromScalaOrdering(scala.math.Ordering.ordered[SPProgramID])
@@ -60,7 +60,7 @@ package object core {
 
   /** For keys you can subtract we can find the closest matching pair.  */
   implicit class NumericKeyedMapOps[K, V](m: K ==>> V)(implicit N: Numeric[K]) {
-    implicit val KOrder = Order.fromScalaOrdering(N)
+    implicit val KOrder: Order[K] = Order.fromScalaOrdering(N)
 
     /** Find the closest matching pair, if any. */
     def lookupClosestAssoc(k: K): Option[(K, V)] =

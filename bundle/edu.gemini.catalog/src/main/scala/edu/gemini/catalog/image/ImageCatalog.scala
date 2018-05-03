@@ -117,15 +117,15 @@ object Dss2iESO extends DssCatalog(Dss2IREsoId, "Digitized Sky (Version II infra
 }
 
 object TwoMassJ extends AstroCatalog(TwoMassJId, "2MASS Quick-Look Image Retrieval Service (J Band)", "2MASS-J") {
-  override val band = MagnitudeBand.J
+  override val band: MagnitudeBand = MagnitudeBand.J
 }
 
 object TwoMassH extends AstroCatalog(TwoMassHId, "2MASS Quick-Look Image Retrieval Service (H Band)", "2MASS-H") {
-  override val band = MagnitudeBand.H
+  override val band: MagnitudeBand = MagnitudeBand.H
 }
 
 object TwoMassK extends AstroCatalog(TwoMassKId, "2MASS Quick-Look Image Retrieval Service (K Band)", "2MASS-K") {
-  override val band = MagnitudeBand.K
+  override val band: MagnitudeBand = MagnitudeBand.K
 }
 
 /**
@@ -133,7 +133,7 @@ object TwoMassK extends AstroCatalog(TwoMassKId, "2MASS Quick-Look Image Retriev
   */
 object ImageCatalog {
   val DefaultImageSize: Angle = Angle.fromArcmin(15.0)
-  val DefaultImageCatalog = DssGemini
+  val DefaultImageCatalog: ImageCatalog = DssGemini
 
   /** @group Typeclass Instances */
   implicit val equals: Equal[ImageCatalog] = Equal.equalA[ImageCatalog]

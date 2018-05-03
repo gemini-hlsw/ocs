@@ -37,7 +37,7 @@ case object TWOMASS_XSC extends CatalogName("twomass_xsc", "TwoMass XSC @ Gemini
 case object SIMBAD extends CatalogName("simbad", "Simbad")
 
 object CatalogName {
-  implicit val equals = Equal.equal[CatalogName]((a, b) => a.id === b.id)
+  implicit val equals: Equal[CatalogName] = Equal.equal[CatalogName]((a, b) => a.id === b.id)
 }
 
 /**
@@ -59,7 +59,7 @@ case class ConeSearchCatalogQuery(id: Option[Int], base: Coordinates, radiusCons
   val filters: NonEmptyList[QueryResultsFilter] = NonEmptyList(RadiusFilter(base, radiusConstraint), magnitudeConstraints.map(MagnitudeQueryFilter.apply): _*)
   override def filter(t: SiderealTarget):Boolean = filters.toList.forall(_.filter(t))
 
-  override def isSuperSetOf(q: CatalogQuery) = q match {
+  override def isSuperSetOf(q: CatalogQuery): Boolean = q match {
     case c: ConeSearchCatalogQuery =>
 
       // Angular separation, or distance between the two.
@@ -77,7 +77,7 @@ case class ConeSearchCatalogQuery(id: Option[Int], base: Coordinates, radiusCons
 }
 
 object ConeSearchCatalogQuery {
-  implicit val equals = Equal.equalA[ConeSearchCatalogQuery]
+  implicit val equals: Equal[ConeSearchCatalogQuery] = Equal.equalA[ConeSearchCatalogQuery]
 }
 
 /**
@@ -101,5 +101,5 @@ object CatalogQuery {
 
   def apply(search: String):CatalogQuery = NameCatalogQuery(search, SIMBAD)
 
-  implicit val equals = Equal.equalA[CatalogQuery]
+  implicit val equals: Equal[CatalogQuery] = Equal.equalA[CatalogQuery]
 }
