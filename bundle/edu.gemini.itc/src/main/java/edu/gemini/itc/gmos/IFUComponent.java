@@ -69,9 +69,9 @@ public final class IFUComponent extends TransmissionElement {
 
         int Nelements = 0;
         for (int i = 0; i < numX; i++) {
-            double x = (i - (numX/2.)) * (0.75*IFU_DIAMETER + IFU_SPACING);
+            double x = (i - (numX/2.)) * ((Math.sqrt(3)/2.)*IFU_DIAMETER + IFU_SPACING);
             for (int j = 0; j < numY; j++) {
-                double y = (2*j - (numY - Math.abs(i)%2 + 1)) * ((Math.sqrt(3)/4.)*IFU_DIAMETER + IFU_SPACING);
+                double y = (2*j - (numY - Math.abs(i)%2 + 1)) * (IFU_DIAMETER/2. + IFU_SPACING);
                 double r = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
                 if (r < radius) {
                     IFUApertures.addAperture(new HexagonalAperture(x, y, IFU_DIAMETER));
