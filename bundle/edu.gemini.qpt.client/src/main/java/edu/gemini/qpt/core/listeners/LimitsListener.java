@@ -1,10 +1,11 @@
 package edu.gemini.qpt.core.listeners;
 
 import java.beans.PropertyChangeEvent;
-import java.util.List;
+import java.util.*;
+import java.util.function.Predicate;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
-import edu.gemini.lch.services.model.ShutteringWindow;
 import edu.gemini.qpt.core.Alloc;
 import edu.gemini.qpt.core.Variant;
 import edu.gemini.qpt.core.Alloc.Circumstance;
@@ -13,11 +14,12 @@ import edu.gemini.qpt.core.Variant.Flag;
 import edu.gemini.qpt.shared.sp.Group;
 import edu.gemini.qpt.core.util.LttsServicesClient;
 import edu.gemini.qpt.core.util.MarkerManager;
+import edu.gemini.qpt.shared.sp.Obs;
 import edu.gemini.qpt.shared.util.TimeUtils;
 import edu.gemini.spModel.obscomp.SPGroup.GroupType;
 
 /**
- * Generates Alloc markers if the alloc reaches elevation or airmass limits.
+ * Generates Alloc markers.
  * @author rnorris
  */
 public class LimitsListener extends MarkerModelListener<Variant> {
@@ -37,6 +39,9 @@ public class LimitsListener extends MarkerModelListener<Variant> {
 		mm.clearMarkers(this, v);
 
 		for (Alloc a: v.getAllocs()) {
+
+			// Add a marker if better-scoring observations are unscheduled
+			ScoreMarker.add(this, mm, v, a);
 
 			// Solo in scheduling group
 			Group g = a.getObs().getGroup();
@@ -235,6 +240,54 @@ public class LimitsListener extends MarkerModelListener<Variant> {
 	@Override
 	protected MarkerManager getMarkerManager(Variant t) {
 		return t.getSchedule().getMarkerManager();
+	}
+
+}
+
+
+// REL-397: warn if another unscheduled obs in the same program has a higher score and is within 1.5h in RA.
+class ScoreMarker {
+
+	private static final double RA_LIMIT_H = 1.5; // we only care about other observations within this distance in RA
+	private static final double RA_LIMIT_DEG = RA_LIMIT_H * 15; // 15 degrees per hour
+	private static final String PREFIX = String.format("Higher-scoring observation(s) within %2.1fH: ", RA_LIMIT_H);
+
+	public static void add(Object owner, MarkerManager mm, Variant v, Alloc a) {
+
+		// unscheduled observations
+		final Predicate<Obs> unscheduled = obs ->
+			!v.getFlags(obs).contains(Flag.SCHEDULED);
+
+		// observations within RA_LIMIT_DEG of `a`
+		final Predicate<Obs> nearby = otherObs -> {
+			final double myRaDeg    = a.getObs().getRa(a.getStart()); // My RA at scheduling time
+			final double otherRaDeg = otherObs.getRa(a.getStart());
+			final double raDiffDeg  = Math.abs(myRaDeg - otherRaDeg);
+			return raDiffDeg <= RA_LIMIT_DEG;
+		};
+
+		// observations with a better score than `a.getObs`
+		final Predicate<Obs> higherScoring = otherObs -> {
+			final double myScore    = v.getScore(a.getObs());
+			final double otherScore = v.getScore(otherObs);
+			return otherScore > myScore;
+		};
+
+		// all of the above, ordered by cost to compute
+		final Predicate<Obs> all =
+			unscheduled.and(nearby).and(higherScoring);
+
+		// observations in the same program as `a` that meet all filter conditions
+		final List<Obs> alternatives =
+			a.getObs().getProg().getFullObsSet().stream().filter(all).collect(Collectors.toList());
+
+		// if there are any, add a marker
+		if (!alternatives.isEmpty()) {
+			final String msg =
+				alternatives.stream().map(Obs::getObsId).collect(Collectors.joining(" ", PREFIX, ""));
+			mm.addMarker(true, owner, Severity.Warning, msg, v, a);
+		}
+
 	}
 
 }
