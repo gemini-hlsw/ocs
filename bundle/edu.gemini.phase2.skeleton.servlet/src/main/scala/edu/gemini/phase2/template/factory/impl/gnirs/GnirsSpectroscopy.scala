@@ -72,18 +72,30 @@ case class GnirsSpectroscopy(blueprint:SpGnirsBlueprintSpectroscopy, exampleTarg
   // # Short Camera bad-pixel patch at +5.25 < Q < +11.25 -> Use -2,+4 and -4,+2
   // # Long Camera bad-pixel patch at  +1.75 < Q <  +3.75 -> Use -1,+5 for both sci and std
   // IF CROSS-DISPERSED == No:
-  //    IF PI Central Wavelength < 2.5um:
-  //       SET Q-OFFSET to -2, 4, 4, -2 respectively IN ITERATOR CALLED 'ABBA offset pattern' for {12}          # Science
-  //       SET Q-OFFSET to -4, 2, 2, -4 respectively IN ITERATOR CALLED 'ABBA offset pattern' for {6}, {14}     # Tellurics
-  //    ELSE:
-  //       SET Q-OFFSET to -1, 5, 5, -1 respectively IN ITERATOR CALLED 'ABBA offset pattern' for {6},{12},{14} # Science & Tellurics
-
+  //   IF pixel scale = 0.15" AND wavelength < 2.5um:
+  //     SET Q-OFFSET to +2, -4, -4, +2 IN ITERATOR CALLED 'ABBA offset pattern' FOR {12} # Science
+  //     SET Q-OFFSET to -2, +4, +4, -2 IN ITERATOR CALLED 'ABBA offset pattern' FOR {6},{14} # Telluric
+  //   ELIF pixel scale = 0.15" AND wavelength >= 2.5um:
+  //     SET Q-OFFSET to +2, -4, -4, +2 IN ITERATOR CALLED 'ABBA offset pattern' FOR {6},{12},{14} # Sci & Tell
+  //   ELIF pixel scale = 0.05" AND wavelength < 2.5um:
+  //     SET Q-OFFSET to -1, +5, +5, -1 IN ITERATOR CALLED 'ABBA offset pattern' FOR {12} # Science
+  //     SET Q-OFFSET to +1, -5, -5, +1 IN ITERATOR CALLED 'ABBA offset pattern' FOR {6},{14} # Telluric
+  //   ELIF pixel scale = 0.05" AND wavelength > 2.5um:
+  //     SET Q-OFFSET to -1, +5, +5, -1 IN ITERATOR CALLED 'ABBA offset pattern' FOR {6},{12},{14} # Sci & Tell
   if (crossDisperser == CrossDispersed.NO) {
-    if (wavelengthGe2_5) {
+    if (pixelScale == PixelScale.PS_015 && !wavelengthGe2_5) {
+      forObs(12)(mutateOffsets.withTitle("ABBA offset sequence")(setQ(2, -4, -4, 2)))
+      forObs(6, 14)(mutateOffsets.withTitle("ABBA offset sequence")(setQ(-2, 4, 4, -2)))
+    }
+    else if (pixelScale == PixelScale.PS_015 && wavelengthGe2_5) {
+      forObs(6, 12, 14)(mutateOffsets.withTitle("ABBA offset sequence")(setQ(2, -4, -4, 2)))
+    }
+    else if (pixelScale == PixelScale.PS_005 && !wavelengthGe2_5) {
+      forObs(12)(mutateOffsets.withTitle("ABBA offset sequence")(setQ(-1, 5, 5, -1)))
+      forObs(6, 14)(mutateOffsets.withTitle("ABBA offset sequence")(setQ(1, -5, -5, 1)))
+    }
+    else if (pixelScale == PixelScale.PS_005 && wavelengthGe2_5) {
       forObs(6, 12, 14)(mutateOffsets.withTitle("ABBA offset sequence")(setQ(-1, 5, 5, -1)))
-    } else {
-      forObs(12)(mutateOffsets.withTitle("ABBA offset sequence")(setQ(-2, 4, 4, -2)))
-      forObs(6, 14)(mutateOffsets.withTitle("ABBA offset sequence")(setQ(-4, 2, 2, -4)))
     }
   }
 
