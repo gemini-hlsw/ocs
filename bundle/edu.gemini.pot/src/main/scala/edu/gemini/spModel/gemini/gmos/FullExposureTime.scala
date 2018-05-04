@@ -19,7 +19,7 @@ import Scalaz._
   */
 object FullExposureTime {
 
-  private object keys {
+  object keys {
     val StepCount:    ItemKey = new ItemKey(s"$INSTRUMENT_CONFIG_NAME:$NS_STEP_COUNT_PROP_NAME")
     val CycleCount:   ItemKey = new ItemKey(s"$INSTRUMENT_CONFIG_NAME:${NUM_NS_CYCLES_PROP.getName}")
     val UseNs:        ItemKey = new ItemKey(s"$INSTRUMENT_CONFIG_NAME:${USE_NS_PROP.getName}")
