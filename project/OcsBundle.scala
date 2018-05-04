@@ -185,6 +185,7 @@ trait OcsBundle {
       bundle_edu_gemini_util_osgi,
       bundle_edu_gemini_model_p1_pdf,
       bundle_edu_gemini_model_p1,
+      bundle_edu_gemini_model_p1_targetio,
       bundle_edu_gemini_util_pdf,
       bundle_jsky_coords,
       bundle_jsky_util

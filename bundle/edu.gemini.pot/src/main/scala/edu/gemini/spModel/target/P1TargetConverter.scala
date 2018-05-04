@@ -1,26 +1,24 @@
-package edu.gemini.phase2.skeleton.factory
+package edu.gemini.spModel.target
 
 import edu.gemini.model.p1.immutable._
 import edu.gemini.spModel.core
-import edu.gemini.spModel.target.SPTarget
 
 import scalaz._, Scalaz._
 
-// P1 and P2 models are almost identical now
-object SpTargetFactory {
+/**
+ * Converts a P1 Target to an SPTarget.
+ */
+object P1TargetConverter {
 
-  val dra  = core.ProperMotion.deltaRA  >=> core.RightAscensionAngularVelocity.velocity >=> core.AngularVelocity.masPerYear
-  val ddec = core.ProperMotion.deltaDec >=> core.DeclinationAngularVelocity.velocity    >=> core.AngularVelocity.masPerYear
+  private val dra  = core.ProperMotion.deltaRA  >=> core.RightAscensionAngularVelocity.velocity >=> core.AngularVelocity.masPerYear
+  private val ddec = core.ProperMotion.deltaDec >=> core.DeclinationAngularVelocity.velocity    >=> core.AngularVelocity.masPerYear
 
-  def create(s: core.Site, t: Target, time: Long): Either[String, SPTarget] = {
-    val ct: core.Target =
-      t match {
+  def toSpTarget(s: core.Site, t: Target, time: Long): SPTarget =
+    new SPTarget(t match {
         case too: TooTarget         => core.TooTarget(too.name)
         case nsd: NonSiderealTarget => initNonSidereal(s, nsd, time).exec(core.NonSiderealTarget.empty)
-        case sid: SiderealTarget    => initSidereal(sid, time).exec(core.SiderealTarget.empty)
-      }
-    Right(new SPTarget(ct))
-  }
+        case sid: SiderealTarget    => initSidereal(sid).exec(core.SiderealTarget.empty)
+    })
 
   private def toCoreEphemeris(s: core.Site, e: List[EphemerisElement]): core.Ephemeris =
     core.Ephemeris(s, ==>>.fromList(e.map { case EphemerisElement(coords, _, time) => (time -> coords) }))
@@ -38,7 +36,7 @@ object SpTargetFactory {
       _ <- core.NonSiderealTarget.magnitudes := nsid.magnitude(time).map(apparentMag).toList
     } yield ()
 
-  private def initSidereal(sid: SiderealTarget, time: Long): State[core.SiderealTarget, Unit] =
+  private def initSidereal(sid: SiderealTarget): State[core.SiderealTarget, Unit] =
     for {
       _ <- core.SiderealTarget.name         := sid.name
       _ <- core.SiderealTarget.coordinates  := sid.coords

@@ -1,5 +1,4 @@
 package jsky.app.ot.editor.template;
-
 import edu.gemini.pot.client.SPDB;
 import edu.gemini.pot.sp.*;
 import edu.gemini.shared.gui.ButtonFlattener;
@@ -339,12 +338,8 @@ final class EdTemplateParameters extends JPanel {
         { putValue(Action.SHORT_DESCRIPTION, "Add a new empty template observation."); }
 
         public void actionPerformed(ActionEvent evt) {
-            addNewParameters(new Function1<Option<TemplateParameters>, TemplateParameters>() {
-                @Override public TemplateParameters apply(Option<TemplateParameters> ignored) {
-                    // Always make a new blank template parameters object.
-                    return TemplateParameters.newEmpty();
-                }
-            });
+            // Always make a new blank template parameters object.
+            addNewParameters(o -> ImCollections.singletonList(TemplateParameters.newEmpty()));
         }
     };
 
@@ -355,19 +350,17 @@ final class EdTemplateParameters extends JPanel {
         public void actionPerformed(ActionEvent evt) {
             // Supply a function that will duplicate the provided prototypical
             // template parameters instance (if any) or make a new one otherwise
-            addNewParameters(new Function1<Option<TemplateParameters>, TemplateParameters>() {
-                @Override public TemplateParameters apply(Option<TemplateParameters> tp) {
-                    return tp.map(new MapOp<TemplateParameters, TemplateParameters>() {
-                        @Override public TemplateParameters apply(TemplateParameters proto) {
-                            return new TemplateParameters(proto.getParamSet(new PioXmlFactory()));
-                        }
-                    }).getOrElse(TemplateParameters.newEmpty());
-                }
-            });
+            addNewParameters(o ->
+                ImCollections.singletonList(
+                    o.map(tp ->
+                        new TemplateParameters(tp.getParamSet(new PioXmlFactory()))
+                    ).getOrElse(TemplateParameters.newEmpty())
+                )
+            );
         }
     };
 
-    private void addNewParameters(Function1<Option<TemplateParameters>, TemplateParameters> cons) {
+    private void addNewParameters(Function1<Option<TemplateParameters>, ImList<TemplateParameters>> cons) {
         // Where? After the last selected row I suppose (if any) or else
         // at the end.
         final int[] sel = paramTable.getSelectedRows();
@@ -379,22 +372,29 @@ final class EdTemplateParameters extends JPanel {
         // prototype.
         final Option<TemplateParameters> proto = (sel.length == 1) ?
                 new Some<TemplateParameters>((TemplateParameters) templateGroup.getTemplateParameters().get(sel[0]).getDataObject()) :
-                None.<TemplateParameters>instance();
+                None.instance();
 
         // Make a new template parameters object with the provided constructor.
-        final ISPTemplateParameters newParams;
-        try {
-            newParams = SPDB.get().getFactory().createTemplateParameters(program, null);
-            newParams.setDataObject(cons.apply(proto));
-            templateGroup.addTemplateParameters(where, newParams);
-            SwingUtilities.invokeLater(new Runnable() {
-                @Override public void run() {
-                    paramTable.getSelectionModel().setSelectionInterval(where, where);
-                }
-            });
-        } catch (SPException ex) {
-            DialogUtil.error(ex);
-        }
+        final ImList<TemplateParameters>      dobs = cons.apply(proto);
+        final ImList<ISPTemplateParameters> shells = dobs.map(dob -> {
+            final ISPTemplateParameters shell;
+            try {
+                shell = SPDB.get().getFactory().createTemplateParameters(program, null);
+            } catch (SPException ex) {
+                throw new RuntimeException(ex);
+            }
+            shell.setDataObject(dob);
+            return shell;
+        });
+
+        shells.reverse().foreach(s -> {
+            try {
+                templateGroup.addTemplateParameters(where, s);
+            } catch (SPException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
+        SwingUtilities.invokeLater(() -> paramTable.getSelectionModel().setSelectionInterval(where, where + shells.size() - 1));
     }
 
     // Action to remove a template group parameter triplet.
@@ -433,6 +433,28 @@ final class EdTemplateParameters extends JPanel {
                     }
                 }
             }
+        }
+    };
+
+    // Action to import a target list.
+    private final Action importAction = new AbstractAction("Import", Resources.getIcon("import.gif")) {
+        { putValue(Action.SHORT_DESCRIPTION, "Import targets from a file."); }
+
+        private void addTargets(final ImList<SPTarget> ts) {
+            addNewParameters(o -> {
+                final SPSiteQuality sq = o.map(tp -> tp.getSiteQuality()).getOrElse(new SPSiteQuality());
+                final TimeValue     tv = o.map(tp -> tp.getTime()).getOrElse(TimeValue.ZERO_HOURS);
+                return ts.map(t -> TemplateParameters.newInstance(t, sq, tv));
+            });
+        }
+
+        public void actionPerformed(ActionEvent evt) {
+            final JComponent c = (evt.getSource() instanceof JComponent) ? (JComponent) evt.getSource() : null;
+
+            TargetImport.promptAndReadAsJava(c, program).biForEach(
+              msg -> JOptionPane.showMessageDialog(c, msg, "Error", JOptionPane.ERROR_MESSAGE),
+              ts  -> addTargets(ts)
+            );
         }
     };
 
@@ -500,6 +522,9 @@ final class EdTemplateParameters extends JPanel {
             ));
             add(new JPanel(), new GridBagConstraints(
                 3, 0, 1, 1, 1.0, 0.0, CENTER, HORIZONTAL, zero, 0, 0
+            ));
+            add(flatButton(importAction), new GridBagConstraints(
+                4, 0, 1, 1, 0.0, 0.0, CENTER, NONE, zero, 0, 0
             ));
         }};
 
