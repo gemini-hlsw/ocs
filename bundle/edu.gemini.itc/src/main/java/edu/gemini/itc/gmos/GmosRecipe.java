@@ -494,7 +494,8 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         String title = "Intermediate Single Exp and Final S/N in aperture" + (ifuUsed ? "\nIFU element offset: " + String.format("%.2f", ifuOffset) + " arcsec" : "");
         if (mainInstrument.isIfuUsed() &&  mainInstrument.getIfuMethod().get() instanceof IfuSum) {
             final IfuSum ifu = (IfuSum) mainInstrument.getIfuMethod().get();
-            title = "Intermediate Single Exp and Final S/N in aperture\nIFU elements summed in a radius of " + String.format("%.2f", ifu.num()) + " arcsec";
+            final int ifuElements = mainInstrument.getIFU().getApertureOffsetList().size();
+            title = "Intermediate Single Exp and Final S/N in aperture\n" + String.format("%d", ifuElements) + " IFU elements summed in a radius of " + String.format("%.2f", ifu.num()) + " arcsec";
         }
         final ChartAxis xAxis = ChartAxis.apply("Wavelength (nm)");
         final ChartAxis yAxis = ChartAxis.apply("Signal / Noise per spectral pixel");

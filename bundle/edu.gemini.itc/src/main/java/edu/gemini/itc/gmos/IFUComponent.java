@@ -65,20 +65,19 @@ public final class IFUComponent extends TransmissionElement {
 
         int numY = 25;            // number of elements in the IFU in the y-direction
         int numX = 20;            // number of elements in the IFU-1 in the x-direction
-        if (isIfu2) {
-            numX = 40;            // number of elements in the IFU-2 in the x-direction
-        }
+        if (isIfu2) numX = 40;    // number of elements in the IFU-2 in the x-direction
 
         int Nelements = 0;
-        for (int i = 0; i < numY; i++) {
-            double y = (i - (numY-1)/2.) * IFU_DIAMETER;
-            for (int j = 0; j < numX; j++) {
-                double x = (j - (numX-1)/2.) * IFU_DIAMETER;
+        double distX = (Math.sqrt(3)/2.0)*IFU_DIAMETER + IFU_SPACING;
+        double distY = (IFU_DIAMETER + IFU_SPACING)/2.0;
+        for (int i = 0; i < numX; i++) {
+            double x = (i - (numX/2.0)) * distX;
+            for (int j = 0; j < numY; j++) {
+                double y = (2*j - (numY - Math.abs(i)%2 + 1)) * distY;
                 double r = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
                 if (r < radius) {
                     IFUApertures.addAperture(new HexagonalAperture(x, y, IFU_DIAMETER));
-                    IFUOffsets.add(x);
-                    IFUOffsets.add(y);
+                    IFUOffsets.add(r);
                     Nelements++;
                 }
             }
