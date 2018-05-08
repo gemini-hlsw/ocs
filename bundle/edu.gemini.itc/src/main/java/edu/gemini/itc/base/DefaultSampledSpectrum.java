@@ -67,7 +67,7 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
 
         if ( (1+z) * sp.getStart() > xStart || (1+z) * sp.getEnd() < xEnd ) {
             throw new IllegalArgumentException(
-                    String.format("Redshifted SED (%.1f - %.1f nm) does not cover range of instrument configuration (%.1f - %.1f nm).",
+                    String.format("Redshifted SED (%.1f - %.1f nm) does not cover the range of the instrument and normalization band (%.1f - %.1f nm).",
                             (1+z)*sp.getStart(), (1+z)*sp.getEnd(), xStart, xEnd));
         }
 
