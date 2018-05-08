@@ -199,6 +199,10 @@ public class LimitsListener extends MarkerModelListener<Variant> {
 					mm.addMarker(false, this, Severity.Error, "Required custom mask is in cabinet.", v, a);
 					break;
 
+				case MASK_UNAVAILABLE:
+					mm.addMarker(false, this, Severity.Error, "Required custom mask is unavailable.", v, a);
+					break;
+
 				case INSTRUMENT_UNAVAILABLE:
 					mm.addMarker(false, this, Severity.Error, "Required instrument is unavailable.", v, a);
 					break;

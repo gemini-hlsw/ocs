@@ -685,10 +685,7 @@ public final class Variant extends BaseMutableBean implements PioSerializable, C
 						if (a == Availability.SummitCabinet) {
 							maskFlags.add(Flag.MASK_IN_CABINET);
 						} else if (a != Availability.Installed) {
-							// TODO: distinguish this case from standard
-							// facilities unavailable with a different Flag?
-							// MASK_UNAVAILABLE?
-							maskFlags.add(Flag.CONFIG_UNAVAILABLE);
+							maskFlags.add(Flag.MASK_UNAVAILABLE);
 						}
 					}
 				});
@@ -954,6 +951,7 @@ public final class Variant extends BaseMutableBean implements PioSerializable, C
 	private static final EnumSet<Flag> AUTOMATIC_DEATH_FLAGS = EnumSet.of(
 			Flag.CONFIG_UNAVAILABLE,
 			Flag.MASK_IN_CABINET,
+			Flag.MASK_UNAVAILABLE,
             Flag.LGS_UNAVAILABLE,
 			Flag.INSTRUMENT_UNAVAILABLE,
 			Flag.ELEVATION_CNS,
