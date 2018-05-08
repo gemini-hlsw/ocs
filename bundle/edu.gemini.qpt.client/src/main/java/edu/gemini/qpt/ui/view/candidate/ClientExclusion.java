@@ -144,7 +144,7 @@ public enum ClientExclusion {
             return HIDDEN_BLOCKED_OBSERVATIONS;
         if (!VIEW_OVER_QUALIFIED_OBSERVATIONS.get() && flags.contains(Flag.OVER_QUALIFIED))
             return HIDDEN_OVER_QUALIFIED_OBSERVATIONS;
-        if (!VIEW_UNAVAILABLE.get() && (flags.contains(Flag.INSTRUMENT_UNAVAILABLE) || flags.contains(Flag.CONFIG_UNAVAILABLE) || flags.contains(Flag.LGS_UNAVAILABLE)))
+        if (!VIEW_UNAVAILABLE.get() && (flags.contains(Flag.INSTRUMENT_UNAVAILABLE) || flags.contains(Flag.CONFIG_UNAVAILABLE) || flags.contains(Flag.LGS_UNAVAILABLE) || flags.contains(Flag.MASK_UNAVAILABLE)))
             return HIDDEN_UNAVAILABLE;
         if (!VIEW_MASK_IN_CABINET.get() && (flags.contains(Flag.MASK_IN_CABINET)))
             return HIDDEN_MASK_IN_CABINET;
