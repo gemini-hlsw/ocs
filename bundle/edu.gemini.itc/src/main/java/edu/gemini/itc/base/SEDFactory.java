@@ -142,9 +142,11 @@ public final class SEDFactory {
 
         } else if (sdp.distribution() instanceof UserDefinedSpectrum) {
             final UserDefinedSpectrum userDefined = (UserDefinedSpectrum) sdp.distribution();
+            final MagnitudeBand band = sdp.normBand();
+            // The user-supplied SED must cover the range of the instrument configuration and the normalization band.
             temp = getUserSED(userDefined,
-                    instrument.getObservingStart(),
-                    instrument.getObservingEnd(),
+                    Math.min(instrument.getObservingStart(), band.start().toNanometers()),
+                    Math.max(instrument.getObservingEnd(), band.end().toNanometers()),
                     instrument.getSampling(),
                     sdp.redshift().z());
             temp.applyWavelengthCorrection();
@@ -206,7 +208,8 @@ public final class SEDFactory {
         // any sed except BBODY and ELINE have normalization regions
         if (!(sdp.distribution() instanceof EmissionLine) && !(sdp.distribution() instanceof BlackBody)) {
             if (sed.getStart() > start || sed.getEnd() < end) {
-                throw new IllegalArgumentException("Shifted spectrum lies outside of specified normalisation waveband.");
+                throw new IllegalArgumentException(String.format("Redshifted SED (%.1f - %.1f nm) does not cover the specified normalization waveband (%.1f - %.1f nm).",
+                        sed.getStart(), sed.getEnd(), start, end));
             }
         }
 
