@@ -5,6 +5,7 @@ import static edu.gemini.qpt.core.Variant.Flag.BLOCKED;
 import static edu.gemini.qpt.core.Variant.Flag.CC_UQUAL;
 import static edu.gemini.qpt.core.Variant.Flag.CONFIG_UNAVAILABLE;
 import static edu.gemini.qpt.core.Variant.Flag.MASK_IN_CABINET;
+import static edu.gemini.qpt.core.Variant.Flag.MASK_UNAVAILABLE;
 import static edu.gemini.qpt.core.Variant.Flag.LGS_UNAVAILABLE;
 import static edu.gemini.qpt.core.Variant.Flag.ELEVATION_CNS;
 import static edu.gemini.qpt.core.Variant.Flag.INACTIVE;
@@ -40,6 +41,7 @@ public class CandidateDecorator {
             INSTRUMENT_UNAVAILABLE,
             CONFIG_UNAVAILABLE,
             MASK_IN_CABINET,
+            MASK_UNAVAILABLE,
             LGS_UNAVAILABLE,
             BLOCKED,
             INACTIVE,
@@ -60,6 +62,7 @@ public class CandidateDecorator {
             INSTRUMENT_UNAVAILABLE,
             CONFIG_UNAVAILABLE,
             MASK_IN_CABINET,
+            MASK_UNAVAILABLE,
             LGS_UNAVAILABLE,
             ELEVATION_CNS,
             BACKGROUND_CNS,

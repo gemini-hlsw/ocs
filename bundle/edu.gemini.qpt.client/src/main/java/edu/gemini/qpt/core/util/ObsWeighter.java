@@ -15,6 +15,7 @@ public class ObsWeighter {
 	private static final EnumSet<Flag> AUTOMATIC_DEATH_FLAGS = EnumSet.of(
         Flag.CONFIG_UNAVAILABLE,
 		Flag.MASK_IN_CABINET,
+		Flag.MASK_UNAVAILABLE,
         Flag.LGS_UNAVAILABLE,
 		Flag.INSTRUMENT_UNAVAILABLE,
 		Flag.ELEVATION_CNS,
