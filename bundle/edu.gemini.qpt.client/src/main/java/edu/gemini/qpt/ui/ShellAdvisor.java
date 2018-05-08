@@ -40,6 +40,7 @@ import edu.gemini.qpt.ui.view.histo.HistoViewAdvisor;
 import edu.gemini.qpt.ui.view.instrument.InstViewAdvisor;
 import edu.gemini.qpt.ui.view.lchWindow.LchWindowType;
 import edu.gemini.qpt.ui.view.lchWindow.LchWindowViewAdvisor;
+import edu.gemini.qpt.ui.view.mask.MaskViewAdvisor;
 import edu.gemini.qpt.ui.view.problem.ProblemViewAdvisor;
 import edu.gemini.qpt.ui.view.program.ScienceProgramViewAdvisor;
 import edu.gemini.qpt.ui.view.property.PropertyViewAdvisor;
@@ -83,6 +84,7 @@ public class ShellAdvisor implements IShellAdvisor, PropertyChangeListener {
         Visits(new VisitViewAdvisor(), SouthOf, Visualizer),
         Variants(new VariantViewAdvisor(), NorthOf, Candidates),
         Instruments(new InstViewAdvisor(), Beneath, Variants),
+        Masks(new MaskViewAdvisor(), Beneath, Instruments),
         Prperties(new PropertyViewAdvisor(), SouthOf, Visits),
         Problems(new ProblemViewAdvisor(), SouthOf, Prperties),
         Comments(new CommentViewAdvisor(), Beneath, Problems),
