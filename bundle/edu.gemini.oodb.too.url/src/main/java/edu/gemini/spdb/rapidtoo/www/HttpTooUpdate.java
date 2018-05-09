@@ -5,6 +5,7 @@
 package edu.gemini.spdb.rapidtoo.www;
 
 import edu.gemini.spdb.rapidtoo.*;
+import edu.gemini.shared.util.immutable.Option;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -28,7 +29,7 @@ public final class HttpTooUpdate implements TooUpdate {
 
     private final TooIdentity _id;
     private final TooTarget _target;
-    private final TooGuideTarget _guide;
+    private final Option<TooGuideTarget> _guide;
     private final Double _posAngle;
     private final String _note;
     private final TooElevationConstraint _elevation;
@@ -45,7 +46,7 @@ public final class HttpTooUpdate implements TooUpdate {
     public HttpTooUpdate(HttpServletRequest req) throws BadRequestException {
         _id     = new HttpTooIdentity(req);
         _target = new HttpTooTarget(req);
-        _guide  = new HttpTooGuideTarget(req);
+        _guide  = HttpTooGuideTarget.parse(req);
 
         double posAngle = 0.0;
         String val = req.getParameter(POSITION_ANGLE_PARAM);
@@ -86,7 +87,7 @@ public final class HttpTooUpdate implements TooUpdate {
         return _target;
     }
 
-    public TooGuideTarget getGuideStar() {
+    public Option<TooGuideTarget> getGuideStar() {
         return _guide;
     }
 

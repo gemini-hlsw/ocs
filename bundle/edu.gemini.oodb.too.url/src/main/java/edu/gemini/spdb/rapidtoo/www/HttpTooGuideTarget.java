@@ -5,8 +5,11 @@
 package edu.gemini.spdb.rapidtoo.www;
 
 import edu.gemini.spdb.rapidtoo.TooGuideTarget;
+import edu.gemini.shared.util.immutable.*;
 
+import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
+
 
 /**
  * A {@link edu.gemini.spdb.rapidtoo.TooGuideTarget} implementation based upon
@@ -23,14 +26,26 @@ import javax.servlet.http.HttpServletRequest;
  * <li>gsmag - magnitude of the guide star</li>
  * </ul>
  */
-public class HttpTooGuideTarget extends HttpTarget implements TooGuideTarget {
+public final class HttpTooGuideTarget extends HttpTarget implements TooGuideTarget {
 
+    public static final String PREFIX = "gs";
     public static final String TARGET_GUIDE_PROBE_PARAM = "probe";
 
-    private TooGuideTarget.GuideProbe _probe;
+    public static Option<TooGuideTarget> parse(HttpServletRequest req) throws BadRequestException {
+        // If all the parameters are missing, then no guide target was specified.
+        // If even one parameter is present, we assume we should be able to
+        // parse it out of the request.
+        final Set<String> ps = HttpTarget.allParams(PREFIX);
+        ps.add(PREFIX + TARGET_GUIDE_PROBE_PARAM);
 
-    public HttpTooGuideTarget(HttpServletRequest req) throws BadRequestException {
-        super("gs", "GS", req);
+        final boolean anyDefined = ps.stream().anyMatch(p -> ImOption.apply(req.getParameter(p)).isDefined());
+        return anyDefined ? new Some<>(new HttpTooGuideTarget(req)) : None.instance();
+    }
+
+    private final TooGuideTarget.GuideProbe _probe;
+
+    private HttpTooGuideTarget(HttpServletRequest req) throws BadRequestException {
+        super(PREFIX, "GS", req);
         String probeStr = getParameter(req, TARGET_GUIDE_PROBE_PARAM, null);
         try {
             _probe = TooGuideTarget.GuideProbe.valueOf(probeStr);

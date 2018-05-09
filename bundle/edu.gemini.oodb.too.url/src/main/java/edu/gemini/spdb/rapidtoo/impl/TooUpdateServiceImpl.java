@@ -230,8 +230,7 @@ final class TooUpdateServiceImpl implements TooUpdateService {
         targetObsComp.setTargetEnvironment(env0);
 
         // Set the guide star, if present.
-        final TooGuideTarget gs = update.getGuideStar();
-        if (gs != null) {
+        update.getGuideStar().foreach(gs -> {
             final TooGuideTarget.GuideProbe tooProbe = gs.getGuideProbe();
             if (tooProbe == null) {
                 LOG.warning("Guide star probe not specified.");
@@ -273,7 +272,7 @@ final class TooUpdateServiceImpl implements TooUpdateService {
                     targetObsComp.setTargetEnvironment(env1);
                 }
             }
-        }
+        });
 
         // Store the data object back.
         targetComp.setDataObject(targetObsComp);

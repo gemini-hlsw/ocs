@@ -8,9 +8,12 @@ import javax.servlet.{RequestDispatcher, ServletInputStream}
 import javax.servlet.http.{Cookie, HttpSession, HttpServletRequest}
 
 import edu.gemini.spModel.core.{Magnitude, Angle, Declination, RightAscension}
+import edu.gemini.spdb.rapidtoo.TooGuideTarget
 import edu.gemini.spdb.rapidtoo.TooGuideTarget.GuideProbe
+import edu.gemini.shared.util.immutable.{ Option => GOption }
 import edu.gemini.shared.util.immutable.ScalaConverters._
 
+import org.specs2.matcher.MatchResult
 import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
 import org.scalacheck.Arbitrary._
@@ -96,29 +99,35 @@ object HttpTargetSpec extends Specification with ScalaCheck with Arbitraries wit
   "HttpTooGuideTarget" should {
 
     def mustFail(req: HttpServletRequest) =
-      new HttpTooGuideTarget(req) must throwA[BadRequestException]
+      HttpTooGuideTarget.parse(req) must throwA[BadRequestException]
+
+    def mustEqual[A](t: GOption[TooGuideTarget], f: TooGuideTarget => A, expected: A): MatchResult[Any] =
+      t.asScalaOpt.map(f) must_== Some(expected)
+
+    def mustBeCloseTo(t: GOption[TooGuideTarget], f: TooGuideTarget => Double, expected: Angle): MatchResult[Any] =
+      t.asScalaOpt.map(f).getOrElse(Double.MinValue) must beCloseTo(expected.toDegrees, 0.001)
 
     "Name: Parse" ! forAll { (s: String) =>
       s.nonEmpty ==> {
-        val t = new HttpTooGuideTarget(req.modifiedWith("gstarget" -> s))
-        t.getName must_== s
+        val t = HttpTooGuideTarget.parse(req.modifiedWith("gstarget" -> s))
+        mustEqual(t, _.getName, s)
       }
     }
     "Name: Default on Missing" in {
-      val t = new HttpTooGuideTarget(req without "gstarget")
-      t.getName must_== "GS"
+      val t = HttpTooGuideTarget.parse(req without "gstarget")
+      mustEqual(t, _.getName, "GS")
     }
     "Name: Default on Empty" in {
-      val t = new HttpTooGuideTarget(req.modifiedWith("gstarget" -> ""))
-      t.getName must_== "GS"
+      val t = HttpTooGuideTarget.parse(req.modifiedWith("gstarget" -> ""))
+      mustEqual(t, _.getName, "GS")
     }
     "RA: Parse Decimal" ! forAll { (ra: RightAscension) =>
-      val t = new HttpTooGuideTarget(req.modifiedWith("gsra" -> ra.toAngle.toDegrees.toString))
-      t.getRa must beCloseTo(ra.toAngle.toDegrees, .001)
+      val t = HttpTooGuideTarget.parse(req.modifiedWith("gsra" -> ra.toAngle.toDegrees.toString))
+      mustBeCloseTo(t, _.getRa, ra.toAngle)
     }
     "RA: Parse Sexigesimal" ! forAll { (ra: RightAscension) =>
-      val t = new HttpTooGuideTarget(req.modifiedWith("gsra" -> ra.toAngle.formatHMS))
-      t.getRa must beCloseTo(ra.toAngle.toDegrees, .001)
+      val t = HttpTooGuideTarget.parse(req.modifiedWith("gsra" -> ra.toAngle.formatHMS))
+      mustBeCloseTo(t, _.getRa, ra.toAngle)
     }
     "RA: Fail on Malformed" in {
       mustFail(req.modifiedWith("gsra" -> "cookie"))
@@ -130,12 +139,12 @@ object HttpTargetSpec extends Specification with ScalaCheck with Arbitraries wit
       mustFail(req without "gsra")
     }
     "Dec: Parse Decimal" ! forAll { (dec: Declination) =>
-      val t = new HttpTooGuideTarget(req.modifiedWith("gsdec" -> dec.toAngle.toDegrees.toString))
-      t.getDec must beCloseTo(dec.toAngle.toDegrees, .001)
+      val t = HttpTooGuideTarget.parse(req.modifiedWith("gsdec" -> dec.toAngle.toDegrees.toString))
+      mustBeCloseTo(t, _.getDec, dec.toAngle)
     }
     "Dec: Parse Sexigesimal" ! forAll { (dec: Declination) =>
-      val t = new HttpTooGuideTarget(req.modifiedWith("gsdec" -> dec.toAngle.formatDMS))
-      Angle.fromDegrees(t.getDec).toDegrees must beCloseTo(dec.toAngle.toDegrees, .001)
+      val t = HttpTooGuideTarget.parse(req.modifiedWith("gsdec" -> dec.toAngle.formatDMS))
+      mustBeCloseTo(t, t => Angle.fromDegrees(t.getDec).toDegrees, dec.toAngle)
     }
     "Dec: Fail on Malformed" in {
       mustFail(req.modifiedWith("gsdec" -> "roomba"))
@@ -147,8 +156,8 @@ object HttpTargetSpec extends Specification with ScalaCheck with Arbitraries wit
       mustFail(req without "gsdec")
     }
     "Probe: Parse" ! forAll { (p: GuideProbe) =>
-      val t = new HttpTooGuideTarget(req.modifiedWith("gsprobe" -> p.name))
-      t.getGuideProbe must_== p
+      val t = HttpTooGuideTarget.parse(req.modifiedWith("gsprobe" -> p.name))
+      mustEqual(t, _.getGuideProbe, p)
     }
     "Probe: Fail on Malformed" in {
       mustFail(req.modifiedWith("gsprobe" -> "eskimo"))
@@ -162,11 +171,15 @@ object HttpTargetSpec extends Specification with ScalaCheck with Arbitraries wit
     "Mags: Parse Magnitudes" ! forAll { (ms0: List[Magnitude]) =>
       val ms = ms0.map(_.copy(error = None))
       val s = ms.map(m => s"${m.value}/${m.band.name}/${m.system}").mkString(",")
-      val t = new HttpTooGuideTarget(req.modifiedWith("gsmags" -> s))
-      t.getMagnitudes must_== ms.asImList
+      val t = HttpTooGuideTarget.parse(req.modifiedWith("gsmags" -> s))
+      mustEqual(t, _.getMagnitudes, ms.asImList)
     }
     "Mags: Fail on Malformed" in {
       mustFail(req.modifiedWith("gsmags" -> "fluffy"))
+    }
+    "None: If no parameters" in {
+      val req0 = req without "gstarget" without "gsra" without "gsdec" without "gsprobe"
+      HttpTooGuideTarget.parse(req0) must_== None.asGeminiOpt
     }
 
   }

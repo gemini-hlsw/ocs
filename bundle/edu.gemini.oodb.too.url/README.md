@@ -56,8 +56,10 @@ This bundle originated from `edu.gemini.oodb.too.url` in the OCS 1.5 build.
 Supported magnitude systems.
 
 
-
 #### Guide Star Details
+
+Guide stars are optional, but if any of the parameters are specified then all
+required parameters must be specified.
 
 | Parameter | Format/Example            | Reqd?  | Notes
 |-----------|---------------------------|:------:|-------
@@ -68,6 +70,18 @@ Supported magnitude systems.
 | `gsprobe` | `PWFS1`                 |✓       | guide probe
 
 Allowed guide probe values are `PWFS1`, `PWFS2`, `OIWFS`, and `AOWFS`.
+
+#### Example Queries
+
+* With guide star
+```
+curl -k "https://localhost:8443/too?prog=GS-2018A-Q-1&posangle=0.0&note=hello&ready=true&email=bob@burger.com&password=password&obsnum=4&target=canopus&ra=06:23:57.110&dec=-52:41:44.38&gstarget=187-007980&gsra=06:23:39.584&gsdec=-52:41:16.43&gsprobe=OIWFS"
+```
+
+* Without guide star
+```
+curl -k "https://localhost:8443/too?prog=GS-2018A-Q-1&posangle=0.0&note=hello&ready=true&email=bob@burger.com&password=password&obsnum=4&target=canopus&ra=06:23:57.110&dec=-52:41:44.38"
+```
 
 
 
