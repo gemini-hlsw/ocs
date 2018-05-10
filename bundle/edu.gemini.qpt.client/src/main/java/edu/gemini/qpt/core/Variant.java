@@ -70,6 +70,11 @@ public final class Variant extends BaseMutableBean implements PioSerializable, C
 	private Map<Obs, Union<Interval>> constrainedUnionCache;
 	private Map<Obs, Union<Interval>> timingUnionCache;
 
+	// Cache names
+	public static final String DARK_UNION_CACHE = "darkUnionCache";
+	public static final String VISIBLE_UNION_CACHE = "visibleUnionCache";
+	public static final String TIMING_UNION_CACHE = "timingUnionCache";
+
 	// The list of all groups encountered in the plan, by first appearance.
 	private List<Group> groups = new ArrayList<>();
 	private boolean flagUpdatesEnabled = true;
