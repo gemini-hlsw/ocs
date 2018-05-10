@@ -9,6 +9,10 @@ import edu.gemini.spModel.core.Angle$;
 import edu.gemini.spModel.core.Magnitude;
 import edu.gemini.spdb.rapidtoo.TooTarget;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -28,6 +32,17 @@ public abstract class HttpTarget implements TooTarget {
     public static final String TARGET_RA_PARAM   = "ra";
     public static final String TARGET_DEC_PARAM  = "dec";
     public static final String TARGET_MAGS_PARAM = "mags";
+
+    public static Set<String> allParams(final String prefix) {
+        return Arrays.asList(
+            TARGET_NAME_PARAM,
+            TARGET_RA_PARAM,
+            TARGET_DEC_PARAM,
+            TARGET_MAGS_PARAM
+        ).stream()
+         .map(p -> prefix + p)
+         .collect(Collectors.toCollection(() -> new HashSet<String>()));
+    }
 
     private static Double parseRa(String val) throws BadRequestException {
         try {

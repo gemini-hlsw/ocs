@@ -4,6 +4,7 @@
 
 package edu.gemini.spdb.rapidtoo;
 
+import edu.gemini.shared.util.immutable.Option;
 import java.io.Serializable;
 
 /**
@@ -24,7 +25,7 @@ public interface TooUpdate extends Serializable {
     /**
      * Gets the guide star coordinate, etc. information.
      */
-    TooGuideTarget getGuideStar();
+    Option<TooGuideTarget> getGuideStar();
 
     /**
      * Gets the instrument position angle to apply to the cloned template
