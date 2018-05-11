@@ -71,9 +71,14 @@ public final class Variant extends BaseMutableBean implements PioSerializable, C
 	private Map<Obs, Union<Interval>> timingUnionCache;
 
 	// Cache names
-	public static final String DARK_UNION_CACHE = "darkUnionCache";
-	public static final String VISIBLE_UNION_CACHE = "visibleUnionCache";
-	public static final String TIMING_UNION_CACHE = "timingUnionCache";
+	public static final String CONDS_FLAG_CACHE        = "condsFlagCache";
+	public static final String FACILITIES_FLAG_CACHE   = "facilitiesFlagCache";
+	public static final String INTRINSIC_FLAG_CACHE    = "intrinsicFlagCache";
+
+	public static final String CONSTRAINED_UNION_CACHE = "constrainedUnionCache";
+	public static final String DARK_UNION_CACHE        = "darkUnionCache";
+	public static final String TIMING_UNION_CACHE      = "timingUnionCache";
+	public static final String VISIBLE_UNION_CACHE     = "visibleUnionCache";
 
 	// The list of all groups encountered in the plan, by first appearance.
 	private List<Group> groups = new ArrayList<>();
@@ -155,15 +160,15 @@ public final class Variant extends BaseMutableBean implements PioSerializable, C
 	void initCaches() {
 
 		// These schedule-level caches are shared among all Variants.
-		intrinsicFlagCache = owner.getCache("intrinsicFlagCache");
-		facilitiesFlagCache = owner.getCache("facilitiesFlagCache", Schedule.PROP_FACILITIES, Schedule.PROP_ICTD);
-		visibleUnionCache = owner.getCache("visibleUnionCache", Schedule.PROP_BLOCKS);
-		darkUnionCache = owner.getCache("darkUnionCache", Schedule.PROP_BLOCKS);
-		constrainedUnionCache = owner.getCache("freeUnionCache", Schedule.PROP_BLOCKS);
-		timingUnionCache = owner.getCache("timingUnionCache");
+		intrinsicFlagCache = owner.getCache(INTRINSIC_FLAG_CACHE);
+		facilitiesFlagCache = owner.getCache(FACILITIES_FLAG_CACHE, Schedule.PROP_FACILITIES, Schedule.PROP_ICTD);
+		visibleUnionCache = owner.getCache(VISIBLE_UNION_CACHE, Schedule.PROP_BLOCKS);
+		darkUnionCache = owner.getCache(DARK_UNION_CACHE, Schedule.PROP_BLOCKS);
+		constrainedUnionCache = owner.getCache(CONSTRAINED_UNION_CACHE, Schedule.PROP_BLOCKS);
+		timingUnionCache = owner.getCache(TIMING_UNION_CACHE);
 
 		// Private variant-level caches.
-		condsFlagCache = getCache("condsFlagCache", Variant.PROP_SITE_CONDITIONS);
+		condsFlagCache = getCache(CONDS_FLAG_CACHE, Variant.PROP_SITE_CONDITIONS);
 
 	}
 
