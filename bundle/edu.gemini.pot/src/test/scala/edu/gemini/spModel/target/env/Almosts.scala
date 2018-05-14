@@ -159,7 +159,7 @@ trait Almosts {
   implicit val GhostAsterismHighResolutionAlmostEqual: AlmostEqual[GhostAsterism.HighResolution] =
     new AlmostEqual[GhostAsterism.HighResolution] {
       override def almostEqual(a: GhostAsterism.HighResolution, b: GhostAsterism.HighResolution): Boolean =
-        (a.ghostTarget ~= b.ghostTarget) && (a.sky ~= b.sky) && (a.base ~= b.base)
+        (a.target ~= b.target) && (a.sky ~= b.sky) && (a.base ~= b.base)
     }
 
   implicit val AsterismAlmostEqual: AlmostEqual[Asterism] =

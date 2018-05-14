@@ -235,28 +235,28 @@ object GhostAsterism {
     * guide fibers will be used by default because the target must be bright,
     * but can be explicitly turned off.
     */
-  final case class HighResolution(ghostTarget: GhostTarget,
+  final case class HighResolution(target: GhostTarget,
                                   sky: Option[Coordinates],
                                   override val base: Option[Coordinates]) extends GhostAsterism {
 
     override def allSpTargets: NonEmptyList[SPTarget] =
-      NonEmptyList(ghostTarget.spTarget)
+      NonEmptyList(target.spTarget)
 
     /** Defines the default base position to be the same as the target position. */
     override def basePosition(when: Option[Instant]): Option[Coordinates] =
-      base orElse ghostTarget.coordinates(when)
+      base orElse target.coordinates(when)
 
     override def basePositionProperMotion: Option[ProperMotion] =
-      Target.pm.get(ghostTarget.spTarget.getTarget)
+      Target.pm.get(target.spTarget.getTarget)
 
     /** Deterimines the guide fiber state for the HRIFU1.  Typically this will
       * be enabled since the target is bright but may be explicitly turned off.
       */
     def guideFiberState(cc: CloudCover): GuideFiberState =
-      GhostTarget.highResGuideFiberState(ghostTarget, cc)
+      GhostTarget.highResGuideFiberState(target, cc)
 
     override def copyWithClonedTargets: Asterism =
-      copy(ghostTarget = ghostTarget.copyWithClonedTarget)
+      copy(target = target.copyWithClonedTarget)
 
     override def asterismType: AsterismType = AsterismType.GhostHighResolution
   }
@@ -265,7 +265,7 @@ object GhostAsterism {
     val empty: HighResolution = HighResolution(GhostTarget.empty, None, None)
 
     val IFU1: HighResolution @> GhostTarget =
-      Lens.lensu((a,b) => a.copy(ghostTarget = b), _.ghostTarget)
+      Lens.lensu((a,b) => a.copy(target = b), _.target)
     val IFU2: HighResolution @> Option[Coordinates] =
       Lens.lensu((a,b) => a.copy(sky = b), _.sky)
     val Base: HighResolution @> Option[Coordinates] =
@@ -293,4 +293,10 @@ object GhostAsterism {
   def createEmptyHighResolutionAsterism: Asterism = {
     HighResolution.empty.copyWithClonedTargets
   }
+
+  // Names of the IFUs.
+  val SRIFU1: String = "SRIFU1"
+  val SRIFU2: String = "SRIFU2"
+  val HRIFU1: String = "HRIFU1"
+  val HRIFU2: String = "HRIFU2"
 }

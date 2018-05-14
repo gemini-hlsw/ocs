@@ -88,6 +88,7 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
     }
 
     /** Returns an arbitrary target from the asterism. This method will be removed for 18A. */
+    // TODO:ASTERISM
     @Deprecated
     public SPTarget getArbitraryTargetFromAsterism() {
       return getAsterism().allSpTargets().head();

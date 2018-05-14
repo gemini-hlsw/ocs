@@ -15,7 +15,10 @@ sealed trait Target extends Product with Serializable {
 
   /** Coordinates (if known) for this target at the specified UNIX time, if any. */
   def coords(time: Option[Long]): Option[Coordinates] =
-    time.flatMap(coords) orElse fold(_ => None, s => Some(s.coordinates), _ => None)
+    time.flatMap(coords) orElse fold(
+      _ => None,
+      s => Some(s.coordinates),
+      _ => None)
 
   /** Alternative to pattern-matching. */
   def fold[A](too: TooTarget         => A,
@@ -25,7 +28,7 @@ sealed trait Target extends Product with Serializable {
   // Some predicates, useful in crappy parts of the codebase
   def isToo:         Boolean = fold(_ => true,  _ => false, _ => false)
   def isSidereal:    Boolean = fold(_ => false, _ => true,  _ => false)
-  def isNonSidereal: Boolean = fold(_ => false, _ => false, _ => true)
+  def isNonSidereal: Boolean = fold(_ => false, _ => false, _ => true )
 
 }
 
@@ -135,12 +138,13 @@ object TooTarget extends TooTargetLenses {
 
 trait TooTargetLenses {
   val name: TooTarget @> String =
-    Lens.lensu((a, b) => a.copy(name = b), _.name)
+  Lens.lensu((a, b) => a.copy(name = b), _.name)
 }
 
+
 /**
- * Properties and derived methods in common for defined (non-TOO) targets.
- */
+  * Properties and derived methods in common for defined (non-TOO) targets.
+  */
 sealed trait DefinedTarget extends Target {
 
   def magnitudes: List[Magnitude]
@@ -150,7 +154,7 @@ sealed trait DefinedTarget extends Target {
   def spatialProfile: Option[SpatialProfile]
 
   def magnitudeIn(b: MagnitudeBand): Option[Magnitude] =
-    magnitudes.find(_.band == b)
+  magnitudes.find(_.band == b)
 
 }
 
