@@ -193,6 +193,15 @@ public class Union<T extends Interval> implements Iterable<T>, Serializable {
 		return Collections.unmodifiableSortedSet(intervals);
 	}
 
+	/**
+	 * Sums the lengths of all contained intervals.
+	 */
+	public long sum() {
+		long sum = 0;
+		for (T i: intervals) sum += i.getLength();
+		return sum;
+	}
+
 	@Override
 	public String toString() {
 		return intervals.toString();

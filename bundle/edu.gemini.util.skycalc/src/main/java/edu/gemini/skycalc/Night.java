@@ -50,4 +50,11 @@ public interface Night extends Serializable {
      * the night.  In other words, if <pre>start <= time < end</pre>.
      */
     boolean includes(long time);
+
+    /**
+     * Creates an interval for the start and end of the night.
+     */
+    default Interval toInterval() {
+        return new Interval(getStartTime(), getEndTime());
+    }
 }

@@ -115,6 +115,14 @@ public final class ObservingNight implements Night {
         return _endTime - getStartTime();
     }
 
+    /**
+     * Gets the dark time for this observing night, according to the given
+     * definition of twilight.
+     */
+    public Night getDarkTime(final TwilightBoundType boundType) {
+        return TwilightBoundedNight.forObservingNight(boundType, this);
+    }
+
     public boolean includes(long time) {
         return (getStartTime() <= time) && (time < _endTime);
     }

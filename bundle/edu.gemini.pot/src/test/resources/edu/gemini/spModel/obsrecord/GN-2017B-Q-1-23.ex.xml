@@ -1,0 +1,462 @@
+<paramset name="Observation Exec Log" kind="dataObj">
+  <paramset name="obsExecRecord">
+    <paramset name="datasets">
+      <paramset name="datasetRecord">
+        <paramset name="dataset">
+          <param name="datasetLabel" value="GN-2017B-Q-1-23-001"/>
+          <param name="dhsFilename" value="N20170902S0474"/>
+          <param name="timestamp" value="1504365151335"/>
+        </paramset>
+        <paramset name="summit">
+          <paramset name="gsa">
+            <param name="qa" value="PASS"/>
+            <param name="timestamp" value="2017-09-02T18:13:15.346750Z"/>
+            <param name="md5" value="72EAF7F921A17848EF5FEFAE428BEE06"/>
+          </paramset>
+          <param name="tag" value="idle"/>
+        </paramset>
+        <paramset name="archive">
+          <param name="qa" value="PASS"/>
+          <param name="timestamp" value="2017-09-02T18:13:25.492534Z"/>
+          <param name="md5" value="72EAF7F921A17848EF5FEFAE428BEE06"/>
+        </paramset>
+      </paramset>
+      <paramset name="datasetRecord">
+        <paramset name="dataset">
+          <param name="datasetLabel" value="GN-2017B-Q-1-23-002"/>
+          <param name="dhsFilename" value="N20170902S0475"/>
+          <param name="timestamp" value="1504365273114"/>
+        </paramset>
+        <paramset name="summit">
+          <paramset name="gsa">
+            <param name="qa" value="PASS"/>
+            <param name="timestamp" value="2017-09-02T18:13:42.271571Z"/>
+            <param name="md5" value="4F9E04FBCD57830244B51CAB60DBD940"/>
+          </paramset>
+          <param name="tag" value="idle"/>
+        </paramset>
+        <paramset name="archive">
+          <param name="qa" value="PASS"/>
+          <param name="timestamp" value="2017-09-02T18:19:34.222673Z"/>
+          <param name="md5" value="4F9E04FBCD57830244B51CAB60DBD940"/>
+        </paramset>
+      </paramset>
+      <paramset name="datasetRecord">
+        <paramset name="dataset">
+          <param name="datasetLabel" value="GN-2017B-Q-1-23-003"/>
+          <param name="dhsFilename" value="N20170902S0476"/>
+          <param name="timestamp" value="1504365403253"/>
+        </paramset>
+        <paramset name="summit">
+          <paramset name="gsa">
+            <param name="qa" value="PASS"/>
+            <param name="timestamp" value="2017-09-02T18:13:17.347948Z"/>
+            <param name="md5" value="B239DC62ADAB06D4FDE2C71CD9F65BBA"/>
+          </paramset>
+          <param name="tag" value="idle"/>
+        </paramset>
+        <paramset name="archive">
+          <param name="qa" value="PASS"/>
+          <param name="timestamp" value="2017-09-02T18:19:18.720363Z"/>
+          <param name="md5" value="B239DC62ADAB06D4FDE2C71CD9F65BBA"/>
+        </paramset>
+      </paramset>
+      <paramset name="datasetRecord">
+        <paramset name="dataset">
+          <param name="datasetLabel" value="GN-2017B-Q-1-23-004"/>
+          <param name="dhsFilename" value="N20170902S0477"/>
+          <param name="timestamp" value="1504365531079"/>
+        </paramset>
+        <paramset name="summit">
+          <paramset name="gsa">
+            <param name="qa" value="PASS"/>
+            <param name="timestamp" value="2017-09-02T18:13:17.236878Z"/>
+            <param name="md5" value="4520F0F81C10AE2C454316C734E2AA08"/>
+          </paramset>
+          <param name="tag" value="idle"/>
+        </paramset>
+        <paramset name="archive">
+          <param name="qa" value="PASS"/>
+          <param name="timestamp" value="2017-09-02T18:18:56.915471Z"/>
+          <param name="md5" value="4520F0F81C10AE2C454316C734E2AA08"/>
+        </paramset>
+      </paramset>
+      <paramset name="datasetRecord">
+        <paramset name="dataset">
+          <param name="datasetLabel" value="GN-2017B-Q-1-23-005"/>
+          <param name="dhsFilename" value="N20170902S0478"/>
+          <param name="timestamp" value="1504365660172"/>
+        </paramset>
+        <paramset name="summit">
+          <paramset name="gsa">
+            <param name="qa" value="USABLE"/>
+            <param name="timestamp" value="2017-09-02T18:13:41.008870Z"/>
+            <param name="md5" value="E451B090A693889E93629E5403CD4542"/>
+          </paramset>
+          <param name="tag" value="idle"/>
+        </paramset>
+        <paramset name="archive">
+          <param name="qa" value="USABLE"/>
+          <param name="timestamp" value="2017-09-02T18:18:47.414605Z"/>
+          <param name="md5" value="E451B090A693889E93629E5403CD4542"/>
+        </paramset>
+      </paramset>
+      <paramset name="datasetRecord">
+        <paramset name="dataset">
+          <param name="datasetLabel" value="GN-2017B-Q-1-23-006"/>
+          <param name="dhsFilename" value="N20170902S0479"/>
+          <param name="timestamp" value="1504365788062"/>
+        </paramset>
+        <paramset name="summit">
+          <paramset name="gsa">
+            <param name="qa" value="USABLE"/>
+            <param name="timestamp" value="2017-09-02T18:13:40.404217Z"/>
+            <param name="md5" value="35E7456CA0BDB02AA2CE594E914692EA"/>
+          </paramset>
+          <param name="tag" value="idle"/>
+        </paramset>
+        <paramset name="archive">
+          <param name="qa" value="USABLE"/>
+          <param name="timestamp" value="2017-09-02T18:18:37.801076Z"/>
+          <param name="md5" value="35E7456CA0BDB02AA2CE594E914692EA"/>
+        </paramset>
+      </paramset>
+      <paramset name="datasetRecord">
+        <paramset name="dataset">
+          <param name="datasetLabel" value="GN-2017B-Q-1-23-007"/>
+          <param name="dhsFilename" value="N20170902S0480"/>
+          <param name="timestamp" value="1504365921204"/>
+        </paramset>
+        <paramset name="summit">
+          <paramset name="gsa">
+            <param name="qa" value="USABLE"/>
+            <param name="timestamp" value="2017-09-02T18:13:39.993575Z"/>
+            <param name="md5" value="C8187D557DA708833EE4663E3B104912"/>
+          </paramset>
+          <param name="tag" value="idle"/>
+        </paramset>
+        <paramset name="archive">
+          <param name="qa" value="USABLE"/>
+          <param name="timestamp" value="2017-09-02T18:18:00.052739Z"/>
+          <param name="md5" value="C8187D557DA708833EE4663E3B104912"/>
+        </paramset>
+      </paramset>
+    </paramset>
+    <paramset name="events">
+      <paramset name="event" kind="StartVisit">
+        <param name="timestamp" value="1504364570472"/>
+        <param name="obsid" value="GN-2017B-Q-1-23"/>
+      </paramset>
+      <paramset name="event" kind="Slew">
+        <param name="timestamp" value="1504364570473"/>
+        <param name="obsid" value="GN-2017B-Q-1-23"/>
+      </paramset>
+      <paramset name="event" kind="StartSequence">
+        <param name="timestamp" value="1504364571908"/>
+        <param name="obsid" value="GN-2017B-Q-1-23"/>
+      </paramset>
+      <paramset name="event" kind="PauseObserve">
+        <param name="timestamp" value="1504364572936"/>
+        <param name="obsid" value="GN-2017B-Q-1-23"/>
+        <param name="reason" value=""/>
+      </paramset>
+      <paramset name="event" kind="StartSequence">
+        <param name="timestamp" value="1504365150139"/>
+        <param name="obsid" value="GN-2017B-Q-1-23"/>
+      </paramset>
+      <paramset name="event" kind="StartDataset">
+        <param name="timestamp" value="1504365151336"/>
+        <param name="obsid" value="GN-2017B-Q-1-23"/>
+        <paramset name="dataset">
+          <param name="datasetLabel" value="GN-2017B-Q-1-23-001"/>
+          <param name="dhsFilename" value="N20170902S0474"/>
+          <param name="timestamp" value="1504365151335"/>
+        </paramset>
+      </paramset>
+      <paramset name="event" kind="EndDataset">
+        <param name="timestamp" value="1504365270884"/>
+        <param name="obsid" value="GN-2017B-Q-1-23"/>
+        <param name="datasetLabel" value="GN-2017B-Q-1-23-001"/>
+      </paramset>
+      <paramset name="event" kind="StartDataset">
+        <param name="timestamp" value="1504365273115"/>
+        <param name="obsid" value="GN-2017B-Q-1-23"/>
+        <paramset name="dataset">
+          <param name="datasetLabel" value="GN-2017B-Q-1-23-002"/>
+          <param name="dhsFilename" value="N20170902S0475"/>
+          <param name="timestamp" value="1504365273114"/>
+        </paramset>
+      </paramset>
+      <paramset name="event" kind="EndDataset">
+        <param name="timestamp" value="1504365392742"/>
+        <param name="obsid" value="GN-2017B-Q-1-23"/>
+        <param name="datasetLabel" value="GN-2017B-Q-1-23-002"/>
+      </paramset>
+      <paramset name="event" kind="StartDataset">
+        <param name="timestamp" value="1504365403254"/>
+        <param name="obsid" value="GN-2017B-Q-1-23"/>
+        <paramset name="dataset">
+          <param name="datasetLabel" value="GN-2017B-Q-1-23-003"/>
+          <param name="dhsFilename" value="N20170902S0476"/>
+          <param name="timestamp" value="1504365403253"/>
+        </paramset>
+      </paramset>
+      <paramset name="event" kind="EndDataset">
+        <param name="timestamp" value="1504365522935"/>
+        <param name="obsid" value="GN-2017B-Q-1-23"/>
+        <param name="datasetLabel" value="GN-2017B-Q-1-23-003"/>
+      </paramset>
+      <paramset name="event" kind="StartDataset">
+        <param name="timestamp" value="1504365531080"/>
+        <param name="obsid" value="GN-2017B-Q-1-23"/>
+        <paramset name="dataset">
+          <param name="datasetLabel" value="GN-2017B-Q-1-23-004"/>
+          <param name="dhsFilename" value="N20170902S0477"/>
+          <param name="timestamp" value="1504365531079"/>
+        </paramset>
+      </paramset>
+      <paramset name="event" kind="EndDataset">
+        <param name="timestamp" value="1504365650705"/>
+        <param name="obsid" value="GN-2017B-Q-1-23"/>
+        <param name="datasetLabel" value="GN-2017B-Q-1-23-004"/>
+      </paramset>
+      <paramset name="event" kind="StartDataset">
+        <param name="timestamp" value="1504365660173"/>
+        <param name="obsid" value="GN-2017B-Q-1-23"/>
+        <paramset name="dataset">
+          <param name="datasetLabel" value="GN-2017B-Q-1-23-005"/>
+          <param name="dhsFilename" value="N20170902S0478"/>
+          <param name="timestamp" value="1504365660172"/>
+        </paramset>
+      </paramset>
+      <paramset name="event" kind="EndDataset">
+        <param name="timestamp" value="1504365779733"/>
+        <param name="obsid" value="GN-2017B-Q-1-23"/>
+        <param name="datasetLabel" value="GN-2017B-Q-1-23-005"/>
+      </paramset>
+      <paramset name="event" kind="StartDataset">
+        <param name="timestamp" value="1504365788063"/>
+        <param name="obsid" value="GN-2017B-Q-1-23"/>
+        <paramset name="dataset">
+          <param name="datasetLabel" value="GN-2017B-Q-1-23-006"/>
+          <param name="dhsFilename" value="N20170902S0479"/>
+          <param name="timestamp" value="1504365788062"/>
+        </paramset>
+      </paramset>
+      <paramset name="event" kind="EndDataset">
+        <param name="timestamp" value="1504365907743"/>
+        <param name="obsid" value="GN-2017B-Q-1-23"/>
+        <param name="datasetLabel" value="GN-2017B-Q-1-23-006"/>
+      </paramset>
+      <paramset name="event" kind="StartDataset">
+        <param name="timestamp" value="1504365921205"/>
+        <param name="obsid" value="GN-2017B-Q-1-23"/>
+        <paramset name="dataset">
+          <param name="datasetLabel" value="GN-2017B-Q-1-23-007"/>
+          <param name="dhsFilename" value="N20170902S0480"/>
+          <param name="timestamp" value="1504365921204"/>
+        </paramset>
+      </paramset>
+      <paramset name="event" kind="EndDataset">
+        <param name="timestamp" value="1504366040815"/>
+        <param name="obsid" value="GN-2017B-Q-1-23"/>
+        <param name="datasetLabel" value="GN-2017B-Q-1-23-007"/>
+      </paramset>
+      <paramset name="event" kind="StartDataset">
+        <param name="timestamp" value="1504366049042"/>
+        <param name="obsid" value="GN-2017B-Q-1-23"/>
+        <paramset name="dataset">
+          <param name="datasetLabel" value="GN-2017B-Q-1-23-008"/>
+          <param name="dhsFilename" value="N20170902S0481"/>
+          <param name="timestamp" value="1504366049041"/>
+        </paramset>
+      </paramset>
+      <paramset name="event" kind="PauseObserve">
+        <param name="timestamp" value="1504366056367"/>
+        <param name="obsid" value="GN-2017B-Q-1-23"/>
+        <param name="reason" value=""/>
+      </paramset>
+      <paramset name="event" kind="AbortObserve">
+        <param name="timestamp" value="1504366058713"/>
+        <param name="obsid" value="GN-2017B-Q-1-23"/>
+        <param name="reason" value="{observation was aborted by user}"/>
+      </paramset>
+      <paramset name="event" kind="EndVisit">
+        <param name="timestamp" value="1504366198791"/>
+        <param name="obsid" value="GN-2017B-Q-1-23"/>
+      </paramset>
+    </paramset>
+    <paramset name="configMap">
+      <paramset name="configMapEntry">
+        <param name="datasetLabels">
+          <value sequence="0">GN-2017B-Q-1-23-001</value>
+          <value sequence="1">GN-2017B-Q-1-23-002</value>
+          <value sequence="2">GN-2017B-Q-1-23-003</value>
+          <value sequence="3">GN-2017B-Q-1-23-004</value>
+          <value sequence="4">GN-2017B-Q-1-23-005</value>
+          <value sequence="5">GN-2017B-Q-1-23-006</value>
+          <value sequence="6">GN-2017B-Q-1-23-007</value>
+        </param>
+        <paramset name="config">
+          <paramset name="item">
+            <param name="key" value="instrument:adc"/>
+            <param name="value" value="No Correction"/>
+          </paramset>
+          <paramset name="item">
+            <param name="key" value="instrument:ampCount"/>
+            <param name="value" value="Twelve"/>
+          </paramset>
+          <paramset name="item">
+            <param name="key" value="instrument:ampReadMode"/>
+            <param name="value" value="Slow"/>
+          </paramset>
+          <paramset name="item">
+            <param name="key" value="instrument:builtinROI"/>
+            <param name="value" value="Full Frame Readout"/>
+          </paramset>
+          <paramset name="item">
+            <param name="key" value="instrument:ccdXBinning"/>
+            <param name="value" value="2"/>
+          </paramset>
+          <paramset name="item">
+            <param name="key" value="instrument:ccdYBinning"/>
+            <param name="value" value="2"/>
+          </paramset>
+          <paramset name="item">
+            <param name="key" value="instrument:detectorManufacturer"/>
+            <param name="value" value="HAMAMATSU"/>
+          </paramset>
+          <paramset name="item">
+            <param name="key" value="instrument:disperser"/>
+            <param name="value" value="Mirror"/>
+          </paramset>
+          <paramset name="item">
+            <param name="key" value="instrument:dtaXOffset"/>
+            <param name="value" value="0"/>
+          </paramset>
+          <paramset name="item">
+            <param name="key" value="instrument:exposureTime"/>
+            <param name="value" value="90.0"/>
+          </paramset>
+          <paramset name="item">
+            <param name="key" value="instrument:filter"/>
+            <param name="value" value="Z_G0322"/>
+          </paramset>
+          <paramset name="item">
+            <param name="key" value="instrument:fpu"/>
+            <param name="value" value="None"/>
+          </paramset>
+          <paramset name="item">
+            <param name="key" value="instrument:fpuMode"/>
+            <param name="value" value="Builtin"/>
+          </paramset>
+          <paramset name="item">
+            <param name="key" value="instrument:gainChoice"/>
+            <param name="value" value="Low"/>
+          </paramset>
+          <paramset name="item">
+            <param name="key" value="instrument:gainSetting"/>
+            <param name="value" value="2"/>
+          </paramset>
+          <paramset name="item">
+            <param name="key" value="instrument:instrument"/>
+            <param name="value" value="GMOS-N"/>
+          </paramset>
+          <paramset name="item">
+            <param name="key" value="instrument:mosPreimaging"/>
+            <param name="value" value="No"/>
+          </paramset>
+          <paramset name="item">
+            <param name="key" value="instrument:observingWavelength"/>
+            <param name="value" value="0.876"/>
+          </paramset>
+          <paramset name="item">
+            <param name="key" value="instrument:port"/>
+            <param name="value" value="side-looking"/>
+          </paramset>
+          <paramset name="item">
+            <param name="key" value="instrument:posAngle"/>
+            <param name="value" value="0.0"/>
+          </paramset>
+          <paramset name="item">
+            <param name="key" value="instrument:stageMode"/>
+            <param name="value" value="Follow in XY"/>
+          </paramset>
+          <paramset name="item">
+            <param name="key" value="instrument:version"/>
+            <param name="value" value="2009A-1"/>
+          </paramset>
+          <paramset name="item">
+            <param name="key" value="observe:class"/>
+            <param name="value" value="science"/>
+          </paramset>
+          <paramset name="item">
+            <param name="key" value="observe:exposureTime"/>
+            <param name="value" value="90.0"/>
+          </paramset>
+          <paramset name="item">
+            <param name="key" value="observe:headerVisibility"/>
+            <param name="value" value="PUBLIC"/>
+          </paramset>
+          <paramset name="item">
+            <param name="key" value="observe:object"/>
+            <param name="value" value="J0008+3946_P1"/>
+          </paramset>
+          <paramset name="item">
+            <param name="key" value="observe:observeType"/>
+            <param name="value" value="OBJECT"/>
+          </paramset>
+          <paramset name="item">
+            <param name="key" value="observe:proprietaryMonths"/>
+            <param name="value" value="12"/>
+          </paramset>
+          <paramset name="item">
+            <param name="key" value="observe:sciBand"/>
+            <param name="value" value="1"/>
+          </paramset>
+          <paramset name="item">
+            <param name="key" value="observe:status"/>
+            <param name="value" value="ready"/>
+          </paramset>
+          <paramset name="item">
+            <param name="key" value="ocs:obsConditions:CloudCover"/>
+            <param name="value" value="70"/>
+          </paramset>
+          <paramset name="item">
+            <param name="key" value="ocs:obsConditions:ImageQuality"/>
+            <param name="value" value="85"/>
+          </paramset>
+          <paramset name="item">
+            <param name="key" value="ocs:obsConditions:SkyBackground"/>
+            <param name="value" value="100"/>
+          </paramset>
+          <paramset name="item">
+            <param name="key" value="ocs:obsConditions:WaterVapor"/>
+            <param name="value" value="100"/>
+          </paramset>
+          <paramset name="item">
+            <param name="key" value="ocs:observationId"/>
+            <param name="value" value="GN-2017B-Q-1-23"/>
+          </paramset>
+          <paramset name="item">
+            <param name="key" value="ocs:programId"/>
+            <param name="value" value="GN-2017B-Q-1"/>
+          </paramset>
+        </paramset>
+      </paramset>
+    </paramset>
+  </paramset>
+  <paramset name="calibrationSequence">
+    <paramset name="calibration">
+      <param name="class" value="science"/>
+    </paramset>
+    <paramset name="calibration"/>
+    <paramset name="calibration"/>
+    <paramset name="calibration"/>
+    <paramset name="calibration"/>
+    <paramset name="calibration"/>
+    <paramset name="calibration"/>
+    <paramset name="calibration"/>
+  </paramset>
+</paramset>
+

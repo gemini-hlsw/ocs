@@ -1,0 +1,41 @@
+<paramset name="Observing Log" kind="dataObj">
+  <paramset name="obsQaRecord">
+    <paramset name="datasetQa">
+      <param name="label" value="GN-2017B-Q-56-104-005"/>
+      <param name="qaState" value="PASS"/>
+    </paramset>
+    <paramset name="datasetQa">
+      <param name="label" value="GN-2017B-Q-56-104-007"/>
+      <param name="qaState" value="PASS"/>
+    </paramset>
+    <paramset name="datasetQa">
+      <param name="label" value="GN-2017B-Q-56-104-001"/>
+      <param name="qaState" value="PASS"/>
+      <param name="comment">
+        <value>Note, PA is 6 deg off nominal parallactic angle (@AM=1.1) -CC
+</value>
+      </param>
+    </paramset>
+    <paramset name="datasetQa">
+      <param name="label" value="GN-2017B-Q-56-104-002"/>
+      <param name="qaState" value="PASS"/>
+    </paramset>
+    <paramset name="datasetQa">
+      <param name="label" value="GN-2017B-Q-56-104-008"/>
+      <param name="qaState" value="PASS"/>
+      <param name="comment" value="Maybe slewed off prematurely -CC"/>
+    </paramset>
+    <paramset name="datasetQa">
+      <param name="label" value="GN-2017B-Q-56-104-004"/>
+      <param name="qaState" value="PASS"/>
+    </paramset>
+    <paramset name="datasetQa">
+      <param name="label" value="GN-2017B-Q-56-104-006"/>
+      <param name="qaState" value="PASS"/>
+    </paramset>
+    <paramset name="datasetQa">
+      <param name="label" value="GN-2017B-Q-56-104-003"/>
+      <param name="qaState" value="PASS"/>
+    </paramset>
+  </paramset>
+</paramset>
