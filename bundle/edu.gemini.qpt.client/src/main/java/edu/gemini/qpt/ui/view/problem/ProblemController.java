@@ -8,6 +8,7 @@ import java.util.Set;
 import edu.gemini.qpt.core.Marker;
 import edu.gemini.qpt.core.Schedule;
 import edu.gemini.qpt.core.util.MarkerManager;
+import edu.gemini.qpt.ui.util.TimePreference;
 import edu.gemini.ui.gface.GTableController;
 import edu.gemini.ui.gface.GViewer;
 
@@ -17,10 +18,10 @@ public class ProblemController implements GTableController<Schedule, Marker, Pro
 	private MarkerManager manager;
 	private Marker[] markers;
 	
-	public Object getSubElement(Marker element, ProblemAttribute subElement) {
+	public synchronized Object getSubElement(Marker element, ProblemAttribute subElement) {
 		if (element != null) {
 			switch (subElement) {
-			case Description: return element.getText();
+			case Description: return element.getUnionText(viewer.getModel().getSite());
 			case Resource: return element.getTarget();
 			case Severity: return element.getSeverity();
 			}
@@ -28,19 +29,24 @@ public class ProblemController implements GTableController<Schedule, Marker, Pro
 		return null;
 	}
 
-	public Marker getElementAt(int row) {		
+	public synchronized Marker getElementAt(int row) {
 		return row < markers.length ? markers[row] : null;
 	}
 
-	public int getElementCount() {
+	public synchronized int getElementCount() {
 		return markers == null ? 0 : markers.length;
 	}
 
-	public void modelChanged(GViewer<Schedule, Marker> viewer, Schedule oldModel, Schedule newModel) {
+	public synchronized void modelChanged(GViewer<Schedule, Marker> viewer, Schedule oldModel, Schedule newModel) {
 		this.viewer = viewer;
+		
 		if (manager != null) manager.removePropertyChangeListener(this);
 		manager = newModel == null ? null : newModel.getMarkerManager();
 		if (manager != null) manager.addPropertyChangeListener(this);
+
+		TimePreference.BOX.removePropertyChangeListener(this);
+		TimePreference.BOX.addPropertyChangeListener(this);
+
 		fetchMarkers();
 	}
 
