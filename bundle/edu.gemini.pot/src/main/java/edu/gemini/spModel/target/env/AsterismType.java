@@ -29,9 +29,14 @@ public enum AsterismType {
             new Some<>(AsterismConverters.GhostSkyPlusTargetConverter$.MODULE$),
             GhostAsterism$.MODULE$::createEmptySkyPlusTargetAsterism),
 
-    GhostHighResolution("ghostHighResolution", "High Resolution",
-            new Some<>(AsterismConverters.GhostHighResolutionConverter$.MODULE$),
-            GhostAsterism$.MODULE$::createEmptyHighResolutionAsterism),
+    GhostHighResolutionTarget("ghostHRTarget", "HRIFU1 Target",
+            new Some<>(AsterismConverters.GhostHRTargetConverter$.MODULE$),
+            GhostAsterism$.MODULE$::createEmptyHRTargetAsterism),
+
+    GhostHighResolutionTargetPlusSky("ghostHRTargetPlusSky", "HRIFU1 Target, HRIFU2 Sky",
+            new Some<>(AsterismConverters.GhostHRTargetPlusSkyConverter$.MODULE$),
+            GhostAsterism$.MODULE$::createEmptyTargetPlusSkyAsterism)
+
     ;
 
     public final String tag;
@@ -63,7 +68,8 @@ public enum AsterismType {
                 s.add(GhostDualTarget);
                 s.add(GhostTargetPlusSky);
                 s.add(GhostSkyPlusTarget);
-                s.add(GhostHighResolution);
+                s.add(GhostHighResolutionTarget);
+                s.add(GhostHighResolutionTargetPlusSky);
                 return Collections.unmodifiableSet(s);
             default:
                 return Collections.singleton(Single);

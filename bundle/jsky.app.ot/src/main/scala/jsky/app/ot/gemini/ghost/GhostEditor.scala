@@ -77,7 +77,8 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
       GhostDualTarget,
       GhostTargetPlusSky,
       GhostSkyPlusTarget,
-      GhostHighResolution
+      GhostHighResolutionTarget,
+      GhostHighResolutionTargetPlusSky
     )
 
     val asterismComboBox: ComboBox[AsterismType] = new ComboBox[AsterismType](asterismList)
