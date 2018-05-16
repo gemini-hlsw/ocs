@@ -10,17 +10,12 @@ import javax.swing.border.Border;
  * The generic concept of a row in the model.
  */
 public abstract class Row {
-    private final RowType type;
     private final boolean enabled;
     private final boolean editable;
     private final String tag;
     private final String name;
     private final Icon icon;
     private final Option<Long> when;
-
-    public RowType type() {
-        return type;
-    }
 
     public boolean enabled() {
         return enabled;
@@ -58,14 +53,12 @@ public abstract class Row {
         return col == 0 ? BorderFactory.createEmptyBorder(0, 5, 0, 0) : null;
     }
 
-    public Row(final RowType type,
-               final boolean enabled,
+    public Row(final boolean enabled,
                final boolean editable,
                final String tag,
                final String name,
                final Icon icon,
                final Option<Long> when) {
-        this.type = type;
         this.enabled = enabled;
         this.editable = editable;
         this.tag = tag;

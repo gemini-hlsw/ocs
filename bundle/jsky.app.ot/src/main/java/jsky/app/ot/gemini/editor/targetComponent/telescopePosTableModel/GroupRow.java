@@ -13,6 +13,21 @@ public final class GroupRow extends Row {
     private final List<Row> children;
     private final IndexedGuideGroup indexedGuideGroup;
 
+    GroupRow(final boolean enabled,
+             final boolean editable,
+             final int index,
+             final GuideGroup group,
+             final List<Row> children) {
+        super(enabled,
+                editable,
+                "",
+                extractGroupName(group),
+                null,
+                None.instance());
+        this.children = Collections.unmodifiableList(children);
+        this.indexedGuideGroup = IndexedGuideGroup$.MODULE$.apply(index, group);
+    }
+
     public List<Row> children() {
         return children;
     }
@@ -26,22 +41,6 @@ public final class GroupRow extends Row {
         return false;
     }
 
-    GroupRow(final boolean enabled,
-             final boolean editable,
-             final int index,
-             final GuideGroup group,
-             final List<Row> children) {
-        super(RowType.GROUP,
-                enabled,
-                editable,
-                "",
-                extractGroupName(group),
-                null,
-                None.instance());
-        this.children = Collections.unmodifiableList(children);
-        this.indexedGuideGroup = IndexedGuideGroup$.MODULE$.apply(index, group);
-    }
-
     private static String extractGroupName(final GuideGroup group) {
         final GuideGrp grp = group.grp();
         final String name;
@@ -50,8 +49,7 @@ public final class GroupRow extends Row {
                 name = "Auto (Disabled)";
             else
                 name = "Auto";
-        }
-        else
+        } else
             name = group.getName().getOrElse("Manual");
         return name;
     }

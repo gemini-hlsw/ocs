@@ -17,28 +17,13 @@ public abstract class TargetRow extends Row {
     private final SPTarget target;
     private final Option<Double> distance;
 
-    public SPTarget target() {
-        return target;
-    }
-
-    public synchronized String formatMagnitude(final MagnitudeBand band) {
-        final Option<Magnitude> mag = target.getMagnitudeJava(band);
-        return mag.map(m -> MAG_FORMAT.format(m.value())).getOrElse("");
-    }
-
-    @Override
-    public Option<Double> distance() {
-        return distance;
-    }
-
     TargetRow(final boolean enabled,
               final boolean editable,
               final String tag,
               final SPTarget target,
               final Option<Coordinates> baseCoords,
               final Option<Long> when) {
-        super(RowType.TARGET,
-                enabled,
+        super(enabled,
                 editable,
                 tag,
                 target.getName(),
@@ -52,6 +37,28 @@ public abstract class TargetRow extends Row {
                         bc.angularDistance(c).toArcmins()
                 )
         );
+    }
+
+    public SPTarget target() {
+        return target;
+    }
+
+    public synchronized String formatMagnitude(final MagnitudeBand band) {
+        final Option<Magnitude> mag = target.getMagnitudeJava(band);
+        return mag.map(m -> MAG_FORMAT.format(m.value())).getOrElse("");
+    }
+
+    public String raStringExtractor() {
+        return target.getRaString(when()).getOrElse("");
+    }
+
+    public String decStringExtractor() {
+        return target.getDecString(when()).getOrElse("");
+    }
+
+    @Override
+    public Option<Double> distance() {
+        return distance;
     }
 }
 

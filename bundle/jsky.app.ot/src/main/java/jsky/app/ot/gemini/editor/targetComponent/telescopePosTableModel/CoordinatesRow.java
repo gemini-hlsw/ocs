@@ -11,12 +11,30 @@ abstract class CoordinatesRow extends Row {
     private final Coordinates coordinates;
     private final Option<Double> distance;
 
+    CoordinatesRow(final boolean enabled,
+                   final boolean editable,
+                   final String tag,
+                   final String name,
+                   final Coordinates coordinates,
+                   final Option<Coordinates> baseCoords) {
+        super(enabled,
+                editable,
+                tag,
+                name,
+                null,
+                None.instance());
+        this.coordinates = coordinates;
+
+        this.distance = baseCoords.map(bc -> bc.angularDistance(coordinates).toArcmins());
+    }
+
     public Coordinates coordinates() {
         return coordinates;
     }
 
     // The coordinates here don't have a concept of "when", so distance will
     // not be exact.
+    @Override
     public Option<Double> distance() {
         return distance;
     }
@@ -26,21 +44,11 @@ abstract class CoordinatesRow extends Row {
         return false;
     }
 
-    CoordinatesRow(final boolean enabled,
-                   final boolean editable,
-                   final String tag,
-                   final String name,
-                   final Coordinates coordinates,
-                   final Option<Coordinates> baseCoords) {
-        super(RowType.COORDINATES,
-                enabled,
-                editable,
-                tag,
-                name,
-                null,
-                None.instance());
-        this.coordinates = coordinates;
+    public String raStringExtractor() {
+        return coordinates.ra().toAngle().formatHMS();
+    }
 
-        this.distance = baseCoords.map(bc -> bc.angularDistance(coordinates).toArcmins());
+    public String decStringExtractor() {
+        return coordinates.dec().toAngle().formatHMS();
     }
 }

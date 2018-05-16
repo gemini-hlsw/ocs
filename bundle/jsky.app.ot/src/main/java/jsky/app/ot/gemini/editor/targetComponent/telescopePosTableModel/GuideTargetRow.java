@@ -18,27 +18,6 @@ final class GuideTargetRow extends TargetRow {
 
     private static final Icon errorIcon = Resources.getIcon("eclipse/error.gif");
 
-    public Option<AgsGuideQuality> quality() {
-        return quality;
-    }
-
-    @Override
-    public boolean movable() {
-        return movable;
-    }
-
-    @Override
-    public Border border(int col)     {
-        return col == 0 ? BorderFactory.createEmptyBorder(0, 16, 0, 0) : null;
-    }
-
-    @Override
-    public Icon icon() {
-        return isActiveGuideProbe ?
-                GuidingIcon.apply(quality.getOrElse(AgsGuideQuality.Unusable$.MODULE$), enabled()) :
-                errorIcon;
-    }
-
     GuideTargetRow(final boolean isActiveGuideProbe,
                    final Option<AgsGuideQuality> quality,
                    final boolean enabled,
@@ -58,5 +37,26 @@ final class GuideTargetRow extends TargetRow {
         this.isActiveGuideProbe = isActiveGuideProbe;
         this.quality = quality;
         this.movable = movable;
+    }
+
+    public Option<AgsGuideQuality> quality() {
+        return quality;
+    }
+
+    @Override
+    public boolean movable() {
+        return movable;
+    }
+
+    @Override
+    public Border border(int col)     {
+        return col == 0 ? BorderFactory.createEmptyBorder(0, 16, 0, 0) : null;
+    }
+
+    @Override
+    public Icon icon() {
+        return isActiveGuideProbe ?
+                GuidingIcon.apply(quality.getOrElse(AgsGuideQuality.Unusable$.MODULE$), enabled()) :
+                errorIcon;
     }
 }

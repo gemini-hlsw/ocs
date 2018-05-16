@@ -17,13 +17,23 @@ enum Column {
 
     RA("RA") {
         public String getValue(final Row row) {
-            return row.type().raStringExtractor(row);
+            if (row instanceof TargetRow)
+                return ((TargetRow) row).raStringExtractor();
+            else if (row instanceof CoordinatesRow)
+                return ((CoordinatesRow) row).raStringExtractor();
+            else
+                return "";
         }
     },
 
     DEC("Dec") {
         public String getValue(final Row row) {
-            return row.type().decStringExtractor(row);
+            if (row instanceof TargetRow)
+                return ((TargetRow) row).decStringExtractor();
+            else if (row instanceof CoordinatesRow)
+                return ((CoordinatesRow) row).decStringExtractor();
+            else
+                return "";
         }
     },
 
