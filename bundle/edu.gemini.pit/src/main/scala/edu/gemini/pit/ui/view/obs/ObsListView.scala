@@ -28,7 +28,7 @@ import edu.gemini.shared.gui.Browser
 // The observation list/tree, which has two visible instances (Band 1/2 and Band 3). This is by far the most complex
 // view, in particular because of drag/drop and copy/paste. The main structure we use here is an ObsListModel which is
 // probably where to start when trying to figure this out.
-class ObsListView(shellAdvisor:ShellAdvisor, band:Band, queueLookup: Target => Unit) extends BorderPanel with BoundView[Proposal] {panel =>
+class ObsListView(shellAdvisor:ShellAdvisor, band:Band) extends BorderPanel with BoundView[Proposal] {panel =>
   implicit val boolMonoid = Monoid.instance[Boolean](_ || _,  false)
 
   // HACK: there will be two instances of this view, each referencing the other. Because we can't construct this stuff
@@ -182,7 +182,6 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band, queueLookup: Target => U
       addCondition.enabled = canEdit
       addTarget.enabled = canEdit
       addObservation.enabled = canEdit
-      lookupText.enabled = canEdit
     }
 
     add(addCondition)
@@ -191,9 +190,6 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band, queueLookup: Target => U
     add(addObservation)
     addSeparator()
     add(delete)
-    addSeparator()
-    addLabel("Lookup")
-    add(lookupText)
     addFlexibleSpace()
     add(checkGsa)
 
@@ -272,44 +268,6 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band, queueLookup: Target => U
       }
     }
 
-
-    // Target lookup
-    // TODO: factor out common functionality that also exists in TargetView
-    object lookupText extends PlaceholderTextField("«enter a target here»") {
-
-      action = Action("Lookup") {
-        for (m <- panel.model) {
-
-          // Our existing target list
-          val ts = Proposal.targets.get(m)
-
-          // Ok here's a function that turns a name into a target (either existing or new)
-          def target(s:String) = ts.find(_.name.equalsIgnoreCase(s)).getOrElse(Target.empty.copy(name = s))
-
-          // Names the user entered
-          val names = text.split(";").map(_.trim).filterNot(_.isEmpty).distinct
-
-          // As targets (possibly existing), and as obs
-          val newTs = names.map(target)
-          val newOs = newTs.map(t => templateObs.copy(target = Some(t)))
-
-          // Look up the new targets (known ones will be discarded)
-          newTs.foreach(queueLookup)
-
-          // Add new targets (they will be uniq'd by the lens)
-          val p0 = Proposal.targets.set(m, ts ++ newTs)
-
-          // AND add observations in the right band
-          val os = Proposal.observations.get(p0)
-          val p1 = Proposal.observations.set(p0, os ++ newOs)
-
-          panel.model = Some(p1)
-          text = null
-
-        }
-      }
-    }
-
   }
 
   object viewer extends SimpleListViewer[Proposal, ObsListModel, ObsListElem] {list =>
@@ -324,7 +282,6 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band, queueLookup: Target => U
     }
 
     // Repaint everything when the catalog or guidstar state changes
-    shellAdvisor.catalogHandler.addListener {_:Any => refresh()}
     AgsRobot.addListener {_:Any => refresh()}
     GsaRobot.addListener {_:Any => refresh()}
 

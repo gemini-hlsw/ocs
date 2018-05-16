@@ -29,9 +29,6 @@ class TargetView(val shellAdvisor:ShellAdvisor) extends BorderPanel with BoundVi
   override lazy val commonActions = Map(
     Copy -> listView.transferHandler.CopyAction)
 
-  // Refresh when the catalog update stuff changes
-  shellAdvisor.catalogHandler.addListener {cs => listView.refresh()}
-
   // Some lenses
   val targetLens = Model.proposal andThen Proposal.targets
   val semesterLens = Model.proposal andThen Proposal.semester
@@ -70,7 +67,6 @@ class TargetView(val shellAdvisor:ShellAdvisor) extends BorderPanel with BoundVi
 
     // Model slices
     def targets:List[Target] = model.map(targetLens.get).getOrElse(Nil)
-    def catalogStatus = shellAdvisor.catalogHandler.state
 
     // One-liners
     def elementAt(m:Model, i:Int) = targets(i)
@@ -132,13 +128,7 @@ class TargetView(val shellAdvisor:ShellAdvisor) extends BorderPanel with BoundVi
       }
 
     def icon(i:Target) = {
-      case Name => catalogStatus.get(i) match {
-        case Some(Some(Offline))     => error(i)
-        case Some(Some(Error(_)))    => error(i)
-        case Some(Some(NotFound(_))) => error(i)
-        case None if i.isEmpty       => error(i)
-        case _                       => ok(i)
-      }
+      case Name => ok(i)
     }
 
     override def alignment(i:Target) = {
@@ -207,52 +197,15 @@ class TargetView(val shellAdvisor:ShellAdvisor) extends BorderPanel with BoundVi
     // Configure content, defined below
     add(add)
     add(delete)
-    addSeparator()
-    addLabel("Lookup:")
-    add(lookupText)
     addFlexibleSpace()
     add(importTargets)
     add(exportTargets)
 
     // Enablement
     override def refresh(m:Option[Model]) {
-      lookupText.enabled = canEdit
       add.enabled = canEdit
       importTargets.enabled = canEdit
       exportTargets.refresh()
-    }
-
-    // Lookup
-    // TODO: factor out common functionality that also exists in ObsListView
-    object lookupText extends PlaceholderTextField("«enter a target here»") {
-
-      action = Action("Lookup") {
-        for (m <- model) {
-
-          // Our existing target list
-          val ts = targetLens.get(m)
-
-          // Ok here's a function that turns a name into a target (either existing or new)
-          def target(s:String) = ts.find(_.name.equalsIgnoreCase(s)).getOrElse(Target.empty.copy(name = s))
-
-          // Names the user entered
-          val names = text.split(";").map(_.trim).filterNot(_.isEmpty).distinct
-
-          // As targets (possibly existing)
-          val newTs = names.map(target)
-
-          // Queue lookup
-          newTs.foreach(shellAdvisor.catalogHandler.lookup)
-
-          // Add new targets (they will be uniq'd by the lens)
-          val p0 = targetLens.set(m, ts ++ newTs)
-
-          panel.model = Some(p0)
-          text = null
-
-        }
-      }
-
     }
 
     // Add Target Button

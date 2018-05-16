@@ -66,12 +66,6 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
   type State = List[Problem]
   protected[this] val initialState = Nil
 
-  // Register with the catalog handler
-  require(s.catalogHandler != null)
-  s.catalogHandler.addListener {
-    a: CatalogRobot#State => refresh(model)
-  }
-
   override protected def refresh(m: Option[Model]) {
     state = m.map(m => new Checker(m.proposal, s.shell.file).all).getOrElse(Nil)
   }
@@ -88,7 +82,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
           TimeProblems.partnerZeroTimeRequest(p, s) ++
           TacProblems(p, s).all ++
           Semester2018BProblems(p, s).all ++
-          List(incompleteInvestigator, missingObsElementCheck, cfCheck, emptyTargetCheck,
+          List(incompleteInvestigator, missingObsElementCheck, emptyTargetCheck,
             emptyEphemerisCheck, singlePointEphemerisCheck, initialEphemerisCheck, finalEphemerisCheck,
             badGuiding, cwfsCorrectionsIssue, badVisibility, iffyVisibility, minTimeCheck, wrongSite, band3Orphan2, gpiCheck, lgsIQ70Check, lgsGemsIQ85Check,
             lgsCC50Check, texesCCCheck, texesWVCheck, gmosWVCheck, gmosR600Check, band3IQ, band3LGS, band3RapidToO, sbIrObservation).flatten
@@ -153,19 +147,9 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       if a.length() > MaxAttachmentSizeBytes
     } yield new Problem(Severity.Error, s"Attachment '${a.getName}' is larger than ${MaxAttachmentSize}MB.", "Overview", s.inOverview(_.attachment.select.doClick()))
 
-    private lazy val cfCheck = for {
-      (t, Some(f)) <- s.catalogHandler.state
-      (sev, msg) = f match {
-        case Offline      => (Severity.Error, s"Catalog lookup failed for ${t.name} due to network connectivity problems.")
-        case NotFound(n)  => (Severity.Error, s"""Catalog lookup returned no results for target "$n".""")
-        case Error(e)     => (Severity.Error, s"Catalog lookup failed for ${t.name} due to an unexpected error.")
-      }
-    } yield new Problem(sev, msg, "Targets", s.inTargetsView(_.edit(t)))
-
     private lazy val emptyTargetCheck = for {
       t <- p.targets
       if t.isEmpty
-      if !s.catalogHandler.state.contains(t)
       msg = s"""Target "${t.name}" appears to be empty."""
     } yield new Problem(Severity.Error, msg, "Targets", s.inTargetsView(_.edit(t)))
 
@@ -173,14 +157,12 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
     private lazy val emptyEphemerisCheck = for {
       t @ NonSiderealTarget(_, n, e, _) <- p.targets
       if e.isEmpty
-      if !s.catalogHandler.state.contains(t)
       msg = s"""Ephemeris for target "$n" is undefined."""
     } yield new Problem(Severity.Warning, msg, "Targets", s.inTargetsView(_.edit(t)))
 
     private lazy val singlePointEphemerisCheck = for {
       t @ NonSiderealTarget(_, n, e, _) <- p.targets
       if e.size == 1
-      if !s.catalogHandler.state.contains(t)
       msg = s"""Ephemeris for target "$n" contains only one point; please specify at least two."""
     } yield new Problem(Severity.Warning, msg, "Targets", s.inTargetsView(_.edit(t)))
 
@@ -189,7 +171,6 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
     private lazy val initialEphemerisCheck = for {
       t @ NonSiderealTarget(_, n, e, _) <- p.targets
       if !e.isEmpty
-      if !s.catalogHandler.state.contains(t)
       ds = e.map(_.validAt) if ds.size > 1
       dsMin = ds.min
       diff = dsMin - p.semester.firstDay
@@ -205,7 +186,6 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
     private lazy val finalEphemerisCheck = for {
       t @ NonSiderealTarget(_, n, e, _) <- p.targets
       if e.nonEmpty
-      if !s.catalogHandler.state.contains(t)
       ds = e.map(_.validAt) if ds.size > 1
       dsMax = ds.max
       diff = p.semester.lastDay - dsMax
