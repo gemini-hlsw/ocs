@@ -14,21 +14,10 @@ class StatusBar(shellAdvisor: ShellAdvisor) extends Label with BoundView[Boolean
 
   horizontalAlignment = Alignment.Left
 
-  shellAdvisor.catalogHandler.addListener {
-    cs =>
-      if (cs.exists(_._2 == None)) {
-        icon = SharedIcons.ICON_SPINNER_BLUE
-        text = "Performing catalog lookup..."
-      } else {
-        icon = null
-        text = readyText
-      }
-  }
-
   def readyText: String = {
     shellAdvisor.context.shell.model.map {
       case m: Model if lens.get(m) => val semester = fromSemester.get(m);s"Ready - This proposal has been converted from the semester ${semester.display}"
-      case _                                    => "Ready"
+      case _                       => "Ready"
     }.getOrElse("Ready")
   }
 }

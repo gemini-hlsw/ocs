@@ -2,7 +2,6 @@ package edu.gemini.pit.ui.editor
 
 import com.jgoodies.forms.factories.Borders.DLU4_BORDER
 import edu.gemini.model.p1.immutable.TooTarget
-
 import edu.gemini.model.p1.immutable._
 import edu.gemini.model.p1.immutable.EphemerisElement
 import edu.gemini.model.p1.immutable.NonSiderealTarget
@@ -16,26 +15,31 @@ import edu.gemini.pit.ui.util.ScrollPanes
 import edu.gemini.pit.ui.util.SharedIcons
 import edu.gemini.pit.ui.util.StdModalEditor
 import edu.gemini.shared.gui.textComponent.{NumberField, SelectOnFocus}
-import edu.gemini.spModel.core.{Magnitude, MagnitudeSystem, MagnitudeBand}
-import edu.gemini.spModel.core.{Declination, RightAscension, Coordinates}
+import edu.gemini.spModel.core.{Coordinates, Declination, Ephemeris, HorizonsDesignation, Magnitude, MagnitudeBand, MagnitudeSystem, RightAscension}
 import edu.gemini.ui.gface.GComparator
 import edu.gemini.ui.gface.GSelection
 import edu.gemini.ui.gface.GSelectionBroker
 import edu.gemini.ui.gface.GTableViewer
 import edu.gemini.ui.gface.GViewer
 import edu.gemini.ui.workspace.util.Factory
-
 import java.beans.PropertyChangeEvent
 import java.beans.PropertyChangeListener
-
 import java.awt
+import java.awt.Color
+
 import edu.gemini.pit.ui.util.ToolButton
+
 import swing._
-import scala.swing.event.{ButtonClicked, ValueChanged, SelectionChanged}
-import javax.swing.{Icon, BorderFactory, ListSelectionModel}
-import java.text.{DecimalFormat}
+import scala.swing.event.{ButtonClicked, SelectionChanged, ValueChanged}
+import javax.swing.{BorderFactory, Icon, ListSelectionModel, SwingUtilities}
+import java.text.DecimalFormat
 import java.time.{Instant, ZoneId}
 import java.time.format.DateTimeFormatter
+
+import edu.gemini.pit.model.Model
+import edu.gemini.pit.ui.view.submit.SubmitStatus
+import edu.gemini.shared.gui.GlassLabel
+import edu.gemini.spModel.core
 
 import scalaz._
 import Scalaz._
@@ -57,6 +61,18 @@ object TargetEditor {
   case class Replace(t:Target) extends Result
 
   case class Done(t:Target) extends Result
+
+  // standalone target editor for testing
+  def main(args: Array[String]): Unit = {
+    import java.util.Locale
+    import edu.gemini.ui.workspace.impl.Workspace
+    Locale.setDefault(Locale.ENGLISH)
+    System.setProperty("edu.gemini.model.p1.schemaVersion", s"${Semester.current.year}.2.1")
+    System.setProperty(classOf[Workspace].getName + ".fonts.shrunk", "true")
+    new Workspace(null).open()
+    open(Semester.current, None, true, null).foreach(println)
+    sys.exit(0)
+  }
 
 }
 
@@ -150,31 +166,36 @@ class TargetEditor private (semester:Semester, target:Target, canEdit:Boolean) e
   object Header extends GridBagPanel with Rows {
 
     // Add our controls, which are defined below.
+    addRow(new Label("Type:"), TypePicker)
     addRow(new Label("Name:"), new BorderPanel {
       add(Name, BorderPanel.Position.Center)
-      add(new BorderPanel {
-        add(lookup, BorderPanel.Position.West)
-        add(cats, BorderPanel.Position.East)
-      }, BorderPanel.Position.East)
+      add(lookup, BorderPanel.Position.East)
     })
-    addRow(new Label("Type:"), TypePicker)
 
     // The target name is a simple text field.
     object Name extends TextField(target.name, 15) with SelectOnFocus with NonEmptyText {
       enabled = canEdit
+      action = lookup.action // lookup on <ENTER>
     }
 
     // Lookup button, for synchronous lookup
-    lazy val lookup = Button("Lookup...") {
-      SynchronousLookup2.open(Name.text, dialog).map(Replace.apply).foreach(dialog.close)
-    }
-    lookup.enabled = canEdit
+    lazy val lookup: Button = {
 
-    // Lookup button, for synchronous lookup w/catalogs
-    lazy val cats = Button("Catalogs...") {
-      SynchronousLookup.open(Name.text, dialog).map(Replace.apply).foreach(dialog.close)
+      // UIs for catalog lookups.
+      val simbad = new SimbadLookup(dialog)
+      val horizons = new HorizonsLookup(dialog, core.Site.GN, semester.midPoint)
+
+      // The actual button.
+      Button("Lookup...") {
+        TypePicker.selection match {
+          case SiderealType    => simbad.lookup(Name.text)
+          case NonSiderealType => horizons.lookup(Name.text)
+          case TooType         => () // unpossible, heh-heh
+        }
+      }
+
     }
-    cats.enabled = canEdit
+    lookup.enabled = canEdit && TypePicker.selection != TooType
 
     // Target type picker is a group of radio buttons.
     // When the user selects a new target type, we ask the
@@ -576,3 +597,4 @@ class TargetEditor private (semester:Semester, target:Target, canEdit:Boolean) e
   }
 
 }
+

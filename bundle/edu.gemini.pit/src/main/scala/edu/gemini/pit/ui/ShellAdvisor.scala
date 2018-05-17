@@ -37,7 +37,7 @@ import java.util.{Locale, Optional}
 
 import edu.gemini.model.p1.submit.SubmitClient
 import edu.gemini.pit.ui.binding._
-import edu.gemini.pit.ui.robot.{AgsRobot, CatalogRobot, GsaRobot, ProblemRobot, VisibilityRobot}
+import edu.gemini.pit.ui.robot.{AgsRobot, GsaRobot, ProblemRobot, VisibilityRobot}
 import edu.gemini.shared.Platform
 import edu.gemini.shared.gui.Browser
 
@@ -63,7 +63,6 @@ class ShellAdvisor(
   lazy val shell = context.shell
 
   // Some robots
-  lazy val catalogHandler = new CatalogRobot(shell.peer)
   lazy val problemHandler = new ProblemRobot(this)
 
   // Our submit client depends on a system property
@@ -78,8 +77,8 @@ class ShellAdvisor(
   lazy val partnerView = new PartnerView
   lazy val problemView = new ProblemView(this)
   lazy val submitView = new SubmitView(problemHandler, newShellHandler, new SaveAction(shell).applyBoolean, submitClient)
-  lazy val obsListView = new ObsListView(this, Band.BAND_1_2, catalogHandler.lookup)
-  lazy val obsListViewB3 = new ObsListView(this, Band.BAND_3, catalogHandler.lookup)
+  lazy val obsListView = new ObsListView(this, Band.BAND_1_2)
+  lazy val obsListViewB3 = new ObsListView(this, Band.BAND_3)
   lazy val tacView = new TacView(locale)
   lazy val schedulingView = new SchedulingView(this)
 
@@ -132,7 +131,6 @@ class ShellAdvisor(
     addRoot(AgsRobot, undoable = false)
     addRoot(VisibilityRobot, undoable = false)
     addRoot(GsaRobot, undoable = false)
-    addRoot(catalogHandler, undoable = false)
     addRoot(problemHandler, undoable = false)
 
     // Update the title bar if the mode or model change
