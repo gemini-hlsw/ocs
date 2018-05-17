@@ -150,8 +150,8 @@ public final class SEDFactory {
             // so use the full GNIRS XD wavelength range:
             if (instrument instanceof Gnirs) {
                 if (((Gnirs) instrument).XDisp_IsUsed()) {
-                    inst_start_wave = 750.;
-                    inst_end_wave = 2600.;
+                    inst_start_wave = 750.0;
+                    inst_end_wave = 2600.0;
                 }
             }
 
