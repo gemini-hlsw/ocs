@@ -1012,6 +1012,11 @@ public final class Variant extends BaseMutableBean implements PioSerializable, C
 		// than those which don't require dark time,
 		score *= 1.0 - obs.getConditions().getSB() / 200.0; // 0 => 1.0, 100 => 0.5
 
+		// Scale way down if this isn't a TOO observation.
+		if (obs.getTooPriority() == TooType.none) {
+			score *= 0.5;
+		}
+
 		// QPT-202: Determine the effective PI priority, which may be higher than
 		// the base priority in the model. Shift everything up if there are unused
 		// non-TOO priorities in the same program (ignoring unobservable obs).
@@ -1028,13 +1033,11 @@ public final class Variant extends BaseMutableBean implements PioSerializable, C
 //			LOGGER.info(obs + ": " + basePriority + " => " + effectivePriority);
 
 		// Scale based on effective priority
-                if (obs.getTooPriority() != TooType.none) {
-		    switch (effectivePriority) {
-		    case HIGH: score *= 0.5; break;
-		    case MEDIUM: score *= 0.4; break;
-		    case LOW: score *= 0.3; break;
-		    }
-                }
+		switch (effectivePriority) {
+			case HIGH:   break; // no scaling
+			case MEDIUM: score *= 0.75; break;
+			case LOW:    score *= 0.5; break;
+		}
 
 		return score;
 
