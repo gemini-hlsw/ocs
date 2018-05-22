@@ -1296,6 +1296,7 @@ final class GuidePositionType implements PositionType {
         } else {
             resultOpt = EdCompTargetList.appendNewGroup(env, positionTable);
         }
+        
         resultOpt.foreach(tup -> {
             final TargetEnvironment envNew = tup._1();
             final IndexedGuideGroup igg    = tup._2();
