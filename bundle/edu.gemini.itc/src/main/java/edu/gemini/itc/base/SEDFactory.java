@@ -143,10 +143,22 @@ public final class SEDFactory {
         } else if (sdp.distribution() instanceof UserDefinedSpectrum) {
             final UserDefinedSpectrum userDefined = (UserDefinedSpectrum) sdp.distribution();
             final MagnitudeBand band = sdp.normBand();
-            // The user-supplied SED must cover the range of the instrument configuration and the normalization band.
+            Double inst_start_wave = instrument.getObservingStart();
+            Double inst_end_wave = instrument.getObservingEnd();
+
+            // GNIRS overrides getObservingStart and getObservingEnd for each order,
+            // so use the full GNIRS XD wavelength range:
+            if (instrument instanceof Gnirs) {
+                if (((Gnirs) instrument).XDisp_IsUsed()) {
+                    inst_start_wave = 750.0;
+                    inst_end_wave = 2600.0;
+                }
+            }
+
+            // The user-supplied SED must cover the range of the instrument configuration AND the normalization band:
             temp = getUserSED(userDefined,
-                    Math.min(instrument.getObservingStart(), band.start().toNanometers()),
-                    Math.max(instrument.getObservingEnd(), band.end().toNanometers()),
+                    Math.min(inst_start_wave, band.start().toNanometers()),
+                    Math.max(inst_end_wave, band.end().toNanometers()),
                     instrument.getSampling(),
                     sdp.redshift().z());
             temp.applyWavelengthCorrection();
