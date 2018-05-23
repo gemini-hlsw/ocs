@@ -20,6 +20,7 @@ import edu.gemini.qpt.core.util.MarkerManager;
 import edu.gemini.qpt.shared.sp.Obs;
 import edu.gemini.qpt.shared.util.TimeUtils;
 import edu.gemini.shared.util.immutable.*;
+import edu.gemini.spModel.obsclass.ObsClass;
 import edu.gemini.spModel.obscomp.SPGroup.GroupType;
 
 /**
@@ -289,41 +290,47 @@ class ScoreMarker {
 	private static final String PREFIX = String.format("Higher-scoring observation(s) within %2.1fH: ", RA_LIMIT_H);
 
 	public static void add(Object owner, MarkerManager mm, Variant v, Alloc a) {
+		if (a.getObs().getObsClass() == ObsClass.SCIENCE) {
 
-		// unscheduled observations
-		final Predicate<Obs> unscheduled = obs ->
-			!v.getFlags(obs).contains(Flag.SCHEDULED);
+			// science observations
+			final Predicate<Obs> science = obs ->
+				obs.getObsClass() == ObsClass.SCIENCE;
 
-		// observations within RA_LIMIT_DEG of `a`
-		final Predicate<Obs> nearby = otherObs -> {
-			final double myRaDeg    = a.getObs().getRa(a.getStart()); // My RA at scheduling time
-			final double otherRaDeg = otherObs.getRa(a.getStart());
-			final double raDiffDeg  = Math.abs(myRaDeg - otherRaDeg);
-			return raDiffDeg <= RA_LIMIT_DEG;
-		};
+			// unscheduled observations
+			final Predicate<Obs> unscheduled = obs ->
+				!v.getFlags(obs).contains(Flag.SCHEDULED);
 
-		// observations with a better score than `a.getObs`
-		final Predicate<Obs> higherScoring = otherObs -> {
-			final double myScore    = v.getScore(a.getObs());
-			final double otherScore = v.getScore(otherObs);
-			return otherScore > myScore;
-		};
+			// observations within RA_LIMIT_DEG of `a`
+			final Predicate<Obs> nearby = otherObs -> {
+				final double myRaDeg = a.getObs().getRa(a.getStart()); // My RA at scheduling time
+				final double otherRaDeg = otherObs.getRa(a.getStart());
+				final double raDiffDeg = Math.abs(myRaDeg - otherRaDeg);
+				return raDiffDeg <= RA_LIMIT_DEG;
+			};
 
-		// all of the above, ordered by cost to compute
-		final Predicate<Obs> all =
-			unscheduled.and(nearby).and(higherScoring);
+			// observations with a better score than `a.getObs`
+			final Predicate<Obs> higherScoring = otherObs -> {
+				final double myScore = v.getScore(a.getObs());
+				final double otherScore = v.getScore(otherObs);
+				return otherScore > myScore;
+			};
 
-		// observations in the same program as `a` that meet all filter conditions
-		final List<Obs> alternatives =
-			a.getObs().getProg().getFullObsSet().stream().filter(all).collect(Collectors.toList());
+			// all of the above, ordered by cost to compute
+			final Predicate<Obs> all =
+				science.and(unscheduled).and(nearby).and(higherScoring);
 
-		// if there are any, add a marker
-		if (!alternatives.isEmpty()) {
-			final String msg =
-				alternatives.stream().map(Obs::getObsId).collect(Collectors.joining(" ", PREFIX, ""));
-			mm.addMarker(true, owner, Severity.Warning, msg, v, a);
+			// observations in the same program as `a` that meet all filter conditions
+			final List<Obs> alternatives =
+				a.getObs().getProg().getFullObsSet().stream().filter(all).collect(Collectors.toList());
+
+			// if there are any, add a marker
+			if (!alternatives.isEmpty()) {
+				final String msg =
+					alternatives.stream().map(Obs::getObsId).collect(Collectors.joining(" ", PREFIX, ""));
+				mm.addMarker(true, owner, Severity.Warning, msg, v, a);
+			}
+
 		}
-
 	}
 
 }
