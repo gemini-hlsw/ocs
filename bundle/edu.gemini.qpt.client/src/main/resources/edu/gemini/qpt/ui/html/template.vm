@@ -143,7 +143,7 @@
 							$!a.Comment
 							
 							#foreach($m in $markers)
-								<div style="margin:0px;color:$doc.getColor($m.Severity)">$m.Severity: $m.FilteredText</div>
+								<div style="margin:0px;color:$doc.getColor($m.Severity)">$m.Severity: $m.getFilteredUnionText($doc.getSchedule().getSite())</div>
 							#end
 
                             #foreach($w in $clearanceWindows)
