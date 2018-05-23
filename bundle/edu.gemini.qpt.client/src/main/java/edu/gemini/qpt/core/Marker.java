@@ -59,10 +59,6 @@ public class Marker implements Comparable<Marker> {
 		return text;
 	}
 
-    public String getFilteredText() {
-        return text.replace("\u00B0", "&deg;");
-    }
-
 	private static final String formatInterval(Site site, Interval interval) {
 		return String.format(
 				"%s - %s",
@@ -85,6 +81,10 @@ public class Marker implements Comparable<Marker> {
 			msg = this.getText();
 		}
 		return msg;
+	}
+
+	public String getFilteredUnionText(Site site) {
+		return this.getUnionText(site).replace("\u00B0", "&deg;");
 	}
 
     public Severity getSeverity() {
