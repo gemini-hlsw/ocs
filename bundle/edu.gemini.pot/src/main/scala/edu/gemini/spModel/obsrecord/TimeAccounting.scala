@@ -12,21 +12,34 @@ import scala.collection.JavaConverters._
  */
 object TimeAccounting {
 
+  /**
+   * Calculate VisitTimes for the events in this visit.
+   */
   def calc(
     events: Vector[ObsExecEvent],
     qa:     DatasetLabel => DatasetQaState,
     oc:     DatasetLabel => ObsClass
   ): VisitTimes = {
 
-    val calc = for {
-      h <- events.headOption
+    val ve = VisitEvents(events)
+
+    // Find the visit calculator that applies to the events.  We use the start
+    // time of the first event for the visit to select the corresponding
+    // calculator that is used for the rest of the sequence regardless of when
+    // it ends.
+    val calculator = for {
+      h <- ve.sorted.headOption
       s <- h.site
       c <- VisitCalculator.all.find(_.validAt(s).isBefore(h.instant))
     } yield c
 
-    calc.fold(new VisitTimes()) { _.calc(events, qa, oc) }
+    calculator.fold(new VisitTimes()) { _.calc(ve, qa, oc) }
   }
 
+  /**
+   * Calculate VisitTimes for the events in this visit.  This method is provided
+   * to facilitate execution from the Java based PrivateVisit class.
+   */
   def calcAsJava(
     events: java.util.List[ObsExecEvent],
     qa:     ObsQaRecord,

@@ -1,10 +1,10 @@
-package edu.gemini.spModel.syntax
+package edu.gemini.spModel.syntax.event
+
+import java.time.Instant
 
 import edu.gemini.skycalc.ObservingNight
 import edu.gemini.spModel.core.Site
-import edu.gemini.spModel.event.{OverlapEvent, ObsExecEvent}
-
-import java.time.Instant
+import edu.gemini.spModel.event.{ObsExecEvent, OverlapEvent}
 
 
 final class ObsExecEventOps(self: ObsExecEvent) {

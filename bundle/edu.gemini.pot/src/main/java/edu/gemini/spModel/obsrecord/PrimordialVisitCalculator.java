@@ -16,14 +16,30 @@ import edu.gemini.spModel.obsclass.ObsClass;
 import edu.gemini.spModel.time.ChargeClass;
 
 import java.util.List;
+import java.util.function.Function;
+import java.time.Instant;
 
 /**
- * The old time accounting implementation for comparison and testing.
+ * This is the algorithm that has been in use since the beginning of time
+ * accounting.  It is confusing, hard to follow, and suffers from several (now)
+ * known bugs:
+ *
+ * 1. It fails to charge for the portion of a dataset after a start event but
+ * before an overlap event.
+ *
+ * 2. In general, intervening dataset events that split start/end events are not
+ * charged correctly in all cases.
+ *
+ * 3. If the first event should happen to be a start dataset event then the
+ * first dataset isn't charged.
+ *
+ * Nevertheless, we cannot change time accounting for past observations so none
+ * of these bugs will be fixed in the PrimordialVisitCalculator below.  The
+ * code is essentially unchanged but instead simply lifted from `PrivateVisit`
+ * and given a calc method with fewer dependencies.
  */
-public final class OldTimeAccounting {
-
-    private OldTimeAccounting() {
-    }
+enum PrimordialVisitCalculator {
+    instance;
 
     // Tries to compute the SiteDesc for this visit based upon the events (if
     // any).  Uses the prefix of the observation id (GN or GS) to guess at the
@@ -158,10 +174,10 @@ public final class OldTimeAccounting {
         inv.nightTime = nighttime;
     }
 
-    public static VisitTimes getTimeCharges(
-        List<ObsExecEvent> events,
-        ObsQaRecord qa,
-        ConfigStore store
+    public VisitTimes calc(
+        List<ObsExecEvent>                     events,
+        Function<DatasetLabel, DatasetQaState> qaState,
+        Function<DatasetLabel, ObsClass>       obsClass
     ) {
 
         VisitTimes res = new VisitTimes();
@@ -175,7 +191,7 @@ public final class OldTimeAccounting {
         EventData ed2 = new EventData(site);
         ed2.updateToMatch(ed1);
 
-        StartDatasetEvent start = null;
+        StartDatasetEvent start = null;  // BUG - if the first event is a start event it will be ignored
         EventInterval inv = new EventInterval();
 
         int sz = events.size();
@@ -198,19 +214,21 @@ public final class OldTimeAccounting {
                     continue;
                 }
 
-                final ObsClass obsClass = store.getObsClass(label);
-                final DatasetQaState qaState = qa.qaState(label);
+                final ObsClass       oc = obsClass.apply(label);
+                final DatasetQaState qa = qaState.apply(label);
 
                 // Charge for datasets that were in the PASS or
                 // some non-final state.  Don't charge for anything else.
-                if (DatasetQaState.PASS.equals(qaState) || !qaState.isFinal()) {
-                    res.addClassifiedTime(obsClass.getDefaultChargeClass(), inv.nightTime);
+                if (DatasetQaState.PASS.equals(qa) || !qa.isFinal()) {
+                    res.addClassifiedTime(oc.getDefaultChargeClass(), inv.nightTime);
                 } else {
                     res.addClassifiedTime(ChargeClass.NONCHARGED, inv.nightTime);
                 }
             } else {
                 // Add the amount of time that passed during the night to the
                 // main charge class.
+                // BUG: events that fall between start and end cause the time
+                // to be unclassified
                 res.addUnclassifiedTime(inv.nightTime);
                 if (curEvt instanceof StartDatasetEvent) {
                     start = (StartDatasetEvent) curEvt;
@@ -221,6 +239,8 @@ public final class OldTimeAccounting {
         // Add any overlapped time to NONCHARGED.  All the time between the
         // overlap event (if there is one) and the last event is counted as
         // non-charged.
+        // BUG: if the overlap event falls between start and end, the time
+        // between start and overlap is dropped
         if (ed1.evt instanceof OverlapEvent) {
             ObsExecEvent curEvt = events.get(sz-1);
             long time = curEvt.getTimestamp() - ed1.evt.getTimestamp();

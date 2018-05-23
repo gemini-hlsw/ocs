@@ -27,7 +27,7 @@ final class VisitTimes implements Serializable {
      */
     static VisitTimes noncharged(long time) {
         final VisitTimes vt = new VisitTimes();
-        vt.addClassifiedTime(ChargeClass.NONCHARGED, time)
+        vt.addClassifiedTime(ChargeClass.NONCHARGED, time);
         return vt;
     }
 
@@ -55,6 +55,10 @@ final class VisitTimes implements Serializable {
         _classifiedTimes[cclass.ordinal()] += time;
     }
 
+    long getClassifiedTime(ChargeClass cclass) {
+        return _classifiedTimes[cclass.ordinal()];
+    }
+
     void addVisitTimes(VisitTimes vt) {
         _unclassifiedTime += vt._unclassifiedTime;
         for (int i=0; i<_classifiedTimes.length; ++i) {
@@ -67,6 +71,20 @@ final class VisitTimes implements Serializable {
         int index = mainChargeClass.ordinal();
         charges[index] = charges[index].addTime(_unclassifiedTime);
         return new ObsTimeCharges(charges);
+    }
+
+    public long getTotalTime() {
+        long result = _unclassifiedTime;
+        for (long t : _classifiedTimes) result += t;
+        return result;
+    }
+
+    /**
+     * Gets the amount of time that is charged to the program or partner (or
+     * unclassified which is eventually charged to one or the other).
+     */
+    public long getChargedTime() {
+        return getTotalTime() - getClassifiedTime(ChargeClass.NONCHARGED);
     }
 
     @Override

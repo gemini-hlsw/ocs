@@ -1,4 +1,4 @@
-package edu.gemini.spModel.syntax
+package edu.gemini.spModel.syntax.skycalc
 
 import edu.gemini.skycalc.ObservingNight
 
