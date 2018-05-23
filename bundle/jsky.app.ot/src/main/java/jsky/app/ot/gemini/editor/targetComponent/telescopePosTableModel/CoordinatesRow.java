@@ -7,7 +7,7 @@ import edu.gemini.spModel.core.Coordinates;
 /**
  * A row that contains a Coordinates object. Should not be movable.
  */
-abstract class CoordinatesRow extends Row {
+public abstract class CoordinatesRow extends Row {
     private final Coordinates coordinates;
     private final Option<Double> distance;
 

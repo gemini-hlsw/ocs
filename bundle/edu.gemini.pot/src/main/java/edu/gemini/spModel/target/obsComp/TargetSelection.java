@@ -104,12 +104,16 @@ public final class TargetSelection {
                     final GhostAsterism.SingleTarget gsa = (GhostAsterism.SingleTarget) a;
                     if (gsa.base().isDefined())
                         res.add(new CoordinatesSelection(idx++, gsa.base().get()));
+                    else
+                        res.add(new CoordinatesSelection(idx++, gsa.basePosition(ImOption.scalaNone()).get()));
                     res.add(new NormalTargetSelection(idx++, gsa.target().spTarget()));
                     break;
                 case GhostDualTarget:
                     final GhostAsterism.DualTarget gda = (GhostAsterism.DualTarget) a;
                     if (gda.base().isDefined())
                         res.add(new CoordinatesSelection(idx++, gda.base().get()));
+                    else
+                        res.add(new CoordinatesSelection(idx++, gda.basePosition(ImOption.scalaNone()).get()));
                     res.add(new NormalTargetSelection(idx++, gda.target1().spTarget()));
                     res.add(new NormalTargetSelection(idx++, gda.target2().spTarget()));
                     break;
@@ -117,6 +121,8 @@ public final class TargetSelection {
                     final GhostAsterism.TargetPlusSky gtsa = (GhostAsterism.TargetPlusSky) a;
                     if (gtsa.base().isDefined())
                         res.add(new CoordinatesSelection(idx++, gtsa.base().get()));
+                    else
+                        res.add(new CoordinatesSelection(idx++, gtsa.basePosition(ImOption.scalaNone()).get()));
                     res.add(new NormalTargetSelection(idx++, gtsa.target().spTarget()));
                     res.add(new CoordinatesSelection(idx++, gtsa.sky()));
                     break;
@@ -124,6 +130,8 @@ public final class TargetSelection {
                     final GhostAsterism.SkyPlusTarget gsta = (GhostAsterism.SkyPlusTarget) a;
                     if (gsta.base().isDefined())
                         res.add(new CoordinatesSelection(idx++, gsta.base().get()));
+                    else
+                        res.add(new CoordinatesSelection(idx++, gsta.basePosition(ImOption.scalaNone()).get()));
                     res.add(new CoordinatesSelection(idx++, gsta.sky()));
                     res.add(new NormalTargetSelection(idx++, gsta.target().spTarget()));
                     break;
@@ -131,12 +139,16 @@ public final class TargetSelection {
                     final GhostAsterism.HighResolutionTarget ghta = (GhostAsterism.HighResolutionTarget) a;
                     if (ghta.base().isDefined())
                         res.add(new CoordinatesSelection(idx++, ghta.base().get()));
+                    else
+                        res.add(new CoordinatesSelection(idx++, ghta.basePosition(ImOption.scalaNone()).get()));
                     res.add(new NormalTargetSelection(idx++, ghta.target().spTarget()));
                     break;
                 case GhostHighResolutionTargetPlusSky:
                     final GhostAsterism.HighResolutionTargetPlusSky ghtsa = (GhostAsterism.HighResolutionTargetPlusSky) a;
                     if (ghtsa.base().isDefined())
                         res.add(new CoordinatesSelection(idx++, ghtsa.base().get()));
+                    else
+                        res.add(new CoordinatesSelection(idx++, ghtsa.basePosition(ImOption.scalaNone()).get()));
                     res.add(new NormalTargetSelection(idx++, ghtsa.target().spTarget()));
                     res.add(new CoordinatesSelection(idx++, ghtsa.sky()));
                     break;
@@ -175,8 +187,25 @@ public final class TargetSelection {
         static ImList<GuideGroupSelection> toGuideGroupSelections(final TargetEnvironment env) {
             if (env == null) return ImCollections.emptyList();
 
-            // Start at 1 to omit base positon.
-            int idx = 1;
+            // We need to start after all of the asterism information.
+            final Asterism a = env.getAsterism();
+            int idx = 0;
+            switch (a.asterismType()) {
+                case Single:
+                    idx = 1;
+                    break;
+                case GhostSingleTarget:
+                case GhostHighResolutionTarget:
+                    idx = 2;
+                    break;
+                case GhostDualTarget:
+                case GhostTargetPlusSky:
+                case GhostSkyPlusTarget:
+                case GhostHighResolutionTargetPlusSky:
+                    idx = 3;
+                    break;
+            }
+
             final List<GuideGroupSelection> res = new ArrayList<>();
             for (final GuideGroup g : env.getGroups()) {
                 res.add(new GuideGroupSelection(idx++, g));

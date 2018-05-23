@@ -104,6 +104,7 @@ final public class TelescopePosTableModel extends AbstractTableModel {
         when               = None.instance();
         rows               = createRows(ctxOpt);
         numRows            = countRows();
+        System.out.println("*** ctor:ROWS=" + rows.size() + ", numRows=" + numRows + ", autoGroupIdx=" + autoGroupIdx + ", firstAutoTargetIdx=" + firstAutoTargetIdx);
     }
 
     // TODO:GHOST Should we have a third type of base, e.g. DependentBase, which
@@ -365,6 +366,8 @@ final public class TelescopePosTableModel extends AbstractTableModel {
 
             tableRowIdx += 1 + children;
         }
+
+        System.out.println("*** replace:ROWS=" + rows.size() + ", numRows=" + numRows + ", autoGroupIdx=" + autoGroupIdx + ", firstAutoTargetIdx=" + firstAutoTargetIdx);
     }
 
     // Given a guide group and its index amongst the set of all groups, create a GroupRow (and all children
@@ -549,6 +552,33 @@ final public class TelescopePosTableModel extends AbstractTableModel {
     }
 
     /**
+     * Conversions between Coordinates and row index.
+     */
+    public Option<Integer> rowIndexForCoordinates(final Coordinates coords) {
+        if (coords == null) return None.instance();
+
+        int index = 0;
+        for (final Row row : rows) {
+            if (row instanceof CoordinatesRow && ((CoordinatesRow) row).coordinates() == coords)
+                return new Some<>(index);
+            ++index;
+
+            if (row instanceof GroupRow)
+                index += ((GroupRow) row).children().size();
+        }
+        return None.instance();
+    }
+
+    public Option<Coordinates> coordinatesAtRowIndex(final int index) {
+        return rowAtRowIndex(index).flatMap(r -> {
+            if (r instanceof CoordinatesRow)
+                return new Some<>(((CoordinatesRow) r).coordinates());
+            else
+                return None.instance();
+        });
+    }
+
+    /**
      * Conversions between group index (index of group in list of groups) and row index.
      */
     public Option<Integer> rowIndexForGroupIndex(final int gpIdx) {
@@ -564,7 +594,7 @@ final public class TelescopePosTableModel extends AbstractTableModel {
                     return new Some<>(index);
                 index += gRow.children().size() + 1;
             } else
-                index += 1;
+                ++index;
         }
         return None.instance();
     }

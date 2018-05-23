@@ -3,6 +3,7 @@ package jsky.app.ot.gemini.editor.targetComponent;
 import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.core.Angle;
+import edu.gemini.spModel.core.Coordinates;
 import edu.gemini.spModel.guide.*;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
@@ -18,10 +19,7 @@ import edu.gemini.spModel.target.offset.OffsetUtil;
 import edu.gemini.spModel.util.SPTreeUtil;
 
 import jsky.app.ot.OTOptions;
-import jsky.app.ot.gemini.editor.targetComponent.telescopePosTableModel.GroupRow;
-import jsky.app.ot.gemini.editor.targetComponent.telescopePosTableModel.Row;
-import jsky.app.ot.gemini.editor.targetComponent.telescopePosTableModel.TargetRow;
-import jsky.app.ot.gemini.editor.targetComponent.telescopePosTableModel.TelescopePosTableModel;
+import jsky.app.ot.gemini.editor.targetComponent.telescopePosTableModel.*;
 import jsky.util.gui.TableUtil;
 
 import javax.swing.*;
@@ -184,9 +182,11 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
                 return ImOption.apply(_model).flatMap(td -> {
                     final Option<SPTarget> tpOpt = TargetSelection.getTargetForNode(oldEnv, _obsComp);
                     final Option<Integer> tpIndex = tpOpt.flatMap(_model::rowIndexForTarget);
+                    final Option<Coordinates> cOpt = TargetSelection.getCoordinatesForNode(oldEnv, _obsComp);
+                    final Option<Integer> cIndex = cOpt.flatMap(_model::rowIndexForCoordinates);
                     final Option<IndexedGuideGroup> iggOpt = TargetSelection.getIndexedGuideGroupForNode(oldEnv, _obsComp);
                     final Option<Integer> iggIndex = iggOpt.map(IndexedGuideGroup::index).flatMap(_model::rowIndexForGroupIndex);
-                    return tpIndex.orElse(iggIndex);
+                    return tpIndex.orElse(cIndex).orElse(iggIndex);
                 });
             });
 
@@ -246,6 +246,9 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
             } finally {
                 startWatchingSelection();
             }
+        } else if (row instanceof CoordinatesRow) {
+            final CoordinatesRow cRow = (CoordinatesRow) row;
+            TargetSelection.setCoordinatesForNode(_env, _obsComp, cRow.coordinates());
         } else if (row instanceof GroupRow) {
             final GroupRow gRow = (GroupRow) row;
             TargetSelection.setGuideGroupByIndex(_env, _obsComp, gRow.indexedGuideGroup().index());
@@ -256,6 +259,8 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
         if (_model == null) return;
         TargetSelection.getTargetForNode(_env, _obsComp)
                 .flatMap(_model::rowIndexForTarget).foreach(this::_setSelectedRow);
+        TargetSelection.getCoordinatesForNode(_env, _obsComp)
+                .flatMap(_model::rowIndexForCoordinates).foreach(this::_setSelectedRow);
     };
 
     private final PropertyChangeListener envChangeListener = new PropertyChangeListener() {
@@ -279,6 +284,12 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
                 else
                     return None.instance();
             });
+            final Option<Coordinates> oldSelCoords = _model.rowAtRowIndex(oldSelIndex).flatMap(r -> {
+                if (r instanceof CoordinatesRow)
+                    return new Some<>(((CoordinatesRow) r).coordinates());
+                else
+                    return None.instance();
+            });
 
             // Update the table -- setting _tableData ....
             _resetTable(newEnv);
@@ -298,6 +309,13 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
                 return;
             }
 
+            // If the obs comp has selected coordinates, then honor them.
+            final Option<Coordinates> newSelectedCoords = TargetSelection.getCoordinatesForNode(_env, _obsComp);
+            if (newSelectedCoords.isDefined()) {
+                _model.rowIndexForCoordinates(newSelectedCoords.getValue())
+                        .foreach(TelescopePosTableWidget.this::_setSelectedRow);
+            }
+
             // If a new group was added, select it.
             final Option<IndexedGuideGroup> newGpIdx = TargetSelection.getIndexedGuideGroupForNode(_env, _obsComp);
             if (newGpIdx.isDefined()) {
@@ -314,8 +332,14 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
                 return;
             }
 
+            // Otherwise, try to select the same coordinates that was selected before.
+            if (oldSelCoords.exists(c -> _model.rowIndexForCoordinates(c).isDefined())) {
+                oldSelCoords.foreach(TelescopePosTableWidget.this::selectCoordinates);
+                return;
+            }
+
             // Okay, the old selected target or group was removed.  Try to select the
-            // target or group at the same position as the old selection.
+            // target, group, or coordinates at the same position as the old selection.
             final int newSelIndex = (oldSelIndex >= getRowCount()) ? getRowCount() - 1 : oldSelIndex;
             if (newSelIndex >= 0) {
                 selectRowAt(newSelIndex);
@@ -473,6 +497,7 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
     /**
      * Moves the given row item to the given parent row.
      * In this case, a guide star to a group.
+     * We cannot move coordinates, so don't worry about this.
      */
     public void moveTo(final Row item, final Row parent) {
         if (item == null) return;
@@ -521,21 +546,19 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
     }
 
     /**
-     * Updates the TargetSelection's target or group, and selects the relevant row in the table.
+     * Updates the TargetSelection's target, group, or coordinates, and selects the relevant row in the table.
      */
     void selectRowAt(final int index) {
         if (_model == null) return;
-        final SPTarget target = _model.targetAtRowIndex(index).getOrNull();
-        if (target != null) {
-            selectTarget(target);
-        } else {
-            _model.groupAtRowIndex(index).foreach(this::selectGroup);
-        }
+        _model.targetAtRowIndex(index).foreach(this::selectTarget);
+        _model.coordinatesAtRowIndex(index).foreach(this::selectCoordinates);
+        _model.groupAtRowIndex(index).foreach(this::selectGroup);
     }
 
     /**
      * Select the base position, updating the TargetSelection's target, and set the relevant row in the table.
      * TODO:ASTERISM We just assume right now that the first target is always the base position.
+     * TODO:ASTERISM This is not always the case! If the base is coordinates, then what?
      */
     private void selectBasePos() {
         final SPTarget t = _env.getAsterism().allSpTargetsJava().head();
@@ -549,6 +572,14 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
     void selectTarget(final SPTarget tp) {
         TargetSelection.setTargetForNode(_env, _obsComp, tp);
         _model.rowIndexForTarget(tp).foreach(this::_setSelectedRow);
+    }
+
+    /**
+     * Updates the TargetSelection's coordinates, and sets the relevant row in the table.
+     */
+    void selectCoordinates(final Coordinates coords) {
+        TargetSelection.setCoordinatesForNode(_env, _obsComp, coords);
+        _model.rowIndexForCoordinates(coords).foreach(this::_setSelectedRow);
     }
 
     /**
