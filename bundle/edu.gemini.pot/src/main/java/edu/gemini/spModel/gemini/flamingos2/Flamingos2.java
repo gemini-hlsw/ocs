@@ -869,7 +869,7 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
 
     public static double getImagingSetupSec(Config[] conf) {
         if (conf[0].containsItem(GUIDE_WITH_OIWFS_KEY)) {
-            String guideWithOIWFS = (String) conf[0].getItemValue(GUIDE_WITH_OIWFS_KEY);
+            String guideWithOIWFS = conf[0].getItemValue(GUIDE_WITH_OIWFS_KEY).toString();
             if (guideWithOIWFS.equals("guide")) {
                 return IMAGING_SETUP_TIME_OIWFS;
             }

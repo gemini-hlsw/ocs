@@ -178,7 +178,7 @@ object ConfigExtractor {
     } yield gsaoi
   }
   // We need this available outside to calculate the GeMS parameters in ITCRequest
-  def createGsaoiParameters(filter: Gsaoi.Filter, readMode: Gsaoi.ReadMode, iq: SPSiteQuality.ImageQuality) = createGsaoiParameters(filter, readMode, iq, 0)
+  def createGsaoiParameters(filter: Gsaoi.Filter, readMode: Gsaoi.ReadMode, iq: SPSiteQuality.ImageQuality): String \/ GsaoiParameters = createGsaoiParameters(filter, readMode, iq, 0)
 
   def createGsaoiParameters(filter: Gsaoi.Filter, readMode: Gsaoi.ReadMode, iq: SPSiteQuality.ImageQuality, largeSkyOffset: Int): String \/ GsaoiParameters = {
     import Gsaoi._
