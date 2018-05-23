@@ -1,10 +1,16 @@
 package edu.gemini.itc.shared;
 
+import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.spModel.config2.Config;
 import edu.gemini.spModel.config2.DefaultConfig;
 import edu.gemini.spModel.config2.ItemKey;
+import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.gemini.gmos.GmosCommonType;
+import edu.gemini.spModel.guide.GuideOption;
 import edu.gemini.spModel.guide.GuideProbe;
+import edu.gemini.spModel.guide.StandardGuideOptions;
+import edu.gemini.spModel.obsclass.ObsClass;
+import edu.gemini.spModel.obscomp.InstConstants;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,11 +20,7 @@ import java.util.List;
 /**
  * Using the ITC parameters creates a mini-config containing the items
  * necessary for the observation overhead calculations.
- * The config has number of steps equal to number of exposures. Even though
- * just two steps would be enough to calculate overheads, I went for more
- * straightforward solution, simulating the OT sequence, which I believe
- * would make any future adds-ons easier to implement (and in case the ITC
- * may become more sophisticated in future).
+ * The config has number of steps equal to number of exposures.
  *
  * Created by osmirnov on 11/28/17.
  */
@@ -44,13 +46,18 @@ public class ConfigCreator {
     public static final ItemKey GuideWithOIWFSKey = new ItemKey("telescope:guideWithOIWFS");
     public static final ItemKey TelescopeQKey = new ItemKey("telescope:q");
     public static final ItemKey TelescopePKey = new ItemKey("telescope:p");
-    public static final ItemKey GuideWithCWFS1 = new ItemKey("telescope:guideWithODGW1");
+    public static final ItemKey GuideWithCWFS1 = new ItemKey("telescope:guideWithCWFS1");
     public static final ItemKey AOGuideStarTypeKey = new ItemKey("adaptive optics:guideStarType");
     public static final ItemKey AOSystemKey = new ItemKey("adaptive optics:aoSystem");
-    public static final ItemKey AOFieldLensKey = new ItemKey("adaptive optics:fieldLens");
 
     private final ItcParameters itcParams;
     private final ObservationDetails obsDetailParams;
+
+    private static String overheadTableWarning = "";
+    private static String offsetString = "";
+
+    public static final double GSAOI_SMALL_SKY_OFFSET = 120.0; // arcsec (assumed in case of sky offset <5')
+    public static final double GSAOI_LARGE_SKY_OFFSET = 310.0; // arcsec (assumed in case of sky offset >5')
 
     public ConfigCreator(final ItcParameters p) {
         this.itcParams = p;
@@ -72,8 +79,10 @@ public class ConfigCreator {
         for (int i = 0; i < (1 + numberExposures / 4); i++) {
             if (calcMethod instanceof Imaging) {
                 offsetList.addAll(imagingOffsets);
+                offsetString = "ABAB dithering pattern";
             } else if (calcMethod instanceof Spectroscopy) {
                 offsetList.addAll(spectroscopyOffsets);
+                offsetString = "ABBA dithering pattern";
             }
         }
 
@@ -82,14 +91,15 @@ public class ConfigCreator {
             dc[i] = step;
 
             step.putItem(ExposureTimeKey, obsDetailParams.exposureTime());
-            step.putItem(ObserveTypeKey, "OBJECT");
-            step.putItem(ObserveClassKey, "SCIENCE");
+            step.putItem(ObserveTypeKey, InstConstants.SCIENCE_OBSERVE_TYPE);
+            step.putItem(ObserveClassKey, ObsClass.SCIENCE);
             step.putItem(CoaddsKey, numberCoadds);
             step.putItem(TelescopePKey, "0");
             step.putItem(TelescopeQKey, offsetList.get(i));
 
+
             if (itcParams.telescope().getWFS().equals(GuideProbe.Type.PWFS)) {
-                step.putItem(GuideWithPWFS2Key, "guide");
+                step.putItem(GuideWithPWFS2Key, StandardGuideOptions.Value.guide);
             }
         }
         return dc;
@@ -103,14 +113,13 @@ public class ConfigCreator {
 
         for (Config step : conf) {
             step.putItem(ReadModeKey, (gnirsParams.readMode()));
-            step.putItem(InstInstrumentKey, "GNIRS");
+            step.putItem(InstInstrumentKey, SPComponentType.INSTRUMENT_GNIRS.readableStr);
             step.putItem(SlitWidthKey, gnirsParams.slitWidth().logValue());
 
             if (gnirsParams.altair().isDefined()) {
                 AltairParameters altairParameters = gnirsParams.altair().get();
                 step.putItem(AOGuideStarTypeKey, altairParameters.wfsMode().displayValue());
-                step.putItem(AOSystemKey, "Altair");
-                step.putItem(AOFieldLensKey, altairParameters.fieldLens().displayValue());
+                step.putItem(AOSystemKey, SPComponentType.AO_ALTAIR.narrowType);
             }
         }
         return conf;
@@ -121,15 +130,14 @@ public class ConfigCreator {
 
         for (Config step : conf) {
             step.putItem(ReadModeKey, (niriParams.readMode()));
-            step.putItem(InstInstrumentKey, "NIRI");
+            step.putItem(InstInstrumentKey, SPComponentType.INSTRUMENT_NIRI.readableStr);
             step.putItem(BuiltinROIKey, (niriParams.builtinROI()));
             step.putItem(DisperserKey, (niriParams.grism().displayValue()));
 
             if (niriParams.altair().isDefined()) {
                 AltairParameters altairParameters = niriParams.altair().get();
                 step.putItem(AOGuideStarTypeKey, altairParameters.wfsMode().displayValue());
-                step.putItem(AOSystemKey, "Altair");
-                step.putItem(AOFieldLensKey, altairParameters.fieldLens().displayValue());
+                step.putItem(AOSystemKey, SPComponentType.AO_ALTAIR.narrowType);
             }
         }
         return conf;
@@ -139,13 +147,12 @@ public class ConfigCreator {
         Config[] conf = createCommonConfig(numExp);
 
         for (Config step : conf) {
-            System.out.println("SIte: " + gmosParams.site().displayName);
-            if (gmosParams.site().displayName.equals("Gemini North")) {
-                step.putItem(InstInstrumentKey, "GMOS-N");
-            } else if (gmosParams.site().displayName.equals("Gemini South")) {
-                step.putItem(InstInstrumentKey, "GMOS-S");
+            if (gmosParams.site().displayName.equals(Site.GN.displayName)) {
+                step.putItem(InstInstrumentKey, SPComponentType.INSTRUMENT_GMOS.readableStr);
+            } else if (gmosParams.site().displayName.equals(Site.GS.displayName)) {
+                step.putItem(InstInstrumentKey, SPComponentType.INSTRUMENT_GMOSSOUTH.readableStr);
             } else {
-                throw new Error("invalid site");
+                throw new Error("Invalid site");
             }
 
             step.putItem(FPUKey, (gmosParams.fpMask().displayValue()));
@@ -158,10 +165,12 @@ public class ConfigCreator {
             step.putItem(CcdXBinning, xbin);
             step.putItem(CcdYBinning, ybin);
             step.putItem(AmpGain, (gmosParams.ampGain()));
-            if (gmosParams.ccdType().displayValue().equals("E2V")) {
+            if (gmosParams.ccdType().equals(GmosCommonType.DetectorManufacturer.E2V)) {
                 step.putItem(AmpCount, GmosCommonType.AmpCount.SIX);
-            } else {
+            } else if (gmosParams.ccdType().equals(GmosCommonType.DetectorManufacturer.HAMAMATSU)){
                 step.putItem(AmpCount, GmosCommonType.AmpCount.TWELVE);
+            } else {
+                throw new Error("Invalid detector type");
             }
         }
         return conf;
@@ -172,12 +181,12 @@ public class ConfigCreator {
 
         for (Config step : conf) {
             step.putItem(ReadModeKey, (nifsParams.readMode()));
-            step.putItem(InstInstrumentKey, "NIFS");
+            step.putItem(InstInstrumentKey, SPComponentType.INSTRUMENT_NIFS.readableStr);
 
             if (nifsParams.altair().isDefined()) {
                 AltairParameters altairParameters = nifsParams.altair().get();
                 step.putItem(AOGuideStarTypeKey, altairParameters.wfsMode().displayValue());
-                step.putItem(AOSystemKey, "Altair");
+                step.putItem(AOSystemKey, SPComponentType.AO_ALTAIR.narrowType);
             }
         }
         return conf;
@@ -186,53 +195,114 @@ public class ConfigCreator {
     public Config[] createGsaoiConfig(GsaoiParameters gsaoiParams, int numExp) {
         Config[] conf = createCommonConfig(numExp);
         final double sf = obsDetailParams.calculationMethod().sourceFraction();
-        int stepNum = 1;
+        int stepNum = 0;
         int numLargeOffsets = gsaoiParams.largeSkyOffset();
 
-        String g = "guide";
-        String p = "park";
-        int numFullAB = numExp / 8;
-        List<String> guideStatusABBA = new ArrayList<>(Arrays.asList(g,g,g,g,p,p,p,p, p,p,p,p,g,g,g,g));
-        List<String> guideStatusList = new ArrayList<>(conf.length);
+        GuideOption g = StandardGuideOptions.Value.guide;
+        GuideOption p = StandardGuideOptions.Value.park;
 
-        // 1. on-source fraction = 1.0, large sky offsets = 0: ABAB dithering, no sky offsets, leave offsets as is. All steps guided.
-        // 2. on-source fraction = 0.5, large sky offsets = 0: obj-sky-sky-obj patterns with ABAB dithering. Sky unguided. Offset to the sky = 120"
-        // 3. on-source fraction = any, large sky offsets = 0:
-        // 4. on-source fraction = any, large sky offsets = n: obj-sky-obj-sky pattern with ABAB dithering.
-        //    Large offset number overrides the source fraction. Offset to the sky = 300"
+        List<GuideOption> guideStatusList = new ArrayList<>(conf.length);
+
+        /**
+         * GSAOI offset overheads and sequence structure is different from all other instruments. In addition
+         * the unguided sky sequence for the case of sky offset is >5' is made into a separate observation in the OT,
+         * whereas in the ITC it should be included in the same observation sequence. So the implementation
+         * of the offset and guide status sequence is far from elegant...
+         *
+         * The overhead calculation is currently supported for source fraction 1 and 0.5. Number of on- and off-source steps must be equal.
+         *    1. on-source fraction = 1.0, large sky offsets = 0: Regular ABAB dithering, no sky offsets, all steps guided.
+         *    2. on-source fraction = 1.0, large sky offsets !=0: Warning, no overheads calculation (using large sky offsets implies some steps being taken off-source).
+         *    3. on-source fraction = 0.5, large sky offsets = 0: Sequence has obj-sky-sky-obj structure, with 4-point ABAB dithering at each position
+         *                   (the last block can have less steps depending on requested number of exposures). Sky is unguided. Offset to the sky and back = 120"
+         *    4. on-source fraction = 0.5, large sky offsets !=0: Sequence has obj-sky-obj-sky structure, with ABAB dithering at each position. Sky is unguided. Offset to the sky and back = 310"
+         *    5. on-source fraction !=1.0 && !=0.5: Warning, no overhead calculations.
+         *
+         */
         if (numLargeOffsets == 0) {
             if (sf == 1) {
-                Collections.fill(guideStatusList, "guide");
+                Collections.fill(guideStatusList, g);
+                offsetString = "ABAB dithering pattern and no sky offsets";
             } else if (sf == 0.5) {
-                int shortABLength = (numExp % 8) / 2;
-                for (int i = 0; i < (conf.length / 16 + 1); i++) {
-                    guideStatusList.addAll(guideStatusABBA);
-                }
-                for (int i = 0; i < shortABLength; i++) {
-                    int index = (i + (conf.length / 8) * 8) - 1;
-                    guideStatusList.add(index, "guide");
-                    guideStatusList.add(index + shortABLength, "park");
+                List<GuideOption> steps = Arrays.asList(g, p);
+                offsetString = "science-sky-sky-science pattern with "+GSAOI_SMALL_SKY_OFFSET+"\" sky offset and 4-point ABAB dithering at each position";
+                while (guideStatusList.size() < conf.length) {
+                    int rest = conf.length - guideStatusList.size();
+                    int chunkLength;
+                    if (rest >= 8)
+                        chunkLength = 4;
+                    else
+                        chunkLength = rest / 2;
+
+                    guideStatusList.addAll(Collections.nCopies(chunkLength, steps.get(0)));
+                    guideStatusList.addAll(Collections.nCopies(chunkLength, steps.get(1)));
+
+                    Collections.reverse(steps);
                 }
             }
-        } /* else {
+        } else {
+            double sourceFraction = itcParams.observation().sourceFraction();
+            int exposuresPerGroup = numExp / numLargeOffsets;
+            int leftOver = numExp % numLargeOffsets;
+            boolean error = false;
 
-            if (numLargeOffsets % 2 != 0) {
-                throw new IllegalArgumentException(
-                    "Number of exposures must be a multiple of requested number of > 5 arcmin sky offsets");
-            } else {
-                int numDitheringPoints = numExp / (numLargeOffsets * 2);
+            overheadTableWarning = "";
+            if ((sourceFraction != 1.0) && (sourceFraction != 0.5)) {
+                overheadTableWarning = "Warning: Observation overheads can only be calculated for <b>fraction with source</b> values 1.0 or 0.5.";
+                error = true;
+            }
+            if (sourceFraction == 1.0) {
+                overheadTableWarning = "Warning: Observation overheads cannot be calculated: for selected <b>fraction with source<b> value 1.0 <b>number of sky offsets >5'</b> should be 0.";
+                error = true;
+            }
+
+            if ((exposuresPerGroup % 2 != 0) || (leftOver % 2 != 0)) {
+                overheadTableWarning = "Warning: Observation overheads cannot be calculated: uneven number of object and sky exposures. Please change <b>number of exposures</b> or <b>number of sky offsets >5'</b>.";
+                error = true;
+            }
+
+            if (!error) {
+                int[] ditheringPoints = new int[numLargeOffsets];
+                int totalAssigned = 0;
+                offsetString = "science-sky-science-sky pattern with "+GSAOI_LARGE_SKY_OFFSET+"\" sky offset and ABAB dithering at each position";
+
+                for (int i = 0; i < (numLargeOffsets - 1); i++) {
+                    ditheringPoints[i] = exposuresPerGroup;
+                    totalAssigned += exposuresPerGroup;
+                }
+                ditheringPoints[numLargeOffsets - 1] = numExp - totalAssigned;
+
+                for (int exps : ditheringPoints) {
+                    int sub = exps / 2;
+
+                    guideStatusList.addAll(Collections.nCopies(sub, g));
+                    guideStatusList.addAll(Collections.nCopies(sub, p));
+                }
             }
         }
+        GuideOption currentGuideStatus;
+        GuideOption previousGuideStatus = null;
 
-        for (int i=1; i < conf.length; i=+4) {
-
-        } */
         for (Config step : conf) {
             step.putItem(ReadModeKey, (gsaoiParams.readMode()));
-            step.putItem(InstInstrumentKey, "GSAOI");
-            step.putItem(GuideWithCWFS1, "guide");
+            step.putItem(InstInstrumentKey, SPComponentType.INSTRUMENT_GSAOI.readableStr);
+            if (!guideStatusList.isEmpty()) {
+                currentGuideStatus = guideStatusList.get(stepNum);
+
+                step.putItem(GuideWithCWFS1, currentGuideStatus);
+                if (previousGuideStatus != null) {
+                    if (!currentGuideStatus.equals(previousGuideStatus)) {
+                        if (numLargeOffsets == 0) {
+                            step.putItem(TelescopeQKey, Double.toString(GSAOI_SMALL_SKY_OFFSET + Double.parseDouble((String) step.getItemValue(TelescopeQKey))));
+                        } else {
+                            step.putItem(TelescopeQKey, Double.toString(GSAOI_LARGE_SKY_OFFSET + Double.parseDouble((String) step.getItemValue(TelescopeQKey))));
+                        }
+                    }
+                }
+                previousGuideStatus = currentGuideStatus;
+            }
 
             stepNum = stepNum + 1;
+
         }
         return conf;
     }
@@ -242,21 +312,27 @@ public class ConfigCreator {
 
         for (Config step : conf) {
             step.putItem(ReadModeKey, (f2Params.readMode()));
-            step.putItem(InstInstrumentKey, "Flamingos2");
+            step.putItem(InstInstrumentKey, SPComponentType.INSTRUMENT_FLAMINGOS2.readableStr);
             step.putItem(DisperserKey, f2Params.grism());
             step.putItem(FPUKey, f2Params.mask());
             if (itcParams.telescope().getWFS().equals(GuideProbe.Type.PWFS)) {
-                step.putItem(GuideWithPWFS2Key, "guide");
+                step.putItem(GuideWithPWFS2Key, StandardGuideOptions.Value.guide);
             } else if (itcParams.telescope().getWFS().equals(GuideProbe.Type.OIWFS)) {
-                step.putItem(GuideWithOIWFSKey, "guide");
+                step.putItem(GuideWithOIWFSKey, StandardGuideOptions.Value.guide);
 
             }
         }
-            return conf;
+        return conf;
 
     }
 
+    static public String getOverheadTableWarning() {
+        return overheadTableWarning;
+    }
 
+    static public String getOffsetString() {
+        return offsetString;
+    }
 
 }
 

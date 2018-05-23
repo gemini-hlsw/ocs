@@ -4,6 +4,7 @@ import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.config2.Config;
 import edu.gemini.spModel.config2.ConfigSequence;
 import edu.gemini.spModel.config2.ItemKey;
+import edu.gemini.spModel.guide.StandardGuideOptions;
 import edu.gemini.spModel.time.ChargeClass;
 
 import java.io.Serializable;
@@ -444,14 +445,14 @@ public final class PlannedTime implements Serializable {
         return numAcq;
     }
 
-    // number of re-acquisitions (re-centering on the slit) for spectroscopic observations
-    // using PWFS2, considering one re-acquisition per every hour of science
+    // Number of re-acquisitions (re-centerings) on the slit for spectroscopic observations using PWFS2, considering one recentering per every
+    // hour of science per visit (assuming one full visit time is 2h, there is maximum of one recentering per visit);
     public int numReacq(Config config) {
         int numReacq = 0;
         long scienceTime = scienceTime();
         ItemKey guideWithPWFS2 = new ItemKey("telescope:guideWithPWFS2");
         if (config.containsItem(guideWithPWFS2) &&
-                config.getItemValue(guideWithPWFS2).equals("guide")) {
+                config.getItemValue(guideWithPWFS2).equals(StandardGuideOptions.Value.guide)) {
             if ((scienceTime > 3600) && ((scienceTime + 3600) % 7200 == 0)) {
                 numReacq = ((int)((3600 + scienceTime) / 7200)) - 1;
             } else if ((scienceTime > 3600) && ((scienceTime + 3600) % 7200 != 0)) {
@@ -461,17 +462,11 @@ public final class PlannedTime implements Serializable {
         return numReacq;
     }
 
-    // total time with multiple acquisitions and re-acquisitions (case of spectroscopy with PWFS2)
-    public long totalTimeWithMultipleAcqReacq(Config config) {
-        long totalTimeWithReacq = setup.time * numAcq() + setup.reacquisitionTime * numReacq(config);
+    // total time with acquisitions and re-acquisitions
+    public long totalTimeWithReacq(int numReacq) {
+        long totalTimeWithReacq = setup.time * numAcq() + setup.reacquisitionTime * numReacq;
         for (Step step : steps) totalTimeWithReacq += step.totalTime();
         return totalTimeWithReacq;
     }
 
-    // total time with multiple acquisitions (general case)
-    public long totalTimeWithMultipleAcq(Config config) {
-        long totalTimeWithReacq = setup.time * numAcq();
-        for (Step step : steps) totalTimeWithReacq += step.totalTime();
-        return totalTimeWithReacq;
-    }
 }

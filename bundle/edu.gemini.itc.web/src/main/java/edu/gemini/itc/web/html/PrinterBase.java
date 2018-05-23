@@ -1,18 +1,11 @@
 package edu.gemini.itc.web.html;
 
-import edu.gemini.itc.base.AOSystem;
-import edu.gemini.itc.base.Instrument;
-import edu.gemini.itc.base.Result;
-import edu.gemini.itc.base.SpectroscopyResult;
+import edu.gemini.itc.base.*;
 import edu.gemini.itc.shared.*;
 import edu.gemini.itc.web.servlets.FilesServlet;
 import edu.gemini.itc.web.servlets.ServerInfo;
-import edu.gemini.shared.util.immutable.ImList;
-import edu.gemini.spModel.config2.Config;
 import edu.gemini.spModel.core.PointSource$;
 import edu.gemini.spModel.core.UniformSource$;
-import edu.gemini.spModel.obs.plannedtime.PlannedTime;
-import edu.gemini.spModel.time.TimeAmountFormatter;
 import scala.collection.JavaConversions;
 
 import java.io.PrintWriter;
@@ -159,7 +152,7 @@ public abstract class PrinterBase {
                 _println(String.format("software aperture extent along slit = %.2f arcsec", slitWidth));
             } else if (result.source().profile() == PointSource$.MODULE$) {
                 if (result.aoSystem().nonEmpty()) {
-                     AOSystem ao = result.aoSystem().get();
+                    AOSystem ao = result.aoSystem().get();
                     _println(String.format("software aperture extent along slit = %.2f arcsec", 1.4 * ao.getAOCorrectedFWHM()));
                 } else {
                     _println(String.format("software aperture extent along slit = %.2f arcsec", 1.4 * result.iqCalc().getImageQuality()));
@@ -209,7 +202,7 @@ public abstract class PrinterBase {
             return "";
         } else {
             return "&" + FilesServlet.ParamLoLimit + "=" + pd.getPlotWaveL() +
-                   "&" + FilesServlet.ParamHiLimit + "=" + pd.getPlotWaveU();
+                    "&" + FilesServlet.ParamHiLimit + "=" + pd.getPlotWaveU();
         }
     }
 
@@ -230,106 +223,4 @@ public abstract class PrinterBase {
         else    throw new Error();
     }
 
-    public String _printOverheadTable(ItcParameters p, Config config, double readoutTimePerCoadd, PlannedTime pta, int step, ItcSpectroscopyResult r) {
-        PlannedTime.Step s = pta.steps.get(step);
-        Config conf = config;
-        Map<PlannedTime.Category, ImList<PlannedTime.CategorizedTime>> m = s.times.groupTimes();
-
-        String setupStr = "";
-        String reacqStr = "";
-        String secStr;
-        int numAcq = pta.numAcq();
-        int numReacq = 0;
-        long totalTime = pta.totalTimeWithMultipleAcq(conf);
-
-        if (p.observation().calculationMethod() instanceof Spectroscopy) {
-            numReacq = pta.numReacq(conf);
-            totalTime = pta.totalTimeWithMultipleAcqReacq(conf);
-
-            String instrumentName = (String) conf.getItemValue(ConfigCreator.InstInstrumentKey);
-            String fpu = null;
-            if (conf.containsItem(ConfigCreator.FPUKey)) {
-                fpu = conf.getItemValue(ConfigCreator.FPUKey).toString();
-            }
-            if ((instrumentName.contains("GMOS") && fpu.contains("IFU"))
-                    || instrumentName.equals("NIFS")) {
-                if (r.maxSingleSNRatio() > 5) {
-                    numReacq = 0;
-                    totalTime = pta.totalTimeWithMultipleAcq(conf);
-                }
-            }
-        }
-
-
-        StringBuilder buf = new StringBuilder("<html><body>");
-
-        buf.append("<table><tr><th>Observation Overheads</th></tr>");
-        buf.append("<tr>");
-        buf.append("<td>").append("Setup ").append("</td>");
-
-        if (numAcq == 1) {
-            setupStr = String.format("%.1f s", pta.setup.time / 1000.0);
-        } else if (numAcq > 1) {
-            setupStr = String.format("%d visits x %.1f s", numAcq, pta.setup.time / 1000.0);
-        }
-
-        buf.append("<td align=\"right\"> ").append(setupStr).append("</td>");
-        buf.append("</tr>");
-
-        reacqStr = String.format("%d x %.1f s", numReacq, pta.setup.reacquisitionTime / 1000.0);
-
-        if (numReacq > 0) {
-            buf.append("<tr>");
-            buf.append("<td>").append("Recentering ").append("</td>");
-            buf.append("<td align=\"right\"> ").append(reacqStr).append("</td>");
-            buf.append("</tr>");
-        }
-
-        for (PlannedTime.Category c : PlannedTime.Category.values()) {
-            ImList<PlannedTime.CategorizedTime> cts = m.get(c);
-            if (cts == null) continue;
-            PlannedTime.CategorizedTime ct = cts.max(Comparator.naturalOrder());
-            int numOfExposures = pta.steps.size();
-            int numOfOffsets = numOfExposures - 1;
-            int coadds = p.observation().calculationMethod().coaddsOrElse(1);
-            String category = (ct.detail == null) ? ct.category.display : ct.detail;
-
-            buf.append("<tr>");
-            buf.append("<td>").append(category).append("</td>");
-
-            if (category.equals("Exposure") && (coadds !=1 )) {
-                secStr = String.format("%d exp x (%d coadds x %.1f s)", numOfExposures, coadds, ct.time/1000.0/coadds);
-            } else if ((category.equals("Readout") && (coadds!=1) && (readoutTimePerCoadd != 0) )) {
-                secStr = String.format("%d exp x (%d coadds x %.1f s)", numOfExposures, coadds, readoutTimePerCoadd, ct.time/1000.0);
-            } else if (category.equals("Telescope Offset")) {
-                if (p.observation().calculationMethod() instanceof Spectroscopy) { numOfOffsets = numOfExposures/2; }
-                secStr = String.format("%d x %.1f s", numOfOffsets, ct.time / 1000.0);
-            } else {
-                secStr = String.format("%d exp x %.1f s", numOfExposures, ct.time/1000.0);
-            }
-
-            buf.append("<td align=\"right\"> ").append(secStr).append("</td>");
-            buf.append("</tr>");
-        }
-        buf.append("<tr><td><b>Total time</b></td><td align=\"right\"><b>").append(String.format("%s", TimeAmountFormatter.getDescriptiveFormat(totalTime))).append("</b></td></tr>");
-        buf.append("</table>");
-
-        buf.append("</body></html>");
-        return buf.toString();
-    }
-
-    // case of instruments with no coadds
-    public String _printOverheadTable(ItcParameters p, Config config, PlannedTime pta, int step, ItcSpectroscopyResult r) {
-        return _printOverheadTable(p, config, 0, pta, step, r);
-        }
-    // case of imaging for all instruments, or spectroscopy for instruments with no IFU
-    public String _printOverheadTable(ItcParameters p, Config config, double readoutTimePerCoadd, PlannedTime pta, int step) {
-        return _printOverheadTable(p, config, readoutTimePerCoadd, pta, step, null);
-    }
-    // both of the above
-    public String _printOverheadTable(ItcParameters p, Config config, PlannedTime pta, int step) {
-        return _printOverheadTable(p, config, 0, pta, step, null);
-    }
-
-
-    }
+}

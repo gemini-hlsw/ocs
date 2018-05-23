@@ -20,18 +20,13 @@ import java.util.UUID;
 /**
  * Helper class for printing GNIRS calculation results to an output stream.
  */
-public final class GnirsPrinter extends PrinterBase {
+public final class GnirsPrinter extends PrinterBase implements OverheadTablePrinter.PrinterWithOverhead {
 
     private final GnirsParameters instr;
     private final PlottingDetails pdp;
     private final GnirsRecipe recipe;
     private final boolean isImaging;
     private final ItcParameters p;
-
-    private double readoutTimePerCoadd;
-    private int step;
-    private PlannedTime pta;
-    private Config[] config;
 
     public GnirsPrinter(final ItcParameters p, final GnirsParameters instr, final PlottingDetails pdp, final PrintWriter out) {
         super(out);
@@ -82,8 +77,8 @@ public final class GnirsPrinter extends PrinterBase {
         _printPeakPixelInfo(s.ccd(0));
         _printWarnings(s.warnings());
 
-        getOverheadTableParams(result, result.observation());
-        _println(_printOverheadTable(p, config[step], readoutTimePerCoadd, pta, step));
+        OverheadTablePrinter overheadTablePrinter = new OverheadTablePrinter(this, p, getReadoutTimePerCoadd(),result);
+        _println(overheadTablePrinter.printOverheadTable());
 
         _print("<HR align=left SIZE=3>");
 
@@ -170,8 +165,9 @@ public final class GnirsPrinter extends PrinterBase {
         _printPeakPixelInfo(s.ccd(0));
         _printWarnings(s.warnings());
 
-        getOverheadTableParams(result, result.observation());
-        _println(_printOverheadTable(p, config[step], readoutTimePerCoadd, pta, step));
+        OverheadTablePrinter overheadTablePrinter = new OverheadTablePrinter(this, p, getReadoutTimePerCoadd(),result);
+        _println(overheadTablePrinter.printOverheadTable());
+
 
         printConfiguration(result.parameters(), instrument, result.aoSystem());
 
@@ -230,23 +226,17 @@ public final class GnirsPrinter extends PrinterBase {
         return s;
     }
 
-    public void getOverheadTableParams(Result result, ObservationDetails obs) {
-        int numberExposures = 1;
-        final CalculationMethod calcMethod = obs.calculationMethod();
-
-        if (calcMethod instanceof ImagingInt) {
-            numberExposures = (int)(((ImagingResult) result).is2nCalc().numberSourceExposures() * obs.sourceFraction());
-        } else if (calcMethod instanceof ImagingS2N) {
-            numberExposures = ((ImagingS2N) calcMethod).exposures();
-        } else if (calcMethod instanceof SpectroscopyS2N) {
-            numberExposures = ((SpectroscopyS2N) calcMethod).exposures();
-        }
-
-        ConfigCreator cc    = new ConfigCreator(p);
-        config              = cc.createGnirsConfig(instr, numberExposures);
-        pta                 = PlannedTimeCalculator.instance.calc(config, new InstGNIRS());
-        readoutTimePerCoadd = GnirsReadoutTime.getReadoutOverheadPerCoadd(instr.readMode());
-
-        if (numberExposures < 2) step = 0; else step = 1;
+    public Config[] createInstConfig(int numberExposures) {
+        ConfigCreator cc = new ConfigCreator(p);
+        return cc.createGnirsConfig(instr, numberExposures);
     }
+
+    public PlannedTime.ItcOverheadProvider getInst() {
+        return new InstGNIRS();
+    }
+
+    public double getReadoutTimePerCoadd() {
+        return GnirsReadoutTime.getReadoutOverheadPerCoadd(instr.readMode());
+    }
+
 }

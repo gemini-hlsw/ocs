@@ -253,8 +253,8 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
         String guideStarType = (String) conf[0].getItemValue(AOConstants.AO_GUIDE_STAR_TYPE_KEY);
         String slitWidth = (String) conf[0].getItemValue(GNIRSConstants.SLIT_WIDTH_KEY);
         
-        if (conf[0].containsItem(AOConstants.AO_SYSTEM_KEY) && aoSystem.equals("Altair") &&
-                guideStarType.equals("LGS")) {
+        if (conf[0].containsItem(AOConstants.AO_SYSTEM_KEY) && aoSystem.equals(SPComponentType.AO_ALTAIR.narrowType) &&
+                guideStarType.equals(AltairParams.GuideStarType.LGS.displayValue())) {
             return getSetupTimeLgs();
         }
 

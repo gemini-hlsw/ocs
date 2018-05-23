@@ -18,17 +18,13 @@ import java.util.*;
 /**
  * Helper class for printing GMOS calculation results to an output stream.
  */
-public final class GmosPrinter extends PrinterBase {
+public final class GmosPrinter extends PrinterBase implements OverheadTablePrinter.PrinterWithOverhead {
 
     private final GmosRecipe recipe;
     private final PlottingDetails pdp;
     private final boolean isImaging;
     private final ItcParameters p;
     private final GmosParameters instr;
-
-    private int step;
-    private PlannedTime pta;
-    private Config[] config;
 
     public GmosPrinter(final ItcParameters p, final GmosParameters instr, final PlottingDetails pdp, final PrintWriter out) {
         super(out);
@@ -93,11 +89,10 @@ public final class GmosPrinter extends PrinterBase {
             if (instrumentWithMaxPeak.isPresent()) {
                 _printPeakPixelInfo(ccdWithMaxPeak, instrumentWithMaxPeak.get().getGmosSaturLimitWarning());
             }
-            _printWarnings(ccdWithMaxPeak.get().warnings());
         }
 
-        getOverheadTableParams(result, result.observation());
-        _println(_printOverheadTable(p, config[step], pta, step, s));
+        OverheadTablePrinter overheadTablePrinter = new OverheadTablePrinter(this, p, results[0], s);
+        _println(overheadTablePrinter.printOverheadTable());
 
         _print("<HR align=left SIZE=3>");
 
@@ -178,8 +173,9 @@ public final class GmosPrinter extends PrinterBase {
             }
         }
 
-        getOverheadTableParams(results[0], results[0].observation());
-        _println(_printOverheadTable(p, config[step], pta, step));
+        OverheadTablePrinter overheadTablePrinter = new OverheadTablePrinter(this, p, results[0]);
+        _println(overheadTablePrinter.printOverheadTable());
+
 
         printConfiguration(results[0].parameters(), instrument);
     }
@@ -253,28 +249,22 @@ public final class GmosPrinter extends PrinterBase {
         }
     }
 
-    public void getOverheadTableParams(Result result, ObservationDetails obs) {
-        int numberExposures = 1;
-        final CalculationMethod calcMethod = obs.calculationMethod();
+    public Config[] createInstConfig(int numberExposures) {
+        ConfigCreator cc = new ConfigCreator(p);
+        return cc.createGmosConfig(instr, numberExposures);
+    }
 
-        if (calcMethod instanceof ImagingInt) {
-            numberExposures = (int)(((ImagingResult) result).is2nCalc().numberSourceExposures() * obs.sourceFraction());
-        } else if (calcMethod instanceof ImagingS2N) {
-            numberExposures = ((ImagingS2N) calcMethod).exposures();
-        } else if (calcMethod instanceof SpectroscopyS2N) {
-            numberExposures = ((SpectroscopyS2N) calcMethod).exposures();
-        }
-
-        ConfigCreator cc    = new ConfigCreator(p);
-        config              = cc.createGmosConfig(instr, numberExposures);
+    public PlannedTime.ItcOverheadProvider getInst() {
         if (instr.site().displayName.equals("Gemini North")) {
-            pta = PlannedTimeCalculator.instance.calc(config, new InstGmosNorth());
+            return new InstGmosNorth();
         } else if (instr.site().displayName.equals("Gemini South")) {
-            pta = PlannedTimeCalculator.instance.calc(config, new InstGmosSouth());
+            return new InstGmosSouth();
         } else {
             throw new Error("invalid site");
         }
+    }
 
-        if (numberExposures < 2) step = 0; else step = 1;
+    public double getReadoutTimePerCoadd() {
+        return 0;
     }
 }

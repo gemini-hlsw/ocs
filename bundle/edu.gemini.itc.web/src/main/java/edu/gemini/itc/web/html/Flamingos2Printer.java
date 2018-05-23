@@ -18,17 +18,13 @@ import java.util.UUID;
 /**
  * Helper class for printing F2 calculation results to an output stream.
  */
-public final class Flamingos2Printer extends PrinterBase {
+public final class Flamingos2Printer extends PrinterBase implements OverheadTablePrinter.PrinterWithOverhead {
 
     private final PlottingDetails pdp;
     private final Flamingos2Recipe recipe;
     private final boolean isImaging;
     private final ItcParameters p;
     private final Flamingos2Parameters instr;
-
-    private int step;
-    private PlannedTime pta;
-    private Config[] config;
 
 
     public Flamingos2Printer(final ItcParameters p, final Flamingos2Parameters instr, final PlottingDetails pdp, final PrintWriter out) {
@@ -77,8 +73,8 @@ public final class Flamingos2Printer extends PrinterBase {
         _printPeakPixelInfo(s.ccd(0));
         _printWarnings(s.warnings());
 
-        getOverheadTableParams(result, result.observation());
-        _println(_printOverheadTable(p, config[step], pta, step));
+        OverheadTablePrinter overheadTablePrinter = new OverheadTablePrinter(this, p, result);
+        _println(overheadTablePrinter.printOverheadTable());
 
         _print("<HR align=left SIZE=3>");
 
@@ -117,8 +113,8 @@ public final class Flamingos2Printer extends PrinterBase {
         _printPeakPixelInfo(s.ccd(0));
         _printWarnings(s.warnings());
 
-        getOverheadTableParams(result, result.observation());
-        _println(_printOverheadTable(p, config[step], pta, step));
+        OverheadTablePrinter overheadTablePrinter = new OverheadTablePrinter(this, p, result);
+        _println(overheadTablePrinter.printOverheadTable());
 
         printConfiguration((Flamingos2) result.instrument(), result.parameters());
     }
@@ -150,24 +146,17 @@ public final class Flamingos2Printer extends PrinterBase {
         return s;
     }
 
-    public void getOverheadTableParams(Result result, ObservationDetails obs) {
-        int numberExposures = 1;
-        final CalculationMethod calcMethod = obs.calculationMethod();
 
-        if (calcMethod instanceof ImagingInt) {
-            numberExposures = (int)(((ImagingResult) result).is2nCalc().numberSourceExposures() * obs.sourceFraction());
-        } else if (calcMethod instanceof ImagingS2N) {
-            numberExposures = ((ImagingS2N) calcMethod).exposures();
-        } else if (calcMethod instanceof SpectroscopyS2N) {
-            numberExposures = ((SpectroscopyS2N) calcMethod).exposures();
-        }
-
-        ConfigCreator cc    = new ConfigCreator(p);
-        config              = cc.createF2Config(instr, numberExposures);
-        pta                 = PlannedTimeCalculator.instance.calc(config, new edu.gemini.spModel.gemini.flamingos2.Flamingos2());
-
-        if (numberExposures < 2) step = 0; else step = 1;
+    public Config[] createInstConfig(int numberExposures) {
+        ConfigCreator cc = new ConfigCreator(p);
+        return cc.createF2Config(instr, numberExposures);
     }
 
+    public PlannedTime.ItcOverheadProvider getInst() {
+        return new edu.gemini.spModel.gemini.flamingos2.Flamingos2();
+    }
 
+    public double getReadoutTimePerCoadd() {
+        return 0;
+    }
 }

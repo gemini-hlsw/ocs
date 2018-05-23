@@ -20,7 +20,7 @@ import java.util.UUID;
 /**
  * Helper class for printing NIRI calculation results to an output stream.
  */
-public final class NiriPrinter extends PrinterBase {
+public final class NiriPrinter extends PrinterBase implements OverheadTablePrinter.PrinterWithOverhead {
 
     private final NiriParameters instr;
     private final PlottingDetails pdp;
@@ -28,10 +28,6 @@ public final class NiriPrinter extends PrinterBase {
     private final boolean isImaging;
     private final ItcParameters p;
 
-    private double readoutTimePerCoadd;
-    private int step;
-    private PlannedTime pta;
-    private Config[] config;
     /**
      * Constructs a NiriRecipe given the parameters. Useful for testing.
      */
@@ -125,8 +121,8 @@ public final class NiriPrinter extends PrinterBase {
         _printPeakPixelInfo(s.ccd(0));
         _printWarnings(s.warnings());
 
-        getOverheadTableParams(result, result.observation());
-        _println(_printOverheadTable(p, config[step], readoutTimePerCoadd, pta, step));
+        OverheadTablePrinter overheadTablePrinter = new OverheadTablePrinter(this, p, getReadoutTimePerCoadd(), result);
+        _println(overheadTablePrinter.printOverheadTable());
 
         printConfiguration(result.parameters(), instrument, result.aoSystem());
 
@@ -165,24 +161,17 @@ public final class NiriPrinter extends PrinterBase {
         return s;
     }
 
-    public void getOverheadTableParams(Result result, ObservationDetails obs) {
-        int numberExposures = 1;
-        final CalculationMethod calcMethod = obs.calculationMethod();
+    public Config[] createInstConfig(int numberExposures) {
+        ConfigCreator cc = new ConfigCreator(p);
+        return cc.createNiriConfig(instr, numberExposures);
+    }
 
-        if (calcMethod instanceof ImagingInt) {
-            numberExposures = (int)(((ImagingResult) result).is2nCalc().numberSourceExposures() * obs.sourceFraction());
-        } else if (calcMethod instanceof ImagingS2N) {
-            numberExposures = ((ImagingS2N) calcMethod).exposures();
-        } else if (calcMethod instanceof SpectroscopyS2N) {
-            numberExposures = ((SpectroscopyS2N) calcMethod).exposures();
-        }
+    public PlannedTime.ItcOverheadProvider getInst() {
+        return new InstNIRI();
+    }
 
-        ConfigCreator cc    = new ConfigCreator(p);
-        config              = cc.createNiriConfig(instr, numberExposures);
-        pta                 = PlannedTimeCalculator.instance.calc(config, new InstNIRI());
+    public double getReadoutTimePerCoadd() {
         NiriReadoutTime nrt = NiriReadoutTime.lookup(instr.builtinROI(), instr.readMode()).getValue();
-        readoutTimePerCoadd = nrt.getReadout(1);
-
-        if (numberExposures < 2) step = 0; else step = 1;
+        return nrt.getReadout(1);
     }
 }

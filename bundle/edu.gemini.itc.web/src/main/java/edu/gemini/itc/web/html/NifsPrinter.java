@@ -20,18 +20,12 @@ import java.util.UUID;
 /**
  * Helper class for printing NIFS calculation results to an output stream.
  */
-public final class NifsPrinter extends PrinterBase {
+public final class NifsPrinter extends PrinterBase implements OverheadTablePrinter.PrinterWithOverhead {
 
     private final NifsRecipe recipe;
     private final PlottingDetails pdp;
     private final NifsParameters instr;
     private final ItcParameters p;
-
-    private int step;
-    private PlannedTime pta;
-    private Config[] config;
-    private double readoutTimePerCoadd;
-
 
     public NifsPrinter(final ItcParameters p, final NifsParameters instr, final PlottingDetails pdp, final PrintWriter out) {
         super(out);
@@ -67,8 +61,8 @@ public final class NifsPrinter extends PrinterBase {
         _printPeakPixelInfo(s.ccd(0));
         _printWarnings(s.warnings());
 
-        getOverheadTableParams(result, result.observation());
-        _println(_printOverheadTable(p, config[step], readoutTimePerCoadd, pta, step, s));
+        OverheadTablePrinter overheadTablePrinter = new OverheadTablePrinter(this, p, getReadoutTimePerCoadd(), result, s);
+        _println(overheadTablePrinter.printOverheadTable());
 
         _print("<HR align=left SIZE=3>");
 
@@ -128,25 +122,18 @@ public final class NifsPrinter extends PrinterBase {
         return s;
     }
 
-    public void getOverheadTableParams(Result result, ObservationDetails obs) {
-        int numberExposures = 1;
-        final CalculationMethod calcMethod = obs.calculationMethod();
 
-        if (calcMethod instanceof ImagingInt) {
-            numberExposures = (int)(((ImagingResult) result).is2nCalc().numberSourceExposures() * obs.sourceFraction());
-        } else if (calcMethod instanceof ImagingS2N) {
-            numberExposures = ((ImagingS2N) calcMethod).exposures();
-        } else if (calcMethod instanceof SpectroscopyS2N) {
-            numberExposures = ((SpectroscopyS2N) calcMethod).exposures();
-        }
+    public Config[] createInstConfig(int numberExposures) {
+        ConfigCreator cc = new ConfigCreator(p);
+        return cc.createNifsConfig(instr, numberExposures);
+    }
 
-        ConfigCreator cc    = new ConfigCreator(p);
-        config              = cc.createNifsConfig(instr, numberExposures);
-        pta                 = PlannedTimeCalculator.instance.calc(config, new InstNIFS());
-        final NIFSParams.ReadMode readMode = (NIFSParams.ReadMode) config[0].getItemValue(NIFSParams.ReadMode.KEY);
-        readoutTimePerCoadd = readMode.getMinExp() + InstNIFS.COADD_CONSTANT;
+    public PlannedTime.ItcOverheadProvider getInst() {
+            return new InstNIFS();
 
-        if (numberExposures < 2) step = 0; else step = 1;
+    }
+    public double getReadoutTimePerCoadd() {
+        return instr.readMode().getMinExp() + InstNIFS.COADD_CONSTANT;
     }
 
 }

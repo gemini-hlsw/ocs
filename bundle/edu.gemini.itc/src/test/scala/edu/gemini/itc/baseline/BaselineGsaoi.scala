@@ -15,6 +15,7 @@ object BaselineGsaoi  {
     new GsaoiParameters(
       Gsaoi.Filter.Z,
       Gsaoi.ReadMode.BRIGHT,
+      2,
       Gems
     )
   ))
@@ -23,6 +24,7 @@ object BaselineGsaoi  {
     new GsaoiParameters(
       Gsaoi.Filter.J,
       Gsaoi.ReadMode.FAINT,
+      0,
       Gems
     )
   ))
