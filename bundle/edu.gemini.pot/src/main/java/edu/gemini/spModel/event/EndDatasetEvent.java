@@ -86,4 +86,13 @@ public final class EndDatasetEvent extends ObsExecEvent {
     public String getName() {
         return "End Dataset";
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("EndDatasetEvent{");
+        sb.append("timestamp=").append(getTimestamp()).append(", ");
+        sb.append("datasetLabel=").append(_datasetLabel);
+        sb.append('}');
+        return sb.toString();
+    }
 }
