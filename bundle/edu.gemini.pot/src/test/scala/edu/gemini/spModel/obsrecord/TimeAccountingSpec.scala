@@ -42,7 +42,7 @@ object TimeAccountingSpec extends Specification with ScalaCheck {
       Gen.oneOf(ObsClass.values.toList)
     }
 
-  val ObsId = new SPObservationID("GS-2018B-Q-1")
+  val ObsId = new SPObservationID("GS-2019A-Q-1")
 
   val eventConstructors: List[Long => ObsExecEvent] = List(
     new AbortObserveEvent(_, ObsId, ""),
@@ -115,45 +115,45 @@ object TimeAccountingSpec extends Specification with ScalaCheck {
 
   }
 
-  val Semester2018B = new Semester(2018, Semester.Half.B)
-  val GS18BStart    = Instant.ofEpochMilli(Semester2018B.getStartDate(GS).getTime)
-  val GS18BEnd      = Instant.ofEpochMilli(Semester2018B.getEndDate(GS).getTime)
+  val Semester2019A = new Semester(2019, Semester.Half.A)
+  val GS19AStart    = Instant.ofEpochMilli(Semester2019A.getStartDate(GS).getTime)
+  val GS19AEnd      = Instant.ofEpochMilli(Semester2019A.getEndDate(GS).getTime)
   val DayInMs       = Duration.ofDays(1l).toMillis
 
   "TimeAccounting" should {
 
     "account for all time" in {
-      forAll(genTest(GS18BStart, GS18BEnd)) { (t: Test) =>
+      forAll(genTest(GS19AStart, GS19AEnd)) { (t: Test) =>
         t.events.total.sum shouldEqual t.visitTimes.getTotalTime
       }
     }
 
     "never charge more than available dark time" in {
-      forAll(genTest(GS18BStart, GS18BEnd)) { (t: Test) =>
+      forAll(genTest(GS19AStart, GS19AEnd)) { (t: Test) =>
         t.visitTimes.getChargedTime must be_<=(t.events.dark.sum)
       }
     }
 
     "never charge more than available dark time - overlap" in {
-      forAll(genTest(GS18BStart, GS18BEnd)) { (t: Test) =>
+      forAll(genTest(GS19AStart, GS19AEnd)) { (t: Test) =>
         t.visitTimes.getChargedTime must be_<=(t.events.chargeable.sum)
       }
     }
 
     "calculate dark time <= total time" in {
-      forAll(genTest(GS18BStart, GS18BEnd)) { (t: Test) =>
+      forAll(genTest(GS19AStart, GS19AEnd)) { (t: Test) =>
         t.events.dark.sum must be_<=(t.events.total.sum)
       }
     }
 
     "include in noncharged all overlap time" in {
-      forAll(genTest(GS18BStart, GS18BEnd)) { (t: Test) =>
+      forAll(genTest(GS19AStart, GS19AEnd)) { (t: Test) =>
         t.events.overlap.sum must be_<=(t.visitTimes.getClassifiedTime(NONCHARGED))
       }
     }
 
     "add chargeable time between datasets to unclassified" in {
-      forAll(genTest(GS18BStart, GS18BEnd)) { (t: Test) =>
+      forAll(genTest(GS19AStart, GS19AEnd)) { (t: Test) =>
         // Union of the dataset intervals.
         val u = new Union(t.events.datasetIntervals.unzip._2.asJava)
 
@@ -168,14 +168,14 @@ object TimeAccountingSpec extends Specification with ScalaCheck {
     }
 
     "not charge if there are no passing datasets" in {
-      forAll(genTest(GS18BStart, GS18BEnd)) { (t: Test) =>
+      forAll(genTest(GS19AStart, GS19AEnd)) { (t: Test) =>
         t.qa.values.exists(_.isChargeable) ||
           (t.visitTimes === VisitTimes.noncharged(t.events.total.sum))
       }
     }
 
-    "produce the same result as pre-2018B for 'normal' chargeable event sequences" in {
-      forAll(genTest(GS18BStart, GS18BStart.plusMillis(DayInMs - 1))) { (t: Test) =>
+    "produce the same result as pre-2019A for 'normal' chargeable event sequences" in {
+      forAll(genTest(GS19AStart, GS19AStart.plusMillis(DayInMs - 1))) { (t: Test) =>
         // For this to work, we have to produce an event list that doesn't
         // trigger any of the bugs in the old implementation.
 
@@ -213,14 +213,14 @@ object TimeAccountingSpec extends Specification with ScalaCheck {
                     else VisitTimes.noncharged(events.total.sum)
 
         // Now the two methods should produce the same results.
-        val vtNew = VisitCalculator.Update2018B.calc(events, t.qa, t.oc)
+        val vtNew = VisitCalculator.Update2019A.calc(events, t.qa, t.oc)
 
         vtNew shouldEqual vtOld
       }
     }
 
     "handle event lists that begin with a start dataset event" in {
-      val night      = new ObservingNight(GS, Semester2018B.getStartDate(GS).getTime).getDarkTime(TwilightBoundType.NAUTICAL)
+      val night      = new ObservingNight(GS, Semester2019A.getStartDate(GS).getTime).getDarkTime(TwilightBoundType.NAUTICAL)
       val startTime  = night.getStartTime
       val label      = new DatasetLabel(ObsId, 1)
       val dataset    = new Dataset(label, "", startTime)
@@ -237,7 +237,7 @@ object TimeAccountingSpec extends Specification with ScalaCheck {
     }
 
     "charge for the portion of a dataset before an intervening overlap" in {
-      val night        = new ObservingNight(GS, Semester2018B.getStartDate(GS).getTime).getDarkTime(TwilightBoundType.NAUTICAL)
+      val night        = new ObservingNight(GS, Semester2019A.getStartDate(GS).getTime).getDarkTime(TwilightBoundType.NAUTICAL)
       val startTime    = night.getStartTime
       val label        = new DatasetLabel(ObsId, 1)
       val dataset      = new Dataset(label, "", startTime)

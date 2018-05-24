@@ -76,7 +76,7 @@ private[obsrecord] object VisitCalculator {
   }
 
   /**
-   * The 2018B+ calculator.  The main change from the previous time accounting
+   * The 2019A+ calculator.  The main change from the previous time accounting
    * result is that visits without a passing dataset are not charged at all.  It
    * also simplifies and fixes a number of bugs with the original algorithm:
    *
@@ -86,8 +86,8 @@ private[obsrecord] object VisitCalculator {
    *   <li>Doesn't drop time if the first event is start dataset</li>
    * </ul>
    */
-  case object Update2018B extends VisitCalculator {
-    val semester = new Semester(2018, Semester.Half.B)
+  case object Update2019A extends VisitCalculator {
+    val semester = new Semester(2019, Semester.Half.A)
 
     override def validAt(s: Site): Instant =
       Instant.ofEpochMilli(semester.getStartDate(s).getTime)
@@ -143,6 +143,6 @@ private[obsrecord] object VisitCalculator {
 
   // reverse order by valid time (newest first)
   def all: List[VisitCalculator] =
-    List(Update2018B, Primordial)
+    List(Update2019A, Primordial)
 
 }
