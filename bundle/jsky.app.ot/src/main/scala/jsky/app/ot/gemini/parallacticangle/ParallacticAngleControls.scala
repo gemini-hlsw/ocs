@@ -6,7 +6,7 @@ import java.text.Format
 import java.util.logging.Logger
 import java.time.{Instant, ZoneId}
 import java.time.format.DateTimeFormatter
-import javax.swing.BorderFactory
+import javax.swing.{ BorderFactory, Icon }
 import javax.swing.border.EtchedBorder
 
 import edu.gemini.pot.sp.ISPNode
@@ -22,6 +22,7 @@ import edu.gemini.spModel.obscomp.SPInstObsComp
 import jsky.app.ot.editor.OtItemEditor
 import jsky.app.ot.gemini.editor.EphemerisUpdater
 import jsky.app.ot.util.TimeZonePreference
+import jsky.util.Resources
 import jsky.util.gui.DialogUtil
 
 import scala.swing.GridBagPanel.{Anchor, Fill}
@@ -49,6 +50,9 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
   private var formatter: Option[Format] = None
   private var callback:  Runnable = Nop
 
+  def getIcon(name: String): Icon =
+    Resources.getIcon(name, classOf[ParallacticAngleControls])
+
   object ui {
     object relativeTimeMenu extends Menu("Set To:") {
       private val incrementsInMinutes = List(5, 10, 20, 30, 45, 60)
@@ -75,7 +79,7 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
       horizontalTextPosition = Alignment.Left
       horizontalAlignment    = Alignment.Left
       iconTextGap            = 10
-      icon                   = Resources.getIcon("eclipse/menu-trimmed.gif")
+      icon                   = getIcon("eclipse/menu-trimmed.gif")
       margin                 = new Insets(-1, -10, -1, -5)
 
       def rebuild(): Unit = Swing.onEDT {
@@ -119,7 +123,7 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
     }
 
     object dateTimeButton extends Button {
-      icon    = Resources.getIcon("dates.gif")
+      icon    = getIcon("dates.gif")
       tooltip =
         if (isPaUi) "Select the time and duration for the average parallactic angle calculation."
         else        "Time of slew for non-sidereal targets."
@@ -137,7 +141,7 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
     object parallacticAngleFeedback extends Label {
       foreground          = Color.black
       horizontalAlignment = Alignment.Left
-      icon                = Resources.getIcon("eclipse/blank.gif")
+      icon                = getIcon("eclipse/blank.gif")
       iconTextGap         = iconTextGap - 2
 
       /**
@@ -167,10 +171,10 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
           }
 
           if (warningFlag) {
-            icon = Resources.getIcon("eclipse/alert.gif")
+            icon = getIcon("eclipse/alert.gif")
             tooltip = "The PA is not at the average parallactic value."
           } else {
-            icon = Resources.getIcon("eclipse/blank.gif")
+            icon = getIcon("eclipse/blank.gif")
             tooltip = ""
           }
         }
