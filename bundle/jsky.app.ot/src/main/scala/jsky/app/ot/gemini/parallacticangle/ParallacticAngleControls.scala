@@ -21,6 +21,7 @@ import edu.gemini.shared.util.immutable.{ImOption, Option => JOption}
 import edu.gemini.spModel.obscomp.SPInstObsComp
 import jsky.app.ot.editor.OtItemEditor
 import jsky.app.ot.gemini.editor.EphemerisUpdater
+import jsky.app.ot.gemini.schedulingBlock.SchedulingBlockDialog
 import jsky.app.ot.util.TimeZonePreference
 import jsky.util.Resources
 import jsky.util.gui.DialogUtil
@@ -299,15 +300,26 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
       e <- editor
       o <- editor.map(_.getContextObservation)
     } {
-      val dialog = new ParallacticAngleDialog(
+      val (title, instructions, mode) =
+        if (isPaUi) (
+         "Parallactic Angle Calculation",
+          Some("Select the time and duration for the average parallactic angle calculation."),
+          SchedulingBlockDialog.DateTimeAndDuration
+        ) else (
+          "Observation Scheduling",
+          None,
+          SchedulingBlockDialog.DateTimeOnly
+        )
+
+      val sb = SchedulingBlockDialog.prompt(
+        title,
+        instructions,
         e.getViewer.getParentFrame,
         o,
-        o.getDataObject.asInstanceOf[SPObservation].getSchedulingBlock.asScalaOpt,
-        site.map(_.timezone),
-        isPaUi)
-      dialog.pack()
-      dialog.visible = true
-      updateSchedulingBlock(dialog.schedulingBlock)
+        site,
+        mode)
+
+      sb.foreach(updateSchedulingBlock(_))
     }
   }
 
