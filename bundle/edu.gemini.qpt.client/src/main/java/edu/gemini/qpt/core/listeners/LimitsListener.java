@@ -116,7 +116,7 @@ public class LimitsListener extends MarkerModelListener<Variant> {
 				};
 
 			// Report intersection of constraints.
-			createSolverMarker.apply(Variant.CONSTRAINED_UNION_CACHE, "Must be observed between").foreach(m -> mm.addMarker(m));
+//			createSolverMarker.apply(Variant.CONSTRAINED_UNION_CACHE, "Must be observed between").foreach(m -> mm.addMarker(m));
 
 
             // Elevation Constraint
