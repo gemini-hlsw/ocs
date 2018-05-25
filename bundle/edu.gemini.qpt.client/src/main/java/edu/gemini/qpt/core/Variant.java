@@ -1005,8 +1005,10 @@ public final class Variant extends BaseMutableBean implements PioSerializable, C
 			score *= 0.5;
 
 		// Decrease if can only be partially scheduled
+		// Note that this is the only factor that is influenced by the state of the
+		// plan; everything else is an intrinsic property of the observation.
 		if (flags.contains(Flag.PARTIALLY_BLOCKED))
-			score *= 0.75;
+			score *= 0.8; // slightly less than the user priority penalty
 
 		// QPT-211: Make observations requiring dark time more important
 		// than those which don't require dark time,
