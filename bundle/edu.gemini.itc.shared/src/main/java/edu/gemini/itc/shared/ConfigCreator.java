@@ -53,11 +53,44 @@ public class ConfigCreator {
     private final ItcParameters itcParams;
     private final ObservationDetails obsDetailParams;
 
-    private static String overheadTableWarning = "";
-    private static String offsetString = "";
-
     public static final double GSAOI_SMALL_SKY_OFFSET = 120.0; // arcsec (assumed in case of sky offset <5')
     public static final double GSAOI_LARGE_SKY_OFFSET = 310.0; // arcsec (assumed in case of sky offset >5')
+
+    public class ConfigCreatorResult {
+        private List<String> warnings;
+        private String offsetMessage;
+        Config[] config;
+
+        public ConfigCreatorResult(Config[] config) {
+            warnings = new ArrayList<>();
+            offsetMessage = "";
+            this.config = config;
+        }
+
+        public List<String> getWarnings() {
+            return warnings;
+        }
+
+        public boolean hasWarnings() {
+            return warnings.size() != 0;
+        }
+
+        public void addWarning(String warning) {
+            warnings.add(warning);
+        }
+
+        public String getOffsetMessage() {
+            return offsetMessage;
+        }
+
+        public void setOffsetMessage(String offsetMessage) {
+            this.offsetMessage = offsetMessage;
+        }
+
+        public Config[] getConfig() {
+            return config;
+        }
+    }
 
     public ConfigCreator(final ItcParameters p) {
         this.itcParams = p;
@@ -65,10 +98,10 @@ public class ConfigCreator {
     }
 
     // create part of config common for all instruments
-    public Config[] createCommonConfig(int numberExposures) {
+    public ConfigCreatorResult createCommonConfig(int numberExposures) {
         final CalculationMethod calcMethod = obsDetailParams.calculationMethod();
+        ConfigCreatorResult result = new ConfigCreatorResult(new DefaultConfig[numberExposures]);
         int numberCoadds = calcMethod.coaddsOrElse(1);
-        Config[] dc = new DefaultConfig[numberExposures];
         String offset = Double.toString(calcMethod.offset());
         // for spectroscopic observations we consider ABBA offset pattern
         List<String> spectroscopyOffsets = new ArrayList<>(Arrays.asList("0", offset, offset, "0"));
@@ -79,16 +112,15 @@ public class ConfigCreator {
         for (int i = 0; i < (1 + numberExposures / 4); i++) {
             if (calcMethod instanceof Imaging) {
                 offsetList.addAll(imagingOffsets);
-                offsetString = "ABAB dithering pattern";
+                result.setOffsetMessage("ABAB dithering pattern");
             } else if (calcMethod instanceof Spectroscopy) {
                 offsetList.addAll(spectroscopyOffsets);
-                offsetString = "ABBA dithering pattern";
+                result.setOffsetMessage("ABBA dithering pattern");
             }
         }
 
-        for (int i = 0; i < dc.length; i++) {
+        for (int i = 0; i < numberExposures; i++) {
             Config step = new DefaultConfig();
-            dc[i] = step;
 
             step.putItem(ExposureTimeKey, obsDetailParams.exposureTime());
             step.putItem(ObserveTypeKey, InstConstants.SCIENCE_OBSERVE_TYPE);
@@ -101,17 +133,20 @@ public class ConfigCreator {
             if (itcParams.telescope().getWFS().equals(GuideProbe.Type.PWFS)) {
                 step.putItem(GuideWithPWFS2Key, StandardGuideOptions.Value.guide);
             }
+
+            result.getConfig()[i] = step;
         }
-        return dc;
+
+        return result;
     }
 
     /**
      * Instrument-specific configs
      */
-    public Config[] createGnirsConfig(GnirsParameters gnirsParams, int numExp) {
-        Config[] conf = createCommonConfig(numExp);
+    public ConfigCreatorResult createGnirsConfig(GnirsParameters gnirsParams, int numExp) {
+        ConfigCreatorResult result = createCommonConfig(numExp);
 
-        for (Config step : conf) {
+        for (Config step : result.getConfig()) {
             step.putItem(ReadModeKey, (gnirsParams.readMode()));
             step.putItem(InstInstrumentKey, SPComponentType.INSTRUMENT_GNIRS.readableStr);
             step.putItem(SlitWidthKey, gnirsParams.slitWidth().logValue());
@@ -122,13 +157,13 @@ public class ConfigCreator {
                 step.putItem(AOSystemKey, SPComponentType.AO_ALTAIR.narrowType);
             }
         }
-        return conf;
+        return result;
     }
 
-    public Config[] createNiriConfig(NiriParameters niriParams, int numExp) {
-        Config[] conf = createCommonConfig(numExp);
+    public ConfigCreatorResult createNiriConfig(NiriParameters niriParams, int numExp) {
+        ConfigCreatorResult result = createCommonConfig(numExp);
 
-        for (Config step : conf) {
+        for (Config step : result.getConfig()) {
             step.putItem(ReadModeKey, (niriParams.readMode()));
             step.putItem(InstInstrumentKey, SPComponentType.INSTRUMENT_NIRI.readableStr);
             step.putItem(BuiltinROIKey, (niriParams.builtinROI()));
@@ -140,13 +175,13 @@ public class ConfigCreator {
                 step.putItem(AOSystemKey, SPComponentType.AO_ALTAIR.narrowType);
             }
         }
-        return conf;
+        return result;
     }
 
-    public Config[] createGmosConfig(GmosParameters gmosParams, int numExp) {
-        Config[] conf = createCommonConfig(numExp);
+    public ConfigCreatorResult createGmosConfig(GmosParameters gmosParams, int numExp) {
+        ConfigCreatorResult result = createCommonConfig(numExp);
 
-        for (Config step : conf) {
+        for (Config step : result.getConfig()) {
             if (gmosParams.site().displayName.equals(Site.GN.displayName)) {
                 step.putItem(InstInstrumentKey, SPComponentType.INSTRUMENT_GMOS.readableStr);
             } else if (gmosParams.site().displayName.equals(Site.GS.displayName)) {
@@ -173,13 +208,13 @@ public class ConfigCreator {
                 throw new Error("Invalid detector type");
             }
         }
-        return conf;
+        return result;
     }
 
-    public Config[] createNifsConfig(NifsParameters nifsParams, int numExp) {
-        Config[] conf = createCommonConfig(numExp);
+    public ConfigCreatorResult createNifsConfig(NifsParameters nifsParams, int numExp) {
+        ConfigCreatorResult result = createCommonConfig(numExp);
 
-        for (Config step : conf) {
+        for (Config step : result.getConfig()) {
             step.putItem(ReadModeKey, (nifsParams.readMode()));
             step.putItem(InstInstrumentKey, SPComponentType.INSTRUMENT_NIFS.readableStr);
 
@@ -189,11 +224,11 @@ public class ConfigCreator {
                 step.putItem(AOSystemKey, SPComponentType.AO_ALTAIR.narrowType);
             }
         }
-        return conf;
+        return result;
     }
 
-    public Config[] createGsaoiConfig(GsaoiParameters gsaoiParams, int numExp) {
-        Config[] conf = createCommonConfig(numExp);
+    public ConfigCreatorResult createGsaoiConfig(GsaoiParameters gsaoiParams, int numExp) {
+        ConfigCreatorResult result = createCommonConfig(numExp);
         final double sf = obsDetailParams.calculationMethod().sourceFraction();
         int stepNum = 0;
         int numLargeOffsets = gsaoiParams.largeSkyOffset();
@@ -201,7 +236,7 @@ public class ConfigCreator {
         GuideOption g = StandardGuideOptions.Value.guide;
         GuideOption p = StandardGuideOptions.Value.park;
 
-        List<GuideOption> guideStatusList = new ArrayList<>(conf.length);
+        List<GuideOption> guideStatusList = new ArrayList<>(numExp);
 
         /**
          * GSAOI offset overheads and sequence structure is different from all other instruments. In addition
@@ -221,12 +256,12 @@ public class ConfigCreator {
         if (numLargeOffsets == 0) {
             if (sf == 1) {
                 Collections.fill(guideStatusList, g);
-                offsetString = "ABAB dithering pattern and no sky offsets";
+                result.setOffsetMessage("ABAB dithering pattern and no sky offsets");
             } else if (sf == 0.5) {
                 List<GuideOption> steps = Arrays.asList(g, p);
-                offsetString = "science-sky-sky-science pattern with "+GSAOI_SMALL_SKY_OFFSET+"\" sky offset and 4-point ABAB dithering at each position";
-                while (guideStatusList.size() < conf.length) {
-                    int rest = conf.length - guideStatusList.size();
+                result.setOffsetMessage("science-sky-sky-science pattern with "+GSAOI_SMALL_SKY_OFFSET+"\" sky offset and 4-point ABAB dithering at each position");
+                while (guideStatusList.size() < numExp) {
+                    int rest = numExp - guideStatusList.size();
                     int chunkLength;
                     if (rest >= 8)
                         chunkLength = 4;
@@ -245,25 +280,24 @@ public class ConfigCreator {
             int leftOver = numExp % numLargeOffsets;
             boolean error = false;
 
-            overheadTableWarning = "";
             if ((sourceFraction != 1.0) && (sourceFraction != 0.5)) {
-                overheadTableWarning = "Warning: Observation overheads can only be calculated for <b>fraction with source</b> values 1.0 or 0.5.";
+                result.addWarning("Warning: Observation overheads can only be calculated for <b>fraction with source</b> values 1.0 or 0.5.");
                 error = true;
             }
             if (sourceFraction == 1.0) {
-                overheadTableWarning = "Warning: Observation overheads cannot be calculated: for selected <b>fraction with source<b> value 1.0 <b>number of sky offsets >5'</b> should be 0.";
+                result.addWarning("Warning: Observation overheads cannot be calculated: for selected <b>fraction with source</b> value 1.0 <b>number of sky offsets >5'</b> should be 0.");
                 error = true;
             }
 
             if ((exposuresPerGroup % 2 != 0) || (leftOver % 2 != 0)) {
-                overheadTableWarning = "Warning: Observation overheads cannot be calculated: uneven number of object and sky exposures. Please change <b>number of exposures</b> or <b>number of sky offsets >5'</b>.";
+                result.addWarning("Warning: Observation overheads cannot be calculated: uneven number of object and sky exposures. Please change <b>number of exposures</b> or <b>number of sky offsets >5'</b>.");
                 error = true;
             }
 
             if (!error) {
                 int[] ditheringPoints = new int[numLargeOffsets];
                 int totalAssigned = 0;
-                offsetString = "science-sky-science-sky pattern with "+GSAOI_LARGE_SKY_OFFSET+"\" sky offset and ABAB dithering at each position";
+                result.setOffsetMessage("science-sky-science-sky pattern with "+GSAOI_LARGE_SKY_OFFSET+"\" sky offset and ABAB dithering at each position");
 
                 for (int i = 0; i < (numLargeOffsets - 1); i++) {
                     ditheringPoints[i] = exposuresPerGroup;
@@ -282,7 +316,7 @@ public class ConfigCreator {
         GuideOption currentGuideStatus;
         GuideOption previousGuideStatus = null;
 
-        for (Config step : conf) {
+        for (Config step : result.getConfig()) {
             step.putItem(ReadModeKey, (gsaoiParams.readMode()));
             step.putItem(InstInstrumentKey, SPComponentType.INSTRUMENT_GSAOI.readableStr);
             if (!guideStatusList.isEmpty()) {
@@ -304,13 +338,13 @@ public class ConfigCreator {
             stepNum = stepNum + 1;
 
         }
-        return conf;
+        return result;
     }
 
-    public Config[] createF2Config(Flamingos2Parameters f2Params, int numExp) {
-        Config[] conf = createCommonConfig(numExp);
+    public ConfigCreatorResult createF2Config(Flamingos2Parameters f2Params, int numExp) {
+        ConfigCreatorResult result = createCommonConfig(numExp);
 
-        for (Config step : conf) {
+        for (Config step : result.getConfig()) {
             step.putItem(ReadModeKey, (f2Params.readMode()));
             step.putItem(InstInstrumentKey, SPComponentType.INSTRUMENT_FLAMINGOS2.readableStr);
             step.putItem(DisperserKey, f2Params.grism());
@@ -322,17 +356,8 @@ public class ConfigCreator {
 
             }
         }
-        return conf;
+        return result;
 
     }
-
-    static public String getOverheadTableWarning() {
-        return overheadTableWarning;
-    }
-
-    static public String getOffsetString() {
-        return offsetString;
-    }
-
 }
 

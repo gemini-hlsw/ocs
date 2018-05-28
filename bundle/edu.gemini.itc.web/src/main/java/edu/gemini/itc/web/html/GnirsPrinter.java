@@ -226,7 +226,7 @@ public final class GnirsPrinter extends PrinterBase implements OverheadTablePrin
         return s;
     }
 
-    public Config[] createInstConfig(int numberExposures) {
+    public ConfigCreator.ConfigCreatorResult createInstConfig(int numberExposures) {
         ConfigCreator cc = new ConfigCreator(p);
         return cc.createGnirsConfig(instr, numberExposures);
     }

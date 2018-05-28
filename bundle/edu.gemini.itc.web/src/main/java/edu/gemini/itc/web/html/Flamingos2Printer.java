@@ -147,7 +147,7 @@ public final class Flamingos2Printer extends PrinterBase implements OverheadTabl
     }
 
 
-    public Config[] createInstConfig(int numberExposures) {
+    public ConfigCreator.ConfigCreatorResult createInstConfig(int numberExposures) {
         ConfigCreator cc = new ConfigCreator(p);
         return cc.createF2Config(instr, numberExposures);
     }

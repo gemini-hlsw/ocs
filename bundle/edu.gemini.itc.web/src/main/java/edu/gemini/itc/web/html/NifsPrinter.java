@@ -123,7 +123,7 @@ public final class NifsPrinter extends PrinterBase implements OverheadTablePrint
     }
 
 
-    public Config[] createInstConfig(int numberExposures) {
+    public ConfigCreator.ConfigCreatorResult createInstConfig(int numberExposures) {
         ConfigCreator cc = new ConfigCreator(p);
         return cc.createNifsConfig(instr, numberExposures);
     }

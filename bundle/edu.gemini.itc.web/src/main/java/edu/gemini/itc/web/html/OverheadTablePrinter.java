@@ -4,7 +4,6 @@ import edu.gemini.itc.base.ImagingResult;
 import edu.gemini.itc.base.Result;
 import edu.gemini.itc.shared.*;
 import edu.gemini.shared.util.immutable.ImList;
-import edu.gemini.spModel.config2.Config;
 import edu.gemini.spModel.obs.plannedtime.OffsetOverheadCalculator;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime;
 import edu.gemini.spModel.obs.plannedtime.PlannedTimeCalculator;
@@ -18,7 +17,7 @@ import java.util.StringJoiner;
 
 public class OverheadTablePrinter {
     private final ItcParameters p;
-    private final Config[] config;
+    private final ConfigCreator.ConfigCreatorResult ccResult;
     private final double readoutTimePerCoadd;
     private final PlannedTime pta;
     private final ItcSpectroscopyResult r;
@@ -30,7 +29,7 @@ public class OverheadTablePrinter {
     private ImList<PlannedTime.CategorizedTime> cts;
 
     public interface PrinterWithOverhead {
-        Config[] createInstConfig(int numberExposures);
+        ConfigCreator.ConfigCreatorResult createInstConfig(int numberExposures);
         PlannedTime.ItcOverheadProvider getInst();
         double getReadoutTimePerCoadd(); // this should return "0" for instruments with no coadds
     }
@@ -53,10 +52,10 @@ public class OverheadTablePrinter {
 
         this.r = sResult;
         this.p = params;
-        this.config = printer.createInstConfig(this.numOfExposures);
+        this.ccResult = printer.createInstConfig(this.numOfExposures);
         this.readoutTimePerCoadd = readoutTimePerCoadd;
-        this.pta = PlannedTimeCalculator.instance.calc(this.config, printer.getInst());
-        this.instrumentName = (String) config[0].getItemValue(ConfigCreator.InstInstrumentKey);
+        this.pta = PlannedTimeCalculator.instance.calc(this.ccResult.getConfig(), printer.getInst());
+        this.instrumentName = (String) ccResult.getConfig()[0].getItemValue(ConfigCreator.InstInstrumentKey);
     }
 
     // instruments with no coadds, case of spectroscopy for instruments with IFU
@@ -78,7 +77,7 @@ public class OverheadTablePrinter {
     public int getGsaoiLgsReacqNum() {
         int gsaoiLgsReacqNum = 0;
 
-        for (int i = 0; i < config.length; i++) {
+        for (int i = 0; i < ccResult.getConfig().length; i++) {
             s = pta.steps.get(i);
             m = s.times.groupTimes();
             cts = m.get(PlannedTime.Category.CONFIG_CHANGE);
@@ -101,7 +100,7 @@ public class OverheadTablePrinter {
     public int getNumReacq() {
         int numReacq = 0;
         if (p.observation().calculationMethod() instanceof Spectroscopy) {
-            numReacq = pta.numReacq(config[0]);
+            numReacq = pta.numReacq(ccResult.getConfig()[0]);
             // for IFU spectroscopy recentering is needed only for faint targets (with SNR in individual images < 5)
             if (isIFU()) {
                 if (r.maxSingleSNRatio() > 5) {
@@ -114,8 +113,8 @@ public class OverheadTablePrinter {
 
     public boolean isIFU() {
         String fpu = null;
-        if (config[0].containsItem(ConfigCreator.FPUKey)) {
-            fpu = config[0].getItemValue(ConfigCreator.FPUKey).toString();
+        if (ccResult.getConfig()[0].containsItem(ConfigCreator.FPUKey)) {
+            fpu = ccResult.getConfig()[0].getItemValue(ConfigCreator.FPUKey).toString();
         }
         if ((instrumentName.contains("GMOS") && fpu.contains("IFU"))
                 || instrumentName.equals("NIFS")) {
@@ -127,7 +126,7 @@ public class OverheadTablePrinter {
     public Map<Double, Integer> getOffsetsByOverhead() {
         Map<Double, Integer> offsetsByOverhead = new HashMap<>();
 
-        for (int i = 0; i < config.length; i++) {
+        for (int i = 0; i < ccResult.getConfig().length; i++) {
             s = pta.steps.get(i);
             m = s.times.groupTimes();
             cts = m.get(PlannedTime.Category.CONFIG_CHANGE);
@@ -149,10 +148,12 @@ public class OverheadTablePrinter {
         StringBuilder buf = new StringBuilder("<html><body>");
         buf.append("<table><tr><th>Observation Overheads</th></tr>");
 
-        if (!ConfigCreator.getOverheadTableWarning().equals("")) {
+        if (ccResult.hasWarnings()) {
             buf.append("</table>");
             buf.append("<div>");
-            buf.append("<p>").append(ConfigCreator.getOverheadTableWarning()).append("</p>");
+            for (String warning : ccResult.getWarnings()) {
+                buf.append("<p>").append(warning).append("</p>");
+            }
             buf.append("</body></html>");
             return buf.toString();
         }
@@ -205,7 +206,7 @@ public class OverheadTablePrinter {
             buf.append("<tr>");
             buf.append("<td>").append("Telescope offset ").append("</td>");
             buf.append("<td align=\"right\"> ").append(offsetStr).append("</td>");
-            buf.append("<td align=\"right\"> ").append("&ensp; assuming " + ConfigCreator.getOffsetString()).append("</td>");
+            buf.append("<td align=\"right\"> ").append("&ensp; assuming " + ccResult.getOffsetMessage()).append("</td>");
             buf.append("</tr>");
         }
 
@@ -241,6 +242,7 @@ public class OverheadTablePrinter {
         buf.append("</table>");
 
         buf.append("</body></html>");
+
         return buf.toString();
     }
 }

@@ -161,7 +161,7 @@ public final class NiriPrinter extends PrinterBase implements OverheadTablePrint
         return s;
     }
 
-    public Config[] createInstConfig(int numberExposures) {
+    public ConfigCreator.ConfigCreatorResult createInstConfig(int numberExposures) {
         ConfigCreator cc = new ConfigCreator(p);
         return cc.createNiriConfig(instr, numberExposures);
     }

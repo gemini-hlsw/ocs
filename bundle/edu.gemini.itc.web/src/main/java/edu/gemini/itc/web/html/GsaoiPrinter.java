@@ -95,7 +95,7 @@ public final class GsaoiPrinter extends PrinterBase
         return s;
     }
 
-    public Config[] createInstConfig(int numberExposures) {
+    public ConfigCreator.ConfigCreatorResult createInstConfig(int numberExposures) {
         ConfigCreator cc = new ConfigCreator(p);
         return cc.createGsaoiConfig(instr, numberExposures);
     }

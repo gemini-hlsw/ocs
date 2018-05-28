@@ -249,7 +249,7 @@ public final class GmosPrinter extends PrinterBase implements OverheadTablePrint
         }
     }
 
-    public Config[] createInstConfig(int numberExposures) {
+    public ConfigCreator.ConfigCreatorResult createInstConfig(int numberExposures) {
         ConfigCreator cc = new ConfigCreator(p);
         return cc.createGmosConfig(instr, numberExposures);
     }
