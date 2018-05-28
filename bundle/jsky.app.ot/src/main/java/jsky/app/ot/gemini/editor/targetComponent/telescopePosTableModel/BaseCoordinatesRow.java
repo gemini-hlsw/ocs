@@ -1,7 +1,7 @@
 package jsky.app.ot.gemini.editor.targetComponent.telescopePosTableModel;
 
 import edu.gemini.shared.util.immutable.None;
-import edu.gemini.spModel.core.Coordinates;
+import edu.gemini.spModel.target.SPCoordinates;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 
 /**
@@ -9,7 +9,7 @@ import edu.gemini.spModel.target.env.TargetEnvironment;
  * target. This may come up in GHOST.
  */
 final class BaseCoordinatesRow extends CoordinatesRow {
-    BaseCoordinatesRow(final Coordinates coordinates) {
+    BaseCoordinatesRow(final SPCoordinates coordinates) {
         super(true,
                 true,
                 TargetEnvironment.BASE_NAME,

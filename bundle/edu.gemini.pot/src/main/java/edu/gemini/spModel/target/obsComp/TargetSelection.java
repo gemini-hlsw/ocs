@@ -7,6 +7,7 @@ import edu.gemini.pot.sp.SPUtil;
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.core.Coordinates;
 import edu.gemini.spModel.gemini.ghost.GhostAsterism;
+import edu.gemini.spModel.target.SPCoordinates;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.*;
 
@@ -79,7 +80,7 @@ public final class TargetSelection {
             return None.instance();
         }
 
-        public Option<Coordinates> getCoordinates() { return None.instance(); }
+        public Option<SPCoordinates> getCoordinates() { return None.instance(); }
 
         /**
          * Create a list of Selection from the target environment, consisting of:
@@ -250,15 +251,32 @@ public final class TargetSelection {
     }
 
     private static final class CoordinatesSelection extends Selection {
-        final Coordinates coordinates;
+        final SPCoordinates spCoordinates;
+        final boolean skyPosition;
 
-        CoordinatesSelection(int index, final Coordinates coordinates) {
+        // This constructor is called with mutable SPCoordinates, indicating
+        // that these can be changed.
+        CoordinatesSelection(int index, final SPCoordinates spCoordinates) {
             super(index);
-            this.coordinates = coordinates;
+            this.spCoordinates = spCoordinates;
+            this.skyPosition = true;
         }
 
-        @Override public Option<Coordinates> getCoordinates() {
-            return new Some<>(coordinates);
+        // This constructor is called with immutable Coordinates, indicating
+        // that these cannot be changed and are dependent on one or more
+        // targets.
+        CoordinatesSelection(int index, final Coordinates coordinates) {
+            super(index);
+            this.spCoordinates = new SPCoordinates(coordinates);
+            this.skyPosition = false;
+        }
+
+        @Override public Option<SPCoordinates> getCoordinates() {
+            return new Some<>(spCoordinates);
+        }
+
+        public boolean isSkyPosition() {
+            return skyPosition;
         }
     }
 
@@ -295,11 +313,11 @@ public final class TargetSelection {
         indexOfTarget(env, target).foreach(i -> setIndex(node, i));
     }
 
-    private static Option<Coordinates> getCoordinatesAtIndex(final TargetEnvironment env, final int index) {
+    private static Option<SPCoordinates> getCoordinatesAtIndex(final TargetEnvironment env, final int index) {
         return selectionAtIndex(env, index).flatMap(Selection::getCoordinates);
     }
 
-    public static Option<Coordinates> getCoordinatesForNode(final TargetEnvironment env, final ISPNode node) {
+    public static Option<SPCoordinates> getCoordinatesForNode(final TargetEnvironment env, final ISPNode node) {
         return getIndex(node).flatMap(i -> getCoordinatesAtIndex(env, i));
     }
 

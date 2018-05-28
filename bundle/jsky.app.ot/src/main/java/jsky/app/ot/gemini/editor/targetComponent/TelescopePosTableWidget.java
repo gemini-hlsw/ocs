@@ -7,6 +7,7 @@ import edu.gemini.spModel.core.Coordinates;
 import edu.gemini.spModel.guide.*;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
+import edu.gemini.spModel.target.SPCoordinates;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.TelescopePosWatcher;
 import edu.gemini.spModel.target.WatchablePos;
@@ -182,7 +183,7 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
                 return ImOption.apply(_model).flatMap(td -> {
                     final Option<SPTarget> tpOpt = TargetSelection.getTargetForNode(oldEnv, _obsComp);
                     final Option<Integer> tpIndex = tpOpt.flatMap(_model::rowIndexForTarget);
-                    final Option<Coordinates> cOpt = TargetSelection.getCoordinatesForNode(oldEnv, _obsComp);
+                    final Option<SPCoordinates> cOpt = TargetSelection.getCoordinatesForNode(oldEnv, _obsComp);
                     final Option<Integer> cIndex = cOpt.flatMap(_model::rowIndexForCoordinates);
                     final Option<IndexedGuideGroup> iggOpt = TargetSelection.getIndexedGuideGroupForNode(oldEnv, _obsComp);
                     final Option<Integer> iggIndex = iggOpt.map(IndexedGuideGroup::index).flatMap(_model::rowIndexForGroupIndex);

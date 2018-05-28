@@ -3,19 +3,20 @@ package jsky.app.ot.gemini.editor.targetComponent.telescopePosTableModel;
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.core.Coordinates;
+import edu.gemini.spModel.target.SPCoordinates;
 
 /**
  * A row that contains a Coordinates object. Should not be movable.
  */
 public abstract class CoordinatesRow extends Row {
-    private final Coordinates coordinates;
+    private final SPCoordinates coordinates;
     private final Option<Double> distance;
 
     CoordinatesRow(final boolean enabled,
                    final boolean editable,
                    final String tag,
                    final String name,
-                   final Coordinates coordinates,
+                   final SPCoordinates coordinates,
                    final Option<Coordinates> baseCoords) {
         super(enabled,
                 editable,
@@ -25,10 +26,10 @@ public abstract class CoordinatesRow extends Row {
                 None.instance());
         this.coordinates = coordinates;
 
-        this.distance = baseCoords.map(bc -> bc.angularDistance(coordinates).toArcmins());
+        this.distance = baseCoords.map(bc -> bc.angularDistance(coordinates.getCoordinates()).toArcmins());
     }
 
-    public Coordinates coordinates() {
+    public SPCoordinates coordinates() {
         return coordinates;
     }
 
@@ -45,10 +46,10 @@ public abstract class CoordinatesRow extends Row {
     }
 
     public String raStringExtractor() {
-        return coordinates.ra().toAngle().formatHMS();
+        return coordinates.getCoordinates().ra().toAngle().formatHMS();
     }
 
     public String decStringExtractor() {
-        return coordinates.dec().toAngle().formatHMS();
+        return coordinates.getCoordinates().dec().toAngle().formatHMS();
     }
 }

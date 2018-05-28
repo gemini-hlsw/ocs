@@ -5,6 +5,7 @@ import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.core.Coordinates;
 import edu.gemini.spModel.gemini.ghost.GhostAsterism;
+import edu.gemini.spModel.target.SPCoordinates;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.Asterism;
 
@@ -15,7 +16,7 @@ final class Utils {
 
     // Return the world coordinates for the given target.
     static Option<Coordinates> getCoordinates(final SPTarget t,
-                                              final Option<Long> when) {
+                                                final Option<Long> when) {
         return t.getRaDegrees(when).flatMap(ra ->
                 t.getDecDegrees(when).flatMap(dec ->
                         ImOption.fromScalaOpt(Coordinates.fromDegrees(ra, dec))));

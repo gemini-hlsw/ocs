@@ -15,6 +15,7 @@ import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.guide.GuideProbeUtil;
 import edu.gemini.spModel.guide.ValidatableGuideProbe;
 import edu.gemini.spModel.obs.context.ObsContext;
+import edu.gemini.spModel.target.SPCoordinates;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.*;
 import jsky.app.ot.OT;
@@ -104,7 +105,6 @@ final public class TelescopePosTableModel extends AbstractTableModel {
         when               = None.instance();
         rows               = createRows(ctxOpt);
         numRows            = countRows();
-        System.out.println("*** ctor:ROWS=" + rows.size() + ", numRows=" + numRows + ", autoGroupIdx=" + autoGroupIdx + ", firstAutoTargetIdx=" + firstAutoTargetIdx);
     }
 
     // TODO:GHOST Should we have a third type of base, e.g. DependentBase, which
@@ -126,10 +126,17 @@ final public class TelescopePosTableModel extends AbstractTableModel {
         final Row row;
 
         // In the case of DualTarget, the base position is not a science target
-        // but simply a set of Coordinates.
+        // but simply a set of coordinates. If this is defined independently of
+        // the targets, link the row to it; otherwise, just stuff the interpolated
+        // coordinates into an SPCoordinates.
         if (a.asterismType() == AsterismType.GhostDualTarget) {
-            final Coordinates c = Utils.getCoordinates(a, when).getOrElse(Coordinates.zero());
-            row = new BaseCoordinatesRow(c);
+            if (a.base().isDefined()) {
+                row = new BaseCoordinatesRow(a.base().get());
+            }
+            else {
+                final Coordinates c = Utils.getCoordinates(a, when).getOrElse(Coordinates.zero());
+                row = new BaseCoordinatesRow(new SPCoordinates(c));
+            }
         }
         else {
             // The logic here is more complicated: we need to determine if the
@@ -197,7 +204,7 @@ final public class TelescopePosTableModel extends AbstractTableModel {
         final List<Row> hdr                 = new ArrayList<>();
         final GhostAsterism.TargetPlusSky a = (GhostAsterism.TargetPlusSky) env.getAsterism();
         final GhostTarget gt                = a.target();
-        final Coordinates c                 = a.sky();
+        final SPCoordinates c               = a.sky();
 
         hdr.add(createGhostBaseRow(a));
         hdr.add(new GhostTargetRow(GhostAsterism$.MODULE$.SRIFU1(), gt, baseCoords, when));
@@ -209,7 +216,7 @@ final public class TelescopePosTableModel extends AbstractTableModel {
         // Base position, a sky target, and a science target.
         final List<Row> hdr                 = new ArrayList<>();
         final GhostAsterism.SkyPlusTarget a = (GhostAsterism.SkyPlusTarget) env.getAsterism();
-        final Coordinates c                 = a.sky();
+        final SPCoordinates c               = a.sky();
         final GhostTarget gt                = a.target();
 
         hdr.add(createGhostBaseRow(a));
@@ -234,7 +241,7 @@ final public class TelescopePosTableModel extends AbstractTableModel {
         final List<Row> hdr                               = new ArrayList<>();
         final GhostAsterism.HighResolutionTargetPlusSky a = (GhostAsterism.HighResolutionTargetPlusSky) env.getAsterism();
         final GhostTarget gt                              = a.target();
-        final Coordinates c                               = a.sky();
+        final SPCoordinates c                             = a.sky();
 
         hdr.add(createGhostBaseRow(a));
         hdr.add(new GhostTargetRow(GhostAsterism$.MODULE$.HRIFU1(), gt, baseCoords, when));
@@ -366,8 +373,6 @@ final public class TelescopePosTableModel extends AbstractTableModel {
 
             tableRowIdx += 1 + children;
         }
-
-        System.out.println("*** replace:ROWS=" + rows.size() + ", numRows=" + numRows + ", autoGroupIdx=" + autoGroupIdx + ", firstAutoTargetIdx=" + firstAutoTargetIdx);
     }
 
     // Given a guide group and its index amongst the set of all groups, create a GroupRow (and all children
@@ -554,7 +559,7 @@ final public class TelescopePosTableModel extends AbstractTableModel {
     /**
      * Conversions between Coordinates and row index.
      */
-    public Option<Integer> rowIndexForCoordinates(final Coordinates coords) {
+    public Option<Integer> rowIndexForCoordinates(final SPCoordinates coords) {
         if (coords == null) return None.instance();
 
         int index = 0;
@@ -569,7 +574,7 @@ final public class TelescopePosTableModel extends AbstractTableModel {
         return None.instance();
     }
 
-    public Option<Coordinates> coordinatesAtRowIndex(final int index) {
+    public Option<SPCoordinates> coordinatesAtRowIndex(final int index) {
         return rowAtRowIndex(index).flatMap(r -> {
             if (r instanceof CoordinatesRow)
                 return new Some<>(((CoordinatesRow) r).coordinates());

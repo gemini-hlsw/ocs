@@ -16,6 +16,7 @@ import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.guide.GuideProbeUtil;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
+import edu.gemini.spModel.target.SPCoordinates;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.TelescopePosWatcher;
 import edu.gemini.spModel.target.env.*;
@@ -179,7 +180,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             return None.instance();
     }
 
-    private Option<Coordinates> selectedCoordinates() {
+    private Option<SPCoordinates> selectedCoordinates() {
         if (selection instanceof TableCoordinateSelection)
             return new Some<>(((TableCoordinateSelection) selection).getCoordinates());
         else
@@ -191,7 +192,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
      * It could be a target or a sky position.
      * Due to type inference issues with map, we have to do this in a horrible way.
      */
-    private ImEither<SPTarget, Coordinates> basePosition() {
+    private ImEither<SPTarget, SPCoordinates> basePosition() {
         final TargetEnvironment env = getDataObject().getTargetEnvironment();
         final Asterism a            = env.getAsterism();
 
@@ -206,8 +207,8 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 final GhostAsterism.DualTarget gda = (GhostAsterism.DualTarget) a;
                 if (gda.base().isDefined()) return new Right<>(gda.base().get());
                 else {
-                    final Coordinates c = ImOption.fromScalaOpt(gda.basePosition(ImOption.scalaNone())).getOrElse(Coordinates.zero());
-                    return new Right<>(c);
+                    final Option<Coordinates> cOpt = ImOption.fromScalaOpt(gda.basePosition(ImOption.scalaNone()));
+                    return new Right<>(cOpt.map(SPCoordinates::new).getOrElse(SPCoordinates::new));
                 }
             case GhostTargetPlusSky:
                 final GhostAsterism.TargetPlusSky gtsa = (GhostAsterism.TargetPlusSky) a;
@@ -228,7 +229,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         }
 
         // Make the compiler shut up.
-        return new Right<>(Coordinates.zero());
+        return new Right<>(new SPCoordinates());
     }
 
     /**
@@ -241,9 +242,10 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
     /**
      * Auxiliary method to determine if the current selection is base coordinates.
+     * TODO:SPCOORDINATES I think we want to compare references here, like we do for selectionIsBaseTarget.
      */
     private boolean selectionIsBaseCoordinates() {
-        final Option<Coordinates> c = basePosition().toOption();
+        final Option<SPCoordinates> c = basePosition().toOption();
         return selectedCoordinates().exists(sc -> c.exists(sc::equals));
     }
 
@@ -319,7 +321,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         selection = new TableGroupSelection(igg);
     }
 
-    private void setSelectionToCoordinates(final Coordinates c) {
+    private void setSelectionToCoordinates(final SPCoordinates c) {
         selection = new TableCoordinateSelection(c);
     }
 
@@ -399,8 +401,9 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         final TargetEnvironment env = obsComp.getTargetEnvironment();
         if (env == null || !env.getTargets().contains(target)) return false;
 
-        // If current selection is a target, remove the posWatcher.
+        // If current selection is a target or coordinates, remove the posWatcher.
         selectedTarget().foreach(t -> t.deleteWatcher(posWatcher));
+        selectedCoordinates().foreach(c -> c.deleteWatcher(posWatcher));
 
         action.run();
 
@@ -861,7 +864,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     };
 
     private final TelescopePosWatcher posWatcher = tp -> {
-        if (tp != selectedTarget().getOrNull()) {
+        if (tp != selectedTarget().getOrNull() && tp != selectedCoordinates().getOrNull()) {
             // This shouldn't happen ...
             System.out.println(getClass().getName() + ": received a position " +
                     " update for a position other than the current one: " + tp);
@@ -888,7 +891,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         final ISPObsComponent node = getContextTargetObsComp();
         final TargetEnvironment env = getDataObject().getTargetEnvironment();
         final Option<SPTarget> targetOpt = TargetSelection.getTargetForNode(env, node);
-        final Option<Coordinates> coordsOpt = TargetSelection.getCoordinatesForNode(env, node);
+        final Option<SPCoordinates> coordsOpt = TargetSelection.getCoordinatesForNode(env, node);
         final Option<IndexedGuideGroup> iggOpt = TargetSelection.getIndexedGuideGroupForNode(env, node);
 
         // If a target, process it.
@@ -1142,7 +1145,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         static Option<TargetClipboard> copy(final TargetEnvironment env, final ISPObsComponent obsComponent) {
             if (obsComponent == null) return None.instance();
             final Option<SPTarget> tOpt = TargetSelection.getTargetForNode(env, obsComponent);
-            final Option<Coordinates> cOpt = TargetSelection.getCoordinatesForNode(env, obsComponent);
+            final Option<SPCoordinates> cOpt = TargetSelection.getCoordinatesForNode(env, obsComponent);
             final Option<IndexedGuideGroup> gOpt = TargetSelection.getIndexedGuideGroupForNode(env, obsComponent);
 
             if (tOpt.isDefined())
@@ -1159,7 +1162,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         TargetClipboard(final SPTarget target) {
             contents = new TableTargetSelection(target);
         }
-        TargetClipboard(final Coordinates coords) {
+        TargetClipboard(final SPCoordinates coords) {
             contents = new TableCoordinateSelection(coords);
         }
         TargetClipboard(final IndexedGuideGroup group) {
@@ -1193,9 +1196,9 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             // TODO:GHOST I have no idea if this will work properly.
             else if (contents instanceof TableCoordinateSelection) {
                 final TableCoordinateSelection s = (TableCoordinateSelection) contents;
-                final Coordinates cSrc = s.getCoordinates();
+                final Coordinates cSrc = s.getCoordinates().getCoordinates();
 
-                final Option<Coordinates> cOpt = TargetSelection.getCoordinatesForNode(env, obsComponent);
+                final Option<SPCoordinates> cOpt = TargetSelection.getCoordinatesForNode(env, obsComponent);
                 cOpt.foreach(c -> TargetSelection.setCoordinatesForNode(env, obsComponent, cSrc));
             }
             else if (contents instanceof TableGroupSelection) {

@@ -16,6 +16,9 @@ object TargetParamSetCodecs {
       .withParam("ra",  Coordinates.ra)
       .withParam("dec", Coordinates.dec)
 
+  implicit val SPCoordinatesParamSetCodec: ParamSetCodec[SPCoordinates] =
+    CoordinatesParamSetCodec.xmap(new SPCoordinates(_), _.getCoordinates)
+
   implicit val ProperMotionParamSetCodec: ParamSetCodec[ProperMotion] =
     ParamSetCodec.initial(ProperMotion.zero)
       .withParam("delta-ra",  ProperMotion.deltaRA)

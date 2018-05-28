@@ -2,22 +2,19 @@ package edu.gemini.spModel.gemini.ghost
 
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.CloudCover
-import edu.gemini.spModel.target.SPTarget
+import edu.gemini.spModel.target.{SPCoordinates, SPTarget}
 import edu.gemini.spModel.target.env.{Asterism, AsterismType}
-
 import java.time.Instant
 
 import scalaz._
 import Scalaz._
-
-// TODO: Unsure if we should return sky positions in allSpTargets as dummy targets.
 
 /** Base trait for the three GHOST asterism types: two target, beam switching,
   * and high resolution.
   */
 sealed trait GhostAsterism extends Asterism {
 
-  def base: Option[Coordinates]
+  def base: Option[SPCoordinates]
 
   /** All Targets that comprise the asterism. */
   override def allTargets: NonEmptyList[Target] =
@@ -127,7 +124,7 @@ object GhostAsterism {
       * the two targets but may be explicitly specified instead.
       */
     override def basePosition(when: Option[Instant]): Option[Coordinates] =
-      base orElse defaultBasePosition(when)
+      base.map(_.getCoordinates) orElse defaultBasePosition(when)
 
     override def basePositionProperMotion: Option[ProperMotion] =
       allTargets.map(Target.pm.get).fold
@@ -139,13 +136,13 @@ object GhostAsterism {
       ifu2.map(t => StandardResolution.guideFiberState(t, cc)).getOrElse(GuideFiberState.Disabled)
     }
 
-    def ifu1: Either[Coordinates, GhostTarget] = this match {
+    def ifu1: Either[SPCoordinates, GhostTarget] = this match {
       case SingleTarget(t,_)    => Right(t)
       case DualTarget(t,_,_)    => Right(t)
       case TargetPlusSky(t,_,_) => Right(t)
       case SkyPlusTarget(s,_,_) => Left(s)
     }
-    def ifu2: Option[Either[Coordinates, GhostTarget]] = this match {
+    def ifu2: Option[Either[SPCoordinates, GhostTarget]] = this match {
       case SingleTarget(_,_)    => None
       case DualTarget(_,t,_)    => Some(Right(t))
       case TargetPlusSky(_,s,_) => Some(Left(s))
@@ -154,10 +151,10 @@ object GhostAsterism {
 
     // Sky coords are immutable, so we don't need to copy them.
     override def copyWithClonedTargets: Asterism = this match {
-      case SingleTarget(t,b)    => SingleTarget(t.copyWithClonedTarget,b)
-      case DualTarget(t1,t2,b)  => DualTarget(t1.copyWithClonedTarget, t2.copyWithClonedTarget, b)
-      case TargetPlusSky(t,s,b) => TargetPlusSky(t.copyWithClonedTarget, s, b)
-      case SkyPlusTarget(s,t,b) => SkyPlusTarget(s, t.copyWithClonedTarget, b)
+      case SingleTarget(t,b)    => SingleTarget(t.copyWithClonedTarget, b.map(_.clone))
+      case DualTarget(t1,t2,b)  => DualTarget(t1.copyWithClonedTarget, t2.copyWithClonedTarget, b.map(_.clone))
+      case TargetPlusSky(t,s,b) => TargetPlusSky(t.copyWithClonedTarget, s.clone, b.map(_.clone))
+      case SkyPlusTarget(s,t,b) => SkyPlusTarget(s.clone, t.copyWithClonedTarget, b.map(_.clone))
     }
 
     /** In any single target object mode, the default base position is the same as the
@@ -178,13 +175,13 @@ object GhostAsterism {
     }
   }
 
-  case class SingleTarget(target: GhostTarget, override val base: Option[Coordinates]) extends StandardResolution
-  case class DualTarget(target1: GhostTarget, target2: GhostTarget, override val base: Option[Coordinates]) extends StandardResolution
-  case class TargetPlusSky(target: GhostTarget, sky: Coordinates, override val base: Option[Coordinates]) extends StandardResolution
-  case class SkyPlusTarget(sky: Coordinates, target: GhostTarget, override val base: Option[Coordinates]) extends StandardResolution
+  case class SingleTarget(target: GhostTarget, override val base: Option[SPCoordinates]) extends StandardResolution
+  case class DualTarget(target1: GhostTarget, target2: GhostTarget, override val base: Option[SPCoordinates]) extends StandardResolution
+  case class TargetPlusSky(target: GhostTarget, sky: SPCoordinates, override val base: Option[SPCoordinates]) extends StandardResolution
+  case class SkyPlusTarget(sky: SPCoordinates, target: GhostTarget, override val base: Option[SPCoordinates]) extends StandardResolution
 
   object StandardResolution {
-    def guideFiberState(e: Either[Coordinates, GhostTarget], cc: CloudCover): GuideFiberState =
+    def guideFiberState(e: Either[SPCoordinates, GhostTarget], cc: CloudCover): GuideFiberState =
       e.rightMap(t => GhostTarget.standardResGuideFiberState(t, cc)).right.getOrElse(GuideFiberState.Disabled)
 
     private[ghost] def interpolateCoords(c1Opt: Option[Coordinates], c2Opt: Option[Coordinates]): Option[Coordinates] = for {
@@ -194,34 +191,34 @@ object GhostAsterism {
 
     val emptySingleTarget:  SingleTarget       = SingleTarget(GhostTarget.empty, None)
     val emptyDualTarget:    DualTarget         = DualTarget(GhostTarget.empty, GhostTarget.empty, None)
-    val emptyTargetPlusSky: TargetPlusSky      = TargetPlusSky(GhostTarget.empty, Coordinates.zero, None)
-    val emptySkyPlusTarget: SkyPlusTarget      = SkyPlusTarget(Coordinates.zero, GhostTarget.empty, None)
+    val emptyTargetPlusSky: TargetPlusSky      = TargetPlusSky(GhostTarget.empty, new SPCoordinates, None)
+    val emptySkyPlusTarget: SkyPlusTarget      = SkyPlusTarget(new SPCoordinates, GhostTarget.empty, None)
     val empty:              StandardResolution = emptySingleTarget
 
     val SingleTargetIFU1: SingleTarget @> GhostTarget =
       Lens.lensu((a,b) => a.copy(target = b), _.target)
-    val SingleTargetBase: SingleTarget @> Option[Coordinates] =
+    val SingleTargetBase: SingleTarget @> Option[SPCoordinates] =
       Lens.lensu((a,b) => a.copy(base = b), _.base)
 
     val DualTargetIFU1: DualTarget @> GhostTarget =
       Lens.lensu((a,b) => a.copy(target1 = b), _.target1)
     val DualTargetIFU2: DualTarget @> GhostTarget =
       Lens.lensu((a,b) => a.copy(target2 = b), _.target2)
-    val DualTargetBase: DualTarget @> Option[Coordinates] =
+    val DualTargetBase: DualTarget @> Option[SPCoordinates] =
       Lens.lensu((a,b) => a.copy(base = b), _.base)
 
     val TargetPlusSkyIFU1: TargetPlusSky @> GhostTarget =
       Lens.lensu((a,b) => a.copy(target = b), _.target)
-    val TargetPlusSkyIFU2: TargetPlusSky @> Coordinates =
+    val TargetPlusSkyIFU2: TargetPlusSky @> SPCoordinates =
       Lens.lensu((a,b) => a.copy(sky = b), _.sky)
-    val TargetPlusSkyBase: TargetPlusSky @> Option[Coordinates] =
+    val TargetPlusSkyBase: TargetPlusSky @> Option[SPCoordinates] =
       Lens.lensu((a,b) => a.copy(base = b), _.base)
 
-    val SkyPlusTargetIFU1: SkyPlusTarget @> Coordinates =
+    val SkyPlusTargetIFU1: SkyPlusTarget @> SPCoordinates =
       Lens.lensu((a,b) => a.copy(sky = b), _.sky)
     val SkyPlusTargetIFU2: SkyPlusTarget @> GhostTarget =
       Lens.lensu((a,b) => a.copy(target = b), _.target)
-    val SkyPlusTargetBase: SkyPlusTarget @> Option[Coordinates] =
+    val SkyPlusTargetBase: SkyPlusTarget @> Option[SPCoordinates] =
       Lens.lensu((a,b) => a.copy(base = b), _.base)
   }
 
@@ -241,7 +238,7 @@ object GhostAsterism {
 
     /** Defines the default base position to be the same as the target position. */
     override def basePosition(when: Option[Instant]): Option[Coordinates] =
-      base orElse target.coordinates(when)
+      base.map(_.getCoordinates) orElse target.coordinates(when)
 
     override def basePositionProperMotion: Option[ProperMotion] =
       Target.pm.get(target.spTarget.getTarget)
@@ -253,8 +250,8 @@ object GhostAsterism {
       GhostTarget.highResGuideFiberState(target, cc)
 
     override def copyWithClonedTargets: Asterism = this match {
-      case HighResolutionTarget(t,b) => HighResolutionTarget(t.copyWithClonedTarget, b)
-      case HighResolutionTargetPlusSky(t,s,b) => HighResolutionTargetPlusSky(t.copyWithClonedTarget, s, b)
+      case HighResolutionTarget(t,b) => HighResolutionTarget(t.copyWithClonedTarget, b.map(_.clone))
+      case HighResolutionTargetPlusSky(t,s,b) => HighResolutionTargetPlusSky(t.copyWithClonedTarget, s.clone, b.map(_.clone))
     }
 
     override def asterismType: AsterismType = this match {
@@ -264,26 +261,26 @@ object GhostAsterism {
   }
 
   final case class HighResolutionTarget(target:            GhostTarget,
-                                        override val base: Option[Coordinates]) extends HighResolution(target)
+                                        override val base: Option[SPCoordinates]) extends HighResolution(target)
 
   final case class HighResolutionTargetPlusSky(target:            GhostTarget,
-                                               sky:               Coordinates,
-                                               override val base: Option[Coordinates]) extends HighResolution(target)
+                                               sky:               SPCoordinates,
+                                               override val base: Option[SPCoordinates]) extends HighResolution(target)
 
   object HighResolution {
     val emptyHRTarget: HighResolutionTarget = HighResolutionTarget(GhostTarget.empty, None)
-    val emptyHRTargetPlusSky: HighResolutionTargetPlusSky = HighResolutionTargetPlusSky(GhostTarget.empty, Coordinates.zero, None)
+    val emptyHRTargetPlusSky: HighResolutionTargetPlusSky = HighResolutionTargetPlusSky(GhostTarget.empty, new SPCoordinates, None)
 
     val HRTargetIFU1: HighResolutionTarget @> GhostTarget =
       Lens.lensu((a,b) => a.copy(target = b), _.target)
-    val HRTargetBase: HighResolutionTarget @> Option[Coordinates] =
+    val HRTargetBase: HighResolutionTarget @> Option[SPCoordinates] =
       Lens.lensu((a,b) => a.copy(base = b), _.base)
 
     val HRTargetPlusSkyIFU1: HighResolutionTargetPlusSky @> GhostTarget =
       Lens.lensu((a,b) => a.copy(target = b), _.target)
-    val HRTargetPlusSkyIFU2: HighResolutionTargetPlusSky @> Coordinates =
+    val HRTargetPlusSkyIFU2: HighResolutionTargetPlusSky @> SPCoordinates =
       Lens.lensu((a,b) => a.copy(sky = b), _.sky)
-    val HRTargetPlusSkyBase: HighResolutionTargetPlusSky @> Option[Coordinates] =
+    val HRTargetPlusSkyBase: HighResolutionTargetPlusSky @> Option[SPCoordinates] =
       Lens.lensu((a,b) => a.copy(base = b), _.base)
   }
 

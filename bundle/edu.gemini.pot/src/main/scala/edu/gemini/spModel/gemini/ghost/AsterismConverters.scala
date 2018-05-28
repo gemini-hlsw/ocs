@@ -2,7 +2,7 @@ package edu.gemini.spModel.gemini.ghost
 
 import edu.gemini.shared.util.immutable.ImList
 import edu.gemini.spModel.core.{Coordinates, SiderealTarget}
-import edu.gemini.spModel.target.SPTarget
+import edu.gemini.spModel.target.{SPCoordinates, SPTarget}
 import edu.gemini.spModel.target.env.{TargetEnvironment, UserTarget}
 
 import scalaz._
@@ -14,8 +14,8 @@ import Scalaz._
 object AsterismConverters {
   import GhostAsterism._
 
-  type BasePosition = Option[Coordinates]
-  type SkyPosition  = Option[Coordinates]
+  type BasePosition = Option[SPCoordinates]
+  type SkyPosition  = Option[SPCoordinates]
 
   sealed trait AsterismConverter {
     def name: String
@@ -27,12 +27,12 @@ object AsterismConverters {
       env.getAsterism match {
         case ga: GhostAsterism =>
           ga match {
-            case SingleTarget(t, b)                   => creator(env, t, None, None, b).some
-            case DualTarget(t1, t2, b)                => creator(env, t1, t2.some, None, b).some
-            case TargetPlusSky(t, s, b)               => creator(env, t, None, s.some, b).some
-            case SkyPlusTarget(s, t, b)               => creator(env, t, None, s.some, b).some
-            case HighResolutionTarget(t, b)           => creator(env, t, None, None, b).some
-            case HighResolutionTargetPlusSky(t, s, b) => creator(env, t, None, s.some, b).some
+            case SingleTarget(t, b)                   => creator(env, t,     None,   None, b).some
+            case DualTarget(t1, t2, b)                => creator(env, t1, t2.some,   None, b).some
+            case TargetPlusSky(t, s, b)               => creator(env, t,     None, s.some, b).some
+            case SkyPlusTarget(s, t, b)               => creator(env, t,     None, s.some, b).some
+            case HighResolutionTarget(t, b)           => creator(env, t,     None,   None, b).some
+            case HighResolutionTargetPlusSky(t, s, b) => creator(env, t,     None, s.some, b).some
           }
         case _                                              => None
       }
@@ -67,7 +67,7 @@ object AsterismConverters {
     override def name: String = "GhostAsterism.TargetPlusSky"
 
     override protected def creator(env: TargetEnvironment, t: GhostTarget, t2: Option[GhostTarget], s: SkyPosition, b: BasePosition): TargetEnvironment = {
-      val asterism    = TargetPlusSky(t, s.getOrElse(Coordinates.zero), b)
+      val asterism    = TargetPlusSky(t, s.getOrElse(new SPCoordinates), b)
       val userTargets = appendTarget(env.getUserTargets, gT2UT(t2))
       TargetEnvironment.createWithClonedTargets(asterism, env.getGuideEnvironment, userTargets)
     }
@@ -77,7 +77,7 @@ object AsterismConverters {
     override def name: String = "GhostAsterism.SkyPlusTarget"
 
     override protected def creator(env: TargetEnvironment, t: GhostTarget, t2: Option[GhostTarget], s: SkyPosition, b: BasePosition): TargetEnvironment = {
-      val asterism    = SkyPlusTarget(s.getOrElse(Coordinates.zero), t, b)
+      val asterism    = SkyPlusTarget(s.getOrElse(new SPCoordinates), t, b)
       val userTargets = appendTarget(env.getUserTargets, gT2UT(t2))
       TargetEnvironment.createWithClonedTargets(asterism, env.getGuideEnvironment, userTargets)
     }
@@ -97,14 +97,14 @@ object AsterismConverters {
     override def name: String = "GhostAsterism.HighResolutionTargetPlusSky"
 
     override protected def creator(env: TargetEnvironment, t: GhostTarget, t2: Option[GhostTarget], s: SkyPosition, b: BasePosition): TargetEnvironment = {
-      val asterism    = HighResolutionTargetPlusSky(t, s.getOrElse(Coordinates.zero), b)
+      val asterism    = HighResolutionTargetPlusSky(t, s.getOrElse(new SPCoordinates), b)
       val userTargets = appendTarget(env.getUserTargets, gT2UT(t2))
       TargetEnvironment.createWithClonedTargets(asterism, env.getGuideEnvironment, userTargets)
     }
   }
 
 
-  private def appendCoords(userTargets: ImList[UserTarget], c: Option[Coordinates]): ImList[UserTarget] =
+  private def appendCoords(userTargets: ImList[UserTarget], c: Option[SPCoordinates]): ImList[UserTarget] =
     appendTarget(userTargets, c.map(c2UT))
 
   private def appendTarget(userTargets: ImList[UserTarget], t: Option[UserTarget]): ImList[UserTarget] =
@@ -115,8 +115,8 @@ object AsterismConverters {
     new UserTarget(UserTarget.Type.other, t)
 
   /** Convert a Coordinate to an empty UserTarget. */
-  private def c2UT(c: Coordinates): UserTarget = {
-    val t = SiderealTarget.coordinates.set(SiderealTarget.empty, c)
+  private def c2UT(c: SPCoordinates): UserTarget = {
+    val t = SiderealTarget.coordinates.set(SiderealTarget.empty, c.getCoordinates)
     t2UT(new SPTarget(t))
   }
 
