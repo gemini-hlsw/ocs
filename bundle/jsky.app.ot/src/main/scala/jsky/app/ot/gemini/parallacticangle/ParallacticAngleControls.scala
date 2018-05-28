@@ -19,6 +19,7 @@ import edu.gemini.spModel.obs.SchedulingBlock.Duration._
 import edu.gemini.spModel.rich.shared.immutable._
 import edu.gemini.shared.util.immutable.{ImOption, Option => JOption}
 import edu.gemini.spModel.obscomp.SPInstObsComp
+import edu.gemini.spModel.syntax.sp.node._
 import jsky.app.ot.editor.OtItemEditor
 import jsky.app.ot.gemini.editor.EphemerisUpdater
 import jsky.app.ot.gemini.schedulingBlock.SchedulingBlockDialog
@@ -417,19 +418,5 @@ object ParallacticAngleControls {
   /** Construct an IO action that runs on the EDT. */
   def edt[A](a: => Unit): IO[Unit] =
     IO(Swing.onEDT(a))
-
-  /** Some useful operations for ISPNodes. */
-  implicit class ParallacticAngleControlsISPNodeOps(n: ISPNode) {
-
-    def silent[A](a: IO[A]): IO[A] =
-      IO(n.setSendingEvents(false)) *> a ensuring IO(n.setSendingEvents(true))
-
-    def locked[A](a: IO[A]): IO[A] =
-      IO(n.getProgramWriteLock()) *> a ensuring IO(n.returnProgramWriteLock())
-
-    def silentAndLocked[A](a: IO[A]): IO[A] =
-      silent(locked(a))
-
-  }
 
 }
