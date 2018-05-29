@@ -427,6 +427,7 @@ final class SPViewerMenuBar extends JMenuBar {
 
         menu.add(_viewer._actions.programAdminAction);
         menu.add(_viewer._actions.setPhase2StatusAction);
+        menu.add(_viewer._actions.setSchedulingBlockAction);
         menu.add(_viewer._actions.setExecStatusAction);
         menu.add(_viewer._actions.purgeEphemerisAction);
 

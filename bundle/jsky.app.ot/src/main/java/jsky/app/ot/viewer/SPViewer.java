@@ -316,6 +316,7 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
         menu.addSeparator();
         menu.add(_actions.editItemTitleAction);
         menu.add(_actions.setPhase2StatusAction);
+        menu.add(_actions.setSchedulingBlockAction);
         menu.add(_actions.setExecStatusAction);
         menu.addSeparator();
         menu.add(_actions.expandObsAction);
