@@ -148,6 +148,7 @@ OsgiKeys.exportPackage := Seq(
   "edu.gemini.spModel.syntax",
   "edu.gemini.spModel.syntax.event",
   "edu.gemini.spModel.syntax.skycalc",
+  "edu.gemini.spModel.syntax.sp",
   "edu.gemini.spModel.target",
   "edu.gemini.spModel.target.env",
   "edu.gemini.spModel.target.obsComp",
