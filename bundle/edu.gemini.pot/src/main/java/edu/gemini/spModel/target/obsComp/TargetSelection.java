@@ -293,7 +293,7 @@ public final class TargetSelection {
         return selections.getOption(guideGroupIndex).map(GuideGroupSelection::getIndex);
     }
 
-    private static Option<Integer> indexOfCoordinates(final TargetEnvironment env, final Coordinates coords) {
+    private static Option<Integer> indexOfCoordinates(final TargetEnvironment env, final SPCoordinates coords) {
         return Selection.toSelections(env).find(sel -> sel.getCoordinates().exists(coords::equals)).map(sel -> sel.index);
     }
 
@@ -321,7 +321,7 @@ public final class TargetSelection {
         return getIndex(node).flatMap(i -> getCoordinatesAtIndex(env, i));
     }
 
-    public static void setCoordinatesForNode(final TargetEnvironment env, final ISPNode node, final Coordinates coords) {
+    public static void setCoordinatesForNode(final TargetEnvironment env, final ISPNode node, final SPCoordinates coords) {
         indexOfCoordinates(env, coords).foreach(i -> setIndex(node, i));
     }
 

@@ -4,9 +4,9 @@ import edu.gemini.spModel.core.{Coordinates, Declination, RightAscension}
 import edu.gemini.spModel.pio.{ParamSet, PioFactory}
 
 /** We need a mutable wrapper for Coordinates so that they can be managed by
-  * an editor and the TPE. We also need them to be dependent on base.
+  * an editor and the TPE.
   */
-final class SPCoordinates(private var coordinates: Option[Coordinates]) extends WatchablePos {
+final class SPCoordinates(private var coordinates: Coordinates) extends WatchablePos {
   import SPCoordinates._
 
   def this() =

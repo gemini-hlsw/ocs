@@ -285,7 +285,7 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
                 else
                     return None.instance();
             });
-            final Option<Coordinates> oldSelCoords = _model.rowAtRowIndex(oldSelIndex).flatMap(r -> {
+            final Option<SPCoordinates> oldSelCoords = _model.rowAtRowIndex(oldSelIndex).flatMap(r -> {
                 if (r instanceof CoordinatesRow)
                     return new Some<>(((CoordinatesRow) r).coordinates());
                 else
@@ -311,7 +311,7 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
             }
 
             // If the obs comp has selected coordinates, then honor them.
-            final Option<Coordinates> newSelectedCoords = TargetSelection.getCoordinatesForNode(_env, _obsComp);
+            final Option<SPCoordinates> newSelectedCoords = TargetSelection.getCoordinatesForNode(_env, _obsComp);
             if (newSelectedCoords.isDefined()) {
                 _model.rowIndexForCoordinates(newSelectedCoords.getValue())
                         .foreach(TelescopePosTableWidget.this::_setSelectedRow);
@@ -578,7 +578,7 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
     /**
      * Updates the TargetSelection's coordinates, and sets the relevant row in the table.
      */
-    void selectCoordinates(final Coordinates coords) {
+    void selectCoordinates(final SPCoordinates coords) {
         TargetSelection.setCoordinatesForNode(_env, _obsComp, coords);
         _model.rowIndexForCoordinates(coords).foreach(this::_setSelectedRow);
     }

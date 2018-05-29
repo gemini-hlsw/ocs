@@ -1193,13 +1193,12 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                     t.setMagnitudes(tSrc.getMagnitudesJava());
                 });
             }
-            // TODO:GHOST I have no idea if this will work properly.
             else if (contents instanceof TableCoordinateSelection) {
                 final TableCoordinateSelection s = (TableCoordinateSelection) contents;
                 final Coordinates cSrc = s.getCoordinates().getCoordinates();
 
                 final Option<SPCoordinates> cOpt = TargetSelection.getCoordinatesForNode(env, obsComponent);
-                cOpt.foreach(c -> TargetSelection.setCoordinatesForNode(env, obsComponent, cSrc));
+                cOpt.foreach(c -> c.setCoordinates(cSrc));
             }
             else if (contents instanceof TableGroupSelection) {
                 final TableGroupSelection s = (TableGroupSelection) contents;
