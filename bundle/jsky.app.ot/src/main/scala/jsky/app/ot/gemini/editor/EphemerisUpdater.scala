@@ -68,12 +68,95 @@ object EphemerisUpdater {
     } yield Ephemeris(site, e1.data.union(e2.data))
   }
 
-  /** Get the target node and site; we need both of these. */
-  private def args(obsN: ISPObservation): Option[(ISPObsComponent, Site)] =
-    for {
-      tocN  <- obsN.findObsComponentByType(TargetObsComp.SP_TYPE)
-      site  <- ObsContext.getSiteFromObservation(obsN).asScalaOpt
-    } yield (tocN, site)
+
+  private final case class UpdateContext(
+    obsN: ISPObservation,
+    site: Site,
+    tocN: ISPObsComponent,
+    toc:  TargetObsComp,
+    nsts: List[(HorizonsDesignation, SPTarget, NonSiderealTarget)]
+  ) {
+
+    def updateAction(m: Map[(HorizonsDesignation, Site), Ephemeris]): HS2[Unit] =
+      (nsts.traverseU { case (hd, spt, nst) =>
+        m.get((hd, site)).fold(HS2.unit) { e =>
+          HS2.delay(spt.setTarget(NonSiderealTarget.ephemeris.set(nst, e)))
+        }
+      }.void) *> HS2.delay(tocN.setDataObject(toc))
+
+  }
+
+  private object UpdateContext {
+
+    def fromObservation(obsN: ISPObservation): Option[UpdateContext] = {
+      // Get the target node and its data object for each observation.
+      val args: Option[(Site, ISPObsComponent, TargetObsComp)] =
+        for {
+          site <- ObsContext.getSiteFromObservation(obsN).asScalaOpt
+          tocN <- obsN.findObsComponentByType(TargetObsComp.SP_TYPE)
+          toc  <- Option(tocN.getDataObject)
+        } yield (site, tocN, toc.asInstanceOf[TargetObsComp])
+
+      // Get the list of nonsidereal target information for each target node.
+      // We separate the lookup key (HorizonsDesignation, Site) from the target
+      // information (which is needed to do the actual update).
+      args.map { case (site, tocN, toc) =>
+        val env  = toc.getTargetEnvironment
+        val spts = env.getTargets.asScalaList
+
+        val nsts = for {
+          spt <- spts
+          nst <- spt.getNonSiderealTarget.toList
+          hd  <- nst.horizonsDesignation.toList
+        } yield (hd, spt, nst)
+
+        UpdateContext(obsN, site, tocN, toc, nsts)
+      }
+    }
+
+  }
+
+  private def bulkLookupWithUI(
+    obsNs: List[ISPObservation],
+    start: Long,
+    ui:    UI
+  ): HS2[Map[(HorizonsDesignation, Site), Ephemeris]] = {
+
+    val keys = obsNs.flatMap(o => UpdateContext.fromObservation(o).toList).flatMap { uc =>
+      uc.nsts.map { case (hd, _, _) => (hd, uc.site) }
+    }.distinct
+
+    val total = keys.size
+
+    keys.zipWithIndex.traverseU { case ((hd, site), n) =>
+      for {
+        _ <- ui.show(s"Looking up ephemeris ${n+1} of $total ...")
+        e <- lookup(hd, site, start)
+      } yield ((hd, site), e)
+    }.map(_.toMap)
+
+  }
+
+  def bulkLookup(
+    obsNs: List[ISPObservation],
+    start: Long,
+    c:     Component
+  ): IO[Map[(HorizonsDesignation, Site), Ephemeris]] = {
+
+    val ui = UI(c)
+    (bulkLookupWithUI(obsNs, start, ui).withResultLogging(Log) ensuring ui.hide).run.map {
+      _.leftMap(_ => Map.empty[(HorizonsDesignation, Site), Ephemeris]).merge
+    }
+
+  }
+
+  def setEphemerides(
+    obsN: ISPObservation,
+    m:    Map[(HorizonsDesignation, Site), Ephemeris]
+  ): IO[Unit] =
+    UpdateContext.fromObservation(obsN).fold(IO.ioUnit) { uc =>
+      uc.updateAction(m).withResultLogging(Log).run.map(_.leftMap(_ => ()).merge)
+    }
 
   /**
    * Action to compute a program to update the ephimerides for all nonsidereal targets in `obs`,
