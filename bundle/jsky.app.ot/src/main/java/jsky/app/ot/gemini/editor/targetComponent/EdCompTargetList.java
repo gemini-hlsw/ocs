@@ -378,7 +378,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
     @Override public void init(final ISPObsComponent oldNode, final TargetObsComp oldTOC) {
         final boolean isBagsUpdate = isBagsUpdate(oldNode, oldTOC);
-        System.out.println("isBagsUpdate = " + isBagsUpdate);
         final TargetObsComp newTOC = getDataObject();
 
         // If only the auto group has changed, we do not want to use a completely reset target environment, as this

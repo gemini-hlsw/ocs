@@ -368,18 +368,4 @@ object ParallacticAngleControls {
 
   // Precision limit for which two parallactic angles are considered equivalent.
   val Precision = 0.005
-
-  /** Wrap an IO action with a logging timer. */
-  def time[A](io: IO[A])(msg: String): IO[A] =
-    for {
-      start <- IO(System.currentTimeMillis())
-      a     <- io
-      end   <- IO(System.currentTimeMillis())
-      _     <- IO(ParallacticAngleControls.Log.info(s"$msg: ${end - start}ms"))
-    } yield a
-
-  /** Construct an IO action that runs on the EDT. */
-  def edt[A](a: => Unit): IO[Unit] =
-    IO(Swing.onEDT(a))
-
 }
