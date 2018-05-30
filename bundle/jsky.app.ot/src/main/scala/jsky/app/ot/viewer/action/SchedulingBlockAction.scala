@@ -6,7 +6,7 @@ import jsky.app.ot.gemini.schedulingBlock.{ SchedulingBlockDialog, SchedulingBlo
 import jsky.app.ot.viewer.SPViewer
 import java.awt.event.ActionEvent
 
-final class SchedulingBlockAction(viewer: SPViewer) extends AbstractViewerAction(viewer, "Set Scheduling Block ...") {
+final class SchedulingBlockAction(viewer: SPViewer) extends AbstractViewerAction(viewer, "Set Scheduling Time ...") {
 
   override def actionPerformed(evt: ActionEvent): Unit =
     Option(viewer.getSelectedObservations).filter(_.nonEmpty).foreach { obsNs =>
