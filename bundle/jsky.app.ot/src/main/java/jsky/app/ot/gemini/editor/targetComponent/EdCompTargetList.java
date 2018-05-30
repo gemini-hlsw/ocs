@@ -5,7 +5,9 @@ import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.pot.sp.SPNodeKey;
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.ags.*;
+import edu.gemini.spModel.core.HorizonsDesignation;
 import edu.gemini.spModel.core.Magnitude;
+import edu.gemini.spModel.core.NonSiderealTarget;
 import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.core.Target;
 import edu.gemini.spModel.guide.GuideProbe;
@@ -334,6 +336,18 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             return false;
         }
 
+        // REL-2822
+        // Okay if the scheduling block changed then it isn't just a bags update.
+        // Of course we don't know whether the scheduling block changed because
+        // that is kept in the observation node itself.  We can however look at
+        // the ephemeris for each nonsidereal target.
+        // Sorry, this is a terrible hack to make bulk scheduling block updates
+        // be considered enough of a change to refresh the target environment
+        // editor when it is selected..
+        if (!getNonSiderealTargets(oldTOC).equals(getNonSiderealTargets(newTOC))) {
+            return false;
+        }
+
         // Check to see if the old and new auto groups contain the same targets, in which case, they are
         // considered equal.
         final GuideGroup oldAutoGroup = oldTOC.getTargetEnvironment().getGuideEnvironment().automaticGroup();
@@ -341,6 +355,12 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         final Map<GuideProbe,Set<Target>> oldAutoTargets = extractGroupTargets(oldAutoGroup);
         final Map<GuideProbe,Set<Target>> newAutoTargets = extractGroupTargets(newAutoGroup);
         return !oldAutoTargets.equals(newAutoTargets);
+    }
+
+    private static ImList<NonSiderealTarget> getNonSiderealTargets(final TargetObsComp toc) {
+        return toc.getTargetEnvironment()
+                  .getTargets()
+                  .flatMap(spt -> ImOption.fromScalaOpt(spt.getNonSiderealTarget()).toImList());
     }
 
     /**
@@ -358,6 +378,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
     @Override public void init(final ISPObsComponent oldNode, final TargetObsComp oldTOC) {
         final boolean isBagsUpdate = isBagsUpdate(oldNode, oldTOC);
+        System.out.println("isBagsUpdate = " + isBagsUpdate);
         final TargetObsComp newTOC = getDataObject();
 
         // If only the auto group has changed, we do not want to use a completely reset target environment, as this
