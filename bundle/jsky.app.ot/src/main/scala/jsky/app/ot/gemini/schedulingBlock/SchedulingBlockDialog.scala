@@ -3,6 +3,7 @@ package jsky.app.ot.gemini.schedulingBlock
 import java.awt.Color
 import java.util.TimeZone
 import javax.swing.BorderFactory
+import javax.swing.border.EtchedBorder.LOWERED
 
 import edu.gemini.pot.sp.ISPObservation
 import edu.gemini.shared.gui.monthview.MonthView.Ymd
@@ -14,6 +15,7 @@ import edu.gemini.spModel.obs.{ ObsTargetCalculatorService, SchedulingBlock, SPO
 import edu.gemini.spModel.obs.SchedulingBlock.Duration
 import edu.gemini.spModel.obs.SchedulingBlock.Duration._
 import jsky.app.ot.util.TimeZonePreference
+import jsky.util.Resources
 
 import scala.swing._
 import scala.swing.Swing._
@@ -229,6 +231,38 @@ final class SchedulingBlockDialog(
       }
     }
 
+    // Create a Set To menu for picking the current time or the current time
+    // plus some small offset.
+    object relativeTimeMenu extends Menu("Set To:") {
+      val incrementsInMinutes = List(5, 10, 20, 30, 45, 60).map { m =>
+        java.time.Duration.ofMinutes(m.toLong)
+      }
+
+      case class RelativeTime(desc: String, dur: java.time.Duration) extends MenuItem(desc) {
+        action = Action(desc) {
+          // Our start time, based on current clock time plus an offset
+          displayTime(java.time.Instant.now.plus(dur).toEpochMilli, state.timeZone)
+        }
+      }
+
+      horizontalTextPosition = Alignment.Left
+      horizontalAlignment    = Alignment.Left
+      iconTextGap            = 10
+      icon                   = Resources.getIcon("eclipse/menu-trimmed.gif", classOf[SchedulingBlockDialog])
+      margin                 = new Insets(-1, -10, -1, -5)
+
+      val now   = RelativeTime("Now", java.time.Duration.ZERO)
+      val later = incrementsInMinutes.map(m => RelativeTime(s"Now + ${m.toMinutes} min", m))
+
+      contents ++= (now :: later)
+    }
+
+    object relativeTimeMenuBar extends MenuBar {
+      contents    += relativeTimeMenu
+      border      =  BorderFactory.createEtchedBorder(LOWERED)
+      minimumSize =  preferredSize
+    }
+
     // Create the OK and Cancel buttons.
     object cancelButton extends Button("Cancel") {
       focusable = false
@@ -242,16 +276,24 @@ final class SchedulingBlockDialog(
                  BorderFactory.createMatteBorder(1, 0, 0, 0, Color.LIGHT_GRAY),
                  BorderFactory.createEmptyBorder(10, 0, 0, 0))
 
+      if (mode == DateTimeOnly) {
+        layout(relativeTimeMenuBar) = new Constraints() {
+          anchor = West
+          gridx  = 0
+        }
+      }
+
       layout(Swing.HGlue) = new Constraints() {
         fill    = Horizontal
+        gridx   = 1
         weightx = 1.0
       }
       layout(okButton)  = new Constraints() {
-        gridx   = 1
+        gridx   = 2
         insets  = new Insets(0, 0, 0, 5)
       }
       layout(cancelButton)  = new Constraints() {
-        gridx   = 2
+        gridx   = 3
       }
     }
 
