@@ -22,7 +22,7 @@ import edu.gemini.spModel.obscomp.SPInstObsComp
 import edu.gemini.spModel.syntax.sp.node._
 import jsky.app.ot.editor.OtItemEditor
 import jsky.app.ot.gemini.editor.EphemerisUpdater
-import jsky.app.ot.gemini.schedulingBlock.SchedulingBlockDialog
+import jsky.app.ot.gemini.schedulingBlock.{ SchedulingBlockDialog, SchedulingBlockUpdate }
 import jsky.app.ot.util.TimeZonePreference
 import jsky.util.Resources
 import jsky.util.gui.DialogUtil
@@ -243,54 +243,17 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
     for {
       e      <- editor
       ispObs <- Option(e.getContextObservation)
-    } {
-      val spObs = ispObs.getDataObject.asInstanceOf[SPObservation]
-      val sameNight = spObs.getSchedulingBlock.asScalaOpt.exists(_.sameObservingNightAs(sb))
-
-      // This is the action that will update the scheduling block
-      val updateSchedBlock: IO[Unit] =
-        for {
-          _ <- IO(spObs.setSchedulingBlock(ImOption.apply(sb)))
-          _ <- IO(ispObs.setDataObject(spObs))
-        } yield ()
-
-      // Ok, this is an IO action that goes and fetches the ephemerides and returns ANOTHER action
-      // that will actually update the model and clear out the glass pane UI.
-      val fetch: IO[IO[Unit]] =
-        if (sameNight) IO(ispObs.silentAndLocked(updateSchedBlock))
-        else EphemerisUpdater.refreshOne(ispObs, sb.start, e.getWindow).map { completion =>
-
-          // This is the action that will update the model
-          val up: IO[Unit] =
-            for {
-              _ <- updateSchedBlock
-              _ <- completion
-            } yield ()
-
-          // Here we bracket the update to disable/enable events and grab/release the program lock
-          ispObs.silentAndLocked(up)
-
+    } SchedulingBlockUpdate.runWithCallback(
+        e.getWindow,
+        sb,
+        List(ispObs),
+        new Runnable() {
+          override def run(): Unit = {
+            callback.run()
+            resetComponents()
+          }
         }
-
-      // Our final program
-      val action: IO[Unit] =
-        for {
-          up <- time(fetch)("fetch ephemerides and construct completion")
-          _  <- time(up)("perform model update without events, holding lock")
-          _  <- edt(callback.run())
-          _  <- edt(resetComponents())
-        } yield ()
-
-      // ... with an exception handler
-      val safe: IO[Unit] =
-        action except { t => edt(DialogUtil.error(peer, t)) }
-
-      // Run it on a short-lived worker
-      new Thread(new Runnable() {
-        override def run() = safe.unsafePerformIO
-      }, s"Ephemeris Update Worker for ${ispObs.getObservationID}").start()
-
-    }
+      )
 
   /**
     * Triggered when the date time button is clicked. Shows the ParallacticAngleDialog to allow the user to
