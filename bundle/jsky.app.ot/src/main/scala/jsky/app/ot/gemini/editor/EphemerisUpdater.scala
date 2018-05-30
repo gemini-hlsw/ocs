@@ -68,7 +68,10 @@ object EphemerisUpdater {
     } yield Ephemeris(site, e1.data.union(e2.data))
   }
 
-
+  /**
+   * A structure that contains all the information required to lookup and set
+   * the ephemerides associated with a given observation `obsN`.
+   */
   private final case class UpdateContext(
     obsN: ISPObservation,
     site: Site,
@@ -77,6 +80,8 @@ object EphemerisUpdater {
     nsts: List[(HorizonsDesignation, SPTarget, NonSiderealTarget)]
   ) {
 
+    // Updates the nonsidereal targets in the associated observation using the
+    // provided map of Ephemeris data.
     def updateAction(m: Map[(HorizonsDesignation, Site), Ephemeris]): HS2[Unit] =
       (nsts.traverseU { case (hd, spt, nst) =>
         m.get((hd, site)).fold(HS2.unit) { e =>
@@ -116,7 +121,11 @@ object EphemerisUpdater {
 
   }
 
-  private def bulkLookupWithUI(
+  // Computes an HS2 action that looks up ephemerides for all nonsidereal
+  // targets in the list of observations, displaying status in the glass pane UI.
+  // Returns a map that can be used after the fact to lookup the `Ephemeris`
+  // associated with a horizons key and site.
+  private def bulkLookup(
     obsNs: List[ISPObservation],
     start: Long,
     ui:    UI
@@ -137,112 +146,44 @@ object EphemerisUpdater {
 
   }
 
-  def bulkLookup(
-    obsNs: List[ISPObservation],
-    start: Long,
-    c:     Component
-  ): IO[Map[(HorizonsDesignation, Site), Ephemeris]] = {
+  /**
+   * Fetches updated ephemerides for all nonsidereal targets in the list of
+   * observations, showing status in the root pane associated with the given
+   * `Component`, returning a function that given a single observation computes
+   * *another* action that completes the update without any further network
+   * access (i.e., quickly).  The idea is that we can perform the final update
+   * actions quickly while holding the program lock.
+   */
+  def refreshAll(
+    obsNs:  List[ISPObservation],
+    start:  Long,
+    c:      Component
+  ): IO[ISPObservation => IO[Unit]] = {
+
+    def setEphemerides(
+      obsN: ISPObservation,
+      m:    Map[(HorizonsDesignation, Site), Ephemeris]
+    ): IO[Unit] =
+      UpdateContext.fromObservation(obsN).fold(IO.ioUnit) { uc =>
+        uc.updateAction(m).withResultLogging(Log).run.map(_.leftMap(_ => ()).merge)
+      }
 
     val ui = UI(c)
-    (bulkLookupWithUI(obsNs, start, ui).withResultLogging(Log) ensuring ui.hide).run.map {
-      _.leftMap(_ => Map.empty[(HorizonsDesignation, Site), Ephemeris]).merge
+    (bulkLookup(obsNs, start, ui).withResultLogging(Log) ensuring ui.hide).run.map {
+      case -\/(_) => (obsN: ISPObservation) => IO.ioUnit
+      case \/-(m) => setEphemerides(_, m)
     }
 
-  }
-
-  def setEphemerides(
-    obsN: ISPObservation,
-    m:    Map[(HorizonsDesignation, Site), Ephemeris]
-  ): IO[Unit] =
-    UpdateContext.fromObservation(obsN).fold(IO.ioUnit) { uc =>
-      uc.updateAction(m).withResultLogging(Log).run.map(_.leftMap(_ => ()).merge)
-    }
-
-  /**
-   * Action to compute a program to update the ephimerides for all nonsidereal targets in `obs`,
-   * showing status in the given `UI`. So, running this fetches all the ephemerides and constructs
-   * a program that updates the model all at once. The idea is that we can perform this final action
-   * quickly holding the program lock.
-   */
-  def refreshEphemerides(obsN: ISPObservation, start: Long, ui: UI): HS2[HS2[Unit]] =
-    refreshEphemerides(List(obsN), start, ui)
-
-  def refreshEphemerides(obsNs: List[ISPObservation], start: Long, ui: UI): HS2[HS2[Unit]] = {
-
-    // Get the target node and its data object for each observation.
-    val targetArgs: List[(ISPObsComponent, TargetObsComp, Site)] =
-      obsNs.flatMap { obsN =>
-        (for {
-          tocN <- obsN.findObsComponentByType(TargetObsComp.SP_TYPE)
-          toc  <- Option(tocN.getDataObject)
-          site <- ObsContext.getSiteFromObservation(obsN).asScalaOpt
-        } yield (tocN, toc.asInstanceOf[TargetObsComp], site)).toList
-      }
-
-    // Get the list of nonsidereal target information for each target node.
-    // We separate the lookup key (HorizonsDesignation, Site) from the target
-    // information (which is needed to do the actual update).
-    val nstArgs: List[((HorizonsDesignation, Site), (SPTarget, NonSiderealTarget))] =
-      targetArgs.flatMap { case (tocN, toc, site) =>
-        val env  = toc.getTargetEnvironment
-        val spts = env.getTargets.asScalaList
-
-        for {
-          spt <- spts
-          nst <- spt.getNonSiderealTarget.toList
-          hd  <- nst.horizonsDesignation.toList
-        } yield ((hd, site), (spt, nst))
-      }
-
-    // Group all the targets by the (horizons designation, site) lookup key.
-    // There's no need to lookup the ephemeris for a given (horizons designation,
-    // site) pair more than once.
-    val groupedNstArgs: List[((HorizonsDesignation, Site), List[(SPTarget, NonSiderealTarget)])] =
-      nstArgs.groupBy(_._1).mapValues(_.map(_._2)).toList
-
-    val total = groupedNstArgs.size
-
-    // An action that will do all the lookups and maintain the user informed.
-    val lookupAction: HS2[List[(Ephemeris, List[(SPTarget, NonSiderealTarget)])]] =
-      groupedNstArgs.zipWithIndex.traverseU { case (((hd, site), nsts), n) =>
-        for {
-          _ <- ui.show(s"Looking up ephemeris ${n+1} of $total ...")
-          e <- lookup(hd, site, start)
-        } yield (e, nsts)
-      }
-
-    // An action that does the lookups and then updates the actual SPTargets
-    // with the new ephemeris.
-    val updateAction: HS2[HS2[Unit]] =
-      lookupAction.map { lst =>
-        lst.traverseU { case (e, nsts) =>
-          nsts.traverseU { case (spt, nst) =>
-            HS2.delay(spt.setTarget(NonSiderealTarget.ephemeris.set(nst, e)))
-          }.void
-        }.void
-      }
-
-    // An action that runs the updates and then updates the target node data
-    // objects to store the changes in the program itself.
-    updateAction.map(_ *> targetArgs.traverseU { case (tocN, toc, _) =>
-        HS2.delay(tocN.setDataObject(toc))
-    }.void)
   }
 
   /**
-   * Fetch updated ephemerides for all nonsidereal targets in `obs`, showing status in the root pane
-   * associated with the given `Component`, returning *another* program that completes the update
-   * without any further network access (i.e., quickly) and clears out the UI.
+   * Fetches updated ephemerides for all nonsidereal targets in `obsN`, showing
+   * status in the root pane associated with the given `Component`, returning
+   * *another* program that completes the update without any further network
+   * access (i.e., quickly).  The idea is that we can perform the final action
+   * quickly while holding the program lock.
    */
-  def refreshEphemerides(obsN: ISPObservation, start: Long, c: Component): IO[IO[Unit]] =
-    refreshEphemerides(List(obsN), start, c)
-
-  def refreshEphemerides(obsNs: List[ISPObservation], start: Long, c: Component): IO[IO[Unit]] = {
-    val ui = UI(c)
-    refreshEphemerides(obsNs, start, ui).withResultLogging(Log).run.map {
-      case -\/(e) => IO.ioUnit
-      case \/-(a) => (a.withResultLogging(Log) ensuring ui.hide).run.void
-    }
-  }
+  def refreshOne(obsN: ISPObservation, start: Long, c: Component): IO[IO[Unit]] =
+    refreshAll(List(obsN), start, c).map(f => f(obsN))
 
 }

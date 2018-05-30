@@ -27,6 +27,11 @@ object SchedulingBlockUpdate {
     override def run() = ()
   }
 
+  /**
+   * Creates an IO action that updates the scheduling block in the given
+   * observations, notifying the user of the lookup progress in a glass pane
+   * over the window of the given `Component`.
+   */
   def action(
     c: java.awt.Component,
     sb: SchedulingBlock,
@@ -34,6 +39,12 @@ object SchedulingBlockUpdate {
   ): IO[Unit] =
     actionWithCallback(c, sb, os, NoOp)
 
+  /**
+   * Creates an IO action that updates the scheduling block in the given
+   * observations, notifying the user of the lookup progress in a glass pane
+   * over the window of the given `Component`, calling the given `callback`
+   * when done.
+   */
   def actionWithCallback(
     c: java.awt.Component,
     sb: SchedulingBlock,
@@ -41,16 +52,18 @@ object SchedulingBlockUpdate {
     callback: Runnable
   ): IO[Unit] = {
 
-    def sameNight(o: ISPObservation): Boolean =
-      o.getDataObject
+    // Partition into observation's whose existing scheduling block (if any)
+    // falls on the same night and those whose block falls on a different night
+    val (sames, diffs) = os.partition {
+      _.getDataObject
        .asInstanceOf[SPObservation]
        .getSchedulingBlock
        .asScalaOpt
        .exists(_.sameObservingNightAs(sb))
+    }
 
-    val (sames, diffs) = os.partition(sameNight)
-
-    def updateBlockAction(o: ISPObservation): IO[Unit] = {
+    // Creates an action that will update the observation's scheduling block.
+    def updateBlock(o: ISPObservation): IO[Unit] = {
       val spObs = o.getDataObject.asInstanceOf[SPObservation]
       for {
         _ <- IO(spObs.setSchedulingBlock(ImOption.apply(sb)))
@@ -58,24 +71,29 @@ object SchedulingBlockUpdate {
       } yield ()
     }
 
-    def updateSameNight(os: List[ISPObservation]): IO[Unit] =
-      os.traverseU { o => o.silentAndLocked(updateBlockAction(o)) }.void
+    // Creates an action that will perform the given update per observation
+    // while holding a lock and without throwing events.
+    def updateAll(os: List[ISPObservation])(up: ISPObservation => IO[Unit]): IO[Unit] =
+      time(os.traverseU { o => o.silentAndLocked(up(o)) }.void)("perform model update without events, holding lock")
 
-    def updateDiffNight(os: List[ISPObservation]): IO[Unit] = {
-      def up(o: ISPObservation, m: Map[(HorizonsDesignation, Site), Ephemeris]): IO[Unit] =
-        EphemerisUpdater.setEphemerides(o, m) *> updateBlockAction(o)
-
+    // Fetches the ephemerides required by all the given observations and then
+    // updates the scheduling block and ephemerides.
+    def updateDiffNight(os: List[ISPObservation]): IO[Unit] =
       for {
-        m <- time(EphemerisUpdater.bulkLookup(os, sb.start, c))("fetch ephemerides")
-        _ <- time(os.traverseU { o => o.silentAndLocked(up(o, m)) }.void)("perform model update without events, holding lock")
+        f <- time(EphemerisUpdater.refreshAll(os, sb.start, c))("fetch ephemerides")
+        _ <- updateAll(os) { o => f(o) *> updateBlock(o) }
       } yield ()
-    }
 
-    updateSameNight(sames) *>
+    updateAll(sames)(updateBlock) *>
     updateDiffNight(diffs) *>
     edt(callback.run())
   }
 
+  /**
+   * Executes an IO action that updates the scheduling block in the given
+   * observations, notifying the user of the lookup progress in a glass pane
+   * over the window of the given `Component`.
+   */
   def run(
     c: java.awt.Component,
     sb: SchedulingBlock,
@@ -83,6 +101,12 @@ object SchedulingBlockUpdate {
   ): Unit =
     runWithCallback(c, sb, os, NoOp)
 
+  /**
+   * Executes an IO action that updates the scheduling block in the given
+   * observations, notifying the user of the lookup progress in a glass pane
+   * over the window of the given `Component`, calling the given `callback`
+   * when done.
+   */
   def runWithCallback(
     c: java.awt.Component,
     sb: SchedulingBlock,
