@@ -12,6 +12,7 @@ import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.guide.PatrolField;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
+import edu.gemini.spModel.target.SPSkyObject;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.WatchablePos;
 import edu.gemini.spModel.target.env.GuideProbeTargets;
@@ -317,7 +318,7 @@ public class TpePWFSFeature extends WFS_FeatureBase implements PropertyWatcher {
 
         Option<SPTarget> primaryPwfs1 = getPrimaryTarget(ctx, PwfsGuideProbe.pwfs1);
         final PosMapOffsetEntry pmoe1 = PosMapOffsetEntry.getPosMapOffsetEntry(pm, selectedOffsetPosList, selectedOffsetPos, PwfsGuideProbe.pwfs1, primaryPwfs1);
-        final PosMapEntry<SPTarget> pme1 = pmoe1.getPosMapEntry();
+        final PosMapEntry<SPSkyObject> pme1 = pmoe1.getPosMapEntry();
         final OffsetPosBase obp1 = pmoe1.getOffsetPos();
         if (pme1 != null) {
             calculateWFSForGuideProbe(pme1.screenPos, obp1, pixelsPerArcsec, baseScreenPos, pfXOffset, pfYOffset, basePosX, basePosY, offsetX, offsetY, isFrozen1, pwfs1, mm2Pixels, PwfsGuideProbe.pwfs1);
@@ -326,7 +327,7 @@ public class TpePWFSFeature extends WFS_FeatureBase implements PropertyWatcher {
 
         Option<SPTarget> primaryPwfs2 = getPrimaryTarget(ctx, PwfsGuideProbe.pwfs2);
         final PosMapOffsetEntry pmoe2 = PosMapOffsetEntry.getPosMapOffsetEntry(pm, selectedOffsetPosList, selectedOffsetPos, PwfsGuideProbe.pwfs2, primaryPwfs2);
-        final PosMapEntry<SPTarget> pme2 = pmoe2.getPosMapEntry();
+        final PosMapEntry<SPSkyObject> pme2 = pmoe2.getPosMapEntry();
         final OffsetPosBase obp2 = pmoe1.getOffsetPos();
         if (pme2 != null) {
             calculateWFSForGuideProbe(pme2.screenPos, obp2, pixelsPerArcsec, baseScreenPos, pfXOffset, pfYOffset, basePosX, basePosY, offsetX, offsetY, isFrozen2, pwfs2, mm2Pixels, PwfsGuideProbe.pwfs2);

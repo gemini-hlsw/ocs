@@ -1,6 +1,7 @@
 package jsky.app.ot.gemini.tpe;
 
 import edu.gemini.spModel.guide.GuideProbe;
+import edu.gemini.spModel.target.SPSkyObject;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.offset.OffsetPosBase;
 import edu.gemini.shared.util.immutable.Option;
@@ -14,15 +15,15 @@ import jsky.app.ot.tpe.TpePositionMap;
  * OffsetPosBase, along with some usefull utility methods.
  */
 public final class PosMapOffsetEntry {
-    private PosMapEntry<SPTarget> _pme;
+    private PosMapEntry<SPSkyObject> _pme;
     private OffsetPosBase _offsetPos;
 
-    private PosMapOffsetEntry(PosMapEntry<SPTarget> pme, OffsetPosBase offsetPos) {
+    private PosMapOffsetEntry(PosMapEntry<SPSkyObject> pme, OffsetPosBase offsetPos) {
         _pme = pme;
         _offsetPos = offsetPos;
     }
 
-    public PosMapEntry<SPTarget> getPosMapEntry() {
+    public PosMapEntry<SPSkyObject> getPosMapEntry() {
         return _pme;
     }
 

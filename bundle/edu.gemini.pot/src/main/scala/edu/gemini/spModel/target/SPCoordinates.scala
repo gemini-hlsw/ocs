@@ -1,12 +1,15 @@
 package edu.gemini.spModel.target
 
+import edu.gemini.shared.util.immutable.{ Option => GOption }
+import edu.gemini.shared.util.immutable.ScalaConverters._
+import edu.gemini.skycalc.{ Coordinates => SCoordinates }
 import edu.gemini.spModel.core.{Coordinates, Declination, RightAscension}
 import edu.gemini.spModel.pio.{ParamSet, PioFactory}
 
 /** We need a mutable wrapper for Coordinates so that they can be managed by
   * an editor and the TPE.
   */
-final class SPCoordinates(private var coordinates: Coordinates) extends WatchablePos {
+final class SPCoordinates(private var coordinates: Coordinates) extends SPSkyObject {
   import SPCoordinates._
 
   def this() =
@@ -34,6 +37,12 @@ final class SPCoordinates(private var coordinates: Coordinates) extends Watchabl
   override def clone: SPCoordinates =
     new SPCoordinates(coordinates)
 
+  override def getSkycalcCoordinates(time: GOption[java.lang.Long]): GOption[SCoordinates] =
+    Some(new SCoordinates(coordinates.ra.toDegrees, coordinates.dec.toDegrees)).asGeminiOpt
+
+  override def getCoordinates(when: Option[Long]): Option[Coordinates] =
+    Some(coordinates)
+
   def getCoordinates: Coordinates =
     coordinates
 
@@ -49,6 +58,8 @@ final class SPCoordinates(private var coordinates: Coordinates) extends Watchabl
     Declination.fromDegrees(value)
       .foreach(dec => setCoordinates(Coordinates.dec.set(coordinates, dec)))
 
+  def setRaDecDegrees(ra: Double, dec: Double): Unit =
+    Coordinates.fromDegrees(ra, dec).foreach(c => coordinates = c)
 }
 
 object SPCoordinates {

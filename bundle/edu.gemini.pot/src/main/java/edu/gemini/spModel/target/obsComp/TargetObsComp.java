@@ -10,6 +10,7 @@ import edu.gemini.spModel.guide.GuideProbeProvider;
 import edu.gemini.spModel.guide.GuideProbeUtil;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.PioFactory;
+import edu.gemini.spModel.target.SPCoordinates;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.TelescopePosWatcher;
 import edu.gemini.spModel.target.WatchablePos;
@@ -34,13 +35,14 @@ public final class TargetObsComp extends AbstractDataObject implements GuideProb
     public static final SPComponentType SP_TYPE = SPComponentType.TELESCOPE_TARGETENV;
 
     public static final ISPNodeInitializer<ISPObsComponent, TargetObsComp> NI =
-        new ComponentNodeInitializer<>(SP_TYPE, () -> new TargetObsComp(), c -> new TargetObsCompCB(c));
+        new ComponentNodeInitializer<>(SP_TYPE, TargetObsComp::new, TargetObsCompCB::new);
 
     private static final String _VERSION =  "2009B-1";
 
     // Property name used when the contained TargetEnvironment is updated.
     public static final String TARGET_ENV_PROP = "TargetEnvironment";
     public static final String TARGET_POS_PROP = "TargetPos";
+    public static final String COORDS_POS_PROP = "CoordinatesPos";
 
     private static TargetEnvironment createEmptyEnvironment() {
         final SPTarget base = new SPTarget();
@@ -48,11 +50,12 @@ public final class TargetObsComp extends AbstractDataObject implements GuideProb
     }
 
     private final class PcePropagator implements TelescopePosWatcher {
-
         @Override public void telescopePosUpdate(final WatchablePos tp) {
-            firePropertyChange(TARGET_POS_PROP, null, tp);
+            if (tp instanceof SPTarget)
+                firePropertyChange(TARGET_POS_PROP, null, tp);
+            else if (tp instanceof SPCoordinates)
+                firePropertyChange(COORDS_POS_PROP, null, tp);
         }
-
     }
 
     private TargetEnvironment targetEnv;
@@ -75,6 +78,7 @@ public final class TargetObsComp extends AbstractDataObject implements GuideProb
         toc.targetEnv = targetEnv.cloneTargets();
         toc.prop      = toc.new PcePropagator();
         toc.targetEnv.getTargets().foreach(target -> target.addWatcher(toc.prop));
+        toc.targetEnv.getCoordinates().foreach(coords -> coords.addWatcher(toc.prop));
         return toc;
     }
 
@@ -114,7 +118,9 @@ public final class TargetObsComp extends AbstractDataObject implements GuideProb
 
         final TargetEnvironment orig = targetEnv;
         unwatchTargets();
+        unwatchCoordinates();
         targetEnv = envNotNull;
+        watchCoordinates();
         watchTargets();
 
         // Notify listeners that the env has been updated.
@@ -127,6 +133,14 @@ public final class TargetObsComp extends AbstractDataObject implements GuideProb
 
     private void watchTargets() {
         targetEnv.getTargets().foreach(target -> target.addWatcher(prop));
+    }
+
+    private void unwatchCoordinates() {
+        targetEnv.getCoordinates().foreach(coords -> coords.deleteWatcher(prop));
+    }
+
+    private void watchCoordinates() {
+        targetEnv.getCoordinates().foreach(coords -> coords.addWatcher(prop));
     }
 
     /**
@@ -163,5 +177,6 @@ public final class TargetObsComp extends AbstractDataObject implements GuideProb
         is.defaultReadObject();
         prop = new PcePropagator();
         watchTargets();
+        watchCoordinates();
     }
 }

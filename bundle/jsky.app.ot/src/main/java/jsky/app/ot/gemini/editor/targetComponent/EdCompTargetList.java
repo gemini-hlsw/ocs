@@ -407,9 +407,13 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
         action.run();
 
-        // If the current selection is a target, then readd the posWatcher and refresh the UI.
+        // If the current selection is a target or coordinates, then readd the posWatcher and refresh the UI.
         selectedTarget().foreach(t -> {
             t.addWatcher(posWatcher);
+            refreshAll();
+        });
+        selectedCoordinates().foreach(c -> {
+            c.addWatcher(posWatcher);
             refreshAll();
         });
         return true;

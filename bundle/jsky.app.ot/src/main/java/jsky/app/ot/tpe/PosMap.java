@@ -1,8 +1,6 @@
 package jsky.app.ot.tpe;
 
-import edu.gemini.spModel.target.SPTarget;
-import edu.gemini.spModel.target.TelescopePosWatcher;
-import edu.gemini.spModel.target.WatchablePos;
+import edu.gemini.spModel.target.*;
 import edu.gemini.spModel.target.offset.OffsetPosBase;
 import edu.gemini.spModel.telescope.IssPort;
 
@@ -123,8 +121,8 @@ public abstract class PosMap <K, T extends WatchablePos>
             } catch (Exception e) {
                 // ignore
             }
-        } else {
-            ((SPTarget) tp).setRaDecDegrees(tme.pos.ra().toDegrees(), tme.pos.dec().toDegrees());
+        } else if (tp instanceof SPSkyObject) {
+            ((SPSkyObject) tp).setRaDecDegrees(tme.pos.ra().toDegrees(), tme.pos.dec().toDegrees());
         }
 
         tp.addWatcher(this);

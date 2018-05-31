@@ -272,10 +272,14 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
             final TargetEnvironmentDiff diff = TargetEnvironmentDiff.all(oldEnv, newEnv);
             final Collection<SPTarget> rmTargets  = diff.getRemovedTargets();
             final Collection<SPTarget> addTargets = diff.getAddedTargets();
+            final Collection<SPCoordinates> rmCoords  = diff.getRemovedCoordinates();
+            final Collection<SPCoordinates> addCoords = diff.getAddedCoordinates();
 
             // First update the target listeners according to what was added and removed.
             rmTargets.forEach (t -> t.deleteWatcher(TelescopePosTableWidget.this));
             addTargets.forEach(t -> t.addWatcher(TelescopePosTableWidget.this));
+            rmCoords.forEach(t -> t.deleteWatcher(TelescopePosTableWidget.this));
+            addCoords.forEach(t -> t.addWatcher(TelescopePosTableWidget.this));
 
             // Remember what was selected before the reset below.
             final int oldSelIndex               = getSelectedRow();

@@ -228,8 +228,10 @@ class MagnitudeEditor2 extends TelescopePosEditor {
 
   val watcher: TelescopePosWatcher =
     new TelescopePosWatcher {
-      def telescopePosUpdate(tp: WatchablePos): Unit =
-        reinit(tp.asInstanceOf[SPTarget])
+      def telescopePosUpdate(tp: WatchablePos): Unit = tp match {
+        case t: SPTarget => reinit(t)
+        case _           =>
+      }
     }
 
   private var target: SPTarget = null

@@ -5,6 +5,7 @@ import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.guide.GuideProbeUtil;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
+import edu.gemini.spModel.target.SPSkyObject;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.WatchablePos;
 import edu.gemini.spModel.target.env.GuideProbeTargets;
@@ -157,7 +158,7 @@ public abstract class OIWFS_FeatureBase extends WFS_FeatureBase
         Option<SPTarget> primaryOiwfs = (guider == null) ? none : getPrimaryTarget(ctx, guider);
         PosMapOffsetEntry pmoe = PosMapOffsetEntry.getPosMapOffsetEntry(pm, selectedOffsetPosList,
                                        selectedOffsetPos, guider, primaryOiwfs);
-        PosMapEntry<SPTarget> pme = pmoe.getPosMapEntry();
+        PosMapEntry<SPSkyObject> pme = pmoe.getPosMapEntry();
 
 
         if (pme == null) {

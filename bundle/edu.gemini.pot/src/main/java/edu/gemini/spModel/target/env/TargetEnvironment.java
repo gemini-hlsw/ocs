@@ -5,6 +5,7 @@ import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.Pio;
 import edu.gemini.spModel.pio.PioFactory;
+import edu.gemini.spModel.target.SPCoordinates;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.SPTargetPio;
 
@@ -27,7 +28,7 @@ import java.util.*;
  * <p>A TargetEnvironment is immutable, but the {@link SPTarget}s it contains
  * are unfortunately mutable.
  */
-public final class TargetEnvironment implements Serializable, Iterable<SPTarget>, TargetContainer {
+public final class TargetEnvironment implements Serializable, TargetContainer {
 
     public static final String BASE_NAME = "Base";
     public static final String USER_NAME = "User";
@@ -76,7 +77,7 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
 
     // Cached list of all the targets in this environment.  As a
     // SoftReference, this cache may disappear when memory is tight
-    private transient SoftReference<ImList<SPTarget>> allTargets;
+    private transient SoftReference<ImList<SPTarget>> allTargets = null;
 
     TargetEnvironment(Asterism asterism, GuideEnvironment guide, ImList<UserTarget> user) {
         if (asterism == null) throw new IllegalArgumentException("asterism = null");
@@ -233,17 +234,22 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
     }
 
     /**
+     * Get a list of all the SPCoordinates objects in this environment, in the
+     * order:
+     * <ol>
+     * <li>base position, if applicable</li>
+     * <li>sky positions</li>
+     * </ol>
+     */
+    public ImList<SPCoordinates> getCoordinates() {
+        return asterism.allSpCoordinatesJava();
+    }
+
+    /**
      * Gets a list of all the guide groups in this environment
      */
     public ImList<GuideGroup> getGroups() {
         return guide.getOptions();
-    }
-
-    /**
-     * Iterates over all the {@link SPTarget}s in this environment.
-     */
-    public Iterator<SPTarget> iterator() {
-        return getTargets().iterator();
     }
 
     /**
@@ -263,7 +269,8 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
     }
 
     /**
-     * Creates an identical TargetEnvironment but with cloned {@link SPTarget}s.
+     * Creates an identical TargetEnvironment but with cloned {@link SPTarget}s
+     * and {@link SPCoordinates}.
      * This can be important in some contexts because the SPTargets are
      * mutable.
      */

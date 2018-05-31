@@ -547,9 +547,9 @@ public class GeneralRule implements IRule {
             final ISPTemplateFolder templateFolderNode = elements.getProgramNode().getTemplateFolder();
             if (templateFolderNode != null) {
 
-                final SPTarget obsTarget = getObsTarget(elements);
-                if (obsTarget != null) {
-
+                // TODO:GHOST Do we have to do anything for SPCoordinates here as well?
+                final Asterism a = getObsAsterism(elements);
+                a.allSpTargetsJava().foreach(obsTarget -> {
                     // We're going to drive this off the target, so we first want to narrow it
                     // down to the TemplateParameters that correspond with this target.
                     final List<TemplateParameters> matchingParams = new ArrayList<>();
@@ -582,20 +582,17 @@ public class GeneralRule implements IRule {
                         }
                     }
 
-                }
+                });
             }
             return ps;
         }
 
-        private SPTarget getObsTarget(final ObservationElements elements)  {
+        private Asterism getObsAsterism(final ObservationElements elements)  {
             final TargetObsComp targetEnv = elements.getTargetObsComp().getOrNull();
             if (targetEnv != null) {
                 final ObsClass obsClass = ObsClassService.lookupObsClass(elements.getObservationNode());
                 if (obsClass == ObsClass.SCIENCE) {
-                    // TODO:ASTERISM: this needs to handle multiple targets … also why only sidereal?
-                    final SPTarget target = targetEnv.getArbitraryTargetFromAsterism();
-                    if (target.isSidereal())
-                        return target;
+                    return targetEnv.getAsterism();
                 }
             }
             return null;

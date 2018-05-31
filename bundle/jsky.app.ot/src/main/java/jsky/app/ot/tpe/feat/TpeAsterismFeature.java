@@ -1,8 +1,11 @@
 package jsky.app.ot.tpe.feat;
 
+import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.shared.util.immutable.Some;
+import edu.gemini.spModel.target.SPCoordinates;
+import edu.gemini.spModel.target.SPSkyObject;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
@@ -52,9 +55,14 @@ public class TpeAsterismFeature extends TpePositionFeature {
         final TargetObsComp obsComp = getTargetObsComp();
         if (obsComp != null) {
             for (final SPTarget spt: obsComp.getAsterism().allSpTargetsJava()) {
-              final PosMapEntry<SPTarget> pme = pm.getPositionMapEntry(spt);
+              final PosMapEntry<SPSkyObject> pme = pm.getPositionMapEntry(spt);
               if ((pme != null) && (positionIsClose(pme, x, y)) && getContext().targets().shell().isDefined()) {
-                  TargetSelection.setTargetForNode(getContext().targets().envOrNull(), getContext().targets().shell().get(), pme.taggedPos);
+                  final TargetEnvironment env = getContext().targets().envOrNull();
+                  final ISPObsComponent ispObsComponent = getContext().targets().shell().get();
+                  if (pme.taggedPos instanceof SPTarget)
+                    TargetSelection.setTargetForNode(env, ispObsComponent, (SPTarget) pme.taggedPos);
+                  else if (pme.taggedPos instanceof SPCoordinates)
+                      TargetSelection.setCoordinatesForNode(env, ispObsComponent, (SPCoordinates) pme.taggedPos);
                   return pme.taggedPos;
               }
           }
@@ -92,7 +100,7 @@ public class TpeAsterismFeature extends TpePositionFeature {
         final TpePositionMap pm = TpePositionMap.getMap(_iw);
         // find any asterism member close to the drag target
         for (final SPTarget spt: env.getAsterism().allSpTargetsJava()) {
-          final PosMapEntry<SPTarget> pme = pm.getPositionMapEntry(spt);
+          final PosMapEntry<SPSkyObject> pme = pm.getPositionMapEntry(spt);
           if (pme != null && positionIsClose(pme, tme.xWidget, tme.yWidget)) {
               _dragObject = pme;
               return new Some<>(pme.taggedPos);
@@ -113,7 +121,7 @@ public class TpeAsterismFeature extends TpePositionFeature {
                 _dragObject.screenPos.y = tme.yWidget;
             }
 
-            final SPTarget tp = _dragObject.taggedPos;
+            final SPSkyObject tp = _dragObject.taggedPos;
             tp.setRaDecDegrees(tme.pos.ra().toDegrees(), tme.pos.dec().toDegrees());
         }
     }

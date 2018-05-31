@@ -1,5 +1,7 @@
 package jsky.app.ot.tpe;
 
+import edu.gemini.spModel.target.SPCoordinates;
+import edu.gemini.spModel.target.SPSkyObject;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.env.TargetEnvironmentDiff;
@@ -8,10 +10,7 @@ import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import java.awt.geom.Point2D;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -19,7 +18,7 @@ import java.util.logging.Logger;
  * An auxiliary class used to maintain a mapping between telescope positions
  * and image widget locations.
  */
-public final class TpePositionMap extends PosMap<SPTarget, SPTarget> {
+public final class TpePositionMap extends PosMap<SPSkyObject, SPSkyObject> {
     private static final Logger LOG = Logger.getLogger(TpePositionMap.class.getName());
 
     private static TpePositionMap _tpm;
@@ -31,20 +30,31 @@ public final class TpePositionMap extends PosMap<SPTarget, SPTarget> {
     private boolean _findGuideStars = false;
 
     private final PropertyChangeListener targetEnvListener = new PropertyChangeListener() {
+        @Override
         public void propertyChange(PropertyChangeEvent evt) {
-            TargetObsComp oc = (TargetObsComp) evt.getSource();
+            final TargetObsComp oc = (TargetObsComp) evt.getSource();
             if (oc != obsComp) return;
 
-            TargetEnvironment oldEnv = (TargetEnvironment) evt.getOldValue();
-            TargetEnvironment newEnv = (TargetEnvironment) evt.getNewValue();
+            final TargetEnvironment oldEnv = (TargetEnvironment) evt.getOldValue();
+            final TargetEnvironment newEnv = (TargetEnvironment) evt.getNewValue();
 
-            TargetEnvironmentDiff diff = TargetEnvironmentDiff.primaryGuideGroup(oldEnv, newEnv);
+            final TargetEnvironmentDiff diff = TargetEnvironmentDiff.all(oldEnv, newEnv);
 
-            Collection<SPTarget> added   = diff.getAddedTargets();
-            Collection<SPTarget> removed = diff.getRemovedTargets();
+            final Collection<SPTarget> addedTargets   = diff.getAddedTargets();
+            final Collection<SPTarget> removedTargets = diff.getRemovedTargets();
+            final Collection<SPCoordinates> addedCoords   = diff.getAddedCoordinates();
+            final Collection<SPCoordinates> removedCoords = diff.getRemovedCoordinates();
 
-            if (added.size() > 0) handlePosListAddedPosition(added);
-            if (removed.size() > 0) handlePosListRemovedPosition(removed);
+            final List<SPSkyObject> addedList = new ArrayList<>();
+            addedList.addAll(addedTargets);
+            addedList.addAll(addedCoords);
+
+            final List<SPSkyObject> removedList = new ArrayList<>();
+            removedList.addAll(removedTargets);
+            removedList.addAll(removedCoords);
+
+            if (!addedList.isEmpty()) handlePosListAddedPosition(addedList);
+            if (!removedList.isEmpty()) handlePosListRemovedPosition(removedList);
 
             _iw.repaint();
         }
@@ -71,19 +81,28 @@ public final class TpePositionMap extends PosMap<SPTarget, SPTarget> {
         super(iw);
     }
 
-    public SPTarget getKey(SPTarget target) {
-        return target;
+    @Override
+    public SPSkyObject getKey(SPSkyObject so) {
+        return so;
     }
 
-    public boolean exists(SPTarget target) {
+    @Override
+    public boolean exists(SPSkyObject so) {
         if (obsComp == null) return false;
-        return obsComp.getTargetEnvironment().getTargets().contains(target);
+        final TargetEnvironment env = obsComp.getTargetEnvironment();
+        if (so instanceof SPTarget)
+            return env.getTargets().contains((SPTarget) so);
+        if (so instanceof SPCoordinates)
+            return env.getCoordinates().contains((SPCoordinates) so);
+        return false;
     }
 
+    @Override
     protected boolean posListAvailable() {
         return obsComp != null;
     }
 
+    @Override
     public void free() {
         LOG.finest("free TpePositionMap for obsComp: " + obsComp);
 
@@ -94,9 +113,14 @@ public final class TpePositionMap extends PosMap<SPTarget, SPTarget> {
         obsComp = null;
     }
 
-    protected List<SPTarget> getAllPositions() {
+    @Override
+    protected List<SPSkyObject> getAllPositions() {
         if (obsComp == null) return Collections.emptyList();
-        return obsComp.getTargetEnvironment().getTargets().toList();
+        final TargetEnvironment env = obsComp.getTargetEnvironment();
+        final List<SPSkyObject> lst = new ArrayList<>();
+        lst.addAll(env.getTargets().toList());
+        lst.addAll(env.getCoordinates().toList());
+        return Collections.unmodifiableList(lst);
     }
 
     public void reset(TpeContext ctx) {
@@ -144,15 +168,15 @@ public final class TpePositionMap extends PosMap<SPTarget, SPTarget> {
     /**
      * Find a (visible) position under the given x,y location.
      */
-    public PosMapEntry<SPTarget> locate(int x, int y) {
-        Map<SPTarget, PosMapEntry<SPTarget>> posTable = getPosTable();
+    public PosMapEntry<SPSkyObject> locate(int x, int y) {
+        Map<SPSkyObject, PosMapEntry<SPSkyObject>> posTable = getPosTable();
         if (posTable == null) return null;
 
         if (obsComp == null) return null;
         TargetEnvironment env = obsComp.getTargetEnvironment();
 
-        for (PosMapEntry<SPTarget> pme : posTable.values()) {
-            Point2D.Double p = pme.screenPos;
+        for (PosMapEntry<SPSkyObject> pme : posTable.values()) {
+            final Point2D.Double p = pme.screenPos;
             if (p == null) {
                 continue;
             }
@@ -168,28 +192,42 @@ public final class TpePositionMap extends PosMap<SPTarget, SPTarget> {
             }
 
             // Is this position visible?
-            SPTarget tp = pme.taggedPos;
+            final SPSkyObject tp = pme.taggedPos;
 
-            if (env.getAsterism().allSpTargetsJava().contains(tp)) {
-                if (_findAsterism) {
-                    return pme;
-                } else {
-                    continue;
+            if (tp instanceof SPTarget) {
+                final SPTarget t = (SPTarget) tp;
+                if (env.getAsterism().allSpTargetsJava().contains(t)) {
+                    if (_findAsterism) {
+                        return pme;
+                    } else {
+                        continue;
+                    }
+                }
+                if (env.isUserPosition(t)) {
+                    if (_findUserTargets) {
+                        return pme;
+                    } else {
+                        continue;
+                    }
+                }
+                if (env.isGuidePosition(t)) {
+                    if (_findGuideStars) {
+                        return pme;
+                    } else {
+                        continue;
+                    }
                 }
             }
-            if (env.isUserPosition(tp)) {
-                if (_findUserTargets) {
-                    return pme;
-                } else {
-                    continue;
-                }
-            }
-            if (env.isGuidePosition(tp)) {
-                if (_findGuideStars) {
-                    return pme;
-                } else {
-                    //noinspection UnnecessaryContinue
-                    continue;
+
+            if (tp instanceof SPCoordinates) {
+                final SPCoordinates c = (SPCoordinates) tp;
+                if (env.getCoordinates().contains(c)) {
+                    if (_findAsterism) {
+                        return pme;
+                    } else {
+                        //noinspection UnnecessaryContinue
+                        continue;
+                    }
                 }
             }
         }

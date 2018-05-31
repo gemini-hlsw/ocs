@@ -8,6 +8,9 @@ import edu.gemini.spModel.target.TelescopePosWatcher
 import edu.gemini.spModel.target.WatchablePos
 import jsky.app.ot.gemini.editor.targetComponent.TelescopePosEditor
 
+/** This is only used with the TargetDetailPanel, so we don't need to worry
+  * about SPCoordinates.
+  */
 final class ForwardingTelescopePosWatcher(tpe: TelescopePosEditor)
   extends TelescopePosEditor with TelescopePosWatcher {
 

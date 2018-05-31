@@ -5,11 +5,10 @@ import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.skycalc.{Coordinates => SCoordinates}
 import edu.gemini.spModel.core.{Coordinates, ProperMotion, SiderealTarget, Target}
 import edu.gemini.spModel.gemini.ghost.{GhostAsterism, GhostParamSetCodecs}
-import edu.gemini.spModel.target.{SPTarget, TargetParamSetCodecs}
+import edu.gemini.spModel.target.{SPCoordinates, SPTarget, TargetParamSetCodecs}
 import edu.gemini.spModel.pio.{ParamSet, Pio}
 import edu.gemini.spModel.pio.codec.{MissingKey, ParamSetCodec, PioError, UnknownTag}
 import edu.gemini.spModel.pio.xml.PioXmlFactory
-
 import java.time.Instant
 
 import scalaz._
@@ -32,6 +31,13 @@ trait Asterism {
 
   /** All Targets that comprise the asterism. */
   def allTargets: NonEmptyList[Target]
+
+  /** All SPCoordinates that comprise the asterism. */
+  def allSpCoordinates: List[SPCoordinates]
+
+  /** All SPCoordinates that comprise the asterism, as a Gemini ImList. */
+  def allSpCoordinatesJava: ImList[SPCoordinates] =
+    allSpCoordinates.asImList
 
   /** Slew coordinates and AGS calculation base position. */
   def basePosition(time: Option[Instant]): Option[Coordinates]
@@ -100,6 +106,7 @@ object Asterism {
   final case class Single(t: SPTarget) extends Asterism {
     override def allSpTargets = NonEmptyList(t) // def because Nel isn't serializable
     override def allTargets = NonEmptyList(t.getTarget)
+    override def allSpCoordinates: List[SPCoordinates] = Nil
     override def basePosition(time: Option[Instant]) = t.getCoordinates(time.map(_.toEpochMilli))
     override def copyWithClonedTargets() = Single(t.clone)
     override def basePositionProperMotion = Target.pm.get(t.getTarget)

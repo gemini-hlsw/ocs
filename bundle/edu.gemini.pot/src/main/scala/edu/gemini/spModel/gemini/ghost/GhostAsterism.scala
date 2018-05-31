@@ -120,6 +120,13 @@ object GhostAsterism {
       case SkyPlusTarget(_,t,_) => NonEmptyList(t.spTarget)
     }
 
+    override def allSpCoordinates: List[SPCoordinates] = this match {
+      case SingleTarget(_,_)    => Nil
+      case DualTarget(_,_,b)    => b.toList
+      case TargetPlusSky(_,s,b) => b.toList ++ List(s)
+      case SkyPlusTarget(s,_,b) => b.toList ++ List(s)
+    }
+
     /** Obtains the base position, which defaults to the half-way point between
       * the two targets but may be explicitly specified instead.
       */
@@ -235,6 +242,11 @@ object GhostAsterism {
   sealed abstract class HighResolution(target: GhostTarget) extends GhostAsterism {
     override def allSpTargets: NonEmptyList[SPTarget] =
       NonEmptyList(target.spTarget)
+
+    override def allSpCoordinates: List[SPCoordinates] = this match {
+      case HighResolutionTarget(_,b)          => b.toList
+      case HighResolutionTargetPlusSky(_,s,b) => b.toList ++ List(s)
+    }
 
     /** Defines the default base position to be the same as the target position. */
     override def basePosition(when: Option[Instant]): Option[Coordinates] =

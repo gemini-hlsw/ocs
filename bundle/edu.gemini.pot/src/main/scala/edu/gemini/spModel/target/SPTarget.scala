@@ -22,7 +22,7 @@ object SPTarget {
     SPTargetPio.fromParamSet(pset)
 }
 
-final class SPTarget(private var target: Target) extends WatchablePos {
+final class SPTarget(private var target: Target) extends SPSkyObject {
 
   def this() =
     this(SiderealTarget.empty)
