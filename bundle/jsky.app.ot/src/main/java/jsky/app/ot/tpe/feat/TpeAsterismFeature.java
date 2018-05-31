@@ -70,25 +70,34 @@ public class TpeAsterismFeature extends TpePositionFeature {
         return null;
     }
 
+    private void drawItem(final Graphics g, final Color color, final Point2D.Double base) {
+        if (base == null)
+            return;
+
+        final int r = MARKER_SIZE;
+        final int d = 2 * r;
+
+        g.setColor(Color.yellow);
+        g.drawOval((int) (base.x - r), (int) (base.y - r), d, d);
+        g.drawLine((int) base.x, (int) (base.y - r), (int) base.x, (int) (base.y + r));
+        g.drawLine((int) (base.x - r), (int) base.y, (int) (base.x + r), (int) base.y);
+    }
+
     public void draw(final Graphics g, final TpeImageInfo tii) {
         final TpePositionMap pm = TpePositionMap.getMap(_iw);
 
         final TargetEnvironment env = getTargetEnvironment();
         if (env == null) return;
 
-        for (final SPTarget spt: env.getAsterism().allSpTargetsJava()) {
-          final Point2D.Double base = pm.getLocationFromTag(spt);
-          if (base == null) continue;
+        // Draw the targets.
+        env.getAsterism().allSpTargetsJava().foreach(spt ->
+            drawItem(g, Color.yellow, pm.getLocationFromTag(spt))
+        );
 
-          final int r = MARKER_SIZE;
-          final int d = 2 * r;
-
-          // Draw crosshairs
-          g.setColor(Color.yellow);
-          g.drawOval((int) (base.x - r), (int) (base.y - r), d, d);
-          g.drawLine((int) base.x, (int) (base.y - r), (int) base.x, (int) (base.y + r));
-          g.drawLine((int) (base.x - r), (int) base.y, (int) (base.x + r), (int) base.y);
-        }
+        // Draw the sky positions.
+        env.getAsterism().allSpCoordinatesJava().foreach(spc ->
+            drawItem(g, Color.orange, pm.getLocationFromTag(spc))
+        );
     }
 
     /**
@@ -98,13 +107,23 @@ public class TpeAsterismFeature extends TpePositionFeature {
         if (env == null) return None.instance();
 
         final TpePositionMap pm = TpePositionMap.getMap(_iw);
-        // find any asterism member close to the drag target
+
+        // Look for targets close to drag position.
         for (final SPTarget spt: env.getAsterism().allSpTargetsJava()) {
-          final PosMapEntry<SPSkyObject> pme = pm.getPositionMapEntry(spt);
-          if (pme != null && positionIsClose(pme, tme.xWidget, tme.yWidget)) {
-              _dragObject = pme;
-              return new Some<>(pme.taggedPos);
-          }
+            final PosMapEntry<SPSkyObject> pme = pm.getPositionMapEntry(spt);
+            if (pme != null && positionIsClose(pme, tme.xWidget, tme.yWidget)) {
+                _dragObject = pme;
+                return new Some<>(pme.taggedPos);
+            }
+        }
+
+        // Look for coordinates close to drag position.
+        for (final SPCoordinates spc: env.getAsterism().allSpCoordinatesJava()) {
+            final PosMapEntry<SPSkyObject> pme = pm.getPositionMapEntry(spc);
+            if (pme != null && positionIsClose(pme, tme.xWidget, tme.yWidget)) {
+                _dragObject = pme;
+                return new Some<>(pme.taggedPos);
+            }
         }
 
         return None.instance();
