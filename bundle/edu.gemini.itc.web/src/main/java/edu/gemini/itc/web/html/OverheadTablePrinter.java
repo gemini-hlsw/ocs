@@ -97,10 +97,10 @@ public class OverheadTablePrinter {
     /**
      *  get number of reacquisitions
      */
-    public int getNumReacq() {
+    public int getNumRecenter() {
         int numReacq = 0;
         if (p.observation().calculationMethod() instanceof Spectroscopy) {
-            numReacq = pta.numReacq(ccResult.getConfig()[0]);
+            numReacq = pta.numRecenter(ccResult.getConfig()[0]);
             // for IFU spectroscopy recentering is needed only for faint targets (with SNR in individual images < 5)
             if (isIFU()) {
                 if (r.maxSingleSNRatio() > 5) {
@@ -176,24 +176,24 @@ public class OverheadTablePrinter {
          *    - as target "Recentering" on the slit for all instruments but GSAOI
          *    - as "LGS Reacquisition" for GSAOI after large unguided sky offsets
          */
-        int numReacq = getNumReacq();
+        int numReacq = getNumRecenter();
         int numLgsReacq = getGsaoiLgsReacqNum();
-        String  reacqStr = "";
-
+        String  reacqStr;
         if (numReacq > 0) {
             reacqStr = String.format("%d x %.1f s", numReacq, pta.setup.reacquisitionTime / 1000.0);
+            buf.append("<tr>");
+            buf.append("<td>").append("Re-centering ").append("</td>");
+            buf.append("<td align=\"right\"> ").append(reacqStr).append("</td>");
+            buf.append("</tr>");
         }
         if (numLgsReacq > 0) {
             reacqStr = String.format("%d x %.1f s", numLgsReacq, pta.setup.reacquisitionTime / 1000.0);
-        }
-
-        if (!reacqStr.equals("")) {
             buf.append("<tr>");
             buf.append("<td>").append("LGS reacquisition ").append("</td>");
             buf.append("<td align=\"right\"> ").append(reacqStr).append("</td>");
-            //   buf.append("<td align=\"right\"> ").append("&ensp; required when returning to science target after sky offset").append("</td>");
             buf.append("</tr>");
         }
+
 
         // print offset overheads
         if (!getOffsetsByOverhead().isEmpty()) {

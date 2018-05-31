@@ -426,43 +426,57 @@ public final class PlannedTime implements Serializable {
      *
      */
 
-    // total science time (without setup)
+    public static final double VISIT_TIME = 7200; // visit time, sec
+    public static final double RECENTERING_INTERVAL = 3600; // sec
+
+    // total science time (time without setup and re-centering)
     public long scienceTime() {
         long scienceTime = 0;
         for (Step step : steps) scienceTime += step.totalTime();
         return scienceTime / 1000;
     }
 
-    // number of acquisitions, considering one acquisition per every two hours of science
-    public int numAcq() {
-        int numAcq = 1;
-        long scienceTime = scienceTime();
-        if ((scienceTime > 7200) && (scienceTime % 7200 == 0)) {
-            numAcq = (int) (scienceTime / 7200);
-        } else if ((scienceTime > 7200) && (scienceTime % 7200 != 0)) {
-            numAcq = (int) (scienceTime / 7200) + 1;
-        }
-        return numAcq;
-    }
-
-    // Number of re-acquisitions (re-centerings) on the slit for spectroscopic observations using PWFS2, considering one recentering per every
-    // hour of science per visit (assuming one full visit time is 2h, there is maximum of one recentering per visit);
-    public int numReacq(Config config) {
+    private int numReacq(double obsTime, double reacqInterval) {
         int numReacq = 0;
-        long scienceTime = scienceTime();
-        ItemKey guideWithPWFS2 = new ItemKey("telescope:guideWithPWFS2");
-        if (config.containsItem(guideWithPWFS2) &&
-                config.getItemValue(guideWithPWFS2).equals(StandardGuideOptions.Value.guide)) {
-            if ((scienceTime > 3600) && ((scienceTime + 3600) % 7200 == 0)) {
-                numReacq = ((int)((3600 + scienceTime) / 7200)) - 1;
-            } else if ((scienceTime > 3600) && ((scienceTime + 3600) % 7200 != 0)) {
-                numReacq = (int)((scienceTime + 3600) / 7200);
-            }
+        if ((obsTime > reacqInterval) && (obsTime % reacqInterval == 0)) {
+            numReacq = (int) (obsTime / reacqInterval) - 1;
+        } else if ((obsTime > reacqInterval) && (obsTime % reacqInterval != 0)) {
+            numReacq = (int) (obsTime / reacqInterval);
         }
         return numReacq;
     }
 
-    // total time with acquisitions and re-acquisitions
+    // number of acquisitions (setups) per observation
+    public int numAcq() {
+        return numReacq(scienceTime(), VISIT_TIME) + 1;
+    }
+
+    // Number of re-centerings on the slit for spectroscopic observations using PWFS2
+    public int numRecenter(Config config) {
+        int numRecenter = 0;
+        ItemKey guideWithPWFS2 = new ItemKey("telescope:guideWithPWFS2");
+
+        if (config.containsItem(guideWithPWFS2) &&
+                config.getItemValue(guideWithPWFS2).equals(StandardGuideOptions.Value.guide)) {
+            long scienceTime = scienceTime();
+            double visitTime = (numAcq() == 1) ? scienceTime : VISIT_TIME;
+            double lastVisitTime = scienceTime % VISIT_TIME;
+            // number of re-centerings per visit
+            int visitRecenteringNum = numReacq(visitTime, RECENTERING_INTERVAL);
+            // number of re-centerings in the last visit
+            int lastVisitRecenteringNum = numReacq(lastVisitTime, RECENTERING_INTERVAL);
+
+            if (VISIT_TIME > RECENTERING_INTERVAL) {
+                numRecenter = (numAcq() - 1) * visitRecenteringNum + lastVisitRecenteringNum;
+            } else {
+                throw new Error("Visit time is smaller than re-centering time");
+            }
+        }
+        return numRecenter;
+    }
+
+    // total time with acquisitions and re-acquisitions.
+    // Uses the parameter because of GSAOI LGS re-acquisitions.
     public long totalTimeWithReacq(int numReacq) {
         long totalTimeWithReacq = setup.time * numAcq() + setup.reacquisitionTime * numReacq;
         for (Step step : steps) totalTimeWithReacq += step.totalTime();
