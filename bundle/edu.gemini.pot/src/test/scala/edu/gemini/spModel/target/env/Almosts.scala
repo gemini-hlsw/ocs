@@ -1,13 +1,12 @@
 package edu.gemini.spModel.target.env
 
 import edu.gemini.shared.util.immutable.{ImOption, Option => GemOption}
-import edu.gemini.spModel.core.{AlmostEqual, Target}
+import edu.gemini.spModel.core.{AlmostEqual, Coordinates, Target}
 import edu.gemini.spModel.core.AlmostEqual.{AlmostEqualOps, AlmostEqualOption}
 import edu.gemini.spModel.gemini.ghost.GhostAsterism
-import edu.gemini.spModel.target.SPTarget
+import edu.gemini.spModel.target.{SPCoordinates, SPTarget}
 
 import scala.collection.JavaConverters._
-
 import scalaz._
 import Scalaz._
 
@@ -116,6 +115,9 @@ trait Almosts {
 
   implicit val SPTargetAlmostEqual: AlmostEqual[SPTarget] =
     AlmostEqual[Target].contramap(_.getTarget)
+
+  implicit val SPCoordinatesAlmostEqual: AlmostEqual[SPCoordinates] =
+    AlmostEqual[Coordinates].contramap(_.getCoordinates)
 
   implicit val UserTargetAlmostEqual: AlmostEqual[UserTarget] =
     new AlmostEqual[UserTarget] {

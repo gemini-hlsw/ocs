@@ -5,14 +5,12 @@ import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.spModel.core.{Angle, Coordinates, Declination, RightAscension, SiderealTarget}
 import edu.gemini.spModel.gemini.ghost.GhostAsterism
 import edu.gemini.spModel.guide.{GuideProbe, GuideProbeMap}
-import edu.gemini.spModel.target.SPTarget
-
+import edu.gemini.spModel.target.{SPCoordinates, SPTarget}
 import org.scalacheck._
 import org.scalacheck.Gen._
 import org.scalacheck.Arbitrary._
 
 import scala.collection.JavaConverters._
-
 import scalaz._
 import Scalaz._
 
@@ -205,7 +203,7 @@ trait Arbitraries extends edu.gemini.spModel.core.Arbitraries {
       for {
         bc :: tc :: _ <- coordinateGen(2)
         t <- ghostTargetWithCoords(tc)
-      } yield SingleTarget(t, Some(bc))
+      } yield SingleTarget(t, Some(new SPCoordinates(bc)))
 
     // DUAL TARGET GENERATORS
     val genDualTargetsNoBase: Gen[DualTarget] =
@@ -220,20 +218,20 @@ trait Arbitraries extends edu.gemini.spModel.core.Arbitraries {
         bc :: tc1 :: tc2 :: _ <- coordinateGen(3)
         t1 <- ghostTargetWithCoords(tc1)
         t2 <- ghostTargetWithCoords(tc2)
-      } yield DualTarget(t1, t2, Some(bc))
+      } yield DualTarget(t1, t2, Some(new SPCoordinates(bc)))
 
     // TARGET + SKY
     val genTargetPlusSkyNoBase: Gen[TargetPlusSky] =
       for {
         tc :: s :: _ <- coordinateGen(2)
         t <- ghostTargetWithCoords(tc)
-      } yield TargetPlusSky(t, s, None)
+      } yield TargetPlusSky(t, new SPCoordinates(s), None)
 
     val genTargetPlusSkyWithBase: Gen[TargetPlusSky] =
       for {
         bc :: tc :: s :: _ <- coordinateGen(3)
         t <- ghostTargetWithCoords(tc)
-      } yield TargetPlusSky(t, s, Some(bc))
+      } yield TargetPlusSky(t, new SPCoordinates(s), Some(new SPCoordinates(bc)))
 
     // SKY + TARGET
     val genSkyPlusTargetNoBase: Gen[SkyPlusTarget] =
@@ -254,20 +252,20 @@ trait Arbitraries extends edu.gemini.spModel.core.Arbitraries {
       for {
         bc :: tc :: _ <- coordinateGen(2)
         t <- ghostTargetWithCoords(tc)
-      } yield HighResolutionTarget(t, Some(bc))
+      } yield HighResolutionTarget(t, Some(new SPCoordinates(bc)))
 
     // HIGH RESOLUTION TARGET + SKY
     val genHighResTargetPlusSkyNoBase: Gen[HighResolutionTargetPlusSky] =
       for {
         tc :: s :: _ <- coordinateGen(2)
         t <- ghostTargetWithCoords(tc)
-      } yield HighResolutionTargetPlusSky(t, s, None)
+      } yield HighResolutionTargetPlusSky(t, new SPCoordinates(s), None)
 
     val genHighResTargetPlusSkyWithBase: Gen[HighResolutionTargetPlusSky] =
       for {
         bc :: tc :: s :: _ <- coordinateGen(3)
         t <- ghostTargetWithCoords(tc)
-      } yield HighResolutionTargetPlusSky(t, s, Some(bc))
+      } yield HighResolutionTargetPlusSky(t, new SPCoordinates(s), Some(new SPCoordinates(bc)))
   }
 
   implicit val arbGuideFiberState: Arbitrary[GhostAsterism.GuideFiberState] =
