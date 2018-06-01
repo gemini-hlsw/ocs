@@ -9,6 +9,9 @@ import org.scalacheck.Gen
 import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
 
+/** NOTE: there is no test for format 6 because all known examples have been
+  * reclassified as comets.
+  */
 object HS2Spec extends Specification with ScalaCheck {
 
   import HorizonsService2.{ HS2Error, Row, Search, search, lookupEphemeris, EphemerisEmpty }
@@ -95,7 +98,7 @@ object HS2Spec extends Specification with ScalaCheck {
         Row(HD.AsteroidNewStyle("A/2017 U1"), "A/2017 U1")
       ))
     }
-    
+
   }
 
   "major body search" should {
