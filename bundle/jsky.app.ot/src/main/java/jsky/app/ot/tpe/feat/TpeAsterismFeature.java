@@ -61,7 +61,15 @@ public class TpeAsterismFeature extends TpePositionFeature {
                   final ISPObsComponent ispObsComponent = getContext().targets().shell().get();
                   if (pme.taggedPos instanceof SPTarget)
                     TargetSelection.setTargetForNode(env, ispObsComponent, (SPTarget) pme.taggedPos);
-                  else if (pme.taggedPos instanceof SPCoordinates)
+                  return pme.taggedPos;
+              }
+          }
+          for (final SPCoordinates spc: obsComp.getAsterism().allSpCoordinatesJava()) {
+              final PosMapEntry<SPSkyObject> pme = pm.getPositionMapEntry(spc);
+              if ((pme != null) && (positionIsClose(pme, x, y)) && getContext().targets().shell().isDefined()) {
+                  final TargetEnvironment env = getContext().targets().envOrNull();
+                  final ISPObsComponent ispObsComponent = getContext().targets().shell().get();
+                  if (pme.taggedPos instanceof SPCoordinates)
                       TargetSelection.setCoordinatesForNode(env, ispObsComponent, (SPCoordinates) pme.taggedPos);
                   return pme.taggedPos;
               }
@@ -76,8 +84,7 @@ public class TpeAsterismFeature extends TpePositionFeature {
 
         final int r = MARKER_SIZE;
         final int d = 2 * r;
-
-        g.setColor(Color.yellow);
+        g.setColor(color);
         g.drawOval((int) (base.x - r), (int) (base.y - r), d, d);
         g.drawLine((int) base.x, (int) (base.y - r), (int) base.x, (int) (base.y + r));
         g.drawLine((int) (base.x - r), (int) base.y, (int) (base.x + r), (int) base.y);

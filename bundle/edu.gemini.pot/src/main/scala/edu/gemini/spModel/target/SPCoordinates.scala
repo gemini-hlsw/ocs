@@ -1,9 +1,9 @@
 package edu.gemini.spModel.target
 
-import edu.gemini.shared.util.immutable.{ Option => GOption }
+import edu.gemini.shared.util.immutable.{Option => GOption}
 import edu.gemini.shared.util.immutable.ScalaConverters._
-import edu.gemini.skycalc.{ Coordinates => SCoordinates }
-import edu.gemini.spModel.core.{Coordinates, Declination, RightAscension}
+import edu.gemini.skycalc.{Coordinates => SCoordinates}
+import edu.gemini.spModel.core.{Angle, Coordinates, Declination, RightAscension}
 import edu.gemini.spModel.pio.{ParamSet, PioFactory}
 
 /** We need a mutable wrapper for Coordinates so that they can be managed by
@@ -11,6 +11,8 @@ import edu.gemini.spModel.pio.{ParamSet, PioFactory}
   */
 final class SPCoordinates(private var coordinates: Coordinates) extends SPSkyObject {
   import SPCoordinates._
+
+  type JDouble = java.lang.Double
 
   def this() =
     this(Coordinates.zero)
@@ -33,14 +35,10 @@ final class SPCoordinates(private var coordinates: Coordinates) extends SPSkyObj
     }
   }
 
-  /** Clone this SPCoordinates. */
   override def clone: SPCoordinates =
     new SPCoordinates(coordinates)
 
-  override def getSkycalcCoordinates(time: GOption[java.lang.Long]): GOption[SCoordinates] =
-    Some(new SCoordinates(coordinates.ra.toDegrees, coordinates.dec.toDegrees)).asGeminiOpt
-
-  override def getCoordinates(when: Option[Long]): Option[Coordinates] =
+  override def getCoordinates(time: Option[Long]): Option[Coordinates] =
     Some(coordinates)
 
   def getCoordinates: Coordinates =
@@ -51,15 +49,56 @@ final class SPCoordinates(private var coordinates: Coordinates) extends SPSkyObj
     _notifyOfUpdate()
   }
 
-  def setRaDegrees(value: Double): Unit =
-    setCoordinates(Coordinates.ra.set(coordinates, RightAscension.fromHours(value)))
+  override def getSkycalcCoordinates(time: GOLong): GOption[SCoordinates] =
+    Some(new SCoordinates(coordinates.ra.toDegrees, coordinates.dec.toDegrees)).asGeminiOpt
 
-  def setDecDegrees(value: Double): Unit =
+  override def setRaDegrees(value: Double): Unit =
+    setCoordinates(Coordinates.ra.set(coordinates, RightAscension.fromDegrees(value)))
+
+  override def setRaHours(value: Double): Unit = {
+    setCoordinates(Coordinates.ra.set(coordinates, RightAscension.fromHours(value)))
+  }
+
+  override def setRaString(hms: String): Unit =
+    for {
+      a <- Angle.parseHMS(hms).toOption
+      c = Coordinates.ra.set(coordinates, RightAscension.fromAngle(a))
+    } setCoordinates(c)
+
+  override def setDecDegrees(value: Double): Unit =
     Declination.fromDegrees(value)
       .foreach(dec => setCoordinates(Coordinates.dec.set(coordinates, dec)))
 
-  def setRaDecDegrees(ra: Double, dec: Double): Unit =
-    Coordinates.fromDegrees(ra, dec).foreach(c => coordinates = c)
+  override def setDecString(dms: String): Unit =
+    for {
+      a <- Angle.parseDMS(dms).toOption
+      d <- Declination.fromAngle(a)
+      c = Coordinates.dec.set(coordinates, d)
+    } setCoordinates(c)
+
+  override def setRaDecDegrees(ra: Double, dec: Double): Unit =
+    Coordinates.fromDegrees(ra, dec).foreach(setCoordinates)
+
+  override def getRaDegrees(time: GOLong): GODouble = {
+    val d: JDouble = coordinates.ra.toDegrees
+    Some(d).asGeminiOpt
+  }
+
+  override def getRaHours(time: GOLong): GODouble = {
+    val d: JDouble = coordinates.ra.toDegrees
+    Some(d).asGeminiOpt
+  }
+
+  override def getRaString(time: GOLong): GOption[String] =
+    Some(coordinates.ra.toAngle.formatHMS).asGeminiOpt
+
+  override def getDecDegrees(time: GOLong): GODouble = {
+    val d: JDouble = coordinates.dec.toDegrees
+    Some(d).asGeminiOpt
+  }
+
+  override def getDecString(time: GOLong): GOption[String] =
+    Some(coordinates.dec.toAngle.formatHMS).asGeminiOpt
 }
 
 object SPCoordinates {
