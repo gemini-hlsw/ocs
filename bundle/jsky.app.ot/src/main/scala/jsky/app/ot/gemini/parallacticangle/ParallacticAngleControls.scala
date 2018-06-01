@@ -6,7 +6,7 @@ import java.text.Format
 import java.util.logging.Logger
 import java.time.{Instant, ZoneId}
 import java.time.format.DateTimeFormatter
-import javax.swing.BorderFactory
+import javax.swing.{ BorderFactory, Icon }
 import javax.swing.border.EtchedBorder
 
 import edu.gemini.pot.sp.ISPNode
@@ -19,9 +19,12 @@ import edu.gemini.spModel.obs.SchedulingBlock.Duration._
 import edu.gemini.spModel.rich.shared.immutable._
 import edu.gemini.shared.util.immutable.{ImOption, Option => JOption}
 import edu.gemini.spModel.obscomp.SPInstObsComp
+import edu.gemini.spModel.syntax.sp.node._
 import jsky.app.ot.editor.OtItemEditor
 import jsky.app.ot.gemini.editor.EphemerisUpdater
+import jsky.app.ot.gemini.schedulingBlock.{ SchedulingBlockDialog, SchedulingBlockUpdate }
 import jsky.app.ot.util.TimeZonePreference
+import jsky.util.Resources
 import jsky.util.gui.DialogUtil
 
 import scala.swing.GridBagPanel.{Anchor, Fill}
@@ -49,6 +52,9 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
   private var formatter: Option[Format] = None
   private var callback:  Runnable = Nop
 
+  def getIcon(name: String): Icon =
+    Resources.getIcon(name, classOf[ParallacticAngleControls])
+
   object ui {
     object relativeTimeMenu extends Menu("Set To:") {
       private val incrementsInMinutes = List(5, 10, 20, 30, 45, 60)
@@ -75,7 +81,7 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
       horizontalTextPosition = Alignment.Left
       horizontalAlignment    = Alignment.Left
       iconTextGap            = 10
-      icon                   = Resources.getIcon("eclipse/menu-trimmed.gif")
+      icon                   = getIcon("eclipse/menu-trimmed.gif")
       margin                 = new Insets(-1, -10, -1, -5)
 
       def rebuild(): Unit = Swing.onEDT {
@@ -119,7 +125,7 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
     }
 
     object dateTimeButton extends Button {
-      icon    = Resources.getIcon("dates.gif")
+      icon    = getIcon("dates.gif")
       tooltip =
         if (isPaUi) "Select the time and duration for the average parallactic angle calculation."
         else        "Time of slew for non-sidereal targets."
@@ -137,7 +143,7 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
     object parallacticAngleFeedback extends Label {
       foreground          = Color.black
       horizontalAlignment = Alignment.Left
-      icon                = Resources.getIcon("eclipse/blank.gif")
+      icon                = getIcon("eclipse/blank.gif")
       iconTextGap         = iconTextGap - 2
 
       /**
@@ -167,10 +173,10 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
           }
 
           if (warningFlag) {
-            icon = Resources.getIcon("eclipse/alert.gif")
+            icon = getIcon("eclipse/alert.gif")
             tooltip = "The PA is not at the average parallactic value."
           } else {
-            icon = Resources.getIcon("eclipse/blank.gif")
+            icon = getIcon("eclipse/blank.gif")
             tooltip = ""
           }
         }
@@ -237,54 +243,17 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
     for {
       e      <- editor
       ispObs <- Option(e.getContextObservation)
-    } {
-      val spObs = ispObs.getDataObject.asInstanceOf[SPObservation]
-      val sameNight = spObs.getSchedulingBlock.asScalaOpt.exists(_.sameObservingNightAs(sb))
-
-      // This is the action that will update the scheduling block
-      val updateSchedBlock: IO[Unit] =
-        for {
-          _ <- IO(spObs.setSchedulingBlock(ImOption.apply(sb)))
-          _ <- IO(ispObs.setDataObject(spObs))
-        } yield ()
-
-      // Ok, this is an IO action that goes and fetches the ephemerides and returns ANOTHER action
-      // that will actually update the model and clear out the glass pane UI.
-      val fetch: IO[IO[Unit]] =
-        if (sameNight) IO(ispObs.silentAndLocked(updateSchedBlock))
-        else EphemerisUpdater.refreshEphemerides(ispObs, sb.start, e.getWindow).map { completion =>
-
-          // This is the action that will update the model
-          val up: IO[Unit] =
-            for {
-              _ <- updateSchedBlock
-              _ <- completion
-            } yield ()
-
-          // Here we bracket the update to disable/enable events and grab/release the program lock
-          ispObs.silentAndLocked(up)
-
+    } SchedulingBlockUpdate.runWithCallback(
+        e.getWindow,
+        sb,
+        List(ispObs),
+        new Runnable() {
+          override def run(): Unit = {
+            callback.run()
+            resetComponents()
+          }
         }
-
-      // Our final program
-      val action: IO[Unit] =
-        for {
-          up <- time(fetch)("fetch ephemerides and construct completion")
-          _  <- time(up)("perform model update without events, holding lock")
-          _  <- edt(callback.run())
-          _  <- edt(resetComponents())
-        } yield ()
-
-      // ... with an exception handler
-      val safe: IO[Unit] =
-        action except { t => edt(DialogUtil.error(peer, t)) }
-
-      // Run it on a short-lived worker
-      new Thread(new Runnable() {
-        override def run() = safe.unsafePerformIO
-      }, s"Ephemeris Update Worker for ${ispObs.getObservationID}").start()
-
-    }
+      )
 
   /**
     * Triggered when the date time button is clicked. Shows the ParallacticAngleDialog to allow the user to
@@ -295,15 +264,26 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
       e <- editor
       o <- editor.map(_.getContextObservation)
     } {
-      val dialog = new ParallacticAngleDialog(
+      val (title, instructions, mode) =
+        if (isPaUi) (
+         "Parallactic Angle Calculation",
+          Some("Select the time and duration for the average parallactic angle calculation."),
+          SchedulingBlockDialog.DateTimeAndDuration
+        ) else (
+          "Observation Scheduling",
+          None,
+          SchedulingBlockDialog.DateTimeOnly
+        )
+
+      val sb = SchedulingBlockDialog.prompt(
+        title,
+        instructions,
         e.getViewer.getParentFrame,
         o,
-        o.getDataObject.asInstanceOf[SPObservation].getSchedulingBlock.asScalaOpt,
-        site.map(_.timezone),
-        isPaUi)
-      dialog.pack()
-      dialog.visible = true
-      updateSchedulingBlock(dialog.schedulingBlock)
+        site,
+        mode)
+
+      sb.foreach(updateSchedulingBlock(_))
     }
   }
 
@@ -388,32 +368,4 @@ object ParallacticAngleControls {
 
   // Precision limit for which two parallactic angles are considered equivalent.
   val Precision = 0.005
-
-  /** Wrap an IO action with a logging timer. */
-  def time[A](io: IO[A])(msg: String): IO[A] =
-    for {
-      start <- IO(System.currentTimeMillis())
-      a     <- io
-      end   <- IO(System.currentTimeMillis())
-      _     <- IO(ParallacticAngleControls.Log.info(s"$msg: ${end - start}ms"))
-    } yield a
-
-  /** Construct an IO action that runs on the EDT. */
-  def edt[A](a: => Unit): IO[Unit] =
-    IO(Swing.onEDT(a))
-
-  /** Some useful operations for ISPNodes. */
-  implicit class ParallacticAngleControlsISPNodeOps(n: ISPNode) {
-
-    def silent[A](a: IO[A]): IO[A] =
-      IO(n.setSendingEvents(false)) *> a ensuring IO(n.setSendingEvents(true))
-
-    def locked[A](a: IO[A]): IO[A] =
-      IO(n.getProgramWriteLock()) *> a ensuring IO(n.returnProgramWriteLock())
-
-    def silentAndLocked[A](a: IO[A]): IO[A] =
-      silent(locked(a))
-
-  }
-
 }

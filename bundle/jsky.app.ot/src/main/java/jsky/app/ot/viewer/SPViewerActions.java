@@ -31,6 +31,7 @@ public final class SPViewerActions {
     public final AbstractViewerAction programAdminAction;
     public final AbstractViewerAction showKeyManagerAction;
     public final AbstractViewerAction setPhase2StatusAction;
+    public final AbstractViewerAction setSchedulingBlockAction;
     public final AbstractViewerAction setExecStatusAction;
     public final AbstractViewerAction navViewerPrevAction;
     public final AbstractViewerAction navViewerNextAction;
@@ -194,6 +195,7 @@ public final class SPViewerActions {
 
         // Observation Actions - General
         setPhase2StatusAction = new Phase2StatusAction(viewer);
+        setSchedulingBlockAction = new SchedulingBlockAction(viewer);
         setExecStatusAction   = new ExecStatusAction(viewer);
         addSiteQualityAction = new AddObsCompAction(viewer, SPSiteQuality.SP_TYPE);
         addTargetListAction = new AddObsCompAction(viewer, TargetObsComp.SP_TYPE);
