@@ -9,6 +9,9 @@ import org.scalacheck.Gen
 import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
 
+/** NOTE: there is no test for format 6 because all known examples have been
+  * reclassified as comets.
+  */
 object HS2Spec extends Specification with ScalaCheck {
 
   import HorizonsService2.{ HS2Error, Row, Search, search, lookupEphemeris, EphemerisEmpty }
@@ -96,12 +99,6 @@ object HS2Spec extends Specification with ScalaCheck {
       ))
     }
 
-    "handle single result (Format 6) A/2017 U7" in {
-      runSearch(Search.Asteroid("A/2017 U7")) must_== \/-(List(
-        Row(HD.AsteroidNewStyle("A/2017 U7"), "A/2017 U7")
-      ))
-    }
-
   }
 
   "major body search" should {
@@ -156,12 +153,6 @@ object HS2Spec extends Specification with ScalaCheck {
 
     "return a populated ephemeris for 'Oumuamua (asteroid, new style)" in {
       runLookup(HD.AsteroidNewStyle("A/2017 U1"), 100).map(_.size).toOption.exists { s =>
-        95 <= s && s <= 105
-      }
-    }
-
-    "return a populated ephemeris for A/2017 U7 (asteroid, new style)" in {
-      runLookup(HD.AsteroidNewStyle("A/2017 U7"), 100).map(_.size).toOption.exists { s =>
         95 <= s && s <= 105
       }
     }
