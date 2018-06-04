@@ -453,10 +453,10 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
 
         // Get the equinox assumed by the coordinate conversion methods (depends on current image)
         if (tp instanceof SPSkyObject) {
-            final SPSkyObject target = (SPSkyObject) tp;
+            final SPSkyObject so = (SPSkyObject) tp;
             final Option<Long> when = _ctx.schedulingBlockStartJava();
-            final double x = target.getRaDegrees(when).getOrElse(0.0);
-            final double y = target.getDecDegrees(when).getOrElse(0.0);
+            final double x = so.getRaDegrees(when).getOrElse(0.0);
+            final double y = so.getDecDegrees(when).getOrElse(0.0);
             final WorldCoords pos = new WorldCoords(x, y, 2000.);
             return worldToScreenCoords(pos);
         }
