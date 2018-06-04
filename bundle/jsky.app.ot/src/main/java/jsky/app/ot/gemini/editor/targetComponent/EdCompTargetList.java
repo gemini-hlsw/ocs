@@ -5,7 +5,6 @@ import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.pot.sp.SPNodeKey;
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.ags.*;
-import edu.gemini.spModel.core.HorizonsDesignation;
 import edu.gemini.spModel.core.Coordinates;
 import edu.gemini.spModel.core.Magnitude;
 import edu.gemini.spModel.core.NonSiderealTarget;
@@ -70,11 +69,12 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             }
         });
 
-        _w.removeButton   .addActionListener(removeListener);
-        _w.copyButton     .addActionListener(copyListener);
-        _w.pasteButton    .addActionListener(pasteListener);
-        _w.duplicateButton.addActionListener(duplicateListener);
-        _w.primaryButton  .addActionListener(primaryListener);
+        _w.removeButton    .addActionListener(removeListener);
+        _w.copyButton      .addActionListener(copyListener);
+        _w.pasteButton     .addActionListener(pasteListener);
+        _w.duplicateButton .addActionListener(duplicateListener);
+        _w.primaryButton   .addActionListener(primaryListener);
+        _w.linkBaseToTarget.addActionListener(linkedBaseListener);
 
         _w.guidingControls.manualGuideStarButton().peer().addActionListener(manualGuideStarListener);
         _w.guidingControls.autoGuideStarGuiderSelector().addSelectionListener(strategy ->
@@ -567,6 +567,22 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         }
 
         _w.positionTable.reinit(newTOC, isBagsUpdate);
+
+
+        // The linkBaseToTarget checkbox is:
+        // 1. visible if the asterism type is a GHOST asterism; and
+        // 2. checked if the base position is None, i.e. linked to the science targets.
+        final Asterism a = env.getAsterism();
+        _w.linkBaseToTarget.removeActionListener(linkedBaseListener);
+        if (a.asterismType() == AsterismType.Single) {
+            _w.linkBaseToTarget.setVisible(false);
+        } else {
+            final GhostAsterism ga = ((GhostAsterism) a);
+            _w.linkBaseToTarget.setVisible(true);
+            _w.linkBaseToTarget.setSelected(ga.base().isEmpty());
+        }
+        _w.linkBaseToTarget.addActionListener(linkedBaseListener);
+
 
         _w.guidingControls.manualGuideStarButton().peer().setVisible(GuideStarSupport.supportsManualGuideStarSelection(getNode()));
         updateGuiding();
@@ -1118,10 +1134,71 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         }
     };
 
-    @SuppressWarnings("FieldCanBeLocal")
     private final ActionListener primaryListener = new ActionListener() {
         public void actionPerformed(final ActionEvent e) {
             _w.positionTable.updatePrimaryStar();
+        }
+    };
+
+    private final ActionListener linkedBaseListener = new ActionListener() {
+        private scala.Option<SPCoordinates> coords(final GhostAsterism ga, final boolean linked) {
+                if (linked)
+                    return ImOption.scalaNone();
+                return ImOption.toScalaOpt(
+                        ImOption.fromScalaOpt(ga.basePosition(ImOption.scalaNone()))
+                        .map(SPCoordinates::new)
+                );
+        }
+
+        @Override
+        public void actionPerformed(final ActionEvent e) {
+            final JCheckBox cb = (JCheckBox) e.getSource();
+
+            final TargetObsComp toc = getDataObject();
+            if (toc == null) return;
+            final TargetEnvironment env = toc.getTargetEnvironment();
+            if (env == null) return;
+            final Asterism oldA = env.getAsterism();
+            if (oldA == null) return;
+
+            // Now depending on the kind of asterism, either make a base SPCoordinates
+            // or eliminate one.
+            final boolean linked = cb.isSelected();
+            final Asterism newA;
+
+            switch (oldA.asterismType()) {
+                case GhostSingleTarget:
+                    final GhostAsterism.SingleTarget gsa = (GhostAsterism.SingleTarget) oldA;
+                    newA = gsa.copy(gsa.target(), coords(gsa, linked));
+                    break;
+                case GhostDualTarget:
+                    final GhostAsterism.DualTarget gda = (GhostAsterism.DualTarget) oldA;
+                    newA = gda.copy(gda.target1(), gda.target2(), coords(gda, linked));
+                    break;
+                case GhostTargetPlusSky:
+                    final GhostAsterism.TargetPlusSky gtsa = (GhostAsterism.TargetPlusSky) oldA;
+                    newA = gtsa.copy(gtsa.target(), gtsa.sky(), coords(gtsa, linked));
+                    break;
+                case GhostSkyPlusTarget:
+                    final GhostAsterism.SkyPlusTarget gsta = (GhostAsterism.SkyPlusTarget) oldA;
+                    newA = gsta.copy(gsta.sky(), gsta.target(), coords(gsta, linked));
+                    break;
+                case GhostHighResolutionTarget:
+                    final GhostAsterism.HighResolutionTarget ghta = (GhostAsterism.HighResolutionTarget) oldA;
+                    newA = ghta.copy(ghta.target(), coords(ghta, linked));
+                    break;
+                case GhostHighResolutionTargetPlusSky:
+                    final GhostAsterism.HighResolutionTargetPlusSky ghtsa = (GhostAsterism.HighResolutionTargetPlusSky) oldA;
+                    newA = ghtsa.copy(ghtsa.target(), ghtsa.sky(), coords(ghtsa, linked));
+                    break;
+                default: // This should never happen.
+                    newA = oldA;
+            }
+
+            if (newA != oldA) {
+                final TargetEnvironment newEnv = env.setAsterism(newA);
+                toc.setTargetEnvironment(newEnv);
+            }
         }
     };
 

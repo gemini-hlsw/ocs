@@ -96,15 +96,19 @@ public class TpeAsterismFeature extends TpePositionFeature {
         final TargetEnvironment env = getTargetEnvironment();
         if (env == null) return;
 
+        // Draw the sky positions first, so that overlapping targets will take precedence.
+        System.out.println("Drawing sky positions: " + env.getCoordinates().size());
+        env.getAsterism().allSpCoordinatesJava().foreach(spc ->
+                drawItem(g, Color.cyan, pm.getLocationFromTag(spc))
+        );
+
         // Draw the targets.
+        System.out.println("Drawing sky positions: " + env.getAsterism().allSpCoordinatesJava().size());
+        System.out.println("Drawing targets...");
         env.getAsterism().allSpTargetsJava().foreach(spt ->
             drawItem(g, Color.yellow, pm.getLocationFromTag(spt))
         );
 
-        // Draw the sky positions.
-        env.getAsterism().allSpCoordinatesJava().foreach(spc ->
-            drawItem(g, Color.orange, pm.getLocationFromTag(spc))
-        );
     }
 
     /**

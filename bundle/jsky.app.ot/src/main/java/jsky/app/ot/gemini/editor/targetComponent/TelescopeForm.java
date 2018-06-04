@@ -85,6 +85,11 @@ class TelescopeForm extends JPanel {
         setToolTipText("Target Type");
     }};
 
+    final JCheckBox linkBaseToTarget = new JCheckBox("Link base to target") {{
+        setToolTipText("Link the base position to the science target(s)");
+        setOpaque(false);
+    }};
+
     final TextBoxWidget guideGroupName = new TextBoxWidget() {{
         setToolTipText("Guide Group name (optional)");
         setHorizontalAlignment(JTextField.LEFT);
@@ -108,20 +113,28 @@ class TelescopeForm extends JPanel {
         setBackground(new Color(238, 238, 238));
         setBorder(new EmptyBorder(2, 2, 2, 2));
         setLayout(new GridBagLayout());
-        final JPanel spacerPanel = new JPanel() {{
+        final JPanel leftSpacerPanel = new JPanel() {{
             setBackground(null);
             setOpaque(false);
             setLayout(new BorderLayout());
         }};
-        add(newMenuBar,             new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0,  0, 0, 0), 0, 0));
-        add(removeButton,           new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0,  0, 0, 0), 0, 0));
-        add(copyButton,             new GridBagConstraints(2, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 10, 0, 0), 0, 0));
-        add(pasteButton,            new GridBagConstraints(3, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0,  0, 0, 0), 0, 0));
-        add(duplicateButton,        new GridBagConstraints(4, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0,  0, 0, 0), 0, 0));
-        add(primaryButton,          new GridBagConstraints(5, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 10, 0, 0), 0, 0));
-        add(tag,                    new GridBagConstraints(6, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 10, 0, 0), 0, 0));
-        add(spacerPanel,            new GridBagConstraints(7, 0, 1, 1, 1.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,  0, 0, 0), 0, 0));
-        add(guidingControls.peer(), new GridBagConstraints(8, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0,  0, 0, 0), 0, 0));
+        final JPanel rightSpacerPanel = new JPanel() {{
+            setBackground(null);
+            setOpaque(false);
+            setLayout(new BorderLayout());
+        }};
+
+        add(newMenuBar,             new GridBagConstraints( 0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0,  0, 0, 0), 0, 0));
+        add(removeButton,           new GridBagConstraints( 1, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0,  0, 0, 0), 0, 0));
+        add(copyButton,             new GridBagConstraints( 2, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 10, 0, 0), 0, 0));
+        add(pasteButton,            new GridBagConstraints( 3, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0,  0, 0, 0), 0, 0));
+        add(duplicateButton,        new GridBagConstraints( 4, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0,  0, 0, 0), 0, 0));
+        add(primaryButton,          new GridBagConstraints( 5, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 10, 0, 0), 0, 0));
+        add(tag,                    new GridBagConstraints( 6, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 10, 0, 0), 0, 0));
+        add(leftSpacerPanel,        new GridBagConstraints( 7, 0, 1, 1, 1.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,  0, 0, 0), 0, 0));
+        add(linkBaseToTarget,       new GridBagConstraints( 8, 0, 1, 1, 1.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,  0, 0, 0), 0, 0));
+        add(rightSpacerPanel,       new GridBagConstraints( 9, 0, 1, 1, 1.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,  0, 0, 0), 0, 0));
+        add(guidingControls.peer(), new GridBagConstraints(10, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0,  0, 0, 0), 0, 0));
     }};
 
     final TelescopePosTableWidget positionTable;
