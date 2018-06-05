@@ -229,9 +229,10 @@ public class ConfigCreator {
 
     public ConfigCreatorResult createGsaoiConfig(GsaoiParameters gsaoiParams, int numExp) {
         ConfigCreatorResult result = createCommonConfig(numExp);
-        final double sf = obsDetailParams.calculationMethod().sourceFraction();
+        double sourceFraction = itcParams.observation().sourceFraction();
         int stepNum = 0;
         int numLargeOffsets = gsaoiParams.largeSkyOffset();
+        boolean error = false;
 
         GuideOption g = StandardGuideOptions.Value.guide;
         GuideOption p = StandardGuideOptions.Value.park;
@@ -253,63 +254,71 @@ public class ConfigCreator {
          *    5. on-source fraction !=1.0 && !=0.5: Warning, no overhead calculations.
          *
          */
-        if (numLargeOffsets == 0) {
-            if (sf == 1) {
-                Collections.fill(guideStatusList, g);
-                result.setOffsetMessage("ABAB dithering pattern and no sky offsets");
-            } else if (sf == 0.5) {
-                List<GuideOption> steps = Arrays.asList(g, p);
-                result.setOffsetMessage("science-sky-sky-science pattern with "+GSAOI_SMALL_SKY_OFFSET+"\" sky offset and 4-point ABAB dithering at each position");
-                while (guideStatusList.size() < numExp) {
-                    int rest = numExp - guideStatusList.size();
-                    int chunkLength;
-                    if (rest >= 8)
-                        chunkLength = 4;
-                    else
-                        chunkLength = rest / 2;
 
-                    guideStatusList.addAll(Collections.nCopies(chunkLength, steps.get(0)));
-                    guideStatusList.addAll(Collections.nCopies(chunkLength, steps.get(1)));
+        if ((sourceFraction != 1.0) && (sourceFraction != 0.5)) {
+            result.addWarning("Warning: Observation overheads can only be calculated for the fraction of exposures on source 1.0 or 0.5.");
+            error = true;
+        }
 
-                    Collections.reverse(steps);
+        if (!error) {
+            if (numLargeOffsets == 0) {
+                if (sourceFraction == 1) {
+                    Collections.fill(guideStatusList, g);
+                    result.setOffsetMessage("ABAB dithering pattern and no sky offsets");
+                } else if (sourceFraction == 0.5) {
+                    List<GuideOption> steps = Arrays.asList(g, p);
+                    result.setOffsetMessage("science-sky-sky-science pattern with " + GSAOI_SMALL_SKY_OFFSET + "\" sky offset and 4-point dithering");
+                    while (guideStatusList.size() < numExp) {
+                        int rest = numExp - guideStatusList.size();
+                        int chunkLength;
+                        if (rest >= 8)
+                            chunkLength = 4;
+                        else
+                            chunkLength = rest / 2;
+
+                        guideStatusList.addAll(Collections.nCopies(chunkLength, steps.get(0)));
+                        guideStatusList.addAll(Collections.nCopies(chunkLength, steps.get(1)));
+
+                        Collections.reverse(steps);
+                    }
                 }
-            }
-        } else {
-            double sourceFraction = itcParams.observation().sourceFraction();
-            int exposuresPerGroup = numExp / numLargeOffsets;
-            int leftOver = numExp % numLargeOffsets;
-            boolean error = false;
+            } else {
+                int exposuresPerGroup = numExp / numLargeOffsets;
+                int leftOver = numExp % numLargeOffsets;
 
-            if ((sourceFraction != 1.0) && (sourceFraction != 0.5)) {
-                result.addWarning("Warning: Observation overheads can only be calculated for <b>fraction with source</b> values 1.0 or 0.5.");
-                error = true;
-            }
-            if (sourceFraction == 1.0) {
-                result.addWarning("Warning: Observation overheads cannot be calculated: for selected <b>fraction with source</b> value 1.0 <b>number of sky offsets >5'</b> should be 0.");
-                error = true;
-            }
-
-            if ((exposuresPerGroup % 2 != 0) || (leftOver % 2 != 0)) {
-                result.addWarning("Warning: Observation overheads cannot be calculated: uneven number of object and sky exposures. Please change <b>number of exposures</b> or <b>number of sky offsets >5'</b>.");
-                error = true;
-            }
-
-            if (!error) {
-                int[] ditheringPoints = new int[numLargeOffsets];
-                int totalAssigned = 0;
-                result.setOffsetMessage("science-sky-science-sky pattern with "+GSAOI_LARGE_SKY_OFFSET+"\" sky offset and ABAB dithering at each position");
-
-                for (int i = 0; i < (numLargeOffsets - 1); i++) {
-                    ditheringPoints[i] = exposuresPerGroup;
-                    totalAssigned += exposuresPerGroup;
+                if (numLargeOffsets > numExp / 2) {
+                    result.addWarning("Warning: Observation overheads cannot be calculated: number of sky offsets >5' is too large.");
+                    error = true;
                 }
-                ditheringPoints[numLargeOffsets - 1] = numExp - totalAssigned;
 
-                for (int exps : ditheringPoints) {
-                    int sub = exps / 2;
+                if (sourceFraction == 1.0) {
+                    result.addWarning("Warning: Observation overheads cannot be calculated: the fraction of exposures on source is incompatible with the number of sky offsets >5'.");
+                    error = true;
+                }
 
-                    guideStatusList.addAll(Collections.nCopies(sub, g));
-                    guideStatusList.addAll(Collections.nCopies(sub, p));
+                if ((exposuresPerGroup % 2 != 0) || (leftOver % 2 != 0)) {
+                    result.addWarning("Warning: Observation overheads cannot be calculated: uneven number of object and sky exposures. Please change number of exposures, or number of sky offsets >5'.");
+                    error = true;
+                }
+
+
+                if (!error) {
+                    int[] ditheringPoints = new int[numLargeOffsets];
+                    int totalAssigned = 0;
+                    result.setOffsetMessage("science-sky-science-sky pattern with " + GSAOI_LARGE_SKY_OFFSET + "\" sky offset and ABAB dithering at each position");
+
+                    for (int i = 0; i < (numLargeOffsets - 1); i++) {
+                        ditheringPoints[i] = exposuresPerGroup;
+                        totalAssigned += exposuresPerGroup;
+                    }
+                    ditheringPoints[numLargeOffsets - 1] = numExp - totalAssigned;
+
+                    for (int exps : ditheringPoints) {
+                        int sub = exps / 2;
+
+                        guideStatusList.addAll(Collections.nCopies(sub, g));
+                        guideStatusList.addAll(Collections.nCopies(sub, p));
+                    }
                 }
             }
         }
@@ -334,9 +343,7 @@ public class ConfigCreator {
                 }
                 previousGuideStatus = currentGuideStatus;
             }
-
             stepNum = stepNum + 1;
-
         }
         return result;
     }

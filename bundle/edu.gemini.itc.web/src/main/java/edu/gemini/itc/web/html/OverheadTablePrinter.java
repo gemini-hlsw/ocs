@@ -165,7 +165,7 @@ public class OverheadTablePrinter {
         if (numAcq == 1) {
             setupStr = String.format("%.1f s", pta.setup.time / 1000.0);
         } else if (numAcq > 1) {
-            setupStr = String.format("%d visits x %.1f s", numAcq, pta.setup.time / 1000.0);
+            setupStr = String.format("%d acq x %.1f s", numAcq, pta.setup.time / 1000.0);
         }
         buf.append("<tr>");
         buf.append("<td>").append("Setup ").append("</td>");
@@ -230,7 +230,7 @@ public class OverheadTablePrinter {
             } else if ((category.equals("Readout") && (coadds!=1) && (readoutTimePerCoadd != 0) )) {
                 secStr = String.format("%d exp x (%d coadds x %.1f s)", numOfExposures, coadds, readoutTimePerCoadd, ct.time/1000.0);
             } else {
-                secStr = String.format("%d exp x %.1f s", numOfExposures, ct.time/1000.0);
+                secStr = String.format("%d x %.1f s", numOfExposures, ct.time/1000.0);
             }
 
             buf.append("<td align=\"right\"> ").append(secStr).append("</td>");
