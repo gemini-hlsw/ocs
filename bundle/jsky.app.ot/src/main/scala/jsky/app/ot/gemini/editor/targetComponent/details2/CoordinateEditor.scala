@@ -14,9 +14,7 @@ import scalaz._
 import Scalaz._
 
 sealed class CoordinateEditor[T <: SPSkyObject, S](initializer: () => T,
-                                                   raLens: scalaz.@?>[S,RightAscension],
-                                                   decLens: scalaz.@?>[S,Declination],
-                                                   coordsExtractor: S => Option[Coordinates],
+                                                   coordsLens: S @?> Coordinates,
                                                    mutableSetter: T => S => Unit,
                                                    getter: T => S
                                             ) extends TelescopePosEditor[T] with ReentrancyHack {
@@ -27,11 +25,13 @@ sealed class CoordinateEditor[T <: SPSkyObject, S](initializer: () => T,
     w.setColumns(10)
     w.setMinimumSize(w.getPreferredSize)
   }
+  private val raLens = coordsLens >=> Coordinates.ra.partial
+  private val decLens = coordsLens >=> Coordinates.dec.partial
 
   ra.addWatcher(watcher { s =>
     nonreentrant {
       Angle.parseHMS(clean(s)).map(RightAscension.fromAngle) match {
-        case -\/(e) => ra.setForeground(Color.RED)
+        case -\/(_) => ra.setForeground(Color.RED)
         case \/-(a) =>
           ra.setForeground(Color.BLACK)
           raLens.set(getter(spo), a).foreach(mutableSetter(spo))
@@ -42,7 +42,7 @@ sealed class CoordinateEditor[T <: SPSkyObject, S](initializer: () => T,
   dec.addWatcher(watcher { s =>
     nonreentrant {
       Angle.parseDMS(clean(s)).map(Declination.fromAngle) match {
-        case -\/(_) | \/-(None) => ra.setForeground(Color.RED)
+        case -\/(_) | \/-(None) => dec.setForeground(Color.RED)
         case \/-(Some(a)) =>
           dec.setForeground(Color.BLACK)
           decLens.set(getter(spo), a).foreach(mutableSetter(spo))
@@ -53,11 +53,9 @@ sealed class CoordinateEditor[T <: SPSkyObject, S](initializer: () => T,
   def edit(ctx: GOption[ObsContext], spo0: T, node: ISPNode): Unit = {
     spo = spo0
     nonreentrant {
-      coordsExtractor(getter(spo)).foreach { cs =>
-        println(s"setting ra to ${cs.ra.toAngle.formatHMS}")
+      coordsLens.get(getter(spo)).foreach { cs =>
         ra.setText(cs.ra.toAngle.formatHMS)
         ra.setForeground(Color.BLACK)
-        println(s"setting dec to ${cs.dec.formatDMS}")
         dec.setText(cs.dec.formatDMS)
         dec.setForeground(Color.BLACK)
       }
@@ -70,13 +68,9 @@ sealed class CoordinateEditor[T <: SPSkyObject, S](initializer: () => T,
 }
 
 final class SPTargetCoordinateEditor extends CoordinateEditor[SPTarget, Target](
-  () => new SPTarget(),
-  Target.coords >=> Coordinates.ra .partial,
-  Target.coords >=> Coordinates.dec.partial,
-  Target.coords.get, _.setTarget, _.getTarget)
+  () => new SPTarget(), Target.coords, _.setTarget, _.getTarget
+)
 
 final class SPCoordinateEditor extends CoordinateEditor[SPCoordinates, Coordinates](
-  () => new SPCoordinates(),
-  Coordinates.ra.partial,
-  Coordinates.dec.partial,
-  c => Some(c), _.setCoordinates, _.getCoordinates)
+  () => new SPCoordinates(), PLens.plensId[Coordinates], _.setCoordinates, _.getCoordinates
+)

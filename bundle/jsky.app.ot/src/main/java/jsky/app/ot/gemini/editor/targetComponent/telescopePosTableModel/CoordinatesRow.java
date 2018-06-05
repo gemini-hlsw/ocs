@@ -50,6 +50,6 @@ public abstract class CoordinatesRow extends Row {
     }
 
     public String decStringExtractor() {
-        return coordinates.getCoordinates().dec().toAngle().formatHMS();
+        return coordinates.getCoordinates().dec().formatDMS();
     }
 }

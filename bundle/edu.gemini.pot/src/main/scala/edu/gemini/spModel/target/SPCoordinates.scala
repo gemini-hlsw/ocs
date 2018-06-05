@@ -6,10 +6,11 @@ import edu.gemini.skycalc.{Coordinates => SCoordinates}
 import edu.gemini.spModel.core.{Angle, Coordinates, Declination, RightAscension}
 import edu.gemini.spModel.pio.{ParamSet, PioFactory}
 
+
 /** We need a mutable wrapper for Coordinates so that they can be managed by
   * an editor and the TPE.
   */
-final class SPCoordinates(private var coordinates: Coordinates) extends SPSkyObject {
+final class SPCoordinates(var coordinates: Coordinates) extends SPSkyObject {
   import SPCoordinates._
 
   type JDouble = java.lang.Double

@@ -4,6 +4,7 @@ import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.core.Angle;
 import edu.gemini.spModel.core.Coordinates;
+import edu.gemini.spModel.gemini.ghost.GhostAsterism;
 import edu.gemini.spModel.guide.*;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
@@ -562,10 +563,20 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
 
     /**
      * Select the base position, updating the TargetSelection's target, and set the relevant row in the table.
-     * TODO:ASTERISM We just assume right now that the first target is always the base position.
-     * TODO:ASTERISM This is not always the case! If the base is coordinates, then what?
      */
     private void selectBasePos() {
+        final Asterism a = _env.getAsterism();
+
+        // If this is a GHOST asterism, and the base coordinates exist, that is the base.
+        if (a instanceof GhostAsterism) {
+            final GhostAsterism ga = (GhostAsterism) a;
+            if (ga.base().isDefined()) {
+                selectCoordinates(ga.base().get());
+                return;
+            }
+        }
+
+        // Otherwise, the first target is always the base.
         final SPTarget t = _env.getAsterism().allSpTargetsJava().head();
         selectTarget(t);
     }

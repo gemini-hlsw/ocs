@@ -525,7 +525,7 @@ final public class TelescopePosTableModel extends AbstractTableModel {
      */
     public Option<Integer> rowIndexForTarget(final SPTarget target) {
         if (target == null) return None.instance();
-
+        System.out.println("Looking up row index for target...");
         int index = 0;
         for (final Row row : rows) {
             if (row instanceof TargetRow && ((TargetRow) row).target() == target)

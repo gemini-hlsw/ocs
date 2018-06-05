@@ -241,6 +241,9 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
      * Auxiliary method to determine if the current selection is base target.
      */
     private boolean selectionIsBaseTarget() {
+        final ISPObsComponent node = getContextTargetObsComp();
+        if (TargetSelection.getIndex(node).forall(i -> i != 0))
+            return false;
         final Option<SPTarget> t = basePosition().toOptionLeft();
         return selectedTarget().exists(st -> t.exists(st::equals));
     }
@@ -249,6 +252,9 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
      * Auxiliary method to determine if the current selection is base coordinates.
      */
     private boolean selectionIsBaseCoordinates() {
+        final ISPObsComponent node = getContextTargetObsComp();
+        if (TargetSelection.getIndex(node).forall(i -> i != 0))
+            return false;
         final Option<SPCoordinates> c = basePosition().toOption();
         return selectedCoordinates().exists(sc -> c.exists(sc::equals));
     }
@@ -712,8 +718,10 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
         // Update the editors for targets and coordinates.
         // This only acts on the one selected.
-        updateTargetDetails(env);
-        updateCoordinateDetails(env);
+        if (selectionIsCoordinates())
+            updateCoordinateDetails(env);
+        else
+            updateTargetDetails(env);
 
         // Set the status of the buttons and detail editors.
         // We do this for both coordinates and targets, as the methods check which is selected.
