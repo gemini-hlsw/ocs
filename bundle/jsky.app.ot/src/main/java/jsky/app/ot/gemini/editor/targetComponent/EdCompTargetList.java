@@ -134,6 +134,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             // update them explicitly so they behave as if they were contained
             // in the panel.
             updateDetailEditorEnabledState(enabled);
+            updateCoordinateEditorEnabledState(enabled);
         }
 
         final SPInstObsComp inst = getContextInstrumentDataObject();
@@ -161,6 +162,10 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     private void updateDetailEditorEnabledState(final boolean enabled) {
         // Update enabled state for all detail widgets.
         _w.detailEditor.allEditorsJava().forEach(ed -> updateEnabledState(new Component[]{ed}, enabled));
+    }
+
+    private void updateCoordinateEditorEnabledState(final boolean enabled) {
+        updateEnabledState(new Component[]{_w.coordinateEditor}, enabled);
     }
 
     /**
@@ -242,7 +247,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
     /**
      * Auxiliary method to determine if the current selection is base coordinates.
-     * TODO:SPCOORDINATES I think we want to compare references here, like we do for selectionIsBaseTarget.
      */
     private boolean selectionIsBaseCoordinates() {
         final Option<SPCoordinates> c = basePosition().toOption();
@@ -362,7 +366,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
     /**
      * Update the UI components when coordinates become selected.
-     * TODO:GHOST More here to show the UI we need?
      */
     private void updateUIForCoordinates() {
         if (selectedCoordinates().isEmpty()) return;
@@ -373,7 +376,9 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         _w.pasteButton.setEnabled(editable);
         _w.duplicateButton.setEnabled(false);
         _w.tag.setEnabled(false);
+        updateCoordinateEditorEnabledState(editable && !selectionIsBaseCoordinates());
     }
+
     /**
      * Update the menu items that allow the addition of guide stars. These must be disabled for the automatic group
      * or if we are currently on the base or a user target.
@@ -658,8 +663,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     private void refreshAll() {
         // We will either have coordinates or a target selected at this point.
         _w.guideGroupPanel.setVisible(false);
-        // TODO:GHOST We need to add the code here for a Coordinate editor.
-        // _w.coordinateEditor.setVisible(selectionIsCoordinates());
+        _w.coordinateEditor.setVisible(selectionIsCoordinates());
         _w.detailEditor.setVisible(!selectionIsCoordinates());
 
         // Get all the legally available guiders in the current context.
@@ -709,7 +713,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         // Update the editors for targets and coordinates.
         // This only acts on the one selected.
         updateTargetDetails(env);
-        updateCoordinateDetails();
+        updateCoordinateDetails(env);
 
         // Set the status of the buttons and detail editors.
         // We do this for both coordinates and targets, as the methods check which is selected.
@@ -722,9 +726,8 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         selectedTarget().foreach(t -> _w.detailEditor.edit(getObsContext(env), t, getNode()));
     }
 
-    // TODO:GHOST Fill in the coordinate editor here.
-    private void updateCoordinateDetails() {
-        selectedCoordinates().foreach(c -> {});
+    private void updateCoordinateDetails(final TargetEnvironment env) {
+        selectedCoordinates().foreach(c -> _w.coordinateEditor.edit(getObsContext(env), c, getNode()));
     }
 
     private void showTargetTag() {
@@ -922,12 +925,12 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             selectedTarget().foreach(t -> t.deleteWatcher(posWatcher));
             setSelectionToCoordinates(coords);
 
-            // TODO:GHOST
             _w.guideGroupPanel.setVisible(false);
-            // _w.coordinateEditor.setVisible(true);
+            _w.coordinateEditor.setVisible(true);
             _w.detailEditor.setVisible(false);
 
-            // TODO:GHOST: add configuration of UI for coordinate editor.
+            updateCoordinateEditorEnabledState(!selectionIsBaseCoordinates());
+            updateCoordinateDetails(env);
             updateUIForCoordinates();
         });
 
@@ -936,9 +939,8 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             selectedTarget().foreach(t -> t.deleteWatcher(posWatcher));
             setSelectionToGroup(igg);
 
-            // TODO:GHOST
             _w.guideGroupPanel.setVisible(true);
-            // _w.coordinateEditor.setVisible(false);
+            _w.coordinateEditor.setVisible(false);
             _w.detailEditor.setVisible(false);
 
             // N.B. don't trim, otherwise user can't include space in group name

@@ -17,7 +17,7 @@ import scala.swing.GridBagPanel.Fill
 import scalaz._
 import Scalaz._
 
-class TargetFeedbackEditor extends TelescopePosEditor {
+class TargetFeedbackEditor extends TelescopePosEditor[SPTarget] {
   private val tab: TargetFeedbackEditor.Table = new TargetFeedbackEditor.Table
 
   def getComponent: Component = tab.peer

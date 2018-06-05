@@ -16,7 +16,7 @@ import edu.gemini.shared.util.immutable.ScalaConverters._
 import scala.swing.Swing
 import scalaz._, Scalaz._
 
-class EphemerisEditor extends TelescopePosEditor with ReentrancyHack {
+class EphemerisEditor extends TelescopePosEditor[SPTarget] with ReentrancyHack {
 
   @volatile private[this] var target: Option[NonSiderealTarget] = None
 

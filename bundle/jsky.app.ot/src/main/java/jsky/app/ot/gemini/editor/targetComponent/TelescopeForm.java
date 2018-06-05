@@ -1,6 +1,7 @@
 package jsky.app.ot.gemini.editor.targetComponent;
 
 import edu.gemini.shared.gui.ButtonFlattener;
+import jsky.app.ot.gemini.editor.targetComponent.details2.SPCoordinatesEditorPanel;
 import jsky.app.ot.gemini.editor.targetComponent.details2.TargetDetailPanel;
 import jsky.app.ot.gemini.parallacticangle.ParallacticAngleControls;
 import jsky.util.gui.Resources;
@@ -17,6 +18,7 @@ class TelescopeForm extends JPanel {
 
     final GuidingControls guidingControls = new GuidingControls();
     final TargetDetailPanel detailEditor = new TargetDetailPanel();
+    final SPCoordinatesEditorPanel coordinateEditor = new SPCoordinatesEditorPanel();
     final ParallacticAngleControls schedulingBlock = new ParallacticAngleControls(false);
 
     final JMenu newMenu = new JMenu() {{
@@ -193,9 +195,15 @@ class TelescopeForm extends JPanel {
             insets = new Insets(5, 0, 5, 0);
         }});
 
-        add(guideGroupPanel, new GridBagConstraints() {{
+        add(coordinateEditor, new GridBagConstraints() {{
             gridx = 0;
             gridy = 3;
+            fill = HORIZONTAL;
+            insets = new Insets(5, 0, 5, 0);
+        }});
+        add(guideGroupPanel, new GridBagConstraints() {{
+            gridx = 0;
+            gridy = 4;
             fill = HORIZONTAL;
             insets = new Insets(5, 0, 5, 0);
         }});

@@ -23,7 +23,7 @@ import scalaz.syntax.id._
 
 // An editor for a list of doubles, with a titled border
 case class NumericPropertySheet[A](title: Option[String], f: SPTarget => A, props: NumericPropertySheet.Prop[A, _]*)
-  extends JPanel with TelescopePosEditor with Publisher with ReentrancyHack {
+  extends JPanel with TelescopePosEditor[SPTarget] with Publisher with ReentrancyHack {
 
   private[this] var spt: SPTarget = new SPTarget // never null
 

@@ -22,7 +22,7 @@ import scalaz._, Scalaz._
 
 // An editor for a list of propertie taken from a Target
 case class NumericPropertySheet2[A <: Target](title: Option[String], f: SPTarget => A, props: NumericPropertySheet2.Prop[A]*)
-  extends JPanel with TelescopePosEditor with Publisher with ReentrancyHack {
+  extends JPanel with TelescopePosEditor[SPTarget] with Publisher with ReentrancyHack {
 
   private[this] var spt: SPTarget = new SPTarget // never null
 

@@ -24,7 +24,7 @@ import scalaz.{ Ordering => _, _ }, Scalaz._
 import language.implicitConversions
 
 // Ported from Java, so slightly nasty.
-class MagnitudeEditor2 extends TelescopePosEditor {
+class MagnitudeEditor2 extends TelescopePosEditor[SPTarget] {
 
   val MAG_FORMAT = new DecimalFormat("0.0##")
   def formatBrightness(mag: Magnitude): String = MAG_FORMAT.format(mag.value)

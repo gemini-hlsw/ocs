@@ -13,7 +13,7 @@ import jsky.app.ot.gemini.editor.targetComponent.{TargetFeedbackEditor, TargetFe
 import scala.collection.JavaConverters._
 import scalaz.syntax.id._
 
-final class TargetDetailPanel extends JPanel with TelescopePosEditor with ReentrancyHack {
+final class TargetDetailPanel extends JPanel with TelescopePosEditor[SPTarget] with ReentrancyHack {
 
   private val nonsidereal = new NonSiderealDetailEditor
   private val sidereal    = new SiderealDetailEditor

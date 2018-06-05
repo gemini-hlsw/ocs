@@ -107,9 +107,6 @@ final public class TelescopePosTableModel extends AbstractTableModel {
         numRows            = countRows();
     }
 
-    // TODO:GHOST Should we have a third type of base, e.g. DependentBase, which
-    // TODO:GHOST depends on the targets?
-
     // We have one method per Asterism for the header rows, and then the remaining
     // rows proceed in a standard way.
     private List<Row> createSingleAsterismRows() {

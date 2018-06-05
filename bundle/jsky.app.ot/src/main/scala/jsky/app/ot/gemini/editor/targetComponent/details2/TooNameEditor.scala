@@ -10,7 +10,7 @@ import jsky.util.gui.{TextBoxWidget, TextBoxWidgetWatcher}
 
 import scalaz.Scalaz._
 
-final class TooNameEditor extends TelescopePosEditor with ReentrancyHack {
+final class TooNameEditor extends TelescopePosEditor[SPTarget] with ReentrancyHack {
   private[this] var spt = new SPTarget // never null
 
   val name = new TextBoxWidget <| { w =>
