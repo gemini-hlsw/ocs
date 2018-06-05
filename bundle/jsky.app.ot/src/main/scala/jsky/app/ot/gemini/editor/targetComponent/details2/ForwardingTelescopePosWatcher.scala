@@ -1,36 +1,32 @@
 package jsky.app.ot.gemini.editor.targetComponent.details2
 
 import edu.gemini.pot.sp.ISPNode
-import edu.gemini.shared.util.immutable.{ Option => GOption, None => GNone }
+import edu.gemini.shared.util.immutable.{None => GNone, Option => GOption}
 import edu.gemini.spModel.obs.context.ObsContext
-import edu.gemini.spModel.target.SPTarget
-import edu.gemini.spModel.target.TelescopePosWatcher
-import edu.gemini.spModel.target.WatchablePos
+import edu.gemini.spModel.target.{SPSkyObject, TelescopePosWatcher, WatchablePos}
 import jsky.app.ot.gemini.editor.targetComponent.TelescopePosEditor
 
-/** This is only used with the TargetDetailPanel, so we don't need to worry
-  * about SPCoordinates.
-  */
-final class ForwardingTelescopePosWatcher(tpe: TelescopePosEditor[SPTarget])
-  extends TelescopePosEditor[SPTarget] with TelescopePosWatcher {
+final class ForwardingTelescopePosWatcher[T <: SPSkyObject](tpe: TelescopePosEditor[T],
+                                                            initializer: () => T)
+  extends TelescopePosEditor[T] with TelescopePosWatcher {
 
-  private[this] var spt:  SPTarget = new SPTarget
+  private[this] var spt:  T = initializer()
   private[this] var ctx:  GOption[ObsContext] = GNone.instance[ObsContext]
   private[this] var node: ISPNode = null
 
-  def edit(obsContext: GOption[ObsContext], spTarget: SPTarget, ispNode: ISPNode): Unit = {
+  def edit(obsContext: GOption[ObsContext], spSkyObject: T, ispNode: ISPNode): Unit = {
     require(obsContext != null, "obsContext should never be null")
-    require(spTarget   != null, "spTarget should never be null")
+    require(spSkyObject != null, "spSkyObject should never be null")
 
     // If this is a new target, switch our watchers
-    if (spt != spTarget) {
+    if (spt != spSkyObject) {
       spt.deleteWatcher(this)
-      spTarget.addWatcher(this)
+      spSkyObject.addWatcher(this)
     }
 
     // Remember the context and target so `telescopePosUpdate` can call `edit`
     ctx  = obsContext
-    spt  = spTarget
+    spt  = spSkyObject
     node = ispNode
 
   }

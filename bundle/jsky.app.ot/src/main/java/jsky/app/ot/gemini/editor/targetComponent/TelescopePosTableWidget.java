@@ -211,6 +211,7 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
         startWatchingSelection();
 
         _env.getTargets().foreach(t -> t.addWatcher(TelescopePosTableWidget.this));
+        _env.getCoordinates().foreach(c -> c.addWatcher(TelescopePosTableWidget.this));
 
         final boolean editable = OTOptions.isEditable(owner.getProgram(), owner.getContextObservation());
         dragSource.setEditable(editable);

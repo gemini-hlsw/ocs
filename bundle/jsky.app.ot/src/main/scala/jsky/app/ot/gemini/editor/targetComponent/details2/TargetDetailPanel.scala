@@ -25,7 +25,7 @@ final class TargetDetailPanel extends JPanel with TelescopePosEditor[SPTarget] w
   // This doodad will ensure that any change event coming from the SPTarget will get turned into
   // a call to `edit`, so we don't have to worry about that case everywhere. Everything from here
   // on down only needs to care about implementing `edit`.
-  val tpw = new ForwardingTelescopePosWatcher(this)
+  val tpw = new ForwardingTelescopePosWatcher(this, () => new SPTarget())
 
   // Fields
   private[this] var tde: TargetDetailEditor  = null

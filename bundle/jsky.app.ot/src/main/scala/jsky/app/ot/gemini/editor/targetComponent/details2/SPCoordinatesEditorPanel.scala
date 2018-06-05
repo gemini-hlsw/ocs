@@ -18,9 +18,15 @@ class SPCoordinatesEditorPanel extends JPanel with TelescopePosEditor[SPCoordina
   // Editor Components
   val coordsEditor = new SPCoordinateEditor
 
+  // This doodad will ensure that any change event coming from the SPTarget will get turned into
+  // a call to `edit`, so we don't have to worry about that case everywhere. Everything from here
+  // on down only needs to care about implementing `edit`.
+  val tpw = new ForwardingTelescopePosWatcher(this, () => new SPCoordinates())
+
   override def edit(ctx: GOption[ObsContext], spCoordinates: SPCoordinates, node: ISPNode): Unit = {
     require(ctx           != null, "obsContext should never be null")
     require(spCoordinates != null, "spCoordinates should never be null")
+    tpw.         edit(ctx, spCoordinates, node)
     coordsEditor.edit(ctx, spCoordinates, node)
   }
 
