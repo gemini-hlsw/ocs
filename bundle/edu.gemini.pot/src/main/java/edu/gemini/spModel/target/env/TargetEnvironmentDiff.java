@@ -24,18 +24,10 @@ public final class TargetEnvironmentDiff implements Serializable {
      * Gets the difference between two target environments considering all the
      * targets in each environment.
      */
-    public static TargetEnvironmentDiff all(TargetEnvironment oldEnv, TargetEnvironment newEnv) {
+    public static TargetEnvironmentDiff all(final TargetEnvironment oldEnv, final TargetEnvironment newEnv) {
         return new TargetEnvironmentDiff(oldEnv, newEnv,
                 oldEnv.getTargets(), newEnv.getTargets(),
                 oldEnv.getCoordinates(), newEnv.getCoordinates());
-    }
-
-    /**
-     * Gets the difference between two target environments considering only the
-     * guide stars in the primary guide group of each environment.
-     */
-    public static TargetEnvironmentDiff primaryGuideGroup(TargetEnvironment oldEnv, TargetEnvironment newEnv) {
-        return primaryGuideGroupExtraction(oldEnv, newEnv, GuideGroup::getTargets);
     }
 
     /**
@@ -43,13 +35,14 @@ public final class TargetEnvironmentDiff implements Serializable {
      * guide stars associated with the given guider in the primary guide group
      * of each environment.
      */
-    public static TargetEnvironmentDiff guideProbe(TargetEnvironment oldEnv, TargetEnvironment newEnv, final GuideProbe guider) {
+    public static TargetEnvironmentDiff guideProbe(final TargetEnvironment oldEnv, final TargetEnvironment newEnv, final GuideProbe guider) {
         final ImList<SPTarget> empty = ImCollections.emptyList();
         return primaryGuideGroupExtraction(oldEnv, newEnv,
                 g -> g.get(guider).map(GuideProbeTargets::getTargets).getOrElse(empty));
     }
 
-    private static TargetEnvironmentDiff primaryGuideGroupExtraction(TargetEnvironment oldEnv, TargetEnvironment newEnv, Function1<GuideGroup, ImList<SPTarget>> f) {
+    private static TargetEnvironmentDiff primaryGuideGroupExtraction(final TargetEnvironment oldEnv, final TargetEnvironment newEnv,
+                                                                     final Function1<GuideGroup, ImList<SPTarget>> f) {
         final ImList<SPTarget> oldList = f.apply(oldEnv.getGuideEnvironment().getPrimary());
         final ImList<SPTarget> newList = f.apply(newEnv.getGuideEnvironment().getPrimary());
         return new TargetEnvironmentDiff(oldEnv, newEnv, oldList, newList,
@@ -65,39 +58,26 @@ public final class TargetEnvironmentDiff implements Serializable {
     private final Collection<SPCoordinates> removedCoordinates;
     private final Collection<SPCoordinates> addedCoordinates;
 
-    private TargetEnvironmentDiff(TargetEnvironment oldEnv, TargetEnvironment newEnv,
-                                  ImList<SPTarget> oldTargets, ImList<SPTarget> newTargets,
-                                  ImList<SPCoordinates> oldCoords, ImList<SPCoordinates> newCoords) {
+    // Return an ImList<T> containing the elements of list1 \ list2.
+    private static<T> Collection<T> calcDifference(final TargetEnvironment env1, final TargetEnvironment env2,
+                                                   final ImList<T> list1, final ImList<T> list2) {
+        final Set<T> set1 = Collections.newSetFromMap(new IdentityHashMap<>());
+        if (env1 != null)
+            set1.addAll(list1.toList());
+        if (env2 != null)
+            set1.removeAll(list2.toList());
+        return Collections.unmodifiableCollection(set1);
+    }
+
+    private TargetEnvironmentDiff(final TargetEnvironment oldEnv, final TargetEnvironment newEnv,
+                                  final ImList<SPTarget> oldTargets, final ImList<SPTarget> newTargets,
+                                  final ImList<SPCoordinates> oldCoords, final ImList<SPCoordinates> newCoords) {
         this.oldEnv = oldEnv;
         this.newEnv = newEnv;
-
-        final Set<SPTarget> oldSet = Collections.newSetFromMap(new IdentityHashMap<>());
-        final Set<SPCoordinates> oldSetC = Collections.newSetFromMap(new IdentityHashMap<>());
-        if (oldEnv != null) {
-            oldSet.addAll(oldTargets.toList());
-            oldSetC.addAll(oldCoords.toList());
-        }
-
-        final Set<SPTarget> newSet = Collections.newSetFromMap(new IdentityHashMap<>());
-        final Set<SPCoordinates> newSetC = Collections.newSetFromMap(new IdentityHashMap<>());
-        if (newEnv != null) {
-            newSet.addAll(newTargets.toList());
-            newSetC.addAll(newCoords.toList());
-        }
-
-        if (oldEnv != null) {
-            newSet.removeAll(oldTargets.toList());
-            newSetC.removeAll(oldCoords.toList());
-        }
-        if (newEnv != null) {
-            oldSet.removeAll(newTargets.toList());
-            oldSetC.removeAll(newCoords.toList());
-        }
-
-        removedTargets = Collections.unmodifiableCollection(oldSet);
-        addedTargets   = Collections.unmodifiableCollection(newSet);
-        removedCoordinates = Collections.unmodifiableCollection(oldSetC);
-        addedCoordinates   = Collections.unmodifiableCollection(newSetC);
+        this.removedTargets     = calcDifference(oldEnv, newEnv, oldTargets, newTargets);
+        this.addedTargets       = calcDifference(newEnv, oldEnv, newTargets, oldTargets);
+        this.removedCoordinates = calcDifference(oldEnv, newEnv, oldCoords, newCoords);
+        this.addedCoordinates   = calcDifference(newEnv, oldEnv, newCoords, oldCoords);
     }
 
     public TargetEnvironment getOldEnvironment() {

@@ -234,12 +234,7 @@ public final class TargetEnvironment implements Serializable, TargetContainer {
     }
 
     /**
-     * Get a list of all the SPCoordinates objects in this environment, in the
-     * order:
-     * <ol>
-     * <li>base position, if applicable</li>
-     * <li>sky positions</li>
-     * </ol>
+     * Get a list of all the SPCoordinates objects in this environment.
      */
     public ImList<SPCoordinates> getCoordinates() {
         return asterism.allSpCoordinatesJava();

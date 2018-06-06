@@ -122,9 +122,9 @@ object GhostAsterism {
 
     override def allSpCoordinates: List[SPCoordinates] = this match {
       case SingleTarget(_,b)    => b.toList
-      case DualTarget(_,_,b)    => b.toList // The base will be handled individually
-      case TargetPlusSky(_,s,b) => b.toList ++ List(s)
-      case SkyPlusTarget(s,_,b) => b.toList ++ List(s)
+      case DualTarget(_,_,b)    => b.toList // The default interpolated base will be handled individually
+      case TargetPlusSky(_,s,b) => b.toList :+ s
+      case SkyPlusTarget(s,_,b) => b.toList :+ s
     }
 
     /** Obtains the base position, which defaults to the half-way point between
