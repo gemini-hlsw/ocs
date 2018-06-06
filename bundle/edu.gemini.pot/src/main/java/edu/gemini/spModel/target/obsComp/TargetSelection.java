@@ -294,7 +294,7 @@ public final class TargetSelection {
     }
 
     private static Option<Integer> indexOfCoordinates(final TargetEnvironment env, final SPCoordinates coords) {
-        return Selection.toSelections(env).find(sel -> sel.getCoordinates().exists(coords::equals)).map(sel -> sel.index);
+        return Selection.toSelections(env).find(sel -> sel.getCoordinates().exists(coords::equals)).map(sel -> sel.index).orElse(new Some<>(0));
     }
 
     private static Option<Selection> selectionAtIndex(final TargetEnvironment env, final int index) {

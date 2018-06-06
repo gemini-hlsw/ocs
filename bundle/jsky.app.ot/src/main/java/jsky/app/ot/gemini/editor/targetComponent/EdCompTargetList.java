@@ -165,6 +165,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     }
 
     private void updateCoordinateEditorEnabledState(final boolean enabled) {
+        System.out.println("updateCoordinateEnabledState: " + enabled);
         updateEnabledState(new Component[]{_w.coordinateEditor}, enabled);
     }
 
@@ -253,10 +254,11 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
      */
     private boolean selectionIsBaseCoordinates() {
         final ISPObsComponent node = getContextTargetObsComp();
-        if (TargetSelection.getIndex(node).forall(i -> i != 0))
-            return false;
-        final Option<SPCoordinates> c = basePosition().toOption();
-        return selectedCoordinates().exists(sc -> c.exists(sc::equals));
+        return selectionIsCoordinates() && TargetSelection.getIndex(node).exists(i -> i == 0);
+//        if (TargetSelection.getIndex(node).forall(i -> i != 0))
+//            return false;
+//        final Option<SPCoordinates> c = basePosition().toOption();
+//        return selectedCoordinates().exists(sc -> c.exists(sc::equals));
     }
 
     /**
@@ -321,6 +323,16 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     }
 
     /**
+     * Auxiliary method to determine if the base coordinates are explicitly defined.
+     */
+    private boolean baseCoordinatesAreDefined() {
+        // Editable if coords are sky position, or base is defined.
+        final TargetEnvironment env = getDataObject().getTargetEnvironment();
+        final Asterism a = env.getAsterism();
+        return (a instanceof GhostAsterism) && ((GhostAsterism)a).base().isDefined();
+    }
+
+    /**
      * Set the selection.
      */
     private void setSelectionToTarget(final SPTarget t) {
@@ -382,7 +394,8 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         _w.pasteButton.setEnabled(editable);
         _w.duplicateButton.setEnabled(false);
         _w.tag.setEnabled(false);
-        updateCoordinateEditorEnabledState(editable && !selectionIsBaseCoordinates());
+        updateCoordinateEditorEnabledState(editable &&
+                (baseCoordinatesAreDefined() || !selectionIsBaseCoordinates()));
     }
 
     /**
@@ -667,6 +680,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     }
 
     private void refreshAll() {
+        System.out.println("EdCompTargetList.refreshAll, selectionIsCoordinates=" + selectionIsCoordinates());
         // We will either have coordinates or a target selected at this point.
         _w.guideGroupPanel.setVisible(false);
         _w.coordinateEditor.setVisible(selectionIsCoordinates());
@@ -919,11 +933,16 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     };
 
     private void setSelectionFromNode() {
+        System.out.println("EdCompTargetList.setSelectionFromNode");
         final ISPObsComponent node = getContextTargetObsComp();
         final TargetEnvironment env = getDataObject().getTargetEnvironment();
         final Option<SPTarget> targetOpt = TargetSelection.getTargetForNode(env, node);
         final Option<SPCoordinates> coordsOpt = TargetSelection.getCoordinatesForNode(env, node);
         final Option<IndexedGuideGroup> iggOpt = TargetSelection.getIndexedGuideGroupForNode(env, node);
+
+        if (targetOpt.isDefined()) System.out.println("\tsetSelectionFromNode: TARGET");
+        if (coordsOpt.isDefined()) System.out.println("\tsetSelectionFromNode: COORD");
+        if (iggOpt.isDefined()) System.out.println("\tsetSelectionFromNode: GROUP");
 
         // If a target, process it.
         targetOpt.foreach(target -> manageCurPosIfEnvContainsTarget(target, () -> setSelectionToTarget(target)));
@@ -931,15 +950,22 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         // If it is coordinates, process.
         coordsOpt.foreach(coords -> {
             selectedTarget().foreach(t -> t.deleteWatcher(posWatcher));
+            selectedCoordinates().foreach(c -> c.deleteWatcher(posWatcher));
             setSelectionToCoordinates(coords);
 
             _w.guideGroupPanel.setVisible(false);
             _w.coordinateEditor.setVisible(true);
             _w.detailEditor.setVisible(false);
 
-            updateCoordinateEditorEnabledState(!selectionIsBaseCoordinates());
+
+            System.out.println("\tbaseCoordinatesAreDefined: " + baseCoordinatesAreDefined());
+            System.out.println("\tselectionIsBaseCoordinates: " +selectionIsBaseCoordinates());
+            updateCoordinateEditorEnabledState(baseCoordinatesAreDefined() || !selectionIsBaseCoordinates());
             updateCoordinateDetails(env);
             updateUIForCoordinates();
+
+            selectedCoordinates().foreach(c -> c.addWatcher(posWatcher));
+            selectedTarget().foreach(t -> t.addWatcher(posWatcher));
         });
 
         // If it is a guide group, process it.

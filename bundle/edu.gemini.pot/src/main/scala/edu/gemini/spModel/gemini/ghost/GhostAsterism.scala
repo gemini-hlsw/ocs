@@ -122,7 +122,7 @@ object GhostAsterism {
 
     override def allSpCoordinates: List[SPCoordinates] = this match {
       case SingleTarget(_,b)    => b.toList
-      case DualTarget(_,_,b)    => b.toList // The base will be handled individually 
+      case DualTarget(_,_,b)    => b.toList // The base will be handled individually
       case TargetPlusSky(_,s,b) => b.toList ++ List(s)
       case SkyPlusTarget(s,_,b) => b.toList ++ List(s)
     }
