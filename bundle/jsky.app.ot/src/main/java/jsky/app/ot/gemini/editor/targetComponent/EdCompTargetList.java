@@ -165,7 +165,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     }
 
     private void updateCoordinateEditorEnabledState(final boolean enabled) {
-        System.out.println("updateCoordinateEnabledState: " + enabled);
         updateEnabledState(new Component[]{_w.coordinateEditor}, enabled);
     }
 
@@ -680,7 +679,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     }
 
     private void refreshAll() {
-        System.out.println("EdCompTargetList.refreshAll, selectionIsCoordinates=" + selectionIsCoordinates());
         // We will either have coordinates or a target selected at this point.
         _w.guideGroupPanel.setVisible(false);
         _w.coordinateEditor.setVisible(selectionIsCoordinates());
@@ -933,16 +931,11 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     };
 
     private void setSelectionFromNode() {
-        System.out.println("EdCompTargetList.setSelectionFromNode");
         final ISPObsComponent node = getContextTargetObsComp();
         final TargetEnvironment env = getDataObject().getTargetEnvironment();
         final Option<SPTarget> targetOpt = TargetSelection.getTargetForNode(env, node);
         final Option<SPCoordinates> coordsOpt = TargetSelection.getCoordinatesForNode(env, node);
         final Option<IndexedGuideGroup> iggOpt = TargetSelection.getIndexedGuideGroupForNode(env, node);
-
-        if (targetOpt.isDefined()) System.out.println("\tsetSelectionFromNode: TARGET");
-        if (coordsOpt.isDefined()) System.out.println("\tsetSelectionFromNode: COORD");
-        if (iggOpt.isDefined()) System.out.println("\tsetSelectionFromNode: GROUP");
 
         // If a target, process it.
         targetOpt.foreach(target -> manageCurPosIfEnvContainsTarget(target, () -> setSelectionToTarget(target)));
@@ -957,9 +950,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             _w.coordinateEditor.setVisible(true);
             _w.detailEditor.setVisible(false);
 
-
-            System.out.println("\tbaseCoordinatesAreDefined: " + baseCoordinatesAreDefined());
-            System.out.println("\tselectionIsBaseCoordinates: " +selectionIsBaseCoordinates());
             updateCoordinateEditorEnabledState(baseCoordinatesAreDefined() || !selectionIsBaseCoordinates());
             updateCoordinateDetails(env);
             updateUIForCoordinates();

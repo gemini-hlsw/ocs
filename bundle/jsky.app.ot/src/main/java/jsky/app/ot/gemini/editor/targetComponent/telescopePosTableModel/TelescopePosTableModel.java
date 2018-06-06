@@ -525,11 +525,9 @@ final public class TelescopePosTableModel extends AbstractTableModel {
      */
     public Option<Integer> rowIndexForTarget(final SPTarget target) {
         if (target == null) return None.instance();
-        System.out.println("TelescopePosTableModel.rowIndexForTarget: Looking up row index for target...");
         int index = 0;
         for (final Row row : rows) {
             if (row instanceof TargetRow && ((TargetRow) row).target() == target) {
-                System.out.println("\tReturning index=" + index);
                 return new Some<>(index);
             }
             ++index;
@@ -538,14 +536,12 @@ final public class TelescopePosTableModel extends AbstractTableModel {
                 final GroupRow gRow = (GroupRow) row;
                 for (final Row row2 : gRow.children()) {
                     if (row2 instanceof TargetRow && ((TargetRow) row2).target() == target) {
-                        System.out.println("\tReturning index (in group)=" + index);
                         return new Some<>(index);
                     }
                     ++index;
                 }
             }
         }
-        System.out.println("\tReturning None");
         return None.instance();
     }
 
@@ -563,7 +559,6 @@ final public class TelescopePosTableModel extends AbstractTableModel {
      */
     public Option<Integer> rowIndexForCoordinates(final SPCoordinates coords) {
         if (coords == null) return None.instance();
-        System.out.println("TelescopePosTableModel.rowIndexForCoordinates: Looking up row index for coordinates...");
         int index = 0;
         for (final Row row : rows) {
             if (row instanceof CoordinatesRow && ((CoordinatesRow) row).coordinates() == coords)

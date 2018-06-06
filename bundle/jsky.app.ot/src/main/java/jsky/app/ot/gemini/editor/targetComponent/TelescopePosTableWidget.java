@@ -62,12 +62,9 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
         setModel(new TelescopePosTableModel());
 
         getSelectionModel().addListSelectionListener(e -> {
-            System.out.println("TelescopePosTableWidget.selectionChanged!");
-            if (_ignoreSelection) System.out.println("\tIgnored: idx=" + getSelectionModel().getMinSelectionIndex());
             if (_ignoreSelection) return;
             final TelescopePosTableModel telescopePosTableModel = (TelescopePosTableModel) getModel();
             final int idx = getSelectionModel().getMinSelectionIndex();
-            System.out.println("\tRow at idx " + idx +  " " + telescopePosTableModel.rowAtRowIndex(idx));
             telescopePosTableModel.rowAtRowIndex(idx).foreach(this::notifySelect);
         });
 
@@ -183,7 +180,6 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
             final TargetObsComp oldTOC = _dataObject;
 
             // Determine what, if anything, is selected.
-            System.out.println("TelescopePosTableWidget.reinit lookup");
             final Option<Integer> selIndex = ImOption.apply(oldTOC).flatMap(toc -> {
                 final TargetEnvironment oldEnv = oldTOC.getTargetEnvironment();
                 return ImOption.apply(_model).flatMap(td -> {
@@ -196,7 +192,6 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
                     return tpIndex.orElse(cIndex).orElse(iggIndex);
                 });
             });
-            System.out.println("TelescopePosTableWidget.reinit lookup results: selIndex=" + selIndex + ", val=" + selIndex.getOrNull());
             _obsComp = owner.getContextTargetObsComp();
             _dataObject = newTOC;
 
@@ -265,7 +260,6 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
 
     private final PropertyChangeListener selectionListener = evt -> {
         if (_model == null) return;
-        System.out.println("TelescopePosTableWidget.selectionListener, old=" + evt.getOldValue() + " new=" + evt.getNewValue());
         TargetSelection.getTargetForNode(_env, _obsComp)
                 .flatMap(_model::rowIndexForTarget).foreach(this::_setSelectedRow);
         TargetSelection.getCoordinatesForNode(_env, _obsComp)
@@ -315,7 +309,6 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
             }
 
             // If obs comp has a selected target, then honor it.
-            System.out.println("TelescopePosTableWidget.envChangeListener");
             final Option<SPTarget> newSelectedTarget = TargetSelection.getTargetForNode(_env, _obsComp);
             if (newSelectedTarget.isDefined()) {
                 _model.rowIndexForTarget(newSelectedTarget.getValue())
@@ -341,7 +334,6 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
             }
 
             // Try to select the same target that was selected before, if it is there in the new table.
-            System.out.println("TelescopePosTableWidget.envChangeListener2");
             if (oldSelTarget.exists(t -> _model.rowIndexForTarget(t).isDefined())) {
                 oldSelTarget.foreach(TelescopePosTableWidget.this::selectTarget);
                 return;
@@ -582,7 +574,6 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
      * Updates the TargetSelection's target, and sets the relevant row in the table.
      */
     void selectTarget(final SPTarget tp) {
-        System.out.println("TelescopePosTableWidget.selectTarget");
         TargetSelection.setTargetForNode(_env, _obsComp, tp);
         _model.rowIndexForTarget(tp).foreach(this::_setSelectedRow);
     }
@@ -621,7 +612,6 @@ final class TelescopePosTableWidget extends JTable implements TelescopePosWatche
      * Selects the relevant row in the table.
      */
     private void _setSelectedRow(final int index) {
-        System.out.println("TelescopePosTableWidget:_setSelectedRow: " + index);
         if ((index < 0) || (index >= getRowCount())) {
             getSelectionModel().setSelectionInterval(0, 0);
         } else {
