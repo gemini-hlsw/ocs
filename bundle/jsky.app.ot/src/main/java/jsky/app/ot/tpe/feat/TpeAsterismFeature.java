@@ -1,12 +1,16 @@
 package jsky.app.ot.tpe.feat;
 
 import edu.gemini.pot.sp.ISPObsComponent;
+import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.shared.util.immutable.Some;
+import edu.gemini.spModel.core.Coordinates;
+import edu.gemini.spModel.gemini.ghost.GhostAsterism;
 import edu.gemini.spModel.target.SPCoordinates;
 import edu.gemini.spModel.target.SPSkyObject;
 import edu.gemini.spModel.target.SPTarget;
+import edu.gemini.spModel.target.env.Asterism;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.target.obsComp.TargetSelection;
@@ -81,7 +85,6 @@ public class TpeAsterismFeature extends TpePositionFeature {
     private void drawItem(final Graphics g, final Color color, final Point2D.Double base) {
         if (base == null)
             return;
-
         final int r = MARKER_SIZE;
         final int d = 2 * r;
         g.setColor(color);
@@ -96,13 +99,35 @@ public class TpeAsterismFeature extends TpePositionFeature {
         final TargetEnvironment env = getTargetEnvironment();
         if (env == null) return;
 
+        // Draw the base position if it does not explicitly exist: otherwise,
+        // it will be handled by the coordinate drawing below. This is a bit
+        // hacky, but it is what we want because since this position does not
+        // appear in the PosMap, we cannot move it, which is precisely what
+        // we want for GHOST dual target mode.
+        final Asterism a = env.getAsterism();
+        if (a instanceof GhostAsterism) {
+            final GhostAsterism ga = (GhostAsterism) a;
+            if (ga.base().isEmpty()) {
+                final Option<Coordinates> cOpt = ImOption.fromScalaOpt(ga.basePosition(ImOption.scalaNone()));
+                cOpt.foreach(c -> {
+                    try {
+                        final SPCoordinates spC = new SPCoordinates(c);
+                        final Point2D.Double p = _iw.taggedPosToScreenCoords(spC);
+                        drawItem(g, Color.pink, p);
+                    } catch (Exception e) {
+                        // Nothing to do here.
+                    }
+                });
+            }
+        }
+
         // Draw the sky positions first, so that overlapping targets will take precedence.
-        env.getAsterism().allSpCoordinatesJava().foreach(spc ->
+        a.allSpCoordinatesJava().foreach(spc ->
                 drawItem(g, Color.cyan, pm.getLocationFromTag(spc))
         );
 
         // Draw the targets.
-        env.getAsterism().allSpTargetsJava().foreach(spt ->
+        a.allSpTargetsJava().foreach(spt ->
             drawItem(g, Color.yellow, pm.getLocationFromTag(spt))
         );
 

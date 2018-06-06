@@ -444,7 +444,7 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
     /**
      * Convert a TaggedPos to a screen coordinates.
      */
-    Point2D.Double taggedPosToScreenCoords(final WatchablePos tp) {
+    public Point2D.Double taggedPosToScreenCoords(final WatchablePos tp) {
         if (tp instanceof OffsetPosBase) {
             final double x = ((OffsetPosBase) tp).getXaxis();
             final double y = ((OffsetPosBase) tp).getYaxis();
