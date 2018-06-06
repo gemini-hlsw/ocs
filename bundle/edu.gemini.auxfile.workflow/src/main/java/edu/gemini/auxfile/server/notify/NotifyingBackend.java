@@ -11,11 +11,15 @@ import edu.gemini.auxfile.server.AuxFileChunk;
 import edu.gemini.auxfile.server.AuxFileServer;
 import edu.gemini.auxfile.server.AuxFileServerDecorator;
 import edu.gemini.auxfile.server.file.FileManager;
+import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.core.SPProgramID;
 
+import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
 import java.io.File;
 
 /**
@@ -105,33 +109,32 @@ public final class NotifyingBackend extends AuxFileServerDecorator {
         return res;
     }
 
+    private void notifyAll(SPProgramID progId, Collection<String> fileNames, BiConsumer<AuxFileListener, Collection<File>> notify) throws AuxFileException {
+        final Collection<File> files =
+          fileNames
+             .stream()
+             .map(n -> FileManager.instance().getProgramFile(progId, n))
+             .collect(Collectors.toList());
+
+        _copyListeners().stream().forEach(l -> notify.accept(l, files));
+    }
+
     @Override
     public void setDescription(SPProgramID progId, Collection<String> fileNames, String newDescription) throws AuxFileException {
         super.setDescription(progId, fileNames, newDescription);
-
-        Collection<File> files = new ArrayList<File>(fileNames.size());
-        for (String fileName : fileNames) {
-            files.add(FileManager.instance().getProgramFile(progId, fileName));
-        }
-
-        List<AuxFileListener> listeners = _copyListeners();
-        for (AuxFileListener listener : listeners) {
-            listener.descriptionUpdated(progId, newDescription, files);
-        }
+        notifyAll(progId, fileNames, (l, fs) -> l.descriptionUpdated(progId, newDescription, fs));
     }
 
     @Override
     public void setChecked(SPProgramID progId, Collection<String> fileNames, boolean newChecked) throws AuxFileException {
         super.setChecked(progId, fileNames, newChecked);
+        notifyAll(progId, fileNames, (l, fs) -> l.checkedUpdated(progId, newChecked, fs));
+    }
 
-        Collection<File> files = new ArrayList<File>(fileNames.size());
-        for (String fileName : fileNames) {
-            files.add(FileManager.instance().getProgramFile(progId, fileName));
-        }
-
-        List<AuxFileListener> listeners = _copyListeners();
-        for (AuxFileListener listener : listeners)
-            listener.checkedUpdated(progId, newChecked, files);
+    @Override
+    public void setLastEmailed(SPProgramID progId, Collection<String> fileNames, Option<Instant> newLastEmailed) throws AuxFileException {
+        super.setLastEmailed(progId, fileNames, newLastEmailed);
+        notifyAll(progId, fileNames, (l, fs) -> l.lastEmailedUpdated(progId, newLastEmailed, fs));
     }
 
 }

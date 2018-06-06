@@ -4,10 +4,12 @@
 
 package edu.gemini.auxfile.api;
 
+import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.core.SPProgramID;
 
-import java.util.Collection;
+import java.time.Instant;
 import java.io.File;
+import java.util.Collection;
 
 /**
  * An interface implemented by clients interested in being informed of of
@@ -19,4 +21,5 @@ public interface AuxFileListener {
     void fileStored(SPProgramID progId, File file);
     void descriptionUpdated(SPProgramID progId, String description, Collection<File> files);
 	void checkedUpdated(SPProgramID progId, boolean newChecked, Collection<File> files);
+    void lastEmailedUpdated(SPProgramID progId, Option<Instant> newLastEmailed, Collection<File> files);
 }

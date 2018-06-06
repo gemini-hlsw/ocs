@@ -1,13 +1,15 @@
 package edu.gemini.phase2.skeleton.auxfile
 
+import edu.gemini.auxfile.api.AuxFile
+import edu.gemini.auxfile.copier.AuxFileCopier
 import edu.gemini.model.p1.immutable.{Meta, ProposalIo, Proposal}
 import edu.gemini.model.p1.pdf.P1PDF
+import edu.gemini.shared.util.immutable.ImOption
+import edu.gemini.spModel.core.SPProgramID
 
 import java.io.File
+import java.time.Instant
 import scala.xml.XML
-import edu.gemini.auxfile.copier.AuxFileCopier
-import edu.gemini.spModel.core.SPProgramID
-import edu.gemini.auxfile.api.AuxFile
 
 object SkeletonAuxfileWriter {
 
@@ -29,7 +31,7 @@ object SkeletonAuxfileWriter {
       List(proposalAuxfile, proposalAttachmentAuxfile, proposalSummaryAuxfile)
 
     private def auxfile(f: File, desc: String): AuxFile =
-      new AuxFile(progId, f.getName, desc, f.length(), f.lastModified(), false)
+      new AuxFile(progId, f.getName, desc, f.length(), f.lastModified(), false, ImOption.empty[Instant])
 
     private def mkFile(suffix: String, extension: String): File =
       new File(auxfileDir, "%s_%s.%s".format(progId.toString, suffix, extension))

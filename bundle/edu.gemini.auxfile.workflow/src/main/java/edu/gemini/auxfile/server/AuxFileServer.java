@@ -3,7 +3,9 @@ package edu.gemini.auxfile.server;
 import edu.gemini.auxfile.api.AuxFile;
 import edu.gemini.auxfile.api.AuxFileException;
 import edu.gemini.spModel.core.SPProgramID;
+import edu.gemini.shared.util.immutable.Option;
 
+import java.time.Instant;
 import java.util.Collection;
 
 public interface AuxFileServer {
@@ -31,4 +33,7 @@ public interface AuxFileServer {
 
     void setChecked(SPProgramID progId, Collection<String> fileNames, boolean newChecked)
 			throws AuxFileException;
+
+    void setLastEmailed(SPProgramID progId, Collection<String> fileNames, Option<Instant> newLastEmailed)
+            throws AuxFileException;
 }

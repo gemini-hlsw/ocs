@@ -23,17 +23,17 @@ public class MetaData {
 
 	private static final Logger LOGGER = Logger.getLogger(MetaData.class.getName());
 
-    private static final String PROP_ROOT        = "meta";
-    private static final String PROP_DESCRIPTION = "description";
-	private static final String PROP_CHECKED     = "checked";
-	private static final String PROP_EMAILED     = "emailed";
+    private static final String PROP_ROOT         = "meta";
+    private static final String PROP_DESCRIPTION  = "description";
+	private static final String PROP_CHECKED      = "checked";
+	private static final String PROP_LAST_EMAILED = "lastEmailed";
 
 	private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ISO_INSTANT;
 
 	private final File xml;
 	private String description;
 	private boolean checked;
-	private Option<Instant> emailed;
+	private Option<Instant> lastEmailed;
 
 	@SuppressWarnings("deprecation")
 	public static MetaData forFile(SPProgramID progId, String fileName) throws IOException, AuxFileException {
@@ -82,12 +82,12 @@ public class MetaData {
 		store();
 	}
 
-	public Option<Instant> getEmailed() {
-		return emailed;
+	public Option<Instant> getLastEmailed() {
+		return lastEmailed;
 	}
 
-	public void setEmailed(Option<Instant> emailed) throws IOException {
-		this.emailed = emailed;
+	public void setLastEmailed(Option<Instant> lastEmailed) throws IOException {
+		this.lastEmailed = lastEmailed;
 		store();
 	}
 
@@ -109,7 +109,7 @@ public class MetaData {
 		// Set the metadata properties
 		Pio.addBooleanParam(factory, node, PROP_CHECKED, checked);
 		Pio.addParam(factory, node, PROP_DESCRIPTION, description);
-		emailed.foreach(t -> Pio.addParam(factory, node, PROP_EMAILED, TIME_FORMAT.format(t)));
+		lastEmailed.foreach(t -> Pio.addParam(factory, node, PROP_LAST_EMAILED, TIME_FORMAT.format(t)));
 
 		// And write out the file.
 		try {
@@ -132,7 +132,7 @@ public class MetaData {
 			// Get the metadata properties
 			checked = Pio.getBooleanValue(node, PROP_CHECKED, false);
 			description = Pio.getValue(node, PROP_DESCRIPTION, null);
-			emailed = ImOption.apply(Pio.getValue(node, PROP_EMAILED, null)).map(s ->
+			lastEmailed = ImOption.apply(Pio.getValue(node, PROP_LAST_EMAILED, null)).map(s ->
 	            TIME_FORMAT.parse(s, Instant::from)
 			);
 
