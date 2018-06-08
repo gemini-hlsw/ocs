@@ -22,10 +22,16 @@ import scalaz.effect.IO
 
 object MaskCheckCron {
 
-  private def pending(a: AuxFileServer, p: SPProgramID, now: Instant): MC[List[AuxFile]] =
-    MC.catchLeft(a.listAll(p)).map(_.asScala.toList.filter { f =>
+  private def pending(
+    afs: AuxFileServer,
+    pid: SPProgramID,
+    now: Instant,
+    nag: Duration
+  ): MC[List[AuxFile]] =
+
+    MC.catchLeft(afs.listAll(pid)).map(_.asScala.toList.filter { f =>
       val lastMod   = Instant.ofEpochMilli(f.getLastModified)
-      val nagAt     = lastMod.plus(Duration.ofDays(7))
+      val nagAt     = lastMod.plus(nag)
       val lastEmail = f.getLastEmailed.asScalaOpt.getOrElse(Instant.MIN)
 
       f.getName.endsWith(".odf") &&   // Only ODF Files
@@ -34,8 +40,14 @@ object MaskCheckCron {
       now.isAfter(nagAt)              // that haven't been checked in at least a week
     })
 
-  private def allPending(a: AuxFileServer, pids: List[SPProgramID], now: Instant): MC[List[(SPProgramID, List[AuxFile])]] =
-    pids.traverseU { pid => pending(a, pid, now).strengthL(pid) }
+  private def allPending(
+    afs:  AuxFileServer,
+    pids: List[SPProgramID],
+    now:  Instant,
+    nag:  Duration
+  ): MC[List[(SPProgramID, List[AuxFile])]] =
+
+    pids.traverseU { pid => pending(afs, pid, now, nag).strengthL(pid) }
 
 //  private def log(level: Level, msg: String, ex: Option[Throwable] = None): IO[Unit] =
 //    IO { logger.log(level, msg, ex.orNull) }
@@ -59,7 +71,7 @@ object MaskCheckCron {
       env  <- MaskCheckEnv.fromBundleContext(ctx)
       now  <- MC.delay(Instant.now)
       pids <- ActiveScienceProgramFunctor.query(env.odb, user)
-      ps   <- allPending(env.auxFileServer, pids, now)
+      ps   <- allPending(env.auxFileServer, pids, now, env.nagDelay)
       _    <- sendEmails(env.odb, env.mailer, ps)
     } yield ()
 
