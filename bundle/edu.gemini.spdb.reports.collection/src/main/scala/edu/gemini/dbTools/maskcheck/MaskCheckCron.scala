@@ -65,8 +65,10 @@ object MaskCheckCron {
       MC.catchLeft(ProgramAddresses.fromProgramId(o, pid)).flatMap {
         case None               =>
           l.log(Level.INFO, s"Could not get email addresses for $pid because it was not found in ODB")
+
         case Some(Failure(msg)) =>
           l.log(Level.INFO, s"Could not send mask check nag email because some addresses are not valid for $pid: $msg")
+
         case Some(Success(pa))  =>
           m.notifyPendingCheck(pid, pa, pending)
       }
