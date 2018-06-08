@@ -19,7 +19,27 @@ import scalaz._
 import Scalaz._
 import scalaz.effect.IO
 
-
+/**
+ * MaskCheckCron sends a nagging email for all active programs which have
+ * unchecked mask files that have been ready for a configurable amount of time
+ * (one week in production at the time of writing).
+ *
+ * At start up it will look for the AuxFileService and the IDBDatabaseService
+ * as well as a handful of bundle properties:
+ *
+ * 1) cron.odbMail.SITE_SMTP_SERVER
+ *    The shared email smtp server host.
+ *
+ * 2) cron.odbMail.mailer.type
+ *    "development", "production", or "test".  The "development" version just
+ *    prints the email that would have been sent.  The "test" version sends a
+ *    modified email that indicates it is a test to @gemini.edu emails only.
+ *    Finally "production" sends the email to NGO + contact scientists.
+ *
+ * 3) edu.gemini.dbTools.maskcheck.nagdelay
+ *    How much time may pass before a nag email is sent.  The value must be
+ *    parseable by java.time.Duration.parse.  For example: "P7D" for one week.
+ */
 object MaskCheckCron {
 
   private def pending(
