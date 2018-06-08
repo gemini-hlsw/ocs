@@ -62,7 +62,7 @@ object MaskCheckCron {
   ): MC[Unit] =
 
     ps.traverseU { case (pid, pending) =>
-      MC.catchLeft(ProgramAddresses.fromProgramId(o, pid)).flatMap {
+      EitherT(ProgramAddresses.fromProgramId(o, pid).catchLeft).flatMap {
         case None               =>
           l.log(Level.INFO, s"Could not get email addresses for $pid because it was not found in ODB")
 

@@ -9,6 +9,9 @@ import javax.mail.internet.InternetAddress
 import scalaz._
 import Scalaz._
 
+import scalaz.effect.IO
+
+
 case class ProgramAddresses(
   pi:  List[InternetAddress],
   ngo: List[InternetAddress],
@@ -19,7 +22,7 @@ object ProgramAddresses {
   val Separators: Array[Char] =
     Array(' ', ',', ';', '\t')
 
-  def fromDataObject(sp: SPProgram): ValidationNel[String, ProgramAddresses] = {
+  def fromDataObject(sp: SPProgram): IO[ValidationNel[String, ProgramAddresses]] = {
 
     def toInternetAddress(s: String): ValidationNel[String, InternetAddress] =
       Validation.fromTryCatchNonFatal {
@@ -36,14 +39,14 @@ object ProgramAddresses {
     val ngo = nullableAddresses(_.getPrimaryContactEmail)
     val cs  = nullableAddresses(_.getContactPerson)
 
-    (pi |@| ngo |@| cs)(ProgramAddresses.apply)
+    IO((pi |@| ngo |@| cs)(ProgramAddresses.apply))
 
   }
 
-  def fromProgram(sp: ISPProgram): ValidationNel[String, ProgramAddresses] =
-    fromDataObject(sp.getDataObject.asInstanceOf[SPProgram])
+  def fromProgram(sp: ISPProgram): IO[ValidationNel[String, ProgramAddresses]] =
+    IO(sp.getDataObject.asInstanceOf[SPProgram]) >>= fromDataObject
 
-  def fromProgramId(odb: IDBDatabaseService, pid: SPProgramID): Option[ValidationNel[String, ProgramAddresses]] =
-    Option(odb.lookupProgramByID(pid)).map(fromProgram)
+  def fromProgramId(odb: IDBDatabaseService, pid: SPProgramID): IO[Option[ValidationNel[String, ProgramAddresses]]] =
+    IO(Option(odb.lookupProgramByID(pid))) >>= { _.traverseU(fromProgram) }
 
 }
