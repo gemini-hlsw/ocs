@@ -49,16 +49,24 @@ object MaskCheckCron {
 
     pids.traverseU { pid => pending(afs, pid, now, nag).strengthL(pid) }
 
-//  private def log(level: Level, msg: String, ex: Option[Throwable] = None): IO[Unit] =
-//    IO { logger.log(level, msg, ex.orNull) }
+  case class MCLogger(logger: Logger) {
+    def log(level: Level, msg: String): MC[Unit] =
+      MC.delay(logger.log(level, msg))
+  }
 
-  private def sendEmails(o: IDBDatabaseService, m: MaskCheckMailer, ps: List[(SPProgramID, List[AuxFile])]): MC[Unit] =
+  private def sendEmails(
+    l: MCLogger,
+    o: IDBDatabaseService,
+    m: MaskCheckMailer,
+    ps: List[(SPProgramID, List[AuxFile])]
+  ): MC[Unit] =
+
     ps.traverseU { case (pid, pending) =>
       MC.catchLeft(ProgramAddresses.fromProgramId(o, pid)).flatMap {
         case None               =>
-          ().point[MC]
+          l.log(Level.INFO, s"Could not get email addresses for $pid because it was not found in ODB")
         case Some(Failure(msg)) =>
-          ().point[MC]
+          l.log(Level.INFO, s"Could not send mask check nag email because some addresses are not valid for $pid: $msg")
         case Some(Success(pa))  =>
           m.notifyPendingCheck(pid, pa, pending)
       }
@@ -72,7 +80,7 @@ object MaskCheckCron {
       now  <- MC.delay(Instant.now)
       pids <- ActiveScienceProgramFunctor.query(env.odb, user)
       ps   <- allPending(env.auxFileServer, pids, now, env.nagDelay)
-      _    <- sendEmails(env.odb, env.mailer, ps)
+      _    <- sendEmails(MCLogger(logger), env.odb, env.mailer, ps)
     } yield ()
 
     action.run.unsafePerformIO() match {
