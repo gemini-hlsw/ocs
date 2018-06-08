@@ -7,20 +7,22 @@ import Scalaz._
 
 
 /**
- * Distinguishes production and test mailers.
+ * Distinguishes development, production and test mailers.
  */
 sealed trait MailerType extends Product with Serializable
 
 object MailerType {
 
-  case object Production extends MailerType
-  case object Test       extends MailerType
+  case object Development extends MailerType
+  case object Production  extends MailerType
+  case object Test        extends MailerType
 
   def fromString(s: String): Option[MailerType] =
     s match {
-      case "production" => Some(Production)
-      case "test"       => Some(Test)
-      case _            => None
+      case "development" => Some(Development)
+      case "production"  => Some(Production)
+      case "test"        => Some(Test)
+      case _             => None
     }
 
   implicit val EqualMailerType: Equal[MailerType] =

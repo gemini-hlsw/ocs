@@ -63,8 +63,8 @@ object TcsEphemerisCron {
     mailer match {
       case -\/(msg) =>
         // If anything is missing use a test mailer.
-        log.warning(s"TcsEphemerisCron using test mailer ($msg).")
-        ReportMailer.forTesting(site)
+        log.warning(s"TcsEphemerisCron using development mailer ($msg).")
+        ReportMailer.forDevelopment(site)
       case \/-(m)   =>
         log.info(s"TcsEphemerisCron using host '${m.mailer.smtpHost}' and recipients '${m.recipients.mkString(",")}'")
         m

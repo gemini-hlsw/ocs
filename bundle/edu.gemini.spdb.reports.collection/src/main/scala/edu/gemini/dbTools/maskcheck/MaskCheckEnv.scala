@@ -62,12 +62,7 @@ object MaskCheckEnv {
       s <- parsedProp(ctx, SiteProperty.NAME)(s => Option(Site.tryParse(s)))
       m <- prop(ctx, SmtpProp)
       t <- parsedProp(ctx, MailerTypeProp)(MailerType.fromString)
-    } yield {
-      t match {
-        case MailerType.Production => MaskCheckMailer(s, m)
-        case MailerType.Test       => MaskCheckMailer.forTesting(s)
-      }
-    }
+    } yield MaskCheckMailer(t, s, m)
 
   private def nagDelay(ctx: BundleContext): MC[Duration] =
     parsedProp(ctx, MaskCheckNagDelayProp) { s =>

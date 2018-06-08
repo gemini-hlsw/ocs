@@ -34,6 +34,6 @@ object ReportMailer {
   def apply(site: Site, smtpHost: String, recipients: List[InternetAddress]): ReportMailer =
     new ReportMailer(Mailer(site, smtpHost), recipients) {}
 
-  def forTesting(site: Site): ReportMailer =
-    new ReportMailer(Mailer.forTesting(site), Nil) {}
+  def forDevelopment(site: Site): ReportMailer =
+    new ReportMailer(Mailer.forDevelopment(site), Nil) {}
 }

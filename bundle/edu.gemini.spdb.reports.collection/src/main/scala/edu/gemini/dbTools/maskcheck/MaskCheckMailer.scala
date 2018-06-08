@@ -1,7 +1,7 @@
 package edu.gemini.dbTools.maskcheck
 
 import edu.gemini.auxfile.api.AuxFile
-import edu.gemini.dbTools.mailer.{ Mailer, ProgramAddresses }
+import edu.gemini.dbTools.mailer.{ Mailer, MailerType, ProgramAddresses }
 import edu.gemini.spModel.core.{ Site, SPProgramID }
 
 import scalaz._
@@ -34,10 +34,7 @@ sealed abstract class MaskCheckMailer(mailer: Mailer) {
 
 object MaskCheckMailer {
 
-  def apply(site: Site, smtpHost: String): MaskCheckMailer =
-    new MaskCheckMailer(Mailer(site, smtpHost)) {}
-
-  def forTesting(site: Site): MaskCheckMailer =
-    new MaskCheckMailer(Mailer.forTesting(site)) {}
+  def apply(t: MailerType, site: Site, smtpHost: String): MaskCheckMailer =
+    new MaskCheckMailer(Mailer.ofType(t, site, smtpHost)) {}
 
 }
