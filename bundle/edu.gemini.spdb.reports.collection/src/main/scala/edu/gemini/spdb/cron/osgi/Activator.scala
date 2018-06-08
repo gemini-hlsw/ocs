@@ -1,6 +1,7 @@
 package edu.gemini.spdb.cron.osgi
 
 import edu.gemini.dbTools.ephemeris.{EphemerisPurgeCron, TcsEphemerisCron}
+import edu.gemini.dbTools.maskcheck.MaskCheckCron
 import org.osgi.framework.{BundleContext, BundleActivator}
 import org.osgi.util.tracker.ServiceTracker
 import edu.gemini.util.osgi.Tracker._
@@ -31,7 +32,8 @@ class Activator extends BundleActivator {
 
   // See each service's entry point for an example invocation via curl
   def services(c: BundleContext): Map[String, Job] =
-     Map("monitor"        -> OdbMonitor.monitor,
+     Map("maskcheck"      -> MaskCheckCron.run(c),
+         "monitor"        -> OdbMonitor.monitor,
          "execHours"      -> ExecHourFunctor.run,
          "tigraTable"     -> new TigraTableCreator(c).run,
          "semesterStatus" -> semesterStatus.Driver.run,
