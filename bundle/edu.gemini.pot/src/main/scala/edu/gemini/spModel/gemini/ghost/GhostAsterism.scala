@@ -156,7 +156,6 @@ object GhostAsterism {
       case SkyPlusTarget(_,t,_) => Some(Right(t))
     }
 
-    // Sky coords are immutable, so we don't need to copy them.
     override def copyWithClonedTargets: Asterism = this match {
       case SingleTarget(t,b)    => SingleTarget(t.copyWithClonedTarget, b.map(_.clone))
       case DualTarget(t1,t2,b)  => DualTarget(t1.copyWithClonedTarget, t2.copyWithClonedTarget, b.map(_.clone))
@@ -245,7 +244,7 @@ object GhostAsterism {
 
     override def allSpCoordinates: List[SPCoordinates] = this match {
       case HighResolutionTarget(_,b)          => b.toList
-      case HighResolutionTargetPlusSky(_,s,b) => b.toList ++ List(s)
+      case HighResolutionTargetPlusSky(_,s,b) => b.toList :+ s
     }
 
     /** Defines the default base position to be the same as the target position. */

@@ -547,42 +547,44 @@ public class GeneralRule implements IRule {
             final ISPTemplateFolder templateFolderNode = elements.getProgramNode().getTemplateFolder();
             if (templateFolderNode != null) {
 
-                // TODO:GHOST Do we have to do anything for SPCoordinates here as well?
                 final Asterism a = getObsAsterism(elements);
-                a.allSpTargetsJava().foreach(obsTarget -> {
-                    // We're going to drive this off the target, so we first want to narrow it
-                    // down to the TemplateParameters that correspond with this target.
-                    final List<TemplateParameters> matchingParams = new ArrayList<>();
-                    TemplateParameters.foreach(templateFolderNode, tp -> {
-                        final SPTarget p1Target = tp.getTarget();
-                        if (_areTargetsEquals(p1Target, obsTarget, elements) || _isTooTarget(p1Target, elements)) {
-                            matchingParams.add(tp);
-                        }
-                    });
-
-                    // If there are none, the target is bogus
-                    if (matchingParams.isEmpty()) {
-                        // REL-1113
-                        ps.addError(PREFIX + "TEMPLATE_RULE", BOGUS_TARGET_MESSAGE, elements.getTargetObsComponentNode().getOrNull());
-                        // UX-1583. Since there was no matching p1 target, we
-                        // don't know what conditions to check so skip the
-                        // test for bogus conditions.
-                    } else {
-                        // Now see if we can't find a match for conditions
-                        outer:
-                        for (; ; ) {
-                            for (final TemplateParameters t : matchingParams) {
-                                final SPSiteQuality expected = t.getSiteQuality();
-                                final SPSiteQuality actual = elements.getSiteQuality().getOrNull();
-                                if (isAcceptable(expected, actual))
-                                    break outer;
+                if (a.asterismType() == AsterismType.Single) {
+                    // There should be only one target here, namely the science target.
+                    a.allSpTargetsJava().foreach(obsTarget -> {
+                        // We're going to drive this off the target, so we first want to narrow it
+                        // down to the TemplateParameters that correspond with this target.
+                        final List<TemplateParameters> matchingParams = new ArrayList<>();
+                        TemplateParameters.foreach(templateFolderNode, tp -> {
+                            final SPTarget p1Target = tp.getTarget();
+                            if (_areTargetsEquals(p1Target, obsTarget, elements) || _isTooTarget(p1Target, elements)) {
+                                matchingParams.add(tp);
                             }
-                            ps.addError(PREFIX + "TEMPLATE_RULE", BOGUS_CONDS_MESSAGE, elements.getSiteQualityNode().getOrNull());
-                            break;
-                        }
-                    }
+                        });
 
-                });
+                        // If there are none, the target is bogus
+                        if (matchingParams.isEmpty()) {
+                            // REL-1113
+                            ps.addError(PREFIX + "TEMPLATE_RULE", BOGUS_TARGET_MESSAGE, elements.getTargetObsComponentNode().getOrNull());
+                            // UX-1583. Since there was no matching p1 target, we
+                            // don't know what conditions to check so skip the
+                            // test for bogus conditions.
+                        } else {
+                            // Now see if we can't find a match for conditions
+                            outer:
+                            for (; ; ) {
+                                for (final TemplateParameters t : matchingParams) {
+                                    final SPSiteQuality expected = t.getSiteQuality();
+                                    final SPSiteQuality actual = elements.getSiteQuality().getOrNull();
+                                    if (isAcceptable(expected, actual))
+                                        break outer;
+                                }
+                                ps.addError(PREFIX + "TEMPLATE_RULE", BOGUS_CONDS_MESSAGE, elements.getSiteQualityNode().getOrNull());
+                                break;
+                            }
+                        }
+
+                    });
+                }
             }
             return ps;
         }
@@ -592,7 +594,10 @@ public class GeneralRule implements IRule {
             if (targetEnv != null) {
                 final ObsClass obsClass = ObsClassService.lookupObsClass(elements.getObservationNode());
                 if (obsClass == ObsClass.SCIENCE) {
-                    return targetEnv.getAsterism();
+                    // Why only sidereal?
+                    final ImList<SPTarget> targets = targetEnv.getTargetEnvironment().getAsterism().allSpTargetsJava();
+                    if (targets.forall(SPTarget::isSidereal))
+                        return targetEnv.getAsterism();
                 }
             }
             return null;

@@ -13,6 +13,8 @@ import edu.gemini.spModel.core.Target;
 import edu.gemini.spModel.gemini.ghost.GhostAsterism;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.guide.GuideProbeUtil;
+import edu.gemini.spModel.obs.SPObservation;
+import edu.gemini.spModel.obs.SchedulingBlock;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.target.SPCoordinates;
@@ -37,6 +39,7 @@ import java.awt.event.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.NumberFormat;
+import java.time.Instant;
 import java.util.*;
 import java.util.List;
 
@@ -233,8 +236,8 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 else return new Left<>(ghtsa.target().spTarget());
         }
 
-        // Make the compiler shut up.
-        return new Right<>(new SPCoordinates());
+        // We shouldn't get here.
+        throw new IllegalStateException("The asterism type could not be determined.");
     }
 
     /**
@@ -324,7 +327,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     /**
      * Auxiliary method to determine if the base coordinates are explicitly defined.
      */
-    private boolean baseCoordinatesAreDefined() {
+    private boolean isGhostAsterismWithExplicitlyDefinedBaseCoordinates() {
         // Editable if coords are sky position, or base is defined.
         final TargetEnvironment env = getDataObject().getTargetEnvironment();
         final Asterism a = env.getAsterism();
@@ -394,7 +397,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         _w.duplicateButton.setEnabled(false);
         _w.tag.setEnabled(false);
         updateCoordinateEditorEnabledState(editable &&
-                (baseCoordinatesAreDefined() || !selectionIsBaseCoordinates()));
+                (isGhostAsterismWithExplicitlyDefinedBaseCoordinates() || !selectionIsBaseCoordinates()));
     }
 
     /**
@@ -950,7 +953,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             _w.coordinateEditor.setVisible(true);
             _w.detailEditor.setVisible(false);
 
-            updateCoordinateEditorEnabledState(baseCoordinatesAreDefined() || !selectionIsBaseCoordinates());
+            updateCoordinateEditorEnabledState(isGhostAsterismWithExplicitlyDefinedBaseCoordinates() || !selectionIsBaseCoordinates());
             updateCoordinateDetails(env);
             updateUIForCoordinates();
 
@@ -1170,8 +1173,13 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         private scala.Option<SPCoordinates> coords(final GhostAsterism ga, final boolean linked) {
                 if (linked)
                     return ImOption.scalaNone();
+
+                // Try to get the scheduling block start, convert to Instant, and look up base.
+                final Option<Instant> sbi = ((SPObservation)getContextObservation().getDataObject())
+                        .getSchedulingBlockStart()
+                        .map(Instant::ofEpochMilli);
                 return ImOption.toScalaOpt(
-                        ImOption.fromScalaOpt(ga.basePosition(ImOption.scalaNone()))
+                        ImOption.fromScalaOpt(ga.basePosition(ImOption.toScalaOpt(sbi)))
                         .map(SPCoordinates::new)
                 );
         }

@@ -29,10 +29,8 @@ final class SPCoordinates(var coordinates: Coordinates) extends SPSkyObject {
   def setParamSet(ps: ParamSet): Unit = {
     if (ps != null) {
       val tps = ps.getParamSet(CoordinatesName)
-      if (tps != null) {
-        val c = TargetParamSetCodecs.CoordinatesParamSetCodec.decode(tps).toOption.get
-        setCoordinates(c)
-      }
+      if (tps != null)
+        TargetParamSetCodecs.CoordinatesParamSetCodec.decode(tps).toOption.foreach(setCoordinates)
     }
   }
 

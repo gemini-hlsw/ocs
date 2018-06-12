@@ -58,7 +58,7 @@ public final class TargetEnvironmentDiff implements Serializable {
     private final Collection<SPCoordinates> removedCoordinates;
     private final Collection<SPCoordinates> addedCoordinates;
 
-    // Return an ImList<T> containing the elements of list1 \ list2.
+    // Return an ImList<T> containing the elements of list1 - list2.
     private static<T> Collection<T> calcDifference(final TargetEnvironment env1, final TargetEnvironment env2,
                                                    final ImList<T> list1, final ImList<T> list2) {
         final Set<T> set1 = Collections.newSetFromMap(new IdentityHashMap<>());
