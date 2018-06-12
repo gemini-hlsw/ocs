@@ -47,7 +47,7 @@ public final class FileManager {
     private static final String XFER_DIR    = "xfer";
 
     private static final String META_DIR    = "meta";
-    private static final String META_SUFFIX = ".meta";    
+    private static final String META_SUFFIX = ".meta";
 
     // were aux files for deleted programs are kept
     private static final String TRASH_DIR   = "trash";
@@ -96,7 +96,7 @@ public final class FileManager {
     }
 
     public Collection<SPProgramID> getAllProgramIds() {
-        final List<SPProgramID> res = new ArrayList<SPProgramID>();
+        final List<SPProgramID> res = new ArrayList<>();
 
         _root.listFiles(new FileFilter() {
             public boolean accept(File file) {
@@ -116,7 +116,7 @@ public final class FileManager {
     public File getProgramDir(SPProgramID progId) {
         return new File(_root, progId.toString());
     }
-    
+
     public File getMetaDir(SPProgramID progId) {
         return new File(getProgramDir(progId), META_DIR);
     }
@@ -133,7 +133,7 @@ public final class FileManager {
     public File getMetaFile(SPProgramID progId, String fileName) {
         return new File(getMetaDir(progId), fileName + META_SUFFIX);
     }
-    
+
     public File getTransferFile(SPProgramID progId, String fileName, String token) {
         if (token == null) throw new NullPointerException("token is null");
         File dir = getTransferDir(progId);
@@ -141,7 +141,7 @@ public final class FileManager {
     }
 
     public List<File> getAllTransferFiles(SPProgramID progId, final String fileName) {
-        List<File> res = new ArrayList<File>();
+        List<File> res = new ArrayList<>();
         File dir = getTransferDir(progId);
 
         dir.listFiles(new FilenameFilter() {

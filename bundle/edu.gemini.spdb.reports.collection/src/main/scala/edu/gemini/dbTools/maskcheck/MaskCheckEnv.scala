@@ -35,6 +35,8 @@ final case class MaskCheckEnv(
 object MaskCheckEnv {
 
   val SmtpProp              = "cron.odbMail.SITE_SMTP_SERVER"
+
+  // "development", "production", or "test".
   val MailerTypeProp        = "cron.odbMail.mailer.type"
 
   // Property that specifies how long to wait before sending a nagging email

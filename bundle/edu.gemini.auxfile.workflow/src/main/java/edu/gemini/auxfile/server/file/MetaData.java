@@ -69,7 +69,10 @@ public class MetaData {
 	}
 
 	private MetaData(File xml) throws IOException {
-		this.xml = xml;
+		this.xml         = xml;
+		this.description = "";
+		this.checked     = false;
+		this.lastEmailed = ImOption.empty();
 		read();
 	}
 
