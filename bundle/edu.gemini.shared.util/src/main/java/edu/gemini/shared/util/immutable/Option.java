@@ -133,4 +133,16 @@ public interface Option<T> extends Iterable<T>, Serializable {
      * otherwise.
      */
     Stream<T> toStream();
+
+    /**
+     * Maps this option to an ImEither right if it is Some, and the supplied
+     * value as an ImEither Left if it is None.
+     */
+    <X> ImEither<X, T> toRight(final Supplier<X> sup);
+
+    /**
+     * Maps this option to an ImEither Left if it is Some, and the supplied
+     * value as an ImEither Right if it is None.
+     */
+    <X> ImEither<T, X> toLeft(final Supplier<X> sup);
 }

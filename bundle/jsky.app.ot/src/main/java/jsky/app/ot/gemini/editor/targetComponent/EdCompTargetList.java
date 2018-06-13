@@ -208,35 +208,34 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 return new Left<>(((Asterism.Single) a).t());
             case GhostSingleTarget:
                 final GhostAsterism.SingleTarget gsa = (GhostAsterism.SingleTarget) a;
-                if (gsa.base().isDefined()) return new Right<>(gsa.base().get());
-                else return new Left<>(gsa.target().spTarget());
+                return ImOption.fromScalaOpt(gsa.base()).toRight(() -> gsa.target().spTarget());
             case GhostDualTarget:
+                // This case is more complicated as it always returns Right.
                 final GhostAsterism.DualTarget gda = (GhostAsterism.DualTarget) a;
                 if (gda.base().isDefined()) return new Right<>(gda.base().get());
                 else {
-                    final Option<Coordinates> cOpt = ImOption.fromScalaOpt(gda.basePosition(ImOption.scalaNone()));
+                    final Option<Instant> sbi = ((SPObservation)getContextObservation().getDataObject())
+                            .getSchedulingBlockStart()
+                            .map(Instant::ofEpochMilli);
+                    final Option<Coordinates> cOpt = ImOption.fromScalaOpt(gda.basePosition(ImOption.toScalaOpt(sbi)));
                     return new Right<>(cOpt.map(SPCoordinates::new).getOrElse(SPCoordinates::new));
                 }
             case GhostTargetPlusSky:
                 final GhostAsterism.TargetPlusSky gtsa = (GhostAsterism.TargetPlusSky) a;
-                if (gtsa.base().isDefined()) return new Right<>(gtsa.base().get());
-                else return new Left<>(gtsa.target().spTarget());
+                return ImOption.fromScalaOpt(gtsa.base()).toRight(() -> gtsa.target().spTarget());
             case GhostSkyPlusTarget:
                 final GhostAsterism.SkyPlusTarget gsta = (GhostAsterism.SkyPlusTarget) a;
-                if (gsta.base().isDefined()) return new Right<>(gsta.base().get());
-                else return new Left<>(gsta.target().spTarget());
+                return ImOption.fromScalaOpt(gsta.base()).toRight(() -> gsta.target().spTarget());
             case GhostHighResolutionTarget:
                 final GhostAsterism.HighResolutionTarget ghta = (GhostAsterism.HighResolutionTarget) a;
-                if (ghta.base().isDefined()) return new Right<>(ghta.base().get());
-                else return new Left<>(ghta.target().spTarget());
+                return ImOption.fromScalaOpt(ghta.base()).toRight(() -> ghta.target().spTarget());
             case GhostHighResolutionTargetPlusSky:
                 final GhostAsterism.HighResolutionTargetPlusSky ghtsa = (GhostAsterism.HighResolutionTargetPlusSky) a;
-                if (ghtsa.base().isDefined()) return new Right<>(ghtsa.base().get());
-                else return new Left<>(ghtsa.target().spTarget());
+                return ImOption.fromScalaOpt(ghtsa.base()).toRight(() -> ghtsa.target().spTarget());
         }
 
         // We shouldn't get here.
-        throw new IllegalStateException("The asterism type could not be determined.");
+        throw new RuntimeException("The asterism type could not be determined.");
     }
 
     /**

@@ -148,6 +148,21 @@ public final class None<T> implements Option<T>, Serializable {
         return Stream.empty();
     }
 
+    // Note: in this case, since the object is None, we return a Left with the
+    // supplier's value.
+    @Override
+    public <X> ImEither<X, T> toRight(final Supplier<X> sup) {
+        return new Left<>(sup.get());
+    }
+
+    // Note: in this case, since the object is None, we return a Right with the
+    // supplier's value.
+    @Override
+    public <X> ImEither<T, X> toLeft(final Supplier<X> sup) {
+        return new Right<>(sup.get());
+    }
+
+
     @Override
     public boolean equals(final Object o) {
         return (o instanceof None);

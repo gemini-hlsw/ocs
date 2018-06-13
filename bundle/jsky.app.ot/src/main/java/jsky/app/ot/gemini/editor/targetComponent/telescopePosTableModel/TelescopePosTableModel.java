@@ -115,7 +115,7 @@ final public class TelescopePosTableModel extends AbstractTableModel {
         final Asterism.Single a = (Asterism.Single) env.getAsterism();
         final SPTarget t        = a.t();
 
-        hdr.add(new BaseTargetRow(t, when));
+        hdr.add(new BaseTargetRow(t, when, true));
         return hdr;
     }
 
@@ -128,11 +128,11 @@ final public class TelescopePosTableModel extends AbstractTableModel {
         // coordinates into an SPCoordinates.
         if (a.asterismType() == AsterismType.GhostDualTarget) {
             if (a.base().isDefined()) {
-                row = new BaseCoordinatesRow(a.base().get());
+                row = new BaseCoordinatesRow(a.base().get(), true);
             }
             else {
                 final Coordinates c = Utils.getCoordinates(a, when).getOrElse(Coordinates.zero());
-                row = new BaseCoordinatesRow(new SPCoordinates(c));
+                row = new BaseCoordinatesRow(new SPCoordinates(c), false);
             }
         }
         else {
@@ -140,7 +140,7 @@ final public class TelescopePosTableModel extends AbstractTableModel {
             // base position corresponds to a target or is set to a sky
             // position, which means checking if a.base (the override) exists.
             if (a.base().isDefined())
-                row = new BaseCoordinatesRow(a.base().get());
+                row = new BaseCoordinatesRow(a.base().get(), true);
             else {
                 // This is mildly annoying because all non-dual-target asterisms
                 // have their own individual target() member.
@@ -165,7 +165,7 @@ final public class TelescopePosTableModel extends AbstractTableModel {
                         // We should never get here, but placate the compiler.
                         gt = null;
                 }
-                row = new BaseTargetRow(gt.spTarget(), when);
+                row = new BaseTargetRow(gt.spTarget(), when, false);
             }
         }
 
@@ -527,7 +527,11 @@ final public class TelescopePosTableModel extends AbstractTableModel {
         if (target == null) return None.instance();
         int index = 0;
         for (final Row row : rows) {
-            if (row instanceof TargetRow && ((TargetRow) row).target() == target) {
+            // Special case: skip the base row if it is disabled. This will mean
+            // that the base is dependent on another target, and we want to pick
+            // that target.
+            if ((index != 0 || row.enabled()) &&
+                    row instanceof TargetRow && ((TargetRow) row).target() == target) {
                 return new Some<>(index);
             }
             ++index;

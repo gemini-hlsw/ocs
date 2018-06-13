@@ -127,6 +127,16 @@ public final class Some<T> implements Option<T> {
     }
 
     @Override
+    public <X> ImEither<X, T> toRight(final Supplier<X> sup) {
+        return new Right<>(val);
+    }
+
+    @Override
+    public <X> ImEither<T, X> toLeft(final Supplier<X> sup) {
+        return new Left<>(val);
+    }
+
+    @Override
     public boolean equals(final Object o) {
         if (!(o instanceof Some)) return false;
         return val.equals(((Some) o).val);

@@ -9,8 +9,8 @@ import edu.gemini.spModel.target.env.TargetEnvironment;
  * target. This may come up in GHOST.
  */
 final class BaseCoordinatesRow extends CoordinatesRow {
-    BaseCoordinatesRow(final SPCoordinates coordinates) {
-        super(true,
+    BaseCoordinatesRow(final SPCoordinates coordinates, boolean enabled) {
+        super(enabled,
                 true,
                 TargetEnvironment.BASE_NAME,
                 "Sky",

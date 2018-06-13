@@ -12,8 +12,9 @@ import edu.gemini.spModel.target.env.TargetEnvironment;
  */
 final class BaseTargetRow extends TargetRow {
     BaseTargetRow(final SPTarget target,
-                  final Option<Long> when) {
-        super(true,
+                  final Option<Long> when,
+                  boolean enabled) {
+        super(enabled,
                 true,
                 TargetEnvironment.BASE_NAME,
                 target,
