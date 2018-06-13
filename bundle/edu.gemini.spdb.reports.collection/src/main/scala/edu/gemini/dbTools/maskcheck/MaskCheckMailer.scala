@@ -23,7 +23,7 @@ sealed abstract class MaskCheckMailer(mailer: Mailer) {
       s"""
          |Mask definition files require checking in ${pid.stringValue}:
          |
-         |${files.mkString("\n")}
+         |${files.map(_.getName).mkString("\t", "\n\t", "")}
        """.stripMargin
 
     EitherT(mailer.sendText(to.ngo ++ to.cs, subject, text).catchLeft)

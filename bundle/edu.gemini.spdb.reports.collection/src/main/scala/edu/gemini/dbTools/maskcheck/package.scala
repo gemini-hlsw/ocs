@@ -10,6 +10,9 @@ package object maskcheck {
 
   object MC {
 
+    def mcUnit: MC[Unit] =
+      EitherT.right(IO.ioUnit)
+
     def fromNullableOp[A](failMessage: => String)(a: => A): MC[A] =
       fromOption(failMessage)(Option(a))
 

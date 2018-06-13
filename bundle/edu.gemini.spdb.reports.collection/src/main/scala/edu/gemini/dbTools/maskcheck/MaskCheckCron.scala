@@ -5,6 +5,7 @@ import edu.gemini.auxfile.server.AuxFileServer
 import edu.gemini.dbTools.mailer.ProgramAddresses
 import edu.gemini.pot.spdb.IDBDatabaseService
 import edu.gemini.spModel.core.SPProgramID
+import edu.gemini.shared.util.immutable.ImOption
 import edu.gemini.shared.util.immutable.ScalaConverters._
 import org.osgi.framework.BundleContext
 
@@ -75,23 +76,30 @@ object MaskCheckCron {
   }
 
   private def sendEmails(
-    l: MCLogger,
-    o: IDBDatabaseService,
-    m: MaskCheckMailer,
-    ps: List[(SPProgramID, List[AuxFile])]
+    log: MCLogger,
+    afs: AuxFileServer,
+    now: Instant,
+    odb: IDBDatabaseService,
+    mcm: MaskCheckMailer,
+    ps:  List[(SPProgramID, List[AuxFile])]
   ): MC[Unit] =
 
-    ps.traverseU { case (pid, pending) =>
-      EitherT(ProgramAddresses.fromProgramId(o, pid).catchLeft).flatMap {
-        case None               =>
-          l.log(Level.INFO, s"Could not get email addresses for $pid because it was not found in ODB")
+    ps.traverseU {
+      case (_, Nil)       =>
+        MC.mcUnit
 
-        case Some(Failure(msg)) =>
-          l.log(Level.INFO, s"Could not send mask check nag email because some addresses are not valid for $pid: $msg")
+      case (pid, pending) =>
+        EitherT(ProgramAddresses.fromProgramId(odb, pid).catchLeft).flatMap {
+          case None               =>
+            log.log(Level.INFO, s"Could not get email addresses for $pid because it was not found in ODB")
 
-        case Some(Success(pa))  =>
-          m.notifyPendingCheck(pid, pa, pending)
-      }
+          case Some(Failure(msg)) =>
+            log.log(Level.INFO, s"Could not send mask check nag email because some addresses are not valid for $pid: $msg")
+
+          case Some(Success(pa))  =>
+            mcm.notifyPendingCheck(pid, pa, pending) *>
+              MC.catchLeft(afs.setLastEmailed(pid, pending.map(_.getName).asJava, ImOption.apply(now)))
+        }
     }.void
 
   /** Cron job entry point.  See edu.gemini.spdb.cron.osgi.Activator. */
@@ -102,7 +110,7 @@ object MaskCheckCron {
       now  <- MC.delay(Instant.now)
       pids <- ActiveScienceProgramFunctor.query(env.odb, user)
       ps   <- allPending(env.auxFileServer, pids, now, env.nagDelay)
-      _    <- sendEmails(MCLogger(logger), env.odb, env.mailer, ps)
+      _    <- sendEmails(MCLogger(logger), env.auxFileServer, now, env.odb, env.mailer, ps)
     } yield ()
 
     action.run.unsafePerformIO() match {
