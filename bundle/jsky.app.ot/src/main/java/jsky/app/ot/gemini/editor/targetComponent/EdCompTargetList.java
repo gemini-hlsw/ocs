@@ -14,7 +14,6 @@ import edu.gemini.spModel.gemini.ghost.GhostAsterism;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.guide.GuideProbeUtil;
 import edu.gemini.spModel.obs.SPObservation;
-import edu.gemini.spModel.obs.SchedulingBlock;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.target.SPCoordinates;
@@ -252,15 +251,33 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     }
 
     /**
+     * Ensure that there is at most one selection for this node in TargetSelection.
+     */
+    static void checkTargetSelectionConsistency(final TargetEnvironment env,
+                                                final ISPObsComponent node) {
+        final Option<SPTarget> tOpt = TargetSelection.getTargetForNode(env, node);
+        final Option<SPCoordinates> cOpt = TargetSelection.getCoordinatesForNode(env, node);
+        final Option<IndexedGuideGroup> gOpt = TargetSelection.getIndexedGuideGroupForNode(env, node);
+        if ((tOpt.isDefined() && (cOpt.isDefined() || gOpt.isDefined()))
+                || (cOpt.isDefined() && gOpt.isDefined()))
+            throw new RuntimeException("Illegal node state: more than one selection recorded for node");
+    }
+
+    /**
+     * Ensure that there is at most one selection for the current node in TargetSelection.
+     */
+    void checkTargetSelectionConsistency() {
+        final TargetEnvironment env = getDataObject().getTargetEnvironment();
+        final ISPObsComponent  node = getNode();
+        checkTargetSelectionConsistency(env, node);
+    }
+
+    /**
      * Auxiliary method to determine if the current selection is base coordinates.
      */
     private boolean selectionIsBaseCoordinates() {
         final ISPObsComponent node = getContextTargetObsComp();
         return selectionIsCoordinates() && TargetSelection.getIndex(node).exists(i -> i == 0);
-//        if (TargetSelection.getIndex(node).forall(i -> i != 0))
-//            return false;
-//        final Option<SPCoordinates> c = basePosition().toOption();
-//        return selectedCoordinates().exists(sc -> c.exists(sc::equals));
     }
 
     /**
@@ -541,6 +558,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
         // If more than the auto group has changed, we need to maintain the selection, or default to the base.
         if (!isBagsUpdate) {
+            checkTargetSelectionConsistency();
             final boolean targetSet = TargetSelection.getTargetForNode(env, node).map(t ->
                     manageCurPosIfEnvContainsTarget(t, () -> setSelectionToTarget(t))
             ).getOrElse(false);
@@ -677,7 +695,8 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     private void updateTargetFeedback(final TargetEnvironment env) {
         final Option<ObsContext> ctx = getObsContext(env);
         final ISPObsComponent node   = getContextTargetObsComp();
-        final SPTarget target        = TargetSelection.getTargetForNode(env, node).getOrElse(env.getArbitraryTargetFromAsterism());
+        final SPTarget target        = TargetSelection.getTargetForNode(env, node)
+                .getOrElse(env.getAsterism().allSpTargets().head());
         _w.detailEditor.targetFeedbackEditor().edit(ctx, target, node);
     }
 
@@ -936,6 +955,8 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     private void setSelectionFromNode() {
         final ISPObsComponent node = getContextTargetObsComp();
         final TargetEnvironment env = getDataObject().getTargetEnvironment();
+
+        checkTargetSelectionConsistency();
         final Option<SPTarget> targetOpt = TargetSelection.getTargetForNode(env, node);
         final Option<SPCoordinates> coordsOpt = TargetSelection.getCoordinatesForNode(env, node);
         final Option<IndexedGuideGroup> iggOpt = TargetSelection.getIndexedGuideGroupForNode(env, node);
@@ -1082,6 +1103,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         if ((obsComponent == null) || (dataObject == null)) return;
 
         // We don't allow this for coordinates.
+        checkTargetSelectionConsistency();
         final Option<SPTarget> targetOpt = TargetSelection.getTargetForNode(dataObject.getTargetEnvironment(), obsComponent);
         final Option<IndexedGuideGroup> iggOpt =
                 TargetSelection.getIndexedGuideGroupForNode(dataObject.getTargetEnvironment(), obsComponent);
@@ -1259,6 +1281,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
         static Option<TargetClipboard> copy(final TargetEnvironment env, final ISPObsComponent obsComponent) {
             if (obsComponent == null) return None.instance();
+            checkTargetSelectionConsistency(env, obsComponent);
             final Option<SPTarget> tOpt = TargetSelection.getTargetForNode(env, obsComponent);
             final Option<SPCoordinates> cOpt = TargetSelection.getCoordinatesForNode(env, obsComponent);
             final Option<IndexedGuideGroup> gOpt = TargetSelection.getIndexedGuideGroupForNode(env, obsComponent);
